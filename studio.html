@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Flameclyffe Studio</title>
+  <link rel="stylesheet" href="./css/flameclyffe.css">
+</head>
+<body>
+  <header class="site-header">
+    <div>
+      <strong>Flameclyffe Studio</strong>
+      <p class="subtitle">Lochflame colourway · Wardenclyffe signal engine · experimental sound presets.</p>
+    </div>
+    <div class="header-actions">
+      <a class="button-link" href="./index.html">Blueprint Index</a>
+      <a class="button-link" href="https://github.com/SingsEnochian/Flameclyffe">GitHub</a>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero card">
+      <div>
+        <h1>Flameclyffe</h1>
+        <p class="hero-copy">A compact sound engine migrated out of Runa: geolocation, local time, seasonal phase, weather, solar wind, flare signal, Kp, Schumann layers, tactile anchors, Gateway Drift, Gamma Lantern, Seven-Minute Drift, Orbital 3:6:9, planetary tones, and rain.</p>
+        <p class="tiny warning">Experimental sound tool. Start low. Binaural layers require headphones. Centre-safe and tactile-first routing are available. Nothing here is medical treatment or historical proof of a Tesla method.</p>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="section-heading-row"><h2>Resonance Field</h2><span class="section-pill" id="audioState">idle</span></div>
+        <p class="tiny">Use My Location updates latitude and longitude, then recalculates local weather, time phase, seasonal phase, and solar/space-weather modulation.</p>
+        <div class="field"><canvas id="field"></canvas><div class="badge"><strong id="mixName">Layered field</strong><br><span id="mixTag">Choose presets, then Begin Resonance.</span></div></div>
+        <div class="button-row" style="margin-top:1rem"><button id="start" class="accent-button">Begin Resonance</button><button id="stop" disabled>Feather Stop</button><button id="refresh">Refresh Signals</button><button id="loc">Use My Location</button></div>
+        <p id="status" class="status-copy">Ready. Default target is Saint Augustine, Florida.</p>
+      </div>
+      <aside class="card">
+        <div class="section-heading-row"><h2>Global Mix</h2><span class="section-pill">live</span></div>
+        <div class="controls" id="knobs"></div>
+        <div class="controls" style="margin-top:1rem">
+          <div><label for="profile">Listening profile</label><select id="profile"><option value="standard">Standard</option><option value="centerSafe" selected>Centre-safe</option><option value="tactile">Tactile-first</option></select></div>
+          <div><label for="protocol">Protocol state</label><select id="protocol"><option value="normal">Normal</option><option value="notch">Notch</option><option value="wrap">Wrap</option><option value="seldrin">Seldrin</option><option value="held">Held</option></select></div>
+          <label style="justify-content:flex-start;gap:.5rem"><input id="mode369" type="checkbox"> 3:6:9 Lochflame opening</label>
+        </div>
+      </aside>
+    </section>
+
+    <section class="wide">
+      <div class="card"><div class="section-heading-row"><h2>Preset Stack</h2><span class="section-pill">mixable</span></div><div class="presets" id="presets"></div></div>
+      <div class="card"><div class="section-heading-row"><h2>Custom Dyad</h2><span class="section-pill">local</span></div><p class="tiny">Names and bond-word are only used in this browser.</p><div class="form"><div class="two"><input id="voiceA" placeholder="First voice"><input id="voiceB" placeholder="Second voice"></div><input id="bond" placeholder="Bond-word, e.g. Withness, Home, Courage"><button id="custom" class="accent-button">Generate Custom Dyad Patch</button></div></div>
+    </section>
+
+    <section class="wide">
+      <div class="card"><div class="section-heading-row"><h2>Earth Signal</h2><span class="section-pill" id="earthPill">Saint Augustine</span></div><div class="tiles" id="earth"></div></div>
+      <div class="card"><div class="section-heading-row"><h2>Solar Signal</h2><span class="section-pill" id="spacePill">live-ish</span></div><div class="tiles" id="space"></div></div>
+    </section>
+
+    <section class="grid">
+      <div class="card"><div class="section-heading-row"><h2>Active Tone Layers</h2><span class="section-pill" id="count">0</span></div><div id="layers" class="layers"></div></div>
+      <div class="card"><div class="section-heading-row"><h2>Save / Record</h2><span class="section-pill">portable</span></div><div class="form"><div class="two"><select id="seconds"><option value="15">15 sec</option><option value="30" selected>30 sec</option><option value="60">60 sec</option><option value="120">120 sec</option><option value="420">7 min</option></select><button id="record" class="accent-button">Record Compact Audio</button></div><div class="button-row"><button id="save">Save State</button><button id="export">Export JSON</button></div><textarea id="notes" style="min-height:180px" placeholder="Listening notes, tuning notes, what felt right..."></textarea><p id="noteStatus" class="status-copy">Notes autosave locally.</p></div></div>
+    </section>
+
+    <section class="card">
+      <div class="section-heading-row"><h2>Research Queue</h2><span class="section-pill">experimental</span></div>
+      <ul class="research-list">
+        <li>Gamma Lantern: 40 Hz as amplitude modulation / proxy layer, not a miracle switch.</li>
+        <li>Seven-Minute Drift: timed creative gate, labelled not Tesla-proven.</li>
+        <li>Orbital 3:6:9: Schumann-absent experiment with 3/6/9 Hz envelopes and 40 Hz reference.</li>
+        <li>Hearing profile: public code stays generic; tune locally with consent and lived feedback.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="./js/flameclyffe-presets.js"></script>
+  <script src="./js/flameclyffe-signals.js"></script>
+  <script src="./js/flameclyffe-audio.js"></script>
+  <script src="./js/flameclyffe-app.js"></script>
+</body>
+</html>
