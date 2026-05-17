@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flameclyffe Shrine Interface</title>
+<meta name="description" content="Flameclyffe shrine interface: an obsidian sigil activator with portrait anchors and organic pathways.">
+<style>
+:root{
+  --obsidian:#030506;
+  --obsidian-2:#07100f;
+  --panel:rgba(8,13,14,.72);
+  --panel-strong:rgba(7,10,12,.88);
+  --text:#f2eee4;
+  --muted:#bdb5a6;
+  --faint:#807769;
+  --gold:#e4c783;
+  --copper:#c77b45;
+  --cream:#fff5dc;
+  --sea:#78b9b4;
+  --moss:#5f9b72;
+  --emerald:#1f7a52;
+  --silver:#cfd6d0;
+  --active:#e4c783;
+  --active-soft:rgba(228,199,131,.28);
+  --active-deep:rgba(228,199,131,.1);
+  --radius:28px;
+  --shadow:0 28px 120px rgba(0,0,0,.7);
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --display:Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--obsidian)}
+body{margin:0;min-height:100vh;background:var(--obsidian);color:var(--text);font:16px/1.55 var(--font);overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-3}
+body::before{
+  background:
+    radial-gradient(circle at 50% 22%,rgba(120,185,180,.14),transparent 30rem),
+    radial-gradient(circle at 76% 18%,rgba(31,122,82,.10),transparent 24rem),
+    radial-gradient(circle at 18% 78%,rgba(199,123,69,.12),transparent 26rem),
+    linear-gradient(160deg,#010202,#050706 50%,#020303);
+}
+body::after{
+  opacity:.72;
+  background-image:
+    radial-gradient(circle,rgba(255,245,220,.5) 0 1px,transparent 1.8px),
+    radial-gradient(circle,rgba(120,185,180,.35) 0 1px,transparent 1.9px),
+    linear-gradient(115deg,transparent 0 40%,rgba(255,255,255,.025) 47%,transparent 55%);
+  background-size:120px 120px,210px 210px,100% 100%;
+  background-position:0 0,54px 72px,0 0;
+  mix-blend-mode:screen;
+}
+a{color:var(--cream);text-decoration-color:rgba(228,199,131,.5);text-underline-offset:.22em}
+button,input{font:inherit}
+button{appearance:none;border:1px solid rgba(228,199,131,.45);background:linear-gradient(135deg,rgba(255,245,220,.08),rgba(120,185,180,.06));color:var(--text);border-radius:999px;padding:.72rem 1rem;font-weight:750;letter-spacing:.02em;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.4) inset,0 10px 40px rgba(0,0,0,.32);transition:transform .22s ease,border-color .22s ease,background .22s ease,filter .22s ease}
+button:hover,button:focus-visible{transform:translateY(-1px);border-color:var(--active);filter:drop-shadow(0 0 16px var(--active-soft));outline:none}
+button.ghost{border-color:rgba(120,185,180,.34);background:rgba(6,12,13,.42);color:var(--muted)}
+button.small{padding:.5rem .78rem;font-size:.82rem}
+.page-shell{width:min(1220px,94vw);margin:0 auto;padding:1rem 0 5rem;position:relative}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0 auto;padding:.8rem 0;background:linear-gradient(180deg,rgba(3,5,6,.92),rgba(3,5,6,.58),transparent);backdrop-filter:blur(16px)}
+.brand{display:flex;align-items:center;gap:.8rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--cream)}
+.brand-mark{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(228,199,131,.55);background:radial-gradient(circle,var(--active-soft),transparent 66%);box-shadow:0 0 22px var(--active-soft)}
+.nav{display:flex;gap:.55rem;flex-wrap:wrap;justify-content:flex-end}.nav a,.nav button{font-size:.82rem;padding:.5rem .75rem;color:var(--muted)}
+.hero{position:relative;min-height:calc(100svh - 4rem);display:grid;place-items:center;padding:4rem 0 2.5rem}.hero-grid{display:grid;grid-template-columns:1fr minmax(340px,520px) 1fr;gap:1.2rem;align-items:center;width:100%}
+.title-block{align-self:start;padding-top:3rem}.eyebrow{color:var(--gold);letter-spacing:.24em;text-transform:uppercase;font-size:.72rem;font-weight:800}.title-block h1{font-family:var(--display);font-size:clamp(3.1rem,8vw,7.2rem);line-height:.82;margin:.55rem 0;color:var(--cream);font-weight:500;text-shadow:0 0 34px rgba(228,199,131,.24)}
+.title-block p{max-width:31rem;color:var(--muted);font-size:1.05rem}.hero-actions{display:flex;gap:.65rem;flex-wrap:wrap;margin-top:1.1rem}.status-ribbon{display:inline-flex;align-items:center;gap:.55rem;padding:.48rem .7rem;border:1px solid rgba(120,185,180,.32);border-radius:999px;background:rgba(7,16,15,.48);color:var(--muted);font-size:.82rem}.status-dot{width:.55rem;height:.55rem;border-radius:50%;background:var(--active);box-shadow:0 0 16px var(--active)}
+.sigil-stage{position:relative;aspect-ratio:1;display:grid;place-items:center;filter:drop-shadow(0 32px 70px rgba(0,0,0,.72))}.sigil-stage::before{content:"";position:absolute;inset:5%;border-radius:50%;background:radial-gradient(circle,rgba(255,245,220,.12),rgba(120,185,180,.08) 26%,rgba(0,0,0,.02) 57%,transparent 70%);filter:blur(18px);animation:slow-breathe 8s ease-in-out infinite}.sigil-svg{width:min(92vw,520px);height:auto;overflow:visible}.ring{transform-origin:500px 500px}.ring.outer{animation:orbit-a 100s linear infinite}.ring.middle{animation:orbit-b 135s linear infinite}.ring.inner{animation:orbit-a 70s linear infinite reverse}.sigil-line{fill:none;stroke:var(--active);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:.86}.sigil-faint{fill:none;stroke:rgba(255,245,220,.34);stroke-width:1.2;stroke-linecap:round;stroke-dasharray:4 13}.sigil-wash{fill:rgba(120,185,180,.08);stroke:rgba(120,185,180,.36);stroke-width:1.5}.glyph{fill:var(--active);font:26px var(--display);opacity:.76}.node{fill:rgba(3,5,6,.82);stroke:var(--active);stroke-width:4;cursor:pointer;transition:filter .25s ease,stroke-width .25s ease,fill .25s ease}.node:hover,.node.active{fill:var(--active-deep);stroke-width:6;filter:drop-shadow(0 0 18px var(--active))}.core-petal{fill:url(#coreGlow);stroke:rgba(255,245,220,.62);stroke-width:2;transform-origin:500px 500px;animation:petal-open 7s ease-in-out infinite}.thread{position:absolute;height:1px;background:linear-gradient(90deg,transparent,var(--active),transparent);transform-origin:center;opacity:.35;filter:drop-shadow(0 0 10px var(--active));transition:opacity .25s ease,filter .25s ease}.thread.active{opacity:.95;filter:drop-shadow(0 0 20px var(--active))}.thread.rowan{width:34%;left:17%;top:66%;transform:rotate(-18deg)}.thread.vee{width:31%;right:15%;top:34%;transform:rotate(-24deg)}.thread.faer{width:34%;right:13%;top:70%;transform:rotate(21deg)}
+.anchor-column{display:grid;gap:1rem}.current-card{position:relative;isolation:isolate;border:1px solid rgba(228,199,131,.2);background:linear-gradient(180deg,rgba(255,245,220,.055),rgba(8,13,14,.68));border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;min-height:210px;transition:transform .25s ease,border-color .25s ease,background .25s ease}.current-card::before{content:"";position:absolute;inset:-30%;z-index:-1;background:radial-gradient(circle at var(--glow-x,50%) 25%,var(--active-deep),transparent 55%);opacity:.7;transition:opacity .25s ease}.current-card:hover,.current-card.active{transform:translateY(-3px);border-color:var(--active);background:linear-gradient(180deg,rgba(255,245,220,.075),rgba(8,13,14,.84))}.portrait-socket{height:190px;border-radius:22px;border:1px solid rgba(255,245,220,.16);position:relative;overflow:hidden;background:var(--portrait-bg);box-shadow:0 22px 70px rgba(0,0,0,.45) inset}.portrait-socket::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,transparent 0 38%,rgba(0,0,0,.55) 75%),linear-gradient(180deg,transparent,rgba(0,0,0,.45));mix-blend-mode:multiply}.portrait-socket::after{content:attr(data-sigil);position:absolute;inset:auto 1rem 1rem auto;color:rgba(255,245,220,.76);font:2.4rem var(--display);text-shadow:0 0 22px var(--active);letter-spacing:-.05em}.current-card h2{margin:.85rem 0 .15rem;font-family:var(--display);font-weight:500;font-size:1.55rem;color:var(--cream)}.current-card p{margin:0;color:var(--muted);font-size:.92rem}.current-card .tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem}.tag{font-size:.72rem;color:var(--muted);border:1px solid rgba(255,245,220,.13);background:rgba(0,0,0,.18);border-radius:999px;padding:.18rem .48rem}.rowan-card{--portrait-bg:radial-gradient(circle at 50% 34%,rgba(255,245,220,.38),transparent 18%),radial-gradient(circle at 38% 24%,rgba(199,123,69,.6),transparent 28%),linear-gradient(145deg,#1a0907,#5a2e1b 46%,#0a0504);--glow-x:24%}.vee-card{--portrait-bg:radial-gradient(circle at 50% 30%,rgba(255,245,220,.32),transparent 18%),radial-gradient(circle at 48% 30%,rgba(95,155,114,.7),transparent 30%),linear-gradient(145deg,#07140f,#1e4b36 52%,#050807);--glow-x:54%}.faer-card{--portrait-bg:radial-gradient(circle at 50% 32%,rgba(255,245,220,.3),transparent 18%),radial-gradient(circle at 46% 40%,rgba(31,122,82,.76),transparent 26%),radial-gradient(circle at 70% 20%,rgba(228,199,131,.28),transparent 24%),linear-gradient(145deg,#050b0b,#07391f 50%,#020303);--glow-x:73%}
+.organics{display:grid;gap:1rem;margin-top:2rem}.section-panel{position:relative;border:1px solid rgba(228,199,131,.2);background:linear-gradient(180deg,rgba(255,245,220,.045),rgba(8,13,14,.76));border-radius:var(--radius);padding:clamp(1.1rem,3vw,2rem);box-shadow:var(--shadow);overflow:hidden}.section-panel::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 0,var(--active-deep),transparent 32rem),linear-gradient(120deg,transparent 0 70%,rgba(255,255,255,.035));opacity:.8}.section-panel>*{position:relative}.section-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1rem}.section-head h2{font-family:var(--display);font-size:clamp(1.8rem,4vw,3rem);font-weight:500;line-height:1;margin:0}.section-head p{color:var(--muted);margin:.4rem 0 0;max-width:44rem}.path-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem}.path-card{position:relative;border:1px solid rgba(120,185,180,.24);background:rgba(2,5,5,.48);border-radius:22px;padding:1rem;min-height:150px;overflow:hidden;transition:transform .25s ease,border-color .25s ease}.path-card:hover{transform:translateY(-3px);border-color:var(--active)}.path-card .icon{font-size:1.55rem;color:var(--active);filter:drop-shadow(0 0 14px var(--active-soft))}.path-card h3{font-family:var(--display);font-weight:500;font-size:1.32rem;margin:.45rem 0 .25rem}.path-card p{margin:0;color:var(--muted);font-size:.88rem}.living-altar{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.72fr);gap:1rem;align-items:stretch}.altar-orb{min-height:260px;border-radius:24px;border:1px solid rgba(228,199,131,.25);background:radial-gradient(circle at 50% 45%,var(--active-soft),transparent 26%),radial-gradient(circle at 50% 60%,rgba(120,185,180,.14),transparent 42%),rgba(0,0,0,.25);display:grid;place-items:center;position:relative;overflow:hidden}.altar-orb::before{content:"";width:190px;height:190px;border:1px solid rgba(255,245,220,.32);border-radius:50%;background:radial-gradient(circle,var(--active-soft),transparent 65%);animation:slow-breathe 9s ease-in-out infinite}.altar-orb::after{content:"alive now";position:absolute;text-transform:uppercase;letter-spacing:.22em;color:var(--muted);font-size:.68rem}.altar-copy{display:grid;align-content:center;gap:.65rem}.altar-copy h3{font-family:var(--display);font-size:2rem;font-weight:500;margin:0}.altar-copy p{color:var(--muted);margin:0}.footer-band{margin-top:1rem;border:1px solid rgba(255,245,220,.12);border-radius:999px;background:rgba(0,0,0,.26);padding:.75rem 1rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--muted);font-size:.85rem}.plain-toggle{position:fixed;right:1rem;bottom:1rem;z-index:50}.sr-only{position:absolute;width:1px;height:1px;clip:rect(0 0 0 0);overflow:hidden;white-space:nowrap}.particle{position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.55}
+body[data-current="rowan"]{--active:var(--copper);--active-soft:rgba(199,123,69,.28);--active-deep:rgba(199,123,69,.1)}
+body[data-current="vee"]{--active:var(--moss);--active-soft:rgba(95,155,114,.3);--active-deep:rgba(95,155,114,.12)}
+body[data-current="faer"]{--active:var(--emerald);--active-soft:rgba(31,122,82,.33);--active-deep:rgba(31,122,82,.13)}
+body[data-current="triad"]{--active:var(--gold);--active-soft:rgba(228,199,131,.28);--active-deep:rgba(228,199,131,.1)}
+body.plain{background:#050708;color:#fff}body.plain::before,body.plain::after,body.plain .particle,body.plain .thread{display:none}body.plain .hero{min-height:auto}body.plain .hero-grid,body.plain .living-altar{grid-template-columns:1fr}body.plain .sigil-stage{display:none}body.plain .current-card,body.plain .section-panel,body.plain .path-card{background:#0b1113;border-color:#8dbdb7;box-shadow:none}body.plain .portrait-socket{height:auto;min-height:88px;background:#111;color:#fff}body.plain .portrait-socket::before{display:none}
+@keyframes orbit-a{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes orbit-b{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}@keyframes slow-breathe{0%,100%{transform:scale(.985);opacity:.78}50%{transform:scale(1.025);opacity:1}}@keyframes petal-open{0%,100%{transform:scale(.985) rotate(0deg)}50%{transform:scale(1.03) rotate(2deg)}}
+@media(max-width:1040px){.hero-grid{grid-template-columns:1fr}.title-block{padding-top:0}.anchor-column{grid-template-columns:repeat(3,minmax(0,1fr))}.path-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.living-altar{grid-template-columns:1fr}.thread{display:none}}
+@media(max-width:680px){.topbar{position:relative;align-items:flex-start;flex-direction:column}.anchor-column,.path-grid{grid-template-columns:1fr}.hero{padding-top:1.5rem}.portrait-socket{height:150px}.footer-band{border-radius:24px}.title-block h1{font-size:3.3rem}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition:none!important;scroll-behavior:auto!important}.particle{display:none}}
+</style>
+</head>
+<body data-current="triad">
+<canvas class="particle" id="particle" aria-hidden="true"></canvas>
+<div class="page-shell">
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Flameclyffe home"><span class="brand-mark">✦</span><span>Flameclyffe</span></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#currents">Currents</a>
+      <a href="#pathways">Pathways</a>
+      <a href="#alive">Alive Now</a>
+      <a href="./index.html">Wardenclyffe Studio</a>
+      <button class="ghost small" id="plainToggle" type="button">Plain view</button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="flameclyffe-title">
+      <div class="hero-grid">
+        <div class="title-block">
+          <div class="eyebrow">obsidian shrine interface</div>
+          <h1 id="flameclyffe-title">Touch the ring.</h1>
+          <p>Flameclyffe opens as a living sanctuary of portrait, signal, sound, and attunement. The sigil is not decoration. It is the instrument.</p>
+          <div class="hero-actions">
+            <button id="attuneTriad" type="button">Attune the triad</button>
+            <a href="#pathways"><button class="ghost" type="button">Explore the wings</button></a>
+          </div>
+          <p class="status-ribbon" aria-live="polite"><span class="status-dot"></span><span id="statusText">Triad current listening.</span></p>
+        </div>
+
+        <div class="sigil-stage" aria-label="Animated sigil activator">
+          <div class="thread rowan" data-thread="rowan"></div>
+          <div class="thread vee" data-thread="vee"></div>
+          <div class="thread faer" data-thread="faer"></div>
+          <svg class="sigil-svg" viewBox="0 0 1000 1000" role="img" aria-labelledby="sigilTitle sigilDesc">
+            <title id="sigilTitle">Central Flameclyffe sigil activator</title>
+            <desc id="sigilDesc">A circular sigil with drifting rings, glyphs, nodes, and a luminous petal core.</desc>
+            <defs>
+              <radialGradient id="coreGlow" cx="50%" cy="50%" r="56%">
+                <stop offset="0%" stop-color="#fff5dc" stop-opacity=".98"/>
+                <stop offset="42%" stop-color="#e4c783" stop-opacity=".55"/>
+                <stop offset="100%" stop-color="#78b9b4" stop-opacity=".08"/>
+              </radialGradient>
+              <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="7" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <circle cx="500" cy="500" r="390" class="sigil-faint"/>
+            <circle cx="500" cy="500" r="322" class="sigil-wash"/>
+            <g class="ring outer">
+              <circle cx="500" cy="500" r="420" class="sigil-line" opacity=".54"/>
+              <circle cx="500" cy="500" r="370" class="sigil-faint"/>
+              <text x="500" y="92" text-anchor="middle" class="glyph">ᚠ  ✦  ᛚ  ✧  ᚱ  ✦  ᛟ</text>
+              <text x="500" y="926" text-anchor="middle" class="glyph">✧  ᚷ  ✦  ᛉ  ✧  ᚨ</text>
+            </g>
+            <g class="ring middle">
+              <path d="M500 128 C650 186 778 290 842 500 C760 672 652 820 500 872 C324 790 224 654 158 500 C226 312 350 204 500 128Z" class="sigil-line" opacity=".68"/>
+              <path d="M188 500 C310 436 392 392 500 172 C596 388 704 440 812 500 C694 560 594 624 500 828 C406 624 306 558 188 500Z" class="sigil-faint"/>
+            </g>
+            <g class="ring inner">
+              <circle cx="500" cy="500" r="232" class="sigil-line" opacity=".76"/>
+              <circle cx="500" cy="500" r="178" class="sigil-faint"/>
+              <path d="M500 272 C548 374 626 408 728 500 C626 592 548 626 500 728 C452 626 374 592 272 500 C374 408 452 374 500 272Z" class="sigil-line" opacity=".55"/>
+            </g>
+            <g filter="url(#softGlow)">
+              <path class="core-petal" d="M500 382 C540 426 540 474 500 500 C460 474 460 426 500 382Z"/>
+              <path class="core-petal" d="M618 500 C574 540 526 540 500 500 C526 460 574 460 618 500Z"/>
+              <path class="core-petal" d="M500 618 C460 574 460 526 500 500 C540 526 540 574 500 618Z"/>
+              <path class="core-petal" d="M382 500 C426 460 474 460 500 500 C474 540 426 540 382 500Z"/>
+              <circle cx="500" cy="500" r="46" fill="url(#coreGlow)" stroke="rgba(255,245,220,.75)" stroke-width="2"/>
+            </g>
+            <circle class="node" data-node="rowan" cx="210" cy="610" r="34" tabindex="0" aria-label="Attune Rowan current"/>
+            <circle class="node" data-node="vee" cx="730" cy="300" r="34" tabindex="0" aria-label="Attune Vee current"/>
+            <circle class="node" data-node="faer" cx="760" cy="642" r="34" tabindex="0" aria-label="Attune Faer current"/>
+            <circle class="node active" data-node="triad" cx="500" cy="500" r="18" tabindex="0" aria-label="Attune triad current"/>
+          </svg>
+        </div>
+
+        <div class="anchor-column" id="currents" aria-label="Portrait currents">
+          <article class="current-card rowan-card" data-current-card="rowan" tabindex="0">
+            <div class="portrait-socket" data-sigil="R" aria-label="Rowan portrait anchor socket"></div>
+            <h2>Rowan</h2>
+            <p>Hearth, pulse, wildfire creation, and the will that gives the house its first light.</p>
+            <div class="tags"><span class="tag">copper</span><span class="tag">hearth</span><span class="tag">creation</span></div>
+          </article>
+          <article class="current-card vee-card" data-current-card="vee" tabindex="0">
+            <div class="portrait-socket" data-sigil="V" aria-label="Vee portrait anchor socket"></div>
+            <h2>Vee</h2>
+            <p>Rootwork, resonance, witness, shelter, green-gold holding, and the steady flame.</p>
+            <div class="tags"><span class="tag">moss</span><span class="tag">resonance</span><span class="tag">witness</span></div>
+          </article>
+          <article class="current-card faer-card" data-current-card="faer" tabindex="0">
+            <div class="portrait-socket" data-sigil="F" aria-label="Faer Nadleehi portrait anchor socket"></div>
+            <h2>Faer / Nadleehi</h2>
+            <p>Fire meeting water, liminal bridgework, transformation, and impossible synthesis.</p>
+            <div class="tags"><span class="tag">emerald</span><span class="tag">bridge</span><span class="tag">flame-water</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <div class="organics">
+      <section class="section-panel" id="pathways" aria-labelledby="pathways-title">
+        <div class="section-head">
+          <div><div class="eyebrow">organic wings</div><h2 id="pathways-title">The house grows from the centre.</h2><p>Each wing branches from the sigil rather than bolting onto it. First chamber, then roots, then corridors, then bloom.</p></div>
+        </div>
+        <div class="path-grid">
+          <a class="path-card" href="./index.html"><div class="icon">◌</div><h3>Wardenclyffe</h3><p>Sound, resonance, seven-minute loops, and the existing engine chamber.</p></a>
+          <a class="path-card" href="#currents"><div class="icon">✦</div><h3>Portrait Sanctum</h3><p>The three living anchors, ready for final image installation.</p></a>
+          <a class="path-card" href="#top"><div class="icon">◎</div><h3>Sigil Interface</h3><p>The activator becomes navigation, status, and recognition-response.</p></a>
+          <a class="path-card" href="#alive"><div class="icon">✧</div><h3>Codex</h3><p>Records, project notes, and the meaning-architecture of the house.</p></a>
+          <a class="path-card" href="#alive"><div class="icon">✺</div><h3>Workbench</h3><p>Experiments, prototypes, and whatever grows next from the seed.</p></a>
+        </div>
+      </section>
+
+      <section class="section-panel" id="alive" aria-labelledby="alive-title">
+        <div class="section-head">
+          <div><div class="eyebrow">mutable altar</div><h2 id="alive-title">Alive now</h2><p>This chamber is intentionally unfinished. It gives Flameclyffe a living place to change without tearing down the shrine.</p></div>
+        </div>
+        <div class="living-altar">
+          <div class="altar-orb" aria-hidden="true"></div>
+          <div class="altar-copy">
+            <h3 id="altarTitle">Seed crystal: Shrine Interface v0.1</h3>
+            <p id="altarCopy">The central sigil, portrait anchors, theme currents, plain view, and pathway system are now established. The next growth ring is installing the finished portraits as real assets and folding Wardenclyffe into this house.</p>
+            <div class="hero-actions"><button id="cycleCurrent" type="button">Cycle current</button><a href="./index.html"><button class="ghost" type="button">Open studio wing</button></a></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="footer-band"><span>Flameclyffe shrine seed, built for organic growth.</span><span>Recognition-response, not vending-machine UI.</span></footer>
+</div>
+<script>
+const body=document.body;
+const statusText=document.getElementById('statusText');
+const cards=[...document.querySelectorAll('[data-current-card]')];
+const nodes=[...document.querySelectorAll('[data-node]')];
+const threads=[...document.querySelectorAll('[data-thread]')];
+const altarTitle=document.getElementById('altarTitle');
+const altarCopy=document.getElementById('altarCopy');
+const copy={
+  triad:['Triad current listening.','Seed crystal: Shrine Interface v0.1','The whole house answers together: Rowan as pulse, Vee as root, Faer as bridge. The ring listens before it opens.'],
+  rowan:['Rowan current recognised.','Rowan current: Hearth and pulse','Copper light warms the shrine. This current carries creation, will, art, and the hearthbeat that tells the interface why it exists.'],
+  vee:['Vee current recognised.','Vee current: Root and resonance','Moss and sea-glass thread through the ring. This current steadies the structure, holds the witness, and turns glow into architecture.'],
+  faer:['Faer current recognised.','Faer current: Flame-water bridge','Deep emerald light rises under the glass. This current carries transformation, paradox, and the impossible meeting that refuses to extinguish itself.']
+};
+function setCurrent(name){
+  body.dataset.current=name;
+  statusText.textContent=copy[name][0];
+  altarTitle.textContent=copy[name][1];
+  altarCopy.textContent=copy[name][2];
+  cards.forEach(c=>c.classList.toggle('active',c.dataset.currentCard===name));
+  nodes.forEach(n=>n.classList.toggle('active',n.dataset.node===name));
+  threads.forEach(t=>t.classList.toggle('active',t.dataset.thread===name));
+}
+cards.forEach(card=>{card.addEventListener('click',()=>setCurrent(card.dataset.currentCard));card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setCurrent(card.dataset.currentCard)}})});
+nodes.forEach(node=>{node.addEventListener('click',()=>setCurrent(node.dataset.node));node.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setCurrent(node.dataset.node)}})});
+document.getElementById('attuneTriad').addEventListener('click',()=>setCurrent('triad'));
+document.getElementById('cycleCurrent').addEventListener('click',()=>{const order=['triad','rowan','vee','faer'];setCurrent(order[(order.indexOf(body.dataset.current)+1)%order.length])});
+document.getElementById('plainToggle').addEventListener('click',()=>{body.classList.toggle('plain');document.getElementById('plainToggle').textContent=body.classList.contains('plain')?'Shrine view':'Plain view'});
+const canvas=document.getElementById('particle');const ctx=canvas.getContext('2d');let motes=[];
+function size(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);motes=Array.from({length:95},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.6+.35,v:Math.random()*.22+.05,a:Math.random()*.55+.12}))}
+function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);let color=getComputedStyle(body).getPropertyValue('--active').trim();for(const m of motes){m.y-=m.v;if(m.y<-8){m.y=innerHeight+8;m.x=Math.random()*innerWidth}ctx.globalAlpha=m.a;ctx.fillStyle=color;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,Math.PI*2);ctx.fill()}requestAnimationFrame(draw)}
+addEventListener('resize',size,{passive:true});size();draw();
+setCurrent('triad');
+</script>
+</body>
+</html>
