@@ -1,0 +1,17 @@
+{
+  "name": "flameclyffe-workshop",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sigil:dev": "vite --config apps/sigil-activator/vite.config.js",
+    "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
+    "sigil:preview": "vite preview --config apps/sigil-activator/vite.config.js"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {}
+}
