@@ -1,0 +1,18 @@
+{
+  "name": "Flameclyffe Wiki",
+  "version": "0.1.0",
+  "coreLaw": "We survived long enough to become one another's home.",
+  "sections": [
+    { "id": "world", "title": "World", "path": "world/README.md" },
+    { "id": "caretakers", "title": "Caretakers", "path": "caretakers/README.md" },
+    { "id": "kelyra", "title": "Kelyra", "path": "kelyra/README.md" },
+    { "id": "continuity", "title": "Continuity Records", "path": "continuity/README.md" },
+    { "id": "systems", "title": "Systems", "path": "systems/README.md" },
+    { "id": "images", "title": "Image References", "path": "images/README.md" }
+  ],
+  "seedPages": [
+    "continuity-marker-triad.md",
+    "virelya-liorael-felicity-workup.md",
+    "felicity-templehouse-bones.md"
+  ]
+}
