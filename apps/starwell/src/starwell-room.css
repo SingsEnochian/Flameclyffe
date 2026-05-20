@@ -1,0 +1,291 @@
+.dome-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+}
+
+.sky-lantern {
+  position: fixed;
+  top: clamp(0.9rem, 2vw, 1.4rem);
+  right: clamp(0.9rem, 2vw, 1.4rem);
+  z-index: 5;
+  width: min(260px, calc(100vw - 2rem));
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem 0.8rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(231, 196, 119, 0.42);
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg, rgba(247, 237, 218, 0.74), rgba(255, 255, 255, 0.22)),
+    radial-gradient(circle at top left, rgba(140, 202, 192, 0.32), transparent 8rem);
+  box-shadow: 0 18px 54px rgba(20, 19, 27, 0.22), inset 0 0 0 1px rgba(255,255,255,0.22);
+  backdrop-filter: blur(18px);
+  color: var(--ink);
+}
+
+.sky-night .sky-lantern,
+.sky-dusk .sky-lantern {
+  color: var(--moon);
+  background:
+    linear-gradient(145deg, rgba(20, 19, 27, 0.78), rgba(54, 47, 65, 0.48)),
+    radial-gradient(circle at top left, rgba(140, 202, 192, 0.2), transparent 8rem);
+}
+
+.lantern-symbol {
+  display: inline-grid;
+  place-items: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 50%;
+  border: 1px solid rgba(182, 95, 61, 0.28);
+  background: rgba(231, 196, 119, 0.22);
+  font-size: 1.35rem;
+}
+
+.sky-lantern strong,
+.sky-lantern span {
+  display: block;
+}
+
+.sky-lantern strong {
+  font-family: Cinzel, serif;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+}
+
+.sky-lantern span {
+  margin-top: 0.1rem;
+  font-weight: 800;
+  color: var(--copper-dark);
+}
+
+.sky-night .sky-lantern span,
+.sky-dusk .sky-lantern span { color: var(--gold); }
+
+.sky-lantern p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(126, 61, 41, 0.18);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  opacity: 0.88;
+}
+
+.observatory-map {
+  position: relative;
+  padding-top: 0.5rem;
+}
+
+.observatory-map::before {
+  content: '';
+  position: absolute;
+  inset: 0 clamp(1rem, 3vw, 2rem) auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(182,95,61,0.32), rgba(140,202,192,0.36), transparent);
+}
+
+.map-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem clamp(1rem, 3vw, 2rem) 0;
+  font-family: Cinzel, serif;
+  color: var(--copper-dark);
+}
+
+.sky-night .map-heading,
+.sky-dusk .map-heading { color: var(--gold); }
+
+.map-heading span {
+  font-size: clamp(1.25rem, 2.5vw, 1.9rem);
+}
+
+.map-heading strong {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(140,202,192,0.36);
+  border-radius: 999px;
+  font-family: Inter, sans-serif;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.room-card {
+  border: 1px solid rgba(126,61,41,0.24);
+  border-radius: 30px;
+  padding: 1.1rem;
+  min-height: 188px;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.5), rgba(247,237,218,0.24)),
+    radial-gradient(circle at 20% 8%, rgba(140,202,192,0.28), transparent 10rem);
+  box-shadow: 0 16px 38px rgba(56,37,28,0.12);
+  position: relative;
+  overflow: hidden;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.room-card::after {
+  content: '';
+  position: absolute;
+  right: -2.25rem;
+  bottom: -2.25rem;
+  width: 8.5rem;
+  height: 8.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(182,95,61,0.18);
+  box-shadow: inset 0 0 32px rgba(140,202,192,0.12);
+}
+
+.room-card:hover,
+.room-card:focus-visible,
+.room-card.active {
+  transform: translateY(-3px);
+  border-color: rgba(231,196,119,0.72);
+  box-shadow: 0 20px 52px rgba(56,37,28,0.2), 0 0 0 3px rgba(140,202,192,0.14);
+  outline: none;
+}
+
+.room-card.active {
+  background:
+    linear-gradient(145deg, rgba(231,196,119,0.36), rgba(247,237,218,0.26)),
+    radial-gradient(circle at 20% 8%, rgba(140,202,192,0.38), transparent 10rem);
+}
+
+.sky-night .room-card,
+.sky-dusk .room-card {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.18)),
+    radial-gradient(circle at 20% 8%, rgba(140,202,192,0.2), transparent 10rem);
+  border-color: rgba(231,196,119,0.22);
+}
+
+.sky-night .room-card.active,
+.sky-dusk .room-card.active {
+  background:
+    linear-gradient(145deg, rgba(231,196,119,0.18), rgba(0,0,0,0.16)),
+    radial-gradient(circle at 20% 8%, rgba(140,202,192,0.28), transparent 10rem);
+}
+
+.room-glyph {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.8rem;
+  height: 2.8rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: rgba(140,202,192,0.25);
+  border: 1px solid rgba(182,95,61,0.22);
+  margin-bottom: 0.85rem;
+  font-size: 1.35rem;
+}
+
+.room-title {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.62rem;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.room-text {
+  display: block;
+  opacity: 0.84;
+  line-height: 1.52;
+}
+
+.selected-alcove {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin: 0 clamp(1rem, 3vw, 2rem) 2rem;
+  padding: clamp(1rem, 2vw, 1.35rem);
+  border: 1px solid rgba(81,111,77,0.28);
+  border-radius: 34px;
+  background:
+    linear-gradient(120deg, rgba(81,111,77,0.14), rgba(140,202,192,0.18), rgba(231,196,119,0.16)),
+    rgba(255,255,255,0.15);
+}
+
+.sky-night .selected-alcove,
+.sky-dusk .selected-alcove {
+  background:
+    linear-gradient(120deg, rgba(81,111,77,0.2), rgba(140,202,192,0.12), rgba(231,196,119,0.12)),
+    rgba(0,0,0,0.18);
+}
+
+.alcove-glyph {
+  display: inline-grid;
+  place-items: center;
+  min-width: 4rem;
+  height: 4rem;
+  padding: 0 0.55rem;
+  border-radius: 50%;
+  background: rgba(247,237,218,0.32);
+  border: 1px solid rgba(231,196,119,0.42);
+  font-size: 1.9rem;
+}
+
+.selected-alcove p {
+  margin: 0 0 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--emerald);
+}
+
+.sky-night .selected-alcove p,
+.sky-dusk .selected-alcove p { color: var(--seaglass); }
+
+.selected-alcove h2 {
+  margin: 0;
+  font-family: Cinzel, serif;
+  font-size: clamp(1.5rem, 4vw, 2.45rem);
+}
+
+.selected-alcove span:last-child {
+  display: block;
+  margin-top: 0.35rem;
+  opacity: 0.86;
+  line-height: 1.55;
+}
+
+.study-row .room-card {
+  min-height: 170px;
+  background:
+    linear-gradient(160deg, rgba(81,111,77,0.18), rgba(231,196,119,0.13)),
+    radial-gradient(circle at top right, rgba(182,95,61,0.12), transparent 10rem);
+}
+
+@media (max-width: 720px) {
+  .sky-lantern {
+    position: relative;
+    inset: auto;
+    margin: 0 auto 0.8rem;
+    width: min(100%, 360px);
+  }
+
+  .map-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .selected-alcove {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .alcove-glyph {
+    margin: 0 auto;
+  }
+}
