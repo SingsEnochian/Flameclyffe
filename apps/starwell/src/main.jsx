@@ -51,6 +51,15 @@ const fallbackCodexEntries = [
   },
 ];
 
+const fallbackCounts = {
+  world: 1,
+  location: 1,
+  character: 0,
+  artifact: 0,
+  discovery: 0,
+  note: 1,
+};
+
 const codexShelves = [
   { key: 'world', label: 'Worlds', glyph: '🌍', table: 'starwell_worlds' },
   { key: 'location', label: 'Locations', glyph: '🔭', table: 'starwell_locations' },
@@ -172,7 +181,7 @@ function AtlasSeedPanel() {
   }[atlasState];
 
   return (
-    <section className="atlas-seed-panel" aria-label="First living atlas seeds">
+    <section className="atlas-seed-panel chamber-card" aria-label="First living atlas seeds">
       <div className="map-heading compact">
         <span>World Seeds</span>
         <strong>{statusLabel}</strong>
@@ -235,6 +244,7 @@ function CodexShelf() {
 
       if (entryResult.error || countResults.some((result) => result.error)) {
         setEntries(fallbackCodexEntries);
+        setCounts(fallbackCounts);
         setSelectedEntry(fallbackCodexEntries[0]);
         setCodexState('fallback');
         return;
@@ -260,6 +270,7 @@ function CodexShelf() {
   }, []);
 
   const displayEntries = entries.length ? entries : fallbackCodexEntries;
+  const displayCounts = codexState === 'fallback' ? fallbackCounts : counts;
   const activeEntry = selectedEntry || displayEntries[0];
   const statusLabel = {
     loading: 'Listening for pages',
@@ -269,7 +280,7 @@ function CodexShelf() {
   }[codexState];
 
   return (
-    <section className="codex-shelf" aria-label="STARWELL codex shelf">
+    <section className="codex-shelf chamber-card" aria-label="STARWELL codex shelf">
       <div className="map-heading compact">
         <span>Codex Shelf</span>
         <strong>{statusLabel}</strong>
@@ -281,7 +292,7 @@ function CodexShelf() {
             <article className="shelf-card" key={shelf.key}>
               <span>{shelf.glyph}</span>
               <strong>{shelf.label}</strong>
-              <em>{counts[shelf.key] ?? '—'} records</em>
+              <em>{displayCounts[shelf.key] ?? 0} records</em>
             </article>
           ))}
         </div>
@@ -312,11 +323,36 @@ function CodexShelf() {
   );
 }
 
+function ComingSoonPanel({ selected }) {
+  return (
+    <section className="coming-soon chamber-card" aria-label={`${selected.title} chamber preview`}>
+      <div className="map-heading compact">
+        <span>{selected.title}</span>
+        <strong>Chamber seed</strong>
+      </div>
+      <div className="coming-soon-body">
+        <span className="seed-glyph">{selected.glyph}</span>
+        <div>
+          <h3>This room is marked on the map.</h3>
+          <p>{selected.text}</p>
+          <p>Next pass: give this chamber its own shelves, records, and tools.</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ActiveChamber({ selected }) {
+  if (selected.key === 'atlas') return <AtlasSeedPanel />;
+  if (selected.key === 'library') return <CodexShelf />;
+  return <ComingSoonPanel selected={selected} />;
+}
+
 function App() {
   const now = new Date();
   const phase = getSkyPhase(now);
   const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const [selected, setSelected] = useState(instruments[0]);
+  const [selected, setSelected] = useState(instruments[1]);
 
   const selectedType = useMemo(() => {
     if (studies.some((study) => study.key === selected.key)) return 'Study Door';
@@ -359,8 +395,7 @@ function App() {
           </div>
         </section>
 
-        <AtlasSeedPanel />
-        <CodexShelf />
+        <ActiveChamber selected={selected} />
 
         <section className="study-row" aria-label="Study doors">
           {studies.map((room) => (
