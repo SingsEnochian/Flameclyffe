@@ -40,6 +40,26 @@ const atlasSeeds = [
   },
 ];
 
+const fallbackCodexEntries = [
+  {
+    id: 'stonewood-principle-fallback',
+    slug: 'stonewood-principle',
+    title: 'Stonewood Principle',
+    entry_type: 'note',
+    excerpt: 'Cities are cultivated, shaped, tended, and inherited rather than manufactured.',
+    visibility: 'private',
+  },
+];
+
+const codexShelves = [
+  { key: 'world', label: 'Worlds', glyph: '🌍', table: 'starwell_worlds' },
+  { key: 'location', label: 'Locations', glyph: '🔭', table: 'starwell_locations' },
+  { key: 'character', label: 'Characters', glyph: '🧭', table: 'starwell_characters' },
+  { key: 'artifact', label: 'Artifacts', glyph: '🏺', table: 'starwell_artifacts' },
+  { key: 'discovery', label: 'Discoveries', glyph: '✨', table: 'starwell_discovery_logs' },
+  { key: 'note', label: 'Notes', glyph: '📝', table: 'starwell_codex_entries' },
+];
+
 function getSkyPhase(date = new Date()) {
   const hour = date.getHours() + date.getMinutes() / 60;
   if (hour >= 5 && hour < 8) return 'dawn';
@@ -184,6 +204,114 @@ function AtlasSeedPanel() {
   );
 }
 
+function getEntryPreview(entry) {
+  return entry.excerpt || entry.body_md || entry.body_html || 'This codex page is awake, but still waiting for its first full note.';
+}
+
+function CodexShelf() {
+  const [entries, setEntries] = useState([]);
+  const [counts, setCounts] = useState({});
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [codexState, setCodexState] = useState(hasSupabaseConfig ? 'loading' : 'fallback');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCodex() {
+      if (!supabase) return;
+
+      const entryRequest = supabase
+        .from('starwell_codex_entries')
+        .select('id, slug, title, entry_type, excerpt, body_md, body_html, tags, visibility, created_at')
+        .order('created_at', { ascending: true });
+
+      const countRequests = codexShelves.map((shelf) =>
+        supabase.from(shelf.table).select('id', { count: 'exact', head: true })
+      );
+
+      const [entryResult, ...countResults] = await Promise.all([entryRequest, ...countRequests]);
+
+      if (cancelled) return;
+
+      if (entryResult.error || countResults.some((result) => result.error)) {
+        setEntries(fallbackCodexEntries);
+        setSelectedEntry(fallbackCodexEntries[0]);
+        setCodexState('fallback');
+        return;
+      }
+
+      const liveCounts = codexShelves.reduce((nextCounts, shelf, index) => {
+        nextCounts[shelf.key] = countResults[index]?.count || 0;
+        return nextCounts;
+      }, {});
+
+      const liveEntries = entryResult.data || [];
+      setCounts(liveCounts);
+      setEntries(liveEntries);
+      setSelectedEntry(liveEntries[0] || null);
+      setCodexState(liveEntries.length ? 'live' : 'empty');
+    }
+
+    loadCodex();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const displayEntries = entries.length ? entries : fallbackCodexEntries;
+  const activeEntry = selectedEntry || displayEntries[0];
+  const statusLabel = {
+    loading: 'Listening for pages',
+    live: 'Live Supabase Codex',
+    empty: 'Shelves awaiting pages',
+    fallback: 'Local codex fallback',
+  }[codexState];
+
+  return (
+    <section className="codex-shelf" aria-label="STARWELL codex shelf">
+      <div className="map-heading compact">
+        <span>Codex Shelf</span>
+        <strong>{statusLabel}</strong>
+      </div>
+
+      <div className="codex-grid">
+        <div className="shelf-stack" aria-label="Codex shelf counts">
+          {codexShelves.map((shelf) => (
+            <article className="shelf-card" key={shelf.key}>
+              <span>{shelf.glyph}</span>
+              <strong>{shelf.label}</strong>
+              <em>{counts[shelf.key] ?? '—'} records</em>
+            </article>
+          ))}
+        </div>
+
+        <div className="entry-stack" aria-label="Codex entries">
+          {displayEntries.map((entry) => (
+            <button
+              className={`entry-tab ${activeEntry?.id === entry.id ? 'active' : ''}`}
+              key={entry.id}
+              onClick={() => setSelectedEntry(entry)}
+              type="button"
+            >
+              <span>{entry.entry_type || 'entry'}</span>
+              <strong>{entry.title}</strong>
+            </button>
+          ))}
+        </div>
+
+        {activeEntry && (
+          <article className="codex-reader" aria-live="polite">
+            <p>{activeEntry.entry_type || 'entry'} · {activeEntry.visibility || 'private'}</p>
+            <h3>{activeEntry.title}</h3>
+            <span>{getEntryPreview(activeEntry)}</span>
+          </article>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function App() {
   const now = new Date();
   const phase = getSkyPhase(now);
@@ -232,6 +360,7 @@ function App() {
         </section>
 
         <AtlasSeedPanel />
+        <CodexShelf />
 
         <section className="study-row" aria-label="Study doors">
           {studies.map((room) => (
