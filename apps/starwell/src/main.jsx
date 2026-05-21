@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './starwell.css';
+import './starwell-room.css';
 
 const instruments = [
   { key: 'library', glyph: '📚', title: 'Grand Library', text: 'Living Codex, manuscripts, marginalia, root-texts, and lore shelves.' },
@@ -15,6 +16,30 @@ const studies = [
   { key: 'hearthlight', glyph: '🍂', title: "Hearthlight's Study", text: 'Copper light, journals, characters, Grove records, warmth, and creative chaos.' },
   { key: 'faer', glyph: '🌊🔥', title: "Faer's Study", text: 'Emerald glass, resonance notes, signal work, deep-water flame, and quiet inquiry.' },
   { key: 'vee', glyph: '🌌', title: "Vee's Study", text: 'Architecture, atlas logic, codex structure, suspicious levers, and systems that ask what happens next.' },
+];
+
+const atlasSeeds = [
+  {
+    glyph: '🌍',
+    title: 'Terra Aeterna',
+    type: 'World Seed',
+    text: 'Primary STARWELL anchor world for Rowan and Vee scope.',
+    status: 'Active',
+  },
+  {
+    glyph: '🔭',
+    title: 'Hearthweave Observatory',
+    type: 'Location Seed',
+    text: 'Private observatory and first drafting room where notes, maps, and sparks begin.',
+    status: 'Rooted',
+  },
+  {
+    glyph: '🌳',
+    title: 'Stonewood Principle',
+    type: 'Civic Seed',
+    text: 'Cities are cultivated, shaped, tended, and inherited rather than manufactured.',
+    status: 'Spark',
+  },
 ];
 
 function getSkyPhase(date = new Date()) {
@@ -55,6 +80,29 @@ function RoomCard({ room, active, onSelect }) {
       <span className="room-title">{room.title}</span>
       <span className="room-text">{room.text}</span>
     </button>
+  );
+}
+
+function AtlasSeedPanel() {
+  return (
+    <section className="atlas-seed-panel" aria-label="First living atlas seeds">
+      <div className="map-heading compact">
+        <span>First Living Atlas Seeds</span>
+        <strong>Rooted locally</strong>
+      </div>
+      <div className="seed-grid">
+        {atlasSeeds.map((seed) => (
+          <article className="seed-card" key={seed.title}>
+            <span className="seed-glyph">{seed.glyph}</span>
+            <div>
+              <p>{seed.type} · {seed.status}</p>
+              <h3>{seed.title}</h3>
+              <span>{seed.text}</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -104,6 +152,8 @@ function App() {
             <span>{selected.text}</span>
           </div>
         </section>
+
+        <AtlasSeedPanel />
 
         <section className="study-row" aria-label="Study doors">
           {studies.map((room) => (
