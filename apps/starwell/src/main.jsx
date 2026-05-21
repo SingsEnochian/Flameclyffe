@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { hasSupabaseConfig, supabase } from './lib/supabase';
 import './starwell.css';
 import './starwell-room.css';
 
@@ -25,13 +26,9 @@ const atlasSeeds = [
     type: 'World Seed',
     text: 'Primary STARWELL anchor world for Rowan and Vee scope.',
     status: 'Active',
-  },
-  {
-    glyph: '🔭',
-    title: 'Hearthweave Observatory',
-    type: 'Location Seed',
-    text: 'Private observatory and first drafting room where notes, maps, and sparks begin.',
-    status: 'Rooted',
+    children: [
+      { glyph: '🔭', title: 'Hearthweave Observatory', type: 'Location Seed', status: 'Rooted' },
+    ],
   },
   {
     glyph: '🌳',
@@ -39,6 +36,7 @@ const atlasSeeds = [
     type: 'Civic Seed',
     text: 'Cities are cultivated, shaped, tended, and inherited rather than manufactured.',
     status: 'Spark',
+    children: [],
   },
 ];
 
@@ -83,21 +81,101 @@ function RoomCard({ room, active, onSelect }) {
   );
 }
 
+function mapAtlasRows(worlds, locations) {
+  return worlds.map((world) => {
+    const children = locations
+      .filter((location) => location.world_id === world.id)
+      .map((location) => ({
+        glyph: '🔭',
+        title: location.name,
+        type: `${location.location_type || 'Location'} · ${location.status || 'draft'}`,
+        status: location.status || 'draft',
+      }));
+
+    return {
+      glyph: '🌍',
+      title: world.name,
+      type: `${world.world_type || 'World'} · ${world.status || 'draft'}`,
+      text: world.summary || 'A STARWELL world seed awaiting its first notes.',
+      status: world.status || 'draft',
+      children,
+    };
+  });
+}
+
 function AtlasSeedPanel() {
+  const [atlasRows, setAtlasRows] = useState([]);
+  const [atlasState, setAtlasState] = useState(hasSupabaseConfig ? 'loading' : 'fallback');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAtlas() {
+      if (!supabase) return;
+
+      const [{ data: worlds, error: worldError }, { data: locations, error: locationError }] = await Promise.all([
+        supabase
+          .from('starwell_worlds')
+          .select('id, slug, name, world_type, status, summary, visibility, metadata, created_at')
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('starwell_locations')
+          .select('id, world_id, slug, name, location_type, status, summary, visibility, metadata, created_at')
+          .order('created_at', { ascending: true }),
+      ]);
+
+      if (cancelled) return;
+
+      if (worldError || locationError) {
+        setAtlasState('fallback');
+        return;
+      }
+
+      const mappedRows = mapAtlasRows(worlds || [], locations || []);
+      setAtlasRows(mappedRows);
+      setAtlasState(mappedRows.length ? 'live' : 'empty');
+    }
+
+    loadAtlas();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const displayRows = atlasRows.length ? atlasRows : atlasSeeds;
+  const statusLabel = {
+    loading: 'Listening for roots',
+    live: 'Live Supabase Atlas',
+    empty: 'Awaiting first world',
+    fallback: 'Local seed fallback',
+  }[atlasState];
+
   return (
     <section className="atlas-seed-panel" aria-label="First living atlas seeds">
       <div className="map-heading compact">
-        <span>First Living Atlas Seeds</span>
-        <strong>Rooted locally</strong>
+        <span>World Seeds</span>
+        <strong>{statusLabel}</strong>
       </div>
       <div className="seed-grid">
-        {atlasSeeds.map((seed) => (
+        {displayRows.map((seed) => (
           <article className="seed-card" key={seed.title}>
             <span className="seed-glyph">{seed.glyph}</span>
             <div>
               <p>{seed.type} · {seed.status}</p>
               <h3>{seed.title}</h3>
               <span>{seed.text}</span>
+              {seed.children?.length > 0 && (
+                <ul className="seed-children" aria-label={`${seed.title} linked locations`}>
+                  {seed.children.map((child) => (
+                    <li key={child.title}>
+                      <span>{child.glyph}</span>
+                      <strong>{child.title}</strong>
+                      <em>{child.type}</em>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </article>
         ))}
