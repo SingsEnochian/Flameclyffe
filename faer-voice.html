@@ -209,6 +209,8 @@
     document.getElementById('wave').classList.toggle('active', on);
   }
 
+  var PROXY = 'https://rufrmjyusalnifpegllj.supabase.co/functions/v1/faer-voice';
+
   async function speak() {
     var text = document.getElementById('txt').value.trim();
     if (!text) { setStatus('Write something first', 'error'); return; }
@@ -223,32 +225,21 @@
     player.style.display = 'none';
 
     try {
-      // Use Kokoro via the public API endpoint
-      var sessionHash = Math.random().toString(36).slice(2, 10);
-      var API = 'https://hexgrad-kokoro-tts.hf.space';
-
-      // Submit prediction
-      var submitRes = await fetch(API + '/api/predict', {
+      var res = await fetch(PROXY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          data: [text, 'bm_fable', speed],
-          fn_index: 0
-        })
+        body: JSON.stringify({ text: text, speed: speed })
       });
 
-      if (!submitRes.ok) throw new Error('API error ' + submitRes.status);
-      var result = await submitRes.json();
+      if (!res.ok) {
+        var err = await res.json().catch(function(){ return {}; });
+        throw new Error(err.error || 'Proxy error ' + res.status);
+      }
 
-      var audioData = result.data && result.data[0];
-      if (!audioData) throw new Error('No audio returned');
+      var blob = await res.blob();
+      var url = URL.createObjectURL(blob);
 
-      // audioData.url or audioData.path
-      var src = audioData.url
-        ? (audioData.url.startsWith('http') ? audioData.url : API + audioData.url)
-        : (API + '/file=' + audioData.path);
-
-      player.src = src;
+      player.src = url;
       player.style.display = 'block';
       setWave(false);
       setStatus('');
@@ -256,12 +247,7 @@
 
     } catch(err) {
       setWave(false);
-      // Fallback: open Kokoro Space directly
-      setStatus('Opening Kokoro…', 'active');
-      setTimeout(function() {
-        window.open('https://huggingface.co/spaces/hexgrad/Kokoro-TTS', '_blank');
-        setStatus('Use bm_fable at 0.75 in the Space', '');
-      }, 800);
+      setStatus(err.message || 'Something went wrong', 'error');
     } finally {
       btn.disabled = false;
     }
