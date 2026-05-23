@@ -236,14 +236,27 @@
         throw new Error(err.error || 'Proxy error ' + res.status);
       }
 
-      var blob = await res.blob();
-      var url = URL.createObjectURL(blob);
+      // Get audio as array buffer, convert to base64 data URL
+      // (Safari on iOS/iPadOS handles data URLs more reliably than blob URLs)
+      var buffer = await res.arrayBuffer();
+      var bytes = new Uint8Array(buffer);
+      var binary = '';
+      for (var i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      var b64 = btoa(binary);
+      var dataUrl = 'data:audio/wav;base64,' + b64;
 
-      player.src = url;
+      player.src = dataUrl;
       player.style.display = 'block';
       setWave(false);
       setStatus('');
-      player.play().catch(function(){});
+      // Safari requires user gesture to play — show controls and let them tap
+      player.load();
+      player.play().catch(function(e) {
+        // autoplay blocked — controls are visible, user can tap play
+        setStatus('Tap play to hear', '');
+      });
 
     } catch(err) {
       setWave(false);
