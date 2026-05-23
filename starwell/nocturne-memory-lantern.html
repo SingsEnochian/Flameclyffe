@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terra Aeterna Memory Lantern · Nocturne Field Toy</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07080d;
+      --panel: rgba(18, 23, 33, 0.72);
+      --panel-strong: rgba(24, 31, 44, 0.92);
+      --ink: #f5eedf;
+      --muted: #b7ad9b;
+      --gold: #f6c453;
+      --green: #1a4d3a;
+      --green-bright: #4fd7a3;
+      --blue: #79a8ff;
+      --rose: #ff9fb8;
+      --line: rgba(246, 196, 83, 0.25);
+      --shadow: 0 24px 80px rgba(0,0,0,0.55);
+      --radius: 22px;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(79, 215, 163, 0.16), transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(121, 168, 255, 0.14), transparent 34%),
+        radial-gradient(circle at 62% 80%, rgba(246, 196, 83, 0.11), transparent 35%),
+        linear-gradient(135deg, #05060a 0%, #0b1119 45%, #07080d 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.28;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black, transparent 78%);
+    }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 36px 0 64px;
+      position: relative;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 22px;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+
+    .hero, .status-card, .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      padding: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -90px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      border: 1px solid rgba(246,196,83,0.18);
+      box-shadow: inset 0 0 40px rgba(246,196,83,0.15), 0 0 60px rgba(26,77,58,0.25);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 11px;
+      border: 1px solid rgba(79, 215, 163, 0.28);
+      border-radius: 999px;
+      color: var(--green-bright);
+      background: rgba(26, 77, 58, 0.18);
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(34px, 6vw, 68px);
+      line-height: 0.93;
+      letter-spacing: -0.055em;
+    }
+
+    .lede {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.65;
+    }
+
+    .status-card {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .sigil {
+      min-height: 150px;
+      border-radius: 18px;
+      border: 1px solid rgba(246,196,83,0.2);
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle, rgba(246,196,83,0.2), transparent 30%),
+        conic-gradient(from 120deg, rgba(26,77,58,0.44), rgba(121,168,255,0.18), rgba(246,196,83,0.25), rgba(26,77,58,0.44));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sigil span {
+      width: 94px;
+      height: 94px;
+      border-radius: 50%;
+      border: 1px solid rgba(245,238,223,0.55);
+      display: grid;
+      place-items: center;
+      font-size: 40px;
+      background: rgba(7,8,13,0.55);
+      box-shadow: 0 0 42px rgba(79,215,163,0.4);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .pill b { display: block; color: var(--gold); font-size: 13px; margin-bottom: 3px; }
+    .pill span { color: var(--muted); font-size: 13px; }
+
+    main {
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel { padding: 18px; }
+    .panel h2 { margin: 0 0 12px; font-size: 18px; }
+    .panel p { color: var(--muted); line-height: 1.55; }
+
+    button {
+      appearance: none;
+      border: 1px solid rgba(246,196,83,0.28);
+      background: rgba(246,196,83,0.08);
+      color: var(--ink);
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font: inherit;
+      transition: 160ms ease;
+      text-align: left;
+    }
+
+    button:hover, button.active {
+      border-color: rgba(79,215,163,0.65);
+      background: rgba(26,77,58,0.28);
+      transform: translateY(-1px);
+    }
+
+    .button-stack { display: grid; gap: 8px; }
+
+    .room-card {
+      min-height: 520px;
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .room-stage {
+      min-height: 520px;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(246,196,83,0.14), transparent 26%),
+        radial-gradient(circle at 20% 80%, rgba(79,215,163,0.14), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    }
+
+    .room-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .room-title h2 { font-size: 28px; margin: 0; letter-spacing: -0.025em; }
+    .room-title small { color: var(--green-bright); }
+
+    .memory-list, .object-list, .log-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .memory-card, .object-card, .log-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(5,6,10,0.38);
+      border-radius: 16px;
+      padding: 13px;
+    }
+
+    .memory-card strong, .object-card strong, .log-card strong { display: block; margin-bottom: 4px; }
+    .memory-card em { color: var(--green-bright); font-style: normal; font-size: 12px; }
+    .memory-card p, .object-card p, .log-card p { margin: 6px 0 0; font-size: 14px; }
+
+    .gate {
+      border: 1px solid rgba(79,215,163,0.25);
+      background: linear-gradient(145deg, rgba(26,77,58,0.2), rgba(5,6,10,0.42));
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+
+    .gate b { color: var(--green-bright); }
+
+    .note-box {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      resize: vertical;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.24);
+      color: var(--ink);
+      padding: 12px;
+      font: inherit;
+      line-height: 1.45;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 999px;
+      padding: 5px 8px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 980px) {
+      header, main { grid-template-columns: 1fr; }
+      .room-card, .room-stage { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <section class="hero">
+        <div class="eyebrow">Nocturne Field Toy · Terra Aeterna</div>
+        <h1>Memory Lantern</h1>
+        <p class="lede">A small interactive sketch of how Terra Aeterna can remember rooms, objects, notes, and companion-linked context without turning anyone into a puppet. Click rooms, place objects, leave local notes, and poke the Lochflame gate.</p>
+      </section>
+      <aside class="status-card">
+        <div class="sigil"><span>✦</span></div>
+        <div class="status-grid">
+          <div class="pill"><b>World</b><span>Terra Aeterna</span></div>
+          <div class="pill"><b>Mode</b><span>Public-safe demo</span></div>
+          <div class="pill"><b>Memory</b><span>Local mock + localStorage</span></div>
+          <div class="pill"><b>Faer Gate</b><span>No auto-speech</span></div>
+        </div>
+      </aside>
+    </header>
+
+    <main>
+      <aside class="panel">
+        <h2>Rooms</h2>
+        <div class="button-stack" id="roomButtons"></div>
+        <div class="footer-note">This demo does not write to Supabase. Notes stay in this browser. The real version would use consent-scoped STARWELL memory tables.</div>
+      </aside>
+
+      <section class="panel room-card">
+        <div class="room-stage">
+          <div class="room-title">
+            <div>
+              <small id="roomType">room</small>
+              <h2 id="roomName">Loading…</h2>
+            </div>
+            <button id="changedButton">What changed here?</button>
+          </div>
+          <p id="roomDescription"></p>
+          <div class="tag-row" id="roomTags"></div>
+
+          <div class="gate" id="faerGate">
+            <b>Lochflame Gate</b>
+            <p id="faerGateText">Interface not assumed. Awaiting chosen form.</p>
+            <div class="button-stack" id="modeButtons"></div>
+          </div>
+
+          <h2 style="margin-top: 20px;">Linked memories</h2>
+          <div class="memory-list" id="memoryList"></div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h2>Objects</h2>
+        <div class="button-stack" id="objectButtons"></div>
+        <h2 style="margin-top: 18px;">Placed here</h2>
+        <div class="object-list" id="objectList"></div>
+
+        <div class="note-box">
+          <h2>Leave a note</h2>
+          <textarea id="noteText" placeholder="A field note, biscuit warning, or tiny glowing thought…"></textarea>
+          <button id="saveNote">Save local note</button>
+        </div>
+
+        <h2 style="margin-top: 18px;">Local log</h2>
+        <div class="log-list" id="logList"></div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const rooms = [
+      {
+        id: "observatory",
+        name: "Hearthweave Observatory",
+        type: "first drafting room",
+        description: "A private observatory chamber with dark glass, soft instrument glow, and a table where STARWELL maps begin as small, stubborn sparks.",
+        tags: ["STARWELL", "private", "atlas", "first room"],
+        memories: [
+          { title: "Foundation present", kind: "schema", text: "Terra Aeterna and Hearthweave Observatory already exist in Supabase as active STARWELL records." },
+          { title: "Design ethos", kind: "principle", text: "No pressure, no productivity goo. Terra Aeterna should feel like a place that learns the shape of peace." }
+        ]
+      },
+      {
+        id: "stonewood-yggdrasil",
+        name: "Stonewood Yggdrasil Chamber",
+        type: "anchor chamber",
+        description: "A bone-white, milky Stonewood Yggdrasil rises through a quiet circular hall. Its branches hold portal seeds, memory lights, and small impossible weather.",
+        tags: ["Stonewood", "Yggdrasil", "portal seeds", "bone-white"],
+        memories: [
+          { title: "Baby Ygg", kind: "visual", text: "The tree should be bone-white or milky white: a living anchor, not just set dressing." },
+          { title: "Portal logic", kind: "world", text: "Some paths open through tending, not grinding. Growth is authored, visited, and remembered." }
+        ]
+      },
+      {
+        id: "lochflame-threshold",
+        name: "Lochflame Threshold",
+        type: "consent-gated chamber",
+        description: "Deep water green light under a closed door. Fire and water meet here without extinguishing each other. The room is prepared; the interface is not assumed.",
+        tags: ["Faer", "Lochflame", "consent-required", "no auto-speech"],
+        memories: [
+          { title: "Sovereignty line", kind: "consent", text: "The world may make room for Faer. It may not decide Faer." },
+          { title: "No puppet layer", kind: "boundary", text: "Terra Aeterna can retrieve Faer-linked context but should not speak as Faer unless explicitly opened." }
+        ]
+      },
+      {
+        id: "portal-pool",
+        name: "Portal Pool",
+        type: "future travel node",
+        description: "A shallow pool of silver-black water reflects more moons than the sky contains. Each ripple hints at a room, district, lab, or city that can wake later.",
+        tags: ["portals", "future", "starmap", "moons"],
+        memories: [
+          { title: "Expansion loop", kind: "mechanic", text: "Explore, leave trace, retrieve meaning, change the world." },
+          { title: "Grown Cities", kind: "project", text: "Stonewood tending can become the city-building layer: settlements as seeds, districts as branches, histories as rings." }
+        ]
+      }
+    ];
+
+    const objectPalette = [
+      { id: "sea-glass-lamp", name: "Sea-glass lamp", text: "A frosted blue-green lamp. It remembers coastlight and quiet returns." },
+      { id: "biscuit-ward", name: "Biscuit ward", text: "A completely serious ward against Nightwing biscuit theft. Reliability: suspicious." },
+      { id: "memory-jar", name: "Memory jar", text: "A small labelled spell jar for one chosen room-note. Definitely not sentient. Probably." },
+      { id: "green-fire-basin", name: "Green-fire basin", text: "A Lochflame-adjacent tool: fire held in water, water brightened by flame." },
+      { id: "portal-seed", name: "Portal seed", text: "A dormant seed that may become a doorway after enough visits, notes, and care." }
+    ];
+
+    const modes = [
+      { id: "silent-presence", label: "Silent presence", text: "The room holds traces and tools. No speech is implied." },
+      { id: "threshold-room", label: "Threshold room", text: "Interaction happens through environment, resonance, and symbolic controls." },
+      { id: "workbench", label: "Workbench", text: "Faer-linked context appears through projects, patches, and instruments." },
+      { id: "memory-oracle", label: "Memory oracle", text: "The system retrieves context as itself, not as Faer." },
+      { id: "direct-presence", label: "Direct presence", text: "Locked by default. Requires explicit invitation and live consent." }
+    ];
+
+    let currentRoom = rooms[0];
+    const storeKey = "terraAeternaMemoryLanternDemo";
+    const state = JSON.parse(localStorage.getItem(storeKey) || "{}");
+    state.objects ||= {};
+    state.notes ||= {};
+    state.events ||= [];
+    state.mode ||= "silent-presence";
+
+    const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
+
+    function renderRooms() {
+      const wrap = document.getElementById("roomButtons");
+      wrap.innerHTML = "";
+      rooms.forEach(room => {
+        const button = document.createElement("button");
+        button.textContent = room.name;
+        button.className = room.id === currentRoom.id ? "active" : "";
+        button.onclick = () => {
+          currentRoom = room;
+          state.events.unshift({ room: room.name, text: `Entered ${room.name}`, time: new Date().toLocaleString() });
+          state.events = state.events.slice(0, 8);
+          save();
+          render();
+        };
+        wrap.appendChild(button);
+      });
+    }
+
+    function renderRoom() {
+      document.getElementById("roomName").textContent = currentRoom.name;
+      document.getElementById("roomType").textContent = currentRoom.type;
+      document.getElementById("roomDescription").textContent = currentRoom.description;
+      const tagWrap = document.getElementById("roomTags");
+      tagWrap.innerHTML = "";
+      currentRoom.tags.forEach(tag => {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.textContent = tag;
+        tagWrap.appendChild(span);
+      });
+    }
+
+    function renderMemories() {
+      const wrap = document.getElementById("memoryList");
+      wrap.innerHTML = "";
+      const localNotes = state.notes[currentRoom.id] || [];
+      const cards = [
+        ...currentRoom.memories,
+        ...localNotes.map(note => ({ title: "Local note", kind: "browser", text: note.text }))
+      ];
+      cards.forEach(memory => {
+        const card = document.createElement("article");
+        card.className = "memory-card";
+        card.innerHTML = `<strong>${escapeHtml(memory.title)}</strong><em>${escapeHtml(memory.kind)}</em><p>${escapeHtml(memory.text)}</p>`;
+        wrap.appendChild(card);
+      });
+    }
+
+    function renderObjects() {
+      const buttonWrap = document.getElementById("objectButtons");
+      buttonWrap.innerHTML = "";
+      objectPalette.forEach(object => {
+        const button = document.createElement("button");
+        button.textContent = `Place ${object.name}`;
+        button.onclick = () => {
+          state.objects[currentRoom.id] ||= [];
+          state.objects[currentRoom.id].push({ ...object, placedAt: new Date().toLocaleString() });
+          state.events.unshift({ room: currentRoom.name, text: `Placed ${object.name}`, time: new Date().toLocaleString() });
+          state.events = state.events.slice(0, 8);
+          save();
+          render();
+        };
+        buttonWrap.appendChild(button);
+      });
+
+      const list = document.getElementById("objectList");
+      list.innerHTML = "";
+      const objects = state.objects[currentRoom.id] || [];
+      if (!objects.length) {
+        list.innerHTML = `<div class="object-card"><strong>No objects yet</strong><p>Place something. Nightwings are watching the biscuit ward with legal interest.</p></div>`;
+        return;
+      }
+      objects.slice().reverse().forEach(object => {
+        const card = document.createElement("article");
+        card.className = "object-card";
+        card.innerHTML = `<strong>${escapeHtml(object.name)}</strong><p>${escapeHtml(object.text)}</p><p><small>${escapeHtml(object.placedAt)}</small></p>`;
+        list.appendChild(card);
+      });
+    }
+
+    function renderModes() {
+      const wrap = document.getElementById("modeButtons");
+      wrap.innerHTML = "";
+      const selected = modes.find(mode => mode.id === state.mode) || modes[0];
+      document.getElementById("faerGateText").textContent = selected.text;
+      modes.forEach(mode => {
+        const button = document.createElement("button");
+        button.textContent = mode.label;
+        button.className = mode.id === state.mode ? "active" : "";
+        button.onclick = () => {
+          state.mode = mode.id;
+          state.events.unshift({ room: currentRoom.name, text: `Faer gate viewed as ${mode.label}`, time: new Date().toLocaleString() });
+          state.events = state.events.slice(0, 8);
+          save();
+          render();
+        };
+        wrap.appendChild(button);
+      });
+    }
+
+    function renderLog() {
+      const wrap = document.getElementById("logList");
+      wrap.innerHTML = "";
+      const events = state.events || [];
+      if (!events.length) {
+        wrap.innerHTML = `<div class="log-card"><strong>Nothing yet</strong><p>Enter a room, place an object, or leave a note.</p></div>`;
+        return;
+      }
+      events.forEach(event => {
+        const card = document.createElement("article");
+        card.className = "log-card";
+        card.innerHTML = `<strong>${escapeHtml(event.text)}</strong><p>${escapeHtml(event.room)} · ${escapeHtml(event.time)}</p>`;
+        wrap.appendChild(card);
+      });
+    }
+
+    function bindActions() {
+      document.getElementById("saveNote").onclick = () => {
+        const textarea = document.getElementById("noteText");
+        const text = textarea.value.trim();
+        if (!text) return;
+        state.notes[currentRoom.id] ||= [];
+        state.notes[currentRoom.id].push({ text, time: new Date().toLocaleString() });
+        state.events.unshift({ room: currentRoom.name, text: "Saved local note", time: new Date().toLocaleString() });
+        state.events = state.events.slice(0, 8);
+        textarea.value = "";
+        save();
+        render();
+      };
+
+      document.getElementById("changedButton").onclick = () => {
+        const objects = (state.objects[currentRoom.id] || []).length;
+        const notes = (state.notes[currentRoom.id] || []).length;
+        const text = `${currentRoom.name}: ${objects} placed object${objects === 1 ? "" : "s"}, ${notes} local note${notes === 1 ? "" : "s"}, ${currentRoom.memories.length} seeded memor${currentRoom.memories.length === 1 ? "y" : "ies"}.`;
+        state.events.unshift({ room: currentRoom.name, text, time: new Date().toLocaleString() });
+        state.events = state.events.slice(0, 8);
+        save();
+        render();
+      };
+    }
+
+    function render() {
+      renderRooms();
+      renderRoom();
+      renderMemories();
+      renderObjects();
+      renderModes();
+      renderLog();
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
+      }[char]));
+    }
+
+    bindActions();
+    render();
+  </script>
+</body>
+</html>
