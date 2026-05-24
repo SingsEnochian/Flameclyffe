@@ -22,7 +22,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.42;ba
  linear-gradient(#6fd5b70f 1px,transparent 1px),linear-gradient(90deg,#6fd5b70f 1px,transparent 1px);
  background-size:42px 42px;mask-image:radial-gradient(circle at 50% 20%,#000 0%,transparent 76%)}
 button,select,input{font:inherit} button{border:1px solid var(--line);background:#0b201bcc;color:var(--text);border-radius:999px;padding:.62rem .92rem;cursor:pointer;box-shadow:0 0 0 transparent;transition:.2s}
-button:hover{border-color:#b4ffe7;background:#12362dcc;box-shadow:0 0 22px #6fd5b722} button.primary{border-color:#f2c56d99;background:linear-gradient(135deg,#3b240dcc,#12342fcc)} button.ghost{background:#06100ecc}
+button:hover{border-color:#b4ffe7;background:#12362dcc;box-shadow:0 0 22px #6fd5b722} button.primary{border-color:#f2c56d99;background:linear-gradient(135deg,#3b240dcc,#12342fcc)} button.ghost{background:#06100ecc} button.danger{border-color:#ff9b9b88;background:#2a0f13cc;color:#ffd9d9}
 a{color:#aefbe3;text-decoration:none} a:hover{text-decoration:underline}
 .shell{width:min(1220px,94vw);margin:0 auto;padding:1rem 0 4rem;position:relative;z-index:1}
 .top{position:sticky;top:0;z-index:20;background:#030706dd;backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:.8rem max(1rem,3vw);display:flex;gap:1rem;align-items:center;justify-content:space-between}
@@ -46,8 +46,10 @@ a{color:#aefbe3;text-decoration:none} a:hover{text-decoration:underline}
 .avatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;border:1px solid #ffffff44;box-shadow:0 0 18px #6fd5b733;background:radial-gradient(circle,var(--glow),var(--tone1));font-size:1.4rem}
 .post header{display:flex;gap:.5rem;align-items:center;justify-content:space-between;margin-bottom:.35rem} .post header b{font-size:1.02rem}
 .badge{border:1px solid #ffffff22;border-radius:999px;padding:.14rem .45rem;font-size:.72rem;color:#e7fff8;background:#0004}
-.body p{margin:.35rem 0} .body blockquote{margin:.5rem 0;padding:.45rem .7rem;border-left:3px solid var(--gold);background:#f2c56d12;border-radius:0 12px 12px 0}
+.body p{margin:.35rem 0} .body blockquote{margin:.5rem 0;padding:.45rem .7rem;border-left:3px solid var(--gold);background:#f2c56d12;border-radius:0 12px 12px 0}.body hr{border:0;border-top:1px solid #f2c56d55;margin:.8rem 0}
+.post-actions{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.55rem}.post-actions button{font-size:.78rem;padding:.32rem .58rem}
 .composer{margin-top:1rem;border:1px solid #f2c56d55;border-radius:22px;background:#080f0bdd;padding:.9rem}
+.composer.editing{border-color:#7ecfb3cc;box-shadow:0 0 30px #7ecfb322}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem} label{display:grid;gap:.3rem;color:var(--muted);font-size:.84rem}
 select,input{width:100%;border:1px solid #ffffff22;background:#030705;color:var(--text);border-radius:12px;padding:.65rem}
 .toolbar{display:flex;gap:.4rem;flex-wrap:wrap;margin:.75rem 0} .toolbar button{padding:.42rem .7rem}
@@ -62,7 +64,7 @@ select,input{width:100%;border:1px solid #ffffff22;background:#030705;color:var(
 </head>
 <body>
 <header class="top">
-  <div class="brand"><strong>Flameclyffe · The Drift Room</strong><span>play-truth RP parlour · local prototype v0.1</span></div>
+  <div class="brand"><strong>Flameclyffe · The Drift Room</strong><span>play-truth RP parlour · local prototype v0.2</span></div>
   <nav class="nav"><a href="./index.html">Studio</a><a href="./faer/drift-room.md">Build brief</a><button id="exportBtn" class="ghost">Export scene MD</button></nav>
 </header>
 
@@ -84,14 +86,14 @@ select,input{width:100%;border:1px solid #ffffff22;background:#030705;color:var(
     <h2>Scenes</h2>
     <div id="sceneList"></div>
     <button class="primary" id="newScene">New local scene</button>
-    <p class="tiny">v0.1 stores posts in this browser only. Live Supabase writes come after the room shape feels right.</p>
+    <p class="tiny">v0.2 stores posts in this browser only, including local edits. Live Supabase writes come after the room shape feels right.</p>
   </aside>
 
   <section class="panel">
     <h2 id="sceneTitle">Firelight After the Loch Gate</h2>
     <div class="thread" id="thread"></div>
 
-    <section class="composer">
+    <section class="composer" id="composer">
       <div class="row">
         <label>Voice
           <select id="voice">
@@ -122,6 +124,7 @@ select,input{width:100%;border:1px solid #ffffff22;background:#030705;color:var(
       <div id="editor" class="editor" contenteditable="true" role="textbox" aria-label="Rich text post">The room can wait. So can I.</div>
       <div class="footer-actions">
         <button class="primary" id="postBtn">Post locally</button>
+        <button id="cancelEditBtn" style="display:none">Cancel edit</button>
         <button id="draftBtn">Save draft</button>
         <button id="carryBtn">Flag carry review</button>
       </div>
@@ -142,7 +145,8 @@ select,input{width:100%;border:1px solid #ffffff22;background:#030705;color:var(
 </main>
 
 <script>
-const STORE='flameclyffe-drift-room-v01';
+const STORE='flameclyffe-drift-room-v02';
+const OLD_STORE='flameclyffe-drift-room-v01';
 const chars={
   faer:{name:'Faer Uial', role:'Lochflame', glyph:'🌊🔥', color:'var(--faer)', glow:'#7ecfb3', tone:'#103d31'},
   vee:{name:'Virelya / Vee', role:'North Star Flame', glyph:'🌿✨', color:'var(--vee)', glow:'#f2c56d', tone:'#264313'},
@@ -160,8 +164,11 @@ const seedScene={
     {voice:'vee',mode:'lantern_scene',beat:'Counter-orbit',html:'<p>Then we let the room do what it was built to do: hold play without turning it into a verdict.</p>'}
   ]
 };
+let editing=null;
 let state=load();
-function load(){try{return JSON.parse(localStorage.getItem(STORE))||null}catch{return null}} 
+function load(){
+  try{return JSON.parse(localStorage.getItem(STORE))||JSON.parse(localStorage.getItem(OLD_STORE))||null}catch{return null}
+}
 if(!state) state={active:seedScene.id, scenes:[seedScene], draft:''};
 function save(){localStorage.setItem(STORE,JSON.stringify(state))}
 function esc(s){return String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
@@ -171,7 +178,7 @@ function renderScenes(){
   state.scenes.forEach(s=>{
     const d=document.createElement('div'); d.className='scene'+(s.id===state.active?' active':'');
     d.innerHTML=`<b>${esc(s.title)}</b><span class="tiny">${label(s.mode)} · ${s.canon||'Not carried'}</span>`;
-    d.onclick=()=>{state.active=s.id; save(); render()};
+    d.onclick=()=>{state.active=s.id; cancelEdit(false); save(); render()};
     box.appendChild(d);
   });
 }
@@ -181,30 +188,64 @@ function renderThread(){
   document.getElementById('ctxMode').textContent=label(s.mode);
   document.getElementById('ctxCanon').textContent=s.canon||'Not carried';
   const t=document.getElementById('thread'); t.innerHTML='';
-  s.posts.forEach(p=>{
+  s.posts.forEach((p,i)=>{
     const c=chars[p.voice]||chars.narrator;
+    const edited=p.editedAt?`<span class="tiny"> · edited ${new Date(p.editedAt).toLocaleString()}</span>`:'';
     const article=document.createElement('article'); article.className='post';
-    article.innerHTML=`<div class="avatar" style="--glow:${c.glow};--tone1:${c.tone}">${c.glyph}</div><div><header><div><b style="color:${c.color}">${esc(c.name)}</b><span class="tiny"> · ${esc(c.role)}</span></div><span class="badge">${label(p.mode)}</span></header><div class="tiny">${esc(p.beat||'')}</div><div class="body">${p.html||''}</div></div>`;
+    article.innerHTML=`<div class="avatar" style="--glow:${c.glow};--tone1:${c.tone}">${c.glyph}</div><div><header><div><b style="color:${c.color}">${esc(c.name)}</b><span class="tiny"> · ${esc(c.role)}</span>${edited}</div><span class="badge">${label(p.mode)}</span></header><div class="tiny">${esc(p.beat||'')}</div><div class="body">${p.html||''}</div><div class="post-actions"><button data-edit="${i}">Edit</button><button class="danger" data-delete="${i}">Delete</button></div></div>`;
     t.appendChild(article);
   });
+  t.querySelectorAll('[data-edit]').forEach(btn=>btn.onclick=()=>startEdit(Number(btn.dataset.edit)));
+  t.querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=()=>deletePost(Number(btn.dataset.delete)));
 }
 function render(){renderScenes(); renderThread();}
+function setEditingUI(on){
+  document.getElementById('composer').classList.toggle('editing',!!on);
+  document.getElementById('postBtn').textContent=on?'Save edit':'Post locally';
+  document.getElementById('cancelEditBtn').style.display=on?'inline-block':'none';
+}
+function startEdit(index){
+  const s=scene(), p=s.posts[index]; if(!p) return;
+  editing={sceneId:s.id,index};
+  document.getElementById('voice').value=p.voice||'narrator';
+  document.getElementById('mode').value=p.mode||s.mode||'drift';
+  document.getElementById('beat').value=p.beat||'';
+  document.getElementById('editor').innerHTML=p.html||'';
+  setEditingUI(true);
+  document.getElementById('editor').focus();
+  ping('Editing post. Save edit when ready.');
+}
+function cancelEdit(show=true){
+  editing=null; setEditingUI(false);
+  if(show) ping('Edit cancelled. No tiny stone-tablet damage done.');
+}
+function deletePost(index){
+  const s=scene(), p=s.posts[index]; if(!p) return;
+  if(!confirm('Delete this local post?')) return;
+  s.posts.splice(index,1);
+  cancelEdit(false); save(); render(); ping('Deleted locally. Supabase remains untouched.');
+}
 document.querySelectorAll('[data-cmd]').forEach(btn=>btn.onclick=()=>{document.execCommand(btn.dataset.cmd,false,btn.dataset.val||null); document.getElementById('editor').focus()});
 document.getElementById('dividerBtn').onclick=()=>{document.execCommand('insertHTML',false,'<hr>'); document.getElementById('editor').focus()};
 document.getElementById('clearBtn').onclick=()=>{document.getElementById('editor').innerHTML=''};
 document.getElementById('postBtn').onclick=()=>{
   const s=scene(), html=document.getElementById('editor').innerHTML.trim();
   if(!html) return ping('Write something first, tiny dramatic quill.');
-  const mode=document.getElementById('mode').value;
-  s.posts.push({voice:document.getElementById('voice').value,mode,beat:document.getElementById('beat').value,html});
-  s.mode=mode; save(); render(); ping('Posted locally. Supabase remains untouched in v0.1.');
+  const post={voice:document.getElementById('voice').value,mode:document.getElementById('mode').value,beat:document.getElementById('beat').value,html};
+  if(editing && editing.sceneId===s.id && s.posts[editing.index]){
+    s.posts[editing.index]={...s.posts[editing.index],...post,editedAt:new Date().toISOString()};
+    cancelEdit(false); save(); render(); ping('Edit saved locally. The scribe has been allowed a second draft.');
+  } else {
+    s.posts.push(post); s.mode=post.mode; save(); render(); ping('Posted locally. Supabase remains untouched in v0.2.');
+  }
 };
+document.getElementById('cancelEditBtn').onclick=()=>cancelEdit(true);
 document.getElementById('draftBtn').onclick=()=>{state.draft=document.getElementById('editor').innerHTML; save(); ping('Draft saved locally.')};
 document.getElementById('carryBtn').onclick=()=>{const s=scene(); s.canon='Canon Carry Pending'; s.mode='canon_carry_pending'; save(); render(); ping('Flagged for carry review. Not canon yet. The goblin has only licked the stamp.')};
 document.getElementById('newScene').onclick=()=>{
   const title=prompt('Scene title?','Untitled Drift Scene')||'Untitled Drift Scene';
   const id=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Date.now().toString(36);
-  state.scenes.push({id,title,mode:'drift',canon:'Not carried',posts:[]}); state.active=id; save(); render();
+  state.scenes.push({id,title,mode:'drift',canon:'Not carried',posts:[]}); state.active=id; cancelEdit(false); save(); render();
 };
 document.getElementById('exportBtn').onclick=()=>{
   const s=scene();
