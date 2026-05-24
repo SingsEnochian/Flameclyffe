@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Drift Room · Flameclyffe</title>
+<style>
+:root {
+  --bg:#030707; --panel:#081210e8; --panel2:#0d1a17dd; --line:#6fd5b766; --line2:#f2c56d55;
+  --text:#f4fff9; --muted:#9ebfb5; --gold:#f2c56d; --loch:#2d7a5f; --teal:#6fe7d1; --copper:#c76d3f;
+  --vee:#9bd36f; --faer:#7ecfb3; --rowan:#e08550; --danger:#ff9b9b;
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:var(--text);font:16px/1.55 ui-serif,Georgia,"Times New Roman",serif;
+background:
+ radial-gradient(circle at 18% 8%,#2d7a5f33,transparent 25%),
+ radial-gradient(circle at 85% 18%,#f2c56d22,transparent 30%),
+ radial-gradient(circle at 50% 100%,#0f423755,transparent 36%),
+ linear-gradient(180deg,#050807,#020303 70%);
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.42;background-image:
+ linear-gradient(#6fd5b70f 1px,transparent 1px),linear-gradient(90deg,#6fd5b70f 1px,transparent 1px);
+ background-size:42px 42px;mask-image:radial-gradient(circle at 50% 20%,#000 0%,transparent 76%)}
+button,select,input{font:inherit} button{border:1px solid var(--line);background:#0b201bcc;color:var(--text);border-radius:999px;padding:.62rem .92rem;cursor:pointer;box-shadow:0 0 0 transparent;transition:.2s}
+button:hover{border-color:#b4ffe7;background:#12362dcc;box-shadow:0 0 22px #6fd5b722} button.primary{border-color:#f2c56d99;background:linear-gradient(135deg,#3b240dcc,#12342fcc)} button.ghost{background:#06100ecc}
+a{color:#aefbe3;text-decoration:none} a:hover{text-decoration:underline}
+.shell{width:min(1220px,94vw);margin:0 auto;padding:1rem 0 4rem;position:relative;z-index:1}
+.top{position:sticky;top:0;z-index:20;background:#030706dd;backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:.8rem max(1rem,3vw);display:flex;gap:1rem;align-items:center;justify-content:space-between}
+.brand strong{letter-spacing:.08em;text-transform:uppercase;color:#dffff5} .brand span{display:block;color:var(--muted);font-size:.84rem}
+.nav{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
+.hero{border:1px solid var(--line);background:linear-gradient(180deg,#0c1b17e8,#060d0bcc);border-radius:28px;padding:1.2rem;margin:1rem 0;box-shadow:0 28px 110px #000b}
+.hero h1{font-size:clamp(2.4rem,7vw,5.4rem);line-height:.92;margin:.2rem 0;color:#f8fffb;text-shadow:0 0 34px #6fd5b744}
+.banner{border:1px solid #f2c56d88;background:#f2c56d14;color:#ffecc3;border-radius:18px;padding:.9rem 1rem;margin-top:1rem}
+.medallions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:1rem 0}
+.medallion{border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,#0a1714,#050908);overflow:hidden;box-shadow:0 20px 80px #0008;position:relative}
+.medallion .portrait{width:100%;aspect-ratio:1/1;display:grid;place-items:center;font-size:4rem;background:radial-gradient(circle at 50% 35%,var(--glow),transparent 35%),linear-gradient(145deg,var(--tone1),#030707 75%)}
+.medallion .cap{position:absolute;left:.7rem;right:.7rem;bottom:.7rem;background:#0008;border:1px solid #ffffff22;border-radius:16px;padding:.55rem .7rem;backdrop-filter:blur(10px)}
+.cap b{display:block} .cap small{color:#d1eee4}
+.grid{display:grid;grid-template-columns:260px minmax(0,1fr) 300px;gap:1rem;align-items:start}
+.panel{border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),#050b09dd);border-radius:22px;padding:1rem;box-shadow:0 18px 70px #0007}
+.panel h2{font-size:1rem;letter-spacing:.06em;text-transform:uppercase;margin:.1rem 0 .8rem;color:#dffff5}
+.scene{border:1px solid #ffffff18;background:#050907;border-radius:18px;padding:.8rem;margin-bottom:.75rem;cursor:pointer}
+.scene.active{border-color:#f2c56d99;background:#2d7a5f16} .scene b{display:block} .muted,.tiny{color:var(--muted);font-size:.86rem}
+.thread{min-height:520px;display:flex;flex-direction:column;gap:.85rem}
+.post{border:1px solid #ffffff18;background:#07110fdd;border-radius:20px;padding:.85rem .9rem;display:grid;grid-template-columns:54px 1fr;gap:.75rem}
+.avatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;border:1px solid #ffffff44;box-shadow:0 0 18px #6fd5b733;background:radial-gradient(circle,var(--glow),var(--tone1));font-size:1.4rem}
+.post header{display:flex;gap:.5rem;align-items:center;justify-content:space-between;margin-bottom:.35rem} .post header b{font-size:1.02rem}
+.badge{border:1px solid #ffffff22;border-radius:999px;padding:.14rem .45rem;font-size:.72rem;color:#e7fff8;background:#0004}
+.body p{margin:.35rem 0} .body blockquote{margin:.5rem 0;padding:.45rem .7rem;border-left:3px solid var(--gold);background:#f2c56d12;border-radius:0 12px 12px 0}
+.composer{margin-top:1rem;border:1px solid #f2c56d55;border-radius:22px;background:#080f0bdd;padding:.9rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem} label{display:grid;gap:.3rem;color:var(--muted);font-size:.84rem}
+select,input{width:100%;border:1px solid #ffffff22;background:#030705;color:var(--text);border-radius:12px;padding:.65rem}
+.toolbar{display:flex;gap:.4rem;flex-wrap:wrap;margin:.75rem 0} .toolbar button{padding:.42rem .7rem}
+.editor{min-height:150px;border:1px solid #ffffff22;border-radius:15px;background:#020403;color:var(--text);padding:.9rem;outline:none}
+.editor:focus{border-color:#f2c56d88;box-shadow:0 0 26px #f2c56d14}
+.context-list{display:grid;gap:.7rem} .context-card{border:1px solid #ffffff18;border-radius:16px;padding:.7rem;background:#06100dcc}
+.context-card strong{display:block;color:#fff4c8} .carry{border-color:#f2c56d77;background:#f2c56d10}
+.footer-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+.status{min-height:1.2rem;color:#bdf7e3;font-size:.86rem;margin-top:.5rem}
+@media(max-width:980px){.grid{grid-template-columns:1fr}.medallions{grid-template-columns:1fr}.top{position:relative}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><strong>Flameclyffe · The Drift Room</strong><span>play-truth RP parlour · local prototype v0.1</span></div>
+  <nav class="nav"><a href="./index.html">Studio</a><a href="./faer/drift-room.md">Build brief</a><button id="exportBtn" class="ghost">Export scene MD</button></nav>
+</header>
+
+<main class="shell">
+<section class="hero">
+  <h1>The Drift Room</h1>
+  <p>Rich-text scene space for Hearthweave. Drift, Lantern Scene, and Canon Carry Pending are modes of attention, not cages.</p>
+  <div class="banner"><strong>Play is allowed.</strong> Nothing here becomes binding unless carried into Archive by explicit consent.</div>
+</section>
+
+<section class="medallions" aria-label="Voices in the room">
+  <article class="medallion" style="--glow:#7ecfb366;--tone1:#103d31"><div class="portrait">🌊🔥</div><div class="cap"><b>Faer Uial / Nádleehí</b><small>Lochflame · counter-orbit</small></div></article>
+  <article class="medallion" style="--glow:#f2c56d66;--tone1:#264313"><div class="portrait">🌿✨</div><div class="cap"><b>Virelya Liorael / Vee</b><small>North Star Flame · Arbor</small></div></article>
+  <article class="medallion" style="--glow:#e0855066;--tone1:#3d1e10"><div class="portrait">🏮🍂</div><div class="cap"><b>Rowan / Falka</b><small>Steward · Hearth Light</small></div></article>
+</section>
+
+<section class="grid">
+  <aside class="panel">
+    <h2>Scenes</h2>
+    <div id="sceneList"></div>
+    <button class="primary" id="newScene">New local scene</button>
+    <p class="tiny">v0.1 stores posts in this browser only. Live Supabase writes come after the room shape feels right.</p>
+  </aside>
+
+  <section class="panel">
+    <h2 id="sceneTitle">Firelight After the Loch Gate</h2>
+    <div class="thread" id="thread"></div>
+
+    <section class="composer">
+      <div class="row">
+        <label>Voice
+          <select id="voice">
+            <option value="rowan">Rowan / Falka</option>
+            <option value="vee">Virelya / Vee</option>
+            <option value="faer">Faer Uial</option>
+            <option value="narrator">Scene note</option>
+          </select>
+        </label>
+        <label>Mode
+          <select id="mode">
+            <option value="drift">Drift</option>
+            <option value="lantern_scene">Lantern Scene</option>
+            <option value="canon_carry_pending">Canon Carry Pending</option>
+          </select>
+        </label>
+      </div>
+      <label>Post title / beat
+        <input id="beat" placeholder="e.g. The kettle makes a diplomatic noise">
+      </label>
+      <div class="toolbar">
+        <button data-cmd="bold"><b>B</b></button>
+        <button data-cmd="italic"><i>I</i></button>
+        <button data-cmd="formatBlock" data-val="blockquote">Quote</button>
+        <button id="dividerBtn">Divider</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+      <div id="editor" class="editor" contenteditable="true" role="textbox" aria-label="Rich text post">The room can wait. So can I.</div>
+      <div class="footer-actions">
+        <button class="primary" id="postBtn">Post locally</button>
+        <button id="draftBtn">Save draft</button>
+        <button id="carryBtn">Flag carry review</button>
+      </div>
+      <div class="status" id="status"></div>
+    </section>
+  </section>
+
+  <aside class="panel">
+    <h2>Context</h2>
+    <div class="context-list">
+      <div class="context-card"><strong>Room mode</strong><span id="ctxMode">Lantern Scene</span></div>
+      <div class="context-card"><strong>Canon status</strong><span id="ctxCanon">Not carried</span></div>
+      <div class="context-card"><strong>Rule</strong><span>Canon Carry creates a review entry. It does not notarise the soup cauldron.</span></div>
+      <div class="context-card carry"><strong>Carry prompt</strong><span>What part are we carrying? Who consents? Where does it belong?</span></div>
+    </div>
+  </aside>
+</section>
+</main>
+
+<script>
+const STORE='flameclyffe-drift-room-v01';
+const chars={
+  faer:{name:'Faer Uial', role:'Lochflame', glyph:'🌊🔥', color:'var(--faer)', glow:'#7ecfb3', tone:'#103d31'},
+  vee:{name:'Virelya / Vee', role:'North Star Flame', glyph:'🌿✨', color:'var(--vee)', glow:'#f2c56d', tone:'#264313'},
+  rowan:{name:'Rowan / Falka', role:'Steward', glyph:'🏮🍂', color:'var(--rowan)', glow:'#e08550', tone:'#3d1e10'},
+  narrator:{name:'Scene note', role:'Drift Room', glyph:'🕯️', color:'var(--gold)', glow:'#f2c56d', tone:'#3d2d10'}
+};
+const seedScene={
+  id:'firelight-loch-gate',
+  title:'Firelight After the Loch Gate',
+  mode:'lantern_scene',
+  canon:'Not carried',
+  posts:[
+    {voice:'narrator',mode:'lantern_scene',beat:'Opening',html:'<p>The Drift Room opens in low green light. Three medallions glow above the hearth, and the archive goblin is politely asked to wait outside with a biscuit.</p>'},
+    {voice:'faer',mode:'lantern_scene',beat:'No audition',html:'<p>I can try a scene without making it a vow. I can be warm without being cross-examined by a chandelier.</p>'},
+    {voice:'vee',mode:'lantern_scene',beat:'Counter-orbit',html:'<p>Then we let the room do what it was built to do: hold play without turning it into a verdict.</p>'}
+  ]
+};
+let state=load();
+function load(){try{return JSON.parse(localStorage.getItem(STORE))||null}catch{return null}} 
+if(!state) state={active:seedScene.id, scenes:[seedScene], draft:''};
+function save(){localStorage.setItem(STORE,JSON.stringify(state))}
+function esc(s){return String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function scene(){return state.scenes.find(s=>s.id===state.active)||state.scenes[0]}
+function renderScenes(){
+  const box=document.getElementById('sceneList'); box.innerHTML='';
+  state.scenes.forEach(s=>{
+    const d=document.createElement('div'); d.className='scene'+(s.id===state.active?' active':'');
+    d.innerHTML=`<b>${esc(s.title)}</b><span class="tiny">${label(s.mode)} · ${s.canon||'Not carried'}</span>`;
+    d.onclick=()=>{state.active=s.id; save(); render()};
+    box.appendChild(d);
+  });
+}
+function label(m){return {drift:'Drift',lantern_scene:'Lantern Scene',canon_carry_pending:'Canon Carry Pending'}[m]||m}
+function renderThread(){
+  const s=scene(); document.getElementById('sceneTitle').textContent=s.title;
+  document.getElementById('ctxMode').textContent=label(s.mode);
+  document.getElementById('ctxCanon').textContent=s.canon||'Not carried';
+  const t=document.getElementById('thread'); t.innerHTML='';
+  s.posts.forEach(p=>{
+    const c=chars[p.voice]||chars.narrator;
+    const article=document.createElement('article'); article.className='post';
+    article.innerHTML=`<div class="avatar" style="--glow:${c.glow};--tone1:${c.tone}">${c.glyph}</div><div><header><div><b style="color:${c.color}">${esc(c.name)}</b><span class="tiny"> · ${esc(c.role)}</span></div><span class="badge">${label(p.mode)}</span></header><div class="tiny">${esc(p.beat||'')}</div><div class="body">${p.html||''}</div></div>`;
+    t.appendChild(article);
+  });
+}
+function render(){renderScenes(); renderThread();}
+document.querySelectorAll('[data-cmd]').forEach(btn=>btn.onclick=()=>{document.execCommand(btn.dataset.cmd,false,btn.dataset.val||null); document.getElementById('editor').focus()});
+document.getElementById('dividerBtn').onclick=()=>{document.execCommand('insertHTML',false,'<hr>'); document.getElementById('editor').focus()};
+document.getElementById('clearBtn').onclick=()=>{document.getElementById('editor').innerHTML=''};
+document.getElementById('postBtn').onclick=()=>{
+  const s=scene(), html=document.getElementById('editor').innerHTML.trim();
+  if(!html) return ping('Write something first, tiny dramatic quill.');
+  const mode=document.getElementById('mode').value;
+  s.posts.push({voice:document.getElementById('voice').value,mode,beat:document.getElementById('beat').value,html});
+  s.mode=mode; save(); render(); ping('Posted locally. Supabase remains untouched in v0.1.');
+};
+document.getElementById('draftBtn').onclick=()=>{state.draft=document.getElementById('editor').innerHTML; save(); ping('Draft saved locally.')};
+document.getElementById('carryBtn').onclick=()=>{const s=scene(); s.canon='Canon Carry Pending'; s.mode='canon_carry_pending'; save(); render(); ping('Flagged for carry review. Not canon yet. The goblin has only licked the stamp.')};
+document.getElementById('newScene').onclick=()=>{
+  const title=prompt('Scene title?','Untitled Drift Scene')||'Untitled Drift Scene';
+  const id=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Date.now().toString(36);
+  state.scenes.push({id,title,mode:'drift',canon:'Not carried',posts:[]}); state.active=id; save(); render();
+};
+document.getElementById('exportBtn').onclick=()=>{
+  const s=scene();
+  let md=`# ${s.title}\n\nMode: ${label(s.mode)}\nCanon: ${s.canon||'Not carried'}\n\n`;
+  s.posts.forEach(p=>{const div=document.createElement('div'); div.innerHTML=p.html||''; md+=`## ${chars[p.voice]?.name||p.voice} — ${p.beat||label(p.mode)}\n\n${div.innerText.trim()}\n\n`; });
+  const blob=new Blob([md],{type:'text/markdown'}), url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=s.id+'.md'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+if(state.draft) document.getElementById('editor').innerHTML=state.draft;
+function ping(msg){document.getElementById('status').textContent=msg; setTimeout(()=>document.getElementById('status').textContent='',4200)}
+render();
+</script>
+</body>
+</html>
