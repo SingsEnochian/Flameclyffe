@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { hasSupabaseConfig, supabase } from './lib/supabase';
 import { LiveGlyphViewer, useSecondTicker } from './live-glyph';
+import { ObservatoryInstrument } from './components/ObservatoryInstrument.jsx';
 import './starwell.css';
 import './starwell-room.css';
 
@@ -377,26 +378,12 @@ function App() {
           </div>
         </section>
 
-        <section className="observatory-map" aria-label="Central Observatory instruments">
-          <div className="map-heading">
-            <span>Central Observatory</span>
-            <strong>{selectedType}</strong>
-          </div>
-          <div className="instrument-grid">
-            {instruments.map((room) => (
-              <RoomCard key={room.key} room={room} active={selected.key === room.key} onSelect={setSelected} />
-            ))}
-          </div>
-        </section>
-
-        <section className="selected-alcove">
-          <span className="alcove-glyph">{selected.glyph}</span>
-          <div>
-            <p>{selectedType}</p>
-            <h2>{selected.title}</h2>
-            <span>{selected.text}</span>
-          </div>
-        </section>
+        <ObservatoryInstrument
+          rooms={instruments}
+          selected={selected}
+          onSelect={setSelected}
+          selectedType={selectedType}
+        />
 
         <ActiveChamber selected={selected} now={now} />
 
