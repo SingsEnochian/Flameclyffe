@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { hasSupabaseConfig, supabase } from './lib/supabase';
+import { LiveGlyphViewer, useSecondTicker } from './live-glyph';
 import './starwell.css';
 import './starwell-room.css';
 
 const instruments = [
+  { key: 'observer', glyph: '🜂', title: 'Observer Almanac', text: 'Live glyph viewer, quanta packets, consent-aware observations, and per-second TAO signal work.' },
   { key: 'library', glyph: '📚', title: 'Grand Library', text: 'Living Codex, manuscripts, marginalia, root-texts, and lore shelves.' },
   { key: 'atlas', glyph: '🗺️', title: 'Atlas Hall', text: 'Worlds, cities, regions, ecologies, beacons, and grown Stonewood maps.' },
   { key: 'studio', glyph: '🎨', title: 'Art Studio', text: 'Concept work, moodboards, gallery walls, sketches, and wet paint.' },
@@ -342,17 +344,18 @@ function ComingSoonPanel({ selected }) {
   );
 }
 
-function ActiveChamber({ selected }) {
+function ActiveChamber({ selected, now }) {
+  if (selected.key === 'observer') return <LiveGlyphViewer now={now} />;
   if (selected.key === 'atlas') return <AtlasSeedPanel />;
   if (selected.key === 'library') return <CodexShelf />;
   return <ComingSoonPanel selected={selected} />;
 }
 
 function App() {
-  const now = new Date();
+  const now = useSecondTicker();
   const phase = getSkyPhase(now);
-  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const [selected, setSelected] = useState(instruments[1]);
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const [selected, setSelected] = useState(() => instruments.find((room) => room.key === 'observer') || instruments[1]);
 
   const selectedType = useMemo(() => {
     if (studies.some((study) => study.key === selected.key)) return 'Study Door';
@@ -395,7 +398,7 @@ function App() {
           </div>
         </section>
 
-        <ActiveChamber selected={selected} />
+        <ActiveChamber selected={selected} now={now} />
 
         <section className="study-row" aria-label="Study doors">
           {studies.map((room) => (
