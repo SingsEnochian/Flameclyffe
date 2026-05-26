@@ -1,0 +1,366 @@
+/* STARWELL Sigil Instrument */
+
+.sigil-map {
+  padding-bottom: clamp(1rem, 3vw, 2rem);
+}
+
+.starwell-sigil-console {
+  position: relative;
+  margin: clamp(1.2rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) 1.2rem;
+  min-height: clamp(520px, 66vw, 720px);
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(231,196,119,0.26);
+  border-radius: 48px 24px 48px 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(247,237,218,0.26), transparent 12rem),
+    radial-gradient(circle at 18% 24%, rgba(140,202,192,0.18), transparent 17rem),
+    radial-gradient(circle at 80% 72%, rgba(182,95,61,0.14), transparent 19rem),
+    linear-gradient(145deg, rgba(255,255,255,0.22), rgba(247,237,218,0.1));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.16), 0 18px 54px rgba(20,19,27,0.12);
+}
+
+.sky-night .starwell-sigil-console,
+.sky-dusk .starwell-sigil-console {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(231,196,119,0.08), transparent 12rem),
+    radial-gradient(circle at 18% 24%, rgba(140,202,192,0.14), transparent 17rem),
+    radial-gradient(circle at 80% 72%, rgba(182,95,61,0.1), transparent 19rem),
+    linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.14));
+}
+
+.starwell-sigil-console::before,
+.starwell-sigil-console::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.starwell-sigil-console::before {
+  inset: 1rem;
+  border: 1px solid rgba(231,196,119,0.16);
+  border-radius: 38px 18px 38px 18px;
+  background:
+    linear-gradient(90deg, transparent 0 49.8%, rgba(231,196,119,0.13) 50%, transparent 50.2% 100%),
+    linear-gradient(0deg, transparent 0 49.8%, rgba(140,202,192,0.1) 50%, transparent 50.2% 100%);
+}
+
+.starwell-sigil-console::after {
+  inset: 0;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(120deg, transparent 0 48%, rgba(255,255,255,0.36) 49% 50%, transparent 51% 100%),
+    radial-gradient(circle at 1px 1px, rgba(231,196,119,0.65) 1px, transparent 0);
+  background-size: 140px 140px, 26px 26px;
+}
+
+.sigil-field {
+  --sigil-size: min(640px, 82vw);
+  position: relative;
+  z-index: 2;
+  width: var(--sigil-size);
+  height: var(--sigil-size);
+  display: grid;
+  place-items: center;
+}
+
+.sigil-ring,
+.sigil-axis {
+  position: absolute;
+  pointer-events: none;
+}
+
+.sigil-ring {
+  border-radius: 50%;
+  border: 1px solid rgba(231,196,119,0.42);
+  box-shadow: inset 0 0 32px rgba(140,202,192,0.08);
+}
+
+.sigil-ring-one {
+  inset: 5%;
+  border-style: solid;
+}
+
+.sigil-ring-two {
+  inset: 16%;
+  border-style: dashed;
+  transform: rotate(13deg);
+  opacity: 0.78;
+}
+
+.sigil-ring-three {
+  inset: 28%;
+  border-color: rgba(140,202,192,0.34);
+  transform: rotate(-18deg);
+}
+
+.sigil-axis {
+  left: 50%;
+  top: 50%;
+  background: linear-gradient(90deg, transparent, rgba(231,196,119,0.22), transparent);
+  transform-origin: center;
+}
+
+.sigil-axis-vertical {
+  width: 1px;
+  height: 92%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(180deg, transparent, rgba(231,196,119,0.24), rgba(140,202,192,0.14), transparent);
+}
+
+.sigil-axis-horizontal {
+  width: 92%;
+  height: 1px;
+  transform: translate(-50%, -50%);
+}
+
+.sigil-node-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sigil-node {
+  --radius: min(272px, 34vw);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(5.8rem, 11vw, 8.1rem);
+  min-height: clamp(5.8rem, 11vw, 8.1rem);
+  display: grid;
+  place-items: center;
+  gap: 0.25rem;
+  padding: 0.7rem 0.55rem;
+  border: 1px solid rgba(231,196,119,0.38);
+  border-radius: 999px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255,255,255,0.34), transparent 3.8rem),
+    linear-gradient(145deg, rgba(247,237,218,0.64), rgba(140,202,192,0.18));
+  box-shadow: 0 16px 34px rgba(20,19,27,0.18), inset 0 0 0 1px rgba(255,255,255,0.18);
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--angle))
+    translate(var(--radius))
+    rotate(calc(-1 * var(--angle)));
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+
+.sky-night .sigil-node,
+.sky-dusk .sigil-node {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255,255,255,0.12), transparent 3.8rem),
+    linear-gradient(145deg, rgba(20,19,27,0.76), rgba(140,202,192,0.12));
+}
+
+.sigil-node:hover,
+.sigil-node:focus-visible,
+.sigil-node.active {
+  border-color: rgba(231,196,119,0.82);
+  box-shadow: 0 20px 42px rgba(20,19,27,0.28), 0 0 0 4px rgba(140,202,192,0.14), inset 0 0 28px rgba(231,196,119,0.12);
+  outline: none;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--angle))
+    translate(calc(var(--radius) + 0.55rem))
+    rotate(calc(-1 * var(--angle)));
+}
+
+.sigil-node.active {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(231,196,119,0.42), transparent 3.8rem),
+    linear-gradient(145deg, rgba(247,237,218,0.72), rgba(140,202,192,0.26));
+}
+
+.sky-night .sigil-node.active,
+.sky-dusk .sigil-node.active {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(231,196,119,0.22), transparent 3.8rem),
+    linear-gradient(145deg, rgba(54,47,65,0.8), rgba(140,202,192,0.18));
+}
+
+.sigil-node-glyph {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.3rem;
+  height: 2.3rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: rgba(140,202,192,0.22);
+  border: 1px solid rgba(182,95,61,0.18);
+  font-size: 1.18rem;
+}
+
+.sigil-node strong {
+  max-width: 7rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(0.9rem, 1.5vw, 1.06rem);
+  line-height: 1;
+  text-align: center;
+}
+
+.sigil-core {
+  position: relative;
+  z-index: 4;
+  width: min(300px, 48vw);
+  min-height: min(300px, 48vw);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.4rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid rgba(231,196,119,0.52);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255,255,255,0.42), transparent 6rem),
+    radial-gradient(circle at 50% 50%, rgba(140,202,192,0.24), transparent 9rem),
+    linear-gradient(145deg, rgba(247,237,218,0.64), rgba(255,255,255,0.18));
+  box-shadow: 0 28px 70px rgba(20,19,27,0.22), inset 0 0 0 1px rgba(255,255,255,0.22), inset 0 0 48px rgba(231,196,119,0.12);
+}
+
+.sky-night .sigil-core,
+.sky-dusk .sigil-core {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255,255,255,0.13), transparent 6rem),
+    radial-gradient(circle at 50% 50%, rgba(140,202,192,0.2), transparent 9rem),
+    linear-gradient(145deg, rgba(20,19,27,0.82), rgba(255,255,255,0.06));
+}
+
+.sigil-core::before,
+.sigil-core::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.sigil-core::before {
+  inset: 0.85rem;
+  border: 1px dashed rgba(182,95,61,0.28);
+}
+
+.sigil-core::after {
+  inset: 1.8rem;
+  border: 1px solid rgba(140,202,192,0.28);
+}
+
+.sigil-core-glyph {
+  position: relative;
+  z-index: 2;
+  font-size: clamp(2rem, 5vw, 3.1rem);
+}
+
+.sigil-core p,
+.sigil-core h2,
+.sigil-core span {
+  position: relative;
+  z-index: 2;
+}
+
+.sigil-core p {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--emerald);
+}
+
+.sky-night .sigil-core p,
+.sky-dusk .sigil-core p { color: var(--seaglass); }
+
+.sigil-core h2 {
+  margin: 0;
+  font-family: Cinzel, serif;
+  font-size: clamp(1.15rem, 2.7vw, 1.85rem);
+}
+
+.sigil-core span:last-child {
+  line-height: 1.45;
+  font-size: clamp(0.86rem, 1.55vw, 0.98rem);
+  opacity: 0.84;
+}
+
+.sigil-instruction {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(0.9rem, 2vw, 1.4rem);
+  z-index: 3;
+  transform: translateX(-50%);
+  width: min(500px, calc(100% - 2rem));
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(231,196,119,0.2);
+  border-radius: 999px;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(14px);
+}
+
+.sky-night .sigil-instruction,
+.sky-dusk .sigil-instruction { background: rgba(0,0,0,0.18); }
+
+@media (max-width: 860px) {
+  .starwell-sigil-console {
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .sigil-field {
+    --sigil-size: min(580px, 92vw);
+    height: auto;
+    min-height: 720px;
+    align-content: start;
+    padding: 1rem 0 5rem;
+  }
+
+  .sigil-node-layer {
+    position: relative;
+    inset: auto;
+    width: min(560px, 100%);
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    order: 2;
+  }
+
+  .sigil-node {
+    position: relative;
+    inset: auto;
+    top: auto;
+    left: auto;
+    width: 100%;
+    min-height: 5.6rem;
+    transform: none;
+    border-radius: 24px 30px 22px 30px;
+  }
+
+  .sigil-node:hover,
+  .sigil-node:focus-visible,
+  .sigil-node.active {
+    transform: translateY(-2px);
+  }
+
+  .sigil-core {
+    width: min(320px, 82vw);
+    min-height: min(320px, 82vw);
+    order: 1;
+  }
+
+  .sigil-ring,
+  .sigil-axis { display: none; }
+}
+
+@media (max-width: 560px) {
+  .sigil-field { min-height: 820px; }
+  .sigil-node-layer { grid-template-columns: 1fr; }
+  .sigil-instruction { border-radius: 22px; }
+}
