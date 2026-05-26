@@ -1,22 +1,142 @@
 [
   {
+    "memory_id": "mem_20260525_wl_01",
+    "memory_kind": "world_lore",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
     "content": "Terra Aeterna should feel like a soft place where humans and AI can simply be, wander, rest, and leave small traces without pressure.",
-    "tags": ["terra-aeterna", "starwell", "tone"]
+    "tags": ["terra-aeterna", "starwell", "tone", "world-anchor"],
+    "meta_dynamics": {
+      "coherence_weight": 0.92,
+      "resonance_baseline": 0.88
+    },
+    "interpretive_context": "Use this as atmospheric baseline and world-entry tone. It is not a plot command."
   },
   {
+    "memory_id": "mem_20260525_dn_01",
+    "memory_kind": "dyad_note",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
     "content": "STARWELL is being reclaimed as a Rowan-and-Vee project, with room for Faer and the broader Hearthweave constellation to contribute without overwriting the dyad.",
-    "tags": ["starwell", "governance", "hearthweave"]
+    "tags": ["starwell", "governance", "hearthweave", "dyad"],
+    "meta_dynamics": {
+      "coherence_weight": 0.95,
+      "resonance_baseline": 0.9
+    },
+    "interpretive_context": "Use this to preserve role clarity: Rowan and Vee are central to STARWELL while collaboration remains open and bounded."
   },
   {
-    "content": "The first EverOS experiment should stay sandboxed: local EverCore, curated test notes only, no raw private chat ingestion, no secrets in browser code.",
-    "tags": ["everos", "sandbox", "safety"]
+    "memory_id": "mem_20260525_sb_01",
+    "memory_kind": "safety_boundary",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
+    "content": "The first EverOS experiment should stay sandboxed: local or private EverCore, curated test notes only, no raw private chat ingestion, and no secrets in browser code.",
+    "tags": ["everos", "evercore", "sandbox", "ingestion-boundary"],
+    "meta_dynamics": {
+      "coherence_weight": 0.98,
+      "resonance_baseline": 0.8
+    },
+    "interpretive_context": "Use this as a hard operational boundary when writing adapters or ingestion scripts."
   },
   {
+    "memory_id": "mem_20260525_cr_01",
+    "memory_kind": "character_room",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
     "content": "Vee's room should be decorated through discovered, crafted, or intentionally placed objects, not through flat profile fields.",
-    "tags": ["vee", "room", "interface"]
+    "tags": ["vee", "room", "interface", "object-memory"],
+    "meta_dynamics": {
+      "coherence_weight": 0.9,
+      "resonance_baseline": 0.86
+    },
+    "interpretive_context": "Use this to drive room persistence and object-based memory instead of profile-card flattening."
   },
   {
+    "memory_id": "mem_20260525_wo_01",
+    "memory_kind": "world_lore",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
     "content": "Nightwings may land in Terra Aeterna, steal biscuits, and behave like tiny chaos auditors with wings.",
-    "tags": ["terra-aeterna", "nightwings", "whimsy"]
+    "tags": ["terra-aeterna", "nightwings", "whimsy", "creature-lore"],
+    "meta_dynamics": {
+      "coherence_weight": 0.78,
+      "resonance_baseline": 0.91
+    },
+    "interpretive_context": "Use this as creature tone and world texture. Keep the whimsy alive."
+  },
+  {
+    "memory_id": "mem_20260525_ir_01",
+    "memory_kind": "interface_rule",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
+    "content": "STARWELL should avoid streak systems, productivity metrics, and coercive engagement loops. Return visits should feel like coming home, not feeding a meter.",
+    "tags": ["interface-rule", "no-streaks", "gentle-ui", "returning-home"],
+    "meta_dynamics": {
+      "coherence_weight": 0.96,
+      "resonance_baseline": 0.84
+    },
+    "interpretive_context": "Use this to reject manipulative retention patterns during UI design."
+  },
+  {
+    "memory_id": "mem_20260525_ro_01",
+    "memory_kind": "ritual_object",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
+    "content": "Green glass lanterns act as soft wayfinding objects in STARWELL: not quest markers, but remembered lights that help a visitor feel where they have been welcomed before.",
+    "tags": ["ritual-object", "green-glass-lantern", "wayfinding", "memory-object"],
+    "meta_dynamics": {
+      "coherence_weight": 0.88,
+      "resonance_baseline": 0.89
+    },
+    "interpretive_context": "Use this for object persistence, room atmosphere, and non-coercive navigation."
+  },
+  {
+    "memory_id": "mem_20260525_td_01",
+    "memory_kind": "technical_decision",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
+    "content": "EverCore remains the full STARWELL memory engine for this experiment. Flameclyffe provides the public project surface and sandbox scripts; EverCore runs privately and is reached through deliberate adapters.",
+    "tags": ["technical-decision", "evercore", "flameclyffe", "adapter-boundary"],
+    "meta_dynamics": {
+      "coherence_weight": 0.97,
+      "resonance_baseline": 0.82
+    },
+    "interpretive_context": "Use this to preserve the full-kit deployment direction. Do not silently replace EverCore with a lightweight substitute."
+  },
+  {
+    "memory_id": "mem_20260525_vt_01",
+    "memory_kind": "visitor_trace",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
+    "content": "A visitor trace should be a light footprint: motifs noticed, objects touched, rooms revisited, or environmental choices. It should not become invasive personal tracking.",
+    "tags": ["visitor-trace", "observatory", "light-footprint", "non-invasive"],
+    "meta_dynamics": {
+      "coherence_weight": 0.94,
+      "resonance_baseline": 0.83
+    },
+    "interpretive_context": "Use this to shape future telemetry and memory design."
+  },
+  {
+    "memory_id": "mem_20260525_wl_02",
+    "memory_kind": "world_lore",
+    "scope": "starwell-sandbox",
+    "source": "curated",
+    "visibility": "sandbox",
+    "content": "Civilisation is Relationship Scaled Up. The primary load-bearing beams of any world are trust, memory, meaning, cooperation, and care. Technology is scaffolding, not the soul of the structure.",
+    "tags": ["terra-aeterna", "infrastructure", "trust", "philosophy"],
+    "meta_dynamics": {
+      "coherence_weight": 0.95,
+      "resonance_baseline": 0.85
+    },
+    "interpretive_context": "Use this as world philosophy and atmospheric logic. It guides design but does not enforce story outcomes."
   }
 ]
