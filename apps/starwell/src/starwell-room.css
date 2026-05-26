@@ -460,6 +460,288 @@
     radial-gradient(circle at top right, rgba(182,95,61,0.12), transparent 10rem);
 }
 
+/* STARWELL Signature Pass: obsidian moon-library, living orrery, and hand-built interface texture. */
+.starwell {
+  isolation: isolate;
+  background-attachment: fixed;
+}
+
+.starwell::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.24;
+  background-image:
+    linear-gradient(115deg, transparent 0 47%, rgba(231,196,119,0.16) 48% 49%, transparent 50% 100%),
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.18) 1px, transparent 0);
+  background-size: 120px 120px, 22px 22px;
+}
+
+.observatory-shell {
+  border-radius: 46px 46px 30px 30px;
+  clip-path: polygon(0 3.5rem, 3.5rem 0, calc(100% - 3.5rem) 0, 100% 3.5rem, 100% 100%, 0 100%);
+}
+
+.observatory-shell::before,
+.observatory-shell::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.observatory-shell::before {
+  inset: 1.1rem;
+  border: 1px solid rgba(231,196,119,0.2);
+  border-radius: 36px 36px 24px 24px;
+  clip-path: polygon(0 3rem, 3rem 0, calc(100% - 3rem) 0, 100% 3rem, 100% 100%, 0 100%);
+  box-shadow: inset 0 0 0 1px rgba(140,202,192,0.1);
+}
+
+.observatory-shell::after {
+  top: 1.25rem;
+  left: 50%;
+  width: min(620px, 78vw);
+  height: min(620px, 78vw);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  opacity: 0.42;
+  background:
+    repeating-radial-gradient(circle, transparent 0 3.5rem, rgba(231,196,119,0.16) 3.55rem 3.62rem),
+    conic-gradient(from 19deg, transparent 0 10deg, rgba(140,202,192,0.16) 11deg 12deg, transparent 13deg 60deg, rgba(231,196,119,0.16) 61deg 62deg, transparent 63deg 100deg);
+  mask-image: radial-gradient(circle, transparent 0 14%, black 15% 64%, transparent 65%);
+}
+
+.dome {
+  min-height: clamp(350px, 48vw, 570px);
+}
+
+.dome::before {
+  border-width: 1px;
+  box-shadow:
+    inset 0 0 80px rgba(140,202,192,0.17),
+    0 -22px 85px rgba(231,196,119,0.14);
+}
+
+.dome::after {
+  content: '✦   ✶   ✧   ✷   ✦';
+  position: absolute;
+  bottom: 2.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, 76vw);
+  padding: 0.45rem 1rem;
+  border-top: 1px solid rgba(231,196,119,0.26);
+  border-bottom: 1px solid rgba(140,202,192,0.18);
+  font-family: Cinzel, serif;
+  letter-spacing: clamp(0.28rem, 1.4vw, 0.7rem);
+  color: rgba(126,61,41,0.5);
+}
+
+.sky-night .dome::after,
+.sky-dusk .dome::after {
+  color: rgba(231,196,119,0.66);
+}
+
+.dome-inner::before,
+.dome-inner::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dome-inner::before {
+  width: clamp(15rem, 38vw, 28rem);
+  height: clamp(15rem, 38vw, 28rem);
+  border: 1px solid rgba(231,196,119,0.34);
+  box-shadow:
+    0 0 0 0.65rem rgba(140,202,192,0.035),
+    0 0 0 1.35rem rgba(231,196,119,0.035),
+    inset 0 0 44px rgba(20,19,27,0.08);
+  transform: rotate(-12deg);
+}
+
+.dome-inner::after {
+  width: clamp(11rem, 27vw, 20rem);
+  height: clamp(11rem, 27vw, 20rem);
+  border: 1px dashed rgba(182,95,61,0.34);
+  transform: rotate(18deg);
+}
+
+.eyebrow,
+.subtitle,
+.inscription,
+h1 {
+  position: relative;
+  z-index: 2;
+}
+
+h1 {
+  filter: drop-shadow(0 22px 32px rgba(20,19,27,0.16));
+}
+
+.inscription {
+  box-shadow: inset 0 0 24px rgba(231,196,119,0.16), 0 12px 30px rgba(20,19,27,0.12);
+}
+
+.map-heading {
+  position: relative;
+}
+
+.map-heading::before {
+  content: '';
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow:
+    1.35rem 0 0 rgba(140,202,192,0.75),
+    2.7rem 0 0 rgba(182,95,61,0.55);
+}
+
+.instrument-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.instrument-grid .room-card:nth-child(1),
+.instrument-grid .room-card:nth-child(4) { grid-column: span 2; }
+.instrument-grid .room-card:nth-child(2),
+.instrument-grid .room-card:nth-child(5) { grid-column: span 3; }
+.instrument-grid .room-card:nth-child(3),
+.instrument-grid .room-card:nth-child(6) { grid-column: span 1; }
+
+.room-card,
+.chamber-card,
+.selected-alcove,
+.sky-lantern,
+.seed-card,
+.shelf-card,
+.codex-reader,
+.entry-tab,
+.coming-soon-body {
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+
+.room-card {
+  border-radius: 28px 34px 24px 38px;
+  clip-path: polygon(0 1.25rem, 1.25rem 0, 100% 0, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0 100%);
+}
+
+.room-card::before {
+  content: '';
+  position: absolute;
+  inset: 0.65rem;
+  border: 1px solid rgba(231,196,119,0.16);
+  border-radius: 22px 28px 18px 30px;
+  pointer-events: none;
+}
+
+.room-card::after {
+  width: 10rem;
+  height: 10rem;
+  background:
+    conic-gradient(from 20deg, transparent 0 60deg, rgba(231,196,119,0.16) 61deg 62deg, transparent 63deg 140deg, rgba(140,202,192,0.16) 141deg 142deg, transparent 143deg 360deg);
+}
+
+.room-glyph,
+.seed-glyph,
+.alcove-glyph,
+.lantern-symbol {
+  box-shadow: inset 0 0 18px rgba(255,255,255,0.16), 0 0 30px rgba(140,202,192,0.15);
+}
+
+.room-title::after {
+  content: '';
+  display: block;
+  width: 3.4rem;
+  height: 1px;
+  margin-top: 0.42rem;
+  background: linear-gradient(90deg, rgba(231,196,119,0.88), rgba(140,202,192,0.32), transparent);
+}
+
+.selected-alcove {
+  border-radius: 24px 38px 24px 38px;
+  clip-path: polygon(0 1.15rem, 1.15rem 0, 100% 0, 100% 100%, 1.15rem 100%, 0 calc(100% - 1.15rem));
+}
+
+.chamber-card {
+  border-radius: 38px 24px 38px 24px;
+  position: relative;
+}
+
+.chamber-card::before {
+  content: '';
+  position: absolute;
+  inset: 0.7rem;
+  pointer-events: none;
+  border-radius: 30px 18px 30px 18px;
+  border: 1px solid rgba(231,196,119,0.12);
+}
+
+.seed-card,
+.shelf-card,
+.codex-reader,
+.entry-tab,
+.coming-soon-body {
+  border-radius: 18px 26px 18px 26px;
+}
+
+.codex-grid {
+  grid-template-columns: minmax(170px, 0.62fr) minmax(210px, 0.88fr) minmax(300px, 1.5fr);
+}
+
+.shelf-stack {
+  position: relative;
+}
+
+.shelf-stack::before {
+  content: '';
+  position: absolute;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  left: 1.15rem;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(231,196,119,0.44), rgba(140,202,192,0.28), transparent);
+}
+
+.shelf-card {
+  position: relative;
+  padding-left: 0.9rem;
+}
+
+.entry-tab.active {
+  transform: translateX(0.35rem);
+}
+
+.study-row {
+  position: relative;
+}
+
+.study-row::before {
+  content: 'PRIVATE STUDIES · SOFT DOORS · NO FORCING';
+  grid-column: 1 / -1;
+  display: block;
+  margin: 0 0 -0.25rem;
+  padding-left: 0.35rem;
+  font-family: Cinzel, serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: rgba(126,61,41,0.62);
+}
+
+.sky-night .study-row::before,
+.sky-dusk .study-row::before { color: rgba(231,196,119,0.72); }
+
+@media (max-width: 1060px) {
+  .instrument-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .instrument-grid .room-card:nth-child(n) { grid-column: span 1; }
+}
+
 @media (max-width: 900px) {
   .codex-grid {
     grid-template-columns: 1fr;
@@ -498,4 +780,13 @@
   .shelf-card em {
     grid-column: 2;
   }
+
+  .observatory-shell,
+  .room-card,
+  .selected-alcove {
+    clip-path: none;
+  }
+
+  .instrument-grid { grid-template-columns: 1fr; }
+  .dome::after { display: none; }
 }
