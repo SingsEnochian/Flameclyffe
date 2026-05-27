@@ -1,0 +1,365 @@
+:root {
+  --font-kelyran: 'Marcellus SC', 'Cinzel', serif;
+  --font-prose: 'Cormorant Garamond', 'EB Garamond', serif;
+  --font-ui: 'IBM Plex Sans', 'Inter', sans-serif;
+  --leaf-glass: rgba(12, 18, 24, 0.58);
+  --leaf-edge: rgba(231, 196, 119, 0.34);
+  --leaf-vein: rgba(140, 202, 192, 0.72);
+  --leaf-ember: rgba(231, 196, 119, 0.92);
+  --leaf-moon: rgba(234, 244, 239, 0.94);
+}
+
+.living-leaf {
+  position: relative;
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 3vw, 2rem);
+  overflow: hidden;
+}
+
+.living-leaf::before {
+  content: '';
+  position: absolute;
+  inset: 7%;
+  border-radius: 45% 55% 42% 58% / 48% 45% 55% 52%;
+  background:
+    radial-gradient(circle at 42% 50%, rgba(140, 202, 192, 0.22), transparent 11rem),
+    radial-gradient(circle at 58% 43%, rgba(231, 196, 119, 0.14), transparent 9rem);
+  filter: blur(18px);
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.seed-node {
+  position: absolute;
+  left: clamp(1.2rem, 5vw, 4rem);
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%);
+  display: inline-grid;
+  gap: 0.35rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.seed-core {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--leaf-moon) 0 14%, var(--leaf-ember) 15% 38%, rgba(140, 202, 192, 0.24) 39% 66%, transparent 67%);
+  border: 1px solid rgba(231, 196, 119, 0.7);
+  box-shadow:
+    0 0 18px rgba(231, 196, 119, 0.52),
+    0 0 44px rgba(140, 202, 192, 0.24),
+    inset 0 0 14px rgba(234, 244, 239, 0.42);
+  transition: transform 180ms ease, box-shadow 220ms ease;
+}
+
+.seed-label {
+  font-family: var(--font-kelyran);
+  font-size: 0.86rem;
+  letter-spacing: 0.12em;
+  opacity: 0;
+  transform: translateY(0.25rem);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.state-stirring .seed-core,
+.state-unfurling .seed-core,
+.state-translating .seed-core,
+.state-reading .seed-core {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 24px rgba(231, 196, 119, 0.68),
+    0 0 62px rgba(140, 202, 192, 0.34),
+    inset 0 0 18px rgba(234, 244, 239, 0.48);
+}
+
+.state-stirring .seed-label,
+.state-unfurling .seed-label,
+.state-translating .seed-label,
+.state-reading .seed-label {
+  opacity: 0.92;
+  transform: translateY(0);
+}
+
+.vein-path {
+  position: absolute;
+  inset: auto auto 42% clamp(2.6rem, 7vw, 6.2rem);
+  width: min(58vw, 560px);
+  height: auto;
+  z-index: 1;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.vein-main,
+.vein-branch {
+  fill: none;
+  stroke: var(--leaf-vein);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  filter: drop-shadow(0 0 9px rgba(140, 202, 192, 0.45));
+  transition: stroke-dashoffset 760ms cubic-bezier(.22,.72,.18,1), opacity 220ms ease;
+}
+
+.vein-branch {
+  stroke-width: 1.2;
+  opacity: 0.72;
+  transition-delay: 160ms;
+}
+
+.vein-branch.soft {
+  opacity: 0.46;
+  transition-delay: 280ms;
+}
+
+.state-unfurling .vein-main,
+.state-translating .vein-main,
+.state-reading .vein-main,
+.state-unfurling .vein-branch,
+.state-translating .vein-branch,
+.state-reading .vein-branch {
+  stroke-dashoffset: 0;
+}
+
+.leaf-shell {
+  position: relative;
+  z-index: 2;
+  width: min(760px, 92%);
+  margin-left: clamp(2rem, 8vw, 6rem);
+  padding: clamp(1.1rem, 3vw, 1.75rem);
+  border: 1px solid var(--leaf-edge);
+  border-radius: 36px 58px 40px 70px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.16)),
+    radial-gradient(circle at 12% 12%, rgba(140, 202, 192, 0.18), transparent 14rem),
+    radial-gradient(circle at 74% 30%, rgba(231, 196, 119, 0.13), transparent 13rem),
+    var(--leaf-glass);
+  box-shadow:
+    0 24px 72px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(234, 244, 239, 0.08),
+    inset 0 0 44px rgba(140, 202, 192, 0.08);
+  backdrop-filter: blur(22px) saturate(1.12);
+  clip-path: ellipse(0% 48% at 0% 52%);
+  opacity: 0;
+  transform: translateX(-1.2rem) scale(0.985);
+  transition:
+    clip-path 860ms cubic-bezier(.19,.82,.2,1),
+    opacity 260ms ease,
+    transform 680ms cubic-bezier(.19,.82,.2,1);
+}
+
+.leaf-shell.visible {
+  clip-path: ellipse(96% 74% at 49% 52%);
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.leaf-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0.75rem;
+  border-radius: 30px 50px 34px 62px;
+  border: 1px solid rgba(231, 196, 119, 0.14);
+  pointer-events: none;
+}
+
+.leaf-inscription {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.kelyran-register {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(140, 202, 192, 0.9);
+}
+
+.leaf-inscription h3 {
+  margin: 0;
+  font-family: var(--font-kelyran);
+  font-size: clamp(2.2rem, 8vw, 5rem);
+  letter-spacing: 0.09em;
+  color: var(--leaf-moon);
+  text-shadow:
+    0 0 16px rgba(234, 244, 239, 0.28),
+    0 0 34px rgba(231, 196, 119, 0.26);
+}
+
+.leaf-inscription span {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(231, 196, 119, 0.88);
+}
+
+.translation-layer {
+  margin-top: 0.9rem;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid rgba(231, 196, 119, 0.16);
+  display: grid;
+  gap: 0.35rem;
+  animation: translationResolve 460ms ease both;
+}
+
+.translation-layer p {
+  margin: 0;
+  font-family: var(--font-prose);
+  font-size: clamp(1.45rem, 3.4vw, 2.1rem);
+  color: var(--leaf-moon);
+}
+
+.translation-layer strong {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(140, 202, 192, 0.88);
+}
+
+.translation-layer span {
+  font-family: var(--font-prose);
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: rgba(234, 244, 239, 0.84);
+}
+
+.root-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.95rem;
+}
+
+.root-chip {
+  display: grid;
+  gap: 0.25rem;
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  color: inherit;
+  border: 1px solid rgba(140, 202, 192, 0.24);
+  border-radius: 18px 28px 18px 28px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.root-chip span {
+  font-family: var(--font-kelyran);
+  color: var(--leaf-ember);
+  letter-spacing: 0.08em;
+}
+
+.root-chip em {
+  font-family: var(--font-ui);
+  font-style: normal;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: rgba(234, 244, 239, 0.78);
+}
+
+.narrative-fragment {
+  margin-top: 1rem;
+  animation: translationResolve 520ms ease both;
+}
+
+.fragment-meta {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(140, 202, 192, 0.82);
+}
+
+.narrative-fragment blockquote {
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 2px solid rgba(231, 196, 119, 0.52);
+  font-family: var(--font-prose);
+  font-size: clamp(1.12rem, 2.5vw, 1.35rem);
+  line-height: 1.55;
+  color: rgba(234, 244, 239, 0.92);
+}
+
+.linked-growth-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.48rem;
+  margin-top: 1rem;
+}
+
+.linked-growth-hints span {
+  padding: 0.38rem 0.55rem;
+  border: 1px solid rgba(231, 196, 119, 0.2);
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(234, 244, 239, 0.78);
+  background: rgba(255,255,255,0.05);
+}
+
+@keyframes translationResolve {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seed-core,
+  .seed-label,
+  .vein-main,
+  .vein-branch,
+  .leaf-shell,
+  .translation-layer,
+  .narrative-fragment {
+    transition: none;
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .living-leaf {
+    min-height: 520px;
+    align-items: start;
+  }
+
+  .seed-node {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin-bottom: 1rem;
+  }
+
+  .vein-path {
+    display: none;
+  }
+
+  .leaf-shell {
+    width: 100%;
+    margin-left: 0;
+  }
+}
