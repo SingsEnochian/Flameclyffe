@@ -3,11 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { hasSupabaseConfig, supabase } from './lib/supabase';
 import { LiveGlyphViewer, useSecondTicker } from './live-glyph';
 import { ObservatoryInstrument } from './components/ObservatoryInstrument.jsx';
+import { VarutoraLeaf } from './components/living/VarutoraLeaf.jsx';
 import './starwell.css';
 import './starwell-room.css';
 
 const instruments = [
-  { key: 'observer', glyph: '🜂', title: 'Observer Almanac', text: 'Live glyph viewer, quanta packets, consent-aware observations, and per-second TAO signal work.' },
+  { key: 'observer', glyph: '🜂', title: 'Observer Almanac', text: 'Live glyph viewer, quanta packets, consent-aware observations, Kelyran leaves, and per-second TAO signal work.' },
   { key: 'library', glyph: '📚', title: 'Grand Library', text: 'Living Codex, manuscripts, marginalia, root-texts, and lore shelves.' },
   { key: 'atlas', glyph: '🗺️', title: 'Atlas Hall', text: 'Worlds, cities, regions, ecologies, beacons, and grown Stonewood maps.' },
   { key: 'studio', glyph: '🎨', title: 'Art Studio', text: 'Concept work, moodboards, gallery walls, sketches, and wet paint.' },
@@ -345,8 +346,23 @@ function ComingSoonPanel({ selected }) {
   );
 }
 
+function ObserverAlmanacPanel({ now }) {
+  return (
+    <>
+      <LiveGlyphViewer now={now} />
+      <section className="chamber-card living-manuscript-chamber" aria-label="Living manuscript prototype">
+        <div className="map-heading compact">
+          <span>Living Manuscript</span>
+          <strong>Varutóra prototype</strong>
+        </div>
+        <VarutoraLeaf />
+      </section>
+    </>
+  );
+}
+
 function ActiveChamber({ selected, now }) {
-  if (selected.key === 'observer') return <LiveGlyphViewer now={now} />;
+  if (selected.key === 'observer') return <ObserverAlmanacPanel now={now} />;
   if (selected.key === 'atlas') return <AtlasSeedPanel />;
   if (selected.key === 'library') return <CodexShelf />;
   return <ComingSoonPanel selected={selected} />;
