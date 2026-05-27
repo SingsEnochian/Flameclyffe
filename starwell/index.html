@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>STARWELL · Hearthweave Observatory</title>
-<meta name="description" content="A branch-served STARWELL doorway for Flameclyffe while the full Vite observatory build deploys.">
+<meta name="description" content="A branch-served STARWELL doorway for Flameclyffe with a live static Observer Almanac prototype.">
 <style>
 :root{
   --obsidian:#10131d;
@@ -87,20 +87,27 @@ h1{
 .subtitle{font-family:Georgia,"Times New Roman",serif;max-width:720px;margin:1rem auto 0;font-size:clamp(1.35rem,3vw,2rem);color:rgba(237,247,241,.84);}
 .pill{display:inline-block;margin-top:1.4rem;padding:.7rem 1rem;border:1px solid rgba(231,196,119,.34);border-radius:999px;background:rgba(0,0,0,.18);font-family:Georgia,"Times New Roman",serif;font-size:1.1rem;}
 .console{position:relative;z-index:2;margin:clamp(1rem,3vw,2rem);min-height:clamp(520px,66vw,690px);display:grid;place-items:center;border:1px solid rgba(231,196,119,.26);border-radius:48px 24px 48px 24px;overflow:hidden;background:radial-gradient(circle at 50% 50%,rgba(231,196,119,.08),transparent 12rem),radial-gradient(circle at 18% 24%,rgba(140,202,192,.14),transparent 17rem),linear-gradient(145deg,rgba(255,255,255,.06),rgba(0,0,0,.14));}
-.console:before{content:"";position:absolute;inset:1rem;border:1px solid rgba(231,196,119,.16);border-radius:38px 18px 38px 18px;background:linear-gradient(90deg,transparent 0 49.8%,rgba(231,196,119,.13) 50%,transparent 50.2% 100%),linear-gradient(0deg,transparent 0 49.8%,rgba(140,202,192,.1) 50%,transparent 50.2% 100%);}
+.console:before{content:"";position:absolute;inset:1rem;pointer-events:none;border:1px solid rgba(231,196,119,.16);border-radius:38px 18px 38px 18px;background:linear-gradient(90deg,transparent 0 49.8%,rgba(231,196,119,.13) 50%,transparent 50.2% 100%),linear-gradient(0deg,transparent 0 49.8%,rgba(140,202,192,.1) 50%,transparent 50.2% 100%);}
 .sigil{--size:min(640px,82vw);position:relative;width:var(--size);height:var(--size);display:grid;place-items:center;}
-.ring{position:absolute;border-radius:50%;border:1px solid rgba(231,196,119,.42);box-shadow:inset 0 0 32px rgba(140,202,192,.08);}
+.ring{position:absolute;border-radius:50%;border:1px solid rgba(231,196,119,.42);box-shadow:inset 0 0 32px rgba(140,202,192,.08);pointer-events:none;}
 .r1{inset:5%}.r2{inset:16%;border-style:dashed;transform:rotate(13deg);opacity:.78}.r3{inset:28%;border-color:rgba(140,202,192,.34);transform:rotate(-18deg)}
-.core{position:relative;z-index:3;width:min(310px,50vw);min-height:min(310px,50vw);display:grid;place-items:center;align-content:center;gap:.4rem;padding:1.5rem;text-align:center;border-radius:50%;border:1px solid rgba(231,196,119,.52);background:radial-gradient(circle at 50% 34%,rgba(255,255,255,.13),transparent 6rem),radial-gradient(circle at 50% 50%,rgba(140,202,192,.2),transparent 9rem),linear-gradient(145deg,rgba(20,19,27,.82),rgba(255,255,255,.06));box-shadow:0 28px 70px rgba(20,19,27,.32),inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 48px rgba(231,196,119,.12);}
+.core{position:relative;z-index:3;width:min(330px,52vw);min-height:min(330px,52vw);display:grid;place-items:center;align-content:center;gap:.4rem;padding:1.5rem;text-align:center;border-radius:50%;border:1px solid rgba(231,196,119,.52);background:radial-gradient(circle at 50% 34%,rgba(255,255,255,.13),transparent 6rem),radial-gradient(circle at 50% 50%,rgba(140,202,192,.2),transparent 9rem),linear-gradient(145deg,rgba(20,19,27,.82),rgba(255,255,255,.06));box-shadow:0 28px 70px rgba(20,19,27,.32),inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 48px rgba(231,196,119,.12);}
 .core:before,.core:after{content:"";position:absolute;border-radius:50%;pointer-events:none}.core:before{inset:.85rem;border:1px dashed rgba(182,95,61,.36)}.core:after{inset:1.8rem;border:1px solid rgba(140,202,192,.3)}
 .glyph{position:relative;z-index:2;font-size:clamp(2.4rem,6vw,4rem)}
-.core p,.core h2,.core span{position:relative;z-index:2}.core p{margin:0;text-transform:uppercase;letter-spacing:.14em;font-size:.68rem;font-weight:800;color:var(--seaglass)}.core h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.35rem,3vw,2rem)}.core span{max-width:22rem;line-height:1.45;opacity:.86}
-.node{--angle:0deg;--radius:min(272px,34vw);position:absolute;top:50%;left:50%;width:clamp(5.8rem,11vw,8.1rem);min-height:clamp(5.8rem,11vw,8.1rem);display:grid;place-items:center;gap:.25rem;padding:.7rem .55rem;border:1px solid rgba(231,196,119,.38);border-radius:999px;background:radial-gradient(circle at 50% 20%,rgba(255,255,255,.12),transparent 3.8rem),linear-gradient(145deg,rgba(20,19,27,.76),rgba(140,202,192,.12));box-shadow:0 16px 34px rgba(20,19,27,.18),inset 0 0 0 1px rgba(255,255,255,.18);transform:translate(-50%,-50%) rotate(var(--angle)) translate(var(--radius)) rotate(calc(-1 * var(--angle)));}
+.core p,.core h2,.core span,.core code{position:relative;z-index:2}.core p{margin:0;text-transform:uppercase;letter-spacing:.14em;font-size:.68rem;font-weight:800;color:var(--seaglass)}.core h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.35rem,3vw,2rem)}.core span{max-width:22rem;line-height:1.45;opacity:.86}.core code{font-size:.86em;color:var(--gold)}
+.node{--angle:0deg;--radius:min(272px,34vw);position:absolute;top:50%;left:50%;width:clamp(5.8rem,11vw,8.1rem);min-height:clamp(5.8rem,11vw,8.1rem);display:grid;place-items:center;gap:.25rem;padding:.7rem .55rem;border:1px solid rgba(231,196,119,.38);border-radius:999px;color:var(--moon);background:radial-gradient(circle at 50% 20%,rgba(255,255,255,.12),transparent 3.8rem),linear-gradient(145deg,rgba(20,19,27,.76),rgba(140,202,192,.12));box-shadow:0 16px 34px rgba(20,19,27,.18),inset 0 0 0 1px rgba(255,255,255,.18);transform:translate(-50%,-50%) rotate(var(--angle)) translate(var(--radius)) rotate(calc(-1 * var(--angle)));cursor:pointer;font:inherit;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;}
+.node:hover,.node:focus-visible,.node.active{border-color:rgba(231,196,119,.82);box-shadow:0 0 0 3px rgba(140,202,192,.14),0 20px 44px rgba(20,19,27,.28);outline:none;}
 .node b{font-family:Georgia,"Times New Roman",serif;font-size:clamp(.85rem,1.4vw,1rem);line-height:1;text-align:center}.node em{font-style:normal;font-size:1.2rem}.n1{--angle:-90deg}.n2{--angle:-38.57deg}.n3{--angle:12.86deg}.n4{--angle:64.29deg}.n5{--angle:115.71deg}.n6{--angle:167.14deg}.n7{--angle:218.57deg}
 .cards{position:relative;z-index:2;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;padding:0 clamp(1rem,3vw,2rem) 2rem;}
 .card{border:1px solid rgba(231,196,119,.22);border-radius:28px 34px 24px 38px;padding:1.1rem;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(0,0,0,.18)),radial-gradient(circle at 20% 8%,rgba(140,202,192,.2),transparent 10rem);box-shadow:0 16px 38px rgba(20,19,27,.18);}
 .card small{display:block;text-transform:uppercase;letter-spacing:.12em;color:var(--seaglass);font-weight:800}.card h3{font-family:Georgia,"Times New Roman",serif;font-size:1.55rem;margin:.35rem 0}.card p{opacity:.84;line-height:1.55}.actions{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;padding:0 1rem 2.5rem}a.button{color:var(--moon);text-decoration:none;padding:.75rem 1rem;border:1px solid rgba(231,196,119,.34);border-radius:999px;background:rgba(0,0,0,.18);font-weight:800}.warn{color:rgba(237,247,241,.72);font-size:.9rem;text-align:center;padding:0 1rem 2rem;position:relative;z-index:2}
-@media(max-width:860px){.shell{clip-path:none}.console{min-height:auto;padding:1rem}.sigil{height:auto;min-height:760px;align-content:start;padding:1rem 0 5rem}.ring{display:none}.core{width:min(320px,82vw);min-height:min(320px,82vw)}.node{position:relative;inset:auto;top:auto;left:auto;width:100%;min-height:5.4rem;transform:none;border-radius:24px 30px 22px 30px}.sigil{display:grid;gap:.75rem}.node{order:2}.core{order:1}.node{margin:.15rem auto}.n1,.n2,.n3,.n4,.n5,.n6,.n7{--angle:0deg}}
+.prototype{position:relative;z-index:2;margin:0 clamp(1rem,3vw,2rem) 2rem;padding:clamp(1rem,3vw,1.5rem);border:1px solid rgba(231,196,119,.26);border-radius:38px 24px 38px 24px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(0,0,0,.18)),radial-gradient(circle at 12% 8%,rgba(140,202,192,.16),transparent 14rem);}
+.prototype header{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin-bottom:1rem}.prototype header h2{font-family:Georgia,"Times New Roman",serif;margin:0;font-size:clamp(1.5rem,4vw,2.4rem);}.prototype header span{border:1px solid rgba(140,202,192,.28);border-radius:999px;padding:.35rem .65rem;text-transform:uppercase;letter-spacing:.12em;font-size:.68rem;color:var(--seaglass);font-weight:800}
+.leaf-stage{position:relative;min-height:300px;display:grid;grid-template-columns:auto 1fr;gap:1.2rem;align-items:center;overflow:hidden}.leaf-stage:before{content:"";position:absolute;inset:8%;border-radius:45% 55% 42% 58%;background:radial-gradient(circle at 42% 50%,rgba(140,202,192,.2),transparent 10rem),radial-gradient(circle at 62% 42%,rgba(231,196,119,.12),transparent 9rem);filter:blur(16px);pointer-events:none}
+.seed{position:relative;z-index:2;display:grid;place-items:center;gap:.45rem;color:var(--moon);background:transparent;border:0;cursor:pointer;font:inherit}.seed-core{width:3rem;height:3rem;border-radius:50%;background:radial-gradient(circle,var(--moon) 0 14%,var(--gold) 15% 38%,rgba(140,202,192,.24) 39% 66%,transparent 67%);border:1px solid rgba(231,196,119,.7);box-shadow:0 0 18px rgba(231,196,119,.52),0 0 44px rgba(140,202,192,.24),inset 0 0 14px rgba(234,244,239,.42)}.seed span:last-child{font-family:Georgia,"Times New Roman",serif;letter-spacing:.1em;color:var(--gold)}
+.leaf{position:relative;z-index:2;padding:1.1rem;border:1px solid rgba(231,196,119,.34);border-radius:36px 58px 40px 70px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(0,0,0,.16)),radial-gradient(circle at 12% 12%,rgba(140,202,192,.18),transparent 14rem),rgba(12,18,24,.58);box-shadow:0 24px 72px rgba(0,0,0,.28),inset 0 0 0 1px rgba(234,244,239,.08);backdrop-filter:blur(16px);opacity:.42;clip-path:ellipse(18% 48% at 0% 52%);transition:clip-path .7s cubic-bezier(.19,.82,.2,1),opacity .25s ease}
+.leaf.open{opacity:1;clip-path:ellipse(96% 74% at 49% 52%)}.leaf small{display:block;text-transform:uppercase;letter-spacing:.15em;color:var(--seaglass);font-weight:800}.leaf h3{margin:.25rem 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2rem,7vw,4.4rem);letter-spacing:.08em;color:var(--moon);text-shadow:0 0 24px rgba(231,196,119,.22)}.leaf .pronounce{color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-size:.78rem}.translation,.roots,.fragment{display:none;margin-top:.85rem;border-top:1px solid rgba(231,196,119,.16);padding-top:.85rem}.leaf.translate .translation,.leaf.read .translation,.leaf.read .roots,.leaf.read .fragment{display:block}.translation b{display:block;font-family:Georgia,"Times New Roman",serif;font-size:1.6rem}.translation p,.fragment p{line-height:1.55;color:rgba(237,247,241,.86)}.roots{display:none;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem}.leaf.read .roots{display:grid}.root{border:1px solid rgba(140,202,192,.25);border-radius:18px 28px 18px 28px;padding:.65rem;background:rgba(255,255,255,.05)}.root b{display:block;color:var(--gold)}.root em{font-style:normal;font-size:.82rem;opacity:.82}.fragment blockquote{margin:0;border-left:2px solid rgba(231,196,119,.55);padding-left:1rem;font-family:Georgia,"Times New Roman",serif;font-size:1.16rem;line-height:1.55}.hint{margin:.65rem 0 0;font-size:.86rem;color:rgba(237,247,241,.72)}
+@media(max-width:860px){.shell{clip-path:none}.console{min-height:auto;padding:1rem}.sigil{height:auto;min-height:760px;align-content:start;padding:1rem 0 5rem}.ring{display:none}.core{width:min(320px,82vw);min-height:min(320px,82vw)}.node{position:relative;inset:auto;top:auto;left:auto;width:100%;min-height:5.4rem;transform:none;border-radius:24px 30px 22px 30px}.sigil{display:grid;gap:.75rem}.node{order:2}.core{order:1}.node{margin:.15rem auto}.n1,.n2,.n3,.n4,.n5,.n6,.n7{--angle:0deg}.leaf-stage{grid-template-columns:1fr}.prototype header{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -116,34 +123,101 @@ h1{
     <section class="console" aria-label="STARWELL fallback sigil">
       <div class="sigil">
         <i class="ring r1"></i><i class="ring r2"></i><i class="ring r3"></i>
-        <div class="node n1"><em>🜂</em><b>Observer Almanac</b></div>
-        <div class="node n2"><em>📚</em><b>Grand Library</b></div>
-        <div class="node n3"><em>🗺️</em><b>Atlas Hall</b></div>
-        <div class="node n4"><em>🎨</em><b>Art Studio</b></div>
-        <div class="node n5"><em>⏳</em><b>Orrery Timeline</b></div>
-        <div class="node n6"><em>✨</em><b>Beacon Network</b></div>
-        <div class="node n7"><em>📝</em><b>Observatory Journal</b></div>
-        <article class="core">
-          <span class="glyph">🜂</span>
-          <p>Fallback Doorway</p>
-          <h2>The map is awake.</h2>
-          <span>The full React observatory is built from <code>apps/starwell</code>. This static branch doorway exists so GitHub Pages has something visible at <code>/Flameclyffe/starwell/</code> while deployment is being sorted.</span>
+        <button class="node n1 active" type="button" data-title="Observer Almanac" data-glyph="🜂" data-kicker="Live Instrument" data-text="Live glyph logic, quanta packets, consent-aware observations, and the first Kelyran living leaf prototype."><em>🜂</em><b>Observer Almanac</b></button>
+        <button class="node n2" type="button" data-title="Grand Library" data-glyph="📚" data-kicker="Codex Shelf" data-text="Living Codex, manuscripts, marginalia, root-texts, and lore shelves waiting for the full React build."><em>📚</em><b>Grand Library</b></button>
+        <button class="node n3" type="button" data-title="Atlas Hall" data-glyph="🗺️" data-kicker="World Seeds" data-text="Worlds, cities, regions, ecologies, beacons, and grown Stonewood maps."><em>🗺️</em><b>Atlas Hall</b></button>
+        <button class="node n4" type="button" data-title="Art Studio" data-glyph="🎨" data-kicker="Image Work" data-text="Concept work, moodboards, gallery walls, sketches, and wet paint."><em>🎨</em><b>Art Studio</b></button>
+        <button class="node n5" type="button" data-title="Orrery Timeline" data-glyph="⏳" data-kicker="Story Time" data-text="Eras, events, histories, and constellated causeways through story."><em>⏳</em><b>Orrery Timeline</b></button>
+        <button class="node n6" type="button" data-title="Beacon Network" data-glyph="✨" data-kicker="Signals" data-text="Discoveries, signals, expeditions, field notes, and anomalies."><em>✨</em><b>Beacon Network</b></button>
+        <button class="node n7" type="button" data-title="Observatory Journal" data-glyph="📝" data-kicker="Raw Sparks" data-text="Tea-stained what-ifs, non-canon ideas, and sparks waiting to root."><em>📝</em><b>Observatory Journal</b></button>
+        <article class="core" aria-live="polite">
+          <span class="glyph" id="coreGlyph">🜂</span>
+          <p id="coreKicker">Live Instrument</p>
+          <h2 id="coreTitle">Observer Almanac</h2>
+          <span id="coreText">Live glyph logic, quanta packets, consent-aware observations, and the first Kelyran living leaf prototype.</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="prototype" aria-label="Living Manuscript Varutóra prototype">
+      <header>
+        <h2>Living Manuscript</h2>
+        <span>Varutóra prototype</span>
+      </header>
+      <div class="leaf-stage">
+        <button class="seed" id="leafSeed" type="button" aria-label="Touch varutóra to unfurl the almost-door leaf">
+          <span class="seed-core"></span>
+          <span>varutóra</span>
+        </button>
+        <article class="leaf" id="leaf" aria-live="polite">
+          <small>Templehouse / threshold</small>
+          <h3>varutóra</h3>
+          <div class="pronounce">VAH-roo-TOH-rah</div>
+          <div class="translation">
+            <b>almost-door</b>
+            <p><strong>Literal:</strong> waiting-door. A threshold that has begun to form but has not yet been consented into opening.</p>
+          </div>
+          <div class="roots">
+            <div class="root"><b>varu</b><em>wait, hold, remain unforced</em></div>
+            <div class="root"><b>tóra</b><em>door, gate, chosen opening</em></div>
+          </div>
+          <div class="fragment">
+            <blockquote>Virelya first knew the Templehouse by the shape of what it refused to become. There were no walls. No threshold stone. No lintel darkened by hands or years. The place gathered in the interval between orbit and planet as a grammar of warmth, a sentence still deciding whether it had been invited to speak.</blockquote>
+          </div>
+          <p class="hint" id="leafHint">Touch the seed once to unfurl. Touch again to translate. Touch a third time to read.</p>
         </article>
       </div>
     </section>
 
     <section class="cards">
       <article class="card"><small>Atlas Seed</small><h3>Terra Aeterna</h3><p>Primary STARWELL anchor world for Rowan and Vee scope.</p></article>
-      <article class="card"><small>Interface Rule</small><h3>No meter-feeding</h3><p>Return visits should feel like coming home, not feeding a streak system.</p></article>
-      <article class="card"><small>Memory Direction</small><h3>EverCore Engine Room</h3><p>Full-kit EverCore remains the long-term memory architecture; this page is only the doorway.</p></article>
+      <article class="card"><small>Interface Rule</small><h3>Nothing opens by force</h3><p>Click is invitation. Hold is deeper attention. Reveal is answer, not conquest.</p></article>
+      <article class="card"><small>Kelyran Seed</small><h3>varutóra</h3><p>A door in restraint. A threshold waiting to learn whether welcome has been chosen.</p></article>
     </section>
 
     <div class="actions">
       <a class="button" href="../">Flameclyffe Home</a>
       <a class="button" href="https://github.com/SingsEnochian/Flameclyffe/tree/main/apps/starwell">STARWELL Source</a>
     </div>
-    <p class="warn">If the full GitHub Actions deployment later takes over, this fallback will be replaced by the real built STARWELL app.</p>
+    <p class="warn">Static branch doorway patched live. The full React observatory remains in <code>apps/starwell</code> for the eventual proper build/deploy.</p>
   </section>
 </main>
+<script>
+const nodes = Array.from(document.querySelectorAll('.node'));
+const coreGlyph = document.getElementById('coreGlyph');
+const coreKicker = document.getElementById('coreKicker');
+const coreTitle = document.getElementById('coreTitle');
+const coreText = document.getElementById('coreText');
+
+nodes.forEach((node) => {
+  node.addEventListener('click', () => {
+    nodes.forEach((item) => item.classList.remove('active'));
+    node.classList.add('active');
+    coreGlyph.textContent = node.dataset.glyph;
+    coreKicker.textContent = node.dataset.kicker;
+    coreTitle.textContent = node.dataset.title;
+    coreText.textContent = node.dataset.text;
+  });
+});
+
+const leafSeed = document.getElementById('leafSeed');
+const leaf = document.getElementById('leaf');
+const leafHint = document.getElementById('leafHint');
+let leafStep = 0;
+const hints = [
+  'Touch the seed once to unfurl. Touch again to translate. Touch a third time to read.',
+  'The leaf has opened. Touch again for translation.',
+  'The translation has surfaced. Touch again for roots and Virelya\'s fragment.',
+  'The roots and fragment are awake. Touch again to fold back to the seed.'
+];
+
+leafSeed.addEventListener('click', () => {
+  leafStep = (leafStep + 1) % 4;
+  leaf.classList.toggle('open', leafStep >= 1);
+  leaf.classList.toggle('translate', leafStep >= 2);
+  leaf.classList.toggle('read', leafStep >= 3);
+  leafHint.textContent = hints[leafStep];
+});
+</script>
 </body>
 </html>
