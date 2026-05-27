@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Shoreline Lab v0.3 · Terra Aeterna</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#020611;color:#eafcff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hud{position:fixed;left:24px;bottom:24px;max-width:min(460px,calc(100vw - 48px));background:rgba(1,8,15,.38);backdrop-filter:blur(16px);padding:16px 18px;border-radius:22px;border:1px solid rgba(177,255,230,.16);box-shadow:0 18px 70px rgba(0,0,0,.45)}
+h1{margin:0 0 6px;font-size:1.25rem}.tiny{opacity:.82;font-size:.9rem}.pill{display:inline-flex;margin-top:10px;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:.25rem .6rem;color:#c9f7e9;font-size:.78rem}.hint{position:fixed;right:24px;top:24px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:.45rem .75rem;color:#d6fff2;font-size:.82rem;backdrop-filter:blur(12px)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hint">move / click the tide</div>
+<div class="hud">
+  <h1>Terra Aeterna · Shoreline Lab v0.3</h1>
+  <div class="tiny">Realism pass: moon-road reflection, organic waves, foam, backwash glow, stirred bioluminescence, layered fog, and lantern scattering.</div>
+  <span class="pill" id="readout">coast breathing</span>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const readout = document.getElementById('readout');
+let width = 0;
+let height = 0;
+let dpr = 1;
+let pointerX = 0.5;
+let pointerY = 0.5;
+let time = 0;
+let stars = [];
+let motes = [];
+let currents = [];
+let ripples = [];
+let foam = [];
+let trails = [];
+let fog = [];
+
+function randomBetween(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  seedScene();
+}
+
+function seedScene() {
+  stars = [];
+  motes = [];
+  currents = [];
+  fog = [];
+
+  for (let i = 0; i < 240; i++) {
+    stars.push({
+      x: Math.random() * width,
+      y: Math.random() * height * 0.56,
+      radius: randomBetween(0.15, 1.25),
+      phase: Math.random() * Math.PI * 2,
+      twinkle: randomBetween(0.35, 1.7),
+    });
+  }
+
+  for (let i = 0; i < 540; i++) {
+    motes.push({
+      x: Math.random() * width,
+      y: randomBetween(height * 0.34, height * 0.82),
+      radius: randomBetween(0.45, 2),
+      phase: Math.random() * Math.PI * 2,
+      drift: randomBetween(0.02, 0.16),
+      hue: randomBetween(62, 152),
+      energy: 0,
+    });
+  }
+
+  for (let i = 0; i < 34; i++) {
+    currents.push({
+      x: Math.random() * width,
+      y: randomBetween(height * 0.27, height * 0.58),
+      length: randomBetween(70, 250),
+      phase: Math.random() * Math.PI * 2,
+      speed: randomBetween(0.12, 0.5),
+    });
+  }
+
+  for (let i = 0; i < 12; i++) {
+    fog.push({
+      x: Math.random() * width,
+      y: height * randomBetween(0.4, 0.66),
+      radiusX: randomBetween(180, 520),
+      radiusY: randomBetween(20, 54),
+      speed: randomBetween(0.006, 0.018),
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+}
+
+function shoreLineY(x) {
+  return height * 0.705 +
+    Math.sin(x * 0.010 + time * 0.36) * 8 +
+    Math.sin(x * 0.027 + time * 0.13) * 5;
+}
+
+function gerstner(x, base, amp, freq, speed, steep) {
+  const phase = x * freq + time * speed;
+  const main = Math.sin(phase) * amp;
+  const chop = Math.sin(phase * 2.07 + 1.4) * amp * 0.28;
+  const fine = Math.sin(phase * 3.3 - time * 0.7) * amp * 0.11;
+  const crest = Math.pow(Math.max(0, Math.sin(phase)), 2) * amp * steep;
+  return base + main + chop + fine + crest;
+}
+
+function drawSky() {
+  const grad = ctx.createLinearGradient(0, 0, 0, height);
+  grad.addColorStop(0, '#051022');
+  grad.addColorStop(0.38, '#081a2d');
+  grad.addColorStop(0.68, '#061622');
+  grad.addColorStop(1, '#020611');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, width, height);
+
+  const moonX = width * 0.78;
+  const moonY = height * 0.18;
+  ctx.save();
+  ctx.shadowColor = 'rgba(210,235,255,.95)';
+  ctx.shadowBlur = 58;
+  ctx.fillStyle = 'rgba(230,242,255,.96)';
+  ctx.beginPath();
+  ctx.arc(moonX, moonY, 34, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  const moonGlow = ctx.createRadialGradient(moonX, moonY, 10, moonX, moonY, width * 0.52);
+  moonGlow.addColorStop(0, 'rgba(160,210,255,.18)');
+  moonGlow.addColorStop(1, 'rgba(160,210,255,0)');
+  ctx.fillStyle = moonGlow;
+  ctx.fillRect(0, 0, width, height);
+
+  for (const star of stars) {
+    const horizonFactor = star.y / (height * 0.56);
+    const extinction = 1 - horizonFactor * 0.58;
+    const warm = Math.round(245 - horizonFactor * 35);
+    const alpha = (0.2 + 0.55 * Math.pow((Math.sin(time * star.twinkle + star.phase) + 1) / 2, 2)) * extinction;
+    ctx.fillStyle = `rgba(${warm},245,255,${alpha})`;
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawFog() {
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  for (const cloud of fog) {
+    cloud.x = (cloud.x + cloud.speed * width * 0.006) % (width + cloud.radiusX) - cloud.radiusX * 0.25;
+    const y = cloud.y + Math.sin(time * 0.16 + cloud.phase) * 14;
+    const grad = ctx.createRadialGradient(cloud.x, y, 0, cloud.x, y, cloud.radiusX);
+    grad.addColorStop(0, 'rgba(185,235,230,.055)');
+    grad.addColorStop(1, 'rgba(185,235,230,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cloud.x, y, cloud.radiusX, cloud.radiusY, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawMoonRoad() {
+  const moonX = width * 0.78;
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  for (let row = 0; row < 48; row++) {
+    const y = height * 0.42 + row * (height * 0.32 / 48);
+    const spread = 12 + row * 4.2;
+    const shimmer = 0.35 + 0.65 * Math.sin(time * 1.2 + row * 0.9);
+    const x0 = moonX + Math.sin(row * 0.7 + time * 0.5) * spread * 0.18;
+    ctx.strokeStyle = `rgba(205,235,255,${0.022 * shimmer * (1 - row / 54)})`;
+    ctx.lineWidth = 1.1 + row * 0.035;
+    ctx.beginPath();
+    for (let x = -spread; x <= spread; x += 6) {
+      const y2 = y + Math.sin(x * 0.05 + time * 1.1 + row) * 3 + Math.sin(x * 0.14 - time * 0.7) * 1.5;
+      ctx.lineTo(x0 + x, y2);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawWaves() {
+  for (let layer = 0; layer < 8; layer++) {
+    const base = height * (0.5 + layer * 0.052);
+    const amp = 5 + layer * 2.4;
+    const freq = 0.0065 + layer * 0.0013;
+    const speed = 0.42 + layer * 0.08;
+    ctx.strokeStyle = `rgba(${95 + layer * 18},${215 + layer * 4},${220 + layer * 3},${0.065 + layer * 0.024})`;
+    ctx.lineWidth = 0.8 + layer * 0.38;
+    ctx.beginPath();
+    for (let x = 0; x <= width; x += 6) {
+      const pull = (pointerX - 0.5) * (layer + 1) * 6;
+      const y = gerstner(x, base, amp, freq, speed, 0.32) + Math.sin(x * 0.023 - time * 0.31) * 2.4 + pull;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  const breakBase = height * 0.69;
+  ctx.strokeStyle = 'rgba(160,255,235,.18)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  for (let x = 0; x <= width; x += 8) {
+    const y = gerstner(x, breakBase, 9, 0.013, 0.8, 0.5);
+    ctx.lineTo(x, y);
+    if (Math.sin(x * 0.013 + time * 0.8) > 0.94 && Math.random() < 0.02) {
+      foam.push({ x, y: y + randomBetween(-5, 10), age: 0, vx: randomBetween(-0.6, 1.2), vy: randomBetween(-0.3, 0.6), radius: randomBetween(0.8, 2.8) });
+    }
+  }
+  ctx.stroke();
+}
+
+function drawBioluminescence() {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const current of currents) {
+    const y = current.y + Math.sin(time * current.speed + current.phase) * 22;
+    ctx.strokeStyle = `rgba(80,255,220,${0.04 + 0.055 * Math.sin(time + current.phase)})`;
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.moveTo(current.x - current.length * 0.5, y);
+    ctx.bezierCurveTo(current.x - current.length * 0.15, y - 25, current.x + current.length * 0.2, y + 35, current.x + current.length * 0.5, y);
+    ctx.stroke();
+  }
+
+  for (const mote of motes) {
+    const px = (mote.x + time * 18 * mote.drift + Math.sin(time * 0.4 + mote.phase) * 22) % width;
+    const py = mote.y + Math.sin(time + mote.phase) * 12 + Math.sin(px * 0.006 + time) * 8;
+    const pointerDist = Math.hypot(px - pointerX * width, py - pointerY * height);
+    const agitation = Math.max(0, 1 - pointerDist / 170);
+    const crest = Math.max(0, Math.sin(px * 0.013 + time * 0.8) - 0.82) * 2.8;
+    mote.energy = Math.max(mote.energy * 0.94, agitation, crest);
+    const alpha = 0.09 + mote.energy * 0.85 + 0.055 * Math.sin(time * 2 + mote.phase);
+    ctx.fillStyle = `hsla(${mote.hue},95%,68%,${alpha})`;
+    ctx.beginPath();
+    ctx.arc(px, py, mote.radius + mote.energy * 4.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  for (const trail of trails) {
+    trail.age += 0.018;
+    trail.x += trail.vx;
+    trail.y += trail.vy;
+    const alpha = Math.max(0, 0.75 - trail.age);
+    ctx.fillStyle = `rgba(90,255,220,${alpha})`;
+    ctx.beginPath();
+    ctx.arc(trail.x, trail.y, 2 + trail.age * 7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  trails = trails.filter(trail => trail.age < 1);
+
+  for (const ripple of ripples) {
+    ripple.age += 0.016;
+    const radius = ripple.age * ripple.max;
+    ctx.strokeStyle = `rgba(130,255,235,${Math.max(0, 0.5 - ripple.age * 0.55)})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(ripple.x, ripple.y, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ripples = ripples.filter(ripple => ripple.age < 1);
+  ctx.restore();
+}
+
+function drawFoam() {
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  for (const bit of foam) {
+    bit.age += 0.018;
+    bit.x += bit.vx;
+    bit.y += bit.vy + bit.age * 0.2;
+    const alpha = Math.max(0, 0.42 - bit.age * 0.32);
+    ctx.fillStyle = `rgba(210,255,245,${alpha})`;
+    ctx.beginPath();
+    ctx.ellipse(bit.x, bit.y, bit.radius * (1 + bit.age * 2.2), bit.radius * 0.55, Math.sin(bit.age * 3), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  foam = foam.filter(bit => bit.age < 1.25);
+  ctx.restore();
+}
+
+function drawObservatory() {
+  const ox = width * 0.18;
+  const oy = height * 0.54;
+  const fogGate = 0.75 + 0.25 * Math.sin(time * 0.35);
+  const glow = ctx.createRadialGradient(ox, oy, 0, ox, oy, 125);
+  glow.addColorStop(0, `rgba(255,202,105,${0.5 * fogGate})`);
+  glow.addColorStop(0.35, `rgba(255,170,80,${0.18 * fogGate})`);
+  glow.addColorStop(1, 'rgba(255,202,105,0)');
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  ctx.fillStyle = glow;
+  ctx.fillRect(ox - 150, oy - 130, 300, 260);
+  ctx.restore();
+
+  ctx.fillStyle = 'rgba(3,9,14,.9)';
+  ctx.beginPath();
+  ctx.moveTo(ox - 70, oy + 38);
+  ctx.lineTo(ox - 46, oy - 4);
+  ctx.lineTo(ox - 15, oy - 17);
+  ctx.quadraticCurveTo(ox + 4, oy - 58, ox + 24, oy - 17);
+  ctx.lineTo(ox + 58, oy + 38);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = `rgba(255,215,124,${0.72 + 0.23 * Math.sin(time * 1.8)})`;
+  ctx.beginPath();
+  ctx.arc(ox + 4, oy - 9, 5.5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawShore() {
+  ctx.fillStyle = 'rgba(214,226,216,.94)';
+  ctx.beginPath();
+  ctx.moveTo(0, height * 0.72);
+  for (let x = 0; x <= width; x += 18) {
+    ctx.lineTo(x, shoreLineY(x));
+  }
+  ctx.lineTo(width, height);
+  ctx.lineTo(0, height);
+  ctx.closePath();
+  ctx.fill();
+
+  const sheen = ctx.createLinearGradient(0, height * 0.66, 0, height * 0.82);
+  sheen.addColorStop(0, 'rgba(130,215,210,.16)');
+  sheen.addColorStop(0.55, 'rgba(255,245,210,.10)');
+  sheen.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, height * 0.66, width, height * 0.18);
+
+  ctx.fillStyle = 'rgba(255,245,210,.16)';
+  for (let x = 0; x < width; x += 9) {
+    const y = shoreLineY(x);
+    ctx.fillRect(x, y, 9, height - y);
+  }
+}
+
+function draw(ms) {
+  time = ms / 1000;
+  ctx.clearRect(0, 0, width, height);
+  drawSky();
+  drawFog();
+  drawMoonRoad();
+  drawWaves();
+  drawBioluminescence();
+  drawObservatory();
+  drawFoam();
+  drawShore();
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('pointermove', event => {
+  pointerX = event.clientX / width;
+  pointerY = event.clientY / height;
+  trails.push({ x: event.clientX, y: event.clientY, age: 0, vx: randomBetween(-1.5, 1.5), vy: randomBetween(-1.5, 1.5) });
+});
+window.addEventListener('pointerdown', event => {
+  ripples.push({ x: event.clientX, y: event.clientY, age: 0, max: randomBetween(140, 220) });
+  for (let i = 0; i < 36; i++) {
+    trails.push({ x: event.clientX + randomBetween(-18, 18), y: event.clientY + randomBetween(-18, 18), age: 0, vx: randomBetween(-1.5, 3), vy: randomBetween(-1, 2) });
+  }
+  readout.textContent = 'the tide noticed';
+});
+
+resize();
+requestAnimationFrame(draw);
+</script>
+</body></html>
