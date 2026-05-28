@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+publish/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Observer DEEP private local input/output
+sandbox/observer-deep/raw/
+sandbox/observer-deep/out/
+
+# OS/editor noise
+.DS_Store
+.vscode/
+.idea/
