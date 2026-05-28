@@ -4,6 +4,7 @@ import { hasSupabaseConfig, supabase } from './lib/supabase';
 import { LiveGlyphViewer, useSecondTicker } from './live-glyph';
 import { ObservatoryInstrument } from './components/ObservatoryInstrument.jsx';
 import { VarutoraLeaf } from './components/living/VarutoraLeaf.jsx';
+import { WriterRoom } from './components/writer/WriterRoom.jsx';
 import './starwell.css';
 import './starwell-room.css';
 
@@ -52,6 +53,9 @@ const fallbackCodexEntries = [
     entry_type: 'note',
     excerpt: 'Cities are cultivated, shaped, tended, and inherited rather than manufactured.',
     visibility: 'private',
+    tags: ['starwell', 'fallback'],
+    body_md: 'Cities are cultivated, shaped, tended, and inherited rather than manufactured.',
+    metadata: {},
   },
 ];
 
@@ -221,11 +225,33 @@ function getEntryPreview(entry) {
   return entry.excerpt || entry.body_md || entry.body_html || 'This codex page is awake, but still waiting for its first full note.';
 }
 
-function CodexShelf() {
+function createLocalEntry() {
+  return {
+    id: `local-new-${Date.now()}`,
+    slug: '',
+    title: 'Untitled leaf',
+    entry_type: 'note',
+    excerpt: '',
+    body_md: 'Begin where the signal warms.',
+    body_html: null,
+    body_json: {},
+    font_theme: {},
+    tags: ['starwell', 'draft'],
+    visibility: 'private',
+    metadata: {
+      local_only: true,
+      source: 'starwell-grand-library-new-leaf',
+    },
+    local_only: true,
+  };
+}
+
+function CodexShelf({ now }) {
   const [entries, setEntries] = useState([]);
   const [counts, setCounts] = useState({});
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [codexState, setCodexState] = useState(hasSupabaseConfig ? 'loading' : 'fallback');
+  const [mode, setMode] = useState('read');
 
   useEffect(() => {
     let cancelled = false;
@@ -235,7 +261,7 @@ function CodexShelf() {
 
       const entryRequest = supabase
         .from('starwell_codex_entries')
-        .select('id, slug, title, entry_type, excerpt, body_md, body_html, tags, visibility, created_at')
+        .select('id, slug, title, entry_type, excerpt, body_md, body_html, body_json, font_theme, tags, visibility, metadata, created_at, updated_at')
         .order('created_at', { ascending: true });
 
       const countRequests = codexShelves.map((shelf) =>
@@ -283,46 +309,81 @@ function CodexShelf() {
     fallback: 'Local codex fallback',
   }[codexState];
 
+  function selectEntry(entry) {
+    setSelectedEntry(entry);
+    setMode('read');
+  }
+
+  function startNewLeaf() {
+    const nextEntry = createLocalEntry();
+    setEntries((current) => [nextEntry, ...current.filter((item) => !item.local_only)]);
+    setSelectedEntry(nextEntry);
+    setMode('write');
+  }
+
+  function handleSaved(savedEntry) {
+    setEntries((current) => {
+      const withoutLocal = current.filter((entry) => !entry.local_only);
+      const exists = withoutLocal.some((entry) => entry.id === savedEntry.id);
+      return exists
+        ? withoutLocal.map((entry) => (entry.id === savedEntry.id ? savedEntry : entry))
+        : [savedEntry, ...withoutLocal];
+    });
+    setSelectedEntry(savedEntry);
+    setCounts((current) => ({ ...current, note: Math.max(current.note || 0, entries.length + 1) }));
+    setCodexState('live');
+  }
+
   return (
     <section className="codex-shelf chamber-card" aria-label="STARWELL codex shelf">
       <div className="map-heading compact">
         <span>Codex Shelf</span>
-        <strong>{statusLabel}</strong>
+        <div className="codex-heading-actions">
+          <strong>{statusLabel}</strong>
+          <button className={`codex-action ${mode === 'read' ? 'active' : ''}`} type="button" onClick={() => setMode('read')}>Read Shelf</button>
+          <button className={`codex-action ${mode === 'write' ? 'active' : ''}`} type="button" onClick={() => setMode('write')}>Write Room</button>
+          <button className="codex-action" type="button" onClick={startNewLeaf}>New Leaf</button>
+        </div>
       </div>
 
-      <div className="codex-grid">
-        <div className="shelf-stack" aria-label="Codex shelf counts">
-          {codexShelves.map((shelf) => (
-            <article className="shelf-card" key={shelf.key}>
-              <span>{shelf.glyph}</span>
-              <strong>{shelf.label}</strong>
-              <em>{displayCounts[shelf.key] ?? 0} records</em>
+      {mode === 'write' ? (
+        <WriterRoom entry={activeEntry} now={now} onSaved={handleSaved} />
+      ) : (
+        <div className="codex-grid">
+          <div className="shelf-stack" aria-label="Codex shelf counts">
+            {codexShelves.map((shelf) => (
+              <article className="shelf-card" key={shelf.key}>
+                <span>{shelf.glyph}</span>
+                <strong>{shelf.label}</strong>
+                <em>{displayCounts[shelf.key] ?? 0} records</em>
+              </article>
+            ))}
+          </div>
+
+          <div className="entry-stack" aria-label="Codex entries">
+            {displayEntries.map((entry) => (
+              <button
+                className={`entry-tab ${activeEntry?.id === entry.id ? 'active' : ''}`}
+                key={entry.id}
+                onClick={() => selectEntry(entry)}
+                type="button"
+              >
+                <span>{entry.entry_type || 'entry'}</span>
+                <strong>{entry.title}</strong>
+              </button>
+            ))}
+          </div>
+
+          {activeEntry && (
+            <article className="codex-reader" aria-live="polite">
+              <p>{activeEntry.entry_type || 'entry'} · {activeEntry.visibility || 'private'}</p>
+              <h3>{activeEntry.title}</h3>
+              <span>{getEntryPreview(activeEntry)}</span>
+              <button className="codex-action" type="button" onClick={() => setMode('write')}>Edit in Writing Room</button>
             </article>
-          ))}
+          )}
         </div>
-
-        <div className="entry-stack" aria-label="Codex entries">
-          {displayEntries.map((entry) => (
-            <button
-              className={`entry-tab ${activeEntry?.id === entry.id ? 'active' : ''}`}
-              key={entry.id}
-              onClick={() => setSelectedEntry(entry)}
-              type="button"
-            >
-              <span>{entry.entry_type || 'entry'}</span>
-              <strong>{entry.title}</strong>
-            </button>
-          ))}
-        </div>
-
-        {activeEntry && (
-          <article className="codex-reader" aria-live="polite">
-            <p>{activeEntry.entry_type || 'entry'} · {activeEntry.visibility || 'private'}</p>
-            <h3>{activeEntry.title}</h3>
-            <span>{getEntryPreview(activeEntry)}</span>
-          </article>
-        )}
-      </div>
+      )}
     </section>
   );
 }
@@ -364,7 +425,7 @@ function ObserverAlmanacPanel({ now }) {
 function ActiveChamber({ selected, now }) {
   if (selected.key === 'observer') return <ObserverAlmanacPanel now={now} />;
   if (selected.key === 'atlas') return <AtlasSeedPanel />;
-  if (selected.key === 'library') return <CodexShelf />;
+  if (selected.key === 'library') return <CodexShelf now={now} />;
   return <ComingSoonPanel selected={selected} />;
 }
 
