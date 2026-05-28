@@ -1,0 +1,152 @@
+.grove-state {
+  position: fixed;
+  top: clamp(0.7rem, 1.5vw, 1.1rem);
+  right: clamp(0.7rem, 1.5vw, 1.1rem);
+  z-index: 8;
+  width: min(390px, calc(100vw - 1.4rem));
+  min-height: 104px;
+  display: grid;
+  grid-template-columns: 4.25rem minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.68rem 0.95rem 0.72rem 0.72rem;
+  color: var(--moon);
+  border: 1px solid rgba(231, 196, 119, 0.44);
+  border-radius: 999px 36px 36px 999px;
+  background:
+    linear-gradient(90deg, rgba(4, 7, 13, 0.72), rgba(8, 19, 28, 0.9)),
+    radial-gradient(circle at 12% 50%, rgba(140, 202, 192, 0.18), transparent 7rem),
+    radial-gradient(circle at 70% 0%, rgba(231, 196, 119, 0.12), transparent 11rem);
+  box-shadow:
+    0 18px 58px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 0 34px rgba(140, 202, 192, 0.06);
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.grove-state::before,
+.grove-state::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.grove-state::before {
+  inset: 0.48rem;
+  border-radius: inherit;
+  border: 1px solid rgba(231, 196, 119, 0.15);
+  background:
+    linear-gradient(90deg, transparent, rgba(231, 196, 119, 0.1), transparent),
+    radial-gradient(circle at 84% 38%, rgba(140, 202, 192, 0.12), transparent 7rem);
+}
+
+.grove-state::after {
+  right: 1.2rem;
+  top: 1.1rem;
+  width: 6.8rem;
+  height: 3.4rem;
+  border-top: 1px solid rgba(231, 196, 119, 0.12);
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+.grove-state-medallion {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  border: 1px solid rgba(231, 196, 119, 0.56);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(231, 196, 119, 0.92) 0 16%, transparent 17%),
+    radial-gradient(circle at 50% 50%, rgba(231, 196, 119, 0.2) 0 45%, transparent 46%),
+    radial-gradient(circle at 50% 50%, rgba(140, 202, 192, 0.2), rgba(10, 27, 38, 0.82));
+  box-shadow:
+    inset 0 0 24px rgba(140, 202, 192, 0.16),
+    0 0 18px rgba(231, 196, 119, 0.18);
+}
+
+.grove-state-medallion::before {
+  content: '';
+  width: 2.5rem;
+  height: 2.5rem;
+  clip-path: polygon(50% 0%, 58% 32%, 88% 12%, 68% 42%, 100% 50%, 68% 58%, 88% 88%, 58% 68%, 50% 100%, 42% 68%, 12% 88%, 32% 58%, 0% 50%, 32% 42%, 12% 12%, 42% 32%);
+  background: linear-gradient(145deg, #fff2b8, #c89135 65%, #f1cf75);
+  filter: drop-shadow(0 0 10px rgba(231, 196, 119, 0.38));
+}
+
+.grove-state-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  line-height: 1;
+  min-width: 0;
+}
+
+.grove-state-label {
+  font-family: Cinzel, Georgia, serif;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: clamp(0.68rem, 1.35vw, 0.88rem);
+  white-space: nowrap;
+}
+
+.grove-state-time {
+  margin-top: 0.16rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.65rem, 6.5vw, 4.6rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #f4ead0;
+  text-shadow: 0 0 18px rgba(231, 196, 119, 0.22), 0 10px 26px rgba(0, 0, 0, 0.42);
+}
+
+.grove-state-note {
+  margin-top: 0.2rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  color: rgba(140, 202, 192, 0.92);
+  font-size: clamp(0.92rem, 2.1vw, 1.28rem);
+  letter-spacing: 0.08em;
+}
+
+.grove-state-dawn .grove-state-medallion::before {
+  clip-path: polygon(50% 0%, 61% 34%, 96% 34%, 68% 54%, 79% 88%, 50% 67%, 21% 88%, 32% 54%, 4% 34%, 39% 34%);
+}
+
+.grove-state-dusk .grove-state-medallion::before {
+  background: linear-gradient(145deg, #ffd08d, #b65f3d 68%, #f4bc68);
+}
+
+.grove-state-night .grove-state-medallion::before {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  clip-path: circle(50% at 50% 50%);
+  background:
+    radial-gradient(circle at 64% 38%, rgba(10, 27, 38, 1) 0 36%, transparent 37%),
+    linear-gradient(145deg, #fff3bf, #c7a55c);
+}
+
+@media (max-width: 760px) {
+  .grove-state {
+    position: sticky;
+    top: 0.5rem;
+    width: auto;
+    margin: 0.55rem auto 0;
+    right: auto;
+    grid-template-columns: 3.3rem 1fr;
+    border-radius: 28px;
+  }
+
+  .grove-state-medallion {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+
+  .grove-state-time {
+    font-size: clamp(2.15rem, 12vw, 3.3rem);
+  }
+}
