@@ -14,9 +14,19 @@ if (!inputPath) {
 }
 
 function section(text, heading) {
-  const pattern = new RegExp(`^## ${heading}\\s*$([\\s\\S]*?)(?=^## |\\z)`, 'm');
-  const match = text.match(pattern);
-  return match ? match[1].trim() : '';
+  const lines = text.split('\n');
+  const headingLine = `## ${heading}`;
+  const start = lines.findIndex((line) => line.trim() === headingLine);
+
+  if (start === -1) return '';
+
+  const body = [];
+  for (let index = start + 1; index < lines.length; index += 1) {
+    if (/^##\s+/.test(lines[index])) break;
+    body.push(lines[index]);
+  }
+
+  return body.join('\n').trim();
 }
 
 function lineValue(text, label) {
