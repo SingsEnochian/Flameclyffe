@@ -17,6 +17,7 @@
   "dependencies": {
     "@supabase/supabase-js": "latest",
     "@vitejs/plugin-react": "latest",
+    "docx": "latest",
     "vite": "latest",
     "react": "latest",
     "react-dom": "latest"
