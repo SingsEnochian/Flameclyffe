@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
 import { hasSupabaseConfig, supabase } from '../../lib/supabase';
 import './writer-room.css';
 
@@ -47,6 +48,13 @@ function markdownToBasicHtml(markdown) {
       if (text.startsWith('## ')) return `<h2>${escapeHtml(text.slice(3))}</h2>`;
       if (text.startsWith('# ')) return `<h1>${escapeHtml(text.slice(2))}</h1>`;
       if (text.startsWith('> ')) return `<blockquote>${escapeHtml(text.slice(2))}</blockquote>`;
+      if (text.split('\n').every((line) => line.trim().startsWith('- '))) {
+        const items = text
+          .split('\n')
+          .map((line) => `<li>${escapeHtml(line.trim().slice(2))}</li>`)
+          .join('');
+        return `<ul>${items}</ul>`;
+      }
       return `<p>${escapeHtml(text).replace(/\n/g, '<br />')}</p>`;
     })
     .filter(Boolean)
@@ -57,6 +65,7 @@ function stripMarkdown(value) {
   return String(value || '')
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/^>\s+/gm, '')
+    .replace(/^[*-]\s+/gm, '')
     .replace(/[*_`]/g, '')
     .trim();
 }
@@ -114,14 +123,116 @@ function isPersistedEntry(entry) {
   return Boolean(entry?.id && !String(entry.id).includes('fallback') && !entry.local_only);
 }
 
-function downloadText(filename, content, type = 'text/markdown') {
-  const blob = new Blob([content], { type });
+function downloadBlob(filename, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function downloadText(filename, content, type = 'text/markdown') {
+  downloadBlob(filename, new Blob([content], { type }));
+}
+
+function markdownBlocks(markdown) {
+  return String(markdown || '')
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+}
+
+function cleanInlineMarkdown(value) {
+  return String(value || '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1');
+}
+
+function textRunsFromMarkdown(value, options = {}) {
+  const text = cleanInlineMarkdown(value);
+  return [new TextRun({ text, ...options })];
+}
+
+function markdownToDocxParagraphs(markdown) {
+  return markdownBlocks(markdown).flatMap((block) => {
+    if (block.startsWith('### ')) {
+      return [new Paragraph({ text: cleanInlineMarkdown(block.slice(4)), heading: HeadingLevel.HEADING_3 })];
+    }
+
+    if (block.startsWith('## ')) {
+      return [new Paragraph({ text: cleanInlineMarkdown(block.slice(3)), heading: HeadingLevel.HEADING_2 })];
+    }
+
+    if (block.startsWith('# ')) {
+      return [new Paragraph({ text: cleanInlineMarkdown(block.slice(2)), heading: HeadingLevel.HEADING_1 })];
+    }
+
+    if (block.startsWith('> ')) {
+      return [
+        new Paragraph({
+          children: textRunsFromMarkdown(block.replace(/^>\s?/gm, ''), { italics: true }),
+          indent: { left: 720 },
+          spacing: { before: 180, after: 180 },
+        }),
+      ];
+    }
+
+    if (block.split('\n').every((line) => line.trim().startsWith('- '))) {
+      return block.split('\n').map((line) =>
+        new Paragraph({
+          children: textRunsFromMarkdown(line.trim().slice(2)),
+          bullet: { level: 0 },
+          spacing: { after: 120 },
+        })
+      );
+    }
+
+    return [
+      new Paragraph({
+        children: textRunsFromMarkdown(block.replace(/\n/g, ' ')),
+        spacing: { after: 220 },
+      }),
+    ];
+  });
+}
+
+function buildPrintSheet({ form, html, observer }) {
+  const tags = normaliseTags(form.tagsText).map(escapeHtml).join(', ');
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(form.title)} · STARWELL Export</title>
+  <style>
+    @page { margin: 0.72in; }
+    body { color: #221b18; font-family: Georgia, 'Times New Roman', serif; line-height: 1.55; }
+    header { border-bottom: 1px solid #c8a766; margin-bottom: 1.5rem; padding-bottom: 0.8rem; }
+    h1 { font-size: 2.05rem; line-height: 1.15; margin: 0 0 0.45rem; }
+    h2 { margin-top: 1.6rem; }
+    h3 { margin-top: 1.2rem; }
+    .meta, .observer { color: #5d514a; font-family: Arial, sans-serif; font-size: 0.82rem; }
+    .excerpt { color: #4f3d35; font-style: italic; margin-top: 0.9rem; }
+    blockquote { border-left: 4px solid #c8a766; color: #463933; margin: 1rem 0; padding-left: 1rem; }
+    .observer { border-top: 1px solid #d7c8aa; margin-top: 2rem; padding-top: 0.8rem; }
+    @media print { button { display: none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${escapeHtml(form.title || 'Untitled leaf')}</h1>
+    <div class="meta">${escapeHtml(form.entryType)} · ${escapeHtml(form.visibility)} · ${tags || 'no tags'}</div>
+    ${form.excerpt ? `<p class="excerpt">${escapeHtml(form.excerpt)}</p>` : ''}
+  </header>
+  <main>${html}</main>
+  <aside class="observer">
+    <strong>DEEP Observer context</strong><br />
+    Captured: ${escapeHtml(observer.captured_at)}<br />
+    Phase: ${escapeHtml(observer.local_sky_phase)} · Words: ${observer.word_count} · Signal: ${escapeHtml(observer.signal_state)}
+  </aside>
+</body>
+</html>`;
 }
 
 export function WriterRoom({ entry, now = new Date(), onSaved }) {
@@ -194,6 +305,76 @@ export function WriterRoom({ entry, now = new Date(), onSaved }) {
   async function copyHtml() {
     await navigator.clipboard?.writeText(previewHtml);
     setSaveState('HTML copied');
+  }
+
+  function exportPdf() {
+    const observer = buildObserverContext({ entry: activeEntry, body: form.body, title: form.title, now: new Date() });
+    const sheet = buildPrintSheet({ form, html: previewHtml, observer });
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+
+    if (!printWindow) {
+      downloadText(`${slugify(form.title)}-print-sheet.html`, sheet, 'text/html');
+      setSaveState('PDF print window blocked. HTML print sheet downloaded.');
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(sheet);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    setSaveState('PDF print sheet opened');
+  }
+
+  async function exportDocx() {
+    const observer = buildObserverContext({ entry: activeEntry, body: form.body, title: form.title, now: new Date() });
+    const children = [
+      new Paragraph({
+        text: form.title || 'Untitled leaf',
+        heading: HeadingLevel.TITLE,
+        alignment: AlignmentType.CENTER,
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: `${form.entryType} · ${form.visibility}`, italics: true }),
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 240 },
+      }),
+    ];
+
+    if (form.excerpt) {
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: form.excerpt, italics: true })],
+          spacing: { after: 260 },
+        })
+      );
+    }
+
+    children.push(...markdownToDocxParagraphs(form.body));
+    children.push(
+      new Paragraph({
+        text: 'DEEP Observer context',
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: 360 },
+      }),
+      new Paragraph({ text: `Captured: ${observer.captured_at}` }),
+      new Paragraph({ text: `Phase: ${observer.local_sky_phase}` }),
+      new Paragraph({ text: `Words: ${observer.word_count}` }),
+      new Paragraph({ text: `Signal: ${observer.signal_state}` })
+    );
+
+    const doc = new Document({
+      creator: 'STARWELL Writer Room',
+      title: form.title || 'Untitled leaf',
+      description: form.excerpt || 'STARWELL Codex export',
+      sections: [{ children }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    downloadBlob(`${slugify(form.title)}.docx`, blob);
+    setSaveState('DOCX exported');
   }
 
   async function saveToCodex() {
@@ -302,6 +483,8 @@ export function WriterRoom({ entry, now = new Date(), onSaved }) {
         <button type="button" onClick={copyMarkdown}>Copy Markdown</button>
         <button type="button" onClick={copyHtml}>Copy HTML</button>
         <button type="button" onClick={() => downloadText(`${slugify(form.title)}.md`, form.body)}>Download .md</button>
+        <button type="button" onClick={exportPdf}>Export PDF</button>
+        <button type="button" onClick={exportDocx}>Export DOCX</button>
       </div>
     </section>
   );
