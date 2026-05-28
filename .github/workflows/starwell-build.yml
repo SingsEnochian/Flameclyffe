@@ -1,0 +1,41 @@
+name: STARWELL build check
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/starwell/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/starwell-build.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/starwell/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/starwell-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-starwell:
+    name: Build STARWELL
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build STARWELL
+        run: npm run starwell:build
