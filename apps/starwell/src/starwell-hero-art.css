@@ -1,0 +1,216 @@
+/* STARWELL live-pretty pass v0.1
+   Shader-style page atmosphere for the React Observatory.
+   This is intentionally CSS-only for the first live pass: no secrets, no binary deploy risk, no GPU goblin tantrum. */
+
+.starwell {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(234, 244, 239, 0.18), transparent 18rem),
+    radial-gradient(circle at 18% 14%, rgba(98, 189, 196, 0.28), transparent 22rem),
+    radial-gradient(circle at 78% 12%, rgba(231, 196, 119, 0.18), transparent 20rem),
+    linear-gradient(145deg, #060a13 0%, #101420 42%, #183c3b 100%) !important;
+}
+
+.starwell::before {
+  z-index: 0;
+  opacity: 0.95 !important;
+  background:
+    linear-gradient(90deg, rgba(5, 7, 12, 0.84), rgba(5, 7, 12, 0.22) 38%, rgba(5, 7, 12, 0.34) 64%, rgba(5, 7, 12, 0.88)),
+    radial-gradient(circle at 50% 34%, rgba(234, 244, 239, 0.14), transparent 20rem),
+    radial-gradient(circle at 24% 14%, rgba(140, 202, 192, 0.32), transparent 18rem),
+    radial-gradient(circle at 76% 18%, rgba(231, 196, 119, 0.18), transparent 16rem),
+    linear-gradient(180deg, rgba(4, 6, 12, 0.1), rgba(4, 6, 12, 0.68));
+}
+
+.starwell::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent 0 24%, rgba(140, 202, 192, 0.08) 25%, transparent 26% 100%),
+    linear-gradient(70deg, transparent 0 54%, rgba(231, 196, 119, 0.08) 55%, transparent 56% 100%),
+    radial-gradient(circle at 50% 58%, rgba(231, 196, 119, 0.16), transparent 2px),
+    radial-gradient(circle at 34% 22%, rgba(234, 244, 239, 0.5), transparent 1px),
+    radial-gradient(circle at 64% 18%, rgba(140, 202, 192, 0.45), transparent 1px),
+    radial-gradient(circle at 73% 44%, rgba(231, 196, 119, 0.38), transparent 1px);
+  background-size: 100% 100%, 100% 100%, 180px 180px, 116px 116px, 142px 142px, 196px 196px;
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  filter: blur(0.1px);
+}
+
+.starwell .stars {
+  z-index: 0;
+  opacity: 0.58 !important;
+  mask-image: radial-gradient(circle at 50% 28%, black 0 54%, transparent 88%);
+}
+
+.starwell .observatory-shell {
+  position: relative;
+  overflow: hidden;
+  color: var(--moon) !important;
+  border-color: rgba(231, 196, 119, 0.34) !important;
+  background:
+    linear-gradient(180deg, rgba(7, 9, 15, 0.44), rgba(10, 14, 24, 0.72)),
+    radial-gradient(circle at 50% 6%, rgba(140, 202, 192, 0.18), transparent 30rem),
+    linear-gradient(145deg, rgba(19, 18, 27, 0.74), rgba(37, 30, 38, 0.58)) !important;
+  box-shadow:
+    0 30px 96px rgba(0, 0, 0, 0.54),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    inset 0 0 90px rgba(140, 202, 192, 0.08) !important;
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.starwell .observatory-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 30%, rgba(0,0,0,0.2) 66%, rgba(0,0,0,0.72) 100%),
+    radial-gradient(ellipse at 50% 2%, rgba(19, 51, 65, 0.72), transparent 34rem),
+    radial-gradient(ellipse at 50% 42%, rgba(140, 202, 192, 0.1), transparent 28rem),
+    repeating-radial-gradient(circle at 50% 22%, rgba(231,196,119,0.15) 0 1px, transparent 1px 56px),
+    linear-gradient(145deg, rgba(4, 8, 15, 0.98), rgba(19, 24, 42, 0.88));
+}
+
+.starwell .observatory-shell::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(231,196,119,0.0), rgba(231,196,119,0.18), rgba(140,202,192,0.12), rgba(231,196,119,0.0)),
+    radial-gradient(circle at 18% 20%, rgba(140,202,192,0.18), transparent 20rem),
+    radial-gradient(circle at 82% 16%, rgba(231,196,119,0.12), transparent 18rem);
+  opacity: 0.7;
+  mix-blend-mode: screen;
+}
+
+.starwell .dome,
+.starwell .observatory-map,
+.starwell .selected-alcove,
+.starwell .chamber-card,
+.starwell .study-row {
+  position: relative;
+  z-index: 1;
+}
+
+.starwell .dome {
+  min-height: clamp(420px, 58vw, 620px) !important;
+  background:
+    linear-gradient(180deg, rgba(1, 4, 9, 0.08), rgba(1, 4, 9, 0.28)),
+    radial-gradient(ellipse at 50% 34%, rgba(234,244,239,0.08), transparent 17rem);
+}
+
+.starwell .dome::before {
+  width: min(1180px, 120vw) !important;
+  height: min(1180px, 120vw) !important;
+  bottom: -850px !important;
+  border-color: rgba(231,196,119,0.28) !important;
+  box-shadow:
+    inset 0 0 96px rgba(140,202,192,0.12),
+    0 0 80px rgba(231,196,119,0.1) !important;
+}
+
+.starwell .dome::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  width: min(760px, 76vw);
+  height: min(220px, 28vw);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 1px solid rgba(231,196,119,0.28);
+  background:
+    repeating-radial-gradient(ellipse at center, rgba(231,196,119,0.14) 0 1px, transparent 1px 28px),
+    radial-gradient(ellipse at center, rgba(140,202,192,0.1), transparent 70%);
+  box-shadow:
+    inset 0 0 42px rgba(140,202,192,0.12),
+    0 0 50px rgba(231,196,119,0.1);
+  opacity: 0.75;
+}
+
+.starwell .dome-inner {
+  max-width: min(820px, 88vw);
+  padding: clamp(1rem, 4vw, 2.4rem);
+  border: 1px solid rgba(231,196,119,0.22);
+  border-radius: 36px;
+  background:
+    linear-gradient(145deg, rgba(0,0,0,0.34), rgba(255,255,255,0.06)),
+    radial-gradient(circle at top, rgba(140,202,192,0.1), transparent 14rem);
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.34),
+    inset 0 0 0 1px rgba(255,255,255,0.12);
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+
+.starwell h1 {
+  color: var(--gold) !important;
+  text-shadow:
+    0 0 20px rgba(231,196,119,0.28),
+    0 18px 42px rgba(0,0,0,0.4) !important;
+}
+
+.starwell .eyebrow,
+.starwell .map-heading,
+.starwell .sky-lantern strong,
+.starwell .selected-alcove h2 {
+  color: var(--gold) !important;
+}
+
+.starwell .subtitle,
+.starwell .selected-alcove span:last-child,
+.starwell .room-text,
+.starwell .instrument-card p,
+.starwell .study-door p {
+  color: rgba(234,244,239,0.84) !important;
+}
+
+.starwell .inscription,
+.starwell .sky-lantern,
+.starwell .room-card,
+.starwell .instrument-card,
+.starwell .selected-alcove,
+.starwell .chamber-card,
+.starwell .study-door,
+.starwell .seed-card,
+.starwell .shelf-card,
+.starwell .codex-reader,
+.starwell .entry-tab,
+.starwell .coming-soon-body {
+  border-color: rgba(231,196,119,0.24) !important;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.18)),
+    radial-gradient(circle at 16% 0%, rgba(140,202,192,0.12), transparent 12rem) !important;
+  box-shadow:
+    0 18px 48px rgba(0,0,0,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(14px) saturate(1.08);
+}
+
+.starwell .room-card:hover,
+.starwell .room-card:focus-visible,
+.starwell .room-card.active,
+.starwell .entry-tab.active {
+  border-color: rgba(231,196,119,0.72) !important;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,0.32),
+    0 0 0 3px rgba(140,202,192,0.14),
+    inset 0 0 24px rgba(231,196,119,0.08) !important;
+}
+
+@media (max-width: 720px) {
+  .starwell .dome {
+    min-height: 460px !important;
+  }
+
+  .starwell .dome-inner {
+    border-radius: 28px;
+  }
+}
