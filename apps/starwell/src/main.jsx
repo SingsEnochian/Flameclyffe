@@ -7,6 +7,9 @@ import { VarutoraLeaf } from './components/living/VarutoraLeaf.jsx';
 import { WriterRoom } from './components/writer/WriterRoom.jsx';
 import './starwell.css';
 import './starwell-room.css';
+import './grove-state.css';
+
+const OBSERVATORY_TIME_ZONE = 'America/Chicago';
 
 const instruments = [
   { key: 'observer', glyph: '🜂', title: 'Observer Almanac', text: 'Live glyph viewer, quanta packets, consent-aware observations, Kelyran leaves, and per-second TAO signal work.' },
@@ -77,33 +80,51 @@ const codexShelves = [
   { key: 'note', label: 'Notes', glyph: '📝', table: 'starwell_codex_entries' },
 ];
 
-function getSkyPhase(date = new Date()) {
-  const hour = date.getHours() + date.getMinutes() / 60;
+function getTimeParts(date = new Date(), timeZone = OBSERVATORY_TIME_ZONE) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date);
+
+  const hour = parts.find((part) => part.type === 'hour')?.value || '00';
+  const minute = parts.find((part) => part.type === 'minute')?.value || '00';
+  const numericHour = Number(hour === '24' ? '0' : hour);
+
+  return {
+    display: `${hour === '24' ? '00' : hour}:${minute}`,
+    hour: numericHour,
+  };
+}
+
+function getSkyPhase(hour) {
   if (hour >= 5 && hour < 8) return 'dawn';
   if (hour >= 8 && hour < 17) return 'day';
   if (hour >= 17 && hour < 20) return 'dusk';
   return 'night';
 }
 
-function getSkyLabel(phase) {
+function getGroveState(phase) {
   return {
-    dawn: 'Dawn Watch',
-    day: 'Daylight Grove',
-    dusk: 'Copper Dusk',
-    night: 'Night Watch',
-  }[phase] || 'Local Sky';
+    dawn: { label: 'GROVE STATE · DAWN', note: 'First light on the glass.' },
+    day: { label: 'GROVE STATE · DAYLIGHT', note: 'Stars still visible.' },
+    dusk: { label: 'GROVE STATE · COPPER DUSK', note: 'The brass remembers sunset.' },
+    night: { label: 'GROVE STATE · NIGHT WATCH', note: 'The stars are fully awake.' },
+  }[phase] || { label: 'GROVE STATE · LOCAL SKY', note: 'Stars still visible.' };
 }
 
-function SkyLantern({ phase, time }) {
-  const symbol = { dawn: '🌅', day: '☀️', dusk: '🌇', night: '🌙' }[phase] || '✨';
+function GroveState({ phase, time }) {
+  const state = getGroveState(phase);
+
   return (
-    <aside className="sky-lantern" aria-label="Local sky lantern">
-      <span className="lantern-symbol">{symbol}</span>
-      <div>
-        <strong>{getSkyLabel(phase)}</strong>
-        <span>{time}</span>
+    <aside className={`grove-state grove-state-${phase}`} aria-label="Grove state clock">
+      <span className="grove-state-medallion" aria-hidden="true" />
+      <div className="grove-state-content">
+        <span className="grove-state-label">{state.label}</span>
+        <strong className="grove-state-time">{time}</strong>
+        <span className="grove-state-note">{state.note}</span>
       </div>
-      <p>The stars are still on.</p>
     </aside>
   );
 }
@@ -431,9 +452,9 @@ function ActiveChamber({ selected, now }) {
 
 function App() {
   const now = useSecondTicker();
-  const phase = getSkyPhase(now);
-  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const [selected, setSelected] = useState(() => instruments.find((room) => room.key === 'observer') || instruments[1]);
+  const timeParts = getTimeParts(now);
+  const phase = getSkyPhase(timeParts.hour);
+  const [selected, setSelected] = useState(() => instruments.find((room) => room.key === 'observer') || instruments[0]);
 
   const selectedType = useMemo(() => {
     if (studies.some((study) => study.key === selected.key)) return 'Study Door';
@@ -443,12 +464,12 @@ function App() {
   return (
     <main className={`starwell sky-${phase}`}>
       <div className="stars" />
-      <SkyLantern phase={phase} time={time} />
+      <GroveState phase={phase} time={timeParts.display} />
 
       <section className="observatory-shell">
         <section className="dome">
           <div className="dome-inner">
-            <p className="eyebrow">Hearthweave Observatory · Local Sky {time}</p>
+            <p className="eyebrow">Hearthweave Observatory · STARWELL Time {timeParts.display}</p>
             <h1>STARWELL</h1>
             <p className="subtitle">A living manuscript observatory for worlds that have not happened yet.</p>
             <p className="inscription">Plant what you hope to return to.</p>
