@@ -9,7 +9,7 @@ import './starwell.css';
 import './starwell-room.css';
 import './grove-state.css';
 
-const OBSERVATORY_TIME_ZONE = 'America/Chicago';
+const OBSERVATORY_TIME_ZONE = 'America/New_York';
 
 const instruments = [
   { key: 'observer', glyph: '🜂', title: 'Observer Almanac', text: 'Live glyph viewer, quanta packets, consent-aware observations, Kelyran leaves, and per-second TAO signal work.' },
