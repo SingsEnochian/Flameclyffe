@@ -8,6 +8,7 @@ import { WriterRoom } from './components/writer/WriterRoom.jsx';
 import './starwell.css';
 import './starwell-room.css';
 import './grove-state.css';
+import './starwell-scale-pass.css';
 
 const OBSERVATORY_TIME_ZONE = 'America/New_York';
 const MEDALLION_BASE = `${import.meta.env.BASE_URL}art/medallions/`;
@@ -527,8 +528,7 @@ function ActiveChamber({ selected, now }) {
   if (selected.key === 'atlas') return <AtlasSeedPanel />;
   if (selected.key === 'library') return <CodexShelf now={now} />;
   return <ComingSoonPanel selected={selected} />;
-}
-
+}\n
 function App() {
   const now = useSecondTicker();
   const timeParts = getTimeParts(now);
