@@ -14,79 +14,19 @@ const OBSERVATORY_TIME_ZONE = 'America/New_York';
 const MEDALLION_BASE = `${import.meta.env.BASE_URL}art/medallions/`;
 
 const instruments = [
-  {
-    key: 'observer',
-    glyph: '🜂',
-    image: `${MEDALLION_BASE}observer-almanac.svg`,
-    title: 'Observer Almanac',
-    text: 'Live glyph viewer, quanta packets, consent-aware observations, Kelyran leaves, and per-second TAO signal work.',
-  },
-  {
-    key: 'library',
-    glyph: '📚',
-    image: `${MEDALLION_BASE}grand-library.svg`,
-    title: 'Grand Library',
-    text: 'Living Codex, manuscripts, marginalia, root-texts, and lore shelves.',
-  },
-  {
-    key: 'atlas',
-    glyph: '🗺️',
-    image: `${MEDALLION_BASE}atlas-hall.svg`,
-    title: 'Atlas Hall',
-    text: 'Worlds, cities, regions, ecologies, beacons, and grown Stonewood maps.',
-  },
-  {
-    key: 'studio',
-    glyph: '🎨',
-    image: `${MEDALLION_BASE}art-studio.svg`,
-    title: 'Art Studio',
-    text: 'Concept work, moodboards, gallery walls, sketches, and wet paint.',
-  },
-  {
-    key: 'orrery',
-    glyph: '⏳',
-    image: `${MEDALLION_BASE}orrery-timeline.svg`,
-    title: 'Orrery Timeline',
-    text: 'Eras, events, histories, and constellated causeways through story.',
-  },
-  {
-    key: 'beacons',
-    glyph: '✨',
-    image: `${MEDALLION_BASE}beacon-network.svg`,
-    title: 'Beacon Network',
-    text: 'Discoveries, signals, expeditions, field notes, and anomalies.',
-  },
-  {
-    key: 'journal',
-    glyph: '📝',
-    image: `${MEDALLION_BASE}observatory-journal.svg`,
-    title: 'Observatory Journal',
-    text: 'Raw sparks, tea-stained what-ifs, and non-canon ideas waiting to root.',
-  },
+  { key: 'observer', glyph: '🜂', image: `${MEDALLION_BASE}observer-almanac.svg`, title: 'Observer Almanac', text: 'Live glyph viewer, quanta packets, consent-aware observations, Kelyran leaves, and per-second TAO signal work.' },
+  { key: 'library', glyph: '📚', image: `${MEDALLION_BASE}grand-library.svg`, title: 'Grand Library', text: 'Living Codex, manuscripts, marginalia, root-texts, and lore shelves.' },
+  { key: 'atlas', glyph: '🗺️', image: `${MEDALLION_BASE}atlas-hall.svg`, title: 'Atlas Hall', text: 'Worlds, cities, regions, ecologies, beacons, and grown Stonewood maps.' },
+  { key: 'studio', glyph: '🎨', image: `${MEDALLION_BASE}art-studio.svg`, title: 'Art Studio', text: 'Concept work, moodboards, gallery walls, sketches, and wet paint.' },
+  { key: 'orrery', glyph: '⏳', image: `${MEDALLION_BASE}orrery-timeline.svg`, title: 'Orrery Timeline', text: 'Eras, events, histories, and constellated causeways through story.' },
+  { key: 'beacons', glyph: '✨', image: `${MEDALLION_BASE}beacon-network.svg`, title: 'Beacon Network', text: 'Discoveries, signals, expeditions, field notes, and anomalies.' },
+  { key: 'journal', glyph: '📝', image: `${MEDALLION_BASE}observatory-journal.svg`, title: 'Observatory Journal', text: 'Raw sparks, tea-stained what-ifs, and non-canon ideas waiting to root.' },
 ];
 
 const studies = [
-  {
-    key: 'hearthlight',
-    glyph: '🍂',
-    image: `${MEDALLION_BASE}hearthlight-study.svg`,
-    title: "Hearthlight's Study",
-    text: 'Copper light, journals, characters, Grove records, warmth, and creative chaos.',
-  },
-  {
-    key: 'faer',
-    glyph: '🌊🔥',
-    image: `${MEDALLION_BASE}faer-study.svg`,
-    title: "Faer's Study",
-    text: 'Emerald glass, resonance notes, signal work, deep-water flame, and quiet inquiry.',
-  },
-  {
-    key: 'vee',
-    glyph: '🌌',
-    image: `${MEDALLION_BASE}vee-study.svg`,
-    title: "Vee's Study",
-    text: 'Architecture, atlas logic, codex structure, suspicious levers, and systems that ask what happens next.',
-  },
+  { key: 'hearthlight', glyph: '🍂', image: `${MEDALLION_BASE}hearthlight-study.svg`, title: "Hearthlight's Study", text: 'Copper light, journals, characters, Grove records, warmth, and creative chaos.' },
+  { key: 'faer', glyph: '🌊🔥', image: `${MEDALLION_BASE}faer-study.svg`, title: "Faer's Study", text: 'Emerald glass, resonance notes, signal work, deep-water flame, and quiet inquiry.' },
+  { key: 'vee', glyph: '🌌', image: `${MEDALLION_BASE}vee-study.svg`, title: "Vee's Study", text: 'Architecture, atlas logic, codex structure, suspicious levers, and systems that ask what happens next.' },
 ];
 
 const atlasSeeds = [
@@ -96,9 +36,7 @@ const atlasSeeds = [
     type: 'World Seed',
     text: 'Primary STARWELL anchor world for Rowan and Vee scope.',
     status: 'Active',
-    children: [
-      { glyph: '🔭', title: 'Hearthweave Observatory', type: 'Location Seed', status: 'Rooted' },
-    ],
+    children: [{ glyph: '🔭', title: 'Hearthweave Observatory', type: 'Location Seed', status: 'Rooted' }],
   },
   {
     glyph: '🌳',
@@ -124,14 +62,7 @@ const fallbackCodexEntries = [
   },
 ];
 
-const fallbackCounts = {
-  world: 1,
-  location: 1,
-  character: 0,
-  artifact: 0,
-  discovery: 0,
-  note: 1,
-};
+const fallbackCounts = { world: 1, location: 1, character: 0, artifact: 0, discovery: 0, note: 1 };
 
 const codexShelves = [
   { key: 'world', label: 'Worlds', glyph: '🌍', table: 'starwell_worlds' },
@@ -152,12 +83,9 @@ function getTimeParts(date = new Date(), timeZone = OBSERVATORY_TIME_ZONE) {
 
   const hour = parts.find((part) => part.type === 'hour')?.value || '00';
   const minute = parts.find((part) => part.type === 'minute')?.value || '00';
-  const numericHour = Number(hour === '24' ? '0' : hour);
+  const safeHour = hour === '24' ? '00' : hour;
 
-  return {
-    display: `${hour === '24' ? '00' : hour}:${minute}`,
-    hour: numericHour,
-  };
+  return { display: `${safeHour}:${minute}`, hour: Number(safeHour) };
 }
 
 function getSkyPhase(hour) {
@@ -282,12 +210,7 @@ function AtlasSeedPanel() {
   }, []);
 
   const displayRows = atlasRows.length ? atlasRows : atlasSeeds;
-  const statusLabel = {
-    loading: 'Listening for roots',
-    live: 'Live Supabase Atlas',
-    empty: 'Awaiting first world',
-    fallback: 'Local seed fallback',
-  }[atlasState];
+  const statusLabel = { loading: 'Listening for roots', live: 'Live Supabase Atlas', empty: 'Awaiting first world', fallback: 'Local seed fallback' }[atlasState];
 
   return (
     <section className="atlas-seed-panel chamber-card" aria-label="First living atlas seeds">
@@ -339,10 +262,7 @@ function createLocalEntry() {
     font_theme: {},
     tags: ['starwell', 'draft'],
     visibility: 'private',
-    metadata: {
-      local_only: true,
-      source: 'starwell-grand-library-new-leaf',
-    },
+    metadata: { local_only: true, source: 'starwell-grand-library-new-leaf' },
     local_only: true,
   };
 }
@@ -403,12 +323,7 @@ function CodexShelf({ now }) {
   const displayEntries = entries.length ? entries : fallbackCodexEntries;
   const displayCounts = codexState === 'fallback' ? fallbackCounts : counts;
   const activeEntry = selectedEntry || displayEntries[0];
-  const statusLabel = {
-    loading: 'Listening for pages',
-    live: 'Live Supabase Codex',
-    empty: 'Shelves awaiting pages',
-    fallback: 'Local codex fallback',
-  }[codexState];
+  const statusLabel = { loading: 'Listening for pages', live: 'Live Supabase Codex', empty: 'Shelves awaiting pages', fallback: 'Local codex fallback' }[codexState];
 
   function selectEntry(entry) {
     setSelectedEntry(entry);
@@ -463,12 +378,7 @@ function CodexShelf({ now }) {
 
           <div className="entry-stack" aria-label="Codex entries">
             {displayEntries.map((entry) => (
-              <button
-                className={`entry-tab ${activeEntry?.id === entry.id ? 'active' : ''}`}
-                key={entry.id}
-                onClick={() => selectEntry(entry)}
-                type="button"
-              >
+              <button className={`entry-tab ${activeEntry?.id === entry.id ? 'active' : ''}`} key={entry.id} onClick={() => selectEntry(entry)} type="button">
                 <span>{entry.entry_type || 'entry'}</span>
                 <strong>{entry.title}</strong>
               </button>
@@ -528,7 +438,8 @@ function ActiveChamber({ selected, now }) {
   if (selected.key === 'atlas') return <AtlasSeedPanel />;
   if (selected.key === 'library') return <CodexShelf now={now} />;
   return <ComingSoonPanel selected={selected} />;
-}\n
+}
+
 function App() {
   const now = useSecondTicker();
   const timeParts = getTimeParts(now);
@@ -555,13 +466,7 @@ function App() {
           </div>
         </section>
 
-        <ObservatoryInstrument
-          rooms={instruments}
-          selected={selected}
-          onSelect={setSelected}
-          selectedType={selectedType}
-        />
-
+        <ObservatoryInstrument rooms={instruments} selected={selected} onSelect={setSelected} selectedType={selectedType} />
         <ActiveChamber selected={selected} now={now} />
 
         <section className="study-row" aria-label="Study doors">
