@@ -5,6 +5,24 @@ function getNodeAngle(index, total) {
   return `${(index * 360) / total - 90}deg`;
 }
 
+function SigilMedallion({ room, className = '' }) {
+  const classes = `sigil-medallion ${className}`.trim();
+
+  if (room.image) {
+    return (
+      <span className={classes} aria-hidden="true">
+        <img src={room.image} alt="" />
+      </span>
+    );
+  }
+
+  return (
+    <span className={classes} aria-hidden="true">
+      <span className="sigil-medallion-fallback">{room.glyph}</span>
+    </span>
+  );
+}
+
 export function ObservatoryInstrument({ rooms, selected, onSelect, selectedType }) {
   return (
     <section className="observatory-map sigil-map" aria-label="Central Observatory instruments">
@@ -33,7 +51,7 @@ export function ObservatoryInstrument({ rooms, selected, onSelect, selectedType 
                   type="button"
                   aria-pressed={active}
                 >
-                  <span className="sigil-node-glyph">{room.glyph}</span>
+                  <SigilMedallion room={room} />
                   <strong>{room.title}</strong>
                 </button>
               );
@@ -41,7 +59,7 @@ export function ObservatoryInstrument({ rooms, selected, onSelect, selectedType 
           </div>
 
           <article className="sigil-core" aria-live="polite">
-            <span className="sigil-core-glyph">{selected.glyph}</span>
+            <SigilMedallion room={selected} className="sigil-core-medallion" />
             <p>{selectedType}</p>
             <h2>{selected.title}</h2>
             <span>{selected.text}</span>
