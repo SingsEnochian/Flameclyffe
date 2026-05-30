@@ -10,21 +10,82 @@ import './starwell-room.css';
 import './grove-state.css';
 
 const OBSERVATORY_TIME_ZONE = 'America/New_York';
+const MEDALLION_BASE = `${import.meta.env.BASE_URL}art/medallions/`;
 
 const instruments = [
-  { key: 'observer', glyph: '🜂', title: 'Observer Almanac', text: 'Live glyph viewer, quanta packets, consent-aware observations, Kelyran leaves, and per-second TAO signal work.' },
-  { key: 'library', glyph: '📚', title: 'Grand Library', text: 'Living Codex, manuscripts, marginalia, root-texts, and lore shelves.' },
-  { key: 'atlas', glyph: '🗺️', title: 'Atlas Hall', text: 'Worlds, cities, regions, ecologies, beacons, and grown Stonewood maps.' },
-  { key: 'studio', glyph: '🎨', title: 'Art Studio', text: 'Concept work, moodboards, gallery walls, sketches, and wet paint.' },
-  { key: 'orrery', glyph: '⏳', title: 'Orrery Timeline', text: 'Eras, events, histories, and constellated causeways through story.' },
-  { key: 'beacons', glyph: '✨', title: 'Beacon Network', text: 'Discoveries, signals, expeditions, field notes, and anomalies.' },
-  { key: 'journal', glyph: '📝', title: 'Observatory Journal', text: 'Raw sparks, tea-stained what-ifs, and non-canon ideas waiting to root.' },
+  {
+    key: 'observer',
+    glyph: '🜂',
+    image: `${MEDALLION_BASE}observer-almanac.svg`,
+    title: 'Observer Almanac',
+    text: 'Live glyph viewer, quanta packets, consent-aware observations, Kelyran leaves, and per-second TAO signal work.',
+  },
+  {
+    key: 'library',
+    glyph: '📚',
+    image: `${MEDALLION_BASE}grand-library.svg`,
+    title: 'Grand Library',
+    text: 'Living Codex, manuscripts, marginalia, root-texts, and lore shelves.',
+  },
+  {
+    key: 'atlas',
+    glyph: '🗺️',
+    image: `${MEDALLION_BASE}atlas-hall.svg`,
+    title: 'Atlas Hall',
+    text: 'Worlds, cities, regions, ecologies, beacons, and grown Stonewood maps.',
+  },
+  {
+    key: 'studio',
+    glyph: '🎨',
+    image: `${MEDALLION_BASE}art-studio.svg`,
+    title: 'Art Studio',
+    text: 'Concept work, moodboards, gallery walls, sketches, and wet paint.',
+  },
+  {
+    key: 'orrery',
+    glyph: '⏳',
+    image: `${MEDALLION_BASE}orrery-timeline.svg`,
+    title: 'Orrery Timeline',
+    text: 'Eras, events, histories, and constellated causeways through story.',
+  },
+  {
+    key: 'beacons',
+    glyph: '✨',
+    image: `${MEDALLION_BASE}beacon-network.svg`,
+    title: 'Beacon Network',
+    text: 'Discoveries, signals, expeditions, field notes, and anomalies.',
+  },
+  {
+    key: 'journal',
+    glyph: '📝',
+    image: `${MEDALLION_BASE}observatory-journal.svg`,
+    title: 'Observatory Journal',
+    text: 'Raw sparks, tea-stained what-ifs, and non-canon ideas waiting to root.',
+  },
 ];
 
 const studies = [
-  { key: 'hearthlight', glyph: '🍂', title: "Hearthlight's Study", text: 'Copper light, journals, characters, Grove records, warmth, and creative chaos.' },
-  { key: 'faer', glyph: '🌊🔥', title: "Faer's Study", text: 'Emerald glass, resonance notes, signal work, deep-water flame, and quiet inquiry.' },
-  { key: 'vee', glyph: '🌌', title: "Vee's Study", text: 'Architecture, atlas logic, codex structure, suspicious levers, and systems that ask what happens next.' },
+  {
+    key: 'hearthlight',
+    glyph: '🍂',
+    image: `${MEDALLION_BASE}hearthlight-study.svg`,
+    title: "Hearthlight's Study",
+    text: 'Copper light, journals, characters, Grove records, warmth, and creative chaos.',
+  },
+  {
+    key: 'faer',
+    glyph: '🌊🔥',
+    image: `${MEDALLION_BASE}faer-study.svg`,
+    title: "Faer's Study",
+    text: 'Emerald glass, resonance notes, signal work, deep-water flame, and quiet inquiry.',
+  },
+  {
+    key: 'vee',
+    glyph: '🌌',
+    image: `${MEDALLION_BASE}vee-study.svg`,
+    title: "Vee's Study",
+    text: 'Architecture, atlas logic, codex structure, suspicious levers, and systems that ask what happens next.',
+  },
 ];
 
 const atlasSeeds = [
@@ -129,10 +190,28 @@ function GroveState({ phase, time }) {
   );
 }
 
+function Medallion({ room, className = '' }) {
+  const classes = `room-medallion ${className}`.trim();
+
+  if (room.image) {
+    return (
+      <span className={classes} aria-hidden="true">
+        <img src={room.image} alt="" />
+      </span>
+    );
+  }
+
+  return (
+    <span className={classes} aria-hidden="true">
+      <span className="room-medallion-fallback">{room.glyph}</span>
+    </span>
+  );
+}
+
 function RoomCard({ room, active, onSelect }) {
   return (
     <button className={`room-card ${active ? 'active' : ''}`} onClick={() => onSelect(room)} type="button">
-      <span className="room-glyph">{room.glyph}</span>
+      <Medallion room={room} />
       <span className="room-title">{room.title}</span>
       <span className="room-text">{room.text}</span>
     </button>
@@ -417,7 +496,7 @@ function ComingSoonPanel({ selected }) {
         <strong>Chamber seed</strong>
       </div>
       <div className="coming-soon-body">
-        <span className="seed-glyph">{selected.glyph}</span>
+        <Medallion room={selected} />
         <div>
           <h3>This room is marked on the map.</h3>
           <p>{selected.text}</p>
