@@ -5,6 +5,7 @@ import { LiveGlyphViewer, useSecondTicker } from './live-glyph';
 import { ObservatoryInstrument } from './components/ObservatoryInstrument.jsx';
 import { VarutoraLeaf } from './components/living/VarutoraLeaf.jsx';
 import { WriterRoom } from './components/writer/WriterRoom.jsx';
+import { ObserverAtelier } from './components/atelier/ObserverAtelier.jsx';
 import './starwell.css';
 import './starwell-room.css';
 import './grove-state.css';
@@ -18,6 +19,7 @@ const instruments = [
   { key: 'library', glyph: '📚', image: `${MEDALLION_BASE}grand-library.svg`, title: 'Grand Library', text: 'Living Codex, manuscripts, marginalia, root-texts, and lore shelves.' },
   { key: 'atlas', glyph: '🗺️', image: `${MEDALLION_BASE}atlas-hall.svg`, title: 'Atlas Hall', text: 'Worlds, cities, regions, ecologies, beacons, and grown Stonewood maps.' },
   { key: 'studio', glyph: '🎨', image: `${MEDALLION_BASE}art-studio.svg`, title: 'Art Studio', text: 'Concept work, moodboards, gallery walls, sketches, and wet paint.' },
+  { key: 'atelier', glyph: '🖼️', image: `${MEDALLION_BASE}art-studio.svg`, title: 'Observer Atelier', text: 'Visual canon cards, prompt loom, pose language, approved anchors, and Gobby containment for image lineage.' },
   { key: 'orrery', glyph: '⏳', image: `${MEDALLION_BASE}orrery-timeline.svg`, title: 'Orrery Timeline', text: 'Eras, events, histories, and constellated causeways through story.' },
   { key: 'beacons', glyph: '✨', image: `${MEDALLION_BASE}beacon-network.svg`, title: 'Beacon Network', text: 'Discoveries, signals, expeditions, field notes, and anomalies.' },
   { key: 'journal', glyph: '📝', image: `${MEDALLION_BASE}observatory-journal.svg`, title: 'Observatory Journal', text: 'Raw sparks, tea-stained what-ifs, and non-canon ideas waiting to root.' },
@@ -435,6 +437,7 @@ function ObserverAlmanacPanel({ now }) {
 
 function ActiveChamber({ selected, now }) {
   if (selected.key === 'observer') return <ObserverAlmanacPanel now={now} />;
+  if (selected.key === 'atelier') return <ObserverAtelier now={now} />;
   if (selected.key === 'atlas') return <AtlasSeedPanel />;
   if (selected.key === 'library') return <CodexShelf now={now} />;
   return <ComingSoonPanel selected={selected} />;
