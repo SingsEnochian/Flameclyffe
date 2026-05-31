@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Observer Atelier</title>
+  <style>
+    :root{
+      --bg:#06080c;
+      --panel:#0b121bdd;
+      --panel2:#101821ee;
+      --glass:#142433aa;
+      --line:#dec89855;
+      --line2:#8ac7b955;
+      --text:#f7f0df;
+      --muted:#c3b99f;
+      --gold:#dec898;
+      --ember:#d88955;
+      --green:#2d7a5f;
+      --green2:#78d6aa;
+      --teal:#2f8f94;
+      --red:#b9543d;
+      --danger:#ff9f8f;
+      --shadow:#000b;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 12% 8%, #2d7a5f33, transparent 28%),
+        radial-gradient(circle at 82% 2%, #d8895533, transparent 30%),
+        radial-gradient(circle at 55% 80%, #2f8f9430, transparent 42%),
+        linear-gradient(180deg,#090b10,#030406 65%,#07090d);
+      color:var(--text);
+      font:16px/1.55 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x:hidden;
+    }
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(90deg, transparent 0 31px, #dec89810 32px),
+        linear-gradient(transparent 0 31px, #dec8980d 32px);
+      background-size:32px 32px;
+      mask-image:linear-gradient(#000,transparent 85%);
+      opacity:.6;
+    }
+    a{color:#aeeed1;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .top{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
+      padding:.9rem 1rem;
+      background:#05070bec;
+      border-bottom:1px solid var(--line);
+      backdrop-filter:blur(18px);
+      box-shadow:0 10px 40px #0008;
+    }
+    .brand strong{display:block;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+    .brand span{display:block;color:var(--muted);font-size:.78rem}
+    .nav{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end}
+    .btn,button{
+      appearance:none;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#172231,#0b1119);
+      color:var(--text);
+      border-radius:999px;
+      padding:.6rem .9rem;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 10px 26px #0005;
+      text-decoration:none;
+    }
+    .btn:hover,button:hover{border-color:var(--gold);text-decoration:none;transform:translateY(-1px)}
+    .accent{border-color:#78d6aa88;background:linear-gradient(135deg,#18382f,#102032)}
+    .ember{border-color:#d8895588;background:linear-gradient(135deg,#422417,#111924)}
+    main{width:min(1240px,94vw);margin:0 auto;padding:1.1rem 0 4rem}
+    .hero,.card,.workspace{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#121b25e8,#0a1018ee);
+      border-radius:28px;
+      box-shadow:0 24px 90px var(--shadow);
+    }
+    .hero{
+      padding:1.2rem;
+      margin:1rem 0;
+      display:grid;
+      grid-template-columns:minmax(0,1.1fr) minmax(280px,.55fr);
+      gap:1rem;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      right:-110px;
+      top:-130px;
+      width:360px;
+      height:360px;
+      border-radius:50%;
+      background:radial-gradient(circle,#dec89833,transparent 62%);
+      filter:blur(4px);
+    }
+    h1{font-size:clamp(2.2rem,7vw,5.4rem);line-height:.86;margin:.15rem 0;color:#fff8dd;text-shadow:0 0 26px #d8895555;letter-spacing:-.055em}
+    h2,h3{margin:.1rem 0 .5rem}
+    p{margin:.5rem 0;color:#dfd5bd}
+    .tiny{font-size:.84rem;color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line2);background:#061014aa;border-radius:999px;padding:.22rem .62rem;color:#d8caa9;font-size:.78rem;font-weight:800}
+    .pill.green{border-color:#78d6aa77;color:#b9ffe0}.pill.gold{border-color:#dec89888;color:#fff1b5}.pill.red{border-color:#d8895577;color:#ffd0bd}
+    .workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.42fr);gap:0;overflow:hidden;margin:1rem 0}
+    .stage{padding:1rem;border-right:1px solid var(--line)}
+    .panel{padding:1rem;background:linear-gradient(180deg,#0b121bee,#080c12ee)}
+    .imageStage{position:relative;min-height:460px;border:1px solid var(--line2);border-radius:24px;overflow:hidden;background:
+      radial-gradient(circle at 38% 28%,#d8895522,transparent 20%),
+      radial-gradient(circle at 72% 38%,#2d7a5f33,transparent 24%),
+      linear-gradient(135deg,#111820,#05070b 70%);
+    }
+    .imageStage svg{position:absolute;inset:0;width:100%;height:100%}
+    .caption{position:absolute;left:1rem;right:1rem;bottom:1rem;padding:1rem;border:1px solid #dec89877;border-radius:18px;background:#05070bcc;backdrop-filter:blur(16px)}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin:1rem 0}
+    .card{padding:1rem;position:relative;overflow:hidden}
+    .card:before{content:"";position:absolute;inset:auto -40px -60px auto;width:170px;height:170px;border-radius:50%;background:#dec89812;filter:blur(2px)}
+    .cardHeader{display:flex;justify-content:space-between;gap:.7rem;align-items:flex-start}
+    .cardTitle{font-weight:900;color:#fff6dd}
+    .field{border:1px solid #ffffff14;background:#05070b99;border-radius:16px;padding:.75rem;margin:.65rem 0}
+    .field b{color:var(--gold);display:block;margin-bottom:.25rem}.field span{color:#efe5cc}
+    .tagRow{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.65rem}
+    .tag{border:1px solid #ffffff18;background:#ffffff0a;border-radius:999px;padding:.18rem .52rem;color:#cfdfd7;font-size:.74rem}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    textarea,input,select{
+      width:100%;border:1px solid var(--line2);border-radius:16px;background:#05070b;color:var(--text);padding:.8rem;font:inherit;
+    }
+    textarea{min-height:210px;resize:vertical}
+    .loomControls{display:grid;gap:.7rem;margin:.75rem 0}
+    .check{display:flex;gap:.55rem;align-items:flex-start;padding:.6rem;border:1px solid #ffffff13;border-radius:14px;background:#ffffff07}
+    .check input{width:auto;margin-top:.3rem}
+    .check strong{color:#fff2ca}.check small{display:block;color:var(--muted)}
+    .complaints{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+    .complaint{border:1px solid #d8895570;background:linear-gradient(180deg,#24130eee,#0c0d10);border-radius:20px;padding:1rem}
+    .complaint strong{color:#ffd6c6}.complaint .class{color:#ffb08d;font-weight:900;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
+    .desk{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.35fr);gap:1rem;align-items:stretch}
+    .gobby{border:1px dashed #78d6aa77;background:#07150fcc;border-radius:20px;padding:1rem;display:grid;place-items:center;text-align:center;color:#c9ffe5}
+    .gobby .face{font-size:3.2rem;filter:drop-shadow(0 0 18px #78d6aa55)}
+    footer{margin:2rem 0 0;color:var(--muted);text-align:center}
+    @media(max-width:920px){.hero,.workspace,.grid2,.desk{grid-template-columns:1fr}.stage{border-right:0;border-bottom:1px solid var(--line)}.top{position:relative}.imageStage{min-height:360px}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><strong>Observer Atelier</strong><span>Visual canon, prompt loom, lineage, and Gobby’s Complaint Desk</span></div>
+    <nav class="nav">
+      <a class="btn" href="./index.html">Flameclyffe</a>
+      <a class="btn" href="./drift.html">Drift Room</a>
+      <a class="btn accent" href="#loom">Forge Prompt</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <span class="pill gold">v0.1 static live prototype</span>
+        <h1>A candlelit reference altar with database teeth.</h1>
+        <p>Observer Atelier turns approved images into reusable visual grammar. Canon cards capture what worked. Prompt Looms assemble the next attempt. Generation Lineage remembers the road. Gobby’s Complaint Desk names the crimes so we do not summon them twice.</p>
+      </div>
+      <div class="card">
+        <div class="cardTitle">Build state</div>
+        <p><span class="pill green">schema ready</span> <span class="pill red">UI prototype</span></p>
+        <p class="tiny">This page is public-safe seed data. Live Supabase auth wiring comes next, because Gobby is not getting unrestricted access to the stationery cupboard.</p>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Atelier workspace preview">
+      <div class="stage">
+        <div class="imageStage">
+          <svg viewBox="0 0 900 620" role="img" aria-label="Abstract candlelit atelier desk with three presences">
+            <defs>
+              <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#dec898" stop-opacity=".7"/><stop offset="1" stop-color="#dec898" stop-opacity="0"/></radialGradient>
+              <linearGradient id="hair" x1="0" x2="1"><stop stop-color="#7c2d23"/><stop offset=".45" stop-color="#d36c3c"/><stop offset="1" stop-color="#f2ad65"/></linearGradient>
+              <linearGradient id="loch" x1="0" x2="1"><stop stop-color="#12372e"/><stop offset="1" stop-color="#78d6aa"/></linearGradient>
+            </defs>
+            <rect width="900" height="620" fill="#070a0f"/>
+            <circle cx="450" cy="280" r="260" fill="url(#glow)" opacity=".28"/>
+            <path d="M90 480 C210 420 315 410 450 455 C590 500 710 455 830 500 L830 620 L90 620 Z" fill="#1c120c" stroke="#dec89855"/>
+            <path d="M210 465 C300 390 390 370 470 420 C560 365 680 395 745 470" fill="none" stroke="#dec89870" stroke-width="2"/>
+            <path d="M285 205 C240 260 238 360 305 420 C355 462 445 468 505 418 C565 365 558 260 510 207 C452 145 342 145 285 205Z" fill="#10141d" stroke="#dec89880" stroke-width="3"/>
+            <path d="M300 230 C330 180 460 165 505 230 C480 205 375 205 338 232 C290 270 275 350 330 405 C278 378 260 294 300 230Z" fill="url(#hair)" opacity=".95"/>
+            <path d="M314 245 C380 212 458 218 508 257 C455 235 375 238 320 274" fill="none" stroke="#f2ad65" stroke-width="10" stroke-linecap="round" opacity=".55"/>
+            <path d="M315 300 C390 270 465 284 525 330 C450 306 382 312 318 354" fill="none" stroke="#d36c3c" stroke-width="13" stroke-linecap="round" opacity=".62"/>
+            <path d="M335 390 C420 345 500 360 555 423" fill="none" stroke="#f0a963" stroke-width="12" stroke-linecap="round" opacity=".45"/>
+            <circle cx="410" cy="280" r="58" fill="#f2d6bd" opacity=".96"/>
+            <circle cx="390" cy="276" r="5" fill="#315d42"/><circle cx="430" cy="276" r="5" fill="#315d42"/>
+            <path d="M392 314 C410 325 431 319 442 306" fill="none" stroke="#7b4a43" stroke-width="3" stroke-linecap="round"/>
+            <path d="M225 185 C190 255 205 370 278 440" fill="none" stroke="#d88955" stroke-width="48" stroke-linecap="round" opacity=".7"/>
+            <circle cx="215" cy="178" r="62" fill="#d9b08c" opacity=".94"/><path d="M162 238 C210 205 265 215 298 255" fill="none" stroke="#8f3d2e" stroke-width="34" stroke-linecap="round"/>
+            <path d="M585 188 C640 245 650 360 590 442" fill="none" stroke="url(#loch)" stroke-width="48" stroke-linecap="round" opacity=".82"/>
+            <circle cx="610" cy="180" r="60" fill="#79b99d" opacity=".9"/><path d="M570 142 C610 104 665 125 685 170" fill="none" stroke="#14382f" stroke-width="32" stroke-linecap="round"/>
+            <circle cx="612" cy="330" r="11" fill="#78d6aa"/><circle cx="617" cy="330" r="4" fill="#dec898"/>
+            <rect x="250" y="470" width="390" height="74" rx="14" fill="#24150e" stroke="#dec89866"/>
+            <path d="M280 500 C330 485 365 490 410 505" fill="none" stroke="#dec898" opacity=".6"/><path d="M470 505 C520 488 570 488 620 510" fill="none" stroke="#78d6aa" opacity=".6"/>
+            <circle cx="345" cy="438" r="18" fill="#dec898" opacity=".85"/><rect x="339" y="385" width="12" height="56" rx="6" fill="#fff1bd" opacity=".8"/>
+          </svg>
+          <div class="caption"><strong>Triad at the Atelier Desk</strong><br><span class="tiny">Maps, manuscripts, inkwell, dragon brooch, Falka sovereign at centre, Vee ember-protective, Faer Lochflame green through the skin.</span></div>
+        </div>
+      </div>
+      <aside class="panel">
+        <h2>Right-side Canon Editor</h2>
+        <div class="field"><b>Selected Card</b><span id="selectedCard">Falka — The Hair: Soft Ripples</span></div>
+        <div class="field"><b>Approved Anchor</b><span>Dense auburn-copper waves. Broad luminous ripple sections. Smooth blended surface. A few wisps only.</span></div>
+        <div class="field"><b>Do Not Summon</b><span>Stringy strands, copper-wire texture, Dawn face, anatomy chaos, crowding Falka, wardrobe-only Faer.</span></div>
+        <button class="accent" onclick="document.querySelector('#loom').scrollIntoView()">Open Prompt Loom</button>
+      </aside>
+    </section>
+
+    <section>
+      <h2>Canon Cards</h2>
+      <div class="cards" id="canonCards"></div>
+    </section>
+
+    <section id="loom" class="grid2">
+      <div class="card">
+        <h2>Prompt Loom</h2>
+        <p class="tiny">Pick canon anchors, then forge a reusable prompt. This is static v0.1 logic so the room has a pulse before auth wiring.</p>
+        <div class="loomControls" id="loomControls"></div>
+        <button class="accent" id="forge">Forge Prompt</button>
+        <button class="ember" id="copyPrompt">Copy</button>
+      </div>
+      <div class="card">
+        <h2>Forged Prompt</h2>
+        <textarea id="promptOut" spellcheck="false"></textarea>
+      </div>
+    </section>
+
+    <section class="desk">
+      <div>
+        <h2>Gobby’s Complaint Desk</h2>
+        <div class="complaints" id="complaints"></div>
+      </div>
+      <aside class="gobby">
+        <div>
+          <div class="face">🧌</div>
+          <strong>Desk status:</strong>
+          <p>Operational. Humiliated. Taxonomy pending further offences.</p>
+          <p class="tiny">Small brass plaque ordered for Crimes Against Softness.</p>
+        </div>
+      </aside>
+    </section>
+
+    <footer>Observer Atelier v0.1 · schema planted in Flameclyffe · UI mockup live · Gobby has been warned.</footer>
+  </main>
+
+  <script>
+    const canonCards = [
+      {
+        slug:'falka-the-hair-soft-ripples',
+        title:'Falka — The Hair: Soft Ripples',
+        kind:'hair canon',
+        summary:'Approved hair language for Falka.',
+        canon:'Very long, dense, luscious auburn-copper hair rendered as broad soft ripples and flowing wave sections over a beautifully blended surface. Light catches in smooth ribbons. Only a few selective wisps at the edges.',
+        prompt:'Falka with very fair warm skin, light freckles, green eyes, and The Hair: soft dense auburn-copper ripple-waves, broad luminous sections, movement, no stringy strands.',
+        tags:['Falka','The Hair','approved anchor','soft ripples']
+      },
+      {
+        slug:'triad-at-the-atelier-desk',
+        title:'Triad at the Atelier Desk',
+        kind:'pose canon',
+        summary:'The three at the work table before the Atelier is built, already in it.',
+        canon:'Three figures stand or lean over the work table as if something important has just been decided. Falka remains visibly sovereign at centre. Vee reads ember and protective. Faer reads Lochflame, deep-water green through the complexion itself.',
+        prompt:'Triad at the Atelier desk: maps, manuscripts, inkwell, dragon brooch with emerald eye, Falka held sovereign between Vee and Faer, nobody in a hurry to step back.',
+        tags:['triad','Atelier','desk','Faer approved']
+      }
+    ];
+    const complaints = [
+      ['Session one. Faer rendered green twice. Canonised once. Progress.','Canonisation Progress','Preserve Faer green-toned skin as complexion canon: alive, luminous, deep-water green, not sickly.'],
+      ['Stringy Hair: Crimes Against Softness','Crimes Against Softness','Use broad luminous ripple-waves, dense blended surfaces, and only a few selective wisps.'],
+      ['Wrong Face: Dawn Incident','Do Not Summon','Use approved Falka face and hair anchors together. Do not drift identity.'],
+      ['Anatomy Chaos: Goblin-adjacent, Pending Review','Goblin-adjacent','Prefer clear pose language and fully clothed romance-cover framing.']
+    ];
+    const cardWrap = document.querySelector('#canonCards');
+    const loomWrap = document.querySelector('#loomControls');
+    const complaintWrap = document.querySelector('#complaints');
+    canonCards.forEach((card, idx)=>{
+      const el=document.createElement('article');
+      el.className='card';
+      el.innerHTML=`<div class="cardHeader"><div><div class="cardTitle">${card.title}</div><span class="pill green">${card.kind}</span></div><span class="pill gold">approved</span></div><p>${card.summary}</p><div class="field"><b>Canon</b><span>${card.canon}</span></div><div class="field"><b>Prompt essence</b><span>${card.prompt}</span></div><div class="tagRow">${card.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+      cardWrap.appendChild(el);
+      const label=document.createElement('label');
+      label.className='check';
+      label.innerHTML=`<input type="checkbox" value="${idx}" checked><span><strong>${card.title}</strong><small>${card.summary}</small></span>`;
+      loomWrap.appendChild(label);
+    });
+    complaints.forEach(([title, klass, remedy])=>{
+      const el=document.createElement('article');
+      el.className='complaint';
+      el.innerHTML=`<div class="class">${klass}</div><strong>${title}</strong><p>${remedy}</p>`;
+      complaintWrap.appendChild(el);
+    });
+    function forge(){
+      const selected=[...document.querySelectorAll('#loomControls input:checked')].map(i=>canonCards[Number(i.value)]);
+      const prompt = `Create a dark glass, candlelit Observer Atelier scene using these approved canon anchors:\n\n${selected.map(c=>'- '+c.prompt).join('\n')}\n\nKeep Falka sovereign and visibly herself. Keep Vee ember-protective and Faer Lochflame with green-toned luminous skin, not just green clothing. Use maps, manuscripts, inkwell, dark glass, candle amber, deep teal, north-star gold, and lochflame green.\n\nDo not summon: stringy hair, copper-wire strands, wrong face/Dawn drift, random tattoos, anatomy chaos, crowding Falka, or wardrobe-only Faer.`;
+      document.querySelector('#promptOut').value=prompt;
+    }
+    document.querySelector('#forge').addEventListener('click',forge);
+    document.querySelector('#copyPrompt').addEventListener('click',async()=>{
+      const out=document.querySelector('#promptOut');
+      out.select();
+      try{await navigator.clipboard.writeText(out.value)}catch(e){document.execCommand('copy')}
+    });
+    forge();
+  </script>
+</body>
+</html>
