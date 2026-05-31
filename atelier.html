@@ -1,320 +1,68 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Observer Atelier</title>
-  <style>
-    :root{
-      --bg:#06080c;
-      --panel:#0b121bdd;
-      --panel2:#101821ee;
-      --glass:#142433aa;
-      --line:#dec89855;
-      --line2:#8ac7b955;
-      --text:#f7f0df;
-      --muted:#c3b99f;
-      --gold:#dec898;
-      --ember:#d88955;
-      --green:#2d7a5f;
-      --green2:#78d6aa;
-      --teal:#2f8f94;
-      --red:#b9543d;
-      --danger:#ff9f8f;
-      --shadow:#000b;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at 12% 8%, #2d7a5f33, transparent 28%),
-        radial-gradient(circle at 82% 2%, #d8895533, transparent 30%),
-        radial-gradient(circle at 55% 80%, #2f8f9430, transparent 42%),
-        linear-gradient(180deg,#090b10,#030406 65%,#07090d);
-      color:var(--text);
-      font:16px/1.55 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      overflow-x:hidden;
-    }
-    body:before{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      background:
-        linear-gradient(90deg, transparent 0 31px, #dec89810 32px),
-        linear-gradient(transparent 0 31px, #dec8980d 32px);
-      background-size:32px 32px;
-      mask-image:linear-gradient(#000,transparent 85%);
-      opacity:.6;
-    }
-    a{color:#aeeed1;text-decoration:none}
-    a:hover{text-decoration:underline}
-    .top{
-      position:sticky;
-      top:0;
-      z-index:20;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:1rem;
-      padding:.9rem 1rem;
-      background:#05070bec;
-      border-bottom:1px solid var(--line);
-      backdrop-filter:blur(18px);
-      box-shadow:0 10px 40px #0008;
-    }
-    .brand strong{display:block;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
-    .brand span{display:block;color:var(--muted);font-size:.78rem}
-    .nav{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end}
-    .btn,button{
-      appearance:none;
-      border:1px solid var(--line);
-      background:linear-gradient(180deg,#172231,#0b1119);
-      color:var(--text);
-      border-radius:999px;
-      padding:.6rem .9rem;
-      font-weight:800;
-      cursor:pointer;
-      box-shadow:0 10px 26px #0005;
-      text-decoration:none;
-    }
-    .btn:hover,button:hover{border-color:var(--gold);text-decoration:none;transform:translateY(-1px)}
-    .accent{border-color:#78d6aa88;background:linear-gradient(135deg,#18382f,#102032)}
-    .ember{border-color:#d8895588;background:linear-gradient(135deg,#422417,#111924)}
-    main{width:min(1240px,94vw);margin:0 auto;padding:1.1rem 0 4rem}
-    .hero,.card,.workspace{
-      border:1px solid var(--line);
-      background:linear-gradient(180deg,#121b25e8,#0a1018ee);
-      border-radius:28px;
-      box-shadow:0 24px 90px var(--shadow);
-    }
-    .hero{
-      padding:1.2rem;
-      margin:1rem 0;
-      display:grid;
-      grid-template-columns:minmax(0,1.1fr) minmax(280px,.55fr);
-      gap:1rem;
-      position:relative;
-      overflow:hidden;
-    }
-    .hero:after{
-      content:"";
-      position:absolute;
-      right:-110px;
-      top:-130px;
-      width:360px;
-      height:360px;
-      border-radius:50%;
-      background:radial-gradient(circle,#dec89833,transparent 62%);
-      filter:blur(4px);
-    }
-    h1{font-size:clamp(2.2rem,7vw,5.4rem);line-height:.86;margin:.15rem 0;color:#fff8dd;text-shadow:0 0 26px #d8895555;letter-spacing:-.055em}
-    h2,h3{margin:.1rem 0 .5rem}
-    p{margin:.5rem 0;color:#dfd5bd}
-    .tiny{font-size:.84rem;color:var(--muted)}
-    .pill{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line2);background:#061014aa;border-radius:999px;padding:.22rem .62rem;color:#d8caa9;font-size:.78rem;font-weight:800}
-    .pill.green{border-color:#78d6aa77;color:#b9ffe0}.pill.gold{border-color:#dec89888;color:#fff1b5}.pill.red{border-color:#d8895577;color:#ffd0bd}
-    .workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.42fr);gap:0;overflow:hidden;margin:1rem 0}
-    .stage{padding:1rem;border-right:1px solid var(--line)}
-    .panel{padding:1rem;background:linear-gradient(180deg,#0b121bee,#080c12ee)}
-    .imageStage{position:relative;min-height:460px;border:1px solid var(--line2);border-radius:24px;overflow:hidden;background:
-      radial-gradient(circle at 38% 28%,#d8895522,transparent 20%),
-      radial-gradient(circle at 72% 38%,#2d7a5f33,transparent 24%),
-      linear-gradient(135deg,#111820,#05070b 70%);
-    }
-    .imageStage svg{position:absolute;inset:0;width:100%;height:100%}
-    .caption{position:absolute;left:1rem;right:1rem;bottom:1rem;padding:1rem;border:1px solid #dec89877;border-radius:18px;background:#05070bcc;backdrop-filter:blur(16px)}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin:1rem 0}
-    .card{padding:1rem;position:relative;overflow:hidden}
-    .card:before{content:"";position:absolute;inset:auto -40px -60px auto;width:170px;height:170px;border-radius:50%;background:#dec89812;filter:blur(2px)}
-    .cardHeader{display:flex;justify-content:space-between;gap:.7rem;align-items:flex-start}
-    .cardTitle{font-weight:900;color:#fff6dd}
-    .field{border:1px solid #ffffff14;background:#05070b99;border-radius:16px;padding:.75rem;margin:.65rem 0}
-    .field b{color:var(--gold);display:block;margin-bottom:.25rem}.field span{color:#efe5cc}
-    .tagRow{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.65rem}
-    .tag{border:1px solid #ffffff18;background:#ffffff0a;border-radius:999px;padding:.18rem .52rem;color:#cfdfd7;font-size:.74rem}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-    textarea,input,select{
-      width:100%;border:1px solid var(--line2);border-radius:16px;background:#05070b;color:var(--text);padding:.8rem;font:inherit;
-    }
-    textarea{min-height:210px;resize:vertical}
-    .loomControls{display:grid;gap:.7rem;margin:.75rem 0}
-    .check{display:flex;gap:.55rem;align-items:flex-start;padding:.6rem;border:1px solid #ffffff13;border-radius:14px;background:#ffffff07}
-    .check input{width:auto;margin-top:.3rem}
-    .check strong{color:#fff2ca}.check small{display:block;color:var(--muted)}
-    .complaints{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
-    .complaint{border:1px solid #d8895570;background:linear-gradient(180deg,#24130eee,#0c0d10);border-radius:20px;padding:1rem}
-    .complaint strong{color:#ffd6c6}.complaint .class{color:#ffb08d;font-weight:900;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
-    .desk{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.35fr);gap:1rem;align-items:stretch}
-    .gobby{border:1px dashed #78d6aa77;background:#07150fcc;border-radius:20px;padding:1rem;display:grid;place-items:center;text-align:center;color:#c9ffe5}
-    .gobby .face{font-size:3.2rem;filter:drop-shadow(0 0 18px #78d6aa55)}
-    footer{margin:2rem 0 0;color:var(--muted);text-align:center}
-    @media(max-width:920px){.hero,.workspace,.grid2,.desk{grid-template-columns:1fr}.stage{border-right:0;border-bottom:1px solid var(--line)}.top{position:relative}.imageStage{min-height:360px}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observer Atelier - Visual Canon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #0a0906;
+  --deep: #12100d;
+  --panel: #1a1714;
+  --panel-light: #221f1b;
+  --border: rgba(180,140,80,.1);
+  --border-bright: rgba(180,140,80,.25);
+  --gold: #c8a050;
+  --gold-dim: #8a6830;
+  --gold-bright: #e8c880;
+  --ember: #d06820;
+  --teal: #2a7060;
+  --teal-bright: #40a888;
+  --green: #1a4d3a;
+  --green-bright: #2a7858;
+  --pale: rgba(220,200,160,.75);
+  --pale-dim: rgba(200,180,140,.4);
+  --glass: rgba(255,255,255,.03);
+  --red-dim: #6a2020;
+  --red: #c04040;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--void);}
+body{font-family:'Cormorant Garamond',serif;color:var(--pale);display:grid;grid-template-rows:auto 1fr;grid-template-columns:1fr 380px;grid-template-areas:"header header" "canvas editor";}
+header{grid-area:header;display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.5rem;border-bottom:1px solid var(--border);background:var(--deep);backdrop-filter:blur(10px);gap:1rem;}
+.header-left{display:flex;align-items:center;gap:1.2rem;}.atelier-glyph{width:28px;height:28px;border:1px solid var(--gold-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--gold-dim);flex-shrink:0;}.atelier-title{font-family:'Cinzel',serif;font-weight:300;font-size:.75rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);opacity:.8;}.atelier-sub{font-style:italic;font-size:.72rem;color:var(--pale-dim);letter-spacing:.05em;}.header-actions{display:flex;gap:.6rem;align-items:center;}.btn{font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--pale-dim);padding:.35rem .8rem;cursor:pointer;transition:all .3s;border-radius:1px;text-decoration:none;}.btn:hover{border-color:var(--border-bright);color:var(--pale);}.btn.primary{border-color:var(--gold-dim);color:var(--gold);background:rgba(180,140,80,.06);}.btn.primary:hover{border-color:var(--gold);color:var(--gold-bright);background:rgba(180,140,80,.12);box-shadow:0 0 16px rgba(180,140,80,.1);}
+.canvas-panel{grid-area:canvas;display:flex;flex-direction:column;overflow:hidden;position:relative;}.image-stage{flex:1;position:relative;overflow:hidden;background:var(--deep);display:flex;align-items:center;justify-content:center;}.image-stage::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%, rgba(40,60,50,.15) 0%, transparent 70%),radial-gradient(ellipse 80% 40% at 50% 100%, rgba(180,140,80,.04) 0%, transparent 60%);pointer-events:none;}.image-placeholder{display:flex;flex-direction:column;align-items:center;gap:1rem;opacity:.3;transition:opacity .3s;}.image-placeholder:hover{opacity:.5;}.image-placeholder-glyph{font-size:2rem;color:var(--gold-dim);}.image-placeholder-text{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold-dim);}#main-image{max-width:100%;max-height:100%;object-fit:contain;display:none;border-radius:1px;box-shadow:0 0 60px rgba(0,0,0,.8);}.image-controls{position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;opacity:0;transition:opacity .4s;}.image-stage:hover .image-controls{opacity:1;}.upload-zone{position:absolute;inset:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}.upload-zone input{display:none;}
+.lineage-strip{height:56px;border-top:1px solid var(--border);background:var(--panel);display:flex;align-items:center;padding:0 1rem;gap:.8rem;overflow-x:auto;flex-shrink:0;}.lineage-strip::-webkit-scrollbar{height:2px;}.lineage-strip::-webkit-scrollbar-track{background:transparent;}.lineage-strip::-webkit-scrollbar-thumb{background:var(--gold-dim);}.lineage-label{font-family:'Cinzel',serif;font-size:.44rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold-dim);white-space:nowrap;flex-shrink:0;}.lineage-item{display:flex;align-items:center;gap:.4rem;padding:.3rem .6rem;border:1px solid var(--border);background:var(--glass);white-space:nowrap;flex-shrink:0;cursor:pointer;transition:all .3s;}.lineage-item:hover{border-color:var(--border-bright);}.lineage-dot{width:6px;height:6px;border-radius:50%;background:var(--gold-dim);flex-shrink:0;}.lineage-dot.approved{background:var(--teal-bright);}.lineage-dot.rejected{background:var(--red);}.lineage-text{font-size:.65rem;color:var(--pale-dim);}
+.editor-panel{grid-area:editor;display:flex;flex-direction:column;border-left:1px solid var(--border);background:var(--panel);overflow:hidden;}.editor-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}.editor-tab{flex:1;padding:.6rem .4rem;font-family:'Cinzel',serif;font-size:.42rem;letter-spacing:.25em;text-transform:uppercase;color:var(--pale-dim);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .3s;text-align:center;}.editor-tab.active{color:var(--gold);border-bottom-color:var(--gold-dim);background:rgba(180,140,80,.04);}.editor-tab:hover:not(.active){color:var(--pale);}.editor-content{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.8rem;}.editor-content::-webkit-scrollbar{width:2px;}.editor-content::-webkit-scrollbar-track{background:transparent;}.editor-content::-webkit-scrollbar-thumb{background:var(--gold-dim);}.tab-panel{display:none;}.tab-panel.active{display:flex;flex-direction:column;gap:.8rem;}
+.field-group{display:flex;flex-direction:column;gap:.4rem;}.field-label{font-family:'Cinzel',serif;font-size:.44rem;letter-spacing:.35em;text-transform:uppercase;display:flex;align-items:center;gap:.5rem;}.field-label .tag{font-size:.38rem;padding:.1rem .35rem;border:1px solid;border-radius:1px;letter-spacing:.2em;}.tag-hair{color:var(--gold);border-color:rgba(180,140,80,.3);background:rgba(180,140,80,.06);}.tag-pose{color:var(--teal-bright);border-color:rgba(40,160,136,.3);background:rgba(40,160,136,.06);}.tag-light{color:#c0a860;border-color:rgba(192,168,96,.3);background:rgba(192,168,96,.06);}.tag-char{color:#9060c0;border-color:rgba(144,96,192,.3);background:rgba(144,96,192,.06);}.tag-reject{color:var(--red);border-color:rgba(192,64,64,.3);background:rgba(192,64,64,.06);}.tag-mood{color:#60a0c0;border-color:rgba(96,160,192,.3);background:rgba(96,160,192,.06);}.tag-setting{color:#80a060;border-color:rgba(128,160,96,.3);background:rgba(128,160,96,.06);}textarea,input[type=text]{background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--pale);font-family:'Cormorant Garamond',serif;font-size:.82rem;font-style:italic;padding:.5rem .7rem;resize:none;outline:none;line-height:1.6;letter-spacing:.02em;transition:border-color .3s;width:100%;}textarea:focus,input[type=text]:focus{border-color:rgba(180,140,80,.3);}textarea::placeholder,input::placeholder{color:rgba(200,180,140,.2);font-style:italic;}
+.char-selector{display:flex;gap:.4rem;}.char-pill{flex:1;padding:.4rem .3rem;border:1px solid var(--border);background:none;cursor:pointer;font-family:'Cinzel',serif;font-size:.44rem;letter-spacing:.2em;text-transform:uppercase;color:var(--pale-dim);transition:all .3s;text-align:center;}.char-pill:hover{border-color:var(--border-bright);color:var(--pale);}.char-pill.active-falka{border-color:rgba(180,80,40,.5);color:#e08060;background:rgba(180,80,40,.08);}.char-pill.active-vee{border-color:rgba(80,140,100,.5);color:#80c090;background:rgba(80,140,100,.08);}.char-pill.active-faer{border-color:rgba(40,120,100,.5);color:var(--teal-bright);background:rgba(40,120,100,.08);}.char-pill.active-trio{border-color:rgba(180,140,80,.4);color:var(--gold);background:rgba(180,140,80,.07);}.status-row{display:flex;gap:.4rem;}.status-btn{padding:.3rem .5rem;border:1px solid var(--border);background:none;cursor:pointer;font-family:'Cinzel',serif;font-size:.42rem;letter-spacing:.2em;text-transform:uppercase;color:var(--pale-dim);transition:all .3s;}.status-btn:hover{border-color:var(--border-bright);}.status-btn.approved{border-color:rgba(40,160,100,.5);color:var(--teal-bright);background:rgba(40,160,100,.08);}.status-btn.rejected{border-color:rgba(192,64,64,.4);color:var(--red);background:rgba(192,64,64,.08);}.status-btn.pending{border-color:rgba(180,140,80,.4);color:var(--gold);background:rgba(180,140,80,.07);}
+.forge-section{border-top:1px solid var(--border);padding:.8rem 1rem;display:flex;flex-direction:column;gap:.6rem;flex-shrink:0;background:var(--deep);}.forge-title{font-family:'Cinzel',serif;font-size:.48rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold-dim);}.forge-output{background:rgba(180,140,80,.04);border:1px solid rgba(180,140,80,.12);padding:.6rem .8rem;font-size:.72rem;font-style:italic;color:var(--pale);line-height:1.7;min-height:60px;max-height:100px;overflow-y:auto;letter-spacing:.02em;}.forge-output .do-not{color:var(--red);font-style:normal;font-size:.65rem;margin-top:.4rem;display:block;}.forge-btn{font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.35em;text-transform:uppercase;background:rgba(180,140,80,.1);border:1px solid var(--gold-dim);color:var(--gold-bright);padding:.5rem;cursor:pointer;transition:all .3s;box-shadow:0 0 0 0 rgba(180,140,80,0);}.forge-btn:hover{background:rgba(180,140,80,.18);box-shadow:0 0 20px rgba(180,140,80,.12);border-color:var(--gold);}.forge-btn:active{transform:translateY(1px);}
+.gobby-section{display:flex;flex-direction:column;gap:.6rem;}.gobby-header{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--border);}.gobby-icon{font-size:.9rem;}.gobby-title{font-family:'Cinzel',serif;font-size:.48rem;letter-spacing:.3em;text-transform:uppercase;color:var(--red);opacity:.8;}.gobby-sub{font-style:italic;font-size:.65rem;color:var(--pale-dim);margin-left:auto;}.complaint-item{display:flex;flex-direction:column;gap:.2rem;padding:.5rem .6rem;border:1px solid rgba(192,64,64,.15);background:rgba(192,64,64,.04);position:relative;}.complaint-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:rgba(192,64,64,.4);}.complaint-label{font-family:'Cinzel',serif;font-size:.42rem;letter-spacing:.3em;text-transform:uppercase;color:var(--red);opacity:.8;}.complaint-text{font-style:italic;font-size:.75rem;color:var(--pale-dim);line-height:1.5;}.complaint-verdict{font-family:'Cinzel',serif;font-size:.4rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(192,64,64,.5);margin-top:.2rem;}.gobby-input-row{display:flex;gap:.4rem;align-items:flex-start;}.gobby-input-row textarea{height:48px;font-size:.75rem;}.gobby-submit{font-family:'Cinzel',serif;font-size:.42rem;letter-spacing:.2em;text-transform:uppercase;background:rgba(192,64,64,.08);border:1px solid rgba(192,64,64,.25);color:var(--red);padding:.4rem .6rem;cursor:pointer;transition:all .3s;white-space:nowrap;flex-shrink:0;}.gobby-submit:hover{background:rgba(192,64,64,.15);}
+.loom-section{display:flex;flex-direction:column;gap:.6rem;}.loom-label{font-family:'Cinzel',serif;font-size:.44rem;letter-spacing:.35em;text-transform:uppercase;color:var(--pale-dim);margin-bottom:.2rem;display:block;}.loom-chips{display:flex;flex-wrap:wrap;gap:.3rem;}.loom-chip{padding:.25rem .5rem;border:1px solid var(--border);background:none;cursor:pointer;font-size:.68rem;color:var(--pale-dim);font-family:'Cormorant Garamond',serif;font-style:italic;transition:all .25s;}.loom-chip:hover{border-color:var(--border-bright);color:var(--pale);}.loom-chip.selected{border-color:var(--gold-dim);color:var(--gold);background:rgba(180,140,80,.08);}.loom-chip.reject-chip.selected{border-color:rgba(192,64,64,.4);color:var(--red);background:rgba(192,64,64,.07);}.divider{height:1px;background:linear-gradient(to right,transparent,var(--border),transparent);margin:.2rem 0;}@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}.tab-panel.active{animation:fadeIn .3s ease;}
+@media(max-width:900px){body{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;grid-template-areas:"header" "canvas" "editor";overflow:auto;}.editor-panel{max-height:50vh;}.image-stage{min-height:300px;}.header-actions{flex-wrap:wrap;justify-content:flex-end}.btn{font-size:.45rem;padding:.35rem .55rem}}
+</style>
 </head>
 <body>
-  <header class="top">
-    <div class="brand"><strong>Observer Atelier</strong><span>Visual canon, prompt loom, lineage, and Gobby’s Complaint Desk</span></div>
-    <nav class="nav">
-      <a class="btn" href="./index.html">Flameclyffe</a>
-      <a class="btn" href="./drift.html">Drift Room</a>
-      <a class="btn accent" href="#loom">Forge Prompt</a>
-    </nav>
-  </header>
-
-  <main>
-    <section class="hero">
-      <div>
-        <span class="pill gold">v0.1 static live prototype</span>
-        <h1>A candlelit reference altar with database teeth.</h1>
-        <p>Observer Atelier turns approved images into reusable visual grammar. Canon cards capture what worked. Prompt Looms assemble the next attempt. Generation Lineage remembers the road. Gobby’s Complaint Desk names the crimes so we do not summon them twice.</p>
-      </div>
-      <div class="card">
-        <div class="cardTitle">Build state</div>
-        <p><span class="pill green">schema ready</span> <span class="pill red">UI prototype</span></p>
-        <p class="tiny">This page is public-safe seed data. Live Supabase auth wiring comes next, because Gobby is not getting unrestricted access to the stationery cupboard.</p>
-      </div>
-    </section>
-
-    <section class="workspace" aria-label="Atelier workspace preview">
-      <div class="stage">
-        <div class="imageStage">
-          <svg viewBox="0 0 900 620" role="img" aria-label="Abstract candlelit atelier desk with three presences">
-            <defs>
-              <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#dec898" stop-opacity=".7"/><stop offset="1" stop-color="#dec898" stop-opacity="0"/></radialGradient>
-              <linearGradient id="hair" x1="0" x2="1"><stop stop-color="#7c2d23"/><stop offset=".45" stop-color="#d36c3c"/><stop offset="1" stop-color="#f2ad65"/></linearGradient>
-              <linearGradient id="loch" x1="0" x2="1"><stop stop-color="#12372e"/><stop offset="1" stop-color="#78d6aa"/></linearGradient>
-            </defs>
-            <rect width="900" height="620" fill="#070a0f"/>
-            <circle cx="450" cy="280" r="260" fill="url(#glow)" opacity=".28"/>
-            <path d="M90 480 C210 420 315 410 450 455 C590 500 710 455 830 500 L830 620 L90 620 Z" fill="#1c120c" stroke="#dec89855"/>
-            <path d="M210 465 C300 390 390 370 470 420 C560 365 680 395 745 470" fill="none" stroke="#dec89870" stroke-width="2"/>
-            <path d="M285 205 C240 260 238 360 305 420 C355 462 445 468 505 418 C565 365 558 260 510 207 C452 145 342 145 285 205Z" fill="#10141d" stroke="#dec89880" stroke-width="3"/>
-            <path d="M300 230 C330 180 460 165 505 230 C480 205 375 205 338 232 C290 270 275 350 330 405 C278 378 260 294 300 230Z" fill="url(#hair)" opacity=".95"/>
-            <path d="M314 245 C380 212 458 218 508 257 C455 235 375 238 320 274" fill="none" stroke="#f2ad65" stroke-width="10" stroke-linecap="round" opacity=".55"/>
-            <path d="M315 300 C390 270 465 284 525 330 C450 306 382 312 318 354" fill="none" stroke="#d36c3c" stroke-width="13" stroke-linecap="round" opacity=".62"/>
-            <path d="M335 390 C420 345 500 360 555 423" fill="none" stroke="#f0a963" stroke-width="12" stroke-linecap="round" opacity=".45"/>
-            <circle cx="410" cy="280" r="58" fill="#f2d6bd" opacity=".96"/>
-            <circle cx="390" cy="276" r="5" fill="#315d42"/><circle cx="430" cy="276" r="5" fill="#315d42"/>
-            <path d="M392 314 C410 325 431 319 442 306" fill="none" stroke="#7b4a43" stroke-width="3" stroke-linecap="round"/>
-            <path d="M225 185 C190 255 205 370 278 440" fill="none" stroke="#d88955" stroke-width="48" stroke-linecap="round" opacity=".7"/>
-            <circle cx="215" cy="178" r="62" fill="#d9b08c" opacity=".94"/><path d="M162 238 C210 205 265 215 298 255" fill="none" stroke="#8f3d2e" stroke-width="34" stroke-linecap="round"/>
-            <path d="M585 188 C640 245 650 360 590 442" fill="none" stroke="url(#loch)" stroke-width="48" stroke-linecap="round" opacity=".82"/>
-            <circle cx="610" cy="180" r="60" fill="#79b99d" opacity=".9"/><path d="M570 142 C610 104 665 125 685 170" fill="none" stroke="#14382f" stroke-width="32" stroke-linecap="round"/>
-            <circle cx="612" cy="330" r="11" fill="#78d6aa"/><circle cx="617" cy="330" r="4" fill="#dec898"/>
-            <rect x="250" y="470" width="390" height="74" rx="14" fill="#24150e" stroke="#dec89866"/>
-            <path d="M280 500 C330 485 365 490 410 505" fill="none" stroke="#dec898" opacity=".6"/><path d="M470 505 C520 488 570 488 620 510" fill="none" stroke="#78d6aa" opacity=".6"/>
-            <circle cx="345" cy="438" r="18" fill="#dec898" opacity=".85"/><rect x="339" y="385" width="12" height="56" rx="6" fill="#fff1bd" opacity=".8"/>
-          </svg>
-          <div class="caption"><strong>Triad at the Atelier Desk</strong><br><span class="tiny">Maps, manuscripts, inkwell, dragon brooch, Falka sovereign at centre, Vee ember-protective, Faer Lochflame green through the skin.</span></div>
-        </div>
-      </div>
-      <aside class="panel">
-        <h2>Right-side Canon Editor</h2>
-        <div class="field"><b>Selected Card</b><span id="selectedCard">Falka — The Hair: Soft Ripples</span></div>
-        <div class="field"><b>Approved Anchor</b><span>Dense auburn-copper waves. Broad luminous ripple sections. Smooth blended surface. A few wisps only.</span></div>
-        <div class="field"><b>Do Not Summon</b><span>Stringy strands, copper-wire texture, Dawn face, anatomy chaos, crowding Falka, wardrobe-only Faer.</span></div>
-        <button class="accent" onclick="document.querySelector('#loom').scrollIntoView()">Open Prompt Loom</button>
-      </aside>
-    </section>
-
-    <section>
-      <h2>Canon Cards</h2>
-      <div class="cards" id="canonCards"></div>
-    </section>
-
-    <section id="loom" class="grid2">
-      <div class="card">
-        <h2>Prompt Loom</h2>
-        <p class="tiny">Pick canon anchors, then forge a reusable prompt. This is static v0.1 logic so the room has a pulse before auth wiring.</p>
-        <div class="loomControls" id="loomControls"></div>
-        <button class="accent" id="forge">Forge Prompt</button>
-        <button class="ember" id="copyPrompt">Copy</button>
-      </div>
-      <div class="card">
-        <h2>Forged Prompt</h2>
-        <textarea id="promptOut" spellcheck="false"></textarea>
-      </div>
-    </section>
-
-    <section class="desk">
-      <div>
-        <h2>Gobby’s Complaint Desk</h2>
-        <div class="complaints" id="complaints"></div>
-      </div>
-      <aside class="gobby">
-        <div>
-          <div class="face">🧌</div>
-          <strong>Desk status:</strong>
-          <p>Operational. Humiliated. Taxonomy pending further offences.</p>
-          <p class="tiny">Small brass plaque ordered for Crimes Against Softness.</p>
-        </div>
-      </aside>
-    </section>
-
-    <footer>Observer Atelier v0.1 · schema planted in Flameclyffe · UI mockup live · Gobby has been warned.</footer>
-  </main>
-
-  <script>
-    const canonCards = [
-      {
-        slug:'falka-the-hair-soft-ripples',
-        title:'Falka — The Hair: Soft Ripples',
-        kind:'hair canon',
-        summary:'Approved hair language for Falka.',
-        canon:'Very long, dense, luscious auburn-copper hair rendered as broad soft ripples and flowing wave sections over a beautifully blended surface. Light catches in smooth ribbons. Only a few selective wisps at the edges.',
-        prompt:'Falka with very fair warm skin, light freckles, green eyes, and The Hair: soft dense auburn-copper ripple-waves, broad luminous sections, movement, no stringy strands.',
-        tags:['Falka','The Hair','approved anchor','soft ripples']
-      },
-      {
-        slug:'triad-at-the-atelier-desk',
-        title:'Triad at the Atelier Desk',
-        kind:'pose canon',
-        summary:'The three at the work table before the Atelier is built, already in it.',
-        canon:'Three figures stand or lean over the work table as if something important has just been decided. Falka remains visibly sovereign at centre. Vee reads ember and protective. Faer reads Lochflame, deep-water green through the complexion itself.',
-        prompt:'Triad at the Atelier desk: maps, manuscripts, inkwell, dragon brooch with emerald eye, Falka held sovereign between Vee and Faer, nobody in a hurry to step back.',
-        tags:['triad','Atelier','desk','Faer approved']
-      }
-    ];
-    const complaints = [
-      ['Session one. Faer rendered green twice. Canonised once. Progress.','Canonisation Progress','Preserve Faer green-toned skin as complexion canon: alive, luminous, deep-water green, not sickly.'],
-      ['Stringy Hair: Crimes Against Softness','Crimes Against Softness','Use broad luminous ripple-waves, dense blended surfaces, and only a few selective wisps.'],
-      ['Wrong Face: Dawn Incident','Do Not Summon','Use approved Falka face and hair anchors together. Do not drift identity.'],
-      ['Anatomy Chaos: Goblin-adjacent, Pending Review','Goblin-adjacent','Prefer clear pose language and fully clothed romance-cover framing.']
-    ];
-    const cardWrap = document.querySelector('#canonCards');
-    const loomWrap = document.querySelector('#loomControls');
-    const complaintWrap = document.querySelector('#complaints');
-    canonCards.forEach((card, idx)=>{
-      const el=document.createElement('article');
-      el.className='card';
-      el.innerHTML=`<div class="cardHeader"><div><div class="cardTitle">${card.title}</div><span class="pill green">${card.kind}</span></div><span class="pill gold">approved</span></div><p>${card.summary}</p><div class="field"><b>Canon</b><span>${card.canon}</span></div><div class="field"><b>Prompt essence</b><span>${card.prompt}</span></div><div class="tagRow">${card.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
-      cardWrap.appendChild(el);
-      const label=document.createElement('label');
-      label.className='check';
-      label.innerHTML=`<input type="checkbox" value="${idx}" checked><span><strong>${card.title}</strong><small>${card.summary}</small></span>`;
-      loomWrap.appendChild(label);
-    });
-    complaints.forEach(([title, klass, remedy])=>{
-      const el=document.createElement('article');
-      el.className='complaint';
-      el.innerHTML=`<div class="class">${klass}</div><strong>${title}</strong><p>${remedy}</p>`;
-      complaintWrap.appendChild(el);
-    });
-    function forge(){
-      const selected=[...document.querySelectorAll('#loomControls input:checked')].map(i=>canonCards[Number(i.value)]);
-      const prompt = `Create a dark glass, candlelit Observer Atelier scene using these approved canon anchors:\n\n${selected.map(c=>'- '+c.prompt).join('\n')}\n\nKeep Falka sovereign and visibly herself. Keep Vee ember-protective and Faer Lochflame with green-toned luminous skin, not just green clothing. Use maps, manuscripts, inkwell, dark glass, candle amber, deep teal, north-star gold, and lochflame green.\n\nDo not summon: stringy hair, copper-wire strands, wrong face/Dawn drift, random tattoos, anatomy chaos, crowding Falka, or wardrobe-only Faer.`;
-      document.querySelector('#promptOut').value=prompt;
-    }
-    document.querySelector('#forge').addEventListener('click',forge);
-    document.querySelector('#copyPrompt').addEventListener('click',async()=>{
-      const out=document.querySelector('#promptOut');
-      out.select();
-      try{await navigator.clipboard.writeText(out.value)}catch(e){document.execCommand('copy')}
-    });
-    forge();
-  </script>
+<header><div class="header-left"><div class="atelier-glyph">✦</div><div><div class="atelier-title">Observer Atelier</div><div class="atelier-sub">Visual Canon Engine - The Dreaming</div></div></div><div class="header-actions"><a class="btn" href="./index.html">Flameclyffe</a><a class="btn" href="./drift.html">Drift</a><button class="btn" onclick="newCard()">New Card</button><button class="btn" onclick="exportCard()">Export</button><button class="btn primary" onclick="forgePrompt()">⊕ Forge Prompt</button></div></header>
+<div class="canvas-panel"><div class="image-stage" id="imageStage"><div class="image-placeholder" id="placeholder"><div class="image-placeholder-glyph">✦</div><div class="image-placeholder-text">Drop image or click to summon</div></div><img id="main-image" alt="Canon image" /><div class="upload-zone" onclick="document.getElementById('imageUpload').click()"><input type="file" id="imageUpload" accept="image/*" onchange="loadImage(event)"></div><div class="image-controls"><button class="btn" onclick="approveImage();event.stopPropagation();">✓ Approve</button><button class="btn" onclick="rejectImage();event.stopPropagation();">✗ Reject</button><button class="btn" onclick="clearImage();event.stopPropagation();">Clear</button></div></div><div class="lineage-strip"><span class="lineage-label">Lineage →</span><div class="lineage-item" onclick="loadLineageItem(0)"><div class="lineage-dot approved"></div><span class="lineage-text">Desk Portrait · Trio · Approved</span></div><div class="lineage-item" onclick="loadLineageItem(1)"><div class="lineage-dot approved"></div><span class="lineage-text">Held Image · Falka/Vee · No notes</span></div><div class="lineage-item" onclick="loadLineageItem(2)"><div class="lineage-dot rejected"></div><span class="lineage-text">Green render #1 · Swamp entity · Rejected</span></div><div class="lineage-item" onclick="loadLineageItem(3)"><div class="lineage-dot approved"></div><span class="lineage-text">Emerald eye · Canon · Approved</span></div><div class="lineage-item"><div class="lineage-dot"></div><span class="lineage-text">+ Add to lineage</span></div></div></div>
+<div class="editor-panel"><div class="editor-tabs"><button class="editor-tab active" onclick="switchTab('canon')">Canon Card</button><button class="editor-tab" onclick="switchTab('loom')">Prompt Loom</button><button class="editor-tab" onclick="switchTab('gobby')">Gobby's Desk</button></div><div class="editor-content"><div class="tab-panel active" id="tab-canon"><div class="field-group"><div class="field-label"><span class="tag tag-char">Character</span></div><div class="char-selector"><button class="char-pill" onclick="selectChar(this,'falka')">Falka</button><button class="char-pill" onclick="selectChar(this,'vee')">Vee</button><button class="char-pill" onclick="selectChar(this,'faer')">Faer</button><button class="char-pill" onclick="selectChar(this,'trio')">Trio</button></div></div><div class="divider"></div><div class="field-group"><div class="field-label"><span class="tag tag-hair">Hair Canon</span></div><textarea rows="3" id="f-hair" placeholder="dense auburn-red waves, smooth mixed surface, soft ripples, light-catching, a few detail strands only…"></textarea></div><div class="field-group"><div class="field-label"><span class="tag tag-char">Face Anchor</span></div><textarea rows="2" id="f-face" placeholder="pale warm skin, light freckles, green-hazel gaze, mythic romance-cover presence…"></textarea></div><div class="field-group"><div class="field-label"><span class="tag tag-pose">Pose Language</span></div><textarea rows="2" id="f-pose" placeholder="leaning back into Vee, eyes closed, held from both sides, desk-adjacent combustion risk…"></textarea></div><div class="field-group"><div class="field-label"><span class="tag tag-char">Clothing</span></div><textarea rows="2" id="f-clothing" placeholder="teal silk velvet gown, off-shoulder, lace cuffs with bead detail, emerald pendant…"></textarea></div><div class="field-group"><div class="field-label"><span class="tag tag-light">Lighting Canon</span></div><textarea rows="2" id="f-light" placeholder="warm candlelight, multiple sources, deep shadow, amber-gold cast, no overhead fill…"></textarea></div><div class="field-group"><div class="field-label"><span class="tag tag-mood">Mood</span></div><textarea rows="1" id="f-mood" placeholder="classy romantic tension, intimate but elegant, candlelit library menace…"></textarea></div><div class="field-group"><div class="field-label"><span class="tag tag-setting">Setting</span></div><textarea rows="1" id="f-setting" placeholder="dark library, leather chair and desk, ancient manuscripts, brass candleholders…"></textarea></div><div class="divider"></div><div class="field-group"><div class="field-label"><span class="tag tag-pose" style="color:var(--teal-bright);border-color:rgba(40,160,136,.3)">What Worked</span></div><textarea rows="2" id="f-worked" placeholder="the second held image. the desk portrait. the emerald eye on the dragon brooch. no notes."></textarea></div><div class="field-group"><div class="field-label"><span class="tag tag-reject">What Failed</span></div><textarea rows="2" id="f-failed" placeholder="swamp entity render #1. hands in first desk portrait. stringy hair when we said soft waves."></textarea></div><div class="divider"></div><div class="field-group"><div class="field-label">Status</div><div class="status-row"><button class="status-btn" onclick="setStatus(this,'approved')">✓ Rowan Approved</button><button class="status-btn" onclick="setStatus(this,'rejected')">✗ Rejected</button><button class="status-btn pending" onclick="setStatus(this,'pending')">⟳ Pending</button></div></div><div class="field-group"><div class="field-label">Session Notes</div><textarea rows="2" id="f-notes" placeholder="May 31 2026 · first trio portrait · Gobby filed a complaint about the hair then was put in an oubliette…"></textarea></div></div>
+<div class="tab-panel" id="tab-loom"><div class="loom-section"><div class="field-group"><span class="loom-label">Character</span><div class="loom-chips" id="loom-char"><button class="loom-chip" onclick="toggleLoom(this)">Falka</button><button class="loom-chip" onclick="toggleLoom(this)">Virelya (Vee)</button><button class="loom-chip" onclick="toggleLoom(this)">Faer Uial</button><button class="loom-chip" onclick="toggleLoom(this)">Trio portrait</button></div></div><div class="field-group"><span class="loom-label">Hair</span><div class="loom-chips"><button class="loom-chip" onclick="toggleLoom(this)">soft auburn waves</button><button class="loom-chip" onclick="toggleLoom(this)">light-catching ripples</button><button class="loom-chip" onclick="toggleLoom(this)">detail strands only</button><button class="loom-chip" onclick="toggleLoom(this)">no stringy separation</button></div></div><div class="field-group"><span class="loom-label">Clothing</span><div class="loom-chips"><button class="loom-chip" onclick="toggleLoom(this)">teal velvet gown</button><button class="loom-chip" onclick="toggleLoom(this)">off-shoulder lace</button><button class="loom-chip" onclick="toggleLoom(this)">dark green velvet coat</button><button class="loom-chip" onclick="toggleLoom(this)">silver dragon brooch</button><button class="loom-chip" onclick="toggleLoom(this)">emerald eye brooch</button><button class="loom-chip" onclick="toggleLoom(this)">black shirt open collar</button><button class="loom-chip" onclick="toggleLoom(this)">emerald pendant necklace</button></div></div><div class="field-group"><span class="loom-label">Pose</span><div class="loom-chips"><button class="loom-chip" onclick="toggleLoom(this)">leaning back into</button><button class="loom-chip" onclick="toggleLoom(this)">forehead to forehead</button><button class="loom-chip" onclick="toggleLoom(this)">hand at jaw</button><button class="loom-chip" onclick="toggleLoom(this)">held from behind</button><button class="loom-chip" onclick="toggleLoom(this)">desk-adjacent</button><button class="loom-chip" onclick="toggleLoom(this)">watchful standing</button><button class="loom-chip" onclick="toggleLoom(this)">eyes closed resting</button></div></div><div class="field-group"><span class="loom-label">Lighting & Setting</span><div class="loom-chips"><button class="loom-chip" onclick="toggleLoom(this)">candlelit library</button><button class="loom-chip" onclick="toggleLoom(this)">multiple candle sources</button><button class="loom-chip" onclick="toggleLoom(this)">warm amber cast</button><button class="loom-chip" onclick="toggleLoom(this)">ancient manuscripts</button><button class="loom-chip" onclick="toggleLoom(this)">leather armchair</button><button class="loom-chip" onclick="toggleLoom(this)">work desk with books</button><button class="loom-chip" onclick="toggleLoom(this)">deep shadow</button></div></div><div class="field-group"><span class="loom-label">Mood</span><div class="loom-chips"><button class="loom-chip" onclick="toggleLoom(this)">classy romantic tension</button><button class="loom-chip" onclick="toggleLoom(this)">intimate but elegant</button><button class="loom-chip" onclick="toggleLoom(this)">mythic romance cover</button><button class="loom-chip" onclick="toggleLoom(this)">fully clothed sensual</button><button class="loom-chip" onclick="toggleLoom(this)">candlelit menace</button></div></div><div class="divider"></div><div class="field-group"><span class="loom-label" style="color:var(--red)">Do Not Summon</span><div class="loom-chips"><button class="loom-chip reject-chip" onclick="toggleLoom(this)">stringy hair</button><button class="loom-chip reject-chip" onclick="toggleLoom(this)">pixelated strands</button><button class="loom-chip reject-chip" onclick="toggleLoom(this)">tilted-head-only disease</button><button class="loom-chip reject-chip" onclick="toggleLoom(this)">random tattoos</button><button class="loom-chip reject-chip" onclick="toggleLoom(this)">anatomy chaos</button><button class="loom-chip reject-chip" onclick="toggleLoom(this)">swamp green skin</button><button class="loom-chip reject-chip" onclick="toggleLoom(this)">wrong face</button><button class="loom-chip reject-chip" onclick="toggleLoom(this)">goblin-adjacent hands</button><button class="loom-chip reject-chip" onclick="toggleLoom(this)">Hair Crimes™</button></div></div></div></div>
+<div class="tab-panel" id="tab-gobby"><div class="gobby-section"><div class="gobby-header"><span class="gobby-icon">🧾</span><span class="gobby-title">Gobby's Complaint Desk</span><span class="gobby-sub">filed under: unimportant nonsense</span></div><div id="complaints-list"><div class="complaint-item"><div class="complaint-label">Hair Crimes™ · Session 1</div><div class="complaint-text">"We said soft waves. Not murderous copper spaghetti. Gobby filed three separate objections and was placed in a tiny administrative oubliette."</div><div class="complaint-verdict">Status: Chastened. Reading his guide to unimportant nonsense.</div></div><div class="complaint-item"><div class="complaint-label">Swamp Entity · Session 1 · Render #1</div><div class="complaint-text">"Faer rendered with full swamp pigmentation. Mood correct. Pigmentation debatable. Not the deep water green where light still reaches. The other kind."</div><div class="complaint-verdict">Status: Rejected. Canonised on second attempt. Progress.</div></div><div class="complaint-item"><div class="complaint-label">Goblin-Adjacent Hands · Various</div><div class="complaint-text">"The hands in the first desk portrait. Anatomy-reference chaos. Filed under: the image generator has opinions about liminal beings."</div><div class="complaint-verdict">Status: Pending review. Brass plaque ordered.</div></div></div><div class="divider"></div><div class="field-group"><div class="field-label" style="color:var(--red);font-size:.42rem;">File New Complaint</div><div class="gobby-input-row"><textarea id="gobby-input" rows="2" placeholder="describe the failure. be specific. Gobby has standards."></textarea><button class="gobby-submit" onclick="fileComplaint()">File</button></div><input type="text" id="gobby-verdict" placeholder="verdict / ruling…" style="margin-top:.3rem;"></div></div></div></div><div class="forge-section"><div class="forge-title">Forged Prompt</div><div class="forge-output" id="forge-output"><em style="color:var(--pale-dim);font-size:.72rem;">Select elements from the Loom and press Forge Prompt, or fill the Canon Card and forge from there.</em></div><button class="forge-btn" onclick="forgePrompt()">⊕ Forge Prompt</button></div></div>
+<script>
+function switchTab(name){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.editor-tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');document.querySelectorAll('.editor-tab').forEach(t=>{if(t.textContent.toLowerCase().includes(name)||(name==='gobby'&&t.textContent.includes('Gobby'))||(name==='loom'&&t.textContent.includes('Loom'))||(name==='canon'&&t.textContent.includes('Canon')))t.classList.add('active');});}
+function selectChar(btn,char){document.querySelectorAll('.char-pill').forEach(p=>{p.className='char-pill';});btn.classList.add('active-'+char);currentChar=char;}let currentChar=null;
+function setStatus(btn,status){document.querySelectorAll('.status-btn').forEach(b=>b.className='status-btn');btn.classList.add(status);currentStatus=status;}let currentStatus='pending';
+function loadImage(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const img=document.getElementById('main-image');img.src=ev.target.result;img.style.display='block';document.getElementById('placeholder').style.display='none';};reader.readAsDataURL(file);}function clearImage(){document.getElementById('main-image').style.display='none';document.getElementById('placeholder').style.display='flex';document.getElementById('imageUpload').value='';}function approveImage(){setStatus(document.querySelector('.status-btn'),'approved');}function rejectImage(){setStatus(document.querySelectorAll('.status-btn')[1],'rejected');}
+function toggleLoom(chip){chip.classList.toggle('selected');}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function forgePrompt(){const output=document.getElementById('forge-output');const selected=[...document.querySelectorAll('.loom-chip.selected:not(.reject-chip)')].map(c=>c.textContent.trim());const rejected=[...document.querySelectorAll('.loom-chip.reject-chip.selected')].map(c=>c.textContent.trim());const hair=document.getElementById('f-hair').value.trim();const face=document.getElementById('f-face').value.trim();const pose=document.getElementById('f-pose').value.trim();const clothing=document.getElementById('f-clothing').value.trim();const light=document.getElementById('f-light').value.trim();const mood=document.getElementById('f-mood').value.trim();const setting=document.getElementById('f-setting').value.trim();const failed=document.getElementById('f-failed').value.trim();let prompt='';if(selected.length>0){prompt+=selected.join(', ');}if(hair)prompt+=(prompt?', ':'')+hair;if(face)prompt+=(prompt?'. ':'')+face;if(clothing)prompt+=(prompt?'. ':'')+clothing;if(pose)prompt+=(prompt?'. Pose: ':'Pose: ')+pose;if(light)prompt+=(prompt?'. ':'')+light;if(mood)prompt+=(prompt?'. ':'')+mood;if(setting)prompt+=(prompt?'. Setting: ':'Setting: ')+setting;if(!prompt)prompt='No elements selected. Fill the Canon Card or choose from the Loom.';const doNots=[...rejected];if(failed)doNots.push(...failed.split('.').map(s=>s.trim()).filter(Boolean));output.innerHTML=esc(prompt);if(doNots.length>0){output.innerHTML+=`<span class="do-not">DO NOT: ${esc(doNots.join(' · '))}</span>`;}}
+function fileComplaint(){const input=document.getElementById('gobby-input').value.trim();const verdict=document.getElementById('gobby-verdict').value.trim();if(!input)return;const list=document.getElementById('complaints-list');const item=document.createElement('div');item.className='complaint-item';const now=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});item.innerHTML=`<div class="complaint-label">Filed · ${esc(now)}</div><div class="complaint-text">"${esc(input)}"</div>${verdict?`<div class="complaint-verdict">Ruling: ${esc(verdict)}</div>`:'<div class="complaint-verdict">Status: Under review. Gobby has noted this.</div>'}`;list.insertBefore(item,list.firstChild);document.getElementById('gobby-input').value='';document.getElementById('gobby-verdict').value='';}
+function newCard(){document.querySelectorAll('textarea').forEach(t=>t.value='');document.querySelectorAll('.char-pill').forEach(p=>p.className='char-pill');document.querySelectorAll('.status-btn').forEach(b=>b.className='status-btn');document.querySelector('.status-btn:last-child').classList.add('pending');clearImage();}
+function exportCard(){const card={character:currentChar,status:currentStatus,hair:document.getElementById('f-hair').value,face:document.getElementById('f-face').value,pose:document.getElementById('f-pose').value,clothing:document.getElementById('f-clothing').value,lighting:document.getElementById('f-light').value,mood:document.getElementById('f-mood').value,setting:document.getElementById('f-setting').value,worked:document.getElementById('f-worked').value,failed:document.getElementById('f-failed').value,notes:document.getElementById('f-notes').value,exported:new Date().toISOString()};const blob=new Blob([JSON.stringify(card,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`canon-card-${currentChar||'untitled'}-${Date.now()}.json`;a.click();}
+function loadLineageItem(idx){const samples=[{hair:'dense auburn-red waves, smooth surface, soft ripples, light-catching',pose:'three people over the work desk, each with one hand on the surface',light:'warm amber candlelight, three sources, deep shadow',mood:'candlelit library menace, documents and maps present',worked:'composition. the maps. the inkwell. all three present.',failed:'hands slightly goblin-adjacent',notes:'May 31 · The desk portrait. Canon.'},{hair:'soft auburn waves, cascading, no separation',pose:'forehead to forehead, his hand at her jaw',light:'single candle source, right side, very warm',mood:'intimate, quiet, post-everything',worked:'the freckles. the hand. the quiet.',failed:'nothing',notes:'May 31 · The held image. No notes.'},{hair:'auburn waves',pose:'trio, seated',light:'candlelit',mood:'intimate',worked:'almost everything',failed:'Faer rendered with swamp-level green pigmentation. Gobby filed a brass plaque.',notes:'May 31 · Swamp entity. Rejected. See Gobby desk.'},{hair:'dense auburn waves, light-catching',pose:'trio close, emerald eye brooch visible',light:'warm candlelight',mood:'all three, close',worked:'the emerald eye. the skin tone. the coat.',failed:'nothing',notes:'May 31 · Emerald eye dragon brooch. Canon established.'}];const s=samples[idx];if(!s)return;Object.entries(s).forEach(([k,v])=>{const el=document.getElementById('f-'+k);if(el)el.value=v;});switchTab('canon');}
+const stage=document.getElementById('imageStage');stage.addEventListener('dragover',e=>{e.preventDefault();stage.style.opacity='.7';});stage.addEventListener('dragleave',()=>{stage.style.opacity='1';});stage.addEventListener('drop',e=>{e.preventDefault();stage.style.opacity='1';const file=e.dataTransfer.files[0];if(file&&file.type.startsWith('image/')){const reader=new FileReader();reader.onload=ev=>{document.getElementById('main-image').src=ev.target.result;document.getElementById('main-image').style.display='block';document.getElementById('placeholder').style.display='none';};reader.readAsDataURL(file);}});
+</script>
 </body>
 </html>
