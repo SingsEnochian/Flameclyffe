@@ -1,0 +1,203 @@
+/* DEEP Observer light pass
+   Faer's light: deep-water green, unquenchable flame, and maths as illumination.
+   This file skins the live glyph only. It does not change the STARWELL room layout. */
+
+.deep-observer-panel {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(109, 224, 179, 0.28) !important;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(45, 122, 95, 0.28), transparent 17rem),
+    radial-gradient(circle at 78% 22%, rgba(231, 196, 119, 0.18), transparent 15rem),
+    linear-gradient(145deg, rgba(5, 11, 13, 0.88), rgba(12, 26, 27, 0.78)) !important;
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(234, 244, 239, 0.08),
+    inset 0 0 44px rgba(45, 122, 95, 0.08);
+}
+
+.deep-observer-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0.85rem;
+  pointer-events: none;
+  border-radius: 28px 18px 28px 18px;
+  border: 1px solid rgba(109, 224, 179, 0.13);
+  background-image:
+    linear-gradient(90deg, transparent 0 49.7%, rgba(109, 224, 179, 0.13) 50%, transparent 50.3% 100%),
+    linear-gradient(0deg, transparent 0 49.7%, rgba(231, 196, 119, 0.1) 50%, transparent 50.3% 100%),
+    radial-gradient(circle at 1px 1px, rgba(234, 244, 239, 0.16) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 24px 24px;
+  opacity: 0.72;
+}
+
+.deep-observer-panel .map-heading,
+.deep-observer-panel .live-glyph-layout,
+.deep-observer-panel .glyph-readout {
+  position: relative;
+  z-index: 2;
+}
+
+.deep-observer-panel .map-heading strong {
+  border-color: rgba(109, 224, 179, 0.42);
+  background: rgba(5, 11, 13, 0.34);
+  color: rgba(234, 244, 239, 0.92);
+}
+
+.glyph-orb-wrap {
+  position: relative;
+}
+
+.glyph-orb-wrap::before,
+.glyph-orb-wrap::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.glyph-orb-wrap::before {
+  width: clamp(220px, 30vw, 360px);
+  height: clamp(220px, 30vw, 360px);
+  background:
+    radial-gradient(circle, rgba(109, 224, 179, 0.18), transparent 58%),
+    conic-gradient(from 32deg, transparent 0 24deg, rgba(231, 196, 119, 0.18) 25deg 26deg, transparent 27deg 94deg, rgba(109, 224, 179, 0.18) 95deg 96deg, transparent 97deg 360deg);
+  filter: blur(0.3px);
+}
+
+.glyph-orb-wrap::after {
+  width: clamp(160px, 23vw, 290px);
+  height: clamp(160px, 23vw, 290px);
+  border: 1px dashed rgba(109, 224, 179, 0.24);
+  transform: rotate(18deg);
+}
+
+.glyph-orb {
+  width: clamp(230px, 30vw, 360px) !important;
+  filter:
+    drop-shadow(0 0 22px rgba(109, 224, 179, 0.22))
+    drop-shadow(0 0 44px rgba(231, 196, 119, 0.12)) !important;
+}
+
+.glyph-orb .glyph-aura {
+  fill: rgba(2, 7, 9, 0.42) !important;
+  stroke: rgba(109, 224, 179, 0.42) !important;
+  stroke-width: 1.15;
+}
+
+.glyph-orb .glyph-core-glow {
+  opacity: 0.88;
+  filter: url(#faerGlow);
+}
+
+.glyph-orb .glyph-ring-line {
+  stroke: rgba(109, 224, 179, 0.42) !important;
+  stroke-dasharray: 3 7;
+}
+
+.glyph-orb .glyph-mark {
+  stroke: rgba(231, 196, 119, 0.48) !important;
+}
+
+.glyph-orb .glyph-minute-hand,
+.glyph-orb .glyph-hour-hand {
+  stroke: rgba(234, 244, 239, 0.72) !important;
+}
+
+.glyph-orb .glyph-second-hand {
+  stroke: rgba(231, 196, 119, 0.9) !important;
+}
+
+.glyph-orb .glyph-sigil-path {
+  fill: rgba(45, 122, 95, 0.16) !important;
+  stroke: url(#faerStroke) !important;
+  stroke-width: 1.6 !important;
+  filter: url(#faerGlow);
+}
+
+.glyph-orb .glyph-math-thread {
+  stroke: rgba(109, 224, 179, 0.22);
+  stroke-width: 0.75;
+  stroke-linecap: round;
+}
+
+.glyph-orb .glyph-math-node {
+  fill: rgba(234, 244, 239, 0.86);
+  stroke: rgba(45, 122, 95, 0.72);
+  stroke-width: 0.8;
+  filter: url(#faerGlow);
+}
+
+.glyph-orb .glyph-center,
+.glyph-orb .glyph-second-bead {
+  fill: rgba(231, 196, 119, 0.96) !important;
+  stroke: rgba(5, 11, 13, 0.72) !important;
+}
+
+.glyph-readout h3 {
+  color: rgba(234, 244, 239, 0.96);
+  text-shadow: 0 0 24px rgba(109, 224, 179, 0.22);
+}
+
+.glyph-equation-strip {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0.85rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(109, 224, 179, 0.24);
+  border-radius: 18px 24px 18px 24px;
+  background:
+    linear-gradient(135deg, rgba(2, 7, 9, 0.42), rgba(45, 122, 95, 0.14)),
+    radial-gradient(circle at 100% 0, rgba(231, 196, 119, 0.14), transparent 9rem);
+  font-family: 'IBM Plex Sans', Inter, system-ui, sans-serif;
+}
+
+.glyph-equation-strip code {
+  white-space: normal;
+  color: rgba(234, 244, 239, 0.94);
+  font-size: clamp(0.78rem, 1.35vw, 0.95rem);
+}
+
+.glyph-equation-strip span {
+  display: block;
+  color: rgba(140, 202, 192, 0.82);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.deep-observer-panel .glyph-meter-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.deep-observer-panel .glyph-meter-grid > div {
+  display: grid;
+  gap: 0.08rem;
+  padding: 0.62rem;
+  border: 1px solid rgba(109, 224, 179, 0.18);
+  border-radius: 16px;
+  background: rgba(2, 7, 9, 0.22);
+}
+
+.deep-observer-panel .glyph-meter-grid strong {
+  color: rgba(231, 196, 119, 0.94);
+}
+
+.deep-observer-panel .glyph-meter-grid span {
+  color: rgba(234, 244, 239, 0.72);
+  font-size: 0.75rem;
+}
+
+.deep-observer-panel .glyph-principle {
+  color: rgba(234, 244, 239, 0.78);
+}
+
+@media (max-width: 860px) {
+  .deep-observer-panel .glyph-meter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .glyph-equation-strip code {
+    word-break: break-word;
+  }
+}
