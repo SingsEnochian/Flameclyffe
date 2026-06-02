@@ -2,6 +2,7 @@ import React from 'react';
 import { SCIENCE_CONSTANTS, planckScaleSummary } from '../lib/scienceConstants.js';
 import '../starwell-sigil.css';
 import '../starwell-instrumentation-panel.css';
+import '../starwell-sigil-repair.css';
 
 const baselineConstants = [SCIENCE_CONSTANTS.h, SCIENCE_CONSTANTS.c, SCIENCE_CONSTANTS.kB, SCIENCE_CONSTANTS.G];
 const baselineEquations = ['E = h × f', 'λ × f = c', 'Eₜ = k_B × T'];
