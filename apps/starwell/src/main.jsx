@@ -66,6 +66,15 @@ const fallbackCodexEntries = [
 
 const fallbackCounts = { world: 1, location: 1, character: 0, artifact: 0, discovery: 0, note: 1 };
 
+const codexShelves = [
+  { key: 'world', label: 'Worlds', glyph: '🌍', table: 'starwell_worlds' },
+  { key: 'location', label: 'Locations', glyph: '🔭', table: 'starwell_locations' },
+  { key: 'character', label: 'Characters', glyph: '🧭', table: 'starwell_characters' },
+  { key: 'artifact', label: 'Artifacts', glyph: '🏺', table: 'starwell_artifacts' },
+  { key: 'discovery', label: 'Discoveries', glyph: '✨', table: 'starwell_discovery_logs' },
+  { key: 'note', label: 'Notes', glyph: '📝', table: 'starwell_codex_entries' },
+];
+
 const fallbackVirelyaEntries = [
   {
     id: 'lantern-study-charter-fallback',
