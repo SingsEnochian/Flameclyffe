@@ -1,0 +1,118 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+
+const DEFAULT_LAT = Number(process.env.DEEP_OBSERVER_LAT || '30.04');
+const DEFAULT_LON = Number(process.env.DEEP_OBSERVER_LON || '-81.40');
+const DEFAULT_LABEL = process.env.DEEP_OBSERVER_LABEL || 'NE Florida approximate';
+const OUT_PATH = 'data/deep-current.json';
+
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const latest = (rows) => Array.isArray(rows) && rows.length ? rows[rows.length - 1] : null;
+
+async function json(url) {
+  const res = await fetch(url, { headers: { 'accept': 'application/json' } });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+  return res.json();
+}
+
+function moonInfo(date = new Date()) {
+  const synodic = 29.530588853;
+  const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+  const days = (date.getTime() - knownNewMoon) / 86400000;
+  const age = ((days % synodic) + synodic) % synodic;
+  const illumination = (1 - Math.cos(Math.PI * 2 * age / synodic)) / 2;
+  let name = 'New Moon';
+  if (age < 1.845) name = 'New Moon';
+  else if (age < 5.536) name = 'Waxing Crescent';
+  else if (age < 9.228) name = 'First Quarter';
+  else if (age < 12.919) name = 'Waxing Gibbous';
+  else if (age < 16.611) name = 'Full Moon';
+  else if (age < 20.302) name = 'Waning Gibbous';
+  else if (age < 23.994) name = 'Last Quarter';
+  else if (age < 27.684) name = 'Waning Crescent';
+  return { age_days: Number(age.toFixed(2)), illumination: Number((illumination * 100).toFixed(1)), name };
+}
+
+function weatherCodeToSky(code, isDay) {
+  if ([95, 96, 99].includes(code)) return 'Storm';
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return 'Rain';
+  if (isDay === 0) return 'Night';
+  return 'Day';
+}
+
+function buildState({ weather, kpRows, magRows, plasmaRows }) {
+  const current = weather?.current || {};
+  const latestKp = latest(kpRows) || {};
+  const mag = latest(magRows) || [];
+  const plasma = latest(plasmaRows) || [];
+  const bz = Number(mag[3] ?? 0);
+  const bt = Number(mag[6] ?? mag[2] ?? 0);
+  const density = Number(plasma[1] ?? 0);
+  const speed = Number(plasma[2] ?? 0);
+  const kp = Number(latestKp.Kp ?? 0);
+  const cloud = Number(current.cloud_cover ?? 0);
+  const precip = Number(current.precipitation ?? 0);
+  const humidity = Number(current.relative_humidity_2m ?? 0);
+  const wind = Number(current.wind_speed_10m ?? 0);
+  const weatherCode = Number(current.weather_code ?? 0);
+  const sky = weatherCodeToSky(weatherCode, Number(current.is_day ?? 0));
+  const moon = moonInfo();
+
+  const P = clamp(0.48 + (Number(current.pressure_msl ?? 1013) - 1013) / 90 + (Number(current.is_day ?? 0) ? 0.04 : -0.02));
+  const C = clamp(0.66 - cloud / 210 - precip / 10 + (kp < 3 ? 0.07 : -0.04));
+  const R = clamp(0.32 + wind / 60 + speed / 1200 + Math.abs(bz) / 50);
+  const E = clamp(0.24 + precip / 8 + humidity / 260 + kp / 14 + (bz < 0 ? Math.abs(bz) / 40 : 0));
+  const M = clamp(moon.illumination / 100);
+  const A = clamp(0.42 + (Number(current.is_day ?? 0) ? 0.18 : -0.04) + (100 - cloud) / 260);
+  const H = clamp(C * 0.25 + E * 0.20 + R * 0.18 + A * 0.14 + kp / 18 + Math.abs(bz) / 80);
+  const T = clamp(P * 0.12 + C * 0.16 + R * 0.12 + (1 - E) * 0.12 + M * 0.08 + A * 0.12 + H * 0.13 + 0.15);
+
+  return {
+    version: 'deep-observer-backend-v1',
+    generated_at: new Date().toISOString(),
+    source: {
+      weather: 'Open-Meteo Forecast API',
+      space_weather: 'NOAA SWPC JSON products',
+      location_mode: 'approximate static cache; browser sync can override locally'
+    },
+    location: { lat: DEFAULT_LAT, lon: DEFAULT_LON, label: DEFAULT_LABEL, public_precision: 'coarse' },
+    weather: {
+      time: current.time || null,
+      sky,
+      current
+    },
+    space_weather: {
+      kp: { value: kp, time_tag: latestKp.time_tag || null, a_running: latestKp.a_running ?? null },
+      solar_wind: { time_tag: mag[0] || plasma[0] || null, bz, bt, density, speed }
+    },
+    moon,
+    field: { P, C, R, E, M, A, T, H, dpdt: R },
+    observer_note: 'Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer.'
+  };
+}
+
+async function main() {
+  const weatherUrl = new URL('https://api.open-meteo.com/v1/forecast');
+  weatherUrl.searchParams.set('latitude', String(DEFAULT_LAT));
+  weatherUrl.searchParams.set('longitude', String(DEFAULT_LON));
+  weatherUrl.searchParams.set('current', 'temperature_2m,relative_humidity_2m,is_day,precipitation,rain,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m');
+  weatherUrl.searchParams.set('temperature_unit', 'fahrenheit');
+  weatherUrl.searchParams.set('wind_speed_unit', 'mph');
+  weatherUrl.searchParams.set('precipitation_unit', 'inch');
+  weatherUrl.searchParams.set('timezone', 'auto');
+
+  const [weather, kpRows, magRows, plasmaRows] = await Promise.all([
+    json(weatherUrl.toString()),
+    json('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
+    json('https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json'),
+    json('https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json')
+  ]);
+
+  await mkdir('data', { recursive: true });
+  await writeFile(OUT_PATH, JSON.stringify(buildState({ weather, kpRows, magRows, plasmaRows }), null, 2) + '\n');
+  console.log(`Wrote ${OUT_PATH}`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
