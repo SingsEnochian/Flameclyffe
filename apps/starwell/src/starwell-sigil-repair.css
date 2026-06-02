@@ -1,0 +1,131 @@
+/* STARWELL sigil repair pass
+   Keeps the sacred geometry clear, restores glyph overlays on art medallions,
+   and gives the Terra Aeterna instrumentation panel its own altar-space. */
+
+.starwell-sigil-console {
+  display: grid !important;
+  place-items: center !important;
+  align-items: start !important;
+  gap: clamp(1rem, 2vw, 1.45rem) !important;
+  min-height: auto !important;
+  padding: clamp(1rem, 2vw, 1.35rem) clamp(0.75rem, 2vw, 1.1rem) clamp(1.25rem, 2.6vw, 1.8rem) !important;
+  overflow: visible !important;
+}
+
+.sigil-field {
+  width: var(--sigil-size) !important;
+  height: var(--sigil-size) !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  transform: none !important;
+}
+
+.terra-instrument-panel {
+  position: relative !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: min(780px, calc(100% - 1rem)) !important;
+  margin: clamp(0.8rem, 1.8vw, 1.2rem) auto 0 !important;
+  z-index: 5 !important;
+}
+
+.sigil-instruction {
+  position: relative !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: min(620px, calc(100% - 1rem)) !important;
+  margin: 0.2rem auto 0 !important;
+}
+
+.sigil-medallion.has-glyph {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.sigil-medallion.has-glyph img {
+  border-radius: 50%;
+}
+
+.sigil-medallion-glyph {
+  position: absolute;
+  right: -0.32rem;
+  bottom: -0.32rem;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  min-width: 1.28rem;
+  height: 1.28rem;
+  padding: 0 0.18rem;
+  border: 1px solid rgba(231, 196, 119, 0.72);
+  border-radius: 999px;
+  background: radial-gradient(circle at 45% 35%, rgba(231, 196, 119, 0.96), rgba(20, 19, 27, 0.94));
+  color: rgba(234, 244, 239, 0.96);
+  box-shadow: 0 0 16px rgba(231, 196, 119, 0.24), 0 8px 18px rgba(0, 0, 0, 0.32);
+  font-size: 0.76rem;
+  line-height: 1;
+}
+
+.sigil-core-medallion .sigil-medallion-glyph {
+  right: -0.42rem;
+  bottom: -0.42rem;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  font-size: 0.9rem;
+}
+
+.terra-instrument-heading {
+  align-items: center !important;
+}
+
+.terra-instrument-equations code {
+  overflow-wrap: anywhere;
+}
+
+.terra-planck-ribbon strong,
+.terra-instrument-chip em,
+.terra-data-safety li {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 861px) {
+  .sigil-field {
+    --sigil-size: clamp(520px, 58vw, 660px) !important;
+  }
+
+  .sigil-node {
+    --radius: clamp(225px, 24vw, 282px) !important;
+  }
+}
+
+@media (min-width: 1121px) {
+  .starwell-sigil-console {
+    padding-bottom: clamp(1.35rem, 2.4vw, 2rem) !important;
+  }
+
+  .terra-instrument-panel {
+    max-width: min(760px, 74vw) !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .starwell-sigil-console {
+    padding: 0.85rem !important;
+  }
+
+  .sigil-field {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .terra-instrument-panel {
+    width: min(620px, 100%) !important;
+  }
+
+  .terra-instrument-heading,
+  .terra-instrument-equations,
+  .terra-instrument-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
