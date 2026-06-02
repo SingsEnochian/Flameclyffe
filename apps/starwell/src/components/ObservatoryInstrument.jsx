@@ -5,6 +5,12 @@ import '../starwell-instrumentation-panel.css';
 
 const baselineConstants = [SCIENCE_CONSTANTS.h, SCIENCE_CONSTANTS.c, SCIENCE_CONSTANTS.kB, SCIENCE_CONSTANTS.G];
 const baselineEquations = ['E = h × f', 'λ × f = c', 'Eₜ = k_B × T'];
+const observerSafetyFindings = [
+  'public.deep_observer_events',
+  'public.deep_observer_event_relations',
+  'public.deep_observer_event_links',
+  'public.observer_handoff_queue',
+];
 
 function getNodeAngle(index, total) {
   return `${(index * 360) / total - 90}deg`;
@@ -64,6 +70,19 @@ function TerraAeternaInstrumentPanel({ selected }) {
         <span>Planck scale marker</span>
         <strong>ℓ_P {planck.planckLengthM} m · t_P {planck.planckTimeS} s</strong>
         <p>{planck.caution}</p>
+      </div>
+
+      <div className="terra-data-safety" aria-label="Observer data safety notice">
+        <span>Observer Data Safety</span>
+        <strong>RLS review needed</strong>
+        <p>
+          Supabase reports these Observer and DEEP tables with row-level security disabled. Review before public client reads or writes.
+        </p>
+        <ul>
+          {observerSafetyFindings.map((tableName) => (
+            <li key={tableName}>{tableName}</li>
+          ))}
+        </ul>
       </div>
 
       <p className="terra-instrument-note">
