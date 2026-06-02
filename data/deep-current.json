@@ -1,0 +1,51 @@
+{
+  "version": "deep-observer-backend-v1",
+  "generated_at": "2026-06-02T00:00:00.000Z",
+  "source": {
+    "weather": "Open-Meteo Forecast API",
+    "space_weather": "NOAA SWPC JSON products",
+    "location_mode": "seed cache; scheduled workflow refreshes this file"
+  },
+  "location": {
+    "lat": 30.04,
+    "lon": -81.4,
+    "label": "NE Florida approximate",
+    "public_precision": "coarse"
+  },
+  "weather": {
+    "time": null,
+    "sky": "Night",
+    "current": {}
+  },
+  "space_weather": {
+    "kp": {
+      "value": 1,
+      "time_tag": null,
+      "a_running": null
+    },
+    "solar_wind": {
+      "time_tag": null,
+      "bz": 0,
+      "bt": 0,
+      "density": 0,
+      "speed": 0
+    }
+  },
+  "moon": {
+    "age_days": 0,
+    "illumination": 50,
+    "name": "First Quarter"
+  },
+  "field": {
+    "P": 0.55,
+    "C": 0.5,
+    "R": 0.45,
+    "E": 0.38,
+    "M": 0.5,
+    "A": 0.65,
+    "T": 0.5,
+    "H": 0.5,
+    "dpdt": 0.45
+  },
+  "observer_note": "Seed only. GitHub Actions updates this cache every 30 minutes once enabled/run. Observed and rendered, not proof."
+}
