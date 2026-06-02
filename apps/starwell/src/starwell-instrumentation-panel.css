@@ -156,6 +156,79 @@
   font-size: 0.74rem;
 }
 
+.terra-data-safety {
+  margin-top: 0.7rem;
+  padding: 0.72rem;
+  border: 1px solid rgba(225,92,92,0.28);
+  border-radius: 18px 12px 18px 12px;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(225,92,92,0.18), transparent 5rem),
+    rgba(42,12,18,0.08);
+}
+
+.sky-night .terra-data-safety,
+.sky-dusk .terra-data-safety {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(225,92,92,0.18), transparent 5rem),
+    rgba(42,12,18,0.28);
+}
+
+.terra-data-safety span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.22rem 0.48rem;
+  border: 1px solid rgba(225,92,92,0.34);
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.55rem;
+  color: #e15c5c;
+  background: rgba(225,92,92,0.12);
+}
+
+.terra-data-safety strong,
+.terra-data-safety p,
+.terra-data-safety li {
+  display: block;
+  line-height: 1.35;
+}
+
+.terra-data-safety strong {
+  margin-top: 0.42rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.98rem;
+  color: var(--gold);
+}
+
+.terra-data-safety p {
+  margin: 0.36rem 0 0;
+  font-size: 0.72rem;
+  opacity: 0.82;
+}
+
+.terra-data-safety ul {
+  display: grid;
+  gap: 0.22rem;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.terra-data-safety li {
+  padding: 0.24rem 0.42rem;
+  border-radius: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.62rem;
+  background: rgba(0,0,0,0.08);
+  overflow-wrap: anywhere;
+}
+
+.sky-night .terra-data-safety li,
+.sky-dusk .terra-data-safety li {
+  background: rgba(0,0,0,0.2);
+}
+
 .terra-instrument-note strong {
   color: var(--gold);
 }
