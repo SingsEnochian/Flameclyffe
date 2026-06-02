@@ -1,0 +1,184 @@
+/* Terra Aeterna Instrumentation Panel */
+
+.terra-instrument-panel {
+  position: absolute;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(4.25rem, 7vw, 5.4rem);
+  z-index: 4;
+  width: min(380px, calc(100% - 2rem));
+  padding: clamp(0.8rem, 2vw, 1rem);
+  border: 1px solid rgba(231,196,119,0.28);
+  border-radius: 28px 18px 28px 18px;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(231,196,119,0.18), transparent 8rem),
+    linear-gradient(145deg, rgba(255,255,255,0.28), rgba(247,237,218,0.14));
+  box-shadow: 0 18px 42px rgba(20,19,27,0.16), inset 0 0 0 1px rgba(255,255,255,0.18);
+  backdrop-filter: blur(18px);
+}
+
+.sky-night .terra-instrument-panel,
+.sky-dusk .terra-instrument-panel {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(231,196,119,0.12), transparent 8rem),
+    linear-gradient(145deg, rgba(20,19,27,0.78), rgba(54,47,65,0.36));
+  box-shadow: 0 18px 42px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.terra-instrument-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.7rem;
+}
+
+.terra-instrument-heading span {
+  display: block;
+  font-family: Cinzel, serif;
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  line-height: 1.05;
+}
+
+.terra-instrument-heading strong,
+.terra-planck-ribbon span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28rem 0.5rem;
+  border: 1px solid rgba(140,202,192,0.32);
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.58rem;
+  color: var(--emerald);
+  background: rgba(140,202,192,0.12);
+}
+
+.sky-night .terra-instrument-heading strong,
+.sky-dusk .terra-instrument-heading strong,
+.sky-night .terra-planck-ribbon span,
+.sky-dusk .terra-planck-ribbon span {
+  color: var(--seaglass);
+}
+
+.terra-instrument-equations,
+.terra-instrument-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.terra-instrument-equations {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 0.65rem;
+}
+
+.terra-instrument-equations code {
+  display: block;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(231,196,119,0.2);
+  border-radius: 14px;
+  text-align: center;
+  font-size: 0.74rem;
+  background: rgba(255,255,255,0.2);
+}
+
+.sky-night .terra-instrument-equations code,
+.sky-dusk .terra-instrument-equations code {
+  background: rgba(0,0,0,0.18);
+}
+
+.terra-instrument-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.terra-instrument-chip {
+  margin: 0;
+  padding: 0.58rem;
+  border: 1px solid rgba(231,196,119,0.18);
+  border-radius: 16px 12px 16px 12px;
+  background: rgba(255,255,255,0.16);
+}
+
+.sky-night .terra-instrument-chip,
+.sky-dusk .terra-instrument-chip {
+  background: rgba(0,0,0,0.14);
+}
+
+.terra-instrument-chip span,
+.terra-instrument-chip strong,
+.terra-instrument-chip em,
+.terra-instrument-chip small {
+  display: block;
+}
+
+.terra-instrument-chip span {
+  font-family: Cinzel, serif;
+  font-size: 1rem;
+  color: var(--gold);
+}
+
+.terra-instrument-chip strong {
+  margin-top: 0.12rem;
+  font-size: 0.76rem;
+}
+
+.terra-instrument-chip em,
+.terra-instrument-chip small,
+.terra-planck-ribbon p,
+.terra-instrument-note {
+  font-style: normal;
+  line-height: 1.35;
+  opacity: 0.78;
+}
+
+.terra-instrument-chip em,
+.terra-instrument-chip small {
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+}
+
+.terra-planck-ribbon {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(231,196,119,0.18);
+}
+
+.terra-planck-ribbon strong {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+}
+
+.terra-planck-ribbon p,
+.terra-instrument-note {
+  margin: 0.42rem 0 0;
+  font-size: 0.74rem;
+}
+
+.terra-instrument-note strong {
+  color: var(--gold);
+}
+
+@media (max-width: 1120px) {
+  .terra-instrument-panel {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: min(620px, calc(100% - 2rem));
+    margin: -1rem auto 4.4rem;
+  }
+}
+
+@media (max-width: 860px) {
+  .terra-instrument-panel {
+    order: 3;
+    width: min(560px, 100%);
+    margin: 0 auto 4.4rem;
+  }
+
+  .terra-instrument-equations,
+  .terra-instrument-grid {
+    grid-template-columns: 1fr;
+  }
+}
