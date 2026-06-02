@@ -1,10 +1,10 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-02T00:00:00.000Z",
+  "generated_at": "2026-06-02T12:24:43.866Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
-    "location_mode": "seed cache; scheduled workflow refreshes this file"
+    "location_mode": "approximate static cache; browser sync can override locally"
   },
   "location": {
     "lat": 30.04,
@@ -13,39 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": null,
-    "sky": "Night",
-    "current": {}
+    "time": "2026-06-02T08:15",
+    "sky": "Day",
+    "current": {
+      "time": "2026-06-02T08:15",
+      "interval": 900,
+      "temperature_2m": 78.2,
+      "relative_humidity_2m": 87,
+      "is_day": 1,
+      "precipitation": 0,
+      "rain": 0,
+      "weather_code": 1,
+      "cloud_cover": 31,
+      "pressure_msl": 1014.4,
+      "wind_speed_10m": 5.3,
+      "wind_direction_10m": 255
+    }
   },
   "space_weather": {
     "kp": {
-      "value": 1,
-      "time_tag": null,
-      "a_running": null
+      "value": 1.33,
+      "time_tag": "2026-06-02T09:00:00",
+      "a_running": 5
     },
     "solar_wind": {
-      "time_tag": null,
-      "bz": 0,
-      "bt": 0,
-      "density": 0,
-      "speed": 0
+      "time_tag": "2026-06-02 12:21:00.000",
+      "bz": 2.33,
+      "bt": 6.1,
+      "density": 4.82,
+      "speed": 387.6
     }
   },
   "moon": {
-    "age_days": 0,
-    "illumination": 50,
-    "name": "First Quarter"
+    "age_days": 16.79,
+    "illumination": 95.5,
+    "name": "Waning Gibbous"
   },
   "field": {
-    "P": 0.55,
-    "C": 0.5,
-    "R": 0.45,
-    "E": 0.38,
-    "M": 0.5,
-    "A": 0.65,
-    "T": 0.5,
-    "H": 0.5,
-    "dpdt": 0.45
+    "P": 0.5355555555555553,
+    "C": 0.5823809523809524,
+    "R": 0.7779333333333334,
+    "E": 0.6696153846153845,
+    "M": 0.955,
+    "A": 0.8653846153846154,
+    "T": 0.7043747532478634,
+    "H": 0.6437140500610501,
+    "dpdt": 0.7779333333333334
   },
-  "observer_note": "Seed only. GitHub Actions updates this cache every 30 minutes once enabled/run. Observed and rendered, not proof."
+  "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
