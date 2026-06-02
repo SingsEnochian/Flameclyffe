@@ -1,0 +1,31 @@
+name: Update DEEP Observer data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deep-observer-data
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Refresh data cache
+        run: node scripts/update-deep-observer-data.mjs
+      - name: Commit data cache
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Update DEEP Observer data cache'
+          file_pattern: data/deep-current.json
