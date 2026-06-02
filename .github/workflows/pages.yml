@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build STARWELL React Observatory
+      - name: Build STARWELL React Observatory Lab
         run: npm run starwell:build
 
       - name: Assemble static Pages site
@@ -48,18 +48,10 @@ jobs:
             --exclude 'sandbox' \
             --exclude 'package-lock.json'
 
-          mkdir -p _site/starwell
-          if [ -f starwell/index.html ]; then
-            cp starwell/index.html _site/starwell/branch-door.html
-          fi
-
-          rm -rf _site/starwell
-          mkdir -p _site/starwell
-          cp -R dist/starwell/* _site/starwell/
-
-          if [ -f starwell/index.html ]; then
-            cp starwell/index.html _site/starwell/branch-door.html
-          fi
+          # /starwell/ is the canonical live glyph instrument channel.
+          # Do not overwrite it with the React lab build.
+          mkdir -p _site/starwell-react-lab
+          cp -R dist/starwell/* _site/starwell-react-lab/
 
           touch _site/.nojekyll
 
