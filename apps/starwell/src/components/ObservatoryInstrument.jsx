@@ -22,12 +22,13 @@ function formatConstantValue(constant) {
 }
 
 function SigilMedallion({ room, className = '' }) {
-  const classes = `sigil-medallion ${className}`.trim();
+  const classes = `sigil-medallion ${room.glyph ? 'has-glyph' : ''} ${className}`.trim();
 
   if (room.image) {
     return (
       <span className={classes} aria-hidden="true">
         <img src={room.image} alt="" />
+        {room.glyph && <span className="sigil-medallion-glyph">{room.glyph}</span>}
       </span>
     );
   }
