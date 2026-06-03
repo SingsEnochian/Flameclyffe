@@ -1,0 +1,13 @@
+{
+  "name": "Seldrin Web Search Shield",
+  "short_name": "Seldrin Shield",
+  "description": "A static prompt-injection quarantine tool for web search evidence.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#071018",
+  "theme_color": "#071018",
+  "orientation": "any",
+  "categories": ["productivity", "security", "utilities"],
+  "icons": []
+}
