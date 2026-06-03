@@ -4,11 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>STARWELL · DEEP Observer</title>
-<meta name="description" content="Live STARWELL DEEP Observer teaching instrument with direct readings, dual time, DEEP variables, multisensory feedback, sacred geometry, and local observation packet export.">
+<meta name="description" content="Live STARWELL DEEP Observer teaching instrument with direct readings, dual time, DEEP variables, multisensory feedback, browser compatibility fallbacks, sacred geometry, and local observation packet export.">
 <link rel="stylesheet" href="deep-observer.css">
 <link rel="stylesheet" href="deep-observer-dual-time.css">
 <link rel="stylesheet" href="deep-observer-layout-hotfix.css">
 <link rel="stylesheet" href="deep-observer-sensory.css">
+<link rel="stylesheet" href="deep-observer-compat.css">
+<script src="deep-observer-compat.js" defer></script>
 <script src="deep-observer.js" defer></script>
 <script src="deep-observer-dual-time.js" defer></script>
 <script src="deep-observer-cloak.js" defer></script>
@@ -34,7 +36,7 @@
       <div class="hero-card">
         <p class="eyebrow" id="heroClock">DEEP Observer · STARWELL Time 00:00:00</p>
         <h1>DEEP Observer</h1>
-        <p class="subtitle">A live teaching surface for direct readings, dual-time context, DEEP variables, multisensory gem feedback, sacred geometry, edge-bound pulse sparks, horizon signal, and local observation packet export.</p>
+        <p class="subtitle">A live teaching surface for direct readings, dual-time context, DEEP variables, multisensory gem feedback, browser-safe fallbacks, sacred geometry, edge-bound pulse sparks, horizon signal, and local observation packet export.</p>
       </div>
     </section>
 
@@ -51,8 +53,8 @@
       </article>
       <article>
         <strong>How to use it</strong>
-        <p>Tap the outer sensor nodes to follow direct-reading pulses. Tap Time to see both clocks answer. Turn on the Sensory Engine for soft gem-clicks, haptics, and packet hum.</p>
-        <code>touch Time; follow the split pulse; hear the gem answer</code>
+        <p>Tap the outer sensor nodes to follow direct-reading pulses. Tap Time to see both clocks answer. Turn on the Sensory Engine for soft gem-clicks, haptics, and packet hum when supported.</p>
+        <code>same instrument, graceful browser fallbacks</code>
       </article>
     </section>
 
@@ -138,8 +140,8 @@
       <article><strong>Translation paths</strong><p>The lines between them show how a direct input becomes visible behaviour. This is the teaching layer, not just decoration.</p></article>
     </section>
 
-    <p class="safety"><strong>Observer Data Safety:</strong> this public page reads bridge or browser state when available and keeps exports local unless you copy or save them. Sound is generated locally in the browser after you turn it on; haptics use device vibration where supported.</p>
-    <p class="note-strip">Sensory Engine v0.1: optional soft gem-clicks, packet tones, tactile feedback, live hum, and responsiveness meter.</p>
+    <p class="safety"><strong>Observer Data Safety:</strong> this public page reads bridge or browser state when available and keeps exports local unless you copy or save them. Sound is generated locally in the browser after you turn it on; haptics use device vibration only where supported; unsupported browser features fall back instead of breaking the instrument.</p>
+    <p class="note-strip">Compatibility Guard v0.1: feature detection for audio, pointer/touch input, vibration, local storage, clipboard, and glass fallbacks.</p>
   </section>
 </main>
 </body>
