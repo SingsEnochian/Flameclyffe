@@ -235,10 +235,12 @@ function buildMathFromState(deep) {
 
 function buildLiveGlyph(now, touchCharge = 0, bridgeDeep = null, bridgeStatus = 'fallback') {
   const secondLocked = new Date(Math.floor(now.getTime() / 1000) * 1000);
+  const minuteLocked = new Date(Math.floor(now.getTime() / 60000) * 60000);
   const isoSecond = secondLocked.toISOString().replace('.000Z', 'Z');
+  const isoMinute = minuteLocked.toISOString().replace('.000Z', 'Z');
   const deep = buildDeepState(touchCharge, bridgeDeep);
   const bridgeSeed = bridgeDeep ? JSON.stringify(bridgeDeep) : 'fallback';
-  const seed = `STARWELL|DEEP|FAER|VEE|${isoSecond}|${now.getTimezoneOffset()}|${bridgeSeed}`;
+  const seed = `STARWELL|DEEP|FAER|VEE|${isoMinute}|${now.getTimezoneOffset()}|${bridgeSeed}`;
   const hash = hashString(seed);
   const second = now.getSeconds();
   const minute = now.getMinutes();
