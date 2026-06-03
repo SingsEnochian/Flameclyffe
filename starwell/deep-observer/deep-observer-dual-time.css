@@ -1,0 +1,96 @@
+/* DEEP Observer Dual Time Overlay v0.1 */
+.dual-time-strip{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:.65rem;
+  margin:.35rem auto .85rem;
+}
+.time-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(168,204,224,.22);
+  border-radius:20px;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(232,244,252,.10),transparent 60%),
+    linear-gradient(145deg,rgba(0,0,0,.24),rgba(255,255,255,.045));
+  padding:.75rem .8rem;
+  text-align:left;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.055),0 10px 28px rgba(0,0,0,.18);
+}
+.time-card:before{
+  content:"";
+  position:absolute;
+  inset:auto -20% -40% -20%;
+  height:80%;
+  background:radial-gradient(ellipse at 50% 100%,rgba(231,196,119,.10),transparent 65%);
+  pointer-events:none;
+}
+.time-card strong{
+  position:relative;
+  display:block;
+  color:var(--gold,#e7c477);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:.96rem;
+  letter-spacing:.05em;
+}
+.time-card .time-value{
+  position:relative;
+  display:block;
+  margin:.18rem 0 .1rem;
+  color:rgba(234,244,239,.96);
+  font:800 1.42rem/1.05 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.04em;
+}
+.time-card .time-note{
+  position:relative;
+  display:block;
+  color:rgba(234,244,239,.58);
+  font-size:.72rem;
+  line-height:1.35;
+}
+.time-card .time-cycle{
+  position:relative;
+  display:inline-flex;
+  margin-top:.42rem;
+  padding:.26rem .48rem;
+  border:1px solid rgba(231,196,119,.20);
+  border-radius:999px;
+  background:rgba(231,196,119,.07);
+  color:rgba(231,196,119,.82);
+  font:800 .62rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.dual-time-rule{
+  width:100%;
+  margin:-.35rem auto .8rem;
+  color:rgba(234,244,239,.52);
+  font:.72rem/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  text-align:center;
+}
+.dual-time-pulse-on .time-card{
+  animation:dualTimeGlow 2.6s ease-out forwards;
+}
+.dual-time-pulse-on .time-card.terra{
+  animation-delay:.18s;
+}
+.dual-time-pulse-on .dual-time-rule{
+  animation:dualRuleGlow 2.6s ease-out forwards;
+}
+@keyframes dualTimeGlow{
+  0%,100%{border-color:rgba(168,204,224,.22);box-shadow:inset 0 0 0 1px rgba(255,255,255,.055),0 10px 28px rgba(0,0,0,.18)}
+  18%,72%{border-color:rgba(231,196,119,.68);box-shadow:inset 0 0 0 1px rgba(231,196,119,.18),0 0 24px rgba(231,196,119,.22),0 12px 32px rgba(0,0,0,.22)}
+}
+@keyframes dualRuleGlow{
+  0%,100%{color:rgba(234,244,239,.52)}
+  18%,72%{color:rgba(231,196,119,.88);text-shadow:0 0 16px rgba(231,196,119,.22)}
+}
+.time-pulse-on .time-card,
+.time-pulse-on .dual-time-rule{
+  animation:dualTimeGlow 2.4s ease-out forwards;
+}
+@media(max-width:680px){
+  .dual-time-strip{grid-template-columns:1fr}
+  .time-card .time-value{font-size:1.24rem}
+}
