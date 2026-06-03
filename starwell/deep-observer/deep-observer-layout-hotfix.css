@@ -1,0 +1,130 @@
+/* DEEP Observer Layout Hotfix + Cloak v0.1 */
+.glyph-stage{
+  gap:1rem;
+}
+
+.glyph-stage .filter-row{
+  position:relative;
+  z-index:8;
+  margin-top:4.35rem;
+  padding:.65rem .75rem;
+  border:1px solid rgba(168,204,224,.14);
+  border-radius:24px;
+  background:linear-gradient(145deg,rgba(1,4,10,.72),rgba(10,18,28,.54));
+  box-shadow:0 18px 40px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter:blur(10px);
+}
+
+.orb-frame{
+  margin-bottom:0;
+}
+
+.sensor-node[data-reading="source"]{
+  top:103%;
+}
+
+.interface-cloak-toggle{
+  position:fixed;
+  right:1rem;
+  bottom:1rem;
+  z-index:100;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(231,196,119,.32);
+  border-radius:999px;
+  background:rgba(4,8,16,.76);
+  color:rgba(234,244,239,.86);
+  padding:.7rem .9rem;
+  font:800 .68rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  box-shadow:0 14px 38px rgba(0,0,0,.38),inset 0 0 0 1px rgba(255,255,255,.06);
+  backdrop-filter:blur(12px);
+  cursor:pointer;
+}
+
+.interface-cloak-toggle:hover{
+  border-color:rgba(231,196,119,.72);
+  background:rgba(18,22,30,.82);
+}
+
+body.interface-cloaked .top,
+body.interface-cloaked .hero,
+body.interface-cloaked .quick-guide,
+body.interface-cloaked .panel,
+body.interface-cloaked .legend,
+body.interface-cloaked .safety,
+body.interface-cloaked .note-strip,
+body.interface-cloaked .filter-row{
+  display:none !important;
+}
+
+body.interface-cloaked .shell{
+  border-color:transparent;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
+}
+
+body.interface-cloaked .page{
+  width:100vw;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:0;
+}
+
+body.interface-cloaked .instrument{
+  display:grid;
+  place-items:center;
+  padding:0;
+  width:100vw;
+  min-height:100vh;
+  grid-template-columns:1fr;
+}
+
+body.interface-cloaked .glyph-stage{
+  position:relative;
+  top:auto;
+  display:grid;
+  place-items:center;
+  width:min(86vw,680px);
+}
+
+body.interface-cloaked .orb-frame{
+  width:min(78vw,560px);
+}
+
+body.interface-cloaked canvas{
+  max-width:560px;
+  max-height:560px;
+}
+
+@media(max-width:1120px){
+  .glyph-stage .filter-row{
+    margin-top:4.65rem;
+  }
+}
+
+@media(max-width:680px){
+  .glyph-stage .filter-row{
+    margin-top:4rem;
+    width:min(92vw,460px);
+  }
+  .sensor-node[data-reading="source"]{
+    top:104%;
+  }
+}
+
+@media(max-width:520px){
+  .glyph-stage .filter-row{
+    margin-top:3.65rem;
+  }
+  .interface-cloak-toggle{
+    right:.7rem;
+    bottom:.7rem;
+    padding:.6rem .72rem;
+    font-size:.58rem;
+  }
+}
