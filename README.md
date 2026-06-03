@@ -34,6 +34,7 @@ The `science_constants` Supabase table is the baseline for Planck/CODATA-style i
 - `docs/science-constants-and-claims.md`
 - `docs/security-rls-plan.md`
 - `docs/runa-flameclyffe-link-map.md`
+- `docs/ui-boundary-contract.md`
 
 ## Development
 
