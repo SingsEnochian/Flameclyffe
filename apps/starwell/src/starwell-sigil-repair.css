@@ -4,38 +4,52 @@
 
 .starwell-sigil-console {
   display: grid !important;
-  place-items: center !important;
+  grid-template-areas:
+    'stage'
+    'rail'
+    'status' !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  justify-items: center !important;
   align-items: start !important;
-  gap: clamp(1rem, 2vw, 1.45rem) !important;
+  gap: clamp(0.9rem, 2vw, 1.45rem) !important;
   min-height: auto !important;
   padding: clamp(1rem, 2vw, 1.35rem) clamp(0.75rem, 2vw, 1.1rem) clamp(1.25rem, 2.6vw, 1.8rem) !important;
-  overflow: visible !important;
+  overflow: hidden !important;
 }
 
 .sigil-field {
+  grid-area: stage !important;
   width: var(--sigil-size) !important;
   height: var(--sigil-size) !important;
   min-height: 0 !important;
+  max-width: 100% !important;
   margin: 0 auto !important;
   transform: none !important;
+  isolation: isolate !important;
 }
 
 .terra-instrument-panel {
+  grid-area: rail !important;
   position: relative !important;
   right: auto !important;
   bottom: auto !important;
   width: min(780px, calc(100% - 1rem)) !important;
-  margin: clamp(0.8rem, 1.8vw, 1.2rem) auto 0 !important;
+  max-width: 100% !important;
+  max-height: min(560px, 70vh) !important;
+  margin: 0 auto !important;
   z-index: 5 !important;
+  overflow: auto !important;
 }
 
 .sigil-instruction {
+  grid-area: status !important;
   position: relative !important;
   left: auto !important;
   bottom: auto !important;
   transform: none !important;
   width: min(620px, calc(100% - 1rem)) !important;
-  margin: 0.2rem auto 0 !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
 }
 
 .sigil-medallion.has-glyph {
@@ -90,27 +104,44 @@
 
 @media (min-width: 861px) {
   .sigil-field {
-    --sigil-size: clamp(520px, 58vw, 660px) !important;
+    --sigil-size: clamp(500px, 54vw, 640px) !important;
   }
 
   .sigil-node {
-    --radius: clamp(225px, 24vw, 282px) !important;
+    --radius: clamp(215px, 22vw, 270px) !important;
   }
 }
 
 @media (min-width: 1121px) {
   .starwell-sigil-console {
+    grid-template-areas:
+      'stage rail'
+      'status status' !important;
+    grid-template-columns: minmax(520px, 1fr) minmax(320px, 420px) !important;
+    align-items: center !important;
     padding-bottom: clamp(1.35rem, 2.4vw, 2rem) !important;
   }
 
+  .sigil-field {
+    --sigil-size: clamp(500px, 46vw, 620px) !important;
+    justify-self: center !important;
+  }
+
+  .sigil-node {
+    --radius: clamp(208px, 19vw, 258px) !important;
+  }
+
   .terra-instrument-panel {
-    max-width: min(760px, 74vw) !important;
+    width: min(420px, 100%) !important;
+    max-height: min(620px, 78vh) !important;
+    justify-self: stretch !important;
   }
 }
 
 @media (max-width: 860px) {
   .starwell-sigil-console {
     padding: 0.85rem !important;
+    overflow: hidden !important;
   }
 
   .sigil-field {
@@ -121,6 +152,7 @@
 
   .terra-instrument-panel {
     width: min(620px, 100%) !important;
+    max-height: none !important;
   }
 
   .terra-instrument-heading,
