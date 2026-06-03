@@ -1,0 +1,85 @@
+/* DEEP Observer Browser Compatibility Guard v0.1 */
+:root{
+  --compat-solid-panel:rgba(4,8,16,.92);
+  --compat-solid-panel-2:rgba(8,14,24,.94);
+}
+
+.no-backdrop-filter .shell,
+.no-backdrop-filter .hero-card,
+.no-backdrop-filter .panel,
+.no-backdrop-filter .direct-card,
+.no-backdrop-filter .teach-card,
+.no-backdrop-filter .dual-time-hologram,
+.no-backdrop-filter .sensory-panel,
+.no-backdrop-filter .glyph-stage .filter-row,
+.no-backdrop-filter .interface-cloak-toggle{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  background:linear-gradient(145deg,var(--compat-solid-panel),var(--compat-solid-panel-2)) !important;
+}
+
+.no-web-audio .sensory-toggle.primary{
+  opacity:.6;
+}
+
+.no-web-audio .sensory-toggle.primary::before{
+  content:"No audio";
+  position:absolute;
+  inset:auto .35rem -.85rem .35rem;
+  color:rgba(234,244,239,.48);
+  font-size:.46rem;
+  text-align:center;
+}
+
+.no-vibration #sensoryHaptics{
+  opacity:.55;
+}
+
+.no-pointer-events canvas{
+  cursor:default;
+}
+
+.no-pointer-events .sensor-node,
+.no-pointer-events .meter,
+.no-pointer-events .filter,
+.no-pointer-events .action{
+  cursor:pointer;
+}
+
+.no-local-storage #saveLocal{
+  opacity:.55;
+}
+
+.no-clipboard #copyPacket{
+  opacity:.75;
+}
+
+.compat-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin:.35rem auto .2rem;
+  padding:.42rem .62rem;
+  border:1px solid rgba(168,204,224,.16);
+  border-radius:999px;
+  background:rgba(0,0,0,.22);
+  color:rgba(234,244,239,.58);
+  font:800 .56rem/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.compat-pill.good{
+  color:rgba(109,224,179,.82);
+  border-color:rgba(109,224,179,.22);
+}
+
+.compat-pill.mixed{
+  color:rgba(231,196,119,.82);
+  border-color:rgba(231,196,119,.22);
+}
+
+.compat-pill.limited{
+  color:rgba(225,92,92,.82);
+  border-color:rgba(225,92,92,.22);
+}
