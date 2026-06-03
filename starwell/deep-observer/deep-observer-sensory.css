@@ -1,0 +1,157 @@
+/* DEEP Observer Sensory Engine v0.1 */
+.sensory-panel{
+  position:fixed;
+  left:1rem;
+  bottom:1rem;
+  z-index:101;
+  display:grid;
+  gap:.45rem;
+  width:min(270px,calc(100vw - 2rem));
+  padding:.62rem;
+  border:1px solid rgba(168,204,224,.20);
+  border-radius:22px;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(232,244,252,.10),transparent 60%),
+    linear-gradient(145deg,rgba(3,8,16,.78),rgba(10,20,30,.62));
+  box-shadow:
+    0 18px 48px rgba(0,0,0,.42),
+    0 0 34px rgba(168,204,224,.10),
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 0 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(14px) saturate(1.1);
+}
+
+.sensory-panel.minimised{
+  width:auto;
+  padding:.48rem;
+  border-radius:999px;
+}
+
+.sensory-panel.minimised .sensory-details,
+.sensory-panel.minimised .sensory-title span,
+.sensory-panel.minimised .sensory-toggle:not(.primary){
+  display:none;
+}
+
+.sensory-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.55rem;
+  color:rgba(231,196,119,.88);
+  font:800 .62rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+.sensory-title button{
+  border:1px solid rgba(231,196,119,.22);
+  border-radius:999px;
+  background:rgba(231,196,119,.06);
+  color:rgba(234,244,239,.78);
+  padding:.28rem .45rem;
+  cursor:pointer;
+  font:800 .52rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+.sensory-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.38rem;
+}
+
+.sensory-toggle{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(168,204,224,.22);
+  border-radius:999px;
+  background:
+    radial-gradient(circle at 35% 20%,rgba(255,255,255,.14),transparent 18%),
+    linear-gradient(145deg,rgba(24,34,48,.72),rgba(3,7,14,.86));
+  color:rgba(234,244,239,.78);
+  padding:.48rem .68rem;
+  cursor:pointer;
+  font:800 .58rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), inset 0 -8px 18px rgba(0,0,0,.28);
+  transition:transform .22s ease,border-color .28s ease,box-shadow .28s ease,background .28s ease;
+}
+
+.sensory-toggle:hover,
+.sensory-toggle[aria-pressed="true"]{
+  transform:translateY(-1px);
+  border-color:rgba(231,196,119,.60);
+  color:rgba(255,242,202,.92);
+  box-shadow:
+    0 0 18px rgba(231,196,119,.16),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -8px 18px rgba(0,0,0,.32),
+    inset 0 0 20px rgba(231,196,119,.08);
+}
+
+.sensory-toggle[aria-pressed="true"]:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(100deg,transparent 0 28%,rgba(255,255,255,.16) 45%,transparent 62% 100%);
+  animation:sensorySheen 1.4s ease-out both;
+}
+
+.sensory-details{
+  display:grid;
+  gap:.32rem;
+  color:rgba(234,244,239,.62);
+  font:.62rem/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+.sensory-meter{
+  height:.38rem;
+  overflow:hidden;
+  border:1px solid rgba(168,204,224,.16);
+  border-radius:999px;
+  background:rgba(0,0,0,.26);
+}
+
+.sensory-meter span{
+  display:block;
+  width:0%;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,rgba(168,204,224,.30),rgba(231,196,119,.78));
+  box-shadow:0 0 18px rgba(231,196,119,.22);
+  transition:width .18s ease;
+}
+
+body.sensory-pulse .sensor-node.active,
+body.sensory-pulse .filter[aria-pressed="true"],
+body.sensory-pulse .sensory-panel{
+  animation:sensoryGlow .48s ease-out both;
+}
+
+@keyframes sensorySheen{
+  from{transform:translateX(-120%);opacity:.8}
+  to{transform:translateX(120%);opacity:0}
+}
+
+@keyframes sensoryGlow{
+  0%{filter:brightness(1)}
+  45%{filter:brightness(1.22)}
+  100%{filter:brightness(1)}
+}
+
+@media(max-width:720px){
+  .sensory-panel{
+    left:.7rem;
+    bottom:.7rem;
+    width:min(230px,calc(100vw - 1.4rem));
+  }
+  .sensory-toggle{
+    font-size:.52rem;
+    padding:.42rem .58rem;
+  }
+}
+
+body.interface-cloaked .sensory-panel:not(.keep-visible){
+  display:none;
+}
