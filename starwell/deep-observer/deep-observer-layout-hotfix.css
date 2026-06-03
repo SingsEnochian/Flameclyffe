@@ -1,26 +1,129 @@
-/* DEEP Observer Layout Hotfix + Cloak v0.1 */
+/* DEEP Observer Layout Hotfix + Cloak v0.2 */
 .glyph-stage{
   gap:1rem;
+  padding-top:1.45rem;
+}
+
+.orb-frame{
+  margin-top:1.15rem;
+  margin-bottom:0;
+  box-shadow:
+    inset 0 0 44px rgba(0,0,0,.48),
+    inset 0 0 0 1px rgba(168,204,224,.10),
+    0 28px 70px rgba(0,0,0,.42);
+}
+
+.sensor-ring{
+  inset:-4% -9% -12% -9%;
+}
+
+.sensor-node{
+  width:4.05rem;
+  height:4.05rem;
+  overflow:hidden;
+  border:1px solid rgba(168,204,224,.34);
+  background:
+    radial-gradient(circle at 34% 22%,rgba(255,255,255,.24),transparent 15%),
+    radial-gradient(circle at 50% 58%,rgba(168,204,224,.18),transparent 42%),
+    linear-gradient(145deg,rgba(28,39,54,.92),rgba(4,8,17,.96) 58%,rgba(0,2,8,.98));
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.46),
+    0 0 0 1px rgba(0,0,0,.78),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -10px 24px rgba(0,0,0,.45),
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    inset 0 0 24px rgba(168,204,224,.055);
+  text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 10px rgba(168,204,224,.18);
+}
+
+.sensor-node:before{
+  content:"";
+  position:absolute;
+  inset:8%;
+  border-radius:50%;
+  border:1px solid rgba(232,244,252,.10);
+  background:
+    radial-gradient(circle at 36% 28%,rgba(232,244,252,.18),transparent 18%),
+    radial-gradient(circle at 50% 62%,rgba(0,0,0,.18),rgba(0,0,0,.46) 72%,rgba(0,0,0,.72));
+  box-shadow:
+    inset 0 1px 3px rgba(255,255,255,.08),
+    inset 0 -8px 18px rgba(0,0,0,.48);
+  pointer-events:none;
+}
+
+.sensor-node:after{
+  content:"✦";
+  position:absolute;
+  left:50%;
+  top:32%;
+  transform:translate(-50%,-50%);
+  color:rgba(232,244,252,.42);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:.82rem;
+  line-height:1;
+  text-shadow:0 0 10px rgba(168,204,224,.25);
+  pointer-events:none;
+}
+
+.sensor-node[data-reading="time"]:after{content:"ᛟ";}
+.sensor-node[data-reading="moon"]:after{content:"☾";font-size:1.08rem;}
+.sensor-node[data-reading="kp"]:after{content:"✶";}
+.sensor-node[data-reading="bz"]:after{content:"⇵";font-size:.9rem;}
+.sensor-node[data-reading="source"]:after{content:"⟁";}
+.sensor-node[data-reading="local"]:after{content:"⌂";font-size:.94rem;}
+.sensor-node[data-reading="motion"]:after{content:"∿";font-size:1.1rem;}
+.sensor-node[data-reading="touch"]:after{content:"✧";}
+
+.sensor-node{
+  padding-top:1.2rem;
+}
+
+.sensor-node:hover,
+.sensor-node.active{
+  border-color:rgba(231,196,119,.76);
+  background:
+    radial-gradient(circle at 34% 22%,rgba(255,255,255,.30),transparent 15%),
+    radial-gradient(circle at 50% 58%,rgba(231,196,119,.22),transparent 44%),
+    linear-gradient(145deg,rgba(42,38,48,.94),rgba(7,9,17,.98) 58%,rgba(0,2,8,.99));
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.52),
+    0 0 0 1px rgba(0,0,0,.80),
+    0 0 28px rgba(231,196,119,.28),
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -10px 24px rgba(0,0,0,.48),
+    inset 0 0 0 1px rgba(231,196,119,.12),
+    inset 0 0 28px rgba(231,196,119,.10);
+}
+
+.sensor-node:hover:after,
+.sensor-node.active:after{
+  color:rgba(255,242,202,.82);
+  text-shadow:0 0 16px rgba(231,196,119,.52);
+}
+
+.sensor-node[data-reading="time"]{
+  top:1.5%;
+}
+
+.sensor-node[data-reading="source"]{
+  top:104%;
 }
 
 .glyph-stage .filter-row{
   position:relative;
   z-index:8;
-  margin-top:4.35rem;
-  padding:.65rem .75rem;
-  border:1px solid rgba(168,204,224,.14);
-  border-radius:24px;
-  background:linear-gradient(145deg,rgba(1,4,10,.72),rgba(10,18,28,.54));
-  box-shadow:0 18px 40px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.04);
+  margin-top:4.85rem;
+  padding:.68rem .78rem;
+  border:1px solid rgba(168,204,224,.16);
+  border-radius:26px;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(168,204,224,.08),transparent 65%),
+    linear-gradient(145deg,rgba(1,4,10,.78),rgba(10,18,28,.58));
+  box-shadow:
+    0 20px 44px rgba(0,0,0,.32),
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 0 0 1px rgba(255,255,255,.035);
   backdrop-filter:blur(10px);
-}
-
-.orb-frame{
-  margin-bottom:0;
-}
-
-.sensor-node[data-reading="source"]{
-  top:103%;
 }
 
 .interface-cloak-toggle{
@@ -102,24 +205,35 @@ body.interface-cloaked canvas{
 }
 
 @media(max-width:1120px){
+  .glyph-stage{
+    padding-top:1.75rem;
+  }
   .glyph-stage .filter-row{
-    margin-top:4.65rem;
+    margin-top:5rem;
   }
 }
 
 @media(max-width:680px){
   .glyph-stage .filter-row{
-    margin-top:4rem;
+    margin-top:4.3rem;
     width:min(92vw,460px);
   }
+  .sensor-node{
+    width:3.35rem;
+    height:3.35rem;
+    padding-top:1rem;
+  }
+  .sensor-node[data-reading="time"]{
+    top:2.2%;
+  }
   .sensor-node[data-reading="source"]{
-    top:104%;
+    top:105%;
   }
 }
 
 @media(max-width:520px){
   .glyph-stage .filter-row{
-    margin-top:3.65rem;
+    margin-top:3.9rem;
   }
   .interface-cloak-toggle{
     right:.7rem;
