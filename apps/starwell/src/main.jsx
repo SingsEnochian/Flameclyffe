@@ -10,6 +10,7 @@ import './starwell.css';
 import './starwell-room.css';
 import './grove-state.css';
 import './starwell-scale-pass.css';
+import './deep-observer-boundary.css';
 
 const OBSERVATORY_TIME_ZONE = 'America/New_York';
 const MEDALLION_BASE = `${import.meta.env.BASE_URL}art/medallions/`;
