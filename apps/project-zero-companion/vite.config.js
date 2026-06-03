@@ -3,6 +3,12 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  root: 'apps/project-zero-companion',
+  base: '/Flameclyffe/project-zero-companion/',
+  build: {
+    outDir: '../../dist/project-zero-companion',
+    emptyOutDir: true,
+  },
   server: {
     host: '127.0.0.1',
     port: 5177,
