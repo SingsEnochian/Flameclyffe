@@ -99,7 +99,6 @@
 }
 
 .room-card:active,
-.sigil-node:active,
 .codex-action:active,
 .entry-tab:active,
 .canon-card:active,
@@ -108,6 +107,26 @@
   transform: translateY(1px) scale(0.992) !important;
   box-shadow: var(--control-shadow-pressed);
   filter: brightness(0.98) saturate(0.98);
+}
+
+@media (min-width: 861px) {
+  .sigil-node:active {
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--angle))
+      translate(calc(var(--radius) - 0.12rem))
+      rotate(calc(-1 * var(--angle))) !important;
+    box-shadow: var(--control-shadow-pressed);
+    filter: brightness(0.98) saturate(0.98);
+  }
+}
+
+@media (max-width: 860px) {
+  .sigil-node:active {
+    transform: translateY(1px) scale(0.992) !important;
+    box-shadow: var(--control-shadow-pressed);
+    filter: brightness(0.98) saturate(0.98);
+  }
 }
 
 .room-card.active,
