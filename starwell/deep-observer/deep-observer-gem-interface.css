@@ -1,0 +1,319 @@
+/* DEEP Observer Gem Interface Unification v0.1
+   Phase 1: longer frosted dock, colour-coordinated gem buttons, mandatory carved rune accents. */
+:root{
+  --gem-glass:rgba(172,207,226,.075);
+  --gem-border:rgba(198,226,242,.24);
+  --gem-border-hot:rgba(231,196,119,.62);
+  --gem-text:rgba(234,244,239,.88);
+  --gem-gold:rgba(231,196,119,.9);
+  --gem-blue:rgba(168,204,224,.72);
+  --gem-green:rgba(109,224,179,.66);
+  --gem-violet:rgba(154,178,255,.66);
+}
+
+.glyph-stage .filter-row{
+  width:min(780px,92vw) !important;
+  max-width:780px;
+  min-height:6.8rem;
+  display:grid !important;
+  grid-template-columns:repeat(5,minmax(6rem,1fr));
+  grid-auto-rows:minmax(2.45rem,auto);
+  align-items:center;
+  justify-items:stretch;
+  gap:.66rem .72rem !important;
+  padding:1.05rem 1.2rem !important;
+  margin-top:5.85rem !important;
+  border-radius:36px !important;
+  border:1px solid rgba(198,226,242,.18) !important;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(232,244,252,.12),transparent 62%),
+    radial-gradient(ellipse at 50% 100%,rgba(231,196,119,.055),transparent 68%),
+    linear-gradient(145deg,rgba(4,9,18,.62),rgba(10,19,30,.42)),
+    rgba(200,230,255,.035) !important;
+  box-shadow:
+    0 24px 58px rgba(0,0,0,.36),
+    0 0 42px rgba(168,204,224,.07),
+    inset 0 1px 0 rgba(255,255,255,.09),
+    inset 0 0 0 1px rgba(255,255,255,.035),
+    inset 0 -18px 42px rgba(0,0,0,.26) !important;
+  backdrop-filter:blur(18px) saturate(1.16) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.16) !important;
+}
+
+.filter,
+.action,
+.interface-cloak-toggle,
+.sensory-toggle{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  min-height:2.35rem;
+  padding-left:2.15rem !important;
+  border-radius:999px !important;
+  border:1px solid var(--gem-border) !important;
+  background:
+    radial-gradient(circle at 30% 16%,rgba(255,255,255,.22),transparent 17%),
+    radial-gradient(circle at 72% 90%,rgba(168,204,224,.10),transparent 38%),
+    linear-gradient(145deg,rgba(24,35,48,.58),rgba(3,7,14,.78)),
+    var(--gem-glass) !important;
+  color:var(--gem-text) !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 10px rgba(168,204,224,.12);
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -10px 22px rgba(0,0,0,.30),
+    inset 0 0 0 1px rgba(255,255,255,.045),
+    inset 0 0 22px rgba(168,204,224,.035) !important;
+  transition:
+    transform .24s cubic-bezier(.2,.8,.2,1),
+    border-color .28s ease,
+    box-shadow .28s ease,
+    background .28s ease,
+    color .28s ease,
+    opacity .28s ease;
+}
+
+.filter::before,
+.action::before,
+.interface-cloak-toggle::before,
+.sensory-toggle::before{
+  content:"✦";
+  position:absolute;
+  left:.72rem;
+  top:50%;
+  width:1.05rem;
+  height:1.05rem;
+  display:grid;
+  place-items:center;
+  transform:translateY(-50%);
+  border-radius:50%;
+  color:rgba(232,244,252,.40);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:.82rem;
+  line-height:1;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.08),
+    0 -1px 1px rgba(0,0,0,.95),
+    0 0 10px rgba(168,204,224,.16);
+  background:
+    radial-gradient(circle at 40% 25%,rgba(255,255,255,.10),transparent 22%),
+    radial-gradient(circle at 50% 62%,rgba(0,0,0,.24),rgba(0,0,0,.48));
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.08),
+    inset 0 -2px 5px rgba(0,0,0,.55),
+    0 0 0 1px rgba(255,255,255,.045);
+  pointer-events:none;
+}
+
+.filter::after,
+.action::after,
+.interface-cloak-toggle::after,
+.sensory-toggle::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:linear-gradient(105deg,transparent 0 28%,rgba(255,255,255,.14) 43%,transparent 58% 100%);
+  opacity:0;
+  transform:translateX(-90%);
+  pointer-events:none;
+}
+
+.filter[data-filter="pulse"]::before{content:"ᛊ";}
+.filter[data-filter="field"]::before{content:"ᚠ";}
+.filter[data-filter="geometry"]::before{content:"ᛟ";}
+.filter[data-filter="horizon"]::before{content:"ᚺ";}
+.filter[data-filter="moons"]::before{content:"☾";font-size:1rem;}
+#themeBtn::before{content:"✧";}
+#toyBtn::before{content:"✶";}
+#stimBtn::before{content:"∿";font-size:1rem;}
+#copyPacket::before{content:"⧉";}
+#saveLocal::before{content:"⌂";}
+.interface-cloak-toggle::before{content:"ᚲ";}
+#sensoryEnable::before{content:"✦";}
+#sensoryHaptics::before{content:"◍";}
+#sensoryHum::before{content:"∿";font-size:1rem;}
+#sensoryLow::before{content:"☾";font-size:1rem;}
+
+.filter:hover,
+.action:hover,
+.interface-cloak-toggle:hover,
+.sensory-toggle:hover,
+.filter[aria-pressed="true"],
+.sensory-toggle[aria-pressed="true"]{
+  transform:translateY(-1px);
+  border-color:var(--gem-border-hot) !important;
+  color:rgba(255,244,211,.96) !important;
+  background:
+    radial-gradient(circle at 30% 16%,rgba(255,255,255,.26),transparent 17%),
+    radial-gradient(circle at 72% 90%,rgba(231,196,119,.15),transparent 40%),
+    linear-gradient(145deg,rgba(42,38,48,.58),rgba(5,7,14,.82)),
+    rgba(231,196,119,.055) !important;
+  box-shadow:
+    0 14px 32px rgba(0,0,0,.30),
+    0 0 22px rgba(231,196,119,.16),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -10px 22px rgba(0,0,0,.34),
+    inset 0 0 0 1px rgba(231,196,119,.08),
+    inset 0 0 26px rgba(231,196,119,.065) !important;
+}
+
+.filter:hover::before,
+.action:hover::before,
+.interface-cloak-toggle:hover::before,
+.sensory-toggle:hover::before,
+.filter[aria-pressed="true"]::before,
+.sensory-toggle[aria-pressed="true"]::before{
+  color:rgba(255,242,202,.82);
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.12),
+    0 -1px 2px rgba(0,0,0,.95),
+    0 0 14px rgba(231,196,119,.42);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.10),
+    inset 0 -2px 5px rgba(0,0,0,.60),
+    0 0 0 1px rgba(231,196,119,.08),
+    0 0 14px rgba(231,196,119,.10);
+}
+
+.filter:hover::after,
+.action:hover::after,
+.interface-cloak-toggle:hover::after,
+.sensory-toggle:hover::after,
+.filter[aria-pressed="true"]::after,
+.sensory-toggle[aria-pressed="true"]::after{
+  animation:gemSheen 1.05s ease-out both;
+}
+
+.filter[data-filter="pulse"][aria-pressed="true"]{--gem-border-hot:rgba(231,196,119,.72)}
+.filter[data-filter="field"][aria-pressed="true"]{--gem-border-hot:rgba(109,224,179,.68)}
+.filter[data-filter="geometry"][aria-pressed="true"]{--gem-border-hot:rgba(168,204,224,.70)}
+.filter[data-filter="horizon"][aria-pressed="true"]{--gem-border-hot:rgba(154,178,255,.66)}
+.filter[data-filter="moons"][aria-pressed="true"]{--gem-border-hot:rgba(232,244,252,.70)}
+#themeBtn{--gem-border-hot:rgba(231,196,119,.68)}
+#toyBtn{--gem-border-hot:rgba(109,224,179,.68)}
+#stimBtn[aria-pressed="true"]{--gem-border-hot:rgba(168,204,224,.72)}
+#stimBtn[aria-pressed="false"]{opacity:.70}
+
+.actions{
+  gap:.7rem !important;
+  margin-top:.9rem;
+}
+.action{min-width:9.5rem;}
+
+.interface-cloak-toggle{
+  min-width:6.25rem;
+  box-shadow:
+    0 16px 36px rgba(0,0,0,.34),
+    0 0 18px rgba(231,196,119,.09),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -10px 22px rgba(0,0,0,.30) !important;
+}
+
+.sensory-panel{
+  border-radius:28px !important;
+  border:1px solid rgba(198,226,242,.18) !important;
+  background:
+    radial-gradient(ellipse at 40% 0%,rgba(232,244,252,.12),transparent 62%),
+    radial-gradient(ellipse at 50% 100%,rgba(231,196,119,.08),transparent 68%),
+    linear-gradient(145deg,rgba(4,9,18,.66),rgba(10,19,30,.50)),
+    rgba(200,230,255,.04) !important;
+  backdrop-filter:blur(18px) saturate(1.16) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.16) !important;
+}
+
+.sensory-panel.minimised,
+body.interface-cloaked .sensory-panel{
+  width:4.4rem !important;
+  height:4.4rem;
+  padding:0 !important;
+  border-radius:50% !important;
+  display:grid !important;
+  place-items:center;
+  cursor:grab;
+  touch-action:none;
+  user-select:none;
+  background:
+    radial-gradient(circle at 34% 20%,rgba(255,255,255,.26),transparent 17%),
+    radial-gradient(circle at 50% 55%,rgba(231,196,119,.16),transparent 42%),
+    linear-gradient(145deg,rgba(32,38,52,.74),rgba(3,7,14,.92)) !important;
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.42),
+    0 0 26px rgba(231,196,119,.16),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -12px 26px rgba(0,0,0,.38),
+    inset 0 0 0 1px rgba(231,196,119,.08) !important;
+}
+
+.sensory-panel.minimised::before,
+body.interface-cloaked .sensory-panel::before{
+  content:"✦";
+  color:rgba(255,242,202,.82);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:1.25rem;
+  text-shadow:0 0 18px rgba(231,196,119,.42);
+}
+
+.sensory-panel.minimised.dragging,
+body.interface-cloaked .sensory-panel.dragging{
+  cursor:grabbing;
+  transition:none !important;
+}
+
+.sensory-panel.minimised .sensory-title,
+.sensory-panel.minimised .sensory-controls,
+.sensory-panel.minimised .sensory-details,
+body.interface-cloaked .sensory-panel .sensory-title,
+body.interface-cloaked .sensory-panel .sensory-controls,
+body.interface-cloaked .sensory-panel .sensory-details{
+  display:none !important;
+}
+
+@keyframes gemSheen{
+  0%{opacity:0;transform:translateX(-90%)}
+  28%{opacity:.85}
+  100%{opacity:0;transform:translateX(92%)}
+}
+
+.no-backdrop-filter .glyph-stage .filter-row,
+.no-backdrop-filter .sensory-panel,
+.no-backdrop-filter .filter,
+.no-backdrop-filter .action,
+.no-backdrop-filter .interface-cloak-toggle,
+.no-backdrop-filter .sensory-toggle{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  background:linear-gradient(145deg,rgba(5,9,18,.96),rgba(10,18,28,.94)) !important;
+}
+
+@media(max-width:1120px){
+  .glyph-stage .filter-row{
+    width:min(680px,92vw) !important;
+    grid-template-columns:repeat(4,minmax(5.75rem,1fr));
+    margin-top:6rem !important;
+  }
+}
+
+@media(max-width:780px){
+  .glyph-stage .filter-row{
+    width:min(560px,92vw) !important;
+    grid-template-columns:repeat(3,minmax(5.4rem,1fr));
+    min-height:8rem;
+    margin-top:5.85rem !important;
+  }
+}
+
+@media(max-width:520px){
+  .glyph-stage .filter-row{
+    width:min(360px,92vw) !important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    min-height:10rem;
+    padding:.85rem !important;
+  }
+  .filter,
+  .action{
+    min-height:2.15rem;
+    font-size:.58rem !important;
+  }
+  .action{min-width:0;width:100%}
+}
