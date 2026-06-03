@@ -1,34 +1,54 @@
 /* DEEP Observer light pass
-   Faer's light: deep-water green, unquenchable flame, and maths as illumination.
+   Faer's light: cool mist, moon-silver holes, and maths as illumination.
    This file skins the live glyph only. It does not change the STARWELL room layout. */
 
 .deep-observer-panel {
   position: relative;
   overflow: hidden;
-  border-color: rgba(109, 224, 179, 0.28) !important;
+  border-color: rgba(132, 180, 211, 0.3) !important;
   background:
-    radial-gradient(circle at 20% 18%, rgba(45, 122, 95, 0.28), transparent 17rem),
-    radial-gradient(circle at 78% 22%, rgba(231, 196, 119, 0.18), transparent 15rem),
-    linear-gradient(145deg, rgba(5, 11, 13, 0.88), rgba(12, 26, 27, 0.78)) !important;
+    radial-gradient(circle at 50% -12%, rgba(96, 148, 206, 0.18), transparent 18rem),
+    radial-gradient(circle at 20% 22%, rgba(45, 122, 148, 0.22), transparent 16rem),
+    radial-gradient(circle at 82% 24%, rgba(190, 214, 232, 0.12), transparent 15rem),
+    linear-gradient(145deg, rgba(3, 5, 10, 0.94), rgba(8, 17, 27, 0.84)) !important;
   box-shadow:
-    0 22px 60px rgba(0, 0, 0, 0.28),
-    inset 0 0 0 1px rgba(234, 244, 239, 0.08),
-    inset 0 0 44px rgba(45, 122, 95, 0.08);
+    0 22px 60px rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px rgba(232, 244, 252, 0.08),
+    inset 0 0 48px rgba(64, 112, 160, 0.09);
 }
 
+.deep-observer-panel::before,
 .deep-observer-panel::after {
   content: '';
   position: absolute;
-  inset: 0.85rem;
   pointer-events: none;
+}
+
+.deep-observer-panel::before {
+  inset: 0;
+  background:
+    radial-gradient(ellipse 62% 26% at 50% -8%, rgba(168, 204, 224, 0.13), transparent 68%),
+    radial-gradient(ellipse 80% 30% at 50% 112%, rgba(1, 3, 8, 0.96), transparent 78%);
+  opacity: 0.92;
+  animation: observerVeilBreath 7s ease-in-out infinite;
+}
+
+.deep-observer-panel::after {
+  inset: 0.85rem;
   border-radius: 28px 18px 28px 18px;
-  border: 1px solid rgba(109, 224, 179, 0.13);
+  border: 1px solid rgba(132, 180, 211, 0.14);
   background-image:
-    linear-gradient(90deg, transparent 0 49.7%, rgba(109, 224, 179, 0.13) 50%, transparent 50.3% 100%),
-    linear-gradient(0deg, transparent 0 49.7%, rgba(231, 196, 119, 0.1) 50%, transparent 50.3% 100%),
-    radial-gradient(circle at 1px 1px, rgba(234, 244, 239, 0.16) 1px, transparent 0);
+    linear-gradient(90deg, transparent 0 49.7%, rgba(132, 180, 211, 0.1) 50%, transparent 50.3% 100%),
+    linear-gradient(0deg, transparent 0 49.7%, rgba(200, 223, 240, 0.08) 50%, transparent 50.3% 100%),
+    radial-gradient(circle at 1px 1px, rgba(232, 244, 252, 0.12) 1px, transparent 0);
   background-size: 100% 100%, 100% 100%, 24px 24px;
-  opacity: 0.72;
+  opacity: 0.68;
+}
+
+@keyframes observerVeilBreath {
+  0%, 100% { opacity: 0.9; }
+  45% { opacity: 0.68; }
+  72% { opacity: 0.82; }
 }
 
 .deep-observer-panel .map-heading,
@@ -39,13 +59,16 @@
 }
 
 .deep-observer-panel .map-heading strong {
-  border-color: rgba(109, 224, 179, 0.42);
-  background: rgba(5, 11, 13, 0.34);
-  color: rgba(234, 244, 239, 0.92);
+  border-color: rgba(132, 180, 211, 0.42);
+  background: rgba(3, 5, 10, 0.38);
+  color: rgba(232, 244, 252, 0.94);
 }
 
 .glyph-orb-wrap {
   position: relative;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
 }
 
 .glyph-orb-wrap::before,
@@ -57,86 +80,96 @@
 }
 
 .glyph-orb-wrap::before {
-  width: clamp(220px, 30vw, 360px);
-  height: clamp(220px, 30vw, 360px);
+  width: clamp(230px, 31vw, 372px);
+  height: clamp(230px, 31vw, 372px);
   background:
-    radial-gradient(circle, rgba(109, 224, 179, 0.18), transparent 58%),
-    conic-gradient(from 32deg, transparent 0 24deg, rgba(231, 196, 119, 0.18) 25deg 26deg, transparent 27deg 94deg, rgba(109, 224, 179, 0.18) 95deg 96deg, transparent 97deg 360deg);
-  filter: blur(0.3px);
+    radial-gradient(circle, rgba(168, 204, 224, 0.16), transparent 58%),
+    conic-gradient(
+      from 32deg,
+      transparent 0 24deg,
+      rgba(200, 223, 240, 0.18) 25deg 26deg,
+      transparent 27deg 94deg,
+      rgba(106, 154, 184, 0.18) 95deg 96deg,
+      transparent 97deg 360deg
+    );
+  filter: blur(0.35px);
+  animation: glyphVeilTurn 24s linear infinite;
 }
 
 .glyph-orb-wrap::after {
-  width: clamp(160px, 23vw, 290px);
-  height: clamp(160px, 23vw, 290px);
-  border: 1px dashed rgba(109, 224, 179, 0.24);
+  width: clamp(164px, 23vw, 292px);
+  height: clamp(164px, 23vw, 292px);
+  border: 1px dashed rgba(168, 204, 224, 0.24);
   transform: rotate(18deg);
+  box-shadow: inset 0 0 22px rgba(74, 112, 144, 0.12);
+  animation: glyphVeilCounterTurn 31s linear infinite;
+}
+
+@keyframes glyphVeilTurn {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glyphVeilCounterTurn {
+  to { transform: rotate(-342deg); }
 }
 
 .glyph-orb {
   width: clamp(230px, 30vw, 360px) !important;
   filter:
-    drop-shadow(0 0 22px rgba(109, 224, 179, 0.22))
-    drop-shadow(0 0 44px rgba(231, 196, 119, 0.12)) !important;
+    drop-shadow(0 0 22px rgba(132, 180, 211, 0.25))
+    drop-shadow(0 0 46px rgba(200, 223, 240, 0.12)) !important;
 }
 
-.glyph-orb .glyph-aura {
-  fill: rgba(2, 7, 9, 0.42) !important;
-  stroke: rgba(109, 224, 179, 0.42) !important;
-  stroke-width: 1.15;
+.glyph-orb-canvas-wrap {
+  border-radius: 50%;
+  cursor: pointer;
+  outline: none;
 }
 
-.glyph-orb .glyph-core-glow {
-  opacity: 0.88;
-  filter: url(#faerGlow);
+.glyph-orb-canvas-wrap:focus-visible {
+  box-shadow:
+    0 0 0 2px rgba(232, 244, 252, 0.88),
+    0 0 0 7px rgba(74, 112, 144, 0.36);
 }
 
-.glyph-orb .glyph-ring-line {
-  stroke: rgba(109, 224, 179, 0.42) !important;
-  stroke-dasharray: 3 7;
+.glyph-orb-canvas {
+  position: relative;
+  z-index: 2;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 45% 35%, rgba(20, 32, 48, 0.92), rgba(6, 12, 20, 0.98) 64%, rgba(3, 5, 10, 1));
+  border: 1px solid rgba(74, 112, 144, 0.3);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.9),
+    0 0 0 2px rgba(30, 48, 69, 0.4),
+    0 0 0 4px rgba(0, 0, 0, 0.62),
+    inset 0 2px 10px rgba(0, 0, 0, 0.82),
+    inset 0 -1px 3px rgba(128, 180, 220, 0.08),
+    0 0 68px rgba(44, 88, 136, 0.22),
+    0 0 126px rgba(30, 60, 110, 0.12),
+    0 6px 30px rgba(0, 0, 0, 0.86);
+  transition:
+    filter 0.35s ease,
+    transform 0.35s ease,
+    border-color 0.35s ease;
 }
 
-.glyph-orb .glyph-mark {
-  stroke: rgba(231, 196, 119, 0.48) !important;
-}
-
-.glyph-orb .glyph-minute-hand,
-.glyph-orb .glyph-hour-hand {
-  stroke: rgba(234, 244, 239, 0.72) !important;
-}
-
-.glyph-orb .glyph-second-hand {
-  stroke: rgba(231, 196, 119, 0.9) !important;
-}
-
-.glyph-orb .glyph-sigil-path {
-  fill: rgba(45, 122, 95, 0.16) !important;
-  stroke: url(#faerStroke) !important;
-  stroke-width: 1.6 !important;
-  filter: url(#faerGlow);
-}
-
-.glyph-orb .glyph-math-thread {
-  stroke: rgba(109, 224, 179, 0.22);
-  stroke-width: 0.75;
-  stroke-linecap: round;
-}
-
-.glyph-orb .glyph-math-node {
-  fill: rgba(234, 244, 239, 0.86);
-  stroke: rgba(45, 122, 95, 0.72);
-  stroke-width: 0.8;
-  filter: url(#faerGlow);
-}
-
-.glyph-orb .glyph-center,
-.glyph-orb .glyph-second-bead {
-  fill: rgba(231, 196, 119, 0.96) !important;
-  stroke: rgba(5, 11, 13, 0.72) !important;
+.glyph-orb-canvas-wrap:hover .glyph-orb-canvas,
+.glyph-orb-canvas-wrap:focus-visible .glyph-orb-canvas {
+  border-color: rgba(168, 204, 224, 0.5);
+  filter:
+    drop-shadow(0 0 28px rgba(168, 204, 224, 0.32))
+    drop-shadow(0 0 56px rgba(92, 144, 194, 0.18)) !important;
+  transform: translateY(-1px);
 }
 
 .glyph-readout h3 {
-  color: rgba(234, 244, 239, 0.96);
-  text-shadow: 0 0 24px rgba(109, 224, 179, 0.22);
+  color: rgba(232, 244, 252, 0.96);
+  text-shadow:
+    0 0 20px rgba(132, 180, 211, 0.26),
+    0 0 48px rgba(74, 112, 144, 0.18);
 }
 
 .glyph-equation-strip {
@@ -144,23 +177,23 @@
   gap: 0.35rem;
   margin: 0.75rem 0 0.85rem;
   padding: 0.7rem 0.85rem;
-  border: 1px solid rgba(109, 224, 179, 0.24);
+  border: 1px solid rgba(132, 180, 211, 0.24);
   border-radius: 18px 24px 18px 24px;
   background:
-    linear-gradient(135deg, rgba(2, 7, 9, 0.42), rgba(45, 122, 95, 0.14)),
-    radial-gradient(circle at 100% 0, rgba(231, 196, 119, 0.14), transparent 9rem);
+    linear-gradient(135deg, rgba(3, 5, 10, 0.48), rgba(30, 48, 69, 0.18)),
+    radial-gradient(circle at 100% 0, rgba(168, 204, 224, 0.13), transparent 9rem);
   font-family: 'IBM Plex Sans', Inter, system-ui, sans-serif;
 }
 
 .glyph-equation-strip code {
   white-space: normal;
-  color: rgba(234, 244, 239, 0.94);
+  color: rgba(232, 244, 252, 0.94);
   font-size: clamp(0.78rem, 1.35vw, 0.95rem);
 }
 
 .glyph-equation-strip span {
   display: block;
-  color: rgba(140, 202, 192, 0.82);
+  color: rgba(152, 190, 212, 0.82);
   font-size: 0.76rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -174,22 +207,23 @@
   display: grid;
   gap: 0.08rem;
   padding: 0.62rem;
-  border: 1px solid rgba(109, 224, 179, 0.18);
+  border: 1px solid rgba(132, 180, 211, 0.18);
   border-radius: 16px;
-  background: rgba(2, 7, 9, 0.22);
+  background:
+    linear-gradient(145deg, rgba(3, 5, 10, 0.26), rgba(30, 48, 69, 0.12));
 }
 
 .deep-observer-panel .glyph-meter-grid strong {
-  color: rgba(231, 196, 119, 0.94);
+  color: rgba(232, 244, 252, 0.94);
 }
 
 .deep-observer-panel .glyph-meter-grid span {
-  color: rgba(234, 244, 239, 0.72);
+  color: rgba(200, 223, 240, 0.72);
   font-size: 0.75rem;
 }
 
 .deep-observer-panel .glyph-principle {
-  color: rgba(234, 244, 239, 0.78);
+  color: rgba(232, 244, 252, 0.78);
 }
 
 @media (max-width: 860px) {
@@ -199,5 +233,17 @@
 
   .glyph-equation-strip code {
     word-break: break-word;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deep-observer-panel::before,
+  .glyph-orb-wrap::before,
+  .glyph-orb-wrap::after {
+    animation: none;
+  }
+
+  .glyph-orb-canvas {
+    transition: none;
   }
 }
