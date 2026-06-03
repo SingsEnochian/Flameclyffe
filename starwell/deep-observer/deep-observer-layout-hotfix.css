@@ -1,4 +1,4 @@
-/* DEEP Observer Layout Hotfix + Cloak v0.2 */
+/* DEEP Observer Layout Hotfix + Cloak v0.3 */
 .glyph-stage{
   gap:1rem;
   padding-top:1.45rem;
@@ -34,6 +34,7 @@
     inset 0 0 0 1px rgba(255,255,255,.06),
     inset 0 0 24px rgba(168,204,224,.055);
   text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 10px rgba(168,204,224,.18);
+  padding-top:1.2rem;
 }
 
 .sensor-node:before{
@@ -74,10 +75,6 @@
 .sensor-node[data-reading="motion"]:after{content:"∿";font-size:1.1rem;}
 .sensor-node[data-reading="touch"]:after{content:"✧";}
 
-.sensor-node{
-  padding-top:1.2rem;
-}
-
 .sensor-node:hover,
 .sensor-node.active{
   border-color:rgba(231,196,119,.76);
@@ -101,13 +98,8 @@
   text-shadow:0 0 16px rgba(231,196,119,.52);
 }
 
-.sensor-node[data-reading="time"]{
-  top:1.5%;
-}
-
-.sensor-node[data-reading="source"]{
-  top:104%;
-}
+.sensor-node[data-reading="time"]{top:1.5%;}
+.sensor-node[data-reading="source"]{top:104%;}
 
 .glyph-stage .filter-row{
   position:relative;
@@ -124,6 +116,10 @@
     inset 0 1px 0 rgba(255,255,255,.06),
     inset 0 0 0 1px rgba(255,255,255,.035);
   backdrop-filter:blur(10px);
+}
+
+.panel{
+  margin-top:1rem;
 }
 
 .interface-cloak-toggle{
@@ -206,34 +202,101 @@ body.interface-cloaked canvas{
 
 @media(max-width:1120px){
   .glyph-stage{
-    padding-top:1.75rem;
+    padding-top:2.7rem;
   }
-  .glyph-stage .filter-row{
-    margin-top:5rem;
+  .orb-frame{
+    width:min(390px,68vw);
+    margin-top:1.85rem;
   }
-}
-
-@media(max-width:680px){
-  .glyph-stage .filter-row{
-    margin-top:4.3rem;
-    width:min(92vw,460px);
+  canvas{
+    max-width:390px;
+    max-height:390px;
+  }
+  .sensor-ring{
+    inset:-3% -8% -13% -8%;
   }
   .sensor-node{
-    width:3.35rem;
-    height:3.35rem;
-    padding-top:1rem;
+    width:3.55rem;
+    height:3.55rem;
+    padding-top:1.05rem;
+    font-size:.48rem;
+  }
+  .sensor-node:after{
+    top:31%;
+    font-size:.76rem;
   }
   .sensor-node[data-reading="time"]{
-    top:2.2%;
+    top:3.4%;
   }
   .sensor-node[data-reading="source"]{
     top:105%;
   }
+  .glyph-stage .filter-row{
+    margin-top:5.1rem;
+  }
+}
+
+@media(max-width:780px){
+  .instrument{
+    padding-top:1.5rem;
+  }
+  .glyph-stage{
+    padding-top:3.25rem;
+  }
+  .orb-frame{
+    width:min(360px,64vw);
+    margin-top:2.2rem;
+  }
+  canvas{
+    max-width:360px;
+    max-height:360px;
+  }
+  .sensor-ring{
+    inset:-1% -7% -14% -7%;
+  }
+  .sensor-node{
+    width:3.25rem;
+    height:3.25rem;
+    padding-top:.98rem;
+    font-size:.44rem;
+  }
+  .sensor-node[data-reading="time"]{
+    top:5%;
+  }
+  .sensor-node[data-reading="source"]{
+    top:106%;
+  }
+  .glyph-stage .filter-row{
+    width:min(92vw,420px);
+    margin-top:5.2rem;
+  }
 }
 
 @media(max-width:520px){
+  .glyph-stage{
+    padding-top:2.6rem;
+  }
+  .orb-frame{
+    width:min(318px,72vw);
+  }
+  canvas{
+    max-width:318px;
+    max-height:318px;
+  }
+  .sensor-node{
+    width:2.85rem;
+    height:2.85rem;
+    padding-top:.86rem;
+    font-size:.40rem;
+  }
+  .sensor-node[data-reading="time"]{
+    top:5.5%;
+  }
+  .sensor-node[data-reading="source"]{
+    top:106.5%;
+  }
   .glyph-stage .filter-row{
-    margin-top:3.9rem;
+    margin-top:4.4rem;
   }
   .interface-cloak-toggle{
     right:.7rem;
