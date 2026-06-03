@@ -1,3 +1,5 @@
+@import './starwell-controls.css';
+
 /* DEEP Observer boundary pass
    Loads after the general STARWELL scale pass so the live glyph panel obeys the UI Boundary Contract.
    Purpose: named regions, responsive containment, predictable overflow, and no readout overlap. */
