@@ -1,4 +1,4 @@
-/* DEEP Observer Dual Time Overlay v0.2 */
+/* DEEP Observer Dual Time Hologram v0.3 */
 'use strict';
 
 (() => {
@@ -54,34 +54,34 @@
   }
 
   function ensureDualTimeUI() {
-    if (document.getElementById('dualTimeStrip')) return;
-    const glyphId = document.getElementById('glyphId');
-    if (!glyphId) return;
+    if (document.getElementById('dualTimeHologram')) return;
+    const orbFrame = document.querySelector('.orb-frame');
+    if (!orbFrame) return;
 
-    const wrap = document.createElement('div');
-    wrap.id = 'dualTimeStrip';
-    wrap.className = 'dual-time-strip';
-    wrap.innerHTML = `
-      <article class="time-card waking" id="wakingTimeCard">
-        <strong>Waking World Time</strong>
-        <span class="time-value" id="wakingTimeValue">--:--:--</span>
-        <span class="time-note" id="wakingTimeNote">user browser local time</span>
-        <span class="time-cycle" id="wakingTimeCycle">local</span>
-      </article>
-      <article class="time-card terra" id="terraTimeCard">
-        <strong>Terra Aeterna Local Time</strong>
-        <span class="time-value" id="terraTimeValue">--:--:--</span>
-        <span class="time-note">derived realm clock</span>
-        <span class="time-cycle" id="terraTimeCycle">realm</span>
-      </article>
+    const hologram = document.createElement('aside');
+    hologram.id = 'dualTimeHologram';
+    hologram.className = 'dual-time-hologram';
+    hologram.setAttribute('aria-live', 'polite');
+    hologram.setAttribute('aria-label', 'Live dual-time readout: Waking World and Terra Aeterna');
+    hologram.innerHTML = `
+      <div class="dual-time-strip" id="dualTimeStrip">
+        <article class="time-card waking" id="wakingTimeCard">
+          <strong>Waking World Time</strong>
+          <span class="time-value" id="wakingTimeValue">--:--:--</span>
+          <span class="time-note" id="wakingTimeNote">user browser local time</span>
+          <span class="time-cycle" id="wakingTimeCycle">local</span>
+        </article>
+        <article class="time-card terra" id="terraTimeCard">
+          <strong>Terra Aeterna Local Time</strong>
+          <span class="time-value" id="terraTimeValue">--:--:--</span>
+          <span class="time-note">derived realm clock</span>
+          <span class="time-cycle" id="terraTimeCycle">realm</span>
+        </article>
+      </div>
+      <p class="dual-time-rule" id="dualTimeRule">${TA_RULE_LABEL}</p>
     `;
-    const rule = document.createElement('p');
-    rule.id = 'dualTimeRule';
-    rule.className = 'dual-time-rule';
-    rule.textContent = TA_RULE_LABEL;
 
-    glyphId.insertAdjacentElement('afterend', wrap);
-    wrap.insertAdjacentElement('afterend', rule);
+    orbFrame.appendChild(hologram);
   }
 
   function updateDualTime() {
@@ -112,7 +112,7 @@
     const dual = window.STARWELL_DUAL_TIME;
     if (!dual) return;
 
-    setText(path, 'Time → split pulse → Waking World clock + Terra Aeterna realm clock');
+    setText(path, 'Time → hologram → Waking World clock + Terra Aeterna realm clock');
     setText(text, `Time is a direct reading with two visible contexts. Waking World time is read from the user’s browser (${dual.waking.zone}). Terra Aeterna local time is derived by the Observatory rule (${TA_RULE_LABEL}). The Waking World clock timestamps the observation; the Terra Aeterna clock places it inside the realm cycle.`);
     setHTML(document.getElementById('directSource'), '<b>Source:</b> Waking World browser time + derived Terra Aeterna realm rule');
     setHTML(document.getElementById('directAffects'), '<b>Affects:</b> observation timestamp, Waking World clock, Terra Aeterna clock, realm cycle, ambient phase');
@@ -127,25 +127,46 @@
     window.setTimeout(() => document.body.classList.remove('dual-time-pulse-on'), 2700);
   }
 
-  function handleTimeSelection() {
+  function showDualTime() {
     updateDualTime();
+    document.body.classList.add('time-hologram-active');
     window.requestAnimationFrame(() => {
       patchTimeReadingCopy();
       pulseDualTime();
     });
   }
 
+  function hideDualTime() {
+    document.body.classList.remove('time-hologram-active', 'dual-time-pulse-on');
+  }
+
+  function isTimeSelectionTarget(target) {
+    return Boolean(target.closest?.('[data-reading="time"], [data-meter="time"]'));
+  }
+
+  function isDismissTarget(target) {
+    if (!target) return false;
+    if (isTimeSelectionTarget(target)) return false;
+    if (target.closest?.('#dualTimeHologram')) return false;
+    return Boolean(target.closest?.('[data-reading], [data-meter], [data-filter], .action, #themeBtn, #toyBtn, #stimBtn, canvas, .interface-cloak-toggle'));
+  }
+
   document.addEventListener('click', event => {
-    const reading = event.target.closest?.('[data-reading="time"]');
-    const meter = event.target.closest?.('[data-meter="time"]');
-    if (reading || meter) handleTimeSelection();
+    if (isTimeSelectionTarget(event.target)) {
+      showDualTime();
+      return;
+    }
+    if (isDismissTarget(event.target)) hideDualTime();
   }, { passive: true });
 
   document.addEventListener('keydown', event => {
     const active = document.activeElement;
-    if ((event.key === 'Enter' || event.key === ' ') && active?.matches?.('[data-reading="time"], [data-meter="time"]')) {
-      handleTimeSelection();
+    if ((event.key === 'Enter' || event.key === ' ') && isTimeSelectionTarget(active)) {
+      showDualTime();
+      return;
     }
+    if ((event.key === 'Enter' || event.key === ' ') && isDismissTarget(active)) hideDualTime();
+    if (event.key === 'Escape') hideDualTime();
   });
 
   document.addEventListener('DOMContentLoaded', () => {
