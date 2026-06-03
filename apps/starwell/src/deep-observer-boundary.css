@@ -1,0 +1,119 @@
+/* DEEP Observer boundary pass
+   Loads after the general STARWELL scale pass so the live glyph panel obeys the UI Boundary Contract.
+   Purpose: named regions, responsive containment, predictable overflow, and no readout overlap. */
+
+.live-glyph-panel.deep-observer-panel {
+  contain: layout paint;
+}
+
+.live-glyph-panel .live-glyph-layout {
+  display: grid;
+  grid-template-areas: 'stage readout';
+  grid-template-columns: minmax(260px, 0.82fr) minmax(320px, 1.18fr);
+  width: 100%;
+  max-width: 100%;
+  gap: clamp(1rem, 3vw, 2.25rem);
+  align-items: center;
+  overflow: hidden;
+}
+
+.live-glyph-panel .glyph-orb-wrap {
+  grid-area: stage;
+  width: min(100%, 420px);
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.live-glyph-panel .glyph-orb-wrap::before {
+  width: min(100%, clamp(230px, 31vw, 372px));
+  height: min(100%, clamp(230px, 31vw, 372px));
+}
+
+.live-glyph-panel .glyph-orb-wrap::after {
+  width: min(82%, clamp(164px, 23vw, 292px));
+  height: min(82%, clamp(164px, 23vw, 292px));
+}
+
+.live-glyph-panel .glyph-orb,
+.live-glyph-panel .glyph-orb-canvas {
+  display: block;
+  width: min(100%, clamp(220px, 28vw, 340px)) !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.live-glyph-panel .glyph-readout {
+  grid-area: readout;
+  min-width: 0;
+  max-width: 100%;
+  max-height: min(620px, 72vh);
+  overflow: auto;
+  padding-right: 0.25rem;
+  scrollbar-gutter: stable;
+}
+
+.live-glyph-panel .glyph-readout h3,
+.live-glyph-panel .glyph-readout p,
+.live-glyph-panel .glyph-readout span,
+.live-glyph-panel .glyph-readout code,
+.live-glyph-panel .glyph-principle {
+  overflow-wrap: anywhere;
+}
+
+.live-glyph-panel .glyph-equation-strip,
+.live-glyph-panel .glyph-meter-grid {
+  max-width: 100%;
+}
+
+.live-glyph-panel .glyph-meter-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 1120px) {
+  .live-glyph-panel .live-glyph-layout {
+    grid-template-areas:
+      'stage'
+      'readout';
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  .live-glyph-panel .glyph-orb-wrap {
+    width: min(100%, 360px);
+  }
+
+  .live-glyph-panel .glyph-readout {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .live-glyph-panel .glyph-meter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .live-glyph-panel.deep-observer-panel {
+    padding-inline: clamp(0.85rem, 4vw, 1rem);
+  }
+
+  .live-glyph-panel .glyph-orb-wrap {
+    width: min(100%, 300px);
+  }
+
+  .live-glyph-panel .glyph-orb,
+  .live-glyph-panel .glyph-orb-canvas {
+    width: min(100%, clamp(190px, 68vw, 280px)) !important;
+  }
+
+  .live-glyph-panel .glyph-equation-strip {
+    padding: 0.62rem 0.7rem;
+  }
+}
