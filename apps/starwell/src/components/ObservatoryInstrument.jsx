@@ -6,7 +6,7 @@ import '../starwell-sigil-repair.css';
 
 const baselineConstants = [SCIENCE_CONSTANTS.h, SCIENCE_CONSTANTS.c, SCIENCE_CONSTANTS.kB, SCIENCE_CONSTANTS.G];
 const baselineEquations = ['E = h × f', 'λ × f = c', 'Eₜ = k_B × T'];
-const observerSafetyFindings = [
+const observerSecurityTables = [
   'public.deep_observer_events',
   'public.deep_observer_event_relations',
   'public.deep_observer_event_links',
@@ -76,12 +76,12 @@ function TerraAeternaInstrumentPanel({ selected }) {
 
       <div className="terra-data-safety" aria-label="Observer data safety notice">
         <span>Observer Data Safety</span>
-        <strong>RLS review needed</strong>
+        <strong>RLS enabled · policies still matter</strong>
         <p>
-          Supabase reports these Observer and DEEP tables with row-level security disabled. Review before public client reads or writes.
+          Supabase currently reports these Observer and DEEP tables with row-level security enabled. Keep policy reviews active before widening public client reads or writes.
         </p>
         <ul>
-          {observerSafetyFindings.map((tableName) => (
+          {observerSecurityTables.map((tableName) => (
             <li key={tableName}>{tableName}</li>
           ))}
         </ul>
