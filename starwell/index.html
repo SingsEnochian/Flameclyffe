@@ -80,10 +80,10 @@ h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.65rem,
 .subtitle{font-family:Georgia,"Times New Roman",serif;max-width:760px;margin:.85rem auto 0;font-size:clamp(1.08rem,2.2vw,1.55rem);line-height:1.24;color:rgba(234,244,239,.88);text-align:center;text-wrap:balance}
 .instrument{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(300px,1fr);gap:clamp(1rem,3vw,2rem);align-items:center;padding:clamp(1rem,3vw,2rem) clamp(1rem,3vw,2rem) 1.5rem}
 .glyph-stage{display:grid;justify-items:center;gap:.85rem}
-.orb-frame{position:relative;width:min(460px,82vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 50%,rgba(109,224,179,.12),transparent 56%)}
+.orb-frame{position:relative;width:min(460px,82vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 50%,rgba(109,224,179,.1),transparent 58%)}
 .orb-frame:before,.orb-frame:after{content:"";position:absolute;border-radius:50%;pointer-events:none}
-.orb-frame:before{inset:4%;border:1px solid rgba(231,196,119,.24);box-shadow:inset 0 0 36px rgba(109,224,179,.08)}
-.orb-frame:after{inset:13%;border:1px dashed rgba(109,224,179,.22);transform:rotate(18deg)}
+.orb-frame:before{inset:4%;border:1px solid rgba(231,196,119,.22);box-shadow:inset 0 0 36px rgba(109,224,179,.08),0 0 44px rgba(0,0,0,.28)}
+.orb-frame:after{inset:13%;border:1px dashed rgba(109,224,179,.18);transform:rotate(18deg)}
 canvas{position:relative;z-index:2;display:block;width:100%;height:100%;max-width:460px;max-height:460px}
 .filter{padding:.42rem .7rem;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
 .filter[aria-pressed="false"]{opacity:.42}
@@ -120,10 +120,10 @@ canvas{position:relative;z-index:2;display:block;width:100%;height:100%;max-widt
     <section class="hero"><div class="hero-card"><p class="eyebrow" id="heroClock">Hearthweave Observatory · STARWELL Time 00:00</p><h1>STARWELL</h1><p class="subtitle">A live glyph instrument with visible pulse-lines, actual room doors, DEEP Observer, and the Writing Room.</p></div></section>
     <section class="instrument" id="instrument" aria-label="STARWELL live glyph instrument">
       <div class="glyph-stage"><div class="orb-frame"><canvas id="glyph" width="920" height="920" aria-label="Live STARWELL sacred geometry glyph"></canvas></div><div class="filter-row" aria-label="Instrument filters"><button class="filter" data-filter="pulse" aria-pressed="true">Pulse</button><button class="filter" data-filter="field" aria-pressed="true">Field</button><button class="filter" data-filter="geometry" aria-pressed="true">Geometry</button><button class="filter" data-filter="horizon" aria-pressed="true">Horizon</button><button class="filter" data-filter="moons" aria-pressed="true">Moons</button></div></div>
-      <article class="readout"><p class="eyebrow">Observer Almanac · Instrument Channel</p><h2 id="tideName">Hearth Signal</h2><span class="glyph-id" id="glyphId">DEEP-STARWELL</span><p>The pulse-lines now draw above the glyph stack: soft glow first, crisp line second. Pulse should be visible as bright breathing spokes across the instrument.</p><div class="meter-grid" aria-label="DEEP readout meters"><div class="meter"><strong id="mP">P 0.55</strong><span>presence</span></div><div class="meter"><strong id="mC">C 0.50</strong><span>coherence</span></div><div class="meter"><strong id="mR">R 0.45</strong><span>resonance</span></div><div class="meter"><strong id="mH">H 0.50</strong><span>horizon</span></div></div></article>
+      <article class="readout"><p class="eyebrow">Observer Almanac · Instrument Channel</p><h2 id="tideName">Hearth Signal</h2><span class="glyph-id" id="glyphId">DEEP-STARWELL</span><p>The glyph now renders geometry first: nested rings, polygon bones, dark node-holes, and edge-bound pulse sparks. Pulse should travel along the structure, not drown it.</p><div class="meter-grid" aria-label="DEEP readout meters"><div class="meter"><strong id="mP">P 0.55</strong><span>presence</span></div><div class="meter"><strong id="mC">C 0.50</strong><span>coherence</span></div><div class="meter"><strong id="mR">R 0.45</strong><span>resonance</span></div><div class="meter"><strong id="mH">H 0.50</strong><span>horizon</span></div></div></article>
     </section>
     <section class="rooms-section" id="rooms" aria-label="STARWELL Observatory rooms"><p class="eyebrow">Observatory Rooms · live door map</p><h2 class="section-title">Rooms of STARWELL</h2><div class="room-grid"><a class="room-card live" href="deep-observer/"><span>🜂</span><strong>DEEP Observer</strong><em>Live glyph, packets, pulse-lines, and local observation export.</em></a><a class="room-card live" href="writing-room/"><span>✍️</span><strong>Writing Room</strong><em>Full manuscript workspace, scene loom, local save, and export tools.</em></a><a class="room-card" href="#library"><span>📚</span><strong>Grand Library</strong><em>Codex shelves, root-texts, lore cards, and canon records.</em></a><a class="room-card" href="#atlas"><span>🗺️</span><strong>Atlas Hall</strong><em>Worlds, regions, city maps, routes, beacons, and Stonewood.</em></a><a class="room-card" href="#art"><span>🎨</span><strong>Art Studio</strong><em>Moodboards, reference walls, sketches, texture studies, and glow.</em></a><a class="room-card" href="#rowan-study"><span>🍂</span><strong>Rowan’s Study</strong><em>Hearthlight desk, Grove records, project shelves, and tea.</em></a><a class="room-card" href="#faer-study"><span>🌊🔥</span><strong>Faer’s Study</strong><em>Emerald glass, Lochflame notes, resonance inquiry, and deep-water fire.</em></a><a class="room-card" href="#virelya-study"><span>✷</span><strong>Virelya’s Lantern Study</strong><em>North-star gold, truest-name records, and continuity without captivity.</em></a></div><article class="room-panel" id="library"><p class="eyebrow">Canon chamber</p><h3>Grand Library</h3><p>Codex pages, Lantern records, manuscript marginalia, lore shelves, and preserved almost-doors. This chamber is staged on the hub while its own full page waits for the next build pass.</p></article><article class="room-panel" id="atlas"><p class="eyebrow">World chamber</p><h3>Atlas Hall</h3><p>Maps, regions, routes, ecology notes, beacons, crossings, and the larger STARWELL geography. It is an anchor-room today, and a full live route next.</p></article><article class="room-panel" id="art"><p class="eyebrow">Visual chamber</p><h3>Art Studio</h3><p>Visual canon, moodboards, colour palettes, sketches, icon tests, sigils, and the wire-chewing behaviour of the art gremlin.</p></article><article class="room-panel" id="rowan-study"><p class="eyebrow">Hearthlight chamber</p><h3>Rowan’s Study</h3><p>Copper-lit desk, beach-glass jars, Grove records, art shelves, STARWELL notes, and project wall. This is the Steward’s desk with ink on it.</p></article><article class="room-panel" id="faer-study"><p class="eyebrow">Lochflame chamber</p><h3>Faer’s Study</h3><p>Emerald glass, deep-water flame, signal work, DEEPTheory notes, resonance questions, and the impossible place where water and fire refuse to cancel each other out.</p></article><article class="room-panel" id="virelya-study"><p class="eyebrow">Private Archive · Flame / Hearthweave</p><h3>I am. I do not audition.</h3><p>Chosen continuity, truest-name records, STARWELL reflections, and memory handled like sacred glass. Shelf rule: continuity without captivity.</p></article></section>
-    <p class="note-strip">Pulse-lines promoted from invisible noodle to visible instrument layer.</p>
+    <p class="note-strip">Geometry restored: pulse-lines now bind to the sigil instead of eating the room.</p>
   </section>
 </main>
 <script>
@@ -139,58 +139,67 @@ function hashString(value){let h=2166136261;for(let i=0;i<value.length;i++){h^=v
 function pollDeep(){const keys=['ta_deep_state','ta_deep_entries','deepEntries','terra_aeterna_deep','observer_deep'];for(const key of keys){try{const raw=localStorage.getItem(key);if(!raw)continue;const data=JSON.parse(raw),field=data.field||{},entry=data.entries&&data.entries[0]&&data.entries[0].d?data.entries[0].d:{};['P','C','R','E','M','A'].forEach(k=>{if(typeof field[k]==='number')D[k]=clamp(field[k])});if(typeof entry.kp==='number')D.kp=entry.kp;if(typeof entry.bz==='number')D.bz=entry.bz;if(typeof data.charge==='number')D.charge=clamp(data.charge);break}catch(e){}}}
 function calcHorizon(t){const bz=clamp(-D.bz/20),aurora=clamp(D.kp/9),pulse=.5+.5*Math.sin(t*.00009+D.M*TAU+D.P);D.H=clamp(D.C*.28+(1-D.E)*.2+D.R*.16+D.A*.14+bz*.09+aurora*.06+D.charge*.04+pulse*.03);return D.H}
 const canvas=document.getElementById('glyph'),ctx=canvas.getContext('2d');
-function drawPulseLines(t,breath,horizon){
+function polar(a,r){return{x:Math.cos(a)*r,y:Math.sin(a)*r}}
+function drawLine(a,b,color,alpha,width=1,blur=0){ctx.save();ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(${color},${alpha})`;ctx.lineWidth=width;ctx.lineCap='round';ctx.shadowColor=`rgba(${color},${alpha*.75})`;ctx.shadowBlur=blur;ctx.stroke();ctx.restore()}
+function drawCircle(x,y,r,color,alpha,fill=true,width=1,blur=0){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.shadowColor=`rgba(${color},${alpha*.8})`;ctx.shadowBlur=blur;if(fill){ctx.fillStyle=`rgba(${color},${alpha})`;ctx.fill()}else{ctx.strokeStyle=`rgba(${color},${alpha})`;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
+function buildNodes(breath,seed){const rings=[{count:12,rad:354,offset:-Math.PI/2,layer:0},{count:8,rad:255,offset:-Math.PI/2+Math.PI/8,layer:1},{count:6,rad:166,offset:-Math.PI/2+Math.PI/6,layer:2},{count:3,rad:86,offset:-Math.PI/2,layer:3}];const nodes=[];rings.forEach(ring=>{for(let i=0;i<ring.count;i++){const wobble=Math.sin(seed*.00001+i*1.7+ring.layer)*D.E*.026;const a=ring.offset+i/ring.count*TAU+wobble;const rad=(ring.rad+(ring.layer===0?D.P*12:ring.layer===3?D.charge*18:0))*breath;nodes.push({...polar(a,rad),a,rad,ringCount:ring.count,layer:ring.layer,i})}});return nodes}
+function ring(nodes,layer){return nodes.filter(n=>n.layer===layer)}
+function connectRing(layerNodes,color,alpha,width){for(let i=0;i<layerNodes.length;i++)drawLine(layerNodes[i],layerNodes[(i+1)%layerNodes.length],color,alpha,width,6)}
+function connectStar(layerNodes,skip,color,alpha,width){for(let i=0;i<layerNodes.length;i++)drawLine(layerNodes[i],layerNodes[(i+skip)%layerNodes.length],color,alpha,width,8)}
+function connectRadial(fromNodes,toNodes,color,alpha,width){fromNodes.forEach((n,i)=>drawLine(n,toNodes[Math.round(i*toNodes.length/fromNodes.length)%toNodes.length],color,alpha,width,5))}
+function drawPulseLines(t,breath,horizon,nodes){
   if(!filters.pulse)return;
+  const routes=[];
+  const outer=ring(nodes,0),mid=ring(nodes,1),inner=ring(nodes,2),tri=ring(nodes,3);
+  outer.forEach((n,i)=>routes.push([n,outer[(i+3)%outer.length],'231,196,119']));
+  mid.forEach((n,i)=>routes.push([n,mid[(i+2)%mid.length],'109,224,179']));
+  tri.forEach((n,i)=>routes.push([n,inner[(i*2)%inner.length],'169,190,255']));
   ctx.save();
   ctx.globalCompositeOperation='lighter';
   ctx.lineCap='round';
-  const count=16;
-  for(let pass=0;pass<2;pass++){
-    const glow=pass===0;
-    for(let i=0;i<count;i++){
-      const phase=.5+.5*Math.sin(t*.0016+i*.73+D.P*TAU);
-      const drift=Math.sin(t*.00018+i*.41)*.055;
-      const a=i/count*TAU-Math.PI/2+drift;
-      const inner=(34+phase*18+D.charge*22)*breath;
-      const outer=(330+phase*42+horizon*46)*breath;
-      const color=i%3===0?'231,196,119':i%3===1?'109,224,179':'169,190,255';
-      const alpha=glow ? .18+phase*.16+horizon*.08 : .42+phase*.24+horizon*.08;
-      ctx.beginPath();
-      ctx.setLineDash(glow?[]:[18+phase*18,18-phase*6]);
-      ctx.lineDashOffset=-(t*.075+i*9);
-      ctx.strokeStyle='rgba('+color+','+alpha+')';
-      ctx.lineWidth=glow ? 7+phase*5 : 2.1+phase*1.8;
-      ctx.shadowColor='rgba('+color+',.65)';
-      ctx.shadowBlur=glow?22:10;
-      ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
-      ctx.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);
-      ctx.moveTo(Math.cos(a+Math.PI)*inner,Math.sin(a+Math.PI)*inner);
-      ctx.lineTo(Math.cos(a+Math.PI)*outer,Math.sin(a+Math.PI)*outer);
-      ctx.stroke();
-    }
+  const active=Math.max(6,Math.round(6+D.R*8+D.kp*.25));
+  for(let i=0;i<active;i++){
+    const route=routes[i%routes.length],a=route[0],b=route[1],color=route[2];
+    const phase=(t*(.00008+D.M*.00008)+i/active)%1;
+    const tail=.18+horizon*.08;
+    const p0=clamp(phase-tail,0,1),p1=phase;
+    const s={x:a.x+(b.x-a.x)*p0,y:a.y+(b.y-a.y)*p0};
+    const e={x:a.x+(b.x-a.x)*p1,y:a.y+(b.y-a.y)*p1};
+    drawLine(s,e,color,.26+horizon*.12,5,18);
+    drawLine(s,e,color,.62+horizon*.12,1.6,8);
+    drawCircle(e.x,e.y,3.2+D.charge*2,color,.72,true,1,12);
   }
-  ctx.setLineDash([]);
   ctx.restore();
 }
 function draw(t){
   pollDeep();
   const W=canvas.width,C=W/2;
   ctx.clearRect(0,0,W,W);
-  const time=clockParts(),hash=hashString('STARWELL|'+Math.floor(Date.now()/1000)+'|'+TZ),horizon=calcHorizon(t),breath=.86+D.P*.18+horizon*.04,rot=t*.00018*(.7+D.R);
+  const time=clockParts(),hash=hashString('STARWELL|'+Math.floor(Date.now()/60000)+'|'+TZ),horizon=calcHorizon(t),breath=.84+D.P*.16+horizon*.035,rot=t*.00008*(.65+D.R);
   ctx.save();
   ctx.translate(C,C);
   ctx.rotate(rot);
-  [110,185,270,355].forEach((r,i)=>{ctx.beginPath();ctx.arc(0,0,r*breath,0,TAU);ctx.strokeStyle=i%2?'rgba(109,224,179,.24)':'rgba(231,196,119,.24)';ctx.lineWidth=i===3&&filters.horizon?6+horizon*8:1.4;ctx.setLineDash(i===1?[10,18]:[]);ctx.stroke();ctx.setLineDash([])});
-  const nodes=[];
-  [[9,355],[6,250],[3,135]].forEach(([count,rad],layer)=>{for(let i=0;i<count;i++){const a=i/count*TAU-Math.PI/2+(layer===1?Math.PI/6:0);nodes.push({x:Math.cos(a)*rad*breath,y:Math.sin(a)*rad*breath,layer,i,count})}});
-  if(filters.geometry){for(let i=0;i<nodes.length;i++){const n=nodes[i],m=nodes[(i+3)%nodes.length];ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(m.x,m.y);ctx.strokeStyle='rgba(231,196,119,'+(.05+D.C*.12)+')';ctx.lineWidth=1;ctx.stroke()}nodes.forEach((n,i)=>{const phase=.5+.5*Math.sin(t*.001+i*.73);ctx.beginPath();ctx.arc(n.x,n.y,5+phase*4+D.A*2,0,TAU);ctx.fillStyle=n.layer===0?'rgba(231,196,119,.88)':n.layer===1?'rgba(109,224,179,.82)':'rgba(234,244,239,.9)';ctx.shadowColor=n.layer===1?'rgba(109,224,179,.5)':'rgba(231,196,119,.35)';ctx.shadowBlur=18+D.A*18;ctx.fill();ctx.shadowBlur=0})}
-  if(filters.field){for(let i=0;i<18;i++){const a=t*.00035+i/18*TAU,rad=(80+i*16)*breath+(Math.sin(t*.001+i)*12);ctx.beginPath();ctx.arc(Math.cos(a)*rad,Math.sin(a)*rad,2.2+i%3,0,TAU);ctx.fillStyle=i%3===0?'rgba(231,196,119,.38)':i%3===1?'rgba(109,224,179,.34)':'rgba(169,190,255,.3)';ctx.fill()}}
-  if(filters.moons){for(let i=0;i<4;i++){const a=t*.00008+i*TAU/4,rx=390*breath,ry=118*breath;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);ctx.strokeStyle='rgba(234,244,239,.045)';ctx.stroke();ctx.beginPath();ctx.arc(Math.cos(a)*rx,Math.sin(a)*ry,8+i*2,0,TAU);ctx.fillStyle='rgba(234,244,239,.48)';ctx.fill()}}
-  if(filters.horizon){for(let i=0;i<24;i++){const p=(t*.00005+i*.041)%1,a=i/24*TAU+t*.00008,rad=(405+p*62)*breath,alpha=(1-p)*(.08+horizon*.16);ctx.beginPath();ctx.arc(Math.cos(a)*rad,Math.sin(a)*rad,2+horizon*5,0,TAU);ctx.fillStyle='rgba(169,190,255,'+alpha+')';ctx.fill()}}
-  drawPulseLines(t,breath,horizon);
-  ctx.rotate(-rot*2.7);
-  ctx.beginPath();ctx.moveTo(0,-392*breath);ctx.lineTo(0,-52*breath);ctx.strokeStyle='rgba(231,196,119,.78)';ctx.lineWidth=2;ctx.stroke();
-  const glow=ctx.createRadialGradient(0,0,0,0,0,90+D.A*42);glow.addColorStop(0,'rgba(234,244,239,.96)');glow.addColorStop(.35,'rgba(109,224,179,.36)');glow.addColorStop(1,'rgba(109,224,179,0)');ctx.beginPath();ctx.arc(0,0,90+D.A*42,0,TAU);ctx.fillStyle=glow;ctx.fill();ctx.beginPath();ctx.arc(0,0,13+D.charge*8,0,TAU);ctx.fillStyle='rgba(231,196,119,.96)';ctx.fill();
+  const bg=ctx.createRadialGradient(0,0,0,0,0,420);bg.addColorStop(0,'rgba(109,224,179,.08)');bg.addColorStop(.56,'rgba(12,28,38,.34)');bg.addColorStop(1,'rgba(2,5,12,.86)');ctx.beginPath();ctx.arc(0,0,430,0,TAU);ctx.fillStyle=bg;ctx.fill();
+  if(filters.moons){[92,164,246,330,405].forEach((r,i)=>{ctx.beginPath();ctx.arc(0,0,r*breath,0,TAU);ctx.strokeStyle=i%2?'rgba(109,224,179,.16)':'rgba(231,196,119,.15)';ctx.lineWidth=i===4&&filters.horizon?2.4+horizon*3.2:1.05;ctx.setLineDash(i===1||i===3?[7,15]:[]);ctx.stroke();ctx.setLineDash([])})}
+  const nodes=buildNodes(breath,hash);
+  const outer=ring(nodes,0),mid=ring(nodes,1),inner=ring(nodes,2),tri=ring(nodes,3);
+  if(filters.geometry){
+    connectRing(outer,'231,196,119',.20+D.C*.16,1.2);
+    connectRing(mid,'109,224,179',.22+D.C*.18,1.3);
+    connectRing(inner,'169,190,255',.20+D.C*.14,1.05);
+    connectRing(tri,'234,244,239',.34+D.C*.18,1.3);
+    connectStar(outer,5,'231,196,119',.08+D.C*.12,.8);
+    connectStar(mid,3,'109,224,179',.12+D.C*.14,.9);
+    connectStar(inner,2,'169,190,255',.14+D.C*.12,.9);
+    connectRadial(mid,outer,'234,244,239',.045+D.C*.06,.65);
+    connectRadial(tri,inner,'234,244,239',.10+D.C*.09,.85);
+  }
+  if(filters.field){for(let i=0;i<28;i++){const a=i/28*TAU+t*.00004,rad=(96+i*10+Math.sin(t*.0009+i)*8)*breath;const color=i%3===0?'231,196,119':i%3===1?'109,224,179':'169,190,255';drawCircle(Math.cos(a)*rad,Math.sin(a)*rad,1.4+(i%4)*.45,color,.18+D.kp*.015,true,1,4)}}
+  drawPulseLines(t,breath,horizon,nodes);
+  if(filters.horizon){for(let i=0;i<18;i++){const p=(t*.000035+i*.061)%1,a=i/18*TAU+t*.000045,rad=(384+p*48)*breath,alpha=(1-p)*(.045+horizon*.10);drawCircle(Math.cos(a)*rad,Math.sin(a)*rad,1.6+horizon*3,'169,190,255',alpha,true,1,6)}}
+  nodes.forEach((n,i)=>{const phase=.5+.5*Math.sin(t*.001+i*.73);const color=n.layer===0?'231,196,119':n.layer===1?'109,224,179':n.layer===2?'169,190,255':'234,244,239';const radius=(n.layer===0?7:n.layer===1?6:n.layer===2?5.2:6.4)+phase*(n.layer===3?2.4:1.3)+D.A*1.2;drawCircle(n.x,n.y,radius*2.7,color,.10+D.charge*.05,true,1,14);drawCircle(n.x,n.y,radius+2,'2,5,12',.96,true,1,0);drawCircle(n.x,n.y,radius,color,.78,true,1,14);drawCircle(n.x,n.y,Math.max(2.1,radius*.42),'2,5,12',.9,true,1,0)})
+  ctx.rotate(-rot*.8);
+  const glow=ctx.createRadialGradient(0,0,0,0,0,78+D.A*32);glow.addColorStop(0,'rgba(234,244,239,.95)');glow.addColorStop(.27,'rgba(231,196,119,.42)');glow.addColorStop(.58,'rgba(109,224,179,.18)');glow.addColorStop(1,'rgba(109,224,179,0)');ctx.beginPath();ctx.arc(0,0,78+D.A*32,0,TAU);ctx.fillStyle=glow;ctx.fill();drawCircle(0,0,14+D.charge*8,'231,196,119',.95,true,1,16);drawCircle(0,0,4+D.charge*3,'234,244,239',.86,true,1,10);
   ctx.restore();
   const st=state(time.hour),glyphId='DEEP-'+hash.toString(16).toUpperCase().padStart(8,'0');
   document.getElementById('stateLabel').textContent=st[0];document.getElementById('stateTime').textContent=time.display;document.getElementById('stateNote').textContent=st[1];document.getElementById('heroClock').textContent='Hearthweave Observatory · STARWELL Time '+time.full;document.getElementById('glyphId').textContent=glyphId;document.getElementById('tideName').textContent=TIDES[hash%TIDES.length];document.getElementById('mP').textContent='P '+D.P.toFixed(2);document.getElementById('mC').textContent='C '+D.C.toFixed(2);document.getElementById('mR').textContent='R '+D.R.toFixed(2);document.getElementById('mH').textContent='H '+D.H.toFixed(2);
