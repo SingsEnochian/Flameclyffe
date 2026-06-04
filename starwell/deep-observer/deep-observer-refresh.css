@@ -1,0 +1,46 @@
+/* DEEP Observer Observation Refresh v0.1 */
+#observerRefreshBtn::before{
+  content:"⟳";
+  font-size:.92rem;
+}
+
+#observerRefreshBtn{
+  --gem-border-hot:rgba(168,204,224,.72);
+}
+
+#observerRefreshBtn.refreshing{
+  border-color:rgba(168,204,224,.72) !important;
+  color:rgba(232,244,252,.98) !important;
+  box-shadow:
+    0 14px 32px rgba(0,0,0,.30),
+    0 0 24px rgba(168,204,224,.20),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -10px 22px rgba(0,0,0,.34) !important;
+}
+
+#observerRefreshBtn.refreshing::before{
+  animation:observerRefreshSpin .82s linear infinite;
+}
+
+#observerRefreshBtn.refreshed{
+  --gem-border-hot:rgba(109,224,179,.72);
+  border-color:rgba(109,224,179,.64) !important;
+  color:rgba(210,255,232,.96) !important;
+  box-shadow:0 0 24px rgba(109,224,179,.18), inset 0 0 0 1px rgba(109,224,179,.09) !important;
+}
+
+#observerRefreshBtn.refresh-error{
+  --gem-border-hot:rgba(225,92,92,.72);
+  border-color:rgba(225,92,92,.62) !important;
+  color:rgba(255,210,210,.96) !important;
+  box-shadow:0 0 24px rgba(225,92,92,.16), inset 0 0 0 1px rgba(225,92,92,.09) !important;
+}
+
+@keyframes observerRefreshSpin{
+  to{transform:translateY(-50%) rotate(360deg)}
+}
+
+body.low-stim #observerRefreshBtn.refreshing::before,
+body.reduced-motion #observerRefreshBtn.refreshing::before{
+  animation:none;
+}
