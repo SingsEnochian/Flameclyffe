@@ -1,8 +1,9 @@
-/* DEEP Observer Dev Console v0.1
-   Writes controlled local override packets into the existing observer localStorage seam. */
+/* DEEP Observer Dev Console v0.2
+   Hidden-by-default local override console. This is obscurity, not real auth. */
 'use strict';
 
 (() => {
+  const DEV_ACCESS_KEY = 'deep_observer_dev_access_v1';
   const DEV_ENABLED_KEY = 'deep_observer_dev_console_open_v1';
   const OVERRIDE_ENABLED_KEY = 'deep_observer_dev_override_enabled_v1';
   const LOCAL_PACKET_KEY = 'ta_deep_state';
@@ -19,6 +20,32 @@
 
   function getStoredPacket() {
     try { return JSON.parse(localStorage.getItem(LOCAL_PACKET_KEY) || '{}'); } catch (e) { return {}; }
+  }
+
+  function hasDevAccess() {
+    try { return localStorage.getItem(DEV_ACCESS_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function setDevAccess(enabled) {
+    try { localStorage.setItem(DEV_ACCESS_KEY, enabled ? '1' : '0'); } catch (e) {}
+    document.body.classList.toggle('observer-dev-access', enabled);
+  }
+
+  function checkUrlAccess() {
+    const params = new URLSearchParams(window.location.search);
+    const flag = params.get('observerDev');
+    if (flag === '1' || window.location.hash === '#observer-dev') {
+      setDevAccess(true);
+      setHintSafe('Observer DEV access unlocked on this device.');
+      return true;
+    }
+    if (flag === '0') {
+      hideDevAccess();
+      setHintSafe('Observer DEV access hidden on this device.');
+      return false;
+    }
+    document.body.classList.toggle('observer-dev-access', hasDevAccess());
+    return hasDevAccess();
   }
 
   function readCurrentFromPacket() {
@@ -41,7 +68,7 @@
   function buildPacket() {
     return {
       observerDevOverride: true,
-      schema: 'deep-observer-dev-console-v0.1',
+      schema: 'deep-observer-dev-console-v0.2',
       timestamp: new Date().toISOString(),
       note: 'Local experimental/theoretical override packet. This is a developer/simulation layer, not physical proof.',
       field: {
@@ -77,7 +104,27 @@
     updateStatus();
   }
 
+  function hideDevAccess() {
+    state.enabled = false;
+    try {
+      localStorage.setItem(OVERRIDE_ENABLED_KEY, '0');
+      localStorage.setItem(DEV_ENABLED_KEY, '0');
+      localStorage.removeItem(DEV_ACCESS_KEY);
+      const packet = getStoredPacket();
+      if (packet.observerDevOverride) localStorage.removeItem(LOCAL_PACKET_KEY);
+    } catch (e) {}
+    setConsoleOpen(false);
+    removeButton();
+    document.getElementById('observerDevConsole')?.remove();
+    document.body.classList.remove('observer-dev-access');
+  }
+
+  function removeButton() {
+    document.getElementById('observerDevBtn')?.remove();
+  }
+
   function ensureButton() {
+    if (!hasDevAccess()) { removeButton(); return; }
     if (document.getElementById('observerDevBtn')) return;
     const dock = document.querySelector('.filter-row');
     if (!dock) return;
@@ -92,6 +139,7 @@
   }
 
   function ensureConsole() {
+    if (!hasDevAccess()) return;
     if (document.getElementById('observerDevConsole')) return;
     const panel = document.createElement('aside');
     panel.id = 'observerDevConsole';
@@ -102,7 +150,7 @@
       <div class="dev-head">
         <div class="dev-title">
           <h3>Observer Dev Console</h3>
-          <p>Local override seam for experimental model tuning. This does not change production maths permanently.</p>
+          <p>Local override seam for experimental model tuning. Hidden access is convenience, not authentication.</p>
         </div>
         <button class="dev-close" id="devClose" type="button" aria-label="Close developer console">×</button>
       </div>
@@ -134,8 +182,9 @@
         <button class="dev-action" id="devCopy" type="button">Copy JSON</button>
         <button class="dev-action" id="devImport" type="button">Import JSON</button>
         <button class="dev-action danger" id="devReset" type="button">Reset override</button>
+        <button class="dev-action danger" id="devHideAccess" type="button">Hide Dev Access</button>
       </div>
-      <p class="dev-boundary"><b>Boundary:</b> Dev values are local simulations and theoretical tuning aids. They should be used to test the mathematical translation layer, not to claim hidden reality.</p>
+      <p class="dev-boundary"><b>Boundary:</b> Dev values are local simulations and theoretical tuning aids. Hidden access keeps casual visitors out of the cockpit, but true security requires authenticated admin hosting.</p>
     `;
     document.body.appendChild(panel);
     buildControls();
@@ -162,6 +211,10 @@
 
   function bindPanel() {
     document.getElementById('devClose')?.addEventListener('click', () => setConsoleOpen(false));
+    document.getElementById('devHideAccess')?.addEventListener('click', () => {
+      hideDevAccess();
+      setHintSafe('DEV access hidden. Use ?observerDev=1 or #observer-dev to unlock again on this device.');
+    });
     document.getElementById('devEnable')?.addEventListener('click', () => {
       state.enabled = !state.enabled;
       try { localStorage.setItem(OVERRIDE_ENABLED_KEY, state.enabled ? '1' : '0'); } catch (e) {}
@@ -279,6 +332,7 @@
   }
 
   function setConsoleOpen(open) {
+    if (!hasDevAccess()) { removeButton(); return; }
     ensureConsole();
     const panel = document.getElementById('observerDevConsole');
     if (!panel) return;
@@ -294,10 +348,11 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     readCurrentFromPacket();
+    const access = checkUrlAccess();
+    if (!access) { removeButton(); return; }
     ensureButton();
     ensureConsole();
     syncControls();
-    const packet = getStoredPacket();
     if (state.enabled) writeOverride();
     let open = false;
     try { open = localStorage.getItem(DEV_ENABLED_KEY) === '1'; } catch (e) {}
