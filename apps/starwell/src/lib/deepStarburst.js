@@ -1,5 +1,3 @@
-import { clamp } from './number.js';
-
 const DEFAULT_DEEP = {
   P: 0.42,
   C: 0.68,
@@ -10,6 +8,10 @@ const DEFAULT_DEEP = {
   charge: 0.94,
   dphi: 0,
 };
+
+function clamp(value, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
+}
 
 function numberOr(value, fallback) {
   const parsed = Number(value);
