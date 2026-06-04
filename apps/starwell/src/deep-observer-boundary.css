@@ -1,4 +1,5 @@
 @import './starwell-controls.css';
+@import './deep-starburst.css';
 
 /* DEEP Observer boundary pass
    Loads after the general STARWELL scale pass so the live glyph panel obeys the UI Boundary Contract.
@@ -20,6 +21,14 @@
 }
 
 .live-glyph-panel .glyph-orb-wrap {
+  --n: 18;
+  --w: min(100%, clamp(230px, 31vw, 372px));
+  --m: 42%;
+  --flare-hue: 198;
+  --flare-alpha: 0.26;
+  --flare-jitter: 0px;
+  --flare-rot: 32deg;
+
   grid-area: stage;
   width: min(100%, 420px);
   max-width: 100%;
@@ -31,8 +40,21 @@
 }
 
 .live-glyph-panel .glyph-orb-wrap::before {
-  width: min(100%, clamp(230px, 31vw, 372px));
-  height: min(100%, clamp(230px, 31vw, 372px));
+  width: var(--w);
+  height: var(--w);
+  background:
+    radial-gradient(circle, hsla(var(--flare-hue), 76%, 78%, 0.16), transparent 58%),
+    repeating-conic-gradient(
+      from var(--flare-rot),
+      hsla(var(--flare-hue), 88%, 76%, var(--flare-alpha)) 0 calc(0.5turn / var(--n)),
+      transparent 0 calc(1turn / var(--n))
+    );
+  filter:
+    blur(0.2px)
+    drop-shadow(0 0 14px hsla(var(--flare-hue), 88%, 74%, 0.2));
+  opacity: 0.72;
+  transform: rotate(var(--flare-rot)) translate(var(--flare-jitter), var(--flare-jitter));
+  mix-blend-mode: screen;
 }
 
 .live-glyph-panel .glyph-orb-wrap::after {
