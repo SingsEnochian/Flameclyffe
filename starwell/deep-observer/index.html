@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>STARWELL · DEEP Observer</title>
-<meta name="description" content="Live STARWELL DEEP Observer teaching instrument with direct readings, dual time, DEEP variables, multisensory feedback, browser compatibility fallbacks, sacred geometry, observation refresh, dev console, and local observation packet export.">
+<meta name="description" content="Live STARWELL DEEP Observer teaching instrument with direct readings, dual time, DEEP variables, multisensory feedback, browser compatibility fallbacks, sacred geometry, observation refresh, dev console, Resonance Bus sound layering, and local observation packet export.">
 <link rel="stylesheet" href="deep-observer.css">
 <link rel="stylesheet" href="deep-observer-dual-time.css">
 <link rel="stylesheet" href="deep-observer-layout-hotfix.css">
@@ -14,12 +14,14 @@
 <link rel="stylesheet" href="deep-observer-codex.css">
 <link rel="stylesheet" href="deep-observer-dev-console.css">
 <link rel="stylesheet" href="deep-observer-refresh.css">
+<script src="../../assets/deep-resonance-bus.js" defer></script>
 <script src="deep-observer-compat.js" defer></script>
 <script src="deep-observer.js" defer></script>
 <script src="deep-observer-refresh.js" defer></script>
 <script src="deep-observer-dual-time.js" defer></script>
 <script src="deep-observer-cloak.js" defer></script>
 <script src="deep-observer-sensory.js" defer></script>
+<script src="deep-observer-resonance-adapter.js" defer></script>
 <script src="deep-observer-codex.js" defer></script>
 <script src="deep-observer-dev-console.js" defer></script>
 </head>
@@ -43,24 +45,24 @@
       <div class="hero-card">
         <p class="eyebrow" id="heroClock">DEEP Observer · STARWELL Time 00:00:00</p>
         <h1>DEEP Observer</h1>
-        <p class="subtitle">A live teaching surface for direct readings, dual-time context, DEEP variables, multisensory gem feedback, browser-safe fallbacks, sacred geometry, edge-bound pulse sparks, horizon signal, observation refresh, developer overrides, and local observation packet export.</p>
+        <p class="subtitle">A live teaching surface for direct readings, dual-time context, DEEP variables, multisensory gem feedback, Resonance Bus sound layering, browser-safe fallbacks, sacred geometry, edge-bound pulse sparks, horizon signal, and local observation packet export.</p>
       </div>
     </section>
 
     <section class="quick-guide" aria-label="DEEP Observer quick guide">
       <article>
         <strong>What it tracks</strong>
-        <p>DEEP separates direct readings from model variables. Direct readings include Waking World time, Terra Aeterna time, moon, Kp, Bz, source, local packet state, motion settings, and touch input.</p>
-        <code>direct readings → translation path → visible behaviour</code>
+        <p>DEEP separates direct readings from model variables. Direct readings include Waking World time, Terra Aeterna time, moon, Kp, Bz, source, local packet state, motion settings, sound field state, and touch input.</p>
+        <code>direct readings → translation path → visible and audible behaviour</code>
       </article>
       <article>
         <strong>Why it matters</strong>
-        <p>The instrument shows how inputs become visible effects. Time now has two clocks: user local Waking World time and derived Terra Aeterna local time.</p>
-        <code>one reading, two temporal contexts</code>
+        <p>The instrument shows how inputs become visible effects. Time has two clocks, and the Resonance Bus lets the same packet become layered sound.</p>
+        <code>one reading, two temporal contexts, one shared bus</code>
       </article>
       <article>
         <strong>How to use it</strong>
-        <p>Tap the outer sensor nodes to follow direct-reading pulses. Use Refresh for a fresh browser/DEEP pull, KEY for plain English, and DEV for local experimental overrides.</p>
+        <p>Tap the outer sensor nodes to follow direct-reading pulses. Turn on Sound, then Field in the floating Resonance Bus to hear the DEEP packet mapped into panning layers.</p>
         <code>same instrument, graceful browser fallbacks</code>
       </article>
     </section>
@@ -102,8 +104,8 @@
 
         <div class="direct-card" id="directCard">
           <h3 id="directTitle">Direct Readings Layer</h3>
-          <p id="directText">Direct readings are inputs the instrument actually receives: time, environmental values, source labels, local packets, accessibility settings, and your touch. Tap one to watch its pulse travel into the glyph.</p>
-          <code id="directPath">Direct reading → translation path → visible behaviour</code>
+          <p id="directText">Direct readings are inputs the instrument actually receives: time, environmental values, source labels, local packets, accessibility settings, sound field state, and your touch. Tap one to watch its pulse travel into the glyph.</p>
+          <code id="directPath">Direct reading → translation path → visible behaviour → optional sound layer</code>
           <div class="direct-meta">
             <span id="directSource"><b>Source:</b> select a reading</span>
             <span id="directAffects"><b>Affects:</b> visible instrument behaviour</span>
@@ -114,8 +116,8 @@
 
         <div class="teach-card">
           <h3 id="teachTitle">How to read this glyph</h3>
-          <p id="teachText">The glyph is a visual translation layer. Numbers do not prove anything by themselves, but they make the current observation state easier to inspect: structure, motion, coherence, and edge activity all become visible.</p>
-          <code id="teachFormula">P → node count · C → edge clarity · R/M → spark traffic · moon → harmonic rings · charge → centre glow</code>
+          <p id="teachText">The glyph is a visual translation layer. Numbers do not prove anything by themselves, but they make the current observation state easier to inspect: structure, motion, coherence, and edge activity all become visible and, when Field is on, audible.</p>
+          <code id="teachFormula">P → node count · C → edge clarity · R/M → spark traffic · moon → harmonic rings · charge → centre glow · bus → layered sound</code>
         </div>
 
         <div class="meter-grid" aria-label="DEEP readout meters">
@@ -144,11 +146,11 @@
     <section class="legend" aria-label="DEEP visual legend">
       <article><strong>Direct readings</strong><p>The outer sensor ring shows inputs the instrument actually receives. Touch Time to see Waking World and Terra Aeterna clocks answer together.</p></article>
       <article><strong>Model variables</strong><p>The inner glyph shows interpretive variables such as presence, coherence, resonance, entropy, alignment, charge, and horizon.</p></article>
-      <article><strong>Translation paths</strong><p>The lines between them show how a direct input becomes visible behaviour. This is the teaching layer, not just decoration.</p></article>
+      <article><strong>Translation paths</strong><p>The lines between them show how a direct input becomes visible behaviour. With Field enabled, the same packet is also mapped into layered, panning sound.</p></article>
     </section>
 
-    <p class="safety"><strong>Observer Data Safety:</strong> this public page reads bridge or browser state when available and keeps exports local unless you copy or save them. Refresh saves a local browser snapshot for provenance; sound is generated locally after you turn it on; haptics use device vibration only where supported; DEV writes only local override packets in this browser; unsupported browser features fall back instead of breaking the instrument.</p>
-    <p class="note-strip">Observation Refresh v0.1: Refresh pulls native browser context, saves a local provenance snapshot, and asks the DEEP engine to refresh bridge/local state without hardcoding new maths.</p>
+    <p class="safety"><strong>Observer Data Safety:</strong> this public page reads bridge or browser state when available and keeps exports local unless you copy or save them. Sound is generated locally in the browser after you turn it on; Resonance Bus layers use the displayed packet and do not change the underlying reading; haptics use device vibration only where supported; unsupported browser features fall back instead of breaking the instrument.</p>
+    <p class="note-strip">Gem Interface Phase 1: longer frosted control dock, colour-coordinated gem buttons, carved rune accents, and Resonance Bus v1 layered sound.</p>
   </section>
 </main>
 </body>
