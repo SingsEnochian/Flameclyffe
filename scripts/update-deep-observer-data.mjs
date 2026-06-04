@@ -8,10 +8,22 @@ const OUT_PATH = 'data/deep-current.json';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const latest = (rows) => Array.isArray(rows) && rows.length ? rows[rows.length - 1] : null;
 
-async function json(url) {
-  const res = await fetch(url, { headers: { 'accept': 'application/json' } });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-  return res.json();
+async function jsonWithRetry(url, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const res = await fetch(url, {
+        headers: { 'accept': 'application/json' },
+        timeout: 15000 // 15 second timeout
+      });
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+      return res.json();
+    } catch (err) {
+      if (i === maxRetries - 1) throw err;
+      const delay = Math.pow(2, i) * 1000; // Exponential backoff: 1s, 2s, 4s
+      console.log(`Retry ${i + 1}/${maxRetries} after ${delay}ms for ${url}...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
 }
 
 function moonInfo(date = new Date()) {
@@ -101,10 +113,10 @@ async function main() {
   weatherUrl.searchParams.set('timezone', 'auto');
 
   const [weather, kpRows, magRows, plasmaRows] = await Promise.all([
-    json(weatherUrl.toString()),
-    json('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
-    json('https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json'),
-    json('https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json')
+    jsonWithRetry(weatherUrl.toString()),
+    jsonWithRetry('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
+    jsonWithRetry('https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json'),
+    jsonWithRetry('https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json')
   ]);
 
   await mkdir('data', { recursive: true });
