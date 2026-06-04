@@ -76,11 +76,11 @@
       boundary: 'Kp is environmental context. It does not diagnose the user or prove a hidden event.'
     },
     bz: {
-      title: 'Bz Component', rune: '⇵', plain: 'magnetic orientation', value: v => `${v.toFixed(1)} · ${v < -1 ? 'southward opening' : v > 1 ? 'northward holding' : 'balanced orientation'}`,
-      science: 'A north-south component of the interplanetary magnetic field. Southward values are often more geoeffective.',
-      instrument: 'Bz shifts colour temperature and horizon tint inside the active theme.',
-      myth: 'The threshold tilts. Colour changes show how the gate-current leans.',
-      boundary: 'Bz is used here as a colour and field-orientation input, not as standalone prophecy.'
+      title: 'Bz Component', rune: '⇵', plain: 'field thermal mood', value: v => `${v.toFixed(1)} · ${v <= -1 ? 'warm active field' : v >= 1 ? 'cool quiet field' : 'neutral liminal field'}`,
+      science: 'A north-south component of the interplanetary magnetic field. In this instrument, positive Bz is treated as quieter/holding, near-zero Bz as balanced or liminal, and negative Bz as more open/active.',
+      instrument: 'Bz sets the thermal mood of the palette: positive values cool and quiet the instrument, near-zero values hold neutral silver, and negative values warm and activate the field.',
+      myth: 'Positive Bz closes the gate into moon-glass quiet. Near-zero Bz holds the silver threshold. Negative Bz opens the gate; the sky-current heats and the field grows teeth.',
+      boundary: 'Bz is used here as an experimental palette and field-orientation input, not as standalone prediction, proof, or prophecy.'
     },
     source: {
       title: 'Data Source', rune: '⟁', plain: 'packet provenance', value: v => `${v} · packet provenance`,
