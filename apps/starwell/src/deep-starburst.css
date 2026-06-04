@@ -1,0 +1,111 @@
+/* DEEP Starburst primitive
+   Mathematical flare layer inspired by CSS gradient starburst construction.
+   Data enters through custom properties from deepStarburst.js.
+   Use as sensor flares and aura anchors before replacing any core glyph machinery. */
+
+.deep-starburst-field {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.deep-starburst {
+  --n: 16;
+  --w: 132px;
+  --m: 44%;
+  --flare-hue: 190;
+  --flare-alpha: 0.34;
+  --flare-jitter: 0px;
+  --flare-rot: 0deg;
+
+  position: absolute;
+  width: var(--w);
+  aspect-ratio: 1;
+  opacity: var(--flare-alpha);
+  transform: rotate(var(--flare-rot)) translate(var(--flare-jitter), calc(var(--flare-jitter) * -0.55));
+  transform-origin: center;
+  filter:
+    drop-shadow(0 0 10px hsla(var(--flare-hue), 88%, 74%, 0.26))
+    drop-shadow(0 0 22px hsla(var(--flare-hue), 90%, 62%, 0.12));
+  background:
+    repeating-conic-gradient(
+      from -0.5turn,
+      hsla(var(--flare-hue), 92%, 74%, 0.92) 0 calc(0.5turn / var(--n)),
+      transparent 0 calc(1turn / var(--n))
+    );
+  clip-path: circle(50%);
+  -webkit-mask: radial-gradient(circle, transparent var(--m), #000 calc(var(--m) + 0.5px));
+  mask: radial-gradient(circle, transparent var(--m), #000 calc(var(--m) + 0.5px));
+  mix-blend-mode: screen;
+  animation: deepStarburstPulse 7s ease-in-out infinite;
+}
+
+.deep-starburst::before,
+.deep-starburst::after {
+  content: '';
+  position: absolute;
+  inset: 17%;
+  border-radius: 50%;
+  border: 1px solid hsla(var(--flare-hue), 80%, 78%, 0.34);
+}
+
+.deep-starburst::after {
+  inset: 32%;
+  border-style: dashed;
+  opacity: 0.55;
+  animation: deepStarburstCounter 11s linear infinite;
+}
+
+.deep-starburst-core {
+  width: min(var(--w), 230px);
+  opacity: calc(var(--flare-alpha) * 0.62);
+}
+
+.deep-starburst-sensor {
+  opacity: calc(var(--flare-alpha) * 0.52);
+  animation-duration: 9s;
+}
+
+.deep-starburst-sensor[data-sensor='presence'] { top: 4%; left: 50%; translate: -50% 0; }
+.deep-starburst-sensor[data-sensor='clarity'] { top: 18%; right: 7%; }
+.deep-starburst-sensor[data-sensor='entropy'] { right: 8%; bottom: 18%; }
+.deep-starburst-sensor[data-sensor='moon'] { bottom: 5%; left: 50%; translate: -50% 0; }
+.deep-starburst-sensor[data-sensor='geomagnetic'] { left: 8%; bottom: 18%; }
+.deep-starburst-sensor[data-sensor='charge'] { top: 18%; left: 7%; }
+
+@keyframes deepStarburstPulse {
+  0%, 100% {
+    scale: 0.985;
+    filter:
+      drop-shadow(0 0 9px hsla(var(--flare-hue), 88%, 74%, 0.22))
+      drop-shadow(0 0 20px hsla(var(--flare-hue), 90%, 62%, 0.1));
+  }
+  50% {
+    scale: 1.018;
+    filter:
+      drop-shadow(0 0 14px hsla(var(--flare-hue), 88%, 78%, 0.36))
+      drop-shadow(0 0 34px hsla(var(--flare-hue), 90%, 66%, 0.18));
+  }
+}
+
+@keyframes deepStarburstCounter {
+  to { rotate: -360deg; }
+}
+
+@media (max-width: 640px) {
+  .deep-starburst-sensor {
+    opacity: calc(var(--flare-alpha) * 0.38);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deep-starburst,
+  .deep-starburst::after {
+    animation: none;
+  }
+}
