@@ -8,5 +8,8 @@ export default defineConfig({
   build: {
     outDir: '../../dist/starwell',
     emptyOutDir: true,
+    rollupOptions: {
+      input: 'apps/starwell/index.html',
+    },
   },
 });
