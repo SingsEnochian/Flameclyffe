@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-05T03:25:17.058Z",
+  "generated_at": "2026-06-05T11:24:47.537Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,52 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-04T23:15",
-    "sky": "Night",
+    "time": "2026-06-05T07:15",
+    "sky": "Day",
     "current": {
-      "time": "2026-06-04T23:15",
+      "time": "2026-06-05T07:15",
       "interval": 900,
-      "temperature_2m": 72.3,
-      "relative_humidity_2m": 67,
-      "is_day": 0,
+      "temperature_2m": 68.3,
+      "relative_humidity_2m": 78,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 1,
-      "cloud_cover": 29,
-      "pressure_msl": 1020.4,
-      "wind_speed_10m": 5.3,
-      "wind_direction_10m": 57
+      "weather_code": 0,
+      "cloud_cover": 0,
+      "pressure_msl": 1020.2,
+      "wind_speed_10m": 2.2,
+      "wind_direction_10m": 307
     }
   },
   "space_weather": {
     "kp": {
-      "value": 1.33,
-      "time_tag": "2026-06-05T00:00:00",
-      "a_running": 5
+      "value": 2,
+      "time_tag": "2026-06-05T06:00:00",
+      "a_running": 7
     },
     "solar_wind": {
-      "time_tag": "2026-06-05 03:22:00.000",
-      "bz": 4.95,
-      "bt": 7.27,
-      "density": 2.49,
-      "speed": 401.2
+      "time_tag": "2026-06-05 11:22:00.000",
+      "bz": -8.69,
+      "bt": 17.14,
+      "density": 5.34,
+      "speed": 565.7
     }
   },
   "moon": {
-    "age_days": 19.41,
-    "illumination": 77.5,
+    "age_days": 19.74,
+    "illumination": 74.5,
     "name": "Waning Gibbous"
   },
   "field": {
-    "P": 0.5422222222222219,
-    "C": 0.5919047619047619,
-    "R": 0.8416666666666666,
-    "E": 0.5926923076923076,
-    "M": 0.775,
-    "A": 0.6530769230769231,
-    "T": 0.6838947927350427,
-    "H": 0.6452093101343102,
-    "dpdt": 0.8416666666666666
+    "P": 0.6000000000000005,
+    "C": 0.73,
+    "R": 1,
+    "E": 0.9001071428571428,
+    "M": 0.745,
+    "A": 0.9846153846153847,
+    "T": 0.7655544691697193,
+    "H": 0.9001036935286935,
+    "dpdt": 1
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
