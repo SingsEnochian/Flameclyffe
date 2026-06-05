@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-05T21:07:00.084Z",
+  "generated_at": "2026-06-05T22:40:55.084Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-05T17:00",
+    "time": "2026-06-05T18:30",
     "sky": "Day",
     "current": {
-      "time": "2026-06-05T17:00",
+      "time": "2026-06-05T18:30",
       "interval": 900,
-      "temperature_2m": 81.8,
-      "relative_humidity_2m": 57,
+      "temperature_2m": 80.1,
+      "relative_humidity_2m": 64,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
-      "cloud_cover": 6,
-      "pressure_msl": 1018.7,
-      "wind_speed_10m": 9.4,
-      "wind_direction_10m": 85
+      "cloud_cover": 1,
+      "pressure_msl": 1018.9,
+      "wind_speed_10m": 9,
+      "wind_direction_10m": 96
     }
   },
   "space_weather": {
@@ -37,27 +37,27 @@
       "a_running": 48
     },
     "solar_wind": {
-      "time_tag": "2026-06-05 21:03:00.000",
-      "bz": -5.13,
-      "bt": 6.96,
-      "density": 1.75,
-      "speed": 622.6
+      "time_tag": "2026-06-05 22:38:00.000",
+      "bz": -3.2,
+      "bt": 6.78,
+      "density": 1.12,
+      "speed": 582.7
     }
   },
   "moon": {
-    "age_days": 20.15,
-    "illumination": 70.6,
+    "age_days": 20.21,
+    "illumination": 70,
     "name": "Waning Gibbous"
   },
   "field": {
-    "P": 0.5833333333333338,
-    "C": 0.5914285714285714,
+    "P": 0.5855555555555553,
+    "C": 0.6152380952380953,
     "R": 1,
-    "E": 0.9446236263736263,
-    "M": 0.706,
-    "A": 0.9615384615384615,
-    "T": 0.7422673556166056,
-    "H": 0.9933000305250305,
+    "E": 0.9232967032967033,
+    "M": 0.7,
+    "A": 0.9807692307692307,
+    "T": 0.7481635286935288,
+    "H": 0.9735543345543346,
     "dpdt": 1
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
