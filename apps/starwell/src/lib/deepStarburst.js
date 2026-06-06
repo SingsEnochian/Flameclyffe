@@ -1,47 +1,24 @@
-const DEFAULT_DEEP = {
-  P: 0.42,
-  C: 0.68,
-  E: 0.61,
-  kp: 3,
-  bz: -5.8,
-  moonIllum: 93,
-  charge: 0.94,
-  dphi: 0,
-};
-
-function clamp(value, min = 0, max = 1) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function numberOr(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function normaliseMoon(value) {
-  const moon = numberOr(value, DEFAULT_DEEP.moonIllum);
-  return moon <= 1 ? clamp(moon, 0, 1) * 100 : clamp(moon, 0, 100);
-}
+import { clampNumber, normaliseDeepState, numberOr } from './deepState.js';
 
 export function normaliseStarburstDeep(rawDeep = {}) {
-  const deep = { ...DEFAULT_DEEP, ...rawDeep };
+  const deep = normaliseDeepState(rawDeep);
 
   return {
-    P: clamp(numberOr(deep.P, DEFAULT_DEEP.P), 0, 1),
-    C: clamp(numberOr(deep.C, DEFAULT_DEEP.C), 0, 1),
-    E: clamp(numberOr(deep.E, DEFAULT_DEEP.E), 0, 1),
-    kp: clamp(numberOr(deep.kp, DEFAULT_DEEP.kp), 0, 9),
-    bz: clamp(numberOr(deep.bz, DEFAULT_DEEP.bz), -20, 20),
-    moonIllum: normaliseMoon(deep.moonIllum),
-    charge: clamp(numberOr(deep.charge, DEFAULT_DEEP.charge), 0, 1),
-    dphi: numberOr(deep.dphi, DEFAULT_DEEP.dphi),
+    P: deep.P,
+    C: deep.C,
+    E: deep.E,
+    kp: deep.kp,
+    bz: deep.bz,
+    moonIllum: deep.moonIllum,
+    charge: deep.charge,
+    dphi: deep.dphi,
   };
 }
 
 export function buildStarburstVars(rawDeep = {}, options = {}) {
   const deep = normaliseStarburstDeep(rawDeep);
   const moon = deep.moonIllum / 100;
-  const bzTemp = clamp((deep.bz + 20) / 40, 0, 1);
+  const bzTemp = clampNumber((deep.bz + 20) / 40, 0, 1);
   const baseSize = numberOr(options.baseSize, 132);
   const baseRotation = numberOr(options.rotation, 0);
 
@@ -49,8 +26,8 @@ export function buildStarburstVars(rawDeep = {}, options = {}) {
   const size = Math.round(baseSize + deep.charge * 34 + deep.kp * 2.8);
   const sharpness = Math.round(18 + deep.C * 42);
   const hue = Math.round(210 - bzTemp * 156);
-  const alpha = clamp(0.18 + deep.charge * 0.34 + deep.kp / 9 * 0.16, 0.12, 0.82);
-  const jitter = clamp(deep.E * (1 + deep.kp / 9), 0, 1.8);
+  const alpha = clampNumber(0.18 + deep.charge * 0.34 + deep.kp / 9 * 0.16, 0.12, 0.82);
+  const jitter = clampNumber(deep.E * (1 + deep.kp / 9), 0, 1.8);
   const rotation = baseRotation + deep.dphi * 40 + deep.E * 11;
 
   return {
