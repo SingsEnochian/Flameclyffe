@@ -5,11 +5,16 @@ import {
   FIRST_WINDOW_SIGILS,
   buildAnchorFromPlacement,
   clamp,
+  clearAllLocalAnchors,
   clearLocalAnchor,
   compareAnchorReturn,
+  deleteLocalAnchor,
   getAnchorPlacement,
   readLocalAnchor,
+  readLocalAnchors,
+  readPreferences,
   saveLocalAnchor,
+  savePreferences,
 } from './anchorContract.js';
 import './styles.css';
 
@@ -20,7 +25,7 @@ function registerServiceWorker() {
   });
 }
 
-function SigilRing({ anchor }) {
+function SigilRing({ anchor, showLabels }) {
   if (!anchor) return null;
 
   const placement = getAnchorPlacement(anchor);
@@ -45,7 +50,7 @@ function SigilRing({ anchor }) {
             style={{ transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))` }}
           >
             <span className="sigil-glyph">{sigil.glyph}</span>
-            <span className="sigil-label">{sigil.label}</span>
+            {showLabels && <span className="sigil-label">{sigil.label}</span>}
           </div>
         );
       })}
@@ -94,15 +99,80 @@ function DeepReading({ anchor, cameraStatus, comparison }) {
   );
 }
 
+function AnchorShelf({ anchors, activeAnchorId, onSelect, onDelete, onClearAll }) {
+  return (
+    <section className="anchor-shelf" aria-label="Saved anchors">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Anchor Shelf</p>
+          <h2>Return-points</h2>
+        </div>
+        <button type="button" onClick={onClearAll} disabled={anchors.length === 0}>Clear all</button>
+      </div>
+      {anchors.length === 0 ? (
+        <p className="empty-shelf">No saved anchors yet. Place a Hearth Lantern to create the first return-point.</p>
+      ) : (
+        <div className="anchor-grid">
+          {anchors.map((item) => {
+            const placement = getAnchorPlacement(item);
+            const isActive = item.id === activeAnchorId;
+            return (
+              <article className={isActive ? 'anchor-card active' : 'anchor-card'} key={item.id}>
+                <button type="button" className="anchor-main" onClick={() => onSelect(item)}>
+                  <strong>{item.display_name || item.label || 'Concordance Anchor'}</strong>
+                  <span>{item.device_mode} · {Math.round(placement.x)}%, {Math.round(placement.y)}%</span>
+                  <span>{new Date(item.updated_at || item.created_at || item.createdAt).toLocaleString()}</span>
+                </button>
+                <button type="button" className="delete-anchor" onClick={() => onDelete(item.id)} aria-label={`Delete ${item.display_name || 'anchor'}`}>×</button>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PreferencePanel({ preferences, onChange }) {
+  function toggle(key) {
+    onChange({
+      ...preferences,
+      [key]: !preferences[key],
+    });
+  }
+
+  return (
+    <section className="preferences" aria-label="Pocket Lens preferences">
+      <p className="eyebrow">Lens Settings</p>
+      <div className="preference-row">
+        <label>
+          <input type="checkbox" checked={preferences.lowMotion} onChange={() => toggle('lowMotion')} />
+          Low motion
+        </label>
+        <label>
+          <input type="checkbox" checked={preferences.largeUi} onChange={() => toggle('largeUi')} />
+          Large UI
+        </label>
+        <label>
+          <input type="checkbox" checked={preferences.showSigilLabels} onChange={() => toggle('showSigilLabels')} />
+          Sigil labels
+        </label>
+      </div>
+    </section>
+  );
+}
+
 function App() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [cameraStatus, setCameraStatus] = useState('idle');
   const [cameraError, setCameraError] = useState('');
+  const [anchors, setAnchors] = useState(() => readLocalAnchors());
   const [anchor, setAnchor] = useState(() => readLocalAnchor());
   const [comparison, setComparison] = useState(null);
   const [demoMode, setDemoMode] = useState(false);
   const [privacyVisible, setPrivacyVisible] = useState(true);
+  const [preferences, setPreferences] = useState(() => readPreferences());
 
   useEffect(() => {
     registerServiceWorker();
@@ -170,24 +240,61 @@ function App() {
     });
 
     setAnchor(nextAnchor);
-    saveLocalAnchor(nextAnchor);
+    setAnchors(saveLocalAnchor(nextAnchor));
     setComparison(previousAnchor ? compareAnchorReturn(previousAnchor, { x, y }) : null);
+  }
+
+  function selectAnchor(savedAnchor) {
+    const placement = getAnchorPlacement(savedAnchor);
+    setAnchor(savedAnchor);
+    setComparison(compareAnchorReturn(savedAnchor, placement));
+    setAnchors(saveLocalAnchor(savedAnchor));
+  }
+
+  function deleteAnchor(anchorId) {
+    const nextAnchors = deleteLocalAnchor(anchorId);
+    setAnchors(nextAnchors);
+    if (anchor?.id === anchorId) {
+      setAnchor(nextAnchors[0] ?? null);
+      setComparison({
+        comparison_state: 'cleared',
+        reading: ['Anchor removed from shelf.', 'Choose or place another return-point.'],
+      });
+    }
   }
 
   function clearSavedAnchor() {
     setAnchor(null);
     setComparison({
       comparison_state: 'cleared',
-      reading: ['Anchor cleared.', 'The room is unbound and ready for a new return-point.'],
+      reading: ['Anchor cleared from active view.', 'The room is unbound and ready for a new return-point.'],
     });
     clearLocalAnchor();
   }
 
+  function clearAllAnchors() {
+    setAnchor(null);
+    setAnchors(clearAllLocalAnchors());
+    setComparison({
+      comparison_state: 'cleared',
+      reading: ['Anchor shelf cleared.', 'The room is unbound and ready for a new return-point.'],
+    });
+  }
+
+  function updatePreferences(nextPreferences) {
+    setPreferences(savePreferences(nextPreferences));
+  }
+
   const isCameraLive = cameraStatus === 'active';
   const viewLabel = isCameraLive ? 'Live camera view' : demoMode ? 'Demo room view' : 'Camera inactive view';
+  const appClasses = [
+    'app-shell',
+    preferences.lowMotion ? 'low-motion' : '',
+    preferences.largeUi ? 'large-ui' : '',
+  ].filter(Boolean).join(' ');
 
   return (
-    <main className="app-shell">
+    <main className={appClasses}>
       <header className="topbar">
         <div>
           <p className="eyebrow">Pocket Concordance Lens</p>
@@ -205,13 +312,15 @@ function App() {
         </section>
       )}
 
+      <PreferencePanel preferences={preferences} onChange={updatePreferences} />
+
       <section className="controls" aria-label="Lens controls">
         <button type="button" onClick={startCamera} disabled={cameraStatus === 'requesting' || isCameraLive}>
           {cameraStatus === 'requesting' ? 'Asking…' : 'Start camera'}
         </button>
         <button type="button" onClick={stopCamera} disabled={!isCameraLive}>Stop camera</button>
         <button type="button" onClick={toggleDemoMode}>{demoMode ? 'Exit demo' : 'Demo room'}</button>
-        <button type="button" onClick={clearSavedAnchor} disabled={!anchor}>Clear anchor</button>
+        <button type="button" onClick={clearSavedAnchor} disabled={!anchor}>Clear active</button>
       </section>
 
       {cameraError && <p className="error-note">{cameraError}</p>}
@@ -226,10 +335,18 @@ function App() {
           </div>
         )}
         <StonewoodOverlay anchor={anchor} />
-        <SigilRing anchor={anchor} />
+        <SigilRing anchor={anchor} showLabels={preferences.showSigilLabels} />
       </section>
 
       <DeepReading anchor={anchor} cameraStatus={cameraStatus} comparison={comparison} />
+
+      <AnchorShelf
+        anchors={anchors}
+        activeAnchorId={anchor?.id}
+        onSelect={selectAnchor}
+        onDelete={deleteAnchor}
+        onClearAll={clearAllAnchors}
+      />
 
       <section className="sigil-list" aria-label="Active sigils">
         {FIRST_WINDOW_SIGILS.map((sigil) => (
