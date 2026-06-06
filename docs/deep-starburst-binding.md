@@ -7,12 +7,14 @@ The DEEP starburst layer is currently wired as a low-risk companion module rathe
 ## Current path
 
 ```text
-LiveGlyphViewer renders DEEP readout text
-→ deep-starburst-bind.js reads the glyph meter values
+Bridge pulse JSON
+→ deep-starburst-bind.js normalises the DEEP packet
 → deepStarburst.js maps values to CSS custom properties
-→ deep-observer-boundary.css applies those properties to .glyph-orb-wrap::before
-→ the glyph aura breathes as a CSS starburst
+→ deep-observer-boundary.css applies those properties to .glyph-orb-wrap::before and the meter-chip flare sockets
+→ the glyph aura and sensor chips breathe as CSS starbursts
 ```
+
+The binder no longer scrapes rendered readout text. It uses the same bridge pulse source as the React glyph, then falls back to the last known or default DEEP state if the pulse is unavailable.
 
 ## Variables
 
@@ -28,6 +30,18 @@ The mapper emits:
 --flare-rot     rotation phase
 ```
 
+Meter chips receive sensor-prefixed equivalents:
+
+```text
+--sensor-n
+--sensor-w
+--sensor-m
+--sensor-hue
+--sensor-alpha
+--sensor-jitter
+--sensor-rot
+```
+
 ## Data mapping
 
 ```text
@@ -39,15 +53,26 @@ charge         → luminosity and size
 A / R          → transitional binder size boost
 ```
 
+The six meter chips currently map to:
+
+```text
+Tide          temporal signature and symbolic mode
+Presence      P and A: node density, attention, activation
+Clarity       C and R: edge sharpness, coherence, resonance
+Entropy       E and Bz: disturbance, turbulence, colour shift
+Moon          M and moon illumination: cycle and ring influence
+Geomagnetic   Kp and charge: storm energy and centre luminosity
+```
+
 ## Why the binder exists
 
 `live-glyph.jsx` is currently a large load-bearing component. Directly replacing it to add one style prop has higher blast radius than a small companion module.
 
-The binder is intentionally temporary. It watches only the STARWELL root, throttles DOM changes, skips redundant writes, and cleans itself up on page hide.
+The binder is intentionally temporary. It watches only the STARWELL root, throttles DOM changes, skips redundant writes, polls the bridge pulse once per minute, and cleans itself up on page hide.
 
 ## Fold-in target
 
-Once the visual behaviour is confirmed, move the binding into React:
+Once the visual behaviour is confirmed, move the aura binding into React:
 
 ```jsx
 import { buildStarburstVars } from './lib/deepStarburst.js';
@@ -69,7 +94,7 @@ function DeepGlyphCanvas({ glyph, onActivate, onSoften, onKeyDown }) {
 }
 ```
 
-Then remove:
+Then move the sensor-chip labels and flare variables into the React meter grid. After both steps are complete, remove:
 
 ```text
 apps/starwell/src/deep-starburst-bind.js
