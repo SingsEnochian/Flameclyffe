@@ -1,6 +1,6 @@
 # STARWELL Viewport / HUD Wrapper Contract
 
-Status: governing contract before floating-panel implementation. The pure bounds helper exists, but no HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
+Status: governing contract before floating-panel implementation. The pure bounds helper and passive bounds binding layer exist, but no HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
 
 ## Purpose
 
@@ -114,6 +114,52 @@ avoid-zone fallback positioning
 ```
 
 This helper is allowed to become the foundation for future floating HUD work. It is not itself an active HUD panel.
+
+## Passive bounds binding layer
+
+The passive STARWELL binding layer now exists at:
+
+```text
+apps/starwell/src/deep-hud-bounds-bind.js
+apps/starwell/src/deep-hud-bounds.css
+```
+
+It is loaded from:
+
+```text
+apps/starwell/index.html
+```
+
+Current responsibilities:
+
+```text
+measure the active Observer instrument shell
+publish CSS custom properties on .live-glyph-panel.deep-observer-panel
+set data-deep-hud-bounds="ready"
+set data-deep-hud-viewport by measured viewport class
+dispatch deep-observer:hud-bounds with plain bounds data
+recalculate on resize, orientation change, DOM mutation, and ResizeObserver events
+```
+
+Current CSS variables include:
+
+```text
+--deep-hud-inset
+--deep-hud-safe-left
+--deep-hud-safe-top
+--deep-hud-safe-width
+--deep-hud-safe-height
+--deep-hud-stage-left
+--deep-hud-stage-top
+--deep-hud-stage-width
+--deep-hud-stage-height
+--deep-hud-readout-left
+--deep-hud-readout-top
+--deep-hud-readout-width
+--deep-hud-readout-height
+```
+
+This binding layer is passive. It creates no floating panels, no sensory controls, no sound, and no haptics. It only wires the measured room into CSS and events for future furniture.
 
 ## Bounds model
 
