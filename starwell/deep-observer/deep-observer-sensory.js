@@ -1,4 +1,4 @@
-/* DEEP Observer Sensory Engine v0.2 */
+/* DEEP Observer Sensory Engine v0.3 */
 'use strict';
 
 (() => {
@@ -65,6 +65,7 @@
   }
 
   function clampPanelPosition(x, y, panel) {
+    if (window.DEEP_OBSERVER_HUD?.clampElement) return window.DEEP_OBSERVER_HUD.clampElement(panel, x, y, 10);
     const pad = 10;
     const rect = panel.getBoundingClientRect();
     const w = rect.width || 72;
@@ -73,6 +74,20 @@
       x: clamp(x, pad, window.innerWidth - w - pad),
       y: clamp(y, pad, window.innerHeight - h - pad)
     };
+  }
+
+  function snapPanelPosition(panel) {
+    const rect = panel.getBoundingClientRect();
+    if (!window.DEEP_OBSERVER_HUD?.snapElement) return clampPanelPosition(rect.left, rect.top, panel);
+    return window.DEEP_OBSERVER_HUD.snapElement(panel, rect.left, rect.top, 10);
+  }
+
+  function defaultPanelPosition(panel) {
+    const rect = panel.getBoundingClientRect();
+    if (window.DEEP_OBSERVER_HUD?.defaultPanelPosition) {
+      return window.DEEP_OBSERVER_HUD.defaultPanelPosition(rect.width || 260, rect.height || 130, 'bottomRight');
+    }
+    return clampPanelPosition(window.innerWidth - (rect.width || 260) - 16, window.innerHeight - (rect.height || 130) - 16, panel);
   }
 
   function setPanelPosition(x, y, persist = true) {
@@ -86,12 +101,27 @@
     if (persist) savePosition(p.x, p.y);
   }
 
+  function snapPanel(persist = true) {
+    const panel = document.getElementById('sensoryPanel');
+    if (!panel) return;
+    const p = snapPanelPosition(panel);
+    panel.style.left = `${p.x}px`;
+    panel.style.top = `${p.y}px`;
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    if (p.zone) panel.dataset.snapZone = p.zone;
+    if (persist) savePosition(p.x, p.y);
+  }
+
   function applySavedPosition() {
     const panel = document.getElementById('sensoryPanel');
     if (!panel) return;
     const saved = loadPosition();
     if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
       setPanelPosition(saved.x, saved.y, false);
+    } else {
+      const p = defaultPanelPosition(panel);
+      setPanelPosition(p.x, p.y, false);
     }
   }
 
@@ -115,7 +145,7 @@
       </div>
     `;
     document.body.appendChild(panel);
-    applySavedPosition();
+    window.requestAnimationFrame(applySavedPosition);
 
     document.getElementById('sensoryEnable')?.addEventListener('click', async () => {
       state.enabled = !state.enabled;
@@ -144,6 +174,7 @@
     document.getElementById('sensoryMinimise')?.addEventListener('click', event => {
       event.stopPropagation();
       panel.classList.toggle('minimised');
+      snapPanel(true);
       respond(panel.classList.contains('minimised') ? 'minimise' : 'unfold', .55);
     });
 
@@ -440,7 +471,10 @@
       panel.classList.remove('dragging');
       stopGlassDrag();
       try { if (event?.pointerId !== undefined) panel.releasePointerCapture?.(event.pointerId); } catch (e) {}
-      if (state.moved) respond('snap', .52);
+      if (state.moved) {
+        snapPanel(true);
+        respond('snap', .52);
+      }
     }
 
     panel.addEventListener('pointerup', event => {
@@ -449,6 +483,7 @@
       if (!wasMoved && (panel.classList.contains('minimised') || document.body.classList.contains('interface-cloaked'))) {
         if (!document.body.classList.contains('interface-cloaked')) {
           panel.classList.remove('minimised');
+          snapPanel(true);
           respond('unfold', .55);
         } else {
           respond('gem', .45);
@@ -463,9 +498,11 @@
     if (!panel) return;
     if (cloaked) {
       panel.classList.add('minimised');
+      snapPanel(true);
       respond('minimise', .44);
     } else {
       panel.classList.remove('minimised');
+      snapPanel(true);
       respond('unfold', .50);
     }
   }
@@ -500,12 +537,15 @@
       handleCloakChange(Boolean(event.detail?.cloaked));
     });
 
-    window.addEventListener('resize', () => {
+    const reclamp = () => {
       const panel = document.getElementById('sensoryPanel');
       if (!panel) return;
       const rect = panel.getBoundingClientRect();
       setPanelPosition(rect.left, rect.top, true);
-    });
+    };
+    window.addEventListener('resize', reclamp, { passive: true });
+    window.addEventListener('orientationchange', () => window.setTimeout(reclamp, 180), { passive: true });
+    window.addEventListener('deep-observer:hud-bounds', reclamp, { passive: true });
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) stopHum();
