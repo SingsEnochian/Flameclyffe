@@ -1,6 +1,7 @@
 export const STORAGE_KEY = 'pocket-concordance-lens-anchor-v0-1';
 export const ANCHOR_SHELF_KEY = 'pocket-concordance-lens-anchor-shelf-v0-1';
 export const PREFERENCES_KEY = 'pocket-concordance-lens-preferences-v0-1';
+export const EXPORT_FORMAT = 'pocket-concordance-lens-local-shelf';
 
 export const LENS_MODES = {
   place: 'place',
@@ -47,6 +48,38 @@ export function clamp(value, min, max) {
 
 function cleanAnchorName(name) {
   return (name || '').trim() || 'First Concordance Window';
+}
+
+function normaliseAnchor(anchor) {
+  if (!anchor || typeof anchor !== 'object') return null;
+
+  const now = new Date().toISOString();
+  const fallbackId = `imported-anchor-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const displayName = cleanAnchorName(anchor.display_name || anchor.label);
+  const placement = anchor.waking_context?.placement?.type === 'screen_percent'
+    ? anchor.waking_context.placement
+    : { type: 'screen_percent', x: anchor.x ?? 50, y: anchor.y ?? 50 };
+
+  return {
+    ...anchor,
+    id: anchor.id || fallbackId,
+    display_name: displayName,
+    label: displayName,
+    waking_context: {
+      ...(anchor.waking_context || {}),
+      placement,
+      recording: false,
+    },
+    metadata: {
+      ...(anchor.metadata || {}),
+      storage_mode: 'local_browser',
+      images_stored: false,
+      video_stored: false,
+      imported_at: anchor.metadata?.imported_at || now,
+    },
+    updated_at: anchor.updated_at || now,
+    last_seen_at: anchor.last_seen_at || now,
+  };
 }
 
 export function readLocalAnchor() {
@@ -165,6 +198,50 @@ export function savePreferences(preferences) {
   };
   window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify(nextPreferences));
   return nextPreferences;
+}
+
+export function buildLocalExportPayload() {
+  return {
+    format: EXPORT_FORMAT,
+    version: '0.1',
+    exported_at: new Date().toISOString(),
+    privacy_note: 'Local metadata export only. This prototype does not export camera images or video.',
+    anchors: readLocalAnchors(),
+    active_anchor: readLocalAnchor(),
+    preferences: readPreferences(),
+  };
+}
+
+export function importLocalExportPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    throw new Error('Import file is not a valid Pocket Concordance Lens export.');
+  }
+
+  const importedAnchors = Array.isArray(payload.anchors)
+    ? payload.anchors.map(normaliseAnchor).filter(Boolean).slice(0, 12)
+    : [];
+
+  if (importedAnchors.length === 0) {
+    throw new Error('Import file does not contain any anchors.');
+  }
+
+  const activeCandidate = normaliseAnchor(payload.active_anchor);
+  const activeAnchor = activeCandidate && importedAnchors.some((item) => item.id === activeCandidate.id)
+    ? activeCandidate
+    : importedAnchors[0];
+
+  window.localStorage.setItem(ANCHOR_SHELF_KEY, JSON.stringify(importedAnchors));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(activeAnchor));
+
+  if (payload.preferences && typeof payload.preferences === 'object') {
+    savePreferences(payload.preferences);
+  }
+
+  return {
+    anchors: importedAnchors,
+    activeAnchor,
+    preferences: readPreferences(),
+  };
 }
 
 export function buildAnchorFromPlacement({ x, y, deviceMode = 'pocket_lens', label = 'First Concordance Window' }) {
