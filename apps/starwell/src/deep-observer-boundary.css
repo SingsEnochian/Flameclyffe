@@ -97,6 +97,65 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.live-glyph-panel .glyph-meter-grid > div {
+  --sensor-n: 12;
+  --sensor-w: 58px;
+  --sensor-m: 44%;
+  --sensor-hue: 198;
+  --sensor-alpha: 0.2;
+  --sensor-jitter: 0px;
+  --sensor-rot: 0deg;
+
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.live-glyph-panel .glyph-meter-grid > div::before {
+  content: '';
+  position: absolute;
+  right: -16px;
+  top: -18px;
+  width: var(--sensor-w);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: calc(var(--sensor-alpha) * 0.72);
+  z-index: -1;
+  background:
+    radial-gradient(circle, hsla(var(--sensor-hue), 82%, 78%, 0.18), transparent 58%),
+    repeating-conic-gradient(
+      from var(--sensor-rot),
+      hsla(var(--sensor-hue), 88%, 76%, 0.78) 0 calc(0.5turn / var(--sensor-n)),
+      transparent 0 calc(1turn / var(--sensor-n))
+    );
+  -webkit-mask: radial-gradient(circle, transparent var(--sensor-m), #000 calc(var(--sensor-m) + 1%));
+  mask: radial-gradient(circle, transparent var(--sensor-m), #000 calc(var(--sensor-m) + 1%));
+  filter: drop-shadow(0 0 12px hsla(var(--sensor-hue), 88%, 74%, 0.18));
+  transform: rotate(var(--sensor-rot)) translate(var(--sensor-jitter), calc(var(--sensor-jitter) * -0.5));
+  mix-blend-mode: screen;
+}
+
+.live-glyph-panel .glyph-meter-grid > div::after {
+  content: '';
+  position: absolute;
+  right: 0.42rem;
+  top: 0.42rem;
+  width: 0.42rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  background: hsla(var(--sensor-hue), 88%, 76%, calc(var(--sensor-alpha) * 0.9));
+  box-shadow:
+    0 0 0 1px hsla(var(--sensor-hue), 88%, 76%, 0.18),
+    0 0 12px hsla(var(--sensor-hue), 88%, 74%, calc(var(--sensor-alpha) * 0.45));
+}
+
+.live-glyph-panel .glyph-meter-grid > div > * {
+  position: relative;
+  z-index: 1;
+}
+
 @media (max-width: 1120px) {
   .live-glyph-panel .live-glyph-layout {
     grid-template-areas:
@@ -139,5 +198,11 @@
 
   .live-glyph-panel .glyph-equation-strip {
     padding: 0.62rem 0.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-glyph-panel .glyph-meter-grid > div::before {
+    transform: rotate(var(--sensor-rot));
   }
 }
