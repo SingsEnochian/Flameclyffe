@@ -34,6 +34,9 @@ jobs:
       - name: Build STARWELL React Observatory Lab
         run: npm run starwell:build
 
+      - name: Build Pocket Concordance Lens
+        run: npm run pocket:build
+
       - name: Assemble static Pages site
         run: |
           set -euo pipefail
@@ -53,6 +56,10 @@ jobs:
           # Do not overwrite it with the React lab build.
           mkdir -p _site/starwell-react-lab
           cp -R dist/starwell/* _site/starwell-react-lab/
+
+          # /pocket-concordance-lens/ is generated from the Pocket Lens app.
+          mkdir -p _site/pocket-concordance-lens
+          cp -R dist/pocket-concordance-lens/* _site/pocket-concordance-lens/
 
           touch _site/.nojekyll
 
