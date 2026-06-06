@@ -48,6 +48,17 @@ input[type="checkbox"] {
   min-height: 1.1rem;
 }
 
+input[type="text"],
+.anchor-rename input {
+  width: 100%;
+  border: 1px solid rgba(244, 211, 139, 0.28);
+  border-radius: 0.8rem;
+  background: rgba(8, 10, 8, 0.78);
+  color: #f8f1dc;
+  font: inherit;
+  padding: 0.72rem 0.8rem;
+}
+
 .app-shell {
   width: min(100%, 920px);
   margin: 0 auto;
@@ -56,6 +67,18 @@ input[type="checkbox"] {
 
 .app-shell.large-ui {
   font-size: 1.12rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .topbar {
@@ -491,6 +514,24 @@ h2 {
   width: 2rem;
   height: 2rem;
   padding: 0;
+}
+
+.anchor-rename {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0 0.9rem 0.9rem;
+}
+
+.anchor-rename-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.anchor-rename-actions button {
+  min-height: 38px;
+  padding: 0.5rem 0.8rem;
+  box-shadow: none;
 }
 
 .sigil-list {
