@@ -11,7 +11,6 @@ const BRIDGE_POLL_MS = 60000;
 const MUTATION_THROTTLE_MS = 160;
 
 let currentDeep = normaliseDeepState();
-let lastSignature = '';
 let mutationTimer = 0;
 let intervalId = 0;
 let bridgePollId = 0;
@@ -71,6 +70,13 @@ function chipsAreBound(panel, signature) {
   });
 }
 
+function panelIsBound(panel, glyphWrap, signature, auraIsNative) {
+  const auraIsBound = auraIsNative
+    || (glyphWrap.dataset.starburstBound === 'true' && glyphWrap.dataset.starburstSignature === signature);
+
+  return auraIsBound && chipsAreBound(panel, signature);
+}
+
 function bindPanel(panel) {
   const glyphWrap = panel.querySelector(WRAP_SELECTOR);
   if (!glyphWrap) return;
@@ -79,8 +85,7 @@ function bindPanel(panel) {
   const signature = makeDeepSignature(deep);
   const auraIsNative = isNativeControlled(glyphWrap, 'aura');
 
-  if (signature === lastSignature && (auraIsNative || glyphWrap.dataset.starburstBound === 'true') && chipsAreBound(panel, signature)) return;
-  lastSignature = signature;
+  if (panelIsBound(panel, glyphWrap, signature, auraIsNative)) return;
 
   if (!auraIsNative) {
     const vars = buildStarburstVars(deep, {
