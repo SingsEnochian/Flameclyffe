@@ -16,27 +16,31 @@ The first slice is intentionally small:
 
 1. Ask for explicit camera permission.
 2. Show a live camera view, or a demo room if camera access is unavailable.
-3. Let the user tap a surface to place the First Concordance Window.
-4. Render a Hearth Lantern at that point.
-5. Render the first five sigils: Anchor, Witness, Waking, Gate, Concordance.
-6. Show a short DEEP reading.
-7. Save anchors locally in the browser.
-8. Let the user return to a saved anchor from the Anchor Shelf.
-9. Let the user clear the active anchor, delete one anchor, or clear the whole shelf.
+3. Let the user choose Place mode or Return mode.
+4. In Place mode, let the user tap a surface to place the First Concordance Window.
+5. In Return mode, protect the active anchor from accidental movement and compare taps against it.
+6. Render a Hearth Lantern at the active anchor.
+7. Render the first five sigils: Anchor, Witness, Waking, Gate, Concordance.
+8. Show a short DEEP reading.
+9. Save anchors locally in the browser.
+10. Let the user return to a saved anchor from the Anchor Shelf.
+11. Let the user name, clear, delete, or clear all anchors.
 
-This is not yet the full horse. It is the horse's first step with saddlebags.
+This is not yet the full horse. It is the horse's first step with saddlebags and reins.
 
 ## Why this slice matters
 
 The first slice proves the core loop:
 
 - enter the Lens
+- choose Place or Return mode
 - choose a Waking anchor
 - mark relation with sigils
 - receive a DEEP reading
 - save locally
 - compare return state
 - choose a saved return-point
+- name the return-point
 - clear if needed
 
 A mythframe with no mechanics floats. A mythframe with repeatable state, anchor, return, choice, and failure modes begins to fly.
@@ -49,6 +53,30 @@ A mythframe with no mechanics floats. A mythframe with repeatable state, anchor,
 - The first slice saves anchors only in local browser storage.
 - Supabase anchor sync should come after the Anchor Registry contract is reviewed.
 - Public copy should stay claim-bounded and avoid private Concordance details unless reviewed.
+
+## Lens modes
+
+### Place mode
+
+Place mode creates or moves a return-point when the user taps the camera or demo view.
+
+Use Place mode when:
+
+- creating a new anchor.
+- intentionally moving a Hearth Lantern.
+- replacing a previous local placement.
+
+### Return mode
+
+Return mode protects anchors from accidental movement. Tapping the camera or demo view compares the tap against the active anchor instead of creating a new one.
+
+Use Return mode when:
+
+- returning to an existing anchor.
+- checking whether the current view still aligns.
+- avoiding accidental overwrite.
+
+Selecting an anchor from the Anchor Shelf automatically switches to Return mode.
 
 ## Concordance reading
 
@@ -72,7 +100,7 @@ Drifted return:
 
 - Anchor drift detected.
 - Relation is present but misaligned.
-- Re-place or clear the anchor.
+- Switch to Place mode to move this anchor, or clear it.
 
 Cleared:
 
@@ -88,6 +116,8 @@ Current behaviour:
 - Up to 12 anchors are stored locally.
 - The newest or selected anchor is also stored as the active anchor.
 - Selecting an anchor reloads its Hearth Lantern, sigils, and Stonewood overlay.
+- Selecting an anchor switches the Lens into Return mode.
+- Naming an anchor changes its local display name.
 - Deleting an anchor removes only that return-point.
 - Clearing all anchors removes the local shelf and active anchor.
 
@@ -127,17 +157,17 @@ npm run pocket:preview
 
 ## Current implementation notes
 
-- `src/anchorContract.js` holds the shared local anchor contract, shelf helpers, comparison helper, and preferences helpers.
+- `src/anchorContract.js` holds the shared local anchor contract, shelf helpers, comparison helper, preferences helpers, lens mode constants, and rename helper.
 - `src/main.jsx` renders the Lens UI and uses the contract helpers.
-- `src/styles.css` includes the Lens, Anchor Shelf, preferences, Stonewood seams, Hearth Lantern, and sigil styling.
+- `src/styles.css` includes the Lens, mode panel, Anchor Shelf, preferences, Stonewood seams, Hearth Lantern, and sigil styling.
 - Local anchors are stored under `pocket-concordance-lens-anchor-shelf-v0-1`.
-- The first comparison checks whether a new placement is close enough to the previous saved placement.
+- The first comparison checks whether a new placement is close enough to the active saved placement.
 - This comparison is intentionally simple and should become more spatially aware later.
 
 ## Next build steps
 
-- Add explicit named-anchor editing.
-- Add a clearer return flow separate from placing a new anchor.
+- Replace `window.prompt` naming with an inline accessible rename field.
+- Add a clearer explicit Compare button for Return mode.
 - Draft Supabase migration only after Anchor Registry contract review.
 - Add DEEP Observer event logging after safe sync exists.
 - Add optional WebXR/device adapter exploration.
