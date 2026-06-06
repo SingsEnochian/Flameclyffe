@@ -8,6 +8,14 @@ The Astrolabe Skin + HUD Containment checklist says the Observer should become o
 
 This note records how the existing dormant/static HUD files relate to that checklist before STARWELL imports, bridges, or replaces them.
 
+Related governing contract:
+
+```text
+docs/starwell-viewport-hud-wrapper-contract.md
+```
+
+Use that contract for STARWELL viewport, HUD wrapper, bounds, safe-zone, mobile docking, sensory/haptic gates, and future `deepHudBounds.js` scope decisions.
+
 ## Checklist signal
 
 The Astrolabe checklist makes HUD containment Phase 1. Its core requirement is that all floating UI remain inside the instrument HUD unless deliberately detached later through DEV.
@@ -61,13 +69,13 @@ apps/starwell/src/lib/deepHudBounds.js
 apps/starwell/src/lib/deepSensoryBus.js
 ```
 
-Bridge or port the logic only after the viewport registry and HUD wrapper target are named.
+Bridge or port the logic only after the STARWELL viewport/HUD wrapper contract is satisfied.
 
 ## Recommended next implementation slice
 
 1. Inspect whether `window.DEEP_OBSERVER_VIEWPORT_MAP` exists anywhere active.
 2. If it exists, align HUD bounds to it.
-3. If it does not exist, create a small viewport/bounds registry before wiring draggable panels.
+3. If it does not exist, use `docs/starwell-viewport-hud-wrapper-contract.md` as the interim viewport/HUD wrapper contract before wiring draggable panels.
 4. Port only the pure helper logic from `deep-observer-hud-bounds.js` into `apps/starwell/src/lib/deepHudBounds.js`.
 5. Keep DOM side effects out of the helper module.
 6. Leave `deep-observer-sensory.js` dormant until sound/haptic consent gates and low-stim rules are explicitly reviewed.
