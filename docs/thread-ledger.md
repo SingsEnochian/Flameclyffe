@@ -202,6 +202,14 @@ Retirement condition: remove this binder only after React owns both aura variabl
 
 ## Dormant / static HUD threads
 
+Decision note:
+
+```text
+docs/hud-integration-decision.md
+```
+
+Current decision: keep the static HUD files shelved for now. Treat them as prototypes/reference implementations. Do not directly load them into `apps/starwell/index.html` until the viewport/HUD wrapper contract is explicit and sensory consent gates have been reviewed.
+
 ### HUD bounds helper
 
 Current state: repo-present, not referenced by STARWELL React search results as of the latest audit.
@@ -214,7 +222,7 @@ starwell/deep-observer/deep-observer-hud-bounds.js
 
 Responsibility: exposes `window.DEEP_OBSERVER_HUD` with helpers for HUD element detection, bounds rectangles, clamping, default panel positions, snap zones, element clamping, element snapping, and `deep-observer:hud-bounds` dispatches.
 
-Ownership note: do not duplicate floating-panel clamp or snap logic in STARWELL until we decide whether this helper should be imported, bridged, or kept static-only.
+Ownership note: do not duplicate floating-panel clamp or snap logic in STARWELL until we decide whether this helper should be imported, bridged, or kept static-only. If it becomes active, prefer a pure STARWELL module such as `apps/starwell/src/lib/deepHudBounds.js` rather than loading the global static helper directly.
 
 ### Sensory engine panel
 
@@ -228,7 +236,7 @@ starwell/deep-observer/deep-observer-sensory.js
 
 Responsibility: creates a draggable `#sensoryPanel` with sound, haptic, hum, and soft-mode controls. It uses `window.DEEP_OBSERVER_HUD` when available for panel clamping and snapping.
 
-Ownership note: this is a sensory/HUD layer, not the same thread as STARWELL starburst aura or sensor-chip visuals. Do not add another sound/haptic panel to STARWELL without deciding whether to reuse or retire this one.
+Ownership note: this is a sensory/HUD layer, not the same thread as STARWELL starburst aura or sensor-chip visuals. Do not add another sound/haptic panel to STARWELL without deciding whether to reuse, module-ise, or retire this one. Do not load sensory UI before sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
 
 ## Documentation threads
 
@@ -261,6 +269,16 @@ docs/deep-observer-math.md
 ```
 
 Responsibility: keeps DEEP framed as symbolic instrumentation, not a physics proof or causation engine.
+
+### HUD integration decision
+
+Primary file:
+
+```text
+docs/hud-integration-decision.md
+```
+
+Responsibility: records the decision to keep static HUD files shelved for now, treat them as prototypes, and build or bridge STARWELL-native helpers only after the viewport/HUD wrapper contract is explicit.
 
 ## Parallel threads to watch
 
@@ -296,12 +314,13 @@ Add to the shared modules or explicitly bridge the static HUD files instead.
 ## Next safe moves
 
 1. Visual QA at mobile, tablet, laptop, and wide widths.
-2. Decide whether `deep-observer-hud-bounds.js` should remain static-only or become a shared STARWELL helper.
-3. Decide whether `deep-observer-sensory.js` should remain static-only, be bridged into STARWELL, or be retired before adding new sound/haptic UI.
-4. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
-5. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
-6. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
-7. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
+2. Define the STARWELL viewport/HUD wrapper contract before activating floating HUD or sensory UI.
+3. If HUD bounds become active, port pure clamp/snap logic into `apps/starwell/src/lib/deepHudBounds.js` rather than loading the static global helper directly.
+4. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
+5. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
+6. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
+7. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
+8. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
 
 ## Working mantra
 
