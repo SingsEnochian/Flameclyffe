@@ -1,6 +1,6 @@
-/* DEEP Observer HUD Bounds v0.1
+/* DEEP Observer HUD Bounds v0.2
    Shared geometry helper for floating panels and draggable HUD elements.
-   Keeps panels bounded to the instrument HUD instead of the whole page.
+   Keeps panels bounded to the Observer HUD instead of the whole page.
 */
 'use strict';
 
@@ -8,7 +8,7 @@
   const DEFAULT_PAD = 10;
 
   function getHudElement() {
-    return document.querySelector('.instrument') || document.querySelector('.shell') || document.body;
+    return document.querySelector('.observer-hud') || document.querySelector('.instrument') || document.querySelector('.shell') || document.body;
   }
 
   function getHudRect() {
@@ -90,6 +90,7 @@
     const detail = {
       reason,
       rect: getHudRect(),
+      element: getHudElement()?.className || 'unknown',
       viewport: window.DEEP_OBSERVER_VIEWPORT_MAP || null
     };
     window.dispatchEvent(new CustomEvent('deep-observer:hud-bounds', { detail }));
@@ -106,7 +107,7 @@
       clampElement,
       snapElement,
       dispatchMap,
-      note: 'Shared HUD bounds helper for keeping floating panels inside the Observer instrument.'
+      note: 'Shared HUD bounds helper for keeping floating panels inside the Observer HUD.'
     };
     dispatchMap('dom-ready');
     window.addEventListener('resize', () => dispatchMap('resize'), { passive: true });
