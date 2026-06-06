@@ -121,7 +121,7 @@
   border-radius: 50%;
   pointer-events: none;
   opacity: calc(var(--sensor-alpha) * 0.72);
-  z-index: -1;
+  z-index: 0;
   background:
     radial-gradient(circle, hsla(var(--sensor-hue), 82%, 78%, 0.18), transparent 58%),
     repeating-conic-gradient(
@@ -145,6 +145,7 @@
   aspect-ratio: 1;
   border-radius: 50%;
   pointer-events: none;
+  z-index: 0;
   background: hsla(var(--sensor-hue), 88%, 76%, calc(var(--sensor-alpha) * 0.9));
   box-shadow:
     0 0 0 1px hsla(var(--sensor-hue), 88%, 76%, 0.18),
