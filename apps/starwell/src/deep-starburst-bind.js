@@ -1,3 +1,4 @@
+import { getBridgeDeep, makeDeepSignature, normaliseDeepState } from './lib/deepState.js';
 import { getDeepSensorByIndex } from './lib/deepSensors.js';
 import { buildSensorStarburstVars, buildStarburstVars } from './lib/deepStarburst.js';
 
@@ -9,58 +10,12 @@ const UPDATE_INTERVAL_MS = 1000;
 const BRIDGE_POLL_MS = 60000;
 const MUTATION_THROTTLE_MS = 160;
 
-const FALLBACK_DEEP = {
-  P: 0.42,
-  A: 0.72,
-  C: 0.68,
-  R: 0.74,
-  E: 0.61,
-  bz: -5.8,
-  M: 0.3,
-  moonIllum: 93,
-  kp: 3,
-  charge: 0.94,
-  dphi: 0,
-};
-
-let currentDeep = FALLBACK_DEEP;
+let currentDeep = normaliseDeepState();
 let lastSignature = '';
 let mutationTimer = 0;
 let intervalId = 0;
 let bridgePollId = 0;
 let observer = null;
-
-function numberOr(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function getBridgeDeep(payload) {
-  if (!payload || typeof payload !== 'object') return null;
-  return payload.deep ?? payload.DEEP ?? payload.state ?? payload.observer ?? null;
-}
-
-function normaliseDeep(rawDeep = {}) {
-  return {
-    P: numberOr(rawDeep.P, FALLBACK_DEEP.P),
-    A: numberOr(rawDeep.A, FALLBACK_DEEP.A),
-    C: numberOr(rawDeep.C, FALLBACK_DEEP.C),
-    R: numberOr(rawDeep.R, FALLBACK_DEEP.R),
-    E: numberOr(rawDeep.E, FALLBACK_DEEP.E),
-    bz: numberOr(rawDeep.bz, FALLBACK_DEEP.bz),
-    M: numberOr(rawDeep.M, FALLBACK_DEEP.M),
-    moonIllum: numberOr(rawDeep.moonIllum, FALLBACK_DEEP.moonIllum),
-    kp: numberOr(rawDeep.kp, FALLBACK_DEEP.kp),
-    charge: numberOr(rawDeep.charge, FALLBACK_DEEP.charge),
-    dphi: numberOr(rawDeep.dphi, FALLBACK_DEEP.dphi),
-  };
-}
-
-function makeSignature(deep) {
-  return [deep.P, deep.A, deep.C, deep.R, deep.E, deep.bz, deep.M, deep.moonIllum, deep.kp, deep.charge]
-    .map((value) => Number(value).toFixed(3))
-    .join('|');
-}
 
 function isNativeControlled(element, scope) {
   const value = element?.dataset?.starburstNative;
@@ -121,7 +76,7 @@ function bindPanel(panel) {
   if (!glyphWrap) return;
 
   const deep = currentDeep;
-  const signature = makeSignature(deep);
+  const signature = makeDeepSignature(deep);
   const auraIsNative = isNativeControlled(glyphWrap, 'aura');
 
   if (signature === lastSignature && (auraIsNative || glyphWrap.dataset.starburstBound === 'true') && chipsAreBound(panel, signature)) return;
@@ -160,7 +115,7 @@ async function refreshBridgeDeep() {
     const payload = await response.json();
     const bridgeDeep = getBridgeDeep(payload);
     if (!bridgeDeep) throw new Error('Bridge pulse did not include a DEEP state');
-    currentDeep = normaliseDeep(bridgeDeep);
+    currentDeep = normaliseDeepState(bridgeDeep);
   } catch (error) {
     currentDeep = { ...currentDeep };
   } finally {
