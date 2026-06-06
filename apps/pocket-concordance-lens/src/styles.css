@@ -42,10 +42,20 @@ button:not(:disabled):active {
   transform: translateY(1px);
 }
 
+input[type="checkbox"] {
+  accent-color: #d2a84d;
+  min-width: 1.1rem;
+  min-height: 1.1rem;
+}
+
 .app-shell {
   width: min(100%, 920px);
   margin: 0 auto;
   padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1.4rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+}
+
+.app-shell.large-ui {
+  font-size: 1.12rem;
 }
 
 .topbar {
@@ -71,6 +81,11 @@ h1 {
   letter-spacing: -0.05em;
 }
 
+h2 {
+  margin: 0;
+  font-size: 1.18rem;
+}
+
 .camera-pill {
   flex: 0 0 auto;
   border: 1px solid rgba(185, 214, 202, 0.22);
@@ -90,7 +105,9 @@ h1 {
 
 .privacy-card,
 .error-note,
+.preferences,
 .deep-reading,
+.anchor-shelf,
 .sigil-list article {
   border: 1px solid rgba(244, 211, 139, 0.18);
   background: rgba(15, 18, 13, 0.78);
@@ -121,6 +138,25 @@ h1 {
   flex-wrap: wrap;
   gap: 0.55rem;
   margin: 0.8rem 0 1rem;
+}
+
+.preferences {
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  margin: 0.8rem 0;
+}
+
+.preference-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.preference-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #efe4c4;
 }
 
 .error-note {
@@ -290,6 +326,11 @@ h1 {
   animation: lanternPulse 3.8s ease-in-out infinite;
 }
 
+.low-motion .hearth-lantern {
+  animation: none;
+  opacity: 0.92;
+}
+
 .lantern-core {
   position: absolute;
   inset: 2.55rem;
@@ -314,6 +355,76 @@ h1 {
 
 .deep-reading p {
   margin: 0.18rem 0;
+}
+
+.comparison-state {
+  color: #ffe89a;
+  font-weight: 700;
+}
+
+.anchor-shelf {
+  border-radius: 1.2rem;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty-shelf {
+  color: #d8ccb0;
+  margin: 0;
+}
+
+.anchor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.7rem;
+}
+
+.anchor-card {
+  position: relative;
+  border: 1px solid rgba(185, 214, 202, 0.16);
+  border-radius: 1rem;
+  background: rgba(8, 10, 8, 0.46);
+  overflow: hidden;
+}
+
+.anchor-card.active {
+  border-color: rgba(255, 232, 154, 0.58);
+  box-shadow: 0 0 1.3rem rgba(255, 232, 154, 0.14);
+}
+
+.anchor-main {
+  display: grid;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0.9rem 3rem 0.9rem 0.9rem;
+}
+
+.anchor-main span {
+  color: #d8ccb0;
+  font-size: 0.84rem;
+  margin-top: 0.16rem;
+}
+
+.delete-anchor {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  width: 2rem;
+  height: 2rem;
+  min-height: 2rem;
+  padding: 0;
 }
 
 .sigil-list {
@@ -368,7 +479,8 @@ h1 {
 }
 
 @media (max-width: 620px) {
-  .topbar {
+  .topbar,
+  .section-heading {
     flex-direction: column;
   }
 
