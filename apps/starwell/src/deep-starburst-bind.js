@@ -1,10 +1,26 @@
 import { buildStarburstVars } from './lib/deepStarburst.js';
 
+const BRIDGE_PULSE_URL = 'https://singsenochian.github.io/-bridge-pulse/pulse.json';
 const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
 const WRAP_SELECTOR = '.glyph-orb-wrap';
 const ROOT_SELECTOR = '#root';
 const UPDATE_INTERVAL_MS = 1000;
+const BRIDGE_POLL_MS = 60000;
 const MUTATION_THROTTLE_MS = 160;
+
+const FALLBACK_DEEP = {
+  P: 0.42,
+  A: 0.72,
+  C: 0.68,
+  R: 0.74,
+  E: 0.61,
+  bz: -5.8,
+  M: 0.3,
+  moonIllum: 93,
+  kp: 3,
+  charge: 0.94,
+  dphi: 0,
+};
 
 const SENSOR_CHIPS = [
   {
@@ -57,35 +73,36 @@ const SENSOR_CHIPS = [
   },
 ];
 
+let currentDeep = FALLBACK_DEEP;
 let lastSignature = '';
 let mutationTimer = 0;
 let intervalId = 0;
+let bridgePollId = 0;
 let observer = null;
 
-function readNumber(pattern, text, fallback) {
-  const match = text.match(pattern);
-  if (!match) return fallback;
-  const parsed = Number(match[1]);
+function numberOr(value, fallback) {
+  const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function readDeepPacket(panel) {
-  const meterText = Array.from(panel.querySelectorAll('.glyph-meter-grid strong'))
-    .map((node) => node.textContent || '')
-    .join(' ');
+function getBridgeDeep(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+  return payload.deep ?? payload.DEEP ?? payload.state ?? payload.observer ?? null;
+}
 
+function normaliseDeep(rawDeep = {}) {
   return {
-    P: readNumber(/P\s+([0-9.]+)/i, meterText, 0.42),
-    A: readNumber(/A\s+([0-9.]+)/i, meterText, 0.72),
-    C: readNumber(/C\s+([0-9.]+)/i, meterText, 0.68),
-    R: readNumber(/R\s+([0-9.]+)/i, meterText, 0.74),
-    E: readNumber(/E\s+([0-9.]+)/i, meterText, 0.61),
-    bz: readNumber(/Bz\s+(-?[0-9.]+)/i, meterText, -5.8),
-    M: readNumber(/M\s+([0-9.]+)/i, meterText, 0.3),
-    moonIllum: readNumber(/moon\s+([0-9.]+)%/i, meterText, 93),
-    kp: readNumber(/Kp\s+([0-9.]+)/i, meterText, 3),
-    charge: readNumber(/charge\s+([0-9.]+)/i, meterText, 0.94),
-    dphi: 0,
+    P: numberOr(rawDeep.P, FALLBACK_DEEP.P),
+    A: numberOr(rawDeep.A, FALLBACK_DEEP.A),
+    C: numberOr(rawDeep.C, FALLBACK_DEEP.C),
+    R: numberOr(rawDeep.R, FALLBACK_DEEP.R),
+    E: numberOr(rawDeep.E, FALLBACK_DEEP.E),
+    bz: numberOr(rawDeep.bz, FALLBACK_DEEP.bz),
+    M: numberOr(rawDeep.M, FALLBACK_DEEP.M),
+    moonIllum: numberOr(rawDeep.moonIllum, FALLBACK_DEEP.moonIllum),
+    kp: numberOr(rawDeep.kp, FALLBACK_DEEP.kp),
+    charge: numberOr(rawDeep.charge, FALLBACK_DEEP.charge),
+    dphi: numberOr(rawDeep.dphi, FALLBACK_DEEP.dphi),
   };
 }
 
@@ -160,7 +177,7 @@ function bindPanel(panel) {
   const glyphWrap = panel.querySelector(WRAP_SELECTOR);
   if (!glyphWrap) return;
 
-  const deep = readDeepPacket(panel);
+  const deep = currentDeep;
   const signature = makeSignature(deep);
   if (signature === lastSignature && glyphWrap.dataset.starburstBound === 'true' && chipsAreBound(panel, signature)) return;
   lastSignature = signature;
@@ -188,23 +205,40 @@ function scheduleBind() {
   }, MUTATION_THROTTLE_MS);
 }
 
+async function refreshBridgeDeep() {
+  try {
+    const response = await fetch(BRIDGE_PULSE_URL, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Bridge pulse returned ${response.status}`);
+    const payload = await response.json();
+    const bridgeDeep = getBridgeDeep(payload);
+    if (!bridgeDeep) throw new Error('Bridge pulse did not include a DEEP state');
+    currentDeep = normaliseDeep(bridgeDeep);
+  } catch (error) {
+    currentDeep = { ...currentDeep };
+  } finally {
+    bindAll();
+  }
+}
+
 function startBinding() {
   bindAll();
+  refreshBridgeDeep();
 
   const root = document.querySelector(ROOT_SELECTOR) || document.body;
   observer = new MutationObserver(scheduleBind);
   observer.observe(root, {
     childList: true,
     subtree: true,
-    characterData: true,
   });
 
   intervalId = window.setInterval(bindAll, UPDATE_INTERVAL_MS);
+  bridgePollId = window.setInterval(refreshBridgeDeep, BRIDGE_POLL_MS);
 }
 
 function stopBinding() {
   if (observer) observer.disconnect();
   if (intervalId) window.clearInterval(intervalId);
+  if (bridgePollId) window.clearInterval(bridgePollId);
   if (mutationTimer) window.clearTimeout(mutationTimer);
 }
 
