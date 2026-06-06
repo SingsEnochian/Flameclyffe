@@ -5,12 +5,14 @@ import {
   FIRST_WINDOW_SIGILS,
   LENS_MODES,
   buildAnchorFromPlacement,
+  buildLocalExportPayload,
   clamp,
   clearAllLocalAnchors,
   clearLocalAnchor,
   compareAnchorReturn,
   deleteLocalAnchor,
   getAnchorPlacement,
+  importLocalExportPayload,
   readLocalAnchor,
   readLocalAnchors,
   readPreferences,
@@ -249,6 +251,7 @@ function PreferencePanel({ preferences, onChange }) {
 function App() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const importInputRef = useRef(null);
   const [cameraStatus, setCameraStatus] = useState('idle');
   const [cameraError, setCameraError] = useState('');
   const [anchors, setAnchors] = useState(() => readLocalAnchors());
@@ -258,6 +261,7 @@ function App() {
   const [privacyVisible, setPrivacyVisible] = useState(true);
   const [preferences, setPreferences] = useState(() => readPreferences());
   const [lensMode, setLensMode] = useState(LENS_MODES.place);
+  const [importStatus, setImportStatus] = useState('');
 
   useEffect(() => {
     registerServiceWorker();
@@ -400,6 +404,56 @@ function App() {
     setPreferences(savePreferences(nextPreferences));
   }
 
+  function exportAnchorShelf() {
+    const payload = buildLocalExportPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchorElement = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    anchorElement.href = url;
+    anchorElement.download = `pocket-concordance-lens-anchors-${date}.json`;
+    document.body.appendChild(anchorElement);
+    anchorElement.click();
+    anchorElement.remove();
+    URL.revokeObjectURL(url);
+    setImportStatus('Anchor shelf export prepared. Save the JSON file somewhere private.');
+  }
+
+  function openImportPicker() {
+    importInputRef.current?.click();
+  }
+
+  function handleImportFile(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(String(reader.result || '{}'));
+        const imported = importLocalExportPayload(payload);
+        setAnchors(imported.anchors);
+        setAnchor(imported.activeAnchor);
+        setPreferences(imported.preferences);
+        setLensMode(LENS_MODES.return);
+        setComparison({
+          comparison_state: 'stable',
+          reading: ['Anchor shelf imported.', `${imported.anchors.length} return-point${imported.anchors.length === 1 ? '' : 's'} restored.`, 'No camera images or video were imported.'],
+        });
+        setImportStatus('Anchor shelf imported successfully.');
+      } catch (error) {
+        setImportStatus(error?.message || 'Import failed.');
+      } finally {
+        event.target.value = '';
+      }
+    };
+    reader.onerror = () => {
+      setImportStatus('Import failed: the file could not be read.');
+      event.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+
   const isCameraLive = cameraStatus === 'active';
   const viewLabel = isCameraLive ? 'Live camera view' : demoMode ? 'Demo room view' : 'Camera inactive view';
   const appClasses = [
@@ -438,9 +492,20 @@ function App() {
         <button type="button" onClick={stopCamera} disabled={!isCameraLive}>Stop camera</button>
         <button type="button" onClick={toggleDemoMode}>{demoMode ? 'Exit demo' : 'Demo room'}</button>
         <button type="button" onClick={() => compareActiveAnchor()} disabled={!anchor}>Compare active</button>
+        <button type="button" onClick={exportAnchorShelf} disabled={anchors.length === 0}>Export shelf</button>
+        <button type="button" onClick={openImportPicker}>Import shelf</button>
         <button type="button" onClick={clearSavedAnchor} disabled={!anchor}>Clear active</button>
+        <input
+          ref={importInputRef}
+          className="sr-only"
+          type="file"
+          accept="application/json,.json"
+          onChange={handleImportFile}
+          aria-label="Import anchor shelf JSON file"
+        />
       </section>
 
+      {importStatus && <p className="import-status">{importStatus}</p>}
       {cameraError && <p className="error-note">{cameraError}</p>}
 
       <section className="lens-stage" aria-label={viewLabel} onClick={handleStageTap}>
