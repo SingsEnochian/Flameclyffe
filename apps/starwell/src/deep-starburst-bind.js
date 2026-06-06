@@ -112,6 +112,11 @@ function makeSignature(deep) {
     .join('|');
 }
 
+function isNativeControlled(element, scope) {
+  const value = element?.dataset?.starburstNative;
+  return value === 'true' || value === scope;
+}
+
 function applyVars(target, vars) {
   Object.entries(vars).forEach(([name, value]) => {
     if (target.style.getPropertyValue(name) !== value) {
@@ -121,6 +126,8 @@ function applyVars(target, vars) {
 }
 
 function ensureChipLegend(chip, sensor) {
+  if (isNativeControlled(chip, 'sensor')) return;
+
   let label = chip.querySelector(':scope > .deep-sensor-label');
   if (!label) {
     label = document.createElement('span');
@@ -155,6 +162,8 @@ function bindSensorChips(panel, deep, signature) {
 
   chips.forEach((chip, index) => {
     const sensor = SENSOR_CHIPS[index] || SENSOR_CHIPS[0];
+    if (isNativeControlled(chip, 'sensor')) return;
+
     const sensorSignature = `${signature}|${sensor.key}`;
     ensureChipLegend(chip, sensor);
     if (chip.dataset.starburstSignature === sensorSignature) return;
@@ -168,6 +177,7 @@ function bindSensorChips(panel, deep, signature) {
 function chipsAreBound(panel, signature) {
   const chips = Array.from(panel.querySelectorAll('.glyph-meter-grid > div'));
   return chips.length > 0 && chips.every((chip, index) => {
+    if (isNativeControlled(chip, 'sensor')) return true;
     const sensor = SENSOR_CHIPS[index] || SENSOR_CHIPS[0];
     return chip.dataset.starburstSignature === `${signature}|${sensor.key}`;
   });
@@ -179,17 +189,22 @@ function bindPanel(panel) {
 
   const deep = currentDeep;
   const signature = makeSignature(deep);
-  if (signature === lastSignature && glyphWrap.dataset.starburstBound === 'true' && chipsAreBound(panel, signature)) return;
+  const auraIsNative = isNativeControlled(glyphWrap, 'aura');
+
+  if (signature === lastSignature && (auraIsNative || glyphWrap.dataset.starburstBound === 'true') && chipsAreBound(panel, signature)) return;
   lastSignature = signature;
 
-  const vars = buildStarburstVars(deep, {
-    baseSize: 132 + deep.A * 24 + deep.R * 18,
-    rotation: deep.E * 18 + deep.kp * 2.5,
-  });
+  if (!auraIsNative) {
+    const vars = buildStarburstVars(deep, {
+      baseSize: 132 + deep.A * 24 + deep.R * 18,
+      rotation: deep.E * 18 + deep.kp * 2.5,
+    });
 
-  applyVars(glyphWrap, vars);
-  glyphWrap.dataset.starburstBound = 'true';
-  glyphWrap.dataset.starburstSignature = signature;
+    applyVars(glyphWrap, vars);
+    glyphWrap.dataset.starburstBound = 'true';
+    glyphWrap.dataset.starburstSignature = signature;
+  }
+
   bindSensorChips(panel, deep, signature);
 }
 
