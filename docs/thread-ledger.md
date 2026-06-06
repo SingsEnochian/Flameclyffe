@@ -206,9 +206,10 @@ Decision note:
 
 ```text
 docs/hud-integration-decision.md
+docs/starwell-viewport-hud-wrapper-contract.md
 ```
 
-Current decision: keep the static HUD files shelved for now. Treat them as prototypes/reference implementations. Do not directly load them into `apps/starwell/index.html` until the viewport/HUD wrapper contract is explicit and sensory consent gates have been reviewed.
+Current decision: keep the static HUD files shelved for now. Treat them as prototypes/reference implementations. Do not directly load them into `apps/starwell/index.html` until the viewport/HUD wrapper contract is satisfied and sensory consent gates have been reviewed.
 
 ### HUD bounds helper
 
@@ -280,6 +281,16 @@ docs/hud-integration-decision.md
 
 Responsibility: records the decision to keep static HUD files shelved for now, treat them as prototypes, and build or bridge STARWELL-native helpers only after the viewport/HUD wrapper contract is explicit.
 
+### Viewport / HUD wrapper contract
+
+Primary file:
+
+```text
+docs/starwell-viewport-hud-wrapper-contract.md
+```
+
+Responsibility: defines the STARWELL viewport root, Observer instrument shell, glyph stage, readout rail, proposed HUD overlay layer, bounds model, default panel positions, snap zones, mobile rules, sensory gates, and future `deepHudBounds.js` scope.
+
 ## Parallel threads to watch
 
 These may change while DEEP visual work is ongoing:
@@ -314,7 +325,7 @@ Add to the shared modules or explicitly bridge the static HUD files instead.
 ## Next safe moves
 
 1. Visual QA at mobile, tablet, laptop, and wide widths.
-2. Define the STARWELL viewport/HUD wrapper contract before activating floating HUD or sensory UI.
+2. Use the STARWELL viewport/HUD wrapper contract before activating floating HUD or sensory UI.
 3. If HUD bounds become active, port pure clamp/snap logic into `apps/starwell/src/lib/deepHudBounds.js` rather than loading the static global helper directly.
 4. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
 5. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
