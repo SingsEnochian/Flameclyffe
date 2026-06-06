@@ -1,13 +1,13 @@
-/* DEEP Observer Organic Astrolabe Layer v0.3
-   Separates glyph, controls, and readout into distinct HUD containers.
-   The control dock no longer inherits glyph-stage/sensor-ring geometry.
+/* DEEP Observer Organic Astrolabe Layer v0.4
+   Mobile-first containment reset.
+   Glyph, controls, and readout are stacked by default; wide two-column HUD only activates on genuinely wide screens.
 */
 :root{
   --observer-dock-edge-gap:3px;
-  --observer-dock-separation:1.05rem;
-  --observer-dock-inner-x:.92rem;
-  --observer-dock-inner-y:.76rem;
-  --observer-jewel-size:1.42rem;
+  --observer-dock-separation:1rem;
+  --observer-dock-inner-x:.68rem;
+  --observer-dock-inner-y:.68rem;
+  --observer-jewel-size:1.22rem;
   --observer-jewel-rim:rgba(231,196,119,.26);
   --observer-jewel-blue:rgba(64,164,224,.34);
   --observer-jewel-cyan:rgba(76,224,230,.24);
@@ -15,22 +15,43 @@
   --observer-jewel-gold:rgba(231,196,119,.30);
 }
 
+html,
+body,
+.page,
+.shell{
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+.page{
+  width:min(100%,96vw) !important;
+}
+
+.quick-guide{
+  width:min(100%,calc(100vw - 1rem)) !important;
+  grid-template-columns:1fr !important;
+}
+
 .observer-hud{
-  width:min(1120px,calc(100% - 2rem));
+  width:min(100%,calc(100vw - .75rem));
+  max-width:1120px;
   margin:0 auto 1.7rem;
   display:grid;
-  grid-template-columns:minmax(280px,460px) minmax(380px,1fr);
+  grid-template-columns:1fr;
   grid-template-areas:
-    "glyph readout"
-    "controls readout";
-  gap:var(--observer-dock-separation) clamp(1rem,3vw,1.6rem);
+    "glyph"
+    "controls"
+    "readout";
+  gap:var(--observer-dock-separation);
   align-items:start;
   justify-items:center;
+  overflow:visible;
 }
 
 .observer-glyph-instrument{
   grid-area:glyph;
   width:100%;
+  min-width:0;
   display:grid !important;
   grid-template-columns:1fr !important;
   padding:0 !important;
@@ -42,6 +63,7 @@
 .observer-control-dock{
   grid-area:controls;
   width:100%;
+  min-width:0;
   display:grid;
   justify-items:center;
   margin-top:var(--observer-dock-edge-gap);
@@ -54,34 +76,36 @@
 }
 
 .observer-readout .panel{
-  width:100%;
-  margin:0 !important;
+  width:min(760px,100%);
+  margin:0 auto !important;
 }
 
 .glyph-stage{
   justify-self:center;
   width:100%;
+  min-width:0;
   justify-items:center;
   gap:0 !important;
-  position:sticky;
-  top:1rem;
+  position:relative !important;
+  top:auto !important;
 }
 
 .orb-frame{
   justify-self:center;
+  max-width:100%;
 }
 
 .observer-control-dock .filter-row{
   position:relative;
   display:grid !important;
-  width:min(760px,100%) !important;
+  width:min(350px,100%) !important;
   max-width:760px;
   margin:0 !important;
   padding:var(--observer-dock-inner-y) var(--observer-dock-inner-x) !important;
   min-height:0;
-  gap:.58rem .62rem !important;
-  grid-template-columns:repeat(2,minmax(7.4rem,1fr));
-  border-radius:30px 28px 33px 29px !important;
+  gap:.5rem !important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  border-radius:28px 26px 31px 27px !important;
   border:1px solid rgba(198,226,242,.21) !important;
   background:
     radial-gradient(ellipse at 12% 0%,rgba(232,244,252,.12),transparent 46%),
@@ -130,8 +154,8 @@
 .action,
 .interface-cloak-toggle,
 .sensory-toggle{
-  min-height:2.24rem;
-  padding:.48rem .82rem .48rem calc(var(--observer-jewel-size) + .94rem) !important;
+  min-height:2.16rem;
+  padding:.46rem .68rem .46rem calc(var(--observer-jewel-size) + .82rem) !important;
   border-radius:999px !important;
   border-color:rgba(198,226,242,.22) !important;
   background:
@@ -146,13 +170,14 @@
     inset 0 -10px 22px rgba(0,0,0,.32),
     inset 0 0 0 1px rgba(255,255,255,.045),
     inset 0 0 20px rgba(64,164,224,.04) !important;
+  font-size:.56rem !important;
 }
 
 .filter::before,
 .action::before,
 .interface-cloak-toggle::before,
 .sensory-toggle::before{
-  left:.52rem;
+  left:.46rem;
   width:var(--observer-jewel-size);
   height:var(--observer-jewel-size);
   border-radius:48% 52% 46% 54%;
@@ -237,58 +262,69 @@
   z-index:96;
 }
 
-@media(max-width:1120px){
-  .observer-hud{
-    grid-template-columns:1fr;
-    grid-template-areas:
-      "glyph"
-      "controls"
-      "readout";
-    gap:var(--observer-dock-separation);
+@media(min-width:640px){
+  :root{
+    --observer-jewel-size:1.32rem;
+    --observer-dock-inner-x:.78rem;
+    --observer-dock-inner-y:.72rem;
   }
-  .observer-glyph-instrument{
-    width:100%;
+  .quick-guide{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  }
+  .observer-control-dock .filter-row{
+    width:min(560px,90vw) !important;
+    grid-template-columns:repeat(3,minmax(6.4rem,1fr));
+    gap:.52rem !important;
+  }
+  .filter,
+  .action{
+    min-height:2.2rem;
+    font-size:.6rem !important;
+  }
+}
+
+@media(min-width:820px){
+  :root{
+    --observer-jewel-size:1.42rem;
+    --observer-dock-inner-x:.92rem;
+    --observer-dock-inner-y:.76rem;
   }
   .observer-control-dock .filter-row{
     width:min(760px,88vw) !important;
     grid-template-columns:repeat(4,minmax(7rem,1fr));
-  }
-  .observer-readout .panel{
-    width:min(760px,100%);
-    margin-inline:auto !important;
-  }
-}
-
-@media(max-width:780px){
-  .observer-control-dock .filter-row{
-    width:min(560px,90vw) !important;
-    grid-template-columns:repeat(3,minmax(6.4rem,1fr));
-    padding:.74rem !important;
-    gap:.52rem !important;
-  }
-}
-
-@media(max-width:520px){
-  :root{
-    --observer-jewel-size:1.22rem;
-    --observer-dock-inner-x:.68rem;
-    --observer-dock-inner-y:.68rem;
-  }
-  .observer-control-dock .filter-row{
-    width:min(350px,91vw) !important;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    padding:var(--observer-dock-inner-y) var(--observer-dock-inner-x) !important;
-    gap:.5rem !important;
+    gap:.58rem .62rem !important;
   }
   .filter,
   .action{
-    min-height:2.16rem;
-    padding-left:calc(var(--observer-jewel-size) + .82rem) !important;
-    font-size:.56rem !important;
+    min-height:2.24rem;
+    padding:.48rem .82rem .48rem calc(var(--observer-jewel-size) + .94rem) !important;
+    font-size:.64rem !important;
   }
   .filter::before,
   .action::before{
-    left:.46rem;
+    left:.52rem;
+  }
+}
+
+@media(min-width:1180px){
+  .observer-hud{
+    width:min(1120px,calc(100% - 2rem));
+    grid-template-columns:minmax(280px,460px) minmax(380px,1fr);
+    grid-template-areas:
+      "glyph readout"
+      "controls readout";
+    gap:var(--observer-dock-separation) clamp(1rem,3vw,1.6rem);
+  }
+  .observer-control-dock .filter-row{
+    width:min(430px,100%) !important;
+    grid-template-columns:repeat(2,minmax(7.4rem,1fr));
+  }
+  .observer-readout .panel{
+    width:100%;
+  }
+  .glyph-stage{
+    position:sticky !important;
+    top:1rem !important;
   }
 }
 
