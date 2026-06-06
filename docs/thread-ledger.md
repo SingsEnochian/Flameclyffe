@@ -157,6 +157,44 @@ getDeepSensorByIndex
 
 Rule: sensor labels, notes, base sizes, rotations, and proxy mappings belong here. If the six-chip language changes, update this module first.
 
+### DEEP HUD bounds helper
+
+Current state: implemented pure helper. No active floating HUD panels yet.
+
+Primary file:
+
+```text
+apps/starwell/src/lib/deepHudBounds.js
+```
+
+Owns:
+
+```text
+DEFAULT_HUD_SELECTORS
+DEFAULT_HUD_BREAKPOINTS
+DEFAULT_HUD_INSETS
+DEFAULT_PANEL_SIZE
+DEFAULT_PANEL_POSITIONS
+toHudRect
+makeRect
+insetRect
+getHudViewportClass
+getHudInset
+resolveHudElements
+getViewportRect
+getAvoidRects
+measureHudBounds
+clampPanelPosition
+makeHudSnapZones
+getDefaultPanelZone
+positionPanelInZone
+getDefaultPanelPosition
+panelIntersectsRect
+avoidRectsForDefaultPosition
+```
+
+Rule: flexible HUD measurement, safe bounds, avoid zones, snap zones, default panel zones, and panel clamping belong here. No hardcoded coffin-coordinates. No DOM panel creation. No sound. No haptics. No React state mutation.
+
 ## Transitional thread
 
 ### Starburst binder
@@ -223,7 +261,7 @@ starwell/deep-observer/deep-observer-hud-bounds.js
 
 Responsibility: exposes `window.DEEP_OBSERVER_HUD` with helpers for HUD element detection, bounds rectangles, clamping, default panel positions, snap zones, element clamping, element snapping, and `deep-observer:hud-bounds` dispatches.
 
-Ownership note: do not duplicate floating-panel clamp or snap logic in STARWELL until we decide whether this helper should be imported, bridged, or kept static-only. If it becomes active, prefer a pure STARWELL module such as `apps/starwell/src/lib/deepHudBounds.js` rather than loading the global static helper directly.
+Ownership note: do not duplicate floating-panel clamp or snap logic in STARWELL. Use `apps/starwell/src/lib/deepHudBounds.js` for STARWELL-native pure helper work rather than loading the global static helper directly.
 
 ### Sensory engine panel
 
@@ -289,7 +327,7 @@ Primary file:
 docs/starwell-viewport-hud-wrapper-contract.md
 ```
 
-Responsibility: defines the STARWELL viewport root, Observer instrument shell, glyph stage, readout rail, proposed HUD overlay layer, bounds model, default panel positions, snap zones, mobile rules, sensory gates, and future `deepHudBounds.js` scope.
+Responsibility: defines the STARWELL viewport root, Observer instrument shell, glyph stage, readout rail, proposed HUD overlay layer, bounds model, default panel positions, snap zones, mobile rules, sensory gates, and `deepHudBounds.js` scope.
 
 ## Parallel threads to watch
 
@@ -325,13 +363,12 @@ Add to the shared modules or explicitly bridge the static HUD files instead.
 ## Next safe moves
 
 1. Visual QA at mobile, tablet, laptop, and wide widths.
-2. Use the STARWELL viewport/HUD wrapper contract before activating floating HUD or sensory UI.
-3. If HUD bounds become active, port pure clamp/snap logic into `apps/starwell/src/lib/deepHudBounds.js` rather than loading the static global helper directly.
-4. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
-5. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
-6. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
-7. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
-8. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
+2. Use `apps/starwell/src/lib/deepHudBounds.js` for STARWELL-native floating HUD measurement and clamp logic.
+3. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
+4. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
+5. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
+6. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
+7. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
 
 ## Working mantra
 
