@@ -128,6 +128,7 @@ h2 {
 
 .privacy-card,
 .error-note,
+.import-status,
 .mode-panel,
 .preferences,
 .deep-reading,
@@ -225,10 +226,19 @@ h2 {
   color: #efe4c4;
 }
 
-.error-note {
+.error-note,
+.import-status {
   border-radius: 0.9rem;
   padding: 0.8rem 1rem;
+}
+
+.error-note {
   color: #ffd7c2;
+}
+
+.import-status {
+  color: #d8f2e6;
+  margin: 0.4rem 0 0.8rem;
 }
 
 .lens-stage {
