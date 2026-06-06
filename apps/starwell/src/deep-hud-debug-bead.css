@@ -1,0 +1,56 @@
+/* DEEP HUD debug bead
+   Dev-gated only. This should remain invisible unless deep-hud-debug-bead.js is enabled
+   through ?deepHudDebug=1 or localStorage.deepHudDebug = "true". */
+
+.deep-hud-debug-bead {
+  position: absolute;
+  left: var(--debug-x, 0px);
+  top: var(--debug-y, 0px);
+  display: inline-grid;
+  place-items: center;
+  min-width: 9.75rem;
+  min-height: 3.1rem;
+  padding: 0.48rem 0.62rem;
+  border: 1px solid rgba(231, 196, 119, 0.42);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 42%),
+    linear-gradient(145deg, rgba(20, 19, 27, 0.82), rgba(3, 5, 10, 0.66));
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -8px 18px rgba(0,0,0,0.18),
+    0 0 0 3px rgba(140, 202, 192, 0.08);
+  color: rgba(232, 244, 252, 0.92);
+  font-family: 'IBM Plex Sans', Inter, system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  pointer-events: none;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px rgba(140, 202, 192, 0.22);
+  white-space: nowrap;
+}
+
+.deep-hud-debug-bead::before {
+  content: '';
+  position: absolute;
+  left: 0.42rem;
+  width: 0.42rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(140, 202, 192, 0.86);
+  box-shadow:
+    0 0 0 1px rgba(232, 244, 252, 0.18),
+    0 0 16px rgba(140, 202, 192, 0.36);
+}
+
+@media (max-width: 720px) {
+  .deep-hud-debug-bead {
+    min-width: 8.4rem;
+    min-height: 2.65rem;
+    padding: 0.38rem 0.52rem;
+    font-size: 0.58rem;
+  }
+}
