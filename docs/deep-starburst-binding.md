@@ -70,6 +70,18 @@ Geomagnetic   Kp and charge: storm energy and centre luminosity
 
 The binder is intentionally temporary. It watches only the STARWELL root, throttles DOM changes, skips redundant writes, polls the bridge pulse once per minute, and cleans itself up on page hide.
 
+## Native handoff marker
+
+The binder now honours a native React handoff marker. If a future React component supplies the starburst variables itself, add one of these markers and the binder will skip that element:
+
+```jsx
+<div data-starburst-native="aura" />
+<div data-starburst-native="sensor" />
+<div data-starburst-native="true" />
+```
+
+Use `aura` on `.glyph-orb-wrap` and `sensor` on individual `.glyph-meter-grid > div` cards. Use `true` only when the element should be fully ignored by the binder regardless of scope.
+
 ## Fold-in target
 
 Once the visual behaviour is confirmed, move the aura binding into React:
@@ -87,14 +99,14 @@ function DeepGlyphCanvas({ glyph, onActivate, onSoften, onKeyDown }) {
   );
 
   return (
-    <div className="glyph-orb-wrap glyph-orb-canvas-wrap" style={starburstVars}>
+    <div className="glyph-orb-wrap glyph-orb-canvas-wrap" data-starburst-native="aura" style={starburstVars}>
       <canvas className="glyph-orb glyph-orb-canvas" />
     </div>
   );
 }
 ```
 
-Then move the sensor-chip labels and flare variables into the React meter grid. After both steps are complete, remove:
+Then move the sensor-chip labels and flare variables into the React meter grid with `data-starburst-native="sensor"`. After both steps are complete, remove:
 
 ```text
 apps/starwell/src/deep-starburst-bind.js
