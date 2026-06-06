@@ -2,6 +2,11 @@ export const STORAGE_KEY = 'pocket-concordance-lens-anchor-v0-1';
 export const ANCHOR_SHELF_KEY = 'pocket-concordance-lens-anchor-shelf-v0-1';
 export const PREFERENCES_KEY = 'pocket-concordance-lens-preferences-v0-1';
 
+export const LENS_MODES = {
+  place: 'place',
+  return: 'return',
+};
+
 export const FIRST_WINDOW_SIGILS = [
   { id: 'anchor', label: 'Anchor', glyph: '◎', note: 'Return-point formed' },
   { id: 'witness', label: 'Witness', glyph: '◉', note: 'DEEP is observing' },
@@ -40,6 +45,10 @@ export function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function cleanAnchorName(name) {
+  return (name || '').trim() || 'First Concordance Window';
+}
+
 export function readLocalAnchor() {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -66,6 +75,8 @@ export function readLocalAnchors() {
 export function saveLocalAnchor(anchor) {
   const nextAnchor = {
     ...anchor,
+    display_name: cleanAnchorName(anchor.display_name || anchor.label),
+    label: cleanAnchorName(anchor.display_name || anchor.label),
     updated_at: new Date().toISOString(),
     last_seen_at: new Date().toISOString(),
   };
@@ -74,6 +85,37 @@ export function saveLocalAnchor(anchor) {
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextAnchor));
   window.localStorage.setItem(ANCHOR_SHELF_KEY, JSON.stringify(nextAnchors));
+  return nextAnchors;
+}
+
+export function renameLocalAnchor(anchorId, name) {
+  const displayName = cleanAnchorName(name);
+  const now = new Date().toISOString();
+  const anchors = readLocalAnchors();
+  const nextAnchors = anchors.map((item) => (
+    item.id === anchorId
+      ? {
+        ...item,
+        display_name: displayName,
+        label: displayName,
+        updated_at: now,
+      }
+      : item
+  ));
+
+  window.localStorage.setItem(ANCHOR_SHELF_KEY, JSON.stringify(nextAnchors));
+
+  const activeAnchor = readLocalAnchor();
+  if (activeAnchor?.id === anchorId) {
+    const nextActive = {
+      ...activeAnchor,
+      display_name: displayName,
+      label: displayName,
+      updated_at: now,
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextActive));
+  }
+
   return nextAnchors;
 }
 
@@ -127,11 +169,12 @@ export function savePreferences(preferences) {
 
 export function buildAnchorFromPlacement({ x, y, deviceMode = 'pocket_lens', label = 'First Concordance Window' }) {
   const now = new Date().toISOString();
+  const displayName = cleanAnchorName(label);
 
   return {
     id: `local-anchor-${Date.now()}`,
     slug: null,
-    display_name: label,
+    display_name: displayName,
     anchor_kind: 'surface',
     layer: 'waking_world',
     visibility: 'private',
@@ -141,7 +184,7 @@ export function buildAnchorFromPlacement({ x, y, deviceMode = 'pocket_lens', lab
     device_mode: deviceMode,
     x,
     y,
-    label,
+    label: displayName,
     sigils: FIRST_WINDOW_SIGILS.map((sigil) => sigil.id),
     relation: 'first_concordance_window',
     waking_context: {
@@ -243,6 +286,6 @@ export function compareAnchorReturn(previousAnchor, currentPlacement) {
     },
     reading: comparisonState === COMPARISON_STATES.stable
       ? ['Return-point recognised.', 'Anchor remains stable.', 'Concordance thread holds.']
-      : ['Anchor drift detected.', 'Relation is present but misaligned.', 'Re-place or clear the anchor.'],
+      : ['Anchor drift detected.', 'Relation is present but misaligned.', 'Switch to Place mode to move this anchor, or clear it.'],
   };
 }
