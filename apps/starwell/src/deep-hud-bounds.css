@@ -1,0 +1,44 @@
+/* DEEP HUD bounds passive layer
+   The JavaScript binder publishes measured bounds as CSS custom properties on
+   .live-glyph-panel.deep-observer-panel. This stylesheet exposes a future
+   overlay socket without creating visible furniture yet. */
+
+.live-glyph-panel.deep-observer-panel {
+  --deep-hud-inset: 16px;
+  --deep-hud-safe-left: var(--deep-hud-inset);
+  --deep-hud-safe-top: var(--deep-hud-inset);
+  --deep-hud-safe-width: calc(100% - (var(--deep-hud-inset) * 2));
+  --deep-hud-safe-height: calc(100% - (var(--deep-hud-inset) * 2));
+  --deep-hud-stage-left: 0px;
+  --deep-hud-stage-top: 0px;
+  --deep-hud-stage-width: 0px;
+  --deep-hud-stage-height: 0px;
+  --deep-hud-readout-left: 0px;
+  --deep-hud-readout-top: 0px;
+  --deep-hud-readout-width: 0px;
+  --deep-hud-readout-height: 0px;
+}
+
+.live-glyph-panel.deep-observer-panel[data-deep-hud-bounds='ready'] {
+  position: relative;
+}
+
+.deep-observer-hud-layer {
+  position: absolute;
+  left: var(--deep-hud-safe-left);
+  top: var(--deep-hud-safe-top);
+  width: var(--deep-hud-safe-width);
+  height: var(--deep-hud-safe-height);
+  pointer-events: none;
+  z-index: 8;
+}
+
+.deep-observer-hud-layer > * {
+  pointer-events: auto;
+}
+
+@media (max-width: 720px) {
+  .live-glyph-panel.deep-observer-panel {
+    --deep-hud-inset: 8px;
+  }
+}
