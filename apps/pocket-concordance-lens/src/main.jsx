@@ -1,38 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import {
+  EMPTY_DEEP_READING,
+  FIRST_WINDOW_SIGILS,
+  buildAnchorFromPlacement,
+  clamp,
+  clearLocalAnchor,
+  compareAnchorReturn,
+  getAnchorPlacement,
+  readLocalAnchor,
+  saveLocalAnchor,
+} from './anchorContract.js';
 import './styles.css';
-
-const STORAGE_KEY = 'pocket-concordance-lens-anchor-v0-1';
-
-const SIGILS = [
-  { id: 'anchor', label: 'Anchor', glyph: '◎', note: 'Return-point formed' },
-  { id: 'witness', label: 'Witness', glyph: '◉', note: 'DEEP is observing' },
-  { id: 'waking', label: 'Waking', glyph: '─•', note: 'Physical handle stable' },
-  { id: 'gate', label: 'Gate', glyph: 'Ⅱ', note: 'Verge contact listening' },
-  { id: 'concordance', label: 'Concordance', glyph: '⊙', note: 'Relation invited' },
-];
-
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function getInitialAnchor() {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (error) {
-    console.warn('Could not read saved Concordance anchor', error);
-    return null;
-  }
-}
-
-function saveAnchor(anchor) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(anchor));
-}
-
-function clearAnchor() {
-  window.localStorage.removeItem(STORAGE_KEY);
-}
 
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
@@ -44,14 +23,16 @@ function registerServiceWorker() {
 function SigilRing({ anchor }) {
   if (!anchor) return null;
 
+  const placement = getAnchorPlacement(anchor);
+
   return (
     <div
       className="sigil-ring"
-      style={{ left: `${anchor.x}%`, top: `${anchor.y}%` }}
+      style={{ left: `${placement.x}%`, top: `${placement.y}%` }}
       aria-label="Active Concordance sigils"
     >
-      {SIGILS.map((sigil, index) => {
-        const angle = (index / SIGILS.length) * Math.PI * 2 - Math.PI / 2;
+      {FIRST_WINDOW_SIGILS.map((sigil, index) => {
+        const angle = (index / FIRST_WINDOW_SIGILS.length) * Math.PI * 2 - Math.PI / 2;
         const radius = 92;
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
@@ -78,36 +59,36 @@ function SigilRing({ anchor }) {
 function StonewoodOverlay({ anchor }) {
   if (!anchor) return null;
 
+  const placement = getAnchorPlacement(anchor);
+
   return (
     <div className="stonewood-layer" aria-hidden="true">
-      <div className="stonewood-seam seam-a" style={{ left: `${clamp(anchor.x - 24, 6, 74)}%`, top: `${clamp(anchor.y - 18, 10, 75)}%` }} />
-      <div className="stonewood-seam seam-b" style={{ left: `${clamp(anchor.x + 12, 8, 82)}%`, top: `${clamp(anchor.y + 14, 12, 80)}%` }} />
-      <div className="sigil-rail" style={{ left: `${clamp(anchor.x - 34, 4, 64)}%`, top: `${clamp(anchor.y + 22, 20, 84)}%` }} />
+      <div className="stonewood-seam seam-a" style={{ left: `${clamp(placement.x - 24, 6, 74)}%`, top: `${clamp(placement.y - 18, 10, 75)}%` }} />
+      <div className="stonewood-seam seam-b" style={{ left: `${clamp(placement.x + 12, 8, 82)}%`, top: `${clamp(placement.y + 14, 12, 80)}%` }} />
+      <div className="sigil-rail" style={{ left: `${clamp(placement.x - 34, 4, 64)}%`, top: `${clamp(placement.y + 22, 20, 84)}%` }} />
     </div>
   );
 }
 
-function DeepReading({ anchor, cameraStatus }) {
+function DeepReading({ anchor, cameraStatus, comparison }) {
   const reading = useMemo(() => {
+    if (comparison?.reading?.length) return comparison.reading;
+
     if (!anchor) {
-      return [
-        'No anchor placed.',
-        cameraStatus === 'active' ? 'Tap the room view to invite relation.' : 'Start the camera or use demo mode.',
-      ];
+      return cameraStatus === 'active'
+        ? ['No anchor placed.', 'Tap the room view to invite relation.']
+        : EMPTY_DEEP_READING;
     }
 
-    return [
-      'Anchor recognised.',
-      'Waking layer stable.',
-      'Verge contact listening.',
-      'Concordance invited, not forced.',
-      'Return-point formed.',
-    ];
-  }, [anchor, cameraStatus]);
+    return anchor.deep_state?.reading?.length ? anchor.deep_state.reading : EMPTY_DEEP_READING;
+  }, [anchor, cameraStatus, comparison]);
 
   return (
     <aside className="deep-reading" aria-live="polite">
       <div className="reading-kicker">DEEP Reading</div>
+      {comparison?.comparison_state && (
+        <p className="comparison-state">Return state: {comparison.comparison_state}</p>
+      )}
       {reading.map((line) => <p key={line}>{line}</p>)}
     </aside>
   );
@@ -118,7 +99,8 @@ function App() {
   const streamRef = useRef(null);
   const [cameraStatus, setCameraStatus] = useState('idle');
   const [cameraError, setCameraError] = useState('');
-  const [anchor, setAnchor] = useState(() => getInitialAnchor());
+  const [anchor, setAnchor] = useState(() => readLocalAnchor());
+  const [comparison, setComparison] = useState(null);
   const [demoMode, setDemoMode] = useState(false);
   const [privacyVisible, setPrivacyVisible] = useState(true);
 
@@ -180,23 +162,25 @@ function App() {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = clamp(((event.clientX - rect.left) / rect.width) * 100, 8, 92);
     const y = clamp(((event.clientY - rect.top) / rect.height) * 100, 12, 88);
-    const nextAnchor = {
-      id: `local-anchor-${Date.now()}`,
+    const previousAnchor = readLocalAnchor();
+    const nextAnchor = buildAnchorFromPlacement({
       x,
       y,
-      label: 'First Concordance Window',
-      sigils: SIGILS.map((sigil) => sigil.id),
-      layer: 'waking_world',
-      relation: 'terra_aeterna_verge_contact',
-      createdAt: new Date().toISOString(),
-    };
+      deviceMode: cameraStatus === 'active' ? 'pocket_lens' : 'demo_lens',
+    });
+
     setAnchor(nextAnchor);
-    saveAnchor(nextAnchor);
+    saveLocalAnchor(nextAnchor);
+    setComparison(previousAnchor ? compareAnchorReturn(previousAnchor, { x, y }) : null);
   }
 
   function clearSavedAnchor() {
     setAnchor(null);
-    clearAnchor();
+    setComparison({
+      comparison_state: 'cleared',
+      reading: ['Anchor cleared.', 'The room is unbound and ready for a new return-point.'],
+    });
+    clearLocalAnchor();
   }
 
   const isCameraLive = cameraStatus === 'active';
@@ -245,10 +229,10 @@ function App() {
         <SigilRing anchor={anchor} />
       </section>
 
-      <DeepReading anchor={anchor} cameraStatus={cameraStatus} />
+      <DeepReading anchor={anchor} cameraStatus={cameraStatus} comparison={comparison} />
 
       <section className="sigil-list" aria-label="Active sigils">
-        {SIGILS.map((sigil) => (
+        {FIRST_WINDOW_SIGILS.map((sigil) => (
           <article key={sigil.id}>
             <span>{sigil.glyph}</span>
             <div>
