@@ -1,8 +1,8 @@
-import { getBridgeDeep, makeDeepSignature, normaliseDeepState } from './lib/deepState.js';
+import { fetchBridgeDeepPulse } from './lib/deepBridge.js';
+import { makeDeepSignature, normaliseDeepState } from './lib/deepState.js';
 import { getDeepSensorByIndex } from './lib/deepSensors.js';
 import { buildSensorStarburstVars, buildStarburstVars } from './lib/deepStarburst.js';
 
-const BRIDGE_PULSE_URL = 'https://singsenochian.github.io/-bridge-pulse/pulse.json';
 const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
 const WRAP_SELECTOR = '.glyph-orb-wrap';
 const ROOT_SELECTOR = '#root';
@@ -110,12 +110,7 @@ function scheduleBind() {
 
 async function refreshBridgeDeep() {
   try {
-    const response = await fetch(BRIDGE_PULSE_URL, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Bridge pulse returned ${response.status}`);
-    const payload = await response.json();
-    const bridgeDeep = getBridgeDeep(payload);
-    if (!bridgeDeep) throw new Error('Bridge pulse did not include a DEEP state');
-    currentDeep = normaliseDeepState(bridgeDeep);
+    currentDeep = await fetchBridgeDeepPulse();
   } catch (error) {
     currentDeep = { ...currentDeep };
   } finally {
