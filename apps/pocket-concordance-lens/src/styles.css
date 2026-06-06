@@ -105,6 +105,7 @@ h2 {
 
 .privacy-card,
 .error-note,
+.mode-panel,
 .preferences,
 .deep-reading,
 .anchor-shelf,
@@ -131,6 +132,48 @@ h2 {
   height: 2rem;
   min-height: 2rem;
   padding: 0;
+}
+
+.mode-panel {
+  border-radius: 1.1rem;
+  padding: 0.95rem 1rem;
+  margin: 0.8rem 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.mode-copy,
+.active-anchor-name {
+  color: #d8ccb0;
+  margin: 0.18rem 0 0;
+}
+
+.active-anchor-name {
+  color: #ffe89a;
+  font-weight: 700;
+}
+
+.segmented-control {
+  display: inline-flex;
+  border-radius: 999px;
+  border: 1px solid rgba(244, 211, 139, 0.28);
+  padding: 0.2rem;
+  background: rgba(8, 10, 8, 0.52);
+  flex: 0 0 auto;
+}
+
+.segmented-control button {
+  box-shadow: none;
+  border: 0;
+  background: transparent;
+  min-height: 38px;
+}
+
+.segmented-control button.active {
+  background: rgba(244, 211, 139, 0.18);
+  color: #ffe89a;
 }
 
 .controls {
@@ -177,6 +220,14 @@ h2 {
     inset 0 0 0 1px rgba(255, 255, 255, 0.05),
     0 1.2rem 3rem rgba(0, 0, 0, 0.42);
   touch-action: manipulation;
+}
+
+.return-mode .lens-stage {
+  border-color: rgba(117, 169, 151, 0.38);
+}
+
+.place-mode .lens-stage {
+  border-color: rgba(244, 211, 139, 0.3);
 }
 
 .camera-feed,
@@ -283,6 +334,10 @@ h2 {
   height: 0;
   pointer-events: none;
   filter: drop-shadow(0 0 1rem rgba(244, 211, 139, 0.42));
+}
+
+.return-mode .sigil-ring {
+  filter: drop-shadow(0 0 1rem rgba(117, 169, 151, 0.5));
 }
 
 .sigil {
@@ -408,7 +463,7 @@ h2 {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  padding: 0.9rem 3rem 0.9rem 0.9rem;
+  padding: 0.9rem 5.4rem 0.9rem 0.9rem;
 }
 
 .anchor-main span {
@@ -417,13 +472,24 @@ h2 {
   margin-top: 0.16rem;
 }
 
-.delete-anchor {
+.anchor-actions {
   position: absolute;
-  top: 0.45rem;
-  right: 0.45rem;
+  top: 0.42rem;
+  right: 0.42rem;
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.anchor-actions button {
+  min-height: 2rem;
+  padding: 0 0.55rem;
+  font-size: 0.76rem;
+  box-shadow: none;
+}
+
+.delete-anchor {
   width: 2rem;
   height: 2rem;
-  min-height: 2rem;
   padding: 0;
 }
 
@@ -480,8 +546,14 @@ h2 {
 
 @media (max-width: 620px) {
   .topbar,
+  .mode-panel,
   .section-heading {
     flex-direction: column;
+  }
+
+  .segmented-control,
+  .segmented-control button {
+    width: 100%;
   }
 
   .lens-stage {
