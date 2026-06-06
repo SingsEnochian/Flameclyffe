@@ -64,6 +64,24 @@ export function buildStarburstVars(rawDeep = {}, options = {}) {
   };
 }
 
+export function buildSensorStarburstVars(rawDeep = {}, sensor) {
+  const deep = normaliseStarburstDeep(rawDeep);
+  const vars = buildStarburstVars(sensor.proxy(deep), {
+    baseSize: sensor.baseSize,
+    rotation: sensor.rotation + deep.E * 12 + deep.kp,
+  });
+
+  return {
+    '--sensor-n': vars['--n'],
+    '--sensor-w': vars['--w'],
+    '--sensor-m': vars['--m'],
+    '--sensor-hue': vars['--flare-hue'],
+    '--sensor-alpha': vars['--flare-alpha'],
+    '--sensor-jitter': vars['--flare-jitter'],
+    '--sensor-rot': vars['--flare-rot'],
+  };
+}
+
 export function buildSensorStarbursts(rawDeep = {}) {
   const deep = normaliseStarburstDeep(rawDeep);
   const labels = [
