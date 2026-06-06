@@ -1,0 +1,152 @@
+/* DEEP Observer mobile pass
+   Pocket observatory rules for phones and narrow tablets.
+   This file intentionally loads after the main STARWELL bundle through index.html.
+   Purpose: lower visual density, protect the glyph stage, and keep sensor cards readable. */
+
+@media (max-width: 720px) {
+  .live-glyph-panel.deep-observer-panel {
+    padding: clamp(0.8rem, 4vw, 1rem) !important;
+    border-radius: 24px !important;
+  }
+
+  .live-glyph-panel .map-heading {
+    gap: 0.5rem !important;
+  }
+
+  .live-glyph-panel .map-heading strong {
+    max-width: 100%;
+    white-space: normal;
+    text-align: right;
+  }
+
+  .live-glyph-panel .live-glyph-layout {
+    gap: clamp(0.85rem, 4vw, 1.2rem) !important;
+  }
+
+  .live-glyph-panel .glyph-orb-wrap {
+    --flare-alpha: min(var(--flare-alpha), 0.22);
+    width: min(100%, 292px) !important;
+  }
+
+  .live-glyph-panel .glyph-orb,
+  .live-glyph-panel .glyph-orb-canvas {
+    width: min(100%, clamp(188px, 66vw, 258px)) !important;
+  }
+
+  .live-glyph-panel .glyph-readout {
+    display: grid;
+    gap: 0.72rem;
+  }
+
+  .live-glyph-panel .glyph-readout h3 {
+    font-size: clamp(1.05rem, 5vw, 1.35rem);
+    line-height: 1.08;
+  }
+
+  .live-glyph-panel .glyph-equation-strip {
+    margin: 0.4rem 0 0.55rem;
+    padding: 0.56rem 0.64rem !important;
+    border-radius: 16px;
+  }
+
+  .live-glyph-panel .glyph-equation-strip code {
+    font-size: 0.76rem;
+  }
+
+  .live-glyph-panel .glyph-meter-grid {
+    gap: 0.55rem !important;
+  }
+
+  .live-glyph-panel .glyph-meter-grid > div {
+    --sensor-w: min(var(--sensor-w), 44px);
+    --sensor-alpha: min(var(--sensor-alpha), 0.18);
+    min-height: 0;
+    padding: 0.54rem 0.64rem !important;
+    border-radius: 14px !important;
+  }
+
+  .live-glyph-panel .glyph-meter-grid > div::before {
+    right: -10px;
+    top: -12px;
+    opacity: calc(var(--sensor-alpha) * 0.5);
+    filter: drop-shadow(0 0 8px hsla(var(--sensor-hue), 88%, 74%, 0.12));
+  }
+
+  .live-glyph-panel .glyph-meter-grid > div::after {
+    right: 0.34rem;
+    top: 0.34rem;
+    width: 0.34rem;
+    opacity: 0.72;
+  }
+
+  .live-glyph-panel .deep-sensor-label {
+    max-width: calc(100% - 1rem);
+    margin: -0.02rem 0 0.12rem;
+    padding: 0.06rem 0.28rem 0.075rem;
+    font-size: 0.54rem;
+    letter-spacing: 0.08em;
+  }
+
+  .live-glyph-panel .glyph-meter-grid strong {
+    font-size: 0.9rem;
+    line-height: 1.15;
+  }
+
+  .live-glyph-panel .glyph-meter-grid span {
+    font-size: 0.7rem;
+    line-height: 1.22;
+  }
+
+  .live-glyph-panel .glyph-principle {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+}
+
+@media (max-width: 430px) {
+  .live-glyph-panel .map-heading {
+    align-items: flex-start !important;
+  }
+
+  .live-glyph-panel .map-heading span,
+  .live-glyph-panel .map-heading strong {
+    font-size: 0.66rem;
+  }
+
+  .live-glyph-panel .glyph-orb-wrap {
+    width: min(100%, 260px) !important;
+  }
+
+  .live-glyph-panel .glyph-orb,
+  .live-glyph-panel .glyph-orb-canvas {
+    width: min(100%, clamp(176px, 72vw, 238px)) !important;
+  }
+
+  .live-glyph-panel .glyph-meter-grid > div {
+    padding: 0.5rem 0.58rem !important;
+  }
+
+  .live-glyph-panel .glyph-equation-strip span {
+    font-size: 0.62rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .live-glyph-panel.deep-observer-panel {
+    padding-inline: 0.68rem !important;
+  }
+
+  .live-glyph-panel .glyph-orb-wrap {
+    width: min(100%, 232px) !important;
+  }
+
+  .live-glyph-panel .glyph-orb,
+  .live-glyph-panel .glyph-orb-canvas {
+    width: min(100%, 212px) !important;
+  }
+
+  .live-glyph-panel .deep-sensor-label {
+    font-size: 0.5rem;
+    letter-spacing: 0.055em;
+  }
+}
