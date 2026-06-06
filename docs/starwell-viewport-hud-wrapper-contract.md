@@ -1,6 +1,6 @@
 # STARWELL Viewport / HUD Wrapper Contract
 
-Status: governing contract before implementation. Do not treat this as a completed build pass.
+Status: governing contract before floating-panel implementation. The pure bounds helper exists, but no HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
 
 ## Purpose
 
@@ -88,9 +88,36 @@ This layer should be `position: absolute` inside a `position: relative` shell. I
 
 Do not add this layer until there is at least one active STARWELL-native HUD panel.
 
+## Implemented pure helper
+
+The flexible wall-measuring helper now exists at:
+
+```text
+apps/starwell/src/lib/deepHudBounds.js
+```
+
+It is a pure helper module. It may measure DOM rectangles when given a document/root, but it must not create panels, play sound, fire haptics, own styling, or mutate React state directly.
+
+Current responsibilities include:
+
+```text
+selector defaults
+viewport classes
+configurable insets
+rect normalisation
+safe bounds
+avoid rects
+snap zones
+default panel zones
+panel clamping
+avoid-zone fallback positioning
+```
+
+This helper is allowed to become the foundation for future floating HUD work. It is not itself an active HUD panel.
+
 ## Bounds model
 
-Future `deepHudBounds.js` should compute bounds from the Observer instrument shell, not from `window.innerWidth` alone.
+`deepHudBounds.js` should compute bounds from the Observer instrument shell, not from `window.innerWidth` alone.
 
 Minimum model:
 
@@ -205,7 +232,7 @@ apps/starwell/src/lib/deepSensoryBus.js
 
 Keep DOM side effects out of helper modules. Keep sound and haptic behaviour behind explicit user action.
 
-## Proposed `deepHudBounds.js` responsibilities
+## `deepHudBounds.js` responsibilities
 
 Allowed responsibilities:
 
