@@ -10,6 +10,7 @@ The DEEP starburst layer is currently wired as a low-risk companion module rathe
 Bridge pulse JSON
 → deep-starburst-bind.js normalises the DEEP packet
 → deepStarburst.js maps values to CSS custom properties
+→ deepSensors.js supplies the shared six-chip sensor grammar
 → deep-observer-boundary.css applies those properties to .glyph-orb-wrap::before and the meter-chip flare sockets
 → the glyph aura and sensor chips breathe as CSS starbursts
 ```
@@ -41,6 +42,16 @@ Meter chips receive sensor-prefixed equivalents:
 --sensor-jitter
 --sensor-rot
 ```
+
+## Shared sensor grammar
+
+The canonical meter-chip definitions live in:
+
+```text
+apps/starwell/src/lib/deepSensors.js
+```
+
+Both the transitional binder and the future React implementation should import from this module. Do not duplicate the six-chip map in another file unless there is a deliberate reason to fork the instrument language.
 
 ## Data mapping
 
@@ -106,7 +117,7 @@ function DeepGlyphCanvas({ glyph, onActivate, onSoften, onKeyDown }) {
 }
 ```
 
-Then move the sensor-chip labels and flare variables into the React meter grid with `data-starburst-native="sensor"`. After both steps are complete, remove:
+Then move the sensor-chip labels and flare variables into the React meter grid with `data-starburst-native="sensor"`, importing sensor metadata from `./lib/deepSensors.js`. After both steps are complete, remove:
 
 ```text
 apps/starwell/src/deep-starburst-bind.js
