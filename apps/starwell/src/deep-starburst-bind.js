@@ -6,6 +6,45 @@ const ROOT_SELECTOR = '#root';
 const UPDATE_INTERVAL_MS = 1000;
 const MUTATION_THROTTLE_MS = 160;
 
+const SENSOR_CHIPS = [
+  {
+    key: 'tide',
+    baseSize: 58,
+    rotation: 0,
+    proxy: (deep) => ({ ...deep, P: (deep.P + deep.R) / 2, C: (deep.C + deep.A) / 2, E: deep.E * 0.62, charge: (deep.charge + deep.A) / 2 }),
+  },
+  {
+    key: 'presence',
+    baseSize: 66,
+    rotation: 42,
+    proxy: (deep) => ({ ...deep, P: deep.P, C: deep.A, E: deep.E * 0.52, charge: deep.A }),
+  },
+  {
+    key: 'clarity',
+    baseSize: 58,
+    rotation: 94,
+    proxy: (deep) => ({ ...deep, P: deep.C, C: deep.C, E: Math.max(0, deep.E * 0.38), charge: deep.R }),
+  },
+  {
+    key: 'entropy',
+    baseSize: 62,
+    rotation: 148,
+    proxy: (deep) => ({ ...deep, P: deep.E, C: 1 - deep.E * 0.42, E: deep.E, charge: Math.max(0.24, deep.E), kp: Math.max(deep.kp, 4) }),
+  },
+  {
+    key: 'moon',
+    baseSize: 64,
+    rotation: 210,
+    proxy: (deep) => ({ ...deep, P: deep.M, C: (deep.C + deep.M) / 2, E: deep.E * 0.42, charge: deep.moonIllum / 100 }),
+  },
+  {
+    key: 'geomagnetic',
+    baseSize: 68,
+    rotation: 282,
+    proxy: (deep) => ({ ...deep, P: deep.kp / 9, C: deep.C * 0.7, E: Math.max(deep.E, deep.kp / 9), charge: deep.charge, kp: deep.kp }),
+  },
+];
+
 let lastSignature = '';
 let mutationTimer = 0;
 let intervalId = 0;
@@ -52,13 +91,52 @@ function applyVars(target, vars) {
   });
 }
 
+function buildSensorVars(deep, sensor) {
+  const vars = buildStarburstVars(sensor.proxy(deep), {
+    baseSize: sensor.baseSize,
+    rotation: sensor.rotation + deep.E * 12 + deep.kp,
+  });
+
+  return {
+    '--sensor-n': vars['--n'],
+    '--sensor-w': vars['--w'],
+    '--sensor-m': vars['--m'],
+    '--sensor-hue': vars['--flare-hue'],
+    '--sensor-alpha': vars['--flare-alpha'],
+    '--sensor-jitter': vars['--flare-jitter'],
+    '--sensor-rot': vars['--flare-rot'],
+  };
+}
+
+function bindSensorChips(panel, deep, signature) {
+  const chips = Array.from(panel.querySelectorAll('.glyph-meter-grid > div'));
+
+  chips.forEach((chip, index) => {
+    const sensor = SENSOR_CHIPS[index] || SENSOR_CHIPS[0];
+    const sensorSignature = `${signature}|${sensor.key}`;
+    if (chip.dataset.starburstSignature === sensorSignature) return;
+
+    applyVars(chip, buildSensorVars(deep, sensor));
+    chip.dataset.deepSensor = sensor.key;
+    chip.dataset.starburstSignature = sensorSignature;
+  });
+}
+
+function chipsAreBound(panel, signature) {
+  const chips = Array.from(panel.querySelectorAll('.glyph-meter-grid > div'));
+  return chips.length > 0 && chips.every((chip, index) => {
+    const sensor = SENSOR_CHIPS[index] || SENSOR_CHIPS[0];
+    return chip.dataset.starburstSignature === `${signature}|${sensor.key}`;
+  });
+}
+
 function bindPanel(panel) {
   const glyphWrap = panel.querySelector(WRAP_SELECTOR);
   if (!glyphWrap) return;
 
   const deep = readDeepPacket(panel);
   const signature = makeSignature(deep);
-  if (signature === lastSignature && glyphWrap.dataset.starburstBound === 'true') return;
+  if (signature === lastSignature && glyphWrap.dataset.starburstBound === 'true' && chipsAreBound(panel, signature)) return;
   lastSignature = signature;
 
   const vars = buildStarburstVars(deep, {
@@ -69,6 +147,7 @@ function bindPanel(panel) {
   applyVars(glyphWrap, vars);
   glyphWrap.dataset.starburstBound = 'true';
   glyphWrap.dataset.starburstSignature = signature;
+  bindSensorChips(panel, deep, signature);
 }
 
 function bindAll() {
