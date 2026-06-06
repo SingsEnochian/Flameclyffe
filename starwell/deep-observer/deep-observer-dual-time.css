@@ -1,45 +1,114 @@
-/* DEEP Observer Dual Time Hologram v0.3 */
+/* DEEP Observer Dual Time Hologram v0.4 */
 .dual-time-hologram{
-  position:absolute;
-  left:50%;
-  top:47%;
-  z-index:9;
-  width:min(360px,78%);
-  transform:translate(-50%,-50%) scale(.98);
+  position:fixed;
+  left:1rem;
+  top:1rem;
+  z-index:92;
+  width:min(380px,calc(100vw - 2rem));
+  transform:none;
   opacity:0;
   pointer-events:none;
   padding:.68rem;
   border:1px solid rgba(168,204,224,.24);
   border-radius:24px;
   background:
-    radial-gradient(ellipse at 50% 0%,rgba(232,244,252,.14),transparent 60%),
-    radial-gradient(ellipse at 50% 100%,rgba(231,196,119,.10),transparent 65%),
-    linear-gradient(145deg,rgba(3,8,16,.74),rgba(10,20,30,.52));
+    radial-gradient(ellipse at 18% 0%,rgba(232,244,252,.16),transparent 60%),
+    radial-gradient(ellipse at 92% 100%,rgba(231,196,119,.10),transparent 65%),
+    linear-gradient(145deg,rgba(3,8,16,.74),rgba(10,20,30,.50));
   box-shadow:
     0 0 0 1px rgba(0,0,0,.48),
     0 18px 48px rgba(0,0,0,.42),
     0 0 42px rgba(168,204,224,.16),
     inset 0 1px 0 rgba(255,255,255,.08),
     inset 0 0 30px rgba(168,204,224,.045);
-  backdrop-filter:blur(16px) saturate(1.18);
-  transition:opacity .28s ease,transform .28s ease;
+  backdrop-filter:blur(18px) saturate(1.2);
+  -webkit-backdrop-filter:blur(18px) saturate(1.2);
+  transition:opacity .28s ease,transform .28s ease,box-shadow .22s ease,border-color .22s ease;
+  touch-action:none;
 }
 
-body.time-hologram-active .dual-time-hologram{
+body.time-hologram-active .dual-time-hologram,
+.dual-time-hologram.pinned{
   opacity:1;
-  transform:translate(-50%,-50%) scale(1);
+  pointer-events:auto;
 }
 
-.dual-time-hologram:before{
-  content:"LIVE DUAL TIME";
-  display:block;
-  margin:0 0 .45rem;
-  color:rgba(231,196,119,.78);
-  font:800 .58rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+.dual-time-hologram.dragging{
+  border-color:rgba(231,196,119,.44);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.52),
+    0 26px 64px rgba(0,0,0,.52),
+    0 0 54px rgba(231,196,119,.18),
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 0 30px rgba(168,204,224,.065);
+  transform:translateY(-2px);
+}
+
+.dual-time-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.7rem;
+  margin:0 0 .5rem;
+  color:rgba(231,196,119,.82);
+  font:900 .58rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   letter-spacing:.16em;
-  text-align:center;
+  text-align:left;
   text-transform:uppercase;
   text-shadow:0 0 14px rgba(231,196,119,.28);
+  cursor:grab;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+.dual-time-hologram.dragging .dual-time-head{cursor:grabbing;}
+
+.dual-time-actions{
+  display:flex;
+  gap:.3rem;
+  flex:0 0 auto;
+}
+
+.dual-time-actions button{
+  border:1px solid rgba(168,204,224,.20);
+  border-radius:999px;
+  background:rgba(0,0,0,.22);
+  color:rgba(234,244,239,.76);
+  padding:.28rem .42rem;
+  font:900 .48rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+
+.dual-time-actions button[aria-pressed="true"]{
+  border-color:rgba(231,196,119,.40);
+  color:rgba(255,242,202,.92);
+  box-shadow:0 0 14px rgba(231,196,119,.12);
+}
+
+.dual-time-body{
+  transition:opacity .22s ease,max-height .24s ease,transform .24s ease;
+  overflow:hidden;
+  max-height:18rem;
+}
+
+.dual-time-hologram.minimised{
+  width:auto;
+  min-width:8.8rem;
+  padding:.52rem .62rem;
+  border-radius:999px;
+  cursor:pointer;
+}
+
+.dual-time-hologram.minimised .dual-time-head{
+  margin:0;
+  cursor:grab;
+}
+
+.dual-time-hologram.minimised .dual-time-actions,
+.dual-time-hologram.minimised .dual-time-body{
+  display:none;
 }
 
 .dual-time-strip{
@@ -157,8 +226,7 @@ body.time-hologram-active .dual-time-hologram{
 
 @media(max-width:780px){
   .dual-time-hologram{
-    top:47%;
-    width:min(320px,82%);
+    width:min(330px,calc(100vw - 1.4rem));
     padding:.56rem;
   }
   .time-card .time-value{font-size:1.02rem}
@@ -168,10 +236,22 @@ body.time-hologram-active .dual-time-hologram{
 @media(max-width:520px){
   .dual-time-strip{grid-template-columns:1fr;gap:.4rem}
   .dual-time-hologram{
-    top:50%;
-    width:min(260px,78%);
+    width:min(280px,calc(100vw - 1.2rem));
   }
+  .dual-time-hologram.minimised{width:auto;min-width:8rem;}
   .time-card{
     padding:.5rem .54rem;
   }
+}
+
+body.low-stim .dual-time-hologram,
+body.reduced-motion .dual-time-hologram{
+  transition:opacity .16s ease;
+}
+
+body.low-stim .dual-time-pulse-on .dual-time-hologram,
+body.reduced-motion .dual-time-pulse-on .dual-time-hologram,
+body.low-stim .time-pulse-on .dual-time-hologram,
+body.reduced-motion .time-pulse-on .dual-time-hologram{
+  animation:none;
 }
