@@ -2,6 +2,14 @@ import { buildStarburstVars } from './lib/deepStarburst.js';
 
 const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
 const WRAP_SELECTOR = '.glyph-orb-wrap';
+const ROOT_SELECTOR = '#root';
+const UPDATE_INTERVAL_MS = 1000;
+const MUTATION_THROTTLE_MS = 160;
+
+let lastSignature = '';
+let mutationTimer = 0;
+let intervalId = 0;
+let observer = null;
 
 function readNumber(pattern, text, fallback) {
   const match = text.match(pattern);
@@ -30,9 +38,17 @@ function readDeepPacket(panel) {
   };
 }
 
+function makeSignature(deep) {
+  return [deep.P, deep.A, deep.C, deep.R, deep.E, deep.bz, deep.M, deep.moonIllum, deep.kp, deep.charge]
+    .map((value) => Number(value).toFixed(3))
+    .join('|');
+}
+
 function applyVars(target, vars) {
   Object.entries(vars).forEach(([name, value]) => {
-    target.style.setProperty(name, value);
+    if (target.style.getPropertyValue(name) !== value) {
+      target.style.setProperty(name, value);
+    }
   });
 }
 
@@ -41,31 +57,53 @@ function bindPanel(panel) {
   if (!glyphWrap) return;
 
   const deep = readDeepPacket(panel);
+  const signature = makeSignature(deep);
+  if (signature === lastSignature && glyphWrap.dataset.starburstBound === 'true') return;
+  lastSignature = signature;
+
   const vars = buildStarburstVars(deep, {
     baseSize: 132 + deep.A * 24 + deep.R * 18,
-    rotation: (Date.now() / 80) % 360,
+    rotation: deep.E * 18 + deep.kp * 2.5,
   });
 
   applyVars(glyphWrap, vars);
   glyphWrap.dataset.starburstBound = 'true';
+  glyphWrap.dataset.starburstSignature = signature;
 }
 
 function bindAll() {
   document.querySelectorAll(PANEL_SELECTOR).forEach(bindPanel);
 }
 
-const observer = new MutationObserver(() => bindAll());
+function scheduleBind() {
+  if (mutationTimer) return;
+  mutationTimer = window.setTimeout(() => {
+    mutationTimer = 0;
+    bindAll();
+  }, MUTATION_THROTTLE_MS);
+}
 
 function startBinding() {
   bindAll();
-  observer.observe(document.documentElement, {
+
+  const root = document.querySelector(ROOT_SELECTOR) || document.body;
+  observer = new MutationObserver(scheduleBind);
+  observer.observe(root, {
     childList: true,
     subtree: true,
     characterData: true,
   });
 
-  window.setInterval(bindAll, 1000);
+  intervalId = window.setInterval(bindAll, UPDATE_INTERVAL_MS);
 }
+
+function stopBinding() {
+  if (observer) observer.disconnect();
+  if (intervalId) window.clearInterval(intervalId);
+  if (mutationTimer) window.clearTimeout(mutationTimer);
+}
+
+window.addEventListener('pagehide', stopBinding, { once: true });
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', startBinding, { once: true });
