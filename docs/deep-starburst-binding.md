@@ -8,7 +8,8 @@ The DEEP starburst layer is currently wired as a low-risk companion module rathe
 
 ```text
 Bridge pulse JSON
-→ deep-starburst-bind.js normalises the DEEP packet
+→ deep-starburst-bind.js fetches the bridge pulse and applies the visual variables
+→ deepState.js extracts, normalises, and signs the DEEP packet
 → deepStarburst.js maps aura values and sensor flare values to CSS custom properties
 → deepSensors.js supplies the shared six-chip sensor grammar
 → deep-observer-boundary.css applies those properties to .glyph-orb-wrap::before and the meter-chip flare sockets
@@ -43,7 +44,13 @@ Meter chips receive sensor-prefixed equivalents:
 --sensor-rot
 ```
 
-## Shared sensor grammar
+## Shared modules
+
+The canonical DEEP defaults, bridge extraction, sky clarity, moon normalisation, and signatures live in:
+
+```text
+apps/starwell/src/lib/deepState.js
+```
 
 The canonical meter-chip definitions live in:
 
@@ -57,7 +64,7 @@ The shared starburst variable helpers live in:
 apps/starwell/src/lib/deepStarburst.js
 ```
 
-Use `buildStarburstVars` for the central aura and `buildSensorStarburstVars` for meter-chip flares. Both the transitional binder and the future React implementation should import from these modules. Do not duplicate the six-chip map or the sensor variable builder in another file unless there is a deliberate reason to fork the instrument language.
+Use `normaliseDeepState` and `makeDeepSignature` for DEEP packet handling, `buildStarburstVars` for the central aura, and `buildSensorStarburstVars` for meter-chip flares. Both the transitional binder and the future React implementation should import from these modules. Do not duplicate the six-chip map or the sensor variable builder in another file unless there is a deliberate reason to fork the instrument language.
 
 ## Data mapping
 
