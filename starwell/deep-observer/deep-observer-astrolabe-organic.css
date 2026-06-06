@@ -1,0 +1,251 @@
+/* DEEP Observer Organic Astrolabe Layer v0.1
+   Tightens structural spacing while giving the dock and controls more organic, embedded-jewel materiality.
+*/
+:root{
+  --observer-dock-edge-gap:3px;
+  --observer-dock-inner-x:1.42rem;
+  --observer-dock-inner-y:1.18rem;
+  --observer-jewel-size:1.72rem;
+  --observer-jewel-rim:rgba(231,196,119,.28);
+  --observer-jewel-blue:rgba(64,164,224,.38);
+  --observer-jewel-cyan:rgba(76,224,230,.28);
+  --observer-jewel-violet:rgba(164,126,255,.28);
+  --observer-jewel-gold:rgba(231,196,119,.34);
+}
+
+.instrument{
+  justify-items:center;
+}
+
+@media(max-width:1120px){
+  .instrument{
+    row-gap:var(--observer-dock-edge-gap) !important;
+  }
+}
+
+.glyph-stage{
+  justify-self:center;
+  width:100%;
+  justify-items:center;
+  gap:var(--observer-dock-edge-gap) !important;
+}
+
+.orb-frame{
+  justify-self:center;
+}
+
+.glyph-stage .filter-row{
+  width:min(900px,94vw) !important;
+  max-width:900px;
+  margin-top:var(--observer-dock-edge-gap) !important;
+  margin-bottom:var(--observer-dock-edge-gap) !important;
+  padding:var(--observer-dock-inner-y) var(--observer-dock-inner-x) !important;
+  min-height:8.25rem;
+  gap:.88rem .96rem !important;
+  grid-template-columns:repeat(4,minmax(9.2rem,1fr));
+  border-radius:38px 34px 42px 36px !important;
+  border-color:rgba(198,226,242,.22) !important;
+  background:
+    radial-gradient(ellipse at 12% 0%,rgba(232,244,252,.13),transparent 46%),
+    radial-gradient(ellipse at 88% 100%,rgba(64,164,224,.105),transparent 54%),
+    radial-gradient(ellipse at 50% 50%,rgba(231,196,119,.045),transparent 72%),
+    linear-gradient(145deg,rgba(4,9,18,.70),rgba(8,18,30,.48) 56%,rgba(3,7,14,.72)),
+    rgba(200,230,255,.038) !important;
+  box-shadow:
+    0 24px 58px rgba(0,0,0,.34),
+    0 0 48px rgba(168,204,224,.08),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    inset 0 -18px 44px rgba(0,0,0,.28),
+    inset 0 0 38px rgba(76,224,230,.035) !important;
+}
+
+.glyph-stage .filter-row::before,
+.glyph-stage .filter-row::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  border-radius:inherit;
+}
+
+.glyph-stage .filter-row::before{
+  inset:.36rem;
+  border:1px solid rgba(231,196,119,.115);
+  background:
+    linear-gradient(90deg,transparent 0 3%,rgba(231,196,119,.10) 3.2%,transparent 8% 92%,rgba(168,204,224,.08) 96.8%,transparent 97% 100%),
+    radial-gradient(circle at 50% 0%,rgba(231,196,119,.14),transparent 1.05rem),
+    radial-gradient(circle at 50% 100%,rgba(64,164,224,.16),transparent 1.05rem);
+  box-shadow:inset 0 0 24px rgba(0,0,0,.28);
+}
+
+.glyph-stage .filter-row::after{
+  inset:-1px;
+  background:
+    radial-gradient(circle at 2.6rem 2.2rem,rgba(76,224,230,.12),transparent .9rem),
+    radial-gradient(circle at calc(100% - 2.6rem) calc(100% - 2.2rem),rgba(231,196,119,.10),transparent .9rem),
+    linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.05) 50%,transparent 58% 100%);
+  opacity:.75;
+  mix-blend-mode:screen;
+}
+
+.filter,
+.action,
+.interface-cloak-toggle,
+.sensory-toggle{
+  min-height:2.68rem;
+  padding:.64rem 1rem .64rem calc(var(--observer-jewel-size) + 1.25rem) !important;
+  border-radius:999px 999px 999px 999px !important;
+  border-color:rgba(198,226,242,.22) !important;
+  background:
+    radial-gradient(ellipse at 18% 12%,rgba(255,255,255,.20),transparent 17%),
+    radial-gradient(ellipse at 78% 92%,rgba(64,164,224,.12),transparent 42%),
+    linear-gradient(150deg,rgba(27,39,54,.68),rgba(5,10,18,.88) 62%,rgba(2,5,12,.94)),
+    rgba(172,207,226,.06) !important;
+  box-shadow:
+    0 13px 28px rgba(0,0,0,.28),
+    0 0 0 1px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -12px 26px rgba(0,0,0,.34),
+    inset 0 0 0 1px rgba(255,255,255,.045),
+    inset 0 0 22px rgba(64,164,224,.045) !important;
+}
+
+.filter::before,
+.action::before,
+.interface-cloak-toggle::before,
+.sensory-toggle::before{
+  left:.62rem;
+  width:var(--observer-jewel-size);
+  height:var(--observer-jewel-size);
+  border-radius:48% 52% 46% 54%;
+  border:1px solid var(--observer-jewel-rim);
+  color:rgba(226,244,255,.72);
+  background:
+    conic-gradient(from 32deg,rgba(255,255,255,.16),transparent 9%,rgba(76,224,230,.20) 18%,transparent 32%,rgba(231,196,119,.14) 45%,transparent 62%,rgba(164,126,255,.17) 78%,rgba(255,255,255,.12)),
+    radial-gradient(circle at 34% 22%,rgba(255,255,255,.34),transparent 14%),
+    radial-gradient(circle at 52% 62%,var(--observer-jewel-blue),rgba(3,9,18,.82) 64%,rgba(0,2,8,.96));
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,.42),
+    0 0 18px rgba(64,164,224,.18),
+    inset 0 2px 2px rgba(255,255,255,.13),
+    inset 0 -8px 14px rgba(0,0,0,.58),
+    inset 0 0 0 1px rgba(255,255,255,.06) !important;
+}
+
+.filter::after,
+.action::after,
+.interface-cloak-toggle::after,
+.sensory-toggle::after{
+  background:
+    linear-gradient(105deg,transparent 0 30%,rgba(255,255,255,.16) 43%,transparent 58% 100%),
+    radial-gradient(ellipse at 18% 50%,rgba(76,224,230,.08),transparent 46%);
+}
+
+.filter:hover,
+.action:hover,
+.interface-cloak-toggle:hover,
+.sensory-toggle:hover,
+.filter[aria-pressed="true"],
+.sensory-toggle[aria-pressed="true"]{
+  transform:translateY(-1px) scale(1.006);
+  border-color:rgba(231,196,119,.54) !important;
+  box-shadow:
+    0 15px 34px rgba(0,0,0,.32),
+    0 0 26px rgba(231,196,119,.12),
+    0 0 0 1px rgba(0,0,0,.44),
+    inset 0 1px 0 rgba(255,255,255,.17),
+    inset 0 -13px 28px rgba(0,0,0,.36),
+    inset 0 0 0 1px rgba(231,196,119,.08),
+    inset 0 0 28px rgba(64,164,224,.055) !important;
+}
+
+.filter:hover::before,
+.action:hover::before,
+.interface-cloak-toggle:hover::before,
+.sensory-toggle:hover::before,
+.filter[aria-pressed="true"]::before,
+.sensory-toggle[aria-pressed="true"]::before{
+  color:rgba(255,244,215,.92);
+  background:
+    conic-gradient(from 22deg,rgba(255,255,255,.22),transparent 10%,var(--observer-jewel-cyan) 20%,transparent 33%,var(--observer-jewel-gold) 48%,transparent 64%,var(--observer-jewel-violet) 82%,rgba(255,255,255,.16)),
+    radial-gradient(circle at 34% 22%,rgba(255,255,255,.42),transparent 14%),
+    radial-gradient(circle at 52% 62%,rgba(231,196,119,.30),rgba(5,11,20,.78) 66%,rgba(0,2,8,.96));
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,.46),
+    0 0 22px rgba(231,196,119,.20),
+    0 0 18px rgba(76,224,230,.12),
+    inset 0 2px 2px rgba(255,255,255,.16),
+    inset 0 -8px 14px rgba(0,0,0,.60),
+    inset 0 0 0 1px rgba(231,196,119,.10) !important;
+}
+
+#refreshBtn::before,
+.filter#refreshBtn::before{content:"⟳";}
+
+#themeBtn::before{background:
+  conic-gradient(from 24deg,rgba(255,255,255,.20),transparent 10%,rgba(76,224,230,.16) 22%,transparent 36%,rgba(231,196,119,.16) 50%,transparent 65%,rgba(164,126,255,.30) 82%,rgba(255,255,255,.13)),
+  radial-gradient(circle at 34% 22%,rgba(255,255,255,.38),transparent 14%),
+  radial-gradient(circle at 52% 62%,rgba(126,89,255,.38),rgba(5,11,20,.78) 66%,rgba(0,2,8,.96));
+}
+
+.filter[data-filter="field"]::before,
+#toyBtn::before{--observer-jewel-blue:rgba(65,220,176,.34);}
+.filter[data-filter="moons"]::before{--observer-jewel-blue:rgba(84,172,232,.42);}
+.filter[data-filter="horizon"]::before,
+#stimBtn::before{--observer-jewel-blue:rgba(94,112,190,.34);}
+
+.instrument .panel{
+  margin-top:var(--observer-dock-edge-gap) !important;
+}
+
+.interface-cloak-toggle{
+  min-width:6.65rem;
+  z-index:96;
+}
+
+@media(max-width:1120px){
+  .glyph-stage .filter-row{
+    width:min(850px,94vw) !important;
+    grid-template-columns:repeat(4,minmax(8.2rem,1fr));
+    margin-top:var(--observer-dock-edge-gap) !important;
+  }
+}
+
+@media(max-width:780px){
+  .glyph-stage .filter-row{
+    width:min(640px,94vw) !important;
+    grid-template-columns:repeat(3,minmax(7.4rem,1fr));
+    min-height:9.2rem;
+    margin-top:var(--observer-dock-edge-gap) !important;
+    padding:1.05rem !important;
+  }
+}
+
+@media(max-width:520px){
+  .glyph-stage .filter-row{
+    width:min(390px,94vw) !important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    min-height:11rem;
+    padding:.98rem !important;
+    gap:.74rem !important;
+  }
+  .filter,
+  .action{
+    min-height:2.48rem;
+    padding-left:calc(1.42rem + 1rem) !important;
+  }
+  .filter::before,
+  .action::before{
+    --observer-jewel-size:1.42rem;
+    left:.55rem;
+  }
+}
+
+body.low-stim .glyph-stage .filter-row::after,
+body.low-stim .filter::after,
+body.low-stim .action::after,
+body.reduced-motion .glyph-stage .filter-row::after,
+body.reduced-motion .filter::after,
+body.reduced-motion .action::after{
+  display:none;
+}
