@@ -1,4 +1,6 @@
 export const STORAGE_KEY = 'pocket-concordance-lens-anchor-v0-1';
+export const ANCHOR_SHELF_KEY = 'pocket-concordance-lens-anchor-shelf-v0-1';
+export const PREFERENCES_KEY = 'pocket-concordance-lens-preferences-v0-1';
 
 export const FIRST_WINDOW_SIGILS = [
   { id: 'anchor', label: 'Anchor', glyph: '◎', note: 'Return-point formed' },
@@ -28,6 +30,12 @@ export const COMPARISON_STATES = {
   cleared: 'cleared',
 };
 
+export const DEFAULT_PREFERENCES = {
+  lowMotion: true,
+  largeUi: false,
+  showSigilLabels: true,
+};
+
 export function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
@@ -35,19 +43,86 @@ export function clamp(value, min, max) {
 export function readLocalAnchor() {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return raw ? JSON.parse(raw) : readLocalAnchors()[0] ?? null;
   } catch (error) {
     console.warn('Could not read saved Concordance anchor', error);
     return null;
   }
 }
 
+export function readLocalAnchors() {
+  try {
+    const raw = window.localStorage.getItem(ANCHOR_SHELF_KEY);
+    const anchors = raw ? JSON.parse(raw) : [];
+
+    if (Array.isArray(anchors)) return anchors;
+    return [];
+  } catch (error) {
+    console.warn('Could not read Concordance anchor shelf', error);
+    return [];
+  }
+}
+
 export function saveLocalAnchor(anchor) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(anchor));
+  const nextAnchor = {
+    ...anchor,
+    updated_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+  };
+  const anchors = readLocalAnchors();
+  const nextAnchors = [nextAnchor, ...anchors.filter((item) => item.id !== nextAnchor.id)].slice(0, 12);
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextAnchor));
+  window.localStorage.setItem(ANCHOR_SHELF_KEY, JSON.stringify(nextAnchors));
+  return nextAnchors;
+}
+
+export function deleteLocalAnchor(anchorId) {
+  const nextAnchors = readLocalAnchors().filter((item) => item.id !== anchorId);
+  window.localStorage.setItem(ANCHOR_SHELF_KEY, JSON.stringify(nextAnchors));
+
+  const activeAnchor = readLocalAnchor();
+  if (activeAnchor?.id === anchorId) {
+    if (nextAnchors[0]) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextAnchors[0]));
+    } else {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  return nextAnchors;
 }
 
 export function clearLocalAnchor() {
   window.localStorage.removeItem(STORAGE_KEY);
+}
+
+export function clearAllLocalAnchors() {
+  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(ANCHOR_SHELF_KEY);
+  return [];
+}
+
+export function readPreferences() {
+  try {
+    const raw = window.localStorage.getItem(PREFERENCES_KEY);
+    return {
+      ...DEFAULT_PREFERENCES,
+      ...(raw ? JSON.parse(raw) : {}),
+    };
+  } catch (error) {
+    console.warn('Could not read Pocket Lens preferences', error);
+    return DEFAULT_PREFERENCES;
+  }
+}
+
+export function savePreferences(preferences) {
+  const nextPreferences = {
+    ...DEFAULT_PREFERENCES,
+    ...preferences,
+  };
+  window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify(nextPreferences));
+  return nextPreferences;
 }
 
 export function buildAnchorFromPlacement({ x, y, deviceMode = 'pocket_lens', label = 'First Concordance Window' }) {
