@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import {
   EMPTY_DEEP_READING,
   FIRST_WINDOW_SIGILS,
+  LENS_MODES,
   buildAnchorFromPlacement,
   clamp,
   clearAllLocalAnchors,
@@ -13,6 +14,7 @@ import {
   readLocalAnchor,
   readLocalAnchors,
   readPreferences,
+  renameLocalAnchor,
   saveLocalAnchor,
   savePreferences,
 } from './anchorContract.js';
@@ -75,18 +77,22 @@ function StonewoodOverlay({ anchor }) {
   );
 }
 
-function DeepReading({ anchor, cameraStatus, comparison }) {
+function DeepReading({ anchor, cameraStatus, comparison, lensMode }) {
   const reading = useMemo(() => {
     if (comparison?.reading?.length) return comparison.reading;
 
     if (!anchor) {
-      return cameraStatus === 'active'
-        ? ['No anchor placed.', 'Tap the room view to invite relation.']
-        : EMPTY_DEEP_READING;
+      if (cameraStatus === 'active') {
+        return lensMode === LENS_MODES.place
+          ? ['No anchor placed.', 'Place mode active. Tap the room view to create a return-point.']
+          : ['No active anchor.', 'Return mode active. Choose a saved anchor from the shelf.'];
+      }
+
+      return EMPTY_DEEP_READING;
     }
 
     return anchor.deep_state?.reading?.length ? anchor.deep_state.reading : EMPTY_DEEP_READING;
-  }, [anchor, cameraStatus, comparison]);
+  }, [anchor, cameraStatus, comparison, lensMode]);
 
   return (
     <aside className="deep-reading" aria-live="polite">
@@ -99,7 +105,39 @@ function DeepReading({ anchor, cameraStatus, comparison }) {
   );
 }
 
-function AnchorShelf({ anchors, activeAnchorId, onSelect, onDelete, onClearAll }) {
+function ModePanel({ lensMode, onModeChange, activeAnchor }) {
+  return (
+    <section className="mode-panel" aria-label="Lens mode">
+      <div>
+        <p className="eyebrow">Lens Mode</p>
+        <p className="mode-copy">
+          {lensMode === LENS_MODES.place
+            ? 'Place mode creates or moves a return-point when you tap the room.'
+            : 'Return mode protects anchors from accidental movement. Choose one from the shelf to return.'}
+        </p>
+        {activeAnchor && <p className="active-anchor-name">Active: {activeAnchor.display_name || activeAnchor.label}</p>}
+      </div>
+      <div className="segmented-control" role="group" aria-label="Choose lens mode">
+        <button
+          type="button"
+          className={lensMode === LENS_MODES.place ? 'active' : ''}
+          onClick={() => onModeChange(LENS_MODES.place)}
+        >
+          Place
+        </button>
+        <button
+          type="button"
+          className={lensMode === LENS_MODES.return ? 'active' : ''}
+          onClick={() => onModeChange(LENS_MODES.return)}
+        >
+          Return
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function AnchorShelf({ anchors, activeAnchorId, onSelect, onDelete, onClearAll, onRename }) {
   return (
     <section className="anchor-shelf" aria-label="Saved anchors">
       <div className="section-heading">
@@ -123,7 +161,10 @@ function AnchorShelf({ anchors, activeAnchorId, onSelect, onDelete, onClearAll }
                   <span>{item.device_mode} · {Math.round(placement.x)}%, {Math.round(placement.y)}%</span>
                   <span>{new Date(item.updated_at || item.created_at || item.createdAt).toLocaleString()}</span>
                 </button>
-                <button type="button" className="delete-anchor" onClick={() => onDelete(item.id)} aria-label={`Delete ${item.display_name || 'anchor'}`}>×</button>
+                <div className="anchor-actions">
+                  <button type="button" onClick={() => onRename(item)} aria-label={`Rename ${item.display_name || 'anchor'}`}>Name</button>
+                  <button type="button" className="delete-anchor" onClick={() => onDelete(item.id)} aria-label={`Delete ${item.display_name || 'anchor'}`}>×</button>
+                </div>
               </article>
             );
           })}
@@ -173,6 +214,7 @@ function App() {
   const [demoMode, setDemoMode] = useState(false);
   const [privacyVisible, setPrivacyVisible] = useState(true);
   const [preferences, setPreferences] = useState(() => readPreferences());
+  const [lensMode, setLensMode] = useState(LENS_MODES.place);
 
   useEffect(() => {
     registerServiceWorker();
@@ -228,15 +270,29 @@ function App() {
     setCameraError('');
   }
 
-  function placeAnchor(event) {
+  function handleStageTap(event) {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = clamp(((event.clientX - rect.left) / rect.width) * 100, 8, 92);
     const y = clamp(((event.clientY - rect.top) / rect.height) * 100, 12, 88);
+
+    if (lensMode === LENS_MODES.return) {
+      if (!anchor) {
+        setComparison({
+          comparison_state: 'unrecognised',
+          reading: ['No active anchor selected.', 'Choose a return-point from the Anchor Shelf before comparing.'],
+        });
+        return;
+      }
+      setComparison(compareAnchorReturn(anchor, { x, y }));
+      return;
+    }
+
     const previousAnchor = readLocalAnchor();
     const nextAnchor = buildAnchorFromPlacement({
       x,
       y,
       deviceMode: cameraStatus === 'active' ? 'pocket_lens' : 'demo_lens',
+      label: anchor?.display_name || anchor?.label || 'First Concordance Window',
     });
 
     setAnchor(nextAnchor);
@@ -247,8 +303,22 @@ function App() {
   function selectAnchor(savedAnchor) {
     const placement = getAnchorPlacement(savedAnchor);
     setAnchor(savedAnchor);
+    setLensMode(LENS_MODES.return);
     setComparison(compareAnchorReturn(savedAnchor, placement));
     setAnchors(saveLocalAnchor(savedAnchor));
+  }
+
+  function renameAnchor(savedAnchor) {
+    const currentName = savedAnchor.display_name || savedAnchor.label || 'First Concordance Window';
+    const nextName = window.prompt('Name this return-point:', currentName);
+    if (nextName === null) return;
+
+    const nextAnchors = renameLocalAnchor(savedAnchor.id, nextName);
+    setAnchors(nextAnchors);
+    const nextActive = nextAnchors.find((item) => item.id === savedAnchor.id);
+    if (anchor?.id === savedAnchor.id && nextActive) {
+      setAnchor(nextActive);
+    }
   }
 
   function deleteAnchor(anchorId) {
@@ -291,6 +361,7 @@ function App() {
     'app-shell',
     preferences.lowMotion ? 'low-motion' : '',
     preferences.largeUi ? 'large-ui' : '',
+    lensMode === LENS_MODES.return ? 'return-mode' : 'place-mode',
   ].filter(Boolean).join(' ');
 
   return (
@@ -312,6 +383,7 @@ function App() {
         </section>
       )}
 
+      <ModePanel lensMode={lensMode} onModeChange={setLensMode} activeAnchor={anchor} />
       <PreferencePanel preferences={preferences} onChange={updatePreferences} />
 
       <section className="controls" aria-label="Lens controls">
@@ -325,20 +397,26 @@ function App() {
 
       {cameraError && <p className="error-note">{cameraError}</p>}
 
-      <section className="lens-stage" aria-label={viewLabel} onClick={placeAnchor}>
+      <section className="lens-stage" aria-label={viewLabel} onClick={handleStageTap}>
         <video ref={videoRef} className={isCameraLive ? 'camera-feed active' : 'camera-feed'} playsInline muted aria-hidden={!isCameraLive} />
         {!isCameraLive && (
           <div className={demoMode ? 'demo-feed active' : 'idle-feed'}>
             <div className="demo-wall" />
             <div className="demo-floor" />
-            <p>{demoMode ? 'Demo room: tap to place the Hearth Lantern.' : 'Start camera or open demo mode. Tap after the view appears.'}</p>
+            <p>
+              {demoMode
+                ? lensMode === LENS_MODES.place
+                  ? 'Demo room: tap to place the Hearth Lantern.'
+                  : 'Demo room: tap to compare against the active return-point.'
+                : 'Start camera or open demo mode. Tap after the view appears.'}
+            </p>
           </div>
         )}
         <StonewoodOverlay anchor={anchor} />
         <SigilRing anchor={anchor} showLabels={preferences.showSigilLabels} />
       </section>
 
-      <DeepReading anchor={anchor} cameraStatus={cameraStatus} comparison={comparison} />
+      <DeepReading anchor={anchor} cameraStatus={cameraStatus} comparison={comparison} lensMode={lensMode} />
 
       <AnchorShelf
         anchors={anchors}
@@ -346,6 +424,7 @@ function App() {
         onSelect={selectAnchor}
         onDelete={deleteAnchor}
         onClearAll={clearAllAnchors}
+        onRename={renameAnchor}
       />
 
       <section className="sigil-list" aria-label="Active sigils">
