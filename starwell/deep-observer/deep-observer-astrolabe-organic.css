@@ -1,10 +1,11 @@
-/* DEEP Observer Organic Astrolabe Layer v0.4
-   Mobile-first containment reset.
-   Glyph, controls, and readout are stacked by default; wide two-column HUD only activates on genuinely wide screens.
+/* DEEP Observer Organic Astrolabe Layer v0.5
+   Mobile-first containment reset with sensor-ring clearance.
+   The Source jewel is absolute-positioned, so the glyph chamber now reserves space before the control dock.
 */
 :root{
   --observer-dock-edge-gap:3px;
   --observer-dock-separation:1rem;
+  --observer-source-clearance:calc(8vw + 1.6rem);
   --observer-dock-inner-x:.68rem;
   --observer-dock-inner-y:.68rem;
   --observer-jewel-size:1.22rem;
@@ -54,7 +55,7 @@ body,
   min-width:0;
   display:grid !important;
   grid-template-columns:1fr !important;
-  padding:0 !important;
+  padding:0 0 var(--observer-source-clearance) 0 !important;
   gap:0 !important;
   justify-items:center;
   align-items:start;
@@ -92,7 +93,24 @@ body,
 
 .orb-frame{
   justify-self:center;
+  width:min(64vw,285px) !important;
   max-width:100%;
+}
+
+canvas{
+  max-width:min(64vw,285px) !important;
+  max-height:min(64vw,285px) !important;
+}
+
+.sensor-ring{
+  inset:-7% -6% -10% -6% !important;
+}
+
+.sensor-node{
+  width:2.74rem !important;
+  height:2.74rem !important;
+  font-size:.38rem !important;
+  letter-spacing:.065em !important;
 }
 
 .observer-control-dock .filter-row{
@@ -264,12 +282,32 @@ body,
 
 @media(min-width:640px){
   :root{
+    --observer-source-clearance:4.7rem;
     --observer-jewel-size:1.32rem;
     --observer-dock-inner-x:.78rem;
     --observer-dock-inner-y:.72rem;
   }
   .quick-guide{
     grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  }
+  .orb-frame{
+    width:min(var(--observer-glyph-size,76vw),100%) !important;
+  }
+  canvas{
+    max-width:var(--observer-glyph-size,390px) !important;
+    max-height:var(--observer-glyph-size,390px) !important;
+  }
+  .sensor-ring{
+    inset:
+      var(--observer-sensor-ring-inset-top,-8%)
+      var(--observer-sensor-ring-inset-right,-12%)
+      var(--observer-sensor-ring-inset-bottom,-15%)
+      var(--observer-sensor-ring-inset-left,-12%) !important;
+  }
+  .sensor-node{
+    width:var(--observer-sensor-node-size,3.55rem) !important;
+    height:var(--observer-sensor-node-size,3.55rem) !important;
+    font-size:var(--observer-sensor-node-font,.48rem) !important;
   }
   .observer-control-dock .filter-row{
     width:min(560px,90vw) !important;
@@ -285,6 +323,7 @@ body,
 
 @media(min-width:820px){
   :root{
+    --observer-source-clearance:5.15rem;
     --observer-jewel-size:1.42rem;
     --observer-dock-inner-x:.92rem;
     --observer-dock-inner-y:.76rem;
@@ -307,6 +346,9 @@ body,
 }
 
 @media(min-width:1180px){
+  :root{
+    --observer-source-clearance:4.4rem;
+  }
   .observer-hud{
     width:min(1120px,calc(100% - 2rem));
     grid-template-columns:minmax(280px,460px) minmax(380px,1fr);
