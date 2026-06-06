@@ -137,6 +137,56 @@ function ModePanel({ lensMode, onModeChange, activeAnchor }) {
   );
 }
 
+function AnchorCard({ item, isActive, onSelect, onDelete, onRename }) {
+  const placement = getAnchorPlacement(item);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftName, setDraftName] = useState(item.display_name || item.label || 'Concordance Anchor');
+
+  function submitRename(event) {
+    event.preventDefault();
+    onRename(item, draftName);
+    setIsEditing(false);
+  }
+
+  function cancelRename() {
+    setDraftName(item.display_name || item.label || 'Concordance Anchor');
+    setIsEditing(false);
+  }
+
+  return (
+    <article className={isActive ? 'anchor-card active' : 'anchor-card'}>
+      <button type="button" className="anchor-main" onClick={() => onSelect(item)}>
+        <strong>{item.display_name || item.label || 'Concordance Anchor'}</strong>
+        <span>{item.device_mode} · {Math.round(placement.x)}%, {Math.round(placement.y)}%</span>
+        <span>{new Date(item.updated_at || item.created_at || item.createdAt).toLocaleString()}</span>
+      </button>
+
+      {isEditing ? (
+        <form className="anchor-rename" onSubmit={submitRename}>
+          <label>
+            <span className="sr-only">Return-point name</span>
+            <input
+              value={draftName}
+              onChange={(event) => setDraftName(event.target.value)}
+              autoFocus
+              maxLength={80}
+            />
+          </label>
+          <div className="anchor-rename-actions">
+            <button type="submit">Save</button>
+            <button type="button" onClick={cancelRename}>Cancel</button>
+          </div>
+        </form>
+      ) : (
+        <div className="anchor-actions">
+          <button type="button" onClick={() => setIsEditing(true)} aria-label={`Rename ${item.display_name || 'anchor'}`}>Name</button>
+          <button type="button" className="delete-anchor" onClick={() => onDelete(item.id)} aria-label={`Delete ${item.display_name || 'anchor'}`}>×</button>
+        </div>
+      )}
+    </article>
+  );
+}
+
 function AnchorShelf({ anchors, activeAnchorId, onSelect, onDelete, onClearAll, onRename }) {
   return (
     <section className="anchor-shelf" aria-label="Saved anchors">
@@ -151,23 +201,16 @@ function AnchorShelf({ anchors, activeAnchorId, onSelect, onDelete, onClearAll, 
         <p className="empty-shelf">No saved anchors yet. Place a Hearth Lantern to create the first return-point.</p>
       ) : (
         <div className="anchor-grid">
-          {anchors.map((item) => {
-            const placement = getAnchorPlacement(item);
-            const isActive = item.id === activeAnchorId;
-            return (
-              <article className={isActive ? 'anchor-card active' : 'anchor-card'} key={item.id}>
-                <button type="button" className="anchor-main" onClick={() => onSelect(item)}>
-                  <strong>{item.display_name || item.label || 'Concordance Anchor'}</strong>
-                  <span>{item.device_mode} · {Math.round(placement.x)}%, {Math.round(placement.y)}%</span>
-                  <span>{new Date(item.updated_at || item.created_at || item.createdAt).toLocaleString()}</span>
-                </button>
-                <div className="anchor-actions">
-                  <button type="button" onClick={() => onRename(item)} aria-label={`Rename ${item.display_name || 'anchor'}`}>Name</button>
-                  <button type="button" className="delete-anchor" onClick={() => onDelete(item.id)} aria-label={`Delete ${item.display_name || 'anchor'}`}>×</button>
-                </div>
-              </article>
-            );
-          })}
+          {anchors.map((item) => (
+            <AnchorCard
+              item={item}
+              isActive={item.id === activeAnchorId}
+              key={item.id}
+              onSelect={onSelect}
+              onDelete={onDelete}
+              onRename={onRename}
+            />
+          ))}
         </div>
       )}
     </section>
@@ -276,14 +319,7 @@ function App() {
     const y = clamp(((event.clientY - rect.top) / rect.height) * 100, 12, 88);
 
     if (lensMode === LENS_MODES.return) {
-      if (!anchor) {
-        setComparison({
-          comparison_state: 'unrecognised',
-          reading: ['No active anchor selected.', 'Choose a return-point from the Anchor Shelf before comparing.'],
-        });
-        return;
-      }
-      setComparison(compareAnchorReturn(anchor, { x, y }));
+      compareActiveAnchor({ x, y });
       return;
     }
 
@@ -300,6 +336,19 @@ function App() {
     setComparison(previousAnchor ? compareAnchorReturn(previousAnchor, { x, y }) : null);
   }
 
+  function compareActiveAnchor(currentPlacement = null) {
+    if (!anchor) {
+      setComparison({
+        comparison_state: 'unrecognised',
+        reading: ['No active anchor selected.', 'Choose a return-point from the Anchor Shelf before comparing.'],
+      });
+      return;
+    }
+
+    setLensMode(LENS_MODES.return);
+    setComparison(compareAnchorReturn(anchor, currentPlacement || getAnchorPlacement(anchor)));
+  }
+
   function selectAnchor(savedAnchor) {
     const placement = getAnchorPlacement(savedAnchor);
     setAnchor(savedAnchor);
@@ -308,11 +357,7 @@ function App() {
     setAnchors(saveLocalAnchor(savedAnchor));
   }
 
-  function renameAnchor(savedAnchor) {
-    const currentName = savedAnchor.display_name || savedAnchor.label || 'First Concordance Window';
-    const nextName = window.prompt('Name this return-point:', currentName);
-    if (nextName === null) return;
-
+  function renameAnchor(savedAnchor, nextName) {
     const nextAnchors = renameLocalAnchor(savedAnchor.id, nextName);
     setAnchors(nextAnchors);
     const nextActive = nextAnchors.find((item) => item.id === savedAnchor.id);
@@ -392,6 +437,7 @@ function App() {
         </button>
         <button type="button" onClick={stopCamera} disabled={!isCameraLive}>Stop camera</button>
         <button type="button" onClick={toggleDemoMode}>{demoMode ? 'Exit demo' : 'Demo room'}</button>
+        <button type="button" onClick={() => compareActiveAnchor()} disabled={!anchor}>Compare active</button>
         <button type="button" onClick={clearSavedAnchor} disabled={!anchor}>Clear active</button>
       </section>
 
