@@ -1,6 +1,7 @@
 import { measureHudBounds } from './lib/deepHudBounds.js';
 
 const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
+const HUD_LAYER_SELECTOR = '.deep-observer-hud-layer';
 const ROOT_SELECTOR = '#root';
 const UPDATE_THROTTLE_MS = 120;
 
@@ -19,6 +20,19 @@ function makeBoundsSignature(bounds) {
     .map((rect) => [rect.left, rect.top, rect.width, rect.height].map((value) => Math.round(Number(value) || 0)).join(','));
 
   return [bounds.viewportClass, bounds.inset, ...rects].join('|');
+}
+
+function ensureHudLayer(panel) {
+  let layer = panel.querySelector(`:scope > ${HUD_LAYER_SELECTOR}`);
+  if (layer) return layer;
+
+  layer = document.createElement('div');
+  layer.className = 'deep-observer-hud-layer';
+  layer.setAttribute('aria-hidden', 'true');
+  layer.dataset.deepHudLayer = 'empty';
+  layer.dataset.deepHudLayerOwner = 'passive-bounds-binder';
+  panel.appendChild(layer);
+  return layer;
 }
 
 function applyBoundsVars(panel, bounds) {
@@ -67,6 +81,7 @@ function dispatchBounds(panel, bounds) {
 }
 
 function bindPanel(panel) {
+  ensureHudLayer(panel);
   const bounds = measureHudBounds({ root: document, shell: panel });
   const signature = makeBoundsSignature(bounds);
   if (signature === panel.dataset.deepHudBoundsSignature) return;
@@ -98,8 +113,10 @@ function observePanels() {
     resizeObserver.observe(panel);
     const stage = panel.querySelector('.glyph-orb-wrap');
     const readout = panel.querySelector('.glyph-readout');
+    const hudLayer = panel.querySelector(HUD_LAYER_SELECTOR);
     if (stage) resizeObserver.observe(stage);
     if (readout) resizeObserver.observe(readout);
+    if (hudLayer) resizeObserver.observe(hudLayer);
   });
 }
 
