@@ -1,0 +1,19 @@
+{
+  "name": "Pocket Concordance Lens",
+  "short_name": "Pocket Lens",
+  "description": "Private-first camera AR prototype for Concordance anchors, sigils, and DEEP readings.",
+  "start_url": "/Flameclyffe/pocket-concordance-lens/",
+  "scope": "/Flameclyffe/pocket-concordance-lens/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#10120f",
+  "theme_color": "#10120f",
+  "icons": [
+    {
+      "src": "./icons/pocket-concordance-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
