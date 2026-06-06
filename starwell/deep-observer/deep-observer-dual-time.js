@@ -1,4 +1,4 @@
-/* DEEP Observer Dual Time Hologram v0.4 */
+/* DEEP Observer Dual Time Hologram v0.5 */
 'use strict';
 
 (() => {
@@ -7,6 +7,7 @@
   const POSITION_KEY = 'deep_observer_dual_time_position_v1';
   const PIN_KEY = 'deep_observer_dual_time_pinned_v1';
   const MIN_KEY = 'deep_observer_dual_time_minimised_v1';
+  const TIME_SELECTOR = '[data-reading="time"], [data-meter="time"]';
 
   const state = {
     dragging: false,
@@ -14,7 +15,8 @@
     dragOffsetX: 0,
     dragOffsetY: 0,
     pinned: false,
-    minimised: false
+    minimised: false,
+    lastTimeTrigger: 0
   };
 
   const pad = value => String(value).padStart(2, '0');
@@ -326,8 +328,47 @@
     document.body.classList.remove('time-hologram-active', 'dual-time-pulse-on');
   }
 
+  function findClosestTarget(start, selector) {
+    if (start?.closest) return start.closest(selector);
+    return null;
+  }
+
+  function findEventTarget(event, selector) {
+    const direct = findClosestTarget(event?.target, selector);
+    if (direct) return direct;
+
+    const path = typeof event?.composedPath === 'function' ? event.composedPath() : [];
+    for (const node of path) {
+      if (node?.matches?.(selector)) return node;
+      const closest = findClosestTarget(node, selector);
+      if (closest) return closest;
+    }
+
+    if (Number.isFinite(event?.clientX) && Number.isFinite(event?.clientY)) {
+      const underPoint = document.elementFromPoint(event.clientX, event.clientY);
+      return findClosestTarget(underPoint, selector);
+    }
+
+    return null;
+  }
+
   function isTimeSelectionTarget(target) {
-    return Boolean(target.closest?.('[data-reading="time"], [data-meter="time"]'));
+    return Boolean(findClosestTarget(target, TIME_SELECTOR));
+  }
+
+  function triggerDualTime(event, reason = 'unknown') {
+    if (event?.button !== undefined && event.button !== 0) return false;
+    if (!findEventTarget(event, TIME_SELECTOR)) return false;
+
+    const now = performance.now();
+    if (now - state.lastTimeTrigger < 260) return true;
+    state.lastTimeTrigger = now;
+
+    showDualTime();
+    window.dispatchEvent(new CustomEvent('deep-observer:dual-time-trigger', {
+      detail: { reason, timestamp: Date.now() }
+    }));
+    return true;
   }
 
   function isDismissTarget(target) {
@@ -344,11 +385,12 @@
     setPanelPosition(rect.left, rect.top, true);
   }
 
+  document.addEventListener('pointerup', event => {
+    triggerDualTime(event, 'pointerup');
+  }, { capture: true, passive: true });
+
   document.addEventListener('click', event => {
-    if (isTimeSelectionTarget(event.target)) {
-      showDualTime();
-      return;
-    }
+    if (triggerDualTime(event, 'click')) return;
     if (isDismissTarget(event.target)) hideDualTime();
   }, { passive: true });
 
