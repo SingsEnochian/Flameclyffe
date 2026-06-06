@@ -157,6 +157,25 @@
   z-index: 1;
 }
 
+.live-glyph-panel .deep-sensor-label {
+  display: block;
+  width: max-content;
+  max-width: calc(100% - 1.4rem);
+  margin: -0.08rem 0 0.18rem;
+  padding: 0.08rem 0.34rem 0.1rem;
+  border: 1px solid hsla(var(--sensor-hue), 72%, 74%, 0.22);
+  border-radius: 999px;
+  background: rgba(3, 5, 10, 0.32);
+  color: hsla(var(--sensor-hue), 88%, 82%, 0.88);
+  font-family: 'IBM Plex Sans', Inter, system-ui, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px hsla(var(--sensor-hue), 88%, 74%, 0.18);
+}
+
 @media (max-width: 1120px) {
   .live-glyph-panel .live-glyph-layout {
     grid-template-areas:
