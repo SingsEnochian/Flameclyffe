@@ -19,14 +19,15 @@ The first slice is intentionally small:
 3. Let the user choose Place mode or Return mode.
 4. In Place mode, let the user tap a surface to place the First Concordance Window.
 5. In Return mode, protect the active anchor from accidental movement and compare taps against it.
-6. Render a Hearth Lantern at the active anchor.
-7. Render the first five sigils: Anchor, Witness, Waking, Gate, Concordance.
-8. Show a short DEEP reading.
-9. Save anchors locally in the browser.
-10. Let the user return to a saved anchor from the Anchor Shelf.
-11. Let the user name, clear, delete, or clear all anchors.
+6. Let the user press Compare active to ask DEEP about the currently selected anchor.
+7. Render a Hearth Lantern at the active anchor.
+8. Render the first five sigils: Anchor, Witness, Waking, Gate, Concordance.
+9. Show a short DEEP reading.
+10. Save anchors locally in the browser.
+11. Let the user return to a saved anchor from the Anchor Shelf.
+12. Let the user name, clear, delete, or clear all anchors.
 
-This is not yet the full horse. It is the horse's first step with saddlebags and reins.
+This is not yet the full horse. It is the horse's first step with saddlebags, reins, and a polite little compare button.
 
 ## Why this slice matters
 
@@ -40,7 +41,7 @@ The first slice proves the core loop:
 - save locally
 - compare return state
 - choose a saved return-point
-- name the return-point
+- name the return-point inline
 - clear if needed
 
 A mythframe with no mechanics floats. A mythframe with repeatable state, anchor, return, choice, and failure modes begins to fly.
@@ -77,6 +78,12 @@ Use Return mode when:
 - avoiding accidental overwrite.
 
 Selecting an anchor from the Anchor Shelf automatically switches to Return mode.
+
+## Compare active
+
+Compare active is the explicit non-secret version of Return mode comparison.
+
+It uses the active anchor's saved placement and asks DEEP whether the return-point is still coherent. This is useful when the user wants to check the saved anchor without tapping the camera or demo stage.
 
 ## Concordance reading
 
@@ -117,7 +124,7 @@ Current behaviour:
 - The newest or selected anchor is also stored as the active anchor.
 - Selecting an anchor reloads its Hearth Lantern, sigils, and Stonewood overlay.
 - Selecting an anchor switches the Lens into Return mode.
-- Naming an anchor changes its local display name.
+- Naming an anchor changes its local display name through an inline form.
 - Deleting an anchor removes only that return-point.
 - Clearing all anchors removes the local shelf and active anchor.
 
@@ -159,15 +166,15 @@ npm run pocket:preview
 
 - `src/anchorContract.js` holds the shared local anchor contract, shelf helpers, comparison helper, preferences helpers, lens mode constants, and rename helper.
 - `src/main.jsx` renders the Lens UI and uses the contract helpers.
-- `src/styles.css` includes the Lens, mode panel, Anchor Shelf, preferences, Stonewood seams, Hearth Lantern, and sigil styling.
+- `src/styles.css` includes the Lens, mode panel, Anchor Shelf, inline rename form, preferences, Stonewood seams, Hearth Lantern, and sigil styling.
 - Local anchors are stored under `pocket-concordance-lens-anchor-shelf-v0-1`.
 - The first comparison checks whether a new placement is close enough to the active saved placement.
 - This comparison is intentionally simple and should become more spatially aware later.
 
 ## Next build steps
 
-- Replace `window.prompt` naming with an inline accessible rename field.
-- Add a clearer explicit Compare button for Return mode.
+- Add richer saved-anchor metadata display.
+- Add export/import of local anchor shelf for backup.
 - Draft Supabase migration only after Anchor Registry contract review.
 - Add DEEP Observer event logging after safe sync exists.
 - Add optional WebXR/device adapter exploration.
