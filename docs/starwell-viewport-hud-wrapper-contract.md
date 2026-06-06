@@ -1,6 +1,6 @@
 # STARWELL Viewport / HUD Wrapper Contract
 
-Status: governing contract before floating-panel implementation. The pure bounds helper and passive bounds binding layer exist, but no HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
+Status: governing contract before floating-panel implementation. The pure bounds helper, passive bounds binding layer, and empty HUD overlay layer exist, but no HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
 
 ## Purpose
 
@@ -76,7 +76,7 @@ Rule: readout content can scroll or stack, but should not become a floating pane
 
 ### HUD overlay layer
 
-Selector target, proposed:
+Selector target, active transitional socket:
 
 ```text
 .deep-observer-hud-layer
@@ -84,9 +84,11 @@ Selector target, proposed:
 
 Role: future absolute-positioned layer inside the Observer instrument shell.
 
-This layer should be `position: absolute` inside a `position: relative` shell. It should use `pointer-events: none` by default, and individual panels should restore `pointer-events: auto`.
+This layer is currently created by `apps/starwell/src/deep-hud-bounds-bind.js` when React has not provided it. It is empty, `aria-hidden`, marked with `data-deep-hud-layer="empty"`, and owned by the passive bounds binder until React takes native ownership.
 
-Do not add this layer until there is at least one active STARWELL-native HUD panel.
+This layer should be `position: absolute` inside a `position: relative` shell. It should use `pointer-events: none` by default, and individual future panels should restore `pointer-events: auto`.
+
+Do not put live furniture, sensory controls, sound controls, or haptic controls into this layer until the relevant acceptance gates are satisfied.
 
 ## Implemented pure helper
 
@@ -134,6 +136,7 @@ Current responsibilities:
 
 ```text
 measure the active Observer instrument shell
+ensure an empty .deep-observer-hud-layer exists when React has not provided one
 publish CSS custom properties on .live-glyph-panel.deep-observer-panel
 set data-deep-hud-bounds="ready"
 set data-deep-hud-viewport by measured viewport class
@@ -159,7 +162,7 @@ Current CSS variables include:
 --deep-hud-readout-height
 ```
 
-This binding layer is passive. It creates no floating panels, no sensory controls, no sound, and no haptics. It only wires the measured room into CSS and events for future furniture.
+This binding layer is passive. It creates only the empty HUD layer socket. It creates no floating panels, no sensory controls, no sound, and no haptics. It only wires the measured room into CSS and events for future furniture.
 
 ## Bounds model
 
