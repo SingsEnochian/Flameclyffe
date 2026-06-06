@@ -1,0 +1,72 @@
+/* DEEP Observer Viewport Token CSS v0.1
+   Registry-driven overrides for glyph scale, sensor ring geometry, and dock spacing.
+*/
+:root{
+  --observer-glyph-size:420px;
+  --observer-sensor-ring-inset-top:-9%;
+  --observer-sensor-ring-inset-right:-12%;
+  --observer-sensor-ring-inset-bottom:-15%;
+  --observer-sensor-ring-inset-left:-12%;
+  --observer-sensor-node-size:4rem;
+  --observer-sensor-node-font:.54rem;
+  --observer-dock-width:560px;
+  --observer-dock-gap:calc((var(--observer-sensor-node-size) / 2) + 14px);
+  --observer-stage-gap:1rem;
+  --observer-panel-max-width:none;
+  --observer-astrolabe-depth-scale:1;
+}
+
+.glyph-stage{
+  gap:var(--observer-stage-gap) !important;
+}
+
+.orb-frame{
+  width:min(var(--observer-glyph-size),100%) !important;
+  margin-bottom:0 !important;
+}
+
+canvas{
+  max-width:var(--observer-glyph-size) !important;
+  max-height:var(--observer-glyph-size) !important;
+}
+
+.sensor-ring{
+  inset:
+    var(--observer-sensor-ring-inset-top)
+    var(--observer-sensor-ring-inset-right)
+    var(--observer-sensor-ring-inset-bottom)
+    var(--observer-sensor-ring-inset-left) !important;
+}
+
+.sensor-node{
+  width:var(--observer-sensor-node-size) !important;
+  height:var(--observer-sensor-node-size) !important;
+  font-size:var(--observer-sensor-node-font) !important;
+}
+
+.glyph-stage .filter-row{
+  width:min(var(--observer-dock-width),100%) !important;
+  margin-top:max(3px,var(--observer-dock-gap)) !important;
+}
+
+.panel{
+  max-width:var(--observer-panel-max-width);
+}
+
+.instrument{
+  position:relative;
+}
+
+body[data-viewport-band="mobile"] .sensor-node,
+body[data-viewport-band="tablet-portrait"] .sensor-node{
+  letter-spacing:.055em;
+}
+
+body[data-viewport-band="mobile"] .sensor-node{
+  padding-top:.92rem;
+}
+
+body[data-viewport-band="mobile"] .sensor-node:after{
+  top:30%;
+  transform:translate(-50%,-50%) scale(.9);
+}
