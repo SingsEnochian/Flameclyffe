@@ -159,12 +159,15 @@ Rule: sensor labels, notes, base sizes, rotations, and proxy mappings belong her
 
 ### DEEP HUD bounds helper
 
-Current state: implemented pure helper. No active floating HUD panels yet.
+Current state: implemented pure helper. Passive binding is active. No active floating HUD panels yet.
 
-Primary file:
+Primary files:
 
 ```text
 apps/starwell/src/lib/deepHudBounds.js
+apps/starwell/src/deep-hud-bounds-bind.js
+apps/starwell/src/deep-hud-bounds.css
+apps/starwell/index.html
 ```
 
 Owns:
@@ -193,7 +196,18 @@ panelIntersectsRect
 avoidRectsForDefaultPosition
 ```
 
-Rule: flexible HUD measurement, safe bounds, avoid zones, snap zones, default panel zones, and panel clamping belong here. No hardcoded coffin-coordinates. No DOM panel creation. No sound. No haptics. No React state mutation.
+Passive binder role:
+
+```text
+measure the active Observer shell
+publish --deep-hud-* CSS custom properties
+set data-deep-hud-bounds="ready"
+set data-deep-hud-viewport by viewport class
+dispatch deep-observer:hud-bounds with plain data
+recalculate on resize, orientation change, DOM mutation, and ResizeObserver events
+```
+
+Rule: flexible HUD measurement, safe bounds, avoid zones, snap zones, default panel zones, and panel clamping belong here. No hardcoded coffin-coordinates. No DOM panel creation. No sound. No haptics. No React state mutation. The binding layer is active, but it is passive infrastructure only.
 
 ## Transitional thread
 
@@ -327,7 +341,7 @@ Primary file:
 docs/starwell-viewport-hud-wrapper-contract.md
 ```
 
-Responsibility: defines the STARWELL viewport root, Observer instrument shell, glyph stage, readout rail, proposed HUD overlay layer, bounds model, default panel positions, snap zones, mobile rules, sensory gates, and `deepHudBounds.js` scope.
+Responsibility: defines the STARWELL viewport root, Observer instrument shell, glyph stage, readout rail, proposed HUD overlay layer, bounds model, default panel positions, snap zones, mobile rules, sensory gates, `deepHudBounds.js` scope, and passive bounds binding layer.
 
 ## Parallel threads to watch
 
@@ -363,12 +377,13 @@ Add to the shared modules or explicitly bridge the static HUD files instead.
 ## Next safe moves
 
 1. Visual QA at mobile, tablet, laptop, and wide widths.
-2. Use `apps/starwell/src/lib/deepHudBounds.js` for STARWELL-native floating HUD measurement and clamp logic.
+2. Use `apps/starwell/src/lib/deepHudBounds.js` and the active passive bounds binder for STARWELL-native floating HUD measurement and clamp logic.
 3. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
-4. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
-5. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
-6. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
-7. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
+4. Add HUD furniture only after it can consume the measured bounds and respect mobile docking.
+5. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
+6. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
+7. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
+8. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
 
 ## Working mantra
 
