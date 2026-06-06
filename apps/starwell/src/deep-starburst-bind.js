@@ -1,5 +1,5 @@
 import { getDeepSensorByIndex } from './lib/deepSensors.js';
-import { buildStarburstVars } from './lib/deepStarburst.js';
+import { buildSensorStarburstVars, buildStarburstVars } from './lib/deepStarburst.js';
 
 const BRIDGE_PULSE_URL = 'https://singsenochian.github.io/-bridge-pulse/pulse.json';
 const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
@@ -90,23 +90,6 @@ function ensureChipLegend(chip, sensor) {
   chip.setAttribute('aria-label', `${sensor.label}. ${sensor.note}`);
 }
 
-function buildSensorVars(deep, sensor) {
-  const vars = buildStarburstVars(sensor.proxy(deep), {
-    baseSize: sensor.baseSize,
-    rotation: sensor.rotation + deep.E * 12 + deep.kp,
-  });
-
-  return {
-    '--sensor-n': vars['--n'],
-    '--sensor-w': vars['--w'],
-    '--sensor-m': vars['--m'],
-    '--sensor-hue': vars['--flare-hue'],
-    '--sensor-alpha': vars['--flare-alpha'],
-    '--sensor-jitter': vars['--flare-jitter'],
-    '--sensor-rot': vars['--flare-rot'],
-  };
-}
-
 function bindSensorChips(panel, deep, signature) {
   const chips = Array.from(panel.querySelectorAll('.glyph-meter-grid > div'));
 
@@ -118,7 +101,7 @@ function bindSensorChips(panel, deep, signature) {
     ensureChipLegend(chip, sensor);
     if (chip.dataset.starburstSignature === sensorSignature) return;
 
-    applyVars(chip, buildSensorVars(deep, sensor));
+    applyVars(chip, buildSensorStarburstVars(deep, sensor));
     chip.dataset.deepSensor = sensor.key;
     chip.dataset.starburstSignature = sensorSignature;
   });
