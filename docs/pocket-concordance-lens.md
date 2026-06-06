@@ -2,7 +2,7 @@
 
 Status: first public-safe prototype slice.
 
-Pocket Concordance Lens is the phone/tablet camera fallback for Concordance Lens. It lets people without dedicated AR glasses open a camera view, place a Waking anchor, see a Hearth Lantern, read the first five Concordance sigils, and return to the saved local anchor.
+Pocket Concordance Lens is the phone/tablet camera fallback for Concordance Lens. It lets people without dedicated AR glasses open a camera view, place a Waking anchor, see a Hearth Lantern, read the first five Concordance sigils, and return to saved local anchors.
 
 ## Related specs
 
@@ -20,10 +20,11 @@ The first slice is intentionally small:
 4. Render a Hearth Lantern at that point.
 5. Render the first five sigils: Anchor, Witness, Waking, Gate, Concordance.
 6. Show a short DEEP reading.
-7. Save the anchor locally in the browser.
-8. Let the user clear the anchor at any time.
+7. Save anchors locally in the browser.
+8. Let the user return to a saved anchor from the Anchor Shelf.
+9. Let the user clear the active anchor, delete one anchor, or clear the whole shelf.
 
-This is not yet the full horse. It is the horse's first step.
+This is not yet the full horse. It is the horse's first step with saddlebags.
 
 ## Why this slice matters
 
@@ -35,9 +36,10 @@ The first slice proves the core loop:
 - receive a DEEP reading
 - save locally
 - compare return state
+- choose a saved return-point
 - clear if needed
 
-A mythframe with no mechanics floats. A mythframe with repeatable state, anchor, return, and failure modes begins to fly.
+A mythframe with no mechanics floats. A mythframe with repeatable state, anchor, return, choice, and failure modes begins to fly.
 
 ## Privacy boundaries
 
@@ -77,6 +79,34 @@ Cleared:
 - Anchor cleared.
 - The room is unbound and ready for a new return-point.
 
+## Local Anchor Shelf
+
+The Anchor Shelf is the local browser memory layer.
+
+Current behaviour:
+
+- Up to 12 anchors are stored locally.
+- The newest or selected anchor is also stored as the active anchor.
+- Selecting an anchor reloads its Hearth Lantern, sigils, and Stonewood overlay.
+- Deleting an anchor removes only that return-point.
+- Clearing all anchors removes the local shelf and active anchor.
+
+Storage keys:
+
+- `pocket-concordance-lens-anchor-v0-1` — active anchor.
+- `pocket-concordance-lens-anchor-shelf-v0-1` — local anchor shelf.
+- `pocket-concordance-lens-preferences-v0-1` — local interface preferences.
+
+## Preferences
+
+Current local preferences:
+
+- Low motion.
+- Large UI.
+- Sigil labels.
+
+Low motion is enabled by default.
+
 ## Build commands
 
 From the repository root:
@@ -97,16 +127,17 @@ npm run pocket:preview
 
 ## Current implementation notes
 
-- `src/anchorContract.js` holds the shared local anchor contract.
+- `src/anchorContract.js` holds the shared local anchor contract, shelf helpers, comparison helper, and preferences helpers.
 - `src/main.jsx` renders the Lens UI and uses the contract helpers.
-- Local anchors are stored under `pocket-concordance-lens-anchor-v0-1`.
+- `src/styles.css` includes the Lens, Anchor Shelf, preferences, Stonewood seams, Hearth Lantern, and sigil styling.
+- Local anchors are stored under `pocket-concordance-lens-anchor-shelf-v0-1`.
 - The first comparison checks whether a new placement is close enough to the previous saved placement.
 - This comparison is intentionally simple and should become more spatially aware later.
 
 ## Next build steps
 
-- Add a saved-anchor list and return flow.
-- Add persistent low-motion and large-ui settings.
+- Add explicit named-anchor editing.
+- Add a clearer return flow separate from placing a new anchor.
 - Draft Supabase migration only after Anchor Registry contract review.
 - Add DEEP Observer event logging after safe sync exists.
 - Add optional WebXR/device adapter exploration.
