@@ -200,6 +200,36 @@ data-starburst-native="true"
 
 Retirement condition: remove this binder only after React owns both aura variables and sensor-chip variables/labels.
 
+## Dormant / static HUD threads
+
+### HUD bounds helper
+
+Current state: repo-present, not referenced by STARWELL React search results as of the latest audit.
+
+Primary file:
+
+```text
+starwell/deep-observer/deep-observer-hud-bounds.js
+```
+
+Responsibility: exposes `window.DEEP_OBSERVER_HUD` with helpers for HUD element detection, bounds rectangles, clamping, default panel positions, snap zones, element clamping, element snapping, and `deep-observer:hud-bounds` dispatches.
+
+Ownership note: do not duplicate floating-panel clamp or snap logic in STARWELL until we decide whether this helper should be imported, bridged, or kept static-only.
+
+### Sensory engine panel
+
+Current state: repo-present, not referenced by STARWELL React search results as of the latest audit.
+
+Primary file:
+
+```text
+starwell/deep-observer/deep-observer-sensory.js
+```
+
+Responsibility: creates a draggable `#sensoryPanel` with sound, haptic, hum, and soft-mode controls. It uses `window.DEEP_OBSERVER_HUD` when available for panel clamping and snapping.
+
+Ownership note: this is a sensory/HUD layer, not the same thread as STARWELL starburst aura or sensor-chip visuals. Do not add another sound/haptic panel to STARWELL without deciding whether to reuse or retire this one.
+
 ## Documentation threads
 
 ### Binding note
@@ -239,9 +269,11 @@ These may change while DEEP visual work is ongoing:
 ```text
 data/deep-current.json
 starwell/deep-observer/specs/Astrolabe_Skin_HUD_Containment_Build_Checklist_v0.1.md
+starwell/deep-observer/deep-observer-hud-bounds.js
+starwell/deep-observer/deep-observer-sensory.js
 ```
 
-Rule: if these change, inspect them before assuming a visual bug comes from the starburst layer. The bridge data and HUD checklist may alter expected behaviour.
+Rule: if these change, inspect them before assuming a visual bug comes from the starburst layer. The bridge data, HUD checklist, bounds helper, and sensory engine may alter expected behaviour.
 
 ## Do not duplicate
 
@@ -255,17 +287,21 @@ six-chip sensor map
 starburst CSS variable mapping
 mobile density overrides
 native handoff marker rules
+floating HUD clamp / snap logic
+sound / haptic sensory panel logic
 ```
 
-Add to the shared modules instead.
+Add to the shared modules or explicitly bridge the static HUD files instead.
 
 ## Next safe moves
 
 1. Visual QA at mobile, tablet, laptop, and wide widths.
-2. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
-3. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
-4. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
-5. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
+2. Decide whether `deep-observer-hud-bounds.js` should remain static-only or become a shared STARWELL helper.
+3. Decide whether `deep-observer-sensory.js` should remain static-only, be bridged into STARWELL, or be retired before adding new sound/haptic UI.
+4. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
+5. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
+6. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
+7. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
 
 ## Working mantra
 
