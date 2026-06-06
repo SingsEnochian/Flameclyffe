@@ -1,10 +1,10 @@
-/* DEEP Observer Organic Astrolabe Layer v0.2
-   Rebalances the control tray after v0.1 over-expanded on tablet landscape.
-   The dock keeps embedded-jewel depth, but returns to compact instrument scale.
+/* DEEP Observer Organic Astrolabe Layer v0.3
+   Separates glyph, controls, and readout into distinct HUD containers.
+   The control dock no longer inherits glyph-stage/sensor-ring geometry.
 */
 :root{
   --observer-dock-edge-gap:3px;
-  --observer-dock-safe-gap:calc((var(--observer-sensor-node-size, 4rem) / 2) + var(--observer-dock-edge-gap));
+  --observer-dock-separation:1.05rem;
   --observer-dock-inner-x:.92rem;
   --observer-dock-inner-y:.76rem;
   --observer-jewel-size:1.42rem;
@@ -15,38 +15,74 @@
   --observer-jewel-gold:rgba(231,196,119,.30);
 }
 
-.instrument{
+.observer-hud{
+  width:min(1120px,calc(100% - 2rem));
+  margin:0 auto 1.7rem;
+  display:grid;
+  grid-template-columns:minmax(280px,460px) minmax(380px,1fr);
+  grid-template-areas:
+    "glyph readout"
+    "controls readout";
+  gap:var(--observer-dock-separation) clamp(1rem,3vw,1.6rem);
+  align-items:start;
   justify-items:center;
 }
 
-@media(max-width:1120px){
-  .instrument{
-    row-gap:var(--observer-dock-edge-gap) !important;
-  }
+.observer-glyph-instrument{
+  grid-area:glyph;
+  width:100%;
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  padding:0 !important;
+  gap:0 !important;
+  justify-items:center;
+  align-items:start;
+}
+
+.observer-control-dock{
+  grid-area:controls;
+  width:100%;
+  display:grid;
+  justify-items:center;
+  margin-top:var(--observer-dock-edge-gap);
+}
+
+.observer-readout{
+  grid-area:readout;
+  width:100%;
+  min-width:0;
+}
+
+.observer-readout .panel{
+  width:100%;
+  margin:0 !important;
 }
 
 .glyph-stage{
   justify-self:center;
   width:100%;
   justify-items:center;
-  gap:var(--observer-dock-edge-gap) !important;
+  gap:0 !important;
+  position:sticky;
+  top:1rem;
 }
 
 .orb-frame{
   justify-self:center;
 }
 
-.glyph-stage .filter-row{
-  width:min(760px,88vw) !important;
+.observer-control-dock .filter-row{
+  position:relative;
+  display:grid !important;
+  width:min(760px,100%) !important;
   max-width:760px;
-  margin-top:var(--observer-dock-safe-gap) !important;
-  margin-bottom:var(--observer-dock-edge-gap) !important;
+  margin:0 !important;
   padding:var(--observer-dock-inner-y) var(--observer-dock-inner-x) !important;
   min-height:0;
   gap:.58rem .62rem !important;
-  grid-template-columns:repeat(4,minmax(7.2rem,1fr));
+  grid-template-columns:repeat(2,minmax(7.4rem,1fr));
   border-radius:30px 28px 33px 29px !important;
-  border-color:rgba(198,226,242,.21) !important;
+  border:1px solid rgba(198,226,242,.21) !important;
   background:
     radial-gradient(ellipse at 12% 0%,rgba(232,244,252,.12),transparent 46%),
     radial-gradient(ellipse at 88% 100%,rgba(64,164,224,.09),transparent 54%),
@@ -62,15 +98,15 @@
     inset 0 0 30px rgba(76,224,230,.03) !important;
 }
 
-.glyph-stage .filter-row::before,
-.glyph-stage .filter-row::after{
+.observer-control-dock .filter-row::before,
+.observer-control-dock .filter-row::after{
   content:"";
   position:absolute;
   pointer-events:none;
   border-radius:inherit;
 }
 
-.glyph-stage .filter-row::before{
+.observer-control-dock .filter-row::before{
   inset:.28rem;
   border:1px solid rgba(231,196,119,.105);
   background:
@@ -80,7 +116,7 @@
   box-shadow:inset 0 0 20px rgba(0,0,0,.24);
 }
 
-.glyph-stage .filter-row::after{
+.observer-control-dock .filter-row::after{
   inset:-1px;
   background:
     radial-gradient(circle at 2.1rem 1.8rem,rgba(76,224,230,.10),transparent .72rem),
@@ -196,28 +232,37 @@
 .filter[data-filter="horizon"]::before,
 #stimBtn::before{--observer-jewel-blue:rgba(94,112,190,.32);}
 
-.instrument .panel{
-  margin-top:var(--observer-dock-edge-gap) !important;
-}
-
 .interface-cloak-toggle{
   min-width:6.3rem;
   z-index:96;
 }
 
 @media(max-width:1120px){
-  .glyph-stage .filter-row{
+  .observer-hud{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "glyph"
+      "controls"
+      "readout";
+    gap:var(--observer-dock-separation);
+  }
+  .observer-glyph-instrument{
+    width:100%;
+  }
+  .observer-control-dock .filter-row{
     width:min(760px,88vw) !important;
     grid-template-columns:repeat(4,minmax(7rem,1fr));
-    margin-top:var(--observer-dock-safe-gap) !important;
+  }
+  .observer-readout .panel{
+    width:min(760px,100%);
+    margin-inline:auto !important;
   }
 }
 
 @media(max-width:780px){
-  .glyph-stage .filter-row{
+  .observer-control-dock .filter-row{
     width:min(560px,90vw) !important;
     grid-template-columns:repeat(3,minmax(6.4rem,1fr));
-    margin-top:var(--observer-dock-safe-gap) !important;
     padding:.74rem !important;
     gap:.52rem !important;
   }
@@ -229,7 +274,7 @@
     --observer-dock-inner-x:.68rem;
     --observer-dock-inner-y:.68rem;
   }
-  .glyph-stage .filter-row{
+  .observer-control-dock .filter-row{
     width:min(350px,91vw) !important;
     grid-template-columns:repeat(2,minmax(0,1fr));
     padding:var(--observer-dock-inner-y) var(--observer-dock-inner-x) !important;
@@ -247,10 +292,10 @@
   }
 }
 
-body.low-stim .glyph-stage .filter-row::after,
+body.low-stim .observer-control-dock .filter-row::after,
 body.low-stim .filter::after,
 body.low-stim .action::after,
-body.reduced-motion .glyph-stage .filter-row::after,
+body.reduced-motion .observer-control-dock .filter-row::after,
 body.reduced-motion .filter::after,
 body.reduced-motion .action::after{
   display:none;
