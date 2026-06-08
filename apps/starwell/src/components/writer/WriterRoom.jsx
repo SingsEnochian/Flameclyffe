@@ -6,6 +6,15 @@ import './writer-room.css';
 const LOCAL_DRAFT_KEY = 'starwell-writer-room-draft-v1';
 const EMPTY_BODY = 'Begin where the signal warms.';
 
+const studyShelfOptions = [
+  { value: 'journal', label: 'Journal Entry', entryType: 'journal', tags: ['journal'] },
+  { value: 'fragments', label: 'Beautiful Fragment', entryType: 'fragment', tags: ['fragment'] },
+  { value: 'starlight', label: 'Starlight & Steel Seed', entryType: 'article_seed', tags: ['starlight-steel', 'seed'] },
+  { value: 'dream', label: 'Dream Record', entryType: 'dream_record', tags: ['dream-record'] },
+  { value: 'art', label: 'Art Note', entryType: 'art-note', tags: ['art-note'] },
+  { value: 'terra', label: 'Terra Aeterna Page', entryType: 'terra-note', tags: ['terra-aeterna'] },
+];
+
 const emptyEntry = {
   id: null,
   slug: '',
@@ -76,6 +85,10 @@ function normaliseTags(value) {
     .split(',')
     .map((tag) => tag.trim())
     .filter(Boolean);
+}
+
+function uniqueTags(tags) {
+  return [...new Set(tags.map((tag) => String(tag || '').trim()).filter(Boolean))];
 }
 
 function getSkyPhase(date = new Date()) {
@@ -241,6 +254,7 @@ export function WriterRoom({ entry, now = new Date(), onSaved }) {
   const [form, setForm] = useState(() => entryToForm(entry));
   const [saveState, setSaveState] = useState('Ready');
   const [localSavedAt, setLocalSavedAt] = useState(null);
+  const [publishShelf, setPublishShelf] = useState('journal');
 
   const wordCount = useMemo(() => stripMarkdown(form.body).split(/\s+/).filter(Boolean).length, [form.body]);
   const previewHtml = useMemo(() => markdownToBasicHtml(form.body), [form.body]);
@@ -255,6 +269,7 @@ export function WriterRoom({ entry, now = new Date(), onSaved }) {
     const draft = {
       entryId: activeEntry?.id || 'new',
       savedAt,
+      publishShelf,
       ...form,
       observer: buildObserverContext({ entry: activeEntry, body: form.body, title: form.title, now: new Date() }),
     };
@@ -265,7 +280,7 @@ export function WriterRoom({ entry, now = new Date(), onSaved }) {
     } catch (error) {
       setSaveState(`Local backup blocked: ${error.message}`);
     }
-  }, [activeEntry?.id, form]);
+  }, [activeEntry?.id, form, publishShelf]);
 
   function setField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -438,13 +453,84 @@ export function WriterRoom({ entry, now = new Date(), onSaved }) {
     onSaved?.(data);
   }
 
+  async function publishToStudy() {
+    const shelf = studyShelfOptions.find((option) => option.value === publishShelf) || studyShelfOptions[0];
+    const observer = buildObserverContext({ entry: activeEntry, body: form.body, title: form.title, now });
+    const html = markdownToBasicHtml(form.body);
+    const publishedAt = new Date().toISOString();
+    const tags = uniqueTags([
+      ...normaliseTags(form.tagsText),
+      'rowans-study',
+      'study',
+      `study-${shelf.value}`,
+      ...shelf.tags,
+    ]);
+
+    const payload = {
+      slug: `study-${shelf.value}-${slugify(form.title)}-${Date.now()}`,
+      title: form.title || 'Untitled Study page',
+      entry_type: shelf.entryType,
+      excerpt: form.excerpt || stripMarkdown(form.body).slice(0, 220),
+      body_html: html,
+      body_md: form.body,
+      body_json: {
+        editor: 'starwell-writer-room',
+        format: 'markdown-with-basic-html-preview',
+      },
+      font_theme: {
+        interface: 'living-stonewood-study',
+        register: 'rowans-study',
+      },
+      tags,
+      visibility: form.visibility || 'private',
+      metadata: {
+        observer,
+        study_publish: {
+          version: 1,
+          shelf: shelf.value,
+          shelf_label: shelf.label,
+          source: 'starwell-writer-room',
+          origin_codex_entry_id: isPersistedEntry(activeEntry) ? activeEntry.id : null,
+          published_at: publishedAt,
+          motion_note: 'page-lift-to-study-shelf',
+        },
+        writer_room: {
+          version: 1,
+          last_local_backup_at: localSavedAt,
+          autosave_key: LOCAL_DRAFT_KEY,
+        },
+      },
+    };
+
+    if (!hasSupabaseConfig || !supabase) {
+      setSaveState('Study publish queued locally. Supabase is not configured in this browser.');
+      return;
+    }
+
+    setSaveState(`Publishing to Rowan’s Study · ${shelf.label}...`);
+
+    const { data, error } = await supabase
+      .from('starwell_codex_entries')
+      .insert(payload)
+      .select('id, slug, title, entry_type, excerpt, body_md, body_html, body_json, font_theme, tags, visibility, metadata, created_at, updated_at')
+      .single();
+
+    if (error) {
+      setSaveState(`Study publish kept in local draft. Supabase needs permission: ${error.message}`);
+      return;
+    }
+
+    setSaveState(`Published to Rowan’s Study · ${shelf.label}`);
+    onSaved?.(data);
+  }
+
   return (
     <section className="writer-room chamber-card" aria-label="STARWELL writing room">
       <div className="writer-header">
         <div>
-          <p className="writer-kicker">Grand Library · Writing Room</p>
-          <h2>Write where the Observer can hear.</h2>
-          <span>Local autosave is always on. Codex save attaches DEEP Observer context into metadata.</span>
+          <p className="writer-kicker">Writing Room · Living Manuscript Atelier</p>
+          <h2>Write where the page can breathe.</h2>
+          <span>Local autosave is always on. Save keeps the Codex leaf. Publish places a chosen copy onto Rowan’s Study shelf.</span>
         </div>
         <div className="writer-status" aria-live="polite">
           <strong>{saveState}</strong>
@@ -475,6 +561,19 @@ export function WriterRoom({ entry, now = new Date(), onSaved }) {
       <textarea ref={textRef} className="writer-editor" value={form.body} onChange={(event) => setField('body', event.target.value)} aria-label="Manuscript editor" />
 
       <div className="observer-bridge"><span>🜂 DEEP Observer bridge</span><p>Phase: {getSkyPhase(now)} · Words: {wordCount} · Signal: {wordCount > 0 ? 'draft_signal_present' : 'empty_leaf'}</p></div>
+
+      <div className="writer-publish-panel" aria-label="Publish to Rowan's Study">
+        <label>
+          Study shelf
+          <select value={publishShelf} onChange={(event) => setPublishShelf(event.target.value)}>
+            {studyShelfOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+        <p>Publish creates a Study-labelled Codex copy with shelf metadata. The draft stays available; the chosen page gets a room.</p>
+        <button type="button" className="primary-action publish-action" onClick={publishToStudy}>Publish to Study</button>
+      </div>
 
       <details className="writer-preview"><summary>Preview HTML export</summary><pre>{previewHtml}</pre></details>
 
