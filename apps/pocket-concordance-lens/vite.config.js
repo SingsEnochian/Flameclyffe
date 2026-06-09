@@ -8,8 +8,5 @@ export default defineConfig({
   build: {
     outDir: '../../dist/pocket-concordance-lens',
     emptyOutDir: true,
-    rollupOptions: {
-      input: 'apps/pocket-concordance-lens/index.html',
-    },
   },
 });
