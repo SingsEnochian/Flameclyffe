@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-09T22:21:18.860Z",
+  "generated_at": "2026-06-09T23:50:40.499Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-09T18:15",
+    "time": "2026-06-09T19:45",
     "sky": "Day",
     "current": {
-      "time": "2026-06-09T18:15",
+      "time": "2026-06-09T19:45",
       "interval": 900,
-      "temperature_2m": 81.2,
-      "relative_humidity_2m": 80,
+      "temperature_2m": 78.6,
+      "relative_humidity_2m": 74,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
       "cloud_cover": 100,
-      "pressure_msl": 1019.4,
-      "wind_speed_10m": 9.2,
-      "wind_direction_10m": 64
+      "pressure_msl": 1019.6,
+      "wind_speed_10m": 8.4,
+      "wind_direction_10m": 73
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 18
     },
     "solar_wind": {
-      "time_tag": "2026-06-09 22:17:00.000",
-      "bz": 0.61,
-      "bt": 5.02,
-      "density": 7.55,
-      "speed": 436.3
+      "time_tag": "2026-06-09 23:46:00.000",
+      "bz": 2.29,
+      "bt": 5.21,
+      "density": 8.61,
+      "speed": 438.8
     }
   },
   "moon": {
-    "age_days": 24.2,
-    "illumination": 28.9,
+    "age_days": 24.26,
+    "illumination": 28.3,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.5911111111111109,
+    "P": 0.5933333333333336,
     "C": 0.14380952380952386,
-    "R": 0.8491166666666667,
-    "E": 0.7855494505494506,
-    "M": 0.289,
+    "R": 0.8714666666666667,
+    "E": 0.7624725274725275,
+    "M": 0.28300000000000003,
     "A": 0.6,
-    "T": 0.5476195983150183,
-    "H": 0.622528271062271,
-    "dpdt": 0.8491166666666667
+    "T": 0.5555104857509158,
+    "H": 0.6429358864468865,
+    "dpdt": 0.8714666666666667
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
