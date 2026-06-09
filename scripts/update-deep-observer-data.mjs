@@ -1,28 +1,43 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const DEFAULT_LAT = Number(process.env.DEEP_OBSERVER_LAT || '30.04');
 const DEFAULT_LON = Number(process.env.DEEP_OBSERVER_LON || '-81.40');
 const DEFAULT_LABEL = process.env.DEEP_OBSERVER_LABEL || 'NE Florida approximate';
 const OUT_PATH = 'data/deep-current.json';
+const FETCH_TIMEOUT_MS = Number(process.env.DEEP_OBSERVER_FETCH_TIMEOUT_MS || '15000');
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const latest = (rows) => Array.isArray(rows) && rows.length ? rows[rows.length - 1] : null;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function jsonWithRetry(url, maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
     try {
       const res = await fetch(url, {
-        headers: { 'accept': 'application/json' },
-        timeout: 15000 // 15 second timeout
+        headers: { accept: 'application/json' },
+        signal: controller.signal,
       });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
       return res.json();
     } catch (err) {
       if (i === maxRetries - 1) throw err;
-      const delay = Math.pow(2, i) * 1000; // Exponential backoff: 1s, 2s, 4s
+      const delay = Math.pow(2, i) * 1000;
       console.log(`Retry ${i + 1}/${maxRetries} after ${delay}ms for ${url}...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await sleep(delay);
+    } finally {
+      clearTimeout(timer);
     }
+  }
+}
+
+async function readPreviousState() {
+  try {
+    return JSON.parse(await readFile(OUT_PATH, 'utf8'));
+  } catch {
+    return null;
   }
 }
 
@@ -102,7 +117,7 @@ function buildState({ weather, kpRows, magRows, plasmaRows }) {
   };
 }
 
-async function main() {
+async function fetchCurrentInputs() {
   const weatherUrl = new URL('https://api.open-meteo.com/v1/forecast');
   weatherUrl.searchParams.set('latitude', String(DEFAULT_LAT));
   weatherUrl.searchParams.set('longitude', String(DEFAULT_LON));
@@ -119,9 +134,23 @@ async function main() {
     jsonWithRetry('https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json')
   ]);
 
-  await mkdir('data', { recursive: true });
-  await writeFile(OUT_PATH, JSON.stringify(buildState({ weather, kpRows, magRows, plasmaRows }), null, 2) + '\n');
-  console.log(`Wrote ${OUT_PATH}`);
+  return { weather, kpRows, magRows, plasmaRows };
+}
+
+async function main() {
+  try {
+    const inputs = await fetchCurrentInputs();
+    await mkdir('data', { recursive: true });
+    await writeFile(OUT_PATH, JSON.stringify(buildState(inputs), null, 2) + '\n');
+    console.log(`Wrote ${OUT_PATH}`);
+  } catch (err) {
+    const previous = await readPreviousState();
+    if (!previous) throw err;
+
+    console.warn('DEEP Observer source fetch failed. Keeping previous cache instead of failing workflow.');
+    console.warn(err);
+    console.log(`${OUT_PATH} remains at ${previous.generated_at || 'unknown generated_at'}`);
+  }
 }
 
 main().catch((err) => {
