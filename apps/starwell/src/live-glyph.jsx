@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './deep-observer.css';
 import { fetchBridgeDeepPulse } from './lib/deepBridge.js';
+import { buildStarburstVars } from './lib/deepStarburst.js';
 import {
   DEFAULT_DEEP_STATE as BASE_DEEP_STATE,
   SKY_TINTS,
@@ -168,6 +169,7 @@ function buildLiveGlyph(now, touchCharge = 0, bridgeDeep = null, bridgeStatus = 
   const isoSecond = secondLocked.toISOString().replace('.000Z', 'Z');
   const isoMinute = minuteLocked.toISOString().replace('.000Z', 'Z');
   const deep = buildDeepState(touchCharge, bridgeDeep);
+  const auraDeep = normaliseDeepState(bridgeDeep ?? BASE_DEEP_STATE);
   const bridgeSeed = bridgeDeep ? JSON.stringify(bridgeDeep) : 'fallback';
   const seed = `STARWELL|DEEP|FAER|VEE|${isoMinute}|${now.getTimezoneOffset()}|${bridgeSeed}`;
   const hash = hashString(seed);
@@ -175,6 +177,10 @@ function buildLiveGlyph(now, touchCharge = 0, bridgeDeep = null, bridgeStatus = 
   const minute = now.getMinutes();
   const hour = now.getHours();
   const math = buildMathFromState(deep);
+  const auraVars = buildStarburstVars(auraDeep, {
+    baseSize: 132 + auraDeep.A * 24 + auraDeep.R * 18,
+    rotation: auraDeep.E * 18 + auraDeep.kp * 2.5,
+  });
   const rotation = (second * 6 * math.rotationMultiplier) % 360;
   const minuteRotation = (minute * 6 + math.bzDisturb * 18) % 360;
   const hourRotation = (((hour % 12) * 30) + minute / 2 + deep.M * 12) % 360;
@@ -201,6 +207,7 @@ function buildLiveGlyph(now, touchCharge = 0, bridgeDeep = null, bridgeStatus = 
     bridgeStatus,
     deep,
     math,
+    auraVars,
     rotation,
     minuteRotation,
     hourRotation,
@@ -504,6 +511,8 @@ function DeepGlyphCanvas({ glyph, onActivate, onSoften, onKeyDown }) {
   return (
     <div
       className="glyph-orb-wrap glyph-orb-canvas-wrap"
+      data-starburst-native="aura"
+      style={glyph.auraVars}
       role="button"
       tabIndex={0}
       aria-label="Touch the DEEP glyph to add a local charge pulse"
