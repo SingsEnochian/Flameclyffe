@@ -6,6 +6,10 @@
    Purpose: named regions, responsive containment, predictable overflow, and no readout overlap. */
 
 .live-glyph-panel.deep-observer-panel {
+  --deep-light-aura-alpha-cap: 1;
+  --deep-light-sensor-size-cap: 999px;
+  --deep-light-sensor-alpha-cap: 1;
+
   contain: layout paint;
 }
 
@@ -28,6 +32,7 @@
   --flare-alpha: 0.26;
   --flare-jitter: 0px;
   --flare-rot: 32deg;
+  --deep-light-aura-alpha: min(var(--flare-alpha), var(--deep-light-aura-alpha-cap));
 
   grid-area: stage;
   width: min(100%, 420px);
@@ -46,7 +51,7 @@
     radial-gradient(circle, hsla(var(--flare-hue), 76%, 78%, 0.16), transparent 58%),
     repeating-conic-gradient(
       from var(--flare-rot),
-      hsla(var(--flare-hue), 88%, 76%, var(--flare-alpha)) 0 calc(0.5turn / var(--n)),
+      hsla(var(--flare-hue), 88%, 76%, var(--deep-light-aura-alpha)) 0 calc(0.5turn / var(--n)),
       transparent 0 calc(1turn / var(--n))
     );
   filter:
@@ -105,6 +110,8 @@
   --sensor-alpha: 0.2;
   --sensor-jitter: 0px;
   --sensor-rot: 0deg;
+  --deep-light-sensor-size: min(var(--sensor-w), var(--deep-light-sensor-size-cap));
+  --deep-light-sensor-alpha: min(var(--sensor-alpha), var(--deep-light-sensor-alpha-cap));
 
   position: relative;
   overflow: hidden;
@@ -116,11 +123,11 @@
   position: absolute;
   right: -16px;
   top: -18px;
-  width: var(--sensor-w);
+  width: var(--deep-light-sensor-size);
   aspect-ratio: 1;
   border-radius: 50%;
   pointer-events: none;
-  opacity: calc(var(--sensor-alpha) * 0.72);
+  opacity: calc(var(--deep-light-sensor-alpha) * 0.72);
   z-index: 0;
   background:
     radial-gradient(circle, hsla(var(--sensor-hue), 82%, 78%, 0.18), transparent 58%),
@@ -146,10 +153,10 @@
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
-  background: hsla(var(--sensor-hue), 88%, 76%, calc(var(--sensor-alpha) * 0.9));
+  background: hsla(var(--sensor-hue), 88%, 76%, calc(var(--deep-light-sensor-alpha) * 0.9));
   box-shadow:
     0 0 0 1px hsla(var(--sensor-hue), 88%, 76%, 0.18),
-    0 0 12px hsla(var(--sensor-hue), 88%, 74%, calc(var(--sensor-alpha) * 0.45));
+    0 0 12px hsla(var(--sensor-hue), 88%, 74%, calc(var(--deep-light-sensor-alpha) * 0.45));
 }
 
 .live-glyph-panel .glyph-meter-grid > div > * {
