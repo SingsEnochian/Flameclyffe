@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './deep-observer.css';
 import { fetchBridgeDeepPulse } from './lib/deepBridge.js';
-import { buildStarburstVars } from './lib/deepStarburst.js';
+import { DEEP_SENSOR_CHIPS } from './lib/deepSensors.js';
+import { buildSensorStarburstVars, buildStarburstVars } from './lib/deepStarburst.js';
 import {
   DEFAULT_DEEP_STATE as BASE_DEEP_STATE,
   SKY_TINTS,
@@ -176,11 +177,51 @@ function buildLiveGlyph(now, touchCharge = 0, bridgeDeep = null, bridgeStatus = 
   const second = now.getSeconds();
   const minute = now.getMinutes();
   const hour = now.getHours();
+  const tide = TIDE_NAMES[hash % TIDE_NAMES.length];
   const math = buildMathFromState(deep);
   const auraVars = buildStarburstVars(auraDeep, {
     baseSize: 132 + auraDeep.A * 24 + auraDeep.R * 18,
     rotation: auraDeep.E * 18 + auraDeep.kp * 2.5,
   });
+  const sensorReadouts = [
+    {
+      sensor: DEEP_SENSOR_CHIPS[0],
+      value: tide,
+      detail: 'narrative tide',
+    },
+    {
+      sensor: DEEP_SENSOR_CHIPS[1],
+      value: `P ${deep.P.toFixed(2)} / A ${deep.A.toFixed(2)}`,
+      detail: 'nodes and glow alignment',
+    },
+    {
+      sensor: DEEP_SENSOR_CHIPS[2],
+      value: `C ${deep.C.toFixed(2)} / R ${deep.R.toFixed(2)}`,
+      detail: 'edges and harmonic motion',
+    },
+    {
+      sensor: DEEP_SENSOR_CHIPS[3],
+      value: `E ${deep.E.toFixed(2)} / Bz ${deep.bz.toFixed(1)}`,
+      detail: 'field wobble and colour temp',
+    },
+    {
+      sensor: DEEP_SENSOR_CHIPS[4],
+      value: `M ${deep.M.toFixed(2)} / moon ${deep.moonIllum.toFixed(0)}%`,
+      detail: 'spark traffic and rings',
+    },
+    {
+      sensor: DEEP_SENSOR_CHIPS[5],
+      value: `Kp ${deep.kp.toFixed(1)} / charge ${deep.charge.toFixed(2)}`,
+      detail: 'particle energy and centre light',
+    },
+  ].map(({ sensor, value, detail }) => ({
+    key: sensor.key,
+    label: sensor.label,
+    note: sensor.note,
+    value,
+    detail,
+    vars: buildSensorStarburstVars(auraDeep, sensor),
+  }));
   const rotation = (second * 6 * math.rotationMultiplier) % 360;
   const minuteRotation = (minute * 6 + math.bzDisturb * 18) % 360;
   const hourRotation = (((hour % 12) * 30) + minute / 2 + deep.M * 12) % 360;
@@ -203,11 +244,12 @@ function buildLiveGlyph(now, touchCharge = 0, bridgeDeep = null, bridgeStatus = 
     isoSecond,
     localTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
     localDate: now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
-    tide: TIDE_NAMES[hash % TIDE_NAMES.length],
+    tide,
     bridgeStatus,
     deep,
     math,
     auraVars,
+    sensorReadouts,
     rotation,
     minuteRotation,
     hourRotation,
@@ -606,30 +648,20 @@ export function LiveGlyphViewer({ now }) {
           </div>
 
           <div className="glyph-meter-grid" aria-label="Live DEEP qualities">
-            <div>
-              <strong>{glyph.tide}</strong>
-              <span>narrative tide</span>
-            </div>
-            <div>
-              <strong>P {glyph.deep.P.toFixed(2)} / A {glyph.deep.A.toFixed(2)}</strong>
-              <span>nodes and glow alignment</span>
-            </div>
-            <div>
-              <strong>C {glyph.deep.C.toFixed(2)} / R {glyph.deep.R.toFixed(2)}</strong>
-              <span>edges and harmonic motion</span>
-            </div>
-            <div>
-              <strong>E {glyph.deep.E.toFixed(2)} / Bz {glyph.deep.bz.toFixed(1)}</strong>
-              <span>field wobble and colour temp</span>
-            </div>
-            <div>
-              <strong>M {glyph.deep.M.toFixed(2)} / moon {glyph.deep.moonIllum.toFixed(0)}%</strong>
-              <span>spark traffic and rings</span>
-            </div>
-            <div>
-              <strong>Kp {glyph.deep.kp.toFixed(1)} / charge {glyph.deep.charge.toFixed(2)}</strong>
-              <span>particle energy and centre light</span>
-            </div>
+            {glyph.sensorReadouts.map((sensor) => (
+              <div
+                key={sensor.key}
+                data-starburst-native="sensor"
+                data-deep-sensor={sensor.key}
+                style={sensor.vars}
+                title={`${sensor.label}: ${sensor.note}`}
+                aria-label={`${sensor.label}. ${sensor.note}`}
+              >
+                <span className="deep-sensor-label">{sensor.label}</span>
+                <strong>{sensor.value}</strong>
+                <span>{sensor.detail}</span>
+              </div>
+            ))}
           </div>
 
           <p className="glyph-principle">
