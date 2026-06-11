@@ -1,6 +1,8 @@
 # STARWELL / DEEP Thread Ledger
 
-Status: living loom-card. Update this whenever a thread becomes load-bearing, retired, folded into React, or split into a new module.
+Status: living loom-card. Last audited 2026-06-11.
+
+Update this whenever a thread becomes load-bearing, retired, folded into React, or split into a new module.
 
 ## Purpose
 
@@ -12,35 +14,35 @@ The current rule: do not add another visual or data thread without deciding whic
 
 ### DEEP central aura
 
-Current state: live.
+Current state: live and React-native.
 
 Primary files:
 
 ```text
+apps/starwell/src/live-glyph.jsx
 apps/starwell/src/deep-observer-boundary.css
 apps/starwell/src/deep-starburst.css
-apps/starwell/src/deep-starburst-bind.js
 apps/starwell/src/lib/deepStarburst.js
 ```
 
-Responsibility: map DEEP state into a CSS starburst aura on `.glyph-orb-wrap`.
+Responsibility: map shared DEEP state into CSS starburst variables on `.glyph-orb-wrap`.
 
-Ownership note: currently applied by the transitional binder. Future React fold-in should use `data-starburst-native="aura"` and `buildStarburstVars`.
+Ownership note: `live-glyph.jsx` applies `buildStarburstVars(...)` directly and marks the wrapper with `data-starburst-native="aura"`. The retired binder is no longer part of the live path.
 
 ### DEEP sensor-chip flares
 
-Current state: live.
+Current state: live and React-native.
 
 Primary files:
 
 ```text
+apps/starwell/src/live-glyph.jsx
 apps/starwell/src/deep-observer-boundary.css
-apps/starwell/src/deep-starburst-bind.js
 apps/starwell/src/lib/deepSensors.js
 apps/starwell/src/lib/deepStarburst.js
 ```
 
-Responsibility: give each meter chip a clipped starburst flare, tiny status bead, label, tooltip, and shared sensor meaning.
+Responsibility: give each meter chip a clipped starburst flare, tiny status bead, label, tooltip, ARIA note, and shared sensor meaning.
 
 Canonical sensor names:
 
@@ -53,7 +55,7 @@ Moon
 Geomagnetic
 ```
 
-Ownership note: the six-chip grammar belongs in `deepSensors.js`. Do not duplicate it in another file.
+Ownership note: `live-glyph.jsx` renders the six chips from `DEEP_SENSOR_CHIPS`, applies `buildSensorStarburstVars(...)`, and marks each card with `data-starburst-native="sensor"`. The six-chip grammar belongs in `deepSensors.js`. Do not duplicate it in another file.
 
 ### Mobile pocket-observatory mode
 
@@ -74,7 +76,7 @@ Ownership note: mobile overrides intentionally load last from `index.html`. Do n
 
 ### DEEP state pantry
 
-Current state: shared module.
+Current state: shared module and live React dependency.
 
 Primary file:
 
@@ -96,11 +98,11 @@ normaliseDeepState
 makeDeepSignature
 ```
 
-Rule: DEEP defaults, bridge extraction, sky clarity, moon normalisation, and signatures should live here rather than being redefined in binders, visual components, or future React modules.
+Rule: DEEP defaults, bridge extraction, sky clarity, moon normalisation, and signatures live here rather than being redefined in binders or visual components.
 
 ### DEEP bridge reader
 
-Current state: shared module.
+Current state: shared module and live React dependency.
 
 Primary file:
 
@@ -115,11 +117,11 @@ BRIDGE_PULSE_URL
 fetchBridgeDeepPulse
 ```
 
-Rule: bridge pulse fetch logic belongs here. Callers may handle fallback behaviour, but they should not reimplement the bridge fetch ritual.
+Rule: bridge pulse fetch logic belongs here. Callers may handle live, stale, and fallback state, but they should not reimplement the bridge fetch ritual.
 
 ### DEEP starburst mapper
 
-Current state: shared module.
+Current state: shared module and live React dependency.
 
 Primary file:
 
@@ -136,11 +138,11 @@ buildSensorStarburstVars
 buildSensorStarbursts
 ```
 
-Rule: aura and sensor flare CSS variables should be built here. Do not duplicate the variable-building logic in the binder or React components.
+Rule: aura and sensor flare CSS variables are built here. Do not duplicate the variable-building logic in React components or fallback adapters.
 
 ### DEEP sensor grammar
 
-Current state: shared module.
+Current state: shared module and live React dependency.
 
 Primary file:
 
@@ -211,11 +213,11 @@ recalculate on resize, orientation change, DOM mutation, and ResizeObserver even
 
 Rule: flexible HUD measurement, safe bounds, avoid zones, snap zones, default panel zones, and panel clamping belong here. No hardcoded coffin-coordinates. No live HUD furniture. No sound. No haptics. No React state mutation. The binding layer is active, but it is passive infrastructure only.
 
-## Transitional thread
+## Retired but retained thread
 
 ### Starburst binder
 
-Current state: transitional adapter.
+Current state: retained in the repository as a rollback reference, retired from the STARWELL live load path.
 
 Primary file:
 
@@ -223,7 +225,7 @@ Primary file:
 apps/starwell/src/deep-starburst-bind.js
 ```
 
-Current role:
+Historical role:
 
 ```text
 fetch bridge pulse through deepBridge.js
@@ -234,25 +236,19 @@ respect native React handoff markers
 clean up timers and observers on pagehide
 ```
 
-What it no longer owns:
+Current ownership:
 
 ```text
-readout text scraping
-bridge fetch implementation
-DEEP normalisation
-sensor definitions
-sensor flare variable construction
+live-glyph.jsx owns bridge polling and live/stale/fallback status
+live-glyph.jsx owns aura variables and data-starburst-native="aura"
+live-glyph.jsx owns sensor labels, notes, variables, and data-starburst-native="sensor"
+deepStarburst.js owns aura and sensor variable construction
+deepSensors.js owns the six-chip grammar
 ```
 
-Handoff markers:
+Live-path note: `apps/starwell/index.html` no longer loads `deep-starburst-bind.js`.
 
-```text
-data-starburst-native="aura"
-data-starburst-native="sensor"
-data-starburst-native="true"
-```
-
-Retirement condition: remove this binder only after React owns both aura variables and sensor-chip variables/labels.
+Retention rule: keep the file available until visual QA confirms aura and sensor parity across target viewports. Do not delete it without a separate cleanup decision.
 
 ## Dormant / static HUD threads
 
@@ -303,7 +299,7 @@ Primary file:
 docs/deep-starburst-binding.md
 ```
 
-Responsibility: records the current binder path, shared modules, handoff markers, and React fold-in target.
+Responsibility: records the completed React ownership path, shared modules, native markers, retired binder status, and rollback conditions.
 
 ### UI boundary contract
 
@@ -345,6 +341,24 @@ docs/starwell-viewport-hud-wrapper-contract.md
 
 Responsibility: defines the STARWELL viewport root, Observer instrument shell, glyph stage, readout rail, active empty HUD overlay layer socket, bounds model, default panel positions, snap zones, mobile rules, sensory gates, `deepHudBounds.js` scope, and passive bounds binding layer.
 
+## Completed ownership transition
+
+All four implementation commits were deployed green on 2026-06-11:
+
+```text
+19e5835f72dbddf93f38176ea7fa001013c3fa80
+Consolidate live glyph DEEP bridge state helpers
+
+d28234e72baa59bd76f217acbf74d3575192ce1d
+Hand off DEEP aura starburst to React
+
+0d31ff68d365d5873c35c5ffc1f9f86321dd7ced
+Hand off DEEP sensor chips to React
+
+8cc429379a89e3e25966ca7e7ec2d95948f7ff62
+Retire transitional DEEP starburst binder from STARWELL
+```
+
 ## Parallel threads to watch
 
 These may change while DEEP visual work is ongoing:
@@ -378,14 +392,12 @@ Add to the shared modules or explicitly bridge the static HUD files instead.
 
 ## Next safe moves
 
-1. Visual QA at mobile, tablet, laptop, and wide widths.
-2. Use `apps/starwell/src/lib/deepHudBounds.js` and the active passive bounds binder for STARWELL-native floating HUD measurement and clamp logic.
+1. Perform visual QA at mobile, tablet, laptop, and wide widths.
+2. Confirm aura and sensor parity in live, stale, and quiet-fallback bridge states.
 3. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
-4. Add HUD furniture only after it can consume the measured bounds, live inside the empty HUD layer, and respect mobile docking.
-5. Fold aura variables into React using `buildStarburstVars` and `data-starburst-native="aura"`.
-6. Fold sensor-chip labels and flare variables into React using `deepSensors.js` and `buildSensorStarburstVars`.
-7. Remove `deep-starburst-bind.js` and its script tag only after both native paths are live and deployed green.
-8. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
+4. Add HUD furniture only after it can consume measured bounds, live inside the empty HUD layer, and respect mobile docking.
+5. Consider deleting the retired binder only after parity QA and a separate explicit cleanup approval.
+6. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
 
 ## Working mantra
 
