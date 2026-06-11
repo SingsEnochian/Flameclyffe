@@ -5,6 +5,10 @@
 
 @media (max-width: 720px) {
   .live-glyph-panel.deep-observer-panel {
+    --deep-light-aura-alpha-cap: 0.22;
+    --deep-light-sensor-size-cap: 44px;
+    --deep-light-sensor-alpha-cap: 0.18;
+
     padding: clamp(0.8rem, 4vw, 1rem) !important;
     border-radius: 24px !important;
   }
@@ -24,7 +28,6 @@
   }
 
   .live-glyph-panel .glyph-orb-wrap {
-    --flare-alpha: min(var(--flare-alpha), 0.22);
     width: min(100%, 292px) !important;
   }
 
@@ -58,8 +61,6 @@
   }
 
   .live-glyph-panel .glyph-meter-grid > div {
-    --sensor-w: min(var(--sensor-w), 44px);
-    --sensor-alpha: min(var(--sensor-alpha), 0.18);
     min-height: 0;
     padding: 0.54rem 0.64rem !important;
     border-radius: 14px !important;
@@ -68,7 +69,7 @@
   .live-glyph-panel .glyph-meter-grid > div::before {
     right: -10px;
     top: -12px;
-    opacity: calc(var(--sensor-alpha) * 0.5);
+    opacity: calc(var(--deep-light-sensor-alpha) * 0.5);
     filter: drop-shadow(0 0 8px hsla(var(--sensor-hue), 88%, 74%, 0.12));
   }
 
