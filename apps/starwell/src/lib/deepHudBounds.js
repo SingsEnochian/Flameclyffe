@@ -33,6 +33,16 @@ export const DEFAULT_PANEL_POSITIONS = {
   controls: 'bottom-rail',
 };
 
+export const DEFAULT_HUD_FALLBACK_ZONES = [
+  'bottom-rail',
+  'top-right',
+  'top-left',
+  'bottom-right',
+  'bottom-left',
+  'right-rail',
+  'left-rail',
+];
+
 function hasDomRectShape(value) {
   return value && ['left', 'top', 'right', 'bottom', 'width', 'height'].every((key) => Number.isFinite(Number(value[key])));
 }
@@ -117,8 +127,8 @@ export function getViewportRect(viewport = {}) {
   return makeRect(0, 0, width, height);
 }
 
-export function getAvoidRects({ stageRect = null, extraAvoidRects = [] } = {}) {
-  return [stageRect, ...extraAvoidRects]
+export function getAvoidRects({ stageRect = null, readoutRect = null, extraAvoidRects = [] } = {}) {
+  return [stageRect, readoutRect, ...extraAvoidRects]
     .map((rect) => toHudRect(rect))
     .filter(Boolean);
 }
@@ -142,7 +152,7 @@ export function measureHudBounds({
   const viewportClass = getHudViewportClass(shellRect.width || viewportRect.width, breakpoints);
   const inset = getHudInset(viewportClass, insets);
   const safeRect = insetRect(shellRect, inset);
-  const avoidRects = getAvoidRects({ stageRect, extraAvoidRects });
+  const avoidRects = getAvoidRects({ stageRect, readoutRect, extraAvoidRects });
 
   return {
     viewportClass,
@@ -242,13 +252,42 @@ export function panelIntersectsRect(panelPosition = {}, panelSize = DEFAULT_PANE
   return !(panel.right <= target.left || panel.left >= target.right || panel.bottom <= target.top || panel.top >= target.bottom);
 }
 
-export function avoidRectsForDefaultPosition(panelKey, panelSize, bounds = {}, fallbackZone = 'bottom-rail') {
-  const initial = getDefaultPanelPosition(panelKey, panelSize, bounds);
-  const intersects = (bounds.avoidRects || []).some((rect) => panelIntersectsRect(initial, panelSize, rect));
+function normaliseFallbackZones(fallbackZones) {
+  const source = Array.isArray(fallbackZones) ? fallbackZones : [fallbackZones];
+  return source.filter((zone) => typeof zone === 'string' && zone.length > 0);
+}
 
-  if (!intersects) return initial;
+function panelIntersectsAvoidRects(position, panelSize, bounds) {
+  return (bounds.avoidRects || []).some((rect) => panelIntersectsRect(position, panelSize, rect));
+}
+
+export function avoidRectsForDefaultPosition(
+  panelKey,
+  panelSize,
+  bounds = {},
+  fallbackZones = DEFAULT_HUD_FALLBACK_ZONES,
+) {
+  const initial = getDefaultPanelPosition(panelKey, panelSize, bounds);
+  const candidateZones = [...new Set([initial.zone, ...normaliseFallbackZones(fallbackZones)])];
+
+  for (let index = 0; index < candidateZones.length; index += 1) {
+    const zone = candidateZones[index];
+    const candidate = zone === initial.zone
+      ? initial
+      : { zone, ...positionPanelInZone(zone, panelSize, bounds) };
+
+    if (!panelIntersectsAvoidRects(candidate, panelSize, bounds)) {
+      return {
+        ...candidate,
+        blocked: false,
+        attemptedZones: candidateZones.slice(0, index + 1),
+      };
+    }
+  }
+
   return {
-    zone: fallbackZone,
-    ...positionPanelInZone(fallbackZone, panelSize, bounds),
+    ...initial,
+    blocked: true,
+    attemptedZones: candidateZones,
   };
 }
