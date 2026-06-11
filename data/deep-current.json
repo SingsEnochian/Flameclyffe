@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-11T21:59:31.526Z",
+  "generated_at": "2026-06-11T23:44:22.361Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-11T17:45",
+    "time": "2026-06-11T19:30",
     "sky": "Day",
     "current": {
-      "time": "2026-06-11T17:45",
+      "time": "2026-06-11T19:30",
       "interval": 900,
-      "temperature_2m": 85.7,
-      "relative_humidity_2m": 62,
+      "temperature_2m": 82.7,
+      "relative_humidity_2m": 74,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
       "cloud_cover": 0,
-      "pressure_msl": 1015.1,
-      "wind_speed_10m": 10.1,
-      "wind_direction_10m": 127
+      "pressure_msl": 1015.4,
+      "wind_speed_10m": 9.3,
+      "wind_direction_10m": 138
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 48
     },
     "solar_wind": {
-      "time_tag": "2026-06-11 21:55:00.000",
-      "bz": 7.73,
-      "bt": 12,
-      "density": 12.83,
-      "speed": 492.6
+      "time_tag": "2026-06-11 23:40:00.000",
+      "bz": 2.5,
+      "bt": 12.07,
+      "density": 13.62,
+      "speed": 502
     }
   },
   "moon": {
-    "age_days": 26.18,
-    "illumination": 12.1,
+    "age_days": 26.26,
+    "illumination": 11.6,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.5433333333333336,
+    "P": 0.5466666666666664,
     "C": 0.62,
-    "R": 1,
-    "E": 0.8356043956043957,
-    "M": 0.121,
+    "R": 0.9433333333333334,
+    "E": 0.8817582417582417,
+    "M": 0.11599999999999999,
     "A": 0.9846153846153847,
-    "T": 0.7119613186813187,
-    "H": 1,
-    "dpdt": 1
+    "T": 0.6928661825396825,
+    "H": 0.9480255799755799,
+    "dpdt": 0.9433333333333334
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
