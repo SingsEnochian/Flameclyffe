@@ -67,7 +67,10 @@ def draw_field(
 
     # Let older light decay according to viscosity rather than vanishing each frame.
     decay = round(210 + ((1.0 - controls.viscosity) * 35))
-    trail_surface.fill((decay, decay, decay, decay), special_flags=pygame.BLEND_RGBA_MULT)
+    trail_surface.fill(
+        (decay, decay, decay, decay),
+        special_flags=pygame.BLEND_RGBA_MULT,
+    )
 
     pixel_nodes = [
         (round(node.x * WIDTH), round(node.y * HEIGHT), node)
@@ -85,21 +88,41 @@ def draw_field(
 
             proximity = 1.0 - (distance / link_distance_px)
             alpha = round(70 * proximity * controls.coherence)
-            colour = node_colour((first.hue_shift + second.hue_shift) / 2.0, proximity)
-            pygame.draw.line(glow, (*colour, alpha), (x1, y1), (x2, y2), width=1)
+            colour = node_colour(
+                (first.hue_shift + second.hue_shift) / 2.0,
+                proximity,
+            )
+            pygame.draw.line(
+                glow,
+                (*colour, alpha),
+                (x1, y1),
+                (x2, y2),
+                width=1,
+            )
 
     for x, y, node in pixel_nodes:
         colour = node_colour(node.hue_shift, node.energy)
         radius = max(3, round(node.radius * min(WIDTH, HEIGHT)))
 
         # Concentric additive halos create a soft, viscous light body.
-        for multiplier, alpha_scale in ((4.2, 0.08), (2.8, 0.14), (1.8, 0.24), (1.0, 0.78)):
+        halo_layers = (
+            (4.2, 0.08),
+            (2.8, 0.14),
+            (1.8, 0.24),
+            (1.0, 0.78),
+        )
+        for multiplier, alpha_scale in halo_layers:
             halo_radius = max(1, round(radius * multiplier))
             alpha = round(255 * alpha_scale * node.energy)
             pygame.draw.circle(glow, (*colour, alpha), (x, y), halo_radius)
 
         core_colour = tuple(lerp(colour[i], IVORY[i], 0.62) for i in range(3))
-        pygame.draw.circle(glow, (*core_colour, round(220 * node.energy)), (x, y), max(2, radius // 2))
+        pygame.draw.circle(
+            glow,
+            (*core_colour, round(220 * node.energy)),
+            (x, y),
+            max(2, radius // 2),
+        )
 
     trail_surface.blit(glow, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
     screen.blit(trail_surface, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
@@ -115,7 +138,13 @@ def draw_hud(
 ) -> None:
     panel = pygame.Surface((425, 150), pygame.SRCALPHA)
     panel.fill((3, 25, 19, 218))
-    pygame.draw.rect(panel, (*GOLD, 105), panel.get_rect(), width=1, border_radius=18)
+    pygame.draw.rect(
+        panel,
+        (*GOLD, 105),
+        panel.get_rect(),
+        width=1,
+        border_radius=18,
+    )
 
     title = font.render("LIQUID LIGHT LABORATORY", True, GOLD)
     panel.blit(title, (18, 14))
@@ -128,16 +157,24 @@ def draw_hud(
     for row, text in enumerate(values):
         panel.blit(small_font.render(text, True, IVORY), (18, 48 + (row * 22)))
 
-    state = f"{'PAUSED' if paused else 'FLOWING'} · pointer {'ON' if pointer_enabled else 'OFF'}"
+    flow_state = "PAUSED" if paused else "FLOWING"
+    pointer_state = "ON" if pointer_enabled else "OFF"
+    state = f"{flow_state} · pointer {pointer_state}"
     panel.blit(small_font.render(state, True, EMERALD), (18, 118))
     screen.blit(panel, (18, 18))
 
-    help_text = "A/Z coherence · S/X resonance · D/C entropy · F/V viscosity · G/B brightness · M pointer · SPACE pause · P capture"
+    help_text = (
+        "A/Z coherence · S/X resonance · D/C entropy · F/V viscosity · "
+        "G/B brightness · M pointer · SPACE pause · P capture"
+    )
     help_surface = small_font.render(help_text, True, (190, 204, 196))
     screen.blit(help_surface, (18, HEIGHT - 30))
 
 
-def adjusted(controls: LiquidLightControls, **changes: float | int | Point2D | None) -> LiquidLightControls:
+def adjusted(
+    controls: LiquidLightControls,
+    **changes: float | int | Point2D | None,
+) -> LiquidLightControls:
     payload = controls.model_dump()
     payload.update(changes)
     return LiquidLightControls.model_validate(payload)
