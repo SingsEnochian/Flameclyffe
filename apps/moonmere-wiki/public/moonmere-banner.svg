@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 900" role="img" aria-labelledby="title desc">
+  <title id="title">Moonmere Archive banner</title>
+  <desc id="desc">An emerald forest surrounds a gold-lit moon gate reflected in dark water beneath three moons.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#03110d"/><stop offset="0.55" stop-color="#0a2c20"/><stop offset="1" stop-color="#07120f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="45%" r="45%">
+      <stop offset="0" stop-color="#fff1bd" stop-opacity=".95"/><stop offset=".28" stop-color="#d8bd7c" stop-opacity=".45"/><stop offset="1" stop-color="#216348" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#123c2c"/><stop offset="1" stop-color="#020a08"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="moon"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <rect width="2400" height="900" fill="url(#sky)"/>
+  <rect width="2400" height="900" fill="url(#glow)"/>
+  <g fill="#174936" opacity=".95">
+    <path d="M0 530C160 350 280 295 430 325c120 24 170 132 280 130 90-2 120-92 210-105 75-11 125 28 180 75V900H0z"/>
+    <path d="M2400 530c-160-180-280-235-430-205-120 24-170 132-280 130-90-2-120-92-210-105-75-11-125 28-180 75v475h1100z"/>
+  </g>
+  <g fill="#061812">
+    <path d="M0 650c180-80 285-35 420-105 100-52 175-155 290-125 80 21 125 120 220 122 103 2 158-93 270-66v424H0z"/>
+    <path d="M2400 650c-180-80-285-35-420-105-100-52-175-155-290-125-80 21-125 120-220 122-103 2-158-93-270-66v424h1200z"/>
+  </g>
+  <g stroke="#708b67" stroke-width="15" fill="none" opacity=".5">
+    <path d="M65 0c40 180-30 315-12 490M180 0c-55 160 15 280-10 460M2335 0c-40 180 30 315 12 490M2220 0c55 160-15 280 10 460"/>
+  </g>
+  <g fill="#ead8a8" stroke="#d8bd7c" stroke-width="5" filter="url(#moon)">
+    <circle cx="1200" cy="180" r="92"/><circle cx="1000" cy="265" r="67" opacity=".8"/><circle cx="1400" cy="265" r="67" opacity=".8"/>
+  </g>
+  <g stroke="#d8bd7c" fill="none" opacity=".75">
+    <circle cx="1200" cy="220" r="230" stroke-width="4"/><circle cx="1200" cy="220" r="320" stroke-width="2"/>
+    <path d="M880 220h640M1200 0v455" stroke-width="2"/>
+  </g>
+  <ellipse cx="1200" cy="600" rx="480" ry="220" fill="#d8bd7c" opacity=".12" filter="url(#soft)"/>
+  <g stroke="#d8bd7c" fill="#0b231a" stroke-linejoin="round">
+    <path d="M1020 600V370h95v230M1380 600V370h-95v230" stroke-width="18"/>
+    <path d="M1100 600V430q100-145 200 0v170" stroke-width="16"/>
+    <path d="M1060 370l140-125 140 125" stroke-width="12"/>
+    <path d="M1145 600V455q55-90 110 0v145" fill="#fff1bd" fill-opacity=".28" stroke-width="10"/>
+  </g>
+  <rect y="610" width="2400" height="290" fill="url(#water)"/>
+  <g stroke="#c6a15b" fill="none" opacity=".5">
+    <ellipse cx="1200" cy="675" rx="320" ry="54" stroke-width="5"/><ellipse cx="1200" cy="712" rx="500" ry="80" stroke-width="3"/><ellipse cx="1200" cy="770" rx="720" ry="105" stroke-width="2"/>
+    <path d="M1200 610v250" stroke-width="8" opacity=".35"/>
+  </g>
+  <g fill="#081611" stroke="#c6a15b" stroke-width="5" opacity=".9">
+    <path d="M245 465c75-90 180-88 250 5-55-25-86-20-135 20-42-38-68-44-115-25z"/>
+    <path d="M2155 465c-75-90-180-88-250 5 55-25 86-20 135 20 42-38 68-44 115-25z"/>
+  </g>
+  <g fill="#d8bd7c">
+    <circle cx="380" cy="560" r="5"/><circle cx="530" cy="430" r="4"/><circle cx="760" cy="340" r="4"/><circle cx="2020" cy="560" r="5"/><circle cx="1870" cy="430" r="4"/><circle cx="1640" cy="340" r="4"/>
+  </g>
+</svg>

@@ -1,0 +1,19 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Moonmere placeholder</title>
+  <desc id="desc">An open golden ring above a dark emerald lake with reeds.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0" stop-color="#174936"/>
+      <stop offset="1" stop-color="#061812"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#EAD8A8"/>
+      <stop offset="1" stop-color="#AD8743"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <circle cx="600" cy="360" r="205" fill="none" stroke="url(#gold)" stroke-width="9" stroke-dasharray="1110 180" stroke-linecap="round"/>
+  <path d="M210 650 Q600 560 990 650 Q600 740 210 650Z" fill="none" stroke="#D8BD7C" stroke-width="5" opacity=".75"/>
+  <path d="M345 710 Q365 610 390 520 M420 720 Q420 600 460 505 M855 710 Q835 610 810 520 M780 720 Q780 600 740 505" stroke="#708B67" stroke-width="11" stroke-linecap="round" fill="none" opacity=".85"/>
+  <circle cx="600" cy="360" r="36" fill="#FFFaf0" opacity=".92"/>
+</svg>
