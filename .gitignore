@@ -10,6 +10,31 @@ publish/
 .env.*
 !.env.example
 
+# Python environments, caches, and coverage
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+
+# ML models, datasets, and generated artefacts
+ml-lab/artifacts/
+ml-lab/checkpoints/
+ml-lab/data/private/
+ml-lab/data/restricted/
+ml-lab/liquid-light-capture.png
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.safetensors
+
 # Observer DEEP private local input/output
 sandbox/observer-deep/raw/
 sandbox/observer-deep/out/
