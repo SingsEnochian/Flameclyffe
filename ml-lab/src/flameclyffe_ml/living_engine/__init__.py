@@ -2,13 +2,13 @@
 
 from .field import generate_liquid_light_snapshot
 from .models import (
+    SCHEMA_VERSION,
     HealthResponse,
     LiquidLightControls,
     LiquidLightFrameRequest,
     LiquidLightNode,
     LiquidLightSnapshot,
     Point2D,
-    SCHEMA_VERSION,
 )
 
 __all__ = [
