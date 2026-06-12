@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-12T22:05:35.808Z",
+  "generated_at": "2026-06-12T23:59:00.626Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-12T18:00",
+    "time": "2026-06-12T19:45",
     "sky": "Day",
     "current": {
-      "time": "2026-06-12T18:00",
+      "time": "2026-06-12T19:45",
       "interval": 900,
-      "temperature_2m": 88,
-      "relative_humidity_2m": 63,
+      "temperature_2m": 85.4,
+      "relative_humidity_2m": 69,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 2,
-      "cloud_cover": 73,
-      "pressure_msl": 1014.2,
-      "wind_speed_10m": 8.9,
-      "wind_direction_10m": 118
+      "weather_code": 1,
+      "cloud_cover": 27,
+      "pressure_msl": 1015,
+      "wind_speed_10m": 8.4,
+      "wind_direction_10m": 138
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 7
     },
     "solar_wind": {
-      "time_tag": "2026-06-12 22:01:00.000",
-      "bz": -3.78,
-      "bt": 5.38,
-      "density": 0.18,
+      "time_tag": "2026-06-12 23:55:00.000",
+      "bz": -1.08,
+      "bt": 4.48,
+      "density": 0.2,
       "speed": 507.7
     }
   },
   "moon": {
-    "age_days": 27.19,
-    "illumination": 6.1,
+    "age_days": 27.27,
+    "illumination": 5.7,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.5333333333333339,
-    "C": 0.38238095238095243,
-    "R": 0.9670166666666667,
-    "E": 0.7196648351648351,
-    "M": 0.061,
-    "A": 0.7038461538461538,
-    "T": 0.6013685117338218,
-    "H": 0.6704907777777778,
-    "dpdt": 0.9670166666666667
+    "P": 0.5422222222222223,
+    "C": 0.6014285714285714,
+    "R": 0.9046833333333333,
+    "E": 0.6752417582417581,
+    "M": 0.057,
+    "A": 0.8807692307692307,
+    "T": 0.6595822835286935,
+    "H": 0.6961672979242978,
+    "dpdt": 0.9046833333333333
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
