@@ -1,0 +1,624 @@
+:root {
+  --sw-void: #0c1024;
+  --sw-deep: #17152a;
+  --sw-surface: rgba(35, 29, 54, 0.88);
+  --sw-surface-strong: rgba(22, 18, 36, 0.96);
+  --sw-surface-soft: rgba(76, 54, 62, 0.56);
+  --sw-text: #f2eadc;
+  --sw-muted: #c2b8b2;
+  --sw-metal: #c77b4e;
+  --sw-metal-bright: #e0aa61;
+  --sw-metal-pale: #f2d39a;
+  --sw-accent: #70829d;
+  --sw-accent-bright: #9cb2c8;
+  --sw-line: rgba(224, 170, 97, 0.34);
+  --sw-line-strong: rgba(224, 170, 97, 0.68);
+  --sw-shadow: rgba(1, 3, 8, 0.72);
+  --sw-glow: rgba(156, 178, 200, 0.22);
+  --sw-wallpaper:
+    radial-gradient(circle at 15% 8%, rgba(116, 95, 143, 0.3), transparent 26rem),
+    radial-gradient(circle at 84% 18%, rgba(191, 104, 64, 0.22), transparent 29rem),
+    linear-gradient(145deg, #0c1024 0%, #211a32 47%, #32211f 100%);
+  --sw-panel-grain:
+    repeating-linear-gradient(95deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 8px),
+    radial-gradient(ellipse at 30% -20%, rgba(255,255,255,0.07), transparent 48%);
+}
+
+html[data-stonewood-theme='stonewood-obsidian'] {
+  --sw-void: #010806;
+  --sw-deep: #071713;
+  --sw-surface: rgba(8, 26, 22, 0.9);
+  --sw-surface-strong: rgba(3, 14, 11, 0.97);
+  --sw-surface-soft: rgba(20, 48, 41, 0.58);
+  --sw-text: #e4ece8;
+  --sw-muted: #a8b6b0;
+  --sw-metal: #a88b4e;
+  --sw-metal-bright: #d2b465;
+  --sw-metal-pale: #e7d49d;
+  --sw-accent: #738681;
+  --sw-accent-bright: #b9c7c2;
+  --sw-line: rgba(210, 180, 101, 0.27);
+  --sw-line-strong: rgba(210, 180, 101, 0.58);
+  --sw-shadow: rgba(0, 0, 0, 0.82);
+  --sw-glow: rgba(185, 199, 194, 0.14);
+  --sw-wallpaper:
+    radial-gradient(circle at 22% 8%, rgba(74, 113, 101, 0.15), transparent 26rem),
+    radial-gradient(circle at 82% 20%, rgba(173, 143, 71, 0.1), transparent 24rem),
+    linear-gradient(145deg, #010403 0%, #06120f 52%, #0a1814 100%);
+}
+
+html[data-stonewood-theme='stonewood-twilight'] {
+  --sw-void: #0c1024;
+  --sw-deep: #17152a;
+  --sw-surface: rgba(35, 29, 54, 0.88);
+  --sw-surface-strong: rgba(22, 18, 36, 0.96);
+  --sw-surface-soft: rgba(76, 54, 62, 0.56);
+  --sw-text: #f2eadc;
+  --sw-muted: #c2b8b2;
+  --sw-metal: #c77b4e;
+  --sw-metal-bright: #e0aa61;
+  --sw-metal-pale: #f2d39a;
+  --sw-accent: #70829d;
+  --sw-accent-bright: #9cb2c8;
+  --sw-line: rgba(224, 170, 97, 0.34);
+  --sw-line-strong: rgba(224, 170, 97, 0.68);
+  --sw-shadow: rgba(1, 3, 8, 0.72);
+  --sw-glow: rgba(156, 178, 200, 0.22);
+  --sw-wallpaper:
+    radial-gradient(circle at 15% 8%, rgba(116, 95, 143, 0.3), transparent 26rem),
+    radial-gradient(circle at 84% 18%, rgba(191, 104, 64, 0.22), transparent 29rem),
+    linear-gradient(145deg, #0c1024 0%, #211a32 47%, #32211f 100%);
+}
+
+html[data-stonewood-theme='stonewood-copper'] {
+  --sw-void: #120c09;
+  --sw-deep: #211710;
+  --sw-surface: rgba(40, 31, 24, 0.9);
+  --sw-surface-strong: rgba(24, 17, 13, 0.97);
+  --sw-surface-soft: rgba(67, 64, 47, 0.58);
+  --sw-text: #f3e8d7;
+  --sw-muted: #c8b8a5;
+  --sw-metal: #9b5435;
+  --sw-metal-bright: #d28b55;
+  --sw-metal-pale: #e9bd7a;
+  --sw-accent: #52684f;
+  --sw-accent-bright: #82987e;
+  --sw-line: rgba(210, 139, 85, 0.34);
+  --sw-line-strong: rgba(233, 189, 122, 0.68);
+  --sw-shadow: rgba(9, 4, 1, 0.74);
+  --sw-glow: rgba(224, 179, 109, 0.22);
+  --sw-wallpaper:
+    radial-gradient(circle at 20% 6%, rgba(118, 135, 90, 0.2), transparent 24rem),
+    radial-gradient(circle at 82% 17%, rgba(189, 92, 49, 0.29), transparent 28rem),
+    linear-gradient(145deg, #110b08 0%, #2b2118 47%, #344033 100%);
+}
+
+html[data-stonewood-theme='stonewood-moonstone'] {
+  --sw-void: #cbd6d4;
+  --sw-deep: #dce5e2;
+  --sw-surface: rgba(241, 244, 238, 0.88);
+  --sw-surface-strong: rgba(230, 237, 234, 0.97);
+  --sw-surface-soft: rgba(174, 191, 194, 0.44);
+  --sw-text: #233036;
+  --sw-muted: #5f6e73;
+  --sw-metal: #9b8148;
+  --sw-metal-bright: #c1a562;
+  --sw-metal-pale: #e5d29b;
+  --sw-accent: #667e8f;
+  --sw-accent-bright: #89a6b5;
+  --sw-line: rgba(111, 96, 60, 0.28);
+  --sw-line-strong: rgba(155, 129, 72, 0.56);
+  --sw-shadow: rgba(31, 49, 55, 0.22);
+  --sw-glow: rgba(255, 255, 255, 0.62);
+  --sw-wallpaper:
+    radial-gradient(circle at 20% 8%, rgba(255,255,255,0.82), transparent 25rem),
+    radial-gradient(circle at 80% 16%, rgba(102,126,143,0.24), transparent 30rem),
+    linear-gradient(145deg, #dbe4e1 0%, #b8c9cb 48%, #e8dfc9 100%);
+}
+
+html[data-stonewood-theme='stonewood-verdigris'] {
+  --sw-void: #03110f;
+  --sw-deep: #08251f;
+  --sw-surface: rgba(10, 47, 40, 0.9);
+  --sw-surface-strong: rgba(4, 28, 24, 0.97);
+  --sw-surface-soft: rgba(28, 84, 74, 0.58);
+  --sw-text: #e5eee8;
+  --sw-muted: #afc2bb;
+  --sw-metal: #aa783f;
+  --sw-metal-bright: #c69a4b;
+  --sw-metal-pale: #e2c17a;
+  --sw-accent: #3f8f82;
+  --sw-accent-bright: #76b7aa;
+  --sw-line: rgba(198, 154, 75, 0.32);
+  --sw-line-strong: rgba(226, 193, 122, 0.64);
+  --sw-shadow: rgba(0, 7, 5, 0.78);
+  --sw-glow: rgba(63, 143, 130, 0.27);
+  --sw-wallpaper:
+    radial-gradient(circle at 18% 8%, rgba(63,143,130,0.28), transparent 26rem),
+    radial-gradient(circle at 84% 18%, rgba(198,154,75,0.18), transparent 27rem),
+    linear-gradient(145deg, #03110f 0%, #0a3029 48%, #183e36 100%);
+}
+
+html[data-stonewood-theme='stonewood-starless'] {
+  --sw-void: #000100;
+  --sw-deep: #020403;
+  --sw-surface: rgba(4, 7, 6, 0.94);
+  --sw-surface-strong: rgba(1, 3, 2, 0.99);
+  --sw-surface-soft: rgba(16, 24, 21, 0.6);
+  --sw-text: #c9d0cd;
+  --sw-muted: #7e8985;
+  --sw-metal: #6f613c;
+  --sw-metal-bright: #93804c;
+  --sw-metal-pale: #b39e68;
+  --sw-accent: #293532;
+  --sw-accent-bright: #51625d;
+  --sw-line: rgba(143, 122, 71, 0.2);
+  --sw-line-strong: rgba(143, 122, 71, 0.4);
+  --sw-shadow: rgba(0, 0, 0, 0.94);
+  --sw-glow: rgba(91, 110, 103, 0.08);
+  --sw-wallpaper: linear-gradient(145deg, #000100 0%, #020403 50%, #050807 100%);
+}
+
+html[data-stonewood-theme='emerald-reliquary'] {
+  --sw-void: #020b08;
+  --sw-deep: #071e18;
+  --sw-surface: rgba(8, 42, 33, 0.9);
+  --sw-surface-strong: rgba(3, 23, 18, 0.97);
+  --sw-surface-soft: rgba(13, 59, 46, 0.62);
+  --sw-text: #f3ebdd;
+  --sw-muted: #c8c0ad;
+  --sw-metal: #b88a2d;
+  --sw-metal-bright: #d6b55a;
+  --sw-metal-pale: #f0d98a;
+  --sw-accent: #176b4a;
+  --sw-accent-bright: #3a9a6b;
+  --sw-line: rgba(214, 181, 90, 0.36);
+  --sw-line-strong: rgba(240, 217, 138, 0.7);
+  --sw-shadow: rgba(0, 5, 3, 0.82);
+  --sw-glow: rgba(58, 154, 107, 0.22);
+  --sw-wallpaper:
+    radial-gradient(circle at 18% 10%, rgba(23,107,74,0.38), transparent 28rem),
+    radial-gradient(circle at 82% 16%, rgba(214,181,90,0.18), transparent 28rem),
+    linear-gradient(145deg, #020b08 0%, #071e18 44%, #0d3b2e 100%);
+}
+
+html[data-stonewood-theme] body {
+  background: var(--sw-void);
+  color: var(--sw-text);
+}
+
+html[data-stonewood-theme] .starwell,
+html[data-stonewood-theme] .starwell.sky-dawn,
+html[data-stonewood-theme] .starwell.sky-day,
+html[data-stonewood-theme] .starwell.sky-dusk,
+html[data-stonewood-theme] .starwell.sky-night {
+  background: var(--sw-wallpaper);
+  color: var(--sw-text);
+  transition: background 650ms ease, color 300ms ease;
+}
+
+html[data-stonewood-theme] .starwell::before {
+  background:
+    radial-gradient(circle at 18% 12%, var(--sw-glow), transparent 18rem),
+    radial-gradient(circle at 78% 10%, color-mix(in srgb, var(--sw-metal-bright) 20%, transparent), transparent 22rem),
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 12px);
+  opacity: 0.82;
+}
+
+html[data-stonewood-theme='stonewood-starless'] .stars { opacity: 0.08; }
+html[data-stonewood-theme='stonewood-moonstone'] .stars { opacity: 0.16; mix-blend-mode: multiply; }
+html[data-stonewood-theme]:not([data-stonewood-theme='stonewood-starless']):not([data-stonewood-theme='stonewood-moonstone']) .stars { opacity: 0.36; }
+
+html[data-stonewood-theme] .observatory-shell {
+  color: var(--sw-text);
+  border-color: var(--sw-line);
+  background: var(--sw-panel-grain), linear-gradient(165deg, var(--sw-surface), var(--sw-surface-strong));
+  box-shadow: 0 28px 100px var(--sw-shadow), inset 0 0 0 1px rgba(255,255,255,0.035), inset 0 1px 0 rgba(255,255,255,0.075);
+  transition: background 500ms ease, border-color 400ms ease, box-shadow 500ms ease;
+}
+
+html[data-stonewood-theme] .dome::before {
+  border-color: var(--sw-line);
+  box-shadow: inset 0 0 100px var(--sw-glow), 0 0 60px color-mix(in srgb, var(--sw-metal) 16%, transparent);
+}
+
+html[data-stonewood-theme] h1 {
+  color: var(--sw-metal-bright);
+  text-shadow: 0 8px 34px color-mix(in srgb, var(--sw-metal) 25%, transparent);
+}
+
+html[data-stonewood-theme='emerald-reliquary'] h1 {
+  background: linear-gradient(105deg, #7d581b 0%, #d6b55a 28%, #f0d98a 48%, #b88a2d 70%, #f0d98a 88%, #8f651f 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+html[data-stonewood-theme] .eyebrow,
+html[data-stonewood-theme] .map-heading,
+html[data-stonewood-theme] .sky-night .map-heading,
+html[data-stonewood-theme] .sky-dusk .map-heading,
+html[data-stonewood-theme] .sky-night .eyebrow,
+html[data-stonewood-theme] .sky-dusk .eyebrow {
+  color: var(--sw-metal-bright);
+}
+
+html[data-stonewood-theme] .subtitle,
+html[data-stonewood-theme] .sky-night .subtitle,
+html[data-stonewood-theme] .sky-dusk .subtitle {
+  color: color-mix(in srgb, var(--sw-text) 88%, transparent);
+}
+
+html[data-stonewood-theme] .inscription,
+html[data-stonewood-theme] .sky-night .inscription,
+html[data-stonewood-theme] .sky-dusk .inscription {
+  color: var(--sw-metal-pale);
+  border-color: var(--sw-line);
+  background: color-mix(in srgb, var(--sw-surface-soft) 68%, transparent);
+}
+
+html[data-stonewood-theme] :is(
+  .room-card,
+  .instrument-card,
+  .chamber-card,
+  .selected-alcove,
+  .seed-card,
+  .codex-reader,
+  .entry-tab,
+  .writer-panel,
+  .atelier-panel,
+  .living-panel
+) {
+  color: var(--sw-text);
+  border-color: var(--sw-line);
+  background: var(--sw-panel-grain), linear-gradient(145deg, color-mix(in srgb, var(--sw-surface-soft) 82%, transparent), color-mix(in srgb, var(--sw-surface-strong) 90%, transparent));
+  box-shadow: 0 16px 48px color-mix(in srgb, var(--sw-shadow) 68%, transparent), inset 0 1px 0 rgba(255,255,255,0.045);
+}
+
+html[data-stonewood-theme] :is(.room-card, .entry-tab, button):focus-visible {
+  outline: 2px solid var(--sw-metal-pale);
+  outline-offset: 3px;
+}
+
+html[data-stonewood-theme] :is(.room-card, .entry-tab):is(:hover, .active, [aria-pressed='true']) {
+  border-color: var(--sw-line-strong);
+  box-shadow: 0 20px 58px var(--sw-shadow), 0 0 0 3px color-mix(in srgb, var(--sw-accent-bright) 16%, transparent);
+}
+
+html[data-stonewood-theme] :is(.room-title, .room-card h2, .room-card h3, .seed-card h3, .codex-reader h3) {
+  color: var(--sw-metal-pale);
+}
+
+html[data-stonewood-theme] :is(.room-text, .seed-card p, .seed-card span, .codex-reader span, .coming-soon-body p) {
+  color: color-mix(in srgb, var(--sw-text) 82%, transparent);
+}
+
+html[data-stonewood-theme] :is(.room-medallion, .room-glyph, .glyph, .seed-glyph, .alcove-glyph, .lantern-symbol) {
+  color: var(--sw-metal-pale);
+  border-color: var(--sw-line);
+  background: radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--sw-accent-bright) 30%, transparent), color-mix(in srgb, var(--sw-surface-strong) 85%, transparent));
+  box-shadow: inset 0 0 22px var(--sw-glow);
+}
+
+html[data-stonewood-theme] .grove-state {
+  color: var(--sw-text);
+  border-color: var(--sw-line);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--sw-surface) 90%, transparent), color-mix(in srgb, var(--sw-surface-strong) 92%, transparent));
+  box-shadow: 0 18px 54px var(--sw-shadow), inset 0 0 0 1px rgba(255,255,255,0.035);
+}
+
+html[data-stonewood-theme] .grove-state :is(strong, .grove-state-label) { color: var(--sw-metal-bright); }
+
+.stonewood-live-region {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.stonewood-theme-instrument {
+  position: fixed;
+  right: clamp(0.8rem, 2vw, 1.4rem);
+  bottom: max(0.8rem, env(safe-area-inset-bottom));
+  z-index: 1000;
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--sw-text);
+}
+
+.stonewood-dial {
+  width: 5.5rem;
+  height: 5.5rem;
+  display: grid;
+  place-items: center;
+  position: relative;
+  border: 1px solid var(--sw-line-strong);
+  border-radius: 50%;
+  color: var(--sw-metal-pale);
+  cursor: pointer;
+  background:
+    radial-gradient(circle at 38% 28%, rgba(255,255,255,0.15), transparent 20%),
+    radial-gradient(circle, color-mix(in srgb, var(--sw-accent) 35%, var(--sw-surface-strong)) 0 35%, var(--sw-surface-strong) 70%);
+  box-shadow: 0 16px 44px var(--sw-shadow), 0 0 0 5px color-mix(in srgb, var(--sw-surface) 76%, transparent), 0 0 0 6px var(--sw-line), inset 0 0 30px var(--sw-glow);
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.stonewood-dial:hover,
+.stonewood-dial:focus-visible,
+.stonewood-dial[aria-expanded='true'] {
+  transform: translateY(-3px) rotate(2deg);
+  border-color: var(--sw-metal-pale);
+  box-shadow: 0 22px 56px var(--sw-shadow), 0 0 0 5px color-mix(in srgb, var(--sw-surface) 82%, transparent), 0 0 0 7px var(--sw-line-strong), inset 0 0 34px var(--sw-glow);
+  outline: none;
+}
+
+.stonewood-dial-rings,
+.stonewood-dial-rings::before,
+.stonewood-dial-rings::after {
+  position: absolute;
+  inset: 0.48rem;
+  border: 1px solid var(--sw-line);
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+
+.stonewood-dial-rings::before { inset: 0.46rem; border-style: dotted; transform: rotate(20deg); }
+.stonewood-dial-rings::after { inset: 1.03rem; border-color: color-mix(in srgb, var(--sw-accent-bright) 50%, transparent); }
+
+.stonewood-dial-star {
+  margin-top: -0.8rem;
+  font-size: 1.35rem;
+  text-shadow: 0 0 16px var(--sw-metal-bright);
+}
+
+.stonewood-current-theme {
+  position: absolute;
+  bottom: 0.92rem;
+  width: 100%;
+  padding: 0 0.35rem;
+  overflow: hidden;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stonewood-theme-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 1.1rem);
+  width: min(31rem, calc(100vw - 1.6rem));
+  max-height: min(74vh, 49rem);
+  overflow: auto;
+  border: 1px solid var(--sw-line-strong);
+  border-radius: 1.75rem;
+  padding: 1rem;
+  color: var(--sw-text);
+  background: var(--sw-panel-grain), linear-gradient(155deg, color-mix(in srgb, var(--sw-surface) 97%, transparent), var(--sw-surface-strong));
+  box-shadow: 0 30px 100px var(--sw-shadow), inset 0 1px 0 rgba(255,255,255,0.075);
+  backdrop-filter: blur(24px) saturate(125%);
+  animation: stonewood-panel-arrive 240ms ease both;
+  scrollbar-color: var(--sw-metal) transparent;
+}
+
+.stonewood-theme-panel[hidden] { display: none; }
+
+@keyframes stonewood-panel-arrive {
+  from { opacity: 0; transform: translateY(0.75rem) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.stonewood-theme-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3rem 0.35rem 0.8rem;
+  border-bottom: 1px solid var(--sw-line);
+}
+
+.stonewood-theme-header span {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--sw-metal-bright);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.stonewood-theme-header h2 {
+  margin: 0;
+  color: var(--sw-metal-pale);
+  font-family: Cinzel, Georgia, serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+}
+
+.stonewood-close {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--sw-line);
+  border-radius: 50%;
+  color: var(--sw-text);
+  background: color-mix(in srgb, var(--sw-surface-soft) 72%, transparent);
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.stonewood-theme-intro {
+  margin: 0.8rem 0.35rem;
+  color: var(--sw-muted);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.05rem;
+}
+
+.stonewood-auto,
+.stonewood-theme-choice {
+  width: 100%;
+  border: 1px solid var(--sw-line);
+  color: inherit;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sw-surface-soft) 62%, transparent), color-mix(in srgb, var(--sw-surface-strong) 68%, transparent));
+  cursor: pointer;
+  text-align: left;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.stonewood-auto:hover,
+.stonewood-theme-choice:hover,
+.stonewood-auto:focus-visible,
+.stonewood-theme-choice:focus-visible,
+.stonewood-auto[aria-pressed='true'],
+.stonewood-theme-choice[aria-pressed='true'] {
+  transform: translateY(-2px);
+  border-color: var(--sw-line-strong);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sw-accent) 28%, var(--sw-surface)), color-mix(in srgb, var(--sw-metal) 13%, var(--sw-surface-strong)));
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--sw-shadow) 56%, transparent), inset 0 0 0 1px rgba(255,255,255,0.035);
+  outline: none;
+}
+
+.stonewood-auto {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.8rem;
+  border-radius: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.stonewood-auto-orbit {
+  display: grid;
+  place-items: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  border: 1px solid var(--sw-line-strong);
+  border-radius: 50%;
+  color: var(--sw-metal-pale);
+  font-size: 1.5rem;
+  box-shadow: inset 0 0 20px var(--sw-glow);
+}
+
+.stonewood-auto strong,
+.stonewood-auto small,
+.stonewood-choice-copy strong,
+.stonewood-choice-copy small { display: block; }
+
+.stonewood-auto strong,
+.stonewood-choice-copy strong {
+  color: var(--sw-metal-pale);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.02rem;
+}
+
+.stonewood-auto small,
+.stonewood-choice-copy small {
+  margin-top: 0.18rem;
+  color: var(--sw-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.stonewood-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.stonewood-theme-choice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  align-items: start;
+  min-height: 8rem;
+  padding: 0.75rem;
+  border-radius: 1.15rem;
+}
+
+.stonewood-choice-glyph {
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid var(--sw-line);
+  border-radius: 50%;
+  color: var(--sw-metal-bright);
+  background: color-mix(in srgb, var(--sw-surface-strong) 82%, transparent);
+}
+
+.stonewood-swatches {
+  display: flex;
+  gap: 0.22rem;
+  margin-top: 0.62rem;
+}
+
+.stonewood-swatches span {
+  width: 1rem;
+  height: 0.32rem;
+  border-radius: 999px;
+  background: var(--stonewood-swatch);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.16);
+}
+
+.stonewood-theme-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  padding: 0.75rem 0.35rem 0.1rem;
+  border-top: 1px solid var(--sw-line);
+  color: var(--sw-muted);
+  font-size: 0.67rem;
+}
+
+@media (max-width: 720px) {
+  .stonewood-theme-instrument {
+    right: 0.75rem;
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .stonewood-dial {
+    width: 4.8rem;
+    height: 4.8rem;
+  }
+
+  .stonewood-theme-panel {
+    position: fixed;
+    right: 0.75rem;
+    left: 0.75rem;
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 5.7rem);
+    width: auto;
+    max-height: min(72vh, 46rem);
+  }
+
+  .stonewood-theme-grid { grid-template-columns: 1fr; }
+  .stonewood-theme-choice { min-height: 0; }
+  .stonewood-theme-footer { flex-direction: column; gap: 0.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-stonewood-theme] *,
+  html[data-stonewood-theme] *::before,
+  html[data-stonewood-theme] *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@supports not (color: color-mix(in srgb, white 50%, black)) {
+  html[data-stonewood-theme] .starwell::before { opacity: 0.48; }
+  html[data-stonewood-theme] :is(.room-card, .instrument-card, .chamber-card, .selected-alcove, .seed-card, .codex-reader, .entry-tab) {
+    background: var(--sw-surface);
+  }
+  .stonewood-theme-panel { background: var(--sw-surface-strong); }
+  .stonewood-auto,
+  .stonewood-theme-choice { background: var(--sw-surface); }
+}
