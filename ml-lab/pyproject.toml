@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flameclyffe-ml"
+version = "0.1.0"
+description = "Review-gated PyTorch laboratory for Flameclyffe and Terra Aeterna engines."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary project code; third-party models retain their own licences." }
+authors = [{ name = "Rowan and Flameclyffe collaborators" }]
+dependencies = [
+  "numpy>=2.1,<3",
+  "pydantic>=2.10,<3",
+]
+
+[project.optional-dependencies]
+torch = [
+  "torch>=2.12,<2.13",
+  "captum>=0.8,<0.9",
+]
+semantic = [
+  "torch>=2.12,<2.13",
+  "sentence-transformers>=5,<6",
+]
+vision = [
+  "torch>=2.12,<2.13",
+  "transformers>=5,<6",
+  "pillow>=11,<12",
+]
+audio = [
+  "torch>=2.12,<2.13",
+  "transformers>=5,<6",
+  "torchcodec>=0.9,<1",
+]
+dev = [
+  "pytest>=8.4,<9",
+  "pytest-cov>=7,<8",
+  "ruff>=0.12,<1",
+  "mypy>=1.17,<2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flameclyffe_ml"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --disable-warnings"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+
+[tool.coverage.run]
+branch = true
+source = ["flameclyffe_ml"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
