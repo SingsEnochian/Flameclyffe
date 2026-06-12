@@ -9,12 +9,14 @@ from __future__ import annotations
 import math
 
 import numpy as np
+from numpy.typing import NDArray
 
 from flameclyffe_ml.provenance import content_hash
 
 from .models import LiquidLightControls, LiquidLightNode, LiquidLightSnapshot
 
 _GOLDEN_ANGLE = math.pi * (3.0 - math.sqrt(5.0))
+FloatArray = NDArray[np.float64]
 
 
 def _round(value: float) -> float:
@@ -24,7 +26,7 @@ def _round(value: float) -> float:
 def _raw_positions(
     controls: LiquidLightControls,
     time_s: float,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray, FloatArray]:
     rng = np.random.default_rng(controls.seed)
     indices = np.arange(controls.node_count, dtype=np.float64)
     phases = rng.uniform(0.0, 2.0 * math.pi, size=controls.node_count)
