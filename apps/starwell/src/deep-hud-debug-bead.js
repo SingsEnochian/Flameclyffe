@@ -1,3 +1,4 @@
+import './deep-hud-debug-bead.css';
 import { avoidRectsForDefaultPosition, measureHudBounds } from './lib/deepHudBounds.js';
 
 const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
@@ -11,23 +12,56 @@ let observer = null;
 let resizeObserver = null;
 
 function debugIsEnabled() {
+  if (!import.meta.env.DEV) return false;
+
   const params = new URLSearchParams(window.location.search);
-  return params.get('deepHudDebug') === '1' || window.localStorage?.getItem('deepHudDebug') === 'true';
+  let storedPreference = null;
+
+  try {
+    storedPreference = window.localStorage?.getItem('deepHudDebug');
+  } catch {
+    storedPreference = null;
+  }
+
+  return params.get('deepHudDebug') === '1' || storedPreference === 'true';
 }
 
 function px(value) {
   return `${Math.round(Number(value) || 0)}px`;
 }
 
+function syncHudLayerState(layer) {
+  if (!layer) return;
+
+  const hasDiagnostic = Boolean(layer.querySelector(`:scope > .${BEAD_CLASS}`));
+  if (hasDiagnostic) {
+    layer.dataset.deepHudLayer = 'diagnostic';
+    return;
+  }
+
+  if (layer.childElementCount === 0) {
+    layer.dataset.deepHudLayer = 'empty';
+    return;
+  }
+
+  if (layer.dataset.deepHudLayer === 'diagnostic') {
+    layer.dataset.deepHudLayer = 'active';
+  }
+}
+
 function getOrCreateBead(layer) {
   let bead = layer.querySelector(`:scope > .${BEAD_CLASS}`);
-  if (bead) return bead;
+  if (bead) {
+    syncHudLayerState(layer);
+    return bead;
+  }
 
   bead = document.createElement('output');
   bead.className = BEAD_CLASS;
   bead.setAttribute('aria-label', 'DEEP HUD bounds debug status');
   bead.dataset.deepHudDebug = 'bead';
   layer.appendChild(bead);
+  syncHudLayerState(layer);
   return bead;
 }
 
@@ -96,6 +130,12 @@ function stopDebugBead() {
   document.removeEventListener('deep-observer:hud-bounds', scheduleUpdate);
   window.removeEventListener('resize', scheduleUpdate);
   window.removeEventListener('orientationchange', scheduleUpdate);
+
+  document.querySelectorAll(`${HUD_LAYER_SELECTOR} > .${BEAD_CLASS}`).forEach((bead) => {
+    const layer = bead.parentElement;
+    bead.remove();
+    syncHudLayerState(layer);
+  });
 }
 
 window.addEventListener('pagehide', stopDebugBead, { once: true });
