@@ -1,0 +1,91 @@
+@font-face {
+  font-family: 'Aetherion Local';
+  src: local('Aetherion');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Legenduras Local';
+  src: local('Legenduras');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Legenduras Rough Local';
+  src: local('Legenduras Rough');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --sw-font-ceremonial: 'Aetherion Local', Cinzel, Georgia, serif;
+  --sw-font-display: 'Legenduras Local', 'Marcellus SC', Cinzel, Georgia, serif;
+  --sw-font-weathered: 'Legenduras Rough Local', 'Legenduras Local', Cinzel, Georgia, serif;
+  --sw-font-reading: 'Cormorant Garamond', Georgia, serif;
+  --sw-font-interface: Inter, system-ui, sans-serif;
+}
+
+html[data-stonewood-theme] h1 {
+  font-family: var(--sw-font-ceremonial);
+  font-weight: 500;
+}
+
+html[data-stonewood-theme] :is(
+  .map-heading span,
+  .selected-alcove h2,
+  .stonewood-theme-header h2,
+  .room-title,
+  .room-card h2,
+  .room-card h3
+) {
+  font-family: var(--sw-font-display);
+  font-weight: 500;
+}
+
+html[data-stonewood-theme] :is(
+  .subtitle,
+  .inscription,
+  .stonewood-theme-intro,
+  .codex-reader,
+  .seed-card
+) {
+  font-family: var(--sw-font-reading);
+}
+
+html[data-stonewood-theme] :is(
+  button,
+  input,
+  textarea,
+  select,
+  .eyebrow,
+  .grove-state,
+  .stonewood-theme-footer
+) {
+  font-family: var(--sw-font-interface);
+}
+
+html[data-stonewood-theme] .legacy-display,
+html[data-stonewood-theme] [data-display-font='weathered'] {
+  font-family: var(--sw-font-weathered);
+  font-weight: 500;
+}
+
+html[data-stonewood-theme='emerald-reliquary'] h1 {
+  letter-spacing: 0.045em;
+}
+
+html[data-stonewood-theme='stonewood-starless'] h1,
+html[data-stonewood-theme='stonewood-obsidian'] h1 {
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 720px) {
+  html[data-stonewood-theme] h1 {
+    letter-spacing: 0.025em;
+  }
+}
