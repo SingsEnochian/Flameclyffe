@@ -1,18 +1,7 @@
 import { clampNumber, normaliseDeepState, numberOr } from './deepState.js';
 
 export function normaliseStarburstDeep(rawDeep = {}) {
-  const deep = normaliseDeepState(rawDeep);
-
-  return {
-    P: deep.P,
-    C: deep.C,
-    E: deep.E,
-    kp: deep.kp,
-    bz: deep.bz,
-    moonIllum: deep.moonIllum,
-    charge: deep.charge,
-    dphi: deep.dphi,
-  };
+  return normaliseDeepState(rawDeep);
 }
 
 export function buildStarburstVars(rawDeep = {}, options = {}) {
