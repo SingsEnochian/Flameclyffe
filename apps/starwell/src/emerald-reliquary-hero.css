@@ -1,0 +1,97 @@
+html[data-stonewood-theme='emerald-reliquary'] .dome {
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, transparent 0 4%, rgba(214,181,90,0.08) 4.1% 4.2%, transparent 4.3% 95.7%, rgba(214,181,90,0.08) 95.8% 95.9%, transparent 96%),
+    radial-gradient(circle at 17% 48%, rgba(58,154,107,0.26), transparent 17rem),
+    radial-gradient(circle at 83% 42%, rgba(214,181,90,0.13), transparent 18rem),
+    linear-gradient(180deg, rgba(2,11,8,0.18), rgba(13,59,46,0.12));
+}
+
+html[data-stonewood-theme='emerald-reliquary'] .dome::after {
+  content: '';
+  position: absolute;
+  inset: 1.1rem;
+  z-index: 0;
+  border: 1px solid rgba(214,181,90,0.34);
+  border-radius: 34px 34px 46% 46% / 34px 34px 30% 30%;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 49.92%, rgba(240,217,138,0.2) 49.96% 50.04%, transparent 50.08%),
+    linear-gradient(0deg, transparent 0 49.92%, rgba(240,217,138,0.12) 49.96% 50.04%, transparent 50.08%),
+    radial-gradient(circle at center, transparent 0 4.2rem, rgba(214,181,90,0.19) 4.25rem 4.34rem, transparent 4.4rem 6.1rem, rgba(214,181,90,0.12) 6.15rem 6.22rem, transparent 6.3rem);
+  box-shadow:
+    inset 0 0 0 1px rgba(240,217,138,0.06),
+    inset 0 -90px 110px rgba(1,8,5,0.24);
+}
+
+html[data-stonewood-theme='emerald-reliquary'] .dome-inner {
+  min-width: min(920px, 92%);
+  padding: 2.25rem clamp(1rem, 5vw, 4rem);
+}
+
+html[data-stonewood-theme='emerald-reliquary'] .dome-inner::before {
+  content: '✦';
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0 auto 1.35rem;
+  border: 1px solid rgba(240,217,138,0.62);
+  border-radius: 50%;
+  color: #f0d98a;
+  font-size: 1.6rem;
+  background:
+    radial-gradient(circle, rgba(214,181,90,0.2), rgba(3,17,13,0.7) 64%),
+    conic-gradient(from 0deg, transparent, rgba(240,217,138,0.18), transparent 25%, rgba(240,217,138,0.18), transparent 50%, rgba(240,217,138,0.18), transparent 75%, rgba(240,217,138,0.18), transparent);
+  box-shadow:
+    0 0 0 0.45rem rgba(3,17,13,0.72),
+    0 0 0 0.5rem rgba(214,181,90,0.24),
+    0 0 34px rgba(58,154,107,0.28),
+    inset 0 0 24px rgba(214,181,90,0.14);
+  text-shadow: 0 0 14px rgba(240,217,138,0.76);
+}
+
+html[data-stonewood-theme='emerald-reliquary'] .dome-inner::after {
+  content: '';
+  width: min(620px, 76vw);
+  height: 1rem;
+  margin-top: 1.25rem;
+  background:
+    radial-gradient(circle at center, #f0d98a 0 0.18rem, transparent 0.2rem),
+    linear-gradient(90deg, transparent, rgba(214,181,90,0.72) 18%, rgba(240,217,138,0.9) 50%, rgba(214,181,90,0.72) 82%, transparent) center / 100% 1px no-repeat;
+  opacity: 0.82;
+}
+
+html[data-stonewood-theme='emerald-reliquary'] .dome h1 {
+  font-size: clamp(3.4rem, 10vw, 8.6rem);
+  letter-spacing: 0.085em;
+}
+
+html[data-stonewood-theme='emerald-reliquary'] .dome .subtitle {
+  max-width: 760px;
+  color: rgba(243,235,221,0.88);
+}
+
+html[data-stonewood-theme='emerald-reliquary'] .dome .inscription {
+  position: relative;
+  padding-inline: 1.4rem;
+  border-color: rgba(240,217,138,0.4);
+  background: linear-gradient(90deg, rgba(3,17,13,0.48), rgba(13,59,46,0.64), rgba(3,17,13,0.48));
+  box-shadow: inset 0 0 18px rgba(214,181,90,0.08);
+}
+
+html[data-stonewood-theme='emerald-reliquary'] .observatory-shell {
+  box-shadow:
+    0 34px 120px rgba(0,5,3,0.86),
+    0 0 0 1px rgba(214,181,90,0.12),
+    inset 0 0 0 1px rgba(240,217,138,0.035),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+@media (max-width: 720px) {
+  html[data-stonewood-theme='emerald-reliquary'] .dome::after { inset: 0.55rem; }
+  html[data-stonewood-theme='emerald-reliquary'] .dome-inner { padding-inline: 0.5rem; }
+  html[data-stonewood-theme='emerald-reliquary'] .dome-inner::before { width: 3.7rem; height: 3.7rem; }
+  html[data-stonewood-theme='emerald-reliquary'] .dome h1 { font-size: clamp(2.65rem, 15vw, 5rem); }
+}
