@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import numpy as np
 
-from flameclyffe_ml import PrivacyClass, content_hash, evaluate_release, run_fingerprint
+from flameclyffe_ml import (
+    PrivacyClass,
+    content_hash,
+    evaluate_release,
+    run_fingerprint,
+)
 from flameclyffe_ml.synthetic import DEEP_CHANNELS, generate_deep_batch
 
 
@@ -66,8 +71,18 @@ def test_restricted_material_cannot_be_downgraded() -> None:
 
 
 def test_synthetic_deep_batch_is_deterministic_and_bounded() -> None:
-    first = generate_deep_batch(samples=64, steps=24, anomaly_fraction=0.25, seed=11)
-    second = generate_deep_batch(samples=64, steps=24, anomaly_fraction=0.25, seed=11)
+    first = generate_deep_batch(
+        samples=64,
+        steps=24,
+        anomaly_fraction=0.25,
+        seed=11,
+    )
+    second = generate_deep_batch(
+        samples=64,
+        steps=24,
+        anomaly_fraction=0.25,
+        seed=11,
+    )
 
     assert first.channels == DEEP_CHANNELS
     assert first.values.shape == (64, 24, len(DEEP_CHANNELS))
