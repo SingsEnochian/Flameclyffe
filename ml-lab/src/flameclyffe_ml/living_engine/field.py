@@ -29,19 +29,33 @@ def _raw_positions(
 ) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray, FloatArray]:
     rng = np.random.default_rng(controls.seed)
     indices = np.arange(controls.node_count, dtype=np.float64)
-    phases = rng.uniform(0.0, 2.0 * math.pi, size=controls.node_count)
-    radial_jitter = rng.uniform(-0.045, 0.045, size=controls.node_count)
-    hue_jitter = rng.uniform(-0.12, 0.12, size=controls.node_count)
+    phases = rng.uniform(
+        0.0,
+        2.0 * math.pi,
+        size=controls.node_count,
+    )
+    radial_jitter = rng.uniform(
+        -0.045,
+        0.045,
+        size=controls.node_count,
+    )
+    hue_jitter = rng.uniform(
+        -0.12,
+        0.12,
+        size=controls.node_count,
+    )
 
     speed = 0.16 + (0.66 * controls.resonance) + (0.18 * controls.entropy)
-    breathing = np.sin((time_s * (0.38 + 0.30 * controls.resonance)) + phases)
+    breathing = np.sin(
+        (time_s * (0.38 + 0.30 * controls.resonance)) + phases
+    )
     swirl = (indices * _GOLDEN_ANGLE) + phases + (time_s * speed)
 
     base_radius = 0.16 + (0.18 * controls.coherence) + radial_jitter
     radius = base_radius + (0.035 + 0.045 * controls.entropy) * breathing
 
-    turbulence = (0.010 + 0.055 * controls.entropy) * (
-        np.sin((time_s * 1.7) + phases * 1.9 + indices * 0.31)
+    turbulence = (0.010 + 0.055 * controls.entropy) * np.sin(
+        (time_s * 1.7) + phases * 1.9 + indices * 0.31
     )
     x = 0.5 + (radius * np.cos(swirl)) + turbulence
     y = 0.5 + (radius * np.sin(swirl)) + (
@@ -53,7 +67,9 @@ def _raw_positions(
         dx = controls.pointer.x - x
         dy = controls.pointer.y - y
         distance_sq = (dx * dx) + (dy * dy)
-        attraction = np.exp(-distance_sq / 0.055) * (0.04 + 0.14 * controls.coherence)
+        attraction = np.exp(-distance_sq / 0.055) * (
+            0.04 + 0.14 * controls.coherence
+        )
         x += dx * attraction
         y += dy * attraction
 
