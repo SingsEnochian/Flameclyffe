@@ -33,8 +33,13 @@ async def health() -> HealthResponse:
 
 
 @app.post("/v1/liquid-light/frame", response_model=LiquidLightSnapshot)
-async def liquid_light_frame(request: LiquidLightFrameRequest) -> LiquidLightSnapshot:
-    return generate_liquid_light_snapshot(request.controls, time_s=request.time_s)
+async def liquid_light_frame(
+    request: LiquidLightFrameRequest,
+) -> LiquidLightSnapshot:
+    return generate_liquid_light_snapshot(
+        request.controls,
+        time_s=request.time_s,
+    )
 
 
 @app.get("/v1/contracts/liquid-light")
@@ -50,13 +55,18 @@ async def liquid_light_contract() -> dict[str, Any]:
 
 def _extract_controls(message: Any) -> LiquidLightControls:
     if not isinstance(message, dict):
-        raise ValueError("Expected a JSON object containing liquid-light controls.")
+        raise ValueError(
+            "Expected a JSON object containing liquid-light controls."
+        )
 
     payload = message.get("controls", message)
     return LiquidLightControls.model_validate(payload)
 
 
-async def _send_validation_error(websocket: WebSocket, exc: Exception) -> None:
+async def _send_validation_error(
+    websocket: WebSocket,
+    exc: Exception,
+) -> None:
     detail = exc.errors() if isinstance(exc, ValidationError) else str(exc)
     await websocket.send_json(
         {
@@ -92,12 +102,18 @@ async def liquid_light_stream(websocket: WebSocket) -> None:
     try:
         while True:
             elapsed = max(0.0, time.monotonic() - started)
-            snapshot = generate_liquid_light_snapshot(controls, time_s=elapsed)
+            snapshot = generate_liquid_light_snapshot(
+                controls,
+                time_s=elapsed,
+            )
             await websocket.send_json(snapshot.model_dump(mode="json"))
 
             interval = 1.0 / controls.stream_hz
             try:
-                message = await asyncio.wait_for(websocket.receive_json(), timeout=interval)
+                message = await asyncio.wait_for(
+                    websocket.receive_json(),
+                    timeout=interval,
+                )
             except TimeoutError:
                 continue
 
