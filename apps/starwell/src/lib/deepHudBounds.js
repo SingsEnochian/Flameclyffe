@@ -37,6 +37,12 @@ function hasDomRectShape(value) {
   return value && ['left', 'top', 'right', 'bottom', 'width', 'height'].every((key) => Number.isFinite(Number(value[key])));
 }
 
+function queryHudElement(queryRoot, selector) {
+  if (!queryRoot || !selector) return null;
+  if (typeof queryRoot.matches === 'function' && queryRoot.matches(selector)) return queryRoot;
+  return typeof queryRoot.querySelector === 'function' ? queryRoot.querySelector(selector) : null;
+}
+
 export function toHudRect(value, fallback = null) {
   if (!value) return fallback;
 
@@ -96,18 +102,18 @@ export function getHudInset(viewportClass, insets = DEFAULT_HUD_INSETS) {
 }
 
 export function resolveHudElements(root = globalThis.document, selectors = DEFAULT_HUD_SELECTORS) {
-  const queryRoot = root?.querySelector ? root : globalThis.document;
+  const queryRoot = root?.querySelector || root?.matches ? root : globalThis.document;
 
-  if (!queryRoot?.querySelector) {
+  if (!queryRoot) {
     return { root: null, shell: null, stage: null, readout: null, hudLayer: null };
   }
 
   return {
-    root: queryRoot.querySelector(selectors.root),
-    shell: queryRoot.querySelector(selectors.shell),
-    stage: queryRoot.querySelector(selectors.stage),
-    readout: queryRoot.querySelector(selectors.readout),
-    hudLayer: queryRoot.querySelector(selectors.hudLayer),
+    root: queryHudElement(queryRoot, selectors.root),
+    shell: queryHudElement(queryRoot, selectors.shell),
+    stage: queryHudElement(queryRoot, selectors.stage),
+    readout: queryHudElement(queryRoot, selectors.readout),
+    hudLayer: queryHudElement(queryRoot, selectors.hudLayer),
   };
 }
 
@@ -117,8 +123,8 @@ export function getViewportRect(viewport = {}) {
   return makeRect(0, 0, width, height);
 }
 
-export function getAvoidRects({ stageRect = null, extraAvoidRects = [] } = {}) {
-  return [stageRect, ...extraAvoidRects]
+export function getAvoidRects({ stageRect = null, readoutRect = null, extraAvoidRects = [] } = {}) {
+  return [stageRect, readoutRect, ...extraAvoidRects]
     .map((rect) => toHudRect(rect))
     .filter(Boolean);
 }
@@ -135,14 +141,18 @@ export function measureHudBounds({
   insets = DEFAULT_HUD_INSETS,
 } = {}) {
   const elements = resolveHudElements(root, selectors);
+  const shellElement = shell || elements.shell;
+  const scopedElements = shellElement?.querySelector || shellElement?.matches
+    ? resolveHudElements(shellElement, selectors)
+    : elements;
   const viewportRect = getViewportRect(viewport);
-  const shellRect = toHudRect(shell, toHudRect(elements.shell, viewportRect));
-  const stageRect = toHudRect(stage, toHudRect(elements.stage));
-  const readoutRect = toHudRect(readout, toHudRect(elements.readout));
+  const shellRect = toHudRect(shellElement, viewportRect);
+  const stageRect = toHudRect(stage, toHudRect(scopedElements.stage));
+  const readoutRect = toHudRect(readout, toHudRect(scopedElements.readout));
   const viewportClass = getHudViewportClass(shellRect.width || viewportRect.width, breakpoints);
   const inset = getHudInset(viewportClass, insets);
   const safeRect = insetRect(shellRect, inset);
-  const avoidRects = getAvoidRects({ stageRect, extraAvoidRects });
+  const avoidRects = getAvoidRects({ stageRect, readoutRect, extraAvoidRects });
 
   return {
     viewportClass,
