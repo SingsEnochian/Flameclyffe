@@ -37,7 +37,14 @@ def _normalise(value: Any) -> Any:
 
     if isinstance(value, Set) and not isinstance(value, (str, bytes, bytearray)):
         items = [_normalise(item) for item in value]
-        return sorted(items, key=lambda item: json.dumps(item, sort_keys=True, ensure_ascii=False))
+        return sorted(
+            items,
+            key=lambda item: json.dumps(
+                item,
+                sort_keys=True,
+                ensure_ascii=False,
+            ),
+        )
 
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         return [_normalise(item) for item in value]
