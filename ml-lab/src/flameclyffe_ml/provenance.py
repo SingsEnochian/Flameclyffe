@@ -30,7 +30,10 @@ def _normalise(value: Any) -> Any:
         return {"__bytes_b64__": base64.b64encode(value).decode("ascii")}
 
     if isinstance(value, Mapping):
-        return {str(key): _normalise(item) for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))}
+        return {
+            str(key): _normalise(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
 
     if isinstance(value, Set) and not isinstance(value, (str, bytes, bytearray)):
         items = [_normalise(item) for item in value]
