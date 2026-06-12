@@ -15,6 +15,9 @@ dependencies = [
   "pydantic>=2.10,<3",
 ]
 
+[project.scripts]
+flameclyffe-living-engine = "flameclyffe_ml.living_engine.__main__:main"
+
 [project.optional-dependencies]
 torch = [
   "torch>=2.12,<2.13",
@@ -33,6 +36,13 @@ audio = [
   "torch>=2.12,<2.13",
   "transformers>=5,<6",
   "torchcodec>=0.9,<1",
+]
+service = [
+  "fastapi[standard]>=0.136,<1",
+]
+visual-lab = [
+  "pygame-ce>=2.5.7,<3",
+  "moderngl>=5.12,<6",
 ]
 dev = [
   "pytest>=8.4,<9",
