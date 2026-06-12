@@ -2,6 +2,8 @@ import { measureHudBounds } from './lib/deepHudBounds.js';
 
 const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
 const HUD_LAYER_SELECTOR = '.deep-observer-hud-layer';
+const STAGE_SELECTOR = '.glyph-orb-wrap';
+const READOUT_SELECTOR = '.glyph-readout';
 const ROOT_SELECTOR = '#root';
 const UPDATE_THROTTLE_MS = 120;
 
@@ -82,7 +84,9 @@ function dispatchBounds(panel, bounds) {
 
 function bindPanel(panel) {
   ensureHudLayer(panel);
-  const bounds = measureHudBounds({ root: document, shell: panel });
+  const stage = panel.querySelector(STAGE_SELECTOR);
+  const readout = panel.querySelector(READOUT_SELECTOR);
+  const bounds = measureHudBounds({ root: panel, shell: panel, stage, readout });
   const signature = makeBoundsSignature(bounds);
   if (signature === panel.dataset.deepHudBoundsSignature) return;
 
@@ -111,8 +115,8 @@ function observePanels() {
 
   document.querySelectorAll(PANEL_SELECTOR).forEach((panel) => {
     resizeObserver.observe(panel);
-    const stage = panel.querySelector('.glyph-orb-wrap');
-    const readout = panel.querySelector('.glyph-readout');
+    const stage = panel.querySelector(STAGE_SELECTOR);
+    const readout = panel.querySelector(READOUT_SELECTOR);
     const hudLayer = panel.querySelector(HUD_LAYER_SELECTOR);
     if (stage) resizeObserver.observe(stage);
     if (readout) resizeObserver.observe(readout);
