@@ -27,7 +27,11 @@ class LiquidLightControls(StrictModel):
     own refresh rate; Python is not asked to push sixty full visual frames per second.
     """
 
-    instrument_id: str = Field(default="starwell-liquid-light", min_length=1, max_length=80)
+    instrument_id: str = Field(
+        default="starwell-liquid-light",
+        min_length=1,
+        max_length=80,
+    )
     seed: int = Field(default=17, ge=0, le=2_147_483_647)
     node_count: int = Field(default=18, ge=3, le=96)
     stream_hz: float = Field(default=12.0, ge=1.0, le=20.0)
@@ -73,7 +77,9 @@ class LiquidLightSnapshot(StrictModel):
 
 class HealthResponse(StrictModel):
     status: Literal["ok"] = "ok"
-    service: Literal["flameclyffe-living-engine"] = "flameclyffe-living-engine"
+    service: Literal["flameclyffe-living-engine"] = (
+        "flameclyffe-living-engine"
+    )
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
     persistent: Literal[False] = False
     canon_authority: Literal[False] = False
