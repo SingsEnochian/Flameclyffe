@@ -82,7 +82,12 @@ def generate_deep_batch(
         raise ValueError("anomaly_fraction must be in [0, 1)")
 
     rng = np.random.default_rng(seed)
-    time = np.linspace(0.0, 2.0 * np.pi, steps, dtype=np.float64)[None, :]
+    time = np.linspace(
+        0.0,
+        2.0 * np.pi,
+        steps,
+        dtype=np.float64,
+    )[None, :]
 
     phase_a = rng.uniform(0.0, 2.0 * np.pi, size=(samples, 1))
     phase_b = rng.uniform(0.0, 2.0 * np.pi, size=(samples, 1))
@@ -90,17 +95,33 @@ def generate_deep_batch(
 
     latent_a = amplitude * np.sin(time + phase_a)
     latent_b = 0.75 * np.cos((time * 0.55) + phase_b)
-    latent_c = np.cumsum(rng.normal(0.0, 0.08, size=(samples, steps)), axis=1)
+    latent_c = np.cumsum(
+        rng.normal(0.0, 0.08, size=(samples, steps)),
+        axis=1,
+    )
     observation_noise = rng.normal(0.0, 0.12, size=(samples, steps))
     local_change = np.abs(np.gradient(latent_a + observation_noise, axis=1))
 
-    presence = _sigmoid(0.95 * latent_a + 0.25 * latent_c + observation_noise)
-    coherence = _sigmoid(1.05 * latent_a - 0.85 * local_change + 0.10 * latent_b)
-    resonance = _sigmoid(0.70 * latent_b + 0.35 * latent_a + 0.10 * observation_noise)
-    entropy = _sigmoid(-0.55 * latent_a + 0.95 * local_change + 0.20 * observation_noise)
-    memory = _sigmoid(0.70 * latent_c + 0.28 * latent_a + 0.12 * latent_b)
+    presence = _sigmoid(
+        0.95 * latent_a + 0.25 * latent_c + observation_noise
+    )
+    coherence = _sigmoid(
+        1.05 * latent_a - 0.85 * local_change + 0.10 * latent_b
+    )
+    resonance = _sigmoid(
+        0.70 * latent_b + 0.35 * latent_a + 0.10 * observation_noise
+    )
+    entropy = _sigmoid(
+        -0.55 * latent_a + 0.95 * local_change + 0.20 * observation_noise
+    )
+    memory = _sigmoid(
+        0.70 * latent_c + 0.28 * latent_a + 0.12 * latent_b
+    )
     alignment = _sigmoid(
-        1.05 * coherence + 0.75 * resonance - 1.00 * entropy + 0.10 * observation_noise
+        1.05 * coherence
+        + 0.75 * resonance
+        - 1.00 * entropy
+        + 0.10 * observation_noise
     )
 
     values = np.stack(
@@ -127,10 +148,23 @@ def generate_deep_batch(
             stop = min(steps, start + width)
             anomaly_steps[row] = start
 
-            values[row, start:stop, entropy_index] += rng.uniform(0.45, 0.75)
-            values[row, start:stop, coherence_index] -= rng.uniform(0.35, 0.60)
-            values[row, start:stop, alignment_index] -= rng.uniform(0.40, 0.65)
-            values[row, start:stop, resonance_index] += rng.normal(0.0, 0.22, size=stop - start)
+            values[row, start:stop, entropy_index] += rng.uniform(
+                0.45,
+                0.75,
+            )
+            values[row, start:stop, coherence_index] -= rng.uniform(
+                0.35,
+                0.60,
+            )
+            values[row, start:stop, alignment_index] -= rng.uniform(
+                0.40,
+                0.65,
+            )
+            values[row, start:stop, resonance_index] += rng.normal(
+                0.0,
+                0.22,
+                size=stop - start,
+            )
 
     clipped = np.clip(values, 0.0, 1.0).astype(np.float32, copy=False)
 
