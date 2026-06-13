@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-13T22:00:05.287Z",
+  "generated_at": "2026-06-13T23:15:36.600Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-13T18:00",
+    "time": "2026-06-13T19:15",
     "sky": "Day",
     "current": {
-      "time": "2026-06-13T18:00",
+      "time": "2026-06-13T19:15",
       "interval": 900,
-      "temperature_2m": 86.6,
-      "relative_humidity_2m": 66,
+      "temperature_2m": 87.6,
+      "relative_humidity_2m": 63,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
       "cloud_cover": 100,
-      "pressure_msl": 1013.9,
-      "wind_speed_10m": 4.8,
-      "wind_direction_10m": 112
+      "pressure_msl": 1014.2,
+      "wind_speed_10m": 1.1,
+      "wind_direction_10m": 281
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 22
     },
     "solar_wind": {
-      "time_tag": "2026-06-13 21:56:00.000",
-      "bz": -0.68,
-      "bt": 4.53,
+      "time_tag": "2026-06-13 23:12:00.000",
+      "bz": 1.44,
+      "bt": 4.6,
       "density": 0.22,
       "speed": 507.6
     }
   },
   "moon": {
-    "age_days": 28.19,
-    "illumination": 2,
+    "age_days": 28.24,
+    "illumination": 1.9,
     "name": "New Moon"
   },
   "field": {
-    "P": 0.5299999999999997,
+    "P": 0.5333333333333339,
     "C": 0.14380952380952386,
-    "R": 0.8366,
-    "E": 0.772989010989011,
-    "M": 0.02,
+    "R": 0.7901333333333335,
+    "E": 0.7444505494505494,
+    "M": 0.019,
     "A": 0.6,
-    "T": 0.5207213618559219,
-    "H": 0.637527072039072,
-    "dpdt": 0.8366
+    "T": 0.5182956572405374,
+    "H": 0.6329553797313798,
+    "dpdt": 0.7901333333333335
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
