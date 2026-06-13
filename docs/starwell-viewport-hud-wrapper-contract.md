@@ -1,6 +1,6 @@
 # STARWELL Viewport / HUD Wrapper Contract
 
-Status: governing contract before floating-panel implementation. The pure bounds helper, passive bounds binding layer, and empty HUD overlay layer exist, but no HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
+Status: governing contract after passive HUD infrastructure repair. The pure bounds helper, passive bounds binding layer, production-empty HUD overlay socket, and development-only diagnostic path exist. No HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
 
 ## Purpose
 
@@ -28,7 +28,7 @@ It does not replace the existing mobile pass or starburst binding work. It gives
 
 ### Viewport root
 
-Selector target, proposed:
+Selector target:
 
 ```text
 .starwell
@@ -40,7 +40,7 @@ Do not bind floating HUD panels to the browser viewport by default. Browser view
 
 ### Observer instrument shell
 
-Selector target, proposed:
+Selector target:
 
 ```text
 .live-glyph-panel.deep-observer-panel
@@ -52,7 +52,7 @@ Floating panels should treat this as their primary containment parent unless a l
 
 ### Glyph stage
 
-Selector target, existing:
+Selector target:
 
 ```text
 .glyph-orb-wrap
@@ -64,7 +64,7 @@ Rule: floating panels must not cover the glyph centre by default. Decorative aur
 
 ### Readout rail
 
-Selector target, existing:
+Selector target:
 
 ```text
 .glyph-readout
@@ -72,11 +72,11 @@ Selector target, existing:
 
 Role: owns equations, meter cards, sensor labels, principles, and status copy.
 
-Rule: readout content can scroll or stack, but should not become a floating panel source unless explicitly promoted.
+Rule: readout content can scroll or stack, but should not become a floating panel source unless explicitly promoted. The readout rail is now part of HUD avoidance geometry, so future panels should avoid it by default alongside the glyph stage.
 
 ### HUD overlay layer
 
-Selector target, active transitional socket:
+Selector target:
 
 ```text
 .deep-observer-hud-layer
@@ -84,7 +84,9 @@ Selector target, active transitional socket:
 
 Role: future absolute-positioned layer inside the Observer instrument shell.
 
-This layer is currently created by `apps/starwell/src/deep-hud-bounds-bind.js` when React has not provided it. It is empty, `aria-hidden`, marked with `data-deep-hud-layer="empty"`, and owned by the passive bounds binder until React takes native ownership.
+Current state: active transitional socket. The passive binder creates this layer only when React has not provided it. In production it remains empty, `aria-hidden`, and marked with `data-deep-hud-layer="empty"` while it contains no HUD furniture.
+
+Development diagnostic exception: `apps/starwell/src/deep-hud-debug-bead.js` can mount a noninteractive debug bead only in Vite development mode and only with explicit debug opt-in. While mounted, the layer marker becomes `data-deep-hud-layer="diagnostic"`; cleanup restores `empty` or `active` according to actual contents.
 
 This layer should be `position: absolute` inside a `position: relative` shell. It should use `pointer-events: none` by default, and individual future panels should restore `pointer-events: auto`.
 
@@ -92,7 +94,7 @@ Do not put live furniture, sensory controls, sound controls, or haptic controls 
 
 ## Implemented pure helper
 
-The flexible wall-measuring helper now exists at:
+The flexible wall-measuring helper exists at:
 
 ```text
 apps/starwell/src/lib/deepHudBounds.js
@@ -107,19 +109,22 @@ selector defaults
 viewport classes
 configurable insets
 rect normalisation
+panel-local shell / stage / readout resolution
 safe bounds
-avoid rects
+stage and readout avoid rects
 snap zones
 default panel zones
+ranked fallback zone candidates
+de-duplicated fallback zones
+collision-checked fallback positioning
 panel clamping
-avoid-zone fallback positioning
 ```
 
 This helper is allowed to become the foundation for future floating HUD work. It is not itself an active HUD panel.
 
 ## Passive bounds binding layer
 
-The passive STARWELL binding layer now exists at:
+The passive STARWELL binding layer exists at:
 
 ```text
 apps/starwell/src/deep-hud-bounds-bind.js
@@ -135,7 +140,8 @@ apps/starwell/index.html
 Current responsibilities:
 
 ```text
-measure the active Observer instrument shell
+measure each active Observer instrument shell
+scope stage/readout lookup to that shell
 ensure an empty .deep-observer-hud-layer exists when React has not provided one
 publish CSS custom properties on .live-glyph-panel.deep-observer-panel
 set data-deep-hud-bounds="ready"
@@ -162,19 +168,20 @@ Current CSS variables include:
 --deep-hud-readout-height
 ```
 
-This binding layer is passive. It creates only the empty HUD layer socket. It creates no floating panels, no sensory controls, no sound, and no haptics. It only wires the measured room into CSS and events for future furniture.
+This binding layer is passive. It creates only the empty HUD layer socket when React has not provided one. It creates no floating panels, no sensory controls, no sound, and no haptics. It only wires the measured room into CSS and events for future furniture.
 
 ## Bounds model
 
-`deepHudBounds.js` should compute bounds from the Observer instrument shell, not from `window.innerWidth` alone.
+`deepHudBounds.js` computes bounds from the Observer instrument shell, not from `window.innerWidth` alone.
 
 Minimum model:
 
 ```text
 shellRect       bounding box of .live-glyph-panel.deep-observer-panel
 stageRect       bounding box of .glyph-orb-wrap
+readoutRect     bounding box of .glyph-readout
 safeRect        shellRect inset by padding / touch margin
-avoidRects      glyph centre and any reserved fixed controls
+avoidRects      stageRect, readoutRect, and any reserved fixed controls
 snapZones       named edges / corners / rails inside safeRect
 ```
 
@@ -197,20 +204,20 @@ desktop: 12px minimum
 
 Floating panels should have named default positions, not arbitrary `top` / `left` values.
 
-Suggested defaults:
+Current semantic defaults:
 
 ```text
-sensory: lower-right rail, outside glyph centre
-time: upper-right rail, outside glyph centre
-status: lower-left rail
-controls: below or beside glyph stage depending on width
+sensory: bottom-right
+time: top-right
+status: bottom-left
+controls: bottom-rail
 ```
 
-On mobile, defaults should prefer stacked or docked positions instead of free-floating positions.
+On mobile and compact widths, defaults may collapse to `bottom-rail`, but fallback handling must not try the same blocked zone twice.
 
-## Snap zones
+## Snap and fallback zones
 
-Future snap zones should be named:
+Named snap zones:
 
 ```text
 top-left
@@ -220,6 +227,18 @@ bottom-right
 left-rail
 right-rail
 bottom-rail
+```
+
+Fallback selection rules:
+
+```text
+start with the semantic default zone
+append explicit fallback zones
+append the shared ranked fallback zone list
+de-duplicate zones before positioning
+test each candidate against avoidRects
+return the first non-intersecting candidate
+fall back to the first candidate only when every candidate intersects
 ```
 
 Do not create unnamed magic coordinates. Magic coordinates become haunted furniture.
@@ -240,6 +259,7 @@ Mobile panel rules:
 
 ```text
 never cover the glyph centre by default
+never cover the readout rail by default
 never require precise drag to access critical controls
 keep reset visible or reachable
 keep sound / haptic controls opt-in and easy to disable
@@ -257,6 +277,8 @@ low-stim visibly and audibly calms the interface
 panel stays bounded to HUD on mobile and desktop
 panel can reset to a safe default position
 panel cannot cover the glyph centre by default
+panel cannot cover the readout rail by default
+production HUD layer ownership is explicit
 ```
 
 Sensory controls should be governed by the HUD wrapper contract, not page-fixed free agents.
@@ -292,6 +314,8 @@ calculate avoid zones
 clamp panel coordinates
 return named snap zones
 return default positions by viewport class
+return ranked fallback candidates
+verify fallback candidates against avoid rects
 emit or return bounds-change data
 ```
 
@@ -319,23 +343,6 @@ deep-observer:low-stim-change
 
 Events should carry plain data only. Do not pass DOM nodes in event details unless there is no alternative.
 
-## Acceptance checklist
+## Next ownership step
 
-Before any floating HUD work is merged:
-
-```text
-panel is contained inside Observer instrument shell
-panel avoids glyph centre by default
-panel can reset to named default position
-panel clamps on resize and orientation change
-mobile layout remains readable
-reduced-motion / low-stim behaviour is respected
-sound and haptic controls are opt-in
-no duplicate clamp / snap helper exists elsewhere
-```
-
-## Working decision
-
-Build the room before releasing the furniture.
-
-No floating panels until the Observer instrument shell, HUD overlay layer, safe bounds, avoid zones, and mobile docking behaviour are explicit.
+React should become the canonical owner of `.deep-observer-hud-layer` before any furniture is added. The passive binder should then observe the React-owned layer and create a fallback only if the layer is absent.
