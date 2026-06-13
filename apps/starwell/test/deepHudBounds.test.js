@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 
 import {
   DEFAULT_HUD_SELECTORS,
+  avoidRectsForDefaultPosition,
+  getPanelZoneCandidates,
   makeRect,
   measureHudBounds,
+  panelIntersectsAvoidRects,
   resolveHudElements,
 } from '../src/lib/deepHudBounds.js';
 
@@ -104,4 +107,37 @@ test('HUD avoidance geometry includes both stage and readout', () => {
     makeRect(200, 470, 420, 90),
     extra,
   ]);
+});
+
+test('HUD fallback zones de-duplicate compact bottom rail before selecting a clear position', () => {
+  const panelSize = { width: 160, height: 70 };
+  const bounds = {
+    viewportClass: 'compact',
+    safeRect: makeRect(0, 0, 360, 500),
+    avoidRects: [makeRect(80, 420, 200, 80)],
+  };
+
+  const candidates = getPanelZoneCandidates('status', bounds, 'bottom-rail');
+  const position = avoidRectsForDefaultPosition('status', panelSize, bounds, 'bottom-rail');
+
+  assert.deepEqual(candidates.slice(0, 4), ['bottom-rail', 'top-right', 'top-left', 'bottom-right']);
+  assert.equal(position.zone, 'top-right');
+  assert.equal(panelIntersectsAvoidRects(position, panelSize, bounds), false);
+});
+
+test('HUD fallback selection skips blocked explicit fallback entries', () => {
+  const panelSize = { width: 200, height: 100 };
+  const bounds = {
+    viewportClass: 'wide',
+    safeRect: makeRect(0, 0, 800, 600),
+    avoidRects: [
+      makeRect(0, 500, 240, 100),
+      makeRect(0, 0, 240, 120),
+    ],
+  };
+
+  const position = avoidRectsForDefaultPosition('status', panelSize, bounds, ['top-left', 'right-rail']);
+
+  assert.equal(position.zone, 'right-rail');
+  assert.equal(panelIntersectsAvoidRects(position, panelSize, bounds), false);
 });
