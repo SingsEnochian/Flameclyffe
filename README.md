@@ -30,10 +30,14 @@ The `science_constants` Supabase table is the baseline for Planck/CODATA-style i
 
 - `docs/architecture.md`
 - `docs/deep-observer-math.md`
+- `docs/deep-starburst-binding.md`
+- `docs/hud-integration-decision.md`
 - `docs/observer-schema-crosswalk.md`
 - `docs/science-constants-and-claims.md`
 - `docs/security-rls-plan.md`
 - `docs/runa-flameclyffe-link-map.md`
+- `docs/starwell-viewport-hud-wrapper-contract.md`
+- `docs/thread-ledger.md`
 - `docs/ui-boundary-contract.md`
 
 ## Development

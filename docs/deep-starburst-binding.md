@@ -1,8 +1,8 @@
 # DEEP Starburst Binding
 
-Status: React-native implementation note. Last audited 2026-06-11.
+Status: React-native implementation note. Last reconciled 2026-06-13.
 
-The DEEP starburst layer is now owned by the STARWELL React path. The former companion binder remains in the repository as a rollback reference, but it is no longer loaded by `apps/starwell/index.html`.
+The DEEP starburst layer is owned by the STARWELL React path. The former companion binder remains in the repository as a rollback reference, but it is no longer loaded by `apps/starwell/index.html`.
 
 ## Current path
 
@@ -78,25 +78,36 @@ apps/starwell/src/lib/deepStarburst.js
 
 ## Data mapping
 
+The full canonical DEEP state is preserved through `normaliseStarburstDeep(...)`. This is required because the sensor proxies use `A`, `R`, and `M`, not only the aura-facing fields.
+
 ```text
 P / moonIllum  → ray count
 C              → sharpness / inner mask
 E / Kp         → jitter and turbulence
 Bz             → colour temperature
 charge         → luminosity and size
-A / R          → aura size boost
+A / R          → aura and sensor activation/resonance behaviour
+M              → moon sensor cycle behaviour
 ```
 
 The six meter chips map to:
 
 ```text
-Tide          temporal signature and symbolic mode
+Tide          temporal signature, attention, resonance, and symbolic mode
 Presence      P and A: node density, attention, activation
 Clarity       C and R: edge sharpness, coherence, resonance
 Entropy       E and Bz: disturbance, turbulence, colour shift
 Moon          M and moon illumination: cycle and ring influence
 Geomagnetic   Kp and charge: storm energy and centre luminosity
 ```
+
+Regression coverage lives in:
+
+```text
+apps/starwell/test/deepStarburst.test.js
+```
+
+It proves that `A`, `R`, and `M` survive normalisation and that Presence, Tide, Clarity, and Moon renderings respond to those live fields.
 
 ## Native React ownership
 
@@ -150,24 +161,37 @@ Do not delete the binder until aura and sensor parity have been visually confirm
 
 ## Completed transition
 
+React ownership transition:
+
 ```text
-19e5835f72dbddf93f38176ea7fa001013c3fa80
-Consolidate live glyph DEEP bridge state helpers
-
-d28234e72baa59bd76f217acbf74d3575192ce1d
-Hand off DEEP aura starburst to React
-
-0d31ff68d365d5873c35c5ffc1f9f86321dd7ced
-Hand off DEEP sensor chips to React
-
-8cc429379a89e3e25966ca7e7ec2d95948f7ff62
-Retire transitional DEEP starburst binder from STARWELL
+19e5835f72dbddf93f38176ea7fa001013c3fa80  Consolidate live glyph DEEP bridge state helpers
+d28234e72baa59bd76f217acbf74d3575192ce1d  Hand off DEEP aura starburst to React
+0d31ff68d365d5873c35c5ffc1f9f86321dd7ced  Hand off DEEP sensor chips to React
+8cc429379a89e3e25966ca7e7ec2d95948f7ff62  Retire transitional DEEP starburst binder from STARWELL
 ```
 
-All four commits deployed green on 2026-06-11.
+Sensor mapping repair:
+
+```text
+3ae8a85  Fix DEEP sensor starburst state mapping
+44917d7  Run STARWELL helper tests in CI
+```
+
+All STARWELL helper tests now run in CI before production build.
+
+## Relationship to passive HUD bounds
+
+The starburst binding layer and the passive HUD bounds layer are separate threads.
+
+```text
+starburst layer: aura and sensor flare variables
+HUD bounds layer: shell/stage/readout measurement, safe rects, avoid rects, snap/fallback positioning
+```
+
+Do not attach HUD panels, sound, or haptics to the starburst binding layer. Future HUD furniture should consume `deep-observer:hud-bounds` or the shared bounds helper rather than piggybacking on starburst ownership markers.
 
 ## Guardrails
 
 Do not replace the central canvas as part of starburst maintenance. The starburst remains an aura/socket layer around the current instrument. Central-core replacement should happen only after containment, performance, and accessibility testing.
 
-Do not attach HUD panels, sound, or haptics to this binding layer. The passive HUD bounds thread remains separate and panel-free.
+Do not attach HUD panels, sound, or haptics to this binding layer. The passive HUD bounds thread remains separate and production-panel-free.
