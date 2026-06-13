@@ -1,6 +1,6 @@
 # STARWELL / DEEP Thread Ledger
 
-Status: living loom-card. Last audited 2026-06-11.
+Status: living loom-card. Last reconciled 2026-06-13.
 
 Update this whenever a thread becomes load-bearing, retired, folded into React, or split into a new module.
 
@@ -31,7 +31,7 @@ Ownership note: `live-glyph.jsx` applies `buildStarburstVars(...)` directly and 
 
 ### DEEP sensor-chip flares
 
-Current state: live and React-native.
+Current state: live and React-native. The sensor starburst mapping preserves the full canonical DEEP state, including `A`, `R`, and `M`, before proxying values into the six sensor flare renderings.
 
 Primary files:
 
@@ -40,6 +40,7 @@ apps/starwell/src/live-glyph.jsx
 apps/starwell/src/deep-observer-boundary.css
 apps/starwell/src/lib/deepSensors.js
 apps/starwell/src/lib/deepStarburst.js
+apps/starwell/test/deepStarburst.test.js
 ```
 
 Responsibility: give each meter chip a clipped starburst flare, tiny status bead, label, tooltip, ARIA note, and shared sensor meaning.
@@ -84,20 +85,6 @@ Primary file:
 apps/starwell/src/lib/deepState.js
 ```
 
-Owns:
-
-```text
-DEFAULT_DEEP_STATE
-SKY_CLARITY
-SKY_TINTS
-clampNumber
-numberOr
-normaliseMoon
-getBridgeDeep
-normaliseDeepState
-makeDeepSignature
-```
-
 Rule: DEEP defaults, bridge extraction, sky clarity, moon normalisation, and signatures live here rather than being redefined in binders or visual components.
 
 ### DEEP bridge reader
@@ -108,13 +95,6 @@ Primary file:
 
 ```text
 apps/starwell/src/lib/deepBridge.js
-```
-
-Owns:
-
-```text
-BRIDGE_PULSE_URL
-fetchBridgeDeepPulse
 ```
 
 Rule: bridge pulse fetch logic belongs here. Callers may handle live, stale, and fallback state, but they should not reimplement the bridge fetch ritual.
@@ -150,18 +130,11 @@ Primary file:
 apps/starwell/src/lib/deepSensors.js
 ```
 
-Owns:
-
-```text
-DEEP_SENSOR_CHIPS
-getDeepSensorByIndex
-```
-
 Rule: sensor labels, notes, base sizes, rotations, and proxy mappings belong here. If the six-chip language changes, update this module first.
 
 ### DEEP HUD bounds helper
 
-Current state: implemented pure helper. Passive binding is active. Empty HUD layer socket is active. No active floating HUD panels yet.
+Current state: implemented pure helper, active passive binding, production-empty HUD layer socket, and development-only diagnostic bead path. No active floating HUD panels yet.
 
 Primary files:
 
@@ -169,7 +142,9 @@ Primary files:
 apps/starwell/src/lib/deepHudBounds.js
 apps/starwell/src/deep-hud-bounds-bind.js
 apps/starwell/src/deep-hud-bounds.css
+apps/starwell/src/deep-hud-debug-bead.js
 apps/starwell/index.html
+apps/starwell/test/deepHudBounds.test.js
 ```
 
 Owns:
@@ -180,6 +155,7 @@ DEFAULT_HUD_BREAKPOINTS
 DEFAULT_HUD_INSETS
 DEFAULT_PANEL_SIZE
 DEFAULT_PANEL_POSITIONS
+DEFAULT_PANEL_FALLBACK_ZONES
 toHudRect
 makeRect
 insetRect
@@ -195,15 +171,30 @@ getDefaultPanelZone
 positionPanelInZone
 getDefaultPanelPosition
 panelIntersectsRect
+panelIntersectsAvoidRects
+getPanelZoneCandidates
 avoidRectsForDefaultPosition
+```
+
+Completed repairs as of 2026-06-13:
+
+```text
+sensor starburst state mapping preserves A / R / M
+HUD diagnostic bead is development-gated and opt-in
+HUD layer no longer reports empty while diagnostics are mounted
+bounds measurement is scoped to each Observer panel
+readoutRect is included in avoidRects
+fallback zones are de-duplicated and collision-checked before selection
+STARWELL helper tests run in CI before production build
 ```
 
 Passive binder role:
 
 ```text
-measure the active Observer shell
-ensure an empty .deep-observer-hud-layer exists when React has not provided one
-mark that layer data-deep-hud-layer="empty"
+measure each active Observer shell
+scope stage/readout lookup to the current shell
+ensure a .deep-observer-hud-layer exists when React has not provided one
+mark production sockets data-deep-hud-layer="empty" while no content exists
 publish --deep-hud-* CSS custom properties
 set data-deep-hud-bounds="ready"
 set data-deep-hud-viewport by viewport class
@@ -212,6 +203,8 @@ recalculate on resize, orientation change, DOM mutation, and ResizeObserver even
 ```
 
 Rule: flexible HUD measurement, safe bounds, avoid zones, snap zones, default panel zones, and panel clamping belong here. No hardcoded coffin-coordinates. No live HUD furniture. No sound. No haptics. No React state mutation. The binding layer is active, but it is passive infrastructure only.
+
+Diagnostic note: the debug bead can exist only in a Vite development build with `?deepHudDebug=1` or `localStorage.deepHudDebug = "true"`. Production is panel-free and diagnostic-free.
 
 ## Retired but retained thread
 
@@ -252,18 +245,16 @@ Retention rule: keep the file available until visual QA confirms aura and sensor
 
 ## Dormant / static HUD threads
 
-Decision note:
+Decision notes:
 
 ```text
 docs/hud-integration-decision.md
 docs/starwell-viewport-hud-wrapper-contract.md
 ```
 
-Current decision: keep the static HUD files shelved for now. Treat them as prototypes/reference implementations. Do not directly load them into `apps/starwell/index.html` until the viewport/HUD wrapper contract is satisfied and sensory consent gates have been reviewed.
+Current decision: keep the static HUD files shelved. Treat them as prototypes/reference implementations. Do not directly load them into `apps/starwell/index.html` until the viewport/HUD wrapper contract, sensory consent gates, and React-owned HUD layer handoff are reviewed.
 
-### HUD bounds helper
-
-Current state: repo-present, not referenced by STARWELL React search results as of the latest audit.
+### Static HUD bounds helper
 
 Primary file:
 
@@ -275,9 +266,7 @@ Responsibility: exposes `window.DEEP_OBSERVER_HUD` with helpers for HUD element 
 
 Ownership note: do not duplicate floating-panel clamp or snap logic in STARWELL. Use `apps/starwell/src/lib/deepHudBounds.js` for STARWELL-native pure helper work rather than loading the global static helper directly.
 
-### Sensory engine panel
-
-Current state: repo-present, not referenced by STARWELL React search results as of the latest audit.
+### Static sensory engine panel
 
 Primary file:
 
@@ -287,76 +276,39 @@ starwell/deep-observer/deep-observer-sensory.js
 
 Responsibility: creates a draggable `#sensoryPanel` with sound, haptic, hum, and soft-mode controls. It uses `window.DEEP_OBSERVER_HUD` when available for panel clamping and snapping.
 
-Ownership note: this is a sensory/HUD layer, not the same thread as STARWELL starburst aura or sensor-chip visuals. Do not add another sound/haptic panel to STARWELL without deciding whether to reuse, module-ise, or retire this one. Do not load sensory UI before sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
+Ownership note: this is a sensory/HUD layer, not the same thread as STARWELL starburst aura or sensor-chip visuals. Do not add another sound/haptic panel to STARWELL without deciding whether to reuse, module-ise, or retire this one. Do not load sensory UI before sound, haptic, low-stim, mobile bounds, reset-position, and explicit consent gates are in place.
 
 ## Documentation threads
 
-### Binding note
-
-Primary file:
-
 ```text
 docs/deep-starburst-binding.md
-```
-
-Responsibility: records the completed React ownership path, shared modules, native markers, retired binder status, and rollback conditions.
-
-### UI boundary contract
-
-Primary file:
-
-```text
 docs/ui-boundary-contract.md
-```
-
-Responsibility: defines stage/rail/status regions, breakpoints, layer rules, overflow rules, and visual QA checklist.
-
-### DEEP Observer math notes
-
-Primary file:
-
-```text
 docs/deep-observer-math.md
-```
-
-Responsibility: keeps DEEP framed as symbolic instrumentation, not a physics proof or causation engine.
-
-### HUD integration decision
-
-Primary file:
-
-```text
 docs/hud-integration-decision.md
-```
-
-Responsibility: records the decision to keep static HUD files shelved for now, treat them as prototypes, and build or bridge STARWELL-native helpers only after the viewport/HUD wrapper contract is explicit.
-
-### Viewport / HUD wrapper contract
-
-Primary file:
-
-```text
 docs/starwell-viewport-hud-wrapper-contract.md
 ```
 
-Responsibility: defines the STARWELL viewport root, Observer instrument shell, glyph stage, readout rail, active empty HUD overlay layer socket, bounds model, default panel positions, snap zones, mobile rules, sensory gates, `deepHudBounds.js` scope, and passive bounds binding layer.
+These are now reconciled with the active HUD repair sequence through 2026-06-13.
 
-## Completed ownership transition
+## Completed ownership and repair transitions
 
-All four implementation commits were deployed green on 2026-06-11:
+React ownership transition, deployed green on 2026-06-11:
 
 ```text
-19e5835f72dbddf93f38176ea7fa001013c3fa80
-Consolidate live glyph DEEP bridge state helpers
+19e5835f72dbddf93f38176ea7fa001013c3fa80  Consolidate live glyph DEEP bridge state helpers
+d28234e72baa59bd76f217acbf74d3575192ce1d  Hand off DEEP aura starburst to React
+0d31ff68d365d5873c35c5ffc1f9f86321dd7ced  Hand off DEEP sensor chips to React
+8cc429379a89e3e25966ca7e7ec2d95948f7ff62  Retire transitional DEEP starburst binder from STARWELL
+```
 
-d28234e72baa59bd76f217acbf74d3575192ce1d
-Hand off DEEP aura starburst to React
+HUD correctness repair sequence, merged through 2026-06-13:
 
-0d31ff68d365d5873c35c5ffc1f9f86321dd7ced
-Hand off DEEP sensor chips to React
-
-8cc429379a89e3e25966ca7e7ec2d95948f7ff62
-Retire transitional DEEP starburst binder from STARWELL
+```text
+3ae8a85  Fix DEEP sensor starburst state mapping
+44917d7  Run STARWELL helper tests in CI
+90a3981  Contain DEEP HUD diagnostics to development
+6ae316e  Scope DEEP HUD bounds to each panel
+9d37280  Verify DEEP HUD fallback zones before selecting
 ```
 
 ## Parallel threads to watch
@@ -392,12 +344,12 @@ Add to the shared modules or explicitly bridge the static HUD files instead.
 
 ## Next safe moves
 
-1. Perform visual QA at mobile, tablet, laptop, and wide widths.
-2. Confirm aura and sensor parity in live, stale, and quiet-fallback bridge states.
-3. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, and reset-position consent gates are explicit.
-4. Add HUD furniture only after it can consume measured bounds, live inside the empty HUD layer, and respect mobile docking.
-5. Consider deleting the retired binder only after parity QA and a separate explicit cleanup approval.
-6. Consider merging mobile overrides into the main boundary sheet only after the mobile pass stabilises.
+1. Hand off `.deep-observer-hud-layer` ownership to React while leaving the passive binder as observer/fallback only.
+2. Perform visual QA at mobile, tablet, laptop, and wide widths.
+3. Confirm aura and sensor parity in live, stale, and quiet-fallback bridge states.
+4. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, reset-position, and consent gates are explicit.
+5. Add HUD furniture only after it can consume measured bounds, live inside the HUD layer, and respect mobile docking.
+6. Consider deleting the retired binder only after parity QA and a separate explicit cleanup approval.
 
 ## Working mantra
 
