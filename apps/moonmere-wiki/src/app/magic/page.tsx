@@ -4,7 +4,6 @@ import { getHubPage } from "@/lib/notion/content";
 import { pageMap } from "@/lib/page-map";
 
 export const metadata: Metadata = { title: "Magic & Runes" };
-export const revalidate = 900;
 
 export default async function MagicPage() {
   const page = await getHubPage(pageMap.magic.id, pageMap.magic.title);
