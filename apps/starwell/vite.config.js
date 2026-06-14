@@ -10,7 +10,10 @@ export default defineConfig({
     outDir: '../../dist/starwell',
     emptyOutDir: true,
     rollupOptions: {
-      input: resolve(process.cwd(), 'apps/starwell/index.html'),
+      input: {
+        main: resolve(process.cwd(), 'apps/starwell/index.html'),
+        materialQa: resolve(process.cwd(), 'apps/starwell/material-qa.html'),
+      },
     },
   },
 });
