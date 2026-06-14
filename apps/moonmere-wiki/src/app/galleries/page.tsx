@@ -5,14 +5,13 @@ import { EmptyState } from "@/components/empty-state";
 import { getAssets } from "@/lib/notion/content";
 
 export const metadata: Metadata = { title: "Galleries" };
-export const revalidate = 900;
 
 export default async function GalleriesPage() {
   const assets = await getAssets();
   return (
     <>
       <HeroBanner eyebrow="Visual Asset Library" title="Galleries & Page Assets">
-        <p>Portraits, wolf forms, sigils, maps, banners, turnarounds, and ornamental pagework.</p>
+        <p>Portraits, forms, sigils, maps, banners, turnarounds, and ornamental pagework.</p>
       </HeroBanner>
       <section className="page-section">
         {assets.length ? (
