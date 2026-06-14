@@ -24,15 +24,32 @@ function makeBoundsSignature(bounds) {
   return [bounds.viewportClass, bounds.inset, ...rects].join('|');
 }
 
+function markEmptyHudLayer(layer, owner) {
+  const isEmpty = layer.childElementCount === 0;
+
+  if (!layer.dataset.deepHudLayer && isEmpty) {
+    layer.dataset.deepHudLayer = 'empty';
+  }
+
+  if (owner && !layer.dataset.deepHudLayerOwner) {
+    layer.dataset.deepHudLayerOwner = owner;
+  }
+
+  if (layer.dataset.deepHudLayer === 'empty' && isEmpty && !layer.hasAttribute('aria-hidden')) {
+    layer.setAttribute('aria-hidden', 'true');
+  }
+}
+
 function ensureHudLayer(panel) {
   let layer = panel.querySelector(`:scope > ${HUD_LAYER_SELECTOR}`);
-  if (layer) return layer;
+  if (layer) {
+    markEmptyHudLayer(layer, 'react-shell');
+    return layer;
+  }
 
   layer = document.createElement('div');
   layer.className = 'deep-observer-hud-layer';
-  layer.setAttribute('aria-hidden', 'true');
-  layer.dataset.deepHudLayer = 'empty';
-  layer.dataset.deepHudLayerOwner = 'passive-bounds-binder';
+  markEmptyHudLayer(layer, 'passive-bounds-binder');
   panel.appendChild(layer);
   return layer;
 }
