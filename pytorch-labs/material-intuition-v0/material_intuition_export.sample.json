@@ -1,0 +1,11 @@
+{
+  "schema": "starwell.material_intuition.export.v0",
+  "source": "pytorch-labs/material-intuition-v0",
+  "note": "Sample export shape for comparing trained material outputs before a lab run creates material_intuition_export.json.",
+  "predictions": [
+    {"id":"cold_live","source":"deep_theory","rating":"approved","target":{"flare_hue":198,"flare_alpha":0.32,"vein_density":0.36,"edge_softness":0.64,"pulse_speed":7.2,"glass_to_leaf":0.42},"predicted":{"flare_hue":196.8,"flare_alpha":0.319,"vein_density":0.372,"edge_softness":0.628,"pulse_speed":7.05,"glass_to_leaf":0.408}},
+    {"id":"warm_charge","source":"deep_theory","rating":"approved","target":{"flare_hue":56,"flare_alpha":0.46,"vein_density":0.48,"edge_softness":0.58,"pulse_speed":4.8,"glass_to_leaf":0.36},"predicted":{"flare_hue":58.4,"flare_alpha":0.452,"vein_density":0.492,"edge_softness":0.566,"pulse_speed":4.94,"glass_to_leaf":0.348}},
+    {"id":"loch_calm","source":"deep_theory","rating":"approved","target":{"flare_hue":158,"flare_alpha":0.24,"vein_density":0.42,"edge_softness":0.72,"pulse_speed":8.4,"glass_to_leaf":0.30},"predicted":{"flare_hue":156.2,"flare_alpha":0.246,"vein_density":0.436,"edge_softness":0.704,"pulse_speed":8.18,"glass_to_leaf":0.286}},
+    {"id":"sigil_leaf","source":"sigil_topology","rating":"approved","target":{"flare_hue":142,"flare_alpha":0.34,"vein_density":0.62,"edge_softness":0.70,"pulse_speed":7.8,"glass_to_leaf":0.22},"predicted":{"flare_hue":144.1,"flare_alpha":0.335,"vein_density":0.604,"edge_softness":0.712,"pulse_speed":7.66,"glass_to_leaf":0.236}}
+  ]
+}
