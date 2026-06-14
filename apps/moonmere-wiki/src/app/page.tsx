@@ -7,8 +7,6 @@ import { SectionHeading } from "@/components/section-heading";
 import { getAssets, getCharacters, getHubPage } from "@/lib/notion/content";
 import { pageMap } from "@/lib/page-map";
 
-export const revalidate = 900;
-
 export default async function HomePage() {
   const [characters, assets, overview] = await Promise.all([
     getCharacters(),
@@ -23,7 +21,7 @@ export default async function HomePage() {
     <>
       <HeroBanner eyebrow="Series Wiki" title="The Luna Who Called Down the Moon">
         <p>
-          A restoration epic wearing werewolf fur, kept in emerald shadow, soft gold,
+          A werewolf-shaped restoration epic, kept in emerald shadow, soft gold,
           lakewater, and witness.
         </p>
         <div className="hero-actions">
