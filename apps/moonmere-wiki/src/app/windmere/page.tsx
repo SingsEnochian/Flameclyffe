@@ -4,7 +4,6 @@ import { getHubPage } from "@/lib/notion/content";
 import { pageMap } from "@/lib/page-map";
 
 export const metadata: Metadata = { title: "Windmere" };
-export const revalidate = 900;
 
 export default async function WindmerePage() {
   const page = await getHubPage(pageMap.windmere.id, pageMap.windmere.title);
@@ -12,7 +11,7 @@ export default async function WindmerePage() {
     <HubPage
       page={page}
       eyebrow="Lake · Wind · Witness"
-      summary="An elegant old territory of pale stone, black water, silver flags, inherited grace, and cruelty polished into tradition."
+      summary="An elegant old territory of pale stone, black water, silver flags, inherited grace, and tradition polished into authority."
     />
   );
 }
