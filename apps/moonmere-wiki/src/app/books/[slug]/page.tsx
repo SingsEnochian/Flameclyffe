@@ -4,8 +4,6 @@ import { HubPage } from "@/components/hub-page";
 import { getHubPage } from "@/lib/notion/content";
 import { bookPageMap } from "@/lib/page-map";
 
-export const revalidate = 900;
-
 export function generateStaticParams() {
   return Object.keys(bookPageMap).map((slug) => ({ slug }));
 }
