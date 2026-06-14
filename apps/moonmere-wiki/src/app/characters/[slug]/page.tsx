@@ -6,8 +6,6 @@ import { AssetCard } from "@/components/asset-card";
 import { StatusPill } from "@/components/status-pill";
 import { getAssets, getCharacterBlocks, getCharacterBySlug, getCharacters } from "@/lib/notion/content";
 
-export const revalidate = 900;
-
 export async function generateStaticParams() {
   const characters = await getCharacters();
   return characters.map((character) => ({ slug: character.slug }));
