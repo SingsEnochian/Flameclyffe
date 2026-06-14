@@ -10,6 +10,12 @@ from .contracts import (
     TextChunk,
 )
 from .lexical import LexicalCodexIndex, tokenise
+from .snapshot import (
+    SnapshotBatch,
+    SnapshotRecord,
+    SnapshotSource,
+    records_to_documents,
+)
 
 __all__ = [
     "CanonDocument",
@@ -18,9 +24,13 @@ __all__ = [
     "LexicalCodexIndex",
     "SearchQuery",
     "SearchResult",
+    "SnapshotBatch",
+    "SnapshotRecord",
+    "SnapshotSource",
     "TextChunk",
     "chunk_document",
     "chunk_documents",
     "normalise_text",
+    "records_to_documents",
     "tokenise",
 ]
