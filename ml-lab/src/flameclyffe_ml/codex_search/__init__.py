@@ -16,6 +16,11 @@ from .snapshot import (
     SnapshotSource,
     records_to_documents,
 )
+from .snapshot_io import (
+    snapshot_batch_from_json,
+    snapshot_batch_from_path,
+    snapshot_batch_to_json,
+)
 
 __all__ = [
     "CanonDocument",
@@ -32,5 +37,8 @@ __all__ = [
     "chunk_documents",
     "normalise_text",
     "records_to_documents",
+    "snapshot_batch_from_json",
+    "snapshot_batch_from_path",
+    "snapshot_batch_to_json",
     "tokenise",
 ]
