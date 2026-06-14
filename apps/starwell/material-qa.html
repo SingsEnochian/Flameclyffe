@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>STARWELL Material QA</title>
-  <meta name="description" content="STARWELL DEEP grown-material QA route for live aura inheritance and material-intuition comparison." />
+  <meta name="description" content="STARWELL DEEP grown-material QA route for live aura inheritance, material-intuition comparison, and observer math swapping." />
   <link rel="stylesheet" href="./src/starwell.css" />
   <link rel="stylesheet" href="./src/deep-observer.css" />
   <link rel="stylesheet" href="./src/deep-observer-boundary.css" />
@@ -130,7 +130,7 @@
 <body>
   <main class="material-qa-shell starwell sky-night">
     <p class="material-qa-intro">
-      Material QA route. The aura source cycles mock DEEP light variables. The passive bridge copies those variables to the Observer shell. The hand-authored membrane and learned export membrane then sit side by side for comparison.
+      Material QA route. The aura source cycles mock DEEP and sigil-derived light variables. The passive bridge copies those variables to the Observer shell. The hand-authored membrane and learned export membrane then sit side by side for comparison.
     </p>
 
     <div class="material-qa-status" aria-label="Material QA status">
@@ -159,7 +159,7 @@
         </div>
 
         <article class="glyph-readout">
-          <p>Current DEEP glyph · material QA</p>
+          <p>Current Observer glyph · material QA</p>
           <h3>QA-LIVE-MEMBRANE</h3>
           <time>Observer shell should carry live aura variables</time>
           <span>The strips below should shift with the aura source and learned material export.</span>
@@ -187,7 +187,7 @@
           </div>
 
           <p class="glyph-principle">
-            Instrument only. This page checks material inheritance, mobile caps, and the first learned comparison leaf without adding controls, sound, haptics, or HUD furniture.
+            Instrument only. This page checks material inheritance, mobile caps, observer math swapping, and the first learned comparison leaf without adding controls, sound, haptics, or HUD furniture.
           </p>
         </article>
       </div>
@@ -196,9 +196,10 @@
 
   <script type="module">
     const modes = [
-      { id: 'cold_live', name: 'cold live', hue: '198', alpha: '0.32', jitter: '0.24px', rot: '18deg' },
-      { id: 'warm_charge', name: 'warm charge', hue: '56', alpha: '0.46', jitter: '0.42px', rot: '46deg' },
-      { id: 'loch_calm', name: 'loch calm', hue: '158', alpha: '0.24', jitter: '0.12px', rot: '7deg' },
+      { id: 'cold_live', name: 'cold live', sourceLabel: 'deep_theory', hue: '198', alpha: '0.32', jitter: '0.24px', rot: '18deg' },
+      { id: 'warm_charge', name: 'warm charge', sourceLabel: 'deep_theory', hue: '56', alpha: '0.46', jitter: '0.42px', rot: '46deg' },
+      { id: 'loch_calm', name: 'loch calm', sourceLabel: 'deep_theory', hue: '158', alpha: '0.24', jitter: '0.12px', rot: '7deg' },
+      { id: 'sigil_leaf', name: 'sigil leaf', sourceLabel: 'sigil_topology', hue: '142', alpha: '0.34', jitter: '0.16px', rot: '22deg' },
     ];
 
     const panel = document.querySelector('.deep-observer-panel');
@@ -242,7 +243,7 @@
       aura.style.setProperty('--flare-alpha', mode.alpha);
       aura.style.setProperty('--flare-jitter', mode.jitter);
       aura.style.setProperty('--flare-rot', mode.rot);
-      modeNode.textContent = `mode: ${mode.name}`;
+      modeNode.textContent = `mode: ${mode.name} / ${mode.sourceLabel}`;
       applyLearned(mode);
       index += 1;
     }
