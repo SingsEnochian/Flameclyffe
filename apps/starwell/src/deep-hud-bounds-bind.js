@@ -6,6 +6,8 @@ const STAGE_SELECTOR = '.glyph-orb-wrap';
 const READOUT_SELECTOR = '.glyph-readout';
 const ROOT_SELECTOR = '#root';
 const UPDATE_THROTTLE_MS = 120;
+const REACT_HUD_LAYER_OWNER = 'react';
+const FALLBACK_HUD_LAYER_OWNER = 'passive-bounds-binder';
 
 let observer = null;
 let resizeObserver = null;
@@ -24,15 +26,28 @@ function makeBoundsSignature(bounds) {
   return [bounds.viewportClass, bounds.inset, ...rects].join('|');
 }
 
+function getLayerState(layer) {
+  return layer.childElementCount === 0 ? 'empty' : 'active';
+}
+
 function ensureHudLayer(panel) {
   let layer = panel.querySelector(`:scope > ${HUD_LAYER_SELECTOR}`);
-  if (layer) return layer;
+  if (layer) {
+    if (!layer.dataset.deepHudLayerOwner) {
+      layer.dataset.deepHudLayerOwner = REACT_HUD_LAYER_OWNER;
+    }
+    if (!layer.dataset.deepHudLayer) {
+      layer.dataset.deepHudLayer = getLayerState(layer);
+    }
+    return layer;
+  }
 
   layer = document.createElement('div');
   layer.className = 'deep-observer-hud-layer';
   layer.setAttribute('aria-hidden', 'true');
   layer.dataset.deepHudLayer = 'empty';
-  layer.dataset.deepHudLayerOwner = 'passive-bounds-binder';
+  layer.dataset.deepHudLayerOwner = FALLBACK_HUD_LAYER_OWNER;
+  layer.dataset.deepHudLayerFallback = 'true';
   panel.appendChild(layer);
   return layer;
 }
