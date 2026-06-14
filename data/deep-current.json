@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-14T22:05:58.069Z",
+  "generated_at": "2026-06-14T23:45:13.716Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-14T18:00",
+    "time": "2026-06-14T19:45",
     "sky": "Day",
     "current": {
-      "time": "2026-06-14T18:00",
+      "time": "2026-06-14T19:45",
       "interval": 900,
-      "temperature_2m": 84.2,
-      "relative_humidity_2m": 77,
+      "temperature_2m": 80.3,
+      "relative_humidity_2m": 84,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
-      "cloud_cover": 88,
-      "pressure_msl": 1014.1,
-      "wind_speed_10m": 4,
-      "wind_direction_10m": 196
+      "cloud_cover": 100,
+      "pressure_msl": 1014.5,
+      "wind_speed_10m": 5.8,
+      "wind_direction_10m": 167
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 5
     },
     "solar_wind": {
-      "time_tag": "2026-06-14 22:02:00.000",
-      "bz": 1.51,
-      "bt": 4.61,
-      "density": 6.54,
-      "speed": 460.9
+      "time_tag": "2026-06-14 23:41:00.000",
+      "bz": 3.13,
+      "bt": 4.72,
+      "density": 8.01,
+      "speed": 463.4
     }
   },
   "moon": {
-    "age_days": 29.19,
+    "age_days": 29.26,
     "illumination": 0.1,
     "name": "New Moon"
   },
   "field": {
-    "P": 0.5322222222222225,
-    "C": 0.310952380952381,
-    "R": 0.80095,
-    "E": 0.6311538461538462,
+    "P": 0.5366666666666666,
+    "C": 0.2538095238095239,
+    "R": 0.8654333333333333,
+    "E": 0.658076923076923,
     "M": 0.001,
-    "A": 0.6461538461538461,
-    "T": 0.5506905355555556,
-    "H": 0.5313652918192918,
-    "dpdt": 0.80095
+    "A": 0.6,
+    "T": 0.5431940481196581,
+    "H": 0.5478596544566544,
+    "dpdt": 0.8654333333333333
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
