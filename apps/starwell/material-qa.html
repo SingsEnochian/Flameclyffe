@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STARWELL Material QA</title>
+  <meta name="description" content="STARWELL DEEP grown-material QA route for live aura inheritance." />
+  <link rel="stylesheet" href="./src/starwell.css" />
+  <link rel="stylesheet" href="./src/deep-observer.css" />
+  <link rel="stylesheet" href="./src/deep-observer-boundary.css" />
+  <link rel="stylesheet" href="./src/deep-observer-mobile.css" />
+  <link rel="stylesheet" href="./src/deep-hud-bounds.css" />
+  <link rel="stylesheet" href="./src/stonewood-themes.css" />
+  <link rel="stylesheet" href="./src/stonewood-typography.css" />
+  <script type="module" src="./src/deep-material-vars-bind.js"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 12%, rgba(140, 202, 192, 0.22), transparent 24rem),
+        radial-gradient(circle at 76% 18%, rgba(231, 196, 119, 0.18), transparent 22rem),
+        linear-gradient(145deg, #101420, #183c3b);
+      color: rgba(234, 244, 239, 0.94);
+    }
+
+    .material-qa-shell {
+      width: min(1080px, 94vw);
+      margin: 0 auto;
+      padding: clamp(1rem, 4vw, 3rem) 0;
+    }
+
+    .material-qa-intro {
+      max-width: 720px;
+      margin: 0 0 1rem;
+      color: rgba(234, 244, 239, 0.78);
+      line-height: 1.6;
+    }
+
+    .material-qa-status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0 0 1rem;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .material-qa-status span {
+      padding: 0.35rem 0.58rem;
+      border: 1px solid rgba(231, 196, 119, 0.28);
+      border-radius: 999px;
+      background: rgba(3, 5, 10, 0.34);
+      color: rgba(234, 244, 239, 0.86);
+    }
+
+    .live-glyph-panel.deep-observer-panel {
+      margin-top: 1rem;
+    }
+
+    .glyph-orb-canvas {
+      width: 220px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, hsla(var(--flare-hue), 88%, 82%, calc(var(--flare-alpha) * 0.9)), transparent 8%),
+        radial-gradient(circle, hsla(var(--flare-hue), 78%, 72%, calc(var(--flare-alpha) * 0.5)), transparent 38%),
+        radial-gradient(circle, rgba(3, 5, 10, 0.98), rgba(3, 5, 10, 0.98));
+      box-shadow:
+        0 0 0 1px rgba(232, 244, 252, 0.14),
+        0 0 34px hsla(var(--flare-hue), 88%, 74%, calc(var(--flare-alpha) * 0.56));
+    }
+
+    .glyph-readout time,
+    .glyph-readout > span {
+      display: block;
+      margin: 0.2rem 0;
+      color: rgba(234, 244, 239, 0.72);
+    }
+
+    .glyph-principle {
+      color: rgba(234, 244, 239, 0.72);
+    }
+  </style>
+</head>
+<body>
+  <main class="material-qa-shell starwell sky-night">
+    <p class="material-qa-intro">
+      Material QA route. The aura source cycles mock DEEP light variables. The passive bridge copies those variables to the Observer shell, then the grown membrane inherits them from the shell.
+    </p>
+
+    <div class="material-qa-status" aria-label="Material QA status">
+      <span id="qa-mode">mode: waking</span>
+      <span id="qa-bridge">bridge: waiting</span>
+      <span id="qa-hue">hue: waiting</span>
+      <span id="qa-alpha">alpha: waiting</span>
+    </div>
+
+    <section class="live-glyph-panel deep-observer-panel chamber-card" aria-label="DEEP Observer material QA viewer">
+      <div class="map-heading compact">
+        <span>DEEP Material QA</span>
+        <strong>Grown membrane inheritance</strong>
+      </div>
+
+      <div class="live-glyph-layout">
+        <div
+          class="glyph-orb-wrap glyph-orb-canvas-wrap"
+          data-starburst-native="aura"
+          style="--n: 18; --w: 214px; --m: 42%; --flare-hue: 198; --flare-alpha: 0.32; --flare-jitter: 0.24px; --flare-rot: 18deg;"
+          aria-label="Mock live aura source"
+        >
+          <div class="glyph-orb glyph-orb-canvas" aria-hidden="true"></div>
+        </div>
+
+        <article class="glyph-readout">
+          <p>Current DEEP glyph · material QA</p>
+          <h3>QA-LIVE-MEMBRANE</h3>
+          <time>Observer shell should carry live aura variables</time>
+          <span>The strip below should shift with the aura source, not remain fixed.</span>
+
+          <div class="glyph-equation-strip" aria-label="Grown membrane inheritance checks">
+            <code>source aura -> --flare-hue / --flare-alpha</code>
+            <code>material bridge -> Observer shell</code>
+            <code>membrane -> inherited grown signal</code>
+            <span>Expected: data-deep-material-vars="live-aura"</span>
+          </div>
+
+          <p class="glyph-principle">
+            Instrument only. This page checks material inheritance, mobile caps, and the first grown light membrane without adding controls, sound, haptics, or HUD furniture.
+          </p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    const modes = [
+      { name: 'cold live', hue: '198', alpha: '0.32', jitter: '0.24px', rot: '18deg' },
+      { name: 'warm charge', hue: '56', alpha: '0.46', jitter: '0.42px', rot: '46deg' },
+      { name: 'loch calm', hue: '158', alpha: '0.24', jitter: '0.12px', rot: '7deg' },
+    ];
+
+    const panel = document.querySelector('.deep-observer-panel');
+    const aura = document.querySelector('.glyph-orb-wrap[data-starburst-native="aura"]');
+    const modeNode = document.querySelector('#qa-mode');
+    const bridgeNode = document.querySelector('#qa-bridge');
+    const hueNode = document.querySelector('#qa-hue');
+    const alphaNode = document.querySelector('#qa-alpha');
+    let index = 0;
+
+    function applyMode() {
+      const mode = modes[index % modes.length];
+      aura.style.setProperty('--flare-hue', mode.hue);
+      aura.style.setProperty('--flare-alpha', mode.alpha);
+      aura.style.setProperty('--flare-jitter', mode.jitter);
+      aura.style.setProperty('--flare-rot', mode.rot);
+      modeNode.textContent = `mode: ${mode.name}`;
+      index += 1;
+    }
+
+    function reportBridge() {
+      const style = getComputedStyle(panel);
+      bridgeNode.textContent = `bridge: ${panel.dataset.deepMaterialVars || 'waiting'}`;
+      hueNode.textContent = `hue: ${style.getPropertyValue('--flare-hue').trim() || 'missing'}`;
+      alphaNode.textContent = `alpha: ${style.getPropertyValue('--flare-alpha').trim() || 'missing'}`;
+      window.requestAnimationFrame(reportBridge);
+    }
+
+    applyMode();
+    window.setInterval(applyMode, 3200);
+    reportBridge();
+  </script>
+</body>
+</html>
