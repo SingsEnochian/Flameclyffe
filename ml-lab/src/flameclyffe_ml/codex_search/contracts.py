@@ -5,8 +5,9 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any
 
-from flameclyffe_ml.privacy import PrivacyClass
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from flameclyffe_ml.privacy import PrivacyClass
 
 
 class StrictModel(BaseModel):
