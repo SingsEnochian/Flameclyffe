@@ -5,14 +5,13 @@ import { EmptyState } from "@/components/empty-state";
 import { getCharacters } from "@/lib/notion/content";
 
 export const metadata: Metadata = { title: "Characters" };
-export const revalidate = 900;
 
 export default async function CharactersPage() {
   const characters = await getCharacters();
   return (
     <>
-      <HeroBanner eyebrow="Character Index" title="People, Wolves, Witnesses">
-        <p>Individual pages, wolf forms, relationships, accountability arcs, and visual canon.</p>
+      <HeroBanner eyebrow="Character Index" title="People of Windmere">
+        <p>Individual pages, relationship arcs, accountability notes, and visual canon.</p>
       </HeroBanner>
       <section className="page-section">
         {characters.length ? (
