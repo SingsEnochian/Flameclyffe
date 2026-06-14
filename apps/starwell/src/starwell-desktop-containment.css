@@ -1,0 +1,107 @@
+/* STARWELL desktop containment repair
+   Purpose: prevent medium-desktop instrument pages from exceeding the viewport.
+   This is a boundary sheet: it should make broken layouts stack or shrink before they create horizontal scroll. */
+
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.starwell,
+.starwell * {
+  box-sizing: border-box;
+}
+
+.starwell,
+.observatory-shell,
+.observatory-map,
+.chamber-card,
+.live-glyph-panel,
+.deep-observer-panel,
+.starwell-sigil-console,
+.deep-observer-shell,
+.deep-observer-layout,
+.deep-observer-grid,
+.deep-observer-stage,
+.deep-observer-console,
+.deep-instrument-shell,
+.deep-instrument-grid,
+.deep-field-grid,
+.instrument-stage,
+.instrument-shell,
+.instrument-grid {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.starwell :is(.chamber-card, .deep-observer-panel, .live-glyph-panel, .deep-observer-shell, .deep-instrument-shell) {
+  overflow-wrap: anywhere;
+}
+
+.starwell :is(.deep-explainer-grid, .observer-explainer-grid, .instrument-summary-grid, .deep-card-grid, .reading-card-grid) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+@media (min-width: 861px) and (max-width: 1320px) {
+  .starwell .observatory-shell {
+    width: min(100%, calc(100vw - clamp(1rem, 3vw, 2.5rem))) !important;
+  }
+
+  .starwell :is(.deep-explainer-grid, .observer-explainer-grid, .instrument-summary-grid, .deep-card-grid, .reading-card-grid) {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    overflow: visible !important;
+  }
+
+  .starwell :is(.deep-observer-layout, .deep-observer-grid, .deep-observer-stage, .deep-observer-console, .deep-instrument-grid, .deep-field-grid, .instrument-stage, .instrument-grid) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    overflow: visible !important;
+  }
+
+  .starwell :is(.deep-observer-readout, .deep-reading-panel, .instrument-readout-panel, .reading-detail-panel, .direct-reading-panel) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    justify-self: stretch !important;
+  }
+
+  .live-glyph-panel .live-glyph-layout {
+    grid-template-areas:
+      'stage'
+      'readout' !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    overflow: visible !important;
+  }
+
+  .live-glyph-panel .glyph-orb-wrap {
+    width: min(100%, 360px) !important;
+  }
+
+  .live-glyph-panel .glyph-readout {
+    max-height: none !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+  }
+
+  .starwell-sigil-console {
+    overflow: visible !important;
+  }
+
+  .sigil-field {
+    --sigil-size: min(520px, 62vw) !important;
+  }
+
+  .sigil-node {
+    --radius: min(220px, 20vw) !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .starwell :is(.deep-explainer-grid, .observer-explainer-grid, .instrument-summary-grid, .deep-card-grid, .reading-card-grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
