@@ -99,7 +99,7 @@ class LexicalCodexIndex:
         documents: list[CanonDocument],
         *,
         chunk_config: ChunkConfig | None = None,
-    ) -> "LexicalCodexIndex":
+    ) -> LexicalCodexIndex:
         return cls(chunk_documents(documents, config=chunk_config))
 
     def _build_document_frequency(self) -> Counter[str]:
@@ -132,19 +132,25 @@ class LexicalCodexIndex:
 
             token_counts = Counter(tokens)
             title_tokens = set(self._title_tokens[index])
-            matched_terms = sorted(set(query_tokens) & set(tokens))
+            searchable_terms = set(tokens) | title_tokens
+            matched_terms = sorted(set(query_tokens) & searchable_terms)
             if not matched_terms:
                 continue
 
             score = 0.0
             for token, query_count in query_counts.items():
                 frequency = token_counts.get(token, 0)
-                if frequency <= 0:
+                title_match = token in title_tokens
+                if frequency <= 0 and not title_match:
                     continue
-                term_score = (frequency / len(tokens)) * self._idf(token)
+
+                term_score = 0.0
+                if frequency > 0:
+                    term_score += (frequency / len(tokens)) * self._idf(token)
+                if title_match:
+                    term_score += 0.35 * self._idf(token)
+
                 score += term_score * (1.0 + math.log(query_count))
-                if token in title_tokens:
-                    score += 0.35 * self._idf(token)
 
             if score <= 0:
                 continue
