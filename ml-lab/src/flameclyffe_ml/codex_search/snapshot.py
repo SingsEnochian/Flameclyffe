@@ -54,7 +54,7 @@ class SnapshotRecord(BaseModel):
         return stripped
 
     @model_validator(mode="after")
-    def public_records_must_be_reviewed_and_public(self) -> "SnapshotRecord":
+    def public_records_must_be_reviewed_and_public(self) -> SnapshotRecord:
         if self.public and self.privacy_class is not PrivacyClass.PUBLIC:
             raise ValueError(
                 "public snapshot records must use PrivacyClass.PUBLIC"
