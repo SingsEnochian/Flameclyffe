@@ -29,10 +29,12 @@ export const DEEP_HUD = Object.freeze({
     bounds: 'deepHudBounds',
     boundsSignature: 'deepHudBoundsSignature',
     viewport: 'deepHudViewport',
+    socketStatus: 'deepHudSocketStatus',
   }),
 
   events: Object.freeze({
     bounds: 'deep-observer:hud-bounds',
+    socketStatus: 'deep-observer:hud-socket-status',
   }),
 });
 
