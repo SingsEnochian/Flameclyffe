@@ -29,7 +29,10 @@ def test_golden_fixture_baseline_retrieves_expected_records() -> None:
     assert summary.mean_reciprocal_rank == 1.0
     assert summary.mean_recall_at_k == 1.0
     assert summary.mean_precision_at_k >= 0.333333
-    assert all(result.retrieved_document_ids[0] in result.relevant_document_ids for result in summary.results)
+    assert all(
+        result.retrieved_document_ids[0] in result.relevant_document_ids
+        for result in summary.results
+    )
 
 
 def test_empty_judgement_list_returns_zero_summary() -> None:
