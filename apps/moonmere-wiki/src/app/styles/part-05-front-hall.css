@@ -35,9 +35,58 @@
   border-radius: var(--radius-md);
 }
 
+.toc-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold-400);
+}
+
 .toc-card strong {
   color: var(--emerald-700);
   font-family: var(--font-display), Georgia, serif;
   font-size: clamp(1.35rem, 2.3vw, 2rem);
   line-height: 1.05;
+}
+
+.toc-card span:last-child {
+  color: var(--ink-700);
+  line-height: 1.55;
+}
+
+.toc-glyph {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  color: var(--gold-600);
+  background: rgba(216, 189, 124, 0.12);
+  border: 1px solid rgba(173, 135, 67, 0.38);
+  border-radius: 50%;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.45rem;
+}
+
+.gate-panel blockquote {
+  margin: 24px 0 0;
+  padding: 20px 24px;
+  color: var(--ink-700);
+  background: rgba(216, 189, 124, 0.12);
+  border-left: 3px solid var(--gold-500);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.25rem;
+  font-style: italic;
+}
+
+@media (max-width: 960px) {
+  .toc-grid,
+  .toc-grid.compact-toc {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .toc-grid,
+  .toc-grid.compact-toc {
+    grid-template-columns: 1fr;
+  }
 }
