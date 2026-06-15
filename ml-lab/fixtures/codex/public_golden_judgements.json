@@ -1,0 +1,44 @@
+[
+  {
+    "query": "living house roots glass",
+    "relevant_document_ids": ["templehouse"],
+    "public_only": true,
+    "top_k": 3
+  },
+  {
+    "query": "priestess linguist kelyran stonesinging",
+    "relevant_document_ids": ["falka-hearthlight"],
+    "public_only": true,
+    "top_k": 3
+  },
+  {
+    "query": "north-star flame gold copper",
+    "relevant_document_ids": ["virelya-lioreal"],
+    "public_only": true,
+    "top_k": 3
+  },
+  {
+    "query": "bone-white city black diamond sand",
+    "relevant_document_ids": ["third-city"],
+    "public_only": true,
+    "top_k": 3
+  },
+  {
+    "query": "Japanese Norse English conlang",
+    "relevant_document_ids": ["kelyran-language"],
+    "public_only": true,
+    "top_k": 3
+  },
+  {
+    "query": "cat bird dragon biscuit raids",
+    "relevant_document_ids": ["nightwings"],
+    "public_only": true,
+    "top_k": 3
+  },
+  {
+    "query": "gold rings green agate mauve cracked moon",
+    "relevant_document_ids": ["three-moons"],
+    "public_only": true,
+    "top_k": 3
+  }
+]
