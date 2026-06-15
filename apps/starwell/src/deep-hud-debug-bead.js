@@ -1,6 +1,7 @@
 import './deep-hud-debug-bead.css';
 import { avoidRectsForDefaultPosition, measureHudBounds } from './lib/deepHudBounds.js';
 import { DEEP_HUD_DEBUG } from './lib/deepHudDebugContract.js';
+import { HUD_MEASURE_SELECTORS } from './lib/deepHudMeasureSelectors.js';
 import {
   DEEP_HUD,
   getHudLayerSelector,
@@ -74,7 +75,11 @@ function updateBead(panel) {
   const layer = panel.querySelector(HUD_LAYER_SELECTOR);
   if (!layer) return;
 
-  const bounds = measureHudBounds({ root: document, shell: panel });
+  const bounds = measureHudBounds({
+    root: document,
+    selectors: HUD_MEASURE_SELECTORS,
+    shell: panel,
+  });
   const position = avoidRectsForDefaultPosition(
     DEEP_HUD_DEBUG.panelKey,
     DEEP_HUD_DEBUG.panelSize,
