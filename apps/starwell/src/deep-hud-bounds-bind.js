@@ -1,4 +1,5 @@
 import { measureHudBounds } from './lib/deepHudBounds.js';
+import { HUD_MEASURE_SELECTORS } from './lib/deepHudMeasureSelectors.js';
 import {
   DEEP_HUD,
   getHudLayerSelector,
@@ -95,7 +96,13 @@ function bindPanel(panel) {
   ensureHudLayer(panel);
   const stage = panel.querySelector(STAGE_SELECTOR);
   const readout = panel.querySelector(READOUT_SELECTOR);
-  const bounds = measureHudBounds({ root: panel, shell: panel, stage, readout });
+  const bounds = measureHudBounds({
+    root: panel,
+    selectors: HUD_MEASURE_SELECTORS,
+    shell: panel,
+    stage,
+    readout,
+  });
   const signature = makeBoundsSignature(bounds);
   if (signature === panel.dataset[DEEP_HUD.data.boundsSignature]) return;
 
