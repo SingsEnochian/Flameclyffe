@@ -36,6 +36,10 @@ export const DEEP_HUD = Object.freeze({
     bounds: 'deep-observer:hud-bounds',
     socketStatus: 'deep-observer:hud-socket-status',
   }),
+
+  debug: Object.freeze({
+    windowKey: '__STARWELL_DEEP_HUD__',
+  }),
 });
 
 export function getObserverPanelSelector() {
