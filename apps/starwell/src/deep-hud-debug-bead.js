@@ -1,5 +1,6 @@
 import './deep-hud-debug-bead.css';
 import { avoidRectsForDefaultPosition, measureHudBounds } from './lib/deepHudBounds.js';
+import { DEEP_HUD_DEBUG } from './lib/deepHudDebugContract.js';
 import {
   DEEP_HUD,
   getHudLayerSelector,
@@ -8,17 +9,7 @@ import {
 
 const PANEL_SELECTOR = getObserverPanelSelector();
 const HUD_LAYER_SELECTOR = getHudLayerSelector();
-const BEAD_CLASS = 'deep-hud-debug-bead';
-const PANEL_SIZE = { width: 164, height: 52 };
 const UPDATE_THROTTLE_MS = DEEP_HUD.updateThrottleMs;
-const DEBUG_QUERY_PARAM = 'deepHudDebug';
-const DEBUG_ENABLED_VALUE = '1';
-const DEBUG_STORAGE_KEY = 'deepHudDebug';
-const DEBUG_STORAGE_VALUE = 'true';
-const DIAGNOSTIC_STATE = 'diagnostic';
-const ACTIVE_STATE = 'active';
-const DEBUG_PANEL_KEY = 'status';
-const DEBUG_FALLBACK_ZONE = 'bottom-rail';
 
 let updateTimer = 0;
 let observer = null;
@@ -31,12 +22,13 @@ function debugIsEnabled() {
   let storedPreference = null;
 
   try {
-    storedPreference = window.localStorage?.getItem(DEBUG_STORAGE_KEY);
+    storedPreference = window.localStorage?.getItem(DEEP_HUD_DEBUG.storageKey);
   } catch {
     storedPreference = null;
   }
 
-  return params.get(DEBUG_QUERY_PARAM) === DEBUG_ENABLED_VALUE || storedPreference === DEBUG_STORAGE_VALUE;
+  return params.get(DEEP_HUD_DEBUG.queryParam) === DEEP_HUD_DEBUG.queryEnabledValue
+    || storedPreference === DEEP_HUD_DEBUG.storageEnabledValue;
 }
 
 function px(value) {
@@ -46,9 +38,9 @@ function px(value) {
 function syncHudLayerState(layer) {
   if (!layer) return;
 
-  const hasDiagnostic = Boolean(layer.querySelector(`:scope > .${BEAD_CLASS}`));
+  const hasDiagnostic = Boolean(layer.querySelector(`:scope > .${DEEP_HUD_DEBUG.beadClass}`));
   if (hasDiagnostic) {
-    layer.dataset[DEEP_HUD.data.layer] = DIAGNOSTIC_STATE;
+    layer.dataset[DEEP_HUD.data.layer] = DEEP_HUD_DEBUG.diagnosticState;
     return;
   }
 
@@ -57,22 +49,22 @@ function syncHudLayerState(layer) {
     return;
   }
 
-  if (layer.dataset[DEEP_HUD.data.layer] === DIAGNOSTIC_STATE) {
-    layer.dataset[DEEP_HUD.data.layer] = ACTIVE_STATE;
+  if (layer.dataset[DEEP_HUD.data.layer] === DEEP_HUD_DEBUG.diagnosticState) {
+    layer.dataset[DEEP_HUD.data.layer] = DEEP_HUD_DEBUG.activeState;
   }
 }
 
 function getOrCreateBead(layer) {
-  let bead = layer.querySelector(`:scope > .${BEAD_CLASS}`);
+  let bead = layer.querySelector(`:scope > .${DEEP_HUD_DEBUG.beadClass}`);
   if (bead) {
     syncHudLayerState(layer);
     return bead;
   }
 
   bead = document.createElement('output');
-  bead.className = BEAD_CLASS;
-  bead.setAttribute('aria-label', 'DEEP HUD bounds debug status');
-  bead.dataset.deepHudDebug = 'bead';
+  bead.className = DEEP_HUD_DEBUG.beadClass;
+  bead.setAttribute('aria-label', DEEP_HUD_DEBUG.beadAriaLabel);
+  bead.dataset.deepHudDebug = DEEP_HUD_DEBUG.beadDatasetValue;
   layer.appendChild(bead);
   syncHudLayerState(layer);
   return bead;
@@ -83,7 +75,12 @@ function updateBead(panel) {
   if (!layer) return;
 
   const bounds = measureHudBounds({ root: document, shell: panel });
-  const position = avoidRectsForDefaultPosition(DEBUG_PANEL_KEY, PANEL_SIZE, bounds, DEBUG_FALLBACK_ZONE);
+  const position = avoidRectsForDefaultPosition(
+    DEEP_HUD_DEBUG.panelKey,
+    DEEP_HUD_DEBUG.panelSize,
+    bounds,
+    DEEP_HUD_DEBUG.fallbackZone,
+  );
   const bead = getOrCreateBead(layer);
 
   bead.style.setProperty('--debug-x', px(position.x - bounds.safeRect.left));
@@ -144,7 +141,7 @@ function stopDebugBead() {
   window.removeEventListener('resize', scheduleUpdate);
   window.removeEventListener('orientationchange', scheduleUpdate);
 
-  document.querySelectorAll(`${HUD_LAYER_SELECTOR} > .${BEAD_CLASS}`).forEach((bead) => {
+  document.querySelectorAll(`${HUD_LAYER_SELECTOR} > .${DEEP_HUD_DEBUG.beadClass}`).forEach((bead) => {
     const layer = bead.parentElement;
     bead.remove();
     syncHudLayerState(layer);
