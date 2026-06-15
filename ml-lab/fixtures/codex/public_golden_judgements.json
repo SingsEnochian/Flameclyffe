@@ -6,7 +6,7 @@
     "top_k": 3
   },
   {
-    "query": "priestess linguist kelyran stonesinging",
+    "query": "priestess linguist healer stonesinging",
     "relevant_document_ids": ["falka-hearthlight"],
     "public_only": true,
     "top_k": 3
