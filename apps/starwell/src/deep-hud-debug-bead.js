@@ -64,7 +64,7 @@ function getOrCreateBead(layer) {
   bead = document.createElement('output');
   bead.className = DEEP_HUD_DEBUG.beadClass;
   bead.setAttribute('aria-label', DEEP_HUD_DEBUG.beadAriaLabel);
-  bead.dataset.deepHudDebug = DEEP_HUD_DEBUG.beadDatasetValue;
+  bead.dataset[DEEP_HUD_DEBUG.beadDatasetKey] = DEEP_HUD_DEBUG.beadDatasetValue;
   layer.appendChild(bead);
   syncHudLayerState(layer);
   return bead;
