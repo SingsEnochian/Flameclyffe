@@ -15,6 +15,7 @@ export const DEEP_HUD = Object.freeze({
   owner: Object.freeze({
     reactShell: 'react-shell',
     passiveBoundsBinder: 'passive-bounds-binder',
+    bootstrapSocketBinder: 'bootstrap-socket-binder',
   }),
 
   attr: Object.freeze({
