@@ -1,0 +1,110 @@
+{
+  "snapshot_name": "terra-public-golden-fixture",
+  "records": [
+    {
+      "source_id": "templehouse",
+      "title": "Hearthweave Templehouse",
+      "body": "The Hearthweave Templehouse is a living house of roots, glass, gold-lit instruments, warm rooms, and listening walls. It anchors the waking city and responds through quiet lantern signals.",
+      "entity_type": "location",
+      "canon_status": "working",
+      "route": "/locations/hearthweave-templehouse",
+      "privacy_class": 0,
+      "public": true,
+      "reviewed": true,
+      "source": "static_canon",
+      "metadata": {
+        "fixture_role": "location-anchor"
+      }
+    },
+    {
+      "source_id": "falka-hearthlight",
+      "title": "Falka Hearthlight",
+      "body": "Falka Hearthlight is a priestess, linguist, healer, and expedition lead. She studies Kelyran language, stonesinging, waking cities, and the signals of the Hearthweave Templehouse.",
+      "entity_type": "character",
+      "canon_status": "working",
+      "route": "/characters/falka-hearthlight",
+      "privacy_class": 0,
+      "public": true,
+      "reviewed": true,
+      "source": "static_canon",
+      "metadata": {
+        "fixture_role": "lead-character"
+      }
+    },
+    {
+      "source_id": "virelya-lioreal",
+      "title": "Virelya Lioreal",
+      "body": "Virelya Lioreal carries the North-Star Flame. Her visual language uses hearth gold, white core light, copper edges, steadiness, and a living flame presence.",
+      "entity_type": "character",
+      "canon_status": "working",
+      "route": "/characters/virelya-lioreal",
+      "privacy_class": 0,
+      "public": true,
+      "reviewed": true,
+      "source": "static_canon",
+      "metadata": {
+        "fixture_role": "lead-character"
+      }
+    },
+    {
+      "source_id": "third-city",
+      "title": "Third City",
+      "body": "The Third City is a waking city with bone-white architecture, black diamond sand, rooted systems, lantern responses, and a hopeful signal returning through old stone and glass.",
+      "entity_type": "location",
+      "canon_status": "working",
+      "route": "/locations/third-city",
+      "privacy_class": 0,
+      "public": true,
+      "reviewed": true,
+      "source": "static_canon",
+      "metadata": {
+        "fixture_role": "city"
+      }
+    },
+    {
+      "source_id": "kelyran-language",
+      "title": "Kelyran Language",
+      "body": "Kelyran is an ancient conlang influenced by Japanese, Norse, and English. It is associated with sung speech, old city memory, almost-doors, names, and translation work.",
+      "entity_type": "language",
+      "canon_status": "working",
+      "route": "/languages/kelyran",
+      "privacy_class": 0,
+      "public": true,
+      "reviewed": true,
+      "source": "static_canon",
+      "metadata": {
+        "fixture_role": "language"
+      }
+    },
+    {
+      "source_id": "nightwings",
+      "title": "Nightwings",
+      "body": "Nightwings are cat-bird-dragon companions with ivory, sapphire, and gold colouring. They are small, clever, social, and famous for biscuit raids around the Templehouse.",
+      "entity_type": "lore",
+      "canon_status": "working",
+      "route": "/lore/nightwings",
+      "privacy_class": 0,
+      "public": true,
+      "reviewed": true,
+      "source": "static_canon",
+      "metadata": {
+        "fixture_role": "ecology"
+      }
+    },
+    {
+      "source_id": "three-moons",
+      "title": "Three Moons",
+      "body": "Terra Aeterna has three moons: a pale gold moon with rings, a green agate moon associated with forest and the deceased, and a deep mauve cracked moon.",
+      "entity_type": "lore",
+      "canon_status": "working",
+      "route": "/lore/three-moons",
+      "privacy_class": 0,
+      "public": true,
+      "reviewed": true,
+      "source": "static_canon",
+      "metadata": {
+        "fixture_role": "cosmology"
+      }
+    }
+  ]
+}
