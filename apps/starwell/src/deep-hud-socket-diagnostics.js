@@ -35,6 +35,36 @@ function runDiagnostics() {
   const statusLine = formatHudSocketReport(report);
   emitReport(report);
   logReport(report, statusLine);
+  return report;
+}
+
+function getDebugApi() {
+  const existing = window[DEEP_HUD.debug.windowKey];
+  if (existing && typeof existing === 'object') return existing;
+
+  const api = {};
+  window[DEEP_HUD.debug.windowKey] = api;
+  return api;
+}
+
+function installDebugApi() {
+  const api = getDebugApi();
+  api.collectSocketReport = () => collectHudSocketReport(document);
+  api.formatSocketReport = () => formatHudSocketReport(collectHudSocketReport(document));
+  api.runSocketDiagnostics = () => runDiagnostics();
+}
+
+function uninstallDebugApi() {
+  const api = window[DEEP_HUD.debug.windowKey];
+  if (!api || typeof api !== 'object') return;
+
+  delete api.collectSocketReport;
+  delete api.formatSocketReport;
+  delete api.runSocketDiagnostics;
+
+  if (Object.keys(api).length === 0) {
+    delete window[DEEP_HUD.debug.windowKey];
+  }
 }
 
 function scheduleDiagnostics() {
@@ -46,6 +76,7 @@ function scheduleDiagnostics() {
 }
 
 function startDiagnostics() {
+  installDebugApi();
   runDiagnostics();
   document.addEventListener(DEEP_HUD.events.bounds, scheduleDiagnostics);
 
@@ -58,6 +89,7 @@ function stopDiagnostics() {
   document.removeEventListener(DEEP_HUD.events.bounds, scheduleDiagnostics);
   if (observer) observer.disconnect();
   if (updateTimer) window.clearTimeout(updateTimer);
+  uninstallDebugApi();
 }
 
 window.addEventListener('pagehide', stopDiagnostics, { once: true });
