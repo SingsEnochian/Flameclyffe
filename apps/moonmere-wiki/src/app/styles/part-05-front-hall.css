@@ -1,0 +1,43 @@
+.front-hall {
+  margin-top: 28px;
+}
+
+.front-hall h2,
+.gate-panel h2 {
+  margin: 0 0 12px;
+  color: var(--ink-900);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.04;
+}
+
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.toc-grid.compact-toc {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.toc-card {
+  display: flex;
+  min-height: 210px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px;
+  color: var(--ink-900);
+  text-decoration: none;
+  background: var(--ivory-100);
+  border: 1px solid rgba(173, 135, 67, 0.45);
+  border-radius: var(--radius-md);
+}
+
+.toc-card strong {
+  color: var(--emerald-700);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.35rem, 2.3vw, 2rem);
+  line-height: 1.05;
+}
