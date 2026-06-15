@@ -23,6 +23,9 @@ def snapshot_batch_from_json(value: str) -> SnapshotBatch:
     Accepted shapes:
     - a batch object with a `records` array;
     - a bare list of record objects, wrapped into the default SnapshotBatch.
+
+    Exported `snapshot_hash` values are ignored on import and recomputed from
+    canonical batch content.
     """
 
     payload = json.loads(value)
@@ -31,7 +34,9 @@ def snapshot_batch_from_json(value: str) -> SnapshotBatch:
         return SnapshotBatch(records=_RECORD_LIST_ADAPTER.validate_python(payload))
 
     if isinstance(payload, dict):
-        return SnapshotBatch.model_validate(payload)
+        batch_payload = dict(payload)
+        batch_payload.pop("snapshot_hash", None)
+        return SnapshotBatch.model_validate(batch_payload)
 
     raise TypeError("Snapshot JSON must be an object or an array of records.")
 
