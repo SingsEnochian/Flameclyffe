@@ -1,11 +1,24 @@
 import './deep-hud-debug-bead.css';
 import { avoidRectsForDefaultPosition, measureHudBounds } from './lib/deepHudBounds.js';
+import {
+  DEEP_HUD,
+  getHudLayerSelector,
+  getObserverPanelSelector,
+} from './lib/deepHudContract.js';
 
-const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
-const HUD_LAYER_SELECTOR = '.deep-observer-hud-layer';
+const PANEL_SELECTOR = getObserverPanelSelector();
+const HUD_LAYER_SELECTOR = getHudLayerSelector();
 const BEAD_CLASS = 'deep-hud-debug-bead';
 const PANEL_SIZE = { width: 164, height: 52 };
-const UPDATE_THROTTLE_MS = 120;
+const UPDATE_THROTTLE_MS = DEEP_HUD.updateThrottleMs;
+const DEBUG_QUERY_PARAM = 'deepHudDebug';
+const DEBUG_ENABLED_VALUE = '1';
+const DEBUG_STORAGE_KEY = 'deepHudDebug';
+const DEBUG_STORAGE_VALUE = 'true';
+const DIAGNOSTIC_STATE = 'diagnostic';
+const ACTIVE_STATE = 'active';
+const DEBUG_PANEL_KEY = 'status';
+const DEBUG_FALLBACK_ZONE = 'bottom-rail';
 
 let updateTimer = 0;
 let observer = null;
@@ -18,12 +31,12 @@ function debugIsEnabled() {
   let storedPreference = null;
 
   try {
-    storedPreference = window.localStorage?.getItem('deepHudDebug');
+    storedPreference = window.localStorage?.getItem(DEBUG_STORAGE_KEY);
   } catch {
     storedPreference = null;
   }
 
-  return params.get('deepHudDebug') === '1' || storedPreference === 'true';
+  return params.get(DEBUG_QUERY_PARAM) === DEBUG_ENABLED_VALUE || storedPreference === DEBUG_STORAGE_VALUE;
 }
 
 function px(value) {
@@ -35,17 +48,17 @@ function syncHudLayerState(layer) {
 
   const hasDiagnostic = Boolean(layer.querySelector(`:scope > .${BEAD_CLASS}`));
   if (hasDiagnostic) {
-    layer.dataset.deepHudLayer = 'diagnostic';
+    layer.dataset[DEEP_HUD.data.layer] = DIAGNOSTIC_STATE;
     return;
   }
 
   if (layer.childElementCount === 0) {
-    layer.dataset.deepHudLayer = 'empty';
+    layer.dataset[DEEP_HUD.data.layer] = DEEP_HUD.state.empty;
     return;
   }
 
-  if (layer.dataset.deepHudLayer === 'diagnostic') {
-    layer.dataset.deepHudLayer = 'active';
+  if (layer.dataset[DEEP_HUD.data.layer] === DIAGNOSTIC_STATE) {
+    layer.dataset[DEEP_HUD.data.layer] = ACTIVE_STATE;
   }
 }
 
@@ -70,12 +83,12 @@ function updateBead(panel) {
   if (!layer) return;
 
   const bounds = measureHudBounds({ root: document, shell: panel });
-  const position = avoidRectsForDefaultPosition('status', PANEL_SIZE, bounds, 'bottom-rail');
+  const position = avoidRectsForDefaultPosition(DEBUG_PANEL_KEY, PANEL_SIZE, bounds, DEBUG_FALLBACK_ZONE);
   const bead = getOrCreateBead(layer);
 
   bead.style.setProperty('--debug-x', px(position.x - bounds.safeRect.left));
   bead.style.setProperty('--debug-y', px(position.y - bounds.safeRect.top));
-  bead.dataset.deepHudViewport = bounds.viewportClass;
+  bead.dataset[DEEP_HUD.data.viewport] = bounds.viewportClass;
   bead.value = '';
   bead.textContent = `HUD ${bounds.viewportClass} · ${Math.round(bounds.safeRect.width)}×${Math.round(bounds.safeRect.height)}`;
 }
@@ -111,11 +124,11 @@ function startDebugBead() {
   updateAll();
   observePanels();
 
-  document.addEventListener('deep-observer:hud-bounds', scheduleUpdate);
+  document.addEventListener(DEEP_HUD.events.bounds, scheduleUpdate);
   window.addEventListener('resize', scheduleUpdate, { passive: true });
   window.addEventListener('orientationchange', scheduleUpdate, { passive: true });
 
-  const root = document.querySelector('#root') || document.body;
+  const root = document.querySelector(DEEP_HUD.rootSelector) || document.body;
   observer = new MutationObserver(() => {
     observePanels();
     scheduleUpdate();
@@ -127,7 +140,7 @@ function stopDebugBead() {
   if (observer) observer.disconnect();
   if (resizeObserver) resizeObserver.disconnect();
   if (updateTimer) window.clearTimeout(updateTimer);
-  document.removeEventListener('deep-observer:hud-bounds', scheduleUpdate);
+  document.removeEventListener(DEEP_HUD.events.bounds, scheduleUpdate);
   window.removeEventListener('resize', scheduleUpdate);
   window.removeEventListener('orientationchange', scheduleUpdate);
 
