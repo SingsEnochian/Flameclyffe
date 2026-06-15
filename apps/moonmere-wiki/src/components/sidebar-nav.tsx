@@ -2,6 +2,7 @@ import Link from "next/link";
 
 const navItems = [
   { href: "/", label: "Overview", glyph: "✦" },
+  { href: "/moonmere-waystation", label: "Waystation", glyph: "☾" },
   { href: "/characters", label: "Characters", glyph: "◌" },
   { href: "/books", label: "Books", glyph: "▥" },
   { href: "/windmere", label: "Windmere", glyph: "⌁" },
