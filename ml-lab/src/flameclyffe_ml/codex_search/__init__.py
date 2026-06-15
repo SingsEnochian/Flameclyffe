@@ -10,6 +10,12 @@ from .contracts import (
     TextChunk,
 )
 from .lexical import LexicalCodexIndex, tokenise
+from .metrics import (
+    QueryJudgement,
+    QueryMetricResult,
+    SearchMetricSummary,
+    evaluate_search,
+)
 from .snapshot import (
     SnapshotBatch,
     SnapshotRecord,
@@ -27,6 +33,9 @@ __all__ = [
     "CanonRecordType",
     "ChunkConfig",
     "LexicalCodexIndex",
+    "QueryJudgement",
+    "QueryMetricResult",
+    "SearchMetricSummary",
     "SearchQuery",
     "SearchResult",
     "SnapshotBatch",
@@ -35,6 +44,7 @@ __all__ = [
     "TextChunk",
     "chunk_document",
     "chunk_documents",
+    "evaluate_search",
     "normalise_text",
     "records_to_documents",
     "snapshot_batch_from_json",
