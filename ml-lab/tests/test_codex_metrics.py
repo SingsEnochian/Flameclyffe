@@ -53,7 +53,7 @@ def test_missed_result_has_zero_reciprocal_rank() -> None:
     index = LexicalCodexIndex.from_documents(batch.public_documents())
     judgements = [
         QueryJudgement(
-            query="unfindable quarry lantern",
+            query="unfindable quarry basalt",
             relevant_document_ids=["templehouse"],
             top_k=3,
         )
