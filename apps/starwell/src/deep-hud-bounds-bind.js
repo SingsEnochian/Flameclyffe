@@ -1,11 +1,20 @@
 import { measureHudBounds } from './lib/deepHudBounds.js';
+import {
+  DEEP_HUD,
+  getHudLayerSelector,
+  getHudReadoutSelector,
+  getHudStageSelector,
+  getObserverPanelSelector,
+  markEmptyHudLayer,
+  markHudBoundsReady,
+} from './lib/deepHudContract.js';
 
-const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
-const HUD_LAYER_SELECTOR = '.deep-observer-hud-layer';
-const STAGE_SELECTOR = '.glyph-orb-wrap';
-const READOUT_SELECTOR = '.glyph-readout';
-const ROOT_SELECTOR = '#root';
-const UPDATE_THROTTLE_MS = 120;
+const PANEL_SELECTOR = getObserverPanelSelector();
+const HUD_LAYER_SELECTOR = getHudLayerSelector();
+const STAGE_SELECTOR = getHudStageSelector();
+const READOUT_SELECTOR = getHudReadoutSelector();
+const ROOT_SELECTOR = DEEP_HUD.rootSelector;
+const UPDATE_THROTTLE_MS = DEEP_HUD.updateThrottleMs;
 
 let observer = null;
 let resizeObserver = null;
@@ -24,32 +33,16 @@ function makeBoundsSignature(bounds) {
   return [bounds.viewportClass, bounds.inset, ...rects].join('|');
 }
 
-function markEmptyHudLayer(layer, owner) {
-  const isEmpty = layer.childElementCount === 0;
-
-  if (!layer.dataset.deepHudLayer && isEmpty) {
-    layer.dataset.deepHudLayer = 'empty';
-  }
-
-  if (owner && !layer.dataset.deepHudLayerOwner) {
-    layer.dataset.deepHudLayerOwner = owner;
-  }
-
-  if (layer.dataset.deepHudLayer === 'empty' && isEmpty && !layer.hasAttribute('aria-hidden')) {
-    layer.setAttribute('aria-hidden', 'true');
-  }
-}
-
 function ensureHudLayer(panel) {
   let layer = panel.querySelector(`:scope > ${HUD_LAYER_SELECTOR}`);
   if (layer) {
-    markEmptyHudLayer(layer, 'react-shell');
+    markEmptyHudLayer(layer, DEEP_HUD.owner.reactShell);
     return layer;
   }
 
   layer = document.createElement('div');
-  layer.className = 'deep-observer-hud-layer';
-  markEmptyHudLayer(layer, 'passive-bounds-binder');
+  layer.className = DEEP_HUD.layerClass;
+  markEmptyHudLayer(layer, DEEP_HUD.owner.passiveBoundsBinder);
   panel.appendChild(layer);
   return layer;
 }
@@ -59,8 +52,7 @@ function applyBoundsVars(panel, bounds) {
   const shellLeft = shellRect?.left || 0;
   const shellTop = shellRect?.top || 0;
 
-  panel.dataset.deepHudBounds = 'ready';
-  panel.dataset.deepHudViewport = bounds.viewportClass;
+  markHudBoundsReady(panel, bounds.viewportClass);
   panel.style.setProperty('--deep-hud-inset', px(bounds.inset));
 
   panel.style.setProperty('--deep-hud-safe-left', px(safeRect.left - shellLeft));
@@ -84,7 +76,7 @@ function applyBoundsVars(panel, bounds) {
 }
 
 function dispatchBounds(panel, bounds) {
-  panel.dispatchEvent(new CustomEvent('deep-observer:hud-bounds', {
+  panel.dispatchEvent(new CustomEvent(DEEP_HUD.events.bounds, {
     bubbles: true,
     detail: {
       viewportClass: bounds.viewportClass,
@@ -105,9 +97,9 @@ function bindPanel(panel) {
   const readout = panel.querySelector(READOUT_SELECTOR);
   const bounds = measureHudBounds({ root: panel, shell: panel, stage, readout });
   const signature = makeBoundsSignature(bounds);
-  if (signature === panel.dataset.deepHudBoundsSignature) return;
+  if (signature === panel.dataset[DEEP_HUD.data.boundsSignature]) return;
 
-  panel.dataset.deepHudBoundsSignature = signature;
+  panel.dataset[DEEP_HUD.data.boundsSignature] = signature;
   lastSignature = signature;
   applyBoundsVars(panel, bounds);
   dispatchBounds(panel, bounds);
