@@ -1,11 +1,10 @@
 import { DEEP_HUD } from './lib/deepHudContract.js';
+import { DEEP_HUD_DEBUG } from './lib/deepHudDebugContract.js';
 import {
   DEEP_HUD_SOCKET_STATUS,
   collectHudSocketReport,
   formatHudSocketReport,
 } from './lib/deepHudSocketInvariant.js';
-
-const LOG_PREFIX = '[DEEP HUD socket]';
 
 let observer = null;
 let updateTimer = 0;
@@ -23,11 +22,11 @@ function logReport(report, statusLine) {
   lastStatusLine = statusLine;
 
   if (report.status === DEEP_HUD_SOCKET_STATUS.healthy || report.status === DEEP_HUD_SOCKET_STATUS.noPanels) {
-    console.info(LOG_PREFIX, statusLine, report);
+    console.info(DEEP_HUD_DEBUG.socketLogPrefix, statusLine, report);
     return;
   }
 
-  console.warn(LOG_PREFIX, statusLine, report);
+  console.warn(DEEP_HUD_DEBUG.socketLogPrefix, statusLine, report);
 }
 
 function runDiagnostics() {
