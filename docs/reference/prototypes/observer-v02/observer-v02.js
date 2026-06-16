@@ -1,24 +1,12 @@
-const DEFAULT_VECTOR = {
-  P: 0.56,
-  C: 0.62,
-  R: 0.58,
-  E: 0.28,
-  M: 0.44,
-  A: 0.66,
-  charge: 0.38
-};
+import { createCircle, createPath, createSvgElement, createText } from '../shared/dom-svg.js';
+import { alternatingBend, curvedPathBetween } from '../shared/svg-paths.js';
+import {
+  DEFAULT_VECTOR,
+  OBSERVER_CONFIG,
+  OBSERVER_CORE,
+  OBSERVER_METRICS,
+} from './observer-vector.model.js';
 
-const metricMeta = {
-  P: { label: 'Presence', css: '--presence', x: 500, y: 110, description: 'mass, nearness, felt body' },
-  C: { label: 'Coherence', css: '--coherence', x: 750, y: 185, description: 'clarity, order, readable pattern' },
-  R: { label: 'Resonance', css: '--resonance', x: 850, y: 410, description: 'pulse, echo, return current' },
-  E: { label: 'Entropy', css: '--entropy', x: 650, y: 645, description: 'scatter, fray, weather' },
-  M: { label: 'Moon', css: '--moon', x: 350, y: 645, description: 'phase, tint, ritual ambience' },
-  A: { label: 'Attention', css: '--attention', x: 150, y: 410, description: 'focus, gaze, selected route' },
-  charge: { label: 'Charge', css: '--charge', x: 250, y: 185, description: 'bloom, flare, stored spark' }
-};
-
-const core = { x: 500, y: 390, label: 'Observer' };
 let vector = { ...DEFAULT_VECTOR };
 
 const root = document.documentElement;
@@ -41,55 +29,23 @@ function pct(value) {
 }
 
 function branchState(key, value) {
-  if (key === 'E' && value > 0.62) return 'unstable';
-  if (value < 0.28) return 'low';
-  if (value > 0.72) return 'high';
+  if (key === 'E' && value > OBSERVER_CONFIG.entropyUnstableThreshold) return 'unstable';
+  if (value < OBSERVER_CONFIG.lowThreshold) return 'low';
+  if (value > OBSERVER_CONFIG.highThreshold) return 'high';
   return 'steady';
-}
-
-function curvePath(target, index) {
-  const midX = (core.x + target.x) / 2;
-  const midY = (core.y + target.y) / 2;
-  const dx = target.x - core.x;
-  const dy = target.y - core.y;
-  const length = Math.max(Math.hypot(dx, dy), 1);
-  const normalX = -dy / length;
-  const normalY = dx / length;
-  const bend = index % 2 === 0 ? 72 : -72;
-  return `M ${core.x} ${core.y} Q ${midX + normalX * bend} ${midY + normalY * bend} ${target.x} ${target.y}`;
-}
-
-function makePath(d, className) {
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', d);
-  path.classList.add(className);
-  return path;
-}
-
-function makeCircle(radius) {
-  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  circle.setAttribute('r', radius);
-  return circle;
-}
-
-function makeText(label, y) {
-  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  text.setAttribute('y', y);
-  text.textContent = label;
-  return text;
 }
 
 function renderControls() {
   controlHost.replaceChildren();
 
-  Object.entries(metricMeta).forEach(([key, meta]) => {
+  Object.entries(OBSERVER_METRICS).forEach(([key, meta]) => {
     const row = document.createElement('div');
     row.className = 'vector-row';
 
     const label = document.createElement('label');
     label.setAttribute('for', `control-${key}`);
     label.textContent = key;
-    label.title = `${meta.label}: ${meta.description}`;
+    label.title = meta.label;
 
     const input = document.createElement('input');
     input.id = `control-${key}`;
@@ -114,17 +70,20 @@ function renderControls() {
 function renderBranches() {
   branchLayer.replaceChildren();
 
-  Object.entries(metricMeta).forEach(([key, meta], index) => {
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  Object.entries(OBSERVER_METRICS).forEach(([key, meta], index) => {
+    const group = createSvgElement('g');
     group.classList.add('branch');
     group.dataset.metric = key;
     group.dataset.state = branchState(key, vector[key]);
 
-    const path = curvePath(meta, index);
+    const path = curvedPathBetween(OBSERVER_CORE, meta, {
+      bend: alternatingBend(index, OBSERVER_CONFIG.bend),
+    });
+
     group.append(
-      makePath(path, 'branch-noise'),
-      makePath(path, 'branch-path'),
-      makePath(path, 'branch-sheen')
+      createPath(path, 'branch-noise'),
+      createPath(path, 'branch-path'),
+      createPath(path, 'branch-sheen')
     );
 
     branchLayer.append(group);
@@ -134,31 +93,39 @@ function renderBranches() {
 function renderNodes() {
   nodeLayer.replaceChildren();
 
-  const coreGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const coreGroup = createSvgElement('g', {
+    transform: `translate(${OBSERVER_CORE.x} ${OBSERVER_CORE.y})`,
+  });
   coreGroup.classList.add('node', 'core');
-  coreGroup.setAttribute('transform', `translate(${core.x} ${core.y})`);
-  coreGroup.append(makeCircle(50), makeText(core.label, 6));
+  coreGroup.append(
+    createCircle(OBSERVER_CONFIG.coreRadius),
+    createText(OBSERVER_CORE.label, OBSERVER_CONFIG.coreLabelOffsetY)
+  );
   nodeLayer.append(coreGroup);
 
-  Object.entries(metricMeta).forEach(([key, meta]) => {
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  Object.entries(OBSERVER_METRICS).forEach(([key, meta]) => {
+    const group = createSvgElement('g', {
+      transform: `translate(${meta.x} ${meta.y})`,
+    });
     group.classList.add('node');
     group.dataset.metric = key;
     group.dataset.state = branchState(key, vector[key]);
-    group.setAttribute('transform', `translate(${meta.x} ${meta.y})`);
-    group.append(makeCircle(34), makeText(`${key} ${pct(vector[key])}`, 58));
+    group.append(
+      createCircle(OBSERVER_CONFIG.nodeRadius),
+      createText(`${key} ${pct(vector[key])}`, OBSERVER_CONFIG.labelOffsetY)
+    );
     nodeLayer.append(group);
   });
 }
 
 function applyCssVariables() {
-  Object.entries(metricMeta).forEach(([key, meta]) => {
+  Object.entries(OBSERVER_METRICS).forEach(([key, meta]) => {
     root.style.setProperty(meta.css, String(vector[key]));
   });
 }
 
 function renderReadout() {
-  const items = Object.entries(metricMeta).map(([key, meta]) => {
+  const items = Object.entries(OBSERVER_METRICS).map(([key, meta]) => {
     return `<div class="metric-pill"><span>${key} · ${meta.label}</span><strong>${pct(vector[key])}</strong></div>`;
   });
   readoutHost.innerHTML = `<div class="metric-grid">${items.join('')}</div>`;
@@ -166,20 +133,24 @@ function renderReadout() {
 
 function renderNarrative() {
   const strongest = Object.keys(vector).reduce((best, key) => vector[key] > vector[best] ? key : best, 'P');
-  const entropyTone = vector.E > 0.62 ? 'The edge is noisy; the field asks for gentler pacing.' : 'The edge remains readable enough to hold the pattern.';
-  const chargeTone = vector.charge > 0.68 ? 'Charge is bright and close to flare.' : 'Charge is present but not overwhelming.';
-  narrativeHost.textContent = `${metricMeta[strongest].label} leads the instrument. ${entropyTone} ${chargeTone}`;
+  const entropyTone = vector.E > OBSERVER_CONFIG.entropyUnstableThreshold
+    ? 'The edge is noisy; the field asks for gentler pacing.'
+    : 'The edge remains readable enough to hold the pattern.';
+  const chargeTone = vector.charge > OBSERVER_CONFIG.flareThreshold
+    ? 'Charge is bright and close to flare.'
+    : 'Charge is present but not overwhelming.';
+  narrativeHost.textContent = `${OBSERVER_METRICS[strongest].label} leads the instrument. ${entropyTone} ${chargeTone}`;
 }
 
 function breathe() {
   shell.classList.remove('is-breathing');
   requestAnimationFrame(() => shell.classList.add('is-breathing'));
-  window.setTimeout(() => shell.classList.remove('is-breathing'), 1600);
+  window.setTimeout(() => shell.classList.remove('is-breathing'), OBSERVER_CONFIG.breatheMs);
 }
 
 function demoDrift() {
   Object.keys(vector).forEach((key, index) => {
-    const wave = Math.sin(Date.now() / 700 + index) * 0.12;
+    const wave = Math.sin(Date.now() / OBSERVER_CONFIG.driftInterval + index) * OBSERVER_CONFIG.driftScale;
     vector[key] = clamp01(vector[key] + wave);
   });
   renderAll();
