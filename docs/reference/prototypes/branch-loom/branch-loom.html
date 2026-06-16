@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DEEP Branch Loom Prototype</title>
+  <link rel="stylesheet" href="./branch-loom.css" />
+</head>
+<body>
+  <main class="loom-shell" data-mode="signal-garden">
+    <section class="loom-stage" aria-labelledby="loom-title">
+      <div class="loom-copy">
+        <p class="eyebrow">DEEP prototype</p>
+        <h1 id="loom-title">Branch Loom</h1>
+        <p>The first nerve-map sketch: branches change state from data, not hardcoded visual guesses.</p>
+      </div>
+
+      <svg class="loom-map" viewBox="0 0 1000 720" role="img" aria-labelledby="map-title map-desc">
+        <title id="map-title">Branch Loom state map</title>
+        <desc id="map-desc">A central core connected to seven branches. Each branch can be dormant, listening, active, stressed, protected, severed, or healing.</desc>
+        <defs>
+          <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <g id="branch-layer"></g>
+        <g id="node-layer"></g>
+      </svg>
+    </section>
+
+    <aside class="loom-panel" aria-label="Branch Loom controls">
+      <div class="panel-card">
+        <label for="mode-select">Mode</label>
+        <select id="mode-select">
+          <option value="signal-garden">Signal Garden</option>
+          <option value="consent-web">Consent Web</option>
+          <option value="mood-weather">Mood Weather</option>
+          <option value="lore-constellation">Lore Constellation</option>
+        </select>
+      </div>
+
+      <div class="panel-card">
+        <label for="branch-select">Branch</label>
+        <select id="branch-select"></select>
+      </div>
+
+      <div class="panel-card">
+        <label for="state-select">State</label>
+        <select id="state-select">
+          <option value="dormant">Dormant</option>
+          <option value="listening">Listening</option>
+          <option value="active">Active</option>
+          <option value="stressed">Stressed</option>
+          <option value="protected">Protected</option>
+          <option value="severed">Severed</option>
+          <option value="healing">Healing</option>
+        </select>
+      </div>
+
+      <button id="breathe-button" class="primary-button" type="button">Let It Breathe</button>
+      <button id="cycle-button" class="ghost-button" type="button">Cycle States</button>
+
+      <div class="panel-card branch-readout" id="branch-readout" aria-live="polite"></div>
+    </aside>
+  </main>
+
+  <script type="module" src="./branch-loom.js"></script>
+</body>
+</html>
