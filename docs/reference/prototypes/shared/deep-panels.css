@@ -1,0 +1,14 @@
+.deep-panel {
+  border: 1px solid var(--deep-panel-border, rgba(228, 195, 109, 0.22));
+  border-radius: var(--deep-radius-lg, 28px);
+  background: var(--deep-panel-bg, rgba(1, 8, 6, 0.56));
+  box-shadow: var(--deep-panel-shadow, 0 24px 80px rgba(0, 0, 0, 0.44));
+  backdrop-filter: blur(18px);
+}
+
+.deep-panel-card {
+  padding: 14px;
+  border-radius: var(--deep-radius-md, 18px);
+  background: rgba(255, 247, 220, 0.055);
+  border: 1px solid rgba(255, 247, 220, 0.12);
+}
