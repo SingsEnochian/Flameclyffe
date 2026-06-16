@@ -1,0 +1,23 @@
+.deep-svg-map {
+  width: 100%;
+  height: min(82vh, 840px);
+  min-height: 650px;
+  display: block;
+}
+
+.deep-stage-copy {
+  position: absolute;
+  z-index: 2;
+  top: 28px;
+  left: 32px;
+  max-width: 460px;
+  pointer-events: none;
+}
+
+.deep-eyebrow {
+  margin: 0 0 6px;
+  color: var(--deep-gold, #e4c36d);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
