@@ -1,6 +1,10 @@
 # Network Pulse Field
 
-Source: pasted by Rowan. Original source URL not yet recorded.
+Source: https://codepen.io/VoXelo/pen/EaabxLj
+
+CodePen title found: Interactive Neural Network Viz.
+
+Author: Techartist.
 
 Visible title in paste: Neural Network.
 
@@ -34,7 +38,7 @@ Adaptation targets:
 
 Implementation cautions:
 
-- source and license are not yet recorded
+- source and author now recorded, but license still needs confirmation before any close adaptation
 - rebuild as contained React and Three modules
 - add reduced-motion and low-power guards
 - make bloom, auto-rotation, pulses, and density user-controllable
