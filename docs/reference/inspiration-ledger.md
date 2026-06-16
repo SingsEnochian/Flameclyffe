@@ -17,13 +17,14 @@ References are not direct copy instructions. Treat them as pattern-language sour
 | Name | Source | Primary use | Card |
 |---|---|---|---|
 | Liquid Glass Wiki Skin | https://codepen.io/Margarita-the-solid/pen/NPRPBjd | Terra Aeterna wiki glass skin | `codepen/liquid-glass-wiki.md` |
-| DEEP Presence Aura | https://codepen.io/russell-henderson/pen/jEVVqBe | 3D presence mass and aura | `codepen/deep-presence-aura.md` |
-| Rain Glass / Living Weather | https://codepen.io/fyildiz1974/pen/RNRgjpj | DEEP weather-on-glass layer | `codepen/deep-rain-glass.md` |
-| Tactile Neumorphism | https://codepen.io/Pedro-Ondiviela/pen/emzdMKj | weighted controls and touch grammar | `codepen/deep-tactile-neumorphism.md` |
-| Sacred Geometry Reactor | https://codepen.io/VoXelo/pen/myOPezP | DEEP reactor core and energy lattice | `codepen/deep-reactor-core.md` |
-| Quantum Morph Lattice | https://codepen.io/VoXelo/pen/YPpReXx | morphing DEEP geometry modes | `codepen/deep-morph-lattice.md` |
+| Aura Core | https://codepen.io/russell-henderson/pen/jEVVqBe | 3D presence mass and aura | `codepen/aura-core.md` |
+| Rain Glass / Living Weather | https://codepen.io/fyildiz1974/pen/RNRgjpj | DEEP weather-on-glass layer | `codepen/rain-glass.md` |
+| Tactile Controls | https://codepen.io/Pedro-Ondiviela/pen/emzdMKj | weighted controls and touch grammar | `codepen/tactile-controls.md` |
+| Reactor Core | https://codepen.io/VoXelo/pen/myOPezP | DEEP reactor core and energy lattice | `codepen/reactor-core.md` |
+| Lattice Modes | https://codepen.io/VoXelo/pen/YPpReXx | morphing DEEP geometry modes | `codepen/lattice-modes.md` |
 | Branching / Curved Tethers | https://codepen.io/t_afif/pen/yyVPKzb | branches, tethers, node strands | `codepen/branching-tethers.md` |
 | CSS Over JS Modularity | https://codepen.io/web-strategist/pen/wBzLaGY | modular CSS architecture | `codepen/css-over-js-modularity.md` |
+| Russell Henderson vEyZxPz | https://codepen.io/russell-henderson/pen/vEyZxPz | pending review, flagged useful | `codepen/russell-henderson-vEyZxPz.md` |
 
 ## Default sort for new references
 
