@@ -8,7 +8,7 @@ Open `consent-web.html` beside `consent-web.css` and `consent-web.js` to review 
 
 This prototype turns sensory permissions into visible branches around the DEEP core.
 
-It does not activate camera, microphone, haptics, audio, or gaze systems. It is a visual and interaction prototype only.
+It does not activate camera, microphone, haptics, audio, depth, LiDAR, location, or gaze systems. It is a visual and interaction prototype only.
 
 ## Consent principle
 
@@ -26,6 +26,7 @@ Disabled does not mean erased. It means present, named, and waiting for permissi
 - gaze
 - location
 - export/logging
+- depth / LiDAR
 
 Each branch has a toggle and a visible state.
 
@@ -43,6 +44,7 @@ Each branch has a toggle and a visible state.
 - No real sensor API is called.
 - Motion is guarded by `prefers-reduced-motion`.
 - Controls are real buttons with `aria-pressed` and live status text.
+- Depth / LiDAR is off by default and exists here as an AR-ready consent branch.
 
 ## Future bridge
 
