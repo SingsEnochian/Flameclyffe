@@ -27,6 +27,7 @@ References are not direct copy instructions. Treat them as pattern-language sour
 | Front-End Signal Grid | https://codepen.io/russell-henderson/pen/vEyZxPz | signal dashboard and glass console | `codepen/russell-henderson-vEyZxPz.md` |
 | QhyNLP UI Reference | https://codepen.io/Kumplex-music/pen/myddeGQ | tabbed documentation reference panel | `codepen/kumplex-music-myddeGQ.md` |
 | Network Pulse Field | https://codepen.io/VoXelo/pen/EaabxLj | DEEP geometry and pulse network | `codepen/network-pulse-field.md` |
+| Holographic Particle Morphing | https://codepen.io/VoXelo/pen/emBZVzJ | particle morphing and DEEP mode transitions | `codepen/holographic-particle-morphing.md` |
 
 ## Default sort for new references
 
