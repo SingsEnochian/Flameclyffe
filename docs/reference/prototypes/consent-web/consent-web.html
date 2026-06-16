@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DEEP Consent Web Prototype</title>
+  <link rel="stylesheet" href="./consent-web.css" />
+</head>
+<body>
+  <main class="consent-shell">
+    <section class="consent-stage" aria-labelledby="consent-title">
+      <div class="stage-copy">
+        <p class="eyebrow">DEEP prototype</p>
+        <h1 id="consent-title">Consent Web</h1>
+        <p>Sensory systems remain visible, named, and inactive until invited.</p>
+      </div>
+
+      <svg class="consent-map" viewBox="0 0 1000 760" role="img" aria-labelledby="map-title map-desc">
+        <title id="map-title">Consent Web state map</title>
+        <desc id="map-desc">A DEEP core connected to sensory permission branches. Branches may be off, on, blocked, or temporarily active.</desc>
+        <defs>
+          <filter id="consent-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <g id="branch-layer"></g>
+        <g id="node-layer"></g>
+      </svg>
+    </section>
+
+    <aside class="consent-panel" aria-label="Consent Web controls">
+      <div class="panel-card status-card">
+        <strong>Current status</strong>
+        <p id="status-line" aria-live="polite">No sensory systems are active.</p>
+      </div>
+
+      <div class="panel-card">
+        <h2>Permissions</h2>
+        <div id="control-list" class="control-list"></div>
+      </div>
+
+      <div class="button-row">
+        <button id="pulse-enabled" class="primary-button" type="button">Pulse Enabled Branches</button>
+        <button id="all-off" class="ghost-button" type="button">All Off</button>
+      </div>
+
+      <p class="tiny-note">This prototype never starts a camera, microphone, haptic device, location request, or sound output.</p>
+    </aside>
+  </main>
+
+  <script type="module" src="./consent-web.js"></script>
+</body>
+</html>
