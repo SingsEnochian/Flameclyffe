@@ -26,7 +26,7 @@ References are not direct copy instructions. Treat them as pattern-language sour
 | CSS Over JS Modularity | https://codepen.io/web-strategist/pen/wBzLaGY | modular CSS architecture | `codepen/css-over-js-modularity.md` |
 | Front-End Signal Grid | https://codepen.io/russell-henderson/pen/vEyZxPz | signal dashboard and glass console | `codepen/russell-henderson-vEyZxPz.md` |
 | QhyNLP UI Reference | https://codepen.io/Kumplex-music/pen/myddeGQ | tabbed documentation reference panel | `codepen/kumplex-music-myddeGQ.md` |
-| Network Pulse Field | source URL not yet recorded | DEEP geometry and pulse network | `codepen/network-pulse-field.md` |
+| Network Pulse Field | https://codepen.io/VoXelo/pen/EaabxLj | DEEP geometry and pulse network | `codepen/network-pulse-field.md` |
 
 ## Default sort for new references
 
