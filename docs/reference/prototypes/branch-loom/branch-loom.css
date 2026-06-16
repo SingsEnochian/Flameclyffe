@@ -185,8 +185,8 @@ h1 {
 }
 
 .core circle {
-  fill: radial-gradient(circle, var(--ivory), var(--gold));
-  stroke: var(--gold);
+  fill: var(--gold);
+  stroke: var(--ivory);
   stroke-width: 3;
 }
 
