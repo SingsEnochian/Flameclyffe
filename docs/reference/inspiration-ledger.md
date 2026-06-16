@@ -28,6 +28,7 @@ References are not direct copy instructions. Treat them as pattern-language sour
 | QhyNLP UI Reference | https://codepen.io/Kumplex-music/pen/myddeGQ | tabbed documentation reference panel | `codepen/kumplex-music-myddeGQ.md` |
 | Network Pulse Field | https://codepen.io/VoXelo/pen/EaabxLj | DEEP geometry and pulse network | `codepen/network-pulse-field.md` |
 | Holographic Particle Morphing | https://codepen.io/VoXelo/pen/emBZVzJ | particle morphing and DEEP mode transitions | `codepen/holographic-particle-morphing.md` |
+| Gesture Neural Universe | https://codepen.io/VoXelo/pen/yyYJNRg | gesture control and DEEP sensory input | `codepen/gesture-neural-universe.md` |
 
 ## Default sort for new references
 
