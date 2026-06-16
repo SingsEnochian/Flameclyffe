@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DEEP Signal Garden Prototype</title>
+  <link rel="stylesheet" href="./signal-garden.css" />
+</head>
+<body>
+  <main class="signal-shell" aria-labelledby="signal-title">
+    <section class="signal-stage">
+      <div class="stage-copy">
+        <p class="eyebrow">DEEP prototype</p>
+        <h1 id="signal-title">Signal Garden</h1>
+        <p>Signals grow from the core and pulse without becoming hardcoded UI furniture.</p>
+      </div>
+
+      <svg class="signal-map" viewBox="0 0 1000 760" role="img" aria-labelledby="map-title map-desc">
+        <title id="map-title">Signal Garden radial map</title>
+        <desc id="map-desc">A central DEEP core connected to presence, coherence, resonance, entropy, moon, attention, and charge signals.</desc>
+        <defs>
+          <filter id="signal-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <g id="branch-layer"></g>
+        <g id="node-layer"></g>
+      </svg>
+    </section>
+
+    <aside class="signal-panel" aria-label="Signal Garden controls">
+      <div class="panel-card">
+        <h2>Signals</h2>
+        <div id="signal-list" class="signal-list"></div>
+      </div>
+      <button id="pulse-all" type="button" class="primary-button">Pulse All</button>
+      <button id="reset-pulses" type="button" class="ghost-button">Settle</button>
+      <p id="signal-status" class="status" aria-live="polite">No signal selected.</p>
+    </aside>
+  </main>
+
+  <script type="module" src="./signal-garden.js"></script>
+</body>
+</html>
