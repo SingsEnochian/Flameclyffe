@@ -1,12 +1,13 @@
 const permissions = [
   { id: 'visual', label: 'Visual Bloom', state: 'on', x: 500, y: 115, description: 'Glow, bloom, and visual emphasis only.' },
-  { id: 'sound', label: 'Sound', state: 'off', x: 740, y: 170, description: 'Audible tones and ambience. Not started here.' },
-  { id: 'subbass', label: 'Sub-bass', state: 'off', x: 875, y: 360, description: 'Low-frequency body signal. Not started here.' },
-  { id: 'haptics', label: 'Haptics', state: 'blocked', x: 760, y: 590, description: 'Device vibration or external haptics.' },
-  { id: 'camera', label: 'Camera', state: 'off', x: 500, y: 660, description: 'Vision input. Requires explicit separate consent.' },
-  { id: 'gaze', label: 'Gaze', state: 'off', x: 240, y: 590, description: 'Eye or pointer attention signal.' },
-  { id: 'location', label: 'Location', state: 'blocked', x: 125, y: 360, description: 'Geolocation signal. Blocked in this sketch.' },
-  { id: 'logging', label: 'Export / Logging', state: 'on', x: 260, y: 170, description: 'Local notes, exports, or almanac logs.' }
+  { id: 'sound', label: 'Sound', state: 'off', x: 710, y: 145, description: 'Audible tones and ambience. Not started here.' },
+  { id: 'subbass', label: 'Sub-bass', state: 'off', x: 870, y: 310, description: 'Low-frequency body signal. Not started here.' },
+  { id: 'haptics', label: 'Haptics', state: 'blocked', x: 835, y: 535, description: 'Device vibration or external haptics.' },
+  { id: 'camera', label: 'Camera', state: 'off', x: 610, y: 650, description: 'Vision input. Requires explicit separate consent.' },
+  { id: 'gaze', label: 'Gaze', state: 'off', x: 390, y: 650, description: 'Eye or pointer attention signal.' },
+  { id: 'location', label: 'Location', state: 'blocked', x: 165, y: 535, description: 'Geolocation signal. Blocked in this sketch.' },
+  { id: 'logging', label: 'Export / Logging', state: 'on', x: 130, y: 310, description: 'Local notes, exports, or almanac logs.' },
+  { id: 'depth', label: 'Depth / LiDAR', state: 'off', x: 290, y: 145, description: 'Spatial depth events for AR. Not started here.' }
 ];
 
 const core = { x: 500, y: 390, label: 'DEEP' };
