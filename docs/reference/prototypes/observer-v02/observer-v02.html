@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DEEP Observer v0.2 Prototype</title>
+  <link rel="stylesheet" href="./observer-v02.css" />
+</head>
+<body>
+  <main class="observer-shell">
+    <header class="observer-hero">
+      <p class="eyebrow">DEEP Observer prototype</p>
+      <h1>Observer v0.2</h1>
+      <p>The state vector becomes branch language, field glow, and narrative return.</p>
+    </header>
+
+    <section class="observer-grid">
+      <section class="observer-stage" aria-labelledby="stage-title">
+        <div class="stage-header">
+          <h2 id="stage-title">Living Field</h2>
+          <button id="breathe-button" type="button">Let It Breathe</button>
+        </div>
+
+        <div class="field-orb" aria-hidden="true">
+          <div class="orb-core"></div>
+          <div class="orb-ring ring-one"></div>
+          <div class="orb-ring ring-two"></div>
+          <div class="orb-ring ring-three"></div>
+        </div>
+
+        <svg class="observer-map" viewBox="0 0 1000 760" role="img" aria-labelledby="map-title map-desc">
+          <title id="map-title">Observer state branch map</title>
+          <desc id="map-desc">The DEEP Observer core connected to six state branches and one charge branch.</desc>
+          <defs>
+            <filter id="observer-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <g id="observer-branches"></g>
+          <g id="observer-nodes"></g>
+        </svg>
+      </section>
+
+      <aside class="observer-panel" aria-label="Observer vector controls">
+        <section class="panel-card">
+          <h2>Vector Controls</h2>
+          <div id="vector-controls" class="vector-controls"></div>
+        </section>
+
+        <section class="panel-card">
+          <h2>State Readout</h2>
+          <div id="metric-readout" class="metric-readout" aria-live="polite"></div>
+        </section>
+
+        <section class="panel-card">
+          <h2>Narrative Return</h2>
+          <p id="narrative" class="narrative" aria-live="polite"></p>
+        </section>
+
+        <section class="button-row">
+          <button id="demo-drift" type="button" class="primary-button">Demo Drift</button>
+          <button id="reset-vector" type="button" class="ghost-button">Reset</button>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script type="module" src="./observer-v02.js"></script>
+</body>
+</html>
