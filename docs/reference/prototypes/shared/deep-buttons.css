@@ -1,0 +1,20 @@
+.deep-button,
+.deep-button-primary,
+.deep-button-ghost {
+  border-radius: 14px;
+  border: 1px solid rgba(228, 195, 109, 0.28);
+  padding: 12px 14px;
+  color: var(--deep-ink, #f7efd9);
+  font: inherit;
+  cursor: pointer;
+}
+
+.deep-button-primary {
+  background: linear-gradient(135deg, rgba(228, 195, 109, 0.94), rgba(27, 138, 104, 0.92));
+  color: #06100c;
+  font-weight: 700;
+}
+
+.deep-button-ghost {
+  background: rgba(255, 247, 220, 0.06);
+}
