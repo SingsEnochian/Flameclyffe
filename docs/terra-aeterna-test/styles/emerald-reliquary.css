@@ -1,0 +1,311 @@
+:root {
+  color-scheme: dark;
+  --ta-void: #03110d;
+  --ta-bg: #071e18;
+  --ta-bg-soft: #0a261e;
+  --ta-panel: #0d3b2e;
+  --ta-panel-bright: #14543d;
+  --ta-emerald: #176b4a;
+  --ta-gold-dark: #7d581b;
+  --ta-gold-antique: #b88a2d;
+  --ta-gold: #d6b55a;
+  --ta-gold-light: #f0d98a;
+  --ta-ivory: #f3ebdd;
+  --ta-muted: #b9b0a2;
+  --ta-ink: #0a0703;
+  --ta-radius-xl: 32px;
+  --ta-radius-card: 22px;
+  --ta-border-fine: 1px solid rgba(214, 181, 90, 0.48);
+  --ta-shadow-gold: 0 0 32px rgba(214, 181, 90, 0.18);
+  --ta-shadow-emerald: 0 24px 80px rgba(0, 0, 0, 0.38);
+  --ta-font-serif: Georgia, Garamond, "Times New Roman", serif;
+  --ta-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--ta-void);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--ta-ivory);
+  font-family: var(--ta-font-sans);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(214, 181, 90, 0.14), transparent 34rem),
+    radial-gradient(circle at 85% 12%, rgba(23, 107, 74, 0.42), transparent 28rem),
+    linear-gradient(140deg, var(--ta-void), var(--ta-bg) 48%, #020806);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(240, 217, 138, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 217, 138, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(circle at center, black, transparent 72%);
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  z-index: 10;
+  transform: translateY(-160%);
+  border: var(--ta-border-fine);
+  border-radius: 999px;
+  padding: 0.6rem 0.9rem;
+  background: var(--ta-panel);
+  color: var(--ta-ivory);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.reliquary-shell {
+  width: min(1180px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.hero,
+.relic-panel,
+.relic-card,
+.archive-panel {
+  position: relative;
+  overflow: hidden;
+  border: var(--ta-border-fine);
+  background:
+    linear-gradient(145deg, rgba(13, 59, 46, 0.94), rgba(3, 17, 13, 0.96)),
+    radial-gradient(circle at 20% 12%, rgba(240, 217, 138, 0.16), transparent 24rem);
+  box-shadow: var(--ta-shadow-emerald), var(--ta-shadow-gold);
+}
+
+.hero {
+  min-height: 420px;
+  border-radius: var(--ta-radius-xl);
+  padding: clamp(2rem, 5vw, 5.5rem);
+}
+
+.hero::after,
+.relic-card::after,
+.relic-panel::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(240, 217, 138, 0.22);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.hero__rings {
+  position: absolute;
+  right: clamp(1rem, 6vw, 5rem);
+  top: 48px;
+  width: 260px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(240, 217, 138, 0.2);
+  border-radius: 50%;
+  opacity: 0.68;
+}
+
+.hero__rings::before,
+.hero__rings::after {
+  content: "";
+  position: absolute;
+  inset: 32px;
+  border: 1px solid rgba(240, 217, 138, 0.26);
+  border-radius: 50%;
+}
+
+.hero__rings::after {
+  inset: 78px;
+  box-shadow: 0 0 48px rgba(214, 181, 90, 0.24);
+}
+
+.eyebrow,
+.panel-kicker,
+.status-chip {
+  color: var(--ta-gold-light);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-family: var(--ta-font-serif);
+  font-weight: 700;
+  line-height: 0.96;
+}
+
+h1 {
+  max-width: 760px;
+  font-size: clamp(3.6rem, 9vw, 8.5rem);
+}
+
+h2 {
+  margin-top: 0.35rem;
+  font-size: clamp(1.65rem, 3vw, 2.5rem);
+}
+
+.gold-text {
+  background: linear-gradient(110deg, var(--ta-gold-dark), var(--ta-gold), var(--ta-gold-light), var(--ta-gold-antique), var(--ta-gold-light));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 22px rgba(214, 181, 90, 0.16));
+}
+
+.hero__lede,
+.relic-card p,
+.relic-panel p,
+.archive-panel p {
+  max-width: 66ch;
+  color: rgba(243, 235, 221, 0.82);
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+.hero__lede {
+  margin-top: 1.35rem;
+  font-size: clamp(1.05rem, 2vw, 1.32rem);
+}
+
+.section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.section-nav__item {
+  border: 1px solid rgba(214, 181, 90, 0.4);
+  border-radius: 999px;
+  padding: 0.72rem 1rem;
+  background: rgba(3, 17, 13, 0.38);
+  color: var(--ta-ivory);
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.section-nav__item:hover,
+.section-nav__item:focus-visible,
+.section-nav__item.is-active {
+  transform: translateY(-2px);
+  border-color: rgba(240, 217, 138, 0.9);
+  background: rgba(214, 181, 90, 0.12);
+  outline: none;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.relic-panel,
+.archive-panel,
+.relic-card {
+  border-radius: var(--ta-radius-card);
+  padding: 1.45rem;
+}
+
+.relic-panel--wide {
+  grid-column: 1 / -1;
+}
+
+.relic-card {
+  min-height: 280px;
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.relic-card:hover,
+.relic-card:focus-within,
+.relic-card.is-focused {
+  transform: translateY(-5px);
+  border-color: rgba(240, 217, 138, 0.72);
+  box-shadow: 0 28px 92px rgba(0, 0, 0, 0.46), 0 0 42px rgba(214, 181, 90, 0.24);
+}
+
+.relic-card__icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  place-items: center;
+  border: 1px solid rgba(240, 217, 138, 0.48);
+  border-radius: 50%;
+  color: var(--ta-gold-light);
+  background: rgba(3, 17, 13, 0.4);
+}
+
+.status-chip {
+  display: inline-flex;
+  margin-top: 0.8rem;
+  border: 1px solid rgba(240, 217, 138, 0.34);
+  border-radius: 999px;
+  padding: 0.45rem 0.68rem;
+  background: rgba(214, 181, 90, 0.09);
+  letter-spacing: 0.08em;
+}
+
+.gilt-divider {
+  margin-top: 1.5rem;
+  color: var(--ta-gold);
+}
+
+.gilt-divider svg {
+  display: block;
+  width: min(640px, 100%);
+  height: auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+.gilt-divider circle,
+.gilt-divider path:nth-of-type(2) {
+  fill: rgba(214, 181, 90, 0.2);
+}
+
+@media (max-width: 820px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    min-height: auto;
+  }
+
+  .hero__rings {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
