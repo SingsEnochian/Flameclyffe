@@ -1,0 +1,8 @@
+.branch {
+  --branch-state-off: var(--deep-off, rgba(114, 145, 132, 0.42));
+  --branch-state-on: var(--deep-loch, #1b8a68);
+  --branch-state-active: var(--deep-gold, #e4c36d);
+  --branch-state-stressed: var(--deep-mauve, #80516f);
+  --branch-state-protected: var(--deep-silver, #c9d7d3);
+  --branch-state-blocked: var(--deep-red, #d66b7c);
+}
