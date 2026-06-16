@@ -8,7 +8,7 @@ Original title shown in paste: The complete QhyNLP UI Reference.
 
 Notice in paste: Copyright 2025 Kumplex Media Holdings Group P.L.L.C and Kumplex Media Group LLC.
 
-Category: tabbed documentation UI, DSL reference panel, tool/features/examples layout, utility-style reference page skin.
+Category: tabbed documentation UI, DSL reference panel, tool/features/examples layout, utility-style reference page skin, reference-page behavior utilities.
 
 ## What the pasted HTML teaches
 
@@ -41,6 +41,24 @@ Useful parts:
 - button, alert, success, border, scrollbar, and pill utility classes
 - basic dark-mode hooks for cards and code blocks
 
+## What the pasted JS teaches
+
+This is a small reference-page utility layer.
+
+Useful mechanics:
+
+- switch visible sections by id
+- mark the active tab visually
+- add a temporary fade-in class when changing panels
+- copy code blocks to clipboard
+- persist theme choice in localStorage
+- initialize saved theme on page load
+- reveal marked elements on scroll with IntersectionObserver
+- initialize tabs from data-target attributes
+- open a tab from a query parameter
+- expose helper functions for demo/debug use
+- provide a scroll-to-top helper
+
 ## Adaptation targets
 
 - ReferenceTabs
@@ -52,6 +70,11 @@ Useful parts:
 - DSLReferencePanel
 - reference-page.css
 - reference-utilities.css
+- useReferenceTabs
+- useCopyBlock
+- useThemePreference
+- useRevealOnScroll
+- useQueryTab
 
 ## DEEP use
 
@@ -80,3 +103,6 @@ Use as a page template for language guides, rune/mode syntax, tool inventories, 
 - generate tool cards from data
 - avoid relying on Tailwind or DaisyUI-specific classes unless the project explicitly includes them
 - avoid scaling cards on hover if it causes layout shift or motion discomfort
+- the pasted JS appears to have template literal or quoting loss in console/query-selector lines, so treat it as behavior reference rather than runnable code
+- use non-alert copy feedback in production
+- make scroll animation respect reduced-motion preferences
