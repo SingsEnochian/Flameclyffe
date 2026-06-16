@@ -18,6 +18,7 @@ What is implemented:
 - three floating cyan glass-like panels
 - instructional text for imagined hand gestures
 - mousedown, mousemove, and mouseup dragging for each panel
+- CSS float animation that bobs panels up and down
 
 What is not implemented:
 
@@ -29,7 +30,46 @@ What is not implemented:
 - no touch handling
 - no keyboard accessibility
 
-## What it teaches
+## What the CSS teaches
+
+The CSS is a simple dark sci-fi floating-panel skin.
+
+Useful parts:
+
+- dark full-height page with hidden overflow
+- cyan headings and description text
+- translucent blue floating panels with border, rounded corners, and glow
+- basic float keyframe animation
+
+Cautions:
+
+- floating-screen rules are duplicated
+- the second floating-screen block overrides and changes layout behavior
+- line-height based vertical centering conflicts with normal card content
+- infinite bobbing animation may interfere with dragging and may bother motion-sensitive users
+
+## What the JS teaches
+
+The JS confirms the demo is mouse-only draggable panels.
+
+Useful parts:
+
+- per-panel drag state
+- offset calculation on mousedown
+- window-level mousemove and mouseup listeners
+- cursor changes between grab and grabbing
+
+Cautions:
+
+- no pointer events
+- no touch events
+- no bounds checking
+- no persisted layout
+- no cleanup of window listeners
+- no accessibility support
+- no gesture logic despite the AirControl copy
+
+## What it teaches overall
 
 Use this only as a simple floating-panel layout reference or as a cautionary example of UI promises not backed by actual input logic.
 
