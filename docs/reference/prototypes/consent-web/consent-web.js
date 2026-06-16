@@ -1,17 +1,12 @@
-const permissions = [
-  { id: 'visual', label: 'Visual Bloom', state: 'on', x: 500, y: 115, description: 'Glow, bloom, and visual emphasis only.' },
-  { id: 'sound', label: 'Sound', state: 'off', x: 685, y: 145, description: 'Audible tones and ambience. Not started here.' },
-  { id: 'subbass', label: 'Sub-bass', state: 'off', x: 835, y: 280, description: 'Low-frequency body signal. Not started here.' },
-  { id: 'haptics', label: 'Haptics', state: 'blocked', x: 870, y: 485, description: 'Device vibration or external haptics.' },
-  { id: 'camera', label: 'Camera', state: 'off', x: 735, y: 640, description: 'Vision input. Requires explicit separate consent.' },
-  { id: 'gesture', label: 'Gesture Manipulation', state: 'off', x: 500, y: 690, description: 'Spatial grab, rotate, scale, and anchor intents for AR.' },
-  { id: 'gaze', label: 'Gaze', state: 'off', x: 265, y: 640, description: 'Eye or pointer attention signal.' },
-  { id: 'location', label: 'Location', state: 'blocked', x: 130, y: 485, description: 'Geolocation signal. Blocked in this sketch.' },
-  { id: 'logging', label: 'Export / Logging', state: 'on', x: 165, y: 280, description: 'Local notes, exports, or almanac logs.' },
-  { id: 'depth', label: 'Depth / LiDAR', state: 'off', x: 315, y: 145, description: 'Spatial depth events for AR. Not started here.' }
-];
+import { createCircle, createPath, createSvgElement, createText } from '../shared/dom-svg.js';
+import { alternatingBend, curvedPathBetween } from '../shared/svg-paths.js';
+import {
+  CONSENT_BRANCHES,
+  CONSENT_WEB_CONFIG,
+  CONSENT_WEB_CORE,
+} from './consent-web.model.js';
 
-const core = { x: 500, y: 390, label: 'DEEP' };
+const permissions = CONSENT_BRANCHES.map((branch) => ({ ...branch }));
 const branchLayer = document.querySelector('#branch-layer');
 const nodeLayer = document.querySelector('#node-layer');
 const controlList = document.querySelector('#control-list');
@@ -19,40 +14,24 @@ const statusLine = document.querySelector('#status-line');
 const pulseEnabledButton = document.querySelector('#pulse-enabled');
 const allOffButton = document.querySelector('#all-off');
 
-function curvePath(target, index) {
-  const midX = (core.x + target.x) / 2;
-  const midY = (core.y + target.y) / 2;
-  const dx = target.x - core.x;
-  const dy = target.y - core.y;
-  const length = Math.max(Math.hypot(dx, dy), 1);
-  const normalX = -dy / length;
-  const normalY = dx / length;
-  const bend = index % 2 === 0 ? 70 : -70;
-  return `M ${core.x} ${core.y} Q ${midX + normalX * bend} ${midY + normalY * bend} ${target.x} ${target.y}`;
-}
-
-function makePath(d, className) {
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', d);
-  path.classList.add(className);
-  return path;
-}
-
 function renderBranches() {
   branchLayer.replaceChildren();
 
   permissions.forEach((permission, index) => {
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const group = createSvgElement('g');
     group.classList.add('branch');
     group.dataset.permission = permission.id;
     group.dataset.state = permission.state;
     group.dataset.activity = String(Boolean(permission.activity));
 
-    const path = curvePath(permission, index);
+    const path = curvedPathBetween(CONSENT_WEB_CORE, permission, {
+      bend: alternatingBend(index, CONSENT_WEB_CONFIG.bend),
+    });
+
     group.append(
-      makePath(path, 'branch-lock'),
-      makePath(path, 'branch-path'),
-      makePath(path, 'branch-pulse')
+      createPath(path, 'branch-lock'),
+      createPath(path, 'branch-path'),
+      createPath(path, 'branch-pulse')
     );
 
     branchLayer.append(group);
@@ -62,36 +41,31 @@ function renderBranches() {
 function renderNodes() {
   nodeLayer.replaceChildren();
 
-  const coreGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const coreGroup = createSvgElement('g', {
+    transform: `translate(${CONSENT_WEB_CORE.x} ${CONSENT_WEB_CORE.y})`,
+  });
   coreGroup.classList.add('node', 'core');
-  coreGroup.setAttribute('transform', `translate(${core.x} ${core.y})`);
-  coreGroup.append(makeCircle(48), makeText(core.label, 6));
+  coreGroup.append(
+    createCircle(CONSENT_WEB_CONFIG.coreRadius),
+    createText(CONSENT_WEB_CORE.label, CONSENT_WEB_CONFIG.coreLabelOffsetY)
+  );
   nodeLayer.append(coreGroup);
 
   permissions.forEach((permission) => {
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const group = createSvgElement('g', {
+      transform: `translate(${permission.x} ${permission.y})`,
+    });
     group.classList.add('node');
     group.dataset.permission = permission.id;
     group.dataset.state = permission.state;
     group.dataset.activity = String(Boolean(permission.activity));
-    group.setAttribute('transform', `translate(${permission.x} ${permission.y})`);
 
-    group.append(makeCircle(34), makeText(permission.label, 58));
+    group.append(
+      createCircle(CONSENT_WEB_CONFIG.nodeRadius),
+      createText(permission.label, CONSENT_WEB_CONFIG.labelOffsetY)
+    );
     nodeLayer.append(group);
   });
-}
-
-function makeCircle(radius) {
-  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  circle.setAttribute('r', radius);
-  return circle;
-}
-
-function makeText(label, y) {
-  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  text.setAttribute('y', y);
-  text.textContent = label;
-  return text;
 }
 
 function renderControls() {
@@ -129,7 +103,7 @@ function pulseEnabled() {
       permission.activity = false;
     });
     renderAll();
-  }, 1400);
+  }, CONSENT_WEB_CONFIG.activityMs);
 }
 
 function setAllOff() {
