@@ -29,7 +29,7 @@ References are not direct copy instructions. Treat them as pattern-language sour
 | Network Pulse Field | https://codepen.io/VoXelo/pen/EaabxLj | DEEP geometry and pulse network | `codepen/network-pulse-field.md` |
 | Holographic Particle Morphing | https://codepen.io/VoXelo/pen/emBZVzJ | particle morphing and DEEP mode transitions | `codepen/holographic-particle-morphing.md` |
 | Gesture Neural Universe | https://codepen.io/VoXelo/pen/yyYJNRg | gesture control and DEEP sensory input | `codepen/gesture-neural-universe.md` |
-| Nurjamol Xoliqulova Reference JoRdaGg | https://codepen.io/Nurjamol-Xoliqulova/pen/JoRdaGg | pending inspection | `codepen/nurjamol-xoliqulova-joradagg.md` |
+| AirControl Floating Screens | https://codepen.io/Nurjamol-Xoliqulova/pen/JoRdaGg | floating panel mockup and gesture placeholder | `codepen/nurjamol-xoliqulova-joradagg.md` |
 
 ## Default sort for new references
 
