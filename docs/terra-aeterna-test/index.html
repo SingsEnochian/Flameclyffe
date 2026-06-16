@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" data-section="tales">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tales of Terra Aeterna | Emerald Reliquary Test</title>
+  <meta name="description" content="Emerald Reliquary front-end test page for Tales of Terra Aeterna." />
+  <link rel="stylesheet" href="./styles/emerald-reliquary.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="reliquary-shell" data-motion="awake">
+    <header class="hero" aria-labelledby="page-title">
+      <div class="hero__rings" aria-hidden="true"></div>
+      <p class="eyebrow">Emerald Reliquary Test Page</p>
+      <h1 id="page-title" class="gold-text">Tales of Terra Aeterna</h1>
+      <p class="hero__lede">
+        A front-end proof of concept for the Terra Aeterna novel-line wiki: emerald panels, metallic-gold ornament,
+        living archive cards, and gentle motion without shipping private font files.
+      </p>
+      <nav class="section-nav" aria-label="Terra Aeterna test sections">
+        <button class="section-nav__item is-active" data-section-target="tales">Tales</button>
+        <button class="section-nav__item" data-section-target="cities">Waking Cities</button>
+        <button class="section-nav__item" data-section-target="characters">Characters</button>
+        <button class="section-nav__item" data-section-target="archive">Archive</button>
+      </nav>
+    </header>
+
+    <main id="main" class="main-grid">
+      <section class="relic-panel relic-panel--wide" aria-labelledby="gate-title">
+        <div class="panel-kicker">Story Gate</div>
+        <h2 id="gate-title">Novel Line Hub</h2>
+        <p>
+          This test page is the first safe public shell for the Emerald Reliquary style. The typography uses system
+          fallbacks. Custom display fonts stay private until licensing is confirmed.
+        </p>
+        <div class="gilt-divider" aria-hidden="true">
+          <svg viewBox="0 0 640 80" role="img" aria-label="Gold ornamental divider">
+            <path d="M24 40 C112 8 180 8 268 40 S424 72 616 40" />
+            <circle cx="320" cy="40" r="10" />
+            <path d="M320 18 C338 28 338 52 320 62 C302 52 302 28 320 18Z" />
+          </svg>
+        </div>
+      </section>
+
+      <section class="relic-card" data-node="falka">
+        <div class="relic-card__icon">✦</div>
+        <p class="panel-kicker">Character Card</p>
+        <h2>Falka Hearthlight</h2>
+        <p>POV anchor, Völva leader, hearth-bearing intelligence at the threshold of the waking cities.</p>
+        <span class="status-chip">Canon Seed</span>
+      </section>
+
+      <section class="relic-card" data-node="hearthweave">
+        <div class="relic-card__icon">⌁</div>
+        <p class="panel-kicker">System Card</p>
+        <h2>Hearthweave</h2>
+        <p>The operational engine behind bridging, gathering, moving, and release.</p>
+        <span class="status-chip">Framework</span>
+      </section>
+
+      <section class="relic-card" data-node="third-city">
+        <div class="relic-card__icon">◈</div>
+        <p class="panel-kicker">Location Card</p>
+        <h2>Third City</h2>
+        <p>Bone-white Stonewood, black diamond sands, sea-wind, waking architecture, and old signal.</p>
+        <span class="status-chip">Waking City</span>
+      </section>
+
+      <section class="archive-panel relic-panel--wide" aria-labelledby="archive-title">
+        <p class="panel-kicker">Legacy Source Archive</p>
+        <h2 id="archive-title">Safe Public Asset Rule</h2>
+        <p>
+          Public GitHub assets may include CSS, JS, HTML, SVG ornament, rendered images, and documentation. Raw font
+          files remain in Drive unless licence language explicitly allows public redistribution and web embedding.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script src="./scripts/reliquary-motion.js"></script>
+</body>
+</html>
