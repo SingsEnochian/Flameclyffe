@@ -22,6 +22,10 @@ These prototypes are reviewable sketches. They are not production surfaces unles
   - Visual update for the DEEP Observer.
   - Tests P, C, R, E, M, A, and charge as CSS variables, branch states, field-orb expression, and narrative return.
 
+- AR Manipulation Mock: `ar-manipulation-mock/`
+  - Pointer-first spatial manipulation sketch.
+  - Tests grab, drag, rotate, scale, anchor, dismiss, and pulse without starting a real AR runtime.
+
 ## Promotion rule
 
 Before any prototype becomes production code:
