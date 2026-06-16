@@ -4,20 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DEEP Consent Web Prototype</title>
+  <link rel="stylesheet" href="../shared/deep-prototype-tokens.css" />
+  <link rel="stylesheet" href="../shared/deep-layout.css" />
+  <link rel="stylesheet" href="../shared/deep-panels.css" />
+  <link rel="stylesheet" href="../shared/deep-buttons.css" />
+  <link rel="stylesheet" href="../shared/deep-svg-field.css" />
+  <link rel="stylesheet" href="../shared/deep-branch-states.css" />
+  <link rel="stylesheet" href="../shared/deep-reduced-motion.css" />
   <link rel="stylesheet" href="./consent-web.css" />
 </head>
 <body>
-  <main class="consent-shell">
-    <section class="consent-stage" aria-labelledby="consent-title">
-      <div class="stage-copy">
-        <p class="eyebrow">DEEP prototype</p>
+  <main class="consent-shell deep-two-column-shell">
+    <section class="consent-stage deep-panel" aria-labelledby="consent-title">
+      <div class="stage-copy deep-stage-copy">
+        <p class="eyebrow deep-eyebrow">DEEP prototype</p>
         <h1 id="consent-title">Consent Web</h1>
         <p>Sensory systems remain visible, named, and inactive until invited.</p>
       </div>
 
-      <svg class="consent-map" viewBox="0 0 1000 760" role="img" aria-labelledby="map-title map-desc">
+      <svg class="consent-map deep-svg-map" viewBox="0 0 1000 760" role="img" aria-labelledby="map-title map-desc">
         <title id="map-title">Consent Web state map</title>
-        <desc id="map-desc">A DEEP core connected to sensory permission branches. Branches may be off, on, blocked, or temporarily active.</desc>
+        <desc id="map-desc">A DEEP core connected to permission branches. Branches may be off, on, blocked, or temporarily active.</desc>
         <defs>
           <filter id="consent-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="4" result="blur" />
@@ -32,23 +39,23 @@
       </svg>
     </section>
 
-    <aside class="consent-panel" aria-label="Consent Web controls">
-      <div class="panel-card status-card">
+    <aside class="consent-panel deep-panel" aria-label="Consent Web controls">
+      <div class="panel-card deep-panel-card status-card">
         <strong>Current status</strong>
         <p id="status-line" aria-live="polite">No sensory systems are active.</p>
       </div>
 
-      <div class="panel-card">
+      <div class="panel-card deep-panel-card">
         <h2>Permissions</h2>
         <div id="control-list" class="control-list"></div>
       </div>
 
       <div class="button-row">
-        <button id="pulse-enabled" class="primary-button" type="button">Pulse Enabled Branches</button>
-        <button id="all-off" class="ghost-button" type="button">All Off</button>
+        <button id="pulse-enabled" class="primary-button deep-button-primary" type="button">Pulse Enabled Branches</button>
+        <button id="all-off" class="ghost-button deep-button-ghost" type="button">All Off</button>
       </div>
 
-      <p class="tiny-note">This prototype never starts a camera, microphone, haptic device, location request, or sound output.</p>
+      <p class="tiny-note">This prototype only models consent state. It does not start real device systems.</p>
     </aside>
   </main>
 
