@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DEEP AR Manipulation Mock</title>
+  <link rel="stylesheet" href="../shared/deep-prototype-tokens.css" />
+  <link rel="stylesheet" href="../shared/deep-layout.css" />
+  <link rel="stylesheet" href="../shared/deep-panels.css" />
+  <link rel="stylesheet" href="../shared/deep-buttons.css" />
+  <link rel="stylesheet" href="../shared/deep-svg-field.css" />
+  <link rel="stylesheet" href="../shared/deep-branch-states.css" />
+  <link rel="stylesheet" href="../shared/deep-reduced-motion.css" />
+  <link rel="stylesheet" href="./ar-manipulation.css" />
+</head>
+<body>
+  <main class="ar-shell deep-two-column-shell" aria-labelledby="ar-title">
+    <section class="ar-stage deep-panel" aria-label="Pointer-first AR manipulation stage">
+      <div class="stage-copy deep-stage-copy">
+        <p class="eyebrow deep-eyebrow">DEEP prototype</p>
+        <h1 id="ar-title">AR Manipulation Mock</h1>
+        <p>Grab, move, rotate, scale, anchor, dismiss, and pulse an Observer object without starting real AR.</p>
+      </div>
+
+      <div class="spatial-grid" aria-hidden="true"></div>
+      <div id="anchor-zone" class="anchor-zone" aria-hidden="true">Anchor plane</div>
+
+      <button id="ar-object" class="ar-object" type="button" aria-label="Observer Core manipulation object">
+        <span class="orb-shell">
+          <span class="orb-core"></span>
+          <span class="orb-ring ring-one"></span>
+          <span class="orb-ring ring-two"></span>
+          <span class="orb-label">Observer</span>
+        </span>
+      </button>
+    </section>
+
+    <aside class="ar-panel deep-panel" aria-label="AR manipulation controls">
+      <section class="panel-card deep-panel-card">
+        <h2>Object</h2>
+        <p id="object-status" class="status" aria-live="polite">Ready.</p>
+      </section>
+
+      <section class="panel-card deep-panel-card">
+        <h2>Manipulate</h2>
+        <div class="control-grid">
+          <button id="move-left" class="deep-button-ghost" type="button">Left</button>
+          <button id="move-up" class="deep-button-ghost" type="button">Up</button>
+          <button id="move-down" class="deep-button-ghost" type="button">Down</button>
+          <button id="move-right" class="deep-button-ghost" type="button">Right</button>
+          <button id="rotate-left" class="deep-button-ghost" type="button">Rotate -</button>
+          <button id="rotate-right" class="deep-button-ghost" type="button">Rotate +</button>
+          <button id="scale-down" class="deep-button-ghost" type="button">Scale -</button>
+          <button id="scale-up" class="deep-button-ghost" type="button">Scale +</button>
+        </div>
+      </section>
+
+      <section class="button-row">
+        <button id="anchor-toggle" class="deep-button-primary" type="button">Toggle Anchor</button>
+        <button id="pulse-object" class="deep-button-primary" type="button">Pulse</button>
+        <button id="dismiss-object" class="deep-button-ghost" type="button">Dismiss</button>
+        <button id="reset-object" class="deep-button-ghost" type="button">Reset</button>
+      </section>
+
+      <section class="panel-card deep-panel-card">
+        <h2>Intent Log</h2>
+        <ol id="intent-log" class="intent-log" aria-live="polite"></ol>
+      </section>
+
+      <p class="tiny-note">Pointer and keyboard only. This mock does not start real AR or device capture.</p>
+    </aside>
+  </main>
+
+  <script type="module" src="./ar-manipulation.js"></script>
+</body>
+</html>
