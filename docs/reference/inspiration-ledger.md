@@ -24,7 +24,8 @@ References are not direct copy instructions. Treat them as pattern-language sour
 | Lattice Modes | https://codepen.io/VoXelo/pen/YPpReXx | morphing DEEP geometry modes | `codepen/lattice-modes.md` |
 | Branching / Curved Tethers | https://codepen.io/t_afif/pen/yyVPKzb | branches, tethers, node strands | `codepen/branching-tethers.md` |
 | CSS Over JS Modularity | https://codepen.io/web-strategist/pen/wBzLaGY | modular CSS architecture | `codepen/css-over-js-modularity.md` |
-| Russell Henderson vEyZxPz | https://codepen.io/russell-henderson/pen/vEyZxPz | pending review, flagged useful | `codepen/russell-henderson-vEyZxPz.md` |
+| Front-End Signal Grid | https://codepen.io/russell-henderson/pen/vEyZxPz | signal dashboard and glass console | `codepen/russell-henderson-vEyZxPz.md` |
+| Kumplex Music myddeGQ | https://codepen.io/Kumplex-music/pen/myddeGQ | pending review | `codepen/kumplex-music-myddeGQ.md` |
 
 ## Default sort for new references
 
