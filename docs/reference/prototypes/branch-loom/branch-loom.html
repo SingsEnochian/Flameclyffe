@@ -4,18 +4,25 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DEEP Branch Loom Prototype</title>
+  <link rel="stylesheet" href="../shared/deep-prototype-tokens.css" />
+  <link rel="stylesheet" href="../shared/deep-layout.css" />
+  <link rel="stylesheet" href="../shared/deep-panels.css" />
+  <link rel="stylesheet" href="../shared/deep-buttons.css" />
+  <link rel="stylesheet" href="../shared/deep-svg-field.css" />
+  <link rel="stylesheet" href="../shared/deep-branch-states.css" />
+  <link rel="stylesheet" href="../shared/deep-reduced-motion.css" />
   <link rel="stylesheet" href="./branch-loom.css" />
 </head>
 <body>
-  <main class="loom-shell" data-mode="signal-garden">
-    <section class="loom-stage" aria-labelledby="loom-title">
-      <div class="loom-copy">
-        <p class="eyebrow">DEEP prototype</p>
+  <main class="loom-shell deep-two-column-shell" data-mode="signal-garden">
+    <section class="loom-stage deep-panel" aria-labelledby="loom-title">
+      <div class="loom-copy deep-stage-copy">
+        <p class="eyebrow deep-eyebrow">DEEP prototype</p>
         <h1 id="loom-title">Branch Loom</h1>
         <p>The first nerve-map sketch: branches change state from data, not hardcoded visual guesses.</p>
       </div>
 
-      <svg class="loom-map" viewBox="0 0 1000 720" role="img" aria-labelledby="map-title map-desc">
+      <svg class="loom-map deep-svg-map" viewBox="0 0 1000 720" role="img" aria-labelledby="map-title map-desc">
         <title id="map-title">Branch Loom state map</title>
         <desc id="map-desc">A central core connected to seven branches. Each branch can be dormant, listening, active, stressed, protected, severed, or healing.</desc>
         <defs>
@@ -32,8 +39,8 @@
       </svg>
     </section>
 
-    <aside class="loom-panel" aria-label="Branch Loom controls">
-      <div class="panel-card">
+    <aside class="loom-panel deep-panel" aria-label="Branch Loom controls">
+      <div class="panel-card deep-panel-card">
         <label for="mode-select">Mode</label>
         <select id="mode-select">
           <option value="signal-garden">Signal Garden</option>
@@ -43,12 +50,12 @@
         </select>
       </div>
 
-      <div class="panel-card">
+      <div class="panel-card deep-panel-card">
         <label for="branch-select">Branch</label>
         <select id="branch-select"></select>
       </div>
 
-      <div class="panel-card">
+      <div class="panel-card deep-panel-card">
         <label for="state-select">State</label>
         <select id="state-select">
           <option value="dormant">Dormant</option>
@@ -61,10 +68,10 @@
         </select>
       </div>
 
-      <button id="breathe-button" class="primary-button" type="button">Let It Breathe</button>
-      <button id="cycle-button" class="ghost-button" type="button">Cycle States</button>
+      <button id="breathe-button" class="primary-button deep-button-primary" type="button">Let It Breathe</button>
+      <button id="cycle-button" class="ghost-button deep-button-ghost" type="button">Cycle States</button>
 
-      <div class="panel-card branch-readout" id="branch-readout" aria-live="polite"></div>
+      <div class="panel-card deep-panel-card branch-readout" id="branch-readout" aria-live="polite"></div>
     </aside>
   </main>
 
