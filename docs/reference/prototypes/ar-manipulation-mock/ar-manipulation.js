@@ -2,6 +2,7 @@ import { AR_MANIPULATION_CONFIG, AR_OBJECT } from './ar-manipulation.model.js';
 import { POINTER_INTENTS, describeIntent } from './ar-intents.js';
 import { createARManipulationController } from './ar-manipulation-controller.js';
 import { createGestureAdapterShim, makeSyntheticPayload } from './gesture-adapter-shim.js';
+import { handleARKeyboard } from './ar-keyboard-controls.js';
 
 const arObject = document.querySelector('#ar-object');
 const objectStatus = document.querySelector('#object-status');
@@ -59,19 +60,6 @@ function endDrag() {
   controller.setMode(POINTER_INTENTS.release);
 }
 
-function keyMove(event) {
-  const step = event.shiftKey ? AR_MANIPULATION_CONFIG.step * 2 : AR_MANIPULATION_CONFIG.step;
-  if (event.key === 'ArrowLeft') { event.preventDefault(); controller.moveBy(-step, 0); }
-  if (event.key === 'ArrowRight') { event.preventDefault(); controller.moveBy(step, 0); }
-  if (event.key === 'ArrowUp') { event.preventDefault(); controller.moveBy(0, -step); }
-  if (event.key === 'ArrowDown') { event.preventDefault(); controller.moveBy(0, step); }
-  if (event.key === '[') { event.preventDefault(); controller.rotateBy(-AR_MANIPULATION_CONFIG.rotationStep); }
-  if (event.key === ']') { event.preventDefault(); controller.rotateBy(AR_MANIPULATION_CONFIG.rotationStep); }
-  if (event.key === '-') { event.preventDefault(); controller.scaleBy(-AR_MANIPULATION_CONFIG.scaleStep); }
-  if (event.key === '+') { event.preventDefault(); controller.scaleBy(AR_MANIPULATION_CONFIG.scaleStep); }
-  if (event.key === 'Enter') { event.preventDefault(); controller.pulse(); }
-}
-
 function sendSynthetic(type) {
   gestureShim.receive(makeSyntheticPayload(type));
 }
@@ -80,7 +68,7 @@ arObject.addEventListener('pointerenter', () => renderIntentLog(POINTER_INTENTS.
 arObject.addEventListener('pointerdown', startDrag);
 window.addEventListener('pointermove', dragMove);
 window.addEventListener('pointerup', endDrag);
-arObject.addEventListener('keydown', keyMove);
+arObject.addEventListener('keydown', (event) => handleARKeyboard(event, controller));
 
 document.querySelector('#move-left').addEventListener('click', () => controller.moveBy(-AR_MANIPULATION_CONFIG.step, 0));
 document.querySelector('#move-right').addEventListener('click', () => controller.moveBy(AR_MANIPULATION_CONFIG.step, 0));
