@@ -1,10 +1,6 @@
-export const DEFAULT_HUD_SELECTORS = {
-  root: '.starwell',
-  shell: '.live-glyph-panel.deep-observer-panel',
-  stage: '.glyph-orb-wrap',
-  readout: '.glyph-readout',
-  hudLayer: '.deep-observer-hud-layer',
-};
+import { HUD_MEASURE_SELECTORS } from './deepHudMeasureSelectors.js';
+
+export const DEFAULT_HUD_SELECTORS = HUD_MEASURE_SELECTORS;
 
 export const DEFAULT_HUD_BREAKPOINTS = {
   mobile: 720,
