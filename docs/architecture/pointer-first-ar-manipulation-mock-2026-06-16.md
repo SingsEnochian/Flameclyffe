@@ -13,6 +13,8 @@ Create the first implementation sketch of DEEP AR manipulation without starting 
 - `docs/reference/prototypes/ar-manipulation-mock/ar-manipulation.model.js`
 - `docs/reference/prototypes/ar-manipulation-mock/ar-intents.js`
 - `docs/reference/prototypes/ar-manipulation-mock/ar-manipulation-controller.js`
+- `docs/reference/prototypes/ar-manipulation-mock/gesture-adapter-shim.js`
+- `docs/reference/prototypes/ar-manipulation-mock/state-transition-examples.md`
 
 ## Contract tested
 
@@ -31,7 +33,7 @@ The mock tests:
 
 ## Synthetic tests
 
-Synthetic gesture buttons now simulate future adapter output without device access.
+Synthetic gesture buttons simulate future adapter output without device access.
 
 Current synthetic events:
 
@@ -66,6 +68,12 @@ The controller file owns:
 - dismissal
 - synthetic gesture handling
 
+The adapter shim owns:
+
+- payload-shaped synthetic gesture input
+- gesture type mapping
+- adapter-style receive function
+
 The page runtime owns:
 
 - pointer input wiring
@@ -81,6 +89,7 @@ The CSS file owns:
 - anchor feedback
 - pulse feedback
 - dismissed-state feedback
+- keyboard help list styling
 
 ## Safety and flexibility
 
@@ -88,11 +97,17 @@ The mock is pointer-first by design.
 
 It does not start camera, depth, LiDAR, WebXR, or hand tracking APIs.
 
-Future adapters should emit the same manipulation intents rather than adding renderer-specific logic.
+Future adapters should emit payload-shaped events into an adapter shim rather than adding renderer-specific logic.
+
+## Completed follow-up pass
+
+- Keyboard help panel added.
+- State transition examples added.
+- Adapter shim added.
+- Synthetic gesture buttons now route through payload-shaped events.
 
 ## Next pass
 
-- Add a keyboard help panel.
-- Add unit-like state transition examples in documentation.
-- Add an adapter shim that accepts synthetic gesture payload objects.
 - Add optional reduced-motion-specific pulse feedback.
+- Add a tiny test harness for controller transitions.
+- Add an adapter contract note for future MediaPipe, WebXR, ARKit, gaze, and controller adapters.
