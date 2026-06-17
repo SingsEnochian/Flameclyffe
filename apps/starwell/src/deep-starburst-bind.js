@@ -2,13 +2,29 @@ import { fetchBridgeDeepPulse } from './lib/deepBridge.js';
 import { makeDeepSignature, normaliseDeepState } from './lib/deepState.js';
 import { getDeepSensorByIndex } from './lib/deepSensors.js';
 import { buildSensorStarburstVars, buildStarburstVars } from './lib/deepStarburst.js';
+import {
+  DEEP_STARBURST_BINDING,
+  DEEP_STARBURST_SELECTORS,
+} from './lib/deepStarburstContract.js';
 
-const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
-const WRAP_SELECTOR = '.glyph-orb-wrap';
-const ROOT_SELECTOR = '#root';
-const UPDATE_INTERVAL_MS = 1000;
-const BRIDGE_POLL_MS = 60000;
-const MUTATION_THROTTLE_MS = 160;
+const {
+  panel: PANEL_SELECTOR,
+  glyphWrap: WRAP_SELECTOR,
+  root: ROOT_SELECTOR,
+  sensorChips: SENSOR_CHIP_SELECTOR,
+  sensorLabel: SENSOR_LABEL_SELECTOR,
+} = DEEP_STARBURST_SELECTORS;
+
+const {
+  className: STARBURST_CLASS,
+  data: STARBURST_DATA,
+  native: STARBURST_NATIVE,
+  timing: STARBURST_TIMING,
+} = DEEP_STARBURST_BINDING;
+
+const UPDATE_INTERVAL_MS = STARBURST_TIMING.updateIntervalMs;
+const BRIDGE_POLL_MS = STARBURST_TIMING.bridgePollMs;
+const MUTATION_THROTTLE_MS = STARBURST_TIMING.mutationThrottleMs;
 
 let currentDeep = normaliseDeepState();
 let mutationTimer = 0;
@@ -17,8 +33,8 @@ let bridgePollId = 0;
 let observer = null;
 
 function isNativeControlled(element, scope) {
-  const value = element?.dataset?.starburstNative;
-  return value === 'true' || value === scope;
+  const value = element?.dataset?.[STARBURST_DATA.native];
+  return value === STARBURST_NATIVE.true || value === scope;
 }
 
 function applyVars(target, vars) {
@@ -30,12 +46,12 @@ function applyVars(target, vars) {
 }
 
 function ensureChipLegend(chip, sensor) {
-  if (isNativeControlled(chip, 'sensor')) return;
+  if (isNativeControlled(chip, STARBURST_NATIVE.sensor)) return;
 
-  let label = chip.querySelector(':scope > .deep-sensor-label');
+  let label = chip.querySelector(SENSOR_LABEL_SELECTOR);
   if (!label) {
     label = document.createElement('span');
-    label.className = 'deep-sensor-label';
+    label.className = STARBURST_CLASS.sensorLabel;
     chip.prepend(label);
   }
 
@@ -45,34 +61,35 @@ function ensureChipLegend(chip, sensor) {
 }
 
 function bindSensorChips(panel, deep, signature) {
-  const chips = Array.from(panel.querySelectorAll('.glyph-meter-grid > div'));
+  const chips = Array.from(panel.querySelectorAll(SENSOR_CHIP_SELECTOR));
 
   chips.forEach((chip, index) => {
     const sensor = getDeepSensorByIndex(index);
-    if (isNativeControlled(chip, 'sensor')) return;
+    if (isNativeControlled(chip, STARBURST_NATIVE.sensor)) return;
 
     const sensorSignature = `${signature}|${sensor.key}`;
     ensureChipLegend(chip, sensor);
-    if (chip.dataset.starburstSignature === sensorSignature) return;
+    if (chip.dataset[STARBURST_DATA.signature] === sensorSignature) return;
 
     applyVars(chip, buildSensorStarburstVars(deep, sensor));
-    chip.dataset.deepSensor = sensor.key;
-    chip.dataset.starburstSignature = sensorSignature;
+    chip.dataset[STARBURST_DATA.sensor] = sensor.key;
+    chip.dataset[STARBURST_DATA.signature] = sensorSignature;
   });
 }
 
 function chipsAreBound(panel, signature) {
-  const chips = Array.from(panel.querySelectorAll('.glyph-meter-grid > div'));
+  const chips = Array.from(panel.querySelectorAll(SENSOR_CHIP_SELECTOR));
   return chips.length > 0 && chips.every((chip, index) => {
-    if (isNativeControlled(chip, 'sensor')) return true;
+    if (isNativeControlled(chip, STARBURST_NATIVE.sensor)) return true;
     const sensor = getDeepSensorByIndex(index);
-    return chip.dataset.starburstSignature === `${signature}|${sensor.key}`;
+    return chip.dataset[STARBURST_DATA.signature] === `${signature}|${sensor.key}`;
   });
 }
 
 function panelIsBound(panel, glyphWrap, signature, auraIsNative) {
   const auraIsBound = auraIsNative
-    || (glyphWrap.dataset.starburstBound === 'true' && glyphWrap.dataset.starburstSignature === signature);
+    || (glyphWrap.dataset[STARBURST_DATA.bound] === STARBURST_NATIVE.true
+      && glyphWrap.dataset[STARBURST_DATA.signature] === signature);
 
   return auraIsBound && chipsAreBound(panel, signature);
 }
@@ -83,7 +100,7 @@ function bindPanel(panel) {
 
   const deep = currentDeep;
   const signature = makeDeepSignature(deep);
-  const auraIsNative = isNativeControlled(glyphWrap, 'aura');
+  const auraIsNative = isNativeControlled(glyphWrap, STARBURST_NATIVE.aura);
 
   if (panelIsBound(panel, glyphWrap, signature, auraIsNative)) return;
 
@@ -94,8 +111,8 @@ function bindPanel(panel) {
     });
 
     applyVars(glyphWrap, vars);
-    glyphWrap.dataset.starburstBound = 'true';
-    glyphWrap.dataset.starburstSignature = signature;
+    glyphWrap.dataset[STARBURST_DATA.bound] = STARBURST_NATIVE.true;
+    glyphWrap.dataset[STARBURST_DATA.signature] = signature;
   }
 
   bindSensorChips(panel, deep, signature);
