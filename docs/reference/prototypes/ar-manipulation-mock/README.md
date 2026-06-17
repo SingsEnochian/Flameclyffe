@@ -4,6 +4,8 @@ Standalone DEEP prototype for pointer-first spatial manipulation.
 
 Open `ar-manipulation.html` beside its CSS and JS files to review it.
 
+Open `ar-controller-test-harness.html` to run tiny controller transition checks.
+
 ## Purpose
 
 This prototype tests the manipulation contract before any AR or sensor adapter exists.
@@ -41,16 +43,19 @@ Current synthetic tests:
 - `ar-intents.js` owns pointer and synthetic intent vocabulary.
 - `ar-manipulation-controller.js` owns manipulation state transitions.
 - `gesture-adapter-shim.js` accepts payload-shaped synthetic gesture events.
+- `ar-controller-test-harness.js` runs small controller transition checks.
 - `ar-manipulation.js` owns DOM and input wiring.
 - JavaScript owns manipulation state and intent events.
 - CSS owns visual feedback.
 - Shared prototype CSS is loaded before local CSS.
 - The object remains usable with keyboard controls.
+- Reduced-motion pulse feedback uses static outline and glow instead of animation.
 
 ## Support files
 
 - `state-transition-examples.md` documents the input-to-controller flow.
 - `gesture-adapter-shim.js` is the future adapter doorway.
+- `ar-controller-test-harness.html` runs browser-visible controller checks.
 
 ## Future bridge
 
