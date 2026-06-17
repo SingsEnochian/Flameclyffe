@@ -1,6 +1,7 @@
 import { AR_MANIPULATION_CONFIG, AR_OBJECT } from './ar-manipulation.model.js';
-import { POINTER_INTENTS, SYNTHETIC_GESTURES, describeIntent } from './ar-intents.js';
+import { POINTER_INTENTS, describeIntent } from './ar-intents.js';
 import { createARManipulationController } from './ar-manipulation-controller.js';
+import { createGestureAdapterShim, makeSyntheticPayload } from './gesture-adapter-shim.js';
 
 const arObject = document.querySelector('#ar-object');
 const objectStatus = document.querySelector('#object-status');
@@ -33,6 +34,7 @@ const controller = createARManipulationController({
   onChange: renderState,
   onIntent: renderIntentLog,
 });
+const gestureShim = createGestureAdapterShim(controller);
 
 function startDrag(event) {
   dragStart = {
@@ -70,6 +72,10 @@ function keyMove(event) {
   if (event.key === 'Enter') { event.preventDefault(); controller.pulse(); }
 }
 
+function sendSynthetic(type) {
+  gestureShim.receive(makeSyntheticPayload(type));
+}
+
 arObject.addEventListener('pointerenter', () => renderIntentLog(POINTER_INTENTS.hover));
 arObject.addEventListener('pointerdown', startDrag);
 window.addEventListener('pointermove', dragMove);
@@ -88,10 +94,10 @@ document.querySelector('#anchor-toggle').addEventListener('click', () => control
 document.querySelector('#pulse-object').addEventListener('click', () => controller.pulse());
 document.querySelector('#dismiss-object').addEventListener('click', () => controller.toggleDismiss());
 document.querySelector('#reset-object').addEventListener('click', () => controller.reset());
-document.querySelector('#synthetic-pinch-drag').addEventListener('click', () => controller.syntheticGesture(SYNTHETIC_GESTURES.pinchDrag));
-document.querySelector('#synthetic-two-hand-rotate').addEventListener('click', () => controller.syntheticGesture(SYNTHETIC_GESTURES.twoHandRotate));
-document.querySelector('#synthetic-hand-scale').addEventListener('click', () => controller.syntheticGesture(SYNTHETIC_GESTURES.handScale));
-document.querySelector('#synthetic-air-anchor').addEventListener('click', () => controller.syntheticGesture(SYNTHETIC_GESTURES.airAnchor));
+document.querySelector('#synthetic-pinch-drag').addEventListener('click', () => sendSynthetic('pinchDrag'));
+document.querySelector('#synthetic-two-hand-rotate').addEventListener('click', () => sendSynthetic('twoHandRotate'));
+document.querySelector('#synthetic-hand-scale').addEventListener('click', () => sendSynthetic('handScale'));
+document.querySelector('#synthetic-air-anchor').addEventListener('click', () => sendSynthetic('airAnchor'));
 
 renderIntentLog(POINTER_INTENTS.select);
 renderState(controller.getState());
