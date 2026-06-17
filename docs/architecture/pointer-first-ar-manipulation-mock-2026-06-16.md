@@ -17,6 +17,8 @@ Create the first implementation sketch of DEEP AR manipulation without starting 
 - `docs/reference/prototypes/ar-manipulation-mock/state-transition-examples.md`
 - `docs/reference/prototypes/ar-manipulation-mock/ar-controller-test-harness.html`
 - `docs/reference/prototypes/ar-manipulation-mock/ar-controller-test-harness.js`
+- `docs/reference/prototypes/ar-manipulation-mock/adapter-contract.md`
+- `docs/reference/prototypes/ar-manipulation-mock/ar-keyboard-controls.js`
 
 ## Contract tested
 
@@ -70,16 +72,30 @@ The controller file owns:
 - dismissal
 - synthetic gesture handling
 
+The adapter contract owns:
+
+- supported source names
+- payload shape
+- safe detail fields
+- consent and privacy rules
+- future adapter requirements
+
 The adapter shim owns:
 
 - payload-shaped synthetic gesture input
+- payload validation
 - gesture type mapping
 - adapter-style receive function
+
+The keyboard helper owns:
+
+- keyboard-to-controller mapping
+- movement, rotation, scale, and pulse keys
 
 The page runtime owns:
 
 - pointer input wiring
-- keyboard input wiring
+- keyboard helper wiring
 - button input wiring
 - live status updates
 - intent log rendering
@@ -98,7 +114,7 @@ The test harness owns:
 
 - browser-visible controller transition checks
 - simple pass/fail reporting
-- confidence checks for movement, rotation, scale clamp, anchor, dismiss, reset, and synthetic rotation
+- confidence checks for movement, rotation, scale clamp, anchor, dismiss, reset, synthetic rotation, payload validation, and pulse timeout
 
 ## Safety and flexibility
 
@@ -116,9 +132,12 @@ Future adapters should emit payload-shaped events into an adapter shim rather th
 - Synthetic gesture buttons now route through payload-shaped events.
 - Reduced-motion pulse feedback added.
 - Tiny controller test harness added.
+- Adapter contract note added.
+- Pulse timeout and synthetic payload variant checks added.
+- Keyboard handling moved into `ar-keyboard-controls.js`.
 
 ## Next pass
 
-- Add an adapter contract note for future MediaPipe, WebXR, ARKit, gaze, and controller adapters.
-- Add more controller checks for pulse timeout and synthetic gesture payload variants.
-- Consider moving shared AR keyboard handling into a separate helper.
+- Add a dedicated consent-state test branch for adapter payload rejection.
+- Add one more shim path for controller/button-style payloads.
+- Consider moving pointer drag handling into a helper once another AR object is added.
