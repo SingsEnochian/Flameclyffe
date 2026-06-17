@@ -157,3 +157,15 @@ body {
   from { transform: scale(0.7); opacity: 0.95; }
   to { transform: scale(1.35); opacity: 0; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-object[data-pulsing="true"] .orb-ring {
+    animation: none;
+  }
+
+  .ar-object[data-pulsing="true"] .orb-shell {
+    outline: 4px solid rgba(228, 195, 109, 0.86);
+    outline-offset: 12px;
+    box-shadow: 0 0 0 8px rgba(27, 138, 104, 0.18), 0 0 36px rgba(228, 195, 109, 0.42);
+  }
+}
