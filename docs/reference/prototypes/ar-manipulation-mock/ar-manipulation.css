@@ -138,9 +138,19 @@ body {
 
 .status,
 .tiny-note,
-.intent-log {
+.intent-log,
+.help-list {
   color: rgba(247, 239, 217, 0.68);
   line-height: 1.45;
+}
+
+.help-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.help-list li + li {
+  margin-top: 0.25rem;
 }
 
 @keyframes ar-pulse {
