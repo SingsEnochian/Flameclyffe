@@ -1,6 +1,7 @@
 import { AR_MANIPULATION_CONFIG } from './ar-manipulation.model.js';
 import { SYNTHETIC_GESTURES } from './ar-intents.js';
 import { createARManipulationController } from './ar-manipulation-controller.js';
+import { createGestureAdapterShim, makeSyntheticPayload } from './gesture-adapter-shim.js';
 
 const status = document.querySelector('#test-status');
 const results = document.querySelector('#test-results');
@@ -23,8 +24,13 @@ function render(items) {
   status.textContent = `${passed}/${items.length} checks passed.`;
 }
 
-function runTests() {
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function runTests() {
   const controller = createARManipulationController();
+  const shim = createGestureAdapterShim(controller);
   const tests = [];
 
   controller.moveBy(AR_MANIPULATION_CONFIG.step, 0);
@@ -51,10 +57,23 @@ function runTests() {
   controller.syntheticGesture(SYNTHETIC_GESTURES.twoHandRotate);
   tests.push(assert('synthetic rotate affects rotation', controller.getState().rotation === AR_MANIPULATION_CONFIG.rotationStep * 2));
 
+  controller.reset();
+  tests.push(assert('shim accepts synthetic payload', shim.receive(makeSyntheticPayload('handScale')) === true));
+  tests.push(assert('synthetic payload changes scale', controller.getState().scale > 1));
+  tests.push(assert('shim rejects missing source', shim.receive({ type: 'pinchDrag', createdAt: new Date().toISOString() }) === false));
+  tests.push(assert('shim rejects disabled consent', shim.receive({ ...makeSyntheticPayload('pinchDrag'), consentState: 'disabled' }) === false));
+
+  controller.reset();
+  controller.pulse();
+  tests.push(assert('pulse starts pulsing', controller.getState().pulsing === true));
+  await wait(AR_MANIPULATION_CONFIG.pulseMs + 40);
+  tests.push(assert('pulse timeout settles pulsing', controller.getState().pulsing === false));
+  tests.push(assert('pulse timeout returns idle mode', controller.getState().mode === 'idle'));
+
   render(tests);
 }
 
-runButton.addEventListener('click', runTests);
+runButton.addEventListener('click', () => { runTests(); });
 clearButton.addEventListener('click', () => {
   results.replaceChildren();
   status.textContent = 'Ready.';
