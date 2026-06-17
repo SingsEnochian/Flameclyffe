@@ -1,6 +1,6 @@
 # STARWELL / DEEP Thread Ledger
 
-Status: living loom-card. Last reconciled 2026-06-13.
+Status: living loom-card. Last reconciled 2026-06-16.
 
 Update this whenever a thread becomes load-bearing, retired, folded into React, or split into a new module.
 
@@ -132,6 +132,28 @@ apps/starwell/src/lib/deepSensors.js
 
 Rule: sensor labels, notes, base sizes, rotations, and proxy mappings belong here. If the six-chip language changes, update this module first.
 
+### DEEP starburst binding contract
+
+Current state: shared module for the retained rollback binder. Not loaded directly by `apps/starwell/index.html`.
+
+Primary file:
+
+```text
+apps/starwell/src/lib/deepStarburstContract.js
+```
+
+Owns:
+
+```text
+retired binder selectors
+retired binder class names
+starburst-native ownership marker vocabulary
+retired binder dataset keys
+retired binder polling and mutation timing
+```
+
+Rule: rollback DOM vocabulary belongs here so `deep-starburst-bind.js` does not grow hardcoded selector fossils while it waits for parity QA and explicit cleanup approval. This contract does not transfer live starburst ownership away from React.
+
 ### DEEP HUD bounds helper
 
 Current state: implemented pure helper, active passive binding, production-empty HUD layer socket, and development-only diagnostic bead path. No active floating HUD panels yet.
@@ -176,7 +198,7 @@ getPanelZoneCandidates
 avoidRectsForDefaultPosition
 ```
 
-Completed repairs as of 2026-06-13:
+Completed repairs as of 2026-06-16:
 
 ```text
 sensor starburst state mapping preserves A / R / M
@@ -185,6 +207,8 @@ HUD layer no longer reports empty while diagnostics are mounted
 bounds measurement is scoped to each Observer panel
 readoutRect is included in avoidRects
 fallback zones are de-duplicated and collision-checked before selection
+HUD selector defaults now route through the shared measure-selector contract
+retained starburst binder selectors and ownership markers now route through deepStarburstContract.js
 STARWELL helper tests run in CI before production build
 ```
 
@@ -212,10 +236,11 @@ Diagnostic note: the debug bead can exist only in a Vite development build with 
 
 Current state: retained in the repository as a rollback reference, retired from the STARWELL live load path.
 
-Primary file:
+Primary files:
 
 ```text
 apps/starwell/src/deep-starburst-bind.js
+apps/starwell/src/lib/deepStarburstContract.js
 ```
 
 Historical role:
@@ -227,6 +252,7 @@ apply aura CSS variables to .glyph-orb-wrap
 apply sensor variables and labels to meter chips
 respect native React handoff markers
 clean up timers and observers on pagehide
+read selectors, dataset keys, native marker values, and timings from deepStarburstContract.js
 ```
 
 Current ownership:
@@ -237,6 +263,7 @@ live-glyph.jsx owns aura variables and data-starburst-native="aura"
 live-glyph.jsx owns sensor labels, notes, variables, and data-starburst-native="sensor"
 deepStarburst.js owns aura and sensor variable construction
 deepSensors.js owns the six-chip grammar
+deepStarburstContract.js owns rollback binder DOM and marker vocabulary
 ```
 
 Live-path note: `apps/starwell/index.html` no longer loads `deep-starburst-bind.js`.
@@ -288,7 +315,7 @@ docs/hud-integration-decision.md
 docs/starwell-viewport-hud-wrapper-contract.md
 ```
 
-These are now reconciled with the active HUD repair sequence through 2026-06-13.
+These are now reconciled with the active HUD and starburst-contract repair sequence through 2026-06-16.
 
 ## Completed ownership and repair transitions
 
@@ -309,6 +336,15 @@ HUD correctness repair sequence, merged through 2026-06-13:
 90a3981  Contain DEEP HUD diagnostics to development
 6ae316e  Scope DEEP HUD bounds to each panel
 9d37280  Verify DEEP HUD fallback zones before selecting
+```
+
+Contract de-hardcoding sequence, merged through 2026-06-16:
+
+```text
+1008102  De-hardcode DEEP HUD bounds selectors
+4ec2c0c  Add DEEP starburst binding contract
+1225e65  Route DEEP starburst binder through contract
+52a10a4  Cover DEEP starburst binding contract
 ```
 
 ## Parallel threads to watch
@@ -334,6 +370,7 @@ bridge pulse URL
 bridge fetch logic
 six-chip sensor map
 starburst CSS variable mapping
+starburst rollback selector / data / timing vocabulary
 mobile density overrides
 native handoff marker rules
 floating HUD clamp / snap logic
@@ -344,12 +381,13 @@ Add to the shared modules or explicitly bridge the static HUD files instead.
 
 ## Next safe moves
 
-1. Hand off `.deep-observer-hud-layer` ownership to React while leaving the passive binder as observer/fallback only.
-2. Perform visual QA at mobile, tablet, laptop, and wide widths.
-3. Confirm aura and sensor parity in live, stale, and quiet-fallback bridge states.
-4. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, reset-position, and consent gates are explicit.
-5. Add HUD furniture only after it can consume measured bounds, live inside the HUD layer, and respect mobile docking.
-6. Consider deleting the retired binder only after parity QA and a separate explicit cleanup approval.
+1. Let CI / Vercel settle on the contract de-hardcoding sequence.
+2. Hand off `.deep-observer-hud-layer` ownership to React while leaving the passive binder as observer/fallback only.
+3. Perform visual QA at mobile, tablet, laptop, and wide widths.
+4. Confirm aura and sensor parity in live, stale, and quiet-fallback bridge states.
+5. Keep `deep-observer-sensory.js` dormant until sound, haptic, low-stim, mobile bounds, reset-position, and consent gates are explicit.
+6. Add HUD furniture only after it can consume measured bounds, live inside the HUD layer, and respect mobile docking.
+7. Consider deleting the retired binder only after parity QA and a separate explicit cleanup approval.
 
 ## Working mantra
 
