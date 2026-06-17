@@ -7,7 +7,7 @@
     "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
     "sigil:preview": "vite preview --config apps/sigil-activator/vite.config.js",
     "starwell:dev": "vite --config apps/starwell/vite.config.js",
-    "starwell:build": "vite build --config apps/starwell/vite.config.js",
+    "starwell:build": "vite build --config apps/starwell/vite.config.js && vite build --config apps/pocket-concordance-lens/vite.vercel.config.js",
     "starwell:preview": "vite preview --config apps/starwell/vite.config.js",
     "starwell:test": "node --test apps/starwell/test/*.test.js",
     "pocket:dev": "vite --config apps/pocket-concordance-lens/vite.config.js",
