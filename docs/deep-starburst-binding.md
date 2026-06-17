@@ -1,6 +1,6 @@
 # DEEP Starburst Binding
 
-Status: React-native implementation note. Last reconciled 2026-06-13.
+Status: React-native implementation note. Last reconciled 2026-06-16.
 
 The DEEP starburst layer is owned by the STARWELL React path. The former companion binder remains in the repository as a rollback reference, but it is no longer loaded by `apps/starwell/index.html`.
 
@@ -76,6 +76,14 @@ apps/starwell/src/lib/deepStarburst.js
 
 `deepStarburst.js` imports shared normalisation from `deepState.js`. Use `buildStarburstVars` for the central aura and `buildSensorStarburstVars` for meter-chip flares. Do not duplicate the six-chip map, bridge reader, or sensor variable builder in another file unless there is a deliberate reason to fork the instrument language.
 
+The retained rollback binding contract lives in:
+
+```text
+apps/starwell/src/lib/deepStarburstContract.js
+```
+
+Use it for rollback binder selectors, data keys, native ownership markers, class names, and polling / mutation timing. It does not make the retired binder live; it keeps rollback vocabulary from drifting while the React path remains authoritative.
+
 ## Data mapping
 
 The full canonical DEEP state is preserved through `normaliseStarburstDeep(...)`. This is required because the sensor proxies use `A`, `R`, and `M`, not only the aura-facing fields.
@@ -107,7 +115,7 @@ Regression coverage lives in:
 apps/starwell/test/deepStarburst.test.js
 ```
 
-It proves that `A`, `R`, and `M` survive normalisation and that Presence, Tide, Clarity, and Moon renderings respond to those live fields.
+It proves that `A`, `R`, and `M` survive normalisation, that Presence, Tide, Clarity, and Moon renderings respond to those live fields, and that the retained rollback contract remains the selector / ownership-marker source for `deep-starburst-bind.js`.
 
 ## Native React ownership
 
@@ -149,6 +157,12 @@ The retained rollback file is:
 apps/starwell/src/deep-starburst-bind.js
 ```
 
+Its DOM selectors, class names, data keys, native marker values, and timing constants are supplied by:
+
+```text
+apps/starwell/src/lib/deepStarburstContract.js
+```
+
 It is no longer loaded by:
 
 ```text
@@ -175,6 +189,14 @@ Sensor mapping repair:
 ```text
 3ae8a85  Fix DEEP sensor starburst state mapping
 44917d7  Run STARWELL helper tests in CI
+```
+
+Contract cleanup:
+
+```text
+4ec2c0c  Add DEEP starburst binding contract
+1225e65  Route DEEP starburst binder through contract
+52a10a4  Cover DEEP starburst binding contract
 ```
 
 All STARWELL helper tests now run in CI before production build.
