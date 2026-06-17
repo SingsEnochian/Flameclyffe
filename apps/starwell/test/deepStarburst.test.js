@@ -6,6 +6,11 @@ import {
   buildSensorStarburstVars,
   normaliseStarburstDeep,
 } from '../src/lib/deepStarburst.js';
+import {
+  DEEP_STARBURST_BINDING,
+  DEEP_STARBURST_SELECTORS,
+  getStarburstPanelSelector,
+} from '../src/lib/deepStarburstContract.js';
 
 function sensor(key) {
   return DEEP_SENSOR_CHIPS.find((entry) => entry.key === key);
@@ -50,4 +55,16 @@ test('tide and clarity rendering respond to live resonance', () => {
 
 test('moon rendering responds to live cyclic phase', () => {
   assert.notDeepEqual(render('moon', { M: 0.1 }), render('moon', { M: 0.9 }));
+});
+
+test('starburst binding contract centralises rollback selectors and ownership markers', () => {
+  assert.equal(getStarburstPanelSelector(), DEEP_STARBURST_SELECTORS.panel);
+  assert.equal(DEEP_STARBURST_SELECTORS.panel, '.live-glyph-panel.deep-observer-panel');
+  assert.equal(DEEP_STARBURST_SELECTORS.glyphWrap, '.glyph-orb-wrap');
+  assert.equal(DEEP_STARBURST_SELECTORS.sensorChips, '.glyph-meter-grid > div');
+  assert.equal(DEEP_STARBURST_SELECTORS.sensorLabel, ':scope > .deep-sensor-label');
+  assert.equal(DEEP_STARBURST_BINDING.data.native, 'starburstNative');
+  assert.equal(DEEP_STARBURST_BINDING.data.signature, 'starburstSignature');
+  assert.equal(DEEP_STARBURST_BINDING.native.aura, 'aura');
+  assert.equal(DEEP_STARBURST_BINDING.native.sensor, 'sensor');
 });
