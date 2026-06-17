@@ -15,6 +15,8 @@ Create the first implementation sketch of DEEP AR manipulation without starting 
 - `docs/reference/prototypes/ar-manipulation-mock/ar-manipulation-controller.js`
 - `docs/reference/prototypes/ar-manipulation-mock/gesture-adapter-shim.js`
 - `docs/reference/prototypes/ar-manipulation-mock/state-transition-examples.md`
+- `docs/reference/prototypes/ar-manipulation-mock/ar-controller-test-harness.html`
+- `docs/reference/prototypes/ar-manipulation-mock/ar-controller-test-harness.js`
 
 ## Contract tested
 
@@ -90,6 +92,13 @@ The CSS file owns:
 - pulse feedback
 - dismissed-state feedback
 - keyboard help list styling
+- reduced-motion pulse feedback
+
+The test harness owns:
+
+- browser-visible controller transition checks
+- simple pass/fail reporting
+- confidence checks for movement, rotation, scale clamp, anchor, dismiss, reset, and synthetic rotation
 
 ## Safety and flexibility
 
@@ -105,9 +114,11 @@ Future adapters should emit payload-shaped events into an adapter shim rather th
 - State transition examples added.
 - Adapter shim added.
 - Synthetic gesture buttons now route through payload-shaped events.
+- Reduced-motion pulse feedback added.
+- Tiny controller test harness added.
 
 ## Next pass
 
-- Add optional reduced-motion-specific pulse feedback.
-- Add a tiny test harness for controller transitions.
 - Add an adapter contract note for future MediaPipe, WebXR, ARKit, gaze, and controller adapters.
+- Add more controller checks for pulse timeout and synthetic gesture payload variants.
+- Consider moving shared AR keyboard handling into a separate helper.
