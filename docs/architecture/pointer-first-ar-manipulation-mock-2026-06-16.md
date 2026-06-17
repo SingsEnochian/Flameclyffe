@@ -11,6 +11,8 @@ Create the first implementation sketch of DEEP AR manipulation without starting 
 - `docs/reference/prototypes/ar-manipulation-mock/ar-manipulation.css`
 - `docs/reference/prototypes/ar-manipulation-mock/ar-manipulation.js`
 - `docs/reference/prototypes/ar-manipulation-mock/ar-manipulation.model.js`
+- `docs/reference/prototypes/ar-manipulation-mock/ar-intents.js`
+- `docs/reference/prototypes/ar-manipulation-mock/ar-manipulation-controller.js`
 
 ## Contract tested
 
@@ -27,6 +29,17 @@ The mock tests:
 - dismiss
 - pulse
 
+## Synthetic tests
+
+Synthetic gesture buttons now simulate future adapter output without device access.
+
+Current synthetic events:
+
+- synthetic:pinch-drag
+- synthetic:two-hand-rotate
+- synthetic:hand-scale
+- synthetic:air-anchor
+
 ## Module boundary
 
 The model file owns:
@@ -34,14 +47,30 @@ The model file owns:
 - object capabilities
 - manipulation defaults
 - timing and step values
-- intent vocabulary
+- scale limits
 
-The runtime file owns:
+The intents file owns:
+
+- pointer intent names
+- synthetic gesture names
+- intent description helpers
+
+The controller file owns:
 
 - state transitions
-- pointer input
-- keyboard input
-- button input
+- movement
+- rotation
+- scaling
+- anchoring
+- pulsing
+- dismissal
+- synthetic gesture handling
+
+The page runtime owns:
+
+- pointer input wiring
+- keyboard input wiring
+- button input wiring
 - live status updates
 - intent log rendering
 
@@ -63,8 +92,7 @@ Future adapters should emit the same manipulation intents rather than adding ren
 
 ## Next pass
 
-- Split intent handling into `ar-intents.js`.
-- Split state transitions into `ar-manipulation-controller.js`.
-- Add synthetic gesture events for testing without device access.
 - Add a keyboard help panel.
 - Add unit-like state transition examples in documentation.
+- Add an adapter shim that accepts synthetic gesture payload objects.
+- Add optional reduced-motion-specific pulse feedback.
