@@ -40,11 +40,17 @@ Current synthetic tests:
 - No camera, depth, LiDAR, WebXR, or hand tracking API is called.
 - `ar-intents.js` owns pointer and synthetic intent vocabulary.
 - `ar-manipulation-controller.js` owns manipulation state transitions.
+- `gesture-adapter-shim.js` accepts payload-shaped synthetic gesture events.
 - `ar-manipulation.js` owns DOM and input wiring.
 - JavaScript owns manipulation state and intent events.
 - CSS owns visual feedback.
 - Shared prototype CSS is loaded before local CSS.
 - The object remains usable with keyboard controls.
+
+## Support files
+
+- `state-transition-examples.md` documents the input-to-controller flow.
+- `gesture-adapter-shim.js` is the future adapter doorway.
 
 ## Future bridge
 
