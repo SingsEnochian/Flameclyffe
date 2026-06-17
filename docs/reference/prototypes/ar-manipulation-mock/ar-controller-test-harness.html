@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AR Manipulation Controller Test Harness</title>
+  <link rel="stylesheet" href="../shared/deep-prototype-tokens.css" />
+  <link rel="stylesheet" href="../shared/deep-layout.css" />
+  <link rel="stylesheet" href="../shared/deep-panels.css" />
+  <link rel="stylesheet" href="../shared/deep-buttons.css" />
+  <link rel="stylesheet" href="../shared/deep-reduced-motion.css" />
+  <link rel="stylesheet" href="./ar-manipulation.css" />
+</head>
+<body>
+  <main class="ar-shell deep-two-column-shell" aria-labelledby="test-title">
+    <section class="deep-panel ar-stage">
+      <div class="stage-copy deep-stage-copy">
+        <p class="eyebrow deep-eyebrow">DEEP prototype test</p>
+        <h1 id="test-title">Controller Harness</h1>
+        <p>Runs tiny state-transition checks against the AR manipulation controller without device access.</p>
+      </div>
+    </section>
+
+    <aside class="ar-panel deep-panel" aria-label="AR controller tests">
+      <section class="panel-card deep-panel-card">
+        <h2>Test Status</h2>
+        <p id="test-status" class="status" aria-live="polite">Ready.</p>
+      </section>
+
+      <button id="run-tests" class="deep-button-primary" type="button">Run Tests</button>
+      <button id="clear-tests" class="deep-button-ghost" type="button">Clear</button>
+
+      <section class="panel-card deep-panel-card">
+        <h2>Results</h2>
+        <ol id="test-results" class="intent-log" aria-live="polite"></ol>
+      </section>
+    </aside>
+  </main>
+
+  <script type="module" src="./ar-controller-test-harness.js"></script>
+</body>
+</html>
