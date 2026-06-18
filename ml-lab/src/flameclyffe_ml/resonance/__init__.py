@@ -4,6 +4,7 @@ These modules are research-lab scaffolds. They do not fetch canon records, write
 publish material, or claim literal quantum memory.
 """
 
+from .interaction_rhythm import InteractionRhythmLayer
 from .narrative_wave_model import (
     NarrativeResonanceModel,
     NarrativeWaveEmbedding,
@@ -14,6 +15,7 @@ from .narrative_wave_model import (
 )
 
 __all__ = [
+    "InteractionRhythmLayer",
     "NarrativeResonanceModel",
     "NarrativeWaveEmbedding",
     "PhaseLockNorm",
