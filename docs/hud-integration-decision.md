@@ -1,12 +1,12 @@
 # DEEP HUD Integration Decision Note
 
-Status: active decision note after passive HUD infrastructure repair. Do not treat this as approval to load sensory panels or floating HUD furniture.
+Status: active decision note after the React-owned empty HUD layer handoff. Do not treat this as approval to load sensory panels or floating HUD furniture.
 
 ## Purpose
 
 The Astrolabe Skin + HUD Containment checklist says the Observer should become one coherent human / cybernetic / Stonewood / magical / astrolabe instrument, not a collection of glittering parts.
 
-This note records how the existing dormant/static HUD files relate to that checklist after the STARWELL-native passive bounds layer was repaired and tested.
+This note records how the existing dormant/static HUD files relate to that checklist after the STARWELL-native passive bounds layer was repaired, the empty socket moved to React ownership, and the shared HUD layer contract was introduced.
 
 Related governing contract:
 
@@ -60,13 +60,16 @@ Risk: sound/haptic behaviour must remain opt-in, low-stim aware, and device-gate
 
 ## STARWELL-native status
 
-The active STARWELL path now has a native pure bounds helper and passive binder:
+The active STARWELL path now has a native pure bounds helper, shared layer contract, React-owned empty socket, passive fallback binder, inert CSS socket, and regression coverage:
 
 ```text
 apps/starwell/src/lib/deepHudBounds.js
+apps/starwell/src/lib/deepHudLayerContract.js
+apps/starwell/src/live-glyph.js
 apps/starwell/src/deep-hud-bounds-bind.js
 apps/starwell/src/deep-hud-bounds.css
 apps/starwell/test/deepHudBounds.test.js
+apps/starwell/test/deepHudLayerContract.test.js
 ```
 
 Completed native repairs:
@@ -76,8 +79,12 @@ panel-local shell / stage / readout measurement
 readoutRect included in avoidRects
 fallback zones de-duplicated and collision-checked
 production HUD socket remains empty and panel-free
+React renders the empty HUD socket before furniture exists
+passive binder observes the React socket and creates fallback only when absent
+shared contract owns selectors, layer states, owner names, data keys, event name, and timing
+CSS keeps children non-interactive until explicit active, non-hidden state
 development diagnostic bead is gated by import.meta.env.DEV plus explicit opt-in
-helper regressions run in CI before production build
+helper and contract regressions have test coverage
 ```
 
 The production HUD layer is therefore empty infrastructure, not a hidden control panel. Development diagnostics may mark the layer `diagnostic`, but production does not import that diagnostic module.
@@ -93,20 +100,22 @@ apps/starwell/src/lib/deepHudBounds.js
 apps/starwell/src/lib/deepSensoryBus.js
 ```
 
-The pure HUD bounds portion has already been ported into STARWELL-native helper form. The sensory portion remains dormant until consent, low-stim, reset, mobile docking, and device gates are explicit.
+The pure HUD bounds portion has already been ported into STARWELL-native helper form. The HUD layer ownership portion has now moved to React. The sensory portion remains dormant until consent, low-stim, reset, mobile docking, and device gates are explicit.
 
-## Recommended next implementation slice
+## Completed implementation slice
 
-The next safe implementation slice is React-owned HUD layer handoff:
+The React-owned HUD layer handoff is now the active PR #11 slice:
 
 ```text
-live-glyph.jsx renders .deep-observer-hud-layer inside the Observer shell
+live-glyph.js renders .deep-observer-hud-layer into the Observer shell
 passive binder observes and measures an existing React-owned layer
+passive binder delays fallback creation so React can claim the socket first
 passive binder creates a fallback empty layer only when React has not rendered one
+shared layer contract prevents selector / owner / state drift
 no furniture, sensory controls, sound, or haptics are introduced in this slice
 ```
 
-This keeps ownership moving toward React before any visible HUD furniture arrives.
+This keeps ownership inside React before any visible HUD furniture arrives.
 
 ## Acceptance gate before loading sensory UI
 
@@ -119,7 +128,7 @@ low-stim visibly and audibly calms the interface
 panel stays bounded to HUD on mobile and desktop
 panel can reset to a safe default position
 panel cannot cover the glyph centre by default
-production HUD layer ownership is explicit
+production HUD layer ownership is explicit and QA-confirmed
 ```
 
 ## Documentation gap
@@ -138,6 +147,6 @@ A code search did not find those exact filenames in the repository during the ea
 
 ## Working decision
 
-For now: keep static HUD files shelved, keep sensory dormant, use the STARWELL-native helper for bounds and snap logic, and hand HUD layer ownership to React before adding visible controls.
+For now: keep static HUD files shelved, keep sensory dormant, use the STARWELL-native helper for bounds and snap logic, keep React as the empty HUD layer owner, and add visible controls only after browser QA confirms the socket invariants.
 
 No duplicate clamp/snap logic. No duplicate sound/haptic panel. One instrument, one HUD contract.
