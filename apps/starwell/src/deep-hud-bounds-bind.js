@@ -13,6 +13,7 @@ let observer = null;
 let resizeObserver = null;
 let updateTimer = 0;
 let lastSignature = '';
+const fallbackFrames = new Set();
 
 function px(value) {
   return `${Math.round(Number(value) || 0)}px`;
@@ -30,6 +31,35 @@ function getLayerState(layer) {
   return layer.childElementCount === 0 ? 'empty' : 'active';
 }
 
+function queueFallbackFrame(callback) {
+  const frameId = window.requestAnimationFrame(() => {
+    fallbackFrames.delete(frameId);
+    callback();
+  });
+  fallbackFrames.add(frameId);
+  return frameId;
+}
+
+function scheduleFallbackLayer(panel) {
+  if (panel.dataset.deepHudLayerFallbackReady === 'true') return;
+  if (panel.dataset.deepHudLayerFallbackPending === 'true') return;
+
+  panel.dataset.deepHudLayerFallbackPending = 'true';
+  queueFallbackFrame(() => {
+    queueFallbackFrame(() => {
+      delete panel.dataset.deepHudLayerFallbackPending;
+      if (panel.querySelector(`:scope > ${HUD_LAYER_SELECTOR}`)) return;
+      panel.dataset.deepHudLayerFallbackReady = 'true';
+      scheduleBind();
+    });
+  });
+}
+
+function clearFallbackState(panel) {
+  delete panel.dataset.deepHudLayerFallbackPending;
+  delete panel.dataset.deepHudLayerFallbackReady;
+}
+
 function ensureHudLayer(panel) {
   let layer = panel.querySelector(`:scope > ${HUD_LAYER_SELECTOR}`);
   if (layer) {
@@ -39,7 +69,15 @@ function ensureHudLayer(panel) {
     if (!layer.dataset.deepHudLayer) {
       layer.dataset.deepHudLayer = getLayerState(layer);
     }
+    if (layer.dataset.deepHudLayerOwner === REACT_HUD_LAYER_OWNER) {
+      clearFallbackState(panel);
+    }
     return layer;
+  }
+
+  if (panel.dataset.deepHudLayerFallbackReady !== 'true') {
+    scheduleFallbackLayer(panel);
+    return null;
   }
 
   layer = document.createElement('div');
@@ -158,6 +196,8 @@ function stopBinding() {
   if (observer) observer.disconnect();
   if (resizeObserver) resizeObserver.disconnect();
   if (updateTimer) window.clearTimeout(updateTimer);
+  fallbackFrames.forEach((frameId) => window.cancelAnimationFrame(frameId));
+  fallbackFrames.clear();
   window.removeEventListener('resize', scheduleBind);
   window.removeEventListener('orientationchange', scheduleBind);
 }
