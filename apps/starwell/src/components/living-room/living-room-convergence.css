@@ -1,0 +1,86 @@
+.hearth-convergence-path {
+  stroke: hsla(var(--living-anchor-hue), 82%, 74%, 0.46);
+  stroke-width: 0.42;
+  stroke-dasharray: 22 10;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 7px var(--living-anchor-glow));
+}
+
+.hearth-convergence-spiral {
+  stroke: rgba(231, 196, 119, 0.28);
+  stroke-width: 0.34;
+  stroke-dasharray: 4 6;
+}
+
+.hearth-merge-nodes {
+  fill: hsla(var(--living-anchor-hue), 90%, 78%, 0.82);
+  stroke: none;
+  filter: drop-shadow(0 0 5px var(--living-anchor-glow));
+}
+
+.hearth-merkaba-core {
+  filter: drop-shadow(0 0 4px rgba(231, 196, 119, 0.44));
+}
+
+.living-anchor-stonewood .hearth-convergence-south,
+.living-anchor-stonewood .hearth-convergence-west {
+  stroke-width: 0.66;
+  opacity: 1;
+}
+
+.living-anchor-starwell .hearth-convergence-north,
+.living-anchor-starwell .hearth-convergence-east {
+  stroke-width: 0.66;
+  opacity: 1;
+}
+
+.living-anchor-wraithtide .hearth-convergence-east,
+.living-anchor-wraithtide .hearth-convergence-spiral {
+  stroke-width: 0.66;
+  opacity: 1;
+}
+
+.living-anchor-withinwood .hearth-convergence-west,
+.living-anchor-withinwood .hearth-convergence-north {
+  stroke-width: 0.66;
+  opacity: 1;
+}
+
+.living-room:not(.living-low-motion) .hearth-convergence-path {
+  animation: fifth-form-converge 5.6s linear infinite;
+}
+
+.living-room:not(.living-low-motion) .hearth-convergence-north { animation-delay: -0.3s; }
+.living-room:not(.living-low-motion) .hearth-convergence-east { animation-delay: -1.1s; }
+.living-room:not(.living-low-motion) .hearth-convergence-south { animation-delay: -1.9s; }
+.living-room:not(.living-low-motion) .hearth-convergence-west { animation-delay: -2.7s; }
+.living-room:not(.living-low-motion) .hearth-convergence-spiral { animation-duration: 12s; }
+
+.living-room:not(.living-low-motion) .hearth-merge-nodes circle {
+  animation: fifth-form-node-enter 4.8s ease-in-out infinite;
+  transform-origin: 50px 50px;
+}
+
+.living-room:not(.living-low-motion) .hearth-merge-nodes circle:nth-child(2) { animation-delay: -1.2s; }
+.living-room:not(.living-low-motion) .hearth-merge-nodes circle:nth-child(3) { animation-delay: -2.4s; }
+.living-room:not(.living-low-motion) .hearth-merge-nodes circle:nth-child(4) { animation-delay: -3.6s; }
+
+@keyframes fifth-form-converge {
+  from { stroke-dashoffset: 0; opacity: 0.18; }
+  35% { opacity: 0.72; }
+  70% { opacity: 0.44; }
+  to { stroke-dashoffset: -64; opacity: 0.18; }
+}
+
+@keyframes fifth-form-node-enter {
+  from { opacity: 0.28; transform: scale(0.72); }
+  40% { opacity: 1; transform: scale(1.28); }
+  to { opacity: 0.36; transform: scale(0.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hearth-convergence-path,
+  .hearth-merge-nodes circle {
+    animation: none !important;
+  }
+}
