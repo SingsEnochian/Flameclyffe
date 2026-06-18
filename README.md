@@ -29,6 +29,7 @@ The `science_constants` Supabase table is the baseline for Planck/CODATA-style i
 ## Useful docs
 
 - `docs/architecture.md`
+- `docs/deep-hud-react-layer-handoff.md`
 - `docs/deep-observer-math.md`
 - `docs/deep-starburst-binding.md`
 - `docs/hud-integration-decision.md`
