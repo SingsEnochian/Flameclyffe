@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 
 import { LiveGlyphViewer as BaseLiveGlyphViewer, useSecondTicker } from './live-glyph.jsx';
 import {
-  DEEP_HUD_DATA_KEYS,
   DEEP_HUD_LAYER_CLASS,
   DEEP_HUD_LAYER_OWNER,
   DEEP_HUD_LAYER_STATE,
@@ -46,8 +45,8 @@ function ReactHudLayerPortal() {
   return createPortal(
     React.createElement('div', {
       className: DEEP_HUD_LAYER_CLASS,
-      [`data-${DEEP_HUD_DATA_KEYS.layer.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`]: DEEP_HUD_LAYER_STATE.empty,
-      [`data-${DEEP_HUD_DATA_KEYS.owner.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`]: DEEP_HUD_LAYER_OWNER.react,
+      'data-deep-hud-layer': DEEP_HUD_LAYER_STATE.empty,
+      'data-deep-hud-layer-owner': DEEP_HUD_LAYER_OWNER.react,
       'aria-hidden': 'true',
     }),
     panel,
