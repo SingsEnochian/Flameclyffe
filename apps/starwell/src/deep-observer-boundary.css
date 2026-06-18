@@ -55,6 +55,17 @@
   width: var(--w);
   height: var(--w);
   background:
+    /* Nodal geometry layer: concentric rings approximating Chladni figures.
+       Invisible at defaults (--wave-nodal-opacity: 0).
+       Rings tighten as nodal density rises (--wave-nodal-scale toward 2.0). */
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0%,
+      transparent calc(24% - var(--wave-nodal-scale) * 7%),
+      hsla(var(--flare-hue), 60%, 84%, calc(var(--wave-nodal-opacity) * 0.28))
+        calc(24% - var(--wave-nodal-scale) * 7% + 0.5%),
+      transparent calc(24% - var(--wave-nodal-scale) * 7% + 1.5%)
+    ),
     radial-gradient(circle, hsla(var(--flare-hue), 76%, 78%, 0.16), transparent 58%),
     repeating-conic-gradient(
       from var(--flare-rot),
@@ -62,9 +73,10 @@
       transparent 0 calc(1turn / var(--n))
     );
   filter:
-    blur(0.2px)
-    drop-shadow(0 0 14px hsla(var(--flare-hue), 88%, 74%, 0.2));
-  opacity: 0.72;
+    blur(calc(0.2px + var(--wave-phase-blur) * 0.06))
+    drop-shadow(0 0 calc(14px + var(--wave-resonance-glow) * 16px)
+      hsla(var(--flare-hue), 88%, 74%, calc(0.2 + var(--wave-resonance-glow) * 0.18)));
+  opacity: calc(0.72 + var(--wave-nodal-opacity) * 0.16);
   transform: rotate(var(--flare-rot)) translate(var(--flare-jitter), var(--flare-jitter));
   mix-blend-mode: screen;
 }
