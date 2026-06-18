@@ -60,9 +60,9 @@ The lab page is `apps/starwell/unit-resonance-lab.html`. Vite ships it as a sepa
 Canonical GitHub Pages routes after deployment:
 
 ```txt
-/Flameclyffe/starwell-react-lab/unit-resonance-lab.html
-/Flameclyffe/starwell-react-lab/unit-resonance-lab/
-/Flameclyffe/starwell-react-lab/resonance-lab/
+https://singsenochian.github.io/Flameclyffe/starwell-react-lab/unit-resonance-lab.html
+https://singsenochian.github.io/Flameclyffe/starwell-react-lab/unit-resonance-lab/
+https://singsenochian.github.io/Flameclyffe/starwell-react-lab/resonance-lab/
 ```
 
 The extensionless routes are copied during Pages assembly so GitHub Pages does not 404 when the browser asks for a directory-style path.
