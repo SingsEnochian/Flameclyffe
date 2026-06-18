@@ -1,0 +1,73 @@
+/* DEEP Observer Phase Anchor Consent Portal v0.1 */
+.phase-anchor-portal{
+  width:min(980px,calc(100% - 2rem));
+  margin:0 auto 1.5rem;
+  padding:1rem;
+  border:1px solid rgba(109,224,179,.24);
+  border-radius:26px;
+  background:
+    radial-gradient(ellipse at 12% 0%,rgba(109,224,179,.12),transparent 58%),
+    radial-gradient(ellipse at 90% 100%,rgba(231,196,119,.10),transparent 62%),
+    linear-gradient(145deg,rgba(0,0,0,.24),rgba(255,255,255,.05));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.055),0 16px 42px rgba(0,0,0,.22);
+  text-align:left;
+}
+
+.phase-anchor-portal[hidden]{display:none !important;}
+
+.phase-anchor-portal h3{
+  margin:0 0 .35rem;
+  color:var(--gold,#e7c477);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:1.35rem;
+}
+
+.phase-anchor-portal p{
+  margin:.4rem 0 0;
+  color:var(--soft,rgba(234,244,239,.78));
+  line-height:1.55;
+}
+
+.phase-anchor-portal code{
+  display:block;
+  margin:.7rem 0;
+  padding:.55rem .7rem;
+  border:1px solid rgba(168,204,224,.16);
+  border-radius:16px;
+  background:rgba(168,204,224,.07);
+  color:rgba(234,244,239,.84);
+  white-space:normal;
+}
+
+.phase-anchor-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.55rem;
+  margin-top:.85rem;
+}
+
+.phase-anchor-status{
+  margin-top:.65rem;
+  color:rgba(234,244,239,.68);
+  font:.74rem/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+.phase-anchor-portal[data-anchor-state="enabled"]{
+  border-color:rgba(231,196,119,.38);
+  box-shadow:inset 0 0 0 1px rgba(231,196,119,.08),0 18px 46px rgba(0,0,0,.24),0 0 34px rgba(109,224,179,.10);
+}
+
+.phase-anchor-portal[data-anchor-state="enabled"] .phase-anchor-status{
+  color:rgba(231,196,119,.82);
+}
+
+@media(max-width:680px){
+  .phase-anchor-portal{
+    width:min(100% - 1rem,980px);
+    border-radius:22px;
+  }
+  .phase-anchor-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+}
