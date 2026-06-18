@@ -14,14 +14,18 @@
   --root-growth: 0.36;
   --anchor-hue: 152;
   --field-glow: 0.22;
+  --focus-x: 50%;
+  --focus-y: 50%;
+  --form-turn: 0deg;
+  --back-turn: -12deg;
 }
 
-:root:has(#stonewood:target) { --root-growth: 0.88; --anchor-hue: 152; --field-glow: 0.72; }
-:root:has(#starwell:target) { --root-growth: 0.88; --anchor-hue: 205; --field-glow: 0.72; }
-:root:has(#ashfen-cairn:target) { --root-growth: 0.86; --anchor-hue: 118; --field-glow: 0.68; }
-:root:has(#wraithtide-shore:target) { --root-growth: 0.88; --anchor-hue: 196; --field-glow: 0.72; }
-:root:has(#withinwood:target) { --root-growth: 0.84; --anchor-hue: 276; --field-glow: 0.66; }
-:root:has(#salt-veil:target) { --root-growth: 0.82; --anchor-hue: 44; --field-glow: 0.64; }
+:root:has(#stonewood:target) { --root-growth: 0.9; --anchor-hue: 152; --field-glow: 0.72; --focus-x: 42%; --focus-y: 76%; --form-turn: -8deg; --back-turn: -20deg; }
+:root:has(#starwell:target) { --root-growth: 0.9; --anchor-hue: 205; --field-glow: 0.74; --focus-x: 52%; --focus-y: 14%; --form-turn: 11deg; --back-turn: 20deg; }
+:root:has(#ashfen-cairn:target) { --root-growth: 0.88; --anchor-hue: 118; --field-glow: 0.68; --focus-x: 23%; --focus-y: 38%; --form-turn: -18deg; --back-turn: -32deg; }
+:root:has(#wraithtide-shore:target) { --root-growth: 0.9; --anchor-hue: 196; --field-glow: 0.72; --focus-x: 75%; --focus-y: 64%; --form-turn: 18deg; --back-turn: 28deg; }
+:root:has(#withinwood:target) { --root-growth: 0.86; --anchor-hue: 276; --field-glow: 0.68; --focus-x: 34%; --focus-y: 28%; --form-turn: -28deg; --back-turn: 36deg; }
+:root:has(#salt-veil:target) { --root-growth: 0.84; --anchor-hue: 44; --field-glow: 0.66; --focus-x: 58%; --focus-y: 84%; --form-turn: 24deg; --back-turn: -28deg; }
 
 * { box-sizing: border-box; }
 html, body { min-height: 100%; margin: 0; }
@@ -37,82 +41,30 @@ body {
 
 a { color: inherit; }
 summary { font: inherit; }
-
 .anchor-targets { position: fixed; inset: 0 auto auto 0; width: 1px; height: 1px; overflow: hidden; }
 
-.page-shell {
-  width: min(1160px, calc(100% - 2rem));
-  margin: 0 auto;
-  padding: clamp(1.25rem, 4vw, 3rem) 0 3rem;
-}
+.page-shell { width: min(1160px, calc(100% - 2rem)); margin: 0 auto; padding: clamp(1.25rem, 4vw, 3rem) 0 3rem; }
 
 .site-header,
-.site-footer {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  border-block: 1px solid var(--border);
-  border-left: 0;
-  border-right: 0;
-  padding: 1rem 0;
-}
+.site-footer { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-block: 1px solid var(--border); border-left: 0; border-right: 0; padding: 1rem 0; }
 .site-header { border-top: 0; margin-bottom: clamp(1.6rem, 5vw, 3.4rem); }
 .site-footer { margin-top: 3rem; color: var(--dim); font-size: 0.82rem; }
 
-.wordmark {
-  color: var(--accent);
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.field-status {
-  color: hsl(var(--anchor-hue), 78%, 74%);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-}
+.wordmark { color: var(--accent); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
+.field-status { color: hsl(var(--anchor-hue), 78%, 74%); font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em; }
 .anchor-readout::after { content: 'ψ field · seed mode'; }
-:root:has(#stonewood:target) .anchor-readout::after { content: 'ψ field · anchored · Stonewood'; }
-:root:has(#starwell:target) .anchor-readout::after { content: 'ψ field · anchored · STARWELL'; }
-:root:has(#ashfen-cairn:target) .anchor-readout::after { content: 'ψ field · anchored · Ashfen Cairn'; }
-:root:has(#wraithtide-shore:target) .anchor-readout::after { content: 'ψ field · anchored · Wraithtide Shore'; }
-:root:has(#withinwood:target) .anchor-readout::after { content: 'ψ field · anchored · The Withinwood'; }
-:root:has(#salt-veil:target) .anchor-readout::after { content: 'ψ field · anchored · Salt Veil'; }
+:root:has(#stonewood:target) .anchor-readout::after { content: 'ψ field · rooted · Stonewood'; }
+:root:has(#starwell:target) .anchor-readout::after { content: 'ψ field · lifted · STARWELL'; }
+:root:has(#ashfen-cairn:target) .anchor-readout::after { content: 'ψ field · rooted · Ashfen Cairn'; }
+:root:has(#wraithtide-shore:target) .anchor-readout::after { content: 'ψ field · tidal · Wraithtide Shore'; }
+:root:has(#withinwood:target) .anchor-readout::after { content: 'ψ field · veiled · The Withinwood'; }
+:root:has(#salt-veil:target) .anchor-readout::after { content: 'ψ field · sifted · Salt Veil'; }
 
-.grove-hero {
-  display: grid;
-  grid-template-columns: minmax(300px, 0.84fr) minmax(360px, 1.16fr);
-  gap: clamp(1.5rem, 5vw, 4rem);
-  align-items: center;
-  margin-bottom: clamp(2.5rem, 7vw, 5rem);
-}
+.grove-hero { display: grid; grid-template-columns: minmax(300px, 0.84fr) minmax(360px, 1.16fr); gap: clamp(1.5rem, 5vw, 4rem); align-items: center; margin-bottom: clamp(2.5rem, 7vw, 5rem); }
 .hero-copy { position: relative; z-index: 2; }
-
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
+.eyebrow { display: flex; align-items: center; gap: 0.65rem; color: var(--muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; }
 .rune { color: var(--gold); font-size: 1.8rem; text-shadow: 0 0 22px rgba(228, 195, 109, calc(0.25 + var(--field-glow) * 0.45)); }
-
-h1 {
-  margin: 0.45rem 0 0.75rem;
-  color: var(--gold);
-  font-size: clamp(3rem, 8.2vw, 6.2rem);
-  font-weight: 300;
-  line-height: 0.92;
-  letter-spacing: -0.05em;
-  text-shadow: 0 0 44px rgba(228, 195, 109, calc(0.08 + var(--field-glow) * 0.3));
-}
+h1 { margin: 0.45rem 0 0.75rem; color: var(--gold); font-size: clamp(3rem, 8.2vw, 6.2rem); font-weight: 300; line-height: 0.92; letter-spacing: -0.05em; text-shadow: 0 0 44px rgba(228, 195, 109, calc(0.08 + var(--field-glow) * 0.3)); }
 .hero-desc { max-width: 58ch; color: var(--muted); line-height: 1.72; font-style: italic; }
 
 .readout-grid { display: grid; gap: 0.55rem; max-width: 340px; margin: 1.4rem 0; }
@@ -127,17 +79,8 @@ h1 {
 :root:has(#wraithtide-shore:target) .readout-val::after,
 :root:has(#withinwood:target) .readout-val::after,
 :root:has(#salt-veil:target) .readout-val::after { content: attr(data-grown); }
-
 .readout-bar { position: relative; height: 3px; overflow: hidden; border-radius: 999px; background: rgba(163, 226, 201, 0.1); }
-.readout-bar-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--base-width, 44%);
-  border-radius: inherit;
-  background: linear-gradient(90deg, hsl(var(--anchor-hue), 58%, 52%), hsl(var(--anchor-hue), 85%, 78%));
-  box-shadow: 0 0 14px hsla(var(--anchor-hue), 80%, 70%, 0.45);
-  transition: width 700ms ease;
-}
+.readout-bar-fill { position: absolute; inset: 0 auto 0 0; width: var(--base-width, 44%); border-radius: inherit; background: linear-gradient(90deg, hsl(var(--anchor-hue), 58%, 52%), hsl(var(--anchor-hue), 85%, 78%)); box-shadow: 0 0 14px hsla(var(--anchor-hue), 80%, 70%, 0.45); transition: width 700ms ease; }
 :root:has(#stonewood:target) .readout-bar-fill,
 :root:has(#starwell:target) .readout-bar-fill,
 :root:has(#ashfen-cairn:target) .readout-bar-fill,
@@ -149,159 +92,73 @@ h1 {
 .anchor-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; }
 .btn,
 .anchor-panel summary,
-.anchor-actions a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.7rem 1rem;
-  background: var(--surface);
-  color: var(--text);
-  text-decoration: none;
-  cursor: pointer;
-}
+.anchor-actions a { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 999px; padding: 0.7rem 1rem; background: var(--surface); color: var(--text); text-decoration: none; cursor: pointer; }
 .btn:hover,
 .btn:focus-visible,
 .anchor-panel summary:hover,
 .anchor-panel summary:focus-visible,
 .anchor-actions a:hover,
-.anchor-actions a:focus-visible {
-  outline: none;
-  border-color: hsl(var(--anchor-hue), 70%, 70%);
-  box-shadow: 0 0 0 0.18rem hsla(var(--anchor-hue), 80%, 70%, 0.14);
-}
+.anchor-actions a:focus-visible { outline: none; border-color: hsl(var(--anchor-hue), 70%, 70%); box-shadow: 0 0 0 0.18rem hsla(var(--anchor-hue), 80%, 70%, 0.14); }
 .btn-primary,
 .anchor-actions a { color: var(--accent); border-color: rgba(163, 226, 201, 0.35); background: hsla(var(--anchor-hue), 70%, 42%, 0.12); }
 
-.grove-stage {
-  position: relative;
-  width: min(100%, 700px);
-  min-height: unset;
-  aspect-ratio: 1 / 0.88;
-  margin-inline: auto;
-  border: 1px solid var(--border);
-  border-radius: clamp(1.25rem, 4vw, 2.25rem);
-  overflow: hidden;
-  isolation: isolate;
-  background:
-    radial-gradient(circle at 50% 50%, hsla(var(--anchor-hue), 68%, 62%, calc(0.08 + var(--field-glow) * 0.15)), transparent 22rem),
-    radial-gradient(circle at 50% 50%, rgba(228, 195, 109, 0.06), transparent 12rem),
-    linear-gradient(180deg, rgba(5, 12, 10, 0.48), rgba(1, 5, 4, 0.78));
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.36), 0 24px 80px rgba(0, 0, 0, 0.3);
-}
+.anchor-effect { min-height: 2.4rem; max-width: 44rem; margin: 1rem 0 0; color: var(--muted); font-size: 0.88rem; line-height: 1.55; }
+.anchor-effect::after { content: 'Choose an anchor to wake a route through the Fifth Form.'; }
+:root:has(#stonewood:target) .anchor-effect::after { content: 'Stonewood roots the field downward: Dreaming Grove and Root Ledger brighten, while root routes open through the lower Fifth Form.'; }
+:root:has(#starwell:target) .anchor-effect::after { content: 'STARWELL lifts the field upward: Standing Wave and DEEP Math brighten, while the upper geometry becomes the active route.'; }
+:root:has(#ashfen-cairn:target) .anchor-effect::after { content: 'Ashfen Cairn pulls left and earthward: Consent Gate and Dreaming Grove become the active hinge.'; }
+:root:has(#wraithtide-shore:target) .anchor-effect::after { content: 'Wraithtide Shore pulls right and tidal: Archive Pool and DEEP Math become the active current.'; }
+:root:has(#withinwood:target) .anchor-effect::after { content: 'The Withinwood darkens the inner passage: Consent Gate and Standing Wave become the quiet route.'; }
+:root:has(#salt-veil:target) .anchor-effect::after { content: 'Salt Veil sifts the lower right field: Root Ledger and Archive Pool become the settling route.'; }
+
+.grove-stage { position: relative; width: min(100%, 700px); min-height: unset; aspect-ratio: 1 / 0.88; margin-inline: auto; border: 1px solid var(--border); border-radius: clamp(1.25rem, 4vw, 2.25rem); overflow: hidden; isolation: isolate; background: radial-gradient(circle at var(--focus-x) var(--focus-y), hsla(var(--anchor-hue), 76%, 66%, calc(0.12 + var(--field-glow) * 0.22)), transparent 17rem), radial-gradient(circle at 50% 50%, rgba(228, 195, 109, 0.06), transparent 12rem), linear-gradient(180deg, rgba(5, 12, 10, 0.48), rgba(1, 5, 4, 0.78)); box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.36), 0 24px 80px rgba(0, 0, 0, 0.3); }
 .grove-stage::before,
-.grove-stage::after {
-  content: '';
-  position: absolute;
-  inset: 8%;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 1;
-}
-.grove-stage::before { border: 1px solid hsla(var(--anchor-hue), 58%, 72%, calc(0.08 + var(--root-growth) * 0.12)); }
-.grove-stage::after { inset: 19%; border: 1px dashed hsla(var(--anchor-hue), 58%, 72%, calc(0.05 + var(--root-growth) * 0.10)); transform: rotate(calc(var(--root-growth) * -18deg)); }
+.grove-stage::after { content: ''; position: absolute; inset: 8%; border-radius: 50%; pointer-events: none; z-index: 1; }
+.grove-stage::before { border: 1px solid hsla(var(--anchor-hue), 58%, 72%, calc(0.08 + var(--root-growth) * 0.12)); transform: translate(calc((50% - var(--focus-x)) / 16), calc((50% - var(--focus-y)) / 16)); }
+.grove-stage::after { inset: 19%; border: 1px dashed hsla(var(--anchor-hue), 58%, 72%, calc(0.05 + var(--root-growth) * 0.10)); transform: rotate(calc(var(--form-turn) * -1)); }
 
 .fifth-form-depth,
 .grove-tendril-layer,
 .grove-node-layer,
 .grove-core { position: absolute; inset: 0; }
 .fifth-form-depth { z-index: 2; display: grid; place-items: center; pointer-events: none; }
-.fifth-form-field {
-  position: absolute;
-  width: min(82%, 520px);
-  aspect-ratio: 1;
-  object-fit: contain;
-  opacity: calc(0.38 + var(--field-glow) * 0.34);
-  filter: drop-shadow(0 0 calc(12px + var(--field-glow) * 34px) hsla(var(--anchor-hue), 82%, 70%, 0.24));
-  transform-origin: center;
-  transition: opacity 700ms ease, filter 700ms ease, transform 700ms ease;
-}
-.fifth-form-field-back {
-  width: min(96%, 610px);
-  opacity: calc(0.15 + var(--field-glow) * 0.16);
-  filter: blur(2px) drop-shadow(0 0 34px hsla(var(--anchor-hue), 82%, 70%, 0.12));
-  transform: rotate(-12deg) scale(calc(0.92 + var(--root-growth) * 0.08));
-}
-.fifth-form-field-main { transform: rotate(calc((var(--root-growth) - 0.36) * 18deg)) scale(calc(0.86 + var(--root-growth) * 0.14)); }
-.fifth-form-mist {
-  position: absolute;
-  width: 72%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, hsla(var(--anchor-hue), 80%, 68%, calc(0.07 + var(--field-glow) * 0.12)), transparent 68%);
-  mix-blend-mode: screen;
-  opacity: 0.8;
-}
+.fifth-form-field { position: absolute; width: min(82%, 520px); aspect-ratio: 1; object-fit: contain; opacity: calc(0.38 + var(--field-glow) * 0.34); filter: drop-shadow(0 0 calc(12px + var(--field-glow) * 34px) hsla(var(--anchor-hue), 82%, 70%, 0.24)); transform-origin: center; transition: opacity 700ms ease, filter 700ms ease, transform 700ms ease; }
+.fifth-form-field-back { width: min(96%, 610px); opacity: calc(0.15 + var(--field-glow) * 0.16); filter: blur(2px) drop-shadow(0 0 34px hsla(var(--anchor-hue), 82%, 70%, 0.12)); transform: rotate(var(--back-turn)) scale(calc(0.92 + var(--root-growth) * 0.08)); }
+.fifth-form-field-main { transform: translate(calc((var(--focus-x) - 50%) / 14), calc((var(--focus-y) - 50%) / 14)) rotate(var(--form-turn)) scale(calc(0.86 + var(--root-growth) * 0.14)); }
+.fifth-form-mist { position: absolute; left: var(--focus-x); top: var(--focus-y); width: 58%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, hsla(var(--anchor-hue), 80%, 68%, calc(0.10 + var(--field-glow) * 0.14)), transparent 68%); mix-blend-mode: screen; opacity: 0.88; transition: left 700ms ease, top 700ms ease, opacity 700ms ease; }
 
 .grove-tendril-layer { z-index: 3; width: 100%; height: 100%; pointer-events: none; }
-.grove-tendril-layer path {
-  fill: none;
-  stroke: hsla(var(--anchor-hue), 70%, 72%, 0.36);
-  stroke-width: 0.42;
-  stroke-linecap: round;
-  stroke-dasharray: 110;
-  stroke-dashoffset: calc(110 - 110 * var(--root-growth));
-  filter: drop-shadow(0 0 0.65px hsla(var(--anchor-hue), 75%, 70%, 0.6));
-  transition: stroke-dashoffset 700ms ease, stroke 700ms ease;
-}
+.grove-tendril-layer path { fill: none; stroke: hsla(var(--anchor-hue), 70%, 72%, 0.36); stroke-width: 0.42; stroke-linecap: round; stroke-dasharray: 110; stroke-dashoffset: calc(110 - 110 * var(--root-growth)); filter: drop-shadow(0 0 0.65px hsla(var(--anchor-hue), 75%, 70%, 0.6)); transition: stroke-dashoffset 700ms ease, stroke 700ms ease, opacity 700ms ease, stroke-width 700ms ease; }
+.route-base path { opacity: 0.36; }
+.route-anchor path { opacity: 0; stroke-width: 0.72; stroke-dasharray: 86; }
+:root:has(#stonewood:target) .route-stonewood path,
+:root:has(#starwell:target) .route-starwell path,
+:root:has(#ashfen-cairn:target) .route-ashfen path,
+:root:has(#wraithtide-shore:target) .route-wraithtide path,
+:root:has(#withinwood:target) .route-withinwood path,
+:root:has(#salt-veil:target) .route-saltveil path { opacity: 0.95; }
 
 .grove-core { z-index: 4; display: grid; place-items: center; pointer-events: none; }
-.fifth-form-bind {
-  position: relative;
-  width: clamp(3.6rem, 8vw, 5.2rem);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 1px solid hsla(var(--anchor-hue), 70%, 76%, 0.46);
-  background:
-    radial-gradient(circle at 50% 50%, rgba(228, 195, 109, 0.26), transparent 28%),
-    radial-gradient(circle, hsla(var(--anchor-hue), 70%, 62%, 0.18), transparent 74%);
-  box-shadow:
-    0 0 calc(18px + var(--field-glow) * 42px) hsla(var(--anchor-hue), 80%, 68%, 0.24),
-    inset 0 0 30px rgba(0, 0, 0, 0.42);
-  transform: scale(calc(0.76 + var(--root-growth) * 0.22));
-  transition: transform 700ms ease, box-shadow 700ms ease;
-}
+.fifth-form-bind { position: relative; width: clamp(3.6rem, 8vw, 5.2rem); aspect-ratio: 1; border-radius: 50%; border: 1px solid hsla(var(--anchor-hue), 70%, 76%, 0.46); background: radial-gradient(circle at 50% 50%, rgba(228, 195, 109, 0.26), transparent 28%), radial-gradient(circle, hsla(var(--anchor-hue), 70%, 62%, 0.18), transparent 74%); box-shadow: 0 0 calc(18px + var(--field-glow) * 42px) hsla(var(--anchor-hue), 80%, 68%, 0.24), inset 0 0 30px rgba(0, 0, 0, 0.42); transform: translate(calc((var(--focus-x) - 50%) / 18), calc((var(--focus-y) - 50%) / 18)) scale(calc(0.76 + var(--root-growth) * 0.22)); transition: transform 700ms ease, box-shadow 700ms ease; }
 .fifth-form-bind::before,
-.fifth-form-bind::after {
-  content: '';
-  position: absolute;
-  inset: 18%;
-  border: 1px solid rgba(228, 195, 109, 0.34);
-  transform: rotate(45deg);
-}
+.fifth-form-bind::after { content: ''; position: absolute; inset: 18%; border: 1px solid rgba(228, 195, 109, 0.34); transform: rotate(45deg); }
 .fifth-form-bind::after { transform: rotate(-15deg); border-color: hsla(var(--anchor-hue), 74%, 78%, 0.28); }
 
 .grove-node-layer { z-index: 5; }
-.grove-node {
-  position: absolute;
-  left: calc(var(--x) * 100%);
-  top: calc(var(--y) * 100%);
-  display: grid;
-  place-items: center;
-  width: clamp(4.25rem, 7.4vw, 5.25rem);
-  min-height: clamp(3.55rem, 6.2vw, 4.45rem);
-  padding: 0.7rem 0.58rem;
-  transform: translate(-50%, -50%) scale(calc(0.82 + var(--root-growth) * 0.14));
-  border: 1px solid hsla(var(--anchor-hue), 65%, 72%, 0.3);
-  border-radius: 1.2rem;
-  background:
-    radial-gradient(circle at 50% 25%, hsla(var(--anchor-hue), 80%, 70%, 0.16), transparent 58%),
-    rgba(3, 12, 10, 0.58);
-  color: var(--text);
-  text-align: center;
-  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.24), 0 0 18px rgba(0, 0, 0, 0.18);
-  transition: transform 700ms ease, border-color 300ms ease, box-shadow 300ms ease;
-}
-.grove-node::before {
-  content: '';
-  width: 0.5rem;
-  aspect-ratio: 1;
-  margin-bottom: 0.32rem;
-  border-radius: 50%;
-  background: hsl(var(--anchor-hue), 78%, 74%);
-  box-shadow: 0 0 14px hsla(var(--anchor-hue), 78%, 74%, 0.68);
-}
+.grove-node { --node-boost: 0; position: absolute; left: calc(var(--x) * 100%); top: calc(var(--y) * 100%); display: grid; place-items: center; width: clamp(4.25rem, 7.4vw, 5.25rem); min-height: clamp(3.55rem, 6.2vw, 4.45rem); padding: 0.7rem 0.58rem; transform: translate(-50%, -50%) scale(calc(0.82 + var(--root-growth) * 0.10 + var(--node-boost) * 0.16)); border: 1px solid hsla(var(--anchor-hue), 65%, 72%, calc(0.26 + var(--node-boost) * 0.28)); border-radius: 1.2rem; background: radial-gradient(circle at 50% 25%, hsla(var(--anchor-hue), 80%, 70%, calc(0.13 + var(--node-boost) * 0.18)), transparent 58%), rgba(3, 12, 10, calc(0.56 + var(--node-boost) * 0.18)); color: var(--text); text-align: center; box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.24), 0 0 calc(14px + var(--node-boost) * 20px) hsla(var(--anchor-hue), 78%, 68%, calc(0.12 + var(--node-boost) * 0.22)); transition: transform 700ms ease, border-color 300ms ease, box-shadow 300ms ease; }
+.grove-node::before { content: ''; width: 0.5rem; aspect-ratio: 1; margin-bottom: 0.32rem; border-radius: 50%; background: hsl(var(--anchor-hue), 78%, 74%); box-shadow: 0 0 14px hsla(var(--anchor-hue), 78%, 74%, 0.68); }
+:root:has(#stonewood:target) .node-grove,
+:root:has(#stonewood:target) .node-root,
+:root:has(#starwell:target) .node-standing,
+:root:has(#starwell:target) .node-deep,
+:root:has(#ashfen-cairn:target) .node-consent,
+:root:has(#ashfen-cairn:target) .node-grove,
+:root:has(#wraithtide-shore:target) .node-archive,
+:root:has(#wraithtide-shore:target) .node-deep,
+:root:has(#withinwood:target) .node-consent,
+:root:has(#withinwood:target) .node-standing,
+:root:has(#salt-veil:target) .node-root,
+:root:has(#salt-veil:target) .node-archive { --node-boost: 1; }
 .node-label { position: static; width: auto; max-width: 8.5rem; color: var(--muted); font-size: clamp(0.64rem, 1.2vw, 0.76rem); line-height: 1.15; text-align: center; }
 
 .anchor-panel { margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface); }
@@ -313,19 +170,7 @@ h1 {
 .nav-section { margin-block: 2rem; }
 .section-label { display: block; margin-bottom: 0.8rem; padding-bottom: 0.45rem; border-bottom: 1px solid var(--border); color: var(--accent-2); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
 .card-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 0.7rem; }
-.holo-card {
-  display: block;
-  min-height: 8rem;
-  padding: 1rem;
-  border: 1px solid transparent;
-  border-radius: 0.9rem;
-  text-decoration: none;
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(135deg, hsla(var(--anchor-hue), 70%, 70%, 0.4), rgba(228, 195, 109, 0.16), rgba(2, 164, 211, 0.24)) border-box;
-  transform: translateY(0);
-  transition: transform 160ms ease, box-shadow 160ms ease;
-}
+.holo-card { display: block; min-height: 8rem; padding: 1rem; border: 1px solid transparent; border-radius: 0.9rem; text-decoration: none; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(135deg, hsla(var(--anchor-hue), 70%, 70%, 0.4), rgba(228, 195, 109, 0.16), rgba(2, 164, 211, 0.24)) border-box; transform: translateY(0); transition: transform 160ms ease, box-shadow 160ms ease; }
 .holo-card:hover,
 .holo-card:focus-visible { outline: none; transform: translateY(-2px); box-shadow: 0 12px 44px hsla(var(--anchor-hue), 80%, 62%, 0.08); }
 .card-tag { display: block; margin-bottom: 0.35rem; color: var(--accent-2); font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -340,10 +185,5 @@ h1 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
-  }
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.001ms !important; }
 }
