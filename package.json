@@ -23,13 +23,16 @@
     "everos:search": "node sandbox/everos/search-memory.mjs"
   },
   "dependencies": {
+    "@react-three/drei": "latest",
+    "@react-three/fiber": "latest",
     "@supabase/supabase-js": "latest",
     "@vitejs/plugin-react": "latest",
     "docx": "latest",
-    "vite": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "slot-text": "0.2.2"
+    "slot-text": "0.2.2",
+    "three": "latest",
+    "vite": "latest"
   },
   "devDependencies": {}
 }
