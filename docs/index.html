@@ -926,9 +926,14 @@ function activateStonewood() {
   document.getElementById('btn-activate').setAttribute('aria-pressed', 'true');
   document.getElementById('btn-activate').textContent = 'Field active';
 
-  // Animate field state
+  // Animate field state — if anchored, rotate Stonewood phases by anchor offset
   applyField(STONEWOOD.deep, STONEWOOD.hue);
-  animatePhasors(STONEWOOD_PHASES, 2200);
+  if (anchorLabel) {
+    const anchorPhases = STONEWOOD_PHASES.map((p, i) => p + (currentPhases[i] - NEUTRAL_PHASES[i]));
+    animatePhasors(anchorPhases, 2200);
+  } else {
+    animatePhasors(STONEWOOD_PHASES, 2200);
+  }
 }
 
 function resetField() {
@@ -1080,14 +1085,21 @@ function computeLocalityAnchor(lat, lon, hour) {
 
 function applyLocalityAnchor(localPhases, label) {
   anchorLabel = label;
-  const mean   = localPhases.reduce((s, p) => s + p, 0) / localPhases.length;
-  anchorHueShift = mean * (180 / Math.PI);   // radians → degrees
-  // Re-apply current field hue with the new shift
-  const base   = stoneActive ? STONEWOOD.hue : 198;
-  const ah     = ((base + anchorHueShift) % 360 + 360) % 360;
+
+  // Hue: sum of phase angles (not mean) gives more range across diverse locations
+  const phaseSum = localPhases.reduce((s, p) => s + p, 0);
+  anchorHueShift = phaseSum * (180 / Math.PI);
+  const base = stoneActive ? STONEWOOD.hue : 198;
+  const ah   = ((base + anchorHueShift) % 360 + 360) % 360;
   setCSS({ '--flare-hue': ah.toFixed(1), '--flare-hue-alt': ((ah + 35) % 360).toFixed(1) });
   bgHue  = ah;
   orbHue = ah;
+
+  // Orb: rotate the current phasor configuration by the anchor phase offsets so
+  // the orb visibly reflects where (and when) you are
+  const basePhases = stoneActive ? STONEWOOD_PHASES : NEUTRAL_PHASES;
+  const anchoredPhases = basePhases.map((p, i) => p + localPhases[i]);
+  animatePhasors(anchoredPhases, 1600);
 
   const statusEl = document.getElementById('field-status');
   statusEl.textContent = `ψ field · anchored · ${label}`;
@@ -1105,6 +1117,10 @@ function clearAnchor() {
   setCSS({ '--flare-hue': base, '--flare-hue-alt': (base + 35) % 360 });
   bgHue  = base;
   orbHue = base;
+
+  // Return orb phasors to unanchored position
+  animatePhasors(stoneActive ? STONEWOOD_PHASES : NEUTRAL_PHASES, 1200);
+
   const btn = document.getElementById('btn-anchor');
   btn.textContent = 'Anchor to location';
   btn.classList.remove('anchored');
