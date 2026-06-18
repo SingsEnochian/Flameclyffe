@@ -1,0 +1,51 @@
+.living-room-doorway {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  align-items: center;
+  max-width: 32rem;
+  margin: 1rem auto 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(231, 196, 119, 0.24);
+  border-radius: 1rem;
+  background: rgba(2, 8, 7, 0.68);
+  color: #f7efd9;
+  text-decoration: none;
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.28);
+}
+
+.living-room-doorway:hover,
+.living-room-doorway:focus-visible {
+  outline: none;
+  border-color: rgba(163, 226, 201, 0.42);
+  box-shadow: 0 0 0 0.18rem rgba(163, 226, 201, 0.12), inset 0 0 22px rgba(0, 0, 0, 0.28);
+}
+
+.living-room-doorway-mark {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(231, 196, 119, 0.12);
+  color: #e7c477;
+  font-size: 1.15rem;
+}
+
+.living-room-doorway-copy {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.living-room-doorway-copy strong {
+  color: #e7c477;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.living-room-doorway-copy em {
+  color: rgba(247, 239, 217, 0.62);
+  font-size: 0.74rem;
+  font-style: normal;
+}
