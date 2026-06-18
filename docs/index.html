@@ -30,7 +30,7 @@
           <div class="eyebrow">
             <span class="rune" aria-hidden="true">ᛉ</span>
             <span>Terra Aeterna</span>
-            <span>Fifth Form · Grove seed v0.2</span>
+            <span>Fifth Form · Grove seed v0.3</span>
           </div>
 
           <h1 id="heroTitle">Stonewood</h1>
@@ -66,10 +66,12 @@
             <a class="btn" href="#">Reset seed</a>
           </div>
 
+          <p class="anchor-effect" aria-live="polite"></p>
+
           <details class="anchor-panel">
             <summary>Anchor the Grove</summary>
             <h2>Choose a place</h2>
-            <p>These are symbolic Terra Aeterna anchors. No browser location request, no hidden telemetry, no ghost modal. The Fifth Form field grows by fragment state and CSS.</p>
+            <p>These are symbolic Terra Aeterna anchors. No browser location request, no hidden telemetry, no ghost modal. Each anchor now changes the route-lines, focus, depth, and awakened nodes.</p>
             <div class="anchor-actions">
               <a href="#stonewood">🌲 Stonewood</a>
               <a href="#starwell">⭐ STARWELL</a>
@@ -88,21 +90,53 @@
             <div class="fifth-form-mist"></div>
           </div>
           <svg class="grove-tendril-layer" viewBox="0 0 100 86" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M 50 43 Q 50 25 50 12"></path>
-            <path d="M 50 43 Q 66 25 76 25"></path>
-            <path d="M 50 43 Q 70 49 70 62"></path>
-            <path d="M 50 43 Q 42 57 34 69"></path>
-            <path d="M 50 43 Q 31 36 22 34"></path>
-            <path d="M 50 43 Q 50 64 50 76"></path>
+            <g class="route route-base">
+              <path d="M 50 43 Q 50 25 50 12"></path>
+              <path d="M 50 43 Q 66 25 76 25"></path>
+              <path d="M 50 43 Q 70 49 70 62"></path>
+              <path d="M 50 43 Q 42 57 34 69"></path>
+              <path d="M 50 43 Q 31 36 22 34"></path>
+              <path d="M 50 43 Q 50 64 50 76"></path>
+            </g>
+            <g class="route route-anchor route-stonewood">
+              <path d="M 50 43 C 44 51, 38 65, 34 80"></path>
+              <path d="M 50 43 C 52 57, 51 70, 50 88"></path>
+              <path d="M 34 80 C 38 73, 43 68, 50 88"></path>
+            </g>
+            <g class="route route-anchor route-starwell">
+              <path d="M 50 43 C 48 31, 49 21, 50 7"></path>
+              <path d="M 50 43 C 60 31, 67 27, 76 25"></path>
+              <path d="M 50 7 C 58 12, 68 16, 76 25"></path>
+            </g>
+            <g class="route route-anchor route-ashfen">
+              <path d="M 50 43 C 37 38, 29 37, 22 34"></path>
+              <path d="M 50 43 C 42 56, 38 66, 34 80"></path>
+              <path d="M 22 34 C 22 50, 26 67, 34 80"></path>
+            </g>
+            <g class="route route-anchor route-wraithtide">
+              <path d="M 50 43 C 62 41, 69 49, 70 62"></path>
+              <path d="M 50 43 C 63 33, 70 28, 76 25"></path>
+              <path d="M 76 25 C 83 39, 82 54, 70 62"></path>
+            </g>
+            <g class="route route-anchor route-withinwood">
+              <path d="M 50 43 C 36 36, 29 36, 22 34"></path>
+              <path d="M 50 43 C 49 30, 50 19, 50 12"></path>
+              <path d="M 22 34 C 32 25, 40 18, 50 12"></path>
+            </g>
+            <g class="route route-anchor route-saltveil">
+              <path d="M 50 43 C 50 56, 50 68, 50 88"></path>
+              <path d="M 50 43 C 62 49, 68 55, 70 62"></path>
+              <path d="M 50 88 C 58 78, 64 68, 70 62"></path>
+            </g>
           </svg>
           <div class="grove-core" aria-hidden="true"><div class="fifth-form-bind"></div></div>
           <div class="grove-node-layer">
-            <span class="grove-node" style="--x: 0.5; --y: 0.14"><span class="node-label">Standing Wave</span></span>
-            <span class="grove-node" style="--x: 0.76; --y: 0.29"><span class="node-label">DEEP Math</span></span>
-            <span class="grove-node" style="--x: 0.70; --y: 0.72"><span class="node-label">Archive Pool</span></span>
-            <span class="grove-node" style="--x: 0.34; --y: 0.80"><span class="node-label">Dreaming Grove</span></span>
-            <span class="grove-node" style="--x: 0.22; --y: 0.39"><span class="node-label">Consent Gate</span></span>
-            <span class="grove-node" style="--x: 0.5; --y: 0.88"><span class="node-label">Root Ledger</span></span>
+            <span class="grove-node node-standing" style="--x: 0.5; --y: 0.14"><span class="node-label">Standing Wave</span></span>
+            <span class="grove-node node-deep" style="--x: 0.76; --y: 0.29"><span class="node-label">DEEP Math</span></span>
+            <span class="grove-node node-archive" style="--x: 0.70; --y: 0.72"><span class="node-label">Archive Pool</span></span>
+            <span class="grove-node node-grove" style="--x: 0.34; --y: 0.80"><span class="node-label">Dreaming Grove</span></span>
+            <span class="grove-node node-consent" style="--x: 0.22; --y: 0.39"><span class="node-label">Consent Gate</span></span>
+            <span class="grove-node node-root" style="--x: 0.5; --y: 0.88"><span class="node-label">Root Ledger</span></span>
           </div>
         </section>
       </section>
