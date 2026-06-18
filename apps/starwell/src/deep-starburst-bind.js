@@ -6,6 +6,7 @@ import {
   DEEP_STARBURST_BINDING,
   DEEP_STARBURST_SELECTORS,
 } from './lib/deepStarburstContract.js';
+import { buildWaveVars, computeWaveFeatures } from './lib/standingWaveLens.js';
 
 const {
   panel: PANEL_SELECTOR,
@@ -114,6 +115,10 @@ function bindPanel(panel) {
     glyphWrap.dataset[STARBURST_DATA.bound] = STARBURST_NATIVE.true;
     glyphWrap.dataset[STARBURST_DATA.signature] = signature;
   }
+
+  // Standing wave lens — set --wave-* vars on the aura element so
+  // deep-material-vars-bind propagates them to the panel.
+  applyVars(glyphWrap, buildWaveVars(computeWaveFeatures(deep)));
 
   bindSensorChips(panel, deep, signature);
 }

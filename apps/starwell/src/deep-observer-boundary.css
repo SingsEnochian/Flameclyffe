@@ -34,6 +34,12 @@
   --flare-jitter: 0px;
   --flare-rot: 32deg;
   --deep-light-aura-alpha: min(var(--flare-alpha), var(--deep-light-aura-alpha-cap));
+  /* Standing wave lens — set by standingWaveLens.js via deep-starburst-bind.js.
+     Defaults reproduce the pre-wave visual exactly (0 = no effect). */
+  --wave-nodal-opacity: 0;
+  --wave-nodal-scale: 1;
+  --wave-phase-blur: 0px;
+  --wave-resonance-glow: 0;
 
   grid-area: stage;
   width: min(100%, 420px);

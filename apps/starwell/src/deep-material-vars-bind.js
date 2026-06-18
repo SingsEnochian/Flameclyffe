@@ -1,7 +1,10 @@
 const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
 const AURA_SELECTOR = '.glyph-orb-wrap[data-starburst-native="aura"]';
 const ROOT_SELECTOR = '#root';
-const MATERIAL_VARS = ['--flare-hue', '--flare-alpha', '--flare-jitter', '--flare-rot'];
+const MATERIAL_VARS = [
+  '--flare-hue', '--flare-alpha', '--flare-jitter', '--flare-rot',
+  '--wave-nodal-opacity', '--wave-nodal-scale', '--wave-phase-blur', '--wave-resonance-glow',
+];
 const UPDATE_THROTTLE_MS = 120;
 
 let observer = null;
