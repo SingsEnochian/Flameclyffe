@@ -5,6 +5,7 @@ publish material, or claim literal quantum memory.
 """
 
 from .interaction_rhythm import InteractionRhythmLayer
+from .local_context_phase import LocalContextPhaseAnchor, UserLocalityPhaseAnchor
 from .narrative_wave_model import (
     NarrativeResonanceModel,
     NarrativeWaveEmbedding,
@@ -16,10 +17,12 @@ from .narrative_wave_model import (
 
 __all__ = [
     "InteractionRhythmLayer",
+    "LocalContextPhaseAnchor",
     "NarrativeResonanceModel",
     "NarrativeWaveEmbedding",
     "PhaseLockNorm",
     "StandingWaveMemoryRegister",
+    "UserLocalityPhaseAnchor",
     "WaveCoherenceLoss",
     "WaveResonanceMemory",
 ]
