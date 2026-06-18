@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://singsenochian.github.io/Flameclyffe/starwell/rooms/schemas/starwell-room-seed.schema.json",
+  "title": "StarwellRoomSeed",
+  "description": "Manifest contract for user-authored STARWELL rooms. A room seed describes purpose, theme, nodes, signals, consent, rendering preferences, accessibility, and storage without hardcoding a room into UI code.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "room_id",
+    "title",
+    "kind",
+    "theme",
+    "nodes",
+    "signals",
+    "consent"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.0\\.0$",
+      "description": "Room seed schema version. Increment when the manifest contract changes."
+    },
+    "room_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "minLength": 2,
+      "maxLength": 80
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "writing_room",
+        "archive_room",
+        "observatory",
+        "rest_room",
+        "portal_room",
+        "laboratory",
+        "gallery"
+      ]
+    },
+    "purpose": {
+      "type": "string",
+      "maxLength": 160
+    },
+    "theme": {
+      "type": "object",
+      "required": ["palette", "materials", "mood"],
+      "additionalProperties": false,
+      "properties": {
+        "palette": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[_-][a-z0-9]+)*$"
+        },
+        "materials": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[_-][a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "mood": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[_-][a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "light": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[_-][a-z0-9]+)*$"
+        },
+        "motion": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[_-][a-z0-9]+)*$"
+        }
+      }
+    },
+    "renderer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "layout": {
+          "type": "string",
+          "enum": ["split_chamber", "radial_grove", "constellation", "gallery_wall", "single_panel"]
+        },
+        "node_shape": {
+          "type": "string",
+          "enum": ["bloom", "lantern", "stone", "card", "glyph", "window", "root"]
+        },
+        "connection_shape": {
+          "type": "string",
+          "enum": ["tendril", "root_path", "thread", "constellation_line", "none"]
+        },
+        "ambient_density": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "effects": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "enum": ["spores", "scanlines", "bloom", "mist", "stars", "ripples", "sparks", "moon_glow"]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "signals": {
+      "type": "object",
+      "required": ["growth", "phase"],
+      "additionalProperties": false,
+      "properties": {
+        "growth": {
+          "$ref": "#/$defs/signalName"
+        },
+        "phase": {
+          "$ref": "#/$defs/signalName"
+        },
+        "glow": {
+          "$ref": "#/$defs/signalName"
+        },
+        "sound": {
+          "$ref": "#/$defs/signalName"
+        },
+        "haptics": {
+          "$ref": "#/$defs/signalName"
+        }
+      }
+    },
+    "consent": {
+      "type": "object",
+      "required": ["live_text", "interaction_rhythm", "local_context"],
+      "additionalProperties": false,
+      "properties": {
+        "live_text": {
+          "type": "boolean",
+          "description": "Whether the room may stream current text while the user writes."
+        },
+        "interaction_rhythm": {
+          "type": "boolean",
+          "description": "Whether the room may use coarse local interaction tempo such as typing pace."
+        },
+        "local_context": {
+          "type": "boolean",
+          "description": "Whether the room may use explicitly granted coarse local context."
+        },
+        "sound": {
+          "type": "boolean"
+        },
+        "haptics": {
+          "type": "boolean"
+        }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "drafts": {
+          "type": "string",
+          "enum": ["none", "local_first", "manual_export", "review_gated"]
+        },
+        "exports": {
+          "type": "string",
+          "enum": ["none", "manual_only", "review_gated"]
+        },
+        "packets": {
+          "type": "string",
+          "enum": ["none", "local_only", "review_gated"]
+        }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reduced_motion_default": {
+          "type": "boolean"
+        },
+        "low_stim_available": {
+          "type": "boolean"
+        },
+        "keyboard_navigation": {
+          "type": "boolean"
+        },
+        "screen_reader_summary": {
+          "type": "string",
+          "maxLength": 280
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "boolean", "null"]
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Namespaced expansion point for experimental room systems. Use reverse-DNS or project prefixes where possible.",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "signalName": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[_-][a-z0-9]+)*$"
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "kind", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["editor", "archive", "ambient", "rest", "portal", "display", "action"]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "position": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y"],
+          "properties": {
+            "x": { "type": "number", "minimum": 0, "maximum": 1 },
+            "y": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "signals": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/signalName" },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "portal" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "required": ["target"]
+          }
+        }
+      ]
+    }
+  }
+}
