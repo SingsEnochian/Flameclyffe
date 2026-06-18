@@ -1,0 +1,37 @@
+[
+  {
+    "query": "Templehouse living archive threshold records",
+    "relevant_document_ids": ["templehouse"],
+    "top_k": 3
+  },
+  {
+    "query": "Stonewood harbour roots grown architecture",
+    "relevant_document_ids": ["stonewood"],
+    "top_k": 3
+  },
+  {
+    "query": "Nightwing cat bird dragon biscuit cushion",
+    "relevant_document_ids": ["nightwings"],
+    "top_k": 3
+  },
+  {
+    "query": "Moonmere Gate Eira Luna healer covenant",
+    "relevant_document_ids": ["moonmere"],
+    "top_k": 3
+  },
+  {
+    "query": "STARWELL observatory route resonance atlas glyph",
+    "relevant_document_ids": ["starwell"],
+    "top_k": 3
+  },
+  {
+    "query": "DEEP Observer coherence entropy memory attention",
+    "relevant_document_ids": ["deep"],
+    "top_k": 3
+  },
+  {
+    "query": "Pocket Concordance Lens mobile camera anchors",
+    "relevant_document_ids": ["pocket"],
+    "top_k": 3
+  }
+]
