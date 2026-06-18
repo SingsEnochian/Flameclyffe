@@ -1,6 +1,6 @@
 # STARWELL Viewport / HUD Wrapper Contract
 
-Status: governing contract after passive HUD infrastructure repair. The pure bounds helper, passive bounds binding layer, production-empty HUD overlay socket, and development-only diagnostic path exist. No HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
+Status: governing contract after passive HUD infrastructure repair and React-owned empty HUD layer handoff. The pure bounds helper, shared layer contract, React-owned production-empty HUD overlay socket, passive fallback binder, and development-only diagnostic path exist. No HUD panels, sensory controls, or astrolabe widgets are active from this contract yet.
 
 ## Purpose
 
@@ -84,13 +84,40 @@ Selector target:
 
 Role: future absolute-positioned layer inside the Observer instrument shell.
 
-Current state: active transitional socket. The passive binder creates this layer only when React has not provided it. In production it remains empty, `aria-hidden`, and marked with `data-deep-hud-layer="empty"` while it contains no HUD furniture.
+Current state: active React-owned empty socket. `apps/starwell/src/live-glyph.js` renders the socket into the Observer shell through a React portal. In production it remains empty, `aria-hidden`, marked with `data-deep-hud-layer="empty"`, and marked with `data-deep-hud-layer-owner="react"` while it contains no HUD furniture.
+
+Passive fallback exception: `apps/starwell/src/deep-hud-bounds-bind.js` observes the React-owned socket when present. It delays fallback creation so React can claim ownership first, then creates a fallback empty socket only when the React socket is absent. Fallback sockets are marked with `data-deep-hud-layer-owner="passive-bounds-binder"` and `data-deep-hud-layer-fallback="true"`.
 
 Development diagnostic exception: `apps/starwell/src/deep-hud-debug-bead.js` can mount a noninteractive debug bead only in Vite development mode and only with explicit debug opt-in. While mounted, the layer marker becomes `data-deep-hud-layer="diagnostic"`; cleanup restores `empty` or `active` according to actual contents.
 
-This layer should be `position: absolute` inside a `position: relative` shell. It should use `pointer-events: none` by default, and individual future panels should restore `pointer-events: auto`.
+This layer should be `position: absolute` inside a `position: relative` shell. It should use `pointer-events: none` by default. Children stay non-interactive until the layer is explicitly active and not `aria-hidden`.
 
 Do not put live furniture, sensory controls, sound controls, or haptic controls into this layer until the relevant acceptance gates are satisfied.
+
+## Shared HUD layer contract
+
+The layer vocabulary contract exists at:
+
+```text
+apps/starwell/src/lib/deepHudLayerContract.js
+```
+
+It owns:
+
+```text
+Observer panel selector
+HUD layer class / selector / scoped selector
+glyph stage selector
+readout selector
+root selector
+bounds event name
+update throttle timing
+HUD owner names
+HUD layer states
+HUD data keys
+```
+
+Use this contract from the React socket wrapper and passive binder. Do not duplicate selector strings, owner names, data keys, or event names in future HUD files without an explicit contract update.
 
 ## Implemented pure helper
 
@@ -142,7 +169,9 @@ Current responsibilities:
 ```text
 measure each active Observer instrument shell
 scope stage/readout lookup to that shell
-ensure an empty .deep-observer-hud-layer exists when React has not provided one
+observe an empty React-owned .deep-observer-hud-layer when present
+delay fallback creation so React can claim the socket first
+create a fallback empty .deep-observer-hud-layer only when React has not provided one
 publish CSS custom properties on .live-glyph-panel.deep-observer-panel
 set data-deep-hud-bounds="ready"
 set data-deep-hud-viewport by measured viewport class
@@ -168,7 +197,7 @@ Current CSS variables include:
 --deep-hud-readout-height
 ```
 
-This binding layer is passive. It creates only the empty HUD layer socket when React has not provided one. It creates no floating panels, no sensory controls, no sound, and no haptics. It only wires the measured room into CSS and events for future furniture.
+This binding layer is passive. It creates only the empty HUD layer fallback when React has not provided one. It creates no floating panels, no sensory controls, no sound, and no haptics. It only wires the measured room into CSS and events for future furniture.
 
 ## Bounds model
 
@@ -278,7 +307,7 @@ panel stays bounded to HUD on mobile and desktop
 panel can reset to a safe default position
 panel cannot cover the glyph centre by default
 panel cannot cover the readout rail by default
-production HUD layer ownership is explicit
+production HUD layer ownership is explicit and QA-confirmed
 ```
 
 Sensory controls should be governed by the HUD wrapper contract, not page-fixed free agents.
@@ -345,4 +374,4 @@ Events should carry plain data only. Do not pass DOM nodes in event details unle
 
 ## Next ownership step
 
-React should become the canonical owner of `.deep-observer-hud-layer` before any furniture is added. The passive binder should then observe the React-owned layer and create a fallback only if the layer is absent.
+Browser-QA the PR preview before any furniture is added. Confirm exactly one direct `.deep-observer-hud-layer` exists inside the Observer shell in the normal production path, with React owner, empty state, `aria-hidden`, zero children, and no fallback marker. Future furniture should consume measured bounds from the passive layer rather than creating a second socket.
