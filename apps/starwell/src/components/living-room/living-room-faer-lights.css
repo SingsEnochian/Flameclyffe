@@ -1,50 +1,64 @@
 .living-room {
-  --room-current-a: rgba(45, 122, 95, 0.42);
-  --room-current-b: rgba(231, 196, 119, 0.28);
-  --room-current-c: rgba(163, 226, 201, 0.22);
+  --forge-iron: rgba(8, 10, 8, 0.88);
+  --forge-copper: rgba(201, 135, 85, 0.34);
+  --forge-ember: rgba(231, 105, 57, 0.22);
+  --faer-green: rgba(45, 122, 95, 0.54);
+  --faer-deep: rgba(18, 76, 61, 0.46);
+  --faer-glass: rgba(120, 238, 196, 0.22);
+  --room-current-a: var(--faer-green);
+  --room-current-b: rgba(231, 196, 119, 0.34);
+  --room-current-c: var(--forge-copper);
+}
+
+.living-hearth {
+  background:
+    radial-gradient(ellipse at 50% 76%, var(--forge-ember), transparent 15rem),
+    radial-gradient(circle at 50% 48%, var(--faer-deep), transparent 17rem),
+    radial-gradient(circle at 50% 48%, var(--living-anchor-glow), transparent 20rem),
+    linear-gradient(180deg, rgba(20, 18, 12, 0.78), var(--forge-iron));
 }
 
 .living-selected-writing {
-  --room-current-a: rgba(231, 196, 119, 0.44);
-  --room-current-b: rgba(201, 135, 85, 0.30);
-  --room-current-c: rgba(247, 239, 217, 0.20);
+  --room-current-a: rgba(231, 196, 119, 0.46);
+  --room-current-b: rgba(201, 135, 85, 0.42);
+  --room-current-c: rgba(45, 122, 95, 0.28);
 }
 
 .living-selected-library {
-  --room-current-a: rgba(120, 238, 196, 0.34);
-  --room-current-b: rgba(231, 196, 119, 0.24);
-  --room-current-c: rgba(80, 150, 126, 0.26);
+  --room-current-a: rgba(45, 122, 95, 0.54);
+  --room-current-b: rgba(231, 196, 119, 0.30);
+  --room-current-c: rgba(18, 76, 61, 0.46);
 }
 
 .living-selected-atlas {
-  --room-current-a: rgba(116, 177, 255, 0.36);
-  --room-current-b: rgba(163, 226, 201, 0.26);
-  --room-current-c: rgba(231, 196, 119, 0.18);
+  --room-current-a: rgba(80, 150, 126, 0.48);
+  --room-current-b: rgba(116, 177, 255, 0.24);
+  --room-current-c: rgba(201, 135, 85, 0.24);
 }
 
 .living-selected-atelier,
 .living-selected-studio {
-  --room-current-a: rgba(196, 147, 255, 0.30);
-  --room-current-b: rgba(231, 196, 119, 0.26);
-  --room-current-c: rgba(163, 226, 201, 0.20);
+  --room-current-a: rgba(45, 122, 95, 0.44);
+  --room-current-b: rgba(231, 196, 119, 0.34);
+  --room-current-c: rgba(196, 147, 255, 0.18);
 }
 
 .living-selected-hearthlight {
-  --room-current-a: rgba(201, 135, 85, 0.42);
-  --room-current-b: rgba(231, 196, 119, 0.28);
-  --room-current-c: rgba(247, 239, 217, 0.18);
+  --room-current-a: rgba(201, 135, 85, 0.50);
+  --room-current-b: rgba(231, 196, 119, 0.38);
+  --room-current-c: rgba(45, 122, 95, 0.26);
 }
 
 .living-selected-faer {
-  --room-current-a: rgba(45, 122, 95, 0.52);
-  --room-current-b: rgba(231, 196, 119, 0.30);
-  --room-current-c: rgba(18, 76, 61, 0.42);
+  --room-current-a: rgba(45, 122, 95, 0.66);
+  --room-current-b: rgba(231, 196, 119, 0.34);
+  --room-current-c: rgba(18, 76, 61, 0.58);
 }
 
 .living-selected-vee {
-  --room-current-a: rgba(231, 196, 119, 0.42);
-  --room-current-b: rgba(247, 239, 217, 0.24);
-  --room-current-c: rgba(116, 177, 255, 0.18);
+  --room-current-a: rgba(231, 196, 119, 0.46);
+  --room-current-b: rgba(247, 239, 217, 0.26);
+  --room-current-c: rgba(45, 122, 95, 0.24);
 }
 
 .living-room-current {
@@ -52,8 +66,8 @@
   top: 34%;
   bottom: 24%;
   width: min(26%, 22rem);
-  opacity: 0.72;
-  filter: blur(0.2px) drop-shadow(0 0 18px var(--room-current-a));
+  opacity: 0.78;
+  filter: blur(0.25px) drop-shadow(0 0 18px var(--room-current-a)) drop-shadow(0 0 10px var(--forge-copper));
 }
 
 .living-room-current-left {
@@ -73,7 +87,9 @@
   height: 34%;
   border-top: 1px solid var(--room-current-a);
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, var(--room-current-c), transparent 58%);
+  background:
+    radial-gradient(ellipse at center, var(--room-current-c), transparent 58%),
+    radial-gradient(ellipse at 68% 48%, var(--room-current-b), transparent 72%);
   transform-origin: 100% 50%;
 }
 
@@ -82,13 +98,19 @@
 .living-room-current span:nth-child(3) { top: 58%; transform: rotate(-12deg); }
 
 .living-door.active .living-door-glyph {
-  box-shadow: 0 0 20px var(--room-current-a), inset 0 0 22px rgba(0, 0, 0, 0.24);
-  background: radial-gradient(circle, var(--room-current-a), transparent 72%);
+  box-shadow: 0 0 20px var(--room-current-a), 0 0 14px var(--forge-copper), inset 0 0 22px rgba(0, 0, 0, 0.24);
+  background:
+    radial-gradient(circle, var(--room-current-a), transparent 62%),
+    radial-gradient(circle, var(--forge-copper), transparent 78%);
 }
 
 .living-lantern.active {
-  border-color: rgba(231, 196, 119, 0.46);
-  box-shadow: 0 0 34px var(--room-current-a), inset 0 0 20px rgba(0, 0, 0, 0.34);
+  border-color: rgba(231, 196, 119, 0.54);
+  background:
+    radial-gradient(circle at 50% 34%, var(--room-current-a), transparent 46%),
+    radial-gradient(circle at 50% 72%, var(--forge-copper), transparent 68%),
+    rgba(2, 8, 7, 0.68);
+  box-shadow: 0 0 34px var(--room-current-a), 0 0 18px var(--forge-copper), inset 0 0 20px rgba(0, 0, 0, 0.34);
 }
 
 .living-lantern.active i {
@@ -96,7 +118,15 @@
 }
 
 .hearth-field {
-  filter: drop-shadow(0 0 10px var(--living-anchor-glow)) drop-shadow(0 0 11px var(--room-current-a));
+  filter: drop-shadow(0 0 10px var(--living-anchor-glow)) drop-shadow(0 0 11px var(--room-current-a)) drop-shadow(0 0 8px var(--forge-copper));
+}
+
+.hearth-glass {
+  background:
+    radial-gradient(circle at 50% 58%, var(--forge-ember), transparent 28%),
+    radial-gradient(circle at 50% 48%, var(--faer-deep), transparent 48%),
+    radial-gradient(circle at 50% 50%, rgba(247, 239, 217, 0.08), transparent 50%),
+    radial-gradient(circle at 50% 50%, var(--living-anchor-glow), transparent 68%);
 }
 
 .living-room:not(.living-low-motion) .living-room-current span {
@@ -112,8 +142,8 @@
 }
 
 @keyframes faer-current-flow {
-  from { opacity: 0.32; translate: -0.2rem 0; }
-  to { opacity: 0.94; translate: 0.32rem 0; }
+  from { opacity: 0.34; translate: -0.2rem 0; }
+  to { opacity: 0.96; translate: 0.32rem 0; }
 }
 
 @keyframes faer-light-pulse {
