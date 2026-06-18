@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stonewright Grove Engine</title>
+  <link rel="stylesheet" href="stonewright-grove.css" />
+</head>
+<body>
+  <main class="grove-shell" data-low-stim="false">
+    <section class="grove-panel" aria-labelledby="groveTitle">
+      <p class="eyebrow">Stonewright Grove Engine v0.1</p>
+      <h1 id="groveTitle">Loading grove seed…</h1>
+      <p id="grovePurpose" class="grove-purpose">The glade is finding its roots.</p>
+
+      <dl class="grove-meta" aria-label="Grove seed metadata">
+        <div><dt>Kind</dt><dd id="groveKind">unknown</dd></div>
+        <div><dt>Palette</dt><dd id="grovePalette">unknown</dd></div>
+        <div><dt>Mode</dt><dd>local preview</dd></div>
+      </dl>
+
+      <section class="grove-status" aria-labelledby="statusTitle">
+        <h2 id="statusTitle">Room response</h2>
+        <p id="groveStory">The room is quiet. Select a node to wake a preview signal.</p>
+      </section>
+
+      <div class="grove-actions" aria-label="Grove preview actions">
+        <button id="saveGlowButton" type="button">Simulate save glow</button>
+        <button id="lowStimButton" type="button" aria-pressed="false">Low-stim preview</button>
+        <button id="exportSeedButton" type="button">Export seed JSON</button>
+      </div>
+    </section>
+
+    <section class="grove-canvas" aria-labelledby="canvasTitle">
+      <h2 id="canvasTitle" class="sr-only">Grove node map</h2>
+      <svg id="tendrilLayer" class="tendril-layer" aria-hidden="true"></svg>
+      <div id="nodeLayer" class="node-layer" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="stonewright-grove.js" type="module"></script>
+</body>
+</html>
