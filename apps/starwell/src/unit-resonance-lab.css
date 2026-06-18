@@ -76,8 +76,9 @@ body {
 
 .unit-resonance-edges path {
   fill: none;
-  stroke: rgba(213, 165, 74, calc(0.28 + var(--edge-strength) * 0.42));
+  stroke: rgba(213, 165, 74, 0.72);
   stroke-width: calc(1.25px + var(--edge-strength) * 2.5px);
+  opacity: calc(0.28 + var(--edge-strength) * 0.42);
   filter: drop-shadow(0 0 10px rgba(213, 165, 74, 0.34));
 }
 
