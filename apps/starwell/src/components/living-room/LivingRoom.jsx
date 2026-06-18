@@ -50,6 +50,26 @@ function ThresholdBar({ phase, time, anchor, lowMotion, onToggleMotion }) {
   );
 }
 
+function SanctuaryLayers({ doors }) {
+  return (
+    <div className="living-sanctuary-layers" aria-hidden="true">
+      <div className="living-stonewood-arch">
+        <span className="living-root living-root-left" />
+        <span className="living-root living-root-right" />
+        <span className="living-root living-root-crown" />
+      </div>
+      <div className="living-lantern-veil">
+        {doors.slice(0, 6).map((door, index) => (
+          <span className="living-lantern" style={{ '--lantern-index': index }} key={door.key}>
+            <i>{door.glyph}</i>
+          </span>
+        ))}
+      </div>
+      <span className="living-threshold-window" />
+    </div>
+  );
+}
+
 export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, phase, time, children }) {
   const [activeAnchor, setActiveAnchor] = useState(livingRoomAnchors[0]);
   const [pulseCount, setPulseCount] = useState(0);
@@ -63,6 +83,7 @@ export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, p
     <main className={classes}>
       <div className="living-presence" aria-hidden="true" />
       <section className="living-arch" aria-label="STARWELL Living Room">
+        <SanctuaryLayers doors={chamberDoors} />
         <header className="living-room-header">
           <div>
             <p className="living-eyebrow">{livingRoomCopy.eyebrow}</p>
