@@ -1,0 +1,242 @@
+.living-sanctuary-layers {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.living-stonewood-arch {
+  position: absolute;
+  inset: 0;
+}
+
+.living-root {
+  position: absolute;
+  display: block;
+  border: 1px solid rgba(231, 196, 119, 0.13);
+  box-shadow: 0 0 34px rgba(231, 196, 119, 0.06), inset 0 0 28px rgba(0, 0, 0, 0.22);
+}
+
+.living-root-left,
+.living-root-right {
+  top: -8%;
+  bottom: 10%;
+  width: 18%;
+  border-radius: 48% 52% 42% 58%;
+  background:
+    radial-gradient(circle at 45% 18%, rgba(231, 196, 119, 0.10), transparent 10rem),
+    linear-gradient(90deg, rgba(231, 196, 119, 0.05), rgba(163, 226, 201, 0.025), transparent);
+}
+
+.living-root-left {
+  left: -7%;
+  transform: rotate(7deg);
+}
+
+.living-root-right {
+  right: -7%;
+  transform: rotate(-7deg) scaleX(-1);
+}
+
+.living-root-crown {
+  left: 10%;
+  right: 10%;
+  top: -17%;
+  height: 35%;
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0;
+  background:
+    radial-gradient(circle at 50% 100%, rgba(231, 196, 119, 0.08), transparent 20rem),
+    linear-gradient(180deg, rgba(163, 226, 201, 0.04), transparent);
+}
+
+.living-root-left::before,
+.living-root-left::after,
+.living-root-right::before,
+.living-root-right::after,
+.living-root-crown::before,
+.living-root-crown::after {
+  content: '';
+  position: absolute;
+  border: 1px solid rgba(163, 226, 201, 0.10);
+  border-radius: inherit;
+  opacity: 0.62;
+}
+
+.living-root-left::before,
+.living-root-right::before {
+  inset: 10% 24% 8% 34%;
+}
+
+.living-root-left::after,
+.living-root-right::after {
+  inset: 24% 42% 18% 18%;
+}
+
+.living-root-crown::before {
+  inset: 20% 8% 12%;
+}
+
+.living-root-crown::after {
+  inset: 40% 18% 4%;
+}
+
+.living-lantern-veil {
+  position: absolute;
+  left: 17%;
+  right: 17%;
+  top: clamp(5.5rem, 10vw, 8rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  opacity: 0.92;
+}
+
+.living-lantern {
+  --drop: calc(0.35rem + var(--lantern-index) * 0.16rem);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(2rem, 4vw, 2.8rem);
+  aspect-ratio: 0.78;
+  margin-top: var(--drop);
+  border: 1px solid rgba(231, 196, 119, 0.28);
+  border-radius: 44% 44% 50% 50%;
+  background:
+    radial-gradient(circle at 50% 34%, hsla(var(--living-anchor-hue), 84%, 72%, 0.22), transparent 52%),
+    rgba(2, 8, 7, 0.62);
+  box-shadow: 0 0 24px var(--living-anchor-glow), inset 0 0 18px rgba(0, 0, 0, 0.30);
+}
+
+.living-lantern::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 1px;
+  height: clamp(1.6rem, 4vw, 3rem);
+  background: linear-gradient(transparent, rgba(231, 196, 119, 0.36));
+}
+
+.living-lantern i {
+  font-style: normal;
+  font-size: clamp(0.92rem, 2vw, 1.25rem);
+  opacity: 0.72;
+}
+
+.living-threshold-window {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  width: min(58%, 44rem);
+  height: min(32%, 19rem);
+  transform: translateX(-50%);
+  border: 1px solid rgba(163, 226, 201, 0.13);
+  border-radius: 48% 48% 24% 24%;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(247, 239, 217, 0.08), transparent 7rem),
+    linear-gradient(180deg, rgba(43, 82, 92, 0.10), rgba(8, 32, 34, 0.05) 48%, transparent 70%);
+  opacity: 0.62;
+}
+
+.living-threshold-window::before {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 22%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(163, 226, 201, 0.22), transparent);
+}
+
+.living-room-grid,
+.living-room-header,
+.living-active-chamber,
+.living-threshold {
+  position: relative;
+  z-index: 3;
+}
+
+.living-hearth {
+  isolation: isolate;
+}
+
+.living-hearth::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: min(82%, 27rem);
+  aspect-ratio: 1 / 0.36;
+  transform: translateX(-50%);
+  border: 1px solid rgba(231, 196, 119, 0.16);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(231, 196, 119, 0.09), transparent 58%),
+    repeating-radial-gradient(ellipse at center, rgba(163, 226, 201, 0.08) 0 1px, transparent 1px 18px);
+  opacity: 0.72;
+  z-index: 1;
+}
+
+.fifth-form-hearth,
+.living-anchor-strip,
+.living-anchor-note {
+  position: relative;
+  z-index: 2;
+}
+
+.living-door-ring {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(231, 196, 119, 0.06), transparent 9rem),
+    rgba(2, 8, 7, 0.56);
+}
+
+.living-door {
+  position: relative;
+  overflow: hidden;
+}
+
+.living-door::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, hsla(var(--living-anchor-hue), 82%, 72%, 0.42), transparent);
+  opacity: 0;
+}
+
+.living-door:hover::after,
+.living-door:focus-visible::after,
+.living-door.active::after {
+  opacity: 1;
+}
+
+.living-glyph-panel {
+  background:
+    radial-gradient(circle at 50% 14%, hsla(var(--living-anchor-hue), 70%, 64%, 0.08), transparent 12rem),
+    rgba(2, 8, 7, 0.58);
+}
+
+@media (max-width: 1120px) {
+  .living-lantern-veil {
+    left: 9%;
+    right: 9%;
+    top: 4.5rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .living-lantern-veil {
+    opacity: 0.38;
+  }
+
+  .living-root-left,
+  .living-root-right {
+    width: 26%;
+  }
+
+  .living-threshold-window {
+    width: 84%;
+  }
+}
