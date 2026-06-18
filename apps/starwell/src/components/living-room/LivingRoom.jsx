@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FifthFormHearth } from './FifthFormHearth.jsx';
+import { FifthFormHearth3D } from './FifthFormHearth3D.jsx';
 import { livingRoomAnchors, livingRoomCopy, livingRoomThresholds } from '../../configs/livingRoom.js';
 
 function LivingDoor({ room, active, onSelect }) {
@@ -129,7 +129,7 @@ export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, p
           </details>
 
           <section className="living-hearth" aria-label="Fifth Form hearth">
-            <FifthFormHearth anchor={activeAnchor} pulsing={pulseActive} onPulse={() => setPulseCount((count) => count + 1)} />
+            <FifthFormHearth3D anchor={activeAnchor} pulsing={pulseActive} lowMotion={lowMotion} onPulse={() => setPulseCount((count) => count + 1)} />
             <div className="living-anchor-strip" aria-label="Anchor choices">
               {livingRoomAnchors.map((anchor) => (
                 <button
