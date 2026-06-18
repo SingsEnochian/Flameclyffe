@@ -1,4 +1,10 @@
-import { assertNode, isFiniteNumber, readVectorValue } from './validation.js';
+import {
+  assertNode,
+  isFiniteNumber,
+  readDimensionKey,
+  readDimensionKeys,
+  readVectorValue,
+} from './validation.js';
 
 export const PROJECTION_MODE = Object.freeze({
   axis: 'axis',
@@ -7,14 +13,30 @@ export const PROJECTION_MODE = Object.freeze({
   phase: 'phase',
 });
 
+function resolveDimensions(projectionConfig = {}, dimensions = []) {
+  const selected = projectionConfig.dimensions || dimensions;
+  if (!Array.isArray(selected) || selected.length === 0) {
+    return ['x', 'y'];
+  }
+  return readDimensionKeys(selected);
+}
+
+function findDimensionIndex(dimensions, dimension, fallbackIndex) {
+  const index = dimensions.indexOf(dimension);
+  return index >= 0 ? index : fallbackIndex;
+}
+
 function projectAxis(node, projectionConfig, dimensions) {
-  const [xDimension = dimensions[0], yDimension = dimensions[1] || dimensions[0]] = projectionConfig.dimensions || dimensions;
-  const xIndex = dimensions.indexOf(xDimension);
-  const yIndex = dimensions.indexOf(yDimension);
+  const resolved = resolveDimensions(projectionConfig, dimensions);
+  const xDimension = resolved[0];
+  const yDimension = resolved[1] || resolved[0];
+  const metricDimensions = readDimensionKeys(dimensions.length ? dimensions : resolved);
+  const xIndex = findDimensionIndex(metricDimensions, xDimension, 0);
+  const yIndex = findDimensionIndex(metricDimensions, yDimension, 1);
 
   return {
-    x: readVectorValue(node.vector, xIndex < 0 ? 0 : xIndex, xDimension),
-    y: readVectorValue(node.vector, yIndex < 0 ? 1 : yIndex, yDimension),
+    x: readVectorValue(node.vector, xIndex, xDimension),
+    y: readVectorValue(node.vector, yIndex, yDimension),
   };
 }
 
@@ -28,11 +50,14 @@ function projectManual(node) {
 }
 
 function projectPolar(node, projectionConfig, dimensions) {
-  const [radiusDimension = dimensions[0], angleDimension = dimensions[1] || dimensions[0]] = projectionConfig.dimensions || dimensions;
-  const radiusIndex = dimensions.indexOf(radiusDimension);
-  const angleIndex = dimensions.indexOf(angleDimension);
-  const radius = Math.max(0, readVectorValue(node.vector, radiusIndex < 0 ? 0 : radiusIndex, radiusDimension));
-  const angleTurns = readVectorValue(node.vector, angleIndex < 0 ? 1 : angleIndex, angleDimension);
+  const resolved = resolveDimensions(projectionConfig, dimensions);
+  const radiusDimension = resolved[0];
+  const angleDimension = resolved[1] || resolved[0];
+  const metricDimensions = readDimensionKeys(dimensions.length ? dimensions : resolved);
+  const radiusIndex = findDimensionIndex(metricDimensions, radiusDimension, 0);
+  const angleIndex = findDimensionIndex(metricDimensions, angleDimension, 1);
+  const radius = Math.max(0, readVectorValue(node.vector, radiusIndex, radiusDimension));
+  const angleTurns = readVectorValue(node.vector, angleIndex, angleDimension);
   const angle = angleTurns * Math.PI * 2;
 
   return {
@@ -42,11 +67,14 @@ function projectPolar(node, projectionConfig, dimensions) {
 }
 
 function projectPhase(node, projectionConfig, dimensions) {
-  const [phaseDimension = dimensions[0], amplitudeDimension = dimensions[1] || dimensions[0]] = projectionConfig.dimensions || dimensions;
-  const phaseIndex = dimensions.indexOf(phaseDimension);
-  const amplitudeIndex = dimensions.indexOf(amplitudeDimension);
-  const phase = readVectorValue(node.vector, phaseIndex < 0 ? 0 : phaseIndex, phaseDimension) * Math.PI * 2;
-  const amplitude = readVectorValue(node.vector, amplitudeIndex < 0 ? 1 : amplitudeIndex, amplitudeDimension, 1) || 1;
+  const resolved = resolveDimensions(projectionConfig, dimensions);
+  const phaseDimension = resolved[0];
+  const amplitudeDimension = resolved[1] || resolved[0];
+  const metricDimensions = readDimensionKeys(dimensions.length ? dimensions : resolved);
+  const phaseIndex = findDimensionIndex(metricDimensions, phaseDimension, 0);
+  const amplitudeIndex = findDimensionIndex(metricDimensions, amplitudeDimension, 1);
+  const phase = readVectorValue(node.vector, phaseIndex, phaseDimension) * Math.PI * 2;
+  const amplitude = Math.max(0, readVectorValue(node.vector, amplitudeIndex, amplitudeDimension, 1));
 
   return {
     x: amplitude * Math.cos(phase),
