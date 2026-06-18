@@ -30,7 +30,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 
-from .wave_attention import WaveSequenceModel
+from .wave_attention import WaveSequenceModel, WaveCoherenceLoss
 
 
 # ── Terra Aeterna lore corpus ─────────────────────────────────────────────────
@@ -184,21 +184,47 @@ def print_phase_snapshot(
 
 # ── Training loop ─────────────────────────────────────────────────────────────
 
+def _log_resonance_scores(model: WaveSequenceModel, epoch: int) -> None:
+    """Print which memory slots the register is attending to."""
+    if model.register is None or model._last_scores is None:
+        return
+    summary = model.register.resonance_summary(model._last_scores)
+    viscosity = float(model.embed.viscosity.item()) if hasattr(model.embed, "viscosity") else None
+    visc_str = f"  viscosity {viscosity:.4f}" if viscosity is not None else ""
+    print(f"     register scores  {summary}{visc_str}")
+
+
+def _epoch_coherence(
+    model: WaveSequenceModel,
+    tokenizer: WordTokenizer,
+    probe: str,
+) -> torch.Tensor:
+    """Per-layer Kuramoto coherence on one probe sentence — cheap diagnostic."""
+    model.eval()
+    ids = torch.tensor(tokenizer.encode(probe), dtype=torch.long).unsqueeze(0)
+    with torch.no_grad():
+        report = model.phase_report(ids)
+    model.train()
+    return torch.tensor([float(r["coherence"][0]) for r in report])
+
+
 def train(
-    n_epochs: int = 40,
-    embed_dim: int = 64,
-    n_layers: int = 3,
-    n_heads: int = 4,
-    batch_size: int = 16,
-    lr: float = 3e-4,
-    window: int = 12,
-    seed: int = 42,
+    n_epochs:     int   = 40,
+    embed_dim:    int   = 64,
+    n_layers:     int   = 3,
+    n_heads:      int   = 4,
+    batch_size:   int   = 16,
+    lr:           float = 3e-4,
+    window:       int   = 12,
+    seed:         int   = 42,
+    use_register: bool  = False,
+    num_memories: int   = 16,
 ) -> WaveSequenceModel:
     torch.manual_seed(seed)
     random.seed(seed)
 
     tokenizer = WordTokenizer(CORPUS)
-    dataset = LoreDataset(CORPUS, tokenizer, window=window)
+    dataset   = LoreDataset(CORPUS, tokenizer, window=window)
 
     def collate_fn(b: list) -> Tuple[torch.Tensor, torch.Tensor]:
         return _collate_pad(b, tokenizer.pad_id)
@@ -213,62 +239,84 @@ def train(
         n_layers=n_layers,
         n_heads=n_heads,
         max_len=window + 4,
+        use_register=use_register,
+        num_memories=num_memories if use_register else 0,
     )
+    coherence_criterion = WaveCoherenceLoss(phase_penalty_weight=0.1)
     optimiser = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimiser, T_max=n_epochs)
 
+    reg_str = f"  register {num_memories} slots" if use_register else ""
     print("=" * 70)
     print("WaveSequenceModel — Terra Aeterna narrative corpus")
     print(f"  vocab {tokenizer.vocab_size} words  |  embed_dim {embed_dim}  |  "
-          f"{n_layers} layers  |  {n_heads} heads")
+          f"{n_layers} layers  |  {n_heads} heads{reg_str}")
     print(f"  {len(dataset)} training windows from {len(CORPUS)} lore fragments")
-    print(f"  {model.n_parameters():,} parameters")
+    print(f"  {model.n_parameters():,} parameters  (NarrativeWaveEmbedding + PhaseLockNorm active)")
     print("=" * 70)
     print()
+    print("Tracking: CE loss | WaveCoherenceLoss (register) | per-layer coherence")
     print("Watch coherence rise as tokens that share narrative context")
     print("converge toward shared phase angles across training.\n")
 
-    probe = "resonance is the moment two phases recognize each other"
+    probe       = "resonance is the moment two phases recognize each other"
     snapshot_at = {1, 5, 10, 20, n_epochs}
 
     for epoch in range(1, n_epochs + 1):
         model.train()
-        total_loss = 0.0
-        layer_coherence = torch.zeros(n_layers)
-        n_batches = 0
+        total_loss     = 0.0
+        total_coh_loss = 0.0
+        n_batches      = 0
 
         for x, y in loader:
             logits = model(x)
-            loss = F.cross_entropy(
+            ce_loss = F.cross_entropy(
                 logits.view(-1, tokenizer.vocab_size),
                 y.view(-1),
                 ignore_index=-100,
             )
+
+            # Auxiliary WaveCoherenceLoss between register retrieved and query
+            coh_loss = torch.tensor(0.0)
+            if (model.register is not None
+                    and model._last_r_real is not None
+                    and model._last_q_real is not None):
+                coh_loss = coherence_criterion(
+                    model._last_r_real, model._last_r_imag,
+                    model._last_q_real, model._last_q_imag,
+                )
+
+            loss = ce_loss + 0.1 * coh_loss
             optimiser.zero_grad()
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimiser.step()
-            total_loss += loss.item()
 
-            with torch.no_grad():
-                for i, ld in enumerate(model.phase_report(x)):
-                    layer_coherence[i] += float(ld["coherence"].mean())
-            n_batches += 1
+            total_loss     += ce_loss.item()
+            total_coh_loss += coh_loss.item()
+            n_batches      += 1
 
         scheduler.step()
-        avg_loss = total_loss / max(n_batches, 1)
-        avg_coh = layer_coherence / max(n_batches, 1)
+        avg_loss     = total_loss     / max(n_batches, 1)
+        avg_coh_loss = total_coh_loss / max(n_batches, 1)
 
-        coh_cols = "  ".join(f"L{i+1}:{_bar(float(c), 10)}" for i, c in enumerate(avg_coh))
-        print(f"epoch {epoch:02d}  loss {avg_loss:.4f}  {coh_cols}")
+        # Coherence sampled once per epoch from the probe sentence (not per-batch)
+        epoch_coh = _epoch_coherence(model, tokenizer, probe)
+        coh_cols     = "  ".join(f"L{i+1}:{_bar(float(c), 10)}" for i, c in enumerate(epoch_coh))
+        coh_loss_str = f"  coh_loss {avg_coh_loss:.4f}" if use_register else ""
+        print(f"epoch {epoch:02d}  loss {avg_loss:.4f}{coh_loss_str}  {coh_cols}")
 
         if epoch in snapshot_at:
             print_phase_snapshot(model, tokenizer, probe, epoch)
+            if use_register:
+                _log_resonance_scores(model, epoch)
 
     print("=" * 70)
     print("Training complete.")
     print("Coherence trajectory: the standing wave memory has learned the narrative.")
     print("High coherence = tokens that share Terra Aeterna context share phase angles.")
+    if use_register:
+        print("Register active: resonance_scores show which memory slots specialised.")
     print()
     print("Next step: export the phase fingerprints as DEEP vector seeds.")
     print("=" * 70)
@@ -276,4 +324,28 @@ def train(
 
 
 if __name__ == "__main__":
-    trained_model = train()
+    import time
+
+    # Train with register active — resonance scores logged at snapshot epochs
+    trained_model = train(use_register=True, num_memories=16, n_epochs=40)
+
+    tokenizer = WordTokenizer(CORPUS)
+
+    print("\n── Autoregressive generation demo ────────────────────────────────────")
+    seed_phrase = "the standing wave beneath the observatory"
+    seed_ids    = torch.tensor(tokenizer.encode(seed_phrase), dtype=torch.long).unsqueeze(0)
+    print(f"Seed: '{seed_phrase}'")
+    print(f"Token IDs: {seed_ids.tolist()[0]}")
+
+    print("\n--- INITIATING RESONANCE NARRATIVE GENERATION ---")
+    t0 = time.time()
+    generated = trained_model.generate_narrative(
+        seed_token_ids=seed_ids,
+        max_new_tokens=15,
+        temperature=0.8,
+    )
+    elapsed = (time.time() - t0) * 1000
+    print(f"Generated token IDs : {generated}")
+    print(f"Decoded             : {tokenizer.decode(generated)}")
+    print(f"Generation time     : {elapsed:.2f} ms")
+    print("=" * 70)

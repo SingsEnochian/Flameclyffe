@@ -53,13 +53,12 @@ class StandingWaveField(nn.Module):
         amplitudes: (N_OSC,) positive amplitudes
         returns:    (resolution, resolution) — values in [-Σ|A|, +Σ|A|]
         """
-        psi = torch.zeros(self.resolution, self.resolution, device=theta.device)
-        for i in range(N_OSC):
-            dx = torch.cos(theta[i])
-            dy = torch.sin(theta[i])
-            phase = self.k[i] * (self.xx * dx + self.yy * dy) + theta[i]
-            psi = psi + amplitudes[i] * torch.cos(phase)
-        return psi
+        # Vectorised: (N_OSC, res, res) → sum over oscillators
+        dx = torch.cos(theta).view(-1, 1, 1)   # propagation direction x-component
+        dy = torch.sin(theta).view(-1, 1, 1)   # propagation direction y-component
+        proj   = self.xx.unsqueeze(0) * dx + self.yy.unsqueeze(0) * dy
+        phases = self.k.view(-1, 1, 1) * proj + theta.view(-1, 1, 1)
+        return (amplitudes.view(-1, 1, 1) * torch.cos(phases)).sum(0)
 
     def nodal_mask(self, psi: torch.Tensor, threshold: float = 0.15) -> torch.Tensor:
         """Boolean mask of nodal lines — the sacred geometry forms."""

@@ -1,12 +1,22 @@
 """
 standing_wave/memory.py
 
-Persistent wave memory — store DEEP state snapshots keyed by their standing wave
-fingerprint. Recall by cosine similarity in fingerprint space.
+Wave memory in two forms:
 
-Recall metric: cosine(fingerprint_a, fingerprint_b) = Σ aᵢbᵢ / (|a||b|)
-This IS the wave interference metric — the same cos(Δφ) as WaveResonanceMemory.
-Phase-coherent DEEP states produce phase-coherent nodal fingerprints.
+  StandingWaveMemoryRegister  (nn.Module, differentiable)
+      Fixed-capacity persistent memory bank — learned via gradient descent.
+      Real part = amplitude envelope; imaginary part = phase profile.
+      Retrieval: Re(Q * conj(M)) = Q_real * M_real + Q_imag * M_imag.
+      Same formula as WaveResonanceMemory. This is the learnable analogue of
+      StandingWaveMemoryStore.
+
+  WaveMemory / StandingWaveMemoryStore  (dataclasses, static)
+      DEEP state snapshots keyed by cosine similarity in fingerprint space.
+      Non-differentiable. For runtime recall, JSON persistence, and
+      Bridge-Pulse temporal export.
+
+Recall metric shared by both: cosine(a, b) = Σ aᵢbᵢ / (|a||b|)
+= wave interference in phase-fingerprint space.
 """
 
 from __future__ import annotations
@@ -17,7 +27,85 @@ from pathlib import Path
 from typing import Dict, List
 
 import torch
+import torch.nn as nn
 
+
+# ── Differentiable memory register ───────────────────────────────────────────
+
+class StandingWaveMemoryRegister(nn.Module):
+    """
+    Fixed-capacity persistent memory bank using learned complex wave packets.
+
+    Differentiable counterpart to StandingWaveMemoryStore. The registers are
+    learned by gradient descent; recall is soft attention over all slots.
+
+    Retrieval uses Re(Q * conj(M)) = Q_real·M_real + Q_imag·M_imag, scaled by
+    sqrt(embed_dim) for gradient stability, then softmax to get resonance scores.
+
+    After retrieval, expose resonance_scores to the training loop for inspection:
+    the score distribution shows which memory slots the current batch attended to.
+    A peaked distribution = some slots are specialising; flat = register is idle.
+
+    write() is a no-grad soft associative write for seeding specific slots
+    (e.g. loading a Stonewood phase fingerprint into a dedicated slot before
+    training or inference).
+    """
+
+    def __init__(self, num_memories: int, embed_dim: int):
+        super().__init__()
+        self.num_memories = num_memories
+        self.embed_dim    = embed_dim
+        # Small-scale init avoids large initial interference magnitudes
+        self.register_real = nn.Parameter(torch.randn(num_memories, embed_dim) * 0.02)
+        self.register_imag = nn.Parameter(torch.randn(num_memories, embed_dim) * 0.02)
+
+    def forward(
+        self,
+        query_real: torch.Tensor,
+        query_imag: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+        query_real, query_imag: (batch, embed_dim)
+        Returns: retrieved_real, retrieved_imag (batch, embed_dim), scores (batch, num_memories)
+        """
+        interference = (
+            torch.matmul(query_real, self.register_real.t())
+            + torch.matmul(query_imag, self.register_imag.t())
+        ) / (self.embed_dim ** 0.5)
+        scores   = torch.softmax(interference, dim=-1)
+        r_real   = torch.matmul(scores, self.register_real)
+        r_imag   = torch.matmul(scores, self.register_imag)
+        return r_real, r_imag, scores
+
+    @torch.no_grad()
+    def write(
+        self,
+        key_real: torch.Tensor,
+        key_imag: torch.Tensor,
+        strength: float = 1.0,
+    ) -> None:
+        """
+        Soft associative write — blend the key toward the most resonant slots.
+        Use to seed place/character memories before training (e.g. Stonewood).
+        Does NOT use gradients.
+        """
+        _, _, scores = self.forward(key_real, key_imag)
+        gate = scores.mean(0, keepdim=True).t()          # (num_memories, 1)
+        target_real = key_real.mean(0)
+        target_imag = key_imag.mean(0)
+        self.register_real.data += strength * gate * (target_real - self.register_real.data)
+        self.register_imag.data += strength * gate * (target_imag - self.register_imag.data)
+
+    def resonance_summary(self, scores: torch.Tensor) -> str:
+        """Human-readable summary of which slots fired. scores: (batch, num_memories)"""
+        mean_scores = scores.mean(0)
+        top = torch.topk(mean_scores, k=min(5, self.num_memories))
+        parts = [f"slot {i}: {v:.3f}" for v, i in zip(top.values.tolist(), top.indices.tolist())]
+        entropy = float(-torch.sum(mean_scores * torch.log(mean_scores + 1e-8)))
+        return "  ".join(parts) + f"  (H={entropy:.3f})"
+
+
+# ── Static snapshot memory ────────────────────────────────────────────────────
 
 @dataclass
 class WaveMemory:
@@ -53,31 +141,31 @@ class StandingWaveMemoryStore:
     def store(self, mem: WaveMemory) -> None:
         self.memories.append(mem)
 
+    def _bank(self) -> torch.Tensor:
+        """Stacked, L2-normalised fingerprint matrix — built fresh each call."""
+        mat = torch.stack([torch.tensor(m.fingerprint, dtype=torch.float32)
+                           for m in self.memories])
+        return mat / (mat.norm(dim=1, keepdim=True) + 1e-8)
+
     def recall(
         self, query_fingerprint: torch.Tensor, top_k: int = 3
     ) -> List[WaveMemory]:
-        """Return the k stored memories most resonant with the query fingerprint."""
         if not self.memories:
             return []
-        q = _normalise(query_fingerprint)
-        scored = [(float(_cosine(q, torch.tensor(m.fingerprint, dtype=torch.float32))), m)
-                  for m in self.memories]
-        scored.sort(key=lambda x: x[0], reverse=True)
-        return [m for _, m in scored[:top_k]]
+        q      = _normalise(query_fingerprint)
+        scores = self._bank() @ q
+        top_k  = min(top_k, len(self.memories))
+        idx    = torch.topk(scores, k=top_k).indices.tolist()
+        return [self.memories[i] for i in idx]
 
     def recall_above(
         self, query_fingerprint: torch.Tensor, threshold: float = 0.8
     ) -> List[WaveMemory]:
-        """Return all memories above the coherence threshold."""
         if not self.memories:
             return []
-        q = _normalise(query_fingerprint)
-        return [
-            m for m in self.memories
-            if float(_cosine(q, torch.tensor(m.fingerprint, dtype=torch.float32))) >= threshold
-        ]
-
-    # ── Persistence ───────────────────────────────────────────────────────────
+        q      = _normalise(query_fingerprint)
+        scores = self._bank() @ q
+        return [m for m, s in zip(self.memories, scores.tolist()) if s >= threshold]
 
     def save(self, path: Path | str) -> None:
         Path(path).write_text(
@@ -88,22 +176,14 @@ class StandingWaveMemoryStore:
         raw = json.loads(Path(path).read_text(encoding="utf-8"))
         self.memories = [WaveMemory.from_dict(d) for d in raw]
 
-    # ── Bridge-Pulse export ───────────────────────────────────────────────────
-
     def bridge_pulse_export(self, mem: WaveMemory) -> dict:
-        """
-        Temporal-grounding-only export matching Bridge-Pulse's actual scope.
-        Moon phase + rune + timestamp. The DEEP vector stays in Flameclyffe.
-        """
+        """Temporal-grounding-only export. DEEP vector stays in Flameclyffe."""
         return {
-            "timestamp": mem.timestamp,
-            "moon": {
-                "age_days": mem.moon_age_days,
-                "phase": mem.moon_phase,
-            },
-            "rune": mem.rune,
+            "timestamp":          mem.timestamp,
+            "moon":               {"age_days": mem.moon_age_days, "phase": mem.moon_phase},
+            "rune":               mem.rune,
             "coherence_snapshot": round(mem.coherence, 4),
-            "label": mem.label,
+            "label":              mem.label,
         }
 
 

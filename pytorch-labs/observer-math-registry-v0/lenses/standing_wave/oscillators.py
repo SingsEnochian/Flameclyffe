@@ -67,7 +67,8 @@ class KuramotoDeepOscillators(nn.Module):
 
     def step(self, theta: torch.Tensor) -> torch.Tensor:
         """Single Euler step. theta: (..., N_OSC)"""
-        diff = theta.unsqueeze(-1) - theta.unsqueeze(-2)      # (..., N, N)
+        # diff[..., i, j] = θⱼ - θᵢ  →  sin(θⱼ - θᵢ) pulls i toward j (standard Kuramoto)
+        diff = theta.unsqueeze(-2) - theta.unsqueeze(-1)      # (..., N, N)
         coupling = (torch.sin(diff) * self.K).sum(dim=-1) / N_OSC
         return theta + self.dt * (self.omega + coupling)
 
