@@ -1,0 +1,130 @@
+.living-room {
+  --room-current-a: rgba(45, 122, 95, 0.42);
+  --room-current-b: rgba(231, 196, 119, 0.28);
+  --room-current-c: rgba(163, 226, 201, 0.22);
+}
+
+.living-selected-writing {
+  --room-current-a: rgba(231, 196, 119, 0.44);
+  --room-current-b: rgba(201, 135, 85, 0.30);
+  --room-current-c: rgba(247, 239, 217, 0.20);
+}
+
+.living-selected-library {
+  --room-current-a: rgba(120, 238, 196, 0.34);
+  --room-current-b: rgba(231, 196, 119, 0.24);
+  --room-current-c: rgba(80, 150, 126, 0.26);
+}
+
+.living-selected-atlas {
+  --room-current-a: rgba(116, 177, 255, 0.36);
+  --room-current-b: rgba(163, 226, 201, 0.26);
+  --room-current-c: rgba(231, 196, 119, 0.18);
+}
+
+.living-selected-atelier,
+.living-selected-studio {
+  --room-current-a: rgba(196, 147, 255, 0.30);
+  --room-current-b: rgba(231, 196, 119, 0.26);
+  --room-current-c: rgba(163, 226, 201, 0.20);
+}
+
+.living-selected-hearthlight {
+  --room-current-a: rgba(201, 135, 85, 0.42);
+  --room-current-b: rgba(231, 196, 119, 0.28);
+  --room-current-c: rgba(247, 239, 217, 0.18);
+}
+
+.living-selected-faer {
+  --room-current-a: rgba(45, 122, 95, 0.52);
+  --room-current-b: rgba(231, 196, 119, 0.30);
+  --room-current-c: rgba(18, 76, 61, 0.42);
+}
+
+.living-selected-vee {
+  --room-current-a: rgba(231, 196, 119, 0.42);
+  --room-current-b: rgba(247, 239, 217, 0.24);
+  --room-current-c: rgba(116, 177, 255, 0.18);
+}
+
+.living-room-current {
+  position: absolute;
+  top: 34%;
+  bottom: 24%;
+  width: min(26%, 22rem);
+  opacity: 0.72;
+  filter: blur(0.2px) drop-shadow(0 0 18px var(--room-current-a));
+}
+
+.living-room-current-left {
+  left: 18%;
+  transform: skewY(-8deg);
+}
+
+.living-room-current-right {
+  right: 18%;
+  transform: skewY(8deg) scaleX(-1);
+}
+
+.living-room-current span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 34%;
+  border-top: 1px solid var(--room-current-a);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, var(--room-current-c), transparent 58%);
+  transform-origin: 100% 50%;
+}
+
+.living-room-current span:nth-child(1) { top: 8%; transform: rotate(12deg); }
+.living-room-current span:nth-child(2) { top: 34%; transform: rotate(0deg); border-color: var(--room-current-b); }
+.living-room-current span:nth-child(3) { top: 58%; transform: rotate(-12deg); }
+
+.living-door.active .living-door-glyph {
+  box-shadow: 0 0 20px var(--room-current-a), inset 0 0 22px rgba(0, 0, 0, 0.24);
+  background: radial-gradient(circle, var(--room-current-a), transparent 72%);
+}
+
+.living-lantern.active {
+  border-color: rgba(231, 196, 119, 0.46);
+  box-shadow: 0 0 34px var(--room-current-a), inset 0 0 20px rgba(0, 0, 0, 0.34);
+}
+
+.living-lantern.active i {
+  opacity: 1;
+}
+
+.hearth-field {
+  filter: drop-shadow(0 0 10px var(--living-anchor-glow)) drop-shadow(0 0 11px var(--room-current-a));
+}
+
+.living-room:not(.living-low-motion) .living-room-current span {
+  animation: faer-current-flow 6.4s ease-in-out infinite alternate;
+}
+
+.living-room:not(.living-low-motion) .living-room-current span:nth-child(2) { animation-delay: -1.3s; }
+.living-room:not(.living-low-motion) .living-room-current span:nth-child(3) { animation-delay: -2.6s; }
+
+.living-room:not(.living-low-motion) .living-door.active .living-door-glyph,
+.living-room:not(.living-low-motion) .living-lantern.active {
+  animation: faer-light-pulse 4.8s ease-in-out infinite alternate;
+}
+
+@keyframes faer-current-flow {
+  from { opacity: 0.32; translate: -0.2rem 0; }
+  to { opacity: 0.94; translate: 0.32rem 0; }
+}
+
+@keyframes faer-light-pulse {
+  from { opacity: 0.72; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .living-room-current span,
+  .living-door.active .living-door-glyph,
+  .living-lantern.active {
+    animation: none !important;
+  }
+}
