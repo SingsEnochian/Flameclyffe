@@ -8,6 +8,14 @@ const MERKABAS = [
   { key: 'west', className: 'hearth-merkaba hearth-merkaba-west', cx: 26, cy: 48, scale: 0.58, rotate: 272 },
 ];
 
+const CONVERGENCE_PATHS = [
+  { key: 'north', d: 'M50 6 C50 14 50 20 50 24 C50 32 50 39 50 50' },
+  { key: 'east', d: 'M94 50 C86 50 80 49 74 48 C65 48 58 49 50 50' },
+  { key: 'south', d: 'M50 94 C50 86 50 80 50 76 C50 66 50 58 50 50' },
+  { key: 'west', d: 'M6 50 C14 50 20 49 26 48 C35 48 42 49 50 50' },
+  { key: 'spiral', d: 'M50 8 C70 13 84 29 86 48 C88 69 72 85 51 88 C29 91 13 74 12 52 C11 29 27 12 50 8' },
+];
+
 function MerkabaGlyph({ className, cx, cy, scale, rotate }) {
   const transform = `translate(${cx} ${cy}) rotate(${rotate}) scale(${scale})`;
 
@@ -31,7 +39,7 @@ export function FifthFormHearth({ anchor, pulsing = false, onPulse }) {
       <span className="hearth-glass" aria-hidden="true" />
       <svg className="hearth-field" viewBox="0 0 100 100" role="img" aria-labelledby="fifth-form-title fifth-form-desc">
         <title id="fifth-form-title">Fifth Form hearth</title>
-        <desc id="fifth-form-desc">Five interlocking merkaba glyphs arranged as a living STARWELL hearth.</desc>
+        <desc id="fifth-form-desc">Outer chamber signals braid inward and merge into five interlocking merkaba glyphs arranged as a living STARWELL hearth.</desc>
         <defs>
           <radialGradient id="hearthGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0" stopColor="currentColor" stopOpacity="0.32" />
@@ -40,6 +48,9 @@ export function FifthFormHearth({ anchor, pulsing = false, onPulse }) {
           </radialGradient>
         </defs>
         <circle className="hearth-aura" cx="50" cy="50" r="46" fill="url(#hearthGlow)" />
+        <g className="hearth-convergence" aria-hidden="true">
+          {CONVERGENCE_PATHS.map((path) => <path key={path.key} className={`hearth-convergence-path hearth-convergence-${path.key}`} d={path.d} />)}
+        </g>
         <circle className="hearth-ring hearth-ring-outer" cx="50" cy="50" r="43" />
         <circle className="hearth-ring hearth-ring-middle" cx="50" cy="50" r="31" />
         <circle className="hearth-ring hearth-ring-inner" cx="50" cy="50" r="16" />
@@ -47,6 +58,12 @@ export function FifthFormHearth({ anchor, pulsing = false, onPulse }) {
         <path className="hearth-chord" d="M22 22 L78 78" />
         <path className="hearth-chord" d="M78 22 L22 78" />
         {MERKABAS.map((merkaba) => <MerkabaGlyph key={merkaba.key} {...merkaba} />)}
+        <g className="hearth-merge-nodes" aria-hidden="true">
+          <circle cx="50" cy="6" r="1.1" />
+          <circle cx="94" cy="50" r="1.1" />
+          <circle cx="50" cy="94" r="1.1" />
+          <circle cx="6" cy="50" r="1.1" />
+        </g>
         <g className="hearth-nodes" aria-hidden="true">
           <circle cx="50" cy="50" r="1.8" />
           <circle cx="50" cy="24" r="1.3" />
