@@ -1,34 +1,1250 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Flameclyffe · STARWELL</title>
-  <meta name="description" content="Flameclyffe project foyer for STARWELL, DEEP Observer, Runa, and Terra Aeterna experiments.">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flameclyffe — STARWELL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
   <style>
-    :root{color-scheme:dark;--bg:#030712;--panel:#07111f;--ink:#eaf4ef;--soft:rgba(234,244,239,.74);--gold:#e7c477;--blue:#90baf0;--line:rgba(168,204,224,.24)}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:2rem;background:radial-gradient(circle at 50% 0%,rgba(144,186,240,.18),transparent 24rem),linear-gradient(145deg,#030712,#07111f 60%,#10272a);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center}
-    main{width:min(760px,100%);padding:clamp(1.2rem,4vw,2.2rem);border:1px solid var(--line);border-radius:28px;background:linear-gradient(145deg,rgba(0,0,0,.36),rgba(255,255,255,.055));box-shadow:0 24px 72px rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.08);backdrop-filter:blur(14px)}
-    .eyebrow{margin:0 0 .8rem;color:var(--blue);font:800 .72rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase}
-    h1{margin:0;color:var(--gold);font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.2rem,8vw,4.8rem);line-height:.95;letter-spacing:.04em;text-wrap:balance}
-    p{color:var(--soft);line-height:1.6;font-size:1rem}
-    .links{display:flex;flex-wrap:wrap;justify-content:center;gap:.7rem;margin-top:1.4rem}
-    a{display:inline-flex;align-items:center;justify-content:center;min-height:2.7rem;padding:.7rem 1rem;border:1px solid rgba(231,196,119,.28);border-radius:999px;color:var(--ink);text-decoration:none;background:rgba(255,255,255,.06);font-weight:800}
-    a:hover{border-color:rgba(231,196,119,.72);background:rgba(231,196,119,.12)}
-    code{display:block;margin-top:1rem;padding:.75rem;border:1px solid rgba(144,186,240,.18);border-radius:16px;background:rgba(144,186,240,.08);color:rgba(234,244,239,.82);font:.82rem/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+
+/* ── Root ── */
+:root {
+  --bg:          #020706;
+  --surface:     rgba(4, 12, 10, 0.76);
+  --border:      rgba(2, 164, 211, 0.16);
+  --text:        #f7efd9;
+  --muted:       rgba(247, 239, 217, 0.48);
+  --dim:         rgba(247, 239, 217, 0.24);
+  --accent:      #02a4d3;
+  --gold:        #e4c36d;
+  --glow-c:      rgba(2, 164, 211, 0.22);
+
+  /* Wave field — updated by JS */
+  --flare-hue:           198;
+  --flare-hue-alt:       233;   /* flare-hue + 35, updated by JS on activation */
+  --flare-alpha:         0.48;
+  --flare-n:             18;
+  --flare-rot:           32deg;
+  --flare-jitter:        0px;
+  --wave-nodal-opacity:  0;
+  --wave-nodal-scale:    1;
+  --wave-phase-blur:     0px;
+  --wave-resonance-glow: 0;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', Inter, system-ui, sans-serif;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* ── Background canvas ── */
+#field-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Page wrapper ── */
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: clamp(3rem, 7vw, 5.5rem);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.wordmark {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 28px rgba(2, 164, 211,
+    calc(0.35 + var(--wave-resonance-glow) * 0.45));
+  transition: text-shadow 1.4s ease;
+}
+
+.field-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  transition: color 0.8s;
+}
+.field-status.live { color: hsla(var(--flare-hue), 70%, 72%, 0.8); }
+
+/* ── Stonewood section ── */
+.stonewood {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+  margin-bottom: clamp(4rem, 8vw, 7rem);
+}
+@media (max-width: 680px) {
+  .stonewood { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .sw-eyebrow { justify-content: center; }
+  .sw-readout { margin-inline: auto; }
+  .sw-actions { justify-content: center; }
+}
+
+/* ── Orb ── */
+.sw-orb-wrap {
+  position: relative;
+  width: clamp(160px, 26vw, 272px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  isolation: isolate;
+  box-shadow:
+    0 0 0 1px rgba(2, 164, 211, calc(0.06 + var(--wave-resonance-glow) * 0.22)),
+    0 0 calc(24px + var(--wave-resonance-glow) * 56px)
+      rgba(2, 164, 211, calc(0.04 + var(--wave-resonance-glow) * 0.18)),
+    inset 0 0 36px rgba(0,0,0,0.65);
+  transition: box-shadow 1.6s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Starburst + nodal rings (CSS only, mirrors deep-observer-boundary.css) */
+.sw-orb-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0%,
+      transparent calc(24% - var(--wave-nodal-scale) * 7%),
+      hsla(var(--flare-hue), 62%, 84%, calc(var(--wave-nodal-opacity) * 0.32))
+        calc(24% - var(--wave-nodal-scale) * 7% + 0.5%),
+      transparent calc(24% - var(--wave-nodal-scale) * 7% + 1.5%)
+    ),
+    radial-gradient(circle, hsla(var(--flare-hue), 76%, 78%, 0.14), transparent 60%),
+    repeating-conic-gradient(
+      from var(--flare-rot),
+      hsla(var(--flare-hue), 88%, 76%, calc(var(--flare-alpha) * 0.88))
+        0 calc(0.5turn / var(--flare-n)),
+      transparent 0 calc(1turn / var(--flare-n))
+    );
+  filter:
+    blur(calc(0.4px + var(--wave-phase-blur) * 0.07))
+    drop-shadow(0 0 calc(10px + var(--wave-resonance-glow) * 28px)
+      hsla(var(--flare-hue), 88%, 74%, calc(0.16 + var(--wave-resonance-glow) * 0.26)));
+  opacity: calc(0.68 + var(--wave-nodal-opacity) * 0.22);
+  mix-blend-mode: screen;
+  transition: opacity 1.6s ease, filter 1.6s ease;
+}
+
+/* Phasor canvas drawn over the starburst */
+#orb-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  transition: opacity 1.2s ease;
+}
+#orb-canvas.live { opacity: 0.88; }
+
+/* ── Stonewood content ── */
+.sw-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.sw-rune {
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 0 0 22px rgba(228, 195, 109, calc(0.4 + var(--wave-resonance-glow) * 0.4));
+  transition: text-shadow 1.4s ease;
+}
+
+.sw-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sw-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--accent);
+  border: 1px solid rgba(2, 164, 211, 0.28);
+  border-radius: 999px;
+  padding: 0.08rem 0.5rem;
+  letter-spacing: 0.04em;
+}
+
+.sw-name {
+  font-size: clamp(2.6rem, 7vw, 4.8rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  color: var(--gold);
+  line-height: 1.05;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 48px rgba(228, 195, 109,
+    calc(0.08 + var(--wave-resonance-glow) * 0.36));
+  transition: text-shadow 1.6s ease;
+}
+
+.sw-desc {
+  color: var(--muted);
+  max-width: 48ch;
+  font-size: 0.88rem;
+  font-style: italic;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+}
+
+/* ── Field readout ── */
+.sw-readout {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+  max-width: 300px;
+}
+
+.readout-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 44px;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.readout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.readout-bar {
+  height: 2px;
+  background: rgba(2, 164, 211, 0.1);
+  border-radius: 999px;
+  overflow: visible;
+  position: relative;
+}
+
+.readout-bar-fill {
+  position: absolute;
+  inset-block: -1px;
+  left: 0;
+  width: 0%;
+  background: linear-gradient(90deg,
+    hsla(var(--flare-hue), 70%, 60%, 0.6),
+    hsla(var(--flare-hue), 88%, 78%, 1));
+  border-radius: 999px;
+  box-shadow: 0 0 6px hsla(var(--flare-hue), 80%, 72%, 0.5);
+  transition: width 1.4s cubic-bezier(0.2, 0, 0, 1),
+              background 1.4s ease,
+              box-shadow 1.4s ease;
+}
+
+.readout-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.64rem;
+  color: var(--accent);
+  text-align: right;
+  transition: color 0.8s;
+}
+
+/* ── Buttons ── */
+.sw-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+.btn {
+  padding: 0.52rem 1.2rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s;
+  border: 1px solid transparent;
+  line-height: 1.4;
+}
+
+.btn-activate {
+  background: rgba(2, 164, 211, 0.12);
+  border-color: rgba(2, 164, 211, 0.42);
+  color: var(--accent);
+}
+.btn-activate:hover, .btn-activate:focus-visible {
+  background: rgba(2, 164, 211, 0.22);
+  border-color: var(--accent);
+  box-shadow: 0 0 18px rgba(2, 164, 211, 0.22);
+  outline: none;
+}
+.btn-activate[aria-pressed="true"] {
+  background: rgba(2, 164, 211, 0.22);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 26px rgba(2, 164, 211, 0.3);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+.btn-ghost:hover, .btn-ghost:focus-visible {
+  border-color: rgba(247, 239, 217, 0.24);
+  color: var(--text);
+  outline: none;
+}
+
+/* ── Nav sections ── */
+.nav-section { margin-bottom: 2.5rem; }
+
+.section-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(2, 164, 211, 0.7);
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  display: block;
+}
+
+.card-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 228px), 1fr));
+  gap: 0.65rem;
+}
+
+/* ── Holographic card ── */
+.holo-card {
+  display: block;
+  position: relative;
+  padding: 1rem 1.15rem 1.05rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+  cursor: pointer;
+  overflow: hidden;
+
+  /* Gradient border via layered backgrounds */
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(
+      calc(var(--shine-angle, 140deg)),
+      hsla(var(--flare-hue), 68%, 72%, 0.52),
+      rgba(228, 195, 109, 0.16) 38%,
+      hsla(var(--flare-hue), 55%, 65%, 0.18) 65%,
+      hsla(var(--flare-hue-alt), 72%, 74%, 0.48)
+    ) border-box;
+  border: 1px solid transparent;
+
+  transform:
+    perspective(560px)
+    rotateX(calc(var(--rx, 0) * 1deg))
+    rotateY(calc(var(--ry, 0) * 1deg))
+    translateZ(0);
+  transform-style: preserve-3d;
+  transition: transform 0.08s linear, box-shadow 0.22s;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Shine sweep */
+.holo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    calc(var(--shine-angle, 140deg)),
+    transparent 30%,
+    rgba(2, 164, 211, 0.09) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.28s;
+}
+.holo-card:hover::after, .holo-card:focus-visible::after { opacity: 1; }
+
+.holo-card:hover, .holo-card:focus-visible {
+  box-shadow:
+    0 6px 36px rgba(2, 164, 211, 0.1),
+    0 0 0 1px rgba(2, 164, 211, 0.14);
+  outline: none;
+}
+
+.card-tag {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(2, 164, 211, 0.55);
+  margin-bottom: 0.35rem;
+}
+
+.card-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.28rem;
+  line-height: 1.3;
+}
+
+.card-note {
+  font-size: 0.73rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* ── Footer ── */
+footer {
+  padding-top: 2rem;
+  margin-top: 3rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  color: var(--dim);
+}
+footer a { color: var(--dim); text-decoration: none; transition: color 0.18s; }
+footer a:hover { color: var(--accent); }
+
+/* ── Locality anchor ── */
+.btn-anchor {
+  background: transparent;
+  border-color: rgba(2, 164, 211, 0.2);
+  color: var(--muted);
+}
+.btn-anchor:hover, .btn-anchor:focus-visible {
+  border-color: rgba(2, 164, 211, 0.4);
+  color: var(--text);
+  outline: none;
+}
+.btn-anchor.anchored {
+  background: rgba(2, 164, 211, 0.07);
+  border-color: rgba(2, 164, 211, 0.32);
+  color: var(--accent);
+}
+
+.anchor-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 7, 6, 0.74);
+  backdrop-filter: blur(10px);
+}
+.anchor-modal[hidden] { display: none; }
+
+.anchor-panel {
+  position: relative;
+  max-width: 420px;
+  width: 100%;
+  padding: 1.75rem 1.75rem 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(#040e0b, #040e0b) padding-box,
+              linear-gradient(135deg,
+                rgba(2,164,211,0.42),
+                rgba(228,195,109,0.18),
+                rgba(2,164,211,0.08)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.55), inset 0 0 40px rgba(2,164,211,0.04);
+}
+.anchor-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.65rem; }
+.anchor-icon { font-size: 1.3rem; color: var(--accent); text-shadow: 0 0 12px rgba(2,164,211,0.5); }
+.anchor-header h2 { font-size: 1.05rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.anchor-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.58; margin-bottom: 1.2rem; font-style: italic; }
+.anchor-options { display: grid; gap: 0.45rem; margin-bottom: 0.9rem; }
+.anchor-opt {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(2,164,211,0.04);
+  border: 1px solid rgba(2,164,211,0.13);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.16s, border-color 0.16s;
+}
+.anchor-opt:hover, .anchor-opt:focus-visible {
+  background: rgba(2,164,211,0.1); border-color: rgba(2,164,211,0.35); outline: none;
+}
+.opt-icon { grid-row: 1 / 3; font-size: 1.05rem; color: var(--accent); align-self: center; line-height: 1; }
+.opt-label { font-size: 0.875rem; font-weight: 600; line-height: 1.3; }
+.opt-note  { font-size: 0.72rem; color: var(--muted); line-height: 1.3; }
+.opt-decline { background: transparent; border-color: rgba(247,239,217,0.07); }
+.opt-decline .opt-icon  { color: var(--dim); }
+.opt-decline .opt-label { color: var(--muted); }
+.world-picker { margin-bottom: 0.9rem; }
+.world-picker[hidden] { display: none; }
+.picker-label {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(2,164,211,0.55); margin-bottom: 0.55rem;
+}
+.location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.38rem; }
+.loc-btn {
+  display: flex; align-items: center; gap: 0.38rem;
+  padding: 0.5rem 0.65rem; border-radius: 6px;
+  background: rgba(2,164,211,0.04); border: 1px solid rgba(2,164,211,0.1);
+  color: var(--text); font-family: inherit; font-size: 0.78rem;
+  cursor: pointer; text-align: left; transition: background 0.14s, border-color 0.14s;
+}
+.loc-btn:hover, .loc-btn:focus-visible { background: rgba(2,164,211,0.1); border-color: rgba(2,164,211,0.28); outline: none; }
+.anchor-privacy { font-size: 0.67rem; color: var(--dim); line-height: 1.5; padding-top: 0.7rem; border-top: 1px solid var(--border); }
+.anchor-close {
+  position: absolute; top: 0.9rem; right: 0.9rem;
+  background: none; border: none; color: var(--dim);
+  font-size: 1rem; cursor: pointer; padding: 0.2rem 0.4rem;
+  line-height: 1; transition: color 0.14s; font-family: inherit;
+}
+.anchor-close:hover { color: var(--text); }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .sw-orb-wrap, .sw-orb-wrap::before,
+  #orb-canvas, .sw-name, .sw-rune, .wordmark,
+  .readout-bar-fill, .readout-val, .btn { transition: none !important; }
+  .holo-card { transform: none !important; transition: box-shadow 0.2s !important; }
+}
+
   </style>
 </head>
 <body>
-  <main>
-    <p class="eyebrow">Flameclyffe · STARWELL</p>
-    <h1>Pages Foyer</h1>
-    <p>GitHub Pages is alive. The full DEEP Observer instrument currently lives in the repository source tree while the Pages publishing path is being finalised.</p>
-    <div class="links">
-      <a href="https://github.com/SingsEnochian/Flameclyffe/tree/main/starwell/deep-observer">DEEP Observer source</a>
-      <a href="https://github.com/SingsEnochian/Flameclyffe">Flameclyffe repository</a>
+
+<canvas id="field-bg" aria-hidden="true"></canvas>
+
+<div class="page">
+
+  <header>
+    <span class="wordmark">Flameclyffe</span>
+    <span class="field-status" id="field-status">ψ field · standby</span>
+  </header>
+
+  <!-- Stonewood — first test layer -->
+  <section class="stonewood" aria-label="Stonewood — Terra Aeterna standing wave test layer">
+    <div class="sw-orb-wrap" aria-hidden="true">
+      <canvas id="orb-canvas"></canvas>
     </div>
-    <code>Publishing note: this site is served from main /docs. To publish the full instrument here, copy the built static observer into docs or switch Pages to the repository root.</code>
-  </main>
+    <div class="sw-content">
+      <div class="sw-eyebrow">
+        <span class="sw-rune" aria-hidden="true">ᛉ</span>
+        <span class="sw-label">Terra Aeterna</span>
+        <span class="sw-badge">standing wave · layer v0.1</span>
+      </div>
+      <h1 class="sw-name">Stonewood</h1>
+      <p class="sw-desc">Ancient. The stone and root remember what the living forget. First site architecture layer for the narrative translation pipeline — phrase → phase fingerprint → DEEP seed.</p>
+      <div class="sw-readout" id="sw-readout">
+        <div class="readout-row">
+          <span class="readout-label">C</span>
+          <span class="readout-bar"><span class="readout-bar-fill" id="fill-c"></span></span>
+          <span class="readout-val" id="val-c">—</span>
+        </div>
+        <div class="readout-row">
+          <span class="readout-label">R</span>
+          <span class="readout-bar"><span class="readout-bar-fill" id="fill-r"></span></span>
+          <span class="readout-val" id="val-r">—</span>
+        </div>
+        <div class="readout-row">
+          <span class="readout-label">Wave ψ</span>
+          <span class="readout-bar"><span class="readout-bar-fill" id="fill-w"></span></span>
+          <span class="readout-val" id="val-w">—</span>
+        </div>
+        <div class="readout-row">
+          <span class="readout-label">E</span>
+          <span class="readout-bar"><span class="readout-bar-fill" id="fill-e"></span></span>
+          <span class="readout-val" id="val-e">—</span>
+        </div>
+      </div>
+      <div class="sw-actions">
+        <button class="btn btn-activate" id="btn-activate" aria-pressed="false">Activate field</button>
+        <button class="btn btn-ghost" id="btn-reset">Reset ψ</button>
+        <button class="btn btn-anchor" id="btn-anchor">Anchor to location</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <div id="nav-root"></div>
+
+  <footer>
+    <a href="https://github.com/singsenochian/Flameclyffe">Repository</a>
+    <a href="https://github.com/singsenochian/Flameclyffe/blob/main/PROJECT_MAP.md">Project Map</a>
+    <a href="https://singsenochian.github.io/Runa/">Runa Lab →</a>
+    <span>STARWELL Observatory · Flameclyffe</span>
+  </footer>
+
+</div><!-- .page -->
+
+<noscript>
+  <style>.page { display: block; } #field-bg { display: none; }</style>
+  <p style="padding:2rem;color:#f7efd9;font-family:monospace">
+    JavaScript is required for the interactive field. Visit the
+    <a style="color:#02a4d3" href="https://github.com/singsenochian/Flameclyffe">repository</a> directly.
+  </p>
+</noscript>
+
+<script>
+'use strict';
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const AXIS_TONES  = { presence:432, coherence:528, resonance:603, moon:1203, attention:741, charge:888 };
+const AXIS_ORDER  = ['presence','coherence','resonance','moon','attention','charge'];
+const DEEP_KEYS   = { presence:'P', coherence:'C', resonance:'R', moon:'M', attention:'A', charge:'charge' };
+const BASE_HZ     = 432;
+const N_OSC       = 6;
+const DT          = 0.01;
+const K_COUPLING  = 0.3;
+const OMEGA       = AXIS_ORDER.map(ax => AXIS_TONES[ax] / BASE_HZ * DT);
+
+const NEUTRAL_DEEP = { P:0.55, C:0.50, R:0.45, E:0.38, M:0.30, A:0.65, charge:0.50 };
+
+const STONEWOOD = {
+  deep: { P:0.72, C:0.88, R:0.81, E:0.12, M:0.45, A:0.65, charge:0.58 },
+  hue: 152,     // forest green-teal
+  rune: 'ᛉ',
+};
+
+// Axis phasor colors (hue for each Runa axis)
+const AXIS_HUES = [198, 152, 172, 245, 186, 218]; // P,C,R,M,A,charge
+
+const NAV = [
+  { section:'Active contracts', links:[
+    { title:'Standing Wave Integration', note:'Kuramoto lens, --wave-* CSS vars, narrative translation pipeline.', href:'https://github.com/singsenochian/Flameclyffe/blob/main/docs/standing-wave-integration.md' },
+    { title:'Narrative Translation Contract', note:'Terra Aeterna text → phase fingerprint → DEEP seed schema.', href:'https://github.com/singsenochian/Flameclyffe/blob/main/docs/narrative-translation-contract.md' },
+    { title:'Deep Starburst Binding', note:'CSS variable binding for the live glyph panel.', href:'https://github.com/singsenochian/Flameclyffe/blob/main/docs/deep-starburst-binding.md' },
+    { title:'UI Boundary Contract', note:'Layout containment, responsive grid, overflow rules.', href:'https://github.com/singsenochian/Flameclyffe/blob/main/docs/ui-boundary-contract.md' },
+  ]},
+  { section:'Architecture', links:[
+    { title:'Architecture Overview', note:'Repository surfaces, STARWELL rooms, Supabase backbone, design rules.', href:'https://github.com/singsenochian/Flameclyffe/blob/main/docs/architecture.md' },
+    { title:'DEEP Observer Math', note:'Vector semantics, mapping patterns, implementation guidance, claim boundaries.', href:'https://github.com/singsenochian/Flameclyffe/blob/main/docs/deep-observer-math.md' },
+    { title:'Thread Ledger', note:'Live and retired visual threads. Last reconciled 2026-06-16.', href:'https://github.com/singsenochian/Flameclyffe/blob/main/docs/thread-ledger.md' },
+    { title:'Observer Schema Crosswalk', note:'Observer source and head schema mapping.', href:'https://github.com/singsenochian/Flameclyffe/blob/main/docs/observer-schema-crosswalk.md' },
+  ]},
+  { section:'Linked labs', links:[
+    { title:'Runa — Public Lab', note:'Sacred geometry, tone lab, brainwave lab, Wardenclyffe, and more.', href:'https://singsenochian.github.io/Runa/' },
+    { title:'Sacred Geometry Lab', note:'3D engine, 7 geometries, energy particles, Bridge-Pulse integration.', href:'https://singsenochian.github.io/Runa/experiments/sacred-geometry/' },
+    { title:'Standing Wave Lens (PyTorch)', note:'WaveResonanceMemory, KuramotoDeepOscillators, Terra Aeterna training loop.', href:'https://github.com/singsenochian/Flameclyffe/tree/main/pytorch-labs/observer-math-registry-v0/lenses/standing_wave' },
+  ]},
+];
+
+// ── Wave math ─────────────────────────────────────────────────────────────────
+
+function encodeDeepToPhases(deep) {
+  return AXIS_ORDER.map(ax => (deep[DEEP_KEYS[ax]] ?? 0.5) * 2 * Math.PI);
+}
+
+function kuramotoStep(theta) {
+  return theta.map((th_i, i) => {
+    let c = 0;
+    for (let j = 0; j < N_OSC; j++) c += Math.sin(theta[j] - th_i);
+    return th_i + DT * (OMEGA[i] + K_COUPLING * c / N_OSC);
+  });
+}
+
+function orderParameter(theta) {
+  let re = 0, im = 0;
+  for (const th of theta) { re += Math.cos(th); im += Math.sin(th); }
+  return Math.sqrt((re/N_OSC)**2 + (im/N_OSC)**2);
+}
+
+function phaseEntropy(theta) {
+  const bins = new Array(8).fill(0);
+  for (const th of theta) {
+    const n = (((th % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI)) / (2*Math.PI);
+    bins[Math.min(Math.floor(n*8), 7)]++;
+  }
+  let h = 0;
+  for (const c of bins) { if (c>0) { const p=c/N_OSC; h -= p*Math.log(p); } }
+  return h / Math.log(8);
+}
+
+function computeWaveFeatures(deep) {
+  let theta = encodeDeepToPhases(deep);
+  for (let s = 0; s < 60; s++) theta = kuramotoStep(theta);
+  const r    = orderParameter(theta);
+  const pEnt = phaseEntropy(theta);
+  return {
+    wave_coherence: r,
+    nodal_density:  Math.max(0, Math.min(1, 0.15 + (1-r)*0.4 + pEnt*0.2)),
+    phase_entropy:  pEnt,
+    theta,
+  };
+}
+
+function buildWaveVars(f) {
+  return {
+    '--wave-nodal-opacity':  (0.1 + f.wave_coherence * 0.6).toFixed(3),
+    '--wave-nodal-scale':    (0.6 + f.nodal_density  * 1.4).toFixed(3),
+    '--wave-phase-blur':     `${(f.phase_entropy * 8).toFixed(2)}px`,
+    '--wave-resonance-glow': (f.wave_coherence * 0.9).toFixed(3),
+  };
+}
+
+function lerpAngle(a, b, t) {
+  const d = ((b - a + Math.PI*3) % (Math.PI*2)) - Math.PI;
+  return a + d * t;
+}
+
+function precomputePhases(deep) {
+  let theta = encodeDeepToPhases(deep);
+  for (let s = 0; s < 200; s++) theta = kuramotoStep(theta);
+  return theta;
+}
+
+const ROOT = document.documentElement;
+function setCSS(vars) {
+  Object.entries(vars).forEach(([k,v]) => ROOT.style.setProperty(k, String(v)));
+}
+
+// Pre-compute settled phase states at load time
+const NEUTRAL_PHASES   = precomputePhases(NEUTRAL_DEEP);
+const STONEWOOD_PHASES = precomputePhases(STONEWOOD.deep);
+
+// ── Background canvas (flowing interference field) ────────────────────────────
+
+const bgCanvas  = document.getElementById('field-bg');
+const bgCtx     = bgCanvas.getContext('2d');
+let   bgW = 0, bgH = 0;
+const REDUCED   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const N_LINES = 48;
+let   bgHue   = 198;
+let   bgActive = false;
+let   bgT     = 0;
+
+function resizeBg() {
+  bgW = bgCanvas.width  = window.innerWidth;
+  bgH = bgCanvas.height = window.innerHeight;
+}
+
+function drawBg(t) {
+  if (REDUCED) return;
+  bgT = t * 0.0003;
+  bgCtx.clearRect(0, 0, bgW, bgH);
+
+  for (let i = 0; i < N_LINES; i++) {
+    const y0     = (i / N_LINES) * bgH;
+    const freq   = AXIS_TONES[AXIS_ORDER[i % N_OSC]] / BASE_HZ;
+    const amp    = bgActive ? 22 + i * 0.15 : 14 + i * 0.08;
+    const phase  = (i / N_LINES) * Math.PI * 6 + bgT * freq * 0.6;
+    const alpha  = bgActive ? 0.09 + 0.05 * (i/N_LINES) : 0.055 + 0.03 * (i/N_LINES);
+
+    bgCtx.beginPath();
+    bgCtx.moveTo(0, y0);
+    for (let x = 0; x <= bgW; x += 6) {
+      const xn = x / bgW;
+      bgCtx.lineTo(x, y0 + amp * Math.sin(freq * xn * 14 + phase));
+    }
+    bgCtx.strokeStyle = `hsla(${bgHue + i}, 72%, 70%, ${alpha.toFixed(3)})`;
+    bgCtx.lineWidth = 0.8;
+    bgCtx.stroke();
+  }
+}
+
+// ── Orb canvas (phasors + Ψ field) ───────────────────────────────────────────
+
+const orbEl   = document.getElementById('orb-canvas');
+const orbCtx  = orbEl.getContext('2d');
+let   orbSize = 0;
+let   orbHue  = 198;
+
+function resizeOrb() {
+  const dpr  = window.devicePixelRatio || 1;
+  const rect = orbEl.parentElement.getBoundingClientRect();
+  orbSize    = rect.width;
+  orbEl.width  = orbSize * dpr;
+  orbEl.height = orbSize * dpr;
+  orbEl.style.width  = orbSize + 'px';
+  orbEl.style.height = orbSize + 'px';
+  orbCtx.scale(dpr, dpr);
+}
+
+function drawOrb(phases) {
+  if (!orbSize) return;
+  const s  = orbSize;
+  const cx = s / 2;
+  const cy = s / 2;
+  const r  = s * 0.38;
+
+  orbCtx.clearRect(0, 0, s, s);
+
+  // Centre glow
+  const grd = orbCtx.createRadialGradient(cx, cy, 0, cx, cy, r * 0.45);
+  const glowAlpha = 0.18 + orderParameter(phases) * 0.28;
+  grd.addColorStop(0, `hsla(${orbHue}, 80%, 82%, ${glowAlpha.toFixed(3)})`);
+  grd.addColorStop(1, `hsla(${orbHue}, 60%, 70%, 0)`);
+  orbCtx.beginPath();
+  orbCtx.arc(cx, cy, r * 0.45, 0, 2 * Math.PI);
+  orbCtx.fillStyle = grd;
+  orbCtx.fill();
+
+  // Phasors — one per Runa axis
+  for (let i = 0; i < N_OSC; i++) {
+    const th   = phases[i];
+    const len  = r * 0.72;
+    const ex   = cx + Math.cos(th) * len;
+    const ey   = cy + Math.sin(th) * len;
+    const h    = AXIS_HUES[i];
+    const coh  = orderParameter(phases);
+
+    // Phasor line
+    orbCtx.beginPath();
+    orbCtx.moveTo(cx, cy);
+    orbCtx.lineTo(ex, ey);
+    orbCtx.strokeStyle = `hsla(${h}, 75%, 72%, ${(0.35 + coh*0.45).toFixed(2)})`;
+    orbCtx.lineWidth   = 1.2;
+    orbCtx.stroke();
+
+    // Tip dot
+    orbCtx.beginPath();
+    orbCtx.arc(ex, ey, 2.5, 0, 2*Math.PI);
+    orbCtx.fillStyle = `hsla(${h}, 85%, 80%, ${(0.5 + coh*0.4).toFixed(2)})`;
+    orbCtx.fill();
+    orbCtx.shadowBlur  = 8;
+    orbCtx.shadowColor = `hsla(${h}, 85%, 76%, 0.7)`;
+    orbCtx.fill();
+    orbCtx.shadowBlur = 0;
+  }
+
+  // Order parameter indicator — small ring whose radius = r * coherence
+  const cohR = orderParameter(phases) * r * 0.28;
+  if (cohR > 4) {
+    orbCtx.beginPath();
+    orbCtx.arc(cx, cy, cohR, 0, 2 * Math.PI);
+    orbCtx.strokeStyle = `hsla(${orbHue}, 70%, 80%, ${(orderParameter(phases) * 0.5).toFixed(2)})`;
+    orbCtx.lineWidth   = 1;
+    orbCtx.setLineDash([3, 5]);
+    orbCtx.stroke();
+    orbCtx.setLineDash([]);
+  }
+}
+
+// ── Stonewood state machine ───────────────────────────────────────────────────
+
+let stoneActive    = false;
+let anchorHueShift = 0;      // degrees; persists across field activate/reset
+let anchorLabel    = null;
+let currentPhases  = [...NEUTRAL_PHASES];
+let animFrame     = null;
+let orbRotT       = 0;
+let lastRAF       = null;
+
+function updateReadout(features) {
+  const fmt = v => v.toFixed(2);
+  const pct = v => `${Math.round(v * 100)}%`;
+
+  document.getElementById('fill-c').style.width = pct(features.C ?? 0);
+  document.getElementById('fill-r').style.width = pct(features.R ?? 0);
+  document.getElementById('fill-w').style.width = pct(features.wave_coherence);
+  document.getElementById('fill-e').style.width = pct(features.E ?? 0);
+
+  document.getElementById('val-c').textContent = fmt(features.C ?? 0);
+  document.getElementById('val-r').textContent = fmt(features.R ?? 0);
+  document.getElementById('val-w').textContent = fmt(features.wave_coherence);
+  document.getElementById('val-e').textContent = fmt(features.E ?? 0);
+}
+
+function applyField(deep, hue) {
+  const f  = computeWaveFeatures(deep);
+  f.C = deep.C; f.R = deep.R; f.E = deep.E;
+  const ah = ((hue + anchorHueShift) % 360 + 360) % 360;
+  setCSS({
+    '--flare-hue':     ah.toFixed(1),
+    '--flare-hue-alt': ((ah + 35) % 360).toFixed(1),
+    '--flare-alpha':   0.58,
+    ...buildWaveVars(f),
+  });
+  updateReadout(f);
+  bgHue  = ah;
+  orbHue = ah;
+}
+
+function animatePhasors(targetPhases, duration, onDone) {
+  const startPhases = [...currentPhases];
+  const startT      = performance.now();
+
+  function step(now) {
+    const p  = Math.min((now - startT) / duration, 1);
+    const ep = 1 - Math.pow(1 - p, 3);                 // ease-out cubic
+    currentPhases = startPhases.map((s, i) => lerpAngle(s, targetPhases[i], ep));
+    drawOrb(currentPhases);
+    if (p < 1) { animFrame = requestAnimationFrame(step); }
+    else { animFrame = null; currentPhases = [...targetPhases]; onDone && onDone(); }
+  }
+  animFrame = requestAnimationFrame(step);
+}
+
+function activateStonewood() {
+  stoneActive = true;
+  bgActive    = true;
+  orbEl.classList.add('live');
+  document.getElementById('field-status').textContent = 'ψ field · stonewood · coherence rising';
+  document.getElementById('field-status').classList.add('live');
+  document.getElementById('btn-activate').setAttribute('aria-pressed', 'true');
+  document.getElementById('btn-activate').textContent = 'Field active';
+
+  // Animate field state
+  applyField(STONEWOOD.deep, STONEWOOD.hue);
+  animatePhasors(STONEWOOD_PHASES, 2200);
+}
+
+function resetField() {
+  stoneActive = false;
+  bgActive    = false;
+  orbEl.classList.remove('live');
+  document.getElementById('field-status').textContent = 'ψ field · standby';
+  document.getElementById('field-status').classList.remove('live');
+  document.getElementById('btn-activate').setAttribute('aria-pressed', 'false');
+  document.getElementById('btn-activate').textContent = 'Activate field';
+
+  const rh = ((198 + anchorHueShift) % 360 + 360) % 360;
+  setCSS({
+    '--flare-hue':           rh.toFixed(1),
+    '--flare-hue-alt':       ((rh + 35) % 360).toFixed(1),
+    '--flare-alpha':         0.48,
+    '--wave-nodal-opacity':  0,
+    '--wave-nodal-scale':    1,
+    '--wave-phase-blur':     '0px',
+    '--wave-resonance-glow': 0,
+  });
+  bgHue  = rh;
+  orbHue = rh;
+
+  // Reset readout
+  ['c','r','w','e'].forEach(k => {
+    document.getElementById(`fill-${k}`).style.width = '0%';
+    document.getElementById(`val-${k}`).textContent = '—';
+  });
+
+  animatePhasors(NEUTRAL_PHASES, 1400);
+}
+
+// ── Unified animation loop ────────────────────────────────────────────────────
+
+let frameCount = 0;
+
+function loop(t) {
+  requestAnimationFrame(loop);
+
+  // Orb rotation — drives --flare-rot via CSS
+  if (!REDUCED) {
+    orbRotT += stoneActive ? 0.055 : 0.028;
+    ROOT.style.setProperty('--flare-rot', `${orbRotT}deg`);
+  }
+
+  // Background canvas at ~30fps
+  frameCount++;
+  if (frameCount % 2 === 0) drawBg(t);
+
+  // Orb canvas: draw current phase state unless phasor animation is running
+  if (!animFrame) drawOrb(currentPhases);
+}
+
+// ── Nav cards ─────────────────────────────────────────────────────────────────
+
+function buildNav() {
+  const root = document.getElementById('nav-root');
+  NAV.forEach(({ section, links }) => {
+    const sec = document.createElement('div');
+    sec.className = 'nav-section';
+
+    const lbl = document.createElement('span');
+    lbl.className = 'section-label';
+    lbl.textContent = section;
+    sec.appendChild(lbl);
+
+    const row = document.createElement('div');
+    row.className = 'card-row';
+
+    links.forEach(({ title, note, href }) => {
+      const a = document.createElement('a');
+      a.className = 'holo-card';
+      a.href = href;
+      a.rel  = 'noopener noreferrer';
+      a.innerHTML = `
+        <span class="card-tag">${section}</span>
+        <div class="card-title">${title}</div>
+        <div class="card-note">${note}</div>
+      `;
+
+      // Per-card 3D tilt
+      a.addEventListener('mousemove', e => {
+        if (REDUCED) return;
+        const rect  = a.getBoundingClientRect();
+        const rx    = ((e.clientY - rect.top)  / rect.height - 0.5) * -14;
+        const ry    = ((e.clientX - rect.left) / rect.width  - 0.5) *  14;
+        const angle = Math.atan2(e.clientY - rect.top - rect.height/2,
+                                 e.clientX - rect.left - rect.width/2)
+                      * (180/Math.PI);
+        a.style.setProperty('--rx', rx.toFixed(2));
+        a.style.setProperty('--ry', ry.toFixed(2));
+        a.style.setProperty('--shine-angle', `${(angle + 180).toFixed(0)}deg`);
+      });
+      a.addEventListener('mouseleave', () => {
+        a.style.setProperty('--rx', 0);
+        a.style.setProperty('--ry', 0);
+      });
+
+      row.appendChild(a);
+    });
+
+    sec.appendChild(row);
+    root.appendChild(sec);
+  });
+}
+
+// ── Mouse parallax (background field shifts slightly with pointer) ─────────────
+
+if (!REDUCED) {
+  document.addEventListener('mousemove', e => {
+    const mx = e.clientX / window.innerWidth;
+    const my = e.clientY / window.innerHeight;
+    ROOT.style.setProperty('--mx', mx.toFixed(4));
+    ROOT.style.setProperty('--my', my.toFixed(4));
+  });
+}
+
+// ── Locality anchor ──────────────────────────────────────────────────────────
+// Consent-first: nothing runs until the user explicitly opens the modal and chooses.
+// GPS is only requested when the user taps "Use my real location" — no implicit calls.
+// If GPS is denied or unavailable, the in-world picker appears as a graceful fallback.
+
+// Terra Aeterna canonical map locations (symbolic lat/lon).
+// Local hour for time anchor is always the visitor's current real time,
+// regardless of which place they choose — you're anchoring a fictional place to your now.
+const TERRA_AETERNA_LOCS = [
+  { name: 'Stonewood',         lat:  42, lon: -18, emoji: '🌲' },
+  { name: 'STARWELL',          lat:  67, lon:  24, emoji: '⭐' },
+  { name: 'Ashfen Cairn',      lat: -28, lon:  88, emoji: '🌿' },
+  { name: 'Wraithtide Shore',  lat: -12, lon: -62, emoji: '🌊' },
+  { name: 'The Withinwood',    lat:  55, lon:  33, emoji: '🌑' },
+  { name: 'Salt Veil',         lat:   8, lon: 142, emoji: '🌫' },
+];
+
+// Mirror of UserLocalityPhaseAnchor.compute_user_anchor in wave_attention.py.
+// Uses AXIS_TONES as the projection basis (no learned weights in-browser).
+// Output: N_OSC phase angles ∈ [-π, π].
+function computeLocalityAnchor(lat, lon, hour) {
+  const latN  = lat  /  90;
+  const lonN  = lon  / 180;
+  const timeN = Math.sin(2 * Math.PI * hour / 24);
+  return AXIS_ORDER.map(ax => {
+    const freq  = AXIS_TONES[ax] / BASE_HZ;
+    const angle = latN * Math.cos(freq) + lonN * Math.sin(freq) + timeN * Math.cos(freq * 2);
+    return Math.tanh(angle) * Math.PI;
+  });
+}
+
+function applyLocalityAnchor(localPhases, label) {
+  anchorLabel = label;
+  const mean   = localPhases.reduce((s, p) => s + p, 0) / localPhases.length;
+  anchorHueShift = mean * (180 / Math.PI);   // radians → degrees
+  // Re-apply current field hue with the new shift
+  const base   = stoneActive ? STONEWOOD.hue : 198;
+  const ah     = ((base + anchorHueShift) % 360 + 360) % 360;
+  setCSS({ '--flare-hue': ah.toFixed(1), '--flare-hue-alt': ((ah + 35) % 360).toFixed(1) });
+  bgHue  = ah;
+  orbHue = ah;
+
+  const statusEl = document.getElementById('field-status');
+  statusEl.textContent = `ψ field · anchored · ${label}`;
+  statusEl.classList.add('live');
+
+  const btn = document.getElementById('btn-anchor');
+  btn.textContent = `Anchored: ${label}`;
+  btn.classList.add('anchored');
+}
+
+function clearAnchor() {
+  anchorLabel    = null;
+  anchorHueShift = 0;
+  const base = stoneActive ? STONEWOOD.hue : 198;
+  setCSS({ '--flare-hue': base, '--flare-hue-alt': (base + 35) % 360 });
+  bgHue  = base;
+  orbHue = base;
+  const btn = document.getElementById('btn-anchor');
+  btn.textContent = 'Anchor to location';
+  btn.classList.remove('anchored');
+  if (!stoneActive) {
+    document.getElementById('field-status').textContent = 'ψ field · standby';
+    document.getElementById('field-status').classList.remove('live');
+  }
+}
+
+function openAnchorModal() {
+  const modal = document.getElementById('anchor-modal');
+  modal.removeAttribute('hidden');
+  modal.querySelector('.anchor-opt').focus();
+}
+
+function closeAnchorModal() {
+  document.getElementById('anchor-modal').setAttribute('hidden', '');
+  document.getElementById('world-picker').setAttribute('hidden', '');
+  document.getElementById('btn-anchor').focus();
+}
+
+function buildLocationGrid() {
+  const grid = document.getElementById('location-grid');
+  TERRA_AETERNA_LOCS.forEach(loc => {
+    const btn = document.createElement('button');
+    btn.className = 'loc-btn';
+    btn.innerHTML = `<span>${loc.emoji}</span><span>${loc.name}</span>`;
+    btn.addEventListener('click', () => {
+      const hour   = new Date().getHours() + new Date().getMinutes() / 60;
+      const phases = computeLocalityAnchor(loc.lat, loc.lon, hour);
+      applyLocalityAnchor(phases, loc.name);
+      closeAnchorModal();
+    });
+    grid.appendChild(btn);
+  });
+}
+
+function requestGPS() {
+  if (!navigator.geolocation) {
+    document.getElementById('world-picker').removeAttribute('hidden');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const hour   = new Date().getHours() + new Date().getMinutes() / 60;
+      const phases = computeLocalityAnchor(pos.coords.latitude, pos.coords.longitude, hour);
+      const label  = `${pos.coords.latitude.toFixed(1)}°, ${pos.coords.longitude.toFixed(1)}°`;
+      applyLocalityAnchor(phases, label);
+      closeAnchorModal();
+    },
+    () => {
+      // Denied or unavailable — show in-world picker without surfacing an error
+      document.getElementById('world-picker').removeAttribute('hidden');
+      document.getElementById('location-grid').querySelector('.loc-btn')?.focus();
+    },
+    { enableHighAccuracy: false, timeout: 8000, maximumAge: 300_000 },
+  );
+}
+
+function initAnchorModal() {
+  buildLocationGrid();
+  document.getElementById('btn-anchor').addEventListener('click', openAnchorModal);
+  document.getElementById('anchor-close').addEventListener('click', closeAnchorModal);
+  document.getElementById('opt-gps').addEventListener('click', requestGPS);
+  document.getElementById('opt-world').addEventListener('click', () => {
+    document.getElementById('world-picker').removeAttribute('hidden');
+    document.getElementById('location-grid').querySelector('.loc-btn')?.focus();
+  });
+  document.getElementById('opt-decline').addEventListener('click', () => {
+    clearAnchor();
+    closeAnchorModal();
+  });
+  // Backdrop click to dismiss
+  document.getElementById('anchor-modal').addEventListener('click', e => {
+    if (e.target.id === 'anchor-modal') closeAnchorModal();
+  });
+  // Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !document.getElementById('anchor-modal').hasAttribute('hidden')) {
+      closeAnchorModal();
+    }
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+document.getElementById('btn-activate').addEventListener('click', () => {
+  if (!stoneActive) activateStonewood();
+  else resetField();
+});
+document.getElementById('btn-reset').addEventListener('click', resetField);
+
+window.addEventListener('resize', () => { resizeBg(); resizeOrb(); }, { passive: true });
+
+resizeBg();
+resizeOrb();
+buildNav();
+initAnchorModal();
+drawOrb(NEUTRAL_PHASES);
+drawBg(0);    // seed the background canvas immediately; loop takes over from here
+requestAnimationFrame(loop);
+
+</script>
+
+  <!-- Locality Anchor consent modal -->
+  <div class="anchor-modal" id="anchor-modal" role="dialog" aria-modal="true"
+       aria-labelledby="anchor-title" hidden>
+    <div class="anchor-panel">
+      <button class="anchor-close" id="anchor-close" aria-label="Close dialog">✕</button>
+      <div class="anchor-header">
+        <span class="anchor-icon">⊙</span>
+        <h2 id="anchor-title">Anchor the field</h2>
+      </div>
+      <p class="anchor-desc">Your location and local time shift the wave field's phase
+        signature — making your reading of this place unique to where and when you are.</p>
+      <div class="anchor-options">
+        <button class="anchor-opt" id="opt-gps">
+          <span class="opt-icon">⊕</span>
+          <span class="opt-label">Use my real location</span>
+          <span class="opt-note">Requests device GPS · not stored or transmitted</span>
+        </button>
+        <button class="anchor-opt" id="opt-world">
+          <span class="opt-icon">◎</span>
+          <span class="opt-label">Choose an in-world place</span>
+          <span class="opt-note">Anchor to a Terra Aeterna location</span>
+        </button>
+        <button class="anchor-opt opt-decline" id="opt-decline">
+          <span class="opt-icon">○</span>
+          <span class="opt-label">No anchor</span>
+          <span class="opt-note">Continue without — field stays in shared mode</span>
+        </button>
+      </div>
+      <div class="world-picker" id="world-picker" hidden>
+        <p class="picker-label">Choose a place</p>
+        <div class="location-grid" id="location-grid"></div>
+      </div>
+      <p class="anchor-privacy">Coordinates are used only to compute a local phase offset
+        in-browser. Nothing is stored, logged, or transmitted.</p>
+    </div>
+  </div>
+
 </body>
 </html>
