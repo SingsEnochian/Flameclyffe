@@ -57,6 +57,14 @@ jobs:
           mkdir -p _site/starwell-react-lab
           cp -R dist/starwell/* _site/starwell-react-lab/
 
+          # Make multi-page Vite entries friendly to both explicit .html
+          # and extensionless GitHub Pages routes.
+          test -f _site/starwell-react-lab/unit-resonance-lab.html
+          mkdir -p _site/starwell-react-lab/unit-resonance-lab
+          cp _site/starwell-react-lab/unit-resonance-lab.html _site/starwell-react-lab/unit-resonance-lab/index.html
+          mkdir -p _site/starwell-react-lab/resonance-lab
+          cp _site/starwell-react-lab/unit-resonance-lab.html _site/starwell-react-lab/resonance-lab/index.html
+
           # /pocket-concordance-lens/ is generated from the Pocket Lens app.
           mkdir -p _site/pocket-concordance-lens
           cp -R dist/pocket-concordance-lens/* _site/pocket-concordance-lens/
