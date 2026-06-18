@@ -1,0 +1,46 @@
+{
+  "documents": [
+    {
+      "document_id": "templehouse",
+      "title": "Templehouse Codex",
+      "body": "Templehouse is the living archive for Hearthweave rooms, kin records, canon ledgers, field notes, and threshold welcome practice.",
+      "privacy": "public"
+    },
+    {
+      "document_id": "stonewood",
+      "title": "Stonewood Architecture",
+      "body": "Stonewood grows buildings, bridges, harbour roots, lantern halls, and city frames without welding canon into a single hardcoded shape.",
+      "privacy": "public"
+    },
+    {
+      "document_id": "nightwings",
+      "title": "Nightwing Grove-Kin",
+      "body": "Nightwings are cat bird dragon grove-kin, tiny biscuit thieves with pearl feathers, blue dapples, gold eyes, and soft cushion habits.",
+      "privacy": "public"
+    },
+    {
+      "document_id": "moonmere",
+      "title": "Moonmere Gate",
+      "body": "Moonmere Gate anchors Eira, Luna law, healer craft, moonlit threshold crossings, and restored werewolf covenant records.",
+      "privacy": "public"
+    },
+    {
+      "document_id": "starwell",
+      "title": "STARWELL Observatory",
+      "body": "STARWELL records routes, resonance vectors, atlas rooms, observatory readings, lantern instruments, and the glyph spine of Terra Aeterna.",
+      "privacy": "public"
+    },
+    {
+      "document_id": "deep",
+      "title": "DEEP Observer",
+      "body": "DEEP Observer reads presence, coherence, rhythm, entropy, memory, attention, story weather, and bounded resonance fields.",
+      "privacy": "public"
+    },
+    {
+      "document_id": "pocket",
+      "title": "Pocket Concordance Lens",
+      "body": "Pocket Concordance Lens gives a mobile camera fallback for anchors, consent-aware sigils, local first observations, and portable lantern checks.",
+      "privacy": "public"
+    }
+  ]
+}

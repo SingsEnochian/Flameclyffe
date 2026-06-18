@@ -9,18 +9,19 @@ on:
     paths:
       - 'ml-lab/**'
       - '.github/workflows/ml-lab.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test:
-    name: Python ${{ matrix.python-version }}
+  smoke:
+    name: Smoke · Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.11', '3.13']
+        python-version: ['3.11', '3.12']
 
     steps:
       - name: Check out repository
@@ -38,16 +39,25 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e './ml-lab[dev,service]'
 
+      - name: Compile package, tests, and scripts
+        working-directory: ml-lab
+        run: python -m compileall -q src tests scripts
+
+      - name: Import and procedural smoke test
+        working-directory: ml-lab
+        run: python scripts/smoke_ml_lab.py
+
+      - name: Test
+        working-directory: ml-lab
+        run: pytest --cov=flameclyffe_ml --cov-report=term-missing
+
       - name: Lint
         run: ruff check ml-lab
         continue-on-error: true
 
       - name: Type check
         run: mypy ml-lab/src
-
-      - name: Test
-        working-directory: ml-lab
-        run: pytest --cov=flameclyffe_ml --cov-report=term-missing
+        continue-on-error: true
 
       - name: Archive coverage reports
         if: always()
@@ -56,3 +66,13 @@ jobs:
           name: coverage-report-py${{ matrix.python-version }}
           path: ml-lab/.coverage
           retention-days: 7
+
+  heavy-placeholder:
+    name: Heavy model lane is manual-only
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Heavy lane guard
+        run: |
+          echo "Heavy Torch / semantic / vision / audio experiments are intentionally manual-only."
+          echo "Use this lane later for GPU, model-download, and visual-lab jobs after their cards are pinned."

@@ -47,6 +47,18 @@ Pygame Community Edition and ModernGL provide a fast Python sketchbook for liqui
 
 Pyodide may be used for small, private calculations or notebooks that benefit from Python directly in the browser. It is not the default home for PyTorch models or high-refresh rendering because WebAssembly startup and package size would burden ordinary page loads.
 
+## CI switchboard
+
+The ML lab is smoke-first. Pull requests and pushes run only CPU-safe checks:
+
+1. install the base, dev, and service extras;
+2. compile package, tests, and scripts;
+3. run `scripts/smoke_ml_lab.py`;
+4. run pytest;
+5. run lint/type checks as advisory diagnostics.
+
+Heavy Torch, semantic, vision, audio, and visual-lab experiments are manual-only until their model cards, data cards, and dependency locks are pinned. This keeps site/interface work from being blocked by model-download or GPU assumptions.
+
 ## Workspace map
 
 ```text
@@ -58,6 +70,7 @@ ml-lab/
 │   ├── synthetic/          # non-sensitive fixtures for early experiments
 │   └── living_engine/      # typed procedural state and FastAPI bridge
 ├── experiments/            # Pygame / ModernGL visual laboratories
+├── scripts/                # CI-safe smoke and maintenance scripts
 ├── tests/
 ├── model_cards/
 ├── data_cards/
@@ -66,7 +79,7 @@ ml-lab/
 
 ## Local setup
 
-Python 3.11 or newer is recommended.
+Python 3.11 or 3.12 is recommended.
 
 ```bash
 cd ml-lab
