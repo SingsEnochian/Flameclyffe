@@ -1,0 +1,145 @@
+/* DEEP Observer Desktop Containment Hotfix v0.1
+   Keeps the wide-screen instrument bounded, balanced, and readable.
+   Loaded last so it can tame older mobile-first / organic astrolabe rules. */
+
+html,
+body{
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+.page{
+  width:min(100%,1500px) !important;
+  padding-inline:clamp(.75rem,2vw,1.5rem) !important;
+}
+
+.shell{
+  max-width:100%;
+}
+
+.quick-guide,
+.legend,
+.observer-hud{
+  max-width:100%;
+}
+
+.quick-guide > *,
+.legend > *,
+.observer-hud > *,
+.observer-readout,
+.observer-glyph-instrument,
+.observer-control-dock,
+.panel,
+.direct-card,
+.teach-card{
+  min-width:0;
+}
+
+.quick-guide{
+  width:min(1280px,100%) !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+}
+
+.quick-guide article{
+  overflow-wrap:anywhere;
+}
+
+.dual-time-hologram{
+  max-width:min(380px,calc(100vw - 2rem));
+}
+
+@media(min-width:1180px){
+  .observer-hud{
+    width:min(1320px,100%) !important;
+    max-width:1320px !important;
+    grid-template-columns:minmax(520px,620px) minmax(460px,650px) !important;
+    grid-template-areas:
+      "glyph readout"
+      "controls readout" !important;
+    justify-content:center;
+    justify-items:stretch;
+    align-items:start;
+    gap:clamp(1.2rem,2.6vw,2.8rem) !important;
+    overflow:visible;
+  }
+
+  .observer-glyph-instrument{
+    padding-bottom:5.8rem !important;
+  }
+
+  .glyph-stage{
+    width:100%;
+    justify-self:center;
+  }
+
+  .orb-frame{
+    width:min(500px,100%) !important;
+  }
+
+  canvas{
+    max-width:500px !important;
+    max-height:500px !important;
+  }
+
+  .sensor-ring{
+    inset:-6% -10% -13% -10% !important;
+  }
+
+  .observer-control-dock .filter-row{
+    width:min(500px,100%) !important;
+    grid-template-columns:repeat(2,minmax(7.4rem,1fr)) !important;
+  }
+
+  .observer-readout .panel{
+    width:min(650px,100%) !important;
+    margin-inline:auto !important;
+  }
+
+  .direct-card,
+  .teach-card{
+    max-width:100%;
+  }
+
+  .dual-time-hologram{
+    width:min(360px,calc(100vw - 2rem));
+  }
+}
+
+@media(min-width:1500px){
+  .observer-hud{
+    width:min(1380px,100%) !important;
+    max-width:1380px !important;
+    grid-template-columns:minmax(560px,660px) minmax(500px,680px) !important;
+  }
+
+  .orb-frame{
+    width:min(540px,100%) !important;
+  }
+
+  canvas{
+    max-width:540px !important;
+    max-height:540px !important;
+  }
+
+  .observer-control-dock .filter-row{
+    width:min(540px,100%) !important;
+  }
+}
+
+@media(max-width:1179px){
+  .quick-guide{
+    grid-template-columns:1fr !important;
+  }
+
+  .observer-hud{
+    grid-template-columns:1fr !important;
+    grid-template-areas:
+      "glyph"
+      "controls"
+      "readout" !important;
+  }
+
+  .dual-time-hologram{
+    width:min(330px,calc(100vw - 1.4rem));
+  }
+}
