@@ -2,12 +2,18 @@ import React, { useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { LiveGlyphViewer as BaseLiveGlyphViewer, useSecondTicker } from './live-glyph.jsx';
-
-const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
-const HUD_LAYER_SELECTOR = ':scope > .deep-observer-hud-layer';
+import {
+  DEEP_HUD_DATA_KEYS,
+  DEEP_HUD_LAYER_CLASS,
+  DEEP_HUD_LAYER_OWNER,
+  DEEP_HUD_LAYER_STATE,
+  DEEP_HUD_PANEL_SELECTOR,
+  DEEP_HUD_ROOT_SELECTOR,
+  DEEP_HUD_SCOPE_LAYER_SELECTOR,
+} from './lib/deepHudLayerContract.js';
 
 function findHudPanel() {
-  return document.querySelector(PANEL_SELECTOR);
+  return document.querySelector(DEEP_HUD_PANEL_SELECTOR);
 }
 
 function ReactHudLayerPortal() {
@@ -25,7 +31,7 @@ function ReactHudLayerPortal() {
     updatePanel();
     frameId = window.requestAnimationFrame(updatePanel);
 
-    const root = document.querySelector('#root') || document.body;
+    const root = document.querySelector(DEEP_HUD_ROOT_SELECTOR) || document.body;
     observer = new MutationObserver(updatePanel);
     observer.observe(root, { childList: true, subtree: true });
 
@@ -35,13 +41,13 @@ function ReactHudLayerPortal() {
     };
   }, []);
 
-  if (!panel || panel.querySelector(HUD_LAYER_SELECTOR)) return null;
+  if (!panel || panel.querySelector(DEEP_HUD_SCOPE_LAYER_SELECTOR)) return null;
 
   return createPortal(
     React.createElement('div', {
-      className: 'deep-observer-hud-layer',
-      'data-deep-hud-layer': 'empty',
-      'data-deep-hud-layer-owner': 'react',
+      className: DEEP_HUD_LAYER_CLASS,
+      [`data-${DEEP_HUD_DATA_KEYS.layer.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`]: DEEP_HUD_LAYER_STATE.empty,
+      [`data-${DEEP_HUD_DATA_KEYS.owner.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`]: DEEP_HUD_LAYER_OWNER.react,
       'aria-hidden': 'true',
     }),
     panel,
