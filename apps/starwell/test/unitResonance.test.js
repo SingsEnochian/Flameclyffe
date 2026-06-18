@@ -2,8 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  assertMetricConfig,
   buildResonanceGraph,
   findUnitEdges,
+  projectNode,
   projectToPlane,
   selectResonanceWindow,
   weightedDistance,
@@ -15,17 +17,39 @@ import {
 } from '../src/configs/resonance/unit-resonance-lab-demo.js';
 import { nodesFromDeepSignals } from '../src/adapters/resonance/fromDeepSignals.js';
 
-test('weightedDistance honours metric dimensions and weights', () => {
+test('weightedDistance honours metric dimensions, weights, and scales', () => {
   const config = {
     id: 'test-metric',
     dimensions: ['x', 'y'],
     weights: { x: 4, y: 1 },
+    scales: { x: 2, y: 1 },
     unitDistance: 1,
     tolerance: 0.01,
   };
 
-  assert.equal(weightedDistance([0, 0], [0.5, 0], config), 1);
+  assert.equal(weightedDistance([0, 0], [1, 0], config), 1);
   assert.equal(weightedDistance({ x: 0, y: 0 }, { x: 0, y: 1 }, config), 1);
+});
+
+test('weightedDistance accepts dimension objects without renderer-side meaning', () => {
+  const config = {
+    id: 'dimension-object-metric',
+    dimensions: [
+      { key: 'phase', weight: 4, scale: 2 },
+      { key: 'amplitude', weight: 1, scale: 1 },
+    ],
+    unitDistance: 1,
+    tolerance: 0.01,
+  };
+
+  assert.equal(weightedDistance({ phase: 0, amplitude: 0 }, { phase: 1, amplitude: 0 }, config), 1);
+});
+
+test('metric validation rejects zero tolerance', () => {
+  assert.throws(
+    () => assertMetricConfig({ id: 'bad', dimensions: ['x'], unitDistance: 1, tolerance: 0 }),
+    /tolerance must be a positive finite number/,
+  );
 });
 
 test('unit resonance lab hypercube has twelve unit strands', () => {
@@ -36,16 +60,33 @@ test('unit resonance lab hypercube has twelve unit strands', () => {
   assert.equal(edges.every((edge) => edge.kind === 'unit'), true);
 });
 
-test('bounded window respects consent and visibility gates', () => {
+test('bounded window respects consent and visibility gates before manual inclusion', () => {
   const nodes = [
     { id: 'visible', kind: 'test', vector: [0], meta: { visible: true, consent: true } },
     { id: 'hidden', kind: 'test', vector: [1], meta: { visible: false, consent: true } },
     { id: 'closed', kind: 'test', vector: [2], meta: { visible: true, consent: false } },
   ];
 
-  const bounded = selectResonanceWindow(nodes, { requireVisible: true, requireConsent: true });
+  const bounded = selectResonanceWindow(nodes, {
+    requireVisible: true,
+    requireConsent: true,
+    includeIds: ['hidden', 'closed'],
+  });
 
   assert.deepEqual(bounded.map((node) => node.id), ['visible']);
+});
+
+test('phase projection preserves intentional zero amplitude', () => {
+  const node = {
+    id: 'silent-phase',
+    kind: 'test',
+    vector: { phase: 0.25, amplitude: 0 },
+  };
+
+  assert.deepEqual(
+    projectNode(node, { mode: 'phase', dimensions: ['phase', 'amplitude'] }, ['phase', 'amplitude']),
+    { x: 0, y: 0 },
+  );
 });
 
 test('DEEP signal adapter maps P C R E M A aliases into resonance vectors', () => {

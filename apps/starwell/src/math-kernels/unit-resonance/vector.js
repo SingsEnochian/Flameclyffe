@@ -1,15 +1,17 @@
-import { isFiniteNumber } from './validation.js';
+import { isFiniteNumber, readDimensionKey } from './validation.js';
 
 export function makeVectorFromRecord(record = {}, dimensions = [], fallback = 0) {
-  return dimensions.map((dimension) => {
-    const value = record?.[dimension];
+  return dimensions.map((dimension, index) => {
+    const key = readDimensionKey(dimension, index);
+    const value = record?.[key];
     return isFiniteNumber(value) ? value : fallback;
   });
 }
 
 export function vectorToRecord(vector = [], dimensions = []) {
   return dimensions.reduce((record, dimension, index) => {
-    record[dimension] = isFiniteNumber(vector[index]) ? vector[index] : 0;
+    const key = readDimensionKey(dimension, index);
+    record[key] = isFiniteNumber(vector[index]) ? vector[index] : 0;
     return record;
   }, {});
 }

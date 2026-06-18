@@ -1,7 +1,12 @@
 import {
   assertMetricConfig,
   assertNode,
+  isFiniteNumber,
+  normaliseEpsilon,
+  normaliseScale,
   normaliseWeight,
+  readDimensionKey,
+  readDimensionOption,
   readVectorValue,
 } from './validation.js';
 
@@ -9,10 +14,12 @@ export function weightedDistance(a, b, config) {
   assertMetricConfig(config);
 
   const sum = config.dimensions.reduce((total, dimension, index) => {
-    const weight = normaliseWeight(config.weights?.[dimension]);
-    const left = readVectorValue(a, index, dimension);
-    const right = readVectorValue(b, index, dimension);
-    const delta = left - right;
+    const key = readDimensionKey(dimension, index);
+    const weight = normaliseWeight(readDimensionOption(dimension, 'weight') ?? config.weights?.[key]);
+    const scale = normaliseScale(readDimensionOption(dimension, 'scale') ?? config.scales?.[key]);
+    const left = readVectorValue(a, index, key);
+    const right = readVectorValue(b, index, key);
+    const delta = (left - right) / scale;
 
     return total + weight * delta * delta;
   }, 0);
@@ -29,9 +36,14 @@ export function nodeDistance(source, target, config) {
 
 export function unitDelta(distance, config) {
   assertMetricConfig(config);
+
+  if (!isFiniteNumber(distance)) {
+    throw new TypeError('Distance must be a finite number.');
+  }
+
   return Math.abs(distance - config.unitDistance);
 }
 
 export function isUnitDistance(distance, config) {
-  return unitDelta(distance, config) <= config.tolerance;
+  return unitDelta(distance, config) <= config.tolerance + normaliseEpsilon(config.epsilon);
 }

@@ -32,6 +32,8 @@ jobs:
         run: npm install
 
       - name: Build STARWELL React Observatory Lab
+        env:
+          STARWELL_BASE: /Flameclyffe/starwell-react-lab/
         run: npm run starwell:build
 
       - name: Build Pocket Concordance Lens
@@ -52,14 +54,23 @@ jobs:
             --exclude 'sandbox' \
             --exclude 'package-lock.json'
 
-          # /starwell/ is the canonical live glyph instrument channel.
-          # Do not overwrite it with the React lab build.
           mkdir -p _site/starwell-react-lab
           cp -R dist/starwell/* _site/starwell-react-lab/
 
-          # /pocket-concordance-lens/ is generated from the Pocket Lens app.
+          test -f _site/starwell-react-lab/unit-resonance-lab.html
+          for route in unit-resonance-lab resonance-lab; do
+            mkdir -p "_site/starwell-react-lab/${route}"
+            cp _site/starwell-react-lab/unit-resonance-lab.html "_site/starwell-react-lab/${route}/index.html"
+          done
+
           mkdir -p _site/pocket-concordance-lens
           cp -R dist/pocket-concordance-lens/* _site/pocket-concordance-lens/
+
+          test -f _site/pocket-concordance-lens/index.html
+          for route in concordance pocket-lens pocket-concordance pocket; do
+            mkdir -p "_site/${route}"
+            cp -R dist/pocket-concordance-lens/* "_site/${route}/"
+          done
 
           touch _site/.nojekyll
 
