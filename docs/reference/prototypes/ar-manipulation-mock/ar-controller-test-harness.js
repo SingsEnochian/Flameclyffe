@@ -7,6 +7,7 @@ const status = document.querySelector('#test-status');
 const results = document.querySelector('#test-results');
 const runButton = document.querySelector('#run-tests');
 const clearButton = document.querySelector('#clear-tests');
+let isRunning = false;
 
 function assert(name, condition) {
   return { name, passed: Boolean(condition) };
@@ -29,6 +30,11 @@ function wait(ms) {
 }
 
 async function runTests() {
+  if (isRunning) return;
+  isRunning = true;
+  runButton.disabled = true;
+  status.textContent = 'Running checks...';
+
   const controller = createARManipulationController();
   const shim = createGestureAdapterShim(controller);
   const tests = [];
@@ -60,8 +66,12 @@ async function runTests() {
   controller.reset();
   tests.push(assert('shim accepts synthetic payload', shim.receive(makeSyntheticPayload('handScale')) === true));
   tests.push(assert('synthetic payload changes scale', controller.getState().scale > 1));
-  tests.push(assert('shim rejects missing source', shim.receive({ type: 'pinchDrag', createdAt: new Date().toISOString() }) === false));
+  tests.push(assert('shim rejects missing source', shim.receive({ type: 'pinchDrag', targetId: 'observer-core', detail: {}, consentState: 'enabled', createdAt: new Date().toISOString() }) === false));
+  tests.push(assert('shim rejects missing target', shim.receive({ source: 'synthetic', type: 'pinchDrag', detail: {}, consentState: 'enabled', createdAt: new Date().toISOString() }) === false));
   tests.push(assert('shim rejects disabled consent', shim.receive({ ...makeSyntheticPayload('pinchDrag'), consentState: 'disabled' }) === false));
+  tests.push(assert('shim rejects unknown source', shim.receive({ ...makeSyntheticPayload('pinchDrag'), source: 'unknown' }) === false));
+  tests.push(assert('shim rejects unsafe detail key', shim.receive(makeSyntheticPayload('pinchDrag', { rawLandmarks: [] })) === false));
+  tests.push(assert('shim rejects invalid confidence', shim.receive(makeSyntheticPayload('pinchDrag', { confidence: 7 })) === false));
 
   controller.reset();
   controller.pulse();
@@ -71,6 +81,8 @@ async function runTests() {
   tests.push(assert('pulse timeout returns idle mode', controller.getState().mode === 'idle'));
 
   render(tests);
+  isRunning = false;
+  runButton.disabled = false;
 }
 
 runButton.addEventListener('click', () => { runTests(); });
