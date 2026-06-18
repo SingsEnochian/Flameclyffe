@@ -50,6 +50,15 @@ function ThresholdBar({ phase, time, anchor, lowMotion, onToggleMotion }) {
   );
 }
 
+function FoldSummary({ label, note }) {
+  return (
+    <summary>
+      <span>{label}</span>
+      <em>{note}</em>
+    </summary>
+  );
+}
+
 function SanctuaryLayers({ doors, selectedKey }) {
   return (
     <div className="living-sanctuary-layers" aria-hidden="true">
@@ -110,11 +119,14 @@ export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, p
         </header>
 
         <section className="living-room-grid">
-          <nav className="living-door-ring" aria-label="Chamber doors">
-            {chamberDoors.map((room) => (
-              <LivingDoor key={room.key} room={room} active={selected.key === room.key} onSelect={onSelect} />
-            ))}
-          </nav>
+          <details className="living-fold living-fold-doors">
+            <FoldSummary label="Chamber doors" note={selected.title} />
+            <nav className="living-door-ring" aria-label="Chamber doors">
+              {chamberDoors.map((room) => (
+                <LivingDoor key={room.key} room={room} active={selected.key === room.key} onSelect={onSelect} />
+              ))}
+            </nav>
+          </details>
 
           <section className="living-hearth" aria-label="Fifth Form hearth">
             <FifthFormHearth anchor={activeAnchor} pulsing={pulseActive} onPulse={() => setPulseCount((count) => count + 1)} />
@@ -134,12 +146,18 @@ export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, p
             <p className="living-anchor-note" aria-live="polite">{activeAnchor.note}</p>
           </section>
 
-          <GlyphPanel selected={selected} selectedType={selectedType} anchor={activeAnchor} />
+          <details className="living-fold living-fold-glyph">
+            <FoldSummary label="Glyph panel" note={`${activeAnchor.label} · ${selected.title}`} />
+            <GlyphPanel selected={selected} selectedType={selectedType} anchor={activeAnchor} />
+          </details>
         </section>
 
-        <section className="living-active-chamber" aria-label="Selected chamber">
-          {children}
-        </section>
+        <details className="living-fold living-fold-preview">
+          <FoldSummary label="Selected chamber" note={selected.title} />
+          <section className="living-active-chamber" aria-label="Selected chamber">
+            {children}
+          </section>
+        </details>
 
         <ThresholdBar phase={phase} time={time} anchor={activeAnchor} lowMotion={lowMotion} onToggleMotion={() => setLowMotion((value) => !value)} />
       </section>
