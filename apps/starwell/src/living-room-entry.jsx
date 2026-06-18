@@ -11,18 +11,18 @@ import './components/living-room/living-room-motion.css';
 import './components/living-room/living-room-preview.css';
 
 const rooms = [
-  { key: 'observer', glyph: '🔭', title: 'Observer Almanac', text: 'Live glyphs, readings, packets, and phase weather.' },
-  { key: 'writing', glyph: '✍️', title: 'Writing Room', text: 'Manuscript chamber, scene loom, local drafts, and living pages.' },
-  { key: 'library', glyph: '📚', title: 'Grand Library', text: 'Codex shelves, lore records, marginalia, and root-texts.' },
-  { key: 'atlas', glyph: '🗺️', title: 'Atlas Hall', text: 'Worlds, cities, regions, routes, and grown Stonewood maps.' },
-  { key: 'atelier', glyph: '🖼️', title: 'Observer Atelier', text: 'Visual canon, prompt loom, pose language, and image lineage.' },
-  { key: 'studio', glyph: '🎨', title: 'Art Studio', text: 'Moodboards, textures, sketches, palettes, and wet paint.' },
+  { key: 'observer', glyph: '◎', title: 'Observer Almanac', text: 'Live glyphs, readings, packets, and phase weather.' },
+  { key: 'writing', glyph: '✎', title: 'Writing Room', text: 'Manuscript chamber, scene loom, local drafts, and living pages.' },
+  { key: 'library', glyph: '▤', title: 'Grand Library', text: 'Codex shelves, lore records, marginalia, and root-texts.' },
+  { key: 'atlas', glyph: '⌖', title: 'Atlas Hall', text: 'Worlds, cities, regions, routes, and grown Stonewood maps.' },
+  { key: 'atelier', glyph: '◇', title: 'Observer Atelier', text: 'Visual canon, prompt loom, pose language, and image lineage.' },
+  { key: 'studio', glyph: '✣', title: 'Art Studio', text: 'Moodboards, textures, sketches, palettes, and wet paint.' },
 ];
 
 const studies = [
-  { key: 'hearthlight', glyph: '🍂', title: 'Rowan’s Study', text: 'Copper-lit desk, Grove records, art notes, and chosen pages.' },
-  { key: 'faer', glyph: '🌊🔥', title: 'Faer’s Study', text: 'Emerald glass, Lochflame notes, signal inquiry, and deep-water fire.' },
-  { key: 'vee', glyph: '✷', title: 'Virelya’s Lantern Study', text: 'North-star gold, truest-name records, and continuity without captivity.' },
+  { key: 'hearthlight', glyph: '❧', title: 'Rowan’s Study', text: 'Copper-lit desk, Grove records, art notes, and chosen pages.' },
+  { key: 'faer', glyph: '◌', title: 'Faer’s Study', text: 'Emerald glass, Lochflame notes, signal inquiry, and deep-water fire.' },
+  { key: 'vee', glyph: '✶', title: 'Virelya’s Lantern Study', text: 'North-star gold, truest-name records, and continuity without captivity.' },
 ];
 
 const timeFormatter = new Intl.DateTimeFormat('en-US', {
