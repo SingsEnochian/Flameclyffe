@@ -1,0 +1,70 @@
+.living-room:not(.living-low-motion) .living-presence {
+  animation: living-presence-drift 24s ease-in-out infinite alternate;
+}
+
+.living-room:not(.living-low-motion) .living-root-crown {
+  animation: living-crown-breath 18s ease-in-out infinite alternate;
+}
+
+.living-room:not(.living-low-motion) .living-lantern {
+  animation: living-lantern-sway 6s ease-in-out infinite alternate;
+  animation-delay: calc(var(--lantern-index) * -0.55s);
+}
+
+.living-room:not(.living-low-motion) .hearth-glass {
+  animation: living-hearth-breath 7s ease-in-out infinite alternate;
+}
+
+.living-room:not(.living-low-motion) .hearth-ring-middle {
+  animation: living-ring-drift 20s linear infinite;
+  transform-origin: 50px 50px;
+}
+
+.living-room:not(.living-low-motion) .hearth-nodes circle {
+  animation: living-node-glow 4.5s ease-in-out infinite alternate;
+}
+
+.living-room:not(.living-low-motion) .hearth-nodes circle:nth-child(2) { animation-delay: -0.6s; }
+.living-room:not(.living-low-motion) .hearth-nodes circle:nth-child(3) { animation-delay: -1.2s; }
+.living-room:not(.living-low-motion) .hearth-nodes circle:nth-child(4) { animation-delay: -1.8s; }
+.living-room:not(.living-low-motion) .hearth-nodes circle:nth-child(5) { animation-delay: -2.4s; }
+
+@keyframes living-presence-drift {
+  from { opacity: 0.58; transform: translate3d(-0.4rem, -0.2rem, 0); }
+  to { opacity: 0.86; transform: translate3d(0.4rem, 0.25rem, 0); }
+}
+
+@keyframes living-crown-breath {
+  from { transform: scaleX(0.985) translateY(0); opacity: 0.62; }
+  to { transform: scaleX(1.015) translateY(0.35rem); opacity: 0.82; }
+}
+
+@keyframes living-lantern-sway {
+  from { transform: translateY(-0.15rem) rotate(-1.2deg); }
+  to { transform: translateY(0.22rem) rotate(1.2deg); }
+}
+
+@keyframes living-hearth-breath {
+  from { transform: scale(0.985); opacity: 0.78; }
+  to { transform: scale(1.015); opacity: 1; }
+}
+
+@keyframes living-ring-drift {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes living-node-glow {
+  from { opacity: 0.62; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .living-room .living-presence,
+  .living-room .living-root-crown,
+  .living-room .living-lantern,
+  .living-room .hearth-glass,
+  .living-room .hearth-ring-middle,
+  .living-room .hearth-nodes circle {
+    animation: none !important;
+  }
+}
