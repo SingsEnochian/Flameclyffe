@@ -4,10 +4,11 @@ import { LivingRoom } from './components/living-room/LivingRoom.jsx';
 import './starwell.css';
 import './components/living-room/living-room.css';
 import './components/living-room/living-room-sanctuary.css';
+import './components/living-room/living-room-motion.css';
 import './components/living-room/living-room-preview.css';
 
 const rooms = [
-  { key: 'observer', glyph: '🜂', title: 'Observer Almanac', text: 'Live glyphs, readings, packets, and phase weather.' },
+  { key: 'observer', glyph: '🔭', title: 'Observer Almanac', text: 'Live glyphs, readings, packets, and phase weather.' },
   { key: 'writing', glyph: '✍️', title: 'Writing Room', text: 'Manuscript chamber, scene loom, local drafts, and living pages.' },
   { key: 'library', glyph: '📚', title: 'Grand Library', text: 'Codex shelves, lore records, marginalia, and root-texts.' },
   { key: 'atlas', glyph: '🗺️', title: 'Atlas Hall', text: 'Worlds, cities, regions, routes, and grown Stonewood maps.' },
