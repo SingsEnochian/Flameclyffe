@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "room_id": "moonroot-writing-chamber",
+  "title": "Moonroot Writing Chamber",
+  "kind": "writing_room",
+  "purpose": "draft_fiction",
+  "theme": {
+    "palette": "moonroot",
+    "materials": ["white_stonewood", "dark_water", "copper_lantern"],
+    "mood": ["quiet", "luminous", "guarded", "tidal"],
+    "light": "moonlit_bioluminescent",
+    "motion": "slow_tidal_pulse"
+  },
+  "renderer": {
+    "layout": "split_chamber",
+    "node_shape": "bloom",
+    "connection_shape": "tendril",
+    "ambient_density": 0.42,
+    "effects": ["spores", "moon_glow", "ripples"]
+  },
+  "nodes": [
+    {
+      "id": "writing-desk",
+      "kind": "editor",
+      "label": "Writing Desk",
+      "position": { "x": 0.32, "y": 0.62 },
+      "signals": ["growth", "glow"]
+    },
+    {
+      "id": "archive-pool",
+      "kind": "archive",
+      "label": "Archive Pool",
+      "position": { "x": 0.72, "y": 0.36 },
+      "signals": ["glow"]
+    },
+    {
+      "id": "moon-window",
+      "kind": "ambient",
+      "label": "Moon Window",
+      "position": { "x": 0.50, "y": 0.18 },
+      "signals": ["phase"]
+    },
+    {
+      "id": "tea-table",
+      "kind": "rest",
+      "label": "Tea Table",
+      "position": { "x": 0.26, "y": 0.82 },
+      "signals": ["glow"]
+    },
+    {
+      "id": "grove-door",
+      "kind": "portal",
+      "label": "Door to Grove",
+      "target": "whispering-grove",
+      "position": { "x": 0.82, "y": 0.72 },
+      "signals": ["phase", "growth"]
+    }
+  ],
+  "signals": {
+    "growth": "save_event",
+    "phase": "manual_interaction",
+    "glow": "focus_mode"
+  },
+  "consent": {
+    "live_text": false,
+    "interaction_rhythm": false,
+    "local_context": false,
+    "sound": false,
+    "haptics": false
+  },
+  "storage": {
+    "drafts": "local_first",
+    "exports": "manual_only",
+    "packets": "none"
+  },
+  "accessibility": {
+    "reduced_motion_default": true,
+    "low_stim_available": true,
+    "keyboard_navigation": true,
+    "screen_reader_summary": "A quiet moonlit writing room with a writing desk, archive pool, moon window, tea table, and portal door to the grove."
+  },
+  "metadata": {
+    "created_by": "Rowan",
+    "canon_status": "prototype_seed"
+  }
+}
