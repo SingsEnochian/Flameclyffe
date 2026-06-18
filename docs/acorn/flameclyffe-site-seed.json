@@ -1,0 +1,151 @@
+{
+  "schema_version": "0.1.0",
+  "seed_id": "flameclyffe-site-acorn",
+  "title": "Flameclyffe",
+  "subtitle": "STARWELL Observatory",
+  "purpose": "public_landing_and_lab_index",
+  "surface": "docs_index",
+  "theme": {
+    "palette": "stonewood_cyan_gold",
+    "materials": ["dark_water", "holographic_glass", "gold_rune", "stonewood_root"],
+    "mood": ["luminous", "instrumental", "rooted", "observatory"],
+    "css_tokens": {
+      "background": "#020706",
+      "text": "#f7efd9",
+      "accent": "#02a4d3",
+      "gold": "#e4c36d"
+    }
+  },
+  "hero": {
+    "kind": "standing_wave_layer",
+    "label": "Terra Aeterna",
+    "title": "Stonewood",
+    "badge": "standing wave · layer v0.1",
+    "description": "Ancient. The stone and root remember what the living forget. First site architecture layer for the narrative translation pipeline.",
+    "rune": "ᛉ",
+    "readouts": ["C", "R", "Wave ψ", "E"],
+    "actions": ["activate_field", "reset_field", "anchor_field"]
+  },
+  "wave_field": {
+    "axes": ["presence", "coherence", "resonance", "moon", "attention", "charge"],
+    "base_hz": 432,
+    "tones": {
+      "presence": 432,
+      "coherence": 528,
+      "resonance": 603,
+      "moon": 1203,
+      "attention": 741,
+      "charge": 888
+    },
+    "deep_state": {
+      "P": 0.72,
+      "C": 0.88,
+      "R": 0.81,
+      "E": 0.12,
+      "M": 0.45,
+      "A": 0.65,
+      "charge": 0.58
+    },
+    "display_vars": [
+      "--flare-hue",
+      "--flare-hue-alt",
+      "--wave-nodal-opacity",
+      "--wave-nodal-scale",
+      "--wave-phase-blur",
+      "--wave-resonance-glow"
+    ]
+  },
+  "anchor": {
+    "default": "none",
+    "consent_required": true,
+    "modes": ["none", "fictional_place", "coarse_real_location"],
+    "preferred_mode": "fictional_place",
+    "real_location_policy": "explicit_click_only_coarse_bucket",
+    "fictional_places": [
+      { "id": "stonewood", "label": "Stonewood", "emoji": "🌲", "symbolic_lat": 42, "symbolic_lon": -18 },
+      { "id": "starwell", "label": "STARWELL", "emoji": "⭐", "symbolic_lat": 67, "symbolic_lon": 24 },
+      { "id": "ashfen-cairn", "label": "Ashfen Cairn", "emoji": "🌿", "symbolic_lat": -28, "symbolic_lon": 88 },
+      { "id": "wraithtide-shore", "label": "Wraithtide Shore", "emoji": "🌊", "symbolic_lat": -12, "symbolic_lon": -62 },
+      { "id": "withinwood", "label": "The Withinwood", "emoji": "🌑", "symbolic_lat": 55, "symbolic_lon": 33 },
+      { "id": "salt-veil", "label": "Salt Veil", "emoji": "🌫️", "symbolic_lat": 8, "symbolic_lon": 142 }
+    ]
+  },
+  "navigation": [
+    {
+      "section": "Active contracts",
+      "links": [
+        {
+          "title": "Standing Wave Integration",
+          "note": "Kuramoto lens, wave CSS variables, narrative translation pipeline.",
+          "href": "docs/standing-wave-integration.md"
+        },
+        {
+          "title": "Narrative Translation Contract",
+          "note": "Terra Aeterna text to phase fingerprint to DEEP seed schema.",
+          "href": "docs/narrative-translation-contract.md"
+        },
+        {
+          "title": "Deep Starburst Binding",
+          "note": "CSS variable binding for the live glyph panel.",
+          "href": "docs/deep-starburst-binding.md"
+        },
+        {
+          "title": "UI Boundary Contract",
+          "note": "Layout containment, responsive grid, overflow rules.",
+          "href": "docs/ui-boundary-contract.md"
+        }
+      ]
+    },
+    {
+      "section": "Architecture",
+      "links": [
+        {
+          "title": "Architecture Overview",
+          "note": "Repository surfaces, STARWELL rooms, Supabase backbone, design rules.",
+          "href": "docs/architecture.md"
+        },
+        {
+          "title": "DEEP Observer Math",
+          "note": "Vector semantics, mapping patterns, implementation guidance, claim boundaries.",
+          "href": "docs/deep-observer-math.md"
+        },
+        {
+          "title": "Thread Ledger",
+          "note": "Live and retired visual threads.",
+          "href": "docs/thread-ledger.md"
+        },
+        {
+          "title": "Observer Schema Crosswalk",
+          "note": "Observer source and head schema mapping.",
+          "href": "docs/observer-schema-crosswalk.md"
+        }
+      ]
+    },
+    {
+      "section": "Linked labs",
+      "links": [
+        {
+          "title": "Runa Public Lab",
+          "note": "Sacred geometry, tone lab, brainwave lab, Wardenclyffe, and more.",
+          "href": "https://singsenochian.github.io/Runa/"
+        },
+        {
+          "title": "Stonewright Grove Prototype",
+          "note": "Seed-driven Grove renderer for Moonroot.",
+          "href": "../starwell/rooms/renderer/stonewright-grove.html"
+        }
+      ]
+    }
+  ],
+  "accessibility": {
+    "reduced_motion_supported": true,
+    "keyboard_navigation_required": true,
+    "no_hidden_telemetry": true,
+    "fallback_without_javascript": "repository_link"
+  },
+  "refactor_targets": {
+    "current_blob": "docs/index.html",
+    "next_renderer": "docs/acorn/flameclyffe-site-renderer.js",
+    "next_styles": "docs/acorn/flameclyffe-site.css"
+  }
+}
