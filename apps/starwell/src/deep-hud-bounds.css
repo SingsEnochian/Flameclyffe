@@ -31,9 +31,14 @@
   height: var(--deep-hud-safe-height);
   pointer-events: none;
   z-index: 8;
+  contain: layout paint;
 }
 
 .deep-observer-hud-layer > * {
+  pointer-events: none;
+}
+
+.deep-observer-hud-layer[data-deep-hud-layer='active']:not([aria-hidden='true']) > * {
   pointer-events: auto;
 }
 
