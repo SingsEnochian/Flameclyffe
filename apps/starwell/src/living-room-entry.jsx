@@ -7,6 +7,7 @@ import './components/living-room/living-room-sanctuary.css';
 import './components/living-room/living-room-convergence.css';
 import './components/living-room/living-room-hearth.css';
 import './components/living-room/living-room-faer-lights.css';
+import './components/living-room/living-room-three-hearth.css';
 import './components/living-room/living-room-folds.css';
 import './components/living-room/living-room-motion.css';
 import './components/living-room/living-room-preview.css';
