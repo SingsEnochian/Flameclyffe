@@ -50,7 +50,7 @@ function ThresholdBar({ phase, time, anchor, lowMotion, onToggleMotion }) {
   );
 }
 
-function SanctuaryLayers({ doors }) {
+function SanctuaryLayers({ doors, selectedKey }) {
   return (
     <div className="living-sanctuary-layers" aria-hidden="true">
       <div className="living-stonewood-arch">
@@ -60,10 +60,20 @@ function SanctuaryLayers({ doors }) {
       </div>
       <div className="living-lantern-veil">
         {doors.slice(0, 6).map((door, index) => (
-          <span className="living-lantern" style={{ '--lantern-index': index }} key={door.key}>
+          <span className={`living-lantern ${selectedKey === door.key ? 'active' : ''}`} style={{ '--lantern-index': index }} key={door.key}>
             <i>{door.glyph}</i>
           </span>
         ))}
+      </div>
+      <div className="living-room-current living-room-current-left">
+        <span />
+        <span />
+        <span />
+      </div>
+      <div className="living-room-current living-room-current-right">
+        <span />
+        <span />
+        <span />
       </div>
       <span className="living-threshold-window" />
     </div>
@@ -77,13 +87,19 @@ export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, p
 
   const chamberDoors = useMemo(() => [...rooms.slice(0, 6), ...studies], [rooms, studies]);
   const pulseActive = pulseCount % 2 === 1;
-  const classes = ['living-room', `living-anchor-${activeAnchor.key}`, lowMotion ? 'living-low-motion' : '', pulseActive ? 'living-pulse' : ''].filter(Boolean).join(' ');
+  const classes = [
+    'living-room',
+    `living-anchor-${activeAnchor.key}`,
+    `living-selected-${selected.key}`,
+    lowMotion ? 'living-low-motion' : '',
+    pulseActive ? 'living-pulse' : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <main className={classes}>
       <div className="living-presence" aria-hidden="true" />
       <section className="living-arch" aria-label="STARWELL Living Room">
-        <SanctuaryLayers doors={chamberDoors} />
+        <SanctuaryLayers doors={chamberDoors} selectedKey={selected.key} />
         <header className="living-room-header">
           <div>
             <p className="living-eyebrow">{livingRoomCopy.eyebrow}</p>
