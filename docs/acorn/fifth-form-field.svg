@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">Fifth Form field</title>
+  <desc id="desc">Five interlocking merkaba forms with rings, crossing chords, and luminous intersection points.</desc>
+  <defs>
+    <radialGradient id="fieldGlow" cx="50%" cy="48%" r="52%">
+      <stop offset="0" stop-color="#e4c36d" stop-opacity="0.22"/>
+      <stop offset="0.44" stop-color="#a3e2c9" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#020706" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2.4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <g id="merkaba" fill="none" stroke-linejoin="round" stroke-linecap="round">
+      <polygon points="0,-48 41,24 -41,24"/>
+      <polygon points="0,48 41,-24 -41,-24"/>
+      <line x1="0" y1="-48" x2="0" y2="48"/>
+      <line x1="-41" y1="24" x2="41" y2="-24"/>
+      <line x1="41" y1="24" x2="-41" y2="-24"/>
+    </g>
+  </defs>
+
+  <rect width="320" height="320" fill="none"/>
+  <circle cx="160" cy="160" r="148" fill="url(#fieldGlow)"/>
+
+  <g class="back-rings" fill="none" stroke="#a3e2c9" stroke-opacity="0.16" stroke-width="1">
+    <circle cx="160" cy="160" r="139"/>
+    <circle cx="160" cy="160" r="111"/>
+    <circle cx="160" cy="160" r="74"/>
+    <path d="M160 21 C220 71 252 111 299 160 C249 220 210 251 160 299 C100 249 68 210 21 160 C71 100 110 69 160 21Z"/>
+    <path d="M160 40 L280 160 L160 280 L40 160Z"/>
+  </g>
+
+  <g class="chords" fill="none" stroke="#e4c36d" stroke-opacity="0.13" stroke-width="1">
+    <path d="M160 21 L280 160 L160 299 L40 160Z"/>
+    <path d="M72 72 L248 248"/>
+    <path d="M248 72 L72 248"/>
+    <path d="M160 21 L160 299"/>
+    <path d="M21 160 L299 160"/>
+  </g>
+
+  <g class="fifth-form" filter="url(#softGlow)">
+    <g transform="translate(160 160) scale(1.08)" stroke="#f2d88a" stroke-opacity="0.72" stroke-width="1.45">
+      <use href="#merkaba"/>
+    </g>
+    <g transform="translate(160 84) scale(0.82) rotate(36)" stroke="#a3e2c9" stroke-opacity="0.62" stroke-width="1.2">
+      <use href="#merkaba"/>
+    </g>
+    <g transform="translate(232 158) scale(0.82) rotate(108)" stroke="#9ed7ff" stroke-opacity="0.58" stroke-width="1.2">
+      <use href="#merkaba"/>
+    </g>
+    <g transform="translate(116 222) scale(0.82) rotate(180)" stroke="#f2d88a" stroke-opacity="0.58" stroke-width="1.2">
+      <use href="#merkaba"/>
+    </g>
+    <g transform="translate(88 150) scale(0.82) rotate(252)" stroke="#a3e2c9" stroke-opacity="0.58" stroke-width="1.2">
+      <use href="#merkaba"/>
+    </g>
+  </g>
+
+  <g class="intersection-points" fill="#f2d88a" fill-opacity="0.78" filter="url(#softGlow)">
+    <circle cx="160" cy="160" r="3.2"/>
+    <circle cx="160" cy="84" r="2.5"/>
+    <circle cx="232" cy="158" r="2.5"/>
+    <circle cx="116" cy="222" r="2.5"/>
+    <circle cx="88" cy="150" r="2.5"/>
+    <circle cx="160" cy="21" r="1.8"/>
+    <circle cx="299" cy="160" r="1.8"/>
+    <circle cx="160" cy="299" r="1.8"/>
+    <circle cx="21" cy="160" r="1.8"/>
+  </g>
+</svg>
