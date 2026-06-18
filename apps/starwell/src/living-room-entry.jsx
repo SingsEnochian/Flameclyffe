@@ -4,6 +4,8 @@ import { LivingRoom } from './components/living-room/LivingRoom.jsx';
 import './starwell.css';
 import './components/living-room/living-room.css';
 import './components/living-room/living-room-sanctuary.css';
+import './components/living-room/living-room-convergence.css';
+import './components/living-room/living-room-hearth.css';
 import './components/living-room/living-room-motion.css';
 import './components/living-room/living-room-preview.css';
 
