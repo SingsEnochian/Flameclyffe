@@ -16,6 +16,7 @@ export default defineConfig({
         main: resolve(process.cwd(), 'apps/starwell/index.html'),
         concordance: resolve(process.cwd(), 'apps/starwell/concordance/index.html'),
         materialQa: resolve(process.cwd(), 'apps/starwell/material-qa.html'),
+        unitResonanceLab: resolve(process.cwd(), 'apps/starwell/unit-resonance-lab.html'),
       },
     },
   },
