@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { LivingRoom } from './components/living-room/LivingRoom.jsx';
 import './starwell.css';
 import './components/living-room/living-room.css';
+import './components/living-room/living-room-sanctuary.css';
 import './components/living-room/living-room-preview.css';
 
 const rooms = [
