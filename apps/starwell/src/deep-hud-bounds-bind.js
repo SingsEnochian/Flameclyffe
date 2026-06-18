@@ -1,13 +1,18 @@
 import { measureHudBounds } from './lib/deepHudBounds.js';
-
-const PANEL_SELECTOR = '.live-glyph-panel.deep-observer-panel';
-const HUD_LAYER_SELECTOR = '.deep-observer-hud-layer';
-const STAGE_SELECTOR = '.glyph-orb-wrap';
-const READOUT_SELECTOR = '.glyph-readout';
-const ROOT_SELECTOR = '#root';
-const UPDATE_THROTTLE_MS = 120;
-const REACT_HUD_LAYER_OWNER = 'react';
-const FALLBACK_HUD_LAYER_OWNER = 'passive-bounds-binder';
+import {
+  DEEP_HUD_BOUNDS_EVENT,
+  DEEP_HUD_DATA_KEYS,
+  DEEP_HUD_LAYER_CLASS,
+  DEEP_HUD_LAYER_OWNER,
+  DEEP_HUD_LAYER_SELECTOR,
+  DEEP_HUD_LAYER_STATE,
+  DEEP_HUD_PANEL_SELECTOR,
+  DEEP_HUD_READOUT_SELECTOR,
+  DEEP_HUD_ROOT_SELECTOR,
+  DEEP_HUD_SCOPE_LAYER_SELECTOR,
+  DEEP_HUD_STAGE_SELECTOR,
+  DEEP_HUD_UPDATE_THROTTLE_MS,
+} from './lib/deepHudLayerContract.js';
 
 let observer = null;
 let resizeObserver = null;
@@ -28,7 +33,7 @@ function makeBoundsSignature(bounds) {
 }
 
 function getLayerState(layer) {
-  return layer.childElementCount === 0 ? 'empty' : 'active';
+  return layer.childElementCount === 0 ? DEEP_HUD_LAYER_STATE.empty : DEEP_HUD_LAYER_STATE.active;
 }
 
 function queueFallbackFrame(callback) {
@@ -41,51 +46,51 @@ function queueFallbackFrame(callback) {
 }
 
 function scheduleFallbackLayer(panel) {
-  if (panel.dataset.deepHudLayerFallbackReady === 'true') return;
-  if (panel.dataset.deepHudLayerFallbackPending === 'true') return;
+  if (panel.dataset[DEEP_HUD_DATA_KEYS.fallbackReady] === 'true') return;
+  if (panel.dataset[DEEP_HUD_DATA_KEYS.fallbackPending] === 'true') return;
 
-  panel.dataset.deepHudLayerFallbackPending = 'true';
+  panel.dataset[DEEP_HUD_DATA_KEYS.fallbackPending] = 'true';
   queueFallbackFrame(() => {
     queueFallbackFrame(() => {
-      delete panel.dataset.deepHudLayerFallbackPending;
-      if (panel.querySelector(`:scope > ${HUD_LAYER_SELECTOR}`)) return;
-      panel.dataset.deepHudLayerFallbackReady = 'true';
+      delete panel.dataset[DEEP_HUD_DATA_KEYS.fallbackPending];
+      if (panel.querySelector(DEEP_HUD_SCOPE_LAYER_SELECTOR)) return;
+      panel.dataset[DEEP_HUD_DATA_KEYS.fallbackReady] = 'true';
       scheduleBind();
     });
   });
 }
 
 function clearFallbackState(panel) {
-  delete panel.dataset.deepHudLayerFallbackPending;
-  delete panel.dataset.deepHudLayerFallbackReady;
+  delete panel.dataset[DEEP_HUD_DATA_KEYS.fallbackPending];
+  delete panel.dataset[DEEP_HUD_DATA_KEYS.fallbackReady];
 }
 
 function ensureHudLayer(panel) {
-  let layer = panel.querySelector(`:scope > ${HUD_LAYER_SELECTOR}`);
+  let layer = panel.querySelector(DEEP_HUD_SCOPE_LAYER_SELECTOR);
   if (layer) {
-    if (!layer.dataset.deepHudLayerOwner) {
-      layer.dataset.deepHudLayerOwner = REACT_HUD_LAYER_OWNER;
+    if (!layer.dataset[DEEP_HUD_DATA_KEYS.owner]) {
+      layer.dataset[DEEP_HUD_DATA_KEYS.owner] = DEEP_HUD_LAYER_OWNER.react;
     }
-    if (!layer.dataset.deepHudLayer) {
-      layer.dataset.deepHudLayer = getLayerState(layer);
+    if (!layer.dataset[DEEP_HUD_DATA_KEYS.layer]) {
+      layer.dataset[DEEP_HUD_DATA_KEYS.layer] = getLayerState(layer);
     }
-    if (layer.dataset.deepHudLayerOwner === REACT_HUD_LAYER_OWNER) {
+    if (layer.dataset[DEEP_HUD_DATA_KEYS.owner] === DEEP_HUD_LAYER_OWNER.react) {
       clearFallbackState(panel);
     }
     return layer;
   }
 
-  if (panel.dataset.deepHudLayerFallbackReady !== 'true') {
+  if (panel.dataset[DEEP_HUD_DATA_KEYS.fallbackReady] !== 'true') {
     scheduleFallbackLayer(panel);
     return null;
   }
 
   layer = document.createElement('div');
-  layer.className = 'deep-observer-hud-layer';
+  layer.className = DEEP_HUD_LAYER_CLASS;
   layer.setAttribute('aria-hidden', 'true');
-  layer.dataset.deepHudLayer = 'empty';
-  layer.dataset.deepHudLayerOwner = FALLBACK_HUD_LAYER_OWNER;
-  layer.dataset.deepHudLayerFallback = 'true';
+  layer.dataset[DEEP_HUD_DATA_KEYS.layer] = DEEP_HUD_LAYER_STATE.empty;
+  layer.dataset[DEEP_HUD_DATA_KEYS.owner] = DEEP_HUD_LAYER_OWNER.fallback;
+  layer.dataset[DEEP_HUD_DATA_KEYS.fallback] = 'true';
   panel.appendChild(layer);
   return layer;
 }
@@ -95,8 +100,8 @@ function applyBoundsVars(panel, bounds) {
   const shellLeft = shellRect?.left || 0;
   const shellTop = shellRect?.top || 0;
 
-  panel.dataset.deepHudBounds = 'ready';
-  panel.dataset.deepHudViewport = bounds.viewportClass;
+  panel.dataset[DEEP_HUD_DATA_KEYS.bounds] = 'ready';
+  panel.dataset[DEEP_HUD_DATA_KEYS.viewport] = bounds.viewportClass;
   panel.style.setProperty('--deep-hud-inset', px(bounds.inset));
 
   panel.style.setProperty('--deep-hud-safe-left', px(safeRect.left - shellLeft));
@@ -120,7 +125,7 @@ function applyBoundsVars(panel, bounds) {
 }
 
 function dispatchBounds(panel, bounds) {
-  panel.dispatchEvent(new CustomEvent('deep-observer:hud-bounds', {
+  panel.dispatchEvent(new CustomEvent(DEEP_HUD_BOUNDS_EVENT, {
     bubbles: true,
     detail: {
       viewportClass: bounds.viewportClass,
@@ -137,20 +142,20 @@ function dispatchBounds(panel, bounds) {
 
 function bindPanel(panel) {
   ensureHudLayer(panel);
-  const stage = panel.querySelector(STAGE_SELECTOR);
-  const readout = panel.querySelector(READOUT_SELECTOR);
+  const stage = panel.querySelector(DEEP_HUD_STAGE_SELECTOR);
+  const readout = panel.querySelector(DEEP_HUD_READOUT_SELECTOR);
   const bounds = measureHudBounds({ root: panel, shell: panel, stage, readout });
   const signature = makeBoundsSignature(bounds);
-  if (signature === panel.dataset.deepHudBoundsSignature) return;
+  if (signature === panel.dataset[DEEP_HUD_DATA_KEYS.boundsSignature]) return;
 
-  panel.dataset.deepHudBoundsSignature = signature;
+  panel.dataset[DEEP_HUD_DATA_KEYS.boundsSignature] = signature;
   lastSignature = signature;
   applyBoundsVars(panel, bounds);
   dispatchBounds(panel, bounds);
 }
 
 function bindAll() {
-  document.querySelectorAll(PANEL_SELECTOR).forEach(bindPanel);
+  document.querySelectorAll(DEEP_HUD_PANEL_SELECTOR).forEach(bindPanel);
 }
 
 function scheduleBind() {
@@ -158,7 +163,7 @@ function scheduleBind() {
   updateTimer = window.setTimeout(() => {
     updateTimer = 0;
     bindAll();
-  }, UPDATE_THROTTLE_MS);
+  }, DEEP_HUD_UPDATE_THROTTLE_MS);
 }
 
 function observePanels() {
@@ -166,11 +171,11 @@ function observePanels() {
   if (resizeObserver) resizeObserver.disconnect();
   resizeObserver = new ResizeObserver(scheduleBind);
 
-  document.querySelectorAll(PANEL_SELECTOR).forEach((panel) => {
+  document.querySelectorAll(DEEP_HUD_PANEL_SELECTOR).forEach((panel) => {
     resizeObserver.observe(panel);
-    const stage = panel.querySelector(STAGE_SELECTOR);
-    const readout = panel.querySelector(READOUT_SELECTOR);
-    const hudLayer = panel.querySelector(HUD_LAYER_SELECTOR);
+    const stage = panel.querySelector(DEEP_HUD_STAGE_SELECTOR);
+    const readout = panel.querySelector(DEEP_HUD_READOUT_SELECTOR);
+    const hudLayer = panel.querySelector(DEEP_HUD_LAYER_SELECTOR);
     if (stage) resizeObserver.observe(stage);
     if (readout) resizeObserver.observe(readout);
     if (hudLayer) resizeObserver.observe(hudLayer);
@@ -181,7 +186,7 @@ function startBinding() {
   bindAll();
   observePanels();
 
-  const root = document.querySelector(ROOT_SELECTOR) || document.body;
+  const root = document.querySelector(DEEP_HUD_ROOT_SELECTOR) || document.body;
   observer = new MutationObserver(() => {
     observePanels();
     scheduleBind();
