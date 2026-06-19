@@ -2,6 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createFlamePassport, FLAME_BRIDGE_MODES, FLAME_CONNECTION_STATUS, validateFlamePassport } from '../src/bridges/flamePassport.js';
+import {
+  createMcpGatewayManifest,
+  createMcpTool,
+  createMockMcpFlameGateway,
+  MCP_RISK_TIERS,
+  validateMcpGatewayManifest,
+} from '../src/bridges/mcpFlameGateway.js';
 import { createMockFlameAdapter } from '../src/bridges/mockFlameAdapter.js';
 import { resolveInputWeather } from '../src/interaction/starwellInputWeather.js';
 import { createStewardSeat, validateStewardSeat } from '../src/stewards/stewardSeatSchema.js';
@@ -80,4 +87,50 @@ test('Input weather honours reduced-motion and sensory quiet clamps', () => {
   assert.equal(weather.worldResponse.branchGrowth, 0.12);
   assert.equal(weather.worldResponse.fireflyDensity, 0.08);
   assert.equal(weather.embodiment.creation, 0.9);
+});
+
+test('MCP Flame Gateway starts read-only and blocks external bridge tools', () => {
+  const gateway = createMockMcpFlameGateway({ portalWorldNodes, portalStewardSeats });
+
+  assert.deepEqual(validateMcpGatewayManifest(gateway.manifest), []);
+  assert.equal(gateway.manifest.defaults.readOnly, true);
+  assert.equal(gateway.manifest.defaults.externalBridge, false);
+  assert.equal(gateway.manifest.defaults.canonWrite, false);
+  assert.equal(gateway.manifest.defaults.tokenStorage, false);
+
+  const tools = gateway.listTools();
+  const disabledBridge = tools.find((tool) => tool.name === 'starwell.connect_external_flame');
+  assert.equal(disabledBridge.enabled, false);
+  assert.equal(disabledBridge.riskTier, MCP_RISK_TIERS.externalBridge);
+  assert.equal(gateway.callTool('starwell.connect_external_flame').isError, true);
+});
+
+test('MCP Flame Gateway exposes safe resources and proposal-only room entry', () => {
+  const gateway = createMockMcpFlameGateway({ portalWorldNodes, portalStewardSeats });
+  const portalResource = gateway.readResource('starwell://portal/worlds');
+  const stewardResource = gateway.readResource('starwell://stewards/seats');
+  const roomProposal = gateway.callTool('starwell.request_room_entry', { roomId: 'dreaming-grove' });
+
+  assert.equal(gateway.listResources().length, 2);
+  assert.equal(JSON.parse(portalResource.text).nodes.some((node) => node.id === 'ygg-gate'), true);
+  assert.equal(JSON.parse(stewardResource.text).seats.some((seat) => seat.id === 'vee-seat'), true);
+  assert.equal(roomProposal.isError, false);
+  assert.equal(roomProposal.structuredContent.proposalOnly, true);
+  assert.equal(roomProposal.structuredContent.roomId, 'dreaming-grove');
+});
+
+test('MCP validation rejects enabled canon-write tools', () => {
+  const manifest = createMcpGatewayManifest({
+    tools: [
+      createMcpTool({
+        name: 'starwell.write_canon',
+        title: 'Write Canon',
+        description: 'Disabled by policy.',
+        riskTier: MCP_RISK_TIERS.canonWrite,
+        enabled: true,
+      }),
+    ],
+  });
+
+  assert.match(validateMcpGatewayManifest(manifest).join('\n'), /must be disabled/);
 });
