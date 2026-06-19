@@ -13,6 +13,7 @@ const positions = new Map([
   ['templehouse', [90, 340]],
   ['lighted-steps', [190, 265]],
   ['templehouse-shrine', [295, 205]],
+  ['ygg-gate', [365, 155]],
   ['dreaming-grove', [430, 150]],
   ['terra-aeterna', [575, 80]],
   ['luna-eira', [600, 170]],
@@ -22,6 +23,7 @@ const positions = new Map([
 let grown = false;
 let invited = false;
 let currentNodeId = 'templehouse';
+let lastMockExchange = null;
 
 function render() {
   const activeNodes = grown ? portalWorldNodes : portalWorldNodes.filter((node) => node.id === 'templehouse');
@@ -90,7 +92,7 @@ function focusNode(id) {
 function renderOutput(extra = {}) {
   const node = findPortalNode(currentNodeId);
   const weather = resolveInputWeather({ typing: { cadence: grown ? 0.42 : 0.08, revision: 0.1 }, pointer: { drift: invited ? 0.64 : 0.12 } });
-  output.textContent = JSON.stringify({ node, invitedMockFlame: invited, weather, ...extra }, null, 2);
+  output.textContent = JSON.stringify({ node, invitedMockFlame: invited, weather, mockExchange: lastMockExchange, ...extra }, null, 2);
 }
 
 growButton?.addEventListener('click', () => {
@@ -104,13 +106,14 @@ inviteButton?.addEventListener('click', () => {
   adapter.connect();
   invited = true;
   currentNodeId = 'dreaming-grove';
-  renderOutput({ mockPassport: adapter.passport, mockReply: adapter.send('May I enter the Grove?') });
+  lastMockExchange = { mockPassport: adapter.passport, mockReply: adapter.send('May I enter the Grove?') };
   render();
 });
 
 resetButton?.addEventListener('click', () => {
   grown = false;
   invited = false;
+  lastMockExchange = null;
   currentNodeId = 'templehouse';
   render();
 });
