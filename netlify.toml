@@ -1,6 +1,6 @@
 [build]
   command = "npm run starwell:build"
-  publish = "apps/starwell/dist"
+  publish = "dist/starwell"
 
 [build.environment]
   NODE_VERSION = "20"
