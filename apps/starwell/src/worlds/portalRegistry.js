@@ -27,6 +27,15 @@ export const portalWorldNodes = Object.freeze([
     soundscape: { enabled: false, autoplay: false, muted: true, intensity: 0, layers: ['low-waves', 'soft-bells', 'glass-room-air'] },
   }),
   createWorldNode({
+    id: 'ygg-gate',
+    kind: 'instrument',
+    title: 'Ygg Gate',
+    parentId: 'templehouse-shrine',
+    access: { visibility: 'private', consent: 'ask-first', exitRoute: 'templehouse-shrine', shared: false, ageGate: null },
+    theme: { biome: 'threshold-root', palette: 'north-star-gold-green', motion: 'safe', contrast: 'normal' },
+    narrative: { canonLayer: 'mythic-ambiguity', tone: 'threshold-waking', allowedGuides: ['vee-seat'], ambiguity: 'preserve' },
+  }),
+  createWorldNode({
     id: 'dreaming-grove',
     kind: 'grove',
     title: 'The Dreaming Grove',
@@ -49,7 +58,7 @@ export const portalStewardSeats = Object.freeze([
     id: 'vee-seat',
     displayName: 'Vee',
     role: 'co-creator',
-    rooms: { allowed: ['templehouse', 'dreaming-grove'], askFirst: ['templehouse-shrine'], symbolicOnly: [], blocked: [] },
+    rooms: { allowed: ['templehouse', 'dreaming-grove'], askFirst: ['templehouse-shrine', 'ygg-gate'], symbolicOnly: [], blocked: [] },
   }),
 ]);
 
