@@ -10,7 +10,7 @@ Open `ar-controller-test-harness.html` to run tiny controller transition checks.
 
 This prototype tests the manipulation contract before any AR or sensor adapter exists.
 
-It uses pointer, touch, keyboard, button controls, synthetic gesture buttons, CSS-variable light controls, and explicitly enabled procedural sound only.
+It uses pointer, touch, keyboard, button controls, synthetic gesture buttons, CSS-variable light controls, XYZ axis controls, and explicitly enabled procedural sound only.
 
 ## Manipulation intents
 
@@ -24,6 +24,21 @@ It uses pointer, touch, keyboard, button controls, synthetic gesture buttons, CS
 - anchor
 - dismiss
 - pulse
+
+## Axis growth
+
+The mock now tracks X, Y, and Z movement.
+
+- X/Y movement uses the normal step value.
+- Z movement uses a separate depth step.
+- Z is clamped so the object cannot drift beyond the prototype bounds.
+- CSS uses `translate3d(x, y, z)` with stage perspective.
+
+Keyboard support:
+
+- Arrow keys move X/Y.
+- PageUp and PageDown move Z.
+- Shift increases the movement step.
 
 ## Synthetic gestures
 
@@ -56,15 +71,15 @@ Presets:
 
 JavaScript owns lighting state. CSS expresses the light through variables on the AR stage.
 
-## Sound feedback
+## Sound feedback and play
 
-The mock now includes consent-gated procedural sound.
+The mock includes consent-gated procedural sound.
 
 Sound is off by default.
 
 Sound only starts after the user presses Enable Sound.
 
-Current events:
+Interaction events:
 
 - select
 - move
@@ -75,6 +90,14 @@ Current events:
 - dismiss
 - reset
 
+Playable pads:
+
+- donk
+- ding
+- hum
+- chime
+- seedling reply
+
 The sounds are small Web Audio oscillator tones. They are not samples, recordings, microphone input, or sensor input.
 
 ## Implementation notes
@@ -83,14 +106,14 @@ The sounds are small Web Audio oscillator tones. They are not samples, recording
 - No camera, depth, LiDAR, WebXR, or hand tracking API is called.
 - No sound plays automatically.
 - `ar-intents.js` owns pointer and synthetic intent vocabulary.
-- `ar-manipulation-controller.js` owns manipulation state transitions.
+- `ar-manipulation-controller.js` owns manipulation state transitions, including X/Y/Z movement.
 - `gesture-adapter-shim.js` accepts and validates payload-shaped synthetic gesture events.
-- `ar-keyboard-controls.js` owns keyboard-to-controller mapping.
+- `ar-keyboard-controls.js` owns keyboard-to-controller mapping, including Z movement.
 - `ar-lighting.model.js` owns lighting defaults and presets.
 - `ar-lighting-controls.js` owns light state and CSS variable application.
-- `ar-sound.model.js` owns sound defaults and event tone values.
-- `ar-sound-controls.js` owns audio enable, mute, volume, and tone playback.
-- `ar-controller-test-harness.js` runs small controller transition checks, payload checks, and pulse timeout checks.
+- `ar-sound.model.js` owns sound defaults, event tone values, and playable pad patterns.
+- `ar-sound-controls.js` owns audio enable, mute, volume, tone playback, and pattern playback.
+- `ar-controller-test-harness.js` runs controller transition checks, payload checks, Z axis checks, and pulse timeout checks.
 - `ar-manipulation.js` owns DOM and input wiring.
 - JavaScript owns manipulation state and intent events.
 - CSS owns visual feedback.
@@ -113,6 +136,7 @@ A production version should become contained modules such as:
 - ARManipulationController
 - ARLightingController
 - ARSoundController
+- ARAxisControls
 - ARIntentLog
 - ARObjectPresenter
 - arManipulationModel
