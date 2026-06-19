@@ -25,11 +25,18 @@ export function createARManipulationController(options = {}) {
     emit(mode);
   }
 
-  function moveBy(dx, dy, intent = POINTER_INTENTS.drag) {
+  function moveBy(dx = 0, dy = 0, dz = 0, intent = POINTER_INTENTS.drag) {
     state.x += dx;
     state.y += dy;
+    state.z = clamp(state.z + dz, AR_OBJECT.minZ, AR_OBJECT.maxZ);
     state.mode = POINTER_INTENTS.drag;
     emit(intent);
+  }
+
+  function moveAxis(axis, delta, intent = POINTER_INTENTS.drag) {
+    if (axis === 'x') moveBy(delta, 0, 0, intent);
+    if (axis === 'y') moveBy(0, delta, 0, intent);
+    if (axis === 'z') moveBy(0, 0, delta, intent);
   }
 
   function rotateBy(delta, intent = POINTER_INTENTS.rotate) {
@@ -74,7 +81,7 @@ export function createARManipulationController(options = {}) {
   }
 
   function syntheticGesture(type) {
-    if (type === SYNTHETIC_GESTURES.pinchDrag) moveBy(AR_MANIPULATION_CONFIG.step * 3, -AR_MANIPULATION_CONFIG.step, type);
+    if (type === SYNTHETIC_GESTURES.pinchDrag) moveBy(AR_MANIPULATION_CONFIG.step * 3, -AR_MANIPULATION_CONFIG.step, 0, type);
     if (type === SYNTHETIC_GESTURES.twoHandRotate) rotateBy(AR_MANIPULATION_CONFIG.rotationStep * 2, type);
     if (type === SYNTHETIC_GESTURES.handScale) scaleBy(AR_MANIPULATION_CONFIG.scaleStep * 2, type);
     if (type === SYNTHETIC_GESTURES.airAnchor) toggleAnchor(type);
@@ -88,6 +95,7 @@ export function createARManipulationController(options = {}) {
     getState,
     setMode,
     moveBy,
+    moveAxis,
     rotateBy,
     scaleBy,
     toggleAnchor,
