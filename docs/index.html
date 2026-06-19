@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./acorn/flameclyffe-site.css" />
+  <link rel="stylesheet" href="./acorn/fifth-form-fluid-light.css" />
 </head>
 <body>
   <div class="anchor-targets" aria-hidden="true">
@@ -30,12 +31,12 @@
           <div class="eyebrow">
             <span class="rune" aria-hidden="true">ᛉ</span>
             <span>Terra Aeterna</span>
-            <span>Fifth Form · Grove seed v0.3</span>
+            <span>Fifth Form · Grove seed v0.4</span>
           </div>
 
           <h1 id="heroTitle">Stonewood</h1>
           <p class="hero-desc">
-            Ancient. The stone and root remember what the living forget. This page now grows around the Fifth Form: five interlocking merkabas, layered rings, and field nodes bound to geometry instead of a lonely orb.
+            Ancient. The stone and root remember what the living forget. This page now grows around the Fifth Form: five interlocking merkabas, layered rings, field nodes, DEEP vector state, and fluid light bound to axis depth.
           </p>
 
           <div class="readout-grid" aria-label="Field readout">
@@ -61,17 +62,28 @@
             </div>
           </div>
 
+          <div class="deep-vector-strip" aria-label="DEEP vector state">
+            <span>P <strong data-deep-key="P">0.46</strong></span>
+            <span>C <strong data-deep-key="C">0.54</strong></span>
+            <span>R <strong data-deep-key="R">0.48</strong></span>
+            <span>E <strong data-deep-key="E">0.18</strong></span>
+            <span>M <strong data-deep-key="M">0.42</strong></span>
+            <span>A <strong data-deep-key="A">0.38</strong></span>
+            <span>Q <strong data-deep-key="charge">0.32</strong></span>
+          </div>
+
           <div class="actions">
             <a class="btn btn-primary" href="#stonewood">Grow the field</a>
             <a class="btn" href="#">Reset seed</a>
           </div>
 
           <p class="anchor-effect" aria-live="polite"></p>
+          <p class="fifth-functional-readout" aria-live="polite"><strong>Fifth Form:</strong> <span data-fifth-form-state>The form is listening. No anchor is dominant yet.</span></p>
 
           <details class="anchor-panel">
             <summary>Anchor the Grove</summary>
             <h2>Choose a place</h2>
-            <p>These are symbolic Terra Aeterna anchors. No browser location request, no hidden telemetry, no ghost modal. Each anchor now changes the route-lines, focus, depth, and awakened nodes.</p>
+            <p>These are symbolic Terra Aeterna anchors. No browser location request, no hidden telemetry, no ghost modal. Each anchor now changes the route-lines, focus, depth, DEEP vector, chamber state, and fluid light.</p>
             <div class="anchor-actions">
               <a href="#stonewood">🌲 Stonewood</a>
               <a href="#starwell">⭐ STARWELL</a>
@@ -83,12 +95,13 @@
           </details>
         </div>
 
-        <section class="grove-stage" aria-label="Fifth Form seed-grown field map">
+        <section class="grove-stage" data-fifth-form-stage aria-label="Fifth Form seed-grown field map">
           <div class="fifth-form-depth" aria-hidden="true">
             <img class="fifth-form-field fifth-form-field-back" src="./acorn/fifth-form-field.svg" alt="" />
             <img class="fifth-form-field fifth-form-field-main" src="./acorn/fifth-form-field.svg" alt="" />
             <div class="fifth-form-mist"></div>
           </div>
+          <div class="fifth-fluid-light" aria-hidden="true"></div>
           <svg class="grove-tendril-layer" viewBox="0 0 100 86" preserveAspectRatio="none" aria-hidden="true">
             <g class="route route-base">
               <path d="M 50 43 Q 50 25 50 12"></path>
@@ -130,6 +143,7 @@
             </g>
           </svg>
           <div class="grove-core" aria-hidden="true"><div class="fifth-form-bind"></div></div>
+          <div class="fifth-chamber-layer" data-fifth-form-chambers aria-hidden="true"></div>
           <div class="grove-node-layer">
             <span class="grove-node node-standing" style="--x: 0.5; --y: 0.14"><span class="node-label">Standing Wave</span></span>
             <span class="grove-node node-deep" style="--x: 0.76; --y: 0.29"><span class="node-label">DEEP Math</span></span>
@@ -175,5 +189,6 @@
       <a href="https://github.com/singsenochian/Flameclyffe">Repository</a>
     </footer>
   </div>
+  <script type="module" src="./acorn/fifth-form-engine.js"></script>
 </body>
 </html>
