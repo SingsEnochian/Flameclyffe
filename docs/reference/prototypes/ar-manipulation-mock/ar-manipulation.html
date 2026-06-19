@@ -50,6 +50,13 @@
           <button id="sound-disable" class="deep-button-ghost" type="button">Mute</button>
         </div>
         <label class="sound-volume">Volume <input id="sound-volume" type="range" min="0" max="0.5" step="0.01" /></label>
+        <div class="control-grid sound-pads" aria-label="Playable seedling sound pads">
+          <button id="sound-donk" class="deep-button-ghost" type="button">Donk</button>
+          <button id="sound-ding" class="deep-button-ghost" type="button">Ding</button>
+          <button id="sound-hum" class="deep-button-ghost" type="button">Hum</button>
+          <button id="sound-chime" class="deep-button-ghost" type="button">Chime</button>
+          <button id="sound-seedling-reply" class="deep-button-ghost" type="button">Seedling Reply</button>
+        </div>
         <p class="tiny-note">No autoplay. Sound only starts after Enable Sound is pressed.</p>
       </section>
 
@@ -73,8 +80,9 @@
         <h2>Keyboard</h2>
         <p class="tiny-note">Focus the Observer object first, then use these keys.</p>
         <ul class="help-list">
-          <li>Arrow keys move the object.</li>
-          <li>Shift + Arrow moves farther.</li>
+          <li>Arrow keys move X/Y.</li>
+          <li>PageUp / PageDown move Z.</li>
+          <li>Shift moves farther.</li>
           <li>[ and ] rotate.</li>
           <li>- and + scale.</li>
           <li>Enter pulses.</li>
@@ -82,12 +90,20 @@
       </section>
 
       <section class="panel-card deep-panel-card">
+        <h2>Axis Growth</h2>
+        <div class="control-grid axis-controls">
+          <button id="axis-x-minus" class="deep-button-ghost" type="button">X -</button>
+          <button id="axis-x-plus" class="deep-button-ghost" type="button">X +</button>
+          <button id="axis-y-minus" class="deep-button-ghost" type="button">Y -</button>
+          <button id="axis-y-plus" class="deep-button-ghost" type="button">Y +</button>
+          <button id="axis-z-minus" class="deep-button-ghost" type="button">Z -</button>
+          <button id="axis-z-plus" class="deep-button-ghost" type="button">Z +</button>
+        </div>
+      </section>
+
+      <section class="panel-card deep-panel-card">
         <h2>Manipulate</h2>
         <div class="control-grid">
-          <button id="move-left" class="deep-button-ghost" type="button">Left</button>
-          <button id="move-up" class="deep-button-ghost" type="button">Up</button>
-          <button id="move-down" class="deep-button-ghost" type="button">Down</button>
-          <button id="move-right" class="deep-button-ghost" type="button">Right</button>
           <button id="rotate-left" class="deep-button-ghost" type="button">Rotate -</button>
           <button id="rotate-right" class="deep-button-ghost" type="button">Rotate +</button>
           <button id="scale-down" class="deep-button-ghost" type="button">Scale -</button>
