@@ -1,6 +1,7 @@
 :root {
   --ar-x: 0px;
   --ar-y: 0px;
+  --ar-z: 0px;
   --ar-rotation: 0deg;
   --ar-scale: 1;
 }
@@ -21,6 +22,8 @@ body {
   overflow: hidden;
   min-height: 720px;
   isolation: isolate;
+  perspective: 900px;
+  transform-style: preserve-3d;
   background:
     radial-gradient(circle at 28% 18%, rgba(228, 195, 109, calc(var(--ar-bloom) * 0.18)), transparent 38%),
     radial-gradient(circle at 76% 70%, rgba(27, 138, 104, calc(var(--ar-green) * 0.22)), transparent 42%),
@@ -86,7 +89,7 @@ body {
   background: transparent;
   cursor: grab;
   touch-action: none;
-  transform: translate3d(var(--ar-x), var(--ar-y), 0) rotate(var(--ar-rotation)) scale(var(--ar-scale));
+  transform: translate3d(var(--ar-x), var(--ar-y), var(--ar-z)) rotate(var(--ar-rotation)) scale(var(--ar-scale));
   transition: opacity 180ms ease, filter 180ms ease;
   filter: drop-shadow(0 0 calc(18px + var(--ar-rim) * 24px) rgba(228, 195, 109, calc(var(--ar-rim) * 0.42)));
 }
@@ -169,6 +172,10 @@ body {
 
 .control-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sound-pads button:last-child {
+  grid-column: 1 / -1;
 }
 
 .light-controls,
