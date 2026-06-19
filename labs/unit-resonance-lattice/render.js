@@ -1,8 +1,8 @@
 import { buildLivingTreeGraph, buildChildrenMap } from './lattice.js';
 import { routeLatticeConfig, routeLatticeNodes } from './route-nodes.js';
 
-const STORAGE_KEY = 'flameclyffe.unitResonanceLivingTree.v1';
-const nodeSourceById = new Map(routeLatticeNodes.map((node) => [node.id, node]));
+const STORAGE_KEY = 'flameclyffe.unitResonanceLivingTree.v2';
+const validNodeIds = new Set(routeLatticeNodes.map((node) => node.id));
 const childrenById = buildChildrenMap(routeLatticeNodes);
 
 const svg = document.querySelector('[data-lattice-svg]');
@@ -17,18 +17,29 @@ const state = loadState();
 let graph = buildLivingTreeGraph(routeLatticeNodes, routeLatticeConfig, state);
 let nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
 
+function defaultTreeState() {
+  return {
+    focusId: routeLatticeConfig.tree.defaultFocusId,
+    openIds: [...routeLatticeConfig.tree.defaultOpenIds],
+  };
+}
+
 function loadState() {
   try {
     const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '{}');
+    const focusId = validNodeIds.has(saved.focusId)
+      ? saved.focusId
+      : routeLatticeConfig.tree.defaultFocusId;
+    const openIds = Array.isArray(saved.openIds)
+      ? saved.openIds.filter((id) => validNodeIds.has(id))
+      : [...routeLatticeConfig.tree.defaultOpenIds];
+
     return {
-      focusId: saved.focusId ?? routeLatticeConfig.tree.defaultFocusId,
-      openIds: Array.isArray(saved.openIds) ? saved.openIds : [...routeLatticeConfig.tree.defaultOpenIds],
+      focusId,
+      openIds: openIds.length ? openIds : [...routeLatticeConfig.tree.defaultOpenIds],
     };
   } catch {
-    return {
-      focusId: routeLatticeConfig.tree.defaultFocusId,
-      openIds: [...routeLatticeConfig.tree.defaultOpenIds],
-    };
+    return defaultTreeState();
   }
 }
 
@@ -37,6 +48,7 @@ function saveState() {
 }
 
 function setFocus(nodeId) {
+  if (!validNodeIds.has(nodeId)) return;
   state.focusId = nodeId;
   if (!state.openIds.includes(nodeId)) state.openIds.push(nodeId);
   saveState();
@@ -44,6 +56,7 @@ function setFocus(nodeId) {
 }
 
 function toggleBranch(nodeId) {
+  if (!validNodeIds.has(nodeId)) return;
   const hasChildren = (childrenById.get(nodeId) ?? []).length > 0;
   if (!hasChildren) {
     setFocus(nodeId);
@@ -64,14 +77,14 @@ function expandAll() {
   state.openIds = routeLatticeNodes
     .filter((node) => (childrenById.get(node.id) ?? []).length > 0)
     .map((node) => node.id);
-  state.focusId = routeLatticeConfig.tree.rootId;
+  state.focusId = routeLatticeConfig.tree.defaultFocusId;
   saveState();
   rerender();
 }
 
 function pruneToTrunk() {
   state.openIds = [routeLatticeConfig.tree.rootId, ...(routeLatticeConfig.tree.defaultOpenIds ?? [])];
-  state.focusId = routeLatticeConfig.tree.rootId;
+  state.focusId = routeLatticeConfig.tree.defaultFocusId;
   saveState();
   rerender();
 }
