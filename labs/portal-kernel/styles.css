@@ -1,0 +1,134 @@
+:root {
+  color-scheme: dark;
+  --surface: #080b13;
+  --surface-2: #111827;
+  --ink: #f5ead8;
+  --muted: #b9adc8;
+  --gold: #d8ac63;
+  --green: #58b38f;
+  --blue: #7db7ff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, rgba(125, 183, 255, 0.18), transparent 42%), var(--surface);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.portal-shell {
+  width: min(1180px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 48px 0;
+  display: grid;
+  gap: 20px;
+}
+
+.portal-card,
+.portal-stage {
+  border: 1px solid rgba(216, 172, 99, 0.28);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(17, 24, 39, 0.92), rgba(8, 11, 19, 0.92));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35), inset 0 0 60px rgba(216, 172, 99, 0.04);
+}
+
+.portal-card {
+  padding: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--gold);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.portal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+button {
+  border: 1px solid rgba(216, 172, 99, 0.4);
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+  background: rgba(216, 172, 99, 0.12);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button:focus-visible,
+.node:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+}
+
+.portal-stage {
+  min-height: 420px;
+  padding: 12px;
+}
+
+svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.branch {
+  fill: none;
+  stroke: rgba(88, 179, 143, 0.68);
+  stroke-width: 4;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 10px rgba(88, 179, 143, 0.28));
+}
+
+.halo {
+  fill: rgba(216, 172, 99, 0.08);
+  stroke: rgba(216, 172, 99, 0.42);
+  transition: r 180ms ease;
+}
+
+.dot {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 12px rgba(216, 172, 99, 0.7));
+}
+
+.dot.invited {
+  fill: var(--green);
+  filter: drop-shadow(0 0 18px rgba(88, 179, 143, 0.8));
+}
+
+.label {
+  fill: var(--ink);
+  font-size: 16px;
+  paint-order: stroke;
+  stroke: rgba(8, 11, 19, 0.86);
+  stroke-width: 4px;
+}
+
+pre {
+  overflow: auto;
+  max-height: 360px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
