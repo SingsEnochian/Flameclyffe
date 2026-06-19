@@ -64,6 +64,35 @@ p { color: var(--dim); }
 
 a { color: inherit; }
 
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.toolbar button,
+.actions button,
+.actions a {
+  border: 1px solid rgba(232, 200, 120, 0.36);
+  border-radius: 999px;
+  padding: 0.6rem 0.85rem;
+  color: var(--stone);
+  background: rgba(232, 200, 120, 0.1);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.toolbar button:hover,
+.toolbar button:focus-visible,
+.actions button:hover,
+.actions button:focus-visible,
+.actions a:hover,
+.actions a:focus-visible {
+  border-color: rgba(232, 200, 120, 0.84);
+  outline: none;
+}
+
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
@@ -81,6 +110,7 @@ a { color: inherit; }
 .stage {
   min-height: 620px;
   padding: 1rem;
+  overflow: hidden;
 }
 
 svg {
@@ -90,9 +120,24 @@ svg {
   min-height: 560px;
 }
 
-.lattice-edge {
+.tree-branch {
+  fill: none;
+  stroke: rgba(120, 217, 175, 0.58);
+  stroke-width: 6;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 12px rgba(120, 217, 175, 0.22));
+}
+
+.tree-branch.is-focused,
+.tree-branch.is-ancestor {
+  stroke: rgba(232, 200, 120, 0.86);
+  stroke-width: 8;
+}
+
+.resonance-strand {
   stroke: var(--gold);
   stroke-linecap: round;
+  stroke-dasharray: 6 10;
 }
 
 .node-halo {
@@ -104,6 +149,28 @@ svg {
   fill: var(--stone);
   stroke: var(--gold);
   stroke-width: 2;
+}
+
+.node-bud {
+  pointer-events: none;
+  fill: #06100c;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.lattice-node {
+  cursor: pointer;
+}
+
+.lattice-node:focus-visible .node-halo,
+.lattice-node:hover .node-halo,
+.lattice-node.is-focused .node-halo {
+  stroke: rgba(232, 200, 120, 0.9);
+  stroke-width: 3;
+}
+
+.lattice-node.is-focused .node-dot {
+  stroke-width: 3;
 }
 
 .kind-core .node-dot { fill: var(--gold); }
@@ -136,9 +203,15 @@ aside {
 
 .panel h2 { font-size: 1.4rem; }
 
-.micro {
+.micro, .empty {
   color: rgba(228, 237, 228, 0.55);
   font-size: 0.86rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .list {
@@ -191,6 +264,23 @@ aside {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .lattice-edge { transition: stroke-opacity 180ms ease, stroke-width 180ms ease; }
-  .lattice-node { transition: opacity 180ms ease; }
+  .tree-branch {
+    animation: sapPulse 4.8s ease-in-out infinite;
+    transition: stroke 180ms ease, stroke-width 180ms ease;
+  }
+  .resonance-strand {
+    animation: strandFlow 9s linear infinite;
+  }
+  .lattice-node { transition: opacity 180ms ease, transform 180ms ease; }
+  .lattice-node:hover { transform: translateY(-2px); }
+}
+
+@keyframes sapPulse {
+  0%, 100% { stroke-opacity: 0.42; }
+  50% { stroke-opacity: 0.88; }
+}
+
+@keyframes strandFlow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -48; }
 }
