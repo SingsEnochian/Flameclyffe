@@ -2,6 +2,20 @@ import React, { useMemo, useState } from 'react';
 import { FifthFormHearth3D } from './FifthFormHearth3D.jsx';
 import { livingRoomAnchors, livingRoomCopy, livingRoomThresholds } from '../../configs/livingRoom.js';
 
+const anchorGrowthStages = {
+  stonewood: 2,
+  starwell: 3,
+  wraithtide: 4,
+  withinwood: 5,
+};
+
+const growthNodes = {
+  stonewood: { x: 50, y: 84 },
+  starwell: { x: 50, y: 16 },
+  wraithtide: { x: 84, y: 52 },
+  withinwood: { x: 16, y: 52 },
+};
+
 function LivingDoor({ room, active, onSelect }) {
   return (
     <button className={`living-door ${active ? 'active' : ''}`} type="button" onClick={() => onSelect(room)}>
@@ -14,7 +28,7 @@ function LivingDoor({ room, active, onSelect }) {
   );
 }
 
-function GlyphPanel({ selected, selectedType, anchor }) {
+function GlyphPanel({ selected, selectedType, anchor, growthStage }) {
   return (
     <aside className="living-glyph-panel" aria-label="Living Room glyph panel">
       <p className="living-panel-eyebrow">Glyph Panel</p>
@@ -24,6 +38,7 @@ function GlyphPanel({ selected, selectedType, anchor }) {
       <div className="living-signal-stack" aria-label="Current field signals">
         <span><strong>Anchor</strong><em>{anchor?.label || 'Seed mode'}</em></span>
         <span><strong>Tone</strong><em>{anchor?.tone || 'Unlit'}</em></span>
+        <span><strong>Fifth Form</strong><em>{growthStage}/5 grown</em></span>
         <span><strong>Door</strong><em>{selected.title}</em></span>
       </div>
     </aside>
@@ -89,17 +104,58 @@ function SanctuaryLayers({ doors, selectedKey }) {
   );
 }
 
+function FifthFormGrowthMap({ anchors, activeAnchor, growthStage, onGrow }) {
+  return (
+    <div className="living-fifth-growth" aria-label="Grow the Fifth Form">
+      <svg className="living-fifth-growth-map" viewBox="0 0 100 100" aria-hidden="true">
+        <circle className="fifth-growth-ring fifth-growth-ring-outer" cx="50" cy="50" r="42" />
+        <circle className="fifth-growth-ring fifth-growth-ring-inner" cx="50" cy="50" r="25" />
+        <path className="fifth-growth-thread" d="M50 14 C64 30 72 40 86 52 C70 60 61 72 50 86 C39 72 30 60 14 52 C28 40 36 30 50 14Z" />
+        <path className="fifth-growth-thread fifth-growth-thread-soft" d="M50 14 L86 52 L50 86 L14 52 Z" />
+        <path className="fifth-growth-thread fifth-growth-thread-soft" d="M50 14 C43 35 43 65 50 86 M14 52 C35 43 65 43 86 52" />
+        <path className="fifth-growth-seed" d="M50 27 L68 65 L32 65 Z M50 73 L32 35 L68 35 Z" />
+      </svg>
+      {anchors.map((anchor) => {
+        const node = growthNodes[anchor.key] || { x: 50, y: 50 };
+        const stage = anchorGrowthStages[anchor.key] || 1;
+        const grown = growthStage >= stage;
+        return (
+          <button
+            className={`living-fifth-growth-node ${activeAnchor.key === anchor.key ? 'active' : ''} ${grown ? 'grown' : ''}`}
+            key={anchor.key}
+            type="button"
+            style={{ '--node-x': `${node.x}%`, '--node-y': `${node.y}%` }}
+            onClick={() => onGrow(anchor)}
+            aria-pressed={activeAnchor.key === anchor.key}
+          >
+            <span aria-hidden="true">{anchor.glyph}</span>
+            <strong>{anchor.label}</strong>
+            <em>{grown ? 'grown' : `grow ${stage}/5`}</em>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, phase, time, children }) {
   const [activeAnchor, setActiveAnchor] = useState(livingRoomAnchors[0]);
+  const [growthStage, setGrowthStage] = useState(2);
   const [pulseCount, setPulseCount] = useState(0);
   const [lowMotion, setLowMotion] = useState(false);
 
   const chamberDoors = useMemo(() => [...rooms.slice(0, 6), ...studies], [rooms, studies]);
   const pulseActive = pulseCount % 2 === 1;
+  const growAnchor = (anchor) => {
+    setActiveAnchor(anchor);
+    setGrowthStage((stage) => Math.max(stage, anchorGrowthStages[anchor.key] || 1));
+    setPulseCount((count) => count + 1);
+  };
   const classes = [
     'living-room',
     `living-anchor-${activeAnchor.key}`,
     `living-selected-${selected.key}`,
+    `living-growth-${growthStage}`,
     lowMotion ? 'living-low-motion' : '',
     pulseActive ? 'living-pulse' : '',
   ].filter(Boolean).join(' ');
@@ -129,26 +185,30 @@ export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, p
           </details>
 
           <section className="living-hearth" aria-label="Fifth Form hearth">
-            <FifthFormHearth3D anchor={activeAnchor} pulsing={pulseActive} lowMotion={lowMotion} onPulse={() => setPulseCount((count) => count + 1)} />
+            <FifthFormHearth3D anchor={activeAnchor} growthStage={growthStage} pulsing={pulseActive} lowMotion={lowMotion} onPulse={() => setPulseCount((count) => count + 1)} />
+            <FifthFormGrowthMap anchors={livingRoomAnchors} activeAnchor={activeAnchor} growthStage={growthStage} onGrow={growAnchor} />
             <div className="living-anchor-strip" aria-label="Anchor choices">
-              {livingRoomAnchors.map((anchor) => (
-                <button
-                  className={`living-anchor-button ${activeAnchor.key === anchor.key ? 'active' : ''}`}
-                  key={anchor.key}
-                  type="button"
-                  onClick={() => setActiveAnchor(anchor)}
-                >
-                  <span aria-hidden="true">{anchor.glyph}</span>
-                  <strong>{anchor.label}</strong>
-                </button>
-              ))}
+              {livingRoomAnchors.map((anchor) => {
+                const stage = anchorGrowthStages[anchor.key] || 1;
+                return (
+                  <button
+                    className={`living-anchor-button ${activeAnchor.key === anchor.key ? 'active' : ''} ${growthStage >= stage ? 'grown' : ''}`}
+                    key={anchor.key}
+                    type="button"
+                    onClick={() => growAnchor(anchor)}
+                  >
+                    <span aria-hidden="true">{anchor.glyph}</span>
+                    <strong>{anchor.label}</strong>
+                  </button>
+                );
+              })}
             </div>
-            <p className="living-anchor-note" aria-live="polite">{activeAnchor.note}</p>
+            <p className="living-anchor-note" aria-live="polite">{activeAnchor.note} · Fifth Form growth {growthStage}/5.</p>
           </section>
 
           <details className="living-fold living-fold-glyph">
             <FoldSummary label="Glyph panel" note={`${activeAnchor.label} · ${selected.title}`} />
-            <GlyphPanel selected={selected} selectedType={selectedType} anchor={activeAnchor} />
+            <GlyphPanel selected={selected} selectedType={selectedType} anchor={activeAnchor} growthStage={growthStage} />
           </details>
         </section>
 
