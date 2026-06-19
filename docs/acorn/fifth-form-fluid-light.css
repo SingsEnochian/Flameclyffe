@@ -1,0 +1,164 @@
+:root {
+  --deep-presence: 0.46;
+  --deep-coherence: 0.54;
+  --deep-resonance: 0.48;
+  --deep-entropy: 0.18;
+  --deep-moon: 0.42;
+  --deep-attention: 0.38;
+  --deep-charge: 0.32;
+  --axis-x: 0;
+  --axis-y: 0;
+  --axis-z: 0;
+}
+
+.grove-stage {
+  perspective: 760px;
+  transform-style: preserve-3d;
+}
+
+.fifth-fluid-light,
+.fifth-fluid-light::before,
+.fifth-fluid-light::after,
+.fifth-chamber-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fifth-fluid-light {
+  z-index: 2;
+  opacity: calc(0.32 + var(--deep-resonance) * 0.34 + var(--deep-charge) * 0.18);
+  mix-blend-mode: screen;
+  filter: blur(calc(10px - var(--deep-coherence) * 4px));
+  transform:
+    translate3d(calc(var(--axis-x) * 18px), calc(var(--axis-y) * 18px), calc(var(--axis-z) * 70px))
+    rotate(calc(var(--form-turn) * 0.34));
+  transition: opacity 700ms ease, filter 700ms ease, transform 700ms ease;
+}
+
+.fifth-fluid-light::before,
+.fifth-fluid-light::after {
+  content: '';
+  border-radius: 42% 58% 47% 53%;
+  background:
+    radial-gradient(circle at calc(50% + var(--axis-x) * 24%) calc(50% + var(--axis-y) * 24%), hsla(var(--anchor-hue), 90%, 74%, calc(0.18 + var(--deep-charge) * 0.26)), transparent 29%),
+    radial-gradient(circle at 62% 38%, rgba(228, 195, 109, calc(0.10 + var(--deep-presence) * 0.22)), transparent 34%),
+    conic-gradient(from calc(var(--form-turn) + 20deg), transparent, hsla(var(--anchor-hue), 80%, 70%, calc(0.06 + var(--deep-resonance) * 0.18)), transparent, rgba(228, 195, 109, calc(0.04 + var(--deep-moon) * 0.14)), transparent);
+  animation: fifth-fluid-turn calc(18s - var(--deep-resonance) * 7s) ease-in-out infinite alternate;
+}
+
+.fifth-fluid-light::after {
+  inset: 9%;
+  opacity: calc(0.42 + var(--deep-moon) * 0.32);
+  filter: blur(calc(8px + var(--deep-entropy) * 8px));
+  transform: rotate(64deg) scale(calc(0.82 + var(--deep-presence) * 0.16));
+  animation-direction: alternate-reverse;
+}
+
+.fifth-chamber-layer {
+  z-index: 6;
+  transform-style: preserve-3d;
+}
+
+.fifth-chamber {
+  position: absolute;
+  left: calc(50% + var(--cx) * 31%);
+  top: calc(50% + var(--cy) * 31%);
+  width: clamp(2.35rem, 5.5vw, 3.4rem);
+  aspect-ratio: 1;
+  border: 1px solid hsla(var(--anchor-hue), 72%, 78%, calc(0.16 + var(--deep-coherence) * 0.18));
+  border-radius: 28% 72% 32% 68%;
+  display: grid;
+  place-items: center;
+  color: rgba(247, 239, 217, 0.72);
+  background:
+    radial-gradient(circle, rgba(247, 239, 217, calc(0.05 + var(--deep-attention) * 0.12)), transparent 48%),
+    hsla(var(--anchor-hue), 80%, 54%, 0.08);
+  box-shadow:
+    0 0 calc(10px + var(--deep-charge) * 20px) hsla(var(--anchor-hue), 82%, 68%, calc(0.08 + var(--deep-charge) * 0.16)),
+    inset 0 0 18px rgba(0, 0, 0, 0.28);
+  transform:
+    translate(-50%, -50%)
+    translateZ(calc(var(--cz) * 90px))
+    rotate(var(--cturn))
+    scale(calc(0.78 + var(--deep-presence) * 0.18));
+  opacity: 0.45;
+  transition: opacity 500ms ease, transform 700ms ease, box-shadow 700ms ease, border-color 500ms ease;
+}
+
+.fifth-chamber[data-active="true"] {
+  opacity: 0.98;
+  border-color: hsla(var(--anchor-hue), 90%, 82%, calc(0.48 + var(--deep-attention) * 0.24));
+  transform:
+    translate(-50%, -50%)
+    translateZ(calc(var(--cz) * 130px + var(--axis-z) * 42px))
+    translate(calc(var(--axis-x) * 15px), calc(var(--axis-y) * 15px))
+    rotate(calc(var(--cturn) + var(--form-turn)))
+    scale(calc(0.95 + var(--deep-charge) * 0.22));
+}
+
+.fifth-chamber::before,
+.fifth-chamber::after {
+  content: '';
+  position: absolute;
+  inset: 20%;
+  border: 1px solid rgba(228, 195, 109, 0.24);
+  transform: rotate(45deg);
+}
+
+.fifth-chamber::after {
+  transform: rotate(-15deg) scaleY(0.8);
+  border-color: hsla(var(--anchor-hue), 80%, 78%, 0.22);
+}
+
+.fifth-chamber-label {
+  position: absolute;
+  top: 100%;
+  margin-top: 0.35rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(0.52rem, 1vw, 0.64rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(calc(var(--cturn) * -1));
+}
+
+.fifth-functional-readout {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(5, 16, 13, 0.62);
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.fifth-functional-readout strong {
+  color: var(--accent);
+}
+
+@keyframes fifth-fluid-turn {
+  0% {
+    transform: rotate(calc(var(--form-turn) - 12deg)) scale(calc(0.96 + var(--deep-presence) * 0.08));
+  }
+  100% {
+    transform: rotate(calc(var(--form-turn) + 18deg)) scale(calc(1.02 + var(--deep-resonance) * 0.1));
+  }
+}
+
+@media (max-width: 820px) {
+  .fifth-chamber {
+    width: clamp(2rem, 10vw, 2.7rem);
+  }
+
+  .fifth-chamber-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fifth-fluid-light::before,
+  .fifth-fluid-light::after {
+    animation: none;
+  }
+}
