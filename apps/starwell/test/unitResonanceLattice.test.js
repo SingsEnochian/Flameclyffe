@@ -80,27 +80,32 @@ test('route lattice graph is bounded, projected, and connected', () => {
   assert.ok(graph.edges.every((edge) => edge.strength >= 0 && edge.strength <= 1));
 });
 
-test('tree window starts at harbour and opens default STARWELL branch', () => {
+test('tree window opens Living Room Ygg with DEEP and Studio as direct branches', () => {
   const treeNodes = selectTreeNodes(routeLatticeNodes, routeLatticeConfig.tree, {
-    focusId: 'harbour',
-    openIds: ['harbour', 'starwell'],
+    focusId: 'living-room-ygg',
+    openIds: ['harbour', 'living-room-ygg', 'starwell'],
   });
+  const nodeById = new Map(treeNodes.map((node) => [node.id, node]));
 
   assert.equal(treeNodes[0].id, 'harbour');
-  assert.ok(treeNodes.some((node) => node.id === 'deep-observer'));
-  assert.ok(treeNodes.some((node) => node.id === 'unit-resonance-lab'));
-  assert.ok(treeNodes.some((node) => node.id === 'lattice-lab'));
+  assert.equal(nodeById.get('living-room-ygg')?.parentId, 'harbour');
+  assert.equal(nodeById.get('deep-observer')?.parentId, 'living-room-ygg');
+  assert.equal(nodeById.get('studio')?.parentId, 'living-room-ygg');
+  assert.equal(nodeById.get('starwell')?.parentId, 'living-room-ygg');
+  assert.ok(nodeById.get('unit-resonance-lab'));
+  assert.ok(nodeById.get('lattice-lab'));
 });
 
 test('living tree graph separates branch edges from resonance strands', () => {
   const graph = buildLivingTreeGraph(routeLatticeNodes, routeLatticeConfig, {
-    focusId: 'starwell',
-    openIds: ['harbour', 'starwell'],
+    focusId: 'living-room-ygg',
+    openIds: ['harbour', 'living-room-ygg', 'starwell'],
   });
 
-  assert.ok(graph.nodes.length < routeLatticeNodes.length || graph.nodes.length === routeLatticeNodes.length);
   assert.ok(graph.branchEdges.length > 0);
   assert.ok(graph.branchEdges.every((edge) => edge.kind === 'branch'));
   assert.ok(graph.resonanceEdges.every((edge) => edge.kind === 'resonance'));
+  assert.ok(graph.branchEdges.some((edge) => edge.source === 'living-room-ygg' && edge.target === 'deep-observer'));
+  assert.ok(graph.branchEdges.some((edge) => edge.source === 'living-room-ygg' && edge.target === 'studio'));
   assert.ok(graph.nodes.every((node) => Number.isFinite(node.position.x) && Number.isFinite(node.position.y)));
 });
