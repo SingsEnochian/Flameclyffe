@@ -2,30 +2,43 @@ import { AR_MANIPULATION_CONFIG } from './ar-manipulation.model.js';
 
 export function handleARKeyboard(event, controller) {
   const step = event.shiftKey ? AR_MANIPULATION_CONFIG.step * 2 : AR_MANIPULATION_CONFIG.step;
+  const zStep = event.shiftKey ? AR_MANIPULATION_CONFIG.zStep * 2 : AR_MANIPULATION_CONFIG.zStep;
   const rotationStep = AR_MANIPULATION_CONFIG.rotationStep;
   const scaleStep = AR_MANIPULATION_CONFIG.scaleStep;
 
   if (event.key === 'ArrowLeft') {
     event.preventDefault();
-    controller.moveBy(-step, 0);
+    controller.moveBy(-step, 0, 0);
     return true;
   }
 
   if (event.key === 'ArrowRight') {
     event.preventDefault();
-    controller.moveBy(step, 0);
+    controller.moveBy(step, 0, 0);
     return true;
   }
 
   if (event.key === 'ArrowUp') {
     event.preventDefault();
-    controller.moveBy(0, -step);
+    controller.moveBy(0, -step, 0);
     return true;
   }
 
   if (event.key === 'ArrowDown') {
     event.preventDefault();
-    controller.moveBy(0, step);
+    controller.moveBy(0, step, 0);
+    return true;
+  }
+
+  if (event.key === 'PageUp') {
+    event.preventDefault();
+    controller.moveAxis('z', zStep);
+    return true;
+  }
+
+  if (event.key === 'PageDown') {
+    event.preventDefault();
+    controller.moveAxis('z', -zStep);
     return true;
   }
 
