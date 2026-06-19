@@ -1,0 +1,108 @@
+.fifth-form-hearth-3d {
+  --holo-copper: rgba(231, 196, 119, 0.26);
+  --holo-green: rgba(120, 238, 196, 0.22);
+  --holo-violet: rgba(147, 120, 238, 0.10);
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 58%, rgba(201, 135, 85, 0.12), transparent 24%),
+    radial-gradient(circle at 48% 46%, rgba(120, 238, 196, 0.12), transparent 42%),
+    radial-gradient(circle at 50% 50%, rgba(2, 6, 4, 0.28), rgba(2, 6, 4, 0.76) 72%, rgba(1, 4, 3, 0.96));
+}
+
+.fifth-form-hearth-3d::before {
+  inset: 5.5%;
+  border-color: rgba(231, 196, 119, 0.14);
+  background:
+    linear-gradient(114deg, transparent 0 31%, rgba(120, 238, 196, 0.12) 36%, transparent 42% 100%),
+    linear-gradient(71deg, transparent 0 44%, rgba(231, 196, 119, 0.10) 49%, transparent 54% 100%),
+    repeating-linear-gradient(92deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 8px),
+    conic-gradient(from 162deg at 50% 50%, transparent, var(--holo-green), transparent 24%, var(--holo-copper), transparent 42%, var(--holo-violet), transparent 66%, var(--holo-green), transparent);
+  mix-blend-mode: screen;
+  opacity: 0.58;
+  filter: blur(0.2px) saturate(1.18);
+  animation: living-holo-breathe 10s ease-in-out infinite;
+}
+
+.fifth-form-hearth-3d::after {
+  width: 72%;
+  height: 13%;
+  bottom: 10%;
+  border-color: rgba(231, 196, 119, 0.16);
+  background:
+    radial-gradient(ellipse at center, rgba(231, 196, 119, 0.14), transparent 58%),
+    radial-gradient(ellipse at center, rgba(120, 238, 196, 0.08), transparent 76%);
+  opacity: 0.72;
+  box-shadow:
+    0 0 22px rgba(120, 238, 196, 0.08),
+    0 0 18px rgba(201, 135, 85, 0.10),
+    inset 0 0 20px rgba(0, 0, 0, 0.34);
+}
+
+.fifth-form-hearth-3d .hearth-label {
+  top: 33%;
+  transform: translateY(-120%);
+  border-color: rgba(231, 196, 119, 0.24);
+  background:
+    linear-gradient(135deg, rgba(5, 9, 7, 0.82), rgba(25, 18, 12, 0.72)),
+    linear-gradient(110deg, transparent, rgba(120, 238, 196, 0.10), transparent);
+  box-shadow:
+    0 0 18px rgba(120, 238, 196, 0.08),
+    0 0 20px rgba(201, 135, 85, 0.12),
+    inset 0 0 18px rgba(231, 196, 119, 0.06);
+  backdrop-filter: blur(12px) saturate(1.28);
+}
+
+.fifth-form-hearth-3d .hearth-label strong,
+.fifth-form-hearth-3d .hearth-label em {
+  text-shadow: 0 0 10px rgba(231, 196, 119, 0.28);
+}
+
+.hearth-three-canvas {
+  filter: saturate(1.14) contrast(1.04);
+}
+
+.living-hearth::after {
+  content: '';
+  position: absolute;
+  inset: 6% 5% 8%;
+  border-radius: 38% 62% 46% 54% / 52% 42% 58% 48%;
+  background:
+    linear-gradient(108deg, transparent 0 35%, rgba(120, 238, 196, 0.08) 42%, transparent 52% 100%),
+    radial-gradient(circle at 50% 48%, rgba(231, 196, 119, 0.08), transparent 54%);
+  opacity: 0.62;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  filter: blur(8px);
+  animation: living-holo-drift 16s ease-in-out infinite;
+}
+
+@keyframes living-holo-breathe {
+  0%, 100% {
+    opacity: 0.44;
+    transform: rotate(0deg) scale(1);
+  }
+  45% {
+    opacity: 0.66;
+    transform: rotate(3deg) scale(1.018);
+  }
+  70% {
+    opacity: 0.54;
+    transform: rotate(-1.5deg) scale(1.006);
+  }
+}
+
+@keyframes living-holo-drift {
+  0%, 100% {
+    transform: translate3d(-1%, 0, 0) rotate(-2deg);
+  }
+  50% {
+    transform: translate3d(1%, -1%, 0) rotate(2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fifth-form-hearth-3d::before,
+  .living-hearth::after {
+    animation: none !important;
+  }
+}
