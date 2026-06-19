@@ -10,7 +10,7 @@ Open `ar-controller-test-harness.html` to run tiny controller transition checks.
 
 This prototype tests the manipulation contract before any AR or sensor adapter exists.
 
-It uses pointer, touch, keyboard, button controls, and synthetic gesture buttons only.
+It uses pointer, touch, keyboard, button controls, synthetic gesture buttons, and CSS-variable light controls only.
 
 ## Manipulation intents
 
@@ -36,6 +36,26 @@ Current synthetic tests:
 - hand scale
 - air anchor
 
+## Light play
+
+The mock now includes a state-driven lighting layer.
+
+Controls:
+
+- ambient
+- gold bloom
+- green shimmer
+- rim light
+
+Presets:
+
+- Moonlit
+- Hearth
+- Grove
+- Eclipse
+
+JavaScript owns lighting state. CSS expresses the light through variables on the AR stage.
+
 ## Implementation notes
 
 - No real AR runtime is started.
@@ -44,6 +64,8 @@ Current synthetic tests:
 - `ar-manipulation-controller.js` owns manipulation state transitions.
 - `gesture-adapter-shim.js` accepts and validates payload-shaped synthetic gesture events.
 - `ar-keyboard-controls.js` owns keyboard-to-controller mapping.
+- `ar-lighting.model.js` owns lighting defaults and presets.
+- `ar-lighting-controls.js` owns light state and CSS variable application.
 - `ar-controller-test-harness.js` runs small controller transition checks, payload checks, and pulse timeout checks.
 - `ar-manipulation.js` owns DOM and input wiring.
 - JavaScript owns manipulation state and intent events.
@@ -65,6 +87,7 @@ A production version should become contained modules such as:
 
 - ARManipulationMock
 - ARManipulationController
+- ARLightingController
 - ARIntentLog
 - ARObjectPresenter
 - arManipulationModel
