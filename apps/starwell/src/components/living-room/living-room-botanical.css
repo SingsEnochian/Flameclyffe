@@ -1,0 +1,242 @@
+.living-fifth-botany {
+  position: absolute;
+  z-index: 3;
+  inset: clamp(1rem, 4vw, 2rem) 8% 10%;
+  pointer-events: none;
+  filter:
+    drop-shadow(0 0 10px rgba(120, 238, 196, 0.10))
+    drop-shadow(0 0 14px rgba(231, 196, 119, 0.08));
+}
+
+.botany-root,
+.botany-vine,
+.botany-leaf,
+.botany-flower {
+  position: absolute;
+  opacity: 0;
+  transform-origin: center;
+  transition:
+    opacity 700ms ease,
+    transform 900ms cubic-bezier(0.19, 1, 0.22, 1),
+    filter 700ms ease;
+}
+
+.botany-root {
+  bottom: 9%;
+  width: 19%;
+  height: 22%;
+  border-bottom: 1px solid rgba(201, 135, 85, 0.34);
+  border-left: 1px solid rgba(120, 238, 196, 0.18);
+  border-radius: 0 0 0 100%;
+  transform: scale(0.58) translateY(-0.8rem);
+}
+
+.botany-root::after {
+  content: '';
+  position: absolute;
+  inset: 18% 20% auto auto;
+  width: 66%;
+  height: 44%;
+  border-top: 1px solid rgba(231, 196, 119, 0.18);
+  border-radius: 100% 0 0 0;
+}
+
+.botany-root-left {
+  left: 22%;
+  rotate: -18deg;
+}
+
+.botany-root-right {
+  right: 22%;
+  scale: -1 1;
+  rotate: 18deg;
+}
+
+.botany-root-centre {
+  left: 45%;
+  width: 10%;
+  height: 28%;
+  border-left: 1px solid rgba(231, 196, 119, 0.26);
+  border-bottom: 0;
+  border-radius: 50%;
+  rotate: 0deg;
+}
+
+.botany-leaf {
+  width: 1.05rem;
+  height: 1.72rem;
+  border: 1px solid rgba(120, 238, 196, 0.28);
+  border-radius: 100% 0 100% 0;
+  background:
+    radial-gradient(circle at 40% 35%, rgba(247, 239, 217, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(120, 238, 196, 0.18), rgba(26, 77, 58, 0.08));
+  transform: scale(0.3) rotate(var(--leaf-rotation, 0deg));
+}
+
+.botany-leaf::after {
+  content: '';
+  position: absolute;
+  inset: 20% auto 18% 48%;
+  width: 1px;
+  background: rgba(247, 239, 217, 0.16);
+  transform: rotate(12deg);
+}
+
+.botany-leaf-star-a {
+  --leaf-rotation: -34deg;
+  left: 44%;
+  top: 13%;
+}
+
+.botany-leaf-star-b {
+  --leaf-rotation: 46deg;
+  right: 42%;
+  top: 18%;
+}
+
+.botany-vine {
+  width: 32%;
+  height: 34%;
+  border-top: 1px solid rgba(120, 238, 196, 0.24);
+  border-radius: 100% 0 0 0;
+  transform: scale(0.64) rotate(var(--vine-rotation, 0deg));
+}
+
+.botany-vine::before,
+.botany-vine::after {
+  content: '';
+  position: absolute;
+  width: 0.72rem;
+  height: 1.08rem;
+  border: 1px solid rgba(120, 238, 196, 0.22);
+  border-radius: 100% 0 100% 0;
+  background: rgba(26, 77, 58, 0.08);
+}
+
+.botany-vine::before {
+  left: 36%;
+  top: -0.48rem;
+  rotate: 32deg;
+}
+
+.botany-vine::after {
+  left: 68%;
+  top: 0.6rem;
+  rotate: -42deg;
+}
+
+.botany-vine-left {
+  --vine-rotation: -16deg;
+  left: 10%;
+  top: 42%;
+}
+
+.botany-vine-right {
+  --vine-rotation: 196deg;
+  right: 10%;
+  top: 42%;
+}
+
+.botany-leaf-tide-a {
+  --leaf-rotation: 76deg;
+  right: 21%;
+  top: 46%;
+  border-color: rgba(94, 207, 238, 0.28);
+}
+
+.botany-leaf-tide-b {
+  --leaf-rotation: -112deg;
+  left: 21%;
+  top: 50%;
+  border-color: rgba(94, 207, 238, 0.24);
+}
+
+.botany-flower {
+  width: 1.04rem;
+  height: 1.04rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(231, 196, 119, 0.78) 0 18%, rgba(247, 239, 217, 0.16) 19% 34%, transparent 35%),
+    conic-gradient(from 20deg, transparent 0 8%, rgba(187, 137, 255, 0.18) 9% 18%, transparent 19% 31%, rgba(120, 238, 196, 0.16) 32% 42%, transparent 43% 55%, rgba(231, 196, 119, 0.15) 56% 66%, transparent 67% 100%);
+  box-shadow: 0 0 12px rgba(187, 137, 255, 0.12);
+  transform: scale(0.26) rotate(0deg);
+}
+
+.botany-flower::before,
+.botany-flower::after {
+  content: '';
+  position: absolute;
+  inset: -38%;
+  border: 1px solid rgba(187, 137, 255, 0.14);
+  border-radius: 50%;
+}
+
+.botany-flower::after {
+  inset: -68%;
+  border-color: rgba(120, 238, 196, 0.10);
+}
+
+.botany-flower-left {
+  left: 28%;
+  top: 30%;
+}
+
+.botany-flower-right {
+  right: 27%;
+  top: 30%;
+}
+
+.living-growth-2 .botany-root {
+  opacity: 0.72;
+  transform: scale(1) translateY(0);
+}
+
+.living-growth-3 .botany-root,
+.living-growth-4 .botany-root,
+.living-growth-5 .botany-root {
+  opacity: 0.78;
+  transform: scale(1) translateY(0);
+}
+
+.living-growth-3 .botany-leaf-star,
+.living-growth-4 .botany-leaf-star,
+.living-growth-5 .botany-leaf-star {
+  opacity: 0.72;
+  transform: scale(1) rotate(var(--leaf-rotation, 0deg));
+}
+
+.living-growth-4 .botany-vine,
+.living-growth-5 .botany-vine {
+  opacity: 0.68;
+  transform: scale(1) rotate(var(--vine-rotation, 0deg));
+}
+
+.living-growth-4 .botany-leaf-tide,
+.living-growth-5 .botany-leaf-tide {
+  opacity: 0.62;
+  transform: scale(1) rotate(var(--leaf-rotation, 0deg));
+}
+
+.living-growth-5 .botany-flower {
+  opacity: 0.78;
+  transform: scale(1) rotate(18deg);
+  filter: drop-shadow(0 0 12px rgba(187, 137, 255, 0.16));
+}
+
+.living-growth-5 .botany-flower-right {
+  transform: scale(1) rotate(-14deg);
+}
+
+.living-pulse .botany-leaf,
+.living-pulse .botany-flower {
+  filter: drop-shadow(0 0 10px var(--living-anchor-glow));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botany-root,
+  .botany-vine,
+  .botany-leaf,
+  .botany-flower {
+    transition: none !important;
+  }
+}
