@@ -85,6 +85,7 @@ labs/unit-resonance-lattice/
   render.js
   styles.css
 
+docs/starwell/living-room-ygg-graft.md
 apps/starwell/test/unitResonanceLattice.test.js
 unit-resonance-lattice.html
 harbor.html
