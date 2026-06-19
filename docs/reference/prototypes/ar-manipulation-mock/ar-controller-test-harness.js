@@ -39,9 +39,15 @@ async function runTests() {
   const shim = createGestureAdapterShim(controller);
   const tests = [];
 
-  controller.moveBy(AR_MANIPULATION_CONFIG.step, 0);
+  controller.moveBy(AR_MANIPULATION_CONFIG.step, 0, 0);
   tests.push(assert('moveBy updates x', controller.getState().x === AR_MANIPULATION_CONFIG.step));
   tests.push(assert('moveBy sets drag mode', controller.getState().mode === 'drag'));
+
+  controller.moveAxis('z', AR_MANIPULATION_CONFIG.zStep);
+  tests.push(assert('moveAxis updates z', controller.getState().z === AR_MANIPULATION_CONFIG.zStep));
+
+  controller.moveAxis('z', 999);
+  tests.push(assert('moveAxis clamps z max', controller.getState().z <= 180));
 
   controller.rotateBy(AR_MANIPULATION_CONFIG.rotationStep);
   tests.push(assert('rotateBy updates rotation', controller.getState().rotation === AR_MANIPULATION_CONFIG.rotationStep));
@@ -58,6 +64,7 @@ async function runTests() {
 
   controller.reset();
   tests.push(assert('reset restores x', controller.getState().x === 0));
+  tests.push(assert('reset restores z', controller.getState().z === 0));
   tests.push(assert('reset restores visibility', controller.getState().visible === true));
 
   controller.syntheticGesture(SYNTHETIC_GESTURES.twoHandRotate);
