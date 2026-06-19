@@ -11,6 +11,7 @@ import './components/living-room/living-room-three-hearth.css';
 import './components/living-room/living-room-holographic.css';
 import './components/living-room/living-room-growth.css';
 import './components/living-room/living-room-botanical.css';
+import './components/living-room/living-room-hearth-unified.css';
 import './components/living-room/living-room-folds.css';
 import './components/living-room/living-room-motion.css';
 import './components/living-room/living-room-preview.css';
