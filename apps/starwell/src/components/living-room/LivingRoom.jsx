@@ -104,6 +104,24 @@ function SanctuaryLayers({ doors, selectedKey }) {
   );
 }
 
+function FifthFormBotanicalGrowth() {
+  return (
+    <div className="living-fifth-botany" aria-hidden="true">
+      <span className="botany-root botany-root-left" />
+      <span className="botany-root botany-root-right" />
+      <span className="botany-root botany-root-centre" />
+      <span className="botany-leaf botany-leaf-star botany-leaf-star-a" />
+      <span className="botany-leaf botany-leaf-star botany-leaf-star-b" />
+      <span className="botany-vine botany-vine-left" />
+      <span className="botany-vine botany-vine-right" />
+      <span className="botany-leaf botany-leaf-tide botany-leaf-tide-a" />
+      <span className="botany-leaf botany-leaf-tide botany-leaf-tide-b" />
+      <span className="botany-flower botany-flower-moon botany-flower-left" />
+      <span className="botany-flower botany-flower-moon botany-flower-right" />
+    </div>
+  );
+}
+
 function FifthFormGrowthMap({ anchors, activeAnchor, growthStage, onGrow }) {
   return (
     <div className="living-fifth-growth" aria-label="Grow the Fifth Form">
@@ -186,6 +204,7 @@ export function LivingRoom({ rooms, studies, selected, selectedType, onSelect, p
 
           <section className="living-hearth" aria-label="Fifth Form hearth">
             <FifthFormHearth3D anchor={activeAnchor} growthStage={growthStage} pulsing={pulseActive} lowMotion={lowMotion} onPulse={() => setPulseCount((count) => count + 1)} />
+            <FifthFormBotanicalGrowth />
             <FifthFormGrowthMap anchors={livingRoomAnchors} activeAnchor={activeAnchor} growthStage={growthStage} onGrow={growAnchor} />
             <div className="living-anchor-strip" aria-label="Anchor choices">
               {livingRoomAnchors.map((anchor) => {
