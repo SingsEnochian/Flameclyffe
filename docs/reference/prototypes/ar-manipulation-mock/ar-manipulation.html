@@ -15,7 +15,8 @@
 </head>
 <body>
   <main class="ar-shell deep-two-column-shell" aria-labelledby="ar-title">
-    <section class="ar-stage deep-panel" aria-label="Pointer-first AR manipulation stage">
+    <section id="ar-stage" class="ar-stage deep-panel" aria-label="Pointer-first AR manipulation stage">
+      <div class="light-field" aria-hidden="true"></div>
       <div class="stage-copy deep-stage-copy">
         <p class="eyebrow deep-eyebrow">DEEP prototype</p>
         <h1 id="ar-title">AR Manipulation Mock</h1>
@@ -39,6 +40,22 @@
       <section class="panel-card deep-panel-card">
         <h2>Object</h2>
         <p id="object-status" class="status" aria-live="polite">Ready.</p>
+      </section>
+
+      <section class="panel-card deep-panel-card">
+        <h2>Light Play</h2>
+        <div class="light-controls">
+          <label>Ambient <input id="light-ambient" type="range" min="0" max="1" step="0.01" /></label>
+          <label>Gold bloom <input id="light-bloom" type="range" min="0" max="1" step="0.01" /></label>
+          <label>Green shimmer <input id="light-green" type="range" min="0" max="1" step="0.01" /></label>
+          <label>Rim light <input id="light-rim" type="range" min="0" max="1" step="0.01" /></label>
+        </div>
+        <div class="control-grid light-presets">
+          <button id="light-moonlit" class="deep-button-ghost" type="button">Moonlit</button>
+          <button id="light-hearth" class="deep-button-ghost" type="button">Hearth</button>
+          <button id="light-grove" class="deep-button-ghost" type="button">Grove</button>
+          <button id="light-eclipse" class="deep-button-ghost" type="button">Eclipse</button>
+        </div>
       </section>
 
       <section class="panel-card deep-panel-card">
