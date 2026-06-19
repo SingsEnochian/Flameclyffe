@@ -1,14 +1,16 @@
-# Unit Resonance Lattice
+# Living Unit Resonance Tree
 
-The Unit Resonance Lattice is the first visible bridge from the sharpened math spine into the interface.
+The Unit Resonance Lattice is being shaped into the first living-tree interface for Flameclyffe.
+
+The earlier constellation view was useful as a math proof-of-life, but it did not behave like a home. The living tree adds interaction: branches open and fold, focus is remembered locally, tree limbs are separate from resonance strands, and the user can climb from trunk to branch to leaf.
 
 It keeps the proof-shape we have been adapting:
 
 1. hidden high-dimensional state;
 2. configured unit-distance relationships;
 3. bounded, consent-aware windows;
-4. projection into a visible plane;
-5. renderer-only drawing.
+4. projection into a visible tree;
+5. renderer-only drawing and interaction.
 
 ## Live routes after deploy
 
@@ -27,18 +29,33 @@ canon, instrument, archive, visual, access, ritual
 
 These are interface dimensions, not physics claims. They let route nodes describe how close they are in practical site behaviour.
 
+## Tree behaviour
+
+```txt
+Root: harbour
+Default-open branches: harbour, starwell
+Click a bud: focus and open/fold its branch
+Grow all branches: open every parent node
+Prune to trunk: return to the default harbour/starwell shape
+Green limbs: parent-child tree structure
+Gold dashed strands: unit-resonance links inside the visible canopy
+```
+
+State is stored in local storage only. It does not alter canon, route records, consent state, or repository data.
+
 ## Contract
 
 ```txt
-Adapter/data: route nodes and vectors
+Adapter/data: route nodes, parent ids, vectors, route hrefs
 Metric: scaled weighted Euclidean distance
 Window: visible + consented + kind-filtered nodes
-Graph: unit strands within tolerance
-Projection: radial layout for the current bounded graph
-Renderer: SVG only
+Tree: root, default-open branches, focus path
+Graph: branch limbs + unit strands inside the visible canopy
+Projection: upward-growing tree layout
+Renderer: SVG interaction only
 ```
 
-The renderer does not own canon. It receives a graph and paints it.
+The renderer does not own canon. It receives a graph and grows the current view.
 
 ## Files
 
@@ -52,12 +69,13 @@ labs/unit-resonance-lattice/
 
 apps/starwell/test/unitResonanceLattice.test.js
 unit-resonance-lattice.html
+harbor.html
 ```
 
 ## Next integration path
 
-1. Keep this static lab green and readable.
-2. Add the lattice link to `harbor.html`.
-3. Convert the static route data into a route registry adapter.
-4. Feed the same kernel into the STARWELL React interface.
-5. Later, feed compatible graph edges into gallery tethers and DEEP HUD strands.
+1. Keep this living tree green and readable.
+2. Convert the static route data into a route registry adapter.
+3. Feed the same kernel into the STARWELL React interface.
+4. Add gallery tethers as leaf-level branch/detail panels.
+5. Later, feed compatible graph edges into DEEP HUD strands.
