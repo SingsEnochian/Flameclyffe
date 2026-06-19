@@ -123,6 +123,32 @@
   transform: rotate(calc(var(--cturn) * -1));
 }
 
+.deep-vector-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+  max-width: 36rem;
+  margin: 0.9rem 0 1rem;
+}
+
+.deep-vector-strip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  border: 1px solid hsla(var(--anchor-hue), 65%, 72%, 0.22);
+  border-radius: 999px;
+  padding: 0.34rem 0.55rem;
+  background: rgba(5, 16, 13, 0.58);
+  color: var(--dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+}
+
+.deep-vector-strip strong {
+  color: hsl(var(--anchor-hue), 78%, 74%);
+  font-weight: 600;
+}
+
 .fifth-functional-readout {
   margin-top: 1rem;
   padding: 0.85rem 1rem;
