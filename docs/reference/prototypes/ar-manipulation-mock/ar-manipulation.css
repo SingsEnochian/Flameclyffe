@@ -171,18 +171,19 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.light-controls {
+.light-controls,
+.sound-volume {
   display: grid;
   gap: 10px;
 }
 
-.light-controls label {
-  display: grid;
-  gap: 4px;
+.light-controls label,
+.sound-volume {
   color: rgba(247, 239, 217, 0.72);
 }
 
-.light-controls input {
+.light-controls input,
+.sound-volume input {
   width: 100%;
 }
 
