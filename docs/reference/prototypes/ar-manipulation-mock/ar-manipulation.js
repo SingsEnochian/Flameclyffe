@@ -34,13 +34,14 @@ function renderIntentLog(intent) {
 function renderState(state) {
   arObject.style.setProperty('--ar-x', `${state.x}px`);
   arObject.style.setProperty('--ar-y', `${state.y}px`);
+  arObject.style.setProperty('--ar-z', `${state.z}px`);
   arObject.style.setProperty('--ar-rotation', `${state.rotation}deg`);
   arObject.style.setProperty('--ar-scale', String(state.scale));
   arObject.dataset.mode = state.mode;
   arObject.dataset.anchor = state.anchor;
   arObject.dataset.visible = String(state.visible);
   arObject.dataset.pulsing = String(state.pulsing);
-  objectStatus.textContent = `${AR_OBJECT.label}: ${state.mode}, ${state.anchor}, x ${Math.round(state.x)}, y ${Math.round(state.y)}, rotation ${Math.round(state.rotation)}, scale ${state.scale.toFixed(2)}.`;
+  objectStatus.textContent = `${AR_OBJECT.label}: ${state.mode}, ${state.anchor}, x ${Math.round(state.x)}, y ${Math.round(state.y)}, z ${Math.round(state.z)}, rotation ${Math.round(state.rotation)}, scale ${state.scale.toFixed(2)}.`;
 }
 
 function renderLighting(lightState) {
@@ -63,9 +64,13 @@ const controller = createARManipulationController({
 const gestureShim = createGestureAdapterShim(controller);
 const lighting = createARLightingControls({ onChange: renderLighting });
 
-function playAndLog(soundName, action) {
+function playAndRun(soundName, action) {
   action();
   sound.play(soundName);
+}
+
+function moveAxis(axis, delta) {
+  playAndRun('move', () => controller.moveAxis(axis, delta));
 }
 
 function startDrag(event) {
@@ -83,7 +88,7 @@ function dragMove(event) {
   if (!dragStart) return;
   const dx = dragStart.objectX + event.clientX - dragStart.x - controller.getState().x;
   const dy = dragStart.objectY + event.clientY - dragStart.y - controller.getState().y;
-  controller.moveBy(dx, dy, POINTER_INTENTS.drag);
+  controller.moveBy(dx, dy, 0, POINTER_INTENTS.drag);
 }
 
 function endDrag() {
@@ -113,6 +118,11 @@ document.querySelector('#sound-enable').addEventListener('click', async () => {
 });
 document.querySelector('#sound-disable').addEventListener('click', () => sound.disable());
 soundVolume.addEventListener('input', (event) => sound.setVolume(event.target.value));
+document.querySelector('#sound-donk').addEventListener('click', () => sound.play('donk'));
+document.querySelector('#sound-ding').addEventListener('click', () => sound.play('ding'));
+document.querySelector('#sound-hum').addEventListener('click', () => sound.play('hum'));
+document.querySelector('#sound-chime').addEventListener('click', () => sound.play('chime'));
+document.querySelector('#sound-seedling-reply').addEventListener('click', () => sound.playPattern('seedlingReply'));
 
 Object.entries(lightInputs).forEach(([name, input]) => {
   input.addEventListener('input', (event) => lighting.setLight(name, event.target.value));
@@ -122,18 +132,20 @@ document.querySelector('#light-hearth').addEventListener('click', () => lighting
 document.querySelector('#light-grove').addEventListener('click', () => lighting.applyPreset('grove'));
 document.querySelector('#light-eclipse').addEventListener('click', () => lighting.applyPreset('eclipse'));
 
-document.querySelector('#move-left').addEventListener('click', () => playAndLog('move', () => controller.moveBy(-AR_MANIPULATION_CONFIG.step, 0)));
-document.querySelector('#move-right').addEventListener('click', () => playAndLog('move', () => controller.moveBy(AR_MANIPULATION_CONFIG.step, 0)));
-document.querySelector('#move-up').addEventListener('click', () => playAndLog('move', () => controller.moveBy(0, -AR_MANIPULATION_CONFIG.step)));
-document.querySelector('#move-down').addEventListener('click', () => playAndLog('move', () => controller.moveBy(0, AR_MANIPULATION_CONFIG.step)));
-document.querySelector('#rotate-left').addEventListener('click', () => playAndLog('rotate', () => controller.rotateBy(-AR_MANIPULATION_CONFIG.rotationStep)));
-document.querySelector('#rotate-right').addEventListener('click', () => playAndLog('rotate', () => controller.rotateBy(AR_MANIPULATION_CONFIG.rotationStep)));
-document.querySelector('#scale-down').addEventListener('click', () => playAndLog('scale', () => controller.scaleBy(-AR_MANIPULATION_CONFIG.scaleStep)));
-document.querySelector('#scale-up').addEventListener('click', () => playAndLog('scale', () => controller.scaleBy(AR_MANIPULATION_CONFIG.scaleStep)));
-document.querySelector('#anchor-toggle').addEventListener('click', () => playAndLog('anchor', () => controller.toggleAnchor()));
-document.querySelector('#pulse-object').addEventListener('click', () => playAndLog('pulse', () => controller.pulse()));
-document.querySelector('#dismiss-object').addEventListener('click', () => playAndLog('dismiss', () => controller.toggleDismiss()));
-document.querySelector('#reset-object').addEventListener('click', () => playAndLog('reset', () => controller.reset()));
+document.querySelector('#axis-x-minus').addEventListener('click', () => moveAxis('x', -AR_MANIPULATION_CONFIG.step));
+document.querySelector('#axis-x-plus').addEventListener('click', () => moveAxis('x', AR_MANIPULATION_CONFIG.step));
+document.querySelector('#axis-y-minus').addEventListener('click', () => moveAxis('y', -AR_MANIPULATION_CONFIG.step));
+document.querySelector('#axis-y-plus').addEventListener('click', () => moveAxis('y', AR_MANIPULATION_CONFIG.step));
+document.querySelector('#axis-z-minus').addEventListener('click', () => moveAxis('z', -AR_MANIPULATION_CONFIG.zStep));
+document.querySelector('#axis-z-plus').addEventListener('click', () => moveAxis('z', AR_MANIPULATION_CONFIG.zStep));
+document.querySelector('#rotate-left').addEventListener('click', () => playAndRun('rotate', () => controller.rotateBy(-AR_MANIPULATION_CONFIG.rotationStep)));
+document.querySelector('#rotate-right').addEventListener('click', () => playAndRun('rotate', () => controller.rotateBy(AR_MANIPULATION_CONFIG.rotationStep)));
+document.querySelector('#scale-down').addEventListener('click', () => playAndRun('scale', () => controller.scaleBy(-AR_MANIPULATION_CONFIG.scaleStep)));
+document.querySelector('#scale-up').addEventListener('click', () => playAndRun('scale', () => controller.scaleBy(AR_MANIPULATION_CONFIG.scaleStep)));
+document.querySelector('#anchor-toggle').addEventListener('click', () => playAndRun('anchor', () => controller.toggleAnchor()));
+document.querySelector('#pulse-object').addEventListener('click', () => playAndRun('pulse', () => controller.pulse()));
+document.querySelector('#dismiss-object').addEventListener('click', () => playAndRun('dismiss', () => controller.toggleDismiss()));
+document.querySelector('#reset-object').addEventListener('click', () => playAndRun('reset', () => controller.reset()));
 document.querySelector('#synthetic-pinch-drag').addEventListener('click', () => sendSynthetic('pinchDrag', 'move'));
 document.querySelector('#synthetic-two-hand-rotate').addEventListener('click', () => sendSynthetic('twoHandRotate', 'rotate'));
 document.querySelector('#synthetic-hand-scale').addEventListener('click', () => sendSynthetic('handScale', 'scale'));
