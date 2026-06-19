@@ -94,6 +94,7 @@ export function findUnitEdges(nodes = [], metric, options = {}) {
           target: target.id,
           distance,
           delta,
+          kind: 'resonance',
           strength: edgeStrength(distance, metric),
           dimensions: explainDistance(source.vector, target.vector, metric),
         });
@@ -144,6 +145,74 @@ export function selectWindow(nodes = [], windowConfig = {}) {
     .slice(0, limit);
 }
 
+export function buildNodeMap(nodes = []) {
+  return new Map(nodes.map((node) => [node.id, node]));
+}
+
+export function buildChildrenMap(nodes = []) {
+  const children = new Map();
+  nodes.forEach((node) => {
+    const parentId = node.parentId ?? node.meta?.parentId ?? null;
+    if (!parentId) return;
+    if (!children.has(parentId)) children.set(parentId, []);
+    children.get(parentId).push(node);
+  });
+
+  children.forEach((siblings) => {
+    siblings.sort((left, right) => finiteNumber(left.order ?? left.meta?.order, 0) - finiteNumber(right.order ?? right.meta?.order, 0) || left.id.localeCompare(right.id));
+  });
+
+  return children;
+}
+
+export function ancestorIds(nodeId, nodes = []) {
+  const map = buildNodeMap(nodes);
+  const ancestors = [];
+  let current = map.get(nodeId);
+  const seen = new Set();
+
+  while (current) {
+    const parentId = current.parentId ?? current.meta?.parentId ?? null;
+    if (!parentId || seen.has(parentId)) break;
+    seen.add(parentId);
+    ancestors.unshift(parentId);
+    current = map.get(parentId);
+  }
+
+  return ancestors;
+}
+
+export function selectTreeNodes(nodes = [], treeConfig = {}, state = {}) {
+  const rootId = treeConfig.rootId ?? nodes[0]?.id;
+  const openIds = new Set([rootId, ...(treeConfig.defaultOpenIds ?? []), ...(state.openIds ?? [])].filter(Boolean));
+  const focusId = state.focusId ?? treeConfig.defaultFocusId ?? rootId;
+  ancestorIds(focusId, nodes).forEach((id) => openIds.add(id));
+
+  const map = buildNodeMap(nodes);
+  const children = buildChildrenMap(nodes);
+  const visible = [];
+  const walk = (id, depth = 0) => {
+    const node = map.get(id);
+    if (!node) return;
+    const childNodes = children.get(id) ?? [];
+    visible.push({
+      ...node,
+      depth,
+      childIds: childNodes.map((child) => child.id),
+      hasChildren: childNodes.length > 0,
+      isOpen: openIds.has(id),
+      isFocused: id === focusId,
+      isAncestor: ancestorIds(focusId, nodes).includes(id),
+    });
+
+    if (!openIds.has(id)) return;
+    childNodes.forEach((child) => walk(child.id, depth + 1));
+  };
+
+  walk(rootId, 0);
+  return visible;
+}
+
 export function projectRadial(nodes = [], projection = {}) {
   const radius = finiteNumber(projection.radius, 260);
   const centre = projection.centre ?? { x: 360, y: 320 };
@@ -169,6 +238,53 @@ export function projectRadial(nodes = [], projection = {}) {
   });
 }
 
+export function projectTree(nodes = [], treeConfig = {}) {
+  const width = finiteNumber(treeConfig.width, 840);
+  const rootY = finiteNumber(treeConfig.rootY, 590);
+  const levelGap = finiteNumber(treeConfig.levelGap, 130);
+  const paddingX = finiteNumber(treeConfig.paddingX, 80);
+  const byDepth = new Map();
+
+  nodes.forEach((node) => {
+    const depth = Number.isInteger(node.depth) ? node.depth : 0;
+    if (!byDepth.has(depth)) byDepth.set(depth, []);
+    byDepth.get(depth).push(node);
+  });
+
+  return nodes.map((node) => {
+    const depth = Number.isInteger(node.depth) ? node.depth : 0;
+    const siblings = byDepth.get(depth) ?? [];
+    const index = siblings.findIndex((candidate) => candidate.id === node.id);
+    const usableWidth = Math.max(1, width - paddingX * 2);
+    const x = siblings.length <= 1 ? width / 2 : paddingX + (usableWidth * (index + 1)) / (siblings.length + 1);
+    const y = rootY - depth * levelGap;
+
+    return {
+      ...node,
+      position: { x, y },
+    };
+  });
+}
+
+export function findBranchEdges(nodes = []) {
+  const visibleIds = new Set(nodes.map((node) => node.id));
+  const map = buildNodeMap(nodes);
+
+  return nodes
+    .map((node) => {
+      const parentId = node.parentId ?? node.meta?.parentId ?? null;
+      if (!parentId || !visibleIds.has(parentId)) return null;
+      const parent = map.get(parentId);
+      return {
+        source: parentId,
+        target: node.id,
+        kind: 'branch',
+        strength: node.isFocused || node.isAncestor || parent?.isFocused ? 1 : 0.64,
+      };
+    })
+    .filter(Boolean);
+}
+
 export function buildLatticeGraph(nodes = [], config = {}) {
   const windowed = selectWindow(nodes, config.window ?? {});
   const projected = projectRadial(windowed, config.projection ?? {});
@@ -179,5 +295,24 @@ export function buildLatticeGraph(nodes = [], config = {}) {
     metric: config.metric,
     projection: config.projection ?? {},
     window: config.window ?? {},
+  };
+}
+
+export function buildLivingTreeGraph(nodes = [], config = {}, state = {}) {
+  const windowed = selectWindow(nodes, config.window ?? {});
+  const treeNodes = selectTreeNodes(windowed, config.tree ?? {}, state);
+  const projected = projectTree(treeNodes, config.tree ?? {});
+  const branchEdges = findBranchEdges(projected);
+  const resonanceEdges = findUnitEdges(projected, config.metric, config.edges ?? {});
+
+  return {
+    nodes: projected,
+    branchEdges,
+    resonanceEdges,
+    edges: [...branchEdges, ...resonanceEdges],
+    metric: config.metric,
+    tree: config.tree ?? {},
+    window: config.window ?? {},
+    state,
   };
 }
