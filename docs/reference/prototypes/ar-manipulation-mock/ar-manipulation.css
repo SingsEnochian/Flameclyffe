@@ -18,9 +18,10 @@ body {
   --ar-bloom: 0.48;
   --ar-green: 0.42;
   --ar-rim: 0.52;
+  --ar-object-size: clamp(150px, 18vw, 190px);
   position: relative;
   overflow: hidden;
-  min-height: 720px;
+  min-height: clamp(520px, 68vh, 720px);
   isolation: isolate;
   perspective: 900px;
   transform-style: preserve-3d;
@@ -80,9 +81,9 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 190px;
-  height: 190px;
-  margin: -95px 0 0 -95px;
+  width: var(--ar-object-size);
+  height: var(--ar-object-size);
+  margin: calc(var(--ar-object-size) / -2) 0 0 calc(var(--ar-object-size) / -2);
   border: 0;
   border-radius: 999px;
   color: var(--deep-ink, #f7efd9);
@@ -135,8 +136,8 @@ body {
 }
 
 .orb-core {
-  width: 74px;
-  height: 74px;
+  width: 39%;
+  height: 39%;
   background: radial-gradient(circle, #fff7dc, #e4c36d 42%, #1b8a68 100%);
   box-shadow: 0 0 calc(18px + var(--ar-bloom) * 26px) rgba(228, 195, 109, calc(0.32 + var(--ar-bloom) * 0.46));
 }
@@ -146,13 +147,13 @@ body {
   box-shadow: 0 0 calc(8px + var(--ar-rim) * 16px) rgba(255, 247, 220, calc(var(--ar-rim) * 0.24));
 }
 
-.ring-one { width: 120px; height: 120px; }
-.ring-two { width: 158px; height: 158px; transform: rotate(28deg) scaleY(0.78); }
+.ring-one { width: 63%; height: 63%; }
+.ring-two { width: 83%; height: 83%; transform: rotate(28deg) scaleY(0.78); }
 
 .orb-label {
   position: absolute;
-  bottom: 26px;
-  font-size: 0.8rem;
+  bottom: 14%;
+  font-size: clamp(0.68rem, 1.1vw, 0.8rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -218,6 +219,55 @@ body {
 @keyframes ar-pulse {
   from { transform: scale(0.7); opacity: 0.95; }
   to { transform: scale(1.35); opacity: 0; }
+}
+
+@media (max-width: 960px) {
+  .ar-stage {
+    --ar-object-size: clamp(132px, 34vw, 170px);
+    min-height: 520px;
+  }
+
+  .spatial-grid {
+    inset: 10% 6% 14%;
+    background-size: 34px 34px;
+  }
+
+  .anchor-zone {
+    width: min(82%, 520px);
+    min-height: 70px;
+  }
+}
+
+@media (max-width: 560px) {
+  .ar-stage {
+    --ar-object-size: clamp(118px, 42vw, 150px);
+    min-height: 430px;
+  }
+
+  .stage-copy {
+    max-width: 92%;
+  }
+
+  .spatial-grid {
+    inset: 18% 2% 10%;
+    background-size: 28px 28px;
+  }
+
+  .anchor-zone {
+    bottom: 8%;
+    width: 90%;
+    min-height: 58px;
+    font-size: 0.82rem;
+  }
+
+  .control-grid,
+  .button-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sound-pads button:last-child {
+    grid-column: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
