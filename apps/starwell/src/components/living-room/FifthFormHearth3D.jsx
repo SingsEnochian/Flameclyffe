@@ -148,7 +148,6 @@ function FifthFormScene({ lowMotion = false, growthStage = 1 }) {
   return (
     <>
       <PerspectiveCamera makeDefault position={[0, 0.3, 7.4]} fov={41} />
-      <color attach="background" args={['#020604']} />
       <ambientLight intensity={0.14} color="#b9d8c8" />
       <directionalLight castShadow position={[3.8, 5.6, 5.8]} intensity={1.08} color="#e7c477" shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
       <pointLight position={[-2.8, 1.8, 2.8]} intensity={2.1 + clampedGrowthStage * 0.18} color="#2d7a5f" />
@@ -163,7 +162,7 @@ function FifthFormScene({ lowMotion = false, growthStage = 1 }) {
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.05, 0]} receiveShadow>
         <circleGeometry args={[2.85, 96]} />
-        <meshStandardMaterial color="#100c08" emissive="#2d1a0e" emissiveIntensity={0.18 + clampedGrowthStage * 0.018} roughness={0.82} metalness={0.35} transparent opacity={0.82} />
+        <meshStandardMaterial color="#100c08" emissive="#2d1a0e" emissiveIntensity={0.18 + clampedGrowthStage * 0.018} roughness={0.82} metalness={0.35} transparent opacity={0.62} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.01, 0]}>
         <ringGeometry args={[1.45, 2.85, 96]} />
@@ -179,7 +178,7 @@ export function FifthFormHearth3D({ anchor, growthStage = 1, pulsing = false, lo
       <button className="hearth-pulse-hitbox" type="button" onClick={onPulse} aria-label={`Pulse the ${anchor?.label || 'seed'} Fifth Form hearth`}>
         <span>Pulse Fifth Form hearth</span>
       </button>
-      <Canvas className="hearth-three-canvas" shadows dpr={[1, 1.5]} gl={{ antialias: true, alpha: false }}>
+      <Canvas className="hearth-three-canvas" shadows dpr={[1, 1.5]} gl={{ antialias: true, alpha: true }}>
         <FifthFormScene lowMotion={lowMotion} growthStage={growthStage} />
       </Canvas>
       <span className="hearth-label">
