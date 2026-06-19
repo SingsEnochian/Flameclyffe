@@ -1,0 +1,198 @@
+.living-fifth-growth {
+  position: relative;
+  z-index: 4;
+  width: min(100%, 28rem);
+  aspect-ratio: 1 / 0.46;
+  margin-top: -0.7rem;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.living-fifth-growth-map {
+  position: absolute;
+  inset: -28% 3% -22%;
+  width: 94%;
+  height: auto;
+  opacity: 0.78;
+  filter:
+    drop-shadow(0 0 10px rgba(120, 238, 196, 0.12))
+    drop-shadow(0 0 14px rgba(231, 196, 119, 0.10));
+  pointer-events: none;
+}
+
+.fifth-growth-ring,
+.fifth-growth-thread,
+.fifth-growth-seed {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.fifth-growth-ring-outer {
+  stroke: rgba(231, 196, 119, 0.14);
+  stroke-width: 0.55;
+  stroke-dasharray: 2.8 2.4;
+}
+
+.fifth-growth-ring-inner {
+  stroke: rgba(120, 238, 196, 0.13);
+  stroke-width: 0.42;
+}
+
+.fifth-growth-thread {
+  stroke: rgba(231, 196, 119, 0.20);
+  stroke-width: 0.5;
+}
+
+.fifth-growth-thread-soft {
+  stroke: rgba(120, 238, 196, 0.15);
+  stroke-width: 0.35;
+}
+
+.fifth-growth-seed {
+  stroke: rgba(247, 239, 217, 0.34);
+  stroke-width: 0.52;
+}
+
+.living-fifth-growth-node {
+  position: absolute;
+  left: var(--node-x);
+  top: var(--node-y);
+  transform: translate(-50%, -50%);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'glyph label'
+    'glyph stage';
+  gap: 0.02rem 0.38rem;
+  align-items: center;
+  min-width: 7.4rem;
+  border: 1px solid rgba(163, 226, 201, 0.16);
+  border-radius: 999px;
+  padding: 0.42rem 0.64rem 0.44rem 0.46rem;
+  background:
+    linear-gradient(135deg, rgba(2, 8, 7, 0.82), rgba(16, 11, 8, 0.76)),
+    radial-gradient(circle at 12% 50%, var(--living-anchor-glow), transparent 76%);
+  color: #f7efd9;
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    0 0 18px rgba(0, 0, 0, 0.22),
+    inset 0 0 16px rgba(247, 239, 217, 0.03);
+  backdrop-filter: blur(10px) saturate(1.2);
+}
+
+.living-fifth-growth-node span {
+  grid-area: glyph;
+  display: grid;
+  place-items: center;
+  width: 1.72rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--living-anchor-glow), transparent 72%);
+  font-size: 0.86rem;
+}
+
+.living-fifth-growth-node strong {
+  grid-area: label;
+  font-size: 0.7rem;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+
+.living-fifth-growth-node em {
+  grid-area: stage;
+  color: rgba(247, 239, 217, 0.48);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.56rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.living-fifth-growth-node.grown {
+  border-color: hsla(var(--living-anchor-hue), 80%, 74%, 0.30);
+}
+
+.living-fifth-growth-node.active,
+.living-fifth-growth-node:hover,
+.living-fifth-growth-node:focus-visible {
+  outline: none;
+  border-color: hsla(var(--living-anchor-hue), 88%, 78%, 0.56);
+  box-shadow:
+    0 0 0 0.14rem hsla(var(--living-anchor-hue), 82%, 70%, 0.12),
+    0 0 26px var(--living-anchor-glow),
+    inset 0 0 18px rgba(231, 196, 119, 0.06);
+}
+
+.living-fifth-growth-node.active::after,
+.living-fifth-growth-node.grown::after {
+  content: '';
+  position: absolute;
+  inset: -0.38rem;
+  border-radius: inherit;
+  border: 1px solid hsla(var(--living-anchor-hue), 76%, 72%, 0.18);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.living-anchor-button.grown {
+  border-color: rgba(231, 196, 119, 0.26);
+  background:
+    linear-gradient(135deg, rgba(14, 23, 18, 0.78), rgba(30, 19, 10, 0.72)),
+    radial-gradient(circle at 18% 50%, var(--living-anchor-glow), transparent 72%);
+}
+
+.living-growth-3 .fifth-growth-ring-outer,
+.living-growth-4 .fifth-growth-ring-outer,
+.living-growth-5 .fifth-growth-ring-outer {
+  animation: fifth-growth-turn 18s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+.living-growth-4 .fifth-growth-thread,
+.living-growth-5 .fifth-growth-thread {
+  stroke-dasharray: 3.5 2.5;
+  animation: fifth-growth-dash 12s linear infinite;
+}
+
+.living-growth-5 .fifth-growth-seed {
+  stroke: rgba(231, 196, 119, 0.50);
+  filter: drop-shadow(0 0 7px rgba(231, 196, 119, 0.24));
+}
+
+@keyframes fifth-growth-turn {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fifth-growth-dash {
+  to { stroke-dashoffset: -24; }
+}
+
+@media (max-width: 760px) {
+  .living-fifth-growth {
+    width: min(100%, 24rem);
+    aspect-ratio: 1 / 0.62;
+    margin-top: -0.2rem;
+  }
+
+  .living-fifth-growth-node {
+    min-width: 5.2rem;
+    padding-right: 0.48rem;
+  }
+
+  .living-fifth-growth-node strong {
+    font-size: 0.62rem;
+  }
+
+  .living-fifth-growth-node em {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fifth-growth-ring-outer,
+  .fifth-growth-thread {
+    animation: none !important;
+  }
+}
