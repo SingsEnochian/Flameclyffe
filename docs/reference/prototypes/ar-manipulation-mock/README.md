@@ -10,7 +10,7 @@ Open `ar-controller-test-harness.html` to run tiny controller transition checks.
 
 This prototype tests the manipulation contract before any AR or sensor adapter exists.
 
-It uses pointer, touch, keyboard, button controls, synthetic gesture buttons, CSS-variable light controls, XYZ axis controls, and explicitly enabled procedural sound only.
+It uses pointer, touch, keyboard, button controls, synthetic gesture buttons, CSS-variable light controls, XYZ axis controls, responsive sizing, and explicitly enabled procedural sound only.
 
 ## Manipulation intents
 
@@ -100,6 +100,15 @@ Playable pads:
 
 The sounds are small Web Audio oscillator tones. They are not samples, recordings, microphone input, or sensor input.
 
+## Responsive sizing
+
+The stage and object now scale down for narrower screens.
+
+- The AR object uses a CSS size variable with `clamp()`.
+- The stage height clamps instead of staying fixed at desktop height.
+- Orb rings and core scale as percentages of the object.
+- Grid, anchor plane, and control columns adjust at small breakpoints.
+
 ## Implementation notes
 
 - No real AR runtime is started.
@@ -107,6 +116,7 @@ The sounds are small Web Audio oscillator tones. They are not samples, recording
 - No sound plays automatically.
 - `ar-intents.js` owns pointer and synthetic intent vocabulary.
 - `ar-manipulation-controller.js` owns manipulation state transitions, including X/Y/Z movement.
+- `ar-pointer-drag.js` owns pointer drag start, move, and release handling.
 - `gesture-adapter-shim.js` accepts and validates payload-shaped synthetic gesture events.
 - `ar-keyboard-controls.js` owns keyboard-to-controller mapping, including Z movement.
 - `ar-lighting.model.js` owns lighting defaults and presets.
@@ -114,7 +124,7 @@ The sounds are small Web Audio oscillator tones. They are not samples, recording
 - `ar-sound.model.js` owns sound defaults, event tone values, and playable pad patterns.
 - `ar-sound-controls.js` owns audio enable, mute, volume, tone playback, and pattern playback.
 - `ar-controller-test-harness.js` runs controller transition checks, payload checks, Z axis checks, and pulse timeout checks.
-- `ar-manipulation.js` owns DOM and input wiring.
+- `ar-manipulation.js` owns DOM and input wiring only.
 - JavaScript owns manipulation state and intent events.
 - CSS owns visual feedback.
 - Shared prototype CSS is loaded before local CSS.
@@ -137,6 +147,7 @@ A production version should become contained modules such as:
 - ARLightingController
 - ARSoundController
 - ARAxisControls
+- ARPointerDrag
 - ARIntentLog
 - ARObjectPresenter
 - arManipulationModel
