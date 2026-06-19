@@ -1,4 +1,4 @@
-import { AR_SOUND_DEFAULTS, AR_SOUND_EVENTS, AR_SOUND_LIMITS } from './ar-sound.model.js';
+import { AR_SOUND_DEFAULTS, AR_SOUND_EVENTS, AR_SOUND_LIMITS, AR_SOUND_PATTERNS } from './ar-sound.model.js';
 
 function clampVolume(value) {
   return Math.max(AR_SOUND_LIMITS.minVolume, Math.min(AR_SOUND_LIMITS.maxVolume, Number(value)));
@@ -57,6 +57,15 @@ export function createARSoundControls(options = {}) {
     oscillator.stop(now + event.durationMs / 1000 + 0.02);
   }
 
+  function playPattern(patternName, gapMs = 135) {
+    if (!state.enabled || !audioContext) return;
+    const pattern = AR_SOUND_PATTERNS[patternName];
+    if (!pattern) return;
+    pattern.forEach((eventName, index) => {
+      window.setTimeout(() => play(eventName), index * gapMs);
+    });
+  }
+
   function getState() {
     return { ...state };
   }
@@ -69,5 +78,6 @@ export function createARSoundControls(options = {}) {
     disable,
     setVolume,
     play,
+    playPattern,
   };
 }
