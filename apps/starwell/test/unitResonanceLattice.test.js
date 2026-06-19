@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 
 import {
   buildLatticeGraph,
+  buildLivingTreeGraph,
   findUnitEdges,
   scaledWeightedDistance,
+  selectTreeNodes,
   selectWindow,
   validateMetric,
 } from '../../../labs/unit-resonance-lattice/lattice.js';
@@ -76,4 +78,29 @@ test('route lattice graph is bounded, projected, and connected', () => {
   assert.ok(graph.edges.length <= routeLatticeConfig.metric.edgeLimit);
   assert.ok(graph.nodes.every((node) => Number.isFinite(node.position.x) && Number.isFinite(node.position.y)));
   assert.ok(graph.edges.every((edge) => edge.strength >= 0 && edge.strength <= 1));
+});
+
+test('tree window starts at harbour and opens default STARWELL branch', () => {
+  const treeNodes = selectTreeNodes(routeLatticeNodes, routeLatticeConfig.tree, {
+    focusId: 'harbour',
+    openIds: ['harbour', 'starwell'],
+  });
+
+  assert.equal(treeNodes[0].id, 'harbour');
+  assert.ok(treeNodes.some((node) => node.id === 'deep-observer'));
+  assert.ok(treeNodes.some((node) => node.id === 'unit-resonance-lab'));
+  assert.ok(treeNodes.some((node) => node.id === 'lattice-lab'));
+});
+
+test('living tree graph separates branch edges from resonance strands', () => {
+  const graph = buildLivingTreeGraph(routeLatticeNodes, routeLatticeConfig, {
+    focusId: 'starwell',
+    openIds: ['harbour', 'starwell'],
+  });
+
+  assert.ok(graph.nodes.length < routeLatticeNodes.length || graph.nodes.length === routeLatticeNodes.length);
+  assert.ok(graph.branchEdges.length > 0);
+  assert.ok(graph.branchEdges.every((edge) => edge.kind === 'branch'));
+  assert.ok(graph.resonanceEdges.every((edge) => edge.kind === 'resonance'));
+  assert.ok(graph.nodes.every((node) => Number.isFinite(node.position.x) && Number.isFinite(node.position.y)));
 });
