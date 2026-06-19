@@ -1,0 +1,113 @@
+.living-hearth {
+  grid-template-rows: auto min-content min-content;
+  align-content: center;
+  min-height: clamp(42rem, 74vh, 54rem);
+}
+
+.fifth-form-hearth-3d {
+  z-index: 3;
+  width: min(100%, 33rem);
+  background:
+    radial-gradient(circle at 50% 58%, rgba(201, 135, 85, 0.12), transparent 24%),
+    radial-gradient(circle at 48% 46%, rgba(120, 238, 196, 0.14), transparent 42%),
+    radial-gradient(circle at 50% 50%, rgba(2, 6, 4, 0.22), rgba(2, 6, 4, 0.70) 74%, rgba(1, 4, 3, 0.88));
+}
+
+.fifth-form-hearth-3d canvas,
+.hearth-three-canvas {
+  background: transparent !important;
+}
+
+.hearth-three-canvas {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.living-fifth-botany {
+  z-index: 4;
+  inset: 4% 9% 18%;
+}
+
+.living-fifth-growth {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: clamp(1.4rem, 3.8vw, 2.4rem);
+  width: min(calc(100% - 2rem), 35rem);
+  aspect-ratio: 1;
+  margin: 0;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.living-fifth-growth-map {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.42;
+}
+
+.living-fifth-growth-node {
+  pointer-events: auto;
+  min-width: 6.8rem;
+  background:
+    linear-gradient(135deg, rgba(2, 8, 7, 0.76), rgba(16, 11, 8, 0.68)),
+    radial-gradient(circle at 12% 50%, var(--living-anchor-glow), transparent 76%);
+}
+
+.living-fifth-growth-node[style*="--node-y: 16%"] {
+  transform: translate(-50%, -52%);
+}
+
+.living-fifth-growth-node[style*="--node-y: 84%"] {
+  transform: translate(-50%, -20%);
+}
+
+.living-anchor-strip {
+  margin-top: -0.2rem;
+  opacity: 0.58;
+  transform: scale(0.92);
+}
+
+.living-anchor-button {
+  padding: 0.46rem 0.72rem;
+  font-size: 0.8rem;
+}
+
+.living-anchor-note {
+  max-width: 32rem;
+  font-size: 0.9rem;
+}
+
+.living-hearth::before {
+  inset: 6% 6% 18%;
+  opacity: 0.62;
+}
+
+.living-hearth::after {
+  inset: 6% 5% 18%;
+}
+
+@media (max-width: 760px) {
+  .living-hearth {
+    min-height: 41rem;
+    padding-top: 1rem;
+  }
+
+  .fifth-form-hearth-3d {
+    width: min(100%, 25rem);
+  }
+
+  .living-fifth-growth {
+    top: 1.2rem;
+    width: min(calc(100% - 1rem), 27rem);
+  }
+
+  .living-fifth-growth-node {
+    min-width: 4.8rem;
+  }
+
+  .living-anchor-strip {
+    transform: scale(0.84);
+  }
+}
