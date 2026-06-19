@@ -13,9 +13,37 @@ body {
 }
 
 .ar-stage {
+  --ar-ambient: 0.38;
+  --ar-bloom: 0.48;
+  --ar-green: 0.42;
+  --ar-rim: 0.52;
   position: relative;
   overflow: hidden;
   min-height: 720px;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(228, 195, 109, calc(var(--ar-bloom) * 0.18)), transparent 38%),
+    radial-gradient(circle at 76% 70%, rgba(27, 138, 104, calc(var(--ar-green) * 0.22)), transparent 42%),
+    rgba(255, 247, 220, calc(var(--ar-ambient) * 0.035));
+}
+
+.light-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 44% 40%, rgba(255, 247, 220, calc(var(--ar-ambient) * 0.16)), transparent 28%),
+    radial-gradient(circle at 58% 44%, rgba(228, 195, 109, calc(var(--ar-bloom) * 0.28)), transparent 34%),
+    radial-gradient(circle at 66% 60%, rgba(27, 138, 104, calc(var(--ar-green) * 0.24)), transparent 38%);
+  filter: blur(12px);
+}
+
+.stage-copy,
+.spatial-grid,
+.anchor-zone,
+.ar-object {
+  z-index: 1;
 }
 
 .spatial-grid {
@@ -23,11 +51,11 @@ body {
   inset: 18%;
   border-radius: 50%;
   background:
-    linear-gradient(rgba(228, 195, 109, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(228, 195, 109, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(228, 195, 109, calc(var(--ar-rim) * 0.12)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(27, 138, 104, calc(var(--ar-green) * 0.11)) 1px, transparent 1px);
   background-size: 42px 42px;
   transform: perspective(900px) rotateX(62deg);
-  opacity: 0.42;
+  opacity: calc(0.22 + var(--ar-ambient) * 0.42);
 }
 
 .anchor-zone {
@@ -38,10 +66,10 @@ body {
   min-height: 92px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(228, 195, 109, 0.24);
+  border: 1px solid rgba(228, 195, 109, calc(var(--ar-rim) * 0.34));
   border-radius: 999px;
   color: rgba(247, 239, 217, 0.5);
-  background: rgba(27, 138, 104, 0.08);
+  background: rgba(27, 138, 104, calc(var(--ar-green) * 0.12));
   transform: translateX(-50%) perspective(900px) rotateX(64deg);
 }
 
@@ -60,6 +88,7 @@ body {
   touch-action: none;
   transform: translate3d(var(--ar-x), var(--ar-y), 0) rotate(var(--ar-rotation)) scale(var(--ar-scale));
   transition: opacity 180ms ease, filter 180ms ease;
+  filter: drop-shadow(0 0 calc(18px + var(--ar-rim) * 24px) rgba(228, 195, 109, calc(var(--ar-rim) * 0.42)));
 }
 
 .ar-object:focus-visible {
@@ -73,7 +102,9 @@ body {
 }
 
 .ar-object[data-anchor="surface"] .orb-shell {
-  box-shadow: 0 0 45px rgba(228, 195, 109, 0.52), 0 22px 55px rgba(27, 138, 104, 0.34);
+  box-shadow:
+    0 0 calc(30px + var(--ar-bloom) * 30px) rgba(228, 195, 109, calc(var(--ar-bloom) * 0.58)),
+    0 22px calc(40px + var(--ar-green) * 30px) rgba(27, 138, 104, calc(var(--ar-green) * 0.38));
 }
 
 .ar-object[data-pulsing="true"] .orb-ring {
@@ -87,8 +118,11 @@ body {
   height: 100%;
   place-items: center;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(228, 195, 109, 0.2), rgba(27, 138, 104, 0.18) 48%, transparent 70%);
-  box-shadow: 0 0 40px rgba(27, 138, 104, 0.42);
+  background:
+    radial-gradient(circle, rgba(255, 247, 220, calc(var(--ar-ambient) * 0.36)), rgba(228, 195, 109, calc(var(--ar-bloom) * 0.22)) 38%, rgba(27, 138, 104, calc(var(--ar-green) * 0.22)) 58%, transparent 76%);
+  box-shadow:
+    inset 0 0 36px rgba(255, 247, 220, calc(var(--ar-ambient) * 0.26)),
+    0 0 calc(28px + var(--ar-green) * 30px) rgba(27, 138, 104, calc(var(--ar-green) * 0.46));
 }
 
 .orb-core,
@@ -101,11 +135,12 @@ body {
   width: 74px;
   height: 74px;
   background: radial-gradient(circle, #fff7dc, #e4c36d 42%, #1b8a68 100%);
-  box-shadow: 0 0 24px rgba(228, 195, 109, 0.72);
+  box-shadow: 0 0 calc(18px + var(--ar-bloom) * 26px) rgba(228, 195, 109, calc(0.32 + var(--ar-bloom) * 0.46));
 }
 
 .orb-ring {
-  border: 1px solid rgba(255, 247, 220, 0.54);
+  border: 1px solid rgba(255, 247, 220, calc(0.24 + var(--ar-rim) * 0.48));
+  box-shadow: 0 0 calc(8px + var(--ar-rim) * 16px) rgba(255, 247, 220, calc(var(--ar-rim) * 0.24));
 }
 
 .ring-one { width: 120px; height: 120px; }
@@ -136,6 +171,25 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.light-controls {
+  display: grid;
+  gap: 10px;
+}
+
+.light-controls label {
+  display: grid;
+  gap: 4px;
+  color: rgba(247, 239, 217, 0.72);
+}
+
+.light-controls input {
+  width: 100%;
+}
+
+.light-presets {
+  margin-top: 12px;
+}
+
 .status,
 .tiny-note,
 .intent-log,
@@ -159,6 +213,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .light-field {
+    filter: blur(8px);
+  }
+
   .ar-object[data-pulsing="true"] .orb-ring {
     animation: none;
   }
