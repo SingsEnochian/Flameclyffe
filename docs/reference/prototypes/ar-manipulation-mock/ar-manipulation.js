@@ -3,6 +3,7 @@ import { POINTER_INTENTS, describeIntent } from './ar-intents.js';
 import { createARManipulationController } from './ar-manipulation-controller.js';
 import { createGestureAdapterShim, makeSyntheticPayload } from './gesture-adapter-shim.js';
 import { handleARKeyboard } from './ar-keyboard-controls.js';
+import { createARPointerDrag } from './ar-pointer-drag.js';
 import { createARLightingControls, applyLightingToElement } from './ar-lighting-controls.js';
 import { createARSoundControls } from './ar-sound-controls.js';
 
@@ -12,7 +13,6 @@ const objectStatus = document.querySelector('#object-status');
 const soundStatus = document.querySelector('#sound-status');
 const soundVolume = document.querySelector('#sound-volume');
 const intentLog = document.querySelector('#intent-log');
-let dragStart = null;
 let logItems = [];
 
 const lightInputs = {
@@ -63,6 +63,11 @@ const controller = createARManipulationController({
 });
 const gestureShim = createGestureAdapterShim(controller);
 const lighting = createARLightingControls({ onChange: renderLighting });
+const pointerDrag = createARPointerDrag({
+  controller,
+  onGrab: () => sound.play('select'),
+  onRelease: () => sound.play('move'),
+});
 
 function playAndRun(soundName, action) {
   action();
@@ -73,40 +78,15 @@ function moveAxis(axis, delta) {
   playAndRun('move', () => controller.moveAxis(axis, delta));
 }
 
-function startDrag(event) {
-  dragStart = {
-    x: event.clientX,
-    y: event.clientY,
-    objectX: controller.getState().x,
-    objectY: controller.getState().y,
-  };
-  controller.setMode(POINTER_INTENTS.grab);
-  sound.play('select');
-}
-
-function dragMove(event) {
-  if (!dragStart) return;
-  const dx = dragStart.objectX + event.clientX - dragStart.x - controller.getState().x;
-  const dy = dragStart.objectY + event.clientY - dragStart.y - controller.getState().y;
-  controller.moveBy(dx, dy, 0, POINTER_INTENTS.drag);
-}
-
-function endDrag() {
-  if (!dragStart) return;
-  dragStart = null;
-  controller.setMode(POINTER_INTENTS.release);
-  sound.play('move');
-}
-
 function sendSynthetic(type, soundName = 'select') {
   gestureShim.receive(makeSyntheticPayload(type));
   sound.play(soundName);
 }
 
 arObject.addEventListener('pointerenter', () => renderIntentLog(POINTER_INTENTS.hover));
-arObject.addEventListener('pointerdown', startDrag);
-window.addEventListener('pointermove', dragMove);
-window.addEventListener('pointerup', endDrag);
+arObject.addEventListener('pointerdown', pointerDrag.startDrag);
+window.addEventListener('pointermove', pointerDrag.dragMove);
+window.addEventListener('pointerup', pointerDrag.endDrag);
 arObject.addEventListener('keydown', (event) => {
   const handled = handleARKeyboard(event, controller);
   if (handled) sound.play('move');
