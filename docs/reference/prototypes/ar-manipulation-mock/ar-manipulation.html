@@ -43,6 +43,17 @@
       </section>
 
       <section class="panel-card deep-panel-card">
+        <h2>Sound</h2>
+        <p id="sound-status" class="status" aria-live="polite">Sound off.</p>
+        <div class="button-row">
+          <button id="sound-enable" class="deep-button-primary" type="button">Enable Sound</button>
+          <button id="sound-disable" class="deep-button-ghost" type="button">Mute</button>
+        </div>
+        <label class="sound-volume">Volume <input id="sound-volume" type="range" min="0" max="0.5" step="0.01" /></label>
+        <p class="tiny-note">No autoplay. Sound only starts after Enable Sound is pressed.</p>
+      </section>
+
+      <section class="panel-card deep-panel-card">
         <h2>Light Play</h2>
         <div class="light-controls">
           <label>Ambient <input id="light-ambient" type="range" min="0" max="1" step="0.01" /></label>
@@ -106,7 +117,7 @@
         <ol id="intent-log" class="intent-log" aria-live="polite"></ol>
       </section>
 
-      <p class="tiny-note">Pointer and keyboard only. Synthetic buttons simulate future gesture events without device access.</p>
+      <p class="tiny-note">Pointer, keyboard, and explicitly enabled sound only. Synthetic buttons simulate future gesture events without device access.</p>
     </aside>
   </main>
 
