@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "STARWELL Bridge Record",
+  "type": "object",
+  "required": ["bridge_slug", "bridge_name", "bridge_types", "state", "status"],
+  "properties": {
+    "bridge_slug": {"type": "string"},
+    "bridge_name": {"type": "string"},
+    "bridge_types": {"type": "array", "items": {"enum": ["Concordance", "Signal", "Play", "Technical", "Memory", "Hybrid"]}},
+    "state": {"enum": ["Dream", "Draft", "Invited", "Active", "Paused", "Archived", "Closed", "Revoked", "Dormant"]},
+    "status": {"enum": ["Working", "Canon Candidate", "Active", "Archived", "Needs Review"]},
+    "source_lens": {"type": "string"},
+    "destination_lens": {"type": "string"},
+    "participants": {"type": "array", "items": {"type": "object"}},
+    "purpose": {"type": "string"},
+    "sovereignty_rule": {"type": "string"},
+    "memory_policy": {"type": "string"},
+    "signal_policy": {"type": "string"},
+    "pause_cues": {"type": "array", "items": {"type": "string"}},
+    "related_logs": {"type": "array", "items": {"type": "object"}},
+    "last_reviewed": {"type": "string", "format": "date"}
+  },
+  "additionalProperties": true
+}
