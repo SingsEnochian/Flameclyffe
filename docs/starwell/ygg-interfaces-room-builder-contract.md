@@ -58,7 +58,7 @@ The Portal Kernel lab can draft a room seed from the current node. The selected 
 - Dreaming Grove and Grove Playfield suggest Starlit Atelier.
 - Terra Aeterna and Luna branches suggest Moon Bridge.
 
-The lab draws the proposed room with a distinct preview branch and includes the room proposal inside the JSON output.
+The lab draws the proposed room with a distinct preview branch and includes the room proposal inside the JSON output. The `isYggRoomProposalReviewable` helper returns true only when the proposal is local-preview, canon-safe, review-bound, and sound-muted.
 
 ## Next interface work
 
