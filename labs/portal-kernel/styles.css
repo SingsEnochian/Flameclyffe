@@ -7,6 +7,7 @@
   --gold: #d8ac63;
   --green: #58b38f;
   --blue: #7db7ff;
+  --mauve: #b994ff;
 }
 
 * { box-sizing: border-box; }
@@ -68,6 +69,16 @@ button {
   cursor: pointer;
 }
 
+button:hover {
+  border-color: rgba(125, 183, 255, 0.72);
+  background: rgba(125, 183, 255, 0.14);
+}
+
+button[data-room] {
+  border-color: rgba(185, 148, 255, 0.5);
+  background: linear-gradient(135deg, rgba(185, 148, 255, 0.14), rgba(88, 179, 143, 0.12));
+}
+
 button:focus-visible,
 .node:focus-visible {
   outline: 3px solid var(--blue);
@@ -93,10 +104,21 @@ svg {
   filter: drop-shadow(0 0 10px rgba(88, 179, 143, 0.28));
 }
 
+.branch-proposal {
+  stroke: rgba(185, 148, 255, 0.78);
+  stroke-dasharray: 10 12;
+  filter: drop-shadow(0 0 12px rgba(185, 148, 255, 0.36));
+}
+
 .halo {
   fill: rgba(216, 172, 99, 0.08);
   stroke: rgba(216, 172, 99, 0.42);
   transition: r 180ms ease;
+}
+
+.halo-proposal {
+  fill: rgba(185, 148, 255, 0.1);
+  stroke: rgba(185, 148, 255, 0.54);
 }
 
 .dot {
@@ -109,12 +131,21 @@ svg {
   filter: drop-shadow(0 0 18px rgba(88, 179, 143, 0.8));
 }
 
+.dot.proposed {
+  fill: var(--mauve);
+  filter: drop-shadow(0 0 18px rgba(185, 148, 255, 0.86));
+}
+
 .label {
   fill: var(--ink);
   font-size: 16px;
   paint-order: stroke;
   stroke: rgba(8, 11, 19, 0.86);
   stroke-width: 4px;
+}
+
+.is-proposal .label {
+  fill: #eadfff;
 }
 
 pre {
@@ -130,5 +161,9 @@ pre {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .branch-proposal {
+    stroke-dasharray: none;
   }
 }
