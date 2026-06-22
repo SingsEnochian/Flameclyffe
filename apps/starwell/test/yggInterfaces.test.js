@@ -68,8 +68,9 @@ test('Ygg room proposal creates a local-preview world node', () => {
   assert.equal(proposal.safety.noCanonWrites, true);
 });
 
-test('Ygg registries include room builder interfaces and templates', () => {
+test('Ygg registries include room builder, sound console, and templates', () => {
   assert.ok(yggInterfaces.some((entry) => entry.id === 'ygg-room-builder'));
+  assert.ok(yggInterfaces.some((entry) => entry.id === 'ygg-sound-console'));
   assert.ok(yggRoomTemplates.some((entry) => entry.id === 'tone-lab'));
 
   const proposal = createYggRoomBuilderProposal({ templateId: 'tone-lab' });
