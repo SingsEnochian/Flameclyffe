@@ -49,6 +49,17 @@ Every generated room seed forces soundscape output off in v0.1: `enabled: false`
 - Tone Lab: proposal-only sound design room.
 - Moon Bridge: threshold room between Grove and story-world branches.
 
+## Lab behaviour
+
+The Portal Kernel lab can draft a room seed from the current node. The selected template is based on where the steward is standing in the Ygg path:
+
+- Templehouse and Lighted Steps suggest Hearth Nook.
+- Shrine and Ygg Gate suggest Tone Lab.
+- Dreaming Grove and Grove Playfield suggest Starlit Atelier.
+- Terra Aeterna and Luna branches suggest Moon Bridge.
+
+The lab draws the proposed room with a distinct preview branch and includes the room proposal inside the JSON output.
+
 ## Promotion path
 
 A local room proposal can later move through review states, but v0.1 only permits proposal and local-preview states. Promotion to canon-ready requires a separate review workflow, explicit consent, export/delete design, and persistence rules.
