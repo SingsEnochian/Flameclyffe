@@ -20,6 +20,14 @@ Every Ygg interface in v0.1 must remain lab-only and preview-safe.
 - Plain Pass must remain available.
 - The output is visible proposal data.
 
+## Interface set
+
+- Ygg Account Gate: local account preview and consent state.
+- Ygg Branch Passport: identity card preview and privacy state.
+- Ygg Room Builder: room-seed proposals and world-node previews.
+- Ygg Starmap Overlay: visible map hotspots and tooltips.
+- Ygg Sound Console: muted proposal-only sound layers for rooms.
+
 ## Room seed rules
 
 A room seed may preview a future room, gallery, lab, bridge, nest, shrine, chamber, or grove. It may not silently publish itself.
