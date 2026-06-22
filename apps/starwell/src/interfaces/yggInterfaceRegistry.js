@@ -29,6 +29,13 @@ export const yggInterfaces = Object.freeze([
     inputs: ['world-node-registry', 'pointer', 'keyboard'],
     outputs: ['map-hotspot-preview', 'tooltip-preview'],
   }),
+  createYggInterface({
+    id: 'ygg-sound-console',
+    title: 'Ygg Sound Console',
+    mode: 'sound-console',
+    inputs: ['room-seed-proposal', 'sound-patch-registry'],
+    outputs: ['proposal-only-sound-layer', 'muted-room-soundscape-preview'],
+  }),
 ]);
 
 export const yggRoomTemplates = Object.freeze([
