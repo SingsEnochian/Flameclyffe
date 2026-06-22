@@ -65,6 +65,8 @@ test('Ygg room proposal creates a local-preview world node', () => {
   assert.equal(proposal.node.theme.palette, 'sea-blues');
   assert.equal(proposal.node.soundscape.enabled, false);
   assert.equal(proposal.node.soundscape.autoplay, false);
+  assert.equal(proposal.controls.canPublish, false);
+  assert.equal(proposal.controls.requiresReviewForCanon, true);
   assert.equal(proposal.safety.noCanonWrites, true);
 });
 
