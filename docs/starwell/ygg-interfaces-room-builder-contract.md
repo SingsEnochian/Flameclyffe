@@ -60,6 +60,10 @@ The Portal Kernel lab can draft a room seed from the current node. The selected 
 
 The lab draws the proposed room with a distinct preview branch and includes the room proposal inside the JSON output.
 
+## Next interface work
+
+The next safe visual layer is to turn the current JSON-only room proposal into cards: a room seed card, template picker, branch passport panel, and starmap tooltip. These should still read from the same schema and registry rather than inventing new hardcoded state.
+
 ## Promotion path
 
 A local room proposal can later move through review states, but v0.1 only permits proposal and local-preview states. Promotion to canon-ready requires a separate review workflow, explicit consent, export/delete design, and persistence rules.
