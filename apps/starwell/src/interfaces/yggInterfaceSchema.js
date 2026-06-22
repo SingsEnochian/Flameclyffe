@@ -117,6 +117,7 @@ export function createYggRoomProposal({
   const parentId = parentNodeId ?? safeTemplate.suggestedParentId;
   const id = roomId ?? `local-${safeTemplate.id}`;
   const roomTitle = title ?? `${displayName}'s ${safeTemplate.title}`;
+  const soundLayers = customization.sound?.defaultPatch ? [`proposal:${customization.sound.defaultPatch}`] : safeTemplate.soundscape.layers;
 
   const node = createWorldNode({
     id,
@@ -134,7 +135,11 @@ export function createYggRoomProposal({
     },
     soundscape: {
       ...safeTemplate.soundscape,
-      layers: customization.sound?.defaultPatch ? [`proposal:${customization.sound.defaultPatch}`] : safeTemplate.soundscape.layers,
+      enabled: false,
+      autoplay: false,
+      muted: true,
+      intensity: 0,
+      layers: soundLayers,
     },
     narrative: {
       canonLayer: 'local-preview',
@@ -188,6 +193,7 @@ export function validateYggRoomTemplate(template) {
   if (!template?.title) errors.push('Ygg room template requires title.');
   if (!Object.values(YGG_ROOM_TEMPLATE_KINDS).includes(template?.kind)) errors.push(`Unknown room template kind: ${template?.kind}`);
   if (template?.soundscape?.autoplay) errors.push('Room templates must not request autoplay.');
+  if (template?.soundscape?.enabled) errors.push('Room templates must not enable live sound in v0.1.');
   if (template?.roomControls?.canPublish && !template?.roomControls?.requiresReviewForCanon) errors.push('Publish-capable room templates require canon review.');
   return errors;
 }
@@ -202,6 +208,7 @@ export function validateYggRoomProposal(proposal) {
   if (!proposal?.safety?.noCanonWrites) errors.push('Ygg room proposals must not write canon.');
   if (!proposal?.safety?.requiresReviewForCanon) errors.push('Ygg room proposals require canon review before promotion.');
   if (proposal?.safety?.noAutoplay !== true) errors.push('Ygg room proposals must keep autoplay disabled.');
+  if (proposal?.node?.soundscape?.enabled) errors.push('Ygg room proposals must not enable live sound in v0.1.');
   errors.push(...validateWorldNode(proposal?.node));
   return errors;
 }
