@@ -32,6 +32,8 @@ Required controls:
 - `canPublish` stays false in v0.1.
 - `requiresReviewForCanon` stays true for every template that could later become persistent.
 
+Every generated room seed forces soundscape output off in v0.1: `enabled: false`, `autoplay: false`, `muted: true`, and `intensity: 0`. Sound choices may appear as proposal layers only.
+
 ## Initial templates
 
 - Hearth Nook: private resting room near Templehouse.
