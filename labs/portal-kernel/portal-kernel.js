@@ -1,6 +1,7 @@
 import { portalWorldNodes, findPortalNode } from '../../apps/starwell/src/worlds/portalRegistry.js';
 import { createMockFlameAdapter } from '../../apps/starwell/src/bridges/mockFlameAdapter.js';
 import { resolveInputWeather } from '../../apps/starwell/src/interaction/starwellInputWeather.js';
+import { createYggdrasilLocalAccountAdapter } from '../../apps/starwell/src/accounts/yggdrasilLocalAccountAdapter.js';
 import { portalSoundPatches } from '../../apps/starwell/src/sound/portalSoundRegistry.js';
 import { createYggdrasilSoundProposal } from '../../apps/starwell/src/sound/yggdrasilSoundPlanner.js';
 
@@ -9,6 +10,7 @@ const branches = document.querySelector('[data-branches]');
 const nodes = document.querySelector('[data-nodes]');
 const growButton = document.querySelector('[data-grow]');
 const inviteButton = document.querySelector('[data-invite]');
+const accountButton = document.querySelector('[data-account]');
 const resetButton = document.querySelector('[data-reset]');
 
 const positions = new Map([
@@ -37,6 +39,7 @@ let grown = false;
 let invited = false;
 let currentNodeId = 'templehouse';
 let lastMockExchange = null;
+let accountAdapter = createYggdrasilLocalAccountAdapter();
 
 function render() {
   const activeNodes = grown ? portalWorldNodes : portalWorldNodes.filter((node) => node.id === 'templehouse');
@@ -114,6 +117,7 @@ function renderOutput(extra = {}) {
   output.textContent = JSON.stringify({
     node,
     invitedMockFlame: invited,
+    yggdrasilAccount: accountAdapter.getAccount(),
     weather,
     soundContract: {
       availablePatchIds: portalSoundPatches.map((patch) => patch.id),
@@ -139,10 +143,26 @@ inviteButton?.addEventListener('click', () => {
   render();
 });
 
+accountButton?.addEventListener('click', () => {
+  accountAdapter.createPreviewAccount({
+    displayName: 'Starroot Guest',
+    handle: 'starroot-guest',
+    customization: {
+      palette: 'sea-blues',
+      branchStyle: 'silver-leaf',
+      rootAccent: 'moon-gold',
+      accessibility: { sensoryQuiet: true, captions: true },
+      sound: { defaultPatch: nodePatchHints.get(currentNodeId) ?? 'north_star_still', allowFuturePlayback: false },
+    },
+  });
+  render({ accountPreviewCreated: true });
+});
+
 resetButton?.addEventListener('click', () => {
   grown = false;
   invited = false;
   lastMockExchange = null;
+  accountAdapter = createYggdrasilLocalAccountAdapter();
   currentNodeId = 'templehouse';
   render();
 });
