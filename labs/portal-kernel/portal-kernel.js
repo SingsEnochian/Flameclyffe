@@ -1,6 +1,8 @@
 import { portalWorldNodes, findPortalNode } from '../../apps/starwell/src/worlds/portalRegistry.js';
 import { createMockFlameAdapter } from '../../apps/starwell/src/bridges/mockFlameAdapter.js';
 import { resolveInputWeather } from '../../apps/starwell/src/interaction/starwellInputWeather.js';
+import { portalSoundPatches } from '../../apps/starwell/src/sound/portalSoundRegistry.js';
+import { createYggdrasilSoundProposal } from '../../apps/starwell/src/sound/yggdrasilSoundPlanner.js';
 
 const output = document.querySelector('[data-output]');
 const branches = document.querySelector('[data-branches]');
@@ -18,6 +20,17 @@ const positions = new Map([
   ['terra-aeterna', [575, 80]],
   ['luna-eira', [600, 170]],
   ['grove-playfield', [560, 270]],
+]);
+
+const nodePatchHints = new Map([
+  ['templehouse', 'north_star_still'],
+  ['lighted-steps', 'safe_gateway_369'],
+  ['templehouse-shrine', 'runa_gateway_432'],
+  ['ygg-gate', 'yggdrasil_root_breath'],
+  ['dreaming-grove', 'dreaming_grove_purrfield'],
+  ['terra-aeterna', 'safe_gateway_369'],
+  ['luna-eira', 'north_star_still'],
+  ['grove-playfield', 'dreaming_grove_purrfield'],
 ]);
 
 let grown = false;
@@ -92,7 +105,23 @@ function focusNode(id) {
 function renderOutput(extra = {}) {
   const node = findPortalNode(currentNodeId);
   const weather = resolveInputWeather({ typing: { cadence: grown ? 0.42 : 0.08, revision: 0.1 }, pointer: { drift: invited ? 0.64 : 0.12 } });
-  output.textContent = JSON.stringify({ node, invitedMockFlame: invited, weather, mockExchange: lastMockExchange, ...extra }, null, 2);
+  const soundProposal = createYggdrasilSoundProposal({
+    patchId: nodePatchHints.get(currentNodeId) ?? 'safe_gateway_369',
+    roomId: currentNodeId,
+    reason: 'portal-lab-preview',
+  });
+
+  output.textContent = JSON.stringify({
+    node,
+    invitedMockFlame: invited,
+    weather,
+    soundContract: {
+      availablePatchIds: portalSoundPatches.map((patch) => patch.id),
+      currentProposal: soundProposal,
+    },
+    mockExchange: lastMockExchange,
+    ...extra,
+  }, null, 2);
 }
 
 growButton?.addEventListener('click', () => {
