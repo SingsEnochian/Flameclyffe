@@ -18,6 +18,7 @@ Allowed:
 - Seed named patches for Runa Gateway, Safe Gateway, Lochflame Still, North Star Still, Yggdrasil Root Breath, and Dreaming Grove Purrfield.
 - Return proposal summaries for an LLM or local guide layer.
 - Keep routing metadata for STARWELL rooms and Lanternwire events.
+- Expose a standalone MCP sound adapter that returns registry summaries and proposal data only.
 
 Not allowed:
 
@@ -35,6 +36,7 @@ Not allowed:
 - `FlameSoundEngine`: future conductor for patch selection and envelopes.
 - `portalSoundRegistry`: draft patch catalogue.
 - `YggdrasilSoundPlanner`: proposal-only adapter for Baby Ygg and LLM-shaped routing.
+- `mcpSoundGatewayAdapter`: standalone bridge annex for future MCP gateway integration.
 
 ## STARWELL route idea
 
@@ -48,3 +50,17 @@ starwellAudio.proposePatch({
 ```
 
 That proposal must remain text/data until a visible user gesture asks the audio engine to wake.
+
+## MCP route idea
+
+The standalone MCP sound adapter can be reviewed without changing the main gateway contract. It exposes the patch registry as data and returns proposal-only responses for `starwell.propose_sound_patch`.
+
+```js
+const adapter = createMcpSoundGatewayAdapter();
+const proposal = adapter.callTool('starwell.propose_sound_patch', {
+  patchId: 'runa_gateway_432',
+  roomId: 'templehouse-shrine',
+});
+```
+
+This adapter is deliberately an annex in v0.1. It gives the next refinement a clean attachment point without widening the live gateway surface yet.
