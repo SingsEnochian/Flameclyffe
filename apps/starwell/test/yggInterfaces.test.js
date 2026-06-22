@@ -29,6 +29,18 @@ test('Ygg room templates stay preview-safe', () => {
   assert.equal(template.roomControls.requiresReviewForCanon, true);
 });
 
+test('Ygg room templates reject live sound enablement', () => {
+  const template = createYggRoomTemplate({
+    id: 'loud-room',
+    title: 'Loud Room',
+    kind: 'lab',
+    soundscape: { enabled: true, autoplay: false },
+  });
+
+  const errors = validateYggRoomTemplate(template).join('\n');
+  assert.match(errors, /live sound/);
+});
+
 test('Ygg room proposal creates a local-preview world node', () => {
   const account = createYggdrasilAccount({
     id: 'local-rowan-seed',
@@ -51,6 +63,7 @@ test('Ygg room proposal creates a local-preview world node', () => {
   assert.equal(proposal.state, 'local-preview');
   assert.equal(proposal.node.title, "Rowan's Hearth Nook");
   assert.equal(proposal.node.theme.palette, 'sea-blues');
+  assert.equal(proposal.node.soundscape.enabled, false);
   assert.equal(proposal.node.soundscape.autoplay, false);
   assert.equal(proposal.safety.noCanonWrites, true);
 });
@@ -70,8 +83,10 @@ test('Ygg room proposal validation blocks unsafe promotion and autoplay', () => 
   unsafe.state = 'canon-ready';
   unsafe.safety.noAutoplay = false;
   unsafe.node.soundscape.autoplay = true;
+  unsafe.node.soundscape.enabled = true;
 
   const errors = validateYggRoomProposal(unsafe).join('\n');
   assert.match(errors, /proposal\/local-preview/);
   assert.match(errors, /autoplay/);
+  assert.match(errors, /live sound/);
 });
