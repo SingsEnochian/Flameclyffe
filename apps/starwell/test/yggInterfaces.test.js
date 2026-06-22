@@ -5,6 +5,7 @@ import {
   createYggInterface,
   createYggRoomProposal,
   createYggRoomTemplate,
+  isYggRoomProposalReviewable,
   validateYggInterface,
   validateYggRoomProposal,
   validateYggRoomTemplate,
@@ -68,6 +69,7 @@ test('Ygg room proposal creates a local-preview world node', () => {
   assert.equal(proposal.controls.canPublish, false);
   assert.equal(proposal.controls.requiresReviewForCanon, true);
   assert.equal(proposal.safety.noCanonWrites, true);
+  assert.equal(isYggRoomProposalReviewable(proposal), true);
 });
 
 test('Ygg registries include room builder, sound console, and templates', () => {
@@ -98,4 +100,5 @@ test('Ygg room proposal validation blocks unsafe promotion and autoplay', () => 
   assert.match(errors, /proposal\/local-preview/);
   assert.match(errors, /autoplay/);
   assert.match(errors, /live sound/);
+  assert.equal(isYggRoomProposalReviewable(unsafe), false);
 });
