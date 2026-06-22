@@ -10,7 +10,7 @@ import {
   validateYggRoomTemplate,
 } from '../src/interfaces/yggInterfaceSchema.js';
 import { createYggdrasilAccount } from '../src/accounts/yggdrasilAccountSchema.js';
-import { createYggRoomBuilderProposal, yggInterfaces, yggRoomTemplates } from '../src/interfaces/yggInterfaceRegistry.js';
+import { createYggRoomBuilderProposal, findYggRoomTemplate, yggInterfaces, yggRoomTemplates } from '../src/interfaces/yggInterfaceRegistry.js';
 
 test('Ygg interfaces are lab-only contracts with reduced-motion support', () => {
   const yggInterface = createYggInterface({ id: 'ygg-room-builder', title: 'Ygg Room Builder', mode: 'room-builder' });
@@ -77,6 +77,12 @@ test('Ygg registries include room builder, sound console, and templates', () => 
   assert.equal(proposal.templateId, 'tone-lab');
   assert.equal(proposal.node.kind, 'lab');
   assert.deepEqual(validateYggRoomProposal(proposal), []);
+});
+
+test('Ygg room templates can be found by id for lab routing', () => {
+  assert.equal(findYggRoomTemplate('hearth-nook').title, 'Hearth Nook');
+  assert.equal(findYggRoomTemplate('starlit-atelier').worldKind, 'gallery');
+  assert.equal(findYggRoomTemplate('moon-bridge').kind, 'bridge');
 });
 
 test('Ygg room proposal validation blocks unsafe promotion and autoplay', () => {
