@@ -3,6 +3,7 @@ import { createMockFlameAdapter } from '../../apps/starwell/src/bridges/mockFlam
 import { resolveInputWeather } from '../../apps/starwell/src/interaction/starwellInputWeather.js';
 import { createYggdrasilLocalAccountAdapter } from '../../apps/starwell/src/accounts/yggdrasilLocalAccountAdapter.js';
 import { createYggRoomBuilderProposal, yggInterfaces, yggRoomTemplates } from '../../apps/starwell/src/interfaces/yggInterfaceRegistry.js';
+import { isYggRoomProposalReviewable } from '../../apps/starwell/src/interfaces/yggInterfaceSchema.js';
 import { portalSoundPatches } from '../../apps/starwell/src/sound/portalSoundRegistry.js';
 import { createYggdrasilSoundProposal } from '../../apps/starwell/src/sound/yggdrasilSoundPlanner.js';
 
@@ -155,6 +156,7 @@ function renderOutput(extra = {}) {
     roomBuilder: {
       availableTemplateIds: yggRoomTemplates.map((template) => template.id),
       lastProposal: lastRoomProposal,
+      reviewable: isYggRoomProposalReviewable(lastRoomProposal),
     },
     weather,
     soundContract: {
