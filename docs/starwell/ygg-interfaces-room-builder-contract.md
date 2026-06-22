@@ -60,6 +60,10 @@ The Portal Kernel lab can draft a room seed from the current node. The selected 
 
 The lab draws the proposed room with a distinct preview branch and includes the room proposal inside the JSON output. The `isYggRoomProposalReviewable` helper returns true only when the proposal is local-preview, canon-safe, review-bound, and sound-muted.
 
+## Current PR scope
+
+This PR adds the schema, registry, lab control, preview branch styling, contract documentation, and Node tests. It does not add a persistent room database, template picker UI, React room card, production navigation, or real account-backed room ownership yet.
+
 ## Next interface work
 
 The next safe visual layer is to turn the current JSON-only room proposal into cards: a room seed card, template picker, branch passport panel, and starmap tooltip. These should still read from the same schema and registry rather than inventing new hardcoded state.
