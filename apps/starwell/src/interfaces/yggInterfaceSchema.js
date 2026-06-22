@@ -175,6 +175,17 @@ export function createYggRoomProposal({
   };
 }
 
+export function isYggRoomProposalReviewable(proposal) {
+  return Boolean(
+    proposal?.state === YGG_ROOM_BUILD_STATES.localPreview
+      && proposal?.safety?.noCanonWrites
+      && proposal?.safety?.requiresReviewForCanon
+      && proposal?.safety?.noAutoplay
+      && proposal?.node?.soundscape?.enabled === false
+      && proposal?.node?.soundscape?.autoplay === false,
+  );
+}
+
 export function validateYggInterface(yggInterface) {
   const errors = [];
   if (!yggInterface || typeof yggInterface !== 'object') errors.push('Ygg interface must be an object.');
