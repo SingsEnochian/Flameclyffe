@@ -135,9 +135,10 @@ svg {
 }
 
 .branch-proposal {
-  stroke: rgba(185, 148, 255, 0.78);
-  stroke-dasharray: 10 12;
-  filter: drop-shadow(0 0 12px rgba(185, 148, 255, 0.36));
+  stroke: rgba(185, 148, 255, 0.48);
+  stroke-width: 2.5;
+  stroke-dasharray: 7 10;
+  filter: drop-shadow(0 0 7px rgba(185, 148, 255, 0.18));
 }
 
 .halo {
@@ -168,14 +169,17 @@ svg {
 
 .label {
   fill: var(--ink);
-  font-size: 16px;
+  font-size: 10px;
   paint-order: stroke;
   stroke: rgba(8, 11, 19, 0.86);
-  stroke-width: 4px;
+  stroke-width: 3px;
 }
 
-.is-proposal .label {
-  fill: #eadfff;
+.label.proposal-label {
+  fill: var(--mauve);
+  font-size: 9px;
+  stroke-width: 2px;
+  opacity: 0.88;
 }
 
 pre {

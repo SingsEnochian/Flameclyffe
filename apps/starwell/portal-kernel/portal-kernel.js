@@ -18,14 +18,36 @@ const roomButton = document.querySelector('[data-room]');
 const resetButton = document.querySelector('[data-reset]');
 
 const positions = new Map([
-  ['templehouse', [90, 340]],
-  ['lighted-steps', [190, 265]],
-  ['templehouse-shrine', [295, 205]],
-  ['ygg-gate', [365, 155]],
-  ['dreaming-grove', [430, 150]],
-  ['terra-aeterna', [575, 80]],
-  ['luna-eira', [600, 170]],
-  ['grove-playfield', [560, 270]],
+  ['templehouse', [88, 378]],
+  ['lighted-steps', [192, 300]],
+  ['templehouse-shrine', [296, 228]],
+  ['ygg-gate', [358, 178]],
+  ['dreaming-grove', [455, 140]],
+  ['terra-aeterna', [572, 100]],
+  ['luna-eira', [648, 192]],
+  ['grove-playfield', [568, 288]],
+]);
+
+const displayLabels = new Map([
+  ['templehouse', 'Templehouse'],
+  ['lighted-steps', 'Lighted Steps'],
+  ['templehouse-shrine', 'Shrine'],
+  ['ygg-gate', 'Ygg Gate'],
+  ['dreaming-grove', 'Dreaming Grove'],
+  ['terra-aeterna', 'Terra Aeterna'],
+  ['luna-eira', 'Luna'],
+  ['grove-playfield', 'Playfield'],
+]);
+
+const labelOffsets = new Map([
+  ['templehouse', [0, -22]],
+  ['lighted-steps', [0, -22]],
+  ['templehouse-shrine', [0, -22]],
+  ['ygg-gate', [0, -22]],
+  ['dreaming-grove', [0, 34]],
+  ['terra-aeterna', [-16, -22]],
+  ['luna-eira', [-32, -22]],
+  ['grove-playfield', [0, 34]],
 ]);
 
 const nodePatchHints = new Map([
@@ -69,7 +91,7 @@ function getLabPositions() {
   const activePositions = new Map(positions);
   if (lastRoomProposal?.node) {
     const parentPosition = activePositions.get(lastRoomProposal.node.parentId) ?? activePositions.get('dreaming-grove') ?? [430, 150];
-    activePositions.set(lastRoomProposal.node.id, [Math.min(parentPosition[0] + 92, 660), Math.min(parentPosition[1] + 86, 370)]);
+    activePositions.set(lastRoomProposal.node.id, [Math.min(parentPosition[0] + 78, 630), Math.min(parentPosition[1] + 88, 350)]);
   }
   return activePositions;
 }
@@ -121,12 +143,16 @@ function render() {
     dot.setAttribute('r', invited && node.id === 'dreaming-grove' ? 10 : isProposal ? 9 : 7);
     dot.setAttribute('class', invited && node.id === 'dreaming-grove' ? 'dot invited' : isProposal ? 'dot proposed' : 'dot');
 
+    const [lx, ly] = isProposal ? [0, 34] : (labelOffsets.get(node.id) ?? [0, -22]);
+    const labelText = isProposal
+      ? (node.title ?? node.id).replace(/^[^']*'s\s*/u, '').slice(0, 20)
+      : (displayLabels.get(node.id) ?? node.title ?? node.id);
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', x);
-    label.setAttribute('y', y - 28);
+    label.setAttribute('x', x + lx);
+    label.setAttribute('y', y + ly);
     label.setAttribute('text-anchor', 'middle');
-    label.setAttribute('class', 'label');
-    label.textContent = node.title;
+    label.setAttribute('class', isProposal ? 'label proposal-label' : 'label');
+    label.textContent = labelText;
 
     group.append(halo, dot, label);
     nodes.append(group);
