@@ -19,3 +19,13 @@
   from = "/living-room/"
   to = "/living-room.html"
   status = 200
+
+[[redirects]]
+  from = "/portal-kernel"
+  to = "/portal-kernel/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portal-kernel/"
+  to = "/portal-kernel/index.html"
+  status = 200
