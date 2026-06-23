@@ -1,5 +1,5 @@
-import { yggRoomTemplates } from '../../apps/starwell/src/interfaces/yggInterfaceRegistry.js';
-import { createYggRoomCardDeck } from '../../apps/starwell/src/interfaces/yggRoomCards.js';
+import { yggRoomTemplates } from '../src/interfaces/yggInterfaceRegistry.js';
+import { createYggRoomCardDeck } from '../src/interfaces/yggRoomCards.js';
 
 const output = document.querySelector('[data-output]');
 const cardsRoot = document.querySelector('[data-room-cards]');

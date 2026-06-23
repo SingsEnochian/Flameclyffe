@@ -1,11 +1,11 @@
-import { portalWorldNodes, findPortalNode } from '../../apps/starwell/src/worlds/portalRegistry.js';
-import { createMockFlameAdapter } from '../../apps/starwell/src/bridges/mockFlameAdapter.js';
-import { resolveInputWeather } from '../../apps/starwell/src/interaction/starwellInputWeather.js';
-import { createYggdrasilLocalAccountAdapter } from '../../apps/starwell/src/accounts/yggdrasilLocalAccountAdapter.js';
-import { createYggRoomBuilderProposal, yggInterfaces, yggRoomTemplates } from '../../apps/starwell/src/interfaces/yggInterfaceRegistry.js';
-import { isYggRoomProposalReviewable } from '../../apps/starwell/src/interfaces/yggInterfaceSchema.js';
-import { portalSoundPatches } from '../../apps/starwell/src/sound/portalSoundRegistry.js';
-import { createWeatherSoundProposal } from '../../apps/starwell/src/sound/weatherSoundConductor.js';
+import { portalWorldNodes, findPortalNode } from '../src/worlds/portalRegistry.js';
+import { createMockFlameAdapter } from '../src/bridges/mockFlameAdapter.js';
+import { resolveInputWeather } from '../src/interaction/starwellInputWeather.js';
+import { createYggdrasilLocalAccountAdapter } from '../src/accounts/yggdrasilLocalAccountAdapter.js';
+import { createYggRoomBuilderProposal, yggInterfaces, yggRoomTemplates } from '../src/interfaces/yggInterfaceRegistry.js';
+import { isYggRoomProposalReviewable } from '../src/interfaces/yggInterfaceSchema.js';
+import { portalSoundPatches } from '../src/sound/portalSoundRegistry.js';
+import { createWeatherSoundProposal } from '../src/sound/weatherSoundConductor.js';
 
 const output = document.querySelector('[data-output]');
 const branches = document.querySelector('[data-branches]');

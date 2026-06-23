@@ -14,7 +14,7 @@ To wire the lab preview to `weatherSoundConductor.js`:
 2. Import the conductor in `labs/portal-kernel/portal-kernel.js`:
 
 ```js
-import { createWeatherSoundProposal } from '../../apps/starwell/src/sound/weatherSoundConductor.js';
+import { createWeatherSoundProposal } from '../src/sound/weatherSoundConductor.js';
 ```
 
 3. Select the textarea:
