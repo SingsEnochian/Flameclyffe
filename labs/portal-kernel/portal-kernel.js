@@ -5,11 +5,12 @@ import { createYggdrasilLocalAccountAdapter } from '../../apps/starwell/src/acco
 import { createYggRoomBuilderProposal, yggInterfaces, yggRoomTemplates } from '../../apps/starwell/src/interfaces/yggInterfaceRegistry.js';
 import { isYggRoomProposalReviewable } from '../../apps/starwell/src/interfaces/yggInterfaceSchema.js';
 import { portalSoundPatches } from '../../apps/starwell/src/sound/portalSoundRegistry.js';
-import { createYggdrasilSoundProposal } from '../../apps/starwell/src/sound/yggdrasilSoundPlanner.js';
+import { createWeatherSoundProposal } from '../../apps/starwell/src/sound/weatherSoundConductor.js';
 
 const output = document.querySelector('[data-output]');
 const branches = document.querySelector('[data-branches]');
 const nodes = document.querySelector('[data-nodes]');
+const sceneTextInput = document.querySelector('[data-scene-text]');
 const growButton = document.querySelector('[data-grow]');
 const inviteButton = document.querySelector('[data-invite]');
 const accountButton = document.querySelector('[data-account]');
@@ -139,19 +140,26 @@ function focusNode(id) {
   render();
 }
 
+function getCurrentNode() {
+  return findPortalNode(currentNodeId) ?? (lastRoomProposal?.node?.id === currentNodeId ? lastRoomProposal.node : null);
+}
+
 function renderOutput(extra = {}) {
-  const node = findPortalNode(currentNodeId) ?? (lastRoomProposal?.node?.id === currentNodeId ? lastRoomProposal.node : null);
-  const weather = resolveInputWeather({ typing: { cadence: grown ? 0.42 : 0.08, revision: 0.1 }, pointer: { drift: invited ? 0.64 : 0.12 } });
-  const soundProposal = createYggdrasilSoundProposal({
-    patchId: nodePatchHints.get(currentNodeId) ?? lastRoomProposal?.node?.soundscape?.layers?.[0]?.replace('proposal:', '') ?? 'safe_gateway_369',
-    roomId: currentNodeId,
-    reason: 'portal-lab-preview',
+  const node = getCurrentNode();
+  const account = accountAdapter.getAccount();
+  const accessibility = account?.customization?.accessibility ?? {};
+  const weather = resolveInputWeather({ typing: { cadence: grown ? 0.42 : 0.08, revision: 0.1 }, pointer: { drift: invited ? 0.64 : 0.12 } }, accessibility);
+  const weatherSoundProposal = createWeatherSoundProposal({
+    text: sceneTextInput?.value ?? '',
+    node,
+    inputWeather: weather,
+    accessibility,
   });
 
   output.textContent = JSON.stringify({
     node,
     invitedMockFlame: invited,
-    yggdrasilAccount: accountAdapter.getAccount(),
+    yggdrasilAccount: account,
     yggInterfaces,
     roomBuilder: {
       availableTemplateIds: yggRoomTemplates.map((template) => template.id),
@@ -161,7 +169,7 @@ function renderOutput(extra = {}) {
     weather,
     soundContract: {
       availablePatchIds: portalSoundPatches.map((patch) => patch.id),
-      currentProposal: soundProposal,
+      currentProposal: weatherSoundProposal,
     },
     mockExchange: lastMockExchange,
     ...extra,
@@ -211,6 +219,10 @@ roomButton?.addEventListener('click', () => {
   });
   currentNodeId = lastRoomProposal.node.id;
   render({ roomSeedCreated: true });
+});
+
+sceneTextInput?.addEventListener('input', () => {
+  renderOutput({ sceneTextChanged: true });
 });
 
 resetButton?.addEventListener('click', () => {
