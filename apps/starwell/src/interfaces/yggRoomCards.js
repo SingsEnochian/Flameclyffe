@@ -84,9 +84,9 @@ export function createYggWeatherSceneCard(weatherSoundProposal = null) {
       { label: 'Crossfade', value: futureSceneMix?.crossfadeMs ? `${futureSceneMix.crossfadeMs}ms` : 'none' },
       { label: 'Density cap', value: formatNumber(futureSceneMix?.suggestedDensity) },
       { label: 'Motion cap', value: formatNumber(futureSceneMix?.suggestedMotion) },
-      { label: 'Playback now', value: weatherSoundProposal?.playbackEnabled ? 'on' : 'off' },
+      { label: 'Sound now', value: weatherSoundProposal?.playbackEnabled ? 'on' : 'off' },
     ],
-    description: 'Scene-reactive sound weather plan. Future playback requires explicit sound enablement and user control.',
+    description: 'Scene-reactive sound weather plan. Future sound requires explicit enablement and user control.',
     guardrails: {
       noAutoplay: futureSceneMix?.guardrails?.noAutoplay !== false,
       explicitSoundOn: futureSceneMix?.guardrails?.requiresExplicitSoundOn === true,

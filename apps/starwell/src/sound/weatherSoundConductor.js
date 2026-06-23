@@ -61,25 +61,14 @@ export function resolveEnvironmentSoundSignal(node = {}, environment = {}) {
   const roomId = environment.roomId ?? node?.id ?? 'templehouse';
   const shared = Boolean(environment.shared ?? node?.access?.shared ?? false);
   const combined = `${roomKind} ${biome} ${palette} ${roomId}`;
+
   const isGrove = roomKind === 'grove' || /grove|moss|leaf|garden/i.test(combined);
-  const isWater = /water|sea|shore|loch|blue|tide/i.test(combined);
+  const isWater = roomKind === 'water' || /water|shore|loch|tide|river|moonmere/i.test(combined);
   const isShrine = roomKind === 'shrine' || /shrine|altar|rune|glass/i.test(combined);
   const isThreshold = roomKind === 'instrument' || /gate|threshold|root|ygg/i.test(combined);
   const sceneKey = resolveSceneKey({ roomKind, roomId, biome, palette, isGrove, isWater, isShrine, isThreshold });
 
-  return {
-    roomId,
-    roomKind,
-    sceneKey,
-    biome,
-    palette,
-    motion,
-    shared,
-    isGrove,
-    isWater,
-    isShrine,
-    isThreshold,
-  };
+  return { roomId, roomKind, sceneKey, biome, palette, motion, shared, isGrove, isWater, isShrine, isThreshold };
 }
 
 export function resolveSceneMixProfile(sceneKey = 'default') {
@@ -106,14 +95,7 @@ export function chooseWeatherSoundPatch({ textSignal, environmentSignal, inputWe
   return { ...sceneProfile, reason: `scene:${environmentSignal?.sceneKey ?? 'default'}` };
 }
 
-export function createWeatherSoundProposal({
-  text = '',
-  node = {},
-  inputWeather = {},
-  environment = {},
-  accessibility = {},
-  requester = 'presence:yggdrasil',
-} = {}) {
+export function createWeatherSoundProposal({ text = '', node = {}, inputWeather = {}, environment = {}, accessibility = {}, requester = 'presence:yggdrasil' } = {}) {
   const baseTextSignal = resolveTextSoundSignal(text);
   const textSignal = { ...baseTextSignal, rawText: String(text ?? '') };
   const environmentSignal = resolveEnvironmentSoundSignal(node, environment);
@@ -124,7 +106,6 @@ export function createWeatherSoundProposal({
     requester,
     reason: `weather-sound:${choice.reason}`,
   });
-  const futureSceneMix = createFutureSceneMixPlan({ choice, inputWeather, textSignal, accessibility });
 
   return {
     ...proposal,
@@ -145,7 +126,7 @@ export function createWeatherSoundProposal({
         suggestedDensity: accessibility.sensoryQuiet ? 0.08 : clamp01((inputWeather.worldResponse?.fireflyDensity ?? 0) + textSignal.density * 0.25),
         appliedToPlayback: false,
       },
-      futureSceneMix,
+      futureSceneMix: createFutureSceneMixPlan({ choice, inputWeather, textSignal, accessibility }),
       safety: {
         playbackEnabled: false,
         mayAutoplay: false,
@@ -169,6 +150,13 @@ function createFutureSceneMixPlan({ choice, inputWeather = {}, textSignal = {}, 
     suggestedDensity: accessibility.sensoryQuiet ? 0.08 : Math.min(choice.densityCap, clamp01((worldResponse.fireflyDensity ?? 0) + textSignal.density * 0.25)),
     suggestedMotion: accessibility.reducedMotion ? 0 : Math.min(choice.motionCap, clamp01(worldResponse.motionScale ?? 0)),
     suggestedGain: 0,
+    crossfade: {
+      curve: 'equal-power',
+      oldSceneFade: 'down',
+      newSceneFade: 'up',
+      densityEases: true,
+      motionEases: true,
+    },
     guardrails: {
       requiresExplicitSoundOn: true,
       noAutoplay: true,
@@ -180,14 +168,16 @@ function createFutureSceneMixPlan({ choice, inputWeather = {}, textSignal = {}, 
 }
 
 function resolveSceneKey({ roomKind, roomId, biome, palette, isGrove, isWater, isShrine, isThreshold }) {
-  if (roomId === 'templehouse' || /hearth|templehouse/i.test(`${biome} ${palette} ${roomId}`)) return 'templehouse';
-  if (isShrine) return 'shrine';
-  if (isWater) return 'water';
-  if (isGrove) return roomKind === 'playfield' ? 'playfield' : 'grove';
-  if (isThreshold) return 'yggGate';
+  const combined = `${biome} ${palette} ${roomId}`;
+  if (roomId === 'templehouse' || /hearth|templehouse/i.test(`${biome} ${palette}`)) return 'templehouse';
+  if (roomKind === 'playfield') return 'playfield';
+  if (roomKind === 'grove') return 'grove';
   if (roomKind === 'gallery') return 'gallery';
   if (roomKind === 'lab') return 'lab';
-  if (roomKind === 'playfield') return 'playfield';
+  if (roomKind === 'shrine' || isShrine) return 'shrine';
+  if (isWater) return 'water';
+  if (isGrove) return 'grove';
+  if (isThreshold) return 'yggGate';
   return 'default';
 }
 

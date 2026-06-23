@@ -30,8 +30,8 @@ test('environment signal resolves scenes from room metadata', () => {
     theme: { biome: 'velvet-twilight', palette: 'moon-gold-blackwood' },
   });
 
+  assert.equal(grove.sceneKey, 'grove');
   assert.equal(grove.isGrove, true);
-  assert.equal(grove.isWater, true);
   assert.equal(shrine.sceneKey, 'shrine');
 });
 
@@ -61,6 +61,7 @@ test('weather sound proposal is scene reactive and preview only', () => {
   assert.equal(proposal.weatherSound.futureSceneMix.activeInV0, false);
   assert.equal(proposal.weatherSound.futureSceneMix.sceneReactive, true);
   assert.equal(proposal.weatherSound.futureSceneMix.suggestedGain, 0);
+  assert.equal(proposal.weatherSound.futureSceneMix.crossfade.curve, 'equal-power');
   assert.equal(proposal.weatherSound.futureSceneMix.guardrails.noAutoplay, true);
 });
 

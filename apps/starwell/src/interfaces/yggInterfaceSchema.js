@@ -117,7 +117,8 @@ export function createYggRoomProposal({
   const parentId = parentNodeId ?? safeTemplate.suggestedParentId;
   const id = roomId ?? `local-${safeTemplate.id}`;
   const roomTitle = title ?? `${displayName}'s ${safeTemplate.title}`;
-  const soundLayers = customization.sound?.defaultPatch ? [`proposal:${customization.sound.defaultPatch}`] : safeTemplate.soundscape.layers;
+  const effectiveCustomization = { ...safeAccount.customization, ...customization };
+  const soundLayers = effectiveCustomization.sound?.defaultPatch ? [`proposal:${effectiveCustomization.sound.defaultPatch}`] : safeTemplate.soundscape.layers;
 
   const node = createWorldNode({
     id,
@@ -130,8 +131,8 @@ export function createYggRoomProposal({
     },
     theme: {
       ...safeTemplate.theme,
-      palette: customization.palette ?? safeTemplate.theme.palette,
-      motion: customization.accessibility?.reducedMotion ? 'still-magic' : safeTemplate.theme.motion,
+      palette: effectiveCustomization.palette ?? safeTemplate.theme.palette,
+      motion: effectiveCustomization.accessibility?.reducedMotion ? 'still-magic' : safeTemplate.theme.motion,
     },
     soundscape: {
       ...safeTemplate.soundscape,
@@ -151,7 +152,7 @@ export function createYggRoomProposal({
       typing: 'soft-pulse',
       touch: 'gentle-ripple',
       pointer: 'hover-glow',
-      motion: customization.accessibility?.reducedMotion ? 'still' : 'permission-required',
+      motion: effectiveCustomization.accessibility?.reducedMotion ? 'still' : 'permission-required',
       haptics: 'off',
       gaze: 'future-opt-in',
     },
