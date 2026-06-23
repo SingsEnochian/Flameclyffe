@@ -53,6 +53,36 @@ h1 {
   font-size: clamp(2rem, 5vw, 4rem);
 }
 
+.scene-text {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.scene-text textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 110px;
+  border: 1px solid rgba(125, 183, 255, 0.28);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.scene-text textarea:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+}
+
 .portal-actions {
   display: flex;
   flex-wrap: wrap;
