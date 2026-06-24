@@ -14,8 +14,8 @@ Guardrails:
 
 Named local routes for the next backend pass:
 
-- chat route
-- router route
-- command list route
-- adapter status route
-- ledger route
+- Chat
+- Router
+- Command list
+- Adapter status
+- Ledger
