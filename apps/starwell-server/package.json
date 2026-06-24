@@ -1,0 +1,13 @@
+{
+  "name": "starwell-local-workbench-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "kernel:test": "node tests/kernel-validation.js"
+  },
+  "dependencies": {
+    "cors": "latest",
+    "express": "latest"
+  }
+}
