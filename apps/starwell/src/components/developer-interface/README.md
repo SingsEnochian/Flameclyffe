@@ -12,4 +12,10 @@ Guardrails:
 - No write actions from chat mode.
 - No public deploy assumptions.
 
-The local API routes are named in the UI but remain to be implemented in the next backend pass.
+Named local routes for the next backend pass:
+
+- chat route
+- router route
+- command list route
+- adapter status route
+- ledger route
