@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { PortalKernelPanel } from './PortalKernelPanel.jsx';
 
 const commandRegistry = [
   { name: '/commands', category: 'Adapters', status: 'available', level: 0, review: false, note: 'List available, locked, partial, and not-built-yet commands.' },
@@ -31,6 +32,7 @@ const panels = [
   { key: 'adapters', label: 'Adapters', glyph: '◈' },
   { key: 'bridgehall', label: 'Bridgehall', glyph: '☷' },
   { key: 'patch', label: 'Patch Tray', glyph: '✎' },
+  { key: 'kernel', label: 'Portal Kernel', glyph: '◉' },
 ];
 
 const bridgehallParticipants = [
@@ -201,6 +203,7 @@ function ActivePanel({ activePanel, selectedCommand, setSelectedCommand, draft, 
   if (activePanel === 'adapters') return <AdaptersPanel />;
   if (activePanel === 'ledger') return <LedgerPanel />;
   if (activePanel === 'bridgehall') return <BridgehallPanel />;
+  if (activePanel === 'kernel') return <PortalKernelPanel />;
   return <StaticPanel panel={activePanel} />;
 }
 
