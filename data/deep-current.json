@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-24T21:08:58.384Z",
+  "generated_at": "2026-06-24T22:45:47.682Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-24T17:00",
+    "time": "2026-06-24T18:45",
     "sky": "Storm",
     "current": {
-      "time": "2026-06-24T17:00",
+      "time": "2026-06-24T18:45",
       "interval": 900,
-      "temperature_2m": 85.4,
-      "relative_humidity_2m": 76,
+      "temperature_2m": 83.2,
+      "relative_humidity_2m": 75,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 95,
-      "cloud_cover": 2,
+      "cloud_cover": 0,
       "pressure_msl": 1015.3,
-      "wind_speed_10m": 7.4,
-      "wind_direction_10m": 123
+      "wind_speed_10m": 7.2,
+      "wind_direction_10m": 92
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 22
     },
     "solar_wind": {
-      "time_tag": "2026-06-24 21:05:00.000",
-      "bz": 5.56,
-      "bt": 14.46,
-      "density": 15.79,
-      "speed": 580.8
+      "time_tag": "2026-06-24 22:41:00.000",
+      "bz": 0.73,
+      "bt": 12.5,
+      "density": 0.14,
+      "speed": 588.5
     }
   },
   "moon": {
-    "age_days": 9.62,
-    "illumination": 72.9,
+    "age_days": 9.69,
+    "illumination": 73.5,
     "name": "Waxing Gibbous"
   },
   "field": {
     "P": 0.545555555555555,
-    "C": 0.6104761904761905,
-    "R": 1,
-    "E": 0.7944505494505495,
-    "M": 0.7290000000000001,
-    "A": 0.9769230769230769,
-    "T": 0.7505763064713065,
-    "H": 0.9016672771672772,
-    "dpdt": 1
+    "C": 0.62,
+    "R": 0.9450166666666666,
+    "E": 0.7906043956043955,
+    "M": 0.735,
+    "A": 0.9846153846153847,
+    "T": 0.7385808951892552,
+    "H": 0.834083921855922,
+    "dpdt": 0.9450166666666666
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
