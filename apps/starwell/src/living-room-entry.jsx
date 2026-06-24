@@ -23,6 +23,7 @@ const rooms = [
   { key: 'atlas', glyph: '⌖', title: 'Atlas Hall', text: 'Worlds, cities, regions, routes, and grown Stonewood maps.' },
   { key: 'atelier', glyph: '◇', title: 'Observer Atelier', text: 'Visual canon, prompt loom, pose language, and image lineage.' },
   { key: 'studio', glyph: '✣', title: 'Art Studio', text: 'Moodboards, textures, sketches, palettes, and wet paint.' },
+  { key: 'developer', glyph: '⌘', title: 'Yggdrasil Developer Workbench', text: 'Laptop-local chat, commands, Bridgehall, adapters, ledger, tests, and patch tray.', href: './developer.html' },
 ];
 
 const studies = [
@@ -59,7 +60,11 @@ function RoomPreview({ selected }) {
         <p>Selected chamber</p>
         <h2>{selected.title}</h2>
         <p>{selected.text}</p>
-        <em>Next graft: connect this preview to the full STARWELL room tools once the hearth layout is approved.</em>
+        {selected.href ? (
+          <a className="living-preview-link" href={selected.href}>Open this chamber</a>
+        ) : (
+          <em>Next graft: connect this preview to the full STARWELL room tools once the hearth layout is approved.</em>
+        )}
       </div>
     </section>
   );
