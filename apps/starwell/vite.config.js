@@ -15,6 +15,7 @@ export default defineConfig({
       input: {
         main: resolve(process.cwd(), 'apps/starwell/index.html'),
         livingRoom: resolve(process.cwd(), 'apps/starwell/living-room.html'),
+        developer: resolve(process.cwd(), 'apps/starwell/developer.html'),
         concordance: resolve(process.cwd(), 'apps/starwell/concordance/index.html'),
         materialQa: resolve(process.cwd(), 'apps/starwell/material-qa.html'),
         unitResonanceLab: resolve(process.cwd(), 'apps/starwell/unit-resonance-lab.html'),
