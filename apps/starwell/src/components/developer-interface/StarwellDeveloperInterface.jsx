@@ -76,26 +76,34 @@ function CommandCard({ command, active, onSelect }) {
   );
 }
 
-function ChatPanel({ draft, setDraft, routePreview, onPreview }) {
+function ChatPanel({ draft, setDraft, routePreview, onPreview, onSend, yggReply, yggLoading, yggError }) {
   return (
     <section className="dev-panel-grid dev-panel-grid-chat" aria-label="Yggdrasil chat mode">
       <div className="dev-card dev-card-wide">
         <p className="dev-eyebrow">LLM Chat Mode</p>
         <h2>Direct Rowan ↔ Yggdrasil lane</h2>
         <p>
-          Local chat is the first room panel. It is ready for the UI shell, but the Ollama call stays behind the local server route:
-          <code>POST /api/yggdrasil/chat</code>
+          Local chat lane active. Messages route through <code>POST /api/v1/yggdrasil/chat</code> to the local <code>yggdrasil:v0.1</code> model.
         </p>
         <textarea
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Talk to Yggdrasil here. For now this creates a route preview, not a model call."
+          placeholder="Talk to Yggdrasil here."
           aria-label="Developer chat draft"
         />
         <div className="dev-actions">
           <button type="button" onClick={onPreview}>Preview route</button>
-          <button type="button" disabled>Send to local Yggdrasil soon</button>
+          <button type="button" onClick={onSend} disabled={yggLoading || !draft.trim()}>
+            {yggLoading ? 'Sending…' : 'Send to Yggdrasil'}
+          </button>
         </div>
+        {yggError && <p className="panel-error-alert">🚨 {yggError}</p>}
+        {yggReply && (
+          <div className="dev-card dev-card-reply">
+            <p className="dev-eyebrow">Yggdrasil</p>
+            <p className="ygg-reply-text">{yggReply}</p>
+          </div>
+        )}
       </div>
       <div className="dev-card dev-card-trace">
         <p className="dev-eyebrow">Route Preview</p>
@@ -197,8 +205,8 @@ function StaticPanel({ panel }) {
   );
 }
 
-function ActivePanel({ activePanel, selectedCommand, setSelectedCommand, draft, setDraft, routePreview, onPreview }) {
-  if (activePanel === 'chat') return <ChatPanel draft={draft} setDraft={setDraft} routePreview={routePreview} onPreview={onPreview} />;
+function ActivePanel({ activePanel, selectedCommand, setSelectedCommand, draft, setDraft, routePreview, onPreview, onSend, yggReply, yggLoading, yggError }) {
+  if (activePanel === 'chat') return <ChatPanel draft={draft} setDraft={setDraft} routePreview={routePreview} onPreview={onPreview} onSend={onSend} yggReply={yggReply} yggLoading={yggLoading} yggError={yggError} />;
   if (activePanel === 'commands') return <CommandsPanel selectedCommand={selectedCommand} setSelectedCommand={setSelectedCommand} />;
   if (activePanel === 'adapters') return <AdaptersPanel />;
   if (activePanel === 'ledger') return <LedgerPanel />;
@@ -212,6 +220,29 @@ export function StarwellDeveloperInterface() {
   const [selectedCommand, setSelectedCommand] = useState(commandRegistry[0]);
   const [draft, setDraft] = useState('');
   const [previewCount, setPreviewCount] = useState(0);
+  const [yggReply, setYggReply] = useState('');
+  const [yggLoading, setYggLoading] = useState(false);
+  const [yggError, setYggError] = useState(null);
+
+  async function sendToYggdrasil() {
+    if (!draft.trim()) return;
+    setYggLoading(true);
+    setYggError(null);
+    try {
+      const res = await fetch('http://127.0.0.1:4000/api/v1/yggdrasil/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: draft, speaker: 'rowan-falka' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Yggdrasil did not respond.');
+      setYggReply(data.reply);
+    } catch (err) {
+      setYggError(err.message);
+    } finally {
+      setYggLoading(false);
+    }
+  }
 
   const routePreview = useMemo(() => ({
     channel: 'starwell-dev',
@@ -256,6 +287,10 @@ export function StarwellDeveloperInterface() {
         setDraft={setDraft}
         routePreview={routePreview}
         onPreview={() => setPreviewCount((count) => count + 1)}
+        onSend={sendToYggdrasil}
+        yggReply={yggReply}
+        yggLoading={yggLoading}
+        yggError={yggError}
       />
     </main>
   );

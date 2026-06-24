@@ -18,7 +18,7 @@ const commandRegistry = Object.freeze([
 ]);
 
 const adapters = Object.freeze([
-  { id: 'ollama-local', title: 'Ollama Local', status: 'planned', scope: 'Local Yggdrasil model calls', fallback: 'Ollama bridge is not reachable yet.' },
+  { id: 'ollama-local', title: 'Ollama Local', status: 'available', scope: 'Local Yggdrasil model calls via yggdrasil:v0.1', fallback: 'Make sure Ollama is running on 127.0.0.1:11434.' },
   { id: 'supabase-private', title: 'Supabase Private Records', status: 'available', scope: 'Private project records and snapshots', fallback: 'Supabase bridge is not available right now.' },
   { id: 'github-workbench', title: 'GitHub Workbench', status: 'available', scope: 'Branch and PR work, no autonomous merge', fallback: 'GitHub bridge can prepare work, not merge it.' },
   { id: 'google-drive-docs', title: 'Google Drive Docs', status: 'available', scope: 'Docs and review surfaces through approved connector', fallback: 'Google Drive bridge is not available right now.' },
