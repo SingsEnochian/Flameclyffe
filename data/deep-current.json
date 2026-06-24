@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-24T15:16:49.026Z",
+  "generated_at": "2026-06-24T17:25:36.991Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-24T11:15",
+    "time": "2026-06-24T13:15",
     "sky": "Day",
     "current": {
-      "time": "2026-06-24T11:15",
+      "time": "2026-06-24T13:15",
       "interval": 900,
-      "temperature_2m": 84,
-      "relative_humidity_2m": 71,
+      "temperature_2m": 86.9,
+      "relative_humidity_2m": 60,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
-      "cloud_cover": 13,
-      "pressure_msl": 1017.1,
-      "wind_speed_10m": 3.9,
-      "wind_direction_10m": 283
+      "cloud_cover": 15,
+      "pressure_msl": 1016.7,
+      "wind_speed_10m": 4.8,
+      "wind_direction_10m": 236
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 12
     },
     "solar_wind": {
-      "time_tag": "2026-06-24 15:12:00.000",
-      "bz": 0.33,
-      "bt": 14.97,
-      "density": 11.24,
-      "speed": 466.5
+      "time_tag": "2026-06-24 17:21:00.000",
+      "bz": 1.43,
+      "bt": 10.88,
+      "density": 18.48,
+      "speed": 492.9
     }
   },
   "moon": {
-    "age_days": 9.37,
-    "illumination": 70.6,
+    "age_days": 9.46,
+    "illumination": 71.4,
     "name": "Waxing Gibbous"
   },
   "field": {
-    "P": 0.5655555555555558,
-    "C": 0.6680952380952381,
-    "R": 0.78035,
-    "E": 0.7037912087912087,
-    "M": 0.706,
-    "A": 0.9346153846153846,
-    "T": 0.7176842458608059,
-    "H": 0.7315495384615385,
-    "dpdt": 0.78035
+    "P": 0.5611111111111117,
+    "C": 0.6585714285714286,
+    "R": 0.83935,
+    "E": 0.6614835164835164,
+    "M": 0.7140000000000001,
+    "A": 0.926923076923077,
+    "T": 0.7291195253479855,
+    "H": 0.7440001245421245,
+    "dpdt": 0.83935
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
