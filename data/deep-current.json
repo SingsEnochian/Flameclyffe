@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-26T21:05:38.939Z",
+  "generated_at": "2026-06-26T22:43:35.312Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-26T17:00",
+    "time": "2026-06-26T18:30",
     "sky": "Storm",
     "current": {
-      "time": "2026-06-26T17:00",
+      "time": "2026-06-26T18:30",
       "interval": 900,
-      "temperature_2m": 85.1,
-      "relative_humidity_2m": 77,
+      "temperature_2m": 79.4,
+      "relative_humidity_2m": 84,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 95,
       "cloud_cover": 96,
-      "pressure_msl": 1019.9,
-      "wind_speed_10m": 2.2,
-      "wind_direction_10m": 336
+      "pressure_msl": 1019.6,
+      "wind_speed_10m": 7,
+      "wind_direction_10m": 117
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 15
     },
     "solar_wind": {
-      "time_tag": "2026-06-26 21:01:00.000",
-      "bz": -2.88,
-      "bt": 3.6,
-      "density": 0.37,
-      "speed": 566.7
+      "time_tag": "2026-06-26 22:40:00.000",
+      "bz": 0.09,
+      "bt": 2.56,
+      "density": 0.74,
+      "speed": 525.2
     }
   },
   "moon": {
-    "age_days": 11.62,
-    "illumination": 89.2,
+    "age_days": 11.68,
+    "illumination": 89.6,
     "name": "Waxing Gibbous"
   },
   "field": {
-    "P": 0.5966666666666665,
+    "P": 0.5933333333333336,
     "C": 0.1628571428571429,
-    "R": 0.8865166666666667,
-    "E": 0.8224395604395605,
-    "M": 0.892,
+    "R": 0.8761333333333334,
+    "E": 0.7773626373626373,
+    "M": 0.8959999999999999,
     "A": 0.6153846153846154,
-    "T": 0.6055199918315018,
-    "H": 0.6535957106227106,
-    "dpdt": 0.8865166666666667
+    "T": 0.6036545026007326,
+    "H": 0.6078363260073261,
+    "dpdt": 0.8761333333333334
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
