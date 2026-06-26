@@ -6,6 +6,7 @@ import { patchRouter } from './src/routes/patch.routes.js';
 import { memoryRouter } from './src/routes/memory.routes.js';
 import { portalKernelRouter } from './src/routes/portal-kernel.routes.js';
 import { ollamaRouter } from './src/routes/ollama.routes.js';
+import { memoryIngestRouter } from './src/routes/memory-ingest.routes.js';
 
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
@@ -63,6 +64,7 @@ app.use('/api/v1/patches', patchRouter);
 app.use('/api/v1/memory', memoryRouter);
 app.use('/api/v1/kernel', portalKernelRouter);
 app.use('/api/v1/yggdrasil', ollamaRouter);
+app.use('/api/v1/memory', memoryIngestRouter);
 
 app.use((req, res) => {
   res.status(404).json({

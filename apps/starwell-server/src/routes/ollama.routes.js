@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { loadYggdrasilContext } from '../memory/context-loader.js';
 
 export const ollamaRouter = Router();
 
@@ -12,6 +13,8 @@ ollamaRouter.post('/chat', async (req, res) => {
     return res.status(400).json({ ok: false, error: 'Message is required.' });
   }
 
+  const canonicalContext = await loadYggdrasilContext();
+
   let ollamaRes;
   try {
     ollamaRes = await fetch(`${OLLAMA_BASE}/api/chat`, {
@@ -19,7 +22,10 @@ ollamaRouter.post('/chat', async (req, res) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: YGGDRASIL_MODEL,
-        messages: [{ role: 'user', content: message.trim() }],
+        messages: [
+          { role: 'system', content: canonicalContext },
+          { role: 'user', content: message.trim() },
+        ],
         stream: false,
       }),
     });
