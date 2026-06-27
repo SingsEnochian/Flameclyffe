@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-27T16:14:44.263Z",
+  "generated_at": "2026-06-27T17:36:23.792Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-27T12:00",
+    "time": "2026-06-27T13:30",
     "sky": "Storm",
     "current": {
-      "time": "2026-06-27T12:00",
+      "time": "2026-06-27T13:30",
       "interval": 900,
-      "temperature_2m": 86.3,
-      "relative_humidity_2m": 70,
+      "temperature_2m": 88.2,
+      "relative_humidity_2m": 66,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 95,
       "cloud_cover": 0,
-      "pressure_msl": 1020.3,
-      "wind_speed_10m": 3.7,
-      "wind_direction_10m": 237
+      "pressure_msl": 1020,
+      "wind_speed_10m": 1.4,
+      "wind_direction_10m": 198
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-06-27 16:10:00.000",
-      "bz": 0.22,
-      "bt": 2.57,
-      "density": 3.38,
-      "speed": 513.1
+      "time_tag": "2026-06-27 17:32:00.000",
+      "bz": -1.83,
+      "bt": 3.02,
+      "density": 2.75,
+      "speed": 527.3
     }
   },
   "moon": {
-    "age_days": 12.41,
-    "illumination": 93.9,
+    "age_days": 12.47,
+    "illumination": 94.2,
     "name": "Waxing Gibbous"
   },
   "field": {
-    "P": 0.6011111111111106,
+    "P": 0.5977777777777777,
     "C": 0.73,
-    "R": 0.81365,
-    "E": 0.6285164835164835,
-    "M": 0.9390000000000001,
+    "R": 0.8193499999999999,
+    "E": 0.6588818681318681,
+    "M": 0.9420000000000001,
     "A": 0.9846153846153847,
-    "T": 0.7638676511477411,
-    "H": 0.6880342283272284,
-    "dpdt": 0.81365
+    "T": 0.764286934993895,
+    "H": 0.7152583052503052,
+    "dpdt": 0.8193499999999999
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
