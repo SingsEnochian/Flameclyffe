@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>STARWELL Möbius Audio Bus v0.1</title>
-<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, held loops, and subjective observation logging.">
+<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, held loops, component isolators, and subjective observation logging.">
 <style>
 :root{
   --void:#020407;
@@ -163,7 +163,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
     <section class="hero" aria-labelledby="title">
       <p class="eyebrow">Feather first · Channel truth · Held loop with consent</p>
       <h1 id="title">Möbius Audio Bus</h1>
-      <p class="subtitle">A controlled lab for left/right channel independence, centre-safe routing, phase-inverted return, mono safety, held loops, and observation notes before the STARWELL twist enters the deeper instrument.</p>
+      <p class="subtitle">A controlled lab for left/right channel independence, centre-safe routing, phase-inverted return, mono safety, held loops, component isolators, and observation notes before the STARWELL twist enters the deeper instrument.</p>
       <div class="controls" aria-label="Main controls">
         <button class="primary" data-action="wake" type="button">Wake Bus</button>
         <button class="feather" data-action="feather" type="button">Feather Stop</button>
@@ -226,6 +226,18 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
       </article>
 
       <article class="card">
+        <h2>Full Twist isolators</h2>
+        <p>Separate the ingredients: centre floor, left-right offset pair, return split, and noise bed.</p>
+        <div class="controls">
+          <button data-action="run" data-mode="centre-floor" type="button">Centre floor</button>
+          <button data-action="run" data-mode="offset-pair" type="button">Offset pair</button>
+          <button data-action="run" data-mode="return-split" type="button">Return split</button>
+          <button data-action="run" data-mode="noise-bed" type="button">Noise bed</button>
+        </div>
+        <p class="tiny">Use held loop to see which component becomes wind, water, or train tracks. Tiny jars, proper labels.</p>
+      </article>
+
+      <article class="card">
         <h2>Live state</h2>
         <pre id="mobius-state">{}</pre>
       </article>
@@ -258,6 +270,6 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
     <p class="footer">Left bus, right bus, centre bus, return bus. Feather first. Wonder labelled. Courage allowed. Loop held by consent.</p>
   </section>
 </main>
-<script src="../assets/mobius-audio-bus.js?v=0.1.2"></script>
+<script src="../assets/mobius-audio-bus.js?v=0.1.3"></script>
 </body>
 </html>
