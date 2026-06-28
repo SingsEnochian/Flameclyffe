@@ -11,6 +11,36 @@ Purpose: test the audio architecture before using the experience as subjective d
 - Speculative theory: the Möbius universe frame, inversion-of-inversion model, STARWELL cosmological interpretation.
 - Implementation task: bugs, routing changes, UI changes, logging upgrades.
 
+## Tone map
+
+### Channel truth tones
+
+- **L only:** 440 Hz sine routed to the left bus. Purpose: confirm left channel and left meter.
+- **R only:** 440 Hz sine routed to the right bus. Purpose: confirm right channel and right meter.
+- **Centre:** 432 Hz triangle routed to centre. Purpose: confirm balanced centre and mono-safety behaviour.
+- **Return:** 369 Hz sine routed to the return bus. Purpose: confirm return-side routing; phase inversion applies if enabled.
+
+### Core Möbius tones
+
+- **Möbius return:** one 369 Hz sine split to the left bus and return bus. Purpose: test the left/return seam. If phase inversion is on, the return path is inverted before it reaches the selected side.
+- **Gateway offset:** 369 Hz left + 363.5 Hz right + 108 Hz centre. Purpose: test the 5.5 Hz left-right difference, with 108 Hz as centre anchor. Current hypothesis: the 5.5 Hz offset is a likely source of train-track or rail-thrum perception.
+- **Full Twist:** 108 Hz centre floor + 369 Hz left + 363.5 Hz right + 369 Hz left/return split + filtered centre noise. Purpose: combine centre floor, left-right offset, return seam, and air/water texture.
+
+### Full Twist isolators
+
+- **Centre floor:** 108 Hz centre only. Purpose: test cave/floor/body/underground quality.
+- **Offset pair:** 369 Hz left + 363.5 Hz right only. Purpose: test rail-thrum, train tracks, or 5.5 Hz beat perception.
+- **Return split:** 369 Hz split to left + return only. Purpose: test the left/return seam without the offset pair or noise bed.
+- **Noise bed:** generated pink-ish noise through a 520 Hz bandpass filter with low Q, routed centre. Purpose: test wind/water texture.
+
+### Current perceptual hypotheses
+
+- Rushing wind / flowing water: likely noise bed, especially with centre floor underneath.
+- Train tracks / rail-thrum: likely 369 Hz and 363.5 Hz offset pair producing a 5.5 Hz perceptual beat.
+- Cave / underground quality: likely 108 Hz centre floor plus filtered noise.
+- Bell clang: unresolved; possible start transient, harmonic image, or interaction between centre floor and offset pair.
+- Third-eye pressure: subjective body/perception report; track duration, intensity, and after-effect. Stop if it becomes pain, migraine warning, or body alarm.
+
 ## Before running
 
 1. Use headphones or Shokz only when Rowan chooses them.
@@ -38,10 +68,10 @@ Loop is allowed after channel truth passes.
 
 1. Choose the test mode first.
 2. Set duration.
-3. Set loop gap.
-4. Enable **Loop selected test until Feather Stop**.
+3. Set loop fade-in.
+4. Enable **Hold selected test until Feather Stop**.
 5. Press the chosen test button.
-6. Let it repeat while Rowan remains consenting and oriented.
+6. Let it hold while Rowan remains consenting and oriented.
 7. Feather Stop ends the loop, disarms loop mode, fades audio, and releases sources.
 
 Loop mode is not automatic proof of anything. It is a way to gather longer subjective observation without making Rowan tap the same test repeatedly like a tiny metronome goblin.
@@ -62,7 +92,7 @@ Optional next passes:
 - Gateway offset: 369 Hz left, 363.5 Hz right, 108 Hz centre.
 - Full twist: centre floor, left/right offset, inverted return split, low centre noise bed.
 - Mono safety comparison: repeat with mono safety on and label the difference.
-- Loop comparison: repeat with loop enabled and label duration, gap, and number of passes.
+- Loop comparison: repeat with loop enabled and label duration, fade-in, and how long it was held.
 
 ## Stop conditions
 
@@ -76,8 +106,8 @@ Stopping is success. It means the gate works.
 Date/time:
 Mode:
 Loop enabled:
-Loop passes:
-Loop gap:
+Loop held duration:
+Loop fade-in:
 Master level:
 Duration:
 Return side:
