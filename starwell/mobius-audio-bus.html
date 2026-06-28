@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>STARWELL Möbius Audio Bus v0.1</title>
-<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, held loops, component isolators, and subjective observation logging.">
+<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, held loops, component isolators, tone map, and subjective observation logging.">
 <style>
 :root{
   --void:#020407;
@@ -144,6 +144,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
 .status{padding:.85rem 1rem;border:1px solid rgba(120,217,175,.22);border-radius:18px;background:rgba(120,217,175,.09);color:var(--soft)}
 .note-entry{border:1px solid rgba(232,200,120,.16);border-radius:18px;padding:.75rem;background:rgba(255,255,255,.045);margin:.6rem 0}
 .note-entry strong{display:block;color:var(--gold-bright);font-size:.82rem}.note-entry p{margin:.35rem 0 0}
+.tone-list{display:grid;gap:.6rem;margin:0;padding:0;list-style:none}.tone-list li{padding:.58rem .65rem;border:1px solid rgba(232,200,120,.14);border-radius:14px;background:rgba(2,6,10,.26);color:var(--soft)}.tone-list strong{color:var(--gold-bright)}.tone-list code{color:var(--green);font-weight:800}
 .footer{padding:1rem clamp(1rem,4vw,3rem) 2rem;color:var(--dim);text-align:center;font-size:.88rem}
 @media(max-width:680px){.top{position:relative;align-items:flex-start;flex-direction:column}.nav,.btn,button{width:100%}.controls button{width:100%}.grid{grid-template-columns:1fr}.shell{border-radius:24px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
@@ -163,7 +164,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
     <section class="hero" aria-labelledby="title">
       <p class="eyebrow">Feather first · Channel truth · Held loop with consent</p>
       <h1 id="title">Möbius Audio Bus</h1>
-      <p class="subtitle">A controlled lab for left/right channel independence, centre-safe routing, phase-inverted return, mono safety, held loops, component isolators, and observation notes before the STARWELL twist enters the deeper instrument.</p>
+      <p class="subtitle">A controlled lab for left/right channel independence, centre-safe routing, phase-inverted return, mono safety, held loops, component isolators, tone mapping, and observation notes before the STARWELL twist enters the deeper instrument.</p>
       <div class="controls" aria-label="Main controls">
         <button class="primary" data-action="wake" type="button">Wake Bus</button>
         <button class="feather" data-action="feather" type="button">Feather Stop</button>
@@ -235,6 +236,19 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
           <button data-action="run" data-mode="noise-bed" type="button">Noise bed</button>
         </div>
         <p class="tiny">Use held loop to see which component becomes wind, water, or train tracks. Tiny jars, proper labels.</p>
+      </article>
+
+      <article class="card">
+        <h2>Tone map</h2>
+        <ul class="tone-list">
+          <li><strong>L only / R only:</strong> <code>440 Hz sine</code> routed hard to left or right for channel truth.</li>
+          <li><strong>Centre:</strong> <code>432 Hz triangle</code> routed centre as a balance and mono-safety check.</li>
+          <li><strong>Return:</strong> <code>369 Hz sine</code> routed through the return bus; phase inversion applies if enabled.</li>
+          <li><strong>Möbius return:</strong> one <code>369 Hz sine</code> split to left bus plus return bus, making the left/return seam.</li>
+          <li><strong>Gateway offset:</strong> <code>369 Hz left</code> + <code>363.5 Hz right</code> with <code>108 Hz centre</code>; the 5.5 Hz difference is the likely rail-thrum source.</li>
+          <li><strong>Full Twist:</strong> <code>108 Hz centre floor</code>, <code>369/363.5 Hz offset pair</code>, <code>369 Hz return split</code>, plus filtered centre noise.</li>
+          <li><strong>Noise bed:</strong> generated pink-ish noise through a <code>520 Hz bandpass</code> with low Q; likely source of wind/water texture.</li>
+        </ul>
       </article>
 
       <article class="card">
