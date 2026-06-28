@@ -24,14 +24,14 @@
       this.ready = false;
       this.activeSources = [];
       this.monitorFrame = null;
-      this.loopTimer = null;
       this.phaseInverted = true;
       this.monoSafe = false;
       this.returnSide = 'right';
       this.masterLevel = 0.12;
       this.testSeconds = 2;
       this.loopEnabled = false;
-      this.loopGap = 0.5;
+      this.loopHeld = false;
+      this.loopRamp = 0.5;
       this.lastMode = 'mobius-return';
       this.loopIteration = 0;
       this.nodes = {};
@@ -183,29 +183,13 @@
 
     setLoopEnabled(value) {
       this.loopEnabled = Boolean(value);
-      if (!this.loopEnabled) this.clearLoopTimer();
-      this.emitState(this.loopEnabled ? 'loop-armed' : 'loop-disarmed');
+      if (!this.loopEnabled && this.loopHeld) this.feather();
+      else this.emitState(this.loopEnabled ? 'loop-armed' : 'loop-disarmed');
     }
 
-    setLoopGap(value) {
-      this.loopGap = clamp(value, 0, 20);
-      this.emitState('loop-gap');
-    }
-
-    clearLoopTimer() {
-      if (this.loopTimer) window.clearTimeout(this.loopTimer);
-      this.loopTimer = null;
-    }
-
-    scheduleLoop(mode) {
-      this.clearLoopTimer();
-      if (!this.loopEnabled) return;
-      const delayMs = Math.max(80, Math.round((this.testSeconds + this.loopGap) * 1000));
-      this.loopTimer = window.setTimeout(() => {
-        if (!this.loopEnabled) return;
-        this.runTest(mode, { fromLoop: true });
-      }, delayMs);
-      this.emitState('loop-scheduled');
+    setLoopRamp(value) {
+      this.loopRamp = clamp(value, 0, 8);
+      this.emitState('loop-ramp');
     }
 
     routeFor(name) {
@@ -228,6 +212,15 @@
       return { gain: g, end };
     }
 
+    makeHeldGain(destination, peak = 0.04) {
+      const g = this.ctx.createGain();
+      const now = this.ctx.currentTime;
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.setTargetAtTime(Math.max(0.0002, peak), now, Math.max(0.02, this.loopRamp));
+      g.connect(destination);
+      return g;
+    }
+
     tone({ frequency = 440, route = 'centre', gain = 0.06, type = 'sine', duration = this.testSeconds, detune = 0 }) {
       const osc = this.ctx.createOscillator();
       const env = this.makeEnvelope(this.routeFor(route), gain, duration);
@@ -238,6 +231,18 @@
       osc.start();
       osc.stop(env.end + 0.08);
       this.activeSources.push(osc, env.gain);
+      return osc;
+    }
+
+    heldTone({ frequency = 440, route = 'centre', gain = 0.035, type = 'sine', detune = 0 }) {
+      const osc = this.ctx.createOscillator();
+      const env = this.makeHeldGain(this.routeFor(route), gain);
+      osc.type = type;
+      osc.frequency.setValueAtTime(frequency, this.ctx.currentTime);
+      osc.detune.value = detune;
+      osc.connect(env);
+      osc.start();
+      this.activeSources.push(osc, env);
       return osc;
     }
 
@@ -257,8 +262,21 @@
       return osc;
     }
 
-    noise({ route = 'centre', gain = 0.018, duration = this.testSeconds, filter = 700, q = 0.75 }) {
-      const frames = Math.max(1, Math.floor(this.ctx.sampleRate * Math.max(0.2, duration)));
+    heldSplitTone({ frequency = 369, primary = 'left', secondary = 'return', primaryGain = 0.035, secondaryGain = 0.035, type = 'sine' }) {
+      const osc = this.ctx.createOscillator();
+      const p = this.makeHeldGain(this.routeFor(primary), primaryGain);
+      const s = this.makeHeldGain(this.routeFor(secondary), secondaryGain);
+      osc.type = type;
+      osc.frequency.setValueAtTime(frequency, this.ctx.currentTime);
+      osc.connect(p);
+      osc.connect(s);
+      osc.start();
+      this.activeSources.push(osc, p, s);
+      return osc;
+    }
+
+    noise({ route = 'centre', gain = 0.018, duration = this.testSeconds, filter = 700, q = 0.75, loop = false }) {
+      const frames = Math.max(1, Math.floor(this.ctx.sampleRate * Math.max(0.2, loop ? 2 : duration)));
       const buffer = this.ctx.createBuffer(1, frames, this.ctx.sampleRate);
       const data = buffer.getChannelData(0);
       let pink = 0;
@@ -269,23 +287,23 @@
       }
       const src = this.ctx.createBufferSource();
       const band = this.ctx.createBiquadFilter();
-      const env = this.makeEnvelope(this.routeFor(route), gain, duration);
+      const env = loop ? this.makeHeldGain(this.routeFor(route), gain) : this.makeEnvelope(this.routeFor(route), gain, duration).gain;
       band.type = 'bandpass';
       band.frequency.value = filter;
       band.Q.value = q;
       src.buffer = buffer;
+      src.loop = Boolean(loop);
       src.connect(band);
-      band.connect(env.gain);
+      band.connect(env);
       src.start();
-      src.stop(env.end + 0.05);
-      this.activeSources.push(src, band, env.gain);
+      if (!loop) src.stop(this.ctx.currentTime + Math.max(0.2, duration) + 0.05);
+      this.activeSources.push(src, band, env);
     }
 
-    async runTest(mode = 'mobius-return', options = {}) {
+    async runTest(mode = 'mobius-return') {
       await this.ensure();
-      this.clearLoopTimer();
-      if (!options.fromLoop) this.loopIteration = 0;
-      this.loopIteration += 1;
+      this.loopHeld = false;
+      this.loopIteration = 0;
       this.lastMode = mode;
       this.stopSourcesOnly();
       const now = this.ctx.currentTime;
@@ -315,7 +333,43 @@
       }
 
       this.emitState(mode);
-      this.scheduleLoop(mode);
+      return true;
+    }
+
+    async startLoop(mode = 'mobius-return') {
+      await this.ensure();
+      this.loopEnabled = true;
+      this.loopHeld = true;
+      this.loopIteration += 1;
+      this.lastMode = mode;
+      this.stopSourcesOnly();
+      const now = this.ctx.currentTime;
+      this.nodes.master.gain.cancelScheduledValues(now);
+      this.nodes.master.gain.setTargetAtTime(this.masterLevel, now, 0.05);
+
+      if (mode === 'left-only') {
+        this.heldTone({ frequency: 440, route: 'left', gain: 0.040 });
+      } else if (mode === 'right-only') {
+        this.heldTone({ frequency: 440, route: 'right', gain: 0.040 });
+      } else if (mode === 'centre') {
+        this.heldTone({ frequency: 432, route: 'centre', gain: 0.040, type: 'triangle' });
+      } else if (mode === 'return-only') {
+        this.heldTone({ frequency: 369, route: 'return', gain: 0.040 });
+      } else if (mode === 'gateway-offset') {
+        this.heldTone({ frequency: 369, route: 'left', gain: 0.031 });
+        this.heldTone({ frequency: 363.5, route: 'right', gain: 0.031 });
+        this.heldTone({ frequency: 108, route: 'centre', gain: 0.018 });
+      } else if (mode === 'full-twist') {
+        this.heldTone({ frequency: 108, route: 'centre', gain: 0.016 });
+        this.heldTone({ frequency: 369, route: 'left', gain: 0.025 });
+        this.heldTone({ frequency: 363.5, route: 'right', gain: 0.025 });
+        this.heldSplitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.014, secondaryGain: 0.024 });
+        this.noise({ route: 'centre', gain: 0.004, filter: 520, q: 0.5, loop: true });
+      } else {
+        this.heldSplitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.032, secondaryGain: 0.032 });
+      }
+
+      this.emitState('loop-holding');
       return true;
     }
 
@@ -332,7 +386,7 @@
 
     feather(fade = 0.12) {
       this.loopEnabled = false;
-      this.clearLoopTimer();
+      this.loopHeld = false;
       if (!this.ctx) {
         this.emitState('feather-stop');
         return;
@@ -377,7 +431,8 @@
         masterLevel: this.masterLevel,
         testSeconds: this.testSeconds,
         loopEnabled: this.loopEnabled,
-        loopGap: this.loopGap,
+        loopHeld: this.loopHeld,
+        loopRamp: this.loopRamp,
         lastMode: this.lastMode,
         loopIteration: this.loopIteration,
         sampleRate: this.ctx?.sampleRate || null,
@@ -421,14 +476,14 @@
 
     function syncControls(state) {
       const loopMode = $('#loop-mode');
-      const loopGap = $('#loop-gap');
+      const loopRamp = $('#loop-ramp');
       const phase = $('#phase-inverted');
       const mono = $('#mono-safe');
       const returnSide = $('#return-side');
       const master = $('#master-level');
       const duration = $('#duration');
       if (loopMode && loopMode.checked !== state.loopEnabled) loopMode.checked = state.loopEnabled;
-      if (loopGap && Number(loopGap.value) !== state.loopGap) loopGap.value = String(state.loopGap);
+      if (loopRamp && Number(loopRamp.value) !== state.loopRamp) loopRamp.value = String(state.loopRamp);
       if (phase && phase.checked !== state.phaseInverted) phase.checked = state.phaseInverted;
       if (mono && mono.checked !== state.monoSafe) mono.checked = state.monoSafe;
       if (returnSide && returnSide.value !== state.returnSide) returnSide.value = state.returnSide;
@@ -441,10 +496,10 @@
       if (stateOut) stateOut.textContent = JSON.stringify(state, null, 2);
       if (state.reason === 'feather-stop') {
         setStatus('Feather stop: loop disarmed, audio faded, and sources released.');
-      } else if (state.loopEnabled && state.reason === 'loop-scheduled') {
-        setStatus(`Looping ${state.lastMode}; pass ${state.loopIteration}. Feather stops the loop.`);
+      } else if (state.loopHeld) {
+        setStatus(`Holding ${state.lastMode} continuously. Feather stops the loop.`);
       } else if (state.loopEnabled) {
-        setStatus(`Loop armed for ${state.lastMode}; pass ${state.loopIteration || 0}.`);
+        setStatus(`Loop armed for the next selected test.`);
       } else {
         setStatus(`State: ${state.reason}`);
       }
@@ -497,9 +552,13 @@
         } else if (action === 'run') {
           bus.setMaster($('#master-level')?.value || bus.masterLevel);
           bus.setDuration($('#duration')?.value || bus.testSeconds);
-          bus.setLoopGap($('#loop-gap')?.value || bus.loopGap);
-          bus.setLoopEnabled(Boolean($('#loop-mode')?.checked));
-          await bus.runTest(button.dataset.mode || 'mobius-return');
+          bus.setLoopRamp($('#loop-ramp')?.value || bus.loopRamp);
+          if ($('#loop-mode')?.checked) {
+            await bus.startLoop(button.dataset.mode || 'mobius-return');
+          } else {
+            bus.setLoopEnabled(false);
+            await bus.runTest(button.dataset.mode || 'mobius-return');
+          }
         } else if (action === 'save-note') {
           const body = (noteBody?.value || '').trim();
           if (!body) {
@@ -531,7 +590,7 @@
       if (target?.id === 'master-level') bus.setMaster(target.value);
       if (target?.id === 'duration') bus.setDuration(target.value);
       if (target?.id === 'loop-mode') bus.setLoopEnabled(target.checked);
-      if (target?.id === 'loop-gap') bus.setLoopGap(target.value);
+      if (target?.id === 'loop-ramp') bus.setLoopRamp(target.value);
     });
 
     renderNotes();
