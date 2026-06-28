@@ -10,16 +10,11 @@
 */
 
 (function () {
-  const TAU = Math.PI * 2;
   const STORAGE_KEY = 'starwell.mobiusAudioBus.v0.1.notes';
   const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, Number(value) || 0));
 
   function safeDisconnect(node) {
     try { node?.disconnect?.(); } catch (error) {}
-  }
-
-  function dbToGain(db) {
-    return Math.pow(10, db / 20);
   }
 
   class MobiusAudioBus {
@@ -29,11 +24,16 @@
       this.ready = false;
       this.activeSources = [];
       this.monitorFrame = null;
+      this.loopTimer = null;
       this.phaseInverted = true;
       this.monoSafe = false;
       this.returnSide = 'right';
       this.masterLevel = 0.12;
       this.testSeconds = 2;
+      this.loopEnabled = false;
+      this.loopGap = 0.5;
+      this.lastMode = 'mobius-return';
+      this.loopIteration = 0;
       this.nodes = {};
       this.onMeter = null;
       this.onState = null;
@@ -181,6 +181,33 @@
       this.emitState('duration');
     }
 
+    setLoopEnabled(value) {
+      this.loopEnabled = Boolean(value);
+      if (!this.loopEnabled) this.clearLoopTimer();
+      this.emitState(this.loopEnabled ? 'loop-armed' : 'loop-disarmed');
+    }
+
+    setLoopGap(value) {
+      this.loopGap = clamp(value, 0, 20);
+      this.emitState('loop-gap');
+    }
+
+    clearLoopTimer() {
+      if (this.loopTimer) window.clearTimeout(this.loopTimer);
+      this.loopTimer = null;
+    }
+
+    scheduleLoop(mode) {
+      this.clearLoopTimer();
+      if (!this.loopEnabled) return;
+      const delayMs = Math.max(80, Math.round((this.testSeconds + this.loopGap) * 1000));
+      this.loopTimer = window.setTimeout(() => {
+        if (!this.loopEnabled) return;
+        this.runTest(mode, { fromLoop: true });
+      }, delayMs);
+      this.emitState('loop-scheduled');
+    }
+
     routeFor(name) {
       const n = this.nodes;
       if (name === 'left') return n.leftBus;
@@ -254,8 +281,12 @@
       this.activeSources.push(src, band, env.gain);
     }
 
-    async runTest(mode = 'mobius-return') {
+    async runTest(mode = 'mobius-return', options = {}) {
       await this.ensure();
+      this.clearLoopTimer();
+      if (!options.fromLoop) this.loopIteration = 0;
+      this.loopIteration += 1;
+      this.lastMode = mode;
       this.stopSourcesOnly();
       const now = this.ctx.currentTime;
       this.nodes.master.gain.cancelScheduledValues(now);
@@ -284,6 +315,7 @@
       }
 
       this.emitState(mode);
+      this.scheduleLoop(mode);
       return true;
     }
 
@@ -299,7 +331,12 @@
     }
 
     feather(fade = 0.12) {
-      if (!this.ctx) return;
+      this.loopEnabled = false;
+      this.clearLoopTimer();
+      if (!this.ctx) {
+        this.emitState('feather-stop');
+        return;
+      }
       const now = this.ctx.currentTime;
       this.stopSourcesOnly();
       this.nodes.master?.gain?.cancelScheduledValues(now);
@@ -339,6 +376,10 @@
         returnSide: this.returnSide,
         masterLevel: this.masterLevel,
         testSeconds: this.testSeconds,
+        loopEnabled: this.loopEnabled,
+        loopGap: this.loopGap,
+        lastMode: this.lastMode,
+        loopIteration: this.loopIteration,
         sampleRate: this.ctx?.sampleRate || null,
         currentTime: this.ctx?.currentTime || null
       };
@@ -378,9 +419,35 @@
       if (status) status.textContent = text;
     }
 
+    function syncControls(state) {
+      const loopMode = $('#loop-mode');
+      const loopGap = $('#loop-gap');
+      const phase = $('#phase-inverted');
+      const mono = $('#mono-safe');
+      const returnSide = $('#return-side');
+      const master = $('#master-level');
+      const duration = $('#duration');
+      if (loopMode && loopMode.checked !== state.loopEnabled) loopMode.checked = state.loopEnabled;
+      if (loopGap && Number(loopGap.value) !== state.loopGap) loopGap.value = String(state.loopGap);
+      if (phase && phase.checked !== state.phaseInverted) phase.checked = state.phaseInverted;
+      if (mono && mono.checked !== state.monoSafe) mono.checked = state.monoSafe;
+      if (returnSide && returnSide.value !== state.returnSide) returnSide.value = state.returnSide;
+      if (master && Number(master.value) !== state.masterLevel) master.value = String(state.masterLevel);
+      if (duration && Number(duration.value) !== state.testSeconds) duration.value = String(state.testSeconds);
+    }
+
     function renderState(state) {
+      syncControls(state);
       if (stateOut) stateOut.textContent = JSON.stringify(state, null, 2);
-      setStatus(state.reason === 'feather-stop' ? 'Feather stop: audio faded and sources released.' : `State: ${state.reason}`);
+      if (state.reason === 'feather-stop') {
+        setStatus('Feather stop: loop disarmed, audio faded, and sources released.');
+      } else if (state.loopEnabled && state.reason === 'loop-scheduled') {
+        setStatus(`Looping ${state.lastMode}; pass ${state.loopIteration}. Feather stops the loop.`);
+      } else if (state.loopEnabled) {
+        setStatus(`Loop armed for ${state.lastMode}; pass ${state.loopIteration || 0}.`);
+      } else {
+        setStatus(`State: ${state.reason}`);
+      }
     }
 
     function renderNotes() {
@@ -430,6 +497,8 @@
         } else if (action === 'run') {
           bus.setMaster($('#master-level')?.value || bus.masterLevel);
           bus.setDuration($('#duration')?.value || bus.testSeconds);
+          bus.setLoopGap($('#loop-gap')?.value || bus.loopGap);
+          bus.setLoopEnabled(Boolean($('#loop-mode')?.checked));
           await bus.runTest(button.dataset.mode || 'mobius-return');
         } else if (action === 'save-note') {
           const body = (noteBody?.value || '').trim();
@@ -461,6 +530,8 @@
       if (target?.id === 'return-side') bus.setReturnSide(target.value);
       if (target?.id === 'master-level') bus.setMaster(target.value);
       if (target?.id === 'duration') bus.setDuration(target.value);
+      if (target?.id === 'loop-mode') bus.setLoopEnabled(target.checked);
+      if (target?.id === 'loop-gap') bus.setLoopGap(target.value);
     });
 
     renderNotes();
