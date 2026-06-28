@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>STARWELL Möbius Audio Bus v0.1</title>
-<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, and subjective observation logging.">
+<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, looping tests, and subjective observation logging.">
 <style>
 :root{
   --void:#020407;
@@ -65,9 +65,7 @@ a{color:inherit}
 .brand strong{font-family:Georgia,"Times New Roman",serif;color:var(--gold);letter-spacing:.13em;text-transform:uppercase}
 .brand span{color:var(--dim);font-size:.82rem}
 .nav{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:flex-end}
-.btn,button,select,input,textarea{
-  font:inherit;
-}
+.btn,button,select,input,textarea{font:inherit}
 .btn,button{
   position:relative;
   display:inline-flex;
@@ -86,11 +84,7 @@ a{color:inherit}
 }
 .btn:hover,.btn:focus-visible,button:hover,button:focus-visible{border-color:rgba(232,200,120,.78);background:rgba(232,200,120,.1);outline:none}
 .primary{border-color:rgba(232,200,120,.64);background:linear-gradient(135deg,rgba(92,57,18,.72),rgba(12,47,38,.76))}
-.feather{
-  border-color:rgba(224,166,160,.78);
-  background:linear-gradient(135deg,rgba(111,22,24,.85),rgba(45,10,16,.82));
-  color:#fff4f0;
-}
+.feather{border-color:rgba(224,166,160,.78);background:linear-gradient(135deg,rgba(111,22,24,.85),rgba(45,10,16,.82));color:#fff4f0}
 main{width:min(1180px,94vw);margin:0 auto;padding:clamp(1rem,3vw,2rem) 0 4rem}
 .shell{
   border:1px solid rgba(232,200,120,.32);
@@ -167,9 +161,9 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
 <main data-mobius-lab>
   <section class="shell">
     <section class="hero" aria-labelledby="title">
-      <p class="eyebrow">Feather first · Channel truth · Subjective data welcomed</p>
+      <p class="eyebrow">Feather first · Channel truth · Loop with consent</p>
       <h1 id="title">Möbius Audio Bus</h1>
-      <p class="subtitle">A controlled lab for left/right channel independence, centre-safe routing, phase-inverted return, mono safety, and observation notes before the STARWELL twist enters the deeper instrument.</p>
+      <p class="subtitle">A controlled lab for left/right channel independence, centre-safe routing, phase-inverted return, mono safety, looping tests, and observation notes before the STARWELL twist enters the deeper instrument.</p>
       <div class="controls" aria-label="Main controls">
         <button class="primary" data-action="wake" type="button">Wake Bus</button>
         <button class="feather" data-action="feather" type="button">Feather Stop</button>
@@ -196,8 +190,12 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
           <label>Test duration, seconds
             <input id="duration" type="range" min="0.25" max="12" step="0.25" value="2">
           </label>
+          <label class="inline"><input id="loop-mode" type="checkbox"> Loop selected test until Feather Stop</label>
+          <label>Loop gap, seconds
+            <input id="loop-gap" type="range" min="0" max="8" step="0.25" value="0.5">
+          </label>
         </div>
-        <p class="tiny">Feather Stop fades the master and releases active sources. It is the first stone, not the panic broom.</p>
+        <p class="tiny">Loop mode repeats whichever test button you press. Feather Stop disarms loop, fades the master, and releases active sources.</p>
       </article>
 
       <article class="card">
@@ -224,7 +222,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
           <button data-action="run" data-mode="gateway-offset" type="button">Gateway offset</button>
           <button data-action="run" data-mode="full-twist" type="button">Full twist</button>
         </div>
-        <p class="tiny">Möbius return sends one oscillator into the left bus and the return bus. With inversion on, the return path flips phase before it reaches the selected ear.</p>
+        <p class="tiny">Möbius return sends one oscillator into the left bus and the return bus. With inversion on, the return path flips phase before it reaches the selected ear. Loop only when your hand is on Feather.</p>
       </article>
 
       <article class="card">
@@ -257,7 +255,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
       </article>
     </section>
 
-    <p class="footer">Left bus, right bus, centre bus, return bus. Feather first. Wonder labelled. Courage allowed.</p>
+    <p class="footer">Left bus, right bus, centre bus, return bus. Feather first. Wonder labelled. Courage allowed. Loop held by consent.</p>
   </section>
 </main>
 <script src="../assets/mobius-audio-bus.js"></script>
