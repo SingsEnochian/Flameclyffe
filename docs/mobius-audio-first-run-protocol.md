@@ -2,7 +2,7 @@
 
 Status: implementation protocol for the STARWELL Möbius Audio Lab.
 
-Purpose: test the audio architecture before using the experience as subjective data. Feather first. Channel truth before the twist.
+Purpose: test the audio architecture before using the experience as subjective data. Feather first. Channel truth before the twist. Loop only after the channel tests pass.
 
 ## Claim labels
 
@@ -32,6 +32,20 @@ Run in this order:
 
 If any channel behaves incorrectly, stop and log it as an implementation task. Do not proceed to Möbius tests.
 
+## Loop pass
+
+Loop is allowed after channel truth passes.
+
+1. Choose the test mode first.
+2. Set duration.
+3. Set loop gap.
+4. Enable **Loop selected test until Feather Stop**.
+5. Press the chosen test button.
+6. Let it repeat while Rowan remains consenting and oriented.
+7. Feather Stop ends the loop, disarms loop mode, fades audio, and releases sources.
+
+Loop mode is not automatic proof of anything. It is a way to gather longer subjective observation without making Rowan tap the same test repeatedly like a tiny metronome goblin.
+
 ## Möbius pass
 
 Run only after channel truth passes.
@@ -48,6 +62,7 @@ Optional next passes:
 - Gateway offset: 369 Hz left, 363.5 Hz right, 108 Hz centre.
 - Full twist: centre floor, left/right offset, inverted return split, low centre noise bed.
 - Mono safety comparison: repeat with mono safety on and label the difference.
+- Loop comparison: repeat with loop enabled and label duration, gap, and number of passes.
 
 ## Stop conditions
 
@@ -60,6 +75,9 @@ Stopping is success. It means the gate works.
 ```text
 Date/time:
 Mode:
+Loop enabled:
+Loop passes:
+Loop gap:
 Master level:
 Duration:
 Return side:
