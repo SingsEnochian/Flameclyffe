@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>STARWELL Möbius Audio Bus v0.1</title>
-<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, looping tests, and subjective observation logging.">
+<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, held loops, and subjective observation logging.">
 <style>
 :root{
   --void:#020407;
@@ -161,9 +161,9 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
 <main data-mobius-lab>
   <section class="shell">
     <section class="hero" aria-labelledby="title">
-      <p class="eyebrow">Feather first · Channel truth · Loop with consent</p>
+      <p class="eyebrow">Feather first · Channel truth · Held loop with consent</p>
       <h1 id="title">Möbius Audio Bus</h1>
-      <p class="subtitle">A controlled lab for left/right channel independence, centre-safe routing, phase-inverted return, mono safety, looping tests, and observation notes before the STARWELL twist enters the deeper instrument.</p>
+      <p class="subtitle">A controlled lab for left/right channel independence, centre-safe routing, phase-inverted return, mono safety, held loops, and observation notes before the STARWELL twist enters the deeper instrument.</p>
       <div class="controls" aria-label="Main controls">
         <button class="primary" data-action="wake" type="button">Wake Bus</button>
         <button class="feather" data-action="feather" type="button">Feather Stop</button>
@@ -190,12 +190,12 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
           <label>Test duration, seconds
             <input id="duration" type="range" min="0.25" max="12" step="0.25" value="2">
           </label>
-          <label class="inline"><input id="loop-mode" type="checkbox"> Loop selected test until Feather Stop</label>
-          <label>Loop gap, seconds
-            <input id="loop-gap" type="range" min="0" max="8" step="0.25" value="0.5">
+          <label class="inline"><input id="loop-mode" type="checkbox"> Hold selected test until Feather Stop</label>
+          <label>Loop fade-in, seconds
+            <input id="loop-ramp" type="range" min="0" max="8" step="0.25" value="0.5">
           </label>
         </div>
-        <p class="tiny">Loop mode repeats whichever test button you press. Feather Stop disarms loop, fades the master, and releases active sources.</p>
+        <p class="tiny">Held loop starts a continuous version of whichever test button you press. Feather Stop disarms loop, fades the master, and releases active sources.</p>
       </article>
 
       <article class="card">
@@ -222,7 +222,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
           <button data-action="run" data-mode="gateway-offset" type="button">Gateway offset</button>
           <button data-action="run" data-mode="full-twist" type="button">Full twist</button>
         </div>
-        <p class="tiny">Möbius return sends one oscillator into the left bus and the return bus. With inversion on, the return path flips phase before it reaches the selected ear. Loop only when your hand is on Feather.</p>
+        <p class="tiny">Möbius return sends one oscillator into the left bus and the return bus. With inversion on, the return path flips phase before it reaches the selected ear. Hold only when your hand is on Feather.</p>
       </article>
 
       <article class="card">
@@ -258,6 +258,6 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
     <p class="footer">Left bus, right bus, centre bus, return bus. Feather first. Wonder labelled. Courage allowed. Loop held by consent.</p>
   </section>
 </main>
-<script src="../assets/mobius-audio-bus.js"></script>
+<script src="../assets/mobius-audio-bus.js?v=0.1.2"></script>
 </body>
 </html>
