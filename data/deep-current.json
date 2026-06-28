@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-28T20:57:32.698Z",
+  "generated_at": "2026-06-28T22:03:39.694Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,52 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-28T16:45",
+    "time": "2026-06-28T18:00",
     "sky": "Storm",
     "current": {
-      "time": "2026-06-28T16:45",
+      "time": "2026-06-28T18:00",
       "interval": 900,
-      "temperature_2m": 85.8,
+      "temperature_2m": 85,
       "relative_humidity_2m": 80,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 95,
       "cloud_cover": 0,
-      "pressure_msl": 1016.7,
+      "pressure_msl": 1016.6,
       "wind_speed_10m": 7.5,
-      "wind_direction_10m": 113
+      "wind_direction_10m": 120
     }
   },
   "space_weather": {
     "kp": {
       "value": 0.67,
-      "time_tag": "2026-06-28T15:00:00",
+      "time_tag": "2026-06-28T18:00:00",
       "a_running": 3
     },
     "solar_wind": {
-      "time_tag": "2026-06-28 20:54:00.000",
-      "bz": -0.17,
-      "bt": 3.28,
-      "density": 3.49,
-      "speed": 448.4
+      "time_tag": "2026-06-28 22:00:00.000",
+      "bz": -0.65,
+      "bt": 3.37,
+      "density": 3.07,
+      "speed": 434.4
     }
   },
   "moon": {
-    "age_days": 13.61,
-    "illumination": 98.5,
+    "age_days": 13.66,
+    "illumination": 98.6,
     "name": "Full Moon"
   },
   "field": {
-    "P": 0.5611111111111117,
+    "P": 0.5600000000000003,
     "C": 0.73,
-    "R": 0.8220666666666666,
-    "E": 0.5997994505494505,
-    "M": 0.985,
+    "R": 0.82,
+    "E": 0.6117994505494505,
+    "M": 0.986,
     "A": 0.9846153846153847,
-    "T": 0.7593505300244201,
-    "H": 0.6276252661782663,
-    "dpdt": 0.8220666666666666
+    "T": 0.7586528366910867,
+    "H": 0.6356532661782662,
+    "dpdt": 0.82
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
