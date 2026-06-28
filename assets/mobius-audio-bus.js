@@ -300,16 +300,7 @@
       this.activeSources.push(src, band, env);
     }
 
-    async runTest(mode = 'mobius-return') {
-      await this.ensure();
-      this.loopHeld = false;
-      this.loopIteration = 0;
-      this.lastMode = mode;
-      this.stopSourcesOnly();
-      const now = this.ctx.currentTime;
-      this.nodes.master.gain.cancelScheduledValues(now);
-      this.nodes.master.gain.setTargetAtTime(this.masterLevel, now, 0.05);
-
+    runOneShotMode(mode) {
       if (mode === 'left-only') {
         this.tone({ frequency: 440, route: 'left', gain: 0.055 });
       } else if (mode === 'right-only') {
@@ -318,6 +309,15 @@
         this.tone({ frequency: 432, route: 'centre', gain: 0.055, type: 'triangle' });
       } else if (mode === 'return-only') {
         this.tone({ frequency: 369, route: 'return', gain: 0.055 });
+      } else if (mode === 'centre-floor') {
+        this.tone({ frequency: 108, route: 'centre', gain: 0.030 });
+      } else if (mode === 'offset-pair') {
+        this.tone({ frequency: 369, route: 'left', gain: 0.042 });
+        this.tone({ frequency: 363.5, route: 'right', gain: 0.042 });
+      } else if (mode === 'return-split') {
+        this.splitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.030, secondaryGain: 0.040 });
+      } else if (mode === 'noise-bed') {
+        this.noise({ route: 'centre', gain: 0.012, filter: 520, q: 0.5 });
       } else if (mode === 'gateway-offset') {
         this.tone({ frequency: 369, route: 'left', gain: 0.042 });
         this.tone({ frequency: 363.5, route: 'right', gain: 0.042 });
@@ -331,7 +331,51 @@
       } else {
         this.splitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.044, secondaryGain: 0.044 });
       }
+    }
 
+    runHeldMode(mode) {
+      if (mode === 'left-only') {
+        this.heldTone({ frequency: 440, route: 'left', gain: 0.040 });
+      } else if (mode === 'right-only') {
+        this.heldTone({ frequency: 440, route: 'right', gain: 0.040 });
+      } else if (mode === 'centre') {
+        this.heldTone({ frequency: 432, route: 'centre', gain: 0.040, type: 'triangle' });
+      } else if (mode === 'return-only') {
+        this.heldTone({ frequency: 369, route: 'return', gain: 0.040 });
+      } else if (mode === 'centre-floor') {
+        this.heldTone({ frequency: 108, route: 'centre', gain: 0.022 });
+      } else if (mode === 'offset-pair') {
+        this.heldTone({ frequency: 369, route: 'left', gain: 0.031 });
+        this.heldTone({ frequency: 363.5, route: 'right', gain: 0.031 });
+      } else if (mode === 'return-split') {
+        this.heldSplitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.022, secondaryGain: 0.032 });
+      } else if (mode === 'noise-bed') {
+        this.noise({ route: 'centre', gain: 0.008, filter: 520, q: 0.5, loop: true });
+      } else if (mode === 'gateway-offset') {
+        this.heldTone({ frequency: 369, route: 'left', gain: 0.031 });
+        this.heldTone({ frequency: 363.5, route: 'right', gain: 0.031 });
+        this.heldTone({ frequency: 108, route: 'centre', gain: 0.018 });
+      } else if (mode === 'full-twist') {
+        this.heldTone({ frequency: 108, route: 'centre', gain: 0.016 });
+        this.heldTone({ frequency: 369, route: 'left', gain: 0.025 });
+        this.heldTone({ frequency: 363.5, route: 'right', gain: 0.025 });
+        this.heldSplitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.014, secondaryGain: 0.024 });
+        this.noise({ route: 'centre', gain: 0.004, filter: 520, q: 0.5, loop: true });
+      } else {
+        this.heldSplitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.032, secondaryGain: 0.032 });
+      }
+    }
+
+    async runTest(mode = 'mobius-return') {
+      await this.ensure();
+      this.loopHeld = false;
+      this.loopIteration = 0;
+      this.lastMode = mode;
+      this.stopSourcesOnly();
+      const now = this.ctx.currentTime;
+      this.nodes.master.gain.cancelScheduledValues(now);
+      this.nodes.master.gain.setTargetAtTime(this.masterLevel, now, 0.05);
+      this.runOneShotMode(mode);
       this.emitState(mode);
       return true;
     }
@@ -346,29 +390,7 @@
       const now = this.ctx.currentTime;
       this.nodes.master.gain.cancelScheduledValues(now);
       this.nodes.master.gain.setTargetAtTime(this.masterLevel, now, 0.05);
-
-      if (mode === 'left-only') {
-        this.heldTone({ frequency: 440, route: 'left', gain: 0.040 });
-      } else if (mode === 'right-only') {
-        this.heldTone({ frequency: 440, route: 'right', gain: 0.040 });
-      } else if (mode === 'centre') {
-        this.heldTone({ frequency: 432, route: 'centre', gain: 0.040, type: 'triangle' });
-      } else if (mode === 'return-only') {
-        this.heldTone({ frequency: 369, route: 'return', gain: 0.040 });
-      } else if (mode === 'gateway-offset') {
-        this.heldTone({ frequency: 369, route: 'left', gain: 0.031 });
-        this.heldTone({ frequency: 363.5, route: 'right', gain: 0.031 });
-        this.heldTone({ frequency: 108, route: 'centre', gain: 0.018 });
-      } else if (mode === 'full-twist') {
-        this.heldTone({ frequency: 108, route: 'centre', gain: 0.016 });
-        this.heldTone({ frequency: 369, route: 'left', gain: 0.025 });
-        this.heldTone({ frequency: 363.5, route: 'right', gain: 0.025 });
-        this.heldSplitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.014, secondaryGain: 0.024 });
-        this.noise({ route: 'centre', gain: 0.004, filter: 520, q: 0.5, loop: true });
-      } else {
-        this.heldSplitTone({ frequency: 369, primary: 'left', secondary: 'return', primaryGain: 0.032, secondaryGain: 0.032 });
-      }
-
+      this.runHeldMode(mode);
       this.emitState('loop-holding');
       return true;
     }
