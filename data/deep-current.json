@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-29T22:35:30.391Z",
+  "generated_at": "2026-06-30T00:00:11.723Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-29T18:30",
+    "time": "2026-06-29T20:00",
     "sky": "Storm",
     "current": {
-      "time": "2026-06-29T18:30",
+      "time": "2026-06-29T20:00",
       "interval": 900,
-      "temperature_2m": 86.4,
-      "relative_humidity_2m": 70,
+      "temperature_2m": 83.5,
+      "relative_humidity_2m": 81,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 95,
       "cloud_cover": 0,
-      "pressure_msl": 1015.6,
-      "wind_speed_10m": 5.7,
-      "wind_direction_10m": 108
+      "pressure_msl": 1015.4,
+      "wind_speed_10m": 3.2,
+      "wind_direction_10m": 141
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 2
     },
     "solar_wind": {
-      "time_tag": "2026-06-29 22:31:00.000",
-      "bz": -1.15,
-      "bt": 3.71,
-      "density": 1.55,
-      "speed": 479.1
+      "time_tag": "2026-06-29 23:55:00.000",
+      "bz": -1.2,
+      "bt": 3.9,
+      "density": 0.09,
+      "speed": 501.8
     }
   },
   "moon": {
-    "age_days": 14.68,
+    "age_days": 14.74,
     "illumination": 100,
     "name": "Full Moon"
   },
   "field": {
-    "P": 0.5488888888888892,
+    "P": 0.5466666666666664,
     "C": 0.73,
-    "R": 0.83725,
-    "E": 0.5615521978021978,
+    "R": 0.8155000000000001,
+    "E": 0.6051098901098901,
     "M": 1,
     "A": 0.9846153846153847,
-    "T": 0.7639933395604397,
-    "H": 0.6160699267399268,
-    "dpdt": 0.83725
+    "T": 0.7565945498168498,
+    "H": 0.6214914652014651,
+    "dpdt": 0.8155000000000001
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
