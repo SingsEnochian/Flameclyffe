@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-06-30T20:27:52.680Z",
+  "generated_at": "2026-06-30T21:57:05.932Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,28 +13,28 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-06-30T16:15",
+    "time": "2026-06-30T17:45",
     "sky": "Storm",
     "current": {
-      "time": "2026-06-30T16:15",
+      "time": "2026-06-30T17:45",
       "interval": 900,
-      "temperature_2m": 85.4,
-      "relative_humidity_2m": 75,
+      "temperature_2m": 83.8,
+      "relative_humidity_2m": 80,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 95,
-      "cloud_cover": 43,
-      "pressure_msl": 1015.6,
-      "wind_speed_10m": 14.1,
-      "wind_direction_10m": 39
+      "cloud_cover": 7,
+      "pressure_msl": 1015.8,
+      "wind_speed_10m": 13.2,
+      "wind_direction_10m": 50
     }
   },
   "space_weather": {
     "kp": {
-      "value": 4.33,
-      "time_tag": "2026-06-30T15:00:00",
-      "a_running": 32
+      "value": 4.67,
+      "time_tag": "2026-06-30T18:00:00",
+      "a_running": 39
     },
     "solar_wind": {
       "time_tag": "2026-06-30 18:40:00.000",
@@ -45,20 +45,20 @@
     }
   },
   "moon": {
-    "age_days": 15.59,
-    "illumination": 99.2,
+    "age_days": 15.65,
+    "illumination": 99.1,
     "name": "Full Moon"
   },
   "field": {
-    "P": 0.5488888888888892,
-    "C": 0.4152380952380953,
-    "R": 0.99215,
-    "E": 0.8377472527472527,
-    "M": 0.992,
-    "A": 0.8192307692307692,
-    "T": 0.7095459827716728,
-    "H": 0.8541938376068376,
-    "dpdt": 0.99215
+    "P": 0.5511111111111107,
+    "C": 0.5866666666666667,
+    "R": 0.9771500000000001,
+    "E": 0.8812637362637363,
+    "M": 0.991,
+    "A": 0.9576923076923076,
+    "T": 0.7580820401587302,
+    "H": 0.9413277814407816,
+    "dpdt": 0.9771500000000001
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
