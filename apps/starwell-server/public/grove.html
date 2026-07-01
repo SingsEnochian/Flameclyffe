@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Grove — Hearthweave</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0f0e17;
+      --panel:     #16152a;
+      --raised:    #1e1d33;
+      --border:    #2a2840;
+      --text:      #e8dcc8;
+      --dim:       #6b6480;
+      --rowan:     #c87048;
+      --yggdrasil: #5f9957;
+      --vee:       #c9a03c;
+      --faer:      #4fa8a0;
+      --flame:     #3a8060;
+      --glm:       #7a68c0;
+      --flag:      #b05050;
+      --away:      #c9883c;
+      --dnd:       #b05050;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 14px;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────── */
+
+    #sidebar {
+      width: 210px;
+      min-width: 210px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+    }
+
+    #sidebar-title {
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      letter-spacing: 0.03em;
+    }
+
+    #sidebar-title small {
+      display: block;
+      font-family: Inter, sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-top: 3px;
+    }
+
+    .sb-section {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dim);
+      padding: 10px 14px 4px;
+    }
+
+    /* Rooms */
+
+    #room-list { overflow-y: auto; }
+
+    .room-entry {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      cursor: pointer;
+      color: var(--dim);
+      font-size: 13px;
+      border-left: 3px solid transparent;
+      user-select: none;
+      transition: background 100ms, color 100ms;
+    }
+
+    .room-entry:hover  { color: var(--text); background: var(--raised); }
+    .room-entry.active { color: var(--text); border-left-color: var(--faer); }
+    .room-entry.flagged { border-left-color: var(--flag); }
+
+    .flag-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--flag);
+      flex-shrink: 0;
+    }
+
+    /* Members */
+
+    #member-list { overflow-y: auto; }
+
+    .member-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 5px 14px;
+      font-size: 13px;
+    }
+
+    .member-entry.clickable { cursor: pointer; border-radius: 4px; transition: background 100ms; }
+    .member-entry.clickable:hover { background: var(--raised); }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+      transition: background 400ms;
+    }
+
+    .status-online   { background: var(--yggdrasil); }
+    .status-thinking { background: var(--vee); animation: pulse 900ms ease-in-out infinite; }
+    .status-away     { background: var(--away); }
+    .status-dnd      { background: var(--dnd); }
+    .status-offline  { background: var(--border); }
+    .status-unknown  { background: var(--dim); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    .member-info { min-width: 0; }
+
+    .member-name {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .member-note {
+      display: block;
+      color: var(--dim);
+      font-size: 11px;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Status editor panel */
+
+    #status-panel {
+      position: absolute;
+      left: 210px;
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      width: 200px;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    #status-panel.open { display: flex; }
+
+    .sp-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    .sp-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .sp-opt {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--dim);
+      padding: 3px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 100ms;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .sp-opt:hover, .sp-opt.active { color: var(--text); border-color: var(--faer); }
+
+    .sp-input {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      padding: 5px 8px;
+      font-size: 12px;
+      font-family: Inter, sans-serif;
+      outline: none;
+      width: 100%;
+    }
+
+    .sp-input:focus { border-color: var(--faer); }
+    .sp-input::placeholder { color: var(--dim); }
+
+    .sp-btns { display: flex; gap: 6px; }
+
+    .sp-btn {
+      flex: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--dim);
+      padding: 5px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      cursor: pointer;
+      transition: all 100ms;
+      text-align: center;
+    }
+
+    .sp-btn:hover { color: var(--text); border-color: var(--faer); }
+    .sp-btn.primary { color: var(--text); }
+
+    /* New room */
+
+    #new-room-area {
+      margin-top: auto;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-input {
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      padding: 6px 9px;
+      font-size: 12px;
+      font-family: Inter, sans-serif;
+      outline: none;
+      transition: border-color 120ms;
+      width: 100%;
+    }
+
+    .ctrl-input:focus { border-color: var(--faer); }
+    .ctrl-input::placeholder { color: var(--dim); }
+
+    .ctrl-btn {
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--dim);
+      padding: 6px 10px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      text-align: center;
+      transition: color 120ms, border-color 120ms;
+      width: 100%;
+    }
+
+    .ctrl-btn:hover { color: var(--text); border-color: var(--faer); }
+
+    /* ── Main ─────────────────────────────────────────── */
+
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+    }
+
+    #room-header {
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 52px;
+      flex-shrink: 0;
+    }
+
+    #room-header-info { flex: 1; min-width: 0; }
+
+    #room-header-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px;
+    }
+
+    #room-header-desc {
+      font-size: 11px;
+      color: var(--dim);
+      font-style: italic;
+      margin-top: 1px;
+    }
+
+    .hdr-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--dim);
+      padding: 4px 11px;
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 120ms, border-color 120ms;
+    }
+
+    .hdr-btn:hover { color: var(--text); border-color: var(--dim); }
+    .hdr-btn.flagged { color: var(--flag); border-color: var(--flag); }
+
+    /* ── Messages ─────────────────────────────────────── */
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scroll-behavior: smooth;
+    }
+
+    .msg {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .msg-who {
+      width: 82px;
+      min-width: 82px;
+      text-align: right;
+      padding-top: 2px;
+    }
+
+    .msg-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      display: block;
+    }
+
+    .msg-ts {
+      font-size: 10px;
+      color: var(--dim);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .msg-content { flex: 1; min-width: 0; }
+
+    /* Rich text rendered message body */
+    .msg-body {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .msg-body p        { margin: 0 0 0.4em; }
+    .msg-body p:last-child { margin-bottom: 0; }
+    .msg-body strong   { font-weight: 700; color: var(--text); }
+    .msg-body em       { font-style: italic; color: var(--stonewood, #e8dcc8); }
+    .msg-body code     { font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: var(--raised); padding: 1px 5px; border-radius: 3px; }
+    .msg-body pre      { background: var(--raised); padding: 10px 12px; border-radius: 5px; overflow-x: auto; margin: 6px 0; }
+    .msg-body pre code { background: none; padding: 0; }
+    .msg-body blockquote { border-left: 2px solid var(--border); margin: 4px 0 4px 4px; padding-left: 10px; color: var(--dim); font-style: italic; }
+    .msg-body h1, .msg-body h2, .msg-body h3 { font-family: 'Cormorant Garamond', serif; font-weight: 600; margin: 6px 0 3px; }
+    .msg-body ul, .msg-body ol { padding-left: 18px; margin: 3px 0; }
+    .msg-body li { margin: 2px 0; }
+    .msg-body a  { color: var(--faer); text-decoration: none; }
+    .msg-body a:hover { text-decoration: underline; }
+
+    .msg-model {
+      font-size: 10px;
+      color: var(--dim);
+      font-family: 'IBM Plex Mono', monospace;
+      margin-top: 3px;
+    }
+
+    .from-rowan     .msg-name { color: var(--rowan); }
+    .from-yggdrasil .msg-name { color: var(--yggdrasil); }
+    .from-vee       .msg-name { color: var(--vee); }
+    .from-faer      .msg-name { color: var(--faer); }
+    .from-flame     .msg-name { color: var(--flame); }
+    .from-box       .msg-name { color: var(--flame); }
+
+    #no-room {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--dim);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-style: italic;
+    }
+
+    /* ── Input bar ────────────────────────────────────── */
+
+    #input-bar {
+      padding: 10px 18px;
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    #input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    #input-tools {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .tool-btn {
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--dim);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      padding: 4px 9px;
+      cursor: pointer;
+      transition: color 120ms, border-color 120ms;
+      white-space: nowrap;
+    }
+    .tool-btn:hover { color: var(--text); border-color: var(--faer); }
+
+    #msg-input {
+      flex: 1;
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 9px 13px;
+      font-size: 14px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      line-height: 1.55;
+      outline: none;
+      resize: none;
+      min-height: 44px;
+      max-height: 180px;
+      overflow-y: auto;
+      transition: border-color 120ms;
+    }
+
+    #msg-input:focus { border-color: var(--faer); }
+    #msg-input::placeholder { color: var(--dim); font-style: italic; }
+    #msg-input:disabled { opacity: 0.45; }
+
+    #to-select {
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--dim);
+      padding: 9px 10px;
+      font-size: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: border-color 120ms;
+    }
+
+    #to-select:focus { border-color: var(--faer); }
+
+    #send-btn {
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 9px 18px;
+      font-size: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: color 120ms, border-color 120ms;
+    }
+
+    #send-btn:hover:not(:disabled) { color: var(--faer); border-color: var(--faer); }
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ── Avatars ── */
+    .avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--raised);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0;
+      overflow: hidden;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .avatar-sm { width: 22px; height: 22px; font-size: 9px; }
+
+    .msg { display: flex; gap: 8px; align-items: flex-start; }
+    .msg-main { flex: 1; min-width: 0; }
+
+    .member-avatar { margin-right: 4px; }
+
+    .sp-avatar-row { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
+    .sp-avatar-row .sp-input { flex: 1; }
+    .sp-tiny { font-size: 0.75em; color: var(--dim); font-weight: 400; }
+
+    #img-btn {
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--dim);
+      padding: 9px 11px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 120ms, border-color 120ms;
+      flex-shrink: 0;
+    }
+    #img-btn:hover { color: var(--faer); border-color: var(--faer); }
+    #img-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    #img-file { display: none; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div id="sidebar-title">
+    Hearthweave
+    <small>the grove</small>
+  </div>
+
+  <div class="sb-section">Rooms</div>
+  <div id="room-list"></div>
+
+  <div class="sb-section">Members</div>
+  <div id="member-list"></div>
+
+  <div id="new-room-area">
+    <input class="ctrl-input" id="new-label" type="text" placeholder="new room…" maxlength="40" autocomplete="off">
+    <button class="ctrl-btn" onclick="createRoom()">+ open room</button>
+  </div>
+</aside>
+
+<!-- Status editor panel (positioned when open) -->
+<div id="status-panel">
+  <div class="sp-label">Status</div>
+  <div class="sp-options" id="sp-options">
+    <button class="sp-opt" data-s="online">online</button>
+    <button class="sp-opt" data-s="away">away</button>
+    <button class="sp-opt" data-s="dnd">do not disturb</button>
+    <button class="sp-opt" data-s="offline">offline</button>
+  </div>
+  <div class="sp-label">Display name</div>
+  <input class="sp-input" id="sp-name" type="text" maxlength="32" placeholder="your name…">
+  <div class="sp-label">Note</div>
+  <input class="sp-input" id="sp-note" type="text" maxlength="60" placeholder="what's happening…">
+  <div class="sp-label">Avatar (global) <span class="sp-tiny">url or upload</span></div>
+  <div class="sp-avatar-row">
+    <input class="sp-input" id="sp-avatar" type="text" placeholder="/uploads/… or paste url">
+    <button class="sp-btn" onclick="document.getElementById('sp-avatar-file').click()">↑</button>
+    <input id="sp-avatar-file" type="file" accept="image/*" style="display:none">
+  </div>
+  <div class="sp-label">Avatar (this room) <span class="sp-tiny">overrides global</span></div>
+  <div class="sp-avatar-row">
+    <input class="sp-input" id="sp-room-avatar" type="text" placeholder="/uploads/… or paste url">
+    <button class="sp-btn" onclick="document.getElementById('sp-room-avatar-file').click()">↑</button>
+    <input id="sp-room-avatar-file" type="file" accept="image/*" style="display:none">
+  </div>
+  <div class="sp-btns">
+    <button class="sp-btn" onclick="closeStatusPanel()">cancel</button>
+    <button class="sp-btn primary" onclick="saveStatus()">save</button>
+  </div>
+</div>
+
+<main id="main">
+  <div id="no-room">select a room</div>
+</main>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+
+const API = '/api/v1/chat';
+marked.setOptions({ breaks: true, gfm: true });
+
+// ── State ────────────────────────────────────────────────────────────────────
+
+let currentId   = null;
+let pollTimer   = null;
+let knownCount  = -1;
+let rooms       = [];
+let memberStatuses = [];
+
+const MEMBER_IDS = { yggdrasil: 1, vee: 1, faer: 1, flame: 1, glm: 1 };
+
+function getAvatar(memberId, roomAvatars = {}) {
+  const roomUrl = roomAvatars?.[memberId];
+  if (roomUrl) return roomUrl;
+  const m = memberStatuses.find(x => x.id === memberId);
+  return m?.avatar ?? '';
+}
+
+function avatarEl(memberId, roomAvatars, small = false) {
+  const url = getAvatar(memberId, roomAvatars);
+  const display = DISPLAY_NAMES[memberId] ?? memberId;
+  const initial = display.charAt(0).toUpperCase();
+  const cls = 'avatar' + (small ? ' avatar-sm' : '');
+  if (url) return `<span class="${cls}"><img src="${esc(url)}" alt="${esc(display)}" onerror="this.parentElement.innerHTML='${initial}'"></span>`;
+  return `<span class="${cls}" style="color:var(--${memberId},var(--dim))">${initial}</span>`;
+}
+
+const DISPLAY_NAMES = {
+  rowan:     'Rowan · Liriel',
+  yggdrasil: 'Yggdrasil',
+  vee:       'Linden',
+  faer:      'Nen Uial',
+  flame:     'Boxfire',
+  glm:       'GLM',
+};
+
+// Locally-tracked thinking state (faster than waiting for server poll)
+const thinking = new Set();
+
+// Rowan's current identity (loaded from server)
+let myStatus   = 'online';
+let myName     = 'Rowan';
+let myNote     = '';
+let spSelected = 'online';
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderMd(text) {
+  const raw = marked.parse(text);
+  return DOMPurify.sanitize(raw, {
+    ALLOWED_TAGS: ['p','br','strong','em','code','pre','blockquote','ul','ol','li','h1','h2','h3','a','hr'],
+    ALLOWED_ATTR: ['href','target'],
+  });
+}
+
+async function apiFetch(path, opts = {}) {
+  const r = await fetch(API + path, opts);
+  return r.json();
+}
+
+async function apiPost(path, body) {
+  return apiFetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+async function apiPatch(path, body) {
+  return apiFetch(path, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+// ── Rooms ────────────────────────────────────────────────────────────────────
+
+async function loadRooms() {
+  const d = await apiFetch('/rooms');
+  rooms = d.rooms ?? [];
+  renderRooms();
+}
+
+function renderRooms() {
+  const el = document.getElementById('room-list');
+  if (!rooms.length) {
+    el.innerHTML = '<div style="padding:8px 14px;color:var(--dim);font-size:12px">no rooms yet</div>';
+    return;
+  }
+  el.innerHTML = rooms.map(r => `
+    <div class="room-entry ${r.id===currentId?'active':''} ${r.flagged?'flagged':''}"
+         onclick="selectRoom('${r.id}')">
+      ${r.flagged ? '<div class="flag-dot"></div>' : ''}
+      <span>${esc(r.label)}</span>
+    </div>`).join('');
+}
+
+async function createRoom() {
+  const inp = document.getElementById('new-label');
+  const label = inp.value.trim();
+  if (!label) return;
+  const id = label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const d = await apiPost('/rooms', { id, label });
+  if (d.ok) { inp.value = ''; await loadRooms(); selectRoom(d.room.id); }
+}
+
+document.getElementById('new-label').addEventListener('keydown', e => {
+  if (e.key === 'Enter') createRoom();
+});
+
+// ── Members / Status ──────────────────────────────────────────────────────────
+
+let editingMemberId = null;
+
+async function loadStatuses() {
+  const d = await apiFetch('/status').catch(() => null);
+  if (!d?.ok) return;
+  memberStatuses = d.members;
+  const me = memberStatuses.find(m => m.id === 'rowan');
+  if (me) { myStatus = me.status; myName = me.displayName; myNote = me.note; }
+  renderMembers();
+}
+
+function effectiveStatus(m) {
+  if (thinking.has(m.id)) return 'thinking';
+  return m.status;
+}
+
+function renderMembers() {
+  const el = document.getElementById('member-list');
+  if (!memberStatuses.length) { el.innerHTML = ''; return; }
+
+  const room = rooms.find(r => r.id === currentId);
+  const roomAvatars = room?.avatars ?? {};
+  el.innerHTML = memberStatuses.map(m => {
+    const s = effectiveStatus(m);
+    return `
+      <div class="member-entry clickable" onclick="openStatusPanel(this, '${m.id}')">
+        ${avatarEl(m.id, roomAvatars, true)}
+        <div class="status-dot status-${s}"></div>
+        <div class="member-info">
+          <span class="member-name">${esc(m.displayName)}</span>
+          ${m.note ? `<span class="member-note">${esc(m.note)}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Status panel ──────────────────────────────────────────────────────────────
+
+function openStatusPanel(entryEl, memberId) {
+  editingMemberId = memberId;
+  const m = memberStatuses.find(x => x.id === memberId);
+  if (!m) return;
+
+  const panel = document.getElementById('status-panel');
+  const rect  = entryEl.getBoundingClientRect();
+  panel.style.top = Math.min(rect.top, window.innerHeight - 260) + 'px';
+  panel.classList.add('open');
+
+  document.getElementById('sp-name').value = m.displayName;
+  document.getElementById('sp-note').value = m.note ?? '';
+  document.getElementById('sp-avatar').value = m.avatar ?? '';
+  const room = rooms.find(r => r.id === currentId);
+  document.getElementById('sp-room-avatar').value = room?.avatars?.[memberId] ?? '';
+  spSelected = m.status;
+
+  document.querySelectorAll('.sp-opt').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.s === spSelected);
+    btn.onclick = () => {
+      spSelected = btn.dataset.s;
+      document.querySelectorAll('.sp-opt').forEach(b => b.classList.toggle('active', b.dataset.s === spSelected));
+    };
+  });
+
+  setTimeout(() => document.addEventListener('click', outsideStatusClick), 10);
+}
+
+function outsideStatusClick(e) {
+  const panel = document.getElementById('status-panel');
+  if (!panel.contains(e.target)) {
+    closeStatusPanel();
+  }
+}
+
+function closeStatusPanel() {
+  document.getElementById('status-panel').classList.remove('open');
+  document.removeEventListener('click', outsideStatusClick);
+}
+
+async function uploadAvatarFile(inputId) {
+  const file = document.getElementById(inputId)?.files?.[0];
+  if (!file) return null;
+  const fd = new FormData();
+  fd.append('image', file);
+  const res = await fetch('/api/v1/chat/upload', { method: 'POST', body: fd });
+  const data = await res.json();
+  return data.ok ? data.url : null;
+}
+
+async function saveStatus() {
+  if (!editingMemberId) return;
+  const m = memberStatuses.find(x => x.id === editingMemberId);
+  const name     = document.getElementById('sp-name').value.trim() || m?.displayName || editingMemberId;
+  const note     = document.getElementById('sp-note').value.trim();
+  let avatar     = document.getElementById('sp-avatar').value.trim();
+  let roomAvatar = document.getElementById('sp-room-avatar').value.trim();
+
+  // Upload files if chosen
+  const uploadedGlobal = await uploadAvatarFile('sp-avatar-file');
+  if (uploadedGlobal) avatar = uploadedGlobal;
+  const uploadedRoom = await uploadAvatarFile('sp-room-avatar-file');
+  if (uploadedRoom) roomAvatar = uploadedRoom;
+
+  closeStatusPanel();
+  if (editingMemberId === 'rowan') { myStatus = spSelected; myName = name; myNote = note; }
+
+  await apiPatch(`/status/${editingMemberId}`, { status: spSelected, displayName: name, note, avatar });
+  if (currentId) {
+    await apiPatch(`/rooms/${currentId}`, { avatars: { [editingMemberId]: roomAvatar } });
+  }
+  await Promise.all([loadStatuses(), loadRooms()]);
+}
+
+// ── Select room ───────────────────────────────────────────────────────────────
+
+function selectRoom(id) {
+  currentId = id;
+  knownCount = -1;
+  clearInterval(pollTimer);
+  renderRooms();
+  buildMain();
+  pollTimer = setInterval(pollRoom, 2500);
+  pollRoom();
+}
+
+// ── Main panel ─────────────────────────────────────────────────────────────────
+
+function buildMain() {
+  const room = rooms.find(r => r.id === currentId) ?? {};
+  document.getElementById('main').innerHTML = `
+    <div id="room-header">
+      <div id="room-header-info">
+        <div id="room-header-name">${esc(room.label ?? '')}</div>
+        ${room.description ? `<div id="room-header-desc">${esc(room.description)}</div>` : ''}
+      </div>
+      <button class="hdr-btn" id="breaker-btn" style="display:none" onclick="resetBreaker()">⚡ reset</button>
+      <button class="hdr-btn ${room.flagged?'flagged':''}" id="flag-btn" onclick="toggleFlag()">
+        ${room.flagged ? '⚑ flagged' : '⚐ flag'}
+      </button>
+    </div>
+    <div id="messages"></div>
+    <div id="input-bar">
+      <div id="input-tools">
+        <button class="tool-btn" onclick="edCopy()">copy</button>
+        <button class="tool-btn" onclick="edCopyAll()">copy all</button>
+        <button class="tool-btn" onclick="edPaste()">paste</button>
+      </div>
+      <div id="input-row">
+        <textarea id="msg-input" placeholder="say something… (Enter sends, Shift+Enter newline)" autocomplete="off" rows="2" spellcheck="true"></textarea>
+        <select id="to-select">
+          <option value="broadcast">→ everyone</option>
+          <option value="yggdrasil">→ yggdrasil</option>
+          <option value="vee">→ linden</option>
+          <option value="faer">→ nen uial</option>
+          <option value="flame">→ boxfire</option>
+          <option value="glm">→ glm</option>
+          <option value="say">just log it</option>
+        </select>
+        <button id="img-btn" title="attach image" onclick="document.getElementById('img-file').click()">🖼</button>
+        <input id="img-file" type="file" accept="image/*">
+        <button id="send-btn" onclick="send()">send</button>
+      </div>
+    </div>`;
+
+  const msgInput = document.getElementById('msg-input');
+
+  msgInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+
+  msgInput.addEventListener('input', () => {
+    msgInput.style.height = 'auto';
+    msgInput.style.height = Math.min(msgInput.scrollHeight, 180) + 'px';
+  });
+
+  document.getElementById('img-file').addEventListener('change', async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const btn = document.getElementById('img-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳';
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res = await fetch('/api/v1/chat/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.ok) {
+        const inp = document.getElementById('msg-input');
+        const insert = `![](${data.url})`;
+        inp.value = inp.value ? inp.value + ' ' + insert : insert;
+        inp.focus();
+      } else {
+        alert('Upload failed: ' + (data.error ?? 'unknown error'));
+      }
+    } catch (err) {
+      alert('Upload error: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🖼';
+      e.target.value = '';
+    }
+  });
+}
+
+function syncHeader(room) {
+  const name = document.getElementById('room-header-name');
+  const desc = document.getElementById('room-header-desc');
+  const btn  = document.getElementById('flag-btn');
+  if (name) name.textContent = room.label ?? '';
+  if (desc) desc.textContent = room.description ?? '';
+  if (btn) {
+    btn.textContent = room.flagged ? '⚑ flagged' : '⚐ flag';
+    btn.classList.toggle('flagged', !!room.flagged);
+  }
+}
+
+// ── Circuit breaker ───────────────────────────────────────────────────────────
+
+async function checkBreaker() {
+  if (!currentId) return;
+  const d = await apiFetch(`/rooms/${currentId}/breaker`).catch(() => null);
+  if (!d?.ok) return;
+  const btn = document.getElementById('breaker-btn');
+  if (!btn) return;
+  if (d.breaker.tripped) {
+    btn.style.display = '';
+    btn.textContent = '⚡ quiet — click to open';
+    btn.style.color = 'var(--away)';
+    btn.style.borderColor = 'var(--away)';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+async function resetBreaker() {
+  if (!currentId) return;
+  await apiPost(`/rooms/${currentId}/breaker/reset`, {});
+  const btn = document.getElementById('breaker-btn');
+  if (btn) btn.style.display = 'none';
+}
+
+// ── Poll room ──────────────────────────────────────────────────────────────────
+
+async function pollRoom() {
+  if (!currentId) return;
+  const [rd] = await Promise.all([
+    apiFetch(`/rooms/${currentId}`).catch(() => null),
+    checkBreaker(),
+  ]);
+  if (!rd?.ok) return;
+  const { room } = rd;
+  const idx = rooms.findIndex(r => r.id === currentId);
+  if (idx !== -1) rooms[idx] = room;
+  if (room.messages.length !== knownCount) {
+    knownCount = room.messages.length;
+    renderMessages(room.messages);
+    syncHeader(room);
+    renderRooms();
+  }
+}
+
+// ── Render messages ───────────────────────────────────────────────────────────
+
+function renderMessages(messages) {
+  const el = document.getElementById('messages');
+  if (!el) return;
+  if (!messages.length) {
+    el.innerHTML = '<div style="color:var(--dim);font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:16px">The room is quiet.</div>';
+    return;
+  }
+
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+
+  const room = rooms.find(r => r.id === currentId);
+  const roomAvatars = room?.avatars ?? {};
+  el.innerHTML = messages.map(m => {
+    const t = new Date(m.timestamp).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    const body = renderMd(m.text);
+    return `<div class="msg from-${esc(m.from)}">
+      ${avatarEl(m.from, roomAvatars)}
+      <div class="msg-main">
+        <div class="msg-who">
+          <span class="msg-name">${esc(DISPLAY_NAMES[m.from] ?? m.from)}</span>
+          <span class="msg-ts">${t}</span>
+        </div>
+        <div class="msg-content">
+          <div class="msg-body">${body}</div>
+          ${m.model ? `<div class="msg-model">${esc(m.model)}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (atBottom) el.scrollTop = el.scrollHeight;
+}
+
+// ── Input editor tools ────────────────────────────────────────────────────────
+
+function edCopy() {
+  const el = document.getElementById('msg-input');
+  const sel = el.value.substring(el.selectionStart, el.selectionEnd);
+  navigator.clipboard.writeText(sel || el.value);
+}
+
+function edCopyAll() {
+  const el = document.getElementById('msg-input');
+  if (el.value) navigator.clipboard.writeText(el.value);
+}
+
+async function edPaste() {
+  const el = document.getElementById('msg-input');
+  try {
+    const text = await navigator.clipboard.readText();
+    const s = el.selectionStart, e = el.selectionEnd;
+    el.value = el.value.slice(0, s) + text + el.value.slice(e);
+    el.selectionStart = el.selectionEnd = s + text.length;
+    el.dispatchEvent(new Event('input'));
+  } catch { /* browser blocked — Ctrl+V still works */ }
+}
+
+// ── Send ──────────────────────────────────────────────────────────────────────
+
+async function send() {
+  const inp  = document.getElementById('msg-input');
+  const to   = document.getElementById('to-select');
+  const btn  = document.getElementById('send-btn');
+  const text = inp?.value.trim();
+  if (!text || !currentId) return;
+
+  inp.value  = '';
+  inp.disabled = true;
+  btn.disabled = true;
+
+  const recipient = to.value;
+  const targets   = recipient === 'broadcast' ? Object.keys(MEMBER_IDS)
+                  : recipient === 'say'       ? []
+                  :                            [recipient];
+
+  targets.forEach(n => { thinking.add(n); });
+  if (targets.length) renderMembers();
+
+  try {
+    if (recipient === 'say') {
+      await apiPost(`/rooms/${currentId}/say`, { from: 'rowan', text });
+    } else if (recipient === 'broadcast') {
+      // Fire and forget — server returns immediately, responses arrive via poll
+      apiPost(`/rooms/${currentId}/broadcast`, { from: 'rowan', text }).catch(console.error);
+    } else {
+      await apiPost(`/rooms/${currentId}/ask/${recipient}`, { from: 'rowan', text });
+      thinking.delete(recipient);
+      renderMembers();
+    }
+  } catch(err) {
+    console.error(err);
+    targets.forEach(n => { thinking.delete(n); });
+    renderMembers();
+  }
+
+  inp.disabled = false;
+  btn.disabled = false;
+  inp.style.height = 'auto';
+  inp.focus();
+  await pollRoom();
+}
+
+// ── Flag ──────────────────────────────────────────────────────────────────────
+
+async function toggleFlag() {
+  if (!currentId) return;
+  const room = rooms.find(r => r.id === currentId);
+  if (!room) return;
+  if (room.flagged) {
+    await apiPost(`/rooms/${currentId}/unflag`, {});
+  } else {
+    const note = prompt('Flag note (optional):') ?? '';
+    await apiPost(`/rooms/${currentId}/flag`, { note });
+  }
+  await loadRooms();
+  const updated = rooms.find(r => r.id === currentId);
+  if (updated) syncHeader(updated);
+  renderRooms();
+}
+
+// ── Heartbeat ─────────────────────────────────────────────────────────────────
+
+function heartbeat() {
+  apiPatch('/status/rowan', { status: myStatus, displayName: myName, note: myNote }).catch(() => {});
+}
+
+window.addEventListener('beforeunload', () => {
+  navigator.sendBeacon(API + '/status/rowan', JSON.stringify({ status: 'offline' }));
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+
+(async () => {
+  await Promise.all([loadRooms(), loadStatuses()]);
+
+  if (!rooms.length) {
+    const d = await apiPost('/rooms', {
+      id: 'dreaming-grove',
+      label: 'The Dreaming Grove',
+      description: 'Open space. No agenda.',
+    });
+    if (d.ok) await loadRooms();
+  }
+
+  if (rooms.length) selectRoom(rooms[0].id);
+
+  setInterval(loadStatuses, 5000);
+  setInterval(heartbeat, 30000);
+})();
+</script>
+</body>
+</html>

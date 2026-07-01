@@ -39,6 +39,9 @@ ml-lab/liquid-light-capture.png
 sandbox/observer-deep/raw/
 sandbox/observer-deep/out/
 
+# Hearthweave local chat history (personal, not for the repo)
+apps/starwell-server/data/
+
 # OS/editor noise
 .DS_Store
 .vscode/

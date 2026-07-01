@@ -3,11 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "node --env-file=.env server.js",
     "kernel:test": "node tests/kernel-validation.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.106.0",
     "cors": "latest",
-    "express": "latest"
+    "express": "latest",
+    "multer": "^2.2.0",
+    "openai": "^6.45.0"
   }
 }
