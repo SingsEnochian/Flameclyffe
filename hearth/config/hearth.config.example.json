@@ -1,0 +1,27 @@
+{
+  "sourceProjectId": "replace-with-supabase-project-id",
+  "supabaseUrlEnv": "SUPABASE_URL",
+  "supabaseServiceRoleKeyEnv": "SUPABASE_SERVICE_ROLE_KEY",
+  "outputRoot": "hearth/mirror",
+  "tables": [
+    "profiles",
+    "flameclyffe_presets",
+    "flameclyffe_observations",
+    "starwell_memories",
+    "starwell_witness_notes"
+  ],
+  "privateChatTables": [
+    "chat_messages",
+    "private_chat_messages",
+    "conversation_messages"
+  ],
+  "pageSize": 1000,
+  "privacy": {
+    "requireShareableForPrivateChat": true,
+    "omitPrivateByDefault": true,
+    "shareableFields": ["shareable", "is_shareable", "hearth_shareable"],
+    "privateFields": ["private", "is_private", "sensitive", "is_sensitive"],
+    "visibilityFields": ["visibility", "privacy", "lane"],
+    "blockedVisibilityValues": ["private", "sensitive", "sensitive-private", "constellation-private", "blocked"]
+  }
+}
