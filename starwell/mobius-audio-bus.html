@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>STARWELL Möbius Audio Bus v0.1</title>
-<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, held loops, component isolators, tone map, and subjective observation logging.">
+<title>STARWELL Möbius Audio Bus v0.2</title>
+<meta name="description" content="A controlled Web Audio lab for testing left/right buses, centre-safe routing, phase-inverted return, mono safety, held loops, component isolators, tone map, layered Full Twist, and subjective observation logging.">
 <style>
 :root{
   --void:#020407;
@@ -152,7 +152,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
 </head>
 <body>
 <header class="top">
-  <div class="brand"><strong>STARWELL</strong><span>Möbius Audio Bus v0.1</span></div>
+  <div class="brand"><strong>STARWELL</strong><span>Möbius Audio Bus v0.2</span></div>
   <nav class="nav" aria-label="Primary">
     <a class="btn" href="../index.html">Flameclyffe</a>
     <a class="btn" href="./">STARWELL</a>
@@ -222,6 +222,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
           <button data-action="run" data-mode="mobius-return" type="button">Möbius return</button>
           <button data-action="run" data-mode="gateway-offset" type="button">Gateway offset</button>
           <button data-action="run" data-mode="full-twist" type="button">Full twist</button>
+          <button data-action="run" data-mode="layered-full-twist" type="button">Layered Full Twist</button>
         </div>
         <p class="tiny">Möbius return sends one oscillator into the left bus and the return bus. With inversion on, the return path flips phase before it reaches the selected ear. Hold only when your hand is on Feather.</p>
       </article>
@@ -247,6 +248,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
           <li><strong>Möbius return:</strong> one <code>369 Hz sine</code> split to left bus plus return bus, making the left/return seam.</li>
           <li><strong>Gateway offset:</strong> <code>369 Hz left</code> + <code>363.5 Hz right</code> with <code>108 Hz centre</code>; the 5.5 Hz difference is the likely rail-thrum source.</li>
           <li><strong>Full Twist:</strong> <code>108 Hz centre floor</code>, <code>369/363.5 Hz offset pair</code>, <code>369 Hz return split</code>, plus filtered centre noise.</li>
+          <li><strong>Layered Full Twist:</strong> preserves the original Full Twist and adds the Schumann-absent Orbital 3:6:9 lane plus optional user layers.</li>
           <li><strong>Noise bed:</strong> generated pink-ish noise through a <code>520 Hz bandpass</code> with low Q; likely source of wind/water texture.</li>
         </ul>
       </article>
@@ -284,6 +286,7 @@ pre{min-height:210px;max-height:360px;overflow:auto;border:1px solid rgba(232,20
     <p class="footer">Left bus, right bus, centre bus, return bus. Feather first. Wonder labelled. Courage allowed. Loop held by consent.</p>
   </section>
 </main>
-<script src="../assets/mobius-audio-bus.js?v=0.1.3"></script>
+<script src="../assets/mobius-audio-bus.js?v=0.2.0"></script>
+<script src="../assets/mobius-layered-spec-adapter.js?v=0.2.0"></script>
 </body>
 </html>
