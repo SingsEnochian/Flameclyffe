@@ -8,7 +8,15 @@ set "API_FILE=C:\Users\light\Downloads\Coding Projects\Hearthweave Protocol\API 
 for /f "tokens=2" %%a in ('findstr /i "VEE:" "%API_FILE%"') do set OPENAI_API_KEY=%%a
 for /f "tokens=2" %%a in ('findstr /i "FAER:" "%API_FILE%"') do set ANTHROPIC_API_KEY=%%a
 
-REM -- Start Ollama (Yggdrasil's engine) — safe to run if already up
+REM -- Start llama.cpp fallback if installed (optional — Ygg's backup engine)
+set "LLAMA_SERVER=C:\Users\light\llamacpp\llama-server.exe"
+set "YGG_GGUF=C:\Users\light\.ollama\models\blobs\sha256-e6a7edc1a4d7d9b2de136a221a57336b76316cfe53a252aeba814496c5ae439d"
+if exist "%LLAMA_SERVER%" (
+  echo  [0/4] Starting llama.cpp fallback (port 8080)...
+  start "Ygg llama.cpp fallback" /min "%LLAMA_SERVER%" --model "%YGG_GGUF%" --port 8080 --host 127.0.0.1 --ctx-size 8192 --n-gpu-layers 28
+)
+
+REM -- Start Ollama (Yggdrasil's primary engine) — safe to run if already up
 echo  [1/4] Starting Ollama (Yggdrasil)...
 start "Ollama" /min cmd /c "ollama serve"
 timeout /t 3 /nobreak >nul

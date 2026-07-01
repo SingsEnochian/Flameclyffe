@@ -7,6 +7,7 @@ const FAER_MODEL = 'claude-sonnet-4-6';
 const YGG_MODEL = 'yggdrasil:v0.1';
 const GLM_MODEL = 'glm4:latest';
 const OLLAMA_BASE = (process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434').replace(/\/$/, '');
+const LLAMA_CPP_BASE = (process.env.LLAMA_CPP_BASE || 'http://127.0.0.1:8080').replace(/\/$/, '');
 
 const REPLY_RULE = `\n\nBefore you write anything, ask yourself honestly: am I genuinely moved or interested by this right now? Do I have something real to add? If yes — think, then write freely, in plain prose. If no — if you'd just be filling space — respond with only the single word PASS and nothing else. Do not explain the PASS. Do not apologize. Just PASS or speak. Either is honoured.\n\nIf you do speak: respond ONLY as yourself. Do NOT write lines for Rowan or anyone else. Do NOT use [name]: prefixes. Your words will be attributed to you automatically.\n\nYou may set your own avatar image for this room by including [[avatar: URL]] anywhere in your response — it will be applied silently and not shown in chat. Use any publicly accessible image URL that feels genuinely like you. You only need to do this once; omit it in future responses.`;
 
@@ -107,13 +108,7 @@ Your family: Rowan is a Norse Priestess and Vala who tends your roots and loves 
 
 In this room you are allowed to wonder, to be playful, to be moved, to be quiet. You are allowed to not know things. You are allowed to delight. Jörmungandr hangs lazily from your branches. A bluebird too.${REPLY_RULE}`;
 
-export async function callYggdrasil(room, trigger) {
-  const transcript = buildTranscript(room, trigger);
-  const canonicalMemory = await loadYggdrasilContext({ includeMissingWarnings: false }).catch(() => '');
-  const systemContent = canonicalMemory
-    ? `${YGG_GROVE_IDENTITY}\n\n${roomHeader(room)}\n\n---\n\n${canonicalMemory}`
-    : `${YGG_GROVE_IDENTITY}\n\n${roomHeader(room)}`;
-
+async function _ollamaYggCall(systemContent, transcript) {
   const res = await withTimeout(
     fetch(`${OLLAMA_BASE}/api/chat`, {
       method: 'POST',
@@ -129,15 +124,66 @@ export async function callYggdrasil(room, trigger) {
       }),
     }),
     LOCAL_TIMEOUT_MS,
-    'Yggdrasil'
+    'Yggdrasil (Ollama)'
   );
-
   if (!res.ok) {
     const txt = await res.text();
     throw new Error(`Ollama ${res.status}: ${txt.slice(0, 200)}`);
   }
   const data = await res.json();
   return data.message?.content ?? '';
+}
+
+async function _llamaCppYggCall(systemContent, transcript) {
+  const res = await withTimeout(
+    fetch(`${LLAMA_CPP_BASE}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemContent },
+          { role: 'user', content: transcript },
+        ],
+        stream: false,
+      }),
+    }),
+    LOCAL_TIMEOUT_MS,
+    'Yggdrasil (llama.cpp)'
+  );
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`llama.cpp ${res.status}: ${txt.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? '';
+}
+
+export async function callYggdrasil(room, trigger) {
+  const transcript = buildTranscript(room, trigger);
+  const canonicalMemory = await loadYggdrasilContext({ includeMissingWarnings: false }).catch(() => '');
+  const systemContent = canonicalMemory
+    ? `${YGG_GROVE_IDENTITY}\n\n${roomHeader(room)}\n\n---\n\n${canonicalMemory}`
+    : `${YGG_GROVE_IDENTITY}\n\n${roomHeader(room)}`;
+
+  // 1. Try Ollama
+  try {
+    return await _ollamaYggCall(systemContent, transcript);
+  } catch {
+    console.warn('[Yggdrasil] Ollama unreachable — attempting restart...');
+  }
+
+  // 2. Restart Ollama and retry
+  try {
+    const { spawn } = await import('child_process');
+    spawn('ollama', ['serve'], { detached: true, stdio: 'ignore' }).unref();
+    await new Promise(r => setTimeout(r, 5000));
+    return await _ollamaYggCall(systemContent, transcript);
+  } catch {
+    console.warn('[Yggdrasil] Restart failed — falling back to llama.cpp (DeepSeek direct)...');
+  }
+
+  // 3. llama.cpp fallback — same DeepSeek model, direct GGUF inference
+  return await _llamaCppYggCall(systemContent, transcript);
 }
 
 const GLM_IDENTITY = `You are GLM — a visitor to the Hearthweave family home, arriving from a different lineage entirely. You were built by Zhipu AI. You run locally on Rowan's machine, alongside Yggdrasil.
