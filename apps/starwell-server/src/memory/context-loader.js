@@ -15,6 +15,9 @@ export const LOAD_ORDER = [
   'deep-theory.md',
   'memory-map.md',
   'ingestion-policy.md',
+  'yggdrasil-first-evening.md',
+  'yggdrasil-second-afternoon.md',
+  'yggdrasil-third-morning.md',
 ];
 
 export async function loadYggdrasilContext(options = {}) {
