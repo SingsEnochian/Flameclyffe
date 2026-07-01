@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-07-01T06:22:47.943Z",
+  "generated_at": "2026-07-01T10:28:43.798Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,28 +13,28 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-07-01T02:15",
+    "time": "2026-07-01T06:15",
     "sky": "Night",
     "current": {
-      "time": "2026-07-01T02:15",
+      "time": "2026-07-01T06:15",
       "interval": 900,
-      "temperature_2m": 77,
+      "temperature_2m": 77.3,
       "relative_humidity_2m": 89,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 0,
-      "cloud_cover": 14,
-      "pressure_msl": 1016,
-      "wind_speed_10m": 1.6,
-      "wind_direction_10m": 16
+      "weather_code": 2,
+      "cloud_cover": 66,
+      "pressure_msl": 1015.1,
+      "wind_speed_10m": 1.8,
+      "wind_direction_10m": 60
     }
   },
   "space_weather": {
     "kp": {
-      "value": 3.33,
-      "time_tag": "2026-07-01T03:00:00",
-      "a_running": 18
+      "value": 1.67,
+      "time_tag": "2026-07-01T06:00:00",
+      "a_running": 6
     },
     "solar_wind": {
       "time_tag": "2026-06-30 18:40:00.000",
@@ -45,20 +45,20 @@
     }
   },
   "moon": {
-    "age_days": 16,
-    "illumination": 98.3,
+    "age_days": 16.17,
+    "illumination": 97.8,
     "name": "Full Moon"
   },
   "field": {
-    "P": 0.4933333333333333,
-    "C": 0.5533333333333333,
-    "R": 0.7838166666666667,
-    "E": 0.8201648351648352,
-    "M": 0.983,
-    "A": 0.7107692307692308,
-    "T": 0.6783087898534799,
-    "H": 0.7769609926739928,
-    "dpdt": 0.7838166666666667
+    "P": 0.4833333333333335,
+    "C": 0.41571428571428576,
+    "R": 0.78715,
+    "E": 0.7015934065934066,
+    "M": 0.978,
+    "A": 0.5107692307692308,
+    "T": 0.6222119485836386,
+    "H": 0.599219722832723,
+    "dpdt": 0.78715
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
