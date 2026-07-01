@@ -1,0 +1,13 @@
+{
+  "name": "dspark-proxy",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "OpenAI-compatible proxy on port 8000 → Yggdrasil via Ollama",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
