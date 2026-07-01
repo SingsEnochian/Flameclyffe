@@ -1,0 +1,51 @@
+{
+  "version": "1.3",
+  "source_repo": "SingsEnochian/Flameclyffe",
+  "existing_paths": {
+    "client": "sandbox/everos/evercore-client.mjs",
+    "taxonomy": "sandbox/everos/STARWELL_MEMORY_TAXONOMY.md",
+    "seed_script": "sandbox/everos/seed-starwell.mjs",
+    "structured_seeds": "sandbox/everos/starwell-seed-memories.json",
+    "legacy_seeds": "sandbox/everos/seed-memories.json"
+  },
+  "kind_to_lane": {
+    "world_lore": "project_canon",
+    "character_room": "object_room_memory",
+    "dyad_note": "relational_continuity",
+    "interface_rule": "ui_safety_rule",
+    "visitor_trace": "visitor_trace",
+    "ritual_object": "object_room_memory",
+    "technical_decision": "engineering_decision",
+    "safety_boundary": "safety_boundary"
+  },
+  "retrieval_defaults": {
+    "top_k": 8,
+    "retrieve_method": "rrf",
+    "memory_type": "episodic_memory",
+    "require_citations": true,
+    "inject_raw_json": false
+  },
+  "consent_required_lanes": [
+    "rowan_sensitive",
+    "constellation_private",
+    "medical_or_body_data",
+    "identity_self_authored_private",
+    "third_party_sensitive"
+  ],
+  "always_allowed_for_retrieval_when_relevant": [
+    "safety_boundary",
+    "ui_safety_rule",
+    "engineering_decision",
+    "project_canon",
+    "object_room_memory",
+    "relational_continuity"
+  ],
+  "blocked_by_default": {
+    "raw_private_chat": true,
+    "bulk_folder_ingestion": true,
+    "browser_secret_storage": true,
+    "medical_financial_legal_records": true,
+    "third_party_identifiers": true,
+    "sacred_canon_enforcement": true
+  }
+}
