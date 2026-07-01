@@ -126,7 +126,7 @@
     const hasFrequency = asNumber(layer.frequency, 0) > 0;
     const hasNoise = !!(layer.noise && typeof layer.noise === 'object');
 
-    if (!id || !label || !route || !claimLabel || (!hasFrequency && !hasNoise)) {
+    if (!id || !label || !route || layer.gain == null || !claimLabel || (!hasFrequency && !hasNoise)) {
       warn('Omitted layer: requires id, label/name, frequency or noise config, route, gain, and claim label.', layer);
       return null;
     }
