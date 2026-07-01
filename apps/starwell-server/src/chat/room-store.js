@@ -19,20 +19,38 @@ export function resetBreaker(roomId) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '../../data');
 const STORE_FILE = join(DATA_DIR, 'chat-rooms.json');
+const BACKUP_DIR = join(DATA_DIR, 'backups');
+const BACKUP_INTERVAL_MS = 5 * 60 * 1000;
+const BACKUP_KEEP = 48; // 4 hours of 5-minute backups
 
 if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+if (!existsSync(BACKUP_DIR)) mkdirSync(BACKUP_DIR, { recursive: true });
 
 const rooms = new Map();
 
 function persist() {
   writeFileSync(STORE_FILE, JSON.stringify(Object.fromEntries(rooms), null, 2));
+}
+
+function backup() {
+  if (!existsSync(STORE_FILE)) return;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  writeFileSync(join(BACKUP_DIR, `chat-rooms-${stamp}.json`), readFileSync(STORE_FILE));
+
+  // Prune oldest backups beyond BACKUP_KEEP
+  const files = readdirSync(BACKUP_DIR)
+    .filter(f => f.startsWith('chat-rooms-') && f.endsWith('.json'))
+    .sort();
+  for (const old of files.slice(0, Math.max(0, files.length - BACKUP_KEEP))) {
+    try { unlinkSync(join(BACKUP_DIR, old)); } catch { /* ignore */ }
+  }
 }
 
 function load() {
@@ -44,6 +62,8 @@ function load() {
 }
 
 load();
+backup(); // snapshot on startup
+setInterval(backup, BACKUP_INTERVAL_MS).unref();
 
 export function getRooms() {
   return [...rooms.values()].sort((a, b) => (b.flagged ? 1 : 0) - (a.flagged ? 1 : 0));
