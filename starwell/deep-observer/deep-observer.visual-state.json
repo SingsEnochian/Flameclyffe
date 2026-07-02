@@ -1,0 +1,117 @@
+{
+  "surface_id": "starwell-deep-observer",
+  "surface_path": "starwell/deep-observer/index.html",
+  "receipt_version": "0.1",
+  "hearthfire_gate": "targeted_receipt_allowed",
+  "gate_scope": "documentation and receipt only; no DEEP Observer behaviour rewrite",
+  "surface_label": "built_aligned_candidate",
+  "primary_truth_lit_rule": "Every Hearthfire surface should glow because something is true.",
+  "state_sources": [
+    "starwell/deep-observer/index.html",
+    "starwell/deep-observer/deep-observer.js",
+    "starwell/deep-observer/deep-observer-sensory.js",
+    "assets/deep-resonance-bus.js",
+    "docs/hearthfire/02-truth-lit-surface-rule.md",
+    "contracts/surface_visual_state_v0_1.schema.json"
+  ],
+  "declared_direct_readings": [
+    "time",
+    "moon",
+    "kp",
+    "bz",
+    "source",
+    "local",
+    "motion",
+    "touch"
+  ],
+  "declared_model_variables": [
+    "presence",
+    "coherence",
+    "resonance",
+    "entropy",
+    "momentum",
+    "alignment",
+    "horizon",
+    "charge",
+    "moon_rings",
+    "particle_energy",
+    "colour_temperature",
+    "source_label"
+  ],
+  "visual_receipts": [
+    {
+      "effect_id": "glyph_canvas",
+      "truth_kind": "input_output_relationship",
+      "state_source": "direct readings and model variables",
+      "plain_language_reading": "The central glyph translates direct readings and model variables into visible structure, motion, edge activity, rings, and centre glow.",
+      "plain_language_reason": "The glyph is a teaching instrument. It makes current observation state easier to inspect, not a proof of hidden states.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "sensor_ring",
+      "truth_kind": "data_source_or_provenance",
+      "state_source": "declared data-reading buttons",
+      "plain_language_reading": "The outer sensor nodes name the readings the instrument says it receives: time, moon, Kp, Bz, source, local, motion, and touch.",
+      "plain_language_reason": "Sensor jewels should glow or respond only to show declared direct readings and user interaction paths.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "reading_pulse_and_time_branch",
+      "truth_kind": "input_output_relationship",
+      "state_source": "selected direct reading",
+      "plain_language_reading": "Pulse paths show how a selected direct input travels into visible instrument behaviour.",
+      "plain_language_reason": "Motion makes translation inspectable rather than ornamental.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "meter_grid",
+      "truth_kind": "readiness_state",
+      "state_source": "displayed meter values",
+      "plain_language_reading": "The meters display the current readable values used by the instrument.",
+      "plain_language_reason": "Meter changes should represent declared observation or fallback values.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "resonance_bus_sound_layers",
+      "truth_kind": "user_activation_for_sound_or_haptics",
+      "state_source": "user-enabled sound field and displayed packet",
+      "plain_language_reading": "Sound is generated locally after activation and maps the displayed packet into layered sound.",
+      "plain_language_reason": "Audio must remain consent-first and must not change the underlying reading.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "local_packet_export",
+      "truth_kind": "local_or_export_state",
+      "state_source": "copy and save local packet actions",
+      "plain_language_reading": "Packet export is local unless the user copies or saves it.",
+      "plain_language_reason": "Export controls reveal the boundary between browser state and user-directed persistence.",
+      "confidence": "observed"
+    }
+  ],
+  "accessibility_requirements": {
+    "low_stim_control_present": true,
+    "motion_state_visible": true,
+    "sound_requires_activation": true,
+    "haptics_feature_gated": true,
+    "browser_fallbacks_declared": true,
+    "next_review_needed": [
+      "verify reduced-motion CSS/JS behaviour across modules",
+      "verify keyboard path for all sensor nodes",
+      "verify low-stim mode suppresses non-essential motion",
+      "verify sound and haptics remain off until user activation"
+    ]
+  },
+  "non_authorizations": [
+    "no behaviour rewrite",
+    "no new sound autoplay",
+    "no database write",
+    "no claim that readings prove hidden states",
+    "no replacement of DEEP Observer with Hearthfire pilot code"
+  ],
+  "next_passes": [
+    "Pass 02 dependency orbit for DEEP Observer modules",
+    "Pass 04 observability review for failure visibility",
+    "accessibility review for reduced-motion and low-stim behaviour",
+    "optional wrapper note after review"
+  ]
+}
