@@ -1,7 +1,7 @@
 # Hearthfire Lightfield Overhaul Plan
 
 Status: design plan
-Gate: `targeted_pilot_allowed`
+Gate: `targeted_receipt_allowed`
 
 This plan describes how Flameclyffe can adopt Faer's light language safely. The goal is not decorative sparkle. The goal is a shared instrument language where light and motion reveal actual state.
 
@@ -26,7 +26,7 @@ Output:
 
 - surface census records
 - risk labels
-- no code changes beyond docs/contracts/pilot surface
+- no code changes beyond docs/contracts/pilot surface/visual receipts
 
 ## Phase 1 — Define shared primitives
 
@@ -43,27 +43,31 @@ Output:
 
 - component contract
 - visual state schema
+- visual receipt schema
 - reduced-motion spec
 - low-stim spec
 - accessibility notes
 
-## Phase 2 — Pilot surface
+## Phase 2 — Pilot surface and first receipt
 
 The first pilot is `/hearthfire/`.
+
+The first existing-surface receipt is `starwell/deep-observer/deep-observer.visual-state.json`.
 
 Acceptance criteria:
 
 - every animation has a declared truth
 - every state source is named
-- the user can quiet motion
+- the user can quiet motion where motion is introduced or controlled by Hearthfire
 - sound/haptics require activation
 - no effect implies completion, safety, canon authority, or live data unless verified
+- receipt files do not rewrite the underlying instrument
 
 ## Phase 3 — Surface-by-surface adoption
 
 Suggested order after census:
 
-1. DEEP Observer wrapper/explanation layer
+1. DEEP Observer dependency orbit and observability pass
 2. STARWELL dashboard surfaces
 3. Runa bridge surfaces
 4. Sigil Loom / Sigil Activator surfaces
@@ -92,4 +96,4 @@ apps/starwell/src/hearthfire/
 
 ## Decision needed before broader implementation
 
-Promote the gate from `targeted_pilot_allowed` to a specific targeted implementation gate for the chosen existing surface.
+Promote the gate from `targeted_receipt_allowed` to a specific targeted implementation gate for the chosen existing surface.
