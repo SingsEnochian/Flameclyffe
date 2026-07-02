@@ -1,0 +1,95 @@
+{
+  "$schema": "../../contracts/surface_visual_receipt_v0_1.schema.json",
+  "surface_id": "starwell-deep-observer-cymatic-field",
+  "surface_path": "starwell/deep-observer/geometry-lenses.html",
+  "receipt_version": "0.1",
+  "hearthfire_gate": "targeted_receipt_allowed",
+  "gate_scope": "design and receipt only; no live DEEP Observer behaviour rewrite",
+  "surface_label": "prototype_live_candidate",
+  "primary_truth_lit_rule": "Every Hearthfire surface should glow because something is true.",
+  "state_sources": [
+    "docs/hearthfire/06-cymatic-field-live-reactivity.md",
+    "starwell/deep-observer/deep-observer.visual-state.json",
+    "contracts/surface_visual_receipt_v0_1.schema.json"
+  ],
+  "declared_direct_readings": [
+    "live_deep_packet",
+    "fallback_slider_state",
+    "canvas_pointer_input",
+    "keyboard_activation",
+    "reduced_motion_preference",
+    "low_stim_state"
+  ],
+  "declared_model_variables": [
+    "presence",
+    "coherence",
+    "resonance",
+    "entropy",
+    "alignment",
+    "motion",
+    "derived_horizon",
+    "interaction_disturbance"
+  ],
+  "visual_receipts": [
+    {
+      "effect_id": "baseline_cymatic_field",
+      "truth_kind": "live_signal_change",
+      "state_source": "live DEEP packet or fallback slider state",
+      "plain_language_reading": "The baseline cymatic pattern is derived from DEEP readings, not painted independently.",
+      "plain_language_reason": "Coherence and Resonance set standing-wave modes; Entropy and Motion shape blur and phase; Presence brightens field density; Alignment stabilises symmetry; Horizon derives from the field.",
+      "confidence": "placeholder"
+    },
+    {
+      "effect_id": "user_disturbance_field",
+      "truth_kind": "input_output_relationship",
+      "state_source": "pointer, touch, drag, or keyboard activation",
+      "plain_language_reading": "User action creates a local, temporary disturbance in the visible field.",
+      "plain_language_reason": "The field changes because the user acted. The perturbation decays and remains distinguishable from the baseline reading.",
+      "confidence": "placeholder"
+    },
+    {
+      "effect_id": "alignment_symmetry_lock",
+      "truth_kind": "readiness_state",
+      "state_source": "Alignment variable",
+      "plain_language_reading": "Alignment controls how cleanly the cymatic field resolves into symmetry.",
+      "plain_language_reason": "High Alignment sharpens and stabilises nodes; low Alignment introduces skew and noisier boundaries.",
+      "confidence": "placeholder"
+    },
+    {
+      "effect_id": "receipt_layer",
+      "truth_kind": "data_source_or_provenance",
+      "state_source": "live/fallback/interaction labels",
+      "plain_language_reading": "The UI labels whether current motion comes from live signal, fallback controls, or user interaction.",
+      "plain_language_reason": "The user should never have to guess whether the field changed because the signal changed or because they touched it.",
+      "confidence": "placeholder"
+    }
+  ],
+  "accessibility_requirements": {
+    "low_stim_control_present": true,
+    "reduced_motion_fallback_required": true,
+    "keyboard_equivalent_required": true,
+    "sound_requires_activation": true,
+    "haptics_feature_gated": true,
+    "interaction_traces_persisted_by_default": false,
+    "next_review_needed": [
+      "wire Alignment into the Cymatic Field formula",
+      "define live packet source detection",
+      "implement pointer and keyboard disturbances",
+      "label live signal versus user perturbation versus fallback state",
+      "verify reduced-motion and low-stim behaviours"
+    ]
+  },
+  "non_authorizations": [
+    "no DEEP Observer replacement",
+    "no sound autoplay",
+    "no database write",
+    "no persistent interaction trace by default",
+    "no claim that reactivity proves hidden agency or fate"
+  ],
+  "next_passes": [
+    "implementation slice plan for GeometryLensSignalAdapter",
+    "implementation slice plan for CymaticInteractionField",
+    "accessibility review for reduced-motion, low-stim, keyboard, and touch paths",
+    "visual receipt update after implementation"
+  ]
+}
