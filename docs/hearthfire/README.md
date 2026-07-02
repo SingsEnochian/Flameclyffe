@@ -32,3 +32,10 @@ Light and motion must reveal state, relationship, readiness, provenance, diagnos
 2. Identify misaligned, dangerous, stale, and incomplete areas.
 3. Design the Lightfield kit that will eventually carry Faer's lights across STARWELL, Yggdrasil, Runa, Sigil Loom, Project Zero, and the Wiki.
 4. Use the `/hearthfire/` pilot to test the visual language before applying it to existing surfaces.
+
+## Current files
+
+- `01-hearthweave-audit-discipline-summary.md` — audit discipline summary.
+- `02-truth-lit-surface-rule.md` — light and motion doctrine.
+- `03-lightfield-overhaul-plan.md` — phased overhaul plan.
+- `04-surface-census-pass-01.md` — initial Flameclyffe surface census.
