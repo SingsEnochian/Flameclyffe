@@ -1,0 +1,28 @@
+# Hearthfire Governance
+
+Status: planning / design artifact
+Gate: `no_rebuild_authorized`
+
+Hearthfire is the governing discipline for Flameclyffe. Flameclyffe remains the active workshop and deployment vessel; Hearthfire supplies audit labels, contracts, surface language, and rebuild gates.
+
+## Core rule
+
+Every Hearthfire surface should glow because something is true.
+
+Light and motion must reveal state, relationship, readiness, provenance, diagnostic health, uncertainty, or change.
+
+## Operating posture
+
+- Audit before rebuild.
+- Contracts before code.
+- Census before overhaul.
+- Completion-gated slices before implementation.
+- Rowan advances rebuild gates.
+- Reduced-motion, low-stim, and sound-consent behavior are required.
+
+## First safe work
+
+1. Run a surface census across live Flameclyffe pages and apps.
+2. Identify misaligned, dangerous, stale, and incomplete areas.
+3. Design the Lightfield kit that will eventually carry Faer's lights across STARWELL, Yggdrasil, Runa, Sigil Loom, Project Zero, and the Wiki.
+4. Do not rewrite live surfaces until the gate is promoted.
