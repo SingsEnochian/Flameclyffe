@@ -13,9 +13,11 @@ This repository currently holds several Vite/React app surfaces and helper scrip
 
 Hearthfire is the governing discipline for Flameclyffe. Flameclyffe remains the workshop and deployment vessel; Hearthfire supplies audit labels, contracts, surface language, continuity posture, and rebuild gates.
 
-Current gate: `targeted_pilot_allowed`.
+Current gate: `targeted_receipt_allowed`.
 
 Current pilot: `/hearthfire/`.
+
+Current receipt target: `starwell/deep-observer/deep-observer.visual-state.json`.
 
 Core visual rule: **Every Hearthfire surface should glow because something is true.** Light, motion, sound, and haptics should reveal declared state rather than serve as decoration.
 
@@ -25,8 +27,10 @@ See:
 - `docs/hearthfire/02-truth-lit-surface-rule.md`
 - `docs/hearthfire/03-lightfield-overhaul-plan.md`
 - `docs/hearthfire/04-surface-census-pass-01.md`
+- `docs/hearthfire/05-deep-observer-visual-state-receipt.md`
 - `contracts/hearthfire_contract_v0_3.json`
 - `contracts/surface_visual_state_v0_1.schema.json`
+- `contracts/surface_visual_receipt_v0_1.schema.json`
 
 ## Claim labels
 
@@ -61,6 +65,7 @@ The `science_constants` Supabase table is the baseline for Planck/CODATA-style i
 - `docs/hearthfire/README.md`
 - `docs/hearthfire/02-truth-lit-surface-rule.md`
 - `docs/hearthfire/04-surface-census-pass-01.md`
+- `docs/hearthfire/05-deep-observer-visual-state-receipt.md`
 
 ## Development
 
