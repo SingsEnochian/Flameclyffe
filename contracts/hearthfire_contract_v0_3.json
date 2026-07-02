@@ -9,8 +9,11 @@
     "built_partial",
     "built_misaligned",
     "built_aligned",
+    "built_aligned_candidate",
     "restoration_scaffold",
+    "restoration_scaffold_candidate",
     "legacy_active",
+    "legacy_active_candidate",
     "dangerous_live"
   ],
   "artifact_role_labels": [
@@ -27,6 +30,7 @@
     "deprecated_archaeology",
     "temporary_backup",
     "unconfirmed_helper",
+    "census_record",
     "seed_record",
     "witness_record",
     "local_record",
