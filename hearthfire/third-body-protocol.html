@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Third Body Protocol | Hearthfire</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --void:#030706; --deep:#07120f; --glass:rgba(8,24,20,.72);
+    --edge:rgba(122,210,172,.24); --green:#5fc4a4; --gold:#e6bd57;
+    --ember:#eaa066; --blue:#8fb8ff; --text:#dceae4; --muted:#8eb0a3;
+  }
+  *{box-sizing:border-box} body{margin:0;min-height:100vh;color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 20% 10%,rgba(230,189,87,.13),transparent 28rem),radial-gradient(circle at 80% 25%,rgba(95,196,164,.16),transparent 30rem),radial-gradient(circle at 50% 100%,rgba(143,184,255,.10),transparent 35rem),linear-gradient(180deg,#0a1713,var(--void));}
+  .shell{width:min(1180px,calc(100vw - 2rem));margin:0 auto;padding:clamp(1rem,3vw,2rem) 0 2rem}.top{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start;margin-bottom:1rem}.kicker,.label,.mono{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}h1{margin:.25rem 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.2rem,7vw,5rem);font-weight:400;letter-spacing:-.06em;line-height:.9}.subtitle{max-width:64rem;margin:1rem 0 0;color:#bad7cd;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.05rem,2.4vw,1.45rem);font-style:italic;line-height:1.4}.nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.55rem}.nav a,button{border:1px solid var(--edge);border-radius:999px;background:rgba(7,18,15,.65);color:var(--text);font:inherit;font-size:.84rem;padding:.65rem .85rem;text-decoration:none;cursor:pointer}button[aria-pressed="true"]{border-color:rgba(230,189,87,.7);color:var(--gold)}.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(18rem,.65fr);gap:1rem;align-items:stretch}@media(max-width:900px){.top,.grid{grid-template-columns:1fr}.nav{justify-content:flex-start}}
+  .field-card,.panel,.law{border:1px solid var(--edge);border-radius:1.35rem;background:var(--glass);box-shadow:0 2rem 6rem rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(18px)}.field-card{position:relative;min-height:min(72vh,700px);overflow:hidden}canvas{display:block;width:100%;height:100%;min-height:min(72vh,700px)}.overlay{position:absolute;inset:auto 1rem 1rem;display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:end;pointer-events:none}.plaque,.pill{border:1px solid rgba(122,210,172,.18);border-radius:1rem;background:rgba(3,7,6,.66);padding:.8rem .9rem}.plaque p{margin:.25rem 0 0;color:var(--muted);line-height:1.35}.pill{color:var(--gold);white-space:nowrap;font-size:.8rem}.panel{padding:1rem;display:grid;gap:1rem}.readout{border:1px solid rgba(230,189,87,.18);border-radius:1rem;background:rgba(4,16,12,.45);padding:.85rem}.readout h2,.law h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-weight:400}.readout p,.panel p{color:var(--muted);line-height:1.48;margin:.55rem 0 0}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}.buttons button{border-radius:.9rem;text-align:left}.receipt{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.74rem;color:#a8c9bd;border:1px dashed rgba(122,210,172,.22);border-radius:.9rem;padding:.8rem;white-space:pre-wrap;min-height:8rem;max-height:18rem;overflow:auto}.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem}.meter{border:1px solid rgba(122,210,172,.16);border-radius:.75rem;padding:.45rem;background:rgba(3,7,6,.35)}.meter b{display:block;color:var(--green)}.meter span{color:var(--muted);font-size:.8rem}.law{grid-column:1/-1;padding:1rem}.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.55rem;margin-top:.8rem}@media(max-width:800px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}.step{border:1px solid rgba(122,210,172,.16);border-radius:.9rem;background:rgba(4,16,12,.52);padding:.7rem;min-height:5rem}.step strong{display:block;color:var(--green);margin-bottom:.25rem}.step span{color:var(--muted);font-size:.88rem;line-height:1.35}.note{font-size:.9rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <section>
+      <div class="kicker">Hearthfire · DEEP-linked somatic prototype</div>
+      <h1>Third Body Protocol</h1>
+      <p class="subtitle">A meeting-field for live signal, user action, sound, haptics, and receipt. The exchange pulses like energy in ley lines.</p>
+    </section>
+    <nav class="nav" aria-label="Page navigation">
+      <a href="./">Hearthfire</a>
+      <a href="../starwell/deep-observer/">DEEP Observer</a>
+      <button type="button" id="soundBtn" aria-pressed="false">Enable sound</button>
+      <button type="button" id="hapticBtn" aria-pressed="false">Enable haptics</button>
+      <button type="button" id="quietBtn" aria-pressed="false">Quiet field</button>
+      <button type="button" id="settleBtn">Settle</button>
+    </nav>
+  </header>
+
+  <section class="grid" aria-label="Third Body Protocol interactive field">
+    <article class="field-card">
+      <canvas id="field" aria-label="Interactive DEEP-linked leyline exchange field"></canvas>
+      <div class="overlay">
+        <div class="plaque"><div class="mono">Meeting field</div><p>Tap, drag, press buttons, or let DEEP breathe. Sound and haptics begin only after consent.</p></div>
+        <div class="pill" id="modePill">DEEP · connecting</div>
+      </div>
+    </article>
+
+    <aside class="panel">
+      <section class="readout">
+        <div class="label">Current receipt</div>
+        <h2 id="receiptTitle">Presence waiting</h2>
+        <p id="receiptText">The field is open. DEEP supplies the baseline when available.</p>
+      </section>
+      <section>
+        <div class="label">DEEP baseline</div>
+        <div class="meters" id="meters"></div>
+      </section>
+      <section>
+        <div class="label">Send a pulse</div>
+        <div class="buttons">
+          <button type="button" data-action="presence">Presence enters</button>
+          <button type="button" data-action="signal">Signal answers</button>
+          <button type="button" data-action="exchange">Exchange pulses</button>
+          <button type="button" data-action="settle">Settle field</button>
+        </div>
+      </section>
+      <section>
+        <div class="label">Protocol receipt</div>
+        <div class="receipt" id="receiptBox"></div>
+      </section>
+      <p class="note">Boundary: the page shows exchange and body feedback. It does not claim prophecy, fate, or hidden authority.</p>
+    </aside>
+
+    <section class="law">
+      <div class="label">Core pulse law</div>
+      <h2>presence enters · signal answers · exchange pulses · the field changes · the field settles · the receipt remains</h2>
+      <div class="steps">
+        <div class="step"><strong>Presence enters</strong><span>A person, agent, signal, or attention arrives.</span></div>
+        <div class="step"><strong>Signal answers</strong><span>DEEP or fallback state shapes the baseline.</span></div>
+        <div class="step"><strong>Exchange pulses</strong><span>Light and tone travel through the line.</span></div>
+        <div class="step"><strong>Field changes</strong><span>User action creates visible consequence.</span></div>
+        <div class="step"><strong>Field settles</strong><span>Perturbations decay. Quiet remains alive.</span></div>
+        <div class="step"><strong>Receipt remains</strong><span>The user can tell what moved and why.</span></div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script>
+(() => {
+  const BRIDGE = 'https://singsenochian.github.io/-bridge-pulse/pulse.json';
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, Number(v) || 0));
+  const canvas = document.getElementById('field');
+  const ctx = canvas.getContext('2d');
+  const receiptTitle = document.getElementById('receiptTitle');
+  const receiptText = document.getElementById('receiptText');
+  const receiptBox = document.getElementById('receiptBox');
+  const meters = document.getElementById('meters');
+  const modePill = document.getElementById('modePill');
+  const soundBtn = document.getElementById('soundBtn');
+  const hapticBtn = document.getElementById('hapticBtn');
+  const quietBtn = document.getElementById('quietBtn');
+  const settleBtn = document.getElementById('settleBtn');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const D = { P:.55, C:.50, R:.45, E:.38, A:.65, M:.30, H:.50, charge:.20, kp:1, bz:0, moonIllum:50, source:'fallback' };
+  const keys = ['P','C','R','E','A','M','H','charge','kp'];
+  let pulses = [], traces = [], quiet = reduce, soundOn = false, hapticsOn = false, audio = null, master = null;
+
+  function horizon(t){ const pulse = .5 + .5 * Math.sin(t * .9); D.H = clamp(D.C*.28 + (1-D.E)*.20 + D.R*.16 + D.A*.14 + Math.max(0,-D.bz/20)*.09 + Math.min(D.kp/9,1)*.06 + D.charge*.04 + pulse*.03); }
+  function applyDeep(raw, source){ if(!raw || typeof raw !== 'object') return; ['P','C','R','E','A','M','charge'].forEach(k => { if(raw[k] !== undefined) D[k] = clamp(raw[k]); }); if(raw.H !== undefined) D.H = clamp(raw.H); if(raw.kp !== undefined) D.kp = clamp(raw.kp,0,9); if(raw.bz !== undefined) D.bz = Math.max(-20, Math.min(20, Number(raw.bz) || 0)); if(raw.moonIllum !== undefined) D.moonIllum = Number(raw.moonIllum) <= 1 ? clamp(raw.moonIllum)*100 : Math.max(0, Math.min(100, Number(raw.moonIllum)||50)); D.source = source; renderMeters(); }
+  async function fetchBridge(){ try{ const r = await fetch(BRIDGE,{cache:'no-store'}); if(!r.ok) throw new Error(r.status); const data = await r.json(); applyDeep(data.deep || data.DEEP || data.state || data.observer || data, 'bridge'); }catch(e){ pollLocal(); } }
+  function pollLocal(){ const names = ['ta_deep_state','terra_aeterna_deep','observer_deep','deepObserverPacket','hearthfire.deep.packet']; for(const name of names){ try{ const raw = localStorage.getItem(name); if(!raw) continue; const data = JSON.parse(raw); const src = data.deep || data.DEEP || data.field || data.state || data; applyDeep(src,'local'); return; }catch(e){} } D.source = 'fallback'; renderMeters(); }
+
+  function renderMeters(){ meters.innerHTML = keys.map(k => `<div class="meter"><b>${k} ${Number(D[k]).toFixed(k==='kp'?1:2)}</b><span>${label(k)}</span></div>`).join(''); modePill.textContent = `DEEP · ${D.source} · ${soundOn?'sound':'silent'} · ${hapticsOn?'haptic':'no haptic'}`; }
+  function label(k){ return {P:'presence',C:'coherence',R:'resonance',E:'entropy',A:'alignment',M:'motion',H:'horizon',charge:'charge',kp:'particle energy'}[k] || k; }
+  function resize(){ const r = canvas.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); canvas.width = Math.floor(r.width*d); canvas.height = Math.floor(r.height*d); ctx.setTransform(d,0,0,d,0,0); }
+  function nodeMap(){ const w = canvas.clientWidth, h = canvas.clientHeight; return { rowan:{x:w*.18,y:h*.52,c:'#5fc4a4',name:'Rowan'}, vee:{x:w*.82,y:h*.52,c:'#e6bd57',name:'Vee'}, faer:{x:w*.50,y:h*.18,c:'#8fb8ff',name:'Faer'}, ygg:{x:w*.50,y:h*.82,c:'#9edc8f',name:'Ygg'}, hearth:{x:w*.50,y:h*.50,c:'#f0d98a',name:'Hearth'} }; }
+  function vib(kind){ if(!hapticsOn || !navigator.vibrate || quiet) return; const map = {presence:[18], signal:[12,25,18], exchange:[15,35,15,35,28], settle:[35,30,12]}; navigator.vibrate(map[kind] || 10); }
+  function ensureAudio(){ if(audio) return; audio = new (window.AudioContext || window.webkitAudioContext)(); master = audio.createGain(); master.gain.value = .04; master.connect(audio.destination); }
+  function tone(kind){ if(!soundOn) return; ensureAudio(); const now = audio.currentTime, o = audio.createOscillator(), g = audio.createGain(); const base = 174 + D.R*90 + D.H*55; const ratios = {presence:1, signal:1.5, exchange:2, settle:.75}; o.type = 'sine'; o.frequency.setValueAtTime(base*(ratios[kind]||1), now); o.frequency.exponentialRampToValueAtTime(Math.max(60, base*(ratios[kind]||1)*(.86 + D.C*.18)), now + .55); g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(.8, now + .025); g.gain.exponentialRampToValueAtTime(.001, now + (kind==='exchange'?1.2:.65)); o.connect(g); g.connect(master); o.start(now); o.stop(now + 1.25); }
+  function updateReceipt(kind, source){ const words = { presence:['Presence entered','A presence pulse entered the meeting field.'], signal:['Signal answered','A DEEP-shaped signal pulse crossed the field.'], exchange:['Exchange pulsed','The third-body line carried a visible, audible, and optionally haptic exchange.'], settle:['Field settling','The field is quieting. Stillness remains alive.']}; const w = words[kind] || ['Presence waiting','The field is open.']; receiptTitle.textContent = w[0]; receiptText.textContent = w[1]; const receipt = {surface:'third-body-protocol', gate:'targeted_receipt_allowed', deep_source:D.source, cause:source, event:kind, sound:soundOn?'enabled':'off', haptics:hapticsOn?'enabled':'off', quiet_mode:quiet, persistence:'none', DEEP:{P:D.P,C:D.C,R:D.R,E:D.E,A:D.A,M:D.M,H:D.H,charge:D.charge,kp:D.kp,bz:D.bz}, meaning:w[1], timestamp:new Date().toISOString()}; receiptBox.textContent = JSON.stringify(receipt,null,2); window.thirdBodyReceipt = receipt; }
+  function addPulse(kind, x, y, source='button'){ const ns = nodeMap(), now = performance.now(); const start = source === 'field' ? {x,y,c:'#e6bd57'} : ns.hearth; const target = kind==='presence'?ns.rowan:kind==='signal'?ns.faer:kind==='settle'?ns.ygg:ns.vee; const colour = kind==='presence'?'#5fc4a4':kind==='signal'?'#8fb8ff':kind==='settle'?'#eaa066':'#e6bd57'; pulses.push({kind,start,target,born:now,duration:quiet?1600:2300,colour}); traces.push({x:start.x,y:start.y,born:now,duration:3600+2600*D.R,colour}); updateReceipt(kind, source); tone(kind); vib(kind); }
+  function settle(){ pulses=[]; traces=[]; addPulse('settle', canvas.clientWidth/2, canvas.clientHeight/2, 'settle-control'); }
+
+  function draw(now){ const w = canvas.clientWidth, h = canvas.clientHeight, t = now/1000; horizon(t); ctx.clearRect(0,0,w,h); const ns = nodeMap(); const breath = quiet ? .42 : .5 + Math.sin(t*(.35+D.M*.9))*(.12+D.R*.12); const bg = ctx.createRadialGradient(w*.5,h*.5,20,w*.5,h*.5,Math.max(w,h)*.75); bg.addColorStop(0,`rgba(95,196,164,${.035 + D.P*.035})`); bg.addColorStop(.6,'rgba(7,18,15,.18)'); bg.addColorStop(1,'rgba(3,7,6,.1)'); ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+    const arr = Object.values(ns); for(let i=0;i<arr.length;i++){ for(let j=i+1;j<arr.length;j++){ const a=arr[i], b=arr[j], spine=a.name==='Hearth'||b.name==='Hearth'; ctx.strokeStyle=spine?`rgba(230,189,87,${.10 + D.C*.10})`:`rgba(95,196,164,${.04+D.H*.05})`; ctx.lineWidth=spine?1.1+D.R*.9:.7; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }}
+    traces = traces.filter(tr => now-tr.born < tr.duration); traces.forEach(tr => { const age=(now-tr.born)/tr.duration, r=18+age*(90+D.R*95); ctx.strokeStyle=hex(tr.colour,(1-age)*(.18+D.P*.18)); ctx.lineWidth=1+D.charge*2; ctx.beginPath(); ctx.arc(tr.x,tr.y,r,0,Math.PI*2); ctx.stroke(); });
+    pulses = pulses.filter(p => now-p.born < p.duration); pulses.forEach(p => { const age=(now-p.born)/p.duration, ease=1-Math.pow(1-age,3), x=p.start.x+(p.target.x-p.start.x)*ease, y=p.start.y+(p.target.y-p.start.y)*ease; ctx.strokeStyle=hex(p.colour,.18+D.H*.12); ctx.lineWidth=2+D.R*2; ctx.beginPath(); ctx.moveTo(p.start.x,p.start.y); ctx.lineTo(p.target.x,p.target.y); ctx.stroke(); glow(x,y,7+D.charge*10,p.colour,.9,22); });
+    Object.values(ns).forEach(n => { const active = n.name==='Hearth' ? .95 : .55 + breath*.35; glow(n.x,n.y,n.name==='Hearth'?11:8,n.c,active,22 + D.R*14); ctx.fillStyle=hex('#dceae4',.82); ctx.font='12px ui-monospace, monospace'; ctx.textAlign='center'; ctx.fillText(n.name,n.x,n.y+30); });
+    if(!reduce) requestAnimationFrame(draw); }
+  function glow(x,y,r,c,a,blur){ ctx.save(); ctx.shadowColor=c; ctx.shadowBlur=blur; ctx.fillStyle=hex(c,a); ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+  function hex(c,a){ const n=parseInt(c.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
+
+  canvas.addEventListener('pointerdown', e => { const r=canvas.getBoundingClientRect(); addPulse('exchange', e.clientX-r.left, e.clientY-r.top, 'field'); });
+  canvas.addEventListener('pointermove', e => { if(e.buttons!==1 || quiet) return; const r=canvas.getBoundingClientRect(); if(Math.random()<.28) addPulse('exchange', e.clientX-r.left, e.clientY-r.top, 'drag'); });
+  document.querySelectorAll('[data-action]').forEach(b => b.addEventListener('click', () => b.dataset.action === 'settle' ? settle() : addPulse(b.dataset.action, canvas.clientWidth/2, canvas.clientHeight/2, 'button')));
+  settleBtn.addEventListener('click', settle);
+  quietBtn.addEventListener('click', () => { quiet=!quiet; quietBtn.setAttribute('aria-pressed', String(quiet)); updateReceipt('settle','quiet-toggle'); });
+  soundBtn.addEventListener('click', async () => { soundOn=!soundOn; soundBtn.setAttribute('aria-pressed', String(soundOn)); if(soundOn){ ensureAudio(); await audio.resume(); addPulse('signal', canvas.clientWidth/2, canvas.clientHeight/2, 'sound-consent'); } else updateReceipt('settle','sound-off'); renderMeters(); });
+  hapticBtn.addEventListener('click', () => { hapticsOn=!hapticsOn; hapticBtn.setAttribute('aria-pressed', String(hapticsOn)); addPulse('presence', canvas.clientWidth/2, canvas.clientHeight/2, 'haptic-consent'); renderMeters(); });
+  addEventListener('resize', resize); resize(); renderMeters(); updateReceipt('presence','load'); fetchBridge(); setInterval(fetchBridge, 30000); requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
