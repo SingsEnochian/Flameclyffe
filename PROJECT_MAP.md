@@ -82,9 +82,17 @@ Enduring systems attached to the trunk with a clear purpose.
 
 **Purpose:** Establish Hearthfire as Flameclyffe's governance layer and test the truth-lit surface rule on one read-only pilot route before applying the lightfield language to existing surfaces.
 
-**Current gate:** `targeted_pilot_allowed`.
+**Current gate:** `targeted_receipt_allowed`.
 
-**Scope:** `/hearthfire/` only. This does not authorize a repo rename, database migration, broad rebuild, or visual overhaul of existing app surfaces.
+**Scope:** `/hearthfire/` plus the DEEP Observer visual-state receipt. This does not authorize a repo rename, database migration, broad rebuild, or visual overhaul of existing app surfaces.
+
+### DEEP Observer visual receipt
+
+**Owner:** `starwell/deep-observer/deep-observer.visual-state.json`, `docs/hearthfire/05-deep-observer-visual-state-receipt.md`, and `contracts/surface_visual_receipt_v0_1.schema.json`.
+
+**Purpose:** Record what DEEP Observer's current light, motion, sound, and export behaviours claim to mean before any overhaul.
+
+**Scope:** Receipt and disclosure link only. No DEEP Observer behaviour rewrite is authorized.
 
 ## Leaves
 
