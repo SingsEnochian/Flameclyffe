@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://singsenochian.github.io/flameclyffe/hearth/schemas/hearth_mirror_manifest.schema.json",
+  "title": "Hearth Mirror Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "timestamp",
+    "sourceProjectId",
+    "outputDirectory",
+    "tablesAttempted",
+    "rowCounts",
+    "omissions",
+    "errors",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "0.1.0" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "sourceProjectId": { "type": "string" },
+    "outputDirectory": { "type": "string" },
+    "tablesAttempted": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "rowCounts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["exported", "omitted"],
+        "properties": {
+          "exported": { "type": "integer", "minimum": 0 },
+          "omitted": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "omissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["table", "reason", "count"],
+        "properties": {
+          "table": { "type": "string" },
+          "reason": { "type": "string" },
+          "count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scope", "message"],
+        "properties": {
+          "scope": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    "status": { "type": "string", "enum": ["ok", "partial", "failed"] }
+  }
+}
