@@ -1,0 +1,72 @@
+{
+  "name": "hearthfire_contract_v0_3",
+  "active_gate": "no_rebuild_authorized",
+  "truth_lit_surface_rule": "Every Hearthfire surface should glow because something is true.",
+  "surface_readiness_labels": [
+    "specified_not_built",
+    "shell_only",
+    "built_partial",
+    "built_misaligned",
+    "built_aligned",
+    "restoration_scaffold",
+    "legacy_active",
+    "dangerous_live"
+  ],
+  "artifact_role_labels": [
+    "live_source",
+    "live_surface",
+    "live_dependency",
+    "legacy_dependency",
+    "dangerous_dependency",
+    "data_config_dependency",
+    "canonical_data",
+    "runtime_data",
+    "migration_source",
+    "generated_artifact",
+    "deprecated_archaeology",
+    "temporary_backup",
+    "unconfirmed_helper",
+    "seed_record",
+    "witness_record",
+    "local_record",
+    "registry_record"
+  ],
+  "rebuild_gates": [
+    "no_rebuild_authorized",
+    "contract_design_allowed",
+    "scaffold_cleanup_allowed",
+    "targeted_repair_allowed",
+    "rebuild_ready_pending_steward_review",
+    "rebuild_authorized"
+  ],
+  "visual_truths": [
+    "readiness_state",
+    "authorization_gate",
+    "input_output_relationship",
+    "data_source_or_provenance",
+    "canon_authority",
+    "continuity_status",
+    "local_or_export_state",
+    "live_signal_change",
+    "diagnostic_health",
+    "risk_or_uncertainty",
+    "false_alarm_or_mundane_check_state",
+    "user_activation_for_sound_or_haptics"
+  ],
+  "surface_components": [
+    "LightfieldShell",
+    "PulsePath",
+    "SignalJewel",
+    "GlyphPanel",
+    "ResonanceBusMini",
+    "SafetyRibbon"
+  ],
+  "surface_visual_requirements": {
+    "reduced_motion_first_class": true,
+    "low_stim_first_class": true,
+    "sound_haptics_require_user_activation": true,
+    "plain_language_reading_explanation_required": true,
+    "plain_language_glow_explanation_required": true,
+    "no_false_completion_or_authority_signal": true
+  }
+}
