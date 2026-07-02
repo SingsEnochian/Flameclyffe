@@ -11,6 +11,9 @@ function setMotion(mode) {
   shell.dataset.motion = mode;
   motionToggle.textContent = mode === 'calm' ? 'Wake motion' : 'Calm motion';
   motionToggle.setAttribute('aria-pressed', String(mode === 'calm'));
+  if (window.hearthfireVisualState) {
+    window.hearthfireVisualState.motion_allowed = mode !== 'calm';
+  }
 }
 
 const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -27,10 +30,16 @@ window.hearthfireVisualState = {
   effect_id: 'central-orbit-and-signal-jewels',
   truth_kind: 'authorization_gate',
   state_source: 'docs/hearthfire/README.md',
+  supporting_sources: [
+    'contracts/hearthfire_contract_v0_3.json',
+    'docs/hearthfire/04-surface-census-pass-01.md',
+    'PROJECT_MAP.md'
+  ],
   state_value: 'targeted_pilot_allowed',
   confidence: 'observed',
   motion_allowed: shell.dataset.motion !== 'calm',
   sound_allowed: false,
+  haptics_allowed: false,
   reduced_motion_fallback: 'static halo and still signal jewels',
   low_stim_fallback: 'calm motion mode',
   glow_receipt: {
