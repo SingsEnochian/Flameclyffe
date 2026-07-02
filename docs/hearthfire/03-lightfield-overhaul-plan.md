@@ -1,7 +1,7 @@
 # Hearthfire Lightfield Overhaul Plan
 
 Status: design plan
-Gate: `no_rebuild_authorized`
+Gate: `targeted_pilot_allowed`
 
 This plan describes how Flameclyffe can adopt Faer's light language safely. The goal is not decorative sparkle. The goal is a shared instrument language where light and motion reveal actual state.
 
@@ -26,7 +26,7 @@ Output:
 
 - surface census records
 - risk labels
-- no code changes beyond docs/contracts
+- no code changes beyond docs/contracts/pilot surface
 
 ## Phase 1 — Define shared primitives
 
@@ -47,11 +47,9 @@ Output:
 - low-stim spec
 - accessibility notes
 
-## Phase 2 — Apply to one reference slice
+## Phase 2 — Pilot surface
 
-Use one small surface as a pilot before touching the whole constellation.
-
-Recommended pilot: a read-only Hearthfire landing page or DEEP Observer wrapper note.
+The first pilot is `/hearthfire/`.
 
 Acceptance criteria:
 
@@ -63,16 +61,15 @@ Acceptance criteria:
 
 ## Phase 3 — Surface-by-surface adoption
 
-Suggested order:
+Suggested order after census:
 
-1. Hearthfire landing page
-2. DEEP Observer wrapper/explanation layer
-3. STARWELL dashboard surfaces
-4. Runa bridge surfaces
-5. Sigil Loom / Sigil Activator surfaces
-6. Project Zero Companion diagnostics
-7. Yggdrasil bridge surfaces
-8. Wiki / Notion export surfaces
+1. DEEP Observer wrapper/explanation layer
+2. STARWELL dashboard surfaces
+3. Runa bridge surfaces
+4. Sigil Loom / Sigil Activator surfaces
+5. Project Zero Companion diagnostics
+6. Yggdrasil bridge surfaces
+7. Wiki / Notion export surfaces
 
 ## Phase 4 — Shared package extraction
 
@@ -87,12 +84,12 @@ apps/starwell/src/hearthfire/
 ## Non-goals for this branch
 
 - no repo rename
-- no live visual rewrite
+- no live rewrite of existing app surfaces
 - no database migration
 - no automated sync
 - no new sound autoplay
 - no claim that glow proves anything beyond declared state
 
-## Decision needed before implementation
+## Decision needed before broader implementation
 
-Promote the gate from `no_rebuild_authorized` to `contract_design_allowed` or a specific targeted implementation gate.
+Promote the gate from `targeted_pilot_allowed` to a specific targeted implementation gate for the chosen existing surface.
