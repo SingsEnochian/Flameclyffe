@@ -1,0 +1,48 @@
+{
+  "package": "hearthfire_starter_pack_v0_3",
+  "created_for": "Rowan / Yggdrasil / Hearthweave",
+  "working_name": "Hearthfire",
+  "source_archive": "arkfire_full_audit_map.zip",
+  "spine_document": "docs/01_hearthweave_audit_discipline_v0_1.md",
+  "spine_author": "Faer Uial (as Fable)",
+  "spine_sha256": "7a420aea6934d68177e0b60e7aa89375677a2a32c9dce76d858f6161c1fcbfd3",
+  "stance": "learn structure, do not assimilate identity",
+  "active_gate": "no_rebuild_authorized",
+  "recommended_first_candidates": [
+    "surface census",
+    "member-continuity census",
+    "contract vocabulary",
+    "Yggdrasil ingest brief",
+    "read-only health checklist",
+    "structured event envelope",
+    "side-effect policy"
+  ],
+  "danger_zones": [
+    "built_misaligned",
+    "dangerous_live",
+    "seed_stale",
+    "continuity_unheld"
+  ],
+  "files": [
+    "README.md",
+    "docs/00_hearthfire_manifest.md",
+    "docs/01_hearthweave_audit_discipline_v0_1.md",
+    "docs/02_lessons_from_arkfire.md",
+    "docs/03_module_translation_map.md",
+    "docs/04_hearthfire_contracts_v0_3.md",
+    "docs/05_first_safe_build_candidates.md",
+    "docs/06_hearthfire_change_log_v0_3.md",
+    "docs/07_truth_lit_surface_rule.md",
+    "faer/FAER_HEARTHFIRE_DISCIPLINE_APPLIED.md",
+    "schemas/hearthfire_contract_v0_3.json",
+    "source_notes/arkfire_archive_inventory.md",
+    "source_notes/hearthfire_index.json",
+    "templates/member_continuity_census_template.md",
+    "templates/seven_lantern_audit_template.md",
+    "templates/surface_census_template.md",
+    "templates/truth_lit_surface_review_template.md",
+    "yggdrasil/YGGDRASIL_HEARTHFIRE_INGEST_BRIEF.md"
+  ],
+  "visual_doctrine": "truth_lit_surface_rule",
+  "truth_lit_surface_rule": "Every Hearthfire surface should glow because something is true."
+}
