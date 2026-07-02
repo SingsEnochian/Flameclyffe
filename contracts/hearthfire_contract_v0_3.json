@@ -1,6 +1,7 @@
 {
   "name": "hearthfire_contract_v0_3",
-  "active_gate": "no_rebuild_authorized",
+  "active_gate": "targeted_pilot_allowed",
+  "gate_scope": "read-only /hearthfire/ landing surface only; no general rebuild authorized",
   "truth_lit_surface_rule": "Every Hearthfire surface should glow because something is true.",
   "surface_readiness_labels": [
     "specified_not_built",
@@ -34,6 +35,7 @@
   "rebuild_gates": [
     "no_rebuild_authorized",
     "contract_design_allowed",
+    "targeted_pilot_allowed",
     "scaffold_cleanup_allowed",
     "targeted_repair_allowed",
     "rebuild_ready_pending_steward_review",
