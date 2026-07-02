@@ -1,4 +1,5 @@
 {
+  "$schema": "../../contracts/surface_visual_receipt_v0_1.schema.json",
   "surface_id": "starwell-deep-observer",
   "surface_path": "starwell/deep-observer/index.html",
   "receipt_version": "0.1",
@@ -12,7 +13,7 @@
     "starwell/deep-observer/deep-observer-sensory.js",
     "assets/deep-resonance-bus.js",
     "docs/hearthfire/02-truth-lit-surface-rule.md",
-    "contracts/surface_visual_state_v0_1.schema.json"
+    "contracts/surface_visual_receipt_v0_1.schema.json"
   ],
   "declared_direct_readings": [
     "time",
