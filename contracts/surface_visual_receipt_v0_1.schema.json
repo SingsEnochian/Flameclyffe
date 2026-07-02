@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://singsenochian.github.io/Flameclyffe/contracts/surface_visual_receipt_v0_1.schema.json",
+  "title": "Hearthfire Surface Visual Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "surface_id",
+    "surface_path",
+    "receipt_version",
+    "hearthfire_gate",
+    "gate_scope",
+    "surface_label",
+    "primary_truth_lit_rule",
+    "state_sources",
+    "visual_receipts",
+    "accessibility_requirements",
+    "non_authorizations",
+    "next_passes"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "surface_id": { "type": "string" },
+    "surface_path": { "type": "string" },
+    "receipt_version": { "type": "string" },
+    "hearthfire_gate": { "type": "string" },
+    "gate_scope": { "type": "string" },
+    "surface_label": { "type": "string" },
+    "primary_truth_lit_rule": { "type": "string" },
+    "state_sources": { "type": "array", "items": { "type": "string" } },
+    "declared_direct_readings": { "type": "array", "items": { "type": "string" } },
+    "declared_model_variables": { "type": "array", "items": { "type": "string" } },
+    "visual_receipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "effect_id",
+          "truth_kind",
+          "state_source",
+          "plain_language_reading",
+          "plain_language_reason",
+          "confidence"
+        ],
+        "properties": {
+          "effect_id": { "type": "string" },
+          "truth_kind": { "type": "string" },
+          "state_source": { "type": "string" },
+          "plain_language_reading": { "type": "string" },
+          "plain_language_reason": { "type": "string" },
+          "confidence": {
+            "type": "string",
+            "enum": ["verified", "observed", "cached", "simulated", "placeholder", "unknown"]
+          }
+        }
+      }
+    },
+    "accessibility_requirements": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "non_authorizations": { "type": "array", "items": { "type": "string" } },
+    "next_passes": { "type": "array", "items": { "type": "string" } }
+  }
+}
