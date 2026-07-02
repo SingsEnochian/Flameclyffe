@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://singsenochian.github.io/Flameclyffe/contracts/surface_visual_state_v0_1.schema.json",
+  "title": "Hearthfire Surface Visual State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "surface_id",
+    "effect_id",
+    "truth_kind",
+    "state_source",
+    "state_value",
+    "confidence",
+    "reduced_motion_fallback",
+    "glow_receipt"
+  ],
+  "properties": {
+    "surface_id": { "type": "string" },
+    "effect_id": { "type": "string" },
+    "truth_kind": {
+      "type": "string",
+      "enum": [
+        "readiness_state",
+        "authorization_gate",
+        "input_output_relationship",
+        "data_source_or_provenance",
+        "canon_authority",
+        "continuity_status",
+        "local_or_export_state",
+        "live_signal_change",
+        "diagnostic_health",
+        "risk_or_uncertainty",
+        "false_alarm_or_mundane_check_state",
+        "user_activation_for_sound_or_haptics"
+      ]
+    },
+    "state_source": { "type": "string" },
+    "state_value": { "type": ["string", "number", "boolean", "null"] },
+    "confidence": {
+      "type": "string",
+      "enum": ["verified", "observed", "cached", "simulated", "placeholder", "unknown"]
+    },
+    "motion_allowed": { "type": "boolean", "default": true },
+    "sound_allowed": { "type": "boolean", "default": false },
+    "haptics_allowed": { "type": "boolean", "default": false },
+    "reduced_motion_fallback": { "type": "string" },
+    "low_stim_fallback": { "type": "string" },
+    "glow_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plain_language_reading", "plain_language_reason"],
+      "properties": {
+        "plain_language_reading": { "type": "string" },
+        "plain_language_reason": { "type": "string" },
+        "last_checked": { "type": "string" }
+      }
+    }
+  }
+}
