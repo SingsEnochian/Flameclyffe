@@ -17,7 +17,8 @@ If not, it remains a sandbox experiment until its purpose is clear.
 3. `apps/starwell/src/starwell.css` and room-specific styles — current visual structure.
 4. Supabase Flameclyffe schema — live world, character, archive, and observation records.
 5. Notion Terra Aeterna Novel Line Wiki — editorial canon, galleries, and production assets.
-6. This file — architectural classification and route ownership.
+6. `docs/hearthfire/` and `contracts/hearthfire_contract_v0_3.json` — Hearthfire audit discipline, surface language, and gate vocabulary.
+7. This file — architectural classification and route ownership.
 
 ## Trunk
 
@@ -25,6 +26,7 @@ Systems that define the product and should remain coherent across every route.
 
 - Terra Aeterna as the world-root and aesthetic grammar.
 - Presence Mode and the Hearthweave Observatory shell.
+- Hearthfire governance: audit labels, truth-lit surface rules, and rebuild gates.
 - Accessible, consent-aware interaction.
 - STARWELL room routing and living manuscript architecture.
 - Supabase-backed canon, archive, and observation data.
@@ -73,6 +75,16 @@ Enduring systems attached to the trunk with a clear purpose.
 - The switcher is a tactile celestial instrument, not a generic dropdown.
 - Reduced-motion and keyboard access remain first-class.
 - Themes change atmosphere, never user intent or canon.
+
+### Hearthfire governance pilot
+
+**Owner:** `docs/hearthfire/README.md`, `contracts/hearthfire_contract_v0_3.json`, and `/hearthfire/`.
+
+**Purpose:** Establish Hearthfire as Flameclyffe's governance layer and test the truth-lit surface rule on one read-only pilot route before applying the lightfield language to existing surfaces.
+
+**Current gate:** `targeted_pilot_allowed`.
+
+**Scope:** `/hearthfire/` only. This does not authorize a repo rename, database migration, broad rebuild, or visual overhaul of existing app surfaces.
 
 ## Leaves
 
