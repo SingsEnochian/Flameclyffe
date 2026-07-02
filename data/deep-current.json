@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-07-02T05:55:54.339Z",
+  "generated_at": "2026-07-02T08:53:00.971Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,28 +13,28 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-07-02T01:45",
+    "time": "2026-07-02T04:45",
     "sky": "Night",
     "current": {
-      "time": "2026-07-02T01:45",
+      "time": "2026-07-02T04:45",
       "interval": 900,
-      "temperature_2m": 74.7,
-      "relative_humidity_2m": 74,
+      "temperature_2m": 72.5,
+      "relative_humidity_2m": 81,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
       "cloud_cover": 0,
-      "pressure_msl": 1016,
-      "wind_speed_10m": 3.3,
-      "wind_direction_10m": 28
+      "pressure_msl": 1016.4,
+      "wind_speed_10m": 2.4,
+      "wind_direction_10m": 326
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2,
-      "time_tag": "2026-07-02T00:00:00",
-      "a_running": 7
+      "value": 1.33,
+      "time_tag": "2026-07-02T03:00:00",
+      "a_running": 5
     },
     "solar_wind": {
       "time_tag": "time_tag",
@@ -45,16 +45,16 @@
     }
   },
   "moon": {
-    "age_days": 16.98,
-    "illumination": 94.5,
+    "age_days": 17.11,
+    "illumination": 93.9,
     "name": "Waning Gibbous"
   },
   "field": {
-    "P": 0.4933333333333333,
+    "P": 0.49777777777777754,
     "C": 0.73,
     "R": null,
-    "E": 0.6674725274725275,
-    "M": 0.945,
+    "E": 0.6465384615384615,
+    "M": 0.9390000000000001,
     "A": 0.7646153846153847,
     "T": null,
     "H": null,
