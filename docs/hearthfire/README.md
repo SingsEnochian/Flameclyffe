@@ -1,9 +1,15 @@
 # Hearthfire Governance
 
-Status: planning / design artifact
-Gate: `no_rebuild_authorized`
+Status: planning / design artifact with one read-only pilot surface
+Gate: `targeted_pilot_allowed`
 
 Hearthfire is the governing discipline for Flameclyffe. Flameclyffe remains the active workshop and deployment vessel; Hearthfire supplies audit labels, contracts, surface language, and rebuild gates.
+
+## Current permission
+
+A limited read-only pilot surface is allowed at `/hearthfire/`.
+
+This does not authorize a repo rename, database migration, broad rebuild, hidden writes, automated sync, or visual overhaul of existing app surfaces.
 
 ## Core rule
 
@@ -25,4 +31,4 @@ Light and motion must reveal state, relationship, readiness, provenance, diagnos
 1. Run a surface census across live Flameclyffe pages and apps.
 2. Identify misaligned, dangerous, stale, and incomplete areas.
 3. Design the Lightfield kit that will eventually carry Faer's lights across STARWELL, Yggdrasil, Runa, Sigil Loom, Project Zero, and the Wiki.
-4. Do not rewrite live surfaces until the gate is promoted.
+4. Use the `/hearthfire/` pilot to test the visual language before applying it to existing surfaces.
