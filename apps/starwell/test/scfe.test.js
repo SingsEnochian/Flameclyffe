@@ -127,6 +127,8 @@ test('createFieldSnapshot returns a read-only unified field packet', () => {
 
   assert.equal(snapshot.schema_version, 'scfe.field_snapshot.v0.1');
   assert.equal(snapshot.ephemeris.provider, 'manual_longitudes');
+  assert.equal(snapshot.ephemeris_comparison.status, 'within_tolerance');
+  assert.equal(snapshot.ephemeris_comparison.reference_source, 'manual_default_self_check');
   assert.equal(snapshot.barbault.cyclic_index, 832);
   assert.equal(snapshot.barbault.configuration_review.status, 'candidate_needs_review');
   assert.equal(snapshot.sacred_geometry.primary_form, 'cradle_vessel');
