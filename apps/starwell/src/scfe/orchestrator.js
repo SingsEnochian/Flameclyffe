@@ -58,6 +58,7 @@ export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
     barbault: {
       ...base.barbault,
       ...barbault,
+      aspects,
       configurations,
       sign_degrees: Object.fromEntries(
         Object.entries(barbault.longitudes).map(([body, longitude]) => [body, signDegreeFromLongitude(longitude)])
