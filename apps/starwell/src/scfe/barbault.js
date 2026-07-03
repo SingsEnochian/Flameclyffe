@@ -6,8 +6,11 @@ export function normalizeLongitude(value) {
     throw new Error(`Longitude must be a finite number, received ${value}`);
   }
 
-  const normalized = number % 360;
-  return normalized < 0 ? normalized + 360 : normalized;
+  if (number < 0 || number >= 360) {
+    throw new Error(`Longitude must be within 0 <= value < 360 degrees, received ${value}`);
+  }
+
+  return number;
 }
 
 export function angularDistance(a, b) {
