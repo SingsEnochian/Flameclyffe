@@ -1,0 +1,244 @@
+.scfe-lab {
+  display: grid;
+  gap: 1rem;
+}
+
+.scfe-heading {
+  align-items: start;
+}
+
+.scfe-lab-note {
+  max-width: 850px;
+  margin: 0.85rem 0 0;
+  line-height: 1.65;
+  opacity: 0.88;
+}
+
+.scfe-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.scfe-panel {
+  border: 1px solid rgba(126, 61, 41, 0.2);
+  border-radius: 26px;
+  padding: 1rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.28), rgba(247, 237, 218, 0.16)),
+    radial-gradient(circle at top left, rgba(140, 202, 192, 0.16), transparent 12rem);
+}
+
+.sky-night .scfe-panel,
+.sky-dusk .scfe-panel {
+  border-color: rgba(231, 196, 119, 0.2);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.16)),
+    radial-gradient(circle at top left, rgba(140, 202, 192, 0.12), transparent 12rem);
+}
+
+.scfe-panel h3 {
+  margin: 0 0 0.75rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.55rem;
+}
+
+.scfe-panel p {
+  line-height: 1.55;
+}
+
+.scfe-inputs {
+  grid-row: span 3;
+}
+
+.scfe-inputs label,
+.scfe-inputs fieldset {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+}
+
+.scfe-inputs label {
+  font-weight: 700;
+}
+
+.scfe-inputs input,
+.scfe-inputs select {
+  width: 100%;
+  border: 1px solid rgba(126, 61, 41, 0.26);
+  border-radius: 14px;
+  padding: 0.65rem 0.75rem;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.46);
+  font: inherit;
+}
+
+.sky-night .scfe-inputs input,
+.sky-night .scfe-inputs select,
+.sky-dusk .scfe-inputs input,
+.sky-dusk .scfe-inputs select {
+  border-color: rgba(231, 196, 119, 0.22);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.scfe-inputs fieldset {
+  border: 1px solid rgba(140, 202, 192, 0.24);
+  border-radius: 20px;
+  padding: 0.8rem;
+}
+
+.scfe-inputs legend {
+  padding: 0 0.4rem;
+  font-family: Cinzel, serif;
+  color: var(--copper-dark);
+}
+
+.sky-night .scfe-inputs legend,
+.sky-dusk .scfe-inputs legend {
+  color: var(--gold);
+}
+
+.scfe-checkbox {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.scfe-checkbox input {
+  width: auto;
+}
+
+.scfe-summary dl {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.scfe-summary div,
+.scfe-mini-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.scfe-summary dt,
+.scfe-mini-list span {
+  opacity: 0.72;
+}
+
+.scfe-summary dd {
+  margin: 0;
+  font-weight: 800;
+  text-align: right;
+}
+
+.scfe-readout {
+  display: inline-block;
+  margin: 0 0 0.65rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(231, 196, 119, 0.36);
+  border-radius: 999px;
+  background: rgba(140, 202, 192, 0.16);
+  font-weight: 900;
+}
+
+.scfe-pill-grid,
+.scfe-vector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.scfe-pill-grid span,
+.scfe-vector span {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(231, 196, 119, 0.16);
+  border: 1px solid rgba(126, 61, 41, 0.16);
+}
+
+.sky-night .scfe-pill-grid span,
+.sky-night .scfe-vector span,
+.sky-dusk .scfe-pill-grid span,
+.sky-dusk .scfe-vector span {
+  background: rgba(231, 196, 119, 0.1);
+  border-color: rgba(231, 196, 119, 0.18);
+}
+
+.scfe-mini-list {
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.scfe-mini-list li {
+  padding: 0.5rem 0.65rem;
+  border-radius: 14px;
+  background: rgba(140, 202, 192, 0.12);
+}
+
+.scfe-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.scfe-actions h3 {
+  margin-right: auto;
+}
+
+.scfe-actions button {
+  border: 1px solid rgba(126, 61, 41, 0.24);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.32);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.scfe-json {
+  max-width: 100%;
+}
+
+.scfe-json pre {
+  max-height: 460px;
+  overflow: auto;
+  margin: 0;
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(20, 19, 27, 0.9);
+  color: var(--moon);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.scfe-error {
+  border-color: rgba(182, 95, 61, 0.52);
+}
+
+@media (max-width: 860px) {
+  .scfe-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .scfe-inputs {
+    grid-row: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scfe-panel,
+  .scfe-actions button {
+    transition: none;
+  }
+}
