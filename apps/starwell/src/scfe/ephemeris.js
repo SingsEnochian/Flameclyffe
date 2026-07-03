@@ -3,6 +3,8 @@ import { signDegreeFromLongitude } from './aspects.js';
 
 export const EPHEMERIS_PROVIDERS = {
   manual: 'manual_longitudes',
+  astronomia: 'astronomia_calculated',
+  jplReference: 'jpl_horizons_reference',
   future: 'future_calculated_ephemeris',
 };
 
