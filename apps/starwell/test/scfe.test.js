@@ -19,6 +19,13 @@ test('angularDistance always returns the shortest zodiac arc', () => {
   assert.equal(angularDistance(126, 307), 179);
 });
 
+test('calculateBarbaultIndex rejects out-of-range manual longitudes', () => {
+  assert.throws(
+    () => calculateBarbaultIndex({ ...july2026Longitudes, jupiter: 360 }),
+    /0 <= value < 360/
+  );
+});
+
 test('calculateBarbaultIndex sums all ten slow-planet distances', () => {
   const result = calculateBarbaultIndex(july2026Longitudes);
 
