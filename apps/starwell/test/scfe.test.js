@@ -1,8 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import fixtures from './fixtures/scfe-ephemeris-fixtures.json' with { type: 'json' };
 import { angularDistance, calculateBarbaultIndex } from '../src/scfe/barbault.js';
 import { detectAspects, detectConfigurations } from '../src/scfe/aspects.js';
+import {
+  compareEphemerisLongitudes,
+  findEphemerisFixture,
+} from '../src/scfe/ephemeris-comparison.js';
 import { createManualEphemerisState, getLongitudesFromEphemeris } from '../src/scfe/ephemeris.js';
 import {
   getGeocentricEcliptic,
@@ -56,6 +61,33 @@ test('manual ephemeris adapter preserves downstream longitude contract', () => {
   assert.equal(ephemeris.provider, 'manual_longitudes');
   assert.equal(ephemeris.positions.jupiter.sign, 'Leo');
   assert.deepEqual(getLongitudesFromEphemeris(ephemeris), july2026Longitudes);
+});
+
+test('ephemeris fixture comparison can pass and request review', () => {
+  const selfFixture = findEphemerisFixture(fixtures, {
+    target_timestamp: DEFAULT_SCFE_INPUT.target_timestamp,
+    provider: 'manual_longitudes',
+  });
+  const selfComparison = compareEphemerisLongitudes({
+    sourceLongitudes: july2026Longitudes,
+    referenceLongitudes: selfFixture.reference_longitudes,
+    tolerance_degrees: selfFixture.tolerance_degrees,
+    reference_source: selfFixture.id,
+  });
+
+  assert.equal(selfComparison.status, 'within_tolerance');
+  assert.equal(selfComparison.worst_delta_degrees, 0);
+
+  const offsetFixture = fixtures.find((fixture) => fixture.id === 'manual-july-2026-review-offset');
+  const offsetComparison = compareEphemerisLongitudes({
+    sourceLongitudes: july2026Longitudes,
+    referenceLongitudes: offsetFixture.reference_longitudes,
+    tolerance_degrees: offsetFixture.tolerance_degrees,
+    reference_source: offsetFixture.id,
+  });
+
+  assert.equal(offsetComparison.status, 'needs_review');
+  assert.equal(offsetComparison.body_deltas.jupiter.delta_degrees, 0.5);
 });
 
 test('astronomia provider helpers normalize angles and geocentric vectors', () => {
