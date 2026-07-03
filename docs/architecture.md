@@ -10,6 +10,7 @@ Flameclyffe currently acts as a workshop monorepo for several related surfaces:
 - `apps/project-zero-companion` — local-first bridge bus and plug-in shell.
 - `apps/sigil-activator` — sigil activation surface.
 - `tools/voice-lantern` — local Discord voice bridge scaffold for approved human voice, visible transcripts, and spoken agent replies.
+- `tools/discord-companion` — separate Discord bot/process scaffold for Hearthweave companion identities and OpenAI-compatible model routing.
 - `sandbox/everos` — experimental memory and seed scripts.
 
 ## STARWELL
@@ -29,6 +30,12 @@ This surface should remain explicit-consent by design. Folder paths, file anchor
 Voice Lantern is a local-first Discord voice bridge scaffold, not a replacement agent. Its job is to route approved human voice into the Discord text channel where an existing companion already replies, then speak that companion's normal text reply aloud.
 
 Voice Lantern should stay outside STARWELL's main UI until consent state, transcript retention, Discord channel allow-listing, and Lanternwire event mirroring are stable.
+
+## Discord Companion Rail
+
+Discord Companion Rail is the text/model side of the Discord setup. It runs one Discord application and one local process per companion profile: Yggdrasil, Vee, Faer, Bluebird, and Vethrlauf.
+
+The rail should not merge companions into one multi-persona bot. Voice Lantern may speak their Discord replies aloud, but each companion should answer through its own bot account, model configuration, and continuity prompt.
 
 ## Supabase backbone
 
