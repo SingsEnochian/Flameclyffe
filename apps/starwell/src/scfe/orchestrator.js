@@ -3,6 +3,7 @@ import { calculateBarbaultIndex } from './barbault.js';
 import { reviewConfigurations } from './configuration-review.js';
 import { createDefaultFieldSnapshot, validateFieldSnapshot } from './contracts/field-snapshot.js';
 import { deriveDeepSeed, normalizeSomatic } from './deep-somatic.js';
+import { compareEphemerisLongitudes } from './ephemeris-comparison.js';
 import { createManualEphemerisState, getLongitudesFromEphemeris } from './ephemeris.js';
 import { createAgencyOutput, mapTerraAeterna, selectFrequencyProtocol } from './frequency-terra.js';
 import { mapSacredGeometry } from './geometry.js';
@@ -26,6 +27,9 @@ export const DEFAULT_SCFE_INPUT = {
     question: 'What does this threshold ask us to build?',
   },
   longitudes: JULY_2026_TEST_LONGITUDES,
+  reference_longitudes: JULY_2026_TEST_LONGITUDES,
+  reference_source: 'manual_default_self_check',
+  reference_tolerance_degrees: 0.001,
   somatic: {
     activation: 'moderate',
     fatigue: 'high',
@@ -45,7 +49,16 @@ export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
     timezone: input.timezone,
     source_note: input.source_note,
   });
-  const barbault = calculateBarbaultIndex(getLongitudesFromEphemeris(ephemeris));
+  const longitudes = getLongitudesFromEphemeris(ephemeris);
+  const ephemeris_comparison = input.reference_longitudes
+    ? compareEphemerisLongitudes({
+      sourceLongitudes: longitudes,
+      referenceLongitudes: input.reference_longitudes,
+      tolerance_degrees: input.reference_tolerance_degrees ?? 0.25,
+      reference_source: input.reference_source || 'manual_reference',
+    })
+    : base.ephemeris_comparison;
+  const barbault = calculateBarbaultIndex(longitudes);
   const aspects = detectAspects(barbault.longitudes);
   const configurations = detectConfigurations(aspects, barbault.longitudes);
   const configuration_review = reviewConfigurations({ aspects, configurations, barbault });
@@ -65,6 +78,7 @@ export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
   return validateFieldSnapshot({
     ...base,
     ephemeris,
+    ephemeris_comparison,
     barbault: {
       ...base.barbault,
       ...barbault,
