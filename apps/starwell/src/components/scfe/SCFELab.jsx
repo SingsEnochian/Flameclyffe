@@ -1,4 +1,9 @@
 import React, { useMemo, useState } from 'react';
+import {
+  clearLocalArchive,
+  readLocalArchive,
+  saveSnapshotToLocalArchive,
+} from '../../scfe/local-archive.js';
 import { DEFAULT_SCFE_INPUT, createFieldSnapshot, exportSnapshot } from '../../scfe/orchestrator.js';
 import { GeometrySigil } from './GeometrySigil.jsx';
 import './scfe-lab.css';
@@ -92,6 +97,7 @@ function buildInput(form) {
 export function SCFELab() {
   const [form, setForm] = useState(createInitialForm);
   const [copyState, setCopyState] = useState('ready');
+  const [archiveEntries, setArchiveEntries] = useState(() => readLocalArchive());
 
   const result = useMemo(() => {
     try {
@@ -152,13 +158,22 @@ export function SCFELab() {
     URL.revokeObjectURL(url);
   }
 
+  function saveLocalSnapshot() {
+    if (!result.snapshot) return;
+    setArchiveEntries(saveSnapshotToLocalArchive(result.snapshot));
+  }
+
+  function clearLocalSnapshots() {
+    setArchiveEntries(clearLocalArchive());
+  }
+
   const snapshot = result.snapshot;
 
   return (
     <section className="scfe-lab chamber-card" aria-label="Starwell Concurrent Field Engine read-only lab">
       <div className="map-heading compact scfe-heading">
         <span>Concurrent Field Engine</span>
-        <strong>v0.1 read-only lab</strong>
+        <strong>v0.2 seed lab</strong>
       </div>
 
       <p className="scfe-lab-note">
@@ -264,11 +279,13 @@ export function SCFELab() {
         ) : (
           <>
             <SnapshotSummary snapshot={snapshot} />
+            <EphemerisPanel snapshot={snapshot} />
             <BarbaultPanel snapshot={snapshot} />
             <GeometryPanel snapshot={snapshot} />
             <DeepSomaticPanel snapshot={snapshot} />
             <FrequencyTerraPanel snapshot={snapshot} />
             <AgencyPanel snapshot={snapshot} />
+            <LocalArchivePanel entries={archiveEntries} onSave={saveLocalSnapshot} onClear={clearLocalSnapshots} />
           </>
         )}
       </div>
@@ -301,6 +318,21 @@ function SnapshotSummary({ snapshot }) {
   );
 }
 
+function EphemerisPanel({ snapshot }) {
+  return (
+    <article className="scfe-panel">
+      <h3>Ephemeris Adapter</h3>
+      <p className="scfe-readout">{snapshot.ephemeris.provider} · {snapshot.ephemeris.calculation_status}</p>
+      <p>{snapshot.ephemeris.source_note}</p>
+      <ul className="scfe-mini-list">
+        {snapshot.ephemeris.warnings.map((warning) => (
+          <li key={warning}><span>warning</span><strong>{warning}</strong></li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
 function BarbaultPanel({ snapshot }) {
   return (
     <article className="scfe-panel">
@@ -316,6 +348,18 @@ function BarbaultPanel({ snapshot }) {
         <ul className="scfe-mini-list">
           {Object.entries(snapshot.barbault.pairwise_distances).map(([pair, distance]) => (
             <li key={pair}><span>{pair}</span><strong>{distance}°</strong></li>
+          ))}
+        </ul>
+      </details>
+      <details open>
+        <summary>Configuration review</summary>
+        <p className="scfe-readout">{snapshot.barbault.configuration_review.status} · {snapshot.barbault.configuration_review.confidence}</p>
+        <div className="scfe-pill-grid">
+          {snapshot.barbault.configuration_review.flags.map((flag) => <span key={flag}>{flag}</span>)}
+        </div>
+        <ul className="scfe-mini-list">
+          {snapshot.barbault.configuration_review.notes.map((note) => (
+            <li key={note}><span>note</span><strong>{note}</strong></li>
           ))}
         </ul>
       </details>
@@ -403,6 +447,28 @@ function AgencyPanel({ snapshot }) {
       <div className="scfe-pill-grid">
         {snapshot.agency.suggested_actions.map((action) => <span key={action}>{action}</span>)}
       </div>
+    </article>
+  );
+}
+
+function LocalArchivePanel({ entries, onSave, onClear }) {
+  return (
+    <article className="scfe-panel scfe-local-archive">
+      <h3>Local Archive Queue</h3>
+      <p>Browser-local only. Nothing syncs, writes to Supabase, or becomes canon.</p>
+      <div className="scfe-actions compact-actions">
+        <button type="button" onClick={onSave}>Save local snapshot</button>
+        <button type="button" onClick={onClear}>Clear local queue</button>
+      </div>
+      <p className="scfe-readout">{entries.length} local snapshots</p>
+      <ul className="scfe-mini-list">
+        {entries.slice(0, 5).map((entry) => (
+          <li key={entry.id}>
+            <span>{entry.field_label} · {entry.safety_mode}</span>
+            <strong>{new Date(entry.saved_at).toLocaleString()}</strong>
+          </li>
+        ))}
+      </ul>
     </article>
   );
 }
