@@ -46,6 +46,8 @@ test('createFieldSnapshot returns a read-only unified field packet', () => {
   assert.equal(snapshot.deep.field_label, 'threshold_vessel');
   assert.equal(snapshot.terra_aeterna.canon_candidate, false);
   assert.equal(snapshot.evidence_labels.frequency, 'evidence_informed_not_medical');
+  assert.ok(Array.isArray(snapshot.barbault.aspects));
+  assert.ok(snapshot.barbault.aspects.length > 0);
 });
 
 test('somatic safety suppresses sound recommendations', () => {
@@ -59,4 +61,19 @@ test('somatic safety suppresses sound recommendations', () => {
 
   assert.equal(snapshot.somatic.interface_safety_mode, 'low_light_silent');
   assert.equal(snapshot.frequency_protocol, null);
+});
+
+test('body-no fully pauses agency and sound', () => {
+  const snapshot = createFieldSnapshot({
+    ...DEFAULT_SCFE_INPUT,
+    somatic: {
+      ...DEFAULT_SCFE_INPUT.somatic,
+      body_no: 'not today',
+    },
+  });
+
+  assert.equal(snapshot.somatic.interface_safety_mode, 'paused');
+  assert.equal(snapshot.frequency_protocol, null);
+  assert.equal(snapshot.agency.energy_cost, 'none');
+  assert.equal(snapshot.deep.field_label, 'paused_by_body');
 });
