@@ -3,6 +3,7 @@ export const SCFE_SCHEMA_VERSION = 'scfe.field_snapshot.v0.1';
 export const DEFAULT_EVIDENCE_LABELS = {
   astronomy: 'manual_or_calculated_input',
   ephemeris: 'manual_input_adapter',
+  ephemeris_comparison: 'reference_fixture_comparison',
   barbault_index: 'mathematical_index',
   astrology: 'theoretical_symbolic',
   sacred_geometry: 'theoretical_form_mapping',
@@ -48,6 +49,14 @@ export function createDefaultFieldSnapshot(input = {}) {
       bodies: [],
       positions: {},
       warnings: [],
+    },
+    ephemeris_comparison: {
+      reference_source: null,
+      tolerance_degrees: null,
+      worst_delta_degrees: null,
+      body_deltas: {},
+      status: 'not_compared',
+      note: 'No ephemeris reference was supplied for this snapshot.',
     },
     barbault: {
       source_type: 'manual_longitudes',
@@ -117,6 +126,7 @@ export function validateFieldSnapshot(snapshot) {
     'mode',
     'context',
     'ephemeris',
+    'ephemeris_comparison',
     'barbault',
     'deep',
     'sacred_geometry',
