@@ -25,6 +25,17 @@ SCFE v0.2 seed has:
 - local-only archive queue
 - manual JSON export
 
+## v0.3 Scaffold Now Committed
+
+The first v0.3 scaffold is present in this PR branch:
+
+- `astronomia` dependency added to `package.json` as `^4.2.0`.
+- Provider enum now includes `astronomia_calculated` and `jpl_horizons_reference`.
+- `apps/starwell/src/scfe/providers/astronomia-provider.js` exists as an optional calculated-provider scaffold.
+- Provider helper tests cover angle normalization and geocentric ecliptic vector conversion without requiring a live provider call.
+
+This scaffold does not yet replace manual mode, does not switch the UI to calculated mode, and does not claim fixture validation.
+
 ## v0.3 Goals
 
 1. Add a calculated ephemeris provider behind the existing adapter interface.
@@ -48,6 +59,7 @@ Observed properties:
 - Based on Jean Meeus, *Astronomical Algorithms*, second edition.
 - Includes planetary-position tooling using VSOP87 data.
 - Allows importing individual packages to reduce bundle size.
+- Current repository `package.json` shows version `4.2.0`.
 
 Initial assessment:
 
@@ -92,18 +104,18 @@ Swiss Ephemeris is powerful, but it should not be casually added to Flameclyffe.
 
 Keep the current ephemeris adapter shape.
 
-Add provider enum values:
+Provider enum values:
 
 ```text
 manual_longitudes
 astronomia_calculated
 jpl_horizons_reference
-swiss_ephemeris_deferred
+future_calculated_ephemeris
 ```
 
 ### Phase 2: `astronomia` Spike
 
-Create an isolated module:
+Isolated module:
 
 ```text
 apps/starwell/src/scfe/providers/astronomia-provider.js
@@ -111,7 +123,7 @@ apps/starwell/src/scfe/providers/astronomia-provider.js
 
 Responsibilities:
 
-- convert target timestamp to Julian Day
+- convert target timestamp to Julian Ephemeris Day
 - calculate geocentric/ecliptic longitude for Jupiter, Saturn, Uranus, Neptune, Pluto
 - return the same ephemeris state shape as the manual provider
 - mark provider as `astronomia_calculated`
@@ -268,18 +280,18 @@ After PR #28 is tested and merged, create:
 scfe-v0.3-ephemeris-geometry
 ```
 
-Keep this as a separate PR so PR #28 remains reviewable.
+Keep future v0.3 work as a separate PR if PR #28 becomes too large for review.
 
-## Recommended First Commit
+## Recommended Next Commit
 
 ```text
-scfe: add astronomia ephemeris provider spike
+scfe: add ephemeris fixture comparison
 ```
 
-## Recommended First Test
+## Recommended Next Test
 
 ```text
-manual and calculated ephemeris providers return compatible position objects
+manual and calculated ephemeris providers can be compared against a tolerance fixture
 ```
 
 Tiny brass-raven rule:
