@@ -1,0 +1,2 @@
+discord.py>=2.7.0
+openai>=1.100.0
