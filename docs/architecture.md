@@ -9,6 +9,7 @@ Flameclyffe currently acts as a workshop monorepo for several related surfaces:
 - `apps/starwell` — STARWELL observatory and living manuscript interface.
 - `apps/project-zero-companion` — local-first bridge bus and plug-in shell.
 - `apps/sigil-activator` — sigil activation surface.
+- `tools/voice-lantern` — local Discord voice bridge scaffold for approved human voice, visible transcripts, and spoken agent replies.
 - `sandbox/everos` — experimental memory and seed scripts.
 
 ## STARWELL
@@ -22,6 +23,12 @@ The Writer Room is currently the first working writing-to-Observer capture rail.
 Project Zero Companion is the local-first shell for bridge events, folder bindings, plug-in manifests, and DEEP vector publishing. Its rule is architectural: data sets atmosphere, not fate.
 
 This surface should remain explicit-consent by design. Folder paths, file anchors, story shards, altar work, sound sources, and Observer states should be manually reviewed or locally scoped until a stronger permission model exists.
+
+## Voice Lantern
+
+Voice Lantern is a local-first Discord voice bridge scaffold, not a replacement agent. Its job is to route approved human voice into the Discord text channel where an existing companion already replies, then speak that companion's normal text reply aloud.
+
+Voice Lantern should stay outside STARWELL's main UI until consent state, transcript retention, Discord channel allow-listing, and Lanternwire event mirroring are stable.
 
 ## Supabase backbone
 
