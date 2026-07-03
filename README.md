@@ -1,12 +1,13 @@
 # Flameclyffe
 
-Flameclyffe is Rowan's active workshop repository for STARWELL, Project Zero Companion, DEEP/Observer instrumentation, Sigil Activator work, and related Flameclyffe/Runa bridges.
+Flameclyffe is Rowan's active workshop repository for STARWELL, Project Zero Companion, DEEP/Observer instrumentation, Sigil Activator work, Voice Lantern experiments, and related Flameclyffe/Runa bridges.
 
 This repository currently holds several Vite/React app surfaces and helper scripts:
 
 - `apps/starwell` — the STARWELL living manuscript observatory, including the DEEP Observer glyph, Grand Library/Codex shelf, Atlas seeds, Writer Room, Observer Atelier, and study doors.
 - `apps/project-zero-companion` — the local-first bridge-bus shell for folder bindings, plug-in manifests, DEEP vectors, bridge-event previews, and Runa handoffs.
 - `apps/sigil-activator` — sigil activation surface for Flameclyffe/Runa experiments.
+- `tools/voice-lantern` — consent-first Discord voice bridge scaffold for routing approved human voice into an existing agent channel and reading agent replies aloud.
 - `sandbox/everos` — experimental memory health, seed, store, and search scripts.
 
 ## Claim labels
@@ -39,6 +40,7 @@ The `science_constants` Supabase table is the baseline for Planck/CODATA-style i
 - `docs/starwell-viewport-hud-wrapper-contract.md`
 - `docs/thread-ledger.md`
 - `docs/ui-boundary-contract.md`
+- `docs/voice-lantern-bridge.md`
 
 ## Development
 
