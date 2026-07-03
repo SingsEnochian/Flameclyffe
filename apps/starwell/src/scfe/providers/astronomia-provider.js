@@ -4,6 +4,7 @@ import { EPHEMERIS_PROVIDERS } from '../ephemeris.js';
 
 const RAD_TO_DEG = 180 / Math.PI;
 const FULL_CIRCLE = 360;
+const EPSILON = 1e-9;
 
 const PLANET_DATA_IMPORTS = {
   jupiter: () => import('astronomia/data/vsop87Djupiter'),
@@ -40,9 +41,9 @@ export async function createAstronomiaEphemerisState({ target_timestamp, timezon
     const longitude = normalizeDegrees(ecliptic.longitude);
     positions[body] = {
       body,
-      longitude: Number(longitude.toFixed(3)),
+      longitude: roundDegrees(longitude, 3),
       ...signDegreeFromLongitude(longitude),
-      latitude: Number(ecliptic.latitude.toFixed(6)),
+      latitude: roundNearZero(ecliptic.latitude, 6),
       retrograde: null,
       speed: null,
       source: EPHEMERIS_PROVIDERS.astronomia,
@@ -68,7 +69,19 @@ export async function createAstronomiaEphemerisState({ target_timestamp, timezon
 
 export function normalizeDegrees(degrees) {
   const normalized = degrees % FULL_CIRCLE;
-  return normalizeLongitude(normalized < 0 ? normalized + FULL_CIRCLE : normalized);
+  const wrapped = normalized < 0 ? normalized + FULL_CIRCLE : normalized;
+  if (Math.abs(wrapped) < EPSILON || Math.abs(wrapped - FULL_CIRCLE) < EPSILON) return 0;
+  return normalizeLongitude(wrapped);
+}
+
+export function roundDegrees(degrees, decimals = 3) {
+  const rounded = Number(normalizeDegrees(degrees).toFixed(decimals));
+  return rounded >= FULL_CIRCLE ? 0 : roundNearZero(rounded, decimals);
+}
+
+export function roundNearZero(value, decimals = 6) {
+  const rounded = Number(value.toFixed(decimals));
+  return Object.is(rounded, -0) ? 0 : rounded;
 }
 
 export function radiansToDegrees(radians) {
@@ -81,8 +94,8 @@ export function getGeocentricEcliptic(planetPosition, earthPosition) {
   const x = planetVector.x - earthVector.x;
   const y = planetVector.y - earthVector.y;
   const z = planetVector.z - earthVector.z;
-  const longitude = radiansToDegrees(Math.atan2(y, x));
-  const latitude = radiansToDegrees(Math.atan2(z, Math.hypot(x, y)));
+  const longitude = normalizeDegrees(radiansToDegrees(Math.atan2(y, x)));
+  const latitude = roundNearZero(radiansToDegrees(Math.atan2(z, Math.hypot(x, y))), 12);
 
   return { longitude, latitude };
 }
