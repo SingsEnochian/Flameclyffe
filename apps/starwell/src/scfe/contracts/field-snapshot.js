@@ -2,6 +2,7 @@ export const SCFE_SCHEMA_VERSION = 'scfe.field_snapshot.v0.1';
 
 export const DEFAULT_EVIDENCE_LABELS = {
   astronomy: 'manual_or_calculated_input',
+  ephemeris: 'manual_input_adapter',
   barbault_index: 'mathematical_index',
   astrology: 'theoretical_symbolic',
   sacred_geometry: 'theoretical_form_mapping',
@@ -38,6 +39,16 @@ export function createDefaultFieldSnapshot(input = {}) {
       question: null,
       ...(input.context || {}),
     },
+    ephemeris: {
+      provider: 'manual_longitudes',
+      calculation_status: 'manual_input_only',
+      target_timestamp: input.target_timestamp || now,
+      timezone: input.timezone || 'America/New_York',
+      source_note: null,
+      bodies: [],
+      positions: {},
+      warnings: [],
+    },
     barbault: {
       source_type: 'manual_longitudes',
       bodies: ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'],
@@ -47,6 +58,7 @@ export function createDefaultFieldSnapshot(input = {}) {
       compression_level: null,
       phase_label: null,
       configurations: [],
+      configuration_review: null,
       calibration_note: 'Compression thresholds are provisional until calibrated against historical Cyclic Index curves.',
     },
     deep: {
@@ -104,6 +116,7 @@ export function validateFieldSnapshot(snapshot) {
     'timezone',
     'mode',
     'context',
+    'ephemeris',
     'barbault',
     'deep',
     'sacred_geometry',
