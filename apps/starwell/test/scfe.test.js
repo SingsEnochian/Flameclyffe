@@ -5,6 +5,11 @@ import { angularDistance, calculateBarbaultIndex } from '../src/scfe/barbault.js
 import { detectAspects, detectConfigurations } from '../src/scfe/aspects.js';
 import { createManualEphemerisState, getLongitudesFromEphemeris } from '../src/scfe/ephemeris.js';
 import {
+  getGeocentricEcliptic,
+  normalizeDegrees,
+  radiansToDegrees,
+} from '../src/scfe/providers/astronomia-provider.js';
+import {
   clearLocalArchive,
   readLocalArchive,
   saveSnapshotToLocalArchive,
@@ -51,6 +56,20 @@ test('manual ephemeris adapter preserves downstream longitude contract', () => {
   assert.equal(ephemeris.provider, 'manual_longitudes');
   assert.equal(ephemeris.positions.jupiter.sign, 'Leo');
   assert.deepEqual(getLongitudesFromEphemeris(ephemeris), july2026Longitudes);
+});
+
+test('astronomia provider helpers normalize angles and geocentric vectors', () => {
+  assert.equal(normalizeDegrees(-5), 355);
+  assert.equal(normalizeDegrees(365), 5);
+  assert.equal(radiansToDegrees(Math.PI), 180);
+
+  const ecliptic = getGeocentricEcliptic(
+    { lon: 0, lat: 0, range: 5 },
+    { lon: Math.PI, lat: 0, range: 1 }
+  );
+
+  assert.equal(Number(ecliptic.longitude.toFixed(3)), 0);
+  assert.equal(Number(ecliptic.latitude.toFixed(3)), 0);
 });
 
 test('calculateBarbaultIndex sums all ten slow-planet distances', () => {
