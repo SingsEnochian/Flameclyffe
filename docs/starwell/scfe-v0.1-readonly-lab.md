@@ -1,4 +1,4 @@
-# Starwell Concurrent Field Engine v0.1 Read-Only Lab
+# Starwell Concurrent Field Engine v0.2 Seed Read-Only Lab
 
 ## Status
 
@@ -14,16 +14,18 @@ The lab is included in `apps/starwell/vite.config.js` as `scfeLab`, so it partic
 
 ## Purpose
 
-SCFE v0.1 creates one read-only Field Snapshot from one input moment.
+SCFE v0.2 seed creates one read-only Field Snapshot from one input moment.
 
 The snapshot currently includes:
 
 - manual slow-planet longitudes
+- manual ephemeris adapter state
 - Barbault-style Cyclic Index calculation
 - all ten pairwise angular distances
 - major aspect detection
 - aspect export inside the Field Snapshot
 - basket/cradle candidate detection
+- configuration review flags and caution notes
 - sacred geometry mapping
 - visual geometry sigil
 - DEEP seed vector
@@ -32,6 +34,7 @@ The snapshot currently includes:
 - Terra Aeterna prompt
 - agency-safe prompt
 - preset buttons for safety/regression checks
+- browser-local archive queue
 - copy/export JSON controls
 
 ## Safety and Consent Boundaries
@@ -51,6 +54,8 @@ Somatic safety can suppress frequency protocol recommendations. Migraine mode yi
 
 Manual longitudes must be finite numbers within `0 <= value < 360`. Out-of-range values fail loudly so incorrect field math does not enter exported snapshots.
 
+The Local Archive Queue writes only to browser `localStorage`, keeps at most thirty entries, and does not sync anywhere.
+
 ## Data Contract
 
 The core contract lives in:
@@ -65,9 +70,12 @@ Schema version:
 scfe.field_snapshot.v0.1
 ```
 
+The v0.2 seed preserves the v0.1 schema identifier while adding optional/forward-compatible sections for ephemeris and configuration review. A breaking schema rename should wait until the first calculated ephemeris provider is added.
+
 The contract requires evidence labels for every interpretive layer:
 
 - astronomy
+- ephemeris
 - Barbault index
 - astrology
 - sacred geometry
@@ -76,6 +84,41 @@ The contract requires evidence labels for every interpretive layer:
 - frequency
 - Terra Aeterna
 - agency
+
+## Ephemeris Adapter
+
+The manual ephemeris seam lives in:
+
+```text
+apps/starwell/src/scfe/ephemeris.js
+```
+
+Current provider:
+
+```text
+manual_longitudes
+```
+
+It converts manual longitude inputs into a provider-shaped state object with sign/degree data. Future calculated providers should write into the same shape so downstream modules do not care whether positions came from manual entry, an astronomy library, or a verified external ephemeris.
+
+No live ephemeris lookup happens in this slice.
+
+## Configuration Review
+
+The review layer lives in:
+
+```text
+apps/starwell/src/scfe/configuration-review.js
+```
+
+It adds flags and notes such as:
+
+- `basket_cradle_candidate`
+- `opposition_axis_present`
+- `harmonic_support_present`
+- `wide_distribution_not_crisis_compression`
+
+This is a caution layer. It prevents the UI from overclaiming candidate geometry before stricter topology validation exists.
 
 ## Lab Presets
 
@@ -103,7 +146,24 @@ Current visual grammar:
 - basket/cradle candidate → vessel curve
 - slow planets → labelled nodes
 
-The sigil is designed to be reduced-motion safe and non-interactive in v0.1.
+The sigil is designed to be reduced-motion safe and non-interactive in v0.2 seed.
+
+## Local Archive Queue
+
+The local archive utilities live in:
+
+```text
+apps/starwell/src/scfe/local-archive.js
+```
+
+They provide:
+
+- local snapshot save
+- local queue read
+- local queue clear
+- max thirty stored entries
+
+This queue is for review only. It is not canon, not synced, and not backend storage.
 
 ## First Test Case
 
@@ -124,6 +184,7 @@ Expected kernel output:
 - Cyclic Index: `832`
 - compression label: `wide_distribution`
 - basket/cradle candidate: present when opposition + enough trine/sextile relationships exist
+- configuration review: `candidate_needs_review`
 - geometry: `cradle_vessel`
 - DEEP field label: `threshold_vessel`
 
@@ -145,12 +206,15 @@ The tests cover:
 
 - shortest angular distance
 - manual longitude validation
+- manual ephemeris adapter contract
 - ten-distance Cyclic Index total
 - basket/cradle candidate ingredients
 - unified Field Snapshot creation
+- configuration review status
 - aspect export inside the snapshot
 - somatic safety suppressing sound recommendations
 - body-no fully pausing sound and agency
+- local archive queue save/read/clear behaviour
 
 ## Build
 
@@ -164,12 +228,12 @@ npm run starwell:build
 
 ## Next Slice
 
-SCFE v0.2 should add only after v0.1 review:
+SCFE v0.3 should add only after v0.2 seed review:
 
-1. ephemeris adapter
-2. stronger configuration detector
+1. calculated ephemeris provider research and selection
+2. stricter basket/cradle topology detector
 3. interactive geometry canvas
-4. local JSON archive queue
+4. explicit local archive restore/export controls
 5. optional Supabase draft table behind explicit user save
 6. actual Hearthfire audio prototype behind manual activation
 
