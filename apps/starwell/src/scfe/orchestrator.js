@@ -1,7 +1,9 @@
-import { detectAspects, detectConfigurations, signDegreeFromLongitude } from './aspects.js';
+import { detectAspects, detectConfigurations } from './aspects.js';
 import { calculateBarbaultIndex } from './barbault.js';
+import { reviewConfigurations } from './configuration-review.js';
 import { createDefaultFieldSnapshot, validateFieldSnapshot } from './contracts/field-snapshot.js';
 import { deriveDeepSeed, normalizeSomatic } from './deep-somatic.js';
+import { createManualEphemerisState, getLongitudesFromEphemeris } from './ephemeris.js';
 import { createAgencyOutput, mapTerraAeterna, selectFrequencyProtocol } from './frequency-terra.js';
 import { mapSacredGeometry } from './geometry.js';
 
@@ -37,9 +39,16 @@ export const DEFAULT_SCFE_INPUT = {
 
 export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
   const base = createDefaultFieldSnapshot(input);
-  const barbault = calculateBarbaultIndex(input.longitudes || JULY_2026_TEST_LONGITUDES);
+  const ephemeris = createManualEphemerisState({
+    longitudes: input.longitudes || JULY_2026_TEST_LONGITUDES,
+    target_timestamp: input.target_timestamp,
+    timezone: input.timezone,
+    source_note: input.source_note,
+  });
+  const barbault = calculateBarbaultIndex(getLongitudesFromEphemeris(ephemeris));
   const aspects = detectAspects(barbault.longitudes);
   const configurations = detectConfigurations(aspects, barbault.longitudes);
+  const configuration_review = reviewConfigurations({ aspects, configurations, barbault });
   const sacred_geometry = mapSacredGeometry({ aspects, configurations, barbault });
   const somatic = normalizeSomatic(input.somatic || {});
   const deep = deriveDeepSeed({ barbault, aspects, sacred_geometry, somatic });
@@ -55,13 +64,15 @@ export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
 
   return validateFieldSnapshot({
     ...base,
+    ephemeris,
     barbault: {
       ...base.barbault,
       ...barbault,
       aspects,
       configurations,
+      configuration_review,
       sign_degrees: Object.fromEntries(
-        Object.entries(barbault.longitudes).map(([body, longitude]) => [body, signDegreeFromLongitude(longitude)])
+        Object.entries(ephemeris.positions).map(([body, position]) => [body, { sign: position.sign, degree: position.degree }])
       ),
     },
     sacred_geometry,
