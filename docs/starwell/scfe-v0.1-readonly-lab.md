@@ -7,6 +7,7 @@ Implemented as a standalone STARWELL lab entrypoint:
 - `apps/starwell/scfe-lab.html`
 - `apps/starwell/src/scfe-lab-main.jsx`
 - `apps/starwell/src/components/scfe/SCFELab.jsx`
+- `apps/starwell/src/components/scfe/GeometrySigil.jsx`
 - `apps/starwell/src/scfe/`
 
 The lab is included in `apps/starwell/vite.config.js` as `scfeLab`, so it participates in the STARWELL build without altering the primary `main.jsx` room map.
@@ -21,13 +22,16 @@ The snapshot currently includes:
 - Barbault-style Cyclic Index calculation
 - all ten pairwise angular distances
 - major aspect detection
+- aspect export inside the Field Snapshot
 - basket/cradle candidate detection
 - sacred geometry mapping
+- visual geometry sigil
 - DEEP seed vector
 - somatic safety mode
 - Hearthfire frequency protocol recommendation or suppression
 - Terra Aeterna prompt
 - agency-safe prompt
+- preset buttons for safety/regression checks
 - copy/export JSON controls
 
 ## Safety and Consent Boundaries
@@ -44,6 +48,8 @@ It does not:
 - present astrological symbolism as deterministic prediction
 
 Somatic safety can suppress frequency protocol recommendations. Migraine mode yields `low_light_silent`; body-no yields `paused`.
+
+Manual longitudes must be finite numbers within `0 <= value < 360`. Out-of-range values fail loudly so incorrect field math does not enter exported snapshots.
 
 ## Data Contract
 
@@ -70,6 +76,34 @@ The contract requires evidence labels for every interpretive layer:
 - frequency
 - Terra Aeterna
 - agency
+
+## Lab Presets
+
+The lab includes four manual presets:
+
+1. `July 2026 threshold` — default Barbault basket/cradle candidate.
+2. `Body-no pause` — tests somatic veto, sound suppression, and rest-only agency.
+3. `Migraine low-light` — tests low-light silent mode and protocol suppression.
+4. `Stable alpha work` — tests an available-body state that can receive alpha grounding guidance.
+
+These are UI convenience presets only. They do not write to storage.
+
+## Visual Sigil
+
+`GeometrySigil.jsx` renders a simple SVG aspect map from the exported aspect list.
+
+The sigil is a visual guide only. The JSON snapshot remains the source of truth.
+
+Current visual grammar:
+
+- opposition → bright axis
+- trine → flow line
+- sextile → dashed gate line
+- square/quincunx → pressure/hinge line
+- basket/cradle candidate → vessel curve
+- slow planets → labelled nodes
+
+The sigil is designed to be reduced-motion safe and non-interactive in v0.1.
 
 ## First Test Case
 
@@ -110,10 +144,13 @@ npm run starwell:test
 The tests cover:
 
 - shortest angular distance
+- manual longitude validation
 - ten-distance Cyclic Index total
 - basket/cradle candidate ingredients
 - unified Field Snapshot creation
+- aspect export inside the snapshot
 - somatic safety suppressing sound recommendations
+- body-no fully pausing sound and agency
 
 ## Build
 
@@ -131,7 +168,7 @@ SCFE v0.2 should add only after v0.1 review:
 
 1. ephemeris adapter
 2. stronger configuration detector
-3. visual geometry canvas
+3. interactive geometry canvas
 4. local JSON archive queue
 5. optional Supabase draft table behind explicit user save
 6. actual Hearthfire audio prototype behind manual activation
