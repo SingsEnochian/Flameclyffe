@@ -25,9 +25,12 @@ export function detectAspects(longitudes, definitions = ASPECT_DEFINITIONS) {
       const body_b = BARBAULT_BODIES[j];
       const actual_angle = angularDistance(longitudes[body_a], longitudes[body_b]);
       const match = definitions
-        .map((definition) => ({ ...definition, orb: Number(angleDelta(actual_angle, definition.angle).toFixed(3)) }))
-        .filter((definition) => definition.orb <= definition.orb || definition.orb === 0)
-        .find((definition) => angleDelta(actual_angle, definition.angle) <= definition.orb);
+        .map((definition) => ({
+          ...definition,
+          actual_orb: Number(angleDelta(actual_angle, definition.angle).toFixed(3)),
+        }))
+        .filter((definition) => definition.actual_orb <= definition.orb)
+        .sort((a, b) => a.actual_orb - b.actual_orb)[0];
 
       if (match) {
         aspects.push({
@@ -36,8 +39,8 @@ export function detectAspects(longitudes, definitions = ASPECT_DEFINITIONS) {
           aspect_type: match.type,
           exact_angle: match.angle,
           actual_angle: Number(actual_angle.toFixed(3)),
-          orb: Number(angleDelta(actual_angle, match.angle).toFixed(3)),
-          weight: Number((match.weight * Math.max(0.1, 1 - angleDelta(actual_angle, match.angle) / Math.max(match.orb, 1))).toFixed(3)),
+          orb: match.actual_orb,
+          weight: Number((match.weight * Math.max(0.1, 1 - match.actual_orb / Math.max(match.orb, 1))).toFixed(3)),
         });
       }
     }
