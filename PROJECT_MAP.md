@@ -15,9 +15,10 @@ If not, it remains a sandbox experiment until its purpose is clear.
 1. `apps/starwell/` — active STARWELL / Terra Aeterna observatory shell.
 2. `apps/starwell/src/main.jsx` — current room map and primary React composition.
 3. `apps/starwell/src/starwell.css` and room-specific styles — current visual structure.
-4. Supabase Flameclyffe schema — live world, character, archive, and observation records.
-5. Notion Terra Aeterna Novel Line Wiki — editorial canon, galleries, and production assets.
-6. This file — architectural classification and route ownership.
+4. `apps/starwell/src/scfe/` — read-only Starwell Concurrent Field Engine v0.1 kernels, contracts, and snapshot orchestration.
+5. Supabase Flameclyffe schema — live world, character, archive, and observation records.
+6. Notion Terra Aeterna Novel Line Wiki — editorial canon, galleries, and production assets.
+7. This file — architectural classification and route ownership.
 
 ## Trunk
 
@@ -47,6 +48,7 @@ Enduring systems attached to the trunk with a clear purpose.
 - Rowan's Study
 - Faer's Study
 - Virelya's Lantern Study
+- SCFE Read-Only Lab (`apps/starwell/scfe-lab.html`) — standalone lab entrypoint for Barbault maths, DEEP seed vectors, somatic safety, sacred geometry mapping, Hearthfire protocol recommendation, Terra Aeterna prompts, and manual JSON export. No Supabase writes.
 
 ### Stonewood theme engine
 
