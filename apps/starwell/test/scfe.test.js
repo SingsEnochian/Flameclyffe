@@ -3,6 +3,12 @@ import test from 'node:test';
 
 import { angularDistance, calculateBarbaultIndex } from '../src/scfe/barbault.js';
 import { detectAspects, detectConfigurations } from '../src/scfe/aspects.js';
+import { createManualEphemerisState, getLongitudesFromEphemeris } from '../src/scfe/ephemeris.js';
+import {
+  clearLocalArchive,
+  readLocalArchive,
+  saveSnapshotToLocalArchive,
+} from '../src/scfe/local-archive.js';
 import { createFieldSnapshot, DEFAULT_SCFE_INPUT } from '../src/scfe/orchestrator.js';
 
 const july2026Longitudes = {
@@ -12,6 +18,15 @@ const july2026Longitudes = {
   neptune: 4,
   pluto: 307,
 };
+
+function createMemoryStorage() {
+  const store = new Map();
+  return {
+    getItem: (key) => store.get(key) || null,
+    setItem: (key, value) => store.set(key, value),
+    removeItem: (key) => store.delete(key),
+  };
+}
 
 test('angularDistance always returns the shortest zodiac arc', () => {
   assert.equal(angularDistance(350, 10), 20);
@@ -24,6 +39,18 @@ test('calculateBarbaultIndex rejects out-of-range manual longitudes', () => {
     () => calculateBarbaultIndex({ ...july2026Longitudes, jupiter: 360 }),
     /0 <= value < 360/
   );
+});
+
+test('manual ephemeris adapter preserves downstream longitude contract', () => {
+  const ephemeris = createManualEphemerisState({
+    longitudes: july2026Longitudes,
+    target_timestamp: DEFAULT_SCFE_INPUT.target_timestamp,
+    timezone: DEFAULT_SCFE_INPUT.timezone,
+  });
+
+  assert.equal(ephemeris.provider, 'manual_longitudes');
+  assert.equal(ephemeris.positions.jupiter.sign, 'Leo');
+  assert.deepEqual(getLongitudesFromEphemeris(ephemeris), july2026Longitudes);
 });
 
 test('calculateBarbaultIndex sums all ten slow-planet distances', () => {
@@ -48,7 +75,9 @@ test('createFieldSnapshot returns a read-only unified field packet', () => {
   const snapshot = createFieldSnapshot(DEFAULT_SCFE_INPUT);
 
   assert.equal(snapshot.schema_version, 'scfe.field_snapshot.v0.1');
+  assert.equal(snapshot.ephemeris.provider, 'manual_longitudes');
   assert.equal(snapshot.barbault.cyclic_index, 832);
+  assert.equal(snapshot.barbault.configuration_review.status, 'candidate_needs_review');
   assert.equal(snapshot.sacred_geometry.primary_form, 'cradle_vessel');
   assert.equal(snapshot.deep.field_label, 'threshold_vessel');
   assert.equal(snapshot.terra_aeterna.canon_candidate, false);
@@ -83,4 +112,18 @@ test('body-no fully pauses agency and sound', () => {
   assert.equal(snapshot.frequency_protocol, null);
   assert.equal(snapshot.agency.energy_cost, 'none');
   assert.equal(snapshot.deep.field_label, 'paused_by_body');
+});
+
+test('local archive queue stores snapshots without backend writes', () => {
+  const storage = createMemoryStorage();
+  const snapshot = createFieldSnapshot(DEFAULT_SCFE_INPUT);
+
+  const saved = saveSnapshotToLocalArchive(snapshot, storage);
+  assert.equal(saved.length, 1);
+  assert.equal(readLocalArchive(storage).length, 1);
+  assert.equal(readLocalArchive(storage)[0].id, snapshot.snapshot_id);
+
+  const cleared = clearLocalArchive(storage);
+  assert.equal(cleared.length, 0);
+  assert.equal(readLocalArchive(storage).length, 0);
 });
