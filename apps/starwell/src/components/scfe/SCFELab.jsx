@@ -1,9 +1,67 @@
 import React, { useMemo, useState } from 'react';
 import { DEFAULT_SCFE_INPUT, createFieldSnapshot, exportSnapshot } from '../../scfe/orchestrator.js';
+import { GeometrySigil } from './GeometrySigil.jsx';
 import './scfe-lab.css';
 
 const BARBAULT_BODIES = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
 const LEVELS = ['low', 'moderate', 'high'];
+
+const FORM_PRESETS = [
+  {
+    key: 'july-2026-threshold',
+    label: 'July 2026 threshold',
+    description: 'Default Barbault basket/cradle candidate with gentle-body framing.',
+    patch: {},
+  },
+  {
+    key: 'body-no-pause',
+    label: 'Body-no pause',
+    description: 'Tests the consent/somatic veto path. Sound is suppressed and agency becomes rest-only.',
+    patch: {
+      somatic: {
+        activation: 'high',
+        fatigue: 'high',
+        pain: 'moderate',
+        migraine: false,
+        tinnitus: 'watchful',
+        body_yes: '',
+        body_no: 'not today',
+      },
+    },
+  },
+  {
+    key: 'migraine-low-light',
+    label: 'Migraine low-light',
+    description: 'Tests low-light silent mode. No frequency protocol should be recommended.',
+    patch: {
+      somatic: {
+        activation: 'moderate',
+        fatigue: 'high',
+        pain: 'moderate',
+        migraine: true,
+        tinnitus: 'sensitive',
+        body_yes: 'dark quiet',
+        body_no: '',
+      },
+    },
+  },
+  {
+    key: 'stable-alpha-work',
+    label: 'Stable alpha work',
+    description: 'Tests an available-body state that can receive alpha grounding guidance.',
+    patch: {
+      somatic: {
+        activation: 'low',
+        fatigue: 'low',
+        pain: 'low',
+        migraine: false,
+        tinnitus: 'stable',
+        body_yes: 'stable work',
+        body_no: '',
+      },
+    },
+  },
+];
 
 function createInitialForm() {
   return {
@@ -58,6 +116,22 @@ export function SCFELab() {
     }));
   }
 
+  function applyPreset(preset) {
+    const base = createInitialForm();
+    setForm({
+      ...base,
+      ...preset.patch,
+      longitudes: {
+        ...base.longitudes,
+        ...(preset.patch.longitudes || {}),
+      },
+      somatic: {
+        ...base.somatic,
+        ...(preset.patch.somatic || {}),
+      },
+    });
+  }
+
   async function copySnapshot() {
     if (!result.json || !navigator.clipboard) return;
     await navigator.clipboard.writeText(result.json);
@@ -94,6 +168,15 @@ export function SCFELab() {
       <div className="scfe-layout">
         <form className="scfe-panel scfe-inputs" onSubmit={(event) => event.preventDefault()}>
           <h3>Input moment</h3>
+
+          <div className="scfe-preset-row" aria-label="SCFE test presets">
+            {FORM_PRESETS.map((preset) => (
+              <button key={preset.key} type="button" title={preset.description} onClick={() => applyPreset(preset)}>
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
           <label>
             Target timestamp
             <input
@@ -242,8 +325,9 @@ function BarbaultPanel({ snapshot }) {
 
 function GeometryPanel({ snapshot }) {
   return (
-    <article className="scfe-panel">
+    <article className="scfe-panel scfe-geometry-panel">
       <h3>Sacred Geometry</h3>
+      <GeometrySigil snapshot={snapshot} />
       <p className="scfe-readout">{snapshot.sacred_geometry.primary_form}</p>
       <p>{snapshot.sacred_geometry.symbolic_function}</p>
       <ul className="scfe-mini-list">
@@ -254,6 +338,17 @@ function GeometryPanel({ snapshot }) {
           </li>
         ))}
       </ul>
+      <details>
+        <summary>Detected aspects</summary>
+        <ul className="scfe-mini-list">
+          {snapshot.barbault.aspects.map((aspect) => (
+            <li key={`${aspect.body_a}-${aspect.body_b}-${aspect.aspect_type}`}>
+              <span>{aspect.body_a} ↔ {aspect.body_b}</span>
+              <strong>{aspect.aspect_type} · orb {aspect.orb}°</strong>
+            </li>
+          ))}
+        </ul>
+      </details>
       <details>
         <summary>Interaction prompts</summary>
         <ul className="scfe-mini-list">
