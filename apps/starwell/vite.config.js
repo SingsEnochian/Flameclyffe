@@ -18,6 +18,7 @@ export default defineConfig({
         concordance: resolve(process.cwd(), 'apps/starwell/concordance/index.html'),
         materialQa: resolve(process.cwd(), 'apps/starwell/material-qa.html'),
         unitResonanceLab: resolve(process.cwd(), 'apps/starwell/unit-resonance-lab.html'),
+        scfeLab: resolve(process.cwd(), 'apps/starwell/scfe-lab.html'),
       },
     },
   },

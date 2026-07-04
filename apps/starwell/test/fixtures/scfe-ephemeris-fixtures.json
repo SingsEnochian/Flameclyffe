@@ -1,0 +1,34 @@
+[
+  {
+    "id": "manual-july-2026-threshold",
+    "source_label": "Manual July 2026 threshold fixture",
+    "provider": "manual_longitudes",
+    "target_timestamp": "2026-07-20T12:00:00-04:00",
+    "timezone": "America/New_York",
+    "tolerance_degrees": 0.001,
+    "reference_longitudes": {
+      "jupiter": 126,
+      "saturn": 14,
+      "uranus": 62,
+      "neptune": 4,
+      "pluto": 307
+    },
+    "notes": "Self-comparison fixture for the SCFE v0.2 manual default. This is not a calculated ephemeris reference. It verifies the comparison contract before external validation fixtures are added."
+  },
+  {
+    "id": "manual-july-2026-review-offset",
+    "source_label": "Manual July 2026 offset review fixture",
+    "provider": "manual_longitudes",
+    "target_timestamp": "2026-07-20T12:00:00-04:00",
+    "timezone": "America/New_York",
+    "tolerance_degrees": 0.25,
+    "reference_longitudes": {
+      "jupiter": 126.5,
+      "saturn": 14,
+      "uranus": 62,
+      "neptune": 4,
+      "pluto": 307
+    },
+    "notes": "Deliberate offset fixture for needs-review tests."
+  }
+]

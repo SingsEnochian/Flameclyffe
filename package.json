@@ -27,6 +27,7 @@
     "@react-three/fiber": "latest",
     "@supabase/supabase-js": "latest",
     "@vitejs/plugin-react": "latest",
+    "astronomia": "^4.2.0",
     "docx": "latest",
     "react": "latest",
     "react-dom": "latest",
