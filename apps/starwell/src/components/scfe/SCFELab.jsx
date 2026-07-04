@@ -280,6 +280,7 @@ export function SCFELab() {
           <>
             <SnapshotSummary snapshot={snapshot} />
             <EphemerisPanel snapshot={snapshot} />
+            <EphemerisComparisonPanel snapshot={snapshot} />
             <BarbaultPanel snapshot={snapshot} />
             <GeometryPanel snapshot={snapshot} />
             <DeepSomaticPanel snapshot={snapshot} />
@@ -329,6 +330,36 @@ function EphemerisPanel({ snapshot }) {
           <li key={warning}><span>warning</span><strong>{warning}</strong></li>
         ))}
       </ul>
+    </article>
+  );
+}
+
+function EphemerisComparisonPanel({ snapshot }) {
+  const comparison = snapshot.ephemeris_comparison;
+  const deltas = Object.entries(comparison.body_deltas || {});
+
+  return (
+    <article className="scfe-panel">
+      <h3>Ephemeris Comparison</h3>
+      <p className="scfe-readout">{comparison.status} · worst delta {comparison.worst_delta_degrees ?? 'n/a'}°</p>
+      <p>{comparison.note}</p>
+      <dl className="scfe-compact-dl">
+        <div><dt>Reference</dt><dd>{comparison.reference_source || 'none'}</dd></div>
+        <div><dt>Tolerance</dt><dd>{comparison.tolerance_degrees ?? 'n/a'}°</dd></div>
+      </dl>
+      {deltas.length > 0 && (
+        <details>
+          <summary>Body deltas</summary>
+          <ul className="scfe-mini-list">
+            {deltas.map(([body, delta]) => (
+              <li key={body}>
+                <span>{body} · {delta.status}</span>
+                <strong>{delta.delta_degrees ?? 'n/a'}°</strong>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </article>
   );
 }
