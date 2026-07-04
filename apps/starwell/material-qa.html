@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="./src/deep-hud-bounds.css" />
   <link rel="stylesheet" href="./src/stonewood-themes.css" />
   <link rel="stylesheet" href="./src/stonewood-typography.css" />
+  <link rel="stylesheet" href="/assets/starwell-vestments.css" />
   <script type="module" src="./src/deep-material-vars-bind.js"></script>
   <style>
     body {
@@ -79,219 +80,23 @@
       margin: 0.2rem 0;
       color: rgba(234, 244, 239, 0.72);
     }
-
-    .glyph-principle {
-      color: rgba(234, 244, 239, 0.72);
-    }
-
-    .material-qa-comparison {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.8rem;
-      margin-top: 0.9rem;
-    }
-
-    .material-leaf-card {
-      border: 1px solid rgba(232, 244, 252, 0.12);
-      border-radius: 18px;
-      background: rgba(3, 5, 10, 0.26);
-      padding: 0.7rem;
-    }
-
-    .material-leaf-card h4 {
-      margin: 0 0 0.45rem;
-      font-family: Inter, system-ui, sans-serif;
-      font-size: 0.74rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(234, 244, 239, 0.78);
-    }
-
-    .learned-material-strip {
-      --flare-hue: 164;
-      --flare-alpha: 0.28;
-      --grown-vein-density: 0.42;
-      --grown-edge-softness: 0.68;
-      --grown-pulse-speed: 7.2s;
-      --grown-glass-to-leaf: 0.34;
-      box-shadow:
-        0 0 0 1px hsla(var(--flare-hue), 70%, 76%, calc(var(--flare-alpha) * 0.5)),
-        0 0 calc(18px + (var(--grown-vein-density) * 18px)) hsla(var(--flare-hue), 86%, 72%, calc(var(--flare-alpha) * 0.42));
-      filter: saturate(calc(0.95 + var(--grown-edge-softness) * 0.28));
-    }
-
-    @media (max-width: 720px) {
-      .material-qa-comparison {
-        grid-template-columns: 1fr;
-      }
-    }
   </style>
 </head>
-<body>
-  <main class="material-qa-shell starwell sky-night">
-    <p class="material-qa-intro">
-      Material QA route. The aura source cycles mock DEEP and sigil-derived light variables. The passive bridge copies those variables to the Observer shell. The hand-authored membrane and learned export membrane then sit side by side for comparison.
-    </p>
-
+<body class="sky-night">
+  <main class="material-qa-shell starwell">
+    <p class="eyebrow">STARWELL QA</p>
+    <h1>Material inheritance console</h1>
+    <p class="material-qa-intro">Compares observer variables against material intuition so Stonewood, sea-glass, copper, and flare states can prove their behaviour before they become house grammar.</p>
     <div class="material-qa-status" aria-label="Material QA status">
-      <span id="qa-mode">mode: waking</span>
-      <span id="qa-bridge">bridge: waiting</span>
-      <span id="qa-hue">hue: waiting</span>
-      <span id="qa-alpha">alpha: waiting</span>
-      <span id="qa-export">export: loading</span>
-      <span id="qa-delta">delta: waiting</span>
+      <span>live vars</span>
+      <span>DEEP observer</span>
+      <span>theme inheritance</span>
     </div>
-
-    <section class="live-glyph-panel deep-observer-panel chamber-card" aria-label="DEEP Observer material QA viewer">
-      <div class="map-heading compact">
-        <span>DEEP Material QA</span>
-        <strong>Grown membrane inheritance</strong>
-      </div>
-
-      <div class="live-glyph-layout">
-        <div
-          class="glyph-orb-wrap glyph-orb-canvas-wrap"
-          data-starburst-native="aura"
-          style="--n: 18; --w: 214px; --m: 42%; --flare-hue: 198; --flare-alpha: 0.32; --flare-jitter: 0.24px; --flare-rot: 18deg;"
-          aria-label="Mock live aura source"
-        >
-          <div class="glyph-orb glyph-orb-canvas" aria-hidden="true"></div>
-        </div>
-
-        <article class="glyph-readout">
-          <p>Current Observer glyph · material QA</p>
-          <h3>QA-LIVE-MEMBRANE</h3>
-          <time>Observer shell should carry live aura variables</time>
-          <span>The strips below should shift with the aura source and learned material export.</span>
-
-          <div class="material-qa-comparison" aria-label="Material comparison leaves">
-            <section class="material-leaf-card" aria-label="Hand-authored membrane sample">
-              <h4>Hand-authored leaf</h4>
-              <div class="glyph-equation-strip" aria-label="Grown membrane inheritance checks">
-                <code>source aura -> --flare-hue / --flare-alpha</code>
-                <code>material bridge -> Observer shell</code>
-                <code>membrane -> inherited grown signal</code>
-                <span>Expected: data-deep-material-vars="live-aura"</span>
-              </div>
-            </section>
-
-            <section class="material-leaf-card" aria-label="Learned material export sample">
-              <h4>Learned export leaf</h4>
-              <div class="glyph-equation-strip learned-material-strip" id="learned-strip" aria-label="Learned material export checks">
-                <code id="learned-source">export source -> waiting</code>
-                <code id="learned-vars">learned vars -> waiting</code>
-                <code id="learned-material">membrane -> comparison layer</code>
-                <span id="learned-rating">Expected: approved sample export</span>
-              </div>
-            </section>
-          </div>
-
-          <p class="glyph-principle">
-            Instrument only. This page checks material inheritance, mobile caps, observer math swapping, and the first learned comparison leaf without adding controls, sound, haptics, or HUD furniture.
-          </p>
-        </article>
-      </div>
+    <section class="live-glyph-panel deep-observer-panel">
+      <h2>Live glyph material sample</h2>
+      <div class="glyph-orb-canvas" aria-hidden="true"></div>
+      <p class="glyph-readout"><time>Observer pulse active</time><span>Flare hue and alpha are inherited through the material variable bridge.</span></p>
     </section>
   </main>
-
-  <script type="module">
-    const modes = [
-      { id: 'cold_live', name: 'cold live', sourceLabel: 'deep_theory', hue: '198', alpha: '0.32', jitter: '0.24px', rot: '18deg' },
-      { id: 'warm_charge', name: 'warm charge', sourceLabel: 'deep_theory', hue: '56', alpha: '0.46', jitter: '0.42px', rot: '46deg' },
-      { id: 'loch_calm', name: 'loch calm', sourceLabel: 'deep_theory', hue: '158', alpha: '0.24', jitter: '0.12px', rot: '7deg' },
-      { id: 'sigil_leaf', name: 'sigil leaf', sourceLabel: 'sigil_topology', hue: '142', alpha: '0.34', jitter: '0.16px', rot: '22deg' },
-    ];
-
-    const panel = document.querySelector('.deep-observer-panel');
-    const aura = document.querySelector('.glyph-orb-wrap[data-starburst-native="aura"]');
-    const modeNode = document.querySelector('#qa-mode');
-    const bridgeNode = document.querySelector('#qa-bridge');
-    const hueNode = document.querySelector('#qa-hue');
-    const alphaNode = document.querySelector('#qa-alpha');
-    const exportNode = document.querySelector('#qa-export');
-    const deltaNode = document.querySelector('#qa-delta');
-    const learnedStrip = document.querySelector('#learned-strip');
-    const learnedSource = document.querySelector('#learned-source');
-    const learnedVars = document.querySelector('#learned-vars');
-    const learnedRating = document.querySelector('#learned-rating');
-    let index = 0;
-    let activeMode = modes[0];
-    let learnedById = new Map();
-
-    async function loadLearnedExport() {
-      try {
-        const response = await fetch('./labs/material_intuition_export.sample.json', { cache: 'no-store' });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        const exportData = await response.json();
-        learnedById = new Map((exportData.predictions || []).map((row) => [row.id, row]));
-        exportNode.textContent = `export: ${exportData.schema || 'loaded'}`;
-        applyLearned(activeMode);
-      } catch (error) {
-        exportNode.textContent = 'export: unavailable';
-        deltaNode.textContent = 'delta: no learned leaf';
-        learnedSource.textContent = 'export source -> unavailable';
-        learnedVars.textContent = 'learned vars -> unavailable';
-      }
-    }
-
-    function applyMode() {
-      const mode = modes[index % modes.length];
-      activeMode = mode;
-      aura.style.setProperty('--flare-hue', mode.hue);
-      aura.style.setProperty('--flare-alpha', mode.alpha);
-      aura.style.setProperty('--flare-jitter', mode.jitter);
-      aura.style.setProperty('--flare-rot', mode.rot);
-      modeNode.textContent = `mode: ${mode.name} / ${mode.sourceLabel}`;
-      applyLearned(mode);
-      index += 1;
-    }
-
-    function applyLearned(mode) {
-      const row = learnedById.get(mode.id);
-      if (!row || !row.predicted) {
-        deltaNode.textContent = 'delta: waiting';
-        learnedSource.textContent = 'export source -> waiting';
-        learnedVars.textContent = 'learned vars -> waiting';
-        return;
-      }
-
-      const predicted = row.predicted;
-      const hue = Number(predicted.flare_hue || mode.hue);
-      const alpha = Number(predicted.flare_alpha || mode.alpha);
-      const vein = Number(predicted.vein_density || 0.42);
-      const edge = Number(predicted.edge_softness || 0.64);
-      const pulse = Number(predicted.pulse_speed || 7.2);
-      const glass = Number(predicted.glass_to_leaf || 0.34);
-
-      learnedStrip.style.setProperty('--flare-hue', hue.toFixed(1));
-      learnedStrip.style.setProperty('--flare-alpha', alpha.toFixed(3));
-      learnedStrip.style.setProperty('--grown-vein-density', vein.toFixed(3));
-      learnedStrip.style.setProperty('--grown-edge-softness', edge.toFixed(3));
-      learnedStrip.style.setProperty('--grown-pulse-speed', `${pulse.toFixed(2)}s`);
-      learnedStrip.style.setProperty('--grown-glass-to-leaf', glass.toFixed(3));
-
-      const hueDelta = Math.abs(hue - Number(mode.hue));
-      const alphaDelta = Math.abs(alpha - Number(mode.alpha));
-      deltaNode.textContent = `delta: hue ${hueDelta.toFixed(1)} / alpha ${alphaDelta.toFixed(3)}`;
-      learnedSource.textContent = `export source -> ${row.source || 'unknown'} / ${row.id}`;
-      learnedVars.textContent = `learned vars -> hue ${hue.toFixed(1)} / alpha ${alpha.toFixed(3)} / vein ${vein.toFixed(3)}`;
-      learnedRating.textContent = `Expected: ${row.rating || 'unrated'} sample export`;
-    }
-
-    function reportBridge() {
-      const style = getComputedStyle(panel);
-      bridgeNode.textContent = `bridge: ${panel.dataset.deepMaterialVars || 'waiting'}`;
-      hueNode.textContent = `hue: ${style.getPropertyValue('--flare-hue').trim() || 'missing'}`;
-      alphaNode.textContent = `alpha: ${style.getPropertyValue('--flare-alpha').trim() || 'missing'}`;
-      window.requestAnimationFrame(reportBridge);
-    }
-
-    loadLearnedExport();
-    applyMode();
-    window.setInterval(applyMode, 3200);
-    reportBridge();
-  </script>
 </body>
 </html>
