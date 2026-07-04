@@ -1,0 +1,93 @@
+/* SCFE hero vestments: loaded last from scfe-lab.html so the visible dome changes above the fold. */
+
+.starwell .observatory-shell {
+  width: min(1500px, 92vw) !important;
+  margin: 2rem auto !important;
+  padding: clamp(1.2rem, 2vw, 2.25rem) !important;
+  border: 1px solid #e7c47766 !important;
+  border-radius: 34px !important;
+  background:
+    radial-gradient(circle at 18% 10%, #e7c4771f, transparent 24rem),
+    radial-gradient(circle at 86% 4%, #8ccac026, transparent 21rem),
+    linear-gradient(165deg, #14131bf0 0%, #211b28ee 52%, #0e151df0 100%) !important;
+  box-shadow: inset 0 1px 0 #ffffff24, inset 0 0 90px #00000059, 0 42px 86px -58px #000000f0 !important;
+  overflow: hidden !important;
+}
+
+.starwell .dome {
+  min-height: 620px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 28px !important;
+  border: 1px solid #e7c47742 !important;
+  background:
+    radial-gradient(circle at 50% 40%, #e7c47729 0%, transparent 22rem),
+    radial-gradient(circle at 50% 78%, #8ccac024 0%, transparent 24rem),
+    linear-gradient(180deg, #ffffff08, #00000026) !important;
+  box-shadow: inset 0 0 0 1px #ffffff0a, inset 0 -80px 120px -90px #8ccac073 !important;
+}
+
+.starwell .dome-inner {
+  width: min(860px, 88vw) !important;
+  padding: clamp(1rem, 2vw, 1.75rem) !important;
+  border-radius: 24px !important;
+  border: 1px solid #e7c47733 !important;
+  background: radial-gradient(circle at 50% 0%, #e7c47719, transparent 18rem), linear-gradient(180deg, #14131b66, #14131b24) !important;
+  box-shadow: inset 0 1px 0 #ffffff17, 0 24px 60px -44px #000000e0 !important;
+  backdrop-filter: blur(2px);
+}
+
+.starwell .dome .eyebrow {
+  color: #e7c477 !important;
+  letter-spacing: .2em !important;
+  text-shadow: 0 0 18px #e7c47736 !important;
+}
+
+.starwell .dome h1 {
+  margin: .15rem 0 .4rem !important;
+  font-size: clamp(5.8rem, 10vw, 9.5rem) !important;
+  letter-spacing: .055em !important;
+  line-height: .82 !important;
+  color: transparent !important;
+  background: linear-gradient(180deg, #ffe6a2 0%, #e7c477 44%, #b65f3d 120%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  text-shadow: 0 18px 52px #00000080 !important;
+}
+
+.starwell .dome .subtitle {
+  width: min(840px, 100%) !important;
+  margin: .35rem auto 1rem !important;
+  padding: .9rem 1.1rem !important;
+  border-top: 1px solid #e7c4773d !important;
+  border-bottom: 1px solid #e7c4773d !important;
+  color: #f7eddae8 !important;
+  font-size: clamp(1.25rem, 2vw, 1.8rem) !important;
+  line-height: 1.35 !important;
+}
+
+.starwell .dome .inscription {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 2.6rem !important;
+  padding: .55rem 1.2rem !important;
+  border: 1px solid #e7c47766 !important;
+  border-radius: 999px !important;
+  background: #14131b80 !important;
+  color: #f7edda !important;
+  box-shadow: 0 0 26px -18px #e7c477 !important;
+}
+
+.starwell .scfe-lab {
+  margin-top: 1.6rem !important;
+  border: 1px solid #e7c47759 !important;
+  border-radius: 26px !important;
+  background: radial-gradient(circle at 22% 0%, #e7c47721, transparent 18rem), radial-gradient(circle at 86% 8%, #8ccac01f, transparent 20rem), linear-gradient(145deg, #f7edda12, #14131b12) !important;
+}
+
+@media (width <= 860px) {
+  .starwell .observatory-shell { width: min(96vw, 100%) !important; margin: 1rem auto !important; padding: .8rem !important; border-radius: 24px !important; }
+  .starwell .dome { min-height: 520px !important; }
+  .starwell .dome-inner { width: min(92vw, 100%) !important; }
+}
