@@ -17,6 +17,7 @@ import {
 import {
   clearLocalArchive,
   readLocalArchive,
+  removeLocalArchiveEntry,
   saveSnapshotToLocalArchive,
 } from '../src/scfe/local-archive.js';
 import { createFieldSnapshot, DEFAULT_SCFE_INPUT } from '../src/scfe/orchestrator.js';
@@ -167,7 +168,7 @@ test('body-no fully pauses agency and sound', () => {
   assert.equal(snapshot.deep.field_label, 'paused_by_body');
 });
 
-test('local archive queue stores snapshots without backend writes', () => {
+test('local archive queue stores, removes, and clears snapshots without backend writes', () => {
   const storage = createMemoryStorage();
   const snapshot = createFieldSnapshot(DEFAULT_SCFE_INPUT);
 
@@ -176,6 +177,11 @@ test('local archive queue stores snapshots without backend writes', () => {
   assert.equal(readLocalArchive(storage).length, 1);
   assert.equal(readLocalArchive(storage)[0].id, snapshot.snapshot_id);
 
+  const removed = removeLocalArchiveEntry(snapshot.snapshot_id, storage);
+  assert.equal(removed.length, 0);
+  assert.equal(readLocalArchive(storage).length, 0);
+
+  saveSnapshotToLocalArchive(snapshot, storage);
   const cleared = clearLocalArchive(storage);
   assert.equal(cleared.length, 0);
   assert.equal(readLocalArchive(storage).length, 0);
