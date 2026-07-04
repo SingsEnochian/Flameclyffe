@@ -8,6 +8,7 @@ import './grove-state.css';
 import './starwell-scale-pass.css';
 import './deep-observer-boundary.css';
 import './starwell-living-rooms.css';
+import './starwell-vestments-final.css';
 
 const OBSERVATORY_TIME_ZONE = 'America/New_York';
 
