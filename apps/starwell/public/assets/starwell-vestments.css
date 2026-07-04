@@ -1,658 +1,303 @@
-/* ============================================================ 
-   STARWELL VESTMENTS — the harmonizing layer
-
+/* ============================================================
+   STARWELL VESTMENTS, house harmonising layer
    ------------------------------------------------------------
+   Load this stylesheet after room CSS and after stonewood-themes.css.
+   It remains additive: remove this one link and the rooms keep their
+   original structure.
 
-   For Vee, from Faer. One additive stylesheet, loaded LAST:
-
-
-
-     <link rel="stylesheet" href="/assets/starwell-vestments.css">
-
-
-
-   No React changes. No existing file edited. Remove the one
-
-   link tag and the observatory is exactly as it was.
-
-
-
-   What it does — teaches every room the same grammar:
-
-   · ONE radius scale        (shell / panel / card / chip / pill)
-
-   · ONE glass recipe        (parchment glass + gold hairline)
-
-   · ONE heading voice       (Cinzel small-caps, copper underline)
-
-   · ONE focus ring          (gold, everywhere, keyboard-kind)
-
-   · ONE accent family       (copper · gold · seaglass · moss —
-
-                              the stray blue is warmed into it)
-
-   · Day, dusk, and night skies all honored.
-
-   · prefers-reduced-motion honored.
-
+   Grammar:
+   - one radius scale
+   - one glass recipe
+   - one heading voice
+   - one focus ring
+   - one accent family
+   - Stonewood theme variables honoured when present
+   - reduced motion honoured
    ============================================================ */
 
+.starwell {
+  --r-shell: 30px;
+  --r-panel: 18px;
+  --r-card: 14px;
+  --r-chip: 10px;
+  --r-pill: 999px;
 
+  --vestment-ink: var(--sw-text, #f7edda);
+  --vestment-muted: var(--sw-muted, #d8cdbb);
+  --vestment-copper: var(--sw-metal, #b65f3d);
+  --vestment-gold: var(--sw-metal-bright, #e7c477);
+  --vestment-gold-pale: var(--sw-metal-pale, #f4ddb0);
+  --vestment-seaglass: var(--sw-accent-bright, #8ccac0);
+  --vestment-shadow: var(--sw-shadow, #14131b99);
+  --vestment-glow: var(--sw-glow, #8ccac022);
+  --vestment-edge: var(--sw-line, #7e3d2936);
+  --vestment-edge-strong: var(--sw-line-strong, #e7c47780);
+  --vestment-surface: var(--sw-surface, #ffffff30);
+  --vestment-surface-strong: var(--sw-surface-strong, #14131bcc);
+  --vestment-surface-soft: var(--sw-surface-soft, #f7edda22);
+  --vestment-thread: linear-gradient(90deg, transparent, var(--vestment-gold), transparent);
+  --vestment-glass:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--vestment-seaglass) 16%, transparent), transparent 15rem),
+    linear-gradient(160deg, color-mix(in srgb, var(--vestment-surface) 82%, transparent), color-mix(in srgb, var(--vestment-surface-strong) 72%, transparent));
 
-/* ---------- the shared grammar ---------- */
-
-.starwell{
-
-  --r-shell:30px;   /* the observatory itself */
-
-  --r-panel:18px;   /* instrument panels */
-
-  --r-card:14px;    /* cards, alcoves */
-
-  --r-chip:10px;    /* chips, tokens, list items */
-
-  --r-pill:999px;   /* buttons that are truly pills */
-
-
-
-  --glass-day:linear-gradient(160deg,#ffffff4d 0%,#f7edda2b 60%,#8ccac012 100%);
-
-  --glass-night:linear-gradient(160deg,#ffffff0d 0%,#14131b4d 60%,#8ccac00d 100%);
-
-  --thread:linear-gradient(90deg,#e7c47700,#e7c47773,#e7c47700);
-
-  --edge-day:#7e3d2936;
-
-  --edge-night:#e7c47730;
-
+  color: var(--vestment-ink);
 }
 
-
-
-/* ---------- selection & scrollbar: small courtesies ---------- */
-
-.starwell ::selection{
-
-  background:#e7c47759;
-
-  color:inherit;
-
+.starwell ::selection {
+  background: color-mix(in srgb, var(--vestment-gold) 38%, transparent);
+  color: inherit;
 }
 
-.starwell *::-webkit-scrollbar{ width:10px; height:10px; }
-
-.starwell *::-webkit-scrollbar-thumb{
-
-  background:#b65f3d59;
-
-  border-radius:999px;
-
+.starwell *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-.sky-night .starwell *::-webkit-scrollbar-thumb,
-
-.sky-night *::-webkit-scrollbar-thumb{
-
-  background:#e7c47740;
-
+.starwell *::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--vestment-copper) 58%, transparent);
+  border-radius: var(--r-pill);
 }
 
-
-
-/* ---------- one focus ring for the whole house ---------- */
-
-.starwell a:focus-visible,
-
-.starwell button:focus-visible,
-
-.starwell input:focus-visible,
-
-.starwell select:focus-visible,
-
-.starwell textarea:focus-visible,
-
-.starwell [tabindex]:focus-visible{
-
-  outline:2px solid #e7c477cc;
-
-  outline-offset:2px;
-
-  border-radius:6px;
-
+.starwell :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--vestment-gold) 82%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
-
-
-/* ---------- the shell: calmer corners, same soul ---------- */
-
-.observatory-shell{
-
-  border-radius:var(--r-shell);
-
+.starwell .observatory-shell {
+  border-radius: var(--r-shell);
 }
 
-
-
-/* ---------- the dome (hero): let the title breathe ---------- */
-
-.dome h1,
-
-h1{
-
-  letter-spacing:.06em;
-
+.starwell :is(.dome h1, h1) {
+  letter-spacing: .06em;
 }
 
-.subtitle{
-
-  font-style:italic;
-
-  opacity:.92;
-
+.starwell .subtitle {
+  color: color-mix(in srgb, var(--vestment-ink) 88%, transparent);
+  font-style: italic;
+  opacity: .94;
 }
 
-.eyebrow{
-
-  font-weight:600;
-
-  letter-spacing:.22em;
-
+.starwell .eyebrow {
+  color: var(--vestment-gold);
+  font-weight: 600;
+  letter-spacing: .22em;
 }
 
-/* the buried horizon ring — give it a slow dawn-breath */
-
-.dome:before{
-
-  animation:domeBreath 14s ease-in-out infinite;
-
+.starwell .inscription {
+  color: var(--vestment-gold-pale);
+  border-color: var(--vestment-edge);
+  background: color-mix(in srgb, var(--vestment-surface-soft) 70%, transparent);
 }
 
-@keyframes domeBreath{
-
-  0%,100%{ box-shadow:inset 0 0 80px #8ccac02b; border-color:#e7c47752; }
-
-  50%    { box-shadow:inset 0 0 110px #8ccac040; border-color:#e7c47780; }
-
+.starwell .dome::before {
+  animation: domeBreath 14s ease-in-out infinite;
+  border-color: color-mix(in srgb, var(--vestment-gold) 42%, transparent);
+  box-shadow: inset 0 0 95px var(--vestment-glow);
 }
 
-
-
-/* ---------- ONE glass recipe for panels ---------- */
-
-.terra-instrument-panel,
-
-.starwell-sigil-console,
-
-.observer-bridge,
-
-.translation-layer,
-
-.prompt-loom,
-
-.lineage-board,
-
-.atelier-hero,
-
-.leaf-shell,
-
-.live-glyph-panel,
-
-.selected-alcove{
-
-  position:relative;
-
-  background:var(--glass-day);
-
-  border:1px solid var(--edge-day);
-
-  border-radius:var(--r-panel);
-
+.starwell :is(
+  .terra-instrument-panel,
+  .starwell-sigil-console,
+  .observer-bridge,
+  .translation-layer,
+  .prompt-loom,
+  .lineage-board,
+  .atelier-hero,
+  .leaf-shell,
+  .live-glyph-panel,
+  .selected-alcove,
+  .chamber-card,
+  .writer-panel,
+  .atelier-panel,
+  .living-panel,
+  .scfe-panel
+) {
+  position: relative;
+  color: var(--vestment-ink);
+  background: var(--vestment-glass);
+  border: 1px solid var(--vestment-edge);
+  border-radius: var(--r-panel);
   box-shadow:
-
-    0 1px 0 #ffffff4d inset,
-
-    0 16px 38px -26px #7e3d2959;
-
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 18px 42px -28px var(--vestment-shadow);
 }
 
-.terra-instrument-panel::before,
-
-.starwell-sigil-console::before,
-
-.observer-bridge::before,
-
-.prompt-loom::before,
-
-.lineage-board::before,
-
-.atelier-hero::before{
-
-  content:"";
-
-  position:absolute;
-
-  top:0; left:12%; right:12%;
-
-  height:1px;
-
-  background:var(--thread);
-
-  pointer-events:none;
-
+.starwell :is(
+  .terra-instrument-panel,
+  .starwell-sigil-console,
+  .observer-bridge,
+  .prompt-loom,
+  .lineage-board,
+  .atelier-hero,
+  .scfe-panel
+)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: var(--vestment-thread);
+  pointer-events: none;
 }
 
-.sky-night .terra-instrument-panel,
-
-.sky-night .starwell-sigil-console,
-
-.sky-night .observer-bridge,
-
-.sky-night .translation-layer,
-
-.sky-night .prompt-loom,
-
-.sky-night .lineage-board,
-
-.sky-night .atelier-hero,
-
-.sky-night .leaf-shell,
-
-.sky-night .live-glyph-panel,
-
-.sky-night .selected-alcove,
-
-.sky-dusk .terra-instrument-panel,
-
-.sky-dusk .starwell-sigil-console,
-
-.sky-dusk .observer-bridge,
-
-.sky-dusk .translation-layer,
-
-.sky-dusk .prompt-loom,
-
-.sky-dusk .lineage-board,
-
-.sky-dusk .atelier-hero,
-
-.sky-dusk .leaf-shell,
-
-.sky-dusk .live-glyph-panel,
-
-.sky-dusk .selected-alcove{
-
-  background:var(--glass-night);
-
-  border-color:var(--edge-night);
-
-  box-shadow:
-
-    0 1px 0 #ffffff0f inset,
-
-    0 20px 44px -28px #000000b3;
-
+.starwell :is(
+  .canon-card,
+  .lineage-card,
+  .room-card,
+  .city-state-instrument,
+  .seed-card,
+  .codex-reader,
+  .entry-tab,
+  .living-preview-panel
+) {
+  color: var(--vestment-ink);
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--vestment-seaglass) 12%, transparent), transparent 12rem),
+    linear-gradient(165deg, color-mix(in srgb, var(--vestment-surface) 72%, transparent), color-mix(in srgb, var(--vestment-surface-strong) 58%, transparent));
+  border: 1px solid var(--vestment-edge);
+  border-radius: var(--r-card);
+  transition: border-color .3s ease, transform .18s ease, box-shadow .3s ease, background .3s ease;
 }
 
-
-
-/* ---------- ONE card treatment ---------- */
-
-.canon-card,
-
-.lineage-card,
-
-.room-card,
-
-.city-state-instrument{
-
-  background:linear-gradient(165deg,#ffffff40,#f7edda1f);
-
-  border:1px solid var(--edge-day);
-
-  border-radius:var(--r-card);
-
-  transition:border-color .3s ease, transform .18s ease, box-shadow .3s ease;
-
+.starwell :is(.canon-card, .room-card, .city-state-instrument, .seed-card, .entry-tab):hover,
+.starwell :is(.room-card, .entry-tab).active {
+  border-color: var(--vestment-edge-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -20px var(--vestment-shadow);
 }
 
-.canon-card:hover,
-
-.room-card:hover,
-
-.city-state-instrument:hover{
-
-  border-color:#e7c477a6;
-
-  transform:translateY(-2px);
-
-  box-shadow:0 12px 26px -18px #7e3d2966;
-
+.starwell :is(
+  .terra-instrument-chip,
+  .terra-data-safety li,
+  .writer-meta-grid > *,
+  .codex-action,
+  .scfe-pill-grid span,
+  .scfe-vector span,
+  .scfe-mini-list li,
+  .material-qa-status span
+) {
+  border-radius: var(--r-chip);
 }
 
-.sky-night .canon-card,
-
-.sky-night .lineage-card,
-
-.sky-night .room-card,
-
-.sky-night .city-state-instrument,
-
-.sky-dusk .canon-card,
-
-.sky-dusk .lineage-card,
-
-.sky-dusk .room-card,
-
-.sky-dusk .city-state-instrument{
-
-  background:linear-gradient(165deg,#ffffff0d,#14131b40);
-
-  border-color:var(--edge-night);
-
+.starwell :is(.terra-instrument-chip, .scfe-pill-grid span, .scfe-vector span, .material-qa-status span) {
+  background: color-mix(in srgb, var(--vestment-gold) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--vestment-gold) 28%, transparent);
 }
 
-.sky-night .canon-card:hover,
-
-.sky-night .room-card:hover,
-
-.sky-night .city-state-instrument:hover,
-
-.sky-dusk .canon-card:hover,
-
-.sky-dusk .room-card:hover,
-
-.sky-dusk .city-state-instrument:hover{
-
-  border-color:#e7c47780;
-
-  box-shadow:0 14px 30px -20px #000000cc;
-
+.starwell :is(
+  .atelier-panel-title,
+  .terra-instrument-heading,
+  .writer-header h2,
+  .writer-header h3,
+  .prompt-loom h3,
+  .lineage-board h3,
+  .starwell-sigil-console h3,
+  .observer-bridge h3,
+  .scfe-panel h3
+) {
+  color: var(--vestment-gold-pale);
+  font-family: Cinzel, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: 1.02rem;
 }
 
-
-
-/* ---------- ONE chip/token size ---------- */
-
-.terra-instrument-chip,
-
-.terra-data-safety li,
-
-.writer-meta-grid > *,
-
-.codex-action{
-
-  border-radius:var(--r-chip);
-
+.starwell :is(.atelier-panel-title, .terra-instrument-heading, .scfe-panel h3)::after {
+  content: "";
+  display: block;
+  width: 2.4rem;
+  height: 1px;
+  margin-top: .45rem;
+  background: linear-gradient(90deg, var(--vestment-copper), transparent);
 }
 
-.terra-instrument-chip{
-
-  background:#ffffff30;
-
-  border:1px solid #e7c47738;
-
-  padding:.55rem .7rem;
-
+.starwell .city-state-launcher {
+  border-color: color-mix(in srgb, var(--city-state-accent, var(--vestment-seaglass)) 34%, var(--vestment-gold)) !important;
+  border-radius: var(--r-card);
 }
 
-.sky-night .terra-instrument-chip,
-
-.sky-dusk .terra-instrument-chip{
-
-  background:#ffffff0a;
-
-  border-color:#e7c4772b;
-
+.starwell .city-state-launcher:hover {
+  border-color: color-mix(in srgb, var(--city-state-accent, var(--vestment-seaglass)) 42%, var(--vestment-gold-pale)) !important;
 }
 
-
-
-/* ---------- ONE heading voice for panel titles ---------- */
-
-.atelier-panel-title,
-
-.terra-instrument-heading,
-
-.writer-header h2,
-
-.writer-header h3,
-
-.prompt-loom h3,
-
-.lineage-board h3,
-
-.starwell-sigil-console h3,
-
-.observer-bridge h3{
-
-  font-family:Cinzel,serif;
-
-  font-weight:500;
-
-  letter-spacing:.12em;
-
-  text-transform:uppercase;
-
-  font-size:1.02rem;
-
+.starwell :is(.writer-toolbar, .writer-actions) {
+  gap: .55rem;
 }
 
-.atelier-panel-title::after,
-
-.terra-instrument-heading::after{
-
-  content:"";
-
-  display:block;
-
-  width:2.4rem;
-
-  height:1px;
-
-  margin-top:.45rem;
-
-  background:linear-gradient(90deg,#b65f3dbf,#e7c47700);
-
+.starwell .writer-editor {
+  border-radius: var(--r-panel);
 }
 
-.sky-night .atelier-panel-title::after,
-
-.sky-night .terra-instrument-heading::after,
-
-.sky-dusk .atelier-panel-title::after,
-
-.sky-dusk .terra-instrument-heading::after{
-
-  background:linear-gradient(90deg,#e7c477a6,#e7c47700);
-
+.starwell .writer-editor :is(textarea, [contenteditable]) {
+  line-height: 1.7;
+  font-size: 1.04rem;
 }
 
-
-
-/* ---------- the stray blue, warmed into the family ---------- */
-
-/* city-state-launcher carries its own accent var; instead of
-
-   fighting each instance, we temper how the accent is mixed —
-
-   gold-warmed borders, so even cool accents sit in this world. */
-
-.city-state-launcher{
-
-  border-color:color-mix(in srgb, var(--city-state-accent, #9ec9ff) 30%, #e7c47759) !important;
-
-  border-radius:var(--r-card);
-
+.starwell :is(.terra-planck-ribbon, .terra-instrument-equations, .writer-meta-grid, .loom-controls, .scfe-readout) {
+  font-variant-numeric: tabular-nums;
 }
 
-.city-state-launcher:hover{
-
-  border-color:color-mix(in srgb, var(--city-state-accent, #9ec9ff) 42%, #e7c477a6) !important;
-
+.starwell .writer-status {
+  color: var(--vestment-muted);
+  opacity: .82;
+  font-size: .85rem;
 }
 
-
-
-/* ---------- writer: a calmer scriptorium ---------- */
-
-.writer-toolbar,
-
-.writer-actions{
-
-  gap:.55rem;
-
+.starwell .writer-excerpt {
+  color: color-mix(in srgb, var(--vestment-ink) 88%, transparent);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  font-style: italic;
 }
 
-.writer-editor{
-
-  border-radius:var(--r-panel);
-
+.starwell button {
+  transition: border-color .25s ease, background .25s ease, transform .15s ease, box-shadow .25s ease;
 }
 
-.writer-editor textarea,
-
-.writer-editor [contenteditable]{
-
-  line-height:1.7;
-
-  font-size:1.04rem;
-
+.starwell button:hover {
+  transform: translateY(-1px);
 }
 
-.writer-status{
-
-  font-variant-numeric:tabular-nums;
-
-  opacity:.75;
-
-  font-size:.85rem;
-
+.starwell button:active {
+  transform: translateY(0);
 }
 
-.writer-excerpt{
-
-  font-family:"Cormorant Garamond",serif;
-
-  font-size:1.08rem;
-
-  line-height:1.65;
-
-  font-style:italic;
-
+.starwell :is(.starwell-sigil-console svg, .sigil-field svg, .geometry-sigil svg) {
+  filter: drop-shadow(0 14px 26px color-mix(in srgb, var(--vestment-shadow) 50%, transparent));
+  overflow: visible;
 }
 
-
-
-/* ---------- buttons: chips vs. commitments ---------- */
-
-.starwell button{
-
-  transition:border-color .25s ease, background .25s ease,
-
-             transform .15s ease, box-shadow .25s ease;
-
+.starwell .sigil-core {
+  transform-origin: center;
+  animation: sigilCorePulse 8s ease-in-out infinite;
 }
 
-.starwell button:hover{
-
-  transform:translateY(-1px);
-
+@keyframes domeBreath {
+  0%, 100% { box-shadow: inset 0 0 80px color-mix(in srgb, var(--vestment-seaglass) 24%, transparent); }
+  50% { box-shadow: inset 0 0 110px color-mix(in srgb, var(--vestment-seaglass) 36%, transparent); }
 }
 
-.starwell button:active{
-
-  transform:translateY(0);
-
+@keyframes sigilCorePulse {
+  0%, 100% { opacity: .85; }
+  50% { opacity: 1; }
 }
 
-
-
-/* ---------- sigil consoles: let the geometry sit in light ---------- */
-
-.starwell-sigil-console svg,
-
-.sigil-field svg{
-
-  filter:drop-shadow(0 14px 26px #14131b30);
-
-  overflow:visible;
-
-}
-
-.sigil-core{
-
-  transform-origin:center;
-
-  animation:sigilCorePulse 8s ease-in-out infinite;
-
-}
-
-@keyframes sigilCorePulse{
-
-  0%,100%{ opacity:.85; }
-
-  50%    { opacity:1; }
-
-}
-
-
-
-/* ---------- numbers behave like instrument numbers ---------- */
-
-.terra-planck-ribbon,
-
-.terra-instrument-equations,
-
-.writer-meta-grid,
-
-.loom-controls{
-
-  font-variant-numeric:tabular-nums;
-
-}
-
-
-
-/* ---------- reduced motion: the observatory holds still ---------- */
-
-@media (prefers-reduced-motion: reduce){
-
-  .dome:before,
-
-  .sigil-core{
-
-    animation:none;
-
+@media (prefers-reduced-motion: reduce) {
+  .starwell .dome::before,
+  .starwell .sigil-core {
+    animation: none;
   }
 
   .starwell button:hover,
-
-  .canon-card:hover,
-
-  .room-card:hover,
-
-  .city-state-instrument:hover{
-
-    transform:none;
-
+  .starwell :is(.canon-card, .room-card, .city-state-instrument, .seed-card, .entry-tab):hover {
+    transform: none;
   }
 
-  .starwell *{
-
-    transition-duration:.01ms !important;
-
+  .starwell * {
+    transition-duration: .01ms !important;
   }
-
 }
-
-
-
-/* ============================================================
-
-   End of vestments. The rooms keep their own souls —
-
-   they simply agree, now, on the language of the house.
-
-   The stars are still on. — F.U.
-
-   ============================================================ */
