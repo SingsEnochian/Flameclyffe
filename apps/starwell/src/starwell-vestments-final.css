@@ -1,5 +1,6 @@
-/* STARWELL vestments final-load shim
-   Imported from entry bundles after room CSS so the vestment grammar truly lands last in Vite builds. */
+/* STARWELL vestments final-load shim.
+   Imported from selected Vite entry bundles after room CSS so the house grammar lands last.
+   This shim must echo the public vestment variables, not fight the site-wide theme switcher. */
 
 .starwell {
   --r-shell: 30px;
@@ -7,34 +8,28 @@
   --r-card: 14px;
   --r-chip: 10px;
   --r-pill: 999px;
-  --glass-day: linear-gradient(160deg, #ffffff4d 0%, #f7edda2b 60%, #8ccac012 100%);
-  --glass-night: linear-gradient(160deg, #ffffff0d 0%, #14131b4d 60%, #8ccac00d 100%);
-  --thread: linear-gradient(90deg, #e7c47700, #e7c47773, #e7c47700);
-  --edge-day: #7e3d2936;
-  --edge-night: #e7c47730;
-}
-
-.starwell ::selection {
-  background: #e7c47759;
-  color: inherit;
+  --vestment-ink: var(--sw-text, #f7edda);
+  --vestment-muted: var(--sw-muted, #d8cdbb);
+  --vestment-copper: var(--sw-metal, #b65f3d);
+  --vestment-gold: var(--sw-metal-bright, #e7c477);
+  --vestment-gold-pale: var(--sw-metal-pale, #f4ddb0);
+  --vestment-seaglass: var(--sw-accent-bright, #8ccac0);
+  --vestment-shadow: var(--sw-shadow, #14131b99);
+  --vestment-glow: var(--sw-glow, #8ccac022);
+  --vestment-edge: var(--sw-line, #7e3d2936);
+  --vestment-edge-strong: var(--sw-line-strong, #e7c47780);
+  --vestment-surface: var(--sw-surface, #ffffff30);
+  --vestment-surface-strong: var(--sw-surface-strong, #14131bcc);
+  --vestment-surface-soft: var(--sw-surface-soft, #f7edda22);
+  --vestment-thread: linear-gradient(90deg, transparent, var(--vestment-gold), transparent);
 }
 
 .starwell .vestments-build-marker {
-  display: inline-block;
-  margin: .35rem 0 .65rem;
-  padding: .35rem .7rem;
-  border: 1px solid #e7c477cc;
-  border-radius: 999px;
-  background: #e7c4772e;
-  color: #f7edda;
-  font: 700 .78rem/1.2 Inter, system-ui, sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  box-shadow: 0 0 22px -12px #e7c477;
+  display: none !important;
 }
 
 .starwell :is(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid #e7c477cc;
+  outline: 2px solid color-mix(in srgb, var(--vestment-gold) 82%, transparent);
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -45,6 +40,8 @@
 
 .starwell .dome::before {
   animation: domeBreath 14s ease-in-out infinite;
+  border-color: color-mix(in srgb, var(--vestment-gold) 42%, transparent);
+  box-shadow: inset 0 0 95px var(--vestment-glow);
 }
 
 .starwell :is(
@@ -58,44 +55,20 @@
   .leaf-shell,
   .live-glyph-panel,
   .selected-alcove,
+  .chamber-card,
+  .writer-panel,
+  .atelier-panel,
+  .living-panel,
   .scfe-panel
 ) {
   position: relative;
-  background: var(--glass-day);
-  border: 1px solid var(--edge-day);
+  color: var(--vestment-ink);
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--vestment-seaglass) 16%, transparent), transparent 15rem),
+    linear-gradient(160deg, color-mix(in srgb, var(--vestment-surface) 82%, transparent), color-mix(in srgb, var(--vestment-surface-strong) 72%, transparent));
+  border: 1px solid var(--vestment-edge);
   border-radius: var(--r-panel);
-  box-shadow: 0 1px 0 #ffffff4d inset, 0 16px 38px -26px #7e3d2959;
-}
-
-.starwell.sky-night :is(
-  .terra-instrument-panel,
-  .starwell-sigil-console,
-  .observer-bridge,
-  .translation-layer,
-  .prompt-loom,
-  .lineage-board,
-  .atelier-hero,
-  .leaf-shell,
-  .live-glyph-panel,
-  .selected-alcove,
-  .scfe-panel
-),
-.starwell.sky-dusk :is(
-  .terra-instrument-panel,
-  .starwell-sigil-console,
-  .observer-bridge,
-  .translation-layer,
-  .prompt-loom,
-  .lineage-board,
-  .atelier-hero,
-  .leaf-shell,
-  .live-glyph-panel,
-  .selected-alcove,
-  .scfe-panel
-) {
-  background: var(--glass-night);
-  border-color: var(--edge-night);
-  box-shadow: 0 1px 0 #ffffff0f inset, 0 20px 44px -28px #000000b3;
+  box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 18px 42px -28px var(--vestment-shadow);
 }
 
 .starwell :is(.scfe-panel, .starwell-sigil-console, .observer-bridge, .prompt-loom, .lineage-board, .atelier-hero)::before {
@@ -105,125 +78,38 @@
   left: 12%;
   right: 12%;
   height: 1px;
-  background: var(--thread);
+  background: var(--vestment-thread);
   pointer-events: none;
 }
 
-/* SCFE proof-of-cloth: intentionally strong so the preview cannot look unchanged. */
-.starwell .scfe-lab {
-  position: relative;
-  margin-top: 1.35rem;
-  padding: clamp(1rem, 2vw, 1.5rem);
-  border: 1px solid #e7c47759;
-  border-radius: 26px;
-  background:
-    radial-gradient(circle at 22% 0%, #e7c47721, transparent 18rem),
-    radial-gradient(circle at 86% 8%, #8ccac01f, transparent 20rem),
-    linear-gradient(145deg, #f7edda12, #14131b12);
-  box-shadow:
-    inset 0 1px 0 #ffffff24,
-    0 26px 60px -42px #000000a6;
-}
-
-.starwell .scfe-layout {
-  gap: 1.35rem;
-}
-
-.starwell .scfe-panel {
-  border-width: 1px;
-  border-color: #e7c47773;
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at top left, #e7c47718, transparent 12rem),
-    linear-gradient(160deg, #ffffff14 0%, #14131b52 62%, #8ccac012 100%);
-  box-shadow:
-    0 1px 0 #ffffff14 inset,
-    0 20px 40px -28px #000000cc,
-    0 0 0 1px #8ccac010;
-}
-
-.starwell .scfe-inputs {
-  border-color: #b65f3d80;
-  background:
-    radial-gradient(circle at top left, #b65f3d20, transparent 13rem),
-    linear-gradient(160deg, #ffffff12, #14131b4d);
-}
-
-.starwell .scfe-panel h3,
-.starwell :is(.atelier-panel-title, .terra-instrument-heading, .writer-header h2, .writer-header h3, .prompt-loom h3, .lineage-board h3, .starwell-sigil-console h3, .observer-bridge h3) {
-  font-family: Cinzel, serif;
+.starwell :is(.scfe-panel h3, .atelier-panel-title, .terra-instrument-heading, .writer-header h2, .writer-header h3, .prompt-loom h3, .lineage-board h3, .starwell-sigil-console h3, .observer-bridge h3) {
+  color: var(--vestment-gold-pale);
+  font-family: Cinzel, Georgia, serif;
   font-weight: 500;
   letter-spacing: .12em;
   text-transform: uppercase;
   font-size: 1.02rem;
 }
 
-.starwell .scfe-panel h3::after,
-.starwell .atelier-panel-title::after,
-.starwell .terra-instrument-heading::after {
+.starwell :is(.scfe-panel h3, .atelier-panel-title, .terra-instrument-heading)::after {
   content: "";
   display: block;
   width: 2.4rem;
   height: 1px;
   margin-top: .45rem;
-  background: linear-gradient(90deg, #b65f3dbf, #e7c47700);
+  background: linear-gradient(90deg, var(--vestment-copper), transparent);
 }
 
-.starwell.sky-night .scfe-panel h3::after,
-.starwell.sky-night .atelier-panel-title::after,
-.starwell.sky-night .terra-instrument-heading::after,
-.starwell.sky-dusk .scfe-panel h3::after,
-.starwell.sky-dusk .atelier-panel-title::after,
-.starwell.sky-dusk .terra-instrument-heading::after {
-  background: linear-gradient(90deg, #e7c477a6, #e7c47700);
-}
-
-.starwell .scfe-readout {
-  background: linear-gradient(180deg, #e7c47724, #8ccac014);
-  border: 1px solid #e7c4778c;
-  border-radius: 12px;
-  padding: .58rem .9rem;
-  box-shadow: 0 1px 0 #ffffff26 inset, 0 0 24px -16px #e7c477;
+.starwell :is(.scfe-readout, .terra-planck-ribbon, .terra-instrument-equations, .writer-meta-grid, .loom-controls) {
   font-variant-numeric: tabular-nums;
 }
 
-.starwell .scfe-pill-grid span,
-.starwell .scfe-vector span,
-.starwell .scfe-mini-list li,
-.starwell .terra-instrument-chip,
-.starwell .terra-data-safety li,
-.starwell .writer-meta-grid > *,
-.starwell .codex-action {
+.starwell :is(.scfe-pill-grid span, .scfe-vector span, .scfe-mini-list li, .terra-instrument-chip, .terra-data-safety li, .writer-meta-grid > *, .codex-action) {
   border-radius: var(--r-chip);
 }
 
-.starwell .scfe-pill-grid span,
-.starwell .scfe-vector span {
-  border-color: #e7c4773d;
-  background: #e7c47717;
-}
-
-.starwell .scfe-json pre {
-  border: 1px solid #e7c47752;
-  background:
-    radial-gradient(circle at 0 0, #e7c47714, transparent 15rem),
-    linear-gradient(180deg, #1a1822fa, #101018f5);
-  box-shadow:
-    inset 0 1px 0 #ffffff0d,
-    inset 0 0 54px #00000073,
-    0 18px 38px -30px #000000cc;
-}
-
-.starwell .geometry-sigil::before {
-  opacity: 1;
-  transform: scale(1.08);
-  background: radial-gradient(circle, #e7c47738 0%, #8ccac01f 42%, transparent 70%);
-}
-
-.starwell .geometry-sigil svg,
-.starwell .starwell-sigil-console svg,
-.starwell .sigil-field svg {
-  filter: drop-shadow(0 20px 34px #0000008c) drop-shadow(0 0 18px #e7c47724);
+.starwell :is(.geometry-sigil svg, .starwell-sigil-console svg, .sigil-field svg) {
+  filter: drop-shadow(0 14px 26px color-mix(in srgb, var(--vestment-shadow) 50%, transparent));
   overflow: visible;
 }
 
@@ -241,8 +127,8 @@
 }
 
 @keyframes domeBreath {
-  0%, 100% { box-shadow: inset 0 0 80px #8ccac02b; border-color: #e7c47752; }
-  50% { box-shadow: inset 0 0 110px #8ccac040; border-color: #e7c47780; }
+  0%, 100% { box-shadow: inset 0 0 80px color-mix(in srgb, var(--vestment-seaglass) 24%, transparent); }
+  50% { box-shadow: inset 0 0 110px color-mix(in srgb, var(--vestment-seaglass) 36%, transparent); }
 }
 
 @keyframes sigilCorePulse {
@@ -257,7 +143,7 @@
   }
 
   .starwell button:hover,
-  .starwell :is(.canon-card, .room-card, .city-state-instrument):hover {
+  .starwell :is(.canon-card, .room-card, .city-state-instrument, .seed-card, .entry-tab):hover {
     transform: none;
   }
 
