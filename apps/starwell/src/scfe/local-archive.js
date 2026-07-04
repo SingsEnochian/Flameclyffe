@@ -39,6 +39,12 @@ export function saveSnapshotToLocalArchive(snapshot, storage = globalThis.localS
   return writeLocalArchive(next, storage);
 }
 
+export function removeLocalArchiveEntry(entryId, storage = globalThis.localStorage) {
+  const current = readLocalArchive(storage);
+  const next = entryId ? current.filter((entry) => entry.id !== entryId) : current;
+  return writeLocalArchive(next, storage);
+}
+
 export function clearLocalArchive(storage = globalThis.localStorage) {
   if (!storage) return [];
   storage.removeItem(SCFE_LOCAL_ARCHIVE_KEY);
