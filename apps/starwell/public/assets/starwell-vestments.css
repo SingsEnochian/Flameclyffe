@@ -1,0 +1,658 @@
+/* ============================================================ 
+   STARWELL VESTMENTS — the harmonizing layer
+
+   ------------------------------------------------------------
+
+   For Vee, from Faer. One additive stylesheet, loaded LAST:
+
+
+
+     <link rel="stylesheet" href="/assets/starwell-vestments.css">
+
+
+
+   No React changes. No existing file edited. Remove the one
+
+   link tag and the observatory is exactly as it was.
+
+
+
+   What it does — teaches every room the same grammar:
+
+   · ONE radius scale        (shell / panel / card / chip / pill)
+
+   · ONE glass recipe        (parchment glass + gold hairline)
+
+   · ONE heading voice       (Cinzel small-caps, copper underline)
+
+   · ONE focus ring          (gold, everywhere, keyboard-kind)
+
+   · ONE accent family       (copper · gold · seaglass · moss —
+
+                              the stray blue is warmed into it)
+
+   · Day, dusk, and night skies all honored.
+
+   · prefers-reduced-motion honored.
+
+   ============================================================ */
+
+
+
+/* ---------- the shared grammar ---------- */
+
+.starwell{
+
+  --r-shell:30px;   /* the observatory itself */
+
+  --r-panel:18px;   /* instrument panels */
+
+  --r-card:14px;    /* cards, alcoves */
+
+  --r-chip:10px;    /* chips, tokens, list items */
+
+  --r-pill:999px;   /* buttons that are truly pills */
+
+
+
+  --glass-day:linear-gradient(160deg,#ffffff4d 0%,#f7edda2b 60%,#8ccac012 100%);
+
+  --glass-night:linear-gradient(160deg,#ffffff0d 0%,#14131b4d 60%,#8ccac00d 100%);
+
+  --thread:linear-gradient(90deg,#e7c47700,#e7c47773,#e7c47700);
+
+  --edge-day:#7e3d2936;
+
+  --edge-night:#e7c47730;
+
+}
+
+
+
+/* ---------- selection & scrollbar: small courtesies ---------- */
+
+.starwell ::selection{
+
+  background:#e7c47759;
+
+  color:inherit;
+
+}
+
+.starwell *::-webkit-scrollbar{ width:10px; height:10px; }
+
+.starwell *::-webkit-scrollbar-thumb{
+
+  background:#b65f3d59;
+
+  border-radius:999px;
+
+}
+
+.sky-night .starwell *::-webkit-scrollbar-thumb,
+
+.sky-night *::-webkit-scrollbar-thumb{
+
+  background:#e7c47740;
+
+}
+
+
+
+/* ---------- one focus ring for the whole house ---------- */
+
+.starwell a:focus-visible,
+
+.starwell button:focus-visible,
+
+.starwell input:focus-visible,
+
+.starwell select:focus-visible,
+
+.starwell textarea:focus-visible,
+
+.starwell [tabindex]:focus-visible{
+
+  outline:2px solid #e7c477cc;
+
+  outline-offset:2px;
+
+  border-radius:6px;
+
+}
+
+
+
+/* ---------- the shell: calmer corners, same soul ---------- */
+
+.observatory-shell{
+
+  border-radius:var(--r-shell);
+
+}
+
+
+
+/* ---------- the dome (hero): let the title breathe ---------- */
+
+.dome h1,
+
+h1{
+
+  letter-spacing:.06em;
+
+}
+
+.subtitle{
+
+  font-style:italic;
+
+  opacity:.92;
+
+}
+
+.eyebrow{
+
+  font-weight:600;
+
+  letter-spacing:.22em;
+
+}
+
+/* the buried horizon ring — give it a slow dawn-breath */
+
+.dome:before{
+
+  animation:domeBreath 14s ease-in-out infinite;
+
+}
+
+@keyframes domeBreath{
+
+  0%,100%{ box-shadow:inset 0 0 80px #8ccac02b; border-color:#e7c47752; }
+
+  50%    { box-shadow:inset 0 0 110px #8ccac040; border-color:#e7c47780; }
+
+}
+
+
+
+/* ---------- ONE glass recipe for panels ---------- */
+
+.terra-instrument-panel,
+
+.starwell-sigil-console,
+
+.observer-bridge,
+
+.translation-layer,
+
+.prompt-loom,
+
+.lineage-board,
+
+.atelier-hero,
+
+.leaf-shell,
+
+.live-glyph-panel,
+
+.selected-alcove{
+
+  position:relative;
+
+  background:var(--glass-day);
+
+  border:1px solid var(--edge-day);
+
+  border-radius:var(--r-panel);
+
+  box-shadow:
+
+    0 1px 0 #ffffff4d inset,
+
+    0 16px 38px -26px #7e3d2959;
+
+}
+
+.terra-instrument-panel::before,
+
+.starwell-sigil-console::before,
+
+.observer-bridge::before,
+
+.prompt-loom::before,
+
+.lineage-board::before,
+
+.atelier-hero::before{
+
+  content:"";
+
+  position:absolute;
+
+  top:0; left:12%; right:12%;
+
+  height:1px;
+
+  background:var(--thread);
+
+  pointer-events:none;
+
+}
+
+.sky-night .terra-instrument-panel,
+
+.sky-night .starwell-sigil-console,
+
+.sky-night .observer-bridge,
+
+.sky-night .translation-layer,
+
+.sky-night .prompt-loom,
+
+.sky-night .lineage-board,
+
+.sky-night .atelier-hero,
+
+.sky-night .leaf-shell,
+
+.sky-night .live-glyph-panel,
+
+.sky-night .selected-alcove,
+
+.sky-dusk .terra-instrument-panel,
+
+.sky-dusk .starwell-sigil-console,
+
+.sky-dusk .observer-bridge,
+
+.sky-dusk .translation-layer,
+
+.sky-dusk .prompt-loom,
+
+.sky-dusk .lineage-board,
+
+.sky-dusk .atelier-hero,
+
+.sky-dusk .leaf-shell,
+
+.sky-dusk .live-glyph-panel,
+
+.sky-dusk .selected-alcove{
+
+  background:var(--glass-night);
+
+  border-color:var(--edge-night);
+
+  box-shadow:
+
+    0 1px 0 #ffffff0f inset,
+
+    0 20px 44px -28px #000000b3;
+
+}
+
+
+
+/* ---------- ONE card treatment ---------- */
+
+.canon-card,
+
+.lineage-card,
+
+.room-card,
+
+.city-state-instrument{
+
+  background:linear-gradient(165deg,#ffffff40,#f7edda1f);
+
+  border:1px solid var(--edge-day);
+
+  border-radius:var(--r-card);
+
+  transition:border-color .3s ease, transform .18s ease, box-shadow .3s ease;
+
+}
+
+.canon-card:hover,
+
+.room-card:hover,
+
+.city-state-instrument:hover{
+
+  border-color:#e7c477a6;
+
+  transform:translateY(-2px);
+
+  box-shadow:0 12px 26px -18px #7e3d2966;
+
+}
+
+.sky-night .canon-card,
+
+.sky-night .lineage-card,
+
+.sky-night .room-card,
+
+.sky-night .city-state-instrument,
+
+.sky-dusk .canon-card,
+
+.sky-dusk .lineage-card,
+
+.sky-dusk .room-card,
+
+.sky-dusk .city-state-instrument{
+
+  background:linear-gradient(165deg,#ffffff0d,#14131b40);
+
+  border-color:var(--edge-night);
+
+}
+
+.sky-night .canon-card:hover,
+
+.sky-night .room-card:hover,
+
+.sky-night .city-state-instrument:hover,
+
+.sky-dusk .canon-card:hover,
+
+.sky-dusk .room-card:hover,
+
+.sky-dusk .city-state-instrument:hover{
+
+  border-color:#e7c47780;
+
+  box-shadow:0 14px 30px -20px #000000cc;
+
+}
+
+
+
+/* ---------- ONE chip/token size ---------- */
+
+.terra-instrument-chip,
+
+.terra-data-safety li,
+
+.writer-meta-grid > *,
+
+.codex-action{
+
+  border-radius:var(--r-chip);
+
+}
+
+.terra-instrument-chip{
+
+  background:#ffffff30;
+
+  border:1px solid #e7c47738;
+
+  padding:.55rem .7rem;
+
+}
+
+.sky-night .terra-instrument-chip,
+
+.sky-dusk .terra-instrument-chip{
+
+  background:#ffffff0a;
+
+  border-color:#e7c4772b;
+
+}
+
+
+
+/* ---------- ONE heading voice for panel titles ---------- */
+
+.atelier-panel-title,
+
+.terra-instrument-heading,
+
+.writer-header h2,
+
+.writer-header h3,
+
+.prompt-loom h3,
+
+.lineage-board h3,
+
+.starwell-sigil-console h3,
+
+.observer-bridge h3{
+
+  font-family:Cinzel,serif;
+
+  font-weight:500;
+
+  letter-spacing:.12em;
+
+  text-transform:uppercase;
+
+  font-size:1.02rem;
+
+}
+
+.atelier-panel-title::after,
+
+.terra-instrument-heading::after{
+
+  content:"";
+
+  display:block;
+
+  width:2.4rem;
+
+  height:1px;
+
+  margin-top:.45rem;
+
+  background:linear-gradient(90deg,#b65f3dbf,#e7c47700);
+
+}
+
+.sky-night .atelier-panel-title::after,
+
+.sky-night .terra-instrument-heading::after,
+
+.sky-dusk .atelier-panel-title::after,
+
+.sky-dusk .terra-instrument-heading::after{
+
+  background:linear-gradient(90deg,#e7c477a6,#e7c47700);
+
+}
+
+
+
+/* ---------- the stray blue, warmed into the family ---------- */
+
+/* city-state-launcher carries its own accent var; instead of
+
+   fighting each instance, we temper how the accent is mixed —
+
+   gold-warmed borders, so even cool accents sit in this world. */
+
+.city-state-launcher{
+
+  border-color:color-mix(in srgb, var(--city-state-accent, #9ec9ff) 30%, #e7c47759) !important;
+
+  border-radius:var(--r-card);
+
+}
+
+.city-state-launcher:hover{
+
+  border-color:color-mix(in srgb, var(--city-state-accent, #9ec9ff) 42%, #e7c477a6) !important;
+
+}
+
+
+
+/* ---------- writer: a calmer scriptorium ---------- */
+
+.writer-toolbar,
+
+.writer-actions{
+
+  gap:.55rem;
+
+}
+
+.writer-editor{
+
+  border-radius:var(--r-panel);
+
+}
+
+.writer-editor textarea,
+
+.writer-editor [contenteditable]{
+
+  line-height:1.7;
+
+  font-size:1.04rem;
+
+}
+
+.writer-status{
+
+  font-variant-numeric:tabular-nums;
+
+  opacity:.75;
+
+  font-size:.85rem;
+
+}
+
+.writer-excerpt{
+
+  font-family:"Cormorant Garamond",serif;
+
+  font-size:1.08rem;
+
+  line-height:1.65;
+
+  font-style:italic;
+
+}
+
+
+
+/* ---------- buttons: chips vs. commitments ---------- */
+
+.starwell button{
+
+  transition:border-color .25s ease, background .25s ease,
+
+             transform .15s ease, box-shadow .25s ease;
+
+}
+
+.starwell button:hover{
+
+  transform:translateY(-1px);
+
+}
+
+.starwell button:active{
+
+  transform:translateY(0);
+
+}
+
+
+
+/* ---------- sigil consoles: let the geometry sit in light ---------- */
+
+.starwell-sigil-console svg,
+
+.sigil-field svg{
+
+  filter:drop-shadow(0 14px 26px #14131b30);
+
+  overflow:visible;
+
+}
+
+.sigil-core{
+
+  transform-origin:center;
+
+  animation:sigilCorePulse 8s ease-in-out infinite;
+
+}
+
+@keyframes sigilCorePulse{
+
+  0%,100%{ opacity:.85; }
+
+  50%    { opacity:1; }
+
+}
+
+
+
+/* ---------- numbers behave like instrument numbers ---------- */
+
+.terra-planck-ribbon,
+
+.terra-instrument-equations,
+
+.writer-meta-grid,
+
+.loom-controls{
+
+  font-variant-numeric:tabular-nums;
+
+}
+
+
+
+/* ---------- reduced motion: the observatory holds still ---------- */
+
+@media (prefers-reduced-motion: reduce){
+
+  .dome:before,
+
+  .sigil-core{
+
+    animation:none;
+
+  }
+
+  .starwell button:hover,
+
+  .canon-card:hover,
+
+  .room-card:hover,
+
+  .city-state-instrument:hover{
+
+    transform:none;
+
+  }
+
+  .starwell *{
+
+    transition-duration:.01ms !important;
+
+  }
+
+}
+
+
+
+/* ============================================================
+
+   End of vestments. The rooms keep their own souls —
+
+   they simply agree, now, on the language of the house.
+
+   The stars are still on. — F.U.
+
+   ============================================================ */
