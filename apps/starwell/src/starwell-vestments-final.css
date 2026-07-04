@@ -19,6 +19,20 @@
   color: inherit;
 }
 
+.starwell .vestments-build-marker {
+  display: inline-block;
+  margin: .35rem 0 .65rem;
+  padding: .35rem .7rem;
+  border: 1px solid #e7c477cc;
+  border-radius: 999px;
+  background: #e7c4772e;
+  color: #f7edda;
+  font: 700 .78rem/1.2 Inter, system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  box-shadow: 0 0 22px -12px #e7c477;
+}
+
 .starwell :is(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid #e7c477cc;
   outline-offset: 2px;
