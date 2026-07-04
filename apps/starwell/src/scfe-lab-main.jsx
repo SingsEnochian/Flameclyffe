@@ -11,6 +11,7 @@ import './starwell-living-rooms.css';
 import './starwell-vestments-final.css';
 
 const OBSERVATORY_TIME_ZONE = 'America/New_York';
+const VESTMENTS_BUILD_MARKER = 'PR34 vestments build c81c603';
 
 function getTimeParts(date = new Date(), timeZone = OBSERVATORY_TIME_ZONE) {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -38,12 +39,13 @@ function SCFELabApp() {
   const phase = getSkyPhase(timeParts.hour);
 
   return (
-    <main className={`starwell sky-${phase}`}>
+    <main className={`starwell sky-${phase}`} data-vestments-build={VESTMENTS_BUILD_MARKER}>
       <div className="stars" />
       <section className="observatory-shell">
         <section className="dome">
           <div className="dome-inner">
             <p className="eyebrow">Hearthweave Observatory · SCFE Lab · STARWELL Time {timeParts.display}</p>
+            <p className="vestments-build-marker">{VESTMENTS_BUILD_MARKER}</p>
             <h1>SCFE</h1>
             <p className="subtitle">A read-only concurrent field lab for Barbault maths, DEEP, somatics, Hearthfire, sacred geometry, and Terra Aeterna.</p>
             <p className="inscription">One moment, many grammars, agency at the throne.</p>
