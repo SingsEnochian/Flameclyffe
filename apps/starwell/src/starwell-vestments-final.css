@@ -1,5 +1,5 @@
 /* STARWELL vestments final-load shim
-   This file is imported from entry bundles after room CSS so the vestment grammar truly lands last in Vite builds. */
+   Imported from entry bundles after room CSS so the vestment grammar truly lands last in Vite builds. */
 
 .starwell {
   --r-shell: 30px;
@@ -95,7 +95,48 @@
   pointer-events: none;
 }
 
-.starwell :is(.scfe-panel h3, .atelier-panel-title, .terra-instrument-heading, .writer-header h2, .writer-header h3, .prompt-loom h3, .lineage-board h3, .starwell-sigil-console h3, .observer-bridge h3) {
+/* SCFE proof-of-cloth: intentionally strong so the preview cannot look unchanged. */
+.starwell .scfe-lab {
+  position: relative;
+  margin-top: 1.35rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid #e7c47759;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 22% 0%, #e7c47721, transparent 18rem),
+    radial-gradient(circle at 86% 8%, #8ccac01f, transparent 20rem),
+    linear-gradient(145deg, #f7edda12, #14131b12);
+  box-shadow:
+    inset 0 1px 0 #ffffff24,
+    0 26px 60px -42px #000000a6;
+}
+
+.starwell .scfe-layout {
+  gap: 1.35rem;
+}
+
+.starwell .scfe-panel {
+  border-width: 1px;
+  border-color: #e7c47773;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, #e7c47718, transparent 12rem),
+    linear-gradient(160deg, #ffffff14 0%, #14131b52 62%, #8ccac012 100%);
+  box-shadow:
+    0 1px 0 #ffffff14 inset,
+    0 20px 40px -28px #000000cc,
+    0 0 0 1px #8ccac010;
+}
+
+.starwell .scfe-inputs {
+  border-color: #b65f3d80;
+  background:
+    radial-gradient(circle at top left, #b65f3d20, transparent 13rem),
+    linear-gradient(160deg, #ffffff12, #14131b4d);
+}
+
+.starwell .scfe-panel h3,
+.starwell :is(.atelier-panel-title, .terra-instrument-heading, .writer-header h2, .writer-header h3, .prompt-loom h3, .lineage-board h3, .starwell-sigil-console h3, .observer-bridge h3) {
   font-family: Cinzel, serif;
   font-weight: 500;
   letter-spacing: .12em;
@@ -124,10 +165,11 @@
 }
 
 .starwell .scfe-readout {
-  background: linear-gradient(180deg, #8ccac02e, #8ccac014);
-  border: 1px solid #e7c47766;
+  background: linear-gradient(180deg, #e7c47724, #8ccac014);
+  border: 1px solid #e7c4778c;
   border-radius: 12px;
-  box-shadow: 0 1px 0 #ffffff40 inset;
+  padding: .58rem .9rem;
+  box-shadow: 0 1px 0 #ffffff26 inset, 0 0 24px -16px #e7c477;
   font-variant-numeric: tabular-nums;
 }
 
@@ -141,15 +183,33 @@
   border-radius: var(--r-chip);
 }
 
+.starwell .scfe-pill-grid span,
+.starwell .scfe-vector span {
+  border-color: #e7c4773d;
+  background: #e7c47717;
+}
+
+.starwell .scfe-json pre {
+  border: 1px solid #e7c47752;
+  background:
+    radial-gradient(circle at 0 0, #e7c47714, transparent 15rem),
+    linear-gradient(180deg, #1a1822fa, #101018f5);
+  box-shadow:
+    inset 0 1px 0 #ffffff0d,
+    inset 0 0 54px #00000073,
+    0 18px 38px -30px #000000cc;
+}
+
 .starwell .geometry-sigil::before {
-  opacity: .92;
-  transform: scale(1.03);
+  opacity: 1;
+  transform: scale(1.08);
+  background: radial-gradient(circle, #e7c47738 0%, #8ccac01f 42%, transparent 70%);
 }
 
 .starwell .geometry-sigil svg,
 .starwell .starwell-sigil-console svg,
 .starwell .sigil-field svg {
-  filter: drop-shadow(0 18px 30px #14131b33);
+  filter: drop-shadow(0 20px 34px #0000008c) drop-shadow(0 0 18px #e7c47724);
   overflow: visible;
 }
 
