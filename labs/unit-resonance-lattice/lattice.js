@@ -136,8 +136,8 @@ export function selectWindow(nodes = [], windowConfig = {}) {
       if (!node || typeof node !== 'object') return false;
       if (excludeIds?.has(node.id)) return false;
       if (includeIds?.has(node.id)) return true;
-      if (windowConfig.requireVisible && !node.meta?.visible) return false;
-      if (windowConfig.requireConsent && !node.meta?.consent) return false;
+      if (windowConfig.requireVisible && node.meta?.visible === false) return false;
+      if (windowConfig.requireConsent && node.meta?.consent === false) return false;
       if (includeKinds && !includeKinds.has(node.kind)) return false;
       return true;
     })
