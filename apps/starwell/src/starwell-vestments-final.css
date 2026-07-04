@@ -1,0 +1,193 @@
+/* STARWELL vestments final-load shim
+   This file is imported from entry bundles after room CSS so the vestment grammar truly lands last in Vite builds. */
+
+.starwell {
+  --r-shell: 30px;
+  --r-panel: 18px;
+  --r-card: 14px;
+  --r-chip: 10px;
+  --r-pill: 999px;
+  --glass-day: linear-gradient(160deg, #ffffff4d 0%, #f7edda2b 60%, #8ccac012 100%);
+  --glass-night: linear-gradient(160deg, #ffffff0d 0%, #14131b4d 60%, #8ccac00d 100%);
+  --thread: linear-gradient(90deg, #e7c47700, #e7c47773, #e7c47700);
+  --edge-day: #7e3d2936;
+  --edge-night: #e7c47730;
+}
+
+.starwell ::selection {
+  background: #e7c47759;
+  color: inherit;
+}
+
+.starwell :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #e7c477cc;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.starwell .observatory-shell {
+  border-radius: var(--r-shell);
+}
+
+.starwell .dome::before {
+  animation: domeBreath 14s ease-in-out infinite;
+}
+
+.starwell :is(
+  .terra-instrument-panel,
+  .starwell-sigil-console,
+  .observer-bridge,
+  .translation-layer,
+  .prompt-loom,
+  .lineage-board,
+  .atelier-hero,
+  .leaf-shell,
+  .live-glyph-panel,
+  .selected-alcove,
+  .scfe-panel
+) {
+  position: relative;
+  background: var(--glass-day);
+  border: 1px solid var(--edge-day);
+  border-radius: var(--r-panel);
+  box-shadow: 0 1px 0 #ffffff4d inset, 0 16px 38px -26px #7e3d2959;
+}
+
+.starwell.sky-night :is(
+  .terra-instrument-panel,
+  .starwell-sigil-console,
+  .observer-bridge,
+  .translation-layer,
+  .prompt-loom,
+  .lineage-board,
+  .atelier-hero,
+  .leaf-shell,
+  .live-glyph-panel,
+  .selected-alcove,
+  .scfe-panel
+),
+.starwell.sky-dusk :is(
+  .terra-instrument-panel,
+  .starwell-sigil-console,
+  .observer-bridge,
+  .translation-layer,
+  .prompt-loom,
+  .lineage-board,
+  .atelier-hero,
+  .leaf-shell,
+  .live-glyph-panel,
+  .selected-alcove,
+  .scfe-panel
+) {
+  background: var(--glass-night);
+  border-color: var(--edge-night);
+  box-shadow: 0 1px 0 #ffffff0f inset, 0 20px 44px -28px #000000b3;
+}
+
+.starwell :is(.scfe-panel, .starwell-sigil-console, .observer-bridge, .prompt-loom, .lineage-board, .atelier-hero)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: var(--thread);
+  pointer-events: none;
+}
+
+.starwell :is(.scfe-panel h3, .atelier-panel-title, .terra-instrument-heading, .writer-header h2, .writer-header h3, .prompt-loom h3, .lineage-board h3, .starwell-sigil-console h3, .observer-bridge h3) {
+  font-family: Cinzel, serif;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: 1.02rem;
+}
+
+.starwell .scfe-panel h3::after,
+.starwell .atelier-panel-title::after,
+.starwell .terra-instrument-heading::after {
+  content: "";
+  display: block;
+  width: 2.4rem;
+  height: 1px;
+  margin-top: .45rem;
+  background: linear-gradient(90deg, #b65f3dbf, #e7c47700);
+}
+
+.starwell.sky-night .scfe-panel h3::after,
+.starwell.sky-night .atelier-panel-title::after,
+.starwell.sky-night .terra-instrument-heading::after,
+.starwell.sky-dusk .scfe-panel h3::after,
+.starwell.sky-dusk .atelier-panel-title::after,
+.starwell.sky-dusk .terra-instrument-heading::after {
+  background: linear-gradient(90deg, #e7c477a6, #e7c47700);
+}
+
+.starwell .scfe-readout {
+  background: linear-gradient(180deg, #8ccac02e, #8ccac014);
+  border: 1px solid #e7c47766;
+  border-radius: 12px;
+  box-shadow: 0 1px 0 #ffffff40 inset;
+  font-variant-numeric: tabular-nums;
+}
+
+.starwell .scfe-pill-grid span,
+.starwell .scfe-vector span,
+.starwell .scfe-mini-list li,
+.starwell .terra-instrument-chip,
+.starwell .terra-data-safety li,
+.starwell .writer-meta-grid > *,
+.starwell .codex-action {
+  border-radius: var(--r-chip);
+}
+
+.starwell .geometry-sigil::before {
+  opacity: .92;
+  transform: scale(1.03);
+}
+
+.starwell .geometry-sigil svg,
+.starwell .starwell-sigil-console svg,
+.starwell .sigil-field svg {
+  filter: drop-shadow(0 18px 30px #14131b33);
+  overflow: visible;
+}
+
+.starwell .sigil-core {
+  transform-origin: center;
+  animation: sigilCorePulse 8s ease-in-out infinite;
+}
+
+.starwell button:hover {
+  transform: translateY(-1px);
+}
+
+.starwell button:active {
+  transform: translateY(0);
+}
+
+@keyframes domeBreath {
+  0%, 100% { box-shadow: inset 0 0 80px #8ccac02b; border-color: #e7c47752; }
+  50% { box-shadow: inset 0 0 110px #8ccac040; border-color: #e7c47780; }
+}
+
+@keyframes sigilCorePulse {
+  0%, 100% { opacity: .85; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starwell .dome::before,
+  .starwell .sigil-core {
+    animation: none;
+  }
+
+  .starwell button:hover,
+  .starwell :is(.canon-card, .room-card, .city-state-instrument):hover {
+    transform: none;
+  }
+
+  .starwell * {
+    transition-duration: .01ms !important;
+  }
+}
