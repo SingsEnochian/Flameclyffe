@@ -357,6 +357,69 @@
     linear-gradient(145deg, rgba(231, 196, 119, 0.16), rgba(140, 202, 192, 0.12));
 }
 
+.scfe-faq-stack {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.scfe-faq-card {
+  border: 1px solid rgba(126, 61, 41, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.sky-night .scfe-faq-card,
+.sky-dusk .scfe-faq-card {
+  border-color: rgba(231, 196, 119, 0.16);
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.scfe-faq-card[open] {
+  border-color: rgba(231, 196, 119, 0.5);
+  background:
+    linear-gradient(145deg, rgba(231, 196, 119, 0.14), rgba(140, 202, 192, 0.1));
+}
+
+.scfe-faq-card summary {
+  cursor: pointer;
+  padding: 0.7rem 0.8rem;
+  font-weight: 900;
+}
+
+.scfe-faq-card summary:focus-visible {
+  outline: 2px solid rgba(231, 196, 119, 0.76);
+  outline-offset: 2px;
+}
+
+.scfe-faq-dl {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0 0.8rem 0.8rem;
+}
+
+.scfe-faq-dl div {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.58rem 0.65rem;
+  border-radius: 14px;
+  background: rgba(140, 202, 192, 0.11);
+}
+
+.scfe-faq-dl dt {
+  font-family: Cinzel, serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.scfe-faq-dl dd {
+  margin: 0;
+  line-height: 1.45;
+}
+
 .scfe-json {
   max-width: 100%;
 }
