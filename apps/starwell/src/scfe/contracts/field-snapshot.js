@@ -1,4 +1,4 @@
-export const SCFE_SCHEMA_VERSION = 'scfe.field_snapshot.v0.1';
+export const SCFE_SCHEMA_VERSION = 'scfe.field_snapshot.v0.2';
 
 export const DEFAULT_EVIDENCE_LABELS = {
   astronomy: 'manual_or_calculated_input',
@@ -12,6 +12,7 @@ export const DEFAULT_EVIDENCE_LABELS = {
   frequency: 'evidence_informed_not_medical',
   terra_aeterna: 'narrative_application',
   agency: 'user_chosen_action',
+  agency_switchboard: 'user_controlled_regulation',
 };
 
 export function createDefaultFieldSnapshot(input = {}) {
@@ -112,6 +113,18 @@ export function createDefaultFieldSnapshot(input = {}) {
       energy_cost: 'low',
       plain_pass: null,
     },
+    agency_switchboard: {
+      schema: 'scfe.agency_switchboard.v0.1',
+      active_channel: 'standard',
+      active_label: 'Standard Exploration',
+      recommended_command: 'continue',
+      plain_language: 'Standard exploration is available.',
+      consent_anchor: 'Agency first. Intensity second. Meaning only with consent.',
+      field_context: 'field_observation',
+      reasons: [],
+      available_channels: [],
+      lab_behaviour: {},
+    },
     evidence_labels: DEFAULT_EVIDENCE_LABELS,
   };
 }
@@ -133,6 +146,7 @@ export function validateFieldSnapshot(snapshot) {
     'somatic',
     'terra_aeterna',
     'agency',
+    'agency_switchboard',
     'evidence_labels',
   ];
 
