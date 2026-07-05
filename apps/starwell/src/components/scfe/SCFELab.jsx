@@ -94,6 +94,10 @@ function buildInput(form) {
   };
 }
 
+function formatToken(value) {
+  return String(value || 'none').replaceAll('_', ' ');
+}
+
 export function SCFELab() {
   const [form, setForm] = useState(createInitialForm);
   const [copyState, setCopyState] = useState('ready');
@@ -286,6 +290,7 @@ export function SCFELab() {
             <DeepSomaticPanel snapshot={snapshot} />
             <FrequencyTerraPanel snapshot={snapshot} />
             <AgencyPanel snapshot={snapshot} />
+            <AgencySwitchboardPanel snapshot={snapshot} />
             <LocalArchivePanel entries={archiveEntries} onSave={saveLocalSnapshot} onClear={clearLocalSnapshots} />
           </>
         )}
@@ -478,6 +483,66 @@ function AgencyPanel({ snapshot }) {
       <div className="scfe-pill-grid">
         {snapshot.agency.suggested_actions.map((action) => <span key={action}>{action}</span>)}
       </div>
+    </article>
+  );
+}
+
+function AgencySwitchboardPanel({ snapshot }) {
+  const switchboard = snapshot.agency_switchboard;
+  if (!switchboard) return null;
+
+  const reasons = switchboard.reasons?.length ? switchboard.reasons : ['standard_available'];
+  const channels = switchboard.available_channels || [];
+
+  return (
+    <article className={`scfe-panel scfe-switchboard is-${switchboard.active_channel}`} aria-labelledby="scfe-switchboard-title">
+      <header className="scfe-switchboard-header">
+        <div>
+          <h3 id="scfe-switchboard-title">Agency Switchboard</h3>
+          <p>Visible lever state for local, read-only regulation.</p>
+        </div>
+        <strong className="scfe-switchboard-badge">{switchboard.active_label}</strong>
+      </header>
+
+      <p className="scfe-readout">Say: {switchboard.recommended_command}</p>
+      <p>{switchboard.plain_language}</p>
+      <p className="scfe-consent-anchor">{switchboard.consent_anchor}</p>
+
+      <dl className="scfe-compact-dl scfe-switchboard-dl">
+        <div><dt>Field context</dt><dd>{formatToken(switchboard.field_context)}</dd></div>
+        <div><dt>Processing</dt><dd>{formatToken(switchboard.lab_behaviour?.processing)}</dd></div>
+        <div><dt>Sound</dt><dd>{formatToken(switchboard.lab_behaviour?.sound)}</dd></div>
+        <div><dt>Archive</dt><dd>{formatToken(switchboard.lab_behaviour?.archive)}</dd></div>
+      </dl>
+
+      <section className="scfe-switchboard-section" aria-labelledby="scfe-switchboard-reasons">
+        <h4 id="scfe-switchboard-reasons">Why this channel</h4>
+        <ul className="scfe-mini-list">
+          {reasons.map((reason) => (
+            <li key={reason}><span>reason</span><strong>{formatToken(reason)}</strong></li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="scfe-switchboard-section" aria-labelledby="scfe-switchboard-levers">
+        <h4 id="scfe-switchboard-levers">Available levers</h4>
+        <div className="scfe-command-grid" role="list">
+          {channels.map((channel) => (
+            <span
+              key={channel.id}
+              className={channel.id === switchboard.active_channel ? 'active' : ''}
+              role="listitem"
+              aria-current={channel.id === switchboard.active_channel ? 'true' : undefined}
+              title={channel.purpose}
+            >
+              <strong>{channel.label}</strong>
+              <small>{channel.invocation}</small>
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <p className="scfe-switchboard-note">Display-only in this pass. The JSON export carries the same switchboard state; future controls can make these levers interactive without changing the packet shape.</p>
     </article>
   );
 }
