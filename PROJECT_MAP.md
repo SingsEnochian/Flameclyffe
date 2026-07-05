@@ -27,6 +27,7 @@ Systems that define the product and should remain coherent across every route.
 - Terra Aeterna as the world-root and aesthetic grammar.
 - Presence Mode and the Hearthweave Observatory shell.
 - Accessible, consent-aware interaction.
+- Agency Switchboard: Nope Lever, Change Channel, Soft Landing, and Log Only as shared regulation grammar.
 - STARWELL room routing and living manuscript architecture.
 - Supabase-backed canon, archive, and observation data.
 - Stonewood material language.
@@ -49,6 +50,22 @@ Enduring systems attached to the trunk with a clear purpose.
 - Faer's Study
 - Virelya's Lantern Study
 - SCFE Read-Only Lab (`apps/starwell/scfe-lab.html`) — standalone lab entrypoint for Barbault maths, manual ephemeris adapter state, DEEP seed vectors, somatic safety, sacred geometry mapping, Hearthfire protocol recommendation, Terra Aeterna prompts, local-only archive queue, and manual JSON export. No Supabase writes.
+
+### Agency Switchboard
+
+**Owner:** `apps/starwell/src/scfe/agency-switchboard.js`
+
+**Spec:** `docs/starwell/agency-switchboard-v0.1.md`
+
+**Purpose:** Give every lab a shared set of graded exits before forced analysis or full stop: Nope Lever, Change Channel, Soft Landing, Log Only Basket, and Standard Exploration.
+
+**Behaviour:**
+
+- Body-no or paused safety mode recommends Nope Lever.
+- Migraine or low-light silent mode recommends Soft Landing.
+- High activation plus high fatigue, or pressure/entropy spikes, recommend Change Channel.
+- High fatigue, high pain, or low agency bandwidth recommend Log Only.
+- Outputs remain local-first and do not canonise, escalate, or write to Supabase by themselves.
 
 ### Stonewood theme engine
 
