@@ -1,3 +1,4 @@
+import { createAgencySwitchboard } from './agency-switchboard.js';
 import { detectAspects, detectConfigurations } from './aspects.js';
 import { calculateBarbaultIndex } from './barbault.js';
 import { reviewConfigurations } from './configuration-review.js';
@@ -74,6 +75,7 @@ export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
     context: input.context || {},
   });
   const agency = createAgencyOutput({ deep, somatic, terra_aeterna });
+  const agency_switchboard = createAgencySwitchboard({ deep, somatic, terra_aeterna });
 
   return validateFieldSnapshot({
     ...base,
@@ -95,6 +97,7 @@ export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
     frequency_protocol,
     terra_aeterna,
     agency,
+    agency_switchboard,
   });
 }
 
