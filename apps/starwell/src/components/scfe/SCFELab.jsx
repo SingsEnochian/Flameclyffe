@@ -68,6 +68,44 @@ const FORM_PRESETS = [
   },
 ];
 
+const SWITCHBOARD_FAQ = {
+  nope_lever: {
+    label: 'Nope Lever',
+    use: 'Use this when your body, attention, or consent says no. You do not need a full reason.',
+    plain_pass: 'Stop here. No more interpretation. No sound. No next step required.',
+    function: 'It closes the active inquiry, keeps the field from asking for more, and leaves only an optional local log.',
+    not_for: 'Not for pushing through, explaining yourself, or finishing the scene because it was already open.',
+  },
+  change_channel: {
+    label: 'Change Channel',
+    use: 'Use this when the current frame is wrong but you do not want to lose the thread.',
+    plain_pass: 'Same thread, safer scene. Shift the tone, task, or sensory channel.',
+    function: 'It redirects the lab away from the current intensity while preserving continuity for later work.',
+    not_for: 'Not for forcing deeper analysis. It changes the path instead of proving the old one was bad.',
+  },
+  soft_landing: {
+    label: 'Soft Landing',
+    use: 'Use this when the system needs to get quieter: migraine, low-light need, dizziness, pain, or too much input.',
+    plain_pass: 'Dim the room. Keep it quiet. Make the next step tiny or none.',
+    function: 'It lowers sensory demand, suppresses sound guidance, and favours orientation over interpretation.',
+    not_for: 'Not for productivity. This is the cushion, not the launchpad.',
+  },
+  log_only: {
+    label: 'Log Only Basket',
+    use: 'Use this when something matters enough to keep but not enough to open right now.',
+    plain_pass: 'Record it. Hold it. Do not analyse it yet.',
+    function: 'It keeps the signal local and non-canon so the lab can remember without escalating.',
+    not_for: 'Not for turning a note into a task, omen, protocol, or required story beat.',
+  },
+  standard: {
+    label: 'Standard Exploration',
+    use: 'Use this when capacity and consent are present and the field is safe to inspect.',
+    plain_pass: 'Continue gently. Read the field and choose one next action.',
+    function: 'It allows normal read-only exploration with the existing agency and archive controls.',
+    not_for: 'Not for ignoring fatigue, pain, body-no, or sensory warning signs.',
+  },
+};
+
 function createInitialForm() {
   return {
     target_timestamp: DEFAULT_SCFE_INPUT.target_timestamp,
@@ -539,6 +577,28 @@ function AgencySwitchboardPanel({ snapshot }) {
               <small>{channel.invocation}</small>
             </span>
           ))}
+        </div>
+      </section>
+
+      <section className="scfe-switchboard-section" aria-labelledby="scfe-switchboard-faq">
+        <h4 id="scfe-switchboard-faq">Plain-pass FAQ</h4>
+        <div className="scfe-faq-stack">
+          {channels.map((channel) => {
+            const faq = SWITCHBOARD_FAQ[channel.id];
+            if (!faq) return null;
+
+            return (
+              <details key={channel.id} className="scfe-faq-card" open={channel.id === switchboard.active_channel}>
+                <summary>{faq.label}</summary>
+                <dl className="scfe-faq-dl">
+                  <div><dt>Use when</dt><dd>{faq.use}</dd></div>
+                  <div><dt>Plain pass</dt><dd>{faq.plain_pass}</dd></div>
+                  <div><dt>Function</dt><dd>{faq.function}</dd></div>
+                  <div><dt>Not for</dt><dd>{faq.not_for}</dd></div>
+                </dl>
+              </details>
+            );
+          })}
         </div>
       </section>
 
