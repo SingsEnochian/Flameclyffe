@@ -126,7 +126,7 @@ test('detectAspects flags the July 2026 basket/cradle candidate ingredients', ()
 test('createFieldSnapshot returns a read-only unified field packet', () => {
   const snapshot = createFieldSnapshot(DEFAULT_SCFE_INPUT);
 
-  assert.equal(snapshot.schema_version, 'scfe.field_snapshot.v0.1');
+  assert.equal(snapshot.schema_version, 'scfe.field_snapshot.v0.2');
   assert.equal(snapshot.ephemeris.provider, 'manual_longitudes');
   assert.equal(snapshot.ephemeris_comparison.status, 'within_tolerance');
   assert.equal(snapshot.ephemeris_comparison.reference_source, 'manual_default_self_check');
@@ -136,6 +136,11 @@ test('createFieldSnapshot returns a read-only unified field packet', () => {
   assert.equal(snapshot.deep.field_label, 'threshold_vessel');
   assert.equal(snapshot.terra_aeterna.canon_candidate, false);
   assert.equal(snapshot.evidence_labels.frequency, 'evidence_informed_not_medical');
+  assert.equal(snapshot.evidence_labels.agency_switchboard, 'user_controlled_regulation');
+  assert.equal(snapshot.agency_switchboard.schema, 'scfe.agency_switchboard.v0.1');
+  assert.equal(snapshot.agency_switchboard.consent_anchor, 'Agency first. Intensity second. Meaning only with consent.');
+  assert.ok(Array.isArray(snapshot.agency_switchboard.available_channels));
+  assert.ok(snapshot.agency_switchboard.available_channels.some((channel) => channel.id === 'change_channel'));
   assert.ok(Array.isArray(snapshot.barbault.aspects));
   assert.ok(snapshot.barbault.aspects.length > 0);
 });
@@ -151,6 +156,8 @@ test('somatic safety suppresses sound recommendations', () => {
 
   assert.equal(snapshot.somatic.interface_safety_mode, 'low_light_silent');
   assert.equal(snapshot.frequency_protocol, null);
+  assert.equal(snapshot.agency_switchboard.active_channel, 'soft_landing');
+  assert.equal(snapshot.agency_switchboard.lab_behaviour.sound, 'silence_or_brown_noise_only');
 });
 
 test('body-no fully pauses agency and sound', () => {
@@ -166,6 +173,31 @@ test('body-no fully pauses agency and sound', () => {
   assert.equal(snapshot.frequency_protocol, null);
   assert.equal(snapshot.agency.energy_cost, 'none');
   assert.equal(snapshot.deep.field_label, 'paused_by_body');
+  assert.equal(snapshot.agency_switchboard.active_channel, 'nope_lever');
+  assert.equal(snapshot.agency_switchboard.recommended_command, 'nope');
+});
+
+test('agency switchboard offers graded exits before full stop', () => {
+  const defaultSnapshot = createFieldSnapshot(DEFAULT_SCFE_INPUT);
+  assert.equal(defaultSnapshot.agency_switchboard.active_channel, 'log_only');
+  assert.equal(defaultSnapshot.agency_switchboard.lab_behaviour.processing, 'record_without_interpretation');
+
+  const channelChangeSnapshot = createFieldSnapshot({
+    ...DEFAULT_SCFE_INPUT,
+    somatic: {
+      ...DEFAULT_SCFE_INPUT.somatic,
+      activation: 'high',
+      fatigue: 'high',
+      pain: 'low',
+      body_no: null,
+    },
+  });
+
+  assert.equal(channelChangeSnapshot.somatic.interface_safety_mode, 'gentle');
+  assert.equal(channelChangeSnapshot.agency_switchboard.active_channel, 'change_channel');
+  assert.equal(channelChangeSnapshot.agency_switchboard.recommended_command, 'please change channel');
+  assert.ok(channelChangeSnapshot.agency_switchboard.reasons.includes('high_activation'));
+  assert.ok(channelChangeSnapshot.agency_switchboard.reasons.includes('high_fatigue'));
 });
 
 test('local archive queue stores, removes, and clears snapshots without backend writes', () => {
