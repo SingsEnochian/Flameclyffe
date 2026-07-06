@@ -1,1 +1,690 @@
-/* STARWELL scale + medallion pass */
+/* STARWELL scale + medallion pass
+   This file intentionally loads last so it can calm older prototype sizing without rewriting the whole room. */
+
+.starwell h1 {
+  font-size: clamp(2.7rem, 8.2vw, 6.15rem) !important;
+  line-height: 0.9 !important;
+  letter-spacing: 0.03em !important;
+}
+
+.starwell .dome {
+  min-height: clamp(350px, 46vw, 520px) !important;
+}
+
+.starwell .dome::before {
+  width: min(860px, 94vw) !important;
+  height: min(860px, 94vw) !important;
+  bottom: -660px !important;
+}
+
+.starwell .dome::after {
+  width: min(620px, 68vw) !important;
+  height: min(160px, 22vw) !important;
+}
+
+.starwell .dome-inner {
+  max-width: min(720px, 88vw) !important;
+  padding: clamp(0.9rem, 2.2vw, 1.65rem) !important;
+  border-radius: 28px !important;
+}
+
+.starwell .subtitle {
+  font-size: clamp(1.05rem, 2.1vw, 1.5rem) !important;
+  line-height: 1.18 !important;
+}
+
+.starwell .eyebrow {
+  font-size: 0.66rem !important;
+  letter-spacing: 0.13em !important;
+}
+
+.starwell .inscription {
+  margin-top: 1rem !important;
+  padding: 0.55rem 0.85rem !important;
+}
+
+.starwell-sigil-console {
+  min-height: clamp(390px, 54vw, 560px) !important;
+  margin: clamp(0.8rem, 2vw, 1.25rem) clamp(0.8rem, 2vw, 1.4rem) 1rem !important;
+  border-radius: 34px 18px 34px 18px !important;
+}
+
+.sigil-field {
+  --sigil-size: min(500px, 74vw) !important;
+}
+
+.sigil-node {
+  --radius: min(214px, 28vw) !important;
+  width: clamp(4.65rem, 8vw, 6.25rem) !important;
+  min-height: clamp(4.65rem, 8vw, 6.25rem) !important;
+  gap: 0.16rem !important;
+  padding: 0.48rem 0.42rem !important;
+}
+
+.sigil-node:hover,
+.sigil-node:focus-visible,
+.sigil-node.active {
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--angle))
+    translate(calc(var(--radius) + 0.28rem))
+    rotate(calc(-1 * var(--angle))) !important;
+}
+
+.sigil-node strong {
+  max-width: 5.6rem !important;
+  font-size: clamp(0.72rem, 1.15vw, 0.86rem) !important;
+  line-height: 0.95 !important;
+}
+
+.sigil-medallion,
+.room-medallion {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(231, 196, 119, 0.28);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.12), transparent 56%),
+    linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,0,0,0.2));
+  box-shadow:
+    0 8px 22px rgba(0,0,0,0.28),
+    inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.sigil-medallion {
+  width: 2.65rem;
+  height: 2.65rem;
+}
+
+.sigil-core-medallion {
+  width: 4.2rem !important;
+  height: 4.2rem !important;
+}
+
+.room-medallion {
+  width: 3.2rem;
+  height: 3.2rem;
+  margin-bottom: 0.68rem;
+}
+
+.sigil-medallion img,
+.room-medallion img {
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+  display: block;
+}
+
+.sigil-medallion-fallback,
+.room-medallion-fallback {
+  font-size: 1.08rem;
+  line-height: 1;
+}
+
+.sigil-core {
+  width: min(240px, 42vw) !important;
+  min-height: min(240px, 42vw) !important;
+  padding: clamp(0.85rem, 2.2vw, 1.15rem) !important;
+}
+
+.sigil-core h2 {
+  font-size: clamp(1rem, 2.1vw, 1.45rem) !important;
+}
+
+.sigil-core span:last-child {
+  font-size: clamp(0.78rem, 1.25vw, 0.9rem) !important;
+}
+
+.sigil-instruction {
+  font-size: 0.9rem !important;
+  padding: 0.42rem 0.7rem !important;
+}
+
+.study-row {
+  gap: 0.85rem !important;
+  padding-bottom: 1.2rem !important;
+}
+
+.room-card {
+  min-height: 148px !important;
+  padding: 0.85rem !important;
+  border-radius: 24px !important;
+}
+
+.room-card::after {
+  width: 6.4rem !important;
+  height: 6.4rem !important;
+}
+
+.room-title {
+  font-size: 1.18rem !important;
+  line-height: 1.08 !important;
+  margin-bottom: 0.36rem !important;
+}
+
+.room-text {
+  font-size: 0.86rem !important;
+  line-height: 1.34 !important;
+}
+
+.coming-soon-body .room-medallion {
+  margin-bottom: 0;
+}
+
+@media (max-width: 860px) {
+  .starwell-sigil-console {
+    min-height: auto !important;
+    padding: 0.85rem !important;
+  }
+
+  .sigil-field {
+    --sigil-size: min(500px, 92vw) !important;
+    min-height: 560px !important;
+    padding: 0.75rem 0 3.8rem !important;
+  }
+
+  .sigil-node-layer {
+    gap: 0.6rem !important;
+  }
+
+  .sigil-node {
+    width: 100% !important;
+    min-height: 4.65rem !important;
+    border-radius: 20px 24px 18px 24px !important;
+  }
+
+  .sigil-node:hover,
+  .sigil-node:focus-visible,
+  .sigil-node.active {
+    transform: translateY(-2px) !important;
+  }
+
+  .sigil-core {
+    width: min(240px, 76vw) !important;
+    min-height: min(240px, 76vw) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .starwell h1 {
+    font-size: clamp(2.45rem, 14vw, 4.25rem) !important;
+  }
+
+  .starwell .dome {
+    min-height: 390px !important;
+  }
+
+  .sigil-field {
+    min-height: 610px !important;
+  }
+}
+
+/* STARWELL Observer Almanac fit pass
+   Calms the live glyph SVG, gives the sigil wheel more breathing room,
+   and fixes inline readout text that was gluing itself together on iPad Safari. */
+
+.live-glyph-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(280px, 1.15fr);
+  gap: clamp(1rem, 3vw, 2.4rem);
+  align-items: center;
+  margin-top: clamp(0.75rem, 2vw, 1.15rem);
+}
+
+.glyph-orb-wrap {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.glyph-orb {
+  display: block;
+  width: clamp(220px, 28vw, 340px) !important;
+  height: auto !important;
+  max-width: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 24px rgba(140, 202, 192, 0.16));
+}
+
+.glyph-orb .glyph-aura {
+  fill: rgba(10, 16, 24, 0.18) !important;
+  stroke: rgba(231, 196, 119, 0.36) !important;
+  stroke-width: 1.1;
+}
+
+.glyph-orb .glyph-core-glow {
+  stroke: rgba(234, 244, 239, 0.72);
+  stroke-width: 0.8;
+}
+
+.glyph-orb .glyph-ring-line {
+  fill: none !important;
+  stroke: rgba(140, 202, 192, 0.36) !important;
+  stroke-width: 0.95;
+  stroke-dasharray: 4 6;
+}
+
+.glyph-orb .glyph-mark,
+.glyph-orb .glyph-minute-hand,
+.glyph-orb .glyph-hour-hand,
+.glyph-orb .glyph-second-hand {
+  fill: none !important;
+  stroke-linecap: round;
+}
+
+.glyph-orb .glyph-mark {
+  stroke: rgba(231, 196, 119, 0.45);
+  stroke-width: 0.75;
+}
+
+.glyph-orb .glyph-minute-hand,
+.glyph-orb .glyph-hour-hand {
+  stroke: rgba(234, 244, 239, 0.7);
+  stroke-width: 1.4;
+}
+
+.glyph-orb .glyph-second-hand {
+  stroke: rgba(231, 196, 119, 0.86);
+  stroke-width: 1;
+}
+
+.glyph-orb .glyph-sigil-path {
+  fill: rgba(140, 202, 192, 0.18) !important;
+  stroke: rgba(231, 196, 119, 0.78);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.glyph-orb .glyph-center,
+.glyph-orb .glyph-second-bead {
+  fill: var(--gold) !important;
+  stroke: rgba(10, 16, 24, 0.72);
+  stroke-width: 0.9;
+}
+
+.glyph-readout {
+  min-width: 0;
+}
+
+.glyph-readout > p:first-child {
+  margin-top: 0;
+}
+
+.glyph-readout time,
+.glyph-readout > span {
+  display: inline-block;
+  margin-right: 0.38rem;
+}
+
+.glyph-meter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.42rem 0.9rem;
+  margin: 0.8rem 0;
+}
+
+.glyph-meter-grid > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.22rem 0.34rem;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.glyph-meter-grid strong,
+.glyph-meter-grid span {
+  display: inline-block;
+}
+
+.glyph-principle {
+  max-width: 72ch;
+  line-height: 1.48;
+}
+
+@media (min-width: 861px) {
+  .starwell-sigil-console {
+    min-height: clamp(560px, 62vw, 720px) !important;
+    padding: clamp(0.75rem, 1.4vw, 1rem) clamp(0.75rem, 1.4vw, 1rem) clamp(3.2rem, 4vw, 4.2rem) !important;
+  }
+
+  .sigil-field {
+    --sigil-size: clamp(500px, 62vw, 620px) !important;
+    transform: translateY(-0.35rem);
+  }
+
+  .sigil-node {
+    --radius: clamp(215px, 25vw, 265px) !important;
+    width: clamp(5rem, 8.2vw, 6.55rem) !important;
+    min-height: clamp(5rem, 8.2vw, 6.55rem) !important;
+    padding: 0.55rem 0.48rem !important;
+  }
+
+  .sigil-node:hover,
+  .sigil-node:focus-visible,
+  .sigil-node.active {
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--angle))
+      translate(calc(var(--radius) + 0.34rem))
+      rotate(calc(-1 * var(--angle))) !important;
+  }
+
+  .sigil-core {
+    width: clamp(230px, 22vw, 280px) !important;
+    min-height: clamp(230px, 22vw, 280px) !important;
+    padding: clamp(0.9rem, 1.8vw, 1.18rem) !important;
+    gap: 0.32rem !important;
+  }
+
+  .sigil-core-medallion {
+    width: clamp(3.35rem, 5vw, 3.95rem) !important;
+    height: clamp(3.35rem, 5vw, 3.95rem) !important;
+  }
+
+  .sigil-core p {
+    max-width: 21ch;
+    line-height: 1.28;
+  }
+
+  .sigil-core h2 {
+    font-size: clamp(1.08rem, 1.9vw, 1.58rem) !important;
+    line-height: 1.12 !important;
+  }
+
+  .sigil-core span:last-child {
+    display: block;
+    max-width: 22ch;
+    margin: 0 auto;
+    font-size: clamp(0.78rem, 1.1vw, 0.92rem) !important;
+    line-height: 1.32 !important;
+  }
+
+  .sigil-node strong {
+    max-width: 6rem !important;
+    font-size: clamp(0.76rem, 1.05vw, 0.9rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .sigil-instruction {
+    bottom: clamp(1.05rem, 2vw, 1.55rem) !important;
+    width: min(560px, calc(100% - 4rem)) !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .live-glyph-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .glyph-orb {
+    width: clamp(190px, 58vw, 280px) !important;
+  }
+
+  .glyph-meter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Faer's wrapper pass: Art Gobby mobile polish
+   The base Starwell sheets stay structural. This late wrapper compresses,
+   clarifies, and makes the chamber map behave more like a mobile console. */
+
+.starwell {
+  --starwell-shell-pad: clamp(0.75rem, 2.2vw, 1.75rem);
+  --starwell-content-pad: clamp(0.85rem, 2.4vw, 1.5rem);
+  --starwell-section-gap: clamp(0.85rem, 2.2vw, 1.2rem);
+  padding: var(--starwell-shell-pad) !important;
+  overflow-x: hidden !important;
+}
+
+.starwell .observatory-shell {
+  width: min(1240px, 100%) !important;
+  border-radius: clamp(28px, 4vw, 42px) !important;
+}
+
+.starwell .dome {
+  min-height: clamp(210px, 28vh, 285px) !important;
+  padding: clamp(1.35rem, 4.8vw, 3rem) 1.2rem clamp(1rem, 3vw, 1.5rem) !important;
+}
+
+.starwell .dome::before {
+  width: min(880px, 104vw) !important;
+  height: min(880px, 104vw) !important;
+  bottom: -710px !important;
+}
+
+.starwell h1 {
+  font-size: clamp(3.2rem, 10vw, 7.4rem) !important;
+  line-height: 0.9 !important;
+}
+
+.starwell .subtitle {
+  max-width: 640px !important;
+  margin-top: 0.8rem !important;
+  font-size: clamp(1.15rem, 2.4vw, 1.65rem) !important;
+}
+
+.starwell .inscription {
+  margin-top: 1rem !important;
+  padding: 0.6rem 0.9rem !important;
+}
+
+.starwell .observatory-map {
+  padding-top: 0.25rem !important;
+}
+
+.starwell .map-heading {
+  flex-wrap: wrap !important;
+  gap: 0.6rem 1rem !important;
+  padding-left: var(--starwell-content-pad) !important;
+  padding-right: var(--starwell-content-pad) !important;
+}
+
+.starwell .map-heading.compact {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.starwell .selected-alcove,
+.starwell .chamber-card {
+  margin-left: var(--starwell-content-pad) !important;
+  margin-right: var(--starwell-content-pad) !important;
+  margin-bottom: var(--starwell-section-gap) !important;
+  border-radius: 28px !important;
+}
+
+.starwell .chamber-card {
+  padding: clamp(0.9rem, 2vw, 1.15rem) !important;
+}
+
+.starwell .study-row {
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)) !important;
+  gap: 0.85rem !important;
+  padding-left: var(--starwell-content-pad) !important;
+  padding-right: var(--starwell-content-pad) !important;
+  padding-bottom: 1.35rem !important;
+}
+
+.starwell .room-card {
+  min-height: 152px !important;
+  border-radius: 24px !important;
+  padding: 0.95rem !important;
+  box-shadow: 0 12px 28px rgba(56,37,28,0.1) !important;
+}
+
+.starwell .room-card:hover,
+.starwell .room-card:focus-visible,
+.starwell .room-card.active {
+  transform: translateY(-2px) !important;
+}
+
+.starwell .room-title {
+  font-size: clamp(1.3rem, 2.4vw, 1.48rem) !important;
+  margin-bottom: 0.3rem !important;
+}
+
+.starwell .room-text {
+  font-size: 0.94rem !important;
+  line-height: 1.44 !important;
+}
+
+@media (max-width: 860px) {
+  .starwell {
+    --starwell-content-pad: 0.75rem;
+    --starwell-section-gap: 0.75rem;
+    padding: 0.55rem !important;
+  }
+
+  .starwell .observatory-shell {
+    border-radius: 24px !important;
+  }
+
+  .starwell .dome {
+    min-height: 210px !important;
+    padding: 1rem 0.9rem 0.8rem !important;
+  }
+
+  .starwell h1 {
+    font-size: clamp(2.65rem, 16vw, 4.8rem) !important;
+  }
+
+  .starwell .subtitle {
+    font-size: clamp(1.02rem, 4vw, 1.28rem) !important;
+    line-height: 1.22 !important;
+  }
+
+  .starwell .inscription {
+    width: min(100%, 24rem) !important;
+  }
+
+  .starwell-sigil-console {
+    min-height: auto !important;
+    margin: 0.7rem var(--starwell-content-pad) 1rem !important;
+    padding: 0.7rem !important;
+    border-radius: 28px !important;
+  }
+
+  .sigil-field {
+    --sigil-size: 0 !important;
+    display: grid !important;
+    gap: 0.7rem !important;
+    min-height: auto !important;
+    padding: 0 !important;
+  }
+
+  .sigil-ring,
+  .sigil-axis,
+  .sigil-instruction {
+    display: none !important;
+  }
+
+  .sigil-core {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    min-height: auto !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 0.95rem !important;
+    text-align: left !important;
+    border-radius: 24px !important;
+  }
+
+  .sigil-core-medallion {
+    width: 3.35rem !important;
+    height: 3.35rem !important;
+    grid-row: span 3;
+  }
+
+  .sigil-core p,
+  .sigil-core h2,
+  .sigil-core span:last-child {
+    margin-left: 0 !important;
+    text-align: left !important;
+  }
+
+  .sigil-core p {
+    margin: 0 !important;
+    max-width: none !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  .sigil-core h2 {
+    margin: 0 !important;
+    font-size: clamp(1.45rem, 7vw, 2rem) !important;
+  }
+
+  .sigil-core span:last-child {
+    max-width: none !important;
+    margin: 0 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.34 !important;
+  }
+
+  .sigil-node-layer {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.62rem !important;
+    width: 100% !important;
+  }
+
+  .sigil-node {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    min-height: 4.35rem !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    align-items: center !important;
+    justify-items: start !important;
+    gap: 0.72rem !important;
+    padding: 0.7rem 0.82rem !important;
+    border-radius: 22px !important;
+    text-align: left !important;
+  }
+
+  .sigil-node:hover,
+  .sigil-node:focus-visible,
+  .sigil-node.active {
+    transform: translateY(-2px) !important;
+  }
+
+  .sigil-node strong {
+    max-width: none !important;
+    font-size: 1.05rem !important;
+    line-height: 1.05 !important;
+    text-align: left !important;
+  }
+
+  .sigil-medallion {
+    width: 3rem !important;
+    height: 3rem !important;
+  }
+
+  .study-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .starwell .room-card {
+    min-height: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starwell,
+  .stars,
+  .starwell .room-card,
+  .sigil-node {
+    transition: none !important;
+  }
+}
