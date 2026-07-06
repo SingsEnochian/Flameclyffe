@@ -4,6 +4,7 @@
   STARWELL Groundwire v0.1
   Honest browser/device telemetry only. No invented metrics, no simulated physics.
   Permission-gated signals wait for explicit user action.
+  Broadcasts an in-tab snapshot for DEEP sidecar pages; it does not alter DEEP variables.
 */
 
 const state = {
@@ -19,6 +20,9 @@ const root = $('[data-groundwire-lab]');
 const statusEl = $('#groundwire-status');
 const stateEl = $('#groundwire-state');
 const micMeter = $('#mic-meter');
+const GROUNDWIRE_CHANNEL = 'starwell-groundwire';
+const GROUNDWIRE_SESSION_KEY = 'starwell.groundwire.v0.1.sessionSnapshot';
+const groundwireChannel = 'BroadcastChannel' in window ? new BroadcastChannel(GROUNDWIRE_CHANNEL) : null;
 
 let micStream = null;
 let micContext = null;
@@ -27,6 +31,39 @@ let micFrame = null;
 
 function setStatus(message) {
   if (statusEl) statusEl.textContent = message;
+}
+
+function cloneState() {
+  return JSON.parse(JSON.stringify(state));
+}
+
+function currentSnapshot() {
+  const next = cloneState();
+  return {
+    type: 'groundwire:snapshot',
+    version: '0.1.0',
+    updatedAt: new Date().toISOString(),
+    location: next.location,
+    network: next.network,
+    hardware: next.hardware,
+    microphone: next.microphone,
+    battery: next.battery,
+    boundary: 'Groundwire reports real browser/device signals only; it does not mutate DEEP model variables.'
+  };
+}
+
+function publishGroundwire() {
+  const snapshot = currentSnapshot();
+  window.StarwellGroundwire = {
+    version: snapshot.version,
+    channel: GROUNDWIRE_CHANNEL,
+    getSnapshot: currentSnapshot,
+    getState: cloneState
+  };
+
+  try { sessionStorage.setItem(GROUNDWIRE_SESSION_KEY, JSON.stringify(snapshot)); } catch (error) {}
+  try { groundwireChannel?.postMessage({ type: 'groundwire:snapshot', snapshot }); } catch (error) {}
+  try { window.dispatchEvent(new CustomEvent('starwell:groundwire:snapshot', { detail: snapshot })); } catch (error) {}
 }
 
 function confidenceClass(confidence) {
@@ -64,6 +101,7 @@ function renderList(selector, rows) {
 
 function updateState() {
   if (stateEl) stateEl.textContent = JSON.stringify(state, null, 2);
+  publishGroundwire();
 }
 
 function renderNetwork() {
