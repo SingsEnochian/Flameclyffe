@@ -1,0 +1,68 @@
+{
+  "$schema": "../contracts/surface_visual_receipt_v0_1.schema.json",
+  "surface_id": "starwell-pipeline-ledger",
+  "surface_path": "starwell/pipeline-ledger.html",
+  "receipt_version": "0.1",
+  "hearthfire_gate": "targeted_receipt_allowed",
+  "gate_scope": "new pilot surface, read-only public API + local reachability probes, no persistence, no database write",
+  "surface_label": "built_partial",
+  "primary_truth_lit_rule": "Every Hearthfire surface should glow because something is true.",
+  "state_sources": [
+    "starwell/pipeline-ledger.html",
+    "assets/pipeline-ledger.js",
+    "docs/hearthfire/02-truth-lit-surface-rule.md",
+    "contracts/surface_visual_receipt_v0_1.schema.json",
+    "contracts/surface_visual_state_v0_1.schema.json"
+  ],
+  "declared_direct_readings": [
+    "github_actions_workflow_runs",
+    "local_grove_reachability",
+    "local_ollama_reachability",
+    "local_dspark_proxy_reachability",
+    "local_mythic_bridge_reachability",
+    "local_starwell_dev_reachability"
+  ],
+  "declared_model_variables": [],
+  "visual_receipts": [
+    {
+      "effect_id": "runs_card",
+      "truth_kind": "data_source_or_provenance",
+      "state_source": "GitHub public REST API, /repos/SingsEnochian/Flameclyffe/actions/runs, fetched on load and on Refresh only",
+      "plain_language_reading": "Shows the most recent GitHub Actions workflow runs across all workflows in this repo, each with its real name, status/conclusion, short commit SHA, and update time, or the real HTTP/network error if the fetch failed.",
+      "plain_language_reason": "No auto-polling, to stay clear of the public API's unauthenticated rate limit. Every field comes directly from the API response; nothing is synthesized or guessed.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "local_status_card",
+      "truth_kind": "diagnostic_health",
+      "state_source": "fetch(url, { mode: 'no-cors' }) reachability probes against a fixed list of known local dev ports",
+      "plain_language_reading": "Shows whether each known local service (Grove, Ollama, DSpark proxy, Mythic Bridge, STARWELL dev server) is currently reachable from this browser, or honestly 'not reachable' if it isn't.",
+      "plain_language_reason": "A no-cors fetch can only tell us whether something answered, not what it said. This card is only meaningful when viewed locally; a public visitor's browser cannot reach localhost and will correctly see everything as unreachable.",
+      "confidence": "observed"
+    }
+  ],
+  "accessibility_requirements": {
+    "low_stim_control_present": false,
+    "motion_state_visible": false,
+    "sound_requires_activation": false,
+    "haptics_feature_gated": false,
+    "browser_fallbacks_declared": true,
+    "next_review_needed": [
+      "verify reduced-motion CSS behaviour",
+      "verify keyboard path for the Refresh button"
+    ]
+  },
+  "non_authorizations": [
+    "no database write",
+    "no Supabase write",
+    "no auto-polling of the GitHub API",
+    "no tokens or secrets embedded in this public page",
+    "no Arkfire branding or mythology",
+    "no fabricated or randomly-generated values"
+  ],
+  "next_passes": [
+    "accessibility review for reduced-motion and keyboard paths",
+    "optional: highlight which workflow run corresponds to the live Pages deploy specifically, if that becomes worth distinguishing",
+    "optional: add Supabase project health once a safe, credential-free read path is identified"
+  ]
+}
