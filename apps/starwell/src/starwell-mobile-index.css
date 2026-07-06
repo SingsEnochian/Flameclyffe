@@ -1,14 +1,14 @@
 /* STARWELL mobile chamber index
-   Real phone mercy for the existing chamber DOM: the desktop sigil stays ritual,
-   the mobile view becomes an app-like chamber index. */
+   Loaded from the DEEP boundary seam and written with higher specificity so later
+   vestment rules cannot turn the phone view back into a shrunken sigil wheel. */
 
 @media (max-width: 860px) {
-  .starwell {
+  html body .starwell {
     padding: 0 !important;
     background: linear-gradient(180deg, #07131d 0%, #122233 42%, #14131b 100%) !important;
   }
 
-  .starwell .observatory-shell {
+  html body .starwell .observatory-shell {
     width: 100% !important;
     min-height: 100vh;
     border: 0 !important;
@@ -19,19 +19,19 @@
       linear-gradient(180deg, rgba(12, 24, 36, 0.96), rgba(20, 19, 27, 0.94)) !important;
   }
 
-  .starwell .dome {
+  html body .starwell .dome {
     min-height: auto !important;
-    padding: 1rem 1rem 0.75rem !important;
     display: block !important;
+    padding: 1rem 1rem 0.75rem !important;
     text-align: left !important;
   }
 
-  .starwell .dome::before,
-  .starwell .dome::after {
+  html body .starwell .dome::before,
+  html body .starwell .dome::after {
     display: none !important;
   }
 
-  .starwell .dome-inner {
+  html body .starwell .dome-inner {
     max-width: none !important;
     padding: 0 !important;
     border: 0 !important;
@@ -40,28 +40,28 @@
     box-shadow: none !important;
   }
 
-  .starwell .eyebrow {
+  html body .starwell .eyebrow {
     margin: 0 0 0.28rem !important;
     font-size: 0.64rem !important;
     letter-spacing: 0.12em !important;
     color: rgba(231, 196, 119, 0.82) !important;
   }
 
-  .starwell h1 {
+  html body .starwell h1 {
     font-size: clamp(2.25rem, 12vw, 3.75rem) !important;
     letter-spacing: 0.04em !important;
     color: rgba(245, 213, 142, 0.96) !important;
   }
 
-  .starwell .subtitle {
-    margin: 0.36rem 0 0 !important;
+  html body .starwell .subtitle {
     max-width: 34ch !important;
+    margin: 0.36rem 0 0 !important;
     font-size: 1.02rem !important;
     line-height: 1.24 !important;
     color: rgba(234, 244, 239, 0.82) !important;
   }
 
-  .starwell .inscription {
+  html body .starwell .inscription {
     display: inline-flex !important;
     width: auto !important;
     margin-top: 0.7rem !important;
@@ -72,40 +72,40 @@
     border-color: rgba(231, 196, 119, 0.24) !important;
   }
 
-  .observatory-map.sigil-map {
+  html body .observatory-map.sigil-map {
     margin: 0 !important;
     padding: 0 0.75rem 0.85rem !important;
   }
 
-  .observatory-map.sigil-map > .map-heading {
+  html body .observatory-map.sigil-map > .map-heading {
     padding: 0.75rem 0.25rem 0.55rem !important;
   }
 
-  .observatory-map.sigil-map > .map-heading span {
+  html body .observatory-map.sigil-map > .map-heading span {
     font-size: 0.72rem !important;
     letter-spacing: 0.14em !important;
   }
 
-  .starwell-sigil-console {
+  html body .starwell-sigil-console {
+    min-height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    min-height: auto !important;
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
   }
 
-  .starwell-sigil-console::before,
-  .starwell-sigil-console::after,
-  .sigil-ring,
-  .sigil-axis,
-  .sigil-instruction,
-  .terra-instrument-panel {
+  html body .starwell-sigil-console::before,
+  html body .starwell-sigil-console::after,
+  html body .sigil-ring,
+  html body .sigil-axis,
+  html body .sigil-instruction,
+  html body .terra-instrument-panel {
     display: none !important;
   }
 
-  .sigil-field {
+  html body .sigil-field {
     --sigil-size: 0 !important;
     display: grid !important;
     gap: 0.68rem !important;
@@ -113,17 +113,17 @@
     padding: 0 !important;
   }
 
-  .sigil-core {
+  html body .sigil-core {
     position: relative !important;
     inset: auto !important;
     transform: none !important;
     width: 100% !important;
     min-height: auto !important;
+    order: -1 !important;
     display: grid !important;
     grid-template-columns: auto 1fr !important;
     gap: 0.78rem !important;
     align-items: center !important;
-    order: -1 !important;
     padding: 0.95rem !important;
     text-align: left !important;
     border: 1px solid rgba(231, 196, 119, 0.32) !important;
@@ -134,13 +134,13 @@
     box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28) !important;
   }
 
-  .sigil-core-medallion {
+  html body .sigil-core-medallion {
     width: 3.25rem !important;
     height: 3.25rem !important;
     grid-row: span 3;
   }
 
-  .sigil-core p {
+  html body .sigil-core p {
     margin: 0 !important;
     font-size: 0.64rem !important;
     letter-spacing: 0.13em !important;
@@ -148,21 +148,21 @@
     color: rgba(140, 202, 192, 0.86) !important;
   }
 
-  .sigil-core h2 {
+  html body .sigil-core h2 {
     margin: 0 !important;
     font-size: clamp(1.45rem, 7vw, 2rem) !important;
     line-height: 1.05 !important;
   }
 
-  .sigil-core span:last-child {
-    margin: 0 !important;
+  html body .sigil-core span:last-child {
     max-width: none !important;
+    margin: 0 !important;
     font-size: 0.9rem !important;
     line-height: 1.34 !important;
     color: rgba(234, 244, 239, 0.78) !important;
   }
 
-  .sigil-node-layer {
+  html body .sigil-node-layer {
     position: relative !important;
     inset: auto !important;
     transform: none !important;
@@ -172,7 +172,7 @@
     width: 100% !important;
   }
 
-  .sigil-node-layer::before {
+  html body .sigil-node-layer::before {
     content: 'Chambers';
     display: block;
     margin: 0.2rem 0.2rem 0.1rem;
@@ -183,7 +183,7 @@
     text-transform: uppercase;
   }
 
-  .sigil-node {
+  html body .sigil-node {
     position: relative !important;
     inset: auto !important;
     transform: none !important;
@@ -202,43 +202,43 @@
     box-shadow: none !important;
   }
 
-  .sigil-node::after {
+  html body .sigil-node::after {
     content: '↗';
     justify-self: end;
     opacity: 0.6;
   }
 
-  .sigil-node.active {
+  html body .sigil-node.active {
     border-color: rgba(231, 196, 119, 0.58) !important;
     background: linear-gradient(145deg, rgba(231, 196, 119, 0.18), rgba(140, 202, 192, 0.11)) !important;
   }
 
-  .sigil-node:hover,
-  .sigil-node:focus-visible,
-  .sigil-node.active {
+  html body .sigil-node:hover,
+  html body .sigil-node:focus-visible,
+  html body .sigil-node.active {
     transform: translateY(-1px) !important;
   }
 
-  .sigil-node strong {
+  html body .sigil-node strong {
     max-width: none !important;
     font-size: 1.02rem !important;
     line-height: 1.05 !important;
     text-align: left !important;
   }
 
-  .sigil-medallion {
+  html body .sigil-medallion {
     width: 2.85rem !important;
     height: 2.85rem !important;
   }
 
-  .selected-alcove,
-  .chamber-card {
+  html body .selected-alcove,
+  html body .chamber-card {
     margin-left: 0.75rem !important;
     margin-right: 0.75rem !important;
     border-radius: 24px !important;
   }
 
-  .study-row {
+  html body .study-row {
     position: relative;
     display: grid !important;
     grid-template-columns: 1fr !important;
@@ -246,7 +246,7 @@
     padding: 1.05rem 0.75rem 0.85rem !important;
   }
 
-  .study-row::before {
+  html body .study-row::before {
     content: 'Personal studies';
     color: rgba(231, 196, 119, 0.82);
     font-family: Cinzel, serif;
@@ -255,7 +255,7 @@
     text-transform: uppercase;
   }
 
-  .study-row .room-card {
+  html body .study-row .room-card {
     min-height: auto !important;
     display: grid !important;
     grid-template-columns: auto 1fr !important;
