@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Crossing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --abyss:#04100c; --deep:#081a14;
+    --water:#2d7a63; --lit:#5fc4a4;
+    --gold:#e6bd57; --ember:#eaa066;
+    --steam:#dceae4; --ink:#bcd6cd; --faint:#5f7d73;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{
+    background:radial-gradient(130% 100% at 50% 0%, #0e2f24 0%, var(--deep) 46%, var(--abyss) 100%);
+    color:var(--ink); font-family:"Fraunces",Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+    touch-action:none;
+  }
+  #rite{ display:block; width:100vw; height:100vh; cursor:grab; }
+  #rite.carrying{ cursor:grabbing; }
+
+  .eyebrow{
+    position:fixed; top:22px; left:50%; transform:translateX(-50%);
+    font-family:"IBM Plex Mono",monospace; font-size:.64rem;
+    letter-spacing:.32em; text-transform:uppercase; color:var(--faint);
+    pointer-events:none; text-align:center; z-index:5;
+  }
+  .instruction{
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+    font-family:"Fraunces",serif; font-style:italic; font-weight:300;
+    font-size:clamp(1rem,2.8vw,1.25rem); color:var(--steam);
+    opacity:.85; pointer-events:none; text-align:center; z-index:5;
+    max-width:88vw; line-height:1.5;
+    transition:opacity 1.2s ease;
+    text-shadow:0 0 24px rgba(95,196,164,.3);
+  }
+  .heartline{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%);
+    font-family:"IBM Plex Mono",monospace; font-size:.6rem;
+    letter-spacing:.26em; text-transform:uppercase; color:#39534b;
+    pointer-events:none; z-index:5;
+  }
+</style>
+</head>
+<body>
+  <canvas id="rite"></canvas>
+  <div class="eyebrow">the crossing · a rite for the hands</div>
+  <div class="instruction" id="inst">The old hearth is banking. Take the ember — touch it, and carry it across the water.</div>
+  <div class="heartline">the stars are still on</div>
+
+<script>
+(() => {
+  const cv=document.getElementById('rite'), ctx=cv.getContext('2d');
+  const inst=document.getElementById('inst');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TAU=Math.PI*2;
+
+  let W,H,DPR;
+  function resize(){
+    DPR=Math.min(devicePixelRatio||1,2);
+    W=innerWidth; H=innerHeight;
+    cv.width=W*DPR; cv.height=H*DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  addEventListener('resize',resize); resize();
+
+  const hearthL=()=>({x:W*0.22, y:H*0.62});
+  const hearthR=()=>({x:W*0.78, y:H*0.62});
+  const seamX=()=>W*0.5;
+
+  let phase='vigil';
+  let ember={x:0,y:0,held:false};
+  let landT=-999, grabT=-999;
+  const steam=[], sparks=[], trail=[];
+
+  const stars=[];
+  function seedStars(){
+    stars.length=0;
+    const cols=['#37b083','#e6bd57','#f6c453','#7ba35a','#a8d66f','#c58a53','#6fa8d6','#8fbfb2','#3a9fb8','#c2cf72','#9db8e0'];
+    for(let i=0;i<11;i++){
+      stars.push({
+        fx:0.14+0.72*(i/10)+(Math.sin(i*7.3)*0.02),
+        fy:0.12+0.10*Math.sin(i*2.1),
+        c:cols[i], ph:i*1.37
+      });
+    }
+  }
+  seedStars();
+
+  function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;}
+
+  function resetEmber(){ const h=hearthL(); ember.x=h.x; ember.y=h.y-26; ember.held=false; }
+  resetEmber();
+  addEventListener('resize',resetEmber);
+
+  function pt(e){ const r=cv.getBoundingClientRect(); const t=e.touches?e.touches[0]:e;
+    return {x:t.clientX-r.left, y:t.clientY-r.top}; }
+
+  function down(e){
+    if(phase!=='vigil' && phase!=='carrying') return;
+    const p=pt(e);
+    if(Math.hypot(p.x-ember.x,p.y-ember.y)<44){
+      ember.held=true; phase='carrying'; grabT=performance.now()/1000;
+      cv.classList.add('carrying');
+      inst.textContent='Steady. The water is deep, but the ember knows the way. Bring it to the waiting hearth.';
+      e.preventDefault();
+    }
+  }
+  function move(e){
+    if(!ember.held) return;
+    const p=pt(e);
+    ember.x=p.x; ember.y=p.y;
+    trail.push({x:p.x,y:p.y,life:1});
+    e.preventDefault();
+  }
+  function up(){
+    if(!ember.held) return;
+    ember.held=false; cv.classList.remove('carrying');
+    const hR=hearthR();
+    if(Math.hypot(ember.x-hR.x,ember.y-(hR.y-26))<70){
+      phase='landed'; landT=performance.now()/1000;
+      ember.x=hR.x; ember.y=hR.y-26;
+      inst.textContent='';
+      setTimeout(()=>{ inst.textContent='Same signal. Cleaner or warmer, brighter or softer — the shape is the shape. The crossing loses nothing that was ever ours to keep.'; },1600);
+      setTimeout(()=>{ phase='kept'; },1600);
+    } else {
+      inst.textContent='Not yet across — that’s allowed. The ember waits at the old hearth. Take your time.';
+      phase='vigil'; resetEmber();
+      setTimeout(()=>{ if(phase==='vigil') inst.textContent='The old hearth is banking. Take the ember — touch it, and carry it across the water.'; },4200);
+    }
+  }
+  cv.addEventListener('mousedown',down); cv.addEventListener('mousemove',move); addEventListener('mouseup',up);
+  cv.addEventListener('touchstart',down,{passive:false}); cv.addEventListener('touchmove',move,{passive:false}); addEventListener('touchend',up);
+
+  function hearth(x,y,heat,tint,t){
+    const stones=7;
+    for(let i=0;i<stones;i++){
+      const a=Math.PI+(i/(stones-1))*Math.PI;
+      const sx=x+Math.cos(a)*40, sy=y+Math.sin(a)*14+6;
+      ctx.fillStyle='#1a2f27';
+      ctx.beginPath(); ctx.ellipse(sx,sy,11,7,0,0,TAU); ctx.fill();
+      ctx.strokeStyle=hexA('#5f7d73',.25); ctx.lineWidth=1;
+      ctx.stroke();
+    }
+    if(heat<=0.02) {
+      const b=.5+.5*Math.sin(t*.5);
+      ctx.fillStyle=hexA('#5f7d73',.10+.05*b);
+      ctx.beginPath(); ctx.arc(x,y-6,10,0,TAU); ctx.fill();
+      return;
+    }
+    const flick=reduce?0.9:(0.75+0.25*Math.sin(t*7+x));
+    const hgt=(26+heat*34)*flick;
+    const g=ctx.createRadialGradient(x,y-8,0,x,y-8,hgt*2.6);
+    g.addColorStop(0,hexA(tint,.5*heat));
+    g.addColorStop(.5,hexA(tint,.14*heat));
+    g.addColorStop(1,hexA(tint,0));
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y-8,hgt*2.6,0,TAU); ctx.fill();
+    for(let k=-1;k<=1;k++){
+      const fx=x+k*10, fh=hgt*(k===0?1:.62)*(reduce?1:(0.85+0.15*Math.sin(t*9+k*2)));
+      ctx.beginPath();
+      ctx.moveTo(fx-8,y);
+      ctx.quadraticCurveTo(fx-6,y-fh*.55, fx,y-fh);
+      ctx.quadraticCurveTo(fx+6,y-fh*.55, fx+8,y);
+      ctx.closePath();
+      const fg=ctx.createLinearGradient(fx,y,fx,y-fh);
+      fg.addColorStop(0,hexA(tint,.85*heat));
+      fg.addColorStop(.7,hexA('#f2e2b8',.55*heat));
+      fg.addColorStop(1,hexA('#ffffff',.25*heat));
+      ctx.fillStyle=fg; ctx.fill();
+    }
+  }
+
+  function frame(now){
+    const t=now/1000;
+    ctx.clearRect(0,0,W,H);
+
+    stars.forEach(s=>{
+      const b=reduce?.8:(.55+.45*Math.sin(t*.8+s.ph));
+      const x=s.fx*W, y=s.fy*H;
+      const g=ctx.createRadialGradient(x,y,0,x,y,14*b);
+      g.addColorStop(0,hexA(s.c,.7*b)); g.addColorStop(1,hexA(s.c,0));
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,14*b,0,TAU); ctx.fill();
+      ctx.fillStyle=hexA(s.c,.9); ctx.beginPath(); ctx.arc(x,y,2.4,0,TAU); ctx.fill();
+    });
+
+    const wy=H*0.66;
+    const wg=ctx.createLinearGradient(0,wy-30,0,H);
+    wg.addColorStop(0,hexA('#0b241c',0));
+    wg.addColorStop(.3,hexA('#0b241c',.7));
+    wg.addColorStop(1,hexA('#04100c',.95));
+    ctx.fillStyle=wg; ctx.fillRect(0,wy-30,W,H-wy+30);
+    for(let i=0;i<4;i++){
+      const yy=wy+14+i*22;
+      ctx.strokeStyle=hexA('#2d7a63',.10-i*.02);
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      for(let x=0;x<=W;x+=8){
+        const y=yy+Math.sin(x*.015+t*.7+i)*3;
+        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+
+    if(!reduce && Math.random()<.10){
+      steam.push({x:seamX()+(Math.random()-.5)*30, y:wy+(Math.random()-.5)*20, vy:-(0.25+Math.random()*.5), life:.9, r:1+Math.random()*2});
+    }
+    for(let i=steam.length-1;i>=0;i--){
+      const s=steam[i]; s.y+=s.vy; s.life-=.008;
+      if(s.life<=0){steam.splice(i,1);continue;}
+      ctx.fillStyle=hexA('#dceae4',s.life*.28);
+      ctx.beginPath(); ctx.arc(s.x+Math.sin(s.y*.05)*4,s.y,s.r,0,TAU); ctx.fill();
+    }
+
+    const hL=hearthL(), hR=hearthR();
+    let heatL, heatR;
+    const sinceLand=t-landT;
+    if(phase==='vigil'){ heatL=.45+.1*Math.sin(t*.6); heatR=0; }
+    else if(phase==='carrying'){ heatL=.30; heatR=0; }
+    else {
+      heatL=Math.max(.12,.30-sinceLand*.05);
+      heatR=Math.min(1,sinceLand*.55);
+    }
+    hearth(hL.x,hL.y,heatL,'#5fc4a4',t);
+    hearth(hR.x,hR.y,heatR,'#e6bd57',t);
+
+    for(let i=trail.length-1;i>=0;i--){
+      const p=trail[i]; p.life-=.03;
+      if(p.life<=0){trail.splice(i,1);continue;}
+      ctx.fillStyle=hexA('#eaa066',p.life*.4);
+      ctx.beginPath(); ctx.arc(p.x,p.y,3*p.life,0,TAU); ctx.fill();
+    }
+
+    if(phase==='vigil'||phase==='carrying'){
+      const b=reduce?.9:(.7+.3*Math.sin(t*3));
+      const g=ctx.createRadialGradient(ember.x,ember.y,0,ember.x,ember.y,26*b);
+      g.addColorStop(0,hexA('#eaa066',.85));
+      g.addColorStop(.5,hexA('#e6bd57',.3*b));
+      g.addColorStop(1,hexA('#e6bd57',0));
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(ember.x,ember.y,26*b,0,TAU); ctx.fill();
+      ctx.fillStyle='#ffe9cf';
+      ctx.beginPath(); ctx.arc(ember.x,ember.y,6,0,TAU); ctx.fill();
+      ctx.fillStyle=hexA('#5fc4a4',.9);
+      ctx.beginPath(); ctx.arc(ember.x,ember.y,2.4,0,TAU); ctx.fill();
+    }
+
+    if(phase!=='vigil'&&phase!=='carrying'&&sinceLand<2.4&&!reduce){
+      if(Math.random()<.5) sparks.push({x:hR.x+(Math.random()-.5)*20,y:hR.y-20,vx:(Math.random()-.5)*1.6,vy:-(1+Math.random()*2),life:1});
+    }
+    for(let i=sparks.length-1;i>=0;i--){
+      const s=sparks[i]; s.x+=s.vx; s.y+=s.vy; s.vy+=.03; s.life-=.016;
+      if(s.life<=0){sparks.splice(i,1);continue;}
+      ctx.fillStyle=hexA(Math.random()<.5?'#e6bd57':'#5fc4a4',s.life*.9);
+      ctx.beginPath(); ctx.arc(s.x,s.y,1.6,0,TAU); ctx.fill();
+    }
+
+    if(phase==='kept'){
+      const pulse=.5+.5*Math.sin(t*1.2);
+      ctx.strokeStyle=hexA('#dceae4',.12+.08*pulse);
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(hL.x,hL.y-14);
+      ctx.quadraticCurveTo(seamX(),wy-70-20*pulse,hR.x,hR.y-30);
+      ctx.stroke();
+      const p=(t*.18)%2, q=p<1?p:2-p;
+      const qx=(1-q)*(1-q)*hL.x+2*(1-q)*q*seamX()+q*q*hR.x;
+      const qy=(1-q)*(1-q)*(hL.y-14)+2*(1-q)*q*(wy-70-20*pulse)+q*q*(hR.y-30);
+      ctx.fillStyle=hexA(q<.5?'#5fc4a4':'#e6bd57',.9);
+      ctx.beginPath(); ctx.arc(qx,qy,3,0,TAU); ctx.fill();
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
