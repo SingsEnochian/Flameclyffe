@@ -1,0 +1,135 @@
+/* SCFE room layout pass: loaded last from scfe-lab.html. */
+
+.starwell .observatory-shell {
+  width: min(1500px, 92vw) !important;
+  margin: 1.2rem auto !important;
+  padding: clamp(.85rem, 1.6vw, 1.45rem) !important;
+  border: 1px solid #e7c47766 !important;
+  border-radius: 30px !important;
+  background: linear-gradient(165deg, #14131bf0 0%, #211b28ee 52%, #0e151df0 100%) !important;
+  box-shadow: inset 0 1px 0 #ffffff24, 0 42px 86px -58px #000000f0 !important;
+  overflow: hidden !important;
+}
+
+.starwell .dome {
+  min-height: clamp(330px, 42vh, 470px) !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 24px !important;
+  border: 1px solid #e7c47742 !important;
+  background: linear-gradient(180deg, #ffffff08, #00000026) !important;
+}
+
+.starwell .dome-inner {
+  width: min(840px, 88vw) !important;
+  padding: clamp(.85rem, 1.7vw, 1.35rem) !important;
+  border-radius: 22px !important;
+  border: 1px solid #e7c47733 !important;
+  background: linear-gradient(180deg, #14131b66, #14131b24) !important;
+  box-shadow: inset 0 1px 0 #ffffff17, 0 24px 60px -44px #000000e0 !important;
+}
+
+.starwell .dome h1 {
+  margin: .1rem 0 .35rem !important;
+  font-size: clamp(4.4rem, 8vw, 7.2rem) !important;
+  line-height: .82 !important;
+}
+
+.starwell .dome .subtitle {
+  width: min(760px, 100%) !important;
+  margin: .25rem auto .75rem !important;
+  padding: .65rem .9rem !important;
+  border-top: 1px solid #e7c4773d !important;
+  border-bottom: 1px solid #e7c4773d !important;
+  font-size: clamp(1.05rem, 1.55vw, 1.45rem) !important;
+  line-height: 1.35 !important;
+}
+
+.starwell .scfe-lab {
+  margin-top: 1.15rem !important;
+  padding: clamp(.9rem, 1.6vw, 1.35rem) !important;
+  border: 1px solid #e7c47759 !important;
+  border-radius: 26px !important;
+  background: linear-gradient(145deg, #f7edda12, #14131b12) !important;
+}
+
+.starwell .scfe-heading {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+  margin-bottom: .75rem !important;
+}
+
+.starwell .scfe-lab-note {
+  max-width: 74ch !important;
+  margin: 0 0 .9rem !important;
+  opacity: .8 !important;
+}
+
+.starwell .scfe-layout {
+  grid-template-columns: minmax(280px, .82fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 1rem !important;
+  align-items: start !important;
+}
+
+.starwell .scfe-inputs {
+  grid-column: 1 !important;
+  grid-row: 1 / span 5 !important;
+  position: sticky !important;
+  top: 1rem !important;
+  border-color: #b65f3d80 !important;
+}
+
+.starwell .scfe-summary {
+  grid-column: 2 / 4 !important;
+}
+
+.starwell .scfe-geometry-panel {
+  grid-column: 2 / 4 !important;
+  min-height: 520px !important;
+}
+
+.starwell .scfe-geometry-panel .geometry-sigil svg {
+  width: min(100%, 430px) !important;
+}
+
+.starwell .scfe-local-archive {
+  grid-column: 1 / 4 !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  gap: .75rem 1rem !important;
+  align-items: center !important;
+}
+
+.starwell .scfe-json pre {
+  max-height: 280px !important;
+}
+
+.starwell .scfe-json::before {
+  content: "Receipts · local JSON only";
+  display: inline-flex;
+  margin-bottom: .7rem;
+  padding: .35rem .7rem;
+  border: 1px solid #e7c47740;
+  border-radius: 999px;
+  color: #e7c477;
+  font: 700 .75rem/1 Inter, system-ui, sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+@media (width <= 1020px) {
+  .starwell .scfe-layout { grid-template-columns: 1fr 1fr !important; }
+  .starwell .scfe-inputs { grid-column: 1 / -1 !important; grid-row: auto !important; position: relative !important; top: auto !important; }
+  .starwell .scfe-summary,
+  .starwell .scfe-geometry-panel,
+  .starwell .scfe-local-archive { grid-column: 1 / -1 !important; }
+}
+
+@media (width <= 720px) {
+  .starwell .observatory-shell { width: min(96vw, 100%) !important; margin: .7rem auto !important; padding: .7rem !important; border-radius: 22px !important; }
+  .starwell .dome { min-height: 430px !important; }
+  .starwell .scfe-layout { grid-template-columns: 1fr !important; }
+  .starwell .scfe-heading { align-items: flex-start !important; flex-direction: column !important; }
+}
