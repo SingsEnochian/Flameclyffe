@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STARWELL · Glass Study</title>
+<!--
+  STARWELL Glass Study
+  Origin: Faer Uial design prototype, carried into the repo by Vee.
+  Material grammar inspired by omid3098/Unity-URP-GlassShader's screen-space glass controls.
+  This is web-native canvas sampling/distortion, not copied Unity shader code.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#f7edda; --ink:#14131b;
+    --gold:#e7c477; --copper:#b65f3d;
+    --seaglass:#8ccac0; --moon:#e8e4f0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:"Cormorant Garamond",Georgia,serif;
+    background:#0d0c14; color:var(--parchment);
+    touch-action:none;
+  }
+  #sky{ position:fixed; inset:0; }
+  #pane{
+    position:fixed;
+    width:min(420px,72vw); height:min(280px,44vh);
+    left:calc(50% - min(210px,36vw)); top:calc(42% - min(140px,22vh));
+    border-radius:20px;
+    cursor:grab;
+    overflow:hidden;
+    border:1px solid rgba(231,196,119,.5);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.25),
+      inset 0 -14px 30px rgba(20,19,27,.25),
+      0 30px 60px -30px rgba(0,0,0,.9);
+  }
+  #pane:active{ cursor:grabbing; }
+  #paneCv{ position:absolute; inset:0; width:100%; height:100%; }
+  /* the specular sweep — the "reflection strength" of the reference shader */
+  #sheen{
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(115deg,
+      transparent 30%,
+      rgba(255,255,255,var(--sheen,0.12)) 45%,
+      rgba(255,255,255,calc(var(--sheen,0.12)*0.4)) 52%,
+      transparent 62%);
+    mix-blend-mode:screen;
+  }
+  #tintLayer{
+    position:absolute; inset:0; pointer-events:none;
+    background:var(--tint, transparent);
+    mix-blend-mode:overlay;
+  }
+  .pane-label{
+    position:absolute; left:18px; bottom:14px; pointer-events:none;
+    font-family:Cinzel,serif; font-size:.62rem; letter-spacing:.3em;
+    text-transform:uppercase; color:rgba(247,237,218,.85);
+    text-shadow:0 1px 8px rgba(0,0,0,.6);
+  }
+
+  /* ---- controls: the Unity shader's own knobs, translated to web ---- */
+  .controls{
+    position:fixed; right:18px; bottom:18px; z-index:5;
+    width:min(300px,86vw);
+    padding:1rem 1.1rem .9rem;
+    border-radius:16px;
+    background:rgba(20,19,27,.72);
+    border:1px solid rgba(231,196,119,.35);
+    backdrop-filter:blur(10px);
+  }
+  .controls::before{
+    content:""; position:absolute; top:0; left:12%; right:12%; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(231,196,119,.7),transparent);
+  }
+  .controls h2{
+    font-family:Cinzel,serif; font-weight:400; font-size:.7rem;
+    letter-spacing:.26em; text-transform:uppercase; color:var(--gold);
+    margin-bottom:.7rem;
+  }
+  .row{ display:grid; grid-template-columns:7.2rem 1fr; align-items:center; gap:.6rem; margin:.45rem 0; }
+  .row label{ font-family:Cinzel,serif; font-size:.56rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(247,237,218,.75); }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; height:2px; border-radius:2px;
+    background:rgba(231,196,119,.3); outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:12px; height:12px; border-radius:50%;
+    background:var(--gold); cursor:pointer; box-shadow:0 0 8px rgba(231,196,119,.6);
+  }
+  input[type=range]::-moz-range-thumb{ width:12px;height:12px;border:none;border-radius:50%;background:var(--gold);cursor:pointer; }
+  .tints{ display:flex; gap:.45rem; margin-top:.55rem; }
+  .tint-dot{
+    width:22px; height:22px; border-radius:50%; cursor:pointer;
+    border:1px solid rgba(247,237,218,.4);
+    transition:transform .15s, border-color .2s;
+  }
+  .tint-dot:hover{ transform:scale(1.12); }
+  .tint-dot.on{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(231,196,119,.35); }
+  .eyebrow{
+    position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    font-family:Cinzel,serif; font-size:.6rem; letter-spacing:.34em;
+    text-transform:uppercase; color:rgba(231,196,119,.75);
+    pointer-events:none; text-align:center;
+  }
+  .hint{
+    position:fixed; bottom:20px; left:20px;
+    font-style:italic; font-size:.95rem; color:rgba(247,237,218,.55);
+    pointer-events:none; max-width:34ch; line-height:1.5;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="sky"></canvas>
+
+<div class="eyebrow">glass study · drag the pane through the sky</div>
+
+<div id="pane">
+  <canvas id="paneCv"></canvas>
+  <div id="tintLayer"></div>
+  <div id="sheen"></div>
+  <div class="pane-label">Observatory Glass</div>
+</div>
+
+<div class="hint">The stars bend through the pane — true distortion of what lies behind, the way a screen-space shader does it. Same knobs, web-native.</div>
+
+<div class="controls">
+  <h2>Material Parameters</h2>
+  <div class="row"><label>Distort Strength</label><input type="range" id="kStr" min="0" max="30" step="0.5" value="10"></div>
+  <div class="row"><label>Distort Tiling</label><input type="range" id="kTile" min="0.004" max="0.08" step="0.002" value="0.02"></div>
+  <div class="row"><label>Frost</label><input type="range" id="kFrost" min="0" max="8" step="0.5" value="1.5"></div>
+  <div class="row"><label>Reflection</label><input type="range" id="kSheen" min="0" max="0.4" step="0.02" value="0.12"></div>
+  <div class="row"><label>Flow</label><input type="range" id="kFlow" min="0" max="2" step="0.1" value="0.5"></div>
+  <div class="row"><label>Tint</label>
+    <div class="tints">
+      <div class="tint-dot on" data-tint="transparent" style="background:conic-gradient(#333,#666,#333)"></div>
+      <div class="tint-dot" data-tint="rgba(231,196,119,0.35)" style="background:#e7c477"></div>
+      <div class="tint-dot" data-tint="rgba(140,202,192,0.35)" style="background:#8ccac0"></div>
+      <div class="tint-dot" data-tint="rgba(182,95,61,0.3)" style="background:#b65f3d"></div>
+      <div class="tint-dot" data-tint="rgba(45,122,99,0.32)" style="background:#2d7a63"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const TAU=Math.PI*2;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- the sky beneath (STARWELL night) ---------- */
+  const sky=document.getElementById('sky'), sctx=sky.getContext('2d');
+  let W,H;
+  const stars=[];
+  function seed(){
+    stars.length=0;
+    for(let i=0;i<240;i++){
+      stars.push({x:Math.random(),y:Math.random(),r:Math.random()<0.05?2:1.1,
+        ph:Math.random()*TAU,
+        tint:Math.random()<0.14?(Math.random()<0.5?'231,196,119':'140,202,192'):'240,236,225'});
+    }
+  }
+  function resize(){ W=innerWidth;H=innerHeight;sky.width=W;sky.height=H;seed(); sizePane(); }
+  addEventListener('resize',resize); resize();
+
+  function paintSky(t){
+    const g=sctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#12101d'); g.addColorStop(.6,'#161327'); g.addColorStop(1,'#0d0c14');
+    sctx.fillStyle=g; sctx.fillRect(0,0,W,H);
+    // seaglass nebula + copper ember-cloud, so the glass has colour to bend
+    let ng=sctx.createRadialGradient(W*.7,H*.28,0,W*.7,H*.28,W*.34);
+    ng.addColorStop(0,'rgba(140,202,192,.12)'); ng.addColorStop(1,'rgba(140,202,192,0)');
+    sctx.fillStyle=ng; sctx.fillRect(0,0,W,H);
+    ng=sctx.createRadialGradient(W*.25,H*.7,0,W*.25,H*.7,W*.3);
+    ng.addColorStop(0,'rgba(182,95,61,.10)'); ng.addColorStop(1,'rgba(182,95,61,0)');
+    sctx.fillStyle=ng; sctx.fillRect(0,0,W,H);
+    stars.forEach(s=>{
+      const tw=reduce?0.8:(0.5+0.5*Math.sin(t*0.0012+s.ph));
+      sctx.fillStyle=`rgba(${s.tint},${0.85*tw})`;
+      sctx.beginPath(); sctx.arc(s.x*W,s.y*H,s.r,0,TAU); sctx.fill();
+    });
+    // a horizon line of gold, faint
+    sctx.strokeStyle='rgba(231,196,119,.18)'; sctx.lineWidth=1;
+    sctx.beginPath(); sctx.moveTo(0,H*.86);
+    for(let x=0;x<=W;x+=10) sctx.lineTo(x,H*.86+Math.sin(x*.01+t*.0006)*3);
+    sctx.stroke();
+  }
+
+  /* ---------- the glass pane: samples & distorts the sky behind it ---------- */
+  const pane=document.getElementById('pane');
+  const pcv=document.getElementById('paneCv'), pctx=pcv.getContext('2d');
+  const P={ str:10, tile:0.02, frost:1.5, flow:0.5 };
+
+  function paneRect(){ const r=pane.getBoundingClientRect(); return r; }
+  function sizePane(){
+    const r=paneRect();
+    pcv.width=r.width; pcv.height=r.height;
+  }
+  addEventListener('resize',sizePane); sizePane();
+
+  // cheap 2-octave value noise via layered sines — enough for glass wobble
+  function n2(x,y,t){
+    return (
+      Math.sin(x*1.0 + t*0.7) * 0.6 +
+      Math.sin(y*1.3 - t*0.5) * 0.6 +
+      Math.sin((x+y)*0.7 + t*0.3) * 0.4 +
+      Math.sin((x*1.9 - y*1.1) - t*0.9) * 0.3
+    );
+  }
+
+  function paintPane(t){
+    const r=paneRect();
+    const w=pcv.width, h=pcv.height;
+    if(w<2||h<2) return;
+    pctx.clearRect(0,0,w,h);
+    pctx.filter = P.frost>0 ? `blur(${P.frost}px)` : 'none';
+    // draw the sky region behind the pane in thin vertical strips,
+    // each strip offset by a flowing noise field = distortion behind the glass
+    const strip=4;
+    const ft=reduce?0:(t*0.001*P.flow);
+    for(let x=0;x<w;x+=strip){
+      const nx=(r.left+x)*P.tile, base=(r.top)*P.tile;
+      const dx=n2(nx, base, ft)*P.str;
+      const dy=n2(nx+31.7, base+11.3, ft*1.1)*P.str;
+      const sx=r.left+x+dx, sy=r.top+dy;
+      pctx.drawImage(sky,
+        Math.max(0,Math.min(W-strip,sx)), Math.max(0,Math.min(H-h,sy)), strip, h,
+        x, 0, strip, h);
+    }
+    pctx.filter='none';
+    // inner edge shading — the pane's own thickness
+    const eg=pctx.createLinearGradient(0,0,0,h);
+    eg.addColorStop(0,'rgba(255,255,255,.10)');
+    eg.addColorStop(.12,'rgba(255,255,255,0)');
+    eg.addColorStop(.88,'rgba(20,19,27,0)');
+    eg.addColorStop(1,'rgba(20,19,27,.22)');
+    pctx.fillStyle=eg; pctx.fillRect(0,0,w,h);
+  }
+
+  /* ---------- drag the pane ---------- */
+  let drag=null;
+  pane.addEventListener('pointerdown',e=>{
+    drag={dx:e.clientX-pane.offsetLeft, dy:e.clientY-pane.offsetTop};
+    pane.setPointerCapture(e.pointerId);
+  });
+  pane.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    pane.style.left=(e.clientX-drag.dx)+'px';
+    pane.style.top=(e.clientY-drag.dy)+'px';
+  });
+  pane.addEventListener('pointerup',()=>drag=null);
+  pane.addEventListener('pointercancel',()=>drag=null);
+
+  /* ---------- knobs (the reference shader's own parameter list, web-native) ---------- */
+  const bind=(id,fn)=>document.getElementById(id).addEventListener('input',e=>fn(parseFloat(e.target.value)));
+  bind('kStr', v=>P.str=v);
+  bind('kTile', v=>P.tile=v);
+  bind('kFrost', v=>P.frost=v);
+  bind('kFlow', v=>P.flow=v);
+  bind('kSheen', v=>document.documentElement.style.setProperty('--sheen',v));
+  document.querySelectorAll('.tint-dot').forEach(d=>{
+    d.addEventListener('click',()=>{
+      document.querySelectorAll('.tint-dot').forEach(x=>x.classList.remove('on'));
+      d.classList.add('on');
+      document.getElementById('tintLayer').style.background=d.dataset.tint==='transparent'?'transparent':d.dataset.tint;
+    });
+  });
+
+  function frame(t){
+    paintSky(t);
+    paintPane(t);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
