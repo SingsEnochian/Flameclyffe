@@ -348,3 +348,264 @@
     width: 100%;
   }
 }
+
+/* Faer's vestment wrapper: loaded through the final Starwell CSS layer.
+   This is the mobile/app polish seam for Art Gobby direction. */
+
+.starwell {
+  --starwell-shell-pad: clamp(0.75rem, 2.2vw, 1.75rem);
+  --starwell-content-pad: clamp(0.85rem, 2.4vw, 1.5rem);
+  --starwell-section-gap: clamp(0.85rem, 2.2vw, 1.2rem);
+  padding: var(--starwell-shell-pad) !important;
+  overflow-x: hidden !important;
+}
+
+.starwell .observatory-shell {
+  width: min(1240px, 100%) !important;
+  border-radius: clamp(28px, 4vw, 42px) !important;
+}
+
+.starwell .dome {
+  min-height: clamp(210px, 28vh, 285px) !important;
+  padding: clamp(1.35rem, 4.8vw, 3rem) 1.2rem clamp(1rem, 3vw, 1.5rem) !important;
+}
+
+.starwell .dome::before {
+  width: min(880px, 104vw) !important;
+  height: min(880px, 104vw) !important;
+  bottom: -710px !important;
+}
+
+.starwell h1 {
+  font-size: clamp(3.2rem, 10vw, 7.4rem) !important;
+  line-height: 0.9 !important;
+}
+
+.starwell .subtitle {
+  max-width: 640px !important;
+  margin-top: 0.8rem !important;
+  font-size: clamp(1.15rem, 2.4vw, 1.65rem) !important;
+}
+
+.starwell .inscription {
+  margin-top: 1rem !important;
+  padding: 0.6rem 0.9rem !important;
+}
+
+.starwell .observatory-map {
+  padding-top: 0.25rem !important;
+}
+
+.starwell .map-heading {
+  flex-wrap: wrap !important;
+  gap: 0.6rem 1rem !important;
+  padding-left: var(--starwell-content-pad) !important;
+  padding-right: var(--starwell-content-pad) !important;
+}
+
+.starwell .map-heading.compact {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.starwell .selected-alcove,
+.starwell .chamber-card {
+  margin-left: var(--starwell-content-pad) !important;
+  margin-right: var(--starwell-content-pad) !important;
+  margin-bottom: var(--starwell-section-gap) !important;
+  border-radius: 28px !important;
+}
+
+.starwell .chamber-card {
+  padding: clamp(0.9rem, 2vw, 1.15rem) !important;
+}
+
+.starwell .study-row {
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)) !important;
+  gap: 0.85rem !important;
+  padding-left: var(--starwell-content-pad) !important;
+  padding-right: var(--starwell-content-pad) !important;
+  padding-bottom: 1.35rem !important;
+}
+
+.starwell .room-card {
+  min-height: 152px !important;
+  border-radius: 24px !important;
+  padding: 0.95rem !important;
+  box-shadow: 0 12px 28px rgba(56,37,28,0.1) !important;
+}
+
+.starwell .room-card:hover,
+.starwell .room-card:focus-visible,
+.starwell .room-card.active {
+  transform: translateY(-2px) !important;
+}
+
+.starwell .room-title {
+  font-size: clamp(1.3rem, 2.4vw, 1.48rem) !important;
+  margin-bottom: 0.3rem !important;
+}
+
+.starwell .room-text {
+  font-size: 0.94rem !important;
+  line-height: 1.44 !important;
+}
+
+@media (max-width: 860px) {
+  .starwell {
+    --starwell-content-pad: 0.75rem;
+    --starwell-section-gap: 0.75rem;
+    padding: 0.55rem !important;
+  }
+
+  .starwell .observatory-shell {
+    border-radius: 24px !important;
+  }
+
+  .starwell .dome {
+    min-height: 210px !important;
+    padding: 1rem 0.9rem 0.8rem !important;
+  }
+
+  .starwell h1 {
+    font-size: clamp(2.65rem, 16vw, 4.8rem) !important;
+  }
+
+  .starwell .subtitle {
+    font-size: clamp(1.02rem, 4vw, 1.28rem) !important;
+    line-height: 1.22 !important;
+  }
+
+  .starwell .inscription {
+    width: min(100%, 24rem) !important;
+  }
+
+  .starwell-sigil-console {
+    min-height: auto !important;
+    margin: 0.7rem var(--starwell-content-pad) 1rem !important;
+    padding: 0.7rem !important;
+    border-radius: 28px !important;
+  }
+
+  .sigil-field {
+    --sigil-size: 0 !important;
+    display: grid !important;
+    gap: 0.7rem !important;
+    min-height: auto !important;
+    padding: 0 !important;
+  }
+
+  .sigil-ring,
+  .sigil-axis,
+  .sigil-instruction {
+    display: none !important;
+  }
+
+  .sigil-core {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    min-height: auto !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 0.95rem !important;
+    text-align: left !important;
+    border-radius: 24px !important;
+  }
+
+  .sigil-core-medallion {
+    width: 3.35rem !important;
+    height: 3.35rem !important;
+    grid-row: span 3;
+  }
+
+  .sigil-core p,
+  .sigil-core h2,
+  .sigil-core span:last-child {
+    margin-left: 0 !important;
+    text-align: left !important;
+  }
+
+  .sigil-core p {
+    margin: 0 !important;
+    max-width: none !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  .sigil-core h2 {
+    margin: 0 !important;
+    font-size: clamp(1.45rem, 7vw, 2rem) !important;
+  }
+
+  .sigil-core span:last-child {
+    max-width: none !important;
+    margin: 0 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.34 !important;
+  }
+
+  .sigil-node-layer {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.62rem !important;
+    width: 100% !important;
+  }
+
+  .sigil-node {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    min-height: 4.35rem !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    align-items: center !important;
+    justify-items: start !important;
+    gap: 0.72rem !important;
+    padding: 0.7rem 0.82rem !important;
+    border-radius: 22px !important;
+    text-align: left !important;
+  }
+
+  .sigil-node:hover,
+  .sigil-node:focus-visible,
+  .sigil-node.active {
+    transform: translateY(-2px) !important;
+  }
+
+  .sigil-node strong {
+    max-width: none !important;
+    font-size: 1.05rem !important;
+    line-height: 1.05 !important;
+    text-align: left !important;
+  }
+
+  .sigil-medallion {
+    width: 3rem !important;
+    height: 3rem !important;
+  }
+
+  .study-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .starwell .room-card {
+    min-height: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starwell,
+  .stars,
+  .starwell .room-card,
+  .sigil-node {
+    transition: none !important;
+  }
+}
