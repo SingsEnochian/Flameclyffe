@@ -1,6 +1,7 @@
 @import './starwell-controls.css';
 @import './starwell-grown-materials.css';
 @import './deep-starburst.css';
+@import './starwell-mobile-index.css';
 
 /* DEEP Observer boundary pass
    Loads after the general STARWELL scale pass so the live glyph panel obeys the UI Boundary Contract.
