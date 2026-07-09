@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#11140f" />
+    <meta
+      name="description"
+      content="STARWELL Living Portal Chamber shell: a consent-led, read-only route for room seeds, portal cards, and future explicit sound/weather proposals."
+    />
+    <title>STARWELL · Living Portal Chamber</title>
+    <style>
+      :root {
+        --ink: #15130f;
+        --paper: #f7edda;
+        --paper-soft: rgba(247, 237, 218, 0.84);
+        --gold: #e7c477;
+        --copper: #b65f3d;
+        --copper-dark: #7e3d29;
+        --seaglass: #8ccac0;
+        --moss: #315641;
+        --night: #10120f;
+        --night-2: #171922;
+        --veil: rgba(255, 255, 255, 0.08);
+        color-scheme: dark;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        color: var(--paper);
+        background:
+          radial-gradient(circle at 50% 0%, rgba(231, 196, 119, 0.18), transparent 28rem),
+          radial-gradient(circle at 12% 22%, rgba(140, 202, 192, 0.16), transparent 24rem),
+          radial-gradient(circle at 88% 34%, rgba(182, 95, 61, 0.14), transparent 22rem),
+          linear-gradient(180deg, #11140f 0%, #171922 52%, #0d0f0e 100%);
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          radial-gradient(circle, rgba(247, 237, 218, 0.72) 0 1px, transparent 1.5px),
+          radial-gradient(circle, rgba(140, 202, 192, 0.36) 0 1px, transparent 1.7px);
+        background-size: 7.5rem 7.5rem, 11rem 11rem;
+        background-position: 0 0, 3rem 2rem;
+        opacity: 0.2;
+        mask-image: linear-gradient(180deg, black, transparent 88%);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .portal-shell {
+        width: min(1120px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: max(1.25rem, env(safe-area-inset-top)) 0 3rem;
+      }
+
+      .portal-hero {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-height: min(68vh, 42rem);
+        padding: clamp(2rem, 6vw, 5rem) 1rem;
+        text-align: center;
+      }
+
+      .portal-ring {
+        position: absolute;
+        width: min(74vw, 32rem);
+        aspect-ratio: 1;
+        border: 1px solid rgba(231, 196, 119, 0.38);
+        border-radius: 50%;
+        box-shadow:
+          0 0 0 1.1rem rgba(231, 196, 119, 0.035),
+          0 0 0 2.25rem rgba(140, 202, 192, 0.035),
+          inset 0 0 4rem rgba(231, 196, 119, 0.1),
+          0 0 7rem rgba(140, 202, 192, 0.16);
+      }
+
+      .portal-ring::before,
+      .portal-ring::after {
+        content: "";
+        position: absolute;
+        inset: 14%;
+        border: 1px dashed rgba(140, 202, 192, 0.34);
+        border-radius: 50%;
+        transform: rotate(18deg);
+      }
+
+      .portal-ring::after {
+        inset: 28%;
+        border-style: solid;
+        border-color: rgba(182, 95, 61, 0.34);
+        transform: rotate(-24deg);
+      }
+
+      .portal-title {
+        position: relative;
+        max-width: 48rem;
+        padding: clamp(1.25rem, 4vw, 2.25rem);
+        border: 1px solid rgba(231, 196, 119, 0.26);
+        border-radius: 28px 44px 28px 44px;
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.22)),
+          rgba(16, 18, 15, 0.58);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+        backdrop-filter: blur(20px) saturate(1.12);
+      }
+
+      .eyebrow {
+        margin: 0 0 0.85rem;
+        color: var(--seaglass);
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 0.9rem;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2.45rem, 10vw, 6.5rem);
+        line-height: 0.86;
+        letter-spacing: 0.04em;
+      }
+
+      .subtitle {
+        max-width: 40rem;
+        margin: 0 auto 1rem;
+        color: rgba(247, 237, 218, 0.88);
+        font-size: clamp(1rem, 2.4vw, 1.24rem);
+        line-height: 1.65;
+      }
+
+      .inscription {
+        margin: 0;
+        color: rgba(231, 196, 119, 0.9);
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .portal-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .portal-card,
+      .portal-panel {
+        border: 1px solid rgba(231, 196, 119, 0.2);
+        border-radius: 22px 34px 22px 34px;
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(0, 0, 0, 0.16)),
+          rgba(16, 18, 15, 0.54);
+        box-shadow: 0 18px 55px rgba(0, 0, 0, 0.22);
+        backdrop-filter: blur(18px) saturate(1.1);
+      }
+
+      .portal-card {
+        min-height: 18rem;
+        padding: 1.15rem;
+      }
+
+      .portal-card p:first-child,
+      .portal-panel p:first-child {
+        margin-bottom: 0.65rem;
+        color: var(--seaglass);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .portal-card h2 {
+        margin-bottom: 0.7rem;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.65rem;
+        line-height: 1.05;
+      }
+
+      .portal-card span,
+      .portal-panel span {
+        display: block;
+        color: rgba(247, 237, 218, 0.82);
+        line-height: 1.56;
+      }
+
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-top: 1rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(140, 202, 192, 0.3);
+        border-radius: 999px;
+        padding: 0.32rem 0.65rem;
+        color: rgba(247, 237, 218, 0.9);
+        background: rgba(140, 202, 192, 0.08);
+        font-size: 0.76rem;
+        line-height: 1.1;
+      }
+
+      .portal-panel {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding: clamp(1rem, 3vw, 1.4rem);
+      }
+
+      .portal-panel h2 {
+        margin-bottom: 0.3rem;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(1.7rem, 4vw, 2.6rem);
+      }
+
+      .split-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .split-list li {
+        border: 1px solid rgba(140, 202, 192, 0.22);
+        border-radius: 16px;
+        padding: 0.85rem;
+        background: rgba(255, 255, 255, 0.055);
+      }
+
+      .split-list strong {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: var(--gold);
+      }
+
+      details {
+        border: 1px solid rgba(231, 196, 119, 0.18);
+        border-radius: 18px;
+        padding: 0.9rem 1rem;
+        background: rgba(0, 0, 0, 0.14);
+      }
+
+      summary {
+        cursor: pointer;
+        color: var(--gold);
+        font-weight: 800;
+      }
+
+      details p {
+        margin: 0.8rem 0 0;
+        color: rgba(247, 237, 218, 0.78);
+        line-height: 1.6;
+      }
+
+      @media (max-width: 860px) {
+        .portal-grid,
+        .split-list {
+          grid-template-columns: 1fr;
+        }
+
+        .portal-hero {
+          min-height: auto;
+          padding-top: 4.5rem;
+        }
+
+        .portal-ring {
+          width: min(86vw, 26rem);
+        }
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .portal-ring {
+          animation: slow-breathe 9s ease-in-out infinite;
+        }
+
+        @keyframes slow-breathe {
+          0%,
+          100% {
+            transform: scale(0.985) rotate(0deg);
+            opacity: 0.82;
+          }
+
+          50% {
+            transform: scale(1.015) rotate(1.4deg);
+            opacity: 1;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="portal-shell" aria-label="STARWELL Living Portal Chamber">
+      <section class="portal-hero">
+        <div class="portal-ring" aria-hidden="true"></div>
+        <div class="portal-title">
+          <p class="eyebrow">STARWELL · Living Portal Chamber · Shell v0.1</p>
+          <h1>PORTAL</h1>
+          <p class="subtitle">
+            A read-only chamber for proposing rooms, paths, and atmosphere without writing canon, starting audio, or pretending a doorway is a command.
+          </p>
+          <p class="inscription">Consent first. Proposal only. No hidden doors.</p>
+        </div>
+      </section>
+
+      <section class="portal-grid" aria-label="Portal chamber doors">
+        <article class="portal-card">
+          <p>Door one</p>
+          <h2>Chamber Shell</h2>
+          <span>
+            This route is the clean landing pad split from the larger Portal Kernel work. It gives the chamber a stable surface before cards, sound, or adapters move in.
+          </span>
+          <div class="status-row" aria-label="Shell state">
+            <span class="pill">read-only</span>
+            <span class="pill">route shell</span>
+            <span class="pill">merge-safe</span>
+          </div>
+        </article>
+
+        <article class="portal-card">
+          <p>Door two</p>
+          <h2>Room Seed Cards</h2>
+          <span>
+            The room-card view models and renderer stay in the big Portal Kernel branch until they can be lifted into a smaller review pass with their tests intact.
+          </span>
+          <div class="status-row" aria-label="Room cards state">
+            <span class="pill">next split</span>
+            <span class="pill">proposal cards</span>
+            <span class="pill">no state mutation</span>
+          </div>
+        </article>
+
+        <article class="portal-card">
+          <p>Door three</p>
+          <h2>Weather Sound</h2>
+          <span>
+            Scene-weather sound remains a future explicit-consent layer: plans only, no autoplay, no hidden playback, no volume changes from model authority.
+          </span>
+          <div class="status-row" aria-label="Sound state">
+            <span class="pill">future pass</span>
+            <span class="pill">sound-off default</span>
+            <span class="pill">explicit enable only</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="portal-panel" aria-label="Living Portal Chamber split plan">
+        <div>
+          <p>Split plan</p>
+          <h2>Tiny dragons, one bridge at a time.</h2>
+          <span>
+            The oversized Portal Kernel branch can now be reduced into reviewable layers. This shell is deliberately small so it can land before the larger room-card and weather-sound pieces are rebased or split.
+          </span>
+        </div>
+
+        <ul class="split-list">
+          <li>
+            <strong>1 · Shell</strong>
+            Static route, chamber language, visual grammar, and guardrails. No data writes. No audio. No adapters.
+          </li>
+          <li>
+            <strong>2 · Cards</strong>
+            Bring over room seed card contracts, view models, renderer, and tests as a read-only proposal layer.
+          </li>
+          <li>
+            <strong>3 · Atmosphere</strong>
+            Bring over weather sound conductor as a proposal-only planner with explicit sound-on gates preserved.
+          </li>
+        </ul>
+
+        <details>
+          <summary>Chamber law</summary>
+          <p>
+            A portal may suggest, preview, and illuminate. It may not write canon, persist private material, start sound, alter volume, or treat generated proposals as commands without explicit consent.
+          </p>
+        </details>
+      </section>
+    </main>
+  </body>
+</html>
