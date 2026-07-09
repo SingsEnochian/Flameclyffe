@@ -16,7 +16,7 @@ A portal may suggest, preview, and illuminate.
 
 Each deeper action gets its own named door, visible switch, and review path.
 
-Persistence is not judged here. It belongs to a later design pass where memory, privacy, consent, and usefulness can be shaped properly instead of flattened into a warning sticker.
+Persistence is a later design craft, not something this shell judges. Memory can be shaped properly when the chamber grows its hands.
 
 ## Split sequence
 
