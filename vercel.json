@@ -1,0 +1,14 @@
+{
+  "buildCommand": "npm run starwell:build",
+  "outputDirectory": "dist/starwell",
+  "rewrites": [
+    {
+      "source": "/templehouse/tesla-observatory",
+      "destination": "/templehouse/tesla-observatory.html"
+    },
+    {
+      "source": "/templehouse/tesla-observatory/",
+      "destination": "/templehouse/tesla-observatory.html"
+    }
+  ]
+}
