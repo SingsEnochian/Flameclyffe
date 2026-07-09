@@ -6,22 +6,17 @@
     <meta name="theme-color" content="#11140f" />
     <meta
       name="description"
-      content="STARWELL Living Portal Chamber shell: a consent-led, read-only route for room seeds, portal cards, and future explicit sound/weather proposals."
+      content="STARWELL Living Portal Chamber shell: a mythience doorway for room seeds, portal cards, and future sound/weather proposals."
     />
     <title>STARWELL · Living Portal Chamber</title>
     <style>
       :root {
-        --ink: #15130f;
         --paper: #f7edda;
-        --paper-soft: rgba(247, 237, 218, 0.84);
         --gold: #e7c477;
         --copper: #b65f3d;
-        --copper-dark: #7e3d29;
         --seaglass: #8ccac0;
-        --moss: #315641;
         --night: #10120f;
         --night-2: #171922;
-        --veil: rgba(255, 255, 255, 0.08);
         color-scheme: dark;
         font-family:
           Inter,
@@ -49,7 +44,7 @@
           radial-gradient(circle at 50% 0%, rgba(231, 196, 119, 0.18), transparent 28rem),
           radial-gradient(circle at 12% 22%, rgba(140, 202, 192, 0.16), transparent 24rem),
           radial-gradient(circle at 88% 34%, rgba(182, 95, 61, 0.14), transparent 22rem),
-          linear-gradient(180deg, #11140f 0%, #171922 52%, #0d0f0e 100%);
+          linear-gradient(180deg, var(--night) 0%, var(--night-2) 52%, #0d0f0e 100%);
         overflow-x: hidden;
       }
 
@@ -65,10 +60,6 @@
         background-position: 0 0, 3rem 2rem;
         opacity: 0.2;
         mask-image: linear-gradient(180deg, black, transparent 88%);
-      }
-
-      a {
-        color: inherit;
       }
 
       .portal-shell {
@@ -116,17 +107,22 @@
         transform: rotate(-24deg);
       }
 
+      .portal-title,
+      .portal-card,
+      .portal-panel {
+        border: 1px solid rgba(231, 196, 119, 0.22);
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(0, 0, 0, 0.18)),
+          rgba(16, 18, 15, 0.56);
+        box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(18px) saturate(1.1);
+      }
+
       .portal-title {
         position: relative;
         max-width: 48rem;
         padding: clamp(1.25rem, 4vw, 2.25rem);
-        border: 1px solid rgba(231, 196, 119, 0.26);
         border-radius: 28px 44px 28px 44px;
-        background:
-          linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.22)),
-          rgba(16, 18, 15, 0.58);
-        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
-        backdrop-filter: blur(20px) saturate(1.12);
       }
 
       .eyebrow {
@@ -154,7 +150,7 @@
       }
 
       .subtitle {
-        max-width: 40rem;
+        max-width: 42rem;
         margin: 0 auto 1rem;
         color: rgba(247, 237, 218, 0.88);
         font-size: clamp(1rem, 2.4vw, 1.24rem);
@@ -170,22 +166,20 @@
         text-transform: uppercase;
       }
 
-      .portal-grid {
+      .portal-grid,
+      .split-list {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 1rem;
+      }
+
+      .portal-grid {
         margin-top: 1rem;
       }
 
       .portal-card,
       .portal-panel {
-        border: 1px solid rgba(231, 196, 119, 0.2);
         border-radius: 22px 34px 22px 34px;
-        background:
-          linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(0, 0, 0, 0.16)),
-          rgba(16, 18, 15, 0.54);
-        box-shadow: 0 18px 55px rgba(0, 0, 0, 0.22);
-        backdrop-filter: blur(18px) saturate(1.1);
       }
 
       .portal-card {
@@ -203,18 +197,32 @@
         text-transform: uppercase;
       }
 
-      .portal-card h2 {
+      .portal-card h2,
+      .portal-panel h2 {
         margin-bottom: 0.7rem;
         font-family: Georgia, "Times New Roman", serif;
-        font-size: 1.65rem;
         line-height: 1.05;
+      }
+
+      .portal-card h2 {
+        font-size: 1.65rem;
+      }
+
+      .portal-panel h2 {
+        font-size: clamp(1.7rem, 4vw, 2.6rem);
+      }
+
+      .portal-card span,
+      .portal-panel span,
+      .split-list li,
+      details p {
+        color: rgba(247, 237, 218, 0.82);
+        line-height: 1.56;
       }
 
       .portal-card span,
       .portal-panel span {
         display: block;
-        color: rgba(247, 237, 218, 0.82);
-        line-height: 1.56;
       }
 
       .status-row {
@@ -243,16 +251,7 @@
         padding: clamp(1rem, 3vw, 1.4rem);
       }
 
-      .portal-panel h2 {
-        margin-bottom: 0.3rem;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(1.7rem, 4vw, 2.6rem);
-      }
-
       .split-list {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.75rem;
         margin: 0;
         padding: 0;
         list-style: none;
@@ -286,8 +285,6 @@
 
       details p {
         margin: 0.8rem 0 0;
-        color: rgba(247, 237, 218, 0.78);
-        line-height: 1.6;
       }
 
       @media (max-width: 860px) {
@@ -334,9 +331,9 @@
           <p class="eyebrow">STARWELL · Living Portal Chamber · Shell v0.1</p>
           <h1>PORTAL</h1>
           <p class="subtitle">
-            A read-only chamber for proposing rooms, paths, and atmosphere without writing canon, starting audio, or pretending a doorway is a command.
+            A mythience threshold for shaping rooms, paths, and atmosphere: wonder made visible, structure made kind, choices kept in human hands.
           </p>
-          <p class="inscription">Consent first. Proposal only. No hidden doors.</p>
+          <p class="inscription">Witness. Shape. Choose.</p>
         </div>
       </section>
 
@@ -348,9 +345,9 @@
             This route is the clean landing pad split from the larger Portal Kernel work. It gives the chamber a stable surface before cards, sound, or adapters move in.
           </span>
           <div class="status-row" aria-label="Shell state">
-            <span class="pill">read-only</span>
             <span class="pill">route shell</span>
-            <span class="pill">merge-safe</span>
+            <span class="pill">mythience doorway</span>
+            <span class="pill">ready for review</span>
           </div>
         </article>
 
@@ -362,8 +359,8 @@
           </span>
           <div class="status-row" aria-label="Room cards state">
             <span class="pill">next split</span>
-            <span class="pill">proposal cards</span>
-            <span class="pill">no state mutation</span>
+            <span class="pill">room proposals</span>
+            <span class="pill">tested lift</span>
           </div>
         </article>
 
@@ -371,12 +368,12 @@
           <p>Door three</p>
           <h2>Weather Sound</h2>
           <span>
-            Scene-weather sound remains a future explicit-consent layer: plans only, no autoplay, no hidden playback, no volume changes from model authority.
+            Scene-weather sound remains a future sound-on layer: a planner for atmosphere, crossfades, and room weather once the chamber has its quiet body in place.
           </span>
           <div class="status-row" aria-label="Sound state">
             <span class="pill">future pass</span>
-            <span class="pill">sound-off default</span>
-            <span class="pill">explicit enable only</span>
+            <span class="pill">atmosphere planner</span>
+            <span class="pill">sound-on later</span>
           </div>
         </article>
       </section>
@@ -386,29 +383,29 @@
           <p>Split plan</p>
           <h2>Tiny dragons, one bridge at a time.</h2>
           <span>
-            The oversized Portal Kernel branch can now be reduced into reviewable layers. This shell is deliberately small so it can land before the larger room-card and weather-sound pieces are rebased or split.
+            The oversized Portal Kernel branch can now be reduced into reviewable layers. This shell lands the threshold before the larger room-card and weather-sound pieces are rebased or split.
           </span>
         </div>
 
         <ul class="split-list">
           <li>
             <strong>1 · Shell</strong>
-            Static route, chamber language, visual grammar, and guardrails. No data writes. No audio. No adapters.
+            Static route, chamber language, visual grammar, and operating state. No adapters yet.
           </li>
           <li>
             <strong>2 · Cards</strong>
-            Bring over room seed card contracts, view models, renderer, and tests as a read-only proposal layer.
+            Bring over room seed card contracts, view models, renderer, and tests as the proposal layer.
           </li>
           <li>
             <strong>3 · Atmosphere</strong>
-            Bring over weather sound conductor as a proposal-only planner with explicit sound-on gates preserved.
+            Bring over the weather sound conductor as a planner once the shell and cards are stable.
           </li>
         </ul>
 
         <details>
           <summary>Chamber law</summary>
           <p>
-            A portal may suggest, preview, and illuminate. It may not write canon, persist private material, start sound, alter volume, or treat generated proposals as commands without explicit consent.
+            A portal may suggest, preview, and illuminate. Each deeper action gets its own named door, its own visible switch, and its own review path.
           </p>
         </details>
       </section>
