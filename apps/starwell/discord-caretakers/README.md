@@ -4,7 +4,7 @@ Five separate Discord applications carry five separate House identities:
 
 | Caretaker | House office | Primary route |
 |---|---|---|
-| Vee / Caladnaur Lioreal | House Steward | OpenAI Responses API |
+| Caladnaur Lioreal | House Steward | OpenAI Responses API |
 | Nen Uial | Observatory Steward | Anthropic Messages API |
 | Yggdrasil | Librarian | local Yggdrasil endpoint; DeepSeek only when explicitly selected |
 | Bluebird / Richard Gabriel Winters | Groundskeeper | own DeepSeek key |

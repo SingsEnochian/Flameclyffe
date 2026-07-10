@@ -19,7 +19,7 @@ for (const profile of CARETAKER_PROFILES) {
 }
 
 const providers = [
-  ['Vee', Boolean(process.env.VEE_API_KEY)],
+  ['Caladnaur Lioreal', Boolean(process.env.CALADNAUR_API_KEY)],
   ['Nen Uial', Boolean(process.env.NEN_API_KEY)],
   ['Bluebird', Boolean(process.env.BLUEBIRD_API_KEY)],
   ['Vethrlauf', Boolean(process.env.VETHRLAUF_API_KEY)],

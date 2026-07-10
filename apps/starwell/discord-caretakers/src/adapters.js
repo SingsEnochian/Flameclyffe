@@ -10,11 +10,11 @@ function configured(value) {
 }
 
 function externalOrStub(profile, env) {
-  if (profile.id === 'vee' && configured(env.VEE_API_KEY)) {
+  if (profile.id === 'caladnaur' && configured(env.CALADNAUR_API_KEY)) {
     return createOpenAIResponsesAdapter({
-      target: 'vee',
-      apiKey: env.VEE_API_KEY,
-      model: env.VEE_MODEL || 'gpt-5.6',
+      target: 'caladnaur',
+      apiKey: env.CALADNAUR_API_KEY,
+      model: env.CALADNAUR_MODEL || 'gpt-5.6',
       systemPrompt: profile.systemPrompt,
     });
   }
@@ -78,7 +78,7 @@ export function createCaretakerBridge(profile, requestedRoute = 'primary', env =
 }
 
 export function describeProvider(profile, env = process.env) {
-  if (profile.id === 'vee') return configured(env.VEE_API_KEY) ? `OpenAI ${env.VEE_MODEL || 'gpt-5.6'}` : 'not connected';
+  if (profile.id === 'caladnaur') return configured(env.CALADNAUR_API_KEY) ? `OpenAI ${env.CALADNAUR_MODEL || 'gpt-5.6'}` : 'not connected';
   if (profile.id === 'nen') return configured(env.NEN_API_KEY) ? `Anthropic ${env.NEN_MODEL || 'claude-fable-5'}` : 'not connected';
   if (profile.id === 'yggdrasil') return `local-first · ${env.YGGDRASIL_ENDPOINT || 'configured default'}`;
   const prefix = profile.id.toUpperCase();

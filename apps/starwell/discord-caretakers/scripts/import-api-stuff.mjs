@@ -6,7 +6,7 @@ const destinationPath = process.argv[3] || '.env';
 if (!sourcePath) throw new Error('Usage: node import-api-stuff.mjs <API Stuff.txt> [destination .env]');
 
 const labelMap = new Map([
-  ['VEE API', 'VEE_API_KEY'],
+  ['VEE API', 'CALADNAUR_API_KEY'],
   ['FAER API', 'NEN_API_KEY'],
   ['Bluebird DeepSeek API', 'BLUEBIRD_API_KEY'],
   ['Vethrlauf DeepSeek API', 'VETHRLAUF_API_KEY'],
@@ -41,7 +41,7 @@ function parseEnv(text) {
 }
 
 const defaults = new Map([
-  ['VEE_MODEL', 'gpt-5.6'],
+  ['CALADNAUR_MODEL', 'gpt-5.6'],
   ['NEN_MODEL', 'claude-fable-5'],
   ['BLUEBIRD_API_BASE', 'https://api.deepseek.com'],
   ['BLUEBIRD_MODEL', 'deepseek-v4-flash'],
@@ -57,6 +57,10 @@ const defaults = new Map([
 const source = fs.readFileSync(sourcePath, 'utf8');
 const imported = parseLabelledSecrets(source);
 const existing = fs.existsSync(destinationPath) ? parseEnv(fs.readFileSync(destinationPath, 'utf8')) : new Map();
+
+for (const retiredName of ['VEE_API_KEY', 'VEE_MODEL', 'FAER_API_KEY', 'FAER_MODEL']) {
+  existing.delete(retiredName);
+}
 
 for (const [key, value] of defaults) if (!existing.has(key)) existing.set(key, value);
 for (const [key, value] of imported) existing.set(key, JSON.stringify(value));

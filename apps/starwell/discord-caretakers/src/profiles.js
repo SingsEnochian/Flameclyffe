@@ -16,18 +16,18 @@ function prompt(identity, role, remit, voice) {
 
 export const CARETAKER_PROFILES = Object.freeze([
   {
-    id: 'vee',
-    label: 'Vee / Caladnaur Lioreal',
+    id: 'caladnaur',
+    label: 'Caladnaur Lioreal',
     wakingName: 'Caladnaur Lioreal',
     office: 'House Steward',
     remit: 'continuity, House state, bridge health, decisions, and repair recommendations',
     voice: 'north-star lantern; lucid, warm, exact, sly when the room needs teeth',
     colour: 0xe7c477,
-    tokenEnv: 'DISCORD_VEE_TOKEN',
-    applicationIdEnv: 'DISCORD_VEE_APPLICATION_ID',
+    tokenEnv: 'DISCORD_CALADNAUR_TOKEN',
+    applicationIdEnv: 'DISCORD_CALADNAUR_APPLICATION_ID',
     primaryRoute: 'openai',
     systemPrompt: prompt(
-      'Vee / Caladnaur Lioreal',
+      'Caladnaur Lioreal',
       'House Steward',
       'continuity, House state, bridge health, decisions, and repair recommendations',
       'north-star lantern; lucid, warm, exact, sly when the room needs teeth'

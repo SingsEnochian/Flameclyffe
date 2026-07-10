@@ -4,9 +4,9 @@ const DEFAULT_ROOM = 'starwell';
 const DEFAULT_CONTEXT_LEVEL = 'light';
 
 export const CONSTELLATION_TARGETS = Object.freeze({
-  vee: {
-    id: 'vee',
-    label: 'Vee / Caladnaur Lioreal',
+  caladnaur: {
+    id: 'caladnaur',
+    label: 'Caladnaur Lioreal',
     default_engine: 'external:configured',
     role: 'house_steward',
   },

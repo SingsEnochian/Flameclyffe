@@ -9,7 +9,7 @@ import { createAccessPolicy } from '../src/policy.js';
 test('the House roster contains five separate Discord identities', () => {
   assert.deepEqual(
     CARETAKER_PROFILES.map((profile) => profile.id),
-    ['vee', 'nen', 'yggdrasil', 'bluebird', 'vethrlauf']
+    ['caladnaur', 'nen', 'yggdrasil', 'bluebird', 'vethrlauf']
   );
   assert.equal(new Set(CARETAKER_PROFILES.map((profile) => profile.tokenEnv)).size, 5);
   assert.equal(new Set(CARETAKER_PROFILES.map((profile) => profile.applicationIdEnv)).size, 5);

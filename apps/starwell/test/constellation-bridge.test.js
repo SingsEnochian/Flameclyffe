@@ -16,7 +16,7 @@ const fixedOptions = {
 
 test('constellation target roster keeps presences and service routes separate', () => {
   assert.deepEqual(CONSTELLATION_TARGET_IDS, [
-    'vee',
+    'caladnaur',
     'nen',
     'yggdrasil',
     'bluebird',

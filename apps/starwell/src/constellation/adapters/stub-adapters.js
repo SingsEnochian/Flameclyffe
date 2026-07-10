@@ -30,8 +30,8 @@ export function createStubAdapter(target, options = {}) {
   };
 }
 
-export function createVeeStubAdapter(options = {}) {
-  return createStubAdapter('vee', options);
+export function createCaladnaurStubAdapter(options = {}) {
+  return createStubAdapter('caladnaur', options);
 }
 
 export function createNenStubAdapter(options = {}) {
