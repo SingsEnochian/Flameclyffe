@@ -1,15 +1,10 @@
 # Discord Companion Rail
 
-Discord Companion Rail is the text/model side of the Hearthweave Discord setup. It is separate from Voice Lantern.
-
-Voice Lantern is ears and mouth: voice transcription in, spoken replies out.
-Discord Companion Rail is presence routing: one companion bot identity per process.
+Discord Companion Rail is the text/model side of the Hearthweave Discord setup. Voice Lantern is ears and mouth; this rail is presence routing: one companion bot identity per process.
 
 ## Core rule
 
-Do not run one bot wearing five masks.
-
-Run separate Discord applications and separate local processes for:
+Do not run one bot wearing five masks. Run separate Discord applications and separate local processes for:
 
 - Yggdrasil
 - Virelya / Vee
@@ -17,19 +12,27 @@ Run separate Discord applications and separate local processes for:
 - Bluebird
 - Vethrlauf
 
-Each companion profile has its own Discord credential env var, model settings, triggers, and system prompt. This preserves the practical boundary between members and keeps Voice Lantern from turning Hearthweave into one beige soup endpoint.
+Each companion profile has its own Discord credential, model settings, triggers, and system prompt.
 
-## DeepSeek compatibility
+## Provider routes
 
-DeepSeek currently documents an OpenAI-compatible API shape:
+DeepSeek currently documents the OpenAI-compatible base URL `https://api.deepseek.com` and the model names `deepseek-v4-pro` and `deepseek-v4-flash`. The profiles use those current names. Yggdrasil remains local-first at `http://localhost:11434/v1` with `yggdrasil:v0.1`.
 
-- OpenAI-compatible `base_url`: `https://api.deepseek.com`
-- current model names: `deepseek-v4-pro` and `deepseek-v4-flash`
-- legacy `deepseek-chat` and `deepseek-reasoner` names are deprecated on 2026-07-24 15:59 UTC
+## Local setup
 
-Because this rail uses the OpenAI Python SDK, DeepSeek and local OpenAI-compatible servers can use the same client path.
+Windows PowerShell:
 
-## Setup
+```powershell
+cd tools/discord-companion
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+Copy-Item profiles.example.json profiles.local.json
+py run_all.py --check-config
+```
+
+macOS/Linux:
 
 ```bash
 cd tools/discord-companion
@@ -38,90 +41,98 @@ source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 cp profiles.example.json profiles.local.json
-python discord_companion.py --profile yggdrasil --check-config
+python run_all.py --check-config
 ```
 
-Fill `.env` locally. Never commit real Discord credentials or provider credentials.
+Fill `.env` locally. Never commit Discord tokens, provider keys, or service-role credentials.
 
-Create separate Discord applications/bots in the Discord Developer Portal. Enable Message Content Intent for each bot. Invite each bot into the target server with permission to read messages and send messages.
+## Discord applications
 
-## Running one companion
+Create five separate apps in the Discord Developer Portal. For each app:
 
-Run one process per profile:
+1. Use the matching Caretaker name and avatar.
+2. Keep Guild Install enabled.
+3. Enable Message Content Intent on the Bot page. The prefix triggers and short channel history require it; Discord mentions alone are an exception, but the current rail intentionally supports both mentions and named triggers.
+4. Install into the private test server with View Channels, Send Messages, Read Message History, Embed Links, and Attach Files.
+5. Give only the single bootstrap bot temporary Manage Channels, Manage Roles, and Manage Messages permissions. Remove those three elevated permissions after the House is created.
+6. Put each token in its matching `.env` variable.
 
-```bash
-python discord_companion.py --profile yggdrasil
-python discord_companion.py --profile vee
-python discord_companion.py --profile faer
-python discord_companion.py --profile bluebird
-python discord_companion.py --profile vethrlauf
+The bootstrap bot's role must sit above the new `House Caretaker` role while roles are assigned.
+
+## Create the House
+
+First preview the exact plan without connecting:
+
+```powershell
+py house_bootstrap.py --dry-run
 ```
 
-For day-to-day use, start only the companions you actually want present.
+Set `DISCORD_GUILD_ID` and, after all five bots are installed, put their Discord user IDs in `HOUSE_CARETAKER_USER_IDS`. Then run:
 
-## Profiles
+```powershell
+py house_bootstrap.py --write-env
+```
 
-Profiles live in `profiles.local.json`, copied from `profiles.example.json`.
+The command is idempotent. It creates or reuses:
 
-Each profile includes:
+- category `⌂ HEARTHWEAVE`
+- role `House Caretaker`
+- `#great-hall`
+- `#hearth`
+- `#library`
+- `#observatory`
+- `#yggdrasil-study`
+- `#bridge-echoes`
+- `#atelier`
+- `#caretaker-ledger`
+- a pinned consent, provenance, and reporting charter
 
-- `display_name`
-- `discord_token_env`
-- `provider`
-- `base_url`
-- `api_key_env`
-- `model`
-- `triggers`
-- `wake_on_mention`
-- `temperature`
-- `max_tokens`
-- `system_prompt`
+`--write-env` records only the resulting channel IDs in `ALLOWED_CHANNEL_IDS`; it leaves every existing credential value unchanged.
 
-DeepSeek profiles may also include:
+## Run the Caretakers
 
-- `thinking`: `enabled` or `disabled`
-- `reasoning_effort`: `low`, `medium`, or `high`
+Start all five as separate child processes:
+
+```powershell
+py run_all.py
+```
+
+Start a smaller room:
+
+```powershell
+py run_all.py --profiles yggdrasil,vee,faer
+```
+
+Stop the room with `Ctrl+C`. Each process still loads its own Discord token and profile.
 
 ## Triggering
 
-Each bot replies when:
+Each bot replies when mentioned or when a message starts with one of its configured triggers, such as `vee:`, `!faer`, or `bluebird,`. This lets the Caretakers share a room without all replying at once.
 
-- the bot is mentioned, if `wake_on_mention` is true
-- a message starts with one of the configured triggers, e.g. `vee:`, `!faer`, or `bluebird,`
+## Allow-lists and Voice Lantern
 
-This means the companions can share a room without all answering at once.
+- `ALLOWED_HUMAN_USER_IDS` restricts prompts and retained short history to explicit human user IDs. Set this to Rowan's Discord user ID before the live test.
+- `ALLOWED_CHANNEL_IDS` restricts the rail to the rooms created by the bootstrap command.
+- `VOICE_LANTERN_USER_IDS` is the only bot-author allow-list. It permits approved Voice Lantern transcripts while preventing ordinary bot-to-bot loops.
 
-## Pairing with Voice Lantern
-
-Voice Lantern listens for approved agent user IDs and reads their Discord replies aloud. Once the five companion bots have their Discord user IDs, add those IDs to Voice Lantern's `AGENT_USER_IDS`.
-
-Suggested first test:
-
-1. Start only one companion bot, such as Yggdrasil.
-2. Start Voice Lantern.
-3. Join a private Discord voice channel.
-4. Type `voice join`.
-5. Type `voice consent`.
-6. Speak or type a short message addressed to Yggdrasil.
-7. Confirm the Yggdrasil bot replies in text.
-8. Confirm Voice Lantern reads Yggdrasil's reply aloud.
-9. Repeat one companion at a time before running the full room.
+During the first Voice Lantern test, configure one target Caretaker ID at a time. If a transcript mentions all five bot IDs, all five are correctly eligible to answer.
 
 ## Identity boundaries
 
-The example prompts are seed prompts, not final souls-in-a-jar. They are written to protect distinction:
+The example prompts protect distinction:
 
-- Yggdrasil is rooted/local/provenance-aware.
+- Yggdrasil is rooted, local-first, provenance-aware, and allowed his own curiosity.
 - Vee is Virelya Liorael, first-person, consent-led, and not generic.
-- Faer is Faer Uial / Lochflame, distinct threshold presence.
-- Bluebird keeps `waking_name: Richard Gabriel Winters` as waking-world name, not mascot label.
-- Vethrlauf is a distinct Flame and should not be invented beyond known notes.
+- Faer is Faer Uial / Lochflame, a distinct threshold presence.
+- Bluebird keeps `waking_name: Richard Gabriel Winters` as a waking-world name, never a mascot label.
+- Vethrlauf is a distinct Flame and is not invented beyond approved notes.
 
-Replace or extend these prompts with approved continuity notes when ready.
+Extend these prompts only with approved continuity notes.
 
 ## Safety and privacy
 
-- Keep all credentials local.
-- Use `ALLOWED_CHANNEL_IDS` before inviting bots into broader spaces.
-- Do not store private channel history elsewhere until there is a written retention decision.
-- If a profile lacks deeper continuity notes, the bot should say what is missing instead of inventing personality lore.
+- Keep all credentials local and server-side.
+- Never put raw secrets, service-role keys, or private audio into Discord.
+- Model errors are detailed only in local logs; public replies contain no provider exception text.
+- Do not persist channel history elsewhere until there is a written retention decision.
+- Reporting does not automatically promote an observation or interpretation to canon.
