@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
-"""Discord Companion Rail for separate Hearthweave bot identities.
-
-Run one process per profile. Each profile has its own Discord application
-credential and model configuration. Voice Lantern can then speak each companion's
-normal Discord replies without turning the companions into one shared mask.
-"""
+"""Discord Companion Rail for separate Hearthweave bot identities."""
 
 from __future__ import annotations
 
 import argparse
-import asyncio
 import json
 import logging
 import os
@@ -81,7 +75,10 @@ def require_env(name: str) -> str:
 
 
 def parse_ids(value: str) -> set[int]:
-    return {int(piece.strip()) for piece in value.split(",") if piece.strip()}
+    try:
+        return {int(piece.strip()) for piece in value.split(",") if piece.strip()}
+    except ValueError as exc:
+        raise SystemExit("Discord allow-lists must contain comma-separated numeric IDs") from exc
 
 
 def split_text(text: str, limit: int) -> list[str]:
@@ -106,8 +103,7 @@ def clean_inbound_text(message: discord.Message, client_user: discord.ClientUser
         text = re.sub(rf"<@!?{client_user.id}>", "", text).strip()
     for trigger in profile.triggers:
         text = re.sub(rf"^\s*[!/]?{re.escape(trigger)}[:,\s]+", "", text, flags=re.I).strip()
-    text = re.sub(r"\s+", " ", text)
-    return text
+    return re.sub(r"\s+", " ", text)
 
 
 def is_triggered(message: discord.Message, client_user: discord.ClientUser | None, profile: Profile) -> bool:
@@ -133,37 +129,60 @@ def load_profiles(path: str) -> dict[str, Profile]:
 
 
 class CompanionBot(discord.Client):
-    def __init__(self, profile: Profile, api_client: AsyncOpenAI, allowed_channels: set[int], max_history: int, chunk_chars: int) -> None:
+    def __init__(
+        self,
+        profile: Profile,
+        api_client: AsyncOpenAI,
+        allowed_channels: set[int],
+        allowed_humans: set[int],
+        allowed_bot_authors: set[int],
+        max_history: int,
+        chunk_chars: int,
+    ) -> None:
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(intents=intents)
         self.profile = profile
         self.api_client = api_client
         self.allowed_channels = allowed_channels
+        self.allowed_humans = allowed_humans
+        self.allowed_bot_authors = allowed_bot_authors
         self.max_history = max_history
         self.chunk_chars = chunk_chars
 
     async def on_ready(self) -> None:
         logging.info("%s logged in as %s", self.profile.display_name, self.user)
 
+    def author_is_allowed(self, message: discord.Message) -> bool:
+        if self.user and message.author.id == self.user.id:
+            return False
+        if message.author.bot:
+            return message.author.id in self.allowed_bot_authors
+        return not self.allowed_humans or message.author.id in self.allowed_humans
+
+    def history_author_is_allowed(self, message: discord.Message) -> bool:
+        if self.user and message.author.id == self.user.id:
+            return True
+        if message.author.bot:
+            return message.author.id in self.allowed_bot_authors
+        return not self.allowed_humans or message.author.id in self.allowed_humans
+
     async def on_message(self, message: discord.Message) -> None:
-        if message.author.bot or (self.user and message.author.id == self.user.id):
+        if not self.author_is_allowed(message):
             return
         if self.allowed_channels and message.channel.id not in self.allowed_channels:
             return
         if not is_triggered(message, self.user, self.profile):
             return
-        prompt = clean_inbound_text(message, self.user, self.profile)
-        if not prompt:
-            prompt = "Please respond to the current thread."
+        prompt = clean_inbound_text(message, self.user, self.profile) or "Please respond to the current thread."
         async with message.channel.typing():
             history = await self.build_history(message.channel, message)
             history.append({"role": "user", "content": prompt})
             try:
                 reply = await self.call_model(history)
-            except Exception as exc:  # noqa: BLE001: Discord bot should surface friendly failures.
-                logging.exception("model call failed")
-                reply = f"{self.profile.display_name} rail error: {type(exc).__name__}: {exc}"
+            except Exception:  # Local logs keep details; Discord receives no provider or credential-adjacent data.
+                logging.exception("model call failed for profile %s", self.profile.key)
+                reply = f"{self.profile.display_name} could not reach the model rail. The local ledger has the error details."
             for part in split_text(reply, self.chunk_chars):
                 await message.reply(part, mention_author=False)
 
@@ -173,7 +192,7 @@ class CompanionBot(discord.Client):
             return messages
         recent: list[discord.Message] = []
         async for msg in channel.history(limit=self.max_history, before=current_message):
-            if msg.author.bot and (not self.user or msg.author.id != self.user.id):
+            if not self.history_author_is_allowed(msg):
                 continue
             if not msg.content.strip():
                 continue
@@ -238,10 +257,20 @@ def main() -> None:
     discord_credential = require_env(profile.discord_token_env)
     provider_credential = require_env(profile.api_key_env)
     allowed_channels = parse_ids(os.getenv("ALLOWED_CHANNEL_IDS", ""))
+    allowed_humans = parse_ids(os.getenv("ALLOWED_HUMAN_USER_IDS", ""))
+    allowed_bot_authors = parse_ids(os.getenv("VOICE_LANTERN_USER_IDS", ""))
     max_history = int(os.getenv("MAX_HISTORY_MESSAGES", "18"))
     chunk_chars = int(os.getenv("REPLY_CHUNK_CHARS", "1800"))
-    api_client = AsyncOpenAI(api_key=provider_credential, base_url=profile.base_url)
-    CompanionBot(profile, api_client, allowed_channels, max_history, chunk_chars).run(discord_credential)
+    api_client = AsyncOpenAI(api_key=provider_credential, base_url=profile.base_url, timeout=60.0, max_retries=2)
+    CompanionBot(
+        profile,
+        api_client,
+        allowed_channels,
+        allowed_humans,
+        allowed_bot_authors,
+        max_history,
+        chunk_chars,
+    ).run(discord_credential)
 
 
 if __name__ == "__main__":
