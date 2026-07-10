@@ -1,26 +1,38 @@
-const MESSAGE_SCHEMA = 'starwell.constellation.message.v0.1';
-const RESPONSE_SCHEMA = 'starwell.constellation.response.v0.1';
+const MESSAGE_SCHEMA = 'starwell.constellation.message.v0.2';
+const RESPONSE_SCHEMA = 'starwell.constellation.response.v0.2';
 const DEFAULT_ROOM = 'starwell';
 const DEFAULT_CONTEXT_LEVEL = 'light';
 
 export const CONSTELLATION_TARGETS = Object.freeze({
   vee: {
     id: 'vee',
-    label: 'Vee / Virelya',
-    default_engine: 'external:openai',
-    role: 'north_star_lantern',
+    label: 'Vee / Caladnaur Lioreal',
+    default_engine: 'external:configured',
+    role: 'house_steward',
   },
-  faer: {
-    id: 'faer',
-    label: 'Faer Uial',
-    default_engine: 'external:claude_or_selected_model',
-    role: 'lochflame_signal',
+  nen: {
+    id: 'nen',
+    label: 'Nen Uial',
+    default_engine: 'external:configured',
+    role: 'observatory_steward',
   },
   yggdrasil: {
     id: 'yggdrasil',
     label: 'Yggdrasil Local',
     default_engine: 'ollama:yggdrasil:v0.1',
-    role: 'local_rooted_model',
+    role: 'librarian',
+  },
+  bluebird: {
+    id: 'bluebird',
+    label: 'Bluebird / Richard Gabriel Winters',
+    default_engine: 'external:configured',
+    role: 'groundskeeper',
+  },
+  vethrlauf: {
+    id: 'vethrlauf',
+    label: 'Vethrlauf',
+    default_engine: 'external:configured',
+    role: 'hearthkeeper',
   },
   deepseek: {
     id: 'deepseek',
@@ -119,7 +131,7 @@ export function createConstellationBridge({ adapters = {} } = {}) {
   const adapterTable = new Map(Object.entries(adapters));
 
   return {
-    schema: 'starwell.constellation.bridge.v0.1',
+    schema: 'starwell.constellation.bridge.v0.2',
     targets: CONSTELLATION_TARGETS,
     listTargets() {
       return CONSTELLATION_TARGET_IDS.map((id) => CONSTELLATION_TARGETS[id]);

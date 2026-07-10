@@ -3,7 +3,11 @@ const DEFAULT_ENGINE = 'ollama:yggdrasil:v0.1';
 
 function extractReply(data) {
   if (typeof data === 'string') return data;
-  return data?.reply || data?.message || data?.text || '';
+  if (typeof data?.reply === 'string') return data.reply;
+  if (typeof data?.message?.content === 'string') return data.message.content;
+  if (typeof data?.message === 'string') return data.message;
+  if (typeof data?.text === 'string') return data.text;
+  return '';
 }
 
 export function createYggdrasilLocalAdapter({ endpoint = DEFAULT_ENDPOINT, fetchImpl = globalThis.fetch } = {}) {
@@ -44,7 +48,6 @@ export function createYggdrasilLocalAdapter({ endpoint = DEFAULT_ENDPOINT, fetch
         memory_used: Array.isArray(data.memory_used) ? data.memory_used : ['local-yggdrasil-route'],
         truth_label: 'local_model_response',
         metadata: {
-          endpoint,
           local_first: true,
           raw_status: response.status,
         },

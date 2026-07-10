@@ -2,6 +2,9 @@
   "name": "flameclyffe-workshop",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "sigil:dev": "vite --config apps/sigil-activator/vite.config.js",
     "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
@@ -11,6 +14,10 @@
     "starwell:build:with-pocket-vercel": "vite build --config apps/starwell/vite.config.js && vite build --config apps/pocket-concordance-lens/vite.vercel.config.js",
     "starwell:preview": "vite preview --config apps/starwell/vite.config.js",
     "starwell:test": "node --test apps/starwell/test/*.test.js",
+    "caretakers:start": "node apps/starwell/discord-caretakers/src/index.js",
+    "caretakers:register": "node apps/starwell/discord-caretakers/src/register-commands.js",
+    "caretakers:doctor": "node apps/starwell/discord-caretakers/src/doctor.js",
+    "caretakers:test": "node --test apps/starwell/discord-caretakers/test/*.test.js",
     "pocket:dev": "vite --config apps/pocket-concordance-lens/vite.config.js",
     "pocket:build": "vite build --config apps/pocket-concordance-lens/vite.config.js",
     "pocket:preview": "vite preview --config apps/pocket-concordance-lens/vite.config.js",
@@ -28,6 +35,8 @@
     "@supabase/supabase-js": "latest",
     "@vitejs/plugin-react": "latest",
     "astronomia": "^4.2.0",
+    "discord.js": "14.26.5",
+    "dotenv": "17.4.2",
     "docx": "latest",
     "react": "latest",
     "react-dom": "latest",
