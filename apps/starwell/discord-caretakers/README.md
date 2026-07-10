@@ -41,7 +41,10 @@ Requires Node.js 22.12 or newer.
 
    `node apps/starwell/discord-caretakers/scripts/import-api-stuff.mjs "API Stuff.txt" .env`
 
-3. Add the guild id, Rowan's Discord user id, allowed channel ids, and the five application ids/tokens.
+3. Add the guild id, Rowan's Discord user id, allowed channel ids, and the five application ids/tokens. A labelled local file can be imported without printing values:
+
+   `node apps/starwell/discord-caretakers/scripts/import-discord-bots.mjs "DISCORD BOTS.txt" .env`
+
 4. Run `npm install`.
 5. Run `npm run caretakers:doctor`.
 6. Run `npm run caretakers:register`.
