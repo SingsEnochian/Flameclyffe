@@ -1,0 +1,18 @@
+{
+  "protocol": "hearthfire.place/v1",
+  "place": { "id": "flameclyffe", "label": "Flameclyffe" },
+  "type": "workshop",
+  "parent": { "id": "hearthfire", "label": "Hearthfire" },
+  "sky": "universal-horizon",
+  "inhabitants": ["Rowan", "Virelya Lioreal", "Faer Uial", "Yggdrasil"],
+  "capabilities": [
+    "worldbuilding",
+    "observation",
+    "instrumentation",
+    "canon",
+    "agent-routing",
+    "bridge-adaptation"
+  ],
+  "worlds": ["earth", "terra-aeterna", "luna", "feather-and-flame", "dreaming-grove"],
+  "bridges": ["hearthfire", "runa", "lioreal", "uial"]
+}
