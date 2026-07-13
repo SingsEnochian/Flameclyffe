@@ -18,12 +18,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node
+
+      - name: Setup latest Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: .nvmrc
+          check-latest: true
+
+      - name: Report Node version
+        run: node --version
+
       - name: Refresh data cache
         run: node scripts/update-deep-observer-data.mjs
+
       - name: Commit data cache
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
