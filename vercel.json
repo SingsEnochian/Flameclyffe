@@ -4,11 +4,11 @@
   "rewrites": [
     {
       "source": "/templehouse/tesla-observatory",
-      "destination": "/templehouse/tesla-observatory.html"
+      "destination": "/templehouse/tesla-observatory-live.html"
     },
     {
       "source": "/templehouse/tesla-observatory/",
-      "destination": "/templehouse/tesla-observatory.html"
+      "destination": "/templehouse/tesla-observatory-live.html"
     }
   ]
 }
