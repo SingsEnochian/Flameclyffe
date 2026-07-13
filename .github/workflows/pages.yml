@@ -22,11 +22,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup latest Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+          check-latest: true
           cache: npm
+
+      - name: Report Node version
+        run: node --version
 
       - name: Install dependencies
         run: npm install
