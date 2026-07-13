@@ -17,7 +17,7 @@
     fetch('/templehouse/tesla-observatory.html',{cache:'no-store'})
       .then((response)=>{if(!response.ok)throw new Error('The Observatory shell did not answer.');return response.text();})
       .then((html)=>{
-        const patch='<script src="/templehouse/tesla-gpt-patch.js"><\\/script>';
+        const patch='<script src="/templehouse/tesla-gpt-patch.js"><\/script>';
         const wired=html.includes('</body>')?html.replace('</body>',patch+'</body>'):html+patch;
         document.open();
         document.write(wired);
