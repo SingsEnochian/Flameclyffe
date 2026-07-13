@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "0.1.0",
+  "defaultSceneId": "observatory",
+  "scenes": [
+    {
+      "id": "observatory",
+      "displayName": "Observatory",
+      "glyph": "✦",
+      "accessibilityLabel": "Open the STARWELL Observatory scene",
+      "palette": {
+        "primary": "#E7C477",
+        "secondary": "#8CCAC0",
+        "background": "#11131A",
+        "accent": "#B65F3D"
+      },
+      "motion": {
+        "profile": "orrery",
+        "speed": 0.22,
+        "reducedMotionSpeed": 0.05
+      },
+      "assets": {
+        "interiorTextureKey": "portal.observatory.interior",
+        "ambientAudioKey": "portal.observatory.ambient"
+      },
+      "capabilities": ["particles", "orbit-lines", "live-instruments"]
+    },
+    {
+      "id": "dreaming-grove",
+      "displayName": "Dreaming Grove",
+      "glyph": "❧",
+      "accessibilityLabel": "Open the Dreaming Grove scene",
+      "palette": {
+        "primary": "#8CCAC0",
+        "secondary": "#A8C98A",
+        "background": "#101815",
+        "accent": "#E7C477"
+      },
+      "motion": {
+        "profile": "drift",
+        "speed": 0.14,
+        "reducedMotionSpeed": 0.03
+      },
+      "assets": {
+        "interiorTextureKey": "portal.grove.interior",
+        "ambientAudioKey": "portal.grove.ambient"
+      },
+      "capabilities": ["particles", "soft-parallax"]
+    },
+    {
+      "id": "quiet-night",
+      "displayName": "Quiet Night",
+      "glyph": "☾",
+      "accessibilityLabel": "Open the low-motion Quiet Night scene",
+      "palette": {
+        "primary": "#E8E4F0",
+        "secondary": "#6D7892",
+        "background": "#080A10",
+        "accent": "#8CCAC0"
+      },
+      "motion": {
+        "profile": "stillness",
+        "speed": 0.03,
+        "reducedMotionSpeed": 0.0
+      },
+      "assets": {
+        "interiorTextureKey": "portal.quiet-night.interior",
+        "ambientAudioKey": "portal.quiet-night.ambient"
+      },
+      "capabilities": ["low-motion", "low-luminance"]
+    }
+  ]
+}
