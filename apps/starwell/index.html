@@ -1,43 +1,13 @@
 <!doctype html>
-<html>
+<html lang='en'>
 <head>
   <meta charset='UTF-8'/>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
   <title>STARWELL</title>
-  <meta name='description' content='STARWELL Hearthweave Observatory, a living manuscript observatory for Terra Aeterna.'/>
-  <script type='module' src='./src/main.jsx'></script>
-  <script type='module' src='./src/observatory-handoff-entry.jsx'></script>
-  <script type='module' src='./src/city-state-motion.jsx'></script>
-  <script type='module' src='./src/deep-material-vars-bind.js'></script>
-  <script type='module' src='./src/deep-hud-socket-bind.js'></script>
-  <script type='module' src='./src/deep-hud-bounds-bind.js'></script>
-  <script type='module'>
-    if (import.meta.env.DEV) {
-      import('./src/deep-hud-debug-bead.js');
-      import('./src/deep-hud-socket-diagnostics.js');
-      import('./src/deep-hud-dev-assertions.js');
-    }
-  </script>
-  <script type='module' src='./src/stonewood-themes.js'></script>
-  <link rel='stylesheet' href='./src/starwell-hero-art.css'/>
-  <link rel='stylesheet' href='./src/deep-observer-mobile.css'/>
-  <link rel='stylesheet' href='./src/deep-hud-bounds.css'/>
-  <link rel='stylesheet' href='./src/stonewood-themes.css'/>
-  <link rel='stylesheet' href='./src/emerald-reliquary-hero.css'/>
-  <link rel='stylesheet' href='./src/stonewood-typography.css'/>
-  <link rel='stylesheet' href='./src/starwell-desktop-containment.css'/>
-  <link rel='stylesheet' href='./src/living-room-door.css'/>
+  <meta name='description' content='STARWELL Hearthweave Observatory, an inhabitable living manuscript place.'/>
+  <script type='module' src='./src/starwell-v2.jsx'></script>
 </head>
 <body>
   <div id='root'></div>
-  <div id='observatory-handoff-root'></div>
-  <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the STARWELL Living Room'>
-    <span class='living-room-doorway-mark' aria-hidden='true'>✴</span>
-    <span class='living-room-doorway-copy'>
-      <strong>Enter the Living Room</strong>
-      <em>Hearth, doors, anchor field, and Fifth Form centre.</em>
-    </span>
-  </a>
-  <div id='city-state-motion-root'></div>
 </body>
 </html>
