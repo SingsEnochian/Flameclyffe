@@ -1,4 +1,8 @@
 const MODEL_ROUTES = {
+  'gpt-5.5': {
+    provider: 'openai',
+    model: () => process.env.OPENAI_MODEL || 'gpt-5.5'
+  },
   'claude-sonnet-4-6': {
     provider: 'anthropic',
     model: () => process.env.CLAUDE_SONNET_MODEL || 'claude-sonnet-4-6'
@@ -45,6 +49,46 @@ function cleanMessages(messages) {
 
 function send(res, status, body) {
   res.status(status).json(body);
+}
+
+async function callOpenAI(route, payload, res) {
+  const apiKey = process.env.OPENAI_API_KEY || process.env.VEE_API_KEY;
+  if (!apiKey) {
+    return send(res, 503, { error: 'OpenAI is not configured on this deploy. Add OPENAI_API_KEY in Vercel environment variables.' });
+  }
+
+  const response = await fetch(process.env.OPENAI_API_URL || 'https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: route.model(),
+      instructions: payload.system,
+      input: cleanMessages(payload.messages),
+      max_output_tokens: payload.max_tokens || 1000,
+      store: false
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    return send(res, response.status, {
+      error: data.error?.message || data.message || 'OpenAI route failed.',
+      provider: 'openai'
+    });
+  }
+
+  const reply = (data.output_text || (Array.isArray(data.output)
+    ? data.output
+        .flatMap((item) => Array.isArray(item.content) ? item.content : [])
+        .filter((block) => block.type === 'output_text' && typeof block.text === 'string')
+        .map((block) => block.text)
+        .join('\n')
+    : '')).trim();
+
+  return send(res, 200, { provider: 'openai', model: route.model(), reply });
 }
 
 async function callAnthropic(route, payload, res) {
@@ -147,12 +191,13 @@ export default async function handler(req, res) {
   const payload = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
   if (payload.resident && payload.resident !== 'tesla') return send(res, 400, { error: 'Only the Tesla resident is wired on this route.' });
 
-  const selected = payload.model || 'claude-sonnet-4-6';
+  const selected = payload.model || 'gpt-5.5';
   const route = MODEL_ROUTES[selected];
   if (!route) return send(res, 400, { error: `Unknown model: ${selected}` });
   if (!payload.system) return send(res, 400, { error: 'System prompt is required.' });
 
   try {
+    if (route.provider === 'openai') return await callOpenAI(route, payload, res);
     if (route.provider === 'anthropic') return await callAnthropic(route, payload, res);
     if (route.provider === 'openai-compatible') return await callOpenAICompatible(route, payload, selected, res);
     if (route.provider === 'ollama') return await callOllama(route, payload, res);
