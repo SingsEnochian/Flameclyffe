@@ -1,0 +1,237 @@
+:root {
+  --sw-ink: #f5efe4;
+  --sw-night: #090b12;
+  --sw-glass: rgba(18, 20, 31, 0.58);
+  --sw-glass-deep: rgba(8, 10, 18, 0.78);
+  --sw-gold: #e7c477;
+  --sw-copper: #b65f3d;
+  --sw-sea: #8ccac0;
+  --sw-moss: #607d62;
+  --sw-line: rgba(231, 196, 119, 0.26);
+  --sw-radius-shell: 56px 24px 56px 24px;
+  --sw-radius-panel: 34px 18px 34px 18px;
+  --sw-radius-chip: 999px;
+}
+
+.observatory-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.observatory-shell::before {
+  content: '';
+  position: absolute;
+  inset: 7rem 2% auto;
+  height: 32rem;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 22% 30%, rgba(140, 202, 192, 0.13), transparent 34%),
+    radial-gradient(circle at 80% 45%, rgba(182, 95, 61, 0.11), transparent 32%);
+  filter: blur(10px);
+  z-index: -1;
+}
+
+.room-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 172px;
+  padding: 1.2rem 1.25rem 1.35rem;
+  border: 1px solid var(--sw-line);
+  border-radius: var(--sw-radius-panel);
+  color: inherit;
+  text-align: left;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.015)),
+    radial-gradient(circle at 12% 0%, rgba(140,202,192,0.2), transparent 11rem),
+    var(--sw-glass);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,0.08),
+    0 24px 65px rgba(0,0,0,0.2);
+  backdrop-filter: blur(22px) saturate(1.12);
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.room-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 12%, rgba(255,255,255,0.06) 34%, transparent 58%);
+  transform: translateX(-120%);
+  transition: transform 420ms ease;
+}
+
+.room-card:hover::before,
+.room-card:focus-visible::before,
+.room-card.active::before { transform: translateX(120%); }
+
+.room-card:hover,
+.room-card:focus-visible,
+.room-card.active {
+  transform: translateY(-4px);
+  border-color: rgba(231,196,119,0.66);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,0.12),
+    0 30px 82px rgba(0,0,0,0.28),
+    0 0 0 1px rgba(140,202,192,0.12);
+  outline: none;
+}
+
+.room-card.active {
+  background:
+    linear-gradient(145deg, rgba(231,196,119,0.14), rgba(255,255,255,0.02)),
+    radial-gradient(circle at 12% 0%, rgba(140,202,192,0.28), transparent 12rem),
+    var(--sw-glass-deep);
+}
+
+.room-title {
+  display: block;
+  margin-top: 0.8rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
+  font-weight: 650;
+}
+
+.room-text {
+  display: block;
+  margin-top: 0.35rem;
+  line-height: 1.5;
+  opacity: 0.76;
+}
+
+.room-medallion,
+.room-glyph,
+.seed-glyph,
+.alcove-glyph {
+  border-radius: 50%;
+  border: 1px solid rgba(231,196,119,0.38);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255,255,255,0.22), transparent 30%),
+    linear-gradient(145deg, rgba(140,202,192,0.23), rgba(182,95,61,0.14));
+  box-shadow: inset 0 0 24px rgba(231,196,119,0.08), 0 10px 32px rgba(0,0,0,0.18);
+}
+
+.selected-alcove,
+.chamber-card,
+.observatory-handoff,
+.room-state-instrument {
+  position: relative;
+  overflow: hidden;
+  margin: 1.5rem clamp(1rem, 3vw, 2rem);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--sw-line);
+  border-radius: var(--sw-radius-shell);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(140,202,192,0.17), transparent 16rem),
+    radial-gradient(circle at 94% 100%, rgba(182,95,61,0.14), transparent 18rem),
+    linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.012)),
+    var(--sw-glass-deep);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,0.08),
+    0 32px 90px rgba(0,0,0,0.24);
+  backdrop-filter: blur(26px) saturate(1.14);
+}
+
+.chamber-card::after,
+.observatory-handoff::after,
+.room-state-instrument::after {
+  content: '';
+  position: absolute;
+  width: 15rem;
+  height: 15rem;
+  right: -8rem;
+  bottom: -8rem;
+  border: 1px solid rgba(231,196,119,0.14);
+  border-radius: 50%;
+  box-shadow: inset 0 0 60px rgba(140,202,192,0.06);
+  pointer-events: none;
+}
+
+.map-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: Cinzel, serif;
+}
+
+.map-heading strong,
+.handoff-status-row em,
+.ledger-whisper {
+  border: 1px solid rgba(140,202,192,0.26);
+  border-radius: var(--sw-radius-chip);
+  padding: 0.35rem 0.7rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+}
+
+.seed-card,
+.shelf-card,
+.codex-reader,
+.entry-tab,
+.coming-soon-body,
+.handoff-thread,
+.handoff-status-row,
+.room-state-instrument dl > div {
+  border: 0;
+  border-radius: 20px 10px 20px 10px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
+  box-shadow: inset 0 1px rgba(255,255,255,0.05);
+}
+
+.handoff-thread,
+.handoff-status-row,
+.room-state-instrument dl > div { padding: 0.85rem 1rem; }
+
+.handoff-thread button {
+  border: 1px solid rgba(231,196,119,0.5);
+  border-radius: var(--sw-radius-chip);
+  padding: 0.7rem 1.1rem;
+  color: inherit;
+  background: linear-gradient(145deg, rgba(231,196,119,0.13), rgba(140,202,192,0.08));
+  cursor: pointer;
+}
+
+.room-state-instrument,
+.observatory-handoff {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
+  gap: clamp(1.25rem, 3vw, 2.75rem);
+}
+
+.room-state-instrument dl,
+.handoff-status {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.room-state-instrument dl > div {
+  display: grid;
+  grid-template-columns: 0.65fr 1fr;
+  gap: 1rem;
+}
+
+.room-state-instrument dt {
+  opacity: 0.58;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+}
+
+.room-state-instrument dd { margin: 0; }
+
+@media (max-width: 780px) {
+  .room-state-instrument,
+  .observatory-handoff { grid-template-columns: 1fr; }
+
+  .selected-alcove,
+  .chamber-card,
+  .observatory-handoff,
+  .room-state-instrument {
+    border-radius: 34px 16px 34px 16px;
+    margin-inline: 0.75rem;
+  }
+}
