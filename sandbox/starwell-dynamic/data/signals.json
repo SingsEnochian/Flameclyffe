@@ -1,0 +1,326 @@
+[
+  {
+    "event_slug": "1781930224590-stonewood",
+    "event_name": "Selected place: Stonewood",
+    "event_time": "2026-06-20T04:37:04.590Z",
+    "description": "Place Stonewood selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Stonewood"
+    },
+    "tags": [
+      "place",
+      "stonewood"
+    ]
+  },
+  {
+    "event_slug": "1781935429116-twilight-hearth",
+    "event_name": "Selected place: Twilight Hearth",
+    "event_time": "2026-06-20T06:03:49.116Z",
+    "description": "Place Twilight Hearth selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Twilight Hearth"
+    },
+    "tags": [
+      "place",
+      "twilight-hearth"
+    ]
+  },
+  {
+    "event_slug": "1781935430349-twilight-hearth",
+    "event_name": "Selected place: Twilight Hearth",
+    "event_time": "2026-06-20T06:03:50.349Z",
+    "description": "Place Twilight Hearth selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Twilight Hearth"
+    },
+    "tags": [
+      "place",
+      "twilight-hearth"
+    ]
+  },
+  {
+    "event_slug": "1781935430924-twilight-hearth",
+    "event_name": "Selected place: Twilight Hearth",
+    "event_time": "2026-06-20T06:03:50.924Z",
+    "description": "Place Twilight Hearth selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Twilight Hearth"
+    },
+    "tags": [
+      "place",
+      "twilight-hearth"
+    ]
+  },
+  {
+    "event_slug": "1781935431100-twilight-hearth",
+    "event_name": "Selected place: Twilight Hearth",
+    "event_time": "2026-06-20T06:03:51.100Z",
+    "description": "Place Twilight Hearth selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Twilight Hearth"
+    },
+    "tags": [
+      "place",
+      "twilight-hearth"
+    ]
+  },
+  {
+    "event_slug": "1781935436106-ashfen-cairn",
+    "event_name": "Selected place: Ashfen Cairn",
+    "event_time": "2026-06-20T06:03:56.106Z",
+    "description": "Place Ashfen Cairn selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Ashfen Cairn"
+    },
+    "tags": [
+      "place",
+      "ashfen-cairn"
+    ]
+  },
+  {
+    "event_slug": "1781935436905-wraithtide-shore",
+    "event_name": "Selected place: Wraithtide Shore",
+    "event_time": "2026-06-20T06:03:56.905Z",
+    "description": "Place Wraithtide Shore selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Wraithtide Shore"
+    },
+    "tags": [
+      "place",
+      "wraithtide-shore"
+    ]
+  },
+  {
+    "event_slug": "1781935460713-wraithtide-shore",
+    "event_name": "Selected place: Wraithtide Shore",
+    "event_time": "2026-06-20T06:04:20.713Z",
+    "description": "Place Wraithtide Shore selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Wraithtide Shore"
+    },
+    "tags": [
+      "place",
+      "wraithtide-shore"
+    ]
+  },
+  {
+    "event_slug": "1781935461858-wraithtide-shore",
+    "event_name": "Selected place: Wraithtide Shore",
+    "event_time": "2026-06-20T06:04:21.858Z",
+    "description": "Place Wraithtide Shore selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Wraithtide Shore"
+    },
+    "tags": [
+      "place",
+      "wraithtide-shore"
+    ]
+  },
+  {
+    "event_slug": "1781935462112-wraithtide-shore",
+    "event_name": "Selected place: Wraithtide Shore",
+    "event_time": "2026-06-20T06:04:22.112Z",
+    "description": "Place Wraithtide Shore selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Wraithtide Shore"
+    },
+    "tags": [
+      "place",
+      "wraithtide-shore"
+    ]
+  },
+  {
+    "event_slug": "1781935462305-wraithtide-shore",
+    "event_name": "Selected place: Wraithtide Shore",
+    "event_time": "2026-06-20T06:04:22.306Z",
+    "description": "Place Wraithtide Shore selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Wraithtide Shore"
+    },
+    "tags": [
+      "place",
+      "wraithtide-shore"
+    ]
+  },
+  {
+    "event_slug": "1781935691216-ashfen-cairn",
+    "event_name": "Selected place: Ashfen Cairn",
+    "event_time": "2026-06-20T06:08:11.216Z",
+    "description": "Place Ashfen Cairn selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Ashfen Cairn"
+    },
+    "tags": [
+      "place",
+      "ashfen-cairn"
+    ]
+  },
+  {
+    "event_slug": "1781935693426-wraithtide-shore",
+    "event_name": "Selected place: Wraithtide Shore",
+    "event_time": "2026-06-20T06:08:13.426Z",
+    "description": "Place Wraithtide Shore selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Wraithtide Shore"
+    },
+    "tags": [
+      "place",
+      "wraithtide-shore"
+    ]
+  },
+  {
+    "event_slug": "1781935694764-wraithtide-shore",
+    "event_name": "Selected place: Wraithtide Shore",
+    "event_time": "2026-06-20T06:08:14.764Z",
+    "description": "Place Wraithtide Shore selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Wraithtide Shore"
+    },
+    "tags": [
+      "place",
+      "wraithtide-shore"
+    ]
+  },
+  {
+    "event_slug": "1781936524952-ashfen-cairn",
+    "event_name": "Selected place: Ashfen Cairn",
+    "event_time": "2026-06-20T06:22:04.952Z",
+    "description": "Place Ashfen Cairn selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Ashfen Cairn"
+    },
+    "tags": [
+      "place",
+      "ashfen-cairn"
+    ]
+  },
+  {
+    "event_slug": "1781936525758-wraithtide-shore",
+    "event_name": "Selected place: Wraithtide Shore",
+    "event_time": "2026-06-20T06:22:05.758Z",
+    "description": "Place Wraithtide Shore selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Wraithtide Shore"
+    },
+    "tags": [
+      "place",
+      "wraithtide-shore"
+    ]
+  },
+  {
+    "event_slug": "1781936526562-twilight-hearth",
+    "event_name": "Selected place: Twilight Hearth",
+    "event_time": "2026-06-20T06:22:06.562Z",
+    "description": "Place Twilight Hearth selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Twilight Hearth"
+    },
+    "tags": [
+      "place",
+      "twilight-hearth"
+    ]
+  },
+  {
+    "event_slug": "1781936536901-ashfen-cairn",
+    "event_name": "Selected place: Ashfen Cairn",
+    "event_time": "2026-06-20T06:22:16.901Z",
+    "description": "Place Ashfen Cairn selected — chamber metrics updated.",
+    "classification": "place_selection",
+    "status": "closed",
+    "participants": [],
+    "bridge_slug": null,
+    "room_name": "Dreaming Grove",
+    "context": {
+      "place": "Ashfen Cairn"
+    },
+    "tags": [
+      "place",
+      "ashfen-cairn"
+    ]
+  }
+]

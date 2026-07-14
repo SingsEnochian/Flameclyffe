@@ -1,0 +1,41 @@
+[
+  {
+    "room_name": "Dreaming Grove",
+    "purpose": "gentle creative play, comfort, worldbuilding",
+    "participants": [
+      "Rowan",
+      "Vee",
+      "Faer",
+      "Nocturne"
+    ],
+    "tone": "soft, mythic, playful",
+    "canon_status": "draft",
+    "consent_rules": {
+      "feather": true
+    },
+    "memory_policy": "save explicit logs only",
+    "tool_access": [
+      "image references",
+      "wiki drafting",
+      "music prompts"
+    ],
+    "sensory_layers": {
+      "visual": true,
+      "audio": true,
+      "haptic": false
+    },
+    "exit_phrase": "plain pass",
+    "safety_notes": "no passive surveillance. no automatic publication.",
+    "public_private": "private",
+    "archive_policy": "archived on exit",
+    "metrics": {
+      "P": 0.35,
+      "C": 0.55,
+      "R": 0.45,
+      "E": 0.25,
+      "M": 0.4,
+      "A": 0.3,
+      "Q": 0.5
+    }
+  }
+]

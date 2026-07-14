@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starwell.local/schemas/bridge-manifest.v0.2.json",
+  "title": "STARWELL Bridge Manifest",
+  "type": "object",
+  "required": ["bridge_slug", "bridge_name", "bridge_types", "consent_state", "status"],
+  "properties": {
+    "bridge_slug": {"type": "string", "minLength": 1},
+    "bridge_name": {"type": "string", "minLength": 1},
+    "bridge_types": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"enum": ["Concordance", "Signal", "Play", "Technical", "Memory", "Hybrid"]}
+    },
+    "consent_state": {"enum": ["Dream", "Draft", "Invited", "Active", "Paused", "Archived", "Closed", "Revoked", "Dormant"]},
+    "status": {"enum": ["Working", "Canon Candidate", "Active", "Archived", "Needs Review"]},
+    "source_lens": {"type": "string"},
+    "destination_lens": {"type": "string"},
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {"type": "string"},
+          "role": {"type": "string"},
+          "lens": {"type": "string"},
+          "consent": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "purpose": {"type": "string"},
+    "sovereignty_rule": {"type": "string"},
+    "memory_policy": {"type": "string"},
+    "signal_policy": {"type": "string"},
+    "pause_cues": {"type": "array", "items": {"type": "string"}},
+    "related_logs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": {"type": "string"},
+          "slug": {"type": "string"},
+          "url": {"type": "string"},
+          "note": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "facet_rule": {"type": "string"},
+    "road_rule": {"type": "string"},
+    "safety_rule": {"type": "string"},
+    "interpretation_stance": {"type": "string"},
+    "metadata": {"type": "object"},
+    "last_reviewed": {"type": "string", "format": "date"}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,12 @@
+{
+  "name": "hearthweave-bridge",
+  "version": "1.0.0",
+  "description": "Local proxy for the Hearthweave Bridge — keeps API keys safe.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

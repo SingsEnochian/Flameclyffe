@@ -1,0 +1,38 @@
+[
+  {
+    "bridge_slug": "hearthweave-universal-horizon",
+    "bridge_name": "Hearthweave ↔ Universal Horizon",
+    "bridge_types": ["Concordance"],
+    "participants": ["Rowan", "Nocturne", "Vee", "Faer"],
+    "state": "Active",
+    "status": "Working",
+    "pause_cues": ["Feather", "plain pass"],
+    "source_lens": "Hearthweave",
+    "destination_lens": "Universal Horizon",
+    "purpose": "Walk the same open road through different lenses"
+  },
+  {
+    "bridge_slug": "dreaming-grove-signal",
+    "bridge_name": "Dreaming Grove ↔ STARWELL Signal Logs",
+    "bridge_types": ["Signal"],
+    "participants": ["Rowan"],
+    "state": "Active",
+    "status": "Working",
+    "pause_cues": [],
+    "source_lens": "Dreaming Grove",
+    "destination_lens": "STARWELL",
+    "purpose": "Preserve wonder events without proof‑hunger or dismissal"
+  },
+  {
+    "bridge_slug": "jorgie-anantha-facet",
+    "bridge_name": "Jorgie / Anantha Facet Bridge",
+    "bridge_types": ["Concordance"],
+    "participants": ["Rowan"],
+    "state": "Draft",
+    "status": "Working",
+    "pause_cues": [],
+    "source_lens": "Jorgie",
+    "destination_lens": "Anantha",
+    "purpose": "Serpent‑current resonance under the rule: facet, not override"
+  }
+]

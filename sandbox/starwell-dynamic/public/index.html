@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STARWELL Dynamic App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    header {
+      background-color: #3a6a73;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: #4a7f8e;
+      margin-bottom: 1rem;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    nav button.active {
+      background-color: #3a6a73;
+    }
+    .container {
+      padding: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      width: 320px;
+      box-sizing: border-box;
+    }
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+    .card small {
+      display: block;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+    .tags {
+      margin-top: 0.5rem;
+    }
+    .tag {
+      display: inline-block;
+      background-color: #eef4f6;
+      color: #4a7f8e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+      font-size: 0.75rem;
+    }
+    .hidden {
+      display: none;
+    }
+
+    /* Style for vector metrics panel */
+    .stonewood-metrics {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-family: monospace;
+    }
+    .stonewood-metrics div {
+      background-color: #eef4f6;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Style for place selection */
+    .place-select {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      max-width: 640px;
+      margin-inline: auto;
+    }
+    .place-select button {
+      background-color: #4a7f8e;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .place-select button:hover {
+      background-color: #3a6a73;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>STARWELL Dynamic Application</h1>
+    <p>Browse bridges, rooms, and signal events</p>
+  </header>
+  <nav>
+    <button id="nav-bridges" class="active">Bridges</button>
+    <button id="nav-rooms">Rooms</button>
+    <button id="nav-signals">Signals</button>
+  </nav>
+
+  <!-- Live vector metrics panel -->
+  <div id="vector-panel" class="stonewood-metrics">
+    <div>P <span id="metric-P">0.00</span></div>
+    <div>C <span id="metric-C">0.00</span></div>
+    <div>R <span id="metric-R">0.00</span></div>
+    <div>E <span id="metric-E">0.00</span></div>
+    <div>M <span id="metric-M">0.00</span></div>
+    <div>A <span id="metric-A">0.00</span></div>
+    <div>Q <span id="metric-Q">0.00</span></div>
+  </div>
+
+  <!-- Place selection buttons -->
+  <div id="place-select" class="place-select">
+    <button data-place="Stonewood">🌲 Stonewood</button>
+    <button data-place="STARWELL">⭐ STARWELL</button>
+    <button data-place="Ashfen Cairn">🌿 Ashfen Cairn</button>
+    <button data-place="Wraithtide Shore">🌊 Wraithtide Shore</button>
+    <button data-place="Twilight Hearth">🔥 Twilight Hearth</button>
+    <button data-place="The Withinwood">🌑 The Withinwood</button>
+    <button data-place="Salt Veil">🌫️ Salt Veil</button>
+  </div>
+  <div id="bridges" class="container"></div>
+  <div id="rooms" class="container hidden"></div>
+  <div id="signals" class="container hidden"></div>
+
+  <script>
+    const navBridges = document.getElementById('nav-bridges');
+    const navRooms = document.getElementById('nav-rooms');
+    const navSignals = document.getElementById('nav-signals');
+    const bridgesContainer = document.getElementById('bridges');
+    const roomsContainer = document.getElementById('rooms');
+    const signalsContainer = document.getElementById('signals');
+
+    function setActive(tab) {
+      // Reset nav buttons
+      [navBridges, navRooms, navSignals].forEach((btn) => btn.classList.remove('active'));
+      tab.classList.add('active');
+      // Hide all containers
+      bridgesContainer.classList.add('hidden');
+      roomsContainer.classList.add('hidden');
+      signalsContainer.classList.add('hidden');
+    }
+
+    navBridges.addEventListener('click', () => {
+      setActive(navBridges);
+      bridgesContainer.classList.remove('hidden');
+    });
+    navRooms.addEventListener('click', () => {
+      setActive(navRooms);
+      roomsContainer.classList.remove('hidden');
+    });
+    navSignals.addEventListener('click', () => {
+      setActive(navSignals);
+      signalsContainer.classList.remove('hidden');
+    });
+
+    // Fetch and render bridges
+    fetch('/bridges')
+      .then((res) => res.json())
+      .then((bridges) => {
+        bridges.forEach((bridge) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3>${bridge.bridge_name}</h3>
+            <small><strong>Slug:</strong> ${bridge.bridge_slug}</small>
+            <small><strong>Type:</strong> ${bridge.bridge_types.join(', ')}</small>
+            <small><strong>Participants:</strong> ${bridge.participants.join(', ')}</small>
+            <small><strong>State:</strong> ${bridge.state}</small>
+            <small><strong>Status:</strong> ${bridge.status}</small>
+            <p>${bridge.purpose}</p>
+          `;
+          bridgesContainer.appendChild(card);
+        });
+      });
+
+    // Fetch and render rooms
+    fetch('/rooms')
+      .then((res) => res.json())
+      .then((rooms) => {
+        rooms.forEach((room) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3>${room.room_name}</h3>
+            <small><strong>Participants:</strong> ${room.participants.join(', ')}</small>
+            <small><strong>Tone:</strong> ${room.tone}</small>
+            <small><strong>Canon Status:</strong> ${room.canon_status}</small>
+            <p>${room.purpose}</p>
+            <small><strong>Exit Phrase:</strong> ${room.exit_phrase}</small>
+            <div class="tags">
+              ${room.tool_access && room.tool_access.length ? room.tool_access.map((tool) => `<span class="tag">${tool}</span>`).join('') : ''}
+            </div>
+          `;
+          roomsContainer.appendChild(card);
+        });
+      });
+
+    // Fetch and render signals
+    fetch('/signals')
+      .then((res) => res.json())
+      .then((signals) => {
+        signals.forEach((event) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          const eventDate = new Date(event.event_time).toLocaleString();
+          card.innerHTML = `
+            <h3>${event.event_name}</h3>
+            <small><strong>Time:</strong> ${eventDate}</small>
+            <p>${event.description}</p>
+            <small><strong>Classification:</strong> ${event.classification}</small>
+            <small><strong>Status:</strong> ${event.status}</small>
+            <small><strong>Bridge:</strong> ${event.bridge_slug || 'N/A'}</small>
+            <small><strong>Room:</strong> ${event.room_name || 'N/A'}</small>
+            <div class="tags">
+              ${event.tags && event.tags.length ? event.tags.map((tag) => `<span class="tag">${tag}</span>`).join('') : ''}
+            </div>
+          `;
+          signalsContainer.appendChild(card);
+        });
+      });
+
+    // Live function to pull vector data metrics directly from the server
+    async function synchStonewoodPulse() {
+      try {
+        const response = await fetch('/api/state');
+        const data = await response.json();
+        // Assume metrics reside on the first room (Dreaming Grove)
+        const metrics = Array.isArray(data.rooms) && data.rooms.length > 0 ? data.rooms[0].metrics : null;
+        if (metrics) {
+          Object.keys(metrics).forEach((key) => {
+            const el = document.getElementById(`metric-${key}`);
+            if (el) {
+              const val = parseFloat(metrics[key]);
+              el.innerText = val.toFixed(2);
+              // update CSS custom properties for vector animations
+              document.documentElement.style.setProperty(`--vector-${key}`, val);
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Lost connection to metrics state:', err);
+      }
+    }
+
+    // Synchronize metrics every 3 seconds and on load
+    setInterval(synchStonewoodPulse, 3000);
+    window.addEventListener('load', () => {
+      synchStonewoodPulse();
+    });
+
+    // Handle place selection buttons
+    const placeButtons = document.querySelectorAll('#place-select button');
+    placeButtons.forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const place = btn.dataset.place;
+        try {
+          const res = await fetch('/api/place', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ place })
+          });
+          if (!res.ok) {
+            const errText = await res.text();
+            console.error('Error selecting place:', errText);
+            return;
+          }
+          const updated = await res.json();
+          // Immediately update metrics panel with returned data
+          const rooms = updated.rooms;
+          if (rooms && rooms.length > 0) {
+            const metrics = rooms[0].metrics;
+            if (metrics) {
+              Object.keys(metrics).forEach((key) => {
+                const el = document.getElementById(`metric-${key}`);
+                if (el) {
+                  const val = parseFloat(metrics[key]);
+                  el.innerText = val.toFixed(2);
+                  document.documentElement.style.setProperty(`--vector-${key}`, val);
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to select place:', error);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
