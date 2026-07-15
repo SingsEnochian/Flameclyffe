@@ -9,6 +9,9 @@ import { createManualEphemerisState, getLongitudesFromEphemeris } from './epheme
 import { createAgencyOutput, mapTerraAeterna, selectFrequencyProtocol } from './frequency-terra.js';
 import { mapSacredGeometry } from './geometry.js';
 
+const CONCURRENT_FIELD_CHANNEL = 'starwell-concurrent-field';
+const CONCURRENT_FIELD_SESSION_KEY = 'starwell.concurrentFieldAudio.v0.2.snapshot';
+
 export const JULY_2026_TEST_LONGITUDES = {
   jupiter: 126,
   saturn: 14,
@@ -41,6 +44,29 @@ export const DEFAULT_SCFE_INPUT = {
     body_no: null,
   },
 };
+
+function publishFieldSnapshot(snapshot) {
+  if (typeof window === 'undefined' || !snapshot) return;
+
+  try {
+    window.sessionStorage.setItem(CONCURRENT_FIELD_SESSION_KEY, JSON.stringify(snapshot));
+  } catch (error) {}
+
+  try {
+    window.dispatchEvent(new CustomEvent('starwell:field-snapshot', { detail: snapshot }));
+  } catch (error) {}
+
+  try {
+    const channel = new BroadcastChannel(CONCURRENT_FIELD_CHANNEL);
+    channel.postMessage({
+      type: 'starwell:field-snapshot',
+      snapshot,
+      publishedAt: new Date().toISOString(),
+      boundary: 'Read-only SCFE snapshot. Audio remains user-invoked.',
+    });
+    channel.close();
+  } catch (error) {}
+}
 
 export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
   const base = createDefaultFieldSnapshot(input);
@@ -77,7 +103,7 @@ export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
   const agency = createAgencyOutput({ deep, somatic, terra_aeterna });
   const agency_switchboard = createAgencySwitchboard({ deep, somatic, terra_aeterna });
 
-  return validateFieldSnapshot({
+  const snapshot = validateFieldSnapshot({
     ...base,
     ephemeris,
     ephemeris_comparison,
@@ -99,6 +125,9 @@ export function createFieldSnapshot(input = DEFAULT_SCFE_INPUT) {
     agency,
     agency_switchboard,
   });
+
+  publishFieldSnapshot(snapshot);
+  return snapshot;
 }
 
 export function exportSnapshot(snapshot) {
