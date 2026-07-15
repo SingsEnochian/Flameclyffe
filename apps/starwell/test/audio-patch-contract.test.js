@@ -97,14 +97,15 @@ test('Dream-Signal 3.4 closes exactly at the ten-second quantum', () => {
   const api = window.StarwellAudioPatchContract;
   const patch = api.presets.dreamSignal34;
   const report = api.exactLoopReport(patch);
+  const beats = patch.stems
+    .filter((stem) => stem.kind === 'binaural-pair')
+    .map((stem) => Number(stem.beatFrequency.toFixed(1)));
 
   assert.equal(report.quantumSeconds, 10);
   assert.equal(report.exact, true);
-  assert.deepEqual(report.openFrequencies, []);
-  assert.deepEqual(
-    patch.stems.filter((stem) => stem.kind === 'binaural-pair').map((stem) => Number(stem.beatFrequency.toFixed(1))),
-    [3.4, 3.4, 3.4]
-  );
+  assert.equal(report.openFrequencies.length, 0);
+  assert.equal(beats.length, 3);
+  beats.forEach((beat) => assert.equal(beat, 3.4));
 });
 
 test('protected binaural carriers declare a warning when sent to Möbius', () => {
