@@ -195,7 +195,8 @@
   function materialize(patch) {
     const api = contract();
     if (!api) throw new Error('StarwellAudioPatchContract is unavailable.');
-    return api.materializePatch(patch, snapshot || {});
+    if (!snapshot) return null;
+    return api.materializePatch(patch, snapshot);
   }
 
   function notify(reason = 'state') {
@@ -263,7 +264,7 @@
   }
 
   global.StarwellConcurrentFieldAudio = Object.freeze({
-    VERSION: '0.2.0',
+    VERSION: '0.2.1',
     CHANNEL,
     setSnapshot,
     getSnapshot,
