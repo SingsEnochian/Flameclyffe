@@ -1,0 +1,252 @@
+.bridge-registry {
+  overflow: hidden;
+}
+
+.bridge-intro {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(126, 61, 41, 0.18);
+  border-radius: 18px 26px 18px 26px;
+  background:
+    linear-gradient(135deg, rgba(140, 202, 192, 0.18), rgba(231, 196, 119, 0.12)),
+    rgba(255, 255, 255, 0.18);
+}
+
+.sky-night .bridge-intro,
+.sky-dusk .bridge-intro {
+  border-color: rgba(231, 196, 119, 0.18);
+  background:
+    linear-gradient(135deg, rgba(140, 202, 192, 0.12), rgba(231, 196, 119, 0.08)),
+    rgba(0, 0, 0, 0.16);
+}
+
+.bridge-intro p,
+.bridge-detail p {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: var(--emerald);
+}
+
+.sky-night .bridge-intro p,
+.sky-night .bridge-detail p,
+.sky-dusk .bridge-intro p,
+.sky-dusk .bridge-detail p {
+  color: var(--seaglass);
+}
+
+.bridge-intro h3,
+.bridge-detail h3 {
+  margin: 0 0 0.45rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.55rem, 4vw, 2.15rem);
+}
+
+.bridge-intro span,
+.bridge-detail > span {
+  display: block;
+  line-height: 1.55;
+  opacity: 0.86;
+}
+
+.bridge-intro code {
+  padding: 0.08rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(20, 19, 27, 0.08);
+  color: inherit;
+}
+
+.sky-night .bridge-intro code,
+.sky-dusk .bridge-intro code {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bridge-registry-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(320px, 1.35fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.bridge-card-grid {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.bridge-card {
+  display: grid;
+  gap: 0.35rem;
+  width: 100%;
+  min-height: 13rem;
+  padding: 1rem;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid rgba(126, 61, 41, 0.18);
+  border-radius: 18px 26px 18px 26px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.24), rgba(247, 237, 218, 0.16)),
+    radial-gradient(circle at 0 0, rgba(140, 202, 192, 0.18), transparent 12rem);
+  box-shadow: 0 12px 30px rgba(56, 37, 28, 0.1);
+  backdrop-filter: blur(18px) saturate(1.08);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.sky-night .bridge-card,
+.sky-dusk .bridge-card {
+  border-color: rgba(231, 196, 119, 0.18);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0.16)),
+    radial-gradient(circle at 0 0, rgba(140, 202, 192, 0.12), transparent 12rem);
+}
+
+.bridge-card:hover,
+.bridge-card:focus-visible,
+.bridge-card.active {
+  transform: translateY(-2px);
+  border-color: rgba(231, 196, 119, 0.72);
+  box-shadow: 0 18px 46px rgba(56, 37, 28, 0.18), 0 0 0 3px rgba(140, 202, 192, 0.12);
+  outline: none;
+}
+
+.bridge-card strong {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.35rem;
+  line-height: 1.05;
+}
+
+.bridge-card span {
+  opacity: 0.82;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.bridge-card em {
+  justify-self: start;
+  margin-top: 0.2rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(140, 202, 192, 0.34);
+  font-size: 0.72rem;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.bridge-detail {
+  padding: 1rem;
+}
+
+.bridge-facets {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1rem 0 0;
+}
+
+.bridge-facets div {
+  padding: 0.7rem 0.8rem;
+  border-radius: 16px;
+  background: rgba(140, 202, 192, 0.1);
+}
+
+.bridge-facets dt {
+  margin: 0 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--copper-dark);
+}
+
+.sky-night .bridge-facets dt,
+.sky-dusk .bridge-facets dt {
+  color: var(--gold);
+}
+
+.bridge-facets dd {
+  margin: 0;
+  line-height: 1.5;
+  opacity: 0.86;
+}
+
+.bridge-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.bridge-pill-row span {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(140, 202, 192, 0.3);
+  background: rgba(231, 196, 119, 0.1);
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.bridge-event-list {
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.bridge-event-list li,
+.bridge-empty {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 16px;
+  background: rgba(20, 19, 27, 0.08);
+}
+
+.sky-night .bridge-event-list li,
+.sky-night .bridge-empty,
+.sky-dusk .bridge-event-list li,
+.sky-dusk .bridge-empty {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.bridge-event-list span {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--emerald);
+}
+
+.sky-night .bridge-event-list span,
+.sky-dusk .bridge-event-list span {
+  color: var(--seaglass);
+}
+
+.bridge-event-list strong {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+}
+
+.bridge-event-list em {
+  display: block;
+  margin-top: 0.25rem;
+  font-style: normal;
+  line-height: 1.45;
+  opacity: 0.78;
+}
+
+@media (max-width: 900px) {
+  .bridge-registry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bridge-card {
+    min-height: auto;
+  }
+}
