@@ -46,6 +46,23 @@ function SCFELabApp() {
             <h1>SCFE</h1>
             <p className="subtitle">A read-only concurrent field lab for Barbault maths, DEEP, somatics, Hearthfire, sacred geometry, and Terra Aeterna.</p>
             <p className="inscription">One moment, many grammars, agency at the throne.</p>
+            <p>
+              <a
+                href="./wardenclyffe-mobius/"
+                style={{
+                  display: 'inline-block',
+                  marginTop: '0.75rem',
+                  padding: '0.65rem 1rem',
+                  border: '1px solid rgba(231,196,119,.55)',
+                  borderRadius: '999px',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  letterSpacing: '0.08em',
+                }}
+              >
+                Open Wardenclyffe × Möbius Patch Bay
+              </a>
+            </p>
           </div>
         </section>
         <SCFELab />
