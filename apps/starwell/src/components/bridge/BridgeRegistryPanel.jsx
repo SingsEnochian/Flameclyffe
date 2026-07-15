@@ -86,7 +86,7 @@ function bridgeDisplayType(bridge) {
 }
 
 function bridgeDisplayState(bridge) {
-  return bridge.metadata?.display_state || bridge.consent_state || 'draft';
+  return bridge.consent_state || bridge.metadata?.display_state || 'draft';
 }
 
 function bridgeSummary(bridge) {
@@ -210,7 +210,7 @@ export function BridgeRegistryPanel() {
         <h3>Facet, not override. Consent, not capture.</h3>
         <span>
           Bridges here read from Supabase when available and fall back to seeded canon when the live wire is quiet.
-          State comes from <code>consent_state</code>, so the Jorgie bridge no longer falls back to draft unless the database says so.
+          Canonical state comes from <code>consent_state</code>; display metadata may decorate it, but never overrule it.
         </span>
       </div>
 
