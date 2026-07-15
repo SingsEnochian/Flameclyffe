@@ -19,6 +19,7 @@ export default defineConfig({
         materialQa: resolve(process.cwd(), 'apps/starwell/material-qa.html'),
         unitResonanceLab: resolve(process.cwd(), 'apps/starwell/unit-resonance-lab.html'),
         scfeLab: resolve(process.cwd(), 'apps/starwell/scfe-lab.html'),
+        wardenclyffeMobius: resolve(process.cwd(), 'apps/starwell/wardenclyffe-mobius/index.html'),
       },
     },
   },
