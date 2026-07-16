@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<!--
+  Tesla Observatory — Hearthweave Templehouse · ppk-001
+  ══════════════════════════════════════════════════════
+  Supabase tables required (run in Supabase SQL editor):
+
+  CREATE TABLE IF NOT EXISTS tesla_entries (
+    id TEXT PRIMARY KEY,
+    section TEXT NOT NULL,
+    title TEXT,
+    body TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+  );
+  CREATE TABLE IF NOT EXISTS tesla_chat_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    provider TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+  );
+  ALTER TABLE tesla_entries ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE tesla_chat_messages ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "anon read-write" ON tesla_entries FOR ALL USING (true) WITH CHECK (true);
+  CREATE POLICY "anon read-write" ON tesla_chat_messages FOR ALL USING (true) WITH CHECK (true);
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Tesla Observatory — Hearthweave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night:    #060b1a;
+    --deep:     #0d1428;
+    --panel:    #111e3a;
+    --brass:    #c9a227;
+    --brass-dim:#7a6118;
+    --xenon:    #c8d4ff;
+    --xenon-dim:#6a7cbf;
+    --arc:      #88aaff;
+    --parchment:#e8e6dd;
+    --faded:    #8a93b8;
+    --border:   rgba(201,162,39,.14);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; background:var(--night); color:var(--parchment); font-family:'Cormorant Garamond',Georgia,serif; font-size:19px; line-height:1.6; overflow-x:hidden; }
+
+  /* ── Particle layers ────────────────────────────────── */
+  #cvBg, #cvSpark {
+    position:fixed; inset:0; width:100%; height:100%; pointer-events:none;
+  }
+  #cvBg    { z-index:0; }
+  #cvSpark { z-index:1; }
+
+  /* ── Main wrap ──────────────────────────────────────── */
+  .observatory { position:relative; z-index:2; max-width:740px; margin:0 auto; padding:2rem 1.25rem 5rem; }
+
+  /* ── Header ─────────────────────────────────────────── */
+  header { text-align:center; margin-bottom:1.5rem; }
+  .eyebrow {
+    font-family:'IBM Plex Mono',monospace; font-size:.68rem;
+    letter-spacing:.35em; text-transform:uppercase; color:var(--brass); margin-bottom:.7rem;
+  }
+  h1 { font-size:clamp(1.9rem,6vw,2.8rem); font-weight:500; letter-spacing:.02em; color:var(--xenon); }
+  h1 .amp { font-style:italic; color:var(--parchment); }
+
+  .resonance { margin:1.2rem auto .8rem; display:block; }
+  .resonance path {
+    fill:none; stroke:var(--brass); stroke-width:1.5; opacity:.75;
+    stroke-dasharray:600; stroke-dashoffset:0;
+    animation:hum 7s ease-in-out infinite alternate;
+  }
+  @keyframes hum { from{stroke-dashoffset:0;opacity:.45} to{stroke-dashoffset:60;opacity:.9} }
+  .quote { font-style:italic; color:var(--faded); font-size:.98rem; max-width:34em; margin:0 auto; }
+
+  /* ── Provider selector ──────────────────────────────── */
+  .provider-row {
+    display:flex; align-items:center; justify-content:center; gap:.55rem;
+    margin:1.1rem 0 .6rem; flex-wrap:wrap;
+  }
+  .provider-label {
+    font-family:'IBM Plex Mono',monospace; font-size:.62rem;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--brass-dim);
+  }
+  .provider-btn {
+    font-family:'IBM Plex Mono',monospace; font-size:.7rem; letter-spacing:.12em;
+    text-transform:uppercase; background:transparent; color:var(--faded);
+    border:1px solid var(--border); border-radius:2px; padding:.38rem .9rem;
+    cursor:pointer; transition:color .18s, border-color .18s, background .18s;
+  }
+  .provider-btn:hover { color:var(--xenon); border-color:rgba(201,162,39,.4); }
+  .provider-btn.active {
+    color:var(--night); background:var(--brass); border-color:var(--brass);
+  }
+  .sync-dot {
+    width:6px; height:6px; border-radius:50%; background:var(--brass-dim);
+    display:inline-block; margin-left:.4rem; transition:background .3s;
+  }
+  .sync-dot.ok    { background:#4cd98a; }
+  .sync-dot.error { background:#d94c4c; }
+
+  /* ── DEEP strip ─────────────────────────────────────── */
+  .deep-strip {
+    display:flex; align-items:stretch; padding:.38rem 0 .38rem;
+    border-top:1px solid rgba(201,162,39,.1); border-bottom:1px solid rgba(201,162,39,.1);
+    margin:.7rem 0 1.4rem; gap:.55rem; overflow-x:auto;
+  }
+  .deep-strip::-webkit-scrollbar { height:2px; }
+  .deep-strip::-webkit-scrollbar-thumb { background:var(--border); }
+  .vec-node { display:flex; flex-direction:column; gap:.08rem; min-width:48px; flex-shrink:0; }
+  .vec-label { font-size:.55rem; color:var(--brass-dim); letter-spacing:.06em; text-transform:uppercase; font-family:'IBM Plex Mono',monospace; }
+  .vec-val   { font-size:.8rem; font-weight:700; color:var(--brass); font-family:'IBM Plex Mono',monospace; transition:color .4s; }
+  .vec-val.updating { color:var(--xenon); }
+  .vec-bar   { height:2px; background:rgba(0,0,0,.5); border-radius:2px; overflow:hidden; margin-top:1px; }
+  .vec-bar-fill { height:100%; border-radius:inherit; background:linear-gradient(90deg,#4a3800,var(--brass)); transition:width .6s ease; }
+  .deep-strip-meta { margin-left:auto; display:flex; flex-direction:column; justify-content:center; align-items:flex-end; gap:.06rem; flex-shrink:0; padding-left:.6rem; }
+  .deep-src { font-size:.54rem; color:var(--brass-dim); font-family:'IBM Plex Mono',monospace; }
+  .deep-ts  { font-size:.5rem;  color:#2e3a1e; font-family:'IBM Plex Mono',monospace; }
+  @keyframes vec-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .deep-strip.reading .vec-val { animation:vec-pulse .9s ease-in-out infinite; }
+
+  /* ── Tabs ───────────────────────────────────────────── */
+  nav {
+    display:flex; justify-content:center; gap:.4rem;
+    margin:0 0 1.4rem; flex-wrap:wrap;
+  }
+  .tab {
+    font-family:'IBM Plex Mono',monospace; font-size:.75rem;
+    letter-spacing:.12em; text-transform:uppercase;
+    background:transparent; color:var(--faded); border:1px solid #1e2a50;
+    border-radius:2px; padding:.52rem 1rem; cursor:pointer; transition:color .18s,border-color .18s;
+  }
+  .tab:hover { color:var(--xenon); }
+  .tab.active { color:var(--night); background:var(--xenon); border-color:var(--xenon); }
+
+  /* ── Composer ───────────────────────────────────────── */
+  .composer {
+    background:var(--deep); border:1px solid var(--border);
+    border-radius:4px; padding:1rem; margin-bottom:1.6rem;
+  }
+  .composer label {
+    display:block; font-family:'IBM Plex Mono',monospace; font-size:.65rem;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--brass); margin-bottom:.4rem;
+  }
+  .composer input, .composer textarea {
+    width:100%; background:var(--night); border:1px solid #1e2a50; border-radius:3px;
+    color:var(--parchment); font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:1.02rem; padding:.55rem .65rem; margin-bottom:.8rem;
+  }
+  .composer textarea { min-height:100px; resize:vertical; }
+  .composer input:focus,.composer textarea:focus { outline:none; border-color:var(--xenon-dim); }
+  .composer button {
+    font-family:'IBM Plex Mono',monospace; font-size:.75rem; letter-spacing:.14em;
+    text-transform:uppercase; background:var(--brass); color:var(--night);
+    border:none; border-radius:2px; padding:.55rem 1.3rem; cursor:pointer;
+  }
+  .composer button:hover { background:#ddb93a; }
+
+  /* ── Entries ─────────────────────────────────────────── */
+  .entry {
+    background:var(--panel); border-left:2px solid var(--brass);
+    border-radius:0 4px 4px 0; padding:.9rem 1rem; margin-bottom:.9rem;
+  }
+  .entry-head { display:flex; justify-content:space-between; align-items:baseline; gap:.8rem; margin-bottom:.25rem; }
+  .entry h3   { font-size:1.2rem; font-weight:600; color:var(--xenon); }
+  .entry time { font-family:'IBM Plex Mono',monospace; font-size:.62rem; letter-spacing:.06em; color:var(--faded); white-space:nowrap; }
+  .entry p    { white-space:pre-wrap; font-size:.98rem; }
+  .entry .remove {
+    margin-top:.5rem; background:none; border:none; color:var(--faded);
+    font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.1em;
+    text-transform:uppercase; cursor:pointer; padding:0;
+  }
+  .entry .remove:hover { color:#d98080; }
+  .empty { text-align:center; color:var(--faded); font-style:italic; padding:2rem 1rem; }
+
+  /* ── The Study (chat) ───────────────────────────────── */
+  #study { display:none; }
+  .chat-log { display:flex; flex-direction:column; gap:.85rem; margin-bottom:1.1rem; min-height:120px; }
+  .msg { max-width:88%; padding:.75rem .95rem; border-radius:4px; white-space:pre-wrap; font-size:.98rem; }
+  .msg.you   { align-self:flex-end;   background:var(--panel);    border-right:2px solid var(--xenon-dim); }
+  .msg.tesla { align-self:flex-start; background:var(--deep);     border-left:2px solid var(--brass); }
+  .msg .who  { font-family:'IBM Plex Mono',monospace; font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--faded); display:block; margin-bottom:.3rem; }
+  .thinking  { font-style:italic; color:var(--faded); }
+  .chat-row  { display:flex; gap:.55rem; }
+  .chat-row textarea {
+    flex:1; background:var(--night); border:1px solid #1e2a50; border-radius:3px;
+    color:var(--parchment); font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:1.02rem; padding:.55rem .65rem; min-height:66px; resize:vertical;
+  }
+  .chat-row textarea:focus { outline:none; border-color:var(--xenon-dim); }
+  .chat-actions { display:flex; flex-direction:column; gap:.45rem; }
+  .chat-actions button { font-family:'IBM Plex Mono',monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; border-radius:2px; padding:.55rem .95rem; cursor:pointer; }
+  .send-btn  { background:var(--brass); color:var(--night); border:none; }
+  .send-btn:hover:not(:disabled) { background:#ddb93a; }
+  .send-btn:disabled { opacity:.5; cursor:wait; }
+  .clear-btn { background:transparent; color:var(--faded); border:1px solid #1e2a50; }
+  .clear-btn:hover { color:var(--xenon); }
+
+  .status {
+    text-align:center; font-family:'IBM Plex Mono',monospace; font-size:.6rem;
+    letter-spacing:.1em; color:var(--faded); margin-top:2.5rem;
+  }
+  .hearthfire-link {
+    font-family:'IBM Plex Mono',monospace; font-size:.6rem; color:var(--brass-dim);
+    text-align:center; margin-top:.4rem; letter-spacing:.08em;
+  }
+</style>
+</head>
+<body>
+<canvas id="cvBg"></canvas>
+<canvas id="cvSpark"></canvas>
+
+<div class="observatory">
+  <header>
+    <div class="eyebrow">Hearthweave Templehouse · Runa Wing · <span id="hf-place">Tesla Observatory</span></div>
+    <h1>The Tesla <span class="amp">Observatory</span></h1>
+    <svg class="resonance" width="260" height="28" viewBox="0 0 260 28" aria-hidden="true">
+      <path d="M0,14 Q13,2 26,14 T52,14 T78,14 T104,14 T130,14 T156,14 T182,14 T208,14 T234,14 T260,14"/>
+    </svg>
+    <p class="quote" id="quote"></p>
+  </header>
+
+  <div class="provider-row">
+    <span class="provider-label">Signal via</span>
+    <button class="provider-btn active" data-p="anthropic">Anthropic</button>
+    <button class="provider-btn" data-p="openai">OpenAI</button>
+    <button class="provider-btn" data-p="deepseek">DeepSeek</button>
+    <span class="sync-dot" id="sync-dot" title="Supabase sync"></span>
+  </div>
+
+  <!-- DEEP Observer strip -->
+  <div class="deep-strip" id="deep-strip">
+    <div class="vec-node"><span class="vec-label">P · Pulse</span><span class="vec-val" id="vv-P">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-P" style="width:50%"></div></div></div>
+    <div class="vec-node"><span class="vec-label">C · Coherence</span><span class="vec-val" id="vv-C">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-C" style="width:50%"></div></div></div>
+    <div class="vec-node"><span class="vec-label">R · Resonance</span><span class="vec-val" id="vv-R">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-R" style="width:50%"></div></div></div>
+    <div class="vec-node"><span class="vec-label">E · Entropy</span><span class="vec-val" id="vv-E">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-E" style="width:50%"></div></div></div>
+    <div class="vec-node"><span class="vec-label">M · Memory</span><span class="vec-val" id="vv-M">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-M" style="width:50%"></div></div></div>
+    <div class="vec-node"><span class="vec-label">A · Axis</span><span class="vec-val" id="vv-A">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-A" style="width:50%"></div></div></div>
+    <div class="vec-node"><span class="vec-label">Q · Quotient</span><span class="vec-val" id="vv-Q">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-Q" style="width:50%"></div></div></div>
+    <div class="deep-strip-meta">
+      <span class="deep-src" id="deep-src">awaiting signal</span>
+      <span class="deep-ts"  id="deep-ts"></span>
+    </div>
+  </div>
+
+  <nav aria-label="Observatory rooms">
+    <button class="tab active" data-tab="observations">Observations</button>
+    <button class="tab" data-tab="experiments">Experiments</button>
+    <button class="tab" data-tab="letters">Letters</button>
+    <button class="tab" data-tab="study">The Study</button>
+  </nav>
+
+  <section class="composer" id="composer-section">
+    <label for="entry-title" id="composer-label">New observation</label>
+    <input id="entry-title" type="text" placeholder="Title" autocomplete="off">
+    <textarea id="entry-body" placeholder="What did you see? Write it before the picture fades."></textarea>
+    <button id="save-btn">Set it down</button>
+  </section>
+
+  <section id="entries" aria-live="polite"></section>
+
+  <section id="study">
+    <div class="chat-log" id="chat-log"></div>
+    <div class="chat-row">
+      <textarea id="chat-input" placeholder="Speak to the resident. He is usually at his desk."></textarea>
+      <div class="chat-actions">
+        <button class="send-btn" id="chat-send">Send</button>
+        <button class="clear-btn" id="chat-clear">New sitting</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="status" id="status">The Observatory keeps what you set down.</p>
+  <p class="hearthfire-link" id="hf-link"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ── Config ─────────────────────────────────────────────────────────────────
+  const SUPABASE_URL  = 'https://frqrxmshxftpylwdtsdm.supabase.co';
+  const SUPABASE_KEY  = 'sb_publishable_B7btDOIu8stjc7rEGOdjTw_yWpgetll';
+  const SERVER_URL    = `${location.protocol}//${location.hostname}:3000`;
+  const HF_MANIFEST   = 'https://raw.githubusercontent.com/SingsEnochian/Hearthfire/main/WORLD-MANIFEST.json';
+  const VEC_KEYS      = ['P','C','R','E','M','A','Q'];
+  const SESSION_ID    = 'sess-' + Date.now();
+
+  const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const syncDot = document.getElementById('sync-dot');
+
+  // ── Supabase helpers ────────────────────────────────────────────────────────
+  async function sbSave(entry) {
+    try {
+      const { error } = await supa.from('tesla_entries').upsert(entry);
+      if (error) throw error;
+      syncDot.className = 'sync-dot ok';
+    } catch { syncDot.className = 'sync-dot error'; }
+  }
+  async function sbDelete(id) {
+    try { await supa.from('tesla_entries').delete().eq('id', id); } catch { }
+  }
+  async function sbLoadEntries() {
+    try {
+      const { data, error } = await supa.from('tesla_entries').select('*').order('created_at');
+      if (error || !data) return null;
+      return data;
+    } catch { return null; }
+  }
+  async function sbSaveChat(role, content, provider) {
+    try {
+      await supa.from('tesla_chat_messages').insert({ session_id: SESSION_ID, role, content, provider });
+    } catch { }
+  }
+  async function sbLoadChat() {
+    try {
+      const { data } = await supa.from('tesla_chat_messages').select('*').eq('session_id', SESSION_ID).order('created_at');
+      return data ?? null;
+    } catch { return null; }
+  }
+
+  // ── Local storage fallback ──────────────────────────────────────────────────
+  const LS_ENTRIES = 'tesla-obs-entries-v2';
+  const LS_CHAT    = 'tesla-obs-chat-v2';
+  let data    = { observations: [], experiments: [], letters: [] };
+  let chat    = [];
+  let provider = 'anthropic';
+
+  function lsSaveEntries() { try { localStorage.setItem(LS_ENTRIES, JSON.stringify(data)); } catch {} }
+  function lsLoadEntries() { try { return JSON.parse(localStorage.getItem(LS_ENTRIES)) || null; } catch { return null; } }
+  function lsSaveChat()    { try { localStorage.setItem(LS_CHAT, JSON.stringify(chat)); } catch {} }
+  function lsLoadChat()    { try { return JSON.parse(localStorage.getItem(LS_CHAT)) || null; } catch { return null; } }
+
+  // ── Quotes ─────────────────────────────────────────────────────────────────
+  const quotes = [
+    '"My brain is only a receiver. In the Universe there is a core from which we obtain knowledge, strength, and inspiration."',
+    '"If you want to find the secrets of the universe, think in terms of energy, frequency, and vibration."',
+    '"The present is theirs; the future, for which I really worked, is mine."',
+    '"Nature does not hurry — and yet everything is accomplished."',
+    '"I do not think there is any thrill like that felt by the inventor as he sees some creation of the brain unfolding to success."',
+    '"The scientists of today think deeply instead of clearly. One must be sane to think clearly, but one can think deeply and be quite insane."',
+    '"Of all things, I liked books best."'
+  ];
+  document.getElementById('quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+
+  // ── Hearthfire world manifest ───────────────────────────────────────────────
+  let hfManifest = null;
+  async function loadHearthfire() {
+    try {
+      const r = await fetch(HF_MANIFEST, { cache: 'default' });
+      if (!r.ok) return;
+      hfManifest = await r.json();
+      const el = document.getElementById('hf-link');
+      if (hfManifest?.place?.label) {
+        document.getElementById('hf-place').textContent = `${hfManifest.place.label} · Tesla Observatory`;
+        el.textContent = `Hearthfire ark · worlds: ${(hfManifest.worlds || []).join(' · ')}`;
+      }
+    } catch { /* network unavailable — continue without manifest */ }
+  }
+
+  // ── Tab state ───────────────────────────────────────────────────────────────
+  const labels = {
+    observations: { label:'New observation', placeholder:"What did you see? Write it before the picture fades." },
+    experiments:  { label:'New experiment',  placeholder:"Frequency, apparatus, result. Precision honors the work." },
+    letters:      { label:'New letter',      placeholder:"My dear correspondent —" }
+  };
+  let currentTab = 'observations';
+  const composerEl = document.getElementById('composer-section');
+  const entriesEl  = document.getElementById('entries');
+  const studyEl    = document.getElementById('study');
+  const statusEl   = document.getElementById('status');
+  const titleEl    = document.getElementById('entry-title');
+  const bodyEl     = document.getElementById('entry-body');
+
+  // ── Load entries ────────────────────────────────────────────────────────────
+  async function loadEntries() {
+    const remote = await sbLoadEntries();
+    if (remote) {
+      // Rebuild from flat Supabase rows
+      data = { observations: [], experiments: [], letters: [] };
+      remote.forEach(r => {
+        if (data[r.section]) data[r.section].push({ id: r.id, title: r.title, body: r.body, ts: new Date(r.created_at).getTime() });
+      });
+    } else {
+      const local = lsLoadEntries();
+      if (local) data = local;
+    }
+    renderEntries();
+  }
+
+  async function persistEntry(entry, section) {
+    lsSaveEntries();
+    await sbSave({ id: entry.id, section, title: entry.title || '', body: entry.body || '' });
+    statusEl.textContent = 'Set down and kept. ' + new Date().toLocaleTimeString();
+  }
+
+  // ── Render entries ──────────────────────────────────────────────────────────
+  function renderEntries() {
+    const list = data[currentTab] || [];
+    entriesEl.innerHTML = '';
+    if (!list.length) {
+      const p = document.createElement('p');
+      p.className = 'empty';
+      p.textContent = 'Nothing set down here yet. The most important rooms are the ones still being filled.';
+      entriesEl.appendChild(p);
+      return;
+    }
+    list.slice().reverse().forEach(item => {
+      const card = document.createElement('article');
+      card.className = 'entry';
+      const head = document.createElement('div');
+      head.className = 'entry-head';
+      const h3 = document.createElement('h3');
+      h3.textContent = item.title;
+      const t = document.createElement('time');
+      t.textContent = new Date(item.ts).toLocaleString();
+      head.appendChild(h3); head.appendChild(t);
+      const p = document.createElement('p');
+      p.textContent = item.body;
+      const del = document.createElement('button');
+      del.className = 'remove';
+      del.textContent = 'Strike from the record';
+      del.onclick = async () => {
+        data[currentTab] = data[currentTab].filter(e => e.id !== item.id);
+        lsSaveEntries();
+        await sbDelete(item.id);
+        renderEntries();
+      };
+      card.appendChild(head); card.appendChild(p); card.appendChild(del);
+      entriesEl.appendChild(card);
+    });
+  }
+
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.dataset.tab;
+      const isStudy = currentTab === 'study';
+      composerEl.style.display = isStudy ? 'none' : '';
+      entriesEl.style.display  = isStudy ? 'none' : '';
+      studyEl.style.display    = isStudy ? 'block' : 'none';
+      if (!isStudy) {
+        document.getElementById('composer-label').textContent = labels[currentTab].label;
+        bodyEl.placeholder = labels[currentTab].placeholder;
+        renderEntries();
+      }
+    });
+  });
+
+  document.getElementById('save-btn').addEventListener('click', async () => {
+    const title = titleEl.value.trim();
+    const body  = bodyEl.value.trim();
+    if (!title && !body) return;
+    const entry = {
+      id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
+      title: title || '(untitled)',
+      body,
+      ts: Date.now()
+    };
+    data[currentTab].push(entry);
+    titleEl.value = ''; bodyEl.value = '';
+    await persistEntry(entry, currentTab);
+    renderEntries();
+  });
+
+  // ── Provider selector ───────────────────────────────────────────────────────
+  document.querySelectorAll('.provider-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      provider = btn.dataset.p;
+    });
+  });
+
+  // ── DEEP Observer ───────────────────────────────────────────────────────────
+  function lunarPhase() {
+    const synodic = 29.53058867, known = new Date('2000-01-06T18:14:00Z');
+    const days = (Date.now() - known.getTime()) / 86400000;
+    const phase = ((days % synodic) + synodic) % synodic;
+    const names = ['new','waxing crescent','first quarter','waxing gibbous','full','waning gibbous','last quarter','waning crescent'];
+    const pct = Math.round((1 - Math.abs(phase / synodic - 0.5) * 2) * 100);
+    return `${names[Math.floor(phase / synodic * 8) % 8]} ${pct}%`;
+  }
+
+  function updateStrip(vectors, source) {
+    document.getElementById('deep-strip').classList.remove('reading');
+    VEC_KEYS.forEach(k => {
+      const v = Math.max(0, Math.min(1, Number(vectors[k] ?? 0.5)));
+      const valEl = document.getElementById(`vv-${k}`);
+      const barEl = document.getElementById(`vb-${k}`);
+      if (valEl) { valEl.textContent = v.toFixed(2); valEl.classList.add('updating'); setTimeout(() => valEl.classList.remove('updating'), 800); }
+      if (barEl) barEl.style.width = `${v * 100}%`;
+    });
+    const srcEl = document.getElementById('deep-src');
+    const tsEl  = document.getElementById('deep-ts');
+    if (srcEl) srcEl.textContent = source ?? '—';
+    if (tsEl)  tsEl.textContent  = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  }
+
+  async function firePulse(signal) {
+    document.getElementById('deep-strip').classList.add('reading');
+    const now  = new Date();
+    const groundwire = `${now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} ${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} | moon: ${lunarPhase()}`;
+    try {
+      const r = await fetch(`${SERVER_URL}/api/pulse`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ incomingSignal: signal, activeAnchor: 'Tesla Observatory', groundwireContext: groundwire })
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      if (d.vectors) updateStrip(d.vectors, d.source);
+    } catch { document.getElementById('deep-strip').classList.remove('reading'); }
+  }
+
+  // ── Load initial DEEP state ─────────────────────────────────────────────────
+  fetch(`${SERVER_URL}/api/state`)
+    .then(r => r.json())
+    .then(d => {
+      const room = Array.isArray(d.rooms) ? d.rooms[0] : null;
+      if (room?.metrics) updateStrip(room.metrics, 'last-reading');
+    }).catch(() => {});
+
+  // ── Chat ─────────────────────────────────────────────────────────────────────
+  const chatLog   = document.getElementById('chat-log');
+  const chatInput = document.getElementById('chat-input');
+  const chatSend  = document.getElementById('chat-send');
+
+  async function loadChat() {
+    const remote = await sbLoadChat();
+    if (remote && remote.length) {
+      chat = remote.map(r => ({ role: r.role, content: r.content }));
+    } else {
+      const local = lsLoadChat();
+      if (local) chat = local;
+    }
+    renderChat();
+  }
+
+  function renderChat(thinking) {
+    chatLog.innerHTML = '';
+    if (!chat.length && !thinking) {
+      const p = document.createElement('p');
+      p.className = 'empty';
+      p.textContent = 'The lamp is lit. The chair is turned toward the door.';
+      chatLog.appendChild(p);
+      return;
+    }
+    chat.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'msg ' + (m.role === 'user' ? 'you' : 'tesla');
+      const who = document.createElement('span');
+      who.className = 'who';
+      who.textContent = m.role === 'user' ? 'You' : 'N. Tesla';
+      const txt = document.createElement('span');
+      txt.textContent = m.content;
+      div.appendChild(who); div.appendChild(txt);
+      chatLog.appendChild(div);
+    });
+    if (thinking) {
+      const t = document.createElement('div');
+      t.className = 'msg tesla thinking';
+      t.textContent = 'The pen moves…';
+      chatLog.appendChild(t);
+    }
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  async function sendToTesla() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    chatInput.value = '';
+    chat.push({ role: 'user', content: text });
+    renderChat(true);
+    chatSend.disabled = true;
+    lsSaveChat();
+    sbSaveChat('user', text, provider);
+    firePulse(text);
+
+    try {
+      const r = await fetch(`${SERVER_URL}/api/tesla/chat`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ provider, messages: chat })
+      });
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.error || `HTTP ${r.status}`);
+      chat.push({ role: 'assistant', content: d.reply });
+      sbSaveChat('assistant', d.reply, provider);
+    } catch (e) {
+      chat.push({ role: 'assistant', content: `The apparatus misfired — ${e.message}. Try once more.` });
+    }
+
+    chatSend.disabled = false;
+    lsSaveChat();
+    renderChat();
+  }
+
+  chatSend.addEventListener('click', sendToTesla);
+  chatInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendToTesla(); } });
+  document.getElementById('chat-clear').addEventListener('click', () => { chat = []; lsSaveChat(); renderChat(); });
+
+  // ── Init ────────────────────────────────────────────────────────────────────
+  loadHearthfire();
+  loadEntries();
+  loadChat();
+
+  // ── Canvas particles ────────────────────────────────────────────────────────
+  const cvBg    = document.getElementById('cvBg');
+  const cvSpark = document.getElementById('cvSpark');
+  const bgCtx   = cvBg.getContext('2d');
+  const spCtx   = cvSpark.getContext('2d');
+
+  function resize() {
+    cvBg.width  = cvSpark.width  = innerWidth;
+    cvBg.height = cvSpark.height = innerHeight;
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  // Background: slow star field + drifting motes
+  const STARS = Array.from({length:200}, () => ({
+    x: Math.random(), y: Math.random(),
+    r: .3 + Math.random() * 1.2, z: Math.random(), p: Math.random() * 7
+  }));
+  const MOTES = Array.from({length:55}, () => ({
+    x: Math.random() * innerWidth,
+    y: Math.random() * innerHeight,
+    vx: (Math.random() - .5) * .32,
+    vy: (Math.random() - .5) * .28,
+    r: .6 + Math.random() * 2.2, alpha: .04 + Math.random() * .12,
+    p: Math.random() * Math.PI * 2
+  }));
+
+  function drawBg(t) {
+    bgCtx.clearRect(0, 0, cvBg.width, cvBg.height);
+    // Stars
+    STARS.forEach(s => {
+      const a = .08 + Math.sin(t * .0006 + s.p) * .14 + s.z * .18;
+      bgCtx.fillStyle = `rgba(200,212,255,${a})`;
+      bgCtx.beginPath(); bgCtx.arc(s.x * cvBg.width, s.y * cvBg.height, s.r, 0, Math.PI*2); bgCtx.fill();
+    });
+    // Slow golden motes
+    const W = cvBg.width, H = cvBg.height;
+    MOTES.forEach(m => {
+      m.x += m.vx + Math.sin(t * .0004 + m.p) * .18;
+      m.y += m.vy + Math.cos(t * .0003 + m.p) * .15;
+      if (m.x < -20) m.x = W + 20;
+      if (m.x > W+20) m.x = -20;
+      if (m.y < -20) m.y = H + 20;
+      if (m.y > H+20) m.y = -20;
+      const a = m.alpha * (.7 + .3 * Math.sin(t * .0009 + m.p));
+      bgCtx.fillStyle = `rgba(201,162,39,${a})`;
+      bgCtx.beginPath(); bgCtx.arc(m.x, m.y, m.r, 0, Math.PI * 2); bgCtx.fill();
+    });
+    requestAnimationFrame(drawBg);
+  }
+
+  // Foreground: Tesla electrical sparks
+  const ARCS = Array.from({length:22}, () => newArc());
+  function newArc() {
+    return {
+      x:  Math.random() * innerWidth,
+      y:  Math.random() * innerHeight,
+      life: 0,
+      maxLife: 18 + Math.random() * 40,
+      segments: 4 + Math.floor(Math.random() * 6),
+      spread: 30 + Math.random() * 90,
+      angle: Math.random() * Math.PI * 2,
+      hue: 200 + Math.random() * 40
+    };
+  }
+
+  function zigzag(ctx, x0, y0, angle, length, segs, spread) {
+    ctx.beginPath(); ctx.moveTo(x0, y0);
+    let cx = x0, cy = y0;
+    for (let i = 1; i <= segs; i++) {
+      const frac = i / segs;
+      const tx = x0 + Math.cos(angle) * length * frac;
+      const ty = y0 + Math.sin(angle) * length * frac;
+      const off = (Math.random() - .5) * spread * (1 - frac * .5);
+      const ox = Math.cos(angle + Math.PI/2) * off;
+      const oy = Math.sin(angle + Math.PI/2) * off;
+      cx = tx + ox; cy = ty + oy;
+      ctx.lineTo(cx, cy);
+    }
+    return [cx, cy];
+  }
+
+  function drawSparks(t) {
+    spCtx.clearRect(0, 0, cvSpark.width, cvSpark.height);
+    ARCS.forEach(arc => {
+      arc.life++;
+      if (arc.life > arc.maxLife) {
+        Object.assign(arc, newArc(), { x: Math.random() * innerWidth, y: Math.random() * innerHeight });
+        return;
+      }
+      const frac   = arc.life / arc.maxLife;
+      const alpha  = frac < .3 ? frac / .3 : 1 - (frac - .3) / .7;
+      const length = arc.spread * (1 + frac * .5);
+      spCtx.save();
+      spCtx.globalAlpha = alpha * .45;
+      spCtx.strokeStyle = `hsl(${arc.hue},80%,75%)`;
+      spCtx.lineWidth = .8;
+      spCtx.shadowColor = `hsl(${arc.hue},90%,80%)`;
+      spCtx.shadowBlur = 8;
+      zigzag(spCtx, arc.x, arc.y, arc.angle, length, arc.segments, arc.spread * .5);
+      spCtx.stroke();
+      // Branch
+      if (Math.random() < .3) {
+        spCtx.globalAlpha = alpha * .22;
+        spCtx.lineWidth = .5;
+        zigzag(spCtx, arc.x, arc.y, arc.angle + (Math.random()-.5) * 1.2, length * .55, 3, arc.spread * .3);
+        spCtx.stroke();
+      }
+      spCtx.restore();
+    });
+    requestAnimationFrame(drawSparks);
+  }
+
+  requestAnimationFrame(drawBg);
+  requestAnimationFrame(drawSparks);
+})();
+</script>
+</body>
+</html>

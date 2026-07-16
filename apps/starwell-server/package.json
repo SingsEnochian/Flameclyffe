@@ -1,0 +1,65 @@
+{
+  "name": "hearthgate",
+  "productName": "Hearthgate",
+  "version": "0.1.0",
+  "type": "commonjs",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "node server.js",
+    "electron:dev": "electron .",
+    "electron:build": "electron-builder"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.111.0",
+    "better-sqlite3": "^12.11.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mammoth": "^1.12.0",
+    "multer": "^2.2.0",
+    "openai": "^6.46.0",
+    "pdf-parse": "^2.4.5"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
+    "electron": "^35.7.5",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.hearthweave.hearthgate",
+    "productName": "Hearthgate",
+    "copyright": "Hearthweave",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "asar": false,
+    "files": [
+      "**/*",
+      "!dist-electron",
+      "!*.md",
+      "!.env",
+      "!env_temp*",
+      "!data/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "electron/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Hearthgate"
+    }
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true,
+    "electron@35.7.5": true
+  }
+}

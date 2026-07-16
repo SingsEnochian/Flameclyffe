@@ -1,0 +1,17 @@
+# API keys — never commit
+.env
+.env.*
+env_temp.txt
+env_temp.env
+
+# Private data
+data/chat-rooms.json
+data/note-images/
+data/notes.state.json
+data/shared-context.md
+
+# User uploads
+public/uploads/
+
+# Dependencies
+node_modules/

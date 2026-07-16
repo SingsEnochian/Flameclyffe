@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Font Preview — Hearthweave</title>
+<style>
+  @font-face { font-family: 'WiredriftBitmap'; src: url('/fonts/font-001-wiredriftbitmapdisplay-regular.ttf') format('truetype'); }
+  @font-face { font-family: 'WraithProtocol'; src: url('/fonts/font-001-wraithprotocoldisplay-regular.ttf') format('truetype'); }
+  @font-face { font-family: 'AlphaSpike'; src: url('/fonts/AlphaSpike-Regular.ttf') format('truetype'); }
+  @font-face { font-family: 'DecomangHold'; src: url('/fonts/DecomangHold-Regular.ttf') format('truetype'); }
+  @font-face { font-family: 'Hermissoul'; src: url('/fonts/Hermissoul-Regular.ttf') format('truetype'); }
+  @font-face { font-family: 'Jelvion'; src: url('/fonts/Jelvion.otf') format('opentype'); }
+  @font-face { font-family: 'Kugile'; src: url('/fonts/Kugile_Demo.ttf') format('truetype'); }
+  @font-face { font-family: 'Mercy'; src: url('/fonts/Mercy.ttf') format('truetype'); font-style: normal; }
+  @font-face { font-family: 'Mercy'; src: url('/fonts/Mercy-Italic.ttf') format('truetype'); font-style: italic; }
+  @font-face { font-family: 'NeoLatina'; src: url('/fonts/neo-latina-demo-FFP.ttf') format('truetype'); }
+  @font-face { font-family: 'Nevera'; src: url('/fonts/Nevera-Regular.otf') format('opentype'); }
+  @font-face { font-family: 'Nordick'; src: url('/fonts/nordick.ttf') format('truetype'); }
+  @font-face { font-family: 'Norse'; src: url('/fonts/Norse.otf') format('opentype'); font-weight: normal; }
+  @font-face { font-family: 'Norse'; src: url('/fonts/Norse-Bold.otf') format('opentype'); font-weight: bold; }
+  @font-face { font-family: 'PTFNordic'; src: url('/fonts/PTF-NORDIC-Rnd-Lt.ttf') format('truetype'); }
+  @font-face { font-family: 'TheLaker'; src: url('/fonts/The Laker.ttf') format('truetype'); }
+  @font-face { font-family: 'YggdrasilFont'; src: url('/fonts/Yggdrasil.ttf') format('truetype'); }
+  @font-face { font-family: 'FlokiHard'; src: url('/fonts/floki-Hard.ttf') format('truetype'); }
+  @font-face { font-family: 'VTCSwitchblade'; src: url('/fonts/VTCSwitchbladeRomance.ttf') format('truetype'); font-style: normal; }
+  @font-face { font-family: 'VTCSwitchblade'; src: url('/fonts/VTCSwitchbladeRomanceItalic.ttf') format('truetype'); font-style: italic; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #060e09;
+    color: #8aaa96;
+    padding: 2.5rem 3rem;
+    font-family: monospace;
+  }
+  h1 { font-family: monospace; font-size: .7rem; letter-spacing: .18em; color: #2e4438; text-transform: uppercase; margin-bottom: 2.5rem; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 1.2rem;
+  }
+  .card {
+    border: 1px solid rgba(114,204,166,.1);
+    border-radius: 6px;
+    padding: 1.4rem 1.6rem 1.2rem;
+    background: rgba(255,255,255,.015);
+  }
+  .card-name {
+    font-size: .62rem; letter-spacing: .12em; text-transform: uppercase;
+    color: #2e4438; margin-bottom: .9rem;
+  }
+  .sample-a { font-size: 2.4rem; line-height: 1.1; margin-bottom: .5rem; color: #c8e8d4; }
+  .sample-b { font-size: 1.1rem; line-height: 1.4; margin-bottom: .4rem; color: #8aaa96; }
+  .sample-c { font-size: .72rem; line-height: 1.6; color: #4a6a56; }
+</style>
+</head>
+<body>
+
+<h1>Hearthweave Font Preview · starwell-server/public/fonts/</h1>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-name">Yggdrasil</div>
+    <div class="sample-a" style="font-family:'YggdrasilFont'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'YggdrasilFont'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'YggdrasilFont'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Floki Hard</div>
+    <div class="sample-a" style="font-family:'FlokiHard'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'FlokiHard'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'FlokiHard'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Wiredrift Bitmap Display</div>
+    <div class="sample-a" style="font-family:'WiredriftBitmap'">STARWELL</div>
+    <div class="sample-b" style="font-family:'WiredriftBitmap'">PCREMAQ · P 0.74 · C 0.61</div>
+    <div class="sample-c" style="font-family:'WiredriftBitmap'">SYSTEM STATUS · SIGNAL GROUNDWIRE</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Wraith Protocol Display</div>
+    <div class="sample-a" style="font-family:'WraithProtocol'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'WraithProtocol'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'WraithProtocol'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Alpha Spike</div>
+    <div class="sample-a" style="font-family:'AlphaSpike'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'AlphaSpike'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'AlphaSpike'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Decomang Hold</div>
+    <div class="sample-a" style="font-family:'DecomangHold'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'DecomangHold'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'DecomangHold'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Hermissoul</div>
+    <div class="sample-a" style="font-family:'Hermissoul'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'Hermissoul'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'Hermissoul'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Jelvion</div>
+    <div class="sample-a" style="font-family:'Jelvion'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'Jelvion'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'Jelvion'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Kugile Demo</div>
+    <div class="sample-a" style="font-family:'Kugile'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'Kugile'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'Kugile'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Mercy / Mercy Italic</div>
+    <div class="sample-a" style="font-family:'Mercy'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'Mercy'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'Mercy';font-style:italic">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Neo Latina Demo</div>
+    <div class="sample-a" style="font-family:'NeoLatina'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'NeoLatina'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'NeoLatina'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Nevera</div>
+    <div class="sample-a" style="font-family:'Nevera'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'Nevera'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'Nevera'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Nordick</div>
+    <div class="sample-a" style="font-family:'Nordick'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'Nordick'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'Nordick'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">Norse / Norse Bold</div>
+    <div class="sample-a" style="font-family:'Norse';font-weight:bold">Hearthroom</div>
+    <div class="sample-b" style="font-family:'Norse'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'Norse'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">PTF Nordic Rounded Light</div>
+    <div class="sample-a" style="font-family:'PTFNordic'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'PTFNordic'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'PTFNordic'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">The Laker</div>
+    <div class="sample-a" style="font-family:'TheLaker'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'TheLaker'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'TheLaker'">In character · Falka Hearthlight</div>
+  </div>
+
+  <div class="card">
+    <div class="card-name">VTC Switchblade Romance / Italic</div>
+    <div class="sample-a" style="font-family:'VTCSwitchblade'">Hearthroom</div>
+    <div class="sample-b" style="font-family:'VTCSwitchblade'">Caladnaur Lioreal · Nen Uial</div>
+    <div class="sample-c" style="font-family:'VTCSwitchblade';font-style:italic">In character · Falka Hearthlight</div>
+  </div>
+
+</div>
+</body>
+</html>

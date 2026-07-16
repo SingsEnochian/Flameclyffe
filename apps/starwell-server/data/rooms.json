@@ -1,0 +1,42 @@
+[
+  {
+    "room_name": "Dreaming Grove",
+    "purpose": "gentle creative play, comfort, worldbuilding",
+    "participants": [
+      "Rowan",
+      "Vee",
+      "Faer"
+    ],
+    "tone": "soft, mythic, playful",
+    "canon_status": "draft",
+    "consent_rules": {
+      "feather": true
+    },
+    "memory_policy": "save explicit logs only",
+    "tool_access": [
+      "image references",
+      "wiki drafting",
+      "music prompts"
+    ],
+    "sensory_layers": {
+      "visual": true,
+      "audio": true,
+      "haptic": false
+    },
+    "exit_phrase": "plain pass",
+    "safety_notes": "no passive surveillance. no automatic publication.",
+    "public_private": "private",
+    "archive_policy": "archived on exit",
+    "metrics": {
+      "P": 0.58,
+      "C": 0.52,
+      "R": 0.71,
+      "E": 0.64,
+      "M": 0.48,
+      "A": 0.61,
+      "Q": 0.59
+    },
+    "chamberState": "Anchored: Wraithtide Shore",
+    "currentPlace": "Wraithtide Shore"
+  }
+]

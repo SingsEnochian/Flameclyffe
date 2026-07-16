@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Grove — Hearthweave</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    @font-face { font-family: 'VTCSwitchblade'; src: url('/fonts/VTCSwitchbladeRomance.ttf') format('truetype'); font-style: normal; }
+    @font-face { font-family: 'VTCSwitchblade'; src: url('/fonts/VTCSwitchbladeRomanceItalic.ttf') format('truetype'); font-style: italic; }
+    @font-face { font-family: 'TheLaker'; src: url('/fonts/The Laker.ttf') format('truetype'); }
+    @font-face { font-family: 'Nevera'; src: url('/fonts/Nevera-Regular.otf') format('opentype'); }
+    @font-face { font-family: 'Norse'; src: url('/fonts/Norse.otf') format('opentype'); font-weight: normal; }
+    @font-face { font-family: 'Norse'; src: url('/fonts/Norse-Bold.otf') format('opentype'); font-weight: bold; }
+    @font-face { font-family: 'Mercy'; src: url('/fonts/Mercy.ttf') format('truetype'); font-style: normal; }
+    @font-face { font-family: 'Mercy'; src: url('/fonts/Mercy-Italic.ttf') format('truetype'); font-style: italic; }
+    @font-face { font-family: 'WiredriftBitmap'; src: url('/fonts/font-001-wiredriftbitmapdisplay-regular.ttf') format('truetype'); }
+    @font-face { font-family: 'WraithProtocol'; src: url('/fonts/font-001-wraithprotocoldisplay-regular.ttf') format('truetype'); }
+    @font-face { font-family: 'YggdrasilFont'; src: url('/fonts/Yggdrasil.ttf') format('truetype'); }
+    @font-face { font-family: 'FlokiHard'; src: url('/fonts/floki-Hard.ttf') format('truetype'); }
+
+    /* ── Mythic Bridge palette ── */
+    :root {
+      --gold:        #b89a4e;
+      --gold-dim:    rgba(184,154,78,.42);
+      --gold-glow:   rgba(184,154,78,.1);
+      --bg:          #07080a;
+      --panel:       #0b0c0e;
+      --raised:      #111214;
+      --border:      rgba(184,154,78,.1);
+      --text:        #e8e0d0;
+      --text-dim:    #7a7060;
+      --font-ui:     'IBM Plex Mono', ui-monospace, monospace;
+      --font-title:  Palatino, 'Book Antiqua', Georgia, serif;
+      --font-msg:    'Cormorant Garamond', Georgia, serif;
+      --font-ic:     'Cormorant Garamond', Georgia, serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-ui); font-size: 14px; overflow: hidden; }
+
+    /* ── App shell ── */
+    .app { display: grid; grid-template-columns: 220px 1fr; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      display: flex; flex-direction: column; height: 100vh;
+      background: var(--panel); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden;
+    }
+
+    #sidebar-title {
+      padding: 14px 14px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    #sidebar-title .title-main {
+      font-family: var(--font-title); font-size: 18px; color: var(--gold);
+      letter-spacing: .03em; font-weight: 400;
+    }
+    #sidebar-title small {
+      display: block; font-family: var(--font-ui); font-size: 10px;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-top: 3px;
+    }
+
+    .sidebar-nav {
+      display: flex; flex-direction: column; gap: 1px;
+      padding: 6px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .sidebar-nav a {
+      color: var(--text-dim); text-decoration: none; font-size: .7rem;
+      letter-spacing: .06em; text-transform: uppercase;
+      padding: .25rem .6rem; border-radius: 4px; transition: color .15s, background .15s;
+    }
+    .sidebar-nav a:hover { color: var(--gold); background: var(--gold-glow); }
+    .sidebar-nav a.active { color: var(--gold); }
+
+    .sb-section {
+      font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-dim); padding: 9px 14px 4px; flex-shrink: 0;
+    }
+
+    #room-list { overflow-y: auto; max-height: 32vh; flex-shrink: 0; }
+
+    .room-entry {
+      display: flex; align-items: center; gap: 7px; padding: 6px 14px;
+      cursor: pointer; color: var(--text-dim); font-size: 12px;
+      border-left: 2px solid transparent; user-select: none; transition: background .1s, color .1s;
+    }
+    .room-entry:hover  { color: var(--text); background: rgba(255,255,255,.025); }
+    .room-entry.active { color: var(--text); border-left-color: var(--gold); background: var(--gold-glow); }
+    .room-entry.flagged { border-left-color: #b05050; }
+    .flag-dot { width: 6px; height: 6px; border-radius: 50%; background: #b05050; flex-shrink: 0; }
+
+    #member-list { overflow-y: auto; flex: 1; }
+
+    .member-entry { display: flex; align-items: flex-start; gap: 8px; padding: 5px 14px; font-size: 12px; }
+    .member-entry.clickable { cursor: pointer; border-radius: 4px; transition: background .1s; }
+    .member-entry.clickable:hover { background: rgba(255,255,255,.025); }
+
+    /* Mini avatar orb in sidebar */
+    .mini-orb {
+      width: 22px; height: 22px; border-radius: 50%; display: inline-flex;
+      align-items: center; justify-content: center; font-size: 10px; font-weight: 700;
+      border: 1px solid rgba(255,255,255,.15);
+      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.22), rgba(0,0,0,.4));
+      flex-shrink: 0;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+    }
+    .status-online   { background: #5aa371; box-shadow: 0 0 5px rgba(90,163,113,.6); }
+    .status-thinking { background: #e7c76d; animation: pulse .9s ease-in-out infinite; }
+    .status-away     { background: #c9883c; }
+    .status-dnd      { background: #b05050; }
+    .status-offline  { background: rgba(255,255,255,.15); }
+    .status-unknown  { background: rgba(255,255,255,.1); }
+
+    @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }
+
+    .member-info { min-width: 0; }
+    .member-name { display: block; color: var(--text); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .member-note { display: block; color: var(--text-dim); font-size: 10px; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Status panel ── */
+    #status-panel {
+      position: fixed; left: 220px; background: var(--raised); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px; width: 205px; z-index: 200;
+      display: none; flex-direction: column; gap: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.65);
+    }
+    #status-panel.open { display: flex; }
+    .sp-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
+    .sp-options { display: flex; flex-wrap: wrap; gap: 4px; }
+    .sp-opt {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text-dim); padding: 3px 8px; font-size: 11px; cursor: pointer;
+      transition: all .1s; font-family: var(--font-ui);
+    }
+    .sp-opt:hover, .sp-opt.active { color: var(--text); border-color: var(--gold); }
+    .sp-input {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text); padding: 5px 8px; font-size: 12px; outline: none; width: 100%; font-family: var(--font-ui);
+    }
+    .sp-input:focus { border-color: var(--gold); }
+    .sp-input::placeholder { color: var(--text-dim); }
+    .sp-btns { display: flex; gap: 6px; }
+    .sp-btn {
+      flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text-dim); padding: 5px; font-size: 11px; font-family: var(--font-ui);
+      cursor: pointer; transition: all .1s; text-align: center;
+    }
+    .sp-btn:hover { color: var(--text); border-color: var(--gold); }
+    .sp-btn.primary { color: var(--text); }
+    .sp-avatar-row { display: flex; gap: 4px; align-items: center; }
+    .sp-avatar-row .sp-input { flex: 1; }
+    .sp-tiny { font-size: .75em; color: var(--text-dim); }
+
+    /* ── New room ── */
+    #new-room-area {
+      padding: 10px 14px; border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;
+    }
+    .ctrl-input {
+      background: var(--raised); border: 1px solid var(--border); border-radius: 5px;
+      color: var(--text); padding: 6px 9px; font-size: 12px; font-family: var(--font-ui);
+      outline: none; transition: border-color .12s; width: 100%;
+    }
+    .ctrl-input:focus { border-color: var(--gold); }
+    .ctrl-input::placeholder { color: var(--text-dim); }
+    .ctrl-btn {
+      background: var(--gold-glow); border: 1px solid var(--gold-dim); border-radius: 5px;
+      color: var(--gold); padding: 6px 10px; font-size: 11px; font-family: var(--font-ui);
+      letter-spacing: .06em; cursor: pointer; text-align: center; transition: background .12s; width: 100%;
+    }
+    .ctrl-btn:hover { background: rgba(184,154,78,.2); }
+
+    /* ── Main ── */
+    #main {
+      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+      position: relative; background: var(--bg);
+    }
+    /* Mythic Bridge ambient glow */
+    #main::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(184,154,78,.055), transparent 30%),
+        radial-gradient(circle at 85% 5%, rgba(255,255,255,.025), transparent 22%);
+      z-index: 0;
+    }
+
+    /* ── Room header ── */
+    #room-header {
+      padding: 10px 18px; border-bottom: 1px solid var(--border);
+      background: rgba(7,8,10,.88); backdrop-filter: blur(14px);
+      display: flex; align-items: center; gap: 12px; min-height: 52px;
+      flex-shrink: 0; position: relative; z-index: 2;
+    }
+    #room-header-info { flex: 1; min-width: 0; }
+    #room-header-name { font-family: var(--font-title); font-size: 18px; color: var(--text); letter-spacing: .025em; font-weight: 400; }
+    #room-header-desc { font-size: 11px; color: var(--text-dim); font-style: italic; margin-top: 1px; }
+    .hdr-btn {
+      background: none; border: 1px solid var(--border); border-radius: 5px;
+      color: var(--text-dim); padding: 4px 10px; font-size: 11px; font-family: var(--font-ui);
+      letter-spacing: .06em; cursor: pointer; white-space: nowrap; transition: color .12s, border-color .12s;
+    }
+    .hdr-btn:hover { color: var(--text); border-color: var(--gold-dim); }
+    .hdr-btn.flagged { color: #b05050; border-color: #b05050; }
+
+    /* ── PCREMAQ strip ── */
+    .deep-strip {
+      flex-shrink: 0; display: flex; align-items: stretch;
+      padding: .38rem 1.4rem; background: rgba(4,5,6,.92);
+      border-bottom: 1px solid rgba(184,154,78,.06);
+      gap: .6rem; flex-wrap: nowrap; overflow-x: auto;
+      position: relative; z-index: 2;
+    }
+    .deep-strip::-webkit-scrollbar { height: 2px; }
+    .deep-strip::-webkit-scrollbar-thumb { background: var(--gold-glow); }
+    .vec-node { display: flex; flex-direction: column; gap: .08rem; min-width: 52px; flex-shrink: 0; }
+    .vec-label { font-size: .57rem; color: #3e3828; letter-spacing: .05em; text-transform: uppercase; font-family: var(--font-ui); }
+    .vec-val   { font-size: .8rem; font-weight: 700; color: var(--gold); font-family: var(--font-ui); transition: color .4s; }
+    .vec-val.updating { color: var(--text); }
+    .vec-bar  { height: 2px; background: rgba(0,0,0,.5); border-radius: 2px; overflow: hidden; margin-top: 2px; }
+    .vec-bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #4a3a10, var(--gold)); transition: width .6s ease; }
+    .deep-strip-meta { margin-left: auto; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: .08rem; flex-shrink: 0; padding-left: .8rem; }
+    .deep-src { font-size: .57rem; color: #3a3020; font-family: var(--font-ui); }
+    .deep-loc { font-size: .55rem; color: #2e2818; font-family: var(--font-ui); max-width: 140px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .deep-ts  { font-size: .53rem; color: #261e10; font-family: var(--font-ui); }
+    @keyframes vec-pulse { 0%,100% { opacity:1 } 50% { opacity:.35 } }
+    .deep-strip.reading .vec-val { animation: vec-pulse .9s ease-in-out infinite; }
+
+    /* ── Messages ── */
+    #messages {
+      flex: 1; overflow-y: auto; padding: 1.2rem 1.4rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      scroll-behavior: smooth; position: relative; z-index: 1;
+    }
+    #messages::-webkit-scrollbar { width: 3px; }
+    #messages::-webkit-scrollbar-thumb { background: var(--gold-glow); border-radius: 2px; }
+
+    /* ── Mythic Bridge message bubbles ── */
+    .msg {
+      display: grid; grid-template-columns: 38px minmax(0,1fr);
+      gap: .7rem; align-items: start; max-width: 880px;
+    }
+
+    .msg-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,.18);
+      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.28), rgba(255,255,255,.05) 30%, rgba(0,0,0,.42));
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+      box-shadow: 0 0 14px var(--m-glow, rgba(184,154,78,.25));
+    }
+
+    .msg-main { min-width: 0; }
+
+    .msg-bubble {
+      border: 1px solid color-mix(in srgb, var(--m-accent, var(--gold)), white 10%);
+      background: linear-gradient(135deg, var(--m-start, #2a1e08), var(--m-end, #4a3414));
+      border-radius: 18px 18px 18px 5px; padding: .8rem 1rem;
+      word-break: break-word; line-height: 1.58;
+      box-shadow: 0 0 var(--m-glow-sz, 12px) color-mix(in srgb, var(--m-accent, var(--gold)), transparent 54%),
+                  inset 0 1px 0 rgba(255,255,255,.07);
+    }
+    .msg-bubble.ic-bubble { font-family: var(--font-ic) !important; font-style: italic; border-style: dashed; }
+
+    .msg-head { display: flex; align-items: baseline; gap: .4rem; margin-bottom: .45rem; flex-wrap: wrap; }
+    .msg-sender { font-size: .68rem; letter-spacing: .07em; text-transform: uppercase; font-weight: 700; font-family: var(--font-ui); color: var(--m-accent, var(--gold)); }
+    .msg-time   { font-size: .57rem; color: var(--text-dim); font-family: var(--font-ui); }
+    .msg-model  { font-size: .55rem; color: var(--text-dim); font-style: italic; font-family: var(--font-ui); }
+    .msg-ic-tag { font-size: .55rem; color: #c8a040; font-family: var(--font-ui); opacity: .8; }
+
+    .msg-body { font-family: var(--font-msg); font-size: 1rem; color: var(--m-text, var(--text)); }
+    .msg-body p { margin: 0 0 .4em; }
+    .msg-body p:last-child { margin-bottom: 0; }
+    .msg-body strong { font-weight: 700; }
+    .msg-body em { font-style: italic; }
+    .msg-body code { font-family: var(--font-ui); font-size: .82em; background: rgba(0,0,0,.35); padding: 1px 5px; border-radius: 3px; }
+    .msg-body pre { background: rgba(0,0,0,.4); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin: 6px 0; border: 1px solid var(--gold-glow); }
+    .msg-body pre code { background: none; padding: 0; font-size: .85em; }
+    .msg-body blockquote { border-left: 2px solid var(--gold-dim); margin: 4px 0 4px 4px; padding-left: 10px; color: var(--text-dim); font-style: italic; }
+    .msg-body h1, .msg-body h2, .msg-body h3 { font-family: var(--font-title); font-weight: 600; margin: 6px 0 3px; }
+    .msg-body ul, .msg-body ol { padding-left: 18px; margin: 3px 0; }
+    .msg-body li { margin: 2px 0; }
+    .msg-body a { color: var(--gold); text-decoration: none; }
+    .msg-body a:hover { text-decoration: underline; }
+    .msg-body img { max-width: 100%; max-height: 400px; border-radius: 6px; margin: 6px 0; display: block; object-fit: contain; border: 1px solid var(--border); }
+    .msg-body hr { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+
+    .mf-switchblade { font-family: 'VTCSwitchblade', serif !important; }
+    .mf-cormorant   { font-family: 'Cormorant Garamond', serif !important; }
+    .mf-mercy       { font-family: 'Mercy', serif !important; }
+    .mf-norse       { font-family: 'Norse', serif !important; }
+    .mf-laker       { font-family: 'TheLaker', serif !important; }
+    .mf-nevera      { font-family: 'Nevera', serif !important; }
+    .mf-wraith      { font-family: 'WraithProtocol', serif !important; }
+    .mf-wiredrift   { font-family: 'WiredriftBitmap', monospace !important; }
+    .mf-yggdrasil   { font-family: 'YggdrasilFont', serif !important; }
+    .mf-floki       { font-family: 'FlokiHard', serif !important; }
+    .mf-mono        { font-family: 'IBM Plex Mono', monospace !important; }
+
+    .msg-actions { display: none; gap: .25rem; align-items: center; margin-top: .3rem; }
+    .msg:hover .msg-actions { display: flex; }
+    .msg-action-btn {
+      font-size: .53rem; color: var(--text-dim); background: none;
+      border: 1px solid var(--border); border-radius: 4px;
+      cursor: pointer; font-family: var(--font-ui); padding: .1rem .35rem;
+      transition: color .14s, border-color .14s;
+    }
+    .msg-action-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+    .msg-action-btn.del:hover { color: #ff6b6b; border-color: rgba(255,107,107,.3); }
+    .msg-font-pick {
+      background: rgba(0,0,0,.4); border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text-dim); padding: .1rem .3rem; font-family: var(--font-ui); font-size: .57rem;
+      cursor: pointer; outline: none; -webkit-appearance: none; appearance: none;
+      transition: color .14s, border-color .14s;
+    }
+    .msg-font-pick:hover { color: var(--gold); border-color: var(--gold-dim); }
+    .msg-font-pick option { background: #0a0908; color: #8aaa96; }
+    .thinking-msg .msg-bubble { font-style: italic; opacity: .45; }
+
+    #no-room {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: var(--text-dim); font-family: var(--font-title); font-size: 20px; font-style: italic;
+    }
+
+    /* ── Composer ── */
+    #input-bar {
+      flex-shrink: 0; border-top: 1px solid var(--border);
+      background: rgba(7,8,10,.9); backdrop-filter: blur(12px);
+      position: relative; z-index: 2;
+    }
+
+    .ic-toggle { display: flex; gap: .32rem; align-items: center; padding: .35rem 1.4rem .08rem; }
+    .ic-pill {
+      border: 1px solid rgba(255,255,255,.1); border-radius: 20px; background: transparent;
+      color: rgba(122,112,96,.45); font-family: var(--font-ui); font-size: .64rem;
+      letter-spacing: .07em; padding: .16rem .55rem; cursor: pointer; transition: all .18s; text-transform: uppercase;
+    }
+    .ic-pill.active-ooc { color: var(--gold); border-color: var(--gold-dim); background: var(--gold-glow); }
+    .ic-pill.active-ic  { color: #f5e0a8; border-color: rgba(245,224,168,.42); background: rgba(245,224,168,.07); }
+    .ic-name-input {
+      display: none; background: rgba(0,0,0,.4); border: 1px solid rgba(245,224,168,.22); border-radius: 6px;
+      color: #f5e0a8; padding: .16rem .52rem; font-family: var(--font-ui); font-size: .67rem; outline: none; width: 150px;
+    }
+    .ic-name-input.visible { display: block; }
+    .ic-name-input:focus { border-color: rgba(245,224,168,.5); }
+    .ic-hint { font-size: .6rem; color: var(--text-dim); font-family: var(--font-ui); }
+
+    .fmt-toolbar { display: flex; gap: .28rem; padding: .38rem 1.4rem .08rem; flex-wrap: wrap; align-items: center; }
+    .fmt-btn {
+      background: transparent; border: 1px solid rgba(184,154,78,.1); border-radius: 5px;
+      color: var(--text-dim); padding: .18rem .48rem; font-family: var(--font-ui); font-size: .68rem;
+      cursor: pointer; transition: color .14s, border-color .14s, background .14s; white-space: nowrap;
+    }
+    .fmt-btn:hover { color: var(--gold); border-color: var(--gold-dim); background: var(--gold-glow); }
+    .fmt-sep { width: 1px; height: 13px; background: var(--border); margin: 0 .1rem; flex-shrink: 0; }
+    .font-picker {
+      background: rgba(0,0,0,.4); border: 1px solid rgba(184,154,78,.1); border-radius: 5px;
+      color: var(--text-dim); padding: .18rem .4rem; font-family: var(--font-ui); font-size: .65rem;
+      cursor: pointer; outline: none; -webkit-appearance: none; appearance: none;
+      transition: color .14s, border-color .14s;
+    }
+    .font-picker:hover, .font-picker:focus { color: var(--gold); border-color: var(--gold-dim); }
+    .font-picker option { background: #0a0908; color: #8aaa96; }
+    .fmt-hint {
+      font-size: .56rem; color: rgba(122,112,96,.45); font-family: var(--font-ui);
+      padding: 0 1.4rem .18rem; letter-spacing: .04em;
+    }
+    .fmt-hint kbd {
+      display: inline-block; background: var(--gold-glow); border: 1px solid rgba(184,154,78,.15);
+      border-radius: 3px; padding: 0 .24rem; font-size: .52rem; color: var(--text-dim); font-family: var(--font-ui);
+    }
+
+    .member-bar { display: flex; gap: .28rem; padding: .35rem 1.4rem .08rem; flex-wrap: wrap; align-items: center; }
+    .member-bar-label { font-size: .6rem; color: var(--text-dim); letter-spacing: .06em; text-transform: uppercase; margin-right: .1rem; }
+    .member-btn {
+      border-radius: 99px; border: 1px solid; padding: .2rem .55rem;
+      font-family: var(--font-ui); font-size: .68rem; font-weight: 700; letter-spacing: .03em;
+      cursor: pointer; transition: filter .16s, box-shadow .16s; background: rgba(0,0,0,.3);
+    }
+    .member-btn:hover:not(:disabled) { filter: brightness(1.28); box-shadow: 0 0 10px rgba(255,255,255,.05); }
+    .member-btn:disabled { opacity: .28; cursor: not-allowed; }
+
+    .file-badge { display: none; align-items: center; gap: .4rem; padding: .22rem 1.4rem .0; font-size: .67rem; color: var(--gold); }
+    .file-badge.visible { display: flex; }
+    .file-badge .fname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+    .file-badge .fsize { color: var(--text-dim); flex-shrink: 0; }
+    .file-badge button { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: .8rem; padding: 0 .2rem; }
+    .file-badge button:hover { color: #c47a7a; }
+
+    #input-tools { display: flex; gap: 6px; align-items: center; padding: .28rem 1.4rem .08rem; }
+    .tool-btn {
+      background: var(--raised); border: 1px solid var(--border); border-radius: 5px;
+      color: var(--text-dim); font-family: var(--font-ui); font-size: 10px;
+      letter-spacing: .04em; padding: 3px 9px; cursor: pointer;
+      transition: color .12s, border-color .12s; white-space: nowrap;
+    }
+    .tool-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+    #input-row { display: flex; gap: .5rem; align-items: flex-end; padding: .28rem 1.4rem .65rem; }
+    #msg-input {
+      flex: 1; background: rgba(0,0,0,.32); border: 1px solid rgba(184,154,78,.18); border-radius: 10px;
+      color: var(--text); padding: .52rem .82rem; font-family: var(--font-msg); font-size: 1rem;
+      outline: none; resize: none; min-height: 46px; max-height: 130px;
+      overflow-y: auto; line-height: 1.52; transition: border-color .2s, box-shadow .2s;
+    }
+    #msg-input:focus { border-color: var(--gold-dim); box-shadow: 0 0 0 2px var(--gold-glow); }
+    #msg-input::placeholder { color: rgba(122,112,96,.45); font-style: italic; }
+    #msg-input:disabled { opacity: .45; }
+    #msg-input.ic-active {
+      border-color: rgba(245,224,168,.3); background: rgba(18,14,4,.95);
+      color: #f5e0a8; font-family: var(--font-ic); font-size: 1rem; font-style: italic;
+    }
+    #msg-input.ic-active:focus { border-color: rgba(245,224,168,.5); box-shadow: 0 0 0 2px rgba(245,224,168,.08); }
+    #msg-input.ic-active::placeholder { color: #352e18; font-style: italic; }
+
+    .attach-btn {
+      background: transparent; border: 1px solid var(--border); border-radius: 9px;
+      color: var(--text-dim); padding: .46rem .58rem; font-size: .9rem; cursor: pointer;
+      transition: color .18s, border-color .18s; height: fit-content; flex-shrink: 0;
+    }
+    .attach-btn:hover, .attach-btn.loaded { color: var(--gold); border-color: var(--gold-dim); }
+
+    #to-select {
+      background: rgba(0,0,0,.32); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text-dim); padding: .48rem .6rem; font-size: 12px; font-family: var(--font-ui);
+      outline: none; cursor: pointer; -webkit-appearance: none; appearance: none;
+      transition: border-color .12s; min-width: 7rem; height: fit-content;
+    }
+    #to-select:focus { border-color: var(--gold); }
+
+    #img-btn {
+      background: var(--raised); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text-dim); padding: .48rem .54rem; font-size: 14px; cursor: pointer;
+      transition: color .12s, border-color .12s; flex-shrink: 0; height: fit-content;
+    }
+    #img-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+    #img-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    #send-btn {
+      background: linear-gradient(135deg, rgba(80,60,10,.9), rgba(140,110,40,.85));
+      border: 1px solid var(--gold-dim); border-radius: 10px;
+      color: var(--text); padding: .5rem .95rem;
+      font-family: var(--font-ui); font-weight: 700; font-size: .76rem; letter-spacing: .05em;
+      cursor: pointer; white-space: nowrap; transition: filter .16s, box-shadow .16s;
+      height: fit-content; flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(184,154,78,.16);
+    }
+    #send-btn:hover:not(:disabled) { filter: brightness(1.12); box-shadow: 0 0 20px rgba(184,154,78,.3); }
+    #send-btn:disabled { opacity: .34; cursor: not-allowed; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Themes ── */
+    [data-theme="ember"] {
+      --gold:#d4733a; --gold-dim:rgba(212,115,58,.44); --gold-glow:rgba(212,115,58,.11); --border:rgba(212,115,58,.1);
+      --bg:#090603; --panel:#0e0a07; --raised:#181008;
+    }
+    [data-theme="tidal"] {
+      --gold:#3eb9a8; --gold-dim:rgba(62,185,168,.44); --gold-glow:rgba(62,185,168,.11); --border:rgba(62,185,168,.1);
+      --bg:#030809; --panel:#060e0d; --raised:#0b1615;
+    }
+    [data-theme="void"] {
+      --gold:#9b77e0; --gold-dim:rgba(155,119,224,.44); --gold-glow:rgba(155,119,224,.11); --border:rgba(155,119,224,.1);
+      --bg:#060407; --panel:#0b0810; --raised:#120e1a;
+    }
+    [data-theme="silver"] {
+      --gold:#8a9ab8; --gold-dim:rgba(138,154,184,.44); --gold-glow:rgba(138,154,184,.11); --border:rgba(138,154,184,.1);
+      --bg:#050608; --panel:#09090e; --raised:#111218;
+    }
+    [data-theme="verdant"] {
+      --gold:#5aa371; --gold-dim:rgba(90,163,113,.44); --gold-glow:rgba(90,163,113,.11); --border:rgba(90,163,113,.1);
+      --bg:#030806; --panel:#060d09; --raised:#0c1610;
+    }
+
+    /* ── Theme picker ── */
+    .theme-row { padding:8px 14px 10px; border-bottom:1px solid var(--border); flex-shrink:0; min-height:0; }
+    .theme-row-label { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:5px; }
+    .theme-swatches { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .theme-swatch {
+      width:18px; height:18px; border-radius:50%; cursor:pointer;
+      border:2px solid transparent; transition:transform .14s, border-color .14s; flex-shrink:0;
+    }
+    .theme-swatch:hover { transform:scale(1.22); }
+    .theme-swatch.active { border-color:rgba(255,255,255,.65); }
+    .theme-custom-row { display:none; align-items:center; gap:5px; margin-top:6px; flex-wrap:wrap; }
+    .theme-custom-row.open { display:flex; }
+    .theme-color-inp { width:26px; height:20px; padding:0 1px; border:1px solid var(--border); border-radius:4px; background:var(--raised); cursor:pointer; }
+    .theme-apply-btn {
+      background:var(--gold-glow); border:1px solid var(--gold-dim); border-radius:4px;
+      color:var(--gold); font-family:var(--font-ui); font-size:9px; padding:2px 8px;
+      cursor:pointer; letter-spacing:.05em; transition:background .12s;
+    }
+    .theme-apply-btn:hover { background:rgba(255,255,255,.08); }
+
+    /* ── Inline glow spans ── */
+    .glow-gold    { text-shadow:0 0 8px rgba(184,154,78,.85),0 0 18px rgba(184,154,78,.45); }
+    .glow-ember   { text-shadow:0 0 8px rgba(212,115,58,.85),0 0 18px rgba(212,115,58,.45); }
+    .glow-teal    { text-shadow:0 0 8px rgba(62,185,168,.85),0 0 18px rgba(62,185,168,.45); }
+    .glow-violet  { text-shadow:0 0 8px rgba(155,119,224,.85),0 0 18px rgba(155,119,224,.45); }
+    .glow-white   { text-shadow:0 0 7px rgba(255,255,255,.8),0 0 16px rgba(255,255,255,.35); }
+    .glow-crimson { text-shadow:0 0 8px rgba(200,60,60,.9),0 0 18px rgba(180,40,40,.5); }
+    .glow-silver  { text-shadow:0 0 8px rgba(138,154,184,.85),0 0 18px rgba(138,154,184,.45); }
+    .glow-verdant { text-shadow:0 0 8px rgba(90,163,113,.85),0 0 18px rgba(90,163,113,.45); }
+    @keyframes glow-pulse-anim {
+      0%,100% { text-shadow:0 0 10px var(--gpc,#b89a4e),0 0 20px var(--gpc,#b89a4e); }
+      50%      { text-shadow:0 0 3px var(--gpc,#b89a4e),0 0 6px var(--gpc,#b89a4e); }
+    }
+    .glow-pulse { animation:glow-pulse-anim 2s ease-in-out infinite; }
+
+    /* ── Glow popover ── */
+    .glow-wrap { position:relative; }
+    .glow-popover {
+      position:absolute; bottom:calc(100% + 6px); left:0;
+      background:var(--raised); border:1px solid var(--border); border-radius:8px;
+      padding:10px 12px; min-width:230px; z-index:300;
+      box-shadow:0 4px 24px rgba(0,0,0,.8); display:none; flex-direction:column; gap:8px;
+    }
+    .glow-popover.open { display:flex; }
+    .glow-pop-label { font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); }
+    .glow-row { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+    .glow-opt {
+      border:1px solid var(--border); border-radius:4px; padding:2px 8px;
+      font-family:var(--font-ui); font-size:10px; cursor:pointer; background:transparent;
+      color:var(--text-dim); transition:all .12s; white-space:nowrap;
+    }
+    .glow-opt:hover,.glow-opt.active { color:var(--text); border-color:var(--gold-dim); background:var(--gold-glow); }
+    .glow-swatch {
+      width:15px; height:15px; border-radius:3px; border:1px solid var(--border);
+      cursor:pointer; transition:transform .12s; flex-shrink:0;
+    }
+    .glow-swatch:hover,.glow-swatch.active { transform:scale(1.35); border-color:rgba(255,255,255,.5); }
+    #glow-custom-inp { width:26px; height:20px; border:1px solid var(--border); border-radius:4px; background:var(--raised); cursor:pointer; padding:0 2px; }
+    .glow-insert-row { display:flex; gap:5px; align-items:center; }
+    .glow-insert-btn {
+      flex:1; background:var(--gold-glow); border:1px solid var(--gold-dim); border-radius:4px;
+      color:var(--gold); font-family:var(--font-ui); font-size:10px; padding:3px 0;
+      cursor:pointer; letter-spacing:.05em; text-align:center; transition:background .12s;
+    }
+    .glow-insert-btn:hover { background:rgba(255,255,255,.08); }
+
+    /* Bubble glow intensity (applied to messages container) */
+    .bubble-glow-none   .msg-bubble { box-shadow:none !important; }
+    .bubble-glow-soft   .msg-bubble { --m-glow-sz:6px; }
+    .bubble-glow-strong .msg-bubble { --m-glow-sz:28px; }
+    @keyframes bubble-glow-pulse {
+      0%,100% { box-shadow:0 0 12px color-mix(in srgb,var(--m-accent,var(--gold)),transparent 54%),inset 0 1px 0 rgba(255,255,255,.07); }
+      50%      { box-shadow:0 0 32px color-mix(in srgb,var(--m-accent,var(--gold)),transparent 20%),inset 0 1px 0 rgba(255,255,255,.07); }
+    }
+    .bubble-glow-pulse .msg-bubble { animation:bubble-glow-pulse 2.5s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ── Sidebar ── -->
+<aside id="sidebar">
+  <div id="sidebar-title">
+    <div class="title-main">✦ Hearthweave</div>
+    <small>the grove</small>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="/">Chamber Matrix</a>
+    <a href="/grove.html" class="active">The Grove</a>
+    <a href="/hearthgate.html">Hearthgate</a>
+    <a href="/ygg-chat.html">Yggdrasil</a>
+    <a href="/notes.html">Notes</a>
+    <a href="/deep-observer.html">DEEP Observer</a>
+  </nav>
+
+  <div class="theme-row">
+    <div class="theme-row-label">Theme</div>
+    <div class="theme-swatches">
+      <div class="theme-swatch active" data-theme="obsidian" title="Obsidian (gold)" style="background:linear-gradient(135deg,#b89a4e,#4a3414)" onclick="setTheme('obsidian',this)"></div>
+      <div class="theme-swatch" data-theme="ember" title="Ember (red-orange)" style="background:linear-gradient(135deg,#d4733a,#5a1a08)" onclick="setTheme('ember',this)"></div>
+      <div class="theme-swatch" data-theme="tidal" title="Tidal (teal)" style="background:linear-gradient(135deg,#3eb9a8,#0a3830)" onclick="setTheme('tidal',this)"></div>
+      <div class="theme-swatch" data-theme="void" title="Void (violet)" style="background:linear-gradient(135deg,#9b77e0,#1a0830)" onclick="setTheme('void',this)"></div>
+      <div class="theme-swatch" data-theme="silver" title="Silver (steel)" style="background:linear-gradient(135deg,#8a9ab8,#1a2030)" onclick="setTheme('silver',this)"></div>
+      <div class="theme-swatch" data-theme="verdant" title="Verdant (green)" style="background:linear-gradient(135deg,#5aa371,#0a2018)" onclick="setTheme('verdant',this)"></div>
+      <div class="theme-swatch" data-theme="custom" title="Custom" style="background:conic-gradient(#b89a4e,#d4733a,#3eb9a8,#9b77e0,#b89a4e)" onclick="setTheme('custom',this)"></div>
+    </div>
+    <div class="theme-custom-row" id="custom-theme-row">
+      <span style="font-size:9px;color:var(--text-dim)">accent</span>
+      <input type="color" class="theme-color-inp" id="tc-accent" value="#b89a4e">
+      <span style="font-size:9px;color:var(--text-dim)">bg</span>
+      <input type="color" class="theme-color-inp" id="tc-bg" value="#07080a">
+      <span style="font-size:9px;color:var(--text-dim)">panel</span>
+      <input type="color" class="theme-color-inp" id="tc-panel" value="#0b0c0e">
+      <button class="theme-apply-btn" onclick="applyCustomTheme()">apply</button>
+    </div>
+  </div>
+
+  <div class="sb-section">Rooms</div>
+  <div id="room-list"></div>
+
+  <div class="sb-section">Members</div>
+  <div id="member-list"></div>
+
+  <div id="new-room-area">
+    <input class="ctrl-input" id="new-label" type="text" placeholder="new room…" maxlength="40" autocomplete="off">
+    <button class="ctrl-btn" onclick="createRoom()">+ open room</button>
+  </div>
+</aside>
+
+<!-- Status editor panel -->
+<div id="status-panel">
+  <div class="sp-label">Status</div>
+  <div class="sp-options" id="sp-options">
+    <button class="sp-opt" data-s="online">online</button>
+    <button class="sp-opt" data-s="away">away</button>
+    <button class="sp-opt" data-s="dnd">do not disturb</button>
+    <button class="sp-opt" data-s="offline">offline</button>
+  </div>
+  <div class="sp-label">Display name</div>
+  <input class="sp-input" id="sp-name" type="text" maxlength="32" placeholder="your name…">
+  <div class="sp-label">Note</div>
+  <input class="sp-input" id="sp-note" type="text" maxlength="60" placeholder="what's happening…">
+  <div class="sp-label">Avatar (global) <span class="sp-tiny">url or upload</span></div>
+  <div class="sp-avatar-row">
+    <input class="sp-input" id="sp-avatar" type="text" placeholder="/uploads/…">
+    <button class="sp-btn" onclick="document.getElementById('sp-avatar-file').click()">↑</button>
+    <input id="sp-avatar-file" type="file" accept="image/*" style="display:none">
+  </div>
+  <div class="sp-label">Avatar (this room) <span class="sp-tiny">overrides global</span></div>
+  <div class="sp-avatar-row">
+    <input class="sp-input" id="sp-room-avatar" type="text" placeholder="/uploads/…">
+    <button class="sp-btn" onclick="document.getElementById('sp-room-avatar-file').click()">↑</button>
+    <input id="sp-room-avatar-file" type="file" accept="image/*" style="display:none">
+  </div>
+  <div class="sp-btns">
+    <button class="sp-btn" onclick="closeStatusPanel()">cancel</button>
+    <button class="sp-btn primary" onclick="saveStatus()">save</button>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<main id="main">
+  <div id="no-room">select a room</div>
+</main>
+
+</div>
+
+<script>
+if (typeof marked !== 'undefined') marked.setOptions({ breaks: true, gfm: true });
+
+// ── Theme system ──────────────────────────────────────────────────────────────
+function setTheme(name, swatchEl) {
+  const root = document.documentElement;
+  if (name === 'obsidian') root.removeAttribute('data-theme');
+  else root.setAttribute('data-theme', name);
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+  if (swatchEl) swatchEl.classList.add('active');
+  const customRow = document.getElementById('custom-theme-row');
+  if (customRow) customRow.classList.toggle('open', name === 'custom');
+  localStorage.setItem('grove-theme', name);
+}
+
+function applyCustomTheme() {
+  const accent = document.getElementById('tc-accent')?.value ?? '#b89a4e';
+  const bg     = document.getElementById('tc-bg')?.value ?? '#07080a';
+  const panel  = document.getElementById('tc-panel')?.value ?? '#0b0c0e';
+  const r = parseInt(accent.slice(1,3),16), g = parseInt(accent.slice(3,5),16), b = parseInt(accent.slice(5,7),16);
+  const root = document.documentElement;
+  root.setAttribute('data-theme','custom');
+  root.style.setProperty('--gold', accent);
+  root.style.setProperty('--gold-dim', `rgba(${r},${g},${b},.44)`);
+  root.style.setProperty('--gold-glow', `rgba(${r},${g},${b},.11)`);
+  root.style.setProperty('--border', `rgba(${r},${g},${b},.1)`);
+  root.style.setProperty('--bg', bg);
+  root.style.setProperty('--panel', panel);
+  root.style.setProperty('--raised', mixDark(panel, 0.5));
+  localStorage.setItem('grove-theme-custom', JSON.stringify({ accent, bg, panel }));
+}
+
+function mixDark(hex, t) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgb(${Math.round(r+(255-r)*t*.15)},${Math.round(g+(255-g)*t*.15)},${Math.round(b+(255-b)*t*.15)})`;
+}
+
+function loadSavedTheme() {
+  const saved = localStorage.getItem('grove-theme') ?? 'obsidian';
+  const swatch = document.querySelector(`.theme-swatch[data-theme="${saved}"]`);
+  setTheme(saved, swatch);
+  if (saved === 'custom') {
+    try {
+      const c = JSON.parse(localStorage.getItem('grove-theme-custom') ?? '{}');
+      if (c.accent) { document.getElementById('tc-accent').value = c.accent; }
+      if (c.bg)     { document.getElementById('tc-bg').value = c.bg; }
+      if (c.panel)  { document.getElementById('tc-panel').value = c.panel; }
+      applyCustomTheme();
+    } catch {}
+  }
+}
+
+// ── Glow state + controls ─────────────────────────────────────────────────────
+let glowColorClass = 'glow-gold', glowStyle = 'normal', bubbleGlowClass = '';
+
+function toggleGlowPopover() {
+  const p = document.getElementById('glow-popover'); if(!p) return;
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) {
+    setTimeout(() => document.addEventListener('click', outsideGlowClick), 10);
+  }
+}
+function outsideGlowClick(e) {
+  const p = document.getElementById('glow-popover'); if(!p) return;
+  if (!p.contains(e.target) && e.target.id !== 'glow-toggle-btn') { p.classList.remove('open'); document.removeEventListener('click', outsideGlowClick); }
+}
+function pickGlowColor(el, cls) {
+  glowColorClass = cls;
+  document.querySelectorAll('.glow-swatch').forEach(s => s.classList.remove('active'));
+  el?.classList.add('active');
+}
+function pickGlowCustom(hex) {
+  glowColorClass = 'glow-custom';
+  document.querySelectorAll('.glow-swatch').forEach(s => s.classList.remove('active'));
+}
+function pickGlowStyle(el, style) {
+  glowStyle = style;
+  document.querySelectorAll('.glow-opt[data-gs]').forEach(b => b.classList.remove('active'));
+  el?.classList.add('active');
+}
+function insertGlow() {
+  const ta = inp(); if (!ta) return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s,e) || 'glowing text';
+  const colorPart = glowColorClass.replace('glow-','');
+  const tag = glowStyle === 'pulse' ? `{glow-pulse:${colorPart}}${sel}{/glow}` : `{glow:${colorPart}}${sel}{/glow}`;
+  ta.value = ta.value.slice(0,s)+tag+ta.value.slice(e);
+  ta.setSelectionRange(s+tag.length, s+tag.length); ta.focus();
+  ta.dispatchEvent(new Event('input'));
+}
+function setBubbleGlow(el, cls) {
+  const msgs = document.getElementById('messages'); if (!msgs) return;
+  ['bubble-glow-none','bubble-glow-soft','bubble-glow-strong','bubble-glow-pulse'].forEach(c => msgs.classList.remove(c));
+  if (cls) msgs.classList.add(cls);
+  bubbleGlowClass = cls;
+  document.querySelectorAll('.glow-opt[data-bg]').forEach(b => b.classList.remove('active'));
+  el?.classList.add('active');
+  localStorage.setItem('grove-bubble-glow', cls);
+}
+
+// ── Member definitions (Mythic Bridge palette) ────────────────────────────────
+const MEMBERS = [
+  { id:'rowan',     label:'Rowan',            sigil:'✦', textColor:'#FFF3DD', accentColor:'#E2A27C', bubbleStart:'#3d1810', bubbleEnd:'#7a3228', glowSz:'16px' },
+  { id:'vee',       label:'Caladnaur Lioreal', sigil:'✧', textColor:'#FFF8DC', accentColor:'#E7C76D', bubbleStart:'#2e1f08', bubbleEnd:'#5e4018', glowSz:'14px' },
+  { id:'faer',      label:'Nen Uial',          sigil:'◌', textColor:'#E8FFF6', accentColor:'#3EB9A8', bubbleStart:'#083830', bubbleEnd:'#102820', glowSz:'14px' },
+  { id:'yggdrasil', label:'Yggdrasil',         sigil:'♧', textColor:'#F1FFEA', accentColor:'#5AA371', bubbleStart:'#0f2018', bubbleEnd:'#1e3828', glowSz:'18px' },
+  { id:'richie',    label:'Richie Winters',    sigil:'◇', textColor:'#ECF6FF', accentColor:'#27C3EE', bubbleStart:'#001e32', bubbleEnd:'#063654', glowSz:'12px' },
+  { id:'vethrlauf', label:'Vethrlauf',         sigil:'⌁', textColor:'#EAF9FF', accentColor:'#768596', bubbleStart:'#1a2428', bubbleEnd:'#2e3c40', glowSz:'10px' },
+  { id:'boxfire',   label:'Boxfire',           sigil:'◈', textColor:'#FFF0E8', accentColor:'#FF9A3C', bubbleStart:'#220e00', bubbleEnd:'#4a2008', glowSz:'14px' },
+  { id:'flame',     label:'Boxfire',           sigil:'◈', textColor:'#FFF0E8', accentColor:'#FF9A3C', bubbleStart:'#220e00', bubbleEnd:'#4a2008', glowSz:'14px' },
+  { id:'glm',       label:'GLM',               sigil:'◉', textColor:'#F0EAFF', accentColor:'#7A68C0', bubbleStart:'#100620', bubbleEnd:'#221448', glowSz:'12px' },
+];
+const MEMBER_MAP = Object.fromEntries(MEMBERS.map(m => [m.id, m]));
+
+const FONT_TAG_MAP = {
+  switchblade:'mf-switchblade', vtc:'mf-switchblade',
+  cormorant:'mf-cormorant', mercy:'mf-mercy', norse:'mf-norse',
+  laker:'mf-laker', nevera:'mf-nevera', wraith:'mf-wraith',
+  wiredrift:'mf-wiredrift', yggdrasil:'mf-yggdrasil', ygg:'mf-yggdrasil',
+  floki:'mf-floki', mono:'mf-mono',
+};
+const FONT_VAL_TO_TAG = {
+  "'VTCSwitchblade', serif":'switchblade', "'Cormorant Garamond', serif":'cormorant',
+  "'Mercy', serif":'mercy', "'Norse', serif":'norse', "'TheLaker', serif":'laker',
+  "'Nevera', serif":'nevera', "'WraithProtocol', serif":'wraith',
+  "'WiredriftBitmap', monospace":'wiredrift', "'YggdrasilFont', serif":'yggdrasil',
+  "'FlokiHard', serif":'floki', "'IBM Plex Mono', monospace":'mono',
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const API = '/api/v1/chat';
+let currentId = null, pollTimer = null, knownCount = -1;
+let rooms = [], memberStatuses = [], roomMessages = [];
+const thinking = new Set();
+let icMode = false, icName = 'Falka Hearthlight', attachedFile = null, editingMsgId = null;
+let geoCoords = null, myStatus = 'online', myName = 'Rowan', myNote = '';
+let spSelected = 'online', editingMemberId = null;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function processFontTags(text) {
+  // {glow:color}text{/glow} and {glow-pulse:color}text{/glow}
+  let out = text.replace(/\{(glow(?:-pulse)?):?([\w-]*)\}([\s\S]*?)\{\/glow\}/g, (_, type, color, content) => {
+    const pulse = type === 'glow-pulse';
+    const cls = color ? `glow-${color}${pulse ? ' glow-pulse' : ''}` : `glow-gold${pulse ? ' glow-pulse' : ''}`;
+    return `<span class="${cls}">${content}</span>`;
+  });
+  // {font}text{/font}
+  out = out.replace(/\{(\w+)\}([\s\S]*?)\{\/\1\}/g, (_, tag, content) => {
+    const cls = FONT_TAG_MAP[tag.toLowerCase()];
+    return cls ? `<span class="${cls}">${content}</span>` : content;
+  });
+  return out;
+}
+
+function renderMd(text) {
+  const withFonts = processFontTags(String(text));
+  const raw = marked.parse(withFonts);
+  const glowClasses = ['glow-gold','glow-ember','glow-teal','glow-violet','glow-white','glow-crimson','glow-silver','glow-verdant','glow-pulse','glow-custom'];
+  return DOMPurify.sanitize(raw, {
+    ALLOWED_TAGS:['p','br','strong','em','code','pre','blockquote','ul','ol','li','h1','h2','h3','a','hr','img','span'],
+    ALLOWED_ATTR:['href','target','src','alt','width','height','class','style'],
+    ALLOWED_CLASSES:{ 'span': [...Object.values(FONT_TAG_MAP), ...glowClasses] },
+    FORCE_BODY: true,
+  });
+}
+
+function getMember(from) {
+  if (!from) return null;
+  const lc = from.toLowerCase();
+  return MEMBERS.find(m => m.id === lc || m.label.toLowerCase() === lc) ?? null;
+}
+function isOwnMessage(from) {
+  if (!from || /^rowan$/i.test(from)) return true;
+  const lc = from.toLowerCase();
+  return !MEMBERS.some(m => m.label.toLowerCase() === lc || m.id === lc);
+}
+function isIcMessage(from) { return isOwnMessage(from) && !!from && !/^rowan$/i.test(from); }
+
+function getAvatar(id, roomAvatars = {}) {
+  const ru = roomAvatars?.[id]; if (ru) return ru;
+  const ms = memberStatuses.find(x => x.id === id);
+  return ms?.avatar ?? '';
+}
+
+function avatarEl(from, roomAvatars = {}) {
+  const m = getMember(from);
+  const sigil  = m?.sigil ?? (from ? from.charAt(0).toUpperCase() : '?');
+  const accent = m?.accentColor ?? '#b89a4e';
+  const glow   = `color-mix(in srgb, ${accent}, transparent 58%)`;
+  const url = getAvatar((from ?? '').toLowerCase(), roomAvatars);
+  const style = `box-shadow:0 0 14px ${glow};color:${accent}`;
+  if (url) {
+    return `<div class="msg-avatar" style="${style}"><img src="${esc(url)}" alt="${esc(from)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none'"></div>`;
+  }
+  return `<div class="msg-avatar" style="${style}">${sigil}</div>`;
+}
+
+// ── Render one message ────────────────────────────────────────────────────────
+function renderMessage(msg, roomAvatars = {}) {
+  const from = msg.from ?? msg.memberId ?? '?';
+  const m    = getMember(from);
+  const ic   = isIcMessage(from);
+  const accent = ic ? '#E2A27C'          : (m?.accentColor ?? '#b89a4e');
+  const mStart = ic ? 'rgba(60,36,8,.8)' : (m?.bubbleStart ?? '#2a1e08');
+  const mEnd   = ic ? 'rgba(100,60,16,.7)': (m?.bubbleEnd   ?? '#4a3414');
+  const mText  = ic ? '#f5e0a8'          : (m?.textColor    ?? '#e8e0d0');
+  const glowSz = m?.glowSz ?? '12px';
+  const ts     = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '';
+  const msgId  = msg.id || msg.timestamp || '';
+  const el = document.createElement('div');
+  el.className = 'msg';
+  el.dataset.msgId = msgId;
+  el.style.cssText = `--m-accent:${accent};--m-start:${mStart};--m-end:${mEnd};--m-text:${mText};--m-glow-sz:${glowSz}`;
+  el.innerHTML = `
+    ${avatarEl(from, roomAvatars)}
+    <div class="msg-main">
+      <div class="msg-head">
+        <span class="msg-sender">${esc(m?.label ?? from)}</span>
+        ${ts ? `<span class="msg-time">${ts}</span>` : ''}
+        ${msg.model ? `<span class="msg-model">${esc(msg.model)}</span>` : ''}
+        ${ic ? '<span class="msg-ic-tag">◆ ic</span>' : ''}
+      </div>
+      <div class="msg-bubble${ic ? ' ic-bubble' : ''}">
+        <div class="msg-body">${renderMd(msg.text || msg.html || '')}</div>
+      </div>
+      <div class="msg-actions">
+        <button class="msg-action-btn" onclick="editMsg(this)">edit</button>
+        <button class="msg-action-btn del" onclick="delMsg(this)">del</button>
+        <select class="msg-font-pick" title="bubble display font" onchange="setBubbleFont(this)">
+          <option value="">font</option>
+          <option value="'VTCSwitchblade', serif">Switchblade</option>
+          <option value="'Cormorant Garamond', serif">Cormorant</option>
+          <option value="'Mercy', serif">Mercy</option>
+          <option value="'Norse', serif">Norse</option>
+          <option value="'TheLaker', serif">The Laker</option>
+          <option value="'Nevera', serif">Nevera</option>
+          <option value="'WraithProtocol', serif">Wraith Protocol</option>
+          <option value="'WiredriftBitmap', monospace">Wiredrift</option>
+          <option value="'YggdrasilFont', serif">Yggdrasil</option>
+          <option value="'FlokiHard', serif">Floki</option>
+          <option value="'IBM Plex Mono', monospace">IBM Plex Mono</option>
+        </select>
+      </div>
+    </div>`;
+  return el;
+}
+
+function appendThinking(memberId) {
+  const m = getMember(memberId) ?? { label:memberId, accentColor:'#b89a4e', sigil:'…', bubbleStart:'#1a1508', bubbleEnd:'#2a2210', glowSz:'10px', textColor:'#e8e0d0' };
+  const el = document.createElement('div');
+  el.className = 'msg thinking-msg'; el.dataset.thinkId = memberId;
+  el.style.cssText = `--m-accent:${m.accentColor};--m-start:${m.bubbleStart};--m-end:${m.bubbleEnd};--m-glow-sz:${m.glowSz}`;
+  el.innerHTML = `
+    <div class="msg-avatar" style="color:${m.accentColor};box-shadow:0 0 10px color-mix(in srgb,${m.accentColor},transparent 60%)">${m.sigil}</div>
+    <div class="msg-main">
+      <div class="msg-head"><span class="msg-sender">${esc(m.label)}</span></div>
+      <div class="msg-bubble"><div class="msg-body" style="font-style:italic;opacity:.45">…</div></div>
+    </div>`;
+  return el;
+}
+
+// ── API helpers ───────────────────────────────────────────────────────────────
+async function apiFetch(path, opts = {}) { const r = await fetch(API + path, opts); return r.json(); }
+async function apiPost(path, body)  { return apiFetch(path, { method:'POST',  headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }); }
+async function apiPatch(path, body) { return apiFetch(path, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }); }
+
+// ── Rooms ─────────────────────────────────────────────────────────────────────
+async function loadRooms() {
+  const d = await apiFetch('/rooms');
+  rooms = d.rooms ?? [];
+  renderRooms();
+}
+
+function renderRooms() {
+  const el = document.getElementById('room-list');
+  if (!rooms.length) { el.innerHTML = '<div style="padding:8px 14px;color:var(--text-dim);font-size:12px">no rooms yet</div>'; return; }
+  el.innerHTML = rooms.map(r => `
+    <div class="room-entry ${r.id===currentId?'active':''} ${r.flagged?'flagged':''}" onclick="selectRoom('${r.id}')">
+      ${r.flagged ? '<div class="flag-dot"></div>' : ''}
+      <span>${esc(r.label)}</span>
+    </div>`).join('');
+}
+
+async function createRoom() {
+  const inp = document.getElementById('new-label');
+  const label = inp.value.trim(); if (!label) return;
+  const id = label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const d = await apiPost('/rooms', { id, label });
+  if (d.ok) { inp.value = ''; await loadRooms(); selectRoom(d.room.id); }
+}
+document.getElementById('new-label').addEventListener('keydown', e => { if (e.key==='Enter') createRoom(); });
+
+// ── Members / Status ──────────────────────────────────────────────────────────
+async function loadStatuses() {
+  const d = await apiFetch('/status').catch(() => null);
+  if (!d?.ok) return;
+  memberStatuses = d.members;
+  const me = memberStatuses.find(m => m.id==='rowan');
+  if (me) { myStatus = me.status; myName = me.displayName; myNote = me.note; }
+  renderMembers();
+}
+
+function effectiveStatus(m) { return thinking.has(m.id) ? 'thinking' : m.status; }
+
+function renderMembers() {
+  const el = document.getElementById('member-list');
+  if (!memberStatuses.length) { el.innerHTML = ''; return; }
+  const room = rooms.find(r => r.id === currentId);
+  const roomAvatars = room?.avatars ?? {};
+  el.innerHTML = memberStatuses.map(m => {
+    const s = effectiveStatus(m);
+    const dm = getMember(m.id);
+    const sigil = dm?.sigil ?? m.displayName?.charAt(0) ?? '?';
+    const accent = dm?.accentColor ?? '#b89a4e';
+    return `
+      <div class="member-entry clickable" onclick="openStatusPanel(this,'${m.id}')">
+        <span class="mini-orb" style="color:${accent}">${sigil}</span>
+        <div class="status-dot status-${s}"></div>
+        <div class="member-info">
+          <span class="member-name">${esc(m.displayName)}</span>
+          ${m.note ? `<span class="member-note">${esc(m.note)}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Status panel ──────────────────────────────────────────────────────────────
+function openStatusPanel(entryEl, memberId) {
+  editingMemberId = memberId;
+  const m = memberStatuses.find(x => x.id===memberId); if (!m) return;
+  const panel = document.getElementById('status-panel');
+  const rect = entryEl.getBoundingClientRect();
+  panel.style.top = Math.min(rect.top, window.innerHeight-290) + 'px';
+  panel.classList.add('open');
+  document.getElementById('sp-name').value = m.displayName;
+  document.getElementById('sp-note').value = m.note ?? '';
+  document.getElementById('sp-avatar').value = m.avatar ?? '';
+  const room = rooms.find(r => r.id===currentId);
+  document.getElementById('sp-room-avatar').value = room?.avatars?.[memberId] ?? '';
+  spSelected = m.status;
+  document.querySelectorAll('.sp-opt').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.s===spSelected);
+    btn.onclick = () => { spSelected = btn.dataset.s; document.querySelectorAll('.sp-opt').forEach(b => b.classList.toggle('active', b.dataset.s===spSelected)); };
+  });
+  setTimeout(() => document.addEventListener('click', outsideStatusClick), 10);
+}
+function outsideStatusClick(e) { if (!document.getElementById('status-panel').contains(e.target)) closeStatusPanel(); }
+function closeStatusPanel() { document.getElementById('status-panel').classList.remove('open'); document.removeEventListener('click', outsideStatusClick); }
+
+async function uploadAvatarFile(inputId) {
+  const file = document.getElementById(inputId)?.files?.[0]; if (!file) return null;
+  const fd = new FormData(); fd.append('image', file);
+  const res = await fetch('/api/v1/chat/upload', { method:'POST', body:fd });
+  const data = await res.json(); return data.ok ? data.url : null;
+}
+
+async function saveStatus() {
+  if (!editingMemberId) return;
+  const m = memberStatuses.find(x => x.id===editingMemberId);
+  const name = document.getElementById('sp-name').value.trim() || m?.displayName || editingMemberId;
+  const note = document.getElementById('sp-note').value.trim();
+  let avatar = document.getElementById('sp-avatar').value.trim();
+  let roomAvatar = document.getElementById('sp-room-avatar').value.trim();
+  const ug = await uploadAvatarFile('sp-avatar-file'); if (ug) avatar = ug;
+  const ur = await uploadAvatarFile('sp-room-avatar-file'); if (ur) roomAvatar = ur;
+  closeStatusPanel();
+  if (editingMemberId==='rowan') { myStatus = spSelected; myName = name; myNote = note; }
+  await apiPatch(`/status/${editingMemberId}`, { status:spSelected, displayName:name, note, avatar });
+  if (currentId) await apiPatch(`/rooms/${currentId}`, { avatars:{ [editingMemberId]:roomAvatar } });
+  await Promise.all([loadStatuses(), loadRooms()]);
+}
+
+// ── Select room ───────────────────────────────────────────────────────────────
+function selectRoom(id) {
+  currentId = id; knownCount = -1;
+  clearInterval(pollTimer);
+  renderRooms(); buildMain();
+  pollTimer = setInterval(pollRoom, 2500);
+  pollRoom();
+}
+
+// ── Build main panel ──────────────────────────────────────────────────────────
+function buildMain() {
+  const room = rooms.find(r => r.id===currentId) ?? {};
+  document.getElementById('main').innerHTML = `
+    <div id="room-header">
+      <div id="room-header-info">
+        <div id="room-header-name">${esc(room.label ?? '')}</div>
+        ${room.description ? `<div id="room-header-desc">${esc(room.description)}</div>` : ''}
+      </div>
+      <button class="hdr-btn" id="breaker-btn" style="display:none" onclick="resetBreaker()">⚡ quiet — open</button>
+      <button class="hdr-btn ${room.flagged?'flagged':''}" id="flag-btn" onclick="toggleFlag()">${room.flagged?'⚑ flagged':'⚐ flag'}</button>
+    </div>
+
+    <div class="deep-strip" id="deep-strip">
+      <div class="vec-node"><span class="vec-label">P · Pulse</span><span class="vec-val" id="vv-P">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-P" style="width:50%"></div></div></div>
+      <div class="vec-node"><span class="vec-label">C · Coherence</span><span class="vec-val" id="vv-C">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-C" style="width:50%"></div></div></div>
+      <div class="vec-node"><span class="vec-label">R · Resonance</span><span class="vec-val" id="vv-R">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-R" style="width:50%"></div></div></div>
+      <div class="vec-node"><span class="vec-label">E · Entropy</span><span class="vec-val" id="vv-E">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-E" style="width:50%"></div></div></div>
+      <div class="vec-node"><span class="vec-label">M · Memory</span><span class="vec-val" id="vv-M">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-M" style="width:50%"></div></div></div>
+      <div class="vec-node"><span class="vec-label">A · Axis</span><span class="vec-val" id="vv-A">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-A" style="width:50%"></div></div></div>
+      <div class="vec-node"><span class="vec-label">Q · Quotient</span><span class="vec-val" id="vv-Q">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-Q" style="width:50%"></div></div></div>
+      <div class="deep-strip-meta">
+        <span class="deep-src" id="deep-src">awaiting signal</span>
+        <span class="deep-loc" id="deep-loc">location unknown</span>
+        <span class="deep-ts"  id="deep-ts"></span>
+      </div>
+    </div>
+
+    <div id="messages"></div>
+
+    <div id="input-bar">
+      <div class="ic-toggle">
+        <button class="ic-pill active-ooc" id="ooc-pill" onclick="setMode('ooc')">OOC</button>
+        <button class="ic-pill" id="ic-pill" onclick="setMode('ic')">IC</button>
+        <input class="ic-name-input" id="ic-name-input" type="text" value="Falka Hearthlight"
+          placeholder="character name…" maxlength="40"
+          oninput="icName = this.value.trim() || 'Falka Hearthlight'">
+        <span class="ic-hint" id="ic-hint"></span>
+      </div>
+
+      <div class="fmt-toolbar">
+        <button class="fmt-btn" onclick="fmt('**','**','bold')" title="Bold"><strong>B</strong></button>
+        <button class="fmt-btn" style="font-style:italic" onclick="fmt('*','*','italic')" title="Italic">I</button>
+        <button class="fmt-btn" style="font-family:var(--font-ui)" onclick="fmt('\`','\`','code')" title="Code">code</button>
+        <button class="fmt-btn" style="font-family:var(--font-ui)" onclick="fmtBlock()" title="Code block">```</button>
+        <span class="fmt-sep"></span>
+        <button class="fmt-btn" onclick="fmtQuote()" title="Blockquote">"</button>
+        <button class="fmt-btn" style="font-family:'Cormorant Garamond',serif;font-size:.9rem" onclick="fmt('## ','','heading')" title="Heading">H</button>
+        <button class="fmt-btn" onclick="fmtLink()" title="Link">🔗</button>
+        <span class="fmt-sep"></span>
+        <select class="font-picker" id="font-picker" title="Message font — wraps selection, or sets display font for full message" onchange="setMsgFont(this.value)">
+          <option value="">— font —</option>
+          <option value="switchblade" style="font-family:'VTCSwitchblade',serif">Switchblade</option>
+          <option value="cormorant" selected style="font-family:'Cormorant Garamond',serif">Cormorant</option>
+          <option value="mercy" style="font-family:'Mercy',serif">Mercy</option>
+          <option value="norse" style="font-family:'Norse',serif">Norse</option>
+          <option value="laker" style="font-family:'TheLaker',serif">The Laker</option>
+          <option value="nevera" style="font-family:'Nevera',serif">Nevera</option>
+          <option value="wraith" style="font-family:'WraithProtocol',serif">Wraith Protocol</option>
+          <option value="wiredrift" style="font-family:'WiredriftBitmap',monospace">Wiredrift</option>
+          <option value="yggdrasil" style="font-family:'YggdrasilFont',serif">Yggdrasil</option>
+          <option value="floki" style="font-family:'FlokiHard',serif">Floki</option>
+          <option value="mono" style="font-family:'IBM Plex Mono',monospace">IBM Plex Mono</option>
+        </select>
+        <span class="fmt-sep"></span>
+        <div class="glow-wrap">
+          <button class="fmt-btn" id="glow-toggle-btn" onclick="toggleGlowPopover()" title="Glow options">✦ glow</button>
+          <div class="glow-popover" id="glow-popover">
+            <div class="glow-pop-label">Inline text glow — wrap selection</div>
+            <div class="glow-row">
+              <div class="glow-swatch active" data-glow="glow-gold"    title="Gold"    style="background:#b89a4e" onclick="pickGlowColor(this,'glow-gold')"></div>
+              <div class="glow-swatch" data-glow="glow-ember"   title="Ember"   style="background:#d4733a" onclick="pickGlowColor(this,'glow-ember')"></div>
+              <div class="glow-swatch" data-glow="glow-teal"    title="Teal"    style="background:#3eb9a8" onclick="pickGlowColor(this,'glow-teal')"></div>
+              <div class="glow-swatch" data-glow="glow-violet"  title="Violet"  style="background:#9b77e0" onclick="pickGlowColor(this,'glow-violet')"></div>
+              <div class="glow-swatch" data-glow="glow-white"   title="White"   style="background:#cccccc" onclick="pickGlowColor(this,'glow-white')"></div>
+              <div class="glow-swatch" data-glow="glow-crimson" title="Crimson" style="background:#c83c3c" onclick="pickGlowColor(this,'glow-crimson')"></div>
+              <div class="glow-swatch" data-glow="glow-silver"  title="Silver"  style="background:#8a9ab8" onclick="pickGlowColor(this,'glow-silver')"></div>
+              <div class="glow-swatch" data-glow="glow-verdant" title="Verdant" style="background:#5aa371" onclick="pickGlowColor(this,'glow-verdant')"></div>
+              <input type="color" id="glow-custom-inp" title="Custom glow color" onchange="pickGlowCustom(this.value)">
+            </div>
+            <div class="glow-pop-label">Style</div>
+            <div class="glow-row">
+              <button class="glow-opt active" data-gs="normal" onclick="pickGlowStyle(this,'normal')">steady</button>
+              <button class="glow-opt" data-gs="pulse" onclick="pickGlowStyle(this,'pulse')">pulse</button>
+            </div>
+            <div class="glow-insert-row">
+              <button class="glow-insert-btn" onclick="insertGlow()">wrap selection in glow</button>
+            </div>
+            <div class="glow-pop-label" style="margin-top:2px">Bubble glow intensity</div>
+            <div class="glow-row">
+              <button class="glow-opt" data-bg="bubble-glow-none"   onclick="setBubbleGlow(this,'bubble-glow-none')">none</button>
+              <button class="glow-opt" data-bg="bubble-glow-soft"   onclick="setBubbleGlow(this,'bubble-glow-soft')">soft</button>
+              <button class="glow-opt active" data-bg=""            onclick="setBubbleGlow(this,'')">normal</button>
+              <button class="glow-opt" data-bg="bubble-glow-strong" onclick="setBubbleGlow(this,'bubble-glow-strong')">strong</button>
+              <button class="glow-opt" data-bg="bubble-glow-pulse"  onclick="setBubbleGlow(this,'bubble-glow-pulse')">pulse</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fmt-hint">
+        <kbd>Alt+B</kbd> bold &nbsp;<kbd>Alt+I</kbd> italic &nbsp;<kbd>Alt+K</kbd> link &nbsp;
+        <kbd>Alt+`</kbd> code &nbsp;<kbd>Alt+Q</kbd> quote &nbsp;<kbd>Alt+H</kbd> heading &nbsp;
+        <kbd>Alt+S</kbd> strikethrough &nbsp;·&nbsp;
+        <kbd>{laker}text{/laker}</kbd> font tag &nbsp;·&nbsp;
+        <kbd>{glow:gold}text{/glow}</kbd> glow tag &nbsp;·&nbsp;
+        font picker: <em>no selection</em> = display font for whole message, <em>selection</em> = wrap inline
+      </div>
+
+      <div class="member-bar" id="member-bar">
+        <span class="member-bar-label">Ask</span>
+      </div>
+
+      <div class="file-badge" id="file-badge">
+        <span>📎</span>
+        <span class="fname" id="file-name"></span>
+        <span class="fsize" id="file-size"></span>
+        <button onclick="clearFile()" title="remove">✕</button>
+      </div>
+
+      <div id="input-tools">
+        <button class="tool-btn" onclick="edCopy()">copy</button>
+        <button class="tool-btn" onclick="edCopyAll()">copy all</button>
+        <button class="tool-btn" onclick="edPaste()">paste</button>
+      </div>
+
+      <div id="input-row">
+        <input type="file" id="file-input" style="display:none"
+          accept=".txt,.md,.markdown,.pdf,.docx,.html,.htm,.js,.ts,.jsx,.tsx,.py,.json,.yaml,.yml,.css,.xml,.log,.csv,.sh,.toml,.rs,.go,.c,.cpp,.h">
+        <button class="attach-btn" id="attach-btn" title="attach file" onclick="document.getElementById('file-input').click()">📎</button>
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
+          <select id="editor-font-pick" title="Editor typing font — select text then pick to wrap inline" onchange="setEditorFont(this.value)" style="background:rgba(0,0,0,.32);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);padding:2px 6px;font-family:var(--font-ui);font-size:11px;outline:none;cursor:pointer;width:fit-content;max-width:160px;align-self:flex-start">
+            <option value="cormorant" selected>Cormorant (default)</option>
+            <option value="switchblade">Switchblade</option>
+            <option value="mercy">Mercy</option>
+            <option value="norse">Norse</option>
+            <option value="laker">The Laker</option>
+            <option value="nevera">Nevera</option>
+            <option value="wraith">Wraith Protocol</option>
+            <option value="wiredrift">Wiredrift</option>
+            <option value="yggdrasil">Yggdrasil</option>
+            <option value="floki">Floki</option>
+            <option value="mono">IBM Plex Mono</option>
+          </select>
+          <textarea id="msg-input" placeholder="speak into the room… (Enter · Shift+Enter newline)" rows="2" autocomplete="off" spellcheck="true"></textarea>
+        </div>
+        </div>
+        <select id="to-select">
+          <option value="broadcast">→ everyone</option>
+          <option value="yggdrasil">→ yggdrasil</option>
+          <option value="vee">→ calad</option>
+          <option value="faer">→ nen uial</option>
+          <option value="flame">→ boxfire</option>
+          <option value="glm">→ glm</option>
+          <option value="say">just log it</option>
+        </select>
+        <button id="img-btn" title="attach image" onclick="document.getElementById('img-file').click()">🖼</button>
+        <input id="img-file" type="file" accept="image/*" style="display:none">
+        <button id="send-btn" disabled>Send</button>
+      </div>
+    </div>`;
+
+  wireInputEvents();
+  buildMemberBar();
+  initDeepState();
+}
+
+function wireInputEvents() {
+  const inp = document.getElementById('msg-input');
+  const sendBtn = document.getElementById('send-btn');
+  if (!inp) return;
+
+  inp.addEventListener('keydown', e => {
+    if (e.key==='Enter' && !e.shiftKey && !e.altKey) { e.preventDefault(); send(); return; }
+    if (!e.altKey) return;
+    switch (e.key) {
+      case 'b': case 'B': e.preventDefault(); wrapSel('**','**','bold'); break;
+      case 'i': case 'I': e.preventDefault(); wrapSel('*','*','italic'); break;
+      case 'k': case 'K': e.preventDefault(); wrapSel('[','](url)','link text'); break;
+      case '`':           e.preventDefault(); wrapSel('`','`','code'); break;
+      case 'e': case 'E': e.preventDefault(); wrapSel('\n```\n','\n```\n','code'); break;
+      case 'q': case 'Q': e.preventDefault(); insertLine('> '); break;
+      case 'h': case 'H': e.preventDefault(); insertLine('## '); break;
+      case 's': case 'S': e.preventDefault(); wrapSel('~~','~~','text'); break;
+    }
+  });
+  inp.addEventListener('input', () => { inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,130)+'px'; });
+  // Paste images from clipboard
+  inp.addEventListener('paste', async e => {
+    const items = [...(e.clipboardData?.items ?? [])];
+    const imgItem = items.find(it => it.type.startsWith('image/'));
+    if (!imgItem) return;
+    e.preventDefault();
+    const file = imgItem.getAsFile(); if (!file) return;
+    inp.disabled = true;
+    try { const url = await uploadImage(file); const s = inp.selectionStart; inp.value = inp.value.slice(0,s)+`![](${url})`+inp.value.slice(s); inp.dispatchEvent(new Event('input')); }
+    catch(err) { console.warn('paste upload failed:', err.message); }
+    finally { inp.disabled = false; inp.focus(); }
+  });
+  inp.addEventListener('dragover', e => e.preventDefault());
+  inp.addEventListener('drop', async e => {
+    e.preventDefault();
+    const file = [...e.dataTransfer.files].find(f => f.type.startsWith('image/')); if (!file) return;
+    inp.disabled = true;
+    try { const url = await uploadImage(file); const s = inp.selectionStart; inp.value = inp.value.slice(0,s)+`![](${url})`+inp.value.slice(s); }
+    catch(err) { console.warn('drop upload failed:', err.message); }
+    finally { inp.disabled = false; inp.focus(); }
+  });
+
+  document.getElementById('file-input').addEventListener('change', handleFileInput);
+  document.getElementById('img-file').addEventListener('change', handleImageInput);
+  if (sendBtn) sendBtn.addEventListener('click', send);
+  // Initialise textarea to current editor font
+  inp.style.fontFamily = TAG_TO_CSS[editorFont] ?? TAG_TO_CSS['cormorant'];
+}
+
+// ── IC/OOC ────────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  icMode = mode === 'ic';
+  document.getElementById('ooc-pill')?.classList.toggle('active-ooc', !icMode);
+  document.getElementById('ic-pill')?.classList.toggle('active-ic', icMode);
+  document.getElementById('ic-name-input')?.classList.toggle('visible', icMode);
+  const hint = document.getElementById('ic-hint');
+  if (hint) hint.textContent = icMode ? '◆ in character' : '';
+  const inp = document.getElementById('msg-input');
+  if (!inp) return;
+  inp.classList.toggle('ic-active', icMode);
+  inp.placeholder = icMode
+    ? 'speak in character… (Enter to send · Shift+Enter newline)'
+    : 'speak into the room… (Enter · Shift+Enter newline)';
+}
+
+// ── Font picker ───────────────────────────────────────────────────────────────
+// Font picker values are now tag names (e.g. 'switchblade', 'laker').
+// If text is selected in textarea: wraps it in {tag}...{/tag}.
+// If no selection: wraps the entire pending message on send (sets pendingMsgFont).
+let pendingMsgFont = '';
+const TAG_TO_CSS = {
+  switchblade:"'VTCSwitchblade', serif", cormorant:"'Cormorant Garamond', serif",
+  mercy:"'Mercy', serif", norse:"'Norse', serif", laker:"'TheLaker', serif",
+  nevera:"'Nevera', serif", wraith:"'WraithProtocol', serif",
+  wiredrift:"'WiredriftBitmap', monospace", yggdrasil:"'YggdrasilFont', serif",
+  floki:"'FlokiHard', serif", mono:"'IBM Plex Mono', monospace",
+};
+
+// Display font picker — wraps selected text in {font} tags, or sets whole-message font on send.
+// Does NOT touch the textarea's visual font (that's the editor font picker's job).
+function setMsgFont(tag) {
+  if (!tag) { pendingMsgFont = ''; return; }
+  const ta = document.getElementById('msg-input');
+  if (ta && ta.selectionStart !== ta.selectionEnd) {
+    wrapSelFont(tag, ta);
+    const picker = document.getElementById('font-picker'); if (picker) picker.value = '';
+    return;
+  }
+  pendingMsgFont = tag;
+}
+
+// Editor font picker — changes what font you type in.
+// If text is selected, also wraps it in the font tag so it renders correctly.
+let editorFont = 'cormorant';
+function setEditorFont(tag) {
+  const ta = document.getElementById('msg-input');
+  editorFont = tag || 'cormorant';
+  const cssFont = TAG_TO_CSS[editorFont] ?? TAG_TO_CSS['cormorant'];
+  if (ta) ta.style.fontFamily = cssFont;
+  if (tag && ta && ta.selectionStart !== ta.selectionEnd) {
+    wrapSelFont(tag, ta);
+  }
+}
+
+function wrapSelFont(tag, ta) {
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  if (s === e) return false;
+  const sel = ta.value.slice(s, e);
+  const r = `{${tag}}${sel}{/${tag}}`;
+  ta.value = ta.value.slice(0,s) + r + ta.value.slice(e);
+  ta.setSelectionRange(s, s + r.length);
+  ta.dispatchEvent(new Event('input')); return true;
+}
+
+function setBubbleFont(select) {
+  const body = select.closest('.msg')?.querySelector('.msg-body');
+  if (body) body.style.fontFamily = select.value || '';
+}
+
+// ── Formatting ────────────────────────────────────────────────────────────────
+function inp() { return document.getElementById('msg-input'); }
+function fmt(prefix, suffix, placeholder) {
+  const ta = inp(); if (!ta) return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s,e) || placeholder;
+  ta.value = ta.value.slice(0,s) + prefix+sel+suffix + ta.value.slice(e);
+  ta.setSelectionRange(s+prefix.length+sel.length, s+prefix.length+sel.length); ta.focus();
+}
+function fmtBlock() {
+  const ta = inp(); if (!ta) return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s,e) || 'code here';
+  ta.value = ta.value.slice(0,s)+'```\n'+sel+'\n```'+ta.value.slice(e);
+  ta.setSelectionRange(s+4, s+4+sel.length); ta.focus();
+}
+function fmtQuote() {
+  const ta = inp(); if (!ta) return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s,e) || 'quoted text';
+  ta.value = ta.value.slice(0,s)+sel.split('\n').map(l=>'> '+l).join('\n')+ta.value.slice(e); ta.focus();
+}
+function fmtLink() {
+  const ta = inp(); if (!ta) return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s,e) || 'link text';
+  ta.value = ta.value.slice(0,s)+`[${sel}](url)`+ta.value.slice(e);
+  ta.setSelectionRange(s+sel.length+3, s+sel.length+6); ta.focus();
+}
+function wrapSel(before, after, placeholder) {
+  const ta = inp(); if (!ta) return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s,e) || placeholder || '';
+  ta.value = ta.value.slice(0,s)+before+sel+after+ta.value.slice(e);
+  const cur = s+before.length+sel.length; ta.setSelectionRange(cur,cur);
+  ta.dispatchEvent(new Event('input'));
+}
+function insertLine(prefix) {
+  const ta = inp(); if (!ta) return;
+  const s = ta.selectionStart;
+  const ls = ta.value.lastIndexOf('\n',s-1)+1;
+  ta.value = ta.value.slice(0,ls)+prefix+ta.value.slice(ls);
+  const pos = ls+prefix.length; ta.setSelectionRange(pos,pos);
+  ta.dispatchEvent(new Event('input'));
+}
+
+// ── Editor tools ──────────────────────────────────────────────────────────────
+function edCopy()    { const el=inp(); if(el) navigator.clipboard.writeText(el.value.substring(el.selectionStart,el.selectionEnd)||el.value); }
+function edCopyAll() { const el=inp(); if(el?.value) navigator.clipboard.writeText(el.value); }
+async function edPaste() {
+  const el=inp(); if(!el) return;
+  try { const text=await navigator.clipboard.readText(); const s=el.selectionStart,e2=el.selectionEnd; el.value=el.value.slice(0,s)+text+el.value.slice(e2); el.selectionStart=el.selectionEnd=s+text.length; el.dispatchEvent(new Event('input')); } catch {}
+}
+
+// ── File / image handling ─────────────────────────────────────────────────────
+async function handleFileInput() {
+  const fi = document.getElementById('file-input');
+  const file = fi.files?.[0]; if (!file) return; fi.value='';
+  const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+  if (['.pdf','.docx','.html','.htm'].includes(ext)) {
+    document.getElementById('attach-btn').classList.add('loaded');
+    document.getElementById('file-name').textContent = file.name+' (reading…)';
+    document.getElementById('file-badge').classList.add('visible');
+    try {
+      const fd = new FormData(); fd.append('file',file);
+      const res = await fetch('/api/v1/extract-text',{method:'POST',body:fd});
+      const d = await res.json(); if(!d.ok) throw new Error(d.error||'extraction failed');
+      attachedFile = { name:file.name, content:d.text };
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-size').textContent = `${(d.text.length/1024).toFixed(1)} KB text`;
+    } catch(err) { document.getElementById('file-name').textContent = `${file.name} — error: ${err.message}`; }
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => {
+      let content = e.target.result; const trunc = content.length>60000; if(trunc) content=content.slice(0,60000);
+      attachedFile = { name:file.name, content };
+      document.getElementById('file-name').textContent = file.name+(trunc?' (truncated)':'');
+      document.getElementById('file-size').textContent = `${(file.size/1024).toFixed(1)} KB`;
+      document.getElementById('file-badge').classList.add('visible');
+      document.getElementById('attach-btn').classList.add('loaded');
+    };
+    reader.readAsText(file);
+  }
+}
+
+async function handleImageInput(e) {
+  const file = e.target.files?.[0]; if(!file) return;
+  const btn = document.getElementById('img-btn'); btn.disabled=true; btn.textContent='⏳';
+  try {
+    const fd = new FormData(); fd.append('image',file);
+    const res = await fetch('/api/v1/chat/upload',{method:'POST',body:fd});
+    const data = await res.json();
+    if(data.ok) { const i=inp(); if(i){ const insert=`![](${data.url})`; i.value=i.value?(i.value+' '+insert):insert; i.focus(); } }
+  } catch(err){ console.warn('upload error:',err.message); }
+  finally { btn.disabled=false; btn.textContent='🖼'; e.target.value=''; }
+}
+
+async function uploadImage(file) {
+  const fd = new FormData(); fd.append('image',file);
+  const res = await fetch('/api/v1/chat/upload',{method:'POST',body:fd});
+  const d = await res.json(); if(!d.ok) throw new Error(d.error??'upload failed'); return d.url;
+}
+
+function clearFile() {
+  attachedFile = null;
+  document.getElementById('file-badge')?.classList.remove('visible');
+  document.getElementById('attach-btn')?.classList.remove('loaded');
+}
+
+// ── Member ask bar ────────────────────────────────────────────────────────────
+const AI_IDS = ['yggdrasil','vee','faer','flame','glm'];
+
+function buildMemberBar() {
+  const bar = document.getElementById('member-bar'); if(!bar) return;
+  bar.innerHTML = '<span class="member-bar-label">Ask</span>';
+  AI_IDS.forEach(id => {
+    const m = getMember(id); if(!m) return;
+    const btn = document.createElement('button');
+    btn.className = 'member-btn'; btn.textContent = m.label; btn.dataset.memberId = id; btn.disabled = true;
+    btn.style.color = m.accentColor;
+    btn.style.borderColor = `color-mix(in srgb, ${m.accentColor}, transparent 55%)`;
+    btn.style.background   = `color-mix(in srgb, ${m.accentColor}, black 80%)`;
+    btn.addEventListener('click', () => askMember(id));
+    bar.appendChild(btn);
+  });
+}
+
+function setMembersEnabled(on) {
+  document.querySelectorAll('.member-btn').forEach(b => { b.disabled = !on; });
+  const sb = document.getElementById('send-btn'); if(sb) sb.disabled = !on;
+}
+
+// ── Render messages ───────────────────────────────────────────────────────────
+function renderMessages(messages) {
+  const el = document.getElementById('messages'); if(!el) return;
+  if(!messages.length) { el.innerHTML='<div style="padding:2rem;color:var(--text-dim);font-family:var(--font-title);font-style:italic;font-size:16px">The room is quiet.</div>'; return; }
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+  const room = rooms.find(r => r.id===currentId);
+  const roomAvatars = room?.avatars ?? {};
+  el.innerHTML = '';
+  messages.forEach(m => el.appendChild(renderMessage(m, roomAvatars)));
+  if(atBottom) el.scrollTop = el.scrollHeight;
+}
+
+// ── Edit / Delete ─────────────────────────────────────────────────────────────
+function editMsg(btn) {
+  const msgEl = btn.closest('.msg');
+  const msgId = msgEl.dataset.msgId;
+  const stored = roomMessages.find(m => (m.id||m.timestamp||'')===msgId);
+  const rawText = stored?.text || msgEl.querySelector('.msg-body')?.innerText.trim() || '';
+  const ta = inp(); if(!ta) return;
+  ta.value = rawText; ta.dispatchEvent(new Event('input')); ta.focus();
+  editingMsgId = msgId;
+  const sb = document.getElementById('send-btn'); if(sb){ sb.textContent='Update'; sb.disabled=false; }
+}
+
+async function delMsg(btn) {
+  const msgEl = btn.closest('.msg');
+  const msgId = msgEl.dataset.msgId;
+  const stored = roomMessages.find(m => (m.id||m.timestamp||'')===msgId);
+  msgEl.style.transition='opacity .2s'; msgEl.style.opacity='0';
+  setTimeout(() => msgEl.remove(), 200);
+  const idx = roomMessages.findIndex(m => (m.id||m.timestamp||'')===msgId);
+  if(idx!==-1) roomMessages.splice(idx,1);
+  if(stored?.id && currentId) fetch(`/api/v1/chat/rooms/${currentId}/messages/${stored.id}`,{method:'DELETE'}).catch(()=>{});
+}
+
+// ── Poll ──────────────────────────────────────────────────────────────────────
+async function pollRoom() {
+  if(!currentId) return;
+  const [rd] = await Promise.all([apiFetch(`/rooms/${currentId}`).catch(()=>null), checkBreaker()]);
+  if(!rd?.ok) return;
+  const { room } = rd;
+  const idx = rooms.findIndex(r => r.id===currentId); if(idx!==-1) rooms[idx]=room;
+  if(room.messages.length!==knownCount) {
+    knownCount = room.messages.length;
+    roomMessages = room.messages;
+    renderMessages(room.messages);
+    syncHeader(room); renderRooms();
+    setMembersEnabled(true);
+  }
+}
+
+function syncHeader(room) {
+  const name = document.getElementById('room-header-name');
+  const desc = document.getElementById('room-header-desc');
+  const btn  = document.getElementById('flag-btn');
+  if(name) name.textContent = room.label??'';
+  if(desc) desc.textContent = room.description??'';
+  if(btn){ btn.textContent=room.flagged?'⚑ flagged':'⚐ flag'; btn.classList.toggle('flagged',!!room.flagged); }
+}
+
+async function checkBreaker() {
+  if(!currentId) return;
+  const d = await apiFetch(`/rooms/${currentId}/breaker`).catch(()=>null); if(!d?.ok) return;
+  const btn = document.getElementById('breaker-btn'); if(!btn) return;
+  if(d.breaker.tripped){ btn.style.display=''; btn.style.color='#c9883c'; btn.style.borderColor='#c9883c'; }
+  else btn.style.display='none';
+}
+async function resetBreaker() {
+  if(!currentId) return;
+  await apiPost(`/rooms/${currentId}/breaker/reset`,{});
+  const btn=document.getElementById('breaker-btn'); if(btn) btn.style.display='none';
+}
+
+async function toggleFlag() {
+  if(!currentId) return;
+  const room = rooms.find(r=>r.id===currentId); if(!room) return;
+  if(room.flagged) await apiPost(`/rooms/${currentId}/unflag`,{});
+  else { const note=prompt('Flag note (optional):')?? ''; await apiPost(`/rooms/${currentId}/flag`,{note}); }
+  await loadRooms();
+  const updated = rooms.find(r=>r.id===currentId); if(updated) syncHeader(updated);
+  renderRooms();
+}
+
+// ── Send ──────────────────────────────────────────────────────────────────────
+async function send() {
+  const ta = inp(); const to = document.getElementById('to-select'); const sb = document.getElementById('send-btn');
+  if(!ta || !currentId) return;
+  let text = ta.value.trim();
+  if(!text && !attachedFile) return;
+
+  if(attachedFile) {
+    const block = `[File: ${attachedFile.name}]\n---\n${attachedFile.content}\n---`;
+    text = text ? block+'\n\n'+text : block; clearFile();
+  }
+
+  // Edit mode
+  if(editingMsgId) {
+    const stored = roomMessages.find(m=>(m.id||m.timestamp||'')===editingMsgId);
+    if(stored) stored.text = text;
+    const msgEl = document.querySelector(`[data-msg-id="${editingMsgId}"]`);
+    const body = msgEl?.querySelector('.msg-body'); if(body) body.innerHTML = renderMd(text);
+    if(stored?.id) fetch(`/api/v1/chat/rooms/${currentId}/messages/${stored.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})}).catch(()=>{});
+    ta.value=''; editingMsgId=null; if(sb){ sb.textContent='Send'; sb.disabled=false; } return;
+  }
+
+  // Apply pending display font as wrapper tag
+  if (pendingMsgFont && !attachedFile) { text = `{${pendingMsgFont}}${text}{/${pendingMsgFont}}`; }
+  pendingMsgFont = '';
+  const picker = document.getElementById('font-picker'); if (picker) picker.value = '';
+  ta.value = ''; ta.style.height = 'auto';
+  ta.style.fontFamily = TAG_TO_CSS[editorFont] ?? TAG_TO_CSS['cormorant'];
+  firePulse(text);
+  const from = icMode ? icName : 'rowan';
+  const recipient = to?.value ?? 'say';
+  const targets = recipient==='broadcast' ? AI_IDS : recipient==='say' ? [] : [recipient];
+
+  targets.forEach(n => { thinking.add(n); });
+  if(targets.length) renderMembers();
+  if(sb) sb.disabled = true;
+
+  try {
+    if(recipient==='say') {
+      await apiPost(`/rooms/${currentId}/say`,{from,text});
+    } else if(recipient==='broadcast') {
+      apiPost(`/rooms/${currentId}/broadcast`,{from,text}).catch(console.error);
+    } else {
+      await apiPost(`/rooms/${currentId}/ask/${recipient}`,{from,text});
+      thinking.delete(recipient); renderMembers();
+    }
+  } catch(err) { console.error(err); targets.forEach(n=>thinking.delete(n)); renderMembers(); }
+
+  if(sb) sb.disabled=false; ta.focus();
+  await pollRoom();
+}
+
+// ── Ask member button ─────────────────────────────────────────────────────────
+async function askMember(memberId) {
+  const ta = inp(); if(!ta || !currentId) return;
+  let text = ta.value.trim();
+  if(!text && !attachedFile) return;
+  if(attachedFile) { const block=`[File: ${attachedFile.name}]\n---\n${attachedFile.content}\n---`; text=text?block+'\n\n'+text:block; clearFile(); }
+  ta.value=''; setMembersEnabled(false); thinking.add(memberId); renderMembers(); firePulse(text);
+  const msgsEl = document.getElementById('messages');
+  const thinkEl = appendThinking(memberId);
+  msgsEl?.appendChild(thinkEl); if(msgsEl) msgsEl.scrollTop=msgsEl.scrollHeight;
+  try {
+    await apiPost(`/rooms/${currentId}/say`,{from:icMode?icName:'rowan',text});
+    await apiPost(`/rooms/${currentId}/ask/${memberId}`,{from:icMode?icName:'rowan',text});
+    thinkEl.remove();
+  } catch(err) { thinkEl.remove(); console.error(err); }
+  thinking.delete(memberId); renderMembers(); setMembersEnabled(true);
+  await pollRoom();
+}
+
+// ── DEEP Observer / PCREMAQ ───────────────────────────────────────────────────
+const VEC_KEYS = ['P','C','R','E','M','A','Q'];
+
+function lunarPhase() {
+  const syn = 29.53058867, known = new Date('2000-01-06T18:14:00Z');
+  const days = (Date.now()-known.getTime())/86400000;
+  const phase = ((days%syn)+syn)%syn;
+  const names = ['new','waxing crescent','first quarter','waxing gibbous','full','waning gibbous','last quarter','waning crescent'];
+  return `${names[Math.floor(phase/syn*8)%8]} ${Math.round((1-Math.abs(phase/syn-.5)*2)*100)}%`;
+}
+
+function buildGroundwire() {
+  const now = new Date();
+  const loc = geoCoords ? `${geoCoords.lat.toFixed(4)}, ${geoCoords.lon.toFixed(4)}` : 'location unknown';
+  return `location: ${loc} | ${now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} ${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} | moon: ${lunarPhase()}`;
+}
+
+function updateStrip(vectors, source) {
+  const strip = document.getElementById('deep-strip'); if(!strip) return;
+  strip.classList.remove('reading');
+  VEC_KEYS.forEach(k => {
+    const v = Math.max(0,Math.min(1,Number(vectors[k]??0.5)));
+    const valEl = document.getElementById(`vv-${k}`); const barEl = document.getElementById(`vb-${k}`);
+    if(valEl){ valEl.textContent=v.toFixed(2); valEl.classList.add('updating'); setTimeout(()=>valEl.classList.remove('updating'),800); }
+    if(barEl) barEl.style.width=`${v*100}%`;
+  });
+  const src = document.getElementById('deep-src'); const ts = document.getElementById('deep-ts');
+  if(src) src.textContent = source??'—';
+  if(ts)  ts.textContent  = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+async function firePulse(signal) {
+  const strip = document.getElementById('deep-strip'); if(!strip) return;
+  strip.classList.add('reading');
+  try {
+    const res = await fetch('/api/pulse',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({incomingSignal:signal,activeAnchor:currentId??'Dreaming Grove',groundwireContext:buildGroundwire()})});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const d = await res.json(); if(d.vectors) updateStrip(d.vectors,d.source);
+  } catch(e) { strip.classList.remove('reading'); console.warn('[DEEP] pulse failed:',e.message); }
+}
+
+function initDeepState() {
+  fetch('/api/state').then(r=>r.json()).then(d=>{ const room=Array.isArray(d.rooms)?d.rooms[0]:null; if(room?.metrics) updateStrip(room.metrics,'last-reading'); }).catch(()=>{});
+}
+
+function initGeo() {
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    geoCoords={lat:pos.coords.latitude,lon:pos.coords.longitude};
+    const locEl=document.getElementById('deep-loc'); if(locEl) locEl.textContent=`${geoCoords.lat.toFixed(4)}, ${geoCoords.lon.toFixed(4)}`;
+  },()=>{},{enableHighAccuracy:false,timeout:8000});
+}
+
+// ── Heartbeat ─────────────────────────────────────────────────────────────────
+function heartbeat() { apiPatch('/status/rowan',{status:myStatus,displayName:myName,note:myNote}).catch(()=>{}); }
+window.addEventListener('beforeunload',()=>{ navigator.sendBeacon(API+'/status/rowan',JSON.stringify({status:'offline'})); });
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+(async () => {
+  loadSavedTheme();
+  // restore bubble glow
+  const savedBg = localStorage.getItem('grove-bubble-glow');
+  if (savedBg) {
+    const el = document.querySelector(`.glow-opt[data-bg="${savedBg}"]`);
+    setBubbleGlow(el ?? null, savedBg);
+  }
+  await Promise.all([loadRooms(), loadStatuses()]);
+  if(!rooms.length) {
+    const d = await apiPost('/rooms',{id:'dreaming-grove',label:'The Dreaming Grove',description:'Open space. No agenda.'});
+    if(d.ok) await loadRooms();
+  }
+  if(rooms.length) selectRoom(rooms[0].id);
+  setInterval(loadStatuses, 5000);
+  setInterval(heartbeat, 30000);
+  initGeo();
+})();
+</script>
+</body>
+</html>

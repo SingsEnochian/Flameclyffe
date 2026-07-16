@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yggdrasil // Flameclyffe Engine Interface</title>
+  <style>
+    :root {
+      --bg-color: #080b0a;
+      --stonewood-base: #1b221f;
+      --stonewood-carved: #0d1210;
+      --fluid-light-glow: rgba(46, 214, 144, 0.22);
+      --text-glow: rgba(46, 214, 144, 0.85);
+      --vector-P: 0.46;
+      --vector-C: 0.54;
+      --vector-R: 0.48;
+      --vector-E: 0.18;
+      --vector-M: 0.42;
+      --vector-A: 0.38;
+      --vector-Q: 0.32;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(46, 214, 144, calc(var(--vector-Q) * 0.16)), transparent 32rem),
+        radial-gradient(circle at 80% 75%, rgba(92, 61, 255, calc(var(--vector-E) * 0.20)), transparent 28rem),
+        #070908;
+      color: #d7e4dc;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .fluid-light-canopy {
+      position: fixed;
+      inset: -30vh -20vw;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(46, 214, 144, calc(var(--vector-R) * 0.42)) 0%, rgba(26, 36, 33, calc(var(--vector-E) * 0.24)) 42%, transparent 68%),
+        conic-gradient(from calc(var(--vector-P) * 360deg), transparent, rgba(46, 214, 144, .14), transparent, rgba(93, 139, 255, .10), transparent);
+      filter: blur(calc(48px + var(--vector-M) * 52px));
+      animation: canopyDrift calc(22s - var(--vector-A) * 8s) ease-in-out infinite alternate;
+      opacity: calc(0.55 + var(--vector-R) * 0.35);
+      transition: opacity 900ms ease, filter 900ms ease, background 900ms ease;
+    }
+
+    @keyframes canopyDrift {
+      0% { transform: rotate(0deg) scale(1); }
+      100% { transform: rotate(10deg) scale(1.08); }
+    }
+
+    .stonewood-container {
+      position: relative;
+      z-index: 2;
+      width: min(1120px, calc(100vw - 48px));
+      margin: 4vh auto;
+      padding: clamp(20px, 3vw, 34px);
+      border-radius: 18px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.045), transparent 24%),
+        linear-gradient(315deg, rgba(0,0,0,.55), transparent 40%),
+        var(--stonewood-base);
+      border: 1px solid rgba(114, 204, 166, .20);
+      box-shadow:
+        0 28px 80px rgba(0,0,0,.72),
+        inset 0 1px 0 rgba(255,255,255,.065),
+        inset 0 -1px 0 rgba(0,0,0,.7),
+        0 0 calc(20px + var(--vector-R) * 36px) rgba(46, 214, 144, calc(var(--vector-R) * .22));
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .stonewood-container::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: .34;
+      background:
+        repeating-linear-gradient(112deg, rgba(255,255,255,.028) 0 1px, transparent 1px 16px),
+        radial-gradient(circle at 25% 20%, rgba(46,214,144,.12), transparent 22rem);
+      filter: url(#stonewood-grain);
+    }
+
+
+
+    /* --- Living branch / root network layer --- */
+    .branch-network {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: calc(0.68 + var(--vector-R) * 0.22);
+      mix-blend-mode: screen;
+      filter:
+        drop-shadow(0 0 calc(6px + var(--vector-A) * 20px) rgba(46, 214, 144, .46))
+        drop-shadow(0 0 calc(14px + var(--vector-M) * 24px) rgba(142, 255, 205, .18));
+      transition: opacity 700ms ease, filter 700ms ease;
+    }
+
+    .branch-network .branch-halo {
+      fill: none;
+      stroke: rgba(46, 214, 144, .10);
+      stroke-width: 16;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: blur(9px);
+    }
+
+    .branch-network .branch-path {
+      fill: none;
+      stroke: rgba(155, 255, 208, calc(0.34 + var(--vector-C) * 0.42));
+      stroke-width: calc(2px + var(--vector-C) * 3.2px);
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 12 22;
+      animation: branchCurrent calc(16s - var(--vector-R) * 7s) linear infinite;
+    }
+
+    .branch-network .branch-path.trunk {
+      stroke: rgba(176, 255, 216, calc(0.42 + var(--vector-M) * 0.28));
+      stroke-width: calc(3.2px + var(--vector-M) * 4.8px);
+      stroke-dasharray: none;
+      filter: drop-shadow(0 0 14px rgba(46, 214, 144, .36));
+    }
+
+    .branch-network .branch-path.twig {
+      stroke: rgba(122, 255, 194, calc(0.24 + var(--vector-C) * 0.36));
+      stroke-width: calc(1.5px + var(--vector-C) * 2px);
+      stroke-dasharray: 5 15;
+    }
+
+    .branch-network .branch-path.root {
+      stroke: rgba(69, 214, 160, calc(0.26 + var(--vector-M) * 0.42));
+      stroke-width: calc(2px + var(--vector-M) * 3.4px);
+      stroke-dasharray: 4 14;
+      animation-direction: reverse;
+    }
+
+    .branch-network .branch-path.gold {
+      stroke: rgba(255, 214, 117, calc(0.18 + var(--vector-Q) * 0.34));
+      stroke-width: calc(1.4px + var(--vector-Q) * 2.4px);
+      stroke-dasharray: 3 12;
+    }
+
+    .branch-network .branch-node {
+      fill: rgba(185, 255, 216, calc(0.36 + var(--vector-A) * 0.46));
+      filter: drop-shadow(0 0 10px rgba(46, 214, 144, .82));
+      transform-origin: center;
+      animation: nodePulse calc(3s + var(--vector-P) * 3s) ease-in-out infinite alternate;
+    }
+
+    .branch-network .branch-node.seed {
+      fill: rgba(255, 226, 148, calc(0.24 + var(--vector-Q) * 0.48));
+      animation-delay: 900ms;
+    }
+
+    .branch-network .branch-leaf {
+      fill: rgba(126, 255, 192, calc(0.20 + var(--vector-R) * 0.42));
+      filter: drop-shadow(0 0 8px rgba(46, 214, 144, .62));
+      animation: leafDrift calc(5s + var(--vector-E) * 5s) ease-in-out infinite alternate;
+      transform-origin: center;
+    }
+
+    @keyframes branchCurrent {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: -180; }
+    }
+
+    @keyframes nodePulse {
+      from { opacity: .46; transform: scale(.9); }
+      to { opacity: 1; transform: scale(1.35); }
+    }
+
+    @keyframes leafDrift {
+      from { opacity: .38; transform: rotate(-4deg) scale(.92); }
+      to { opacity: .96; transform: rotate(5deg) scale(1.08); }
+    }
+
+    .stonewood-container > :not(.branch-network) {
+      position: relative;
+      z-index: 1;
+    }
+
+    .build-badge {
+      display: inline-flex;
+      gap: .5rem;
+      align-items: center;
+      padding: .4rem .7rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(46, 214, 144, .34);
+      border-radius: 999px;
+      color: #9ff4c8;
+      background: rgba(0,0,0,.24);
+      text-shadow: 0 0 10px rgba(46,214,144,.5);
+      font-size: .82rem;
+      letter-spacing: .08em;
+    }
+
+    h1 {
+      margin: 0 0 .6rem;
+      font-size: clamp(1.55rem, 4vw, 3.1rem);
+      letter-spacing: .12em;
+      color: #dff8ea;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(46,214,144,.45), 0 0 34px rgba(46,214,144,.14);
+    }
+
+    .subtitle {
+      margin: 0 0 1.4rem;
+      max-width: 74ch;
+      color: #97b7a6;
+      line-height: 1.55;
+    }
+
+    .panel {
+      background: rgba(7, 10, 9, .78);
+      border: 1px solid rgba(151, 183, 166, .12);
+      box-shadow: inset 0 2px 9px rgba(0,0,0,.82), 0 1px 0 rgba(255,255,255,.035);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+    }
+
+    .eyebrow {
+      color: #668373;
+      font-size: .78rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: .45rem;
+    }
+
+    #chamber-state-text { color: #d8f4e4; line-height: 1.5; }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      gap: .8rem;
+    }
+
+    .metric-node {
+      padding: .8rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,.30);
+      border: 1px solid rgba(255,255,255,.045);
+    }
+
+    .metric-label {
+      display: block;
+      color: #6f8f7d;
+      font-weight: 700;
+      font-size: .78rem;
+      margin-bottom: .3rem;
+    }
+
+    .metric-value {
+      display: block;
+      color: #bdf4d4;
+      font-size: 1.18rem;
+      text-shadow: 0 0 9px rgba(46,214,144,.36);
+    }
+
+    .metric-bar-container {
+      height: 5px;
+      margin-top: .55rem;
+      background: #050706;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .metric-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #1c8061, #2ed690, #b9ffe0);
+      box-shadow: 0 0 12px #2ed690;
+      transition: width 780ms cubic-bezier(.25, 1, .5, 1);
+    }
+
+    .route-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      margin: .3rem 0 1rem;
+    }
+
+    button {
+      border: 1px solid rgba(46,214,144,.48);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(40,75,60,.95), rgba(20,43,34,.95));
+      color: #d7ffe9;
+      padding: .72rem 1rem;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: .04em;
+      transition: transform 160ms ease, box-shadow 220ms ease, background 220ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(46,214,144,.32);
+      background: linear-gradient(180deg, rgba(46,214,144,.34), rgba(24,61,47,.95));
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      border: 1px solid rgba(46,214,144,.25);
+      border-radius: 10px;
+      background: #050706;
+      color: #bff7d8;
+      padding: .9rem;
+      font: inherit;
+      outline: none;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,.72);
+    }
+
+    .action-row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; margin-top: .75rem; }
+    .small-note { color: #769383; font-size: .82rem; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      padding: 1rem;
+      border-radius: 14px;
+      background: rgba(5, 7, 6, .52);
+      border: 1px solid rgba(151,183,166,.13);
+    }
+
+    .card h3 { margin: 0 0 .45rem; color: #e4fff0; }
+    .card p { margin: .25rem 0; color: #a8c2b3; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <nav style="display:flex;gap:1rem;align-items:center;padding:.5rem 1.25rem;background:rgba(5,7,6,.94);border-bottom:1px solid rgba(114,204,166,.16);position:sticky;top:0;z-index:10">
+    <a href="/" style="color:#9fffb4;text-decoration:none;font-size:.76rem;letter-spacing:.07em;text-transform:uppercase">Chamber Matrix</a>
+    <span style="color:rgba(114,204,166,.2);font-size:.7rem">·</span>
+    <a href="/ygg-chat.html" style="color:#8aaa96;text-decoration:none;font-size:.76rem;letter-spacing:.07em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#2ed690'" onmouseout="this.style.color='#8aaa96'">Yggdrasil</a>
+    <span style="color:rgba(114,204,166,.2);font-size:.7rem">·</span>
+    <a href="/hearthroom.html" style="color:#8aaa96;text-decoration:none;font-size:.76rem;letter-spacing:.07em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#2ed690'" onmouseout="this.style.color='#8aaa96'">The Hearthroom</a>
+    <span style="color:rgba(114,204,166,.2);font-size:.7rem">·</span>
+    <a href="/notes.html" style="color:#8aaa96;text-decoration:none;font-size:.76rem;letter-spacing:.07em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#2ed690'" onmouseout="this.style.color='#8aaa96'">Notes</a>
+  </nav>
+
+  <div class="fluid-light-canopy" aria-hidden="true"></div>
+
+  <main class="stonewood-container">
+
+    <svg class="branch-network" viewBox="0 0 1120 760" preserveAspectRatio="none" aria-hidden="true">
+      <!-- Soft glowing underlines make the branching grammar visible before the fine-line layer animates. -->
+      <path class="branch-halo" d="M82 84 C72 190 82 286 126 372 C180 478 288 548 424 620 C514 668 592 700 704 724" />
+      <path class="branch-halo" d="M1038 94 C1048 204 1030 306 978 394 C914 504 812 568 682 632 C596 674 516 706 406 736" />
+      <path class="branch-halo" d="M142 374 C282 326 420 324 560 360 C706 398 860 378 1010 322" />
+
+      <!-- Visible side trunks: left and right living tethers, like roots climbing the wall. -->
+      <path class="branch-path trunk" d="M82 84 C72 190 82 286 126 372 C180 478 288 548 424 620 C514 668 592 700 704 724" />
+      <path class="branch-path trunk" d="M1038 94 C1048 204 1030 306 978 394 C914 504 812 568 682 632 C596 674 516 706 406 736" />
+
+      <!-- Cross-room forks and roots. These are deliberately routed through open space between panels. -->
+      <path class="branch-path root" d="M120 274 C232 296 332 302 442 318 C528 332 596 352 694 340 C812 326 922 288 1044 250" />
+      <path class="branch-path root gold" d="M142 374 C282 326 420 324 560 360 C706 398 860 378 1010 322" />
+      <path class="branch-path" d="M156 516 C282 480 394 466 512 490 C640 516 756 506 872 466 C930 446 982 426 1040 392" />
+      <path class="branch-path root" d="M118 650 C230 612 356 604 486 624 C616 644 744 638 874 600 C944 580 1002 548 1060 514" />
+
+      <!-- Smaller tethers, forks, and vein lines around panels and route buttons. -->
+      <path class="branch-path twig" d="M156 214 C204 234 244 252 284 284 C326 316 354 340 406 356" />
+      <path class="branch-path twig" d="M964 220 C914 242 872 268 834 302 C792 340 746 358 690 364" />
+      <path class="branch-path twig" d="M224 430 C300 426 358 436 410 464 C456 488 500 500 548 494" />
+      <path class="branch-path twig gold" d="M902 430 C820 430 756 444 704 472 C648 502 596 506 540 496" />
+      <path class="branch-path twig" d="M342 674 C426 646 496 638 560 652 C632 668 706 662 790 630" />
+
+      <!-- Nodes and leaves so the user can see this is a living branch system, not faint scratches. -->
+      <circle class="branch-node seed" cx="82" cy="84" r="6" />
+      <circle class="branch-node seed" cx="1038" cy="94" r="6" />
+      <circle class="branch-node" cx="126" cy="372" r="5" />
+      <circle class="branch-node" cx="978" cy="394" r="5" />
+      <circle class="branch-node seed" cx="560" cy="360" r="7" />
+      <circle class="branch-node" cx="512" cy="490" r="4" />
+      <circle class="branch-node" cx="704" cy="472" r="4" />
+      <circle class="branch-node" cx="486" cy="624" r="4" />
+      <circle class="branch-node" cx="874" cy="600" r="4" />
+
+      <ellipse class="branch-leaf" cx="162" cy="210" rx="5" ry="11" transform="rotate(-28 162 210)" />
+      <ellipse class="branch-leaf" cx="960" cy="218" rx="5" ry="11" transform="rotate(24 960 218)" />
+      <ellipse class="branch-leaf" cx="410" cy="464" rx="4" ry="9" transform="rotate(-42 410 464)" />
+      <ellipse class="branch-leaf" cx="790" cy="630" rx="4" ry="9" transform="rotate(36 790 630)" />
+      <ellipse class="branch-leaf" cx="560" cy="652" rx="4" ry="10" transform="rotate(2 560 652)" />
+    </svg>
+    <div class="build-badge">🌿 STONEWOOD v0.6 BRANCH-VISIBLE BUILD</div>
+    <h1>YGGDRASIL // Chamber Matrix</h1>
+    <p class="subtitle">A standalone STARWELL interface for testing DEEP vectors, fluid-light ambience, visible branching tethers, route anchors, and narrative pulse logging.</p>
+
+    <section class="panel">
+      <div class="eyebrow">Current field state</div>
+      <div id="chamber-state-text">Synchronizing roots with local node registries...</div>
+    </section>
+
+    <section class="panel metrics-grid" id="metrics-grid"></section>
+
+    <section class="panel">
+      <div class="eyebrow">Route anchors</div>
+      <div class="route-grid" id="route-grid"></div>
+      <div class="small-note">Route clicks pass updates to <code>/api/place</code> and append a signal entry.</div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Translate new narrative signal</div>
+      <textarea id="signal-input" placeholder="Type a signal event to watch the stonewood shift..."></textarea>
+      <div class="action-row">
+        <button id="pulse-button">Anchor Grove Signal</button>
+        <span class="small-note">Uses local fallback math unless you wire an LLM later.</span>
+      </div>
+    </section>
+
+    <section class="panel" id="groundwire-panel">
+      <div class="eyebrow">Groundwire // Live device signals</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.6rem;margin:.6rem 0" id="gw-fields"></div>
+      <div style="margin:.6rem 0">
+        <label style="display:block;font-size:.8rem;color:#6f8f7d;margin-bottom:.35rem">Mic input level</label>
+        <div style="height:.7rem;border:1px solid rgba(46,214,144,.22);border-radius:999px;background:rgba(2,6,10,.42);overflow:hidden">
+          <div id="gw-mic-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#1c8061,#2ed690,#b9ffe0);transition:width .06s linear"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem">
+        <button id="gw-loc-btn" style="font-size:.8rem;padding:.4rem .75rem">Request Location</button>
+        <button id="gw-mic-btn" style="font-size:.8rem;padding:.4rem .75rem">Start Mic Meter</button>
+        <button id="gw-mic-stop" style="font-size:.8rem;padding:.4rem .75rem;border-color:rgba(224,120,120,.6);color:#f4c0c0" disabled>Stop</button>
+      </div>
+      <div class="small-note" style="margin-top:.5rem">Passive reads fire automatically. Location and microphone wait for your tap. All readings stay local — nothing is transmitted.</div>
+    </section>
+
+    <section class="cards" id="bridge-cards"></section>
+  </main>
+
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;">
+    <filter id="stonewood-grain" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04 0.15" numOctaves="4" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.12 0" in="noise" result="coloredNoise" />
+      <feComposite operator="in" in="coloredNoise" in2="SourceGraphic" />
+      <feBlend mode="multiply" in="coloredNoise" in2="SourceGraphic" />
+    </filter>
+  </svg>
+
+  <script>
+    // --- Groundwire: live device signal state ---
+    const gwState = {
+      network:     { value: null, confidence: 'unknown', reason: 'Checking…' },
+      hardware:    { value: null, confidence: 'unknown', reason: 'Checking…' },
+      battery:     { value: null, confidence: 'unknown', reason: 'Checking…' },
+      location:    { value: null, confidence: 'unknown', reason: 'Not requested.' },
+      microphone:  { value: null, confidence: 'unknown', reason: 'Not started.' },
+    };
+
+    function gwBadge(c) {
+      const colors = { verified: '#78d9af', observed: '#9ec9ff', unknown: '#7a7a8a' };
+      return `<span style="font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:${colors[c]??colors.unknown}">${c}</span>`;
+    }
+
+    function gwRow(label, val, confidence) {
+      return `<div style="padding:.35rem .55rem;border:1px solid rgba(46,214,144,.12);border-radius:10px;background:rgba(0,0,0,.28)">
+        <div style="font-size:.72rem;color:#6f8f7d;margin-bottom:.2rem">${label}</div>
+        <div style="font-size:.88rem;color:#bdf4d4">${val} ${gwBadge(confidence)}</div>
+      </div>`;
+    }
+
+    function renderGroundwire() {
+      const net = gwState.network;
+      const hw  = gwState.hardware;
+      const bat = gwState.battery;
+      const loc = gwState.location;
+      const mic = gwState.microphone;
+      document.getElementById('gw-fields').innerHTML = [
+        gwRow('Connection',   net.value ? `${net.value.effectiveType} · ${net.value.downlink}Mb/s · ${net.value.rtt}ms RTT` : net.reason,  net.confidence),
+        gwRow('Cores',        hw.value?.hardwareConcurrency != null ? `${hw.value.hardwareConcurrency} logical` : 'Not exposed',         hw.value?.hardwareConcurrency != null ? hw.confidence : 'unknown'),
+        gwRow('Memory',       hw.value?.deviceMemory != null ? `${hw.value.deviceMemory}GB (bucketed)` : 'Not exposed',                  hw.value?.deviceMemory != null ? hw.confidence : 'unknown'),
+        gwRow('Battery',      bat.value ? `${bat.value.charging ? 'Charging' : 'Discharging'} · ${Math.round(bat.value.level*100)}%` : bat.reason, bat.confidence),
+        gwRow('Location',     loc.value ? `${loc.value.latitude.toFixed(4)}, ${loc.value.longitude.toFixed(4)} ±${Math.round(loc.value.accuracy)}m` : loc.reason, loc.confidence),
+        gwRow('Mic RMS',      mic.value ? mic.value.rms.toFixed(4) : mic.reason, mic.confidence),
+      ].join('');
+    }
+
+    function gwLunarPhase() {
+      // Days since known new moon (2000-01-06 UTC), lunar cycle ~29.53059 days
+      const known = new Date('2000-01-06T18:14:00Z');
+      const elapsed = (Date.now() - known.getTime()) / 86400000;
+      const phase = ((elapsed % 29.53059) / 29.53059 + 1) % 1;
+      const names = ['new','waxing crescent','first quarter','waxing gibbous','full','waning gibbous','last quarter','waning crescent'];
+      return { phase: parseFloat(phase.toFixed(3)), name: names[Math.round(phase * 8) % 8] };
+    }
+
+    function gwSummary() {
+      const net = gwState.network.value;
+      const hw  = gwState.hardware.value;
+      const bat = gwState.battery.value;
+      const loc = gwState.location.value;
+      const mic = gwState.microphone.value;
+      const now = new Date();
+      const lunar = gwLunarPhase();
+      const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const dayStr  = now.toLocaleDateString('en-GB', { weekday: 'short' });
+      return [
+        `time:${dayStr}/${timeStr}`,
+        `lunar:${lunar.name}/${lunar.phase}`,
+        net ? `network:${net.effectiveType}/${net.downlink}Mbps/${net.rtt}ms` : 'network:unknown',
+        hw?.hardwareConcurrency != null ? `cores:${hw.hardwareConcurrency}` : 'cores:unknown',
+        hw?.deviceMemory != null ? `memory:${hw.deviceMemory}GB` : 'memory:unknown',
+        bat ? `battery:${Math.round(bat.level*100)}%/${bat.charging?'charging':'discharging'}` : 'battery:unknown',
+        loc ? `location:${loc.latitude.toFixed(3)},${loc.longitude.toFixed(3)}` : 'location:unknown',
+        mic ? `mic_rms:${mic.rms.toFixed(3)}` : 'mic:inactive',
+      ].join(' | ');
+    }
+
+    // Passive reads
+    function gwReadNetwork() {
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!conn) { gwState.network = { value: null, confidence: 'unknown', reason: 'Network API unsupported.' }; renderGroundwire(); return; }
+      const read = () => { gwState.network = { value: { effectiveType: conn.effectiveType, downlink: conn.downlink, rtt: conn.rtt }, confidence: 'observed', reason: '' }; renderGroundwire(); };
+      read();
+      conn.addEventListener?.('change', read);
+    }
+
+    function gwReadHardware() {
+      const c = 'hardwareConcurrency' in navigator ? navigator.hardwareConcurrency : null;
+      const m = 'deviceMemory' in navigator ? navigator.deviceMemory : null;
+      gwState.hardware = { value: { hardwareConcurrency: c, deviceMemory: m }, confidence: 'observed', reason: '' };
+      renderGroundwire();
+    }
+
+    function gwReadBattery() {
+      if (!navigator.getBattery) { gwState.battery = { value: null, confidence: 'unknown', reason: 'Battery API unsupported.' }; renderGroundwire(); return; }
+      navigator.getBattery().then((bat) => {
+        const read = () => { gwState.battery = { value: { charging: bat.charging, level: bat.level }, confidence: 'observed', reason: '' }; renderGroundwire(); };
+        read();
+        bat.addEventListener('chargingchange', read);
+        bat.addEventListener('levelchange', read);
+      }).catch(() => { gwState.battery = { value: null, confidence: 'unknown', reason: 'Battery read failed.' }; renderGroundwire(); });
+    }
+
+    // Gated reads
+    document.getElementById('gw-loc-btn').addEventListener('click', () => {
+      if (!('geolocation' in navigator)) { gwState.location = { value: null, confidence: 'unknown', reason: 'Geolocation unsupported.' }; renderGroundwire(); return; }
+      gwState.location = { value: null, confidence: 'unknown', reason: 'Requesting…' }; renderGroundwire();
+      navigator.geolocation.getCurrentPosition(
+        (p) => { gwState.location = { value: { latitude: p.coords.latitude, longitude: p.coords.longitude, accuracy: p.coords.accuracy }, confidence: 'verified', reason: '' }; renderGroundwire(); },
+        (e) => { gwState.location = { value: null, confidence: 'unknown', reason: e.message }; renderGroundwire(); },
+        { enableHighAccuracy: false, timeout: 10000 }
+      );
+    });
+
+    let micStream = null, micCtx = null, micAnalyser = null, micFrame = null;
+    document.getElementById('gw-mic-btn').addEventListener('click', () => {
+      if (!navigator.mediaDevices?.getUserMedia) { gwState.microphone = { value: null, confidence: 'unknown', reason: 'Mic unsupported.' }; renderGroundwire(); return; }
+      navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        micStream = stream;
+        micCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = micCtx.createMediaStreamSource(stream);
+        micAnalyser = micCtx.createAnalyser(); micAnalyser.fftSize = 2048;
+        src.connect(micAnalyser);
+        const buf = new Float32Array(micAnalyser.fftSize);
+        const bar = document.getElementById('gw-mic-bar');
+        const tick = () => {
+          micAnalyser.getFloatTimeDomainData(buf);
+          let ss = 0; for (let i = 0; i < buf.length; i++) ss += buf[i]*buf[i];
+          const rms = Math.sqrt(ss / buf.length);
+          bar.style.width = `${Math.min(100, rms*400)}%`;
+          gwState.microphone = { value: { rms }, confidence: 'verified', reason: 'Live.' };
+          micFrame = requestAnimationFrame(tick);
+        };
+        tick();
+        document.getElementById('gw-mic-stop').disabled = false;
+      }).catch((e) => { gwState.microphone = { value: null, confidence: 'unknown', reason: e.message }; renderGroundwire(); });
+    });
+
+    document.getElementById('gw-mic-stop').addEventListener('click', () => {
+      if (micFrame) cancelAnimationFrame(micFrame); micFrame = null;
+      micStream?.getTracks().forEach(t => t.stop()); micStream = null;
+      micCtx?.close(); micCtx = null; micAnalyser = null;
+      document.getElementById('gw-mic-bar').style.width = '0%';
+      gwState.microphone = { value: null, confidence: 'unknown', reason: 'Stopped.' };
+      document.getElementById('gw-mic-stop').disabled = true;
+      renderGroundwire();
+    });
+
+    gwReadNetwork();
+    gwReadHardware();
+    gwReadBattery();
+    renderGroundwire();
+
+    // --- Grove core ---
+    const METRIC_KEYS = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
+    const ROUTES = ['Stonewood', 'Ashfen Cairn', 'Wraithtide Shore', 'Twilight Hearth', 'The Withinwood', 'Salt Veil'];
+
+    const metricLabels = {
+      P: 'P · Pulse',
+      C: 'C · Coherence',
+      R: 'R · Resonance',
+      E: 'E · Entropy',
+      M: 'M · Memory',
+      A: 'A · Axis',
+      Q: 'Q · Quotient'
+    };
+
+    function buildMetricGrid() {
+      const grid = document.getElementById('metrics-grid');
+      grid.innerHTML = METRIC_KEYS.map((key) => `
+        <div class="metric-node" id="node-${key}">
+          <span class="metric-label">${metricLabels[key]}</span>
+          <span class="metric-value" id="val-${key}">0.00</span>
+          <div class="metric-bar-container"><div class="metric-bar-fill" id="bar-${key}"></div></div>
+        </div>
+      `).join('');
+    }
+
+    function buildRoutes() {
+      const grid = document.getElementById('route-grid');
+      grid.innerHTML = ROUTES.map((place) => `<button data-place="${place}">${place}</button>`).join('');
+      grid.querySelectorAll('button').forEach((button) => {
+        button.addEventListener('click', () => anchorPlace(button.dataset.place));
+      });
+    }
+
+    function setMetrics(metrics = {}) {
+      METRIC_KEYS.forEach((key) => {
+        const raw = Number(metrics[key] || 0);
+        const value = Number.isFinite(raw) ? Math.max(0, Math.min(1, raw)) : 0;
+        document.documentElement.style.setProperty(`--vector-${key}`, value.toFixed(2));
+        const val = document.getElementById(`val-${key}`);
+        const bar = document.getElementById(`bar-${key}`);
+        if (val) val.textContent = value.toFixed(2);
+        if (bar) bar.style.width = `${value * 100}%`;
+      });
+    }
+
+    function renderCards(bridges = []) {
+      const cards = document.getElementById('bridge-cards');
+      cards.innerHTML = bridges.map((bridge) => `
+        <article class="card">
+          <h3>${bridge.bridge_name || bridge.name || 'Unnamed Bridge'}</h3>
+          <p><strong>Slug:</strong> ${bridge.bridge_slug || bridge.slug || 'none'}</p>
+          <p><strong>Type:</strong> ${(bridge.bridge_types || [bridge.bridge_type || 'unknown']).join(', ')}</p>
+          <p><strong>State:</strong> ${bridge.consent_state || bridge.state || 'unknown'}</p>
+          <p>${bridge.description || ''}</p>
+        </article>
+      `).join('');
+    }
+
+    async function fetchLivingState() {
+      try {
+        const response = await fetch('/api/state');
+        if (!response.ok) throw new Error(`State request failed: ${response.status}`);
+        const data = await response.json();
+        const room = Array.isArray(data.rooms) ? data.rooms[0] : null;
+        if (room) {
+          document.getElementById('chamber-state-text').textContent = room.chamberState || 'Room active.';
+          setMetrics(room.metrics || {});
+        }
+        renderCards(data.bridges || []);
+      } catch (error) {
+        document.getElementById('chamber-state-text').textContent = `Root fetch failed: ${error.message}`;
+        console.error(error);
+      }
+    }
+
+    async function anchorPlace(place) {
+      document.getElementById('chamber-state-text').textContent = `Routing through ${place}...`;
+      const response = await fetch('/api/place', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ place })
+      });
+      if (!response.ok) {
+        document.getElementById('chamber-state-text').textContent = `Could not anchor ${place}.`;
+        return;
+      }
+      await fetchLivingState();
+    }
+
+    async function sendNarrativePulse() {
+      const input = document.getElementById('signal-input');
+      const incomingSignal = input.value.trim();
+      if (!incomingSignal) return;
+      document.getElementById('chamber-state-text').textContent = 'Translating text fingerprint into DEEP seed vectors...';
+      const response = await fetch('/api/pulse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ incomingSignal, activeAnchor: 'Stonewood', groundwireContext: gwSummary() })
+      });
+      if (response.ok) {
+        input.value = '';
+        await fetchLivingState();
+      } else {
+        document.getElementById('chamber-state-text').textContent = 'Signal transmission snapped.';
+      }
+    }
+
+    document.getElementById('pulse-button').addEventListener('click', sendNarrativePulse);
+    buildMetricGrid();
+    buildRoutes();
+    fetchLivingState();
+    setInterval(fetchLivingState, 3500);
+  </script>
+</body>
+</html>

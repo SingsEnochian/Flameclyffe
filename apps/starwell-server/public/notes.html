@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes // Flameclyffe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+SC:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #07090a;
+      --surface:   #0d1210;
+      --surface2:  #111815;
+      --surface3:  #161e1b;
+      --border:    rgba(114, 204, 166, .13);
+      --border-hi: rgba(114, 204, 166, .28);
+      --text:      #cce6d8;
+      --text-dim:  #6e8b7a;
+      --text-faint:#3d5448;
+      --accent:    #2ed690;
+      --accent-dim:rgba(46, 214, 144, .22);
+      --ember:     #e88a3a;
+      --ember-dim: rgba(232, 138, 58, .20);
+      --danger:    #d06060;
+      --font-ui:   'VTCSwitchbladeRomance', ui-monospace, SFMono-Regular, monospace;
+      --font-body: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      --font-sc:   'Cormorant SC', 'Cormorant Garamond', Georgia, serif;
+    }
+
+    @font-face {
+      font-family: 'VTCSwitchbladeRomance';
+      src: url('/fonts/VTCSwitchbladeRomance.woff2') format('woff2'),
+           url('/fonts/VTCSwitchbladeRomance.woff') format('woff');
+      font-display: swap;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ── */
+    nav {
+      flex-shrink: 0;
+      display: flex;
+      gap: .9rem;
+      align-items: center;
+      padding: .45rem 1.25rem;
+      background: rgba(5,7,6,.95);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+    nav a {
+      color: #8aaa96;
+      text-decoration: none;
+      font-size: .75rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    nav a:hover, nav a.active { color: var(--accent); }
+    nav .dot { color: var(--text-faint); font-size: .7rem; }
+
+    /* ── Layout ── */
+    .notes-app {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar-top {
+      padding: .75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    #btn-new {
+      width: 100%;
+      padding: .52rem;
+      border: 1px solid var(--border-hi);
+      border-radius: 8px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-family: var(--font-ui);
+      font-size: .8rem;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: background .2s, box-shadow .2s;
+    }
+    #btn-new:hover {
+      background: rgba(46,214,144,.34);
+      box-shadow: 0 0 14px rgba(46,214,144,.20);
+    }
+
+    #search {
+      width: 100%;
+      padding: .42rem .65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface2);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: .8rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #search::placeholder { color: var(--text-faint); }
+    #search:focus { border-color: var(--border-hi); }
+
+    .scope-filter {
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+    .scope-pill {
+      padding: .22rem .55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-dim);
+      font-family: var(--font-ui);
+      font-size: .7rem;
+      letter-spacing: .05em;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .scope-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .note-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: .5rem 0;
+    }
+    .note-list::-webkit-scrollbar { width: 4px; }
+    .note-list::-webkit-scrollbar-track { background: transparent; }
+    .note-list::-webkit-scrollbar-thumb { background: rgba(114,204,166,.18); border-radius: 2px; }
+
+    .note-item {
+      padding: .65rem .9rem;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: background .15s, border-color .15s;
+      user-select: none;
+    }
+    .note-item:hover { background: var(--surface2); }
+    .note-item.active {
+      background: var(--surface3);
+      border-left-color: var(--accent);
+    }
+    .note-item-title {
+      font-family: var(--font-ui);
+      font-size: .82rem;
+      color: var(--text);
+      margin-bottom: .2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .note-item.active .note-item-title { color: #dfffed; }
+    .note-item-meta {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+      font-size: .68rem;
+      color: var(--text-faint);
+    }
+    .note-item-scope {
+      padding: .1rem .35rem;
+      border-radius: 4px;
+      border: 1px solid rgba(114,204,166,.15);
+      color: var(--text-dim);
+      font-size: .64rem;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .note-item-preview {
+      font-size: .7rem;
+      color: var(--text-faint);
+      margin-top: .18rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty-list {
+      padding: 2rem .9rem;
+      text-align: center;
+      color: var(--text-faint);
+      font-size: .8rem;
+      line-height: 1.5;
+    }
+
+    /* ── Main editor area ── */
+    .editor-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg);
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .75rem;
+      color: var(--text-faint);
+    }
+    .empty-state .big { font-family: var(--font-sc); font-size: 1.4rem; color: var(--text-dim); letter-spacing: .08em; }
+    .empty-state .small { font-size: .8rem; }
+
+    #editor-panel {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      min-height: 0;
+    }
+    #editor-panel.visible { display: flex; }
+
+    /* Title */
+    .note-title-bar {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .85rem 1.5rem .55rem;
+      border-bottom: 1px solid var(--border);
+    }
+    #note-title {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--font-sc);
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: #e8faf0;
+      letter-spacing: .04em;
+    }
+    #note-title::placeholder { color: var(--text-faint); }
+
+    .title-scope {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      flex-shrink: 0;
+    }
+    .title-scope label { font-size: .7rem; color: var(--text-faint); letter-spacing: .05em; text-transform: uppercase; }
+    #scope-input {
+      padding: .28rem .55rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface2);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: .75rem;
+      width: 110px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #scope-input:focus { border-color: var(--border-hi); }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: .38rem .9rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-wrap: wrap;
+    }
+    .tb-sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 .25rem;
+      flex-shrink: 0;
+    }
+    .tb-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 26px;
+      padding: 0 5px;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--text-dim);
+      font-family: var(--font-ui);
+      font-size: .76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .13s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .tb-btn:hover { background: var(--surface3); border-color: var(--border); color: var(--text); }
+    .tb-btn.active { background: var(--accent-dim); border-color: rgba(46,214,144,.35); color: var(--accent); }
+    .tb-btn svg { width: 13px; height: 13px; fill: currentColor; pointer-events: none; }
+
+    /* Inline file-tag input that appears below toolbar */
+    .file-tag-row {
+      display: none;
+      align-items: center;
+      gap: .5rem;
+      padding: .35rem .9rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .file-tag-row.visible { display: flex; }
+    .file-tag-row label { font-size: .72rem; color: var(--text-dim); white-space: nowrap; }
+    #file-tag-input {
+      flex: 1;
+      max-width: 340px;
+      padding: .28rem .55rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: .8rem;
+      outline: none;
+    }
+    #file-tag-input:focus { border-color: var(--border-hi); }
+    .file-tag-row .btn-sm {
+      padding: .25rem .6rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface3);
+      color: var(--text-dim);
+      font-family: var(--font-ui);
+      font-size: .75rem;
+      cursor: pointer;
+    }
+    .file-tag-row .btn-sm:hover { color: var(--text); border-color: var(--border-hi); }
+
+    /* Link input row */
+    .link-row {
+      display: none;
+      align-items: center;
+      gap: .5rem;
+      padding: .35rem .9rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .link-row.visible { display: flex; }
+    .link-row label { font-size: .72rem; color: var(--text-dim); white-space: nowrap; }
+    #link-url-input {
+      flex: 1;
+      max-width: 400px;
+      padding: .28rem .55rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: .8rem;
+      outline: none;
+    }
+    #link-url-input:focus { border-color: var(--border-hi); }
+
+    /* Editor content */
+    .editor-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.6rem 2rem 3rem;
+    }
+    .editor-scroll::-webkit-scrollbar { width: 5px; }
+    .editor-scroll::-webkit-scrollbar-track { background: transparent; }
+    .editor-scroll::-webkit-scrollbar-thumb { background: rgba(114,204,166,.15); border-radius: 3px; }
+
+    #editor {
+      min-height: 100%;
+      max-width: 760px;
+      outline: none;
+      font-family: var(--font-body);
+      font-size: 1.15rem;
+      line-height: 1.75;
+      color: #d4ead9;
+      caret-color: var(--accent);
+    }
+
+    #editor:empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-faint);
+      pointer-events: none;
+    }
+
+    /* Editor content typography */
+    #editor h1, #editor h2, #editor h3 {
+      font-family: var(--font-sc);
+      color: #ecfdf5;
+      margin: 1.4em 0 .5em;
+      letter-spacing: .03em;
+    }
+    #editor h1 { font-size: 1.9rem; border-bottom: 1px solid var(--border); padding-bottom: .3em; }
+    #editor h2 { font-size: 1.45rem; }
+    #editor h3 { font-size: 1.18rem; color: #b5e8c8; }
+    #editor p  { margin: .5em 0; }
+    #editor a  { color: #6ec9e4; text-underline-offset: 2px; }
+    #editor a:hover { color: #a0e4f8; }
+    #editor strong { color: #dffaeb; font-weight: 600; }
+    #editor em { color: #c9e8d8; font-style: italic; }
+    #editor s  { color: var(--text-dim); }
+
+    #editor ul, #editor ol { margin: .5em 0 .5em 1.4em; }
+    #editor li { margin: .25em 0; }
+    #editor li::marker { color: var(--accent); }
+
+    #editor blockquote {
+      border-left: 3px solid var(--ember);
+      margin: 1em 0;
+      padding: .4em 1em;
+      background: var(--ember-dim);
+      border-radius: 0 6px 6px 0;
+      color: #ddc8a8;
+      font-style: italic;
+    }
+
+    #editor pre, #editor code {
+      font-family: ui-monospace, SFMono-Regular, 'Fira Code', Consolas, monospace;
+      font-size: .9em;
+    }
+    #editor pre {
+      background: #040706;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: .9em 1.1em;
+      margin: 1em 0;
+      overflow-x: auto;
+      color: #9decbe;
+      line-height: 1.55;
+    }
+    #editor code:not(pre code) {
+      background: rgba(46,214,144,.10);
+      border: 1px solid rgba(46,214,144,.18);
+      border-radius: 4px;
+      padding: .08em .35em;
+      color: #8ee8b8;
+    }
+    #editor hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.4em 0;
+    }
+
+    #editor img.note-img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin: .8em 0;
+      display: block;
+    }
+
+    #editor .file-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .3em;
+      padding: .15em .55em;
+      border: 1px solid rgba(114,204,166,.30);
+      border-radius: 5px;
+      background: rgba(46,214,144,.07);
+      color: #9de8b8;
+      font-family: ui-monospace, monospace;
+      font-size: .82em;
+      cursor: default;
+      user-select: all;
+      white-space: nowrap;
+    }
+
+    /* Image drop overlay */
+    .drop-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(7,9,10,.8);
+      border: 2px dashed var(--accent);
+      border-radius: 4px;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-sc);
+      font-size: 1.3rem;
+      letter-spacing: .06em;
+      color: var(--accent);
+      z-index: 20;
+      pointer-events: none;
+    }
+    .drop-overlay.visible { display: flex; }
+    .editor-wrap { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+    /* Footer */
+    .editor-footer {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .4rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      font-size: .72rem;
+      color: var(--text-faint);
+    }
+    #save-status { min-width: 60px; }
+    #save-status.saving { color: var(--ember); }
+    #save-status.saved  { color: var(--text-dim); }
+    #save-status.error  { color: var(--danger); }
+    .word-count { margin-left: auto; }
+
+    #btn-delete-note {
+      padding: .25rem .65rem;
+      border: 1px solid rgba(208,96,96,.3);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--danger);
+      font-family: var(--font-ui);
+      font-size: .72rem;
+      cursor: pointer;
+      opacity: .7;
+      transition: opacity .15s, background .15s;
+    }
+    #btn-delete-note:hover { opacity: 1; background: rgba(208,96,96,.12); }
+
+    /* Hidden image file input */
+    #img-file-input { display: none; }
+
+    /* Shortcut hint row */
+    .hint-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: .3rem 1.5rem;
+      background: rgba(7,9,10,.5);
+      border-top: 1px solid var(--border);
+      font-size: .65rem;
+      color: var(--text-faint);
+    }
+    .hint-row kbd {
+      display: inline-block;
+      padding: .05em .3em;
+      border: 1px solid var(--text-faint);
+      border-radius: 3px;
+      font-size: .9em;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/">Chamber Matrix</a>
+  <span class="dot">·</span>
+  <a href="/ygg-chat.html">Yggdrasil</a>
+  <span class="dot">·</span>
+  <a href="/hearthroom.html">Hearthroom</a>
+  <span class="dot">·</span>
+  <a href="/grove.html">Grove</a>
+  <span class="dot">·</span>
+  <a href="/notes.html" class="active">Notes</a>
+</nav>
+
+<div class="notes-app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <button id="btn-new">+ New Note</button>
+      <input id="search" type="search" placeholder="Search notes…" autocomplete="off" />
+      <div class="scope-filter" id="scope-filter">
+        <button class="scope-pill active" data-scope="">All</button>
+        <button class="scope-pill" data-scope="global">Global</button>
+      </div>
+    </div>
+    <div class="note-list" id="note-list">
+      <div class="empty-list">No notes yet.<br/>Press + to begin.</div>
+    </div>
+  </aside>
+
+  <!-- Editor area -->
+  <div class="editor-area">
+
+    <!-- Empty state -->
+    <div class="empty-state" id="empty-state">
+      <div class="big">Hearthweave Notes</div>
+      <div class="small">Select a note or press + to create one</div>
+    </div>
+
+    <!-- Editor panel (hidden until a note is selected) -->
+    <div id="editor-panel">
+
+      <div class="note-title-bar">
+        <input id="note-title" type="text" placeholder="Note title…" spellcheck="true" autocomplete="off" />
+        <div class="title-scope">
+          <label for="scope-input">scope</label>
+          <input id="scope-input" type="text" placeholder="global" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="toolbar" id="toolbar">
+        <!-- Text format -->
+        <button class="tb-btn" data-cmd="bold"          title="Bold (Ctrl+B)"><b>B</b></button>
+        <button class="tb-btn" data-cmd="italic"        title="Italic (Ctrl+I)"><i>I</i></button>
+        <button class="tb-btn" data-cmd="underline"     title="Underline (Ctrl+U)"><u>U</u></button>
+        <button class="tb-btn" data-cmd="strikeThrough" title="Strikethrough (Ctrl+Shift+X)"><s>S</s></button>
+        <div class="tb-sep"></div>
+        <!-- Blocks -->
+        <button class="tb-btn" data-cmd="block-h1"  title="Heading 1 (Ctrl+Shift+1)">H1</button>
+        <button class="tb-btn" data-cmd="block-h2"  title="Heading 2 (Ctrl+Shift+2)">H2</button>
+        <button class="tb-btn" data-cmd="block-h3"  title="Heading 3 (Ctrl+Shift+3)">H3</button>
+        <button class="tb-btn" data-cmd="block-pre" title="Code block (Ctrl+Shift+K)">{ }</button>
+        <button class="tb-btn" data-cmd="block-blockquote" title="Blockquote (Ctrl+Shift+Q)">"</button>
+        <button class="tb-btn" data-cmd="block-p"   title="Normal paragraph (Ctrl+Shift+0)">¶</button>
+        <div class="tb-sep"></div>
+        <!-- Inline code -->
+        <button class="tb-btn" data-cmd="inline-code" title="Inline code (Ctrl+`)">`</button>
+        <!-- Lists -->
+        <button class="tb-btn" data-cmd="insertUnorderedList" title="Bullet list (Ctrl+Shift+8)">• —</button>
+        <button class="tb-btn" data-cmd="insertOrderedList"   title="Numbered list (Ctrl+Shift+7)">1.</button>
+        <div class="tb-sep"></div>
+        <!-- Link, image, file -->
+        <button class="tb-btn" data-cmd="link"       title="Insert link (Ctrl+K)">🔗</button>
+        <button class="tb-btn" data-cmd="image"      title="Insert image (Ctrl+Shift+I)">🖼</button>
+        <button class="tb-btn" data-cmd="file-tag"   title="Tag a file (Ctrl+Shift+F)">📎</button>
+        <div class="tb-sep"></div>
+        <!-- Divider -->
+        <button class="tb-btn" data-cmd="insertHorizontalRule" title="Horizontal rule">—</button>
+        <button class="tb-btn" data-cmd="removeFormat" title="Clear formatting">✕fmt</button>
+      </div>
+
+      <!-- File tag input row -->
+      <div class="file-tag-row" id="file-tag-row">
+        <label>📎 Tag file path or name:</label>
+        <input id="file-tag-input" type="text" placeholder="e.g. docs/design.md or design.md" autocomplete="off" />
+        <button class="btn-sm" id="file-tag-confirm">Insert</button>
+        <button class="btn-sm" id="file-tag-cancel">Cancel</button>
+      </div>
+
+      <!-- Link input row -->
+      <div class="link-row" id="link-row">
+        <label>🔗 URL:</label>
+        <input id="link-url-input" type="url" placeholder="https://…" autocomplete="off" />
+        <button class="btn-sm" id="link-confirm">Insert</button>
+        <button class="btn-sm" id="link-cancel">Cancel</button>
+      </div>
+
+      <div class="editor-wrap" id="editor-wrap">
+        <div class="drop-overlay" id="drop-overlay">Drop image here</div>
+        <div class="editor-scroll">
+          <div
+            id="editor"
+            contenteditable="true"
+            spellcheck="true"
+            data-placeholder="Begin writing…"
+          ></div>
+        </div>
+      </div>
+
+      <div class="editor-footer">
+        <span id="save-status" class="saved">Saved</span>
+        <span id="word-count" class="word-count">0 words</span>
+        <button id="btn-delete-note">Delete note</button>
+      </div>
+
+      <div class="hint-row">
+        <span><kbd>Ctrl+B</kbd> bold</span>
+        <span><kbd>Ctrl+I</kbd> italic</span>
+        <span><kbd>Ctrl+U</kbd> underline</span>
+        <span><kbd>Ctrl+Shift+X</kbd> strike</span>
+        <span><kbd>Ctrl+Shift+1/2/3</kbd> headings</span>
+        <span><kbd>Ctrl+Shift+K</kbd> code block</span>
+        <span><kbd>Ctrl+`</kbd> inline code</span>
+        <span><kbd>Ctrl+Shift+Q</kbd> blockquote</span>
+        <span><kbd>Ctrl+K</kbd> link</span>
+        <span><kbd>Ctrl+Shift+I</kbd> image</span>
+        <span><kbd>Ctrl+Shift+F</kbd> tag file</span>
+        <span><kbd>Ctrl+Shift+8</kbd> bullet list</span>
+        <span><kbd>Ctrl+Shift+7</kbd> numbered list</span>
+        <span><kbd>Ctrl+S</kbd> save now</span>
+      </div>
+
+    </div><!-- #editor-panel -->
+
+  </div><!-- .editor-area -->
+
+</div><!-- .notes-app -->
+
+<input type="file" id="img-file-input" accept="image/*" />
+
+<script>
+'use strict';
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let notes        = [];
+let activeNoteId = null;
+let saveTimer    = null;
+let savedRange   = null; // saved selection range for toolbar ops that lose focus
+
+// ─── DOM refs ────────────────────────────────────────────────────────────────
+const noteList      = document.getElementById('note-list');
+const editorPanel   = document.getElementById('editor-panel');
+const emptyState    = document.getElementById('empty-state');
+const editorEl      = document.getElementById('editor');
+const titleEl       = document.getElementById('note-title');
+const scopeEl       = document.getElementById('scope-input');
+const saveStatus    = document.getElementById('save-status');
+const wordCountEl   = document.getElementById('word-count');
+const searchEl      = document.getElementById('search');
+const scopeFilter   = document.getElementById('scope-filter');
+const dropOverlay   = document.getElementById('drop-overlay');
+const imgFileInput  = document.getElementById('img-file-input');
+const fileTagRow    = document.getElementById('file-tag-row');
+const fileTagInput  = document.getElementById('file-tag-input');
+const linkRow       = document.getElementById('link-row');
+const linkUrlInput  = document.getElementById('link-url-input');
+
+let activeScope = ''; // '' = all, 'global' = global, anything else = project
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function stripHtml(html) {
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function wordCount(html) {
+  const text = stripHtml(html);
+  return text ? text.split(/\s+/).length : 0;
+}
+function relativeTime(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function setSaveStatus(state, msg) {
+  saveStatus.className = state;
+  saveStatus.textContent = msg || (state === 'saving' ? 'Saving…' : state === 'saved' ? 'Saved' : 'Error');
+}
+
+// ─── Save selection before toolbar button clicks steal focus ─────────────────
+document.getElementById('toolbar').addEventListener('mousedown', () => {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+});
+
+function restoreSelection() {
+  if (!savedRange) return;
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(savedRange);
+}
+
+// ─── Format commands ─────────────────────────────────────────────────────────
+function execFmt(cmd) {
+  editorEl.focus();
+  restoreSelection();
+  document.execCommand(cmd, false, null);
+  updateToolbarState();
+  scheduleSave();
+}
+
+function execBlock(tag) {
+  editorEl.focus();
+  restoreSelection();
+  // Toggle: if already in this block, revert to paragraph
+  const sel = window.getSelection();
+  const node = sel?.anchorNode;
+  const block = node ? node.parentElement?.closest('h1,h2,h3,pre,blockquote') : null;
+  if (block && block.tagName.toLowerCase() === tag) {
+    document.execCommand('formatBlock', false, 'p');
+  } else {
+    document.execCommand('formatBlock', false, tag);
+  }
+  updateToolbarState();
+  scheduleSave();
+}
+
+function execInlineCode() {
+  editorEl.focus();
+  restoreSelection();
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  const range = sel.getRangeAt(0);
+  // Check if already wrapped in <code>
+  const ancestor = sel.anchorNode?.parentElement?.closest('code:not(pre code)');
+  if (ancestor) {
+    // Unwrap
+    const text = document.createTextNode(ancestor.textContent);
+    ancestor.replaceWith(text);
+  } else {
+    const code = document.createElement('code');
+    range.surroundContents(code);
+  }
+  scheduleSave();
+}
+
+// ─── Toolbar button dispatch ──────────────────────────────────────────────────
+document.getElementById('toolbar').addEventListener('mousedown', (e) => {
+  const btn = e.target.closest('[data-cmd]');
+  if (!btn) return;
+  e.preventDefault();
+  const cmd = btn.dataset.cmd;
+
+  if (['bold','italic','underline','strikeThrough','insertUnorderedList','insertOrderedList','insertHorizontalRule','removeFormat'].includes(cmd)) {
+    execFmt(cmd);
+  } else if (cmd.startsWith('block-')) {
+    execBlock(cmd.replace('block-', ''));
+  } else if (cmd === 'inline-code') {
+    execInlineCode();
+  } else if (cmd === 'image') {
+    imgFileInput.click();
+  } else if (cmd === 'file-tag') {
+    toggleFileTagRow();
+  } else if (cmd === 'link') {
+    toggleLinkRow();
+  }
+});
+
+// ─── Toolbar state updater ────────────────────────────────────────────────────
+function updateToolbarState() {
+  const cmds = ['bold','italic','underline','strikeThrough','insertUnorderedList','insertOrderedList'];
+  cmds.forEach(cmd => {
+    const btn = document.querySelector(`[data-cmd="${cmd}"]`);
+    if (btn) btn.classList.toggle('active', document.queryCommandState(cmd));
+  });
+  // Block detection
+  const node = window.getSelection()?.anchorNode;
+  const block = node?.parentElement?.closest('h1,h2,h3,pre,blockquote');
+  ['block-h1','block-h2','block-h3','block-pre','block-blockquote'].forEach(cmd => {
+    const btn = document.querySelector(`[data-cmd="${cmd}"]`);
+    const tag = cmd.replace('block-','').toLowerCase();
+    if (btn) btn.classList.toggle('active', block?.tagName?.toLowerCase() === tag);
+  });
+}
+
+editorEl.addEventListener('keyup', updateToolbarState);
+editorEl.addEventListener('mouseup', updateToolbarState);
+
+// ─── File-tag row ─────────────────────────────────────────────────────────────
+function toggleFileTagRow() {
+  fileTagRow.classList.toggle('visible');
+  linkRow.classList.remove('visible');
+  if (fileTagRow.classList.contains('visible')) {
+    savedRange = window.getSelection()?.rangeCount ? window.getSelection().getRangeAt(0).cloneRange() : savedRange;
+    fileTagInput.value = '';
+    fileTagInput.focus();
+  }
+}
+document.getElementById('file-tag-confirm').addEventListener('click', insertFileTag);
+document.getElementById('file-tag-cancel').addEventListener('click', () => fileTagRow.classList.remove('visible'));
+fileTagInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); insertFileTag(); }
+  if (e.key === 'Escape') fileTagRow.classList.remove('visible');
+});
+
+function insertFileTag() {
+  const val = fileTagInput.value.trim();
+  if (!val) { fileTagRow.classList.remove('visible'); return; }
+  const name = val.split('/').pop().split('\\').pop() || val;
+  editorEl.focus();
+  restoreSelection();
+  const span = document.createElement('span');
+  span.className = 'file-tag';
+  span.dataset.path = val;
+  span.setAttribute('contenteditable', 'false');
+  span.textContent = `📎 ${name}`;
+  const sel = window.getSelection();
+  if (sel?.rangeCount) {
+    const range = sel.getRangeAt(0);
+    range.collapse(false);
+    range.insertNode(span);
+    range.setStartAfter(span);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  fileTagRow.classList.remove('visible');
+  scheduleSave();
+}
+
+// ─── Link row ─────────────────────────────────────────────────────────────────
+function toggleLinkRow() {
+  linkRow.classList.toggle('visible');
+  fileTagRow.classList.remove('visible');
+  if (linkRow.classList.contains('visible')) {
+    savedRange = window.getSelection()?.rangeCount ? window.getSelection().getRangeAt(0).cloneRange() : savedRange;
+    linkUrlInput.value = '';
+    linkUrlInput.focus();
+  }
+}
+document.getElementById('link-confirm').addEventListener('click', insertLink);
+document.getElementById('link-cancel').addEventListener('click', () => linkRow.classList.remove('visible'));
+linkUrlInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); insertLink(); }
+  if (e.key === 'Escape') linkRow.classList.remove('visible');
+});
+
+function insertLink() {
+  const url = linkUrlInput.value.trim();
+  if (!url) { linkRow.classList.remove('visible'); return; }
+  editorEl.focus();
+  restoreSelection();
+  document.execCommand('createLink', false, url);
+  const links = editorEl.querySelectorAll('a:not([target])');
+  links.forEach(a => { a.target = '_blank'; a.rel = 'noopener'; });
+  linkRow.classList.remove('visible');
+  scheduleSave();
+}
+
+// ─── Image upload ─────────────────────────────────────────────────────────────
+async function uploadAndInsertImage(file) {
+  if (!file.type.startsWith('image/')) return;
+  const fd = new FormData();
+  fd.append('image', file);
+  setSaveStatus('saving', 'Uploading…');
+  try {
+    const res = await fetch('/api/notes/images', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!data.url) throw new Error('No URL returned');
+    editorEl.focus();
+    restoreSelection();
+    const img = document.createElement('img');
+    img.src = data.url;
+    img.className = 'note-img';
+    img.alt = file.name;
+    const sel = window.getSelection();
+    if (sel?.rangeCount) {
+      const range = sel.getRangeAt(0);
+      range.collapse(false);
+      range.insertNode(img);
+      range.setStartAfter(img);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    setSaveStatus('saved');
+    scheduleSave();
+  } catch (err) {
+    setSaveStatus('error', 'Upload failed');
+    console.error(err);
+  }
+}
+
+imgFileInput.addEventListener('change', () => {
+  const file = imgFileInput.files[0];
+  if (file) uploadAndInsertImage(file);
+  imgFileInput.value = '';
+});
+
+// Paste handler (image from clipboard)
+editorEl.addEventListener('paste', (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      uploadAndInsertImage(item.getAsFile());
+      return;
+    }
+  }
+  // Plain text paste — default handled by browser via contenteditable
+});
+
+// Drag-and-drop images onto editor
+const editorWrap = document.getElementById('editor-wrap');
+editorWrap.addEventListener('dragover', (e) => { e.preventDefault(); dropOverlay.classList.add('visible'); });
+editorWrap.addEventListener('dragleave', () => dropOverlay.classList.remove('visible'));
+editorWrap.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropOverlay.classList.remove('visible');
+  const file = e.dataTransfer.files[0];
+  if (file) uploadAndInsertImage(file);
+});
+
+// ─── Keyboard shortcuts ───────────────────────────────────────────────────────
+editorEl.addEventListener('keydown', (e) => {
+  const ctrl = e.ctrlKey || e.metaKey;
+  const shift = e.shiftKey;
+
+  if (ctrl && !shift) {
+    if (e.key === 'b') { e.preventDefault(); execFmt('bold'); return; }
+    if (e.key === 'i') { e.preventDefault(); execFmt('italic'); return; }
+    if (e.key === 'u') { e.preventDefault(); execFmt('underline'); return; }
+    if (e.key === 'k') { e.preventDefault(); toggleLinkRow(); return; }
+    if (e.key === 's') { e.preventDefault(); saveNow(); return; }
+    if (e.key === '`') { e.preventDefault(); execInlineCode(); return; }
+  }
+
+  if (ctrl && shift) {
+    if (e.key === 'X' || e.key === 'x') { e.preventDefault(); execFmt('strikeThrough'); return; }
+    if (e.key === '1' || e.key === '!') { e.preventDefault(); execBlock('h1'); return; }
+    if (e.key === '2' || e.key === '@') { e.preventDefault(); execBlock('h2'); return; }
+    if (e.key === '3' || e.key === '#') { e.preventDefault(); execBlock('h3'); return; }
+    if (e.key === '0' || e.key === ')') { e.preventDefault(); execBlock('p'); return; }
+    if (e.key === 'K' || e.key === 'k') { e.preventDefault(); execBlock('pre'); return; }
+    if (e.key === 'Q' || e.key === 'q') { e.preventDefault(); execBlock('blockquote'); return; }
+    if (e.key === '8' || e.key === '*') { e.preventDefault(); execFmt('insertUnorderedList'); return; }
+    if (e.key === '7' || e.key === '&') { e.preventDefault(); execFmt('insertOrderedList'); return; }
+    if (e.key === 'I' || e.key === 'i') { e.preventDefault(); imgFileInput.click(); return; }
+    if (e.key === 'F' || e.key === 'f') { e.preventDefault(); toggleFileTagRow(); return; }
+  }
+});
+
+// ─── Auto-save ────────────────────────────────────────────────────────────────
+function scheduleSave() {
+  if (!activeNoteId) return;
+  setSaveStatus('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 1200);
+  updateWordCount();
+}
+
+async function saveNow() {
+  if (!activeNoteId) return;
+  clearTimeout(saveTimer);
+  const content = editorEl.innerHTML;
+  const title   = titleEl.value.trim() || 'Untitled';
+  const scope   = scopeEl.value.trim() || 'global';
+  try {
+    const res = await fetch(`/api/notes/${activeNoteId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, content, scope }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    setSaveStatus('saved');
+    // Update sidebar entry without full reload
+    const idx = notes.findIndex(n => n.id === activeNoteId);
+    if (idx !== -1) {
+      notes[idx].title = title;
+      notes[idx].scope = scope;
+      notes[idx].metadata.updatedAt = new Date().toISOString();
+      renderNoteList();
+    }
+  } catch (err) {
+    setSaveStatus('error', 'Save failed');
+    console.error(err);
+  }
+}
+
+editorEl.addEventListener('input', scheduleSave);
+titleEl.addEventListener('input', scheduleSave);
+scopeEl.addEventListener('input', scheduleSave);
+
+function updateWordCount() {
+  const count = wordCount(editorEl.innerHTML);
+  wordCountEl.textContent = `${count} word${count !== 1 ? 's' : ''}`;
+}
+
+// ─── Note list rendering ──────────────────────────────────────────────────────
+function renderNoteList() {
+  const q = searchEl.value.toLowerCase();
+  let filtered = notes.filter(n => {
+    if (activeScope && n.scope !== activeScope) return false;
+    if (q && !n.title.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    noteList.innerHTML = `<div class="empty-list">${q ? 'No notes match your search.' : 'No notes yet.<br/>Press + to begin.'}</div>`;
+    return;
+  }
+
+  noteList.innerHTML = filtered.map(n => {
+    const active = n.id === activeNoteId ? ' active' : '';
+    const date   = relativeTime(n.metadata?.updatedAt || n.metadata?.createdAt || '');
+    return `
+      <div class="note-item${active}" data-id="${n.id}">
+        <div class="note-item-title">${escHtml(n.title || 'Untitled')}</div>
+        <div class="note-item-meta">
+          <span>${date}</span>
+          ${n.scope ? `<span class="note-item-scope">${escHtml(n.scope)}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  noteList.querySelectorAll('.note-item').forEach(el => {
+    el.addEventListener('click', () => openNote(el.dataset.id));
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Load and open notes ──────────────────────────────────────────────────────
+async function loadNoteList() {
+  try {
+    const params = new URLSearchParams();
+    if (activeScope) params.set('scope', activeScope);
+    const res = await fetch('/api/notes' + (params.toString() ? '?' + params : ''));
+    const data = await res.json();
+    notes = data.notes || [];
+    renderNoteList();
+
+    // Auto-open selected note if none active
+    if (!activeNoteId && data.selectedNoteId) {
+      openNote(data.selectedNoteId);
+    }
+  } catch (err) {
+    console.error('Failed to load notes:', err);
+  }
+}
+
+async function openNote(id) {
+  if (activeNoteId === id) return;
+  // Save current before switching
+  if (activeNoteId) await saveNow();
+
+  activeNoteId = id;
+  try {
+    const res = await fetch(`/api/notes/${id}`);
+    if (!res.ok) throw new Error('Not found');
+    const note = await res.json();
+
+    titleEl.value    = note.title || '';
+    scopeEl.value    = note.scope !== 'global' ? (note.scope || '') : '';
+    editorEl.innerHTML = note.content || '';
+    setSaveStatus('saved');
+    updateWordCount();
+
+    emptyState.style.display  = 'none';
+    editorPanel.classList.add('visible');
+
+    renderNoteList();
+    titleEl.focus();
+  } catch (err) {
+    console.error('Failed to open note:', err);
+  }
+}
+
+// ─── New note ─────────────────────────────────────────────────────────────────
+document.getElementById('btn-new').addEventListener('click', async () => {
+  if (activeNoteId) await saveNow();
+  try {
+    const res = await fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Untitled', content: '', scope: activeScope || 'global' }),
+    });
+    const note = await res.json();
+    notes.unshift({ id: note.id, title: note.title, scope: note.scope, metadata: note.metadata });
+    activeNoteId = null; // force re-open
+    await openNote(note.id);
+    titleEl.select();
+  } catch (err) {
+    console.error('Failed to create note:', err);
+  }
+});
+
+// ─── Delete note ──────────────────────────────────────────────────────────────
+document.getElementById('btn-delete-note').addEventListener('click', async () => {
+  if (!activeNoteId) return;
+  if (!confirm(`Delete "${titleEl.value || 'this note'}"?`)) return;
+  clearTimeout(saveTimer);
+  try {
+    await fetch(`/api/notes/${activeNoteId}`, { method: 'DELETE' });
+    notes = notes.filter(n => n.id !== activeNoteId);
+    activeNoteId = null;
+    editorPanel.classList.remove('visible');
+    emptyState.style.display = '';
+    renderNoteList();
+    // Open first remaining note if any
+    if (notes.length) openNote(notes[0].id);
+  } catch (err) {
+    console.error('Failed to delete note:', err);
+  }
+});
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+searchEl.addEventListener('input', renderNoteList);
+
+// ─── Scope filter ─────────────────────────────────────────────────────────────
+scopeFilter.addEventListener('click', (e) => {
+  const pill = e.target.closest('.scope-pill');
+  if (!pill) return;
+  activeScope = pill.dataset.scope;
+  scopeFilter.querySelectorAll('.scope-pill').forEach(p => p.classList.toggle('active', p === pill));
+  renderNoteList();
+});
+
+// Dynamically add scope pills from loaded notes
+function refreshScopePills() {
+  const scopes = [...new Set(notes.map(n => n.scope).filter(Boolean).filter(s => s !== 'global'))];
+  const existing = [...scopeFilter.querySelectorAll('.scope-pill')].map(p => p.dataset.scope);
+  scopes.forEach(s => {
+    if (!existing.includes(s)) {
+      const pill = document.createElement('button');
+      pill.className = 'scope-pill';
+      pill.dataset.scope = s;
+      pill.textContent = s;
+      scopeFilter.appendChild(pill);
+    }
+  });
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+(async () => {
+  await loadNoteList();
+  refreshScopePills();
+})();
+</script>
+</body>
+</html>
