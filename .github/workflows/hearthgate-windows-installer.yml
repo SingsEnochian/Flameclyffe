@@ -102,6 +102,7 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          INSTALLER_NAME: ${{ steps.verify.outputs.installer_name }}
         run: |
           $tag = "${{ github.ref_name }}"
           $files = @(
@@ -116,6 +117,3 @@ jobs:
           } else {
             gh release create $tag @files --title "Hearthgate $tag" --generate-notes
           }
-        env:
-          GH_TOKEN: ${{ github.token }}
-          INSTALLER_NAME: ${{ steps.verify.outputs.installer_name }}
