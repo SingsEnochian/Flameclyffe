@@ -27,23 +27,41 @@
   <link rel='stylesheet' href='./src/starwell-desktop-containment.css'/>
   <link rel='stylesheet' href='./src/living-room-door.css'/>
   <link rel='stylesheet' href='./src/glyph-studio-door.css'/>
+  <link rel='stylesheet' href='./src/framework-door-rack.css'/>
 </head>
 <body>
   <div id='root'></div>
-  <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the STARWELL Living Room'>
-    <span class='living-room-doorway-mark' aria-hidden='true'>✴</span>
-    <span class='living-room-doorway-copy'>
-      <strong>Enter the Living Room</strong>
-      <em>Hearth, doors, anchor field, and Fifth Form centre.</em>
-    </span>
-  </a>
-  <a class='glyph-studio-doorway' href='./glyph-studio/' aria-label='Open the STARWELL Glyph Studio'>
-    <span class='glyph-studio-doorway-mark' aria-hidden='true'>◇</span>
-    <span class='glyph-studio-doorway-copy'>
-      <strong>Open Glyph Studio</strong>
-      <em>Apple Pencil canvas, brushes, colour, layers, text, and SVG handoff.</em>
-    </span>
-  </a>
+  <nav class='framework-door-rack' aria-label='STARWELL framework doors'>
+    <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the STARWELL Living Room'>
+      <span class='living-room-doorway-mark' aria-hidden='true'>✴</span>
+      <span class='living-room-doorway-copy'>
+        <strong>Enter the Living Room</strong>
+        <em>Hearth, doors, anchor field, and Fifth Form centre.</em>
+      </span>
+    </a>
+    <a class='glyph-studio-doorway framework-doorway-glyph' href='./glyph-studio/' aria-label='Open the STARWELL Glyph Studio'>
+      <span class='glyph-studio-doorway-mark' aria-hidden='true'>◇</span>
+      <span class='glyph-studio-doorway-copy'>
+        <strong>Open Glyph Studio</strong>
+        <em>Apple Pencil canvas, brushes, colour, layers, text, and local FontForge handoff.</em>
+      </span>
+    </a>
+    <a class='living-room-doorway framework-doorway-hearthgate' id='hearthgate-local-door' href='../hearthgate.html' aria-label='Open the local Hearthgate rooms' hidden>
+      <span class='living-room-doorway-mark' aria-hidden='true'>⬡</span>
+      <span class='living-room-doorway-copy'>
+        <strong>Open Hearthgate</strong>
+        <em>Local rooms, Grove chat, Archive, notes, and House configuration.</em>
+      </span>
+    </a>
+  </nav>
   <div id='city-state-motion-root'></div>
+  <script>
+    (() => {
+      const localShell = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)
+        && window.location.pathname.startsWith('/starwell/');
+      const door = document.getElementById('hearthgate-local-door');
+      if (localShell && door) door.hidden = false;
+    })();
+  </script>
 </body>
 </html>
