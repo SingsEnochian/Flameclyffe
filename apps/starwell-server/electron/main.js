@@ -8,9 +8,11 @@ const net   = require('net');
 const CONFIG_PATH = path.join(app.getPath('userData'), 'hearthgate-config.json');
 const DATA_DIR    = path.join(app.getPath('userData'), 'hearthgate-data');
 const PORT = 3841;
+const FONTFORGE_PORT = 3842;
 
 let win = null;
 let serverProc = null;
+let fontForgeProc = null;
 
 // ── Config ────────────────────────────────────────────────────────────────────
 function loadConfig() {
@@ -23,11 +25,22 @@ function saveConfig(cfg) {
 }
 
 // ── Server ────────────────────────────────────────────────────────────────────
-function startServer(cfg) {
+function stopServers() {
   if (serverProc) { serverProc.kill(); serverProc = null; }
+  if (fontForgeProc) { fontForgeProc.kill(); fontForgeProc = null; }
+}
+
+function startServer(cfg) {
+  stopServers();
 
   const serverPath = path.join(app.getAppPath(), 'server.js');
-  const env = { ...process.env, PORT: String(PORT), HEARTHGATE_DATA_DIR: DATA_DIR };
+  const fontForgeServerPath = path.join(app.getAppPath(), 'fontforge', 'server.js');
+  const env = {
+    ...process.env,
+    PORT: String(PORT),
+    FONTFORGE_PORT: String(FONTFORGE_PORT),
+    HEARTHGATE_DATA_DIR: DATA_DIR,
+  };
 
   if (cfg?.keys) {
     const k = cfg.keys;
@@ -47,6 +60,12 @@ function startServer(cfg) {
 
   serverProc = fork(serverPath, [], { env, silent: false });
   serverProc.on('error', err => console.error('[Hearthgate] Server error:', err));
+
+  fontForgeProc = fork(fontForgeServerPath, [], { env, silent: false });
+  fontForgeProc.on('error', err => console.error('[Hearthgate] FontForge worker error:', err));
+  fontForgeProc.on('exit', (code, signal) => {
+    if (code || signal) console.warn(`[Hearthgate] FontForge worker stopped (${signal || code}).`);
+  });
 }
 
 // ── Wait for server ready ─────────────────────────────────────────────────────
@@ -137,5 +156,5 @@ app.whenReady().then(async () => {
   }
 });
 
-app.on('window-all-closed', () => { serverProc?.kill(); app.quit(); });
-app.on('will-quit', () => serverProc?.kill());
+app.on('window-all-closed', () => { stopServers(); app.quit(); });
+app.on('will-quit', () => stopServers());
