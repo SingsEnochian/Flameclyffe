@@ -1,0 +1,46 @@
+.framework-door-rack {
+  position: relative;
+  z-index: 12;
+  width: min(96vw, 72rem);
+  margin: 0 auto 1.25rem;
+  padding-inline: max(0.75rem, env(safe-area-inset-left));
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.framework-door-rack .living-room-doorway {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-height: 4.5rem;
+}
+
+.framework-door-rack .framework-doorway-hearthgate {
+  border-color: rgba(163, 226, 201, 0.3);
+}
+
+.framework-door-rack .framework-doorway-hearthgate .living-room-doorway-mark,
+.framework-door-rack .framework-doorway-hearthgate .living-room-doorway-copy strong {
+  color: #a3e2c9;
+}
+
+.framework-door-rack .framework-doorway-glyph {
+  border-color: rgba(207, 157, 123, 0.34);
+}
+
+.framework-door-rack .framework-doorway-glyph .living-room-doorway-mark,
+.framework-door-rack .framework-doorway-glyph .living-room-doorway-copy strong {
+  color: #cf9d7b;
+}
+
+.framework-door-rack [hidden] {
+  display: none !important;
+}
+
+@media (max-width: 860px) {
+  .framework-door-rack {
+    grid-template-columns: 1fr;
+    width: min(100%, 40rem);
+  }
+}
