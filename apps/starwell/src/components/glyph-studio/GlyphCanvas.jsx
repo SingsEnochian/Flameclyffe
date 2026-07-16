@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { VIEWBOX, brushRuntime, clamp, makeId } from './glyphStudioModel.js';
+import RasterSurface from './RasterSurface.jsx';
 
 function pointWidth(stroke, point, index) {
   const pressure = clamp(point.pressure ?? 0.5, stroke.brush.minPressure, 1);
@@ -122,7 +123,10 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
   const drawingRef = useRef(null);
   const [draftStroke, setDraftStroke] = useState(null);
   const [stylus, setStylus] = useState({ type: 'none', pressure: 0, tiltX: 0, tiltY: 0, twist: 0 });
-  const visibleLayers = useMemo(() => glyph.layers.filter((layer) => layer.visible), [glyph.layers]);
+  const visibleVectorLayers = useMemo(
+    () => glyph.layers.filter((layer) => layer.visible && layer.kind !== 'raster'),
+    [glyph.layers],
+  );
 
   function eventPoint(event) {
     const matrix = svgRef.current?.getScreenCTM();
@@ -194,31 +198,34 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
 
   return (
     <div className="glyph-stage-wrap">
-      <svg
-        ref={svgRef}
-        className="glyph-stage"
-        viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}
-        onPointerDown={startStroke}
-        onPointerMove={moveStroke}
-        onPointerUp={finishStroke}
-        onPointerCancel={finishStroke}
-        aria-label={`Drawing canvas for ${glyph.name}`}
-      >
-        <rect width={VIEWBOX} height={VIEWBOX} className="stage-paper" />
-        <MetricGuides guides={guides} />
-        {visibleLayers.map((layer) => (
-          <g key={layer.id} opacity={layer.opacity} style={{ mixBlendMode: layerBlend(layer.blendMode) }} data-layer-kind={layer.kind}>
-            {layer.kind === 'text' && <TextLayerMark layer={layer} />}
-            {glyph.strokes.filter((stroke) => stroke.layerId === layer.id).map((stroke) => <StrokeMarks key={stroke.id} stroke={stroke} />)}
-          </g>
-        ))}
-        {draftStroke && <StrokeMarks stroke={draftStroke} />}
-      </svg>
+      <div className="glyph-stage-surface">
+        <RasterSurface glyph={glyph} />
+        <svg
+          ref={svgRef}
+          className="glyph-stage"
+          viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}
+          onPointerDown={startStroke}
+          onPointerMove={moveStroke}
+          onPointerUp={finishStroke}
+          onPointerCancel={finishStroke}
+          aria-label={`Drawing canvas for ${glyph.name}`}
+        >
+          <MetricGuides guides={guides} />
+          {visibleVectorLayers.map((layer) => (
+            <g key={layer.id} opacity={layer.opacity} style={{ mixBlendMode: layerBlend(layer.blendMode) }} data-layer-kind={layer.kind}>
+              {layer.kind === 'text' && <TextLayerMark layer={layer} />}
+              {glyph.strokes.filter((stroke) => stroke.layerId === layer.id).map((stroke) => <StrokeMarks key={stroke.id} stroke={stroke} />)}
+            </g>
+          ))}
+          {draftStroke && <StrokeMarks stroke={draftStroke} />}
+        </svg>
+      </div>
       <div className="stage-readout" aria-live="polite">
         <span>{stylus.type}</span>
         <span>P {stylus.pressure.toFixed(2)}</span>
         <span>T {stylus.tiltX}/{stylus.tiltY}</span>
         <span>R {stylus.twist}°</span>
+        <span>{activeLayer?.kind === 'raster' ? 'PIXEL' : 'VECTOR'}</span>
       </div>
       {!['vector', 'raster'].includes(activeLayer?.kind) && <div className="stage-mode-note">Select a vector or raster layer to draw. Current layer: {activeLayer?.kind || 'none'}.</div>}
     </div>
