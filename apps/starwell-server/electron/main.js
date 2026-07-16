@@ -4,11 +4,18 @@ const path  = require('path');
 const fs    = require('fs');
 const { fork } = require('child_process');
 const net   = require('net');
+const { fileURLToPath } = require('url');
 
 const CONFIG_PATH = path.join(app.getPath('userData'), 'hearthgate-config.json');
 const DATA_DIR    = path.join(app.getPath('userData'), 'hearthgate-data');
 const PORT = 3841;
 const FONTFORGE_PORT = 3842;
+const LOCAL_HTTP_ORIGINS = new Set([
+  `http://localhost:${PORT}`,
+  `http://127.0.0.1:${PORT}`,
+  `http://localhost:${FONTFORGE_PORT}`,
+  `http://127.0.0.1:${FONTFORGE_PORT}`,
+]);
 
 let win = null;
 let serverProc = null;
@@ -31,14 +38,28 @@ function primaryApplicationUrl() {
     : `http://localhost:${PORT}/hearthgate.html`;
 }
 
-function isLocalApplicationUrl(url) {
-  return [
-    `http://localhost:${PORT}`,
-    `http://127.0.0.1:${PORT}`,
-    `http://localhost:${FONTFORGE_PORT}`,
-    `http://127.0.0.1:${FONTFORGE_PORT}`,
-    'file://',
-  ].some((prefix) => url.startsWith(prefix));
+function isPathInside(candidate, root) {
+  const relative = path.relative(root, candidate);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function isLocalApplicationUrl(value) {
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol === 'http:') return LOCAL_HTTP_ORIGINS.has(parsed.origin);
+    if (parsed.protocol !== 'file:') return false;
+
+    const candidate = path.resolve(fileURLToPath(parsed));
+    const appRoot = path.resolve(app.getAppPath());
+    return isPathInside(candidate, path.join(appRoot, 'public'))
+      || isPathInside(candidate, path.join(appRoot, 'electron'));
+  } catch {
+    return false;
+  }
+}
+
+function isWriterPrintPopup(targetUrl, openerUrl) {
+  return targetUrl === 'about:blank' && isLocalApplicationUrl(openerUrl);
 }
 
 // ── Server ────────────────────────────────────────────────────────────────────
@@ -123,13 +144,30 @@ function createWindow(url) {
   // Keep Hearthgate and its local workers inside the application boundary.
   win.webContents.setWindowOpenHandler(({ url: targetUrl }) => {
     if (isLocalApplicationUrl(targetUrl)) return { action: 'allow' };
-    shell.openExternal(targetUrl);
+
+    // Writer Room creates a blank, same-application document and writes the
+    // printable sheet into it before invoking the system print dialog.
+    if (isWriterPrintPopup(targetUrl, win.webContents.getURL())) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          autoHideMenuBar: true,
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
+          },
+        },
+      };
+    }
+
+    if (/^https?:/i.test(targetUrl)) shell.openExternal(targetUrl);
     return { action: 'deny' };
   });
   win.webContents.on('will-navigate', (event, navigationUrl) => {
     if (!isLocalApplicationUrl(navigationUrl)) {
       event.preventDefault();
-      shell.openExternal(navigationUrl);
+      if (/^https?:/i.test(navigationUrl)) shell.openExternal(navigationUrl);
     }
   });
 
