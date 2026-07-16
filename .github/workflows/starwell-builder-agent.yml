@@ -1,14 +1,25 @@
-name: STARWELL Builder Agent
+name: STARWELL Workshop Agent
 
 on:
   workflow_dispatch:
     inputs:
       task:
-        description: "Bounded STARWELL build task"
+        description: "One bounded STARWELL workshop task"
         required: true
         type: string
+      mode:
+        description: "Agent operating mode"
+        required: true
+        default: "build"
+        type: choice
+        options:
+          - build
+          - design
+          - ingest
+          - audit
+          - release
       base_branch:
-        description: "Branch to build from"
+        description: "Branch to work from"
         required: false
         default: "main"
         type: string
@@ -16,7 +27,7 @@ on:
     types: [labeled]
 
 concurrency:
-  group: starwell-builder-${{ github.event.issue.number || github.run_id }}
+  group: starwell-workshop-${{ github.event.issue.number || github.run_id }}
   cancel-in-progress: false
 
 permissions:
@@ -29,13 +40,14 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issues' &&
-       github.event.label.name == 'agent:build' &&
+       contains(fromJSON('["agent:build","agent:design","agent:ingest","agent:audit","agent:release"]'), github.event.label.name) &&
        (github.event.issue.author_association == 'OWNER' ||
         github.event.issue.author_association == 'MEMBER' ||
         github.event.issue.author_association == 'COLLABORATOR'))
     runs-on: ubuntu-latest
     outputs:
       task: ${{ steps.context.outputs.task }}
+      mode: ${{ steps.context.outputs.mode }}
       issue_number: ${{ steps.context.outputs.issue_number }}
       branch_name: ${{ steps.context.outputs.branch_name }}
       base_branch: ${{ steps.context.outputs.base_branch }}
@@ -45,37 +57,43 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           INPUT_TASK: ${{ inputs.task }}
+          INPUT_MODE: ${{ inputs.mode }}
           INPUT_BASE: ${{ inputs.base_branch }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_LABEL: ${{ github.event.label.name }}
         run: |
           if [ "$EVENT_NAME" = "issues" ]; then
             task=$(printf '%s\n\n%s' "$ISSUE_TITLE" "$ISSUE_BODY")
             issue="$ISSUE_NUMBER"
-            branch="agent/starwell-issue-${ISSUE_NUMBER}-${GITHUB_RUN_ID}"
+            mode="${ISSUE_LABEL#agent:}"
+            branch="agent/starwell-${mode}-issue-${ISSUE_NUMBER}-${GITHUB_RUN_ID}"
             base="main"
           else
             task="$INPUT_TASK"
             issue=""
-            branch="agent/starwell-dispatch-${GITHUB_RUN_ID}"
+            mode="${INPUT_MODE:-build}"
+            branch="agent/starwell-${mode}-dispatch-${GITHUB_RUN_ID}"
             base="${INPUT_BASE:-main}"
           fi
           {
             echo "task<<STARWELL_TASK"
             echo "$task"
             echo "STARWELL_TASK"
+            echo "mode=$mode"
             echo "issue_number=$issue"
             echo "branch_name=$branch"
             echo "base_branch=$base"
           } >> "$GITHUB_OUTPUT"
 
-  build:
+  workshop:
     needs: authorise
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       TASK: ${{ needs.authorise.outputs.task }}
+      AGENT_MODE: ${{ needs.authorise.outputs.mode }}
       ISSUE_NUMBER: ${{ needs.authorise.outputs.issue_number }}
       BRANCH_NAME: ${{ needs.authorise.outputs.branch_name }}
       BASE_BRANCH: ${{ needs.authorise.outputs.base_branch }}
@@ -97,10 +115,10 @@ jobs:
         working-directory: apps/starwell
         run: npm ci
 
-      - name: Create implementation branch
+      - name: Create workshop branch
         run: git switch -c "$BRANCH_NAME"
 
-      - name: Run STARWELL Builder Agent
+      - name: Run STARWELL Workshop Agent
         id: codex
         uses: openai/codex-action@v1
         with:
@@ -109,6 +127,7 @@ jobs:
           codex-args: "--sandbox workspace-write"
         env:
           STARWELL_BUILD_TASK: ${{ env.TASK }}
+          STARWELL_AGENT_MODE: ${{ env.AGENT_MODE }}
 
       - name: Validate STARWELL tests
         working-directory: apps/starwell
@@ -118,7 +137,7 @@ jobs:
         working-directory: apps/starwell
         run: npm run build
 
-      - name: Check for implementation changes
+      - name: Check for workshop changes
         id: changes
         shell: bash
         run: |
@@ -128,13 +147,13 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit implementation
+      - name: Commit workshop changes
         if: steps.changes.outputs.changed == 'true'
         run: |
-          git config user.name "STARWELL Builder Agent"
+          git config user.name "STARWELL Workshop Agent"
           git config user.email "actions@users.noreply.github.com"
           git add -A
-          git commit -m "feat(STARWELL): implement automated build task"
+          git commit -m "feat(STARWELL): complete automated ${AGENT_MODE} task"
           git push --set-upstream origin "$BRANCH_NAME"
 
       - name: Open pull request
@@ -146,7 +165,9 @@ jobs:
         shell: bash
         run: |
           cat > /tmp/pr-body.md <<EOF
-          ## Builder task
+          ## Workshop task
+
+          **Mode:** $AGENT_MODE
 
           $TASK
 
@@ -159,12 +180,12 @@ jobs:
           - `npm test`
           - `npm run build`
 
-          Generated by the gated STARWELL Builder Agent. Human review and merge remain required.
+          Generated by the gated STARWELL Workshop Agent. Human review and merge remain required.
           EOF
           pr_url=$(gh pr create \
             --base "$BASE_BRANCH" \
             --head "$BRANCH_NAME" \
-            --title "feat(STARWELL): automated build task" \
+            --title "feat(STARWELL): automated ${AGENT_MODE} task" \
             --body-file /tmp/pr-body.md)
           echo "url=$pr_url" >> "$GITHUB_OUTPUT"
 
@@ -178,8 +199,8 @@ jobs:
         shell: bash
         run: |
           if [ "$CHANGED" = "true" ]; then
-            message="Builder Agent completed the bounded task and opened: $PR_URL"
+            message="STARWELL Workshop Agent completed the $AGENT_MODE slice and opened: $PR_URL"
           else
-            message="Builder Agent completed its run but produced no repository changes."
+            message="STARWELL Workshop Agent completed the $AGENT_MODE run but produced no repository changes."
           fi
           printf '%s\n\n%s\n' "$message" "$CODEX_SUMMARY" | gh issue comment "$ISSUE_NUMBER" --body-file -
