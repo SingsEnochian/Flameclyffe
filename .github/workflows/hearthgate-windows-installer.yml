@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - "apps/starwell-server/**"
+      - "apps/starwell/**"
+      - "package.json"
+      - "package-lock.json"
       - ".github/workflows/hearthgate-windows-installer.yml"
   push:
     branches:
@@ -13,6 +16,9 @@ on:
       - "hearthgate-v*"
     paths:
       - "apps/starwell-server/**"
+      - "apps/starwell/**"
+      - "package.json"
+      - "package-lock.json"
       - ".github/workflows/hearthgate-windows-installer.yml"
 
 permissions:
@@ -26,7 +32,7 @@ jobs:
   build-windows-installer:
     name: Build Windows x64 NSIS installer
     runs-on: windows-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
@@ -43,10 +49,27 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: apps/starwell-server/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            apps/starwell-server/package-lock.json
 
-      - name: Install locked dependencies
+      - name: Install locked STARWELL dependencies
+        working-directory: ${{ github.workspace }}
         run: npm ci
+
+      - name: Test and build packaged STARWELL framework
+        working-directory: ${{ github.workspace }}
+        env:
+          STARWELL_BASE: /starwell/
+        run: |
+          npm run starwell:test
+          npm run starwell:build
+
+      - name: Install locked Hearthgate dependencies
+        run: npm ci
+
+      - name: Stage STARWELL inside Hearthgate
+        run: npm run stage:starwell
 
       - name: Run packaging preflight
         run: npm run check:packaging
@@ -69,6 +92,23 @@ jobs:
             throw "Installer is unexpectedly small: $($installer.Length) bytes."
           }
 
+          $unpackedStarwell = "dist-electron/win-unpacked/resources/app/public/starwell/index.html"
+          $unpackedGlyphStudio = "dist-electron/win-unpacked/resources/app/public/starwell/glyph-studio/index.html"
+          if (-not (Test-Path $unpackedStarwell)) {
+            throw "Packaged installer is missing STARWELL framework entry: $unpackedStarwell"
+          }
+          if (-not (Test-Path $unpackedGlyphStudio)) {
+            throw "Packaged installer is missing Glyph Studio entry: $unpackedGlyphStudio"
+          }
+          $starwellHtml = Get-Content -Raw -Path $unpackedStarwell
+          $glyphHtml = Get-Content -Raw -Path $unpackedGlyphStudio
+          if (-not $starwellHtml.Contains('/starwell/')) {
+            throw "Packaged STARWELL entry does not use the /starwell/ asset base."
+          }
+          if (-not $glyphHtml.Contains('/starwell/')) {
+            throw "Packaged Glyph Studio entry does not use the /starwell/ asset base."
+          }
+
           $hash = Get-FileHash -Path $installer.FullName -Algorithm SHA256
           "$($hash.Hash)  $($installer.Name)" | Set-Content -Path "dist-electron/SHA256SUMS.txt" -Encoding ascii
 
@@ -82,6 +122,8 @@ jobs:
           - File: ``$($installer.Name)``
           - Size: $([math]::Round($installer.Length / 1MB, 2)) MB
           - SHA-256: ``$($hash.Hash)``
+          - Framework: bundled STARWELL + Glyph Studio
+          - Font compiler: local FontForge sidecar adapter
           - Signing: unsigned development build
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
