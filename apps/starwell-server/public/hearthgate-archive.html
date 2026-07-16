@@ -7,187 +7,37 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg:#070908;
-      --surface:#101613;
-      --raised:#171f1a;
-      --text:#d7e4dc;
-      --dim:#8aaa96;
-      --faint:#496257;
-      --green:#2ed690;
-      --gold:#c9a84c;
-      --amber:#fbbf24;
-      --red:#f87171;
-      --blue:#90b8e0;
-      --violet:#a880e0;
-      --border:rgba(114,204,166,.17);
-      --mono:'IBM Plex Mono', ui-monospace, monospace;
-      --serif:'Cormorant Garamond', Georgia, serif;
-    }
-    *,*::before,*::after{box-sizing:border-box}
-    html{background:var(--bg);color-scheme:dark}
-    body{margin:0;min-height:100vh;background:
-      radial-gradient(circle at 18% 0%,rgba(46,214,144,.08),transparent 28rem),
-      radial-gradient(circle at 92% 12%,rgba(201,168,76,.08),transparent 24rem),
-      var(--bg);color:var(--text);font-family:var(--mono)}
-    button,input,select,textarea{font:inherit}
-    button{cursor:pointer}
-    a{color:inherit}
-    .house-nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:.35rem;padding:.45rem clamp(.7rem,2vw,1.2rem);background:rgba(5,7,6,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(14px)}
-    .house-nav a{text-decoration:none;color:var(--dim);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .55rem;border-radius:5px}
-    .house-nav a:hover,.house-nav a.active{color:var(--gold);background:rgba(201,168,76,.06)}
-    .house-nav .spacer{flex:1}
-    .privacy-lamp{display:flex;align-items:center;gap:.35rem;color:var(--dim);font-size:.62rem}
-    .privacy-lamp::before{content:'';width:.52rem;height:.52rem;border-radius:50%;background:var(--green);box-shadow:0 0 14px rgba(46,214,144,.55)}
-    main{width:min(1440px,100%);margin:0 auto;padding:clamp(1rem,3vw,2rem)}
-    .hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:end;padding:clamp(1rem,3vw,2rem);border:1px solid var(--border);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(46,214,144,.025));box-shadow:0 20px 55px rgba(0,0,0,.28)}
-    .eyebrow{font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:.45rem}
-    h1{font-family:var(--serif);font-size:clamp(2rem,6vw,4rem);line-height:.95;font-weight:600;color:#f0e6c8;margin:0}
-    .hero p{font-family:var(--serif);font-size:1.05rem;line-height:1.45;color:var(--dim);max-width:68ch;margin:.7rem 0 0}
-    .hero-note{max-width:34ch;padding:.8rem 1rem;border-left:2px solid var(--gold);background:rgba(201,168,76,.055);font-family:var(--serif);color:#d9cda9;line-height:1.45}
-    .toolbar{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;margin:1rem 0;padding:.75rem;border:1px solid var(--border);border-radius:12px;background:rgba(10,15,12,.86)}
-    .btn,.file-btn{border:1px solid var(--border);border-radius:7px;background:rgba(46,214,144,.055);color:var(--dim);padding:.48rem .72rem;font-size:.68rem;letter-spacing:.04em}
-    .btn:hover,.file-btn:hover{color:var(--green);border-color:rgba(46,214,144,.42)}
-    .btn.gold{color:#d9c27c;border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.055)}
-    .btn.danger:hover{color:var(--red);border-color:rgba(248,113,113,.45)}
-    .file-btn input{display:none}
-    .search{flex:1;min-width:220px;background:rgba(0,0,0,.32);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:.5rem .7rem;outline:none}
-    .search:focus{border-color:rgba(46,214,144,.46)}
-    select{background:#0b100d;color:var(--dim);border:1px solid var(--border);border-radius:7px;padding:.48rem .58rem;outline:none}
-    .status{display:flex;justify-content:space-between;gap:1rem;align-items:center;color:var(--faint);font-size:.63rem;margin:.75rem .2rem}
-    .status strong{color:var(--dim)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:.8rem}
-    .card{display:flex;flex-direction:column;gap:.65rem;min-height:230px;padding:1rem;border:1px solid var(--border);border-radius:14px;background:linear-gradient(155deg,rgba(255,255,255,.035),rgba(0,0,0,.12));box-shadow:0 12px 30px rgba(0,0,0,.18)}
-    .card[data-privacy="restricted"],.card[data-privacy="private"]{border-color:rgba(248,113,113,.22)}
-    .card-head{display:flex;gap:.75rem;align-items:flex-start}
-    .sigil{display:grid;place-items:center;flex:0 0 2.35rem;height:2.35rem;border:1px solid var(--border);border-radius:50%;background:rgba(46,214,144,.055);color:var(--gold);font-family:var(--serif);font-size:1.2rem}
-    .card h2{font-family:var(--serif);font-size:1.28rem;line-height:1.05;margin:0;color:#eee3c6}
-    .filename{color:var(--faint);font-size:.58rem;overflow-wrap:anywhere;margin-top:.25rem}
-    .tags{display:flex;flex-wrap:wrap;gap:.32rem}
-    .tag{padding:.18rem .4rem;border:1px solid var(--border);border-radius:999px;font-size:.55rem;letter-spacing:.045em;text-transform:uppercase;color:var(--dim);background:rgba(255,255,255,.018)}
-    .tag.notebook{color:var(--green)}
-    .tag.science{color:var(--blue);border-color:rgba(144,184,224,.28)}
-    .tag.speculative{color:var(--violet);border-color:rgba(168,128,224,.28)}
-    .tag.implementation{color:var(--amber);border-color:rgba(251,191,36,.28)}
-    .tag.private{color:#ff9b9b;border-color:rgba(248,113,113,.34)}
-    .summary{font-family:var(--serif);font-size:.98rem;line-height:1.45;color:#b9c9bf;flex:1}
-    .card-meta{display:grid;grid-template-columns:auto 1fr;gap:.25rem .6rem;font-size:.59rem;color:var(--faint)}
-    .card-meta dt{color:var(--dim)}
-    .card-meta dd{margin:0;overflow-wrap:anywhere}
-    .card-actions{display:flex;flex-wrap:wrap;gap:.4rem;padding-top:.15rem}
-    .card-actions button{border:1px solid var(--border);border-radius:5px;background:rgba(0,0,0,.2);color:var(--dim);font-size:.6rem;padding:.3rem .48rem}
-    .card-actions button:hover{color:var(--green)}
-    .empty{padding:3rem;text-align:center;border:1px dashed var(--border);border-radius:14px;color:var(--dim);font-family:var(--serif);font-size:1.08rem}
-    dialog{width:min(720px,calc(100% - 2rem));border:1px solid var(--border);border-radius:14px;background:#0b100d;color:var(--text);padding:0;box-shadow:0 30px 80px rgba(0,0,0,.65)}
-    dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(4px)}
-    .dialog-body{padding:1rem}
-    .dialog-body h2{font-family:var(--serif);color:var(--gold);margin-top:0}
-    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
-    label{display:flex;flex-direction:column;gap:.25rem;color:var(--dim);font-size:.62rem}
-    label.full{grid-column:1/-1}
-    input,textarea{background:rgba(0,0,0,.3);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:.5rem .6rem;outline:none}
-    textarea{min-height:110px;resize:vertical;font-family:var(--serif);font-size:1rem}
-    .dialog-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.8rem}
-    .footnote{margin:1.2rem 0 .2rem;padding:1rem;border-top:1px solid var(--border);color:var(--faint);font-size:.62rem;line-height:1.55}
-    @media(max-width:760px){.hero{grid-template-columns:1fr}.hero-note{max-width:none}.form-grid{grid-template-columns:1fr}.house-nav{overflow-x:auto;flex-wrap:nowrap}.privacy-lamp{display:none}}
-    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+    :root{--bg:#070908;--surface:#101613;--text:#d7e4dc;--dim:#8aaa96;--faint:#496257;--green:#2ed690;--gold:#c9a84c;--amber:#fbbf24;--red:#f87171;--blue:#90b8e0;--violet:#a880e0;--border:rgba(114,204,166,.17);--mono:'IBM Plex Mono',ui-monospace,monospace;--serif:'Cormorant Garamond',Georgia,serif}
+    *,*::before,*::after{box-sizing:border-box}html{background:var(--bg);color-scheme:dark}body{margin:0;min-height:100vh;background:radial-gradient(circle at 18% 0%,rgba(46,214,144,.08),transparent 28rem),radial-gradient(circle at 92% 12%,rgba(201,168,76,.08),transparent 24rem),var(--bg);color:var(--text);font-family:var(--mono)}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
+    .house-nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:.35rem;padding:.45rem clamp(.7rem,2vw,1.2rem);background:rgba(5,7,6,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(14px)}.house-nav a{text-decoration:none;color:var(--dim);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .55rem;border-radius:5px}.house-nav a:hover,.house-nav a.active{color:var(--gold);background:rgba(201,168,76,.06)}.spacer{flex:1}.privacy-lamp{display:flex;align-items:center;gap:.35rem;color:var(--dim);font-size:.62rem}.privacy-lamp::before{content:'';width:.52rem;height:.52rem;border-radius:50%;background:var(--green);box-shadow:0 0 14px rgba(46,214,144,.55)}
+    main{width:min(1440px,100%);margin:0 auto;padding:clamp(1rem,3vw,2rem)}.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:end;padding:clamp(1rem,3vw,2rem);border:1px solid var(--border);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(46,214,144,.025));box-shadow:0 20px 55px rgba(0,0,0,.28)}.eyebrow{font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:.45rem}h1{font-family:var(--serif);font-size:clamp(2rem,6vw,4rem);line-height:.95;font-weight:600;color:#f0e6c8;margin:0}.hero p{font-family:var(--serif);font-size:1.05rem;line-height:1.45;color:var(--dim);max-width:68ch;margin:.7rem 0 0}.hero-note{max-width:34ch;padding:.8rem 1rem;border-left:2px solid var(--gold);background:rgba(201,168,76,.055);font-family:var(--serif);color:#d9cda9;line-height:1.45}
+    .toolbar{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;margin:1rem 0;padding:.75rem;border:1px solid var(--border);border-radius:12px;background:rgba(10,15,12,.86)}.btn,.file-btn{border:1px solid var(--border);border-radius:7px;background:rgba(46,214,144,.055);color:var(--dim);padding:.48rem .72rem;font-size:.68rem;letter-spacing:.04em}.btn:hover,.file-btn:hover{color:var(--green);border-color:rgba(46,214,144,.42)}.btn.gold{color:#d9c27c;border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.055)}.btn.danger:hover{color:var(--red);border-color:rgba(248,113,113,.45)}.file-btn input{display:none}.search{flex:1;min-width:220px;background:rgba(0,0,0,.32);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:.5rem .7rem;outline:none}.search:focus{border-color:rgba(46,214,144,.46)}select{background:#0b100d;color:var(--dim);border:1px solid var(--border);border-radius:7px;padding:.48rem .58rem;outline:none}
+    .status{display:flex;justify-content:space-between;gap:1rem;align-items:center;color:var(--faint);font-size:.63rem;margin:.75rem .2rem}.status strong{color:var(--dim)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:.8rem}.card{display:flex;flex-direction:column;gap:.65rem;min-height:230px;padding:1rem;border:1px solid var(--border);border-radius:14px;background:linear-gradient(155deg,rgba(255,255,255,.035),rgba(0,0,0,.12));box-shadow:0 12px 30px rgba(0,0,0,.18)}.card[data-privacy="restricted"],.card[data-privacy="private"]{border-color:rgba(248,113,113,.22)}.card-head{display:flex;gap:.75rem;align-items:flex-start}.sigil{display:grid;place-items:center;flex:0 0 2.35rem;height:2.35rem;border:1px solid var(--border);border-radius:50%;background:rgba(46,214,144,.055);color:var(--gold);font-family:var(--serif);font-size:1.2rem}.card h2{font-family:var(--serif);font-size:1.28rem;line-height:1.05;margin:0;color:#eee3c6}.filename{color:var(--faint);font-size:.58rem;overflow-wrap:anywhere;margin-top:.25rem}.tags{display:flex;flex-wrap:wrap;gap:.32rem}.tag{padding:.18rem .4rem;border:1px solid var(--border);border-radius:999px;font-size:.55rem;letter-spacing:.045em;text-transform:uppercase;color:var(--dim);background:rgba(255,255,255,.018)}.tag.notebook{color:var(--green)}.tag.science{color:var(--blue);border-color:rgba(144,184,224,.28)}.tag.speculative{color:var(--violet);border-color:rgba(168,128,224,.28)}.tag.implementation{color:var(--amber);border-color:rgba(251,191,36,.28)}.tag.private{color:#ff9b9b;border-color:rgba(248,113,113,.34)}.summary{font-family:var(--serif);font-size:.98rem;line-height:1.45;color:#b9c9bf;flex:1}.card-meta{display:grid;grid-template-columns:auto 1fr;gap:.25rem .6rem;font-size:.59rem;color:var(--faint)}.card-meta dt{color:var(--dim)}.card-meta dd{margin:0;overflow-wrap:anywhere}.card-actions{display:flex;flex-wrap:wrap;gap:.4rem;padding-top:.15rem}.card-actions button{border:1px solid var(--border);border-radius:5px;background:rgba(0,0,0,.2);color:var(--dim);font-size:.6rem;padding:.3rem .48rem}.card-actions button:hover{color:var(--green)}.empty{padding:3rem;text-align:center;border:1px dashed var(--border);border-radius:14px;color:var(--dim);font-family:var(--serif);font-size:1.08rem}
+    dialog{width:min(720px,calc(100% - 2rem));border:1px solid var(--border);border-radius:14px;background:#0b100d;color:var(--text);padding:0;box-shadow:0 30px 80px rgba(0,0,0,.65)}dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(4px)}.dialog-body{padding:1rem}.dialog-body h2{font-family:var(--serif);color:var(--gold);margin-top:0}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}label{display:flex;flex-direction:column;gap:.25rem;color:var(--dim);font-size:.62rem}label.full{grid-column:1/-1}input,textarea{background:rgba(0,0,0,.3);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:.5rem .6rem;outline:none}textarea{min-height:110px;resize:vertical;font-family:var(--serif);font-size:1rem}.dialog-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.8rem}.footnote{margin:1.2rem 0 .2rem;padding:1rem;border-top:1px solid var(--border);color:var(--faint);font-size:.62rem;line-height:1.55}@media(max-width:760px){.hero{grid-template-columns:1fr}.hero-note{max-width:none}.form-grid{grid-template-columns:1fr}.house-nav{overflow-x:auto;flex-wrap:nowrap}.privacy-lamp{display:none}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
 <body>
-  <nav class="house-nav" aria-label="Templehouse rooms">
-    <a href="/hearthgate.html">← Hearthgate</a>
-    <a href="/notes.html">Notes</a>
-    <a class="active" href="/hearthgate-archive.html">Archive Room</a>
-    <span class="spacer"></span>
-    <span class="privacy-lamp">local browser archive</span>
-  </nav>
-
+  <nav class="house-nav" aria-label="Templehouse rooms"><a href="/hearthgate.html">← Hearthgate</a><a href="/notes.html">Notes</a><a class="active" href="/hearthgate-archive.html">Archive Room</a><span class="spacer"></span><span class="privacy-lamp">local browser archive</span></nav>
   <main>
-    <section class="hero">
-      <div>
-        <div class="eyebrow">Templehouse · Hearthgate</div>
-        <h1>Archive Room</h1>
-        <p>Research, continuity, trends, creative canon, and governance records live here without being forced into the same epistemic drawer. Import is local-first: source files and private manifests remain in this browser unless you deliberately export them.</p>
-      </div>
-      <div class="hero-note"><strong>The House rule:</strong> preserve the source, label the interpretation, and never turn a private relational archive into public repository content by accident.</div>
-    </section>
-
-    <section class="toolbar" aria-label="Archive tools">
-      <input id="search" class="search" type="search" placeholder="Search title, summary, tags, or filename…" />
-      <select id="notebook-filter" aria-label="Notebook filter"><option value="">All notebooks</option></select>
-      <select id="class-filter" aria-label="Classification filter"><option value="">All classes</option></select>
-      <select id="privacy-filter" aria-label="Privacy filter"><option value="">All privacy</option><option>public</option><option>private</option><option>restricted</option></select>
-      <label class="file-btn gold">Import manifest<input id="manifest-input" type="file" accept=".json,application/json" /></label>
-      <label class="file-btn">Attach sources<input id="source-input" type="file" multiple /></label>
-      <button id="new-record" class="btn">+ Record</button>
-      <button id="export" class="btn">Export manifest</button>
-      <button id="clear" class="btn danger">Clear local</button>
-    </section>
-
-    <div class="status"><span id="status-text">Archive is quiet.</span><span><strong id="visible-count">0</strong> visible · <strong id="total-count">0</strong> total</span></div>
-    <section id="grid" class="grid" aria-live="polite"></section>
-    <div class="footnote">This room stores metadata in <code>localStorage</code> and attached source blobs in <code>IndexedDB</code>. Repository code contains no private intake records. Epistemic labels describe how Hearthgate should present a source; they do not certify the source’s claims.</div>
+    <section class="hero"><div><div class="eyebrow">Templehouse · Hearthgate</div><h1>Archive Room</h1><p>Research, continuity, trends, creative canon, and governance records live here without being forced into the same epistemic drawer. Import is local-first: source files and private manifests remain in this browser unless you deliberately export them.</p></div><div class="hero-note"><strong>The House rule:</strong> preserve the source, label the interpretation, and never turn a private relational archive into public repository content by accident.</div></section>
+    <section class="toolbar" aria-label="Archive tools"><input id="search" class="search" type="search" placeholder="Search title, summary, tags, or filename…" /><select id="notebook-filter" aria-label="Notebook filter"><option value="">All notebooks</option></select><select id="class-filter" aria-label="Classification filter"><option value="">All classes</option></select><select id="privacy-filter" aria-label="Privacy filter"><option value="">All privacy</option><option>public</option><option>private</option><option>restricted</option></select><label class="file-btn gold">Import manifest<input id="manifest-input" type="file" accept=".json,application/json" /></label><label class="file-btn">Attach sources<input id="source-input" type="file" multiple /></label><button id="new-record" class="btn">+ Record</button><button id="export" class="btn">Export manifest</button><button id="clear" class="btn danger">Clear local</button></section>
+    <div class="status"><span id="status-text">Archive is quiet.</span><span><strong id="visible-count">0</strong> visible · <strong id="total-count">0</strong> total</span></div><section id="grid" class="grid" aria-live="polite"></section><div class="footnote">This room stores metadata in <code>localStorage</code> and attached source blobs in <code>IndexedDB</code>. Repository code contains no private intake records. Epistemic labels describe how Hearthgate should present a source; they do not certify the source’s claims.</div>
   </main>
-
-  <dialog id="record-dialog">
-    <form id="record-form" class="dialog-body" method="dialog">
-      <h2 id="dialog-title">Archive record</h2>
-      <input id="record-id" type="hidden" />
-      <div class="form-grid">
-        <label>Title<input id="record-title" required maxlength="160" /></label>
-        <label>Filename<input id="record-filename" maxlength="220" /></label>
-        <label>Notebook<select id="record-notebook"><option>Research</option><option>Continuity</option><option>Trends</option><option>Creative Library</option><option>Governance</option><option>Visual Archive</option></select></label>
-        <label>Privacy<select id="record-privacy"><option>private</option><option>restricted</option><option>public</option></select></label>
-        <label>Primary class<select id="record-class"><option>active research</option><option>speculative theory</option><option>fringe inspiration</option><option>implementation task</option><option>evidence-backed finding</option><option>established science</option><option>creative canon</option><option>personal continuity</option><option>interaction transcript</option><option>governance archive</option></select></label>
-        <label>Source date<input id="record-date" type="date" /></label>
-        <label class="full">Tags<input id="record-tags" placeholder="comma, separated, tags" /></label>
-        <label class="full">Summary<textarea id="record-summary" required></textarea></label>
-        <label class="full">Epistemic note<textarea id="record-note" placeholder="What this source can support; what it cannot establish."></textarea></label>
-      </div>
-      <div class="dialog-actions"><button class="btn" value="cancel">Cancel</button><button id="save-record" class="btn gold" value="default">Save</button></div>
-    </form>
-  </dialog>
-
+  <dialog id="record-dialog"><form id="record-form" class="dialog-body"><h2 id="dialog-title">Archive record</h2><input id="record-id" type="hidden" /><div class="form-grid"><label>Title<input id="record-title" required maxlength="160" /></label><label>Filename<input id="record-filename" maxlength="220" /></label><label>Notebook<select id="record-notebook"><option>Research</option><option>Continuity</option><option>Trends</option><option>Creative Library</option><option>Governance</option><option>Visual Archive</option></select></label><label>Privacy<select id="record-privacy"><option>private</option><option>restricted</option><option>public</option></select></label><label>Primary class<select id="record-class"><option>active research</option><option>speculative theory</option><option>fringe inspiration</option><option>implementation task</option><option>evidence-backed finding</option><option>established science</option><option>creative canon</option><option>personal continuity</option><option>interaction transcript</option><option>governance archive</option></select></label><label>Source date<input id="record-date" type="date" /></label><label class="full">Tags<input id="record-tags" placeholder="comma, separated, tags" /></label><label class="full">Summary<textarea id="record-summary" required></textarea></label><label class="full">Epistemic note<textarea id="record-note" placeholder="What this source can support; what it cannot establish."></textarea></label></div><div class="dialog-actions"><button id="cancel-record" type="button" class="btn">Cancel</button><button id="save-record" type="submit" class="btn gold">Save</button></div></form></dialog>
   <script>
-    const META_KEY='hearthgate:archive:v1';
-    const DB_NAME='hearthgate-archive';
-    const STORE='sources';
-    const $=sel=>document.querySelector(sel);
-    let records=loadRecords();
-
-    function loadRecords(){try{return JSON.parse(localStorage.getItem(META_KEY)||'[]')}catch{return []}}
-    function saveRecords(){localStorage.setItem(META_KEY,JSON.stringify(records));render()}
-    function uid(){return crypto.randomUUID?.()||`hg-${Date.now()}-${Math.random().toString(16).slice(2)}`}
-    function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-    function list(v){return Array.isArray(v)?v:(v?String(v).split(',').map(x=>x.trim()).filter(Boolean):[])}
-    function normalise(r){return {id:r.id||uid(),title:r.title||r.filename||'Untitled source',filename:r.filename||'',notebook:r.notebook||'Research',privacy:r.privacy||'private',classification:r.classification||r.primaryClass||'active research',sourceDate:r.sourceDate||'',tags:list(r.tags),summary:r.summary||'No summary supplied.',epistemicNote:r.epistemicNote||'',attached:Boolean(r.attached),size:r.size||0,type:r.type||'',ingestStatus:r.ingestStatus||'indexed summary',createdAt:r.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()}}
-
-    async function db(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(STORE))req.result.createObjectStore(STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
-    async function putBlob(id,file){const d=await db();return new Promise((resolve,reject)=>{const tx=d.transaction(STORE,'readwrite');tx.objectStore(STORE).put(file,id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
-    async function getBlob(id){const d=await db();return new Promise((resolve,reject)=>{const req=d.transaction(STORE).objectStore(STORE).get(id);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
-    async function delBlob(id){const d=await db();return new Promise((resolve,reject)=>{const tx=d.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
-    async function clearBlobs(){const d=await db();return new Promise((resolve,reject)=>{const tx=d.transaction(STORE,'readwrite');tx.objectStore(STORE).clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
-
-    function className(label=''){const s=label.toLowerCase();if(s.includes('established')||s.includes('evidence'))return'science';if(s.includes('speculative')||s.includes('fringe'))return'speculative';if(s.includes('implementation'))return'implementation';return''}
-    function sigilFor(n=''){return ({Research:'⌖',Continuity:'∞',Trends:'⌁','Creative Library':'✦',Governance:'⚖','Visual Archive':'◉'})[n]||'◇'}
-    function filtered(){const q=$('#search').value.trim().toLowerCase(),nb=$('#notebook-filter').value,cl=$('#class-filter').value,pv=$('#privacy-filter').value;return records.filter(r=>{const hay=[r.title,r.filename,r.summary,r.epistemicNote,r.notebook,r.classification,...list(r.tags)].join(' ').toLowerCase();return(!q||hay.includes(q))&&(!nb||r.notebook===nb)&&(!cl||r.classification===cl)&&(!pv||r.privacy===pv)})}
-    function refillFilters(){const keepN=$('#notebook-filter').value,keepC=$('#class-filter').value;const notebooks=[...new Set(records.map(r=>r.notebook).filter(Boolean))].sort();const classes=[...new Set(records.map(r=>r.classification).filter(Boolean))].sort();$('#notebook-filter').innerHTML='<option value="">All notebooks</option>'+notebooks.map(x=>`<option>${esc(x)}</option>`).join('');$('#class-filter').innerHTML='<option value="">All classes</option>'+classes.map(x=>`<option>${esc(x)}</option>`).join('');$('#notebook-filter').value=keepN;$('#class-filter').value=keepC}
+    const META_KEY='hearthgate:archive:v1',DB_NAME='hearthgate-archive',STORE='sources',$=s=>document.querySelector(s);let records=loadRecords();
+    function loadRecords(){try{return JSON.parse(localStorage.getItem(META_KEY)||'[]')}catch{return[]}}function saveRecords(){localStorage.setItem(META_KEY,JSON.stringify(records));render()}function uid(){return crypto.randomUUID?.()||`hg-${Date.now()}-${Math.random().toString(16).slice(2)}`}function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}function list(v){return Array.isArray(v)?v:(v?String(v).split(',').map(x=>x.trim()).filter(Boolean):[])}
+    function normalise(r){return{id:r.id||uid(),title:r.title||r.filename||'Untitled source',filename:r.filename||'',notebook:r.notebook||'Research',privacy:r.privacy||'private',classification:r.classification||r.primaryClass||'active research',sourceDate:r.sourceDate||'',tags:list(r.tags),summary:r.summary||'No summary supplied.',epistemicNote:r.epistemicNote||'',attached:Boolean(r.attached),size:r.size||0,type:r.type||'',ingestStatus:r.ingestStatus||'indexed summary',createdAt:r.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()}}
+    async function db(){return new Promise((res,rej)=>{const q=indexedDB.open(DB_NAME,1);q.onupgradeneeded=()=>{if(!q.result.objectStoreNames.contains(STORE))q.result.createObjectStore(STORE)};q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}async function putBlob(id,file){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction(STORE,'readwrite');tx.objectStore(STORE).put(file,id);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}async function getBlob(id){const d=await db();return new Promise((res,rej)=>{const q=d.transaction(STORE).objectStore(STORE).get(id);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}async function delBlob(id){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}async function clearBlobs(){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction(STORE,'readwrite');tx.objectStore(STORE).clear();tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+    function className(x=''){x=x.toLowerCase();if(x.includes('established')||x.includes('evidence'))return'science';if(x.includes('speculative')||x.includes('fringe'))return'speculative';if(x.includes('implementation'))return'implementation';return''}function sigilFor(n=''){return({Research:'⌖',Continuity:'∞',Trends:'⌁','Creative Library':'✦',Governance:'⚖','Visual Archive':'◉'})[n]||'◇'}function filtered(){const q=$('#search').value.trim().toLowerCase(),n=$('#notebook-filter').value,c=$('#class-filter').value,p=$('#privacy-filter').value;return records.filter(r=>{const h=[r.title,r.filename,r.summary,r.epistemicNote,r.notebook,r.classification,...list(r.tags)].join(' ').toLowerCase();return(!q||h.includes(q))&&(!n||r.notebook===n)&&(!c||r.classification===c)&&(!p||r.privacy===p)})}
+    function refillFilters(){const nk=$('#notebook-filter').value,ck=$('#class-filter').value,ns=[...new Set(records.map(r=>r.notebook).filter(Boolean))].sort(),cs=[...new Set(records.map(r=>r.classification).filter(Boolean))].sort();$('#notebook-filter').innerHTML='<option value="">All notebooks</option>'+ns.map(x=>`<option>${esc(x)}</option>`).join('');$('#class-filter').innerHTML='<option value="">All classes</option>'+cs.map(x=>`<option>${esc(x)}</option>`).join('');$('#notebook-filter').value=nk;$('#class-filter').value=ck}
     function render(){refillFilters();const rows=filtered();$('#visible-count').textContent=rows.length;$('#total-count').textContent=records.length;$('#status-text').textContent=records.length?'Sources are indexed locally.':'Archive is quiet.';if(!rows.length){$('#grid').innerHTML='<div class="empty">No records match this shelf. Import a manifest, attach sources, or add a record by hand.</div>';return}$('#grid').innerHTML=rows.map(r=>`<article class="card" data-id="${esc(r.id)}" data-privacy="${esc(r.privacy)}"><div class="card-head"><div class="sigil">${sigilFor(r.notebook)}</div><div><h2>${esc(r.title)}</h2><div class="filename">${esc(r.filename||'no filename recorded')}</div></div></div><div class="tags"><span class="tag notebook">${esc(r.notebook)}</span><span class="tag ${className(r.classification)}">${esc(r.classification)}</span><span class="tag ${r.privacy!=='public'?'private':''}">${esc(r.privacy)}</span>${list(r.tags).slice(0,5).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="summary">${esc(r.summary)}</div><dl class="card-meta"><dt>Status</dt><dd>${esc(r.attached?'source attached locally':r.ingestStatus||'metadata only')}</dd><dt>Source date</dt><dd>${esc(r.sourceDate||'not recorded')}</dd><dt>Boundary</dt><dd>${esc(r.epistemicNote||'No epistemic note supplied.')}</dd></dl><div class="card-actions">${r.attached?'<button data-action="open">Open local source</button>':''}<button data-action="edit">Edit</button><button data-action="remove">Remove</button></div></article>`).join('')}
-
-    function openDialog(record={}){const r=normalise(record);$('#record-id').value=record.id||'';$('#record-title').value=record.title||'';$('#record-filename').value=record.filename||'';$('#record-notebook').value=record.notebook||'Research';$('#record-privacy').value=record.privacy||'private';$('#record-class').value=record.classification||'active research';$('#record-date').value=record.sourceDate||'';$('#record-tags').value=list(record.tags).join(', ');$('#record-summary').value=record.summary||'';$('#record-note').value=record.epistemicNote||'';$('#dialog-title').textContent=record.id?'Edit archive record':'New archive record';$('#record-dialog').showModal()}
-    $('#record-form').addEventListener('submit',e=>{e.preventDefault();const id=$('#record-id').value;const previous=records.find(r=>r.id===id)||{};const next=normalise({...previous,id:id||uid(),title:$('#record-title').value.trim(),filename:$('#record-filename').value.trim(),notebook:$('#record-notebook').value,privacy:$('#record-privacy').value,classification:$('#record-class').value,sourceDate:$('#record-date').value,tags:$('#record-tags').value,summary:$('#record-summary').value.trim(),epistemicNote:$('#record-note').value.trim()});records=id?records.map(r=>r.id===id?next:r):[next,...records];saveRecords();$('#record-dialog').close()})
-    $('#new-record').onclick=()=>openDialog();
-
-    $('#grid').addEventListener('click',async e=>{const btn=e.target.closest('button[data-action]');if(!btn)return;const card=btn.closest('.card'),id=card.dataset.id,r=records.find(x=>x.id===id);if(!r)return;if(btn.dataset.action==='edit')openDialog(r);if(btn.dataset.action==='remove'){if(confirm(`Remove “${r.title}” from this local archive?`)){records=records.filter(x=>x.id!==id);await delBlob(id).catch(()=>{});saveRecords()}}if(btn.dataset.action==='open'){const blob=await getBlob(id);if(!blob)return alert('Local source blob is missing. Re-attach the file.');const url=URL.createObjectURL(blob);window.open(url,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(url),60000)}})
-
-    $('#manifest-input').addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;try{const payload=JSON.parse(await file.text());const incoming=Array.isArray(payload)?payload:(payload.records||[]);const map=new Map(records.map(r=>[r.id,r]));incoming.map(normalise).forEach(r=>map.set(r.id,r));records=[...map.values()];saveRecords();$('#status-text').textContent=`Imported ${incoming.length} record${incoming.length===1?'':'s'} from ${file.name}.`}catch(err){alert(`Manifest import failed: ${err.message}`)}})
-
-    $('#source-input').addEventListener('change',async e=>{const files=[...e.target.files];e.target.value='';for(const file of files){let r=records.find(x=>x.filename&&x.filename.toLowerCase()===file.name.toLowerCase());if(!r){r=normalise({title:file.name.replace(/\.[^.]+$/,''),filename:file.name,notebook:'Research',privacy:'private',classification:'active research',summary:'Local source attached; summary pending.',epistemicNote:'Attachment alone does not validate the source claims.'});records.unshift(r)}await putBlob(r.id,file);r.attached=true;r.size=file.size;r.type=file.type;r.filename=file.name;r.updatedAt=new Date().toISOString()}saveRecords();$('#status-text').textContent=`Attached ${files.length} source file${files.length===1?'':'s'} locally.`})
-
-    $('#export').onclick=()=>{const payload={schema:'hearthgate.archive.v1',exportedAt:new Date().toISOString(),records:records.map(({attached,...r})=>({...r,attached:false}))};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`hearthgate-archive-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url)}
-    $('#clear').onclick=async()=>{if(!confirm('Clear all local archive metadata and attached source blobs from this browser?'))return;records=[];localStorage.removeItem(META_KEY);await clearBlobs().catch(()=>{});render()}
-    ;['search','notebook-filter','class-filter','privacy-filter'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',render));
-    render();
+    function openDialog(r={}){$('#record-id').value=r.id||'';$('#record-title').value=r.title||'';$('#record-filename').value=r.filename||'';$('#record-notebook').value=r.notebook||'Research';$('#record-privacy').value=r.privacy||'private';$('#record-class').value=r.classification||'active research';$('#record-date').value=r.sourceDate||'';$('#record-tags').value=list(r.tags).join(', ');$('#record-summary').value=r.summary||'';$('#record-note').value=r.epistemicNote||'';$('#dialog-title').textContent=r.id?'Edit archive record':'New archive record';$('#record-dialog').showModal()}
+    $('#cancel-record').onclick=()=>$('#record-dialog').close();$('#new-record').onclick=()=>openDialog();$('#record-form').addEventListener('submit',e=>{e.preventDefault();const id=$('#record-id').value,old=records.find(r=>r.id===id)||{},next=normalise({...old,id:id||uid(),title:$('#record-title').value.trim(),filename:$('#record-filename').value.trim(),notebook:$('#record-notebook').value,privacy:$('#record-privacy').value,classification:$('#record-class').value,sourceDate:$('#record-date').value,tags:$('#record-tags').value,summary:$('#record-summary').value.trim(),epistemicNote:$('#record-note').value.trim()});records=id?records.map(r=>r.id===id?next:r):[next,...records];saveRecords();$('#record-dialog').close()})
+    $('#grid').addEventListener('click',async e=>{const b=e.target.closest('button[data-action]');if(!b)return;const id=b.closest('.card').dataset.id,r=records.find(x=>x.id===id);if(!r)return;if(b.dataset.action==='edit')openDialog(r);if(b.dataset.action==='remove'&&confirm(`Remove “${r.title}” from this local archive?`)){records=records.filter(x=>x.id!==id);await delBlob(id).catch(()=>{});saveRecords()}if(b.dataset.action==='open'){const blob=await getBlob(id);if(!blob)return alert('Local source blob is missing. Re-attach the file.');const u=URL.createObjectURL(blob);window.open(u,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(u),60000)}})
+    $('#manifest-input').addEventListener('change',async e=>{const f=e.target.files?.[0];e.target.value='';if(!f)return;try{const p=JSON.parse(await f.text()),incoming=Array.isArray(p)?p:(p.records||[]),map=new Map(records.map(r=>[r.id,r]));incoming.map(normalise).forEach(r=>{const old=map.get(r.id);map.set(r.id,{...old,...r,attached:Boolean(old?.attached||r.attached),size:old?.size||r.size,type:old?.type||r.type})});records=[...map.values()];saveRecords();$('#status-text').textContent=`Imported ${incoming.length} record${incoming.length===1?'':'s'} from ${f.name}.`}catch(err){alert(`Manifest import failed: ${err.message}`)}})
+    $('#source-input').addEventListener('change',async e=>{const fs=[...e.target.files];e.target.value='';for(const f of fs){let r=records.find(x=>x.filename&&x.filename.toLowerCase()===f.name.toLowerCase());if(!r){r=normalise({title:f.name.replace(/\.[^.]+$/,''),filename:f.name,notebook:'Research',privacy:'private',classification:'active research',summary:'Local source attached; summary pending.',epistemicNote:'Attachment alone does not validate the source claims.'});records.unshift(r)}await putBlob(r.id,f);r.attached=true;r.size=f.size;r.type=f.type;r.filename=f.name;r.updatedAt=new Date().toISOString()}saveRecords();$('#status-text').textContent=`Attached ${fs.length} source file${fs.length===1?'':'s'} locally.`})
+    $('#export').onclick=()=>{const p={schema:'hearthgate.archive.v1',exportedAt:new Date().toISOString(),records:records.map(({attached,...r})=>({...r,attached:false}))},blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`hearthgate-archive-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(u)};$('#clear').onclick=async()=>{if(!confirm('Clear all local archive metadata and attached source blobs from this browser?'))return;records=[];localStorage.removeItem(META_KEY);await clearBlobs().catch(()=>{});render()};['search','notebook-filter','class-filter','privacy-filter'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',render));render();
   </script>
 </body>
 </html>
