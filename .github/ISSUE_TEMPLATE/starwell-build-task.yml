@@ -1,0 +1,54 @@
+name: STARWELL Builder Task
+description: Queue one bounded implementation slice for the gated Builder Agent.
+title: "[STARWELL Build] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe one reviewable software slice. After checking the task, a repository collaborator starts the agent by applying the `agent:build` label. The agent opens a pull request; it never merges directly to `main`.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Required outcome
+      description: What working behaviour should exist when this slice is complete?
+      placeholder: Add eraser mode to raster layers with pressure-aware size and reversible stroke history.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Boundaries and non-goals
+      description: State what this task must not claim or alter.
+      placeholder: Do not add smudge yet. Do not change vector export behaviour.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance checks
+      description: List observable checks and tests.
+      placeholder: |
+        - eraser works only on raster layers
+        - undo restores removed pixels
+        - project JSON remains serialisable
+        - npm test and npm run build pass
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: STARWELL area
+      options:
+        - Brush Studio / raster engine
+        - Procreate compatibility
+        - Art Gobby / effects
+        - Glyph Studio / Font Forge
+        - Hearthroom / Grove
+        - Local Model
+        - Laboratory / Observatory
+        - Research / Continuity / Trends
+        - Hearthgate desktop / installer
+        - Other
+    validations:
+      required: true
