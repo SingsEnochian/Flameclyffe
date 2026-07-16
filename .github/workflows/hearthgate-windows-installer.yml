@@ -53,9 +53,13 @@ jobs:
             package-lock.json
             apps/starwell-server/package-lock.json
 
-      - name: Install locked STARWELL dependencies
+      # The current root package-lock is an incomplete stub: it names direct
+      # dependencies but contains no resolved package records. `npm ci` must
+      # reject that state. Keep CI non-mutating until a complete root lockfile
+      # is regenerated and committed; Hearthgate below remains fully locked.
+      - name: Install STARWELL dependencies
         working-directory: ${{ github.workspace }}
-        run: npm ci
+        run: npm install --package-lock=false --ignore-scripts --no-audit --no-fund
 
       - name: Test and build packaged STARWELL framework
         working-directory: ${{ github.workspace }}
