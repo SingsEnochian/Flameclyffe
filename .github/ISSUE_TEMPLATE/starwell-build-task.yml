@@ -1,37 +1,61 @@
-name: STARWELL Builder Task
-description: Queue one bounded implementation slice for the gated Builder Agent.
-title: "[STARWELL Build] "
+name: STARWELL Workshop Task
+description: Queue one bounded build, design, ingestion, audit, or release slice for the gated Workshop Agent.
+title: "[STARWELL Workshop] "
 labels: []
 body:
   - type: markdown
     attributes:
       value: |
-        Describe one reviewable software slice. After checking the task, a repository collaborator starts the agent by applying the `agent:build` label. The agent opens a pull request; it never merges directly to `main`.
+        Describe one reviewable STARWELL slice. After checking the task, a repository collaborator starts the agent by applying the matching label: `agent:build`, `agent:design`, `agent:ingest`, `agent:audit`, or `agent:release`. The agent opens a pull request and never merges directly to `main`.
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Workshop mode
+      description: Choose the kind of work this task requires.
+      options:
+        - Build — product behaviour, integrations, tests, or tooling
+        - Design — UI, interaction states, effects, tokens, previews, accessibility
+        - Ingest — importers, schemas, normalisers, notebooks, registries, seed transforms
+        - Audit — architecture, privacy, accessibility, naming, routes, capability claims
+        - Release — packaging, changelog, installer checks, smoke tests, receipts
+    validations:
+      required: true
   - type: textarea
     id: outcome
     attributes:
       label: Required outcome
-      description: What working behaviour should exist when this slice is complete?
-      placeholder: Add eraser mode to raster layers with pressure-aware size and reversible stroke history.
+      description: What working behaviour or checked-in artifact should exist when this slice is complete?
+      placeholder: Implement a responsive Art Gobby effects rail with glow, ember, mist, and reduced-motion preview states.
     validations:
       required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: Design or source references
+      description: List relevant routes, components, files, palettes, screenshots, documents, or prior PRs. Do not paste secrets or private chat content.
+      placeholder: |
+        - apps/starwell/src/components/glyph-studio/
+        - PR #64
+        - House palette: chestnut, gold-creme, moss, seaglass
+    validations:
+      required: false
   - type: textarea
     id: boundaries
     attributes:
       label: Boundaries and non-goals
-      description: State what this task must not claim or alter.
-      placeholder: Do not add smudge yet. Do not change vector export behaviour.
+      description: State what this task must not claim, alter, publish, or ingest.
+      placeholder: Do not generate images in CI. Do not alter Glyph Studio project JSON. Do not commit uploaded references.
     validations:
       required: true
   - type: textarea
     id: acceptance
     attributes:
       label: Acceptance checks
-      description: List observable checks and tests.
+      description: List observable checks, responsive states, tests, and build gates.
       placeholder: |
-        - eraser works only on raster layers
-        - undo restores removed pixels
-        - project JSON remains serialisable
+        - keyboard and touch access work
+        - reduced-motion mode disables animated shimmer
+        - empty/loading/error states are visible in the preview fixture
         - npm test and npm run build pass
     validations:
       required: true
@@ -40,15 +64,29 @@ body:
     attributes:
       label: STARWELL area
       options:
+        - Art Gobby / effects / visual assets
         - Brush Studio / raster engine
         - Procreate compatibility
-        - Art Gobby / effects
         - Glyph Studio / Font Forge
         - Hearthroom / Grove
         - Local Model
         - Laboratory / Observatory
         - Research / Continuity / Trends
+        - Project registry / maps / timeline / codex
+        - Themes / fonts / design system
         - Hearthgate desktop / installer
+        - Data import / notebooks / archives
         - Other
     validations:
       required: true
+  - type: checkboxes
+    id: handling
+    attributes:
+      label: Handling checks
+      options:
+        - label: This task is bounded to one reviewable slice.
+          required: true
+        - label: No API keys, private chats, uploads, or source documents are included in the issue.
+          required: true
+        - label: Human review is required before merge or release.
+          required: true
