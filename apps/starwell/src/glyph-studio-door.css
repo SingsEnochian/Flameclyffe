@@ -1,0 +1,53 @@
+.glyph-studio-doorway {
+  position: fixed;
+  right: clamp(1rem, 2.5vw, 2rem);
+  bottom: clamp(6.5rem, 12vh, 8.5rem);
+  z-index: 40;
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 15rem);
+  align-items: center;
+  gap: 0.65rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgba(230, 198, 122, 0.34);
+  border-radius: 999px;
+  background: rgba(9, 11, 18, 0.88);
+  color: #f1e7cb;
+  text-decoration: none;
+  box-shadow: 0 0.8rem 2.8rem rgba(0, 0, 0, 0.32), inset 0 0 1.4rem rgba(61, 109, 99, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.glyph-studio-doorway:hover,
+.glyph-studio-doorway:focus-visible {
+  border-color: rgba(230, 198, 122, 0.72);
+  background: rgba(24, 28, 42, 0.94);
+  outline: none;
+}
+
+.glyph-studio-doorway-mark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(230, 198, 122, 0.34);
+  border-radius: 50%;
+  color: #e6c67a;
+  font-size: 1.2rem;
+}
+
+.glyph-studio-doorway-copy { min-width: 0; }
+.glyph-studio-doorway-copy strong,
+.glyph-studio-doorway-copy em { display: block; }
+.glyph-studio-doorway-copy strong { font-size: 0.82rem; letter-spacing: 0.04em; }
+.glyph-studio-doorway-copy em { margin-top: 0.12rem; color: rgba(241, 231, 203, 0.65); font-size: 0.68rem; }
+
+@media (max-width: 640px) {
+  .glyph-studio-doorway {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin: 0.75rem;
+    border-radius: 1rem;
+  }
+}
