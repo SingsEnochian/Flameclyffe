@@ -1,0 +1,119 @@
+name: Hearthgate Windows Installer
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/starwell-server/**"
+      - ".github/workflows/hearthgate-windows-installer.yml"
+  push:
+    branches:
+      - main
+    tags:
+      - "hearthgate-v*"
+    paths:
+      - "apps/starwell-server/**"
+      - ".github/workflows/hearthgate-windows-installer.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hearthgate-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows-installer:
+    name: Build Windows x64 NSIS installer
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+    defaults:
+      run:
+        working-directory: apps/starwell-server
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/starwell-server/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run packaging preflight
+        run: npm run check:packaging
+
+      - name: Build unsigned NSIS installer
+        run: npm run electron:build:win
+
+      - name: Verify installer and write checksum
+        id: verify
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $installers = @(Get-ChildItem -Path "dist-electron" -Filter "Hearthgate-Setup-*.exe" -File)
+          if ($installers.Count -ne 1) {
+            throw "Expected exactly one Hearthgate installer, found $($installers.Count)."
+          }
+
+          $installer = $installers[0]
+          if ($installer.Length -lt 1MB) {
+            throw "Installer is unexpectedly small: $($installer.Length) bytes."
+          }
+
+          $hash = Get-FileHash -Path $installer.FullName -Algorithm SHA256
+          "$($hash.Hash)  $($installer.Name)" | Set-Content -Path "dist-electron/SHA256SUMS.txt" -Encoding ascii
+
+          "installer_name=$($installer.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "installer_bytes=$($installer.Length)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "installer_sha256=$($hash.Hash)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+          @"
+          ## Hearthgate Windows installer
+
+          - File: ``$($installer.Name)``
+          - Size: $([math]::Round($installer.Length / 1MB, 2)) MB
+          - SHA-256: ``$($hash.Hash)``
+          - Signing: unsigned development build
+          "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
+      - name: Upload installer artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hearthgate-windows-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 21
+          path: |
+            apps/starwell-server/dist-electron/Hearthgate-Setup-*.exe
+            apps/starwell-server/dist-electron/*.blockmap
+            apps/starwell-server/dist-electron/latest*.yml
+            apps/starwell-server/dist-electron/SHA256SUMS.txt
+
+      - name: Publish tagged GitHub release
+        if: startsWith(github.ref, 'refs/tags/hearthgate-v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INSTALLER_NAME: ${{ steps.verify.outputs.installer_name }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $files = @(
+            "dist-electron/$($env:INSTALLER_NAME)",
+            "dist-electron/SHA256SUMS.txt"
+          )
+          $blockmaps = @(Get-ChildItem -Path "dist-electron" -Filter "*.blockmap" -File | ForEach-Object { $_.FullName })
+          $files += $blockmaps
+
+          if (gh release view $tag 2>$null) {
+            gh release upload $tag @files --clobber
+          } else {
+            gh release create $tag @files --title "Hearthgate $tag" --generate-notes
+          }

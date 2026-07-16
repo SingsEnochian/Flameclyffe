@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node server.js",
     "electron:dev": "electron .",
-    "electron:build": "electron-builder"
+    "electron:pack:win": "electron-builder --win dir --x64 --publish never",
+    "electron:build": "electron-builder",
+    "electron:build:win": "electron-builder --win nsis --x64 --publish never",
+    "check:packaging": "node scripts/check-packaging.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
@@ -27,6 +30,7 @@
   "build": {
     "appId": "com.hearthweave.hearthgate",
     "productName": "Hearthgate",
+    "artifactName": "Hearthgate-Setup-${version}-${arch}.${ext}",
     "copyright": "Hearthweave",
     "directories": {
       "output": "dist-electron"
@@ -48,14 +52,14 @@
             "x64"
           ]
         }
-      ],
-      "icon": "electron/icon.ico"
+      ]
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Hearthgate"
+      "shortcutName": "Hearthgate",
+      "uninstallDisplayName": "Hearthgate"
     }
   },
   "allowScripts": {
