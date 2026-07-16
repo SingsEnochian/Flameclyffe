@@ -1,0 +1,32 @@
+.glyph-stage-surface {
+  position: relative;
+  width: min(100%, calc(100vh - 13rem));
+  max-height: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #f5f0df;
+}
+
+.glyph-raster-surface,
+.glyph-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glyph-raster-surface {
+  z-index: 1;
+  display: block;
+  pointer-events: none;
+}
+
+.glyph-stage {
+  z-index: 2;
+}
+
+@media (max-width: 900px) {
+  .glyph-stage-surface {
+    width: min(100%, 72dvh);
+  }
+}
