@@ -39,6 +39,10 @@ ml-lab/liquid-light-capture.png
 sandbox/observer-deep/raw/
 sandbox/observer-deep/out/
 
+# Hearthgate private local archive intake
+apps/starwell-server/public/hearthgate-archive.local.json
+apps/starwell-server/public/hearthgate-sources/
+
 # OS/editor noise
 .DS_Store
 .vscode/
