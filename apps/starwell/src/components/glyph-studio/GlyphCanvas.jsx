@@ -83,15 +83,46 @@ function MetricGuides({ guides }) {
   );
 }
 
+function TextLayerMark({ layer }) {
+  const text = layer.text;
+  if (!text) return null;
+  const content = text.capitals ? String(text.content || '').toUpperCase() : String(text.content || '');
+  const lines = content.split('\n');
+  const anchor = text.alignment === 'center' ? 'middle' : text.alignment === 'right' ? 'end' : 'start';
+  const transform = text.orientation === 'vertical' ? `rotate(90 ${text.x} ${text.y})` : undefined;
+  return (
+    <text
+      x={text.x}
+      y={text.y + Number(text.baseline || 0)}
+      transform={transform}
+      fill={text.outline ? 'none' : text.colour}
+      stroke={text.outline ? text.colour : 'none'}
+      strokeWidth={text.outline ? Math.max(1, Number(text.size) * 0.025) : 0}
+      fontFamily={text.family}
+      fontSize={text.size}
+      fontStyle={text.style}
+      fontWeight={text.weight}
+      textAnchor={anchor}
+      textDecoration={text.underline ? 'underline' : 'none'}
+      style={{ letterSpacing: `${Number(text.tracking || 0)}px` }}
+    >
+      {lines.map((line, index) => (
+        <tspan key={`${layer.id}-${index}`} x={text.x} dy={index === 0 ? 0 : Number(text.size) * Number(text.leading || 1.2)}>{line || ' '}</tspan>
+      ))}
+    </text>
+  );
+}
+
+function layerBlend(mode) {
+  return mode === 'normal' ? 'normal' : mode;
+}
+
 export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, onCommitStroke }) {
   const svgRef = useRef(null);
   const drawingRef = useRef(null);
   const [draftStroke, setDraftStroke] = useState(null);
   const [stylus, setStylus] = useState({ type: 'none', pressure: 0, tiltX: 0, tiltY: 0, twist: 0 });
-  const visibleLayerIds = useMemo(
-    () => new Set(glyph.layers.filter((layer) => layer.visible).map((layer) => layer.id)),
-    [glyph.layers],
-  );
+  const visibleLayers = useMemo(() => glyph.layers.filter((layer) => layer.visible), [glyph.layers]);
 
   function eventPoint(event) {
     const matrix = svgRef.current?.getScreenCTM();
@@ -125,7 +156,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
   }
 
   function startStroke(event) {
-    if (!activeLayer || activeLayer.locked || event.button > 0) return;
+    if (!activeLayer || !activeBrush || activeLayer.locked || !['vector', 'raster'].includes(activeLayer.kind) || event.button > 0) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     const stroke = {
@@ -155,9 +186,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     const stroke = drawingRef.current;
     if (!stroke) return;
     event.preventDefault();
-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     drawingRef.current = null;
     setDraftStroke(null);
     if (stroke.points.length) onCommitStroke(stroke);
@@ -177,9 +206,12 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
       >
         <rect width={VIEWBOX} height={VIEWBOX} className="stage-paper" />
         <MetricGuides guides={guides} />
-        {glyph.strokes
-          .filter((stroke) => visibleLayerIds.has(stroke.layerId))
-          .map((stroke) => <StrokeMarks key={stroke.id} stroke={stroke} />)}
+        {visibleLayers.map((layer) => (
+          <g key={layer.id} opacity={layer.opacity} style={{ mixBlendMode: layerBlend(layer.blendMode) }} data-layer-kind={layer.kind}>
+            {layer.kind === 'text' && <TextLayerMark layer={layer} />}
+            {glyph.strokes.filter((stroke) => stroke.layerId === layer.id).map((stroke) => <StrokeMarks key={stroke.id} stroke={stroke} />)}
+          </g>
+        ))}
         {draftStroke && <StrokeMarks stroke={draftStroke} />}
       </svg>
       <div className="stage-readout" aria-live="polite">
@@ -188,6 +220,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
         <span>T {stylus.tiltX}/{stylus.tiltY}</span>
         <span>R {stylus.twist}°</span>
       </div>
+      {!['vector', 'raster'].includes(activeLayer?.kind) && <div className="stage-mode-note">Select a vector or raster layer to draw. Current layer: {activeLayer?.kind || 'none'}.</div>}
     </div>
   );
 }
