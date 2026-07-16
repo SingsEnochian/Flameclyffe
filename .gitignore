@@ -43,6 +43,9 @@ sandbox/observer-deep/out/
 apps/starwell-server/public/hearthgate-archive.local.json
 apps/starwell-server/public/hearthgate-sources/
 
+# Generated STARWELL bundle staged for Hearthgate packaging
+apps/starwell-server/public/starwell/
+
 # OS/editor noise
 .DS_Store
 .vscode/

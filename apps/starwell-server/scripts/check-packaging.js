@@ -15,15 +15,34 @@ const requiredFiles = [
   'server.js',
   'fontforge/server.js',
   'fontforge/worker.js',
+  'scripts/stage-starwell.js',
   'public/hearthgate.html',
   'public/hearthgate-archive.html',
   'public/setup-wizard.html',
+  'public/starwell/index.html',
+  'public/starwell/glyph-studio/index.html',
 ];
 
 for (const relativePath of requiredFiles) {
   if (!relativePath || !fs.existsSync(path.join(root, relativePath))) {
     errors.push(`Missing required packaging file: ${relativePath || '(undefined)'}`);
   }
+}
+
+for (const relativePath of ['public/starwell/index.html', 'public/starwell/glyph-studio/index.html']) {
+  const absolutePath = path.join(root, relativePath);
+  if (!fs.existsSync(absolutePath)) continue;
+  const html = fs.readFileSync(absolutePath, 'utf8');
+  if (!html.includes('/starwell/')) {
+    errors.push(`${relativePath} does not contain the packaged /starwell/ asset base.`);
+  }
+}
+
+const starwellAssets = path.join(root, 'public', 'starwell', 'assets');
+if (!fs.existsSync(starwellAssets) || !fs.statSync(starwellAssets).isDirectory()) {
+  errors.push('Bundled STARWELL assets directory is missing.');
+} else if (!fs.readdirSync(starwellAssets).some((name) => /\.(js|css)$/i.test(name))) {
+  errors.push('Bundled STARWELL assets directory has no JavaScript or CSS assets.');
 }
 
 const winTarget = pkg.build?.win?.target;
@@ -69,5 +88,6 @@ console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
 console.log(' services: core + local FontForge sidecar');
+console.log(' framework: /starwell/ + /starwell/glyph-studio/ bundled');
 console.log(` installer: ${pkg.build.artifactName}`);
 console.log(' signing: not configured; CI output will be unsigned');

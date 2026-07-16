@@ -4,11 +4,18 @@ const path  = require('path');
 const fs    = require('fs');
 const { fork } = require('child_process');
 const net   = require('net');
+const { fileURLToPath } = require('url');
 
 const CONFIG_PATH = path.join(app.getPath('userData'), 'hearthgate-config.json');
 const DATA_DIR    = path.join(app.getPath('userData'), 'hearthgate-data');
 const PORT = 3841;
 const FONTFORGE_PORT = 3842;
+const LOCAL_HTTP_ORIGINS = new Set([
+  `http://localhost:${PORT}`,
+  `http://127.0.0.1:${PORT}`,
+  `http://localhost:${FONTFORGE_PORT}`,
+  `http://127.0.0.1:${FONTFORGE_PORT}`,
+]);
 
 let win = null;
 let serverProc = null;
@@ -22,6 +29,37 @@ function loadConfig() {
 function saveConfig(cfg) {
   fs.mkdirSync(path.dirname(CONFIG_PATH), { recursive: true });
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
+}
+
+function primaryApplicationUrl() {
+  const starwellEntry = path.join(app.getAppPath(), 'public', 'starwell', 'index.html');
+  return fs.existsSync(starwellEntry)
+    ? `http://localhost:${PORT}/starwell/`
+    : `http://localhost:${PORT}/hearthgate.html`;
+}
+
+function isPathInside(candidate, root) {
+  const relative = path.relative(root, candidate);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function isLocalApplicationUrl(value) {
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol === 'http:') return LOCAL_HTTP_ORIGINS.has(parsed.origin);
+    if (parsed.protocol !== 'file:') return false;
+
+    const candidate = path.resolve(fileURLToPath(parsed));
+    const appRoot = path.resolve(app.getAppPath());
+    return isPathInside(candidate, path.join(appRoot, 'public'))
+      || isPathInside(candidate, path.join(appRoot, 'electron'));
+  } catch {
+    return false;
+  }
+}
+
+function isWriterPrintPopup(targetUrl, openerUrl) {
+  return targetUrl === 'about:blank' && isLocalApplicationUrl(openerUrl);
 }
 
 // ── Server ────────────────────────────────────────────────────────────────────
@@ -92,7 +130,7 @@ function createWindow(url) {
     width: 1380, height: 880,
     minWidth: 820, minHeight: 620,
     backgroundColor: '#070908',
-    title: 'Hearthgate',
+    title: 'STARWELL · Hearthgate',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -103,15 +141,33 @@ function createWindow(url) {
   Menu.setApplicationMenu(null);
   win.loadURL(url);
 
-  // Open external links in default browser
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+  // Keep Hearthgate and its local workers inside the application boundary.
+  win.webContents.setWindowOpenHandler(({ url: targetUrl }) => {
+    if (isLocalApplicationUrl(targetUrl)) return { action: 'allow' };
+
+    // Writer Room creates a blank, same-application document and writes the
+    // printable sheet into it before invoking the system print dialog.
+    if (isWriterPrintPopup(targetUrl, win.webContents.getURL())) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          autoHideMenuBar: true,
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
+          },
+        },
+      };
+    }
+
+    if (/^https?:/i.test(targetUrl)) shell.openExternal(targetUrl);
     return { action: 'deny' };
   });
-  win.webContents.on('will-navigate', (e, navUrl) => {
-    if (!navUrl.startsWith(`http://localhost:${PORT}`) && !navUrl.startsWith('file://')) {
-      e.preventDefault();
-      shell.openExternal(navUrl);
+  win.webContents.on('will-navigate', (event, navigationUrl) => {
+    if (!isLocalApplicationUrl(navigationUrl)) {
+      event.preventDefault();
+      if (/^https?:/i.test(navigationUrl)) shell.openExternal(navigationUrl);
     }
   });
 
@@ -126,7 +182,7 @@ ipcMain.handle('save-config', async (_e, cfg) => {
   startServer(cfg);
   try {
     await waitForServer(PORT);
-    win?.loadURL(`http://localhost:${PORT}/hearthgate.html`);
+    win?.loadURL(primaryApplicationUrl());
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err.message };
@@ -150,7 +206,7 @@ app.whenReady().then(async () => {
   startServer(cfg);
   try {
     await waitForServer(PORT);
-    createWindow(`http://localhost:${PORT}/hearthgate.html`);
+    createWindow(primaryApplicationUrl());
   } catch {
     createWindow(`file://${path.join(__dirname, '..', 'public', 'setup-wizard.html')}`);
   }
