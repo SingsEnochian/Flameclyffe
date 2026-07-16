@@ -5,7 +5,9 @@
   "type": "commonjs",
   "main": "electron/main.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node launcher.js",
+    "start:core": "node server.js",
+    "fontforge:start": "node fontforge/server.js",
     "electron:dev": "electron .",
     "electron:pack:win": "electron-builder --win dir --x64 --publish never",
     "electron:build": "electron-builder",
