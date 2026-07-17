@@ -45,6 +45,20 @@ if (!fs.existsSync(starwellAssets) || !fs.statSync(starwellAssets).isDirectory()
   errors.push('Bundled STARWELL assets directory has no JavaScript or CSS assets.');
 }
 
+const electronMainPath = path.join(root, pkg.main);
+if (fs.existsSync(electronMainPath)) {
+  const electronMain = fs.readFileSync(electronMainPath, 'utf8');
+  if (!electronMain.includes('utilityProcess.fork')) {
+    errors.push('Electron main process must launch local services with utilityProcess.fork.');
+  }
+  if (/require\(['"]child_process['"]\)/.test(electronMain) || /\bfork\(serverPath/.test(electronMain)) {
+    errors.push('Electron main process must not launch packaged local services with child_process.fork.');
+  }
+  if (!electronMain.includes('hearthgate-startup.log')) {
+    errors.push('Electron main process must expose a persistent startup diagnostics log.');
+  }
+}
+
 const winTarget = pkg.build?.win?.target;
 const targets = Array.isArray(winTarget) ? winTarget : [winTarget].filter(Boolean);
 const hasNsis = targets.some((target) => {
@@ -87,7 +101,8 @@ console.log('[Hearthgate packaging check] OK');
 console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
-console.log(' services: core + local FontForge sidecar');
+console.log(' services: Electron utility processes for core + local FontForge sidecar');
+console.log(' diagnostics: persistent hearthgate-startup.log');
 console.log(' framework: /starwell/ + /starwell/glyph-studio/ bundled');
 console.log(` installer: ${pkg.build.artifactName}`);
 console.log(' signing: not configured; CI output will be unsigned');
