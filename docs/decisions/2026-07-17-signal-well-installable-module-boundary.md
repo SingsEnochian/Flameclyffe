@@ -1,14 +1,14 @@
-# Signal Well: Installable Core and Optional Adapter Boundary
+# Signal Well: Installable Core and Adapter Boundary
 
 **Date:** 2026-07-17  
-**Status:** Accepted for implementation  
-**Applies to:** STARWELL, Hearthgate desktop packaging, Signal Well, future radio hardware and telescope archive integrations
+**Status:** Implemented in PR #71  
+**Applies to:** STARWELL, Hearthgate desktop packaging, Signal Well, radio hardware and telescope archive integrations
 
 ## Decision
 
 Signal Well ships in every Hearthgate installer as a first-class STARWELL room.
 
-The bundled core includes the local sifting instrument:
+The bundled core includes:
 
 - CSV and JSON signal ingest;
 - waterfall rendering;
@@ -16,29 +16,39 @@ The bundled core includes the local sifting instrument:
 - a human-led candidate ledger;
 - RFI comparison and annotation;
 - immutable source receipts;
-- JSON session export and CSV candidate export.
+- JSON session and CSV candidate export;
+- Radio JOVE live observatory listening.
 
-Hardware drivers, live network feeds, large scientific file decoders, and specialist sonification engines are installed as optional Signal Well adapters.
+Specialist hardware drivers, large scientific file decoders, telescope archive clients, and sonification engines remain optional Signal Well adapters.
 
 ## Governing sentence
 
 > The instrument belongs in the House. The antennae and specialist ears may be fitted as needed.
 
-## Why the hybrid model
+## Bundled Radio JOVE adapter
 
-Keeping the sifter in the base installer means every Hearthgate installation can open, inspect, classify, and preserve signal datasets without a second installation step.
+`radio-jove-live` is the first bundled acquisition adapter. It presents the official Radio JOVE live observatory product inside Signal Well:
 
-Keeping external integrations modular prevents the installer from accumulating platform-specific drivers, heavyweight scientific runtimes, and hardware dependencies that many installations will never use.
+- live spectrograph view across approximately 16–24 MHz;
+- live radio audio centred near 20.1 MHz;
+- station and source attribution;
+- direct access to the official source and live channel.
 
-The distinction is therefore:
+The first slice embeds the live observatory product. A later local bridge will convert live numeric readings into native Signal Well time/frequency/intensity points for marking and export.
+
+## Hybrid model
 
 ```text
 Bundled Signal Well core
-= inspect, mark, compare, annotate, preserve, export
+= inspect, listen, mark, compare, annotate, preserve, export
 
 Optional adapters
-= acquire, decode, stream, convert, or sonify specialised sources
+= acquire from local hardware, decode large formats, query archives, or sonify specialised sources
 ```
+
+Keeping the sifter and first public live ear in the base installer means every Hearthgate installation can listen immediately and can inspect local datasets without another installation step.
+
+Keeping specialist integrations modular prevents the installer from accumulating platform-specific drivers and heavyweight scientific runtimes that many installations will never use.
 
 ## Packaging contract
 
@@ -46,9 +56,10 @@ The Windows package must contain:
 
 - `/starwell/signal-well/`;
 - `/starwell/modules/signal-well.module.json`;
-- all compiled assets required to run the local sifter offline.
+- `/starwell/modules/signal-well/adapters/radio-jove-live.adapter.json`;
+- all compiled assets required to run the local sifter.
 
-Packaging checks fail when either the room or its module manifest is absent.
+Packaging checks fail when the room, module manifest, or bundled Radio JOVE adapter is absent.
 
 ## Adapter contract
 
@@ -58,28 +69,15 @@ Adapters target Signal Well API version `0.1.0` and are discovered beneath the H
 modules/signal-well/adapters/
 ```
 
-Adapter kinds include:
+Adapter kinds include live stream, radio hardware, telescope archive, binary decoder, and sonification.
 
-- live stream;
-- radio hardware;
-- telescope archive;
-- binary decoder;
-- sonification.
-
-The first planned adapters are Radio JOVE live data, SDRplay RSP1B capture, Breakthrough Listen archive access, Filterbank/HDF5/FITS decoding, and IQ/audio sonification.
+The next adapters are SDRplay RSP1B capture, Breakthrough Listen archive access, Filterbank/HDF5/FITS decoding, and IQ/audio sonification.
 
 ## Data boundary
 
 Raw recordings remain immutable.
 
 Selections, classifications, confidence, notes, cross-checks, and interpretations are appended beside the source. Automated tools may surface candidates later, but they do not silently classify or discard source material.
-
-## Release path
-
-1. Bundle Signal Well core in the next Hearthgate installer.
-2. Publish the adapter API and discovery loader.
-3. Add Radio JOVE and local SDR capture as the first acquisition adapters.
-4. Add professional telescope archive and binary-format adapters after the base sifter is stable.
 
 ## Seal
 
