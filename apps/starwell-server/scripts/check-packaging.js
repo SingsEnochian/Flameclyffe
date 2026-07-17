@@ -59,6 +59,33 @@ if (fs.existsSync(electronMainPath)) {
   }
 }
 
+const lockPath = path.join(root, 'package-lock.json');
+if (fs.existsSync(lockPath)) {
+  const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+  if (lock.version !== pkg.version || lock.packages?.['']?.version !== pkg.version) {
+    errors.push('package.json and package-lock.json must declare the same Hearthgate version.');
+  }
+}
+
+const groveChatPath = path.join(root, 'routes', 'grove-chat.routes.js');
+if (fs.existsSync(groveChatPath)) {
+  const groveChat = fs.readFileSync(groveChatPath, 'utf8');
+  if (!groveChat.includes('process.env.HEARTHGATE_DATA_DIR')) {
+    errors.push('Grove chat must store mutable state under HEARTHGATE_DATA_DIR.');
+  }
+  if (groveChat.includes("path.join(__dirname, '..', 'public', 'uploads')")) {
+    errors.push('Grove chat must not create uploads inside the packaged application tree.');
+  }
+}
+
+const coreServerPath = path.join(root, 'server.js');
+if (fs.existsSync(coreServerPath)) {
+  const coreServer = fs.readFileSync(coreServerPath, 'utf8');
+  if (!coreServer.includes("app.use('/uploads', express.static(uploadsDir))")) {
+    errors.push('Core server must serve user uploads from the writable data directory.');
+  }
+}
+
 const winTarget = pkg.build?.win?.target;
 const targets = Array.isArray(winTarget) ? winTarget : [winTarget].filter(Boolean);
 const hasNsis = targets.some((target) => {
