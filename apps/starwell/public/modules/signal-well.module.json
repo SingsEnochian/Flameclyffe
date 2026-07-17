@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "0.1.0",
+  "moduleId": "signal-well",
+  "displayName": "Signal Well",
+  "version": "0.1.0",
+  "delivery": "bundled-core",
+  "enabledByDefault": true,
+  "route": "/starwell/signal-well/",
+  "entrypoint": "signal-well/index.html",
+  "capabilities": [
+    "local-file-ingest",
+    "waterfall-rendering",
+    "time-frequency-selection",
+    "human-led-candidate-ledger",
+    "rfi-comparison",
+    "json-session-export",
+    "csv-candidate-export",
+    "source-receipt"
+  ],
+  "acceptedInputs": [
+    {
+      "mediaType": "text/csv",
+      "extensions": [".csv"]
+    },
+    {
+      "mediaType": "application/json",
+      "extensions": [".json"]
+    }
+  ],
+  "storage": {
+    "mode": "local-first",
+    "rawImmutable": true,
+    "annotationsAppendOnly": true,
+    "dataDirectory": "modules/signal-well"
+  },
+  "extensionContract": {
+    "apiVersion": "0.1.0",
+    "discoveryDirectory": "modules/signal-well/adapters",
+    "adapterKinds": [
+      "live-stream",
+      "radio-hardware",
+      "telescope-archive",
+      "binary-decoder",
+      "sonification"
+    ],
+    "bundledAdapters": []
+  },
+  "plannedAdapters": [
+    "radio-jove-live",
+    "sdrplay-rsp1b",
+    "breakthrough-listen-archive",
+    "filterbank-hdf5-fits",
+    "iq-audio-sonification"
+  ]
+}
