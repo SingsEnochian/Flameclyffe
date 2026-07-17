@@ -1,0 +1,36 @@
+{
+  "apiVersion": "0.1.0",
+  "moduleId": "signal-well",
+  "adapterId": "radio-jove-live",
+  "displayName": "Radio JOVE Live Observatory",
+  "kind": "live-stream",
+  "delivery": "bundled",
+  "enabledByDefault": true,
+  "source": {
+    "publisher": "NASA Radio JOVE Project",
+    "station": "K4LED / Larry Dodd",
+    "officialPage": "https://radiojove.gsfc.nasa.gov/",
+    "liveChannel": "https://youtube.com/channel/UCtawz3MnMBwjz9ShhSC0ygQ/live",
+    "embedUrl": "https://www.youtube-nocookie.com/embed/live_stream?channel=UCtawz3MnMBwjz9ShhSC0ygQ&rel=0"
+  },
+  "observation": {
+    "spectrographFrequencyMinMHz": 16,
+    "spectrographFrequencyMaxMHz": 24,
+    "audioCenterMHz": 20.1,
+    "products": [
+      "live-waterfall-video",
+      "live-radio-audio"
+    ]
+  },
+  "capabilities": [
+    "embedded-live-observatory",
+    "live-waterfall-view",
+    "live-audio-listening",
+    "manual-candidate-marking",
+    "source-attribution"
+  ],
+  "dataBridge": {
+    "numericStreamIngest": "planned-local-bridge",
+    "browserProduct": "live-observatory-view"
+  }
+}
