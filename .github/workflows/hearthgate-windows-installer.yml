@@ -124,7 +124,8 @@ jobs:
           $unpackedBuildInfoPath = Join-Path $unpackedRoot "build-info.json"
           $unpackedGrovePath = Join-Path $unpackedRoot "routes/grove-chat.routes.js"
           $unpackedServerPath = Join-Path $unpackedRoot "server.js"
-          foreach ($requiredPath in @($unpackedPackagePath, $unpackedBuildInfoPath, $unpackedGrovePath, $unpackedServerPath)) {
+          $unpackedElectronPath = Join-Path $unpackedRoot "electron/main.js"
+          foreach ($requiredPath in @($unpackedPackagePath, $unpackedBuildInfoPath, $unpackedGrovePath, $unpackedServerPath, $unpackedElectronPath)) {
             if (-not (Test-Path $requiredPath)) {
               throw "Packaged installer is missing required runtime file: $requiredPath"
             }
@@ -154,6 +155,11 @@ jobs:
           $serverSource = Get-Content -Raw -Path $unpackedServerPath
           if (-not $serverSource.Contains("app.use('/uploads', express.static(uploadsDir))")) {
             throw "Packaged core does not serve uploads from the writable data directory."
+          }
+
+          $electronSource = Get-Content -Raw -Path $unpackedElectronPath
+          if (-not $electronSource.Contains("build-info.json") -or -not $electronSource.Contains("app.getVersion()")) {
+            throw "Packaged Electron main process does not report version and embedded build identity."
           }
 
           $unpackedStarwell = "dist-electron/win-unpacked/resources/app/public/starwell/index.html"
