@@ -9,6 +9,7 @@
   "entrypoint": "signal-well/index.html",
   "capabilities": [
     "local-file-ingest",
+    "live-observatory-readings",
     "waterfall-rendering",
     "time-frequency-selection",
     "human-led-candidate-ledger",
@@ -43,10 +44,11 @@
       "binary-decoder",
       "sonification"
     ],
-    "bundledAdapters": []
+    "bundledAdapters": [
+      "radio-jove-live"
+    ]
   },
   "plannedAdapters": [
-    "radio-jove-live",
     "sdrplay-rsp1b",
     "breakthrough-listen-archive",
     "filterbank-hdf5-fits",
