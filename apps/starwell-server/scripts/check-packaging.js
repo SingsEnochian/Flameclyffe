@@ -23,6 +23,7 @@ const requiredFiles = [
   'public/starwell/glyph-studio/index.html',
   'public/starwell/signal-well/index.html',
   'public/starwell/modules/signal-well.module.json',
+  'public/starwell/modules/signal-well/adapters/radio-jove-live.adapter.json',
 ];
 
 for (const relativePath of requiredFiles) {
@@ -60,8 +61,37 @@ if (fs.existsSync(signalWellManifestPath)) {
     if (manifest.extensionContract?.discoveryDirectory !== 'modules/signal-well/adapters') {
       errors.push('Signal Well manifest is missing the optional adapter discovery contract.');
     }
+    if (!manifest.extensionContract?.bundledAdapters?.includes('radio-jove-live')) {
+      errors.push('Signal Well must bundle the Radio JOVE live adapter.');
+    }
+    if (!manifest.capabilities?.includes('live-observatory-readings')) {
+      errors.push('Signal Well manifest must declare live-observatory-readings.');
+    }
   } catch (error) {
     errors.push(`Signal Well manifest is invalid JSON: ${error.message}`);
+  }
+}
+
+const radioJoveAdapterPath = path.join(
+  root,
+  'public',
+  'starwell',
+  'modules',
+  'signal-well',
+  'adapters',
+  'radio-jove-live.adapter.json',
+);
+if (fs.existsSync(radioJoveAdapterPath)) {
+  try {
+    const adapter = JSON.parse(fs.readFileSync(radioJoveAdapterPath, 'utf8'));
+    if (adapter.adapterId !== 'radio-jove-live' || adapter.kind !== 'live-stream') {
+      errors.push('Radio JOVE adapter contract is invalid.');
+    }
+    if (!adapter.source?.embedUrl || adapter.observation?.audioCenterMHz !== 20.1) {
+      errors.push('Radio JOVE adapter is missing its live source or observation metadata.');
+    }
+  } catch (error) {
+    errors.push(`Radio JOVE adapter is invalid JSON: ${error.message}`);
   }
 }
 
@@ -116,6 +146,6 @@ console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
 console.log(' services: core + local FontForge sidecar');
 console.log(' framework: /starwell/ + /starwell/glyph-studio/ + /starwell/signal-well/ bundled');
-console.log(' modules: Signal Well core bundled; hardware, archive, decoder, and sonification adapters optional');
+console.log(' modules: Signal Well core + Radio JOVE live listening bundled; specialist adapters optional');
 console.log(` installer: ${pkg.build.artifactName}`);
 console.log(' signing: not configured; CI output will be unsigned');
