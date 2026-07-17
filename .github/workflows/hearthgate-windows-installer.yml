@@ -1,4 +1,5 @@
 name: Hearthgate Windows Installer
+run-name: Hearthgate Windows · ${{ github.event.pull_request.head.sha || github.sha }}
 
 on:
   workflow_dispatch:
@@ -35,14 +36,19 @@ jobs:
     timeout-minutes: 40
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      HEARTHGATE_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      HEARTHGATE_EVENT_SHA: ${{ github.sha }}
+      HEARTHGATE_SOURCE_REF: ${{ github.head_ref || github.ref_name }}
 
     defaults:
       run:
         working-directory: apps/starwell-server
 
     steps:
-      - name: Check out repository
+      - name: Check out exact source commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEARTHGATE_SOURCE_SHA }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -75,6 +81,23 @@ jobs:
       - name: Stage STARWELL inside Hearthgate
         run: npm run stage:starwell
 
+      - name: Embed build identity
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $package = Get-Content -Raw -Path "package.json" | ConvertFrom-Json
+          $identity = [ordered]@{
+            version = [string]$package.version
+            sourceCommit = [string]$env:HEARTHGATE_SOURCE_SHA
+            eventCommit = [string]$env:HEARTHGATE_EVENT_SHA
+            sourceRef = [string]$env:HEARTHGATE_SOURCE_REF
+            runId = [string]$env:GITHUB_RUN_ID
+            runNumber = [string]$env:GITHUB_RUN_NUMBER
+            builtAtUtc = (Get-Date).ToUniversalTime().ToString("o")
+          }
+          $identity | ConvertTo-Json | Set-Content -Path "build-info.json" -Encoding utf8
+          Write-Host "Embedded Hearthgate $($identity.version) from $($identity.sourceCommit), run $($identity.runNumber)."
+
       - name: Run packaging preflight
         run: npm run check:packaging
 
@@ -94,6 +117,43 @@ jobs:
           $installer = $installers[0]
           if ($installer.Length -lt 1MB) {
             throw "Installer is unexpectedly small: $($installer.Length) bytes."
+          }
+
+          $unpackedRoot = "dist-electron/win-unpacked/resources/app"
+          $unpackedPackagePath = Join-Path $unpackedRoot "package.json"
+          $unpackedBuildInfoPath = Join-Path $unpackedRoot "build-info.json"
+          $unpackedGrovePath = Join-Path $unpackedRoot "routes/grove-chat.routes.js"
+          $unpackedServerPath = Join-Path $unpackedRoot "server.js"
+          foreach ($requiredPath in @($unpackedPackagePath, $unpackedBuildInfoPath, $unpackedGrovePath, $unpackedServerPath)) {
+            if (-not (Test-Path $requiredPath)) {
+              throw "Packaged installer is missing required runtime file: $requiredPath"
+            }
+          }
+
+          $sourcePackage = Get-Content -Raw -Path "package.json" | ConvertFrom-Json
+          $packagedPackage = Get-Content -Raw -Path $unpackedPackagePath | ConvertFrom-Json
+          $packagedBuildInfo = Get-Content -Raw -Path $unpackedBuildInfoPath | ConvertFrom-Json
+          if ([string]$packagedPackage.version -ne [string]$sourcePackage.version) {
+            throw "Packaged version $($packagedPackage.version) does not match source version $($sourcePackage.version)."
+          }
+          if ([string]$packagedBuildInfo.version -ne [string]$sourcePackage.version) {
+            throw "Embedded build version $($packagedBuildInfo.version) does not match source version $($sourcePackage.version)."
+          }
+          if ([string]$packagedBuildInfo.sourceCommit -ne [string]$env:HEARTHGATE_SOURCE_SHA) {
+            throw "Embedded source commit $($packagedBuildInfo.sourceCommit) does not match expected $($env:HEARTHGATE_SOURCE_SHA)."
+          }
+
+          $groveSource = Get-Content -Raw -Path $unpackedGrovePath
+          if (-not $groveSource.Contains("process.env.HEARTHGATE_DATA_DIR")) {
+            throw "Packaged Grove route does not use HEARTHGATE_DATA_DIR."
+          }
+          if ($groveSource -match 'public[''"]\s*,\s*[''"]uploads') {
+            throw "Packaged Grove route still targets the read-only public/uploads directory."
+          }
+
+          $serverSource = Get-Content -Raw -Path $unpackedServerPath
+          if (-not $serverSource.Contains("app.use('/uploads', express.static(uploadsDir))")) {
+            throw "Packaged core does not serve uploads from the writable data directory."
           }
 
           $unpackedStarwell = "dist-electron/win-unpacked/resources/app/public/starwell/index.html"
@@ -126,6 +186,9 @@ jobs:
           - File: ``$($installer.Name)``
           - Size: $([math]::Round($installer.Length / 1MB, 2)) MB
           - SHA-256: ``$($hash.Hash)``
+          - Source commit: ``$($packagedBuildInfo.sourceCommit)``
+          - Packaged version: ``$($packagedPackage.version)``
+          - Runtime gate: writable Grove uploads verified in win-unpacked
           - Framework: bundled STARWELL + Glyph Studio
           - Font compiler: local FontForge sidecar adapter
           - Signing: unsigned development build
@@ -134,7 +197,7 @@ jobs:
       - name: Upload installer artefact
         uses: actions/upload-artifact@v4
         with:
-          name: hearthgate-windows-${{ github.sha }}
+          name: hearthgate-windows-${{ env.HEARTHGATE_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 21
           path: |
