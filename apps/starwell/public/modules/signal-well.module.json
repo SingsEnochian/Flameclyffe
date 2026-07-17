@@ -2,7 +2,7 @@
   "schemaVersion": "0.1.0",
   "moduleId": "signal-well",
   "displayName": "Signal Well",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "delivery": "bundled-core",
   "enabledByDefault": true,
   "route": "/starwell/signal-well/",
@@ -10,6 +10,10 @@
   "capabilities": [
     "local-file-ingest",
     "live-observatory-readings",
+    "signal-source-array",
+    "display-media-recording",
+    "timed-json-snapshots",
+    "live-recording-receipt",
     "waterfall-rendering",
     "time-frequency-selection",
     "human-led-candidate-ledger",
@@ -26,6 +30,10 @@
     {
       "mediaType": "application/json",
       "extensions": [".json"]
+    },
+    {
+      "mediaType": "video/webm",
+      "extensions": [".webm"]
     }
   ],
   "storage": {
@@ -42,15 +50,27 @@
       "radio-hardware",
       "telescope-archive",
       "binary-decoder",
+      "event-feed",
+      "machine-data-feed",
       "sonification"
     ],
     "bundledAdapters": [
       "radio-jove-live"
     ]
   },
+  "sourceArray": {
+    "defaultSelection": "all",
+    "recorder": "display-media-with-audio-requested",
+    "machineSnapshotCadenceSeconds": 60,
+    "receiptSchema": "signal_well_live_recording@0.1.0"
+  },
   "plannedAdapters": [
     "sdrplay-rsp1b",
     "breakthrough-listen-archive",
+    "e-callisto-fits-ingest",
+    "brams-wav-ingest",
+    "superdarn-websocket",
+    "chime-frb-voevent",
     "filterbank-hdf5-fits",
     "iq-audio-sonification"
   ]
