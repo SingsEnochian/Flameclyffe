@@ -21,6 +21,7 @@ export default defineConfig({
         unitResonanceLab: resolve(process.cwd(), 'apps/starwell/unit-resonance-lab.html'),
         scfeLab: resolve(process.cwd(), 'apps/starwell/scfe-lab.html'),
         glyphStudio: resolve(process.cwd(), 'apps/starwell/glyph-studio/index.html'),
+        signalWell: resolve(process.cwd(), 'apps/starwell/signal-well/index.html'),
       },
     },
   },
