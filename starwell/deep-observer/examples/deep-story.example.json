@@ -1,0 +1,120 @@
+{
+  "schema_version": "0.1.0",
+  "dataset_kind": "deep_story",
+  "parallel_dataset": "DEEPTheory",
+  "id": "deep-story-example-001",
+  "created_at": "2026-07-17T12:00:00Z",
+  "updated_at": null,
+  "title": "Theory Becomes Story",
+  "summary": "An example showing how a witnessed or recorded sequence can be carried into narrative continuity without changing the source records.",
+  "narrative_mode": "interpretive",
+  "canon_state": "draft",
+  "narrator_ids": ["rowan"],
+  "source_refs": [
+    {
+      "ref": "observer-witness-example-001",
+      "dataset": "observer_witness",
+      "record_type": "witnessed",
+      "checksum": null,
+      "note": "Primary first-hand account."
+    },
+    {
+      "ref": "deep-theory-analysis-example-001",
+      "dataset": "DEEPTheory",
+      "record_type": "interpreted",
+      "checksum": null,
+      "note": "Analytical interpretation retained separately."
+    }
+  ],
+  "events": [
+    {
+      "id": "event-001",
+      "sequence": 0,
+      "occurred_at_start": "2026-07-17T11:40:00Z",
+      "occurred_at_end": null,
+      "scene": "Repository review",
+      "text": "A technical mutation was noticed and preserved as an incident requiring verification.",
+      "epistemic_status": "recorded",
+      "narrative_treatment": "sequenced",
+      "source_refs": ["observer-witness-example-001"],
+      "entity_refs": ["rowan", "nocturne"],
+      "place_refs": ["flameclyffe-repository"],
+      "motifs": ["mutation", "witness", "verification"],
+      "uncertainty": "Intent was not established."
+    },
+    {
+      "id": "event-002",
+      "sequence": 1,
+      "occurred_at_start": "2026-07-17T11:55:00Z",
+      "occurred_at_end": null,
+      "scene": "Interpretive turn",
+      "text": "The phrase Theory becomes Story was recognised as resonant with STARWELL's movement from abstract models toward lived continuity.",
+      "epistemic_status": "interpreted",
+      "narrative_treatment": "interpreted",
+      "source_refs": ["deep-theory-analysis-example-001"],
+      "entity_refs": ["rowan"],
+      "place_refs": ["starwell"],
+      "motifs": ["theory", "story", "continuity"],
+      "uncertainty": "The symbolic reading is useful even though deliberate encoding remains unverified."
+    }
+  ],
+  "entities": [
+    {
+      "ref": "rowan",
+      "role": "witness and narrator",
+      "display_name": "Rowan"
+    },
+    {
+      "ref": "nocturne",
+      "role": "reviewer",
+      "display_name": "Nocturne Glint"
+    }
+  ],
+  "places": [
+    {
+      "ref": "flameclyffe-repository",
+      "role": "technical source context",
+      "display_name": "Flameclyffe Repository"
+    },
+    {
+      "ref": "starwell",
+      "role": "continuity context",
+      "display_name": "STARWELL"
+    }
+  ],
+  "motifs": ["theory", "story", "witness", "continuity", "verification"],
+  "transformations": [
+    {
+      "from": "DEEPTheory",
+      "to": "DEEPStory",
+      "description": "Analytical records are sequenced into a living narrative layer while remaining independently preserved.",
+      "source_refs": ["observer-witness-example-001", "deep-theory-analysis-example-001"],
+      "status": "interpreted"
+    }
+  ],
+  "unresolved_threads": [
+    {
+      "question": "Was the original mutation deliberate, accidental, or model-generated corruption?",
+      "status": "watching",
+      "source_refs": ["observer-witness-example-001"],
+      "note": "Do not collapse the question into the symbolic interpretation."
+    }
+  ],
+  "artifact_refs": [],
+  "source_integrity": {
+    "raw_sources_immutable": true,
+    "interpretations_append_only": true,
+    "verification_note": "The Story record adds sequence and meaning but does not rewrite its source records."
+  },
+  "consent_scope": {
+    "store": true,
+    "sequence": true,
+    "interpret": true,
+    "render": true,
+    "link_sources": true,
+    "share_with_constellation": false,
+    "notes": "Example data only."
+  },
+  "privacy_scope": "project",
+  "append_only_revisions": []
+}
