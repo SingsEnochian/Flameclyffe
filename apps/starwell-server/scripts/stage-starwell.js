@@ -39,8 +39,10 @@ if (!fs.existsSync(sourceDir) || !fs.statSync(sourceDir).isDirectory()) {
 
 requireFile('index.html');
 requireFile(path.join('glyph-studio', 'index.html'));
+requireFile(path.join('signal-well', 'index.html'));
 assertPackagedBase('index.html');
 assertPackagedBase(path.join('glyph-studio', 'index.html'));
+assertPackagedBase(path.join('signal-well', 'index.html'));
 
 fs.rmSync(destinationDir, { recursive: true, force: true });
 fs.mkdirSync(path.dirname(destinationDir), { recursive: true });
@@ -48,15 +50,16 @@ fs.cpSync(sourceDir, destinationDir, { recursive: true, force: true });
 
 const stagedIndex = path.join(destinationDir, 'index.html');
 const stagedGlyphStudio = path.join(destinationDir, 'glyph-studio', 'index.html');
-if (!fs.existsSync(stagedIndex) || !fs.existsSync(stagedGlyphStudio)) {
-  throw new Error('STARWELL staging finished without the required framework and Glyph Studio entry points.');
+const stagedSignalWell = path.join(destinationDir, 'signal-well', 'index.html');
+if (!fs.existsSync(stagedIndex) || !fs.existsSync(stagedGlyphStudio) || !fs.existsSync(stagedSignalWell)) {
+  throw new Error('STARWELL staging finished without the required framework, Glyph Studio, and Signal Well entry points.');
 }
 
 const fileCount = countFiles(destinationDir);
-if (fileCount < 3) throw new Error(`Staged STARWELL bundle is unexpectedly small (${fileCount} files).`);
+if (fileCount < 4) throw new Error(`Staged STARWELL bundle is unexpectedly small (${fileCount} files).`);
 
 console.log('[Hearthgate STARWELL stage] OK');
 console.log(` source: ${sourceDir}`);
 console.log(` destination: ${destinationDir}`);
 console.log(` files: ${fileCount}`);
-console.log(' routes: /starwell/ and /starwell/glyph-studio/');
+console.log(' routes: /starwell/, /starwell/glyph-studio/, and /starwell/signal-well/');
