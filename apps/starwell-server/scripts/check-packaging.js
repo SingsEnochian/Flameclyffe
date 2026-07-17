@@ -57,6 +57,9 @@ if (fs.existsSync(electronMainPath)) {
   if (!electronMain.includes('hearthgate-startup.log')) {
     errors.push('Electron main process must expose a persistent startup diagnostics log.');
   }
+  if (!electronMain.includes('build-info.json') || !electronMain.includes('app.getVersion()')) {
+    errors.push('Electron main process must log the packaged version and embedded build identity.');
+  }
 }
 
 const lockPath = path.join(root, 'package-lock.json');
