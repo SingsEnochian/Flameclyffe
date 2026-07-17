@@ -21,6 +21,8 @@ const requiredFiles = [
   'public/setup-wizard.html',
   'public/starwell/index.html',
   'public/starwell/glyph-studio/index.html',
+  'public/starwell/signal-well/index.html',
+  'public/starwell/modules/signal-well.module.json',
 ];
 
 for (const relativePath of requiredFiles) {
@@ -29,12 +31,37 @@ for (const relativePath of requiredFiles) {
   }
 }
 
-for (const relativePath of ['public/starwell/index.html', 'public/starwell/glyph-studio/index.html']) {
+for (const relativePath of [
+  'public/starwell/index.html',
+  'public/starwell/glyph-studio/index.html',
+  'public/starwell/signal-well/index.html',
+]) {
   const absolutePath = path.join(root, relativePath);
   if (!fs.existsSync(absolutePath)) continue;
   const html = fs.readFileSync(absolutePath, 'utf8');
   if (!html.includes('/starwell/')) {
     errors.push(`${relativePath} does not contain the packaged /starwell/ asset base.`);
+  }
+}
+
+const signalWellManifestPath = path.join(root, 'public', 'starwell', 'modules', 'signal-well.module.json');
+if (fs.existsSync(signalWellManifestPath)) {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(signalWellManifestPath, 'utf8'));
+    if (manifest.moduleId !== 'signal-well') {
+      errors.push('Signal Well manifest has the wrong moduleId.');
+    }
+    if (manifest.delivery !== 'bundled-core' || manifest.enabledByDefault !== true) {
+      errors.push('Signal Well must be declared as an enabled bundled-core module.');
+    }
+    if (manifest.route !== '/starwell/signal-well/' || manifest.entrypoint !== 'signal-well/index.html') {
+      errors.push('Signal Well manifest has an invalid packaged route or entrypoint.');
+    }
+    if (manifest.extensionContract?.discoveryDirectory !== 'modules/signal-well/adapters') {
+      errors.push('Signal Well manifest is missing the optional adapter discovery contract.');
+    }
+  } catch (error) {
+    errors.push(`Signal Well manifest is invalid JSON: ${error.message}`);
   }
 }
 
@@ -88,6 +115,7 @@ console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
 console.log(' services: core + local FontForge sidecar');
-console.log(' framework: /starwell/ + /starwell/glyph-studio/ bundled');
+console.log(' framework: /starwell/ + /starwell/glyph-studio/ + /starwell/signal-well/ bundled');
+console.log(' modules: Signal Well core bundled; hardware, archive, decoder, and sonification adapters optional');
 console.log(` installer: ${pkg.build.artifactName}`);
 console.log(' signing: not configured; CI output will be unsigned');
