@@ -45,6 +45,23 @@ function resetStartupLog() {
   }
 }
 
+function logBuildIdentity() {
+  writeStartupLog(`Hearthgate version: ${app.getVersion()}`);
+
+  const buildInfoPath = path.join(app.getAppPath(), 'build-info.json');
+  try {
+    const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, 'utf8'));
+    writeStartupLog(
+      `Build identity: source ${buildInfo.sourceCommit || 'unknown'}; ` +
+      `event ${buildInfo.eventCommit || 'unknown'}; ` +
+      `ref ${buildInfo.sourceRef || 'unknown'}; ` +
+      `workflow run ${buildInfo.runNumber || 'unknown'} (${buildInfo.runId || 'unknown'})`
+    );
+  } catch (error) {
+    writeStartupLog(`Build identity unavailable: ${error.message}`);
+  }
+}
+
 function normaliseChunk(chunk) {
   return String(chunk || '').replace(/\r?\n$/, '');
 }
@@ -157,6 +174,7 @@ function startServer(cfg) {
   lastServerFailure = '';
 
   const appRoot = app.getAppPath();
+  logBuildIdentity();
   const serverPath = path.join(appRoot, 'server.js');
   const fontForgeServerPath = path.join(appRoot, 'fontforge', 'server.js');
   const env = {
