@@ -151,12 +151,13 @@ export default function SignalSourceArray() {
   };
 
   const stopRecording = () => {
-    if (!recording) return;
+    const recorder = recorderRef.current;
+    if (!recorder || recorder.state === 'inactive') return;
     clearInterval(timerRef.current);
     clearInterval(snapshotTimerRef.current);
     timerRef.current = null;
     snapshotTimerRef.current = null;
-    if (recorderRef.current?.state !== 'inactive') recorderRef.current.stop();
+    recorder.stop();
     streamRef.current?.getTracks().forEach((track) => track.stop());
     setRecording(false);
   };
@@ -190,7 +191,13 @@ export default function SignalSourceArray() {
 
       streamRef.current = stream;
       recorderRef.current = recorder;
-      sessionRef.current = { sessionId, startedAt, sourcesAtStart, mimeType: recorder.mimeType || mimeType || 'video/webm' };
+      sessionRef.current = {
+        sessionId,
+        startedAt,
+        sourcesAtStart,
+        mimeType: recorder.mimeType || mimeType || 'video/webm',
+        notes,
+      };
 
       recorder.addEventListener('dataavailable', (event) => {
         if (event.data?.size) chunksRef.current.push(event.data);
@@ -217,7 +224,7 @@ export default function SignalSourceArray() {
             captureMode: 'display-media-with-audio-requested',
           },
           snapshots: snapshotsRef.current,
-          notes,
+          notes: session.notes,
         });
         setDurationMs(duration);
         setRecordingBlob({ blob, filename });
@@ -229,7 +236,7 @@ export default function SignalSourceArray() {
       recorder.start(5000);
       setRecording(true);
       setDurationMs(0);
-      setMessage('Recording the selected display surface and polling machine feeds every 60 seconds.');
+      setMessage('Choose the Signal Well tab or source window and include system audio; machine feeds are polled every 60 seconds.');
 
       await captureMachineSnapshots(sourcesAtStart);
       timerRef.current = setInterval(() => {
@@ -275,7 +282,7 @@ export default function SignalSourceArray() {
         </div>
         <div className="recorder-actions">
           {!recording ? (
-            <button className="record-button" type="button" onClick={startRecording}>Start whole-array recording</button>
+            <button className="record-button" type="button" onClick={startRecording}>Start array session recording</button>
           ) : (
             <button className="stop-button" type="button" onClick={stopRecording}>Stop recording</button>
           )}
