@@ -35,6 +35,8 @@ const sharedContextFile = path.join(dataDir, 'shared-context.md');
 
 fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(uploadsDir, { recursive: true });
+console.log(`[Core] data directory: ${dataDir}`);
+console.log(`[Core] uploads directory: ${uploadsDir}`);
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
