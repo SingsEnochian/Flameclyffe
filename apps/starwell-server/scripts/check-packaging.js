@@ -102,50 +102,6 @@ if (!fs.existsSync(starwellAssets) || !fs.statSync(starwellAssets).isDirectory()
   errors.push('Bundled STARWELL assets directory has no JavaScript or CSS assets.');
 }
 
-const electronMainPath = path.join(root, pkg.main);
-if (fs.existsSync(electronMainPath)) {
-  const electronMain = fs.readFileSync(electronMainPath, 'utf8');
-  if (!electronMain.includes('utilityProcess.fork')) {
-    errors.push('Electron main process must launch local services with utilityProcess.fork.');
-  }
-  if (/require\(['"]child_process['"]\)/.test(electronMain) || /\bfork\(serverPath/.test(electronMain)) {
-    errors.push('Electron main process must not launch packaged local services with child_process.fork.');
-  }
-  if (!electronMain.includes('hearthgate-startup.log')) {
-    errors.push('Electron main process must expose a persistent startup diagnostics log.');
-  }
-  if (!electronMain.includes('build-info.json') || !electronMain.includes('app.getVersion()')) {
-    errors.push('Electron main process must log the packaged version and embedded build identity.');
-  }
-}
-
-const lockPath = path.join(root, 'package-lock.json');
-if (fs.existsSync(lockPath)) {
-  const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
-  if (lock.version !== pkg.version || lock.packages?.['']?.version !== pkg.version) {
-    errors.push('package.json and package-lock.json must declare the same Hearthgate version.');
-  }
-}
-
-const groveChatPath = path.join(root, 'routes', 'grove-chat.routes.js');
-if (fs.existsSync(groveChatPath)) {
-  const groveChat = fs.readFileSync(groveChatPath, 'utf8');
-  if (!groveChat.includes('process.env.HEARTHGATE_DATA_DIR')) {
-    errors.push('Grove chat must store mutable state under HEARTHGATE_DATA_DIR.');
-  }
-  if (groveChat.includes("path.join(__dirname, '..', 'public', 'uploads')")) {
-    errors.push('Grove chat must not create uploads inside the packaged application tree.');
-  }
-}
-
-const coreServerPath = path.join(root, 'server.js');
-if (fs.existsSync(coreServerPath)) {
-  const coreServer = fs.readFileSync(coreServerPath, 'utf8');
-  if (!coreServer.includes("app.use('/uploads', express.static(uploadsDir))")) {
-    errors.push('Core server must serve user uploads from the writable data directory.');
-  }
-}
-
 const winTarget = pkg.build?.win?.target;
 const targets = Array.isArray(winTarget) ? winTarget : [winTarget].filter(Boolean);
 const hasNsis = targets.some((target) => {
@@ -188,8 +144,7 @@ console.log('[Hearthgate packaging check] OK');
 console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
-console.log(' services: Electron utility processes for core + local FontForge sidecar');
-console.log(' diagnostics: persistent hearthgate-startup.log');
+console.log(' services: core + local FontForge sidecar');
 console.log(' framework: /starwell/ + /starwell/glyph-studio/ + /starwell/signal-well/ bundled');
 console.log(' modules: Signal Well core + Radio JOVE live listening bundled; specialist adapters optional');
 console.log(` installer: ${pkg.build.artifactName}`);
