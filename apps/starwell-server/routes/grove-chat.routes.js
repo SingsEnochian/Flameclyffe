@@ -8,18 +8,25 @@ const { FLAMES } = require('../flames/manifests');
 
 const router = express.Router();
 
-const DATA_FILE    = path.join(__dirname, '..', 'data', 'chat-rooms.json');
-const UPLOAD_DIR   = path.join(__dirname, '..', 'public', 'uploads');
-const CONTEXT_FILE = path.join(__dirname, '..', 'data', 'shared-context.md');
+const DATA_DIR     = process.env.HEARTHGATE_DATA_DIR || path.join(__dirname, '..', 'data');
+const DATA_FILE    = path.join(DATA_DIR, 'chat-rooms.json');
+const UPLOAD_DIR   = path.join(DATA_DIR, 'uploads');
+const CONTEXT_FILE = path.join(DATA_DIR, 'shared-context.md');
 
 // ── Room I/O ──────────────────────────────────────────────────────────────────
 
 async function readRooms() {
-  const raw = await fs.readFile(DATA_FILE, 'utf8');
-  return JSON.parse(raw);
+  try {
+    const raw = await fs.readFile(DATA_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (error) {
+    if (error.code === 'ENOENT') return {};
+    throw error;
+  }
 }
 
 async function writeRooms(rooms) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(DATA_FILE, JSON.stringify(rooms, null, 2));
 }
 
