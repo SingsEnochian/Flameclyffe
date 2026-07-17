@@ -30,6 +30,11 @@ try {
 const app = express();
 const PORT = process.env.PORT || 3000;
 const dataDir = process.env.HEARTHGATE_DATA_DIR || path.join(__dirname, 'data');
+const uploadsDir = path.join(dataDir, 'uploads');
+const sharedContextFile = path.join(dataDir, 'shared-context.md');
+
+fs.mkdirSync(dataDir, { recursive: true });
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -108,6 +113,7 @@ async function fetchUrlContent(url, maxChars = 3000) {
 
 app.use(cors({ origin: true }));
 app.use(express.json());
+app.use('/uploads', express.static(uploadsDir));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper to read a JSON file asynchronously
@@ -353,7 +359,7 @@ app.post('/api/chat', async (req, res) => {
   if (!config) return res.status(400).json({ error: `No AI backend for member: ${memberId}` });
 
   let sharedCtx = '';
-  try { sharedCtx = await fs.promises.readFile(path.join(__dirname, 'data', 'shared-context.md'), 'utf8'); } catch { /* optional */ }
+  try { sharedCtx = await fs.promises.readFile(sharedContextFile, 'utf8'); } catch { /* optional */ }
   const sysPrompt = sharedCtx ? `${sharedCtx}\n\n---\n\n${config.system}` : config.system;
 
   const contextText = context.slice(-10).map(m => `${m.member}: ${stripHtml(m.html)}`).join('\n');
@@ -448,7 +454,7 @@ app.post('/api/tesla/chat', async (req, res) => {
     return res.status(400).json({ ok: false, error: 'messages array required' });
   }
   let sharedCtx = '';
-  try { sharedCtx = await fs.promises.readFile(path.join(__dirname, 'data', 'shared-context.md'), 'utf8'); } catch { }
+  try { sharedCtx = await fs.promises.readFile(sharedContextFile, 'utf8'); } catch { }
   const sys = sharedCtx ? `${sharedCtx}\n\n---\n\n${TESLA_SYSTEM}` : TESLA_SYSTEM;
   try {
     let reply = '';
@@ -528,7 +534,7 @@ app.post('/api/v1/extract-text', extractUpload.single('file'), async (req, res) 
 // ── Shared context endpoint ───────────────────────────────────────────────────
 app.get('/api/v1/context', async (req, res) => {
   try {
-    const ctx = await fs.promises.readFile(path.join(__dirname, 'data', 'shared-context.md'), 'utf8');
+    const ctx = await fs.promises.readFile(sharedContextFile, 'utf8');
     res.type('text/plain; charset=utf-8').send(ctx);
   } catch (e) {
     res.status(404).json({ ok: false, error: 'shared-context.md not found' });
