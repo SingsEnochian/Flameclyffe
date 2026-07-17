@@ -12,6 +12,11 @@ const manifest = JSON.parse(readFileSync(
   'utf8',
 ));
 
+const radioJoveAdapter = JSON.parse(readFileSync(
+  new URL('../public/modules/signal-well/adapters/radio-jove-live.adapter.json', import.meta.url),
+  'utf8',
+));
+
 test('Signal Well is bundled in the installable as the core radio-sifting module', () => {
   assert.equal(manifest.moduleId, 'signal-well');
   assert.equal(manifest.delivery, 'bundled-core');
@@ -44,12 +49,20 @@ test('Signal Well preserves source data and appends human classifications', () =
   assert.equal(receipt.provenance.reviewer, 'human-led');
 });
 
-test('Signal Well exposes an adapter contract without forcing hardware into the core installer', () => {
+test('Signal Well bundles Radio JOVE live listening while keeping specialist hardware optional', () => {
   assert.equal(manifest.extensionContract.apiVersion, '0.1.0');
   assert.equal(manifest.extensionContract.discoveryDirectory, 'modules/signal-well/adapters');
-  assert.deepEqual(manifest.extensionContract.bundledAdapters, []);
+  assert.deepEqual(manifest.extensionContract.bundledAdapters, ['radio-jove-live']);
+  assert.ok(manifest.capabilities.includes('live-observatory-readings'));
   assert.ok(manifest.extensionContract.adapterKinds.includes('radio-hardware'));
   assert.ok(manifest.extensionContract.adapterKinds.includes('telescope-archive'));
-  assert.ok(manifest.plannedAdapters.includes('radio-jove-live'));
   assert.ok(manifest.plannedAdapters.includes('filterbank-hdf5-fits'));
+
+  assert.equal(radioJoveAdapter.adapterId, 'radio-jove-live');
+  assert.equal(radioJoveAdapter.kind, 'live-stream');
+  assert.equal(radioJoveAdapter.delivery, 'bundled');
+  assert.equal(radioJoveAdapter.enabledByDefault, true);
+  assert.equal(radioJoveAdapter.observation.spectrographFrequencyMinMHz, 16);
+  assert.equal(radioJoveAdapter.observation.spectrographFrequencyMaxMHz, 24);
+  assert.equal(radioJoveAdapter.observation.audioCenterMHz, 20.1);
 });
