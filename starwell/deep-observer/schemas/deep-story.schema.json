@@ -238,7 +238,7 @@
     "storyEvent": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "sequence", "text", "epistemic_status", "source_refs"],
+      "required": ["id", "sequence", "text", "epistemic_status", "narrative_treatment", "source_refs"],
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "sequence": { "type": "integer", "minimum": 0 },
@@ -250,8 +250,7 @@
           "enum": ["witnessed", "recorded", "derived", "interpreted", "remembered", "correlated", "unknown"]
         },
         "narrative_treatment": {
-          "enum": ["verbatim", "paraphrased", "sequenced", "interpreted", "mythologised", "speculated", "fictionalised"],
-          "default": "sequenced"
+          "enum": ["verbatim", "paraphrased", "sequenced", "interpreted", "mythologised", "speculated", "fictionalised"]
         },
         "source_refs": {
           "type": "array",
