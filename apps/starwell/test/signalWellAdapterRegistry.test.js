@@ -7,8 +7,12 @@ const registry = JSON.parse(readFileSync(
   'utf8',
 ));
 
-test('Signal Well adapter registry starts empty and versioned', () => {
+test('Signal Well adapter registry is versioned and includes the bundled Radio JOVE adapter', () => {
   assert.equal(registry.apiVersion, '0.1.0');
   assert.equal(registry.moduleId, 'signal-well');
-  assert.deepEqual(registry.adapters, []);
+  assert.deepEqual(registry.adapters, [{
+    adapterId: 'radio-jove-live',
+    delivery: 'bundled',
+    enabled: true,
+  }]);
 });
