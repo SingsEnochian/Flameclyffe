@@ -1,31 +1,41 @@
 {
   "name": "hearthgate",
   "productName": "Hearthgate",
-  "version": "0.1.0",
+  "version": "0.1.11",
   "type": "commonjs",
   "main": "electron/main.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node launcher.js",
+    "start:core": "node server.js",
+    "fontforge:start": "node fontforge/server.js",
+    "stage:starwell": "node scripts/stage-starwell.js",
     "electron:dev": "electron .",
     "electron:pack:win": "electron-builder --win dir --x64 --publish never",
     "electron:build": "electron-builder",
     "electron:build:win": "electron-builder --win nsis --x64 --publish never",
+    "test": "node --test test/*.test.js",
     "check:packaging": "node scripts/check-packaging.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
+    "@tesseract.js-data/eng": "^1.0.0",
     "better-sqlite3": "^12.11.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "gsap": "^3.15.0",
     "mammoth": "^1.12.0",
     "multer": "^2.2.0",
     "openai": "^6.46.0",
-    "pdf-parse": "^2.4.5"
+    "pdf-parse": "^2.4.5",
+    "tesseract.js": "^7.0.0",
+    "three": "^0.179.1",
+    "ws": "^8.21.1"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.7.2",
     "electron": "^35.7.5",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "pdf-lib": "^1.17.1"
   },
   "build": {
     "appId": "com.hearthweave.hearthgate",
