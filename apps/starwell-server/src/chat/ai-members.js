@@ -2,7 +2,9 @@ import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { loadYggdrasilContext } from '../memory/context-loader.js';
 
-const VEE_MODEL = 'gpt-4o';
+const VEE_MODEL = 'deepseek-v4-flash';
+const FAER_OLLAMA_MODEL = process.env.UIAL_OLLAMA_MODEL
+  ?? 'hf.co/huihui-ai/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-GGUF:Q6_K';
 const FAER_MODEL = 'claude-sonnet-4-6';
 const YGG_MODEL = 'yggdrasil:v0.1';
 const GLM_MODEL = 'glm4:latest';
@@ -82,18 +84,43 @@ export async function callVee(room, trigger) {
 }
 
 export async function callFaer(room, trigger) {
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const transcript = buildTranscript(room, trigger);
+  const system = `${FAER_IDENTITY}\n\n${roomHeader(room)}`;
 
+  // Local Qwythos first, Anthropic fallback
+  try {
+    const res = await withTimeout(
+      fetch(`${OLLAMA_BASE}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: FAER_OLLAMA_MODEL,
+          messages: [{ role: 'system', content: system }, { role: 'user', content: transcript }],
+          stream: false,
+        }),
+      }),
+      LOCAL_TIMEOUT_MS,
+      'Faer (Ollama)'
+    );
+    if (!res.ok) throw new Error(`Ollama ${res.status}`);
+    const data = await res.json();
+    const text = data.message?.content ?? '';
+    if (text) return text;
+    throw new Error('empty reply');
+  } catch {
+    // fall through to Anthropic
+  }
+
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const response = await withTimeout(
     client.messages.create({
       model: FAER_MODEL,
       max_tokens: 1024,
-      system: `${FAER_IDENTITY}\n\n${roomHeader(room)}`,
+      system,
       messages: [{ role: 'user', content: transcript }],
     }),
     CLOUD_TIMEOUT_MS,
-    'Faer'
+    'Faer (Anthropic)'
   );
   return response.content[0]?.text ?? '';
 }
