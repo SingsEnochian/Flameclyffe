@@ -8,6 +8,7 @@ on:
       - "apps/starwell/**"
       - "package.json"
       - "package-lock.json"
+      - ".nvmrc"
       - ".github/workflows/hearthgate-windows-installer.yml"
   push:
     branches:
@@ -19,6 +20,7 @@ on:
       - "apps/starwell/**"
       - "package.json"
       - "package-lock.json"
+      - ".nvmrc"
       - ".github/workflows/hearthgate-windows-installer.yml"
 
 permissions:
@@ -44,10 +46,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version-file: ".nvmrc"
           cache: npm
           cache-dependency-path: |
             package-lock.json
