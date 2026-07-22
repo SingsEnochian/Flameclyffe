@@ -46,6 +46,22 @@ function assertSignalWellManifest(relativePath) {
   }
 }
 
+function assertSheetConvergenceManifest(relativePath) {
+  const manifest = JSON.parse(fs.readFileSync(requireFile(relativePath), 'utf8'));
+  if (manifest.moduleId !== 'sheet-convergence' || manifest.delivery !== 'bundled-core') {
+    throw new Error(`${relativePath} does not declare Sheet Convergence as a bundled core module.`);
+  }
+  if (!manifest.hosts?.includes('starwell') || !manifest.hosts?.includes('hearthgate')) {
+    throw new Error(`${relativePath} must declare both STARWELL and Hearthgate hosts.`);
+  }
+  if (manifest.epistemicContract?.localFoldProbabilityForBundledMap !== 0) {
+    throw new Error(`${relativePath} must preserve the exact zero local-fold probability for the bundled map.`);
+  }
+  if (manifest.epistemicContract?.physicalFoldProbability !== null) {
+    throw new Error(`${relativePath} must not invent a physical fold probability.`);
+  }
+}
+
 function assertRadioJoveAdapter(relativePath) {
   const adapter = JSON.parse(fs.readFileSync(requireFile(relativePath), 'utf8'));
   if (adapter.adapterId !== 'radio-jove-live' || adapter.kind !== 'live-stream') {
@@ -64,11 +80,13 @@ requireFile('index.html');
 requireFile(path.join('glyph-studio', 'index.html'));
 requireFile(path.join('signal-well', 'index.html'));
 requireFile(path.join('modules', 'signal-well.module.json'));
+requireFile(path.join('modules', 'sheet-convergence.module.json'));
 requireFile(path.join('modules', 'signal-well', 'adapters', 'radio-jove-live.adapter.json'));
 assertPackagedBase('index.html');
 assertPackagedBase(path.join('glyph-studio', 'index.html'));
 assertPackagedBase(path.join('signal-well', 'index.html'));
 assertSignalWellManifest(path.join('modules', 'signal-well.module.json'));
+assertSheetConvergenceManifest(path.join('modules', 'sheet-convergence.module.json'));
 assertRadioJoveAdapter(path.join('modules', 'signal-well', 'adapters', 'radio-jove-live.adapter.json'));
 
 fs.rmSync(destinationDir, { recursive: true, force: true });
@@ -79,23 +97,25 @@ const stagedIndex = path.join(destinationDir, 'index.html');
 const stagedGlyphStudio = path.join(destinationDir, 'glyph-studio', 'index.html');
 const stagedSignalWell = path.join(destinationDir, 'signal-well', 'index.html');
 const stagedSignalWellManifest = path.join(destinationDir, 'modules', 'signal-well.module.json');
+const stagedSheetConvergenceManifest = path.join(destinationDir, 'modules', 'sheet-convergence.module.json');
 const stagedRadioJoveAdapter = path.join(destinationDir, 'modules', 'signal-well', 'adapters', 'radio-jove-live.adapter.json');
 if (
   !fs.existsSync(stagedIndex)
   || !fs.existsSync(stagedGlyphStudio)
   || !fs.existsSync(stagedSignalWell)
   || !fs.existsSync(stagedSignalWellManifest)
+  || !fs.existsSync(stagedSheetConvergenceManifest)
   || !fs.existsSync(stagedRadioJoveAdapter)
 ) {
-  throw new Error('STARWELL staging finished without the framework, Glyph Studio, Signal Well, module manifest, or Radio JOVE live adapter.');
+  throw new Error('STARWELL staging finished without the framework, bundled rooms, module manifests, or Radio JOVE live adapter.');
 }
 
 const fileCount = countFiles(destinationDir);
-if (fileCount < 6) throw new Error(`Staged STARWELL bundle is unexpectedly small (${fileCount} files).`);
+if (fileCount < 7) throw new Error(`Staged STARWELL bundle is unexpectedly small (${fileCount} files).`);
 
 console.log('[Hearthgate STARWELL stage] OK');
 console.log(` source: ${sourceDir}`);
 console.log(` destination: ${destinationDir}`);
 console.log(` files: ${fileCount}`);
 console.log(' routes: /starwell/, /starwell/glyph-studio/, and /starwell/signal-well/');
-console.log(' modules: Signal Well core and Radio JOVE live listening bundled; specialist adapters remain optional');
+console.log(' modules: Signal Well and Sheet Convergence bundled for STARWELL/Hearthgate; specialist adapters remain optional');
