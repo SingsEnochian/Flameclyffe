@@ -1,5 +1,6 @@
 import React from 'react';
 import { SCIENCE_CONSTANTS, planckScaleSummary } from '../lib/scienceConstants.js';
+import { calculateSheetConvergence, normaliseLocationState } from '../lib/sheetConvergence.js';
 import '../starwell-sigil.css';
 import '../starwell-instrumentation-panel.css';
 import '../starwell-sigil-repair.css';
@@ -12,6 +13,12 @@ const observerSecurityTables = [
   'public.deep_observer_event_links',
   'public.observer_handoff_queue',
 ];
+const observatoryReferenceLocation = Object.freeze({
+  name: 'St. Augustine · KSGJ reference',
+  latitude: 29.95917,
+  longitude: -81.33972,
+  altitudeM: 3,
+});
 
 function getNodeAngle(index, total) {
   return `${(index * 360) / total - 90}deg`;
@@ -20,6 +27,11 @@ function getNodeAngle(index, total) {
 function formatConstantValue(constant) {
   const value = constant.value >= 1 ? constant.value.toLocaleString('en-US') : constant.value.toExponential(6);
   return `${value} ${constant.unit}`;
+}
+
+function formatNumber(value, digits = 4) {
+  if (!Number.isFinite(value)) return 'unavailable';
+  return value.toFixed(digits);
 }
 
 function SigilMedallion({ room, className = '' }) {
@@ -38,6 +50,45 @@ function SigilMedallion({ room, className = '' }) {
     <span className={classes} aria-hidden="true">
       <span className="sigil-medallion-fallback">{room.glyph}</span>
     </span>
+  );
+}
+
+function SheetConvergencePanel() {
+  const timestamp = new Date();
+  const state = normaliseLocationState({ ...observatoryReferenceLocation, timestamp });
+  const result = calculateSheetConvergence(state);
+
+  const readings = [
+    ['Normalised state', state.map((value) => formatNumber(value)).join(', ')],
+    ['Mapped coordinate', result.mapped.map((value) => formatNumber(value)).join(', ')],
+    ['Jacobian determinant', formatNumber(result.determinant, 2)],
+    ['Local volume scale', formatNumber(result.volumeScale, 2)],
+    ['Minimum singular value', formatNumber(result.minimumSingularValue)],
+    ['Condition number', formatNumber(result.conditionNumber)],
+    ['Fold susceptibility', formatNumber(result.susceptibility)],
+    ['Sheet convergence score', formatNumber(result.convergenceScore)],
+    ['Target residual', formatNumber(result.targetResidual)],
+  ];
+
+  return (
+    <section className="terra-data-safety sheet-convergence-panel" aria-label="Local sheet convergence and fold susceptibility">
+      <span>Mathematical derivation</span>
+      <strong>Local Sheet-Convergence and Fold Susceptibility</strong>
+      <p>
+        Location input: {observatoryReferenceLocation.name} · {observatoryReferenceLocation.latitude.toFixed(5)}°, {observatoryReferenceLocation.longitude.toFixed(5)}° · {timestamp.toISOString()}
+      </p>
+      <ul>
+        {readings.map(([label, value]) => (
+          <li key={label}><strong>{label}</strong>: {value}</li>
+        ))}
+      </ul>
+      <p>
+        Local fold probability: <strong>0</strong> for this map. Singularity: <strong>false</strong>. Orientation: <strong>{result.orientation}</strong>.
+      </p>
+      <p>
+        Physical fold probability: <strong>unavailable until a named physical model and empirical calibration exist.</strong>
+      </p>
+    </section>
   );
 }
 
@@ -73,6 +124,8 @@ function TerraAeternaInstrumentPanel({ selected }) {
         <strong>ℓ_P {planck.planckLengthM} m · t_P {planck.planckTimeS} s</strong>
         <p>{planck.caution}</p>
       </div>
+
+      <SheetConvergencePanel />
 
       <div className="terra-data-safety" aria-label="Observer data safety notice">
         <span>Observer Data Safety</span>
