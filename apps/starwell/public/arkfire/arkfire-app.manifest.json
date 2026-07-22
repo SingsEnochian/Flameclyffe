@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "0.1.0",
+  "format": "concatenated-es-module",
+  "parts": [
+    {
+      "path": "./parts/arkfire-app-01.part",
+      "sha256": "fd88aca089e8358de5bebcb5f361d6c56445c97c19d0ba81cbbea09a21a46cef",
+      "bytes": 8520
+    },
+    {
+      "path": "./parts/arkfire-app-02.part",
+      "sha256": "a8d13028ff746ccd8a4c7eac095ad0181780ab70db09eef84b55aa04ed3056cc",
+      "bytes": 8502
+    },
+    {
+      "path": "./parts/arkfire-app-03.part",
+      "sha256": "553bed072e45b7dae26129ac90b7336d8acbdb9fce61eb2b0c6ac8afd9e608b5",
+      "bytes": 8504
+    },
+    {
+      "path": "./parts/arkfire-app-04.part",
+      "sha256": "e4776fbd8803f73a3c5e6f6f02f24ebbe947e015e578b336eb2e102632324253",
+      "bytes": 8506
+    },
+    {
+      "path": "./parts/arkfire-app-05.part",
+      "sha256": "36064cc5f4ab9950a664f4c9ea6cbb4fd04aceb9c11b4d2c9c6b195ce7a4fac8",
+      "bytes": 8517
+    },
+    {
+      "path": "./parts/arkfire-app-06.part",
+      "sha256": "5294e992278436ce536a123727370f2f736a9954373ed201d3661171c144755c",
+      "bytes": 8503
+    },
+    {
+      "path": "./parts/arkfire-app-07.part",
+      "sha256": "c639bd668c7978d281f304d0ef66e8bf456d20792218540d15680b22c280886d",
+      "bytes": 8515
+    },
+    {
+      "path": "./parts/arkfire-app-08.part",
+      "sha256": "44b4e8e04c4981677784b7c6bb25a0846593271c52e26c91082dc00f45623611",
+      "bytes": 8508
+    },
+    {
+      "path": "./parts/arkfire-app-09.part",
+      "sha256": "257429fe2c10819c15e07fc79e12d170b46cbdf005b69899ff1179970b738bb4",
+      "bytes": 5469
+    }
+  ],
+  "sourceBytes": 73544,
+  "sourceSha256": "54cc495b3213d911fc72b7e2a10346a1c211906eefd5e3d887bd7689c33f8525"
+}
