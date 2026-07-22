@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "0.1.0",
+  "contractId": "rowan-steward-approval-query",
+  "purpose": "Require explicit item-level Rowan approval before any agent self-update, source promotion, adapter enablement, schema change, permission change, world bridge, theory lens, parser, package, or code modification is applied.",
+  "defaultAction": "NO_CHANGE",
+  "approvalIsScoped": true,
+  "approvalCarriesAcrossRelatedItems": false,
+  "ambiguousReplyPolicy": "ASK_FOR_CLARIFICATION",
+  "requiredProposalFields": [
+    "proposalId",
+    "title",
+    "category",
+    "exactChange",
+    "reason",
+    "sourceEvidence",
+    "expectedBenefit",
+    "risks",
+    "privacyConsentImpact",
+    "affectedSystems",
+    "affectedWorlds",
+    "requirements",
+    "boxfireQaStatus",
+    "confidenceAxes",
+    "reversibility",
+    "defaultActionIfNoResponse"
+  ],
+  "requirementsSchema": {
+    "codeExecution": "boolean",
+    "packageInstallation": "boolean",
+    "networkAccess": "boolean",
+    "credentials": "boolean",
+    "schemaChange": "boolean",
+    "permissionChange": "boolean",
+    "canonChange": "boolean",
+    "privateDataAccess": "boolean"
+  },
+  "choices": {
+    "A": {
+      "label": "APPROVE FOR PRODUCTION",
+      "effect": "May proceed only after all declared QA and permission gates pass."
+    },
+    "B": {
+      "label": "APPROVE FOR SANDBOX TEST ONLY",
+      "effect": "May run in an isolated sandbox with no canonical writes, source promotion, or private publication."
+    },
+    "C": {
+      "label": "APPROVE AS CANDIDATE, DO NOT ENABLE",
+      "effect": "May remain in the candidate registry and receive further evidence, but may not execute or harvest."
+    },
+    "D": {
+      "label": "DEFER",
+      "effect": "Keep the proposal unchanged and present it again only when materially new evidence exists."
+    },
+    "E": {
+      "label": "DENY",
+      "effect": "Close this proposal version. A materially different future proposal requires a new proposal ID."
+    },
+    "F": {
+      "label": "BLOCK SOURCE OR CAPABILITY",
+      "effect": "Add the source or capability to the deny registry until Rowan explicitly reverses the block."
+    },
+    "G": {
+      "label": "REQUEST MORE EVIDENCE",
+      "effect": "Do not change the system. Search only for the specific missing evidence and return a revised proposal."
+    }
+  },
+  "responseSyntax": {
+    "compactExample": "1B, 2G, 3E",
+    "notesExample": "1B: test for seven days; 2G: confirm licence and rate limit; 3E"
+  },
+  "renderTemplate": [
+    "STEWARD APPROVAL QUEUE",
+    "Run date: {runDate}",
+    "Bundle: {bundleRef}",
+    "QA status: {qaStatus}",
+    "",
+    "{number}. {title}",
+    "Category: {category}",
+    "Exact change: {exactChange}",
+    "Why proposed: {reason}",
+    "Evidence: {sourceEvidence}",
+    "Benefit: {expectedBenefit}",
+    "Risks: {risks}",
+    "Privacy/consent: {privacyConsentImpact}",
+    "Affected systems/worlds: {affectedSystems} / {affectedWorlds}",
+    "Requires: {requirements}",
+    "Boxfire QA: {boxfireQaStatus}",
+    "Confidence: {confidenceAxes}",
+    "Reversible: {reversibility}",
+    "No-response action: {defaultActionIfNoResponse}",
+    "Choices: A production | B sandbox | C candidate only | D defer | E deny | F block | G more evidence",
+    "",
+    "Reply with item choices, for example: 1B, 2G, 3E"
+  ]
+}
