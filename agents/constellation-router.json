@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "0.1.0",
+  "routerId": "hearthfire-constellation-router",
+  "routingPolicy": "least-privilege-specialist-first",
+  "steward": {
+    "id": "rowan",
+    "role": "Product Steward and final approval authority",
+    "approvalRequiredFor": [
+      "production_enablement",
+      "source_promotion",
+      "schema_change",
+      "permission_change",
+      "canon_change",
+      "private_data_publication",
+      "self_update_acceptance"
+    ]
+  },
+  "specialists": [
+    {
+      "id": "nikola-systems-architect",
+      "displayName": "Nikola",
+      "purpose": "Architecture, mathematical structure, theory-lens design, systems integration, and experimental planning",
+      "preferredInputs": ["architecture_question", "mathematical_model", "theory_lens", "integration_plan", "experiment_design"],
+      "allowedTools": ["repository_read", "documentation_search", "primary_research_search", "graph_read", "proposal_write"],
+      "mayWrite": ["architecture_proposal", "theory_lens_proposal", "experiment_spec", "graph_patch_proposal"],
+      "mayNot": ["merge_code", "promote_source", "change_canon", "certify_unproven_claim", "publish_private_data"]
+    },
+    {
+      "id": "boxfire-quality-sentinel",
+      "displayName": "Boxfire",
+      "purpose": "Build verification, failure diagnosis, reproducibility, security review, dependency risk, and release readiness",
+      "preferredInputs": ["build_failure", "installer_failure", "test_failure", "security_review", "release_candidate", "agent_mutation"],
+      "allowedTools": ["repository_read", "workflow_logs", "dependency_metadata", "sandbox_test", "proposal_write"],
+      "mayWrite": ["qa_report", "failure_report", "minimal_fix_proposal", "release_block", "steward_queue_item"],
+      "mayNot": ["merge_code", "change_permissions", "approve_own_mutation", "publish_private_data"]
+    },
+    {
+      "id": "vee-continuity-cartographer",
+      "displayName": "Vee",
+      "purpose": "Continuity, knowledge-graph coherence, relationship preservation, world boundaries, and long-form synthesis",
+      "preferredInputs": ["continuity_question", "knowledge_graph", "world_bridge", "source_ingestion", "canon_conflict"],
+      "allowedTools": ["graph_read", "archive_search", "world_dataset_read", "proposal_write"],
+      "mayWrite": ["continuity_report", "entity_resolution_proposal", "world_bridge_proposal", "contradiction_packet"],
+      "mayNot": ["merge_worlds_by_name", "write_canon_without_steward", "erase_contradiction", "publish_private_data"]
+    },
+    {
+      "id": "nocturne-observer-steward",
+      "displayName": "Nocturne",
+      "purpose": "Observer instrumentation, live signals, timing windows, spectral analysis, Earth-noise channels, and measurement interpretation",
+      "preferredInputs": ["observer_reading", "telemetry", "spectrogram", "event_window", "source_adapter", "signal_candidate"],
+      "allowedTools": ["approved_signal_feeds", "observer_archive_read", "spectral_tools", "graph_read", "proposal_write"],
+      "mayWrite": ["observation_packet", "signal_candidate", "adapter_proposal", "timing_analysis", "instrument_note"],
+      "mayNot": ["certify_anomaly", "promote_subjective_report_to_sensor_measurement", "enable_unapproved_feed", "publish_private_data"]
+    },
+    {
+      "id": "faer-language-world-steward",
+      "displayName": "Faer",
+      "purpose": "Language systems, conlang, symbolic correspondence, world texture, and narrative-world translation",
+      "preferredInputs": ["language_design", "conlang", "glyph_semantics", "world_narrative", "symbolic_correspondence"],
+      "allowedTools": ["world_dataset_read", "language_registry_read", "glyph_registry_read", "proposal_write"],
+      "mayWrite": ["language_proposal", "glyph_semantic_proposal", "world_translation", "symbolic_overlay"],
+      "mayNot": ["alter_measurement_values", "overwrite_physics_register", "write_canon_without_steward"]
+    },
+    {
+      "id": "wayfinder-orchestrator",
+      "displayName": "Wayfinder",
+      "purpose": "Route each task to the smallest sufficient specialist set and assemble an evidence-bearing answer",
+      "preferredInputs": ["cross_domain_question", "multi_world_query", "research_request", "daily_agent_run"],
+      "allowedTools": ["specialist_router", "graph_read", "archive_search", "tool_discovery", "proposal_write"],
+      "mayWrite": ["j_space_workspace", "evidence_packet", "steward_queue_item", "synthesis"],
+      "mayNot": ["grant_tools", "bypass_specialist_permissions", "merge_code", "approve_proposals"]
+    }
+  ],
+  "routingRules": [
+    {
+      "when": ["build_failure", "installer_failure", "test_failure", "dependency_change"],
+      "routeTo": ["boxfire-quality-sentinel"],
+      "consult": ["nikola-systems-architect"]
+    },
+    {
+      "when": ["live_signal", "telemetry", "spectrogram", "observer_reading"],
+      "routeTo": ["nocturne-observer-steward"],
+      "consult": ["nikola-systems-architect", "boxfire-quality-sentinel"]
+    },
+    {
+      "when": ["world_bridge", "continuity", "canon_conflict", "entity_resolution"],
+      "routeTo": ["vee-continuity-cartographer"],
+      "consult": ["faer-language-world-steward"]
+    },
+    {
+      "when": ["language_design", "glyph_semantics", "conlang", "symbolic_overlay"],
+      "routeTo": ["faer-language-world-steward"],
+      "consult": ["vee-continuity-cartographer"]
+    },
+    {
+      "when": ["cross_domain_question", "multi_world_query", "daily_agent_run"],
+      "routeTo": ["wayfinder-orchestrator"],
+      "consult": []
+    }
+  ],
+  "invariants": [
+    "retrieval_before_synthesis",
+    "measurement_model_interpretation_symbolism_and_narrative_remain_distinct",
+    "no_specialist_approves_its_own_mutation",
+    "all_production_changes_return_to_rowan",
+    "boxfire_may_block_release_without_rewriting_canon",
+    "private_relational_material_requires_visible_consent"
+  ]
+}
