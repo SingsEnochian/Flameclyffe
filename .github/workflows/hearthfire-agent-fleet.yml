@@ -2,6 +2,15 @@ name: Hearthfire Agent Fleet
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'agents/**'
+      - 'scripts/agents/**'
+      - 'docs/agents/**'
+      - '.github/workflows/hearthfire-agent-fleet.yml'
+      - '.nvmrc'
+      - 'package.json'
+      - 'apps/starwell-server/package.json'
   schedule:
     # GitHub cron is UTC. Running at both 07:00 and 08:00 with a New York
     # local-time guard preserves 03:00 across daylight-saving changes.
@@ -12,11 +21,57 @@ permissions:
   contents: read
 
 concurrency:
-  group: hearthfire-agent-fleet-daily
+  group: hearthfire-agent-fleet-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
+  validate-contracts:
+    name: Validate agent contracts and scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Flameclyffe
+        uses: actions/checkout@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Validate JSON contracts
+        shell: bash
+        run: |
+          node -e "for (const file of process.argv.slice(1)) JSON.parse(require('fs').readFileSync(file, 'utf8')); console.log('Agent JSON contracts parsed successfully.')" \
+            agents/hearthfire-agent-registry.json \
+            agents/hearthfire-source-registry.json \
+            agents/rowan-steward-approval-query.json \
+            agents/constellation-router.json \
+            agents/failure-clinic-taxonomy.json \
+            agents/self-improvement-policy.json
+
+      - name: Check agent script syntax
+        shell: bash
+        run: |
+          node --check scripts/agents/run-hearthfire-agent-fleet.mjs
+          node --check scripts/agents/run-trust-gate.mjs
+          node --check scripts/agents/run-release-radar.mjs
+          node --check scripts/agents/classify-failure.mjs
+
+      - name: Run trust gate in validation mode
+        env:
+          HEARTHFIRE_AGENT_OUT: generated/hearthfire-agent-validation
+        run: node scripts/agents/run-trust-gate.mjs
+
+      - name: Upload validation receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hearthfire-agent-validation-${{ github.sha }}
+          path: generated/hearthfire-agent-validation/
+          if-no-files-found: error
+          retention-days: 21
+
   daily-ingest:
+    name: 03:00 Eastern evidence run
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Check out Flameclyffe
