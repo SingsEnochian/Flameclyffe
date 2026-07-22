@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "0.1.0",
+  "moduleId": "sheet-convergence",
+  "displayName": "Local Sheet-Convergence and Fold Susceptibility",
+  "version": "0.1.0",
+  "delivery": "bundled-core",
+  "enabledByDefault": true,
+  "hosts": ["starwell", "hearthgate"],
+  "starwell": {
+    "mount": "central-observatory",
+    "component": "ObservatoryInstrument",
+    "libraryEntrypoint": "src/lib/sheetConvergence.js"
+  },
+  "hearthgate": {
+    "moduleKind": "instrument",
+    "mount": "laboratory/observatory",
+    "dataDirectory": "modules/sheet-convergence",
+    "requiresNetwork": false
+  },
+  "capabilities": [
+    "polynomial-map-evaluation",
+    "jacobian-evaluation",
+    "determinant-certificate",
+    "singular-value-analysis",
+    "condition-number-analysis",
+    "location-state-normalisation",
+    "sheet-convergence-scoring",
+    "fold-susceptibility-scoring",
+    "certified-fibre-comparison"
+  ],
+  "registers": [
+    "MATHEMATICAL_DERIVATION",
+    "LOCATION_INPUT",
+    "PHYSICS_MODEL",
+    "SYMBOLIC_CORRESPONDENCE"
+  ],
+  "epistemicContract": {
+    "localFoldProbabilityForBundledMap": 0,
+    "physicalFoldProbability": null,
+    "physicalStatus": "UNAVAILABLE_UNTIL_CALIBRATED",
+    "mustLabelScoresAsModelDerived": true,
+    "mustNotClaimPhysicalSpacetimeFold": true
+  },
+  "storage": {
+    "mode": "local-first",
+    "rawInputsImmutable": true,
+    "derivedReadingsAppendOnly": true,
+    "dataDirectory": "modules/sheet-convergence"
+  },
+  "extensionContract": {
+    "apiVersion": "0.1.0",
+    "discoveryDirectory": "modules/sheet-convergence/adapters",
+    "adapterKinds": [
+      "location-provider",
+      "ephemeris-provider",
+      "sensor-calibration",
+      "physics-model",
+      "symbolic-correspondence"
+    ],
+    "bundledAdapters": ["st-augustine-reference-location"]
+  }
+}
