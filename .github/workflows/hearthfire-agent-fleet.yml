@@ -22,10 +22,10 @@ jobs:
       - name: Check out Flameclyffe
         uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Set up Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version-file: '.nvmrc'
 
       - name: Resolve 03:00 America/New_York guard
         id: guard
@@ -33,6 +33,7 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "local_date=$(TZ=America/New_York date +%F)" >> "$GITHUB_OUTPUT"
             echo "Manual dispatch accepted."
             exit 0
           fi
@@ -48,6 +49,10 @@ jobs:
             echo "Skipping duplicate UTC trigger. Local hour is $LOCAL_HOUR."
           fi
 
+      - name: Run agent and Constellation trust gate
+        if: steps.guard.outputs.run == 'true'
+        run: node scripts/agents/run-trust-gate.mjs
+
       - name: Run approved live-signal harvest
         if: steps.guard.outputs.run == 'true'
         env:
@@ -56,7 +61,11 @@ jobs:
           HEARTHFIRE_LOCATION_LABEL: ${{ vars.HEARTHFIRE_LOCATION_LABEL || 'NE Florida approximate' }}
         run: node scripts/agents/run-hearthfire-agent-fleet.mjs
 
-      - name: Upload daily evidence bundle
+      - name: Run dependency release radar in proposal-only mode
+        if: steps.guard.outputs.run == 'true'
+        run: node scripts/agents/run-release-radar.mjs
+
+      - name: Upload daily evidence and Steward queue
         if: steps.guard.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -71,6 +80,9 @@ jobs:
         run: |
           echo "## Hearthfire Agent Fleet" >> "$GITHUB_STEP_SUMMARY"
           echo "- Requested schedule: 03:00 America/New_York" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Runtime: Node from .nvmrc, currently Node 24" >> "$GITHUB_STEP_SUMMARY"
           echo "- Guard accepted: ${{ steps.guard.outputs.run }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Local date: ${{ steps.guard.outputs.local_date }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Governance: explicit trust contracts plus tamper-evident audit chain" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dependency updates: proposal-only Steward queue" >> "$GITHUB_STEP_SUMMARY"
           echo "- Output: generated evidence artifact, not a canonical code mutation" >> "$GITHUB_STEP_SUMMARY"
