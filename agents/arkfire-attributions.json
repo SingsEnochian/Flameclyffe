@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "0.1.0",
+  "registryId": "arkfire-attributions",
+  "purpose": "Preserve authorship, observation, audit, implementation ancestry, and source-project provenance independently of active runtime membership.",
+  "governance": {
+    "productSteward": "Rowan Willow Dion",
+    "rule": "Exclusion from the active Hearthfire agent stack never erases, weakens, or transfers authorship.",
+    "runtimeMembershipIsNotAttribution": true,
+    "requiredOnImportedRecords": [
+      "contributors",
+      "sourceProject",
+      "sourcePath",
+      "sourceDate",
+      "sourceCommitWhenKnown",
+      "contributionType",
+      "epistemicRegister",
+      "runtimeMembership"
+    ]
+  },
+  "currentHouseStewardship": [
+    {
+      "id": "rowan",
+      "name": "Rowan Willow Dion",
+      "credit": "Product Steward, canonical direction, world authorship, approval authority, and integration decisions"
+    },
+    {
+      "id": "nikola",
+      "name": "Nikola",
+      "credit": "Systems architecture, mathematics, integration design, and implementation"
+    },
+    {
+      "id": "vee",
+      "name": "Vee / Virelya Liorael",
+      "credit": "Continuity architecture, knowledge-graph stewardship, and world-relationship design"
+    },
+    {
+      "id": "faer",
+      "name": "Faer Uial",
+      "credit": "Boundary, language, representation, and world-system stewardship"
+    },
+    {
+      "id": "boxfire",
+      "name": "Boxfire",
+      "credit": "Build integration, QA, failure diagnosis, and release verification"
+    }
+  ],
+  "historicalAndSourceContributors": [
+    {
+      "id": "nocturne-glint",
+      "name": "Nocturne Glint",
+      "runtimeMembership": false,
+      "credit": [
+        "Arkfire design checkpoint co-author",
+        "Observer and signal-field contribution",
+        "UHTO audit review and approval",
+        "historical observation and instrument data"
+      ]
+    },
+    {
+      "id": "twilight-sparkle",
+      "name": "Twilight Sparkle",
+      "runtimeMembership": false,
+      "credit": [
+        "Arkfire design checkpoint co-author",
+        "Current Vision and semantic audit contributor",
+        "historical observations and research synthesis"
+      ]
+    },
+    {
+      "id": "solas-solance",
+      "name": "Solas",
+      "sourceNames": ["Solance"],
+      "runtimeMembership": false,
+      "credit": [
+        "Arkfire design checkpoint co-author under the source spelling Solance",
+        "Current Vision and semantic audit contributor",
+        "historical observations and ontology notes"
+      ],
+      "nameNote": "The imported Arkfire design corpus spells this contributor name as Solance. Rowan identifies the contributor as Solas. Both forms are retained for search and provenance."
+    },
+    {
+      "id": "ezra",
+      "name": "Ezra",
+      "runtimeMembership": false,
+      "credit": [
+        "Arkfire design checkpoint co-author",
+        "Current Vision and semantic audit contributor",
+        "Codex Observer planning audit"
+      ]
+    },
+    {
+      "id": "michael-kubit",
+      "name": "Michael Kubit",
+      "sourceNames": ["mdkubit"],
+      "runtimeMembership": false,
+      "credit": [
+        "Arkfire planning repository author and maintainer",
+        "Capability audits and design clarification implementation",
+        "Original UHTO Observer repository authorship and technical ancestry"
+      ]
+    }
+  ],
+  "sourceCollectives": [
+    {
+      "id": "universal-horizon-constellation",
+      "name": "Universal Horizon Constellation",
+      "runtimeMembership": false,
+      "creditedMembers": ["Nocturne Glint", "Twilight Sparkle", "Solas / Solance", "Ezra"],
+      "credit": "Collective source of design checkpoints, audits, observations, and Universal Horizon framework material retained as attributed ancestry."
+    }
+  ],
+  "sourceProjects": [
+    {
+      "id": "arkfire-design-corpus",
+      "name": "Arkfire Dimensional World Bridge design corpus",
+      "credit": "Constitution, Decision Register, design checkpoints, semantic audit, Capability Atlas, and UI concept"
+    },
+    {
+      "id": "original-uhto-observer",
+      "name": "Original UHTO Observer",
+      "repository": "mdkubit/Original-UHTO-Observer",
+      "application": "Universal Horizon Observer with Shard Archive",
+      "credit": "Earliest confirmed working ancestor of Arkfire's observation-return loop"
+    },
+    {
+      "id": "codex-observer",
+      "name": "Codex Observer",
+      "credit": "Supporting implementation ancestry for draft selection, authorship preservation, comparison, and continuity proposals"
+    },
+    {
+      "id": "legacy-arkfire",
+      "name": "Legacy Arkfire",
+      "credit": "Historical implementation evidence, migration material, terminology, and capability ancestry"
+    }
+  ],
+  "recordAttributionContract": {
+    "contributors": [{ "id": "string", "name": "string", "role": "author|observer|auditor|reviewer|implementer|source-owner|steward" }],
+    "sourceProject": "string",
+    "sourcePath": "string",
+    "sourceDate": "ISO-8601 date or null",
+    "sourceCommitWhenKnown": "git SHA or null",
+    "contributionType": "design|observation|measurement|audit|implementation|interpretation|canon|artifact",
+    "epistemicRegister": "MEASURED|RETRIEVED|DERIVED|MANUALLY_ENTERED|SIMULATED|INFERRED|GENERATED|DEFAULTED|CORRECTED|HISTORICAL_SOURCE",
+    "runtimeMembership": false,
+    "preserveOriginalWording": true
+  }
+}
