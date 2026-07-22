@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "0.1.0",
+  "clinicId": "boxfire-failure-clinic",
+  "purpose": "Classify failures consistently and demand the smallest structural correction supported by evidence",
+  "patterns": [
+    {"id":"F01","name":"grounding-drift","symptoms":["answer contradicts retrieved evidence","claim lacks supporting source"],"minimumEvidence":["answer","evidence packet","citation map"]},
+    {"id":"F02","name":"chunk-or-segmentation-loss","symptoms":["facts split across chunks","context truncated"],"minimumEvidence":["source artifact","chunk boundaries","retrieval result"]},
+    {"id":"F03","name":"retrieval-distance-mismatch","symptoms":["semantically irrelevant nearest results","correct record ranked low"],"minimumEvidence":["query","ranking scores","candidate set"]},
+    {"id":"F04","name":"index-staleness","symptoms":["old data returned","new source absent","latest pointer incorrect"],"minimumEvidence":["source timestamp","index timestamp","latest pointer"]},
+    {"id":"F05","name":"router-misalignment","symptoms":["wrong specialist selected","wrong world or tool queried"],"minimumEvidence":["query","router decision","available routes"]},
+    {"id":"F06","name":"long-chain-constraint-loss","symptoms":["later step violates earlier requirement","world boundary forgotten"],"minimumEvidence":["plan","step receipts","final output"]},
+    {"id":"F07","name":"tool-contract-misuse","symptoms":["wrong arguments","unsupported tool called","unapproved source accessed"],"minimumEvidence":["tool schema","tool call","permission state"]},
+    {"id":"F08","name":"memory-continuity-break","symptoms":["known constraint missing","session or agent state leaked"],"minimumEvidence":["source memory","retrieved context","session boundary"]},
+    {"id":"F09","name":"evaluation-blind-spot","symptoms":["tests pass but real use fails","fixture excludes observed edge case"],"minimumEvidence":["test suite","incident","coverage comparison"]},
+    {"id":"F10","name":"startup-order-or-readiness","symptoms":["dependent service unavailable","first launch fails then later succeeds"],"minimumEvidence":["startup timeline","health checks","service logs"]},
+    {"id":"F11","name":"configuration-drift","symptoms":["works locally but fails in CI or production","runtime or secret differs"],"minimumEvidence":["environment manifest","local config","CI config"]},
+    {"id":"F12","name":"agent-or-tenant-interference","symptoms":["workers overwrite state","world data crosses partition","concurrent run collision"],"minimumEvidence":["run ids","state paths","concurrency policy"]},
+    {"id":"F13","name":"syntax-or-parser-incompatibility","symptoms":["build parser rejects valid-intent expression","toolchain grammar changed"],"minimumEvidence":["exact error","source line","runtime and bundler versions"]},
+    {"id":"F14","name":"dependency-lock-incoherence","symptoms":["npm ci rejects lockfile","manifest and lock disagree","transitive package absent"],"minimumEvidence":["package manifest","lockfile","installer output"]},
+    {"id":"F15","name":"installer-staging-loss","symptoms":["built application misses staged asset","installer succeeds but module absent"],"minimumEvidence":["staging manifest","packaged tree","verification output"]},
+    {"id":"F16","name":"source-adapter-contract-change","symptoms":["feed schema changed","units or field names differ","parser produces nulls"],"minimumEvidence":["raw before and after","source documentation","parser version"]},
+    {"id":"F17","name":"epistemic-register-collapse","symptoms":["interpretation presented as measurement","speculative lens inherits physical confidence"],"minimumEvidence":["source register","transformation chain","published claim"]},
+    {"id":"F18","name":"consent-or-visibility-violation","symptoms":["private material included without permission","visibility widened silently"],"minimumEvidence":["consent rule","object visibility","publication receipt"]}
+  ],
+  "reportContract": {
+    "required": [
+      "incident_id",
+      "observed_at",
+      "primary_pattern",
+      "secondary_patterns",
+      "affected_systems",
+      "exact_failure",
+      "reproduction_steps",
+      "evidence_refs",
+      "suspected_root_cause",
+      "minimal_structural_fix",
+      "regression_tests",
+      "rollback_plan",
+      "owner",
+      "verification_status"
+    ],
+    "verificationStates": ["UNTRIAGED","REPRODUCED","PATCH_PROPOSED","SANDBOX_PASS","VERIFIED","BLOCKED"]
+  }
+}
