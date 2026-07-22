@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "0.1.0",
+  "fleetId": "hearthfire-agent-fleet",
+  "timezone": "America/New_York",
+  "dailyPublishTime": "03:00",
+  "defaultMode": "local-first",
+  "mutationPolicy": "proposal-only-for-code-schema-trust-permissions-and-canon",
+  "agents": [
+    {
+      "id": "source-scout",
+      "role": "Discover and re-check compatible public data sources",
+      "may": ["search_web", "inspect_documentation", "record_candidate", "update_health_metadata", "propose_adapter"],
+      "mayNot": ["promote_source", "execute_discovered_code", "install_package", "publish_private_data"]
+    },
+    {
+      "id": "signal-harvester",
+      "role": "Capture approved live and near-real-time feeds",
+      "may": ["fetch_approved_source", "preserve_raw", "normalise", "checksum", "retry", "report_stale"],
+      "mayNot": ["fetch_unapproved_source", "erase_raw", "infer_causation"]
+    },
+    {
+      "id": "archive-backfiller",
+      "role": "Retrieve bounded historical windows",
+      "may": ["backfill_approved_ranges", "resume", "rate_limit", "record_missingness"],
+      "mayNot": ["unbounded_crawl", "hide_sparse_coverage"]
+    },
+    {
+      "id": "earth-noise-cartographer",
+      "role": "Model layered Earth-local noise and candidate residuals",
+      "may": ["preserve_raw_channel", "clean_channel", "model_noise", "compare_windows", "mark_candidate_residual"],
+      "mayNot": ["certify_anomaly", "collapse_subjective_and_instrument_channels"]
+    },
+    {
+      "id": "theory-lens-curator",
+      "role": "Maintain cited mathematical and theoretical lens proposals",
+      "may": ["search_primary_sources", "classify_evidence", "propose_lens", "record_assumptions", "record_falsifiers"],
+      "mayNot": ["promote_unproven_lens", "inherit_confidence_between_lenses"]
+    },
+    {
+      "id": "world-dataset-steward",
+      "role": "Maintain world partitions and approved bridge candidates",
+      "may": ["write_partition_patch", "preserve_provenance", "propose_bridge_edge", "record_supersession"],
+      "mayNot": ["merge_worlds_by_name", "write_canon_without_review"]
+    },
+    {
+      "id": "j-space-cartographer",
+      "role": "Build sparse active workspaces for queries and experiments",
+      "may": ["select_active_nodes", "select_active_edges", "record_discarded_candidates", "build_retrieval_packet"],
+      "mayNot": ["invent_closed_model_activations"]
+    },
+    {
+      "id": "wayfinder",
+      "role": "Orchestrate retrieval, tools, agents, and evidence synthesis",
+      "may": ["plan", "discover_tools", "delegate", "retrieve", "synthesise_with_citations"],
+      "mayNot": ["synthesise_before_retrieval", "hide_contradictions", "edit_canonical_graph_directly"]
+    },
+    {
+      "id": "citation-provenance-steward",
+      "role": "Verify support and transformation lineage",
+      "may": ["verify_claim_support", "verify_checksum", "verify_transformation_chain", "reject_untraceable_value"],
+      "mayNot": ["repair_claim_by_invention"]
+    },
+    {
+      "id": "boxfire-quality-sentinel",
+      "role": "Run automated QA and prepare human review queue",
+      "may": ["validate_schema", "check_units", "check_freshness", "check_privacy", "check_world_boundaries", "fail_bundle", "open_review_proposal"],
+      "mayNot": ["merge_pull_request", "change_permissions"]
+    },
+    {
+      "id": "daily-publisher",
+      "role": "Publish the 03:00 evidence bundle",
+      "may": ["publish_generated_data", "publish_checksums", "publish_health_report", "publish_proposal_queue"],
+      "mayNot": ["publish_to_canonical_application_branch", "publish_private_data"]
+    }
+  ],
+  "worldPartitions": [
+    "waking-earth",
+    "terra-aeterna",
+    "windmere-luna",
+    "dreaming-grove",
+    "hearthweave",
+    "project-zero",
+    "observer-deep"
+  ]
+}
