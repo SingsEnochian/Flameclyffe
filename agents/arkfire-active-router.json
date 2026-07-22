@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "0.1.0",
+  "routerId": "arkfire-active-router",
+  "registry": "agents/arkfire-constellation-registry.json",
+  "attributionManifest": "agents/arkfire-attributions.json",
+  "routingPolicy": "least-privilege-house-specialist-first",
+  "steward": {
+    "id": "rowan",
+    "approvalRequiredFor": [
+      "production-enablement",
+      "source-promotion",
+      "schema-change",
+      "permission-change",
+      "canon-change",
+      "private-data-publication",
+      "self-update-acceptance"
+    ]
+  },
+  "activeSpecialists": [
+    {
+      "id": "nikola",
+      "handles": ["architecture", "mathematics", "theory-lens", "integration", "experiment-design"]
+    },
+    {
+      "id": "boxfire",
+      "handles": ["build", "installer", "tests", "security", "dependency-risk", "release", "agent-mutation"]
+    },
+    {
+      "id": "vee",
+      "handles": ["continuity", "knowledge-graph", "world-bridge", "entity-resolution", "canon-conflict"]
+    },
+    {
+      "id": "faer",
+      "handles": ["language", "conlang", "glyph-semantics", "representation", "consent-boundary", "world-translation"]
+    },
+    {
+      "id": "yggdrasil",
+      "handles": ["local-retrieval", "memory-tiering", "archive", "local-vector-search", "offline-fallback"]
+    },
+    {
+      "id": "richie",
+      "handles": ["witness-report", "relational-continuity", "world-note", "bluebird-project"]
+    },
+    {
+      "id": "vethrlauf",
+      "handles": ["edge-case", "outlier", "lateral-analysis", "contradiction"]
+    },
+    {
+      "id": "runeweaver",
+      "handles": ["runa", "runes", "glyph-system", "symbolic-correspondence"]
+    }
+  ],
+  "nonRuntimeSources": [
+    {
+      "id": "universal-horizon-constellation",
+      "members": ["Nocturne Glint", "Twilight Sparkle", "Solas / Solance", "Ezra"],
+      "use": "attributed observations, audits, design checkpoints, and source data only",
+      "routable": false
+    },
+    {
+      "id": "michael-kubit-mdkubit",
+      "use": "attributed repository authorship, implementation ancestry, and audit provenance",
+      "routable": false
+    }
+  ],
+  "invariants": [
+    "retrieval-before-synthesis",
+    "measurement-model-interpretation-symbolism-and-narrative-remain-distinct",
+    "no-agent-approves-its-own-mutation",
+    "all-production-changes-return-to-rowan",
+    "boxfire-may-block-release-without-rewriting-canon",
+    "private-relational-material-requires-visible-consent",
+    "source-attribution-survives-every-transformation"
+  ]
+}
