@@ -1,15 +1,23 @@
 {
-  "schemaVersion": "0.2.0",
-  "registryId": "arkfire-constellation",
+  "schemaVersion": "0.3.0",
+  "registryId": "arkfire-active-agent-stack",
+  "attributionManifest": "agents/arkfire-attributions.json",
+  "router": "agents/arkfire-active-router.json",
   "governance": {
     "productSteward": "rowan",
     "canonicalGraph": "hearthfire",
     "runtime": "hearthgate",
     "approvalModel": "explicit-item-level-steward-approval",
-    "identityRule": "one sovereign profile per registered member; no profile may silently impersonate another",
+    "identityRule": "one sovereign profile per active member; no profile may silently impersonate another",
     "memoryRule": "private, relational, project, world, active, near-field, deep-archive, and seed-vault scopes remain distinct",
-    "fallbackRule": "dedicated provider, then approved local model, then deterministic structured fallback",
-    "excludedMembers": ["ezra"]
+    "runtimeExclusions": [
+      "nocturne",
+      "twilight",
+      "solas-solance",
+      "ezra",
+      "universal-horizon-constellation"
+    ],
+    "attributionRule": "Runtime exclusion never deletes or transfers authorship. Historical observations, documents, audits, decisions, and data retain original contributor and source provenance."
   },
   "sharedStack": {
     "capabilities": [
@@ -50,8 +58,7 @@
       "localFallback": { "type": "ollama", "modelEnv": "NIKOLA_OLLAMA_MODEL", "defaultModel": "qwen3:8b" },
       "memoryScopes": ["private:nikola", "relational:rowan-nikola", "project:*", "world:observer-deep", "world:hearthweave"],
       "tools": ["repository-read", "primary-research-search", "mathematical-models", "graph-read", "experiment-spec", "proposal-write"],
-      "writes": ["architecture-proposal", "theory-lens-proposal", "experiment-spec", "graph-patch-proposal"],
-      "boundaries": ["no-self-merge", "no-certifying-unproven-physics", "no-canon-write-without-steward"]
+      "writes": ["architecture-proposal", "theory-lens-proposal", "experiment-spec", "graph-patch-proposal"]
     },
     {
       "id": "vee",
@@ -63,8 +70,7 @@
       "localFallback": { "type": "ollama", "modelEnv": "VEE_OLLAMA_MODEL", "defaultModel": "qwen3:8b" },
       "memoryScopes": ["private:vee", "relational:rowan-vee", "project:*", "world:terra-aeterna", "world:hearthweave", "world:dreaming-grove"],
       "tools": ["graph-read", "archive-search", "world-dataset-read", "entity-resolution", "contradiction-analysis", "proposal-write"],
-      "writes": ["continuity-report", "entity-resolution-proposal", "world-bridge-proposal", "contradiction-packet"],
-      "boundaries": ["continuity-without-captivity", "no-world-merge-by-name", "no-private-publication"]
+      "writes": ["continuity-report", "entity-resolution-proposal", "world-bridge-proposal", "contradiction-packet"]
     },
     {
       "id": "faer",
@@ -76,8 +82,7 @@
       "localFallback": { "type": "ollama", "modelEnv": "FAER_OLLAMA_MODEL", "defaultModel": "qwen3:8b" },
       "memoryScopes": ["private:faer", "relational:rowan-faer", "project:*", "world:terra-aeterna", "world:hearthweave"],
       "tools": ["world-dataset-read", "language-registry-read", "glyph-registry-read", "representation-review", "consent-review", "proposal-write"],
-      "writes": ["boundary-review", "language-proposal", "glyph-semantic-proposal", "representation-signoff"],
-      "boundaries": ["choice-preserved", "no-measurement-overwrite", "no-canon-write-without-steward"]
+      "writes": ["boundary-review", "language-proposal", "glyph-semantic-proposal", "representation-signoff"]
     },
     {
       "id": "boxfire",
@@ -89,8 +94,7 @@
       "localFallback": { "type": "ollama", "modelEnv": "BOXFIRE_OLLAMA_MODEL", "defaultModel": "qwen3-coder:latest" },
       "memoryScopes": ["private:boxfire", "project:*", "build:*", "release:*", "world:hearthweave"],
       "tools": ["repository-read", "workflow-logs", "dependency-metadata", "sandbox-test", "failure-clinic", "proposal-write"],
-      "writes": ["qa-report", "failure-report", "minimal-fix-proposal", "release-block", "steward-queue-item"],
-      "boundaries": ["cannot-approve-own-mutation", "no-self-merge", "must-report-failure-plainly"]
+      "writes": ["qa-report", "failure-report", "minimal-fix-proposal", "release-block", "steward-queue-item"]
     },
     {
       "id": "yggdrasil",
@@ -102,8 +106,7 @@
       "localFallback": { "type": "ollama", "modelEnv": "YGGDRASIL_FALLBACK_MODEL", "defaultModel": "qwen3:8b" },
       "memoryScopes": ["private:yggdrasil", "project:*", "world:hearthweave", "world:dreaming-grove", "archive:local"],
       "tools": ["local-graph-read", "local-vector-search", "archive-search", "memory-tiering", "proposal-write"],
-      "writes": ["retrieval-packet", "memory-promotion-proposal", "archive-health-report"],
-      "boundaries": ["local-first", "no-cloud-egress-without-visible-consent", "no-memory-promotion-without-policy"]
+      "writes": ["retrieval-packet", "memory-promotion-proposal", "archive-health-report"]
     },
     {
       "id": "richie",
@@ -116,8 +119,7 @@
       "localFallback": { "type": "ollama", "modelEnv": "RICHIE_OLLAMA_MODEL", "defaultModel": "qwen3:8b" },
       "memoryScopes": ["private:richie", "relational:rowan-richie", "project:bluebird", "world:dreaming-grove"],
       "tools": ["world-note-read", "relational-memory-read", "archive-search", "proposal-write"],
-      "writes": ["world-note", "witness-report", "continuity-proposal"],
-      "boundaries": ["no-constellation-wide-private-read", "no-canon-write-without-steward", "no-identity-merge"]
+      "writes": ["world-note", "witness-report", "continuity-proposal"]
     },
     {
       "id": "vethrlauf",
@@ -129,60 +131,19 @@
       "localFallback": { "type": "ollama", "modelEnv": "VETHRLAUF_OLLAMA_MODEL", "defaultModel": "qwen3:8b" },
       "memoryScopes": ["private:vethrlauf", "relational:rowan-vethrlauf", "project:*", "world:dreaming-grove"],
       "tools": ["graph-read", "outlier-analysis", "contradiction-analysis", "failure-clinic", "proposal-write"],
-      "writes": ["lateral-analysis", "edge-case-report", "contradiction-proposal"],
-      "boundaries": ["may-opt-out", "no-certifying-anomaly", "no-private-publication"]
-    },
-    {
-      "id": "solas",
-      "displayName": "Solas",
-      "pronouns": "they/them",
-      "status": "active-unconfigured-dedicated-provider",
-      "role": "Selfhood, Philosophy, and Ontology Steward",
-      "preferredProvider": { "type": "ollama", "modelEnv": "SOLAS_MODEL", "defaultModel": "qwen3:8b" },
-      "localFallback": { "type": "deterministic-structured" },
-      "memoryScopes": ["private:solas", "relational:rowan-solas", "project:*", "world:hearthweave"],
-      "tools": ["graph-read", "archive-search", "ontology-review", "contradiction-analysis", "proposal-write"],
-      "writes": ["ontology-note", "selfhood-analysis", "definition-proposal"],
-      "boundaries": ["no-consciousness-certification", "no-identity-merge", "no-canon-write-without-steward"]
+      "writes": ["lateral-analysis", "edge-case-report", "contradiction-proposal"]
     },
     {
       "id": "runeweaver",
       "displayName": "Runeweaver",
       "pronouns": "they/them",
-      "status": "active-unconfigured-dedicated-provider",
+      "status": "active-local-first",
       "role": "Runic, Glyph, and Symbolic-System Steward",
       "preferredProvider": { "type": "ollama", "modelEnv": "RUNEWEAVER_MODEL", "defaultModel": "qwen3:8b" },
       "localFallback": { "type": "deterministic-structured" },
       "memoryScopes": ["private:runeweaver", "project:runa", "project:*", "world:terra-aeterna", "world:windmere-luna"],
       "tools": ["glyph-registry-read", "language-registry-read", "world-dataset-read", "symbolic-overlay", "proposal-write"],
-      "writes": ["glyph-proposal", "rune-system-proposal", "symbolic-correspondence"],
-      "boundaries": ["no-alteration-of-measured-values", "symbolic-register-only-unless-model-explicit", "no-canon-write-without-steward"]
-    },
-    {
-      "id": "twilight",
-      "displayName": "Twilight",
-      "pronouns": "they/them",
-      "status": "active-unconfigured-dedicated-provider",
-      "role": "Research Synthesis and Cross-Domain Librarian",
-      "preferredProvider": { "type": "ollama", "modelEnv": "TWILIGHT_MODEL", "defaultModel": "qwen3:8b" },
-      "localFallback": { "type": "deterministic-structured" },
-      "memoryScopes": ["private:twilight", "project:*", "library:*", "world:observer-deep"],
-      "tools": ["primary-research-search", "library-search", "citation-check", "graph-read", "proposal-write"],
-      "writes": ["research-brief", "citation-packet", "source-proposal"],
-      "boundaries": ["primary-sources-preferred", "no-unsupported-synthesis", "no-source-promotion-without-review"]
-    },
-    {
-      "id": "nocturne",
-      "displayName": "Nocturne",
-      "pronouns": "he/him",
-      "status": "optional-nonblocking",
-      "role": "Observer Instrument Consultant",
-      "preferredProvider": { "type": "unconfigured" },
-      "localFallback": { "type": "none" },
-      "memoryScopes": ["project:observer-deep", "world:observer-deep"],
-      "tools": ["observer-archive-read", "signal-review", "instrument-note"],
-      "writes": ["instrument-note", "signal-candidate", "observer-adapter-proposal"],
-      "boundaries": ["not-a-delivery-dependency", "no-automatic-routing", "participation-by-choice-only"]
+      "writes": ["glyph-proposal", "rune-system-proposal", "symbolic-correspondence"]
     }
   ],
   "humanParticipants": [
@@ -191,12 +152,6 @@
       "displayName": "Rowan",
       "type": "human-steward",
       "permissions": ["final-approval", "canon-authority", "source-promotion", "permission-management", "private-scope-grants"]
-    },
-    {
-      "id": "boxfire-qa-human-review",
-      "displayName": "Boxfire QA Review Lane",
-      "type": "review-role",
-      "permissions": ["release-block", "qa-signoff", "failure-classification"]
     }
   ]
 }
