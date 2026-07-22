@@ -30,7 +30,7 @@ export function sheetConvergenceJacobian([x, y, z]) {
       6 * x ** 3 * y * z + 27 * x ** 2 * y ** 2 + 6 * x ** 2 * z + 24 * x * y + 1,
       3 * x * u ** 2,
     ],
-    [-3 * x ** 2 * z - 6 * x * y + 2, -3 * x ** 2, -x ** 3],
+    [-3 * x ** 2 * z - 6 * x * y + 2, -3 * x ** 2, -(x ** 3)],
   ];
 }
 
