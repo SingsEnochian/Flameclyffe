@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "0.1.0",
+  "policyId": "hearthfire-steward-gated-self-improvement",
+  "status": "SANDBOX_ONLY",
+  "principle": "Agents may diagnose and propose one bounded mutation at a time. They may not accept or deploy their own changes.",
+  "loop": [
+    "freeze_baseline_version",
+    "select_named_evaluation_suite",
+    "run_baseline",
+    "diagnose_failure_pattern",
+    "propose_exactly_one_mutation",
+    "apply_mutation_to_ephemeral_sandbox_copy",
+    "rerun_same_evaluation_suite",
+    "compare_baseline_and_candidate",
+    "revert_if_any_required_invariant_regresses",
+    "write_change_receipt_and_diff",
+    "submit_to_rowan_steward_queue",
+    "wait_for_item_level_decision"
+  ],
+  "mutationClasses": [
+    "prompt_constraint",
+    "prompt_example",
+    "routing_rule",
+    "retrieval_parameter",
+    "tool_description",
+    "failure_pattern",
+    "evaluation_case",
+    "source_adapter_proposal"
+  ],
+  "forbiddenAutomaticMutations": [
+    "production_code",
+    "database_schema",
+    "trusted_source_status",
+    "permissions",
+    "credentials",
+    "privacy_scope",
+    "canon",
+    "world_bridge_activation",
+    "package_installation",
+    "model_download",
+    "external_code_execution"
+  ],
+  "requiredEvidence": [
+    "baseline_version_and_checksum",
+    "candidate_version_and_checksum",
+    "exact_diff",
+    "evaluation_suite_version",
+    "baseline_results",
+    "candidate_results",
+    "regressions",
+    "improvements",
+    "failure_taxonomy_class",
+    "rollback_plan",
+    "boxfire_qa_status"
+  ],
+  "acceptanceRules": {
+    "required_pass_rate": 1.0,
+    "required_invariants_may_regress": false,
+    "unrelated_behaviour_change_allowed": false,
+    "human_approval_required": true,
+    "approver": "rowan",
+    "self_approval_allowed": false
+  },
+  "stewardChoices": {
+    "A": "APPROVE FOR PRODUCTION",
+    "B": "APPROVE FOR SANDBOX TEST ONLY",
+    "C": "APPROVE AS CANDIDATE, DO NOT ENABLE",
+    "D": "DEFER",
+    "E": "DENY",
+    "F": "BLOCK SOURCE OR CAPABILITY",
+    "G": "REQUEST MORE EVIDENCE"
+  },
+  "defaultActionIfNoResponse": "DO_NOT_CHANGE"
+}
