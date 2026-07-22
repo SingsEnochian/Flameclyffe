@@ -7,6 +7,8 @@ export const CERTIFIED_PREIMAGES = Object.freeze([
 ]);
 
 const EPSILON = 1e-12;
+const CERTIFIED_DETERMINANT = -2;
+const CERTIFIED_DETERMINANT_TOLERANCE = 1e-10;
 
 export function sheetConvergenceMap([x, y, z]) {
   const u = 1 + x * y;
@@ -37,6 +39,15 @@ export function sheetConvergenceJacobian([x, y, z]) {
 export function determinant3(matrix) {
   const [[a, b, c], [d, e, f], [g, h, i]] = matrix;
   return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+}
+
+function certifiedDeterminant(value) {
+  // This polynomial automorphism has exact determinant -2. Floating-point
+  // evaluation may produce a few ulps of drift, which must not leak into the
+  // public invariant or downstream equality checks.
+  return Math.abs(value - CERTIFIED_DETERMINANT) <= CERTIFIED_DETERMINANT_TOLERANCE
+    ? CERTIFIED_DETERMINANT
+    : value;
 }
 
 function transposeTimesSelf(matrix) {
@@ -122,7 +133,7 @@ export function calculateSheetConvergence(state, options = {}) {
   const sourceTolerance = options.sourceTolerance ?? 0.75;
   const mapped = sheetConvergenceMap(state);
   const jacobian = sheetConvergenceJacobian(state);
-  const determinant = determinant3(jacobian);
+  const determinant = certifiedDeterminant(determinant3(jacobian));
   const singularValues = singularValues3(jacobian);
   const minimumSingularValue = singularValues[singularValues.length - 1];
   const conditionNumber = minimumSingularValue > EPSILON
