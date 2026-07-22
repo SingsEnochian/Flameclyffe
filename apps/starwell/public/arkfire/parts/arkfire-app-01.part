@@ -1,0 +1,255 @@
+const {
+  ARKFIRE_LOOP,
+  ARKFIRE_SCHEMA_VERSION,
+  DEFAULT_ENTITIES,
+  DEFAULT_WORLDS,
+  EPISTEMIC_REGISTERS,
+  MODEL_REGISTRY,
+  appendAuditEntry,
+  applyApproval,
+  buildAgentPrompt,
+  buildPromptPackage,
+  clamp,
+  createProjectSeed,
+  deriveToneSet,
+  deterministicAgentFallback,
+  extractContinuityProposals,
+  generateGlyphSet,
+  runModels,
+  simulateWorldObservation,
+  stableHash,
+  validateAuditChain,
+  worldClock,
+} = await import(new URL('./arkfire-core.js', window.location.href).href);
+
+const DB_NAME = 'arkfire-dimensional-world-bridge';
+const DB_VERSION = 1;
+const STORES = [
+  'projects', 'worlds', 'entities', 'sessions', 'observations', 'modelRuns',
+  'artifacts', 'narratives', 'continuity', 'approvals', 'library', 'agentRuns',
+  'audit', 'settings', 'logs',
+];
+
+const MODULES = [
+  ['bridge', 'Bridge', '⌘'],
+  ['observer', 'Observer', '◉'],
+  ['math', 'Math Modeler', '∑'],
+  ['timesync', 'TimeSync', '◷'],
+  ['library', 'Library', '▤'],
+  ['glyphs', 'Glyphs & Tones', '✦'],
+  ['prompt', 'Prompt Engine', '⌁'],
+  ['continuity', 'Continuity', '∞'],
+  ['agents', 'Constellation', '✺'],
+];
+
+const AGENTS = [
+  { id: 'nikola', name: 'Nikola', role: 'Systems Architect', endpoint: 'tesla' },
+  { id: 'vee', name: 'Vee', role: 'Continuity Cartographer', endpoint: 'chat' },
+  { id: 'faer', name: 'Faer', role: 'Boundary and Representation Steward', endpoint: 'chat' },
+  { id: 'boxfire', name: 'Boxfire', role: 'Quality Sentinel', endpoint: 'chat' },
+];
+
+const appState = {
+  db: null,
+  module: 'bridge',
+  project: null,
+  worlds: [],
+  entities: [],
+  sessions: [],
+  observations: [],
+  modelRuns: [],
+  artifacts: [],
+  narratives: [],
+  continuity: [],
+  approvals: [],
+  library: [],
+  agentRuns: [],
+  audit: [],
+  settings: {},
+  logs: [],
+  currentSessionId: null,
+  locationDraft: { latitude: 29.9012, longitude: -81.3124, altitudeM: 2, accuracyM: null, source: 'manual' },
+  busy: false,
+  status: 'Initialising Arkfire…',
+  developerOpen: false,
+  libraryQuery: '',
+  selectedLibraryIds: [],
+};
+
+const root = document.getElementById('arkfire-root');
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+  })[character]);
+}
+
+function formatNumber(value, digits = 3) {
+  return Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : 'unavailable';
+}
+
+function formatDate(value) {
+  if (!value) return 'unknown';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'unknown' : date.toLocaleString();
+}
+
+function id(prefix = 'id') {
+  return `${prefix}-${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+}
+
+function currentSession() {
+  return appState.sessions.find((session) => session.id === appState.currentSessionId) || appState.sessions[0] || null;
+}
+
+function currentObservation() {
+  const session = currentSession();
+  return session?.observationId ? appState.observations.find((item) => item.id === session.observationId) || null : null;
+}
+
+function currentModelRun() {
+  const session = currentSession();
+  return session?.modelRunId ? appState.modelRuns.find((item) => item.id === session.modelRunId) || null : null;
+}
+
+function currentArtifact(kind) {
+  const session = currentSession();
+  const artifactId = session?.artifactIds?.find((candidate) => appState.artifacts.find((item) => item.id === candidate)?.kind === kind);
+  return artifactId ? appState.artifacts.find((item) => item.id === artifactId) || null : null;
+}
+
+function currentNarrative() {
+  const session = currentSession();
+  return session?.narrativeId ? appState.narratives.find((item) => item.id === session.narrativeId) || null : null;
+}
+
+function activeWorlds() {
+  return appState.worlds.filter((world) => appState.project?.activeWorldIds?.includes(world.id));
+}
+
+function activeEntities() {
+  return appState.entities.filter((entity) => appState.project?.activeEntityIds?.includes(entity.id));
+}
+
+function setStatus(message) {
+  appState.status = message;
+  const element = document.getElementById('arkfire-status');
+  if (element) element.textContent = message;
+}
+
+function setBusy(value, message) {
+  appState.busy = value;
+  if (message) setStatus(message);
+  document.body.classList.toggle('arkfire-busy', value);
+}
+
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const database = request.result;
+      for (const storeName of STORES) {
+        if (!database.objectStoreNames.contains(storeName)) database.createObjectStore(storeName, { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function transaction(storeName, mode = 'readonly') {
+  return appState.db.transaction(storeName, mode).objectStore(storeName);
+}
+
+function getAll(storeName) {
+  return new Promise((resolve, reject) => {
+    const request = transaction(storeName).getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function put(storeName, value) {
+  return new Promise((resolve, reject) => {
+    const request = transaction(storeName, 'readwrite').put(value);
+    request.onsuccess = () => resolve(value);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function remove(storeName, key) {
+  return new Promise((resolve, reject) => {
+    const request = transaction(storeName, 'readwrite').delete(key);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function clearStore(storeName) {
+  return new Promise((resolve, reject) => {
+    const request = transaction(storeName, 'readwrite').clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function loadState() {
+  const results = await Promise.all(STORES.map((storeName) => getAll(storeName)));
+  const map = Object.fromEntries(STORES.map((storeName, index) => [storeName, results[index]]));
+  Object.assign(appState, map);
+  appState.worlds = map.worlds;
+  appState.entities = map.entities;
+  appState.sessions = map.sessions;
+  appState.observations = map.observations;
+  appState.modelRuns = map.modelRuns;
+  appState.artifacts = map.artifacts;
+  appState.narratives = map.narratives;
+  appState.continuity = map.continuity;
+  appState.approvals = map.approvals;
+  appState.library = map.library;
+  appState.agentRuns = map.agentRuns;
+  appState.audit = map.audit.sort((left, right) => left.sequence - right.sequence);
+  appState.settings = Object.fromEntries(map.settings.map((setting) => [setting.id, setting.value]));
+  appState.logs = map.logs.sort((left, right) => new Date(right.at) - new Date(left.at));
+  appState.project = map.projects[0] || null;
+  appState.currentSessionId = appState.settings.currentSessionId || appState.sessions[0]?.id || null;
+}
+
+async function seedIfNeeded() {
+  const projects = await getAll('projects');
+  if (!projects.length) await put('projects', createProjectSeed());
+  const worlds = await getAll('worlds');
+  if (!worlds.length) await Promise.all(DEFAULT_WORLDS.map((world) => put('worlds', { ...world })));
+  const entities = await getAll('entities');
+  if (!entities.length) await Promise.all(DEFAULT_ENTITIES.map((entity) => put('entities', { ...entity })));
+  const settings = await getAll('settings');
+  if (!settings.length) {
+    await Promise.all([
+      put('settings', { id: 'teslaProvider', value: 'anthropic' }),
+      put('settings', { id: 'agentMode', value: 'live-with-fallback' }),
+      put('settings', { id: 'theme', value: 'arkfire-night' }),
+    ]);
+  }
+}
+
+async function log(level, message, detail = null) {
+  const entry = { id: id('log'), at: new Date().toISOString(), level, message, detail };
+  appState.logs.unshift(entry);
+  appState.logs = appState.logs.slice(0, 500);
+  try { await put('logs', entry); } catch { /* logging must not collapse the instrument */ }
+}
+
+async function audit(actor, action, payload) {
+  const next = appendAuditEntry(appState.audit, { actor, action, payload });
+  const entry = next[next.length - 1];
+  appState.audit = next;
+  await put('audit', entry);
+  return entry;
+}
+
+async function saveSetting(name, value) {
+  appState.settings[name] = value;
+  await put('settings', { id: name, value });
+}
+
+async function fetchJson(url, options = {"method":"GET
