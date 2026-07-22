@@ -53,7 +53,7 @@ function SigilMedallion({ room, className = '' }) {
   );
 }
 
-function SheetConvergencePanel() {
+function SheetConvergenceModuleHost() {
   const timestamp = new Date();
   const state = normaliseLocationState({ ...observatoryReferenceLocation, timestamp });
   const result = calculateSheetConvergence(state);
@@ -71,8 +71,13 @@ function SheetConvergencePanel() {
   ];
 
   return (
-    <section className="terra-data-safety sheet-convergence-panel" aria-label="Local sheet convergence and fold susceptibility">
-      <span>Mathematical derivation</span>
+    <section
+      className="terra-data-safety sheet-convergence-panel"
+      aria-label="Local sheet convergence and fold susceptibility"
+      data-module-id="sheet-convergence"
+      data-module-version="0.1.0"
+    >
+      <span>Installable module · mathematical derivation</span>
       <strong>Local Sheet-Convergence and Fold Susceptibility</strong>
       <p>
         Location input: {observatoryReferenceLocation.name} · {observatoryReferenceLocation.latitude.toFixed(5)}°, {observatoryReferenceLocation.longitude.toFixed(5)}° · {timestamp.toISOString()}
@@ -125,7 +130,7 @@ function TerraAeternaInstrumentPanel({ selected }) {
         <p>{planck.caution}</p>
       </div>
 
-      <SheetConvergencePanel />
+      <SheetConvergenceModuleHost />
 
       <div className="terra-data-safety" aria-label="Observer data safety notice">
         <span>Observer Data Safety</span>
