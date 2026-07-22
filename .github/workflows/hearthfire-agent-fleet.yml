@@ -1,0 +1,76 @@
+name: Hearthfire Agent Fleet
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub cron is UTC. Running at both 07:00 and 08:00 with a New York
+    # local-time guard preserves 03:00 across daylight-saving changes.
+    - cron: '0 7 * * *'
+    - cron: '0 8 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hearthfire-agent-fleet-daily
+  cancel-in-progress: false
+
+jobs:
+  daily-ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Flameclyffe
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Resolve 03:00 America/New_York guard
+        id: guard
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Manual dispatch accepted."
+            exit 0
+          fi
+          LOCAL_HOUR=$(TZ=America/New_York date +%H)
+          LOCAL_DATE=$(TZ=America/New_York date +%F)
+          echo "local_hour=$LOCAL_HOUR" >> "$GITHUB_OUTPUT"
+          echo "local_date=$LOCAL_DATE" >> "$GITHUB_OUTPUT"
+          if [ "$LOCAL_HOUR" = "03" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "3 a.m. Eastern window accepted."
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping duplicate UTC trigger. Local hour is $LOCAL_HOUR."
+          fi
+
+      - name: Run approved live-signal harvest
+        if: steps.guard.outputs.run == 'true'
+        env:
+          HEARTHFIRE_LAT: ${{ vars.HEARTHFIRE_LAT || '30.04' }}
+          HEARTHFIRE_LON: ${{ vars.HEARTHFIRE_LON || '-81.40' }}
+          HEARTHFIRE_LOCATION_LABEL: ${{ vars.HEARTHFIRE_LOCATION_LABEL || 'NE Florida approximate' }}
+        run: node scripts/agents/run-hearthfire-agent-fleet.mjs
+
+      - name: Upload daily evidence bundle
+        if: steps.guard.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: hearthfire-agent-bundle-${{ steps.guard.outputs.local_date || github.run_id }}
+          path: generated/hearthfire-agent-data/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Write job summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## Hearthfire Agent Fleet" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Requested schedule: 03:00 America/New_York" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Guard accepted: ${{ steps.guard.outputs.run }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Local date: ${{ steps.guard.outputs.local_date }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Output: generated evidence artifact, not a canonical code mutation" >> "$GITHUB_STEP_SUMMARY"
