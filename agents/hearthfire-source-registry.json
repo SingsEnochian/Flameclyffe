@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "0.1.0",
+  "updatedAt": "2026-07-22T20:30:00Z",
+  "promotionRule": "candidate sources require Boxfire review and Rowan authorisation before harvest is enabled",
+  "sources": [
+    {
+      "id": "noaa-swpc-planetary-kp",
+      "status": "approved",
+      "authority": "NOAA Space Weather Prediction Center",
+      "channel": "geomagnetic",
+      "cadence": "near-real-time",
+      "format": "json",
+      "endpoint": "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "direct_measurement_or_official_derived_product"
+    },
+    {
+      "id": "noaa-swpc-solar-wind-mag",
+      "status": "approved",
+      "authority": "NOAA Space Weather Prediction Center",
+      "channel": "heliospheric-magnetic",
+      "cadence": "near-real-time",
+      "format": "json",
+      "endpoint": "https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "direct_measurement"
+    },
+    {
+      "id": "noaa-swpc-solar-wind-plasma",
+      "status": "approved",
+      "authority": "NOAA Space Weather Prediction Center",
+      "channel": "heliospheric-plasma",
+      "cadence": "near-real-time",
+      "format": "json",
+      "endpoint": "https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "direct_measurement"
+    },
+    {
+      "id": "noaa-swpc-f107",
+      "status": "approved",
+      "authority": "NOAA Space Weather Prediction Center",
+      "channel": "solar-radio-flux",
+      "cadence": "operational",
+      "format": "json",
+      "endpoint": "https://services.swpc.noaa.gov/json/f107_cm_flux.json",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "official_measurement_product"
+    },
+    {
+      "id": "noaa-swpc-solar-radio-flux",
+      "status": "approved",
+      "authority": "NOAA Space Weather Prediction Center",
+      "channel": "solar-radio",
+      "cadence": "operational",
+      "format": "json",
+      "endpoint": "https://services.swpc.noaa.gov/json/solar-radio-flux.json",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "official_measurement_product"
+    },
+    {
+      "id": "noaa-swpc-goes-xray",
+      "status": "approved",
+      "authority": "NOAA Space Weather Prediction Center",
+      "channel": "solar-xray",
+      "cadence": "near-real-time",
+      "format": "json",
+      "endpoint": "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "direct_measurement"
+    },
+    {
+      "id": "usgs-earthquakes-day",
+      "status": "approved",
+      "authority": "United States Geological Survey",
+      "channel": "seismic",
+      "cadence": "updated-every-minute",
+      "format": "geojson",
+      "endpoint": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "instrumented_event_catalogue"
+    },
+    {
+      "id": "open-meteo-local-current",
+      "status": "approved-existing",
+      "authority": "Open-Meteo",
+      "channel": "atmospheric-weather",
+      "cadence": "current",
+      "format": "json",
+      "endpointTemplate": "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m&timezone=auto",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "model_and_station_derived_weather_product"
+    },
+    {
+      "id": "noaa-glotec",
+      "status": "candidate-adapter-required",
+      "authority": "NOAA NCEI and SWPC",
+      "channel": "ionosphere-total-electron-content",
+      "cadence": "near-real-time",
+      "format": "product-specific",
+      "documentation": "https://www.ncei.noaa.gov/products/space-weather/ionospheric-program/total-electron-content",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "official_assimilated_model_product"
+    },
+    {
+      "id": "intermagnet-near-real-time",
+      "status": "candidate-adapter-required",
+      "authority": "INTERMAGNET",
+      "channel": "ground-geomagnetic",
+      "cadence": "close-to-real-time",
+      "format": "observatory-data",
+      "documentation": "https://intermagnet.org/",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "direct_measurement"
+    },
+    {
+      "id": "ecallisto-solar-radio",
+      "status": "candidate-licence-and-adapter-review",
+      "authority": "e-CALLISTO network",
+      "channel": "solar-radio-dynamic-spectrum",
+      "cadence": "continuous-network-archive",
+      "format": "FITS-and-quickviews",
+      "documentation": "https://www.e-callisto.org/Data/data.html",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "direct_measurement",
+      "notes": "Automated use and publication obligations require explicit review before enabling harvest."
+    },
+    {
+      "id": "nasa-dsn-now",
+      "status": "candidate-metadata-only",
+      "authority": "NASA Jet Propulsion Laboratory",
+      "channel": "spacecraft-radio-communications",
+      "cadence": "updated-every-five-seconds",
+      "format": "interactive-live-status",
+      "documentation": "https://www.nasa.gov/communicating-with-missions/dsn/",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "official_operational_telemetry_display",
+      "notes": "Do not scrape until a documented machine interface or permission is confirmed."
+    },
+    {
+      "id": "gwosc",
+      "status": "candidate-historical-archive",
+      "authority": "LIGO Virgo KAGRA collaborations",
+      "channel": "gravitational-wave-strain",
+      "cadence": "released-archive-not-live",
+      "format": "open-science-data",
+      "documentation": "https://gwosc.org/",
+      "worldScope": ["waking-earth", "observer-deep"],
+      "epistemicRegister": "calibrated_released_measurement",
+      "notes": "Use for historical baselines and event windows, not as a live feed."
+    }
+  ]
+}
