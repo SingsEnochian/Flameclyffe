@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "0.1.0",
+  "runId": "2026-07-23T030433-0400",
+  "boxfireQA": {
+    "result": "PARTIAL",
+    "checks": {
+      "registry_loaded": true,
+      "approved_sources_attempted": 8,
+      "successful_source_contracts": 1,
+      "broken_contracts": 2,
+      "reachable_but_raw_unavailable": 4,
+      "runtime_fetch_failures": 1,
+      "candidate_sources_auto_promoted": 0,
+      "code_executed": 0,
+      "packages_installed": 0,
+      "schema_changes_applied": 0,
+      "canon_changes_applied": 0,
+      "private_sources_accessed": 0,
+      "world_patches_written": 2,
+      "j_space_written": true
+    },
+    "releaseBlockers": [
+      "Full raw payload bytes, HTTP headers, and SHA-256 checksums could not be preserved because the automation runtime exposed web retrieval rather than a raw HTTP client.",
+      "The two approved NOAA solar-wind URLs return HTTP 404 and require item-level approval before replacement.",
+      "The scheduled workflow exists only on draft PR #75 and was not dispatchable through the available GitHub connector in this run."
+    ],
+    "statusStatement": "Evidence uploaded to a generated-data branch, not the canonical application branch. This is not a verified production ingest."
+  },
+  "proposals": [
+    {
+      "number": 1,
+      "title": "Replace broken NOAA solar-wind endpoints with official summary products",
+      "category": "changed source contract / adapter",
+      "exactChange": {
+        "failedApproved": [
+          "https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json",
+          "https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json"
+        ],
+        "sandboxCandidates": [
+          "https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json",
+          "https://services.swpc.noaa.gov/products/summary/solar-wind-speed.json"
+        ]
+      },
+      "why": "Both approved URLs returned HTTP 404; the official SWPC summary endpoints returned timestamped magnetic-field and proton-speed values.",
+      "expectedBenefit": "Restores current solar-wind inputs with small payloads and lower ingest cost.",
+      "risks": ["Less historical detail than one-day series","New field and unit contract required","Upstream layout may change"],
+      "privacyConsentImpact": "None; public official data.",
+      "affectedSystems": ["Flameclyffe source registry","Signal Harvester","Science Centre","Observer DEEP"],
+      "affectedWorlds": ["waking-earth","observer-deep"],
+      "requirements": {"codeExecution":false,"packageInstallation":false,"networkAccess":true,"credentials":false,"schemaChange":false,"canonChange":false},
+      "boxfireQA": "BLOCKED_PENDING_ITEM_APPROVAL_AND_SANDBOX_TEST",
+      "confidenceAxes": {"sourceAuthority":"high","contractFailure":"high","replacementCompatibility":"medium-high","parserReadiness":"medium"},
+      "reversibility": "High; registry-only rollback.",
+      "defaultIfNoAction": "Keep failed endpoints visibly failed; do not substitute candidates."
+    },
+    {
+      "number": 2,
+      "title": "Add bounded GloTEC GeoJSON sandbox adapter",
+      "category": "new source adapter / ionospheric telemetry",
+      "exactChange": "Create a sandbox-only parser for the official GloTEC 2D ultra-real-time GeoJSON product with bounding-box sampling, payload-size limits, timestamps, TEC units, quality flags, and raw checksum retention.",
+      "why": "The official endpoint is reachable and matches an existing candidate source, but the payload is large and was not parsed during this run.",
+      "expectedBenefit": "Adds ionospheric total electron content as a distinct Earth-local channel.",
+      "risks": ["Large payload and storage growth","Assimilated-model output can be mistaken for direct measurement","Spatial sampling and missingness require care"],
+      "privacyConsentImpact": "Public feed is non-private; configured user-location precision must remain separately governed.",
+      "affectedSystems": ["Flameclyffe","Science Centre","Temporal Centre","Observer DEEP"],
+      "affectedWorlds": ["waking-earth","observer-deep"],
+      "requirements": {"codeExecution":true,"packageInstallation":false,"networkAccess":true,"credentials":false,"schemaChange":false,"canonChange":false},
+      "boxfireQA": "CANDIDATE_SANDBOX_ONLY",
+      "confidenceAxes": {"sourceAuthority":"high","endpointReachability":"high","adapterCompatibility":"medium","operationalCost":"medium-low"},
+      "reversibility": "High; isolated adapter and feature flag.",
+      "defaultIfNoAction": "Remain candidate; no harvesting."
+    },
+    {
+      "number": 3,
+      "title": "Add manual generated-data workflow dispatch and artifact retrieval path",
+      "category": "agent capability / workflow",
+      "exactChange": "Expose a reviewable workflow-dispatch action for the evidence job on the agent-fleet branch and a connector-supported artifact retrieval step, without merging or writing generated data to main.",
+      "why": "The available connector could inspect existing jobs but could not dispatch the draft-branch daily ingest, forcing a partial branch upload instead of a workflow artifact.",
+      "expectedBenefit": "Allows the real Node harvester to preserve full payloads, headers, checksums, and artifacts.",
+      "risks": ["Workflow permissions must remain read-only for code","Manual and scheduled runs can duplicate dates","Artifact size and retention need limits"],
+      "privacyConsentImpact": "Approximate configured location may appear inside private artifacts and must remain configurable.",
+      "affectedSystems": ["GitHub Actions","Flameclyffe agent fleet","Hearthgate ingestion"],
+      "affectedWorlds": ["waking-earth","observer-deep"],
+      "requirements": {"codeExecution":true,"packageInstallation":false,"networkAccess":true,"credentials":false,"schemaChange":false,"canonChange":false},
+      "boxfireQA": "PROPOSED_REQUIRES_PERMISSION_AND_IDEMPOTENCY_TEST",
+      "confidenceAxes": {"need":"high","implementationFeasibility":"high","connectorCompatibility":"medium"},
+      "reversibility": "High; workflow-only change.",
+      "defaultIfNoAction": "Continue partial reports and do not claim full raw capture or artifact upload."
+    }
+  ]
+}
