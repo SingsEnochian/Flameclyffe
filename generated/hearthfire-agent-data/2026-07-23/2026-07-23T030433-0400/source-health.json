@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "0.1.0",
+  "runId": "2026-07-23T030433-0400",
+  "generatedAt": "2026-07-23T07:04:33Z",
+  "status": "PARTIAL",
+  "sources": [
+    {"source_id":"noaa-swpc-planetary-kp","registry_status":"approved","health":"ok","latest_observed_at":"2026-07-23T03:00:00","quality_flags":["full_raw_bytes_unavailable_in_runtime"]},
+    {"source_id":"noaa-swpc-solar-wind-mag","registry_status":"approved","health":"failed","http_status":404,"endpoint":"https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json","quality_flags":["approved_endpoint_contract_broken"],"replacement_candidate":"https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json"},
+    {"source_id":"noaa-swpc-solar-wind-plasma","registry_status":"approved","health":"failed","http_status":404,"endpoint":"https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json","quality_flags":["approved_endpoint_contract_broken"],"replacement_candidate":"https://services.swpc.noaa.gov/products/summary/solar-wind-speed.json"},
+    {"source_id":"noaa-swpc-f107","registry_status":"approved","health":"reachable-unparsed","quality_flags":["full_raw_bytes_unavailable_in_runtime"],"summary_candidate":"https://services.swpc.noaa.gov/products/summary/10cm-flux.json"},
+    {"source_id":"noaa-swpc-solar-radio-flux","registry_status":"approved","health":"reachable-unparsed","quality_flags":["full_raw_bytes_unavailable_in_runtime"]},
+    {"source_id":"noaa-swpc-goes-xray","registry_status":"approved","health":"reachable-unparsed","quality_flags":["full_raw_bytes_unavailable_in_runtime"],"supplementary_summary":"https://services.swpc.noaa.gov/json/goes/primary/xray-flares-latest.json"},
+    {"source_id":"usgs-earthquakes-day","registry_status":"approved","health":"reachable-unparsed","quality_flags":["full_raw_bytes_unavailable_in_runtime"]},
+    {"source_id":"open-meteo-local-current","registry_status":"approved-existing","health":"fetch-failed-in-runtime","quality_flags":["web_fetch_internal_error","no_raw_capture"]}
+  ],
+  "candidateChecks": [
+    {"source_id":"noaa-glotec","status":"candidate-endpoint-reachable","endpoint":"https://services.swpc.noaa.gov/products/glotec/geojson_2d_urt.json","quality_flags":["large_payload_not_parsed","approval_required"]},
+    {"source_id":"intermagnet-near-real-time","status":"not-promoted","quality_flags":["no_machine_contract_verified_this_run"]},
+    {"source_id":"ecallisto-solar-radio","status":"not-promoted","quality_flags":["licence_and_adapter_review_required"]},
+    {"source_id":"nasa-dsn-now","status":"not-promoted","quality_flags":["no_documented_machine_interface_verified"]},
+    {"source_id":"gwosc","status":"historical-only","quality_flags":["not_live"]}
+  ]
+}
