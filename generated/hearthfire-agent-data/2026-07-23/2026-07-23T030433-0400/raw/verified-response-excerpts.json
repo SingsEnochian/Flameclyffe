@@ -1,0 +1,23 @@
+{
+  "captureMode": "verified-response-excerpts",
+  "rawCompleteness": "partial",
+  "checksumStatus": "unavailable-in-current-automation-runtime",
+  "responses": {
+    "noaa-planetary-k-index-latest": [
+      {"time_tag":"2026-07-23T03:00:00","Kp":2.0,"a_running":7,"station_count":8}
+    ],
+    "noaa-summary-solar-wind-mag-field-candidate": [
+      {"bt":9,"bz_gsm":-3,"time_tag":"2026-07-23T03:31:00Z"}
+    ],
+    "noaa-summary-solar-wind-speed-candidate": [
+      {"proton_speed":495,"time_tag":"2026-07-23T03:31:00Z"}
+    ],
+    "noaa-summary-10cm-flux-candidate": [
+      {"flux":150,"time_tag":"2026-07-22T20:00:00"}
+    ],
+    "noaa-goes-xray-flare-summary": [
+      {"time_tag":"2026-07-23T06:42:00Z","satellite":18,"current_class":"C1.0","begin_time":"2026-07-23T03:24:00Z","begin_class":"C1.7","max_time":"2026-07-23T03:27:00Z","max_class":"C5.3","end_time":"2026-07-23T03:29:00Z","end_class":"C2.6"}
+    ]
+  },
+  "note": "These are exact response excerpts verified through official public endpoints. Full raw payload bytes and response headers could not be preserved because the current automation runtime exposed page retrieval rather than a raw HTTP client."
+}
