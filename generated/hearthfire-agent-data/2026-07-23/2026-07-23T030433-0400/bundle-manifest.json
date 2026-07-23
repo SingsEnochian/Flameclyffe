@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "0.1.0",
+  "runId": "2026-07-23T030433-0400",
+  "evidenceDate": "2026-07-23",
+  "timezone": "America/New_York",
+  "generatedAt": "2026-07-23T07:04:33Z",
+  "status": "PARTIAL",
+  "sourceBranch": "forge/agent-fleet-3am-ingest",
+  "sourceCommit": "984d25fe2efbc399244cc4c794dc749034775cf6",
+  "outputBranch": "generated-data/night-watch-2026-07-23",
+  "files": [
+    "raw/verified-response-excerpts.json",
+    "source-health.json",
+    "world-patches-and-jspace.json",
+    "boxfire-qa-and-proposals.json"
+  ],
+  "checksumStatus": "UNAVAILABLE",
+  "checksumFailure": "The current automation runtime did not provide a working raw HTTP or local hashing execution path. No checksum is fabricated.",
+  "epistemicBoundary": "No causal, supernatural, diagnostic, prophetic, multiversal, or hidden-entity certification is made.",
+  "uploadNote": "Uploaded to a generated-data branch because the draft-branch workflow could not be dispatched through the available GitHub connector. No canonical application branch was modified."
+}
