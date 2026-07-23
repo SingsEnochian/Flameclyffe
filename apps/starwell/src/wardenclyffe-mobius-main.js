@@ -20,6 +20,7 @@ const stages = [
   ['Möbius layered adapter', () => import('../../../assets/mobius-layered-spec-adapter.js')],
   ['Möbius DEEP/Groundwire adapter', () => import('../../../assets/mobius-deep-groundwire-adapter.js')],
   ['Wardenclyffe/Möbius coupler', () => import('../../../assets/wardenclyffe-mobius-coupler.js')],
+  ['Runa 3-6-9 Harmonic Triptych', () => import('../../../assets/runa-369-harmonic-triptych.js')],
   ['live Groundwire coupling', () => import('../../../assets/wardenclyffe-groundwire-live.js')],
   ['audio output witness', () => import('../../../assets/starwell-audio-output-witness.js')],
 ];
@@ -84,6 +85,7 @@ if (!boot.failed) {
     ['shared AudioContext', window.StarwellSharedAudioContext],
     ['Möbius bus instance', window.mobiusAudioBus],
     ['Wardenclyffe coupler', window.wardenclyffeMobiusCoupler],
+    ['Runa 3-6-9 Triptych', window.Runa369HarmonicTriptych],
     ['Groundwire', window.StarwellGroundwire],
     ['output witness', window.StarwellAudioOutputWitness],
   ];
@@ -107,6 +109,7 @@ if (document.readyState === 'loading') {
         const lateGlobals = [
           ['Möbius bus instance', window.mobiusAudioBus],
           ['Wardenclyffe coupler', window.wardenclyffeMobiusCoupler],
+          ['Runa 3-6-9 Triptych', window.Runa369HarmonicTriptych],
           ['Groundwire', window.StarwellGroundwire],
           ['output witness', window.StarwellAudioOutputWitness],
         ];
@@ -126,6 +129,7 @@ if (document.readyState === 'loading') {
       boot.missingGlobals = [
         ['Möbius bus instance', window.mobiusAudioBus],
         ['Wardenclyffe coupler', window.wardenclyffeMobiusCoupler],
+        ['Runa 3-6-9 Triptych', window.Runa369HarmonicTriptych],
         ['Groundwire', window.StarwellGroundwire],
         ['output witness', window.StarwellAudioOutputWitness],
       ].filter(([, value]) => !value).map(([name]) => name);
