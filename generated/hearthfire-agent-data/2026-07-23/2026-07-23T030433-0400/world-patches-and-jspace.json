@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "0.1.0",
+  "runId": "2026-07-23T030433-0400",
+  "patchStatus": "generated-needs-review",
+  "worldPatches": [
+    {
+      "world_id": "waking-earth",
+      "nodes": [
+        {"id":"obs:noaa-kp:2026-07-23T03:00:00","type":"geomagnetic_observation","source_id":"noaa-swpc-planetary-kp","observed_at":"2026-07-23T03:00:00","value":{"Kp":2.0,"a_running":7,"station_count":8},"epistemic_register":"RETRIEVED","verification_status":"source-verified-partial-raw"},
+        {"id":"candidate:noaa-solar-wind:2026-07-23T03:31:00Z","type":"source-contract-candidate","source_id":"noaa-summary-endpoints","observed_at":"2026-07-23T03:31:00Z","value":{"bt_nT":9,"bz_gsm_nT":-3,"proton_speed_km_s":495},"epistemic_register":"RETRIEVED","verification_status":"candidate-not-approved"},
+        {"id":"candidate:noaa-f107:2026-07-22T20:00:00","type":"source-contract-candidate","source_id":"noaa-summary-10cm-flux","observed_at":"2026-07-22T20:00:00","value":{"flux_sfu":150},"epistemic_register":"RETRIEVED","verification_status":"candidate-not-approved"},
+        {"id":"obs:noaa-xray-flare:2026-07-23T03:27:00Z","type":"solar-xray-event-summary","source_id":"noaa-swpc-goes-xray","observed_at":"2026-07-23T03:27:00Z","value":{"max_class":"C5.3","current_class_at_2026-07-23T06:42:00Z":"C1.0"},"epistemic_register":"RETRIEVED","verification_status":"supplementary-summary"}
+      ],
+      "edges": []
+    },
+    {
+      "world_id": "observer-deep",
+      "source_refs": ["obs:noaa-kp:2026-07-23T03:00:00","candidate:noaa-solar-wind:2026-07-23T03:31:00Z","candidate:noaa-f107:2026-07-22T20:00:00","obs:noaa-xray-flare:2026-07-23T03:27:00Z"],
+      "note": "Reference-only bridge. No physical, causal, cosmological, or supernatural certification."
+    }
+  ],
+  "jSpace": {
+    "workspaceId": "jspace:2026-07-23T030433-0400",
+    "status": "SPARSE_PARTIAL",
+    "query": "Earth-local live signal health and compatible source changes",
+    "activeWorlds": ["waking-earth","observer-deep"],
+    "activeNodes": ["obs:noaa-kp:2026-07-23T03:00:00","candidate:noaa-solar-wind:2026-07-23T03:31:00Z","candidate:noaa-f107:2026-07-22T20:00:00","obs:noaa-xray-flare:2026-07-23T03:27:00Z"],
+    "candidateTools": ["noaa-summary-adapter","glotec-geojson-adapter"],
+    "unresolvedQuestions": ["Replace broken NOAA solar-wind registry endpoints?","Sandbox GloTEC with bounded spatial sampling?","Expose connector-supported workflow dispatch and artifact retrieval?"],
+    "discardedCandidates": [
+      {"id":"nasa-dsn-now","reason":"no documented machine endpoint verified"},
+      {"id":"ecallisto","reason":"licence and automated-use review incomplete"},
+      {"id":"gwosc-live","reason":"archive, not live feed"}
+    ],
+    "epistemicBoundary": "Records measurements, official products, source health, and proposals; does not infer hidden causes."
+  }
+}
