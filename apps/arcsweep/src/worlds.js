@@ -29,6 +29,15 @@ export const VISIBILITY_MODES = [
   ['custom', 'Custom visibility rule'],
 ];
 
+function mergeAppletLayout(importedLayout) {
+  const defaults = createDefaultAppletLayout();
+  if (!Array.isArray(importedLayout)) return defaults;
+  return defaults.map((defaultItem) => {
+    const importedItem = importedLayout.find((item) => item?.id === defaultItem.id);
+    return importedItem ? { ...defaultItem, ...importedItem } : defaultItem;
+  });
+}
+
 export function createWorld(id, now = new Date().toISOString()) {
   return {
     id,
@@ -104,7 +113,7 @@ export function normaliseWorld(value, fallbackId, now = new Date().toISOString()
     safetyWeave: { ...defaults.safetyWeave, ...(world.safetyWeave || {}) },
     recall: { ...defaults.recall, ...(world.recall || {}) },
     companion: { ...defaults.companion, ...(world.companion || {}) },
-    applets: Array.isArray(world.applets) ? world.applets : defaults.applets,
+    applets: mergeAppletLayout(world.applets),
   };
 }
 
