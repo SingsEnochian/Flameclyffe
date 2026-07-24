@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "0.1.0",
+  "generatedAt": "2026-07-24T07:04:00Z",
+  "result": "PARTIAL",
+  "sources": [
+    {"sourceId": "noaa-swpc-planetary-kp", "status": "OK", "httpStatus": 200, "detail": "Latest exposed approved row parsed and preserved."},
+    {"sourceId": "noaa-swpc-solar-wind-mag", "status": "FAILED", "httpStatus": 404, "detail": "Approved endpoint no longer exists."},
+    {"sourceId": "noaa-swpc-solar-wind-plasma", "status": "FAILED", "httpStatus": 404, "detail": "Approved endpoint no longer exists."},
+    {"sourceId": "noaa-swpc-f107", "status": "REACHABLE_UNPARSED", "httpStatus": 200, "detail": "JSON body not exposed by the retrieval layer."},
+    {"sourceId": "noaa-swpc-solar-radio-flux", "status": "REACHABLE_UNPARSED", "httpStatus": 200, "detail": "JSON body not exposed by the retrieval layer."},
+    {"sourceId": "noaa-swpc-goes-xray", "status": "REACHABLE_UNPARSED", "httpStatus": 200, "detail": "JSON body not exposed by the retrieval layer."},
+    {"sourceId": "usgs-earthquakes-day", "status": "REACHABLE_UNPARSED", "httpStatus": 200, "detail": "Complete GeoJSON body not exposed."},
+    {"sourceId": "open-meteo-local-current", "status": "FAILED", "httpStatus": null, "detail": "Retrieval-layer internal fetch error."}
+  ],
+  "candidateEvidence": [
+    {"id": "noaa-summary-solar-wind-mag-field", "endpoint": "https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json", "observedAt": "2026-07-24T05:52:00Z", "exposedValue": {"bt": 7, "bz_gsm": -1}, "status": "CANDIDATE_ONLY"},
+    {"id": "noaa-summary-solar-wind-speed", "endpoint": "https://services.swpc.noaa.gov/products/summary/solar-wind-speed.json", "observedAt": "2026-07-24T05:52:00Z", "exposedValue": {"proton_speed": 582}, "status": "CANDIDATE_ONLY"},
+    {"id": "noaa-summary-10cm-flux", "endpoint": "https://services.swpc.noaa.gov/products/summary/10cm-flux.json", "observedAt": "2026-07-23T20:00:00Z", "exposedValue": {"flux": 148}, "status": "CANDIDATE_ONLY"},
+    {"id": "noaa-goes-xray-flares-latest", "endpoint": "https://services.swpc.noaa.gov/json/goes/primary/xray-flares-latest.json", "observedAt": "2026-07-24T06:54:00Z", "exposedValue": {"current_class": "C1.5", "max_class": "C1.8"}, "status": "CANDIDATE_ONLY"},
+    {"id": "noaa-glotec", "status": "CANDIDATE_ONLY", "detail": "Official product directory remains available; adapter not enabled."}
+  ]
+}
