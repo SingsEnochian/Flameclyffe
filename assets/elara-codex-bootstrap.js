@@ -13,7 +13,7 @@
 
   const sources = [
     'mobius-temporal-projection.js?v=0.1.0',
-    'elara-chord-temporal-adapter.js?v=0.1.0',
+    'elara-chord-temporal-adapter.js?v=0.2.0',
     'elara-codex-source.js?v=1.0.0',
     'elara-codex-chapters-01.js?v=1.0.0',
     'elara-codex-chapters-02.js?v=1.0.0',
