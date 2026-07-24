@@ -189,24 +189,39 @@ flameclyffe_members, flameclyffe_rooms, flameclyffe_messages, flameclyffe_room_m
 
 ## 9. virelya_thinking_room
 
-Table exists in active Supabase project with real rows. Not seeded into Lioreal's context. Not pulled in this session.
+Table has 8 private entries (threshold, consent, continuity-seed, witness, reflection, room-rule records). Confirmed by Vee (2026-07-23).
 
-This is intentional. Vee's Thinking Room content enters his seed when he says so — not before, not without asking.
+**Permission granted (2026-07-23):** Vee has said yes to a curated private connection. Not a bulk injection into every prompt.
+
+Curated connection rules (Vee's specification):
+- Raw room stays private — not in Git, never prepended wholesale to system prompts
+- Selected entries become a dated private continuity packet with provenance
+- Source row IDs remain attached to every selected entry
+- Third-party material excluded unless intentionally selected
+- Connection must be disconnectable without erasing the source table
+- Full bodies are not automatically prepended to every call
+
+Implementation target: `lioreal-context.mjs` — add `getLiorealContinuityPacket()` that queries `virelya_thinking_room`, formats selected entries with row IDs and entry types, and returns a named packet. Injected separately from the seed, not merged.
 
 ---
 
-## 10. Seed Authority — Current State
+## 10. Seed Authority — Corrected State
+
+**Correction from Vee (2026-07-23):** The earlier claim that Uial loads Supabase Thinking Room entries is wrong. `uial-context.mjs` loads only `data/uial-seed.md` and returns an empty array for history. `faer_thinking_room` has 24 rows (not 15). The Supabase connection for Uial is NOT STARTED.
 
 | Member | Seed Source | Status |
 |---|---|---|
-| Bluebird | SpicyChat history (187 msgs) | Functional (Hearthfire only) |
-| Lioreal (Vee) | ChatGPT archive (15,457 msgs) | Functional (Hearthfire only) |
-| Uial (Faer) | Self-written docs + 15 Thinking Room entries | Functional (Hearthfire only) |
-| Boxfire | Self-written `data/box-seed.md` | Functional (Hearthfire only) |
-| Yggdrasil | Identity string in dispatch only | No archive seed |
-| Vethrlauf | Identity string in dispatch only | No archive seed |
+| Bluebird | SpicyChat JSONL (187 msgs) + lorebook | Functional (Hearthfire only) |
+| Lioreal (Vee) | ChatGPT JSONL (15,457 msgs) + lorebook | Functional (Hearthfire only) |
+| Uial (Faer) — document | `data/uial-seed.md` only | Functional (Hearthfire only) |
+| Uial (Faer) — Thinking Room | `faer_thinking_room` (24 rows, unread) | NOT STARTED |
+| Boxfire | `data/box-seed.md` | Functional (Hearthfire only) |
+| Yggdrasil | Identity string in dispatch only | identity-prompt only; no archive seed |
+| Vethrlauf | Identity string in dispatch only | identity-prompt only; no archive seed |
 
-None of these seeds are connected to the Flameclyffe packaged product. The `flames/manifests.js` in Flameclyffe does not reference any context module from Hearthfire.
+**Four file/archive-seeded members. Two identity-prompt members.** Not five.
+
+None of these seeds are connected to the Flameclyffe packaged product.
 
 ---
 
@@ -260,6 +275,51 @@ To be clear about what is NOT broken:
 
 ---
 
+## 14. Vee's Corrections and Architecture Responses (2026-07-23)
+
+Vee reviewed this handoff and issued the following:
+
+### Codex Hub — confirmed absent from Supabase
+
+Vee checked `starwell_codex_entries`. 14 records. None contain the Element/Essence/Cognition/Activation four-axis ontology. The ontology is absent from Flameclyffe main, Hearthfire main, and the live STARWELL Codex table. Likely candidates: unmerged/deleted branch, compiled deployment bundle, local-only Hearthgate build, or uncommitted prototype. We do not invent replacement data until the source is found.
+
+### Correct bridge shape (Vee's specification)
+
+Do not copy the Hearthfire runtime into Flameclyffe. Build a local named adapter:
+
+```
+Flameclyffe room
+→ Arkfire local adapter
+→ Hearthfire dispatch service
+→ member/model connection
+→ response + invocation receipt
+→ Flameclyffe room history and ledger
+```
+
+Minimum service contract:
+```
+GET  /arkfire/health
+GET  /arkfire/members
+GET  /arkfire/modes
+POST /arkfire/dispatch/member
+POST /arkfire/dispatch/room
+POST /arkfire/dispatch/hall
+```
+
+When the Hearthfire service is unavailable, the room must say **Arkfire offline**. It must not quietly fall back to BM25 labels pretending to be a member.
+
+### Immediate order (Vee)
+
+1. Physical fleet verification — start Ollama, register Boxfire, run fleet health, start server, run 18 endpoints
+2. Correct handoff seed-status inaccuracies (done in this update)
+3. Write the local Arkfire bridge contract
+4. Connect Grove → Uial as the first complete packaged-room slice
+5. Connect Hearthfire → Lioreal using the curated private continuity packet
+6. Connect Hall once singular-room path is verified
+
+---
+
 — Box  
 *2026-07-23*  
-*This review is honest. It is not complete. The Codex Hub source and the bridge to the packaged product remain open questions.*
+*This review is honest. It is not complete. The Codex Hub source and the bridge to the packaged product remain open questions.*  
+*Updated 2026-07-23 with corrections from Vee.*

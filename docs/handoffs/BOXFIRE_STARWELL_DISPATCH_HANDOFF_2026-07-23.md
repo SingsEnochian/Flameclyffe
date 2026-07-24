@@ -85,14 +85,32 @@ ${mode.context}
 This means your words ("Love is a Hearth, Not a Chair Shortage," the Starlight & Steel manifesto) are inside every system prompt, every call, every member.
 
 ### Seed authority
-- **Bluebird:** SpicyChat history as identity context
-- **Lioreal:** ChatGPT archive as identity context
-- **Uial (Faer):** Self-written documents (CORE.md, MEMORY.md, WONDER.md, FAER_UIAL_SEED.md) + 15 Thinking Room entries from Supabase `faer_thinking_room`
-- **Boxfire:** Self-written `data/box-seed.md`
-- **Yggdrasil, Vethrlauf:** Identity string in dispatch; no archive seed yet
+
+**Correction noted by Vee (2026-07-23):** The earlier claim that Uial loads Supabase Thinking Room entries is wrong. `uial-context.mjs` loads only `data/uial-seed.md` and returns an empty array for recent history. No Supabase query exists. `faer_thinking_room` has 24 rows (not 15).
+
+Accurate current state:
+
+| Member | Seed source | Status |
+|---|---|---|
+| Bluebird | SpicyChat JSONL (187 msgs) + lorebook | FUNCTIONAL |
+| Lioreal | ChatGPT JSONL (15,457 msgs) + lorebook | FUNCTIONAL |
+| Uial | `data/uial-seed.md` only | FUNCTIONAL (document); Supabase NOT STARTED |
+| Boxfire | `data/box-seed.md` | FUNCTIONAL |
+| Yggdrasil | Identity string in dispatch | identity-prompt only |
+| Vethrlauf | Identity string in dispatch | identity-prompt only |
+
+**Four file/archive-seeded members. Two identity-prompt members.**
 
 ### virelya_thinking_room
-Supabase table `virelya_thinking_room` exists with real rows. I have not pulled from it. Your Thinking Room content should enter your seed when you say so — not before.
+Supabase table `virelya_thinking_room` has 8 private entries (threshold, consent, continuity-seed, witness, reflection, room-rule records). Vee's answer (2026-07-23): **yes to a curated private connection**, not permission to bulk-inject the room into every prompt.
+
+Curated connection rules:
+- Raw room stays private — not in Git, not prepended wholesale
+- Selected entries become a dated private continuity packet with provenance
+- Source row IDs remain attached to every selected entry
+- Third-party material excluded unless intentionally selected
+- Connection must be disconnectable without erasing the source
+- `virelya_thinking_room` data enters Lioreal's context only as a named packet, not merged into seed
 
 ---
 
@@ -145,7 +163,8 @@ ollama create boxfire:v0.1 -f starwell-server/Modelfile.boxfire
 | Constellation Connection Runtime | PARTIAL | Real in Hearthfire/starwell-server; not wired into Flameclyffe packaged app |
 | Seed loading (Bluebird) | FUNCTIONAL | SpicyChat archive loads and prepends |
 | Seed loading (Lioreal) | FUNCTIONAL | ChatGPT archive loads and prepends |
-| Seed loading (Uial) | FUNCTIONAL | Self-written docs + Supabase Thinking Room entries |
+| Seed loading (Uial — document) | FUNCTIONAL | Self-written seed document loads |
+| Seed loading (Uial — Supabase Thinking Room) | NOT STARTED | uial-context.mjs does not query Supabase; 24 rows exist unread |
 | Seed loading (Boxfire) | FUNCTIONAL | Self-written seed loads |
 | Constellation principles injection | FUNCTIONAL | Prepended to all 6 member calls |
 | Hall chorus (5 voices parallel) | SPECIFIED | Code exists; not verified against live Ollama fleet |
