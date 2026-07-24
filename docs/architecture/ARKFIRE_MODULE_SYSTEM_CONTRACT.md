@@ -9,38 +9,84 @@
 
 Arkfire is modular Stonewood, not a monolith.
 
-All substantial House information and capability domains are carried by independently registered modules. The module system allows the House to grow, prune, repair, replace, travel offline, and reconnect without making one failure, provider, room, ontology, or instrument the owner of the whole.
+All substantial House information and capability domains are carried by independently registered, **standalone-runnable modules**. Hearthgate and Hearthfire are hosts, connectors, and shared-room environments. They are not life-support systems required to keep a module alive.
+
+> **Every Arkfire module must be able to launch, perform its primary function, persist its own state, report health, export its records, stop, and restart without Hearthgate, Hearthfire, STARWELL, or another House module running.**
+
+If a unit cannot run by itself, it is a component, library, adapter, panel, or internal service—not a module.
 
 ## Hierarchy
 
 ```text
 Universal Horizon — sky
-├── Hearthgate: Arkfire 0.002 — packaged House and module host
-└── Hearthfire: Arkfire — Ark, continuity/dispatch system, and module host
+├── Hearthgate: Arkfire 0.002 — packaged House and optional module host
+└── Hearthfire: Arkfire — Ark, continuity/dispatch system, and optional module host
 ```
 
 Universal Horizon is not a module and cannot be installed, disabled, removed, replaced, imported, or superseded by Arkfire.
 
 A UH bridge or observation module stores connection records and observations beneath the sky. It does not internalise the sky as Arkfire-owned data.
 
+## Standalone runtime law
+
+Every module, including every unit named as a submodule, must provide:
+
+- its own documented launch command or executable entrypoint;
+- its own configuration boundary;
+- its own writable local data directory;
+- its own suitable interface: UI, API, CLI, service endpoint, or a deliberate combination;
+- its own health and status report;
+- its own logs and provenance receipts;
+- its own import and export path;
+- its own stop and restart behaviour;
+- its own tests and fixtures;
+- its own honest degraded state when a network, device, provider, or optional bridge is unavailable;
+- a documented way to run without either Arkfire host.
+
+A standalone module may use operating-system facilities, a language runtime, or an external service inherent to its purpose. It may not require another House module to perform its **primary** function.
+
+Examples:
+
+- Codex must browse, edit under its own permissions, persist, import, and export without Atlas or Arkfire.
+- Signal Well must launch, inspect local recordings, preserve receipts, and report remote-source outages without STARWELL.
+- Runa must generate/play/export its supported tone work without the full Sound Room.
+- Glyph Studio must draw, save, export, and report compiler availability without Hearthgate.
+- Constellation dispatch must expose its registry, health, and dispatch interface without the packaged rooms.
+- A room module must launch its own room surface and local history without the whole House shell.
+
+If a proposed “submodule” cannot satisfy this law, it must be reclassified as an internal component of the nearest standalone module.
+
+## Host relationship
+
+Hearthgate and Hearthfire discover and connect modules through public contracts. A host may provide navigation, shared authentication, shared consent presentation, cross-module routing, and a common visual frame, but the hosted path must call the same public interface used by the standalone path.
+
+The host must not:
+
+- contain a secret second implementation of the module;
+- own the only copy of module data;
+- be the only place configuration exists;
+- be required for module startup;
+- replace the module’s health report with a decorative badge;
+- make cross-module access mandatory for primary operation.
+
 ## Kernel boundary
 
-The shared Arkfire kernel may own only:
+The optional Arkfire host kernel may own only:
 
 - module discovery and registry;
-- lifecycle orchestration;
-- dependency resolution;
-- permissions and consent checks;
-- configuration validation;
-- health state;
+- lifecycle orchestration inside the host;
+- adapter discovery;
+- permissions and consent checks for hosted connections;
+- configuration validation for host connections;
+- hosted health aggregation;
 - connection and handoff envelopes;
-- provenance and audit receipts;
-- local export/import;
+- provenance and audit receipts for host-mediated actions;
+- local export/import orchestration;
 - migration orchestration;
 - failure isolation;
 - recovery and restoration.
 
-The kernel must not become the hidden owner of domain records. Domain data belongs to named modules and remains exportable independently.
+The kernel must not become the hidden owner of domain records. Domain data belongs to named standalone modules and remains exportable independently.
 
 ## Required first-class module families
 
@@ -48,7 +94,7 @@ The kernel must not become the hidden owner of domain records. Domain data belon
 |---|---|
 | Constellation | member registries, modes, presence, dispatch, deliberation, sign-offs, dissent, handoffs |
 | Continuity | seeds, witness packets, memory shelves, Welcome Home, The Strike, lineage |
-| Rooms | room manifests, room adapters, histories, coherence state, presentation hooks |
+| Rooms | room manifests, room surfaces, histories, coherence state, presentation hooks |
 | Models | local/cloud provider connections, model availability, invocation receipts, fallbacks |
 | Observer | first-hand witness, DEEP channels, PREMAQ, mathematics, Lattice links, model translations |
 | Codex | ontology, lore, terms, aliases, semantic edges, provenance, revision history |
@@ -63,7 +109,7 @@ The kernel must not become the hidden owner of domain records. Domain data belon
 | Steward | consent, agency controls, permissions, approvals, ingestion gates, QA and audit |
 | Themes | room skins, palettes, typography, motion and low-GPU presentation packs |
 
-A family may contain independently removable submodules. For example, Sound may contain Runa, ambience, Audacity interchange, and haptic output as separate modules.
+Every listed family must resolve into one or more standalone modules. Shared code beneath them is a library or component, not a module.
 
 ## Module manifest
 
@@ -81,13 +127,18 @@ Minimum shape:
   "owner": "Rowan",
   "maintainers": [],
   "description": "",
-  "entrypoints": {},
+  "standalone": true,
+  "standaloneEntrypoints": {},
+  "standaloneInterface": [],
+  "standaloneDataDirectory": null,
+  "standaloneHealthCheck": null,
+  "standaloneTestCommand": null,
+  "hostAdapters": [],
   "capabilities": [],
   "dataContracts": [],
   "dataOwnership": [],
   "storageLocations": [],
-  "dependencies": [],
-  "optionalDependencies": [],
+  "optionalIntegrations": [],
   "permissions": [],
   "consentRequirements": [],
   "networkRequirements": [],
@@ -99,11 +150,15 @@ Minimum shape:
   "migrationVersion": null,
   "lifecycle": {
     "install": null,
-    "enable": null,
-    "disable": null,
-    "remove": null,
+    "launchStandalone": null,
+    "enableInHost": null,
+    "pause": null,
+    "disableInHost": null,
+    "removeFromHost": null,
+    "uninstallStandalone": null,
     "restore": null
   },
+  "importProcedure": null,
   "exportProcedure": null,
   "healthChecks": [],
   "acceptanceTests": [],
@@ -112,55 +167,47 @@ Minimum shape:
 }
 ```
 
+A manifest declaring `standalone: false` is invalid for an Arkfire module.
+
 ## Lifecycle
 
-Canonical states:
+A module has two related but distinct lifecycles.
+
+Standalone lifecycle:
 
 ```text
-AVAILABLE
-INSTALLED
-ENABLED
-ACTIVE
-PAUSED
-DISABLED
-FAILED
-BLOCKED
-REMOVED
-RESTORABLE
-RETIRED
+AVAILABLE → INSTALLED → RUNNING → PAUSED → STOPPED → UNINSTALLED → RESTORABLE
 ```
 
-Lifecycle rules:
+Hosted lifecycle:
 
-1. **Install** registers executable/UI surfaces, schemas, migrations, and configuration without silently enabling sensitive behaviour.
-2. **Enable** makes the module available while still respecting consent and device gates.
-3. **Activate** begins runtime behaviour only when required consent and dependencies are valid.
-4. **Pause** stops active work while preserving session and source state.
-5. **Disable** removes runtime participation and UI actions without deleting records.
-6. **Remove** unregisters code/UI and produces a removal receipt plus export reference.
-7. **Restore** reinstalls the compatible module version and reconnects stable records through migrations.
-8. **Retire** preserves long-term read/export support without claiming current runtime compatibility.
+```text
+DISCOVERED → CONNECTED → ENABLED → ACTIVE → PAUSED → DISABLED → DISCONNECTED → RECONNECTABLE
+```
 
-## Independent removal law
+Hosting and standalone execution must not be conflated. Disconnecting a module from Hearthgate or Hearthfire does not stop or uninstall its standalone process unless Rowan explicitly requests that action.
 
-Removing or disabling one module must not:
+## Independent execution and removal law
 
-- crash the shell;
+Running, stopping, disconnecting, disabling, removing, or uninstalling one module must not:
+
+- crash either host or another module;
+- prevent that module from running standalone when merely disconnected from a host;
 - erase another module’s records;
 - delete identities, canon, continuity, provenance, dissent, or handoffs;
 - strand records without an export path;
 - cause BM25, a fallback model, or another façade to impersonate a missing Constellation member;
 - silently widen another module’s permissions;
 - change Universal Horizon’s position as the sky;
-- make a disabled module appear active.
+- make a disabled or stopped module appear active.
 
-The shell must show the actual state and offer only valid restore, configure, or dependency actions.
+The host and the standalone module must each show the actual state.
 
 ## Data sovereignty
 
 Every persisted record must identify its owning module and source provenance while remaining exportable independently of that module’s executable code.
 
-Minimum cross-module fields:
+Minimum record fields:
 
 ```text
 recordId
@@ -175,80 +222,101 @@ continuityRefs
 exportState
 ```
 
-Cross-module relationships use edge or link records. One module must not mutate another module’s authoritative store directly.
+Each module owns its own authoritative store. Cross-module relationships use edge, message, or adapter records. One module must not directly mutate another module’s authoritative store.
 
-A module may cache another module’s data only with a declared cache contract, source identity, expiry, and invalidation behaviour.
+A module may cache another module’s data only through an optional adapter with source identity, version, expiry, and invalidation behaviour.
 
-## Dependencies
+## Integration law
 
-Dependencies must be explicit and versioned.
+There are **no hard runtime dependencies between Arkfire modules**.
 
-- hard dependency: module cannot enable without it;
-- optional dependency: adds capability but absence is non-fatal;
-- bridge dependency: requires a named adapter and connection state;
-- data dependency: reads a versioned contract but does not own the source;
-- device dependency: requires hardware or OS support;
-- consent dependency: requires current explicit permission.
+Allowed relationships:
 
-Dependency loops are invalid unless a dedicated mediator contract breaks the cycle.
+- optional integration: enhances capability but absence is non-fatal;
+- bridge adapter: connects two standalone modules through a versioned public contract;
+- data import: receives an exported, versioned record without owning the source;
+- device capability: enables hardware-specific behaviour while preserving a runnable degraded state;
+- external provider: supplies remote data or inference while the module still launches and reports provider unavailability honestly;
+- consent connection: permits an action but is not required for the module to start and show its status.
+
+Shared implementation code must be packaged as a versioned library inside the module’s distributable or installed as an ordinary declared software dependency. It must not require another Arkfire module process.
+
+Dependency loops between modules are invalid.
 
 ## Configuration and secrets
 
-Configuration is module-scoped. Secrets remain outside browser-readable state and exported project bundles.
+Configuration is module-scoped and must be usable in standalone mode. Host-specific configuration is an adapter overlay, not the only configuration source.
 
-Removing a module must not expose, copy, or orphan secrets. Secret references are revoked or retained according to explicit Steward choice and provider rules.
+Secrets remain outside browser-readable state and exported project bundles. Disconnecting or uninstalling a module must not expose, copy, or orphan secrets.
 
 ## User interface
 
-The Module Room must show:
+Every module must provide a suitable standalone interface for its primary capability. A visual module requires a standalone visual surface; a headless service requires a documented API/CLI and status surface.
 
-- installed and available modules;
-- status and health;
-- version;
-- dependencies;
+The Arkfire Module Room must show:
+
+- standalone launch availability;
+- standalone and hosted status separately;
+- version and build identity;
+- optional integrations;
 - permissions and consent;
 - data location and export state;
-- enable, pause, disable, remove, and restore actions;
+- connect, enable, pause, disable, disconnect, remove-from-host, launch-standalone, stop, and restore actions where applicable;
 - known limitations;
-- last verification receipt.
+- last standalone verification receipt;
+- last hosted verification receipt.
 
-A module card is not proof that the module works. Status labels follow the Forge definition of done.
+A module card is not proof that the module works.
 
 ## Packaging and offline operation
 
-The packaged manifest must name the exact module versions included in the build.
+Every module must be distributable and testable separately from Hearthgate and Hearthfire.
 
-Offline-capable modules declare what works without network access. Remote-only modules must fail honestly and must not block local modules unless explicitly declared as hard dependencies.
+A module package must include its manifest, launch path, configuration template, schemas, migrations, tests, export/import instructions, and health check.
+
+Modules whose purpose includes remote data may require a network for fresh readings, but they must still launch offline, expose cached/local material where permitted, and report the remote source as unavailable rather than failing to start.
 
 The Mirror exports module manifests, data contracts, records, checksums where available, and restoration instructions.
 
 ## Verification
 
-A module is not FUNCTIONAL until its required user flow works with real persistence and integration.
+A module is not FUNCTIONAL until it passes its **standalone** primary user flow with real persistence.
 
-The module system itself is not VERIFIED until a second reviewer proves at least one real module can complete:
+Hosted integration is a separate criterion and cannot substitute for standalone verification.
+
+Every module must independently prove:
 
 ```text
-install → enable → use → pause → disable → remove → restore → use
+install standalone
+→ launch with both Arkfire hosts absent
+→ complete primary workflow
+→ persist locally
+→ export
+→ stop
+→ restart
+→ recover prior state
+→ import/restore
+→ report health
 ```
 
-while preserving:
+Then, separately:
 
-- source data;
-- stable IDs;
-- provenance;
-- consent state;
-- continuity links;
-- unrelated modules;
-- packaged/local consistency;
-- honest failure states.
+```text
+connect to host
+→ complete hosted workflow through the same public contract
+→ disconnect
+→ continue standalone
+→ reconnect without data loss
+```
+
+The module system is not VERIFIED until **each module**, not merely one example module, has standalone and hosted receipts from a second reviewer.
 
 ## Documentation inheritance
 
 Every module specification, handoff, README, manifest guide, and release note must inherit:
 
-> **Universal Horizon is the sky. Hearthgate: Arkfire 0.002 and Hearthfire: Arkfire operate beneath it. They do not supersede it. This capability is an independently addable and removable module.**
+> **Universal Horizon is the sky. Hearthgate: Arkfire 0.002 and Hearthfire: Arkfire operate beneath it and do not supersede it. This module runs on its own and may connect to either host through an optional, reversible adapter.**
 
 ## Seal
 
-> **The sky is not a plugin. The House is not a monolith. Modules are doors with hinges, receipts, and a way home.**
+> **The sky is not a plugin. The House is not life support. Every module is its own working instrument before it joins the orchestra.**
