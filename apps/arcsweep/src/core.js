@@ -33,18 +33,23 @@ export function buildReturnRecord(state, returnedAt = new Date().toISOString()) 
   const elapsedCr = state.session.startedAt
     ? Math.max(0, new Date(returnedAt).getTime() - new Date(state.session.startedAt).getTime())
     : 0;
+  const wakingMinutes = state.session.wakingMinutes || state.settings.crMinutes;
+  const worldMinutes = state.session.worldMinutes || state.settings.drMinutes;
   return {
     id: `return-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     returnedAt,
+    targetWorldId: state.session.targetWorldId || null,
     targetWorld: state.session.targetWorld || state.settings.drLabel,
     intention: state.session.intention || '',
     returnAnchor: state.settings.returnAnchor || 'Notch',
+    wakingMinutes,
+    worldMinutes,
     elapsedCr,
     elapsedDr: calculateDrElapsed(
       state.session.startedAt,
       returnedAt,
-      state.settings.crMinutes,
-      state.settings.drMinutes,
+      wakingMinutes,
+      worldMinutes,
     ),
   };
 }
@@ -52,6 +57,9 @@ export function buildReturnRecord(state, returnedAt = new Date().toISOString()) 
 export function validateImportedState(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('Arcsweep import must be a JSON object.');
+  }
+  if (value.worlds && !Array.isArray(value.worlds)) {
+    throw new Error('Arcsweep worlds must be an array.');
   }
   if (value.scripts && !Array.isArray(value.scripts)) {
     throw new Error('Arcsweep scripts must be an array.');
