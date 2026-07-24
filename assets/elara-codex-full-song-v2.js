@@ -8,7 +8,7 @@
 */
 
 (function () {
-  const SCORE_VERSION = '0.2.0';
+  const SCORE_VERSION = '0.3.0';
   const BASE_BPM = 123;
   const BEAT_SECONDS = 60 / BASE_BPM;
   const PASS_SECONDS = 576;
@@ -32,13 +32,13 @@
   });
 
   const ROLE_GAIN = Object.freeze({
-    ground: 0.034,
-    path: 0.032,
-    impulse: 0.031,
-    relation: 0.030,
-    weave: 0.028,
-    crown: 0.024,
-    unregistered: 0.029
+    ground: 0.102,
+    path: 0.096,
+    impulse: 0.093,
+    relation: 0.090,
+    weave: 0.084,
+    crown: 0.072,
+    unregistered: 0.087
   });
 
   const RETURN_MODES = Object.freeze({
@@ -152,6 +152,12 @@
   };
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value) || 0));
+
+  // Rolls off gain above 880 Hz so high partials sit beneath the melody rather than cutting through it.
+  function freqRolloff(hz) {
+    if (hz <= 880) return 1.0;
+    return Math.pow(880 / hz, 0.65);
+  }
   const source = () => window.ElaraCodexSource || null;
   const chapters = () => source()?.chapters || [];
 
@@ -318,9 +324,9 @@
     returnLeft.gain.value = returnMode === 'both-inverted' ? Math.SQRT1_2 : 1;
     returnRight.gain.value = returnMode === 'both-inverted' ? Math.SQRT1_2 : 0;
     master.gain.value = MASTER_LEVEL;
-    limiter.threshold.value = -14;
-    limiter.knee.value = 16;
-    limiter.ratio.value = 8;
+    limiter.threshold.value = -7;
+    limiter.knee.value = 10;
+    limiter.ratio.value = 3;
     limiter.attack.value = 0.004;
     limiter.release.value = 0.18;
 
@@ -430,14 +436,18 @@
     const routeNames = routesFor(event.label);
     const routeScale = 1 / Math.max(1, Math.sqrt(routeNames.length));
     const base = (ROLE_GAIN[event.role] || ROLE_GAIN.unregistered) * event.gainScale * routeScale;
+    const cappedMix = Math.min(event.harmonicMix, 0.32);
     FIVE_LAYERS.forEach((harmonic) => {
+      const harmonicFreq = event.frequency * harmonic;
+      if (harmonicFreq > 9000) return;
+      const rolloff = freqRolloff(harmonicFreq);
       const layerGain = harmonic === 1
-        ? base
-        : base * HARMONIC_WEIGHT[harmonic] * event.harmonicMix;
+        ? base * rolloff
+        : base * HARMONIC_WEIGHT[harmonic] * cappedMix * rolloff;
       routeNames.forEach((route) => {
         scheduleLiveSine(
           graph[route] || graph.centre,
-          event.frequency * harmonic,
+          harmonicFreq,
           event.start,
           event.end,
           layerGain,
@@ -451,7 +461,7 @@
   function scheduleTwistEvent(event) {
     const floor = clamp(state.twistMix, 0, 0.08);
     if (floor <= 0) return;
-    const gain = 0.0032 * floor;
+    const gain = 0.18 * floor;
     scheduleLiveSine(state.graph.centre, 108 * event.multiplier, event.start, event.end, gain * 0.50, 1.8, 1.8);
     scheduleLiveSine(state.graph.left, 369 * event.multiplier, event.start, event.end, gain * 0.62, 1.8, 1.8);
     scheduleLiveSine(state.graph.right, 363.5 * event.multiplier, event.start, event.end, gain * 0.62, 1.8, 1.8);
@@ -479,7 +489,7 @@
     const filter = ctx.createBiquadFilter();
     const env = ctx.createGain();
     const pan = ctx.createStereoPanner();
-    const gain = 0.0030 * floor;
+    const gain = 0.15 * floor;
     src.buffer = noiseBuffer(ctx);
     filter.type = event.gate === 6 ? 'lowpass' : 'bandpass';
     filter.frequency.value = event.gate === 6 ? 520 : 1350;
@@ -713,12 +723,16 @@
       const routeNames = routesFor(event.label);
       const routeScale = 1 / Math.max(1, Math.sqrt(routeNames.length));
       const base = (ROLE_GAIN[event.role] || ROLE_GAIN.unregistered) * event.gainScale * routeScale;
+      const cappedMix = Math.min(event.harmonicMix, 0.32);
       FIVE_LAYERS.forEach((harmonic) => {
-        const layerGain = harmonic === 1 ? base : base * HARMONIC_WEIGHT[harmonic] * event.harmonicMix;
+        const harmonicFreq = event.frequency * harmonic;
+        if (harmonicFreq > 9000) return;
+        const rolloff = freqRolloff(harmonicFreq);
+        const layerGain = harmonic === 1 ? base * rolloff : base * HARMONIC_WEIGHT[harmonic] * cappedMix * rolloff;
         routeNames.forEach((route) => scheduleOfflineSine(
           ctx,
           graph[route] || graph.centre,
-          event.frequency * harmonic,
+          harmonicFreq,
           event.start,
           event.end,
           layerGain,
@@ -733,7 +747,7 @@
 
     if (event.kind === 'twist-floor') {
       const floor = clamp(twistMix, 0, 0.08);
-      const gain = 0.0032 * floor;
+      const gain = 0.18 * floor;
       scheduleOfflineSine(ctx, graph.centre, 108 * event.multiplier, event.start, event.end, gain * 0.50, pass.offset, speed, 1.8, 1.8);
       scheduleOfflineSine(ctx, graph.left, 369 * event.multiplier, event.start, event.end, gain * 0.62, pass.offset, speed, 1.8, 1.8);
       scheduleOfflineSine(ctx, graph.right, 363.5 * event.multiplier, event.start, event.end, gain * 0.62, pass.offset, speed, 1.8, 1.8);
@@ -751,7 +765,7 @@
       const filter = ctx.createBiquadFilter();
       const env = ctx.createGain();
       const pan = ctx.createStereoPanner();
-      const gain = 0.0030 * floor;
+      const gain = 0.15 * floor;
       src.buffer = whiteNoise;
       filter.type = event.gate === 6 ? 'lowpass' : 'bandpass';
       filter.frequency.value = event.gate === 6 ? 520 : 1350;
