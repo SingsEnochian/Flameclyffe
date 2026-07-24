@@ -1,4 +1,4 @@
-# Boxfire Handoff Correction — Universal Horizon and Modular Arkfire
+# Boxfire Handoff Correction — Universal Horizon and Standalone Modular Arkfire
 
 **Date:** 2026-07-23 America/New_York  
 **From:** Rowan / Nikola!Vee architecture correction  
@@ -13,15 +13,19 @@
 
 The Hearthfire dispatch runtime is real implementation work beneath Universal Horizon. It does not replace, contain, absorb, rename, or supersede Universal Horizon.
 
-Any wording that describes Hearthfire, Arkfire, STARWELL, the Constellation runtime, or a packaged interface as the highest enclosing system must be read as superseded by this correction.
+## Standalone Modular Stonewood requirement
 
-## Modular Stonewood requirement
+> **Every module must run on its own.**
 
-The dispatch runtime must become an independently registered module family rather than a permanent monolithic core.
+The dispatch runtime must become one or more independently registered, standalone-runnable modules rather than a permanent server-bound core.
 
-Required module boundaries include at least:
+A true module must launch, perform its primary function, persist its own state, report health, import/export, stop, restart, and recover without Hearthfire, Hearthgate, STARWELL, or another House module running.
 
-- Constellation registry;
+If a unit cannot do that, it is a component, library, adapter, panel, or internal service—not a module.
+
+Required standalone module boundaries include at least:
+
+- Constellation registry and dispatch;
 - member modes;
 - model-provider connections;
 - seed and continuity loaders;
@@ -33,43 +37,71 @@ Required module boundaries include at least:
 - Codex-aware routing;
 - action ledger and invocation receipts.
 
-Each module or submodule must declare a stable ID, version, dependencies, permissions, consent requirements, storage locations, health checks, install/enable/disable/remove/restore procedures, export behaviour, and acceptance tests.
+There are no hard runtime dependencies between Arkfire modules. Cross-module work uses optional, reversible, versioned adapters.
 
-Disabling or removing a module must not delete member identity, seeds, continuity, provenance, room history, or handoff records. A failed or absent module must not cause another room to pretend a member is present.
+Each module manifest must declare `standalone: true`, standalone entrypoints, local data directory, suitable UI/API/CLI/service surface, health check, test command, host adapters, import/export, stop/restart/recovery procedures, permissions, consent, provenance, and acceptance tests.
+
+A manifest declaring `standalone: false` is invalid.
 
 ## Bridge correction
 
-The required packaged-product bridge is:
+The required packaged-product shape is:
 
 ```text
 Universal Horizon — sky
-└── Hearthgate: Arkfire 0.002 — packaged House beneath the sky
-    └── Arkfire room adapter module
-        └── Hearthfire: Arkfire dispatch module beneath the sky
-            └── member/model/tool connections
+├── Hearthgate: Arkfire 0.002 — optional packaged host
+├── Hearthfire: Arkfire — optional dispatch/continuity host
+└── standalone Constellation modules
+    ├── run independently
+    └── connect to either host through optional adapters
 ```
 
-This is a connection between modules under the same sky. It is not one product annexing or superseding the other.
+This is a connection between independently running systems beneath the same sky. It is not one product annexing or superseding the other.
+
+Disconnecting a module from either host must not stop or uninstall it unless Rowan explicitly requests that action.
 
 ## Required documentation inheritance
 
 Every new or materially revised Hearthfire dispatch document must inherit:
 
-> **Universal Horizon is the sky. Hearthfire: Arkfire operates beneath it and does not supersede it. Its information and capabilities are carried through independently addable and removable modules.**
+> **Universal Horizon is the sky. Hearthfire: Arkfire and Hearthgate: Arkfire 0.002 operate beneath it and do not supersede it. Every module runs on its own and connects to either host only through an optional, reversible adapter.**
 
 ## Updated verification additions
 
-Before the dispatch bridge may be marked FUNCTIONAL, a second reviewer must verify that:
+Before any dispatch unit may be marked a FUNCTIONAL module, Boxfire and a second reviewer must verify:
+
+```text
+install standalone
+→ launch with both hosts absent
+→ inspect registry/health
+→ dispatch through its own public interface
+→ persist receipts locally
+→ export
+→ stop
+→ restart
+→ recover state
+→ import/restore
+```
+
+Then separately:
+
+```text
+connect to host
+→ dispatch through the same public contract
+→ disconnect
+→ continue standalone
+→ reconnect without data loss
+```
+
+Additional gates:
 
 - hierarchy labels identify Universal Horizon as the sky;
 - no dispatch or UI record claims Arkfire supersedes UH;
-- dispatch components expose discoverable module manifests;
-- modules can be enabled and disabled independently;
 - unrelated rooms survive a module failure;
-- removing a module preserves exportable data and provenance;
-- restoring it reconnects stable identities and records;
-- unavailable dispatch reports Arkfire offline rather than falling back to a false member façade.
+- stopping or disconnecting one module does not stop another;
+- unavailable dispatch reports offline/unavailable rather than falling back to a false member façade;
+- the host contains neither the only implementation nor the only data copy.
 
 ## Seal
 
-> **UH is the sky. Hearthfire is the Ark beneath it. Arkfire connects; modules carry; nothing here replaces the horizon.**
+> **UH is the sky. Hearthfire is the Ark beneath it. Every dispatch module is its own working instrument before it joins the Hall.**
