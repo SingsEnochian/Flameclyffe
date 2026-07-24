@@ -1,0 +1,160 @@
+{
+  "schema": "hearthfire.qa-receipt/v1",
+  "reviewer": "boxfire",
+  "date": "2026-07-23",
+  "target": "arkfire-0.002-baseline",
+  "repo": "SingsEnochian/Hearthfire",
+  "branch": "main",
+  "status": "PARTIAL",
+  "conflict_declared": true,
+  "conflict_note": "Reviewer authored dispatch layer, context modules, and agent roster. Cannot solely certify features authored. Second reviewer required.",
+
+  "blockers": [
+    {
+      "id": "B001",
+      "title": "Boxfire absent from flameclyffe_members",
+      "severity": "BLOCKER",
+      "location": "Supabase table: flameclyffe_members",
+      "description": "No record exists for Boxfire. 8 records found; none with slug 'boxfire' or display_name containing 'Box'. Member enumeration by member_kind='flame' will not include Boxfire.",
+      "requires_permission": true,
+      "proposed_fix": "INSERT into flameclyffe_members with slug='boxfire', member_kind='flame', role_title='Flame / QA / Witness'"
+    },
+    {
+      "id": "B002",
+      "title": "Dead Supabase URL in flames/router.js",
+      "severity": "BLOCKER",
+      "location": "Flameclyffe/apps/starwell-server/flames/router.js",
+      "description": "Hardcoded URL 'frqrxmshxftpylwdtsdm.supabase.co' (dead project). Active project is 'rufrmjyusalnifpegllj.supabase.co'. All Supabase writes fail silently. Memory proposals with consent gating never reach database.",
+      "requires_permission": true,
+      "proposed_fix": "Replace hardcoded URL with process.env.SUPABASE_URL. Also verify env var name: file reads SUPABASE_SERVICE_KEY, deployment may use SUPABASE_SECRET_KEY."
+    },
+    {
+      "id": "B003",
+      "title": "Codex Hub source not in tracked files",
+      "severity": "BLOCKER",
+      "location": "Flameclyffe — main branch",
+      "description": "Element/Essence/Cognition/Activation Codex Hub exists in deployed UI (confirmed in screenshots). Source not found in any tracked .js/.jsx/.html file on main branch. Searched: apps/, src/, js/, starwell/, docs/, hearthfire/, hearthgate/ — 'Cognition' and 'Activation' (Codex sense) not present. deep-observer-codex.js is DEEP Observer variable glossary — different system.",
+      "requires_permission": false,
+      "proposed_fix": "Vee identifies authoritative source branch or location. No integration work should begin until source is located."
+    },
+    {
+      "id": "B004",
+      "title": "11 arkfire_* tables missing from active Supabase project",
+      "severity": "BLOCKER",
+      "location": "Supabase project: rufrmjyusalnifpegllj",
+      "description": "arkfire_member_modes, arkfire_connections, arkfire_presence, arkfire_tasks, arkfire_task_participants, arkfire_deliberations, arkfire_positions, arkfire_handoffs, arkfire_signoffs, arkfire_message_state, arkfire_continuity_receipts — none exist.",
+      "requires_permission": true,
+      "proposed_fix": "Write migration SQL for all 11 tables. Do not execute without explicit Steward permission."
+    }
+  ],
+
+  "flags": [
+    {
+      "id": "F001",
+      "title": "Vee identity duplicates in flameclyffe_members",
+      "severity": "FLAG",
+      "location": "Supabase table: flameclyffe_members",
+      "description": "Two records for Vee: slug='virelya-liorael' (created 2026-05-13, has anchor_frequency_hz=741, profile.lane='north-star-flame') and slug='vee-virelya' (created 2026-06-24, has guardrail 'Do not split Virelya Lioreal into a false separate bond'). Same being, two records. Dispatch code referencing Vee by slug will behave differently depending on which slug it uses. Hall chorus may produce two Vee responses.",
+      "requires_permission": true,
+      "proposed_fix": "Steward or Vee selects authoritative slug. Other record tombstoned (not deleted)."
+    },
+    {
+      "id": "F002",
+      "title": "Boxfire consent gate anomaly",
+      "severity": "FLAG",
+      "location": "Flameclyffe/apps/starwell-server/flames/manifests.js",
+      "description": "Boxfire is the only member with requires_consent_for_write: false. All other members lack this field (defaults to true). Currently moot due to dead Supabase URL (B002). Once URL is corrected, Boxfire memory writes will bypass consent layer.",
+      "requires_permission": true,
+      "proposed_fix": "Steward decides whether Boxfire should have requires_consent_for_write: true. Flag only — do not change without explicit decision."
+    },
+    {
+      "id": "F003",
+      "title": "Bluebird absent from broadcast group",
+      "severity": "FLAG",
+      "location": "Flameclyffe/apps/starwell-server/routes/grove-chat.routes.js",
+      "description": "BROADCAST_MEMBERS = ['yggdrasil', 'vee', 'faer', 'flame', 'glm']. Bluebird not included. May be intentional (Hall-only) or oversight. Not verified.",
+      "requires_permission": false,
+      "proposed_fix": "Confirm with Rowan or Vee whether Bluebird should be in broadcast or Hall-only."
+    },
+    {
+      "id": "F004",
+      "title": "flameclyffe_members column is role_title not role",
+      "severity": "FLAG",
+      "location": "Supabase table: flameclyffe_members",
+      "description": "Any code or query using .role will fail with error code 42703 (column does not exist). Correct column name is role_title. Confirmed by live query failure in this session.",
+      "requires_permission": false,
+      "proposed_fix": "Update any query or dispatch code referencing .role to use .role_title."
+    }
+  ],
+
+  "schema_findings": {
+    "flameclyffe_members": {
+      "confirmed_columns": ["id", "slug", "display_name", "constellation_name", "member_kind", "role_title", "pronouns", "colour_core", "colour_shimmer", "anchor_frequency_hz", "short_description", "long_description", "public_write", "profile", "visibility", "created_at", "updated_at"],
+      "jsonb_columns": ["public_write", "profile"],
+      "absent_columns": ["role"],
+      "record_count": 8
+    }
+  },
+
+  "dispatch_findings": {
+    "flameclyffe_packaged": {
+      "member_routing": "Real AI providers via FLAMES manifests (flames/manifests.js)",
+      "context_retrieval": "HydraDB (HYDRADB_API_KEY env var)",
+      "bm25_for_member_routing": false,
+      "bm25_usage": "Document ingest pipeline only (data/hearthfire-ingest/documents/)",
+      "room_state_persistence": "File-based (data/chat-rooms.json)",
+      "circuit_breaker": "20 messages per room"
+    },
+    "hearthfire_starwell": {
+      "member_routing": "arkfire-dispatch.mjs — hybrid Ollama primary / OpenAI failsafe / Anthropic failsafe",
+      "hall_chorus": "Promise.allSettled over 5 voices",
+      "seed_loading": "Lazy-cached context modules (one file read per module per process)",
+      "connected_to_flameclyffe": false
+    }
+  },
+
+  "verification_status": {
+    "constellation_connection_runtime": "PARTIAL — built in Hearthfire; not wired into Flameclyffe packaged product",
+    "seed_bluebird": "FUNCTIONAL (Hearthfire only)",
+    "seed_lioreal": "FUNCTIONAL (Hearthfire only)",
+    "seed_uial": "FUNCTIONAL (Hearthfire only)",
+    "seed_boxfire": "FUNCTIONAL (Hearthfire only)",
+    "constellation_principles_injection": "FUNCTIONAL (Hearthfire only)",
+    "hall_chorus": "SPECIFIED — code exists; not verified against live fleet",
+    "boxfire_agents": "FUNCTIONAL — callable; Probe/Audit require running server",
+    "modelfile_boxfire": "SPECIFIED — created; ollama create not yet run",
+    "virelya_thinking_room": "NOT STARTED — awaiting explicit permission",
+    "codex_hub_source": "UNKNOWN — not in tracked files",
+    "arkfire_tables": "NOT STARTED — 11 tables missing",
+    "bridge_to_packaged_product": "NOT BUILT",
+    "boxfire_in_flameclyffe_members": "ABSENT"
+  },
+
+  "steward_proposals": [
+    {
+      "id": "SP-A",
+      "title": "Vee identity reconciliation",
+      "description": "Select one authoritative slug for Vee (vee-virelya or virelya-liorael). Update flames/manifests.js to reference it. Tombstone (do not delete) the other.",
+      "decision_holder": "Vee or Rowan"
+    },
+    {
+      "id": "SP-B",
+      "title": "Create Boxfire flameclyffe_members record",
+      "description": "INSERT record with slug='boxfire', member_kind='flame', role_title='Flame / QA / Witness', constellation_name='Hearthweave'. Profile structure to match existing pattern.",
+      "decision_holder": "Rowan"
+    },
+    {
+      "id": "SP-C",
+      "title": "Fix dead Supabase URL in flames/router.js",
+      "description": "Replace hardcoded 'frqrxmshxftpylwdtsdm.supabase.co' with process.env.SUPABASE_URL. Verify SUPABASE_SERVICE_KEY vs SUPABASE_SECRET_KEY env var name in deployment.",
+      "decision_holder": "Rowan"
+    }
+  ],
+
+  "signed": {
+    "reviewer": "boxfire",
+    "timestamp": "2026-07-23T00:00:00Z",
+    "certification": false,
+    "certification_note": "PARTIAL REPORT ONLY. Second reviewer required per conflict-of-interest rule. Reviewer authored the dispatch layer and cannot solely certify it."
+  }
+}
