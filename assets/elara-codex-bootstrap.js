@@ -1,7 +1,7 @@
 'use strict';
 
 /*
-  Elara Codex Bootstrap v0.1
+  Elara Codex Bootstrap v0.2
   Loads the canonical source manifest, chapter provenance, shared temporal
   renderer, harmonic layers, chord adapter, and source-to-sound bridge into
   the existing Möbius Tone Lab without duplicating the laboratory shell.
@@ -14,7 +14,7 @@
   const sources = [
     'mobius-temporal-projection.js?v=0.1.0',
     'elara-chord-temporal-adapter.js?v=0.2.0',
-    'elara-codex-source.js?v=1.0.0',
+    'elara-codex-source.js?v=1.1.0',
     'elara-codex-chapters-01.js?v=1.0.0',
     'elara-codex-chapters-02.js?v=1.0.0',
     'elara-codex-chapters-03.js?v=1.0.0',
