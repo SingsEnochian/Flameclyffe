@@ -1,15 +1,16 @@
 'use strict';
 
 /*
-  Elara Codex Bootstrap v0.2
+  Elara Codex Bootstrap v0.3
   Loads the canonical source manifest, chapter provenance, shared temporal
-  renderer, harmonic layers, chord adapter, and source-to-sound bridge into
-  the existing Möbius Tone Lab without duplicating the laboratory shell.
+  renderer, harmonic layers, chord adapter, source-to-sound bridge, and the
+  whole-page wrapping repair into the existing Möbius Tone Lab.
 */
 
 (function () {
   const current = document.currentScript?.src || '';
   const assetBase = current ? new URL('./', current) : new URL('../assets/', window.location.href);
+  const wrapStylesheet = 'mobius-page-wrap.css?v=0.1.0';
 
   const sources = [
     'mobius-temporal-projection.js?v=0.1.0',
@@ -40,6 +41,26 @@
   function alreadyLoaded(url) {
     const target = normalized(url);
     return [...document.scripts].some((script) => normalized(script.src) === target);
+  }
+
+  function stylesheetLoaded(url) {
+    const target = normalized(url);
+    return [...document.querySelectorAll('link[rel="stylesheet"]')]
+      .some((link) => normalized(link.href) === target);
+  }
+
+  function loadStylesheet(relative) {
+    const url = new URL(relative, assetBase).href;
+    if (stylesheetLoaded(url)) return Promise.resolve(url);
+    return new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = url;
+      link.dataset.mobiusWrapStyles = 'true';
+      link.addEventListener('load', () => resolve(url), { once: true });
+      link.addEventListener('error', () => reject(new Error(`Could not load ${relative}`)), { once: true });
+      document.head.appendChild(link);
+    });
   }
 
   function loadScript(relative) {
@@ -104,11 +125,12 @@
 
   async function boot() {
     try {
+      await loadStylesheet(wrapStylesheet);
       for (const source of sources) await loadScript(source);
       addCodexNavigation();
       updateLabIdentity();
       updateToneMap();
-      setStatus('Elara Codex connected. Source text, narrative order, temporal mathematics, and harmonic sound paths are ready. Sound still requires a tap.');
+      setStatus('Elara Codex connected. Source text, narrative order, temporal mathematics, harmonic sound paths, and whole-page wrapping are ready. Sound still requires a tap.');
       window.dispatchEvent(new CustomEvent('elara-codex:connected', {
         detail: {
           sourceSha256: window.ElaraCodexSource?.source?.textSha256 || null,
