@@ -5,6 +5,18 @@
 **Evidence type:** user-supplied interface screenshots  
 **Status:** OBSERVED UI / backend and persistence NOT YET VERIFIED
 
+## Governing hierarchy and module placement
+
+> **Universal Horizon is the sky. Hearthgate: Arkfire 0.002 sits beneath it.**
+
+The Codex Hub is a module family beneath Universal Horizon and inside the Hearthgate/Hearthfire module architecture. It is not the sky, does not contain the sky, and does not give Arkfire authority to supersede Universal Horizon.
+
+Codex data must live behind an independently registered module manifest. The Codex module must be addable, disableable, removable, replaceable, and restorable without deleting its source records, provenance, canon history, semantic links, or stable identifiers. Arkfire connects to the Codex; it does not absorb the Codex into member identity or into an irreversible shell taxonomy.
+
+This addendum inherits:
+
+`docs/decisions/2026-07-23-universal-horizon-sky-and-modular-arkfire.md`
+
 ## Correction to the current baseline
 
 The House already contains a visible **Codex Hub** and **Codex: Elemental Lore** surface. This is more than a future Wiki Creator proposal.
@@ -128,7 +140,9 @@ Lioreal --handoff state--> Activation: Linked
 
 This does not mean Lioreal “is” Light, Analytical, or Linked in every context.
 
-## Minimum Codex record contract
+## Minimum Codex module and record contract
+
+The Codex must declare a module manifest containing at least module identity, version, status, entrypoints, storage locations, data ownership, dependencies, permissions, consent requirements, migration version, export procedure, disable/remove/restore procedures, health checks, and acceptance tests.
 
 The next verified implementation should expose or derive a record similar to:
 
@@ -151,9 +165,12 @@ CodexEntry
 - createdBy
 - approvedBy
 - sourceLocation
+- moduleId
 ```
 
 Connections to tasks, rooms, members, messages, and artefacts should use separate edge records rather than mutating the Codex entry itself.
+
+Disabling or removing the Codex module must not delete Codex records. Restoring the module must reconnect the same stable entries and semantic edges.
 
 ## Boxfire verification tasks
 
@@ -172,7 +189,11 @@ Boxfire should independently determine:
 11. whether tags survive restart and offline operation;
 12. whether import/export preserves stable identifiers and relationships;
 13. whether the ontology can connect to Arkfire task envelopes without becoming an identity-binding system;
-14. whether contrast, font scaling, scrolling, focus order, dropdown styling, and mobile/iPad layouts meet accessibility requirements.
+14. whether contrast, font scaling, scrolling, focus order, dropdown styling, and mobile/iPad layouts meet accessibility requirements;
+15. whether the Codex has a discoverable, versioned module manifest;
+16. whether the module can be disabled without crashing unrelated rooms;
+17. whether remove/export/restore preserves stable IDs, provenance, and semantic edges;
+18. whether any UI or metadata incorrectly presents the Codex, Arkfire, Hearthgate, or Hearthfire as superseding Universal Horizon.
 
 ## Honest status
 
@@ -187,10 +208,16 @@ From the screenshots alone:
 - **persistent data model:** UNKNOWN
 - **graph integration:** UNKNOWN
 - **Arkfire routing integration:** NOT VERIFIED
+- **module manifest:** NOT VERIFIED
+- **disable/remove/restore behaviour:** NOT VERIFIED
 - **packaged-build presence:** NOT VERIFIED
 
 ## Required baseline correction
 
 Add to the Hearthgate: Arkfire 0.002 live/working inheritance list:
 
-> Codex Hub and Elemental Lore semantic ontology UI — observed; persistence, provenance, graph connection, packaged-build status, and accessibility remain to be verified.
+> Codex Hub and Elemental Lore semantic ontology UI — observed; persistence, provenance, graph connection, module manifest, remove/restore behaviour, packaged-build status, and accessibility remain to be verified.
+
+## Seal
+
+> **The Codex is a removable semantic module beneath the sky. It connects meaning across the House without becoming the sky or binding the inhabitants.**
