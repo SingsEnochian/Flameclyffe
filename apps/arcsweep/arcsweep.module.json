@@ -1,7 +1,7 @@
 {
   "moduleId": "arcsweep",
   "name": "Hearthgate: Arcsweep",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "delivery": "local-core",
   "hosts": ["standalone", "hearthgate"],
   "entrypoint": "index.html",
@@ -13,6 +13,17 @@
     "futureDesktopStorage": "hearthgate-data/arcsweep/"
   },
   "capabilities": [
+    "world-registry",
+    "polymorphic-world-interface",
+    "summon-cue",
+    "veil-mode",
+    "arrival-context",
+    "world-clock",
+    "world-competencies",
+    "safety-weave",
+    "continuity-recall",
+    "consent-shaped-companion",
+    "per-world-applet-deck",
     "script-editor",
     "waking-thread",
     "time-ratio-calculator",
@@ -23,22 +34,32 @@
     "json-import-export"
   ],
   "languageContract": {
-    "preferred": ["Waking Thread", "Continuity Log", "arc", "return"],
+    "preferred": ["Waking Thread", "Continuity Log", "arc", "return", "World Registry", "Safety Weave"],
     "forbidden": ["clone"],
     "noDisclaimers": true,
     "rule": "Disclaimers are never needed.",
     "implementation": "State any actual limitation, uncertainty, boundary, or required condition directly where it applies. Do not add generic warning prefaces, defensive throat-clearing, or padded safety language."
   },
-  "epistemicContract": {
-    "timeRatiosAreCalculations": true,
-    "continuityRequiresEnteredOrImportedData": true,
-    "softwareDoesNotClaimPhysicalManifestation": true,
-    "sourceConcept": "Community LIFA app traditions",
-    "adaptation": "Hearthgate local continuity instrument"
+  "provenanceContract": {
+    "timeRatioSource": "user-authored world configuration",
+    "continuitySources": ["self-entered", "trusted person", "calendar", "imported note", "other"],
+    "sourceConcepts": [
+      "Community LIFA app traditions",
+      "Extremely unusual and helpful things to script community post"
+    ],
+    "adaptation": "Hearthgate local continuity and world-interface instrument"
   },
   "consentContract": {
     "returnAlwaysAvailable": true,
     "anchors": ["Feather", "Wrap", "Notch", "Seldrin clear"],
-    "noAutomaticExternalReads": true
+    "noAutomaticExternalReads": true,
+    "companionAgency": "Companions may speak honestly, refuse, negotiate, rest, change, and leave. Loyalty is relational, not compulsory."
+  },
+  "interfaceContract": {
+    "engine": "one local Arcsweep world model",
+    "surfaces": ["portal", "journal", "mirror", "pearl", "watch", "moving-picture", "candle", "familiar", "custom"],
+    "perWorldConfiguration": true,
+    "summonIsIntentional": true,
+    "veilModeIsPerWorld": true
   }
 }
