@@ -21,7 +21,9 @@
     'elara-codex-chapters-04.js?v=1.0.0',
     'elara-codex-chapters-05.js?v=1.0.0',
     'elara-codex-chapters-06.js?v=1.0.0',
-    'elara-codex-bridge.js?v=0.1.0'
+    'elara-codex-curation.js?v=0.1.0',
+    'elara-codex-bridge.js?v=0.1.0',
+    'elara-codex-reading-mode.js?v=0.1.0'
   ];
 
   function normalized(url) {
