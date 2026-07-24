@@ -1,0 +1,50 @@
+name: Arcsweep Build
+
+on:
+  pull_request:
+    paths:
+      - 'apps/arcsweep/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/arcsweep-build.yml'
+  push:
+    branches:
+      - 'feature/arcsweep-local-0.1'
+    paths:
+      - 'apps/arcsweep/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/arcsweep-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Arcsweep tests
+        run: npm run arcsweep:test
+
+      - name: Build Arcsweep
+        run: npm run arcsweep:build
+
+      - name: Upload standalone build
+        uses: actions/upload-artifact@v4
+        with:
+          name: hearthgate-arcsweep
+          path: dist/arcsweep
+          if-no-files-found: error
