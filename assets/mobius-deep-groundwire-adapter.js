@@ -30,3 +30,13 @@
   window.MobiusDeepGroundwireAdapter={install,getFeed:()=>({...feed}),summary};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
+
+(function loadElaraCodexBootstrap(){
+  const here=document.currentScript?.src;
+  if(!here||document.querySelector('script[data-elara-codex-bootstrap-loader]'))return;
+  const script=document.createElement('script');
+  script.src=new URL('elara-codex-bootstrap.js?v=0.1.0',here).href;
+  script.async=false;
+  script.dataset.elaraCodexBootstrapLoader='true';
+  document.head.appendChild(script);
+})();
