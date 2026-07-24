@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Elara Codex · Source Instrument and Full Song</title>
-<meta name="description" content="Canonical Elara Codex text connected to narrative glyph mathematics, the complete double-spiral song, and the STARWELL Möbius Tone Lab.">
+<title>The Elara Codex · Source Instrument</title>
+<meta name="description" content="Canonical Elara Codex text connected to narrative glyph mathematics and the STARWELL Möbius Tone Lab.">
 <style>
 :root{--void:#030407;--night:#08111c;--deep:#0d231f;--stone:#e8eee8;--soft:rgba(232,238,232,.82);--dim:rgba(232,238,232,.62);--gold:#e6c87a;--gold2:#ffe9aa;--green:#83d8b2;--line:rgba(230,200,122,.28);--rose:#e4aaa5}
 *{box-sizing:border-box}
@@ -22,7 +22,7 @@ main{width:min(1500px,96vw);margin:0 auto;padding:clamp(1rem,3vw,2rem) 0 4rem}
 .hero{padding:clamp(1.2rem,4vw,3rem);border:1px solid var(--line);border-radius:32px;background:rgba(4,8,12,.62);box-shadow:0 26px 80px rgba(0,0,0,.45)}
 .eyebrow{margin:0 0 .7rem;color:var(--gold2);letter-spacing:.16em;text-transform:uppercase;font-size:.72rem;font-weight:900}
 h1{margin:0;font:clamp(2.4rem,6vw,5.8rem)/.96 Georgia,"Times New Roman",serif;color:var(--gold)}
-.subtitle{max-width:980px;color:var(--soft);font:clamp(1.05rem,2vw,1.35rem)/1.35 Georgia,"Times New Roman",serif}
+.subtitle{max-width:900px;color:var(--soft);font:clamp(1.05rem,2vw,1.35rem)/1.35 Georgia,"Times New Roman",serif}
 .controls{display:flex;gap:.55rem;flex-wrap:wrap;margin:.8rem 0}
 .status{padding:.8rem 1rem;border:1px solid rgba(131,216,178,.24);border-radius:16px;background:rgba(131,216,178,.08);color:var(--soft)}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-items:start;gap:1rem;margin-top:1rem}
@@ -44,7 +44,7 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
 .codex-source-text-card{grid-column:span 8}
 .codex-source-math-card{grid-column:span 4}
 .observation-card,.saved-notes-card{grid-column:span 3}
-[data-elara-codex-card],[data-elara-full-song-card]{grid-column:span 6}
+[data-elara-codex-card]{grid-column:span 6}
 [data-elara-codex-card] .tone-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 [data-elara-codex-card] .tone-list .inline{align-items:flex-start;flex-wrap:wrap}
 .codex-source-frame{min-height:46rem}
@@ -52,22 +52,21 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
 @media(max-width:1100px){
   .grid{grid-template-columns:repeat(6,minmax(0,1fr))}
   .card,[data-temporal-projection-card],.playback-boundary-card,.codex-source-card,.live-state-card,.observation-card,.saved-notes-card{grid-column:span 3}
-  .codex-source-text-card,.codex-source-math-card,[data-elara-codex-card],[data-elara-full-song-card]{grid-column:span 6}
+  .codex-source-text-card,.codex-source-math-card,[data-elara-codex-card]{grid-column:span 6}
 }
 @media(max-width:760px){
   .top{position:relative;align-items:flex-start;flex-direction:column}
   .nav,.btn,button{width:100%}
   .grid{grid-template-columns:1fr}
-  .card,[data-temporal-projection-card],.playback-boundary-card,.codex-source-card,.live-state-card,.codex-source-text-card,.codex-source-math-card,.observation-card,.saved-notes-card,[data-elara-codex-card],[data-elara-full-song-card]{grid-column:1}
+  .card,[data-temporal-projection-card],.playback-boundary-card,.codex-source-card,.live-state-card,.codex-source-text-card,.codex-source-math-card,.observation-card,.saved-notes-card,[data-elara-codex-card]{grid-column:1}
   [data-elara-codex-card] .tone-list{grid-template-columns:1fr}
   .codex-source-frame{min-height:32rem}
 }
 </style>
-<link rel="stylesheet" href="../assets/mobius-page-wrap.css?v=0.1.0">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><strong>STARWELL · Elara</strong><span>Canonical text · narrative glyph · complete song</span></div>
+  <div class="brand"><strong>STARWELL · Elara</strong><span>Canonical text · narrative glyph · temporal sound</span></div>
   <nav class="nav" aria-label="Primary">
     <a class="btn" href="./">STARWELL</a>
     <a class="btn" href="./mobius-audio-bus.html">Tone Lab</a>
@@ -78,27 +77,27 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
   <section class="hero">
     <p class="eyebrow">Source first · Mathematics visible · Sound by consent</p>
     <h1>The Elara Codex</h1>
-    <p class="subtitle">The original text is the source instrument. Open a chapter to inspect its narrative mathematics, or play the complete double-spiral song: the full original 2025 Codex followed by the full 2026 return, with five pure harmonic layers and the Twist kept beneath the notes.</p>
+    <p class="subtitle">The original text is the source instrument. Each opened chapter exposes its narrative tone order, its canonical frequencies, the active temporal projection, and the exact harmonic layers sent to the Möbius engine.</p>
     <div class="controls">
       <button class="primary" data-action="wake" type="button">Wake Sound Engine</button>
       <button class="feather" data-action="feather" type="button">Feather Stop</button>
     </div>
-    <p class="status" id="mobius-status" role="status" aria-live="polite">Loaded. Opening a chapter changes context only. Song rendering and sound require a tap.</p>
+    <p class="status" id="mobius-status" role="status" aria-live="polite">Loaded. Opening a chapter changes context only. Sound requires a tap.</p>
   </section>
 
   <section class="grid" aria-label="Elara Codex source instrument">
     <article class="card playback-boundary-card">
       <h2>Playback boundary</h2>
       <div class="stack">
-        <label>Master level<input id="master-level" type="range" min="0.01" max="0.32" step="0.01" value="0.15"></label>
+        <label>Master level<input id="master-level" type="range" min="0.01" max="0.32" step="0.01" value="0.10"></label>
         <label>Chapter duration, seconds<input id="duration" type="range" min="0.5" max="18" step="0.5" value="5"></label>
         <label class="inline"><input id="loop-mode" type="checkbox"> Hold opened chapter until Feather Stop</label>
-        <label>Loop fade-in, seconds<input id="loop-ramp" type="range" min="0" max="8" step="0.01" value="3.69"></label>
+        <label>Loop fade-in, seconds<input id="loop-ramp" type="range" min="0" max="8" step="0.25" value="0.75"></label>
         <label class="inline"><input id="phase-inverted" type="checkbox" checked> Phase-invert return bus</label>
         <label class="inline"><input id="mono-safe" type="checkbox"> Mono safety</label>
-        <label>Return side<select id="return-side"><option value="right">Right ear return</option><option value="left" selected>Left ear return</option><option value="both">Both ears return</option></select></label>
+        <label>Return side<select id="return-side"><option value="right" selected>Right ear return</option><option value="left">Left ear return</option><option value="both">Both ears return</option></select></label>
       </div>
-      <p class="tiny">The full song has its own left-return and both-ear-return masters. Temporal pitch changes affect tonal carriers; noise remains noise and 3-6-9 modulation rates remain rhythmic operators.</p>
+      <p class="tiny">Temporal projection and harmonic controls apply to every tonal carrier. Noise remains noise; modulation rates remain rhythmic operators.</p>
     </article>
 
     <section data-elara-codex-reader></section>
@@ -106,7 +105,7 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
     <article class="card observation-card"><h2>Observation log</h2><label>Claim label<select id="claim-label"><option value="source-reading">Source reading</option><option value="subjective-experiment" selected>Subjective experiment</option><option value="mathematical-projection">Mathematical projection</option><option value="implementation-task">Implementation task</option></select></label><label>Notes<textarea id="note-body" placeholder="What did the text say? What was rendered? What did you notice?"></textarea></label><div class="controls"><button data-action="save-note" type="button">Save local note</button><button data-action="clear-notes" type="button">Clear notes</button></div></article>
     <article class="card saved-notes-card"><h2>Saved notes</h2><div id="note-list"></div></article>
   </section>
-  <p class="footer">The source remains itself. The song declares every transformation.</p>
+  <p class="footer">The source remains itself. The renderer declares every transformation.</p>
 </main>
 <script src="../assets/mobius-audio-bus.js?v=0.4.0"></script>
 <script src="../assets/mobius-layered-spec-adapter.js?v=0.4.0"></script>
@@ -121,6 +120,6 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
 <script src="../assets/elara-codex-curation.js?v=0.1.0"></script>
 <script src="../assets/elara-codex-bridge.js?v=0.1.0"></script>
 <script src="../assets/elara-codex-reading-mode.js?v=0.1.0"></script>
-<script src="../assets/elara-codex-full-song.js?v=0.1.0"></script>
+<script src="../assets/elara-codex-full-song-v2.js?v=0.2.0"></script>
 </body>
 </html>
