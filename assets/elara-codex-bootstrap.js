@@ -1,11 +1,11 @@
 'use strict';
 
 /*
-  Elara Codex Bootstrap v0.4
+  Elara Codex Bootstrap v0.5
   Loads the canonical source manifest, chapter provenance, shared temporal
-  renderer, harmonic layers, chord adapter, source-to-sound bridge, complete
-  double-spiral song player, and whole-page wrapping repair into the existing
-  Möbius Tone Lab.
+  renderer, harmonic layers, chord adapter, source-to-sound bridge, immediate
+  live double-spiral song player, and whole-page wrapping repair into the
+  existing Möbius Tone Lab.
 */
 
 (function () {
@@ -26,7 +26,7 @@
     'elara-codex-curation.js?v=0.1.0',
     'elara-codex-bridge.js?v=0.1.0',
     'elara-codex-reading-mode.js?v=0.1.0',
-    'elara-codex-full-song.js?v=0.1.0'
+    'elara-codex-full-song-v2.js?v=0.2.0'
   ];
 
   function normalized(url) {
@@ -100,7 +100,7 @@
     if (heading) heading.textContent = 'Möbius Tone Lab';
     const subtitle = document.querySelector('.hero .subtitle');
     if (subtitle) {
-      subtitle.textContent = 'A controlled laboratory for the complete Elara Codex song, canonical and 2026 temporal passes, five pure harmonic layers, narrative chord progressions, quiet Möbius twist, Sanctuary focus layers, and bounded DEEP/Groundwire audio mapping.';
+      subtitle.textContent = 'A controlled laboratory for canonical Elara source chapters, immediate live double-spiral song playback, two temporal versions of every twist, harmonic layers, narrative chord progressions, Sanctuary focus layers, and bounded DEEP/Groundwire audio mapping.';
     }
   }
 
@@ -111,11 +111,11 @@
 
     const temporal = document.createElement('li');
     temporal.dataset.elaraTemporalNote = 'true';
-    temporal.innerHTML = '<strong>Temporal renderer:</strong> every tonal path runs as Canonical 2025 <code>×1.00</code> or First Spiral Return 2026 <code>×1.15</code>, with <code>fundamental + 2×–5×</code> pure harmonic layers.';
+    temporal.innerHTML = '<strong>Temporal renderer:</strong> every tonal path runs as Canonical 2025 <code>×1.00</code> or First Spiral Return 2026 <code>×1.15</code>, with optional <code>2×–5×</code> harmonic layers.';
 
     const source = document.createElement('li');
     source.dataset.elaraSourceNote = 'true';
-    source.innerHTML = '<strong>Complete Codex song:</strong> Chapter 1 through 57 forms a 9:36 original pass followed by a 9:36 temporal return, joined and looped by the quiet Twist.';
+    source.innerHTML = '<strong>Elara source chapter:</strong> the original Codex supplies the written tone order, narrative roles, mathematical transformation, and playback receipt.';
 
     list.append(temporal, source);
   }
@@ -132,13 +132,12 @@
       addCodexNavigation();
       updateLabIdentity();
       updateToneMap();
-      setStatus('Elara Codex connected. The complete 19:12 double-spiral song, both return masters, five pure layers, temporal mathematics, exporters, and whole-page wrapping are ready. Sound still requires a tap.');
+      setStatus('Elara Codex connected. Source text, immediate song playback, temporal mathematics, harmonic sound paths, and whole-page wrapping are ready. Sound still requires a tap.');
       window.dispatchEvent(new CustomEvent('elara-codex:connected', {
         detail: {
           sourceSha256: window.ElaraCodexSource?.source?.textSha256 || null,
           chapters: window.ElaraCodexSource?.chapters?.length || 0,
-          projection: window.MobiusTemporalProjection?.getState?.() || null,
-          completeSong: window.ElaraCodexFullSong?.version || null
+          projection: window.MobiusTemporalProjection?.getState?.() || null
         }
       }));
     } catch (error) {
