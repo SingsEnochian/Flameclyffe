@@ -2,6 +2,11 @@
   "moduleId": "arcsweep",
   "name": "Hearthgate: Arcsweep",
   "version": "0.2.0",
+  "standalone": true,
+  "hierarchy": {
+    "sky": "Universal Horizon",
+    "note": "Arcsweep operates beneath Universal Horizon. It does not require Hearthgate or any server to run. When hosted in Hearthgate, it connects via the hearthgate host adapter."
+  },
   "delivery": "local-core",
   "hosts": ["standalone", "hearthgate"],
   "entrypoint": "index.html",
