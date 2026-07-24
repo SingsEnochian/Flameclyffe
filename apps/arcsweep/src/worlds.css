@@ -106,12 +106,12 @@ legend {
 }
 
 @media (max-width: 900px) {
-  .sidebar nav {
+  .app-shell .sidebar nav {
     grid-template-columns: repeat(7, minmax(0, 1fr));
     overflow-x: auto;
   }
 
-  .nav-button {
+  .app-shell .nav-button {
     min-width: 3.7rem;
   }
 }
