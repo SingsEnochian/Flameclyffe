@@ -1,4 +1,5 @@
 import { validateImportedState } from './core.js';
+import { createWorld, normaliseWorld } from './worlds.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 
@@ -8,8 +9,9 @@ function uid(prefix = 'item') {
 
 export function createDefaultState() {
   const now = new Date().toISOString();
+  const world = createWorld(uid('world'), now);
   return {
-    version: '0.1.0',
+    version: '0.2.0',
     settings: {
       crLabel: 'Waking World',
       drLabel: 'Desired Reality',
@@ -18,17 +20,22 @@ export function createDefaultState() {
       returnAnchor: 'Notch',
       reduceMotion: false,
     },
+    worlds: [world],
+    activeWorldId: world.id,
     session: {
       active: false,
       startedAt: null,
+      targetWorldId: null,
       targetWorld: '',
       intention: '',
+      wakingMinutes: null,
+      worldMinutes: null,
     },
     scripts: [
       {
         id: uid('script'),
         name: 'First DR Script',
-        world: 'Unassigned',
+        world: world.name,
         status: 'Draft I',
         content: 'Identity:\nEmbodiment:\nWorld:\nRelationships:\nArrival:\nReturn:',
         updatedAt: now,
@@ -50,11 +57,38 @@ export function createDefaultState() {
 export function normaliseState(value) {
   const imported = validateImportedState(value);
   const defaults = createDefaultState();
+  const fallbackWorldName = imported.session?.targetWorld
+    || imported.scripts?.[0]?.world
+    || imported.settings?.drLabel
+    || defaults.worlds[0].name;
+
+  const worlds = Array.isArray(imported.worlds) && imported.worlds.length
+    ? imported.worlds.map((world, index) => normaliseWorld(
+      world,
+      world?.id || uid(`world-${index + 1}`),
+    ))
+    : [normaliseWorld({ ...defaults.worlds[0], name: fallbackWorldName }, defaults.worlds[0].id)];
+
+  const requestedActiveId = imported.activeWorldId;
+  const activeWorldId = worlds.some((world) => world.id === requestedActiveId)
+    ? requestedActiveId
+    : worlds[0].id;
+
+  const legacySessionWorld = worlds.find((world) => world.name === imported.session?.targetWorld);
+  const session = {
+    ...defaults.session,
+    ...(imported.session || {}),
+  };
+  if (!session.targetWorldId && legacySessionWorld) session.targetWorldId = legacySessionWorld.id;
+
   return {
     ...defaults,
     ...imported,
+    version: '0.2.0',
     settings: { ...defaults.settings, ...(imported.settings || {}) },
-    session: { ...defaults.session, ...(imported.session || {}) },
+    worlds,
+    activeWorldId,
+    session,
     appearance: { ...defaults.appearance, ...(imported.appearance || {}) },
     scripts: Array.isArray(imported.scripts) ? imported.scripts : defaults.scripts,
     continuity: Array.isArray(imported.continuity) ? imported.continuity : [],
