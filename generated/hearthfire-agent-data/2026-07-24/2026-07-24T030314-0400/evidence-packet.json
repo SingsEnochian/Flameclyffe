@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "0.1.0",
+  "retrievedAt": "2026-07-24T07:04:00Z",
+  "captureMode": "approved-source web retrieval; exact exposed excerpts only",
+  "observations": [
+    {
+      "id": "noaa-swpc-planetary-kp:2026-07-24T03:00:00Z",
+      "worldId": "waking-earth",
+      "bridgeWorlds": ["observer-deep"],
+      "sourceId": "noaa-swpc-planetary-kp",
+      "sourceUri": "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+      "authority": "NOAA Space Weather Prediction Center",
+      "observedAt": "2026-07-24T03:00:00Z",
+      "retrievedAt": "2026-07-24T07:04:00Z",
+      "ageMinutes": 244,
+      "rawExcerpt": "{\"time_tag\":\"2026-07-24T03:00:00\",\"Kp\":2.67,\"a_running\":12,\"station_count\":8}",
+      "value": {"kp": 2.67, "aRunning": 12, "stationCount": 8},
+      "units": {"kp": "dimensionless index", "aRunning": "official a-index field"},
+      "qualityFlags": [],
+      "missingness": [],
+      "epistemicRegister": "direct_measurement_or_official_derived_product",
+      "verificationStatus": "captured-from-approved-source-exact-row"
+    }
+  ],
+  "unavailableApprovedSources": [
+    {"sourceId": "noaa-swpc-solar-wind-mag", "endpoint": "https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json", "status": "FAILED", "reason": "HTTP 404"},
+    {"sourceId": "noaa-swpc-solar-wind-plasma", "endpoint": "https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json", "status": "FAILED", "reason": "HTTP 404"},
+    {"sourceId": "noaa-swpc-f107", "endpoint": "https://services.swpc.noaa.gov/json/f107_cm_flux.json", "status": "REACHABLE_UNPARSED", "reason": "The retrieval layer confirmed application/json but did not expose body text."},
+    {"sourceId": "noaa-swpc-solar-radio-flux", "endpoint": "https://services.swpc.noaa.gov/json/solar-radio-flux.json", "status": "REACHABLE_UNPARSED", "reason": "The retrieval layer confirmed application/json but did not expose body text."},
+    {"sourceId": "noaa-swpc-goes-xray", "endpoint": "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json", "status": "REACHABLE_UNPARSED", "reason": "The retrieval layer confirmed application/json but did not expose body text."},
+    {"sourceId": "usgs-earthquakes-day", "endpoint": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson", "status": "REACHABLE_UNPARSED", "reason": "Only a partial indexed fragment was exposed; no complete raw GeoJSON was preserved."},
+    {"sourceId": "open-meteo-local-current", "status": "FAILED", "reason": "Retrieval-layer internal fetch error."}
+  ],
+  "worldPatches": [
+    {
+      "worldId": "waking-earth",
+      "status": "generated-needs-review",
+      "nodeRefs": ["noaa-swpc-planetary-kp:2026-07-24T03:00:00Z"],
+      "edges": [{"type": "observed_in_world", "from": "noaa-swpc-planetary-kp:2026-07-24T03:00:00Z", "to": "world:waking-earth"}]
+    },
+    {
+      "worldId": "observer-deep",
+      "status": "generated-needs-review",
+      "sourceRefs": ["noaa-swpc-planetary-kp:2026-07-24T03:00:00Z"],
+      "note": "References Waking Earth evidence without promoting it into narrative or causal certainty."
+    }
+  ],
+  "jSpace": {
+    "workspaceId": "night-watch:2026-07-24T030314-0400",
+    "activeWorlds": ["waking-earth", "observer-deep"],
+    "activeNodes": ["noaa-swpc-planetary-kp:2026-07-24T03:00:00Z"],
+    "candidateSources": ["noaa-summary-solar-wind-mag-field", "noaa-summary-solar-wind-speed", "noaa-summary-10cm-flux", "noaa-goes-xray-flares-latest", "noaa-glotec"],
+    "unresolved": ["full raw-body transport", "approved solar-wind contract replacement", "large JSON and GeoJSON parser access"]
+  }
+}
