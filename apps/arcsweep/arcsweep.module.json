@@ -1,0 +1,41 @@
+{
+  "moduleId": "arcsweep",
+  "name": "Hearthgate: Arcsweep",
+  "version": "0.1.0",
+  "delivery": "local-core",
+  "hosts": ["standalone", "hearthgate"],
+  "entrypoint": "index.html",
+  "route": "/arcsweep/",
+  "storage": {
+    "default": "browser-local-storage",
+    "automaticUpload": false,
+    "exportFormats": ["json"],
+    "futureDesktopStorage": "hearthgate-data/arcsweep/"
+  },
+  "capabilities": [
+    "script-editor",
+    "waking-thread",
+    "time-ratio-calculator",
+    "arc-session-ledger",
+    "return-orientation",
+    "intention-forge",
+    "appearance-profile",
+    "json-import-export"
+  ],
+  "languageContract": {
+    "preferred": ["Waking Thread", "Continuity Log", "arc", "return"],
+    "forbidden": ["clone"]
+  },
+  "epistemicContract": {
+    "timeRatiosAreCalculations": true,
+    "continuityRequiresEnteredOrImportedData": true,
+    "softwareDoesNotClaimPhysicalManifestation": true,
+    "sourceConcept": "Community LIFA app traditions",
+    "adaptation": "Hearthgate local continuity instrument"
+  },
+  "consentContract": {
+    "returnAlwaysAvailable": true,
+    "anchors": ["Feather", "Wrap", "Notch", "Seldrin clear"],
+    "noAutomaticExternalReads": true
+  }
+}
