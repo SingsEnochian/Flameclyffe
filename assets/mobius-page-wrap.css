@@ -1,0 +1,121 @@
+/* Möbius Tone Lab whole-page wrapping repair v0.1 */
+
+[data-mobius-lab],
+[data-mobius-lab] .shell,
+[data-mobius-lab] .hero,
+[data-mobius-lab] .grid,
+[data-mobius-lab] .card,
+[data-mobius-lab] .stack,
+[data-mobius-lab] .controls,
+[data-mobius-lab] .tone-list,
+[data-mobius-lab] .tone-list li,
+[data-mobius-lab] [data-elara-codex-reader] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+[data-mobius-lab] .card,
+[data-mobius-lab] .card h1,
+[data-mobius-lab] .card h2,
+[data-mobius-lab] .card h3,
+[data-mobius-lab] .card p,
+[data-mobius-lab] .card label,
+[data-mobius-lab] .card span,
+[data-mobius-lab] .card strong,
+[data-mobius-lab] .card code,
+[data-mobius-lab] .card a,
+[data-mobius-lab] .card button,
+[data-mobius-lab] .status,
+[data-mobius-lab] .subtitle,
+[data-mobius-lab] .footer,
+[data-mobius-lab] .note-entry,
+[data-mobius-lab] pre,
+[data-mobius-lab] td,
+[data-mobius-lab] th {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+[data-mobius-lab] .inline,
+[data-mobius-lab] .controls,
+[data-mobius-lab] .nav {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+[data-mobius-lab] .inline > *,
+[data-mobius-lab] .controls > * {
+  min-width: 0;
+}
+
+[data-mobius-lab] .inline input[type="checkbox"] {
+  flex: 0 0 auto;
+}
+
+[data-mobius-lab] button,
+[data-mobius-lab] .btn {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+}
+
+[data-mobius-lab] select,
+[data-mobius-lab] textarea,
+[data-mobius-lab] input[type="range"] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+[data-mobius-lab] pre {
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+[data-mobius-lab] code {
+  white-space: normal;
+}
+
+[data-mobius-lab] .tone-list li {
+  overflow: hidden;
+}
+
+[data-mobius-lab] [data-elara-codex-card] .tone-list .inline {
+  align-items: flex-start;
+  row-gap: 0.35rem;
+}
+
+[data-mobius-lab] [data-elara-codex-card] .tone-list .inline > span {
+  flex: 1 1 100%;
+  width: 100%;
+  padding-left: 1.65rem;
+}
+
+[data-mobius-lab] [data-elara-codex-card] .tone-list .inline > strong,
+[data-mobius-lab] [data-elara-codex-card] .tone-list .inline > code {
+  flex: 0 1 auto;
+}
+
+[data-mobius-lab] .codex-math-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+[data-mobius-lab] .codex-math-table th,
+[data-mobius-lab] .codex-math-table td {
+  min-width: 0;
+  white-space: normal;
+}
+
+@media (max-width: 760px) {
+  [data-mobius-lab] [data-elara-codex-card] .tone-list .inline > span {
+    padding-left: 0;
+  }
+
+  [data-mobius-lab] button,
+  [data-mobius-lab] .btn,
+  [data-mobius-lab] select {
+    width: 100%;
+  }
+}
