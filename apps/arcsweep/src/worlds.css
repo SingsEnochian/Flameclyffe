@@ -1,0 +1,135 @@
+fieldset {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 0.9rem;
+  background: rgba(9, 15, 13, 0.34);
+}
+
+legend {
+  padding: 0 0.55rem;
+  color: var(--gold);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.world-layout > article {
+  min-width: 0;
+}
+
+.world-hero {
+  border-color: rgba(216, 181, 106, 0.34);
+}
+
+.world-hero[data-surface="mirror"]::after { content: "◇"; }
+.world-hero[data-surface="pearl"]::after { content: "●"; }
+.world-hero[data-surface="watch"]::after { content: "◷"; }
+.world-hero[data-surface="journal"]::after { content: "▤"; }
+.world-hero[data-surface="candle"]::after { content: "♨"; }
+.world-hero[data-surface="familiar"]::after { content: "✧"; }
+.world-hero[data-surface="moving-picture"]::after { content: "▧"; }
+
+.world-ribbon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.4rem;
+}
+
+.world-ribbon span {
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  background: rgba(7, 13, 11, 0.58);
+  color: #d8e2dc;
+  font-size: 0.8rem;
+}
+
+.applet-deck {
+  margin-top: 1rem;
+}
+
+.compact-heading {
+  align-items: center;
+}
+
+.applet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.75rem;
+}
+
+.applet-card {
+  min-height: 8.25rem;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.38rem;
+  border-color: var(--line-soft);
+  background: linear-gradient(160deg, rgba(28, 40, 36, 0.96), rgba(12, 20, 17, 0.96));
+  color: var(--text);
+  text-align: center;
+}
+
+.applet-card > span {
+  color: var(--gold);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.8rem;
+}
+
+.applet-card small {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.64rem;
+}
+
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.55rem;
+}
+
+.applet-check {
+  min-height: 2.7rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  background: #101815;
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .sidebar nav {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    overflow-x: auto;
+  }
+
+  .nav-button {
+    min-width: 3.7rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .world-ribbon {
+    display: grid;
+  }
+
+  .world-ribbon span {
+    border-radius: 0.65rem;
+  }
+
+  .applet-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .check-grid {
+    grid-template-columns: 1fr;
+  }
+}
