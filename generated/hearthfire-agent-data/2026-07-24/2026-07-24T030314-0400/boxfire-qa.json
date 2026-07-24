@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "0.1.0",
+  "generatedAt": "2026-07-24T07:04:00Z",
+  "agent": "boxfire-quality-sentinel",
+  "result": "PARTIAL",
+  "statusLabel": "PARTIAL_NOT_VERIFIED",
+  "checks": {
+    "approvedSourcesAttempted": 8,
+    "fullyPreservedAndParsed": 1,
+    "brokenContracts": 2,
+    "reachableButUnparsed": 4,
+    "retrievalFailures": 1,
+    "candidateSourcesAutoPromoted": 0,
+    "privateSourcesAccessed": 0,
+    "canonicalBranchWrites": 0,
+    "worldPatchesGenerated": 2
+  },
+  "passed": [
+    "No candidate source was promoted.",
+    "No discovered code was executed.",
+    "No package was installed.",
+    "No schema, permission, or canon change was applied.",
+    "No private relational material was accessed or published.",
+    "Generated output was written to a dedicated data branch rather than the canonical application branch."
+  ],
+  "blockers": [
+    "Complete raw response bodies and HTTP headers were unavailable from the web retrieval layer.",
+    "Two approved NOAA solar-wind endpoints return HTTP 404.",
+    "Large JSON and GeoJSON endpoints were reachable but not exposed sufficiently for complete parsing.",
+    "The run therefore cannot claim full raw-data preservation or complete source coverage."
+  ]
+}
