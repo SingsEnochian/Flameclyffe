@@ -2,6 +2,12 @@ name: Arcsweep Windows Installer
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/arcsweep/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/arcsweep-windows.yml'
   push:
     branches:
       - feature/arcsweep-local-0.1
