@@ -14,13 +14,16 @@
     basis: 'Compounded temporal projection: canonical frequency × 1.15²'
   });
 
+  let announced = false;
+
   function install() {
     const projection = window.MobiusTemporalProjection;
-    if (!projection?.profiles || projection.profiles[PROFILE.id]) return Boolean(projection?.profiles?.[PROFILE.id]);
+    if (!projection?.profiles) return false;
 
-    projection.profiles[PROFILE.id] = PROFILE;
+    if (!projection.profiles[PROFILE.id]) projection.profiles[PROFILE.id] = PROFILE;
 
-    document.querySelectorAll('[data-temporal-profile]').forEach((select) => {
+    const selects = [...document.querySelectorAll('[data-temporal-profile]')];
+    selects.forEach((select) => {
       if (select.querySelector(`option[value="${PROFILE.id}"]`)) return;
       const option = document.createElement('option');
       option.value = PROFILE.id;
@@ -28,13 +31,17 @@
       select.appendChild(option);
     });
 
-    window.dispatchEvent(new CustomEvent('elara:temporal-2027-ready', {
-      detail: {
-        profile: PROFILE,
-        law: 'f_2027 = f_2025 × 1.15² = f_2025 × 1.3225'
-      }
-    }));
-    return true;
+    if (!announced) {
+      announced = true;
+      window.dispatchEvent(new CustomEvent('elara:temporal-2027-ready', {
+        detail: {
+          profile: PROFILE,
+          law: 'f_2027 = f_2025 × 1.15² = f_2025 × 1.3225'
+        }
+      }));
+    }
+
+    return selects.length > 0 && selects.every((select) => select.querySelector(`option[value="${PROFILE.id}"]`));
   }
 
   let attempts = 0;
@@ -44,7 +51,7 @@
   }, 50);
 
   window.ElaraTemporal2027 = {
-    version: '0.1.0',
+    version: '0.1.1',
     profile: PROFILE,
     install
   };
