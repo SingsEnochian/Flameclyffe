@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "commonjs",
   "main": "electron/main.js",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "start": "node launcher.js",
     "start:core": "node server.js",
