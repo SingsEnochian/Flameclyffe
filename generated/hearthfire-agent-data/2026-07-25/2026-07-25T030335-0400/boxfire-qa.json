@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-07-25T07:03:35Z",
+  "agent": "boxfire-quality-sentinel",
+  "result": "PARTIAL_NOT_VERIFIED",
+  "checks": {
+    "approved_sources_attempted": 8,
+    "successful_sources": 2,
+    "failed_sources": 3,
+    "partially_exposed_sources": 3,
+    "raw_exact_bytes_preserved": 0,
+    "parsed_source_content_preserved": 2,
+    "checksums_verified": 0,
+    "world_partitions_written": 2,
+    "j_space_packet_written": true,
+    "candidate_sources_auto_promoted": 0,
+    "private_sources_accessed": 0,
+    "discovered_code_executed": 0,
+    "packages_installed": 0,
+    "schema_changes_applied": 0,
+    "permission_changes_applied": 0,
+    "canon_changes_applied": 0,
+    "canonical_application_branch_modified": false
+  },
+  "release_blockers": [
+    "Two approved NOAA solar-wind endpoint contracts return HTTP 404.",
+    "Exact original response bytes were not available from the retrieval layer, so SHA-256 checksums could not be verified.",
+    "Three approved JSON endpoints were reachable but their current rows were not exposed for parsing.",
+    "The approved Open-Meteo request failed in the retrieval layer."
+  ],
+  "quality_flags": [
+    "BROKEN_SOURCE_CONTRACT",
+    "RAW_BODY_NOT_EXPOSED",
+    "CHECKSUM_UNAVAILABLE",
+    "TRANSIENT_RETRIEVAL_FAILURE",
+    "PARTIAL_PAYLOAD"
+  ],
+  "verification_statement": "The bundle exists on a generated-data branch and contains evidence, graph-patch candidates, J-space state, source health, and proposals. It is not a fully reproducible raw-evidence capture and must not be marked VERIFIED."
+}
