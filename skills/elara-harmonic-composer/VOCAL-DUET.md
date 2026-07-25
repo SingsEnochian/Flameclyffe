@@ -24,11 +24,27 @@ Carries:
 
 Default character:
 
+- Scottish-inflected with a refined Received Pronunciation foundation
 - clear rather than piercing
 - warm rather than glassy
+- poised and articulate without sounding emotionally remote
+- lyrical, intimate, and capable of quiet authority
 - expressive without excessive vibrato
 - capable of intimacy at low dynamics
 - never forced into a permanently high tessitura
+
+Regional and stylistic boundary:
+
+- preserve precise RP diction as the structural base
+- allow Scottish colour to emerge through vowel shape, musical cadence, softened consonants, and emotionally weighted words
+- let the Scottish inflection deepen naturally in intimate, ancestral, or defiant passages
+- allow the regional colour to soften during sustained high notes so tuning and legibility remain clean
+- maintain natural speech rhythm rather than overly clipped conservatoire diction
+- no exaggerated stage-Scottish accent
+- no broad comic burr
+- no aristocratic affectation
+- no icy operatic distance
+- no shrill, over-bright choral soprano tone
 
 Preferred comfortable range for the current work:
 
@@ -109,6 +125,7 @@ Avoid:
 - Baritone enters first, close and restrained.
 - His soft Nashville inflection should be audible as human presence before the full orchestration opens.
 - Soprano appears as a distant answering interval, not immediately as a full melody.
+- Her first entrance should establish clear RP diction with a faint Scottish colour underneath it.
 - Their first shared harmony should be an open fifth or a quiet minor third.
 - The baritone carries the tonic memory while the soprano introduces the first transformed contour.
 
@@ -117,6 +134,7 @@ Avoid:
 - The voices begin exchanging complete phrases.
 - Use flowing sixths, suspensions, and contrary motion.
 - The soprano may lead the Arc material while the baritone carries Bridge and Anchor functions.
+- Her Scottish inflection may become more audible in lyrical phrase endings and words associated with memory, crossing, or belonging.
 - Stereo placement may widen slightly, but the duet must still feel relational rather than separated.
 
 ### Movement III · The Solar Surge
@@ -125,6 +143,7 @@ Avoid:
 - The baritone may initiate propulsion rather than merely support it.
 - His rasp may become slightly more pronounced at emotional or rhythmic attacks, but must remain soft-edged.
 - The soprano may answer with ascending sequence or luminous extension.
+- Her diction remains precise, but the Scottish colour may sharpen slightly in moments of resolve or defiance.
 - Use brief unisons as declarations, then split again into independent lines.
 
 ### Movement IV · The Full Spiral Return
@@ -132,12 +151,14 @@ Avoid:
 - Both voices carry transformed versions of motifs introduced earlier.
 - Counterpoint becomes fully integrated with the five instrumental layers.
 - The emotional summit may use a brief unison or octave, but only after the duet has earned it through prior independence.
+- The soprano's peak must remain warm and human, never a glassy crown-tone substitute.
 - The final cadence should resolve through shared breath, not an endlessly sustained top note.
 
 ## Phrase Rules
 
 - Each vocal phrase must have a singable contour.
 - Text setting must respect natural stress and vowel shape.
+- Soprano phrasing should balance RP precision with Scottish musical cadence and emotional warmth.
 - Baritone phrasing should retain conversational warmth and regional ease without distorting the metric structure.
 - Final syllables should generally release within 0.75 to 1.25 beats unless a longer suspension has a clear harmonic purpose.
 - Avoid repeated hard consonant attacks at every chapter boundary.
@@ -155,6 +176,7 @@ Use open, comfortable vowels such as ah, oh, oo, eh, and humming consonants spar
 The vowel must follow register:
 
 - warmer, rounder vowels for high soprano writing
+- preserve the soprano's Scottish colour through vowel warmth rather than exaggerated consonants
 - clearer central vowels for baritone articulation
 - preserve the baritone's warm grain without forcing artificial throat noise
 - avoid bright exposed ee on high sustained notes
@@ -192,6 +214,8 @@ The instrumental layers support, answer, and transform the duet. They must leave
 
 - Keep the soprano's strongest energy below the active B5 ceiling.
 - Use de-essing and gentle high-shelf control rather than dulling the entire voice.
+- Preserve the soprano's consonant clarity without over-emphasising sibilance or upper-mid brightness.
+- Keep her close enough to feel human, not suspended in a distant cathedral wash.
 - Keep the baritone clear around the low-mid range; avoid masking with cello, horn, or synth bass.
 - Preserve the rasp as vocal texture without over-emphasising harsh upper-mid frequencies.
 - Keep the baritone close and warm rather than artificially huge or cavernous.
@@ -203,7 +227,7 @@ The instrumental layers support, answer, and transform the duet. They must leave
 
 Describe the vocal pair as:
 
-"A true duet between a warm first soprano and an intimate resonant baritone with soft natural rasp and a subtle Nashville, Tennessee inflection. The baritone is gently weathered, close-miked, tender, and conversational, with light Southern vowel colour but no exaggerated drawl, no broad country twang, no cowboy affect, and no belting. Independent melodic lines, call and response, contrary motion, thirds and sixths, occasional earned unison, restrained vibrato, no generic choir, no piercing high notes, and no endless sustained final syllables."
+"A true duet between a warm first soprano with refined Received Pronunciation and subtle natural Scottish inflection, and an intimate resonant baritone with soft natural rasp and a subtle Nashville, Tennessee inflection. The soprano is poised, lyrical, precise, emotionally warm, and never shrill, with Scottish colour emerging through vowel shape, cadence, and expressive emphasis rather than an exaggerated accent. The baritone is gently weathered, close-miked, tender, and conversational, with light Southern vowel colour but no exaggerated drawl, no broad country twang, no cowboy affect, and no belting. Independent melodic lines, call and response, contrary motion, thirds and sixths, occasional earned unison, restrained vibrato, no generic choir, no piercing high notes, and no endless sustained final syllables."
 
 Do not request imitation of a specific living singer.
 
@@ -212,7 +236,7 @@ Do not request imitation of a specific living singer.
 Before rendering the complete song, produce a 30 to 60 second duet audition containing:
 
 - one baritone-led phrase that clearly establishes the soft Nashville timbre
-- one soprano answer
+- one soprano answer that clearly establishes refined RP diction with subtle Scottish colour
 - one overlap in contrary motion
 - one brief shared consonance
 - one short release into the next instrumental phrase
