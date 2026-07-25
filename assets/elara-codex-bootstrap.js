@@ -1,13 +1,11 @@
 'use strict';
 
 /*
-  Elara Codex Bootstrap v0.5
+  Elara Codex Bootstrap v0.6
   Loads the canonical source manifest, chapter provenance, shared temporal
-  renderer, harmonic layers, chord adapter, source-to-sound bridge, immediate
-  live double-spiral song player, and whole-page wrapping repair into the
-  existing Möbius Tone Lab.
+  renderer, harmonic layers, chord adapter, source-to-sound bridge, live
+  double-spiral player, and Elara Harmonic Composer into the Möbius Tone Lab.
 */
-
 (function () {
   const current = document.currentScript?.src || '';
   const assetBase = current ? new URL('./', current) : new URL('../assets/', window.location.href);
@@ -26,7 +24,8 @@
     'elara-codex-curation.js?v=0.1.0',
     'elara-codex-bridge.js?v=0.1.0',
     'elara-codex-reading-mode.js?v=0.1.0',
-    'elara-codex-full-song-v2.js?v=0.2.0'
+    'elara-codex-full-song-v2.js?v=0.2.0',
+    'elara-composer-core.js?v=0.1.0'
   ];
 
   function normalized(url) {
@@ -93,14 +92,14 @@
   }
 
   function updateLabIdentity() {
-    document.title = 'STARWELL Möbius Tone Lab v0.8';
+    document.title = 'STARWELL Möbius Tone Lab v0.9';
     const brand = document.querySelector('.brand span');
-    if (brand) brand.textContent = 'Möbius Tone Lab v0.8';
+    if (brand) brand.textContent = 'Möbius Tone Lab v0.9';
     const heading = document.querySelector('h1#title');
     if (heading) heading.textContent = 'Möbius Tone Lab';
     const subtitle = document.querySelector('.hero .subtitle');
     if (subtitle) {
-      subtitle.textContent = 'A controlled laboratory for canonical Elara source chapters, immediate live double-spiral song playback, two temporal versions of every twist, harmonic layers, narrative chord progressions, Sanctuary focus layers, and bounded DEEP/Groundwire audio mapping.';
+      subtitle.textContent = 'A controlled laboratory for canonical Elara chapters, deterministic E-minor and C-major composition, Kelyran and English lyric layers, 2025–2027 temporal rendering, harmonic paths, and bounded DEEP/Groundwire audio mapping.';
     }
   }
 
@@ -111,11 +110,11 @@
 
     const temporal = document.createElement('li');
     temporal.dataset.elaraTemporalNote = 'true';
-    temporal.innerHTML = '<strong>Temporal renderer:</strong> every tonal path runs as Canonical 2025 <code>×1.00</code> or First Spiral Return 2026 <code>×1.15</code>, with optional <code>2×–5×</code> harmonic layers.';
+    temporal.innerHTML = '<strong>Temporal renderer:</strong> canonical identity is preserved as 2025 <code>×1.00</code>, 2026 <code>×1.15</code>, or compounded 2027 <code>×1.3225</code>. The composer may render a separate hidden temporal mirror without shifting the audible musical key.';
 
     const source = document.createElement('li');
     source.dataset.elaraSourceNote = 'true';
-    source.innerHTML = '<strong>Elara source chapter:</strong> the original Codex supplies the written tone order, narrative roles, mathematical transformation, and playback receipt.';
+    source.innerHTML = '<strong>Elara source chapter:</strong> the original Codex supplies written tone order, narrative roles, mathematical transformation, and playback provenance. Musical interpretation is declared separately.';
 
     list.append(temporal, source);
   }
@@ -132,12 +131,13 @@
       addCodexNavigation();
       updateLabIdentity();
       updateToneMap();
-      setStatus('Elara Codex connected. Source text, immediate song playback, temporal mathematics, harmonic sound paths, and whole-page wrapping are ready. Sound still requires a tap.');
+      setStatus('Elara Codex connected. Source text, live playback, composer, temporal mathematics, harmonic sound paths, and whole-page wrapping are ready. Sound still requires a tap.');
       window.dispatchEvent(new CustomEvent('elara-codex:connected', {
         detail: {
           sourceSha256: window.ElaraCodexSource?.source?.textSha256 || null,
           chapters: window.ElaraCodexSource?.chapters?.length || 0,
-          projection: window.MobiusTemporalProjection?.getState?.() || null
+          projection: window.MobiusTemporalProjection?.getState?.() || null,
+          composer: window.ElaraComposerCore?.getState?.() || null
         }
       }));
     } catch (error) {
