@@ -44,6 +44,8 @@ export function createWorld(id, now = new Date().toISOString()) {
     name: 'Unassigned World',
     kind: 'Desired Reality',
     description: '',
+    history: '',
+    rules: '',
     surface: {
       type: 'portal',
       name: 'Arcsweep',
@@ -66,6 +68,17 @@ export function createWorld(id, now = new Date().toISOString()) {
       context: '',
       memories: '',
       orientation: 'I arrive calm, oriented, and able to recognise the people, place, date, and immediate situation.',
+    },
+    identity: {
+      name: '',
+      pronouns: '',
+      age: '',
+      roles: '',
+      form: '',
+      sensorySignature: '',
+      appearance: '',
+      accessibility: '',
+      notes: '',
     },
     competencies: {
       languages: '',
@@ -92,6 +105,16 @@ export function createWorld(id, now = new Date().toISOString()) {
       role: '',
       communication: '',
       agency: 'This companion may speak honestly, refuse, negotiate, rest, change, and leave. Loyalty is relational, not compulsory.',
+      notes: '',
+    },
+    theme: {
+      background: '#0b0f0e',
+      panel: '#18221f',
+      accent: '#d8b56a',
+      secondary: '#8ebca6',
+      text: '#f0eadb',
+      backgroundImage: '',
+      lowMotion: false,
     },
     applets: createDefaultAppletLayout(),
     createdAt: now,
@@ -102,6 +125,7 @@ export function createWorld(id, now = new Date().toISOString()) {
 export function normaliseWorld(value, fallbackId, now = new Date().toISOString()) {
   const defaults = createWorld(fallbackId, now);
   const world = value && typeof value === 'object' ? value : {};
+  const legacyAppearance = world.appearance && typeof world.appearance === 'object' ? world.appearance : {};
   return {
     ...defaults,
     ...world,
@@ -109,10 +133,12 @@ export function normaliseWorld(value, fallbackId, now = new Date().toISOString()
     surface: { ...defaults.surface, ...(world.surface || {}) },
     time: { ...defaults.time, ...(world.time || {}) },
     arrival: { ...defaults.arrival, ...(world.arrival || {}) },
+    identity: { ...defaults.identity, ...legacyAppearance, ...(world.identity || {}) },
     competencies: { ...defaults.competencies, ...(world.competencies || {}) },
     safetyWeave: { ...defaults.safetyWeave, ...(world.safetyWeave || {}) },
     recall: { ...defaults.recall, ...(world.recall || {}) },
     companion: { ...defaults.companion, ...(world.companion || {}) },
+    theme: { ...defaults.theme, ...(world.theme || {}) },
     applets: mergeAppletLayout(world.applets),
   };
 }
