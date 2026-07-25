@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-07-25T07:03:35Z",
+  "review_required": true,
+  "default_action": "NO_CHANGE",
+  "choices": {
+    "A": "APPROVE FOR PRODUCTION",
+    "B": "APPROVE FOR SANDBOX TEST ONLY",
+    "C": "APPROVE AS CANDIDATE, DO NOT ENABLE",
+    "D": "DEFER",
+    "E": "DENY",
+    "F": "BLOCK SOURCE OR CAPABILITY",
+    "G": "REQUEST MORE EVIDENCE"
+  },
+  "proposals": [
+    {
+      "id": 1,
+      "title": "Replace removed NOAA solar-wind contracts with RTSW adapters",
+      "category": "changed source contract and parser adapter",
+      "exact_change": "Sandbox NOAA SWPC rtsw_mag_1m.json and rtsw_wind_1m.json as replacements for the two approved 404 endpoints. Retain official summary magnetic-field and speed files as compact health companions only.",
+      "why": "The approved mag-1-day and plasma-1-day URLs return HTTP 404. NOAA states that real-time solar-wind JSON is available and lists the current RTSW one-minute magnetic and plasma files.",
+      "evidence": [
+        "https://www.swpc.noaa.gov/products/real-time-solar-wind",
+        "https://services.swpc.noaa.gov/json/rtsw/",
+        "https://services.swpc.noaa.gov/products/summary/"
+      ],
+      "expected_benefit": "Restores timestamped Bt, Bz, speed, density, temperature, and quality-aware upstream solar-wind telemetry.",
+      "risks": "Large files, source-spacecraft switching, missing or suspect plasma data, parser and retention cost, and accidental treatment of health summaries as full history.",
+      "privacy_consent": "None for public source data.",
+      "affected_systems": ["Flameclyffe", "Hearthgate Science Centre", "Observer DEEP", "Temporal Centre"],
+      "affected_worlds": ["waking-earth", "observer-deep"],
+      "requirements": {"code_execution":true,"package_installation":false,"network_access":true,"credentials":false,"schema_change":false,"canon_change":false},
+      "boxfire_qa": "BLOCKED_PENDING_SANDBOX_AND_STEWARD_APPROVAL",
+      "confidence_axes": {"source_authority":"high","contract_failure":"high","replacement_compatibility":"medium-high","parser_readiness":"medium"},
+      "reversibility": "high",
+      "default_if_no_action": "Keep both approved sources failed and do not substitute candidates.",
+      "recommendation": "B"
+    },
+    {
+      "id": 2,
+      "title": "Enable exact raw-body transport and SHA-256 evidence receipts",
+      "category": "agent capability and workflow",
+      "exact_change": "Run the existing Node 24 harvester in a dispatchable or local worker context that exposes exact response bytes, HTTP metadata, SHA-256 checksums, bounded retention, and idempotent dated artifacts.",
+      "why": "The present retrieval layer exposed parsed content but not original bytes. The current bundle therefore cannot honestly verify raw checksums.",
+      "evidence": ["draft PR #75", "generated-data/night-watch-2026-07-25"],
+      "expected_benefit": "Reproducible evidence, parser validation, transport-level provenance, and reliable comparison between Night Watch runs.",
+      "risks": "Artifact growth, duplicated runs, location metadata precision, permissions, and retention cost.",
+      "privacy_consent": "Approximate configured location remains private. Exact location is prohibited without separate explicit approval.",
+      "affected_systems": ["GitHub Actions", "Flameclyffe", "Hearthgate Ingestion Centre", "Science Centre"],
+      "affected_worlds": ["waking-earth", "observer-deep"],
+      "requirements": {"code_execution":true,"package_installation":false,"network_access":true,"credentials":false,"schema_change":false,"canon_change":false},
+      "boxfire_qa": "PROPOSED_REQUIRES_PERMISSION_IDEMPOTENCY_AND_RETENTION_TESTS",
+      "confidence_axes": {"need":"high","feasibility":"high","connector_compatibility":"medium"},
+      "reversibility": "high",
+      "default_if_no_action": "Continue partial evidence bundles and never claim complete raw preservation or checksum verification.",
+      "recommendation": "B"
+    },
+    {
+      "id": 3,
+      "title": "Add bounded NOAA GloTEC regional adapter",
+      "category": "new ionospheric source adapter",
+      "exact_change": "Sandbox a regional GloTEC parser with payload-size limits, source timestamps, TEC units, quality and missingness masks, model-assimilation labelling, and approximate-location privacy controls.",
+      "why": "NOAA and NCEI identify GloTEC as an operational global near-real-time TEC product available from 2025 onward.",
+      "evidence": [
+        "https://www.ncei.noaa.gov/products/space-weather/ionospheric-program/total-electron-content",
+        "https://services.swpc.noaa.gov/products/glotec/"
+      ],
+      "expected_benefit": "Adds ionospheric total-electron-content context for radio propagation and cross-temporal comparisons.",
+      "risks": "Large payloads, interpolation complexity, storage growth, and confusion between assimilated model output and direct measurement.",
+      "privacy_consent": "Regional sampling must use approximate coordinates and remain private by default.",
+      "affected_systems": ["Flameclyffe", "Science Centre", "Temporal Centre", "Observer DEEP"],
+      "affected_worlds": ["waking-earth", "observer-deep"],
+      "requirements": {"code_execution":true,"package_installation":false,"network_access":true,"credentials":false,"schema_change":false,"canon_change":false},
+      "boxfire_qa": "CANDIDATE_SANDBOX_ONLY",
+      "confidence_axes": {"source_authority":"high","availability":"high","adapter_compatibility":"medium","operational_cost":"medium-low"},
+      "reversibility": "high",
+      "default_if_no_action": "Remain candidate-only and unharvested.",
+      "recommendation": "B"
+    },
+    {
+      "id": 4,
+      "title": "Add ground geomagnetic observatory source discovery bench",
+      "category": "candidate source and adapter research",
+      "exact_change": "Keep INTERMAGNET disabled while a sandbox study identifies a documented machine endpoint, station selection rules, cadence, licences, quality flags, and Northeast Florida-relevant observatories.",
+      "why": "The registry includes INTERMAGNET as candidate-only, but no approved adapter or exact machine contract exists.",
+      "evidence": ["https://intermagnet.org/"],
+      "expected_benefit": "Adds direct ground magnetic-field measurements independent of planetary Kp.",
+      "risks": "Station gaps, licensing or redistribution conditions, heterogeneous cadence, and false equivalence between local station vectors and planetary indices.",
+      "privacy_consent": "None for public observatory data.",
+      "affected_systems": ["Source Scout", "Science Centre", "Observer DEEP"],
+      "affected_worlds": ["waking-earth", "observer-deep"],
+      "requirements": {"code_execution":false,"package_installation":false,"network_access":true,"credentials":false,"schema_change":false,"canon_change":false},
+      "boxfire_qa": "MORE_EVIDENCE_REQUIRED_BEFORE_ADAPTER",
+      "confidence_axes": {"scientific_relevance":"high","machine_contract":"low","licence_clarity":"medium-low"},
+      "reversibility": "high",
+      "default_if_no_action": "Remain candidate-only with no automated retrieval.",
+      "recommendation": "G"
+    },
+    {
+      "id": 5,
+      "title": "Investigate a documented NASA DSN Now data interface",
+      "category": "spacecraft-communications telemetry candidate",
+      "exact_change": "Research whether NASA or JPL exposes a documented machine-readable DSN Now interface. Do not scrape the interactive visualization and do not enable retrieval until permission and contract are verified.",
+      "why": "NASA states that DSN Now uses real-time ground-station data updated every five seconds, but the registry correctly lacks an approved machine interface.",
+      "evidence": [
+        "https://www.nasa.gov/communicating-with-missions/dsn/",
+        "https://www.jpl.nasa.gov/deep-space-network-now/"
+      ],
+      "expected_benefit": "Potentially adds live antenna, spacecraft-link, band, uplink, downlink, and data-rate telemetry with primary-source provenance.",
+      "risks": "Undocumented endpoints, scraping restrictions, display misidentification during off-nominal signal searches, and rapid data volume.",
+      "privacy_consent": "None for public operational data.",
+      "affected_systems": ["Source Scout", "Science Centre", "Radio Observatory module"],
+      "affected_worlds": ["waking-earth", "observer-deep"],
+      "requirements": {"code_execution":false,"package_installation":false,"network_access":true,"credentials":false,"schema_change":false,"canon_change":false},
+      "boxfire_qa": "CANDIDATE_METADATA_ONLY",
+      "confidence_axes": {"source_authority":"high","real_time_status":"high","machine_interface":"unknown","automated_use_permission":"unknown"},
+      "reversibility": "high",
+      "default_if_no_action": "Remain metadata-only and do not scrape.",
+      "recommendation": "G"
+    }
+  ]
+}
