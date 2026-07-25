@@ -1,10 +1,11 @@
 'use strict';
 
 /*
-  Elara Codex Bootstrap v0.6
+  Elara Codex Bootstrap v0.7
   Loads the canonical source manifest, chapter provenance, shared temporal
   renderer, harmonic layers, chord adapter, source-to-sound bridge, live
-  double-spiral player, and Elara Harmonic Composer into the Möbius Tone Lab.
+  double-spiral player, Elara Harmonic Composer, and bounded export renderer
+  into the Möbius Tone Lab.
 */
 (function () {
   const current = document.currentScript?.src || '';
@@ -26,7 +27,8 @@
     'elara-codex-bridge.js?v=0.1.0',
     'elara-codex-reading-mode.js?v=0.1.0',
     'elara-codex-full-song-v2.js?v=0.2.0',
-    'elara-composer-core.js?v=0.1.0'
+    'elara-composer-core.js?v=0.1.0',
+    'elara-composer-export.js?v=0.2.0'
   ];
 
   function normalized(url) {
@@ -100,7 +102,7 @@
     if (heading) heading.textContent = 'Möbius Tone Lab';
     const subtitle = document.querySelector('.hero .subtitle');
     if (subtitle) {
-      subtitle.textContent = 'A controlled laboratory for canonical Elara chapters, deterministic E-minor and C-major composition, Kelyran and English lyric layers, 2025–2027 temporal rendering, harmonic paths, and bounded DEEP/Groundwire audio mapping.';
+      subtitle.textContent = 'A controlled laboratory for canonical Elara chapters, deterministic E-minor and C-major composition, Kelyran and English lyric layers, 2025–2027 temporal rendering, MIDI and bounded WAV export, harmonic paths, and DEEP/Groundwire audio mapping.';
     }
   }
 
@@ -115,7 +117,7 @@
 
     const source = document.createElement('li');
     source.dataset.elaraSourceNote = 'true';
-    source.innerHTML = '<strong>Elara source chapter:</strong> the original Codex supplies written tone order, narrative roles, mathematical transformation, and playback provenance. Musical interpretation is declared separately.';
+    source.innerHTML = '<strong>Elara source chapter:</strong> the original Codex supplies written tone order, narrative roles, mathematical transformation, and playback provenance. Musical interpretation and exports are declared separately.';
 
     list.append(temporal, source);
   }
@@ -132,13 +134,14 @@
       addCodexNavigation();
       updateLabIdentity();
       updateToneMap();
-      setStatus('Elara Codex connected. Source text, live playback, composer, temporal mathematics, harmonic sound paths, and whole-page wrapping are ready. Sound still requires a tap.');
+      setStatus('Elara Codex connected. Source text, live playback, composer, MIDI and bounded WAV export, temporal mathematics, harmonic sound paths, and whole-page wrapping are ready. Sound still requires a tap.');
       window.dispatchEvent(new CustomEvent('elara-codex:connected', {
         detail: {
           sourceSha256: window.ElaraCodexSource?.source?.textSha256 || null,
           chapters: window.ElaraCodexSource?.chapters?.length || 0,
           projection: window.MobiusTemporalProjection?.getState?.() || null,
-          composer: window.ElaraComposerCore?.getState?.() || null
+          composer: window.ElaraComposerCore?.getState?.() || null,
+          exporter: window.ElaraComposerExport?.version || null
         }
       }));
     } catch (error) {
