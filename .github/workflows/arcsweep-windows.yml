@@ -1,0 +1,89 @@
+name: Arcsweep Windows Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/arcsweep-local-0.1
+    paths:
+      - 'apps/arcsweep/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/arcsweep-windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install web dependencies
+        run: npm install
+
+      - name: Test Arcsweep
+        run: npm run arcsweep:test
+
+      - name: Build and stage renderer
+        run: |
+          npm run arcsweep:build
+          npm run arcsweep:stage:desktop
+
+      - name: Install desktop dependencies
+        run: npm install --prefix apps/arcsweep/desktop
+
+      - name: Verify desktop source
+        shell: pwsh
+        run: |
+          node --check apps/arcsweep/desktop/main.cjs
+          node --check apps/arcsweep/desktop/preload.cjs
+          node --check apps/arcsweep/desktop/store.cjs
+          if (-not (Test-Path 'apps/arcsweep/desktop/app/index.html')) { throw 'Staged renderer missing.' }
+
+      - name: Build unpacked application
+        run: npm --prefix apps/arcsweep/desktop run electron:pack:win
+
+      - name: Verify unpacked executable
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'dist/arcsweep-desktop/win-unpacked/Hearthgate Arcsweep.exe')) { throw 'Unpacked executable missing.' }
+          if (-not (Test-Path 'dist/arcsweep-desktop/win-unpacked/resources/app.asar')) { throw 'Packaged app archive missing.' }
+
+      - name: Build NSIS installer
+        run: npm --prefix apps/arcsweep/desktop run electron:build:win
+
+      - name: Create portable ZIP and checksums
+        shell: pwsh
+        run: |
+          Compress-Archive -Path 'dist/arcsweep-desktop/win-unpacked/*' -DestinationPath 'dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.0-x64.zip' -Force
+          $installer = 'dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-0.2.0-x64.exe'
+          if (-not (Test-Path $installer)) { throw 'Expected NSIS installer missing.' }
+          $files = @($installer, 'dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.0-x64.zip')
+          $lines = foreach ($file in $files) {
+            $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
+            "$hash  $(Split-Path $file -Leaf)"
+          }
+          $lines | Set-Content 'dist/arcsweep-desktop/SHA256SUMS.txt'
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hearthgate-arcsweep-windows-x64
+          path: |
+            dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-0.2.0-x64.exe
+            dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.0-x64.zip
+            dist/arcsweep-desktop/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 21
