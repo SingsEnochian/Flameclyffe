@@ -1,21 +1,39 @@
 {
-  "moduleId": "arcsweep",
-  "name": "Hearthgate: Arcsweep",
+  "schemaVersion": "arkfire.module/v1",
+  "moduleId": "arkfire.arcsweep",
+  "canonicalName": "Hearthgate: Arcsweep",
   "version": "0.2.0",
+  "status": "IMPLEMENTED_PENDING_WINDOWS_VERIFICATION",
+  "owner": "Rowan",
+  "maintainers": [],
+  "description": "A private, local-first world planning, continuity, scripting, timing, asset, and return instrument.",
   "standalone": true,
-  "hierarchy": {
-    "sky": "Universal Horizon",
-    "note": "Arcsweep operates beneath Universal Horizon. It does not require Hearthgate or any server to run. When hosted in Hearthgate, it connects via the hearthgate host adapter."
+  "standaloneEntrypoints": {
+    "webDevelopment": "npm run arcsweep:dev",
+    "webBuild": "npm run arcsweep:build",
+    "windowsInstaller": "apps/arcsweep/desktop/npm run electron:build:win"
   },
-  "delivery": "local-core",
-  "hosts": ["standalone", "hearthgate"],
-  "entrypoint": "index.html",
-  "route": "/arcsweep/",
+  "standaloneInterface": ["desktop-ui", "local-web-development-ui"],
+  "standaloneDataDirectory": "%APPDATA%/Hearthgate/Arcsweep",
+  "standaloneHealthCheck": "Settings and Recovery room",
+  "standaloneTestCommand": "npm run arcsweep:test",
+  "hostAdapters": [
+    {
+      "host": "Hearthgate: Arkfire",
+      "status": "specified-not-connected",
+      "optional": true,
+      "reversible": true
+    }
+  ],
   "storage": {
-    "default": "browser-local-storage",
+    "desktop": "atomic-json-local-store",
+    "stateFile": "state/arcsweep-state.json",
+    "backups": "backups/*.json",
+    "attachments": "attachments/*",
+    "receipts": "receipts/storage-receipts.jsonl",
+    "browserDevelopmentFallback": "localStorage",
     "automaticUpload": false,
-    "exportFormats": ["json"],
-    "futureDesktopStorage": "hearthgate-data/arcsweep/"
+    "exportFormats": ["json"]
   },
   "capabilities": [
     "world-registry",
@@ -27,32 +45,81 @@
     "world-competencies",
     "safety-weave",
     "continuity-recall",
-    "consent-shaped-companion",
+    "consent-shaped-companion-profile",
     "per-world-applet-deck",
+    "applet-order-label-glyph-customisation",
     "script-editor",
     "waking-thread",
     "time-ratio-calculator",
     "arc-session-ledger",
     "return-orientation",
     "intention-forge",
-    "appearance-profile",
-    "json-import-export"
+    "per-world-identity-and-appearance",
+    "timeline-room",
+    "relationships-room",
+    "scenarios-room",
+    "calendar-room",
+    "diary-room",
+    "playlists-room",
+    "visualisations-room",
+    "wardrobe-room",
+    "outfits-room",
+    "belongings-room",
+    "places-room",
+    "family-tree-room",
+    "photo-gallery-room",
+    "local-file-attachments",
+    "world-theme-editor",
+    "atomic-persistence",
+    "automatic-recovery-snapshots",
+    "manual-backup-and-restore",
+    "json-import-export",
+    "reduced-motion",
+    "large-text",
+    "high-contrast",
+    "windows-nsis-installer"
+  ],
+  "dataContracts": ["arcsweep.state/v0.2", "arcsweep.attachment/v1", "arcsweep.storage-receipt/v1"],
+  "dataOwnership": ["worlds", "scripts", "room-records", "waking-thread", "forge-workings", "return-history", "attachments", "themes"],
+  "storageLocations": ["%APPDATA%/Hearthgate/Arcsweep"],
+  "optionalIntegrations": ["Hearthgate: Arkfire host adapter", "local companion model adapter", "Notion import adapter", "calendar import adapter"],
+  "permissions": ["local-file-read-on-explicit-selection", "local-file-write", "open-local-attachment"],
+  "consentRequirements": ["explicit-file-selection", "explicit-import", "explicit-restore", "explicit-external-adapter-enable"],
+  "networkRequirements": [],
+  "deviceRequirements": ["Windows x64 for NSIS installer"],
+  "routes": ["/arcsweep/"],
+  "rooms": [
+    "Portal", "World Registry", "About this World", "Summon", "Veil Mode", "World Clock", "Arrival Context", "Timeline", "Scripts", "About Me", "World Competencies", "Safety Weave", "Continuity Recall", "Companion Interface", "Relationships", "Scenarios", "Calendar", "Diary", "Playlists", "Visualisations", "Appearance", "Wardrobe", "Outfits", "Belongings", "Places", "Family Tree", "Photo Gallery", "Theme", "Forge", "Waking Thread", "Settings and Recovery"
+  ],
+  "commands": ["arcsweep:dev", "arcsweep:test", "arcsweep:build", "electron:build:win"],
+  "configurationSchema": null,
+  "migrationVersion": "0.2.0",
+  "lifecycle": {
+    "install": "Run the Windows NSIS installer.",
+    "launchStandalone": "Launch Hearthgate Arcsweep from the Start Menu or desktop shortcut.",
+    "enableInHost": "Connect the optional Arkfire adapter after standalone verification.",
+    "pause": "Close the window; state is already persisted.",
+    "disableInHost": "Disconnect the optional host adapter without stopping the standalone app.",
+    "removeFromHost": "Remove only the host connection.",
+    "uninstallStandalone": "Use Windows Apps settings. Local data is preserved by default.",
+    "restore": "Reinstall, then restore an exported archive or a local recovery snapshot."
+  },
+  "importProcedure": "Settings and Recovery -> Import archive",
+  "exportProcedure": "Settings and Recovery -> Export archive",
+  "healthChecks": ["native data directory available", "atomic state save", "backup listing", "renderer loads"],
+  "acceptanceTests": [
+    "launch without Hearthgate or Hearthfire",
+    "create and edit every room type",
+    "restart and recover state",
+    "export and import archive",
+    "create and restore backup",
+    "attach and open a local file",
+    "install and uninstall on Windows x64"
   ],
   "languageContract": {
     "preferred": ["Waking Thread", "Continuity Log", "arc", "return", "World Registry", "Safety Weave"],
     "forbidden": ["clone"],
-    "noDisclaimers": true,
-    "rule": "Disclaimers are never needed.",
-    "implementation": "State any actual limitation, uncertainty, boundary, or required condition directly where it applies. Do not add generic warning prefaces, defensive throat-clearing, or padded safety language."
-  },
-  "provenanceContract": {
-    "timeRatioSource": "user-authored world configuration",
-    "continuitySources": ["self-entered", "trusted person", "calendar", "imported note", "other"],
-    "sourceConcepts": [
-      "Community LIFA app traditions",
-      "Extremely unusual and helpful things to script community post"
-    ],
-    "adaptation": "Hearthgate local continuity and world-interface instrument"
+    "noDisclaimers": true
   },
   "consentContract": {
     "returnAlwaysAvailable": true,
@@ -60,11 +127,14 @@
     "noAutomaticExternalReads": true,
     "companionAgency": "Companions may speak honestly, refuse, negotiate, rest, change, and leave. Loyalty is relational, not compulsory."
   },
-  "interfaceContract": {
-    "engine": "one local Arcsweep world model",
-    "surfaces": ["portal", "journal", "mirror", "pearl", "watch", "moving-picture", "candle", "familiar", "custom"],
-    "perWorldConfiguration": true,
-    "summonIsIntentional": true,
-    "veilModeIsPerWorld": true
-  }
+  "provenance": [
+    "Community LIFA traditions supplied source concepts.",
+    "Hearthgate: Arcsweep is an original local continuity and world-interface instrument.",
+    "Universal Horizon is the sky. This module operates beneath it and does not supersede it."
+  ],
+  "knownLimitations": [
+    "Windows installer requires CI and physical Windows verification.",
+    "Live companion inference remains an optional future adapter.",
+    "External calendar and Notion reads are not automatic."
+  ]
 }
