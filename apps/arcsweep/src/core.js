@@ -58,17 +58,22 @@ export function validateImportedState(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('Arcsweep import must be a JSON object.');
   }
-  if (value.worlds && !Array.isArray(value.worlds)) {
-    throw new Error('Arcsweep worlds must be an array.');
+  for (const key of ['worlds', 'scripts', 'continuity', 'manifestations', 'returnHistory']) {
+    if (value[key] !== undefined && !Array.isArray(value[key])) {
+      throw new Error(`Arcsweep ${key} must be an array.`);
+    }
   }
-  if (value.scripts && !Array.isArray(value.scripts)) {
-    throw new Error('Arcsweep scripts must be an array.');
+  if (value.records !== undefined && (!value.records || typeof value.records !== 'object' || Array.isArray(value.records))) {
+    throw new Error('Arcsweep room records must be an object.');
   }
-  if (value.continuity && !Array.isArray(value.continuity)) {
-    throw new Error('Arcsweep continuity must be an array.');
-  }
-  if (value.manifestations && !Array.isArray(value.manifestations)) {
-    throw new Error('Arcsweep manifestations must be an array.');
+  if (value.records) {
+    for (const [roomId, records] of Object.entries(value.records)) {
+      if (!Array.isArray(records)) throw new Error(`Arcsweep room ${roomId} must be an array.`);
+    }
   }
   return value;
+}
+
+export function isoNow() {
+  return new Date().toISOString();
 }
