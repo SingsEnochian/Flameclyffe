@@ -10,6 +10,8 @@
   "scripts": {
     "start": "node launcher.js",
     "start:core": "node server.js",
+    "start:atomic-bridge": "node atomic-bridge-server.js",
+    "test:atomic": "node --test test/atomic-chat.test.js",
     "fontforge:start": "node fontforge/server.js",
     "stage:starwell": "node scripts/stage-starwell.js",
     "electron:dev": "electron .",
