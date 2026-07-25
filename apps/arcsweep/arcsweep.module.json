@@ -2,8 +2,8 @@
   "schemaVersion": "arkfire.module/v1",
   "moduleId": "arkfire.arcsweep",
   "canonicalName": "Hearthgate: Arcsweep",
-  "version": "0.2.0",
-  "status": "IMPLEMENTED_PENDING_WINDOWS_VERIFICATION",
+  "version": "0.2.1",
+  "status": "IMPLEMENTED_PENDING_PHYSICAL_WINDOWS_VERIFICATION",
   "owner": "Rowan",
   "maintainers": [],
   "description": "A private, local-first world planning, continuity, scripting, timing, asset, and return instrument.",
@@ -15,7 +15,7 @@
   },
   "standaloneInterface": ["desktop-ui", "local-web-development-ui"],
   "standaloneDataDirectory": "%APPDATA%/Hearthgate/Arcsweep",
-  "standaloneHealthCheck": "Settings and Recovery room",
+  "standaloneHealthCheck": "Settings and Recovery room plus logs/desktop.log",
   "standaloneTestCommand": "npm run arcsweep:test",
   "hostAdapters": [
     {
@@ -31,6 +31,7 @@
     "backups": "backups/*.json",
     "attachments": "attachments/*",
     "receipts": "receipts/storage-receipts.jsonl",
+    "diagnostics": "logs/desktop.log",
     "browserDevelopmentFallback": "localStorage",
     "automaticUpload": false,
     "exportFormats": ["json"]
@@ -77,10 +78,15 @@
     "reduced-motion",
     "large-text",
     "high-contrast",
+    "display-topology-recovery",
+    "forced-visible-window-fallback",
+    "explicit-window-title",
+    "desktop-startup-diagnostics",
+    "single-instance-window-recall",
     "windows-nsis-installer"
   ],
-  "dataContracts": ["arcsweep.state/v0.2", "arcsweep.attachment/v1", "arcsweep.storage-receipt/v1"],
-  "dataOwnership": ["worlds", "scripts", "room-records", "waking-thread", "forge-workings", "return-history", "attachments", "themes"],
+  "dataContracts": ["arcsweep.state/v0.2", "arcsweep.attachment/v1", "arcsweep.storage-receipt/v1", "arcsweep.desktop-diagnostic/v1"],
+  "dataOwnership": ["worlds", "scripts", "room-records", "waking-thread", "forge-workings", "return-history", "attachments", "themes", "desktop-diagnostics"],
   "storageLocations": ["%APPDATA%/Hearthgate/Arcsweep"],
   "optionalIntegrations": ["Hearthgate: Arkfire host adapter", "local companion model adapter", "Notion import adapter", "calendar import adapter"],
   "permissions": ["local-file-read-on-explicit-selection", "local-file-write", "open-local-attachment"],
@@ -106,9 +112,21 @@
   },
   "importProcedure": "Settings and Recovery -> Import archive",
   "exportProcedure": "Settings and Recovery -> Export archive",
-  "healthChecks": ["native data directory available", "atomic state save", "backup listing", "renderer loads"],
+  "healthChecks": [
+    "native data directory available",
+    "atomic state save",
+    "backup listing",
+    "renderer loads",
+    "window intersects an active display",
+    "window title equals Hearthgate: Arcsweep",
+    "fallback show occurs when ready-to-show is absent",
+    "desktop diagnostic log records launch state"
+  ],
   "acceptanceTests": [
     "launch without Hearthgate or Hearthfire",
+    "launch after display removal or topology change",
+    "launch when renderer readiness is delayed",
+    "second launch recalls and focuses existing window",
     "create and edit every room type",
     "restart and recover state",
     "export and import archive",
@@ -133,7 +151,7 @@
     "Universal Horizon is the sky. This module operates beneath it and does not supersede it."
   ],
   "knownLimitations": [
-    "Windows installer requires CI and physical Windows verification.",
+    "The 0.2.1 visible-window repair requires physical verification on Rowan's display configuration.",
     "Live companion inference remains an optional future adapter.",
     "External calendar and Notion reads are not automatic."
   ]
