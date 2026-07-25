@@ -26,6 +26,7 @@ jobs:
     timeout-minutes: 35
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      ARCSWEEP_VERSION: '0.2.1'
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -57,6 +58,12 @@ jobs:
           node --check apps/arcsweep/desktop/preload.cjs
           node --check apps/arcsweep/desktop/store.cjs
           if (-not (Test-Path 'apps/arcsweep/desktop/app/index.html')) { throw 'Staged renderer missing.' }
+          $packageVersion = (Get-Content 'apps/arcsweep/desktop/package.json' -Raw | ConvertFrom-Json).version
+          if ($packageVersion -ne $env:ARCSWEEP_VERSION) { throw "Package version $packageVersion does not match workflow version $env:ARCSWEEP_VERSION." }
+          $main = Get-Content 'apps/arcsweep/desktop/main.cjs' -Raw
+          foreach ($required in @('forceWindowVisible', 'display-removed', 'fallback-timeout', 'page-title-updated', 'desktop.log')) {
+            if ($main -notmatch [regex]::Escape($required)) { throw "Visible-window repair marker missing: $required" }
+          }
 
       - name: Build unpacked application
         run: npm --prefix apps/arcsweep/desktop run electron:pack:win
@@ -73,10 +80,11 @@ jobs:
       - name: Create portable ZIP and checksums
         shell: pwsh
         run: |
-          Compress-Archive -Path 'dist/arcsweep-desktop/win-unpacked/*' -DestinationPath 'dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.0-x64.zip' -Force
-          $installer = 'dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-0.2.0-x64.exe'
+          $portable = "dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-$env:ARCSWEEP_VERSION-x64.zip"
+          $installer = "dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-$env:ARCSWEEP_VERSION-x64.exe"
+          Compress-Archive -Path 'dist/arcsweep-desktop/win-unpacked/*' -DestinationPath $portable -Force
           if (-not (Test-Path $installer)) { throw 'Expected NSIS installer missing.' }
-          $files = @($installer, 'dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.0-x64.zip')
+          $files = @($installer, $portable)
           $lines = foreach ($file in $files) {
             $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
             "$hash  $(Split-Path $file -Leaf)"
@@ -86,10 +94,10 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: hearthgate-arcsweep-windows-x64
+          name: hearthgate-arcsweep-windows-x64-0.2.1
           path: |
-            dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-0.2.0-x64.exe
-            dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.0-x64.zip
+            dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-0.2.1-x64.exe
+            dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.1-x64.zip
             dist/arcsweep-desktop/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 21
