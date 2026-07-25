@@ -18,10 +18,13 @@ const {
 const APP_NAME = 'Hearthgate: Arcsweep';
 const APP_VERSION = '0.2.1';
 const FALLBACK_SHOW_MS = 2500;
+const RENDERER_HEALTH_MS = 1800;
 let mainWindow = null;
 let storePaths = null;
 let saveQueue = Promise.resolve();
 let showFallback = null;
+let rendererHealthCheck = null;
+let showingFailureDocument = false;
 
 function dataRoot() {
   return path.join(app.getPath('appData'), 'Hearthgate', 'Arcsweep');
@@ -55,8 +58,8 @@ async function logDesktop(event, details = {}) {
 function fitBoundsToDisplay(display = screen.getPrimaryDisplay()) {
   const work = display.workArea;
   const margin = 36;
-  const width = Math.max(900, Math.min(1440, work.width - margin * 2));
-  const height = Math.max(650, Math.min(920, work.height - margin * 2));
+  const width = Math.min(1440, Math.max(720, work.width - margin * 2));
+  const height = Math.min(920, Math.max(520, work.height - margin * 2));
   return {
     width,
     height,
@@ -90,16 +93,78 @@ function forceWindowVisible(reason = 'show') {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.show();
   mainWindow.focus();
-  mainWindow.moveTop();
+  mainWindow.setAlwaysOnTop(true, 'normal');
+  setTimeout(() => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.setAlwaysOnTop(false);
+  }, 350);
+  if (typeof mainWindow.moveTop === 'function') mainWindow.moveTop();
   void logDesktop('window-shown', { reason, bounds: mainWindow.getBounds() });
+}
+
+function escapeFailureHtml(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function showRendererFailure(title, details) {
+  if (!mainWindow || mainWindow.isDestroyed() || showingFailureDocument) return;
+  showingFailureDocument = true;
+  const diagnosticPath = diagnosticsFile();
+  const html = `<!doctype html>
+  <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${escapeFailureHtml(APP_NAME)}</title>
+  <style>
+    :root{color-scheme:dark;font-family:Segoe UI,system-ui,sans-serif;background:#0b0f0e;color:#f0eadb}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:32px;background:radial-gradient(circle at 70% 10%,#3a3020,transparent 42rem),#0b0f0e}
+    main{width:min(760px,100%);border:1px solid #d8b56a;border-radius:18px;padding:28px;background:#18221f;box-shadow:0 28px 90px #0009}
+    h1{font-family:Georgia,serif;margin:0 0 16px;color:#f6e2ad}p{line-height:1.6}.path{padding:12px;border:1px solid #385047;border-radius:10px;background:#0e1513;overflow-wrap:anywhere;color:#b9ddcc}.detail{white-space:pre-wrap;color:#d7c7aa}.seal{margin-top:22px;color:#8ebca6;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+  </style></head><body><main>
+    <h1>${escapeFailureHtml(title)}</h1>
+    <p>Arcsweep opened its Windows shell, but the interface did not initialise. The failure is visible rather than hidden, and no world data has been discarded.</p>
+    <p class="detail">${escapeFailureHtml(details)}</p>
+    <p>Desktop diagnostics:</p><p class="path">${escapeFailureHtml(diagnosticPath)}</p>
+    <p class="seal">Hearthgate: Arcsweep ${escapeFailureHtml(APP_VERSION)}</p>
+  </main></body></html>`;
+
+  void logDesktop('renderer-failure-document', { title, details });
+  mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`)
+    .catch((error) => void logDesktop('failure-document-load-rejected', { message: error.message }))
+    .finally(() => forceWindowVisible('renderer-failure-document'));
+}
+
+function scheduleRendererHealthCheck() {
+  if (rendererHealthCheck) clearTimeout(rendererHealthCheck);
+  rendererHealthCheck = setTimeout(async () => {
+    if (!mainWindow || mainWindow.isDestroyed() || showingFailureDocument) return;
+    try {
+      const health = await mainWindow.webContents.executeJavaScript(`(() => ({
+        title: document.title,
+        readyState: document.readyState,
+        appExists: Boolean(document.querySelector('#app')),
+        appChildren: document.querySelector('#app')?.childElementCount || 0,
+        bodyTextLength: document.body?.innerText?.trim().length || 0
+      }))()`, true);
+      void logDesktop('renderer-health', health);
+      if (!health.appExists || health.appChildren === 0) {
+        showRendererFailure('Arcsweep interface did not initialise', `Document state: ${health.readyState}. App children: ${health.appChildren}.`);
+      }
+    } catch (error) {
+      void logDesktop('renderer-health-failed', { message: error.message });
+      showRendererFailure('Arcsweep interface could not be inspected', error.message);
+    }
+  }, RENDERER_HEALTH_MS);
 }
 
 function createWindow() {
   const initialBounds = fitBoundsToDisplay(screen.getPrimaryDisplay());
   mainWindow = new BrowserWindow({
     ...initialBounds,
-    minWidth: 900,
-    minHeight: 650,
+    minWidth: Math.min(900, initialBounds.width),
+    minHeight: Math.min(650, initialBounds.height),
     backgroundColor: '#0b0f0e',
     title: APP_NAME,
     autoHideMenuBar: true,
@@ -126,6 +191,7 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (showingFailureDocument && url.startsWith('data:text/html')) return;
     if (url !== mainWindow.webContents.getURL()) event.preventDefault();
   });
 
@@ -134,14 +200,28 @@ function createWindow() {
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.setTitle(APP_NAME);
   });
 
+  mainWindow.webContents.on('preload-error', (_event, preloadPath, error) => {
+    void logDesktop('preload-error', { preloadPath, message: error.message, stack: error.stack });
+    showRendererFailure('Arcsweep preload bridge failed', error.message);
+  });
+
+  mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+    if (level >= 2) void logDesktop('renderer-console', { level, message, line, sourceId });
+  });
+
+  mainWindow.webContents.on('dom-ready', () => scheduleRendererHealthCheck());
   mainWindow.webContents.on('did-finish-load', () => forceWindowVisible('did-finish-load'));
   mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     void logDesktop('renderer-load-failed', { errorCode, errorDescription, validatedURL, isMainFrame });
-    if (isMainFrame) forceWindowVisible('did-fail-load');
+    if (isMainFrame && errorCode !== -3 && !showingFailureDocument) {
+      showRendererFailure('Arcsweep renderer failed to load', `${errorDescription} (${errorCode})\n${validatedURL}`);
+    } else {
+      forceWindowVisible('did-fail-load');
+    }
   });
   mainWindow.webContents.on('render-process-gone', (_event, details) => {
     void logDesktop('renderer-process-gone', details);
-    forceWindowVisible('render-process-gone');
+    showRendererFailure('Arcsweep renderer stopped', `${details.reason || 'unknown reason'} · exit code ${details.exitCode ?? 'unknown'}`);
   });
   mainWindow.on('unresponsive', () => void logDesktop('window-unresponsive', { bounds: mainWindow?.getBounds() }));
   mainWindow.on('responsive', () => void logDesktop('window-responsive', { bounds: mainWindow?.getBounds() }));
@@ -151,12 +231,15 @@ function createWindow() {
 
   mainWindow.loadFile(rendererEntry()).catch((error) => {
     void logDesktop('load-file-rejected', { message: error.message, stack: error.stack });
-    forceWindowVisible('load-file-rejected');
+    showRendererFailure('Arcsweep application file could not open', error.message);
   });
 
   mainWindow.on('closed', () => {
     if (showFallback) clearTimeout(showFallback);
+    if (rendererHealthCheck) clearTimeout(rendererHealthCheck);
     showFallback = null;
+    rendererHealthCheck = null;
+    showingFailureDocument = false;
     mainWindow = null;
   });
 }
