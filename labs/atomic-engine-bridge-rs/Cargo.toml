@@ -1,0 +1,18 @@
+[package]
+name = "hearthgate-atomic-bridge"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "A bounded loopback health probe for Atomic Chat and other OpenAI-compatible local engines."
+publish = false
+
+[lib]
+name = "hearthgate_atomic_bridge"
+path = "src/lib.rs"
+
+[[bin]]
+name = "atomic-engine-probe"
+path = "src/main.rs"
+
+[dependencies]
