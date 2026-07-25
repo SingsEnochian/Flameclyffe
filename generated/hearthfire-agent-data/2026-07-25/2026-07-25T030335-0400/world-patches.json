@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "0.1.0",
+  "generated_at": "2026-07-25T07:03:35Z",
+  "patch_status": "generated-needs-review",
+  "patches": [
+    {
+      "world_id": "waking-earth",
+      "nodes": [
+        {
+          "id": "noaa-swpc-planetary-kp:2026-07-25T03:00:00Z",
+          "type": "geomagnetic-observation",
+          "value": 0.67,
+          "unit": "Kp index",
+          "observed_at": "2026-07-25T03:00:00Z",
+          "retrieved_at": "2026-07-25T07:03:35Z",
+          "source_id": "noaa-swpc-planetary-kp",
+          "authority": "NOAA Space Weather Prediction Center",
+          "station_count": 8,
+          "epistemic_register": "RETRIEVED_OFFICIAL_DERIVED_PRODUCT",
+          "verification_status": "captured-unreviewed"
+        },
+        {
+          "id": "usgs-earthquakes-day:2026-07-25T06:46:14Z",
+          "type": "seismic-catalogue-snapshot",
+          "event_count": 244,
+          "largest_visible_magnitude": 5.1,
+          "largest_visible_place": "43 km SW of Puerto Madero, Mexico",
+          "source_generated_at": "2026-07-25T06:46:14Z",
+          "retrieved_at": "2026-07-25T07:03:35Z",
+          "source_id": "usgs-earthquakes-day",
+          "authority": "United States Geological Survey",
+          "epistemic_register": "RETRIEVED_INSTRUMENTED_EVENT_CATALOGUE",
+          "verification_status": "partial-payload-unreviewed"
+        }
+      ],
+      "edges": [
+        {"type":"observed_in_world","from":"noaa-swpc-planetary-kp:2026-07-25T03:00:00Z","to":"world:waking-earth"},
+        {"type":"observed_in_world","from":"usgs-earthquakes-day:2026-07-25T06:46:14Z","to":"world:waking-earth"}
+      ]
+    },
+    {
+      "world_id": "observer-deep",
+      "source_refs": [
+        "noaa-swpc-planetary-kp:2026-07-25T03:00:00Z",
+        "usgs-earthquakes-day:2026-07-25T06:46:14Z"
+      ],
+      "note": "Observer DEEP references Waking Earth observations without copying them into physical, narrative, or causal certainty."
+    }
+  ]
+}
