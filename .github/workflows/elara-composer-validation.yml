@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'assets/elara-composer-core.js'
+      - 'assets/elara-composer-export.js'
       - 'assets/elara-temporal-2027-adapter.js'
       - 'scripts/validate-elara-composer.mjs'
       - '.github/workflows/elara-composer-validation.yml'
@@ -12,6 +13,7 @@ on:
       - 'vee/elara-composer-core-v0.1'
     paths:
       - 'assets/elara-composer-core.js'
+      - 'assets/elara-composer-export.js'
       - 'assets/elara-temporal-2027-adapter.js'
       - 'scripts/validate-elara-composer.mjs'
       - '.github/workflows/elara-composer-validation.yml'
@@ -30,5 +32,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate deterministic score laws
+      - name: Validate deterministic score and export laws
         run: node scripts/validate-elara-composer.mjs
