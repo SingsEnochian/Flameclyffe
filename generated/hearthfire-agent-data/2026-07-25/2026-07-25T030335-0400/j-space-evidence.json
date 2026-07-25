@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "0.1.0",
+  "workspace_id": "night-watch:2026-07-25",
+  "generated_at": "2026-07-25T07:03:35Z",
+  "active_worlds": ["waking-earth", "observer-deep"],
+  "active_nodes": [
+    "noaa-swpc-planetary-kp:2026-07-25T03:00:00Z",
+    "usgs-earthquakes-day:2026-07-25T06:46:14Z"
+  ],
+  "active_evidence": [
+    {
+      "source_id": "noaa-swpc-planetary-kp",
+      "status": "approved-and-retrieved",
+      "value": {"Kp":0.67,"a_running":3,"station_count":8},
+      "observed_at": "2026-07-25T03:00:00Z"
+    },
+    {
+      "source_id": "usgs-earthquakes-day",
+      "status": "approved-partial-payload",
+      "value": {"event_count":244,"largest_visible_magnitude":5.1,"largest_visible_place":"43 km SW of Puerto Madero, Mexico"},
+      "observed_at": "2026-07-25T06:46:14Z"
+    }
+  ],
+  "failed_approved_sources": [
+    "noaa-swpc-solar-wind-mag",
+    "noaa-swpc-solar-wind-plasma",
+    "open-meteo-local-current"
+  ],
+  "partially_exposed_approved_sources": [
+    "noaa-swpc-f107",
+    "noaa-swpc-solar-radio-flux",
+    "noaa-swpc-goes-xray"
+  ],
+  "candidate_evidence_not_promoted": [
+    {
+      "source": "NOAA SWPC Solar Wind Magnetic Field Summary",
+      "value": {"Bt":5,"Bz_GSM":0,"unit":"nT"},
+      "observed_at": "2026-07-25T06:41:00Z",
+      "reason": "official replacement candidate for broken approved endpoint"
+    },
+    {
+      "source": "NOAA SWPC Solar Wind Speed Summary",
+      "value": {"proton_speed":521,"unit":"km/s"},
+      "observed_at": "2026-07-25T06:41:00Z",
+      "reason": "official replacement candidate for broken approved endpoint"
+    }
+  ],
+  "unresolved_questions": [
+    "Which current NOAA full-resolution RTSW endpoints should replace the two removed one-day solar-wind contracts?",
+    "Can the runtime preserve exact raw bytes and SHA-256 checksums rather than parsed web excerpts?",
+    "Should GloTEC, INTERMAGNET, e-CALLISTO, or NASA DSN receive sandbox adapters after explicit Steward approval?"
+  ],
+  "discarded_candidates": [],
+  "synthesis": null,
+  "reason": "Night Watch stores evidence and failures only; it does not infer patterns or causes."
+}
