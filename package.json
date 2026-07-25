@@ -2,7 +2,11 @@
   "name": "flameclyffe-workshop",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
+    "node24:check": "node scripts/verify-node24-policy.mjs",
     "sigil:dev": "vite --config apps/sigil-activator/vite.config.js",
     "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
     "sigil:preview": "vite preview --config apps/sigil-activator/vite.config.js",
