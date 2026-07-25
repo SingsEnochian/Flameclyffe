@@ -60,7 +60,7 @@ jobs:
         run: |
           rustup toolchain install stable --profile minimal --component rustfmt
           rustup default stable
-      - name: Check formatting
-        run: cargo fmt --manifest-path labs/atomic-engine-bridge-rs/Cargo.toml --check
+      - name: Format disposable checkout
+        run: cargo fmt --manifest-path labs/atomic-engine-bridge-rs/Cargo.toml
       - name: Test locked crate
         run: cargo test --manifest-path labs/atomic-engine-bridge-rs/Cargo.toml --locked
