@@ -51,7 +51,10 @@ function assertSheetConvergenceManifest(relativePath) {
   if (manifest.moduleId !== 'sheet-convergence' || manifest.delivery !== 'bundled-core') {
     throw new Error(`${relativePath} does not declare Sheet Convergence as a bundled core module.`);
   }
-  if (!manifest.hosts?.includes('starwell') || !manifest.hosts?.includes('hearthgate')) {
+  const hostNames = Array.isArray(manifest.hosts) 
+    ? manifest.hosts.map(h => typeof h === 'string' ? h : h.host)
+    : [];
+  if (!hostNames.includes('starwell') || !hostNames.includes('hearthgate')) {
     throw new Error(`${relativePath} must declare both STARWELL and Hearthgate hosts.`);
   }
   if (manifest.epistemicContract?.localFoldProbabilityForBundledMap !== 0) {
