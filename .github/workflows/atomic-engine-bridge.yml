@@ -1,0 +1,66 @@
+name: Atomic Engine Bridge
+
+on:
+  pull_request:
+    paths:
+      - 'apps/starwell-server/atomic-bridge-server.js'
+      - 'apps/starwell-server/providers/atomic-*.js'
+      - 'apps/starwell-server/routes/atomic-engine.routes.js'
+      - 'apps/starwell-server/test/atomic-chat.test.js'
+      - 'apps/starwell-server/package.json'
+      - 'labs/atomic-engine-bridge-rs/**'
+      - 'docs/atomic-engine-bridge-v0.1.md'
+      - 'docs/third-party/atomic-chat.md'
+      - '.github/workflows/atomic-engine-bridge.yml'
+  push:
+    branches:
+      - 'feat/atomic-engine-bridge-v0.1'
+    paths:
+      - 'apps/starwell-server/atomic-bridge-server.js'
+      - 'apps/starwell-server/providers/atomic-*.js'
+      - 'apps/starwell-server/routes/atomic-engine.routes.js'
+      - 'apps/starwell-server/test/atomic-chat.test.js'
+      - 'apps/starwell-server/package.json'
+      - 'labs/atomic-engine-bridge-rs/**'
+      - '.github/workflows/atomic-engine-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-bridge:
+    name: Verify Node 24 bridge
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Check bridge syntax
+        run: |
+          node --check apps/starwell-server/providers/atomic-chat.js
+          node --check apps/starwell-server/providers/atomic-boundaries.js
+          node --check apps/starwell-server/routes/atomic-engine.routes.js
+          node --check apps/starwell-server/atomic-bridge-server.js
+      - name: Run dependency-free bridge tests
+        run: node --test apps/starwell-server/test/atomic-chat.test.js
+
+  rust-probe:
+    name: Verify Rust loopback probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install stable Rust
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt
+          rustup default stable
+      - name: Check formatting
+        run: cargo fmt --manifest-path labs/atomic-engine-bridge-rs/Cargo.toml --check
+      - name: Test locked crate
+        run: cargo test --manifest-path labs/atomic-engine-bridge-rs/Cargo.toml --locked
