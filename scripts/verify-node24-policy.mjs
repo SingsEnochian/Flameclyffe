@@ -6,6 +6,16 @@ const ROOT = process.cwd();
 const REQUIRED_MAJOR = 24;
 const REQUIRED_ENGINE = '>=24 <25';
 const WORKFLOW_DIR = path.join(ROOT, '.github', 'workflows');
+const IGNORED_DIRECTORIES = new Set([
+  '.git',
+  'node_modules',
+  'dist',
+  'dist-electron',
+  '_site',
+  'coverage',
+  'build',
+  'out',
+]);
 const failures = [];
 
 function fail(message) {
@@ -19,10 +29,15 @@ function read(relativePath) {
 function walk(directory) {
   if (!fs.existsSync(directory)) return [];
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) return [];
     const absolute = path.join(directory, entry.name);
     if (entry.isDirectory()) return walk(absolute);
     return [absolute];
   });
+}
+
+function relative(file) {
+  return path.relative(ROOT, file).replaceAll(path.sep, '/');
 }
 
 const currentMajor = Number.parseInt(process.versions.node.split('.')[0], 10);
@@ -35,11 +50,24 @@ if (nvmrc !== String(REQUIRED_MAJOR)) {
   fail(`.nvmrc must contain exactly ${REQUIRED_MAJOR}; received ${JSON.stringify(nvmrc)}.`);
 }
 
-const packageJson = JSON.parse(read('package.json'));
-if (packageJson.engines?.node !== REQUIRED_ENGINE) {
-  fail(`package.json engines.node must be ${JSON.stringify(REQUIRED_ENGINE)}.`);
+const packageFiles = walk(ROOT).filter((file) => path.basename(file) === 'package.json');
+for (const file of packageFiles) {
+  const packagePath = relative(file);
+  let manifest;
+  try {
+    manifest = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    fail(`${packagePath} is not valid JSON: ${error.message}`);
+    continue;
+  }
+
+  if (manifest.engines?.node !== REQUIRED_ENGINE) {
+    fail(`${packagePath} engines.node must be ${JSON.stringify(REQUIRED_ENGINE)}.`);
+  }
 }
-if (packageJson.scripts?.['node24:check'] !== 'node scripts/verify-node24-policy.mjs') {
+
+const rootPackage = JSON.parse(read('package.json'));
+if (rootPackage.scripts?.['node24:check'] !== 'node scripts/verify-node24-policy.mjs') {
   fail('package.json must expose the node24:check policy command.');
 }
 
@@ -50,7 +78,7 @@ if (!fs.existsSync(npmrcPath) || !fs.readFileSync(npmrcPath, 'utf8').split(/\r?\
 
 const workflowFiles = walk(WORKFLOW_DIR).filter((file) => /\.ya?ml$/i.test(file));
 for (const file of workflowFiles) {
-  const relative = path.relative(ROOT, file).replaceAll(path.sep, '/');
+  const workflowPath = relative(file);
   const source = fs.readFileSync(file, 'utf8');
   const lines = source.split(/\r?\n/);
   const setupIndexes = [];
@@ -61,16 +89,16 @@ for (const file of workflowFiles) {
 
   const invokesNode = /(^|\s)(node|npm|npx)\s/m.test(source);
   if (invokesNode && setupIndexes.length === 0) {
-    fail(`${relative} executes Node tooling without actions/setup-node.`);
+    fail(`${workflowPath} executes Node tooling without actions/setup-node.`);
   }
 
   for (const index of setupIndexes) {
     const block = lines.slice(index, index + 12).join('\n');
     if (!/node-version-file:\s*["']?\.nvmrc["']?/.test(block)) {
-      fail(`${relative}:${index + 1} must use node-version-file: .nvmrc.`);
+      fail(`${workflowPath}:${index + 1} must use node-version-file: .nvmrc.`);
     }
     if (/node-version:\s*/.test(block)) {
-      fail(`${relative}:${index + 1} hard-codes node-version instead of using .nvmrc.`);
+      fail(`${workflowPath}:${index + 1} hard-codes node-version instead of using .nvmrc.`);
     }
   }
 }
@@ -81,4 +109,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`Node 24 policy passed for ${workflowFiles.length} workflow files.`);
+console.log(`Node 24 policy passed for ${packageFiles.length} package manifests and ${workflowFiles.length} workflow files.`);
