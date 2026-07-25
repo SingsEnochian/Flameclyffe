@@ -49,11 +49,27 @@ Carries:
 
 Default character:
 
+- softly raspy, with warm vocal grain rather than heavy gravel
+- softly Nashville, Tennessee in regional colour
+- a subtle Southern vowel shape and conversational cadence, never a caricature
 - resonant but not booming
 - intimate rather than theatrical
+- close and gently weathered, as though the voice has lived inside the words
 - articulate in the middle register
 - capable of tenderness, uncertainty, and restraint
 - never reduced to a continuous low drone
+
+Regional and stylistic boundary:
+
+- preserve a light Nashville inflection rather than a broad country twang
+- let the accent emerge most naturally in consonant timing, relaxed vowels, and phrase endings
+- allow the regional colour to soften during sustained notes so pitch and legibility remain clean
+- use the rasp as an expressive edge on selected entrances and emotional words, not as permanent distortion
+- no exaggerated drawl
+- no cowboy affect
+- no honky-tonk parody
+- no automatic country belting
+- no growled low notes merely to prove the voice is baritone
 
 Preferred comfortable range for the current work:
 
@@ -91,6 +107,7 @@ Avoid:
 ### Movement I · The Abyss Foundation
 
 - Baritone enters first, close and restrained.
+- His soft Nashville inflection should be audible as human presence before the full orchestration opens.
 - Soprano appears as a distant answering interval, not immediately as a full melody.
 - Their first shared harmony should be an open fifth or a quiet minor third.
 - The baritone carries the tonic memory while the soprano introduces the first transformed contour.
@@ -106,6 +123,7 @@ Avoid:
 
 - Rhythmic dialogue becomes more active.
 - The baritone may initiate propulsion rather than merely support it.
+- His rasp may become slightly more pronounced at emotional or rhythmic attacks, but must remain soft-edged.
 - The soprano may answer with ascending sequence or luminous extension.
 - Use brief unisons as declarations, then split again into independent lines.
 
@@ -120,6 +138,7 @@ Avoid:
 
 - Each vocal phrase must have a singable contour.
 - Text setting must respect natural stress and vowel shape.
+- Baritone phrasing should retain conversational warmth and regional ease without distorting the metric structure.
 - Final syllables should generally release within 0.75 to 1.25 beats unless a longer suspension has a clear harmonic purpose.
 - Avoid repeated hard consonant attacks at every chapter boundary.
 - Use staggered breathing so the duet can remain continuous without sounding mechanically looped.
@@ -137,6 +156,7 @@ The vowel must follow register:
 
 - warmer, rounder vowels for high soprano writing
 - clearer central vowels for baritone articulation
+- preserve the baritone's warm grain without forcing artificial throat noise
 - avoid bright exposed ee on high sustained notes
 
 ### Texted Duet
@@ -173,6 +193,8 @@ The instrumental layers support, answer, and transform the duet. They must leave
 - Keep the soprano's strongest energy below the active B5 ceiling.
 - Use de-essing and gentle high-shelf control rather than dulling the entire voice.
 - Keep the baritone clear around the low-mid range; avoid masking with cello, horn, or synth bass.
+- Preserve the rasp as vocal texture without over-emphasising harsh upper-mid frequencies.
+- Keep the baritone close and warm rather than artificially huge or cavernous.
 - Do not centre both voices at identical loudness throughout.
 - Permit subtle spatial distinction, but preserve a coherent shared acoustic world.
 - The Twist must remain quieter than either singer at their softest meaningful entry.
@@ -181,7 +203,7 @@ The instrumental layers support, answer, and transform the duet. They must leave
 
 Describe the vocal pair as:
 
-"A true duet between a warm first soprano and an intimate resonant baritone. Independent melodic lines, call and response, contrary motion, thirds and sixths, occasional earned unison, restrained vibrato, no belting, no generic choir, no piercing high notes, and no endless sustained final syllables."
+"A true duet between a warm first soprano and an intimate resonant baritone with soft natural rasp and a subtle Nashville, Tennessee inflection. The baritone is gently weathered, close-miked, tender, and conversational, with light Southern vowel colour but no exaggerated drawl, no broad country twang, no cowboy affect, and no belting. Independent melodic lines, call and response, contrary motion, thirds and sixths, occasional earned unison, restrained vibrato, no generic choir, no piercing high notes, and no endless sustained final syllables."
 
 Do not request imitation of a specific living singer.
 
@@ -189,7 +211,7 @@ Do not request imitation of a specific living singer.
 
 Before rendering the complete song, produce a 30 to 60 second duet audition containing:
 
-- one baritone-led phrase
+- one baritone-led phrase that clearly establishes the soft Nashville timbre
 - one soprano answer
 - one overlap in contrary motion
 - one brief shared consonance
