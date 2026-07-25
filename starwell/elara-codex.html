@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Elara Codex · Source Instrument</title>
-<meta name="description" content="Canonical Elara Codex text connected to narrative glyph mathematics and the STARWELL Möbius Tone Lab.">
+<title>The Elara Codex · Source Instrument + Composer</title>
+<meta name="description" content="Canonical Elara Codex text connected to narrative glyph mathematics, deterministic composition, and the STARWELL Möbius Tone Lab.">
 <style>
 :root{--void:#030407;--night:#08111c;--deep:#0d231f;--stone:#e8eee8;--soft:rgba(232,238,232,.82);--dim:rgba(232,238,232,.62);--gold:#e6c87a;--gold2:#ffe9aa;--green:#83d8b2;--line:rgba(230,200,122,.28);--rose:#e4aaa5}
 *{box-sizing:border-box}
@@ -22,7 +22,7 @@ main{width:min(1500px,96vw);margin:0 auto;padding:clamp(1rem,3vw,2rem) 0 4rem}
 .hero{padding:clamp(1.2rem,4vw,3rem);border:1px solid var(--line);border-radius:32px;background:rgba(4,8,12,.62);box-shadow:0 26px 80px rgba(0,0,0,.45)}
 .eyebrow{margin:0 0 .7rem;color:var(--gold2);letter-spacing:.16em;text-transform:uppercase;font-size:.72rem;font-weight:900}
 h1{margin:0;font:clamp(2.4rem,6vw,5.8rem)/.96 Georgia,"Times New Roman",serif;color:var(--gold)}
-.subtitle{max-width:900px;color:var(--soft);font:clamp(1.05rem,2vw,1.35rem)/1.35 Georgia,"Times New Roman",serif}
+.subtitle{max-width:1000px;color:var(--soft);font:clamp(1.05rem,2vw,1.35rem)/1.35 Georgia,"Times New Roman",serif}
 .controls{display:flex;gap:.55rem;flex-wrap:wrap;margin:.8rem 0}
 .status{padding:.8rem 1rem;border:1px solid rgba(131,216,178,.24);border-radius:16px;background:rgba(131,216,178,.08);color:var(--soft)}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-items:start;gap:1rem;margin-top:1rem}
@@ -32,7 +32,7 @@ h1{margin:0;font:clamp(2.4rem,6vw,5.8rem)/.96 Georgia,"Times New Roman",serif;co
 .stack{display:grid;gap:.75rem}
 label{display:grid;gap:.32rem;color:var(--dim);font-size:.88rem;font-weight:750}
 .inline{display:flex;align-items:center;gap:.55rem}
-select,input[type="range"],textarea{width:100%;border:1px solid rgba(230,200,122,.25);border-radius:14px;background:rgba(2,6,10,.6);color:var(--stone);padding:.68rem .75rem}
+select,input[type="range"],input[type="text"],textarea{width:100%;border:1px solid rgba(230,200,122,.25);border-radius:14px;background:rgba(2,6,10,.6);color:var(--stone);padding:.68rem .75rem}
 input[type="checkbox"]{width:1.1rem;height:1.1rem;accent-color:var(--gold)}
 pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(230,200,122,.16);border-radius:16px;background:rgba(2,6,10,.48);padding:.8rem;color:var(--soft)}
 .tiny{font-size:.82rem;color:var(--dim)}
@@ -66,7 +66,7 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
 </head>
 <body>
 <header class="top">
-  <div class="brand"><strong>STARWELL · Elara</strong><span>Canonical text · narrative glyph · temporal sound</span></div>
+  <div class="brand"><strong>STARWELL · Elara</strong><span>Canonical text · narrative glyph · temporal sound · harmonic composer</span></div>
   <nav class="nav" aria-label="Primary">
     <a class="btn" href="./">STARWELL</a>
     <a class="btn" href="./mobius-audio-bus.html">Tone Lab</a>
@@ -75,14 +75,14 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
 </header>
 <main data-mobius-lab>
   <section class="hero">
-    <p class="eyebrow">Source first · Mathematics visible · Sound by consent</p>
+    <p class="eyebrow">Source first · Transformations declared · Sound by consent</p>
     <h1>The Elara Codex</h1>
-    <p class="subtitle">The original text is the source instrument. Each opened chapter exposes its narrative tone order, its canonical frequencies, the active temporal projection, and the exact harmonic layers sent to the Möbius engine.</p>
+    <p class="subtitle">The original text remains the source instrument. The composer now translates its relationships into E-minor and C-major musical bodies, Kelyran and English lyric layers, four movements, and declared 2025–2027 temporal rendering.</p>
     <div class="controls">
       <button class="primary" data-action="wake" type="button">Wake Sound Engine</button>
       <button class="feather" data-action="feather" type="button">Feather Stop</button>
     </div>
-    <p class="status" id="mobius-status" role="status" aria-live="polite">Loaded. Opening a chapter changes context only. Sound requires a tap.</p>
+    <p class="status" id="mobius-status" role="status" aria-live="polite">Loaded. Opening a chapter changes context only. Composer and tonal playback require a tap.</p>
   </section>
 
   <section class="grid" aria-label="Elara Codex source instrument">
@@ -97,7 +97,7 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
         <label class="inline"><input id="mono-safe" type="checkbox"> Mono safety</label>
         <label>Return side<select id="return-side"><option value="right" selected>Right ear return</option><option value="left">Left ear return</option><option value="both">Both ears return</option></select></label>
       </div>
-      <p class="tiny">Temporal projection and harmonic controls apply to every tonal carrier. Noise remains noise; modulation rates remain rhythmic operators.</p>
+      <p class="tiny">Canonical chapter playback remains separate from composer interpretation. Every transformation is declared in the composer receipt.</p>
     </article>
 
     <section data-elara-codex-reader></section>
@@ -105,7 +105,7 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
     <article class="card observation-card"><h2>Observation log</h2><label>Claim label<select id="claim-label"><option value="source-reading">Source reading</option><option value="subjective-experiment" selected>Subjective experiment</option><option value="mathematical-projection">Mathematical projection</option><option value="implementation-task">Implementation task</option></select></label><label>Notes<textarea id="note-body" placeholder="What did the text say? What was rendered? What did you notice?"></textarea></label><div class="controls"><button data-action="save-note" type="button">Save local note</button><button data-action="clear-notes" type="button">Clear notes</button></div></article>
     <article class="card saved-notes-card"><h2>Saved notes</h2><div id="note-list"></div></article>
   </section>
-  <p class="footer">The source remains itself. The renderer declares every transformation.</p>
+  <p class="footer">The source remains itself. The composer declares every transformation. Feather remains armed.</p>
 </main>
 <script src="../assets/mobius-audio-bus.js?v=0.4.0"></script>
 <script src="../assets/mobius-layered-spec-adapter.js?v=0.4.0"></script>
@@ -122,6 +122,6 @@ pre{white-space:pre-wrap;max-height:30rem;overflow:auto;border:1px solid rgba(23
 <script src="../assets/elara-codex-reading-mode.js?v=0.1.0"></script>
 <script src="../assets/elara-codex-full-song-v2.js?v=0.2.0"></script>
 <script src="../assets/elara-codex-live-smoothing-hotfix.js?v=0.2.1"></script>
-<script src="../assets/elara-e-minor-voicing.js?v=0.1.0"></script>
+<script src="../assets/elara-composer-core.js?v=0.1.0"></script>
 </body>
 </html>
