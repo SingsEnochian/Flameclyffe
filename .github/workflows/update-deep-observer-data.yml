@@ -21,7 +21,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: .nvmrc
+      - name: Verify Node 24 policy
+        run: npm run node24:check
       - name: Refresh data cache
         run: node scripts/update-deep-observer-data.mjs
       - name: Commit data cache
