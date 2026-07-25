@@ -7,7 +7,7 @@ const {
   createAtomicChatClient,
   normalizeBaseUrl,
 } = require('../providers/atomic-chat');
-const { sanitizeMessages } = require('../routes/atomic-engine.routes');
+const { sanitizeMessages } = require('../providers/atomic-boundaries');
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
