@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-07-25T07:03:35Z",
+  "sources": [
+    {
+      "source_id": "noaa-swpc-planetary-kp",
+      "status": "ok",
+      "endpoint": "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+      "latest_observation": {"time_tag":"2026-07-25T03:00:00Z","Kp":0.67,"a_running":3,"station_count":8},
+      "epistemic_register": "direct_measurement_or_official_derived_product",
+      "quality_flags": [],
+      "missingness": [],
+      "raw_preservation": "parsed source content preserved in observations.json; exact transport bytes unavailable",
+      "checksum": null
+    },
+    {
+      "source_id": "noaa-swpc-solar-wind-mag",
+      "status": "failed",
+      "endpoint": "https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json",
+      "error": "HTTP 404 Not Found",
+      "quality_flags": ["BROKEN_SOURCE_CONTRACT"],
+      "missingness": ["all fields unavailable"],
+      "checksum": null
+    },
+    {
+      "source_id": "noaa-swpc-solar-wind-plasma",
+      "status": "failed",
+      "endpoint": "https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json",
+      "error": "HTTP 404 Not Found",
+      "quality_flags": ["BROKEN_SOURCE_CONTRACT"],
+      "missingness": ["all fields unavailable"],
+      "checksum": null
+    },
+    {
+      "source_id": "noaa-swpc-f107",
+      "status": "partial",
+      "endpoint": "https://services.swpc.noaa.gov/json/f107_cm_flux.json",
+      "error": "Endpoint returned application/json but the retrieval layer exposed no parseable row content",
+      "quality_flags": ["RAW_BODY_NOT_EXPOSED"],
+      "missingness": ["current value", "observation timestamp", "units"],
+      "checksum": null
+    },
+    {
+      "source_id": "noaa-swpc-solar-radio-flux",
+      "status": "partial",
+      "endpoint": "https://services.swpc.noaa.gov/json/solar-radio-flux.json",
+      "error": "Endpoint returned application/json but the retrieval layer exposed no parseable row content",
+      "quality_flags": ["RAW_BODY_NOT_EXPOSED"],
+      "missingness": ["current value", "observation timestamp", "units"],
+      "checksum": null
+    },
+    {
+      "source_id": "noaa-swpc-goes-xray",
+      "status": "partial",
+      "endpoint": "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+      "error": "Endpoint returned application/json but the retrieval layer exposed no parseable row content",
+      "quality_flags": ["RAW_BODY_NOT_EXPOSED"],
+      "missingness": ["latest flux rows", "energy channels"],
+      "checksum": null
+    },
+    {
+      "source_id": "usgs-earthquakes-day",
+      "status": "ok-partial-payload",
+      "endpoint": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+      "metadata": {"generated":1784961974000,"title":"USGS All Earthquakes, Past Day","status":200,"api":"2.7.0","count":244},
+      "latest_visible_event": {"id":"ci40661114","magnitude":1.06,"place":"11 km WNW of Calipatria, CA","time":1784957985730,"status":"automatic"},
+      "largest_visible_event": {"id":"us7000t3a0","magnitude":5.1,"place":"43 km SW of Puerto Madero, Mexico","time":1784957193842,"status":"reviewed","tsunami":0},
+      "quality_flags": ["FULL_RESPONSE_NOT_PRESERVED"],
+      "missingness": ["complete 244-event raw payload checksum"],
+      "checksum": null
+    },
+    {
+      "source_id": "open-meteo-local-current",
+      "status": "failed",
+      "endpoint": "https://api.open-meteo.com/v1/forecast?latitude=30.04&longitude=-81.40&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m&timezone=auto",
+      "error": "Retrieval-layer internal error; no current payload exposed",
+      "quality_flags": ["TRANSIENT_RETRIEVAL_FAILURE"],
+      "missingness": ["all current weather fields"],
+      "checksum": null
+    }
+  ]
+}
