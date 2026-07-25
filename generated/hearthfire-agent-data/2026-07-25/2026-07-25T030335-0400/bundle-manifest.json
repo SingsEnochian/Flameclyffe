@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "0.1.0",
+  "run_id": "2026-07-25T030335-0400",
+  "evidence_date": "2026-07-25",
+  "local_time": "2026-07-25T03:03:35-04:00",
+  "utc_time": "2026-07-25T07:03:35Z",
+  "timezone": "America/New_York",
+  "location": {
+    "label": "Northeast Florida approximate",
+    "latitude": 30.04,
+    "longitude": -81.40,
+    "precision": "configured-approximate",
+    "device_geolocation_available": false
+  },
+  "source_registry": {
+    "repository": "SingsEnochian/Flameclyffe",
+    "branch": "forge/agent-fleet-3am-ingest",
+    "path": "agents/hearthfire-source-registry.json",
+    "schemaVersion": "0.1.0"
+  },
+  "output_branch": "generated-data/night-watch-2026-07-25",
+  "canonical_branch_modified": false,
+  "approved_sources_attempted": 8,
+  "completed_sources": 2,
+  "failed_sources": 3,
+  "partially_exposed_sources": 3,
+  "candidate_sources_promoted": 0,
+  "private_sources_accessed": 0,
+  "checksum_status": "UNAVAILABLE_FOR_WEB-EXPOSED_PAYLOADS",
+  "checksum_note": "The retrieval layer exposed parsed source content but did not provide the exact original response bytes or a functioning local hashing runtime. No checksum was invented.",
+  "epistemic_boundary": "This bundle records retrieved measurements, official products, failures, and candidate proposals. It makes no causal, supernatural, diagnostic, or prophetic certification.",
+  "status": "PARTIAL_NOT_VERIFIED"
+}
