@@ -90,14 +90,29 @@ jobs:
             "$hash  $(Split-Path $file -Leaf)"
           }
           $lines | Set-Content 'dist/arcsweep-desktop/SHA256SUMS.txt'
+          $installerHash = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLower()
+          "$installerHash  $(Split-Path $installer -Leaf)" | Set-Content 'dist/arcsweep-desktop/INSTALLER-SHA256.txt'
+          $portableHash = (Get-FileHash $portable -Algorithm SHA256).Hash.ToLower()
+          "$portableHash  $(Split-Path $portable -Leaf)" | Set-Content 'dist/arcsweep-desktop/PORTABLE-SHA256.txt'
 
-      - name: Upload Windows artifacts
+      - name: Upload installer only
         uses: actions/upload-artifact@v4
         with:
-          name: hearthgate-arcsweep-windows-x64-0.2.1
+          name: hearthgate-arcsweep-installer-0.2.1-x64
           path: |
             dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-0.2.1-x64.exe
+            dist/arcsweep-desktop/INSTALLER-SHA256.txt
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 21
+
+      - name: Upload portable edition separately
+        uses: actions/upload-artifact@v4
+        with:
+          name: hearthgate-arcsweep-portable-0.2.1-x64
+          path: |
             dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.1-x64.zip
-            dist/arcsweep-desktop/SHA256SUMS.txt
+            dist/arcsweep-desktop/PORTABLE-SHA256.txt
+          compression-level: 0
           if-no-files-found: error
           retention-days: 21
