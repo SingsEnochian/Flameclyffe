@@ -6,6 +6,9 @@ on:
       - 'apps/arcsweep/**'
       - 'package.json'
       - 'package-lock.json'
+      - '.nvmrc'
+      - '.npmrc'
+      - 'scripts/verify-node24-policy.mjs'
       - '.github/workflows/arcsweep-build.yml'
   push:
     branches:
@@ -14,6 +17,9 @@ on:
       - 'apps/arcsweep/**'
       - 'package.json'
       - 'package-lock.json'
+      - '.nvmrc'
+      - '.npmrc'
+      - 'scripts/verify-node24-policy.mjs'
       - '.github/workflows/arcsweep-build.yml'
 
 permissions:
@@ -30,8 +36,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
+
+      - name: Verify Node 24 policy
+        run: npm run node24:check
 
       - name: Install dependencies
         run: npm install
