@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "0.1.0",
+  "runId": "2026-07-26T030708-0400",
+  "evidenceDate": "2026-07-26",
+  "timezone": "America/New_York",
+  "localRunTime": "2026-07-26T03:07:08-04:00",
+  "utcRunTime": "2026-07-26T07:07:08Z",
+  "configuredLocation": {"label":"NE Florida approximate","latitude":30.04,"longitude":-81.40,"precision":"approximate-configured"},
+  "sourceRegistry": {"path":"agents/hearthfire-source-registry.json","branch":"forge/agent-fleet-3am-ingest","schemaVersion":"0.1.0"},
+  "publicationLane": "generated-data/night-watch-2026-07-25",
+  "canonicalApplicationBranchChanged": false,
+  "rawTransportStatus": "PARTIAL: exact endpoint response bytes were not exposed by the retrieval runtime; source excerpts and normalised records are preserved. No transport checksum is claimed where raw bytes were unavailable.",
+  "hashingStatus": "UNAVAILABLE: local hashing runtime returned a client error during this run.",
+  "epistemicBoundary": "Signals, source states, derived packets, and proposals only. No causal, supernatural, diagnostic, or prophetic certification."
+}
