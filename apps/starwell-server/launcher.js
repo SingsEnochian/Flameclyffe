@@ -30,6 +30,7 @@ function shutdown(code = 0) {
 }
 
 start('server.js');
+start('observer-api.js', { OBSERVER_PORT: process.env.OBSERVER_PORT || '3001' });
 start(path.join('fontforge', 'server.js'), { FONTFORGE_PORT: process.env.FONTFORGE_PORT || '3842' });
 
 process.on('SIGINT', () => shutdown(0));
