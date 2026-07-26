@@ -60,7 +60,7 @@ async function getSource(sourceKey, options = {}) {
     ...options,
     params: {
       source_key: `eq.${sourceKey}`,
-      select: 'id,source_key,display_name,source_kind,poll_interval_seconds,last_success_at,last_error_at,last_error,enabled',
+      select: 'id,source_key,display_name,instrument_name,source_kind,poll_interval_seconds,stale_threshold_seconds,last_success_at,last_error_at,last_error,enabled',
       limit: 1,
     },
   });
@@ -68,14 +68,31 @@ async function getSource(sourceKey, options = {}) {
 }
 
 function measurementInsert(packet, sourceId, ingestionRunId) {
-  const { source_key: _sourceKey, ...measurement } = packet;
+  const {
+    source_key: _sourceKey,
+    observed_at: _observedAt,
+    retrieved_at: _retrievedAt,
+    metric: _metric,
+    value: _value,
+    raw_source_record: _rawSourceRecord,
+    error: _error,
+    ...measurement
+  } = packet;
   return { ...measurement, source_id: sourceId, ingestion_run_id: ingestionRunId };
+}
+
+function executionTimeMs(result) {
+  const started = new Date(result.started_at).getTime();
+  const completed = new Date(result.completed_at).getTime();
+  if (!Number.isFinite(started) || !Number.isFinite(completed)) return null;
+  return Math.max(0, completed - started);
 }
 
 async function persistSourceResult(result, options = {}) {
   const source = await getSource(result.source_key, options);
   if (!source) throw new Error(`Observer feed is not registered: ${result.source_key}`);
 
+  const operatingMode = String(options.operatingMode || 'MANUAL').toUpperCase();
   const runs = await restRequest('observer_ingestion_runs', {
     ...options,
     method: 'POST',
@@ -83,9 +100,10 @@ async function persistSourceResult(result, options = {}) {
     body: {
       source_id: source.id,
       started_at: result.started_at,
+      operating_mode: operatingMode,
       run_status: 'running',
       request_window: { endpoint: result.endpoint },
-      transport_metadata: { adapter: 'noaa-swpc-v0.1' },
+      transport_metadata: { adapter: 'noaa-swpc-v0.1', execution_origin: 'starwell-server' },
     },
   });
   const run = Array.isArray(runs) ? runs[0] : null;
@@ -125,6 +143,7 @@ async function persistSourceResult(result, options = {}) {
       duplicate_count: duplicateCount,
       error_count: finalStatus === 'failed' ? 1 : 0,
       error_summary: errorSummary,
+      execution_time_ms: executionTimeMs(result),
     },
   });
 
@@ -134,16 +153,24 @@ async function persistSourceResult(result, options = {}) {
     params: { id: `eq.${source.id}` },
     prefer: 'return=minimal',
     body: finalStatus === 'succeeded'
-      ? { last_success_at: result.completed_at || new Date().toISOString(), last_error: null }
-      : { last_error_at: result.completed_at || new Date().toISOString(), last_error: errorSummary },
+      ? {
+          last_success_at: result.completed_at || new Date().toISOString(),
+          last_error: null,
+        }
+      : {
+          last_error_at: result.completed_at || new Date().toISOString(),
+          last_error: errorSummary,
+        },
   });
 
   return {
     source_key: result.source_key,
     ingestion_run_id: run.id,
+    operating_mode: operatingMode,
     status: finalStatus,
     inserted_count: insertedCount,
     duplicate_count: duplicateCount,
+    execution_time_ms: executionTimeMs(result),
     error: errorSummary,
   };
 }
@@ -166,6 +193,8 @@ function newestByMetric(rows = []) {
 }
 
 function staleAfterSeconds(source) {
+  const explicit = Number(source.stale_threshold_seconds);
+  if (Number.isFinite(explicit) && explicit > 0) return explicit;
   if (source.source_kind === 'geomagnetic') return 4 * 60 * 60;
   return Math.max(10 * 60, Number(source.poll_interval_seconds || 300) * 4);
 }
@@ -195,11 +224,11 @@ function sourceHealth(source, measurements, now = Date.now()) {
 }
 
 async function loadSnapshot({ limit = DEFAULT_MEASUREMENT_LIMIT, ...options } = {}) {
-  const [sources, measurements, anomalies] = await Promise.all([
+  const [sources, measurements, anomalies, runs] = await Promise.all([
     restRequest('observer_feed_registry', {
       ...options,
       params: {
-        select: 'id,source_key,display_name,provider,source_kind,poll_interval_seconds,enabled,last_success_at,last_error_at,last_error',
+        select: 'id,source_key,display_name,provider,instrument_name,source_kind,poll_interval_seconds,stale_threshold_seconds,enabled,last_success_at,last_error_at,last_error',
         order: 'display_name.asc',
       },
     }),
@@ -219,11 +248,20 @@ async function loadSnapshot({ limit = DEFAULT_MEASUREMENT_LIMIT, ...options } = 
         limit: 30,
       },
     }),
+    restRequest('observer_ingestion_runs', {
+      ...options,
+      params: {
+        select: 'id,source_id,started_at,completed_at,operating_mode,run_status,packet_count,duplicate_count,error_count,error_summary,execution_time_ms',
+        order: 'started_at.desc',
+        limit: 20,
+      },
+    }),
   ]);
 
   const safeSources = Array.isArray(sources) ? sources : [];
   const safeMeasurements = Array.isArray(measurements) ? measurements : [];
   const safeAnomalies = Array.isArray(anomalies) ? anomalies : [];
+  const safeRuns = Array.isArray(runs) ? runs : [];
   const sourceMap = new Map(safeSources.map((source) => [source.id, source]));
   const withSources = safeMeasurements.map((measurement) => ({
     ...measurement,
@@ -237,6 +275,10 @@ async function loadSnapshot({ limit = DEFAULT_MEASUREMENT_LIMIT, ...options } = 
     latest: newestByMetric(withSources),
     timeline: withSources.slice(0, 180),
     anomalies: safeAnomalies,
+    recent_runs: safeRuns.map((run) => ({
+      ...run,
+      source: sourceMap.get(run.source_id) || null,
+    })),
   };
 }
 
@@ -245,6 +287,8 @@ module.exports = {
   hasSupabaseStoreConfig,
   restRequest,
   getSource,
+  measurementInsert,
+  executionTimeMs,
   persistSourceResult,
   persistPollResults,
   newestByMetric,
