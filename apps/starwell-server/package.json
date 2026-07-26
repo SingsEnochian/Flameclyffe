@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node launcher.js",
     "start:core": "node server.js",
+    "observer:api": "node observer-api.js",
     "fontforge:start": "node fontforge/server.js",
     "stage:starwell": "node scripts/stage-starwell.js",
     "observer:scoop:poll": "node scripts/poll-observer-scoop.js",
