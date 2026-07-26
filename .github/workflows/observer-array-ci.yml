@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
   observer-array:
@@ -49,6 +51,7 @@ jobs:
           exit $status
 
       - name: Run STARWELL helper tests
+        id: starwell_tests
         shell: bash
         run: |
           set +e
@@ -56,6 +59,44 @@ jobs:
           status=$?
           tail -n 200 /tmp/starwell-tests.log
           exit $status
+
+      - name: Post concise failure receipt
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- observer-array-ci-failure -->';
+            const files = ['/tmp/observer-tests.log', '/tmp/starwell-tests.log'];
+            const sections = [];
+            for (const file of files) {
+              if (!fs.existsSync(file)) continue;
+              const lines = fs.readFileSync(file, 'utf8').trim().split('\n').slice(-140);
+              sections.push(`### ${file.split('/').pop()}\n\n\`\`\`text\n${lines.join('\n')}\n\`\`\``);
+            }
+            const body = `${marker}\n## Observer Array CI failure receipt\n\n${sections.join('\n\n')}`.slice(0, 60000);
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find(comment => comment.user?.type === 'Bot' && comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
 
       - name: Build STARWELL including Veil Observatory
         run: npm run starwell:build
