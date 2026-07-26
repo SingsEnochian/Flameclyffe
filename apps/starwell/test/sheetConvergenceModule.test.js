@@ -19,14 +19,22 @@ const close = (actual, expected, tolerance = 1e-8) => {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} differs from ${expected}`);
 };
 
+const host = (hostName) => manifest.hosts.find((entry) => entry.host === hostName);
+
 test('sheet convergence module is bundled for STARWELL and Hearthgate', () => {
   assert.equal(manifest.moduleId, 'sheet-convergence');
   assert.equal(manifest.delivery, 'bundled-core');
   assert.equal(manifest.enabledByDefault, true);
-  assert.deepEqual(manifest.hosts, ['starwell', 'hearthgate']);
-  assert.equal(manifest.starwell.mount, 'central-observatory');
-  assert.equal(manifest.hearthgate.moduleKind, 'instrument');
-  assert.equal(manifest.hearthgate.requiresNetwork, false);
+  assert.equal(manifest.entrypoint, 'sheet-convergence/index.html');
+
+  const starwell = host('starwell');
+  const hearthgate = host('hearthgate');
+  assert.ok(starwell, 'STARWELL host registration is required');
+  assert.ok(hearthgate, 'Hearthgate host registration is required');
+  assert.equal(starwell.mount, 'central-observatory');
+  assert.equal(starwell.component, 'ObservatoryInstrument');
+  assert.equal(hearthgate.mount, 'laboratory/observatory');
+  assert.equal(hearthgate.requiresNetwork, false);
 });
 
 test('module preserves the epistemic boundary', () => {
