@@ -6,8 +6,13 @@ on:
       - 'apps/starwell-server/atomic-bridge-server.js'
       - 'apps/starwell-server/providers/atomic-*.js'
       - 'apps/starwell-server/routes/atomic-engine.routes.js'
-      - 'apps/starwell-server/test/atomic-chat.test.js'
+      - 'apps/starwell-server/flames/atomic-provider.js'
+      - 'apps/starwell-server/flames/manifests.js'
+      - 'apps/starwell-server/flames/router.js'
+      - 'apps/starwell-server/test/atomic-*.js'
+      - 'apps/starwell-server/test/fixtures/atomic-chat-mock.js'
       - 'apps/starwell-server/package.json'
+      - 'apps/starwell-server/package-lock.json'
       - 'labs/atomic-engine-bridge-rs/**'
       - 'docs/atomic-engine-bridge-v0.1.md'
       - 'docs/third-party/atomic-chat.md'
@@ -19,8 +24,13 @@ on:
       - 'apps/starwell-server/atomic-bridge-server.js'
       - 'apps/starwell-server/providers/atomic-*.js'
       - 'apps/starwell-server/routes/atomic-engine.routes.js'
-      - 'apps/starwell-server/test/atomic-chat.test.js'
+      - 'apps/starwell-server/flames/atomic-provider.js'
+      - 'apps/starwell-server/flames/manifests.js'
+      - 'apps/starwell-server/flames/router.js'
+      - 'apps/starwell-server/test/atomic-*.js'
+      - 'apps/starwell-server/test/fixtures/atomic-chat-mock.js'
       - 'apps/starwell-server/package.json'
+      - 'apps/starwell-server/package-lock.json'
       - 'labs/atomic-engine-bridge-rs/**'
       - '.github/workflows/atomic-engine-bridge.yml'
   workflow_dispatch:
@@ -46,6 +56,10 @@ jobs:
           node --check apps/starwell-server/providers/atomic-boundaries.js
           node --check apps/starwell-server/routes/atomic-engine.routes.js
           node --check apps/starwell-server/atomic-bridge-server.js
+          node --check apps/starwell-server/flames/atomic-provider.js
+          node --check apps/starwell-server/flames/manifests.js
+          node --check apps/starwell-server/flames/router.js
+          node --check apps/starwell-server/test/fixtures/atomic-chat-mock.js
       - name: Run dependency-free bridge tests
         run: node --test apps/starwell-server/test/atomic-chat.test.js
 
@@ -64,3 +78,105 @@ jobs:
         run: cargo fmt --manifest-path labs/atomic-engine-bridge-rs/Cargo.toml
       - name: Test locked crate
         run: cargo test --manifest-path labs/atomic-engine-bridge-rs/Cargo.toml --locked
+
+  end-to-end:
+    name: Prove Atomic current end to end
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/starwell-server/package-lock.json
+      - name: Install stable Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+      - name: Install locked bridge dependencies
+        run: npm ci --prefix apps/starwell-server --ignore-scripts
+      - name: Start mock engine and prove the complete route
+        shell: bash
+        env:
+          ATOMIC_CHAT_BASE_URL: http://127.0.0.1:1337/v1
+          ATOMIC_CHAT_MODEL: atomic-test-model
+          ATOMIC_BRIDGE_HOST: 127.0.0.1
+          ATOMIC_BRIDGE_PORT: '31337'
+        run: |
+          set -euo pipefail
+
+          node apps/starwell-server/test/fixtures/atomic-chat-mock.js > atomic-mock.log 2>&1 &
+          MOCK_PID=$!
+          node apps/starwell-server/atomic-bridge-server.js > atomic-bridge.log 2>&1 &
+          BRIDGE_PID=$!
+
+          cleanup() {
+            kill "$BRIDGE_PID" "$MOCK_PID" 2>/dev/null || true
+            wait "$BRIDGE_PID" "$MOCK_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          node <<'NODE'
+          const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          async function waitFor(url) {
+            let lastError;
+            for (let attempt = 0; attempt < 50; attempt += 1) {
+              try {
+                const response = await fetch(url, { signal: AbortSignal.timeout(500) });
+                if (response.ok) return response;
+                lastError = new Error(`${url} returned ${response.status}`);
+              } catch (error) {
+                lastError = error;
+              }
+              await wait(100);
+            }
+            throw lastError || new Error(`${url} did not become ready`);
+          }
+
+          await waitFor('http://127.0.0.1:1337/v1/models');
+          await waitFor('http://127.0.0.1:31337/health');
+
+          const modelsResponse = await fetch('http://127.0.0.1:31337/api/v1/engines/atomic/models');
+          if (!modelsResponse.ok) throw new Error(`models route returned ${modelsResponse.status}`);
+          const models = await modelsResponse.json();
+          if (models.modelCount !== 1 || models.models[0]?.id !== 'atomic-test-model') {
+            throw new Error(`unexpected models payload: ${JSON.stringify(models)}`);
+          }
+
+          const chatResponse = await fetch('http://127.0.0.1:31337/api/v1/engines/atomic/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'atomic-test-model',
+              messages: [
+                { role: 'system', content: 'Remain on the proving bench.' },
+                { role: 'user', content: 'Seldrin clear.' },
+              ],
+            }),
+          });
+          if (!chatResponse.ok) throw new Error(`chat route returned ${chatResponse.status}`);
+          const chat = await chatResponse.json();
+          if (chat.message?.content !== 'Atomic current complete: Seldrin clear.') {
+            throw new Error(`unexpected chat payload: ${JSON.stringify(chat)}`);
+          }
+
+          console.log(JSON.stringify({ models, chat }, null, 2));
+          NODE
+
+          cargo run --quiet --locked \
+            --manifest-path labs/atomic-engine-bridge-rs/Cargo.toml \
+            -- http://127.0.0.1:1337/v1 | tee atomic-rust-probe.json
+
+          grep -q '"reachable":true' atomic-rust-probe.json
+          grep -q 'atomic-test-model' atomic-rust-probe.json
+      - name: Show process logs on failure
+        if: failure()
+        run: |
+          echo '--- Atomic mock ---'
+          cat atomic-mock.log 2>/dev/null || true
+          echo '--- House bridge ---'
+          cat atomic-bridge.log 2>/dev/null || true
