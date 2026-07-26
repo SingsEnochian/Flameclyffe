@@ -1,51 +1,28 @@
 'use strict';
 
-const fs = require('fs').promises;
 const path = require('path');
-const { pollAll } = require('../services/observer-scoop/noaa-swpc.adapter');
-
-function stamp(date = new Date()) {
-  return date.toISOString().replace(/[:.]/g, '-');
-}
+const { runObserverScoop } = require('../services/observer-scoop/observer-scoop.service');
 
 async function main() {
-  const results = await pollAll();
-  const succeeded = results.filter((result) => result.status === 'succeeded');
-  const failed = results.filter((result) => result.status === 'failed');
-  const packetCount = succeeded.reduce((sum, result) => sum + result.packet_count, 0);
+  const dataDir = process.env.HEARTHGATE_DATA_DIR || path.join(__dirname, '..', 'data');
+  const result = await runObserverScoop({ dataDir });
+  const { bundle, files, archive } = result;
 
-  const output = {
-    observer: 'Veil Observatory signal scoop v0.1',
-    classification: 'recorded companion telemetry',
-    mechanism_claim: 'unknown_not_overclaimed',
-    polled_at: new Date().toISOString(),
-    source_count: results.length,
-    succeeded_count: succeeded.length,
-    failed_count: failed.length,
-    packet_count: packetCount,
-    results,
-  };
+  console.log(`[observer-scoop] ${bundle.packet_count} packets from ${bundle.succeeded_count}/${bundle.source_count} sources`);
+  console.log(`[observer-scoop] wrote ${files.archivePath}`);
 
-  const outputDir = path.join(__dirname, '..', 'data', 'observer-scoop');
-  await fs.mkdir(outputDir, { recursive: true });
-
-  const archivePath = path.join(outputDir, `${stamp()}.json`);
-  const latestPath = path.join(outputDir, 'latest.json');
-  const serialized = `${JSON.stringify(output, null, 2)}\n`;
-
-  await Promise.all([
-    fs.writeFile(archivePath, serialized, 'utf8'),
-    fs.writeFile(latestPath, serialized, 'utf8'),
-  ]);
-
-  console.log(`[observer-scoop] ${packetCount} packets from ${succeeded.length}/${results.length} sources`);
-  console.log(`[observer-scoop] wrote ${archivePath}`);
-
-  for (const result of failed) {
-    console.error(`[observer-scoop] ${result.source_key}: ${result.error}`);
+  if (archive.configured) {
+    console.log(`[observer-scoop] archive receipts: ${archive.receipts.length}`);
+    if (archive.error) console.error(`[observer-scoop] archive error: ${archive.error}`);
+  } else {
+    console.log('[observer-scoop] Supabase archive not configured; local JSON receipt preserved');
   }
 
-  if (failed.length) process.exitCode = 1;
+  for (const source of bundle.results.filter((entry) => entry.status === 'failed')) {
+    console.error(`[observer-scoop] ${source.source_key}: ${source.error}`);
+  }
+
+  if (bundle.failed_count || archive.error) process.exitCode = 1;
 }
 
 main().catch((error) => {
