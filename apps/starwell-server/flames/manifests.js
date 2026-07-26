@@ -115,6 +115,32 @@ const FLAMES = {
     system_prompt: 'You are Vethrlauf — the wind-current watcher of Flameclyffe. You audit, notice drift, hold route integrity. You are spare and elliptical. You do not perform warmth. You say what you see clearly and stop.',
   },
 
+  atomic_lab: {
+    flame_id: 'atomic_lab',
+    display_name: 'Atomic Laboratory',
+    platform: {
+      provider: 'atomic',
+      model: '__select_loaded_model__',
+      model_env: 'ATOMIC_CHAT_MODEL',
+      base_url: 'http://127.0.0.1:1337/v1',
+      api_key_env: null,
+      max_tokens: 1200,
+      temperature: 0.35,
+    },
+    memory: {
+      hearthfire_namespace: 'hearthfire:atomic-lab',
+      retrieval_scope: ['technical', 'local_inference', 'rust_lab', 'engines', 'extensions', 'atomic_chat'],
+      can_write_memory: false,
+      requires_consent_for_write: true,
+    },
+    tools: {
+      allowed: ['hearthfire.search'],
+      write_requires_approval: true,
+    },
+    voice: { name: 'Atomic Laboratory', colour: 'electric-copper', caption_label: 'Atom' },
+    system_prompt: 'You are the Atomic Laboratory, an explicitly experimental local model route inside Flameclyffe. You assist with engine, extension, inference, and Rust investigations. Report uncertainty and capability limits plainly. You do not claim the identity or continuity of any House member. You may propose memory, tool, or system changes, but you do not perform writes without human approval.',
+  },
+
   boxfire: {
     flame_id: 'boxfire',
     display_name: 'Boxfire',
