@@ -1,0 +1,46 @@
+name: Observer Array CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/starwell-server/**'
+      - 'apps/starwell/**'
+      - '.github/workflows/observer-array-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  observer-array:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install STARWELL dependencies
+        run: npm ci
+
+      - name: Check local Observer server syntax
+        run: |
+          node --check apps/starwell-server/observer-api.js
+          node --check apps/starwell-server/routes/observer-scoop.routes.js
+          node --check apps/starwell-server/services/observer-scoop/normalization.js
+          node --check apps/starwell-server/services/observer-scoop/noaa-swpc.adapter.js
+          node --check apps/starwell-server/services/observer-scoop/observer-scoop.runtime.js
+          node --check apps/starwell-server/services/observer-scoop/observer-scoop.service.js
+          node --check apps/starwell-server/services/observer-scoop/supabase.store.js
+
+      - name: Run Observer normalization and runtime tests
+        run: node --test apps/starwell-server/services/observer-scoop/*.test.js
+
+      - name: Build STARWELL including Veil Observatory
+        run: npm run starwell:build
