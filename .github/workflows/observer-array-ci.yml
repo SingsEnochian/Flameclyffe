@@ -40,13 +40,22 @@ jobs:
           node --check apps/starwell-server/services/observer-scoop/supabase.store.js
 
       - name: Run Observer normalization and runtime tests
-        run: node --test apps/starwell-server/services/observer-scoop/*.test.js
+        shell: bash
+        run: |
+          set +e
+          node --test apps/starwell-server/services/observer-scoop/*.test.js > /tmp/observer-tests.log 2>&1
+          status=$?
+          tail -n 200 /tmp/observer-tests.log
+          exit $status
 
       - name: Run STARWELL helper tests
         shell: bash
         run: |
-          set -o pipefail
-          npm run starwell:test 2>&1 | tail -n 160
+          set +e
+          npm run starwell:test > /tmp/starwell-tests.log 2>&1
+          status=$?
+          tail -n 200 /tmp/starwell-tests.log
+          exit $status
 
       - name: Build STARWELL including Veil Observatory
         run: npm run starwell:build
