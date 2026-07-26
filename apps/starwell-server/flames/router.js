@@ -2,6 +2,7 @@
 
 const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
+const { callAtomic } = require('./atomic-provider');
 const { FLAMES } = require('./manifests');
 
 const router = express.Router();
@@ -87,11 +88,21 @@ async function callOllama(manifest, systemPrompt, userMessage) {
 async function dispatchToProvider(manifest, systemPrompt, userMessage) {
   switch (manifest.platform.provider) {
     case 'anthropic': return callAnthropic(manifest, systemPrompt, userMessage);
+    case 'atomic': {
+      const result = await callAtomic(manifest, systemPrompt, userMessage);
+      return result.text;
+    }
     case 'deepseek':  return callDeepSeek(manifest, systemPrompt, userMessage);
     case 'openai':    return callOpenAI(manifest, systemPrompt, userMessage);
     case 'ollama':    return callOllama(manifest, systemPrompt, userMessage);
     default: throw new Error(`Provider "${manifest.platform.provider}" not implemented`);
   }
+}
+
+function resolvedModel(manifest) {
+  if (manifest.platform.provider !== 'atomic') return manifest.platform.model;
+  const modelEnv = manifest.platform.model_env || 'ATOMIC_CHAT_MODEL';
+  return process.env[modelEnv] || manifest.platform.model;
 }
 
 // ── Hearthfire / HydraDB ────────────────────────────────────────────────────
@@ -229,10 +240,11 @@ router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
     error = err.message;
   }
 
+  const model = resolvedModel(manifest);
   await logRouteInvocation({
     flame_id: manifest.flame_id,
     provider: manifest.platform.provider,
-    model: manifest.platform.model,
+    model,
     session_id: session_id ?? null,
     message_hash: Buffer.from(message).toString('base64').slice(0, 16),
     retrieved_source_ids: hearthCtx.snippets.map(s => s.id ?? 'unknown'),
@@ -246,7 +258,7 @@ router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
     flame_id: manifest.flame_id,
     display_name: manifest.display_name,
     provider: manifest.platform.provider,
-    model: manifest.platform.model,
+    model,
     message: reply,
     cited_sources: hearthCtx.snippets.map(s => s.id ?? 'hearthfire'),
     suggested_actions: [],
@@ -265,7 +277,8 @@ router.get('/flames/:flame_id/status', resolveFlame, (req, res) => {
     flame_id: manifest.flame_id,
     display_name: manifest.display_name,
     provider: manifest.platform.provider,
-    model: manifest.platform.model,
+    model: resolvedModel(manifest),
+    model_env: manifest.platform.model_env ?? null,
     base_url: manifest.platform.base_url ?? null,
     api_key_env: envVar,
     api_key_present: keyPresent,
