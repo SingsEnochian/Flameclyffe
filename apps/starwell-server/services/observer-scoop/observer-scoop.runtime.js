@@ -161,6 +161,7 @@ class ObserverScoopRuntime {
       this.state.lastStatus = failureCount ? 'DEGRADED' : 'SUCCESS';
       this.state.lastError = result.archive?.error || null;
       this.state.consecutiveFaults = failureCount ? this.state.consecutiveFaults + 1 : 0;
+      this.state.polling = false;
 
       if (trigger === 'interval') {
         if (failureCount) {
