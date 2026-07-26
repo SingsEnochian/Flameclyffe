@@ -8,6 +8,14 @@ export default defineConfig({
   plugins: [react()],
   root: 'apps/starwell',
   base: STARWELL_BASE,
+  server: {
+    proxy: {
+      '/api/observer-scoop': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: false,
+      },
+    },
+  },
   build: {
     outDir: '../../dist/starwell',
     emptyOutDir: true,
@@ -22,6 +30,7 @@ export default defineConfig({
         scfeLab: resolve(process.cwd(), 'apps/starwell/scfe-lab.html'),
         glyphStudio: resolve(process.cwd(), 'apps/starwell/glyph-studio/index.html'),
         signalWell: resolve(process.cwd(), 'apps/starwell/signal-well/index.html'),
+        veilObservatory: resolve(process.cwd(), 'apps/starwell/veil-observatory/index.html'),
       },
     },
   },
