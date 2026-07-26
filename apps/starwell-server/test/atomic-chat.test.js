@@ -8,6 +8,12 @@ const {
   normalizeBaseUrl,
 } = require('../providers/atomic-chat');
 const { sanitizeMessages } = require('../providers/atomic-boundaries');
+const {
+  UNCONFIGURED_MODEL,
+  callAtomic,
+  resolveAtomicModel,
+} = require('../flames/atomic-provider');
+const { FLAMES } = require('../flames/manifests');
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -113,4 +119,55 @@ test('route message boundary rejects empty and excessive input', () => {
     () => sanitizeMessages([{ role: 'user', content: 'x'.repeat(100001) }]),
     /exceeds 100000 characters/,
   );
+});
+
+test('Atomic Laboratory is opt-in and does not replace a House member', () => {
+  assert.equal(FLAMES.atomic_lab.platform.provider, 'atomic');
+  assert.equal(FLAMES.atomic_lab.platform.model, UNCONFIGURED_MODEL);
+  assert.equal(FLAMES.vee.platform.provider, 'openai');
+  assert.equal(FLAMES.yggdrasil.platform.provider, 'ollama');
+  assert.equal(FLAMES.atomic_lab.memory.can_write_memory, false);
+  assert.equal(FLAMES.atomic_lab.tools.write_requires_approval, true);
+});
+
+test('Atomic Flame requires an explicitly selected loaded model', () => {
+  assert.throws(
+    () => resolveAtomicModel(FLAMES.atomic_lab, {}),
+    (error) => error.code === 'ATOMIC_CHAT_MODEL_NOT_CONFIGURED',
+  );
+  assert.equal(
+    resolveAtomicModel(FLAMES.atomic_lab, { ATOMIC_CHAT_MODEL: 'atomic-test-model' }),
+    'atomic-test-model',
+  );
+});
+
+test('Atomic Flame preserves system and user boundaries through the provider', async () => {
+  let observedInput;
+  const result = await callAtomic(
+    FLAMES.atomic_lab,
+    'System law.',
+    'User signal.',
+    {
+      env: { ATOMIC_CHAT_MODEL: 'atomic-test-model' },
+      clientFactory: () => ({
+        chat: async (input) => {
+          observedInput = input;
+          return {
+            text: 'Atomic current complete.',
+            model: input.model,
+            finishReason: 'stop',
+            usage: { total_tokens: 12 },
+          };
+        },
+      }),
+    },
+  );
+
+  assert.equal(observedInput.model, 'atomic-test-model');
+  assert.deepEqual(observedInput.messages, [
+    { role: 'system', content: 'System law.' },
+    { role: 'user', content: 'User signal.' },
+  ]);
+  assert.equal(result.text, 'Atomic current complete.');
+  assert.equal(result.model, 'atomic-test-model');
 });
