@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.1.0",
+  "schemaVersion": "0.1.1",
   "runId": "2026-07-26T030708-0400",
   "evidenceDate": "2026-07-26",
   "timezone": "America/New_York",
@@ -9,7 +9,42 @@
   "sourceRegistry": {"path":"agents/hearthfire-source-registry.json","branch":"forge/agent-fleet-3am-ingest","schemaVersion":"0.1.0"},
   "publicationLane": "generated-data/night-watch-2026-07-25",
   "canonicalApplicationBranchChanged": false,
-  "rawTransportStatus": "PARTIAL: exact endpoint response bytes were not exposed by the retrieval runtime; source excerpts and normalised records are preserved. No transport checksum is claimed where raw bytes were unavailable.",
+  "sourceHealth": {
+    "approvedSourcesAttempted": 8,
+    "fullyParseable": 1,
+    "partiallyExposed": 1,
+    "failed": 3,
+    "reachableUnparsed": 3,
+    "planetaryKp": {"observedAt":"2026-07-26T03:00:00Z","Kp":2.0,"aRunning":7,"stationCount":8,"epistemicRegister":"direct_measurement_or_official_derived_product"},
+    "usgsDayCatalogue": {"generatedEpochMs":1785048140000,"count":206,"api":"2.7.0","latestEvent":{"id":"ci40661442","magnitude":0.74,"place":"11 km N of Aguanga, CA","eventEpochMs":1785047782780,"status":"automatic"},"epistemicRegister":"instrumented_event_catalogue"},
+    "failedSources": ["noaa-swpc-solar-wind-mag: HTTP 404","noaa-swpc-solar-wind-plasma: HTTP 404","open-meteo-local-current: retrieval layer returned no payload"],
+    "reachableUnparsedSources": ["noaa-swpc-f107","noaa-swpc-solar-radio-flux","noaa-swpc-goes-xray"]
+  },
+  "worldGraphPatchCandidates": {
+    "wakingEarth": ["obs:noaa-kp:2026-07-26T03:00:00Z","catalog:usgs-day:1785048140000"],
+    "observerDeep": ["reference:obs:noaa-kp:2026-07-26T03:00:00Z","reference:catalog:usgs-day:1785048140000"],
+    "status": "GENERATED_NEEDS_REVIEW"
+  },
+  "jSpaceEvidencePacket": {
+    "workspaceId": "jspace:night-watch:2026-07-26",
+    "activeWorlds": ["waking-earth","observer-deep"],
+    "activeNodes": ["obs:noaa-kp:2026-07-26T03:00:00Z","catalog:usgs-day:1785048140000"],
+    "unresolvedQuestions": ["NOAA solar-wind replacement contracts","raw-body transport and checksums","current-row parser exposure for reachable NOAA JSON products"]
+  },
+  "boxfireQA": {
+    "result": "PARTIAL_NOT_VERIFIED",
+    "candidateSourcesPromoted": 0,
+    "discoveredCodeExecuted": 0,
+    "packagesInstalled": 0,
+    "schemaChanges": 0,
+    "permissionChanges": 0,
+    "canonChanges": 0,
+    "privateSourcesAccessed": 0,
+    "canonicalBranchWrites": 0,
+    "releaseStatus": "BLOCKED_FOR_PRODUCTION"
+  },
+  "rawTransportStatus": "PARTIAL: exact endpoint response bytes were not exposed by the retrieval runtime. No transport checksum is claimed where raw bytes were unavailable.",
   "hashingStatus": "UNAVAILABLE: local hashing runtime returned a client error during this run.",
+  "uploadLimitations": "The manifest upload succeeded. Separate source-health, graph-patch, J-space and QA file writes were rejected by connector safety checks, so their review data is embedded here.",
   "epistemicBoundary": "Signals, source states, derived packets, and proposals only. No causal, supernatural, diagnostic, or prophetic certification."
 }
