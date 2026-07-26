@@ -13,13 +13,14 @@ function stamp(date = new Date()) {
   return date.toISOString().replace(/[:.]/g, '-');
 }
 
-function makeBundle(results) {
+function makeBundle(results, operatingMode = 'MANUAL') {
   const succeeded = results.filter((result) => result.status === 'succeeded');
   const failed = results.filter((result) => result.status === 'failed');
   return {
     observer: 'Veil Observatory signal scoop v0.1',
     classification: 'recorded companion telemetry',
     mechanism_claim: 'unknown_not_overclaimed',
+    operating_mode: operatingMode,
     polled_at: new Date().toISOString(),
     source_count: results.length,
     succeeded_count: succeeded.length,
@@ -85,6 +86,7 @@ function localSnapshot(bundle) {
   return {
     generated_at: bundle.polled_at,
     mechanism_claim: bundle.mechanism_claim,
+    operating_mode: bundle.operating_mode || 'MANUAL',
     storage: 'local-json',
     feeds: bundle.results.map((result) => ({
       source_key: result.source_key,
@@ -109,17 +111,22 @@ async function getObserverSnapshot(dataDir, options = {}) {
   return localSnapshot(await readLocalBundle(dataDir));
 }
 
-async function runObserverScoop({ dataDir, persist = true, ...options } = {}) {
+async function runObserverScoop({
+  dataDir,
+  persist = true,
+  operatingMode = 'MANUAL',
+  ...options
+} = {}) {
   if (!dataDir) throw new Error('dataDir is required');
   const results = await pollAll(options);
-  const bundle = makeBundle(results);
+  const bundle = makeBundle(results, operatingMode);
   const files = await writeBundle(bundle, dataDir);
   let archiveReceipts = [];
   let archiveError = null;
 
   if (persist && hasSupabaseStoreConfig(options.env)) {
     try {
-      archiveReceipts = await persistPollResults(results, options);
+      archiveReceipts = await persistPollResults(results, { ...options, operatingMode });
     } catch (error) {
       archiveError = error instanceof Error ? error.message : String(error);
     }
