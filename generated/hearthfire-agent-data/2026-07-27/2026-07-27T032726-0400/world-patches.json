@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "0.1.0",
+  "generatedAt": "2026-07-27T07:27:26Z",
+  "patchStatus": "GENERATED_NEEDS_REVIEW",
+  "patches": [
+    {
+      "worldId": "waking-earth",
+      "nodes": [
+        {
+          "id": "obs:noaa-swpc-planetary-kp:2026-07-27T00:00:00",
+          "type": "Observation",
+          "sourceId": "noaa-swpc-planetary-kp",
+          "observedAt": "2026-07-27T00:00:00Z",
+          "retrievedAt": "2026-07-27T07:27:26Z",
+          "values": {"Kp": 1.67, "a_running": 6, "station_count": 8},
+          "epistemicRegister": "direct_measurement_or_official_derived_product",
+          "verificationStatus": "captured_unreviewed",
+          "qualityFlags": ["official_near_real_time_product"]
+        },
+        {
+          "id": "catalogue:usgs-earthquakes-day:1785128605000",
+          "type": "EventCatalogueSnapshot",
+          "sourceId": "usgs-earthquakes-day",
+          "observedAtEpochMs": 1785128605000,
+          "retrievedAt": "2026-07-27T07:27:26Z",
+          "values": {"eventCount": 221, "apiVersion": "2.7.0"},
+          "epistemicRegister": "instrumented_event_catalogue",
+          "verificationStatus": "captured_unreviewed",
+          "qualityFlags": ["full_original_bytes_unavailable"]
+        }
+      ],
+      "edges": [
+        {"type": "observed_in_world", "from": "obs:noaa-swpc-planetary-kp:2026-07-27T00:00:00", "to": "world:waking-earth"},
+        {"type": "observed_in_world", "from": "catalogue:usgs-earthquakes-day:1785128605000", "to": "world:waking-earth"}
+      ]
+    },
+    {
+      "worldId": "observer-deep",
+      "sourceRefs": [
+        "obs:noaa-swpc-planetary-kp:2026-07-27T00:00:00",
+        "catalogue:usgs-earthquakes-day:1785128605000"
+      ],
+      "note": "References Waking Earth observations without promoting them into interpretation, anomaly, symbolism, narrative, or causal claims."
+    }
+  ]
+}
