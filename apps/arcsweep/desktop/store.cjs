@@ -9,8 +9,8 @@ function safeStamp(date = new Date()) {
   return date.toISOString().replace(/[:.]/g, '-');
 }
 
-function sha256(text) {
-  return crypto.createHash('sha256').update(text).digest('hex');
+function sha256(data) {
+  return crypto.createHash('sha256').update(data).digest('hex');
 }
 
 function createStorePaths(root) {
@@ -20,6 +20,7 @@ function createStorePaths(root) {
     stateFile: path.join(root, 'state', 'arcsweep-state.json'),
     backupDir: path.join(root, 'backups'),
     attachmentDir: path.join(root, 'attachments'),
+    ingestDir: path.join(root, 'ingest'),
     receiptDir: path.join(root, 'receipts'),
     receiptFile: path.join(root, 'receipts', 'storage-receipts.jsonl'),
   };
@@ -30,6 +31,7 @@ async function ensureStore(paths) {
     fsp.mkdir(paths.stateDir, { recursive: true }),
     fsp.mkdir(paths.backupDir, { recursive: true }),
     fsp.mkdir(paths.attachmentDir, { recursive: true }),
+    fsp.mkdir(paths.ingestDir, { recursive: true }),
     fsp.mkdir(paths.receiptDir, { recursive: true }),
   ]);
 }
@@ -126,26 +128,42 @@ async function copyAttachment(paths, sourcePath) {
   await ensureStore(paths);
   const stats = await fsp.stat(sourcePath);
   if (!stats.isFile()) throw new Error('Attachment source is not a file.');
-  const ext = path.extname(sourcePath).slice(0, 12);
+  const ext = path.extname(sourcePath).slice(0, 12).toLowerCase();
   const id = crypto.randomUUID();
   const name = `${id}${ext}`;
-  const destination = path.join(paths.attachmentDir, name);
-  await fsp.copyFile(sourcePath, destination);
+  const destination = path.join(paths.ingestDir, name);
+  const bytes = await fsp.readFile(sourcePath);
+  const digest = sha256(bytes);
+  await fsp.writeFile(destination, bytes);
   const originalName = path.basename(sourcePath);
   const receipt = {
     id,
     name: originalName,
     storedName: name,
-    relativePath: path.join('attachments', name),
+    relativePath: path.join('ingest', name),
     size: stats.size,
+    extension: ext,
+    sha256: digest,
+    canonStatus: 'non-canon',
+    reviewStatus: 'unreviewed',
+    sourceClass: 'uploaded-reference',
     addedAt: new Date().toISOString(),
   };
-  await appendReceipt(paths, { action: 'attachment-add', ...receipt });
+  await appendReceipt(paths, { action: 'source-ingest', ...receipt });
   return receipt;
 }
 
 function resolveAttachment(paths, attachment) {
-  const storedName = attachment?.storedName || path.basename(attachment?.relativePath || '');
+  const relativePath = String(attachment?.relativePath || '');
+  if (relativePath) {
+    const portablePath = relativePath.replace(/[\\/]+/g, path.sep);
+    const resolved = path.resolve(paths.root, portablePath);
+    const root = path.resolve(paths.root);
+    if (!resolved.startsWith(root + path.sep)) throw new Error('Attachment path escaped its data directory.');
+    return resolved;
+  }
+
+  const storedName = attachment?.storedName || '';
   if (!/^[a-zA-Z0-9_.-]+$/.test(storedName)) throw new Error('Invalid attachment path.');
   return path.join(paths.attachmentDir, storedName);
 }
