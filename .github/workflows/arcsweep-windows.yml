@@ -7,14 +7,17 @@ on:
       - 'apps/arcsweep/**'
       - 'package.json'
       - 'package-lock.json'
+      - '.nvmrc'
       - '.github/workflows/arcsweep-windows.yml'
   push:
     branches:
       - feature/arcsweep-local-0.1
+      - fix/arcsweep-electron-43-launch
     paths:
       - 'apps/arcsweep/**'
       - 'package.json'
       - 'package-lock.json'
+      - '.nvmrc'
       - '.github/workflows/arcsweep-windows.yml'
 
 permissions:
@@ -23,10 +26,12 @@ permissions:
 jobs:
   windows-installer:
     runs-on: windows-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       ARCSWEEP_VERSION: '0.2.1'
+      ARCSWEEP_ELECTRON_VERSION: '43.2.0'
+      ARCSWEEP_BUILDER_VERSION: '26.15.3'
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -34,7 +39,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install web dependencies
@@ -48,18 +53,46 @@ jobs:
           npm run arcsweep:build
           npm run arcsweep:stage:desktop
 
-      - name: Install desktop dependencies
-        run: npm install --prefix apps/arcsweep/desktop
+      - name: Install locked desktop dependencies
+        shell: pwsh
+        run: |
+          $lock = 'apps/arcsweep/desktop/package-lock.json'
+          if (Test-Path $lock) {
+            npm ci --prefix apps/arcsweep/desktop
+          } else {
+            npm install --prefix apps/arcsweep/desktop --package-lock=true
+          }
+          if (-not (Test-Path $lock)) { throw 'Desktop package lock was not generated.' }
 
-      - name: Verify desktop source
+      - name: Verify desktop source and runtime pins
         shell: pwsh
         run: |
           node --check apps/arcsweep/desktop/main.cjs
           node --check apps/arcsweep/desktop/preload.cjs
           node --check apps/arcsweep/desktop/store.cjs
+          node --check apps/arcsweep/desktop/runtime-receipt.cjs
           if (-not (Test-Path 'apps/arcsweep/desktop/app/index.html')) { throw 'Staged renderer missing.' }
-          $packageVersion = (Get-Content 'apps/arcsweep/desktop/package.json' -Raw | ConvertFrom-Json).version
-          if ($packageVersion -ne $env:ARCSWEEP_VERSION) { throw "Package version $packageVersion does not match workflow version $env:ARCSWEEP_VERSION." }
+
+          $package = Get-Content 'apps/arcsweep/desktop/package.json' -Raw | ConvertFrom-Json
+          if ($package.version -ne $env:ARCSWEEP_VERSION) {
+            throw "Package version $($package.version) does not match workflow version $env:ARCSWEEP_VERSION."
+          }
+          if ($package.devDependencies.electron -ne $env:ARCSWEEP_ELECTRON_VERSION) {
+            throw "Electron is not pinned exactly to $env:ARCSWEEP_ELECTRON_VERSION."
+          }
+          if ($package.devDependencies.'electron-builder' -ne $env:ARCSWEEP_BUILDER_VERSION) {
+            throw "electron-builder is not pinned exactly to $env:ARCSWEEP_BUILDER_VERSION."
+          }
+
+          $installedElectron = node -p "require('./apps/arcsweep/desktop/node_modules/electron/package.json').version"
+          $installedBuilder = node -p "require('./apps/arcsweep/desktop/node_modules/electron-builder/package.json').version"
+          if ($installedElectron -ne $env:ARCSWEEP_ELECTRON_VERSION) {
+            throw "Installed Electron $installedElectron does not match $env:ARCSWEEP_ELECTRON_VERSION."
+          }
+          if ($installedBuilder -ne $env:ARCSWEEP_BUILDER_VERSION) {
+            throw "Installed electron-builder $installedBuilder does not match $env:ARCSWEEP_BUILDER_VERSION."
+          }
+
           $main = Get-Content 'apps/arcsweep/desktop/main.cjs' -Raw
           foreach ($required in @('forceWindowVisible', 'display-removed', 'fallback-timeout', 'page-title-updated', 'desktop.log')) {
             if ($main -notmatch [regex]::Escape($required)) { throw "Visible-window repair marker missing: $required" }
@@ -74,17 +107,55 @@ jobs:
           if (-not (Test-Path 'dist/arcsweep-desktop/win-unpacked/Hearthgate Arcsweep.exe')) { throw 'Unpacked executable missing.' }
           if (-not (Test-Path 'dist/arcsweep-desktop/win-unpacked/resources/app.asar')) { throw 'Packaged app archive missing.' }
 
+      - name: Smoke launch unpacked application
+        shell: pwsh
+        run: |
+          $exe = (Resolve-Path 'dist/arcsweep-desktop/win-unpacked/Hearthgate Arcsweep.exe').Path
+          $dataRoot = Join-Path $env:APPDATA 'Hearthgate\Arcsweep'
+          $log = Join-Path $dataRoot 'logs\desktop.log'
+          if (Test-Path $dataRoot) { Remove-Item $dataRoot -Recurse -Force }
+
+          $process = Start-Process -FilePath $exe -PassThru
+          try {
+            $deadline = (Get-Date).AddSeconds(20)
+            $visible = $false
+            while ((Get-Date) -lt $deadline) {
+              Start-Sleep -Milliseconds 500
+              $process.Refresh()
+              if ($process.HasExited) {
+                throw "Arcsweep exited during launch smoke test with code $($process.ExitCode)."
+              }
+              if (Test-Path $log) {
+                $text = Get-Content $log -Raw
+                if ($text -match '"event":"window-shown"') {
+                  $visible = $true
+                  break
+                }
+              }
+            }
+            if (-not $visible) {
+              throw "Arcsweep remained alive but did not record a visible window within 20 seconds. Diagnostics: $log"
+            }
+          } finally {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+          }
+
       - name: Build NSIS installer
         run: npm --prefix apps/arcsweep/desktop run electron:build:win
+
+      - name: Create runtime receipt
+        run: npm --prefix apps/arcsweep/desktop run runtime:receipt
 
       - name: Create portable ZIP and checksums
         shell: pwsh
         run: |
           $portable = "dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-$env:ARCSWEEP_VERSION-x64.zip"
           $installer = "dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-$env:ARCSWEEP_VERSION-x64.exe"
+          $receipt = 'dist/arcsweep-desktop/RUNTIME-RECEIPT.json'
           Compress-Archive -Path 'dist/arcsweep-desktop/win-unpacked/*' -DestinationPath $portable -Force
           if (-not (Test-Path $installer)) { throw 'Expected NSIS installer missing.' }
-          $files = @($installer, $portable)
+          if (-not (Test-Path $receipt)) { throw 'Runtime receipt missing.' }
+          $files = @($installer, $portable, $receipt)
           $lines = foreach ($file in $files) {
             $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
             "$hash  $(Split-Path $file -Leaf)"
@@ -98,10 +169,11 @@ jobs:
       - name: Upload installer only
         uses: actions/upload-artifact@v4
         with:
-          name: hearthgate-arcsweep-installer-0.2.1-x64
+          name: hearthgate-arcsweep-installer-0.2.1-electron43-x64
           path: |
             dist/arcsweep-desktop/Hearthgate-Arcsweep-Setup-0.2.1-x64.exe
             dist/arcsweep-desktop/INSTALLER-SHA256.txt
+            dist/arcsweep-desktop/RUNTIME-RECEIPT.json
           compression-level: 0
           if-no-files-found: error
           retention-days: 21
@@ -109,10 +181,28 @@ jobs:
       - name: Upload portable edition separately
         uses: actions/upload-artifact@v4
         with:
-          name: hearthgate-arcsweep-portable-0.2.1-x64
+          name: hearthgate-arcsweep-portable-0.2.1-electron43-x64
           path: |
             dist/arcsweep-desktop/Hearthgate-Arcsweep-Portable-0.2.1-x64.zip
             dist/arcsweep-desktop/PORTABLE-SHA256.txt
+            dist/arcsweep-desktop/RUNTIME-RECEIPT.json
           compression-level: 0
           if-no-files-found: error
           retention-days: 21
+
+      - name: Upload generated desktop lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: arcsweep-desktop-package-lock-electron43
+          path: apps/arcsweep/desktop/package-lock.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload launch diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arcsweep-electron43-launch-diagnostics
+          path: ${{ env.APPDATA }}\Hearthgate\Arcsweep\logs\desktop.log
+          if-no-files-found: ignore
+          retention-days: 7
