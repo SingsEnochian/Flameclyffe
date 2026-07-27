@@ -1,18 +1,22 @@
 {
   "name": "hearthgate-arcsweep",
   "productName": "Hearthgate Arcsweep",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A private, local-first world planning, continuity, and return instrument.",
   "type": "commonjs",
   "main": "main.cjs",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "electron:dev": "electron .",
     "electron:pack:win": "electron-builder --win dir --x64 --publish never",
-    "electron:build:win": "electron-builder --win nsis --x64 --publish never"
+    "electron:build:win": "electron-builder --win nsis --x64 --publish never",
+    "runtime:receipt": "node runtime-receipt.cjs"
   },
   "devDependencies": {
-    "electron": "^35.7.5",
-    "electron-builder": "^25.1.8"
+    "electron": "43.2.0",
+    "electron-builder": "26.15.3"
   },
   "build": {
     "appId": "com.hearthweave.arcsweep",
