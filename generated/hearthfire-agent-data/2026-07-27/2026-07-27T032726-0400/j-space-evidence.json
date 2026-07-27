@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "0.1.0",
+  "workspaceId": "jspace:night-watch:2026-07-27T032726-0400",
+  "query": "Collect approved Earth-local live or near-real-time evidence for the current Night Watch window.",
+  "createdAt": "2026-07-27T07:27:26Z",
+  "activeWorlds": ["waking-earth", "observer-deep"],
+  "activeNodes": [
+    "obs:noaa-swpc-planetary-kp:2026-07-27T00:00:00",
+    "catalogue:usgs-earthquakes-day:1785128605000"
+  ],
+  "activeEdges": ["observed_in_world"],
+  "approvedSourcesAttempted": [
+    "noaa-swpc-planetary-kp",
+    "noaa-swpc-solar-wind-mag",
+    "noaa-swpc-solar-wind-plasma",
+    "noaa-swpc-f107",
+    "noaa-swpc-solar-radio-flux",
+    "noaa-swpc-goes-xray",
+    "usgs-earthquakes-day",
+    "open-meteo-local-current"
+  ],
+  "retrievedEvidence": [
+    {
+      "sourceId": "noaa-swpc-planetary-kp",
+      "status": "parsed",
+      "latestExposedObservation": "2026-07-27T00:00:00Z"
+    },
+    {
+      "sourceId": "usgs-earthquakes-day",
+      "status": "partially_parsed",
+      "eventCount": 221,
+      "generatedEpochMs": 1785128605000
+    }
+  ],
+  "unresolvedQuestions": [
+    "Which reviewed replacement contracts should supersede the removed NOAA solar-wind endpoints?",
+    "Can exact response bytes and HTTP metadata be exposed to the Node 24 harvester in the workflow-artifact lane?",
+    "Should GloTEC receive a bounded regional sandbox adapter?",
+    "Is there a documented machine-readable DSN Now interface with explicit automated-use permission?"
+  ],
+  "discardedCandidates": [
+    {
+      "sourceId": "noaa-rtsw-one-minute",
+      "reason": "candidate replacement only; not approved in registry"
+    },
+    {
+      "sourceId": "noaa-summary-solar-wind",
+      "reason": "candidate companion only; not approved in registry"
+    },
+    {
+      "sourceId": "noaa-glotec",
+      "reason": "candidate adapter not approved"
+    },
+    {
+      "sourceId": "intermagnet-near-real-time",
+      "reason": "candidate adapter not approved"
+    },
+    {
+      "sourceId": "ecallisto-solar-radio",
+      "reason": "licence and adapter review incomplete"
+    },
+    {
+      "sourceId": "nasa-dsn-now",
+      "reason": "metadata-only candidate; no documented machine contract approved"
+    },
+    {
+      "sourceId": "gwosc",
+      "reason": "historical archive, not live Night Watch source"
+    }
+  ],
+  "epistemicBoundary": "This workspace contains source states, measurements, official derived products, and event catalogue records only. It contains no causal, supernatural, diagnostic, prophetic, or anomaly certification."
+}
