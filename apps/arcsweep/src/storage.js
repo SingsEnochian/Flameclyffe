@@ -1,4 +1,6 @@
 import { validateImportedState } from './core.js';
+import { HOUSE_DR_BUNDLE } from './house-dr-bundle.js';
+import { applyHouseDrBundle } from './house-dr-library.js';
 import { createEmptyRoomCollections, normaliseRoomCollections } from './rooms.js';
 import { createWorld, normaliseWorld } from './worlds.js';
 
@@ -13,7 +15,7 @@ export function createDefaultState() {
   const now = new Date().toISOString();
   const world = createWorld(uid('world'), now);
   return {
-    version: '0.2.0',
+    version: '0.2.1',
     settings: {
       crLabel: 'Waking World',
       drLabel: 'Desired Reality',
@@ -52,6 +54,7 @@ export function createDefaultState() {
       name: '', form: '', sensorySignature: '', notes: '', updatedAt: now,
     },
     returnHistory: [],
+    houseBundles: [],
     provenance: {
       createdAt: now,
       updatedAt: now,
@@ -97,7 +100,7 @@ export function normaliseState(value) {
   return {
     ...defaults,
     ...imported,
-    version: '0.2.0',
+    version: '0.2.1',
     settings: { ...defaults.settings, ...(imported.settings || {}) },
     worlds,
     activeWorldId,
@@ -108,6 +111,7 @@ export function normaliseState(value) {
     records: normaliseRoomCollections(imported.records),
     appearance: { ...defaults.appearance, ...(imported.appearance || {}) },
     returnHistory: Array.isArray(imported.returnHistory) ? imported.returnHistory : [],
+    houseBundles: Array.isArray(imported.houseBundles) ? imported.houseBundles : [],
     provenance: {
       ...defaults.provenance,
       ...(imported.provenance || {}),
@@ -115,6 +119,21 @@ export function normaliseState(value) {
       storage: desktop ? 'desktop-local-store' : 'browser-development-fallback',
     },
   };
+}
+
+function hasCurrentHouseBundle(state) {
+  return state.houseBundles?.some((bundle) => (
+    bundle.id === HOUSE_DR_BUNDLE.id && bundle.version === HOUSE_DR_BUNDLE.version
+  ));
+}
+
+export function installCurrentHouseDrLibrary(state, now = new Date().toISOString()) {
+  const normalised = normaliseState(state);
+  if (hasCurrentHouseBundle(normalised)) {
+    return { state: normalised, changed: false, receipt: null, summary: null };
+  }
+  const result = applyHouseDrBundle(normalised, HOUSE_DR_BUNDLE, now);
+  return { ...result, changed: true };
 }
 
 function readBrowserState() {
@@ -129,13 +148,27 @@ function readBrowserState() {
 export async function loadState() {
   if (desktop?.loadState) {
     const result = await desktop.loadState();
-    if (result?.state) return normaliseState(result.state);
-    const legacy = readBrowserState();
-    const initial = legacy || createDefaultState();
-    await desktop.saveState(initial, { reason: legacy ? 'browser-migration' : 'first-run' });
-    return normaliseState(initial);
+    const legacy = result?.state ? null : readBrowserState();
+    const initial = result?.state || legacy || createDefaultState();
+    const installed = installCurrentHouseDrLibrary(initial);
+    if (installed.changed) {
+      if (result?.state && desktop.createBackup) {
+        await desktop.createBackup('before-house-dr-library-update').catch(() => null);
+      }
+      await desktop.saveState(installed.state, {
+        reason: result?.state ? 'house-dr-library-update' : (legacy ? 'browser-migration-house-library' : 'first-run-house-library'),
+        bundleId: installed.receipt.id,
+        bundleVersion: installed.receipt.version,
+      });
+    } else if (!result?.state) {
+      await desktop.saveState(installed.state, { reason: legacy ? 'browser-migration' : 'first-run' });
+    }
+    return installed.state;
   }
-  return readBrowserState() || createDefaultState();
+
+  const installed = installCurrentHouseDrLibrary(readBrowserState() || createDefaultState());
+  if (installed.changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(installed.state));
+  return installed.state;
 }
 
 let saveChain = Promise.resolve();
@@ -176,13 +209,15 @@ export async function exportState(state) {
 }
 
 export async function importState(file = null) {
+  let imported = null;
   if (desktop?.importState) {
     const result = await desktop.importState();
-    return result?.state ? normaliseState(result.state) : null;
+    imported = result?.state || null;
+  } else if (file) {
+    const text = await file.text();
+    imported = JSON.parse(text);
   }
-  if (!file) return null;
-  const text = await file.text();
-  return normaliseState(JSON.parse(text));
+  return imported ? installCurrentHouseDrLibrary(imported).state : null;
 }
 
 export async function getStorageInfo() {
@@ -201,7 +236,7 @@ export async function listBackups() {
 export async function restoreBackup(name) {
   if (!desktop?.restoreBackup) return null;
   const result = await desktop.restoreBackup(name);
-  return result?.state ? normaliseState(result.state) : null;
+  return result?.state ? installCurrentHouseDrLibrary(result.state).state : null;
 }
 
 export async function addAttachments() {
