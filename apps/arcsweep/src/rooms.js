@@ -9,6 +9,20 @@ export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
       ['tags', 'Tags', 'text'],
     ],
   },
+  ingest: {
+    label: 'Non-Canon Ingest', glyph: '⇣', category: 'evidence', description: 'Private source intake. Uploaded material remains non-canon until an explicit Steward review creates a separate canon record.',
+    fields: [
+      ['title', 'Source title', 'text', true],
+      ['sourceType', 'Source type', 'select', false, ['Document', 'Image', 'Audio', 'Video', 'Dataset', 'Web capture', 'Archive', 'Other']],
+      ['sourceCreator', 'Author, creator, or origin', 'text'],
+      ['sourceLocation', 'Original location or citation', 'text'],
+      ['reviewStatus', 'Review status', 'select', false, ['Non-canon intake', 'Under review', 'Reference only', 'Canon candidate', 'Rejected', 'Archived']],
+      ['summary', 'Summary or extracted notes', 'textarea'],
+      ['provenanceNotes', 'Provenance and handling notes', 'textarea'],
+      ['canonBoundary', 'Canon boundary', 'select', false, ['Non-canon source', 'Candidate for Steward review']],
+    ],
+    attachments: true,
+  },
   relationships: {
     label: 'Relationships', glyph: '✧', category: 'relationships', description: 'People, bonds, agreements, histories, and living boundaries.',
     fields: [
@@ -155,7 +169,7 @@ export const WORLD_SECTION_DEFINITIONS = Object.freeze({
 
 export const IMPLEMENTED_APPLET_IDS = Object.freeze(new Set([
   'portal', 'worlds', 'about-world', 'summon', 'veil-mode', 'time', 'arrival',
-  'timeline', 'scripts', 'identity', 'competencies', 'safety-weave',
+  'timeline', 'scripts', 'ingest', 'identity', 'competencies', 'safety-weave',
   'continuity-recall', 'companion', 'relationships', 'scenarios', 'calendar',
   'diary', 'playlists', 'visualisations', 'appearance', 'wardrobe', 'outfits',
   'belongings', 'places', 'family-tree', 'photo-gallery', 'theme', 'forge',
