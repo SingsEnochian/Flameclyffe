@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "0.1.0",
+  "generatedAt": "2026-07-27T07:27:26Z",
+  "agent": "boxfire-quality-sentinel",
+  "result": "PARTIAL_NOT_VERIFIED",
+  "checks": {
+    "approvedSourcesAttempted": 8,
+    "fullyParsedSources": 1,
+    "partiallyParsedSources": 1,
+    "reachableUnparsedSources": 3,
+    "failedSources": 3,
+    "candidateSourcesPromoted": 0,
+    "discoveredCodeExecuted": 0,
+    "packagesInstalled": 0,
+    "schemaChanges": 0,
+    "permissionChanges": 0,
+    "canonChanges": 0,
+    "privateSourcesAccessed": 0,
+    "canonicalApplicationBranchWrites": 0,
+    "worldPatchesWritten": 2,
+    "jSpacePacketWritten": true,
+    "exactRawBodiesPreserved": false,
+    "transportSha256Verified": false
+  },
+  "failures": [
+    {
+      "class": "source_contract_failure",
+      "sourceId": "noaa-swpc-solar-wind-mag",
+      "detail": "Approved endpoint returned HTTP 404."
+    },
+    {
+      "class": "source_contract_failure",
+      "sourceId": "noaa-swpc-solar-wind-plasma",
+      "detail": "Approved endpoint returned HTTP 404."
+    },
+    {
+      "class": "retrieval_layer_failure",
+      "sourceId": "open-meteo-local-current",
+      "detail": "No usable payload was returned."
+    },
+    {
+      "class": "evidence_transport_limit",
+      "detail": "Exact original response bytes and complete response headers were unavailable; a direct download attempt failed with a connector client error."
+    }
+  ],
+  "warnings": [
+    "The latest exposed planetary Kp interval was 2026-07-27T00:00:00Z, approximately 7 hours 27 minutes before retrieval.",
+    "F10.7, solar-radio flux, and GOES X-ray feeds were reachable but no current rows were exposed by the retrieval layer.",
+    "USGS catalogue metadata and selected rows were parsed, but the exact original GeoJSON body was not preserved."
+  ],
+  "releaseGate": "BLOCKED_FOR_PRODUCTION_EVIDENCE_CLAIMS",
+  "allowedUse": "Reviewable partial evidence packet and source-health record only."
+}
