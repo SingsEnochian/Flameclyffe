@@ -31,6 +31,19 @@ test('normalisation preserves known room records and repairs malformed rooms', (
   assert.equal('unknown' in normalised, false);
 });
 
+test('non-canon ingest is visible, attachment-backed, and has no direct canon status', () => {
+  const applet = APPLET_CATALOGUE.find((item) => item.id === 'ingest');
+  const definition = COLLECTION_ROOM_DEFINITIONS.ingest;
+  assert.equal(applet?.defaultVisible, true);
+  assert.equal(definition.attachments, true);
+
+  const reviewField = definition.fields.find(([name]) => name === 'reviewStatus');
+  const boundaryField = definition.fields.find(([name]) => name === 'canonBoundary');
+  assert.ok(reviewField[4].includes('Canon candidate'));
+  assert.equal(reviewField[4].includes('Canon'), false);
+  assert.deepEqual(boundaryField[4], ['Non-canon source', 'Candidate for Steward review']);
+});
+
 test('world section rooms cover identity, safety, recall, companion, and theme', () => {
   for (const id of ['identity', 'safety-weave', 'continuity-recall', 'companion', 'theme']) {
     assert.ok(WORLD_SECTION_DEFINITIONS[id]);
