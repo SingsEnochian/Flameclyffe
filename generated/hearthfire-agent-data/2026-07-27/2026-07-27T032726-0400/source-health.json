@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "0.1.0",
+  "evidenceDate": "2026-07-27",
+  "packetLocalTime": "2026-07-27T03:27:26-04:00",
+  "packetUtcTime": "2026-07-27T07:27:26Z",
+  "registryRef": "forge/agent-fleet-3am-ingest:agents/hearthfire-source-registry.json",
+  "registrySchemaVersion": "0.1.0",
+  "rawTransport": {
+    "status": "UNAVAILABLE",
+    "reason": "The live retrieval layer exposed parsed web representations but not exact original response bytes or complete response headers. A direct raw-body download attempt failed with a connector client error. No transport SHA-256 values are claimed."
+  },
+  "sources": [
+    {
+      "sourceId": "noaa-swpc-planetary-kp",
+      "endpoint": "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+      "status": "OK_PARSED",
+      "retrievedAt": "2026-07-27T07:27:26Z",
+      "latestExposedObservation": {
+        "time_tag": "2026-07-27T00:00:00",
+        "Kp": 1.67,
+        "a_running": 6,
+        "station_count": 8
+      },
+      "qualityFlags": ["official_near_real_time_product", "latest_exposed_interval_precedes_retrieval_by_approximately_7h27m"],
+      "missingness": [],
+      "epistemicRegister": "direct_measurement_or_official_derived_product"
+    },
+    {
+      "sourceId": "noaa-swpc-solar-wind-mag",
+      "endpoint": "https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json",
+      "status": "FAILED_HTTP_404",
+      "retrievedAt": "2026-07-27T07:27:26Z",
+      "qualityFlags": ["approved_contract_broken"],
+      "missingness": ["all_fields"],
+      "epistemicRegister": "direct_measurement"
+    },
+    {
+      "sourceId": "noaa-swpc-solar-wind-plasma",
+      "endpoint": "https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json",
+      "status": "FAILED_HTTP_404",
+      "retrievedAt": "2026-07-27T07:27:26Z",
+      "qualityFlags": ["approved_contract_broken"],
+      "missingness": ["all_fields"],
+      "epistemicRegister": "direct_measurement"
+    },
+    {
+      "sourceId": "noaa-swpc-f107",
+      "endpoint": "https://services.swpc.noaa.gov/json/f107_cm_flux.json",
+      "status": "REACHABLE_UNPARSED",
+      "retrievedAt": "2026-07-27T07:27:26Z",
+      "qualityFlags": ["official_json_reached", "current_row_not_exposed_by_retrieval_layer"],
+      "missingness": ["current_value", "observation_timestamp", "units"],
+      "epistemicRegister": "official_measurement_product"
+    },
+    {
+      "sourceId": "noaa-swpc-solar-radio-flux",
+      "endpoint": "https://services.swpc.noaa.gov/json/solar-radio-flux.json",
+      "status": "REACHABLE_UNPARSED",
+      "retrievedAt": "2026-07-27T07:27:26Z",
+      "qualityFlags": ["official_json_reached", "current_row_not_exposed_by_retrieval_layer"],
+      "missingness": ["current_value", "observation_timestamp", "units"],
+      "epistemicRegister": "official_measurement_product"
+    },
+    {
+      "sourceId": "noaa-swpc-goes-xray",
+      "endpoint": "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+      "status": "REACHABLE_UNPARSED",
+      "retrievedAt": "2026-07-27T07:27:26Z",
+      "qualityFlags": ["official_json_reached", "current_rows_not_exposed_by_retrieval_layer"],
+      "missingness": ["current_flux", "energy_band", "observation_timestamp"],
+      "epistemicRegister": "direct_measurement"
+    },
+    {
+      "sourceId": "usgs-earthquakes-day",
+      "endpoint": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+      "status": "OK_PARTIAL_PARSED",
+      "retrievedAt": "2026-07-27T07:27:26Z",
+      "metadata": {
+        "generatedEpochMs": 1785128605000,
+        "title": "USGS All Earthquakes, Past Day",
+        "httpStatus": 200,
+        "apiVersion": "2.7.0",
+        "eventCount": 221
+      },
+      "newestExposedEvent": {
+        "id": "nc75406407",
+        "magnitude": 0.72,
+        "place": "10 km WNW of Cobb, CA",
+        "eventEpochMs": 1785128293990,
+        "updatedEpochMs": 1785128392376,
+        "status": "automatic",
+        "coordinates": [-122.82266998291, 38.8735008239746, 1.95000004768372]
+      },
+      "qualityFlags": ["official_event_catalogue", "full_payload_not_preserved_as_original_bytes"],
+      "missingness": ["transport_checksum"],
+      "epistemicRegister": "instrumented_event_catalogue"
+    },
+    {
+      "sourceId": "open-meteo-local-current",
+      "endpointTemplate": "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m&timezone=auto",
+      "configuredCoordinates": {"latitude": 30.04, "longitude": -81.40, "precision": "approximate"},
+      "status": "FAILED_RETRIEVAL_LAYER",
+      "retrievedAt": "2026-07-27T07:27:26Z",
+      "qualityFlags": ["approved_existing_source", "no_forecast_or_cached_value_substituted"],
+      "missingness": ["all_current_fields"],
+      "epistemicRegister": "model_and_station_derived_weather_product"
+    }
+  ]
+}
