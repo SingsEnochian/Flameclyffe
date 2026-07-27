@@ -14,21 +14,44 @@ function findWorld(state, entry) {
     || null;
 }
 
+function sourceProfile(entry) {
+  return {
+    name: entry.name || '',
+    kind: entry.kind || 'Desired Reality',
+    description: entry.description || '',
+    history: entry.history || '',
+    rules: entry.rules || '',
+    protagonist: entry.protagonist || '',
+    roles: entry.roles || '',
+    identityNotes: entry.identityNotes || '',
+    revisedAt: entry.revisedAt || null,
+  };
+}
+
 function seedWorld(entry, now) {
   const world = createWorld(stableId('house-world', entry.sourceKey), now);
-  world.name = entry.name;
-  world.kind = entry.kind || 'Desired Reality';
-  world.description = entry.description || '';
-  world.history = entry.history || '';
-  world.rules = entry.rules || '';
-  world.identity.name = entry.protagonist || '';
-  world.identity.roles = entry.roles || '';
-  world.identity.notes = entry.identityNotes || '';
+  const profile = sourceProfile(entry);
+  world.name = profile.name;
+  world.kind = profile.kind;
+  world.description = profile.description;
+  world.history = profile.history;
+  world.rules = profile.rules;
+  world.identity.name = profile.protagonist;
+  world.identity.roles = profile.roles;
+  world.identity.notes = profile.identityNotes;
   world.houseSourceKey = entry.sourceKey;
   world.houseSourceUrls = [...(entry.sourceUrls || [])];
+  world.houseProfile = profile;
   world.houseBundleManaged = true;
   world.updatedAt = now;
   return world;
+}
+
+function managedValue(current, previous, next, placeholders = []) {
+  if (current === undefined || current === null || current === '') return next;
+  if (previous !== undefined && current === previous) return next;
+  if (placeholders.includes(current)) return next;
+  return current;
 }
 
 function upsertWorld(state, entry, now) {
@@ -39,26 +62,23 @@ function upsertWorld(state, entry, now) {
     return { world, created: true };
   }
 
+  const previous = world.houseProfile || {};
+  const next = sourceProfile(entry);
+  if (!world.identity || typeof world.identity !== 'object') world.identity = {};
+
+  world.name = managedValue(world.name, previous.name, next.name, ['Unassigned World', 'Untitled World']);
+  world.kind = managedValue(world.kind, previous.kind, next.kind, ['Desired Reality']);
+  world.description = managedValue(world.description, previous.description, next.description);
+  world.history = managedValue(world.history, previous.history, next.history);
+  world.rules = managedValue(world.rules, previous.rules, next.rules);
+  world.identity.name = managedValue(world.identity.name, previous.protagonist, next.protagonist);
+  world.identity.roles = managedValue(world.identity.roles, previous.roles, next.roles);
+  world.identity.notes = managedValue(world.identity.notes, previous.identityNotes, next.identityNotes);
+
   world.houseSourceKey = entry.sourceKey;
   world.houseSourceUrls = [...(entry.sourceUrls || [])];
+  world.houseProfile = next;
   world.houseBundleManaged = true;
-  world.houseProfile = {
-    description: entry.description || '',
-    history: entry.history || '',
-    rules: entry.rules || '',
-    protagonist: entry.protagonist || '',
-    roles: entry.roles || '',
-    identityNotes: entry.identityNotes || '',
-    revisedAt: entry.revisedAt || null,
-  };
-
-  if (!world.name || world.name === 'Unassigned World' || world.name === 'Untitled World') world.name = entry.name;
-  if (!world.kind || world.kind === 'Desired Reality') world.kind = entry.kind || world.kind;
-  if (!world.description) world.description = entry.description || '';
-  if (!world.history) world.history = entry.history || '';
-  if (!world.rules) world.rules = entry.rules || '';
-  if (!world.identity?.name) world.identity.name = entry.protagonist || '';
-  if (!world.identity?.roles) world.identity.roles = entry.roles || '';
   world.updatedAt = now;
   return { world, created: false };
 }
@@ -104,7 +124,7 @@ function upsertIngestRecord(state, world, document, bundle, now) {
     provenance: document.content || '',
     reviewStatus: document.reviewStatus || 'Unreviewed',
     canonBoundary: document.canonBoundary || 'Source-derived reference. Not automatically canon.',
-    attachments: [],
+    attachments: existing?.attachments || [],
     createdAt: existing?.createdAt || now,
     updatedAt: now,
     canonStatus: 'non-canon',
