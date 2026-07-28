@@ -39,7 +39,7 @@ export const FOUNDATION_DOCUMENTS = [
 1. Terra Aeterna / Hearthweave
 2. The Luna Who Called Down the Moon
 3. Feather & Flame
-4. T’averen Vaen
+4. Ta’veren Vaen
 5. Starsong: Friendship Is Magic
 6. A Momento Creatonis
 7. Dreaming Grove / Templehouse
@@ -55,7 +55,7 @@ Drafts may grow through conversation; nothing becomes final canon merely because
     kind: 'foundation-template',
     revisedAt: '2026-07-26',
     sourceUrl: 'https://app.notion.com/p/3a470290d9c481a79412dbfe56ca3d26',
-    content: String.raw`A modular master architecture for every Desired Reality in the Shifting Wiki. This is not a single-world script. It is the shared grammar from which Terra Aeterna, Luna, Feather & Flame, T’averen Vaen, Starsong, A Momento Creatonis, Dreaming Grove, Between the Dreaming, and future worlds may each grow their own coherent form.
+    content: String.raw`A modular master architecture for every Desired Reality in the Shifting Wiki. This is not a single-world script. It is the shared grammar from which Terra Aeterna, Luna, Feather & Flame, Ta’veren Vaen, Starsong, A Momento Creatonis, Dreaming Grove, Between the Dreaming, and future worlds may each grow their own coherent form.
 
 ## First principle
 **I enter by choice, remain by choice, and return by choice.**

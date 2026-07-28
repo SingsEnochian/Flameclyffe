@@ -4,7 +4,7 @@ import { HOUSE_DOCUMENTS_B, HOUSE_WORLDS_B } from './house-dr-bundle-worlds-b.js
 
 export const HOUSE_DR_BUNDLE = Object.freeze({
   id: 'hearthweave-notion-dr-library',
-  version: '2026.07.28.1',
+  version: '2026.07.28.2',
   title: 'Hearthweave Desired Reality Library',
   source: 'Notion Shifting Wiki and Desired Reality Scripts',
   decisionDate: '2026-07-28',

@@ -48,7 +48,7 @@ export const HOUSE_WORLDS_A = [
   },
   {
     sourceKey: 'taveren-vaen',
-    name: 'T’averen Vaen',
+    name: 'Ta’veren Vaen',
     kind: 'Desired Reality / later Turning of the Wheel',
     protagonist: 'Kestrelle al’Valari',
     roles: 'Travelling Wise Woman; healer; Dreamwalker; channeller',
@@ -504,14 +504,14 @@ How much vocal presence supports entry without becoming distracting? What distin
   {
     sourceKey: 'taveren-vaen-universe-wiki',
     worldSourceKey: 'taveren-vaen',
-    title: 'T’averen Vaen — Universe Wiki',
+    title: 'Ta’veren Vaen — Universe Wiki',
     status: 'In Review',
     formats: ['Reference Script'],
     kind: 'universe-wiki',
     revisedAt: '2026-07-25',
     sourceUrl: 'https://app.notion.com/p/3a970290d9c48108b47ed21fa9573df7',
     content: String.raw`## Canon identity
-**Universe:** T’averen Vaen
+**Universe:** Ta’veren Vaen
 
 **Protagonist:** Kestrelle al’Valari
 
@@ -519,7 +519,7 @@ How much vocal presence supports entry without becoming distracting? What distin
 
 **Earlier protagonist name:** Ayrel al’Valsora
 
-The earlier names remain provenance only. They are superseded by T’averen Vaen and Kestrelle al’Valari.
+The earlier names remain provenance only. They are superseded by Ta’veren Vaen and Kestrelle al’Valari.
 
 ## The Turning
 This is a later Turning, long after the Fourth Age and the gradual disappearance of earlier Aes Sedai traditions. The world is entering a period of Mending, not Breaking.
@@ -555,14 +555,14 @@ Birthplace, family, the person burned, geography, Meriene’s earlier history, t
   {
     sourceKey: 'taveren-vaen-kestrelle-script',
     worldSourceKey: 'taveren-vaen',
-    title: 'T’averen Vaen 01 — Kestrelle al’Valari',
+    title: 'Ta’veren Vaen 01 — Kestrelle al’Valari',
     status: 'In Review',
     formats: ['Reference Script'],
     kind: 'world-script',
     revisedAt: '2026-07-25',
     sourceUrl: 'https://app.notion.com/p/3a970290d9c481f792bdf392f5439387',
     content: String.raw`## Canon source
-This entry uses the canonical names T’averen Vaen and Kestrelle al’Valari. Ta’veren Bound, Ta’veren Unbound, and Ayrel al’Valsora are provenance only.
+This entry uses the canonical names Ta’veren Vaen and Kestrelle al’Valari. The earlier working titles Ta’veren Bound and Ta’veren Unbound, and the earlier protagonist name Ayrel al’Valsora, are provenance only.
 
 ## Identity
 I am Kestrelle al’Valari. I am eighteen years old and a fully recognised travelling Wise Woman. I am a healer, Dreamwalker, and exceptionally strong channeller. I am not an apprentice.
@@ -605,7 +605,7 @@ Feather pauses. Wrap softens intensity. Notch restores orientation and continuit
   {
     sourceKey: 'taveren-vaen-reception-profile',
     worldSourceKey: 'taveren-vaen',
-    title: 'World Reception Profile — T’averen Vaen',
+    title: 'World Reception Profile — Ta’veren Vaen',
     status: 'Draft I',
     formats: ['Reference Script'],
     kind: 'reception-profile',
