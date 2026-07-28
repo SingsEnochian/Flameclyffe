@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hearthweave.local/schemas/arcsweep-ingest-primer.schema.json",
+  "title": "Arcsweep Canon Ingest Primer",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "primerId",
+    "name",
+    "scope",
+    "sourcePolicy",
+    "canonPolicy",
+    "classification",
+    "extraction",
+    "conflictPolicy",
+    "approvalPolicy",
+    "exportPolicy"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "arcsweep.ingest-primer/v0.1" },
+    "primerId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string", "minLength": 1 },
+    "scope": {
+      "type": "object",
+      "required": ["appliesToAllCanons", "worldIds"],
+      "properties": {
+        "appliesToAllCanons": { "type": "boolean" },
+        "worldIds": { "type": "array", "items": { "type": "string" } },
+        "overlayOf": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "sourcePolicy": {
+      "type": "object",
+      "required": ["acceptedExtensions", "copyIntoPrivateStore", "hashAlgorithm", "preserveOriginalName", "automaticExternalReads"],
+      "properties": {
+        "acceptedExtensions": { "type": "array", "items": { "type": "string", "pattern": "^\\.[a-z0-9]+$" }, "minItems": 1 },
+        "copyIntoPrivateStore": { "const": true },
+        "hashAlgorithm": { "const": "sha256" },
+        "preserveOriginalName": { "const": true },
+        "preserveRelativePath": { "type": "boolean" },
+        "automaticExternalReads": { "const": false },
+        "deduplicateByHash": { "type": "boolean" },
+        "maximumFileBytes": { "type": ["integer", "null"], "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "canonPolicy": {
+      "type": "object",
+      "required": ["authorityLevels", "statusValues", "neverOverwriteWithoutApproval", "rawSourceIsImmutable"],
+      "properties": {
+        "authorityLevels": { "type": "array", "items": { "enum": ["primary-canon", "working-canon", "author-note", "adaptation", "reference", "inspiration", "deprecated", "unknown"] }, "minItems": 1, "uniqueItems": true },
+        "statusValues": { "type": "array", "items": { "enum": ["canonical", "working", "candidate", "contradicted", "retired", "reference-only", "unclassified"] }, "minItems": 1, "uniqueItems": true },
+        "neverOverwriteWithoutApproval": { "const": true },
+        "rawSourceIsImmutable": { "const": true },
+        "canonMayContainMultipleTimelines": { "type": "boolean" },
+        "variantsRemainNamed": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "classification": {
+      "type": "object",
+      "required": ["canonKinds", "entityKinds", "worldResolution"],
+      "properties": {
+        "canonKinds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "entityKinds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "worldResolution": { "enum": ["explicit-first", "ask-if-ambiguous", "quarantine-if-ambiguous"] },
+        "timelineResolution": { "enum": ["preserve-all", "explicit-first", "ask-if-ambiguous"] },
+        "relationshipResolution": { "enum": ["named-edges", "free-text", "both"] }
+      },
+      "additionalProperties": false
+    },
+    "extraction": {
+      "type": "object",
+      "required": ["proposalOnly", "requiredProvenance", "extractors"],
+      "properties": {
+        "proposalOnly": { "const": true },
+        "requiredProvenance": { "type": "array", "items": { "enum": ["sourceId", "sourceHash", "sourceName", "relativePath", "page", "heading", "lineRange", "quotedFragment", "extractedAt", "extractor"] }, "minItems": 1, "uniqueItems": true },
+        "extractors": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "plainTextFallback": { "type": "boolean" },
+        "ocrAllowed": { "type": "boolean" },
+        "crossSourceSynthesis": { "enum": ["disabled", "proposal-only", "allowed-after-approval"] }
+      },
+      "additionalProperties": false
+    },
+    "conflictPolicy": {
+      "type": "object",
+      "required": ["detect", "quarantine", "resolutionModes"],
+      "properties": {
+        "detect": { "const": true },
+        "quarantine": { "const": true },
+        "resolutionModes": { "type": "array", "items": { "enum": ["keep-both-as-variants", "promote-one", "merge-with-notes", "mark-unresolved", "retire-older"] }, "minItems": 1, "uniqueItems": true },
+        "automaticWinnerSelection": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "approvalPolicy": {
+      "type": "object",
+      "required": ["approvalRequiredBeforeCanonWrite", "batchApprovalAllowed", "reversible"],
+      "properties": {
+        "approvalRequiredBeforeCanonWrite": { "const": true },
+        "batchApprovalAllowed": { "type": "boolean" },
+        "reversible": { "const": true },
+        "receiptRequired": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "exportPolicy": {
+      "type": "object",
+      "required": ["formats", "includeSourceReceipts", "includePrimer", "sourceInclusionModes"],
+      "properties": {
+        "formats": { "type": "array", "items": { "enum": ["json", "arcsweep-canon-json", "portable-canon-folder", "markdown"] }, "minItems": 1, "uniqueItems": true },
+        "includeSourceReceipts": { "const": true },
+        "includePrimer": { "const": true },
+        "sourceInclusionModes": { "type": "array", "items": { "enum": ["none", "selected", "all"] }, "minItems": 1, "uniqueItems": true },
+        "redactionBeforeExport": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
