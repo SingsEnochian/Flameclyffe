@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hearthweave.local/schemas/arcsweep-canon-pack.schema.json",
+  "title": "Arcsweep Canon Pack",
+  "type": "object",
+  "required": ["schemaVersion", "packId", "name", "world", "createdAt", "primer", "sources", "records", "conflicts", "provenance"],
+  "properties": {
+    "schemaVersion": { "const": "arcsweep.canon-pack/v0.1" },
+    "packId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string", "minLength": 1 },
+    "world": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "variant": { "type": ["string", "null"] },
+        "timeline": { "type": ["string", "null"] },
+        "receptionProfileRef": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "primer": { "type": "object" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sourceId", "name", "storedName", "relativePath", "sha256", "size", "addedAt", "authority", "status"],
+        "properties": {
+          "sourceId": { "type": "string" },
+          "name": { "type": "string" },
+          "storedName": { "type": "string" },
+          "relativePath": { "type": "string" },
+          "originalRelativePath": { "type": ["string", "null"] },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "size": { "type": "integer", "minimum": 0 },
+          "mediaType": { "type": ["string", "null"] },
+          "addedAt": { "type": "string", "format": "date-time" },
+          "authority": { "type": "string" },
+          "status": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "records": { "type": "object" },
+    "conflicts": { "type": "array", "items": { "type": "object" } },
+    "provenance": {
+      "type": "object",
+      "required": ["createdBy", "receipts"],
+      "properties": {
+        "createdBy": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "receipts": { "type": "array", "items": { "type": "object" } },
+        "revisionNotes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
