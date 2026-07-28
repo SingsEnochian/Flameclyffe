@@ -22,6 +22,7 @@ export default defineConfig({
         scfeLab: resolve(process.cwd(), 'apps/starwell/scfe-lab.html'),
         glyphStudio: resolve(process.cwd(), 'apps/starwell/glyph-studio/index.html'),
         signalWell: resolve(process.cwd(), 'apps/starwell/signal-well/index.html'),
+        arcsweep: resolve(process.cwd(), 'apps/starwell/arcsweep/index.html'),
       },
     },
   },
