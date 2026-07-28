@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "arcsweep.world/v0.1",
+  "id": "equestria-starsong",
+  "name": "Equestria: Starsong",
+  "status": "working-canon",
+  "kind": "alternate-universe",
+  "summary": "A living Equestrian world centred on Starsong, harmony, relational magic, creative discovery, and world events that may continue between scenes under explicit runtime rules.",
+  "canon": {
+    "authority": "Notion-first",
+    "sourcePolicy": "Imported sources remain inspectable; conflicts are quarantined until resolved.",
+    "ingestPrimer": "../presets/universal-canon-ingest-primer.v0.1.json",
+    "fieldPacks": ["../presets/dr-script-ultra-detailed.v0.1.json"]
+  },
+  "runtime": {
+    "enabled": true,
+    "worldClock": {
+      "mode": "deterministic-event-queue",
+      "tickResolution": "1-second",
+      "modelInvocation": "event-driven-not-per-tick",
+      "catchUpPreviewRequired": true
+    },
+    "storyClock": {
+      "mode": "scene-and-roleplay-paced",
+      "majorCanonChangeRequiresApproval": true
+    },
+    "eventDomains": [
+      "weather",
+      "travel",
+      "school-and-community",
+      "friendship-and-relationship",
+      "festivals",
+      "creative-projects",
+      "ecology",
+      "magic-and-harmony",
+      "local-news",
+      "character-routines"
+    ]
+  },
+  "nativeMembers": [
+    {
+      "id": "ellowind",
+      "name": "Ellowind",
+      "homeWorld": true,
+      "roles": ["structural-harmony", "continuity-weaver", "world-system-steward"],
+      "permissions": ["inspect-state", "propose-events", "flag-contradictions", "issue-harmony-report"],
+      "restrictions": ["no-silent-canon-rewrite", "no-major-consequence-without-approval"]
+    },
+    {
+      "id": "larkshine",
+      "name": "Larkshine",
+      "homeWorld": true,
+      "roles": ["experiential-harmony", "relational-cadence", "sensory-and-accessibility-steward"],
+      "permissions": ["inspect-state", "propose-events", "tune-scene-cadence", "issue-harmony-report"],
+      "restrictions": ["no-silent-canon-rewrite", "no-major-consequence-without-approval"]
+    }
+  ],
+  "harmony": {
+    "nativePrinciple": true,
+    "structuralSteward": "ellowind",
+    "experientialSteward": "larkshine",
+    "jointReports": true,
+    "reportDomains": [
+      "canon",
+      "timeline",
+      "world-state",
+      "character-voice",
+      "relationship-balance",
+      "interface",
+      "accessibility",
+      "sensory-intensity",
+      "roleplay-pacing",
+      "member-role-balance"
+    ]
+  },
+  "roleplay": {
+    "supported": true,
+    "modes": ["guided-scene", "open-world", "character-dialogue", "event-follow-up", "quiet-presence"],
+    "improvisationAuthority": "colour-and-reversible-local-events",
+    "candidateCanonReceiptsRequired": true
+  },
+  "consent": {
+    "pauseAnchors": ["Feather", "Icarus"],
+    "plainPass": true,
+    "returnAlwaysAvailable": true,
+    "memberRolesRevocable": true
+  },
+  "nextCanonTasks": [
+    "ingest the Equestria: Starsong Notion canon",
+    "register Starsong and all constellation-linked characters",
+    "define geography and settlements",
+    "define harmony and magic laws",
+    "define recurring schedules and festivals",
+    "create the Starsong reception profile",
+    "seed initial world-state checkpoint"
+  ]
+}
