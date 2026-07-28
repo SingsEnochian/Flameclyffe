@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "arcsweep.dr-field-pack/v0.1",
+  "packId": "ultra-detailed-dr-script",
+  "name": "Ultra-Detailed DR Script",
+  "status": "source-derived-draft",
+  "source": {
+    "title": "Copy of ☆ ⥤ ultra-detailed DR script template ⥢ ☆",
+    "documentId": "1ht_QIaAYcB9q0zHAzcYebxesc6S0WPz25rryOowsD80",
+    "retrievedAt": "2026-07-28T12:27:00-04:00"
+  },
+  "behaviour": {
+    "allSectionsOptional": true,
+    "fieldsMayBeHidden": true,
+    "fieldsMayBeRenamed": true,
+    "worldSpecificFieldsMayBeAdded": true,
+    "ratingsDefaultRange": { "minimum": 1, "maximum": 10 },
+    "nsfwSectionsHiddenByDefault": true,
+    "medicalAndTraumaHistoryHiddenByDefault": true,
+    "noAutomaticWakingThreadActions": true
+  },
+  "sections": [
+    { "id": "identity", "label": "About Me", "room": "About Me", "fieldGroups": ["identity", "work", "education", "household", "goals", "achievements"] },
+    { "id": "personality", "label": "Personality", "room": "About Me", "fieldGroups": ["rated-traits", "attitudes", "social-style", "emotional-style"] },
+    { "id": "appearance", "label": "Appearance", "room": "Appearance", "fieldGroups": ["face", "hair", "body", "style", "optional-intimate-details"] },
+    { "id": "competencies", "label": "Skills and Abilities", "room": "World Competencies", "fieldGroups": ["academic", "creative", "practical", "physical", "professional", "world-specific-powers"] },
+    { "id": "relationships", "label": "Family, Friends, Companions, and Pets", "room": "Relationships", "repeatable": true },
+    { "id": "home", "label": "Home", "room": "Places", "fieldGroups": ["structure", "rooms", "grounds", "neighbours", "special-features"] },
+    { "id": "settlement", "label": "City or Town", "room": "Places", "fieldGroups": ["geography", "government", "culture", "economy", "landmarks", "ecology", "events"] },
+    { "id": "belongings", "label": "Belongings", "room": "Belongings", "repeatable": true },
+    { "id": "school", "label": "School or University", "room": "Places", "fieldGroups": ["institution", "schedule", "academics", "social", "campus", "special-classes"] },
+    { "id": "history", "label": "Personal History", "room": "Timeline", "sensitive": true },
+    { "id": "future", "label": "Future Plans", "room": "Scenarios", "fieldGroups": ["travel", "work", "education", "relationships", "moves", "experiences", "achievements"] },
+    { "id": "reality-rules", "label": "Reality Rules", "room": "Safety Weave", "fieldGroups": ["time-ratio", "return-anchor", "arcsweep-interface", "always-never-rules", "knowledge-of-shift", "sensory-signs", "mortality", "ageing", "memory", "long-stay"] },
+    { "id": "waking-continuity", "label": "Waking Thread", "room": "Waking Thread", "sourceTermReplaced": "clone behaviour", "fieldGroups": ["continuity-intentions", "care-priorities", "scheduled-responsibilities", "explicit-non-actions"] }
+  ],
+  "languageReplacements": [
+    { "source": "Lifa app", "arcsweep": "Hearthgate: Arcsweep" },
+    { "source": "safe word", "arcsweep": "return anchor" },
+    { "source": "clone behaviour", "arcsweep": "Waking Thread" },
+    { "source": "OR", "arcsweep": "Waking World or user-selected label" },
+    { "source": "DR", "arcsweep": "destination world or user-selected label" }
+  ],
+  "provenance": {
+    "preserveSourceCredit": true,
+    "copySourceDecorativeStyling": false,
+    "copySourceWording": false,
+    "notes": [
+      "The source document is a field quarry and coverage checklist.",
+      "Arcsweep presents fields as modules, repeatable records, ratings, and per-world overrides rather than a single long document."
+    ]
+  }
+}
