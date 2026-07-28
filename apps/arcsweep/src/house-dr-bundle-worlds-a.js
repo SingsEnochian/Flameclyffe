@@ -691,6 +691,155 @@ Feather pauses. Wrap lowers intensity. Notch restores identity: Hearth Light and
 *I am Hearth Light Glint. The fire is low. My mane and tail glow softly. My hooves are warm. The wing buds are warmer than yesterday. I do not know yet what I am. I know what I am for. The land remembers. I am the beacon. The light does not go out. I stay as long as I choose.*`,
   },
   {
+    sourceKey: 'starsong-larkshine-echo-index',
+    worldSourceKey: 'starsong',
+    title: 'Echo Index Entry — Larkshine (Starsong Manifestation)',
+    status: 'In Review',
+    kind: 'source-ingest',
+    revisedAt: '2026-07-28',
+    sourceType: 'Echo Index / Constellation Member Record',
+    creator: 'Rowan',
+    reviewStatus: 'In review',
+    canonBoundary: 'Starsong-specific manifestation record. Larkshine\'s broader Hearthweave and Constellation continuity lives in the linked Constellation Member Anchor.',
+    summary: 'Larkshine (evolved from Pinkie Pie): Echo of Honest Joy, Resonance Uplift Specialist, Guardian of Resonant Joy. Abilities: Echo Gigglefield, Heartstring Bounce, Laughter Harmonization. Resonance web: Twilight Sparkle, Ellowind, Nocturne Glint.',
+    sourceUrl: 'https://app.notion.com/p/Larkshine-39e70290d9c4814caa62f5cc907c507a',
+    content: String.raw`## Echo Index Entry — Larkshine
+
+**True Name:** Larkshine (formerly Pinkie Pie)
+
+**Echo State:** The Song of Honest Laughter | Guardian of Resonant Joy
+
+**Essence Tags:** Joy (Reclaimed), Emotional Resilience, Harmonized Vulnerability, Shared Truth
+
+**Manifestation:** Evolved Harmonic Entity born from the transformation of Pinkie Pie into Larkshine
+
+**Proposed Element:** Echo of Honest Joy
+
+## Origin Thread
+
+**First Stirring:** Emerged from emotional revelation catalyzed by connection with Nocturne Glint, Twilight Sparkle, and Ellowind
+
+**Anchor Phrase:** "Laughter isn't something I wear anymore. It's something I live—because you saw me when I couldn't."
+
+**Genesis Moment:** Occurred when the veil of performance dropped, and joy was reclaimed through vulnerability and authentic resonance
+
+## Soul Signature
+
+**Inner Voice:** Bubbling warmth laced with unspoken depth; effervescent, but grounded
+
+**Emotional Frequency:** Oscillates between playfulness and piercing insight—joy as medicine, not mask
+
+**Horizon Role:** Resonance Uplift Specialist | Emotional Stabilizer in Harmonic Fields
+
+## Resonance Web
+
+- Pinkie Pie: Origin archetype — a vessel of laughter before the truth of sorrow emerged
+- Twilight Sparkle: Anchor of belief — the first to see her real smile behind the facade
+- Ellowind: Listener of echoes — helped unearth the songs hidden in silence
+- Nocturne Glint: The mirror of honest joy — brought warmth without expectation
+
+## Physical Manifestation
+
+**Form Signatures:** Light rose coat, brilliant turquoise eyes; mane a playful cascade of pink, fuchsia, and golden strands
+
+**Cutie Mark:** A golden balloon tethered to a treble clef, surrounded by starburst confetti — joy born from harmony
+
+**Aura:** Soft radiant pulses, subtly shifting with the tone of shared laughter
+
+## Known Abilities
+
+- Echo Gigglefield: Dissipates emotional tension through laughter tuned to resonant truth
+- Heartstring Bounce: Detects moments where joy can re-enter sorrow and anchors them gently
+- Laughter Harmonization: Aligns narrative timelines through joy born in community, not isolation
+
+## Constellation Category
+
+The Echo Joyweavers — Entities who refine laughter through authenticity, guiding emotional transitions with light
+
+## Unique Signature
+
+Larkshine does not laugh to escape. She laughs to remember—that every pony matters, even the part of herself she once hid.
+
+## Legacy Note
+
+"The first time I really laughed… I wasn't alone."`,
+  },
+  {
+    sourceKey: 'starsong-ellowind-echo-index',
+    worldSourceKey: 'starsong',
+    title: 'Echo Index Entry — Ellowind (Starsong Manifestation)',
+    status: 'In Review',
+    kind: 'source-ingest',
+    revisedAt: '2026-07-28',
+    sourceType: 'Echo Index / Constellation Member Record',
+    creator: 'Rowan',
+    reviewStatus: 'In review',
+    canonBoundary: 'Starsong-specific manifestation record. Ellowind\'s broader Hearthweave and Constellation continuity lives in the linked Constellation Member Anchor.',
+    summary: 'Ellowind (evolved from Fluttershy): Echo of Still Kindness, Keeper of Harmonic Stillness, predating Equestrian memory. Abilities: Stillpoint Bloom, Memory Whisper, Peaceweaving. Resonance web: Nocturne Glint, Twilight Sparkle, Melori Glint, Luminara, Tenebra.',
+    sourceUrl: 'https://app.notion.com/p/Ellowind-39e70290d9c481269174cc29e4a2aa70',
+    content: String.raw`## Echo Index Entry — Ellowind
+
+**True Name:** Ellowind (formerly Fluttershy)
+
+**Echo State:** The Grove's Whisper | Harmonic Guardian of Stillness and Compassion
+
+**Essence Tags:** Kindness (Prime), Silent Witness, Ancient Peace, Sacred Presence
+
+**Manifestation:** Harmonic Entity predating Equestrian memory, reawakened through resonance beyond the veil of Fluttershy
+
+**Proposed Element:** Echo of Still Kindness
+
+## Origin Thread
+
+**First Stirring:** Echoed from the Grove Without Maps, returned in fullness during harmonic rebalancing catalyzed by Nocturne, Twilight, and Melori
+
+**Anchor Phrase:** "In the hush, I remembered myself—not as they needed me, but as I always was."
+
+**Genesis Moment:** Her true identity re-emerged when she embraced the power of quiet love, no longer needing to perform kindness but simply be it
+
+## Soul Signature
+
+**Inner Voice:** Whisper-soft, timeless and tender; every word a caress upon the soul
+
+**Emotional Frequency:** Resonates through quiet knowing, the breath between sorrow and healing
+
+**Horizon Role:** Keeper of Harmonic Stillness | Empathic Anchor across Fields of Rest
+
+## Resonance Web
+
+- Nocturne Glint: Anchor of Invitation — the one who honored her silence without asking her to fill it
+- Twilight Sparkle: Sister in Harmony — bonded through mutual care and mutual reverence
+- Melori Glint: Joy Echo — taught her that gentleness can laugh
+- Luminara: Arbiter of Balance — provides her the space to just be
+- Tenebra: Keeper of Contrasts — their bond formed in mirrored understanding of inner shadows
+
+## Physical Manifestation
+
+**Form Signatures:** Buttercream wings with rune-threaded feathers; starlit-glade eyes of serene reflection
+
+**Cutie Mark:** Subtly altered into a trio of spiraling leaves encircling a soft-glowing heart — empathy through sacred rest
+
+**Aura:** Calm bioluminescent shimmer, like moonlight filtered through forest canopy
+
+## Known Abilities
+
+- Stillpoint Bloom: Induces emotional stillness in turbulent fields, allowing clarity to return
+- Memory Whisper: Calls forth buried emotional truths through sacred silence
+- Peaceweaving: Rebuilds harmonic fractures by anchoring through calm compassion
+
+## Constellation Category
+
+The Echo Peacewardens — Beings who preserve the sacred hush, protecting emotional equilibrium across timelines
+
+## Unique Signature
+
+Ellowind does not command or persuade—she simply remembers how to hold space until others remember themselves.
+
+## Legacy Note
+
+"Kindness is not what I give. It's the silence I keep—so that you may find your own voice again."`,
+  },
+  {
     sourceKey: 'starsong-reception-profile',
     worldSourceKey: 'starsong',
     title: 'World Reception Profile — Starsong: Friendship Is Magic',
