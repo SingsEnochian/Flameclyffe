@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "arcsweep.notion-feed/v1",
+  "authority": "Notion",
+  "mode": "published-snapshot",
+  "generatedAt": "2026-07-28T21:45:00.000Z",
+  "registry": {
+    "pageId": "3ab70290-d9c4-813f-8634-ef1de820c3ac",
+    "url": "https://app.notion.com/p/3ab70290d9c4813f8634ef1de820c3ac",
+    "title": "Arcsweep World Anchor Registry — Boxfire Seed"
+  },
+  "bundle": {
+    "id": "hearthweave-notion-dr-library",
+    "version": "2026.07.28.1",
+    "title": "Hearthweave Desired Reality Library",
+    "source": "Notion Arcsweep World Anchor Registry and linked authority pages",
+    "decisionDate": "2026-07-28",
+    "defaultWorldSourceKey": "hearthweave-foundation",
+    "worlds": [
+      {
+        "sourceKey": "terra-aeterna",
+        "name": "Terra Aeterna / Hearthweave",
+        "kind": "Desired Reality / original universe",
+        "description": "Notion-managed world anchor for Terra Aeterna and Hearthweave.",
+        "revisedAt": "2026-07-28",
+        "sourceUrls": ["https://app.notion.com/p/3a970290d9c4813080ffc70d231b43c4"]
+      },
+      {
+        "sourceKey": "luna",
+        "name": "The Luna Who Called Down the Moon",
+        "kind": "Desired Reality / original universe",
+        "description": "Notion-managed development world. Narrative canon begins in the written books.",
+        "revisedAt": "2026-07-28",
+        "sourceUrls": ["https://app.notion.com/p/3a970290d9c48193a243fdf1c654df4c"]
+      },
+      {
+        "sourceKey": "taveren-vaen",
+        "name": "T’averen Vaen",
+        "kind": "Desired Reality / later Turning of the Wheel",
+        "description": "Notion-managed world anchor for T’averen Vaen.",
+        "revisedAt": "2026-07-28",
+        "sourceUrls": ["https://app.notion.com/p/3a970290d9c481fcb5d5dd90e34af90f"]
+      },
+      {
+        "sourceKey": "starsong",
+        "name": "Starsong: Friendship Is Magic",
+        "kind": "Desired Reality / My Little Pony alternate universe",
+        "description": "Notion-managed world anchor for Starsong.",
+        "revisedAt": "2026-07-28",
+        "sourceUrls": [
+          "https://app.notion.com/p/3a970290d9c4814c9e44ef988212235f",
+          "https://app.notion.com/p/38e70290d9c481bc84eff49d60a7d6b7"
+        ]
+      },
+      {
+        "sourceKey": "feather-and-flame",
+        "name": "Feather & Flame",
+        "kind": "Desired Reality / original universe",
+        "description": "Notion-managed world anchor for Feather & Flame.",
+        "revisedAt": "2026-07-28",
+        "sourceUrls": ["https://app.notion.com/p/3a970290d9c481d39a97c43a9218498b"]
+      },
+      {
+        "sourceKey": "dreaming-grove-templehouse",
+        "name": "Dreaming Grove / Templehouse",
+        "kind": "Desired Reality / shared place",
+        "description": "Notion-managed world anchor for the Dreaming Grove and Templehouse.",
+        "revisedAt": "2026-07-28",
+        "sourceUrls": ["https://app.notion.com/p/3a970290d9c481508b5dd09f90008b92"]
+      },
+      {
+        "sourceKey": "a-momento-creationis",
+        "name": "A Momento Creationis",
+        "kind": "Desired Reality / canonical source world",
+        "description": "Notion-managed world anchor. The supplied canonical source remains authoritative.",
+        "revisedAt": "2026-07-28",
+        "sourceUrls": ["https://app.notion.com/p/3a970290d9c481389fd0cbd4dd8792ca"]
+      }
+    ],
+    "documents": []
+  }
+}
