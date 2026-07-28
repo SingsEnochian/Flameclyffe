@@ -220,6 +220,10 @@ hr { width: 100%; border: 0; border-top: 1px solid var(--line-soft); }
 .backup-row strong { overflow-wrap: anywhere; }
 .backup-row small { color: var(--muted); }
 
+button.steward-commit { background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 40%, var(--panel-solid)), var(--panel-solid)); border-color: var(--gold); color: var(--gold); letter-spacing: 0.02em; }
+button.steward-commit:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 55%, var(--panel-solid)), color-mix(in srgb, var(--gold) 25%, var(--panel-solid))); }
+.commit-badge { margin: 0; font-size: 0.8rem; color: var(--gold); letter-spacing: 0.04em; align-self: center; }
+
 .modal-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 1rem; background: rgba(2, 5, 4, 0.82); backdrop-filter: blur(8px); }
 .return-dialog { width: min(100%, 36rem); border: 1px solid var(--gold); border-radius: 1.2rem; background: var(--panel-solid); padding: clamp(1.2rem, 4vw, 2rem); box-shadow: 0 30px 100px rgba(0, 0, 0, 0.65); }
 .return-dialog ol { display: grid; gap: 0.65rem; padding-left: 1.3rem; line-height: 1.5; }

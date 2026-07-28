@@ -68,6 +68,9 @@ export function createWorld(id, now = new Date().toISOString()) {
       context: '',
       memories: '',
       orientation: 'I arrive calm, oriented, and able to recognise the people, place, date, and immediate situation.',
+      wrpProfileId: '',
+      wrpLabel: '',
+      wrpRunaUrl: '',
     },
     identity: {
       name: '',

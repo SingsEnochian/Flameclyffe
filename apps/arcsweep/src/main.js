@@ -174,7 +174,8 @@ function renderPortal() {
         <div><dt>Location</dt><dd>${escapeHtml(world.arrival.location || 'Not yet specified')}</dd></div>
         <div><dt>Orientation</dt><dd>${escapeHtml(world.arrival.orientation)}</dd></div>
         <div><dt>Recall</dt><dd>${escapeHtml(world.recall.onArrival)}</dd></div>
-      </dl></article>
+        ${world.arrival.wrpLabel ? `<div><dt>World Reception</dt><dd>${escapeHtml(world.arrival.wrpLabel)}</dd></div>` : ''}
+      </dl>${world.arrival.wrpRunaUrl ? `<button class="quiet" data-action="open-wrp">Open in Runa ↗</button>` : ''}</article>
     </section>
     <section class="panel applet-deck"><div class="section-heading compact-heading"><div><p class="eyebrow">World-native rooms</p><h2>${escapeHtml(world.surface.name || 'Arcsweep')}</h2></div><button class="quiet" data-room="worlds">Configure world</button></div>${renderAppletDeck(world)}</section>
     <section class="panel"><h2>Latest return</h2>${latestReturn ? `<dl class="facts horizontal"><div><dt>Returned</dt><dd>${new Date(latestReturn.returnedAt).toLocaleString()}</dd></div><div><dt>World</dt><dd>${escapeHtml(latestReturn.targetWorld)}</dd></div><div><dt>Waking elapsed</dt><dd>${formatDuration(latestReturn.elapsedCr)}</dd></div><div><dt>World projection</dt><dd>${formatDuration(latestReturn.elapsedDr)}</dd></div></dl>` : '<p class="muted">No completed arcs yet.</p>'}</section>`;
@@ -199,7 +200,7 @@ function worldSectionTitle(id) {
 }
 
 function renderWorldSection(id) {
-  const world = activeWorld();
+  const world = selectedWorld();
   const section = id === 'appearance' ? 'identity' : WORLD_SECTION_DEFINITIONS[id]?.section;
   let body = '';
   if (section === 'about') body = `
@@ -211,7 +212,8 @@ function renderWorldSection(id) {
   if (section === 'time') body = `
     <div class="grid two compact-grid"><label>Waking minutes<input name="wakingMinutes" type="number" min="0.001" step="0.001" value="${world.time.wakingMinutes}" /></label><label>World minutes<input name="worldMinutes" type="number" min="0.001" step="0.001" value="${world.time.worldMinutes}" /></label></div><p class="callout">${escapeHtml(ratioLabel(world))}</p><label class="checkbox"><input name="pauseWhenAway" type="checkbox" ${world.time.pauseWhenAway ? 'checked' : ''} /> Pause this world clock between arcs</label><label>Authored world date<input name="arrivalDate" value="${attr(world.time.arrivalDate)}" /></label><label>Authored world time<input name="arrivalTime" value="${attr(world.time.arrivalTime)}" /></label>`;
   if (section === 'arrival') body = `
-    <label>Arrival location<input name="location" value="${attr(world.arrival.location)}" /></label><label>Immediate situation<textarea name="context" rows="6">${escapeHtml(world.arrival.context)}</textarea></label><label>Local memories and context<textarea name="memories" rows="7">${escapeHtml(world.arrival.memories)}</textarea></label><label>Orientation statement<textarea name="orientation" rows="5">${escapeHtml(world.arrival.orientation)}</textarea></label>`;
+    <label>Arrival location<input name="location" value="${attr(world.arrival.location)}" /></label><label>Immediate situation<textarea name="context" rows="6">${escapeHtml(world.arrival.context)}</textarea></label><label>Local memories and context<textarea name="memories" rows="7">${escapeHtml(world.arrival.memories)}</textarea></label><label>Orientation statement<textarea name="orientation" rows="5">${escapeHtml(world.arrival.orientation)}</textarea></label>
+    <fieldset class="nested-fieldset"><legend>World Reception Profile</legend><p class="muted">Optional. Connects this world's arrival to a Runa sound environment.</p><label>Profile label<input name="wrpLabel" value="${attr(world.arrival.wrpLabel)}" placeholder="e.g. Terra Aeterna Reception" /></label><label>Profile ID<input name="wrpProfileId" value="${attr(world.arrival.wrpProfileId)}" placeholder="e.g. terra-aeterna-reception" /></label><label>Runa player URL<input name="wrpRunaUrl" value="${attr(world.arrival.wrpRunaUrl)}" placeholder="e.g. file:///path/to/Runa/docs/world-reception-loader.html" /></label></fieldset>`;
   if (section === 'identity') body = `
     <div class="grid two compact-grid"><label>Name or identity expression<input name="name" value="${attr(world.identity.name)}" /></label><label>Pronouns<input name="pronouns" value="${attr(world.identity.pronouns)}" /></label><label>Age or life stage<input name="age" value="${attr(world.identity.age)}" /></label><label>Roles and titles<input name="roles" value="${attr(world.identity.roles)}" /></label></div><label>Body, species, or form<input name="form" value="${attr(world.identity.form)}" /></label><label>Sensory signature<textarea name="sensorySignature" rows="5">${escapeHtml(world.identity.sensorySignature)}</textarea></label><label>Appearance<textarea name="appearance" rows="8">${escapeHtml(world.identity.appearance)}</textarea></label><label>Accessibility and embodiment supports<textarea name="accessibility" rows="6">${escapeHtml(world.identity.accessibility)}</textarea></label><label>Notes<textarea name="notes" rows="5">${escapeHtml(world.identity.notes)}</textarea></label>`;
   if (section === 'competencies') body = `
@@ -251,9 +253,23 @@ function renderCollectionRoom(roomId) {
   const world = activeWorld();
   const records = (state.records[roomId] || []).filter((record) => record.worldId === world.id);
   const record = recordForRoom(roomId);
+  const isIngest = roomId === 'ingest';
+  const committed = isIngest && record?.canonBoundary === 'Committed to canon';
+  const commitEligible = isIngest && record && !committed
+    && (record.canonBoundary === 'Candidate for Steward review' || record.reviewStatus === 'Canon candidate');
+  const stewardControls = isIngest && record ? (
+    committed
+      ? `<p class="commit-badge">✦ Committed to canon${record.canonisedAt ? ' · ' + new Date(record.canonisedAt).toLocaleDateString() : ''}</p><button type="button" class="quiet" data-action="edit-canon-script" data-ingest-id="${attr(record.id)}">Edit canon script →</button>`
+      : commitEligible
+        ? `<button type="button" class="steward-commit" data-action="commit-to-canon" data-room-id="${attr(roomId)}" data-record-id="${attr(record.id)}">Commit to canon ✦</button>`
+        : ''
+  ) : '';
+  const itemLabel = (item) => isIngest
+    ? escapeHtml(item.reviewStatus || item.canonBoundary || 'Non-canon intake')
+    : escapeHtml(item.date || item.status || item.category || 'Local record');
   return `<section class="section-heading"><div><p class="eyebrow">${escapeHtml(world.name)} · ${escapeHtml(definition.category)}</p><h1>${escapeHtml(definition.label)}</h1><p class="lede">${escapeHtml(definition.description)}</p></div><button data-action="new-record" data-room-id="${attr(roomId)}">New entry</button></section>
-    <section class="split-layout"><aside class="panel item-list">${records.length ? records.map((item) => `<button class="item-card ${item.id === record?.id ? 'active' : ''}" data-record-room="${attr(roomId)}" data-record-id="${attr(item.id)}"><strong>${escapeHtml(item.title || 'Untitled')}</strong><span>${escapeHtml(item.date || item.status || item.category || 'Local record')}</span></button>`).join('') : '<p class="muted">No entries in this world yet.</p>'}</aside>
-    <article class="panel"><form id="record-form" data-room-id="${attr(roomId)}" class="stack"><input type="hidden" name="id" value="${attr(record?.id || '')}" />${definition.fields.map((field) => fieldMarkup(field, record)).join('')}${definition.attachments ? renderAttachments(record, roomId) : ''}<div class="button-row"><button type="submit">${record ? 'Save entry' : 'Create entry'}</button>${record ? `<button type="button" class="quiet danger" data-action="delete-record" data-room-id="${attr(roomId)}" data-record-id="${attr(record.id)}">Delete</button>` : ''}</div></form></article></section>`;
+    <section class="split-layout"><aside class="panel item-list">${records.length ? records.map((item) => `<button class="item-card ${item.id === record?.id ? 'active' : ''}" data-record-room="${attr(roomId)}" data-record-id="${attr(item.id)}"><strong>${escapeHtml(item.title || 'Untitled')}</strong><span>${itemLabel(item)}</span></button>`).join('') : '<p class="muted">No entries in this world yet.</p>'}</aside>
+    <article class="panel"><form id="record-form" data-room-id="${attr(roomId)}" class="stack"><input type="hidden" name="id" value="${attr(record?.id || '')}" />${definition.fields.map((field) => fieldMarkup(field, record)).join('')}${definition.attachments ? renderAttachments(record, roomId) : ''}<div class="button-row"><button type="submit">${record ? 'Save entry' : 'Create entry'}</button>${record ? `<button type="button" class="quiet danger" data-action="delete-record" data-room-id="${attr(roomId)}" data-record-id="${attr(record.id)}">Delete</button>` : ''}${stewardControls}</div></form></article></section>`;
 }
 
 function renderScripts() {
@@ -272,7 +288,7 @@ function renderForge() {
 }
 
 function renderAppletManager() {
-  const world = activeWorld();
+  const world = selectedWorld();
   return `<section class="section-heading"><div><p class="eyebrow">${escapeHtml(world.name)}</p><h1>Applet Deck</h1></div></section><section class="panel"><form id="applet-form" class="stack"><div class="applet-manager">${APPLET_CATALOGUE.map((applet) => {
     const item = world.applets.find((candidate) => candidate.id === applet.id) || { visible: false, order: 0, customLabel: '', customGlyph: '' };
     return `<article class="applet-editor"><label class="checkbox"><input type="checkbox" name="visible:${attr(applet.id)}" ${item.visible ? 'checked' : ''} /> ${escapeHtml(applet.label)}</label><label>Label<input name="label:${attr(applet.id)}" value="${attr(item.customLabel)}" placeholder="${attr(applet.label)}" /></label><label>Glyph<input name="glyph:${attr(applet.id)}" value="${attr(item.customGlyph)}" placeholder="${attr(applet.glyph)}" /></label><label>Order<input name="order:${attr(applet.id)}" type="number" value="${item.order}" /></label></article>`;
@@ -313,13 +329,13 @@ function formValues(form) {
 }
 
 function saveWorldSection(section, form) {
-  const world = activeWorld();
+  const world = selectedWorld();
   const v = formValues(form);
   if (section === 'about') Object.assign(world, { name: v.name.trim() || 'Untitled World', kind: v.kind.trim(), description: v.description.trim(), history: v.history.trim(), rules: v.rules.trim() });
   if (section === 'summon') Object.assign(world.surface, { type: v.type, name: v.surfaceName.trim() || 'Arcsweep', appearance: v.appearance.trim(), summonMode: v.summonMode, summonCue: v.summonCue.trim() });
   if (section === 'veil') Object.assign(world.surface, { veilEnabled: form.elements.veilEnabled.checked, visibility: v.visibility, approvedPeople: v.approvedPeople.trim() });
   if (section === 'time') Object.assign(world.time, { wakingMinutes: Number(v.wakingMinutes) || 60, worldMinutes: Number(v.worldMinutes) || 10080, pauseWhenAway: form.elements.pauseWhenAway.checked, arrivalDate: v.arrivalDate.trim(), arrivalTime: v.arrivalTime.trim() });
-  if (section === 'arrival') Object.assign(world.arrival, { location: v.location.trim(), context: v.context.trim(), memories: v.memories.trim(), orientation: v.orientation.trim() });
+  if (section === 'arrival') Object.assign(world.arrival, { location: v.location.trim(), context: v.context.trim(), memories: v.memories.trim(), orientation: v.orientation.trim(), wrpProfileId: v.wrpProfileId.trim(), wrpLabel: v.wrpLabel.trim(), wrpRunaUrl: v.wrpRunaUrl.trim() });
   if (section === 'identity') Object.assign(world.identity, { name: v.name.trim(), pronouns: v.pronouns.trim(), age: v.age.trim(), roles: v.roles.trim(), form: v.form.trim(), sensorySignature: v.sensorySignature.trim(), appearance: v.appearance.trim(), accessibility: v.accessibility.trim(), notes: v.notes.trim() });
   if (section === 'competencies') Object.assign(world.competencies, { languages: v.languages.trim(), worldSystems: v.worldSystems.trim(), movement: v.movement.trim(), socialContext: v.socialContext.trim(), accessibility: v.accessibility.trim() });
   if (section === 'safety') Object.assign(world.safetyWeave, { general: v.general.trim(), exclusions: v.exclusions.trim(), returnAlwaysAvailable: form.elements.returnAlwaysAvailable.checked, anchorIntentGated: form.elements.anchorIntentGated.checked });
@@ -343,6 +359,7 @@ app.addEventListener('click', async (event) => {
   if (!button) return;
   const { action, id } = button.dataset;
 
+  if (action === 'open-wrp') { const url = activeWorld()?.arrival?.wrpRunaUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer'); return; }
   if (action === 'open-return') returnOpen = true;
   if (action === 'cancel-return') returnOpen = false;
   if (action === 'complete-return') {
@@ -374,6 +391,28 @@ app.addEventListener('click', async (event) => {
   if (action === 'delete-forge') { state.manifestations = state.manifestations.filter((entry) => entry.id !== id); persist('Forge working deleted.', 'delete-forge'); }
   if (action === 'new-record') { selectedRecords[button.dataset.roomId] = null; }
   if (action === 'delete-record') { const roomId = button.dataset.roomId; state.records[roomId] = state.records[roomId].filter((record) => record.id !== button.dataset.recordId); selectedRecords[roomId] = null; persist('Room entry deleted.', `delete-${roomId}`); }
+  if (action === 'commit-to-canon') {
+    const roomId = button.dataset.roomId;
+    const recordId = button.dataset.recordId;
+    const record = state.records[roomId]?.find((r) => r.id === recordId);
+    if (record) {
+      record.canonBoundary = 'Committed to canon';
+      record.reviewStatus = 'Committed';
+      record.canonisedAt = isoNow();
+      record.canonStatus = 'committed';
+      record.updatedAt = isoNow();
+      const world = state.worlds.find((w) => w.id === record.worldId) || activeWorld();
+      const content = [record.summary, record.provenanceNotes].filter(Boolean).join('\n\n---\n\n');
+      state.scripts.unshift({ id: newId('canon-script'), name: record.title, worldId: world.id, world: world.name, status: 'Canon', content, updatedAt: isoNow(), formats: ['Reference Script'], ingestSourceId: record.id });
+      persist('Committed to canon. Canon script created.', 'commit-canon');
+    }
+  }
+  if (action === 'edit-canon-script') {
+    const ingestId = button.dataset.ingestId;
+    const script = state.scripts.find((s) => s.ingestSourceId === ingestId);
+    if (script) { selectedScriptId = script.id; activeRoom = 'scripts'; }
+    else { notice = 'Canon script not found.'; }
+  }
   if (action === 'add-attachments') {
     const roomId = button.dataset.roomId; const record = recordForRoom(roomId); if (record) { const files = await addAttachments(); if (files.length) { record.attachments = [...(record.attachments || []), ...files]; persist(`${files.length} local file${files.length === 1 ? '' : 's'} added.`, 'attachment-add'); } }
   }
@@ -414,7 +453,7 @@ app.addEventListener('submit', (event) => {
     for (const [name] of definition.fields) record[name] = String(v[name] || '').trim();
     record.updatedAt = isoNow(); persist(`${definition.label} entry saved.`, `room-${roomId}`);
   }
-  if (form.id === 'applet-form') { const world = activeWorld(); world.applets = APPLET_CATALOGUE.map((applet, index) => ({ id: applet.id, visible: form.elements[`visible:${applet.id}`]?.checked || false, customLabel: String(v[`label:${applet.id}`] || '').trim(), customGlyph: String(v[`glyph:${applet.id}`] || '').trim(), order: Number(v[`order:${applet.id}`]) || index })); persist('Applet deck saved.', 'applets'); }
+  if (form.id === 'applet-form') { const world = selectedWorld(); world.applets = APPLET_CATALOGUE.map((applet, index) => ({ id: applet.id, visible: form.elements[`visible:${applet.id}`]?.checked || false, customLabel: String(v[`label:${applet.id}`] || '').trim(), customGlyph: String(v[`glyph:${applet.id}`] || '').trim(), order: Number(v[`order:${applet.id}`]) || index })); persist('Applet deck saved.', 'applets'); }
   if (form.id === 'settings-form') { state.settings = { ...state.settings, crLabel: v.crLabel.trim() || 'Waking World', drLabel: v.drLabel.trim() || 'Desired Reality', returnAnchor: v.returnAnchor.trim() || 'Notch', reduceMotion: form.elements.reduceMotion.checked, largeText: form.elements.largeText.checked, highContrast: form.elements.highContrast.checked, fontScale: Number(v.fontScale) || 1 }; persist('Settings saved.', 'settings'); }
   render();
 });
