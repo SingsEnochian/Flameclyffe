@@ -1,8 +1,9 @@
 import { FOUNDATION_DOCUMENTS, FOUNDATION_WORLD } from './house-dr-bundle-foundation.js';
 import { HOUSE_DOCUMENTS_A, HOUSE_WORLDS_A } from './house-dr-bundle-worlds-a.js';
 import { HOUSE_DOCUMENTS_B, HOUSE_WORLDS_B } from './house-dr-bundle-worlds-b.js';
+import { loadNotionFeed } from './notion-feed.js';
 
-export const HOUSE_DR_BUNDLE = Object.freeze({
+const BASE_HOUSE_DR_BUNDLE = Object.freeze({
   id: 'hearthweave-notion-dr-library',
   version: '2026.07.26.1',
   title: 'Hearthweave Desired Reality Library',
@@ -21,6 +22,8 @@ export const HOUSE_DR_BUNDLE = Object.freeze({
   ]),
 });
 
+export const HOUSE_DR_BUNDLE = await loadNotionFeed(BASE_HOUSE_DR_BUNDLE);
+
 export const HOUSE_DR_BUNDLE_SUMMARY = Object.freeze({
   id: HOUSE_DR_BUNDLE.id,
   version: HOUSE_DR_BUNDLE.version,
@@ -28,4 +31,5 @@ export const HOUSE_DR_BUNDLE_SUMMARY = Object.freeze({
   documents: HOUSE_DR_BUNDLE.documents.length,
   source: HOUSE_DR_BUNDLE.source,
   decisionDate: HOUSE_DR_BUNDLE.decisionDate,
+  notionFeed: HOUSE_DR_BUNDLE.notionFeed || null,
 });
