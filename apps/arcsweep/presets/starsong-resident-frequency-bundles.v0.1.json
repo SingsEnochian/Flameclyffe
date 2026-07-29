@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "arcsweep.resident-frequency-bundles/v0.1",
+  "bundleId": "starsong-resident-frequency-bundles",
+  "worldId": "starsong-friendship-is-magic",
+  "worldName": "My Little Pony: Starsong",
+  "status": "approved-preset",
+  "carrierRangeHz": {
+    "minimum": 95.0,
+    "maximum": 100.0
+  },
+  "shared": {
+    "mode": "true-binaural",
+    "beatHz": 3.69,
+    "automaticPlayback": false,
+    "explicitStartRequired": true,
+    "returnAlwaysAvailable": true,
+    "fadeInSeconds": 8,
+    "fadeOutSeconds": 8,
+    "defaultGainDb": -18,
+    "headphoneRendering": true
+  },
+  "residents": {
+    "larkshine": {
+      "displayName": "Larkshine",
+      "bundleName": "Sunskip Low Carrier",
+      "leftHz": 96.0,
+      "rightHz": 99.69,
+      "beatHz": 3.69,
+      "character": [
+        "bright-grounding",
+        "playful-presence",
+        "responsive-movement"
+      ]
+    },
+    "ellowind": {
+      "displayName": "Ellowind",
+      "bundleName": "Stillgrove Low Carrier",
+      "leftHz": 95.0,
+      "rightHz": 98.69,
+      "beatHz": 3.69,
+      "character": [
+        "steady-grounding",
+        "quiet-presence",
+        "compassionate-stillness"
+      ]
+    }
+  },
+  "routing": {
+    "host": "Hearthgate",
+    "instrument": "Hearthgate: Arcsweep",
+    "activeWorldRequired": true,
+    "activeResidentRequired": true,
+    "residentSelection": {
+      "larkshine": "residents.larkshine",
+      "ellowind": "residents.ellowind"
+    }
+  },
+  "provenance": {
+    "approvedBy": "Rowan",
+    "approvedOn": "2026-07-28",
+    "notes": "Carrier neighbourhood approved at 95-100 Hz. The binaural difference remains 3.69 Hz."
+  }
+}
