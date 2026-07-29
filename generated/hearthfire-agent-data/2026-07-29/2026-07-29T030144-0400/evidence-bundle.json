@@ -1,0 +1,96 @@
+{
+  "schema_version": "0.1.0",
+  "evidence_date": "2026-07-29",
+  "timezone": "America/New_York",
+  "run_started_local": "2026-07-29T03:01:44-04:00",
+  "run_started_utc": "2026-07-29T07:01:44Z",
+  "repository": "SingsEnochian/Flameclyffe",
+  "source_registry": "agents/hearthfire-source-registry.json",
+  "registry_scope": "approved-only",
+  "canonical_branch_written": false,
+  "epistemic_registers": {
+    "official_derived": [
+      {
+        "source": "NOAA SWPC Planetary K-index",
+        "observation_time": "2026-07-29T03:00:00Z",
+        "values": {"kp": 2.0, "running_a_index": 7, "station_count": 8},
+        "units": {"kp": "index", "running_a_index": "index", "station_count": "count"},
+        "quality_flags": {"station_count": 8},
+        "missingness": null,
+        "transport_sha256": null,
+        "transport_note": "Exact response bytes unavailable to local worker; no transport hash claimed."
+      }
+    ],
+    "instrumented_catalogue": [
+      {
+        "source": "USGS All Earthquakes, Past Day",
+        "metadata_generated_unix_ms": 1785307620000,
+        "api_version": "2.7.0",
+        "event_count": 278,
+        "newest_exposed_event": {
+          "id": "ci40662914",
+          "magnitude": 0.45,
+          "place": "2 km NNE of Valle Vista, CA",
+          "time_unix_ms": 1785306671130,
+          "status": "automatic",
+          "coordinates": [-116.8835, 33.768, 10.03],
+          "coordinate_units": ["degrees_east", "degrees_north", "km_depth"],
+          "nst": 22,
+          "rms": 0.18,
+          "gap": 76,
+          "magnitude_type": "ml"
+        },
+        "transport_sha256": null,
+        "transport_note": "Exact response bytes unavailable to local worker; no transport hash claimed."
+      }
+    ],
+    "failed_contracts": [
+      {"source": "NOAA solar-wind magnetic one-day", "status": 404, "missingness": "endpoint_not_found"},
+      {"source": "NOAA solar-wind plasma one-day", "status": 404, "missingness": "endpoint_not_found"},
+      {"source": "Open-Meteo local current", "status": "retrieval_failure", "missingness": "no_usable_payload"}
+    ],
+    "reachable_unparsed": [
+      {"source": "NOAA F10.7", "missingness": "current_row_not_exposed"},
+      {"source": "NOAA solar-radio flux", "missingness": "current_row_not_exposed"},
+      {"source": "NOAA GOES X-ray", "missingness": "current_row_not_exposed"}
+    ],
+    "candidate_only_not_fetched": ["NOAA GloTEC", "INTERMAGNET", "e-CALLISTO", "NASA DSN Now", "GWOSC"]
+  },
+  "graph_patch_candidates": {
+    "waking-earth": [
+      "add NOAA Kp observation node",
+      "add USGS daily catalogue snapshot node",
+      "add source-health failure nodes for removed solar-wind contracts",
+      "add explicit missingness nodes for unparsed NOAA products and atmospheric retrieval"
+    ],
+    "observer-deep": [
+      "reference Waking Earth Kp and seismic nodes",
+      "attach provenance, source-health and missingness edges",
+      "attach no causal, diagnostic, supernatural, prophetic or canon conclusion"
+    ]
+  },
+  "j_space": {
+    "sparsity_policy": "retain only approved-source observations, source failures and explicit missingness",
+    "active_evidence": ["Kp 2.00 at 03:00 UTC", "USGS catalogue count 278"],
+    "active_contradictions": ["registry-approved NOAA solar-wind URLs return HTTP 404"],
+    "excluded_candidates": ["RTSW replacements", "compact NOAA summaries", "GloTEC", "INTERMAGNET", "e-CALLISTO", "DSN Now", "GWOSC"]
+  },
+  "boxfire_qa": {
+    "result": "PARTIAL_NOT_VERIFIED",
+    "approved_sources_attempted": 8,
+    "fully_parsed": 2,
+    "reachable_unparsed": 3,
+    "failed": 3,
+    "candidate_sources_promoted": 0,
+    "discovered_code_executed": 0,
+    "packages_installed": 0,
+    "schema_changes": 0,
+    "permission_changes": 0,
+    "canon_changes": 0,
+    "private_sources_accessed": 0,
+    "canonical_branch_writes": 0,
+    "exact_raw_bodies_preserved": false,
+    "transport_sha256_verified": false,
+    "raw_transport_failure": "Local exact-byte retrieval failed for all eight sources because DNS resolution returned Temporary failure in name resolution."
+  }
+}
