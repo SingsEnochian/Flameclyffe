@@ -1,0 +1,13 @@
+{
+  "evidence_date":"2026-07-29",
+  "applied":false,
+  "proposals":[
+    {"id":1,"title":"Replace removed NOAA solar-wind contracts with RTSW adapters","category":"changed source contract and parser","default":"no change"},
+    {"id":2,"title":"Add NOAA compact summaries as degraded-mode companions","category":"source companion and parser","default":"disabled candidate"},
+    {"id":3,"title":"Enable exact raw-body workflow transport and SHA-256 receipts","category":"agent capability and workflow","default":"partial evidence only"},
+    {"id":4,"title":"Add bounded regional GloTEC adapter","category":"ionospheric adapter","default":"candidate-only"},
+    {"id":5,"title":"Ground INTERMAGNET machine-contract research","category":"geomagnetic observatory source research","default":"candidate-only"},
+    {"id":6,"title":"Keep NASA DSN Now and e-CALLISTO in non-ingesting evidence research","category":"spacecraft communications and radio astronomy source research","default":"metadata-only"}
+  ],
+  "choice_set":{"A":"APPROVE FOR PRODUCTION","B":"APPROVE FOR SANDBOX TEST ONLY","C":"APPROVE AS CANDIDATE, DO NOT ENABLE","D":"DEFER","E":"DENY","F":"BLOCK SOURCE OR CAPABILITY","G":"REQUEST MORE EVIDENCE"}
+}
