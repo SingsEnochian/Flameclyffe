@@ -176,6 +176,7 @@ function buildCharacterRecord(d) {
   const bio   = truncate([d.sections?.['Character Biography'], d.sections?.['Personality']].filter(Boolean).join('\n\n'));
   return {
     id: `evil-char-${d.slug || uid('char')}`,
+    worldId: WORLD_ID,
     title: d.name,
     relationship: role || 'Character',
     status: mapRelStatus(d.infobox?.status),
@@ -198,6 +199,7 @@ function buildDemonRecord(d) {
     .join('\n\n');
   return {
     id: `evil-demon-${d.slug || uid('demon')}`,
+    worldId: WORLD_ID,
     title: d.name,
     relationship: `${d.ontology || 'Demon/Entity'} · ${categories}`,
     status: 'Unknown',
@@ -222,6 +224,7 @@ function buildSeasonRecord(d) {
   ].filter(Boolean).join('\n\n');
   return {
     id: `evil-season-${d.slug || uid('season')}`,
+    worldId: WORLD_ID,
     title: d.name || 'Evil Season',
     date: period,
     kind: 'Era',
@@ -243,6 +246,7 @@ function buildEpisodeRecord(d) {
   const meta   = `Director: ${dir} · Writer: ${writer} · Runtime: ${rt}`;
   return {
     id: `evil-ep-${d.slug || uid('ep')}`,
+    worldId: WORLD_ID,
     title: `S${s}E${ep} · ${d.name}`,
     date: air,
     kind: 'Event',
