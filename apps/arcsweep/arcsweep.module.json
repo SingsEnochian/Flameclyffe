@@ -20,9 +20,10 @@
   "hostAdapters": [
     {
       "host": "Hearthgate: Arkfire",
-      "status": "specified-not-connected",
+      "status": "connected-web-path",
       "optional": true,
-      "reversible": true
+      "reversible": true,
+      "notes": "Web path: npm run arcsweep:deploy:server stages the build to starwell-server/public/arcsweep/ with __hearthgateHost injection. Native IPC path (window.arcsweep, single-writer lock, shared native store) is not yet connected."
     }
   ],
   "storage": {
