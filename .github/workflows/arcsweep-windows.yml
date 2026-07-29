@@ -70,6 +70,7 @@ jobs:
           node --check apps/arcsweep/desktop/main.cjs
           node --check apps/arcsweep/desktop/preload.cjs
           node --check apps/arcsweep/desktop/store.cjs
+          node --check apps/arcsweep/desktop/register-arcsweep-ipc.cjs
           node --check apps/arcsweep/desktop/runtime-receipt.cjs
           if (-not (Test-Path 'apps/arcsweep/desktop/app/index.html')) { throw 'Staged renderer missing.' }
 
@@ -82,6 +83,9 @@ jobs:
           }
           if ($package.devDependencies.'electron-builder' -ne $env:ARCSWEEP_BUILDER_VERSION) {
             throw "electron-builder is not pinned exactly to $env:ARCSWEEP_BUILDER_VERSION."
+          }
+          if ('register-arcsweep-ipc.cjs' -notin @($package.build.files)) {
+            throw 'Extracted IPC service is not included in the packaged application.'
           }
 
           $installedElectron = node -p "require('./apps/arcsweep/desktop/node_modules/electron/package.json').version"
@@ -113,9 +117,14 @@ jobs:
           $exe = (Resolve-Path 'dist/arcsweep-desktop/win-unpacked/Hearthgate Arcsweep.exe').Path
           $dataRoot = Join-Path $env:APPDATA 'Hearthgate\Arcsweep'
           $log = Join-Path $dataRoot 'logs\desktop.log'
+          $diagnostics = Join-Path (Resolve-Path '.').Path 'dist\arcsweep-desktop\launch-diagnostics'
+          $stdout = Join-Path $diagnostics 'stdout.log'
+          $stderr = Join-Path $diagnostics 'stderr.log'
+          $desktopLog = Join-Path $diagnostics 'desktop.log'
+          New-Item -ItemType Directory -Path $diagnostics -Force | Out-Null
           if (Test-Path $dataRoot) { Remove-Item $dataRoot -Recurse -Force }
 
-          $process = Start-Process -FilePath $exe -PassThru
+          $process = Start-Process -FilePath $exe -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
           try {
             $deadline = (Get-Date).AddSeconds(20)
             $visible = $false
@@ -138,6 +147,12 @@ jobs:
             }
           } finally {
             if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+            $process.WaitForExit()
+            if (Test-Path $log) {
+              Copy-Item $log $desktopLog -Force
+            } else {
+              "No desktop log was created at $log before the smoke test ended." | Set-Content $desktopLog
+            }
           }
 
       - name: Build NSIS installer
@@ -203,6 +218,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: arcsweep-electron43-launch-diagnostics
-          path: ${{ env.APPDATA }}\Hearthgate\Arcsweep\logs\desktop.log
-          if-no-files-found: ignore
+          path: dist/arcsweep-desktop/launch-diagnostics/**
+          if-no-files-found: error
           retention-days: 7
