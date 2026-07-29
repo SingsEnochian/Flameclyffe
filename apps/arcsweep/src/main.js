@@ -337,7 +337,7 @@ async function fetchDeepData() {
     notice = `Field unavailable: ${err.message}`;
   } finally {
     deepDataFetching = false;
-    render();
+    if (activeRoom === 'deep-observer') render();
   }
 }
 
