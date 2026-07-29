@@ -1,0 +1,23 @@
+{
+  "evidence_date": "2026-07-29",
+  "retrieval_scope": "approved sources only",
+  "summary": {"approved_attempted": 8, "parsed": 2, "reachable_unparsed": 3, "failed": 3},
+  "sources": [
+    {"name":"NOAA planetary Kp","state":"parsed","latest_observation":"2026-07-29T03:00:00Z","quality":"8 contributing stations"},
+    {"name":"NOAA solar-wind magnetic one-day","state":"failed","http_status":404,"reason":"approved contract removed"},
+    {"name":"NOAA solar-wind plasma one-day","state":"failed","http_status":404,"reason":"approved contract removed"},
+    {"name":"NOAA F10.7","state":"reachable_unparsed","reason":"current row not exposed by retrieval interface"},
+    {"name":"NOAA solar-radio flux","state":"reachable_unparsed","reason":"current row not exposed by retrieval interface"},
+    {"name":"NOAA GOES X-ray","state":"reachable_unparsed","reason":"current row not exposed by retrieval interface"},
+    {"name":"USGS all earthquakes past day","state":"parsed","catalogue_count":278,"api_version":"2.7.0"},
+    {"name":"Open-Meteo local current","state":"failed","reason":"retrieval interface returned no usable payload"}
+  ],
+  "transport": {
+    "exact_byte_attempted": true,
+    "exact_byte_result": "failed",
+    "failure_class": "DNS NameResolutionError",
+    "failure_text": "Temporary failure in name resolution",
+    "raw_bodies_preserved": false,
+    "transport_checksums": false
+  }
+}
