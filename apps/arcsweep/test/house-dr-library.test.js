@@ -9,11 +9,12 @@ const NOW = '2026-07-26T23:30:00.000Z';
 
 test('fresh Arcsweep installs the complete Steward-approved House DR bundle', () => {
   const installed = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const expectedIngestRecords = HOUSE_DR_BUNDLE.documents.filter((item) => item.kind === 'source-ingest').length;
 
   assert.equal(installed.changed, true);
   assert.equal(installed.state.worlds.length, HOUSE_DR_BUNDLE.worlds.length);
   assert.equal(installed.state.scripts.length, HOUSE_DR_BUNDLE.documents.filter((item) => item.kind !== 'source-ingest').length);
-  assert.equal(installed.state.records.ingest.length, 1);
+  assert.equal(installed.state.records.ingest.length, expectedIngestRecords);
   assert.equal(installed.state.houseBundles.length, 1);
   assert.equal(installed.state.houseBundles[0].version, HOUSE_DR_BUNDLE.version);
   assert.equal(installed.state.worlds.some((world) => world.name === 'Unassigned World'), false);
