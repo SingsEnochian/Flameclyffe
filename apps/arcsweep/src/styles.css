@@ -228,6 +228,11 @@ button.steward-commit:hover { background: linear-gradient(180deg, color-mix(in s
 .return-dialog { width: min(100%, 36rem); border: 1px solid var(--gold); border-radius: 1.2rem; background: var(--panel-solid); padding: clamp(1.2rem, 4vw, 2rem); box-shadow: 0 30px 100px rgba(0, 0, 0, 0.65); }
 .return-dialog ol { display: grid; gap: 0.65rem; padding-left: 1.3rem; line-height: 1.5; }
 
+/* Hearthgate host adapter */
+[data-hosted] .brand { display: none; }
+[data-hosted] .privacy-seal { display: none; }
+[data-hosted] .sidebar { padding-top: .4rem; }
+
 /* DEEP Observer */
 .deep-channels { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 1rem; margin-top: 1rem; }
 .deep-channel { display: grid; gap: 0.7rem; align-content: start; }

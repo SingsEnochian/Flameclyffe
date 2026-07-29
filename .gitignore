@@ -46,6 +46,9 @@ apps/starwell-server/public/hearthgate-sources/
 # Generated STARWELL bundle staged for Hearthgate packaging
 apps/starwell-server/public/starwell/
 
+# Generated Arcsweep bundle staged for Hearthgate web server
+apps/starwell-server/public/arcsweep/
+
 # OS/editor noise
 .DS_Store
 .vscode/

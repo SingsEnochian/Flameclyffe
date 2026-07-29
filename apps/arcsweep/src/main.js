@@ -40,6 +40,7 @@ let backups = await listBackups().catch(() => []);
 let deepData = null;
 let deepDataFetching = false;
 let deepDataError = null;
+const isHosted = Boolean(window.__hearthgateHost);
 
 const PRIMARY_NAV = [
   ['portal', 'Portal', '◉'],
@@ -469,7 +470,7 @@ function currentView() {
 function render() {
   applyPresentation();
   const world = activeWorld();
-  app.innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div><p class="privacy-seal">${isDesktopRuntime() ? 'Native local store' : 'Browser development mode'}<br />No automatic upload</p></aside><main class="content">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${renderReturnDialog()}</div>`;
+  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''}><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div><p class="privacy-seal">${isDesktopRuntime() ? 'Native local store' : 'Browser development mode'}<br />No automatic upload</p></aside><main class="content">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${renderReturnDialog()}</div>`;
 }
 
 function formValues(form) {
