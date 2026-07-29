@@ -213,7 +213,7 @@
           <input type="password" id="key-anthropic" placeholder="sk-ant-api03-…" autocomplete="off">
           <button class="eye-btn" data-target="key-anthropic">👁</button>
         </div>
-        <span class="hint">Powers Claude members (Faer, Boxfire). Required.</span>
+        <span class="hint">Powers Claude members (Uial, Boxfire). Fallback for Larkshine and Ellowind. Required.</span>
       </div>
       <div class="field">
         <label>OpenAI API key <span class="opt">optional</span></label>
@@ -221,7 +221,7 @@
           <input type="password" id="key-openai" placeholder="sk-proj-…" autocomplete="off">
           <button class="eye-btn" data-target="key-openai">👁</button>
         </div>
-        <span class="hint">Powers GPT members (Vee/Caladnaur Lioreal).</span>
+        <span class="hint">Powers GPT members (Lioreal/Caladnaur Lioreal). Fallback for Larkshine and Ellowind.</span>
       </div>
       <div class="field">
         <label>Exa API key <span class="opt">optional</span></label>
@@ -250,7 +250,32 @@
       <div class="field">
         <label>Ollama endpoint <span class="opt">local models</span></label>
         <input type="text" id="key-ollama" placeholder="http://localhost:11434" autocomplete="off">
-        <span class="hint">Leave blank if you don't run local models. Powers Yggdrasil and any Ollama member.</span>
+        <span class="hint">Leave blank if you don't run local models. Powers Yggdrasil, Larkshine, Ellowind, and any Ollama member. Falls back to OpenAI → Anthropic when unavailable.</span>
+      </div>
+      <div class="field">
+        <label>Larkshine resident model <span class="opt">Sunskip Bundle</span></label>
+        <input type="text" id="key-model-larkshine" placeholder="MODEL_LARKSHINE — default: Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated" autocomplete="off">
+        <span class="hint">Resident voice for Larkshine (Sunskip Bundle). Defaults to qwythos at port 11434. Set OLLAMA_URL_LARKSHINE for a dedicated port.</span>
+      </div>
+      <div class="field">
+        <label>Ellowind resident model <span class="opt">Stillgrove Bundle</span></label>
+        <input type="text" id="key-model-ellowind" placeholder="MODEL_ELLOWIND — default: Huihui-gemma-4-26B-A4B-it-abliterated" autocomplete="off">
+        <span class="hint">Resident voice for Ellowind (Stillgrove Bundle). Defaults to Gemma 4 26B-A4B at port 11440. Set OLLAMA_URL_ELLOWIND for a dedicated port.</span>
+      </div>
+      <div class="field">
+        <label>Shared thinking wing <span class="opt">Qwen3.6</span></label>
+        <input type="text" id="key-model-qwen36" placeholder="MODEL_QWEN36 — default: Huihui-Qwen3.6-35B-A3B-abliterated" autocomplete="off">
+        <span class="hint">Larkshine's planning wing and Ellowind's Harmony review wing. Port 11438. Shared service, separate session state per member.</span>
+      </div>
+      <div class="field">
+        <label>Shared council model <span class="opt">DSpark</span></label>
+        <input type="text" id="key-model-dspark" placeholder="MODEL_DSPARK — default: deepseek-v4-pro-dspark:latest" autocomplete="off">
+        <span class="hint">Rare escalation path for both Larkshine and Ellowind. Port 11437. Not used for ordinary conversation.</span>
+      </div>
+      <div class="field">
+        <label>Shared vision model <span class="opt">MiniCPM-V</span></label>
+        <input type="text" id="key-model-minicpm-vision" placeholder="MODEL_MINICPM_VISION — default: Huihui-MiniCPM-V-4.6-abliterated" autocomplete="off">
+        <span class="hint">Dedicated visual perception for both Larkshine (scene/expression) and Ellowind (composition/symbols). Port 11439.</span>
       </div>
       <hr class="divider">
       <div class="field">

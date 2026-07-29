@@ -37,6 +37,9 @@ let returnOpen = false;
 let notice = 'Arcsweep ready.';
 let storageInfo = await getStorageInfo().catch(() => null);
 let backups = await listBackups().catch(() => []);
+let deepData = null;
+let deepDataFetching = false;
+let deepDataError = null;
 
 const PRIMARY_NAV = [
   ['portal', 'Portal', '◉'],
@@ -44,7 +47,19 @@ const PRIMARY_NAV = [
   ['scripts', 'Scripts', '▤'],
   ['waking-thread', 'Waking Thread', '⌁'],
   ['forge', 'Forge', '✦'],
+  ['deep-observer', 'Field', '◈'],
   ['settings', 'Settings', '⚙'],
+];
+
+const DEEP_CHANNELS = [
+  ['P', 'Presence', 'pressure · daylight', '0.48 + (pressure−1013)/90 ± 0.04'],
+  ['C', 'Clarity', 'cloud · precip · Kp', '0.66 − cloud/210 − precip/10 ± Kp'],
+  ['R', 'Resonance', 'wind · solar wind · |Bz|', '0.32 + wind/60 + speed/1200 + |Bz|/50'],
+  ['E', 'Entanglement', 'precip · humidity · Kp · Bz', '0.24 + precip/8 + humidity/260 + Kp/14 + Bz⁻·|Bz|/40'],
+  ['M', 'Moonfield', 'lunar illumination', 'illumination / 100'],
+  ['A', 'Availability', 'daylight · cloud', '0.42 + day·0.18 + (100−cloud)/260'],
+  ['H', 'Harmony', 'composite', 'C·0.25 + E·0.20 + R·0.18 + A·0.14 + Kp/18 + |Bz|/80'],
+  ['T', 'Threshold', 'meta-composite', 'P·0.12 + C·0.16 + R·0.12 + (1−E)·0.12 + M·0.08 + A·0.12 + H·0.13 + 0.15'],
 ];
 
 function escapeHtml(value = '') {
@@ -305,6 +320,138 @@ function renderReturnDialog() {
   return `<div class="modal-backdrop"><section class="return-dialog" role="dialog" aria-modal="true" aria-labelledby="return-title"><p class="eyebrow">${escapeHtml(state.settings.returnAnchor)}</p><h2 id="return-title">Return to the ${escapeHtml(state.settings.crLabel)}</h2><ol><li>Name yourself.</li><li>Feel the support beneath your body.</li><li>Notice three present sensory facts.</li><li>Move fingers and toes.</li><li>Choose to close the active arc.</li></ol><div class="button-row"><button data-action="complete-return">I am here · Close arc</button><button class="quiet" data-action="cancel-return">Continue arc</button></div></section></div>`;
 }
 
+async function fetchDeepData() {
+  if (deepDataFetching) return;
+  deepDataFetching = true;
+  notice = 'Reading field…';
+  render();
+  try {
+    const res = await fetch('https://singsenochian.github.io/Flameclyffe/data/deep-current.json');
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    deepData = await res.json();
+    deepDataError = null;
+    notice = 'Field data received.';
+  } catch (err) {
+    deepDataError = err.message;
+    notice = `Field unavailable: ${err.message}`;
+  } finally {
+    deepDataFetching = false;
+    render();
+  }
+}
+
+function renderDeepObserver() {
+  const genAt = deepData?.generated_at ? new Date(deepData.generated_at) : null;
+  const stamp = genAt ? genAt.toLocaleString() : '';
+  const loc = deepData?.location?.label || '';
+
+  const header = `<section class="section-heading">
+    <div>
+      <p class="eyebrow">Ambient instrument</p>
+      <h1>Field · DEEP Observer</h1>
+      <p class="lede">${stamp ? escapeHtml(stamp) + (loc ? ' · ' + escapeHtml(loc) : '') : 'Symbolic field state from weather, space weather, and moon.'}</p>
+    </div>
+    <button data-action="refresh-deep"${deepDataFetching ? ' disabled' : ''}>↻ Refresh</button>
+  </section>`;
+
+  if (deepDataFetching && !deepData) return header + `<section class="panel"><p class="muted">Reading field…</p></section>`;
+
+  if (!deepData) return header + `<section class="panel">
+    <p>The DEEP Observer reads ambient field conditions from weather data, space weather feeds, and lunar position. Data is cached on GitHub Pages and updated on a schedule.</p>
+    <button data-action="refresh-deep">Read field now</button>
+  </section>`;
+
+  const field = deepData.field || {};
+  const current = deepData.weather?.current || {};
+  const sw = deepData.space_weather || {};
+  const moon = deepData.moon || {};
+  const sky = deepData.weather?.sky || '';
+
+  function channelCard([key, name, source, formula]) {
+    const raw = field[key];
+    const val = (raw !== null && raw !== undefined) ? Number(raw) : null;
+    const pct = val !== null ? Math.round(val * 100) : 0;
+    const display = val !== null ? val.toFixed(3) : '—';
+    return `<article class="panel deep-channel">
+      <div class="deep-channel-header">
+        <span class="deep-letter" aria-hidden="true">${escapeHtml(key)}</span>
+        <div><strong>${escapeHtml(name)}</strong><span class="muted">${escapeHtml(source)}</span></div>
+        <span class="deep-value${val === null ? ' muted' : ''}">${escapeHtml(display)}</span>
+      </div>
+      <div class="deep-bar-track"><div class="deep-bar-fill" data-ch="${attr(key)}" style="width:${pct}%"></div></div>
+      <code class="deep-formula">${escapeHtml(formula)}</code>
+    </article>`;
+  }
+
+  const channelsHtml = DEEP_CHANNELS.map(channelCard).join('');
+
+  const kp = sw.kp?.value ?? '—';
+  const bz = sw.solar_wind?.bz ?? '—';
+  const speed = sw.solar_wind?.speed ?? '—';
+  const bt = sw.solar_wind?.bt ?? '—';
+  const cloud = current.cloud_cover ?? '—';
+  const precip = current.precipitation ?? '—';
+  const humidity = current.relative_humidity_2m ?? '—';
+  const wind = current.wind_speed_10m ?? '—';
+  const pressure = current.pressure_msl ?? '—';
+  const temp = current.temperature_2m ?? '—';
+
+  const rawHtml = `<section class="grid two">
+    <article class="panel">
+      <p class="eyebrow">Atmosphere · ${escapeHtml(sky)}</p>
+      <dl class="facts">
+        <div><dt>Pressure</dt><dd>${escapeHtml(String(pressure))} hPa</dd></div>
+        <div><dt>Cloud cover</dt><dd>${escapeHtml(String(cloud))} %</dd></div>
+        <div><dt>Precipitation</dt><dd>${escapeHtml(String(precip))} in/hr</dd></div>
+        <div><dt>Humidity</dt><dd>${escapeHtml(String(humidity))} %</dd></div>
+        <div><dt>Wind speed</dt><dd>${escapeHtml(String(wind))} mph</dd></div>
+        <div><dt>Temperature</dt><dd>${escapeHtml(String(temp))} °F</dd></div>
+      </dl>
+    </article>
+    <article class="panel">
+      <p class="eyebrow">Space weather · Moon</p>
+      <dl class="facts">
+        <div><dt>Kp index</dt><dd>${escapeHtml(String(kp))}</dd></div>
+        <div><dt>Bz (IMF)</dt><dd>${escapeHtml(String(bz))} nT</dd></div>
+        <div><dt>Bt (IMF)</dt><dd>${escapeHtml(String(bt))} nT</dd></div>
+        <div><dt>Solar wind</dt><dd>${escapeHtml(String(speed))} km/s</dd></div>
+        <div><dt>Moon phase</dt><dd>${escapeHtml(moon.name || '—')} · ${escapeHtml(String(moon.illumination ?? '—'))}%</dd></div>
+        <div><dt>Lunar age</dt><dd>${escapeHtml(String(moon.age_days ?? '—'))} days</dd></div>
+      </dl>
+    </article>
+  </section>`;
+
+  const dpdt = field.dpdt;
+  const dpdtDisplay = (dpdt !== null && dpdt !== undefined) ? Number(dpdt).toFixed(3) : '—';
+
+  const spineRows = DEEP_CHANNELS.map(([key, name, , formula]) => {
+    const val = field[key];
+    const display = (val !== null && val !== undefined) ? Number(val).toFixed(3) : '—';
+    return `<div class="deep-spine-row">
+      <span class="deep-letter small">${escapeHtml(key)}</span>
+      <span>${escapeHtml(name)}</span>
+      <code class="deep-formula">${escapeHtml(formula)}</code>
+      <span class="deep-spine-val">${escapeHtml(display)}</span>
+    </div>`;
+  }).join('');
+
+  const spineHtml = `<section class="panel">
+    <h2>Mathematics spine</h2>
+    <div class="deep-spine">
+      ${spineRows}
+      <div class="deep-spine-row">
+        <span class="deep-letter small">∂</span>
+        <span>Rate of change</span>
+        <code class="deep-formula">dpdt = R (current placeholder)</code>
+        <span class="deep-spine-val">${escapeHtml(dpdtDisplay)}</span>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:1rem;font-size:.8rem">Observed, not proof. Computed from Open-Meteo and NOAA SWPC feeds at source time above.</p>
+  </section>`;
+
+  return header + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
+}
+
 function currentView() {
   if (activeRoom === 'portal') return renderPortal();
   if (activeRoom === 'worlds') return renderWorlds();
@@ -313,6 +460,7 @@ function currentView() {
   if (activeRoom === 'forge') return renderForge();
   if (activeRoom === 'settings') return renderSettings();
   if (activeRoom === 'applet-deck') return renderAppletManager();
+  if (activeRoom === 'deep-observer') return renderDeepObserver();
   if (COLLECTION_ROOM_DEFINITIONS[activeRoom]) return renderCollectionRoom(activeRoom);
   if (WORLD_SECTION_DEFINITIONS[activeRoom] || activeRoom === 'appearance') return renderWorldSection(activeRoom);
   return renderPortal();
@@ -348,7 +496,7 @@ function saveWorldSection(section, form) {
 
 app.addEventListener('click', async (event) => {
   const room = event.target.closest('[data-room]');
-  if (room) { activeRoom = room.dataset.room; render(); return; }
+  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); render(); return; }
   const worldButton = event.target.closest('[data-world-id]');
   if (worldButton) { selectedWorldId = worldButton.dataset.worldId; render(); return; }
   const scriptButton = event.target.closest('[data-script-id]');
@@ -360,6 +508,7 @@ app.addEventListener('click', async (event) => {
   const { action, id } = button.dataset;
 
   if (action === 'open-wrp') { const url = activeWorld()?.arrival?.wrpRunaUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer'); return; }
+  if (action === 'refresh-deep') { deepData = null; deepDataFetching = false; fetchDeepData(); return; }
   if (action === 'open-return') returnOpen = true;
   if (action === 'cancel-return') returnOpen = false;
   if (action === 'complete-return') {
