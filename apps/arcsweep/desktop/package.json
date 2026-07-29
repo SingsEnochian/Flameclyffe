@@ -32,6 +32,7 @@
       "main.cjs",
       "preload.cjs",
       "store.cjs",
+      "register-arcsweep-ipc.cjs",
       "package.json"
     ],
     "win": {
