@@ -19,7 +19,7 @@ export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
       ['reviewStatus', 'Review status', 'select', false, ['Non-canon intake', 'Under review', 'Reference only', 'Canon candidate', 'Committed', 'Rejected', 'Archived']],
       ['summary', 'Summary or extracted notes', 'textarea'],
       ['provenanceNotes', 'Provenance and handling notes', 'textarea'],
-      ['canonBoundary', 'Canon boundary', 'select', false, ['Non-canon source', 'Candidate for Steward review', 'Committed to canon']],
+      ['canonBoundary', 'Canon boundary', 'select', false, ['Non-canon source', 'Candidate for Steward review']],
     ],
     attachments: true,
   },
