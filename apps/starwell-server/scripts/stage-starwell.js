@@ -51,7 +51,10 @@ function assertSheetConvergenceManifest(relativePath) {
   if (manifest.moduleId !== 'sheet-convergence' || manifest.delivery !== 'bundled-core') {
     throw new Error(`${relativePath} does not declare Sheet Convergence as a bundled core module.`);
   }
-  if (!manifest.hosts?.includes('starwell') || !manifest.hosts?.includes('hearthgate')) {
+  const hostNames = Array.isArray(manifest.hosts)
+    ? manifest.hosts.map((host) => (typeof host === 'string' ? host : host?.host)).filter(Boolean)
+    : [];
+  if (!hostNames.includes('starwell') || !hostNames.includes('hearthgate')) {
     throw new Error(`${relativePath} must declare both STARWELL and Hearthgate hosts.`);
   }
   if (manifest.epistemicContract?.localFoldProbabilityForBundledMap !== 0) {
@@ -118,4 +121,3 @@ console.log(` source: ${sourceDir}`);
 console.log(` destination: ${destinationDir}`);
 console.log(` files: ${fileCount}`);
 console.log(' routes: /starwell/, /starwell/glyph-studio/, and /starwell/signal-well/');
-console.log(' modules: Signal Well and Sheet Convergence bundled for STARWELL/Hearthgate; specialist adapters remain optional');
