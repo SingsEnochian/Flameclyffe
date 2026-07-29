@@ -1,10 +1,13 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, shell, Menu } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, shell, Menu } = require('electron');
 const path  = require('path');
 const fs    = require('fs');
+const fsp   = require('node:fs/promises');
 const { fork } = require('child_process');
 const net   = require('net');
 const { fileURLToPath } = require('url');
+const { createStorePaths, ensureStore } = require('../../arcsweep/desktop/store.cjs');
+const registerArcsweepIpc = require('../../arcsweep/desktop/register-arcsweep-ipc.cjs');
 
 const CONFIG_PATH = path.join(app.getPath('userData'), 'hearthgate-config.json');
 const DATA_DIR    = path.join(app.getPath('userData'), 'hearthgate-data');
@@ -20,6 +23,7 @@ const LOCAL_HTTP_ORIGINS = new Set([
 let win = null;
 let serverProc = null;
 let fontForgeProc = null;
+let arcsweepStorePaths = null;
 
 // ── Config ────────────────────────────────────────────────────────────────────
 function loadConfig() {
@@ -196,6 +200,16 @@ ipcMain.handle('open-wizard', () => {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
   fs.mkdirSync(DATA_DIR, { recursive: true });
+
+  arcsweepStorePaths = createStorePaths(path.join(app.getPath('appData'), 'Hearthgate', 'Arcsweep'));
+  await ensureStore(arcsweepStorePaths);
+  registerArcsweepIpc({
+    ipcMain, dialog, shell, fsp,
+    getWindow: () => win,
+    storePaths: arcsweepStorePaths,
+    appName: 'Arcsweep',
+    appVersion: '0.2.1',
+  });
 
   const cfg = loadConfig();
   if (!cfg) {

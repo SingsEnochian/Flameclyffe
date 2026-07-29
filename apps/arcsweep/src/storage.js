@@ -5,7 +5,7 @@ import { createEmptyRoomCollections, normaliseRoomCollections } from './rooms.js
 import { createWorld, normaliseWorld } from './worlds.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
-const desktop = typeof window !== 'undefined' ? window.arcsweepDesktop : null;
+const desktop = typeof window !== 'undefined' ? (window.arcsweepDesktop ?? window.arcsweep ?? null) : null;
 
 function uid(prefix = 'item') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -180,7 +180,7 @@ export function saveState(state, meta = {}) {
   };
   const snapshot = JSON.parse(JSON.stringify(state));
   if (desktop?.saveState) {
-    saveChain = saveChain.then(() => desktop.saveState(snapshot, meta));
+    saveChain = saveChain.catch(() => {}).then(() => desktop.saveState(snapshot, meta));
     return saveChain;
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
