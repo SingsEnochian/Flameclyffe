@@ -6,6 +6,7 @@ const nativeFetch = window.fetch.bind(window);
 let latestSnapshot = readSnapshot();
 
 function finite(value, fallback = null) {
+  if (value === null || value === undefined || value === '') return fallback;
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 }
@@ -37,7 +38,6 @@ function writeSnapshot(snapshot) {
 function observerField(snapshot) {
   const raw = snapshot?.raw || {};
   const field = snapshot?.field || raw.field || raw.deep || raw.DEEP || raw.state || raw.observer || raw;
-  const direct = snapshot?.direct || raw.direct || {};
 
   const P = clamp(field.P, 0, 1);
   const C = clamp(field.C, 0, 1);
