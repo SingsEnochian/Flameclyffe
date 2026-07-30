@@ -7,7 +7,7 @@
     "npm": ">=11"
   },
   "scripts": {
-    "matrix:install": "npm ci",
+    "matrix:install": "npm install --no-audit --no-fund",
     "matrix:dev": "vite --config apps/starwell/vite.config.js --host 127.0.0.1",
     "matrix:start": "npm run matrix:dev",
     "matrix:build": "vite build --config apps/starwell/vite.config.js",
