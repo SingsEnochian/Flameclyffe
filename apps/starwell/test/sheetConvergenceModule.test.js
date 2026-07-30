@@ -23,7 +23,17 @@ test('sheet convergence module is bundled for STARWELL and Hearthgate', () => {
   assert.equal(manifest.moduleId, 'sheet-convergence');
   assert.equal(manifest.delivery, 'bundled-core');
   assert.equal(manifest.enabledByDefault, true);
-  assert.deepEqual(manifest.hosts, ['starwell', 'hearthgate']);
+
+  const hosts = manifest.hosts.map((host) => host.host);
+  assert.ok(hosts.includes('starwell'));
+  assert.ok(hosts.includes('hearthgate'));
+
+  const starwellHost = manifest.hosts.find((host) => host.host === 'starwell');
+  const hearthgateHost = manifest.hosts.find((host) => host.host === 'hearthgate');
+
+  assert.equal(starwellHost?.mount, 'central-observatory');
+  assert.equal(hearthgateHost?.mount, 'laboratory/observatory');
+  assert.equal(hearthgateHost?.requiresNetwork, false);
   assert.equal(manifest.starwell.mount, 'central-observatory');
   assert.equal(manifest.hearthgate.moduleKind, 'instrument');
   assert.equal(manifest.hearthgate.requiresNetwork, false);
