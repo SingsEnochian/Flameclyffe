@@ -1,4 +1,4 @@
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -9,7 +9,6 @@ const required = [
   'dist/starwell/temporal-twist-renderer.html',
   'dist/starwell/starwell/mobius-audio-bus.html',
   'dist/starwell/observer-deep.html',
-  'dist/starwell/assets/js/observatory_live_contract.js',
 ];
 
 const checks = [];
@@ -21,6 +20,18 @@ for (const relativePath of required) {
   } catch {
     checks.push({ id: relativePath, status: 'FAILED' });
   }
+}
+
+try {
+  const assets = await readdir(resolve(root, 'dist/starwell/assets'));
+  const supabaseBundle = assets.find((name) => /^supabase-.*\.js$/.test(name));
+  checks.push({
+    id: 'bundle:observatory-live-contract',
+    status: supabaseBundle ? 'VERIFIED' : 'FAILED',
+    artifact: supabaseBundle ?? null,
+  });
+} catch {
+  checks.push({ id: 'bundle:observatory-live-contract', status: 'FAILED', artifact: null });
 }
 
 try {
