@@ -40,7 +40,7 @@ jobs:
           npm exec vite preview -- --config apps/starwell/vite.config.js --host 127.0.0.1 --port 4173 > matrix-preview.log 2>&1 &
           echo $! > matrix-preview.pid
 
-      - name: Verify start and shell
+      - name: Verify start, shell and iPad contract
         run: |
           for attempt in {1..30}; do
             if curl --fail --silent http://127.0.0.1:4173/observatory-matrix.html > matrix-shell.html; then
@@ -50,6 +50,12 @@ jobs:
           done
           test -s matrix-shell.html
           grep -q 'Observatory Matrix' matrix-shell.html
+          grep -q 'viewport-fit=cover' matrix-shell.html
+          grep -q 'safe-area-inset-top' matrix-shell.html
+          grep -q '@media (pointer:coarse)' matrix-shell.html
+          grep -q 'min-height:48px' matrix-shell.html
+          grep -q 'touch-action:manipulation' matrix-shell.html
+          grep -q 'apple-mobile-web-app-capable' matrix-shell.html
           curl --fail --silent http://127.0.0.1:4173/assets/js/observatory_live_contract.js > live-contract.js
           test -s live-contract.js
 
@@ -66,7 +72,9 @@ jobs:
             "install": "VERIFIED",
             "build": "VERIFIED",
             "start": "VERIFIED",
-            "package": "VERIFIED"
+            "package": "VERIFIED",
+            "ipad_static_contract": "VERIFIED",
+            "ipad_device_test": "NOT_YET_TESTED"
           }
           EOF
 
