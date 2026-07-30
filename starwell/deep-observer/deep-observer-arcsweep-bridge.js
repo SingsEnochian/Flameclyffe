@@ -6,7 +6,7 @@
   const iframe = document.getElementById('arcsweepFrame');
   const status = document.getElementById('arcsweepBridgeStatus');
   const packetElement = document.getElementById('packet');
-  let lastSerialised = '';
+  let lastFingerprint = '';
   let lastPublishedAt = 0;
   let latestSnapshot = readStoredSnapshot();
 
@@ -121,12 +121,13 @@
     const now = Date.now();
     if (!force && now - lastPublishedAt < 1000) return;
     const snapshot = buildSnapshot();
-    const serialised = JSON.stringify(snapshot);
-    if (!force && serialised === lastSerialised) return;
+    const fingerprint = JSON.stringify({ field: snapshot.field, direct: snapshot.direct });
+    if (!force && fingerprint === lastFingerprint) return;
 
     lastPublishedAt = now;
-    lastSerialised = serialised;
+    lastFingerprint = fingerprint;
     latestSnapshot = snapshot;
+    const serialised = JSON.stringify(snapshot);
     try {
       localStorage.setItem(STORAGE_KEY, serialised);
     } catch {
