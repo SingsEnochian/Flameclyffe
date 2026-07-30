@@ -1,0 +1,80 @@
+{
+  "ingest_id": "taaveren-vaen.wot-fandom.full-v1",
+  "world_key": "taaveren-vaen",
+  "display_name": "Ta’veren Vaen",
+  "source": {
+    "name": "A Wheel of Time Wiki",
+    "base_url": "https://wot.fandom.com",
+    "api_url": "https://wot.fandom.com/api.php",
+    "license": "CC BY-SA",
+    "attribution_required": true
+  },
+  "snapshot": {
+    "mode": "mediawiki-api",
+    "format": "ndjson",
+    "include_latest_revision_content": true,
+    "include_revision_identity": true,
+    "include_categories": true,
+    "include_links": true,
+    "include_images": true,
+    "include_redirects": true,
+    "request_delay_ms": 350,
+    "batch_size": 50,
+    "resume": true
+  },
+  "namespaces": {
+    "archive": "all",
+    "canon_promote": [0],
+    "support_only": [10, 14, 828],
+    "exclude_from_knowledge": [-2, -1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13]
+  },
+  "canon_policy": {
+    "source_classification": "secondary-canon-reference",
+    "book_canon_default": true,
+    "tv_canon_default": false,
+    "community_meta_is_canon": false,
+    "talk_pages_are_canon": false,
+    "promote_only_after_normalisation": true,
+    "preserve_source_disagreement": true,
+    "spoiler_scope": "full-series"
+  },
+  "entity_targets": [
+    "character",
+    "location",
+    "nation",
+    "organisation",
+    "culture",
+    "book",
+    "chapter",
+    "event",
+    "artifact",
+    "weapon",
+    "creature",
+    "ability",
+    "channeling_concept",
+    "old_tongue_term",
+    "prophecy",
+    "timeline_marker",
+    "calendar_term",
+    "relationship",
+    "source_note"
+  ],
+  "outputs": {
+    "raw_pages": "data/raw/pages.ndjson",
+    "page_index": "data/index/pages.json",
+    "categories": "data/index/categories.json",
+    "redirects": "data/index/redirects.json",
+    "entities": "data/normalised/entities.ndjson",
+    "relationships": "data/normalised/relationships.ndjson",
+    "timeline": "data/normalised/timeline.ndjson",
+    "dossiers": "data/dossiers",
+    "receipts": "data/receipts"
+  },
+  "arcsweep": {
+    "import_bundle": "dist/taaveren-vaen-wot-canon.bundle.json",
+    "world_key": "taaveren-vaen",
+    "classification": "canonical-reference",
+    "notion_role": "knowledge-provenance",
+    "telemetry_role": "none"
+  }
+}
