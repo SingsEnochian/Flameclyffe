@@ -11,6 +11,7 @@
   let latestSnapshot = readStoredSnapshot();
 
   function finite(value, fallback = null) {
+    if (value === null || value === undefined || value === '') return fallback;
     const number = Number(value);
     return Number.isFinite(number) ? number : fallback;
   }
@@ -72,7 +73,7 @@
       bt: finite(direct.bt ?? raw?.bt, null),
       solarWind: finite(direct.solarWind ?? raw?.solarWind ?? raw?.speed, null),
       sky: direct.sky ?? raw?.sky ?? '',
-      source: direct.source ?? raw?.source ?? sourceText.trim() || 'observer',
+      source: direct.source ?? raw?.source ?? (sourceText.trim() || 'observer'),
     };
   }
 
