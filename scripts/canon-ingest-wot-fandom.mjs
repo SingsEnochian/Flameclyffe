@@ -10,6 +10,7 @@ const RAW_DIR = path.join(ROOT, 'data/raw');
 const INDEX_DIR = path.join(ROOT, 'data/index');
 const RECEIPT_DIR = path.join(ROOT, 'data/receipts');
 const RAW_FILE = path.join(ROOT, manifest.outputs.raw_pages);
+const PAGE_INDEX_FILE = path.join(ROOT, manifest.outputs.page_index);
 const STATE_FILE = path.join(RAW_DIR, 'crawl-state.json');
 
 await Promise.all([RAW_DIR, INDEX_DIR, RECEIPT_DIR].map((dir) => mkdir(dir, { recursive: true })));
@@ -21,14 +22,9 @@ async function exists(file) {
   try { await access(file); return true; } catch { return false; }
 }
 
-async function loadState() {
-  if (!(await exists(STATE_FILE))) return { apcontinue: null, pages: 0, started_at: new Date().toISOString() };
-  return JSON.parse(await readFile(STATE_FILE, 'utf8'));
-}
-
 async function api(params) {
   const url = new URL(API);
-  for (const [key, value] of Object.entries({ format: 'json', formatversion: '2', origin: '*', ...params })) {
+  for (const [key, value] of Object.entries({ format: 'json', formatversion: '2', ...params })) {
     if (value !== undefined && value !== null) url.searchParams.set(key, String(value));
   }
   const response = await fetch(url, {
@@ -40,89 +36,145 @@ async function api(params) {
   return body;
 }
 
-async function listPageBatch(apcontinue) {
-  return api({
-    action: 'query',
-    generator: 'allpages',
-    gaplimit: manifest.snapshot.batch_size,
-    gapfilterredir: 'all',
-    gapcontinue: apcontinue,
-    prop: 'revisions|categories|links|images|info|pageprops',
-    rvprop: 'ids|timestamp|user|userid|comment|content|contentmodel|sha1|size',
-    rvslots: 'main',
-    rvlimit: 1,
-    cllimit: 'max',
-    pllimit: 'max',
-    imlimit: 'max',
-    inprop: 'url'
-  });
+async function getNamespaces() {
+  const body = await api({ action: 'query', meta: 'siteinfo', siprop: 'namespaces' });
+  return Object.values(body.query?.namespaces || {})
+    .map((ns) => Number(ns.id))
+    .filter(Number.isInteger)
+    .sort((a, b) => a - b);
 }
 
-const state = await loadState();
-let continuation = state.apcontinue;
-let pageCount = state.pages || 0;
+async function enumerateNamespace(namespace, start = null) {
+  const pages = [];
+  let apcontinue = start;
+  do {
+    const body = await api({
+      action: 'query',
+      list: 'allpages',
+      aplimit: 'max',
+      apnamespace: namespace,
+      apfilterredir: 'all',
+      apcontinue
+    });
+    pages.push(...(body.query?.allpages || []));
+    apcontinue = body.continue?.apcontinue || null;
+    await sleep(manifest.snapshot.request_delay_ms);
+  } while (apcontinue);
+  return pages;
+}
+
+async function fetchPage(pageid) {
+  const aggregate = { categories: [], links: [], images: [] };
+  let continuation = {};
+  let basePage = null;
+  do {
+    const body = await api({
+      action: 'query',
+      pageids: pageid,
+      prop: 'revisions|categories|links|images|info|pageprops',
+      rvprop: 'ids|timestamp|user|userid|comment|content|contentmodel|sha1|size',
+      rvslots: 'main',
+      rvlimit: 1,
+      cllimit: 'max',
+      pllimit: 'max',
+      imlimit: 'max',
+      inprop: 'url',
+      ...continuation
+    });
+    const page = body.query?.pages?.[0];
+    if (!page) throw new Error(`Missing page ${pageid}`);
+    basePage ||= page;
+    aggregate.categories.push(...(page.categories || []));
+    aggregate.links.push(...(page.links || []));
+    aggregate.images.push(...(page.images || []));
+    continuation = body.continue || null;
+    if (continuation) delete continuation.continue;
+    await sleep(manifest.snapshot.request_delay_ms);
+  } while (continuation && Object.keys(continuation).length);
+  return { ...basePage, ...aggregate };
+}
+
+const priorState = (await exists(STATE_FILE))
+  ? JSON.parse(await readFile(STATE_FILE, 'utf8'))
+  : { completed_page_ids: [], pages: 0, started_at: new Date().toISOString() };
+const completed = new Set(priorState.completed_page_ids || []);
 const runStarted = new Date().toISOString();
 
-if (!continuation && !manifest.snapshot.resume) await writeFile(RAW_FILE, '');
-
-while (true) {
-  const body = await listPageBatch(continuation);
-  const pages = body.query?.pages || [];
-  for (const page of pages) {
-    const revision = page.revisions?.[0] || null;
-    const content = revision?.slots?.main?.content ?? revision?.content ?? '';
-    const record = {
-      ingest_id: manifest.ingest_id,
-      source_wiki: manifest.source.name,
-      source_url: page.fullurl,
-      page_id: page.pageid,
-      namespace: page.ns,
-      title: page.title,
-      canonical_title: page.title.replace(/_/g, ' ').trim(),
-      redirect: Boolean(page.redirect),
-      categories: (page.categories || []).map((item) => item.title.replace(/^Category:/, '')),
-      links: (page.links || []).map((item) => ({ ns: item.ns, title: item.title })),
-      images: (page.images || []).map((item) => item.title),
-      pageprops: page.pageprops || {},
-      revision: revision ? {
-        revid: revision.revid,
-        parentid: revision.parentid,
-        timestamp: revision.timestamp,
-        user: revision.user,
-        userid: revision.userid,
-        comment: revision.comment,
-        sha1: revision.sha1,
-        size: revision.size,
-        contentmodel: revision.slots?.main?.contentmodel || revision.contentmodel || 'wikitext'
-      } : null,
-      content,
-      content_sha256: hash(content),
-      classification: page.ns === 0 ? manifest.canon_policy.source_classification : 'support-material',
-      attribution: {
-        licence: manifest.source.license,
-        source_page: page.fullurl,
-        revision_id: revision?.revid || null,
-        revision_user: revision?.user || null,
-        retrieved_at: new Date().toISOString()
-      }
-    };
-    await appendFile(RAW_FILE, `${JSON.stringify(record)}\n`, 'utf8');
-    pageCount += 1;
-  }
-
-  continuation = body.continue?.gapcontinue || null;
-  await writeFile(STATE_FILE, JSON.stringify({
-    apcontinue: continuation,
-    pages: pageCount,
-    started_at: state.started_at,
-    updated_at: new Date().toISOString(),
-    complete: !continuation
-  }, null, 2));
-
-  process.stdout.write(`\rCaptured ${pageCount} pages${continuation ? '…' : '.\n'}`);
-  if (!continuation) break;
-  await sleep(manifest.snapshot.request_delay_ms);
+if (!manifest.snapshot.resume || !(await exists(RAW_FILE))) {
+  await writeFile(RAW_FILE, '');
+  completed.clear();
 }
+
+const namespaces = await getNamespaces();
+const pageIndex = [];
+for (const namespace of namespaces) {
+  const pages = await enumerateNamespace(namespace);
+  pageIndex.push(...pages.map((page) => ({ ...page, namespace })));
+}
+await writeFile(PAGE_INDEX_FILE, JSON.stringify({
+  ingest_id: manifest.ingest_id,
+  generated_at: new Date().toISOString(),
+  namespaces,
+  pages: pageIndex
+}, null, 2));
+
+let pageCount = completed.size;
+for (const summary of pageIndex) {
+  if (completed.has(summary.pageid)) continue;
+  const page = await fetchPage(summary.pageid);
+  const revision = page.revisions?.[0] || null;
+  const content = revision?.slots?.main?.content ?? revision?.content ?? '';
+  const record = {
+    ingest_id: manifest.ingest_id,
+    source_wiki: manifest.source.name,
+    source_url: page.fullurl,
+    page_id: page.pageid,
+    namespace: page.ns,
+    title: page.title,
+    canonical_title: page.title.replace(/_/g, ' ').trim(),
+    redirect: Boolean(page.redirect),
+    categories: [...new Set((page.categories || []).map((item) => item.title.replace(/^Category:/, '')))],
+    links: [...new Map((page.links || []).map((item) => [`${item.ns}:${item.title}`, { ns: item.ns, title: item.title }])).values()],
+    images: [...new Set((page.images || []).map((item) => item.title))],
+    pageprops: page.pageprops || {},
+    revision: revision ? {
+      revid: revision.revid,
+      parentid: revision.parentid,
+      timestamp: revision.timestamp,
+      user: revision.user,
+      userid: revision.userid,
+      comment: revision.comment,
+      sha1: revision.sha1,
+      size: revision.size,
+      contentmodel: revision.slots?.main?.contentmodel || revision.contentmodel || 'wikitext'
+    } : null,
+    content,
+    content_sha256: hash(content),
+    classification: page.ns === 0 ? manifest.canon_policy.source_classification : 'support-material',
+    knowledge_eligible: !manifest.namespaces.exclude_from_knowledge.includes(page.ns),
+    canon_promotable: manifest.namespaces.canon_promote.includes(page.ns),
+    attribution: {
+      licence: manifest.source.license,
+      source_page: page.fullurl,
+      revision_id: revision?.revid || null,
+      revision_user: revision?.user || null,
+      retrieved_at: new Date().toISOString()
+    }
+  };
+  await appendFile(RAW_FILE, `${JSON.stringify(record)}\n`, 'utf8');
+  completed.add(page.pageid);
+  pageCount += 1;
+  await writeFile(STATE_FILE, JSON.stringify({
+    completed_page_ids: [...completed],
+    pages: pageCount,
+    total_discovered: pageIndex.length,
+    started_at: priorState.started_at,
+    updated_at: new Date().toISOString(),
+    complete: pageCount >= pageIndex.length
+  }, null, 2));
+  process.stdout.write(`\rCaptured ${pageCount}/${pageIndex.length} pages…`);
+}
+process.stdout.write('\n');
 
 const receipt = {
   ingest_id: manifest.ingest_id,
@@ -131,6 +183,7 @@ const receipt = {
   started_at: runStarted,
   completed_at: new Date().toISOString(),
   pages: pageCount,
+  namespaces,
   raw_file: manifest.outputs.raw_pages,
   raw_sha256: hash(await readFile(RAW_FILE)),
   manifest_sha256: hash(JSON.stringify(manifest)),
