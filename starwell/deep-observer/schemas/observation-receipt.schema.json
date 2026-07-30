@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/observation-receipt.schema.json",
+  "title": "Observer Append-Only Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "sequence", "created_at", "observation_id", "inputs", "interpretation", "human_response", "result", "provenance"],
+  "properties": {
+    "schema_version": { "const": "2.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "observation_id": { "type": "string", "minLength": 1 },
+    "previous_receipt_ref": { "type": ["string", "null"] },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["witness_refs", "evidence_refs", "prior_state_ref"],
+      "properties": {
+        "witness_refs": { "type": "array", "items": { "type": "string" } },
+        "evidence_refs": { "type": "array", "items": { "type": "string" } },
+        "glyph_refs": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "prior_state_ref": { "type": ["string", "null"] }
+      }
+    },
+    "interpretation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["narrative_refs", "metric_refs"],
+      "properties": {
+        "narrative_refs": { "type": "array", "items": { "type": "string" } },
+        "metric_refs": { "type": "array", "items": { "type": "string" } },
+        "model_version": { "type": ["string", "null"] },
+        "prompt_version": { "type": ["string", "null"] }
+      }
+    },
+    "human_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "actor_id"],
+      "properties": {
+        "action": { "enum": ["accept", "reject", "annotate", "defer", "partial-carry-forward"] },
+        "actor_id": { "type": "string" },
+        "accepted_refs": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "rejected_refs": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "annotation": { "type": ["string", "null"] }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["applied", "rejected", "deferred", "partial"] },
+        "proposed_premaq_ref": { "type": ["string", "null"] },
+        "accepted_premaq_ref": { "type": ["string", "null"] }
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_ref", "source_class"],
+        "properties": {
+          "source_ref": { "type": "string" },
+          "source_class": { "enum": ["witnessed", "recorded", "derived", "model-interpreted", "human-interpreted", "remembered", "correlated", "simulated", "projected", "unknown"] },
+          "sha256": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}
