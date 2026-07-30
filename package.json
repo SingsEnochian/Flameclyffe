@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24 <25"
+    "node": ">=24 <27",
+    "npm": ">=11"
   },
   "scripts": {
     "matrix:install": "npm ci",
