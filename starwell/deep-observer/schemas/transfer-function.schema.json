@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/transfer-function.schema.json",
+  "title": "Canon Transfer Function",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "world_id", "version", "input_registry_version", "canon_graph_version", "projection_class", "calibration", "implementation"],
+  "properties": {
+    "schema_version": { "const": "2.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "world_id": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "input_registry_version": { "type": "string", "minLength": 1 },
+    "canon_graph_version": { "type": "string", "minLength": 1 },
+    "projection_class": { "enum": ["evidence-grounded", "canon-grounded"] },
+    "timeline_selector": { "type": ["string", "null"] },
+    "anchor_refs": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "calibration": { "type": "object", "additionalProperties": true },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "entrypoint"],
+      "properties": {
+        "kind": { "enum": ["declarative", "javascript", "typescript", "wasm", "service"] },
+        "entrypoint": { "type": "string", "minLength": 1 },
+        "checksum": { "type": ["string", "null"] }
+      }
+    },
+    "output_schema_ref": { "type": ["string", "null"] }
+  }
+}
