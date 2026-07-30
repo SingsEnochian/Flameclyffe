@@ -2,7 +2,17 @@
   "name": "flameclyffe-workshop",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
+    "matrix:install": "npm ci",
+    "matrix:dev": "vite --config apps/starwell/vite.config.js --host 127.0.0.1",
+    "matrix:start": "npm run matrix:dev",
+    "matrix:build": "vite build --config apps/starwell/vite.config.js",
+    "matrix:health": "node scripts/matrix-health.mjs",
+    "matrix:package": "node scripts/matrix-package.mjs",
+    "matrix:verify": "npm run matrix:build && npm run matrix:health && npm run matrix:package",
     "sigil:dev": "vite --config apps/sigil-activator/vite.config.js",
     "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
     "sigil:preview": "vite preview --config apps/sigil-activator/vite.config.js",
