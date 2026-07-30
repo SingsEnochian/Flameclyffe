@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/world-projection.schema.json",
+  "title": "World Projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "created_at", "world_id", "projection_class", "premaq_state_ref", "canon_graph_version", "transfer_function", "timeline", "payload", "uncertainty", "provenance_refs", "receipt_id"],
+  "properties": {
+    "schema_version": { "const": "2.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "world_id": { "type": "string", "minLength": 1 },
+    "projection_class": { "enum": ["evidence-grounded", "canon-grounded"] },
+    "premaq_state_ref": { "type": "string", "minLength": 1 },
+    "canon_graph_version": { "type": "string", "minLength": 1 },
+    "transfer_function": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "timeline": { "type": "object", "additionalProperties": true },
+    "payload": { "type": "object", "additionalProperties": true },
+    "uncertainty": { "type": ["number", "string", "object", "null"] },
+    "provenance_refs": { "type": "array", "items": { "type": "string" } },
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "labels": { "type": "array", "items": { "enum": ["projected", "observational", "fictional", "speculative"] }, "default": [] }
+  }
+}
