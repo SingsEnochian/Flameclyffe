@@ -1,0 +1,57 @@
+:root{
+  --hg-bg:#07100d;
+  --hg-surface:#0d1713;
+  --hg-raised:#14221c;
+  --hg-ink:#edf2ec;
+  --hg-muted:#a9b8ae;
+  --hg-gold:#d7bd79;
+  --hg-copper:#b97854;
+  --hg-green:#79b99a;
+  --hg-line:rgba(215,189,121,.20);
+  --hg-radius:22px;
+  --hg-shadow:0 18px 54px rgba(0,0,0,.34);
+}
+html{background:var(--hg-bg)}
+body{background:var(--hg-bg);color:var(--hg-ink)}
+.hearthgate-housebar{
+  position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:.8rem;
+  min-height:58px;padding:.65rem clamp(.8rem,2.5vw,1.5rem);
+  background:rgba(7,16,13,.94);border-bottom:1px solid var(--hg-line);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)
+}
+.hearthgate-nameplate{display:flex;flex-direction:column;min-width:max-content;text-decoration:none;color:var(--hg-ink)}
+.hearthgate-nameplate strong{font-family:Cinzel,serif;letter-spacing:.15em;font-size:.82rem;color:var(--hg-gold)}
+.hearthgate-nameplate span{font-size:.66rem;color:var(--hg-muted);margin-top:.12rem}
+.hearthgate-rail{display:flex;gap:.35rem;align-items:center;overflow:auto;scrollbar-width:none}
+.hearthgate-rail::-webkit-scrollbar{display:none}
+.hearthgate-rail a{white-space:nowrap;text-decoration:none;color:var(--hg-muted);font-size:.72rem;font-weight:700;padding:.52rem .7rem;border-radius:999px;border:1px solid transparent}
+.hearthgate-rail a:hover,.hearthgate-rail a[aria-current="page"]{color:var(--hg-ink);border-color:var(--hg-line);background:rgba(215,189,121,.07)}
+.hearthgate-reception{margin-left:auto;white-space:nowrap;color:var(--hg-gold);font-size:.7rem;border:1px solid var(--hg-line);border-radius:999px;padding:.48rem .7rem;background:rgba(215,189,121,.05)}
+.starwell{padding:clamp(.7rem,2vw,1.4rem);background:radial-gradient(circle at 18% 0,rgba(121,185,154,.10),transparent 30rem),linear-gradient(145deg,#07100d,#0a1311 52%,#101914)!important;color:var(--hg-ink);overflow:visible}
+.starwell::before{opacity:.28;background:radial-gradient(circle at 80% 4%,rgba(215,189,121,.12),transparent 24rem),radial-gradient(circle at 16% 20%,rgba(121,185,154,.08),transparent 20rem)}
+.stars{opacity:.18!important}
+.grove-state{border-radius:18px!important;border-color:var(--hg-line)!important;background:rgba(13,23,19,.86)!important;box-shadow:none!important}
+.observatory-shell{width:min(1240px,98vw);border-radius:28px;border:1px solid var(--hg-line);background:rgba(13,23,19,.86)!important;color:var(--hg-ink)!important;box-shadow:var(--hg-shadow);backdrop-filter:blur(14px)}
+.dome{min-height:230px;padding:2.2rem 1.2rem 1.4rem;border-bottom:1px solid var(--hg-line);background:linear-gradient(180deg,rgba(215,189,121,.04),transparent)}
+.dome::before{display:none}
+.dome .eyebrow{color:var(--hg-muted)!important;font-size:.7rem;letter-spacing:.13em}
+.dome h1{font-size:0!important;line-height:1;margin:0;color:var(--hg-gold)!important;text-shadow:none}
+.dome h1::after{content:'ARCSWEEP';display:block;font-family:Cinzel,serif;font-size:clamp(2.7rem,8vw,6.4rem);letter-spacing:.08em;color:var(--hg-gold)}
+.dome .subtitle{max-width:720px;color:var(--hg-ink)!important;font-size:clamp(1.08rem,2.5vw,1.45rem);line-height:1.45;margin-top:.65rem}
+.dome .subtitle::after{content:' Hearthgate’s gentle rail between rooms, worlds, instruments, and records.'}
+.inscription{margin-top:1rem;border-color:var(--hg-line)!important;background:rgba(255,255,255,.025)!important;color:var(--hg-muted)!important;padding:.55rem .8rem;font-size:.95rem}
+.instrument-grid,.study-row{gap:.72rem;padding-left:clamp(.8rem,2vw,1.35rem);padding-right:clamp(.8rem,2vw,1.35rem)}
+.instrument-card,.room-card,.chamber-card,.study-door,.seed-card,.codex-reader,.entry-tab{border-radius:var(--hg-radius)!important;border-color:var(--hg-line)!important;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.10))!important;color:var(--hg-ink)!important;box-shadow:none!important}
+.instrument-card:hover,.room-card:hover,.entry-tab:hover{background:rgba(215,189,121,.065)!important;border-color:rgba(215,189,121,.38)!important;transform:none!important}
+.instrument-card.active,.room-card.active,.entry-tab.active{background:rgba(121,185,154,.09)!important;border-color:rgba(121,185,154,.38)!important}
+.room-title,.instrument-card h2,.chamber-card h2,.chamber-card h3,.map-heading strong{color:var(--hg-gold)!important}
+.room-text,.instrument-card p,.chamber-card p,.chamber-card span,.seed-card span,.codex-reader span{color:var(--hg-muted)}
+.room-medallion,.glyph{background:rgba(121,185,154,.09)!important;border-color:rgba(121,185,154,.22)!important;box-shadow:none!important}
+.framework-door-rack{width:min(1240px,98vw)!important;margin:1rem auto 2rem!important;gap:.7rem!important;padding:0!important;background:transparent!important}
+.framework-door-rack a{border-radius:20px!important;border:1px solid var(--hg-line)!important;background:rgba(13,23,19,.82)!important;color:var(--hg-ink)!important;box-shadow:none!important}
+.framework-door-rack a:hover{background:rgba(215,189,121,.06)!important;border-color:rgba(215,189,121,.38)!important;transform:none!important}
+.framework-door-rack strong{color:var(--hg-gold)!important}.framework-door-rack em{color:var(--hg-muted)!important}
+button,input,textarea,select{font:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--hg-gold);outline-offset:3px}
+@media(max-width:760px){.hearthgate-housebar{align-items:flex-start;flex-wrap:wrap}.hearthgate-reception{margin-left:0}.hearthgate-rail{order:3;width:100%}.observatory-shell{border-radius:22px}.dome{min-height:190px}.framework-door-rack{padding:.2rem!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
