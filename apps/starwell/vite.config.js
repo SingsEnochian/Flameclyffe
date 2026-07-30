@@ -56,6 +56,7 @@ export default defineConfig({
         materialQa: resolve(REPO_ROOT, 'apps/starwell/material-qa.html'),
         unitResonanceLab: resolve(REPO_ROOT, 'apps/starwell/unit-resonance-lab.html'),
         scfeLab: resolve(REPO_ROOT, 'apps/starwell/scfe-lab.html'),
+        temporalTwistRenderer: resolve(REPO_ROOT, 'apps/starwell/temporal-twist-renderer.html'),
         glyphStudio: resolve(REPO_ROOT, 'apps/starwell/glyph-studio/index.html'),
         signalWell: resolve(REPO_ROOT, 'apps/starwell/signal-well/index.html'),
       },
