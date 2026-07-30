@@ -5,8 +5,12 @@ const fsp = require('node:fs/promises');
 const path = require('node:path');
 
 const repoRoot = path.resolve(__dirname, '../..');
-const source = path.join(repoRoot, 'dist', 'arcsweep');
-const destination = path.join(repoRoot, 'dist', 'starwell', 'arcsweep');
+const arcsweepSource = path.join(repoRoot, 'dist', 'arcsweep');
+const arcsweepDestination = path.join(repoRoot, 'dist', 'starwell', 'arcsweep');
+const observerSource = path.join(repoRoot, 'starwell', 'deep-observer');
+const observerDestination = path.join(repoRoot, 'dist', 'starwell', 'observer');
+const resonanceSource = path.join(repoRoot, 'assets', 'deep-resonance-bus.js');
+const resonanceDestination = path.join(repoRoot, 'dist', 'starwell', 'assets', 'deep-resonance-bus.js');
 
 async function copyTree(from, to) {
   const stat = await fsp.stat(from);
@@ -22,19 +26,33 @@ async function copyTree(from, to) {
 }
 
 (async () => {
-  const indexPath = path.join(source, 'index.html');
-  if (!fs.existsSync(indexPath)) {
-    throw new Error(`Arcsweep web build missing at: ${source}. Run npm run arcsweep:build first.`);
+  const arcsweepIndex = path.join(arcsweepSource, 'index.html');
+  const observerIndex = path.join(observerSource, 'index.html');
+  if (!fs.existsSync(arcsweepIndex)) {
+    throw new Error(`Arcsweep web build missing at: ${arcsweepSource}. Run npm run arcsweep:build first.`);
+  }
+  if (!fs.existsSync(observerIndex)) {
+    throw new Error(`DEEP Observer source missing at: ${observerSource}.`);
   }
 
-  await fsp.rm(destination, { recursive: true, force: true });
-  await copyTree(source, destination);
+  await fsp.rm(arcsweepDestination, { recursive: true, force: true });
+  await copyTree(arcsweepSource, arcsweepDestination);
 
-  if (!fs.existsSync(path.join(destination, 'index.html'))) {
-    throw new Error(`Arcsweep Vercel stage failed: ${destination}/index.html was not created.`);
+  await fsp.rm(observerDestination, { recursive: true, force: true });
+  await copyTree(observerSource, observerDestination);
+  if (fs.existsSync(resonanceSource)) {
+    await copyTree(resonanceSource, resonanceDestination);
   }
 
-  console.log(`[Arcsweep] staged canonical programme ${source} -> ${destination}`);
+  if (!fs.existsSync(path.join(arcsweepDestination, 'index.html'))) {
+    throw new Error(`Arcsweep Vercel stage failed: ${arcsweepDestination}/index.html was not created.`);
+  }
+  if (!fs.existsSync(path.join(observerDestination, 'index.html'))) {
+    throw new Error(`Observer Vercel stage failed: ${observerDestination}/index.html was not created.`);
+  }
+
+  console.log(`[Arcsweep] staged canonical programme ${arcsweepSource} -> ${arcsweepDestination}`);
+  console.log(`[Observer] staged DEEP Observer with Arcsweep chamber ${observerSource} -> ${observerDestination}`);
 })().catch((error) => {
   console.error(error);
   process.exitCode = 1;
