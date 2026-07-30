@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run starwell:build",
+  "buildCommand": "npm run web:build",
   "outputDirectory": "dist/starwell",
   "rewrites": [
     {
