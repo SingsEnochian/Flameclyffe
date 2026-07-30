@@ -2,34 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#090c11" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Matrix" />
   <title>Observatory Matrix</title>
   <style>
-    :root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color:#f4ead8; background:#090c11; }
+    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; color:#f4ead8; background:#090c11; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
     * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; background:radial-gradient(circle at top,#182028 0,#090c11 52%); }
-    header { padding:24px clamp(18px,4vw,56px) 14px; border-bottom:1px solid #6d5738; }
-    h1 { margin:0; font-family:Georgia,serif; letter-spacing:.06em; color:#efc77b; }
+    html { min-height:100%; background:#090c11; }
+    body { margin:0; min-height:100vh; min-height:100dvh; background:radial-gradient(circle at top,#182028 0,#090c11 52%); overflow-x:hidden; }
+    header { padding:calc(24px + env(safe-area-inset-top)) max(clamp(18px,4vw,56px),env(safe-area-inset-right)) 14px max(clamp(18px,4vw,56px),env(safe-area-inset-left)); border-bottom:1px solid #6d5738; }
+    h1 { margin:0; font-family:Georgia,serif; letter-spacing:.06em; color:#efc77b; font-size:clamp(1.65rem,4vw,2.5rem); }
     .subtitle,.meta { color:#b9c3c5; }
-    main { padding:22px clamp(18px,4vw,56px) 48px; }
+    main { padding:22px max(clamp(18px,4vw,56px),env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(clamp(18px,4vw,56px),env(safe-area-inset-left)); }
     .bar,.grid { display:grid; gap:14px; }
-    .bar { grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); margin-bottom:16px; }
-    .grid { grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); }
-    .card,.pill { border:1px solid #554a3b; background:rgba(16,22,29,.94); border-radius:14px; box-shadow:0 18px 50px rgba(0,0,0,.25); }
+    .bar { grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); margin-bottom:16px; }
+    .grid { grid-template-columns:repeat(auto-fit,minmax(min(270px,100%),1fr)); }
+    .card,.pill { min-width:0; border:1px solid #554a3b; background:rgba(16,22,29,.94); border-radius:14px; box-shadow:0 18px 50px rgba(0,0,0,.25); }
     .card { padding:18px; min-height:190px; }
     .pill { padding:12px 14px; }
     .status { font-weight:800; letter-spacing:.08em; }
     .verified { color:#8fdbb4; } .degraded { color:#efc77b; } .failed { color:#f08f8f; }
     h2 { margin:0 0 10px; font-size:1.05rem; color:#f3d99f; }
-    p { line-height:1.45; overflow-wrap:anywhere; }
-    a { color:#9bd9df; }
-    button { border:1px solid #8d734c; border-radius:9px; background:#241f19; color:#f4ead8; padding:9px 12px; cursor:pointer; }
-    button:focus-visible,a:focus-visible { outline:3px solid #d4b06a; outline-offset:3px; }
-    pre { white-space:pre-wrap; overflow-wrap:anywhere; font-size:.78rem; color:#bcc9cb; }
-    .vector { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-    label { display:grid; gap:4px; color:#c9d2d3; font-size:.8rem; }
-    input[type=range] { width:100%; }
+    p,li { line-height:1.5; overflow-wrap:anywhere; }
+    ul { padding-left:1.25rem; }
+    a { color:#9bd9df; text-underline-offset:.2em; }
+    button,a { touch-action:manipulation; -webkit-tap-highlight-color:rgba(239,199,123,.22); }
+    button { min-width:44px; min-height:44px; border:1px solid #8d734c; border-radius:10px; background:#241f19; color:#f4ead8; padding:10px 14px; cursor:pointer; font:inherit; }
+    .card > a { display:inline-flex; align-items:center; min-height:44px; padding:8px 0; }
+    button:focus-visible,a:focus-visible,input:focus-visible { outline:3px solid #d4b06a; outline-offset:3px; }
+    pre { max-width:100%; white-space:pre-wrap; overflow-wrap:anywhere; font-size:.78rem; color:#bcc9cb; }
+    .vector { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    label { display:grid; gap:6px; color:#c9d2d3; font-size:.85rem; min-width:0; }
+    input[type=range] { width:100%; min-height:44px; margin:0; accent-color:#d4b06a; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; }
+    @media (max-width: 820px) {
+      .bar { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .grid { grid-template-columns:1fr 1fr; }
+      .card { min-height:0; }
+    }
+    @media (max-width: 620px), (orientation: portrait) and (max-width: 820px) {
+      .bar,.grid { grid-template-columns:1fr; }
+      .vector { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      header { padding-bottom:12px; }
+      main { padding-top:16px; }
+    }
+    @media (pointer:coarse) {
+      button { min-height:48px; padding:12px 16px; }
+      .card > a { min-height:48px; }
+      input[type=range] { min-height:48px; }
+    }
+    @media (hover:hover) and (pointer:fine) {
+      button:hover { border-color:#d4b06a; background:#30271d; }
+      a:hover { color:#c8f5f7; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -50,10 +82,10 @@
     <article class="card"><h2>PREMAQ</h2><div class="vector" id="premaq"></div><p class="meta">One canonical state vector. Local controls are explicitly interpretive until accepted by the runtime.</p></article>
     <article class="card"><h2>Mathematics Spine</h2><p>Shared state carries source, freshness, calibration, uncertainty and temporal horizon. Formula implementations remain versioned by receipt.</p><pre id="math-receipt"></pre></article>
     <article class="card"><h2>Temporal Mechanics</h2><p>Projected horizons remain labelled as projections and never overwrite observational reality.</p><a href="/temporal-twist-renderer.html">Open Temporal Twist</a></article>
-    <article class="card"><h2>Arcsweep</h2><p>World selection and calibrated transfer orchestration surface. Canon mappings remain canonical or interpretive, never telemetry.</p><button id="world-cycle">Cycle world</button><p id="world">current-reality</p></article>
+    <article class="card"><h2>Arcsweep</h2><p>World selection and calibrated transfer orchestration surface. Canon mappings remain canonical or interpretive, never telemetry.</p><button id="world-cycle" type="button">Cycle world</button><p id="world" aria-live="polite">current-reality</p></article>
     <article class="card"><h2>Tone / Audio</h2><p>Audio opens against the same PREMAQ snapshot and temporal horizon. Feather Stop remains the immediate safe halt.</p><a href="/starwell/mobius-audio-bus.html">Open Möbius Audio Bus</a></article>
     <article class="card"><h2>Notion Knowledge</h2><p>Knowledge links are provenance only, not a high-frequency telemetry bus.</p><ul><li><a href="https://www.notion.so/3ad70290d9c481cc8a11cfd52e34428e">Observer Charter</a></li><li><a href="https://www.notion.so/3ab70290d9c4813f8634ef1de820c3ac">Arcsweep Anchor Registry</a></li></ul></article>
-    <article class="card"><h2>Receipts / Replay</h2><button id="save-receipt">Save receipt</button> <button id="replay">Replay last</button><pre id="receipt"></pre></article>
+    <article class="card"><h2>Receipts / Replay</h2><div class="actions"><button id="save-receipt" type="button">Save receipt</button><button id="replay" type="button">Replay last</button></div><pre id="receipt" aria-live="polite"></pre></article>
   </section>
 </main>
 <script type="module">
@@ -63,11 +95,11 @@
   const vector = document.querySelector('#premaq');
   for (const axis of axes) {
     const label=document.createElement('label');
-    label.textContent=axis;
+    const name=document.createElement('span'); name.textContent=axis;
     const value=document.createElement('span'); value.textContent=state.premaq[axis].toFixed(2);
-    const input=document.createElement('input'); input.type='range'; input.min='0'; input.max='1'; input.step='.01'; input.value=state.premaq[axis];
+    const input=document.createElement('input'); input.type='range'; input.min='0'; input.max='1'; input.step='.01'; input.value=state.premaq[axis]; input.setAttribute('aria-label',`${axis} PREMAQ value`);
     input.addEventListener('input',()=>{ state.premaq[axis]=Number(input.value); value.textContent=Number(input.value).toFixed(2); state.classification='interpretive'; renderReceipt(); });
-    label.append(value,input); vector.append(label);
+    label.append(name,value,input); vector.append(label);
   }
   const worlds=['current-reality','terra-aeterna','taveren-vaen','starsong'];
   document.querySelector('#world-cycle').addEventListener('click',()=>{ state.world=worlds[(worlds.indexOf(state.world)+1)%worlds.length]; document.querySelector('#world').textContent=state.world; renderReceipt(); });
