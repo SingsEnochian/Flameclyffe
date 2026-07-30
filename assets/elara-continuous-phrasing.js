@@ -1,14 +1,27 @@
 'use strict';
 
 /*
-  Elara Continuous Phrasing v0.2
+  Elara Continuous Phrasing v0.3
   Corrects the narrative-chord scheduler without changing canonical tones.
   Later entries receive their own full sounding duration, fixed attacks, and
   close overlapping entrances so the Codex reads as one continuous phrase.
+
+  Also registers the Runa 3-6-9 Harmonic Triptych as a first-class mode.
 */
 
 (function installContinuousElaraPhrasing() {
   const MODE_PREFIX = 'elara-chord:';
+  const RUNA_TRIPTYCH_MODES = new Set([
+    'runa-3-6-9-harmonic-triptych',
+    'runa-369-harmonic-triptych',
+    'runa-harmonic-triptych',
+    'runa-triptych'
+  ]);
+  const RUNA_TRIPTYCH_LAYERS = Object.freeze([
+    { frequency: 369, ampMod: 3, modulationDepth: 0.42, route: 'left', gain: 0.016, waveform: 'sine' },
+    { frequency: 432, ampMod: 6, modulationDepth: 0.36, route: 'centre', gain: 0.013, waveform: 'sine' },
+    { frequency: 522, ampMod: 9, modulationDepth: 0.32, route: 'right', gain: 0.011, waveform: 'sine' }
+  ]);
   const ROLE_BY_TONE = {
     'elara-memory': 'ground',
     'elara-root': 'ground',
@@ -31,6 +44,11 @@
   function renderedFrequency(tone) {
     const soft = window.ElaraNarrativeChords?.readSoftAwakening?.() ?? true;
     return tone?.id === 'elara-awakening' && soft ? tone.frequency / 2 : tone.frequency;
+  }
+
+  function setStatus(text) {
+    const status = document.querySelector('[data-mobius-lab] #mobius-status');
+    if (status) status.textContent = text;
   }
 
   function scheduleTone(bus, tone, { held, startDelay, sustain, count }) {
@@ -70,7 +88,10 @@
 
   function install() {
     const proto = window.MobiusAudioBus?.prototype;
-    if (!proto || proto.__elaraContinuousPhrasingV02) return false;
+    if (!proto || proto.__elaraContinuousPhrasingV03) return false;
+
+    const previousOneShot = proto.runOneShotMode;
+    const previousHeld = proto.runHeldMode;
 
     proto.runElaraChordProgression = function runElaraChordProgression(chord, { held = false } = {}) {
       if (!chord) return false;
@@ -95,7 +116,34 @@
       return true;
     };
 
+    proto.runRuna369Triptych = function runRuna369Triptych({ held = false } = {}) {
+      const play = held ? this.heldAmplitudeModTone : this.amplitudeModTone;
+      if (typeof play !== 'function') {
+        setStatus('Runa 3-6-9 Triptych unavailable: layered audio adapter did not initialise.');
+        return false;
+      }
+
+      RUNA_TRIPTYCH_LAYERS.forEach((layer) => play.call(this, layer));
+      const mode = 'runa-3-6-9-harmonic-triptych';
+      this.emitState(mode);
+      setStatus(held
+        ? 'Runa 3-6-9 Harmonic Triptych held: 3 Hz left, 6 Hz centre, 9 Hz right. Feather Stop releases it.'
+        : 'Runa 3-6-9 Harmonic Triptych sounding: 3 Hz left, 6 Hz centre, 9 Hz right.');
+      return true;
+    };
+
+    proto.runOneShotMode = function runOneShotMode(mode) {
+      if (RUNA_TRIPTYCH_MODES.has(mode)) return this.runRuna369Triptych({ held: false });
+      return previousOneShot.call(this, mode);
+    };
+
+    proto.runHeldMode = function runHeldMode(mode) {
+      if (RUNA_TRIPTYCH_MODES.has(mode)) return this.runRuna369Triptych({ held: true });
+      return previousHeld.call(this, mode);
+    };
+
     proto.__elaraContinuousPhrasingV02 = true;
+    proto.__elaraContinuousPhrasingV03 = true;
     return true;
   }
 
