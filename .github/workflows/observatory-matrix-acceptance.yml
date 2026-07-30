@@ -1,0 +1,81 @@
+name: Observatory Matrix Acceptance
+
+on:
+  pull_request:
+    paths:
+      - 'apps/starwell/**'
+      - 'assets/**'
+      - 'resonance/**'
+      - 'scripts/matrix-*.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/observatory-matrix-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-checkout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Clean checkout
+        uses: actions/checkout@v4
+
+      - name: Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install from lockfile
+        run: npm run matrix:install
+
+      - name: Build, health and package
+        run: npm run matrix:verify
+
+      - name: Start production preview
+        run: |
+          npm exec vite preview -- --config apps/starwell/vite.config.js --host 127.0.0.1 --port 4173 > matrix-preview.log 2>&1 &
+          echo $! > matrix-preview.pid
+
+      - name: Verify start and shell
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/observatory-matrix.html > matrix-shell.html; then
+              break
+            fi
+            sleep 1
+          done
+          test -s matrix-shell.html
+          grep -q 'Observatory Matrix' matrix-shell.html
+          curl --fail --silent http://127.0.0.1:4173/assets/js/observatory_live_contract.js > live-contract.js
+          test -s live-contract.js
+
+      - name: Write acceptance receipt
+        run: |
+          mkdir -p acceptance-receipts
+          cat > acceptance-receipts/clean-checkout.json <<EOF
+          {
+            "schema": "observatory.matrix.acceptance.v1",
+            "commit": "${GITHUB_SHA}",
+            "run_id": "${GITHUB_RUN_ID}",
+            "run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "node": "$(node --version)",
+            "install": "VERIFIED",
+            "build": "VERIFIED",
+            "start": "VERIFIED",
+            "package": "VERIFIED"
+          }
+          EOF
+
+      - name: Upload receipts and package
+        uses: actions/upload-artifact@v4
+        with:
+          name: observatory-matrix-${{ github.sha }}
+          path: |
+            acceptance-receipts/
+            release/observatory-matrix/
+            matrix-preview.log
+          if-no-files-found: error
