@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Observatory Matrix</title>
+  <style>
+    :root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color:#f4ead8; background:#090c11; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at top,#182028 0,#090c11 52%); }
+    header { padding:24px clamp(18px,4vw,56px) 14px; border-bottom:1px solid #6d5738; }
+    h1 { margin:0; font-family:Georgia,serif; letter-spacing:.06em; color:#efc77b; }
+    .subtitle,.meta { color:#b9c3c5; }
+    main { padding:22px clamp(18px,4vw,56px) 48px; }
+    .bar,.grid { display:grid; gap:14px; }
+    .bar { grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); margin-bottom:16px; }
+    .grid { grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); }
+    .card,.pill { border:1px solid #554a3b; background:rgba(16,22,29,.94); border-radius:14px; box-shadow:0 18px 50px rgba(0,0,0,.25); }
+    .card { padding:18px; min-height:190px; }
+    .pill { padding:12px 14px; }
+    .status { font-weight:800; letter-spacing:.08em; }
+    .verified { color:#8fdbb4; } .degraded { color:#efc77b; } .failed { color:#f08f8f; }
+    h2 { margin:0 0 10px; font-size:1.05rem; color:#f3d99f; }
+    p { line-height:1.45; overflow-wrap:anywhere; }
+    a { color:#9bd9df; }
+    button { border:1px solid #8d734c; border-radius:9px; background:#241f19; color:#f4ead8; padding:9px 12px; cursor:pointer; }
+    button:focus-visible,a:focus-visible { outline:3px solid #d4b06a; outline-offset:3px; }
+    pre { white-space:pre-wrap; overflow-wrap:anywhere; font-size:.78rem; color:#bcc9cb; }
+    .vector { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    label { display:grid; gap:4px; color:#c9d2d3; font-size:.8rem; }
+    input[type=range] { width:100%; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Observatory Matrix</h1>
+  <p class="subtitle">Observer and DEEP → PREMAQ → mathematics → temporal mechanics → Arcsweep → tone and audio → receipts and replay.</p>
+</header>
+<main>
+  <section class="bar" aria-label="Matrix health">
+    <div class="pill"><strong>Runtime</strong><div id="runtime-status" class="status degraded">CHECKING</div></div>
+    <div class="pill"><strong>Classification</strong><div>observational / projected / canonical / interpretive</div></div>
+    <div class="pill"><strong>Mode</strong><div id="mode">LIVE REQUESTED</div></div>
+    <div class="pill"><strong>Snapshot</strong><div id="snapshot-time">none</div></div>
+  </section>
+
+  <section class="grid">
+    <article class="card"><h2>Observer / DEEP</h2><p id="observer-copy">Checking the shared live-data contract.</p><a href="/observer-deep.html">Open Observer</a></article>
+    <article class="card"><h2>PREMAQ</h2><div class="vector" id="premaq"></div><p class="meta">One canonical state vector. Local controls are explicitly interpretive until accepted by the runtime.</p></article>
+    <article class="card"><h2>Mathematics Spine</h2><p>Shared state carries source, freshness, calibration, uncertainty and temporal horizon. Formula implementations remain versioned by receipt.</p><pre id="math-receipt"></pre></article>
+    <article class="card"><h2>Temporal Mechanics</h2><p>Projected horizons remain labelled as projections and never overwrite observational reality.</p><a href="/temporal-twist-renderer.html">Open Temporal Twist</a></article>
+    <article class="card"><h2>Arcsweep</h2><p>World selection and calibrated transfer orchestration surface. Canon mappings remain canonical or interpretive, never telemetry.</p><button id="world-cycle">Cycle world</button><p id="world">current-reality</p></article>
+    <article class="card"><h2>Tone / Audio</h2><p>Audio opens against the same PREMAQ snapshot and temporal horizon. Feather Stop remains the immediate safe halt.</p><a href="/starwell/mobius-audio-bus.html">Open Möbius Audio Bus</a></article>
+    <article class="card"><h2>Notion Knowledge</h2><p>Knowledge links are provenance only, not a high-frequency telemetry bus.</p><ul><li><a href="https://www.notion.so/3ad70290d9c481cc8a11cfd52e34428e">Observer Charter</a></li><li><a href="https://www.notion.so/3ab70290d9c4813f8634ef1de820c3ac">Arcsweep Anchor Registry</a></li></ul></article>
+    <article class="card"><h2>Receipts / Replay</h2><button id="save-receipt">Save receipt</button> <button id="replay">Replay last</button><pre id="receipt"></pre></article>
+  </section>
+</main>
+<script type="module">
+  const axes = ['P','C','R','E','M','A'];
+  const defaults = { P:.78,C:.82,R:.88,E:.31,M:.71,A:.79 };
+  const state = { schema:'observatory.matrix.state.v1', classification:'interpretive', premaq:{...defaults}, world:'current-reality', horizon:'present', calibration:'matrix-shell-v1', observed_at:new Date().toISOString() };
+  const vector = document.querySelector('#premaq');
+  for (const axis of axes) {
+    const label=document.createElement('label');
+    label.textContent=axis;
+    const value=document.createElement('span'); value.textContent=state.premaq[axis].toFixed(2);
+    const input=document.createElement('input'); input.type='range'; input.min='0'; input.max='1'; input.step='.01'; input.value=state.premaq[axis];
+    input.addEventListener('input',()=>{ state.premaq[axis]=Number(input.value); value.textContent=Number(input.value).toFixed(2); state.classification='interpretive'; renderReceipt(); });
+    label.append(value,input); vector.append(label);
+  }
+  const worlds=['current-reality','terra-aeterna','taveren-vaen','starsong'];
+  document.querySelector('#world-cycle').addEventListener('click',()=>{ state.world=worlds[(worlds.indexOf(state.world)+1)%worlds.length]; document.querySelector('#world').textContent=state.world; renderReceipt(); });
+  function renderReceipt(){ state.observed_at=new Date().toISOString(); document.querySelector('#receipt').textContent=JSON.stringify(state,null,2); document.querySelector('#math-receipt').textContent=JSON.stringify({premaq_version:'v2',transfer_registry:'setting-specific',temporal_calibration:state.horizon,classification:state.classification},null,2); document.querySelector('#snapshot-time').textContent=state.observed_at; }
+  document.querySelector('#save-receipt').addEventListener('click',()=>{ localStorage.setItem('observatory.matrix.lastReceipt',JSON.stringify(state)); renderReceipt(); });
+  document.querySelector('#replay').addEventListener('click',()=>{ const saved=localStorage.getItem('observatory.matrix.lastReceipt'); if(!saved)return; Object.assign(state,JSON.parse(saved)); document.querySelector('#world').textContent=state.world; document.querySelector('#mode').textContent='REPLAY'; renderReceipt(); });
+  async function probe(){
+    try {
+      const response=await fetch('/assets/js/observatory_live_contract.js',{cache:'no-store'});
+      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+      document.querySelector('#runtime-status').textContent='VERIFIED'; document.querySelector('#runtime-status').className='status verified';
+      document.querySelector('#observer-copy').textContent='Shared Observatory live-data contract is reachable. Runtime-specific telemetry freshness remains visible within Observer.';
+    } catch(error) {
+      document.querySelector('#runtime-status').textContent='DEGRADED'; document.querySelector('#runtime-status').className='status degraded'; document.querySelector('#mode').textContent='DEGRADED / LAST RECEIPT';
+      document.querySelector('#observer-copy').textContent=`Live contract unavailable: ${error.message}. No silent demo fallback; replay is explicit.`;
+      const saved=localStorage.getItem('observatory.matrix.lastReceipt'); if(saved) Object.assign(state,JSON.parse(saved));
+    }
+    renderReceipt();
+  }
+  probe();
+</script>
+</body>
+</html>
