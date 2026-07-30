@@ -50,6 +50,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(REPO_ROOT, 'apps/starwell/index.html'),
+        observatoryMatrix: resolve(REPO_ROOT, 'apps/starwell/observatory-matrix.html'),
         livingRoom: resolve(REPO_ROOT, 'apps/starwell/living-room.html'),
         concordance: resolve(REPO_ROOT, 'apps/starwell/concordance/index.html'),
         bridgeRegistry: resolve(REPO_ROOT, 'apps/starwell/bridge-registry/index.html'),
