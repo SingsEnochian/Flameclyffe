@@ -3,8 +3,9 @@
 <head>
   <meta charset='UTF-8'/>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
-  <title>STARWELL</title>
-  <meta name='description' content='STARWELL Hearthweave Observatory, a living manuscript observatory for Terra Aeterna.'/>
+  <meta name='theme-color' content='#07100d'/>
+  <title>ARCSWEEP · Hearthgate</title>
+  <meta name='description' content='ARCSWEEP in Hearthgate: a gentle, themeable rail between STARWELL rooms, worlds, instruments, and records.'/>
   <script type='module' src='./src/main.jsx'></script>
   <script type='module' src='./src/city-state-motion.jsx'></script>
   <script type='module' src='./src/deep-material-vars-bind.js'></script>
@@ -28,35 +29,51 @@
   <link rel='stylesheet' href='./src/living-room-door.css'/>
   <link rel='stylesheet' href='./src/glyph-studio-door.css'/>
   <link rel='stylesheet' href='./src/framework-door-rack.css'/>
+  <link rel='stylesheet' href='./src/hearthgate-arcsweep.css'/>
 </head>
 <body>
+  <header class='hearthgate-housebar'>
+    <a class='hearthgate-nameplate' href='../starwell/hearthgate/' aria-label='Return to the Hearthgate foyer'>
+      <strong>HEARTHGATE</strong>
+      <span>A House of Many Worlds</span>
+    </a>
+    <nav class='hearthgate-rail' aria-label='Arcsweep house rail'>
+      <a href='../starwell/hearthgate/'>Foyer</a>
+      <a href='./' aria-current='page'>Arcsweep</a>
+      <a href='./living-room.html'>Hearth</a>
+      <a href='./glyph-studio/'>Foundry</a>
+      <a href='./signal-well/'>Signal Well</a>
+      <a href='./deep-observer/'>Observatory</a>
+    </nav>
+    <span class='hearthgate-reception'>Reception · Terra Aeterna</span>
+  </header>
   <div id='root'></div>
-  <nav class='framework-door-rack' aria-label='STARWELL framework doors'>
-    <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the STARWELL Living Room'>
+  <nav class='framework-door-rack' aria-label='Hearthgate room doors'>
+    <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the Hearth'>
       <span class='living-room-doorway-mark' aria-hidden='true'>✴</span>
       <span class='living-room-doorway-copy'>
-        <strong>Enter the Living Room</strong>
-        <em>Hearth, doors, anchor field, and Fifth Form centre.</em>
+        <strong>Enter the Hearth</strong>
+        <em>Living Room, anchor field, doors, and Fifth Form centre.</em>
       </span>
     </a>
-    <a class='glyph-studio-doorway framework-doorway-glyph' href='./glyph-studio/' aria-label='Open the STARWELL Glyph Studio'>
+    <a class='glyph-studio-doorway framework-doorway-glyph' href='./glyph-studio/' aria-label='Open the Foundry and Glyph Studio'>
       <span class='glyph-studio-doorway-mark' aria-hidden='true'>◇</span>
       <span class='glyph-studio-doorway-copy'>
-        <strong>Open Glyph Studio</strong>
-        <em>Apple Pencil canvas, brushes, colour, layers, text, and local FontForge handoff.</em>
+        <strong>Open the Foundry</strong>
+        <em>Full Glyph Studio: Apple Pencil canvas, brushes, colour, layers, text, and FontForge handoff.</em>
       </span>
     </a>
-    <a class='living-room-doorway framework-doorway-signal' href='./signal-well/' aria-label='Open the STARWELL Signal Well'>
+    <a class='living-room-doorway framework-doorway-signal' href='./signal-well/' aria-label='Open Signal Well'>
       <span class='living-room-doorway-mark' aria-hidden='true'>⌁</span>
       <span class='living-room-doorway-copy'>
         <strong>Open Signal Well</strong>
         <em>Local radio waterfall, human-led sifting, RFI ledger, candidates, and provenance export.</em>
       </span>
     </a>
-    <a class='living-room-doorway framework-doorway-hearthgate' id='hearthgate-local-door' href='../hearthgate.html' aria-label='Open the local Hearthgate rooms' hidden>
+    <a class='living-room-doorway framework-doorway-hearthgate' id='hearthgate-local-door' href='../hearthgate.html' aria-label='Open local Hearthgate rooms' hidden>
       <span class='living-room-doorway-mark' aria-hidden='true'>⬡</span>
       <span class='living-room-doorway-copy'>
-        <strong>Open Hearthgate</strong>
+        <strong>Open Local Hearthgate</strong>
         <em>Local rooms, Grove chat, Archive, notes, and House configuration.</em>
       </span>
     </a>
