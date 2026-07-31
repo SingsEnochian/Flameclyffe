@@ -19,14 +19,22 @@ const close = (actual, expected, tolerance = 1e-8) => {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${actual} differs from ${expected}`);
 };
 
-test('sheet convergence module is bundled for STARWELL and Hearthgate', () => {
+test('sheet convergence module is bundled for STARWELL, Hearthgate, and DEEP Observer', () => {
   assert.equal(manifest.moduleId, 'sheet-convergence');
   assert.equal(manifest.delivery, 'bundled-core');
   assert.equal(manifest.enabledByDefault, true);
-  assert.deepEqual(manifest.hosts, ['starwell', 'hearthgate']);
-  assert.equal(manifest.starwell.mount, 'central-observatory');
-  assert.equal(manifest.hearthgate.moduleKind, 'instrument');
-  assert.equal(manifest.hearthgate.requiresNetwork, false);
+  assert.deepEqual(manifest.hosts.map(({ host }) => host), ['starwell', 'hearthgate', 'deep-observer']);
+
+  const starwell = manifest.hosts.find(({ host }) => host === 'starwell');
+  const hearthgate = manifest.hosts.find(({ host }) => host === 'hearthgate');
+  const deepObserver = manifest.hosts.find(({ host }) => host === 'deep-observer');
+
+  assert.equal(starwell.mount, 'central-observatory');
+  assert.equal(starwell.component, 'ObservatoryInstrument');
+  assert.equal(hearthgate.mount, 'laboratory/observatory');
+  assert.equal(hearthgate.requiresNetwork, false);
+  assert.equal(deepObserver.mount, 'instrument-panel');
+  assert.equal(deepObserver.integration, 'iframe-or-es-module');
 });
 
 test('module preserves the epistemic boundary', () => {
