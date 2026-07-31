@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#091016" />
-  <meta name="description" content="Consent-aware Arcsweep gate for importing reviewed Hearthweave continuity packets." />
+  <meta name="description" content="Consent-aware Arcsweep gate for importing and resolving reviewed Hearthweave continuity." />
   <title>Arcsweep Continuity Gate · STARWELL</title>
 </head>
 <body>
@@ -14,7 +14,7 @@
       <div>
         <p>HEARTHGATE · ARCSWEEP</p>
         <h1>Continuity Gate</h1>
-        <span>Reviewed continuity enters here. Canon does not move without a separate act.</span>
+        <span>Reviewed continuity enters here. Session context may borrow it. Canon does not move.</span>
       </div>
       <a href="../" class="return-link">Return to STARWELL</a>
     </header>
@@ -47,7 +47,7 @@
 
     <section class="boundary-card">
       <strong>Boundary law</strong>
-      <span>Only accepted, human-reviewed, continuity-only items may enter. Imported items are stored as <code>not-promoted</code>. This gate cannot commit canon.</span>
+      <span>Only accepted, human-reviewed, continuity-only items may enter. Imported items remain <code>not-promoted</code>. Resolved contexts are supplemental, browser-session only, and cannot commit canon.</span>
     </section>
 
     <section class="packet-card" id="packet-card" hidden>
@@ -98,11 +98,109 @@
       <div id="receipt-list" class="receipt-list"></div>
     </section>
 
+    <section class="session-card">
+      <header>
+        <div>
+          <p class="eyebrow">Arcsweep session resolver</p>
+          <h2>Prepare continuity for one session</h2>
+          <p>Resolve a bounded, supplemental context from active reviewed continuity. Nothing is loaded until you press the load button.</p>
+        </div>
+        <div class="session-lifetime">sessionStorage · not durable</div>
+      </header>
+
+      <div class="loaded-session" id="loaded-session">
+        <div>
+          <strong id="loaded-session-title">No continuity context loaded</strong>
+          <span id="loaded-session-detail">The browser session is clear.</span>
+        </div>
+        <button id="clear-session" type="button" class="clear-session-button" hidden>Clear loaded context</button>
+      </div>
+
+      <div class="session-controls">
+        <label>
+          <span>World</span>
+          <select id="session-world">
+            <option value="">No active continuity worlds</option>
+          </select>
+        </label>
+        <label>
+          <span>Continuity route</span>
+          <select id="session-route">
+            <option value="">All routes</option>
+            <option value="observational-continuity">Observational continuity</option>
+            <option value="world-continuity">World continuity</option>
+            <option value="interpretive-continuity">Interpretive continuity</option>
+            <option value="system-continuity">System continuity</option>
+            <option value="creative-continuity">Creative continuity</option>
+            <option value="relationship-continuity">Relationship continuity</option>
+          </select>
+        </label>
+        <label>
+          <span>Epistemic register</span>
+          <select id="session-register">
+            <option value="">All registers</option>
+            <option value="external-observation">External observation</option>
+            <option value="target-world-narrative">Target-world narrative</option>
+            <option value="interpretation">Interpretation</option>
+            <option value="system-state">System state</option>
+            <option value="creative-insight">Creative insight</option>
+            <option value="relationship-state">Relationship state</option>
+          </select>
+        </label>
+        <label>
+          <span>Maximum items</span>
+          <input id="session-limit" type="number" min="1" max="100" step="1" value="24" />
+        </label>
+        <button id="resolve-session" type="button" class="resolve-session-button">Resolve session context</button>
+      </div>
+
+      <section class="session-preview" id="session-preview" hidden>
+        <header>
+          <div>
+            <p class="eyebrow">Resolved context preview</p>
+            <h3 id="session-preview-title">No context</h3>
+            <p id="session-preview-chain"></p>
+          </div>
+          <div class="packet-badge" id="session-preview-badge">Preview only</div>
+        </header>
+
+        <dl class="session-facts">
+          <div><dt>Context</dt><dd id="session-context-id">—</dd></div>
+          <div><dt>Items</dt><dd id="session-context-count">—</dd></div>
+          <div><dt>Source packets</dt><dd id="session-context-packets">—</dd></div>
+          <div><dt>Lifetime</dt><dd>Browser session</dd></div>
+        </dl>
+
+        <div class="item-grid" id="session-item-grid"></div>
+
+        <footer class="session-actions">
+          <button id="export-context" type="button" class="quiet-button">Export context preview</button>
+          <button id="load-session" type="button" class="load-session-button">
+            <span>Ephemeral supplemental context</span>
+            <strong>Load for this session</strong>
+          </button>
+        </footer>
+      </section>
+
+      <div class="session-history">
+        <p class="eyebrow">This browser session’s receipts</p>
+        <div id="session-receipt-list" class="receipt-list"></div>
+      </div>
+    </section>
+
     <p class="message-line" id="message-line" aria-live="polite"></p>
   </main>
 
   <template id="item-template">
     <article class="continuity-item">
+      <header><span class="route-chip"></span><span class="layer-chip"></span></header>
+      <p></p>
+      <footer><span class="register-chip"></span><span class="source-chip"></span></footer>
+    </article>
+  </template>
+
+  <template id="session-item-template">
+    <article class="continuity-item session-context-item">
       <header><span class="route-chip"></span><span class="layer-chip"></span></header>
       <p></p>
       <footer><span class="register-chip"></span><span class="source-chip"></span></footer>
