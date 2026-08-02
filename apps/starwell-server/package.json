@@ -2,7 +2,7 @@
   "name": "hearthgate",
   "productName": "Hearthgate",
   "version": "0.1.0",
-  "description": "Local-first STARWELL, Arcsweep, and Bifröst observatory for Hearthgate.",
+  "description": "Local-first STARWELL, Arcsweep, Bifröst, and Hearthweave dual-aspect observatory for Hearthgate.",
   "author": "Hearthweave",
   "license": "UNLICENSED",
   "type": "commonjs",
@@ -15,10 +15,13 @@
     "prepare:assets": "node scripts/prepare-assets.js",
     "test": "node --test test/*.test.js",
     "electron:dev": "npm run prepare:assets && electron .",
-    "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never",
+    "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:dual-aspect-package",
     "electron:build": "npm run prepare:assets && electron-builder",
-    "electron:build:win": "npm run prepare:assets && electron-builder --win nsis --x64 --publish never",
-    "check:packaging": "node scripts/check-packaging.js"
+    "electron:build:win": "npm run prepare:assets && electron-builder --win nsis --x64 --publish never && npm run verify:dual-aspect-package",
+    "check:base-packaging": "node scripts/check-packaging.js",
+    "check:dual-aspect": "node scripts/check-dual-aspect-packaging.js",
+    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect",
+    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
