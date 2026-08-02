@@ -2,9 +2,11 @@
 
 const http = require('node:http');
 const originalCors = require('cors');
+const originalExpress = require('express');
 const { localCorsOptions } = require('./security/local-boundary');
 
 const corsPath = require.resolve('cors');
+const expressPath = require.resolve('express');
 const originalListen = http.Server.prototype.listen;
 
 // server.js predates the desktop boundary. Keep its routes intact while
@@ -15,6 +17,22 @@ require.cache[corsPath].exports = function hardenedCors(options = {}) {
     ...localCorsOptions(process.env),
   });
 };
+
+function hardenedExpress(...args) {
+  const app = originalExpress(...args);
+  app.disable('x-powered-by');
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), usb=(), serial=()');
+    if (req.path?.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
+  return app;
+}
+Object.assign(hardenedExpress, originalExpress);
+require.cache[expressPath].exports = hardenedExpress;
 
 // Express calls listen(PORT, callback), which otherwise binds every network
 // interface. Insert the loopback host unless a host was explicitly supplied.
@@ -34,4 +52,5 @@ try {
 } finally {
   http.Server.prototype.listen = originalListen;
   require.cache[corsPath].exports = originalCors;
+  require.cache[expressPath].exports = originalExpress;
 }
