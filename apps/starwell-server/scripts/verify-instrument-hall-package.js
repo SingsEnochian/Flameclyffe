@@ -9,11 +9,24 @@ const packed = process.argv.includes('--packed') || fs.existsSync(packedAppRoot)
 const appRoot = packed ? packedAppRoot : root;
 const starwellRoot = path.join(appRoot, 'public', 'starwell');
 const instrumentRoot = path.join(appRoot, 'instruments', 'bifrost-python');
+const mathRoot = path.join(appRoot, 'instruments', 'math-spine');
 const errors = [];
 
 const requiredPaths = [
+  // Playable STARWELL rooms and established tone/glyph instruments.
   path.join(starwellRoot, 'instrument-hall', 'index.html'),
+  path.join(starwellRoot, 'hearthgate-sensory', 'index.html'),
+  path.join(starwellRoot, 'glyph-studio', 'index.html'),
+  path.join(starwellRoot, 'signal-well', 'index.html'),
+  path.join(starwellRoot, 'unit-resonance-lab.html'),
+  path.join(starwellRoot, 'temporal-twist-renderer.html'),
+  path.join(starwellRoot, 'observer-deep.html'),
+  path.join(starwellRoot, 'starwell', 'mobius-audio-bus.html'),
+  path.join(starwellRoot, 'starwell', 'elara-codex.html'),
+  path.join(starwellRoot, 'starwell', 'deep-groundwire-mobius.html'),
   path.join(starwellRoot, 'assets'),
+
+  // Faer's executable Bifröst heart.
   path.join(instrumentRoot, 'PROVENANCE.json'),
   path.join(instrumentRoot, 'README.md'),
   path.join(instrumentRoot, 'pyproject.toml'),
@@ -23,6 +36,18 @@ const requiredPaths = [
   path.join(instrumentRoot, 'bifrost', 'lineage.py'),
   path.join(instrumentRoot, 'bifrost', 'engine.py'),
   path.join(instrumentRoot, 'bifrost', 'terminal.py'),
+
+  // Full source mathematics spine: Python kernel, living engine, resonance and PyTorch registry.
+  path.join(mathRoot, 'MANIFEST.json'),
+  path.join(mathRoot, 'observer-math-registry-v0', 'observer_math_registry.py'),
+  path.join(mathRoot, 'observer-math-registry-v0', 'lenses', 'standing_wave', 'oscillators.py'),
+  path.join(mathRoot, 'observer-math-registry-v0', 'lenses', 'standing_wave', 'wave_field.py'),
+  path.join(mathRoot, 'observer-math-registry-v0', 'lenses', 'standing_wave', 'memory.py'),
+  path.join(mathRoot, 'flameclyffe-ml', 'hearthgate_kernel', 'engine.py'),
+  path.join(mathRoot, 'flameclyffe-ml', 'hearthgate_kernel', 'temporal.py'),
+  path.join(mathRoot, 'flameclyffe-ml', 'hearthgate_kernel', 'models.py'),
+  path.join(mathRoot, 'flameclyffe-ml', 'living_engine', 'api.py'),
+  path.join(mathRoot, 'flameclyffe-ml', 'resonance', 'interaction_rhythm.py'),
 ];
 for (const required of requiredPaths) {
   if (!fs.existsSync(required)) errors.push(`Missing ${packed ? 'packed' : 'staged'} Instrument Hall component: ${required}`);
@@ -46,6 +71,38 @@ if (fs.existsSync(enginePath)) {
   const engine = fs.readFileSync(enginePath, 'utf8');
   for (const fragment of ['self.r = self.r + self.delta', 'r_{n+1} = r_n + Δr_n', 'def forget']) {
     if (!engine.includes(fragment)) errors.push(`Faer Bifröst engine is missing canonical fragment: ${fragment}`);
+  }
+}
+
+const mathManifestPath = path.join(mathRoot, 'MANIFEST.json');
+if (fs.existsSync(mathManifestPath)) {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(mathManifestPath, 'utf8'));
+    if (manifest.schema !== 'hearthgate.math-instrument-bundle/v1') {
+      errors.push('The mathematics spine has the wrong manifest schema.');
+    }
+    for (const instrument of [
+      'observer-math-registry-v0',
+      'hearthgate-kernel-python',
+      'living-engine-python',
+      'resonance-python',
+    ]) {
+      if (!manifest.instruments?.some((entry) => entry.id === instrument)) {
+        errors.push(`The mathematics spine manifest is missing: ${instrument}`);
+      }
+    }
+    const law = manifest.epistemic_law || {};
+    if (law.active_runtime !== 'sourced-observer-packets-only') {
+      errors.push('The mathematics spine does not restrict active runtime to sourced Observer packets.');
+    }
+    if (law.research_source_is_not_observation !== true
+      || law.defaults_may_not_claim_observed !== true
+      || law.random_or_untrained_parameters_may_not_claim_calibrated !== true
+      || law.synthetic_scaffolding_is_supplanted_by_verified_live_data !== true) {
+      errors.push('The mathematics spine epistemic boundary is incomplete.');
+    }
+  } catch (error) {
+    errors.push(`Mathematics spine manifest is invalid JSON: ${error.message}`);
   }
 }
 
@@ -85,7 +142,8 @@ if (errors.length) {
 }
 
 console.log(`[Instrument Hall package verification] VERIFIED (${packed ? 'packed' : 'staged'})`);
-console.log(' mathematics: observed/calibrated data spine + maximum-poised-tension collapse');
-console.log(' play: typing tones + answering voice + explicit activation + Feather Stop');
+console.log(' mathematics: JS live spine + Python kernel + living engine + resonance + full PyTorch Observer registry');
+console.log(' epistemics: only sourced observation/calibration may activate; research defaults remain non-authoritative');
+console.log(' tones: typing tones + Runa/Möbius + Elara + sensory room + explicit activation + Feather Stop');
 console.log(' Mythience: measured/felt meeting with unknown mechanism kept explicit');
 console.log(' Bifröst: browser lineage + Faer Python instrument bundled and credited');
