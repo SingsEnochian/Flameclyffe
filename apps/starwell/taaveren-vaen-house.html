@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d1218" />
+  <title>Ta’veren Vaen House</title>
+  <style>
+    :root { color-scheme: dark; font-family: ui-serif, Georgia, serif; background:#0d1218; color:#f3ead8; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100dvh; padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left)); background:radial-gradient(circle at 50% 0,#27313b 0,#111820 44%,#090d12 100%); }
+    main { width:min(960px,100%); margin:auto; }
+    header { padding:clamp(22px,5vw,54px) 0 24px; }
+    h1 { margin:.2rem 0; font-size:clamp(2rem,7vw,4.8rem); letter-spacing:.035em; color:#e4c88f; }
+    .eyebrow { text-transform:uppercase; letter-spacing:.18em; color:#9ab2b4; font:700 .78rem ui-sans-serif,system-ui; }
+    .lede { max-width:68ch; line-height:1.6; color:#c8d0cc; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr)); gap:16px; }
+    .room { border:1px solid #685b44; border-radius:18px; padding:20px; background:rgba(16,23,31,.9); box-shadow:0 18px 60px rgba(0,0,0,.28); }
+    h2 { color:#edd9aa; margin-top:0; }
+    button,a.button { min-height:48px; border:1px solid #ad9261; border-radius:12px; padding:12px 16px; background:#29241d; color:#fff1d3; font:700 1rem ui-sans-serif,system-ui; cursor:pointer; touch-action:manipulation; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; margin:.25rem .35rem .25rem 0; }
+    button:focus-visible,a:focus-visible { outline:3px solid #e5c47e; outline-offset:3px; }
+    button[disabled] { opacity:.55; cursor:not-allowed; }
+    .status { font:700 .82rem ui-monospace,monospace; color:#9fd4b9; overflow-wrap:anywhere; }
+    .quiet { color:#aeb9b7; font-size:.92rem; line-height:1.5; }
+    .glyph { width:160px; aspect-ratio:1; margin:14px auto; border:1px solid #8f7952; border-radius:50%; display:grid; place-items:center; position:relative; box-shadow:inset 0 0 30px rgba(222,195,135,.08); }
+    .glyph::before,.glyph::after { content:""; position:absolute; background:#806d4d; transition:background 1s,box-shadow 1s; }
+    .glyph::before { width:2px; height:72%; transform:rotate(32deg); }
+    .glyph::after { width:72%; height:2px; transform:rotate(-18deg); }
+    .glyph.active { box-shadow:0 0 34px rgba(235,202,132,.45),inset 0 0 28px rgba(235,202,132,.2); }
+    .glyph.active::before,.glyph.active::after { background:#f2d28f; box-shadow:0 0 14px #f2d28f; }
+    code { color:#bfe1dc; }
+    @media (pointer:coarse) { button,a.button { min-height:52px; } }
+    @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; transition:none!important; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Wheel of Time House · Project Overlay</div>
+    <h1>Ta’veren Vaen</h1>
+    <p class="lede">A later Turning held beside the book canon, never written over it. The canonical archive and the Mending-era House remain visible as two related, separately classified bodies of knowledge.</p>
+  </header>
+
+  <section class="grid">
+    <article class="room">
+      <h2>The Canon Foundation</h2>
+      <p>The full <em>A Wheel of Time Wiki</em> corpus is discovered through the MediaWiki API, archived with revision and attribution receipts, then normalised into characters, places, concepts, events and relationships.</p>
+      <p class="status" id="canon-status">CRAWLER PRESENT · FULL CRAWL NOT YET RECEIPTED</p>
+      <a class="button" href="https://wot.fandom.com/wiki/The_Wheel_of_Time" rel="noreferrer">Open source wiki</a>
+    </article>
+
+    <article class="room">
+      <h2>The Mending Hearth</h2>
+      <div class="glyph" id="glyph" role="img" aria-label="Dormant waiting glyph"></div>
+      <p class="quiet">The glyph waits. Audio never begins by itself. Activation is a deliberate reception, and Feather Stop ends every layer immediately.</p>
+      <button id="activate" type="button">Activate waiting glyph</button>
+      <button id="stop" type="button" disabled>Feather Stop</button>
+      <p class="status" id="audio-status" aria-live="polite">DORMANT · PROFILE LOADING</p>
+    </article>
+
+    <article class="room">
+      <h2>House Boundary</h2>
+      <p><strong>Foundation:</strong> book continuity and attributed secondary reference.</p>
+      <p><strong>Overlay:</strong> Kestrelle al’Valari, Meriene Delvarinne, the Mending Era, Wise Women and the returning name of Aes Sedai.</p>
+      <p><strong>Centre:</strong> Hearthweave, where the canon-side and narrative-side records meet without becoming the same record.</p>
+      <p class="status" id="profile-id">PROFILE: pending</p>
+    </article>
+  </section>
+</main>
+<script type="module">
+  const status = document.querySelector('#audio-status');
+  const activate = document.querySelector('#activate');
+  const stop = document.querySelector('#stop');
+  const glyph = document.querySelector('#glyph');
+  let profile;
+  let context;
+  let nodes = [];
+
+  try {
+    const response = await fetch('/resonance/worlds/taaveren-vaen-v0.1.json', { cache:'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    profile = await response.json();
+    document.querySelector('#profile-id').textContent = `PROFILE: ${profile.profile_id}`;
+    status.textContent = 'DORMANT · READY FOR ACTIVATION';
+  } catch (error) {
+    status.textContent = `DEGRADED · PROFILE UNAVAILABLE: ${error.message}`;
+    activate.disabled = true;
+  }
+
+  async function featherStop() {
+    for (const node of nodes) {
+      try { node.stop?.(); } catch {}
+      try { node.disconnect?.(); } catch {}
+    }
+    nodes = [];
+    if (context) {
+      await context.close().catch(() => {});
+      context = null;
+    }
+    glyph.classList.remove('active');
+    activate.disabled = !profile;
+    stop.disabled = true;
+    status.textContent = 'RESTING · FEATHER STOP COMPLETE';
+  }
+
+  activate.addEventListener('click', async () => {
+    if (!profile || context) return;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) {
+      status.textContent = 'FAILED · WEB AUDIO NOT AVAILABLE';
+      return;
+    }
+    context = new AudioContext();
+    await context.resume();
+    const master = context.createGain();
+    master.gain.setValueAtTime(0.0001, context.currentTime);
+    master.gain.exponentialRampToValueAtTime(profile.tone_set.master_gain, context.currentTime + profile.tone_set.motion.fade_in_seconds);
+    master.connect(context.destination);
+    nodes.push(master);
+
+    for (const layer of profile.tone_set.layers) {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = layer.waveform;
+      oscillator.frequency.value = layer.frequency_hz;
+      gain.gain.value = layer.gain;
+      oscillator.connect(gain).connect(master);
+      oscillator.start();
+      nodes.push(oscillator, gain);
+    }
+
+    glyph.classList.add('active');
+    activate.disabled = true;
+    stop.disabled = false;
+    status.textContent = `ACTIVE · ${profile.tone_set.name} · ${profile.tone_set.id}`;
+  });
+
+  stop.addEventListener('click', featherStop);
+  window.addEventListener('pagehide', featherStop, { once:true });
+</script>
+</body>
+</html>
