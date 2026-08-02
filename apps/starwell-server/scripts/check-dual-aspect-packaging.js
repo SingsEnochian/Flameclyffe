@@ -30,13 +30,17 @@ const packetSchemaPath = path.join(stagedStarwell, 'schemas', 'dual-aspect-packe
 const receiptSchemaPath = path.join(stagedStarwell, 'schemas', 'dual-aspect-receipt-v1.schema.json');
 const manifestPath = path.join(stagedStarwell, 'modules', 'bifrost-arcsweep.module.json');
 const sourceHookPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'arcsweep-continuity', 'kernel-hook.js');
-const sourceKernelPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'dual-aspect.js');
+const sourceKernelPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'index.js');
+const sourceValidationPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'validation.js');
+const sourceGlyphPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'packet-glyph-render.js');
 const sourceSensoryPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'sensory-bus.js');
 const sourceHousePath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthgate', 'profiles', 'ta-veren-vaen.js');
 const sourceGatePath = path.join(repoRoot, 'apps', 'starwell', 'arcsweep-continuity', 'index.html');
 
 for (const [filePath, label] of [
-  [sourceKernelPath, 'DualAspectPacket kernel source'],
+  [sourceKernelPath, 'strict DualAspectPacket kernel entrypoint'],
+  [sourceValidationPath, 'complete correspondence validator'],
+  [sourceGlyphPath, 'packet-bound glyph renderer'],
   [sourceHookPath, 'Arcsweep kernel hook'],
   [sourceSensoryPath, 'sensory activation bus'],
   [sourceHousePath, "Ta'veren Vaen House profile"],
@@ -47,6 +51,15 @@ if (fs.existsSync(sourceGatePath)) {
   const gate = fs.readFileSync(sourceGatePath, 'utf8');
   if (!gate.includes('arcsweep-continuity/kernel-hook.js')) {
     errors.push('Arcsweep source gate does not load the dual-aspect kernel hook.');
+  }
+}
+
+if (fs.existsSync(sourceValidationPath)) {
+  const validation = fs.readFileSync(sourceValidationPath, 'utf8');
+  for (const binding of ['observable', 'experiential', 'glyph', 'tone', 'visual', 'haptic', 'narrative']) {
+    if (!validation.includes(`'${binding}'`)) {
+      errors.push(`Strict validator does not require correspondence binding: ${binding}`);
+    }
   }
 }
 
@@ -69,6 +82,9 @@ if (receiptSchema?.properties?.schema?.const !== 'hearthweave.dual-aspect-receip
 
 if (manifest) {
   if (manifest.version !== '0.2.0') errors.push('Bifröst manifest must be version 0.2.0.');
+  if (manifest.engine?.kernel !== 'src/hearthweave-kernel/index.js') {
+    errors.push('Bifröst manifest must point to the strict kernel entrypoint.');
+  }
   if (manifest.engine?.packetAuthority !== 'hearthweave-kernel') {
     errors.push('Bifröst manifest must assign packet authority to the Hearthweave Kernel.');
   }
@@ -103,7 +119,8 @@ if (errors.length) {
 }
 
 console.log('[Dual-aspect packaging check] OK');
-console.log(' packet: Hearthweave DualAspectPacket v1');
+console.log(' packet: Hearthweave DualAspectPacket v1 with complete correspondence validation');
+console.log(' glyph: sealed packet expression rendered and receipted directly');
 console.log(' receipts: joined activation/render/replay ledger');
 console.log(' activation: Arcsweep kernel freeze + packet-bound sensory bus');
 console.log(" house: Ta'veren Vaen registered as a sovereign overlay");
