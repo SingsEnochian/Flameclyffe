@@ -1,0 +1,81 @@
+import { defineHouseProfile } from '../contracts.js';
+
+export const taVerenVaenProfile = defineHouseProfile({
+  id: 'ta-veren-vaen',
+  name: "Ta'veren Vaen",
+  world: "Ta'veren Vaen",
+  theme: 'ta-veren-vaen',
+  language: 'old-tongue-en',
+  calendar: 'wheel-turning-relative',
+  clock: { timeZone: 'America/New_York', format: '24h', worldTime: true },
+  canon: {
+    foundation: {
+      id: 'wheel-of-time-canon',
+      name: 'The Wheel of Time canon',
+      version: 'wheel-of-time-canon/reference-v1',
+      source_class: 'external-canon-reference',
+      authority: 'foundation-only',
+    },
+    overlay: {
+      id: 'ta-veren-vaen-overlay',
+      name: "Ta'veren Vaen authored overlay",
+      version: 'ta-veren-vaen/0.1',
+      source_class: 'authored-overlay',
+      authority: 'overlay-only',
+    },
+  },
+  sovereignty: {
+    foundation_preserved: true,
+    overlay_silently_merges: false,
+    house_identity_preserved: true,
+    crossing_may_commit_canon: false,
+  },
+  temporalProfile: {
+    timeline: 'later-turning-mending-era',
+    initialDelta: 1,
+    bridgeCoupling: 0.07,
+    focusAxis: 'R',
+    measurementStrength: 0.62,
+    release: 0.4,
+  },
+  harmonicIdentity: {
+    voice: 'thread-and-hearth',
+    baseCarrierHz: 144,
+    beatFloorHz: 4,
+    beatCeilingHz: 7.5,
+    anchorInterval: 'open-fifth',
+    livingInterval: 'woven-third',
+  },
+  visualIdentity: {
+    structure: 'wheel-thread-lattice',
+    atmosphere: 'mending-era-hearthwind',
+    palette: ['old-gold', 'river-blue', 'hearth-copper', 'dream-silver'],
+  },
+  culturalIdentity: {
+    arrivalPrompt: 'A traveller enters the Pattern without claiming authority over it.',
+    receptionPrompt: 'The House answers through hospitality, memory, and the laws of its Turning.',
+    values: ['service', 'mending', 'choice', 'continuity'],
+  },
+  transferFunctions: {
+    version: 'ta-veren-vaen-transfer/1.0.0',
+    source_axes: ['P', 'C', 'R', 'E', 'M', 'A', 'Q'],
+    outputs: ['glyph', 'tone', 'visual', 'haptic', 'narrative'],
+  },
+  packages: [
+    'hearthgate.design',
+    'hearthgate.arcsweep',
+    'wheel-of-time.canon-reference',
+    'ta-veren-vaen.overlay',
+    'deep.observer',
+    'runa.audio',
+  ],
+  rooms: ['hearth', 'library', 'observatory', 'workshop', 'glyph-hall', 'ledger', 'bridge', 'house'],
+  capabilities: {
+    observer: true,
+    audio: true,
+    glyphs: true,
+    canon: true,
+    timeline: true,
+    dualAspect: true,
+  },
+});
