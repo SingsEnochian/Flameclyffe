@@ -20,10 +20,10 @@ if (typeof globalThis.CustomEvent !== 'function') {
 const BASIS = 'a'.repeat(64);
 const PACKET_HASH = 'b'.repeat(64);
 
-function packet({ answered = true } = {}) {
+function packet({ answered = true, identity = 'test:templehouse' } = {}) {
   return {
     schema: 'hearthgate.dual-aspect-packet.v1',
-    identity: 'test:templehouse',
+    identity,
     house_id: 'templehouse',
     bridge: {
       origin_house: 'terra-prime',
@@ -104,7 +104,7 @@ class FakeNode {
 }
 
 class FakeAudioContext {
-  constructor() {
+  constructor({ closeGate = null } = {}) {
     this.currentTime = 1;
     this.destination = new FakeNode('destination');
     this.gains = [];
@@ -112,6 +112,7 @@ class FakeAudioContext {
     this.panners = [];
     this.resumed = false;
     this.closed = false;
+    this.closeGate = closeGate;
   }
   createGain() {
     const node = new FakeNode('gain');
@@ -133,7 +134,10 @@ class FakeAudioContext {
     return node;
   }
   async resume() { this.resumed = true; }
-  async close() { this.closed = true; }
+  async close() {
+    if (this.closeGate) await this.closeGate;
+    this.closed = true;
+  }
 }
 
 function fakeElement() {
@@ -178,13 +182,14 @@ test('hidden state divergence and failed receipts are rejected before rendering'
   assert.throws(() => verifySensoryPacket(failed), /unverified claim/);
 });
 
-test('waiting glyph preserves call and answer roles without inventing a reception stroke', () => {
+test('waiting glyph preserves a zero-intensity answer as physical silence', () => {
   const waiting = verifySensoryPacket(packet({ answered:false }));
   const plan = packetToHapticPlan(waiting);
 
   assert.equal(waiting.sensory.glyph.complete, false);
   assert.equal(waiting.sensory.glyph.reception_stroke, null);
   assert.equal(plan.pulses.find((pulse) => pulse.role === 'answer').intensity, 0);
+  assert.deepEqual(plan.web_vibration_pattern, [64, 90, 0, 120]);
 });
 
 test('activation renders packet frequencies, visual state and haptics then Feather Stop closes all', async () => {
@@ -199,7 +204,7 @@ test('activation renders packet frequencies, visual state and haptics then Feath
     vibrate:(pattern) => vibrations.push(pattern),
   });
 
-  const received = bridge.receive(packet());
+  const received = await bridge.receive(packet());
   assert.equal(received.correspondence.basis_hash, BASIS);
   assert.equal(root.dataset.hearthgateBasis, BASIS);
   assert.equal(glyph.dataset.state, 'bound');
@@ -221,4 +226,31 @@ test('activation renders packet frequencies, visual state and haptics then Feath
   assert.equal(glyph.dataset.activation, 'resting');
   assert.equal(vibrations.at(-1), 0);
   assert.equal(context.oscillators.every((node) => node.stopped), true);
+});
+
+test('replacement reception waits for prior AudioContext teardown', async () => {
+  let releaseClose;
+  const closeGate = new Promise((resolve) => { releaseClose = resolve; });
+  const firstContext = new FakeAudioContext({ closeGate });
+  const bridge = new HearthgateSensoryBridge({
+    root:fakeRoot(),
+    glyphElement:fakeElement(),
+    audioContextFactory:() => firstContext,
+    vibrate:() => true,
+  });
+
+  await bridge.receive(packet({ identity:'first-packet' }));
+  await bridge.activate({ haptics:false });
+  const replacement = bridge.receive(packet({ identity:'second-packet' }));
+
+  await Promise.resolve();
+  assert.equal(bridge.packet.identity, 'first-packet');
+  assert.equal(firstContext.closed, false);
+
+  releaseClose();
+  const received = await replacement;
+  assert.equal(firstContext.closed, true);
+  assert.equal(received.identity, 'second-packet');
+  assert.equal(bridge.packet.identity, 'second-packet');
+  assert.equal(bridge.active, false);
 });
