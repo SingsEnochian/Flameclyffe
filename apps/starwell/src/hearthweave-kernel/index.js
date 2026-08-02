@@ -17,8 +17,14 @@ export {
   fingerprint,
   replayDualAspectPacket,
   validateDeepSnapshot,
-  validateDualAspectPacket,
 } from './dual-aspect.js';
+
+export {
+  DUAL_ASPECT_REQUIRED_BINDINGS,
+  validateDualAspectPacket,
+} from './validation.js';
+
+export { buildPacketGlyphRender } from './packet-glyph-render.js';
 
 export {
   clearDualAspectActivation,
