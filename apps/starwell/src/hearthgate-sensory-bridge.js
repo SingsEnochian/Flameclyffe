@@ -86,8 +86,8 @@ export function packetToHapticPlan(packetInput) {
   }));
   const webVibrationPattern = [];
   for (const pulse of pulses) {
-    // The Web Vibration API exposes duration, not amplitude. Duration is the declared proxy.
-    webVibrationPattern.push(Math.max(10, Math.round(pulse.duration_ms * pulse.intensity)));
+    // The Web Vibration API exposes duration, not amplitude. Zero intensity must remain silence.
+    webVibrationPattern.push(Math.max(0, Math.round(pulse.duration_ms * pulse.intensity)));
     if (pulse.gap_after_ms > 0) webVibrationPattern.push(pulse.gap_after_ms);
   }
   return deepFreeze({
@@ -126,9 +126,10 @@ export class HearthgateSensoryBridge extends EventTarget {
     this.active = false;
   }
 
-  receive(packetInput) {
-    this.stop();
-    this.packet = verifySensoryPacket(packetInput);
+  async receive(packetInput) {
+    const nextPacket = verifySensoryPacket(packetInput);
+    await this.stop();
+    this.packet = nextPacket;
     this.applyVisualState();
     this.dispatchEvent(new CustomEvent('hearthgate:sensory-received', {
       detail: this.receiptDetail('received'),
@@ -136,15 +137,15 @@ export class HearthgateSensoryBridge extends EventTarget {
     return this.packet;
   }
 
-  receiptDetail(action) {
-    invariant(this.packet, 'no packet has been received');
+  receiptDetail(action, packet = this.packet) {
+    invariant(packet, 'no packet has been received');
     return deepFreeze({
       schema: 'hearthgate.browser-sensory-receipt.v1',
       action,
-      identity: this.packet.identity,
-      house_id: this.packet.house_id,
-      basis_hash: this.packet.correspondence.basis_hash,
-      packet_hash: this.packet.receipts.at(-1).packet_hash,
+      identity: packet.identity,
+      house_id: packet.house_id,
+      basis_hash: packet.correspondence.basis_hash,
+      packet_hash: packet.receipts.at(-1).packet_hash,
       created_at: new Date().toISOString(),
     });
   }
@@ -249,24 +250,29 @@ export class HearthgateSensoryBridge extends EventTarget {
   }
 
   async stop() {
-    for (const node of new Set(this.audioNodes)) {
+    const stoppedNodes = [...new Set(this.audioNodes)];
+    const stoppedContext = this.audioContext;
+    const stoppedPacket = this.packet;
+    const wasActive = this.active;
+
+    this.audioNodes = [];
+    this.audioContext = null;
+    this.active = false;
+    if (this.glyphElement?.dataset) this.glyphElement.dataset.activation = 'resting';
+
+    for (const node of stoppedNodes) {
       try { node.stop?.(); } catch {}
       try { node.disconnect?.(); } catch {}
-    }
-    this.audioNodes = [];
-    if (this.audioContext) {
-      try { await this.audioContext.close?.(); } catch {}
-      this.audioContext = null;
     }
     if (this.vibrate) {
       try { this.vibrate(0); } catch {}
     }
-    const wasActive = this.active;
-    this.active = false;
-    if (this.glyphElement?.dataset) this.glyphElement.dataset.activation = 'resting';
-    if (wasActive && this.packet) {
+    if (stoppedContext) {
+      try { await stoppedContext.close?.(); } catch {}
+    }
+    if (wasActive && stoppedPacket) {
       this.dispatchEvent(new CustomEvent('hearthgate:sensory-stopped', {
-        detail: this.receiptDetail('feather-stop'),
+        detail: this.receiptDetail('feather-stop', stoppedPacket),
       }));
     }
   }
