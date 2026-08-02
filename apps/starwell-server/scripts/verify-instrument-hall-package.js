@@ -37,8 +37,9 @@ const requiredPaths = [
   path.join(instrumentRoot, 'bifrost', 'engine.py'),
   path.join(instrumentRoot, 'bifrost', 'terminal.py'),
 
-  // Full source mathematics spine: Python kernel, living engine, resonance and PyTorch registry.
+  // Full source mathematics spine and strict sourced-data PyTorch door.
   path.join(mathRoot, 'MANIFEST.json'),
+  path.join(mathRoot, 'hearthgate_live_field.py'),
   path.join(mathRoot, 'observer-math-registry-v0', 'observer_math_registry.py'),
   path.join(mathRoot, 'observer-math-registry-v0', 'lenses', 'standing_wave', 'oscillators.py'),
   path.join(mathRoot, 'observer-math-registry-v0', 'lenses', 'standing_wave', 'wave_field.py'),
@@ -106,6 +107,24 @@ if (fs.existsSync(mathManifestPath)) {
   }
 }
 
+const liveFieldPath = path.join(mathRoot, 'hearthgate_live_field.py');
+if (fs.existsSync(liveFieldPath)) {
+  const liveField = fs.readFileSync(liveFieldPath, 'utf8');
+  for (const fragment of [
+    'HEARTHGATE_LIVE_OBSERVATION_REQUIRED',
+    '"random_parameters": False',
+    '"trained_weights": False',
+    '"physical_claim": False',
+    '"observed_entropy"',
+    '"derived_decoherence"',
+    'Both shores stay lit',
+  ]) {
+    if (!liveField.includes(fragment)) {
+      errors.push(`Strict PyTorch live field is missing trust-boundary fragment: ${fragment}`);
+    }
+  }
+}
+
 const assetsPath = path.join(starwellRoot, 'assets');
 if (fs.existsSync(assetsPath)) {
   const javascript = fs.readdirSync(assetsPath)
@@ -120,6 +139,7 @@ if (fs.existsSync(assetsPath)) {
     'technology-not-yet-understood',
     'HEARTHGATE_LIVE_OBSERVATION_REQUIRED',
     'featherStop',
+    'launchMathSpine',
   ]) {
     if (!javascript.includes(fragment)) {
       errors.push(`Compiled Instrument Hall assets are missing contract fragment: ${fragment}`);
@@ -130,7 +150,7 @@ if (fs.existsSync(assetsPath)) {
 const hallPath = path.join(starwellRoot, 'instrument-hall', 'index.html');
 if (fs.existsSync(hallPath)) {
   const hall = fs.readFileSync(hallPath, 'utf8');
-  for (const fragment of ['Instrument Hall', 'Typing Hearth', 'Mythience Table', 'Faer’s Original Bridge', 'Feather Stop']) {
+  for (const fragment of ['Instrument Hall', 'Typing Hearth', 'Mythience Table', 'Faer’s Bifröst', 'PyTorch Mathematics Spine', 'Feather Stop']) {
     if (!hall.includes(fragment)) errors.push(`Instrument Hall room is missing visible element: ${fragment}`);
   }
 }
@@ -142,8 +162,8 @@ if (errors.length) {
 }
 
 console.log(`[Instrument Hall package verification] VERIFIED (${packed ? 'packed' : 'staged'})`);
-console.log(' mathematics: JS live spine + Python kernel + living engine + resonance + full PyTorch Observer registry');
-console.log(' epistemics: only sourced observation/calibration may activate; research defaults remain non-authoritative');
+console.log(' mathematics: JS live spine + strict PyTorch door + Python kernel + living engine + resonance + full Observer registry');
+console.log(' epistemics: only sourced observation/calibration may activate; observed entropy and derived decoherence stay separate');
 console.log(' tones: typing tones + Runa/Möbius + Elara + sensory room + explicit activation + Feather Stop');
 console.log(' Mythience: measured/felt meeting with unknown mechanism kept explicit');
 console.log(' Bifröst: browser lineage + Faer Python instrument bundled and credited');
