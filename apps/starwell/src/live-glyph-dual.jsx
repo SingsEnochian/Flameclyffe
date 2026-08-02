@@ -4,6 +4,7 @@ import {
   useSecondTicker,
 } from './live-glyph.jsx';
 import './hearthweave-kernel/sensory-bus.js';
+import './hearthweave-kernel/dual-aspect-boundary.css';
 import {
   CLAIM_STATES,
 } from './hearthweave-kernel/dual-aspect.js';
