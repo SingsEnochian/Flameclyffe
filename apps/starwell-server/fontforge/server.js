@@ -5,13 +5,17 @@ const cors = require('cors');
 const fs = require('node:fs');
 const path = require('node:path');
 const {
+  isAllowedLocalOrigin,
+  localCorsOptions,
+} = require('../security/local-boundary');
+const {
   compileFontProject,
   detectFontForge,
 } = require('./worker');
 
 const app = express();
 const PORT = Number(process.env.FONTFORGE_PORT || 3842);
-const HOST = process.env.FONTFORGE_HOST || '127.0.0.1';
+const HOST = '127.0.0.1';
 const dataDir = process.env.HEARTHGATE_DATA_DIR || path.join(__dirname, '..', 'data');
 const jobsRoot = path.join(dataDir, 'fontforge-jobs');
 let cachedStatus = null;
@@ -19,17 +23,20 @@ let statusCheckedAt = 0;
 
 app.disable('x-powered-by');
 app.use((req, res, next) => {
-  if (req.headers['access-control-request-private-network'] === 'true') {
+  if (
+    req.headers['access-control-request-private-network'] === 'true'
+    && isAllowedLocalOrigin(req.headers.origin, process.env)
+  ) {
     res.setHeader('Access-Control-Allow-Private-Network', 'true');
   }
   res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
   next();
 });
 app.use(cors({
-  origin: true,
+  ...localCorsOptions(process.env),
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
-  exposedHeaders: ['Content-Disposition', 'Content-Length'],
 }));
 app.use(express.json({ limit: '25mb' }));
 
