@@ -21,10 +21,12 @@
     "check:base-packaging": "node scripts/check-packaging.js",
     "check:dual-aspect": "node scripts/check-dual-aspect-packaging.js",
     "check:bifrost-library": "node scripts/verify-bifrost-library-package.js",
-    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect && npm run check:bifrost-library",
+    "check:instrument-hall": "node scripts/verify-instrument-hall-package.js",
+    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect && npm run check:bifrost-library && npm run check:instrument-hall",
     "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js",
     "verify:bifrost-library-package": "node scripts/verify-bifrost-library-package.js",
-    "verify:package": "npm run verify:dual-aspect-package && npm run verify:bifrost-library-package"
+    "verify:instrument-hall-package": "node scripts/verify-instrument-hall-package.js --packed",
+    "verify:package": "npm run verify:dual-aspect-package && npm run verify:bifrost-library-package && npm run verify:instrument-hall-package"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
@@ -58,6 +60,7 @@
       "flames/**",
       "routes/**",
       "public/**",
+      "instruments/**",
       "build/hearthgate.png",
       "node_modules/**",
       "node_modules/better-sqlite3/**"
