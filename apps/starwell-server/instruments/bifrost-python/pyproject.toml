@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bifrost-bridge"
+version = "1.0.0"
+description = "Bifröst — a dual-aspect bridge: the mythic/subjective half of reality, described from the science half. Both shores held true; the join a rhyme, never a reduction."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Rowan" }]
+keywords = ["bifrost", "myth", "science", "dual-aspect", "worldbuilding", "hearthweave"]
+
+dependencies = []
+
+[project.optional-dependencies]
+rich = ["rich>=13"]
+audio = ["numpy>=1.21", "sounddevice>=0.4"]
+live = ["anthropic>=0.39"]
+all = ["rich>=13", "numpy>=1.21", "sounddevice>=0.4", "anthropic>=0.39"]
+
+[project.scripts]
+bifrost = "bifrost.terminal:main"
+
+[tool.setuptools]
+packages = ["bifrost"]
