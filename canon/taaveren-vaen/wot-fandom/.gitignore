@@ -1,0 +1,5 @@
+# Generated Wheel of Time corpus archives and receipts.
+data/
+dist/
+*.tar.gz
+WOT-CANON-SHA256SUMS.txt
