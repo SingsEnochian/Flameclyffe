@@ -2,15 +2,22 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from datetime import datetime, timezone
 from enum import StrEnum
-from types import MappingProxyType
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 
 Scalar = str | int | float | bool | None
+ScalarItems = tuple[tuple[str, Scalar], ...]
 
 
 class KernelModel(BaseModel):
@@ -27,6 +34,37 @@ class ClaimStatus(StrEnum):
     VERIFIED = "VERIFIED"
     FAILED = "FAILED"
     NOT_YET_TESTED = "NOT_YET_TESTED"
+
+
+ClaimItems = tuple[tuple[str, ClaimStatus], ...]
+
+
+def _immutable_items(value: Any, *, field_name: str) -> tuple[tuple[str, Any], ...]:
+    """Normalise a mapping or pair iterable into a deterministic immutable tuple."""
+
+    if value is None:
+        return ()
+    raw_items: Iterable[Any]
+    if isinstance(value, Mapping):
+        raw_items = value.items()
+    elif isinstance(value, (list, tuple)):
+        raw_items = value
+    else:
+        raise TypeError(f"{field_name} must be a mapping or an iterable of key-value pairs")
+
+    normalised: list[tuple[str, Any]] = []
+    seen: set[str] = set()
+    for raw_item in raw_items:
+        if not isinstance(raw_item, (list, tuple)) or len(raw_item) != 2:
+            raise TypeError(f"{field_name} entries must be two-item key-value pairs")
+        key, item_value = raw_item
+        if not isinstance(key, str) or not key:
+            raise TypeError(f"{field_name} keys must be non-empty strings")
+        if key in seen:
+            raise ValueError(f"{field_name} contains duplicate key {key!r}")
+        seen.add(key)
+        normalised.append((key, item_value))
+    return tuple(sorted(normalised, key=lambda item: item[0]))
 
 
 class PREMAQ(KernelModel):
@@ -47,17 +85,26 @@ class PREMAQ(KernelModel):
 
 
 class ObservableAspect(KernelModel):
-    measurements: Mapping[str, Scalar] = Field(default_factory=dict)
+    measurements: ScalarItems = ()
     chronology: tuple[str, ...] = ()
-    telemetry: Mapping[str, Scalar] = Field(default_factory=dict)
+    telemetry: ScalarItems = ()
     canon_sources: tuple[str, ...] = ()
     confidence: float = Field(ge=0.0, le=1.0)
     causal_history: tuple[str, ...] = ()
 
-    @field_validator("measurements", "telemetry", mode="after")
+    @field_validator(
+        "measurements",
+        "telemetry",
+        mode="before",
+        json_schema_input_type=dict[str, Scalar],
+    )
     @classmethod
-    def freeze_scalar_mapping(cls, value: Mapping[str, Scalar]) -> Mapping[str, Scalar]:
-        return MappingProxyType(dict(value))
+    def freeze_scalar_mapping(cls, value: Any) -> ScalarItems:
+        return _immutable_items(value, field_name="observable mapping")
+
+    @field_serializer("measurements", "telemetry", when_used="always")
+    def serialize_scalar_mapping(self, value: ScalarItems) -> dict[str, Scalar]:
+        return dict(value)
 
     @model_validator(mode="after")
     def require_observable_anchor(self) -> "ObservableAspect":
@@ -213,13 +260,21 @@ class Receipt(KernelModel):
     packet_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
     engine_version: str = Field(min_length=1)
     status: ClaimStatus
-    claims: Mapping[str, ClaimStatus] = Field(default_factory=dict)
+    claims: ClaimItems = ()
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    @field_validator("claims", mode="after")
+    @field_validator(
+        "claims",
+        mode="before",
+        json_schema_input_type=dict[str, ClaimStatus],
+    )
     @classmethod
-    def freeze_claims(cls, value: Mapping[str, ClaimStatus]) -> Mapping[str, ClaimStatus]:
-        return MappingProxyType(dict(value))
+    def freeze_claims(cls, value: Any) -> ClaimItems:
+        return _immutable_items(value, field_name="receipt claims")
+
+    @field_serializer("claims", when_used="always")
+    def serialize_claims(self, value: ClaimItems) -> dict[str, ClaimStatus]:
+        return dict(value)
 
     @field_validator("created_at")
     @classmethod
