@@ -68,8 +68,9 @@ h1 { margin:.25rem 0 1rem; max-width:18ch; font:600 clamp(2.6rem,7vw,6.7rem)/.95
 .spiral-room { grid-column:span 7; }
 .typing-room { grid-column:span 7; }
 .mythience-room { grid-column:span 5; }
-.lineage-room { grid-column:span 8; }
-.python-room { grid-column:span 4; }
+.lineage-room { grid-column:span 6; }
+.python-room { grid-column:span 3; }
+.math-runtime-room { grid-column:span 3; border-color:rgba(134,197,216,.34); }
 .state-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; margin:1rem 0; }
 .state-strip div,.axis { padding:.7rem; border-radius:10px; background:rgba(0,0,0,.2); }
 .state-strip small { display:block; color:var(--muted); }
@@ -106,7 +107,7 @@ body[data-phase="collapse"] .spiral-room { border-color:rgba(224,164,92,.72); bo
 body[data-phase="release"] .spiral-room { border-color:rgba(134,197,216,.62); }
 @media (max-width:900px) {
   .hero { grid-template-columns:1fr; }
-  .observer-room,.spiral-room,.typing-room,.mythience-room,.lineage-room,.python-room { grid-column:1/-1; }
+  .observer-room,.spiral-room,.typing-room,.mythience-room,.lineage-room,.python-room,.math-runtime-room { grid-column:1/-1; }
   .housebar { align-items:flex-start; flex-wrap:wrap; }
   .housebar div { order:-1; width:100%; }
 }
