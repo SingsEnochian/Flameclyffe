@@ -46,6 +46,9 @@ if (packetSchema?.properties?.schema?.const !== 'hearthweave.dual-aspect-packet/
 if (receiptSchema?.properties?.schema?.const !== 'hearthweave.dual-aspect-receipt/v1') {
   errors.push('Packed receipt schema contract is wrong.');
 }
+if (manifest?.engine?.kernel !== 'src/hearthweave-kernel/index.js') {
+  errors.push('Packed Bifröst manifest lost the strict kernel entrypoint.');
+}
 if (manifest?.engine?.packetAuthority !== 'hearthweave-kernel') {
   errors.push('Packed Bifröst manifest lost Hearthweave Kernel packet authority.');
 }
@@ -67,6 +70,9 @@ for (const marker of [
   'hearthweave.dual-aspect-packet/v1',
   'hearthweave:dual-aspect-activation',
   'runa:dual-aspect-tone-activation',
+  'hearthweave.packet-glyph-render/v1',
+  'missing-correspondence-binding',
+  'Sensory acknowledgement targets a packet that is no longer active',
 ]) {
   if (!compiledSource.includes(marker)) {
     errors.push(`Packed STARWELL JavaScript is missing kernel marker: ${marker}`);
@@ -81,4 +87,4 @@ if (errors.length) {
 
 console.log('[Packed dual-aspect verification] OK');
 console.log(` assets scanned: ${jsFiles.length}`);
-console.log(' packet kernel, activation event, Runa contract, and manifest no-refetch law are present');
+console.log(' strict packet validation, sealed glyph rendering, stale sensory rejection, activation, Runa, and no-refetch law are present');
