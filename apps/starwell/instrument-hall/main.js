@@ -292,6 +292,19 @@ $('#launch-python').addEventListener('click', async () => {
     : `RESTING · ${result.error}`;
 });
 
+$('#launch-math-spine').addEventListener('click', async () => {
+  const status = $('#math-runtime-status');
+  if (!window.electronAPI?.launchMathSpine) {
+    status.textContent = 'The strict Python/PyTorch door is available inside the installed Windows House. The browser mathematics remains active here.';
+    return;
+  }
+  status.textContent = 'LISTENING · sealing the current sourced basis for PyTorch…';
+  const result = await window.electronAPI.launchMathSpine({ state, profile });
+  status.textContent = result.ok
+    ? `OPEN · PyTorch ${result.torch_version} · basis ${result.basis_id}`
+    : `RESTING · ${result.error}`;
+});
+
 window.addEventListener('resize', renderSpiral);
 window.addEventListener('beforeunload', () => void audio.featherStop());
 
