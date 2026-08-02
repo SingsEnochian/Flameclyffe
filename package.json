@@ -21,10 +21,11 @@
     "everos:seed": "node sandbox/everos/seed-starwell.mjs",
     "everos:store": "node sandbox/everos/store-memory.mjs",
     "everos:search": "node sandbox/everos/search-memory.mjs",
+    "canon:wot:test": "node --test test/canon-wot-ingest.test.mjs",
     "canon:wot:crawl": "node scripts/canon-ingest-wot-fandom.mjs",
     "canon:wot:normalise": "node scripts/normalise-wot-fandom.mjs",
     "canon:wot:verify": "node scripts/verify-wot-fandom-ingest.mjs",
-    "canon:wot:ingest": "npm run canon:wot:crawl && npm run canon:wot:normalise && npm run canon:wot:verify"
+    "canon:wot:ingest": "npm run canon:wot:test && npm run canon:wot:crawl && npm run canon:wot:normalise && npm run canon:wot:verify"
   },
   "dependencies": {
     "@react-three/drei": "latest",
