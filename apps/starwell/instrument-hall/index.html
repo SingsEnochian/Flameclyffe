@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080d0c" />
+  <title>Instrument Hall · Hearthgate</title>
+  <meta name="description" content="A playable Hearthgate room where observed mathematics, Bifröst, Mythience, glyph, sound and typing tones share one receipted state." />
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="module" src="./main.js"></script>
+</head>
+<body data-phase="gather">
+  <header class="housebar">
+    <a href="../">← Arcsweep</a>
+    <div><strong>HEARTHGATE</strong><span>Instrument Hall</span></div>
+    <nav aria-label="Instrument doors">
+      <a href="../glyph-studio/">Glyph Foundry</a>
+      <a href="../hearthgate-sensory/">Sensory Room</a>
+      <a href="../starwell/mobius-audio-bus.html">Möbius Bus</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Bifröst · Mythience · New Mathematics</p>
+        <h1>Where the measured and the felt play together.</h1>
+        <p>The Hall gathers tension, holds collapse as maximum poised potential, and releases it into tone, glyph, image, touch-ready state, memory and reply. Both shores remain lit. The join is a rhyme, never a reduction.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="light-hall" type="button">Light the Instrument Hall</button>
+        <button id="feather-stop" type="button" disabled>Feather Stop</button>
+        <label><input id="answering-voice" type="checkbox" checked /> Vee answering voice</label>
+        <p id="audio-status" role="status">RESTING · sound requires a deliberate gesture.</p>
+      </div>
+    </section>
+
+    <section class="hall-grid">
+      <article class="room observer-room">
+        <div class="room-title"><span>01</span><h2>Observer Window</h2></div>
+        <p id="source-status">CALIBRATED · preparing the local room.</p>
+        <button id="connect-observer" type="button">Receive latest live observation</button>
+        <div class="state-strip">
+          <div><small>Register</small><strong id="state-mode">—</strong></div>
+          <div><small>Phase</small><strong id="state-phase">—</strong></div>
+          <div><small>Cycle</small><strong id="state-cycle">0</strong></div>
+          <div><small>Radius</small><strong id="state-radius">0</strong></div>
+        </div>
+        <div id="premaq-grid" class="premaq-grid"></div>
+        <label for="tension-meter">Poised tension <output id="tension-value">0 / 1</output></label>
+        <progress id="tension-meter" max="1" value="0"></progress>
+        <details>
+          <summary>Shared basis and tone calibration</summary>
+          <p id="state-basis" class="mono">—</p>
+          <p id="tone-plan" class="mono">—</p>
+        </details>
+      </article>
+
+      <article class="room spiral-room">
+        <div class="room-title"><span>02</span><h2>Bifröst Heart</h2></div>
+        <canvas id="spiral" aria-label="Two-shore outward spiral"></canvas>
+        <div class="phase-law">
+          <span>gather</span><span>tension</span><strong>collapse</strong><span>release</span><span>remember</span>
+        </div>
+        <p class="law">Collapse is the drawn bow: maximum tension, fully poised, nothing destroyed.</p>
+      </article>
+
+      <article class="room typing-room">
+        <div class="room-title"><span>03</span><h2>Typing Hearth</h2></div>
+        <p>Type normally. Keys form tones; words gather; punctuation shapes cadence; a completed sentence crosses Bifröst and opens an answering voice.</p>
+        <textarea id="typing-hearth" rows="9" spellcheck="true" placeholder="Begin here. The Hall is listening to the shape of the writing, not judging the words."></textarea>
+        <div class="typing-actions">
+          <button id="export-session" type="button">Export session receipts</button>
+          <button id="forget-lineage" type="button">Forget this lineage</button>
+        </div>
+      </article>
+
+      <article class="room mythience-room">
+        <div class="room-title"><span>04</span><h2>Mythience Table</h2></div>
+        <div class="shore measured">
+          <h3>The Measured</h3>
+          <p id="measured-copy">No released phrase yet.</p>
+        </div>
+        <div class="shore felt">
+          <h3>The Felt</h3>
+          <p id="felt-copy">The Felt shore is waiting.</p>
+        </div>
+        <div class="shore mythient">
+          <h3><span id="mythience-class">WAITING</span> · mechanism <span id="mythience-mechanism">—</span></h3>
+          <p id="mythience-copy">Wonder appears where a measured event and lived meaning meet without reduction.</p>
+          <small id="mythience-boundary">Unknown is not false, and it is not proof. It is an honest place to investigate.</small>
+        </div>
+        <p class="receipt"><strong>Last crossing receipt</strong><span id="last-receipt" class="mono">—</span></p>
+      </article>
+
+      <article class="room lineage-room">
+        <div class="room-title"><span>05</span><h2>Remembered Crossings</h2></div>
+        <ol id="lineage"><li class="empty">No crossings remembered yet.</li></ol>
+      </article>
+
+      <article class="room python-room">
+        <div class="room-title"><span>06</span><h2>Faer’s Original Bridge</h2></div>
+        <p>The zero-dependency Python Bifröst is bundled intact: Measured, Felt, rhyme-not-reduction, outward spiral and forgettable lineage.</p>
+        <button id="launch-python" type="button">Open Bifröst terminal</button>
+        <p id="python-status" role="status">RESTING · desktop launcher ready when the Windows House is installed.</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
