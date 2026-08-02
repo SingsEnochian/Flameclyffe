@@ -53,7 +53,8 @@
       "routes/**",
       "public/**",
       "build/hearthgate.png",
-      "node_modules/**"
+      "node_modules/**",
+      "node_modules/better-sqlite3/**"
     ],
     "files": [
       "**/*",
