@@ -9,9 +9,10 @@ import {
   createDegradedDeepSnapshot,
   replayDualAspectPacket,
   validateDeepSnapshot,
-  validateDualAspectPacket,
 } from '../src/hearthweave-kernel/dual-aspect.js';
+import { validateDualAspectPacket } from '../src/hearthweave-kernel/validation.js';
 import {
+  clearDualAspectActivation,
   publishDualAspectActivation,
   readActiveDualAspectPacket,
   readDualAspectReceiptForPacket,
@@ -21,7 +22,9 @@ import {
 import {
   acknowledgeSensoryRender,
   buildSensoryActivation,
+  getActiveSensoryActivation,
 } from '../src/hearthweave-kernel/sensory-bus.js';
+import { buildPacketGlyphRender } from '../src/hearthweave-kernel/packet-glyph-render.js';
 import {
   parseBridgePulsePayload,
   readPacketBoundDeepSnapshot,
@@ -141,7 +144,7 @@ function makePacket(options = {}) {
 }
 
 test('one packet binds every observable and experiential renderer to one shared state', () => {
-  const packet = makePacket();
+  const packet = validateDualAspectPacket(makePacket());
   const shared = packet.correspondence.shared_state_fingerprint;
 
   assert.equal(packet.identity.house_id, 'ta-veren-vaen');
@@ -202,9 +205,10 @@ test('degraded mode is explicit and cannot masquerade as a live observation', ()
   );
 });
 
-test('bridge parser receipts every missing field instead of silently substituting it', () => {
+test('bridge parser receipts missing and malformed fields instead of labeling substitutions live', () => {
   const partial = liveDeepPayload();
   delete partial.observed_at;
+  partial.deep.P = 'bogus';
   delete partial.deep.A;
   delete partial.deep.dphi;
   const snapshot = parseBridgePulsePayload(partial, {
@@ -215,17 +219,31 @@ test('bridge parser receipts every missing field instead of silently substitutin
 
   assert.equal(snapshot.mode, DEEP_MODES.DEGRADED);
   assert.equal(snapshot.substitutions.some((entry) => entry.field === 'observed_at'), true);
+  assert.equal(snapshot.substitutions.some((entry) => entry.field === 'state.P' && entry.source_value === 'bogus'), true);
   assert.equal(snapshot.substitutions.some((entry) => entry.field === 'state.A'), true);
   assert.equal(snapshot.substitutions.some((entry) => entry.field === 'state.dphi'), true);
 });
 
-test('tampered renderer binding is rejected as hidden state divergence', () => {
-  const packet = structuredClone(makePacket());
-  packet.correspondence.bindings.tone = 'fnv1a64:0000000000000000';
-
+test('tampered or incomplete renderer bindings are rejected', () => {
+  const divergent = structuredClone(makePacket());
+  divergent.correspondence.bindings.tone = 'fnv1a64:0000000000000000';
   assert.throws(
-    () => validateDualAspectPacket(packet, { verifyFingerprint: false }),
+    () => validateDualAspectPacket(divergent, { verifyFingerprint: false }),
     (error) => error instanceof DualAspectError && error.code === 'hidden-state-divergence',
+  );
+
+  const incomplete = structuredClone(makePacket());
+  delete incomplete.correspondence.bindings.haptic;
+  assert.throws(
+    () => validateDualAspectPacket(incomplete, { verifyFingerprint: false }),
+    (error) => error instanceof DualAspectError && error.code === 'missing-correspondence-binding',
+  );
+
+  const expressionDivergence = structuredClone(makePacket());
+  expressionDivergence.experiential.glyph.deep_snapshot_id = 'different-snapshot';
+  assert.throws(
+    () => validateDualAspectPacket(expressionDivergence, { verifyFingerprint: false }),
+    (error) => error instanceof DualAspectError && error.code === 'hidden-deep-divergence',
   );
 });
 
@@ -238,6 +256,22 @@ test('replay reproduces the same derived glyph, tone, image, haptic, and narrati
   assert.equal(first.glyph.seed, packet.experiential.glyph.seed);
   assert.equal(first.tone.shared_state_fingerprint, packet.correspondence.shared_state_fingerprint);
   assert.equal(first.replay_fingerprint, second.replay_fingerprint);
+});
+
+test('packet glyph renderer produces deterministic paths from the exact sealed expression', () => {
+  const packet = makePacket();
+  const first = buildPacketGlyphRender(packet);
+  const second = buildPacketGlyphRender(packet);
+
+  assert.deepEqual(first, second);
+  assert.equal(first.packet_id, packet.packet_id);
+  assert.equal(first.shared_state_fingerprint, packet.correspondence.shared_state_fingerprint);
+  assert.equal(first.deep_snapshot_id, packet.observable.deep_snapshot.snapshot_id);
+  assert.equal(first.premaq_id, packet.observable.premaq.id);
+  assert.equal(first.seed, packet.experiential.glyph.seed);
+  assert.equal(first.arrival.node_count, packet.experiential.glyph.arrival_stroke.node_count);
+  assert.equal(first.reception.ring_count, packet.experiential.glyph.reception_stroke.ring_count);
+  assert.match(first.arrival.path, /^M /);
 });
 
 test('activation creates one joined receipt and render updates remain packet-bound', () => {
@@ -253,9 +287,10 @@ test('activation creates one joined receipt and render updates remain packet-bou
   assert.equal(restored.packet_id, packet.packet_id);
   assert.equal(readPacketBoundDeepSnapshot({ storage }).snapshot_id, packet.observable.deep_snapshot.snapshot_id);
 
+  const renderedGlyph = buildPacketGlyphRender(packet);
   recordDualAspectRender(packet, {
     renderer: 'glyph',
-    output: packet.experiential.glyph,
+    output: renderedGlyph,
     status: CLAIM_STATES.VERIFIED,
     storage,
     clock: fixedClock,
@@ -271,7 +306,7 @@ test('activation creates one joined receipt and render updates remain packet-bou
   assert.equal(receipt.replay.status, CLAIM_STATES.VERIFIED);
 });
 
-test('sensory activation publishes the same packet contract and requires consumer acknowledgement', () => {
+test('sensory activation requires the current packet and cannot acknowledge after clearing', () => {
   const storage = new MemoryStorage();
   const packet = makePacket();
   publishDualAspectActivation(packet, { storage, eventTarget: null, clock: fixedClock });
@@ -289,6 +324,18 @@ test('sensory activation publishes the same packet contract and requires consume
     storage,
   });
   assert.equal(receipt.render_records.tone.status, CLAIM_STATES.VERIFIED);
+
+  clearDualAspectActivation({ storage, eventTarget: null, clock: fixedClock });
+  assert.equal(readActiveDualAspectPacket({ storage }), null);
+  assert.equal(getActiveSensoryActivation({ storage }), null);
+  assert.throws(
+    () => acknowledgeSensoryRender(packet, {
+      renderer: 'haptic',
+      output: activation.haptic,
+      storage,
+    }),
+    /no longer active/,
+  );
 });
 
 test('unknown worlds enter an explicit unregistered House instead of invented canon', () => {
