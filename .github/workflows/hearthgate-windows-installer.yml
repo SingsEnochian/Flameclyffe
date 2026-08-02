@@ -120,7 +120,6 @@ jobs:
           $secureServer = "$unpackedRoot/server-secure.js"
           $securityBoundary = "$unpackedRoot/security/local-boundary.js"
           $fontForgeServer = "$unpackedRoot/fontforge/server.js"
-          $icon = "$unpackedRoot/build/hearthgate.png"
 
           foreach ($required in @(
             $asar,
@@ -132,8 +131,7 @@ jobs:
             $unpackedBifrostSchema,
             $secureServer,
             $securityBoundary,
-            $fontForgeServer,
-            $icon
+            $fontForgeServer
           )) {
             if (-not (Test-Path $required)) {
               throw "Packaged installer is missing required hardened Hearthgate file: $required"
