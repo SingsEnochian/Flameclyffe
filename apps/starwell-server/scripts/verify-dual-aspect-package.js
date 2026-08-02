@@ -72,7 +72,7 @@ for (const marker of [
   'runa:dual-aspect-tone-activation',
   'hearthweave.packet-glyph-render/v1',
   'missing-correspondence-binding',
-  'Sensory acknowledgement targets a packet that is no longer active',
+  'HEARTHWEAVE_STALE_SENSORY_PACKET',
 ]) {
   if (!compiledSource.includes(marker)) {
     errors.push(`Packed STARWELL JavaScript is missing kernel marker: ${marker}`);
