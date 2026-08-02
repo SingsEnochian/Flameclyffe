@@ -18,6 +18,7 @@ const {
   redactHearthgateConfig,
   sanitiseHearthgateConfig,
 } = require('../security/local-boundary');
+const { launchBifrostTerminal } = require('./bifrost-launcher');
 
 app.enableSandbox();
 
@@ -268,6 +269,15 @@ ipcMain.handle('save-config', async (_event, input) => {
 ipcMain.handle('open-wizard', () => {
   const wizardPath = path.join(runtimeRoot(), 'public', 'setup-wizard.html');
   win?.loadURL(pathToFileURL(wizardPath).href);
+});
+
+ipcMain.handle('launch-bifrost-terminal', async () => {
+  try {
+    return await launchBifrostTerminal(runtimeRoot());
+  } catch (error) {
+    console.error('[Hearthgate] Bifröst terminal launch failed:', error.message);
+    return { ok: false, error: error.message };
+  }
 });
 
 app.whenReady().then(async () => {
