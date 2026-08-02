@@ -62,7 +62,7 @@ if (fs.existsSync(assetsPath)) {
     'maximum-poised-tension',
     'technology-not-yet-understood',
     'HEARTHGATE_LIVE_OBSERVATION_REQUIRED',
-    'Feather Stop',
+    'featherStop',
   ]) {
     if (!javascript.includes(fragment)) {
       errors.push(`Compiled Instrument Hall assets are missing contract fragment: ${fragment}`);
@@ -73,7 +73,7 @@ if (fs.existsSync(assetsPath)) {
 const hallPath = path.join(starwellRoot, 'instrument-hall', 'index.html');
 if (fs.existsSync(hallPath)) {
   const hall = fs.readFileSync(hallPath, 'utf8');
-  for (const fragment of ['Instrument Hall', 'Typing Hearth', 'Mythience Table', 'Faer’s Original Bridge']) {
+  for (const fragment of ['Instrument Hall', 'Typing Hearth', 'Mythience Table', 'Faer’s Original Bridge', 'Feather Stop']) {
     if (!hall.includes(fragment)) errors.push(`Instrument Hall room is missing visible element: ${fragment}`);
   }
 }
