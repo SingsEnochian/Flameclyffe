@@ -18,8 +18,10 @@
     "include_links": true,
     "include_images": true,
     "include_redirects": true,
-    "request_delay_ms": 350,
-    "batch_size": 50,
+    "request_delay_ms": 900,
+    "batch_size": 25,
+    "max_retries": 10,
+    "max_backoff_ms": 120000,
     "resume": true
   },
   "namespaces": {
