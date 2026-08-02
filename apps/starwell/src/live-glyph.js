@@ -1,1 +1,1 @@
-export { LiveGlyphViewer, useSecondTicker } from './live-glyph.jsx';
+export { LiveGlyphViewer, useSecondTicker } from './live-glyph-dual.jsx';
