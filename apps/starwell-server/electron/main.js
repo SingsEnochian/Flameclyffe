@@ -18,7 +18,7 @@ const {
   redactHearthgateConfig,
   sanitiseHearthgateConfig,
 } = require('../security/local-boundary');
-const { launchBifrostTerminal } = require('./bifrost-launcher');
+const { launchBifrostTerminal, launchMathSpine } = require('./bifrost-launcher');
 
 app.enableSandbox();
 
@@ -273,9 +273,18 @@ ipcMain.handle('open-wizard', () => {
 
 ipcMain.handle('launch-bifrost-terminal', async () => {
   try {
-    return await launchBifrostTerminal(runtimeRoot());
+    return await launchBifrostTerminal(runtimeRoot(), DATA_DIR);
   } catch (error) {
     console.error('[Hearthgate] Bifröst terminal launch failed:', error.message);
+    return { ok: false, error: error.message };
+  }
+});
+
+ipcMain.handle('launch-math-spine', async (_event, payload) => {
+  try {
+    return await launchMathSpine(runtimeRoot(), DATA_DIR, payload);
+  } catch (error) {
+    console.error('[Hearthgate] PyTorch mathematics launch failed:', error.message);
     return { ok: false, error: error.message };
   }
 });
