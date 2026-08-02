@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from flameclyffe_ml.hearthgate_kernel import (
@@ -36,6 +37,14 @@ app = FastAPI(
         "A non-persistent Python state service for living STARWELL instruments and the "
         "deterministic Hearthgate Kernel. It has no canon or publication authority."
     ),
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"^https?://(?:127\.0\.0\.1|localhost)(?::\d+)?$",
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Accept"],
+    max_age=600,
 )
 
 _kernel = HearthgateKernel()
