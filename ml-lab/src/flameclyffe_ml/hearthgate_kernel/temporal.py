@@ -8,6 +8,7 @@ from typing import Literal
 
 from flameclyffe_ml.provenance import content_hash
 
+from .integrity import assert_packet_integrity
 from .models import DualAspectPacket
 
 TemporalRelation = Literal["observation", "branch", "answer", "bind", "replay", "return"]
@@ -22,7 +23,7 @@ class TemporalEdge:
 
 
 class TemporalGraph:
-    """A causal directed graph that rejects cycles and unreceipted packets."""
+    """A causal directed graph that rejects cycles and stale receipts."""
 
     def __init__(self) -> None:
         self._packets: dict[str, DualAspectPacket] = {}
@@ -33,8 +34,7 @@ class TemporalGraph:
         return packet.temporal.frame_id
 
     def add_packet(self, packet: DualAspectPacket) -> str:
-        if not packet.receipts:
-            raise ValueError("Temporal packets require a receipt before graph admission.")
+        assert_packet_integrity(packet, require_receipt=True)
         key = self.packet_key(packet)
         existing = self._packets.get(key)
         if existing is not None and existing != packet:
@@ -61,6 +61,8 @@ class TemporalGraph:
     def link(self, source: str, target: str, relation: TemporalRelation) -> TemporalEdge:
         if source not in self._packets or target not in self._packets:
             raise KeyError("Both temporal frames must exist before they can be linked.")
+        assert_packet_integrity(self._packets[source], require_receipt=True)
+        assert_packet_integrity(self._packets[target], require_receipt=True)
         if source == target or self._path_exists(target, source):
             raise ValueError("A causal temporal edge cannot create a cycle.")
         receipt_hash = content_hash(
@@ -100,6 +102,8 @@ class TemporalGraph:
         return tuple(found)
 
     def snapshot(self) -> dict[str, object]:
+        for packet in self._packets.values():
+            assert_packet_integrity(packet, require_receipt=True)
         packets = {
             key: packet.receipts[-1].packet_hash
             for key, packet in sorted(self._packets.items())
