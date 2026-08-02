@@ -41,8 +41,21 @@ async function probePythonModule(python, moduleName) {
   );
 }
 
+async function probePythonVersion(python) {
+  const result = await probe(
+    python.command,
+    python.prefixArgs,
+    ['-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'],
+  );
+  return result?.stdout || null;
+}
+
 function quoteWindows(value) {
   return `"${String(value).replaceAll('"', '\\"')}"`;
+}
+
+function quoteShell(value) {
+  return `'${String(value).replaceAll("'", "'\\''")}'`;
 }
 
 function launchVisibleTerminal({ title, command, args, cwd, env }) {
@@ -123,6 +136,79 @@ function validateMathPayload(payload) {
   return JSON.parse(JSON.stringify({ state, profile }));
 }
 
+async function prepareMathRuntime(runtimeRoot, dataRoot) {
+  const instrumentRoot = path.join(runtimeRoot, 'instruments', 'math-spine');
+  const requirements = path.join(instrumentRoot, 'requirements.txt');
+  if (!fs.existsSync(requirements)) {
+    return { ok: false, error: 'The packaged PyTorch requirements receipt is missing.' };
+  }
+
+  const existing = await findPython(dataRoot);
+  if (existing) {
+    const existingTorch = await probePythonModule(existing, 'torch');
+    if (existingTorch) {
+      return { ok: true, already_ready: true, torch_version: existingTorch.stdout };
+    }
+  }
+
+  const bootstrapPython = await findPython(null);
+  if (!bootstrapPython) {
+    return {
+      ok: false,
+      error: 'Python 3.11 or 3.12 is required to prepare the private Hearthgate PyTorch runtime.',
+    };
+  }
+  const version = await probePythonVersion(bootstrapPython);
+  if (!['3.11', '3.12'].includes(version)) {
+    return {
+      ok: false,
+      error: `Python ${version || 'unknown'} was found; the Hearthgate mathematics runtime requires Python 3.11 or 3.12.`,
+    };
+  }
+
+  const runtimePath = path.join(dataRoot, 'math-runtime');
+  const runtimePython = process.platform === 'win32'
+    ? path.join(runtimePath, 'Scripts', 'python.exe')
+    : path.join(runtimePath, 'bin', 'python');
+  fs.mkdirSync(dataRoot, { recursive: true });
+
+  if (process.platform === 'win32') {
+    const bootstrap = [bootstrapPython.command, ...bootstrapPython.prefixArgs, '-m', 'venv', runtimePath]
+      .map(quoteWindows).join(' ');
+    const install = [runtimePython, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', requirements]
+      .map(quoteWindows).join(' ');
+    const command = `${bootstrap} && ${install} && echo. && echo Hearthgate PyTorch runtime is ready. && pause`;
+    const child = spawn('cmd.exe', ['/d', '/s', '/c', `start ${quoteWindows('Hearthgate Math Runtime')} cmd.exe /d /s /c ${quoteWindows(command)}`], {
+      cwd: instrumentRoot,
+      env: { ...process.env },
+      detached: true,
+      windowsHide: false,
+      stdio: 'ignore',
+    });
+    child.unref();
+  } else {
+    const bootstrap = [bootstrapPython.command, ...bootstrapPython.prefixArgs, '-m', 'venv', runtimePath]
+      .map(quoteShell).join(' ');
+    const install = [runtimePython, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', requirements]
+      .map(quoteShell).join(' ');
+    const child = spawn('sh', ['-lc', `${bootstrap} && ${install}`], {
+      cwd: instrumentRoot,
+      env: { ...process.env },
+      detached: true,
+      stdio: 'inherit',
+    });
+    child.unref();
+  }
+
+  return {
+    ok: true,
+    already_ready: false,
+    state: 'PREPARING',
+    runtime_path: runtimePath,
+    source_python: `${bootstrapPython.command} ${bootstrapPython.prefixArgs.join(' ')}`.trim(),
+  };
+}
+
 async function launchMathSpine(runtimeRoot, dataRoot, payload) {
   const instrumentRoot = path.join(runtimeRoot, 'instruments', 'math-spine');
   const entry = path.join(instrumentRoot, 'hearthgate_live_field.py');
@@ -146,11 +232,19 @@ async function launchMathSpine(runtimeRoot, dataRoot, payload) {
       needs_runtime: true,
     };
   }
+  const version = await probePythonVersion(python);
+  if (!['3.11', '3.12'].includes(version)) {
+    return {
+      ok: false,
+      error: `Python ${version || 'unknown'} cannot host this mathematics spine; use Python 3.11 or 3.12.`,
+      needs_runtime: true,
+    };
+  }
   const torch = await probePythonModule(python, 'torch');
   if (!torch) {
     return {
       ok: false,
-      error: 'Python is present but PyTorch is not installed in that environment. The live browser spine remains available; the PyTorch door is resting.',
+      error: 'Python is present but PyTorch is not installed in that environment. Prepare the private Hearthgate math runtime, then open the field again.',
       needs_runtime: true,
     };
   }
@@ -185,6 +279,8 @@ module.exports = {
   findPython,
   launchBifrostTerminal,
   launchMathSpine,
+  prepareMathRuntime,
   probePythonModule,
+  probePythonVersion,
   validateMathPayload,
 };
