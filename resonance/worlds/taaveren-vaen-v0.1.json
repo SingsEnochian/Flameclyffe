@@ -1,0 +1,61 @@
+{
+  "schema": "hearthgate.world-tone-profile.v1",
+  "profile_id": "taaveren-vaen-v0.1",
+  "world_key": "taaveren-vaen",
+  "display_name": "Ta’veren Vaen",
+  "classification": "project-overlay",
+  "foundation_canon": {
+    "name": "The Wheel of Time book continuity",
+    "source": "https://wot.fandom.com",
+    "classification": "secondary-canon-reference"
+  },
+  "house": {
+    "foyer": "The Mending Hearth",
+    "host_mode": "rotating-located-witness",
+    "arrival_glyph": "waiting",
+    "bridge_centre": "Hearthweave"
+  },
+  "tone_set": {
+    "id": "taaveren-vaen.mending-hearth.v0.1",
+    "name": "The Mending Hearth",
+    "classification": "interpretive-audio",
+    "autoplay": false,
+    "master_gain": 0.035,
+    "feather_stop_required": true,
+    "layers": [
+      {
+        "id": "pattern-root",
+        "waveform": "sine",
+        "frequency_hz": 111,
+        "gain": 0.45,
+        "meaning": "the Pattern beneath the Turning"
+      },
+      {
+        "id": "mending-fifth",
+        "waveform": "sine",
+        "frequency_hz": 166.5,
+        "gain": 0.24,
+        "meaning": "service returning through the Mending"
+      },
+      {
+        "id": "hearth-crown",
+        "waveform": "triangle",
+        "frequency_hz": 222,
+        "gain": 0.16,
+        "meaning": "the answering house"
+      }
+    ],
+    "motion": {
+      "tremolo_hz": 0.369,
+      "depth": 0.18,
+      "fade_in_seconds": 3.69,
+      "fade_out_seconds": 1.2
+    }
+  },
+  "provenance": {
+    "canon_is_immutable": true,
+    "overlay_field": "project_overlay",
+    "canon_and_overlay_must_remain_visible": true,
+    "created_for": "SingsEnochian/Flameclyffe#95"
+  }
+}
