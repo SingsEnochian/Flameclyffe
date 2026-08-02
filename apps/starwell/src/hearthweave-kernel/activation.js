@@ -6,10 +6,11 @@ import {
   DUAL_ASPECT_RECEIPT_LEDGER_KEY,
   DUAL_ASPECT_RECEIPT_SCHEMA,
   fingerprint,
-  validateDualAspectPacket,
 } from './dual-aspect.js';
+import { validateDualAspectPacket } from './validation.js';
 
 const RENDERERS = Object.freeze(['glyph', 'tone', 'visual', 'haptic', 'narrative']);
+const SENSORY_ACTIVATION_KEY = 'hearthweave:sensory-activation:active:v1';
 
 function clone(value) {
   return value == null ? value : structuredClone(value);
@@ -125,6 +126,7 @@ export function readActiveDualAspectPacket({ storage } = {}) {
     return validateDualAspectPacket(packet);
   } catch {
     selectedStorage?.removeItem?.(DUAL_ASPECT_ACTIVE_PACKET_KEY);
+    selectedStorage?.removeItem?.(SENSORY_ACTIVATION_KEY);
     return null;
   }
 }
@@ -236,6 +238,7 @@ export function clearDualAspectActivation({
   const selectedStorage = resolveStorage(storage);
   const packet = readActiveDualAspectPacket({ storage: selectedStorage });
   selectedStorage?.removeItem?.(DUAL_ASPECT_ACTIVE_PACKET_KEY);
+  selectedStorage?.removeItem?.(SENSORY_ACTIVATION_KEY);
   if (packet) {
     const receipt = readDualAspectReceiptForPacket(packet.packet_id, { storage: selectedStorage });
     if (receipt) {
