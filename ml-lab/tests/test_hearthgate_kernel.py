@@ -37,7 +37,12 @@ def provenance(label: str) -> tuple[ProvenanceRecord, ...]:
     )
 
 
-def packet(house_id: str, *, answer: bool = True, causal_order: int = 0):
+def packet(
+    house_id: str,
+    *,
+    answer: bool = True,
+    causal_order: int = 0,
+) -> DualAspectPacket:
     return HearthgateKernel().create_packet(
         identity=f"test:{house_id}:{causal_order}",
         house_id=house_id,
@@ -108,8 +113,33 @@ def test_hidden_state_divergence_is_rejected() -> None:
     payload = rendered.model_dump(mode="json")
     payload["sensory"]["source_state_hash"] = "0" * 64
 
-    with pytest.raises(ValidationError, match="diverged"):
+    with pytest.raises(ValidationError, match="integrity failed"):
         DualAspectPacket.model_validate(payload)
+
+
+def test_equal_forged_hashes_cannot_mask_changed_state() -> None:
+    rendered = packet("templehouse")
+    payload = rendered.model_dump(mode="json")
+    forged_hash = "a" * 64
+    payload["observable"]["measurements"]["presence"] = 0.125
+    payload["correspondence"]["basis_hash"] = forged_hash
+    payload["correspondence"]["observable_hash"] = forged_hash
+    payload["correspondence"]["experiential_hash"] = forged_hash
+    payload["sensory"]["source_state_hash"] = forged_hash
+
+    with pytest.raises(ValidationError, match="integrity failed"):
+        DualAspectPacket.model_validate(payload)
+
+
+def test_nested_contract_mappings_are_immutable() -> None:
+    rendered = packet("terra-prime")
+
+    with pytest.raises(TypeError):
+        rendered.observable.measurements["presence"] = 0.0  # type: ignore[index]
+    with pytest.raises(TypeError):
+        rendered.observable.telemetry["fixture"] = False  # type: ignore[index]
+    with pytest.raises(TypeError):
+        rendered.receipts[-1].claims["shared_state"] = ClaimStatus.FAILED  # type: ignore[index]
 
 
 def test_canon_overlay_never_replaces_its_foundation() -> None:
@@ -137,3 +167,11 @@ def test_temporal_graph_is_receipted_and_acyclic() -> None:
 
     with pytest.raises(ValueError, match="cycle"):
         graph.link(second_key, first_key, "return")
+
+
+def test_temporal_graph_rejects_stale_receipts() -> None:
+    rendered = packet("taaveren-vaen")
+    tampered = rendered.model_copy(update={"history": ("changed-after-receipt",)})
+
+    with pytest.raises(ValueError, match="integrity failed"):
+        TemporalGraph().add_packet(tampered)
