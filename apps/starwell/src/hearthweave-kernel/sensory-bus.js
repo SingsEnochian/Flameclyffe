@@ -1,8 +1,7 @@
 import {
   CLAIM_STATES,
-  DUAL_ASPECT_ACTIVATION_EVENT,
-  validateDualAspectPacket,
 } from './dual-aspect.js';
+import { validateDualAspectPacket } from './validation.js';
 import {
   readActiveDualAspectPacket,
   recordDualAspectRender,
@@ -116,6 +115,14 @@ export function acknowledgeSensoryRender(packetInput, {
     throw new Error(`Unsupported sensory acknowledgement: ${renderer}`);
   }
   const packet = validateDualAspectPacket(packetInput);
+  const activePacket = readActiveDualAspectPacket({ storage });
+  if (
+    !activePacket
+    || activePacket.packet_id !== packet.packet_id
+    || activePacket.packet_fingerprint !== packet.packet_fingerprint
+  ) {
+    throw new Error('Sensory acknowledgement targets a packet that is no longer active');
+  }
   const active = JSON.parse(storage?.getItem?.(SENSORY_ACTIVATION_KEY) || 'null');
   if (!active || active.packet_id !== packet.packet_id) {
     throw new Error('Sensory acknowledgement does not match the active DualAspectPacket');
@@ -155,7 +162,10 @@ if (typeof window !== 'undefined' && !window.__HEARTHWEAVE_SENSORY_BUS__) {
 
 export function getActiveSensoryActivation({ storage = globalThis.sessionStorage } = {}) {
   try {
-    return JSON.parse(storage?.getItem?.(SENSORY_ACTIVATION_KEY) || 'null');
+    const packet = readActiveDualAspectPacket({ storage });
+    const activation = JSON.parse(storage?.getItem?.(SENSORY_ACTIVATION_KEY) || 'null');
+    if (!packet || !activation || activation.packet_id !== packet.packet_id) return null;
+    return activation;
   } catch {
     return null;
   }
