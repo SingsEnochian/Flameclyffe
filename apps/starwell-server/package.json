@@ -72,7 +72,8 @@
       "!.env",
       "!env_temp*",
       "!data/**",
-      "!test/**"
+      "!test/**",
+      "instruments/**"
     ],
     "win": {
       "icon": "build/hearthgate.png",
