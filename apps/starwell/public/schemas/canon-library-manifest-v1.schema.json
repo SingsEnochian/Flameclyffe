@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/canon-library-manifest-v1.schema.json",
+  "title": "Hearthgate Canon Library Manifest v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "package_id",
+    "version",
+    "house",
+    "canon_law",
+    "streams",
+    "counts",
+    "provenance"
+  ],
+  "properties": {
+    "schema": { "const": "hearthgate.canon-library-manifest/v1" },
+    "package_id": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "house": {
+      "type": "object",
+      "required": ["foundation", "overlay"],
+      "properties": {
+        "foundation": { "type": "string", "minLength": 1 },
+        "overlay": { "type": ["string", "null"] }
+      }
+    },
+    "canon_law": {
+      "type": "object",
+      "required": ["overwrite_source_canon", "foundation_overlay_separate"],
+      "properties": {
+        "overwrite_source_canon": { "const": false },
+        "foundation_overlay_separate": { "const": true }
+      }
+    },
+    "streams": {
+      "type": "object",
+      "required": ["entities", "relationships", "timeline", "verification"],
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "records": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source", "receipt"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "receipt": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
