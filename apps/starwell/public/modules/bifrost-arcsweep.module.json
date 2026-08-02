@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "0.1.0",
+  "moduleId": "bifrost-arcsweep",
+  "displayName": "Bifröst Arcsweep",
+  "version": "0.1.0",
+  "delivery": "bundled-core",
+  "enabledByDefault": true,
+  "route": "/starwell/arcsweep-continuity/",
+  "entrypoint": "arcsweep-continuity/index.html",
+  "engine": {
+    "module": "src/arcsweep-temporal-quantum/engine.js",
+    "formalism": "temporal-quantum-state-machine",
+    "physicalClaim": false
+  },
+  "schemas": {
+    "premaq": "schemas/premaq-state-v2.schema.json",
+    "temporalState": "schemas/bifrost-temporal-state-v1.schema.json"
+  },
+  "capabilities": [
+    "premaq-v2-ingest",
+    "complex-state-encoding",
+    "norm-preserving-temporal-evolution",
+    "collapse-release-cycles",
+    "outward-spiral-memory",
+    "dual-presence-anchoring",
+    "temporal-twist-measurement",
+    "canon-calibrated-world-projection",
+    "provenance-preserving-receipts"
+  ],
+  "authorityContract": {
+    "hearthside": "evidence-grounded-observational",
+    "targetside": "canon-grounded-projected",
+    "rawEvidenceMutable": false,
+    "projectionMayClaimExternalCause": false
+  },
+  "installContract": {
+    "required": true,
+    "verifyRoute": "arcsweep-continuity/index.html",
+    "verifySchemas": [
+      "schemas/premaq-state-v2.schema.json",
+      "schemas/bifrost-temporal-state-v1.schema.json"
+    ]
+  }
+}
