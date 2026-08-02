@@ -65,7 +65,9 @@ class KernelProjectionRequest(BaseModel):
 
 
 class KernelReplayResponse(BaseModel):
-    schema: str = "hearthgate.replay-result.v1"
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_id: str = Field(default="hearthgate.replay-result.v1", alias="schema")
     packet_hash: str
     verified: bool
 
@@ -134,7 +136,24 @@ async def hearthgate_contract() -> dict[str, Any]:
 async def hearthgate_packet(request: KernelProjectionRequest) -> DualAspectPacket:
     """Project one shared state into sound, image, glyph and haptic expressions."""
 
-    return _kernel.create_packet(**request.model_dump())
+    return _kernel.create_packet(
+        identity=request.identity,
+        house_id=request.house_id,
+        observable=request.observable,
+        experiential=request.experiential,
+        premaq=request.premaq,
+        provenance=request.provenance,
+        origin_house=request.origin_house,
+        origin_witness=request.origin_witness,
+        reception_witness=request.reception_witness,
+        observed_at=request.observed_at,
+        branch=request.branch,
+        parents=request.parents,
+        horizon=request.horizon,
+        causal_order=request.causal_order,
+        uncertainty=request.uncertainty,
+        history=request.history,
+    )
 
 
 @app.post("/v1/hearthgate/audit")
