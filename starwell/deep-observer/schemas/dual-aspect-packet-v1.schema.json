@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/dual-aspect-packet-v1.schema.json",
+  "title": "Hearthweave DualAspectPacket v1",
+  "description": "One frozen temporal state expressed through separate observable and experiential aspects.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "packet_id",
+    "packet_fingerprint",
+    "created_at",
+    "identity",
+    "temporal",
+    "observable",
+    "experiential",
+    "correspondence",
+    "provenance",
+    "uncertainty",
+    "degraded",
+    "history",
+    "receipts",
+    "claims",
+    "laws"
+  ],
+  "properties": {
+    "schema": { "const": "hearthweave.dual-aspect-packet/v1" },
+    "schema_version": { "const": "1.0.0" },
+    "packet_id": { "type": "string", "minLength": 1 },
+    "packet_fingerprint": { "type": "string", "pattern": "^fnv1a64:[0-9a-f]{16}$" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "identity": {
+      "type": "object",
+      "required": ["world_slug", "house_id", "session_context_id", "canon_foundation_id", "canon_overlay_id"],
+      "properties": {
+        "world_slug": { "type": "string", "minLength": 1 },
+        "house_id": { "type": "string", "minLength": 1 },
+        "session_context_id": { "type": "string", "minLength": 1 },
+        "canon_foundation_id": { "type": "string", "minLength": 1 },
+        "canon_overlay_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "temporal": {
+      "type": "object",
+      "required": ["observed_at", "activated_at", "coordinate", "hearthside_state_id", "targetside_state_id", "bridge_packet_id", "spiral"],
+      "properties": {
+        "observed_at": { "type": "string", "format": "date-time" },
+        "activated_at": { "type": "string", "format": "date-time" },
+        "coordinate": { "type": "number" },
+        "hearthside_state_id": { "type": "string" },
+        "targetside_state_id": { "type": "string" },
+        "bridge_packet_id": { "type": "string" },
+        "spiral": { "type": "object" }
+      }
+    },
+    "observable": {
+      "type": "object",
+      "required": ["authority", "continuity", "deep_snapshot", "premaq", "hearthside", "targetside", "bridge"],
+      "properties": {
+        "authority": { "const": "evidence-grounded-observational" },
+        "deep_snapshot": {
+          "type": "object",
+          "required": ["snapshot_id", "mode", "observed_at", "captured_at", "source", "state", "substitutions", "errors", "fingerprint"],
+          "properties": {
+            "snapshot_id": { "type": "string" },
+            "mode": { "enum": ["LIVE", "STALE", "DEGRADED"] },
+            "observed_at": { "type": "string", "format": "date-time" },
+            "captured_at": { "type": "string", "format": "date-time" },
+            "source": { "type": "object" },
+            "state": { "type": "object" },
+            "substitutions": { "type": "array" },
+            "errors": { "type": "array" },
+            "fingerprint": { "type": "string" }
+          }
+        },
+        "premaq": { "type": "object" },
+        "hearthside": { "type": "object" },
+        "targetside": { "type": "object" },
+        "bridge": { "type": "object" }
+      }
+    },
+    "experiential": {
+      "type": "object",
+      "required": ["authority", "house", "glyph", "tone", "visual", "haptic", "narrative"],
+      "properties": {
+        "authority": { "const": "canon-grounded-projected" },
+        "house": { "type": "object" },
+        "glyph": { "$ref": "#/$defs/expression" },
+        "tone": { "$ref": "#/$defs/expression" },
+        "visual": { "$ref": "#/$defs/expression" },
+        "haptic": { "$ref": "#/$defs/expression" },
+        "narrative": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "correspondence": {
+      "type": "object",
+      "required": ["shared_state_fingerprint", "explicit", "bindings"],
+      "properties": {
+        "shared_state_fingerprint": { "type": "string" },
+        "explicit": { "const": true },
+        "bindings": {
+          "type": "object",
+          "required": ["observable", "experiential", "glyph", "tone", "visual", "haptic", "narrative"],
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "degraded": {
+      "type": "object",
+      "required": ["active", "reasons", "substitutions"],
+      "properties": {
+        "active": { "type": "boolean" },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "substitutions": { "type": "array" }
+      }
+    },
+    "history": { "type": "array" },
+    "receipts": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "claims": { "type": "object" },
+    "laws": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+  },
+  "$defs": {
+    "expression": {
+      "type": "object",
+      "required": ["shared_state_fingerprint", "premaq_id", "deep_snapshot_id", "transfer_function_version", "source_class"],
+      "properties": {
+        "shared_state_fingerprint": { "type": "string" },
+        "premaq_id": { "type": "string" },
+        "deep_snapshot_id": { "type": "string" },
+        "transfer_function_version": { "type": "string" },
+        "source_class": { "const": "derived-from-shared-state" }
+      }
+    }
+  }
+}
