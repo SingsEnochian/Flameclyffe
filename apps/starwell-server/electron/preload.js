@@ -6,5 +6,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveConfig:             (cfg)     => ipcRenderer.invoke('save-config', cfg),
   openWizard:             ()        => ipcRenderer.invoke('open-wizard'),
   launchBifrostTerminal:  ()        => ipcRenderer.invoke('launch-bifrost-terminal'),
+  prepareMathRuntime:     ()        => ipcRenderer.invoke('prepare-math-runtime'),
   launchMathSpine:        (payload) => ipcRenderer.invoke('launch-math-spine', payload),
 });
