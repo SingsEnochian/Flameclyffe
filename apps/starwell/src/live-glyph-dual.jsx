@@ -3,6 +3,7 @@ import {
   LiveGlyphViewer as InstrumentLiveGlyphViewer,
   useSecondTicker,
 } from './live-glyph.jsx';
+import './hearthweave-kernel/sensory-bus.js';
 import {
   CLAIM_STATES,
 } from './hearthweave-kernel/dual-aspect.js';
