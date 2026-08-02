@@ -1,3 +1,6 @@
+import { readActiveDualAspectPacket } from './hearthweave-kernel/activation.js';
+import { assertCrossRuntimeActivation } from './hearthweave-kernel/cross-runtime.js';
+
 const HASH_PATTERN = /^[0-9a-f]{64}$/;
 const REQUIRED_TONE_ROLES = ['anchor', 'bind', 'living'];
 
@@ -114,32 +117,49 @@ export class HearthgateSensoryBridge extends EventTarget {
     glyphElement = null,
     audioContextFactory = null,
     vibrate = globalThis.navigator?.vibrate?.bind(globalThis.navigator) || null,
+    storage = globalThis.sessionStorage ?? null,
   } = {}) {
     super();
     this.root = root;
     this.glyphElement = glyphElement;
     this.audioContextFactory = audioContextFactory;
     this.vibrate = vibrate;
+    this.storage = storage;
     this.packet = null;
+    this.crossRuntimeActivation = null;
     this.audioContext = null;
     this.audioNodes = [];
     this.active = false;
   }
 
-  receive(packetInput) {
+  receive(packetInput, {
+    hearthweavePacket,
+    correspondenceReceipt = null,
+  } = {}) {
     const nextPacket = verifySensoryPacket(packetInput);
+    const activeHearthweavePacket = hearthweavePacket === undefined
+      ? readActiveDualAspectPacket({ storage:this.storage })
+      : hearthweavePacket;
+    const nextCrossRuntimeActivation = assertCrossRuntimeActivation({
+      kernelPacket:nextPacket,
+      hearthweavePacket:activeHearthweavePacket,
+      correspondenceReceipt,
+    });
     const teardownRequired = this.active || this.audioContext || this.audioNodes.length > 0;
-    if (teardownRequired) return this.replaceAfterStop(nextPacket);
-    return this.installPacket(nextPacket);
+    if (teardownRequired) {
+      return this.replaceAfterStop(nextPacket, nextCrossRuntimeActivation);
+    }
+    return this.installPacket(nextPacket, nextCrossRuntimeActivation);
   }
 
-  async replaceAfterStop(nextPacket) {
+  async replaceAfterStop(nextPacket, nextCrossRuntimeActivation) {
     await this.stop();
-    return this.installPacket(nextPacket);
+    return this.installPacket(nextPacket, nextCrossRuntimeActivation);
   }
 
-  installPacket(nextPacket) {
+  installPacket(nextPacket, nextCrossRuntimeActivation) {
     this.packet = nextPacket;
+    this.crossRuntimeActivation = nextCrossRuntimeActivation;
     this.applyVisualState();
     this.dispatchEvent(new CustomEvent('hearthgate:sensory-received', {
       detail: this.receiptDetail('received'),
@@ -147,7 +167,11 @@ export class HearthgateSensoryBridge extends EventTarget {
     return this.packet;
   }
 
-  receiptDetail(action, packet = this.packet) {
+  receiptDetail(
+    action,
+    packet = this.packet,
+    crossRuntimeActivation = this.crossRuntimeActivation,
+  ) {
     invariant(packet, 'no packet has been received');
     return deepFreeze({
       schema: 'hearthgate.browser-sensory-receipt.v1',
@@ -156,6 +180,7 @@ export class HearthgateSensoryBridge extends EventTarget {
       house_id: packet.house_id,
       basis_hash: packet.correspondence.basis_hash,
       packet_hash: packet.receipts.at(-1).packet_hash,
+      cross_runtime: copyPacket(crossRuntimeActivation),
       created_at: new Date().toISOString(),
     });
   }
@@ -168,6 +193,7 @@ export class HearthgateSensoryBridge extends EventTarget {
       if (this.root.dataset) {
         this.root.dataset.hearthgateHouse = this.packet.house_id;
         this.root.dataset.hearthgateBasis = this.packet.correspondence.basis_hash;
+        this.root.dataset.hearthgateRuntimeMode = this.crossRuntimeActivation?.mode ?? 'unknown';
       }
     }
     if (this.glyphElement) {
@@ -192,6 +218,10 @@ export class HearthgateSensoryBridge extends EventTarget {
 
   async activate({ sound = true, haptics = true } = {}) {
     invariant(this.packet, 'receive a verified packet before activation');
+    invariant(
+      this.crossRuntimeActivation?.status === 'VERIFIED',
+      'cross-runtime activation has not been verified',
+    );
     if (this.active) return this.receiptDetail('already-active');
 
     if (sound) await this.activateSound();
@@ -263,6 +293,7 @@ export class HearthgateSensoryBridge extends EventTarget {
     const stoppedNodes = [...new Set(this.audioNodes)];
     const stoppedContext = this.audioContext;
     const stoppedPacket = this.packet;
+    const stoppedCrossRuntimeActivation = this.crossRuntimeActivation;
     const wasActive = this.active;
 
     this.audioNodes = [];
@@ -282,7 +313,11 @@ export class HearthgateSensoryBridge extends EventTarget {
     }
     if (wasActive && stoppedPacket) {
       this.dispatchEvent(new CustomEvent('hearthgate:sensory-stopped', {
-        detail: this.receiptDetail('feather-stop', stoppedPacket),
+        detail: this.receiptDetail(
+          'feather-stop',
+          stoppedPacket,
+          stoppedCrossRuntimeActivation,
+        ),
       }));
     }
   }
