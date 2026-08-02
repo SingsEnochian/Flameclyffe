@@ -1,0 +1,149 @@
+name: Wheel of Time Canon Transform
+
+on:
+  push:
+    branches:
+      - canon/taaveren-vaen-wot-wiki-ingest
+    paths:
+      - 'scripts/prepare-wot-fandom-archive.mjs'
+      - 'scripts/normalise-wot-fandom.mjs'
+      - 'scripts/verify-wot-fandom-ingest.mjs'
+      - 'canon/taaveren-vaen/project-overlay.json'
+      - '.github/workflows/wot-canon-transform.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wot-canon-transform-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  transform:
+    name: Restore, canonicalise, normalise and verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Restore completed crawl archive
+        id: crawl_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            canon/taaveren-vaen/wot-fandom/data/raw
+            canon/taaveren-vaen/wot-fandom/data/index/pages.json
+          key: wot-fandom-transform-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            wot-fandom-crawl-${{ runner.os }}-${{ github.ref_name }}-
+
+      - name: Require a restored archive
+        shell: bash
+        run: |
+          if [[ "${{ steps.crawl_cache.outputs.cache-matched-key }}" == "" ]]; then
+            echo 'No completed Wheel of Time crawl cache was restored.' >&2
+            exit 1
+          fi
+
+      - name: Validate transform scripts
+        run: |
+          node --check scripts/prepare-wot-fandom-archive.mjs
+          node --check scripts/normalise-wot-fandom.mjs
+          node --check scripts/verify-wot-fandom-ingest.mjs
+          node -e "JSON.parse(require('node:fs').readFileSync('canon/taaveren-vaen/project-overlay.json','utf8'))"
+
+      - name: Canonicalise and re-receipt preserved archive
+        id: prepared_archive
+        env:
+          WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
+        run: node scripts/prepare-wot-fandom-archive.mjs
+
+      - name: Normalise with deterministic retry
+        env:
+          WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
+        shell: bash
+        run: |
+          success=false
+          for attempt in 1 2 3; do
+            echo "Normalisation attempt $attempt/3"
+            rm -rf \
+              canon/taaveren-vaen/wot-fandom/data/normalised \
+              canon/taaveren-vaen/wot-fandom/data/dossiers \
+              canon/taaveren-vaen/wot-fandom/dist
+            if node scripts/normalise-wot-fandom.mjs; then
+              success=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          if [[ "$success" != "true" ]]; then
+            echo 'Normalisation failed three times against the same verified archive.' >&2
+            exit 1
+          fi
+
+      - name: Box integrity verification
+        env:
+          WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
+        run: node scripts/verify-wot-fandom-ingest.mjs
+
+      - name: Package canon archive and receipts
+        run: |
+          tar -czf taaveren-vaen-wot-canon-${{ github.sha }}.tar.gz \
+            canon/taaveren-vaen/project-overlay.json \
+            canon/taaveren-vaen/wot-fandom/data \
+            canon/taaveren-vaen/wot-fandom/dist
+          sha256sum taaveren-vaen-wot-canon-${{ github.sha }}.tar.gz > WOT-CANON-SHA256SUMS.txt
+
+      - name: Upload complete canon artefact
+        uses: actions/upload-artifact@v7
+        with:
+          name: taaveren-vaen-wot-canon-${{ github.sha }}
+          path: |
+            taaveren-vaen-wot-canon-${{ github.sha }}.tar.gz
+            WOT-CANON-SHA256SUMS.txt
+            canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json
+            canon/taaveren-vaen/wot-fandom/data/receipts/ndjson-canonicalisation-latest.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Upload transform evidence on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: taaveren-vaen-wot-transform-failed-${{ github.sha }}
+          path: |
+            canon/taaveren-vaen/wot-fandom/data/receipts
+            canon/taaveren-vaen/wot-fandom/data/normalised
+            canon/taaveren-vaen/wot-fandom/dist
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Write Canon Steward summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Wheel of Time Canon Transform'
+            echo
+            echo "Restored cache: \`${{ steps.crawl_cache.outputs.cache-matched-key }}\`"
+            if [[ "${{ steps.prepared_archive.outputs.complete }}" == "true" ]]; then
+              echo "Archive: VERIFIED · ${{ steps.prepared_archive.outputs.pages }} pages"
+              echo "Raw SHA-256: \`${{ steps.prepared_archive.outputs.raw_sha256 }}\`"
+              echo
+            fi
+            if [[ -f canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json ]]; then
+              echo '### Box verification'
+              echo '```json'
+              cat canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
