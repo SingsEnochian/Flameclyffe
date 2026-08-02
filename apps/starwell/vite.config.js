@@ -63,6 +63,7 @@ export default defineConfig({
         concordance: resolve(REPO_ROOT, 'apps/starwell/concordance/index.html'),
         bridgeRegistry: resolve(REPO_ROOT, 'apps/starwell/bridge-registry/index.html'),
         arcsweepContinuity: resolve(REPO_ROOT, 'apps/starwell/arcsweep-continuity/index.html'),
+        hearthgateSensory: resolve(REPO_ROOT, 'apps/starwell/hearthgate-sensory/index.html'),
         materialQa: resolve(REPO_ROOT, 'apps/starwell/material-qa.html'),
         unitResonanceLab: resolve(REPO_ROOT, 'apps/starwell/unit-resonance-lab.html'),
         scfeLab: resolve(REPO_ROOT, 'apps/starwell/scfe-lab.html'),
