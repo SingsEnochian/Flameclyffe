@@ -6,9 +6,10 @@ import {
   projectWorldState,
   validateTemporalState,
 } from './engine.js';
+import { createBifrostLibraryBridge } from '../arcsweep-canon/bifrost-library-bridge.js';
 
-export const BIFROST_RUNTIME_VERSION = '0.1.0';
-export const BIFROST_RUNTIME_SCHEMA = 'arcsweep.bifrost-dual-presence-runtime/v0.1';
+export const BIFROST_RUNTIME_VERSION = '0.2.0';
+export const BIFROST_RUNTIME_SCHEMA = 'arcsweep.bifrost-dual-presence-runtime/v0.2';
 export const BIFROST_STATE_STORAGE_KEY = 'arcsweep:bifrost-temporal-state:v1';
 export const BIFROST_BRIDGE_STORAGE_KEY = 'arcsweep:bifrost-bridge-packet:v1';
 
@@ -32,7 +33,7 @@ function writeJson(storage, key, value) {
 
 function validateEnvelope(value) {
   if (!value) return null;
-  if (value.schema === BIFROST_RUNTIME_SCHEMA) {
+  if (value.schema === BIFROST_RUNTIME_SCHEMA || value.schema === 'arcsweep.bifrost-dual-presence-runtime/v0.1') {
     return {
       schema: BIFROST_RUNTIME_SCHEMA,
       hearthside: validateTemporalState(value.hearthside),
@@ -47,9 +48,13 @@ function validateEnvelope(value) {
   };
 }
 
-export function createArcsweepBifrostRuntime({ storage = globalThis.localStorage } = {}) {
+export function createArcsweepBifrostRuntime({
+  storage = globalThis.localStorage,
+  libraryBridge = {},
+} = {}) {
   let envelope = null;
   let bridge = readJson(storage, BIFROST_BRIDGE_STORAGE_KEY);
+  let canonLibraryBridge = null;
 
   try {
     envelope = validateEnvelope(readJson(storage, BIFROST_STATE_STORAGE_KEY));
@@ -69,6 +74,11 @@ export function createArcsweepBifrostRuntime({ storage = globalThis.localStorage
     return clone(envelope.targetside);
   }
 
+  function getLibraryBridge() {
+    canonLibraryBridge ||= createBifrostLibraryBridge(libraryBridge);
+    return canonLibraryBridge;
+  }
+
   return Object.freeze({
     version: BIFROST_RUNTIME_VERSION,
     schema: BIFROST_RUNTIME_SCHEMA,
@@ -84,17 +94,11 @@ export function createArcsweepBifrostRuntime({ storage = globalThis.localStorage
     },
     evolve(options = {}) {
       const current = requireEnvelope();
-      return persistEnvelope({
-        ...current,
-        targetside: evolveTemporalState(current.targetside, options),
-      });
+      return persistEnvelope({ ...current, targetside: evolveTemporalState(current.targetside, options) });
     },
     cycle(options = {}) {
       const current = requireEnvelope();
-      return persistEnvelope({
-        ...current,
-        targetside: collapseRelease(current.targetside, options),
-      });
+      return persistEnvelope({ ...current, targetside: collapseRelease(current.targetside, options) });
     },
     bridge({ premaq, targetside, ...options } = {}) {
       const current = requireEnvelope();
@@ -112,18 +116,13 @@ export function createArcsweepBifrostRuntime({ storage = globalThis.localStorage
       if (!bridge) throw new Error('Bifröst bridge packet is not available. Create the bridge first.');
       return projectWorldState(bridge, options);
     },
-    getState() {
-      return clone(envelope?.targetside ?? null);
+    library() {
+      return getLibraryBridge();
     },
-    getHearthside() {
-      return clone(envelope?.hearthside ?? null);
-    },
-    getTargetside() {
-      return clone(envelope?.targetside ?? null);
-    },
-    getBridge() {
-      return clone(bridge);
-    },
+    getState() { return clone(envelope?.targetside ?? null); },
+    getHearthside() { return clone(envelope?.hearthside ?? null); },
+    getTargetside() { return clone(envelope?.targetside ?? null); },
+    getBridge() { return clone(bridge); },
     clear() {
       envelope = null;
       bridge = null;
@@ -143,7 +142,7 @@ export function installBifrostRuntime(target = globalThis, options = {}) {
   });
   if (target.dispatchEvent && globalThis.CustomEvent) {
     target.dispatchEvent(new CustomEvent('arcsweep:bifrost-ready', {
-      detail: { version: runtime.version, schema: runtime.schema },
+      detail: { version: runtime.version, schema: runtime.schema, canon_library_bridge: true },
     }));
   }
   return runtime;
