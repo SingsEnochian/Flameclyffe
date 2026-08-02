@@ -24,7 +24,8 @@ except ImportError as exc:  # pragma: no cover - runtime boundary
         "Install the Hearthgate math runtime, then open this instrument again."
     ) from exc
 
-AXES = ("P", "C", "R", "M", "A", "Q")
+PREMAQ_AXES = ("P", "C", "R", "E", "M", "A", "Q")
+FIELD_AXES = ("P", "C", "R", "M", "A", "Q")
 ACTIVE_MODES = {"OBSERVED", "DERIVED", "CALIBRATED"}
 
 
@@ -81,7 +82,7 @@ def validate(payload: Any) -> dict[str, Any]:
     mode_set: set[str] = set()
     axis_values: dict[str, float] = {}
     source_ledger: dict[str, Any] = {}
-    for axis in AXES:
+    for axis in PREMAQ_AXES:
         axis_values[axis] = require_number(premaq.get(axis), f"state.premaq.{axis}")
         datum = require_mapping(axes_ledger.get(axis), f"state.observation.axes.{axis}")
         provenance = require_mapping(datum.get("provenance"), f"state.observation.axes.{axis}.provenance")
@@ -127,9 +128,9 @@ def validate(payload: Any) -> dict[str, Any]:
 
 def derive_field(validated: dict[str, Any], resolution: int = 96) -> dict[str, Any]:
     values = validated["premaq"]
-    phases = torch.tensor([values[axis] * 2.0 * math.pi for axis in AXES], dtype=torch.float64)
-    amplitudes = torch.tensor([values[axis] for axis in AXES], dtype=torch.float64)
-    tones = torch.tensor([validated["tone_hz"][axis] for axis in AXES], dtype=torch.float64)
+    phases = torch.tensor([values[axis] * 2.0 * math.pi for axis in FIELD_AXES], dtype=torch.float64)
+    amplitudes = torch.tensor([values[axis] for axis in FIELD_AXES], dtype=torch.float64)
+    tones = torch.tensor([validated["tone_hz"][axis] for axis in FIELD_AXES], dtype=torch.float64)
     wave_numbers = tones / tones[0] * 0.1
 
     coordinates = torch.linspace(-1.0, 1.0, resolution, dtype=torch.float64)
@@ -155,6 +156,8 @@ def derive_field(validated: dict[str, Any], resolution: int = 96) -> dict[str, A
             "kind": "deterministic-standing-wave-superposition",
             "framework": f"PyTorch {torch.__version__}",
             "resolution": resolution,
+            "field_axes": list(FIELD_AXES),
+            "entropy_role": "observed comparison axis; not silently replaced by oscillator decoherence",
             "random_parameters": False,
             "trained_weights": False,
             "physical_claim": False,
@@ -172,7 +175,7 @@ def derive_field(validated: dict[str, Any], resolution: int = 96) -> dict[str, A
             "field_mean": float(field.mean()),
             "field_std": float(field.std()),
             "phase_order_parameter": order_parameter,
-            "observed_entropy": values.get("E"),
+            "observed_entropy": values["E"],
             "derived_decoherence": 1.0 - order_parameter,
             "spectral_fingerprint": [float(value) for value in fingerprint],
         },
