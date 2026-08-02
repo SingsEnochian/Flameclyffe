@@ -1,0 +1,132 @@
+name: Wheel of Time Canon Ingest
+
+on:
+  push:
+    branches:
+      - canon/taaveren-vaen-wot-wiki-ingest
+    paths:
+      - 'scripts/canon-ingest-wot-fandom.mjs'
+      - 'scripts/normalise-wot-fandom.mjs'
+      - 'scripts/verify-wot-fandom-ingest.mjs'
+      - 'test/canon-wot-ingest.test.mjs'
+      - 'canon/taaveren-vaen/**'
+      - '.github/workflows/wot-canon-ingest.yml'
+  workflow_dispatch:
+    inputs:
+      reset:
+        description: 'Discard a restored partial crawl and begin again'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wot-canon-ingest-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    name: Crawl, normalise, bind and verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Restore resumable crawl state
+        uses: actions/cache@v4
+        with:
+          path: |
+            canon/taaveren-vaen/wot-fandom/data/raw
+            canon/taaveren-vaen/wot-fandom/data/index/pages.json
+          key: wot-fandom-crawl-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            wot-fandom-crawl-${{ runner.os }}-${{ github.ref_name }}-
+
+      - name: Validate Canon Steward scripts
+        run: |
+          node --check scripts/canon-ingest-wot-fandom.mjs
+          node --check scripts/normalise-wot-fandom.mjs
+          node --check scripts/verify-wot-fandom-ingest.mjs
+          node --test test/canon-wot-ingest.test.mjs
+          node -e "JSON.parse(require('node:fs').readFileSync('canon/taaveren-vaen/project-overlay.json','utf8'))"
+
+      - name: Crawl complete MediaWiki corpus
+        env:
+          WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
+        shell: bash
+        run: |
+          RESET_ARG=""
+          if [[ "${{ github.event.inputs.reset }}" == "true" ]]; then
+            RESET_ARG="--reset"
+          fi
+          node scripts/canon-ingest-wot-fandom.mjs $RESET_ARG
+
+      - name: Normalise canon and bind Ta’veren Vaen overlay
+        env:
+          WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
+        run: node scripts/normalise-wot-fandom.mjs
+
+      - name: Box integrity verification
+        env:
+          WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
+        run: node scripts/verify-wot-fandom-ingest.mjs
+
+      - name: Package canon archive and receipts
+        if: success()
+        run: |
+          tar -czf taaveren-vaen-wot-canon-${{ github.sha }}.tar.gz \
+            canon/taaveren-vaen/project-overlay.json \
+            canon/taaveren-vaen/wot-fandom/data \
+            canon/taaveren-vaen/wot-fandom/dist
+          sha256sum taaveren-vaen-wot-canon-${{ github.sha }}.tar.gz > WOT-CANON-SHA256SUMS.txt
+
+      - name: Upload complete canon artefact
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: taaveren-vaen-wot-canon-${{ github.sha }}
+          path: |
+            taaveren-vaen-wot-canon-${{ github.sha }}.tar.gz
+            WOT-CANON-SHA256SUMS.txt
+            canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Upload partial crawl evidence on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: taaveren-vaen-wot-canon-partial-${{ github.sha }}
+          path: |
+            canon/taaveren-vaen/wot-fandom/data/raw
+            canon/taaveren-vaen/wot-fandom/data/index
+            canon/taaveren-vaen/wot-fandom/data/receipts
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Write Steward summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Wheel of Time Canon Steward'
+            echo
+            if [[ -f canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json ]]; then
+              echo '### Verification'
+              echo '```json'
+              cat canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json
+              echo '```'
+            else
+              echo 'Verification receipt was not produced. Inspect the partial crawl artefact and failed-step logs.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
