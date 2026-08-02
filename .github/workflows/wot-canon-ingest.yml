@@ -24,7 +24,7 @@ permissions:
 
 concurrency:
   group: wot-canon-ingest-${{ github.event.pull_request.head.ref || github.ref_name }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   ingest:
