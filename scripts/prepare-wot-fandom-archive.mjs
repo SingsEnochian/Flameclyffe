@@ -63,6 +63,12 @@ function diagnosticExcerpt(line) {
   return compact.replaceAll(/[\u0000-\u001f\u007f]/g, '?');
 }
 
+function encodeNdjsonRecord(record) {
+  return JSON.stringify(record)
+    .replaceAll('\u2028', '\\u2028')
+    .replaceAll('\u2029', '\\u2029');
+}
+
 function parseArchive(rawText) {
   const text = rawText.replace(/^\uFEFF/, '');
   const lines = text.split('\n');
@@ -159,7 +165,7 @@ if (records.length !== inspection.state.pages) {
   );
 }
 
-const canonicalText = `${records.map((record) => JSON.stringify(record)).join('\n')}\n`;
+const canonicalText = `${records.map(encodeNdjsonRecord).join('\n')}\n`;
 const afterHash = hash(canonicalText);
 const temporaryRaw = `${RAW_FILE}.canonical.tmp`;
 await writeFile(temporaryRaw, canonicalText, 'utf8');
@@ -204,6 +210,7 @@ await atomicJson(path.join(RECEIPT_DIR, 'ndjson-canonicalisation-latest.json'), 
   semantic_page_ids_preserved: true,
   canonical_newline: 'LF',
   terminal_newline: true,
+  unicode_record_separators_escaped: true,
 });
 
 await rm(`${RAW_FILE}.tmp`, { force: true });
