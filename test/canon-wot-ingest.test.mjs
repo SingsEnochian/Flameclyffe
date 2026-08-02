@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
 const REPO_ROOT = path.resolve(import.meta.dirname, '..');
+const PREPARE = path.join(REPO_ROOT, 'scripts/prepare-wot-fandom-archive.mjs');
 const NORMALISE = path.join(REPO_ROOT, 'scripts/normalise-wot-fandom.mjs');
 const VERIFY = path.join(REPO_ROOT, 'scripts/verify-wot-fandom-ingest.mjs');
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
@@ -54,6 +55,7 @@ test('normalisation keeps Wheel of Time canon separate from Ta’veren Vaen', as
   ];
   const rawLines = [
     {
+      schema: 'hearthgate.canon-source-page.v1',
       page_id: 1,
       namespace: 0,
       title: "Rand al'Thor",
@@ -63,13 +65,14 @@ test('normalisation keeps Wheel of Time canon separate from Ta’veren Vaen', as
       links: [{ ns: 0, title: 'Dragon Reborn' }],
       images: [],
       revision: { revid: 10 },
-      content: "'''Rand al'Thor''' is a character with a sufficiently long fixture summary for normalisation.",
+      content: "'''Rand al'Thor''' is a character with a sufficiently long fixture summary\u2028for normalisation.",
       content_sha256: 'a',
       source_url: 'https://example.test/1',
       canon_promotable: true,
       attribution: { licence: 'CC BY-SA' },
     },
     {
+      schema: 'hearthgate.canon-source-page.v1',
       page_id: 2,
       namespace: 0,
       title: 'Dragon Reborn',
@@ -79,7 +82,7 @@ test('normalisation keeps Wheel of Time canon separate from Ta’veren Vaen', as
       links: [{ ns: 0, title: "Rand al'Thor" }],
       images: [],
       revision: { revid: 11 },
-      content: 'The Dragon Reborn is a prophecy with a sufficiently long fixture summary for normalisation.',
+      content: 'The Dragon Reborn is a prophecy with a sufficiently long fixture summary\u2029for normalisation.',
       content_sha256: 'b',
       source_url: 'https://example.test/2',
       canon_promotable: true,
@@ -90,7 +93,12 @@ test('normalisation keeps Wheel of Time canon separate from Ta’veren Vaen', as
   const index = `${JSON.stringify({ pages }, null, 2)}\n`;
   await writeFile(path.join(root, 'data/raw/pages.ndjson'), raw, 'utf8');
   await writeFile(path.join(root, 'data/index/pages.json'), index, 'utf8');
-  await writeJson(path.join(root, 'data/raw/crawl-state.json'), { complete: true, pages: 2 });
+  await writeJson(path.join(root, 'data/raw/crawl-state.json'), {
+    complete: true,
+    pages: 2,
+    total_discovered: 2,
+    completed_page_ids: [1, 2],
+  });
   await writeJson(path.join(root, 'data/receipts/crawl-1.json'), {
     status: 'complete',
     pages: 2,
@@ -98,6 +106,18 @@ test('normalisation keeps Wheel of Time canon separate from Ta’veren Vaen', as
     raw_sha256: sha256(raw),
     page_index_sha256: sha256(index),
   });
+
+  const prepare = spawnSync(process.execPath, [PREPARE, `--root=${root}`], { encoding: 'utf8' });
+  assert.equal(prepare.status, 0, prepare.stderr || prepare.stdout);
+
+  const canonicalRaw = await readFile(path.join(root, 'data/raw/pages.ndjson'), 'utf8');
+  assert.equal(canonicalRaw.includes('\u2028'), false);
+  assert.equal(canonicalRaw.includes('\u2029'), false);
+  assert.equal(canonicalRaw.includes('\\u2028'), true);
+  assert.equal(canonicalRaw.includes('\\u2029'), true);
+  const canonicalPages = canonicalRaw.trimEnd().split('\n').map((line) => JSON.parse(line));
+  assert.equal(canonicalPages[0].content.includes('\u2028'), true);
+  assert.equal(canonicalPages[1].content.includes('\u2029'), true);
 
   const normalise = spawnSync(process.execPath, [NORMALISE, `--root=${root}`], { encoding: 'utf8' });
   assert.equal(normalise.status, 0, normalise.stderr || normalise.stdout);
