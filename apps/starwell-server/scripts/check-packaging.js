@@ -13,9 +13,13 @@ const requiredFiles = [
   'electron/preload.js',
   'launcher.js',
   'server.js',
+  'server-secure.js',
+  'security/local-boundary.js',
   'fontforge/server.js',
   'fontforge/worker.js',
   'scripts/stage-starwell.js',
+  'scripts/prepare-assets.js',
+  'build/hearthgate.png',
   'public/hearthgate.html',
   'public/hearthgate-archive.html',
   'public/setup-wizard.html',
@@ -54,9 +58,7 @@ const signalWellManifestPath = path.join(root, 'public', 'starwell', 'modules', 
 if (fs.existsSync(signalWellManifestPath)) {
   try {
     const manifest = JSON.parse(fs.readFileSync(signalWellManifestPath, 'utf8'));
-    if (manifest.moduleId !== 'signal-well') {
-      errors.push('Signal Well manifest has the wrong moduleId.');
-    }
+    if (manifest.moduleId !== 'signal-well') errors.push('Signal Well manifest has the wrong moduleId.');
     if (manifest.delivery !== 'bundled-core' || manifest.enabledByDefault !== true) {
       errors.push('Signal Well must be declared as an enabled bundled-core module.');
     }
@@ -81,9 +83,7 @@ const bifrostManifestPath = path.join(root, 'public', 'starwell', 'modules', 'bi
 if (fs.existsSync(bifrostManifestPath)) {
   try {
     const manifest = JSON.parse(fs.readFileSync(bifrostManifestPath, 'utf8'));
-    if (manifest.moduleId !== 'bifrost-arcsweep') {
-      errors.push('Bifröst Arcsweep manifest has the wrong moduleId.');
-    }
+    if (manifest.moduleId !== 'bifrost-arcsweep') errors.push('Bifröst Arcsweep manifest has the wrong moduleId.');
     if (manifest.delivery !== 'bundled-core' || manifest.enabledByDefault !== true) {
       errors.push('Bifröst Arcsweep must be declared as an enabled bundled-core module.');
     }
@@ -138,9 +138,7 @@ for (const [relativePath, expectedId] of [
   if (!fs.existsSync(schemaPath)) continue;
   try {
     const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-    if (schema.$id !== expectedId) {
-      errors.push(`${relativePath} has the wrong schema identifier.`);
-    }
+    if (schema.$id !== expectedId) errors.push(`${relativePath} has the wrong schema identifier.`);
   } catch (error) {
     errors.push(`${relativePath} is invalid JSON: ${error.message}`);
   }
@@ -153,31 +151,62 @@ if (!fs.existsSync(starwellAssets) || !fs.statSync(starwellAssets).isDirectory()
   errors.push('Bundled STARWELL assets directory has no JavaScript or CSS assets.');
 }
 
+const mainPath = path.join(root, pkg.main || '');
+if (fs.existsSync(mainPath)) {
+  const mainSource = fs.readFileSync(mainPath, 'utf8');
+  for (const requiredFragment of [
+    'app.enableSandbox()',
+    'safeStorage',
+    'sandbox: true',
+    'setPermissionRequestHandler',
+    'redactHearthgateConfig',
+    "path.join(process.resourcesPath, 'app.asar.unpacked')",
+  ]) {
+    if (!mainSource.includes(requiredFragment)) {
+      errors.push(`Electron main process is missing hardening contract: ${requiredFragment}`);
+    }
+  }
+}
+
+const secureServerPath = path.join(root, 'server-secure.js');
+if (fs.existsSync(secureServerPath)) {
+  const secureServerSource = fs.readFileSync(secureServerPath, 'utf8');
+  if (!secureServerSource.includes("'127.0.0.1'")) errors.push('Core server bootstrap must bind to loopback.');
+  if (!secureServerSource.includes('localCorsOptions')) errors.push('Core server bootstrap must use the local CORS boundary.');
+}
+
 const winTarget = pkg.build?.win?.target;
 const targets = Array.isArray(winTarget) ? winTarget : [winTarget].filter(Boolean);
-const hasNsis = targets.some((target) => {
-  if (typeof target === 'string') return target === 'nsis';
-  return target?.target === 'nsis';
-});
+const hasNsis = targets.some((target) => typeof target === 'string' ? target === 'nsis' : target?.target === 'nsis');
+if (!hasNsis) errors.push('package.json build.win.target must include NSIS.');
 
-if (!hasNsis) {
-  errors.push('package.json build.win.target must include NSIS.');
+if (pkg.build?.asar !== true) errors.push('package.json build.asar must be true.');
+const unpacked = pkg.build?.asarUnpack;
+if (!Array.isArray(unpacked)) {
+  errors.push('package.json build.asarUnpack must explicitly list runtime files.');
+} else {
+  for (const requiredPattern of ['server-secure.js', 'security/**', 'fontforge/**', 'public/**', 'node_modules/better-sqlite3/**']) {
+    if (!unpacked.includes(requiredPattern)) errors.push(`Missing required asarUnpack pattern: ${requiredPattern}`);
+  }
 }
 
 const configuredIcon = pkg.build?.win?.icon;
-if (configuredIcon && !fs.existsSync(path.join(root, configuredIcon))) {
+if (!configuredIcon) {
+  errors.push('A Windows icon must be configured.');
+} else if (!fs.existsSync(path.join(root, configuredIcon))) {
   errors.push(`Configured Windows icon does not exist: ${configuredIcon}`);
+}
+
+if (!pkg.description || !pkg.author || !pkg.license) {
+  errors.push('package.json must declare description, author, and license metadata.');
 }
 
 const packagedFiles = pkg.build?.files;
 if (!Array.isArray(packagedFiles)) {
   errors.push('package.json build.files must be an explicit array.');
 } else {
-  const requiredExclusions = ['!.env', '!data/**', '!dist-electron'];
-  for (const exclusion of requiredExclusions) {
-    if (!packagedFiles.includes(exclusion)) {
-      errors.push(`Missing sensitive/generated-file exclusion: ${exclusion}`);
-    }
+  for (const exclusion of ['!.env', '!data/**', '!dist-electron', '!test/**']) {
+    if (!packagedFiles.includes(exclusion)) errors.push(`Missing sensitive/generated-file exclusion: ${exclusion}`);
   }
 }
 
@@ -195,9 +224,10 @@ console.log('[Hearthgate packaging check] OK');
 console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
-console.log(' services: core + local FontForge sidecar');
+console.log(' security: sandboxed renderer + redacted IPC + encrypted config when OS key storage is available');
+console.log(' network: core and FontForge services restricted to the local boundary');
+console.log(' packaging: ASAR enabled with explicit runtime unpack list and generated Hearthgate icon');
 console.log(' framework: /starwell/ + Glyph Studio + Signal Well + Bifröst Arcsweep bundled');
 console.log(' schemas: PREMAQ v2 + Bifröst temporal state bundled');
-console.log(' modules: Signal Well, Radio JOVE live listening, and Bifröst Arcsweep core');
 console.log(` installer: ${pkg.build.artifactName}`);
 console.log(' signing: not configured; CI output will be unsigned');
