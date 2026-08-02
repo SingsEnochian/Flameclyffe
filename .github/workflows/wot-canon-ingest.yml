@@ -50,6 +50,7 @@ jobs:
           key: wot-fandom-crawl-${{ runner.os }}-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             wot-fandom-crawl-${{ runner.os }}-${{ github.event.pull_request.head.ref || github.ref_name }}-
+          save-always: true
 
       - name: Validate Canon Steward scripts
         run: |
