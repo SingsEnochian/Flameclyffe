@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d1218" />
+  <title>Hearthgate Sensory Bridge</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --hg-palette-0:#0d1218;
+      --hg-palette-1:#e4c88f;
+      --hg-palette-2:#9ab2b4;
+      --hg-palette-3:#f3ead8;
+      --hg-motion:.5;
+      --hg-luminance:.7;
+      --hg-structure-weight:.7;
+      --hg-atmosphere-weight:.7;
+      --hg-glyph-activation:0;
+      font-family: ui-serif, Georgia, serif;
+      background:var(--hg-palette-0);
+      color:var(--hg-palette-3);
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      min-height:100dvh;
+      padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
+      background:
+        radial-gradient(circle at 50% 0,color-mix(in srgb,var(--hg-palette-2) calc(var(--hg-atmosphere-weight) * 22%),transparent),transparent 42%),
+        linear-gradient(145deg,var(--hg-palette-0),color-mix(in srgb,var(--hg-palette-0) 82%,var(--hg-palette-1)));
+    }
+    main { width:min(1100px,100%); margin:auto; }
+    header { padding:clamp(24px,6vw,64px) 0 24px; }
+    .eyebrow { text-transform:uppercase; letter-spacing:.18em; font:700 .76rem ui-sans-serif,system-ui; color:var(--hg-palette-2); }
+    h1 { margin:.25rem 0 .7rem; color:var(--hg-palette-1); font-size:clamp(2rem,7vw,4.5rem); line-height:1; }
+    .lede { max-width:72ch; line-height:1.65; color:color-mix(in srgb,var(--hg-palette-3) 78%,var(--hg-palette-2)); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:16px; }
+    .room { background:color-mix(in srgb,var(--hg-palette-0) 88%,transparent); border:1px solid color-mix(in srgb,var(--hg-palette-1) 48%,transparent); border-radius:20px; padding:20px; box-shadow:0 18px 60px rgba(0,0,0,.28); backdrop-filter:blur(12px); }
+    h2 { margin-top:0; color:var(--hg-palette-1); }
+    label { display:block; margin:.85rem 0 .35rem; font:700 .82rem ui-sans-serif,system-ui; color:var(--hg-palette-2); }
+    input,select,button { font:600 1rem ui-sans-serif,system-ui; }
+    input[type="url"],select { width:100%; min-height:48px; padding:10px 12px; color:var(--hg-palette-3); background:#0b1016; border:1px solid #59656d; border-radius:11px; }
+    input[type="range"] { width:100%; accent-color:var(--hg-palette-1); }
+    button { min-height:50px; border:1px solid var(--hg-palette-1); border-radius:12px; padding:11px 16px; margin:.35rem .35rem .35rem 0; color:var(--hg-palette-3); background:color-mix(in srgb,var(--hg-palette-0) 68%,var(--hg-palette-1)); cursor:pointer; touch-action:manipulation; }
+    button:disabled { opacity:.48; cursor:not-allowed; }
+    button:focus-visible,input:focus-visible,select:focus-visible { outline:3px solid var(--hg-palette-1); outline-offset:3px; }
+    .axes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 14px; }
+    .axis-line { display:flex; justify-content:space-between; align-items:baseline; }
+    output,.mono { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+    .status { min-height:3.2em; color:var(--hg-palette-2); line-height:1.5; overflow-wrap:anywhere; }
+    .basis { font-size:.76rem; overflow-wrap:anywhere; color:color-mix(in srgb,var(--hg-palette-3) 65%,var(--hg-palette-2)); }
+    .glyph-wrap { display:grid; place-items:center; min-height:270px; }
+    .glyph { width:min(230px,72vw); aspect-ratio:1; border-radius:50%; border:2px solid color-mix(in srgb,var(--hg-palette-1) calc(35% + var(--hg-glyph-activation) * 55%),transparent); position:relative; box-shadow:0 0 calc(12px + var(--hg-glyph-activation) * 42px) color-mix(in srgb,var(--hg-palette-1) 42%,transparent),inset 0 0 42px color-mix(in srgb,var(--hg-palette-2) 12%,transparent); transition:box-shadow .8s,border-color .8s,transform .8s; }
+    .glyph::before,.glyph::after,.bind { content:""; position:absolute; inset:50% auto auto 50%; transform-origin:center; border-radius:99px; transition:opacity .8s,box-shadow .8s,background .8s; }
+    .glyph::before { width:3px; height:72%; transform:translate(-50%,-50%) rotate(32deg); background:var(--hg-palette-1); box-shadow:0 0 14px var(--hg-palette-1); }
+    .glyph::after { width:72%; height:3px; transform:translate(-50%,-50%) rotate(-18deg); background:var(--hg-palette-2); opacity:.18; }
+    .glyph[data-state="bound"]::after { opacity:1; box-shadow:0 0 14px var(--hg-palette-2); }
+    .bind { width:34%; aspect-ratio:1; border:2px solid var(--hg-palette-3); transform:translate(-50%,-50%) rotate(45deg); opacity:calc(.2 + var(--hg-glyph-activation) * .8); }
+    .glyph[data-activation="active"] { transform:scale(1.025); }
+    .tone-list { display:grid; gap:8px; }
+    .tone { display:grid; grid-template-columns:80px 1fr auto; gap:8px; padding:9px 0; border-bottom:1px solid color-mix(in srgb,var(--hg-palette-2) 25%,transparent); }
+    .tone strong { text-transform:capitalize; color:var(--hg-palette-1); }
+    .receipt { margin-top:16px; padding:12px; border-left:3px solid var(--hg-palette-2); background:rgba(0,0,0,.18); font-size:.82rem; }
+    @media (max-width:620px) { .axes { grid-template-columns:1fr; } }
+    @media (prefers-reduced-motion:reduce) { * { transition:none!important; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Hearthgate Kernel · Sensory Room</div>
+    <h1>One State, Two Aspects</h1>
+    <p class="lede">The kernel creates one receipted packet. This room renders its anchor voice and living voice, arrival stroke and reception stroke, structure and atmosphere, call pulse and answering pulse. No modality receives a private truth.</p>
+  </header>
+
+  <section class="grid">
+    <article class="room">
+      <h2>Kernel</h2>
+      <label for="endpoint">Loopback Living Engine</label>
+      <input id="endpoint" type="url" value="http://127.0.0.1:8765" spellcheck="false" />
+      <button id="connect" type="button">Connect to the Hearth</button>
+      <p id="connection-status" class="status" role="status">RESTING · Local kernel not yet contacted.</p>
+
+      <label for="house">Destination House</label>
+      <select id="house" disabled><option>Connect first</option></select>
+
+      <div class="axes" id="axes"></div>
+      <label><input id="answered" type="checkbox" checked /> Reception witness answers the waiting glyph</label>
+      <button id="receive" type="button" disabled>Receive verified packet</button>
+    </article>
+
+    <article class="room">
+      <h2>The Waiting Glyph</h2>
+      <div class="glyph-wrap">
+        <div id="glyph" class="glyph" data-state="waiting" data-activation="resting" role="img" aria-label="Waiting Hearthweave glyph"><span class="bind"></span></div>
+      </div>
+      <button id="activate" type="button" disabled>Activate sound · image · touch</button>
+      <button id="stop" type="button" disabled>Feather Stop</button>
+      <p id="sensory-status" class="status" aria-live="polite">DORMANT · A verified packet must arrive first.</p>
+    </article>
+
+    <article class="room">
+      <h2>Shared State</h2>
+      <div id="tones" class="tone-list"><p>No tone plan received.</p></div>
+      <p><strong>Basis hash</strong></p>
+      <p id="basis" class="basis mono">—</p>
+      <p><strong>Packet receipt</strong></p>
+      <p id="packet-hash" class="basis mono">—</p>
+      <div id="browser-receipt" class="receipt">No browser sensory receipt yet.</div>
+    </article>
+  </section>
+</main>
+
+<script type="module">
+  import { HearthgateSensoryBridge } from '../src/hearthgate-sensory-bridge.js';
+
+  const values = { P:.82, C:.88, R:.79, E:.22, M:.76, A:.84 };
+  const axisNames = {
+    P:'Presence', C:'Coherence', R:'Relationship', E:'Entropy', M:'Memory', A:'Attention',
+  };
+  const $ = (selector) => document.querySelector(selector);
+  const bridge = new HearthgateSensoryBridge({ root:document.documentElement, glyphElement:$('#glyph') });
+  let registry = {};
+  let currentPacket = null;
+
+  function endpoint(path) {
+    return `${$('#endpoint').value.replace(/\/$/,'')}${path}`;
+  }
+
+  function buildAxes() {
+    $('#axes').replaceChildren(...Object.entries(values).map(([axis,value]) => {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<label class="axis-line" for="axis-${axis}"><span>${axis} · ${axisNames[axis]}</span><output>${value.toFixed(2)}</output></label><input id="axis-${axis}" type="range" min="0" max="1" step="0.01" value="${value}" />`;
+      const input = wrapper.querySelector('input');
+      input.addEventListener('input', () => {
+        values[axis] = Number(input.value);
+        wrapper.querySelector('output').textContent = values[axis].toFixed(2);
+      });
+      return wrapper;
+    }));
+  }
+
+  async function sha256Hex(value) {
+    const bytes = new TextEncoder().encode(value);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function fetchJson(path, options = {}) {
+    const response = await fetch(endpoint(path), {
+      ...options,
+      headers:{ Accept:'application/json', ...(options.body ? {'Content-Type':'application/json'} : {}), ...(options.headers || {}) },
+    });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}: ${await response.text()}`);
+    return response.json();
+  }
+
+  async function connect() {
+    $('#connection-status').textContent = 'LISTENING · Contacting local kernel…';
+    try {
+      const [awake, houses] = await Promise.all([
+        fetchJson('/v1/hearthgate/awaken'),
+        fetchJson('/v1/hearthgate/houses'),
+      ]);
+      if (awake.state !== 'awake' || awake.centre !== 'hearthweave') throw new Error('Kernel answered without Hearthweave state.');
+      registry = houses.houses;
+      const select = $('#house');
+      select.replaceChildren(...Object.entries(registry).map(([id,profile]) => new Option(profile.display_name,id)));
+      select.disabled = false;
+      $('#receive').disabled = false;
+      $('#connection-status').textContent = `AWAKE · ${Object.keys(registry).length} sovereign Houses · Hearthweave online.`;
+    } catch (error) {
+      $('#connection-status').textContent = `DEGRADED · ${error.message}`;
+      $('#house').disabled = true;
+      $('#receive').disabled = true;
+    }
+  }
+
+  async function receive() {
+    await bridge.stop();
+    $('#activate').disabled = true;
+    $('#stop').disabled = true;
+    $('#sensory-status').textContent = 'RECEIVING · Kernel is deriving every modality from one state…';
+    const houseId = $('#house').value;
+    const observedAt = new Date().toISOString();
+    const source = JSON.stringify({ kind:'hearthgate-sensory-room', house_id:houseId, observed_at:observedAt, premaq:values });
+    const request = {
+      identity:`sensory-room:${houseId}:${observedAt}`,
+      house_id:houseId,
+      observable:{
+        measurements:{ presence:values.P, coherence:values.C, relationship:values.R, entropy:values.E, memory:values.M, attention:values.A },
+        chronology:[observedAt], telemetry:{ mode:'manual-sensory-room' },
+        canon_sources:[registry[houseId].canon_foundation], confidence:values.C,
+        causal_history:['traveller selected House and requested reception'],
+      },
+      experiential:{
+        story:['A traveller arrives and finds a glyph waiting.'],
+        symbols:['arrival-stroke','reception-stroke','hearthweave-bind'],
+        memory:['the House keeps the crossing receipt'],
+        tone_tags:['anchor-voice','living-voice','bind-voice'],
+        image_tags:['structure','atmosphere'], haptic_tags:['call','answer','bind'],
+        relationships:['traveller','resident-host'], cultural_meaning:['hospitality','mutual recognition'],
+        lived_continuity:['both Houses remain sovereign after the crossing'],
+      },
+      premaq:{...values},
+      provenance:[{
+        source_id:'hearthgate-sensory-room', source_kind:'manual-demonstration',
+        uri:'urn:hearthgate:sensory-room', content_hash:await sha256Hex(source),
+        classification:'synthetic-demonstration', retrieved_at:observedAt,
+      }],
+      origin_house:houseId === 'terra-prime' ? 'templehouse' : 'terra-prime',
+      origin_witness:'traveller',
+      reception_witness:$('#answered').checked ? 'resident-host' : null,
+      observed_at:observedAt, history:['sensory-room-reception'],
+    };
+    try {
+      const packet = await fetchJson('/v1/hearthgate/packet', { method:'POST', body:JSON.stringify(request) });
+      const audit = await fetchJson('/v1/hearthgate/audit', { method:'POST', body:JSON.stringify(packet) });
+      if (audit.status !== 'VERIFIED') throw new Error('Kernel audit did not verify the packet.');
+      currentPacket = bridge.receive(packet);
+      $('#basis').textContent = packet.correspondence.basis_hash;
+      $('#packet-hash').textContent = packet.receipts.at(-1).packet_hash;
+      $('#tones').replaceChildren(...packet.sensory.tones.map((tone) => {
+        const row = document.createElement('div');
+        row.className = 'tone';
+        row.innerHTML = `<strong>${tone.role}</strong><span>${tone.waveform} · modulation ${tone.modulation_hz.toFixed(3)} Hz</span><span class="mono">${tone.frequency_hz.toFixed(3)} Hz</span>`;
+        return row;
+      }));
+      $('#activate').disabled = false;
+      $('#sensory-status').textContent = packet.sensory.glyph.complete
+        ? 'RECEIVED · Both witnesses present. Glyph, tones, image and haptics share one basis.'
+        : 'WAITING · Arrival is present; the reception stroke remains dormant.';
+    } catch (error) {
+      currentPacket = null;
+      $('#sensory-status').textContent = `FAILED · ${error.message}`;
+    }
+  }
+
+  async function activate() {
+    try {
+      const receipt = await bridge.activate({ sound:true, haptics:true });
+      $('#browser-receipt').textContent = JSON.stringify(receipt,null,2);
+      $('#browser-receipt').style.whiteSpace = 'pre-wrap';
+      $('#activate').disabled = true;
+      $('#stop').disabled = false;
+      $('#sensory-status').textContent = `ACTIVE · ${currentPacket.house_id} is rendering from ${receipt.basis_hash.slice(0,12)}…`;
+    } catch (error) {
+      $('#sensory-status').textContent = `FAILED · ${error.message}`;
+    }
+  }
+
+  async function stop() {
+    await bridge.stop();
+    $('#activate').disabled = !currentPacket;
+    $('#stop').disabled = true;
+    $('#sensory-status').textContent = 'RESTING · Feather Stop complete.';
+  }
+
+  buildAxes();
+  $('#connect').addEventListener('click',connect);
+  $('#receive').addEventListener('click',receive);
+  $('#activate').addEventListener('click',activate);
+  $('#stop').addEventListener('click',stop);
+  window.addEventListener('pagehide',() => bridge.stop(),{once:true});
+</script>
+</body>
+</html>
