@@ -9,7 +9,7 @@
   "entrypoint": "arcsweep-continuity/index.html",
   "engine": {
     "module": "src/arcsweep-temporal-quantum/engine.js",
-    "kernel": "src/hearthweave-kernel/dual-aspect.js",
+    "kernel": "src/hearthweave-kernel/index.js",
     "formalism": "temporal-quantum-state-machine",
     "physicalClaim": false,
     "packetAuthority": "hearthweave-kernel"
