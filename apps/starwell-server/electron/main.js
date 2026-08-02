@@ -1,13 +1,29 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, shell, Menu } = require('electron');
-const path  = require('path');
-const fs    = require('fs');
-const { fork } = require('child_process');
-const net   = require('net');
-const { fileURLToPath } = require('url');
 
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  shell,
+  Menu,
+  session,
+  safeStorage,
+} = require('electron');
+const path = require('node:path');
+const fs = require('node:fs');
+const { fork } = require('node:child_process');
+const net = require('node:net');
+const { fileURLToPath, pathToFileURL } = require('node:url');
+const {
+  redactHearthgateConfig,
+  sanitiseHearthgateConfig,
+} = require('../security/local-boundary');
+
+app.enableSandbox();
+
+const CONFIG_SCHEMA = 'hearthgate.secure-config/v1';
 const CONFIG_PATH = path.join(app.getPath('userData'), 'hearthgate-config.json');
-const DATA_DIR    = path.join(app.getPath('userData'), 'hearthgate-data');
+const DATA_DIR = path.join(app.getPath('userData'), 'hearthgate-data');
 const PORT = 3841;
 const FONTFORGE_PORT = 3842;
 const LOCAL_HTTP_ORIGINS = new Set([
@@ -21,18 +37,65 @@ let win = null;
 let serverProc = null;
 let fontForgeProc = null;
 
-// ── Config ────────────────────────────────────────────────────────────────────
-function loadConfig() {
-  try { return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); }
-  catch { return null; }
+function runtimeRoot() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'app.asar.unpacked')
+    : app.getAppPath();
 }
-function saveConfig(cfg) {
+
+function encodeConfig(config) {
+  const payload = JSON.stringify(config);
+  if (safeStorage.isEncryptionAvailable()) {
+    return {
+      schema: CONFIG_SCHEMA,
+      encrypted: true,
+      protection: process.platform === 'win32' ? 'os-key-store' : 'electron-safe-storage',
+      payload: safeStorage.encryptString(payload).toString('base64'),
+    };
+  }
+  return {
+    schema: CONFIG_SCHEMA,
+    encrypted: false,
+    protection: 'filesystem-only',
+    payload: config,
+  };
+}
+
+function decodeConfig(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  if (raw.schema !== CONFIG_SCHEMA) return sanitiseHearthgateConfig(raw);
+  if (raw.encrypted === true) {
+    if (!safeStorage.isEncryptionAvailable()) {
+      throw new Error('The operating-system key store is unavailable for this encrypted Hearthgate configuration.');
+    }
+    const plaintext = safeStorage.decryptString(Buffer.from(String(raw.payload || ''), 'base64'));
+    return sanitiseHearthgateConfig(JSON.parse(plaintext));
+  }
+  return sanitiseHearthgateConfig(raw.payload);
+}
+
+function loadConfig() {
+  try {
+    return decodeConfig(JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')));
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.error('[Hearthgate] Configuration load failed:', error.message);
+    return null;
+  }
+}
+
+function saveConfig(input) {
+  const config = sanitiseHearthgateConfig(input);
+  const envelope = encodeConfig(config);
   fs.mkdirSync(path.dirname(CONFIG_PATH), { recursive: true });
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
+  const temporaryPath = `${CONFIG_PATH}.tmp`;
+  fs.writeFileSync(temporaryPath, JSON.stringify(envelope, null, 2), { encoding: 'utf8', mode: 0o600 });
+  fs.renameSync(temporaryPath, CONFIG_PATH);
+  try { fs.chmodSync(CONFIG_PATH, 0o600); } catch { /* Windows ACLs are managed by the user profile. */ }
+  return config;
 }
 
 function primaryApplicationUrl() {
-  const starwellEntry = path.join(app.getAppPath(), 'public', 'starwell', 'index.html');
+  const starwellEntry = path.join(runtimeRoot(), 'public', 'starwell', 'index.html');
   return fs.existsSync(starwellEntry)
     ? `http://localhost:${PORT}/starwell/`
     : `http://localhost:${PORT}/hearthgate.html`;
@@ -50,7 +113,7 @@ function isLocalApplicationUrl(value) {
     if (parsed.protocol !== 'file:') return false;
 
     const candidate = path.resolve(fileURLToPath(parsed));
-    const appRoot = path.resolve(app.getAppPath());
+    const appRoot = path.resolve(runtimeRoot());
     return isPathInside(candidate, path.join(appRoot, 'public'))
       || isPathInside(candidate, path.join(appRoot, 'electron'));
   } catch {
@@ -62,17 +125,31 @@ function isWriterPrintPopup(targetUrl, openerUrl) {
   return targetUrl === 'about:blank' && isLocalApplicationUrl(openerUrl);
 }
 
-// ── Server ────────────────────────────────────────────────────────────────────
+function hardenedWebPreferences({ preload = false } = {}) {
+  return {
+    ...(preload ? { preload: path.join(__dirname, 'preload.js') } : {}),
+    nodeIntegration: false,
+    nodeIntegrationInWorker: false,
+    nodeIntegrationInSubFrames: false,
+    contextIsolation: true,
+    sandbox: true,
+    webSecurity: true,
+    allowRunningInsecureContent: false,
+    spellcheck: false,
+  };
+}
+
 function stopServers() {
   if (serverProc) { serverProc.kill(); serverProc = null; }
   if (fontForgeProc) { fontForgeProc.kill(); fontForgeProc = null; }
 }
 
-function startServer(cfg) {
+function startServer(configInput) {
   stopServers();
-
-  const serverPath = path.join(app.getAppPath(), 'server.js');
-  const fontForgeServerPath = path.join(app.getAppPath(), 'fontforge', 'server.js');
+  const cfg = sanitiseHearthgateConfig(configInput);
+  const root = runtimeRoot();
+  const serverPath = path.join(root, 'server-secure.js');
+  const fontForgeServerPath = path.join(root, 'fontforge', 'server.js');
   const env = {
     ...process.env,
     PORT: String(PORT),
@@ -80,83 +157,81 @@ function startServer(cfg) {
     HEARTHGATE_DATA_DIR: DATA_DIR,
   };
 
-  if (cfg?.keys) {
-    const k = cfg.keys;
-    if (k.anthropic)     { env.ANTHROPIC_API_KEY = k.anthropic; env.UIAL_API_KEY = k.anthropic; }
-    if (k.openai)        { env.OPENAI_API_KEY = k.openai; env.LIOREAL_API_KEY = k.openai; }
-    if (k.exa)             env.EXA_API_KEY = k.exa;
-    if (k.deepseek_blue)   env.BLUEBIRD_DEEPSEEK_API_KEY = k.deepseek_blue;
-    if (k.deepseek_veth)   env.VETHRLAUF_DEEPSEEK_API_KEY = k.deepseek_veth;
-    if (k.ollama)          env.OLLAMA_HOST = k.ollama;
-    if (Array.isArray(k.custom)) {
-      for (const { name, value } of k.custom) {
-        if (name && value) env[name] = value;
-      }
-    }
-  }
-  if (cfg?.name) env.HEARTHGATE_HOUSE_NAME = cfg.name;
+  const keys = cfg.keys;
+  if (keys.anthropic) { env.ANTHROPIC_API_KEY = keys.anthropic; env.UIAL_API_KEY = keys.anthropic; }
+  if (keys.openai) { env.OPENAI_API_KEY = keys.openai; env.LIOREAL_API_KEY = keys.openai; }
+  if (keys.exa) env.EXA_API_KEY = keys.exa;
+  if (keys.deepseek_blue) env.BLUEBIRD_DEEPSEEK_API_KEY = keys.deepseek_blue;
+  if (keys.deepseek_veth) env.VETHRLAUF_DEEPSEEK_API_KEY = keys.deepseek_veth;
+  if (keys.ollama) env.OLLAMA_HOST = keys.ollama;
+  for (const { name, value } of keys.custom) env[name] = value;
+  env.HEARTHGATE_HOUSE_NAME = cfg.name;
 
   serverProc = fork(serverPath, [], { env, silent: false });
-  serverProc.on('error', err => console.error('[Hearthgate] Server error:', err));
+  serverProc.on('error', (error) => console.error('[Hearthgate] Server error:', error));
+  serverProc.on('exit', (code, signal) => {
+    if (code || signal) console.warn(`[Hearthgate] Core server stopped (${signal || code}).`);
+  });
 
   fontForgeProc = fork(fontForgeServerPath, [], { env, silent: false });
-  fontForgeProc.on('error', err => console.error('[Hearthgate] FontForge worker error:', err));
+  fontForgeProc.on('error', (error) => console.error('[Hearthgate] FontForge worker error:', error));
   fontForgeProc.on('exit', (code, signal) => {
     if (code || signal) console.warn(`[Hearthgate] FontForge worker stopped (${signal || code}).`);
   });
 }
 
-// ── Wait for server ready ─────────────────────────────────────────────────────
 function waitForServer(port, retries = 25, interval = 300) {
   return new Promise((resolve, reject) => {
-    let n = 0;
+    let attempts = 0;
     const attempt = () => {
-      const sock = new net.Socket();
-      sock.once('connect', () => { sock.destroy(); resolve(); });
-      sock.once('error', () => {
-        sock.destroy();
-        if (++n >= retries) return reject(new Error('Server did not start'));
+      const socket = new net.Socket();
+      socket.once('connect', () => { socket.destroy(); resolve(); });
+      socket.once('error', () => {
+        socket.destroy();
+        if (++attempts >= retries) return reject(new Error('Server did not start'));
         setTimeout(attempt, interval);
       });
-      sock.connect(port, '127.0.0.1');
+      socket.connect(port, '127.0.0.1');
     };
     attempt();
   });
 }
 
-// ── Window ────────────────────────────────────────────────────────────────────
 function createWindow(url) {
+  const iconPath = path.join(runtimeRoot(), 'build', 'hearthgate.png');
   win = new BrowserWindow({
-    width: 1380, height: 880,
-    minWidth: 820, minHeight: 620,
+    width: 1380,
+    height: 880,
+    minWidth: 820,
+    minHeight: 620,
     backgroundColor: '#070908',
     title: 'STARWELL · Hearthgate',
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
-    },
+    ...(fs.existsSync(iconPath) ? { icon: iconPath } : {}),
+    autoHideMenuBar: true,
+    webPreferences: hardenedWebPreferences({ preload: true }),
   });
 
   Menu.setApplicationMenu(null);
   win.loadURL(url);
 
-  // Keep Hearthgate and its local workers inside the application boundary.
+  win.webContents.on('will-attach-webview', (event) => event.preventDefault());
   win.webContents.setWindowOpenHandler(({ url: targetUrl }) => {
-    if (isLocalApplicationUrl(targetUrl)) return { action: 'allow' };
+    if (isLocalApplicationUrl(targetUrl)) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          autoHideMenuBar: true,
+          webPreferences: hardenedWebPreferences(),
+        },
+      };
+    }
 
-    // Writer Room creates a blank, same-application document and writes the
-    // printable sheet into it before invoking the system print dialog.
     if (isWriterPrintPopup(targetUrl, win.webContents.getURL())) {
       return {
         action: 'allow',
         overrideBrowserWindowOptions: {
           autoHideMenuBar: true,
-          webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            sandbox: true,
-          },
+          webPreferences: hardenedWebPreferences(),
         },
       };
     }
@@ -164,6 +239,7 @@ function createWindow(url) {
     if (/^https?:/i.test(targetUrl)) shell.openExternal(targetUrl);
     return { action: 'deny' };
   });
+
   win.webContents.on('will-navigate', (event, navigationUrl) => {
     if (!isLocalApplicationUrl(navigationUrl)) {
       event.preventDefault();
@@ -174,32 +250,36 @@ function createWindow(url) {
   win.on('closed', () => { win = null; });
 }
 
-// ── IPC handlers ─────────────────────────────────────────────────────────────
-ipcMain.handle('get-config', () => loadConfig());
+ipcMain.handle('get-config', () => redactHearthgateConfig(loadConfig()));
 
-ipcMain.handle('save-config', async (_e, cfg) => {
-  saveConfig(cfg);
-  startServer(cfg);
+ipcMain.handle('save-config', async (_event, input) => {
   try {
+    const cfg = saveConfig(input);
+    startServer(cfg);
     await waitForServer(PORT);
     win?.loadURL(primaryApplicationUrl());
     return { ok: true };
-  } catch (err) {
-    return { ok: false, error: err.message };
+  } catch (error) {
+    console.error('[Hearthgate] Configuration save failed:', error.message);
+    return { ok: false, error: error.message };
   }
 });
 
 ipcMain.handle('open-wizard', () => {
-  win?.loadURL(`file://${path.join(__dirname, '..', 'public', 'setup-wizard.html')}`);
+  const wizardPath = path.join(runtimeRoot(), 'public', 'setup-wizard.html');
+  win?.loadURL(pathToFileURL(wizardPath).href);
 });
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 
+  session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
+  session.defaultSession.setPermissionCheckHandler(() => false);
+
   const cfg = loadConfig();
   if (!cfg) {
-    createWindow(`file://${path.join(__dirname, '..', 'public', 'setup-wizard.html')}`);
+    const wizardPath = path.join(runtimeRoot(), 'public', 'setup-wizard.html');
+    createWindow(pathToFileURL(wizardPath).href);
     return;
   }
 
@@ -208,7 +288,8 @@ app.whenReady().then(async () => {
     await waitForServer(PORT);
     createWindow(primaryApplicationUrl());
   } catch {
-    createWindow(`file://${path.join(__dirname, '..', 'public', 'setup-wizard.html')}`);
+    const wizardPath = path.join(runtimeRoot(), 'public', 'setup-wizard.html');
+    createWindow(pathToFileURL(wizardPath).href);
   }
 });
 
