@@ -15,13 +15,16 @@
     "prepare:assets": "node scripts/prepare-assets.js",
     "test": "node --test test/*.test.js",
     "electron:dev": "npm run prepare:assets && electron .",
-    "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:dual-aspect-package",
+    "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:package",
     "electron:build": "npm run prepare:assets && electron-builder",
-    "electron:build:win": "npm run prepare:assets && electron-builder --win nsis --x64 --publish never && npm run verify:dual-aspect-package",
+    "electron:build:win": "npm run prepare:assets && electron-builder --win nsis --x64 --publish never && npm run verify:package",
     "check:base-packaging": "node scripts/check-packaging.js",
     "check:dual-aspect": "node scripts/check-dual-aspect-packaging.js",
-    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect",
-    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js"
+    "check:bifrost-library": "node scripts/verify-bifrost-library-package.js",
+    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect && npm run check:bifrost-library",
+    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js",
+    "verify:bifrost-library-package": "node scripts/verify-bifrost-library-package.js",
+    "verify:package": "npm run verify:dual-aspect-package && npm run verify:bifrost-library-package"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
