@@ -35,15 +35,36 @@ export const practicePackages = Object.freeze([
       'foundation-overlay-separation',
     ],
   }),
+  definePracticePackage({
+    id: 'hearthgate.instrument-hall',
+    name: 'Hearthgate Instrument Hall',
+    capabilities: [
+      'observed-mathematics-spine',
+      'maximum-poised-tension-collapse',
+      'receipted-release',
+      'mythience-register',
+      'typing-tones',
+      'answering-voice',
+      'indexed-lineage',
+      'explicit-audio-activation',
+      'feather-stop',
+      'session-export',
+      'python-bifrost-instrument',
+    ],
+  }),
   definePracticePackage({ id: 'terra.canon', name: 'Terra Aeterna Canon', capabilities: ['canon', 'timeline', 'artifacts'] }),
   definePracticePackage({ id: 'kelyran.language', name: 'Kelyran Language', capabilities: ['language', 'pronunciation'] }),
   definePracticePackage({ id: 'kelyran.glyphs', name: 'Kelyran Audible Glyphs', capabilities: ['glyphs', 'ink', 'playback'] }),
   definePracticePackage({
     id: 'deep.observer',
     name: 'DEEP Observer',
-    capabilities: ['observer', 'signals', 'premaq', 'premaq-v2', 'temporal-state-source', 'receipt-provenance'],
+    capabilities: ['observer', 'signals', 'premaq', 'premaq-v2', 'temporal-state-source', 'receipt-provenance', 'live-local-observation'],
   }),
-  definePracticePackage({ id: 'runa.audio', name: 'Runa Acoustic Engine', capabilities: ['audio', 'binaural', 'world-profile'] }),
+  definePracticePackage({
+    id: 'runa.audio',
+    name: 'Runa Acoustic Engine',
+    capabilities: ['audio', 'binaural', 'world-profile', 'typing-tones', 'mobius-bus', 'audible-glyphs', 'answering-voice'],
+  }),
 ]);
 
 export function getPracticePackage(id) {
