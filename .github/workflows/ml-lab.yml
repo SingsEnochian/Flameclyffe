@@ -25,10 +25,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -61,10 +61,12 @@ jobs:
 
       - name: Archive coverage reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report-py${{ matrix.python-version }}
           path: ml-lab/.coverage
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 7
 
   heavy-placeholder:
