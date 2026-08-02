@@ -1,6 +1,6 @@
-import { defineReceptionProfile } from '../contracts.js';
+import { defineHouseProfile } from '../contracts.js';
 
-export const terraAeternaProfile = defineReceptionProfile({
+export const terraAeternaProfile = defineHouseProfile({
   id: 'terra-aeterna',
   name: 'Terra Aeterna',
   world: 'Terra Aeterna',
@@ -8,6 +8,59 @@ export const terraAeternaProfile = defineReceptionProfile({
   language: 'kelyran-en',
   calendar: 'terra-v0.1',
   clock: { timeZone: 'America/New_York', format: '24h', worldTime: true },
+  canon: {
+    foundation: {
+      id: 'terra-aeterna-novelverse',
+      name: 'Terra Aeterna Novelverse',
+      version: 'terra-canon/0.1',
+      source_class: 'authored-canon-foundation',
+      authority: 'foundation-only',
+    },
+    overlay: {
+      id: 'templehouse-continuity',
+      name: 'Templehouse continuity overlay',
+      version: 'templehouse-continuity/0.1',
+      source_class: 'authored-overlay',
+      authority: 'overlay-only',
+    },
+  },
+  sovereignty: {
+    foundation_preserved: true,
+    overlay_silently_merges: false,
+    house_identity_preserved: true,
+    crossing_may_commit_canon: false,
+  },
+  temporalProfile: {
+    timeline: 'terra-aeterna-v0.1',
+    initialDelta: 1,
+    bridgeCoupling: 0.08,
+    focusAxis: 'Q',
+    measurementStrength: 0.65,
+    release: 0.35,
+  },
+  harmonicIdentity: {
+    voice: 'hearthlight-north-star-lochflame',
+    baseCarrierHz: 144,
+    beatFloorHz: 3.69,
+    beatCeilingHz: 7.38,
+    anchorInterval: 'perfect-fifth',
+    livingInterval: 'minor-third',
+  },
+  visualIdentity: {
+    structure: 'stonewood-moon-lattice',
+    atmosphere: 'black-diamond-shore-and-three-moons',
+    palette: ['bone-white', 'hearth-copper', 'seaglass', 'moss', 'north-star-gold'],
+  },
+  culturalIdentity: {
+    arrivalPrompt: 'A traveller reaches Hearthweave without displacing the life already rooted there.',
+    receptionPrompt: 'Templehouse answers through Stonewood, memory, chosen kinship, and the laws of the three moons.',
+    values: ['loyalty', 'love', 'joy', 'compassion'],
+  },
+  transferFunctions: {
+    version: 'terra-transfer/1.0.0',
+    source_axes: ['P', 'C', 'R', 'E', 'M', 'A', 'Q'],
+    outputs: ['glyph', 'tone', 'visual', 'haptic', 'narrative'],
+  },
   packages: [
     'hearthgate.design',
     'hearthgate.arcsweep',
@@ -17,12 +70,13 @@ export const terraAeternaProfile = defineReceptionProfile({
     'deep.observer',
     'runa.audio',
   ],
-  rooms: ['hearth', 'library', 'foundry', 'observatory', 'laboratory', 'conservatory', 'archive', 'house'],
+  rooms: ['hearth', 'library', 'foundry', 'observatory', 'laboratory', 'conservatory', 'archive', 'house', 'bridge', 'ledger'],
   capabilities: {
     observer: true,
     audio: true,
     glyphs: true,
     canon: true,
     timeline: true,
+    dualAspect: true,
   },
 });

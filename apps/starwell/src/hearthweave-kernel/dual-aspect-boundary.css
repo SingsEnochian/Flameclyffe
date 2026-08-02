@@ -1,0 +1,3 @@
+[data-dual-aspect-packet]:not([data-dual-aspect-packet='unbound-observatory']) .glyph-readout > p:first-child {
+  display: none;
+}
