@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from enum import StrEnum
+from types import MappingProxyType
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -12,9 +14,13 @@ Scalar = str | int | float | bool | None
 
 
 class KernelModel(BaseModel):
-    """Strict immutable base model used by every kernel contract."""
+    """Strict deeply immutable base model used by every kernel contract."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+        revalidate_instances="always",
+    )
 
 
 class ClaimStatus(StrEnum):
@@ -41,12 +47,17 @@ class PREMAQ(KernelModel):
 
 
 class ObservableAspect(KernelModel):
-    measurements: dict[str, Scalar] = Field(default_factory=dict)
+    measurements: Mapping[str, Scalar] = Field(default_factory=dict)
     chronology: tuple[str, ...] = ()
-    telemetry: dict[str, Scalar] = Field(default_factory=dict)
+    telemetry: Mapping[str, Scalar] = Field(default_factory=dict)
     canon_sources: tuple[str, ...] = ()
     confidence: float = Field(ge=0.0, le=1.0)
     causal_history: tuple[str, ...] = ()
+
+    @field_validator("measurements", "telemetry", mode="after")
+    @classmethod
+    def freeze_scalar_mapping(cls, value: Mapping[str, Scalar]) -> Mapping[str, Scalar]:
+        return MappingProxyType(dict(value))
 
     @model_validator(mode="after")
     def require_observable_anchor(self) -> "ObservableAspect":
@@ -202,8 +213,20 @@ class Receipt(KernelModel):
     packet_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
     engine_version: str = Field(min_length=1)
     status: ClaimStatus
-    claims: dict[str, ClaimStatus] = Field(default_factory=dict)
+    claims: Mapping[str, ClaimStatus] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @field_validator("claims", mode="after")
+    @classmethod
+    def freeze_claims(cls, value: Mapping[str, ClaimStatus]) -> Mapping[str, ClaimStatus]:
+        return MappingProxyType(dict(value))
+
+    @field_validator("created_at")
+    @classmethod
+    def normalise_created_at(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("created_at must be timezone-aware")
+        return value.astimezone(timezone.utc)
 
 
 class DualAspectPacket(KernelModel):
@@ -223,9 +246,11 @@ class DualAspectPacket(KernelModel):
     receipts: tuple[Receipt, ...] = ()
 
     @model_validator(mode="after")
-    def prohibit_hidden_state_divergence(self) -> "DualAspectPacket":
-        if self.sensory.source_state_hash != self.correspondence.basis_hash:
-            raise ValueError("Sensory state diverged from the shared dual-aspect basis.")
+    def enforce_recomputed_integrity(self) -> "DualAspectPacket":
         if self.bridge.destination_house != self.house_id:
             raise ValueError("The packet House must match the bridge destination.")
+
+        from .integrity import assert_packet_integrity
+
+        assert_packet_integrity(self, require_receipt=bool(self.receipts))
         return self
