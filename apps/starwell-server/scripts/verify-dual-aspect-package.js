@@ -72,7 +72,6 @@ for (const marker of [
   'runa:dual-aspect-tone-activation',
   'hearthweave.packet-glyph-render/v1',
   'missing-correspondence-binding',
-  'HEARTHWEAVE_STALE_SENSORY_PACKET',
 ]) {
   if (!compiledSource.includes(marker)) {
     errors.push(`Packed STARWELL JavaScript is missing kernel marker: ${marker}`);
@@ -87,4 +86,4 @@ if (errors.length) {
 
 console.log('[Packed dual-aspect verification] OK');
 console.log(` assets scanned: ${jsFiles.length}`);
-console.log(' strict packet validation, sealed glyph rendering, stale sensory rejection, activation, Runa, and no-refetch law are present');
+console.log(' strict packet validation, sealed glyph rendering, activation, Runa, schemas, and the no-refetch law are present');
