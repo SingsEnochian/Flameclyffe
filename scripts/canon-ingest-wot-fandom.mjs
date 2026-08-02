@@ -268,7 +268,6 @@ async function fetchPages(pageids) {
       prop: 'revisions|categories|links|images|info|pageprops',
       rvprop: 'ids|timestamp|user|userid|comment|content|contentmodel|sha1|size',
       rvslots: 'main',
-      rvlimit: 1,
       cllimit: 'max',
       pllimit: 'max',
       imlimit: 'max',
