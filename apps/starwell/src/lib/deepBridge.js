@@ -1,4 +1,4 @@
-import { normaliseDeepState } from './deepState.js';
+import { DEFAULT_DEEP_STATE, normaliseDeepState } from './deepState.js';
 import {
   DEEP_MODES,
   fingerprint,
@@ -8,6 +8,10 @@ import { readActiveDualAspectPacket } from '../hearthweave-kernel/activation.js'
 
 export const BRIDGE_PULSE_URL = 'https://singsenochian.github.io/-bridge-pulse/pulse.json';
 export const BRIDGE_PULSE_CONTRACT = 'hearthweave.bridge-pulse/v1';
+
+const REQUIRED_DEEP_FIELDS = Object.freeze([
+  'P', 'C', 'R', 'E', 'M', 'A', 'dpdt', 'moonIllum', 'sky', 'kp', 'bz', 'charge', 'dphi',
+]);
 
 function clone(value) {
   return value == null ? value : structuredClone(value);
@@ -43,19 +47,38 @@ export function parseBridgePulsePayload(payload, {
 
   const [contractKey, rawDeep] = candidates[0];
   const capturedAtIso = capturedAt.toISOString();
-  const observedAt = validDateTime(payload.observed_at ?? payload.timestamp ?? payload.updated_at) ?? capturedAtIso;
+  const sourceTimestamp = validDateTime(payload.observed_at ?? payload.timestamp ?? payload.updated_at);
+  const observedAt = sourceTimestamp ?? capturedAtIso;
   const warnings = [];
+  const substitutions = [];
+
   if (contractKey !== 'deep') warnings.push(`LEGACY_DEEP_KEY:${contractKey}`);
-  if (!validDateTime(payload.observed_at ?? payload.timestamp ?? payload.updated_at)) {
-    warnings.push('SOURCE_TIMESTAMP_MISSING:captured_at_used');
+  if (!sourceTimestamp) {
+    substitutions.push({
+      field: 'observed_at',
+      reason: 'SOURCE_TIMESTAMP_MISSING',
+      source: 'captured_at',
+      substituted_value: capturedAtIso,
+    });
   }
+  for (const field of REQUIRED_DEEP_FIELDS) {
+    if (rawDeep[field] == null || (typeof rawDeep[field] === 'number' && !Number.isFinite(rawDeep[field]))) {
+      substitutions.push({
+        field: `state.${field}`,
+        reason: 'SOURCE_FIELD_MISSING_OR_INVALID',
+        source: 'DEFAULT_DEEP_STATE',
+        substituted_value: DEFAULT_DEEP_STATE[field],
+      });
+    }
+  }
+
   const snapshotId = typeof idFactory === 'function'
     ? `deep-snapshot-${idFactory()}`
-    : `deep-snapshot-${fingerprint({ url, observedAt, contractKey, rawDeep }).split(':').at(-1)}`;
+    : `deep-snapshot-${fingerprint({ url, observedAt, contractKey, rawDeep, substitutions }).split(':').at(-1)}`;
 
   return validateDeepSnapshot({
     snapshot_id: snapshotId,
-    mode: DEEP_MODES.LIVE,
+    mode: substitutions.length ? DEEP_MODES.DEGRADED : DEEP_MODES.LIVE,
     observed_at: observedAt,
     captured_at: capturedAtIso,
     source: {
@@ -65,7 +88,7 @@ export function parseBridgePulsePayload(payload, {
       contract_key: contractKey,
     },
     state: normaliseDeepState(rawDeep),
-    substitutions: [],
+    substitutions,
     errors: [],
     warnings,
   });
