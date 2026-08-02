@@ -12,6 +12,7 @@ export const RUNA_TONE_ACTIVATION_EVENT = 'runa:dual-aspect-tone-activation';
 export const HEARTHWEAVE_HAPTIC_ACTIVATION_EVENT = 'hearthweave:haptic-activation';
 export const HEARTHWEAVE_NARRATIVE_ACTIVATION_EVENT = 'hearthweave:narrative-activation';
 export const SENSORY_ACTIVATION_KEY = 'hearthweave:sensory-activation:active:v1';
+export const STALE_SENSORY_PACKET_CODE = 'HEARTHWEAVE_STALE_SENSORY_PACKET';
 
 function clone(value) {
   return value == null ? value : structuredClone(value);
@@ -121,7 +122,7 @@ export function acknowledgeSensoryRender(packetInput, {
     || activePacket.packet_id !== packet.packet_id
     || activePacket.packet_fingerprint !== packet.packet_fingerprint
   ) {
-    throw new Error('Sensory acknowledgement targets a packet that is no longer active');
+    throw new Error(`${STALE_SENSORY_PACKET_CODE}: sensory acknowledgement targets a packet that is no longer active`);
   }
   const active = JSON.parse(storage?.getItem?.(SENSORY_ACTIVATION_KEY) || 'null');
   if (!active || active.packet_id !== packet.packet_id) {
