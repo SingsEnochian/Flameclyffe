@@ -1,0 +1,19 @@
+{
+  "schema": "hearthgate.instrument-provenance/v1",
+  "instrument_id": "faer-bifrost-python-v1",
+  "name": "Bifröst",
+  "creator_credit": "Faer",
+  "received_from": "Rowan",
+  "received_at": "2026-08-02T18:37:00.000Z",
+  "source_form": "bifrost.zip and bifrost-README.md supplied in the Hearthgate build conversation",
+  "preservation_law": "The original source is bundled as its own instrument. Browser and Electron integrations may correspond with it but do not silently rewrite its authorship or founding semantics.",
+  "founding_terms": [
+    "Measured",
+    "Felt",
+    "rhyme-not-reduction",
+    "both-shores-remain-lit",
+    "outward-spiral-memory",
+    "forgettable-lineage",
+    "exits-open-both-ways"
+  ]
+}
