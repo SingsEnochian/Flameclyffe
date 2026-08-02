@@ -31,7 +31,10 @@ function hardenedExpress(...args) {
   });
   return app;
 }
-Object.assign(hardenedExpress, originalExpress);
+for (const key of Reflect.ownKeys(originalExpress)) {
+  if (key === 'length' || key === 'name' || key === 'prototype') continue;
+  Object.defineProperty(hardenedExpress, key, Object.getOwnPropertyDescriptor(originalExpress, key));
+}
 require.cache[expressPath].exports = hardenedExpress;
 
 // Express calls listen(PORT, callback), which otherwise binds every network
