@@ -8,6 +8,7 @@ import {
 } from './engine.js';
 
 export const BIFROST_RUNTIME_VERSION = '0.1.0';
+export const BIFROST_RUNTIME_SCHEMA = 'arcsweep.bifrost-dual-presence-runtime/v0.1';
 export const BIFROST_STATE_STORAGE_KEY = 'arcsweep:bifrost-temporal-state:v1';
 export const BIFROST_BRIDGE_STORAGE_KEY = 'arcsweep:bifrost-bridge-packet:v1';
 
@@ -29,46 +30,78 @@ function writeJson(storage, key, value) {
   storage?.setItem?.(key, JSON.stringify(value));
 }
 
+function validateEnvelope(value) {
+  if (!value) return null;
+  if (value.schema === BIFROST_RUNTIME_SCHEMA) {
+    return {
+      schema: BIFROST_RUNTIME_SCHEMA,
+      hearthside: validateTemporalState(value.hearthside),
+      targetside: validateTemporalState(value.targetside),
+    };
+  }
+  const legacy = validateTemporalState(value);
+  return {
+    schema: BIFROST_RUNTIME_SCHEMA,
+    hearthside: legacy,
+    targetside: clone(legacy),
+  };
+}
+
 export function createArcsweepBifrostRuntime({ storage = globalThis.localStorage } = {}) {
-  let state = readJson(storage, BIFROST_STATE_STORAGE_KEY);
+  let envelope = null;
   let bridge = readJson(storage, BIFROST_BRIDGE_STORAGE_KEY);
 
   try {
-    if (state) state = validateTemporalState(state);
+    envelope = validateEnvelope(readJson(storage, BIFROST_STATE_STORAGE_KEY));
   } catch {
-    state = null;
+    envelope = null;
     storage?.removeItem?.(BIFROST_STATE_STORAGE_KEY);
   }
 
-  function requireState() {
-    if (!state) throw new Error('Bifröst temporal state is not initialised. Load a PREMAQ v2 packet first.');
-    return state;
+  function requireEnvelope() {
+    if (!envelope) throw new Error('Bifröst temporal state is not initialised. Load a PREMAQ v2 packet first.');
+    return envelope;
   }
 
-  function persistState(next) {
-    state = validateTemporalState(next);
-    writeJson(storage, BIFROST_STATE_STORAGE_KEY, state);
-    return clone(state);
+  function persistEnvelope(next) {
+    envelope = validateEnvelope(next);
+    writeJson(storage, BIFROST_STATE_STORAGE_KEY, envelope);
+    return clone(envelope.targetside);
   }
 
   return Object.freeze({
     version: BIFROST_RUNTIME_VERSION,
+    schema: BIFROST_RUNTIME_SCHEMA,
     initialise(premaq, options = {}) {
+      const initial = premaqToTemporalState(premaq, options);
       bridge = null;
       storage?.removeItem?.(BIFROST_BRIDGE_STORAGE_KEY);
-      return persistState(premaqToTemporalState(premaq, options));
+      return persistEnvelope({
+        schema: BIFROST_RUNTIME_SCHEMA,
+        hearthside: initial,
+        targetside: clone(initial),
+      });
     },
     evolve(options = {}) {
-      return persistState(evolveTemporalState(requireState(), options));
+      const current = requireEnvelope();
+      return persistEnvelope({
+        ...current,
+        targetside: evolveTemporalState(current.targetside, options),
+      });
     },
     cycle(options = {}) {
-      return persistState(collapseRelease(requireState(), options));
+      const current = requireEnvelope();
+      return persistEnvelope({
+        ...current,
+        targetside: collapseRelease(current.targetside, options),
+      });
     },
-    bridge({ premaq, targetside = state, ...options } = {}) {
+    bridge({ premaq, targetside, ...options } = {}) {
+      const current = requireEnvelope();
       const packet = createBifrostBridgePacket({
         premaq,
-        hearthside: requireState(),
-        targetside: validateTemporalState(targetside),
+        hearthside: current.hearthside,
+        targetside: targetside ? validateTemporalState(targetside) : current.targetside,
         ...options,
       });
       bridge = packet;
@@ -80,13 +113,19 @@ export function createArcsweepBifrostRuntime({ storage = globalThis.localStorage
       return projectWorldState(bridge, options);
     },
     getState() {
-      return clone(state);
+      return clone(envelope?.targetside ?? null);
+    },
+    getHearthside() {
+      return clone(envelope?.hearthside ?? null);
+    },
+    getTargetside() {
+      return clone(envelope?.targetside ?? null);
     },
     getBridge() {
       return clone(bridge);
     },
     clear() {
-      state = null;
+      envelope = null;
       bridge = null;
       storage?.removeItem?.(BIFROST_STATE_STORAGE_KEY);
       storage?.removeItem?.(BIFROST_BRIDGE_STORAGE_KEY);
@@ -102,8 +141,10 @@ export function installBifrostRuntime(target = globalThis, options = {}) {
     enumerable: true,
     writable: false,
   });
-  target.dispatchEvent?.(new CustomEvent('arcsweep:bifrost-ready', {
-    detail: { version: runtime.version },
-  }));
+  if (target.dispatchEvent && globalThis.CustomEvent) {
+    target.dispatchEvent(new CustomEvent('arcsweep:bifrost-ready', {
+      detail: { version: runtime.version, schema: runtime.schema },
+    }));
+  }
   return runtime;
 }
