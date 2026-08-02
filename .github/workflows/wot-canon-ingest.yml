@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'scripts/canon-ingest-wot-fandom.mjs'
+      - 'scripts/prepare-wot-fandom-archive.mjs'
       - 'scripts/normalise-wot-fandom.mjs'
       - 'scripts/verify-wot-fandom-ingest.mjs'
       - 'test/canon-wot-ingest.test.mjs'
@@ -54,12 +55,21 @@ jobs:
       - name: Validate Canon Steward scripts
         run: |
           node --check scripts/canon-ingest-wot-fandom.mjs
+          node --check scripts/prepare-wot-fandom-archive.mjs
           node --check scripts/normalise-wot-fandom.mjs
           node --check scripts/verify-wot-fandom-ingest.mjs
           node --test test/canon-wot-ingest.test.mjs
           node -e "JSON.parse(require('node:fs').readFileSync('canon/taaveren-vaen/project-overlay.json','utf8'))"
 
+      - name: Probe restored complete archive
+        id: restored_archive
+        if: github.event.inputs.reset != 'true'
+        env:
+          WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
+        run: node scripts/prepare-wot-fandom-archive.mjs --probe
+
       - name: Crawl complete MediaWiki corpus
+        if: github.event.inputs.reset == 'true' || steps.restored_archive.outputs.complete != 'true'
         env:
           WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
         shell: bash
@@ -69,6 +79,12 @@ jobs:
             RESET_ARG="--reset"
           fi
           node scripts/canon-ingest-wot-fandom.mjs $RESET_ARG
+
+      - name: Canonicalise and receipt complete archive
+        id: prepared_archive
+        env:
+          WOT_INGEST_ROOT: canon/taaveren-vaen/wot-fandom
+        run: node scripts/prepare-wot-fandom-archive.mjs
 
       - name: Normalise canon and bind Ta’veren Vaen overlay
         env:
@@ -98,6 +114,7 @@ jobs:
             taaveren-vaen-wot-canon-${{ github.sha }}.tar.gz
             WOT-CANON-SHA256SUMS.txt
             canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json
+            canon/taaveren-vaen/wot-fandom/data/receipts/ndjson-canonicalisation-latest.json
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -130,12 +147,17 @@ jobs:
           {
             echo '## Wheel of Time Canon Steward'
             echo
+            if [[ "${{ steps.prepared_archive.outputs.complete }}" == "true" ]]; then
+              echo "Archive: VERIFIED · ${{ steps.prepared_archive.outputs.pages }} pages"
+              echo "Raw SHA-256: \`${{ steps.prepared_archive.outputs.raw_sha256 }}\`"
+              echo
+            fi
             if [[ -f canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json ]]; then
               echo '### Verification'
               echo '```json'
               cat canon/taaveren-vaen/wot-fandom/data/receipts/verification-latest.json
               echo '```'
             else
-              echo 'Verification receipt was not produced. Inspect the partial crawl artefact and failed-step logs.'
+              echo 'Verification receipt was not produced. Inspect the partial artefact and failed-step logs.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
