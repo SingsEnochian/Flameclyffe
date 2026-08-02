@@ -1,0 +1,91 @@
+{
+  "schema": "hearthgate.project-overlay.v1",
+  "overlay_id": "taaveren-vaen.project-canon.v1",
+  "display_name": "Ta’veren Vaen",
+  "world_key": "taaveren-vaen",
+  "classification": "project-canon-overlay",
+  "status": "active-development",
+  "foundation": {
+    "house": "wheel-of-time-canon",
+    "relationship": "later-turning-of-the-wheel",
+    "overwrite_foundation": false,
+    "provenance_required": true
+  },
+  "temporal_frame": {
+    "era": "The Mending Era",
+    "placement": "A later Turning, long after the Fourth Age",
+    "world_condition": "Mending rather than Breaking",
+    "continuity_note": "Earlier Aes Sedai institutions have faded; traditions of service are gathering again under the returning name Aes Sedai."
+  },
+  "characters": [
+    {
+      "id": "taaveren-vaen:kestrelle-al-valari",
+      "name": "Kestrelle al’Valari",
+      "age": 18,
+      "role": [
+        "travelling Wise Woman",
+        "healer",
+        "Dreamwalker",
+        "exceptionally strong channeller"
+      ],
+      "lineage": "Descended from the ancient Valae; not herself a Vala.",
+      "status": "Fully recognised Wise Woman",
+      "teacher_and_companion": "Meriene Delvarinne",
+      "pronunciation": "KESS-trel al vah-LAR-ee"
+    },
+    {
+      "id": "taaveren-vaen:meriene-delvarinne",
+      "name": "Meriene Delvarinne",
+      "role": [
+        "teacher",
+        "travelling companion",
+        "Wise Woman"
+      ],
+      "relationship_to_kestrelle": "Teacher and travelling companion"
+    }
+  ],
+  "institutions": [
+    {
+      "id": "taaveren-vaen:wise-women",
+      "name": "Wise Women",
+      "description": "Healers, channellers, dreamers and keepers of family and community traditions who preserve service-centred practices across the later Turning."
+    },
+    {
+      "id": "taaveren-vaen:returning-aes-sedai",
+      "name": "The Returning Aes Sedai",
+      "description": "The name Aes Sedai—servants of all—begins to re-emerge among people gathering around traditions of service rather than the institutions of an earlier Age."
+    }
+  ],
+  "canon_links": [
+    {
+      "overlay_concept": "Returning Aes Sedai",
+      "foundation_concept": "Aes Sedai",
+      "relation": "name-and-service-tradition-re-emerges"
+    },
+    {
+      "overlay_concept": "Dreamwalking",
+      "foundation_concept": "Tel’aran’rhiod and dream-related Talents",
+      "relation": "later-turning-continuity"
+    },
+    {
+      "overlay_concept": "Channeling",
+      "foundation_concept": "The One Power",
+      "relation": "same-cosmological-foundation-later-cultural-expression"
+    }
+  ],
+  "dual_aspect_identity": {
+    "observable_anchor": "Attributed Wheel of Time canon reference archive",
+    "experiential_answer": "Ta’veren Vaen Mending-era project canon",
+    "hearthweave_bind": "Preserve both records and make every correspondence explicit"
+  },
+  "sensory_identity": {
+    "tone_profile": "resonance/worlds/taaveren-vaen-v0.1.json",
+    "anchor_voice": "wheel-of-time-canon",
+    "living_voice": "taaveren-vaen"
+  },
+  "provenance": {
+    "authority": "Rowan-approved project canon",
+    "recorded_at": "2026-08-02",
+    "historical_alias": "Ta’veren Unbound"
+  }
+}
