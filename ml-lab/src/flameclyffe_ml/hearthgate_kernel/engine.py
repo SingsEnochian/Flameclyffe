@@ -40,12 +40,13 @@ def _model_hash(value: Any) -> str:
 
 
 def _frame_id(identity: str, house_id: str, observed_at: datetime, parents: tuple[str, ...]) -> str:
-    return f"frame-{content_hash({
-        'identity': identity,
-        'house_id': house_id,
-        'observed_at': observed_at,
-        'parents': parents,
-    })[:24]}"
+    seed = {
+        "identity": identity,
+        "house_id": house_id,
+        "observed_at": observed_at,
+        "parents": parents,
+    }
+    return f"frame-{content_hash(seed)[:24]}"
 
 
 def _basis_payload(
