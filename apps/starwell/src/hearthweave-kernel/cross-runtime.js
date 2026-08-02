@@ -60,10 +60,29 @@ function requireAxis(value, label) {
   return Number(value);
 }
 
+function requirePolicy({ tolerance, maxTemporalSkewMs }) {
+  if (!Number.isFinite(tolerance) || tolerance < 0 || tolerance > 0.1) {
+    throw new CrossRuntimeCorrespondenceError(
+      'tolerance must be between 0 and 0.1',
+      'INVALID_CORRESPONDENCE_POLICY',
+    );
+  }
+  if (!Number.isFinite(maxTemporalSkewMs) || maxTemporalSkewMs < 0 || maxTemporalSkewMs > 300_000) {
+    throw new CrossRuntimeCorrespondenceError(
+      'maxTemporalSkewMs must be between 0 and 300000',
+      'INVALID_CORRESPONDENCE_POLICY',
+    );
+  }
+  return { tolerance, maxTemporalSkewMs };
+}
+
 function validateKernelPacket(packetInput) {
   const packet = clone(requireObject(packetInput, 'Python kernel packet'));
   if (packet.schema !== 'hearthgate.dual-aspect-packet.v1') {
-    throw new CrossRuntimeCorrespondenceError('Unsupported Python kernel packet schema', 'UNSUPPORTED_CROSS_RUNTIME_PACKET');
+    throw new CrossRuntimeCorrespondenceError(
+      'Unsupported Python kernel packet schema',
+      'UNSUPPORTED_CROSS_RUNTIME_PACKET',
+    );
   }
   requireString(packet.identity, 'kernel.identity');
   requireString(packet.house_id, 'kernel.house_id');
@@ -78,10 +97,16 @@ function validateKernelPacket(packetInput) {
   for (const axis of AXES) requireAxis(packet.premaq?.[axis], `kernel.premaq.${axis}`);
   const receipt = Array.isArray(packet.receipts) ? packet.receipts.at(-1) : null;
   if (!receipt || receipt.status !== VERIFIED) {
-    throw new CrossRuntimeCorrespondenceError('Python kernel packet lacks a VERIFIED receipt', 'PYTHON_RECEIPT_UNVERIFIED');
+    throw new CrossRuntimeCorrespondenceError(
+      'Python kernel packet lacks a VERIFIED receipt',
+      'PYTHON_RECEIPT_UNVERIFIED',
+    );
   }
   if (!Object.values(receipt.claims ?? {}).every((claim) => claim === VERIFIED)) {
-    throw new CrossRuntimeCorrespondenceError('Python kernel receipt contains a failed claim', 'PYTHON_RECEIPT_UNVERIFIED');
+    throw new CrossRuntimeCorrespondenceError(
+      'Python kernel receipt contains a failed claim',
+      'PYTHON_RECEIPT_UNVERIFIED',
+    );
   }
   requireString(receipt.packet_hash, 'kernel.receipt.packet_hash');
   return deepFreeze(packet);
@@ -99,7 +124,9 @@ function mappedHearthweaveHouse(kernelHouseId) {
 }
 
 function extractKernelAxes(packet) {
-  return Object.fromEntries(AXES.map((axis) => [axis, requireAxis(packet.premaq[axis], `kernel.premaq.${axis}`)]));
+  return Object.fromEntries(
+    AXES.map((axis) => [axis, requireAxis(packet.premaq[axis], `kernel.premaq.${axis}`)]),
+  );
 }
 
 function extractHearthweaveAxes(packet) {
@@ -109,7 +136,14 @@ function extractHearthweaveAxes(packet) {
   ]));
 }
 
-function buildComparison(kernelPacket, hearthweavePacket, { tolerance, maxTemporalSkewMs }) {
+function canonSovereignty(packet) {
+  const foundation = packet.experiential?.house?.canon_foundation?.id;
+  const overlay = packet.experiential?.house?.canon_overlay?.id;
+  return Boolean(foundation && overlay && foundation !== overlay);
+}
+
+function buildComparison(kernelPacket, hearthweavePacket, policy) {
+  const { tolerance, maxTemporalSkewMs } = requirePolicy(policy);
   const expectedHearthweaveHouse = mappedHearthweaveHouse(kernelPacket.house_id);
   const actualHearthweaveHouse = hearthweavePacket.identity.house_id;
   const kernelAxes = extractKernelAxes(kernelPacket);
@@ -135,11 +169,7 @@ function buildComparison(kernelPacket, hearthweavePacket, { tolerance, maxTempor
     temporal_proximity: temporalSkewMs <= maxTemporalSkewMs ? VERIFIED : FAILED,
     kernel_receipt: VERIFIED,
     hearthweave_fingerprint: VERIFIED,
-    canon_sovereignty: (
-      kernelPacket.house_id === 'taaveren-vaen'
-        ? hearthweavePacket.identity.canon_foundation_id !== hearthweavePacket.identity.canon_overlay_id
-        : true
-    ) ? VERIFIED : FAILED,
+    canon_sovereignty: canonSovereignty(hearthweavePacket) ? VERIFIED : FAILED,
   };
   return {
     expected_hearthweave_house: expectedHearthweaveHouse,
@@ -185,15 +215,7 @@ export function createCrossRuntimeCorrespondenceReceipt(kernelPacketInput, heart
   maxTemporalSkewMs = 5_000,
   clock = () => new Date(),
 } = {}) {
-  if (!Number.isFinite(tolerance) || tolerance < 0 || tolerance > 0.1) {
-    throw new CrossRuntimeCorrespondenceError('tolerance must be between 0 and 0.1', 'INVALID_CORRESPONDENCE_POLICY');
-  }
-  if (!Number.isFinite(maxTemporalSkewMs) || maxTemporalSkewMs < 0 || maxTemporalSkewMs > 300_000) {
-    throw new CrossRuntimeCorrespondenceError(
-      'maxTemporalSkewMs must be between 0 and 300000',
-      'INVALID_CORRESPONDENCE_POLICY',
-    );
-  }
+  requirePolicy({ tolerance, maxTemporalSkewMs });
   const kernelPacket = validateKernelPacket(kernelPacketInput);
   const hearthweavePacket = validateDualAspectPacket(hearthweavePacketInput);
   const policy = {
@@ -207,26 +229,49 @@ export function createCrossRuntimeCorrespondenceReceipt(kernelPacketInput, heart
   return deepFreeze({ ...base, bind_fingerprint: fingerprint(base) });
 }
 
-export function validateCrossRuntimeCorrespondenceReceipt(receiptInput, kernelPacketInput, hearthweavePacketInput) {
+export function validateCrossRuntimeCorrespondenceReceipt(
+  receiptInput,
+  kernelPacketInput,
+  hearthweavePacketInput,
+) {
   const receipt = clone(requireObject(receiptInput, 'Cross-runtime receipt'));
   if (receipt.schema !== CROSS_RUNTIME_CORRESPONDENCE_SCHEMA) {
-    throw new CrossRuntimeCorrespondenceError('Unsupported cross-runtime receipt schema', 'UNSUPPORTED_CORRESPONDENCE_RECEIPT');
+    throw new CrossRuntimeCorrespondenceError(
+      'Unsupported cross-runtime receipt schema',
+      'UNSUPPORTED_CORRESPONDENCE_RECEIPT',
+    );
   }
   requireDate(receipt.created_at, 'receipt.created_at');
   const kernelPacket = validateKernelPacket(kernelPacketInput);
   const hearthweavePacket = validateDualAspectPacket(hearthweavePacketInput);
-  const policy = receipt.policy ?? {};
+  const tolerance = Number(receipt.policy?.tolerance);
+  const maxTemporalSkewMs = Number(receipt.policy?.max_temporal_skew_ms);
+  requirePolicy({ tolerance, maxTemporalSkewMs });
   const comparison = buildComparison(kernelPacket, hearthweavePacket, {
-    tolerance: Number(policy.tolerance),
-    maxTemporalSkewMs: Number(policy.max_temporal_skew_ms),
+    tolerance,
+    maxTemporalSkewMs,
   });
-  const expectedBase = receiptBase(kernelPacket, hearthweavePacket, comparison, policy, receipt.created_at);
-  const expectedFingerprint = fingerprint(expectedBase);
-  if (receipt.bind_fingerprint !== expectedFingerprint) {
-    throw new CrossRuntimeCorrespondenceError('Cross-runtime receipt fingerprint mismatch', 'CORRESPONDENCE_RECEIPT_MISMATCH');
+  const expectedBase = receiptBase(
+    kernelPacket,
+    hearthweavePacket,
+    comparison,
+    receipt.policy,
+    receipt.created_at,
+  );
+  if (receipt.bind_fingerprint !== fingerprint(expectedBase)) {
+    throw new CrossRuntimeCorrespondenceError(
+      'Cross-runtime receipt fingerprint mismatch',
+      'CORRESPONDENCE_RECEIPT_MISMATCH',
+    );
   }
-  if (receipt.status !== comparison.status || JSON.stringify(receipt.claims) !== JSON.stringify(comparison.claims)) {
-    throw new CrossRuntimeCorrespondenceError('Cross-runtime receipt claims are stale', 'CORRESPONDENCE_RECEIPT_MISMATCH');
+  if (
+    receipt.status !== comparison.status
+    || JSON.stringify(receipt.claims) !== JSON.stringify(comparison.claims)
+  ) {
+    throw new CrossRuntimeCorrespondenceError(
+      'Cross-runtime receipt claims are stale',
+      'CORRESPONDENCE_RECEIPT_MISMATCH',
+    );
   }
   return deepFreeze(receipt);
 }
@@ -258,7 +303,10 @@ export function assertCrossRuntimeActivation({
     kernelPacket,
     hearthweavePacketInput,
   );
-  if (receipt.status !== VERIFIED || !Object.values(receipt.claims).every((claim) => claim === VERIFIED)) {
+  if (
+    receipt.status !== VERIFIED
+    || !Object.values(receipt.claims).every((claim) => claim === VERIFIED)
+  ) {
     throw new CrossRuntimeCorrespondenceError(
       'The active Hearthweave packet does not correspond to the Python kernel packet',
       CROSS_RUNTIME_ERROR_CODE,
