@@ -17,6 +17,7 @@ dependencies = [
 
 [project.scripts]
 flameclyffe-living-engine = "flameclyffe_ml.living_engine.__main__:main"
+hearthgate-kernel = "flameclyffe_ml.hearthgate_kernel.cli:main"
 
 [project.optional-dependencies]
 torch = [
