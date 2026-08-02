@@ -126,9 +126,19 @@ export class HearthgateSensoryBridge extends EventTarget {
     this.active = false;
   }
 
-  async receive(packetInput) {
+  receive(packetInput) {
     const nextPacket = verifySensoryPacket(packetInput);
+    const teardownRequired = this.active || this.audioContext || this.audioNodes.length > 0;
+    if (teardownRequired) return this.replaceAfterStop(nextPacket);
+    return this.installPacket(nextPacket);
+  }
+
+  async replaceAfterStop(nextPacket) {
     await this.stop();
+    return this.installPacket(nextPacket);
+  }
+
+  installPacket(nextPacket) {
     this.packet = nextPacket;
     this.applyVisualState();
     this.dispatchEvent(new CustomEvent('hearthgate:sensory-received', {
