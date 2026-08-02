@@ -44,10 +44,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: npm
@@ -74,8 +74,17 @@ jobs:
       - name: Install locked Hearthgate dependencies
         run: npm ci
 
+      - name: Test local security boundary
+        run: npm test
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Stage STARWELL inside Hearthgate
         run: npm run stage:starwell
+
+      - name: Prepare deterministic installer assets
+        run: npm run prepare:assets
 
       - name: Run packaging preflight
         run: npm run check:packaging
@@ -98,24 +107,36 @@ jobs:
             throw "Installer is unexpectedly small: $($installer.Length) bytes."
           }
 
-          $unpackedRoot = "dist-electron/win-unpacked/resources/app/public/starwell"
-          $unpackedStarwell = "$unpackedRoot/index.html"
-          $unpackedGlyphStudio = "$unpackedRoot/glyph-studio/index.html"
-          $unpackedArcsweep = "$unpackedRoot/arcsweep-continuity/index.html"
-          $unpackedBifrostManifest = "$unpackedRoot/modules/bifrost-arcsweep.module.json"
-          $unpackedPremaqSchema = "$unpackedRoot/schemas/premaq-state-v2.schema.json"
-          $unpackedBifrostSchema = "$unpackedRoot/schemas/bifrost-temporal-state-v1.schema.json"
+          $resourcesRoot = "dist-electron/win-unpacked/resources"
+          $asar = "$resourcesRoot/app.asar"
+          $unpackedRoot = "$resourcesRoot/app.asar.unpacked"
+          $starwellRoot = "$unpackedRoot/public/starwell"
+          $unpackedStarwell = "$starwellRoot/index.html"
+          $unpackedGlyphStudio = "$starwellRoot/glyph-studio/index.html"
+          $unpackedArcsweep = "$starwellRoot/arcsweep-continuity/index.html"
+          $unpackedBifrostManifest = "$starwellRoot/modules/bifrost-arcsweep.module.json"
+          $unpackedPremaqSchema = "$starwellRoot/schemas/premaq-state-v2.schema.json"
+          $unpackedBifrostSchema = "$starwellRoot/schemas/bifrost-temporal-state-v1.schema.json"
+          $secureServer = "$unpackedRoot/server-secure.js"
+          $securityBoundary = "$unpackedRoot/security/local-boundary.js"
+          $fontForgeServer = "$unpackedRoot/fontforge/server.js"
+          $icon = "$unpackedRoot/build/hearthgate.png"
 
           foreach ($required in @(
+            $asar,
             $unpackedStarwell,
             $unpackedGlyphStudio,
             $unpackedArcsweep,
             $unpackedBifrostManifest,
             $unpackedPremaqSchema,
-            $unpackedBifrostSchema
+            $unpackedBifrostSchema,
+            $secureServer,
+            $securityBoundary,
+            $fontForgeServer,
+            $icon
           )) {
             if (-not (Test-Path $required)) {
-              throw "Packaged installer is missing required Bifröst/STARWELL file: $required"
+              throw "Packaged installer is missing required hardened Hearthgate file: $required"
             }
           }
 
@@ -130,6 +151,15 @@ jobs:
             if (-not $page.Html.Contains('/starwell/')) {
               throw "Packaged $($page.Name) entry does not use the /starwell/ asset base."
             }
+          }
+
+          $secureServerSource = Get-Content -Raw -Path $secureServer
+          $securityBoundarySource = Get-Content -Raw -Path $securityBoundary
+          if (-not $secureServerSource.Contains("127.0.0.1")) {
+            throw "Packaged core server does not enforce loopback binding."
+          }
+          if (-not $securityBoundarySource.Contains("HEARTHGATE_ORIGIN_DENIED")) {
+            throw "Packaged local-origin boundary is missing."
           }
 
           $manifest = Get-Content -Raw -Path $unpackedBifrostManifest | ConvertFrom-Json
@@ -168,6 +198,8 @@ jobs:
           - File: ``$($installer.Name)``
           - Size: $([math]::Round($installer.Length / 1MB, 2)) MB
           - SHA-256: ``$($hash.Hash)``
+          - Packaging: ASAR enabled with explicit runtime unpack boundary
+          - Security: sandboxed renderer, loopback-only services, restricted origins, redacted IPC
           - Framework: bundled STARWELL + Glyph Studio + Bifröst Arcsweep
           - State contracts: PREMAQ v2 + Bifröst Temporal Quantum State v1
           - Font compiler: local FontForge sidecar adapter
@@ -175,7 +207,7 @@ jobs:
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
       - name: Upload installer artefact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hearthgate-windows-${{ github.sha }}
           if-no-files-found: error
