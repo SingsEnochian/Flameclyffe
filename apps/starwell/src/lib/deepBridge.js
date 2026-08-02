@@ -9,9 +9,10 @@ import { readActiveDualAspectPacket } from '../hearthweave-kernel/activation.js'
 export const BRIDGE_PULSE_URL = 'https://singsenochian.github.io/-bridge-pulse/pulse.json';
 export const BRIDGE_PULSE_CONTRACT = 'hearthweave.bridge-pulse/v1';
 
-const REQUIRED_DEEP_FIELDS = Object.freeze([
-  'P', 'C', 'R', 'E', 'M', 'A', 'dpdt', 'moonIllum', 'sky', 'kp', 'bz', 'charge', 'dphi',
+const NUMERIC_DEEP_FIELDS = Object.freeze([
+  'P', 'C', 'R', 'E', 'M', 'A', 'dpdt', 'moonIllum', 'kp', 'bz', 'charge', 'dphi',
 ]);
+const REQUIRED_DEEP_FIELDS = Object.freeze([...NUMERIC_DEEP_FIELDS, 'sky']);
 
 function clone(value) {
   return value == null ? value : structuredClone(value);
@@ -20,6 +21,12 @@ function clone(value) {
 function validDateTime(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function deepFieldIsValid(field, value) {
+  if (value == null) return false;
+  if (field === 'sky') return typeof value === 'string' && value.trim() !== '';
+  return NUMERIC_DEEP_FIELDS.includes(field) && Number.isFinite(Number(value));
 }
 
 export function parseBridgePulsePayload(payload, {
@@ -62,11 +69,12 @@ export function parseBridgePulsePayload(payload, {
     });
   }
   for (const field of REQUIRED_DEEP_FIELDS) {
-    if (rawDeep[field] == null || (typeof rawDeep[field] === 'number' && !Number.isFinite(rawDeep[field]))) {
+    if (!deepFieldIsValid(field, rawDeep[field])) {
       substitutions.push({
         field: `state.${field}`,
         reason: 'SOURCE_FIELD_MISSING_OR_INVALID',
         source: 'DEFAULT_DEEP_STATE',
+        source_value: rawDeep[field] ?? null,
         substituted_value: DEFAULT_DEEP_STATE[field],
       });
     }
