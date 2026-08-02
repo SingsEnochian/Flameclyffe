@@ -49,8 +49,10 @@ export function normaliseMoon(value, fallback = DEFAULT_DEEP_STATE.moonIllum) {
 }
 
 export function getBridgeDeep(payload) {
-  if (!payload || typeof payload !== 'object') return null;
-  return payload.deep ?? payload.DEEP ?? payload.state ?? payload.observer ?? null;
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
+  return payload.deep && typeof payload.deep === 'object' && !Array.isArray(payload.deep)
+    ? payload.deep
+    : null;
 }
 
 export function normaliseDeepState(rawDeep = {}) {
