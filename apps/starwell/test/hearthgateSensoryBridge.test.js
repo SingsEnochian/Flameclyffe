@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { createKernelAuthorityProof } from '../src/hearthweave-kernel/cross-runtime.js';
+
 import {
   HearthgateSensoryBridge,
   packetToCssVariables,
@@ -81,6 +83,26 @@ function packet({ answered = true, identity = 'test:templehouse' } = {}) {
       created_at:'2026-08-02T06:00:00Z',
     }],
   };
+}
+
+
+function trustedKernelVerifier(packet) {
+  return Promise.resolve(createKernelAuthorityProof(
+    packet,
+    {
+      schema:'hearthgate.integrity-audit.v1',
+      identity:packet.identity,
+      house_id:packet.house_id,
+      status:'VERIFIED',
+      claims:{shared_state:'VERIFIED',receipt_integrity:'VERIFIED'},
+    },
+    {
+      schema:'hearthgate.replay-result.v1',
+      packet_hash:packet.receipts.at(-1).packet_hash,
+      verified:true,
+    },
+    {authority:'synthetic-test-verifier'},
+  ));
 }
 
 class FakeParam {
@@ -202,6 +224,7 @@ test('activation renders packet frequencies, visual state and haptics then Feath
     glyphElement:glyph,
     audioContextFactory:() => context,
     vibrate:(pattern) => vibrations.push(pattern),
+    kernelVerifier:trustedKernelVerifier,
   });
 
   const received = await bridge.receive(packet());
@@ -237,6 +260,7 @@ test('replacement reception waits for prior AudioContext teardown', async () => 
     glyphElement:fakeElement(),
     audioContextFactory:() => firstContext,
     vibrate:() => true,
+    kernelVerifier:trustedKernelVerifier,
   });
 
   await bridge.receive(packet({ identity:'first-packet' }));

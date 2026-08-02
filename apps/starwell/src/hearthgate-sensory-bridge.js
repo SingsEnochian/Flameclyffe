@@ -118,6 +118,9 @@ export class HearthgateSensoryBridge extends EventTarget {
     audioContextFactory = null,
     vibrate = globalThis.navigator?.vibrate?.bind(globalThis.navigator) || null,
     storage = globalThis.sessionStorage ?? null,
+    kernelEndpoint = 'http://127.0.0.1:8765',
+    fetchImpl = globalThis.fetch?.bind(globalThis) ?? null,
+    kernelVerifier = undefined,
   } = {}) {
     super();
     this.root = root;
@@ -125,6 +128,9 @@ export class HearthgateSensoryBridge extends EventTarget {
     this.audioContextFactory = audioContextFactory;
     this.vibrate = vibrate;
     this.storage = storage;
+    this.kernelEndpoint = kernelEndpoint;
+    this.fetchImpl = fetchImpl;
+    this.kernelVerifier = kernelVerifier;
     this.packet = null;
     this.crossRuntimeActivation = null;
     this.audioContext = null;
@@ -132,7 +138,7 @@ export class HearthgateSensoryBridge extends EventTarget {
     this.active = false;
   }
 
-  receive(packetInput, {
+  async receive(packetInput, {
     hearthweavePacket,
     correspondenceReceipt = null,
   } = {}) {
@@ -140,10 +146,13 @@ export class HearthgateSensoryBridge extends EventTarget {
     const activeHearthweavePacket = hearthweavePacket === undefined
       ? readActiveDualAspectPacket({ storage:this.storage })
       : hearthweavePacket;
-    const nextCrossRuntimeActivation = assertCrossRuntimeActivation({
+    const nextCrossRuntimeActivation = await assertCrossRuntimeActivation({
       kernelPacket:nextPacket,
       hearthweavePacket:activeHearthweavePacket,
       correspondenceReceipt,
+      ...(this.kernelVerifier ? { kernelVerifier:this.kernelVerifier } : {}),
+      kernelEndpoint:this.kernelEndpoint,
+      fetchImpl:this.fetchImpl,
     });
     const teardownRequired = this.active || this.audioContext || this.audioNodes.length > 0;
     if (teardownRequired) {

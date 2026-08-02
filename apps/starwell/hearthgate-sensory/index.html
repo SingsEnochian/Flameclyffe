@@ -218,7 +218,8 @@
       const packet = await fetchJson('/v1/hearthgate/packet', { method:'POST', body:JSON.stringify(request) });
       const audit = await fetchJson('/v1/hearthgate/audit', { method:'POST', body:JSON.stringify(packet) });
       if (audit.status !== 'VERIFIED') throw new Error('Kernel audit did not verify the packet.');
-      currentPacket = bridge.receive(packet);
+      bridge.kernelEndpoint = $('#endpoint').value.replace(/\/$/,'');
+      currentPacket = await bridge.receive(packet);
       $('#basis').textContent = packet.correspondence.basis_hash;
       $('#packet-hash').textContent = packet.receipts.at(-1).packet_hash;
       $('#tones').replaceChildren(...packet.sensory.tones.map((tone) => {

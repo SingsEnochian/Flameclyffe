@@ -2,6 +2,7 @@ import { fingerprint } from './dual-aspect.js';
 import { validateDualAspectPacket } from './validation.js';
 
 export const CROSS_RUNTIME_CORRESPONDENCE_SCHEMA = 'hearthgate.cross-runtime-correspondence/v1';
+export const KERNEL_AUTHORITY_PROOF_SCHEMA = 'hearthgate.kernel-authority-proof/v1';
 export const CROSS_RUNTIME_ERROR_CODE = 'HEARTHGATE_RIVAL_ACTIVE_STATE';
 
 const AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A']);
@@ -76,7 +77,7 @@ function requirePolicy({ tolerance, maxTemporalSkewMs }) {
   return { tolerance, maxTemporalSkewMs };
 }
 
-function validateKernelPacket(packetInput) {
+function validateKernelPacketShape(packetInput) {
   const packet = clone(requireObject(packetInput, 'Python kernel packet'));
   if (packet.schema !== 'hearthgate.dual-aspect-packet.v1') {
     throw new CrossRuntimeCorrespondenceError(
@@ -86,7 +87,6 @@ function validateKernelPacket(packetInput) {
   }
   requireString(packet.identity, 'kernel.identity');
   requireString(packet.house_id, 'kernel.house_id');
-  requireDate(packet.temporal?.observed_at, 'kernel.temporal.observed_at');
   const basisHash = requireString(packet.correspondence?.basis_hash, 'kernel.correspondence.basis_hash');
   if (packet.sensory?.source_state_hash !== basisHash) {
     throw new CrossRuntimeCorrespondenceError(
@@ -94,7 +94,6 @@ function validateKernelPacket(packetInput) {
       'PYTHON_HIDDEN_STATE_DIVERGENCE',
     );
   }
-  for (const axis of AXES) requireAxis(packet.premaq?.[axis], `kernel.premaq.${axis}`);
   const receipt = Array.isArray(packet.receipts) ? packet.receipts.at(-1) : null;
   if (!receipt || receipt.status !== VERIFIED) {
     throw new CrossRuntimeCorrespondenceError(
@@ -112,6 +111,128 @@ function validateKernelPacket(packetInput) {
   return deepFreeze(packet);
 }
 
+function authorityProofBase(packet, audit, replay, authority) {
+  return {
+    schema: KERNEL_AUTHORITY_PROOF_SCHEMA,
+    authority,
+    identity: packet.identity,
+    house_id: packet.house_id,
+    basis_hash: packet.correspondence.basis_hash,
+    packet_hash: packet.receipts.at(-1).packet_hash,
+    audit: {
+      schema: audit.schema,
+      status: audit.status,
+      claims: audit.claims,
+    },
+    replay: {
+      schema: replay.schema,
+      verified: replay.verified,
+      packet_hash: replay.packet_hash,
+    },
+  };
+}
+
+export function createKernelAuthorityProof(
+  packetInput,
+  auditInput,
+  replayInput,
+  { authority = 'injected-kernel-verifier' } = {},
+) {
+  const packet = validateKernelPacketShape(packetInput);
+  const audit = clone(requireObject(auditInput, 'Kernel audit response'));
+  const replay = clone(requireObject(replayInput, 'Kernel replay response'));
+  if (audit.schema !== 'hearthgate.integrity-audit.v1') {
+    throw new CrossRuntimeCorrespondenceError('Kernel audit schema is invalid', 'KERNEL_AUTHORITY_FAILED');
+  }
+  if (audit.identity !== packet.identity || audit.house_id !== packet.house_id) {
+    throw new CrossRuntimeCorrespondenceError('Kernel audit identifies another packet', 'KERNEL_AUTHORITY_FAILED');
+  }
+  if (audit.status !== VERIFIED || !Object.values(audit.claims ?? {}).every((claim) => claim === VERIFIED)) {
+    throw new CrossRuntimeCorrespondenceError('Kernel audit did not verify every claim', 'KERNEL_AUTHORITY_FAILED');
+  }
+  if (replay.schema !== 'hearthgate.replay-result.v1' || replay.verified !== true) {
+    throw new CrossRuntimeCorrespondenceError('Kernel replay did not verify the packet', 'KERNEL_AUTHORITY_FAILED');
+  }
+  if (replay.packet_hash !== packet.receipts.at(-1).packet_hash) {
+    throw new CrossRuntimeCorrespondenceError('Kernel replay hash differs from the receipt', 'KERNEL_AUTHORITY_FAILED');
+  }
+  const base = authorityProofBase(packet, audit, replay, authority);
+  return deepFreeze({ ...base, proof_fingerprint: fingerprint(base) });
+}
+
+export function validateKernelAuthorityProof(proofInput, packetInput) {
+  const packet = validateKernelPacketShape(packetInput);
+  const proof = clone(requireObject(proofInput, 'Kernel authority proof'));
+  if (proof.schema !== KERNEL_AUTHORITY_PROOF_SCHEMA) {
+    throw new CrossRuntimeCorrespondenceError('Kernel authority proof schema is invalid', 'KERNEL_AUTHORITY_FAILED');
+  }
+  const submittedBase = clone(proof);
+  delete submittedBase.proof_fingerprint;
+  if (proof.proof_fingerprint !== fingerprint(submittedBase)) {
+    throw new CrossRuntimeCorrespondenceError('Kernel authority proof fingerprint mismatch', 'KERNEL_AUTHORITY_FAILED');
+  }
+  if (
+    proof.identity !== packet.identity
+    || proof.house_id !== packet.house_id
+    || proof.basis_hash !== packet.correspondence.basis_hash
+    || proof.packet_hash !== packet.receipts.at(-1).packet_hash
+  ) {
+    throw new CrossRuntimeCorrespondenceError('Kernel authority proof is stale', 'KERNEL_AUTHORITY_FAILED');
+  }
+  if (
+    proof.audit?.status !== VERIFIED
+    || !Object.values(proof.audit?.claims ?? {}).every((claim) => claim === VERIFIED)
+    || proof.replay?.verified !== true
+    || proof.replay?.packet_hash !== proof.packet_hash
+  ) {
+    throw new CrossRuntimeCorrespondenceError('Kernel authority proof is not VERIFIED', 'KERNEL_AUTHORITY_FAILED');
+  }
+  return deepFreeze(proof);
+}
+
+async function postJson(fetchImpl, url, body) {
+  const response = await fetchImpl(url, {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new CrossRuntimeCorrespondenceError(
+      `Kernel authority request failed: ${response.status} ${response.statusText}`,
+      'KERNEL_AUTHORITY_FAILED',
+    );
+  }
+  return response.json();
+}
+
+export async function requestKernelAuthorityProof(packetInput, {
+  endpoint = 'http://127.0.0.1:8765',
+  fetchImpl = globalThis.fetch?.bind(globalThis),
+} = {}) {
+  const packet = validateKernelPacketShape(packetInput);
+  if (typeof fetchImpl !== 'function') {
+    throw new CrossRuntimeCorrespondenceError('Kernel authority fetch is unavailable', 'KERNEL_AUTHORITY_FAILED');
+  }
+  const root = endpoint.replace(/\/$/, '');
+  const [audit, replay] = await Promise.all([
+    postJson(fetchImpl, `${root}/v1/hearthgate/audit`, packet),
+    postJson(fetchImpl, `${root}/v1/hearthgate/replay`, packet),
+  ]);
+  return createKernelAuthorityProof(packet, audit, replay, { authority: root });
+}
+
+async function resolveKernelAuthorityProof(packet, {
+  kernelVerifier = requestKernelAuthorityProof,
+  kernelEndpoint,
+  fetchImpl,
+} = {}) {
+  if (typeof kernelVerifier !== 'function') {
+    throw new CrossRuntimeCorrespondenceError('Kernel verifier is unavailable', 'KERNEL_AUTHORITY_FAILED');
+  }
+  const proof = await kernelVerifier(packet, { endpoint: kernelEndpoint, fetchImpl });
+  return validateKernelAuthorityProof(proof, packet);
+}
+
 function mappedHearthweaveHouse(kernelHouseId) {
   const mapped = HOUSE_BINDINGS[kernelHouseId];
   if (!mapped) {
@@ -125,7 +246,7 @@ function mappedHearthweaveHouse(kernelHouseId) {
 
 function extractKernelAxes(packet) {
   return Object.fromEntries(
-    AXES.map((axis) => [axis, requireAxis(packet.premaq[axis], `kernel.premaq.${axis}`)]),
+    AXES.map((axis) => [axis, requireAxis(packet.premaq?.[axis], `kernel.premaq.${axis}`)]),
   );
 }
 
@@ -157,7 +278,7 @@ function buildComparison(kernelPacket, hearthweavePacket, policy) {
       status: delta <= tolerance ? VERIFIED : FAILED,
     }];
   }));
-  const kernelObservedAt = requireDate(kernelPacket.temporal.observed_at, 'kernel.temporal.observed_at');
+  const kernelObservedAt = requireDate(kernelPacket.temporal?.observed_at, 'kernel.temporal.observed_at');
   const hearthweaveObservedAt = requireDate(
     hearthweavePacket.observable.premaq.observed_at ?? hearthweavePacket.temporal.observed_at,
     'hearthweave.premaq.observed_at',
@@ -167,7 +288,7 @@ function buildComparison(kernelPacket, hearthweavePacket, policy) {
     house_identity: expectedHearthweaveHouse === actualHearthweaveHouse ? VERIFIED : FAILED,
     premaq_axes: Object.values(axes).every((entry) => entry.status === VERIFIED) ? VERIFIED : FAILED,
     temporal_proximity: temporalSkewMs <= maxTemporalSkewMs ? VERIFIED : FAILED,
-    kernel_receipt: VERIFIED,
+    kernel_authority: VERIFIED,
     hearthweave_fingerprint: VERIFIED,
     canon_sovereignty: canonSovereignty(hearthweavePacket) ? VERIFIED : FAILED,
   };
@@ -181,7 +302,7 @@ function buildComparison(kernelPacket, hearthweavePacket, policy) {
   };
 }
 
-function receiptBase(kernelPacket, hearthweavePacket, comparison, policy, createdAt) {
+function receiptBase(kernelPacket, kernelAuthority, hearthweavePacket, comparison, policy, createdAt) {
   return {
     schema: CROSS_RUNTIME_CORRESPONDENCE_SCHEMA,
     version: '1.0.0',
@@ -195,6 +316,8 @@ function receiptBase(kernelPacket, hearthweavePacket, comparison, policy, create
       observed_at: kernelPacket.temporal.observed_at,
       basis_hash: kernelPacket.correspondence.basis_hash,
       packet_hash: kernelPacket.receipts.at(-1).packet_hash,
+      authority: kernelAuthority.authority,
+      authority_proof_fingerprint: kernelAuthority.proof_fingerprint,
     },
     hearthweave: {
       schema: hearthweavePacket.schema,
@@ -210,13 +333,21 @@ function receiptBase(kernelPacket, hearthweavePacket, comparison, policy, create
   };
 }
 
-export function createCrossRuntimeCorrespondenceReceipt(kernelPacketInput, hearthweavePacketInput, {
+export async function createCrossRuntimeCorrespondenceReceipt(kernelPacketInput, hearthweavePacketInput, {
   tolerance = 0.000001,
   maxTemporalSkewMs = 5_000,
   clock = () => new Date(),
+  kernelVerifier = requestKernelAuthorityProof,
+  kernelEndpoint,
+  fetchImpl,
 } = {}) {
   requirePolicy({ tolerance, maxTemporalSkewMs });
-  const kernelPacket = validateKernelPacket(kernelPacketInput);
+  const kernelPacket = validateKernelPacketShape(kernelPacketInput);
+  const kernelAuthority = await resolveKernelAuthorityProof(kernelPacket, {
+    kernelVerifier,
+    kernelEndpoint,
+    fetchImpl,
+  });
   const hearthweavePacket = validateDualAspectPacket(hearthweavePacketInput);
   const policy = {
     axes: AXES,
@@ -225,14 +356,26 @@ export function createCrossRuntimeCorrespondenceReceipt(kernelPacketInput, heart
     unmatched_house_policy: 'fail-closed',
   };
   const comparison = buildComparison(kernelPacket, hearthweavePacket, { tolerance, maxTemporalSkewMs });
-  const base = receiptBase(kernelPacket, hearthweavePacket, comparison, policy, clock().toISOString());
+  const base = receiptBase(
+    kernelPacket,
+    kernelAuthority,
+    hearthweavePacket,
+    comparison,
+    policy,
+    clock().toISOString(),
+  );
   return deepFreeze({ ...base, bind_fingerprint: fingerprint(base) });
 }
 
-export function validateCrossRuntimeCorrespondenceReceipt(
+export async function validateCrossRuntimeCorrespondenceReceipt(
   receiptInput,
   kernelPacketInput,
   hearthweavePacketInput,
+  {
+    kernelVerifier = requestKernelAuthorityProof,
+    kernelEndpoint,
+    fetchImpl,
+  } = {},
 ) {
   const receipt = clone(requireObject(receiptInput, 'Cross-runtime receipt'));
   if (receipt.schema !== CROSS_RUNTIME_CORRESPONDENCE_SCHEMA) {
@@ -242,52 +385,73 @@ export function validateCrossRuntimeCorrespondenceReceipt(
     );
   }
   requireDate(receipt.created_at, 'receipt.created_at');
-  const kernelPacket = validateKernelPacket(kernelPacketInput);
+  const submittedBase = clone(receipt);
+  delete submittedBase.bind_fingerprint;
+  if (receipt.bind_fingerprint !== fingerprint(submittedBase)) {
+    throw new CrossRuntimeCorrespondenceError(
+      'Submitted cross-runtime receipt fingerprint mismatch',
+      'CORRESPONDENCE_RECEIPT_MISMATCH',
+    );
+  }
+
+  const kernelPacket = validateKernelPacketShape(kernelPacketInput);
+  const kernelAuthority = await resolveKernelAuthorityProof(kernelPacket, {
+    kernelVerifier,
+    kernelEndpoint,
+    fetchImpl,
+  });
   const hearthweavePacket = validateDualAspectPacket(hearthweavePacketInput);
   const tolerance = Number(receipt.policy?.tolerance);
   const maxTemporalSkewMs = Number(receipt.policy?.max_temporal_skew_ms);
   requirePolicy({ tolerance, maxTemporalSkewMs });
+  if (JSON.stringify(receipt.policy?.axes) !== JSON.stringify(AXES)) {
+    throw new CrossRuntimeCorrespondenceError(
+      'Cross-runtime receipt axis policy is invalid',
+      'INVALID_CORRESPONDENCE_POLICY',
+    );
+  }
   const comparison = buildComparison(kernelPacket, hearthweavePacket, {
     tolerance,
     maxTemporalSkewMs,
   });
   const expectedBase = receiptBase(
     kernelPacket,
+    kernelAuthority,
     hearthweavePacket,
     comparison,
     receipt.policy,
     receipt.created_at,
   );
-  if (receipt.bind_fingerprint !== fingerprint(expectedBase)) {
+  if (fingerprint(submittedBase) !== fingerprint(expectedBase)) {
     throw new CrossRuntimeCorrespondenceError(
-      'Cross-runtime receipt fingerprint mismatch',
-      'CORRESPONDENCE_RECEIPT_MISMATCH',
-    );
-  }
-  if (
-    receipt.status !== comparison.status
-    || JSON.stringify(receipt.claims) !== JSON.stringify(comparison.claims)
-  ) {
-    throw new CrossRuntimeCorrespondenceError(
-      'Cross-runtime receipt claims are stale',
+      'Cross-runtime receipt body is stale or belongs to another state',
       'CORRESPONDENCE_RECEIPT_MISMATCH',
     );
   }
   return deepFreeze(receipt);
 }
 
-export function assertCrossRuntimeActivation({
+export async function assertCrossRuntimeActivation({
   kernelPacket: kernelPacketInput,
   hearthweavePacket: hearthweavePacketInput = null,
   correspondenceReceipt = null,
+  kernelVerifier = requestKernelAuthorityProof,
+  kernelEndpoint,
+  fetchImpl,
 } = {}) {
-  const kernelPacket = validateKernelPacket(kernelPacketInput);
+  const kernelPacket = validateKernelPacketShape(kernelPacketInput);
+  const kernelAuthority = await resolveKernelAuthorityProof(kernelPacket, {
+    kernelVerifier,
+    kernelEndpoint,
+    fetchImpl,
+  });
   if (!hearthweavePacketInput) {
     return deepFreeze({
       schema: 'hearthgate.cross-runtime-activation/v1',
       mode: 'kernel-only',
       status: VERIFIED,
       kernel_basis_hash: kernelPacket.correspondence.basis_hash,
+      kernel_authority_proof_fingerprint: kernelAuthority.proof_fingerprint,
       hearthweave_packet_id: null,
       bind_fingerprint: null,
     });
@@ -298,10 +462,11 @@ export function assertCrossRuntimeActivation({
       CROSS_RUNTIME_ERROR_CODE,
     );
   }
-  const receipt = validateCrossRuntimeCorrespondenceReceipt(
+  const receipt = await validateCrossRuntimeCorrespondenceReceipt(
     correspondenceReceipt,
     kernelPacket,
     hearthweavePacketInput,
+    { kernelVerifier: async () => kernelAuthority },
   );
   if (
     receipt.status !== VERIFIED
@@ -317,6 +482,7 @@ export function assertCrossRuntimeActivation({
     mode: 'corresponded-dual-runtime',
     status: VERIFIED,
     kernel_basis_hash: kernelPacket.correspondence.basis_hash,
+    kernel_authority_proof_fingerprint: kernelAuthority.proof_fingerprint,
     hearthweave_packet_id: receipt.hearthweave.packet_id,
     bind_fingerprint: receipt.bind_fingerprint,
   });
