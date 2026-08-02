@@ -1,0 +1,45 @@
+name: Apply cross-runtime review fixes
+
+on:
+  push:
+    branches:
+      - feature/hearthgate-cross-runtime-bind-v0.2
+    paths:
+      - 'scripts/review-fixes/**'
+      - '.github/workflows/apply-cross-runtime-review-fixes.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-cross-runtime-review-fixes
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, 'Apply authoritative cross-runtime review fixes') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out review branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/hearthgate-cross-runtime-bind-v0.2
+          fetch-depth: 0
+
+      - name: Apply staged review corrections
+        run: python scripts/review-fixes/apply_cross_runtime_review_fixes.py
+
+      - name: Remove one-use patch scaffolding
+        run: |
+          rm -rf scripts/review-fixes
+          rm -f .github/workflows/apply-cross-runtime-review-fixes.yml
+
+      - name: Commit authoritative bind
+        shell: bash
+        run: |
+          git config user.name 'Hearthgate Canon Steward'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Apply authoritative cross-runtime review fixes'
+          git push origin HEAD:feature/hearthgate-cross-runtime-bind-v0.2
