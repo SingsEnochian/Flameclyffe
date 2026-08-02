@@ -1,9 +1,9 @@
 name: Wheel of Time Canon Ingest
 
 on:
-  push:
+  pull_request:
     branches:
-      - canon/taaveren-vaen-wot-wiki-ingest
+      - main
     paths:
       - 'scripts/canon-ingest-wot-fandom.mjs'
       - 'scripts/normalise-wot-fandom.mjs'
@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: wot-canon-ingest-${{ github.ref }}
+  group: wot-canon-ingest-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -47,9 +47,9 @@ jobs:
           path: |
             canon/taaveren-vaen/wot-fandom/data/raw
             canon/taaveren-vaen/wot-fandom/data/index/pages.json
-          key: wot-fandom-crawl-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          key: wot-fandom-crawl-${{ runner.os }}-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.run_id }}
           restore-keys: |
-            wot-fandom-crawl-${{ runner.os }}-${{ github.ref_name }}-
+            wot-fandom-crawl-${{ runner.os }}-${{ github.event.pull_request.head.ref || github.ref_name }}-
 
       - name: Validate Canon Steward scripts
         run: |
