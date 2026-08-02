@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/bifrost-temporal-state-v1.schema.json",
+  "title": "Bifrost Temporal Quantum State v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "state_id",
+    "created_at",
+    "temporal_coordinate",
+    "sequence",
+    "premaq",
+    "basis",
+    "amplitudes",
+    "probabilities",
+    "derivatives",
+    "normalisation",
+    "entropy",
+    "spiral",
+    "history",
+    "receipts",
+    "interpretation"
+  ],
+  "$defs": {
+    "axis": {
+      "enum": ["P", "C", "R", "E", "M", "A", "Q"]
+    },
+    "complex": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["re", "im"],
+      "properties": {
+        "re": { "type": "number" },
+        "im": { "type": "number" }
+      }
+    },
+    "axisNumberMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P", "C", "R", "E", "M", "A", "Q"],
+      "properties": {
+        "P": { "type": "number" },
+        "C": { "type": "number" },
+        "R": { "type": "number" },
+        "E": { "type": "number" },
+        "M": { "type": "number" },
+        "A": { "type": "number" },
+        "Q": { "type": "number" }
+      }
+    }
+  },
+  "properties": {
+    "schema": { "const": "arcsweep.bifrost-temporal-state/v0.1" },
+    "state_id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "temporal_coordinate": { "type": "number" },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "premaq": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "receipt_id", "registry_version", "model_version", "observed_at"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "receipt_id": { "type": "string", "minLength": 1 },
+        "registry_version": { "type": "string", "minLength": 1 },
+        "model_version": { "type": "string", "minLength": 1 },
+        "observed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "basis": {
+      "type": "array",
+      "prefixItems": [
+        { "const": "P" },
+        { "const": "C" },
+        { "const": "R" },
+        { "const": "E" },
+        { "const": "M" },
+        { "const": "A" },
+        { "const": "Q" }
+      ],
+      "items": false,
+      "minItems": 7,
+      "maxItems": 7
+    },
+    "amplitudes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P", "C", "R", "E", "M", "A", "Q"],
+      "properties": {
+        "P": { "$ref": "#/$defs/complex" },
+        "C": { "$ref": "#/$defs/complex" },
+        "R": { "$ref": "#/$defs/complex" },
+        "E": { "$ref": "#/$defs/complex" },
+        "M": { "$ref": "#/$defs/complex" },
+        "A": { "$ref": "#/$defs/complex" },
+        "Q": { "$ref": "#/$defs/complex" }
+      }
+    },
+    "probabilities": { "$ref": "#/$defs/axisNumberMap" },
+    "derivatives": { "$ref": "#/$defs/axisNumberMap" },
+    "confidence": { "type": "object" },
+    "uncertainty": { "type": "object" },
+    "normalisation": { "type": "number", "minimum": 0.999999, "maximum": 1.000001 },
+    "entropy": { "type": "number", "minimum": 0 },
+    "spiral": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycle", "radius", "angle", "outward_distance"],
+      "properties": {
+        "cycle": { "type": "integer", "minimum": 0 },
+        "radius": { "type": "number", "minimum": 0 },
+        "angle": { "type": "number" },
+        "outward_distance": { "type": "number", "minimum": 0 }
+      }
+    },
+    "history": { "type": "array", "maxItems": 128 },
+    "receipts": { "type": "array", "maxItems": 256 },
+    "interpretation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["formalism", "physical_claim", "note"],
+      "properties": {
+        "formalism": { "const": "temporal-quantum-state-machine" },
+        "physical_claim": { "const": false },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

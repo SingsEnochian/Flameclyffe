@@ -36,6 +36,15 @@ function publishLegacyObservatoryPages() {
         recursive: true,
         force: true,
       });
+
+      await cp(
+        resolve(REPO_ROOT, 'starwell/deep-observer/schemas'),
+        resolve(OUT_DIR, 'schemas'),
+        {
+          recursive: true,
+          force: true,
+        },
+      );
     },
   };
 }

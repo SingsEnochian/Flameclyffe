@@ -6,6 +6,7 @@ on:
     paths:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
+      - "starwell/deep-observer/schemas/**"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/hearthgate-windows-installer.yml"
@@ -17,6 +18,7 @@ on:
     paths:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
+      - "starwell/deep-observer/schemas/**"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/hearthgate-windows-installer.yml"
@@ -96,21 +98,61 @@ jobs:
             throw "Installer is unexpectedly small: $($installer.Length) bytes."
           }
 
-          $unpackedStarwell = "dist-electron/win-unpacked/resources/app/public/starwell/index.html"
-          $unpackedGlyphStudio = "dist-electron/win-unpacked/resources/app/public/starwell/glyph-studio/index.html"
-          if (-not (Test-Path $unpackedStarwell)) {
-            throw "Packaged installer is missing STARWELL framework entry: $unpackedStarwell"
+          $unpackedRoot = "dist-electron/win-unpacked/resources/app/public/starwell"
+          $unpackedStarwell = "$unpackedRoot/index.html"
+          $unpackedGlyphStudio = "$unpackedRoot/glyph-studio/index.html"
+          $unpackedArcsweep = "$unpackedRoot/arcsweep-continuity/index.html"
+          $unpackedBifrostManifest = "$unpackedRoot/modules/bifrost-arcsweep.module.json"
+          $unpackedPremaqSchema = "$unpackedRoot/schemas/premaq-state-v2.schema.json"
+          $unpackedBifrostSchema = "$unpackedRoot/schemas/bifrost-temporal-state-v1.schema.json"
+
+          foreach ($required in @(
+            $unpackedStarwell,
+            $unpackedGlyphStudio,
+            $unpackedArcsweep,
+            $unpackedBifrostManifest,
+            $unpackedPremaqSchema,
+            $unpackedBifrostSchema
+          )) {
+            if (-not (Test-Path $required)) {
+              throw "Packaged installer is missing required Bifröst/STARWELL file: $required"
+            }
           }
-          if (-not (Test-Path $unpackedGlyphStudio)) {
-            throw "Packaged installer is missing Glyph Studio entry: $unpackedGlyphStudio"
-          }
+
           $starwellHtml = Get-Content -Raw -Path $unpackedStarwell
           $glyphHtml = Get-Content -Raw -Path $unpackedGlyphStudio
-          if (-not $starwellHtml.Contains('/starwell/')) {
-            throw "Packaged STARWELL entry does not use the /starwell/ asset base."
+          $arcsweepHtml = Get-Content -Raw -Path $unpackedArcsweep
+          foreach ($page in @(
+            @{ Name = "STARWELL"; Html = $starwellHtml },
+            @{ Name = "Glyph Studio"; Html = $glyphHtml },
+            @{ Name = "Arcsweep"; Html = $arcsweepHtml }
+          )) {
+            if (-not $page.Html.Contains('/starwell/')) {
+              throw "Packaged $($page.Name) entry does not use the /starwell/ asset base."
+            }
           }
-          if (-not $glyphHtml.Contains('/starwell/')) {
-            throw "Packaged Glyph Studio entry does not use the /starwell/ asset base."
+
+          $manifest = Get-Content -Raw -Path $unpackedBifrostManifest | ConvertFrom-Json
+          if ($manifest.moduleId -ne "bifrost-arcsweep") {
+            throw "Packaged Bifröst manifest has the wrong moduleId."
+          }
+          if ($manifest.engine.formalism -ne "temporal-quantum-state-machine" -or $manifest.engine.physicalClaim -ne $false) {
+            throw "Packaged Bifröst manifest violates the bounded formalism contract."
+          }
+          if ($manifest.authorityContract.hearthside -ne "evidence-grounded-observational") {
+            throw "Packaged Bifröst manifest does not preserve Hearthside evidence authority."
+          }
+          if ($manifest.authorityContract.targetside -ne "canon-grounded-projected") {
+            throw "Packaged Bifröst manifest does not preserve Targetside projection authority."
+          }
+
+          $premaqSchema = Get-Content -Raw -Path $unpackedPremaqSchema | ConvertFrom-Json
+          $bifrostSchema = Get-Content -Raw -Path $unpackedBifrostSchema | ConvertFrom-Json
+          if ($premaqSchema.title -ne "PREMAQ Observation State v2") {
+            throw "Packaged PREMAQ schema is not v2."
+          }
+          if ($bifrostSchema.title -ne "Bifrost Temporal Quantum State v1") {
+            throw "Packaged Bifröst temporal schema is invalid."
           }
 
           $hash = Get-FileHash -Path $installer.FullName -Algorithm SHA256
@@ -126,7 +168,8 @@ jobs:
           - File: ``$($installer.Name)``
           - Size: $([math]::Round($installer.Length / 1MB, 2)) MB
           - SHA-256: ``$($hash.Hash)``
-          - Framework: bundled STARWELL + Glyph Studio
+          - Framework: bundled STARWELL + Glyph Studio + Bifröst Arcsweep
+          - State contracts: PREMAQ v2 + Bifröst Temporal Quantum State v1
           - Font compiler: local FontForge sidecar adapter
           - Signing: unsigned development build
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8

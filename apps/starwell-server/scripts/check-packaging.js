@@ -22,8 +22,12 @@ const requiredFiles = [
   'public/starwell/index.html',
   'public/starwell/glyph-studio/index.html',
   'public/starwell/signal-well/index.html',
+  'public/starwell/arcsweep-continuity/index.html',
   'public/starwell/modules/signal-well.module.json',
+  'public/starwell/modules/bifrost-arcsweep.module.json',
   'public/starwell/modules/signal-well/adapters/radio-jove-live.adapter.json',
+  'public/starwell/schemas/premaq-state-v2.schema.json',
+  'public/starwell/schemas/bifrost-temporal-state-v1.schema.json',
 ];
 
 for (const relativePath of requiredFiles) {
@@ -36,6 +40,7 @@ for (const relativePath of [
   'public/starwell/index.html',
   'public/starwell/glyph-studio/index.html',
   'public/starwell/signal-well/index.html',
+  'public/starwell/arcsweep-continuity/index.html',
 ]) {
   const absolutePath = path.join(root, relativePath);
   if (!fs.existsSync(absolutePath)) continue;
@@ -72,6 +77,36 @@ if (fs.existsSync(signalWellManifestPath)) {
   }
 }
 
+const bifrostManifestPath = path.join(root, 'public', 'starwell', 'modules', 'bifrost-arcsweep.module.json');
+if (fs.existsSync(bifrostManifestPath)) {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(bifrostManifestPath, 'utf8'));
+    if (manifest.moduleId !== 'bifrost-arcsweep') {
+      errors.push('Bifröst Arcsweep manifest has the wrong moduleId.');
+    }
+    if (manifest.delivery !== 'bundled-core' || manifest.enabledByDefault !== true) {
+      errors.push('Bifröst Arcsweep must be declared as an enabled bundled-core module.');
+    }
+    if (manifest.route !== '/starwell/arcsweep-continuity/' || manifest.entrypoint !== 'arcsweep-continuity/index.html') {
+      errors.push('Bifröst Arcsweep manifest has an invalid packaged route or entrypoint.');
+    }
+    if (manifest.engine?.formalism !== 'temporal-quantum-state-machine' || manifest.engine?.physicalClaim !== false) {
+      errors.push('Bifröst Arcsweep must preserve its bounded temporal-quantum interpretation contract.');
+    }
+    if (!manifest.capabilities?.includes('premaq-v2-ingest') || !manifest.capabilities?.includes('collapse-release-cycles')) {
+      errors.push('Bifröst Arcsweep manifest is missing PREMAQ or collapse-release capability.');
+    }
+    if (manifest.authorityContract?.hearthside !== 'evidence-grounded-observational') {
+      errors.push('Bifröst Arcsweep must preserve Hearthside evidence authority.');
+    }
+    if (manifest.authorityContract?.targetside !== 'canon-grounded-projected') {
+      errors.push('Bifröst Arcsweep must preserve Targetside projection authority.');
+    }
+  } catch (error) {
+    errors.push(`Bifröst Arcsweep manifest is invalid JSON: ${error.message}`);
+  }
+}
+
 const radioJoveAdapterPath = path.join(
   root,
   'public',
@@ -92,6 +127,22 @@ if (fs.existsSync(radioJoveAdapterPath)) {
     }
   } catch (error) {
     errors.push(`Radio JOVE adapter is invalid JSON: ${error.message}`);
+  }
+}
+
+for (const [relativePath, expectedId] of [
+  ['public/starwell/schemas/premaq-state-v2.schema.json', 'https://flameclyffe.local/schemas/premaq-state-v2.schema.json'],
+  ['public/starwell/schemas/bifrost-temporal-state-v1.schema.json', 'https://flameclyffe.local/schemas/bifrost-temporal-state-v1.schema.json'],
+]) {
+  const schemaPath = path.join(root, relativePath);
+  if (!fs.existsSync(schemaPath)) continue;
+  try {
+    const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+    if (schema.$id !== expectedId) {
+      errors.push(`${relativePath} has the wrong schema identifier.`);
+    }
+  } catch (error) {
+    errors.push(`${relativePath} is invalid JSON: ${error.message}`);
   }
 }
 
@@ -145,7 +196,8 @@ console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
 console.log(' services: core + local FontForge sidecar');
-console.log(' framework: /starwell/ + /starwell/glyph-studio/ + /starwell/signal-well/ bundled');
-console.log(' modules: Signal Well core + Radio JOVE live listening bundled; specialist adapters optional');
+console.log(' framework: /starwell/ + Glyph Studio + Signal Well + Bifröst Arcsweep bundled');
+console.log(' schemas: PREMAQ v2 + Bifröst temporal state bundled');
+console.log(' modules: Signal Well, Radio JOVE live listening, and Bifröst Arcsweep core');
 console.log(` installer: ${pkg.build.artifactName}`);
 console.log(' signing: not configured; CI output will be unsigned');
