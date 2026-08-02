@@ -1,20 +1,24 @@
 {
-  "schemaVersion": "0.1.0",
+  "schemaVersion": "0.2.0",
   "moduleId": "bifrost-arcsweep",
   "displayName": "Bifröst Arcsweep",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "delivery": "bundled-core",
   "enabledByDefault": true,
   "route": "/starwell/arcsweep-continuity/",
   "entrypoint": "arcsweep-continuity/index.html",
   "engine": {
     "module": "src/arcsweep-temporal-quantum/engine.js",
+    "kernel": "src/hearthweave-kernel/dual-aspect.js",
     "formalism": "temporal-quantum-state-machine",
-    "physicalClaim": false
+    "physicalClaim": false,
+    "packetAuthority": "hearthweave-kernel"
   },
   "schemas": {
     "premaq": "schemas/premaq-state-v2.schema.json",
-    "temporalState": "schemas/bifrost-temporal-state-v1.schema.json"
+    "temporalState": "schemas/bifrost-temporal-state-v1.schema.json",
+    "dualAspectPacket": "schemas/dual-aspect-packet-v1.schema.json",
+    "dualAspectReceipt": "schemas/dual-aspect-receipt-v1.schema.json"
   },
   "capabilities": [
     "premaq-v2-ingest",
@@ -23,22 +27,34 @@
     "collapse-release-cycles",
     "outward-spiral-memory",
     "dual-presence-anchoring",
+    "dual-aspect-packet-freeze",
+    "single-state-sensory-activation",
+    "explicit-degraded-mode",
+    "deterministic-replay",
     "temporal-twist-measurement",
     "canon-calibrated-world-projection",
+    "sovereign-house-overlays",
+    "joined-render-receipts",
     "provenance-preserving-receipts"
   ],
   "authorityContract": {
+    "packetAuthor": "hearthweave-kernel",
+    "arcsweep": "human-reviewed-trigger-and-receipt",
     "hearthside": "evidence-grounded-observational",
     "targetside": "canon-grounded-projected",
+    "renderers": "derive-only-no-refetch-after-activation",
     "rawEvidenceMutable": false,
-    "projectionMayClaimExternalCause": false
+    "projectionMayClaimExternalCause": false,
+    "canonFoundationMaySilentlyMergeOverlay": false
   },
   "installContract": {
     "required": true,
     "verifyRoute": "arcsweep-continuity/index.html",
     "verifySchemas": [
       "schemas/premaq-state-v2.schema.json",
-      "schemas/bifrost-temporal-state-v1.schema.json"
+      "schemas/bifrost-temporal-state-v1.schema.json",
+      "schemas/dual-aspect-packet-v1.schema.json",
+      "schemas/dual-aspect-receipt-v1.schema.json"
     ]
   }
 }
