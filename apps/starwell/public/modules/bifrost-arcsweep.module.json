@@ -9,6 +9,9 @@
   "entrypoint": "arcsweep-continuity/index.html",
   "engine": {
     "module": "src/arcsweep-temporal-quantum/engine.js",
+    "runtime": "src/arcsweep-temporal-quantum/runtime.js",
+    "libraryBridge": "src/arcsweep-canon/bifrost-library-bridge.js",
+    "libraryContract": "src/arcsweep-canon/library-contract.js",
     "kernel": "src/hearthweave-kernel/index.js",
     "formalism": "temporal-quantum-state-machine",
     "physicalClaim": false,
@@ -18,7 +21,8 @@
     "premaq": "schemas/premaq-state-v2.schema.json",
     "temporalState": "schemas/bifrost-temporal-state-v1.schema.json",
     "dualAspectPacket": "schemas/dual-aspect-packet-v1.schema.json",
-    "dualAspectReceipt": "schemas/dual-aspect-receipt-v1.schema.json"
+    "dualAspectReceipt": "schemas/dual-aspect-receipt-v1.schema.json",
+    "canonLibraryManifest": "schemas/canon-library-manifest-v1.schema.json"
   },
   "capabilities": [
     "premaq-v2-ingest",
@@ -35,7 +39,14 @@
     "canon-calibrated-world-projection",
     "sovereign-house-overlays",
     "joined-render-receipts",
-    "provenance-preserving-receipts"
+    "provenance-preserving-receipts",
+    "canon-library-manifest-v1",
+    "desktop-authoritative-library",
+    "loopback-library-bridge",
+    "paired-web-desktop-access",
+    "approval-gated-library-writes",
+    "canon-library-import-receipts",
+    "canon-library-rollback"
   ],
   "authorityContract": {
     "packetAuthor": "hearthweave-kernel",
@@ -47,14 +58,31 @@
     "projectionMayClaimExternalCause": false,
     "canonFoundationMaySilentlyMergeOverlay": false
   },
+  "libraryContract": {
+    "manifestSchema": "hearthgate.canon-library-manifest/v1",
+    "authority": "desktop-authoritative",
+    "transport": "loopback-only",
+    "webRole": "paired-local-window-with-optional-offline-mirror",
+    "durableWritesRequireApproval": true,
+    "sourceCanonOverwriteAllowed": false,
+    "foundationOverlaySeparate": true,
+    "receiptRequired": true
+  },
   "installContract": {
     "required": true,
     "verifyRoute": "arcsweep-continuity/index.html",
+    "verifyCompiledFragments": [
+      "ARCSWEEP_BIFROST",
+      "hearthgate.canon-library-manifest/v1",
+      "HEARTHGATE_LIBRARY_APPROVAL_REQUIRED",
+      "/api/v1/bifrost/library"
+    ],
     "verifySchemas": [
       "schemas/premaq-state-v2.schema.json",
       "schemas/bifrost-temporal-state-v1.schema.json",
       "schemas/dual-aspect-packet-v1.schema.json",
-      "schemas/dual-aspect-receipt-v1.schema.json"
+      "schemas/dual-aspect-receipt-v1.schema.json",
+      "schemas/canon-library-manifest-v1.schema.json"
     ]
   }
 }
