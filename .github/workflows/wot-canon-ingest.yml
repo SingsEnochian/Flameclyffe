@@ -42,7 +42,7 @@ jobs:
           node-version: '24'
 
       - name: Restore resumable crawl state
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             canon/taaveren-vaen/wot-fandom/data/raw
@@ -50,7 +50,6 @@ jobs:
           key: wot-fandom-crawl-${{ runner.os }}-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             wot-fandom-crawl-${{ runner.os }}-${{ github.event.pull_request.head.ref || github.ref_name }}-
-          save-always: true
 
       - name: Validate Canon Steward scripts
         run: |
@@ -114,6 +113,15 @@ jobs:
             canon/taaveren-vaen/wot-fandom/data/receipts
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Save resumable crawl state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            canon/taaveren-vaen/wot-fandom/data/raw
+            canon/taaveren-vaen/wot-fandom/data/index/pages.json
+          key: wot-fandom-crawl-${{ runner.os }}-${{ github.event.pull_request.head.ref || github.ref_name }}-${{ github.run_id }}
 
       - name: Write Steward summary
         if: always()
