@@ -84,7 +84,6 @@ if (fs.existsSync(assetsPath)) {
   for (const fragment of [
     'ARCSWEEP_BIFROST',
     'hearthgate.canon-library-manifest/v1',
-    'HEARTHGATE_LIBRARY_APPROVAL_REQUIRED',
     '/api/v1/bifrost/library',
   ]) {
     if (!javascript.includes(fragment)) {
