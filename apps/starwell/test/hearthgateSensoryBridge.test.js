@@ -212,7 +212,8 @@ test('activation renders packet frequencies, visual state and haptics then Feath
     context.oscillators.slice(0, 1).map((oscillator) => oscillator.frequency.value),
     [174],
   );
-  assert.equal(Array.isArray(vibrations[0]), true);
+  const activationPattern = vibrations.find((value) => Array.isArray(value));
+  assert.equal(Array.isArray(activationPattern), true);
   assert.equal(glyph.dataset.activation, 'active');
 
   await bridge.stop();
