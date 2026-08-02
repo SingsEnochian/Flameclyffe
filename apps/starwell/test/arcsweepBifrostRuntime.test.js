@@ -37,7 +37,7 @@ function premaq() {
   };
 }
 
-test('persists the temporal state and bridge packet for Arcsweep', () => {
+test('persists separate Hearthside and Targetside states plus the bridge packet', () => {
   const storage = new MemoryStorage();
   const runtime = createArcsweepBifrostRuntime({ storage });
   runtime.initialise(premaq(), { idFactory: () => 'initial' });
@@ -45,7 +45,8 @@ test('persists the temporal state and bridge packet for Arcsweep', () => {
   runtime.cycle({ focus: 'Q', idFactory: () => 'cycle' });
 
   assert.ok(storage.getItem(BIFROST_STATE_STORAGE_KEY));
-  assert.equal(runtime.getState().spiral.cycle, 1);
+  assert.equal(runtime.getHearthside().spiral.cycle, 0);
+  assert.equal(runtime.getTargetside().spiral.cycle, 1);
 
   const bridge = runtime.bridge({
     premaq: premaq(),
@@ -60,10 +61,12 @@ test('persists the temporal state and bridge packet for Arcsweep', () => {
   });
 
   assert.equal(bridge.world_id, 'terra-aeterna');
+  assert.notEqual(bridge.hearthside.state_id, bridge.targetside.state_id);
   assert.ok(storage.getItem(BIFROST_BRIDGE_STORAGE_KEY));
 
   const restored = createArcsweepBifrostRuntime({ storage });
-  assert.equal(restored.getState().spiral.cycle, 1);
+  assert.equal(restored.getHearthside().spiral.cycle, 0);
+  assert.equal(restored.getTargetside().spiral.cycle, 1);
   assert.equal(restored.getBridge().bridge_packet_id, bridge.bridge_packet_id);
 });
 
@@ -75,6 +78,8 @@ test('clears both persisted shores without touching PREMAQ source data', () => {
   runtime.clear();
 
   assert.equal(runtime.getState(), null);
+  assert.equal(runtime.getHearthside(), null);
+  assert.equal(runtime.getTargetside(), null);
   assert.equal(runtime.getBridge(), null);
   assert.equal(storage.getItem(BIFROST_STATE_STORAGE_KEY), null);
   assert.equal(source.id, 'premaq-runtime');
