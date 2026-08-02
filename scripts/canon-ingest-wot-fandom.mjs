@@ -11,6 +11,7 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import path from 'node:path';
+import { createInterface } from 'node:readline';
 
 const DEFAULT_ROOT = 'canon/taaveren-vaen/wot-fandom';
 const args = parseArgs(process.argv.slice(2));
@@ -23,7 +24,16 @@ const RECEIPT_DIR = path.join(ROOT, 'data/receipts');
 const RAW_FILE = path.join(ROOT, manifest.outputs.raw_pages);
 const PAGE_INDEX_FILE = path.join(ROOT, manifest.outputs.page_index);
 const STATE_FILE = path.join(RAW_DIR, 'crawl-state.json');
-const REQUEST_DELAY_MS = Math.max(100, Number(args.delayMs ?? manifest.snapshot.request_delay_ms ?? 350));
+const BASE_DELAY_MS = Math.max(
+  250,
+  Number(args.delayMs ?? manifest.snapshot.request_delay_ms ?? 900),
+);
+const BATCH_SIZE = Math.min(
+  25,
+  Math.max(1, Number(args.batchSize ?? manifest.snapshot.batch_size ?? 25)),
+);
+const MAX_RETRIES = Math.max(3, Number(manifest.snapshot.max_retries ?? 10));
+const MAX_BACKOFF_MS = Math.max(30_000, Number(manifest.snapshot.max_backoff_ms ?? 120_000));
 const MAX_PAGES = args.maxPages === null ? null : Math.max(1, Number(args.maxPages));
 const ONLY_NAMESPACE = args.namespace === null ? null : Number(args.namespace);
 
@@ -36,6 +46,7 @@ function parseArgs(argv) {
     maxPages: null,
     namespace: null,
     delayMs: null,
+    batchSize: null,
     root: null,
   };
   for (const arg of argv) {
@@ -44,6 +55,7 @@ function parseArgs(argv) {
     else if (arg.startsWith('--max-pages=')) parsed.maxPages = arg.split('=')[1];
     else if (arg.startsWith('--namespace=')) parsed.namespace = arg.split('=')[1];
     else if (arg.startsWith('--delay-ms=')) parsed.delayMs = arg.split('=')[1];
+    else if (arg.startsWith('--batch-size=')) parsed.batchSize = arg.split('=')[1];
     else if (arg.startsWith('--root=')) parsed.root = arg.slice('--root='.length);
     else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -52,6 +64,18 @@ function parseArgs(argv) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const hash = (value) => createHash('sha256').update(value).digest('hex');
+
+function jitter(maximum = 250) {
+  return Math.floor(Math.random() * (maximum + 1));
+}
+
+function parseRetryAfter(value) {
+  if (!value) return null;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? Math.max(0, timestamp - Date.now()) : null;
+}
 
 async function hashFile(filePath) {
   const digest = createHash('sha256');
@@ -79,6 +103,42 @@ async function atomicJson(filePath, value) {
   await rename(temporaryPath, filePath);
 }
 
+async function completedIdsFromArchive(filePath) {
+  const completed = new Set();
+  if (!(await exists(filePath))) return completed;
+
+  const lines = createInterface({
+    input: createReadStream(filePath, { encoding: 'utf8' }),
+    crlfDelay: Infinity,
+  });
+  let lineNumber = 0;
+  for await (const line of lines) {
+    lineNumber += 1;
+    if (!line.trim()) continue;
+    try {
+      const record = JSON.parse(line);
+      if (Number.isInteger(record.page_id)) completed.add(record.page_id);
+    } catch (error) {
+      throw new Error(`Invalid NDJSON at ${filePath}:${lineNumber}: ${error.message}`);
+    }
+  }
+  return completed;
+}
+
+let adaptiveDelayMs = BASE_DELAY_MS;
+let previousRequestStartedAt = 0;
+
+async function throttle() {
+  const elapsed = Date.now() - previousRequestStartedAt;
+  const waitMs = Math.max(0, adaptiveDelayMs - elapsed) + jitter(125);
+  if (waitMs > 0) await sleep(waitMs);
+  previousRequestStartedAt = Date.now();
+}
+
+function retryableHttpStatus(status) {
+  return [408, 425, 429, 500, 502, 503, 504].includes(status);
+}
+
 async function api(params) {
   const url = new URL(API);
   for (const [key, value] of Object.entries({
@@ -94,38 +154,57 @@ async function api(params) {
   }
 
   let lastError;
-  for (let attempt = 1; attempt <= 6; attempt += 1) {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
+    await throttle();
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 45_000);
+    const timeout = setTimeout(() => controller.abort(), 60_000);
     try {
       const response = await fetch(url, {
         signal: controller.signal,
         headers: {
           accept: 'application/json',
-          'user-agent': 'Hearthgate-Canon-Steward/1.1 (Taaveren Vaen; attribution-preserving research archive)',
+          'user-agent': 'Hearthgate-Canon-Steward/1.2 (Taaveren Vaen; attribution-preserving research archive)',
         },
       });
+
       if (response.ok) {
         const body = await response.json();
-        if (!body.error) return body;
+        if (!body.error) {
+          adaptiveDelayMs = Math.max(BASE_DELAY_MS, Math.floor(adaptiveDelayMs * 0.9));
+          return body;
+        }
         if (body.error.code !== 'maxlag') {
-          throw new Error(`${body.error.code}: ${body.error.info}`);
+          const error = new Error(`${body.error.code}: ${body.error.info}`);
+          error.retryable = false;
+          throw error;
         }
         lastError = new Error(`${body.error.code}: ${body.error.info}`);
       } else {
         lastError = new Error(`MediaWiki API request failed: ${response.status} ${response.statusText}`);
-        if (![429, 500, 502, 503, 504].includes(response.status)) throw lastError;
+        if (!retryableHttpStatus(response.status)) {
+          lastError.retryable = false;
+          throw lastError;
+        }
       }
 
-      const retryAfterSeconds = Number(response.headers.get('retry-after'));
-      const waitMs = Number.isFinite(retryAfterSeconds)
-        ? retryAfterSeconds * 1000
-        : Math.min(30_000, 750 * (2 ** (attempt - 1)));
+      adaptiveDelayMs = Math.min(5_000, Math.max(BASE_DELAY_MS * 2, Math.ceil(adaptiveDelayMs * 1.5)));
+      const retryAfterMs = parseRetryAfter(response.headers.get('retry-after'));
+      const exponentialMs = Math.min(MAX_BACKOFF_MS, 1_500 * (2 ** (attempt - 1)));
+      const waitMs = Math.max(retryAfterMs ?? 0, exponentialMs) + jitter(750);
+      console.warn(
+        `[Canon Steward] ${lastError.message}; retry ${attempt}/${MAX_RETRIES} in ${waitMs} ms.`,
+      );
       await sleep(waitMs);
     } catch (error) {
       lastError = error;
-      if (attempt === 6) break;
-      await sleep(Math.min(30_000, 750 * (2 ** (attempt - 1))));
+      if (error.retryable === false) throw error;
+      if (attempt === MAX_RETRIES) break;
+      adaptiveDelayMs = Math.min(5_000, Math.max(BASE_DELAY_MS * 2, Math.ceil(adaptiveDelayMs * 1.5)));
+      const waitMs = Math.min(MAX_BACKOFF_MS, 1_500 * (2 ** (attempt - 1))) + jitter(750);
+      console.warn(
+        `[Canon Steward] ${error.message}; retry ${attempt}/${MAX_RETRIES} in ${waitMs} ms.`,
+      );
+      await sleep(waitMs);
     } finally {
       clearTimeout(timeout);
     }
@@ -157,29 +236,35 @@ async function enumerateNamespace(namespace) {
     });
     pages.push(...(body.query?.allpages || []));
     apcontinue = body.continue?.apcontinue || null;
-    await sleep(REQUEST_DELAY_MS);
   } while (apcontinue);
   return pages;
 }
 
 function contentContinuations(continuation) {
   if (!continuation) return null;
-  const allowed = ['clcontinue', 'plcontinue', 'imcontinue'];
+  const allowed = ['continue', 'clcontinue', 'plcontinue', 'imcontinue'];
   const selected = Object.fromEntries(
     allowed
       .filter((key) => continuation[key] !== undefined)
       .map((key) => [key, continuation[key]]),
   );
-  return Object.keys(selected).length ? selected : null;
+  return Object.keys(selected).length > 1 ? selected : null;
 }
 
-async function fetchPage(pageid) {
-  const aggregate = { categories: [], links: [], images: [] };
+async function fetchPages(pageids) {
+  const aggregates = new Map(
+    pageids.map((pageid) => [pageid, {
+      basePage: null,
+      categories: [],
+      links: [],
+      images: [],
+    }]),
+  );
   let continuation = null;
-  let basePage = null;
+
   do {
     const body = await api({
-      pageids: pageid,
+      pageids: pageids.join('|'),
       prop: 'revisions|categories|links|images|info|pageprops',
       rvprop: 'ids|timestamp|user|userid|comment|content|contentmodel|sha1|size',
       rvslots: 'main',
@@ -190,16 +275,28 @@ async function fetchPage(pageid) {
       inprop: 'url',
       ...(continuation || {}),
     });
-    const page = body.query?.pages?.[0];
-    if (!page) throw new Error(`Missing page ${pageid}`);
-    basePage ||= page;
-    aggregate.categories.push(...(page.categories || []));
-    aggregate.links.push(...(page.links || []));
-    aggregate.images.push(...(page.images || []));
+
+    for (const page of body.query?.pages || []) {
+      const aggregate = aggregates.get(page.pageid);
+      if (!aggregate) continue;
+      aggregate.basePage ||= page;
+      aggregate.categories.push(...(page.categories || []));
+      aggregate.links.push(...(page.links || []));
+      aggregate.images.push(...(page.images || []));
+    }
     continuation = contentContinuations(body.continue);
-    await sleep(REQUEST_DELAY_MS);
   } while (continuation);
-  return { ...basePage, ...aggregate };
+
+  return pageids.map((pageid) => {
+    const aggregate = aggregates.get(pageid);
+    if (!aggregate?.basePage) throw new Error(`Missing page ${pageid}`);
+    return {
+      ...aggregate.basePage,
+      categories: aggregate.categories,
+      links: aggregate.links,
+      images: aggregate.images,
+    };
+  });
 }
 
 function createRecord(page) {
@@ -247,11 +344,20 @@ function createRecord(page) {
   };
 }
 
+function chunks(values, size) {
+  const output = [];
+  for (let index = 0; index < values.length; index += size) {
+    output.push(values.slice(index, index + size));
+  }
+  return output;
+}
+
 const runId = randomUUID();
 const runStarted = new Date().toISOString();
 let pageIndex = [];
 let pageCount = 0;
 let selectedCount = 0;
+let selectedCaptured = 0;
 
 try {
   if (args.reset) {
@@ -282,23 +388,26 @@ try {
     process.exit(0);
   }
 
-  const rawExists = await exists(RAW_FILE);
-  const priorState = rawExists && await exists(STATE_FILE)
+  if (!(await exists(RAW_FILE))) await writeFile(RAW_FILE, '');
+  const priorState = await exists(STATE_FILE)
     ? JSON.parse(await readFile(STATE_FILE, 'utf8'))
-    : { completed_page_ids: [], pages: 0, started_at: runStarted };
-  if (!rawExists) await writeFile(RAW_FILE, '');
-
-  const completed = new Set(priorState.completed_page_ids || []);
+    : { started_at: runStarted };
+  const completed = await completedIdsFromArchive(RAW_FILE);
   const selectedIndex = MAX_PAGES === null ? pageIndex : pageIndex.slice(0, MAX_PAGES);
   selectedCount = selectedIndex.length;
+  selectedCaptured = selectedIndex.filter((page) => completed.has(page.pageid)).length;
   pageCount = completed.size;
 
-  for (const summary of selectedIndex) {
-    if (completed.has(summary.pageid)) continue;
-    const record = createRecord(await fetchPage(summary.pageid));
-    await appendFile(RAW_FILE, `${JSON.stringify(record)}\n`, 'utf8');
-    completed.add(summary.pageid);
+  const remaining = selectedIndex.filter((page) => !completed.has(page.pageid));
+  for (const batch of chunks(remaining, BATCH_SIZE)) {
+    const pages = await fetchPages(batch.map((page) => page.pageid));
+    const records = pages.map(createRecord);
+    await appendFile(RAW_FILE, `${records.map((record) => JSON.stringify(record)).join('\n')}\n`, 'utf8');
+    for (const record of records) completed.add(record.page_id);
     pageCount = completed.size;
+    selectedCaptured += records.length;
+
+    const fullSelectionComplete = selectedCaptured >= selectedCount;
     await atomicJson(STATE_FILE, {
       schema: 'hearthgate.canon-crawl-state.v1',
       ingest_id: manifest.ingest_id,
@@ -306,21 +415,29 @@ try {
       pages: pageCount,
       total_discovered: pageIndex.length,
       selected_pages: selectedCount,
-      started_at: priorState.started_at,
+      selected_captured: selectedCaptured,
+      started_at: priorState.started_at || runStarted,
       updated_at: new Date().toISOString(),
-      complete: MAX_PAGES === null && pageCount >= pageIndex.length,
-      run_mode: MAX_PAGES === null ? 'full' : 'bounded',
+      complete: MAX_PAGES === null && ONLY_NAMESPACE === null && fullSelectionComplete,
+      run_mode: MAX_PAGES === null && ONLY_NAMESPACE === null ? 'full' : 'bounded',
+      batch_size: BATCH_SIZE,
+      request_delay_ms: adaptiveDelayMs,
     });
-    process.stdout.write(`\rCaptured ${pageCount}/${selectedCount} selected pages (${pageIndex.length} discovered)…`);
+    process.stdout.write(
+      `\rCaptured ${selectedCaptured}/${selectedCount} selected pages `
+      + `(${pageCount} archived; ${pageIndex.length} discovered)…`,
+    );
   }
   process.stdout.write('\n');
 
-  const fullComplete = MAX_PAGES === null && pageCount >= pageIndex.length;
+  const fullComplete = MAX_PAGES === null
+    && ONLY_NAMESPACE === null
+    && selectedIndex.every((page) => completed.has(page.pageid));
   const receipt = {
     schema: 'hearthgate.canon-crawl-receipt.v1',
     receipt_id: runId,
     status: fullComplete ? 'complete' : 'partial',
-    run_mode: MAX_PAGES === null ? 'full' : 'bounded',
+    run_mode: MAX_PAGES === null && ONLY_NAMESPACE === null ? 'full' : 'bounded',
     ingest_id: manifest.ingest_id,
     world_key: manifest.world_key,
     source: manifest.source,
@@ -328,8 +445,12 @@ try {
     completed_at: new Date().toISOString(),
     pages: pageCount,
     selected_pages: selectedCount,
+    selected_captured: selectedIndex.filter((page) => completed.has(page.pageid)).length,
     total_discovered: pageIndex.length,
     namespaces,
+    batch_size: BATCH_SIZE,
+    base_request_delay_ms: BASE_DELAY_MS,
+    final_request_delay_ms: adaptiveDelayMs,
     raw_file: manifest.outputs.raw_pages,
     raw_sha256: await hashFile(RAW_FILE),
     page_index_sha256: await hashFile(PAGE_INDEX_FILE),
@@ -339,7 +460,7 @@ try {
   };
   const prefix = fullComplete ? 'crawl' : 'crawl-partial';
   await atomicJson(path.join(RECEIPT_DIR, `${prefix}-${Date.now()}.json`), receipt);
-  console.log(`${receipt.status.toUpperCase()} receipt written for ${pageCount} captured pages.`);
+  console.log(`${receipt.status.toUpperCase()} receipt written for ${pageCount} archived pages.`);
 } catch (error) {
   await atomicJson(path.join(RECEIPT_DIR, `crawl-failed-${Date.now()}.json`), {
     schema: 'hearthgate.canon-crawl-receipt.v1',
@@ -350,7 +471,10 @@ try {
     failed_at: new Date().toISOString(),
     pages: pageCount,
     selected_pages: selectedCount,
+    selected_captured: selectedCaptured,
     total_discovered: pageIndex.length,
+    batch_size: BATCH_SIZE,
+    request_delay_ms: adaptiveDelayMs,
     error: {
       name: error.name,
       message: error.message,
