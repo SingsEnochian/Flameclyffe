@@ -2,17 +2,22 @@
   "name": "hearthgate",
   "productName": "Hearthgate",
   "version": "0.1.0",
+  "description": "Local-first STARWELL, Arcsweep, and Bifröst observatory for Hearthgate.",
+  "author": "Hearthweave",
+  "license": "UNLICENSED",
   "type": "commonjs",
   "main": "electron/main.js",
   "scripts": {
     "start": "node launcher.js",
-    "start:core": "node server.js",
+    "start:core": "node server-secure.js",
     "fontforge:start": "node fontforge/server.js",
     "stage:starwell": "node scripts/stage-starwell.js",
-    "electron:dev": "electron .",
-    "electron:pack:win": "electron-builder --win dir --x64 --publish never",
-    "electron:build": "electron-builder",
-    "electron:build:win": "electron-builder --win nsis --x64 --publish never",
+    "prepare:assets": "node scripts/prepare-assets.js",
+    "test": "node --test test/*.test.js",
+    "electron:dev": "npm run prepare:assets && electron .",
+    "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never",
+    "electron:build": "npm run prepare:assets && electron-builder",
+    "electron:build:win": "npm run prepare:assets && electron-builder --win nsis --x64 --publish never",
     "check:packaging": "node scripts/check-packaging.js"
   },
   "dependencies": {
@@ -38,16 +43,31 @@
     "directories": {
       "output": "dist-electron"
     },
-    "asar": false,
+    "asar": true,
+    "asarUnpack": [
+      "server.js",
+      "server-secure.js",
+      "security/**",
+      "fontforge/**",
+      "flames/**",
+      "routes/**",
+      "public/**",
+      "build/hearthgate.png",
+      "node_modules/better-sqlite3/**",
+      "node_modules/bindings/**",
+      "node_modules/file-uri-to-path/**"
+    ],
     "files": [
       "**/*",
       "!dist-electron",
       "!*.md",
       "!.env",
       "!env_temp*",
-      "!data/**"
+      "!data/**",
+      "!test/**"
     ],
     "win": {
+      "icon": "build/hearthgate.png",
       "target": [
         {
           "target": "nsis",
