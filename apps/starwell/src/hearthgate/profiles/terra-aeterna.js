@@ -1,5 +1,15 @@
 import { defineHouseProfile } from '../contracts.js';
 
+const IDENTITY_JACOBIAN_7 = Object.freeze([
+  Object.freeze([1, 0, 0, 0, 0, 0, 0]),
+  Object.freeze([0, 1, 0, 0, 0, 0, 0]),
+  Object.freeze([0, 0, 1, 0, 0, 0, 0]),
+  Object.freeze([0, 0, 0, 1, 0, 0, 0]),
+  Object.freeze([0, 0, 0, 0, 1, 0, 0]),
+  Object.freeze([0, 0, 0, 0, 0, 1, 0]),
+  Object.freeze([0, 0, 0, 0, 0, 0, 1]),
+]);
+
 export const terraAeternaProfile = defineHouseProfile({
   id: 'terra-aeterna',
   name: 'Terra Aeterna',
@@ -34,9 +44,20 @@ export const terraAeternaProfile = defineHouseProfile({
     timeline: 'terra-aeterna-v0.1',
     initialDelta: 1,
     bridgeCoupling: 0.08,
-    focusAxis: 'Q',
-    measurementStrength: 0.65,
-    release: 0.35,
+    compressionRelease: {
+      focusAxis: 'Q',
+      enterThreshold: 0.82,
+      releaseThreshold: 0.68,
+      compressionGain: 1,
+      releaseFraction: 0.35,
+      derivativeRelease: 0.08,
+      memoryRelease: 0.04,
+      phaseReleaseGain: Math.PI / 4,
+      radialGain: 0.5,
+      entropyGain: 0.1,
+      angularGain: Math.PI / 3,
+      temporalWeights: { fold: 0.55, derivative: 0.20, entropy: 0.15, phase: 0.10 },
+    },
   },
   harmonicIdentity: {
     voice: 'hearthlight-north-star-lochflame',
@@ -45,6 +66,13 @@ export const terraAeternaProfile = defineHouseProfile({
     beatCeilingHz: 7.38,
     anchorInterval: 'perfect-fifth',
     livingInterval: 'minor-third',
+    compressionReleaseTone: {
+      toneLayerId: 'hearthlight-root',
+      rootHz: 220,
+      excursion: 5,
+      approvalState: 'pending',
+      approvalReceiptId: null,
+    },
   },
   visualIdentity: {
     structure: 'stonewood-moon-lattice',
@@ -57,9 +85,11 @@ export const terraAeternaProfile = defineHouseProfile({
     values: ['loyalty', 'love', 'joy', 'compassion'],
   },
   transferFunctions: {
-    version: 'terra-transfer/1.0.0',
+    version: 'terra-transfer/1.1.0',
     source_axes: ['P', 'C', 'R', 'E', 'M', 'A', 'Q'],
     outputs: ['glyph', 'tone', 'visual', 'haptic', 'narrative'],
+    jacobianVersion: 'terra-jacobian/reference-identity-v1',
+    jacobian: IDENTITY_JACOBIAN_7,
   },
   packages: [
     'hearthgate.design',
@@ -78,5 +108,6 @@ export const terraAeternaProfile = defineHouseProfile({
     canon: true,
     timeline: true,
     dualAspect: true,
+    compressionRelease: true,
   },
 });
