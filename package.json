@@ -8,6 +8,7 @@
   },
   "packageManager": "npm@11.16.0",
   "scripts": {
+    "contracts:verify": "node scripts/deny-stale-engine-contracts.mjs",
     "sigil:dev": "vite --config apps/sigil-activator/vite.config.js",
     "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
     "sigil:preview": "vite preview --config apps/sigil-activator/vite.config.js",
