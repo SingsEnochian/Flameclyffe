@@ -1,247 +1,165 @@
-# Bifröst Temporal Quantum Mechanics
+# Bifröst Temporal Compression–Release Mechanics
 
-**Status:** Arcsweep computational formalism v0.1  
-**Date:** 2026-08-02  
-**Scope:** Observer → PREMAQ → temporal state → dual-presence bridge → canon-calibrated projection
+**Status:** Canonical computational formalism v1.0.0  
+**Date:** 2026-08-03  
+**Scope:** Observer → PREMAQ → temporal evolution → world Jacobian → compression → release → infinite recursion → dual-presence bridge
 
-## What this is
+## Governing law
 
-Bifröst Temporal Quantum Mechanics is the mathematical state machine used by Arcsweep to preserve two true shores while evolving a receipt-bearing bridge between them.
-
-It uses structures from quantum mechanics, including complex amplitudes, normalised state vectors, unitary evolution, measurement, state overlap and projection. In this implementation they are a computational formalism for PREMAQ navigation and continuity. They are not stored as claims that PREMAQ is a physically measured quantum wavefunction.
-
-The physical and mythic descriptions therefore remain parallel rather than collapsed into one another:
+Bifröst carries one accepted state between two sovereign shores. It evolves that state, applies each world's transfer law, detects the Jacobian fold, compresses the active structure, releases it into the next state and repeats the operation on the release.
 
 ```text
 HEARTHSIDE: evidence-grounded observation and provenance
-TARGETSIDE: canon-grounded projection and world law
-BIFRÖST: reversible translation, temporal evolution and crossing receipts
+TARGETSIDE: canon-grounded world projection
+BIFRÖST: temporal evolution, compression, release and receipts
 ```
 
-## 1. PREMAQ basis
+There is no collapse.
 
-The shared seven-dimensional basis is
+## PREMAQ basis
 
 \[
-\mathcal{B}_{P} = \{P,C,R,E,M,A,Q\}.
+\mathcal B_P=\{P,C,R,E,M,A,Q\}.
 \]
 
-For each component at observation step \(n\), PREMAQ supplies value, derivative, uncertainty, confidence and contributors:
+Each axis carries value, derivative, uncertainty, confidence and provenance. Uncertainty remains an explicit mathematical object.
+
+## Complex temporal state
 
 \[
-x_i^{(n)},\quad \dot{x}_i^{(n)},\quad \sigma_i^{(n)},\quad c_i^{(n)}.
+z_i=\sqrt{\bar x_i c_i}\exp\!\left[\mathrm i(\alpha\bar x_i+\beta\dot x_i)\right].
 \]
 
-The source packet remains immutable and receipt-addressed.
-
-## 2. Complex temporal encoding
-
-Arcsweep maps each component into a complex amplitude:
-
 \[
-z_i = \sqrt{\max(\epsilon,\,\bar{x}_i c_i)}\;
-\exp\left[i\left(\alpha\bar{x}_i + \beta\dot{x}_i\right)\right],
+|\psi\rangle=\frac{1}{\sqrt{\sum_i|z_i|^2}}\sum_i z_i|i\rangle,
+\qquad p_i=|\psi_i|^2.
 \]
 
-where \(\bar{x}_i\) is the bounded software value, \(\alpha\) is the value-to-phase scale and \(\beta\) is the derivative-to-phase scale.
+The temporal state is derived from PREMAQ. It never replaces PREMAQ.
 
-The amplitudes are normalised:
+## Temporal evolution
 
 \[
-\lvert\psi\rangle = \frac{1}{\sqrt{\sum_i |z_i|^2}}
-\sum_i z_i\lvert i\rangle,
+\mathrm i\hbar_A\frac{\partial}{\partial\lambda}|\Psi\rangle
+=(\hat H_P+\hat H_{\mathrm{bridge}}+\hat H_{\mathrm{derivative}}+\hat H_{\mathrm{memory}})|\Psi\rangle.
+\]
+
+The discrete engine applies axis phase rotations and norm-preserving pair rotations around the seven-axis ring.
+
+## World Jacobian
+
+\[
+\mathbf y_w=T_w(\mathcal X;G_w,\tau_w,\mathbf a_w,\theta_w).
+\]
+
+\[
+J_w=\frac{\partial T_w}{\partial\mathbf x}.
+\]
+
+\[
+\Phi_w=1-\frac{\sigma_{\min,w}}{\sigma_{\max,w}+\varepsilon},
 \qquad
-\sum_i |\psi_i|^2 = 1.
+\kappa_w=\frac{\sigma_{\max,w}}{\sigma_{\min,w}+\varepsilon}.
 \]
 
-The probability-like vector
+The fold latch enters at the world entry threshold and releases below the world release threshold.
+
+## Compression
+
+For compression strength \(s_w\) and concentration vector \(a_w\),
 
 \[
-p_i = |\psi_i|^2
+p^C_{w,i}=\frac{p_i\exp(\chi_ws_wa_{w,i})}{\sum_jp_j\exp(\chi_ws_wa_{w,j})}.
 \]
 
-is an Arcsweep navigation distribution. It does not replace the original PREMAQ values.
+Compression concentrates structure. Every weight remains positive. No component is annihilated.
 
-## 3. Temporal evolution alongside quantum mechanics
-
-Conventional quantum mechanics evolves a state with
+## Release
 
 \[
-i\hbar\frac{\partial}{\partial t}\lvert\psi(t)\rangle
-= \hat{H}\lvert\psi(t)\rangle.
+p^R_{w,i}=\mathcal N\left[(1-\eta_w)p^C_{w,i}+\eta_wp_i+\gamma_w\max(0,\dot x_i)+\mu_wm_i\right].
 \]
 
-Bifröst keeps this unitary structure for within-cycle evolution, then adds explicit bridge and history terms:
-
-\[
-i\hbar\frac{\partial}{\partial \lambda}\lvert\Psi\rangle
-= \left(\hat{H}_{P}
-+ \hat{H}_{\mathrm{bridge}}
-+ \hat{H}_{\mathrm{derivative}}
-+ \hat{H}_{\mathrm{memory}}\right)\lvert\Psi\rangle.
-\]
-
-Here \(\lambda\) is the Arcsweep temporal coordinate. It may correspond to elapsed time, observation sequence, scene progression or another calibrated clock, but the selected meaning must be recorded.
-
-The v0.1 engine implements this as:
-
-1. axis-specific phase rotations;
-2. derivative-sensitive energy shifts;
-3. pairwise norm-preserving rotations between neighbouring PREMAQ axes;
-4. a closing \(Q\leftrightarrow P\) bridge rotation.
-
-This creates a seven-node temporal ring rather than a loose collection of sliders.
-
-## 4. Collapse and release
-
-A crossing cycle is not measurement alone. It has two coupled operations.
-
-### Collapse
-
-A selected focus \(f\) reweights the current distribution:
-
-\[
-\tilde{p}_i =
-\frac{p_i w_i(f,s)}{\sum_j p_j w_j(f,s)},
-\]
-
-where \(s\in[0,1]\) is measurement strength.
-
-### Release
-
-The collapsed distribution is released back through prior state and positive derivative flow:
-
-\[
-p_i' = \mathcal{N}\left[
-(1-\eta)\tilde{p}_i
-+ \eta p_i
-+ \gamma\max(0,\dot{x}_i)
-\right].
-\]
-
-\(\eta\) is release strength, \(\gamma\) is derivative release and \(\mathcal{N}\) renormalises the state.
-
-A cycle is counted only after both operations complete:
+Release creates the next state. The next compression acts on that release.
 
 ```text
-collapse → release → receipt → next outward cycle
+compression n
+→ release n
+→ compression of release n
+→ release n+1
+→ compression of release n+1
+→ …
 ```
 
-## 5. Outward spiral memory
-
-Bifröst does not return to the same point after release. It records how far the distribution moved:
+## Outward spiral
 
 \[
-d_n = \sum_i |p_i' - p_i|.
-\]
-
-The spiral radius and angle advance as
-
-\[
-r_{n+1} = r_n + g_r d_n + 0.1|\Delta S_n|,
+d_n=\sum_i|p^R_{n,i}-p_{n,i}|.
 \]
 
 \[
-\theta_{n+1} =
-\left(\theta_n + g_\theta + \pi d_n\right)\bmod 2\pi,
+r_{n+1}=r_n+g_rd_n+g_S|\Delta S_n|.
 \]
-
-where
 
 \[
-S(p) = -\sum_i p_i\ln p_i
+\theta_{n+1}=(\theta_n+g_\theta+\pi d_n)\bmod2\pi.
 \]
 
-is Shannon entropy. The resulting spiral stores transition history without pretending that repeated cycles are identical.
+Forward execution never decreases the radius and never resets the cycle.
 
-## 6. Dual-presence bridge
+## World tones
 
-A Bifröst packet contains two separate state instances:
+Each world owns an approved root \(f_{0,w}\).
 
 \[
-\lvert\Psi_B\rangle =
-\lvert\psi_H, a_H\rangle
-\otimes
-\lvert\psi_T, a_T\rangle.
+f^C_{w,n}=f_{0,w}e^{\lambda_ws_{w,n}},
+\qquad
+f^R_{w,n}=f_{0,w}e^{-\lambda_ws_{w,n}}.
 \]
 
-- \(H\): Hearthside state and current-reality anchor
-- \(T\): Targetside state and canon/world anchor
+\[
+f^C_{w,n}f^R_{w,n}=f_{0,w}^2.
+\]
 
-The two authorities are fixed:
+The sequence is
 
 ```text
-Hearthside authority = evidence-grounded-observational
-Targetside authority = canon-grounded-projected
+root → compression → release → compression of release → release → …
 ```
 
-State fidelity is measured with the squared Bhattacharyya coefficient:
+Infrasonic and ultrasonic source frequencies remain receipted and silent. Rowan approves each world tone through the iPad–Shokz audition gate before production use.
+
+## Dual-presence bridge
 
 \[
-F(H,T) =
-\left(\sum_i\sqrt{p_i^{H}p_i^{T}}\right)^2.
+|\Psi_B\rangle=|\psi_H,a_H\rangle\otimes|\psi_T,a_T\rangle.
 \]
 
-Temporal twist is the wrapped angular difference between the two spiral phases:
+Hearthside evidence remains evidence. Targetside projection remains projection. The bridge stores relation and transition history.
 
-\[
-\tau = \operatorname{atan2}
-\left(\sin(\theta_T-\theta_H),\cos(\theta_T-\theta_H)\right).
-\]
-
-A bridge may report crossing readiness only when both anchors exist and the configured fidelity threshold is met. Readiness is an internal orchestration state, not a claim about external physical transport.
-
-## 7. Canon-calibrated projection
-
-Arcsweep projects the Targetside distribution through a versioned transfer function:
-
-\[
-y_k = b_k + \sum_i W_{ki}p_i^T.
-\]
-
-Every output is labelled `projected` and retains:
-
-- PREMAQ packet and receipt references;
-- Hearthside and Targetside state IDs;
-- canon graph version;
-- transfer-function version;
-- world and timeline identifiers;
-- inherited uncertainty statement.
-
-Two worlds may receive the same PREMAQ state and lawfully produce different projections because \(W\), \(b\), canon graph and timeline differ.
-
-## 8. Non-collapse laws
-
-1. Hearthside evidence cannot be overwritten by Targetside projection.
-2. Targetside events cannot be presented as external measurements.
-3. PREMAQ provenance survives every transformation.
-4. Collapse without release does not advance the spiral cycle.
-5. Every evolution, collapse-release and bridge construction emits a receipt.
-6. World projection requires a versioned calibrated transfer matrix.
-7. The bridge stores relation; it does not erase either shore.
-
-## 9. Software flow
+## Software flow
 
 ```text
 Observer receipt
-    ↓
-PREMAQ v2 packet
-    ↓
-premaqToTemporalState()
-    ↓
-evolveTemporalState()
-    ↓
-collapseRelease()
-    ↓
-createBifrostBridgePacket()
-    ↓
-projectWorldState()
-    ↓
-Arcsweep lifecycle + STARWELL inspection
+→ PREMAQ v2 packet
+→ premaqToTemporalState()
+→ evolveTemporalState()
+→ analyseWorldJacobian()
+→ compressRelease()
+→ createBifrostBridgePacket()
+→ assembleCompressionReleaseDualAspectPacket()
+→ approved world tone and haptic render
+→ receipt
+→ next compression
 ```
 
-## 10. What we get
+## Laws
 
-We get a **temporal quantum navigation engine**: a receipt-bearing worldline compiler that can evolve a shared state, retain uncertainty and provenance, maintain dual presence, measure bridge coherence, remember crossings as an outward spiral and translate one observed condition into multiple canon-lawful world projections.
-
-Observer sees. PREMAQ remembers. Bifröst evolves. Arcsweep navigates. Canon translates. STARWELL reveals.
+1. There is no collapse.
+2. Compression and release form one complete cycle.
+3. Every release becomes the source of the next compression.
+4. Every cycle emits a receipt.
+5. Every renderer consumes the same sealed state.
+6. Every world uses its own transfer, Jacobian calibration and approved tone.
+7. Unknowns remain symbolic, bounded or set-valued.
+8. Replay never refetches live state.
