@@ -165,10 +165,10 @@ test('body transducer path fails closed without output, placement, clearance, an
   );
 });
 
-test('audio somatic path schedules the full recurrence and issues an approval receipt', async () => {
+test('audio somatic path enforces completion time, closes transport, and issues an approval receipt', async () => {
   const storage = new MemoryStorage();
   const context = new FakeAudioContext();
-  const now = new Date('2026-08-03T19:29:00Z');
+  let now = new Date('2026-08-03T19:29:00Z');
   const session = new IPadSomaticHapticSession({
     audioContextFactory: () => context,
     storage,
@@ -193,9 +193,17 @@ test('audio somatic path schedules the full recurrence and issues an approval re
   assert.equal(context.resumed, true);
   assert.equal(context.oscillators.length, 7);
 
+  await assert.rejects(
+    () => session.markAuditionComplete(),
+    /has not reached its completion time/,
+  );
+
+  now = new Date(new Date(audition.completes_at).getTime() + 1);
   const complete = await session.markAuditionComplete();
   assert.equal(complete.status, 'completed');
   assert.match(complete.receipt_hash, /^[0-9a-f]{64}$/);
+  assert.equal(context.closed, true);
+  assert.equal(session.active, false);
 
   await assert.rejects(
     () => session.decide({
