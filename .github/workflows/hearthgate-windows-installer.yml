@@ -9,6 +9,7 @@ on:
       - "starwell/deep-observer/schemas/**"
       - "package.json"
       - "package-lock.json"
+      - ".nvmrc"
       - ".github/workflows/hearthgate-windows-installer.yml"
   push:
     branches:
@@ -21,6 +22,7 @@ on:
       - "starwell/deep-observer/schemas/**"
       - "package.json"
       - "package-lock.json"
+      - ".nvmrc"
       - ".github/workflows/hearthgate-windows-installer.yml"
 
 permissions:
@@ -49,16 +51,29 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: |
             package-lock.json
             apps/starwell-server/package-lock.json
 
-      # The current root package-lock is an incomplete stub: it names direct
-      # dependencies but contains no resolved package records. `npm ci` must
-      # reject that state. Keep CI non-mutating until a complete root lockfile
-      # is regenerated and committed; Hearthgate below remains fully locked.
+      - name: Verify Node and npm contract
+        working-directory: ${{ github.workspace }}
+        shell: pwsh
+        run: |
+          $nodeMajor = [int]((node --version).TrimStart('v').Split('.')[0])
+          $npmMajor = [int]((npm --version).Split('.')[0])
+          if ($nodeMajor -ne 24) {
+            throw "Expected Node 24, received $(node --version)."
+          }
+          if ($npmMajor -ne 11) {
+            throw "Expected npm 11, received $(npm --version)."
+          }
+          node --version
+          npm --version
+
+      # The root lock remains metadata-only. Keep this install non-mutating and
+      # script-free until the complete dependency graph is committed.
       - name: Install STARWELL dependencies
         working-directory: ${{ github.workspace }}
         run: npm install --package-lock=false --ignore-scripts --no-audit --no-fund
@@ -92,7 +107,7 @@ jobs:
       - name: Build unsigned NSIS installer
         run: npm run electron:build:win
 
-      - name: Verify installer and write checksum
+      - name: Verify installer and compression-release package
         id: verify
         shell: pwsh
         run: |
@@ -111,76 +126,76 @@ jobs:
           $asar = "$resourcesRoot/app.asar"
           $unpackedRoot = "$resourcesRoot/app.asar.unpacked"
           $starwellRoot = "$unpackedRoot/public/starwell"
-          $unpackedStarwell = "$starwellRoot/index.html"
-          $unpackedGlyphStudio = "$starwellRoot/glyph-studio/index.html"
-          $unpackedArcsweep = "$starwellRoot/arcsweep-continuity/index.html"
-          $unpackedBifrostManifest = "$starwellRoot/modules/bifrost-arcsweep.module.json"
-          $unpackedPremaqSchema = "$starwellRoot/schemas/premaq-state-v2.schema.json"
-          $unpackedBifrostSchema = "$starwellRoot/schemas/bifrost-temporal-state-v1.schema.json"
-          $secureServer = "$unpackedRoot/server-secure.js"
-          $securityBoundary = "$unpackedRoot/security/local-boundary.js"
-          $fontForgeServer = "$unpackedRoot/fontforge/server.js"
-
-          foreach ($required in @(
+          $required = @(
             $asar,
-            $unpackedStarwell,
-            $unpackedGlyphStudio,
-            $unpackedArcsweep,
-            $unpackedBifrostManifest,
-            $unpackedPremaqSchema,
-            $unpackedBifrostSchema,
-            $secureServer,
-            $securityBoundary,
-            $fontForgeServer
-          )) {
-            if (-not (Test-Path $required)) {
-              throw "Packaged installer is missing required hardened Hearthgate file: $required"
+            "$starwellRoot/index.html",
+            "$starwellRoot/glyph-studio/index.html",
+            "$starwellRoot/arcsweep-continuity/index.html",
+            "$starwellRoot/world-tone-approval/index.html",
+            "$starwellRoot/modules/bifrost-arcsweep.module.json",
+            "$starwellRoot/schemas/premaq-state-v2.schema.json",
+            "$starwellRoot/schemas/bifrost-temporal-state-v1.schema.json",
+            "$starwellRoot/schemas/world-tone-approval.schema.json",
+            "$starwellRoot/schemas/ipad-somatic-haptic-receipt.schema.json",
+            "$unpackedRoot/server-secure.js",
+            "$unpackedRoot/security/local-boundary.js",
+            "$unpackedRoot/fontforge/server.js"
+          )
+
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) {
+              throw "Packaged installer is missing required Hearthgate file: $path"
             }
           }
 
-          $starwellHtml = Get-Content -Raw -Path $unpackedStarwell
-          $glyphHtml = Get-Content -Raw -Path $unpackedGlyphStudio
-          $arcsweepHtml = Get-Content -Raw -Path $unpackedArcsweep
           foreach ($page in @(
-            @{ Name = "STARWELL"; Html = $starwellHtml },
-            @{ Name = "Glyph Studio"; Html = $glyphHtml },
-            @{ Name = "Arcsweep"; Html = $arcsweepHtml }
+            @{ Name = "STARWELL"; Path = "$starwellRoot/index.html" },
+            @{ Name = "Glyph Studio"; Path = "$starwellRoot/glyph-studio/index.html" },
+            @{ Name = "Arcsweep"; Path = "$starwellRoot/arcsweep-continuity/index.html" }
           )) {
-            if (-not $page.Html.Contains('/starwell/')) {
+            $html = Get-Content -Raw -Path $page.Path
+            if (-not $html.Contains('/starwell/')) {
               throw "Packaged $($page.Name) entry does not use the /starwell/ asset base."
             }
           }
 
-          $secureServerSource = Get-Content -Raw -Path $secureServer
-          $securityBoundarySource = Get-Content -Raw -Path $securityBoundary
-          if (-not $secureServerSource.Contains("127.0.0.1")) {
+          $somaticHtml = Get-Content -Raw -Path "$starwellRoot/world-tone-approval/index.html"
+          if (-not $somaticHtml.Contains('ROWAN APPROVAL GATE')) {
+            throw "Packaged somatic gate does not expose Rowan's persistent approval action."
+          }
+
+          $secureServerSource = Get-Content -Raw -Path "$unpackedRoot/server-secure.js"
+          $securityBoundarySource = Get-Content -Raw -Path "$unpackedRoot/security/local-boundary.js"
+          if (-not $secureServerSource.Contains('127.0.0.1')) {
             throw "Packaged core server does not enforce loopback binding."
           }
-          if (-not $securityBoundarySource.Contains("HEARTHGATE_ORIGIN_DENIED")) {
+          if (-not $securityBoundarySource.Contains('HEARTHGATE_ORIGIN_DENIED')) {
             throw "Packaged local-origin boundary is missing."
           }
 
-          $manifest = Get-Content -Raw -Path $unpackedBifrostManifest | ConvertFrom-Json
-          if ($manifest.moduleId -ne "bifrost-arcsweep") {
+          $manifest = Get-Content -Raw -Path "$starwellRoot/modules/bifrost-arcsweep.module.json" | ConvertFrom-Json
+          if ($manifest.moduleId -ne 'bifrost-arcsweep') {
             throw "Packaged Bifröst manifest has the wrong moduleId."
           }
-          if ($manifest.engine.formalism -ne "temporal-quantum-state-machine" -or $manifest.engine.physicalClaim -ne $false) {
-            throw "Packaged Bifröst manifest violates the bounded formalism contract."
+          if ($manifest.engine.formalism -ne 'temporal-compression-release-state-machine') {
+            throw "Packaged Bifröst manifest does not execute the compression-release formalism."
           }
-          if ($manifest.authorityContract.hearthside -ne "evidence-grounded-observational") {
-            throw "Packaged Bifröst manifest does not preserve Hearthside evidence authority."
+          if ($manifest.engine.physicalClaim -ne $false) {
+            throw "Packaged Bifröst manifest violates the physical-claim boundary."
           }
-          if ($manifest.authorityContract.targetside -ne "canon-grounded-projected") {
-            throw "Packaged Bifröst manifest does not preserve Targetside projection authority."
+          if ($manifest.authorityContract.collapseExists -ne $false) {
+            throw "Packaged Bifröst manifest reintroduces collapse."
+          }
+          if ($manifest.authorityContract.releaseFeedsNextCompression -ne $true) {
+            throw "Packaged Bifröst manifest breaks compression of the release."
+          }
+          if ($manifest.installContract.verifySomaticRoute -ne 'world-tone-approval/index.html') {
+            throw "Packaged Bifröst manifest omits the somatic approval route."
           }
 
-          $premaqSchema = Get-Content -Raw -Path $unpackedPremaqSchema | ConvertFrom-Json
-          $bifrostSchema = Get-Content -Raw -Path $unpackedBifrostSchema | ConvertFrom-Json
-          if ($premaqSchema.title -ne "PREMAQ Observation State v2") {
-            throw "Packaged PREMAQ schema is not v2."
-          }
-          if ($bifrostSchema.title -ne "Bifrost Temporal Quantum State v1") {
-            throw "Packaged Bifröst temporal schema is invalid."
+          $somaticSchema = Get-Content -Raw -Path "$starwellRoot/schemas/ipad-somatic-haptic-receipt.schema.json" | ConvertFrom-Json
+          if ($somaticSchema.title -ne 'Hearthgate iPad Somatic Haptic Receipts') {
+            throw "Packaged iPad somatic receipt schema is invalid."
           }
 
           $hash = Get-FileHash -Path $installer.FullName -Algorithm SHA256
@@ -193,14 +208,14 @@ jobs:
           @"
           ## Hearthgate Windows installer
 
+          - Node: ``$(node --version)``
+          - npm: ``$(npm --version)``
           - File: ``$($installer.Name)``
           - Size: $([math]::Round($installer.Length / 1MB, 2)) MB
           - SHA-256: ``$($hash.Hash)``
-          - Packaging: ASAR enabled with explicit runtime unpack boundary
-          - Security: sandboxed renderer, loopback-only services, restricted origins, redacted IPC
-          - Framework: bundled STARWELL + Glyph Studio + Bifröst Arcsweep
-          - State contracts: PREMAQ v2 + Bifröst Temporal Quantum State v1
-          - Font compiler: local FontForge sidecar adapter
+          - Formalism: compression → release → compression of the release
+          - Somatic gate: packaged and Rowan-owned
+          - Security: loopback-only services and restricted origins
           - Signing: unsigned development build
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
@@ -228,8 +243,7 @@ jobs:
             "dist-electron/$($env:INSTALLER_NAME)",
             "dist-electron/SHA256SUMS.txt"
           )
-          $blockmaps = @(Get-ChildItem -Path "dist-electron" -Filter "*.blockmap" -File | ForEach-Object { $_.FullName })
-          $files += $blockmaps
+          $files += @(Get-ChildItem -Path "dist-electron" -Filter "*.blockmap" -File | ForEach-Object { $_.FullName })
 
           if (gh release view $tag 2>$null) {
             gh release upload $tag @files --clobber
