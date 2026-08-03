@@ -8,7 +8,6 @@ export {
   BIFROST_TEMPORAL_STATE_SCHEMA,
   BifrostTemporalError,
   PREMAQ_AXES,
-  collapseRelease,
   createBifrostBridgePacket,
   evolveTemporalState,
   premaqToTemporalState,
@@ -16,6 +15,14 @@ export {
   validatePremaqPacket,
   validateTemporalState,
 } from './arcsweep-temporal-quantum/engine.js';
+
+export {
+  advanceWorldCompressionRelease,
+  buildWorldCompressionToneSequence,
+  compressRelease,
+  mapCompressionReleaseFrequencies,
+  temporalCompressionDriver,
+} from './arcsweep-temporal-quantum/compression-release.js';
 
 export {
   BIFROST_BRIDGE_STORAGE_KEY,
