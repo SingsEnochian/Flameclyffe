@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/ipad-somatic-haptic-receipt.schema.json",
+  "title": "Hearthgate iPad Somatic Haptic Receipts",
+  "oneOf": [
+    { "$ref": "#/$defs/audition" },
+    { "$ref": "#/$defs/decision" }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "deviceProfile": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "transport",
+        "minimum_hz",
+        "maximum_hz",
+        "maximum_gain",
+        "fidelity"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "body-transducer",
+            "shokz-bone-conduction",
+            "native-controller-bridge"
+          ]
+        },
+        "transport": {
+          "enum": [
+            "selected-system-audio-output",
+            "webkit-native-message-bridge"
+          ]
+        },
+        "minimum_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "maximum_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "maximum_gain": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "fidelity": { "type": "string", "minLength": 1 }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "role",
+        "phase",
+        "cycle",
+        "frequency_hz",
+        "source_frequency_hz",
+        "duration_ms",
+        "gap_after_ms",
+        "start_gain",
+        "peak_gain",
+        "end_gain"
+      ],
+      "properties": {
+        "role": { "enum": ["world-root", "compression", "release"] },
+        "phase": { "enum": ["anchor", "compression", "release"] },
+        "cycle": { "type": "integer", "minimum": 0 },
+        "frequency_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "source_frequency_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "duration_ms": { "type": "integer", "minimum": 1 },
+        "gap_after_ms": { "type": "integer", "minimum": 0 },
+        "start_gain": { "type": "number", "minimum": 0, "maximum": 1 },
+        "peak_gain": { "type": "number", "minimum": 0, "maximum": 1 },
+        "end_gain": { "type": "number", "minimum": 0, "maximum": 1 },
+        "seed_from_release_event": { "type": ["string", "null"] },
+        "seed_from_compression_event": { "type": "string" }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "world_id",
+        "tone_layer_id",
+        "device_profile",
+        "fold_index",
+        "fold_strength",
+        "source_pair",
+        "proxy_frequencies",
+        "recurrence",
+        "events",
+        "total_duration_ms",
+        "limits"
+      ],
+      "properties": {
+        "schema": { "const": "hearthgate.ipad-somatic-plan/v1" },
+        "world_id": { "type": "string", "minLength": 1 },
+        "tone_layer_id": { "type": "string", "minLength": 1 },
+        "device_profile": { "$ref": "#/$defs/deviceProfile" },
+        "fold_index": { "type": "number", "minimum": 0, "maximum": 1 },
+        "fold_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "recurrence": {
+          "type": "object",
+          "required": ["law", "rendered_cycles", "continuation", "final_release_gain"],
+          "properties": {
+            "law": { "const": "compression -> release -> compression of the release -> release -> infinite continuation" },
+            "rendered_cycles": { "type": "integer", "minimum": 1, "maximum": 8 },
+            "continuation": { "type": "string", "minLength": 1 },
+            "final_release_gain": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "events": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 17,
+          "items": { "$ref": "#/$defs/event" }
+        },
+        "total_duration_ms": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "audition": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "candidate_hash",
+        "world_id",
+        "profile_version",
+        "tone_layer_id",
+        "interface",
+        "internal_haptic_actuator",
+        "output_device_detected",
+        "output_confirmation",
+        "device_profile_id",
+        "device_fidelity",
+        "placement",
+        "start_low_confirmed",
+        "fold_index",
+        "plan",
+        "started_at",
+        "completes_at",
+        "status"
+      ],
+      "properties": {
+        "schema": { "const": "hearthgate.ipad-somatic-audition-receipt/v1" },
+        "candidate_hash": { "$ref": "#/$defs/sha256" },
+        "world_id": { "type": "string", "minLength": 1 },
+        "profile_version": { "type": "string", "minLength": 1 },
+        "tone_layer_id": { "type": "string", "minLength": 1 },
+        "interface": { "const": "ipad-pwa" },
+        "internal_haptic_actuator": { "const": false },
+        "output_device_detected": { "const": false },
+        "output_confirmation": { "const": "user-confirmed" },
+        "device_profile_id": {
+          "enum": [
+            "body-transducer",
+            "shokz-bone-conduction",
+            "native-controller-bridge"
+          ]
+        },
+        "device_fidelity": { "type": "string", "minLength": 1 },
+        "placement": { "type": "string", "minLength": 1 },
+        "placement_clearance_confirmed": { "type": "boolean" },
+        "start_low_confirmed": { "const": true },
+        "fold_index": { "type": "number", "minimum": 0, "maximum": 1 },
+        "plan": { "$ref": "#/$defs/plan" },
+        "started_at": { "type": "string", "format": "date-time" },
+        "completes_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "status": { "enum": ["scheduled", "completed"] },
+        "receipt_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "candidate_hash",
+        "world_id",
+        "world_name",
+        "profile_version",
+        "tone_layer_id",
+        "root_hz",
+        "decision",
+        "signer",
+        "signer_authority",
+        "felt_and_identified",
+        "comfortable",
+        "output_confirmed",
+        "interface",
+        "somatic_audition_receipt",
+        "created_at",
+        "receipt_hash"
+      ],
+      "properties": {
+        "schema": { "const": "hearthgate.ipad-somatic-decision-receipt/v1" },
+        "candidate_hash": { "$ref": "#/$defs/sha256" },
+        "world_id": { "type": "string", "minLength": 1 },
+        "world_name": { "type": "string", "minLength": 1 },
+        "profile_version": { "type": "string", "minLength": 1 },
+        "tone_layer_id": { "type": "string", "minLength": 1 },
+        "root_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "decision": { "enum": ["approved", "adjust", "rejected"] },
+        "signer": { "const": "rowan" },
+        "signer_authority": { "const": "human-calibration-owner" },
+        "felt_and_identified": { "type": "boolean" },
+        "comfortable": { "type": "boolean" },
+        "output_confirmed": { "const": true },
+        "interface": { "const": "ipad-pwa" },
+        "somatic_audition_receipt": { "$ref": "#/$defs/audition" },
+        "note": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "receipt_hash": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}
