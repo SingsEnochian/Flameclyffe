@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#101419" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Somatic Gate" />
@@ -100,6 +100,8 @@
         <div><dt>Root tone</dt><dd id="root">—</dd></div>
         <div><dt>Profile</dt><dd id="profile">—</dd></div>
         <div><dt>Candidate hash</dt><dd id="candidate-hash">—</dd></div>
+        <div><dt>Bifröst state</dt><dd id="source-state">Load through Arcsweep</dd></div>
+        <div><dt>Compression receipt</dt><dd id="compression-receipt">—</dd></div>
       </dl>
       <p><span class="badge attention">Pending until Rowan approves</span></p>
     </article>
@@ -193,15 +195,16 @@
     updateFoldLatch,
   } from '../src/world-tone-fold-approval.js';
   import {
-    IPadSomaticHapticSession,
     SOMATIC_BODY_PLACEMENTS,
     SOMATIC_DEVICE_PROFILES,
     buildSomaticCompressionReleasePlan,
     detectIPadSomaticCapabilities,
   } from '../src/ipad-somatic-haptics.js';
+  import { BoundIPadSomaticHapticSession } from '../src/ipad-somatic-bound-session.js';
+  import { readIPadSomaticLineage } from '../src/ipad-somatic-lineage.js';
 
   const $ = (selector) => document.querySelector(selector);
-  const session = new IPadSomaticHapticSession();
+  const session = new BoundIPadSomaticHapticSession();
   let candidate = null;
   let foldActive = false;
   let auditionReady = false;
@@ -217,6 +220,24 @@
     $('#approve').disabled = !enabled;
     $('#adjust').disabled = !enabled;
     $('#reject').disabled = !enabled;
+  }
+
+  function resetDecisionEvidence() {
+    auditionReady = false;
+    $('#felt').checked = false;
+    $('#comfortable').checked = false;
+    setDecisionEnabled(false);
+  }
+
+  function invalidatePhysicalConfirmations({
+    output = false,
+    startLow = false,
+    clearance = false,
+  } = {}) {
+    if (output) $('#output-confirmed').checked = false;
+    if (startLow) $('#start-low').checked = false;
+    if (clearance) $('#placement-clearance').checked = false;
+    resetDecisionEvidence();
   }
 
   function renderCapabilities() {
@@ -243,31 +264,47 @@
     return SOMATIC_DEVICE_PROFILES[$('#device-profile').value];
   }
 
-  function syncDeviceControls() {
+  function renderLineage() {
+    if (!candidate) return;
+    try {
+      const lineage = readIPadSomaticLineage({ worldId:candidate.world_id });
+      $('#source-state').textContent = lineage.shared_state_fingerprint;
+      $('#compression-receipt').textContent = lineage.compression_release_receipt_id;
+      return lineage;
+    } catch (error) {
+      $('#source-state').textContent = 'Not bound';
+      $('#compression-receipt').textContent = 'Load selected world through Arcsweep';
+      return null;
+    }
+  }
+
+  function syncDeviceControls({ invalidate = true } = {}) {
     const device = selectedDevice();
     $('#gain').max = String(device.maximum_gain);
-    $('#gain').value = String(Math.min(Number($('#gain').value), device.maximum_gain) || device.default_gain);
+    $('#gain').value = String(device.default_gain);
     $('#gain-output').textContent = Number($('#gain').value).toFixed(3);
     $('#cycles').value = String(device.default_cycles);
     $('#cycles-output').textContent = String(device.default_cycles);
     $('#placement-wrap').classList.toggle('hidden', !device.requires_placement_confirmation);
     $('#clearance-label').classList.toggle('hidden', !device.requires_placement_confirmation);
     $('#device-band').textContent = `${device.minimum_hz}–${device.maximum_hz} Hz`;
-    auditionReady = false;
-    setDecisionEnabled(false);
+    if (invalidate) {
+      invalidatePhysicalConfirmations({ output:true, startLow:true, clearance:true });
+      $('#audition-status').textContent = 'RESTING · Output profile changed. Reconfirm the physical device and start-low gate.';
+    }
     updatePlanPreview();
   }
 
   async function loadCandidate() {
     clearTimeout(completionTimer);
-    auditionReady = false;
-    setDecisionEnabled(false);
+    resetDecisionEvidence();
     candidate = DEFAULT_WORLD_TONE_CANDIDATES.find((item) => item.world_id === $('#world').value);
     await session.loadCandidate(candidate);
     $('#layer').textContent = candidate.tone_layer_id;
     $('#root').textContent = formatHz(candidate.root_hz);
     $('#profile').textContent = `v${candidate.profile_version}`;
     $('#candidate-hash').textContent = await candidateHash(candidate);
+    renderLineage();
     $('#audition-status').textContent = 'RESTING · Candidate loaded. Confirm the external somatic output before playing.';
     $('#decision-status').textContent = 'No decision receipt.';
     updateFold();
@@ -289,8 +326,7 @@
     $('#compression-source').textContent = `${formatHz(pair.direct_hz)} · ${pair.direct_class}`;
     $('#release-source').textContent = `${formatHz(pair.inverse_hz)} · ${pair.inverse_class}`;
     $('#reciprocal').textContent = `${pair.reciprocal_product.toFixed(4)} = ${(candidate.root_hz ** 2).toFixed(4)}`;
-    auditionReady = false;
-    setDecisionEnabled(false);
+    resetDecisionEvidence();
     updatePlanPreview();
   }
 
@@ -334,25 +370,27 @@
 
   $('#world').addEventListener('change', loadCandidate);
   $('#fold').addEventListener('input', updateFold);
-  $('#device-profile').addEventListener('change', syncDeviceControls);
+  $('#device-profile').addEventListener('change', () => syncDeviceControls({ invalidate:true }));
+  $('#placement').addEventListener('change', () => {
+    invalidatePhysicalConfirmations({ clearance:true });
+    $('#audition-status').textContent = 'RESTING · Body placement changed. Reconfirm placement clearance.';
+  });
   $('#cycles').addEventListener('input', () => {
     $('#cycles-output').textContent = $('#cycles').value;
-    auditionReady = false;
-    setDecisionEnabled(false);
+    resetDecisionEvidence();
     updatePlanPreview();
   });
   $('#gain').addEventListener('input', () => {
     $('#gain-output').textContent = Number($('#gain').value).toFixed(3);
-    auditionReady = false;
-    setDecisionEnabled(false);
+    invalidatePhysicalConfirmations({ startLow:true });
+    $('#audition-status').textContent = 'RESTING · Strength changed. Reconfirm the start-low gate before playing.';
     updatePlanPreview();
   });
 
   $('#audition').addEventListener('click', async () => {
     try {
       clearTimeout(completionTimer);
-      auditionReady = false;
-      setDecisionEnabled(false);
+      resetDecisionEvidence();
       const receipt = await session.audition({
         foldIndex:Number($('#fold').value),
         deviceProfileId:$('#device-profile').value,
@@ -363,7 +401,9 @@
         placementClearanceConfirmed:$('#placement-clearance').checked,
         startLowConfirmed:$('#start-low').checked,
       });
-      $('#audition-status').textContent = `PLAYING · ${(receipt.plan.total_duration_ms / 1000).toFixed(2)} s · ${receipt.plan.recurrence.rendered_cycles} compression–release cycles.`;
+      $('#source-state').textContent = receipt.source_state_fingerprint;
+      $('#compression-receipt').textContent = receipt.compression_release_receipt_id;
+      $('#audition-status').textContent = `PLAYING · ${(receipt.plan.total_duration_ms / 1000).toFixed(2)} s · ${receipt.plan.recurrence.rendered_cycles} compression–release cycles · Bifröst cycle ${receipt.compression_cycle}.`;
       completionTimer = setTimeout(async () => {
         try {
           await session.markAuditionComplete();
@@ -381,8 +421,7 @@
 
   async function featherStop(reason = 'feather-stop') {
     clearTimeout(completionTimer);
-    auditionReady = false;
-    setDecisionEnabled(false);
+    resetDecisionEvidence();
     await session.stop(reason);
     $('#audition-status').textContent = 'FEATHER STOP · Every active oscillator, envelope, context, and native command is closed.';
   }
@@ -426,6 +465,10 @@
     URL.revokeObjectURL(url);
   });
 
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'hearthgate.ipad-somatic-lineage.active.v1') renderLineage();
+  });
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./service-worker.js', { scope:'./' }).catch((error) => {
       $('#audition-status').textContent = `PWA cache registration failed: ${error.message}`;
@@ -434,7 +477,7 @@
 
   renderCapabilities();
   renderReceipts();
-  syncDeviceControls();
+  syncDeviceControls({ invalidate:false });
   await loadCandidate();
 </script>
 </body>
