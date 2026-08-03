@@ -22,7 +22,9 @@ from flameclyffe_ml.hearthgate_kernel import (
     house_registry,
 )
 
+from .archivist_api import router as archivist_router
 from .field import generate_liquid_light_snapshot
+from .geometric_api import router as geometric_router
 from .models import (
     HealthResponse,
     LiquidLightControls,
@@ -43,9 +45,11 @@ app.add_middleware(
     allow_origin_regex=r"^https?://(?:127\.0\.0\.1|localhost)(?::\d+)?$",
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Accept"],
+    allow_headers=["Content-Type", "Accept", "X-Hearthgate-Ingest-Token"],
     max_age=600,
 )
+app.include_router(geometric_router)
+app.include_router(archivist_router)
 
 _kernel = HearthgateKernel()
 
