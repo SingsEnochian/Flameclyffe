@@ -8,6 +8,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const contractFiles = [
   'apps/starwell/public/modules/bifrost-arcsweep.module.json',
   'apps/starwell-server/scripts/check-packaging.js',
+  'apps/starwell-server/scripts/check-dual-aspect-packaging.js',
   '.github/workflows/hearthgate-windows-installer.yml',
   '.github/workflows/ipad-somatic-check.yml',
   'package.json',
@@ -17,6 +18,7 @@ const forbiddenContracts = [
   'temporal-' + 'quantum-state-machine',
   'collapse-' + 'release-cycles',
   'bounded temporal-' + 'quantum interpretation contract',
+  'manifest must be version ' + '0.2.0',
 ];
 
 for (const file of contractFiles) {
@@ -31,6 +33,13 @@ for (const file of contractFiles) {
 const manifest = JSON.parse(read('apps/starwell/public/modules/bifrost-arcsweep.module.json'));
 if (manifest.engine?.formalism !== 'temporal-compression-release-state-machine') {
   errors.push('Bifröst formalism is not temporal-compression-release-state-machine.');
+}
+const version = String(manifest.version || '').split('.').map(Number);
+if (version.length !== 3 || version.some((value) => !Number.isInteger(value)) || version[0] < 0 || (version[0] === 0 && version[1] < 4)) {
+  errors.push(`Bifröst manifest version ${manifest.version} predates the compression-release and somatic contracts.`);
+}
+if (manifest.schemaVersion !== manifest.version) {
+  errors.push('Bifröst schemaVersion and version do not match.');
 }
 for (const capability of ['compression-release-cycles', 'compression-of-release-recursion']) {
   if (!manifest.capabilities?.includes(capability)) {
@@ -102,6 +111,7 @@ if (errors.length) {
 
 console.log('[Hearthgate contract provenance guard] PASSED');
 console.log(` lockfile records: ${lockEntries.length}`);
+console.log(` Bifröst version: ${manifest.version}`);
 console.log(' formalism: temporal-compression-release-state-machine');
 console.log(' naming authority: Rowan');
 console.log(' approved experimental identifier: Intermezzo');
