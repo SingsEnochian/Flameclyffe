@@ -1,16 +1,17 @@
 {
-  "schemaVersion": "0.2.0",
+  "schemaVersion": "0.3.0",
   "moduleId": "bifrost-arcsweep",
   "displayName": "Bifröst Arcsweep",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "delivery": "bundled-core",
   "enabledByDefault": true,
   "route": "/starwell/arcsweep-continuity/",
   "entrypoint": "arcsweep-continuity/index.html",
   "engine": {
     "module": "src/arcsweep-temporal-quantum/engine.js",
+    "compressionRelease": "src/arcsweep-temporal-quantum/compression-release.js",
     "kernel": "src/hearthweave-kernel/index.js",
-    "formalism": "temporal-quantum-state-machine",
+    "formalism": "temporal-compression-release-state-machine",
     "physicalClaim": false,
     "packetAuthority": "hearthweave-kernel"
   },
@@ -18,14 +19,19 @@
     "premaq": "schemas/premaq-state-v2.schema.json",
     "temporalState": "schemas/bifrost-temporal-state-v1.schema.json",
     "dualAspectPacket": "schemas/dual-aspect-packet-v1.schema.json",
-    "dualAspectReceipt": "schemas/dual-aspect-receipt-v1.schema.json"
+    "dualAspectReceipt": "schemas/dual-aspect-receipt-v1.schema.json",
+    "worldToneApproval": "schemas/world-tone-approval.schema.json"
   },
   "capabilities": [
     "premaq-v2-ingest",
     "complex-state-encoding",
     "norm-preserving-temporal-evolution",
-    "collapse-release-cycles",
+    "jacobian-fold-analysis",
+    "compression-release-cycles",
+    "compression-of-release-recursion",
     "outward-spiral-memory",
+    "world-specific-tone-sequences",
+    "rowan-owned-tone-approval",
     "dual-presence-anchoring",
     "dual-aspect-packet-freeze",
     "single-state-sensory-activation",
@@ -43,9 +49,12 @@
     "hearthside": "evidence-grounded-observational",
     "targetside": "canon-grounded-projected",
     "renderers": "derive-only-no-refetch-after-activation",
+    "toneApproval": "rowan-human-calibration-owner",
     "rawEvidenceMutable": false,
     "projectionMayClaimExternalCause": false,
-    "canonFoundationMaySilentlyMergeOverlay": false
+    "canonFoundationMaySilentlyMergeOverlay": false,
+    "collapseExists": false,
+    "releaseFeedsNextCompression": true
   },
   "installContract": {
     "required": true,
@@ -54,7 +63,8 @@
       "schemas/premaq-state-v2.schema.json",
       "schemas/bifrost-temporal-state-v1.schema.json",
       "schemas/dual-aspect-packet-v1.schema.json",
-      "schemas/dual-aspect-receipt-v1.schema.json"
+      "schemas/dual-aspect-receipt-v1.schema.json",
+      "schemas/world-tone-approval.schema.json"
     ]
   }
 }
