@@ -1,4 +1,4 @@
-name: Root Lockfile Repair
+name: Root Lockfile And Packaging Repair
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
       - package.json
       - package-lock.json
       - .nvmrc
+      - apps/starwell-server/scripts/check-packaging.js
+      - .github/workflows/ipad-somatic-check.yml
+      - .github/workflows/hearthgate-windows-installer.yml
       - .github/workflows/root-lockfile-repair.yml
   workflow_dispatch:
 
@@ -20,7 +23,7 @@ concurrency:
 
 jobs:
   repair:
-    name: Regenerate complete npm lockfile
+    name: Repair deterministic root install and packaging law
     runs-on: ubuntu-24.04
 
     steps:
@@ -45,6 +48,75 @@ jobs:
       - name: Regenerate complete root lockfile
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
+      - name: Replace collapse-era packaging checks and restore locked installs
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+
+          function replaceRequired(path, before, after) {
+            const source = fs.readFileSync(path, 'utf8');
+            if (!source.includes(before)) {
+              throw new Error(`Expected contract not found in ${path}: ${before}`);
+            }
+            fs.writeFileSync(path, source.replace(before, after));
+          }
+
+          const packaging = 'apps/starwell-server/scripts/check-packaging.js';
+          replaceRequired(
+            packaging,
+            "  'public/starwell/arcsweep-continuity/index.html',\n  'public/starwell/modules/signal-well.module.json',",
+            "  'public/starwell/arcsweep-continuity/index.html',\n  'public/starwell/world-tone-approval/index.html',\n  'public/starwell/modules/signal-well.module.json',",
+          );
+          replaceRequired(
+            packaging,
+            "  'public/starwell/schemas/bifrost-temporal-state-v1.schema.json',\n];",
+            "  'public/starwell/schemas/bifrost-temporal-state-v1.schema.json',\n  'public/starwell/schemas/ipad-somatic-haptic-receipt.schema.json',\n];",
+          );
+          replaceRequired(
+            packaging,
+            "  'public/starwell/arcsweep-continuity/index.html',\n]) {",
+            "  'public/starwell/arcsweep-continuity/index.html',\n  'public/starwell/world-tone-approval/index.html',\n]) {",
+          );
+          replaceRequired(
+            packaging,
+            "    if (manifest.engine?.formalism !== 'temporal-quantum-state-machine' || manifest.engine?.physicalClaim !== false) {\n      errors.push('Bifröst Arcsweep must preserve its bounded temporal-quantum interpretation contract.');\n    }",
+            "    if (manifest.engine?.formalism !== 'temporal-compression-release-state-machine' || manifest.engine?.physicalClaim !== false) {\n      errors.push('Bifröst Arcsweep must preserve its temporal compression-release execution contract.');\n    }",
+          );
+          replaceRequired(
+            packaging,
+            "    if (!manifest.capabilities?.includes('premaq-v2-ingest') || !manifest.capabilities?.includes('collapse-release-cycles')) {\n      errors.push('Bifröst Arcsweep manifest is missing PREMAQ or collapse-release capability.');\n    }",
+            "    if (!manifest.capabilities?.includes('premaq-v2-ingest') || !manifest.capabilities?.includes('compression-release-cycles') || !manifest.capabilities?.includes('compression-of-release-recursion')) {\n      errors.push('Bifröst Arcsweep manifest is missing PREMAQ or compression-release recursion capability.');\n    }",
+          );
+          replaceRequired(
+            packaging,
+            "    if (manifest.authorityContract?.targetside !== 'canon-grounded-projected') {\n      errors.push('Bifröst Arcsweep must preserve Targetside projection authority.');\n    }",
+            "    if (manifest.authorityContract?.targetside !== 'canon-grounded-projected') {\n      errors.push('Bifröst Arcsweep must preserve Targetside projection authority.');\n    }\n    if (manifest.authorityContract?.collapseExists !== false) {\n      errors.push('Bifröst Arcsweep must declare that collapse does not exist.');\n    }\n    if (manifest.authorityContract?.releaseFeedsNextCompression !== true) {\n      errors.push('Bifröst Arcsweep must feed every release into the next compression.');\n    }",
+          );
+          replaceRequired(
+            packaging,
+            "  ['public/starwell/schemas/bifrost-temporal-state-v1.schema.json', 'https://flameclyffe.local/schemas/bifrost-temporal-state-v1.schema.json'],\n]) {",
+            "  ['public/starwell/schemas/bifrost-temporal-state-v1.schema.json', 'https://flameclyffe.local/schemas/bifrost-temporal-state-v1.schema.json'],\n  ['public/starwell/schemas/ipad-somatic-haptic-receipt.schema.json', 'https://flameclyffe.local/schemas/ipad-somatic-haptic-receipt.schema.json'],\n]) {",
+          );
+          replaceRequired(
+            packaging,
+            "console.log(' framework: /starwell/ + Glyph Studio + Signal Well + Bifröst Arcsweep bundled');\nconsole.log(' schemas: PREMAQ v2 + Bifröst temporal state bundled');",
+            "console.log(' framework: /starwell/ + Glyph Studio + Signal Well + Bifröst Arcsweep + iPad Somatic Gate bundled');\nconsole.log(' law: compression -> release -> compression of the release -> infinite continuation');\nconsole.log(' schemas: PREMAQ v2 + Bifröst temporal state + iPad somatic receipts bundled');",
+          );
+
+          replaceRequired(
+            '.github/workflows/ipad-somatic-check.yml',
+            '        run: npm install\n',
+            '        run: npm ci --ignore-scripts --no-audit --no-fund\n',
+          );
+
+          const installer = '.github/workflows/hearthgate-windows-installer.yml';
+          replaceRequired(
+            installer,
+            "      # The current root package-lock is an incomplete stub: it names direct\n      # dependencies but contains no resolved package records. `npm ci` must\n      # reject that state. Keep CI non-mutating until a complete root lockfile\n      # is regenerated and committed; Hearthgate below remains fully locked.\n      - name: Install STARWELL dependencies\n        working-directory: ${{ github.workspace }}\n        run: npm install --package-lock=false --ignore-scripts --no-audit --no-fund\n",
+            "      - name: Install locked STARWELL dependencies\n        working-directory: ${{ github.workspace }}\n        run: npm ci --ignore-scripts --no-audit --no-fund\n",
+          );
+          NODE
+
       - name: Verify lockfile is complete
         shell: bash
         run: |
@@ -59,21 +131,41 @@ jobs:
           if (!lock.packages['node_modules/react']) throw new Error('Resolved React package record is missing');
           console.log(`Verified ${entries.length} resolved package records.`);
           NODE
-          rm -rf node_modules
-          npm ci --ignore-scripts --no-audit --no-fund
-          npm run starwell:test
-          npm run starwell:build
 
-      - name: Commit regenerated lockfile
+      - name: Verify deterministic root install and STARWELL
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- package-lock.json; then
-            echo 'Root lockfile already complete.'
+          rm -rf node_modules
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run starwell:test
+          STARWELL_BASE=/starwell/ npm run starwell:build
+
+      - name: Verify Hearthgate packaging preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix apps/starwell-server --ignore-scripts --no-audit --no-fund
+          npm run --prefix apps/starwell-server stage:starwell
+          npm run --prefix apps/starwell-server prepare:assets
+          npm run --prefix apps/starwell-server check:packaging
+
+      - name: Commit repaired contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(
+            package-lock.json
+            apps/starwell-server/scripts/check-packaging.js
+            .github/workflows/ipad-somatic-check.yml
+            .github/workflows/hearthgate-windows-installer.yml
+          )
+          if git diff --quiet -- "${paths[@]}"; then
+            echo 'Dependency and packaging contracts already repaired.'
             exit 0
           fi
           git config user.name 'hearthgate-ci'
           git config user.email 'hearthgate-ci@users.noreply.github.com'
-          git add package-lock.json
-          git commit -m 'build: commit complete Node 24 root lockfile'
+          git add "${paths[@]}"
+          git commit -m 'build: lock Node 24 dependencies and repair packaging law'
           git push origin HEAD:feature/ipad-somatic-haptics-v1
