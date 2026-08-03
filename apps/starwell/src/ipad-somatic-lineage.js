@@ -73,7 +73,6 @@ export function buildIPadSomaticLineage(packetInput) {
     schema: IPAD_SOMATIC_LINEAGE_SCHEMA,
     status: 'active',
     world_id: packetWorld,
-    source_world_id: requireString(packet.identity?.world_slug, 'identity.world_slug'),
     house_id: houseId,
     session_context_id: requireString(packet.identity?.session_context_id, 'identity.session_context_id'),
     dual_aspect_packet_id: packetId,
@@ -100,7 +99,6 @@ export function validateIPadSomaticLineage(lineageInput, { worldId = null } = {}
   invariant(lineage.authority === 'derived-from-active-hearthweave-packet', 'lineage authority is invalid');
   const required = [
     'world_id',
-    'source_world_id',
     'house_id',
     'session_context_id',
     'dual_aspect_packet_id',
