@@ -13,71 +13,102 @@
   <title>Hearthgate iPad Somatic Tone Gate</title>
   <style>
     :root {
-      color-scheme:dark;
-      font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:#101419;
-      color:#f2ead9;
-      --copper:#c98652;
-      --gold:#e6c27a;
-      --moss:#7ea58c;
-      --ink:#101419;
-      --panel:#171d24;
-      --edge:#39444f;
-      --danger:#d98282;
-      --good:#91c9a2;
+      color-scheme: dark;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #101419;
+      color: #f2ead9;
+      --copper: #c98652;
+      --gold: #e6c27a;
+      --moss: #7ea58c;
+      --panel: #171d24;
+      --edge: #39444f;
+      --danger: #d98282;
+      --good: #91c9a2;
     }
-    * { box-sizing:border-box; }
-    html { min-height:100%; background:#101419; }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: #101419; }
     body {
-      margin:0;
-      min-height:100dvh;
-      padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(30px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
-      background:radial-gradient(circle at 50% 0,#26333d 0,transparent 44%),linear-gradient(155deg,#101419,#17120f);
-      overscroll-behavior:none;
-      -webkit-user-select:none;
-      user-select:none;
+      margin: 0;
+      min-height: 100dvh;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(190px, calc(160px + env(safe-area-inset-bottom)))
+        max(18px, env(safe-area-inset-left));
+      background: radial-gradient(circle at 50% 0, #26333d 0, transparent 44%), linear-gradient(155deg, #101419, #17120f);
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
-    main { width:min(1020px,100%); margin:auto; }
-    header { padding:22px 0; }
-    .eyebrow { color:var(--moss); text-transform:uppercase; letter-spacing:.15em; font-weight:800; font-size:.75rem; }
-    h1 { margin:.3rem 0 .7rem; color:var(--gold); font-family:ui-serif,Georgia,serif; font-size:clamp(2rem,7vw,4rem); line-height:1.02; }
-    h2 { margin-top:0; color:var(--gold); font-family:ui-serif,Georgia,serif; }
-    p { line-height:1.55; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:16px; }
-    .panel { background:color-mix(in srgb,var(--panel) 94%,transparent); border:1px solid var(--edge); border-radius:22px; padding:20px; box-shadow:0 18px 60px rgba(0,0,0,.28); }
-    .wide { grid-column:1/-1; }
-    label { display:block; margin:.9rem 0 .35rem; font-weight:750; color:#c8d7d6; }
-    select,input[type="range"],textarea { width:100%; }
-    select,textarea { min-height:52px; padding:11px 12px; border-radius:12px; border:1px solid #52606b; background:#0d1217; color:#f2ead9; font:inherit; }
-    textarea { min-height:96px; resize:vertical; -webkit-user-select:text; user-select:text; }
-    input[type="range"] { accent-color:var(--copper); min-height:42px; }
-    .check { display:flex; gap:12px; align-items:flex-start; color:#f2ead9; font-weight:650; }
-    .check input { width:27px; height:27px; flex:0 0 auto; accent-color:var(--moss); }
-    button { min-height:58px; border-radius:14px; border:1px solid var(--gold); background:#2c221b; color:#fff7e8; padding:13px 17px; font:750 1rem ui-sans-serif,system-ui; touch-action:manipulation; cursor:pointer; }
-    button.secondary { border-color:#70828f; background:#17212a; }
-    button.stop { border-color:var(--danger); background:#351b1b; }
-    button.approve { border-color:var(--good); background:#183326; }
-    button:disabled { opacity:.42; cursor:not-allowed; }
-    button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
-    .button-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
-    .button-row button { flex:1 1 190px; }
-    .readout { display:grid; gap:8px; margin:12px 0; }
-    .readout div { display:flex; justify-content:space-between; gap:14px; padding:9px 0; border-bottom:1px solid #303a43; }
-    .readout dt { color:#a8babd; }
-    .readout dd { margin:0; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; text-align:right; overflow-wrap:anywhere; }
-    .status { min-height:3.5em; padding:12px; border-left:4px solid var(--moss); background:rgba(0,0,0,.2); border-radius:8px; }
-    .warning { border-left-color:var(--copper); }
-    .danger { border-left-color:var(--danger); }
-    .receipt { font:.77rem/1.45 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; max-height:320px; overflow:auto; -webkit-user-select:text; user-select:text; }
-    .badges { display:flex; flex-wrap:wrap; gap:7px; margin:12px 0; }
-    .badge { display:inline-block; padding:6px 10px; border-radius:999px; background:#25313a; color:#d5e0df; font-size:.75rem; font-weight:800; }
-    .badge.good { background:#183326; color:#bfe8ca; }
-    .badge.attention { background:#3a2b18; color:#f0d39b; }
-    .math { font-family:ui-serif,Georgia,serif; color:#edd9ad; }
-    .sequence { padding:14px; border-radius:14px; background:#0e1419; border:1px solid #34414b; font:700 .9rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace; }
-    .hidden { display:none!important; }
-    @media (display-mode:standalone) { .install-note { display:none; } }
-    @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; transition:none!important; } }
+    main { width: min(1020px, 100%); margin: auto; }
+    header { padding: 22px 0; }
+    .eyebrow { color: var(--moss); text-transform: uppercase; letter-spacing: .15em; font-weight: 800; font-size: .75rem; }
+    h1 { margin: .3rem 0 .7rem; color: var(--gold); font-family: ui-serif, Georgia, serif; font-size: clamp(2rem, 7vw, 4rem); line-height: 1.02; }
+    h2 { margin-top: 0; color: var(--gold); font-family: ui-serif, Georgia, serif; }
+    p { line-height: 1.55; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+    .panel { background: color-mix(in srgb, var(--panel) 94%, transparent); border: 1px solid var(--edge); border-radius: 22px; padding: 20px; box-shadow: 0 18px 60px rgba(0,0,0,.28); }
+    .wide { grid-column: 1 / -1; }
+    label { display: block; margin: .9rem 0 .35rem; font-weight: 750; color: #c8d7d6; }
+    select, input[type="range"], textarea { width: 100%; }
+    select, textarea { min-height: 52px; padding: 11px 12px; border-radius: 12px; border: 1px solid #52606b; background: #0d1217; color: #f2ead9; font: inherit; }
+    textarea { min-height: 96px; resize: vertical; -webkit-user-select: text; user-select: text; }
+    input[type="range"] { accent-color: var(--copper); min-height: 42px; }
+    .check { display: flex; gap: 12px; align-items: flex-start; color: #f2ead9; font-weight: 650; }
+    .check input { width: 27px; height: 27px; flex: 0 0 auto; accent-color: var(--moss); }
+    button { min-height: 58px; border-radius: 14px; border: 1px solid var(--gold); background: #2c221b; color: #fff7e8; padding: 13px 17px; font: 750 1rem ui-sans-serif, system-ui; touch-action: manipulation; cursor: pointer; }
+    button.secondary { border-color: #70828f; background: #17212a; }
+    button.stop { border-color: var(--danger); background: #351b1b; }
+    button.approve { border-color: var(--good); background: #183326; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .button-row button { flex: 1 1 190px; }
+    .readout { display: grid; gap: 8px; margin: 12px 0; }
+    .readout div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid #303a43; }
+    .readout dt { color: #a8babd; }
+    .readout dd { margin: 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; text-align: right; overflow-wrap: anywhere; }
+    .status { min-height: 3.5em; padding: 12px; border-left: 4px solid var(--moss); background: rgba(0,0,0,.2); border-radius: 8px; }
+    .warning { border-left-color: var(--copper); }
+    .danger { border-left-color: var(--danger); }
+    .receipt { font: .77rem/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; -webkit-user-select: text; user-select: text; }
+    .badges { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0; }
+    .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #25313a; color: #d5e0df; font-size: .75rem; font-weight: 800; }
+    .badge.good { background: #183326; color: #bfe8ca; }
+    .badge.attention { background: #3a2b18; color: #f0d39b; }
+    .math { font-family: ui-serif, Georgia, serif; color: #edd9ad; }
+    .sequence { padding: 14px; border-radius: 14px; background: #0e1419; border: 1px solid #34414b; font: 700 .9rem/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .hidden { display: none !important; }
+    .approval-dock {
+      position: fixed;
+      z-index: 80;
+      left: 50%;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: min(1020px, calc(100% - max(24px, env(safe-area-inset-left)) - max(24px, env(safe-area-inset-right))));
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border: 2px solid var(--gold);
+      border-radius: 20px;
+      background: rgba(10, 15, 20, .96);
+      box-shadow: 0 -10px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(230,194,122,.2) inset;
+      backdrop-filter: blur(16px);
+    }
+    .approval-dock strong { display: block; color: var(--gold); letter-spacing: .08em; }
+    .approval-dock span { display: block; margin-top: 4px; color: #d8e1df; font-size: .9rem; line-height: 1.35; }
+    .approval-dock.ready { border-color: var(--good); box-shadow: 0 -10px 50px rgba(0,0,0,.5), 0 0 28px rgba(145,201,162,.22); }
+    .approval-dock.ready strong { color: var(--good); }
+    .approval-dock button { width: 100%; min-height: 68px; font-size: 1.08rem; }
+    @media (max-width: 680px) {
+      body { padding-bottom: max(230px, calc(205px + env(safe-area-inset-bottom))); }
+      .approval-dock { grid-template-columns: 1fr; }
+      .approval-dock button { min-height: 62px; }
+    }
+    @media (display-mode: standalone) { .install-note { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
   </style>
 </head>
 <body>
@@ -89,6 +120,14 @@
     <div id="capabilities" class="badges" aria-label="Device capabilities"></div>
     <p class="status warning install-note"><strong>Install on iPad:</strong> open this page in Safari, choose Share, then Add to Home Screen. The installed PWA preserves this room as a dedicated full-screen instrument.</p>
   </header>
+
+  <aside id="approval-dock" class="approval-dock" aria-label="Rowan approval gate" aria-live="polite">
+    <div>
+      <strong>ROWAN APPROVAL GATE</strong>
+      <span id="approval-gate-status">LOCKED · Complete the somatic audition.</span>
+    </div>
+    <button id="approve" class="approve" type="button" disabled>Approval locked</button>
+  </aside>
 
   <section class="grid">
     <article class="panel">
@@ -123,25 +162,20 @@
     <article class="panel wide">
       <h2>3 · Somatic output</h2>
       <p class="sequence">world root → compression → release → compression of the release → release → continuing outward</p>
-      <p class="status warning"><strong>iPad boundary:</strong> iPad has no internal Core Haptics actuator. This room never claims otherwise. Select and confirm an external output before every audition.</p>
-
+      <p class="status warning"><strong>iPad boundary:</strong> iPad has no internal Core Haptics actuator. Select and confirm an external output before every audition.</p>
       <div class="grid">
         <div>
           <label for="device-profile">Somatic device</label>
           <select id="device-profile"></select>
-
           <div id="placement-wrap">
             <label for="placement">Body placement</label>
             <select id="placement"></select>
           </div>
-
           <label for="cycles">Rendered compression–release cycles <output id="cycles-output">3</output></label>
           <input id="cycles" type="range" min="1" max="8" step="1" value="3" />
-
           <label for="gain">Somatic strength <output id="gain-output">0.022</output></label>
           <input id="gain" type="range" min="0.005" max="0.06" step="0.001" value="0.022" />
         </div>
-
         <div>
           <label class="check"><input id="output-confirmed" type="checkbox" /> <span>I confirm the selected external device is connected and is the active iPad audio or controller output.</span></label>
           <label class="check"><input id="start-low" type="checkbox" /> <span>I am starting at the lowest clearly perceptible level and increasing only by deliberate adjustment.</span></label>
@@ -155,7 +189,6 @@
           </dl>
         </div>
       </div>
-
       <div class="button-row">
         <button id="audition" type="button">Play somatic compression–release window</button>
         <button id="stop" class="stop" type="button">Feather Stop</button>
@@ -165,12 +198,12 @@
 
     <article class="panel">
       <h2>4 · Rowan decides</h2>
+      <p>The approval button remains visible in the persistent Rowan Approval Gate at the bottom of the screen.</p>
       <label class="check"><input id="felt" type="checkbox" /> <span>I felt or clearly identified the root, compression, release, and next compression.</span></label>
       <label class="check"><input id="comfortable" type="checkbox" /> <span>The complete somatic window remained comfortable.</span></label>
       <label for="note">Calibration note</label>
       <textarea id="note" placeholder="Placement, intensity, tone identity, compression density, release length, adjustment…"></textarea>
       <div class="button-row">
-        <button id="approve" class="approve" type="button" disabled>Approve somatic tone</button>
         <button id="adjust" class="secondary" type="button" disabled>Needs adjustment</button>
         <button id="reject" class="stop" type="button" disabled>Reject candidate</button>
       </div>
@@ -179,9 +212,7 @@
 
     <article class="panel">
       <h2>Somatic receipt ledger</h2>
-      <div class="button-row">
-        <button id="export" class="secondary" type="button">Export receipts</button>
-      </div>
+      <div class="button-row"><button id="export" class="secondary" type="button">Export receipts</button></div>
       <pre id="receipts" class="receipt">[]</pre>
     </article>
   </section>
@@ -216,28 +247,31 @@
     return `${value.toFixed(3)} Hz`;
   }
 
-  function setDecisionEnabled(enabled) {
+  function setDecisionEnabled(enabled, message = null) {
     $('#approve').disabled = !enabled;
     $('#adjust').disabled = !enabled;
     $('#reject').disabled = !enabled;
+    $('#approve').textContent = enabled ? 'Approve somatic tone' : 'Approval locked';
+    $('#approval-dock').classList.toggle('ready', enabled);
+    $('#approval-gate-status').textContent = message || (
+      enabled
+        ? 'READY · Confirm felt identity and comfort, then approve.'
+        : 'LOCKED · Complete the somatic audition.'
+    );
   }
 
-  function resetDecisionEvidence() {
+  function resetDecisionEvidence(message = 'LOCKED · Complete the somatic audition.') {
     auditionReady = false;
     $('#felt').checked = false;
     $('#comfortable').checked = false;
-    setDecisionEnabled(false);
+    setDecisionEnabled(false, message);
   }
 
-  function invalidatePhysicalConfirmations({
-    output = false,
-    startLow = false,
-    clearance = false,
-  } = {}) {
+  function invalidatePhysicalConfirmations({ output = false, startLow = false, clearance = false } = {}) {
     if (output) $('#output-confirmed').checked = false;
     if (startLow) $('#start-low').checked = false;
     if (clearance) $('#placement-clearance').checked = false;
-    resetDecisionEvidence();
+    resetDecisionEvidence('LOCKED · Reconfirm the changed physical settings and complete a new audition.');
   }
 
   function renderCapabilities() {
@@ -265,13 +299,13 @@
   }
 
   function renderLineage() {
-    if (!candidate) return;
+    if (!candidate) return null;
     try {
-      const lineage = readIPadSomaticLineage({ worldId:candidate.world_id });
+      const lineage = readIPadSomaticLineage({ worldId: candidate.world_id });
       $('#source-state').textContent = lineage.shared_state_fingerprint;
       $('#compression-receipt').textContent = lineage.compression_release_receipt_id;
       return lineage;
-    } catch (error) {
+    } catch {
       $('#source-state').textContent = 'Not bound';
       $('#compression-receipt').textContent = 'Load selected world through Arcsweep';
       return null;
@@ -289,7 +323,7 @@
     $('#clearance-label').classList.toggle('hidden', !device.requires_placement_confirmation);
     $('#device-band').textContent = `${device.minimum_hz}–${device.maximum_hz} Hz`;
     if (invalidate) {
-      invalidatePhysicalConfirmations({ output:true, startLow:true, clearance:true });
+      invalidatePhysicalConfirmations({ output: true, startLow: true, clearance: true });
       $('#audition-status').textContent = 'RESTING · Output profile changed. Reconfirm the physical device and start-low gate.';
     }
     updatePlanPreview();
@@ -297,7 +331,7 @@
 
   async function loadCandidate() {
     clearTimeout(completionTimer);
-    resetDecisionEvidence();
+    resetDecisionEvidence('LOCKED · Load the candidate, bind Bifröst, and complete the audition.');
     candidate = DEFAULT_WORLD_TONE_CANDIDATES.find((item) => item.world_id === $('#world').value);
     await session.loadCandidate(candidate);
     $('#layer').textContent = candidate.tone_layer_id;
@@ -315,18 +349,18 @@
     const foldIndex = Number($('#fold').value);
     $('#fold-output').textContent = foldIndex.toFixed(2);
     foldActive = updateFoldLatch(foldIndex, foldActive, {
-      enter:candidate.enter_threshold,
-      release:candidate.release_threshold,
+      enter: candidate.enter_threshold,
+      release: candidate.release_threshold,
     });
     const pair = mapWorldFoldFrequencies(candidate.root_hz, foldIndex, {
-      enterThreshold:candidate.enter_threshold,
-      excursion:candidate.excursion,
+      enterThreshold: candidate.enter_threshold,
+      excursion: candidate.excursion,
     });
     $('#fold-state').textContent = foldActive ? 'active' : 'resting';
     $('#compression-source').textContent = `${formatHz(pair.direct_hz)} · ${pair.direct_class}`;
     $('#release-source').textContent = `${formatHz(pair.inverse_hz)} · ${pair.inverse_class}`;
     $('#reciprocal').textContent = `${pair.reciprocal_product.toFixed(4)} = ${(candidate.root_hz ** 2).toFixed(4)}`;
-    resetDecisionEvidence();
+    resetDecisionEvidence('LOCKED · Fold settings changed. Complete a new audition.');
     updatePlanPreview();
   }
 
@@ -334,9 +368,9 @@
     if (!candidate || !selectedDevice()) return;
     try {
       const plan = buildSomaticCompressionReleasePlan(candidate, Number($('#fold').value), {
-        deviceProfileId:$('#device-profile').value,
-        cycles:Number($('#cycles').value),
-        baseGain:Number($('#gain').value),
+        deviceProfileId: $('#device-profile').value,
+        cycles: Number($('#cycles').value),
+        baseGain: Number($('#gain').value),
       });
       $('#root-proxy').textContent = formatHz(plan.proxy_frequencies.root_hz);
       $('#compression-proxy').textContent = formatHz(plan.proxy_frequencies.compression_hz);
@@ -370,19 +404,19 @@
 
   $('#world').addEventListener('change', loadCandidate);
   $('#fold').addEventListener('input', updateFold);
-  $('#device-profile').addEventListener('change', () => syncDeviceControls({ invalidate:true }));
+  $('#device-profile').addEventListener('change', () => syncDeviceControls({ invalidate: true }));
   $('#placement').addEventListener('change', () => {
-    invalidatePhysicalConfirmations({ clearance:true });
+    invalidatePhysicalConfirmations({ clearance: true });
     $('#audition-status').textContent = 'RESTING · Body placement changed. Reconfirm placement clearance.';
   });
   $('#cycles').addEventListener('input', () => {
     $('#cycles-output').textContent = $('#cycles').value;
-    resetDecisionEvidence();
+    resetDecisionEvidence('LOCKED · Cycle count changed. Complete a new audition.');
     updatePlanPreview();
   });
   $('#gain').addEventListener('input', () => {
     $('#gain-output').textContent = Number($('#gain').value).toFixed(3);
-    invalidatePhysicalConfirmations({ startLow:true });
+    invalidatePhysicalConfirmations({ startLow: true });
     $('#audition-status').textContent = 'RESTING · Strength changed. Reconfirm the start-low gate before playing.';
     updatePlanPreview();
   });
@@ -390,16 +424,16 @@
   $('#audition').addEventListener('click', async () => {
     try {
       clearTimeout(completionTimer);
-      resetDecisionEvidence();
+      resetDecisionEvidence('LOCKED · Somatic window is playing.');
       const receipt = await session.audition({
-        foldIndex:Number($('#fold').value),
-        deviceProfileId:$('#device-profile').value,
-        cycles:Number($('#cycles').value),
-        baseGain:Number($('#gain').value),
-        outputConfirmed:$('#output-confirmed').checked,
-        placement:$('#placement').value,
-        placementClearanceConfirmed:$('#placement-clearance').checked,
-        startLowConfirmed:$('#start-low').checked,
+        foldIndex: Number($('#fold').value),
+        deviceProfileId: $('#device-profile').value,
+        cycles: Number($('#cycles').value),
+        baseGain: Number($('#gain').value),
+        outputConfirmed: $('#output-confirmed').checked,
+        placement: $('#placement').value,
+        placementClearanceConfirmed: $('#placement-clearance').checked,
+        startLowConfirmed: $('#start-low').checked,
       });
       $('#source-state').textContent = receipt.source_state_fingerprint;
       $('#compression-receipt').textContent = receipt.compression_release_receipt_id;
@@ -408,20 +442,22 @@
         try {
           await session.markAuditionComplete();
           auditionReady = true;
-          setDecisionEnabled(true);
+          setDecisionEnabled(true, 'READY · Confirm felt identity and comfort, then approve.');
           $('#audition-status').textContent = 'COMPLETE · The final release state is preserved as the seed of the next render window.';
         } catch (error) {
+          resetDecisionEvidence('LOCKED · Audition completion failed. Run the window again.');
           $('#audition-status').textContent = error.message;
         }
       }, receipt.plan.total_duration_ms + 100);
     } catch (error) {
+      resetDecisionEvidence('LOCKED · Audition did not start. Correct the displayed gate and run it again.');
       $('#audition-status').textContent = error.message;
     }
   });
 
   async function featherStop(reason = 'feather-stop') {
     clearTimeout(completionTimer);
-    resetDecisionEvidence();
+    resetDecisionEvidence('LOCKED · Feather Stop cleared the audition. Run a new window.');
     await session.stop(reason);
     $('#audition-status').textContent = 'FEATHER STOP · Every active oscillator, envelope, context, and native command is closed.';
   }
@@ -439,15 +475,22 @@
       if (!auditionReady) throw new Error('IPAD_SOMATIC_HAPTICS: complete the somatic audition before deciding');
       const receipt = await session.decide({
         decision,
-        feltAndIdentified:$('#felt').checked,
-        comfortable:$('#comfortable').checked,
-        outputConfirmed:$('#output-confirmed').checked,
-        note:$('#note').value,
+        feltAndIdentified: $('#felt').checked,
+        comfortable: $('#comfortable').checked,
+        outputConfirmed: $('#output-confirmed').checked,
+        note: $('#note').value,
       });
-      $('#decision-status').textContent = `${decision.toUpperCase()} · ${receipt.receipt_hash}`;
+      const result = `${decision.toUpperCase()} · ${receipt.receipt_hash}`;
+      $('#decision-status').textContent = result;
+      $('#approval-gate-status').textContent = result;
+      if (decision === 'approved') {
+        $('#approve').textContent = 'Approved';
+        $('#approve').disabled = true;
+      }
       renderReceipts();
     } catch (error) {
       $('#decision-status').textContent = error.message;
+      $('#approval-gate-status').textContent = `BLOCKED · ${error.message}`;
     }
   }
 
@@ -456,7 +499,7 @@
   $('#reject').addEventListener('click', () => decide('rejected'));
 
   $('#export').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(session.readReceipts(), null, 2)], { type:'application/json' });
+    const blob = new Blob([JSON.stringify(session.readReceipts(), null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -470,14 +513,14 @@
   });
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js', { scope:'./' }).catch((error) => {
+    navigator.serviceWorker.register('./service-worker.js', { scope: './' }).catch((error) => {
       $('#audition-status').textContent = `PWA cache registration failed: ${error.message}`;
     });
   }
 
   renderCapabilities();
   renderReceipts();
-  syncDeviceControls({ invalidate:false });
+  syncDeviceControls({ invalidate: false });
   await loadCandidate();
 </script>
 </body>
