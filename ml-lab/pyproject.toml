@@ -17,6 +17,7 @@ dependencies = [
 
 [project.scripts]
 flameclyffe-living-engine = "flameclyffe_ml.living_engine.__main__:main"
+flameclyffe-geometric-engine = "flameclyffe_ml.geometric_engine.__main__:main"
 hearthgate-kernel = "flameclyffe_ml.hearthgate_kernel.cli:main"
 
 [project.optional-dependencies]
@@ -40,6 +41,10 @@ audio = [
 ]
 service = [
   "fastapi[standard]>=0.115,<1",
+]
+ingest = [
+  "httpx>=0.27,<1",
+  "beautifulsoup4>=4.12,<5",
 ]
 visual-lab = [
   "pygame-ce>=2.5,<3",
@@ -77,7 +82,9 @@ warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
 module = [
+  "bs4.*",
   "fastapi.*",
+  "httpx.*",
   "starlette.*",
   "numpy.*",
 ]
