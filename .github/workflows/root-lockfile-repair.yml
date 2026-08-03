@@ -1,0 +1,79 @@
+name: Root Lockfile Repair
+
+on:
+  push:
+    branches:
+      - feature/ipad-somatic-haptics-v1
+    paths:
+      - package.json
+      - package-lock.json
+      - .nvmrc
+      - .github/workflows/root-lockfile-repair.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: root-lockfile-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    name: Regenerate complete npm lockfile
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/ipad-somatic-haptics-v1
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Verify Node contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node -p "process.versions.node.split('.')[0]")" = "24"
+          test "$(npm --version | cut -d. -f1)" = "11"
+
+      - name: Regenerate complete root lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Verify lockfile is complete
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          const entries = Object.keys(lock.packages || {});
+          if (lock.lockfileVersion !== 3) throw new Error(`Expected lockfileVersion 3, received ${lock.lockfileVersion}`);
+          if (entries.length < 50) throw new Error(`Root lockfile remains incomplete: ${entries.length} package records`);
+          if (!lock.packages['node_modules/vite']) throw new Error('Resolved Vite package record is missing');
+          if (!lock.packages['node_modules/react']) throw new Error('Resolved React package record is missing');
+          console.log(`Verified ${entries.length} resolved package records.`);
+          NODE
+          rm -rf node_modules
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run starwell:test
+          npm run starwell:build
+
+      - name: Commit regenerated lockfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- package-lock.json; then
+            echo 'Root lockfile already complete.'
+            exit 0
+          fi
+          git config user.name 'hearthgate-ci'
+          git config user.email 'hearthgate-ci@users.noreply.github.com'
+          git add package-lock.json
+          git commit -m 'build: commit complete Node 24 root lockfile'
+          git push origin HEAD:feature/ipad-somatic-haptics-v1
