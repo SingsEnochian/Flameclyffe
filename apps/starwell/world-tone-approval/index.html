@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <meta name="theme-color" content="#101419" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Tone Gate" />
-  <title>Hearthgate World Tone Approval</title>
+  <meta name="apple-mobile-web-app-title" content="Somatic Gate" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./hearthgate-somatic-icon.svg" />
+  <title>Hearthgate iPad Somatic Tone Gate</title>
   <style>
     :root {
       color-scheme:dark;
@@ -19,105 +23,152 @@
       --ink:#101419;
       --panel:#171d24;
       --edge:#39444f;
+      --danger:#d98282;
+      --good:#91c9a2;
     }
     * { box-sizing:border-box; }
+    html { min-height:100%; background:#101419; }
     body {
       margin:0;
       min-height:100dvh;
-      padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(26px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
+      padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(30px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
       background:radial-gradient(circle at 50% 0,#26333d 0,transparent 44%),linear-gradient(155deg,#101419,#17120f);
+      overscroll-behavior:none;
+      -webkit-user-select:none;
+      user-select:none;
     }
-    main { width:min(980px,100%); margin:auto; }
+    main { width:min(1020px,100%); margin:auto; }
     header { padding:22px 0; }
     .eyebrow { color:var(--moss); text-transform:uppercase; letter-spacing:.15em; font-weight:800; font-size:.75rem; }
     h1 { margin:.3rem 0 .7rem; color:var(--gold); font-family:ui-serif,Georgia,serif; font-size:clamp(2rem,7vw,4rem); line-height:1.02; }
-    p { line-height:1.55; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:16px; }
-    .panel { background:color-mix(in srgb,var(--panel) 92%,transparent); border:1px solid var(--edge); border-radius:20px; padding:20px; box-shadow:0 18px 60px rgba(0,0,0,.28); }
     h2 { margin-top:0; color:var(--gold); font-family:ui-serif,Georgia,serif; }
+    p { line-height:1.55; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:16px; }
+    .panel { background:color-mix(in srgb,var(--panel) 94%,transparent); border:1px solid var(--edge); border-radius:22px; padding:20px; box-shadow:0 18px 60px rgba(0,0,0,.28); }
+    .wide { grid-column:1/-1; }
     label { display:block; margin:.9rem 0 .35rem; font-weight:750; color:#c8d7d6; }
     select,input[type="range"],textarea { width:100%; }
-    select,textarea { min-height:50px; padding:11px 12px; border-radius:12px; border:1px solid #52606b; background:#0d1217; color:#f2ead9; font:inherit; }
-    textarea { min-height:96px; resize:vertical; }
-    input[type="range"] { accent-color:var(--copper); }
-    .check { display:flex; gap:10px; align-items:flex-start; color:#f2ead9; font-weight:650; }
-    .check input { width:24px; height:24px; flex:0 0 auto; accent-color:var(--moss); }
-    button { min-height:54px; border-radius:13px; border:1px solid var(--gold); background:#2c221b; color:#fff7e8; padding:12px 16px; font:750 1rem ui-sans-serif,system-ui; touch-action:manipulation; cursor:pointer; }
+    select,textarea { min-height:52px; padding:11px 12px; border-radius:12px; border:1px solid #52606b; background:#0d1217; color:#f2ead9; font:inherit; }
+    textarea { min-height:96px; resize:vertical; -webkit-user-select:text; user-select:text; }
+    input[type="range"] { accent-color:var(--copper); min-height:42px; }
+    .check { display:flex; gap:12px; align-items:flex-start; color:#f2ead9; font-weight:650; }
+    .check input { width:27px; height:27px; flex:0 0 auto; accent-color:var(--moss); }
+    button { min-height:58px; border-radius:14px; border:1px solid var(--gold); background:#2c221b; color:#fff7e8; padding:13px 17px; font:750 1rem ui-sans-serif,system-ui; touch-action:manipulation; cursor:pointer; }
     button.secondary { border-color:#70828f; background:#17212a; }
-    button.stop { border-color:#d98282; background:#351b1b; }
-    button.approve { border-color:#91c9a2; background:#183326; }
-    button:disabled { opacity:.45; cursor:not-allowed; }
+    button.stop { border-color:var(--danger); background:#351b1b; }
+    button.approve { border-color:var(--good); background:#183326; }
+    button:disabled { opacity:.42; cursor:not-allowed; }
     button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
-    .button-row { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    .button-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    .button-row button { flex:1 1 190px; }
     .readout { display:grid; gap:8px; margin:12px 0; }
     .readout div { display:flex; justify-content:space-between; gap:14px; padding:9px 0; border-bottom:1px solid #303a43; }
     .readout dt { color:#a8babd; }
     .readout dd { margin:0; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; text-align:right; overflow-wrap:anywhere; }
     .status { min-height:3.5em; padding:12px; border-left:4px solid var(--moss); background:rgba(0,0,0,.2); border-radius:8px; }
     .warning { border-left-color:var(--copper); }
-    .receipt { font: .77rem/1.45 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; max-height:320px; overflow:auto; }
-    .badge { display:inline-block; padding:5px 9px; border-radius:999px; background:#25313a; color:#d5e0df; font-size:.75rem; font-weight:800; }
+    .danger { border-left-color:var(--danger); }
+    .receipt { font:.77rem/1.45 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; max-height:320px; overflow:auto; -webkit-user-select:text; user-select:text; }
+    .badges { display:flex; flex-wrap:wrap; gap:7px; margin:12px 0; }
+    .badge { display:inline-block; padding:6px 10px; border-radius:999px; background:#25313a; color:#d5e0df; font-size:.75rem; font-weight:800; }
+    .badge.good { background:#183326; color:#bfe8ca; }
+    .badge.attention { background:#3a2b18; color:#f0d39b; }
     .math { font-family:ui-serif,Georgia,serif; color:#edd9ad; }
+    .sequence { padding:14px; border-radius:14px; background:#0e1419; border:1px solid #34414b; font:700 .9rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace; }
+    .hidden { display:none!important; }
+    @media (display-mode:standalone) { .install-note { display:none; } }
     @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; transition:none!important; } }
   </style>
 </head>
 <body>
 <main>
   <header>
-    <div class="eyebrow">Hearthgate · Jacobian Fold Tone Gate</div>
-    <h1>Rowan’s World-Tone Approval Room</h1>
-    <p>This room never approves a tone automatically. It calculates the world’s reciprocal fold pair, translates inaudible branches into a bounded audible vibration proxy, sends that proxy through the iPad’s selected audio route, and waits for Rowan’s explicit decision.</p>
+    <div class="eyebrow">Hearthgate · Bifröst · iPad Somatic Interface</div>
+    <h1>Rowan’s Somatic World-Tone Gate</h1>
+    <p>The iPad computes and controls the pattern. The body receives it through an explicitly selected external transducer, Shokz, or native controller bridge. Compression releases into the next compression without reset.</p>
+    <div id="capabilities" class="badges" aria-label="Device capabilities"></div>
+    <p class="status warning install-note"><strong>Install on iPad:</strong> open this page in Safari, choose Share, then Add to Home Screen. The installed PWA preserves this room as a dedicated full-screen instrument.</p>
   </header>
 
   <section class="grid">
     <article class="panel">
-      <h2>1 · Select the world</h2>
+      <h2>1 · World and tone</h2>
       <label for="world">World profile</label>
       <select id="world"></select>
       <dl class="readout">
         <div><dt>Candidate layer</dt><dd id="layer">—</dd></div>
         <div><dt>Root tone</dt><dd id="root">—</dd></div>
         <div><dt>Profile</dt><dd id="profile">—</dd></div>
-        <div><dt>Source</dt><dd id="source">—</dd></div>
         <div><dt>Candidate hash</dt><dd id="candidate-hash">—</dd></div>
       </dl>
-      <p><span class="badge">Pending until Rowan approves</span></p>
+      <p><span class="badge attention">Pending until Rowan approves</span></p>
     </article>
 
     <article class="panel">
-      <h2>2 · Jacobian fold</h2>
+      <h2>2 · Jacobian compression gate</h2>
       <p class="math">Φ = 1 − σ<sub>min</sub> / (σ<sub>max</sub> + ε)</p>
       <label for="fold">Fold index <output id="fold-output">0.90</output></label>
       <input id="fold" type="range" min="0" max="1" step="0.01" value="0.90" />
       <dl class="readout">
-        <div><dt>Fold state</dt><dd id="fold-state">active</dd></div>
-        <div><dt>Direct branch</dt><dd id="direct">—</dd></div>
-        <div><dt>Inverse branch</dt><dd id="inverse">—</dd></div>
-        <div><dt>Reciprocal check</dt><dd id="reciprocal">—</dd></div>
+        <div><dt>Compression gate</dt><dd id="fold-state">active</dd></div>
+        <div><dt>Compression source</dt><dd id="compression-source">—</dd></div>
+        <div><dt>Release source</dt><dd id="release-source">—</dd></div>
+        <div><dt>Reciprocal invariant</dt><dd id="reciprocal">—</dd></div>
       </dl>
-      <p>The ultrasonic and infrasonic values are recorded, not played. The Shokz cue uses octave-folded audible proxies so the world relationship survives without asking the headset to reproduce impossible frequencies.</p>
+      <p>Ultrasonic and infrasonic source branches remain in the receipt. The somatic renderer octave-folds them into the selected external device’s physical response band.</p>
     </article>
 
-    <article class="panel">
-      <h2>3 · Shokz audition</h2>
-      <p class="status warning"><strong>Device boundary:</strong> iPad Safari cannot verify which Bluetooth headset receives Web Audio. Confirm Shokz in iPad Control Centre before playing. The cue is an audio-haptic proxy, not a calibrated actuator command.</p>
-      <label class="check"><input id="shokz" type="checkbox" /> <span>I confirm my Shokz are connected and selected as the iPad audio output.</span></label>
-      <label for="gain">Audition strength <output id="gain-output">Low · 0.035</output></label>
-      <input id="gain" type="range" min="0.02" max="0.08" step="0.005" value="0.035" />
+    <article class="panel wide">
+      <h2>3 · Somatic output</h2>
+      <p class="sequence">world root → compression → release → compression of the release → release → continuing outward</p>
+      <p class="status warning"><strong>iPad boundary:</strong> iPad has no internal Core Haptics actuator. This room never claims otherwise. Select and confirm an external output before every audition.</p>
+
+      <div class="grid">
+        <div>
+          <label for="device-profile">Somatic device</label>
+          <select id="device-profile"></select>
+
+          <div id="placement-wrap">
+            <label for="placement">Body placement</label>
+            <select id="placement"></select>
+          </div>
+
+          <label for="cycles">Rendered compression–release cycles <output id="cycles-output">3</output></label>
+          <input id="cycles" type="range" min="1" max="8" step="1" value="3" />
+
+          <label for="gain">Somatic strength <output id="gain-output">0.022</output></label>
+          <input id="gain" type="range" min="0.005" max="0.06" step="0.001" value="0.022" />
+        </div>
+
+        <div>
+          <label class="check"><input id="output-confirmed" type="checkbox" /> <span>I confirm the selected external device is connected and is the active iPad audio or controller output.</span></label>
+          <label class="check"><input id="start-low" type="checkbox" /> <span>I am starting at the lowest clearly perceptible level and increasing only by deliberate adjustment.</span></label>
+          <label id="clearance-label" class="check"><input id="placement-clearance" type="checkbox" /> <span>The transducer is clear of my neck, healing surgical areas, and implanted-device sites.</span></label>
+          <dl class="readout">
+            <div><dt>Rendered band</dt><dd id="device-band">—</dd></div>
+            <div><dt>Root proxy</dt><dd id="root-proxy">—</dd></div>
+            <div><dt>Compression proxy</dt><dd id="compression-proxy">—</dd></div>
+            <div><dt>Release proxy</dt><dd id="release-proxy">—</dd></div>
+            <div><dt>Window duration</dt><dd id="duration">—</dd></div>
+          </dl>
+        </div>
+      </div>
+
       <div class="button-row">
-        <button id="audition" type="button">Play root · rise · fall</button>
+        <button id="audition" type="button">Play somatic compression–release window</button>
         <button id="stop" class="stop" type="button">Feather Stop</button>
       </div>
-      <p id="audition-status" class="status" role="status">RESTING · No candidate auditioned.</p>
+      <p id="audition-status" class="status" role="status">RESTING · No somatic audition scheduled.</p>
     </article>
 
     <article class="panel">
       <h2>4 · Rowan decides</h2>
-      <label class="check"><input id="felt" type="checkbox" /> <span>I felt or clearly identified the root, rising branch, and falling branch without discomfort.</span></label>
+      <label class="check"><input id="felt" type="checkbox" /> <span>I felt or clearly identified the root, compression, release, and next compression.</span></label>
+      <label class="check"><input id="comfortable" type="checkbox" /> <span>The complete somatic window remained comfortable.</span></label>
       <label for="note">Calibration note</label>
-      <textarea id="note" placeholder="Comfort, clarity, wrong tone, stronger or softer, alternate root…"></textarea>
+      <textarea id="note" placeholder="Placement, intensity, tone identity, compression density, release length, adjustment…"></textarea>
       <div class="button-row">
-        <button id="approve" class="approve" type="button" disabled>Approve tone</button>
+        <button id="approve" class="approve" type="button" disabled>Approve somatic tone</button>
         <button id="adjust" class="secondary" type="button" disabled>Needs adjustment</button>
         <button id="reject" class="stop" type="button" disabled>Reject candidate</button>
       </div>
@@ -125,7 +176,7 @@
     </article>
 
     <article class="panel">
-      <h2>Receipt ledger</h2>
+      <h2>Somatic receipt ledger</h2>
       <div class="button-row">
         <button id="export" class="secondary" type="button">Export receipts</button>
       </div>
@@ -137,14 +188,20 @@
 <script type="module">
   import {
     DEFAULT_WORLD_TONE_CANDIDATES,
-    WorldToneApprovalSession,
     candidateHash,
     mapWorldFoldFrequencies,
     updateFoldLatch,
   } from '../src/world-tone-fold-approval.js';
+  import {
+    IPadSomaticHapticSession,
+    SOMATIC_BODY_PLACEMENTS,
+    SOMATIC_DEVICE_PROFILES,
+    buildSomaticCompressionReleasePlan,
+    detectIPadSomaticCapabilities,
+  } from '../src/ipad-somatic-haptics.js';
 
   const $ = (selector) => document.querySelector(selector);
-  const session = new WorldToneApprovalSession();
+  const session = new IPadSomaticHapticSession();
   let candidate = null;
   let foldActive = false;
   let auditionReady = false;
@@ -162,8 +219,43 @@
     $('#reject').disabled = !enabled;
   }
 
+  function renderCapabilities() {
+    const capabilities = detectIPadSomaticCapabilities();
+    const badges = [
+      [capabilities.ipad ? 'iPad detected' : 'Open on iPad for physical use', capabilities.ipad],
+      [capabilities.standalone ? 'Installed PWA' : 'Safari tab', capabilities.standalone],
+      ['Internal haptics: none', false],
+      [capabilities.native_controller_bridge ? 'Native controller bridge ready' : 'External audio path ready', true],
+    ];
+    $('#capabilities').replaceChildren(...badges.map(([text, good]) => {
+      const badge = document.createElement('span');
+      badge.className = `badge ${good ? 'good' : 'attention'}`;
+      badge.textContent = text;
+      return badge;
+    }));
+  }
+
   function renderReceipts() {
     $('#receipts').textContent = JSON.stringify(session.readReceipts(), null, 2);
+  }
+
+  function selectedDevice() {
+    return SOMATIC_DEVICE_PROFILES[$('#device-profile').value];
+  }
+
+  function syncDeviceControls() {
+    const device = selectedDevice();
+    $('#gain').max = String(device.maximum_gain);
+    $('#gain').value = String(Math.min(Number($('#gain').value), device.maximum_gain) || device.default_gain);
+    $('#gain-output').textContent = Number($('#gain').value).toFixed(3);
+    $('#cycles').value = String(device.default_cycles);
+    $('#cycles-output').textContent = String(device.default_cycles);
+    $('#placement-wrap').classList.toggle('hidden', !device.requires_placement_confirmation);
+    $('#clearance-label').classList.toggle('hidden', !device.requires_placement_confirmation);
+    $('#device-band').textContent = `${device.minimum_hz}–${device.maximum_hz} Hz`;
+    auditionReady = false;
+    setDecisionEnabled(false);
+    updatePlanPreview();
   }
 
   async function loadCandidate() {
@@ -175,9 +267,8 @@
     $('#layer').textContent = candidate.tone_layer_id;
     $('#root').textContent = formatHz(candidate.root_hz);
     $('#profile').textContent = `v${candidate.profile_version}`;
-    $('#source').textContent = candidate.source_ref;
     $('#candidate-hash').textContent = await candidateHash(candidate);
-    $('#audition-status').textContent = 'RESTING · Candidate loaded. Confirm Shokz before playing.';
+    $('#audition-status').textContent = 'RESTING · Candidate loaded. Confirm the external somatic output before playing.';
     $('#decision-status').textContent = 'No decision receipt.';
     updateFold();
   }
@@ -195,11 +286,29 @@
       excursion:candidate.excursion,
     });
     $('#fold-state').textContent = foldActive ? 'active' : 'resting';
-    $('#direct').textContent = `${formatHz(pair.direct_hz)} · ${pair.direct_class}`;
-    $('#inverse').textContent = `${formatHz(pair.inverse_hz)} · ${pair.inverse_class}`;
-    $('#reciprocal').textContent = `${pair.reciprocal_product.toFixed(4)} = root² ${(candidate.root_hz ** 2).toFixed(4)}`;
+    $('#compression-source').textContent = `${formatHz(pair.direct_hz)} · ${pair.direct_class}`;
+    $('#release-source').textContent = `${formatHz(pair.inverse_hz)} · ${pair.inverse_class}`;
+    $('#reciprocal').textContent = `${pair.reciprocal_product.toFixed(4)} = ${(candidate.root_hz ** 2).toFixed(4)}`;
     auditionReady = false;
     setDecisionEnabled(false);
+    updatePlanPreview();
+  }
+
+  function updatePlanPreview() {
+    if (!candidate || !selectedDevice()) return;
+    try {
+      const plan = buildSomaticCompressionReleasePlan(candidate, Number($('#fold').value), {
+        deviceProfileId:$('#device-profile').value,
+        cycles:Number($('#cycles').value),
+        baseGain:Number($('#gain').value),
+      });
+      $('#root-proxy').textContent = formatHz(plan.proxy_frequencies.root_hz);
+      $('#compression-proxy').textContent = formatHz(plan.proxy_frequencies.compression_hz);
+      $('#release-proxy').textContent = formatHz(plan.proxy_frequencies.release_hz);
+      $('#duration').textContent = `${(plan.total_duration_ms / 1000).toFixed(2)} s`;
+    } catch (error) {
+      $('#audition-status').textContent = error.message;
+    }
   }
 
   $('#world').replaceChildren(...DEFAULT_WORLD_TONE_CANDIDATES.map((item) => {
@@ -209,10 +318,34 @@
     return option;
   }));
 
+  $('#device-profile').replaceChildren(...Object.values(SOMATIC_DEVICE_PROFILES).map((profile) => {
+    const option = document.createElement('option');
+    option.value = profile.id;
+    option.textContent = profile.label;
+    return option;
+  }));
+
+  $('#placement').replaceChildren(...SOMATIC_BODY_PLACEMENTS.map((placement) => {
+    const option = document.createElement('option');
+    option.value = placement.id;
+    option.textContent = placement.label;
+    return option;
+  }));
+
   $('#world').addEventListener('change', loadCandidate);
   $('#fold').addEventListener('input', updateFold);
+  $('#device-profile').addEventListener('change', syncDeviceControls);
+  $('#cycles').addEventListener('input', () => {
+    $('#cycles-output').textContent = $('#cycles').value;
+    auditionReady = false;
+    setDecisionEnabled(false);
+    updatePlanPreview();
+  });
   $('#gain').addEventListener('input', () => {
-    $('#gain-output').textContent = `Bounded · ${Number($('#gain').value).toFixed(3)}`;
+    $('#gain-output').textContent = Number($('#gain').value).toFixed(3);
+    auditionReady = false;
+    setDecisionEnabled(false);
+    updatePlanPreview();
   });
 
   $('#audition').addEventListener('click', async () => {
@@ -222,35 +355,54 @@
       setDecisionEnabled(false);
       const receipt = await session.audition({
         foldIndex:Number($('#fold').value),
-        shokzConfirmed:$('#shokz').checked,
-        gain:Number($('#gain').value),
+        deviceProfileId:$('#device-profile').value,
+        cycles:Number($('#cycles').value),
+        baseGain:Number($('#gain').value),
+        outputConfirmed:$('#output-confirmed').checked,
+        placement:$('#placement').value,
+        placementClearanceConfirmed:$('#placement-clearance').checked,
+        startLowConfirmed:$('#start-low').checked,
       });
-      $('#audition-status').textContent = `PLAYING · ${receipt.plan.total_duration_ms} ms. Root, direct rise, inverse fall.`;
-      completionTimer = setTimeout(() => {
-        auditionReady = true;
-        setDecisionEnabled(true);
-        $('#audition-status').textContent = 'COMPLETE · Choose approve, adjust, or reject. Replay is allowed.';
-      }, receipt.plan.total_duration_ms + 80);
+      $('#audition-status').textContent = `PLAYING · ${(receipt.plan.total_duration_ms / 1000).toFixed(2)} s · ${receipt.plan.recurrence.rendered_cycles} compression–release cycles.`;
+      completionTimer = setTimeout(async () => {
+        try {
+          await session.markAuditionComplete();
+          auditionReady = true;
+          setDecisionEnabled(true);
+          $('#audition-status').textContent = 'COMPLETE · The final release state is preserved as the seed of the next render window.';
+        } catch (error) {
+          $('#audition-status').textContent = error.message;
+        }
+      }, receipt.plan.total_duration_ms + 100);
     } catch (error) {
       $('#audition-status').textContent = error.message;
     }
   });
 
-  $('#stop').addEventListener('click', async () => {
+  async function featherStop(reason = 'feather-stop') {
     clearTimeout(completionTimer);
     auditionReady = false;
     setDecisionEnabled(false);
-    await session.stop();
-    $('#audition-status').textContent = 'FEATHER STOP · Audio closed. Replay before deciding.';
+    await session.stop(reason);
+    $('#audition-status').textContent = 'FEATHER STOP · Every active oscillator, envelope, context, and native command is closed.';
+  }
+
+  $('#stop').addEventListener('click', () => featherStop());
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && session.active) featherStop('ipad-page-hidden');
+  });
+  window.addEventListener('pagehide', () => {
+    if (session.active) session.stop('ipad-pagehide');
   });
 
   async function decide(decision) {
     try {
-      if (!auditionReady) throw new Error('WORLD_TONE_APPROVAL: complete the audition before deciding');
+      if (!auditionReady) throw new Error('IPAD_SOMATIC_HAPTICS: complete the somatic audition before deciding');
       const receipt = await session.decide({
         decision,
-        shokzConfirmed:$('#shokz').checked,
         feltAndIdentified:$('#felt').checked,
+        comfortable:$('#comfortable').checked,
+        outputConfirmed:$('#output-confirmed').checked,
         note:$('#note').value,
       });
       $('#decision-status').textContent = `${decision.toUpperCase()} · ${receipt.receipt_hash}`;
@@ -269,12 +421,20 @@
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'hearthgate-world-tone-approvals.json';
+    link.download = 'hearthgate-ipad-somatic-receipts.json';
     link.click();
     URL.revokeObjectURL(url);
   });
 
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js', { scope:'./' }).catch((error) => {
+      $('#audition-status').textContent = `PWA cache registration failed: ${error.message}`;
+    });
+  }
+
+  renderCapabilities();
   renderReceipts();
+  syncDeviceControls();
   await loadCandidate();
 </script>
 </body>
