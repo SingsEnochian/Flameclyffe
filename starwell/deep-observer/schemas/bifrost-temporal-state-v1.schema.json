@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flameclyffe.local/schemas/bifrost-temporal-state-v1.schema.json",
-  "title": "Bifrost Temporal Quantum State v1",
+  "title": "Bifröst Temporal Compression–Release State v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -23,9 +23,6 @@
     "interpretation"
   ],
   "$defs": {
-    "axis": {
-      "enum": ["P", "C", "R", "E", "M", "A", "Q"]
-    },
     "complex": {
       "type": "object",
       "additionalProperties": false,
@@ -112,6 +109,32 @@
         "radius": { "type": "number", "minimum": 0 },
         "angle": { "type": "number" },
         "outward_distance": { "type": "number", "minimum": 0 }
+      }
+    },
+    "compression_release": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "law",
+        "source_state_id",
+        "released_state_id",
+        "focus",
+        "compression_strength",
+        "compression_potential",
+        "compressed_probabilities",
+        "released_probabilities",
+        "next_operation"
+      ],
+      "properties": {
+        "law": { "const": "compression-release-compression-of-release-infinite-recursion" },
+        "source_state_id": { "type": "string", "minLength": 1 },
+        "released_state_id": { "type": "string", "minLength": 1 },
+        "focus": { "enum": ["P", "C", "R", "E", "M", "A", "Q"] },
+        "compression_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "compression_potential": { "type": "number", "minimum": 0 },
+        "compressed_probabilities": { "$ref": "#/$defs/axisNumberMap" },
+        "released_probabilities": { "$ref": "#/$defs/axisNumberMap" },
+        "next_operation": { "const": "compression-of-release" }
       }
     },
     "history": { "type": "array", "maxItems": 128 },
