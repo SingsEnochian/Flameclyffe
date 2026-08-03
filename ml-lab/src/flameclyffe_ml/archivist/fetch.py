@@ -88,12 +88,12 @@ async def validate_public_https_url(
         raise ValueError(f"Domain is not allowlisted: {hostname}")
 
     try:
-        if not _address_is_public(hostname):
-            raise ValueError("Literal source address is not public")
-    except ValueError as error:
-        if "does not appear to be an IPv4 or IPv6 address" not in str(error):
-            raise
+        literal_address = ipaddress.ip_address(hostname)
+    except ValueError:
         await _resolve_public_addresses(hostname, parsed.port or 443)
+    else:
+        if not _address_is_public(str(literal_address)):
+            raise ValueError("Literal source address is not public")
 
     return url
 
@@ -163,6 +163,7 @@ async def fetch_source_document(
         limits=limits,
         follow_redirects=False,
         headers=headers,
+        trust_env=False,
     ) as client:
         for redirect_index in range(policy.max_redirects + 1):
             async with client.stream("GET", current_url) as response:
@@ -203,8 +204,7 @@ async def fetch_source_document(
         else:
             raise ValueError("Source retrieval did not reach a terminal response")
 
-    encoding = "utf-8"
-    markup = raw_body.decode(encoding, errors="replace")
+    markup = raw_body.decode("utf-8", errors="replace")
     if response_content_type == "text/plain":
         title = None
         text = "\n".join(line.strip() for line in markup.splitlines() if line.strip())
