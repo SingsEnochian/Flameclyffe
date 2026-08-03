@@ -116,7 +116,7 @@ test('rectangular Jacobians use the smaller Gram matrix rather than structural z
   close(audit.condition_number, 3);
 });
 
-test('zero Jacobian is classified as complete local collapse', () => {
+test('zero Jacobian is classified as complete local compression', () => {
   const audit = analyseWorldJacobian([
     [0, 0],
     [0, 0],
