@@ -19,6 +19,30 @@ Supported renderer profiles:
 
 The browser cannot identify the selected Bluetooth or audio output. Every audition therefore requires Rowan to confirm the active external device. The receipt records `output_device_detected: false` and `output_confirmation: user-confirmed`.
 
+## Active Bifröst lineage
+
+The somatic renderer does not create an independent state. Arcsweep publishes a compact local lineage record when it freezes the active compression–release DualAspectPacket. The installed PWA reads that record from same-origin local storage.
+
+The lineage contains:
+
+```text
+world ID
+House ID
+session context ID
+DualAspectPacket ID and fingerprint
+shared-state fingerprint
+PREMAQ ID and receipt
+Bifröst bridge packet ID
+compression-release receipt ID
+compression cycle
+next operation = compression-of-release
+activation timestamp
+```
+
+Every audition requires an active lineage for the selected world. Ta'veren aliases resolve to one canonical somatic world identity. Every approval rechecks the active packet, shared state and compression receipt. A state change after audition invalidates the decision gate.
+
+Clearing the Arcsweep binding also clears the iPad somatic lineage. The PWA therefore carries the same truth, not a cached rival truth.
+
 ## Somatic mapping
 
 For world root `f0`, Jacobian fold index `Φ`, entry threshold `Φe`, and excursion `λ`:
@@ -66,6 +90,7 @@ The runtime never resets to the original root between cycles.
 The route is an installable PWA with:
 
 - `viewport-fit=cover` and safe-area handling;
+- user pinch zoom preserved;
 - standalone display mode;
 - portrait and landscape layouts;
 - runtime caching for the HTML, manifest, icon and compiled assets;
@@ -107,6 +132,8 @@ start-low confirmed
 WKWebView hearthgateSomatic bridge present
 ```
 
+Changing the output profile clears output, placement-clearance and start-low confirmations. Changing placement clears placement clearance. Changing digital strength clears start-low confirmation. These gates cannot silently survive a physical configuration change.
+
 ## Safety envelope
 
 The renderer enforces:
@@ -139,12 +166,17 @@ rendered recurrence events
 start and completion times
 external-output confirmation
 internal_haptic_actuator = false
+source-state fingerprint
+DualAspectPacket lineage
+compression-release receipt ID and cycle
+next operation = compression-of-release
 ```
 
 Approval requires:
 
 ```text
 completed audition
+unchanged active Bifröst lineage
 external output still confirmed
 felt-and-identified confirmation
 comfort confirmation
@@ -193,8 +225,12 @@ The implementation passes only when:
 3. Compression cycle `n + 1` starts from release cycle `n`.
 4. Ultrasonic and infrasonic source values remain receipted and unplayed.
 5. Output, placement and start-low gates fail closed.
-6. Feather Stop closes every active transport.
-7. Approval fails without a completed somatic audition.
-8. Approval fails without felt, comfort and output confirmations.
-9. iPad PWA installation and offline relaunch succeed on physical hardware.
-10. Boxfire records physical devices, iPadOS version, Safari/PWA mode and every result as PASS, FAIL, BLOCKED or NOT TESTED.
+6. Physical confirmations reset when their configuration changes.
+7. Feather Stop closes every active transport.
+8. An audition fails without active matching Bifröst lineage.
+9. Approval fails after the active state or compression receipt changes.
+10. Approval fails without a completed somatic audition.
+11. Approval fails without felt, comfort and output confirmations.
+12. User pinch zoom remains available.
+13. iPad PWA installation and offline relaunch succeed on physical hardware.
+14. Boxfire records physical devices, iPadOS version, Safari/PWA mode and every result as PASS, FAIL, BLOCKED or NOT TESTED.
