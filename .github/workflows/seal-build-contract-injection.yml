@@ -1,0 +1,259 @@
+name: Seal Build Contract Injection
+
+on:
+  push:
+    branches:
+      - feature/ipad-somatic-haptics-v1
+    paths:
+      - .github/workflows/seal-build-contract-injection.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: seal-build-contract-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  seal:
+    name: Seal stale contract and naming injection paths
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/ipad-somatic-haptics-v1
+          fetch-depth: 0
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Rewrite active contracts and install denial guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          function read(file) {
+            return fs.readFileSync(file, 'utf8');
+          }
+
+          function write(file, content) {
+            fs.mkdirSync(path.dirname(file), { recursive: true });
+            fs.writeFileSync(file, content.endsWith('\n') ? content : `${content}\n`);
+          }
+
+          function replaceRequired(source, before, after, file) {
+            if (!source.includes(before)) {
+              throw new Error(`Required migration source not found in ${file}: ${before}`);
+            }
+            return source.replace(before, after);
+          }
+
+          const checkerPath = 'apps/starwell-server/scripts/check-packaging.js';
+          let checker = read(checkerPath);
+          checker = replaceRequired(
+            checker,
+            "manifest.engine?.formalism !== 'temporal-quantum-state-machine' || manifest.engine?.physicalClaim !== false",
+            "manifest.engine?.formalism !== 'temporal-compression-release-state-machine' || manifest.engine?.physicalClaim !== false",
+            checkerPath,
+          );
+          checker = replaceRequired(
+            checker,
+            'Bifröst Arcsweep must preserve its bounded temporal-quantum interpretation contract.',
+            'Bifröst Arcsweep must execute its bounded temporal compression-release contract.',
+            checkerPath,
+          );
+          checker = replaceRequired(
+            checker,
+            "manifest.capabilities?.includes('collapse-release-cycles')",
+            "manifest.capabilities?.includes('compression-release-cycles')",
+            checkerPath,
+          );
+          checker = replaceRequired(
+            checker,
+            'Bifröst Arcsweep manifest is missing PREMAQ or collapse-release capability.',
+            'Bifröst Arcsweep manifest is missing PREMAQ or compression-release capability.',
+            checkerPath,
+          );
+          const authorityMarker = "    if (manifest.authorityContract?.hearthside !== 'evidence-grounded-observational') {";
+          if (!checker.includes('releaseFeedsNextCompression')) {
+            checker = replaceRequired(
+              checker,
+              authorityMarker,
+              "    if (manifest.authorityContract?.collapseExists !== false) {\n      errors.push('Bifröst Arcsweep authority contract reintroduces collapse.');\n    }\n    if (manifest.authorityContract?.releaseFeedsNextCompression !== true) {\n      errors.push('Bifröst Arcsweep authority contract breaks compression of the release.');\n    }\n${authorityMarker}",
+              checkerPath,
+            );
+          }
+          write(checkerPath, checker);
+
+          const packagePath = 'package.json';
+          const pkg = JSON.parse(read(packagePath));
+          pkg.scripts = {
+            'contracts:verify': 'node scripts/deny-stale-engine-contracts.mjs',
+            ...pkg.scripts,
+          };
+          write(packagePath, JSON.stringify(pkg, null, 2));
+
+          const authority = {
+            schema: 'hearthgate.engine-name-authority/v1',
+            personal_names_require_explicit_approval: true,
+            approved_experimental_identifiers: ['intermezzo'],
+            denied_experimental_identifiers: ['nocturne'],
+            authority: 'rowan',
+            enforcement: 'fail-closed-on-sensitive-engine-surfaces',
+          };
+          write('config/engine-name-authority.json', JSON.stringify(authority, null, 2));
+
+          const guard = `import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
+const errors = [];
+
+const contractFiles = [
+  'apps/starwell/public/modules/bifrost-arcsweep.module.json',
+  'apps/starwell-server/scripts/check-packaging.js',
+  '.github/workflows/hearthgate-windows-installer.yml',
+  '.github/workflows/ipad-somatic-check.yml',
+  'package.json',
+];
+
+const forbiddenContracts = [
+  'temporal-quantum-state-machine',
+  'collapse-release-cycles',
+  'bounded temporal-quantum interpretation contract',
+];
+
+for (const file of contractFiles) {
+  const source = read(file);
+  for (const token of forbiddenContracts) {
+    if (source.includes(token)) errors.push(\`${'${file}'} contains denied stale contract token: ${'${token}'}\`);
+  }
+}
+
+const manifest = JSON.parse(read('apps/starwell/public/modules/bifrost-arcsweep.module.json'));
+if (manifest.engine?.formalism !== 'temporal-compression-release-state-machine') {
+  errors.push('Bifröst formalism is not temporal-compression-release-state-machine.');
+}
+if (!manifest.capabilities?.includes('compression-release-cycles')) {
+  errors.push('Bifröst manifest lacks compression-release-cycles.');
+}
+if (manifest.authorityContract?.collapseExists !== false) {
+  errors.push('Bifröst authority contract does not deny collapse.');
+}
+if (manifest.authorityContract?.releaseFeedsNextCompression !== true) {
+  errors.push('Bifröst authority contract does not feed release into the next compression.');
+}
+
+const pkg = JSON.parse(read('package.json'));
+if (pkg.engines?.node !== '24.x' || pkg.engines?.npm !== '11.x') {
+  errors.push('Root package engine contract is not Node 24.x and npm 11.x.');
+}
+
+const lock = JSON.parse(read('package-lock.json'));
+const lockEntries = Object.keys(lock.packages || {});
+if (lock.lockfileVersion !== 3 || lockEntries.length < 50) {
+  errors.push(\`Root lockfile is incomplete: version=${'${lock.lockfileVersion}'}, records=${'${lockEntries.length}'}\`);
+}
+
+const naming = JSON.parse(read('config/engine-name-authority.json'));
+const sensitiveRoots = ['apps/starwell/src', 'apps/starwell/public/modules', '.github/workflows'];
+const deniedNames = naming.denied_experimental_identifiers.map((value) => value.toLowerCase());
+
+function walk(directory) {
+  if (!fs.existsSync(directory)) return [];
+  const files = [];
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...walk(full));
+    else files.push(full);
+  }
+  return files;
+}
+
+for (const directory of sensitiveRoots) {
+  for (const file of walk(directory)) {
+    if (!/\.(?:js|mjs|json|ya?ml|html|md)$/i.test(file)) continue;
+    const lowerPath = file.toLowerCase();
+    const lowerSource = fs.readFileSync(file, 'utf8').toLowerCase();
+    for (const denied of deniedNames) {
+      if (lowerPath.includes(denied) || lowerSource.includes(denied)) {
+        errors.push(\`${'${file}'} uses denied experimental personal-name identifier: ${'${denied}'}\`);
+      }
+    }
+  }
+}
+
+if (errors.length) {
+  console.error('[Hearthgate contract denial] FAILED');
+  for (const error of errors) console.error(\` - ${'${error}'}\`);
+  process.exit(1);
+}
+
+console.log('[Hearthgate contract denial] PASSED');
+console.log(\` lockfile records: ${'${lockEntries.length}'}\`);
+console.log(' formalism: temporal-compression-release-state-machine');
+console.log(' naming authority: Rowan, fail-closed');
+`;
+          write('scripts/deny-stale-engine-contracts.mjs', guard);
+
+          const ipadPath = '.github/workflows/ipad-somatic-check.yml';
+          let ipad = read(ipadPath);
+          ipad = replaceRequired(
+            ipad,
+            '      - name: Install dependencies\n        run: npm install\n',
+            "      - name: Install locked dependencies\n        run: npm ci --ignore-scripts --no-audit --no-fund\n\n      - name: Deny stale engine and naming contracts\n        run: npm run contracts:verify\n",
+            ipadPath,
+          );
+          write(ipadPath, ipad);
+
+          const windowsPath = '.github/workflows/hearthgate-windows-installer.yml';
+          let windows = read(windowsPath);
+          windows = replaceRequired(
+            windows,
+            "      # The root lock remains metadata-only. Keep this install non-mutating and\n      # script-free until the complete dependency graph is committed.\n      - name: Install STARWELL dependencies\n        working-directory: ${{ github.workspace }}\n        run: npm install --package-lock=false --ignore-scripts --no-audit --no-fund\n",
+            "      - name: Install locked STARWELL dependencies\n        working-directory: ${{ github.workspace }}\n        run: npm ci --ignore-scripts --no-audit --no-fund\n\n      - name: Deny stale engine and naming contracts\n        working-directory: ${{ github.workspace }}\n        run: npm run contracts:verify\n",
+            windowsPath,
+          );
+          write(windowsPath, windows);
+
+          for (const disposable of [
+            '.github/workflows/root-lockfile-repair.yml',
+            '.github/workflows/seal-build-contract-injection.yml',
+          ]) {
+            if (fs.existsSync(disposable)) fs.rmSync(disposable);
+          }
+          NODE
+
+      - name: Verify deterministic dependency and denial gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf node_modules
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run contracts:verify
+          npm run starwell:test
+          npm run starwell:build
+
+      - name: Commit sealed contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'hearthgate-ci'
+          git config user.email 'hearthgate-ci@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Build-contract injection paths are already sealed.'
+            exit 0
+          fi
+          git commit -m 'build: deny stale contract and naming injection'
+          git push origin HEAD:feature/ipad-somatic-haptics-v1
