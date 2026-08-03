@@ -11,6 +11,7 @@ on:
       - 'docs/handoffs/BOXFIRE_IPAD_SOMATIC_HAPTICS_HANDOFF_2026-08-03.md'
       - 'package.json'
       - 'package-lock.json'
+      - '.nvmrc'
       - '.github/workflows/ipad-somatic-check.yml'
   pull_request:
     branches:
@@ -22,6 +23,7 @@ on:
       - 'docs/handoffs/BOXFIRE_IPAD_SOMATIC_HAPTICS_HANDOFF_2026-08-03.md'
       - 'package.json'
       - 'package-lock.json'
+      - '.nvmrc'
       - '.github/workflows/ipad-somatic-check.yml'
   workflow_dispatch:
 
@@ -43,6 +45,15 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      - name: Verify Node and npm contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const major=Number(process.versions.node.split('.')[0]); if (major !== 24) { throw new Error('Expected Node 24, received '+process.versions.node); }"
+          node -e "const {execFileSync}=require('node:child_process'); const major=Number(execFileSync('npm',['--version'],{encoding:'utf8'}).trim().split('.')[0]); if (major !== 11) { throw new Error('Expected npm 11, received npm '+major); }"
+          node --version
+          npm --version
+
       - name: Install dependencies
         run: npm install
 
@@ -62,6 +73,7 @@ jobs:
           test -f dist/starwell/world-tone-approval/hearthgate-somatic-icon.svg
           test -f dist/starwell/schemas/ipad-somatic-haptic-receipt.schema.json
           grep -q 'Hearthgate iPad Somatic Tone Gate' dist/starwell/world-tone-approval/index.html
+          grep -q 'ROWAN APPROVAL GATE' dist/starwell/world-tone-approval/index.html
           grep -q 'BoundIPadSomaticHapticSession' apps/starwell/world-tone-approval/index.html
           grep -q 'source_state_fingerprint' apps/starwell/src/ipad-somatic-bound-session.js
           grep -q 'compression_release_receipt_id' apps/starwell/src/ipad-somatic-lineage.js
