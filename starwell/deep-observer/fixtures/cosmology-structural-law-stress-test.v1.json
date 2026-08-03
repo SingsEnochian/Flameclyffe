@@ -1,0 +1,110 @@
+{
+  "schema_version": "observer.structural-law-stress-test/v1",
+  "fixture_id": "cosmology-large-scale-structure-2026",
+  "created_at": "2026-08-03T17:06:00Z",
+  "principle": {
+    "law_id": "cosmological-principle",
+    "statement": "The universe is statistically homogeneous and isotropic above the registered scale.",
+    "scope": "large-scale matter distribution",
+    "status": "UNDER_TEST",
+    "version": "1.0.0"
+  },
+  "cases": [
+    {
+      "case_id": "kbc-local-underdensity",
+      "source_class": "observed-derived-model-compared",
+      "observed_domain": "Local Group radial environment",
+      "observations": [
+        "galaxy counts",
+        "luminosity density",
+        "redshifts",
+        "distance indicators",
+        "peculiar velocities",
+        "survey mask",
+        "selection function"
+      ],
+      "parameters": {
+        "density_contrast_convention": "1-rho/rho_bar",
+        "reported_density_contrast": 0.46,
+        "reported_density_contrast_uncertainty": 0.06,
+        "reported_radial_range_mpc": [40, 300],
+        "profile": {
+          "status": "SYMBOLIC",
+          "symbol": "delta(r; theta_v)",
+          "parameter_set": ["central_depth", "radius", "shape", "centre_offset"]
+        }
+      },
+      "model_outputs": [
+        "galaxy-density profile",
+        "peculiar-velocity field",
+        "bulk-flow curve",
+        "luminosity-distance relation",
+        "redshift-binned inferred H0",
+        "BAO scale shift"
+      ],
+      "sources": [
+        {
+          "kind": "secondary",
+          "title": "New Scientist article 2426698",
+          "url": "https://www.newscientist.com/article/2426698-we-live-in-a-cosmic-void-so-empty-that-it-breaks-the-laws-of-cosmology/"
+        },
+        {
+          "kind": "primary",
+          "doi": "10.1093/mnras/staa2348"
+        },
+        {
+          "kind": "primary",
+          "doi": "10.1093/mnras/stae2758"
+        }
+      ]
+    },
+    {
+      "case_id": "desi-gigaparsec-anisotropy",
+      "source_class": "observed-derived-model-compared",
+      "observed_domain": "DESI galaxy samples and registered survey geometry",
+      "observations": [
+        "galaxy catalogue",
+        "positions",
+        "redshifts",
+        "survey footprint",
+        "angular completeness",
+        "target selection"
+      ],
+      "statistic": {
+        "name": "Angular Distribution of Pairwise Distances",
+        "abbreviation": "ADPD",
+        "status": "REGISTERED_EXTERNAL_METHOD",
+        "reported_scale": "order-one-gigaparsec",
+        "reported_significance": ">3 sigma",
+        "controls": [
+          "isotropic controls",
+          "geometry-matched Lambda-CDM mock catalogues"
+        ]
+      },
+      "claim_scope": {
+        "established": "Persistent directional coherence in the analysed DESI samples under the registered ADPD statistic and controls.",
+        "not_established": "Global anisotropy outside the analysed domain."
+      },
+      "sources": [
+        {
+          "kind": "secondary",
+          "title": "New Scientist article 2581589",
+          "url": "https://www.newscientist.com/article/2581589-why-the-most-central-law-in-cosmology-may-need-to-be-broken/"
+        },
+        {
+          "kind": "primary",
+          "doi": "10.1038/s41586-026-10702-5"
+        }
+      ]
+    }
+  ],
+  "required_behaviour": [
+    "Preserve observations unchanged.",
+    "Keep derived statistics separate from model conclusions.",
+    "Represent unresolved parameters symbolically or as bounded sets.",
+    "Record survey masks, selection functions, mock versions and covariance methods.",
+    "Update structural-law status only inside the tested domain.",
+    "Permit downstream calculation while law status is UNDER_TEST.",
+    "Append every status transition to the receipt chain."
+  ]
+}
