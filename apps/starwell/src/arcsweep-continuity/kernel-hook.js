@@ -12,6 +12,10 @@ import {
   readActiveDualAspectPacket,
   recordDualAspectReplay,
 } from '../hearthweave-kernel/activation.js';
+import {
+  clearIPadSomaticLineage,
+  publishIPadSomaticLineage,
+} from '../ipad-somatic-lineage.js';
 
 const SESSION_CONTEXT_KEY = 'arcsweep:session-context:active:v1';
 const SESSION_RECEIPTS_KEY = 'arcsweep:session-receipts:v1';
@@ -102,8 +106,9 @@ export async function freezeLoadedArcsweepContext() {
 
   const current = readActiveDualAspectPacket({ storage: sessionStorage });
   if (current?.identity?.session_context_id === context.session_context_id) {
+    publishIPadSomaticLineage(current, { storage: localStorage });
     setGateMessage(
-      `DualAspectPacket ${current.packet_id} is already bound to this session. No second clock was created.`,
+      `DualAspectPacket ${current.packet_id} is already bound to this session. Its iPad somatic lineage is active. No second clock was created.`,
       'success',
     );
     return current;
@@ -121,6 +126,7 @@ export async function freezeLoadedArcsweepContext() {
     storage: sessionStorage,
     eventTarget: window,
   });
+  publishIPadSomaticLineage(packet, { storage: localStorage });
   const replay = replayDualAspectPacket(packet);
   recordDualAspectReplay(packet, replay, { storage: sessionStorage });
   annotateSessionEnvelope(envelope, packet);
@@ -130,7 +136,7 @@ export async function freezeLoadedArcsweepContext() {
     ? `DEGRADED: ${packet.degraded.reasons.join(', ')}`
     : 'LIVE';
   setGateMessage(
-    `Bifröst bound: ${packet.packet_id} · ${packet.identity.house_id} · ${mode}. Compression, release, glyph, tone, image, haptic, and narrative share ${packet.correspondence.shared_state_fingerprint}.`,
+    `Bifröst bound: ${packet.packet_id} · ${packet.identity.house_id} · ${mode}. Compression, release, glyph, tone, image, haptic, narrative, and iPad somatic output share ${packet.correspondence.shared_state_fingerprint}.`,
     packet.degraded.active ? 'attention' : 'success',
   );
   return packet;
@@ -142,6 +148,7 @@ function clearKernelBinding() {
     eventTarget: window,
     reason: 'arcsweep-session-cleared',
   });
+  clearIPadSomaticLineage({ storage: localStorage });
 }
 
 function scheduleAfterArcsweep(callback) {
@@ -166,7 +173,13 @@ document.addEventListener('click', handleGateClick, true);
 
 const restoredContext = readJson(sessionStorage, SESSION_CONTEXT_KEY, null)?.context;
 const restoredPacket = readActiveDualAspectPacket({ storage: sessionStorage });
-if (restoredContext && !restoredPacket) {
+if (restoredPacket) {
+  try {
+    publishIPadSomaticLineage(restoredPacket, { storage: localStorage });
+  } catch (error) {
+    setGateMessage(`iPad somatic lineage failed: ${error.message}`, 'error');
+  }
+} else if (restoredContext) {
   window.setTimeout(() => {
     setGateMessage('This continuity context predates the compression–release freeze. Press “Load for this session” once to bind every layer to one state.', 'attention');
   }, 0);
