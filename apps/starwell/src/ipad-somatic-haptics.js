@@ -13,10 +13,6 @@ function invariant(condition, message) {
   if (!condition) throw new Error(`IPAD_SOMATIC_HAPTICS: ${message}`);
 }
 
-function clamp(value, minimum = 0, maximum = 1) {
-  return Math.min(maximum, Math.max(minimum, value));
-}
-
 function deepFreeze(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
   for (const child of Object.values(value)) deepFreeze(child);
@@ -39,6 +35,12 @@ function rampAudioValue(parameter, value, at) {
   } else if (parameter) {
     parameter.value = value;
   }
+}
+
+function requireDate(value, field) {
+  const date = value instanceof Date ? value : new Date(value);
+  invariant(!Number.isNaN(date.getTime()), `${field} must be a valid date`);
+  return date;
 }
 
 export const SOMATIC_DEVICE_PROFILES = deepFreeze({
@@ -180,6 +182,7 @@ export function buildSomaticCompressionReleasePlan(
   const strength = pair.fold_strength;
 
   const events = [{
+    event_id: 'world-root',
     role: 'world-root',
     phase: 'anchor',
     cycle: 0,
@@ -306,6 +309,34 @@ export class IPadSomaticHapticSession extends EventTarget {
     return new Context();
   }
 
+  async closeTransport(reason, { clearCompletion = false } = {}) {
+    const nodes = [...new Set(this.nodes)];
+    const context = this.context;
+    const plan = this.currentPlan;
+    this.nodes = [];
+    this.context = null;
+    this.currentPlan = null;
+    this.active = false;
+    if (clearCompletion) this.completedAudition = null;
+
+    for (const node of nodes) {
+      try { node.stop?.(); } catch {}
+      try { node.disconnect?.(); } catch {}
+    }
+    if (context) {
+      try { await context.close?.(); } catch {}
+    }
+    if (plan?.device_profile?.transport === 'webkit-native-message-bridge') {
+      try {
+        this.nativeBridge?.postMessage?.({
+          schema: 'hearthgate.ipad-somatic-native-command/v1',
+          action: 'stop',
+          reason,
+        });
+      } catch {}
+    }
+  }
+
   async loadCandidate(candidateInput) {
     await this.stop('candidate-replaced');
     this.candidate = validateWorldToneCandidate(candidateInput);
@@ -406,7 +437,7 @@ export class IPadSomaticHapticSession extends EventTarget {
     }
 
     this.active = true;
-    const startedAt = this.now();
+    const startedAt = requireDate(this.now(), 'started_at');
     this.auditionReceipt = deepFreeze({
       schema: 'hearthgate.ipad-somatic-audition-receipt/v1',
       candidate_hash: this.candidateHash,
@@ -435,44 +466,24 @@ export class IPadSomaticHapticSession extends EventTarget {
 
   async markAuditionComplete() {
     invariant(this.auditionReceipt, 'no somatic audition is scheduled');
+    const completedAt = requireDate(this.now(), 'completed_at');
+    const requiredCompletion = requireDate(this.auditionReceipt.completes_at, 'completes_at');
+    invariant(completedAt.getTime() >= requiredCompletion.getTime(), 'somatic audition has not reached its completion time');
+
     const completion = {
       ...copy(this.auditionReceipt),
       status: 'completed',
-      completed_at: this.now().toISOString(),
+      completed_at: completedAt.toISOString(),
     };
     const receiptHash = await sha256Hex(completion);
     this.completedAudition = deepFreeze({ ...completion, receipt_hash: receiptHash });
-    this.active = false;
+    await this.closeTransport('window-complete', { clearCompletion: false });
     this.dispatchEvent(new CustomEvent('hearthgate:ipad-somatic-complete', { detail: this.completedAudition }));
     return this.completedAudition;
   }
 
   async stop(reason = 'feather-stop') {
-    const nodes = [...new Set(this.nodes)];
-    const context = this.context;
-    const plan = this.currentPlan;
-    this.nodes = [];
-    this.context = null;
-    this.currentPlan = null;
-    this.active = false;
-    this.completedAudition = null;
-
-    for (const node of nodes) {
-      try { node.stop?.(); } catch {}
-      try { node.disconnect?.(); } catch {}
-    }
-    if (context) {
-      try { await context.close?.(); } catch {}
-    }
-    if (plan?.device_profile?.transport === 'webkit-native-message-bridge') {
-      try {
-        this.nativeBridge?.postMessage?.({
-          schema: 'hearthgate.ipad-somatic-native-command/v1',
-          action: 'stop',
-          reason,
-        });
-      } catch {}
-    }
+    await this.closeTransport(reason, { clearCompletion: true });
     this.dispatchEvent(new CustomEvent('hearthgate:ipad-somatic-stopped', { detail: { reason } }));
   }
 
@@ -509,7 +520,7 @@ export class IPadSomaticHapticSession extends EventTarget {
       interface: 'ipad-pwa',
       somatic_audition_receipt: this.completedAudition,
       note: String(note || ''),
-      created_at: this.now().toISOString(),
+      created_at: requireDate(this.now(), 'created_at').toISOString(),
     };
     const receiptHash = await sha256Hex(receipt);
     const finalReceipt = deepFreeze({ ...receipt, receipt_hash: receiptHash });
