@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "0.3.0",
+  "schemaVersion": "0.4.0",
   "moduleId": "bifrost-arcsweep",
   "displayName": "Bifröst Arcsweep",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "delivery": "bundled-core",
   "enabledByDefault": true,
   "route": "/starwell/arcsweep-continuity/",
@@ -10,6 +10,7 @@
   "engine": {
     "module": "src/arcsweep-temporal-quantum/engine.js",
     "compressionRelease": "src/arcsweep-temporal-quantum/compression-release.js",
+    "somaticRenderer": "src/ipad-somatic-haptics.js",
     "kernel": "src/hearthweave-kernel/index.js",
     "formalism": "temporal-compression-release-state-machine",
     "physicalClaim": false,
@@ -20,7 +21,8 @@
     "temporalState": "schemas/bifrost-temporal-state-v1.schema.json",
     "dualAspectPacket": "schemas/dual-aspect-packet-v1.schema.json",
     "dualAspectReceipt": "schemas/dual-aspect-receipt-v1.schema.json",
-    "worldToneApproval": "schemas/world-tone-approval.schema.json"
+    "worldToneApproval": "schemas/world-tone-approval.schema.json",
+    "ipadSomaticHaptics": "schemas/ipad-somatic-haptic-receipt.schema.json"
   },
   "capabilities": [
     "premaq-v2-ingest",
@@ -32,6 +34,11 @@
     "outward-spiral-memory",
     "world-specific-tone-sequences",
     "rowan-owned-tone-approval",
+    "ipad-installable-pwa",
+    "external-body-transducer-rendering",
+    "shokz-bone-conduction-rendering",
+    "native-controller-haptic-bridge",
+    "somatic-audition-receipts",
     "dual-presence-anchoring",
     "dual-aspect-packet-freeze",
     "single-state-sensory-activation",
@@ -50,6 +57,8 @@
     "targetside": "canon-grounded-projected",
     "renderers": "derive-only-no-refetch-after-activation",
     "toneApproval": "rowan-human-calibration-owner",
+    "somaticOutput": "external-device-user-confirmed",
+    "internalIPadHapticsClaimed": false,
     "rawEvidenceMutable": false,
     "projectionMayClaimExternalCause": false,
     "canonFoundationMaySilentlyMergeOverlay": false,
@@ -59,12 +68,14 @@
   "installContract": {
     "required": true,
     "verifyRoute": "arcsweep-continuity/index.html",
+    "verifySomaticRoute": "world-tone-approval/index.html",
     "verifySchemas": [
       "schemas/premaq-state-v2.schema.json",
       "schemas/bifrost-temporal-state-v1.schema.json",
       "schemas/dual-aspect-packet-v1.schema.json",
       "schemas/dual-aspect-receipt-v1.schema.json",
-      "schemas/world-tone-approval.schema.json"
+      "schemas/world-tone-approval.schema.json",
+      "schemas/ipad-somatic-haptic-receipt.schema.json"
     ]
   }
 }
