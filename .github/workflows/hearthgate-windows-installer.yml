@@ -7,6 +7,8 @@ on:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
       - "starwell/deep-observer/schemas/**"
+      - "config/engine-name-authority.json"
+      - "scripts/deny-stale-engine-contracts.mjs"
       - "package.json"
       - "package-lock.json"
       - ".nvmrc"
@@ -20,6 +22,8 @@ on:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
       - "starwell/deep-observer/schemas/**"
+      - "config/engine-name-authority.json"
+      - "scripts/deny-stale-engine-contracts.mjs"
       - "package.json"
       - "package-lock.json"
       - ".nvmrc"
@@ -72,11 +76,13 @@ jobs:
           node --version
           npm --version
 
-      # The root lock remains metadata-only. Keep this install non-mutating and
-      # script-free until the complete dependency graph is committed.
-      - name: Install STARWELL dependencies
+      - name: Install locked STARWELL dependencies
         working-directory: ${{ github.workspace }}
-        run: npm install --package-lock=false --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Deny stale engine and naming contracts
+        working-directory: ${{ github.workspace }}
+        run: npm run contracts:verify
 
       - name: Test and build packaged STARWELL framework
         working-directory: ${{ github.workspace }}
@@ -189,6 +195,9 @@ jobs:
           if ($manifest.authorityContract.releaseFeedsNextCompression -ne $true) {
             throw "Packaged Bifröst manifest breaks compression of the release."
           }
+          if ($manifest.authorityContract.toneApproval -ne 'rowan-human-calibration-owner') {
+            throw "Packaged Bifröst manifest removes Rowan tone-approval authority."
+          }
           if ($manifest.installContract.verifySomaticRoute -ne 'world-tone-approval/index.html') {
             throw "Packaged Bifröst manifest omits the somatic approval route."
           }
@@ -215,6 +224,7 @@ jobs:
           - SHA-256: ``$($hash.Hash)``
           - Formalism: compression → release → compression of the release
           - Somatic gate: packaged and Rowan-owned
+          - Naming authority: Rowan, fail-closed
           - Security: loopback-only services and restricted origins
           - Signing: unsigned development build
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
