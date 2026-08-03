@@ -6,9 +6,12 @@ on:
       - feature/ipad-somatic-haptics-v1
     paths:
       - 'apps/starwell/**'
+      - 'apps/starwell-server/scripts/check-packaging.js'
       - 'starwell/deep-observer/schemas/ipad-somatic-haptic-receipt.schema.json'
       - 'docs/ipad/**'
       - 'docs/handoffs/BOXFIRE_IPAD_SOMATIC_HAPTICS_HANDOFF_2026-08-03.md'
+      - 'config/engine-name-authority.json'
+      - 'scripts/deny-stale-engine-contracts.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.nvmrc'
@@ -18,9 +21,12 @@ on:
       - feature/compression-release-mathematics-spine-v1
     paths:
       - 'apps/starwell/**'
+      - 'apps/starwell-server/scripts/check-packaging.js'
       - 'starwell/deep-observer/schemas/ipad-somatic-haptic-receipt.schema.json'
       - 'docs/ipad/**'
       - 'docs/handoffs/BOXFIRE_IPAD_SOMATIC_HAPTICS_HANDOFF_2026-08-03.md'
+      - 'config/engine-name-authority.json'
+      - 'scripts/deny-stale-engine-contracts.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.nvmrc'
@@ -54,8 +60,11 @@ jobs:
           node --version
           npm --version
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Deny stale engine and naming contracts
+        run: npm run contracts:verify
 
       - name: Test STARWELL and somatic contracts
         run: npm run starwell:test
