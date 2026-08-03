@@ -1,5 +1,15 @@
 import { defineHouseProfile } from '../contracts.js';
 
+const IDENTITY_JACOBIAN_7 = Object.freeze([
+  Object.freeze([1, 0, 0, 0, 0, 0, 0]),
+  Object.freeze([0, 1, 0, 0, 0, 0, 0]),
+  Object.freeze([0, 0, 1, 0, 0, 0, 0]),
+  Object.freeze([0, 0, 0, 1, 0, 0, 0]),
+  Object.freeze([0, 0, 0, 0, 1, 0, 0]),
+  Object.freeze([0, 0, 0, 0, 0, 1, 0]),
+  Object.freeze([0, 0, 0, 0, 0, 0, 1]),
+]);
+
 export const taVerenVaenProfile = defineHouseProfile({
   id: 'ta-veren-vaen',
   name: "Ta'veren Vaen",
@@ -34,9 +44,20 @@ export const taVerenVaenProfile = defineHouseProfile({
     timeline: 'later-turning-mending-era',
     initialDelta: 1,
     bridgeCoupling: 0.07,
-    focusAxis: 'R',
-    measurementStrength: 0.62,
-    release: 0.4,
+    compressionRelease: {
+      focusAxis: 'R',
+      enterThreshold: 0.82,
+      releaseThreshold: 0.68,
+      compressionGain: 1,
+      releaseFraction: 0.4,
+      derivativeRelease: 0.07,
+      memoryRelease: 0.05,
+      phaseReleaseGain: Math.PI / 4,
+      radialGain: 0.48,
+      entropyGain: 0.1,
+      angularGain: Math.PI / 3,
+      temporalWeights: { fold: 0.50, derivative: 0.20, entropy: 0.15, phase: 0.15 },
+    },
   },
   harmonicIdentity: {
     voice: 'thread-and-hearth',
@@ -45,6 +66,13 @@ export const taVerenVaenProfile = defineHouseProfile({
     beatCeilingHz: 7.5,
     anchorInterval: 'open-fifth',
     livingInterval: 'woven-third',
+    compressionReleaseTone: {
+      toneLayerId: 'wheel-drone',
+      rootHz: 120,
+      excursion: 5,
+      approvalState: 'pending',
+      approvalReceiptId: null,
+    },
   },
   visualIdentity: {
     structure: 'wheel-thread-lattice',
@@ -57,9 +85,11 @@ export const taVerenVaenProfile = defineHouseProfile({
     values: ['service', 'mending', 'choice', 'continuity'],
   },
   transferFunctions: {
-    version: 'ta-veren-vaen-transfer/1.0.0',
+    version: 'ta-veren-vaen-transfer/1.1.0',
     source_axes: ['P', 'C', 'R', 'E', 'M', 'A', 'Q'],
     outputs: ['glyph', 'tone', 'visual', 'haptic', 'narrative'],
+    jacobianVersion: 'ta-veren-vaen-jacobian/reference-identity-v1',
+    jacobian: IDENTITY_JACOBIAN_7,
   },
   packages: [
     'hearthgate.design',
@@ -77,5 +107,6 @@ export const taVerenVaenProfile = defineHouseProfile({
     canon: true,
     timeline: true,
     dualAspect: true,
+    compressionRelease: true,
   },
 });
