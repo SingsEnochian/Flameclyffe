@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#101419" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Tone Gate" />
+  <title>Hearthgate World Tone Approval</title>
+  <style>
+    :root {
+      color-scheme:dark;
+      font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:#101419;
+      color:#f2ead9;
+      --copper:#c98652;
+      --gold:#e6c27a;
+      --moss:#7ea58c;
+      --ink:#101419;
+      --panel:#171d24;
+      --edge:#39444f;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      min-height:100dvh;
+      padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(26px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
+      background:radial-gradient(circle at 50% 0,#26333d 0,transparent 44%),linear-gradient(155deg,#101419,#17120f);
+    }
+    main { width:min(980px,100%); margin:auto; }
+    header { padding:22px 0; }
+    .eyebrow { color:var(--moss); text-transform:uppercase; letter-spacing:.15em; font-weight:800; font-size:.75rem; }
+    h1 { margin:.3rem 0 .7rem; color:var(--gold); font-family:ui-serif,Georgia,serif; font-size:clamp(2rem,7vw,4rem); line-height:1.02; }
+    p { line-height:1.55; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:16px; }
+    .panel { background:color-mix(in srgb,var(--panel) 92%,transparent); border:1px solid var(--edge); border-radius:20px; padding:20px; box-shadow:0 18px 60px rgba(0,0,0,.28); }
+    h2 { margin-top:0; color:var(--gold); font-family:ui-serif,Georgia,serif; }
+    label { display:block; margin:.9rem 0 .35rem; font-weight:750; color:#c8d7d6; }
+    select,input[type="range"],textarea { width:100%; }
+    select,textarea { min-height:50px; padding:11px 12px; border-radius:12px; border:1px solid #52606b; background:#0d1217; color:#f2ead9; font:inherit; }
+    textarea { min-height:96px; resize:vertical; }
+    input[type="range"] { accent-color:var(--copper); }
+    .check { display:flex; gap:10px; align-items:flex-start; color:#f2ead9; font-weight:650; }
+    .check input { width:24px; height:24px; flex:0 0 auto; accent-color:var(--moss); }
+    button { min-height:54px; border-radius:13px; border:1px solid var(--gold); background:#2c221b; color:#fff7e8; padding:12px 16px; font:750 1rem ui-sans-serif,system-ui; touch-action:manipulation; cursor:pointer; }
+    button.secondary { border-color:#70828f; background:#17212a; }
+    button.stop { border-color:#d98282; background:#351b1b; }
+    button.approve { border-color:#91c9a2; background:#183326; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+    .button-row { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    .readout { display:grid; gap:8px; margin:12px 0; }
+    .readout div { display:flex; justify-content:space-between; gap:14px; padding:9px 0; border-bottom:1px solid #303a43; }
+    .readout dt { color:#a8babd; }
+    .readout dd { margin:0; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; text-align:right; overflow-wrap:anywhere; }
+    .status { min-height:3.5em; padding:12px; border-left:4px solid var(--moss); background:rgba(0,0,0,.2); border-radius:8px; }
+    .warning { border-left-color:var(--copper); }
+    .receipt { font: .77rem/1.45 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; max-height:320px; overflow:auto; }
+    .badge { display:inline-block; padding:5px 9px; border-radius:999px; background:#25313a; color:#d5e0df; font-size:.75rem; font-weight:800; }
+    .math { font-family:ui-serif,Georgia,serif; color:#edd9ad; }
+    @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; transition:none!important; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Hearthgate · Jacobian Fold Tone Gate</div>
+    <h1>Rowan’s World-Tone Approval Room</h1>
+    <p>This room never approves a tone automatically. It calculates the world’s reciprocal fold pair, translates inaudible branches into a bounded audible vibration proxy, sends that proxy through the iPad’s selected audio route, and waits for Rowan’s explicit decision.</p>
+  </header>
+
+  <section class="grid">
+    <article class="panel">
+      <h2>1 · Select the world</h2>
+      <label for="world">World profile</label>
+      <select id="world"></select>
+      <dl class="readout">
+        <div><dt>Candidate layer</dt><dd id="layer">—</dd></div>
+        <div><dt>Root tone</dt><dd id="root">—</dd></div>
+        <div><dt>Profile</dt><dd id="profile">—</dd></div>
+        <div><dt>Source</dt><dd id="source">—</dd></div>
+        <div><dt>Candidate hash</dt><dd id="candidate-hash">—</dd></div>
+      </dl>
+      <p><span class="badge">Pending until Rowan approves</span></p>
+    </article>
+
+    <article class="panel">
+      <h2>2 · Jacobian fold</h2>
+      <p class="math">Φ = 1 − σ<sub>min</sub> / (σ<sub>max</sub> + ε)</p>
+      <label for="fold">Fold index <output id="fold-output">0.90</output></label>
+      <input id="fold" type="range" min="0" max="1" step="0.01" value="0.90" />
+      <dl class="readout">
+        <div><dt>Fold state</dt><dd id="fold-state">active</dd></div>
+        <div><dt>Direct branch</dt><dd id="direct">—</dd></div>
+        <div><dt>Inverse branch</dt><dd id="inverse">—</dd></div>
+        <div><dt>Reciprocal check</dt><dd id="reciprocal">—</dd></div>
+      </dl>
+      <p>The ultrasonic and infrasonic values are recorded, not played. The Shokz cue uses octave-folded audible proxies so the world relationship survives without asking the headset to reproduce impossible frequencies.</p>
+    </article>
+
+    <article class="panel">
+      <h2>3 · Shokz audition</h2>
+      <p class="status warning"><strong>Device boundary:</strong> iPad Safari cannot verify which Bluetooth headset receives Web Audio. Confirm Shokz in iPad Control Centre before playing. The cue is an audio-haptic proxy, not a calibrated actuator command.</p>
+      <label class="check"><input id="shokz" type="checkbox" /> <span>I confirm my Shokz are connected and selected as the iPad audio output.</span></label>
+      <label for="gain">Audition strength <output id="gain-output">Low · 0.035</output></label>
+      <input id="gain" type="range" min="0.02" max="0.08" step="0.005" value="0.035" />
+      <div class="button-row">
+        <button id="audition" type="button">Play root · rise · fall</button>
+        <button id="stop" class="stop" type="button">Feather Stop</button>
+      </div>
+      <p id="audition-status" class="status" role="status">RESTING · No candidate auditioned.</p>
+    </article>
+
+    <article class="panel">
+      <h2>4 · Rowan decides</h2>
+      <label class="check"><input id="felt" type="checkbox" /> <span>I felt or clearly identified the root, rising branch, and falling branch without discomfort.</span></label>
+      <label for="note">Calibration note</label>
+      <textarea id="note" placeholder="Comfort, clarity, wrong tone, stronger or softer, alternate root…"></textarea>
+      <div class="button-row">
+        <button id="approve" class="approve" type="button" disabled>Approve tone</button>
+        <button id="adjust" class="secondary" type="button" disabled>Needs adjustment</button>
+        <button id="reject" class="stop" type="button" disabled>Reject candidate</button>
+      </div>
+      <p id="decision-status" class="status">No decision receipt.</p>
+    </article>
+
+    <article class="panel">
+      <h2>Receipt ledger</h2>
+      <div class="button-row">
+        <button id="export" class="secondary" type="button">Export receipts</button>
+      </div>
+      <pre id="receipts" class="receipt">[]</pre>
+    </article>
+  </section>
+</main>
+
+<script type="module">
+  import {
+    DEFAULT_WORLD_TONE_CANDIDATES,
+    WorldToneApprovalSession,
+    candidateHash,
+    mapWorldFoldFrequencies,
+    updateFoldLatch,
+  } from '../src/world-tone-fold-approval.js';
+
+  const $ = (selector) => document.querySelector(selector);
+  const session = new WorldToneApprovalSession();
+  let candidate = null;
+  let foldActive = false;
+  let auditionReady = false;
+  let completionTimer = null;
+
+  function formatHz(value) {
+    if (!Number.isFinite(value)) return 'invalid';
+    if (value >= 1000) return `${value.toLocaleString(undefined,{maximumFractionDigits:2})} Hz`;
+    return `${value.toFixed(3)} Hz`;
+  }
+
+  function setDecisionEnabled(enabled) {
+    $('#approve').disabled = !enabled;
+    $('#adjust').disabled = !enabled;
+    $('#reject').disabled = !enabled;
+  }
+
+  function renderReceipts() {
+    $('#receipts').textContent = JSON.stringify(session.readReceipts(), null, 2);
+  }
+
+  async function loadCandidate() {
+    clearTimeout(completionTimer);
+    auditionReady = false;
+    setDecisionEnabled(false);
+    candidate = DEFAULT_WORLD_TONE_CANDIDATES.find((item) => item.world_id === $('#world').value);
+    await session.loadCandidate(candidate);
+    $('#layer').textContent = candidate.tone_layer_id;
+    $('#root').textContent = formatHz(candidate.root_hz);
+    $('#profile').textContent = `v${candidate.profile_version}`;
+    $('#source').textContent = candidate.source_ref;
+    $('#candidate-hash').textContent = await candidateHash(candidate);
+    $('#audition-status').textContent = 'RESTING · Candidate loaded. Confirm Shokz before playing.';
+    $('#decision-status').textContent = 'No decision receipt.';
+    updateFold();
+  }
+
+  function updateFold() {
+    if (!candidate) return;
+    const foldIndex = Number($('#fold').value);
+    $('#fold-output').textContent = foldIndex.toFixed(2);
+    foldActive = updateFoldLatch(foldIndex, foldActive, {
+      enter:candidate.enter_threshold,
+      release:candidate.release_threshold,
+    });
+    const pair = mapWorldFoldFrequencies(candidate.root_hz, foldIndex, {
+      enterThreshold:candidate.enter_threshold,
+      excursion:candidate.excursion,
+    });
+    $('#fold-state').textContent = foldActive ? 'active' : 'resting';
+    $('#direct').textContent = `${formatHz(pair.direct_hz)} · ${pair.direct_class}`;
+    $('#inverse').textContent = `${formatHz(pair.inverse_hz)} · ${pair.inverse_class}`;
+    $('#reciprocal').textContent = `${pair.reciprocal_product.toFixed(4)} = root² ${(candidate.root_hz ** 2).toFixed(4)}`;
+    auditionReady = false;
+    setDecisionEnabled(false);
+  }
+
+  $('#world').replaceChildren(...DEFAULT_WORLD_TONE_CANDIDATES.map((item) => {
+    const option = document.createElement('option');
+    option.value = item.world_id;
+    option.textContent = item.world_name;
+    return option;
+  }));
+
+  $('#world').addEventListener('change', loadCandidate);
+  $('#fold').addEventListener('input', updateFold);
+  $('#gain').addEventListener('input', () => {
+    $('#gain-output').textContent = `Bounded · ${Number($('#gain').value).toFixed(3)}`;
+  });
+
+  $('#audition').addEventListener('click', async () => {
+    try {
+      clearTimeout(completionTimer);
+      auditionReady = false;
+      setDecisionEnabled(false);
+      const receipt = await session.audition({
+        foldIndex:Number($('#fold').value),
+        shokzConfirmed:$('#shokz').checked,
+        gain:Number($('#gain').value),
+      });
+      $('#audition-status').textContent = `PLAYING · ${receipt.plan.total_duration_ms} ms. Root, direct rise, inverse fall.`;
+      completionTimer = setTimeout(() => {
+        auditionReady = true;
+        setDecisionEnabled(true);
+        $('#audition-status').textContent = 'COMPLETE · Choose approve, adjust, or reject. Replay is allowed.';
+      }, receipt.plan.total_duration_ms + 80);
+    } catch (error) {
+      $('#audition-status').textContent = error.message;
+    }
+  });
+
+  $('#stop').addEventListener('click', async () => {
+    clearTimeout(completionTimer);
+    auditionReady = false;
+    setDecisionEnabled(false);
+    await session.stop();
+    $('#audition-status').textContent = 'FEATHER STOP · Audio closed. Replay before deciding.';
+  });
+
+  async function decide(decision) {
+    try {
+      if (!auditionReady) throw new Error('WORLD_TONE_APPROVAL: complete the audition before deciding');
+      const receipt = await session.decide({
+        decision,
+        shokzConfirmed:$('#shokz').checked,
+        feltAndIdentified:$('#felt').checked,
+        note:$('#note').value,
+      });
+      $('#decision-status').textContent = `${decision.toUpperCase()} · ${receipt.receipt_hash}`;
+      renderReceipts();
+    } catch (error) {
+      $('#decision-status').textContent = error.message;
+    }
+  }
+
+  $('#approve').addEventListener('click', () => decide('approved'));
+  $('#adjust').addEventListener('click', () => decide('adjust'));
+  $('#reject').addEventListener('click', () => decide('rejected'));
+
+  $('#export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(session.readReceipts(), null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'hearthgate-world-tone-approvals.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+
+  renderReceipts();
+  await loadCandidate();
+</script>
+</body>
+</html>
