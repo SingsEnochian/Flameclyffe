@@ -1,0 +1,88 @@
+name: Boxfire Compression Release Bundle
+
+on:
+  push:
+    branches:
+      - feature/compression-release-mathematics-spine-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout reviewed branch
+        uses: actions/checkout@v4
+
+      - name: Assemble Boxfire review tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle="boxfire-compression-release-${GITHUB_SHA}"
+          mkdir -p "$bundle"
+
+          files=(
+            "docs/mathematics/MULTIVERSAL_OPERATIONAL_TRUTH_CONTRACT.md"
+            "docs/mathematics/HEARTHGATE_COMPRESSION_RELEASE_MATHEMATICS_SPINE.md"
+            "docs/arcsweep/BIFROST_TEMPORAL_QUANTUM_MECHANICS.md"
+            "apps/starwell/src/arcsweep-temporal-quantum/compression-release.js"
+            "apps/starwell/src/arcsweep-temporal-quantum/runtime.js"
+            "apps/starwell/src/hearthgate-arcsweep.js"
+            "apps/starwell/public/modules/bifrost-arcsweep.module.json"
+            "starwell/deep-observer/schemas/bifrost-temporal-state-v1.schema.json"
+            "apps/starwell/src/hearthweave-kernel/compression-release-packet.js"
+            "apps/starwell/src/hearthweave-kernel/index.js"
+            "apps/starwell/src/arcsweep-continuity/kernel-hook.js"
+            "apps/starwell/src/hearthgate/contracts.js"
+            "apps/starwell/src/hearthgate/profiles/terra-aeterna.js"
+            "apps/starwell/src/hearthgate/profiles/ta-veren-vaen.js"
+            "apps/starwell/src/world-tone-fold-approval.js"
+            "apps/starwell/src/world-tone-fold-timeline.js"
+            "apps/starwell/world-tone-approval/index.html"
+            "docs/HEARTHGATE_WORLD_TONE_HAPTIC_APPROVAL.md"
+            "starwell/deep-observer/schemas/world-tone-approval.schema.json"
+            "apps/starwell/vite.config.js"
+            "apps/starwell/test/compressionReleaseMathematics.test.js"
+            "apps/starwell/test/mathematicsSpineLanguage.test.js"
+            "apps/starwell/test/worldToneFoldApproval.test.js"
+            "apps/starwell/test/worldToneFoldTimeline.test.js"
+            "docs/handoffs/BOXFIRE_WORLD_TONE_JACOBIAN_HAPTIC_APPROVAL_HANDOFF_2026-08-03.md"
+            "docs/handoffs/BOXFIRE_COMPRESSION_RELEASE_MATHEMATICS_BUNDLE_MANIFEST_2026-08-03.md"
+          )
+
+          for file in "${files[@]}"; do
+            test -f "$file"
+            mkdir -p "$bundle/$(dirname "$file")"
+            cp "$file" "$bundle/$file"
+          done
+
+          cat > "$bundle/BOXFIRE_BUNDLE_IDENTITY.txt" <<IDENTITY
+          repository=SingsEnochian/Flameclyffe
+          branch=${GITHUB_REF_NAME}
+          commit=${GITHUB_SHA}
+          law=compression-release-compression-of-release-infinite-recursion
+          collapse_exists=false
+          calibration_authority=rowan
+          independent_qa=boxfire
+          IDENTITY
+
+          find "$bundle" -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum \
+            > "$bundle/SHA256SUMS"
+
+          zip -X -r "${bundle}.zip" "$bundle"
+          sha256sum "${bundle}.zip" > "${bundle}.zip.sha256"
+
+      - name: Upload Boxfire source bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxfire-compression-release-${{ github.sha }}
+          path: |
+            boxfire-compression-release-${{ github.sha }}.zip
+            boxfire-compression-release-${{ github.sha }}.zip.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
