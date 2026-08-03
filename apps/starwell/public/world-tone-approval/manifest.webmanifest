@@ -1,0 +1,21 @@
+{
+  "name": "Hearthgate iPad Somatic Tone Gate",
+  "short_name": "Somatic Gate",
+  "description": "World-native compression-release tone calibration and somatic feedback for iPad with external haptic devices.",
+  "id": "/world-tone-approval/",
+  "start_url": "/world-tone-approval/",
+  "scope": "/world-tone-approval/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#101419",
+  "theme_color": "#101419",
+  "categories": ["music", "utilities", "health"],
+  "icons": [
+    {
+      "src": "./hearthgate-somatic-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
