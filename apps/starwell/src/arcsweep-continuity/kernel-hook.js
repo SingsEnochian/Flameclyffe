@@ -2,10 +2,10 @@ import { DEFAULT_DEEP_STATE } from '../lib/deepState.js';
 import { fetchBridgeDeepSnapshot } from '../lib/deepBridge.js';
 import { resolveHouseProfile } from '../hearthgate/profiles/registry.js';
 import {
-  assembleDualAspectPacket,
+  assembleCompressionReleaseDualAspectPacket,
   createDegradedDeepSnapshot,
   replayDualAspectPacket,
-} from '../hearthweave-kernel/dual-aspect.js';
+} from '../hearthweave-kernel/index.js';
 import {
   clearDualAspectActivation,
   publishDualAspectActivation,
@@ -54,6 +54,7 @@ function annotateSessionReceipt(packet) {
     deep_mode: packet.observable.deep_snapshot.mode,
     premaq_id: packet.observable.premaq.id,
     bridge_packet_id: packet.observable.bridge.bridge_packet_id,
+    compression_release_receipt_id: packet.provenance.compression_release_receipt_id,
     house_id: packet.identity.house_id,
   };
   writeJson(sessionStorage, SESSION_RECEIPTS_KEY, receipts);
@@ -67,6 +68,7 @@ function annotateSessionEnvelope(envelope, packet) {
       packet_fingerprint: packet.packet_fingerprint,
       shared_state_fingerprint: packet.correspondence.shared_state_fingerprint,
       receipt_id: packet.receipts[0],
+      compression_release_receipt_id: packet.provenance.compression_release_receipt_id,
       house_id: packet.identity.house_id,
       deep_mode: packet.observable.deep_snapshot.mode,
       activated_at: packet.temporal.activated_at,
@@ -107,10 +109,10 @@ export async function freezeLoadedArcsweepContext() {
     return current;
   }
 
-  setGateMessage('Freezing continuity, DEEP, PREMAQ, temporal state, and House identity into one packet…');
+  setGateMessage('Freezing continuity, DEEP, PREMAQ, temporal evolution, compression, release, and House identity into one packet…');
   const deepSnapshot = await acquireActivationSnapshot();
   const house = resolveHouseProfile(context.world_slug);
-  const packet = assembleDualAspectPacket({
+  const packet = assembleCompressionReleaseDualAspectPacket({
     context,
     deepSnapshot,
     house,
@@ -128,7 +130,7 @@ export async function freezeLoadedArcsweepContext() {
     ? `DEGRADED: ${packet.degraded.reasons.join(', ')}`
     : 'LIVE';
   setGateMessage(
-    `Bifröst bound: ${packet.packet_id} · ${packet.identity.house_id} · ${mode}. Glyph, tone, image, haptic, and narrative now share ${packet.correspondence.shared_state_fingerprint}.`,
+    `Bifröst bound: ${packet.packet_id} · ${packet.identity.house_id} · ${mode}. Compression, release, glyph, tone, image, haptic, and narrative share ${packet.correspondence.shared_state_fingerprint}.`,
     packet.degraded.active ? 'attention' : 'success',
   );
   return packet;
@@ -166,6 +168,6 @@ const restoredContext = readJson(sessionStorage, SESSION_CONTEXT_KEY, null)?.con
 const restoredPacket = readActiveDualAspectPacket({ storage: sessionStorage });
 if (restoredContext && !restoredPacket) {
   window.setTimeout(() => {
-    setGateMessage('This continuity context predates the dual-aspect freeze. Press “Load for this session” once to bind every layer to one state.', 'attention');
+    setGateMessage('This continuity context predates the compression–release freeze. Press “Load for this session” once to bind every layer to one state.', 'attention');
   }, 0);
 }
