@@ -1,16 +1,16 @@
 import {
-  collapseRelease,
   createBifrostBridgePacket,
   evolveTemporalState,
   premaqToTemporalState,
   projectWorldState,
   validateTemporalState,
 } from './engine.js';
+import { compressRelease } from './compression-release.js';
 
-export const BIFROST_RUNTIME_VERSION = '0.1.0';
-export const BIFROST_RUNTIME_SCHEMA = 'arcsweep.bifrost-dual-presence-runtime/v0.1';
-export const BIFROST_STATE_STORAGE_KEY = 'arcsweep:bifrost-temporal-state:v1';
-export const BIFROST_BRIDGE_STORAGE_KEY = 'arcsweep:bifrost-bridge-packet:v1';
+export const BIFROST_RUNTIME_VERSION = '0.2.0';
+export const BIFROST_RUNTIME_SCHEMA = 'arcsweep.bifrost-dual-presence-runtime/v0.2';
+export const BIFROST_STATE_STORAGE_KEY = 'arcsweep:bifrost-temporal-state:v2';
+export const BIFROST_BRIDGE_STORAGE_KEY = 'arcsweep:bifrost-bridge-packet:v2';
 
 function clone(value) {
   return value == null ? null : structuredClone(value);
@@ -93,7 +93,14 @@ export function createArcsweepBifrostRuntime({ storage = globalThis.localStorage
       const current = requireEnvelope();
       return persistEnvelope({
         ...current,
-        targetside: collapseRelease(current.targetside, options),
+        targetside: compressRelease(current.targetside, options),
+      });
+    },
+    compressRelease(options = {}) {
+      const current = requireEnvelope();
+      return persistEnvelope({
+        ...current,
+        targetside: compressRelease(current.targetside, options),
       });
     },
     bridge({ premaq, targetside, ...options } = {}) {
