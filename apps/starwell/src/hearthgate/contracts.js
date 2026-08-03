@@ -1,4 +1,4 @@
-export const HEARTHGATE_CONTRACT_VERSION = '0.2.0';
+export const HEARTHGATE_CONTRACT_VERSION = '0.3.0';
 
 export const roomRegions = Object.freeze(['header', 'toolbar', 'content', 'inspector', 'status']);
 
@@ -56,15 +56,27 @@ export function defineHouseProfile(profile) {
       timeline: null,
       initialDelta: 1,
       bridgeCoupling: 0.08,
-      focusAxis: 'Q',
-      measurementStrength: 0.65,
-      release: 0.35,
+      compressionRelease: {
+        focusAxis: 'Q',
+        enterThreshold: 0.82,
+        releaseThreshold: 0.68,
+        compressionGain: 1,
+        releaseFraction: 0.35,
+        derivativeRelease: 0.08,
+        memoryRelease: 0,
+        phaseReleaseGain: Math.PI / 4,
+        radialGain: 0.5,
+        entropyGain: 0.1,
+        angularGain: Math.PI / 3,
+        temporalWeights: { fold: 0.55, derivative: 0.20, entropy: 0.15, phase: 0.10 },
+      },
     },
     harmonicIdentity: {
       voice: profile.name,
       baseCarrierHz: 144,
       beatFloorHz: 3,
       beatCeilingHz: 8,
+      compressionReleaseTone: null,
     },
     visualIdentity: {
       structure: 'paired-bridge-geometry',
