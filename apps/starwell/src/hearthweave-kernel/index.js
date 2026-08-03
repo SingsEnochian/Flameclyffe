@@ -19,6 +19,8 @@ export {
   validateDeepSnapshot,
 } from './dual-aspect.js';
 
+export { assembleCompressionReleaseDualAspectPacket } from './compression-release-packet.js';
+
 export {
   DUAL_ASPECT_REQUIRED_BINDINGS,
   validateDualAspectPacket,
