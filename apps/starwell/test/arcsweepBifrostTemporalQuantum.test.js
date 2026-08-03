@@ -78,7 +78,7 @@ test('evolves with norm-preserving phase and pair rotations', () => {
   assert.notDeepEqual(evolved.probabilities, initial.probabilities);
 });
 
-test('collapse-release advances the outward spiral rather than resetting it', () => {
+test('compression-release advances the outward spiral rather than resetting it', () => {
   const initial = premaqToTemporalState(premaq(), { idFactory: () => 'initial' });
   const first = collapseRelease(initial, {
     focus: 'Q',
