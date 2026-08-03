@@ -1,6 +1,12 @@
 export const IPAD_SOMATIC_LINEAGE_SCHEMA = 'hearthgate.ipad-somatic-lineage/v1';
 export const IPAD_SOMATIC_LINEAGE_STORAGE_KEY = 'hearthgate.ipad-somatic-lineage.active.v1';
 
+const WORLD_ALIASES = new Map([
+  ['ta-veren-vaen', 'taveren-vaen'],
+  ['taveren-vaen', 'taveren-vaen'],
+  ['ta-veren-unbound', 'taveren-vaen'],
+]);
+
 function invariant(condition, message) {
   if (!condition) throw new Error(`IPAD_SOMATIC_LINEAGE: ${message}`);
 }
@@ -27,11 +33,21 @@ function requireDateTime(value, field) {
   return date.toISOString();
 }
 
+export function canonicalSomaticWorldId(value) {
+  const slug = requireString(value, 'world_id')
+    .normalize('NFKD')
+    .replace(/[’']/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  return WORLD_ALIASES.get(slug) ?? slug;
+}
+
 export function buildIPadSomaticLineage(packetInput) {
   invariant(packetInput && typeof packetInput === 'object' && !Array.isArray(packetInput), 'DualAspectPacket is required');
   const packet = copy(packetInput);
   const compressionReceipt = packet.observable?.compression_release?.receipt;
-  const packetWorld = requireString(packet.identity?.world_slug, 'identity.world_slug');
+  const packetWorld = canonicalSomaticWorldId(packet.identity?.world_slug);
   const houseId = requireString(packet.identity?.house_id, 'identity.house_id');
   const packetId = requireString(packet.packet_id, 'packet_id');
   const packetFingerprint = requireString(packet.packet_fingerprint, 'packet_fingerprint');
@@ -57,6 +73,7 @@ export function buildIPadSomaticLineage(packetInput) {
     schema: IPAD_SOMATIC_LINEAGE_SCHEMA,
     status: 'active',
     world_id: packetWorld,
+    source_world_id: requireString(packet.identity?.world_slug, 'identity.world_slug'),
     house_id: houseId,
     session_context_id: requireString(packet.identity?.session_context_id, 'identity.session_context_id'),
     dual_aspect_packet_id: packetId,
@@ -83,6 +100,7 @@ export function validateIPadSomaticLineage(lineageInput, { worldId = null } = {}
   invariant(lineage.authority === 'derived-from-active-hearthweave-packet', 'lineage authority is invalid');
   const required = [
     'world_id',
+    'source_world_id',
     'house_id',
     'session_context_id',
     'dual_aspect_packet_id',
@@ -95,11 +113,13 @@ export function validateIPadSomaticLineage(lineageInput, { worldId = null } = {}
     'bridge_packet_id',
   ];
   for (const field of required) requireString(lineage[field], field);
+  lineage.world_id = canonicalSomaticWorldId(lineage.world_id);
   requireDateTime(lineage.activated_at, 'activated_at');
   invariant(Number.isInteger(lineage.compression_cycle) && lineage.compression_cycle >= 1, 'compression_cycle must be a positive integer');
   invariant(lineage.next_operation === 'compression-of-release', 'next operation must be compression-of-release');
   if (worldId != null) {
-    invariant(lineage.world_id === worldId, `active Bifröst world ${lineage.world_id} does not match selected world ${worldId}`);
+    const selectedWorld = canonicalSomaticWorldId(worldId);
+    invariant(lineage.world_id === selectedWorld, `active Bifröst world ${lineage.world_id} does not match selected world ${selectedWorld}`);
   }
   return deepFreeze(lineage);
 }
