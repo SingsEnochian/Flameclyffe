@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 
 from flameclyffe_ml.provenance import content_hash
@@ -46,14 +47,17 @@ def _chunk_text(text: str, *, chunk_chars: int) -> tuple[IngestChunk, ...]:
         IngestChunk(
             chunk_index=index,
             text=chunk,
-            text_sha256=content_hash({"text": chunk}),
+            text_sha256=hashlib.sha256(chunk.encode("utf-8")).hexdigest(),
             char_count=len(chunk),
         )
         for index, chunk in enumerate(chunks)
     )
 
 
-def _measured_shore(document: SourceDocument, chunks: tuple[IngestChunk, ...]) -> dict[str, float | int | str | bool]:
+def _measured_shore(
+    document: SourceDocument,
+    chunks: tuple[IngestChunk, ...],
+) -> dict[str, float | int | str | bool]:
     words = re.findall(r"\b[\w'’-]+\b", document.text.casefold())
     unique_words = len(set(words))
     lexical_diversity = unique_words / len(words) if words else 0.0
@@ -104,7 +108,7 @@ def build_ingest_proposal(
         "source_hash_present": "VERIFIED",
         "text_hash_present": "VERIFIED",
         "consent_receipt_present": "VERIFIED",
-        "canon_write_performed": "VERIFIED",
+        "canon_write_absent": "VERIFIED",
         "human_review_complete": "NOT_YET_TESTED",
         "bifrost_validation_complete": "NOT_YET_TESTED",
     }
