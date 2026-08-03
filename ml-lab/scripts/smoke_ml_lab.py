@@ -1,7 +1,7 @@
 """CPU-only smoke test for the Flameclyffe ML laboratory.
 
 This script is intentionally small: it proves that the installed package, service
-contract, and deterministic living-engine state can start without summoning heavy
+contracts, and deterministic living-engine state can start without summoning heavy
 model downloads or GPU assumptions.
 """
 
@@ -33,6 +33,23 @@ def main() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["canon_authority"] is False
+
+    geometric_health = client.get("/v1/geometric/health")
+    assert geometric_health.status_code == 200
+    assert geometric_health.json()["canon_authority"] is False
+
+    reference = client.post(
+        "/v1/geometric/reference",
+        json={"geometry_id": "penteract"},
+    )
+    assert reference.status_code == 200
+    assert reference.json()["vertex_count"] == 32
+    assert reference.json()["receipt"]["status"] == "VERIFIED"
+
+    archivist_health = client.get("/v1/archivist/health")
+    assert archivist_health.status_code == 200
+    assert archivist_health.json()["canon_authority"] is False
+    assert archivist_health.json()["review_required"] is True
 
     print("flameclyffe-ml smoke: ok")
 
