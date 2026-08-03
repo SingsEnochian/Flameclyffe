@@ -52,7 +52,7 @@ jobs:
       - name: Build STARWELL
         run: npm run starwell:build
 
-      - name: Verify iPad PWA artefacts
+      - name: Verify iPad PWA artefacts and truth binding
         shell: bash
         run: |
           set -euo pipefail
@@ -62,6 +62,15 @@ jobs:
           test -f dist/starwell/world-tone-approval/hearthgate-somatic-icon.svg
           test -f dist/starwell/schemas/ipad-somatic-haptic-receipt.schema.json
           grep -q 'Hearthgate iPad Somatic Tone Gate' dist/starwell/world-tone-approval/index.html
+          grep -q 'BoundIPadSomaticHapticSession' apps/starwell/world-tone-approval/index.html
+          grep -q 'source_state_fingerprint' apps/starwell/src/ipad-somatic-bound-session.js
+          grep -q 'compression_release_receipt_id' apps/starwell/src/ipad-somatic-lineage.js
+          grep -q 'publishIPadSomaticLineage' apps/starwell/src/arcsweep-continuity/kernel-hook.js
           grep -q 'internal_haptic_actuator' apps/starwell/src/ipad-somatic-haptics.js
           grep -q 'compression -> release -> compression of the release' apps/starwell/src/ipad-somatic-haptics.js
           grep -q '"collapseExists": false' apps/starwell/public/modules/bifrost-arcsweep.module.json
+          if grep -q 'user-scalable=no' apps/starwell/world-tone-approval/index.html; then
+            echo 'iPad viewport disables user zoom'
+            exit 1
+          fi
+          node -e "JSON.parse(require('node:fs').readFileSync('starwell/deep-observer/schemas/ipad-somatic-haptic-receipt.schema.json','utf8'))"
