@@ -1,0 +1,67 @@
+name: iPad Somatic PWA Check
+
+on:
+  push:
+    branches:
+      - feature/ipad-somatic-haptics-v1
+    paths:
+      - 'apps/starwell/**'
+      - 'starwell/deep-observer/schemas/ipad-somatic-haptic-receipt.schema.json'
+      - 'docs/ipad/**'
+      - 'docs/handoffs/BOXFIRE_IPAD_SOMATIC_HAPTICS_HANDOFF_2026-08-03.md'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ipad-somatic-check.yml'
+  pull_request:
+    branches:
+      - feature/compression-release-mathematics-spine-v1
+    paths:
+      - 'apps/starwell/**'
+      - 'starwell/deep-observer/schemas/ipad-somatic-haptic-receipt.schema.json'
+      - 'docs/ipad/**'
+      - 'docs/handoffs/BOXFIRE_IPAD_SOMATIC_HAPTICS_HANDOFF_2026-08-03.md'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ipad-somatic-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify iPad somatic renderer
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test STARWELL and somatic contracts
+        run: npm run starwell:test
+
+      - name: Build STARWELL
+        run: npm run starwell:build
+
+      - name: Verify iPad PWA artefacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist/starwell/world-tone-approval/index.html
+          test -f dist/starwell/world-tone-approval/manifest.webmanifest
+          test -f dist/starwell/world-tone-approval/service-worker.js
+          test -f dist/starwell/world-tone-approval/hearthgate-somatic-icon.svg
+          test -f dist/starwell/schemas/ipad-somatic-haptic-receipt.schema.json
+          grep -q 'Hearthgate iPad Somatic Tone Gate' dist/starwell/world-tone-approval/index.html
+          grep -q 'internal_haptic_actuator' apps/starwell/src/ipad-somatic-haptics.js
+          grep -q 'compression -> release -> compression of the release' apps/starwell/src/ipad-somatic-haptics.js
+          grep -q '"collapseExists": false' apps/starwell/public/modules/bifrost-arcsweep.module.json
