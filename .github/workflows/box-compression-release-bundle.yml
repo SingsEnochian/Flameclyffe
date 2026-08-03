@@ -15,15 +15,20 @@ permissions:
 jobs:
   package:
     runs-on: ubuntu-24.04
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
-      - name: Checkout reviewed branch
+      - name: Checkout exact reviewed branch head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
 
       - name: Assemble Boxfire review tree
         shell: bash
         run: |
           set -euo pipefail
-          bundle="boxfire-compression-release-${GITHUB_SHA}"
+          bundle="boxfire-compression-release-${SOURCE_SHA}"
           mkdir -p "$bundle"
 
           files=(
@@ -63,8 +68,8 @@ jobs:
 
           cat > "$bundle/BOXFIRE_BUNDLE_IDENTITY.txt" <<IDENTITY
           repository=SingsEnochian/Flameclyffe
-          branch=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
-          commit=${GITHUB_SHA}
+          branch=${SOURCE_BRANCH}
+          commit=${SOURCE_SHA}
           law=compression-release-compression-of-release-infinite-recursion
           collapse_exists=false
           calibration_authority=rowan
@@ -82,10 +87,10 @@ jobs:
       - name: Upload Boxfire source bundle
         uses: actions/upload-artifact@v4
         with:
-          name: boxfire-compression-release-${{ github.sha }}
+          name: boxfire-compression-release-${{ env.SOURCE_SHA }}
           path: |
-            boxfire-compression-release-${{ github.sha }}.zip
-            boxfire-compression-release-${{ github.sha }}.zip.sha256
+            boxfire-compression-release-${{ env.SOURCE_SHA }}.zip
+            boxfire-compression-release-${{ env.SOURCE_SHA }}.zip.sha256
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
