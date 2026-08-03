@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/compression-release-mathematics-spine-v1
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -60,7 +63,7 @@ jobs:
 
           cat > "$bundle/BOXFIRE_BUNDLE_IDENTITY.txt" <<IDENTITY
           repository=SingsEnochian/Flameclyffe
-          branch=${GITHUB_REF_NAME}
+          branch=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
           commit=${GITHUB_SHA}
           law=compression-release-compression-of-release-infinite-recursion
           collapse_exists=false
