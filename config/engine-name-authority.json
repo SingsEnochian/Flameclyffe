@@ -1,0 +1,17 @@
+{
+  "schema": "hearthgate.engine-name-authority/v1",
+  "authority": "rowan",
+  "personal_names_require_explicit_approval": true,
+  "approved_experimental_identifiers": [
+    "intermezzo"
+  ],
+  "denied_experimental_identifiers": [
+    "nocturne"
+  ],
+  "sensitive_surfaces": [
+    "apps/starwell/src",
+    "apps/starwell/public/modules",
+    ".github/workflows"
+  ],
+  "enforcement": "fail-closed"
+}
