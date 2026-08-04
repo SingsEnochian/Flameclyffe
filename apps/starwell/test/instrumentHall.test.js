@@ -73,7 +73,7 @@ test('Mythience holds an observed effect and unknown mechanism without false pro
   assert.match(record.boundary, /neither dismissal nor proof/);
 });
 
-test('typing a complete sentence performs a non-destructive collapse-release crossing', async () => {
+test('typing a complete sentence performs a non-destructive compress-release crossing', async () => {
   const store = new MemoryLineageStore();
   const bridge = new BifrostRuntime({ store });
   await bridge.awaken();

@@ -10,7 +10,6 @@ import {
 } from './mythience.js';
 import {
   RELEASE_STROKE,
-  COMPRESS_STROKE,
 } from './bifrost-runtime.js';
 
 export const TYPING_TONE_SCHEMA = 'hearthgate.typing-tone-event/v1';
