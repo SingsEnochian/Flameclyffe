@@ -27,6 +27,15 @@ function publishLegacyObservatoryPages() {
         await cp(source, destination, { force: true });
       }
 
+      await cp(
+        resolve(REPO_ROOT, 'starwell/deep-observer'),
+        resolve(OUT_DIR, 'starwell/deep-observer'),
+        {
+          recursive: true,
+          force: true,
+        },
+      );
+
       await cp(resolve(REPO_ROOT, 'assets'), resolve(OUT_DIR, 'assets'), {
         recursive: true,
         force: true,
