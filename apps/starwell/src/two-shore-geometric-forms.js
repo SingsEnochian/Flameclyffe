@@ -147,15 +147,14 @@ function nearestNeighbourEdges(vertices) {
     .map(([left, right]) => [left, right]);
 }
 
-function hypercubeEdges(vertices) {
+function hypercubeEdges(vertexCount) {
   const edges = [];
-  for (let left = 0; left < vertices.length; left += 1) {
-    for (let right = left + 1; right < vertices.length; right += 1) {
-      let differences = 0;
-      for (let axis = 0; axis < vertices[left].length; axis += 1) {
-        if (Math.sign(vertices[left][axis]) !== Math.sign(vertices[right][axis])) differences += 1;
-      }
-      if (differences === 1) edges.push([left, right]);
+  for (let left = 0; left < vertexCount; left += 1) {
+    for (let right = left + 1; right < vertexCount; right += 1) {
+      const differingBits = left ^ right;
+      const differsByExactlyOneBit = differingBits !== 0
+        && (differingBits & (differingBits - 1)) === 0;
+      if (differsByExactlyOneBit) edges.push([left, right]);
     }
   }
   return edges;
@@ -222,7 +221,7 @@ function buildAnchorForm({ geometryId, premaq, year, shoreId, elaraMultiplier })
   const vertices = reference.vertices.map((vertex) => multiplyVectorMatrix(vertex, rotation));
   const edges = geometryId === 'dodecahedron'
     ? nearestNeighbourEdges(vertices)
-    : hypercubeEdges(vertices);
+    : hypercubeEdges(vertices.length);
   const frame = frameMatrix(vertices);
   const gram = gramMatrix(vertices);
   const unitError = Math.max(...vertices.map((vertex) => Math.abs(vectorNorm(vertex) - 1)));
