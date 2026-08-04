@@ -1,4 +1,5 @@
 import { featherStop } from './premaq-shokz-soundfont.js';
+import './two-shore-gate-ui.js';
 
 const GLOBAL_STOP_SELECTOR = [
   '#feather-stop',
