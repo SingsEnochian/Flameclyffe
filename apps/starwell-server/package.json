@@ -21,8 +21,10 @@
     "check:base-packaging": "node scripts/check-packaging.js",
     "check:dual-aspect": "node scripts/check-dual-aspect-packaging.js",
     "check:premaq-shokz": "node scripts/check-premaq-shokz-packaging.js",
-    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect && npm run check:premaq-shokz",
-    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js"
+    "check:eleven-year-wav": "node scripts/check-eleven-year-wav-packaging.js",
+    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect && npm run check:premaq-shokz && npm run check:eleven-year-wav",
+    "verify:eleven-year-wav-package": "node scripts/verify-eleven-year-wav-package.js",
+    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js && npm run verify:eleven-year-wav-package"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
