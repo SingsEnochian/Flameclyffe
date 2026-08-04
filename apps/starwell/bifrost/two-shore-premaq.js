@@ -2,64 +2,34 @@ import {
   readActiveDualAspectPacket,
   subscribeToDualAspectActivation,
 } from '../src/hearthweave-kernel/activation.js';
+import {
+  PREMAQ_AXES,
+  axisValue,
+  buildBifrostReceiptSidecar,
+  buildBifrostRuntimeState,
+  bridgeBlocksCertifiedExecution,
+  short,
+} from './bifrost-runtime-state.js';
 
-const AXES = Object.freeze([
-  ['P', 'Presence'],
-  ['C', 'Coherence'],
-  ['R', 'Resonance'],
-  ['E', 'Entropy'],
-  ['M', 'Memory'],
-  ['A', 'Agency'],
-  ['Q', 'Qualia'],
-]);
-
-const REFERENCE_VALUES = Object.freeze({
-  P: 0.72,
-  C: 0.81,
-  R: 0.67,
-  E: 0.31,
-  M: 0.76,
-  A: 0.84,
-  Q: 0.79,
+const AXIS_NAMES = Object.freeze({
+  P: 'Presence',
+  C: 'Coherence',
+  R: 'Resonance',
+  E: 'Entropy',
+  M: 'Memory',
+  A: 'Agency',
+  Q: 'Qualia',
 });
 
 const panelId = 'two-shore-premaq-panel';
+const runtimeStatusId = 'two-shore-runtime-status';
+const guardedButtonIds = Object.freeze([
+  'run-window',
+  'sound-pair',
+  'play-premaq-song',
+]);
 
-function short(value, length = 22) {
-  const text = String(value ?? 'UNKNOWN');
-  if (text.length <= length) return text;
-  return `${text.slice(0, Math.max(6, length - 7))}…${text.slice(-6)}`;
-}
-
-function finiteValue(value) {
-  const number = Number(value);
-  return Number.isFinite(number) ? Math.min(1, Math.max(0, number)) : null;
-}
-
-function axisValue(source, axis) {
-  return finiteValue(source?.probabilities?.[axis])
-    ?? finiteValue(source?.state?.[axis]?.value)
-    ?? finiteValue(source?.premaq?.state?.[axis]?.value)
-    ?? finiteValue(source?.observable?.premaq?.state?.[axis]?.value)
-    ?? null;
-}
-
-function shoreFingerprint(source) {
-  return source?.shared_state_fingerprint
-    ?? source?.state_fingerprint
-    ?? source?.fingerprint
-    ?? source?.premaq?.shared_state_fingerprint
-    ?? source?.premaq?.state_fingerprint
-    ?? null;
-}
-
-function shoreId(source, fallback) {
-  return source?.state_id
-    ?? source?.id
-    ?? source?.premaq?.id
-    ?? source?.observable?.premaq?.id
-    ?? fallback;
-}
+let currentRuntimeState = null;
 
 function readPacket() {
   try {
@@ -69,98 +39,10 @@ function readPacket() {
   }
 }
 
-function resolveShore(packet, side) {
-  if (!packet) {
-    return {
-      side,
-      status: 'LOCAL REFERENCE',
-      source: { probabilities: REFERENCE_VALUES, state_id: `reference-${side}` },
-      id: `reference-${side}`,
-      fingerprint: 'LOCAL REFERENCE',
-      note: 'No active DualAspectPacket is bound. Values are labelled local reference only.',
-    };
-  }
-
-  const temporal = packet?.temporal?.[side] ?? null;
-  if (temporal) {
-    return {
-      side,
-      status: side === 'hearthside' ? 'TEMPORAL HEARTHSIDE' : 'TEMPORAL TARGETSIDE',
-      source: temporal,
-      id: shoreId(temporal, `${side}-temporal`),
-      fingerprint: shoreFingerprint(temporal) ?? packet?.correspondence?.shared_state_fingerprint ?? 'NOT PROVIDED',
-      note: 'Temporal shore state supplied by the active DualAspectPacket.',
-    };
-  }
-
-  if (side === 'hearthside' && packet?.observable?.premaq) {
-    const source = { premaq: packet.observable.premaq };
-    return {
-      side,
-      status: 'OBSERVABLE PREMAQ ONLY',
-      source,
-      id: shoreId(source, 'observable-premaq'),
-      fingerprint: shoreFingerprint(source) ?? packet?.correspondence?.shared_state_fingerprint ?? 'NOT PROVIDED',
-      note: 'Observable PREMAQ is visible, but temporal.hearthside is not present on the packet.',
-    };
-  }
-
-  if (side === 'targetside' && packet?.experiential?.premaq) {
-    const source = { premaq: packet.experiential.premaq };
-    return {
-      side,
-      status: 'EXPERIENTIAL PREMAQ ONLY',
-      source,
-      id: shoreId(source, 'experiential-premaq'),
-      fingerprint: shoreFingerprint(source) ?? packet?.correspondence?.shared_state_fingerprint ?? 'NOT PROVIDED',
-      note: 'Experiential PREMAQ is visible, but temporal.targetside is not present on the packet.',
-    };
-  }
-
-  return {
-    side,
-    status: 'NOT PROVIDED',
-    source: null,
-    id: `${side}-missing`,
-    fingerprint: 'NOT PROVIDED',
-    note: `The active DualAspectPacket does not include ${side} PREMAQ data.`,
-  };
-}
-
-function bridgeStatus(packet, hearth, target) {
-  if (!packet) {
-    return {
-      label: 'LOCAL REFERENCE',
-      detail: 'No active packet is bound. Both shore indicators are visible in reference mode.',
-    };
-  }
-
-  if (hearth.status === 'NOT PROVIDED' || target.status === 'NOT PROVIDED') {
-    return {
-      label: 'SHORE_STATE_INCOMPLETE',
-      detail: 'At least one shore is missing explicit PREMAQ data. Do not certify two-shore state binding.',
-    };
-  }
-
-  const hearthFp = hearth.fingerprint;
-  const targetFp = target.fingerprint;
-  if (hearthFp && targetFp && hearthFp !== 'NOT PROVIDED' && targetFp !== 'NOT PROVIDED' && hearthFp !== targetFp) {
-    return {
-      label: 'HIDDEN_STATE_DIVERGENCE',
-      detail: 'Hearthside and Targetside fingerprints disagree. The crossing must fail closed.',
-    };
-  }
-
-  return {
-    label: 'TWO_SHORE_PREMAQ_VISIBLE',
-    detail: 'Both shore indicators are visible. Engine binding still requires core two-shore lineage tests.',
-  };
-}
-
 function createBars(source) {
   const container = document.createElement('div');
   container.className = 'two-shore-bars';
-  for (const [axis, name] of AXES) {
+  for (const axis of PREMAQ_AXES) {
     const value = axisValue(source, axis);
     const row = document.createElement('div');
     row.className = 'axis-row';
@@ -168,7 +50,7 @@ function createBars(source) {
     const label = document.createElement('span');
     label.className = 'axis-label';
     label.textContent = axis;
-    label.title = name;
+    label.title = AXIS_NAMES[axis];
 
     const track = document.createElement('span');
     track.className = 'axis-track';
@@ -197,16 +79,21 @@ function createPanel() {
         <p class="eyebrow">TWO-SHORE PREMAQ INDICATOR</p>
         <h2>Hearthside and Targetside</h2>
       </div>
-      <button id="refresh-two-shore-premaq" type="button" class="quiet">Refresh shores</button>
+      <div class="two-shore-actions">
+        <button id="refresh-two-shore-premaq" type="button" class="quiet">Refresh shores</button>
+        <button id="export-two-shore-receipt" type="button" class="quiet">Export bridge receipt</button>
+      </div>
     </header>
     <div class="two-shore-grid">
       <section class="shore-card" data-shore="hearthside" aria-label="Hearthside PREMAQ indicator"></section>
       <section class="shore-card" data-shore="bridge" aria-label="Bifröst bridge PREMAQ status"></section>
       <section class="shore-card" data-shore="targetside" aria-label="Targetside PREMAQ indicator"></section>
     </div>
+    <p id="${runtimeStatusId}" class="engine-message" role="status">TWO-SHORE CHECK · waiting for active packet.</p>
     <p class="boundary-note">This panel is read-only. It exposes both shores and the bridge status without mutating the active packet, writing canon, approving tone, or claiming external physical evidence.</p>
   `;
   panel.querySelector('#refresh-two-shore-premaq')?.addEventListener('click', renderTwoShorePanel);
+  panel.querySelector('#export-two-shore-receipt')?.addEventListener('click', () => exportTwoShoreReceipt('manual-two-shore-export'));
   return panel;
 }
 
@@ -224,28 +111,28 @@ function renderShore(container, title, shore) {
   meta.className = 'shore-meta';
   meta.innerHTML = `
     <div><dt>Fingerprint</dt><dd>${short(shore.fingerprint, 34)}</dd></div>
+    <div><dt>Temporal state</dt><dd>${shore.temporal ? 'YES' : 'NO'}</dd></div>
     <div><dt>Note</dt><dd>${shore.note}</dd></div>
   `;
 
   container.append(header, createBars(shore.source), meta);
 }
 
-function renderBridge(container, packet, hearth, target) {
-  const status = bridgeStatus(packet, hearth, target);
-  const shared = packet?.correspondence?.shared_state_fingerprint ?? 'LOCAL REFERENCE';
-  const packetId = packet?.packet_id ?? 'REFERENCE';
+function renderBridge(container, runtime) {
+  const { bridge, hearthside, targetside } = runtime;
   container.replaceChildren();
   container.innerHTML = `
     <div class="shore-heading bridge-heading">
       <small>BRIDGE / BIFRÖST</small>
-      <strong data-bridge-status="${status.label}">${status.label}</strong>
-      <code>${short(packetId, 34)}</code>
+      <strong data-bridge-status="${bridge.status}">${bridge.status}</strong>
+      <code>${short(runtime.packet_id, 34)}</code>
     </div>
     <dl class="shore-meta bridge-meta">
-      <div><dt>Shared state</dt><dd>${short(shared, 34)}</dd></div>
-      <div><dt>Hearthside</dt><dd>${short(hearth.fingerprint, 30)}</dd></div>
-      <div><dt>Targetside</dt><dd>${short(target.fingerprint, 30)}</dd></div>
-      <div><dt>Gate</dt><dd>${status.detail}</dd></div>
+      <div><dt>Shared state</dt><dd>${short(runtime.shared_state_fingerprint, 34)}</dd></div>
+      <div><dt>Hearthside</dt><dd>${short(hearthside.fingerprint, 30)}</dd></div>
+      <div><dt>Targetside</dt><dd>${short(targetside.fingerprint, 30)}</dd></div>
+      <div><dt>Crossing ready</dt><dd>${bridge.crossing_ready ? 'YES' : 'NO'}</dd></div>
+      <div><dt>Gate</dt><dd>${bridge.detail}</dd></div>
     </dl>
   `;
 }
@@ -260,15 +147,83 @@ function ensurePanel() {
   return panel;
 }
 
+function setRuntimeStatus(runtime) {
+  const status = document.getElementById(runtimeStatusId);
+  if (!status) return;
+  status.className = `engine-message${bridgeBlocksCertifiedExecution(runtime) ? ' error' : ''}`;
+  status.textContent = bridgeBlocksCertifiedExecution(runtime)
+    ? `BLOCKED · ${runtime.bridge.status} · Bifröst execution controls are disabled until the packet is corrected.`
+    : `${runtime.bridge.status} · ${runtime.bridge.detail}`;
+}
+
+function setControlGuard(runtime) {
+  const blocked = bridgeBlocksCertifiedExecution(runtime);
+  for (const id of guardedButtonIds) {
+    const button = document.getElementById(id);
+    if (!button) continue;
+    button.disabled = blocked;
+    button.setAttribute('aria-disabled', String(blocked));
+    button.title = blocked
+      ? `${runtime.bridge.status}: correct the two-shore packet before execution.`
+      : '';
+  }
+}
+
 function renderTwoShorePanel() {
   const panel = ensurePanel();
   if (!panel) return;
   const packet = readPacket();
-  const hearth = resolveShore(packet, 'hearthside');
-  const target = resolveShore(packet, 'targetside');
-  renderShore(panel.querySelector('[data-shore="hearthside"]'), 'HEARTHSIDE / OBSERVABLE', hearth);
-  renderBridge(panel.querySelector('[data-shore="bridge"]'), packet, hearth, target);
-  renderShore(panel.querySelector('[data-shore="targetside"]'), 'TARGETSIDE / EXPERIENTIAL', target);
+  currentRuntimeState = buildBifrostRuntimeState(packet);
+  renderShore(panel.querySelector('[data-shore="hearthside"]'), 'HEARTHSIDE / OBSERVABLE', currentRuntimeState.hearthside);
+  renderBridge(panel.querySelector('[data-shore="bridge"]'), currentRuntimeState);
+  renderShore(panel.querySelector('[data-shore="targetside"]'), 'TARGETSIDE / EXPERIENTIAL', currentRuntimeState.targetside);
+  setRuntimeStatus(currentRuntimeState);
+  setControlGuard(currentRuntimeState);
+  window.dispatchEvent(new CustomEvent('bifrost:runtime-state', { detail: currentRuntimeState }));
+}
+
+function exportJson(payload, filename) {
+  const blob = new Blob([`${JSON.stringify(payload, null, 2)}\n`], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportTwoShoreReceipt(reason) {
+  const runtime = currentRuntimeState ?? buildBifrostRuntimeState(readPacket());
+  const sidecar = buildBifrostReceiptSidecar(runtime, {
+    notes: [
+      reason,
+      'Sidecar export records both Bifröst shores and bridge status. It does not certify physical device testing, canon write or tone approval.',
+    ],
+  });
+  exportJson(sidecar, `bifrost-two-shore-${runtime.bridge.status.toLowerCase().replaceAll('_', '-')}.json`);
+}
+
+function installExportSidecarHook() {
+  const exportButton = document.getElementById('export-receipts');
+  if (!exportButton || exportButton.dataset.twoShoreSidecar === 'installed') return;
+  exportButton.dataset.twoShoreSidecar = 'installed';
+  exportButton.addEventListener('click', () => {
+    window.setTimeout(() => exportTwoShoreReceipt('automatic-sidecar-for-cycle-receipt-export'), 0);
+  });
+}
+
+function installExecutionCaptureGuard() {
+  document.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target.closest('button') : null;
+    if (!target || !guardedButtonIds.includes(target.id)) return;
+    const runtime = currentRuntimeState ?? buildBifrostRuntimeState(readPacket());
+    if (!bridgeBlocksCertifiedExecution(runtime)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setRuntimeStatus(runtime);
+  }, true);
 }
 
 function installStyles() {
@@ -277,6 +232,7 @@ function installStyles() {
   style.id = 'two-shore-premaq-style';
   style.textContent = `
     .two-shore-premaq-panel { grid-column: 1 / -1; }
+    .two-shore-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5rem; }
     .two-shore-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.8fr) minmax(0, 1fr); gap: 0.85rem; }
     .shore-card { min-width: 0; padding: 0.9rem; border: 1px solid var(--line); border-radius: 0.95rem; background: rgba(255, 255, 255, 0.018); }
     .shore-card[data-shore="bridge"] { border-color: rgba(243, 204, 117, 0.24); background: linear-gradient(145deg, rgba(243, 204, 117, 0.045), rgba(131, 239, 217, 0.025)); }
@@ -290,13 +246,16 @@ function installStyles() {
     .shore-meta div { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: 0.7rem; padding-top: 0.45rem; border-top: 1px solid var(--line); }
     .shore-meta dt { color: var(--muted); font-size: 0.68rem; }
     .shore-meta dd { min-width: 0; margin: 0; overflow-wrap: anywhere; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.68rem; text-align: right; }
-    @media (max-width: 980px) { .two-shore-grid { grid-template-columns: 1fr; } .shore-meta div { grid-template-columns: 1fr; gap: 0.25rem; } .shore-meta dd { text-align: left; } }
+    button[disabled], button[aria-disabled="true"] { cursor: not-allowed; opacity: 0.52; transform: none !important; }
+    @media (max-width: 980px) { .two-shore-grid { grid-template-columns: 1fr; } .shore-meta div { grid-template-columns: 1fr; gap: 0.25rem; } .shore-meta dd { text-align: left; } .two-shore-actions { justify-content: flex-start; } }
   `;
   document.head.append(style);
 }
 
 function boot() {
   installStyles();
+  installExecutionCaptureGuard();
+  installExportSidecarHook();
   renderTwoShorePanel();
   subscribeToDualAspectActivation(() => renderTwoShorePanel(), {
     storage: sessionStorage,
