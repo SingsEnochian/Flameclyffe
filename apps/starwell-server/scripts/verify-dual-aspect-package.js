@@ -26,14 +26,15 @@ function readJson(filePath, label) {
   }
 }
 
-function extractAsset(html, label, stem) {
+function findAsset(html, stem) {
   const pattern = new RegExp(`(?:\\/starwell)?\\/assets\\/(${stem}-[^"']+\\.js)`);
-  const match = html.match(pattern);
-  if (!match) {
-    errors.push(`Packed ${label} does not load the ${stem} asset.`);
-    return null;
-  }
-  return match[1];
+  return html.match(pattern)?.[1] ?? null;
+}
+
+function requireAsset(html, label, stem) {
+  const asset = findAsset(html, stem);
+  if (!asset) errors.push(`Packed ${label} does not load the ${stem} asset.`);
+  return asset;
 }
 
 const packetSchema = readJson(
@@ -120,47 +121,46 @@ if (fs.existsSync(arcsweepPath) && fs.existsSync(bifrostPath)) {
   const arcsweepHtml = fs.readFileSync(arcsweepPath, 'utf8');
   const bifrostHtml = fs.readFileSync(bifrostPath, 'utf8');
 
-  const arcsweepSoundfontAsset = extractAsset(arcsweepHtml, 'web Arcsweep', 'premaq-shokz-soundfont');
-  const bifrostSoundfontAsset = extractAsset(bifrostHtml, 'Bifröst', 'premaq-shokz-soundfont');
-  if (arcsweepSoundfontAsset && bifrostSoundfontAsset && arcsweepSoundfontAsset !== bifrostSoundfontAsset) {
-    errors.push('Packed web Arcsweep and Bifröst do not share one PREMAQ Shokz sound-font asset.');
+  const arcsweepBridgeAsset = requireAsset(
+    arcsweepHtml,
+    'web Arcsweep',
+    'premaq-shokz-feather-stop-bridge',
+  );
+  const bifrostBridgeAsset = requireAsset(
+    bifrostHtml,
+    'Bifröst',
+    'premaq-shokz-feather-stop-bridge',
+  );
+  if (arcsweepBridgeAsset && bifrostBridgeAsset && arcsweepBridgeAsset !== bifrostBridgeAsset) {
+    errors.push('Packed web Arcsweep and Bifröst do not share one PREMAQ Shokz bundle.');
   }
 
-  const soundfontAsset = bifrostSoundfontAsset || arcsweepSoundfontAsset;
-  if (soundfontAsset) {
-    const assetPath = path.join(assetsDir, soundfontAsset);
-    if (requireFile(assetPath, 'compiled PREMAQ Shokz sound font')) {
-      const soundfontSource = fs.readFileSync(assetPath, 'utf8');
-      if (soundfontSource.includes('navigator.vibrate')) {
-        errors.push('Packed PREMAQ Shokz asset reintroduced an internal iPad vibration claim.');
+  const standaloneSoundfontAssets = [
+    findAsset(arcsweepHtml, 'premaq-shokz-soundfont'),
+    findAsset(bifrostHtml, 'premaq-shokz-soundfont'),
+  ].filter(Boolean);
+  if (standaloneSoundfontAssets.length === 2 && standaloneSoundfontAssets[0] !== standaloneSoundfontAssets[1]) {
+    errors.push('Packed web Arcsweep and Bifröst load different standalone PREMAQ Shokz assets.');
+  }
+
+  const bundleAsset = standaloneSoundfontAssets[0] || bifrostBridgeAsset || arcsweepBridgeAsset;
+  if (bundleAsset) {
+    const bundlePath = path.join(assetsDir, bundleAsset);
+    if (requireFile(bundlePath, 'compiled PREMAQ Shokz bundle')) {
+      const bundleSource = fs.readFileSync(bundlePath, 'utf8');
+      if (bundleSource.includes('navigator.vibrate')) {
+        errors.push('Packed PREMAQ Shokz bundle reintroduced an internal iPad vibration claim.');
       }
-      for (const marker of ['90–360 Hz', '35 chained cycles', 'FEATHER STOP']) {
-        if (!soundfontSource.includes(marker)) {
-          errors.push(`Packed PREMAQ Shokz asset is missing marker: ${marker}`);
-        }
-      }
-    }
-  }
-
-  const arcsweepStopAsset = extractAsset(arcsweepHtml, 'web Arcsweep', 'premaq-shokz-feather-stop-bridge');
-  const bifrostStopAsset = extractAsset(bifrostHtml, 'Bifröst', 'premaq-shokz-feather-stop-bridge');
-  if (arcsweepStopAsset && bifrostStopAsset && arcsweepStopAsset !== bifrostStopAsset) {
-    errors.push('Packed web Arcsweep and Bifröst do not share one Feather Stop bridge.');
-  }
-
-  const stopAsset = bifrostStopAsset || arcsweepStopAsset;
-  if (stopAsset) {
-    const stopPath = path.join(assetsDir, stopAsset);
-    if (requireFile(stopPath, 'compiled PREMAQ Shokz Feather Stop bridge')) {
-      const stopSource = fs.readFileSync(stopPath, 'utf8');
       for (const marker of [
+        '90–360 Hz',
+        '35 chained cycles',
         'GLOBAL FEATHER STOP',
         '#feather-stop',
         '#stop-premaq-song',
         'hearthgate:feather-stop',
       ]) {
-        if (!stopSource.includes(marker)) {
-          errors.push(`Packed Feather Stop bridge is missing marker: ${marker}`);
+        if (!bundleSource.includes(marker)) {
+          errors.push(`Packed PREMAQ Shokz bundle is missing marker: ${marker}`);
         }
       }
     }
@@ -180,4 +180,4 @@ if (errors.length) {
 
 console.log('[Packed dual-aspect verification] OK');
 console.log(` assets scanned: ${jsFiles.length}`);
-console.log(' strict packet validation, sealed glyph rendering, activation, Runa, schemas, no-refetch law, Bifröst route, PREMAQ Shokz sound font, and unified Feather Stop bridge are present');
+console.log(' strict packet validation, sealed glyph rendering, activation, Runa, schemas, no-refetch law, Bifröst route, coalesced PREMAQ Shokz bundle, and unified Feather Stop are present');
