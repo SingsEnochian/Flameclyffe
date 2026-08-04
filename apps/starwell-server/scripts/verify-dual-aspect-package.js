@@ -53,9 +53,15 @@ const manifest = readJson(
 const arcsweepPath = path.join(starwellRoot, 'index.html');
 const continuityPath = path.join(starwellRoot, 'arcsweep-continuity', 'index.html');
 const bifrostPath = path.join(starwellRoot, 'bifrost', 'index.html');
+const deepGroundwirePath = path.join(starwellRoot, 'starwell', 'deep-groundwire-mobius.html');
+const deepObserverPath = path.join(starwellRoot, 'starwell', 'deep-observer', 'index.html');
+const groundwirePath = path.join(starwellRoot, 'starwell', 'groundwire.html');
 requireFile(arcsweepPath, 'web Arcsweep route');
 requireFile(continuityPath, 'Arcsweep continuity route');
 requireFile(bifrostPath, 'Bifröst route');
+requireFile(deepGroundwirePath, 'DEEP + Groundwire live calibration console');
+requireFile(deepObserverPath, 'full DEEP Observer route');
+requireFile(groundwirePath, 'Groundwire route');
 
 if (packetSchema?.properties?.schema?.const !== 'hearthweave.dual-aspect-packet/v1') {
   errors.push('Packed DualAspectPacket schema contract is wrong.');
@@ -71,6 +77,15 @@ if (manifest?.engine?.packetAuthority !== 'hearthweave-kernel') {
 }
 if (manifest?.engine?.shokzSoundfont !== 'src/premaq-shokz-soundfont.js') {
   errors.push('Packed Bifröst manifest lost the PREMAQ Shokz sound-font entrypoint.');
+}
+if (manifest?.engine?.twoShoreGate !== 'src/two-shore-premaq-gate.js') {
+  errors.push('Packed Bifröst manifest lost the two-shore PREMAQ gate engine.');
+}
+if (manifest?.engine?.twoShoreGateUi !== 'src/two-shore-gate-ui.js') {
+  errors.push('Packed Bifröst manifest lost the two-shore gate UI.');
+}
+if (manifest?.engine?.worldPremaqRegistry !== 'src/world-premaq-registry.js') {
+  errors.push('Packed Bifröst manifest lost the target-world PREMAQ registry.');
 }
 if (manifest?.authorityContract?.renderers !== 'derive-only-no-refetch-after-activation') {
   errors.push('Packed Bifröst manifest lost the renderer no-refetch law.');
@@ -89,6 +104,30 @@ if (JSON.stringify(manifest?.authorityContract?.shokzProxyBandHz) !== '[90,360]'
 }
 if (manifest?.authorityContract?.internalIPadHapticsClaimed !== false) {
   errors.push('Packed Bifröst manifest reintroduced an internal iPad haptic claim.');
+}
+if (manifest?.authorityContract?.liveGateRequiresDeepAndGroundwire !== true) {
+  errors.push('Packed Bifröst manifest lost the DEEP + Groundwire LIVE requirement.');
+}
+if (JSON.stringify(manifest?.authorityContract?.lockedGateToneAxes) !== '["P","R","E","M","A","Q"]') {
+  errors.push('Packed Bifröst manifest has the wrong locked gate tone axes.');
+}
+if (manifest?.authorityContract?.bridgeCoherenceAxis !== 'C') {
+  errors.push('Packed Bifröst manifest lost the C bridge-coherence channel.');
+}
+if (manifest?.authorityContract?.gateBaseCycles !== 369) {
+  errors.push('Packed Bifröst manifest has the wrong 369 base cycle.');
+}
+if (JSON.stringify(manifest?.authorityContract?.gateExtensionCycles) !== '[3,6,9]') {
+  errors.push('Packed Bifröst manifest has the wrong +3 +6 +9 continuation sequence.');
+}
+if (JSON.stringify(manifest?.authorityContract?.elaraYearLabels) !== '[2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035]') {
+  errors.push('Packed Bifröst manifest has the wrong Elara year labels.');
+}
+if (manifest?.authorityContract?.yearMultiplierChangesAudibleCarrier !== false) {
+  errors.push('Packed Bifröst manifest allows silent annual drift of locked audible carriers.');
+}
+if (manifest?.authorityContract?.externalPhysicalGateClaimed !== false) {
+  errors.push('Packed Bifröst manifest reintroduced an external physical-gate claim.');
 }
 
 const assetsDir = path.join(starwellRoot, 'assets');
@@ -111,9 +150,14 @@ for (const marker of [
   'CONFIRM_SHOKZ_OUTPUT_FIRST',
   'premaq-shokz-soundfont-dock',
   'bifrost:current-interface-session:v0.4',
+  'hearthgate.two-shore-premaq-gate/v0.1',
+  'EARTH PRIME SHORE ⇄ TARGET-WORLD SHORE',
+  'LIVE GATE TEST · 2025',
+  'Run 2025→2035',
+  'TWO_SHORE_GATE_LINEAGE_MISMATCH',
 ]) {
   if (!compiledSource.includes(marker)) {
-    errors.push(`Packed STARWELL JavaScript is missing kernel or sound-font marker: ${marker}`);
+    errors.push(`Packed STARWELL JavaScript is missing kernel, sound-font, or two-shore gate marker: ${marker}`);
   }
 }
 
@@ -132,7 +176,7 @@ if (fs.existsSync(arcsweepPath) && fs.existsSync(bifrostPath)) {
     'premaq-shokz-feather-stop-bridge',
   );
   if (arcsweepBridgeAsset && bifrostBridgeAsset && arcsweepBridgeAsset !== bifrostBridgeAsset) {
-    errors.push('Packed web Arcsweep and Bifröst do not share one PREMAQ Shokz bundle.');
+    errors.push('Packed web Arcsweep and Bifröst do not share one PREMAQ Shokz and gate bundle.');
   }
 
   const standaloneSoundfontAssets = [
@@ -146,10 +190,10 @@ if (fs.existsSync(arcsweepPath) && fs.existsSync(bifrostPath)) {
   const bundleAsset = standaloneSoundfontAssets[0] || bifrostBridgeAsset || arcsweepBridgeAsset;
   if (bundleAsset) {
     const bundlePath = path.join(assetsDir, bundleAsset);
-    if (requireFile(bundlePath, 'compiled PREMAQ Shokz bundle')) {
+    if (requireFile(bundlePath, 'compiled PREMAQ Shokz and two-shore gate bundle')) {
       const bundleSource = fs.readFileSync(bundlePath, 'utf8');
       if (bundleSource.includes('navigator.vibrate')) {
-        errors.push('Packed PREMAQ Shokz bundle reintroduced an internal iPad vibration claim.');
+        errors.push('Packed shared PREMAQ bundle reintroduced an internal iPad vibration claim.');
       }
       for (const marker of [
         '90–360 Hz',
@@ -158,9 +202,13 @@ if (fs.existsSync(arcsweepPath) && fs.existsSync(bifrostPath)) {
         '#feather-stop',
         '#stop-premaq-song',
         'hearthgate:feather-stop',
+        'hearthgate.two-shore-premaq-gate/v0.1',
+        'LIVE GATE TEST · 2025',
+        'Run 2025→2035',
+        'Unsupported or ungranted fields remain UNKNOWN',
       ]) {
         if (!bundleSource.includes(marker)) {
-          errors.push(`Packed PREMAQ Shokz bundle is missing marker: ${marker}`);
+          errors.push(`Packed shared PREMAQ bundle is missing marker: ${marker}`);
         }
       }
     }
@@ -173,11 +221,11 @@ if (fs.existsSync(arcsweepPath) && fs.existsSync(bifrostPath)) {
 }
 
 if (errors.length) {
-  console.error('[Packed dual-aspect verification] FAILED');
+  console.error('[Packed dual-aspect and two-shore gate verification] FAILED');
   for (const error of errors) console.error(` - ${error}`);
   process.exit(1);
 }
 
-console.log('[Packed dual-aspect verification] OK');
+console.log('[Packed dual-aspect and two-shore gate verification] OK');
 console.log(` assets scanned: ${jsFiles.length}`);
-console.log(' strict packet validation, sealed glyph rendering, activation, Runa, schemas, no-refetch law, Bifröst route, coalesced PREMAQ Shokz bundle, and unified Feather Stop are present');
+console.log(' strict packet validation, sealed glyph rendering, activation, Runa, schemas, no-refetch law, Bifröst route, live DEEP/Groundwire routes, coalesced PREMAQ Shokz + two-shore gate bundle, and unified Feather Stop are present');
