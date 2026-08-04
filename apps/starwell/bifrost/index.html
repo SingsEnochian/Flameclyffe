@@ -7,6 +7,7 @@
   <meta name="description" content="Bifröst Arcsweep v0.4 compression-release interface bound to the active Hearthweave packet." />
   <title>Bifröst Arcsweep v0.4 · Hearthgate</title>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./premaq-song.css" />
 </head>
 <body>
   <header class="topbar">
@@ -141,7 +142,7 @@
         <header class="panel-header">
           <div>
             <p class="eyebrow">RECIPROCAL SOUND CANON</p>
-            <h2>Compression and release tones</h2>
+            <h2>Compression-release motif</h2>
           </div>
           <span class="device-chip">browser audio proxy</span>
         </header>
@@ -152,10 +153,10 @@
           <div><small>Invariant</small><strong id="tone-invariant">f₊f₋ = f₀²</strong></div>
         </div>
         <div class="action-row">
-          <button id="sound-pair" type="button" class="primary">Sound current pair</button>
+          <button id="sound-pair" type="button" class="primary">Sound two-tone motif</button>
           <span id="audio-status" role="status">RESTING · no autoplay · gain ceiling 0.03</span>
         </div>
-        <p class="boundary-note">Source frequencies are receipted exactly. Playback is octave-folded into 90–360 Hz and is not calibrated haptic intensity. Physical-device status remains NOT TESTED until a device receipt exists.</p>
+        <p class="boundary-note">This pair is the compression-release motif, not the full PREMAQ composition. Source frequencies are receipted exactly. Playback is octave-folded into 90–360 Hz and is not calibrated haptic intensity.</p>
       </article>
 
       <article class="panel receipts-panel">
@@ -169,6 +170,47 @@
         <ol id="receipt-list" class="receipt-list">
           <li class="empty">No local cycle receipts yet.</li>
         </ol>
+      </article>
+
+      <article class="panel song-panel">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">FULL PREMAQ COMPOSITION</p>
+            <h2>Seven voices across thirty-five chained cycles</h2>
+          </div>
+          <span class="song-count-badge">35 cycles × 7 voices</span>
+        </header>
+
+        <div class="premaq-song-summary">
+          <div><small>PREMAQ voices</small><strong>P · C · R · E · M · A · Q</strong></div>
+          <div><small>Cycles per voice</small><strong>35</strong></div>
+          <div><small>Axis-cycles</small><strong>245</strong></div>
+          <div><small>Scheduled notes</small><strong>490</strong></div>
+        </div>
+
+        <div id="premaq-song-voices" class="premaq-song-voices" aria-label="Seven PREMAQ song voices"></div>
+
+        <div class="premaq-song-controls">
+          <label>
+            <span>Cycle tempo</span>
+            <select id="premaq-song-bpm">
+              <option value="60">60 cycles/min · spacious</option>
+              <option value="72">72 cycles/min · measured</option>
+              <option value="84" selected>84 cycles/min · flowing</option>
+              <option value="100">100 cycles/min · bright</option>
+              <option value="120">120 cycles/min · swift</option>
+            </select>
+          </label>
+          <div class="action-row">
+            <button id="play-premaq-song" type="button" class="primary">Play full 35-cycle PREMAQ song</button>
+            <button id="stop-premaq-song" type="button" class="stop">Stop song</button>
+            <button id="export-premaq-song" type="button" class="quiet">Export song receipt</button>
+          </div>
+        </div>
+
+        <progress id="premaq-song-progress" max="1" value="0" aria-label="PREMAQ song playback progress"></progress>
+        <p id="premaq-song-status" data-kind="resting" role="status">RESTING · every voice will receive 35 compression-release cycles. No autoplay. Feather Stop remains immediate.</p>
+        <p class="boundary-note">The song is generated from the current released PREMAQ state. Each later cycle consumes the prior cycle’s release. The browser synthesis is a local musical mapping, performs no canon write, grants no tone approval, and makes no physical-device claim.</p>
       </article>
     </section>
 
@@ -188,5 +230,6 @@
   </main>
 
   <script type="module" src="./main.js"></script>
+  <script type="module" src="./premaq-song.js"></script>
 </body>
 </html>
