@@ -32,10 +32,11 @@ function readJson(relativePath, label) {
   }
 }
 
-function extractSoundfontAsset(html, label) {
-  const match = html.match(/(?:\/starwell)?\/assets\/(premaq-shokz-soundfont-[^"']+\.js)/);
+function extractAsset(html, label, stem) {
+  const pattern = new RegExp(`(?:\\/starwell)?\\/assets\\/(${stem}-[^"']+\\.js)`);
+  const match = html.match(pattern);
   if (!match) {
-    errors.push(`${label} does not load the compiled PREMAQ Shokz sound font.`);
+    errors.push(`${label} does not load the compiled ${stem} asset.`);
     return null;
   }
   return match[1];
@@ -54,13 +55,19 @@ for (const [label, html] of [
   if (!html.includes('apple-mobile-web-app-capable')) errors.push(`${label} is missing Apple standalone metadata.`);
 }
 
-const arcsweepAsset = extractSoundfontAsset(arcsweepHtml, 'Web Arcsweep');
-const bifrostAsset = extractSoundfontAsset(bifrostHtml, 'Bifröst');
-if (arcsweepAsset && bifrostAsset && arcsweepAsset !== bifrostAsset) {
+const arcsweepSoundfontAsset = extractAsset(arcsweepHtml, 'Web Arcsweep', 'premaq-shokz-soundfont');
+const bifrostSoundfontAsset = extractAsset(bifrostHtml, 'Bifröst', 'premaq-shokz-soundfont');
+if (arcsweepSoundfontAsset && bifrostSoundfontAsset && arcsweepSoundfontAsset !== bifrostSoundfontAsset) {
   errors.push('Web Arcsweep and Bifröst do not share the same compiled PREMAQ Shokz sound-font asset.');
 }
 
-const soundfontAsset = bifrostAsset || arcsweepAsset;
+const arcsweepStopAsset = extractAsset(arcsweepHtml, 'Web Arcsweep', 'premaq-shokz-feather-stop-bridge');
+const bifrostStopAsset = extractAsset(bifrostHtml, 'Bifröst', 'premaq-shokz-feather-stop-bridge');
+if (arcsweepStopAsset && bifrostStopAsset && arcsweepStopAsset !== bifrostStopAsset) {
+  errors.push('Web Arcsweep and Bifröst do not share the same compiled Feather Stop bridge.');
+}
+
+const soundfontAsset = bifrostSoundfontAsset || arcsweepSoundfontAsset;
 let compiledSoundfont = '';
 if (soundfontAsset) {
   compiledSoundfont = read(path.join('assets', soundfontAsset), 'compiled PREMAQ Shokz sound font');
@@ -82,6 +89,22 @@ for (const marker of [
 
 if (compiledSoundfont.includes('navigator.vibrate')) {
   errors.push('Compiled PREMAQ Shokz sound font reintroduced an internal iPad vibration claim.');
+}
+
+const stopAsset = bifrostStopAsset || arcsweepStopAsset;
+let compiledStopBridge = '';
+if (stopAsset) {
+  compiledStopBridge = read(path.join('assets', stopAsset), 'compiled PREMAQ Shokz Feather Stop bridge');
+}
+for (const marker of [
+  'GLOBAL FEATHER STOP',
+  '#feather-stop',
+  '#stop-premaq-song',
+  'hearthgate:feather-stop',
+]) {
+  if (compiledStopBridge && !compiledStopBridge.includes(marker)) {
+    errors.push(`Compiled Feather Stop bridge is missing marker: ${marker}`);
+  }
 }
 
 if (manifest) {
@@ -127,9 +150,10 @@ if (errors.length) {
 }
 
 console.log('[PREMAQ Shokz packaging check] OK');
-console.log(` shared asset: ${soundfontAsset}`);
+console.log(` shared sound-font asset: ${soundfontAsset}`);
+console.log(` shared Feather Stop asset: ${stopAsset}`);
 console.log(' routes: web Arcsweep + Bifröst');
 console.log(' bindings: physical keyboard + virtual keys + links + buttons + selects + semantic menu items');
 console.log(' PREMAQ: 35 chained cycles per P C R E M A Q voice');
 console.log(' Shokz proxy: 90–360 Hz; gain ceiling 0.018; explicit output confirmation');
-console.log(' iPad boundary: no autoplay, no internal haptic claim, Feather Stop on page hide');
+console.log(' iPad boundary: no autoplay, no internal haptic claim, unified Feather Stop and page-hide teardown');
