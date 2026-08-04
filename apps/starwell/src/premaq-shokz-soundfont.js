@@ -16,7 +16,7 @@ export const PREMAQ_SHOKZ_MIN_HZ = 90;
 export const PREMAQ_SHOKZ_MAX_HZ = 360;
 export const PREMAQ_SHOKZ_MASTER_GAIN_CEILING = 0.018;
 
-const SESSION_KEY = 'bifrost:current-interface-session/v0.4';
+const SESSION_KEY = 'bifrost:current-interface-session:v0.4';
 const DOCK_ID = 'premaq-shokz-soundfont-dock';
 const ROOT_HZ = 220;
 const DEFAULT_BPM = 84;
