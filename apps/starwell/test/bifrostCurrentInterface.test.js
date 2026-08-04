@@ -7,9 +7,10 @@ async function read(relativePath) {
 }
 
 test('dedicated Bifröst route publishes the current compression-release interface', async () => {
-  const [html, main, vite, manifestText] = await Promise.all([
+  const [html, main, root, vite, manifestText] = await Promise.all([
     read('../bifrost/index.html'),
     read('../bifrost/main.js'),
+    read('../index.html'),
     read('../vite.config.js'),
     read('../public/modules/bifrost-arcsweep.module.json'),
   ]);
@@ -28,6 +29,8 @@ test('dedicated Bifröst route publishes the current compression-release interfa
   assert.doesNotMatch(main, /collapseRelease\s*\(/);
   assert.doesNotMatch(main, /action:\s*['"]collapse-release['"]/);
 
+  assert.match(root, /href=['"]\.\/bifrost\//);
+  assert.match(root, /Open Bifröst Arcsweep/);
   assert.match(vite, /bifrost:\s*resolve\(REPO_ROOT, 'apps\/starwell\/bifrost\/index\.html'\)/);
   assert.equal(manifest.version, '0.4.0');
   assert.equal(manifest.interfaceRoute, '/starwell/bifrost/');
