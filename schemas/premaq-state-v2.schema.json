@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/premaq-state-v2.schema.json",
+  "title": "PREMAQ Observation State v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "observed_at", "registry_version", "state", "receipt_id", "sequence", "model_version"],
+  "$defs": {
+    "sourceClass": { "enum": ["witnessed", "recorded", "derived", "model-interpreted", "human-interpreted", "remembered", "correlated", "simulated", "projected", "unknown"] },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "derivative", "uncertainty", "confidence", "contributors"],
+      "properties": {
+        "value": { "type": "number" },
+        "derivative": { "type": "number" },
+        "uncertainty": { "type": ["number", "object", "null"] },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source_ref", "source_class", "weight", "method"],
+            "properties": {
+              "source_ref": { "type": "string" },
+              "source_class": { "$ref": "#/$defs/sourceClass" },
+              "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+              "method": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema_version": { "const": "2.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "registry_version": { "type": "string", "minLength": 1 },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P", "C", "R", "E", "M", "A", "Q"],
+      "properties": {
+        "P": { "$ref": "#/$defs/component" },
+        "C": { "$ref": "#/$defs/component" },
+        "R": { "$ref": "#/$defs/component" },
+        "E": { "$ref": "#/$defs/component" },
+        "M": { "$ref": "#/$defs/component" },
+        "A": { "$ref": "#/$defs/component" },
+        "Q": { "$ref": "#/$defs/component" }
+      }
+    },
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "prior_state_ref": { "type": ["string", "null"] },
+    "model_version": { "type": "string", "minLength": 1 },
+    "provenance_refs": { "type": "array", "items": { "type": "string" }, "default": [] }
+  }
+}

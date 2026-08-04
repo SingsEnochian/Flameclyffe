@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STARWELL · DEEP Observer</title>
+<meta name="description" content="Live STARWELL DEEP Observer teaching instrument with direct readings, dual time, DEEP variables, multisensory feedback, browser compatibility fallbacks, sacred geometry, observation refresh, dev console, Resonance Bus sound layering, viewport registry, HUD-bounded panels, separated organic astrolabe jewel controls, and local observation packet export.">
+<link rel="stylesheet" href="deep-observer.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-dual-time.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-layout-hotfix.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-viewport.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-sensory.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-compat.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-gem-interface.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-codex.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-dev-console.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-refresh.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-astrolabe-organic.css?v=sensor-clearance-1">
+<link rel="stylesheet" href="deep-observer-desktop-fix.css?v=desktop-balance-1">
+<script src="../../assets/deep-resonance-bus.js" defer></script>
+<script src="observer-viewport.registry.js" defer></script>
+<script src="deep-observer-compat.js" defer></script>
+<script src="deep-observer-viewport.js" defer></script>
+<script src="deep-observer-hud-bounds.js" defer></script>
+<script src="deep-observer.js" defer></script>
+<script src="deep-observer-refresh.js" defer></script>
+<script src="deep-observer-dual-time.js?v=timetap-1" defer></script>
+<script src="deep-observer-desktop-fix.js?v=desktop-balance-1" defer></script>
+<script src="deep-observer-cloak.js" defer></script>
+<script src="deep-observer-sensory.js" defer></script>
+<script src="deep-observer-resonance-adapter.js" defer></script>
+<script src="deep-observer-codex.js" defer></script>
+<script src="deep-observer-dev-console.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <section class="shell">
+    <header class="top">
+      <div class="brand-block">
+        <div class="brand">STARWELL · DEEP Observer</div>
+        <div class="tagline">Teaching instrument · readings, not controls</div>
+      </div>
+      <nav class="nav" aria-label="DEEP Observer navigation">
+        <a class="btn" href="../">STARWELL</a>
+        <a class="btn" href="../writing-room/">Writing Room</a>
+        <a class="btn" href="../#rooms">Rooms</a>
+        <a class="btn" href="https://github.com/SingsEnochian/Flameclyffe">GitHub</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-card">
+        <p class="eyebrow" id="heroClock">DEEP Observer · STARWELL Time 00:00:00</p>
+        <h1>DEEP Observer</h1>
+        <p class="subtitle">A live teaching surface for direct readings, dual-time context, DEEP variables, multisensory gem feedback, Resonance Bus sound layering, browser-safe fallbacks, sacred geometry, edge-bound pulse sparks, horizon signal, and local observation packet export.</p>
+      </div>
+    </section>
+
+    <section class="quick-guide" aria-label="DEEP Observer quick guide">
+      <article>
+        <strong>What it tracks</strong>
+        <p>DEEP separates direct readings from model variables. Direct readings include Waking World time, Terra Aeterna time, moon, Kp, Bz, source, local packet state, motion settings, sound field state, and touch input.</p>
+        <code>direct readings → translation path → visible and audible behaviour</code>
+      </article>
+      <article>
+        <strong>Why it matters</strong>
+        <p>The instrument shows how inputs become visible effects. Time has two clocks, and the Resonance Bus lets the same packet become layered sound.</p>
+        <code>one reading, two temporal contexts, one shared bus</code>
+      </article>
+      <article>
+        <strong>How to use it</strong>
+        <p>Tap the outer sensor nodes to follow direct-reading pulses. Turn on Sound, then Field in the floating Resonance Bus to hear the DEEP packet mapped into panning layers.</p>
+        <code>same instrument, graceful browser fallbacks</code>
+      </article>
+    </section>
+
+    <section class="observer-hud" aria-label="DEEP Observer HUD">
+      <section class="instrument observer-glyph-instrument" aria-label="DEEP Observer glyph instrument">
+        <div class="glyph-stage">
+          <div class="orb-frame" aria-label="DEEP Observer direct readings and glyph">
+            <canvas id="glyph" width="920" height="920" aria-label="DEEP Observer live glyph"></canvas>
+            <div class="reading-pulse" aria-hidden="true"></div>
+            <div class="time-branch" aria-hidden="true"></div>
+            <div class="sensor-ring" aria-label="Direct readings ring">
+              <button class="sensor-node" data-reading="time" type="button">Time</button>
+              <button class="sensor-node" data-reading="moon" type="button">Moon</button>
+              <button class="sensor-node" data-reading="kp" type="button">Kp</button>
+              <button class="sensor-node" data-reading="bz" type="button">Bz</button>
+              <button class="sensor-node" data-reading="source" type="button">Source</button>
+              <button class="sensor-node" data-reading="local" type="button">Local</button>
+              <button class="sensor-node" data-reading="motion" type="button">Motion</button>
+              <button class="sensor-node" data-reading="touch" type="button">Touch</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="observer-control-dock" aria-label="Observer control dock">
+        <div class="filter-row" aria-label="Instrument controls">
+          <button class="filter" data-filter="pulse" aria-pressed="true">Pulse</button>
+          <button class="filter" data-filter="field" aria-pressed="true">Field</button>
+          <button class="filter" data-filter="geometry" aria-pressed="true">Geometry</button>
+          <button class="filter" data-filter="horizon" aria-pressed="true">Horizon</button>
+          <button class="filter" data-filter="moons" aria-pressed="true">Moons</button>
+          <button class="filter" id="themeBtn" type="button">Theme · Between</button>
+          <button class="filter" id="toyBtn" type="button" aria-pressed="true">Toy · On</button>
+          <button class="filter" id="stimBtn" type="button" aria-pressed="false">Low Stim · Off</button>
+        </div>
+      </section>
+
+      <section class="observer-readout" aria-label="DEEP Observer readout">
+        <article class="panel">
+          <p class="eyebrow">Current DEEP glyph</p>
+          <h2 id="tideName">Hearth Signal</h2>
+          <span class="glyph-id" id="glyphId">DEEP-STARWELL</span>
+          <p id="instrumentHint">Tap Time to see Waking World and Terra Aeterna clocks answer, or tap another direct reading to follow its pulse.</p>
+
+          <div class="direct-card" id="directCard">
+            <h3 id="directTitle">Direct Readings Layer</h3>
+            <p id="directText">Direct readings are inputs the instrument actually receives: time, environmental values, source labels, local packets, accessibility settings, sound field state, and your touch. Tap one to watch its pulse travel into the glyph.</p>
+            <code id="directPath">Direct reading → translation path → visible behaviour → optional sound layer</code>
+            <div class="direct-meta">
+              <span id="directSource"><b>Source:</b> select a reading</span>
+              <span id="directAffects"><b>Affects:</b> visible instrument behaviour</span>
+              <span id="directBoundary"><b>Boundary:</b> readings show inputs; they do not prove hidden states.</span>
+              <span id="directTiny"><b>Label:</b> follow the pulse.</span>
+            </div>
+          </div>
+
+          <div class="teach-card">
+            <h3 id="teachTitle">How to read this glyph</h3>
+            <p id="teachText">The glyph is a visual translation layer. Numbers do not prove anything by themselves, but they make the current observation state easier to inspect: structure, motion, coherence, and edge activity all become visible and, when Field is on, audible.</p>
+            <code id="teachFormula">P → node count · C → edge clarity · R/M → spark traffic · moon → harmonic rings · charge → centre glow · bus → layered sound</code>
+          </div>
+
+          <div class="meter-grid" aria-label="DEEP readout meters">
+            <div class="meter" data-meter="P" role="button" tabindex="0"><strong id="mP">P 0.55</strong><span>presence</span></div>
+            <div class="meter" data-meter="C" role="button" tabindex="0"><strong id="mC">C 0.50</strong><span>coherence</span></div>
+            <div class="meter" data-meter="R" role="button" tabindex="0"><strong id="mR">R 0.45</strong><span>resonance</span></div>
+            <div class="meter" data-meter="E" role="button" tabindex="0"><strong id="mE">E 0.38</strong><span>entropy</span></div>
+            <div class="meter" data-meter="M" role="button" tabindex="0"><strong id="mM">M 0.30</strong><span>momentum</span></div>
+            <div class="meter" data-meter="A" role="button" tabindex="0"><strong id="mA">A 0.65</strong><span>alignment</span></div>
+            <div class="meter" data-meter="H" role="button" tabindex="0"><strong id="mH">H 0.50</strong><span>horizon</span></div>
+            <div class="meter" data-meter="Q" role="button" tabindex="0"><strong id="mQ">Q 0.20</strong><span>charge</span></div>
+            <div class="meter" data-meter="moon" role="button" tabindex="0"><strong id="mMoon">Moon 50%</strong><span>rings</span></div>
+            <div class="meter" data-meter="kp" role="button" tabindex="0"><strong id="mKp">Kp 1.0</strong><span>particle energy</span></div>
+            <div class="meter" data-meter="bz" role="button" tabindex="0"><strong id="mBz">Bz 0.0</strong><span>colour temp</span></div>
+            <div class="meter" data-meter="source" role="button" tabindex="0"><strong id="mSource">fallback</strong><span>source</span></div>
+          </div>
+
+          <pre class="packet" id="packet"></pre>
+          <div class="actions">
+            <button class="action" id="copyPacket" type="button">Copy packet</button>
+            <button class="action" id="saveLocal" type="button">Save local packet</button>
+          </div>
+        </article>
+      </section>
+    </section>
+
+    <section class="legend" aria-label="DEEP visual legend">
+      <article><strong>Direct readings</strong><p>The outer sensor ring shows inputs the instrument actually receives. Touch Time to see Waking World and Terra Aeterna clocks answer together.</p></article>
+      <article><strong>Model variables</strong><p>The inner glyph shows interpretive variables such as presence, coherence, resonance, entropy, alignment, charge, and horizon.</p></article>
+      <article><strong>Translation paths</strong><p>The lines between them show how a direct input becomes visible behaviour. With Field enabled, the same packet is also mapped into layered, panning sound.</p></article>
+    </section>
+
+    <p class="safety"><strong>Observer Data Safety:</strong> this public page reads bridge or browser state when available and keeps exports local unless you copy or save them. Sound is generated locally in the browser after you turn it on; Resonance Bus layers use the displayed packet and do not change the underlying reading; haptics use device vibration only where supported; unsupported browser features fall back instead of breaking the instrument.</p>
+    <p class="note-strip">Time Tap v0.1: the Time jewel now listens for pointerup, click, and keyboard activation so the dual clock answers more reliably on mobile.</p>
+  </section>
+</main>
+</body>
+</html>

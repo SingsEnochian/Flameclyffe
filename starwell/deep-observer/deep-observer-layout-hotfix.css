@@ -1,0 +1,307 @@
+/* DEEP Observer Layout Hotfix + Cloak v0.3 */
+.glyph-stage{
+  gap:1rem;
+  padding-top:1.45rem;
+}
+
+.orb-frame{
+  margin-top:1.15rem;
+  margin-bottom:0;
+  box-shadow:
+    inset 0 0 44px rgba(0,0,0,.48),
+    inset 0 0 0 1px rgba(168,204,224,.10),
+    0 28px 70px rgba(0,0,0,.42);
+}
+
+.sensor-ring{
+  inset:-4% -9% -12% -9%;
+}
+
+.sensor-node{
+  width:4.05rem;
+  height:4.05rem;
+  overflow:hidden;
+  border:1px solid rgba(168,204,224,.34);
+  background:
+    radial-gradient(circle at 34% 22%,rgba(255,255,255,.24),transparent 15%),
+    radial-gradient(circle at 50% 58%,rgba(168,204,224,.18),transparent 42%),
+    linear-gradient(145deg,rgba(28,39,54,.92),rgba(4,8,17,.96) 58%,rgba(0,2,8,.98));
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.46),
+    0 0 0 1px rgba(0,0,0,.78),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -10px 24px rgba(0,0,0,.45),
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    inset 0 0 24px rgba(168,204,224,.055);
+  text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 10px rgba(168,204,224,.18);
+  padding-top:1.2rem;
+}
+
+.sensor-node:before{
+  content:"";
+  position:absolute;
+  inset:8%;
+  border-radius:50%;
+  border:1px solid rgba(232,244,252,.10);
+  background:
+    radial-gradient(circle at 36% 28%,rgba(232,244,252,.18),transparent 18%),
+    radial-gradient(circle at 50% 62%,rgba(0,0,0,.18),rgba(0,0,0,.46) 72%,rgba(0,0,0,.72));
+  box-shadow:
+    inset 0 1px 3px rgba(255,255,255,.08),
+    inset 0 -8px 18px rgba(0,0,0,.48);
+  pointer-events:none;
+}
+
+.sensor-node:after{
+  content:"✦";
+  position:absolute;
+  left:50%;
+  top:32%;
+  transform:translate(-50%,-50%);
+  color:rgba(232,244,252,.42);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:.82rem;
+  line-height:1;
+  text-shadow:0 0 10px rgba(168,204,224,.25);
+  pointer-events:none;
+}
+
+.sensor-node[data-reading="time"]:after{content:"ᛟ";}
+.sensor-node[data-reading="moon"]:after{content:"☾";font-size:1.08rem;}
+.sensor-node[data-reading="kp"]:after{content:"✶";}
+.sensor-node[data-reading="bz"]:after{content:"⇵";font-size:.9rem;}
+.sensor-node[data-reading="source"]:after{content:"⟁";}
+.sensor-node[data-reading="local"]:after{content:"⌂";font-size:.94rem;}
+.sensor-node[data-reading="motion"]:after{content:"∿";font-size:1.1rem;}
+.sensor-node[data-reading="touch"]:after{content:"✧";}
+
+.sensor-node:hover,
+.sensor-node.active{
+  border-color:rgba(231,196,119,.76);
+  background:
+    radial-gradient(circle at 34% 22%,rgba(255,255,255,.30),transparent 15%),
+    radial-gradient(circle at 50% 58%,rgba(231,196,119,.22),transparent 44%),
+    linear-gradient(145deg,rgba(42,38,48,.94),rgba(7,9,17,.98) 58%,rgba(0,2,8,.99));
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.52),
+    0 0 0 1px rgba(0,0,0,.80),
+    0 0 28px rgba(231,196,119,.28),
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -10px 24px rgba(0,0,0,.48),
+    inset 0 0 0 1px rgba(231,196,119,.12),
+    inset 0 0 28px rgba(231,196,119,.10);
+}
+
+.sensor-node:hover:after,
+.sensor-node.active:after{
+  color:rgba(255,242,202,.82);
+  text-shadow:0 0 16px rgba(231,196,119,.52);
+}
+
+.sensor-node[data-reading="time"]{top:1.5%;}
+.sensor-node[data-reading="source"]{top:104%;}
+
+.glyph-stage .filter-row{
+  position:relative;
+  z-index:8;
+  margin-top:4.85rem;
+  padding:.68rem .78rem;
+  border:1px solid rgba(168,204,224,.16);
+  border-radius:26px;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(168,204,224,.08),transparent 65%),
+    linear-gradient(145deg,rgba(1,4,10,.78),rgba(10,18,28,.58));
+  box-shadow:
+    0 20px 44px rgba(0,0,0,.32),
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 0 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(10px);
+}
+
+.panel{
+  margin-top:1rem;
+}
+
+.interface-cloak-toggle{
+  position:fixed;
+  right:1rem;
+  bottom:1rem;
+  z-index:100;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(231,196,119,.32);
+  border-radius:999px;
+  background:rgba(4,8,16,.76);
+  color:rgba(234,244,239,.86);
+  padding:.7rem .9rem;
+  font:800 .68rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  box-shadow:0 14px 38px rgba(0,0,0,.38),inset 0 0 0 1px rgba(255,255,255,.06);
+  backdrop-filter:blur(12px);
+  cursor:pointer;
+}
+
+.interface-cloak-toggle:hover{
+  border-color:rgba(231,196,119,.72);
+  background:rgba(18,22,30,.82);
+}
+
+body.interface-cloaked .top,
+body.interface-cloaked .hero,
+body.interface-cloaked .quick-guide,
+body.interface-cloaked .panel,
+body.interface-cloaked .legend,
+body.interface-cloaked .safety,
+body.interface-cloaked .note-strip,
+body.interface-cloaked .filter-row{
+  display:none !important;
+}
+
+body.interface-cloaked .shell{
+  border-color:transparent;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
+}
+
+body.interface-cloaked .page{
+  width:100vw;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:0;
+}
+
+body.interface-cloaked .instrument{
+  display:grid;
+  place-items:center;
+  padding:0;
+  width:100vw;
+  min-height:100vh;
+  grid-template-columns:1fr;
+}
+
+body.interface-cloaked .glyph-stage{
+  position:relative;
+  top:auto;
+  display:grid;
+  place-items:center;
+  width:min(86vw,680px);
+}
+
+body.interface-cloaked .orb-frame{
+  width:min(78vw,560px);
+}
+
+body.interface-cloaked canvas{
+  max-width:560px;
+  max-height:560px;
+}
+
+@media(max-width:1120px){
+  .glyph-stage{
+    padding-top:2.7rem;
+  }
+  .orb-frame{
+    width:min(390px,68vw);
+    margin-top:1.85rem;
+  }
+  canvas{
+    max-width:390px;
+    max-height:390px;
+  }
+  .sensor-ring{
+    inset:-3% -8% -13% -8%;
+  }
+  .sensor-node{
+    width:3.55rem;
+    height:3.55rem;
+    padding-top:1.05rem;
+    font-size:.48rem;
+  }
+  .sensor-node:after{
+    top:31%;
+    font-size:.76rem;
+  }
+  .sensor-node[data-reading="time"]{
+    top:3.4%;
+  }
+  .sensor-node[data-reading="source"]{
+    top:105%;
+  }
+  .glyph-stage .filter-row{
+    margin-top:5.1rem;
+  }
+}
+
+@media(max-width:780px){
+  .instrument{
+    padding-top:1.5rem;
+  }
+  .glyph-stage{
+    padding-top:3.25rem;
+  }
+  .orb-frame{
+    width:min(360px,64vw);
+    margin-top:2.2rem;
+  }
+  canvas{
+    max-width:360px;
+    max-height:360px;
+  }
+  .sensor-ring{
+    inset:-1% -7% -14% -7%;
+  }
+  .sensor-node{
+    width:3.25rem;
+    height:3.25rem;
+    padding-top:.98rem;
+    font-size:.44rem;
+  }
+  .sensor-node[data-reading="time"]{
+    top:5%;
+  }
+  .sensor-node[data-reading="source"]{
+    top:106%;
+  }
+  .glyph-stage .filter-row{
+    width:min(92vw,420px);
+    margin-top:5.2rem;
+  }
+}
+
+@media(max-width:520px){
+  .glyph-stage{
+    padding-top:2.6rem;
+  }
+  .orb-frame{
+    width:min(318px,72vw);
+  }
+  canvas{
+    max-width:318px;
+    max-height:318px;
+  }
+  .sensor-node{
+    width:2.85rem;
+    height:2.85rem;
+    padding-top:.86rem;
+    font-size:.40rem;
+  }
+  .sensor-node[data-reading="time"]{
+    top:5.5%;
+  }
+  .sensor-node[data-reading="source"]{
+    top:106.5%;
+  }
+  .glyph-stage .filter-row{
+    margin-top:4.4rem;
+  }
+  .interface-cloak-toggle{
+    right:.7rem;
+    bottom:.7rem;
+    padding:.6rem .72rem;
+    font-size:.58rem;
+  }
+}

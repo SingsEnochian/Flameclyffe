@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#091016" />
+  <meta name="description" content="Consent-aware Arcsweep gate for importing and resolving reviewed Hearthweave continuity." />
+  <title>Arcsweep Continuity Gate · STARWELL</title>
+  <script type="module" crossorigin src="../assets/arcsweepContinuity-BIcMLM3V.js"></script>
+  <link rel="modulepreload" crossorigin href="../assets/modulepreload-polyfill-P2Xu9kJm.js">
+  <link rel="modulepreload" crossorigin href="../assets/activation-C1W2Rmpg.js">
+  <link rel="modulepreload" crossorigin href="../assets/packet-glyph-render-gxePDnhQ.js">
+  <link rel="modulepreload" crossorigin href="../assets/world-tone-fold-approval-C4CtNKJD.js">
+  <link rel="modulepreload" crossorigin href="../assets/compression-release-DgEk6_J6.js">
+  <link rel="modulepreload" crossorigin href="../assets/session-resolver-CMmbYAaq.js">
+  <link rel="modulepreload" crossorigin href="../assets/ipad-somatic-lineage-BvuN4w52.js">
+  <link rel="stylesheet" crossorigin href="../assets/arcsweepContinuity-Dc594z_4.css">
+</head>
+<body>
+  <main class="gate-shell">
+    <header class="gate-header">
+      <div class="gate-glyph" aria-hidden="true">⌁</div>
+      <div>
+        <p>HEARTHGATE · ARCSWEEP</p>
+        <h1>Continuity Gate</h1>
+        <span>Reviewed continuity enters here. Session context may borrow it. Canon does not move.</span>
+      </div>
+      <a href="../" class="return-link">Return to STARWELL</a>
+    </header>
+
+    <section class="status-strip" aria-live="polite">
+      <span id="store-state">Reading the local Arcsweep store…</span>
+      <strong id="canon-state">0 canon commits</strong>
+    </section>
+
+    <section class="source-card">
+      <div>
+        <p class="eyebrow">Packet source</p>
+        <h2>Bring reviewed continuity to the gate</h2>
+        <p>The loopback route reads the latest Hearthfire packet when its local service permits it. File import is always available and remains device-local.</p>
+      </div>
+      <div class="source-controls">
+        <label>
+          <span>Hearthfire loopback URL</span>
+          <input id="packet-url" type="url" value="http://127.0.0.1:4319/api/continuity/latest" spellcheck="false" />
+        </label>
+        <div class="source-actions">
+          <button id="read-url" type="button">Read loopback packet</button>
+          <label class="file-button">
+            <input id="packet-file" type="file" accept="application/json,.json" />
+            Choose continuity JSON
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="boundary-card">
+      <strong>Boundary law</strong>
+      <span>Only accepted, human-reviewed, continuity-only items may enter. Imported items remain <code>not-promoted</code>. Resolved contexts are supplemental, browser-session only, and cannot commit canon.</span>
+    </section>
+
+    <section class="packet-card" id="packet-card" hidden>
+      <header>
+        <div>
+          <p class="eyebrow">Validated packet</p>
+          <h2 id="packet-world">No packet</h2>
+          <p id="packet-chain"></p>
+        </div>
+        <div class="packet-badge" id="packet-badge">Ready</div>
+      </header>
+
+      <dl class="packet-facts">
+        <div><dt>Packet</dt><dd id="packet-id">—</dd></div>
+        <div><dt>Reviewer</dt><dd id="packet-reviewer">—</dd></div>
+        <div><dt>Accepted items</dt><dd id="packet-count">—</dd></div>
+        <div><dt>Authority</dt><dd id="packet-authority">—</dd></div>
+      </dl>
+
+      <div class="item-grid" id="item-grid"></div>
+
+      <footer class="import-table">
+        <label>
+          <span>Imported by</span>
+          <input id="imported-by" value="Rowan" autocomplete="name" />
+        </label>
+        <button id="import-button" type="button">
+          <span>Store as reviewed continuity</span>
+          <strong>Ingest into Arcsweep</strong>
+        </button>
+      </footer>
+    </section>
+
+    <section class="store-card">
+      <header>
+        <div>
+          <p class="eyebrow">Arcsweep continuity store</p>
+          <h2>What the gate is carrying</h2>
+        </div>
+        <button id="export-store" type="button" class="quiet-button">Export local store</button>
+      </header>
+      <dl class="store-facts">
+        <div><dt>Packets</dt><dd id="store-packets">0</dd></div>
+        <div><dt>Items</dt><dd id="store-items">0</dd></div>
+        <div><dt>Worlds</dt><dd id="store-worlds">0</dd></div>
+        <div><dt>Receipts</dt><dd id="store-receipts">0</dd></div>
+      </dl>
+      <div id="receipt-list" class="receipt-list"></div>
+    </section>
+
+    <section class="session-card">
+      <header>
+        <div>
+          <p class="eyebrow">Arcsweep session resolver</p>
+          <h2>Prepare continuity for one session</h2>
+          <p>Resolve a bounded, supplemental context from active reviewed continuity. Nothing is loaded until you press the load button.</p>
+        </div>
+        <div class="session-lifetime">sessionStorage · not durable</div>
+      </header>
+
+      <div class="loaded-session" id="loaded-session">
+        <div>
+          <strong id="loaded-session-title">No continuity context loaded</strong>
+          <span id="loaded-session-detail">The browser session is clear.</span>
+        </div>
+        <button id="clear-session" type="button" class="clear-session-button" hidden>Clear loaded context</button>
+      </div>
+
+      <div class="session-controls">
+        <label>
+          <span>World</span>
+          <select id="session-world">
+            <option value="">No active continuity worlds</option>
+          </select>
+        </label>
+        <label>
+          <span>Continuity route</span>
+          <select id="session-route">
+            <option value="">All routes</option>
+            <option value="observational-continuity">Observational continuity</option>
+            <option value="world-continuity">World continuity</option>
+            <option value="interpretive-continuity">Interpretive continuity</option>
+            <option value="system-continuity">System continuity</option>
+            <option value="creative-continuity">Creative continuity</option>
+            <option value="relationship-continuity">Relationship continuity</option>
+          </select>
+        </label>
+        <label>
+          <span>Epistemic register</span>
+          <select id="session-register">
+            <option value="">All registers</option>
+            <option value="external-observation">External observation</option>
+            <option value="target-world-narrative">Target-world narrative</option>
+            <option value="interpretation">Interpretation</option>
+            <option value="system-state">System state</option>
+            <option value="creative-insight">Creative insight</option>
+            <option value="relationship-state">Relationship state</option>
+          </select>
+        </label>
+        <label>
+          <span>Maximum items</span>
+          <input id="session-limit" type="number" min="1" max="100" step="1" value="24" />
+        </label>
+        <button id="resolve-session" type="button" class="resolve-session-button">Resolve session context</button>
+      </div>
+
+      <section class="session-preview" id="session-preview" hidden>
+        <header>
+          <div>
+            <p class="eyebrow">Resolved context preview</p>
+            <h3 id="session-preview-title">No context</h3>
+            <p id="session-preview-chain"></p>
+          </div>
+          <div class="packet-badge" id="session-preview-badge">Preview only</div>
+        </header>
+
+        <dl class="session-facts">
+          <div><dt>Context</dt><dd id="session-context-id">—</dd></div>
+          <div><dt>Items</dt><dd id="session-context-count">—</dd></div>
+          <div><dt>Source packets</dt><dd id="session-context-packets">—</dd></div>
+          <div><dt>Lifetime</dt><dd>Browser session</dd></div>
+        </dl>
+
+        <div class="item-grid" id="session-item-grid"></div>
+
+        <footer class="session-actions">
+          <button id="export-context" type="button" class="quiet-button">Export context preview</button>
+          <button id="load-session" type="button" class="load-session-button">
+            <span>Ephemeral supplemental context</span>
+            <strong>Load for this session</strong>
+          </button>
+        </footer>
+      </section>
+
+      <div class="session-history">
+        <p class="eyebrow">This browser session’s receipts</p>
+        <div id="session-receipt-list" class="receipt-list"></div>
+      </div>
+    </section>
+
+    <p class="message-line" id="message-line" aria-live="polite"></p>
+  </main>
+
+  <template id="item-template">
+    <article class="continuity-item">
+      <header><span class="route-chip"></span><span class="layer-chip"></span></header>
+      <p></p>
+      <footer><span class="register-chip"></span><span class="source-chip"></span></footer>
+    </article>
+  </template>
+
+  <template id="session-item-template">
+    <article class="continuity-item session-context-item">
+      <header><span class="route-chip"></span><span class="layer-chip"></span></header>
+      <p></p>
+      <footer><span class="register-chip"></span><span class="source-chip"></span></footer>
+    </article>
+  </template>
+
+</body>
+</html>

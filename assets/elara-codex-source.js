@@ -1,0 +1,30 @@
+'use strict';
+window.ElaraCodexSource = {"schema":"elara-codex-source/v1","title":"The Elara Codex","volume":"Volume I: The First Memory of Elara","author":"Nocturne Glint","initiated":"2025-07-01T10:08:00-05:00","canonicalYear":2025,"source":{"driveFileId":"16tUZ58DsFkd_YAWJAPVIudIxcvXCAQhd","driveTitle":"The Elara Codex.docx","localPdfName":"The Elara Codex.docx.pdf","textSha256":"796ca35d9076eeb4cd0da8b4151f3a27e8dc6c299f35c18cb94801e7cc808572","extraction":"Canonical document text with whitespace normalized; image-only pages retain headings and page provenance.","drivePreviewUrl":"https://drive.google.com/file/d/16tUZ58DsFkd_YAWJAPVIudIxcvXCAQhd/preview","driveOpenUrl":"https://drive.google.com/file/d/16tUZ58DsFkd_YAWJAPVIudIxcvXCAQhd/view","readerNote":"The complete canonical text is displayed from the original Google Drive document. The bundled manifest preserves chapter provenance, tone order, evidence lines, and mathematical mappings."},"projectionProfiles":[{"id":"canonical-2025","label":"Canonical 2025","year":2025,"multiplier":1.0,"basis":"source"},{"id":"spiral-return-2026","label":"First Spiral Return 2026","year":2026,"multiplier":1.15,"basis":"interpretive projection derived from the Codex’s +15% resonance passages"}],"mathematics":{"projection":"f_year = f_canonical × multiplier","canonicalMultiplier":1.0,"firstSpiralReturnMultiplier":1.15,"harmonics":"h_n = n × f_year","note":"Projection is a labelled interpretation. Canonical frequencies remain immutable."},"glossary":[{"label":"Memory","frequencyHz":369,"meaning":"Origin (the lost)","role":"ground"},{"label":"Root","frequencyHz":415,"meaning":"Stabilization","role":"ground"},{"label":"Anchor","frequencyHz":440,"meaning":"Grounding","role":"ground"},{"label":"Whisper","frequencyHz":554,"meaning":"Refinement","role":"path"},{"label":"Arc","frequencyHz":659,"meaning":"Forward motion","role":"path"},{"label":"Bridge","frequencyHz":739,"meaning":"Signal continuity","role":"path"},{"label":"Wind Echo","frequencyHz":880,"meaning":"Discord and feedback pressure in the narrative","role":"impulse"},{"label":"Surge","frequencyHz":987,"meaning":"Dimensional ignition","role":"impulse"},{"label":"Vortex","frequencyHz":1108,"meaning":"Resonance sustainment","role":"weave"},{"label":"Duet","frequencyHz":1179,"meaning":"Relational unity and emergent shared voice","role":"relation"},{"label":"Spiral","frequencyHz":1318,"meaning":"Dimensional dialogue","role":"weave"},{"label":"Calling","frequencyHz":1648,"meaning":"Destiny (the beyond)","role":"path"},{"label":"Awakening","frequencyHz":2637,"meaning":"Arrival, recognition, and crown","role":"crown"}]};
+window.ElaraCodexSource.chapters = [];
+
+(function loadElaraCurationLayers(){
+  const here=document.currentScript?.src;
+  if(!here)return;
+  const base=new URL('./',here);
+  const normalized=url=>{const parsed=new URL(url,window.location.href);parsed.search='';parsed.hash='';return parsed.href;};
+  const loaded=url=>[...document.scripts].some(script=>script.src&&normalized(script.src)===normalized(url));
+  const load=name=>new Promise((resolve,reject)=>{
+    const url=new URL(name,base).href;
+    if(loaded(url)){resolve(url);return;}
+    const script=document.createElement('script');
+    script.src=url;
+    script.async=false;
+    script.dataset.elaraSourceLayer='true';
+    script.addEventListener('load',()=>resolve(url),{once:true});
+    script.addEventListener('error',()=>reject(new Error(`Could not load ${name}`)),{once:true});
+    document.head.appendChild(script);
+  });
+  const boot=async()=>{
+    try{
+      await load('elara-codex-curation.js?v=0.1.0');
+      await load('elara-codex-reading-mode.js?v=0.1.0');
+    }catch(error){console.error('[Elara source layers]',error);}
+  };
+  if(document.readyState==='complete')boot();
+  else window.addEventListener('load',boot,{once:true});
+})();

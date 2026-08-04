@@ -1,0 +1,4 @@
+Flameclyffe live branch
+Source commit: 072e2cfbef468ed0a2468eb5b355ddd688a325bf
+Formalism: compression → release → compression of the release
+Both web Arcsweep and Hearthgate Bifröst load the same shared sensory bundle.

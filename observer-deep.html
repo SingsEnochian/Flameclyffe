@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Observer DEEP · Terra Aeterna</title>
+  <link rel="stylesheet" href="css/observer-deep.css" />
+</head>
+<body>
+  <header class="top">
+    <div>
+      <strong>Terra Aeterna · Observer DEEP</strong>
+      <span class="tiny">live data → state vector → living glyph → tone → narrative</span>
+    </div>
+    <nav class="nav">
+      <a href="#generate">Generate</a>
+      <a href="#use-location">Use Location</a>
+      <a href="#fetch-live">Fetch Live</a>
+      <a href="#export">Export</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1>Observer DEEP</h1>
+        <p class="tiny">
+          A live relational instrument. It pulls local weather from Open-Meteo, 
+          space weather from NOAA SWPC, computes moon phase locally, 
+          and streams state-vector physics to generate a procedural sigil, 
+          tone, and narrative reflection of the moment.
+        </p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head">
+        <h2>1 · DEEP State Vector</h2>
+        <span class="pill">[P,C,R,E,M,A]</span>
+      </div>
+      <div class="six" id="stateMetrics"></div>
+      <pre class="syntax">dP/dt = α(C − E) + β(R − M)
+dC/dt = γ(T.attention − C) + δ·M
+dR/dt = ε·T.resonance − ζ·C
+dE/dt = η(T.entropy − E)
+dM/dt = θ·Σ(exp(−k·age(entries)))
+dA/dt = ι·(user + T.attention)</pre>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <div class="head">
+          <h2>2 · Waking World Signal</h2>
+          <span class="pill" id="sourcePill">manual/demo</span>
+        </div>
+        <div class="form">
+          <div class="row">
+            <label>Location Name</label>
+            <input id="location" type="text" placeholder="e.g., Malibu, CA" value="demo" />
+          </div>
+          <div class="row">
+            <label>Latitude</label>
+            <input id="lat" type="number" placeholder="34.0195" value="34.0195" />
+          </div>
+          <div class="row">
+            <label>Longitude</label>
+            <input id="lon" type="number" placeholder="-118.4912" value="-118.4912" />
+          </div>
+          <button id="useLocation">Use My Location</button>
+          <button id="fetchLive">Fetch Live Weather</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="head">
+          <h2>3 · Sensory Witness</h2>
+          <span class="pill">manual entry</span>
+        </div>
+        <div class="form">
+          <div class="row">
+            <label>Sky Condition</label>
+            <input id="sky" type="text" placeholder="e.g., clear, overcast" value="clear" />
+          </div>
+          <div class="row">
+            <label>Temperature (°F)</label>
+            <input id="temp" type="number" placeholder="72" value="72" />
+          </div>
+          <div class="row">
+            <label>Wind (mph)</label>
+            <input id="wind" type="number" placeholder="5" value="5" />
+          </div>
+          <div class="row">
+            <label>Cloud Cover (%)</label>
+            <input id="cloud" type="number" placeholder="20" value="20" />
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="head">
+          <h2>4 · Attention / Intention</h2>
+          <span class="pill">manual tuning</span>
+        </div>
+        <div class="form">
+          <div class="row">
+            <label>Energy (0–100)</label>
+            <input id="energy" type="range" min="0" max="100" value="50" />
+            <span id="energyValue">50</span>
+          </div>
+          <div class="row">
+            <label>Coherence Return (0–100)</label>
+            <input id="coherenceReturn" type="range" min="0" max="100" value="50" />
+            <span id="coherenceReturnValue">50</span>
+          </div>
+          <div class="row">
+            <label>Resonance Return (0–100)</label>
+            <input id="resonanceReturn" type="range" min="0" max="100" value="50" />
+            <span id="resonanceReturnValue">50</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="head">
+          <h2>5 · Living Sigil</h2>
+          <span class="pill">procedural svg</span>
+        </div>
+        <svg id="glyphStage" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <g id="glyph"></g>
+        </svg>
+      </section>
+
+      <section class="card">
+        <div class="head">
+          <h2>6 · Narrative Return</h2>
+          <span class="pill">fragment only</span>
+        </div>
+        <label>Narrative Fragment</label>
+        <textarea id="narrative" placeholder="(generated on save)" rows="4" readonly></textarea>
+      </section>
+
+      <section class="card">
+        <div class="head">
+          <h2>Living Almanac</h2>
+          <span class="pill">browser localStorage</span>
+        </div>
+        <p style="margin: 0 0 1rem 0; color: var(--muted); font-size: 0.85em;">
+          <span id="entryCount">0</span> entries recorded
+        </p>
+        <div id="entries"></div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+          <button id="generateBtn">Generate Entry</button>
+          <button id="saveBtn">Save Entry</button>
+          <button id="clearBtn">Clear All</button>
+          <button id="exportBtn">Export JSON</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="status" class="status" style="display: none;"></div>
+
+  <script>
+    const STORE = 'ta-observer-deep-v02';
+    const $ = (id) => document.getElementById(id);
+    const maxDrift = 0.05;
+    
+    const weights = {
+      alpha: 0.3,
+      beta: 0.4,
+      epsilon: 0.3,
+      k: 0.05,
+    };
+    
+    const state = {
+      entries: [],
+      current: null,
+      charge: 0,
+      field: {
+        P: 0.5,
+        C: 0.5,
+        R: 0.5,
+        E: 0.35,
+        M: 0,
+        A: 0.5,
+      },
+    };
+
+    // Utility functions
+    const clamp01 = (v) => Math.max(0, Math.min(1, v));
+    const pct = (v) => Math.round(v * 100);
+    
+    function hash(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        h = ((h << 5) - h) + char;
+        h = h & h; // Convert to 32bit integer
+      }
+      return Math.abs(h);
+    }
+
+    // Status messages
+    function setStatus(msg, cls = '') {
+      const s = $('status');
+      s.textContent = msg;
+      s.className = 'status ' + cls;
+      s.style.display = 'block';
+      setTimeout(() => { s.style.display = 'none'; }, 3000);
+    }
+
+    // Fetch live data
+    async function fetchLive(lat, lon) {
+      setStatus('fetching live weather + space weather...', 'tiny warn');
+      try {
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,cloud_cover,pressure_msl`;
+        const weatherResp = await fetch(weatherUrl);
+        const weather = await weatherResp.json();
+        const current = weather.current;
+        
+        $('temp').value = Math.round(current.temperature_2m * 9/5 + 32);
+        $('wind').value = Math.round(current.wind_speed_10m);
+        $('cloud').value = current.cloud_cover;
+        
+        setStatus('Live weather loaded!', 'tiny');
+      } catch (e) {
+        setStatus('Could not fetch live data: ' + e.message, 'error');
+      }
+    }
+
+    // Gather data from inputs
+    function gather() {
+      const m = moonPhase();
+      return {
+        createdAt: new Date().toISOString(),
+        lat: +$('lat').value,
+        lon: +$('lon').value,
+        location: $('location').value,
+        sky: $('sky').value,
+        temp: +$('temp').value || 0,
+        humidity: 50,
+        wind: +$('wind').value || 0,
+        cloud: +$('cloud').value || 0,
+        precip: 0,
+        pressure: 1013,
+        kp: 2,
+        solarWind: 400,
+        bz: 0,
+        moon: m,
+      };
+    }
+
+    // Calculate memory decay
+    function calculateMemory(entries, now = Date.now()) {
+      let total = 0;
+      entries.forEach((e) => {
+        const dt = (now - new Date(e.createdAt).getTime()) / 86400000;
+        total += Math.exp(-weights.k * Math.max(0, dt));
+      });
+      return Math.min(1, total / 10);
+    }
+
+    // Telemetry calculation
+    function telemetry(d) {
+      const space = clamp01((d.kp * 8 + Math.max(0, d.solarWind - 400) / 8 + Math.abs(d.bz) * 3) / 140);
+      const weather = clamp01((Math.abs(d.temp - 72) / 40 + d.wind / 45 + d.cloud / 100 + d.precip * 8 + Math.abs(d.pressure - 1013) / 50) / 5);
+      
+      return {
+        attention: (d.humidity + +$('energy').value) / 200,
+        entropy: (space + weather) / 2,
+        resonance: space,
+      };
+    }
+
+    // Next field state
+    function nextField(d, returnedC = null, returnedR = null) {
+      const T = telemetry(d);
+      const cur = state.field;
+      const M = calculateMemory(state.entries);
+      const A = T.attention;
+      const E = T.entropy;
+
+      const dP = weights.alpha * (cur.C - E) + weights.beta * (cur.R - M);
+      const dC = T.attention * 0.2;
+      const dR = T.resonance * 0.3;
+      const dE = (T.entropy - cur.E) * 0.5;
+      const dM = M;
+      const dA = A;
+
+      return {
+        P: clamp01(cur.P + dP * 0.01),
+        C: clamp01(cur.C + (returnedC !== null ? returnedC - cur.C : dC * 0.01)),
+        R: clamp01(cur.R + (returnedR !== null ? returnedR - cur.R : dR * 0.01)),
+        E: clamp01(cur.E + dE * 0.01),
+        M: clamp01(dM),
+        A: clamp01(cur.A + dA * 0.01),
+      };
+    }
+
+    // Tone parameters
+    function toneParams(f = state.field) {
+      return {
+        carrier: Math.round(174 + f.P * 222 + f.C * 111),
+        beat: (2 + f.R * 8 + f.A * 4).toFixed(2),
+        noise: (f.E * 0.22).toFixed(2),
+      };
+    }
+
+    // Generate sigil SVG
+    function sigilSvg(d, f) {
+      const seed = hash(JSON.stringify(d) + JSON.stringify(f));
+      const rings = 3 + Math.round(f.M * 5);
+      const spokes = 5 + Math.round(f.C * 9);
+      const jitter = 8 + f.E * 32;
+      const lum = 45 + f.R * 35;
+      const hue = 35 + Math.round(f.P * 120);
+      
+      let p = [];
+      for (let i = 0; i < rings; i++) {
+        const r = 20 + i * 25;
+        const ns = Math.round(spokes + Math.sin((seed + i) / 100) * 3);
+        for (let j = 0; j < ns; j++) {
+          const ang = (j / ns) * Math.PI * 2;
+          const dx = Math.cos(ang + (seed % 100) / 100) * (Math.random() - 0.5) * jitter;
+          const dy = Math.sin(ang + (seed % 100) / 100) * (Math.random() - 0.5) * jitter;
+          p.push({
+            x: 100 + (r + dx) * Math.cos(ang),
+            y: 100 + (r + dy) * Math.sin(ang),
+          });
+        }
+      }
+      
+      let svg = `<g stroke="hsl(${hue}, 80%, ${lum}%)" stroke-width="1.5" fill="none" opacity="0.8" filter="url(#glow)">`;
+      
+      // Draw paths
+      for (let i = 0; i < p.length - 1; i++) {
+        const t = i / p.length;
+        if (Math.random() > 0.7) {
+          svg += `<line x1="${p[i].x}" y1="${p[i].y}" x2="${p[i+1].x}" y2="${p[i+1].y}" opacity="${t * 0.6}"/>`;
+        }
+      }
+      
+      svg += '</g>';
+      return svg;
+    }
+
+    // Apply CSS variables
+    function applyVars(f = state.field) {
+      document.documentElement.style.setProperty('--p', pct(f.P));
+      document.documentElement.style.setProperty('--c', pct(f.C));
+      document.documentElement.style.setProperty('--r', pct(f.R));
+      document.documentElement.style.setProperty('--e', pct(f.E));
+      document.documentElement.style.setProperty('--m', pct(f.M));
+      document.documentElement.style.setProperty('--a', pct(f.A));
+    }
+
+    // Render state metrics
+    function renderState() {
+      const f = state.field;
+      const names = [
+        ['P', 'Perspective', f.P],
+        ['C', 'Coherence', f.C],
+        ['R', 'Resonance', f.R],
+        ['E', 'Entropy', f.E],
+        ['M', 'Memory', f.M],
+        ['A', 'Attention', f.A],
+      ];
+      
+      $('stateMetrics').innerHTML = names.map(([k, label, v]) => 
+        `<div class="metric"><div class="label">${k}</div><div class="label">${label}</div><div class="value">${pct(v)}</div></div>`
+      ).join('');
+    }
+
+    // Generate entry
+    function generate() {
+      const d = gather();
+      const f = nextField(d);
+      const id = 'DEEP-' + hash(JSON.stringify(d)).toString(16).slice(0, 8).toUpperCase();
+      
+      state.current = { d, f, id };
+      $('glyph').innerHTML = sigilSvg(d, f);
+      applyVars(f);
+      renderState();
+    }
+
+    // Audio tone
+    let audio = null;
+    function startTone() {
+      if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+      stopTone();
+      
+      const f = state.current?.f || state.field;
+      const tp = toneParams(f);
+      const now = audio.currentTime;
+      const gain = audio.createGain();
+      
+      gain.connect(audio.destination);
+      gain.gain.setValueAtTime(0.05, now);
+      
+      const o1 = audio.createOscillator();
+      o1.frequency.value = +tp.carrier;
+      o1.connect(gain);
+      o1.start(now);
+      
+      audio.nodes = { o1, gain };
+    }
+
+    function stopTone() {
+      if (audio?.nodes) {
+        const n = audio.nodes;
+        const now = audio.currentTime;
+        n.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+        setTimeout(() => {
+          try { n.o1.stop(); } catch {}
+        }, 180);
+      }
+    }
+
+    // Save entry
+    function saveEntry() {
+      if (!state.current) generate();
+      
+      const f = nextField(
+        state.current.d,
+        (+$('coherenceReturn').value || 50) / 100,
+        (+$('resonanceReturn').value || 50) / 100
+      );
+      
+      state.field = f;
+      const entry = {
+        createdAt: new Date().toISOString(),
+        id: state.current.id,
+        d: state.current.d,
+        f: f,
+      };
+      
+      state.entries.push(entry);
+      persist();
+      render();
+      setStatus('Entry saved: ' + entry.id, 'tiny');
+    }
+
+    // Persist to localStorage
+    function persist() {
+      localStorage.setItem(STORE, JSON.stringify({
+        entries: state.entries,
+        field: state.field,
+        charge: state.charge,
+      }));
+    }
+
+    // Render entries
+    function render() {
+      renderState();
+      $('entryCount').textContent = state.entries.length;
+      
+      $('entries').innerHTML = state.entries.slice(-10).reverse().map(e => 
+        `<div class="entry">
+          <div class="entry-id">${e.id}</div>
+          <div class="entry-time">${new Date(e.createdAt).toLocaleString()}</div>
+        </div>`
+      ).join('');
+    }
+
+    // Export JSON
+    function exportJson() {
+      const blob = new Blob([JSON.stringify({
+        exportedAt: new Date().toISOString(),
+        entries: state.entries,
+        field: state.field,
+        charge: state.charge,
+      }, null, 2)], { type: 'application/json' });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'observer-deep-' + Date.now() + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Moon phase
+    function moonPhase(d = new Date()) {
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const day = d.getDate();
+      
+      let k = (year - 1900) * 12.3685;
+      if (month < 3) k -= 1;
+      k += (month - 1) / 12 + day / 365.25;
+      k = Math.round(k * 1236.85) / 1236.85;
+      
+      const phase = (k - Math.floor(k)) * 29.5;
+      const illumination = (1 - Math.cos((phase / 29.5) * 2 * Math.PI)) / 2;
+      const names = ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent'];
+      const idx = Math.floor((phase / 29.5) * 8) % 8;
+      
+      return {
+        phase: phase,
+        illumination: Math.round(illumination * 100),
+        name: names[idx],
+      };
+    }
+
+    // Point move for glyph interaction
+    const stage = $('glyphStage');
+    if (stage) {
+      stage.addEventListener('mousemove', (ev) => {
+        const r = stage.getBoundingClientRect();
+        const x = ((ev.clientX - r.left) / r.width) * 100;
+        const y = ((ev.clientY - r.top) / r.height) * 100;
+        document.documentElement.style.setProperty('--gx', x);
+        document.documentElement.style.setProperty('--gy', y);
+      });
+    }
+
+    // Event listeners
+    $('useLocation').onclick = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          const { latitude, longitude } = pos.coords;
+          $('lat').value = latitude.toFixed(4);
+          $('lon').value = longitude.toFixed(4);
+          setStatus('Location acquired', 'tiny');
+        });
+      }
+    };
+
+    $('fetchLive').onclick = () => {
+      const lat = +$('lat').value;
+      const lon = +$('lon').value;
+      fetchLive(lat, lon);
+    };
+
+    $('generateBtn').onclick = generate;
+    $('saveBtn').onclick = saveEntry;
+    $('clearBtn').onclick = () => {
+      if (confirm('Clear all entries?')) {
+        state.entries = [];
+        persist();
+        render();
+        setStatus('Cleared', 'tiny');
+      }
+    };
+    $('exportBtn').onclick = exportJson;
+
+    // Range input sync
+    $('energy').oninput = (e) => { $('energyValue').textContent = e.target.value; };
+    $('coherenceReturn').oninput = (e) => { $('coherenceReturnValue').textContent = e.target.value; };
+    $('resonanceReturn').oninput = (e) => { $('resonanceReturnValue').textContent = e.target.value; };
+
+    // Initialize
+    (() => {
+      const saved = localStorage.getItem(STORE);
+      if (saved) {
+        const data = JSON.parse(saved);
+        state.entries = data.entries || [];
+        state.field = data.field || state.field;
+        state.charge = data.charge || 0;
+      }
+      
+      generate();
+      render();
+    })();
+  </script>
+</body>
+</html>

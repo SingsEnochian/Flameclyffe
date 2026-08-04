@@ -1,0 +1,42 @@
+{
+  "dataset_id": "deep-story",
+  "display_name": "DEEPStory",
+  "version": "0.1.0",
+  "status": "experimental",
+  "parallel_to": "DEEPTheory",
+  "schema": "../schemas/deep-story.schema.json",
+  "purpose": "Preserve ordered events, scenes, entities, motifs, transformations, and unresolved threads as a narrative continuity layer without changing source witness, telemetry, mathematical, or interpretive records.",
+  "governing_rule": "Theory records what is known, measured, witnessed, derived, or proposed. Story records how those records unfold through time and relation.",
+  "source_policy": {
+    "minimum_source_refs": 1,
+    "raw_sources_immutable": true,
+    "interpretations_append_only": true,
+    "silent_canonicalisation_forbidden": true,
+    "fictionalisation_must_be_declared": true
+  },
+  "supported_modes": [
+    "documentary",
+    "continuity",
+    "interpretive",
+    "mythic",
+    "speculative",
+    "fictionalised"
+  ],
+  "epistemic_statuses": [
+    "witnessed",
+    "recorded",
+    "derived",
+    "interpreted",
+    "remembered",
+    "correlated",
+    "unknown"
+  ],
+  "exports": [
+    "json",
+    "markdown",
+    "timeline",
+    "glyph-thread",
+    "sound-cue-sheet",
+    "visual-storyboard"
+  ]
+}

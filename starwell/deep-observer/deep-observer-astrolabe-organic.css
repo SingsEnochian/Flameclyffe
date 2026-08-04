@@ -1,0 +1,390 @@
+/* DEEP Observer Organic Astrolabe Layer v0.6
+   Mobile-first containment reset with stronger sensor-ring clearance.
+   The Source jewel is absolute-positioned, so the glyph chamber reserves a halo before the control dock.
+*/
+:root{
+  --observer-dock-edge-gap:3px;
+  --observer-dock-separation:1.25rem;
+  --observer-source-clearance:calc(8vw + 1.6rem);
+  --observer-dock-inner-x:.68rem;
+  --observer-dock-inner-y:.68rem;
+  --observer-jewel-size:1.22rem;
+  --observer-jewel-rim:rgba(231,196,119,.26);
+  --observer-jewel-blue:rgba(64,164,224,.34);
+  --observer-jewel-cyan:rgba(76,224,230,.24);
+  --observer-jewel-violet:rgba(164,126,255,.24);
+  --observer-jewel-gold:rgba(231,196,119,.30);
+}
+
+html,
+body,
+.page,
+.shell{
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+.page{
+  width:min(100%,96vw) !important;
+}
+
+.quick-guide{
+  width:min(100%,calc(100vw - 1rem)) !important;
+  grid-template-columns:1fr !important;
+  margin-bottom:1.35rem !important;
+}
+
+.observer-hud{
+  width:min(100%,calc(100vw - .75rem));
+  max-width:1120px;
+  margin:1.2rem auto 1.7rem;
+  display:grid;
+  grid-template-columns:1fr;
+  grid-template-areas:
+    "glyph"
+    "controls"
+    "readout";
+  gap:var(--observer-dock-separation);
+  align-items:start;
+  justify-items:center;
+  overflow:visible;
+}
+
+.observer-glyph-instrument{
+  grid-area:glyph;
+  width:100%;
+  min-width:0;
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  padding:0 0 var(--observer-source-clearance) 0 !important;
+  gap:0 !important;
+  justify-items:center;
+  align-items:start;
+}
+
+.observer-control-dock{
+  grid-area:controls;
+  width:100%;
+  min-width:0;
+  display:grid;
+  justify-items:center;
+  margin-top:var(--observer-dock-edge-gap);
+}
+
+.observer-readout{
+  grid-area:readout;
+  width:100%;
+  min-width:0;
+}
+
+.observer-readout .panel{
+  width:min(760px,100%);
+  margin:0 auto !important;
+}
+
+.glyph-stage{
+  justify-self:center;
+  width:100%;
+  min-width:0;
+  justify-items:center;
+  gap:0 !important;
+  position:relative !important;
+  top:auto !important;
+}
+
+.orb-frame{
+  justify-self:center;
+  width:min(64vw,285px) !important;
+  max-width:100%;
+}
+
+canvas{
+  max-width:min(64vw,285px) !important;
+  max-height:min(64vw,285px) !important;
+}
+
+.sensor-ring{
+  inset:-7% -6% -10% -6% !important;
+}
+
+.sensor-node{
+  width:2.74rem !important;
+  height:2.74rem !important;
+  font-size:.38rem !important;
+  letter-spacing:.065em !important;
+}
+
+.observer-control-dock .filter-row{
+  position:relative;
+  display:grid !important;
+  width:min(350px,100%) !important;
+  max-width:760px;
+  margin:0 !important;
+  padding:var(--observer-dock-inner-y) var(--observer-dock-inner-x) !important;
+  min-height:0;
+  gap:.5rem !important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  border-radius:28px 26px 31px 27px !important;
+  border:1px solid rgba(198,226,242,.21) !important;
+  background:
+    radial-gradient(ellipse at 12% 0%,rgba(232,244,252,.12),transparent 46%),
+    radial-gradient(ellipse at 88% 100%,rgba(64,164,224,.09),transparent 54%),
+    radial-gradient(ellipse at 50% 50%,rgba(231,196,119,.04),transparent 72%),
+    linear-gradient(145deg,rgba(4,9,18,.68),rgba(8,18,30,.46) 56%,rgba(3,7,14,.70)),
+    rgba(200,230,255,.035) !important;
+  box-shadow:
+    0 20px 46px rgba(0,0,0,.32),
+    0 0 38px rgba(168,204,224,.07),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    inset 0 -15px 34px rgba(0,0,0,.25),
+    inset 0 0 30px rgba(76,224,230,.03) !important;
+}
+
+.observer-control-dock .filter-row::before,
+.observer-control-dock .filter-row::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  border-radius:inherit;
+}
+
+.observer-control-dock .filter-row::before{
+  inset:.28rem;
+  border:1px solid rgba(231,196,119,.105);
+  background:
+    linear-gradient(90deg,transparent 0 3%,rgba(231,196,119,.08) 3.2%,transparent 8% 92%,rgba(168,204,224,.065) 96.8%,transparent 97% 100%),
+    radial-gradient(circle at 50% 0%,rgba(231,196,119,.11),transparent .82rem),
+    radial-gradient(circle at 50% 100%,rgba(64,164,224,.13),transparent .82rem);
+  box-shadow:inset 0 0 20px rgba(0,0,0,.24);
+}
+
+.observer-control-dock .filter-row::after{
+  inset:-1px;
+  background:
+    radial-gradient(circle at 2.1rem 1.8rem,rgba(76,224,230,.10),transparent .72rem),
+    radial-gradient(circle at calc(100% - 2.1rem) calc(100% - 1.8rem),rgba(231,196,119,.08),transparent .72rem),
+    linear-gradient(105deg,transparent 0 43%,rgba(255,255,255,.04) 50%,transparent 57% 100%);
+  opacity:.68;
+  mix-blend-mode:screen;
+}
+
+.filter,
+.action,
+.interface-cloak-toggle,
+.sensory-toggle{
+  min-height:2.16rem;
+  padding:.46rem .68rem .46rem calc(var(--observer-jewel-size) + .82rem) !important;
+  border-radius:999px !important;
+  border-color:rgba(198,226,242,.22) !important;
+  background:
+    radial-gradient(ellipse at 18% 12%,rgba(255,255,255,.18),transparent 17%),
+    radial-gradient(ellipse at 78% 92%,rgba(64,164,224,.11),transparent 42%),
+    linear-gradient(150deg,rgba(27,39,54,.66),rgba(5,10,18,.86) 62%,rgba(2,5,12,.92)),
+    rgba(172,207,226,.055) !important;
+  box-shadow:
+    0 11px 24px rgba(0,0,0,.27),
+    0 0 0 1px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -10px 22px rgba(0,0,0,.32),
+    inset 0 0 0 1px rgba(255,255,255,.045),
+    inset 0 0 20px rgba(64,164,224,.04) !important;
+  font-size:.56rem !important;
+}
+
+.filter::before,
+.action::before,
+.interface-cloak-toggle::before,
+.sensory-toggle::before{
+  left:.46rem;
+  width:var(--observer-jewel-size);
+  height:var(--observer-jewel-size);
+  border-radius:48% 52% 46% 54%;
+  border:1px solid var(--observer-jewel-rim);
+  color:rgba(226,244,255,.72);
+  background:
+    conic-gradient(from 32deg,rgba(255,255,255,.16),transparent 9%,rgba(76,224,230,.18) 18%,transparent 32%,rgba(231,196,119,.13) 45%,transparent 62%,rgba(164,126,255,.15) 78%,rgba(255,255,255,.11)),
+    radial-gradient(circle at 34% 22%,rgba(255,255,255,.32),transparent 14%),
+    radial-gradient(circle at 52% 62%,var(--observer-jewel-blue),rgba(3,9,18,.82) 64%,rgba(0,2,8,.96));
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,.42),
+    0 0 15px rgba(64,164,224,.16),
+    inset 0 2px 2px rgba(255,255,255,.12),
+    inset 0 -7px 12px rgba(0,0,0,.58),
+    inset 0 0 0 1px rgba(255,255,255,.06) !important;
+}
+
+.filter::after,
+.action::after,
+.interface-cloak-toggle::after,
+.sensory-toggle::after{
+  background:
+    linear-gradient(105deg,transparent 0 30%,rgba(255,255,255,.14) 43%,transparent 58% 100%),
+    radial-gradient(ellipse at 18% 50%,rgba(76,224,230,.07),transparent 46%);
+}
+
+.filter:hover,
+.action:hover,
+.interface-cloak-toggle:hover,
+.sensory-toggle:hover,
+.filter[aria-pressed="true"],
+.sensory-toggle[aria-pressed="true"]{
+  transform:translateY(-1px) scale(1.004);
+  border-color:rgba(231,196,119,.52) !important;
+  box-shadow:
+    0 13px 28px rgba(0,0,0,.31),
+    0 0 22px rgba(231,196,119,.11),
+    0 0 0 1px rgba(0,0,0,.44),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -11px 24px rgba(0,0,0,.35),
+    inset 0 0 0 1px rgba(231,196,119,.08),
+    inset 0 0 24px rgba(64,164,224,.05) !important;
+}
+
+.filter:hover::before,
+.action:hover::before,
+.interface-cloak-toggle:hover::before,
+.sensory-toggle:hover::before,
+.filter[aria-pressed="true"]::before,
+.sensory-toggle[aria-pressed="true"]::before{
+  color:rgba(255,244,215,.92);
+  background:
+    conic-gradient(from 22deg,rgba(255,255,255,.21),transparent 10%,var(--observer-jewel-cyan) 20%,transparent 33%,var(--observer-jewel-gold) 48%,transparent 64%,var(--observer-jewel-violet) 82%,rgba(255,255,255,.15)),
+    radial-gradient(circle at 34% 22%,rgba(255,255,255,.40),transparent 14%),
+    radial-gradient(circle at 52% 62%,rgba(231,196,119,.28),rgba(5,11,20,.78) 66%,rgba(0,2,8,.96));
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,.46),
+    0 0 18px rgba(231,196,119,.18),
+    0 0 15px rgba(76,224,230,.11),
+    inset 0 2px 2px rgba(255,255,255,.15),
+    inset 0 -7px 12px rgba(0,0,0,.60),
+    inset 0 0 0 1px rgba(231,196,119,.10) !important;
+}
+
+#refreshBtn::before,
+.filter#refreshBtn::before{content:"⟳";}
+
+#themeBtn::before{background:
+  conic-gradient(from 24deg,rgba(255,255,255,.19),transparent 10%,rgba(76,224,230,.14) 22%,transparent 36%,rgba(231,196,119,.14) 50%,transparent 65%,rgba(164,126,255,.27) 82%,rgba(255,255,255,.12)),
+  radial-gradient(circle at 34% 22%,rgba(255,255,255,.36),transparent 14%),
+  radial-gradient(circle at 52% 62%,rgba(126,89,255,.34),rgba(5,11,20,.78) 66%,rgba(0,2,8,.96));
+}
+
+.filter[data-filter="field"]::before,
+#toyBtn::before{--observer-jewel-blue:rgba(65,220,176,.32);}
+.filter[data-filter="moons"]::before{--observer-jewel-blue:rgba(84,172,232,.38);}
+.filter[data-filter="horizon"]::before,
+#stimBtn::before{--observer-jewel-blue:rgba(94,112,190,.32);}
+
+.interface-cloak-toggle{
+  min-width:6.3rem;
+  z-index:96;
+}
+
+@media(min-width:640px){
+  :root{
+    --observer-source-clearance:5.9rem;
+    --observer-jewel-size:1.32rem;
+    --observer-dock-inner-x:.78rem;
+    --observer-dock-inner-y:.72rem;
+  }
+  .quick-guide{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    margin-bottom:1.6rem !important;
+  }
+  .orb-frame{
+    width:min(var(--observer-glyph-size,76vw),100%) !important;
+  }
+  canvas{
+    max-width:var(--observer-glyph-size,390px) !important;
+    max-height:var(--observer-glyph-size,390px) !important;
+  }
+  .sensor-ring{
+    inset:
+      var(--observer-sensor-ring-inset-top,-8%)
+      var(--observer-sensor-ring-inset-right,-12%)
+      var(--observer-sensor-ring-inset-bottom,-15%)
+      var(--observer-sensor-ring-inset-left,-12%) !important;
+  }
+  .sensor-node{
+    width:var(--observer-sensor-node-size,3.55rem) !important;
+    height:var(--observer-sensor-node-size,3.55rem) !important;
+    font-size:var(--observer-sensor-node-font,.48rem) !important;
+  }
+  .observer-control-dock .filter-row{
+    width:min(560px,90vw) !important;
+    grid-template-columns:repeat(3,minmax(6.4rem,1fr));
+    gap:.52rem !important;
+  }
+  .filter,
+  .action{
+    min-height:2.2rem;
+    font-size:.6rem !important;
+  }
+}
+
+@media(min-width:820px){
+  :root{
+    --observer-source-clearance:7.8rem;
+    --observer-dock-separation:1.55rem;
+    --observer-jewel-size:1.42rem;
+    --observer-dock-inner-x:.92rem;
+    --observer-dock-inner-y:.76rem;
+  }
+  .observer-control-dock{
+    margin-top:.55rem;
+  }
+  .observer-control-dock .filter-row{
+    width:min(760px,88vw) !important;
+    grid-template-columns:repeat(4,minmax(7rem,1fr));
+    gap:.58rem .62rem !important;
+  }
+  .filter,
+  .action{
+    min-height:2.24rem;
+    padding:.48rem .82rem .48rem calc(var(--observer-jewel-size) + .94rem) !important;
+    font-size:.64rem !important;
+  }
+  .filter::before,
+  .action::before{
+    left:.52rem;
+  }
+}
+
+@media(min-width:1180px){
+  :root{
+    --observer-source-clearance:5.65rem;
+    --observer-dock-separation:1.2rem;
+  }
+  .observer-hud{
+    width:min(1120px,calc(100% - 2rem));
+    grid-template-columns:minmax(280px,460px) minmax(380px,1fr);
+    grid-template-areas:
+      "glyph readout"
+      "controls readout";
+    gap:var(--observer-dock-separation) clamp(1rem,3vw,1.6rem);
+  }
+  .observer-control-dock{
+    margin-top:.25rem;
+  }
+  .observer-control-dock .filter-row{
+    width:min(430px,100%) !important;
+    grid-template-columns:repeat(2,minmax(7.4rem,1fr));
+  }
+  .observer-readout .panel{
+    width:100%;
+  }
+  .glyph-stage{
+    position:sticky !important;
+    top:1rem !important;
+  }
+}
+
+body.low-stim .observer-control-dock .filter-row::after,
+body.low-stim .filter::after,
+body.low-stim .action::after,
+body.reduced-motion .observer-control-dock .filter-row::after,
+body.reduced-motion .filter::after,
+body.reduced-motion .action::after{
+  display:none;
+}

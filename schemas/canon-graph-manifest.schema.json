@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/canon-graph-manifest.schema.json",
+  "title": "Canon Graph Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "world_id", "version", "canon_status", "sources", "timeline", "entities", "rules", "anchors"],
+  "properties": {
+    "schema_version": { "const": "2.0.0" },
+    "world_id": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "canon_status": { "enum": ["current-reality", "canonical", "adaptation", "alternate-universe", "speculative"] },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "source_class", "confidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "citation": { "type": ["string", "null"] },
+          "source_class": { "enum": ["witnessed", "recorded", "derived", "model-interpreted", "human-interpreted", "remembered", "correlated", "simulated", "projected", "unknown"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["calendar_id", "active_era"],
+      "properties": {
+        "calendar_id": { "type": "string" },
+        "active_era": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "entities": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "characters": { "type": "array", "items": { "type": "string" } },
+        "locations": { "type": "array", "items": { "type": "string" } },
+        "organisations": { "type": "array", "items": { "type": "string" } },
+        "artefacts": { "type": "array", "items": { "type": "string" } },
+        "events": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "rules": { "type": "object", "additionalProperties": true },
+    "anchors": { "type": "array", "items": { "type": "string" } },
+    "contradiction_ledger_ref": { "type": ["string", "null"] }
+  }
+}

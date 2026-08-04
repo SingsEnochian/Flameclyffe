@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/world-tone-approval.schema.json",
+  "title": "Hearthgate World Tone Approval Receipt",
+  "oneOf": [
+    { "$ref": "#/$defs/auditionReceipt" },
+    { "$ref": "#/$defs/approvalReceipt" }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "pulse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "frequency_hz", "duration_ms", "gap_after_ms", "gain"],
+      "properties": {
+        "role": { "type": "string", "minLength": 1 },
+        "frequency_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "duration_ms": { "type": "number", "exclusiveMinimum": 0 },
+        "gap_after_ms": { "type": "number", "minimum": 0 },
+        "gain": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.08 }
+      }
+    },
+    "tonePair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "root_hz",
+        "fold_index",
+        "fold_strength",
+        "excursion",
+        "direct_hz",
+        "direct_class",
+        "inverse_hz",
+        "inverse_class",
+        "reciprocal_product"
+      ],
+      "properties": {
+        "schema": { "const": "hearthgate.world-fold-tone-pair.v1" },
+        "root_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "fold_index": { "type": "number", "minimum": 0, "maximum": 1 },
+        "fold_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "excursion": { "type": "number", "minimum": 0 },
+        "direct_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "direct_class": { "enum": ["infrasonic", "audible", "ultrasonic", "invalid"] },
+        "inverse_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "inverse_class": { "enum": ["infrasonic", "audible", "ultrasonic", "invalid"] },
+        "reciprocal_product": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "auditionPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "transport",
+        "intended_device",
+        "fidelity",
+        "direct_source_class",
+        "inverse_source_class",
+        "pair",
+        "pulses",
+        "total_duration_ms"
+      ],
+      "properties": {
+        "schema": { "const": "hearthgate.shokz-audio-haptic-plan.v1" },
+        "transport": { "const": "selected-system-audio-output" },
+        "intended_device": { "const": "shokz-bluetooth-audio" },
+        "fidelity": { "const": "bone-conduction-audio-haptic-proxy" },
+        "direct_source_class": { "enum": ["infrasonic", "audible", "ultrasonic", "invalid"] },
+        "inverse_source_class": { "enum": ["infrasonic", "audible", "ultrasonic", "invalid"] },
+        "pair": { "$ref": "#/$defs/tonePair" },
+        "pulses": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/pulse" }
+        },
+        "total_duration_ms": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "auditionReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "candidate_hash",
+        "world_id",
+        "profile_version",
+        "tone_layer_id",
+        "interface",
+        "intended_device",
+        "output_device_detected",
+        "device_confirmation",
+        "fidelity",
+        "fold_index",
+        "plan",
+        "started_at",
+        "completes_at"
+      ],
+      "properties": {
+        "schema": { "const": "hearthgate.world-tone-audition-receipt.v1" },
+        "candidate_hash": { "$ref": "#/$defs/sha256" },
+        "world_id": { "type": "string", "minLength": 1 },
+        "profile_version": { "type": "string", "minLength": 1 },
+        "tone_layer_id": { "type": "string", "minLength": 1 },
+        "interface": { "const": "ipad-web-audio" },
+        "intended_device": { "const": "shokz-bluetooth-audio" },
+        "output_device_detected": { "const": false },
+        "device_confirmation": { "const": "user-confirmed" },
+        "fidelity": { "const": "bone-conduction-audio-haptic-proxy" },
+        "fold_index": { "type": "number", "minimum": 0, "maximum": 1 },
+        "plan": { "$ref": "#/$defs/auditionPlan" },
+        "started_at": { "type": "string", "format": "date-time" },
+        "completes_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "approvalReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "candidate_hash",
+        "world_id",
+        "world_name",
+        "profile_version",
+        "tone_layer_id",
+        "root_hz",
+        "enter_threshold",
+        "release_threshold",
+        "excursion",
+        "decision",
+        "signer",
+        "signer_authority",
+        "shokz_confirmed",
+        "felt_and_identified",
+        "interface",
+        "audition_receipt",
+        "note",
+        "created_at",
+        "receipt_hash"
+      ],
+      "properties": {
+        "schema": { "const": "hearthgate.world-tone-approval-receipt.v1" },
+        "candidate_hash": { "$ref": "#/$defs/sha256" },
+        "world_id": { "type": "string", "minLength": 1 },
+        "world_name": { "type": "string", "minLength": 1 },
+        "profile_version": { "type": "string", "minLength": 1 },
+        "tone_layer_id": { "type": "string", "minLength": 1 },
+        "root_hz": { "type": "number", "exclusiveMinimum": 0 },
+        "enter_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "release_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "excursion": { "type": "number", "minimum": 0 },
+        "decision": { "enum": ["approved", "adjust", "rejected"] },
+        "signer": { "const": "rowan" },
+        "signer_authority": { "const": "human-calibration-owner" },
+        "shokz_confirmed": { "const": true },
+        "felt_and_identified": { "type": "boolean" },
+        "interface": { "const": "ipad-web-app" },
+        "audition_receipt": { "$ref": "#/$defs/auditionReceipt" },
+        "note": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "receipt_hash": { "$ref": "#/$defs/sha256" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "decision": { "const": "approved" } },
+            "required": ["decision"]
+          },
+          "then": {
+            "properties": { "felt_and_identified": { "const": true } }
+          }
+        }
+      ]
+    }
+  }
+}

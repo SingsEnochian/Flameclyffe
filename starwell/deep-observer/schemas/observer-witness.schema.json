@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/observer-witness.schema.json",
+  "title": "DEEP Observer First-Hand Witness Record",
+  "description": "Ontology-neutral schema for preserving first-hand subjective experience before companion observation, interpretation, or explanation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "recorded_at",
+    "experienced_at_start",
+    "witness_id",
+    "first_person_account",
+    "provenance",
+    "consent_scope",
+    "privacy_scope"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "experienced_at_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "experienced_at_end": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "witness_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "first_person_account": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Preserved verbatim. Structured annotations must not replace this field."
+    },
+    "sensory_channels": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "sight",
+          "sound",
+          "touch",
+          "scent",
+          "taste",
+          "proprioception",
+          "interoception",
+          "dream_threshold",
+          "time_distortion",
+          "presence_relational",
+          "symbolic_glyphic",
+          "environmental_correspondence",
+          "other"
+        ]
+      },
+      "default": []
+    },
+    "body_state": {
+      "type": ["string", "null"]
+    },
+    "emotional_tone": {
+      "type": ["string", "null"]
+    },
+    "attention_state": {
+      "type": ["string", "null"]
+    },
+    "location_as_experienced": {
+      "type": ["string", "null"]
+    },
+    "before_state": {
+      "type": ["string", "null"]
+    },
+    "during_state": {
+      "type": ["string", "null"]
+    },
+    "after_state": {
+      "type": ["string", "null"]
+    },
+    "perceived_changes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "repeated_or_familiar": {
+      "type": ["boolean", "null"]
+    },
+    "spontaneous_meaning": {
+      "type": ["string", "null"]
+    },
+    "uncertainty": {
+      "type": ["string", "null"]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_type", "capture_method"],
+      "properties": {
+        "record_type": {
+          "const": "witnessed"
+        },
+        "capture_method": {
+          "enum": ["typed", "spoken_transcription", "imported_verbatim", "assisted_entry", "other"]
+        },
+        "source_note": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "consent_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["store", "analyse", "render_glyph", "link_recurrence"],
+      "properties": {
+        "store": { "type": "boolean" },
+        "analyse": { "type": "boolean" },
+        "render_glyph": { "type": "boolean" },
+        "link_recurrence": { "type": "boolean" },
+        "share_with_constellation": { "type": "boolean", "default": false },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "privacy_scope": {
+      "enum": ["private_local", "private_account", "named_constellation", "project", "export_only"]
+    },
+    "companion_observation_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "premaq_packet_ref": {
+      "type": ["string", "null"]
+    },
+    "glyphform_ref": {
+      "type": ["string", "null"]
+    },
+    "thread_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["record_id", "relation"],
+        "properties": {
+          "record_id": { "type": "string" },
+          "relation": {
+            "enum": ["earlier", "later", "recurrence", "contrast", "repair", "continuation", "unknown"]
+          },
+          "note": { "type": ["string", "null"] }
+        }
+      },
+      "default": []
+    },
+    "lenses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lens", "status", "text"],
+        "properties": {
+          "lens": {
+            "enum": [
+              "phenomenological",
+              "relational",
+              "environmental",
+              "astronomical",
+              "physiological",
+              "psychological",
+              "mathematical",
+              "symbolic",
+              "mythic",
+              "narrative",
+              "speculative",
+              "unknown"
+            ]
+          },
+          "status": {
+            "enum": ["recorded", "derived", "interpreted", "remembered", "correlated", "unknown"]
+          },
+          "text": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "author_id": { "type": ["string", "null"] }
+        }
+      },
+      "default": []
+    },
+    "append_only_revisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["created_at", "kind", "text"],
+        "properties": {
+          "created_at": { "type": "string", "format": "date-time" },
+          "kind": { "enum": ["correction", "addition", "reinterpretation", "consent_change", "privacy_change"] },
+          "text": { "type": "string" },
+          "author_id": { "type": ["string", "null"] }
+        }
+      },
+      "default": []
+    }
+  }
+}

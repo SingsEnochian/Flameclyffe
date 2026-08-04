@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#101419" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Somatic Gate" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./hearthgate-somatic-icon.svg" />
+  <title>Hearthgate iPad Somatic Tone Gate</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #101419;
+      color: #f2ead9;
+      --copper: #c98652;
+      --gold: #e6c27a;
+      --moss: #7ea58c;
+      --panel: #171d24;
+      --edge: #39444f;
+      --danger: #d98282;
+      --good: #91c9a2;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: #101419; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(190px, calc(160px + env(safe-area-inset-bottom)))
+        max(18px, env(safe-area-inset-left));
+      background: radial-gradient(circle at 50% 0, #26333d 0, transparent 44%), linear-gradient(155deg, #101419, #17120f);
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    main { width: min(1020px, 100%); margin: auto; }
+    header { padding: 22px 0; }
+    .eyebrow { color: var(--moss); text-transform: uppercase; letter-spacing: .15em; font-weight: 800; font-size: .75rem; }
+    h1 { margin: .3rem 0 .7rem; color: var(--gold); font-family: ui-serif, Georgia, serif; font-size: clamp(2rem, 7vw, 4rem); line-height: 1.02; }
+    h2 { margin-top: 0; color: var(--gold); font-family: ui-serif, Georgia, serif; }
+    p { line-height: 1.55; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+    .panel { background: color-mix(in srgb, var(--panel) 94%, transparent); border: 1px solid var(--edge); border-radius: 22px; padding: 20px; box-shadow: 0 18px 60px rgba(0,0,0,.28); }
+    .wide { grid-column: 1 / -1; }
+    label { display: block; margin: .9rem 0 .35rem; font-weight: 750; color: #c8d7d6; }
+    select, input[type="range"], textarea { width: 100%; }
+    select, textarea { min-height: 52px; padding: 11px 12px; border-radius: 12px; border: 1px solid #52606b; background: #0d1217; color: #f2ead9; font: inherit; }
+    textarea { min-height: 96px; resize: vertical; -webkit-user-select: text; user-select: text; }
+    input[type="range"] { accent-color: var(--copper); min-height: 42px; }
+    .check { display: flex; gap: 12px; align-items: flex-start; color: #f2ead9; font-weight: 650; }
+    .check input { width: 27px; height: 27px; flex: 0 0 auto; accent-color: var(--moss); }
+    button { min-height: 58px; border-radius: 14px; border: 1px solid var(--gold); background: #2c221b; color: #fff7e8; padding: 13px 17px; font: 750 1rem ui-sans-serif, system-ui; touch-action: manipulation; cursor: pointer; }
+    button.secondary { border-color: #70828f; background: #17212a; }
+    button.stop { border-color: var(--danger); background: #351b1b; }
+    button.approve { border-color: var(--good); background: #183326; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .button-row button { flex: 1 1 190px; }
+    .readout { display: grid; gap: 8px; margin: 12px 0; }
+    .readout div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid #303a43; }
+    .readout dt { color: #a8babd; }
+    .readout dd { margin: 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; text-align: right; overflow-wrap: anywhere; }
+    .status { min-height: 3.5em; padding: 12px; border-left: 4px solid var(--moss); background: rgba(0,0,0,.2); border-radius: 8px; }
+    .warning { border-left-color: var(--copper); }
+    .danger { border-left-color: var(--danger); }
+    .receipt { font: .77rem/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; -webkit-user-select: text; user-select: text; }
+    .badges { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0; }
+    .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #25313a; color: #d5e0df; font-size: .75rem; font-weight: 800; }
+    .badge.good { background: #183326; color: #bfe8ca; }
+    .badge.attention { background: #3a2b18; color: #f0d39b; }
+    .math { font-family: ui-serif, Georgia, serif; color: #edd9ad; }
+    .sequence { padding: 14px; border-radius: 14px; background: #0e1419; border: 1px solid #34414b; font: 700 .9rem/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .hidden { display: none !important; }
+    .approval-dock {
+      position: fixed;
+      z-index: 80;
+      left: 50%;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: min(1020px, calc(100% - max(24px, env(safe-area-inset-left)) - max(24px, env(safe-area-inset-right))));
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border: 2px solid var(--gold);
+      border-radius: 20px;
+      background: rgba(10, 15, 20, .96);
+      box-shadow: 0 -10px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(230,194,122,.2) inset;
+      backdrop-filter: blur(16px);
+    }
+    .approval-dock strong { display: block; color: var(--gold); letter-spacing: .08em; }
+    .approval-dock span { display: block; margin-top: 4px; color: #d8e1df; font-size: .9rem; line-height: 1.35; }
+    .approval-dock.ready { border-color: var(--good); box-shadow: 0 -10px 50px rgba(0,0,0,.5), 0 0 28px rgba(145,201,162,.22); }
+    .approval-dock.ready strong { color: var(--good); }
+    .approval-dock button { width: 100%; min-height: 68px; font-size: 1.08rem; }
+    @media (max-width: 680px) {
+      body { padding-bottom: max(230px, calc(205px + env(safe-area-inset-bottom))); }
+      .approval-dock { grid-template-columns: 1fr; }
+      .approval-dock button { min-height: 62px; }
+    }
+    @media (display-mode: standalone) { .install-note { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+  <script type="module" crossorigin src="../assets/worldToneApproval-CFq26EIT.js"></script>
+  <link rel="modulepreload" crossorigin href="../assets/modulepreload-polyfill-P2Xu9kJm.js">
+  <link rel="modulepreload" crossorigin href="../assets/world-tone-fold-approval-C4CtNKJD.js">
+  <link rel="modulepreload" crossorigin href="../assets/ipad-somatic-lineage-BvuN4w52.js">
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Hearthgate · Bifröst · iPad Somatic Interface</div>
+    <h1>Rowan’s Somatic World-Tone Gate</h1>
+    <p>The iPad computes and controls the pattern. The body receives it through an explicitly selected external transducer, Shokz, or native controller bridge. Compression releases into the next compression without reset.</p>
+    <div id="capabilities" class="badges" aria-label="Device capabilities"></div>
+    <p class="status warning install-note"><strong>Install on iPad:</strong> open this page in Safari, choose Share, then Add to Home Screen. The installed PWA preserves this room as a dedicated full-screen instrument.</p>
+  </header>
+
+  <aside id="approval-dock" class="approval-dock" aria-label="Rowan approval gate" aria-live="polite">
+    <div>
+      <strong>ROWAN APPROVAL GATE</strong>
+      <span id="approval-gate-status">LOCKED · Complete the somatic audition.</span>
+    </div>
+    <button id="approve" class="approve" type="button" disabled>Approval locked</button>
+  </aside>
+
+  <section class="grid">
+    <article class="panel">
+      <h2>1 · World and tone</h2>
+      <label for="world">World profile</label>
+      <select id="world"></select>
+      <dl class="readout">
+        <div><dt>Candidate layer</dt><dd id="layer">—</dd></div>
+        <div><dt>Root tone</dt><dd id="root">—</dd></div>
+        <div><dt>Profile</dt><dd id="profile">—</dd></div>
+        <div><dt>Candidate hash</dt><dd id="candidate-hash">—</dd></div>
+        <div><dt>Bifröst state</dt><dd id="source-state">Load through Arcsweep</dd></div>
+        <div><dt>Compression receipt</dt><dd id="compression-receipt">—</dd></div>
+      </dl>
+      <p><span class="badge attention">Pending until Rowan approves</span></p>
+    </article>
+
+    <article class="panel">
+      <h2>2 · Jacobian compression gate</h2>
+      <p class="math">Φ = 1 − σ<sub>min</sub> / (σ<sub>max</sub> + ε)</p>
+      <label for="fold">Fold index <output id="fold-output">0.90</output></label>
+      <input id="fold" type="range" min="0" max="1" step="0.01" value="0.90" />
+      <dl class="readout">
+        <div><dt>Compression gate</dt><dd id="fold-state">active</dd></div>
+        <div><dt>Compression source</dt><dd id="compression-source">—</dd></div>
+        <div><dt>Release source</dt><dd id="release-source">—</dd></div>
+        <div><dt>Reciprocal invariant</dt><dd id="reciprocal">—</dd></div>
+      </dl>
+      <p>Ultrasonic and infrasonic source branches remain in the receipt. The somatic renderer octave-folds them into the selected external device’s physical response band.</p>
+    </article>
+
+    <article class="panel wide">
+      <h2>3 · Somatic output</h2>
+      <p class="sequence">world root → compression → release → compression of the release → release → continuing outward</p>
+      <p class="status warning"><strong>iPad boundary:</strong> iPad has no internal Core Haptics actuator. Select and confirm an external output before every audition.</p>
+      <div class="grid">
+        <div>
+          <label for="device-profile">Somatic device</label>
+          <select id="device-profile"></select>
+          <div id="placement-wrap">
+            <label for="placement">Body placement</label>
+            <select id="placement"></select>
+          </div>
+          <label for="cycles">Rendered compression–release cycles <output id="cycles-output">3</output></label>
+          <input id="cycles" type="range" min="1" max="8" step="1" value="3" />
+          <label for="gain">Somatic strength <output id="gain-output">0.022</output></label>
+          <input id="gain" type="range" min="0.005" max="0.06" step="0.001" value="0.022" />
+        </div>
+        <div>
+          <label class="check"><input id="output-confirmed" type="checkbox" /> <span>I confirm the selected external device is connected and is the active iPad audio or controller output.</span></label>
+          <label class="check"><input id="start-low" type="checkbox" /> <span>I am starting at the lowest clearly perceptible level and increasing only by deliberate adjustment.</span></label>
+          <label id="clearance-label" class="check"><input id="placement-clearance" type="checkbox" /> <span>The transducer is clear of my neck, healing surgical areas, and implanted-device sites.</span></label>
+          <dl class="readout">
+            <div><dt>Rendered band</dt><dd id="device-band">—</dd></div>
+            <div><dt>Root proxy</dt><dd id="root-proxy">—</dd></div>
+            <div><dt>Compression proxy</dt><dd id="compression-proxy">—</dd></div>
+            <div><dt>Release proxy</dt><dd id="release-proxy">—</dd></div>
+            <div><dt>Window duration</dt><dd id="duration">—</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="button-row">
+        <button id="audition" type="button">Play somatic compression–release window</button>
+        <button id="stop" class="stop" type="button">Feather Stop</button>
+      </div>
+      <p id="audition-status" class="status" role="status">RESTING · No somatic audition scheduled.</p>
+    </article>
+
+    <article class="panel">
+      <h2>4 · Rowan decides</h2>
+      <p>The approval button remains visible in the persistent Rowan Approval Gate at the bottom of the screen.</p>
+      <label class="check"><input id="felt" type="checkbox" /> <span>I felt or clearly identified the root, compression, release, and next compression.</span></label>
+      <label class="check"><input id="comfortable" type="checkbox" /> <span>The complete somatic window remained comfortable.</span></label>
+      <label for="note">Calibration note</label>
+      <textarea id="note" placeholder="Placement, intensity, tone identity, compression density, release length, adjustment…"></textarea>
+      <div class="button-row">
+        <button id="adjust" class="secondary" type="button" disabled>Needs adjustment</button>
+        <button id="reject" class="stop" type="button" disabled>Reject candidate</button>
+      </div>
+      <p id="decision-status" class="status">No decision receipt.</p>
+    </article>
+
+    <article class="panel">
+      <h2>Somatic receipt ledger</h2>
+      <div class="button-row"><button id="export" class="secondary" type="button">Export receipts</button></div>
+      <pre id="receipts" class="receipt">[]</pre>
+    </article>
+  </section>
+</main>
+
+</body>
+</html>

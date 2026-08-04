@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STARWELL Material QA</title>
+  <meta name="description" content="STARWELL DEEP grown-material QA route for live aura inheritance, material-intuition comparison, and observer math swapping." />
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 12%, rgba(140, 202, 192, 0.22), transparent 24rem),
+        radial-gradient(circle at 76% 18%, rgba(231, 196, 119, 0.18), transparent 22rem),
+        linear-gradient(145deg, #101420, #183c3b);
+      color: rgba(234, 244, 239, 0.94);
+    }
+
+    .material-qa-shell {
+      width: min(1080px, 94vw);
+      margin: 0 auto;
+      padding: clamp(1rem, 4vw, 3rem) 0;
+    }
+
+    .material-qa-intro {
+      max-width: 760px;
+      margin: 0 0 1rem;
+      color: rgba(234, 244, 239, 0.78);
+      line-height: 1.6;
+    }
+
+    .material-qa-status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0 0 1rem;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .material-qa-status span {
+      padding: 0.35rem 0.58rem;
+      border: 1px solid rgba(231, 196, 119, 0.28);
+      border-radius: 999px;
+      background: rgba(3, 5, 10, 0.34);
+      color: rgba(234, 244, 239, 0.86);
+    }
+
+    .live-glyph-panel.deep-observer-panel {
+      margin-top: 1rem;
+    }
+
+    .glyph-orb-canvas {
+      width: 220px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, hsla(var(--flare-hue), 88%, 82%, calc(var(--flare-alpha) * 0.9)), transparent 8%),
+        radial-gradient(circle, hsla(var(--flare-hue), 78%, 72%, calc(var(--flare-alpha) * 0.5)), transparent 38%),
+        radial-gradient(circle, rgba(3, 5, 10, 0.98), rgba(3, 5, 10, 0.98));
+      box-shadow:
+        0 0 0 1px rgba(232, 244, 252, 0.14),
+        0 0 34px hsla(var(--flare-hue), 88%, 74%, calc(var(--flare-alpha) * 0.56));
+    }
+
+    .glyph-readout time,
+    .glyph-readout > span {
+      display: block;
+      margin: 0.2rem 0;
+      color: rgba(234, 244, 239, 0.72);
+    }
+
+    .glyph-principle {
+      color: rgba(234, 244, 239, 0.72);
+    }
+
+    .material-qa-comparison {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-top: 0.9rem;
+    }
+
+    .material-leaf-card {
+      border: 1px solid rgba(232, 244, 252, 0.12);
+      border-radius: 18px;
+      background: rgba(3, 5, 10, 0.26);
+      padding: 0.7rem;
+    }
+
+    .material-leaf-card h4 {
+      margin: 0 0 0.45rem;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(234, 244, 239, 0.78);
+    }
+
+    .learned-material-strip {
+      --flare-hue: 164;
+      --flare-alpha: 0.28;
+      --grown-vein-density: 0.42;
+      --grown-edge-softness: 0.68;
+      --grown-pulse-speed: 7.2s;
+      --grown-glass-to-leaf: 0.34;
+      box-shadow:
+        0 0 0 1px hsla(var(--flare-hue), 70%, 76%, calc(var(--flare-alpha) * 0.5)),
+        0 0 calc(18px + (var(--grown-vein-density) * 18px)) hsla(var(--flare-hue), 86%, 72%, calc(var(--flare-alpha) * 0.42));
+      filter: saturate(calc(0.95 + var(--grown-edge-softness) * 0.28));
+    }
+
+    @media (max-width: 720px) {
+      .material-qa-comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/materialQa-CqZ2-nJj.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-P2Xu9kJm.js">
+  <link rel="modulepreload" crossorigin href="./assets/stonewood-typography-BAP6eep5.js">
+  <link rel="stylesheet" crossorigin href="./assets/stonewood-typography-CzS1IeFG.css">
+  <link rel="stylesheet" crossorigin href="./assets/deep-observer-boundary-e-bWy4Jy.css">
+  <link rel="stylesheet" crossorigin href="./assets/starwell-KYg2XK4p.css">
+</head>
+<body>
+  <main class="material-qa-shell starwell sky-night">
+    <p class="material-qa-intro">
+      Material QA route. The aura source cycles mock DEEP and sigil-derived light variables. The passive bridge copies those variables to the Observer shell. The hand-authored membrane and learned export membrane then sit side by side for comparison.
+    </p>
+
+    <div class="material-qa-status" aria-label="Material QA status">
+      <span id="qa-mode">mode: waking</span>
+      <span id="qa-bridge">bridge: waiting</span>
+      <span id="qa-hue">hue: waiting</span>
+      <span id="qa-alpha">alpha: waiting</span>
+      <span id="qa-export">export: loading</span>
+      <span id="qa-delta">delta: waiting</span>
+    </div>
+
+    <section class="live-glyph-panel deep-observer-panel chamber-card" aria-label="DEEP Observer material QA viewer">
+      <div class="map-heading compact">
+        <span>DEEP Material QA</span>
+        <strong>Grown membrane inheritance</strong>
+      </div>
+
+      <div class="live-glyph-layout">
+        <div
+          class="glyph-orb-wrap glyph-orb-canvas-wrap"
+          data-starburst-native="aura"
+          style="--n: 18; --w: 214px; --m: 42%; --flare-hue: 198; --flare-alpha: 0.32; --flare-jitter: 0.24px; --flare-rot: 18deg;"
+          aria-label="Mock live aura source"
+        >
+          <div class="glyph-orb glyph-orb-canvas" aria-hidden="true"></div>
+        </div>
+
+        <article class="glyph-readout">
+          <p>Current Observer glyph · material QA</p>
+          <h3>QA-LIVE-MEMBRANE</h3>
+          <time>Observer shell should carry live aura variables</time>
+          <span>The strips below should shift with the aura source and learned material export.</span>
+
+          <div class="material-qa-comparison" aria-label="Material comparison leaves">
+            <section class="material-leaf-card" aria-label="Hand-authored membrane sample">
+              <h4>Hand-authored leaf</h4>
+              <div class="glyph-equation-strip" aria-label="Grown membrane inheritance checks">
+                <code>source aura -> --flare-hue / --flare-alpha</code>
+                <code>material bridge -> Observer shell</code>
+                <code>membrane -> inherited grown signal</code>
+                <span>Expected: data-deep-material-vars="live-aura"</span>
+              </div>
+            </section>
+
+            <section class="material-leaf-card" aria-label="Learned material export sample">
+              <h4>Learned export leaf</h4>
+              <div class="glyph-equation-strip learned-material-strip" id="learned-strip" aria-label="Learned material export checks">
+                <code id="learned-source">export source -> waiting</code>
+                <code id="learned-vars">learned vars -> waiting</code>
+                <code id="learned-material">membrane -> comparison layer</code>
+                <span id="learned-rating">Expected: approved sample export</span>
+              </div>
+            </section>
+          </div>
+
+          <p class="glyph-principle">
+            Instrument only. This page checks material inheritance, mobile caps, observer math swapping, and the first learned comparison leaf without adding controls, sound, haptics, or HUD furniture.
+          </p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

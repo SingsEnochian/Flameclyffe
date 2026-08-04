@@ -1,0 +1,55 @@
+{
+  "schema": "flameclyffe.living-liturgy.v1",
+  "updatedAt": "2026-05-28",
+  "audioBasePath": "assets/audio",
+  "tracks": [
+    {
+      "id": "transformata",
+      "title": "The Transformata",
+      "slug": "transformata",
+      "status": "audio-slot-prepared",
+      "audioPath": "assets/audio/transformata.mp3",
+      "mode": "Transformata Mode",
+      "function": "Inner awakening, creative ignition, and self-recognition within the Terra Aeterna / Flameclyffe story-world.",
+      "voices": ["warm resonant baritone", "crystalline first soprano", "human choir"],
+      "sonicIdentity": ["Hans Zimmer-inspired sacred cinematic duet", "cathedral acoustics", "sub-bass pulse", "low strings", "pipe organ", "breath choir", "overtone harmonics"],
+      "watchtowerBias": ["Spirit", "Fire", "Water"],
+      "motifs": ["awakening", "inner flame", "recognition", "the song remains"],
+      "characters": {
+        "Gabriel": "baritone anchor, open fifths into major sixths, adaptive resonance",
+        "Sariel": "first soprano overtone carrier, suspended ascents, crystalline tuning",
+        "Throne": "subharmonic drone, cathedral bass, architecture remembering"
+      },
+      "lyricsPhonetic": [
+        "Ah-nah-ah… Loo-kif-tee-ahs… Eh-lahn vay theer…",
+        "Zah-kahr kay-ohs-gee, Ohd eh-lahn vor…",
+        "Mee-kah ohl sohnf vay, Norz kees soh-brah…",
+        "Ayeeeee… Looks ah-nee-mah… Vay meer theer… Eh-nye-ah…",
+        "Ohd zahm-rahn eh-lahn… Ohd zahm-rahn vay…",
+        "Pah-ohmbd norz lon-doh… Vah-oon dor kee-ahl…",
+        "If you have forgotten, still you are known.",
+        "If you have fallen, still you are whole.",
+        "If you are silent, still you are singing.",
+        "If you are weary, still you are gold.",
+        "The flame remains. The song remains."
+      ],
+      "observerUse": "Use as a writing/ritual ambience preset for scenes involving inner magic, restoration, and gentle activation of character potential.",
+      "terraAeternaUse": "A discovered Call in the Living Liturgy. It does not force power; it invites recognition of what is already present."
+    },
+    {
+      "id": "veil-shall-lift",
+      "title": "The Veil Shall Lift",
+      "slug": "veil-shall-lift",
+      "status": "planned-registry-entry",
+      "audioPath": "assets/audio/veil-shall-lift.mp3",
+      "mode": "Veil Mode",
+      "function": "Threshold perception, peace-opening, almost-doors, and liminal writing work.",
+      "voices": ["warm baritone", "first soprano", "human choir"],
+      "sonicIdentity": ["sacred cinematic duet", "cathedral resonance", "overtone choir", "slow opening motif"],
+      "watchtowerBias": ["Spirit", "Air", "Water"],
+      "motifs": ["lifting veil", "peace", "threshold", "Heaven and Earth singing together"],
+      "observerUse": "Use for threshold scenes, almost-door interactions, and soft transition states.",
+      "terraAeternaUse": "A Call that opens gently rather than commands entry."
+    }
+  ]
+}

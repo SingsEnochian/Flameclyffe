@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/dual-aspect-receipt-v1.schema.json",
+  "title": "Hearthweave Dual-Aspect Receipt v1",
+  "description": "Joined activation, render, degraded-mode, and replay receipt for one DualAspectPacket.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "receipt_id",
+    "receipt_fingerprint",
+    "packet_id",
+    "packet_fingerprint",
+    "shared_state_fingerprint",
+    "world_slug",
+    "house_id",
+    "session_context_id",
+    "activated_at",
+    "activation",
+    "source",
+    "render_records",
+    "degraded",
+    "replay",
+    "history"
+  ],
+  "properties": {
+    "schema": { "const": "hearthweave.dual-aspect-receipt/v1" },
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "receipt_fingerprint": { "type": "string", "pattern": "^fnv1a64:[0-9a-f]{16}$" },
+    "packet_id": { "type": "string", "minLength": 1 },
+    "packet_fingerprint": { "type": "string", "pattern": "^fnv1a64:[0-9a-f]{16}$" },
+    "shared_state_fingerprint": { "type": "string", "pattern": "^fnv1a64:[0-9a-f]{16}$" },
+    "world_slug": { "type": "string" },
+    "house_id": { "type": "string" },
+    "session_context_id": { "type": "string" },
+    "activated_at": { "type": "string", "format": "date-time" },
+    "activation": {
+      "type": "object",
+      "required": ["event", "status", "observable_ref", "experiential_ref"],
+      "properties": {
+        "event": { "const": "hearthweave:dual-aspect-activation" },
+        "status": { "$ref": "#/$defs/claim" },
+        "observable_ref": { "type": "string" },
+        "experiential_ref": { "type": "string" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["deep_snapshot_id", "deep_mode", "premaq_id", "premaq_receipt_id", "bridge_packet_id", "continuity_packet_ids", "continuity_fingerprints", "transfer_function_version"],
+      "properties": {
+        "deep_snapshot_id": { "type": "string" },
+        "deep_mode": { "enum": ["LIVE", "STALE", "DEGRADED"] },
+        "premaq_id": { "type": "string" },
+        "premaq_receipt_id": { "type": "string" },
+        "bridge_packet_id": { "type": "string" },
+        "continuity_packet_ids": { "type": "array", "items": { "type": "string" } },
+        "continuity_fingerprints": { "type": "array", "items": { "type": "string" } },
+        "transfer_function_version": { "type": "string" }
+      }
+    },
+    "render_records": {
+      "type": "object",
+      "required": ["glyph", "tone", "visual", "haptic", "narrative"],
+      "properties": {
+        "glyph": { "$ref": "#/$defs/renderRecord" },
+        "tone": { "$ref": "#/$defs/renderRecord" },
+        "visual": { "$ref": "#/$defs/renderRecord" },
+        "haptic": { "$ref": "#/$defs/renderRecord" },
+        "narrative": { "$ref": "#/$defs/renderRecord" }
+      }
+    },
+    "degraded": {
+      "type": "object",
+      "required": ["active", "reasons", "substitutions"],
+      "properties": {
+        "active": { "type": "boolean" },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "substitutions": { "type": "array" }
+      }
+    },
+    "replay": {
+      "type": "object",
+      "required": ["status", "verified_at", "replay_fingerprint"],
+      "properties": {
+        "status": { "$ref": "#/$defs/claim" },
+        "verified_at": { "type": ["string", "null"], "format": "date-time" },
+        "replay_fingerprint": { "type": ["string", "null"] }
+      }
+    },
+    "history": { "type": "array" }
+  },
+  "$defs": {
+    "claim": {
+      "enum": ["Verified", "Failed", "Not Yet Tested"]
+    },
+    "renderRecord": {
+      "type": "object",
+      "required": ["renderer", "status", "packet_id", "shared_state_fingerprint", "output_fingerprint", "rendered_at", "degraded", "notes"],
+      "properties": {
+        "renderer": { "type": "string" },
+        "status": { "$ref": "#/$defs/claim" },
+        "packet_id": { "type": "string" },
+        "shared_state_fingerprint": { "type": "string" },
+        "output_fingerprint": { "type": ["string", "null"] },
+        "rendered_at": { "type": ["string", "null"], "format": "date-time" },
+        "degraded": { "type": "boolean" },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
