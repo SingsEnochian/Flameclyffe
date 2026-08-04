@@ -3,12 +3,12 @@ import {
   GATE_LOCKED_TONE_AXES,
   GROUNDWIRE_SESSION_KEY,
   TWO_SHORE_GATE_PLAN_KEY,
-  buildFullHorizonGatePlan,
   buildYearGatePlan,
   calibrateEarthPrimePremaq,
   listSelectableGateWorlds,
   readLiveTwoShoreInputs,
 } from './two-shore-premaq-gate.js';
+import { buildEfficientFullHorizonGatePlan } from './two-shore-gate-horizon.js';
 import {
   ELARA_EXPANSION_HORIZON,
   readSelectedWorld,
@@ -325,9 +325,13 @@ async function runFullHorizon() {
   setProgress(0.03);
   setStatus(`RUNNING · 2025→2035 · Earth Prime ⇄ ${world.name}. Keep this page open.`, 'running');
   await new Promise((resolve) => window.setTimeout(resolve, 30));
-  const plan = buildFullHorizonGatePlan({
+  const plan = await buildEfficientFullHorizonGatePlan({
     earthCalibration: calibration,
     targetProfile: world.slug,
+    onYear: ({ year, completed, total }) => {
+      setProgress(completed / total);
+      setStatus(`RUNNING · ${year} complete · ${completed}/${total} labeled years.`, 'running');
+    },
   });
   currentYearPlan = plan.years[0];
   currentCompactPlan = writeCompactPlan(plan);
