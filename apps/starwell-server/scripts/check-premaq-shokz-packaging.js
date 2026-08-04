@@ -32,14 +32,15 @@ function readJson(relativePath, label) {
   }
 }
 
-function extractAsset(html, label, stem) {
+function findAsset(html, stem) {
   const pattern = new RegExp(`(?:\\/starwell)?\\/assets\\/(${stem}-[^"']+\\.js)`);
-  const match = html.match(pattern);
-  if (!match) {
-    errors.push(`${label} does not load the compiled ${stem} asset.`);
-    return null;
-  }
-  return match[1];
+  return html.match(pattern)?.[1] ?? null;
+}
+
+function requireAsset(html, label, stem) {
+  const asset = findAsset(html, stem);
+  if (!asset) errors.push(`${label} does not load the compiled ${stem} asset.`);
+  return asset;
 }
 
 const arcsweepHtml = read('index.html', 'web Arcsweep route');
@@ -55,22 +56,32 @@ for (const [label, html] of [
   if (!html.includes('apple-mobile-web-app-capable')) errors.push(`${label} is missing Apple standalone metadata.`);
 }
 
-const arcsweepSoundfontAsset = extractAsset(arcsweepHtml, 'Web Arcsweep', 'premaq-shokz-soundfont');
-const bifrostSoundfontAsset = extractAsset(bifrostHtml, 'Bifröst', 'premaq-shokz-soundfont');
-if (arcsweepSoundfontAsset && bifrostSoundfontAsset && arcsweepSoundfontAsset !== bifrostSoundfontAsset) {
-  errors.push('Web Arcsweep and Bifröst do not share the same compiled PREMAQ Shokz sound-font asset.');
+const arcsweepBridgeAsset = requireAsset(
+  arcsweepHtml,
+  'Web Arcsweep',
+  'premaq-shokz-feather-stop-bridge',
+);
+const bifrostBridgeAsset = requireAsset(
+  bifrostHtml,
+  'Bifröst',
+  'premaq-shokz-feather-stop-bridge',
+);
+if (arcsweepBridgeAsset && bifrostBridgeAsset && arcsweepBridgeAsset !== bifrostBridgeAsset) {
+  errors.push('Web Arcsweep and Bifröst do not share the same compiled PREMAQ Shokz bundle.');
 }
 
-const arcsweepStopAsset = extractAsset(arcsweepHtml, 'Web Arcsweep', 'premaq-shokz-feather-stop-bridge');
-const bifrostStopAsset = extractAsset(bifrostHtml, 'Bifröst', 'premaq-shokz-feather-stop-bridge');
-if (arcsweepStopAsset && bifrostStopAsset && arcsweepStopAsset !== bifrostStopAsset) {
-  errors.push('Web Arcsweep and Bifröst do not share the same compiled Feather Stop bridge.');
+const standaloneSoundfontAssets = [
+  findAsset(arcsweepHtml, 'premaq-shokz-soundfont'),
+  findAsset(bifrostHtml, 'premaq-shokz-soundfont'),
+].filter(Boolean);
+if (standaloneSoundfontAssets.length === 2 && standaloneSoundfontAssets[0] !== standaloneSoundfontAssets[1]) {
+  errors.push('Web Arcsweep and Bifröst load different standalone PREMAQ Shokz sound-font assets.');
 }
 
-const soundfontAsset = bifrostSoundfontAsset || arcsweepSoundfontAsset;
-let compiledSoundfont = '';
-if (soundfontAsset) {
-  compiledSoundfont = read(path.join('assets', soundfontAsset), 'compiled PREMAQ Shokz sound font');
+const bundleAsset = standaloneSoundfontAssets[0] || bifrostBridgeAsset || arcsweepBridgeAsset;
+let compiledBundle = '';
+if (bundleAsset) {
+  compiledBundle = read(path.join('assets', bundleAsset), 'compiled PREMAQ Shokz bundle');
 }
 
 for (const marker of [
@@ -78,33 +89,20 @@ for (const marker of [
   'CONFIRM_SHOKZ_OUTPUT_FIRST',
   'bifrost:current-interface-session:v0.4',
   'premaq-shokz-soundfont-dock',
-  'FEATHER STOP',
-  '90–360 Hz',
-  '35 chained cycles',
-]) {
-  if (compiledSoundfont && !compiledSoundfont.includes(marker)) {
-    errors.push(`Compiled PREMAQ Shokz sound font is missing contract marker: ${marker}`);
-  }
-}
-
-if (compiledSoundfont.includes('navigator.vibrate')) {
-  errors.push('Compiled PREMAQ Shokz sound font reintroduced an internal iPad vibration claim.');
-}
-
-const stopAsset = bifrostStopAsset || arcsweepStopAsset;
-let compiledStopBridge = '';
-if (stopAsset) {
-  compiledStopBridge = read(path.join('assets', stopAsset), 'compiled PREMAQ Shokz Feather Stop bridge');
-}
-for (const marker of [
   'GLOBAL FEATHER STOP',
   '#feather-stop',
   '#stop-premaq-song',
   'hearthgate:feather-stop',
+  '90–360 Hz',
+  '35 chained cycles',
 ]) {
-  if (compiledStopBridge && !compiledStopBridge.includes(marker)) {
-    errors.push(`Compiled Feather Stop bridge is missing marker: ${marker}`);
+  if (compiledBundle && !compiledBundle.includes(marker)) {
+    errors.push(`Compiled PREMAQ Shokz bundle is missing contract marker: ${marker}`);
   }
+}
+
+if (compiledBundle.includes('navigator.vibrate')) {
+  errors.push('Compiled PREMAQ Shokz bundle reintroduced an internal iPad vibration claim.');
 }
 
 if (manifest) {
@@ -150,8 +148,7 @@ if (errors.length) {
 }
 
 console.log('[PREMAQ Shokz packaging check] OK');
-console.log(` shared sound-font asset: ${soundfontAsset}`);
-console.log(` shared Feather Stop asset: ${stopAsset}`);
+console.log(` shared PREMAQ Shokz bundle: ${bundleAsset}`);
 console.log(' routes: web Arcsweep + Bifröst');
 console.log(' bindings: physical keyboard + virtual keys + links + buttons + selects + semantic menu items');
 console.log(' PREMAQ: 35 chained cycles per P C R E M A Q voice');
