@@ -3,6 +3,7 @@ import './terra-aeterna-dial.js';
 import './two-shore-gate-ui.js';
 import './two-shore-eleven-year-wav-ui.js';
 import './two-shore-mythframe-wav-ui.js';
+import './two-shore-loop-shokz-spiral.js';
 
 const GLOBAL_STOP_SELECTOR = [
   '#feather-stop',
