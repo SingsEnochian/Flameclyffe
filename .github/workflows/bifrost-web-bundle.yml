@@ -1,0 +1,86 @@
+name: Bifröst web bundle
+
+on:
+  push:
+    branches:
+      - feature/bifrost-arcsweep-current-ui-v0.4
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bifrost-web-bundle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-web-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Deny stale engine and naming contracts
+        run: npm run contracts:verify
+
+      - name: Run STARWELL tests
+        run: npm run starwell:test
+
+      - name: Build STARWELL web application
+        run: npm run starwell:build
+
+      - name: Verify required Bifröst web markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist/starwell/bifrost/index.html
+          grep -R -F "two-shore-loop-playback" dist/starwell/assets >/dev/null
+          grep -R -F "two-shore-shokz-confirm" dist/starwell/assets >/dev/null
+          grep -R -F "hearthgate.two-shore-coil-release-spiral/v0.1" dist/starwell/assets >/dev/null
+          grep -R -F "hearthgate.two-shore-eleven-year-wav/v0.1" dist/starwell/assets >/dev/null
+          grep -R -F "Build all 11 years" dist/starwell/assets >/dev/null
+          grep -R -F "Save WAV" dist/starwell/assets >/dev/null
+
+      - name: Write deployment receipt
+        shell: bash
+        run: |
+          cat > dist/starwell/BIFROST_BUILD_RECEIPT.json <<JSON
+          {
+            "schema": "hearthgate.bifrost-web-build-receipt/v0.1",
+            "commit": "${GITHUB_SHA}",
+            "branch": "${GITHUB_REF_NAME}",
+            "run_id": "${GITHUB_RUN_ID}",
+            "built_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "routes": ["/", "/bifrost/", "/arcsweep-continuity/", "/world-tone-approval/"],
+            "features": [
+              "live-deep-groundwire",
+              "selectable-target-world",
+              "premaq-2025-2035",
+              "eleven-year-wav",
+              "loop-playback",
+              "shokz-explicit-verification",
+              "coil-release-upward-spiral"
+            ],
+            "physical_claim": false
+          }
+          JSON
+          (cd dist/starwell && find . -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+
+      - name: Upload portable web bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: flameclyffe-bifrost-live-web-${{ github.sha }}
+          path: dist/starwell
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 30
