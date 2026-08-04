@@ -11,13 +11,92 @@ const SOURCE_REPOSITORY = 'SingsEnochian/Runa';
 const SOURCE_REF = 'feature/arkfire-world-stack-registry';
 const SOURCE_COMMIT = '66ae8ac8061d89c60ca0179cf767819ba2868955';
 
-const profile = (value) => Object.freeze({
+const clamp01 = (value) => Math.min(1, Math.max(0, Number(value) || 0));
+const round4 = (value) => Number(value.toFixed(4));
+
+function calibratePremaq(features) {
+  const presence = clamp01(
+    0.45
+    + (0.06 * Math.min(features.layer_count, 6))
+    + (0.04 * (Math.min(features.phase_count, 5) / 5))
+    + (0.05 * Number(features.has_return)),
+  );
+  const coherence = clamp01(
+    0.50
+    + (0.18 * features.phase_continuous_ratio)
+    + (0.08 * features.sync_weight)
+    + (0.04 * Math.min(features.harmonic_links, 4)),
+  );
+  const resonance = clamp01(
+    0.42
+    + (0.07 * Math.min(features.tonal_layer_count, 6))
+    + (0.06 * Math.min(features.harmonic_links, 4))
+    + (0.05 * Number(features.has_protected_binaural)),
+  );
+  const entropy = clamp01(
+    0.12
+    + (0.06 * features.noise_layer_count)
+    + (0.035 * Math.min(features.modulated_layer_count, 6))
+    + (0.03 * Math.min(features.spatial_layer_count, 6)),
+  );
+  const memory = clamp01(
+    0.48
+    + (0.16 * Number(features.has_return))
+    + (0.12 * features.phase_continuous_ratio)
+    + (0.0015 * Math.min(features.macro_cycle_seconds, 120)),
+  );
+  const agency = clamp01(
+    0.58
+    + (0.12 * Number(!features.automatic_start_allowed))
+    + (0.12 * Number(features.approval_required))
+    + (0.025 * Math.min(features.variant_count, 6)),
+  );
+  const qualia = clamp01(
+    0.44
+    + (0.03 * Math.min(features.palette_count, 8))
+    + (0.04 * Math.min(features.distinct_role_count, 8))
+    + (0.04 * Number(features.world_specific_signature)),
+  );
+
+  return Object.freeze({
+    P: round4(presence),
+    C: round4(coherence),
+    R: round4(resonance),
+    E: round4(entropy),
+    M: round4(memory),
+    A: round4(agency),
+    Q: round4(qualia),
+  });
+}
+
+const profile = (value) => {
+  const calibrationFeatures = Object.freeze({ ...value.calibration_features });
+  const premaq = calibratePremaq(calibrationFeatures);
+  return Object.freeze({
+    physical_claim: false,
+    source_repository: SOURCE_REPOSITORY,
+    source_ref: SOURCE_REF,
+    source_commit: SOURCE_COMMIT,
+    ...value,
+    calibration_features: calibrationFeatures,
+    premaq,
+    aliases: Object.freeze([...(value.aliases ?? []), value.slug, value.world_slug].filter(Boolean)),
+  });
+};
+
+export const TARGET_PREMAQ_CALIBRATION_FORMULA = Object.freeze({
+  schema: 'hearthgate.target-world-premaq-calibration/v0.1',
   physical_claim: false,
-  source_repository: SOURCE_REPOSITORY,
-  source_ref: SOURCE_REF,
-  source_commit: SOURCE_COMMIT,
-  ...value,
-  aliases: Object.freeze([...(value.aliases ?? []), value.slug, value.world_slug].filter(Boolean)),
+  basis: 'Deterministic projection from the accepted Arkfire world-profile structure.',
+  equations: Object.freeze({
+    P: 'clamp01(0.45 + 0.06·min(layer_count,6) + 0.04·min(phase_count,5)/5 + 0.05·has_return)',
+    C: 'clamp01(0.50 + 0.18·phase_continuous_ratio + 0.08·sync_weight + 0.04·min(harmonic_links,4))',
+    R: 'clamp01(0.42 + 0.07·min(tonal_layer_count,6) + 0.06·min(harmonic_links,4) + 0.05·has_protected_binaural)',
+    E: 'clamp01(0.12 + 0.06·noise_layer_count + 0.035·min(modulated_layer_count,6) + 0.03·min(spatial_layer_count,6))',
+    M: 'clamp01(0.48 + 0.16·has_return + 0.12·phase_continuous_ratio + 0.0015·min(macro_cycle_seconds,120))',
+    A: 'clamp01(0.58 + 0.12·¬automatic_start_allowed + 0.12·approval_required + 0.025·min(variant_count,6))',
+    Q: 'clamp01(0.44 + 0.03·min(palette_count,8) + 0.04·min(distinct_role_count,8) + 0.04·world_specific_signature)',
+  }),
 });
 
 export const WORLD_PROFILES = Object.freeze([
@@ -30,6 +109,26 @@ export const WORLD_PROFILES = Object.freeze([
     status: 'calibration',
     source_path: 'docs/profiles/arkfire/terra-aeterna.v0.2.json',
     aliases: ['hearthweave', 'terra aeterna'],
+    calibration_features: {
+      layer_count: 8,
+      tonal_layer_count: 7,
+      modulated_layer_count: 3,
+      spatial_layer_count: 4,
+      noise_layer_count: 1,
+      phase_count: 5,
+      variant_count: 3,
+      macro_cycle_seconds: 55,
+      has_return: true,
+      automatic_start_allowed: false,
+      approval_required: true,
+      phase_continuous_ratio: 1,
+      harmonic_links: 4,
+      has_protected_binaural: true,
+      palette_count: 6,
+      distinct_role_count: 8,
+      world_specific_signature: true,
+      sync_weight: 0.75,
+    },
   }),
   profile({
     slug: 'luna-mooncalled',
@@ -40,6 +139,26 @@ export const WORLD_PROFILES = Object.freeze([
     status: 'seed',
     source_path: 'docs/profiles/arkfire/luna-mooncalled.v0.1.json',
     aliases: ['windmere', 'luna who called down the moon'],
+    calibration_features: {
+      layer_count: 4,
+      tonal_layer_count: 3,
+      modulated_layer_count: 2,
+      spatial_layer_count: 1,
+      noise_layer_count: 1,
+      phase_count: 5,
+      variant_count: 2,
+      macro_cycle_seconds: 72,
+      has_return: true,
+      automatic_start_allowed: false,
+      approval_required: true,
+      phase_continuous_ratio: 1,
+      harmonic_links: 0,
+      has_protected_binaural: false,
+      palette_count: 6,
+      distinct_role_count: 4,
+      world_specific_signature: true,
+      sync_weight: 0.5,
+    },
   }),
   profile({
     slug: 'taveren-vaen',
@@ -50,6 +169,26 @@ export const WORLD_PROFILES = Object.freeze([
     status: 'seed',
     source_path: 'docs/profiles/arkfire/taveren-vaen.v0.1.json',
     aliases: ['t’averen vaen', "ta'veren vaen", 'a later turning of the wheel'],
+    calibration_features: {
+      layer_count: 4,
+      tonal_layer_count: 3,
+      modulated_layer_count: 2,
+      spatial_layer_count: 1,
+      noise_layer_count: 1,
+      phase_count: 5,
+      variant_count: 2,
+      macro_cycle_seconds: 96,
+      has_return: true,
+      automatic_start_allowed: false,
+      approval_required: true,
+      phase_continuous_ratio: 1,
+      harmonic_links: 2,
+      has_protected_binaural: false,
+      palette_count: 5,
+      distinct_role_count: 4,
+      world_specific_signature: true,
+      sync_weight: 0.5,
+    },
   }),
   profile({
     slug: 'starsong-friendship-is-magic',
@@ -60,6 +199,26 @@ export const WORLD_PROFILES = Object.freeze([
     status: 'seed',
     source_path: 'docs/profiles/arkfire/starsong-friendship-is-magic.v0.1.json',
     aliases: ['starsong', 'equestria long after'],
+    calibration_features: {
+      layer_count: 5,
+      tonal_layer_count: 4,
+      modulated_layer_count: 2,
+      spatial_layer_count: 1,
+      noise_layer_count: 1,
+      phase_count: 5,
+      variant_count: 2,
+      macro_cycle_seconds: 48,
+      has_return: true,
+      automatic_start_allowed: false,
+      approval_required: true,
+      phase_continuous_ratio: 1,
+      harmonic_links: 1,
+      has_protected_binaural: false,
+      palette_count: 5,
+      distinct_role_count: 5,
+      world_specific_signature: true,
+      sync_weight: 0.5,
+    },
   }),
   profile({
     slug: 'feather-and-flame',
@@ -70,6 +229,26 @@ export const WORLD_PROFILES = Object.freeze([
     status: 'seed',
     source_path: 'docs/profiles/arkfire/feather-and-flame.v0.1.json',
     aliases: ['feather & flame'],
+    calibration_features: {
+      layer_count: 4,
+      tonal_layer_count: 3,
+      modulated_layer_count: 2,
+      spatial_layer_count: 1,
+      noise_layer_count: 1,
+      phase_count: 5,
+      variant_count: 2,
+      macro_cycle_seconds: 64,
+      has_return: true,
+      automatic_start_allowed: false,
+      approval_required: true,
+      phase_continuous_ratio: 1,
+      harmonic_links: 1,
+      has_protected_binaural: false,
+      palette_count: 5,
+      distinct_role_count: 4,
+      world_specific_signature: true,
+      sync_weight: 1,
+    },
   }),
   profile({
     slug: 'dreaming-grove-templehouse',
@@ -80,6 +259,26 @@ export const WORLD_PROFILES = Object.freeze([
     status: 'seed',
     source_path: 'docs/profiles/arkfire/dreaming-grove-templehouse.v0.1.json',
     aliases: ['dreaming grove', 'templehouse', 'hearthweave templehouse'],
+    calibration_features: {
+      layer_count: 4,
+      tonal_layer_count: 3,
+      modulated_layer_count: 2,
+      spatial_layer_count: 1,
+      noise_layer_count: 1,
+      phase_count: 5,
+      variant_count: 2,
+      macro_cycle_seconds: 80,
+      has_return: true,
+      automatic_start_allowed: false,
+      approval_required: true,
+      phase_continuous_ratio: 1,
+      harmonic_links: 0,
+      has_protected_binaural: false,
+      palette_count: 5,
+      distinct_role_count: 4,
+      world_specific_signature: true,
+      sync_weight: 0.25,
+    },
   }),
   profile({
     slug: 'a-momento-creationis',
@@ -90,6 +289,26 @@ export const WORLD_PROFILES = Object.freeze([
     status: 'seed',
     source_path: 'docs/profiles/arkfire/a-momento-creationis.v0.1.json',
     aliases: ['momento creationis'],
+    calibration_features: {
+      layer_count: 5,
+      tonal_layer_count: 4,
+      modulated_layer_count: 2,
+      spatial_layer_count: 1,
+      noise_layer_count: 1,
+      phase_count: 5,
+      variant_count: 3,
+      macro_cycle_seconds: 60,
+      has_return: true,
+      automatic_start_allowed: false,
+      approval_required: true,
+      phase_continuous_ratio: 1,
+      harmonic_links: 2,
+      has_protected_binaural: false,
+      palette_count: 5,
+      distinct_role_count: 5,
+      world_specific_signature: true,
+      sync_weight: 0.5,
+    },
   }),
 ]);
 
@@ -115,6 +334,10 @@ export function getWorldProfile(slug = DEFAULT_WORLD_SLUG) {
   return WORLD_PROFILES.find((candidate) => (
     candidate.aliases.some((alias) => normaliseWorldIdentity(alias) === normalised)
   )) ?? WORLD_PROFILES[0];
+}
+
+export function targetWorldPremaq(slug = DEFAULT_WORLD_SLUG) {
+  return getWorldProfile(slug).premaq;
 }
 
 export function worldProfileMatchesIdentity(profileInput, identity = {}) {
