@@ -1,0 +1,186 @@
+.song-panel {
+  grid-column: 1 / -1;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(131, 239, 217, 0.075), transparent 24rem),
+    radial-gradient(circle at 88% 18%, rgba(199, 166, 255, 0.075), transparent 28rem),
+    var(--panel-strong);
+}
+
+.song-count-badge {
+  padding: 0.42rem 0.68rem;
+  border: 1px solid rgba(243, 204, 117, 0.34);
+  border-radius: 999px;
+  color: var(--gold);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.premaq-song-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.premaq-song-summary div {
+  min-width: 0;
+  padding: 0.78rem;
+  border: 1px solid var(--line);
+  border-radius: 0.78rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.premaq-song-summary small {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.premaq-song-summary strong {
+  display: block;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.premaq-song-voices {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.premaq-song-voice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.25rem 0.55rem;
+  align-items: center;
+  min-width: 0;
+  padding: 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: 0.82rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.premaq-song-voice strong {
+  display: grid;
+  grid-row: 1 / span 2;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(131, 239, 217, 0.4);
+  border-radius: 50%;
+  color: var(--aqua);
+}
+
+.premaq-song-voice span {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 720;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.premaq-song-voice small {
+  grid-column: 2;
+  overflow: hidden;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.premaq-song-controls {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.35fr) minmax(0, 1.65fr);
+  gap: 0.8rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+.premaq-song-controls label {
+  display: grid;
+  gap: 0.48rem;
+  padding: 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: 0.82rem;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.premaq-song-controls label span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.premaq-song-controls .action-row {
+  margin-top: 0;
+}
+
+#premaq-song-progress {
+  width: 100%;
+  height: 0.68rem;
+  margin-top: 1rem;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  accent-color: var(--gold);
+}
+
+#premaq-song-progress::-webkit-progress-bar {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+#premaq-song-progress::-webkit-progress-value {
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aqua), var(--gold), var(--violet));
+}
+
+#premaq-song-status {
+  margin: 0.65rem 0 0;
+  padding: 0.72rem 0.82rem;
+  border-radius: 0.75rem;
+  background: rgba(131, 239, 217, 0.055);
+  color: #bfe8df;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+#premaq-song-status[data-kind="playing"] {
+  background: rgba(243, 204, 117, 0.08);
+  color: #ffe1a0;
+}
+
+#premaq-song-status[data-kind="blocked"] {
+  background: rgba(255, 138, 147, 0.08);
+  color: #ffc2c7;
+}
+
+#premaq-song-status[data-kind="complete"] {
+  background: rgba(199, 166, 255, 0.09);
+  color: #e3d2ff;
+}
+
+@media (max-width: 1180px) {
+  .premaq-song-voices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .premaq-song-summary,
+  .premaq-song-controls { grid-template-columns: 1fr; }
+  .premaq-song-voices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .song-count-badge { white-space: normal; }
+}
+
+@media (max-width: 430px) {
+  .premaq-song-voices { grid-template-columns: 1fr; }
+}
