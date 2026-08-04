@@ -114,9 +114,6 @@ for (const marker of [
     errors.push(`Packed STARWELL JavaScript is missing kernel or sound-font marker: ${marker}`);
   }
 }
-if (compiledSource.includes('navigator.vibrate')) {
-  errors.push('Packed STARWELL JavaScript reintroduced an internal iPad vibration claim.');
-}
 
 if (fs.existsSync(arcsweepPath) && fs.existsSync(bifrostPath)) {
   const arcsweepHtml = fs.readFileSync(arcsweepPath, 'utf8');
@@ -127,7 +124,20 @@ if (fs.existsSync(arcsweepPath) && fs.existsSync(bifrostPath)) {
     errors.push('Packed web Arcsweep and Bifröst do not share one PREMAQ Shokz sound-font asset.');
   }
   const assetName = bifrostAsset || arcsweepAsset;
-  if (assetName) requireFile(path.join(assetsDir, assetName), 'compiled PREMAQ Shokz sound font');
+  if (assetName) {
+    const assetPath = path.join(assetsDir, assetName);
+    if (requireFile(assetPath, 'compiled PREMAQ Shokz sound font')) {
+      const soundfontSource = fs.readFileSync(assetPath, 'utf8');
+      if (soundfontSource.includes('navigator.vibrate')) {
+        errors.push('Packed PREMAQ Shokz asset reintroduced an internal iPad vibration claim.');
+      }
+      for (const marker of ['90–360 Hz', '35 chained cycles', 'FEATHER STOP']) {
+        if (!soundfontSource.includes(marker)) {
+          errors.push(`Packed PREMAQ Shokz asset is missing marker: ${marker}`);
+        }
+      }
+    }
+  }
   for (const [label, html] of [['web Arcsweep', arcsweepHtml], ['Bifröst', bifrostHtml]]) {
     if (!html.includes('viewport-fit=cover')) errors.push(`Packed ${label} is missing iPad safe-area metadata.`);
     if (!html.includes('apple-mobile-web-app-capable')) errors.push(`Packed ${label} is missing Apple standalone metadata.`);
