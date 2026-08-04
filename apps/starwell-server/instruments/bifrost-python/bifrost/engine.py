@@ -1,7 +1,7 @@
 """BIFRÖST — the engine that folds a myth into structure and opens structure
 back into myth, along a controlled cycle that never returns to the same point.
 
-    collapse -> release -> collapse -> release
+    compress -> release -> compress -> release
 
 Each crossing advances along an outward spiral:
 
@@ -16,7 +16,7 @@ from typing import Optional
 import os
 import json
 
-from .models import Breath, SEEDS, COLLAPSE, RELEASE
+from .models import Breath, SEEDS, COMPRESS, RELEASE
 from .lineage import Lineage
 
 
@@ -56,7 +56,7 @@ class Bifrost:
     def remembers(self) -> bool:
         return self.store is not None and self.store.persistent
 
-    def cross(self, seed: str, direction: str = COLLAPSE) -> Optional[Breath]:
+    def cross(self, seed: str, direction: str = COMPRESS) -> Optional[Breath]:
         """Make one crossing. Returns a Breath, or None if a new seed can't be
         translated live."""
         seed = (seed or "").strip()
@@ -94,9 +94,9 @@ class Bifrost:
         if not self._client:
             return None
         facing = (
-            "The seed is offered as a MYTH. Collapse stroke: fold it into structure "
+            "The seed is offered as a MYTH. Compress stroke: fold it into structure "
             "(lead into The Measured), but render The Felt fully too."
-            if direction == COLLAPSE else
+            if direction == COMPRESS else
             "The seed is offered as a MEASUREMENT / scientific idea. Release stroke: open "
             "it into myth (lead into The Felt), but render The Measured fully too."
         )

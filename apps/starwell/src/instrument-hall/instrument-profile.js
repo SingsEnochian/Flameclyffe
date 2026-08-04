@@ -27,7 +27,7 @@ export const TERRA_AETERNA_INSTRUMENT_PROFILE = Object.freeze({
   mathematics: Object.freeze({
     tension_limit: 1,
     recurrence: 'r[n+1] = r[n] + delta_r[n]',
-    collapse: 'maximum-poised-tension',
+    compress: 'maximum-poised-tension',
     release: 'stored-tension-to-expression',
     shore_law: 'both-shores-remain-lit',
   }),

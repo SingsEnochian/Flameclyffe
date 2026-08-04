@@ -4,7 +4,7 @@ import test from 'node:test';
 import {
   EPISTEMIC_MODES,
   applyTension,
-  collapse,
+  compress,
   createInstrumentState,
   release,
   standingWavePlan,
@@ -80,11 +80,11 @@ test('synthetic scaffolding remains visibly inactive', () => {
   );
 });
 
-test('collapse is maximum poised tension without loss of either shore', () => {
+test('compress is maximum poised tension without loss of either shore', () => {
   const state = activeState();
-  const poised = collapse(state);
+  const poised = compress(state);
 
-  assert.equal(poised.phase, 'collapse');
+  assert.equal(poised.phase, 'compress');
   assert.equal(poised.poised, true);
   assert.equal(poised.tension, poised.tension_limit);
   assert.deepEqual(poised.shores, { measured: true, felt: true });
@@ -101,7 +101,7 @@ test('only sourced active data may apply tension and drive release', () => {
     /HEARTHGATE_SYNTHETIC_CANNOT_DRIVE_ACTIVE_STATE/,
   );
 
-  const poised = collapse(gathered);
+  const poised = compress(gathered);
   const released = release(poised, {
     shape: 'sentence-cadence',
     delta_radius: datum(0.31, 'observed-release-radius'),

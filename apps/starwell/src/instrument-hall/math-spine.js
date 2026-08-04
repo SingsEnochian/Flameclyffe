@@ -14,8 +14,8 @@ const ACTIVE_MODES = new Set([
   EPISTEMIC_MODES.CALIBRATED,
 ]);
 
-export const COLLAPSE_DEFINITION = Object.freeze({
-  name: 'collapse',
+export const COMPRESS_DEFINITION = Object.freeze({
+  name: 'compress',
   meaning: 'maximum-poised-tension',
   destructive: false,
   information_loss: false,
@@ -216,7 +216,7 @@ export function applyTension(state, impulse) {
   if (!isActiveDatum(datum)) throw new Error('HEARTHGATE_SYNTHETIC_CANNOT_DRIVE_ACTIVE_STATE');
   const tension = Math.min(state.tension_limit, state.tension + datum.value);
   return nextState(state, {
-    phase: tension >= state.tension_limit ? 'collapse' : 'gather',
+    phase: tension >= state.tension_limit ? 'compress' : 'gather',
     poised: tension >= state.tension_limit,
     tension,
   }, {
@@ -226,16 +226,16 @@ export function applyTension(state, impulse) {
   });
 }
 
-export function collapse(state, source = 'manual-collapse') {
+export function compress(state, source = 'manual-compress') {
   assertActiveInstrumentState(state);
   return nextState(state, {
-    phase: 'collapse',
+    phase: 'compress',
     poised: true,
     tension: state.tension_limit,
   }, {
-    kind: 'collapse',
+    kind: 'compress',
     source,
-    definition: COLLAPSE_DEFINITION.meaning,
+    definition: COMPRESS_DEFINITION.meaning,
     tension: state.tension_limit,
     destructive: false,
     information_loss: false,
@@ -349,7 +349,7 @@ export function assertInstrumentState(state) {
   if (Number.isFinite(state.tension_limit) && state.tension > state.tension_limit) {
     throw new Error('HEARTHGATE_TENSION_OUT_OF_BOUNDS');
   }
-  if (state.phase === 'collapse' && !state.poised) throw new Error('HEARTHGATE_COLLAPSE_MUST_BE_POISED');
+  if (state.phase === 'compress' && !state.poised) throw new Error('HEARTHGATE_COMPRESS_MUST_BE_POISED');
   if (state.active && (!state.observation?.active || !state.calibration?.active)) {
     throw new Error('HEARTHGATE_ACTIVE_STATE_REQUIRES_LIVE_OR_DERIVED_DATA');
   }

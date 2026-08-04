@@ -1,6 +1,6 @@
 export const BIFROST_RUNTIME_SCHEMA = 'hearthgate.bifrost-runtime/v1';
 export const BIFROST_CROSSING_SCHEMA = 'hearthgate.bifrost-crossing/v1';
-export const COLLAPSE_STROKE = 'collapse';
+export const COMPRESS_STROKE = 'compress';
 export const RELEASE_STROKE = 'release';
 
 function canonical(value) {
@@ -94,7 +94,7 @@ export class BifrostRuntime {
   }
 
   async cross({ seed, stroke, measured, felt, rhyme, basisId, observedAt, mythienceReceiptId = null } = {}) {
-    if (![COLLAPSE_STROKE, RELEASE_STROKE].includes(stroke)) {
+    if (![COMPRESS_STROKE, RELEASE_STROKE].includes(stroke)) {
       throw new Error('HEARTHGATE_BIFROST_STROKE_REQUIRED');
     }
     if (!Number.isFinite(Date.parse(observedAt))) {

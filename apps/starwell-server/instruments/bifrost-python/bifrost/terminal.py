@@ -8,7 +8,7 @@ import time
 import textwrap
 
 from .engine import Bifrost
-from .models import Breath, COLLAPSE, RELEASE, FOUNDING
+from .models import Breath, COMPRESS, RELEASE, FOUNDING
 
 _TTY = sys.stdout.isatty()
 MEASURED_RGB = (134, 197, 216)
@@ -150,13 +150,13 @@ def main():
     if not _AUDIO:
         print(_c("  tone: unavailable (`pip install numpy sounddevice`).", MUTE_RGB))
     print(_c("  seeds now: the threshold · descent and return · entropy · entanglement", MUTE_RGB))
-    print(_c("  commands:  :m collapse   :f release   :tone   :lineage   :forget   :quit", MUTE_RGB))
+    print(_c("  commands:  :m compress   :f release   :tone   :lineage   :forget   :quit", MUTE_RGB))
     print()
 
     if prior == 0:
-        render_crossing(bridge.cross("the threshold", COLLAPSE))
+        render_crossing(bridge.cross("the threshold", COMPRESS))
 
-    direction = COLLAPSE
+    direction = COMPRESS
     while True:
         try:
             raw = input(_c("\n  seed » ", BRIDGE_RGB)).strip()
@@ -170,9 +170,9 @@ def main():
         if low in (":q", ":quit", "quit", "exit"):
             print(_c("\n  Bifröst rests. The shores hold. Exits open both ways.\n", MUTE_RGB))
             break
-        if low in (":m", ":collapse", ":myth"):
-            direction = COLLAPSE
-            print(_c("  stroke: collapse · myth → measured", MEASURED_RGB))
+        if low in (":m", ":compress", ":myth"):
+            direction = COMPRESS
+            print(_c("  stroke: compress · myth → measured", MEASURED_RGB))
             continue
         if low in (":f", ":release", ":felt"):
             direction = RELEASE

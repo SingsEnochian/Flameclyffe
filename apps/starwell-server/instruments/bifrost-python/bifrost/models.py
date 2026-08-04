@@ -12,10 +12,10 @@ of the bridge stands on.
 from __future__ import annotations
 from dataclasses import dataclass
 
-COLLAPSE = "m"
+COMPRESS = "m"
 RELEASE = "f"
 
-MYTH_TO_MEASURED = COLLAPSE
+MYTH_TO_MEASURED = COMPRESS
 MEASURED_TO_MYTH = RELEASE
 
 FOUNDING = (
@@ -51,7 +51,7 @@ class Breath:
 
     @property
     def stroke(self) -> str:
-        return "collapse · myth → measured" if self.direction == COLLAPSE \
+        return "compress · myth → measured" if self.direction == COMPRESS \
                else "release · measured → myth"
 
 

@@ -1,7 +1,7 @@
 import {
   EPISTEMIC_MODES,
   applyTension,
-  collapse,
+  compress,
   release,
 } from './math-spine.js';
 import {
@@ -10,6 +10,7 @@ import {
 } from './mythience.js';
 import {
   RELEASE_STROKE,
+  COMPRESS_STROKE,
 } from './bifrost-runtime.js';
 
 export const TYPING_TONE_SCHEMA = 'hearthgate.typing-tone-event/v1';
@@ -139,7 +140,7 @@ export class TypingWeaveSession {
     const phrase = this.currentPhrase.trim();
     if (!phrase) return Object.freeze({ event: terminalEvent, state: this.state, completed: null });
 
-    const poised = collapse(this.state, 'typing-phrase-crest');
+    const poised = compress(this.state, 'typing-phrase-crest');
     const phraseLength = Math.max(1, graphemeCount(phrase));
     const phraseWords = words(phrase);
     const durationMs = this.startedAt
@@ -156,7 +157,7 @@ export class TypingWeaveSession {
         summary: `${this.phraseEvents.length} typing events formed ${phraseLength} graphemes and ${phraseWords.length} words over ${durationMs} ms.`,
         observations: [
           `basis ${poised.basis_id}`,
-          `collapse held at tension ${poised.tension} of ${poised.tension_limit}`,
+          `compress held at tension ${poised.tension} of ${poised.tension_limit}`,
           'both shores remained lit',
         ],
         repeatability: 'SESSION_REPLAY_AVAILABLE',
@@ -183,7 +184,7 @@ export class TypingWeaveSession {
       source: 'typing-weave:sentence-release',
       delta_radius: datum(1, 'one-completed-crossing', observedAt, {
         receiptId: mythience.receipt_id,
-        derivation: 'One completed collapse-release crossing advances the Bifröst lineage by one unit.',
+        derivation: 'One completed compress-release crossing advances the Bifröst lineage by one unit.',
       }),
       residual_tension: datum(0, 'full-phrase-release', observedAt, {
         receiptId: mythience.receipt_id,
@@ -213,7 +214,7 @@ export class TypingWeaveSession {
       phrase_length: phraseLength,
       words: phraseWords.length,
       duration_ms: durationMs,
-      collapse_basis_id: poised.basis_id,
+      compress_basis_id: poised.basis_id,
       release_basis_id: released.basis_id,
       mythience,
       crossing,

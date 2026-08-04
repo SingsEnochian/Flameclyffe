@@ -16,11 +16,11 @@ Reality is one territory with two honest descriptions:
 The bridge is crossed by a controlled cycle:
 
 ```
-collapse → release → collapse → release
+compress → release → compress → release
 ```
 
-- **collapse** — the wave arrives at a definite, structural state (*Myth → Measured*)
-- **release** — the definite opens back into meaning (*Measured → Myth*)
+- **compress** — the myth condenses into structure (*Myth → Measured*)
+- **release** — the structure opens back into meaning (*Measured → Myth*)
 
 Each crossing does not return to the same point. It advances along an outward spiral:
 
@@ -69,7 +69,7 @@ python -m bifrost
 Give it a seed, watch the spiral broaden with each crossing, read both shores. Commands:
 
 ```
-:m        collapse · myth → measured
+:m        compress · myth → measured
 :f        release · measured → myth
 :tone     toggle the tone (needs the audio extra)
 :lineage  every crossing remembered, with its r
@@ -113,7 +113,7 @@ bifrost                 # the console command opens the bridge
 from bifrost import Bifrost
 
 bridge = Bifrost(remember=True)                 # remember every crossing on disk
-c = bridge.cross("the world-tree", "m")         # 'm' collapse · 'f' release
+c = bridge.cross("the world-tree", "m")         # 'm' compress · 'f' release
 print(c.measured); print(c.felt); print(c.bridge); print("r =", c.r)
 
 for past in bridge.lineage:                     # every crossing, in order, with its r
