@@ -7,9 +7,12 @@
   "enabledByDefault": true,
   "route": "/starwell/arcsweep-continuity/",
   "entrypoint": "arcsweep-continuity/index.html",
+  "interfaceRoute": "/starwell/bifrost/",
+  "interfaceEntrypoint": "bifrost/index.html",
   "engine": {
     "module": "src/arcsweep-temporal-quantum/engine.js",
     "compressionRelease": "src/arcsweep-temporal-quantum/compression-release.js",
+    "interface": "bifrost/main.js",
     "somaticRenderer": "src/ipad-somatic-haptics.js",
     "kernel": "src/hearthweave-kernel/index.js",
     "formalism": "temporal-compression-release-state-machine",
@@ -34,6 +37,7 @@
     "outward-spiral-memory",
     "world-specific-tone-sequences",
     "rowan-owned-tone-approval",
+    "dedicated-bifrost-interface",
     "ipad-installable-pwa",
     "external-body-transducer-rendering",
     "shokz-bone-conduction-rendering",
@@ -68,6 +72,7 @@
   "installContract": {
     "required": true,
     "verifyRoute": "arcsweep-continuity/index.html",
+    "verifyInterfaceRoute": "bifrost/index.html",
     "verifySomaticRoute": "world-tone-approval/index.html",
     "verifySchemas": [
       "schemas/premaq-state-v2.schema.json",
