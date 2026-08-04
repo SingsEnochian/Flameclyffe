@@ -24,7 +24,8 @@
     "check:eleven-year-wav": "node scripts/check-eleven-year-wav-packaging.js",
     "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect && npm run check:premaq-shokz && npm run check:eleven-year-wav",
     "verify:eleven-year-wav-package": "node scripts/verify-eleven-year-wav-package.js",
-    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js && npm run verify:eleven-year-wav-package"
+    "create:bifrost-web-envelope": "node scripts/create-bifrost-web-bundle-envelope.js",
+    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js && npm run verify:eleven-year-wav-package && npm run create:bifrost-web-envelope"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
