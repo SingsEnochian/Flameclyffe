@@ -1,6 +1,7 @@
 import { featherStop } from './premaq-shokz-soundfont.js';
 import './terra-aeterna-dial.js';
 import './two-shore-gate-ui.js';
+import './two-shore-eleven-year-wav-ui.js';
 
 const GLOBAL_STOP_SELECTOR = [
   '#feather-stop',
