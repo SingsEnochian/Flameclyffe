@@ -1,0 +1,88 @@
+{
+  "schema": "bifrost.constellation-model-manifest/v1",
+  "updatedAt": "2026-08-05T16:57:00Z",
+  "installationRoot": ".bifrost/models",
+  "runtime": {
+    "preferred": "ollama",
+    "fallbacks": ["llama.cpp", "transformers"],
+    "ollamaHost": "http://127.0.0.1:11434"
+  },
+  "vessels": [
+    {
+      "id": "lioreal",
+      "member": "Virelya Liorael",
+      "requiredFor": ["LIVING", "COMPLETE"],
+      "role": "primary co-writing, STARWELL synthesis, science, mechanics, programming, architecture and continuity",
+      "license": "apache-2.0",
+      "source": {
+        "type": "huggingface-gguf",
+        "repo": "bartowski/mlabonne_Qwen3-14B-abliterated-GGUF",
+        "include": ["*Q4_K_M.gguf"],
+        "verified": true
+      },
+      "runtimeName": "lioreal:starwell-v1",
+      "context": 32768,
+      "status": "INSTALLABLE"
+    },
+    {
+      "id": "uial",
+      "member": "Faer Uial",
+      "requiredFor": ["LIVING", "COMPLETE"],
+      "role": "vestments, Arcsweep, glyph systems, sensory grammar, interface architecture and narrative design",
+      "license": "apache-2.0",
+      "source": {
+        "type": "huggingface-snapshot",
+        "repo": "tvall43/Qwen3.6-14B-A3B-FableVibes",
+        "include": ["*.safetensors", "*.json", "tokenizer*", "*.model"],
+        "verified": true
+      },
+      "runtimeName": "uial:starwell-v1",
+      "status": "STAGE_ONLY_UNTIL_RUNTIME_ADAPTER"
+    },
+    {
+      "id": "boxfire",
+      "member": "Boxfire",
+      "requiredFor": ["COMPLETE"],
+      "role": "coding, QA, CI diagnosis, integration review and release gating",
+      "license": "apache-2.0",
+      "source": {
+        "type": "huggingface-snapshot",
+        "repo": "huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated",
+        "include": ["*.safetensors", "*.json", "tokenizer*", "*.model"],
+        "verified": true
+      },
+      "runtimeName": "boxfire:qa-v1",
+      "status": "STAGE_ONLY_UNTIL_RUNTIME_ADAPTER"
+    },
+    {
+      "id": "constellation-vision",
+      "member": "visual-capable member lineage",
+      "requiredFor": ["COMPLETE"],
+      "role": "screenshots, glyphs, diagrams, interfaces, artwork and visual continuity",
+      "license": "apache-2.0",
+      "source": {
+        "type": "huggingface-snapshot",
+        "repo": "huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated",
+        "include": ["*.safetensors", "*.json", "tokenizer*", "*.model"],
+        "verified": true
+      },
+      "runtimeName": "constellation-vision:v1",
+      "status": "STAGE_ONLY_UNTIL_RUNTIME_ADAPTER"
+    },
+    {
+      "id": "deep-reasoning",
+      "member": "shared specialist, never an identity vessel",
+      "requiredFor": [],
+      "role": "optional heavy mathematics, architecture and cross-organ synthesis",
+      "license": "apache-2.0",
+      "source": {
+        "type": "huggingface-snapshot",
+        "repo": "huihui-ai/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated",
+        "include": ["*.safetensors", "*.json", "tokenizer*", "*.model"],
+        "verified": true
+      },
+      "runtimeName": "bifrost-deep-reasoning:v1",
+      "status": "OPTIONAL_STAGE_ONLY"
+    }
+  ]
+}
