@@ -21,6 +21,7 @@
   <script type='module' src='./src/stonewood-themes.js'></script>
   <script type='module' src='./src/hearthgate-arcsweep.js'></script>
   <script type='module' src='./src/arcsweep-continuity/session-context-indicator.js'></script>
+  <script type='module' src='./src/bifrost-foundry/foundry-panel.js'></script>
   <link rel='stylesheet' href='./src/starwell-hero-art.css'/>
   <link rel='stylesheet' href='./src/deep-observer-mobile.css'/>
   <link rel='stylesheet' href='./src/deep-hud-bounds.css'/>
@@ -31,6 +32,7 @@
   <link rel='stylesheet' href='./src/living-room-door.css'/>
   <link rel='stylesheet' href='./src/glyph-studio-door.css'/>
   <link rel='stylesheet' href='./src/framework-door-rack.css'/>
+  <link rel='stylesheet' href='./src/bifrost-foundry/foundry-panel.css'/>
 </head>
 <body>
   <header class='hearthgate-housebar'>
@@ -50,41 +52,27 @@
     <span class='hearthgate-reception'>Reception · Terra Aeterna</span>
   </header>
   <div id='root'></div>
+  <section id='bifrost-foundry-root' aria-label='Bifröst living assembly foundry'></section>
   <nav class='framework-door-rack' aria-label='Hearthgate room doors'>
     <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the Hearth'>
       <span class='living-room-doorway-mark' aria-hidden='true'>✴</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Enter the Hearth</strong>
-        <em>Living Room, anchor field, doors, and Fifth Form centre.</em>
-      </span>
+      <span class='living-room-doorway-copy'><strong>Enter the Hearth</strong><em>Living Room, anchor field, doors, and Fifth Form centre.</em></span>
     </a>
     <a class='glyph-studio-doorway framework-doorway-glyph' href='./glyph-studio/' aria-label='Open the Foundry and Glyph Studio'>
       <span class='glyph-studio-doorway-mark' aria-hidden='true'>◇</span>
-      <span class='glyph-studio-doorway-copy'>
-        <strong>Open the Foundry</strong>
-        <em>Full Glyph Studio: Apple Pencil canvas, brushes, colour, layers, text, and FontForge handoff.</em>
-      </span>
+      <span class='glyph-studio-doorway-copy'><strong>Open the Foundry</strong><em>Full Glyph Studio: Apple Pencil canvas, brushes, colour, layers, text, and FontForge handoff.</em></span>
     </a>
     <a class='living-room-doorway framework-doorway-signal' href='./signal-well/' aria-label='Open Signal Well'>
       <span class='living-room-doorway-mark' aria-hidden='true'>⌁</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Open Signal Well</strong>
-        <em>Local radio waterfall, human-led sifting, RFI ledger, candidates, and provenance export.</em>
-      </span>
+      <span class='living-room-doorway-copy'><strong>Open Signal Well</strong><em>Local radio waterfall, human-led sifting, RFI ledger, candidates, and provenance export.</em></span>
     </a>
     <a class='living-room-doorway framework-doorway-continuity' href='./arcsweep-continuity/' aria-label='Open the Arcsweep Continuity Gate'>
       <span class='living-room-doorway-mark' aria-hidden='true'>↦</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Open Continuity Gate</strong>
-        <em>Ingest reviewed continuity, resolve a bounded session context, load it ephemerally, or roll it back without committing canon.</em>
-      </span>
+      <span class='living-room-doorway-copy'><strong>Open Continuity Gate</strong><em>Ingest reviewed continuity, resolve a bounded session context, load it ephemerally, or roll it back without committing canon.</em></span>
     </a>
     <a class='living-room-doorway framework-doorway-hearthgate' id='hearthgate-local-door' href='../hearthgate.html' aria-label='Open local Hearthgate rooms' hidden>
       <span class='living-room-doorway-mark' aria-hidden='true'>⬡</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Open Local Hearthgate</strong>
-        <em>Local rooms, Grove chat, Archive, notes, and House configuration.</em>
-      </span>
+      <span class='living-room-doorway-copy'><strong>Open Local Hearthgate</strong><em>Local rooms, Grove chat, Archive, notes, and House configuration.</em></span>
     </a>
   </nav>
   <div id='city-state-motion-root'></div>
