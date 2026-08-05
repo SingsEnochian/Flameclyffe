@@ -9,11 +9,13 @@ export const RUNA_LAYER_ORDER = Object.freeze([
   'suggestions'
 ]);
 
+export const SPIRAL_STATE_SCHEMA = 'hearthgate/spiral-state/v1';
+
 export const RUNA_REQUIRED_INPUTS = Object.freeze([
   'desiredState',
   'world',
   'PREMAQ',
-  'sharedSpiralState',
+  'dualAspectPacket',
   'userPreferences',
   'historicalReceipts'
 ]);
@@ -44,7 +46,10 @@ export const HARMONIC_SPIRAL_PHASES = Object.freeze([
   'observe',
   'receive',
   'compress',
+  'integrate',
   'release',
+  'expand',
+  'reorient',
   'contribute'
 ]);
 
@@ -52,6 +57,60 @@ function assertObject(value, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new TypeError(`${label} must be an object`);
   }
+}
+
+function assertUnitInterval(value, label) {
+  if (!Number.isFinite(value) || value < 0 || value > 1) {
+    throw new TypeError(`${label} must be between 0 and 1`);
+  }
+}
+
+function validateReceiptList(value, label) {
+  if (!Array.isArray(value) || value.some(item => typeof item !== 'string' || item.length === 0)) {
+    throw new TypeError(`${label} must be an array of receipt identifiers`);
+  }
+}
+
+export function validateSpiralState(state) {
+  assertObject(state, 'Spiral State');
+  if (state.schema !== SPIRAL_STATE_SCHEMA) {
+    throw new TypeError(`Spiral State must use ${SPIRAL_STATE_SCHEMA}`);
+  }
+  if (!HARMONIC_SPIRAL_PHASES.includes(state.phase)) {
+    throw new TypeError('Spiral State phase is not recognised');
+  }
+  if (!['ascending', 'holding', 'descending', 'indeterminate'].includes(state.direction)) {
+    throw new TypeError('Spiral State direction is not recognised');
+  }
+  assertUnitInterval(state.confidence, 'Spiral State confidence');
+  if (!Array.isArray(state.suggested_actions)) {
+    throw new TypeError('Spiral State suggested_actions must be an array');
+  }
+  for (const action of state.suggested_actions) {
+    assertObject(action, 'Spiral State action');
+    if (!action.token || typeof action.token !== 'string') {
+      throw new TypeError('Spiral State action token is required');
+    }
+    assertUnitInterval(action.weight, `Spiral State action ${action.token} weight`);
+  }
+  assertObject(state.subsystem_contexts, 'Spiral State subsystem_contexts');
+  for (const subsystem of ['llm', 'audio', 'glyph', 'ui']) {
+    assertObject(state.subsystem_contexts[subsystem], `Spiral State ${subsystem} context`);
+  }
+  assertObject(state.supporting_receipts, 'Spiral State supporting_receipts');
+  for (const dataset of ['story', 'time', 'theory']) {
+    validateReceiptList(state.supporting_receipts[dataset], `Spiral State ${dataset} receipts`);
+  }
+  return true;
+}
+
+export function harmonicStateFromPacket(packet) {
+  assertObject(packet, 'DualAspectPacket');
+  if (!Object.hasOwn(packet, 'harmonic_state')) {
+    throw new TypeError('DualAspectPacket requires harmonic_state populated by the Spiral Engine');
+  }
+  validateSpiralState(packet.harmonic_state);
+  return packet.harmonic_state;
 }
 
 export function validateWorldProfile(profile) {
@@ -72,6 +131,10 @@ export function validateCompilerRequest(request) {
   assertObject(request, 'Runa compiler request');
   for (const field of RUNA_REQUIRED_INPUTS) {
     if (!(field in request)) throw new TypeError(`Runa compiler request requires ${field}`);
+  }
+  harmonicStateFromPacket(request.dualAspectPacket);
+  if ('DEEPStory' in request || 'DEEPTime' in request || 'DEEPTheory' in request) {
+    throw new TypeError('Runa must consume Spiral State, never DEEP datasets directly');
   }
   return true;
 }
@@ -129,7 +192,7 @@ export function evaluateRunaLivingGate(state = {}) {
   if (!state.worldHumMounted) failures.push('MISSING_WORLD_HUM');
   if (!state.semanticCompilerMounted) failures.push('MISSING_SEMANTIC_COMPILER');
   if (!state.PREMAQIntentMappingMounted) failures.push('MISSING_PREMAQ_INTENT_MAPPING');
-  if (!state.sharedSpiralSubscriptionMounted) failures.push('MISSING_SHARED_SPIRAL_SUBSCRIPTION');
+  if (!state.spiralStatePacketSubscriptionMounted) failures.push('MISSING_SPIRAL_STATE_PACKET_SUBSCRIPTION');
   if (!state.provenanceSuggestionsMounted) failures.push('MISSING_SUGGESTION_PROVENANCE');
   if (!state.deterministicReplayMounted) failures.push('MISSING_DETERMINISTIC_REPLAY');
   if (!state.userControlMounted) failures.push('MISSING_USER_CONTROL');
