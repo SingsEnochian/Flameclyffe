@@ -2,12 +2,38 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   RUNA_LAYER_ORDER,
+  SPIRAL_STATE_SCHEMA,
+  validateSpiralState,
+  harmonicStateFromPacket,
   validateWorldProfile,
   validateCompilerRequest,
   createSuggestion,
   createCompilerReceipt,
   evaluateRunaLivingGate
 } from '../src/runa/harmonic-spiral-contract.js';
+
+function spiralState() {
+  return {
+    schema: SPIRAL_STATE_SCHEMA,
+    phase: 'release',
+    direction: 'ascending',
+    confidence: 0.91,
+    suggested_actions: [
+      { token: 'deepen_scene', weight: 0.87, reason_code: 'story_arc_opening' }
+    ],
+    subsystem_contexts: {
+      llm: { breath_note: 'Allow descriptive space before dialogue.' },
+      audio: { directive: 'widen', intensity: 0.7 },
+      glyph: { evolution_hint: 'open_path' },
+      ui: { attention_level: 0.6 }
+    },
+    supporting_receipts: {
+      story: ['deepstory:1'],
+      time: ['deeptime:1'],
+      theory: ['deeptheory:1']
+    }
+  };
+}
 
 test('world profiles remain semantic and reject fixed canon frequencies', () => {
   const profile = {
@@ -26,15 +52,34 @@ test('world profiles remain semantic and reject fixed canon frequencies', () => 
   assert.throws(() => validateWorldProfile({ ...profile, worldHum: ['369 Hz'] }), /not fixed frequencies/);
 });
 
-test('compiler requests require the whole shared state body', () => {
+test('Spiral State is versioned and extracted only from DualAspectPacket.harmonic_state', () => {
+  const state = spiralState();
+  assert.equal(validateSpiralState(state), true);
+  assert.equal(harmonicStateFromPacket({ harmonic_state: state }), state);
+  assert.throws(() => harmonicStateFromPacket({}), /requires harmonic_state/);
+});
+
+test('compiler requests require the DualAspectPacket Spiral State contract', () => {
   assert.equal(validateCompilerRequest({
     desiredState: 'creative-flow',
     world: 'terra-aeterna',
     PREMAQ: { P: 0.8 },
-    sharedSpiralState: { phase: 'receive' },
+    dualAspectPacket: { harmonic_state: spiralState() },
     userPreferences: {},
     historicalReceipts: []
   }), true);
+});
+
+test('Runa rejects direct DEEP dataset access', () => {
+  assert.throws(() => validateCompilerRequest({
+    desiredState: 'creative-flow',
+    world: 'terra-aeterna',
+    PREMAQ: { P: 0.8 },
+    dualAspectPacket: { harmonic_state: spiralState() },
+    userPreferences: {},
+    historicalReceipts: [],
+    DEEPStory: {}
+  }), /never DEEP datasets directly/);
 });
 
 test('suggestions are advisory, provenance-bound, and require user choice', () => {
@@ -68,7 +113,7 @@ test('Runa cannot pass LIVING with a missing organ', () => {
     worldHumMounted: true,
     semanticCompilerMounted: true,
     PREMAQIntentMappingMounted: true,
-    sharedSpiralSubscriptionMounted: true,
+    spiralStatePacketSubscriptionMounted: true,
     provenanceSuggestionsMounted: true,
     deterministicReplayMounted: true,
     userControlMounted: true,
