@@ -9,6 +9,12 @@
   "packageManager": "npm@11.16.0",
   "scripts": {
     "contracts:verify": "node scripts/deny-stale-engine-contracts.mjs",
+    "bifrost:models:doctor": "node scripts/bifrost-models.mjs doctor all",
+    "bifrost:models:status": "node scripts/bifrost-models.mjs status all",
+    "bifrost:models:install": "node scripts/bifrost-models.mjs install all",
+    "bifrost:models:install:lioreal": "node scripts/bifrost-models.mjs install lioreal",
+    "bifrost:models:install:uial": "node scripts/bifrost-models.mjs install uial",
+    "bifrost:models:install:boxfire": "node scripts/bifrost-models.mjs install boxfire",
     "sigil:dev": "vite --config apps/sigil-activator/vite.config.js",
     "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
     "sigil:preview": "vite preview --config apps/sigil-activator/vite.config.js",
