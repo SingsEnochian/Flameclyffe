@@ -1,0 +1,37 @@
+{
+  "schema": "hearthgate/canon-source-profile/v1",
+  "ingest_id": "taaveren-vaen.wot-fandom.full-v1",
+  "world_key": "taaveren-vaen",
+  "source_name": "A Wheel of Time Wiki",
+  "source_role": "secondary-canon-reference",
+  "base_url": "https://wot.fandom.com",
+  "api_url": "https://wot.fandom.com/api.php",
+  "license": {
+    "text_default": "CC-BY-SA-3.0-unless-otherwise-noted",
+    "attribution_required": true,
+    "share_alike_required": true,
+    "media_policy": "metadata-only-until-file-level-license-reviewed"
+  },
+  "scope": {
+    "all_namespaces": true,
+    "redirects": true,
+    "categories": true,
+    "links": true,
+    "page_properties": true,
+    "latest_revision": true,
+    "contributors": true,
+    "full_revision_history_default": false,
+    "media_binary_default": false
+  },
+  "canon_policy": {
+    "primary_authority": "published Wheel of Time novels and approved primary sources",
+    "promotable_source_records": "reviewed main-namespace book-lore only",
+    "television_continuity": "separate",
+    "project_overlay_path": "overlays/",
+    "silent_overwrite_forbidden": true
+  },
+  "observer": {
+    "channel": "canon-source-ingest",
+    "routes": ["DEEPStory", "DEEPTime", "DEEPTheory"]
+  }
+}
