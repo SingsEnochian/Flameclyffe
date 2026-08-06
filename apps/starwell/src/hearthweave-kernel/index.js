@@ -1,3 +1,17 @@
+// Hearthgate Cycle
+//
+// Observer receives.
+// PREMAQ carries.
+// Bifröst evolves.
+// The world compresses.
+// The world releases.
+// The release becomes the next compression.
+// Hearthweave binds.
+// Runa voices.
+// STARWELL reveals.
+// Receipts remember.
+// Wonder continues.
+
 export {
   CLAIM_STATES,
   DEEP_MODES,

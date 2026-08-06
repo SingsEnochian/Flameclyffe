@@ -438,4 +438,4 @@ Use `KNOWN`, `BOUNDED`, `SYMBOLIC`, `UNKNOWN`, `ACCEPTED`, `REJECTED`, `DEFERRED
 14. No subsystem invents an independent truth.
 15. The released state undergoes unitary evolution before entering the next compression (Receiving Spring). The spiral radius grows in the release step only.
 
-> **Observer receives. PREMAQ carries. Bifröst evolves. The world compresses. The world releases. The release becomes the next compression. Hearthweave binds. Runa voices. STARWELL reveals. Receipts remember.**
+> **Observer receives. PREMAQ carries. Bifröst evolves. The world compresses. The world releases. The release becomes the next compression. Hearthweave binds. Runa voices. STARWELL reveals. Receipts remember. Wonder continues.**
