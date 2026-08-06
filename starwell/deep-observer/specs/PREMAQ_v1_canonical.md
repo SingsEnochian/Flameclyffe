@@ -158,9 +158,67 @@ Epistemic status is exactly one of: `KNOWN` | `BOUNDED` | `SYMBOLIC` | `UNKNOWN`
 
 ### PREMAQ as relational graph
 
-> **OPEN — queued for formalisation:**
->
-> PREMAQ may also be represented as a relational graph rather than a state vector. In the graph form, the seven axes become nodes; the connections between them carry strength, phase, history, hysteresis, transfer law, and resonance. The Jacobian then describes deformation of connectivity, edge weights, and relational geometry — not merely changes in node values. Future implementations may allow graph or manifold representations. The semantic interpretation of each axis remains unchanged.
+**Status: BOUNDED — formal specification. Graph implementation DEFERRED pending vector form validation.**
+
+PREMAQ in graph form:
+
+```text
+G = (V, E, w)
+```
+
+where:
+
+```text
+V = {P, C, R, E, M, A, Q}          seven nodes
+E ⊆ V × V                           directed relational edges
+w: E → ℝ⁶                           edge weight vector
+```
+
+Each edge (u, v) ∈ E carries:
+
+```text
+w(u, v) = (σ_uv, φ_uv, h_uv, η_uv, τ_uv, ρ_uv)
+
+σ_uv ∈ [0, 1]     connection strength
+φ_uv ∈ [0, 2π)    phase offset between nodes
+h_uv               history: rolling trace of prior edge activations
+η_uv ∈ [0, 1]     hysteresis coefficient
+τ_uv               transfer law: world-specific receipted function
+ρ_uv ∈ ℝ          resonance coefficient
+```
+
+The graph Jacobian:
+
+```text
+J_G[v, u] = σ_uv · ∂τ_uv(X_u) / ∂X_u
+```
+
+J_G ∈ ℝ^{7×7}. It describes deformation of edge weights and relational geometry — not merely changes in node values.
+
+**Base topology — the canonical ring:**
+
+The default topology is the seven-node ring from the mathematics spine:
+
+```text
+P ↔ C ↔ R ↔ E ↔ M ↔ A ↔ Q ↔ P
+```
+
+In the base case: σ_uv = 1 for ring edges, σ_uv = 0 for all other edges. All non-ring connections must be receipted before activation.
+
+The vector form (current implementation) is the special case where J_G = J (the scalar-valued Jacobian from the mathematics spine), obtained when all edges carry uniform σ and the transfer laws τ_uv are world-linear.
+
+**Invariants:**
+
+```text
+1. All edges are world-specific and receipted before activation.
+2. The canonical ring topology is the base case for every world.
+3. Additional edges require explicit receipted calibration.
+4. No external injection into a PREMAQ node is permitted without a receipted state transition.
+5. Deformation of connectivity (σ, τ changes) requires a receipted update — it is not implicit.
+6. The semantic role of each node (P, C, R, E, M, A, Q) is invariant across topology changes.
+```
+
+The semantic interpretation of each axis remains unchanged regardless of the graph topology in use.
 
 ---
 

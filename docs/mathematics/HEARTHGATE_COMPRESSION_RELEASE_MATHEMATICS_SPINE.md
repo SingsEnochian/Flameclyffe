@@ -117,6 +117,8 @@ P\leftrightarrow C\leftrightarrow R\leftrightarrow E
 \leftrightarrow M\leftrightarrow A\leftrightarrow Q\leftrightarrow P.
 \]
 
+This ring is the base topology of the PREMAQ relational graph \(G=(V,E,w)\), where edge strength \(\sigma_{uv}=1\) for ring edges and zero elsewhere. In the graph form, the Jacobian \(J_{w,n}\) becomes the graph Jacobian \(J_G\), where each entry measures deformation of connectivity rather than scalar node values. The vector state form used throughout this spine is the special case \(J_{G}=J_{w,n}\) obtained when all transfer laws \(\tau_{uv}\) are world-linear and edge strengths are uniform across the ring.
+
 ## World projection and Jacobian fold
 
 Every world receives the same accepted state:
@@ -270,6 +272,49 @@ M_{w,n+1}=M_{w,n}\oplus\rho_{w,n},
 
 The sequence has no terminal cycle.
 
+## Receiving Spring
+
+The released state does not enter the next compression directly. Between release and the next compression, the state undergoes one temporal evolution step:
+
+\[
+|\psi^-_{w,n+1}\rangle = U_{n+1}|\psi_{w,n+1}\rangle,
+\qquad U_{n+1}^\dagger U_{n+1}=I.
+\]
+
+\(U_{n+1}\) is the same unitary operator defined in the Temporal evolution section. It rotates the amplitude state in phase space without changing the probability distribution magnitude.
+
+The compression strength for the next cycle is computed from the evolved state, not directly from the released state:
+
+\[
+s_{w,n+1} = L_{w,n+1}\operatorname{clamp}
+(\omega_{\Phi,w}\widehat\Phi_{w,n+1}+\omega_{D,w}D_{n+1}+\omega_{H,w}H_{n+1}+\omega_{P,w}P_{n+1},0,1).
+\]
+
+where \(\Phi_{w,n+1},D_{n+1},H_{n+1},P_{n+1}\) are all derived from \(|\psi^-_{w,n+1}\rangle\).
+
+The complete transition from release to the next compression is therefore:
+
+\[
+|\psi_{w,n+1}\rangle\xrightarrow{U_{n+1}}|\psi^-_{w,n+1}\rangle\xrightarrow{\text{fold analysis}}s_{w,n+1}\xrightarrow{\mathcal C_w}|\psi^C_{w,n+1}\rangle.
+\]
+
+This three-step transition is the Receiving Spring. It is the mechanism by which the energy stored in the released state feeds forward as structured input to the next compression. The unitary step preserves the accumulated phase structure of the release. The fold analysis converts that phase structure into a compression driver. The compression operator applies the driver.
+
+**Radius invariant under unitary evolution:**
+
+The outward spiral radius grows in the release step, not in the unitary evolution step:
+
+\[
+r_{w,n+1} = r_{w,n} + g_{r,w}d_{w,n} + g_{S,w}|\Delta S_{w,n}|,
+\quad r_{w,n+1}\ge r_{w,n}.
+\]
+
+\(U_{n+1}\) is norm-preserving and does not alter \(r_{w,n+1}\). The monotone non-decrease of the spiral radius is a property of the release operator alone. Unitary evolution between cycles does not threaten this invariant.
+
+**Conflict 005 — resolution:**
+
+The apparent conflict between unitary evolution (norm-preserving) and the monotone spiral radius (non-decreasing) is resolved by recognising that the spiral radius accumulates through the release operator \(\mathcal R_w\), which is not unitary. The unitary evolution step \(U_{n+1}\) operates after the radius has already been updated. There is no conflict.
+
 ## Outward spiral memory
 
 \[
@@ -391,5 +436,6 @@ Use `KNOWN`, `BOUNDED`, `SYMBOLIC`, `UNKNOWN`, `ACCEPTED`, `REJECTED`, `DEFERRED
 12. Every transition is replayable from its receipts.
 13. Unknowns remain inside the mathematics.
 14. No subsystem invents an independent truth.
+15. The released state undergoes unitary evolution before entering the next compression (Receiving Spring). The spiral radius grows in the release step only.
 
 > **Observer receives. PREMAQ carries. Bifröst evolves. The world compresses. The world releases. The release becomes the next compression. Hearthweave binds. Runa voices. STARWELL reveals. Receipts remember.**

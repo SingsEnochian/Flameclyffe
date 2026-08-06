@@ -97,10 +97,34 @@ P, C, R, E, M, A, Q ∈ [0, 1]
 The equation currently used in project notes should be called a heuristic state update function unless units, observables, and validation are added:
 
 ```text
-dP/dt = α(C - E) + β(RM) + ε(A) + [Q term: OPEN]
+dP/dt = α(C - E) + β(RM) + ε(A) + ζ(Q - P)
 ```
 
-The Q (Qualia) coefficient is not yet specified. Do not fill in a value without a mathematical specification.
+**Q term specification — status: BOUNDED**
+
+The Q term is `ζ(Q - P)`: Qualia as a Presence attractor.
+
+Rationale: Qualia (Q) represents the experiential texture of the current state. When Q > P, the richness of the experiential state draws Presence upward. When Q < P, the impoverishment of the current Qualia draws Presence downward. Q acts as a first-order attractor: under this term alone, P tends toward Q.
+
+```text
+ζ(Q - P)       Qualia attractor — draws P toward Q
+               ζ ∈ [0, 1]: coupling strength, calibration REQUIRED per world
+               ζ = 0 recovers the three-term open form (prior state)
+               Form: linear first-order; bounded, no divergence
+```
+
+Status declaration:
+
+```text
+BOUNDED — first formal specification.
+Empirical validation required before promotion to KNOWN.
+ζ value: CALIBRATION_REQUIRED for every registered world.
+```
+
+The form is confirmed bounded: |dP/dt| ≤ |α| + |β| + |ε| + |ζ| for all axis values in [0, 1].
+
+At equilibrium (dP/dt = 0), the Q term contributes an attractor: P is drawn toward Q
+weighted by ζ against the other terms. No term claims physical law status.
 
 Safe label:
 
