@@ -1,0 +1,43 @@
+{
+  "dataset_id": "deep-time",
+  "display_name": "DEEPTime",
+  "version": "0.1.0",
+  "status": "experimental",
+  "parallel_to": ["DEEPTheory", "DEEPStory"],
+  "schema": "../schemas/deep-time.schema.json",
+  "purpose": "Preserve receipted temporal sequences of PREMAQ state evolution anchored to real-world time markers. DEEPTime answers when and at what rate — not what was witnessed (DEEPStory) and not what patterns emerged (DEEPTheory).",
+  "governing_rule": "Story records what happened. Theory records what is known. Time records when, in what order, and at what spiral coordinate the accepted state moved.",
+  "source_policy": {
+    "minimum_source_refs": 1,
+    "raw_sources_immutable": true,
+    "sequences_append_only": true,
+    "step_index_must_be_monotone": true,
+    "spiral_radius_must_not_decrease": true,
+    "time_anchors_must_not_be_invented": true
+  },
+  "time_anchor_baseline": {
+    "utc_source": "system clock or Observer packet timestamp",
+    "julian_date_source": "computed from UTC via CODATA reference",
+    "moon_phase_source": "astronomia or equivalent library; illumination fraction",
+    "solar_flux_source": "NOAA/SWPC F10.7 index when available",
+    "kp_source": "NOAA/SWPC Kp index when available"
+  },
+  "premaq_axes": ["P", "C", "R", "E", "M", "A", "Q"],
+  "axis_names": {
+    "P": "Presence",
+    "C": "Coherence",
+    "R": "Resonance",
+    "E": "Entropy",
+    "M": "Memory",
+    "A": "Agency",
+    "Q": "Qualia"
+  },
+  "epistemic_statuses": ["KNOWN", "BOUNDED", "SYMBOLIC", "UNKNOWN"],
+  "exports": [
+    "json",
+    "temporal-trace",
+    "spiral-path",
+    "axis-time-series",
+    "acceptance-ledger"
+  ]
+}

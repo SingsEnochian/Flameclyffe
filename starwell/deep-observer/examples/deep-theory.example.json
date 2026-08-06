@@ -1,0 +1,114 @@
+{
+  "schema_version": "0.1.0",
+  "dataset_kind": "deep_theory",
+  "parallel_datasets": ["DEEPStory", "DEEPTime"],
+  "id": "deep-theory-example-001",
+  "created_at": "2026-08-05T19:00:00Z",
+  "updated_at": null,
+  "title": "Sustained Presence rise precedes deep creative flow",
+  "summary": "Across three observed sequences, a sustained rise in P (Presence) over 30 or more minutes consistently preceded periods the observer identified as deep creative flow. C (Coherence) also rose in all three cases. E (Entropy) declined. The Q axis was UNKNOWN in one of the three sequences.",
+  "theory_kind": "recurrence",
+  "confidence": 0.74,
+  "epistemic_status": "active_research",
+  "premaq_axes_involved": ["P", "C", "E", "Q"],
+  "findings": [
+    {
+      "finding_id": "finding-001",
+      "text": "In all three observed sequences, P rose by at least 0.15 over a window of 30 or more minutes before the observer reported creative flow.",
+      "finding_kind": "recurrence",
+      "epistemic_status": "active_research",
+      "confidence": 0.74,
+      "premaq_axes": ["P"],
+      "source_refs": [
+        "deeptime:seq-example-001",
+        "deepstory:event-example-001"
+      ],
+      "quantitative": {
+        "metric": "P_rise_before_flow",
+        "value": 0.15,
+        "unit": "axis_units",
+        "tolerance": 0.03
+      },
+      "uncertainty": "Sample size is three sequences. The threshold of 0.15 is preliminary. P may be rising as a consequence of an unmeasured third factor."
+    },
+    {
+      "finding_id": "finding-002",
+      "text": "C (Coherence) rose alongside P in all three sequences. The two axes moved together within a lag of two observation steps.",
+      "finding_kind": "correlation",
+      "epistemic_status": "active_research",
+      "confidence": 0.68,
+      "premaq_axes": ["P", "C"],
+      "source_refs": [
+        "deeptime:seq-example-001"
+      ],
+      "quantitative": {
+        "metric": "PC_comovement_lag",
+        "value": 2,
+        "unit": "steps",
+        "tolerance": 1
+      },
+      "uncertainty": "Causal direction between P and C is not established. They may both respond to a shared antecedent."
+    },
+    {
+      "finding_id": "finding-003",
+      "text": "In the sequence where Q was UNKNOWN, the transition to creative flow was still observed. Q absence did not block the pattern.",
+      "finding_kind": "structural",
+      "epistemic_status": "speculative",
+      "confidence": 0.51,
+      "premaq_axes": ["Q"],
+      "source_refs": [
+        "deeptime:seq-example-001",
+        "deepstory:event-example-001"
+      ],
+      "quantitative": null,
+      "uncertainty": "This is a single case. Q may have been present but unmeasured, not absent."
+    }
+  ],
+  "source_refs": [
+    {
+      "ref": "deeptime:seq-example-001",
+      "dataset": "DEEPTime",
+      "record_type": "instrumented",
+      "checksum": null,
+      "note": "Three-step temporal sequence from observer-run-example-001."
+    },
+    {
+      "ref": "deepstory:event-example-001",
+      "dataset": "DEEPStory",
+      "record_type": "witnessed",
+      "checksum": null,
+      "note": "Observer-reported creative flow event."
+    }
+  ],
+  "contradicts": [],
+  "supersedes": [],
+  "open_questions": [
+    {
+      "question": "Is the P rise causal, or does it co-occur with an unmeasured antecedent?",
+      "status": "open",
+      "note": "Requires more sequences and ideally an intervention study."
+    },
+    {
+      "question": "What is the role of Q when it is available? Does it modulate the threshold?",
+      "status": "watching",
+      "note": "Q data insufficient in current sample."
+    }
+  ],
+  "source_integrity": {
+    "raw_sources_immutable": true,
+    "patterns_append_only": true,
+    "silent_contradiction_forbidden": true,
+    "verification_note": "DEEPTheory records patterns. It does not rewrite source packets or temporal sequences."
+  },
+  "consent_scope": {
+    "store": true,
+    "analyse": true,
+    "derive_patterns": true,
+    "render": true,
+    "link_sources": true,
+    "share_with_constellation": false,
+    "notes": "Example data only."
+  },
+  "privacy_scope": "project",
+  "notes": "Illustrates a three-finding recurrence record with one speculative structural finding and two open questions."
+}

@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/spiral-state.schema.json",
+  "title": "Hearthgate Spiral State",
+  "description": "The synthesised harmonic state produced by the Spiral Engine from DEEPStory, DEEPTime, DEEPTheory, PREMAQ, Desired State, World Profile, and Shared State. No subsystem reads the DEEP datasets directly — every subsystem reads this packet. Placed in DualAspectPacket.harmonic_state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "spiral_state_id",
+    "generated_at",
+    "phase",
+    "direction",
+    "confidence",
+    "suggested_actions",
+    "subsystem_contexts",
+    "supporting_receipts",
+    "source_integrity"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "hearthgate/spiral-state/v1"
+    },
+    "spiral_state_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique ID for this Spiral State packet."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the Spiral Engine produced this packet."
+    },
+    "engine_version": {
+      "type": ["string", "null"],
+      "description": "Version of the Spiral Engine that produced this packet."
+    },
+    "phase": {
+      "enum": ["compression", "release", "transition"],
+      "description": "Current compression-release phase. Derived from the temporal trajectory across DEEPTime and PREMAQ."
+    },
+    "direction": {
+      "enum": ["ascending", "gathering", "stable", "pivoting"],
+      "description": "Directional momentum within the compression-release cycle. Ascending = outward release movement. Gathering = compression accumulating toward the next release. Stable = holding. Pivoting = at a phase boundary. The spiral always moves outward — gathering is not retreat, it is preparation."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence in this Spiral State reading. Below 0.5 signals degraded mode — subsystems should reduce emphasis, not invent."
+    },
+    "suggested_actions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/suggestedAction" },
+      "description": "Ordered list of possible next steps. The Spiral Engine composes, never invents. Every action is traceable to a supporting receipt."
+    },
+    "subsystem_contexts": {
+      "$ref": "#/$defs/subsystemContexts",
+      "description": "Per-subsystem distillations. Each subsystem reads only its own context — not the full packet."
+    },
+    "supporting_receipts": {
+      "$ref": "#/$defs/supportingReceipts",
+      "description": "Immutable reference IDs to the DEEP records that produced this state. Not copied content — only IDs or hashes."
+    },
+    "source_integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["references_only"],
+      "properties": {
+        "references_only": {
+          "type": "boolean",
+          "const": true,
+          "description": "supporting_receipts contains IDs/hashes only. Source records are never copied into the Spiral State."
+        },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "degraded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["active"],
+      "properties": {
+        "active": { "type": "boolean" },
+        "reasons": { "type": "array", "items": { "type": "string" } }
+      },
+      "description": "When active, subsystems reduce emphasis. They do not invent alternate state."
+    }
+  },
+  "$defs": {
+    "suggestedAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "weight", "reason_code"],
+      "properties": {
+        "token": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Machine-readable action identifier. e.g. deepen_scene, reduce_dialogue, widen_world, preserve_silence."
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Relative weight of this suggestion in the current state. Not a command — a compass reading."
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Traceable origin of this suggestion. Must resolve to a supporting_receipt."
+        }
+      }
+    },
+    "subsystemContexts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "llm": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "breath_note": {
+              "type": ["string", "null"],
+              "description": "Narrative pacing guidance. e.g. 'Allow descriptive space before dialogue.'"
+            },
+            "character_dynamics": {
+              "type": ["object", "null"],
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "trajectory": { "type": "string" },
+                  "momentum": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              },
+              "description": "Per-character trajectory and momentum, keyed by character ID."
+            }
+          }
+        },
+        "audio": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "directive": {
+              "type": ["string", "null"],
+              "description": "Sound world instruction. e.g. widen, narrow, deepen, still."
+            },
+            "intensity": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "glyph": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "evolution_hint": {
+              "type": ["string", "null"],
+              "description": "Glyph evolution guidance. e.g. open_path, seal_ring, extend_arm."
+            }
+          }
+        },
+        "ui": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "attention_level": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 1,
+              "description": "How much the UI should surface to the user's attention right now."
+            },
+            "emphasis_tokens": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "UI element tokens to emphasise in the current state."
+            }
+          }
+        },
+        "haptic": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pattern": { "type": ["string", "null"] },
+            "intensity": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+          }
+        },
+        "replay": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "create_checkpoint": { "type": "boolean", "default": false },
+            "label": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "supportingReceipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "story": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "DEEPStory record IDs that contributed to this state. Format: deepstory:<id>."
+        },
+        "time": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "DEEPTime record IDs that contributed to this state. Format: deeptime:<id>."
+        },
+        "theory": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "DEEPTheory record IDs that contributed to this state. Format: deeptheory:<id>."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/deep-time.schema.json",
+  "title": "DEEPTime Temporal Sequence Record",
+  "description": "Receipted temporal sequences of PREMAQ state evolution, anchored to real-world time markers. Parallel to DEEPStory and DEEPTheory. Captures the ordered worldline — not what was observed, not how it was interpreted, but when, at what rate, and in what spiral the state moved.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset_kind",
+    "id",
+    "created_at",
+    "sequence_id",
+    "time_anchors",
+    "snapshots",
+    "source_refs",
+    "source_integrity",
+    "consent_scope",
+    "privacy_scope"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "dataset_kind": {
+      "type": "string",
+      "const": "deep_time"
+    },
+    "parallel_datasets": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["DEEPTheory", "DEEPStory"] },
+      "uniqueItems": true,
+      "default": ["DEEPTheory", "DEEPStory"]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "sequence_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Observation run or session that produced this temporal sequence."
+    },
+    "observer_id": {
+      "type": ["string", "null"],
+      "description": "Observer instance that emitted the accepted PREMAQ states."
+    },
+    "time_anchors": {
+      "$ref": "#/$defs/timeAnchors"
+    },
+    "snapshots": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/temporalSnapshot" }
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceRef" }
+    },
+    "source_integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_sources_immutable", "sequences_append_only"],
+      "properties": {
+        "raw_sources_immutable": { "type": "boolean", "const": true },
+        "sequences_append_only": { "type": "boolean", "const": true },
+        "verification_note": { "type": ["string", "null"] }
+      }
+    },
+    "consent_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["store", "sequence", "derive_patterns", "render", "link_sources"],
+      "properties": {
+        "store": { "type": "boolean" },
+        "sequence": { "type": "boolean" },
+        "derive_patterns": { "type": "boolean" },
+        "render": { "type": "boolean" },
+        "link_sources": { "type": "boolean" },
+        "share_with_constellation": { "type": "boolean", "default": false },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "privacy_scope": {
+      "enum": ["private_local", "private_account", "named_constellation", "project", "export_only"]
+    },
+    "notes": {
+      "type": ["string", "null"]
+    }
+  },
+  "$defs": {
+    "timeAnchors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["utc_start"],
+      "properties": {
+        "utc_start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "UTC timestamp of the first accepted snapshot."
+        },
+        "utc_end": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "UTC timestamp of the last accepted snapshot. Null if the sequence is ongoing."
+        },
+        "julian_date_start": {
+          "type": ["number", "null"],
+          "description": "Julian date at sequence start. CODATA reference."
+        },
+        "moon_phase": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Lunar illumination fraction at utc_start. 0 = new moon, 1 = full moon."
+        },
+        "solar_flux_f107": {
+          "type": ["number", "null"],
+          "description": "Solar flux index F10.7 at utc_start. Null if not available."
+        },
+        "kp_index": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 9,
+          "description": "Geomagnetic Kp index at utc_start. Null if not available."
+        },
+        "source_note": {
+          "type": ["string", "null"],
+          "description": "Time anchor data source and fetch method."
+        }
+      }
+    },
+    "temporalSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step", "temporal_coordinate", "premaq_state", "acceptance_mask", "spiral", "source_ref"],
+      "properties": {
+        "step": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Monotonically increasing step index within this sequence."
+        },
+        "temporal_coordinate": {
+          "type": "number",
+          "description": "Bifröst lambda at this step — the Arcsweep temporal coordinate."
+        },
+        "utc_timestamp": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Wall-clock UTC time of this accepted state, if available."
+        },
+        "premaq_state": {
+          "$ref": "#/$defs/premaqSnapshot"
+        },
+        "acceptance_mask": {
+          "$ref": "#/$defs/acceptanceMask"
+        },
+        "spiral": {
+          "$ref": "#/$defs/spiralCoordinate"
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reference to the Observer receipt or PREMAQ packet that produced this accepted state."
+        }
+      }
+    },
+    "premaqSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P", "C", "R", "E", "M", "A", "Q"],
+      "properties": {
+        "P": { "$ref": "#/$defs/axisValue" },
+        "C": { "$ref": "#/$defs/axisValue" },
+        "R": { "$ref": "#/$defs/axisValue" },
+        "E": { "$ref": "#/$defs/axisValue" },
+        "M": { "$ref": "#/$defs/axisValue" },
+        "A": { "$ref": "#/$defs/axisValue" },
+        "Q": { "$ref": "#/$defs/axisValue" }
+      }
+    },
+    "axisValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["epistemic_status"],
+      "properties": {
+        "value": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Accepted scalar value. Null when epistemic_status is UNKNOWN."
+        },
+        "derivative": {
+          "type": ["number", "null"],
+          "description": "Rate of change at this step. Null when not computed."
+        },
+        "epistemic_status": {
+          "enum": ["KNOWN", "BOUNDED", "SYMBOLIC", "UNKNOWN"]
+        },
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "acceptanceMask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P", "C", "R", "E", "M", "A", "Q"],
+      "properties": {
+        "P": { "type": "boolean" },
+        "C": { "type": "boolean" },
+        "R": { "type": "boolean" },
+        "E": { "type": "boolean" },
+        "M": { "type": "boolean" },
+        "A": { "type": "boolean" },
+        "Q": { "type": "boolean" }
+      }
+    },
+    "spiralCoordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cycle", "radius", "angle"],
+      "properties": {
+        "cycle": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Compression-release cycle count at this snapshot."
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Outward spiral radius. Monotonically non-decreasing in forward execution."
+        },
+        "angle": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 6.283185307179586,
+          "description": "Spiral angle in radians [0, 2π)."
+        },
+        "outward_distance": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Cumulative outward distance from the origin."
+        }
+      }
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "dataset", "record_type"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "dataset": {
+          "enum": [
+            "DEEPTheory",
+            "DEEPStory",
+            "observer_witness",
+            "PREMAQ",
+            "Bifrost",
+            "archive",
+            "external"
+          ]
+        },
+        "record_type": {
+          "enum": ["witnessed", "recorded", "derived", "instrumented", "unknown"]
+        },
+        "checksum": { "type": ["string", "null"] },
+        "note": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "dataset_id": "deep-theory",
+  "display_name": "DEEPTheory",
+  "version": "0.1.0",
+  "status": "experimental",
+  "parallel_to": ["DEEPStory", "DEEPTime"],
+  "schema": "../schemas/deep-theory.schema.json",
+  "purpose": "Preserve patterns, correlations, recurrences, structural findings, contradictions, and hypotheses derived from observation. DEEPTheory answers why the state behaves as it does — not what happened (DEEPStory) and not when it happened (DEEPTime).",
+  "governing_rule": "Story records what happened. Time records when. Theory records what it means and why. No theory silently overwrites a prior finding. Contradictions are named and tracked.",
+  "source_policy": {
+    "minimum_source_refs": 1,
+    "raw_sources_immutable": true,
+    "patterns_append_only": true,
+    "silent_contradiction_forbidden": true,
+    "confidence_required_per_finding": true,
+    "epistemic_status_required_per_finding": true
+  },
+  "theory_kinds": [
+    "correlation",
+    "recurrence",
+    "contradiction",
+    "hypothesis",
+    "structural",
+    "calibration",
+    "threshold"
+  ],
+  "finding_kinds": [
+    "correlation",
+    "recurrence",
+    "threshold",
+    "trajectory",
+    "structural",
+    "anomaly",
+    "calibration",
+    "contradiction"
+  ],
+  "epistemic_statuses": [
+    "established",
+    "active_research",
+    "speculative",
+    "symbolic",
+    "unknown"
+  ],
+  "premaq_axes": ["P", "C", "R", "E", "M", "A", "Q"],
+  "exports": [
+    "json",
+    "pattern-summary",
+    "axis-correlation-matrix",
+    "contradiction-ledger",
+    "hypothesis-queue",
+    "spiral-engine-brief"
+  ]
+}

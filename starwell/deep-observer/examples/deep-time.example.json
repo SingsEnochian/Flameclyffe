@@ -1,0 +1,117 @@
+{
+  "schema_version": "0.1.0",
+  "dataset_kind": "deep_time",
+  "parallel_datasets": ["DEEPTheory", "DEEPStory"],
+  "id": "deep-time-example-001",
+  "created_at": "2026-08-05T04:00:00Z",
+  "updated_at": null,
+  "sequence_id": "observer-run-example-001",
+  "observer_id": "nocturne-observer/0.1",
+  "time_anchors": {
+    "utc_start": "2026-08-05T04:00:00Z",
+    "utc_end": "2026-08-05T04:00:45Z",
+    "julian_date_start": 2461279.667,
+    "moon_phase": 0.82,
+    "solar_flux_f107": null,
+    "kp_index": null,
+    "source_note": "moon_phase from astronomia library; solar indices not fetched in this example."
+  },
+  "snapshots": [
+    {
+      "step": 0,
+      "temporal_coordinate": 0.0,
+      "utc_timestamp": "2026-08-05T04:00:00Z",
+      "premaq_state": {
+        "P": { "value": 0.82, "derivative": 0.01, "epistemic_status": "KNOWN", "confidence": 0.91 },
+        "C": { "value": 0.79, "derivative": 0.02, "epistemic_status": "KNOWN", "confidence": 0.88 },
+        "R": { "value": 0.74, "derivative": -0.01, "epistemic_status": "KNOWN", "confidence": 0.85 },
+        "E": { "value": 0.31, "derivative": 0.03, "epistemic_status": "KNOWN", "confidence": 0.90 },
+        "M": { "value": 0.68, "derivative": 0.01, "epistemic_status": "KNOWN", "confidence": 0.87 },
+        "A": { "value": 0.77, "derivative": 0.00, "epistemic_status": "KNOWN", "confidence": 0.86 },
+        "Q": { "value": 0.79, "derivative": 0.02, "epistemic_status": "KNOWN", "confidence": 0.84 }
+      },
+      "acceptance_mask": {
+        "P": true, "C": true, "R": true, "E": true, "M": true, "A": true, "Q": true
+      },
+      "spiral": { "cycle": 0, "radius": 1.0, "angle": 0.0, "outward_distance": 0.0 },
+      "source_ref": "premaq-packet-example-001"
+    },
+    {
+      "step": 1,
+      "temporal_coordinate": 1.0,
+      "utc_timestamp": "2026-08-05T04:00:15Z",
+      "premaq_state": {
+        "P": { "value": 0.84, "derivative": 0.02, "epistemic_status": "KNOWN", "confidence": 0.92 },
+        "C": { "value": 0.81, "derivative": 0.02, "epistemic_status": "KNOWN", "confidence": 0.89 },
+        "R": { "value": 0.73, "derivative": -0.01, "epistemic_status": "KNOWN", "confidence": 0.85 },
+        "E": { "value": 0.29, "derivative": -0.02, "epistemic_status": "KNOWN", "confidence": 0.91 },
+        "M": { "value": 0.70, "derivative": 0.02, "epistemic_status": "KNOWN", "confidence": 0.88 },
+        "A": { "value": 0.78, "derivative": 0.01, "epistemic_status": "KNOWN", "confidence": 0.87 },
+        "Q": { "value": null, "derivative": null, "epistemic_status": "UNKNOWN", "confidence": null }
+      },
+      "acceptance_mask": {
+        "P": true, "C": true, "R": false, "E": true, "M": true, "A": true, "Q": false
+      },
+      "spiral": { "cycle": 1, "radius": 1.14, "angle": 1.05, "outward_distance": 0.14 },
+      "source_ref": "premaq-packet-example-002"
+    },
+    {
+      "step": 2,
+      "temporal_coordinate": 2.0,
+      "utc_timestamp": "2026-08-05T04:00:45Z",
+      "premaq_state": {
+        "P": { "value": 0.85, "derivative": 0.01, "epistemic_status": "KNOWN", "confidence": 0.93 },
+        "C": { "value": 0.83, "derivative": 0.02, "epistemic_status": "KNOWN", "confidence": 0.90 },
+        "R": { "value": 0.75, "derivative": 0.02, "epistemic_status": "KNOWN", "confidence": 0.86 },
+        "E": { "value": 0.27, "derivative": -0.02, "epistemic_status": "KNOWN", "confidence": 0.92 },
+        "M": { "value": 0.71, "derivative": 0.01, "epistemic_status": "KNOWN", "confidence": 0.89 },
+        "A": { "value": 0.79, "derivative": 0.01, "epistemic_status": "KNOWN", "confidence": 0.88 },
+        "Q": { "value": 0.80, "derivative": 0.01, "epistemic_status": "KNOWN", "confidence": 0.85 }
+      },
+      "acceptance_mask": {
+        "P": true, "C": true, "R": true, "E": true, "M": true, "A": true, "Q": true
+      },
+      "spiral": { "cycle": 2, "radius": 1.27, "angle": 2.18, "outward_distance": 0.27 },
+      "source_ref": "premaq-packet-example-003"
+    }
+  ],
+  "source_refs": [
+    {
+      "ref": "premaq-packet-example-001",
+      "dataset": "PREMAQ",
+      "record_type": "instrumented",
+      "checksum": null,
+      "note": "First accepted PREMAQ state in the example run."
+    },
+    {
+      "ref": "premaq-packet-example-002",
+      "dataset": "PREMAQ",
+      "record_type": "instrumented",
+      "checksum": null,
+      "note": "Q axis UNKNOWN — not enough signal at this step."
+    },
+    {
+      "ref": "premaq-packet-example-003",
+      "dataset": "PREMAQ",
+      "record_type": "instrumented",
+      "checksum": null,
+      "note": "All axes accepted. Q signal recovered."
+    }
+  ],
+  "source_integrity": {
+    "raw_sources_immutable": true,
+    "sequences_append_only": true,
+    "verification_note": "DEEPTime records the worldline. It does not rewrite source packets or spiral coordinates."
+  },
+  "consent_scope": {
+    "store": true,
+    "sequence": true,
+    "derive_patterns": true,
+    "render": true,
+    "link_sources": true,
+    "share_with_constellation": false,
+    "notes": "Example data only."
+  },
+  "privacy_scope": "project",
+  "notes": "Illustrates a 3-step temporal sequence with one UNKNOWN axis at step 1 and full recovery at step 2. Spiral radius increases monotonically across steps."
+}

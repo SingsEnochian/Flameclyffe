@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/deep-theory.schema.json",
+  "title": "DEEPTheory Pattern and Analysis Record",
+  "description": "Parallel analysis dataset capturing patterns, correlations, recurrences, structural findings, and hypotheses derived from DEEPStory and DEEPTime records. DEEPTheory answers why the state behaves as it does — not what happened (Story) and not when it happened (Time). Sources are immutable. Findings are append-only. Contradictions are tracked explicitly, never silently resolved.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset_kind",
+    "id",
+    "created_at",
+    "title",
+    "theory_kind",
+    "confidence",
+    "epistemic_status",
+    "findings",
+    "source_refs",
+    "source_integrity",
+    "consent_scope",
+    "privacy_scope"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "dataset_kind": {
+      "type": "string",
+      "const": "deep_theory"
+    },
+    "parallel_datasets": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["DEEPStory", "DEEPTime"] },
+      "uniqueItems": true,
+      "default": ["DEEPStory", "DEEPTime"]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable title for this theory record."
+    },
+    "summary": {
+      "type": ["string", "null"],
+      "description": "Plain-language summary of what this theory record claims and at what confidence."
+    },
+    "theory_kind": {
+      "enum": [
+        "correlation",
+        "recurrence",
+        "contradiction",
+        "hypothesis",
+        "structural",
+        "calibration",
+        "threshold"
+      ],
+      "description": "Primary kind of theoretical claim in this record."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Overall confidence in the record's findings. Per-finding confidence is also required."
+    },
+    "epistemic_status": {
+      "enum": [
+        "established",
+        "active_research",
+        "speculative",
+        "symbolic",
+        "unknown"
+      ],
+      "description": "Overall epistemic standing of this theory record."
+    },
+    "premaq_axes_involved": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["P", "C", "R", "E", "M", "A", "Q"] },
+      "uniqueItems": true,
+      "description": "Which PREMAQ axes this theory record concerns."
+    },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/finding" },
+      "description": "Individual theoretical findings. Each carries its own epistemic status, confidence, and source backing."
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceRef" },
+      "description": "Evidence sources backing this theory record. All findings must reference sources declared here."
+    },
+    "contradicts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "IDs of other DEEPTheory records that this record contradicts. Contradictions are named, not silently resolved.",
+      "default": []
+    },
+    "supersedes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "IDs of older DEEPTheory records that this record supersedes with updated findings.",
+      "default": []
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question", "status"],
+        "properties": {
+          "question": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["open", "watching", "answered", "set_aside"] },
+          "note": { "type": ["string", "null"] }
+        }
+      },
+      "description": "Unresolved questions this theory record cannot yet answer.",
+      "default": []
+    },
+    "source_integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_sources_immutable", "patterns_append_only"],
+      "properties": {
+        "raw_sources_immutable": { "type": "boolean", "const": true },
+        "patterns_append_only": { "type": "boolean", "const": true },
+        "silent_contradiction_forbidden": { "type": "boolean", "const": true },
+        "verification_note": { "type": ["string", "null"] }
+      }
+    },
+    "consent_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["store", "analyse", "derive_patterns", "render", "link_sources"],
+      "properties": {
+        "store": { "type": "boolean" },
+        "analyse": { "type": "boolean" },
+        "derive_patterns": { "type": "boolean" },
+        "render": { "type": "boolean" },
+        "link_sources": { "type": "boolean" },
+        "share_with_constellation": { "type": "boolean", "default": false },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "privacy_scope": {
+      "enum": ["private_local", "private_account", "named_constellation", "project", "export_only"]
+    },
+    "notes": {
+      "type": ["string", "null"]
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["finding_id", "text", "finding_kind", "epistemic_status", "confidence", "source_refs"],
+      "properties": {
+        "finding_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The finding stated plainly. No hedge language. Confidence is declared separately."
+        },
+        "finding_kind": {
+          "enum": [
+            "correlation",
+            "recurrence",
+            "threshold",
+            "trajectory",
+            "structural",
+            "anomaly",
+            "calibration",
+            "contradiction"
+          ]
+        },
+        "epistemic_status": {
+          "enum": ["established", "active_research", "speculative", "symbolic", "unknown"]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "premaq_axes": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["P", "C", "R", "E", "M", "A", "Q"] },
+          "uniqueItems": true,
+          "description": "Which PREMAQ axes this finding directly concerns."
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Refs to sources declared in the record-level source_refs ledger."
+        },
+        "quantitative": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "metric": { "type": "string" },
+            "value": { "type": "number" },
+            "unit": { "type": ["string", "null"] },
+            "tolerance": { "type": ["number", "null"] }
+          },
+          "description": "Optional numeric claim. If present, metric and value are required."
+        },
+        "uncertainty": {
+          "type": ["string", "null"],
+          "description": "What is not yet known or what could falsify this finding."
+        }
+      }
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "dataset", "record_type"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "dataset": {
+          "enum": [
+            "DEEPStory",
+            "DEEPTime",
+            "observer_witness",
+            "PREMAQ",
+            "Bifrost",
+            "archive",
+            "external"
+          ]
+        },
+        "record_type": {
+          "enum": ["witnessed", "recorded", "derived", "instrumented", "correlated", "unknown"]
+        },
+        "checksum": { "type": ["string", "null"] },
+        "note": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
