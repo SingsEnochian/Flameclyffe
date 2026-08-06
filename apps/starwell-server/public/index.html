@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yggdrasil // Flameclyffe Engine Interface</title>
+  <title>Hearthgate // Observatory</title>
   <style>
     :root {
       --bg-color: #080b0a;
@@ -44,7 +44,9 @@
         radial-gradient(circle at 50% 45%, rgba(46, 214, 144, calc(var(--vector-R) * 0.42)) 0%, rgba(26, 36, 33, calc(var(--vector-E) * 0.24)) 42%, transparent 68%),
         conic-gradient(from calc(var(--vector-P) * 360deg), transparent, rgba(46, 214, 144, .14), transparent, rgba(93, 139, 255, .10), transparent);
       filter: blur(calc(48px + var(--vector-M) * 52px));
-      animation: canopyDrift calc(22s - var(--vector-A) * 8s) ease-in-out infinite alternate;
+      animation:
+        canopyDrift calc(22s - var(--vector-A) * 8s) ease-in-out infinite alternate,
+        deepBreathe 90s ease-in-out infinite;
       opacity: calc(0.55 + var(--vector-R) * 0.35);
       transition: opacity 900ms ease, filter 900ms ease, background 900ms ease;
     }
@@ -52,6 +54,11 @@
     @keyframes canopyDrift {
       0% { transform: rotate(0deg) scale(1); }
       100% { transform: rotate(10deg) scale(1.08); }
+    }
+
+    @keyframes deepBreathe {
+      0%, 100% { opacity: calc(0.52 + var(--vector-R) * 0.32); }
+      50% { opacity: calc(0.62 + var(--vector-R) * 0.36); }
     }
 
     .stonewood-container {
@@ -86,8 +93,6 @@
         radial-gradient(circle at 25% 20%, rgba(46,214,144,.12), transparent 22rem);
       filter: url(#stonewood-grain);
     }
-
-
 
     /* --- Living branch / root network layer --- */
     .branch-network {
@@ -238,8 +243,9 @@
       margin-bottom: .45rem;
     }
 
-    #chamber-state-text { color: #d8f4e4; line-height: 1.5; }
+    #shared-state-text { color: #d8f4e4; line-height: 1.5; }
 
+    /* PREMAQ grid */
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
@@ -251,6 +257,7 @@
       border-radius: 10px;
       background: rgba(0,0,0,.30);
       border: 1px solid rgba(255,255,255,.045);
+      position: relative;
     }
 
     .metric-label {
@@ -259,6 +266,7 @@
       font-weight: 700;
       font-size: .78rem;
       margin-bottom: .3rem;
+      padding-right: 1.2rem;
     }
 
     .metric-value {
@@ -285,6 +293,223 @@
       transition: width 780ms cubic-bezier(.25, 1, .5, 1);
     }
 
+    .metric-descriptor {
+      display: block;
+      color: #4d6e5d;
+      font-size: .70rem;
+      margin-top: .42rem;
+      letter-spacing: .03em;
+      min-height: .9em;
+      transition: color 600ms ease;
+    }
+
+    .receipt-icon {
+      position: absolute;
+      top: .7rem;
+      right: .7rem;
+      font-size: .72rem;
+      opacity: .22;
+      cursor: default;
+      transition: opacity 240ms ease;
+      color: #9ff4c8;
+    }
+
+    .metric-node:hover .receipt-icon { opacity: .56; }
+    .metric-node:hover .metric-descriptor { color: #6f8f7d; }
+
+    /* Spiral State */
+    .spiral-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: .7rem;
+    }
+
+    .spiral-cell {
+      padding: .7rem .9rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,.26);
+      border: 1px solid rgba(255,255,255,.038);
+    }
+
+    .spiral-label {
+      display: block;
+      color: #668373;
+      font-size: .70rem;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      margin-bottom: .24rem;
+    }
+
+    .spiral-value {
+      display: block;
+      color: #b9ffe0;
+      font-size: 1.02rem;
+      text-shadow: 0 0 8px rgba(46,214,144,.28);
+    }
+
+    /* World Hum */
+    .world-hum-row {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .world-hum-play {
+      appearance: none;
+      background: rgba(46,214,144,.10);
+      border: 1px solid rgba(46,214,144,.30);
+      border-radius: 50%;
+      width: 2.6rem;
+      height: 2.6rem;
+      font-size: 1.3rem;
+      color: #72ccaa;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 200ms, box-shadow 200ms;
+      text-shadow: 0 0 14px rgba(46,214,144,.5);
+      flex-shrink: 0;
+    }
+    .world-hum-play:hover { background: rgba(46,214,144,.22); }
+    .world-hum-play.playing {
+      background: rgba(46,214,144,.20);
+      box-shadow: 0 0 14px rgba(46,214,144,.38);
+      animation: nodePulse 4s ease-in-out infinite alternate;
+    }
+
+    .world-hum-info { display: flex; flex-direction: column; gap: .18rem; flex: 1; min-width: 0; }
+    .world-hum-name { color: #9ff4c8; font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .world-hum-status { color: #5a7a68; font-size: .78rem; letter-spacing: .06em; }
+
+    .world-hum-vol-wrap {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      flex-shrink: 0;
+    }
+    .world-hum-vol-icon { font-size: .9rem; color: #5a7a68; }
+    .world-hum-vol {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 80px;
+      height: 3px;
+      background: rgba(46,214,144,.22);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+    .world-hum-vol::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #72ccaa;
+      box-shadow: 0 0 6px rgba(46,214,144,.5);
+    }
+
+    .world-hum-selector {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-top: .7rem;
+    }
+    .world-btn {
+      appearance: none;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(46,214,144,.18);
+      border-radius: 999px;
+      color: #7aaa90;
+      font-family: inherit;
+      font-size: .78rem;
+      letter-spacing: .06em;
+      padding: .28rem .75rem;
+      cursor: pointer;
+      transition: border-color 150ms, color 150ms, background 150ms;
+    }
+    .world-btn:hover { border-color: rgba(46,214,144,.40); color: #9ff4c8; }
+    .world-btn.active {
+      border-color: rgba(46,214,144,.60);
+      color: #bdf4d4;
+      background: rgba(46,214,144,.10);
+      box-shadow: 0 0 8px rgba(46,214,144,.18);
+    }
+
+    .world-hum-identity {
+      margin: .7rem 0 0;
+      font-size: .78rem;
+      color: #5a7a68;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    /* Tone Palette */
+    .tone-palette {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+      gap: .32rem;
+      margin-top: .85rem;
+      opacity: 0.72;
+    }
+    .tone-cell {
+      display: flex;
+      flex-direction: column;
+      gap: .15rem;
+    }
+    .tone-cell-label {
+      font-size: .74rem;
+      color: #7aaa8a;
+      letter-spacing: .05em;
+      font-weight: 500;
+    }
+    .tone-cell-bar {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(46,214,144,.12);
+      overflow: hidden;
+    }
+    .tone-cell-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2a8060, #2ed690);
+      box-shadow: 0 0 6px rgba(46,214,144,.3);
+      transition: width 1.2s ease;
+    }
+    .tone-cell-val {
+      font-size: .70rem;
+      color: #6a8a78;
+      text-align: right;
+    }
+
+    /* Desired State */
+    .ds-pill { background:rgba(0,0,0,.28); border:1px solid rgba(46,214,144,.18); border-radius:999px; color:#5a7a68; font-family:inherit; font-size:.72rem; letter-spacing:.04em; padding:.25rem .65rem; cursor:pointer; transition:all .15s; }
+    .ds-pill:hover { border-color:rgba(46,214,144,.45); color:#9ff4c8; }
+    .ds-pill.active { background:rgba(46,214,144,.12); border-color:rgba(46,214,144,.6); color:#b9ffe0; }
+
+    /* Observer Feed */
+    .obs-feed { display: flex; flex-direction: column; gap: .36rem; margin-top: .5rem; }
+
+    .obs-entry {
+      display: flex;
+      gap: .8rem;
+      align-items: baseline;
+      padding: .32rem .5rem;
+      border-radius: 7px;
+      background: rgba(0,0,0,.16);
+    }
+
+    .obs-time { color: #4d6e5d; font-size: .72rem; min-width: 4.5ch; flex-shrink: 0; }
+    .obs-text { color: #97b7a6; font-size: .82rem; flex: 1; }
+    .obs-badge {
+      color: #4d6e5d;
+      font-size: .68rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    /* Routes */
     .route-grid {
       display: flex;
       flex-wrap: wrap;
@@ -348,7 +573,7 @@
 </head>
 <body>
   <nav style="display:flex;gap:1rem;align-items:center;padding:.5rem 1.25rem;background:rgba(5,7,6,.94);border-bottom:1px solid rgba(114,204,166,.16);position:sticky;top:0;z-index:10">
-    <a href="/" style="color:#9fffb4;text-decoration:none;font-size:.76rem;letter-spacing:.07em;text-transform:uppercase">Chamber Matrix</a>
+    <a href="/" style="color:#9fffb4;text-decoration:none;font-size:.76rem;letter-spacing:.07em;text-transform:uppercase">Observatory</a>
     <span style="color:rgba(114,204,166,.2);font-size:.7rem">·</span>
     <a href="/ygg-chat.html" style="color:#8aaa96;text-decoration:none;font-size:.76rem;letter-spacing:.07em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#2ed690'" onmouseout="this.style.color='#8aaa96'">Yggdrasil</a>
     <span style="color:rgba(114,204,166,.2);font-size:.7rem">·</span>
@@ -362,29 +587,20 @@
   <main class="stonewood-container">
 
     <svg class="branch-network" viewBox="0 0 1120 760" preserveAspectRatio="none" aria-hidden="true">
-      <!-- Soft glowing underlines make the branching grammar visible before the fine-line layer animates. -->
       <path class="branch-halo" d="M82 84 C72 190 82 286 126 372 C180 478 288 548 424 620 C514 668 592 700 704 724" />
       <path class="branch-halo" d="M1038 94 C1048 204 1030 306 978 394 C914 504 812 568 682 632 C596 674 516 706 406 736" />
       <path class="branch-halo" d="M142 374 C282 326 420 324 560 360 C706 398 860 378 1010 322" />
-
-      <!-- Visible side trunks: left and right living tethers, like roots climbing the wall. -->
       <path class="branch-path trunk" d="M82 84 C72 190 82 286 126 372 C180 478 288 548 424 620 C514 668 592 700 704 724" />
       <path class="branch-path trunk" d="M1038 94 C1048 204 1030 306 978 394 C914 504 812 568 682 632 C596 674 516 706 406 736" />
-
-      <!-- Cross-room forks and roots. These are deliberately routed through open space between panels. -->
       <path class="branch-path root" d="M120 274 C232 296 332 302 442 318 C528 332 596 352 694 340 C812 326 922 288 1044 250" />
       <path class="branch-path root gold" d="M142 374 C282 326 420 324 560 360 C706 398 860 378 1010 322" />
       <path class="branch-path" d="M156 516 C282 480 394 466 512 490 C640 516 756 506 872 466 C930 446 982 426 1040 392" />
       <path class="branch-path root" d="M118 650 C230 612 356 604 486 624 C616 644 744 638 874 600 C944 580 1002 548 1060 514" />
-
-      <!-- Smaller tethers, forks, and vein lines around panels and route buttons. -->
       <path class="branch-path twig" d="M156 214 C204 234 244 252 284 284 C326 316 354 340 406 356" />
       <path class="branch-path twig" d="M964 220 C914 242 872 268 834 302 C792 340 746 358 690 364" />
       <path class="branch-path twig" d="M224 430 C300 426 358 436 410 464 C456 488 500 500 548 494" />
       <path class="branch-path twig gold" d="M902 430 C820 430 756 444 704 472 C648 502 596 506 540 496" />
       <path class="branch-path twig" d="M342 674 C426 646 496 638 560 652 C632 668 706 662 790 630" />
-
-      <!-- Nodes and leaves so the user can see this is a living branch system, not faint scratches. -->
       <circle class="branch-node seed" cx="82" cy="84" r="6" />
       <circle class="branch-node seed" cx="1038" cy="94" r="6" />
       <circle class="branch-node" cx="126" cy="372" r="5" />
@@ -394,41 +610,124 @@
       <circle class="branch-node" cx="704" cy="472" r="4" />
       <circle class="branch-node" cx="486" cy="624" r="4" />
       <circle class="branch-node" cx="874" cy="600" r="4" />
-
       <ellipse class="branch-leaf" cx="162" cy="210" rx="5" ry="11" transform="rotate(-28 162 210)" />
       <ellipse class="branch-leaf" cx="960" cy="218" rx="5" ry="11" transform="rotate(24 960 218)" />
       <ellipse class="branch-leaf" cx="410" cy="464" rx="4" ry="9" transform="rotate(-42 410 464)" />
       <ellipse class="branch-leaf" cx="790" cy="630" rx="4" ry="9" transform="rotate(36 790 630)" />
       <ellipse class="branch-leaf" cx="560" cy="652" rx="4" ry="10" transform="rotate(2 560 652)" />
     </svg>
-    <div class="build-badge">🌿 STONEWOOD v0.6 BRANCH-VISIBLE BUILD</div>
-    <h1>YGGDRASIL // Chamber Matrix</h1>
-    <p class="subtitle">A standalone STARWELL interface for testing DEEP vectors, fluid-light ambience, visible branching tethers, route anchors, and narrative pulse logging.</p>
 
-    <section class="panel">
-      <div class="eyebrow">Current field state</div>
-      <div id="chamber-state-text">Synchronizing roots with local node registries...</div>
-    </section>
+    <div class="build-badge">🌿 HEARTHGATE v0.7 · SPIRAL-WIRED</div>
+    <h1>OBSERVATORY</h1>
+    <p class="subtitle">Observer receives. PREMAQ carries. The spiral turns. Receipts remember.</p>
 
-    <section class="panel metrics-grid" id="metrics-grid"></section>
-
-    <section class="panel">
-      <div class="eyebrow">Route anchors</div>
-      <div class="route-grid" id="route-grid"></div>
-      <div class="small-note">Route clicks pass updates to <code>/api/place</code> and append a signal entry.</div>
-    </section>
-
-    <section class="panel">
-      <div class="eyebrow">Translate new narrative signal</div>
-      <textarea id="signal-input" placeholder="Type a signal event to watch the stonewood shift..."></textarea>
-      <div class="action-row">
-        <button id="pulse-button">Anchor Grove Signal</button>
-        <span class="small-note">Uses local fallback math unless you wire an LLM later.</span>
+    <!-- 1. Observer — what has entered today -->
+    <section class="panel" id="observer-feed-panel">
+      <div class="eyebrow">Observer</div>
+      <div class="obs-feed" id="obs-feed">
+        <div class="obs-entry">
+          <span class="obs-time">—</span>
+          <span class="obs-text">Synchronising with Observer...</span>
+          <span class="obs-badge"></span>
+        </div>
       </div>
     </section>
 
+    <!-- 2. Shared State — narrative summary -->
+    <section class="panel">
+      <div class="eyebrow">Shared State</div>
+      <div id="shared-state-text">Awaiting state...</div>
+    </section>
+
+    <!-- 3. PREMAQ — seven canonical axes -->
+    <section class="panel metrics-grid" id="metrics-grid"></section>
+
+    <!-- 4. Spiral State — what every subsystem reads -->
+    <section class="panel">
+      <div class="eyebrow">Spiral State <span class="receipt-icon" title="Supporting receipts">🧾</span></div>
+      <div class="spiral-grid" id="spiral-grid">
+        <div class="spiral-cell">
+          <span class="spiral-label">Phase</span>
+          <span class="spiral-value" id="spiral-phase">—</span>
+        </div>
+        <div class="spiral-cell">
+          <span class="spiral-label">Direction</span>
+          <span class="spiral-value" id="spiral-direction">—</span>
+        </div>
+        <div class="spiral-cell">
+          <span class="spiral-label">Confidence</span>
+          <span class="spiral-value" id="spiral-confidence">—</span>
+        </div>
+      </div>
+      <div id="spiral-actions" style="margin-top:.6rem;font-size:.75rem;color:#5a7a68;letter-spacing:.04em;line-height:1.6;min-height:1.4rem"></div>
+    </section>
+
+    <!-- 4b. Desired State — primary input to Runa and Spiral Engine -->
+    <section class="panel">
+      <div class="eyebrow">Desired State</div>
+      <div id="desired-state-pills" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.7rem">
+        <button class="ds-pill" data-state="Writing">Writing</button>
+        <button class="ds-pill" data-state="Focused">Focused</button>
+        <button class="ds-pill" data-state="Wondering">Wondering</button>
+        <button class="ds-pill" data-state="Calm">Calm</button>
+        <button class="ds-pill" data-state="Open">Open</button>
+        <button class="ds-pill" data-state="No fatigue">No fatigue</button>
+        <button class="ds-pill" data-state="Making">Making</button>
+        <button class="ds-pill" data-state="Receiving">Receiving</button>
+      </div>
+      <div style="font-size:.72rem;color:#4d6e5d">Active: <span id="desired-state-active">—</span></div>
+    </section>
+
+    <!-- 5. Runa — sound compiler; World Hum is one organ within -->
+    <section class="panel" id="world-hum-panel">
+      <div class="eyebrow">Runa · World Hum</div>
+      <div class="world-hum-row">
+        <button class="world-hum-play" id="world-hum-play" aria-label="Play world hum" title="Play / pause soundscape">♫</button>
+        <div class="world-hum-info">
+          <span class="world-hum-name" id="world-hum-name">Terra Aeterna</span>
+          <span class="world-hum-status" id="world-hum-status">Ready</span>
+        </div>
+        <div class="world-hum-vol-wrap" title="Volume">
+          <span class="world-hum-vol-icon">𝅘𝅥𝅮</span>
+          <input type="range" id="world-hum-volume" class="world-hum-vol" min="0" max="1" step="0.02" value="0.30" aria-label="Volume">
+        </div>
+      </div>
+      <div class="world-hum-selector">
+        <button class="world-btn active" data-world="terra" title="Terra Aeterna">Terra Aeterna</button>
+        <button class="world-btn" data-world="luna" title="The Luna Who Called Down the Moon">Luna</button>
+        <button class="world-btn" data-world="taaveren" title="Ta'veren Vaen — A Later Turning of the Wheel">Ta'veren Vaen</button>
+        <button class="world-btn" data-world="starsong" title="Starsong: Friendship Is Magic">Starsong</button>
+        <button class="world-btn" data-world="feather-flame" title="Feather & Flame">Feather & Flame</button>
+        <button class="world-btn" data-world="dreaming-grove" title="Dreaming Grove / Templehouse">Grove</button>
+        <button class="world-btn" data-world="momento-creationis" title="A Momento Creationis">Momento</button>
+      </div>
+      <p class="world-hum-identity" id="world-hum-identity">The state is measured. The world interprets. Runa gives it voice.</p>
+      <div style="font-size:.68rem;color:#4d6e5d;letter-spacing:.05em;margin:.5rem 0 .3rem;font-style:italic">Compiled from Shared State. Semantic intent — not direct measurement. Runa gives it voice.</div>
+      <div class="tone-palette" id="tone-palette" aria-label="Live tone qualities">
+        <!-- populated by world-hum-engine.js -->
+      </div>
+    </section>
+
+    <!-- 6. Route anchors -->
+    <section class="panel">
+      <div class="eyebrow">Route Anchors</div>
+      <div class="route-grid" id="route-grid"></div>
+      <div class="small-note">Route signals pass through <code>/api/place</code> and feed into Observer.</div>
+    </section>
+
+    <!-- 7. Narrative signal / Observer input -->
+    <section class="panel">
+      <div class="eyebrow">Narrative Signal → Observer</div>
+      <textarea id="signal-input" placeholder="Describe what is entering from the world right now — an observation, not a desired state..."></textarea>
+      <div class="action-row">
+        <button id="pulse-button">Send to Observer</button>
+        <span class="small-note">Translated into PREMAQ vectors via Yggdrasil.</span>
+      </div>
+    </section>
+
+    <!-- 8. Groundwire — device instrumentation (supporting, not centre) -->
     <section class="panel" id="groundwire-panel">
-      <div class="eyebrow">Groundwire // Live device signals</div>
+      <div class="eyebrow">Groundwire · Device Layer</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.6rem;margin:.6rem 0" id="gw-fields"></div>
       <div style="margin:.6rem 0">
         <label style="display:block;font-size:.8rem;color:#6f8f7d;margin-bottom:.35rem">Mic input level</label>
@@ -441,7 +740,7 @@
         <button id="gw-mic-btn" style="font-size:.8rem;padding:.4rem .75rem">Start Mic Meter</button>
         <button id="gw-mic-stop" style="font-size:.8rem;padding:.4rem .75rem;border-color:rgba(224,120,120,.6);color:#f4c0c0" disabled>Stop</button>
       </div>
-      <div class="small-note" style="margin-top:.5rem">Passive reads fire automatically. Location and microphone wait for your tap. All readings stay local — nothing is transmitted.</div>
+      <div class="small-note" style="margin-top:.5rem">Passive reads fire automatically. Location and microphone wait for your tap. All readings stay local.</div>
     </section>
 
     <section class="cards" id="bridge-cards"></section>
@@ -495,7 +794,6 @@
     }
 
     function gwLunarPhase() {
-      // Days since known new moon (2000-01-06 UTC), lunar cycle ~29.53059 days
       const known = new Date('2000-01-06T18:14:00Z');
       const elapsed = (Date.now() - known.getTime()) / 86400000;
       const phase = ((elapsed % 29.53059) / 29.53059 + 1) % 1;
@@ -525,7 +823,6 @@
       ].join(' | ');
     }
 
-    // Passive reads
     function gwReadNetwork() {
       const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
       if (!conn) { gwState.network = { value: null, confidence: 'unknown', reason: 'Network API unsupported.' }; renderGroundwire(); return; }
@@ -551,7 +848,6 @@
       }).catch(() => { gwState.battery = { value: null, confidence: 'unknown', reason: 'Battery read failed.' }; renderGroundwire(); });
     }
 
-    // Gated reads
     document.getElementById('gw-loc-btn').addEventListener('click', () => {
       if (!('geolocation' in navigator)) { gwState.location = { value: null, confidence: 'unknown', reason: 'Geolocation unsupported.' }; renderGroundwire(); return; }
       gwState.location = { value: null, confidence: 'unknown', reason: 'Requesting…' }; renderGroundwire();
@@ -601,27 +897,81 @@
     gwReadBattery();
     renderGroundwire();
 
-    // --- Grove core ---
+    // --- PREMAQ canonical axis definitions ---
     const METRIC_KEYS = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
     const ROUTES = ['Stonewood', 'Ashfen Cairn', 'Wraithtide Shore', 'Twilight Hearth', 'The Withinwood', 'Salt Veil'];
 
     const metricLabels = {
-      P: 'P · Pulse',
-      C: 'C · Coherence',
-      R: 'R · Resonance',
-      E: 'E · Entropy',
+      P: 'P · Presence',
+      C: 'C · Compression',
+      R: 'R · Resolution',
+      E: 'E · Entanglement',
       M: 'M · Memory',
-      A: 'A · Axis',
-      Q: 'Q · Quotient'
+      A: 'A · Agency',
+      Q: 'Q · Qualia',
     };
+
+    function axisDescriptor(key, v) {
+      if (key === 'P') {
+        if (v < 0.20) return 'Withdrawn';
+        if (v < 0.45) return 'Emergent';
+        if (v < 0.65) return 'Present';
+        if (v < 0.85) return 'Strongly present';
+        return 'Fully embodied';
+      }
+      if (key === 'C') {
+        if (v < 0.25) return 'Dispersed';
+        if (v < 0.50) return 'Gathering';
+        if (v < 0.75) return 'Integrated';
+        return 'Compressed';
+      }
+      if (key === 'R') {
+        if (v < 0.30) return 'Generalised';
+        if (v < 0.55) return 'Resolving';
+        if (v < 0.78) return 'Distinct';
+        return 'High fidelity';
+      }
+      if (key === 'E') {
+        if (v < 0.20) return 'Ordered';
+        if (v < 0.40) return 'Low flux';
+        if (v < 0.60) return 'Variable';
+        if (v < 0.80) return 'High flux';
+        return 'Turbulent';
+      }
+      if (key === 'M') {
+        if (v < 0.20) return 'Still';
+        if (v < 0.45) return 'Drifting';
+        if (v < 0.65) return 'Flowing';
+        if (v < 0.85) return 'Building';
+        return 'Driving';
+      }
+      if (key === 'A') {
+        if (v < 0.25) return 'Capacity suspended';
+        if (v < 0.50) return 'Constrained';
+        if (v < 0.68) return 'Choice available';
+        if (v < 0.85) return 'Capacity increasing';
+        return 'Full directed capacity';
+      }
+      if (key === 'Q') {
+        if (v < 0.20) return 'Hollow · Muted';
+        if (v < 0.38) return 'Quiet · Reserved';
+        if (v < 0.55) return 'Warm · Aware';
+        if (v < 0.72) return 'Open · Spacious';
+        if (v < 0.88) return 'Resonant · Wonder';
+        return 'Luminous · Radiant';
+      }
+      return '—';
+    }
 
     function buildMetricGrid() {
       const grid = document.getElementById('metrics-grid');
       grid.innerHTML = METRIC_KEYS.map((key) => `
         <div class="metric-node" id="node-${key}">
+          <span class="receipt-icon" title="Provenance">🧾</span>
           <span class="metric-label">${metricLabels[key]}</span>
           <span class="metric-value" id="val-${key}">0.00</span>
           <div class="metric-bar-container"><div class="metric-bar-fill" id="bar-${key}"></div></div>
+          <span class="metric-descriptor" id="desc-${key}">—</span>
         </div>
       `).join('');
     }
@@ -635,15 +985,61 @@
     }
 
     function setMetrics(metrics = {}) {
+      const normalised = {};
       METRIC_KEYS.forEach((key) => {
         const raw = Number(metrics[key] || 0);
         const value = Number.isFinite(raw) ? Math.max(0, Math.min(1, raw)) : 0;
+        normalised[key] = value;
         document.documentElement.style.setProperty(`--vector-${key}`, value.toFixed(2));
         const val = document.getElementById(`val-${key}`);
         const bar = document.getElementById(`bar-${key}`);
+        const desc = document.getElementById(`desc-${key}`);
         if (val) val.textContent = value.toFixed(2);
         if (bar) bar.style.width = `${value * 100}%`;
+        if (desc) desc.textContent = axisDescriptor(key, value);
       });
+      // Forward normalised PREMAQ to the World Hum Engine
+      if (window.worldHumEngine) window.worldHumEngine.updatePREMAQ(normalised);
+    }
+
+    function deriveSpiralState(metrics = {}) {
+      const C = metrics.C || 0;
+      const R = metrics.R || 0;
+      const E = metrics.E || 0;
+      const M = metrics.M || 0;
+      const A = metrics.A || 0;
+
+      const phase = C > E ? 'Compression' : 'Release';
+
+      let direction;
+      if (M > 0.65) direction = 'ascending';
+      else if (M > 0.45) direction = 'branching';
+      else if (M > 0.28) direction = 'stable';
+      else direction = 'returning';
+
+      const confidence = Math.min(1, (R + Math.max(0, 1 - E)) / 2);
+
+      const actions = [];
+      if (phase === 'Compression' && confidence > 0.6) actions.push('Hold current anchoring');
+      if (direction === 'ascending') actions.push('Deepen world anchor');
+      if (direction === 'branching') actions.push('Invite new signal');
+      if (direction === 'returning') actions.push('Stabilise before routing');
+      if (E > 0.7) actions.push('Reduce entropy — fewer parallel threads');
+      if (A < 0.3) actions.push('Agency low — clarify next action');
+
+      return { phase, direction, confidence, actions };
+    }
+
+    function renderSpiralState(metrics) {
+      const s = deriveSpiralState(metrics);
+      const ph = document.getElementById('spiral-phase');
+      const dir = document.getElementById('spiral-direction');
+      const conf = document.getElementById('spiral-confidence');
+      const acts = document.getElementById('spiral-actions');
+      if (ph) ph.textContent = s.phase;
+      if (dir) dir.textContent = s.direction;
+      if (conf) conf.textContent = s.confidence.toFixed(2);
+      if (acts) acts.textContent = s.actions.length ? '→ ' + s.actions.slice(0,2).join(' · ') : '';
     }
 
     function renderCards(bridges = []) {
@@ -659,32 +1055,81 @@
       `).join('');
     }
 
+    // ── Local observation log (page-layer events) ────────────────────────────────
+    const _localLog = [];
+    function logObservation(text, badge = 'local') {
+      _localLog.unshift({ time: new Date(), text, badge });
+      if (_localLog.length > 20) _localLog.length = 20;
+      renderObserverFeed(null);
+    }
+
+    function renderObserverFeed(signals) {
+      const feed = document.getElementById('obs-feed');
+      if (!feed) return;
+      const serverEntries = (signals || []).slice(-6).reverse().map(s => {
+        const ts = s.timestamp || s.created_at || s.time || '';
+        const timeStr = ts ? new Date(ts).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false }) : '—';
+        return { timeStr, text: s.description || s.name || s.type || s.event || 'Signal', badge:'Observed' };
+      });
+      const localEntries = _localLog.slice(0,6).map(e => ({
+        timeStr: e.time.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false }),
+        text: e.text,
+        badge: e.badge,
+      }));
+      const all = [...serverEntries, ...localEntries].slice(0,8);
+      if (!all.length) {
+        feed.innerHTML = `<div class="obs-entry"><span class="obs-time">—</span><span class="obs-text">Observer ready. Route signals appear here.</span><span class="obs-badge"></span></div>`;
+        return;
+      }
+      feed.innerHTML = all.map(e => `<div class="obs-entry">
+        <span class="obs-time">${e.timeStr}</span>
+        <span class="obs-text">${e.text}</span>
+        <span class="obs-badge">${e.badge}</span>
+      </div>`).join('');
+    }
+
     async function fetchLivingState() {
       try {
-        const response = await fetch('/api/state');
-        if (!response.ok) throw new Error(`State request failed: ${response.status}`);
-        const data = await response.json();
+        const [stateRes, receptionRes] = await Promise.all([
+          fetch('/api/state'),
+          fetch('/api/reception').catch(() => null),
+        ]);
+        if (!stateRes.ok) throw new Error(`State ${stateRes.status}`);
+        const data = await stateRes.json();
+
         const room = Array.isArray(data.rooms) ? data.rooms[0] : null;
         if (room) {
-          document.getElementById('chamber-state-text').textContent = room.chamberState || 'Room active.';
-          setMetrics(room.metrics || {});
+          document.getElementById('shared-state-text').textContent = room.chamberState || 'Shared state active.';
+          const metrics = room.metrics || {};
+          setMetrics(metrics);
+          renderSpiralState(metrics);
         }
         renderCards(data.bridges || []);
+        if (Array.isArray(data.signals)) renderObserverFeed(data.signals);
+
+        if (receptionRes && receptionRes.ok) {
+          const rec = await receptionRes.json();
+          const nameEl = document.getElementById('world-hum-name');
+          if (nameEl && rec.activeReception) {
+            const name = rec.activeReception.charAt(0).toUpperCase() + rec.activeReception.slice(1);
+            nameEl.textContent = name;
+          }
+        }
       } catch (error) {
-        document.getElementById('chamber-state-text').textContent = `Root fetch failed: ${error.message}`;
+        document.getElementById('shared-state-text').textContent = `Observer: ${error.message}`;
         console.error(error);
       }
     }
 
     async function anchorPlace(place) {
-      document.getElementById('chamber-state-text').textContent = `Routing through ${place}...`;
+      document.getElementById('shared-state-text').textContent = `Routing through ${place}...`;
       const response = await fetch('/api/place', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ place })
       });
       if (!response.ok) {
-        document.getElementById('chamber-state-text').textContent = `Could not anchor ${place}.`;
+        document.getElementById('shared-state-text').textContent = `Could not anchor ${place}.`;
         return;
       }
       await fetchLivingState();
@@ -694,7 +1139,7 @@
       const input = document.getElementById('signal-input');
       const incomingSignal = input.value.trim();
       if (!incomingSignal) return;
-      document.getElementById('chamber-state-text').textContent = 'Translating text fingerprint into DEEP seed vectors...';
+      document.getElementById('shared-state-text').textContent = 'Translating signal into PREMAQ...';
       const response = await fetch('/api/pulse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -704,15 +1149,44 @@
         input.value = '';
         await fetchLivingState();
       } else {
-        document.getElementById('chamber-state-text').textContent = 'Signal transmission snapped.';
+        document.getElementById('shared-state-text').textContent = 'Signal transmission failed.';
       }
     }
 
     document.getElementById('pulse-button').addEventListener('click', sendNarrativePulse);
+
+    // ── Desired State pills ───────────────────────────────────────────────────────
+    let _desiredState = [];
+    document.querySelectorAll('.ds-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const s = btn.dataset.state;
+        const idx = _desiredState.indexOf(s);
+        if (idx >= 0) { _desiredState.splice(idx,1); btn.classList.remove('active'); }
+        else { _desiredState.push(s); btn.classList.add('active'); }
+        const activeEl = document.getElementById('desired-state-active');
+        if (activeEl) activeEl.textContent = _desiredState.length ? _desiredState.join(' · ') : '—';
+        logObservation(`Desired state: ${_desiredState.join(', ') || 'cleared'}`, 'intent');
+      });
+    });
+
+    // ── Observe local events on world select ────────────────────────────────────
+    document.querySelectorAll('.world-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const title = btn.title || btn.textContent.trim();
+        logObservation(`World Hum → ${title}`, 'world');
+      });
+    });
+
+    // ── Initial page-load observation ────────────────────────────────────────────
+    logObservation('Observatory loaded · PREMAQ active', 'system');
+
     buildMetricGrid();
     buildRoutes();
     fetchLivingState();
     setInterval(fetchLivingState, 3500);
   </script>
+
+  <script src="/js/tone-map.js"></script>
+  <script src="/js/world-hum-engine.js"></script>
 </body>
 </html>

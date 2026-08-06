@@ -1,0 +1,5 @@
+export function injectVertexRipples(material, amplitude = 0.02, frequency = 1.4) {
+  material.userData ||= {};
+  Object.assign(material.userData,{uRippleTime:{value:0},uRippleAmplitude:{value:amplitude},uRippleFrequency:{value:frequency}});
+  material.onBeforeCompile=shader=>{Object.assign(shader.uniforms,{uRippleTime:material.userData.uRippleTime,uRippleAmplitude:material.userData.uRippleAmplitude,uRippleFrequency:material.userData.uRippleFrequency});shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>\nuniform float uRippleTime;uniform float uRippleAmplitude;uniform float uRippleFrequency;`);shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>\nfloat ripple=sin((position.x+position.y+position.z)*uRippleFrequency+uRippleTime)*0.55+sin(position.y*uRippleFrequency*1.7-uRippleTime*0.7)*0.45;transformed+=normal*ripple*uRippleAmplitude;`);};material.customProgramCacheKey=()=>`hearthgate-ripple-v1`;material.needsUpdate=true;return material;
+}

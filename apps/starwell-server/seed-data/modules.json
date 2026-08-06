@@ -1,0 +1,21 @@
+{"schema":"hearthgate.module-registry/v1","modules":[
+{"id":"concordance","name":"Concordance","route":"/concordance.html?embedded=1","description":"Cross-source search and cited correspondences.","category":"knowledge","enabled":true,"permissions":["read-sources"]},
+{"id":"deep-story","name":"DEEPStory","route":"/deep-story.html?embedded=1","description":"Source-bound narrative continuity parallel to DEEPTheory.","category":"story","enabled":true,"permissions":["read-sources","write-local"]},
+{"id":"almanac","name":"Observer Almanac","route":"/almanac.html?embedded=1","description":"Observation, vector, glyph, story, and receipt packets.","category":"observer","enabled":true,"permissions":["read-observer","write-local"]},
+{"id":"bridge-registry","name":"Bridge Registry","route":"/starwell/bridge-registry/?embedded=1","description":"Registered connective structures.","category":"house","enabled":true,"permissions":["read-local"]},
+{"id":"signal-well","name":"Signal Well","route":"/starwell/signal-well/?embedded=1","description":"Live listening and optional source adapters.","category":"observer","enabled":true,"permissions":["network-optional"]},
+{"id":"solar-observatory","name":"Solar Observatory","route":"/solar-observatory.html?embedded=1","description":"Sourced NOAA SWPC solar and geomagnetic measurements, alerts, freshness, and history.","category":"observer","enabled":true,"permissions":["network-optional","read-environmental-sources","write-local"]},
+{"id":"living-room","name":"Living Room","route":"/starwell/living-room.html?embedded=1","description":"Shared STARWELL hearth environment.","category":"house","enabled":true,"permissions":["read-local"]},
+{"id":"scfe","name":"SCFE Lab","route":"/starwell/scfe-lab.html?embedded=1","description":"Experimental field instruments.","category":"laboratory","enabled":true,"permissions":["read-observer"]},
+{"id":"unit-resonance","name":"Unit Resonance","route":"/starwell/unit-resonance-lab.html?embedded=1","description":"Resonance comparison instruments.","category":"laboratory","enabled":true,"permissions":["read-observer"]},
+{"id":"tesla-live","name":"Tesla Observatory Live","route":"/starwell/templehouse/tesla-observatory-live.html?embedded=1","description":"Live LLM-assisted observatory.","category":"laboratory","enabled":true,"permissions":["api-provider","network-optional"]},
+{"id":"tesla","name":"Tesla Observatory","route":"/starwell/templehouse/tesla-observatory.html?embedded=1","description":"Recorded Tesla instruments.","category":"laboratory","enabled":true,"permissions":["read-local"]},
+{"id":"material-qa","name":"Material QA","route":"/starwell/material-qa.html?embedded=1","description":"Interface and material verification.","category":"development","enabled":true,"permissions":["read-local"]},
+{"id":"grove","name":"Grove","route":"/grove.html?embedded=1","description":"Local rooted conversation.","category":"conversation","enabled":true,"permissions":["local-model"]},
+{"id":"hearthroom","name":"Hearthroom","route":"/hearthroom.html?embedded=1","description":"House conversation.","category":"conversation","enabled":true,"permissions":["api-provider"]},
+{"id":"yggdrasil","name":"Yggdrasil","route":"/ygg-chat.html?embedded=1","description":"Local-first model conversation.","category":"conversation","enabled":true,"permissions":["local-model"]},
+{"id":"notes","name":"Notes","route":"/notes.html?embedded=1","description":"Working notes and fragments.","category":"writing","enabled":true,"permissions":["write-local"]},
+{"id":"fonts","name":"Fonts","route":"/font-preview.html?embedded=1","description":"Bundled typography collection.","category":"creation","enabled":true,"permissions":["read-local"]},
+{"id":"glyph-studio","name":"Experimental Glyph Studio","route":"/starwell/glyph-studio/?embedded=1","description":"Glyph-to-font experimental foundation.","category":"creation","enabled":true,"permissions":["write-local"]},
+{"id":"setup","name":"First Light & APIs","route":"/setup-wizard.html?embedded=1","description":"Initialisation, services, and provider configuration.","category":"system","enabled":true,"permissions":["configure-secrets"]}
+]}

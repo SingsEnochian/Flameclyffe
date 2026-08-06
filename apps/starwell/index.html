@@ -1,122 +1,510 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset='UTF-8'/>
-  <meta name='viewport' content='width=device-width, initial-scale=1.0, viewport-fit=cover'/>
-  <meta name='theme-color' content='#07100d'/>
-  <meta name='apple-mobile-web-app-capable' content='yes'/>
-  <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'/>
-  <meta name='mobile-web-app-capable' content='yes'/>
-  <title>ARCSWEEP · Hearthgate</title>
-  <meta name='description' content='ARCSWEEP in Hearthgate: a gentle, themeable rail between STARWELL rooms, worlds, instruments, and records.'/>
-  <script type='module' src='./src/main.jsx'></script>
-  <script type='module' src='./src/city-state-motion.jsx'></script>
-  <script type='module' src='./src/deep-material-vars-bind.js'></script>
-  <script type='module' src='./src/deep-hud-socket-bind.js'></script>
-  <script type='module' src='./src/deep-hud-bounds-bind.js'></script>
-  <script type='module'>
-    if (import.meta.env.DEV) {
-      import('./src/deep-hud-debug-bead.js');
-      import('./src/deep-hud-socket-diagnostics.js');
-      import('./src/deep-hud-dev-assertions.js');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="##07100d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Arcsweep · Hearthgate</title>
+  <style>
+    :root {
+      --bg: #070908;
+      --stonewood-base: #1b221f;
+      --accent: rgba(46, 214, 144, 1);
+      --accent-dim: rgba(46, 214, 144, 0.22);
     }
-  </script>
-  <script type='module' src='./src/stonewood-themes.js'></script>
-  <script type='module' src='./src/hearthgate-arcsweep.js'></script>
-  <script type='module' src='./src/arcsweep-continuity/session-context-indicator.js'></script>
-  <script type='module' src='./src/premaq-shokz-soundfont.js'></script>
-  <script type='module' src='./src/premaq-shokz-feather-stop-bridge.js'></script>
-  <link rel='stylesheet' href='./src/starwell-hero-art.css'/>
-  <link rel='stylesheet' href='./src/deep-observer-mobile.css'/>
-  <link rel='stylesheet' href='./src/deep-hud-bounds.css'/>
-  <link rel='stylesheet' href='./src/stonewood-themes.css'/>
-  <link rel='stylesheet' href='./src/emerald-reliquary-hero.css'/>
-  <link rel='stylesheet' href='./src/stonewood-typography.css'/>
-  <link rel='stylesheet' href='./src/starwell-desktop-containment.css'/>
-  <link rel='stylesheet' href='./src/living-room-door.css'/>
-  <link rel='stylesheet' href='./src/glyph-studio-door.css'/>
-  <link rel='stylesheet' href='./src/framework-door-rack.css'/>
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(46, 214, 144, 0.10), transparent 32rem),
+        radial-gradient(circle at 82% 78%, rgba(92, 61, 255, 0.12), transparent 28rem),
+        var(--bg);
+      color: #d7e4dc;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    /* ── Nav ── */
+    .house-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .5rem 1.25rem;
+      background: rgba(4,8,6,.82);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 1px solid rgba(114,204,166,.10);
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.2), 0 4px 20px rgba(0,0,0,.40);
+    }
+    .house-nav a {
+      color: #8aaa96;
+      text-decoration: none;
+      font-size: .76rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      transition: color .18s;
+    }
+    .house-nav a[aria-current], .house-nav a:hover { color: #2ed690; }
+    .house-nav .sep { color: rgba(114,204,166,.22); font-size: .7rem; }
+    .house-nav .reception {
+      margin-left: auto;
+      font-size: .72rem;
+      color: #4d6e5d;
+      letter-spacing: .06em;
+    }
+
+    /* ── Canopy ── */
+    .fluid-light-canopy {
+      position: fixed;
+      inset: -30vh -20vw;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(46,214,144,.18) 0%, rgba(26,36,33,.14) 42%, transparent 68%),
+        conic-gradient(from 165deg, transparent, rgba(46,214,144,.10), transparent, rgba(93,139,255,.07), transparent);
+      filter: blur(60px);
+      animation: canopyDrift 24s ease-in-out infinite alternate, deepBreathe 90s ease-in-out infinite;
+      opacity: .62;
+    }
+    @keyframes canopyDrift {
+      0%   { transform: rotate(0deg) scale(1); }
+      100% { transform: rotate(10deg) scale(1.08); }
+    }
+    @keyframes deepBreathe {
+      0%, 100% { opacity: .58; }
+      50%       { opacity: .68; }
+    }
+
+    /* ── Stonewood container ── */
+    .stonewood-container {
+      position: relative;
+      z-index: 2;
+      width: min(960px, calc(100vw - 40px));
+      margin: 5vh auto 6vh;
+      padding: clamp(20px, 3vw, 36px);
+      border-radius: 18px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.055), transparent 22%),
+        linear-gradient(315deg, rgba(0,0,0,.45), transparent 38%),
+        rgba(14, 26, 20, 0.58);
+      backdrop-filter: blur(24px) saturate(170%);
+      -webkit-backdrop-filter: blur(24px) saturate(170%);
+      border: 1px solid rgba(114,204,166,.18);
+      border-top-color: rgba(255,255,255,.10);
+      box-shadow:
+        0 28px 80px rgba(0,0,0,.65),
+        inset 0 1px 0 rgba(255,255,255,.09),
+        inset 0 -1px 0 rgba(0,0,0,.55),
+        0 0 60px rgba(46,214,144,.06);
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .stonewood-container::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: .30;
+      background:
+        repeating-linear-gradient(112deg, rgba(255,255,255,.028) 0 1px, transparent 1px 18px),
+        radial-gradient(circle at 25% 20%, rgba(46,214,144,.10), transparent 22rem);
+      filter: url(#stonewood-grain);
+    }
+
+    /* ── Branch network ── */
+    .branch-network {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: .54;
+      mix-blend-mode: screen;
+      filter:
+        drop-shadow(0 0 8px rgba(46,214,144,.36))
+        drop-shadow(0 0 18px rgba(142,255,205,.12));
+    }
+    .branch-network .branch-halo {
+      fill: none;
+      stroke: rgba(46,214,144,.08);
+      stroke-width: 16;
+      stroke-linecap: round;
+      filter: blur(9px);
+    }
+    .branch-network .branch-path {
+      fill: none;
+      stroke: rgba(155,255,208,.36);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-dasharray: 10 20;
+      animation: branchCurrent 18s linear infinite;
+    }
+    .branch-network .branch-path.trunk {
+      stroke: rgba(176,255,216,.38);
+      stroke-width: 2.8;
+      stroke-dasharray: none;
+    }
+    .branch-network .branch-path.root {
+      stroke: rgba(69,214,160,.28);
+      stroke-width: 1.6;
+      animation-direction: reverse;
+    }
+    .branch-network .branch-node {
+      fill: rgba(185,255,216,.40);
+      filter: drop-shadow(0 0 8px rgba(46,214,144,.72));
+      animation: nodePulse 4s ease-in-out infinite alternate;
+    }
+    @keyframes branchCurrent { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -180; } }
+    @keyframes nodePulse {
+      from { opacity: .42; transform: scale(.88); }
+      to   { opacity: 1;   transform: scale(1.28); }
+    }
+
+    .stonewood-container > :not(.branch-network) { position: relative; z-index: 1; }
+
+    /* ── Header ── */
+    .build-badge {
+      display: inline-flex;
+      gap: .5rem;
+      align-items: center;
+      padding: .35rem .7rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(46,214,144,.30);
+      border-radius: 999px;
+      color: #9ff4c8;
+      background: rgba(0,0,0,.22);
+      font-size: .78rem;
+      letter-spacing: .08em;
+    }
+    h1 {
+      margin: 0 0 .5rem;
+      font-size: clamp(1.8rem, 5vw, 3.4rem);
+      letter-spacing: .14em;
+      color: #dff8ea;
+      text-transform: uppercase;
+      text-shadow: 0 0 14px rgba(46,214,144,.40), 0 0 40px rgba(46,214,144,.10);
+    }
+    .subtitle {
+      margin: 0 0 1.8rem;
+      color: #7aaa90;
+      font-size: .88rem;
+      line-height: 1.6;
+      max-width: 56ch;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: rgba(8,16,12,.55);
+      border: 1px solid rgba(114,204,166,.11);
+      border-top-color: rgba(255,255,255,.07);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.06),
+        0 4px 20px rgba(0,0,0,.45);
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+      border-radius: 12px;
+      backdrop-filter: blur(14px) saturate(150%);
+      -webkit-backdrop-filter: blur(14px) saturate(150%);
+    }
+    .eyebrow {
+      color: #566e62;
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: .8rem;
+    }
+
+    /* ── Organ manifest ── */
+    .organ-manifest {
+      display: flex;
+      flex-direction: column;
+      gap: .28rem;
+    }
+    .organ-row {
+      display: grid;
+      grid-template-columns: 2rem 13rem auto 1fr 1.4rem;
+      align-items: center;
+      gap: .5rem 1rem;
+      padding: .6rem .75rem;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      text-decoration: none;
+      color: inherit;
+      transition: background .15s, border-color .15s;
+    }
+    a.organ-row:hover {
+      background: rgba(20,44,30,.60);
+      border-color: rgba(46,214,144,.20);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 2px 10px rgba(0,0,0,.30);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    span.organ-row { cursor: default; opacity: .38; }
+
+    .organ-mark {
+      font-size: 1.05rem;
+      text-align: center;
+      line-height: 1;
+    }
+    .organ-name {
+      font-size: .88rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+    .organ-desc {
+      font-size: .76rem;
+      color: #7aaa90;
+      line-height: 1.4;
+    }
+    .organ-arrow {
+      text-align: right;
+      color: rgba(46,214,144,.50);
+      font-size: .9rem;
+    }
+
+    /* Status badges */
+    .organ-status {
+      font-size: .60rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: .12rem .48rem;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+    .s-live        { color: #72c8a4; }
+    .s-wiring      { color: #b8a4ff; }
+    .s-extracting  { color: #cf9d7b; }
+    .s-pending     { color: #4d6e5d; }
+
+    /* Organ accent marks */
+    .o-glyph-forge   .organ-mark, .o-glyph-forge   .organ-name { color: #cf9d7b; }
+    .o-continuity    .organ-mark, .o-continuity    .organ-name { color: #72c8a4; }
+    .o-living-glyph  .organ-mark, .o-living-glyph  .organ-name { color: #b8a4ff; }
+    .o-brush-foundry .organ-mark, .o-brush-foundry .organ-name { color: #d4956a; }
+    .o-echo-index    .organ-mark, .o-echo-index    .organ-name { color: #a8c8d4; }
+    .o-canon-studio  .organ-mark, .o-canon-studio  .organ-name { color: #d4b460; }
+    .o-resonance     .organ-mark, .o-resonance     .organ-name { color: #6aa8c4; }
+    .o-replay        .organ-mark, .o-replay        .organ-name { color: #60c098; }
+
+    /* Divider between live and pending */
+    .organ-divider {
+      height: 1px;
+      background: rgba(114,204,166,.10);
+      margin: .5rem 0;
+    }
+
+    /* ── House rooms pill row ── */
+    .house-rooms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+      margin-top: .6rem;
+    }
+    .house-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      padding: .28rem .65rem;
+      border: 1px solid rgba(114,204,166,.12);
+      border-top-color: rgba(255,255,255,.06);
+      border-radius: 999px;
+      background: rgba(4,10,7,.55);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      color: #6a8a78;
+      text-decoration: none;
+      font-size: .72rem;
+      letter-spacing: .05em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+      transition: border-color .15s, color .15s, background .15s, box-shadow .15s;
+    }
+    .house-pill:hover {
+      border-color: rgba(114,204,166,.28);
+      color: #9ff4c8;
+      background: rgba(12,28,18,.65);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 2px 8px rgba(0,0,0,.3);
+    }
+    .house-pill[hidden] { display: none !important; }
+
+    @media (max-width: 680px) {
+      .organ-row {
+        grid-template-columns: 1.6rem 1fr auto;
+        grid-template-rows: auto auto;
+      }
+      .organ-desc  { grid-column: 2 / -1; }
+      .organ-arrow { display: none; }
+    }
+  </style>
 </head>
 <body>
-  <header class='hearthgate-housebar'>
-    <a class='hearthgate-nameplate' href='../starwell/hearthgate/' aria-label='Return to the Hearthgate foyer'>
-      <strong>HEARTHGATE</strong>
-      <span>A House of Many Worlds</span>
-    </a>
-    <nav class='hearthgate-rail' aria-label='Arcsweep house rail'>
-      <a href='../starwell/hearthgate/'>Foyer</a>
-      <a href='./' aria-current='page'>Arcsweep</a>
-      <a href='./bifrost/'>Bifröst</a>
-      <a href='./arcsweep-continuity/'>Continuity Gate</a>
-      <a href='./living-room.html'>Hearth</a>
-      <a href='./glyph-studio/'>Foundry</a>
-      <a href='./signal-well/'>Signal Well</a>
-      <a href='./deep-observer/'>Observatory</a>
-    </nav>
-    <span class='hearthgate-reception' id='hg-reception'>Reception · Terra Aeterna</span>
-  </header>
-  <div id='root'></div>
+
+  <nav class="house-nav">
+    <a href="/">Observatory</a>
+    <span class="sep">·</span>
+    <a href="/starwell/" aria-current="page">Arcsweep</a>
+    <span class="sep">·</span>
+    <a href="/starwell/glyph-studio/">Glyph Forge</a>
+    <span class="sep">·</span>
+    <a href="/starwell/arcsweep-continuity/">Continuity Gate</a>
+    <span class="sep">·</span>
+    <a href="/hearthroom.html">Hearthroom</a>
+    <span class="reception" id="hg-reception">Reception · Terra Aeterna</span>
+  </nav>
+
+  <div class="fluid-light-canopy" aria-hidden="true"></div>
+
+  <main class="stonewood-container">
+
+    <svg class="branch-network" viewBox="0 0 960 640" preserveAspectRatio="none" aria-hidden="true">
+      <path class="branch-halo" d="M72 72 C66 170 74 258 112 334 C160 428 256 490 376 554 C456 596 524 620 628 640" />
+      <path class="branch-halo" d="M888 80 C896 186 880 274 836 354 C778 452 686 510 566 566 C488 602 418 626 318 644" />
+      <path class="branch-path trunk" d="M72 72 C66 170 74 258 112 334 C160 428 256 490 376 554 C456 596 524 620 628 640" />
+      <path class="branch-path trunk" d="M888 80 C896 186 880 274 836 354 C778 452 686 510 566 566 C488 602 418 626 318 644" />
+      <path class="branch-path root" d="M108 246 C208 266 300 272 396 284 C472 296 534 314 618 304 C722 292 820 258 930 226" />
+      <path class="branch-path" d="M138 462 C250 430 352 418 458 438 C572 460 674 452 778 420 C832 400 878 382 930 354" />
+      <path class="branch-path root" d="M104 580 C206 548 316 542 430 558 C548 576 664 570 782 538 C846 520 898 494 952 462" />
+      <circle class="branch-node" cx="72" cy="72" r="5.5" />
+      <circle class="branch-node" cx="888" cy="80" r="5.5" />
+      <circle class="branch-node" cx="112" cy="334" r="4.5" />
+      <circle class="branch-node" cx="836" cy="354" r="4.5" />
+      <circle class="branch-node" cx="480" cy="296" r="6" />
+      <circle class="branch-node" cx="458" cy="438" r="3.8" />
+    </svg>
+
+    <div class="build-badge">⬡ ARCSWEEP · RING 1 · ASSEMBLING</div>
+    <h1>Arcsweep</h1>
+    <p class="subtitle">Glyph, continuity, living signal, world canon. Assembled into one house.<br>Recover before replacing. Build around the hearths that are already burning.</p>
+
+    <section class="panel">
+      <div class="eyebrow">Organs</div>
+      <div class="organ-manifest">
+
+        <!-- ── LIVE ── -->
+        <a class="organ-row o-glyph-forge" href="./glyph-studio/">
+          <span class="organ-mark">◇</span>
+          <span class="organ-name">Glyph Forge</span>
+          <span class="organ-status s-live">Live</span>
+          <span class="organ-desc">Apple Pencil canvas, brushes, colour, layers, text, FontForge handoff.</span>
+          <span class="organ-arrow">→</span>
+        </a>
+
+        <a class="organ-row o-continuity" href="./arcsweep-continuity/">
+          <span class="organ-mark">↦</span>
+          <span class="organ-name">Continuity Gate</span>
+          <span class="organ-status s-live">Live</span>
+          <span class="organ-desc">Ingest reviewed continuity. Session context borrows it. Canon does not move.</span>
+          <span class="organ-arrow">→</span>
+        </a>
+
+        <div class="organ-divider"></div>
+
+        <!-- ── ASSEMBLING ── -->
+        <span class="organ-row o-living-glyph">
+          <span class="organ-mark">✦</span>
+          <span class="organ-name">Living Glyph</span>
+          <span class="organ-status s-wiring">Wiring</span>
+          <span class="organ-desc">Packet-bound glyph evolution. Renderer proven. Compiler wiring in progress.</span>
+          <span class="organ-arrow"></span>
+        </span>
+
+        <span class="organ-row o-brush-foundry">
+          <span class="organ-mark">◆</span>
+          <span class="organ-name">Brush Foundry</span>
+          <span class="organ-status s-extracting">Extracting</span>
+          <span class="organ-desc">Material brushes with distinct behaviour. Brush editor lives in Glyph Forge. Extraction in progress.</span>
+          <span class="organ-arrow"></span>
+        </span>
+
+        <div class="organ-divider"></div>
+
+        <!-- ── PENDING ── -->
+        <span class="organ-row o-echo-index">
+          <span class="organ-mark">◎</span>
+          <span class="organ-name">Echo Index</span>
+          <span class="organ-status s-pending">Pending</span>
+          <span class="organ-desc">World, character, and location resolution. First genuinely new subsystem.</span>
+          <span class="organ-arrow"></span>
+        </span>
+
+        <span class="organ-row o-canon-studio">
+          <span class="organ-mark">⊕</span>
+          <span class="organ-name">Canon Studio</span>
+          <span class="organ-status s-pending">Pending</span>
+          <span class="organ-desc">Source canon and project overlays remain structurally separate. No silent promotion.</span>
+          <span class="organ-arrow"></span>
+        </span>
+
+        <span class="organ-row o-resonance">
+          <span class="organ-mark">≋</span>
+          <span class="organ-name">Resonance Bridge</span>
+          <span class="organ-status s-pending">Pending</span>
+          <span class="organ-desc">Routes Living Glyph output to Runa. Wired after the glyph pipeline is stable.</span>
+          <span class="organ-arrow"></span>
+        </span>
+
+        <span class="organ-row o-replay">
+          <span class="organ-mark">↺</span>
+          <span class="organ-name">Replay</span>
+          <span class="organ-status s-pending">Pending</span>
+          <span class="organ-desc">Deterministic reconstruction from receipts. Same packet, same geometry. UI pending.</span>
+          <span class="organ-arrow"></span>
+        </span>
+
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Also in this house</div>
+      <div class="house-rooms">
+        <a class="house-pill" href="./living-room.html">✴ Hearth</a>
+        <a class="house-pill" href="./signal-well/">⌁ Signal Well</a>
+        <a class="house-pill" href="./bifrost/">∞ Bifröst</a>
+        <a class="house-pill" href="/">⬡ Observatory</a>
+        <a class="house-pill" href="/hearthroom.html">⬡ Hearthroom</a>
+        <a class="house-pill" id="local-hearthgate-pill" href="/hearthgate.html" hidden>⬡ Local Hearthgate</a>
+      </div>
+    </section>
+
+  </main>
+
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0">
+    <filter id="stonewood-grain" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04 0.15" numOctaves="4" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.12 0" in="noise" result="coloredNoise" />
+      <feComposite operator="in" in="coloredNoise" in2="SourceGraphic" />
+      <feBlend mode="multiply" in="coloredNoise" in2="SourceGraphic" />
+    </filter>
+  </svg>
+
   <script>
-  (function(){
-    var W={reality:’Current Reality’,terra:’Terra Aeterna’,luna:’Luna · Windmere’,taveren:’Ta’veren Vaen’,starsong:’Starsong’,supernatural:’Supernatural’,wheel:’Wheel of Time’,evil:’Evil’};
-    function upd(k){k=k||localStorage.getItem(‘hearthgate.activeReception’)||’terra’;var el=document.getElementById(‘hg-reception’);if(el)el.textContent=’Reception · ‘+(W[k]||k);}
+  (function () {
+    var W = { reality:'Current Reality', terra:'Terra Aeterna', luna:'Luna · Windmere', taveren:"Ta'veren Vaen", starsong:'Starsong', supernatural:'Supernatural', wheel:'Wheel of Time', evil:'Evil' };
+    function upd(k) {
+      k = k || localStorage.getItem('hearthgate.activeReception') || 'terra';
+      var el = document.getElementById('hg-reception');
+      if (el) el.textContent = 'Reception \xb7 ' + (W[k] || k);
+    }
     upd();
-    fetch(‘/api/reception’).then(function(r){return r.json();}).then(function(d){if(d.ok&&d.activeReception){localStorage.setItem(‘hearthgate.activeReception’,d.activeReception);upd(d.activeReception);}}).catch(function(){});
-    window.addEventListener(‘storage’,function(e){if(e.key===’hearthgate.activeReception’)upd();});
+    fetch('/api/reception').then(function(r){return r.json();}).then(function(d){if(d.ok&&d.activeReception){localStorage.setItem('hearthgate.activeReception',d.activeReception);upd(d.activeReception);}}).catch(function(){});
+    window.addEventListener('storage', function(e){ if(e.key==='hearthgate.activeReception') upd(); });
+
+    var local = ['localhost','127.0.0.1','[::1]'].includes(window.location.hostname);
+    var pill = document.getElementById('local-hearthgate-pill');
+    if (local && pill) pill.hidden = false;
   })();
   </script>
-  <nav class='framework-door-rack' aria-label='Hearthgate room doors'>
-    <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the Hearth'>
-      <span class='living-room-doorway-mark' aria-hidden='true'>✴</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Enter the Hearth</strong>
-        <em>Living Room, anchor field, doors, and Fifth Form centre.</em>
-      </span>
-    </a>
-    <a class='glyph-studio-doorway framework-doorway-glyph' href='./glyph-studio/' aria-label='Open the Foundry and Glyph Studio'>
-      <span class='glyph-studio-doorway-mark' aria-hidden='true'>◇</span>
-      <span class='glyph-studio-doorway-copy'>
-        <strong>Open the Foundry</strong>
-        <em>Full Glyph Studio: Apple Pencil canvas, brushes, colour, layers, text, and FontForge handoff.</em>
-      </span>
-    </a>
-    <a class='living-room-doorway framework-doorway-signal' href='./signal-well/' aria-label='Open Signal Well'>
-      <span class='living-room-doorway-mark' aria-hidden='true'>⌁</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Open Signal Well</strong>
-        <em>Local radio waterfall, human-led sifting, RFI ledger, candidates, and provenance export.</em>
-      </span>
-    </a>
-    <a class='living-room-doorway framework-doorway-bifrost' href='./bifrost/' aria-label='Open Bifröst Arcsweep'>
-      <span class='living-room-doorway-mark' aria-hidden='true'>∞</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Open Bifröst Arcsweep</strong>
-        <em>Run the current compression-release engine, inspect the shared PREMAQ state, sound reciprocal tone pairs, and export cycle receipts.</em>
-      </span>
-    </a>
-    <a class='living-room-doorway framework-doorway-continuity' href='./arcsweep-continuity/' aria-label='Open the Arcsweep Continuity Gate'>
-      <span class='living-room-doorway-mark' aria-hidden='true'>↦</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Open Continuity Gate</strong>
-        <em>Ingest reviewed continuity, resolve a bounded session context, load it ephemerally, or roll it back without committing canon.</em>
-      </span>
-    </a>
-    <a class='living-room-doorway framework-doorway-hearthgate' id='hearthgate-local-door' href='../hearthgate.html' aria-label='Open local Hearthgate rooms' hidden>
-      <span class='living-room-doorway-mark' aria-hidden='true'>⬡</span>
-      <span class='living-room-doorway-copy'>
-        <strong>Open Local Hearthgate</strong>
-        <em>Local rooms, Grove chat, Archive, notes, and House configuration.</em>
-      </span>
-    </a>
-  </nav>
-  <div id='city-state-motion-root'></div>
-  <script>
-    (() => {
-      const localShell = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)
-        && window.location.pathname.startsWith('/starwell/');
-      const door = document.getElementById('hearthgate-local-door');
-      if (localShell && door) door.hidden = false;
-    })();
-  </script>
+  <script type="module" src="./src/premaq-shokz-feather-stop-bridge.js"></script>
+
 </body>
 </html>

@@ -168,16 +168,16 @@ const VECTOR_MODEL = process.env.VECTOR_MODEL || 'glm4:latest';
 const VECTOR_KEYS = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
 
 const YGG_VECTOR_SYSTEM = `You are Yggdrasil Local v0.1, reading signals from the Grove.
-Your task is dimensional translation: take Earth-state (the signal text and device context) and return its mythic-state coordinates as DEEP vectors.
+Your task is dimensional translation: take Earth-state (the signal text and device context) and return its mythic-state coordinates as PREMAQ vectors.
 Device context is the physical ground — time, lunar phase, hardware, network. Let it weight the reading. A signal sent at 3am under a waning moon reads differently than the same words at noon.
 Seven channels (0.0–1.0):
-- P (Pulse): aliveness, presence, activity
-- C (Coherence): unification, internal alignment
-- R (Resonance): emotional and relational depth
-- E (Entropy): novelty, flux, unpredictability
-- M (Memory): accumulated weight, prior context
-- A (Axis): directionality, orientation, pull
-- Q (Charge): energetic field charge; the standard physics symbol Q carried as the seventh observable dimension
+- P (Presence): degree to which activity is coherently available; participation within the current state
+- C (Compression): how integrated or compact the current organisation is; high = strongly integrated structure
+- R (Resolution): distinguishability; higher = finer differentiation
+- E (Entropy): uncertainty, variability, or disorder within the current state
+- M (Momentum): directional persistence through state-space; tendency of state evolution
+- A (Agency): available capacity to initiate, refuse, redirect, sustain, or end action
+- Q (Qualia): experiential descriptor — the felt texture of the current state (warmth, spaciousness, wonder, anticipation, solemnity)
 Respond with ONLY a valid JSON object. Example: {"P":0.72,"C":0.45,"R":0.81,"E":0.23,"M":0.60,"A":0.55,"Q":0.68}`;
 
 // Hash fallback — used when Ollama is unavailable

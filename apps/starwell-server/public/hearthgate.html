@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -87,10 +87,25 @@
     .log-session-btn { background:rgba(46,214,144,.06); border:1px solid rgba(46,214,144,.2); border-radius:4px; color:#3a5a48; font-family:var(--font-ui); font-size:.66rem; letter-spacing:.06em; padding:.22rem .55rem; cursor:pointer; transition:color .16s,border-color .16s; white-space:nowrap; flex-shrink:0; }
     .log-session-btn:hover { color:var(--green); border-color:rgba(46,214,144,.5); }
     .log-session-btn.busy { color:var(--gold); border-color:rgba(201,168,76,.4); }
-    .theme-dots { display:flex; gap:.28rem; align-items:center; margin-left:auto; flex-wrap:wrap; max-width:260px; justify-content:flex-end; }
+    .theme-dots { display:flex; gap:.28rem; align-items:center; flex-wrap:wrap; max-width:200px; justify-content:flex-end; }
     .theme-dot { width:11px; height:11px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:border-color .15s,transform .15s; flex-shrink:0; }
     .theme-dot:hover { transform:scale(1.3); }
     .theme-dot.active { border-color:rgba(255,255,255,.7); }
+    .theme-wizard-btn { background:rgba(46,214,144,.06); border:1px solid rgba(46,214,144,.2); border-radius:4px; color:#3a5a48; font-family:var(--font-ui); font-size:.66rem; letter-spacing:.06em; padding:.22rem .55rem; cursor:pointer; transition:color .16s,border-color .16s; white-space:nowrap; flex-shrink:0; margin-left:.4rem; }
+    .theme-wizard-btn:hover { color:var(--green); border-color:rgba(46,214,144,.5); }
+
+    /* ── Theme wizard modal ── */
+    .theme-wizard-overlay { display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.72); backdrop-filter:blur(3px); align-items:center; justify-content:center; }
+    .theme-wizard-overlay.open { display:flex; }
+    .theme-wizard-panel { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1.2rem 1.4rem; max-width:600px; width:92vw; max-height:82vh; overflow-y:auto; }
+    .theme-wizard-title { font-family:var(--font-ui); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:1rem; }
+    .theme-wizard-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:.6rem; }
+    .theme-swatch { display:flex; flex-direction:column; gap:.35rem; cursor:pointer; padding:.5rem; border-radius:6px; border:1px solid transparent; transition:border-color .15s; }
+    .theme-swatch:hover { border-color:var(--border); }
+    .theme-swatch.active { border-color:var(--green); }
+    .theme-swatch-bar { height:32px; border-radius:4px; display:flex; gap:2px; overflow:hidden; }
+    .theme-swatch-bar span { flex:1; }
+    .theme-swatch-name { font-family:var(--font-ui); font-size:.58rem; letter-spacing:.04em; color:var(--text-dim); }
 
     /* ── Shell ── */
     .shell {
@@ -461,6 +476,14 @@
 <canvas id="hr-particles"></canvas>
 <canvas id="hr-geometry"></canvas>
 
+<!-- ── Theme wizard ── -->
+<div class="theme-wizard-overlay" id="theme-wizard-overlay">
+  <div class="theme-wizard-panel">
+    <div class="theme-wizard-title">Theme selector · all combinations</div>
+    <div class="theme-wizard-grid" id="theme-wizard-grid"></div>
+  </div>
+</div>
+
 <div id="mini-obs-wrap">
   <div id="mini-obs-panel">
     <canvas id="mini-obs-canvas" width="210" height="210"></canvas>
@@ -473,12 +496,17 @@
   <span class="sep">·</span>
   <a href="/hearthroom.html">Hearthroom</a>
   <span class="sep">·</span>
-  <a href="/grove.html">Grove</a>
-  <span class="sep">·</span>
   <a href="/ygg-chat.html">Yggdrasil</a>
+  <span class="sep">·</span>
+  <a href="/starwell/glyph-studio/">Glyphs</a>
+  <span class="sep">·</span>
+  <a href="/starwell/arcsweep-continuity/">Arcsweep</a>
+  <span class="sep">·</span>
+  <a href="http://localhost:4173" target="_blank">Lattice ↗</a>
   <span class="sep">·</span>
   <a href="/notes.html">Notes</a>
   <button class="log-session-btn" id="log-session-btn" title="Export all room messages to a timestamped markdown file">⬇ Log</button>
+  <button class="theme-wizard-btn" id="theme-wizard-btn" title="Theme wizard">⬡ Theme</button>
   <div class="theme-dots" id="theme-dots"></div>
 </nav>
 
@@ -512,13 +540,13 @@
       <button class="refresh-btn" id="refresh-btn">↺</button>
     </header>
         <div class="deep-strip" id="deep-strip">
-          <div class="vec-node"><span class="vec-label">P · Pulse</span><span class="vec-val" id="vv-P">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-P" style="width:50%"></div></div></div>
-          <div class="vec-node"><span class="vec-label">C · Coherence</span><span class="vec-val" id="vv-C">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-C" style="width:50%"></div></div></div>
-          <div class="vec-node"><span class="vec-label">R · Resonance</span><span class="vec-val" id="vv-R">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-R" style="width:50%"></div></div></div>
-          <div class="vec-node"><span class="vec-label">E · Entropy</span><span class="vec-val" id="vv-E">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-E" style="width:50%"></div></div></div>
+          <div class="vec-node"><span class="vec-label">P · Presence</span><span class="vec-val" id="vv-P">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-P" style="width:50%"></div></div></div>
+          <div class="vec-node"><span class="vec-label">C · Compression</span><span class="vec-val" id="vv-C">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-C" style="width:50%"></div></div></div>
+          <div class="vec-node"><span class="vec-label">R · Resolution</span><span class="vec-val" id="vv-R">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-R" style="width:50%"></div></div></div>
+          <div class="vec-node"><span class="vec-label">E · Entanglement</span><span class="vec-val" id="vv-E">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-E" style="width:50%"></div></div></div>
           <div class="vec-node"><span class="vec-label">M · Memory</span><span class="vec-val" id="vv-M">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-M" style="width:50%"></div></div></div>
-          <div class="vec-node"><span class="vec-label">A · Axis</span><span class="vec-val" id="vv-A">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-A" style="width:50%"></div></div></div>
-          <div class="vec-node"><span class="vec-label">Q · Quotient</span><span class="vec-val" id="vv-Q">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-Q" style="width:50%"></div></div></div>
+          <div class="vec-node"><span class="vec-label">A · Agency</span><span class="vec-val" id="vv-A">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-A" style="width:50%"></div></div></div>
+          <div class="vec-node"><span class="vec-label">Q · Qualia</span><span class="vec-val" id="vv-Q">—</span><div class="vec-bar"><div class="vec-bar-fill" id="vb-Q" style="width:50%"></div></div></div>
           <div class="deep-strip-meta">
             <span class="deep-src" id="deep-src">awaiting signal</span>
             <span class="deep-loc" id="deep-loc">location unknown</span>
@@ -732,6 +760,59 @@ function applyTheme(id) {
   localStorage.setItem('comb-theme', id);
 }
 dotsEl.addEventListener('click', e=>{ const d=e.target.closest('.theme-dot'); if(d) applyTheme(d.dataset.t); });
+
+// ── Theme wizard ──────────────────────────────────────────────────────────────
+const THEME_COLORS = {
+  'grove':           {bg:'#070908',sf:'#111814',ac:'#2ed690'},
+  'dreaming-grove':  {bg:'#060C08',sf:'#0A1C10',ac:'#50C060'},
+  'lochflame':       {bg:'#050E0C',sf:'#0C1E1A',ac:'#40C8A8'},
+  'jungle-verdigris':{bg:'#10201F',sf:'#193A31',ac:'#3EB9A8'},
+  'copper-turquoise':{bg:'#040c0e',sf:'#063438',ac:'#1a9e9e'},
+  'obsidian':        {bg:'#04151A',sf:'#092828',ac:'#6F9487'},
+  'electric-forest': {bg:'#290215',sf:'#00385A',ac:'#27C3EE'},
+  'moonwater':       {bg:'#060810',sf:'#0A1028',ac:'#90B8E0'},
+  'void-lilac':      {bg:'#0A080E',sf:'#161025',ac:'#A880E0'},
+  'salt-and-iron':   {bg:'#0A0C0E',sf:'#141820',ac:'#A8B8C8'},
+  'dark-academia':   {bg:'#0b0d11',sf:'#222a2f',ac:'#829ea2'},
+  'black-glaze':     {bg:'#011814',sf:'#233835',ac:'#797693'},
+  'stonewood':       {bg:'#080A09',sf:'#0F1210',ac:'#B89A4E'},
+  'terra-aeterna':   {bg:'#0C0A06',sf:'#1C1610',ac:'#C8A860'},
+  'scholars-study':  {bg:'#0d0b08',sf:'#2c2e30',ac:'#bfa76f'},
+  'lush-blend':      {bg:'#0B1513',sf:'#1A342C',ac:'#8D8D6F'},
+  'moody-earth':     {bg:'#0E1719',sf:'#1C2D2A',ac:'#BABA9E'},
+  'sea-and-copper':  {bg:'#0c1519',sf:'#162127',ac:'#cf9d7b'},
+  'starfall':        {bg:'#04060E',sf:'#080E20',ac:'#C0A030'},
+  'hearthfire':      {bg:'#100806',sf:'#2A1208',ac:'#C86030'},
+  'ember-and-ink':   {bg:'#0A0806',sf:'#1C1208',ac:'#E06820'},
+  'tropical-noir':   {bg:'#080006',sf:'#30082a',ac:'#b87030'},
+  'earthy-danger':   {bg:'#2D0E0E',sf:'#404654',ac:'#DF6043'},
+  'cherry-kettle':   {bg:'#141117',sf:'#32343c',ac:'#c54e3f'},
+  'evening-lanterns':{bg:'#190C0A',sf:'#44363A',ac:'#BF4F3C'},
+  'sunset-aubergine':{bg:'#26121B',sf:'#183554',ac:'#CE3F37'},
+  'black-umber':     {bg:'#181418',sf:'#3D1016',ac:'#A93134'},
+  'dark-void-rage':  {bg:'#131518',sf:'#2D3E41',ac:'#56696A'},
+};
+const wizardOverlay = document.getElementById('theme-wizard-overlay');
+const wizardGrid    = document.getElementById('theme-wizard-grid');
+THEMES.forEach(t => {
+  const c = THEME_COLORS[t.id] || {bg:'#070908',sf:'#111814',ac:t.dot};
+  const sw = document.createElement('div');
+  sw.className='theme-swatch'; sw.dataset.t=t.id;
+  sw.innerHTML=`<div class="theme-swatch-bar"><span style="background:${c.bg}"></span><span style="background:${c.sf}"></span><span style="flex:0 0 24px;background:${c.ac}"></span></div><div class="theme-swatch-name">${t.name}</div>`;
+  sw.addEventListener('click',()=>{ applyTheme(t.id); updateWizardActive(); });
+  wizardGrid.appendChild(sw);
+});
+function updateWizardActive(){
+  const cur = localStorage.getItem('comb-theme')||'grove';
+  document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.toggle('active',s.dataset.t===cur));
+}
+document.getElementById('theme-wizard-btn').addEventListener('click',()=>{
+  updateWizardActive();
+  wizardOverlay.classList.add('open');
+});
+wizardOverlay.addEventListener('click',e=>{ if(e.target===wizardOverlay) wizardOverlay.classList.remove('open'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') wizardOverlay.classList.remove('open'); });
+
 applyTheme(localStorage.getItem('comb-theme')||'grove');
 
 // ── Main tabs (Chat / Glyph) ──────────────────────────────────────────────────

@@ -46,6 +46,12 @@ apps/starwell-server/public/hearthgate-sources/
 # Generated STARWELL bundle staged for Hearthgate packaging
 apps/starwell-server/public/starwell/
 
+# WoT Fandom canon ingest — bulk corpus (tracked: source-profile.json, README.md, BOXFIRE-RUNBOOK.md, manifest.json)
+canon/taaveren-vaen/wot-fandom/pages/
+canon/taaveren-vaen/wot-fandom/receipts/
+canon/taaveren-vaen/wot-fandom/checkpoint.json
+canon/taaveren-vaen/wot-fandom/failures.json
+
 # OS/editor noise
 .DS_Store
 .vscode/

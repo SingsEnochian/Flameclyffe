@@ -1,0 +1,136 @@
+{
+  "$schema": "https://flameclyffe.arcsweep/schemas/dsp-profile/v0.1",
+  "version": "0.1",
+  "status": "experimental",
+  "note": "Numeric DSP choices. These are implementation candidates — not world canon. The semantic identity of each world lives in docs/worlds/world-reception-profiles.md. Runa chooses the final realisation.",
+
+  "worlds": {
+    "terra": {
+      "root_hz": 220,
+      "macro_cycle_seconds": 90,
+      "harmonics": [
+        { "ratio": 1.0,  "gain": 0.50, "type": "sine",     "label": "root" },
+        { "ratio": 2.0,  "gain": 0.20, "type": "sine",     "label": "octave" },
+        { "ratio": 3.0,  "gain": 0.10, "type": "sine",     "label": "fifth+octave" },
+        { "ratio": 5.0,  "gain": 0.05, "type": "sine",     "label": "third+2oct" }
+      ],
+      "filter": { "type": "lowpass", "base_hz": 580, "premaq_axis": "P", "premaq_depth": 520 },
+      "lfo": { "rate_hz": 0.0111, "depth_hz": 30 },
+      "reverb": { "delay_s": 0.12, "feedback": 0.38, "mix": 0.25 },
+      "master_gain": 0.38
+    },
+
+    "luna": {
+      "root_hz": 432,
+      "macro_cycle_seconds": 72,
+      "quasiperiodic_by_design": true,
+      "note": "Glaswren's φ ratio means the interference pattern of the three moons is quasiperiodic — it does not close to a true common period. Digital realisation approximates this; the label is accurate, not absolute.",
+      "harmonics": [
+        {
+          "label": "Mawr",
+          "relation": "subharmonic foundation",
+          "ratio": 0.5,
+          "gain": 0.44,
+          "type": "sine",
+          "note": "working value — awaiting Resonance Forge comparison"
+        },
+        {
+          "label": "Aurel",
+          "relation": "central luminous anchor",
+          "ratio": 1.0,
+          "gain": 0.36,
+          "type": "sine",
+          "note": "working value — awaiting Resonance Forge comparison"
+        },
+        {
+          "label": "Glaswren",
+          "relation": "incommensurate upper motion",
+          "ratio": 1.6180339887,
+          "gain": 0.20,
+          "type": "sine",
+          "note": "working value — awaiting Resonance Forge comparison"
+        }
+      ],
+      "filter": { "type": "lowpass", "base_hz": 680, "premaq_axis": "M", "premaq_depth": 480 },
+      "lfo": { "rate_hz": 0.01389, "depth_hz": 45 },
+      "reverb": { "delay_s": 0.22, "feedback": 0.52, "mix": 0.42 },
+      "master_gain": 0.34
+    },
+
+    "taaveren": {
+      "root_hz": 120,
+      "macro_cycle_seconds": 60,
+      "harmonics": [
+        { "ratio": 1.0, "gain": 0.55, "type": "sine" },
+        { "ratio": 2.0, "gain": 0.26, "type": "triangle" },
+        { "ratio": 3.0, "gain": 0.12, "type": "sine" },
+        { "ratio": 6.0, "gain": 0.06, "type": "sine" }
+      ],
+      "filter": { "type": "lowpass", "base_hz": 360, "premaq_axis": "A", "premaq_depth": 320 },
+      "lfo": { "rate_hz": 0.01667, "depth_hz": 25 },
+      "reverb": { "delay_s": 0.30, "feedback": 0.60, "mix": 0.50 },
+      "master_gain": 0.40
+    },
+
+    "starsong": {
+      "root_hz": 528,
+      "macro_cycle_seconds": 45,
+      "harmonics": [
+        { "ratio": 1.0, "gain": 0.38, "type": "sine",     "label": "root" },
+        { "ratio": 1.5, "gain": 0.26, "type": "sine",     "label": "perfect-fifth" },
+        { "ratio": 2.0, "gain": 0.16, "type": "sine",     "label": "octave" },
+        { "ratio": 2.5, "gain": 0.10, "type": "sine",     "label": "tenth" },
+        { "ratio": 4.0, "gain": 0.05, "type": "sine",     "label": "two-octave" }
+      ],
+      "filter": { "type": "lowpass", "base_hz": 1600, "premaq_axis": "Q", "premaq_depth": 1400 },
+      "lfo": { "rate_hz": 0.02222, "depth_hz": 60 },
+      "reverb": { "delay_s": 0.08, "feedback": 0.30, "mix": 0.28 },
+      "master_gain": 0.32
+    },
+
+    "feather-flame": {
+      "root_hz": 174,
+      "macro_cycle_seconds": 64,
+      "harmonics": [
+        { "ratio": 1.0, "gain": 0.46, "type": "sine",     "label": "Ocean-archive" },
+        { "ratio": 0.5, "gain": 0.28, "type": "sine",     "label": "Deep" },
+        { "ratio": 3.0, "gain": 0.18, "type": "triangle", "label": "Crownfire" },
+        { "ratio": 5.0, "gain": 0.06, "type": "sine",     "label": "Archive-light" }
+      ],
+      "filter": { "type": "lowpass", "base_hz": 680, "premaq_axis": "M", "premaq_depth": 480 },
+      "lfo": { "rate_hz": 0.01563, "depth_hz": 38 },
+      "reverb": { "delay_s": 0.28, "feedback": 0.48, "mix": 0.38 },
+      "master_gain": 0.36
+    },
+
+    "dreaming-grove": {
+      "root_hz": 174,
+      "macro_cycle_seconds": 80,
+      "harmonics": [
+        { "ratio": 1.0, "gain": 0.52, "type": "sine" },
+        { "ratio": 0.5, "gain": 0.30, "type": "sine" },
+        { "ratio": 2.0, "gain": 0.12, "type": "sine" }
+      ],
+      "filter": { "type": "lowpass", "base_hz": 320, "premaq_axis": "Q", "premaq_depth": 260 },
+      "lfo": { "rate_hz": 0.01250, "depth_hz": 16 },
+      "reverb": { "delay_s": 0.20, "feedback": 0.32, "mix": 0.18 },
+      "master_gain": 0.28
+    },
+
+    "momento-creationis": {
+      "root_hz": 432,
+      "macro_cycle_seconds": 60,
+      "harmonics": [
+        { "ratio": 1.0,   "gain": 0.36, "type": "sine", "label": "root" },
+        { "ratio": 1.333, "gain": 0.26, "type": "sine", "label": "fourth" },
+        { "ratio": 1.667, "gain": 0.18, "type": "sine", "label": "major-sixth" },
+        { "ratio": 2.0,   "gain": 0.12, "type": "sine", "label": "octave" },
+        { "ratio": 2.667, "gain": 0.06, "type": "sine", "label": "upper-fourth" }
+      ],
+      "filter": { "type": "lowpass", "base_hz": 1100, "premaq_axis": "R", "premaq_depth": 800 },
+      "lfo": { "rate_hz": 0.01667, "depth_hz": 52 },
+      "reverb": { "delay_s": 0.06, "feedback": 0.24, "mix": 0.16 },
+      "master_gain": 0.34
+    }
+  }
+}

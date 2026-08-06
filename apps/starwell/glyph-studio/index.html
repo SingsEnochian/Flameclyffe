@@ -4,9 +4,122 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#090b12" />
-    <title>STARWELL Glyph Studio</title>
+    <title>Glyph Forge · Arcsweep · STARWELL</title>
+    <style>
+      .house-nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: .5rem 1.25rem;
+        background: rgba(5,7,6,.94);
+        border-bottom: 1px solid rgba(114,204,166,.14);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      }
+      .house-nav a {
+        color: #8aaa96;
+        text-decoration: none;
+        font-size: .76rem;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        transition: color .18s;
+      }
+      .house-nav a[aria-current], .house-nav a:hover { color: #2ed690; }
+      .house-nav .sep { color: rgba(114,204,166,.22); font-size: .7rem; }
+      .house-nav .reception {
+        margin-left: auto;
+        font-size: .72rem;
+        color: #4d6e5d;
+        letter-spacing: .06em;
+      }
+      .state-ribbon {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        padding: .24rem 1.25rem;
+        background: rgba(9,13,11,.88);
+        border-bottom: 1px solid rgba(114,204,166,.06);
+        font-size: .66rem;
+        color: #2d4038;
+        letter-spacing: .04em;
+        overflow-x: auto;
+        white-space: nowrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      }
+      .state-ribbon[data-active=true] { color: #567060; }
+      .sr-world { color: #5aaa80; font-weight: 600; }
+      .sr-divider { color: rgba(114,204,166,.18); }
+      .sr-axes { display: flex; gap: .45rem; }
+      .sr-axis em { font-style: normal; color: #3a5045; margin-right: .12rem; }
+      .sr-axis { color: #6a9e80; }
+      .sr-mode { margin-left: auto; }
+      .sr-mode-live { color: #4aaa74; }
+      .sr-mode-stale { color: #9a7858; }
+      .sr-mode-degraded { color: #7a4a4a; }
+      .sr-idle { color: #2a3830; font-style: italic; }
+    </style>
   </head>
   <body>
+    <nav class="house-nav">
+      <a href="/">Observatory</a>
+      <span class="sep">·</span>
+      <a href="/starwell/">Arcsweep</a>
+      <span class="sep">·</span>
+      <a href="/starwell/glyph-studio/" aria-current="page">Glyph Forge</a>
+      <span class="sep">·</span>
+      <a href="/starwell/brush-foundry/">Brush Foundry</a>
+      <span class="sep">·</span>
+      <a href="/starwell/living-glyph/">Living Glyph</a>
+      <span class="sep">·</span>
+      <a href="/starwell/echo-index/">Echo Index</a>
+      <span class="sep">·</span>
+      <a href="/starwell/canon-studio/">Canon Studio</a>
+      <span class="sep">·</span>
+      <a href="/starwell/resonance-bridge/">Resonance Bridge</a>
+      <span class="sep">·</span>
+      <a href="/starwell/arcsweep-continuity/">Continuity Gate</a>
+      <span class="sep">·</span>
+      <a href="/hearthroom.html">Hearthroom</a>
+      <span class="reception">Reception · Terra Aeterna</span>
+    </nav>
+    <div class="state-ribbon" id="state-ribbon" aria-live="polite">
+      <span class="sr-idle">No active packet · Hearthgate not yet activated</span>
+    </div>
+    <script>
+      (function () {
+        var ACTIVE_KEY = 'hearthweave:dual-aspect-packet:active:v1';
+        var ACTIVATION_EVENT = 'hearthweave:dual-aspect-activation';
+        function readPacket() {
+          try { return JSON.parse(sessionStorage.getItem(ACTIVE_KEY)); } catch (e) { return null; }
+        }
+        function fmt(n) { return typeof n === 'number' ? n.toFixed(2) : '—'; }
+        function render(packet) {
+          var el = document.getElementById('state-ribbon');
+          if (!el) return;
+          if (!packet) {
+            el.innerHTML = '<span class="sr-idle">No active packet · Hearthgate not yet activated</span>';
+            el.dataset.active = 'false';
+            return;
+          }
+          var id = packet.identity || {};
+          var st = (packet.observable && packet.observable.premaq && packet.observable.premaq.state) || {};
+          var mode = (packet.observable && packet.observable.deep_snapshot && packet.observable.deep_snapshot.mode) || '—';
+          var axes = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
+          var vals = axes.map(function (a) {
+            return '<span class="sr-axis"><em>' + a + '</em>' + fmt(st[a] && st[a].value) + '</span>';
+          }).join('');
+          el.innerHTML = '<span class="sr-world">' + (id.world_slug || '—') + '</span>'
+            + '<span class="sr-divider">|</span>'
+            + '<span class="sr-axes">' + vals + '</span>'
+            + '<span class="sr-mode sr-mode-' + mode.toLowerCase() + '">' + mode + '</span>';
+          el.dataset.active = 'true';
+        }
+        document.addEventListener('DOMContentLoaded', function () { render(readPacket()); });
+        window.addEventListener(ACTIVATION_EVENT, function (e) { render((e.detail && e.detail.packet) || readPacket()); });
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="../src/glyph-studio-main.jsx"></script>
   </body>

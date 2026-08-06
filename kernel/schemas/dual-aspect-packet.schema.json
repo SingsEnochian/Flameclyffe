@@ -1,0 +1,621 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/kernel/dual-aspect-packet.schema.json",
+  "title": "DualAspectPacket",
+  "description": "The atomic shared-state object authored by the Hearthweave Kernel. One packet per activation event. All renderers (glyph, tone, image, haptic, narrative) consume this packet by ID and derive from it exclusively — they may not refetch live state after activation. The packet is sealed (content-hashed) at assembly time; only activation and render_receipt_id are written after sealing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "packet_id",
+    "authored_by",
+    "kernel_version",
+    "sealed_at",
+    "seal",
+    "trigger",
+    "house",
+    "temporal",
+    "deep_snapshot",
+    "premaq_snapshot",
+    "observable",
+    "experiential",
+    "transfer_functions",
+    "uncertainty",
+    "degraded",
+    "provenance",
+    "activation",
+    "maths_spine",
+    "temporal_mechanics"
+  ],
+  "$defs": {
+    "sourceClass": {
+      "enum": [
+        "witnessed", "recorded", "derived", "model-interpreted",
+        "human-interpreted", "remembered", "correlated",
+        "simulated", "projected", "unknown"
+      ]
+    },
+    "transferFunctionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id":       { "type": "string", "minLength": 1 },
+        "version":  { "type": "string", "minLength": 1 },
+        "checksum": { "type": ["string", "null"] }
+      }
+    },
+    "deepField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "source_class"],
+      "properties": {
+        "value":        { "type": "number" },
+        "source_class": { "$ref": "#/$defs/sourceClass" }
+      }
+    },
+    "premaqField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "confidence"],
+      "properties": {
+        "value":      { "type": "number" },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+      }
+    },
+    "aspectRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pair", "kind", "delta_degrees"],
+      "properties": {
+        "pair": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "The two planetary bodies in aspect (e.g. ['Jupiter', 'Saturn'])"
+        },
+        "kind": { "enum": ["conjunction", "opposition", "trine", "square", "sextile"] },
+        "delta_degrees": {
+          "type": "number",
+          "description": "Angular separation from exact (orb). Positive = separating, negative = applying."
+        },
+        "separating": {
+          "type": ["boolean", "null"],
+          "description": "true = aspect is separating (waning influence), false = applying (waxing), null = not computed"
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+
+    "packet_id": {
+      "type": "string",
+      "description": "SHA-256 hex digest of the sealed fields (everything except activation and render_receipt_id). Content-addressed: the same input state always produces the same packet_id. Enables deterministic replay.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+
+    "authored_by": { "const": "hearthweave-kernel" },
+
+    "kernel_version": {
+      "type": "string",
+      "description": "Semver of the Kernel that assembled this packet. Required for replay — if the Kernel changes its assembly logic, the version must change.",
+      "minLength": 1
+    },
+
+    "sealed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC ISO-8601 timestamp at which the Kernel froze and hashed the packet."
+    },
+
+    "seal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hash", "algorithm"],
+      "description": "Content hash covering all fields except activation and render_receipt_id.",
+      "properties": {
+        "hash":      { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "algorithm": { "const": "SHA-256" }
+      }
+    },
+
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["continuity_packet_id", "source_fingerprint", "world_slug", "item_refs", "item_count", "trigger_actor", "triggered_at"],
+      "description": "The Arcsweep selection that caused this packet to be assembled. The Kernel snapshots environmental state the moment this trigger is received.",
+      "properties": {
+        "continuity_packet_id": { "type": "string", "minLength": 1 },
+        "source_fingerprint":   { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "world_slug":           { "type": "string", "minLength": 1 },
+        "item_refs":            { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "item_count":           { "type": "integer", "minimum": 1 },
+        "trigger_actor":        { "type": "string", "minLength": 1 },
+        "triggered_at":         { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "house": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "canon_foundation", "temporal_profile_id", "harmonic_identity_id", "visual_identity_id", "cultural_identity_id"],
+      "description": "The sovereign House active at activation. canon_foundation and overlay are held as separate, non-merged references. A null overlay means the packet operates in unmodified canon.",
+      "properties": {
+        "id":                   { "type": "string", "minLength": 1 },
+        "canon_foundation":     { "type": "string", "minLength": 1, "description": "Reference to the base canon (e.g. 'wheel-of-time', 'friendship-is-magic', 'terra-aeterna-novelverse')" },
+        "overlay":              { "type": ["string", "null"], "description": "Reference to the project overlay (e.g. 'ta-veren-vaen', 'starsong', 'templehouse'). Null means unmodified canon." },
+        "temporal_profile_id":  { "type": "string", "minLength": 1 },
+        "harmonic_identity_id": { "type": "string", "minLength": 1 },
+        "visual_identity_id":   { "type": "string", "minLength": 1 },
+        "cultural_identity_id": { "type": "string", "minLength": 1 }
+      }
+    },
+
+    "temporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sealed_at_utc", "sealed_at_unix_ms", "timezone", "sky_phase", "calendar_id"],
+      "description": "The temporal coordinate frozen at seal time. All subsystems share this coordinate; none may use their own clock after activation.",
+      "properties": {
+        "sealed_at_utc":    { "type": "string", "format": "date-time" },
+        "sealed_at_unix_ms":{ "type": "integer", "minimum": 0 },
+        "timezone":         { "type": "string", "minLength": 1, "description": "IANA timezone string (e.g. 'America/New_York')" },
+        "local_time":       { "type": ["string", "null"], "description": "Local time string in HH:MM format, derived at seal time" },
+        "sky_phase":        { "enum": ["dawn", "day", "dusk", "night"] },
+        "calendar_id":      { "type": "string", "minLength": 1, "description": "Calendar system reference (e.g. 'gregorian', 'terra-v0.1')" }
+      }
+    },
+
+    "deep_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P","C","R","E","M","A","dpdt","moonIllum","sky","kp","bz","charge","dphi","fetched_at","source_ref"],
+      "description": "The live DEEP state vector frozen at the moment the Kernel received the trigger. Captured once; no subsystem may re-fetch after this point.",
+      "properties": {
+        "P":          { "$ref": "#/$defs/deepField", "description": "Presence [0,1]" },
+        "C":          { "$ref": "#/$defs/deepField", "description": "Clarity [0,1]" },
+        "R":          { "$ref": "#/$defs/deepField", "description": "Resonance [0,1]" },
+        "E":          { "$ref": "#/$defs/deepField", "description": "Energy [0,1]" },
+        "M":          { "$ref": "#/$defs/deepField", "description": "Momentum [0,1]" },
+        "A":          { "$ref": "#/$defs/deepField", "description": "Anchoring [0,1]" },
+        "dpdt":       { "$ref": "#/$defs/deepField", "description": "Rate of change of Presence" },
+        "moonIllum":  { "$ref": "#/$defs/deepField", "description": "Lunar illumination [0,100]" },
+        "sky":        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "source_class"],
+          "properties": {
+            "value":        { "enum": ["dawn", "day", "dusk", "night", "rain", "cloud", "storm", "clear"] },
+            "source_class": { "$ref": "#/$defs/sourceClass" }
+          }
+        },
+        "kp":         { "$ref": "#/$defs/deepField", "description": "Planetary K-index [0,9]" },
+        "bz":         { "$ref": "#/$defs/deepField", "description": "IMF Bz component (nT); negative = southward" },
+        "charge":     { "$ref": "#/$defs/deepField", "description": "Composite charge state [0,1]" },
+        "dphi":       { "$ref": "#/$defs/deepField", "description": "Sector polarity angle (degrees)" },
+        "fetched_at": { "type": "string", "format": "date-time", "description": "When the DEEP source was fetched, before the trigger was processed" },
+        "source_ref": { "type": "string", "description": "URL or identifier of the DEEP source endpoint" }
+      }
+    },
+
+    "premaq_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P","C","R","E","M","A","Q","premaq_state_ref","computed_at"],
+      "description": "Abbreviated inline PREMAQ values for replay, plus a reference to the full PREMAQ v2 object for audit. The Kernel reads PREMAQ from its canonical source and freezes it here; no subsystem computes its own PREMAQ instance after this point.",
+      "properties": {
+        "P": { "$ref": "#/$defs/premaqField" },
+        "C": { "$ref": "#/$defs/premaqField" },
+        "R": { "$ref": "#/$defs/premaqField" },
+        "E": { "$ref": "#/$defs/premaqField" },
+        "M": { "$ref": "#/$defs/premaqField" },
+        "A": { "$ref": "#/$defs/premaqField" },
+        "Q": { "$ref": "#/$defs/premaqField" },
+        "premaq_state_ref": {
+          "type": "string",
+          "description": "Reference to the full PREMAQ v2 object (premaq-state-v2 schema) for provenance audit.",
+          "minLength": 1
+        },
+        "computed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "observable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["continuity", "environmental", "confidence"],
+      "description": "The measurement-and-provenance face of the dual aspect. Contains what was objectively true at this moment: what the human reviewed, what the instruments read, what the receipts prove.",
+      "properties": {
+        "continuity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["continuity_packet_id", "item_count", "item_refs", "authority_scope"],
+          "properties": {
+            "continuity_packet_id": { "type": "string", "minLength": 1 },
+            "item_count":           { "type": "integer", "minimum": 0 },
+            "item_refs":            { "type": "array", "items": { "type": "string" } },
+            "authority_scope":      { "type": "string", "minLength": 1 },
+            "canon_commit":         { "type": "boolean" }
+          }
+        },
+        "environmental": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["deep_snapshot_at", "premaq_ref"],
+          "properties": {
+            "deep_snapshot_at": { "type": "string", "format": "date-time" },
+            "premaq_ref":       { "type": "string", "minLength": 1 },
+            "measurement_quality": {
+              "enum": ["live", "cached", "DEGRADED"],
+              "description": "Quality of the environmental measurement at freeze time"
+            }
+          }
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Overall confidence in the observable state: 1.0 = all sources live and verified, 0.0 = fully degraded synthetic state"
+        }
+      }
+    },
+
+    "experiential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sky_tone", "world_mood", "narrative_register", "harmonic_register", "haptic_register", "image_register"],
+      "description": "The story-and-symbol face of the dual aspect. Derived from the same packet state as observable — never from an independent source. These values are what glyphs, tone, haptics, and narrative draw from.",
+      "properties": {
+        "sky_tone": {
+          "type": "string",
+          "description": "Experiential quality derived from sky_phase and DEEP state (e.g. 'threshold-gold', 'deep-indigo', 'rain-grey')"
+        },
+        "world_mood": {
+          "type": "string",
+          "description": "Terra Aeterna / House world-mood derived from frequency-terra transfer function (e.g. 'low-tide', 'convergence', 'open-field')"
+        },
+        "terra_protocol": {
+          "type": ["string", "null"],
+          "description": "Active Terra Aeterna protocol string, if applicable to this House"
+        },
+        "narrative_register": {
+          "type": "string",
+          "description": "The dominant epistemic register of the continuity items, resolved to an experiential tone (e.g. 'observational', 'relational', 'interpretive')"
+        },
+        "harmonic_register": {
+          "type": "string",
+          "description": "The tone quality the Resonance Engine should express — derived from DEEP + House harmonic identity (e.g. 'low-resonance-open', 'high-clarity-held')"
+        },
+        "haptic_register": {
+          "type": "string",
+          "description": "The haptic pattern the Sensory Engine should express — derived from dpdt + sky (e.g. 'steady-pulse', 'slow-wave', 'still')"
+        },
+        "image_register": {
+          "type": "string",
+          "description": "The visual atmosphere the Sensory Engine should express — derived from sky + House visual identity (e.g. 'soft-amber', 'deep-twilight', 'copper-haze')"
+        }
+      }
+    },
+
+    "transfer_functions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tone", "glyph", "visual", "haptic", "narrative"],
+      "description": "The exact transfer-function versions locked at seal time. Replay must use these exact versions to reproduce the same outputs. If a renderer's transfer function has changed, replay must fork a new packet.",
+      "properties": {
+        "tone":      { "$ref": "#/$defs/transferFunctionRef" },
+        "glyph":     { "$ref": "#/$defs/transferFunctionRef" },
+        "visual":    { "$ref": "#/$defs/transferFunctionRef" },
+        "haptic":    { "$ref": "#/$defs/transferFunctionRef" },
+        "narrative": { "$ref": "#/$defs/transferFunctionRef" }
+      }
+    },
+
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overall", "deep_source_quality", "premaq_source_quality"],
+      "properties": {
+        "overall": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Aggregate uncertainty across all sources. 0 = maximum confidence, 1 = maximum uncertainty."
+        },
+        "deep_source_quality":  { "enum": ["live", "cached", "DEGRADED"] },
+        "premaq_source_quality":{ "enum": ["measured", "derived", "DEGRADED"] },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+
+    "degraded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["is_degraded"],
+      "description": "Explicit degraded-mode declaration. A degraded packet is valid but must not be treated as live observation. Every renderer must surface degraded status visibly — silent substitution is not permitted.",
+      "properties": {
+        "is_degraded": { "type": "boolean" },
+        "mode": {
+          "type": ["string", "null"],
+          "enum": ["DEGRADED", null],
+          "description": "Non-null only when is_degraded is true"
+        },
+        "reason": {
+          "type": ["string", "null"],
+          "description": "Machine-readable reason code (e.g. 'DEEP_SOURCE_UNAVAILABLE', 'PREMAQ_SOURCE_UNAVAILABLE', 'PARTIAL_DEGRADED')"
+        },
+        "substitutions": {
+          "type": "array",
+          "description": "Audit trail of every synthetic value substituted for a live measurement.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["field", "original_source", "substitution_applied"],
+            "properties": {
+              "field":                { "type": "string" },
+              "original_source":      { "type": "string" },
+              "substitution_applied": { "type": "string" }
+            }
+          },
+          "default": []
+        }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["arcsweep_continuity_id", "arcsweep_source_fingerprint", "deep_source_ref", "premaq_state_ref", "kernel_version"],
+      "description": "Full causal chain from which this packet was assembled. Sufficient to re-derive the packet given the same sources.",
+      "properties": {
+        "arcsweep_continuity_id":     { "type": "string", "minLength": 1 },
+        "arcsweep_source_fingerprint":{ "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "deep_source_ref":            { "type": "string", "description": "URL or identifier of the DEEP fetch endpoint" },
+        "premaq_state_ref":           { "type": "string", "minLength": 1 },
+        "kernel_version":             { "type": "string", "minLength": 1 },
+        "additional_refs":            { "type": "array", "items": { "type": "string" }, "default": [] }
+      }
+    },
+
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "description": "Written by Arcsweep after the Kernel publishes the sealed packet. The packet moves from 'sealed' to 'accepted' or 'rejected'. Only at 'accepted' is DualAspectActivation(packet_id) fired.",
+      "properties": {
+        "status": { "enum": ["sealed", "accepted", "rejected"] },
+        "accepted_at":       { "type": ["string", "null"], "format": "date-time" },
+        "accepted_by":       { "type": ["string", "null"] },
+        "arcsweep_receipt_id":{ "type": ["string", "null"], "description": "The Arcsweep receipt written upon acceptance" },
+        "rejection_reason":  { "type": ["string", "null"] }
+      }
+    },
+
+    "maths_spine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scfe_schema_version", "scfe_snapshot_ref", "barbault", "sacred_geometry", "somatic", "agency"],
+      "description": "Key values from the SCFE (Starwell Concurrent Field Engine) field snapshot frozen at seal time. The SCFE is the mathematical spine that derives DEEP state from planetary positions, aspects, sacred geometry, somatic self-report, and ephemeris. The full snapshot is referenced by scfe_snapshot_ref; this block carries the values renderers need without re-running the SCFE. Every value here is an output of the SCFE; none is invented by a renderer.",
+      "properties": {
+        "scfe_schema_version": {
+          "type": "string",
+          "description": "Version of the SCFE field snapshot (e.g. 'scfe.field_snapshot.v0.2')",
+          "minLength": 1
+        },
+        "scfe_snapshot_ref": {
+          "type": "string",
+          "description": "ID of the full SCFE field snapshot object for audit and replay",
+          "minLength": 1
+        },
+        "ephemeris_provider": {
+          "type": "string",
+          "description": "How planetary longitudes were obtained (e.g. 'manual_longitudes', 'astronomia')"
+        },
+        "barbault": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cyclic_index", "phase_label", "compression_level", "aspects_in_orb"],
+          "description": "Barbault Cyclic Index: a measure of the compression or dispersal of the outer planets at this moment. The cyclic index is the mathematical load-bearing structure for temporal position — it is what 'temporal quantum mechanics' means in this system: the current phase of the planetary harmonic cycle that the packet is embedded in.",
+          "properties": {
+            "cyclic_index": {
+              "type": ["number", "null"],
+              "description": "Barbault Cyclic Index value. Lower = more compressed (planetary convergence); higher = more dispersed."
+            },
+            "phase_label": {
+              "type": ["string", "null"],
+              "description": "Qualitative phase (e.g. 'compression', 'dispersal', 'peak-compression', 'release')"
+            },
+            "compression_level": {
+              "type": ["number", "null"],
+              "description": "Normalized compression score derived from the cyclic index"
+            },
+            "aspects_in_orb": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/aspectRef" },
+              "description": "Aspects active within orb at seal time. These are the harmonic relationships between planetary bodies that shape the packet's tonal and geometric expression."
+            },
+            "sign_degrees": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "sign":   { "type": "string" },
+                  "degree": { "type": "number" }
+                }
+              },
+              "description": "Planetary sign and degree positions at seal time (e.g. { Jupiter: { sign: 'Gemini', degree: 6 } })"
+            }
+          }
+        },
+        "sacred_geometry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primary_form"],
+          "description": "The dominant sacred geometry pattern active at seal time, derived from aspects and planetary configurations. This drives glyph geometry — the primary_form is what determines which geometric template the glyph renderer uses.",
+          "properties": {
+            "primary_form": {
+              "type": ["string", "null"],
+              "description": "Primary geometric form (e.g. 'star-of-david', 'grand-trine', 'yod', 'grand-cross', 'stellium', 'none')"
+            },
+            "secondary_forms": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            },
+            "interaction_points": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Named intersection points in the geometric pattern",
+              "default": []
+            },
+            "render_payload_ref": {
+              "type": ["string", "null"],
+              "description": "Reference to the full sacred geometry render payload object, if stored separately"
+            }
+          }
+        },
+        "somatic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["capacity_label", "interface_safety_mode"],
+          "description": "Somatic self-report state at activation time. The interface_safety_mode is a hard constraint — renderers must not exceed it. If 'gentle', all renderers must reduce sensory intensity accordingly.",
+          "properties": {
+            "capacity_label": {
+              "type": ["string", "null"],
+              "description": "Human-readable capacity label derived from somatic inputs (e.g. 'low-capacity', 'moderate', 'full')"
+            },
+            "interface_safety_mode": {
+              "enum": ["gentle", "standard", "reduced"],
+              "description": "Hard safety constraint for all renderers. gentle = reduced sensory load; standard = normal; reduced = minimal."
+            },
+            "activation": { "type": ["string", "null"] },
+            "fatigue":    { "type": ["string", "null"] },
+            "pain":       { "type": ["string", "null"] },
+            "migraine":   { "type": ["boolean", "null"] },
+            "tinnitus":   { "type": ["string", "null"] }
+          }
+        },
+        "agency": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["active_channel", "recommended_command", "consent_anchor"],
+          "description": "Agency switchboard state at seal time. The active_channel is the graduated consent/pacing recommendation. Renderers must not override it. If the channel is 'nope-lever', activation must not proceed.",
+          "properties": {
+            "active_channel": {
+              "enum": ["nope-lever", "change-channel", "soft-landing", "log-only", "standard"],
+              "description": "Active agency channel. nope-lever = stop; change-channel = redirect; soft-landing = reduce load; log-only = record without rendering; standard = full exploration."
+            },
+            "recommended_command": { "type": "string" },
+            "consent_anchor": {
+              "type": "string",
+              "description": "The consent anchor phrase active at this moment (e.g. 'Agency first. Intensity second. Meaning only with consent.')"
+            },
+            "field_context": { "type": ["string", "null"] }
+          }
+        },
+        "frequency_protocol": {
+          "type": ["string", "null"],
+          "description": "The Terra Aeterna / House frequency protocol selected by the SCFE at this moment. Drives tone rendering."
+        },
+        "evidence_labels": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Per-domain evidence quality labels (e.g. { barbault_index: 'mathematical_index', somatic: 'self_report', sacred_geometry: 'form_mapping' }). These must propagate to any rendered output that cites this domain."
+        },
+        "sheet_convergence_ref": {
+          "type": ["string", "null"],
+          "description": "Reference to the Sheet Convergence reading (Local Sheet-Convergence and Fold Susceptibility module) active at seal time, if available. This is a separate append-only JSON receipt object."
+        },
+        "epistemic_registers_active": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "MATHEMATICAL_DERIVATION",
+              "LOCATION_INPUT",
+              "PHYSICS_MODEL",
+              "SYMBOLIC_CORRESPONDENCE",
+              "OBSERVATION",
+              "SIMULATION"
+            ]
+          },
+          "description": "The science spine epistemic registers contributing to this packet's computed state. No register silently replaces another — all active registers are declared here.",
+          "default": []
+        }
+      }
+    },
+
+    "temporal_mechanics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_timestamp", "collapse_status", "unit_resonance"],
+      "description": "The deeper temporal coordinate and causal mechanics of this packet. Wall-clock time (in temporal) tells you when the packet was sealed. temporal_mechanics tells you where the packet sits in harmonic time (Barbault phase), what its causal lineage is (prior_packet_ref, branch_id), and whether it has collapsed from superposition into a fixed activation. This is the escapement — the mechanism that replaces the diverging clocks with one shared heartbeat.",
+      "properties": {
+        "target_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The SCFE target timestamp — the astronomical moment the field snapshot was computed for. May differ from sealed_at if the snapshot was run for a specific query time rather than now."
+        },
+        "collapse_status": {
+          "enum": ["superposed", "collapsed"],
+          "description": "superposed: the packet is sealed and valid but DualAspectActivation has not yet fired. The packet exists as a definite object but no renderer has locked onto it. collapsed: DualAspectActivation(packet_id) has fired; all renderers are bound to this packet and may not refetch state."
+        },
+        "collapsed_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "The exact moment DualAspectActivation fired. Null while superposed. Set by the Kernel when Arcsweep acceptance triggers activation."
+        },
+        "prior_packet_ref": {
+          "type": ["string", "null"],
+          "description": "packet_id of the previous DualAspectPacket in this House's causal chain. Null for the first packet in a session or after a branch reset. Enables history traversal and causal replay chain reconstruction."
+        },
+        "branch_id": {
+          "type": ["string", "null"],
+          "description": "Temporal branch identifier. Null means the primary canon timeline. Non-null means an alternate, experimental, or DR branch that has not yet merged into the primary record. The canon foundation is never mutated by branching — only the overlay and experiential layer differ across branches."
+        },
+        "session_id": {
+          "type": ["string", "null"],
+          "description": "The bridge session this packet belongs to, if applicable. Connects the packet to the session receipt chain."
+        },
+        "unit_resonance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["config_ref", "distance_metric_version"],
+          "description": "The unit resonance configuration frozen at seal time. The weighted Euclidean distance metric and channel weights determine how DEEP fields map to resonance node distances — which determines glyph geometry routing and tone graph projection. Locked here so replay uses identical metric weights.",
+          "properties": {
+            "config_ref": {
+              "type": "string",
+              "description": "Reference to the resonance config object used at seal time (e.g. 'deep-default', 'gallery-canon', 'route-registry')",
+              "minLength": 1
+            },
+            "distance_metric_version": {
+              "type": "string",
+              "description": "Version of the scaled weighted Euclidean distance kernel: d(a,b) = sqrt(sum_i weight_i * ((a_i - b_i) / scale_i)^2)",
+              "minLength": 1
+            },
+            "channel_weights": {
+              "type": "object",
+              "additionalProperties": { "type": "number" },
+              "description": "The weight per DEEP channel active at seal time. A zero weight means that channel was intentionally excluded from resonance distance."
+            },
+            "projection_mode": {
+              "type": ["string", "null"],
+              "description": "The projection target active at seal time (e.g. 'svg', 'webgl', 'audio-routing', 'haptic')"
+            },
+            "tolerance": {
+              "type": ["number", "null"],
+              "description": "The unit band tolerance used to classify nodes as 'unit distance' or not"
+            }
+          }
+        }
+      }
+    },
+
+    "render_receipt_id": {
+      "type": ["string", "null"],
+      "description": "Written after all renderers complete. References the render receipt object (separate schema) that captures: glyph_seed, glyph_geometry, tone_profile_applied, house_transfer_function_checksums, degraded_status, render_timestamp. Null until rendering is complete.",
+      "default": null
+    }
+  }
+}

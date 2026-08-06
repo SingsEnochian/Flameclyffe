@@ -367,12 +367,13 @@ dA/dt = ι·(user + T.attention)</pre>
     function renderState() {
       const f = state.field;
       const names = [
-        ['P', 'Perspective', f.P],
+        ['P', 'Presence', f.P],
         ['C', 'Coherence', f.C],
         ['R', 'Resonance', f.R],
-        ['E', 'Entropy', f.E],
+        ['E', 'Entanglement', f.E],
         ['M', 'Memory', f.M],
-        ['A', 'Attention', f.A],
+        ['A', 'Agency', f.A],
+        ['Q', 'Qualia', f.Q ?? 0],
       ];
       
       $('stateMetrics').innerHTML = names.map(([k, label, v]) => 

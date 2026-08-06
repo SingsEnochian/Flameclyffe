@@ -1,0 +1,52 @@
+{
+  "schema": "boxfire.source-profile/v1",
+  "source_id": "wot-fandom-wiki",
+  "world": "taaveren-vaen",
+  "world_display_name": "T'averen Vaen",
+  "display_name": "Wheel of Time Fandom Wiki",
+  "base_url": "https://wheeloftime.fandom.com",
+  "api_endpoint": "https://wheeloftime.fandom.com/api.php",
+  "license": "CC BY-SA 3.0",
+  "content_type": "wiki",
+  "namespace": 0,
+  "semantic_role": "canon-lore",
+  "ingest_strategy": "full-crawl",
+  "gitignored": true,
+  "tracked_files": [
+    "source-profile.json",
+    "README.md",
+    "BOXFIRE-RUNBOOK.md",
+    "manifest.json"
+  ],
+  "gitignored_paths": [
+    "pages/",
+    "receipts/",
+    "checkpoint.json",
+    "failures.json"
+  ],
+  "premaq_guidance": {
+    "principle": "data sets atmosphere, not fate",
+    "axes": {
+      "P_presence": "Named character density, active POV count — how populated the Pattern feels at this moment",
+      "C_compression": "Plot density, Age of Legends depth, sealed layers — how much history compresses into now",
+      "R_resolution": "Specificity of Prophecies, ter'angreal precision, weave taxonomy — the sharpness of form",
+      "E_entropy": "Chaos of the Breaking, DO's touch, turning corruption, balefired timelines — disruption measure",
+      "M_momentum": "Narrative arc of the Wheel's turning, Last Battle proximity — forward pull of the Pattern",
+      "A_agency": "Ta'veren count and strength, moment of choice density — capacity to redirect the Pattern",
+      "Q_qualia": "Emotional weight: the void Rand holds, the warmth of Emonds Field, the dread of Shayol Ghul — feel of the weave"
+    },
+    "mapping_notes": [
+      "Pages in Category:Ta'veren should push A upward",
+      "Pages referencing the Breaking or the Dark One should push E upward",
+      "Prophecy pages (Karaethon Cycle, Essanik Cycle) set R",
+      "Pages about Age of Legends set deep C baseline",
+      "Pages about Two Rivers / Emonds Field calibrate Q-low (warm, grounded)"
+    ]
+  },
+  "ingest_notes": {
+    "redirect_handling": "apfilterredir=nonredirects — redirects excluded during enumeration",
+    "rate_policy": "350ms delay between batch requests; MAX_RETRIES=3 with exponential backoff",
+    "batch_size": 20,
+    "user_agent": "Boxfire-Arcsweep/1.0 (hearthgate world ingest; non-commercial research)"
+  }
+}
