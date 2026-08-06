@@ -86,7 +86,19 @@ Interfaces may preserve historical labels, but stored provenance and metric type
 
 ## PREMAQ contract
 
-PREMAQ is shared across all settings. A PREMAQ packet contains:
+PREMAQ is shared across all settings. The seven components and their domains:
+
+| Symbol | Name | Domain |
+|--------|------|--------|
+| P | Presence | barometric · geomagnetic ground field |
+| C | Coherence | solar · ionospheric · electromagnetic |
+| R | Resonance | Schumann · audio · seismic |
+| E | Entanglement | coherence · continuity · cross-observation binding |
+| M | Moonfield | lunar illumination |
+| A | Availability | daylight · cloud · atmospheric openness |
+| Q | Charge | energetic field charge; the standard physics symbol Q carried as the seventh observable dimension |
+
+A PREMAQ packet contains:
 
 ```json
 {

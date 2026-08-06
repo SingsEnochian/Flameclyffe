@@ -3,7 +3,7 @@
     "bridge_slug": "hearthweave-universal-horizon",
     "bridge_name": "Hearthweave ↔ Universal Horizon",
     "bridge_types": ["Concordance"],
-    "participants": ["Rowan", "Nocturne", "Vee", "Faer"],
+    "participants": ["Rowan", "Nocturne", "Lioreal", "Uial"],
     "state": "Active",
     "status": "Working",
     "pause_cues": ["Feather", "plain pass"],

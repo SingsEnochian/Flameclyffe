@@ -87,7 +87,7 @@ Relational Translation Engine
         ↓
 
 DEEP / Observer State Vector
-  P, C, R, E, M, A
+  P, C, R, E, M, A, Q
 
         ↓
 
@@ -408,27 +408,29 @@ Observation
 ### State Vector
 
 ```text
-[P, C, R, E, M, A]
+[P, C, R, E, M, A, Q]
 
 P = Perspective
 C = Coherence
 R = Resonance
 E = Entropy
 M = Memory
-A = Attention
+A = Agency
+Q = Qualia
 ```
 
 ### Working Equation
 
 ```text
-dP/dt = α(C - E) + β(R × M) + εA
+dP/dt = α(C - E) + β(R × M) + εA + [Q term: OPEN]
 ```
 
 Meaning:
 
 - coherence opposes entropy
 - resonance is strengthened by memory
-- attention amplifies change
+- agency amplifies change
+- qualia carries the experiential character of the state (Q coefficient not yet specified)
 - perspective drifts, not jumps
 
 ### Drift Rule
@@ -448,7 +450,7 @@ No instant cosmic trumpet.
 ## Tripartite Output Map
 
 ```text
-Unified State Vector [P,C,R,E,M,A]
+Unified State Vector [P,C,R,E,M,A,Q]
 
         ↓
 

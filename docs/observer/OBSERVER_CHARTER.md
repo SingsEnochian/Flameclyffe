@@ -38,6 +38,18 @@ Each state transition records its inputs, transformations, outputs, uncertainty,
 
 PREMAQ is the shared Observation State carried across the Hearthgate architecture. It is not a display widget and not merely a set of floating values.
 
+The seven components are:
+
+| Symbol | Name | Domain |
+|--------|------|--------|
+| P | Presence | barometric · geomagnetic ground field |
+| C | Coherence | solar · ionospheric · electromagnetic |
+| R | Resonance | Schumann · audio · seismic |
+| E | Entanglement | coherence · continuity · cross-observation binding |
+| M | Moonfield | lunar illumination |
+| A | Availability | daylight · cloud · atmospheric openness |
+| Q | Charge | energetic field charge; the physics symbol Q, carried as the seventh observable dimension |
+
 Each component carries:
 
 - value

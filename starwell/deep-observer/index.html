@@ -40,7 +40,9 @@
         <div class="brand">STARWELL · DEEP Observer</div>
         <div class="tagline">Teaching instrument · readings, not controls</div>
       </div>
+      <div id="hg-reception" style="font-size:.76rem;color:var(--dim);margin-top:.1rem">Reception · Terra Aeterna</div>
       <nav class="nav" aria-label="DEEP Observer navigation">
+        <a class="btn" href="../hearthgate/">Hearthgate</a>
         <a class="btn" href="../">STARWELL</a>
         <a class="btn" href="../writing-room/">Writing Room</a>
         <a class="btn" href="../#rooms">Rooms</a>
@@ -167,5 +169,6 @@
     <p class="note-strip">Time Tap v0.1: the Time jewel now listens for pointerup, click, and keyboard activation so the dual clock answers more reliably on mobile.</p>
   </section>
 </main>
+<script>(function(){var W={reality:'Current Reality',terra:'Terra Aeterna',luna:'Luna · Windmere',taveren:'Ta'veren Vaen',starsong:'Starsong',supernatural:'Supernatural',wheel:'Wheel of Time',evil:'Evil'};function updR(){var k=localStorage.getItem('hearthgate.activeReception')||'terra';var el=document.getElementById('hg-reception');if(el)el.textContent='Reception · '+(W[k]||k);}updR();window.addEventListener('storage',function(e){if(e.key==='hearthgate.activeReception')updR();});})();</script>
 </body>
 </html>

@@ -53,9 +53,18 @@
       <a href='./signal-well/'>Signal Well</a>
       <a href='./deep-observer/'>Observatory</a>
     </nav>
-    <span class='hearthgate-reception'>Reception · Terra Aeterna</span>
+    <span class='hearthgate-reception' id='hg-reception'>Reception · Terra Aeterna</span>
   </header>
   <div id='root'></div>
+  <script>
+  (function(){
+    var W={reality:’Current Reality’,terra:’Terra Aeterna’,luna:’Luna · Windmere’,taveren:’Ta’veren Vaen’,starsong:’Starsong’,supernatural:’Supernatural’,wheel:’Wheel of Time’,evil:’Evil’};
+    function upd(k){k=k||localStorage.getItem(‘hearthgate.activeReception’)||’terra’;var el=document.getElementById(‘hg-reception’);if(el)el.textContent=’Reception · ‘+(W[k]||k);}
+    upd();
+    fetch(‘/api/reception’).then(function(r){return r.json();}).then(function(d){if(d.ok&&d.activeReception){localStorage.setItem(‘hearthgate.activeReception’,d.activeReception);upd(d.activeReception);}}).catch(function(){});
+    window.addEventListener(‘storage’,function(e){if(e.key===’hearthgate.activeReception’)upd();});
+  })();
+  </script>
   <nav class='framework-door-rack' aria-label='Hearthgate room doors'>
     <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the Hearth'>
       <span class='living-room-doorway-mark' aria-hidden='true'>✴</span>

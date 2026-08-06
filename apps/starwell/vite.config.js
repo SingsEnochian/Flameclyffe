@@ -54,6 +54,20 @@ function publishLegacyObservatoryPages() {
           force: true,
         },
       );
+
+      // Deep Observer (The Laboratory) — served at /starwell/deep-observer/
+      await mkdir(resolve(OUT_DIR, 'deep-observer'), { recursive: true });
+      await cp(resolve(REPO_ROOT, 'starwell', 'deep-observer'), resolve(OUT_DIR, 'deep-observer'), {
+        recursive: true,
+        force: true,
+      });
+
+      // Hearthgate house landing — served at /starwell/hearthgate/
+      await mkdir(resolve(OUT_DIR, 'hearthgate'), { recursive: true });
+      await cp(resolve(REPO_ROOT, 'starwell', 'hearthgate'), resolve(OUT_DIR, 'hearthgate'), {
+        recursive: true,
+        force: true,
+      });
     },
   };
 }

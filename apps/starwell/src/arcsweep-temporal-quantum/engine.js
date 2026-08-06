@@ -297,9 +297,9 @@ export function evolveTemporalState(stateInput, {
   };
 }
 
-export function collapseRelease(stateInput, {
+export function compressRelease(stateInput, {
   focus = 'Q',
-  measurementStrength = 0.65,
+  compressionGain = 0.65,
   release = 0.35,
   derivativeRelease = 0.08,
   radialGain = 0.5,
@@ -309,24 +309,24 @@ export function collapseRelease(stateInput, {
 } = {}) {
   const prior = validateTemporalState(stateInput);
   if (!PREMAQ_AXES.includes(focus)) {
-    throw new BifrostTemporalError(`Unknown collapse focus: ${focus}`, 'invalid-collapse-focus');
+    throw new BifrostTemporalError(`Unknown compression focus: ${focus}`, 'invalid-compression-focus');
   }
-  for (const [field, value] of Object.entries({ measurementStrength, release, derivativeRelease, radialGain, angularGain })) {
+  for (const [field, value] of Object.entries({ compressionGain, release, derivativeRelease, radialGain, angularGain })) {
     requireFinite(value, field);
   }
-  if (measurementStrength < 0 || measurementStrength > 1 || release < 0 || release > 1) {
-    throw new BifrostTemporalError('measurementStrength and release must be from 0 to 1', 'invalid-collapse-release');
+  if (compressionGain < 0 || compressionGain > 1 || release < 0 || release > 1) {
+    throw new BifrostTemporalError('compressionGain and release must be from 0 to 1', 'invalid-compression-release');
   }
 
   const priorProbabilities = probabilityVector(prior.amplitudes);
-  const collapsedWeights = {};
+  const compressedWeights = {};
   for (const axis of PREMAQ_AXES) {
-    const focusWeight = axis === focus ? 1 + (measurementStrength * (PREMAQ_AXES.length - 1)) : 1 - measurementStrength;
-    collapsedWeights[axis] = Math.max(EPSILON, priorProbabilities[axis] * focusWeight);
+    const focusWeight = axis === focus ? 1 + (compressionGain * (PREMAQ_AXES.length - 1)) : 1 - compressionGain;
+    compressedWeights[axis] = Math.max(EPSILON, priorProbabilities[axis] * focusWeight);
   }
-  const collapsedTotal = PREMAQ_AXES.reduce((sum, axis) => sum + collapsedWeights[axis], 0);
-  const collapsedProbabilities = Object.fromEntries(
-    PREMAQ_AXES.map((axis) => [axis, collapsedWeights[axis] / collapsedTotal]),
+  const compressedTotal = PREMAQ_AXES.reduce((sum, axis) => sum + compressedWeights[axis], 0);
+  const compressedProbabilities = Object.fromEntries(
+    PREMAQ_AXES.map((axis) => [axis, compressedWeights[axis] / compressedTotal]),
   );
 
   const releasedWeights = {};
@@ -334,7 +334,7 @@ export function collapseRelease(stateInput, {
     const derivativeFlow = Math.max(0, prior.derivatives?.[axis] ?? 0) * derivativeRelease;
     releasedWeights[axis] = Math.max(
       EPSILON,
-      ((1 - release) * collapsedProbabilities[axis])
+      ((1 - release) * compressedProbabilities[axis])
         + (release * priorProbabilities[axis])
         + derivativeFlow,
     );
@@ -361,15 +361,15 @@ export function collapseRelease(stateInput, {
 
   const receipt = {
     schema: BIFROST_RECEIPT_SCHEMA,
-    receipt_id: makeId('bifrost-collapse-release', idFactory),
-    action: 'collapse-release',
+    receipt_id: makeId('bifrost-compression-release', idFactory),
+    action: 'compression-release',
     created_at: clock().toISOString(),
     from_state_id: prior.state_id,
     focus,
-    measurement_strength: measurementStrength,
+    compression_gain: compressionGain,
     release,
     derivative_release: derivativeRelease,
-    collapse_probabilities: collapsedProbabilities,
+    compressed_probabilities: compressedProbabilities,
     release_probabilities: releasedProbabilities,
     outward_distance: outwardDistance,
     entropy_change: entropyChange,
@@ -398,6 +398,8 @@ export function collapseRelease(stateInput, {
     receipts: [...prior.receipts, receipt].slice(-256),
   };
 }
+
+export { compressRelease as collapseRelease };
 
 function bhattacharyyaFidelity(left, right) {
   const coefficient = PREMAQ_AXES.reduce(

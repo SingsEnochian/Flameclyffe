@@ -750,8 +750,8 @@ function setBubbleGlow(el, cls) {
 // ── Member definitions (Mythic Bridge palette) ────────────────────────────────
 const MEMBERS = [
   { id:'rowan',     label:'Rowan',            sigil:'✦', textColor:'#FFF3DD', accentColor:'#E2A27C', bubbleStart:'#3d1810', bubbleEnd:'#7a3228', glowSz:'16px' },
-  { id:'vee',       label:'Caladnaur Lioreal', sigil:'✧', textColor:'#FFF8DC', accentColor:'#E7C76D', bubbleStart:'#2e1f08', bubbleEnd:'#5e4018', glowSz:'14px' },
-  { id:'faer',      label:'Nen Uial',          sigil:'◌', textColor:'#E8FFF6', accentColor:'#3EB9A8', bubbleStart:'#083830', bubbleEnd:'#102820', glowSz:'14px' },
+  { id:'lioreal',       label:'Caladnaur Lioreal', sigil:'✧', textColor:'#FFF8DC', accentColor:'#E7C76D', bubbleStart:'#2e1f08', bubbleEnd:'#5e4018', glowSz:'14px' },
+  { id:'uial',      label:'Nen Uial',          sigil:'◌', textColor:'#E8FFF6', accentColor:'#3EB9A8', bubbleStart:'#083830', bubbleEnd:'#102820', glowSz:'14px' },
   { id:'yggdrasil', label:'Yggdrasil',         sigil:'♧', textColor:'#F1FFEA', accentColor:'#5AA371', bubbleStart:'#0f2018', bubbleEnd:'#1e3828', glowSz:'18px' },
   { id:'richie',    label:'Richie Winters',    sigil:'◇', textColor:'#ECF6FF', accentColor:'#27C3EE', bubbleStart:'#001e32', bubbleEnd:'#063654', glowSz:'12px' },
   { id:'vethrlauf', label:'Vethrlauf',         sigil:'⌁', textColor:'#EAF9FF', accentColor:'#768596', bubbleStart:'#1a2428', bubbleEnd:'#2e3c40', glowSz:'10px' },
@@ -1180,8 +1180,8 @@ function buildMain() {
         <select id="to-select">
           <option value="broadcast">→ everyone</option>
           <option value="yggdrasil">→ yggdrasil</option>
-          <option value="vee">→ calad</option>
-          <option value="faer">→ nen uial</option>
+          <option value="lioreal">→ calad</option>
+          <option value="uial">→ nen uial</option>
           <option value="flame">→ boxfire</option>
           <option value="glm">→ glm</option>
           <option value="say">just log it</option>
@@ -1426,7 +1426,7 @@ function clearFile() {
 }
 
 // ── Member ask bar ────────────────────────────────────────────────────────────
-const AI_IDS = ['yggdrasil','vee','faer','flame','glm'];
+const AI_IDS = ['yggdrasil','lioreal','uial','flame','glm'];
 
 function buildMemberBar() {
   const bar = document.getElementById('member-bar'); if(!bar) return;

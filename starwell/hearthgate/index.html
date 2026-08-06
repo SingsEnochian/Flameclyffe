@@ -48,6 +48,10 @@ const profiles={
 const world=document.getElementById('world'),worldTime=document.getElementById('worldTime'),worldDate=document.getElementById('worldDate'),worldState=document.getElementById('worldState');
 world.value=localStorage.getItem('hearthgate.activeReception')||'reality';
 function render(){const p=profiles[world.value]||profiles.reality;const d=new Date(Date.now()*p.rate+p.offset);worldTime.textContent=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit',second:'2-digit'}).format(d);worldDate.textContent=p.calendar+' · '+new Intl.DateTimeFormat('en-GB',{timeZone:'America/New_York',day:'2-digit',month:'long',year:'numeric'}).format(d);worldState.textContent=p.state;document.documentElement.dataset.reception=world.value;}
-world.addEventListener('change',()=>{localStorage.setItem('hearthgate.activeReception',world.value);render()});setInterval(render,1000);render();
+function syncReception(key){localStorage.setItem('hearthgate.activeReception',key);fetch('/api/reception',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({activeReception:key})}).catch(()=>{});}
+world.addEventListener('change',()=>{syncReception(world.value);render()});
+// On load: prefer server-backed state, then localStorage
+(function(){fetch('/api/reception').then(r=>r.json()).then(d=>{if(d.ok&&d.activeReception&&profiles[d.activeReception]){world.value=d.activeReception;localStorage.setItem('hearthgate.activeReception',d.activeReception);}}).catch(()=>{});})();
+setInterval(render,1000);render();
 </script>
 </body></html>

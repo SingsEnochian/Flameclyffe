@@ -84,20 +84,23 @@ C = Coherence
 R = Recurrence / Resonance
 E = Entropy
 M = Memory
-A = Attention
+A = Agency
+Q = Qualia
 ```
 
 Recommended default range:
 
 ```text
-P, C, R, E, M, A ∈ [0, 1]
+P, C, R, E, M, A, Q ∈ [0, 1]
 ```
 
 The equation currently used in project notes should be called a heuristic state update function unless units, observables, and validation are added:
 
 ```text
-dP/dt = α(C - E) + β(RM) + ε(A)
+dP/dt = α(C - E) + β(RM) + ε(A) + [Q term: OPEN]
 ```
+
+The Q (Qualia) coefficient is not yet specified. Do not fill in a value without a mathematical specification.
 
 Safe label:
 
