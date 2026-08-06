@@ -1,0 +1,8 @@
+raw/*.ndjson
+receipts/*.json
+receipts/*.ndjson
+manifest.json
+normalized/**
+indexes/**
+!normalized/.gitkeep
+!indexes/.gitkeep
