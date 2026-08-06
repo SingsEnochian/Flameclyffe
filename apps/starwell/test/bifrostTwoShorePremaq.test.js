@@ -23,10 +23,12 @@ function temporalState(id, fingerprint = 'shared-fp') {
   };
 }
 
-function packet({ hearthside = temporalState('hearth-state'), targetside = temporalState('target-state') } = {}) {
+function packet(options = {}) {
+  const hearth = 'hearthside' in options ? options.hearthside : temporalState('hearth-state');
+  const target = 'targetside' in options ? options.targetside : temporalState('target-state');
   const temporal = {};
-  if (hearthside !== undefined) temporal.hearthside = hearthside;
-  if (targetside !== undefined) temporal.targetside = targetside;
+  if (hearth !== undefined) temporal.hearthside = hearth;
+  if (target !== undefined) temporal.targetside = target;
   return {
     packet_id: 'packet-two-shore',
     packet_fingerprint: 'packet-fp',
