@@ -10,6 +10,7 @@ import {
   validatePremaqPacket,
 } from '../arcsweep-temporal-quantum/engine.js';
 import { advanceWorldCompressionRelease } from '../arcsweep-temporal-quantum/compression-release.js';
+import { computeSpiralState } from '../harmonic-spiral/spiral-engine.js';
 
 function deepFreeze(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
@@ -118,5 +119,13 @@ export function assembleCompressionReleaseDualAspectPacket({
     'The compression-release recursion has no terminal cycle.',
     'A world tone enters production only through Rowan approval.',
   ];
+  base.harmonic_state = computeSpiralState({
+    premaq,
+    deepRefs: {
+      story: [snapshot.snapshot_id],
+      time: [transition.receipt.receipt_id],
+      theory: [],
+    },
+  });
   return deepFreeze({ ...base, packet_fingerprint: fingerprint(base) });
 }

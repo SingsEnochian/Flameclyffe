@@ -29,6 +29,10 @@ export {
 export { buildPacketGlyphRender } from './packet-glyph-render.js';
 
 export {
+  readSubsystemBriefs,
+} from '../harmonic-spiral/spiral-wire.js';
+
+export {
   clearDualAspectActivation,
   publishDualAspectActivation,
   readActiveDualAspectPacket,
