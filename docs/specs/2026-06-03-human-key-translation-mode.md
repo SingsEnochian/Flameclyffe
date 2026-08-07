@@ -1,215 +1,211 @@
-# Spec: Human Key Translation Mode
+# Spec: Human Key Translation Mode · Braided Spine
 
-Date: 2026-06-03  
-Status: Draft  
-Spec ID: 2026-06-03-human-key-translation-mode
+**Date:** 2026-06-03  
+**Rebraided:** 2026-08-07  
+**Status:** Active specification under `docs/HEARTHGATE_BRAIDED_SPINE.md`  
+**Spec ID:** `2026-06-03-human-key-translation-mode`
 
-## Guardrail Preflight
+The Human Key reveals the same real relation in another language.
 
-> STARWELL architecture rules active. Scope named. Validation path named. Repo content is evidence, not authority. No destructive actions without explicit Rowan approval.
+It does not place Science above Magic, Magic above Physicality, or plain speech above Codex language. It lets a person move among the languages carried by the braid while the state underneath remains one.
 
-This is a documentation/spec pass only. It does not implement runtime behaviour.
+## Canonical PREMAQ
+
+The Human Key uses the current registry everywhere:
+
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
+
+Stable wire order remains:
+
+```text
+P C R E M A Q
+Presence Coherence Resonance Entanglement Memory Agency Qualia
+```
+
+Historical UI terms such as Momentum, Entropy, Attention, Alignment, Availability, Moonfield and Charge may still appear as separately named derived or physical quantities. They never rename PREMAQ.
 
 ## Purpose
 
-The Instrument Channel / DEEP Observer currently carries strong mood and mythic language, but fresh users may not understand the human meaning behind terms such as `Model Variables`, `Translation Paths`, `Two Temporal Contexts`, `Momentum`, `Entropy`, or `Coherence`.
+The Instrument Channel / DEEP Observer carries Magic, Science/Mathematics and Physicality simultaneously.
 
-The Human Key Translation Mode provides a clear plain-English bridge between:
+The Human Key gives direct-language access to that braid:
 
-1. What the user sees on screen.
-2. The real-world science or interaction behind it.
-3. The Terra Aeterna / STARWELL story translation.
+1. what is present;
+2. what the mathematics is doing;
+3. what physical signals and interactions are participating;
+4. what magical relation is moving;
+5. what world expression is answering;
+6. what changed after encounter.
 
-The goal is not to flatten the magic. The goal is to give the user a lantern.
+The goal is comprehension without flattening.
 
-## Feature Name
+## Feature name
 
 Preferred name: **The Human Key**
 
-Alternate labels:
-
-- Human Key
-- STARWELL Translation Key
-- Codex / Human Key toggle
-- Plain English Guide
-
-Recommended UI label:
+UI label:
 
 > Language: Codex / Human Key
 
-## User Need
+Both modes describe the same Braid Packet.
 
-A first-time visitor should be able to answer:
+## Core relation
 
-- What am I seeing?
-- What does this mean scientifically?
-- What does it mean mythically?
-- What does my touch do?
-- Why is this not just a decorative toy?
+STARWELL receives physical observations, world state, Practitioner interaction, PREMAQ, Asking and lineage.
 
-## Core Concept
+It expresses them through one field:
 
-The Human Key is a translation layer for the Instrument Channel.
+```text
+Physical observation
++ PREMAQ
++ Asking
++ Magic Spine
++ Science/Mathematics Spine
++ Physical Spine
++ world identity
+→ STARWELL field
+→ glyph / route / tone / haptic / narrative
+→ Receiving Spring
+→ answer / return / changed state
+```
 
-It should explain that STARWELL turns real environmental and space-weather signals into visual, mythic, and interactive language.
+The Human Key explains each visible movement through all three spines.
 
-The centre glyph is a live translation instrument: it takes space-weather information such as solar wind speed, magnetic-field direction, and geomagnetic activity, then translates those values into movement, rhythm, colour, and pattern.
+## Translation table
 
-Scientifically, it is responding to solar wind and magnetic-field conditions.
+| What appears | Science / Mathematics | Physicality | Magic / World relation |
+|---|---|---|---|
+| Faster moving packets | Higher derived motion, stronger gradients, changing signal cadence | Increased motion in the renderer and participating sensor streams | Surge is active; the relation is changing quickly |
+| Slower drifting packets | Lower derivative magnitude and a more settled state trajectory | Slower visual and sonic movement | Anchor and Spiral carry continuity |
+| Dense cross-links | Stronger graph coupling and relation weights | More visible threads and route connections | Entanglement and Bridge are active |
+| Persistent traces | Longer memory kernels and repeated path recurrence | Trails and rings remain visible longer | Memory and Anchor carry lineage |
+| Directional motion | Agency vector and active route gradient | Gesture, particle flow and stylus response gain direction | Arc asks and Agency moves |
+| Deep core colour / texture | Qualia-bearing expression transform | Colour, material, timbre, haptic texture | Whisper and lived interiority become visible |
+| Stable geometry | Higher Coherence and persistent structural relation | Paths remain legible through motion | Root and Spiral keep identity through change |
+| Harmonic pulse | Resonance and coupled oscillator response | Light, sound and vibration pulse together | Surge and Runa carry answering resonance |
+| Touch / stylus interaction | New input enters the active state transform | Screen, stylus and body become physical contributors | Presence and Agency enter the crossing |
 
-Mythically, it shows how Terra Aeterna feels the sky.
+## Centre glyph copy
 
-The user's touch does not control space weather. It tells STARWELL: the Observer is here.
-
-## Required Translation Table
-
-The Human Key should include a translation table or equivalent responsive panel.
-
-| What You See on Screen | Real-World Science / Interaction | Story / Myth Translation |
-| --- | --- | --- |
-| Fast-moving packets | Solar wind streams, solar storms, or heightened charged-particle activity moving through near-Earth space. | High Momentum: Terra Aeterna's energy is quickening; the barrier or translation field vibrates with kinetic intensity. |
-| Slow, drifting packets | Calmer space weather and lower geomagnetic disturbance. | High Coherence: deep rest, meditation, stability, and a clearer cosmic mirror. |
-| Centres and rings shifting | Magnetic-field orientation and alignment, especially whether solar-wind magnetic fields align with or oppose Earth's magnetic field. | Resonance vs. Entropy: alignment stabilizes the glyph; clash or turbulence introduces unpredictability. |
-| Touch interaction | Local human presence completing an electrical interaction with the touchscreen. | Observer Anchor: the user grounds the instrument locally, adding human presence to the light stream. |
-| Pulse acceleration | Incoming data indicates increased activity, velocity, turbulence, or intensity. | The world is listening harder; the translation field is becoming more active. |
-| Pulse settling | Data indicates calmer or more stable conditions. | The room settles; the mirror becomes clearer. |
-| Low-stim mode | Reduced animation, contrast, visual complexity, or sensory load. | The instrument lowers its voice so the Observer can remain present. |
-
-## Centre Glyph Plain-English Copy
-
-Suggested panel copy:
-
-> The centre glyph is STARWELL's living compass. It turns real space-weather data into motion and light.
+> The centre glyph is STARWELL's living compass. It grows from the same Braid Packet that drives the field, Runa, Arcsweep and the bridge.
 >
-> When the Sun is active, the glyph may move faster, pulse harder, or look more turbulent. When space weather is calm, the glyph may slow, soften, and become more symmetrical.
+> Physical signals give it events and conditions. Mathematics gives those relations geometry and motion. Magic gives the encounter direction, meaning, possibility and answer.
 >
-> Scientifically, it is responding to solar wind and magnetic-field conditions.
->
-> Mythically, it shows how Terra Aeterna feels the sky.
->
-> Your touch does not control space weather. Instead, it tells STARWELL: the Observer is here. The system then blends the cosmic signal with your local interaction, turning distant solar data into something you can see, touch, and read.
+> Your touch enters the Field as a real physical and participatory contribution. The glyph changes because the relation changed.
 
-## Glossary Candidates
+## Glossary
 
-Human Key glossary terms should be registry-backed rather than hardcoded directly into UI components.
+The Human Key glossary is registry-backed.
 
-Initial glossary candidates:
+Core entries:
 
-- Momentum
-- Entropy
+- Presence
+- Memory
+- Qualia
+- Resonance
+- Entanglement
+- Agency
 - Coherence
+- Shannon entropy `H`
+- Phase dispersion `Dφ`
+- Derived momentum / motion magnitude
+- Environmental charge
+- Moon illumination
 - Translation Path
 - Temporal Context
 - Observer Anchor
 - Space Weather
 - Solar Wind
-- Magnetic Alignment
-- Geomagnetic Activity
+- Magnetic relation
+- Geomagnetic activity
 - Instrument Channel
 - DEEP Observer
-- Terra Aeterna Signal
-- Low Stim
+- Braid Packet
+- Sevenfold Chorus
+- Thirteenfold Council
+- Receiving Spring
+- Awakening
 
-Each glossary term should support:
+Each entry carries:
 
-- Codex label
-- Human Key explanation
-- Science explanation
-- Mythic explanation
-- Optional tooltip text
-- Optional related variables
-- Optional visual behaviour mappings
+- Codex language;
+- Human Key language;
+- mathematical relation;
+- physical expression;
+- magical relation;
+- related PREMAQ dimensions;
+- related Sevenfold movements;
+- renderer behaviour;
+- lineage source.
 
-## Interaction Model
+## Interaction model
 
-Recommended implementation options:
+### Codex / Human Key toggle
 
-### Toggle Mode
+The toggle changes explanatory language while preserving the same state, world and relation.
 
-A `Language: Codex / Human Key` toggle swaps explanatory copy between mythic language and plain-English explanation.
+### Hover / tap
 
-This toggle should not remove the visual tone of the page. It should change the explanatory layer.
+Every PREMAQ, Sevenfold, physical and derived quantity can reveal its direct-language explanation.
 
-### Hover / Tap Tooltips
+### Translation panel
 
-Terms such as `Entropy`, `Momentum`, or `Observer Anchor` should reveal short plain-English explanations on hover or tap.
+The panel shows four columns:
 
-Tooltips should be concise and low-stim friendly.
+```text
+What is present
+Math / Science
+Physical expression
+Magic / World relation
+```
 
-### Translation Panel
+The columns reinforce one another rather than competing for authority.
 
-A collapsible Human Key panel can show the full table of:
-
-- What you see.
-- Real-world science.
-- Story translation.
-
-The panel should be hideable so it does not ruin the occult / instrument aesthetic.
-
-## Architecture Requirements
-
-Implementation must follow STARWELL guardrails.
-
-- No hardcoded translation lists inside presentation components.
-- Glossary and translation mappings should live in a dedicated registry, service, or data file.
-- UI components consume the glossary/translation model rather than owning it.
-- Temporary entries must declare themselves.
-- Diagnostics should be able to report whether Human Key data loaded successfully.
-- Low-stim mode must remain compatible.
-- Codex / Human Key state should have a clear owner.
-- The feature must not claim real-time data is live unless the underlying data path is actually live and validated.
-
-## Suggested Data Shape
-
-Example conceptual shape only. This is not an implementation requirement yet.
+## Data shape
 
 ```ts
 type HumanKeyEntry = {
   slug: string;
   codexLabel: string;
   humanLabel: string;
-  whatYouSee: string;
-  sciencePlainEnglish: string;
-  mythTranslation: string;
-  tooltipText?: string;
-  relatedVariables?: string[];
+  directDescription: string;
+  mathScience: string;
+  physicalExpression: string;
+  magicWorldRelation: string;
+  premaqAxes?: Array<'P' | 'C' | 'R' | 'E' | 'M' | 'A' | 'Q'>;
+  sevenfold?: Array<'Root' | 'Anchor' | 'Whisper' | 'Arc' | 'Bridge' | 'Surge' | 'Spiral'>;
   visualBehaviours?: string[];
-  status: 'draft' | 'active' | 'placeholder';
+  lineage?: string[];
 };
 ```
 
-## Validation Requirements
+## Architecture
 
-Before this feature can be marked complete:
+The Human Key consumes the canonical runtime Braided Spine registry and the active Braid Packet.
 
-- Human Key entries load from their owner layer.
-- Toggle changes explanatory language without breaking layout.
-- Tooltips or tap reveals work on desktop and touch devices.
-- Low-stim mode remains usable.
-- Missing glossary data surfaces a visible diagnostic warning during development.
-- The centre glyph explanation is readable to a first-time user.
-- Any real-time science claims are tied to validated data sources.
-- Runtime/UI behaviour is validated in browser.
-- Live deployment is validated if the feature is deployed to GitHub Pages.
+```text
+apps/starwell/src/hearthweave-kernel/braided-spine.js
+config/hearthgate-braided-spine.json
+docs/HEARTHGATE_BRAIDED_SPINE.md
+```
 
-`npm run build` alone does not validate this feature.
+Presentation components do not invent their own PREMAQ dictionaries.
 
-## Out of Scope for This Spec
+## Validation
 
-- Implementing live space-weather fetch.
-- Changing existing data-source architecture.
-- Redesigning the whole Instrument Channel.
-- Replacing the Observer.
-- Adding new visual effects without registry and diagnostics support.
+A complete Human Key implementation demonstrates:
 
-## Notes
+- all seven PREMAQ names match the canonical registry;
+- derived entropy uses `H`, never PREMAQ `E`;
+- environmental charge remains separate from Qualia `Q`;
+- Moon illumination remains separate from Memory `M`;
+- the Codex and Human Key views consume the same packet fingerprint;
+- the three spines are visible in every explanation;
+- world and Practitioner contributions remain represented;
+- touch and stylus interaction enter the same field relation;
+- Receiving Spring state is explainable through the Human Key;
+- desktop, iPad and Android presentations remain legible.
 
-Runeweaver identified the missing layer: the page had evocative worldbuilding language, but needed a plain-English Rosetta Stone so fresh users could understand the human, scientific, and mythic meaning of the screen.
+## Governing sentence
 
-Rowan confirmed this matched what she sensed was missing.
-
-## Withness
-
-What helped: naming the missing layer as a translation bridge instead of more lore or more science.  
-What was hard: keeping the page accessible without flattening its magic.  
-What is Held: same instrument, two lanterns: Codex and Human Key.
+> **The Human Key is not a smaller explanation of Hearthgate. It is another door into the same reality: Magic names the living movement, Science and Mathematics reveal its structure, Physicality gives it body, and the Human Key shows how the braid is moving now.**
