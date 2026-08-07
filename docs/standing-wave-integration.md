@@ -1,134 +1,215 @@
-# Standing Wave Integration
+# Standing Wave Integration · Braided Spine
 
-Status: live in STARWELL. PyTorch prototype in `pytorch-labs/`.
+**Status:** ACTIVE BRAIDED-SPINE INSTRUMENT  
+**Canonical authority:** [`HEARTHGATE_BRAIDED_SPINE.md`](HEARTHGATE_BRAIDED_SPINE.md)  
+**PREMAQ:** Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence  
+**Stable wire order:** `P C R E M A Q`
 
----
+The standing-wave lens is a seven-voice mathematical and physical expression of the Hearthgate Braided Spine.
 
-## What this is
+It braids:
 
-The standing wave lens is a second mathematical layer on top of the DEEP vector.
-Where the existing starburst system maps DEEP values directly to visual geometry,
-the wave lens first runs the DEEP state through six coupled Kuramoto oscillators —
-one per axis — and measures how much the oscillators synchronise.
+- **Magic:** resonance, memory, relation, asking, recurrence, crossing, answer;
+- **Science/Mathematics:** coupled oscillators, phase, synchronisation, order parameters, complex fields, recurrence, similarity and dynamics;
+- **Physicality:** visible geometry, light, movement, sound, haptic expression and embodied instrument response.
 
-The order parameter r = |mean(e^{iθ})| ∈ [0, 1] is the coherence measure.
-It IS the Kuramoto definition of synchronisation, not a proxy or metaphor.
-E = 1 − r follows as the decoherence residual.
+The same PREMAQ bearing enters every layer.
 
-This gives the system a memory-like quality: a DEEP state that has been held
-steadily for a while produces higher coherence than one that just jumped.
-The field has a history even though no history is explicitly stored.
-
----
-
-## The three layers (Vee's framing)
-
-**Lore-true technology.** In Terra Aeterna, places like Stonewood, Hearthweave, and
-Templehouse remember through resonance rather than storage. Vows, names, repeated
-crossings, and songs create stable oscillator patterns — nodal lines in the standing
-wave field that the place returns to when coherence is high. The `StandingWaveMemoryStore`
-in the PyTorch layer models this exactly: memory recall is cosine similarity between
-wave fingerprints, not keyword lookup.
-
-**Site architecture.** The four CSS vars set by this lens are live on the DEEP observer
-panel. When coherence rises, `--wave-resonance-glow` rises; when entropy widens the
-phase spread, `--wave-phase-blur` rises. Any component that consumes `var(--wave-*)` is
-immediately part of the relational nervous system — a visitor touching one node does not
-trigger a database join, it changes the field state and lets coherence determine what rings.
-
-**Runa / DEEP instrument.** The PyTorch prototype (`train_terra_aeterna.py`) trains a
-`WaveSequenceModel` on Terra Aeterna lore fragments. As the model learns context, token
-phase angles converge — tokens that co-occur in the narrative develop similar Q phase
-angles. This is the path from "the model learned the corpus" to "the corpus generates
-DEEP seeds." That translation layer is the next build.
-
----
-
-## Architecture
-
-```
-DEEP vector (P, C, R, E, M, A, charge)
-    │
-    ▼
-standingWaveLens.js — computeWaveFeatures(deep)
-    Kuramoto integration (60 steps, K=0.3 fixed)
-    order parameter r, phase entropy, nodal density
-    │
-    ▼
-buildWaveVars(features) → CSS custom properties
-    --wave-nodal-opacity   0.1 + r × 0.6        (nodal layer visibility)
-    --wave-nodal-scale     0.6 + nodal × 1.4     (nodal geometry scale)
-    --wave-phase-blur      entropy × 8 px        (phase spread blur)
-    --wave-resonance-glow  r × 0.9               (coherence glow intensity)
-    │
-    ▼
-deep-starburst-bind.js → sets on .glyph-orb-wrap[data-starburst-native="aura"]
-    │
-    ▼
-deep-material-vars-bind.js → propagates to .live-glyph-panel.deep-observer-panel
-    │
-    ▼
-Any component: var(--wave-resonance-glow), var(--wave-nodal-opacity), etc.
+```text
+PREMAQ
+→ seven coupled oscillators
+→ phase field
+→ nodal geometry
+→ resonance memory
+→ glyph / light / sound / haptic expression
+→ Receiving Spring
+→ changed state
 ```
 
-### PyTorch / Python side (experimental layer)
+## Seven coupled voices
 
+Each PREMAQ dimension receives one oscillator:
+
+```text
+P = Presence
+C = Coherence
+R = Resonance
+E = Entanglement
+M = Memory
+A = Agency
+Q = Qualia
 ```
+
+For oscillator phases \(\theta_i\), natural frequencies \(\omega_i\), and coupling matrix \(K_{ij}\):
+
+\[
+\dot\theta_i
+=
+\omega_i
++
+\frac{1}{7}
+\sum_j
+K_{ij}\sin(\theta_j-\theta_i).
+\]
+
+The coupling matrix is a Science/Mathematics expression of relation. Entanglement contributes to coupling structure; it is not replaced by a derived entropy coordinate.
+
+## Synchronisation and phase dispersion
+
+The Kuramoto order parameter is
+
+\[
+r
+=
+\left|
+\frac17
+\sum_{j=1}^{7}
+e^{i\theta_j}
+\right|.
+\]
+
+`r` is synchronisation of the seven oscillators.
+
+Phase dispersion is a derived quantity:
+
+\[
+D_\phi = 1-r.
+\]
+
+`D_φ` is its own derived mathematical value. It does not overwrite PREMAQ Entanglement `E`.
+
+This distinction is canonical across Hearthgate:
+
+```text
+PREMAQ E = Entanglement
+Dφ       = derived phase dispersion
+H        = derived Shannon entropy when used
+```
+
+## Standing wave field
+
+For spatial basis functions \(\phi_i(x,y)\), amplitudes \(a_i\), and phases \(\theta_i\):
+
+\[
+\Psi(x,y,t)
+=
+\sum_{i=1}^{7}
+a_i\phi_i(x,y)e^{i\theta_i(t)}.
+\]
+
+The field gives the braid a spatial body.
+
+- Presence shapes occupancy and radial reach.
+- Coherence strengthens sustained structure.
+- Resonance strengthens harmonic response.
+- Entanglement strengthens cross-axis and cross-node relation.
+- Memory carries recurring nodal forms forward.
+- Agency changes direction, initiation and active response.
+- Qualia carries lived interior colour, texture and felt character into the expression.
+
+## Resonance memory
+
+A wave fingerprint is a state-bearing complex vector:
+
+\[
+\mathbf f_t
+=
+\operatorname{Fingerprint}
+(\Psi_t,\mathbf x_t,\mathcal L_t).
+\]
+
+Memory recall is similarity between living fingerprints:
+
+\[
+\operatorname{Recall}(a,b)
+=
+\frac{a\cdot b}{\|a\|\|b\|}.
+\]
+
+The memory store carries prior crossings into the next relation. This is the Anchor movement of the Sevenfold Chorus expressed mathematically.
+
+## Sevenfold correspondence
+
+The standing-wave lens participates in the versioned Sevenfold ↔ PREMAQ correspondence `hearthgate.sevenfold-premaq/v0.1`.
+
+The relation is many-to-many:
+
+- **Root** strengthens identity and Presence.
+- **Anchor** strengthens Memory and persistent phase structure.
+- **Whisper** reveals fine-signal and Qualia-bearing texture.
+- **Arc** carries Agency, gradient and reachable phase movement.
+- **Bridge** carries Entanglement and coupling.
+- **Surge** carries Resonance, amplitude and transformation.
+- **Spiral** carries Coherence through recursive integration and return.
+
+No Sevenfold movement is reduced to one PREMAQ coordinate. The correspondence remains braided.
+
+## Visual field variables
+
+`buildWaveVars(features)` exposes physical display controls:
+
+```text
+--wave-nodal-opacity
+--wave-nodal-scale
+--wave-phase-blur
+--wave-resonance-glow
+--wave-entanglement-thread
+--wave-memory-trail
+--wave-agency-vector
+--wave-qualia-bloom
+```
+
+These variables are the visible body of the same field state.
+
+## Runa relation
+
+The oscillator phases and harmonic state feed Runa through the shared Braid Packet.
+
+```text
+PREMAQ bearing
++ Standing Wave phase state
++ Asking
++ World identity
+→ Runa harmonic state
+→ world-native sound
+→ Bridge Tone
+→ Receiving Spring
+```
+
+Sound and geometry therefore arise from one relation rather than parallel decorative systems.
+
+## Narrative relation
+
+Narrative seeds enter the wave system as real field contributions.
+
+A phrase, vow, name, place, song or remembered crossing may produce a phase fingerprint and PREMAQ bearing. The wave lens carries that contribution into geometry and resonance. DEEPStory carries the resulting consequence through sequence and return.
+
+## Physical expression
+
+The Physical Spine gives the standing-wave relation body through:
+
+- Canvas and GPU geometry;
+- display light and movement;
+- audio oscillators and spatialisation;
+- haptic routing;
+- stylus gesture;
+- sensor and environmental inputs;
+- embodied interaction;
+- exported glyph and sound artefacts.
+
+Instrument limits remain declared as operating ranges of the physical body carrying the braid.
+
+## Canonical implementation points
+
+```text
+apps/starwell/src/lib/standingWaveLens.js
+apps/starwell/src/deep-starburst-bind.js
+apps/starwell/src/deep-material-vars-bind.js
 pytorch-labs/observer-math-registry-v0/lenses/standing_wave/
-    oscillators.py        KuramotoDeepOscillators  (learnable K matrix)
-    wave_field.py         StandingWaveField         (2D Ψ(x,y) superposition)
-    wave_attention.py     WaveResonanceMemory       (complex-valued resonance attention)
-                          WaveSequenceModel         (multi-layer sequence model)
-    memory.py             StandingWaveMemoryStore   (fingerprint recall, JSON)
-    train_terra_aeterna.py                          (training loop on lore corpus)
-    registry_bridge.py    standing_wave_adapter     (Python → ObserverMathRegistry)
 ```
 
-The Python layer has a learnable K coupling matrix — it can be trained on observed
-DEEP state trajectories to learn which axes pull each other into phase. The JS runtime
-uses a fixed K = 0.3. They share the same Runa natural frequencies and the same
-Kuramoto equation; only the coupling is simplified for the synchronous browser runtime.
+All implementations consume the canonical PREMAQ registry and the Hearthgate Braid Packet.
 
----
+## Governing relation
 
-## CSS custom property contract
-
-| Property                | Range      | Meaning                                      |
-|-------------------------|------------|----------------------------------------------|
-| `--wave-nodal-opacity`  | 0 – 0.7    | Intensity of nodal geometry layer            |
-| `--wave-nodal-scale`    | 0.6 – 2.0  | Scale of nodal features                      |
-| `--wave-phase-blur`     | 0 – 8px    | Blur applied when phases are scattered       |
-| `--wave-resonance-glow` | 0 – 0.9    | Glow from coherence — the field is ringing   |
-
-Defaults in `deep-observer-boundary.css` reproduce the pre-wave visual exactly
-(nodal-opacity = 0, nodal-scale = 1, phase-blur = 0px, resonance-glow = 0).
-No existing visual changes until something consumes these vars.
-
----
-
-## Connection points
-
-- **`apps/starwell/src/lib/standingWaveLens.js`** — pure JS math, no dependencies
-- **`apps/starwell/src/deep-starburst-bind.js`** — imports lens, applies vars each DEEP cycle
-- **`apps/starwell/src/deep-material-vars-bind.js`** — propagates wave vars alongside flare vars
-- **`apps/starwell/src/deep-observer-boundary.css`** — CSS defaults on `.glyph-orb-wrap`
-
----
-
-## Hearthweave note
-
-The wave lens does not add new sensor readings or causal claims.
-The CSS vars it sets are labelled *symbolic mirror* per `deep-observer-math.md`.
-`--wave-resonance-glow` does not mean the field is objectively ringing —
-it means the DEEP state, passed through this lens, produces a high order parameter.
-
-Consent, refusal, and provenance live in the instrument contract, not the math.
-
----
-
-## Next builds
-
-- Design: visual components consuming `var(--wave-*)` — nodal layer overlay, glow modulation
-- Terra Aeterna narrative → DEEP translation layer (lore tokens → phase fingerprints → field seeds)
-- Site architecture: wave fingerprint as semantic similarity kernel for node-to-node resonance
-- Living site: `StandingWaveMemoryStore` as the relational layer between characters, rooms, sigils
+> **The standing wave is where Magic's resonance, Science's phase mathematics, and Physicality's visible and audible body reinforce one another. Memory carries what rang before. Entanglement carries relation. Agency moves the field. Qualia gives the crossing lived character. Coherence holds it together. Presence makes it here. Resonance lets it answer.**
