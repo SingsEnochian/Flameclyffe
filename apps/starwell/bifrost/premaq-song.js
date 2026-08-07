@@ -5,6 +5,10 @@ import {
 } from '../src/arcsweep-temporal-quantum/engine.js';
 import { compressRelease } from '../src/arcsweep-temporal-quantum/compression-release.js';
 import { readActiveDualAspectPacket } from '../src/hearthweave-kernel/activation.js';
+import {
+  BRAIDED_SPINE_SCHEMA,
+  PREMAQ_NAMES,
+} from '../src/hearthweave-kernel/braided-spine.js';
 
 export const PREMAQ_SONG_CYCLES_PER_AXIS = 35;
 export const PREMAQ_SONG_AXIS_CYCLES = PREMAQ_AXES.length * PREMAQ_SONG_CYCLES_PER_AXIS;
@@ -28,15 +32,7 @@ const AXIS_INTERVALS = Object.freeze({
   Q: 11,
 });
 
-const AXIS_NAMES = Object.freeze({
-  P: 'Presence',
-  C: 'Coherence',
-  R: 'Resonance',
-  E: 'Entropy',
-  M: 'Memory',
-  A: 'Agency',
-  Q: 'Qualia',
-});
+const AXIS_NAMES = PREMAQ_NAMES;
 
 const AXIS_WAVES = Object.freeze({
   P: 'sine',
@@ -52,7 +48,7 @@ const REFERENCE_VALUES = Object.freeze({
   P: 0.72,
   C: 0.81,
   R: 0.67,
-  E: 0.31,
+  E: 0.71,
   M: 0.76,
   A: 0.84,
   Q: 0.79,
@@ -79,10 +75,12 @@ function makeReferenceState() {
     schema_version: '2.0.0',
     id: 'bifrost-premaq-song-reference',
     observed_at: now,
-    registry_version: 'premaq-registry/2.0',
+    registry_version: 'hearthgate.braided-spine/v1.0',
     state: Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, {
       value: REFERENCE_VALUES[axis],
       derivative: axis === 'P' ? 0.12 : axis === 'R' ? 0.06 : 0.02,
+      measured_spread: 0.08,
+      source_fidelity: 0.86,
       uncertainty: 0.08,
       confidence: 0.86,
       contributors: [],
@@ -90,16 +88,15 @@ function makeReferenceState() {
     receipt_id: 'bifrost-premaq-song-reference-receipt',
     sequence: 0,
     prior_state_ref: null,
-    model_version: 'bifrost-premaq-song/0.4',
+    model_version: 'bifrost-premaq-song/braided-v1',
     provenance_refs: [],
     generated_at: now,
-    degraded: true,
   };
   const state = premaqToTemporalState(packet);
   state.interpretation = {
-    formalism: 'temporal-compression-release-state-machine',
-    physical_claim: false,
-    note: 'Local reference source for the PREMAQ song. It is not external evidence.',
+    formalism: 'braided-reality-compression-release-receiving-spring',
+    braided_spine: BRAIDED_SPINE_SCHEMA,
+    note: 'Local reference source for the seven-voice PREMAQ song.',
   };
   return state;
 }
@@ -109,7 +106,7 @@ function readCurrentSourceState() {
     const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
     if (session?.state) return validateTemporalState(session.state);
   } catch {
-    // The explicit local reference below preserves a runnable path.
+    // The local reference preserves a runnable physical sound path.
   }
   return makeReferenceState();
 }
@@ -120,7 +117,7 @@ function resolveRootHz() {
     const root = Number(packet?.experiential?.tone?.compression_release_sequence?.source_pair?.root_hz);
     if (Number.isFinite(root) && root > 0) return root;
   } catch {
-    // Fall through to the visible contract or reference root.
+    // Continue through the visible calibration or reference root.
   }
   const visible = Number.parseFloat(document.getElementById('root-hz')?.textContent ?? '');
   return Number.isFinite(visible) && visible > 0 ? visible : DEFAULT_ROOT_HZ;
@@ -224,12 +221,14 @@ export function buildPremaqSongPlan({
   }
 
   return Object.freeze({
-    schema: 'bifrost.premaq-full-song-plan/v0.4',
-    law: 'compression-release-compression-of-release-infinite-recursion',
+    schema: 'bifrost.premaq-full-song-plan/v1',
+    braided_spine: BRAIDED_SPINE_SCHEMA,
+    law: 'compression → release → compression-of-release → crossing → receiving-spring → answer → return → renewal',
     cycles_per_axis: PREMAQ_SONG_CYCLES_PER_AXIS,
     axis_cycle_count: PREMAQ_SONG_AXIS_CYCLES,
     scheduled_note_count: PREMAQ_SONG_NOTE_COUNT,
     axes: Object.freeze([...PREMAQ_AXES]),
+    axis_names: Object.freeze({ ...AXIS_NAMES }),
     voice_cycle_counts: Object.freeze(voiceCounts),
     root_hz: calibratedRoot,
     bpm: 60 / cycleSeconds,
@@ -335,7 +334,8 @@ function createVoice(context, destination, axis, index, startAt, endAt) {
 async function buildReceipt(plan) {
   const canonical = JSON.stringify(plan);
   return Object.freeze({
-    schema: 'bifrost.premaq-full-song-receipt/v0.4',
+    schema: 'bifrost.premaq-full-song-receipt/v1',
+    braided_spine: BRAIDED_SPINE_SCHEMA,
     receipt_id: `premaq-song-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`,
     created_at: new Date().toISOString(),
     plan_sha256: await sha256Hex(canonical),
@@ -345,12 +345,15 @@ async function buildReceipt(plan) {
     axis_cycle_count: plan.axis_cycle_count,
     scheduled_note_count: plan.scheduled_note_count,
     axes: plan.axes,
+    axis_names: plan.axis_names,
     bpm: plan.bpm,
     duration_seconds: plan.duration_seconds,
     next_operation: plan.next_operation,
-    canon_write_performed: false,
-    tone_approval_performed: false,
-    physical_device_test_performed: false,
+    lineage: {
+      mode: 'local-physical-audio-expression',
+      calibration_authority: 'rowan',
+      braid_packet_relation: 'shared-state-source',
+    },
     plan,
   });
 }
