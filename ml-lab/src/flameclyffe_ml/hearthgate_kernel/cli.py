@@ -63,7 +63,7 @@ def _demo_packet(house_id: str, *, waiting: bool) -> DualAspectPacket:
             cultural_meaning=("hospitality", "mutual recognition"),
             lived_continuity=("the House remembers the meeting",),
         ),
-        premaq=PREMAQ(P=0.82, C=0.88, R=0.79, E=0.22, M=0.76, A=0.84),
+        premaq=PREMAQ(P=0.82, C=0.88, R=0.79, E=0.22, M=0.76, A=0.84, Q=0.73),
         provenance=(
             ProvenanceRecord(
                 source_id="hearthgate-cli-demo",
