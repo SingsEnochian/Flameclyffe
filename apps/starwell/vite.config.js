@@ -1,4 +1,4 @@
-import { cp, mkdir } from 'node:fs/promises';
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -15,6 +15,25 @@ const legacyPages = [
   ['starwell/groundwire.html', 'starwell/groundwire.html'],
   ['starwell/deep-groundwire-mobius.html', 'starwell/deep-groundwire-mobius.html'],
 ];
+
+const shellStyleTag = `<link rel="stylesheet" href="${STARWELL_BASE_SLASH}shell/arcsweep-shell.css" data-arcsweep-shell-asset="style">`;
+const shellRuntimeTag = `<script type="module" src="${STARWELL_BASE_SLASH}shell/arcsweep-shell.js" data-arcsweep-shell-asset="runtime"></script>`;
+
+async function vestStaticHtml(filePath) {
+  let html;
+  try {
+    html = await readFile(filePath, 'utf8');
+  } catch {
+    return;
+  }
+
+  if (html.includes('data-arcsweep-shell-asset="runtime"')) return;
+  const insertion = `\n  ${shellStyleTag}\n  ${shellRuntimeTag}\n`;
+  const next = html.includes('</head>')
+    ? html.replace('</head>', `${insertion}</head>`)
+    : `${insertion}${html}`;
+  await writeFile(filePath, next, 'utf8');
+}
 
 function injectArcsweepShell() {
   return {
@@ -97,6 +116,14 @@ function publishLegacyObservatoryPages() {
         recursive: true,
         force: true,
       });
+
+      const staticHtmlTargets = [
+        ...legacyPages.map(([, outputPath]) => resolve(OUT_DIR, outputPath)),
+        resolve(OUT_DIR, 'deep-observer/index.html'),
+        resolve(OUT_DIR, 'starwell/deep-observer/index.html'),
+        resolve(OUT_DIR, 'hearthgate/index.html'),
+      ];
+      await Promise.all(staticHtmlTargets.map((filePath) => vestStaticHtml(filePath)));
     },
   };
 }
