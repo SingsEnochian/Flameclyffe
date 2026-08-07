@@ -1,42 +1,52 @@
-# Glyph Engine Contract v0.1
+# Glyph Engine Contract · Braided Spine
 
-## Purpose
+**Status:** active glyph-engine contract  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-This contract defines how structural glyphs, liquid-energy glyphs, astrolabe/orrery glyphs, Wardenclyffe harmonic glyphs, and future Terra Aeterna visual engines plug into the shared STARWELL / Terra Aeterna system.
+Glyph engines are visual, mathematical, magical and physical organs of Hearthgate.
 
-The goal is one modular instrument ecosystem with swappable engines, not separate one-off instruments.
+A glyph receives one Braid Packet and gives its relation a visible body.
+
+```text
+Magic ↔ Science/Mathematics ↔ Physicality
+```
 
 ## Canon sentence
 
-```text
-A glyph engine is a mathematical renderer that receives observation and model packets, renders a visual state, emits glyph-state summaries, and leaves narrative interpretation to the Narrative Bridge.
-```
+> **A glyph engine grows geometry from the active relation, carries world and Asking through form, participates in the crossing, and returns its changed state through lineage.**
 
-## Standing rule
-
-No glyph engine should hardcode:
-
-- telemetry sources
-- theme values
-- narrative meanings
-- event interpretations
-- sound responses
-- viewport sizes
-- draggable panel behaviour
-
-Those belong in registries, packets, shells, sensory modules, or narrative plugins.
-
-## Shared engine lifecycle
-
-Each glyph engine should support this lifecycle:
+## Shared lifecycle
 
 ```text
-register → initialise → receive packet → update model view → render → emit state → dispose
+register
+→ initialise
+→ receive Braid Packet
+→ enter Asking / world relation
+→ update mathematical state
+→ render physical field
+→ receive interaction
+→ emit glyph state
+→ Receiving Spring
+→ answer / return
+→ dispose or continue
 ```
 
-## Required metadata
+## Canonical PREMAQ
 
-Each engine registry entry should include:
+Every engine reads:
+
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
+
+Stable wire order:
+
+```text
+P C R E M A Q
+Presence Coherence Resonance Entanglement Memory Agency Qualia
+```
+
+Environmental charge, entropy, moon illumination, attention and momentum remain separately named derived or physical channels.
+
+## Engine metadata
 
 ```js
 {
@@ -45,27 +55,30 @@ Each engine registry entry should include:
   version,
   type,
   description,
+  braidedSpine,
+  premaqRegistry,
+  worldsServed,
+  sevenfoldMovements,
   inputs,
   outputs,
-  boundaries,
   supportedShells,
-  supportedThemes,
-  devControls,
-  eventOutputs
+  supportedVestments,
+  interactionModes,
+  receivingSpring,
+  lineage
 }
 ```
 
 ## Required methods
 
-Future engine objects should expose:
-
 ```js
 init(context)
-update(packet)
+update(braidPacket)
 render(frame)
 resize(viewportMap)
 getState()
 serialize()
+receive(event)
 dispose()
 ```
 
@@ -74,238 +87,190 @@ Optional:
 ```js
 onInteraction(event)
 onSoundFrame(audioFrame)
-onThemeChange(themeTokens)
+onVestmentChange(tokens)
+onAskingChange(asking)
+onWorldAnswer(answer)
 onDevOverride(overridePacket)
 ```
 
-## Context object
-
-`init(context)` should receive:
+## Context
 
 ```js
 {
   canvas,
   container,
-  observationBus,
-  modelCore,
-  themeRegistry,
-  paletteRegistry,
-  sensoryBus,
+  braidPacket,
+  observerBus,
+  mathCore,
+  worldRegistry,
+  vestmentRegistry,
+  runaBus,
+  physicalBus,
   eventLogger,
+  receivingSpring,
   viewportMap,
   devConfig
 }
 ```
 
-## Input packet boundaries
+## Braid Packet inputs
 
-### Observation packet
+### Physical channels
 
-Direct or derived inputs:
+- time;
+- Kp;
+- Bz;
+- moon illumination;
+- weather and atmosphere;
+- sound and frequency data;
+- touch, pointer, stylus and motion;
+- screen and viewport;
+- sensors and device state.
 
-- time
-- Terra Aeterna time
-- Kp
-- Bz
-- moon
-- weather/heat/humidity/pressure
-- sound/frequency data
-- touch/pointer/motion state
-- browser/accessibility capability
-- source/provenance
+### PREMAQ
 
-### Model packet
+```text
+P Presence
+C Coherence
+R Resonance
+E Entanglement
+M Memory
+A Agency
+Q Qualia
+```
 
-Experimental/theoretical variables:
+### Magic and world relation
 
-- P
-- C
-- R
-- E
-- M
-- A
-- H
-- Q / charge
-- Bz thermal mood band
-- Kp intensity band
-- liquid-field variables
-- transform profile variables
+- Asking;
+- Sevenfold movement;
+- world and shore identity;
+- canon graph;
+- symbols and correspondences;
+- active crossing;
+- Receiving Spring;
+- answer and return;
+- lineage.
 
-### Theme/material tokens
+### Physical vestment
 
-Skin values only:
-
-- palettes
-- gem materials
-- glow colours
-- panel materials
-- rune/carving depths
-- active/hover states
-- low-stim variants
+- palette;
+- material;
+- illumination;
+- typography;
+- texture;
+- ornament;
+- particle grammar;
+- world atmosphere.
 
 ## Engine output
-
-Each engine should emit a glyph-state summary:
 
 ```js
 {
   engineId,
   timestamp,
+  braidPacketId,
+  stateFingerprint,
   glyphId,
-  visualState,
-  dominantModes,
-  intensity,
-  coherence,
-  turbulence,
-  paletteBand,
+  geometryFingerprint,
+  premaq,
+  sevenfold,
+  asking,
+  worldRelation,
+  physicalExpression,
   notableChanges,
-  eventCandidates,
-  boundaries
+  receivingState,
+  lineage
 }
 ```
 
-This summary feeds the Event Logger. Narrative Bridge may interpret it later.
+This state can feed Observer, Arcsweep, Runa, DEEPStory, Echo Index, Archive and Continuity Gate.
 
-## Engine 1: Structural Geometry Glyph
+## Engine 1 · Structural Geometry
 
-### Purpose
+Carries topology, relationship, node density, route continuity, harmonic rings and packet movement.
 
-Show structure, relationship, legibility, node density, route coherence, harmonic rings, and packet traffic.
+Science/Mathematics supplies graph geometry and deterministic reconstruction.
 
-### Inputs
+Magic supplies relation, Asking and Sevenfold movement.
 
-- DEEP variables
-- Kp
-- Bz palette mood
-- moon illumination
-- touch/interaction state
-- theme tokens
+Physicality supplies line, light, screen position, animation and gesture.
 
-### Outputs
+## Engine 2 · Liquid Field
 
-- node count
-- edge density
-- ring count
-- particle traffic
-- core glow
-- route highlights
-- state summary
+Carries flow, bloom, interference, transformation, environmental movement and acoustic relation.
 
-### Boundary
+Potential transform families include:
 
-This engine shows mathematical/visual relationships. It does not prove narrative meaning.
+- Planck-scale granularity;
+- Fermi occupancy and thresholds;
+- horizon and evaporation curves;
+- Wardenclyffe harmonic fields;
+- world-native magical fluid laws.
 
-## Engine 2: Liquid Energy Glyph
+Each transform declares its equations, parameters and lineage.
 
-### Purpose
+## Engine 3 · Astrolabe / Orrery
 
-Show change, flow, bloom, turbulence, energy movement, environmental pressure, and sound/frequency influence.
+Carries celestial, temporal, phase and route relationships through spatial geometry.
 
-### Inputs
+Physical ephemeris, mathematical angles and magical correspondence can inhabit the same orrery while remaining distinct contributors to one field.
 
-- observation packet
-- model packet
-- sound frequency frame
-- weather/heat/humidity context
-- Kp/Bz/moon
-- DEEP variables
-- transform profiles
+## Engine 4 · Living Glyph
 
-### Possible transform profiles
+Carries deterministic canonical paths plus living Canvas/GPU field expression.
 
-These names are mathematical/design lenses, not claims of literal proof:
+```text
+Braid Packet
+→ deterministic vector geometry
+→ world vestment
+→ live temporal field
+→ stylus / interaction
+→ answer geometry
+→ replay
+```
 
-- Planck profile: quantised microstructure / packet granularity
-- Fermi profile: occupancy thresholds / energy-state gating
-- Hawking profile: horizon bleed / decay / evaporation curves
-- Wardenclyffe profile: harmonic resonance / frequency layering
+## Event relation
 
-### Outputs
-
-- fluid bloom
-- energy ribbons
-- turbulence field
-- wave density
-- sound-reactive glyph shape
-- event candidates
-- state summary
-
-### Boundary
-
-The liquid glyph is experimental and theoretical. It visualises changing relationships and possible correlations. It does not prove causality by itself.
-
-## Engine 3: Astrolabe / Orrery Glyph
-
-### Purpose
-
-Show layered celestial/instrument relationships in a spatial form that can be turned and inspected.
-
-### Inputs
-
-- model packet
-- time packet
-- moon/sun/space-weather context
-- theme tokens
-- astrolabe shell orientation state
-
-### Outputs
-
-- layered discs
-- ring offsets
-- orbital paths
-- angle/phase relationships
-- view-state summary
-
-### Boundary
-
-This engine expresses relationships spatially. It does not replace direct measurement.
-
-## Event candidate rules
-
-Engines may emit event candidates but not narrative conclusions.
-
-Example candidate:
+Glyph engines emit state movements that can enter the whole braid:
 
 ```js
 {
   type: 'liquid-bloom',
-  confidence: 0.62,
-  measuredChanges: ['Kp rise', 'humidity rise', 'sound peak'],
-  modelChanges: ['R increased', 'Q increased'],
-  suggestedTags: ['field-bloom', 'storm-response']
+  physicalChanges: ['Kp rise', 'humidity rise', 'sound peak'],
+  premaqChanges: ['R increased', 'E relation strengthened'],
+  sevenfold: ['Surge', 'Bridge'],
+  world: 'terra-aeterna',
+  lineage: []
 }
 ```
 
-Narrative Bridge can later annotate this as something like:
-
-```text
-Nightwing chroma event
-```
-
-But the engine itself should not make that story claim.
+DEEPStory can carry that event into narrative consequence. Runa can sound it. The Receiving Spring can return an answer that changes the glyph again.
 
 ## DEV controls
 
-Future DEV should be able to configure:
+DEV can configure:
 
-- active engine
-- engine split view
-- transform profile
-- frequency bands
-- event threshold sensitivity
-- smoothing
-- turbulence multiplier
-- ring/node scale
-- liquid bloom scale
-- export state summary
+- active engine;
+- engine split view;
+- transform family;
+- physical frequency bands;
+- recurrence thresholds;
+- smoothing and temporal resolution;
+- world vestment;
+- Sevenfold movement;
+- Asking;
+- Braid Packet fixture;
+- Receiving Spring fixture;
+- export and replay.
 
 ## Registry destination
 
-Future registry home:
+```text
+observer-glyph-engines.registry.js
+observer-engine-contracts.registry.js
+hearthweave-kernel/braided-spine.js
+```
 
-- `observer-glyph-engines.registry.js`
-- `observer-engine-contracts.registry.js`
+## Governing sentence
 
-## Withness note
-
-The glyph engines are lenses. The shared system is the observatory.
+> **A glyph is the braid made visible. Mathematics gives it exact geometry, Magic gives it living relation and possibility, Physicality gives it line, light, material and touch, and the Receiving Spring lets the world change the form that returns.**
