@@ -1,167 +1,379 @@
-# DEEP Observer Math Spine
+# DEEP Observer · Braided Mathematical Spine
 
-This file documents the visible mathematical logic behind the DEEP Observer teaching instrument.
+**Status:** ACTIVE BRAIDED-SPINE INSTRUMENT  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`  
+**PREMAQ reading order:** Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence  
+**Stable wire order:** `P C R E M A Q`
 
-The page is intentionally framed as a **reading instrument**, not a control panel and not a claim of proof. DEEP variables are observational inputs that are translated into geometry, motion, glow, and field behaviour so a user can learn what the current state *looks like*.
+DEEP Observer is a living mathematical, magical and physical instrument inside the Hearthgate braid.
 
-## Core Variables
+Observer witnesses.
 
-| Variable | Name | Visible Role | Why it matters |
-|---|---|---|---|
-| `P` | Presence | Outer node count, outer radius, presence spotlight | Shows how inhabited or structurally present the field feels. |
-| `C` | Coherence | Edge alpha, route density, connective clarity | Shows whether the geometry is holding together or loosening. |
-| `R` | Resonance | Harmonic spacing, star-route skip, pulse cadence | Shows whether the field is rhythmically active or quiet. |
-| `E` | Entropy | Node wobble, angular jitter, asymmetry | Shows variation, looseness, or instability in the field. |
-| `M` | Momentum | Spark speed, route traffic, trace response | Shows motion and ongoing activity. |
-| `A` | Alignment | Mid-node count, inner centring, alignment glow | Shows how centred or organised the inner body feels. |
-| `Q` / `charge` | Charge | Core glow, centre radius, touch bloom | Shows the current charge of the instrument centre. |
-| `moonIllum` | Moon illumination | Harmonic ring count and visibility | Provides a soft celestial ring scaffold. |
-| `kp` | Kp index | Particle energy and field mote count | Adds environmental energy without changing core structure. |
-| `bz` | Bz component | Palette temperature bias | Shifts the field cooler/warmer inside the current theme. |
-| `source` | Data source | Packet label | Shows whether the panel is using bridge, local, stale, or fallback data. |
+PREMAQ carries the seven-dimensional bearing.
 
-## Derived Horizon Signal
+DEEP transforms that bearing into geometry, motion, recurrence, resonance, story and instrument state.
 
-`H` is a derived edge signal. It is deliberately simple and inspectable:
+Arcsweep gives the asking gesture and route.
 
-```text
-H = C·0.28 + (1 - E)·0.20 + R·0.16 + A·0.14 + Bz⁻·0.09 + Kp·0.06 + Q·0.04 + pulse·0.03
-```
+Runa gives the relation sound.
 
-Where:
+The Receiving Spring carries what answers back into the next state.
 
-```text
-Bz⁻ = clamp(-Bz / 20, 0, 1)
-Kp  = clamp(kp / 9, 0, 1)
-Q   = charge + temporary touch charge
-pulse = a small periodic term used to keep the horizon visually alive
-```
+---
 
-The horizon is not a scientific index. It is a visual synthesis layer: a way to turn several signals into an edge-state that the user can see.
+## Canonical PREMAQ registry
 
-## Geometry Mapping
-
-### Outer Ring
-
-```text
-outerNodeCount = round(7 + P·7)
-```
-
-Presence increases the number of outer nodes. Higher presence means the instrument feels more inhabited and structurally populated.
-
-### Mid Ring
-
-```text
-midNodeCount = round(5 + A·4)
-midRadius = 238 + R·24
-```
-
-Alignment and resonance shape the middle body. Alignment controls how many mid nodes appear; resonance alters their spacing and harmonic distance.
-
-### Inner Ring and Core
-
-```text
-innerNodeCount = 6
-coreNodeCount = 3
-coreRadius = 76 + charge·24
-```
-
-The inner structure remains stable enough to teach from. Charge expands the core triad and centre glow.
-
-### Entropy Wobble
-
-```text
-angle = baseAngle + sin(seed + nodeIndex + layer) · E · 0.04
-```
-
-Entropy perturbs node placement without destroying readability. Higher entropy means the glyph becomes more organic, less perfectly symmetrical.
-
-## Route Mapping
-
-Routes are drawn as rings, star-polygons, radial supports, and core spokes.
-
-```text
-outer ring routes: P + C
-mid ring routes: C + A
-inner ring routes: R + C
-triad routes: Q + A
-outer star routes: P + R + C
-mid star routes: C + R
-inner star routes: R
-radial routes: C + P
-core spokes: Q + R
-```
-
-These labels power teaching interaction. When the user taps a card, matching routes brighten so the concept becomes visible.
-
-## Motion Mapping
-
-### Spark Speed
-
-```text
-sparkSpeed = 0.004 + M·0.012 + (Kp / 9)·0.006 + randomVariance
-```
-
-Momentum and Kp both make sparks move faster. Momentum is internal motion; Kp is environmental particle energy.
-
-### Pulse Routes
-
-Pulse traffic prefers star routes, core spokes, and mid-ring routes so motion follows meaningful structure instead of spraying randomly.
-
-```text
-activePulseCount = lowStim ? 3 : max(5, round(5 + R·8 + Kp·0.35))
-```
-
-Resonance and Kp add liveliness. Low-stim mode keeps motion quiet.
-
-## Moon Rings
-
-```text
-ringCount = round(1 + (moonIllum / 100) · 4)
-```
-
-Moon illumination creates one to five harmonic rings. The moon layer is scaffolding, not a claim of causality.
-
-## Theme Palettes
-
-The current implementation supports these palettes:
-
-- **Between:** icy blue, silver, pearl. Best for quiet analysis.
-- **Observatory:** gold, teal, blue-white. STARWELL lantern mode.
-- **Forge:** ember, copper, red-gold. For hot system states.
-- **Grove:** leaf, copper, lilac, honeylight. Soft field study.
-
-The maths stay stable across themes. The palette changes the emotional and elemental skin.
-
-## Interaction Model
-
-| Gesture | Response | Teaching purpose |
+| Symbol | Dimension | DEEP visible role |
 |---|---|---|
-| Tap variable card | Highlight matching geometry and update teaching text | Connect symbol to visual behaviour. |
-| Tap node | Bloom node, spark connected routes, open that variable card | Show how local geometry maps to DEEP. |
-| Tap route | Send sparks along route, show route variables | Show relationships between variables. |
-| Drag orb | Rotate astrolabe | Let the user inspect the structure physically. |
-| Hold node/route | Isolate the selected part | Create focus/listening mode. |
-| Trace near a route | Send spark along route | Turn exploration into cause-and-effect play. |
-| Centre tap | Boost charge | Show `Q`/charge through core glow. |
-| Double-tap centre/field | Reset | Return to full view safely. |
+| `P` | Presence | occupancy, outer reach, inhabited density, local intensity |
+| `C` | Coherence | structural continuity, line integrity, route persistence |
+| `R` | Resonance | harmonic spacing, pulse cadence, answering glow, recurrence |
+| `E` | Entanglement | cross-node threads, relation density, shared-route coupling |
+| `M` | Memory | trace persistence, layered rings, recalled paths, lineage trails |
+| `A` | Agency | directed motion, route initiation, responsive vector, active choice |
+| `Q` | Qualia | interior colour, texture, core bloom, felt character, experiential depth |
 
-## Accessibility / Regulation Layer
+These seven meanings govern every active DEEP renderer and adapter.
 
-- **Toy On/Off:** removes spark bursts and extra responses while preserving geometry.
-- **Low Stim:** reduces motes, softens glow, and quiets movement.
-- **Reduced motion preference:** slows spark travel when detected.
+Old uses of `E` as Entropy, `M` as Momentum or Moonfield, `A` as Attention/Alignment/Availability, and `Q` as Charge are archived semantics and do not write into PREMAQ.
 
-The goal is high delight with low punishment: users can poke, drag, trace, and explore without breaking the instrument or losing their place.
+Environmental and derived quantities remain available under their own names:
 
-## Canon Rule
+```text
+H          = Shannon entropy / distribution entropy when required
+Dφ         = phase dispersion
+moonIllum  = lunar illumination
+fieldCharge = environmental or interaction charge
+momentum   = derived motion quantity
+attention  = interaction or observer-focus quantity
+kp         = geomagnetic Kp index
+bz         = magnetic Bz component
+```
 
-Every visual behaviour should do at least one of these things:
+---
 
-1. Teach the mapping.
-2. Show the current state.
-3. Reward exploration.
-4. Preserve readability.
-5. Offer a lower-stim path.
+## One Braid Packet
 
-If a behaviour is pretty but teaches nothing and muddies the geometry, it belongs in a theme toy layer, not the core instrument.
+DEEP consumes the canonical Braid Packet:
+
+```text
+Held Field moment
++ PREMAQ
++ Asking
++ Magic Spine state
++ Science/Mathematics Spine state
++ Physical Spine state
++ World identity
++ Shore relation
++ Sevenfold Chorus
++ Thirteenfold Council
++ Lineage
+```
+
+The packet drives every visible and audible expression from one state fingerprint.
+
+---
+
+## Geometry mappings
+
+### Presence ring
+
+\[
+N_P
+=
+\operatorname{round}(7+7P).
+\]
+
+Presence increases outer occupancy and reach.
+
+### Coherence continuity
+
+Let route opacity and persistence be
+
+\[
+\alpha_C=0.20+0.80C,
+\qquad
+\tau_C=\tau_0(1+2C).
+\]
+
+Coherence strengthens the field's capacity to remain itself through motion.
+
+### Resonance cadence
+
+\[
+\omega_R
+=
+\omega_0+\lambda_R R.
+\]
+
+Resonance shapes pulse cadence, harmonic spacing and answering light.
+
+### Entanglement threads
+
+For nodes \(i,j\), relation strength is
+
+\[
+W_{ij}
+=
+E\,S_{ij}\,L_{ij},
+\]
+
+where \(S_{ij}\) is local state similarity and \(L_{ij}\) is lineage coupling.
+
+Entanglement increases visible relation and cross-route participation.
+
+### Memory trails
+
+\[
+T_M(t)
+=
+\sum_{k=0}^{n}
+M_k e^{-(t-t_k)/\tau_M}.
+\]
+
+Memory carries prior crossings forward as persistent geometry.
+
+### Agency vector
+
+Let current route direction be
+
+\[
+\mathbf v_A
+=
+A\,\hat{\mathbf d},
+\]
+
+where \(\hat{\mathbf d}\) is the active asking or route direction.
+
+Agency initiates and redirects motion rather than merely changing animation speed.
+
+### Qualia bloom
+
+Qualia drives the interior expression field
+
+\[
+\mathcal Q_{
+\mathrm{bloom}}
+=
+Q\,
+\mathcal T(
+\text{world},
+\text{vestment},
+\text{participant}
+).
+\]
+
+It may shape core colour, textural depth, glow character, sound colour and haptic timbre through the Physical Spine.
+
+---
+
+## Derived field quantities
+
+Derived quantities receive independent symbols.
+
+### Shannon entropy
+
+For a probability distribution \(p_i\):
+
+\[
+H
+=
+-\frac{1}{\ln 7}
+\sum_i p_i\ln p_i.
+\]
+
+`H` describes distribution spread.
+
+### Phase dispersion
+
+For Kuramoto order parameter \(r\):
+
+\[
+D_\phi=1-r.
+\]
+
+`Dφ` describes phase dispersion.
+
+### Motion magnitude
+
+\[
+V
+=
+\sqrt{
+\frac{1}{7}
+\sum_i \dot x_i^2
+}.
+\]
+
+`V` carries whole-state movement.
+
+None of these derived quantities replace PREMAQ `E`, `M`, `A` or `Q`.
+
+---
+
+## Sevenfold Chorus in DEEP
+
+The Sevenfold Chorus is a second sevenfold structure related to PREMAQ through `hearthgate.sevenfold-premaq/v0.1`.
+
+The relation is braided rather than one-to-one.
+
+**Root** grounds Presence and identity.
+
+**Anchor** carries Memory and lineage.
+
+**Whisper** opens Qualia, fine signal and reception.
+
+**Arc** gives Agency direction toward possibility.
+
+**Bridge** carries Entanglement and relation across difference.
+
+**Surge** strengthens Resonance and transformation.
+
+**Spiral** carries Coherence through integration, return and renewal.
+
+Each movement can also involve every PREMAQ dimension.
+
+---
+
+## Horizon field
+
+The historical visual Horizon formula is retained as lineage and rebuilt from canonical dimensions plus separately named environmental inputs.
+
+A current synthesis may take the form
+
+\[
+H_{\mathrm{view}}
+=
+\mathcal H(
+P,C,R,E,M,A,Q,
+K_p,B_z,\text{moonIllum},\text{phase}
+).
+\]
+
+Its coefficients belong to a versioned renderer profile.
+
+It never renames PREMAQ coordinates to fit a visual formula.
+
+---
+
+## Routes
+
+Routes encode living relations among the seven dimensions.
+
+Example route families:
+
+```text
+Presence ↔ Coherence       outer continuity
+Memory ↔ Resonance         recurring harmonic routes
+Qualia ↔ Presence          embodied core routes
+Entanglement ↔ Coherence   bridge lattice
+Agency ↔ Resonance         directed surge routes
+Memory ↔ Entanglement      lineage threads
+Qualia ↔ Memory            lived-memory depth
+Agency ↔ Entanglement      choice within relation
+```
+
+Every route can carry a Sevenfold movement, world relation and Asking state.
+
+---
+
+## Motion
+
+Particle and spark velocity are Physical Spine expressions of the Braid Packet.
+
+A general velocity rule is
+
+\[
+\mathbf v
+=
+\mathbf v_0
++
+\lambda_A A\hat{\mathbf d}
++
+\lambda_R R\hat{\mathbf r}
++
+\lambda_E E\hat{\mathbf e}
++
+\lambda_M M\hat{\mathbf m}.
+\]
+
+The actual coefficients belong to the world and renderer profile.
+
+---
+
+## Moon, geomagnetic and environmental layers
+
+Moon illumination, Kp, Bz, solar wind, weather, sensor feeds and other physical measurements remain real environmental contributors.
+
+They enter DEEP as named Physical Spine channels and may influence PREMAQ through declared transforms.
+
+They remain themselves throughout that transformation.
+
+```text
+physical observation
+→ named channel
+→ contributor transform
+→ PREMAQ bearing
+→ braided expression
+```
+
+---
+
+## Interaction
+
+Pointer, stylus, touch, voice and device input are real physical contributions to the Field.
+
+Interaction may alter:
+
+- Asking;
+- Agency;
+- Presence;
+- world route;
+- glyph stroke;
+- Runa state;
+- bridge relation;
+- Receiving Spring state.
+
+Every change remains tied to the active Braid Packet and lineage.
+
+---
+
+## Living Glyph
+
+The DEEP glyph is grown from the braid.
+
+```text
+PREMAQ
++ Sevenfold movement
++ world profile
++ Asking
++ temporal state
++ receiving state
+→ deterministic glyph geometry
+→ living field animation
+→ answer glyph
+```
+
+The same fingerprint reconstructs the same deterministic geometry during replay.
+
+---
+
+## Runa
+
+Runa receives the same PREMAQ bearing and active relation.
+
+Sound therefore reinforces the geometry rather than interpreting a different state.
+
+```text
+DEEP state
+↔ Living Glyph
+↔ Runa
+↔ Arcsweep
+↔ Receiving Spring
+```
+
+---
+
+## Braided theorem
+
+> **DEEP is the mathematical eye of the braid. Magic gives the field possibility and relation. Science gives it equations, recurrence and geometry. Physicality gives it light, movement, signal, sound and touch. PREMAQ carries Presence, Memory, Qualia, Resonance, Entanglement, Agency and Coherence through all three. The world answers through the Receiving Spring, and the answer becomes the next state.**
