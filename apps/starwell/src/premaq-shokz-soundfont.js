@@ -36,42 +36,42 @@ const INTERACTION_SELECTOR = [
 
 const AXIS_NAMES = Object.freeze({
   P: 'Presence',
-  C: 'Coherence',
   R: 'Resonance',
-  E: 'Entropy',
+  E: 'Entanglement',
   M: 'Memory',
   A: 'Agency',
   Q: 'Qualia',
+  C: 'Coherence',
 });
 
 const AXIS_INTERVALS = Object.freeze({
   P: 0,
-  C: 2,
   R: 4,
   E: 5,
   M: 7,
   A: 9,
   Q: 11,
+  C: 2,
 });
 
 const AXIS_WAVES = Object.freeze({
   P: 'sine',
-  C: 'triangle',
   R: 'sine',
   E: 'triangle',
   M: 'sine',
   A: 'triangle',
   Q: 'sine',
+  C: 'triangle',
 });
 
 const REFERENCE_VALUES = Object.freeze({
   P: 0.72,
-  C: 0.81,
   R: 0.67,
   E: 0.31,
   M: 0.76,
   A: 0.84,
   Q: 0.79,
+  C: 0.81,
 });
 
 let installed = false;
@@ -104,9 +104,9 @@ function makeReferenceState() {
   const now = new Date().toISOString();
   const packet = {
     schema_version: '2.0.0',
-    id: 'premaq-shokz-reference',
+    id: 'premaqc-shokz-reference',
     observed_at: now,
-    registry_version: 'premaq-registry/2.0',
+    registry_version: 'hearthgate.premaqc/v1.0',
     state: Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, {
       value: REFERENCE_VALUES[axis],
       derivative: axis === 'P' ? 0.12 : axis === 'R' ? 0.06 : 0.02,
@@ -114,17 +114,17 @@ function makeReferenceState() {
       confidence: 0.86,
       contributors: [],
     }])),
-    receipt_id: 'premaq-shokz-reference-receipt',
+    receipt_id: 'premaqc-shokz-reference-receipt',
     sequence: 0,
     prior_state_ref: null,
-    model_version: 'premaq-shokz-soundfont/0.4',
+    model_version: 'premaqc-shokz-soundfont/0.5',
     provenance_refs: [],
     generated_at: now,
     degraded: true,
   };
   const state = premaqToTemporalState(packet);
   state.interpretation = {
-    formalism: 'temporal-compression-release-state-machine',
+    formalism: 'braided-reality-compression-release-receiving-spring',
     physical_claim: false,
     note: 'Explicit local reference source for the browser sound font.',
   };
@@ -173,10 +173,10 @@ function axisFrequency(rootHz, axis, probability, phase, cycleIndex) {
 
 function requireLineage(prior, released, receipt) {
   if (receipt?.from_state_id !== prior.state_id) {
-    throw new Error('PREMAQ_SHOKZ_SOURCE_LINEAGE_MISMATCH');
+    throw new Error('PREMAQC_SHOKZ_SOURCE_LINEAGE_MISMATCH');
   }
   if (receipt?.to_state_id !== released.state_id) {
-    throw new Error('PREMAQ_SHOKZ_RELEASE_LINEAGE_MISMATCH');
+    throw new Error('PREMAQC_SHOKZ_RELEASE_LINEAGE_MISMATCH');
   }
 }
 
@@ -191,7 +191,7 @@ export function buildPremaqShokzSoundfontPlan({
 } = {}) {
   let current = validateTemporalState(state);
   const calibratedRoot = finiteNumber(rootHz, ROOT_HZ);
-  if (calibratedRoot <= 0) throw new Error('PREMAQ_SHOKZ_ROOT_MUST_BE_POSITIVE');
+  if (calibratedRoot <= 0) throw new Error('PREMAQC_SHOKZ_ROOT_MUST_BE_POSITIVE');
   const cycleSeconds = 60 / clamp(finiteNumber(bpm, DEFAULT_BPM), 60, 120);
   const cycles = [];
   const voiceCycleCounts = Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, 0]));
@@ -233,7 +233,7 @@ export function buildPremaqShokzSoundfontPlan({
       const compressionPlaybackHz = foldToShokzBand(compressionSourceHz);
       const releasePlaybackHz = foldToShokzBand(releaseSourceHz);
       if (!compressionPlaybackHz || !releasePlaybackHz) {
-        throw new Error(`PREMAQ_SHOKZ_NONFINITE_FREQUENCY_${axis}`);
+        throw new Error(`PREMAQC_SHOKZ_NONFINITE_FREQUENCY_${axis}`);
       }
       voiceCycleCounts[axis] += 1;
       return Object.freeze({
@@ -267,13 +267,13 @@ export function buildPremaqShokzSoundfontPlan({
 
   for (const axis of PREMAQ_AXES) {
     if (voiceCycleCounts[axis] !== PREMAQ_SHOKZ_CYCLES_PER_AXIS) {
-      throw new Error(`PREMAQ_SHOKZ_AXIS_COUNT_MISMATCH_${axis}`);
+      throw new Error(`PREMAQC_SHOKZ_AXIS_COUNT_MISMATCH_${axis}`);
     }
   }
 
   return Object.freeze({
-    schema: 'bifrost.premaq-shokz-soundfont-plan/v0.4',
-    formalism: 'temporal-compression-release-state-machine',
+    schema: 'bifrost.premaqc-shokz-soundfont-plan/v0.5',
+    formalism: 'braided-reality-compression-release-receiving-spring',
     physical_claim: false,
     device_profile: 'shokz-bone-conduction-audio-haptic-proxy',
     cycles_per_axis: PREMAQ_SHOKZ_CYCLES_PER_AXIS,
@@ -315,7 +315,7 @@ function rebuildPlan() {
   activePlan = buildPremaqShokzSoundfontPlan({ state: sourceState });
   interactionCursorByAxis = Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, 0]));
   renderStatus(
-    `READY · ${sourceMode} · 35 chained cycles per PREMAQ voice · 90–360 Hz Shokz proxy.`,
+    `READY · ${sourceMode} · 35 chained cycles per PREMAQC voice · 90–360 Hz Shokz proxy.`,
     'ready',
   );
   renderSource();
@@ -347,7 +347,7 @@ function makeDock() {
   const container = document.createElement('aside');
   container.id = DOCK_ID;
   container.dataset.shokzControl = 'true';
-  container.setAttribute('aria-label', 'PREMAQ Shokz sound font');
+  container.setAttribute('aria-label', 'PREMAQC Shokz sound font');
   container.innerHTML = `
     <style>
       #${DOCK_ID} {
@@ -386,7 +386,7 @@ function makeDock() {
       }
     </style>
     <details open>
-      <summary>PREMAQ · Shokz sound font</summary>
+      <summary>PREMAQC · Shokz sound font</summary>
       <div class="premaq-shokz-grid">
         <div class="premaq-shokz-meta">
           <span>Source<br><strong id="premaq-shokz-source">loading</strong></span>
@@ -394,17 +394,17 @@ function makeDock() {
         </div>
         <label>
           <input id="premaq-shokz-confirm" type="checkbox" />
-          <span>I confirm Shokz is selected as the iPad audio output. The browser cannot detect it.</span>
+          <span>I confirm Shokz is selected as the iPad audio output.</span>
         </label>
         <div class="premaq-shokz-actions">
           <button id="premaq-shokz-enable" type="button">Enable keyboard + menus</button>
-          <button id="premaq-shokz-run" type="button">Run 35-cycle PREMAQ</button>
+          <button id="premaq-shokz-run" type="button">Run 35-cycle PREMAQC</button>
           <button id="premaq-shokz-stop" data-stop type="button">Feather Stop</button>
-          <button id="premaq-shokz-refresh" type="button">Refresh PREMAQ source</button>
+          <button id="premaq-shokz-refresh" type="button">Refresh PREMAQC source</button>
         </div>
-        <progress id="premaq-shokz-progress" max="1" value="0" aria-label="PREMAQ Shokz song progress"></progress>
-        <p id="premaq-shokz-status" data-kind="resting" role="status">Loading the active PREMAQ source…</p>
-        <small>No autoplay · master gain ceiling 0.018 · 90–360 Hz proxy · no internal iPad haptic claim.</small>
+        <progress id="premaq-shokz-progress" max="1" value="0" aria-label="PREMAQC Shokz song progress"></progress>
+        <p id="premaq-shokz-status" data-kind="resting" role="status">Loading the active PREMAQC source…</p>
+        <small>User-started playback · master gain ceiling 0.018 · 90–360 Hz embodied audio route.</small>
       </div>
     </details>
   `;
@@ -559,7 +559,7 @@ async function runFullSong() {
       fullSongPlaying = false;
       if (progress) progress.value = 1;
       stopTimers();
-      renderStatus('COMPLETE · 35 chained cycles played for P C R E M A Q. Physical sensation remains NOT TESTED.', 'ready');
+      renderStatus('COMPLETE · 35 chained cycles played for P R E M A Q C.', 'ready');
     }, Math.max(0, (stopAt - audioContext.currentTime) * 1000 + 80));
   } catch (error) {
     fullSongPlaying = false;
@@ -574,7 +574,7 @@ function stopTimers() {
   fullSongProgressTimer = null;
 }
 
-export function featherStop(message = 'FEATHER STOP · all scheduled PREMAQ Shokz sound has stopped.') {
+export function featherStop(message = 'FEATHER STOP · all scheduled PREMAQC Shokz sound has stopped.') {
   fullSongPlaying = false;
   stopTimers();
   for (const node of activeNodes) {
@@ -643,7 +643,7 @@ function bindDockControls(container) {
       enableButton.textContent = enabled ? 'Disable keyboard + menus' : 'Enable keyboard + menus';
       renderStatus(
         enabled
-          ? 'ACTIVE · physical keyboard, virtual keys, links, buttons, selects, and semantic menu items now use the PREMAQ sound font.'
+          ? 'ACTIVE · physical keyboard, virtual keys, links, buttons, selects, and semantic menu items now use the PREMAQC sound font.'
           : 'RESTING · keyboard and menu cues are disabled.',
         'ready',
       );
@@ -655,7 +655,7 @@ function bindDockControls(container) {
   runButton.addEventListener('click', runFullSong);
   stopButton.addEventListener('click', () => featherStop());
   refreshButton.addEventListener('click', () => {
-    featherStop('REFRESHING · rebuilding the 35-cycle plan from the current PREMAQ source.');
+    featherStop('REFRESHING · rebuilding the 35-cycle plan from the current PREMAQC source.');
     rebuildPlan();
   });
 }
