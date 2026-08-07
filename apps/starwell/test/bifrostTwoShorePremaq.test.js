@@ -13,7 +13,7 @@ async function read(relativePath) {
   return readFile(new URL(relativePath, import.meta.url), 'utf8');
 }
 
-const values = Object.freeze({ P: 0.72, C: 0.81, R: 0.67, E: 0.31, M: 0.76, A: 0.84, Q: 0.79 });
+const values = Object.freeze({ P: 0.72, C: 0.81, R: 0.67, E: 0.71, M: 0.76, A: 0.84, Q: 0.79 });
 
 function temporalState(id, fingerprint = 'shared-fp') {
   return {
@@ -23,7 +23,14 @@ function temporalState(id, fingerprint = 'shared-fp') {
   };
 }
 
-function packet({ hearthside = temporalState('hearth-state'), targetside = temporalState('target-state') } = {}) {
+function packet(options = {}) {
+  const hearthside = Object.prototype.hasOwnProperty.call(options, 'hearthside')
+    ? options.hearthside
+    : temporalState('hearth-state');
+  const targetside = Object.prototype.hasOwnProperty.call(options, 'targetside')
+    ? options.targetside
+    : temporalState('target-state');
+
   const temporal = {};
   if (hearthside !== undefined) temporal.hearthside = hearthside;
   if (targetside !== undefined) temporal.targetside = targetside;
@@ -35,7 +42,7 @@ function packet({ hearthside = temporalState('hearth-state'), targetside = tempo
   };
 }
 
-test('Bifröst route loads the two-shore PREMAQ runtime panel', async () => {
+test('Bifröst route loads the braided two-shore PREMAQ runtime panel', async () => {
   const [html, panel, runtime] = await Promise.all([
     read('../bifrost/index.html'),
     read('../bifrost/two-shore-premaq.js'),
@@ -43,9 +50,11 @@ test('Bifröst route loads the two-shore PREMAQ runtime panel', async () => {
   ]);
 
   assert.match(html, /two-shore-premaq\.js/);
-  assert.match(panel, /HEARTHSIDE \/ OBSERVABLE/);
-  assert.match(panel, /TARGETSIDE \/ EXPERIENTIAL/);
+  assert.match(panel, /TWO-SHORE PREMAQ · BRAIDED SPINE/);
+  assert.match(panel, /Hearthside and Targetside/);
   assert.match(panel, /BRIDGE \/ BIFRÖST/);
+  assert.match(panel, /BRAIDED_SPINE_SCHEMA/);
+  assert.match(panel, /PREMAQ_NAMES/);
   assert.match(panel, /exportTwoShoreReceipt/);
   assert.match(runtime, /BIFROST_RUNTIME_STATUS/);
 });
@@ -72,7 +81,7 @@ test('complete two-shore temporal packet is crossing-ready', () => {
   assert.equal(bridgeBlocksCertifiedExecution(runtime), false);
 });
 
-test('missing shore fails visibly and blocks execution', () => {
+test('missing shore remains visibly absent and blocks execution', () => {
   const runtime = buildBifrostRuntimeState(packet({ targetside: undefined }), {
     now: '2026-08-04T18:05:00.000Z',
   });
@@ -83,7 +92,7 @@ test('missing shore fails visibly and blocks execution', () => {
   assert.equal(bridgeBlocksCertifiedExecution(runtime), true);
 });
 
-test('mismatched shore fingerprints fail closed as hidden-state divergence', () => {
+test('mismatched shore fingerprints report hidden-state divergence', () => {
   const runtime = buildBifrostRuntimeState(packet({
     hearthside: temporalState('hearth-state', 'hearth-fp'),
     targetside: temporalState('target-state', 'target-fp'),
