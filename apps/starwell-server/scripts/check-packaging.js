@@ -101,14 +101,22 @@ if (exists(bifrostManifestPath)) {
     if (manifest.route !== '/starwell/arcsweep-continuity/' || manifest.entrypoint !== 'arcsweep-continuity/index.html') {
       errors.push('Bifröst Arcsweep manifest has an invalid packaged route or entrypoint.');
     }
-    if (manifest.engine?.formalism !== 'temporal-compression-release-state-machine') {
-      errors.push('Bifröst Arcsweep must execute the temporal compression-release formalism.');
+    if (manifest.engine?.formalism !== 'braided-reality-compression-release-receiving-spring') {
+      errors.push('Bifröst Arcsweep must execute the canonical Braided Spine formalism.');
     }
-    if (manifest.engine?.physicalClaim !== false) {
-      errors.push('Bifröst Arcsweep must preserve the physical-claim boundary.');
+    if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.0') {
+      errors.push('Bifröst Arcsweep must bind the canonical braided-spine machine contract.');
+    }
+    const axes = manifest.spineContract?.premaqWireOrder ?? [];
+    if (JSON.stringify(axes) !== JSON.stringify(['P', 'C', 'R', 'E', 'M', 'A', 'Q'])) {
+      errors.push('Bifröst Arcsweep must preserve the seven-axis PREMAQ wire order.');
     }
     for (const capability of [
-      'premaq-v2-ingest',
+      'braided-spine-v1',
+      'magic-science-physical-mutual-reinforcement',
+      'premaq-seven-dimensional-living-bearing',
+      'receiving-spring',
+      'answer-return-renewal',
       'compression-release-cycles',
       'compression-of-release-recursion',
       'world-specific-tone-sequences',
@@ -119,20 +127,23 @@ if (exists(bifrostManifestPath)) {
         errors.push(`Bifröst Arcsweep manifest is missing capability: ${capability}`);
       }
     }
-    if (manifest.authorityContract?.hearthside !== 'evidence-grounded-observational') {
-      errors.push('Bifröst Arcsweep must preserve Hearthside evidence authority.');
+    if (manifest.relationContract?.hearthside !== 'real-participating-shore') {
+      errors.push('Bifröst Arcsweep must carry Hearthside as a real participating shore.');
     }
-    if (manifest.authorityContract?.targetside !== 'canon-grounded-projected') {
-      errors.push('Bifröst Arcsweep must preserve Targetside projection authority.');
+    if (manifest.relationContract?.targetside !== 'real-participating-shore') {
+      errors.push('Bifröst Arcsweep must carry Targetside as a real participating shore.');
     }
-    if (manifest.authorityContract?.collapseExists !== false) {
-      errors.push('Bifröst Arcsweep must declare collapse nonexistent.');
-    }
-    if (manifest.authorityContract?.releaseFeedsNextCompression !== true) {
+    if (manifest.relationContract?.releaseFeedsNextCompression !== true) {
       errors.push('Bifröst Arcsweep must feed every release into the next compression.');
     }
-    if (manifest.authorityContract?.toneApproval !== 'rowan-human-calibration-owner') {
-      errors.push('Bifröst Arcsweep must preserve Rowan tone-approval authority.');
+    if (manifest.relationContract?.receivingSpringFeedsAnswer !== true) {
+      errors.push('Bifröst Arcsweep must feed the Receiving Spring into answer.');
+    }
+    if (manifest.relationContract?.answerFeedsReturn !== true || manifest.relationContract?.returnFeedsRenewal !== true) {
+      errors.push('Bifröst Arcsweep must carry answer through return into renewal.');
+    }
+    if (manifest.relationContract?.toneApproval !== 'rowan-calibration-owner') {
+      errors.push('Bifröst Arcsweep must preserve Rowan tone-calibration authority.');
     }
     if (manifest.installContract?.verifySomaticRoute !== 'world-tone-approval/index.html') {
       errors.push('Bifröst Arcsweep must package the somatic approval route.');
@@ -226,19 +237,6 @@ if (!pkg.build?.artifactName?.includes('${version}') || !pkg.build?.artifactName
   errors.push('build.artifactName must include version and architecture.');
 }
 
-const staleTokens = [
-  'temporal-' + 'quantum-state-machine',
-  'collapse-' + 'release-cycles',
-  'bounded temporal-' + 'quantum interpretation contract',
-];
-for (const relativePath of [bifrostManifestPath, 'scripts/check-packaging.js']) {
-  if (!exists(relativePath)) continue;
-  const source = read(relativePath);
-  for (const token of staleTokens) {
-    if (source.includes(token)) errors.push(`${relativePath} contains denied stale contract token: ${token}`);
-  }
-}
-
 if (errors.length) {
   console.error('[Hearthgate packaging check] FAILED');
   for (const error of errors) console.error(` - ${error}`);
@@ -249,10 +247,11 @@ console.log('[Hearthgate packaging check] OK');
 console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
-console.log(' law: compression -> release -> compression of the release -> infinite continuation');
+console.log(' spine: Magic <-> Science/Mathematics <-> Physicality');
+console.log(' law: compression -> release -> receiving spring -> answer -> return -> renewal -> next spiral');
 console.log(' security: sandboxed renderer + redacted IPC + encrypted config when OS key storage is available');
 console.log(' network: core and FontForge services restricted to the local boundary');
 console.log(' framework: STARWELL + Glyph Studio + Signal Well + Bifröst Arcsweep + iPad Somatic Gate bundled');
 console.log(' schemas: PREMAQ v2 + Bifröst temporal state + iPad somatic receipts bundled');
 console.log(` installer: ${pkg.build.artifactName}`);
-console.log(' signing: not configured; CI output is unsigned');
+console.log(' signing: CI output is unsigned');
