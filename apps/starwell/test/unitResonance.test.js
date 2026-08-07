@@ -89,13 +89,14 @@ test('phase projection preserves intentional zero amplitude', () => {
   );
 });
 
-test('DEEP signal adapter maps P C R E M A aliases into resonance vectors', () => {
+test('DEEP signal adapter maps canonical seven-axis PREMAQ into resonance vectors', () => {
   const [node] = nodesFromDeepSignals([
-    { id: 'packet', field: { P: 1, C: 0.5, R: 0.25, E: 0.125, M: 0.75, A: 0.875 } },
+    { id: 'packet', field: { P: 1, C: 0.5, R: 0.25, E: 0.125, M: 0.75, A: 0.875, Q: 0.625 } },
   ]);
 
   assert.equal(node.id, 'packet');
-  assert.deepEqual(node.vector, [1, 0.5, 0.25, 0.125, 0.75, 0.875]);
+  assert.deepEqual(node.vector, [1, 0.5, 0.25, 0.125, 0.75, 0.875, 0.625]);
+  assert.equal(node.meta.premaq_registry, 'hearthgate.braided-spine/v1.0');
 });
 
 test('buildResonanceGraph returns nodes and edges without mutating the projection', () => {
