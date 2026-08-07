@@ -10,15 +10,17 @@
   "interfaceRoute": "/starwell/bifrost/",
   "interfaceEntrypoint": "bifrost/index.html",
   "spineContract": {
-    "schema": "hearthgate.braided-spine/v1.0",
+    "schema": "hearthgate.braided-spine/v1.1",
     "document": "docs/HEARTHGATE_BRAIDED_SPINE.md",
     "machine": "config/hearthgate-braided-spine.json",
     "runtimeRegistry": "src/hearthweave-kernel/braided-spine.js",
     "braidPacketSchema": "schemas/braid-packet-v1.schema.json",
+    "premaqcSchema": "hearthgate.premaqc/v1.0",
     "realityAxiom": "Everything is real",
     "spines": ["magic", "science_mathematics", "physical"],
-    "premaqReadingOrder": ["Presence", "Memory", "Qualia", "Resonance", "Entanglement", "Agency", "Coherence"],
-    "premaqWireOrder": ["P", "C", "R", "E", "M", "A", "Q"]
+    "premaqcReadingOrder": ["Presence", "Memory", "Qualia", "Resonance", "Entanglement", "Agency", "Coherence"],
+    "premaqcWireOrder": ["P", "R", "E", "M", "A", "Q", "C"],
+    "legacyPremaqWireOrder": ["P", "C", "R", "E", "M", "A", "Q"]
   },
   "engine": {
     "module": "src/arcsweep-temporal-quantum/engine.js",
@@ -38,7 +40,9 @@
     "kernel": "src/hearthweave-kernel/index.js",
     "braidedSpineRegistry": "src/hearthweave-kernel/braided-spine.js",
     "formalism": "braided-reality-compression-release-receiving-spring",
-    "packetAuthority": "hearthweave-kernel"
+    "packetAuthority": "hearthweave-kernel",
+    "rendererStateSource": "shared-braid-packet",
+    "continuationLaw": "release-receiving-spring-answer-return-renewal-next-compression"
   },
   "schemas": {
     "braidPacket": "schemas/braid-packet-v1.schema.json",
@@ -51,7 +55,11 @@
   },
   "capabilities": [
     "braided-spine-v1",
+    "braided-spine-v1.1",
     "magic-science-physical-mutual-reinforcement",
+    "premaqc-seven-dimensional-living-bearing",
+    "premaqc-agency-qualia",
+    "premaqc-canonical-wire-prem aqc".replace(" ", ""),
     "premaq-seven-dimensional-living-bearing",
     "premaq-agency-qualia",
     "sevenfold-premaq-living-correspondence",
@@ -104,6 +112,7 @@
     "dual-presence-anchoring",
     "dual-aspect-packet-freeze",
     "single-state-sensory-activation",
+    "explicit-degraded-mode",
     "deterministic-replay",
     "temporal-twist-measurement",
     "sovereign-house-overlays",
@@ -116,6 +125,7 @@
     "hearthside": "real-participating-shore",
     "targetside": "real-participating-shore",
     "renderers": "shared-braid-packet-expression",
+    "rendererStateContinuity": "same-packet-fingerprint-through-activation",
     "toneApproval": "rowan-calibration-owner",
     "somaticOutput": "embodied-external-device-route",
     "interactionGainCeiling": 0.018,
