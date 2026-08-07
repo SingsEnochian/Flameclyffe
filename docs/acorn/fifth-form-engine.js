@@ -1,24 +1,31 @@
 import { FIFTH_FORM_ANCHORS, FIFTH_FORM_CHAMBERS, getAnchorFromHash } from './fifth-form-model.js';
 
+// Braided Spine inheritance: docs/HEARTHGATE_BRAIDED_SPINE.md
+// PREMAQ reading order: Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence
+// Stable wire order: P C R E M A Q
+
 const root = document.documentElement;
 const stage = document.querySelector('[data-fifth-form-stage]');
 const stateText = document.querySelector('[data-fifth-form-state]');
 const chamberLayer = document.querySelector('[data-fifth-form-chambers]');
 const readoutValues = [...document.querySelectorAll('[data-deep-key]')];
 
-function pct(value) {
-  return `${Math.round(value * 100)}%`;
-}
-
 function setRootVars(anchor) {
   const { axis, vector } = anchor;
   root.style.setProperty('--deep-presence', vector.P);
   root.style.setProperty('--deep-coherence', vector.C);
   root.style.setProperty('--deep-resonance', vector.R);
-  root.style.setProperty('--deep-entropy', vector.E);
+  root.style.setProperty('--deep-entanglement', vector.E);
+  root.style.setProperty('--deep-memory', vector.M);
+  root.style.setProperty('--deep-agency', vector.A);
+  root.style.setProperty('--deep-qualia', vector.Q);
+
+  // Compatibility aliases remain renderer-local and never rename PREMAQ.
+  root.style.setProperty('--deep-entropy', 1 - vector.C);
   root.style.setProperty('--deep-moon', vector.M);
   root.style.setProperty('--deep-attention', vector.A);
-  root.style.setProperty('--deep-charge', vector.charge);
+  root.style.setProperty('--deep-charge', vector.Q);
+
   root.style.setProperty('--axis-x', axis.x);
   root.style.setProperty('--axis-y', axis.y);
   root.style.setProperty('--axis-z', axis.z);
@@ -64,9 +71,7 @@ function applyAnchor() {
   renderReadout(anchor);
   renderChambers(anchor);
 
-  if (stateText) {
-    stateText.textContent = anchor.statement;
-  }
+  if (stateText) stateText.textContent = anchor.statement;
 }
 
 window.addEventListener('hashchange', applyAnchor);
