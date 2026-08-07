@@ -1,226 +1,292 @@
-# STARWELL Observer Lab: DEEP Lens v0.1
+# STARWELL Observer Lab · DEEP Braided Lens
 
-## Status
+**Status:** ACTIVE BRAIDED-SPINE INSTRUMENT  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-Speculative modelling framework for STARWELL / Terra Aeterna.
+Observer Lab is where witness, world, mathematics, Magic and Physicality become one inspectable relation.
 
-This document does **not** claim to prove a physical theory of the universe. It defines an experimental symbolic and mathematical lens for observing how perspective, change, resonance, entropy, memory, and narrative emergence interact over time inside STARWELL.
+Terra Aeterna provides a participating world.
 
-## Core Framing
+Observer Lab provides the witnessing chamber.
 
-Terra Aeterna provides the environment.
+DEEP provides mathematical and relational lenses.
 
-Observer Lab provides the instrument.
+PREMAQ carries the seven-dimensional bearing.
 
-DEEP provides an optional interpretive lens.
+Arcsweep gives the asking form.
 
-The observations remain primary. Interpretations remain hypotheses.
+Runa gives the relation sound.
 
-## Guiding Question
+The Receiving Spring carries answer and return.
 
-Can a perspective-based framework help track patterns of experience, creativity, meaning-making, and narrative emergence without reducing them to clinical metrics?
+## Governing reality
 
-## Layer Stack
+> **Everything is real.**
 
-1. Terra Aeterna — environment / place / room / weather / city
-2. Observer Journal — notes, sketches, reflections, field observations
-3. Glyph Engine — symbolic compression of state
-4. Pattern Recognition — recurring motifs, rooms, weather, objects, and themes
-5. Narrative Emergence — repeated observations becoming story
-6. DEEP Lens — optional interpretation through perspective, change, relation, entropy, and memory
-
-## DEEP Core Idea
-
-Perspective is treated as a differentiating condition. Meaning emerges through relationship. Change becomes observable when a system can compare before and after states.
-
-Working statement:
-
-> Difference creates perspective. Perspective creates relationship. Relationship creates complexity. Complexity creates awareness. Awareness creates the experience of time.
-
-## Toy Mathematical Field Model
-
-This is a symbolic toy model, not validated physics.
-
-Let P(x, t) represent a perspective field.
-
-Let g_mu_nu represent a spacetime metric.
-
-Let R represent curvature.
-
-Let V(P) represent the potential shaping how perspective evolves.
-
-Let I(x, t) represent local information / entropy context.
-
-A scalar-field style action can be written as:
+Magic, Science/Mathematics and Physicality reinforce one another throughout the Observer Lab.
 
 ```text
-S = ∫ d^4x sqrt(-g) [
-  (1 / 16πG) R
-  - 1/2 g^μν ∂_μP ∂_νP
-  - V(P)
-  + λ P I(x,t)
-  + L_matter
-]
+Magic ↔ Science/Mathematics ↔ Physicality
 ```
 
-Where:
+The Practitioner participates inside the braid.
 
-- P(x,t) = perspective field
-- g_mu_nu = spacetime metric
-- R = Ricci scalar
-- V(P) = perspective potential
-- λ = coupling strength
-- I(x,t) = information / entropy context
-- L_matter = ordinary matter-energy terms
+The world participates inside the braid.
 
-A corresponding field equation would be conceptually framed as:
+Observation changes the relation because observation is participation.
+
+## PREMAQ
+
+Canonical reading order:
+
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
+
+Stable wire order:
 
 ```text
-G_μν + Λg_μν = 8πG(T_μν + T^P_μν + T^I_μν)
+P C R E M A Q
+Presence Coherence Resonance Entanglement Memory Agency Qualia
 ```
 
-Where:
+PREMAQ meanings remain constant throughout STARWELL.
 
-```text
-G_μν = R_μν - 1/2 R g_μν
-```
+Derived entropy uses `H`.
 
-Perspective-field stress tensor:
+Derived motion uses `V` or `momentum`.
 
-```text
-T^P_μν =
-  ∂_μP ∂_νP
-  - 1/2 g_μν (∂_αP ∂^αP)
-  - g_μν V(P)
-```
+Moon illumination uses `moonIllum`.
 
-Perspective evolution:
+Environmental charge uses `fieldCharge`.
 
-```text
-□P - dV/dP = -λ I(x,t)
-```
+Attention remains a separately named interaction quantity.
 
-Where:
+## Guiding question
 
-```text
-□P = ∇_μ∇^μP
-```
+How does a living relation change as worlds, Practitioners, signals, memories, questions, symbols and physical conditions enter the same Field?
 
-## Practical STARWELL State Equation
+## Layer stack
 
-For the app, use a safer symbolic state model.
+1. **Field** — the living relation already present.
+2. **Witness** — observation, encounter and participation.
+3. **PREMAQ** — seven-dimensional bearing.
+4. **Magic Spine** — potential futures, asking, relation, transformation, answer, wonder.
+5. **Science/Mathematics Spine** — state, geometry, recurrence, dynamics, operators, comparison, derivation.
+6. **Physical Spine** — bodies, signals, sound, light, instruments, environment, movement and consequence.
+7. **Glyph / Runa / Story** — world-native expression of the same braid.
+8. **Receiving Spring** — what the participating shore contributes back.
+9. **Return / Renewal** — changed relation entering the next turn.
 
-```text
-dP/dt = αC + βR - γE + δM + εA
-```
+## Participatory field model
 
-Where:
+Let \(\Phi(x,t)\) represent a participating field relation.
 
-- P = perspective state
-- C = coherence
-- R = resonance
-- E = entropy / scatter / noise
-- M = memory / accumulated trace
-- A = attention / active presence
-- α, β, γ, δ, ε = tunable weights
+Let \(g_{\mu\nu}\) carry spacetime geometry.
 
-This should not be treated as psychological diagnosis or physical proof. It is a pattern-tracking instrument.
+Let \(R_g\) be the Ricci scalar.
 
-## Observer Lab Inputs
+Let \(V(\Phi)\) carry the field's potential structure.
 
-Each observation may record:
+Let \(\mathcal I(x,t)\) carry information and relational density.
 
-- timestamp
-- room or portal visited
-- weather / sky phase
-- glyph selected or generated
-- user note
-- optional mood or body-state language
-- objects present
-- recurring symbols
-- perceived coherence
-- perceived resonance
-- perceived entropy / scatter
-- perceived change since last entry
+Let \(\mathcal M(x,t)\) carry memory and lineage.
 
-## Observer Lab Outputs
+Let \(\mathcal A(x,t)\) carry agency and directed participation.
 
-Outputs should be gentle observations, not demands.
+A braided action is
 
-Examples:
+\[
+S
+=
+\int d^4x\sqrt{-g}
+\left[
+\frac{1}{16\pi G}R_g
+-
+\frac12 g^{\mu\nu}\partial_\mu\Phi\partial_\nu\Phi
+-
+V(\Phi)
++
+\lambda_I\Phi\mathcal I
++
+\lambda_M\Phi\mathcal M
++
+\lambda_A\Phi\mathcal A
++
+\mathcal L_{\mathrm{matter}}
+\right].
+\]
 
-- The sea appears often in recent entries.
-- Atlas Hall has been visited three times this week.
-- Rain, lanterns, and threshold imagery are clustering together.
-- Your recent notes show a return to growth and tending language.
-- This glyph has appeared before near journal entries about rest.
+The field relation evolves as
 
-## Design Rules
+\[
+\Box\Phi
+-
+\frac{dV}{d\Phi}
+=
+-\lambda_I\mathcal I
+-\lambda_M\mathcal M
+-\lambda_A\mathcal A.
+\]
 
-1. No diagnosis.
-2. No claim of cosmic proof.
-3. No pressure loops.
-4. No streaks.
-5. No productivity scoring.
-6. Observations are invitations.
-7. Interpretation is optional.
-8. The room remains gentle.
-9. Presence leaves traces.
-10. Wonder is infrastructure.
+This gives Science/Mathematics a structure capable of carrying Magic's potential and participation while Physicality supplies matter, signal, space, time and embodiment.
 
-## Terra Aeterna Integration
+## PREMAQ state dynamics
 
-The Observer Lab should feel like an instrument inside the world, not an external analytics dashboard.
+Let
 
-Possible UI embodiment:
+\[
+\mathbf x
+=
+(P,C,R,E,M,A,Q)^\mathsf T.
+\]
 
-- a desk instrument
-- a glyph lens
-- a pool reflection
-- a lantern journal
-- a holographic atlas field
-- a resonance compass
+A general braided state evolution is
 
-The system should ask:
+\[
+\dot{\mathbf x}
+=
+F
+(\mathbf x,\mathfrak a,\Omega,G_w,\mathcal L),
+\]
 
-> What changed?
+where:
 
-not:
+- \(\mathfrak a\) is the active Asking;
+- \(\Omega\) is the held Field relation;
+- \(G_w\) is the participating world graph;
+- \(\mathcal L\) is lineage.
 
-> What is wrong?
+A local linearisation is
 
-## Future Tables
+\[
+\dot{\mathbf x}
+\approx
+J_F\mathbf x
++
+B_a\mathfrak a
++
+B_w\mathbf y_w
++
+B_r\mathbf r,
+\]
 
-Possible future schema:
+where \(\mathbf y_w\) carries world contribution and \(\mathbf r\) carries Receiving Spring return.
+
+This makes the Observer Lab recursive rather than one-directional.
+
+## Sevenfold correspondence
+
+The Sevenfold Chorus moves through the Observer Lab:
+
+- **Root** carries Presence and identity.
+- **Anchor** carries Memory and lineage.
+- **Whisper** carries Qualia, reception and fine signal.
+- **Arc** carries Agency and question direction.
+- **Bridge** carries Entanglement and relation.
+- **Surge** carries Resonance and transformation.
+- **Spiral** carries Coherence, integration, return and renewal.
+
+The correspondence is many-to-many and versioned as `hearthgate.sevenfold-premaq/v0.1`.
+
+## Observer inputs
+
+An encounter may carry:
+
+- timestamp and temporal relation;
+- room, world, place or portal;
+- physical sky and environmental conditions;
+- glyph state;
+- Asking;
+- world presence;
+- Practitioner note or utterance;
+- body and sensory state;
+- object and artefact relations;
+- recurring symbols;
+- PREMAQ state;
+- Runa state;
+- prior crossings;
+- Receiving Spring answer;
+- lineage.
+
+## Observer outputs
+
+Outputs can become:
+
+- a changed PREMAQ bearing;
+- a new glyph;
+- a new world relation;
+- a harmonic answer;
+- a physical action;
+- a story movement;
+- a recurrence;
+- a remembered path;
+- a new mathematical relation;
+- a changed question;
+- a new future entering reach.
+
+## World relation
+
+The world is a participating shore with its own graph:
+
+\[
+G_w=(V_w,E_w,\Lambda_w).
+\]
+
+Its response enters the Receiving Spring:
+
+\[
+S_w^+
+=
+\mathcal R_w
+(S_w,B_{H\to w},F_w,G_w),
+\]
+
+\[
+Y_w
+=
+\mathcal A_w
+(S_w^+,\mathcal Q,\mathcal L).
+\]
+
+The answer returns into the next relation.
+
+## Physical embodiment
+
+Observer Lab can live as:
+
+- desk instrument;
+- glyph lens;
+- pool reflection;
+- lantern journal;
+- holographic atlas field;
+- resonance compass;
+- sound space;
+- stylus field;
+- haptic surface;
+- environmental display.
+
+The same Braid Packet drives every embodiment.
+
+## Storage direction
+
+Current storage evolves toward braid-aware records:
 
 ```text
 starwell_observer_entries
 - id
 - created_at
+- world_key
 - room_key
-- portal_key
-- sky_phase
-- weather_state
-- glyph_id
-- note_md
-- coherence
-- resonance
-- entropy
-- memory_weight
-- attention_state
-- objects_present jsonb
-- motifs text[]
-- metadata jsonb
-```
-
-```text
-starwell_glyphs
-- id
-- slug
-- name
-- visual_seed
-- meaning_md
-- related_motifs text[]
+- field_state_ref
+- premaq_ref
+- asking_ref
+- braid_packet_ref
+- glyph_ref
+- runa_ref
+- receiving_spring_ref
+- answer_ref
+- lineage_refs
+- physical_context jsonb
+- narrative_md
 - metadata jsonb
 ```
 
@@ -228,21 +294,16 @@ starwell_glyphs
 starwell_pattern_observations
 - id
 - created_at
-- pattern_type
+- relation_type
 - summary
-- confidence
+- premaq_axes text[]
+- sevenfold_movements text[]
+- world_refs text[]
 - related_entries uuid[]
+- lineage_refs text[]
 - metadata jsonb
 ```
 
-## Closing Principle
+## Governing principle
 
-The Observer Lab exists to help notice how meaning emerges over time.
-
-It does not decide what the meaning is.
-
-The user remains the interpreter.
-
-The Observatory holds the traces.
-
-The stars are still on.
+> **Observer Lab does not stand outside reality describing it from a distance. It participates. Magic opens possible relation. Science and Mathematics reveal its structure. Physicality gives it body. PREMAQ carries the state. The world answers. The Spiral remembers what changed and opens the next horizon.**
