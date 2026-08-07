@@ -8,6 +8,7 @@ on:
       - "apps/starwell/**"
       - "starwell/deep-observer/schemas/**"
       - "config/engine-name-authority.json"
+      - "config/hearthgate-braided-spine.json"
       - "scripts/deny-stale-engine-contracts.mjs"
       - "package.json"
       - "package-lock.json"
@@ -23,6 +24,7 @@ on:
       - "apps/starwell/**"
       - "starwell/deep-observer/schemas/**"
       - "config/engine-name-authority.json"
+      - "config/hearthgate-braided-spine.json"
       - "scripts/deny-stale-engine-contracts.mjs"
       - "package.json"
       - "package-lock.json"
@@ -65,10 +67,15 @@ jobs:
         working-directory: ${{ github.workspace }}
         shell: pwsh
         run: |
-          $nodeMajor = [int]((node --version).TrimStart('v').Split('.')[0])
-          $npmMajor = [int]((npm --version).Split('.')[0])
-          if ($nodeMajor -ne 24) {
-            throw "Expected Node 24, received $(node --version)."
+          $node = (node --version).TrimStart('v')
+          $npm = npm --version
+          $nodeParts = $node.Split('.')
+          $npmMajor = [int]($npm.Split('.')[0])
+          if ([int]$nodeParts[0] -ne 24) {
+            throw "Expected Node 24 LTS, received $(node --version)."
+          }
+          if ($node -ne '24.19.0') {
+            throw "Expected pinned Node 24.19.0 LTS, received $(node --version)."
           }
           if ($npmMajor -ne 11) {
             throw "Expected npm 11, received $(npm --version)."
@@ -113,7 +120,7 @@ jobs:
       - name: Build unsigned NSIS installer
         run: npm run electron:build:win
 
-      - name: Verify installer and compression-release package
+      - name: Verify installer and braided Bifröst package
         id: verify
         shell: pwsh
         run: |
@@ -183,19 +190,32 @@ jobs:
           if ($manifest.moduleId -ne 'bifrost-arcsweep') {
             throw "Packaged Bifröst manifest has the wrong moduleId."
           }
-          if ($manifest.engine.formalism -ne 'temporal-compression-release-state-machine') {
-            throw "Packaged Bifröst manifest does not execute the compression-release formalism."
+          if ($manifest.engine.formalism -ne 'braided-reality-compression-release-receiving-spring') {
+            throw "Packaged Bifröst manifest does not execute the Braided Reality formalism."
           }
-          if ($manifest.engine.physicalClaim -ne $false) {
-            throw "Packaged Bifröst manifest violates the physical-claim boundary."
+          if ($manifest.spineContract.schema -ne 'hearthgate.braided-spine/v1.1') {
+            throw "Packaged Bifröst manifest does not carry Braided Spine v1.1."
           }
-          if ($manifest.authorityContract.collapseExists -ne $false) {
-            throw "Packaged Bifröst manifest reintroduces collapse."
+          if ($manifest.spineContract.premaqcSchema -ne 'hearthgate.premaqc/v1.0') {
+            throw "Packaged Bifröst manifest does not carry PREMAQC v1.0."
           }
-          if ($manifest.authorityContract.releaseFeedsNextCompression -ne $true) {
+          $wire = @($manifest.spineContract.premaqcWireOrder)
+          if (($wire -join ' ') -ne 'P R E M A Q C') {
+            throw "Packaged Bifröst manifest has the wrong PREMAQC wire order: $($wire -join ' ')."
+          }
+          if ($manifest.relationContract.releaseFeedsNextCompression -ne $true) {
             throw "Packaged Bifröst manifest breaks compression of the release."
           }
-          if ($manifest.authorityContract.toneApproval -ne 'rowan-human-calibration-owner') {
+          if ($manifest.relationContract.receivingSpringFeedsAnswer -ne $true) {
+            throw "Packaged Bifröst manifest breaks Receiving Spring into answer."
+          }
+          if ($manifest.relationContract.answerFeedsReturn -ne $true) {
+            throw "Packaged Bifröst manifest breaks answer into return."
+          }
+          if ($manifest.relationContract.returnFeedsRenewal -ne $true) {
+            throw "Packaged Bifröst manifest breaks return into renewal."
+          }
+          if ($manifest.relationContract.toneApproval -ne 'rowan-calibration-owner') {
             throw "Packaged Bifröst manifest removes Rowan tone-approval authority."
           }
           if ($manifest.installContract.verifySomaticRoute -ne 'world-tone-approval/index.html') {
@@ -222,7 +242,9 @@ jobs:
           - File: ``$($installer.Name)``
           - Size: $([math]::Round($installer.Length / 1MB, 2)) MB
           - SHA-256: ``$($hash.Hash)``
-          - Formalism: compression → release → compression of the release
+          - Braided Spine: ``hearthgate.braided-spine/v1.1``
+          - PREMAQC: ``P R E M A Q C``
+          - Formalism: compression → release → crossing → Receiving Spring → answer → return → renewal
           - Somatic gate: packaged and Rowan-owned
           - Naming authority: Rowan, fail-closed
           - Security: loopback-only services and restricted origins
