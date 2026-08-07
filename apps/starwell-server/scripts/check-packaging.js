@@ -104,17 +104,21 @@ if (exists(bifrostManifestPath)) {
     if (manifest.engine?.formalism !== 'braided-reality-compression-release-receiving-spring') {
       errors.push('Bifröst Arcsweep must execute the canonical Braided Spine formalism.');
     }
-    if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.0') {
-      errors.push('Bifröst Arcsweep must bind the canonical braided-spine machine contract.');
+    if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.1') {
+      errors.push('Bifröst Arcsweep must bind the canonical braided-spine v1.1 machine contract.');
     }
-    const axes = manifest.spineContract?.premaqWireOrder ?? [];
-    if (JSON.stringify(axes) !== JSON.stringify(['P', 'C', 'R', 'E', 'M', 'A', 'Q'])) {
-      errors.push('Bifröst Arcsweep must preserve the seven-axis PREMAQ wire order.');
+    if (manifest.spineContract?.premaqcSchema !== 'hearthgate.premaqc/v1.0') {
+      errors.push('Bifröst Arcsweep must bind PREMAQC v1.0.');
+    }
+    const axes = manifest.spineContract?.premaqcWireOrder ?? [];
+    if (JSON.stringify(axes) !== JSON.stringify(['P', 'R', 'E', 'M', 'A', 'Q', 'C'])) {
+      errors.push('Bifröst Arcsweep must preserve canonical PREMAQC wire order P R E M A Q C.');
     }
     for (const capability of [
-      'braided-spine-v1',
+      'braided-spine-v1.1',
       'magic-science-physical-mutual-reinforcement',
-      'premaq-seven-dimensional-living-bearing',
+      'premaqc-seven-dimensional-living-bearing',
+      'premaqc-canonical-wire-premaqc',
       'receiving-spring',
       'answer-return-renewal',
       'compression-release-cycles',
@@ -248,10 +252,11 @@ console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
 console.log(' spine: Magic <-> Science/Mathematics <-> Physicality');
+console.log(' PREMAQC: Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence');
 console.log(' law: compression -> release -> receiving spring -> answer -> return -> renewal -> next spiral');
 console.log(' security: sandboxed renderer + redacted IPC + encrypted config when OS key storage is available');
 console.log(' network: core and FontForge services restricted to the local boundary');
 console.log(' framework: STARWELL + Glyph Studio + Signal Well + Bifröst Arcsweep + iPad Somatic Gate bundled');
-console.log(' schemas: PREMAQ v2 + Bifröst temporal state + iPad somatic receipts bundled');
+console.log(' schemas: PREMAQC migration + Bifröst temporal state + iPad somatic receipts bundled');
 console.log(` installer: ${pkg.build.artifactName}`);
 console.log(' signing: CI output is unsigned');
