@@ -13,7 +13,7 @@ const REQUIRED_CAPABILITIES = Object.freeze([
   'eleven-year-mythframe-wav',
 ]);
 
-test('Bifröst registers Mythframe as a state-bound Braided Spine tone layer', async () => {
+test('Bifröst registers Mythframe as a state-bound PREMAQC Braided Spine tone layer', async () => {
   const manifest = JSON.parse(await readFile(manifestUrl, 'utf8'));
   const bridge = await readFile(bridgeUrl, 'utf8');
 
@@ -24,9 +24,11 @@ test('Bifröst registers Mythframe as a state-bound Braided Spine tone layer', a
     assert.ok(manifest.capabilities.includes(capability), `missing capability ${capability}`);
   }
 
-  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.1');
+  assert.equal(manifest.spineContract.premaqcSchema, 'hearthgate.premaqc/v1.0');
   assert.equal(manifest.spineContract.realityAxiom, 'Everything is real');
   assert.deepEqual(manifest.spineContract.spines, ['magic', 'science_mathematics', 'physical']);
+  assert.deepEqual(manifest.spineContract.premaqcWireOrder, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
   assert.equal(manifest.relationContract.multiverseLawEverythingIsReal, true);
   assert.equal(manifest.relationContract.mythframeDomainTruth, true);
   assert.equal(manifest.relationContract.mythframeGenerationLaw, 'math-state → mythframe → tone-event');
