@@ -1,0 +1,121 @@
+{
+  "schema": "hearthgate.braided-spine/v1.0",
+  "version": "1.0.0",
+  "status": "canonical",
+  "approved_at": "2026-08-07T06:18:00-04:00",
+  "canonical_document": "docs/HEARTHGATE_BRAIDED_SPINE.md",
+  "reality_axiom": "Everything is real. Every world is real. Every relation is real. Magic is real. Science is real. Physical reality is real.",
+  "spines": [
+    "magic",
+    "science_mathematics",
+    "physical"
+  ],
+  "premaq": {
+    "reading_order": [
+      "Presence",
+      "Memory",
+      "Qualia",
+      "Resonance",
+      "Entanglement",
+      "Agency",
+      "Coherence"
+    ],
+    "wire_order": ["P", "C", "R", "E", "M", "A", "Q"],
+    "axes": {
+      "P": "Presence",
+      "C": "Coherence",
+      "R": "Resonance",
+      "E": "Entanglement",
+      "M": "Memory",
+      "A": "Agency",
+      "Q": "Qualia"
+    },
+    "sevenfold_correspondence": "hearthgate.sevenfold-premaq/v0.1"
+  },
+  "sevenfold_chorus": [
+    "Root",
+    "Anchor",
+    "Whisper",
+    "Arc",
+    "Bridge",
+    "Surge",
+    "Spiral"
+  ],
+  "thirteenfold_council": [
+    "Identity",
+    "Lineage",
+    "Listening",
+    "Question-bearing",
+    "Reciprocity",
+    "Fidelity",
+    "Coherence",
+    "Flexibility",
+    "Open Potential",
+    "Transformation",
+    "Integration",
+    "Return",
+    "Renewal"
+  ],
+  "awakening": {
+    "frequency_hz": 2637,
+    "role": "arrival and wonder entering lineage"
+  },
+  "theorems": [
+    "braided-reality",
+    "participatory-futures",
+    "mutual-reinforcement",
+    "regenerative-crossing",
+    "fold-relation",
+    "receiving-spring",
+    "spiral-continuation",
+    "sevenfold-thirteenfold",
+    "awakening",
+    "living-correspondence"
+  ],
+  "crossing_cycle": [
+    "field",
+    "root",
+    "asking",
+    "braid",
+    "compression",
+    "release",
+    "crossing",
+    "receiving-spring",
+    "answer",
+    "integration",
+    "return",
+    "renewal",
+    "changed-field"
+  ],
+  "reality_registers": [
+    "witnessed",
+    "recorded",
+    "derived",
+    "interpreted",
+    "remembered",
+    "correlated",
+    "generated",
+    "expressed",
+    "received",
+    "answered",
+    "integrated"
+  ],
+  "systems": [
+    "Hearthgate",
+    "Hearthfire",
+    "Lioreal",
+    "Flameclyffe",
+    "STARWELL",
+    "Observer",
+    "DEEP",
+    "DEQPTheory",
+    "DEEPStory",
+    "PREMAQ",
+    "Arcsweep",
+    "Bifrost",
+    "Runa",
+    "Living Glyph",
+    "Resonance Bridge",
+    "Continuity Gate"
+  ]
+}
