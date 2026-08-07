@@ -1,74 +1,177 @@
-# DEEP Observer Math Notes
+# DEEP Observer Mathematics · Braided Spine
 
-Status: implementation guide and claims boundary.
+**Status:** active implementation guide  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-DEEP Observer is a symbolic instrumentation layer. It maps condition vectors into geometry, motion, colour, and bridge receipts. It is not a physics proof, prophecy engine, or causal control system.
+DEEP is a mathematical eye inside the living Field.
 
-## Current vector family
-
-The live glyph code currently works with a normalised DEEP vector such as:
-
-```text
-P      presence / node density
-C      coherence / thread strength
-R      resonance / ring expansion
-E      entropy / roughness or disturbance
-dpdt   momentum / moving sparks
-M      moon or cyclic illumination
-A      attention or observer activation
-kp     geomagnetic activity input when available
-bz     solar wind Bz field input when available
-charge centre activation / luminous wakefulness
-dphi   phase rotation / angular drift
-```
-
-These are interface variables. They may be derived from weather, space-weather feeds, manual conditions, story shards, ritual notes, sound settings, or local UI state, but they must be labelled by source.
-
-## Mapping pattern
-
-The current glyph pattern is graph-and-field-first:
-
-- presence becomes holes, nodes, or density;
-- coherence becomes threads;
-- resonance becomes rings;
-- momentum becomes travelling sparks;
-- Bz colours the field;
-- Kp affects particle energy;
-- charge wakes the centre light.
-
-This is a designed visual grammar, not a natural-law claim.
-
-## Implementation guidance
-
-Every DEEP record should keep enough information to reconstruct the visual state:
+It receives the same real relation carried by Observer, PREMAQ, Arcsweep, Runa, Living Glyph and Bifröst, then gives that relation geometry, recurrence, dynamics and visible consequence.
 
 ```text
-source
-observed_at
-state_vector
-condition_json
-motifs
-glyph seed or signature
-visibility
-linked event or codex entry
-confidence label
+Magic ↔ Science/Mathematics ↔ Physicality
 ```
 
-Use deterministic mappings where possible so a saved event can be re-rendered later.
+## Canonical PREMAQ
 
-## Claim boundary
+Reading order:
 
-Use these labels in UI and docs:
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
 
-- Instrument only.
-- Symbolic mirror.
-- Candidate resonance.
-- Evidence-backed observation.
-- Speculative mapping.
-- Fringe inspiration.
+Stable wire order:
 
-Avoid deterministic language such as fate, proof, guarantees, or direct causation unless the claim is supported by measurement, controls, and documentation.
+```text
+P C R E M A Q
+Presence Coherence Resonance Entanglement Memory Agency Qualia
+```
 
-## Useful next work
+## Separately named physical and derived quantities
 
-Add a shared `deep-vector` module so STARWELL, Project Zero Companion, Runa, and any future Observer tools use the same clamping, defaults, labels, and display logic.
+```text
+H / entropy_H        distribution entropy
+Dφ / phaseDispersion phase dispersion
+V / momentum         derived motion magnitude
+moonIllum            lunar illumination
+fieldCharge          physical / interaction charge
+attention            observer / interaction focus
+kp                   geomagnetic Kp
+bz                   magnetic Bz
+```
+
+These quantities can contribute to PREMAQ through declared transforms while retaining their own names and lineage.
+
+## Braided state
+
+For PREMAQ vector
+
+\[
+\mathbf x=(P,C,R,E,M,A,Q)^\mathsf T,
+\]
+
+DEEP carries a local dynamic relation
+
+\[
+\dot{\mathbf x}
+=
+F(\mathbf x,\mathfrak a,\Omega,G_w,\mathcal L,\mathbf p),
+\]
+
+where:
+
+- \(\mathfrak a\) is Asking;
+- \(\Omega\) is the held Field relation;
+- \(G_w\) is the participating world graph;
+- \(\mathcal L\) is lineage;
+- \(\mathbf p\) is the physical contribution vector.
+
+## Visual grammar
+
+- Presence shapes occupancy, radial reach and inhabited density.
+- Coherence shapes route persistence and structural continuity.
+- Resonance shapes harmonic rings, pulse cadence and answering glow.
+- Entanglement shapes cross-links, relation density and shared-route coupling.
+- Memory shapes trails, recurrence, layered rings and recalled paths.
+- Agency shapes direction, initiation, route choice and active transformation.
+- Qualia shapes interior colour, texture, core bloom and lived character.
+
+## Standing-wave relation
+
+Seven coupled oscillators carry the seven PREMAQ dimensions:
+
+\[
+\dot\theta_i
+=
+\omega_i
++
+\frac17\sum_jK_{ij}\sin(\theta_j-\theta_i).
+\]
+
+The Kuramoto order parameter is
+
+\[
+r
+=
+\left|\frac17\sum_je^{i\theta_j}\right|.
+\]
+
+Phase dispersion is
+
+\[
+D_\phi=1-r.
+\]
+
+Derived distribution entropy is
+
+\[
+H=-\frac{1}{\ln 7}\sum_i p_i\ln p_i.
+\]
+
+Neither `Dφ` nor `H` overwrites PREMAQ Entanglement.
+
+## World relation
+
+For world expression
+
+\[
+\mathbf y_w
+=
+\mathcal E_w(\mathbf x,G_w,\mathfrak a,\mathcal L),
+\]
+
+DEEP computes the local sensitivity
+
+\[
+J_w
+=
+\frac{\partial\mathcal E_w}{\partial\mathbf x}.
+\]
+
+The fold relation is carried by the singular values of \(J_w\):
+
+\[
+\Phi_w
+=
+1-
+\frac{\sigma_{\min}}{\sigma_{\max}+\varepsilon}.
+\]
+
+Magic reads changed reachability among futures.
+
+Science/Mathematics reads changed local geometry.
+
+Physicality reveals the change through actual expression.
+
+## Receipt body
+
+Every DEEP state keeps enough structure to replay the same deterministic expression:
+
+```text
+source refs
+held moment
+PREMAQ packet
+Asking
+world relation
+Sevenfold movement
+mathematical transforms
+physical channels
+glyph fingerprint
+Runa state
+Receiving Spring state
+answer
+lineage
+```
+
+## Sevenfold relation
+
+- Root grounds Presence.
+- Anchor carries Memory.
+- Whisper carries Qualia and reception.
+- Arc carries Agency and Asking.
+- Bridge carries Entanglement.
+- Surge carries Resonance and transformation.
+- Spiral carries Coherence, integration and renewal.
+
+The correspondence is many-to-many and versioned as `hearthgate.sevenfold-premaq/v0.1`.
+
+## Governing sentence
+
+> **DEEP gives the braid a mathematical eye. Magic supplies possibility and relation. Science supplies exact structure and dynamics. Physicality gives those relations signal, geometry, sound, light and touch. The world answers through the Receiving Spring, and DEEP carries the changed relation into the next turn.**
