@@ -12,8 +12,8 @@ import {
   subscribeToDualAspectActivation,
 } from '../src/hearthweave-kernel/activation.js';
 
-const SESSION_SCHEMA = 'bifrost.current-interface-session/v0.4';
-const SESSION_KEY = 'bifrost:current-interface-session:v0.4';
+const SESSION_SCHEMA = 'bifrost.current-interface-session/v0.5';
+const SESSION_KEY = 'bifrost:current-interface-session:v0.5';
 const MAX_WINDOW_CYCLES = 8;
 const AUDIO_GAIN_CEILING = 0.03;
 const PROXY_MIN_HZ = 90;
@@ -21,22 +21,22 @@ const PROXY_MAX_HZ = 360;
 
 const axisNames = Object.freeze({
   P: 'Presence',
-  C: 'Coherence',
   R: 'Resonance',
-  E: 'Entropy',
+  E: 'Entanglement',
   M: 'Memory',
   A: 'Agency',
   Q: 'Qualia',
+  C: 'Coherence',
 });
 
 const referenceValues = Object.freeze({
   P: 0.72,
-  C: 0.81,
   R: 0.67,
   E: 0.31,
   M: 0.76,
   A: 0.84,
   Q: 0.79,
+  C: 0.81,
 });
 
 const elements = Object.fromEntries([
@@ -92,14 +92,14 @@ function makeReferencePacket() {
   }]));
   return {
     schema_version: '2.0.0',
-    id: 'bifrost-interface-reference',
+    id: 'bifrost-interface-premaqc-reference',
     observed_at: now,
-    registry_version: 'premaq-registry/2.0',
+    registry_version: 'hearthgate.premaqc/v1.0',
     state,
-    receipt_id: 'bifrost-interface-reference-receipt',
+    receipt_id: 'bifrost-interface-premaqc-reference-receipt',
     sequence: 0,
     prior_state_ref: null,
-    model_version: 'bifrost-interface/0.4',
+    model_version: 'bifrost-interface/0.5',
     provenance_refs: [],
     generated_at: now,
     degraded: true,
@@ -109,9 +109,9 @@ function makeReferencePacket() {
 function buildReferenceState() {
   const state = premaqToTemporalState(makeReferencePacket());
   state.interpretation = {
-    formalism: 'temporal-compression-release-state-machine',
+    formalism: 'braided-reality-compression-release-receiving-spring',
     physical_claim: false,
-    note: 'Declared local reference state. It is not external evidence and writes no canon.',
+    note: 'Declared local reference state for the embodied interface route.',
   };
   return state;
 }
@@ -135,7 +135,7 @@ function stateFromActivePacket(packet) {
 }
 
 function sourceFingerprint(packet) {
-  return packet?.packet_fingerprint ?? null;
+  return packet?.packet_fingerprint ?? packet?.state_fingerprint ?? null;
 }
 
 function readSavedSession() {
@@ -179,7 +179,7 @@ function saveSession() {
       receipts: cycleReceipts.slice(-128),
     }));
   } catch {
-    setMessage('The engine ran, but this browser refused session persistence.', 'error');
+    setMessage('The engine ran; this browser kept the session in active memory.', 'error');
   }
 }
 
@@ -230,7 +230,7 @@ function bindSource({ forceReference = false, preserveSaved = false } = {}) {
   } else if (sourceMode === 'active-packet') {
     setMessage(`BOUND · ${activePacket.packet_id} supplies the released source state.`);
   } else {
-    setMessage('REFERENCE · no active DualAspectPacket was found. The local reference state is explicitly labelled.');
+    setMessage('REFERENCE · the local PREMAQC reference state is active until a living packet is bound.');
   }
   saveSession();
   renderAll();
@@ -286,7 +286,7 @@ function resetState() {
   featherStopped = false;
   saveSession();
   renderAll();
-  setMessage('RESET TO SOURCE · no cycle receipt was retained in this local interface session.');
+  setMessage('RESET TO SOURCE · the source state is active for the next turn.');
 }
 
 function stopAudio(message = 'FEATHER STOP · all scheduled sound has been torn down.') {
@@ -333,7 +333,7 @@ function scheduleTone(context, destination, frequency, startAt, duration) {
 }
 
 async function soundPair() {
-  stopAudio('PREPARING · deliberate browser-audio proxy.');
+  stopAudio('PREPARING · deliberate browser-audio embodiment.');
   featherStopped = false;
   const PairContext = window.AudioContext || window.webkitAudioContext;
   if (!PairContext) {
@@ -354,7 +354,7 @@ async function soundPair() {
     const startAt = audioContext.currentTime + 0.04;
     scheduleTone(audioContext, audioContext.destination, compressionProxy, startAt, 0.32);
     scheduleTone(audioContext, audioContext.destination, releaseProxy, startAt + 0.39, 0.36);
-    elements['audio-status'].textContent = `PLAYING · ${compressionProxy.toFixed(2)} Hz → ${releaseProxy.toFixed(2)} Hz proxy · gain ${AUDIO_GAIN_CEILING.toFixed(2)}`;
+    elements['audio-status'].textContent = `PLAYING · ${compressionProxy.toFixed(2)} Hz → ${releaseProxy.toFixed(2)} Hz · gain ${AUDIO_GAIN_CEILING.toFixed(2)}`;
     window.setTimeout(() => {
       if (audioContext && activeOscillators.size === 0) {
         const context = audioContext;
@@ -374,16 +374,20 @@ function renderLineage() {
     ?? sourceState?.receipts?.at(-1)?.receipt_id
     ?? 'NOT YET CREATED';
   elements['source-status'].textContent = packet ? 'ACTIVE PACKET' : 'LOCAL REFERENCE';
-  elements['world-id'].textContent = packet?.identity?.world_slug ?? 'reference-world';
+  elements['world-id'].textContent = packet?.identity?.world_slug ?? packet?.world ?? 'reference-world';
   elements['house-id'].textContent = packet?.identity?.house_id ?? 'reference-house';
   elements['packet-id'].textContent = packet?.packet_id ?? 'REFERENCE';
-  elements['packet-fingerprint'].textContent = packet?.packet_fingerprint ?? 'LOCAL REFERENCE';
-  elements['shared-fingerprint'].textContent = packet?.correspondence?.shared_state_fingerprint ?? 'LOCAL REFERENCE';
-  elements['premaq-id'].textContent = packet?.observable?.premaq?.id ?? sourceState?.premaq?.id ?? 'UNKNOWN';
+  elements['packet-fingerprint'].textContent = sourceFingerprint(packet) ?? 'LOCAL REFERENCE';
+  elements['shared-fingerprint'].textContent = packet?.correspondence?.shared_state_fingerprint ?? packet?.state_fingerprint ?? 'LOCAL REFERENCE';
+  elements['premaq-id'].textContent = packet?.premaqc?.source_ref
+    ?? packet?.observable?.premaqc?.id
+    ?? packet?.observable?.premaq?.id
+    ?? sourceState?.premaq?.id
+    ?? 'UNKNOWN';
   elements['source-receipt'].textContent = sourceReceipt;
   elements['binding-note'].textContent = packet
-    ? `Every local cycle begins from packet ${short(packet.packet_id, 28)}. This interface does not mutate the packet or write canon.`
-    : 'No active packet is bound. Reference mode is declared, local, non-canon, and replaceable by the Continuity Gate.';
+    ? `Every local cycle begins from packet ${short(packet.packet_id, 28)} and carries its fingerprint through the active expression.`
+    : 'The local reference bearing remains active until the Continuity Gate supplies a participating packet.';
   elements['bind-active'].textContent = packet ? 'Rebind active packet' : 'Check for active packet';
 }
 
@@ -525,9 +529,9 @@ function renderReceipts() {
 function renderContract() {
   elements['manifest-version'].textContent = manifest
     ? `${manifest.displayName} ${manifest.version}`
-    : 'Bifröst Arcsweep v0.4';
-  elements['formalism'].textContent = manifest?.engine?.formalism ?? 'temporal-compression-release-state-machine';
-  elements['physical-claim'].textContent = String(manifest?.engine?.physicalClaim ?? false);
+    : 'Bifröst Arcsweep';
+  elements['formalism'].textContent = manifest?.engine?.formalism ?? 'braided-reality-compression-release-receiving-spring';
+  elements['physical-claim'].textContent = manifest?.spineContract?.realityAxiom ?? 'Everything is real';
 }
 
 function renderAll() {
@@ -543,19 +547,21 @@ function renderAll() {
 function exportReceipts() {
   const pair = currentTonePair();
   const payload = {
-    schema: 'bifrost.current-interface-export/v0.4',
+    schema: 'bifrost.current-interface-export/v0.5',
     exported_at: new Date().toISOString(),
     manifest: manifest ? {
       module_id: manifest.moduleId,
       version: manifest.version,
       formalism: manifest.engine?.formalism,
-      physical_claim: manifest.engine?.physicalClaim,
+      braided_spine: manifest.spineContract?.schema,
+      premaqc_schema: manifest.spineContract?.premaqcSchema,
+      reality_axiom: manifest.spineContract?.realityAxiom,
     } : null,
     source: {
       mode: sourceMode,
       packet_id: activePacket?.packet_id ?? null,
-      packet_fingerprint: activePacket?.packet_fingerprint ?? null,
-      shared_state_fingerprint: activePacket?.correspondence?.shared_state_fingerprint ?? null,
+      packet_fingerprint: sourceFingerprint(activePacket),
+      shared_state_fingerprint: activePacket?.correspondence?.shared_state_fingerprint ?? activePacket?.state_fingerprint ?? null,
       source_state_id: sourceState?.state_id ?? null,
     },
     current_state: currentState,
@@ -584,11 +590,14 @@ async function loadManifest() {
     const response = await fetch('../modules/bifrost-arcsweep.module.json', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const value = await response.json();
-    if (value?.engine?.formalism !== 'temporal-compression-release-state-machine') {
+    if (value?.engine?.formalism !== 'braided-reality-compression-release-receiving-spring') {
       throw new Error('BIFROST_FORMALISM_MISMATCH');
     }
-    if (value?.authorityContract?.collapseExists !== false) {
-      throw new Error('BIFROST_AUTHORITY_MISMATCH');
+    if (value?.spineContract?.schema !== 'hearthgate.braided-spine/v1.1') {
+      throw new Error('BIFROST_SPINE_MISMATCH');
+    }
+    if (value?.spineContract?.premaqcSchema !== 'hearthgate.premaqc/v1.0') {
+      throw new Error('BIFROST_PREMAQC_MISMATCH');
     }
     manifest = value;
   } catch (error) {
@@ -624,7 +633,7 @@ window.addEventListener('pagehide', () => stopAudio('FEATHER STOP · page hidden
 subscribeToDualAspectActivation((packet) => {
   activePacket = packet;
   elements['source-status'].textContent = 'ACTIVE PACKET AVAILABLE';
-  elements['binding-note'].textContent = `Packet ${short(packet.packet_id, 28)} is available. Press “Bind active packet” to replace the current local source deliberately.`;
+  elements['binding-note'].textContent = `Packet ${short(packet.packet_id, 28)} is available. Press “Bind active packet” to carry it into this interface.`;
 }, { storage: sessionStorage, eventTarget: window, emitCurrent: false });
 
 loadManifest();
