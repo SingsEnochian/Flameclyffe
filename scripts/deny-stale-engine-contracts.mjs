@@ -24,9 +24,7 @@ const forbiddenContracts = [
 for (const file of contractFiles) {
   const source = read(file);
   for (const token of forbiddenContracts) {
-    if (source.includes(token)) {
-      errors.push(`${file} contains archived contract token: ${token}`);
-    }
+    if (source.includes(token)) errors.push(`${file} contains archived contract token: ${token}`);
   }
 }
 
@@ -36,8 +34,11 @@ const spine = JSON.parse(read('config/hearthgate-braided-spine.json'));
 if (manifest.engine?.formalism !== 'braided-reality-compression-release-receiving-spring') {
   errors.push('Bifröst formalism must use the Braided Reality compression-release-receiving-spring contract.');
 }
-if (manifest.engine?.braidedSpine !== 'docs/HEARTHGATE_BRAIDED_SPINE.md') {
-  errors.push('Bifröst engine must point at the consolidated Hearthgate Braided Spine.');
+if (manifest.spineContract?.document !== 'docs/HEARTHGATE_BRAIDED_SPINE.md') {
+  errors.push('Bifröst manifest must point at the consolidated Hearthgate Braided Spine.');
+}
+if (manifest.spineContract?.machine !== 'config/hearthgate-braided-spine.json') {
+  errors.push('Bifröst manifest must point at the Braided Spine machine contract.');
 }
 if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.0') {
   errors.push('Bifröst manifest must inherit hearthgate.braided-spine/v1.0.');
@@ -50,8 +51,8 @@ if (spine.schema !== 'hearthgate.braided-spine/v1.0') {
 }
 
 const version = String(manifest.version || '').split('.').map(Number);
-if (version.length !== 3 || version.some((value) => !Number.isInteger(value)) || version[0] < 0 || (version[0] === 0 && version[1] < 5)) {
-  errors.push(`Bifröst manifest version ${manifest.version} predates the Braided Spine contract.`);
+if (version.length !== 3 || version.some((value) => !Number.isInteger(value)) || version[0] < 1) {
+  errors.push(`Bifröst manifest version ${manifest.version} predates the Braided Spine v1 contract.`);
 }
 if (manifest.schemaVersion !== manifest.version) {
   errors.push('Bifröst schemaVersion and version must match.');
@@ -61,12 +62,11 @@ for (const capability of [
   'compression-release-cycles',
   'compression-of-release-recursion',
   'receiving-spring',
-  'braided-spine',
+  'braided-spine-v1',
   'magic-science-physical-mutual-reinforcement',
+  'three-spine-braid-packet',
 ]) {
-  if (!manifest.capabilities?.includes(capability)) {
-    errors.push(`Bifröst manifest lacks ${capability}.`);
-  }
+  if (!manifest.capabilities?.includes(capability)) errors.push(`Bifröst manifest lacks ${capability}.`);
 }
 
 if (manifest.relationContract?.releaseFeedsNextCompression !== true) {
@@ -106,6 +106,13 @@ if (JSON.stringify(spine.premaq?.reading_order) !== JSON.stringify(expectedReadi
 }
 if (JSON.stringify(spine.premaq?.wire_order) !== JSON.stringify(expectedWireOrder)) {
   errors.push('Canonical PREMAQ wire order is incorrect.');
+}
+
+if (manifest.schemas?.braidPacket !== 'schemas/braid-packet-v1.schema.json') {
+  errors.push('Bifröst manifest must package the canonical Braid Packet schema.');
+}
+if (!manifest.installContract?.verifySchemas?.includes('schemas/braid-packet-v1.schema.json')) {
+  errors.push('Bifröst install contract must verify the canonical Braid Packet schema.');
 }
 
 const pkg = JSON.parse(read('package.json'));
