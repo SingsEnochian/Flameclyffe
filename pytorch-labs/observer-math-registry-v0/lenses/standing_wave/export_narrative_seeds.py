@@ -1,50 +1,40 @@
 """
 standing_wave/export_narrative_seeds.py
 
-Train WaveSequenceModel on the Terra Aeterna corpus, extract phase fingerprints
-per phrase, map them to DEEP seed vectors, and export to JSON.
+Train WaveSequenceModel on the Terra Aeterna corpus, extract phase fingerprints,
+map them to the canonical seven-dimensional PREMAQ bearing, and export JSON.
 
-The exported JSON is the bridge between the PyTorch narrative layer and the
-JS runtime. It is loaded by apps/starwell/src/lib/narrativeSeed.js for
-phrase → DEEP-seed lookup in the browser.
-
-Run from observer-math-registry-v0/:
-    python -m lenses.standing_wave.export_narrative_seeds
-    python -m lenses.standing_wave.export_narrative_seeds --out /path/to/output.json
-    python -m lenses.standing_wave.export_narrative_seeds --epochs 60
-
-Output schema (one entry per phrase):
-    {
-        "phrase": str,
-        "tokens": [str, ...],
-        "phase_fingerprint": [float, ...],   # 32 values, L2-normalised
-        "deep_seed": {
-            "P": float, "C": float, "R": float,
-            "E": float, "M": float, "A": float, "charge": float
-        },
-        "coherence": float,
-        "label": str
-    }
+PREMAQ reading order:
+    Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence
+Stable wire order:
+    P C R E M A Q
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import math
 import re
 from pathlib import Path
 from typing import Dict, List
 
 import torch
-import torch.nn.functional as F
 
 from .oscillators import KuramotoDeepOscillators, AXIS_ORDER
-from .train_terra_aeterna import CORPUS, WordTokenizer, LoreDataset, train
+from .train_terra_aeterna import CORPUS, WordTokenizer, train
 from .wave_attention import WaveSequenceModel
 
 
-# ── Phase fingerprint extraction ──────────────────────────────────────────────
+PREMAQ_KEY_MAP = {
+    "presence": "P",
+    "coherence": "C",
+    "resonance": "R",
+    "entanglement": "E",
+    "memory": "M",
+    "agency": "A",
+    "qualia": "Q",
+}
+
 
 def phrase_fingerprint(
     model: WaveSequenceModel,
@@ -52,58 +42,68 @@ def phrase_fingerprint(
     phrase: str,
     n_coeffs: int = 32,
 ) -> torch.Tensor:
-    """
-    Mean Q phase vector for a phrase from the final model layer.
-    Shape: (n_coeffs,), L2-normalised.
-    """
+    """Return a normalised phase fingerprint for one phrase."""
     model.eval()
     ids = torch.tensor(tokenizer.encode(phrase), dtype=torch.long).unsqueeze(0)
     with torch.no_grad():
         report = model.phase_report(ids)
-    # Final layer phase angles: (1, seq_len)
-    angles = report[-1]["angles"].squeeze(0)   # (seq_len,)
-    # Mean across tokens → single phase value
+
+    angles = report[-1]["angles"].squeeze(0)
     mean_angle = angles.mean()
-    # Expand into a fingerprint via sinusoidal projection (n_coeffs dimensions)
     k = torch.arange(1, n_coeffs + 1, dtype=torch.float32)
-    fp = torch.cat([torch.sin(k * mean_angle), torch.cos(k * mean_angle)])[:n_coeffs]
-    fp = fp / (fp.norm() + 1e-8)
-    return fp
+    fingerprint = torch.cat([
+        torch.sin(k * mean_angle),
+        torch.cos(k * mean_angle),
+    ])[:n_coeffs]
+    return fingerprint / (fingerprint.norm() + 1e-8)
 
 
-def fingerprint_to_deep_seed(
-    fp: torch.Tensor,
-    osc: KuramotoDeepOscillators,
+def fingerprint_to_premaq_seed(
+    fingerprint: torch.Tensor,
+    oscillators: KuramotoDeepOscillators,
 ) -> Dict[str, float]:
-    """
-    Phase fingerprint → DEEP seed via Kuramoto oscillators.
-    The fingerprint encodes phase angles; we recover them and decode to DEEP values.
-    """
-    # Recover N_OSC phase angles from the fingerprint via atan2
+    """Phase fingerprint → canonical PREMAQ seed plus derived wave metrics."""
     n = len(AXIS_ORDER)
-    # Use first n values (sin projection) to recover angles
-    sin_vals = fp[:n].clamp(-1.0, 1.0)
-    cos_vals = fp[n:2*n].clamp(-1.0, 1.0) if len(fp) >= 2*n else torch.zeros(n)
-    theta = torch.atan2(sin_vals, cos_vals)
+    sin_values = fingerprint[:n].clamp(-1.0, 1.0)
+    cos_values = (
+        fingerprint[n:2 * n].clamp(-1.0, 1.0)
+        if len(fingerprint) >= 2 * n
+        else torch.zeros(n)
+    )
+    theta = torch.atan2(sin_values, cos_values)
 
-    # Run a short integration to let the oscillators find their natural attractor
-    theta_final = osc.forward(theta.unsqueeze(0), n_steps=50).squeeze(0)
-    deep = osc.decode(theta_final)
+    theta_final = oscillators.forward(theta.unsqueeze(0), n_steps=50).squeeze(0)
+    decoded = oscillators.decode(theta_final)
 
-    # Map axis names to DEEP vector keys
-    key_map = {"presence": "P", "coherence": "C", "resonance": "R",
-               "moon": "M", "attention": "A", "charge": "charge"}
-    seed = {key_map.get(k, k): round(v, 4) for k, v in deep.items()
-            if k in key_map}
-    seed["E"] = round(deep.get("entropy", 1.0 - seed.get("C", 0.5)), 4)
-    return seed
+    return {
+        PREMAQ_KEY_MAP[name]: round(float(decoded[name]), 4)
+        for name in AXIS_ORDER
+    }
+
+
+def wave_metrics(
+    fingerprint: torch.Tensor,
+    oscillators: KuramotoDeepOscillators,
+) -> Dict[str, float]:
+    n = len(AXIS_ORDER)
+    sin_values = fingerprint[:n].clamp(-1.0, 1.0)
+    cos_values = (
+        fingerprint[n:2 * n].clamp(-1.0, 1.0)
+        if len(fingerprint) >= 2 * n
+        else torch.zeros(n)
+    )
+    theta = torch.atan2(sin_values, cos_values)
+    theta_final = oscillators.forward(theta.unsqueeze(0), n_steps=50).squeeze(0)
+    synchronisation = float(oscillators.order_parameter(theta_final.unsqueeze(0)).squeeze())
+    return {
+        "wave_coherence": round(synchronisation, 4),
+        "phase_dispersion": round(1.0 - synchronisation, 4),
+    }
 
 
 def slug(phrase: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", phrase.lower()).strip("_")[:48]
 
-
-# ── Export pipeline ───────────────────────────────────────────────────────────
 
 def export(
     out_path: Path,
@@ -123,42 +123,44 @@ def export(
     )
 
     tokenizer = WordTokenizer(CORPUS)
-    osc = KuramotoDeepOscillators()
-    osc.eval()
+    oscillators = KuramotoDeepOscillators()
+    oscillators.eval()
 
-    print("\nExtracting phase fingerprints…")
+    print("\nExtracting phase fingerprints and PREMAQ bearings…")
     entries: List[dict] = []
-    for phrase in CORPUS:
-        fp = phrase_fingerprint(model, tokenizer, phrase)
-        deep_seed = fingerprint_to_deep_seed(fp, osc)
 
-        # Compute coherence from the seed's C axis (already the order parameter)
-        coherence = float(deep_seed.get("C", 0.5))
+    for phrase in CORPUS:
+        fingerprint = phrase_fingerprint(model, tokenizer, phrase)
+        premaq_seed = fingerprint_to_premaq_seed(fingerprint, oscillators)
+        metrics = wave_metrics(fingerprint, oscillators)
 
         entries.append({
-            "phrase":            phrase,
-            "tokens":            phrase.lower().split(),
-            "phase_fingerprint": fp.tolist(),
-            "deep_seed":         deep_seed,
-            "coherence":         round(coherence, 4),
-            "label":             slug(phrase),
+            "schema": "hearthgate.narrative-premaq-seed/v0.2",
+            "phrase": phrase,
+            "tokens": phrase.lower().split(),
+            "phase_fingerprint": fingerprint.tolist(),
+            "premaq": premaq_seed,
+            "wave_metrics": metrics,
+            "label": slug(phrase),
         })
-        print(f"  [{coherence:.3f}]  {phrase[:60]}")
+
+        print(
+            f"  [R={premaq_seed['R']:.3f} E={premaq_seed['E']:.3f} "
+            f"M={premaq_seed['M']:.3f}]  {phrase[:60]}"
+        )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(entries, indent=2), encoding="utf-8")
     print(f"\nExported {len(entries)} narrative seeds → {out_path}")
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
-
 if __name__ == "__main__":
-    _default_out = (
+    default_out = (
         Path(__file__).resolve().parents[4] / "data" / "narrative-seeds.json"
     )
 
-    parser = argparse.ArgumentParser(description="Export narrative seeds to JSON")
-    parser.add_argument("--out", type=Path, default=_default_out)
+    parser = argparse.ArgumentParser(description="Export braided narrative PREMAQ seeds")
+    parser.add_argument("--out", type=Path, default=default_out)
     parser.add_argument("--epochs", type=int, default=40)
     parser.add_argument("--embed-dim", type=int, default=64)
     parser.add_argument("--layers", type=int, default=3)
