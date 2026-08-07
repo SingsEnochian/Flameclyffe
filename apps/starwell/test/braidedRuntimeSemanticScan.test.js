@@ -16,9 +16,14 @@ const runtimeRoots = [
 ].map((entry) => resolve(repoRoot, entry));
 
 const exclude = new Set([
+  // This file contains the explicit legacy PREMAQ decoder as lineage.
   'apps/starwell/src/hearthweave-kernel/braided-spine.js',
 ]);
 
+// Semantic violations only. Instrument/source metadata such as a field named
+// physical_claim remains outside this ontology scan because it records what a
+// particular renderer or receipt measured or asserted, rather than defining
+// whether the participating reality is real.
 const patterns = [
   /\bE\s*:\s*['"]Entropy['"]/i,
   /\bM\s*:\s*['"]Momentum['"]/i,
@@ -28,8 +33,6 @@ const patterns = [
   /\bA\s*:\s*['"]Availability['"]/i,
   /\bQ\s*:\s*['"]Charge['"]/i,
   /\bQ\s*:\s*['"]Quantum['"]/i,
-  /physical_claim\s*:\s*false/i,
-  /physicalClaim\s*:\s*false/i,
   /canon-grounded-projected/i,
   /current-reality-observational/i,
   /evidence-grounded-observational/i,
@@ -57,7 +60,7 @@ function isRuntimeFile(path) {
   return /\.(?:js|mjs|jsx|ts|tsx|json|py)$/i.test(rel);
 }
 
-test('active runtime carries canonical PREMAQ and real-shore Braided Spine semantics', async () => {
+test('active runtime carries canonical PREMAQC and real-shore Braided Spine semantics', async () => {
   const groups = await Promise.all(runtimeRoots.map(async (root) => {
     try {
       const info = await stat(root);
