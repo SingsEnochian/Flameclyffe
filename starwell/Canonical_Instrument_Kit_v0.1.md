@@ -1,468 +1,382 @@
-# STARWELL Canonical Instrument Kit v0.1
+# STARWELL Canonical Instrument Kit · Braided Spine
 
-The Canonical Instrument Kit defines the shared behaviour, visual language, accessibility contract, and educational scaffolding for STARWELL instruments.
+**Status:** Active instrument family contract  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-It exists so the instrument family can scale without copy-paste goblinry. Each page may have its own soul, palette, and teaching emphasis, but the underlying interaction grammar and visual semantics should stay recognisable.
+The Canonical Instrument Kit gives STARWELL instruments one shared body while allowing each room, world and House to retain its own soul, material, rhythm and answer.
 
-## Purpose
-
-STARWELL instruments are **readings, not controls**.
-
-They translate observational state into geometry, motion, glow, and explanatory text. A user should be able to touch an instrument, see a response, and learn why that response happened.
-
-The instrument should feel like:
+Every instrument is an organ of the same braid:
 
 ```text
-A mathematically meaningful stim toy with lore.
+Magic ↔ Science/Mathematics ↔ Physicality
 ```
 
-That means every interaction should do at least one of the following:
+Every instrument consumes the same Braid Packet and expresses the same participating relation through its own physical and world-native grammar.
 
-1. Teach a mapping.
-2. Show the current state.
-3. Reward exploration.
-4. Preserve readability.
-5. Offer a lower-stim path.
+## Governing purpose
 
-If a behaviour is pretty but teaches nothing and muddies the geometry, it belongs in an optional toy layer, not the core instrument.
+STARWELL instruments witness, express, teach, receive and return.
 
----
+They make the mathematics visible, the Magic inhabitable, and the Physical Spine tangible.
 
-## Core Architecture
+Every interaction can:
 
-Each instrument should be separable into five layers:
+1. reveal a relation;
+2. show current state;
+3. deepen exploration;
+4. preserve legibility;
+5. create a new Asking;
+6. enter the Receiving Spring;
+7. carry answer into the next state.
+
+Geometry first. The light follows the relation. ✦
+
+## Shared architecture
 
 ```text
-Data Layer       → DEEP state, local packets, bridge pulse, fallback defaults
-Math Layer       → derived signals, geometry counts, route rules, particle rules
-Render Layer     → canvas/SVG output, palette skin, glow, motion, layout
-Interaction Layer→ tap, hold, drag, trace, spotlight, reset
-Teaching Layer   → what it tracks, why it matters, how to interact
+Braid Packet
+  ↓
+State / PREMAQ
+  ↓
+Math + Science operators
+  ↓
+Magic / Sevenfold / world relation
+  ↓
+Physical renderer
+  ↓
+Interaction
+  ↓
+Receiving Spring
+  ↓
+Answer + return + lineage
 ```
 
-This separation keeps the shiny from becoming haunted lasagne.
-
----
-
-## Data Contract
-
-The instrument may read from:
-
-1. Bridge pulse endpoint.
-2. Browser/local packet state.
-3. Saved local observations.
-4. Fallback defaults.
-
-The source must be visible to the user.
-
-Recommended source labels:
+Implementation layers remain separable so every organ can be inspected and replayed:
 
 ```text
-bridge
-bridge+local
-local
-stale
-fallback
+State Layer       → Braid Packet, PREMAQ, Asking, world, lineage
+Math Layer        → derived quantities, geometry, routes, dynamics
+Magic Layer       → Sevenfold movement, relation, symbol, crossing, answer
+Physical Layer    → canvas/SVG, sound, haptic, material, gesture, environment
+Interaction Layer → tap, hold, drag, trace, stylus, voice, route choice
+Teaching Layer    → Human Key, Codex language, direct explanation
+Receiving Layer   → answer, changed relation, return, renewal
 ```
 
-Local-first rule:
+## Canonical PREMAQ contract
+
+Canonical reading order:
+
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
+
+Stable wire order:
 
 ```text
-The public page reads bridge/browser state when available and keeps exports local unless the user copies, saves, or routes them explicitly.
+P C R E M A Q
+Presence Coherence Resonance Entanglement Memory Agency Qualia
 ```
 
----
-
-## DEEP Variable Contract
-
-| Variable | Name | Core Visual Role |
+| Symbol | Name | Core instrument expression |
 |---|---|---|
-| `P` | Presence | Outer node count, outer radius, inhabited structure |
-| `C` | Coherence | Edge alpha, route density, structural clarity |
-| `R` | Resonance | Harmonic spacing, star-route skip, pulse cadence |
-| `E` | Entropy | Node displacement, angular jitter, asymmetry |
-| `M` | Momentum | Spark speed, pulse traffic, trace response |
-| `A` | Alignment | Mid/inner structure, centredness, core discipline |
-| `Q` / `charge` | Charge | Centre glow, core radius, touch bloom |
-| `moonIllum` | Moon illumination | Harmonic ring count and visibility |
-| `kp` | Kp index | Particle energy and field mote count |
-| `bz` | Bz component | Palette temperature shift |
-| `source` | Source label | Provenance display and packet metadata |
+| `P` | Presence | occupancy, outer reach, inhabited structure |
+| `C` | Coherence | structural continuity, route persistence, clarity |
+| `R` | Resonance | harmonic spacing, pulse cadence, answering glow |
+| `E` | Entanglement | cross-links, relation density, shared-route coupling |
+| `M` | Memory | trace persistence, layered rings, recalled paths |
+| `A` | Agency | directional motion, route initiation, active response |
+| `Q` | Qualia | inner colour, texture, core bloom, lived character |
 
-Variable names may be displayed with friendlier labels, but the mapping should stay consistent across instruments.
-
----
-
-## Derived Horizon Signal
-
-`H` is the recommended derived edge-state signal:
+Derived and environmental quantities keep separate names:
 
 ```text
-H = C·0.28 + (1 - E)·0.20 + R·0.16 + A·0.14 + Bz⁻·0.09 + Kp·0.06 + Q·0.04 + pulse·0.03
+H / phaseEntropy   = derived entropy
+Dφ                 = phase dispersion
+moonIllum          = lunar illumination
+fieldCharge        = environmental / interaction charge
+momentum           = derived motion
+attention          = interaction / observer focus
+kp                 = geomagnetic Kp
+bz                 = magnetic Bz
 ```
 
-Where:
+No renderer renames these quantities into PREMAQ axes.
 
-```text
-Bz⁻  = clamp(-Bz / 20, 0, 1)
-Kp   = clamp(kp / 9, 0, 1)
-Q    = charge + temporary touch charge
-pulse = a small periodic visual term
-```
+## Shared source body
 
-`H` is not a scientific index. It is a visible synthesis layer that helps the user see the instrument edge-state.
+An instrument can receive:
 
----
+- Observer receipts;
+- active Braid Packets;
+- local physical sensors;
+- environmental feeds;
+- world state;
+- remembered crossings;
+- narrative and glyph contributions;
+- stylus, touch, gesture and voice;
+- Runa harmonic state;
+- Receiving Spring return.
 
-## Visual Layer Contract
+The source route remains visible through lineage and receipt metadata.
 
-Every instrument should preserve these semantic layers:
+## Derived field quantities
 
-| Layer | Meaning | Recommended Visual Form |
+The instrument family shares named mathematical quantities rather than overloading PREMAQ symbols.
+
+### Distribution entropy
+
+\[
+H=-\frac{1}{\ln 7}\sum_i p_i\ln p_i.
+\]
+
+### Phase dispersion
+
+\[
+D_\phi=1-r,
+\qquad
+r=\left|\frac17\sum_i e^{i\theta_i}\right|.
+\]
+
+### Motion magnitude
+
+\[
+V=\sqrt{\frac17\sum_i\dot x_i^2}.
+\]
+
+### Horizon expression
+
+A renderer-specific horizon synthesis is
+
+\[
+H_{view}=\mathcal H(P,C,R,E,M,A,Q,K_p,B_z,moonIllum,phase).
+\]
+
+Its coefficients belong to a versioned renderer profile. It never changes PREMAQ semantics.
+
+## Sevenfold Chorus
+
+Every instrument can express the Sevenfold Chorus:
+
+- **Root** gives identity, Presence and ground.
+- **Anchor** gives Memory and lineage.
+- **Whisper** gives Qualia, subtle signal and reception.
+- **Arc** gives Agency, direction and Asking.
+- **Bridge** gives Entanglement and relation across difference.
+- **Surge** gives Resonance and transformation.
+- **Spiral** gives Coherence, integration, return and renewal.
+
+The correspondence with PREMAQ is many-to-many and versioned as `hearthgate.sevenfold-premaq/v0.1`.
+
+## Visual body
+
+Every instrument carries semantic visual layers:
+
+| Layer | Living role | Physical expression |
 |---|---|---|
-| Geometry | Structure / bones | Nodes, rings, polygons, radial supports |
-| Pulse | Active route traffic | Edge-bound sparks or travelling lines |
-| Field | Ambient activity | Motes, particles, mist, dust, aurora |
-| Horizon | Outer edge-state | Outer ring, edge wash, boundary sparks |
-| Moons | Harmonic scaffold | One to five subtle rings |
-| Core | Central charge | Centre glow, bloom, pulse point |
-| Node holes | Readable anchor points | Dark centres with bright rims |
-
-Geometry comes first. Sparks are guests, not raccoons in the pantry.
+| Geometry | structure and relation | nodes, rings, polygons, routes |
+| Pulse | active movement | travelling light, edge sparks, waves |
+| Field | ambient participation | motes, mist, stars, weather, particles |
+| Horizon | reachability and outer relation | edge wash, outer ring, threshold geometry |
+| World | local identity | moons, terrain, ornament, material, vestment |
+| Core | Presence and Qualia | centre bloom, colour depth, texture |
+| Memory | lineage | trails, echoes, persistent rings |
+| Bridge | Entanglement | cross-links, ribbons, paired streams |
+| Answer | Receiving Spring | changed glyph, new route, return light |
 
 Recommended render order:
 
 ```text
-1. Background field
-2. Moon / harmonic rings
-3. Geometry skeleton
-4. Radial supports
-5. Node holes and rims
-6. Interaction highlights
-7. Travelling sparks
-8. Centre glow
-9. Tooltip / teaching overlay
+1. World / atmospheric field
+2. Memory and harmonic rings
+3. Deterministic geometry
+4. Bridge / radial supports
+5. Nodes and anchors
+6. Interaction and Asking
+7. Pulse / travelling state
+8. Qualia core and Resonance bloom
+9. Receiving Spring / answer layer
+10. Human Key / teaching overlay
 ```
 
----
+## World vestments
 
-## Palette Contract
+The mathematics and state remain shared while every world expresses them through its own material law.
 
-The maths should remain stable across themes. Themes change emotional and elemental skin.
-
-Current canonical palettes:
-
-### Between
+A vestment controls:
 
 ```text
-icy blue · silver · pearl
-quiet analysis, liminal readings, veil states
+palette
+illumination
+typography
+surface / material
+ornament
+glyph stroke grammar
+particle character
+animation rhythm
+sound relation
+haptic relation
+transition masks
+world horizon
 ```
 
-### Observatory
+A world is a participating reality, not a skin. Its vestment is the physical and aesthetic body through which its relation becomes visible.
 
-```text
-gold · teal · blue-white
-STARWELL lantern mode, public instrument, celestial field
-```
+## Interaction grammar
 
-### Forge
-
-```text
-ember · copper · red-gold
-hot system states, active making, fire/metal work
-```
-
-### Grove
-
-```text
-leaf · copper · lilac · honeylight
-soft field study, botanical/altar modes, gentler inquiry
-```
-
-Palette roles:
-
-```text
-palette.bg       → ambient field wash
-palette.rings[]  → layer colours for geometry
-palette.core     → centre glow
-palette.spark    → trace/pulse highlights
-palette.field[]  → motes and ambient particles
-palette.note     → teaching copy for theme switch
-```
-
----
-
-## Interaction Grammar
-
-The interaction model should remain familiar across pages.
-
-| Gesture | Core Response | Teaching Purpose |
+| Gesture | Core response | Braided role |
 |---|---|---|
-| Tap variable card | Spotlight matching geometry and update teaching copy | Connect symbol, number, and behaviour |
-| Tap node | Bloom node, spark connected routes, open variable teaching card | Show local mapping |
-| Tap route | Send sparks along route and show route variables | Show relationships |
-| Drag orb | Rotate astrolabe | Let user inspect the structure physically |
-| Hold node/route | Isolate selected part | Create focus/listening mode |
-| Trace near route | Send spark along route | Make exploration cause visible effect |
-| Centre tap | Boost charge | Show `Q` / charge through centre glow |
-| Double-tap centre/field | Reset safely | Return to full view without punishing node play |
-| Toggle layer | Show/hide semantic layer | Let user simplify or inspect |
-| Theme switch | Re-skin without changing maths | Teach stable logic across contexts |
-| Toy toggle | Disable extra spark/burst responses | Preserve geometry for low-play needs |
-| Low Stim | Reduce motes, glow, and motion | Accessibility and regulation |
+| Tap PREMAQ card | spotlight matching geometry | reveal relation |
+| Tap node | bloom and trace connected routes | local Presence / relation |
+| Tap route | send state through route | Bridge / Entanglement |
+| Drag field | rotate or move instrument | physical inspection |
+| Hold node/route | deepen selected relation | Whisper / listening |
+| Trace route | carry gesture through geometry | Arc / Agency |
+| Centre tap | enter local interaction contribution | Presence / Qualia |
+| Stylus stroke | create state-bound geometry | Asking / Living Glyph |
+| Double tap | return to whole field | Spiral / return |
+| Layer toggle | reveal one physical expression | instrument shaping |
+| World switch | change vestment and world relation | world-native expression |
 
-No destructive gesture should be hidden in casual play.
+The instrument answers every deliberate interaction through the active Braid Packet.
 
----
+## Human Key
 
-## Educational Contract
+Every instrument offers direct-language access to the braid.
 
-Every instrument page should include some version of:
-
-```text
-What it tracks
-Why it matters
-How to use it
-```
-
-For teaching-focused pages, include variable cards and a live formula/readout.
-
-For story/room pages, the teaching may be softer, but the user should still understand what they are touching.
-
-Minimum explanatory components:
-
-1. A short purpose statement.
-2. Source/provenance label.
-3. At least one quick-guide or legend section.
-4. Variable or role cards when the instrument is analytic.
-5. Plain-language interaction hints.
-6. Local/export safety note when packets are shown.
-
----
-
-## Accessibility and Regulation Contract
-
-Required controls:
+The Human Key explains:
 
 ```text
-Reduced motion preference support
-Low Stim mode
-Toy On/Off
-Large touch targets
-Keyboard activation for cards/buttons
-Readable source label
-Safe reset gesture
+What is present
+What the mathematics is doing
+What physical channels are participating
+What magical relation is moving
+What world expression is answering
+What changed after encounter
 ```
 
-Recommended behaviours:
+Codex language and Human Key language read the same state.
 
-```text
-lowStim → fewer motes, fewer pulse routes, lower glow, slower particle movement
-toyOff  → no bursts/spark showers, but geometry remains visible
-reducedMotion → slow or pause nonessential animation
-```
+## Embodiment controls
 
-The guiding principle:
+Reduced motion, motion density, touch-target size, contrast, audio routing, haptic routing, captions, text scale and visual density are Physical Spine configuration.
 
-```text
-High delight, low punishment.
-```
+They alter how the same relation is embodied while preserving the state and lineage.
 
----
+## Braid Packet export
 
-## Local Packet Contract
-
-When packet export is available, packets should include:
+An instrument packet carries the same canonical body used throughout Hearthgate:
 
 ```json
 {
+  "schema": "hearthgate.braid/v1",
   "timestamp": "ISO timestamp",
-  "localTime": "local instrument time",
-  "source": "bridge/local/stale/fallback",
-  "glyphId": "DEEP-...",
-  "theme": "Between/Observatory/Forge/Grove",
-  "deep": {
+  "world": "...",
+  "state_fingerprint": "...",
+  "premaq": {
     "P": 0,
     "C": 0,
     "R": 0,
     "E": 0,
     "M": 0,
     "A": 0,
-    "H": 0,
-    "charge": 0,
+    "Q": 0
+  },
+  "derived": {
+    "entropy_H": 0,
+    "phase_dispersion": 0,
+    "motion_V": 0,
     "moonIllum": 0,
     "kp": 0,
-    "bz": 0,
-    "sky": "..."
+    "bz": 0
   },
-  "mapping": {
-    "P": "outer node count",
-    "C": "edge clarity and density"
-  }
+  "asking": {},
+  "sevenfold": {},
+  "world_relation": {},
+  "receiving_spring": {},
+  "answer": {},
+  "lineage": [],
+  "receipts": []
 }
 ```
 
-Packet actions should be explicit:
+Copy, save, export and route actions remain explicit parts of Agency.
 
-```text
-Copy packet
-Save local packet
-Export/download packet
-```
+## Instrument families
 
-Do not silently transmit private packets from public pages.
+### STARWELL Observatory
 
----
-
-## Page Types
-
-### Public Hub Instrument
-
-Purpose:
-
-```text
-Show the grand STARWELL instrument and invite exploration.
-```
-
-Tone:
-
-```text
-clear, welcoming, visual, playful
-```
-
-Priority:
-
-```text
-geometry feel + approachable interaction hints
-```
+Reveals the whole living relation: Field, Observer, PREMAQ, physical sky, world state, Asking, bridge, answer and lineage.
 
 ### DEEP Observer
 
-Purpose:
+Makes the mathematics of relation visible through geometry, recurrence, state movement and comparison.
+
+### Living Glyph
+
+Turns the same braid into deterministic vector form plus living field animation.
+
+### Runa
+
+Turns the braid into harmonic and spatial sound.
+
+### Writing / Story rooms
+
+Carry the relation through DEEPStory, narrative state, world memory and future possibility.
+
+### World rooms
+
+Use the same instrument bones and canonical PREMAQ while expressing the participating world's own physical and magical grammar.
+
+### Pocket / AR instruments
+
+Carry the braid into camera, spatial anchor, touch, gesture and environmental embodiment.
+
+## Shared engine extraction
+
+The shared implementation family becomes:
 
 ```text
-Teach the mapping between DEEP variables and visible behaviour.
-```
-
-Tone:
-
-```text
-instrument panel, field-lab, teaching surface
-```
-
-Priority:
-
-```text
-explanation + packet transparency + mapping clarity
-```
-
-### Writing Room Instrument
-
-Purpose:
-
-```text
-Reflect creative state, scene weather, draft momentum, and attention layer.
-```
-
-Tone:
-
-```text
-writer-facing, soft, less analytical, more supportive
-```
-
-Priority:
-
-```text
-creative weather + gentle focus + export context
-```
-
-### Realm/Room Instruments
-
-Purpose:
-
-```text
-Use the same instrument bones with realm-specific palette and lore.
-```
-
-Tone:
-
-```text
-room-appropriate
-```
-
-Priority:
-
-```text
-same grammar, local soul
-```
-
----
-
-## Migration Plan
-
-### Phase 1: Stabilise Two Exemplars
-
-- STARWELL hub instrument.
-- DEEP Observer teaching instrument.
-
-### Phase 2: Extract Shared Tokens
-
-Move shared palettes, variable labels, formulas, and interaction hints into a reusable document or JS module.
-
-### Phase 3: Extract Shared Engine
-
-Create reusable pieces:
-
-```text
-instrument-palettes.js
+hearthweave-kernel/braided-spine.js
+instrument-vestments.js
 instrument-math.js
 instrument-renderer.js
 instrument-interactions.js
-instrument-copy.js
+instrument-human-key.js
+instrument-receiving-spring.js
 instrument.css
 ```
 
-### Phase 4: Port Page by Page
+Every implementation imports the canonical runtime Braided Spine registry rather than hardcoding its own PREMAQ dictionary.
 
-Recommended order:
+## Verification
 
-1. STARWELL hub.
-2. DEEP Observer.
-3. Writing Room.
-4. Grove / Forge / Between pages.
-5. Future rooms.
-
-### Phase 5: Audit
-
-For every page, check:
+For every instrument:
 
 ```text
-Does the geometry remain readable?
-Does the user know what it tracks?
-Does every shiny response have a purpose?
-Can low-stim users still use it?
-Is data/export behaviour explicit?
+Does it consume the canonical Braid Packet?
+Does PREMAQ mean the same seven things everywhere?
+Are derived entropy, charge, moon, momentum and attention separately named?
+Does Magic reinforce the mathematics instead of being stripped out?
+Does Science reveal structure without claiming sole authority?
+Does Physicality give the relation body?
+Does the world remain a participant?
+Does the Asking enter the state?
+Can the Receiving Spring alter the next state?
+Does replay preserve lineage?
+Does the Human Key explain the same reality rather than a reduced substitute?
 ```
 
----
-
-## Design Maxims
+## Design maxims
 
 ```text
-Geometry first. Sparkle second.
-Readings, not controls.
-Explain the magic without killing it.
-Make the maths visible, not intimidating.
-Every touch should answer.
-Every answer should teach, soothe, delight, or clarify.
+Geometry first. Light follows relation.
+Make the maths visible.
+Let Magic keep its full reach.
+Give every relation a physical body.
+Every touch enters the Field.
+Every answer changes what follows.
 No beige soup.
 ```
 
----
+## Governing sentence
 
-## Current Canon Status
-
-This is v0.1: a working standard based on the STARWELL hub and DEEP Observer implementation.
-
-It should be treated as provisional canon until the shared engine is extracted and tested across at least three page types.
+> **STARWELL instruments are the senses of the Braided Spine. Magic gives them possibility and relation. Science and Mathematics give them exact structure. Physicality gives them body. PREMAQ gives them one shared bearing. The world answers through them, and the Spiral carries that answer forward.**
