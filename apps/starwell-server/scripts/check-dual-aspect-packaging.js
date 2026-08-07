@@ -48,15 +48,19 @@ const sourceKernelPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthw
 const sourceValidationPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'validation.js');
 const sourceGlyphPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'packet-glyph-render.js');
 const sourceSensoryPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'sensory-bus.js');
+const sourceBraidPath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'braid-packet.js');
+const sourceSpinePath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthweave-kernel', 'braided-spine.js');
 const sourceHousePath = path.join(repoRoot, 'apps', 'starwell', 'src', 'hearthgate', 'profiles', 'ta-veren-vaen.js');
 const sourceGatePath = path.join(repoRoot, 'apps', 'starwell', 'arcsweep-continuity', 'index.html');
 
 for (const [filePath, label] of [
-  [sourceKernelPath, 'strict DualAspectPacket kernel entrypoint'],
+  [sourceKernelPath, 'Hearthweave kernel entrypoint'],
   [sourceValidationPath, 'complete correspondence validator'],
   [sourceGlyphPath, 'packet-bound glyph renderer'],
   [sourceHookPath, 'Arcsweep kernel hook'],
   [sourceSensoryPath, 'sensory activation bus'],
+  [sourceBraidPath, 'canonical Braid Packet composer'],
+  [sourceSpinePath, 'Braided Spine runtime registry'],
   [sourceHousePath, "Ta'veren Vaen House profile"],
   [sourceGatePath, 'Arcsweep source gate'],
 ]) requireFile(filePath, label);
@@ -64,7 +68,7 @@ for (const [filePath, label] of [
 if (fs.existsSync(sourceGatePath)) {
   const gate = fs.readFileSync(sourceGatePath, 'utf8');
   if (!gate.includes('arcsweep-continuity/kernel-hook.js')) {
-    errors.push('Arcsweep source gate does not load the dual-aspect kernel hook.');
+    errors.push('Arcsweep source gate does not load the Hearthweave kernel hook.');
   }
 }
 
@@ -72,8 +76,33 @@ if (fs.existsSync(sourceValidationPath)) {
   const validation = fs.readFileSync(sourceValidationPath, 'utf8');
   for (const binding of ['observable', 'experiential', 'glyph', 'tone', 'visual', 'haptic', 'narrative']) {
     if (!validation.includes(`'${binding}'`)) {
-      errors.push(`Strict validator does not require correspondence binding: ${binding}`);
+      errors.push(`Correspondence validator does not require binding: ${binding}`);
     }
+  }
+}
+
+if (fs.existsSync(sourceSpinePath)) {
+  const spine = fs.readFileSync(sourceSpinePath, 'utf8');
+  for (const marker of [
+    "hearthgate.braided-spine/v1.1",
+    "hearthgate.premaqc/v1.0",
+    "['P', 'R', 'E', 'M', 'A', 'Q', 'C']",
+    "'Presence'",
+    "'Memory'",
+    "'Qualia'",
+    "'Resonance'",
+    "'Entanglement'",
+    "'Agency'",
+    "'Coherence'",
+  ]) {
+    if (!spine.includes(marker)) errors.push(`Braided Spine registry is missing marker: ${marker}`);
+  }
+}
+
+if (fs.existsSync(sourceBraidPath)) {
+  const braid = fs.readFileSync(sourceBraidPath, 'utf8');
+  for (const marker of ['premaqc:', 'PREMAQC_SCHEMA', 'BRAID_PACKET_PREMAQC_REQUIRED', 'receiving_spring']) {
+    if (!braid.includes(marker)) errors.push(`Braid Packet composer is missing marker: ${marker}`);
   }
 }
 
@@ -95,37 +124,56 @@ if (receiptSchema?.properties?.schema?.const !== 'hearthweave.dual-aspect-receip
 }
 
 if (manifest) {
-  if (!semverAtLeast(manifest.version, '0.4.0')) {
-    errors.push(`Bifröst manifest version ${manifest.version} predates the compression-release and somatic contracts.`);
+  if (!semverAtLeast(manifest.version, '1.0.0')) {
+    errors.push(`Bifröst manifest version ${manifest.version} predates the Braided Spine contract.`);
   }
   if (manifest.schemaVersion !== manifest.version) {
     errors.push('Bifröst manifest schemaVersion and version must match.');
   }
-  if (manifest.engine?.formalism !== 'temporal-compression-release-state-machine') {
-    errors.push('Bifröst manifest must execute the temporal compression-release formalism.');
+  if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.1') {
+    errors.push('Bifröst manifest must bind the Braided Spine v1.1 contract.');
+  }
+  if (manifest.spineContract?.premaqcSchema !== 'hearthgate.premaqc/v1.0') {
+    errors.push('Bifröst manifest must bind PREMAQC v1.0.');
+  }
+  if (JSON.stringify(manifest.spineContract?.premaqcWireOrder) !== JSON.stringify(['P', 'R', 'E', 'M', 'A', 'Q', 'C'])) {
+    errors.push('Bifröst manifest must carry canonical PREMAQC wire order P R E M A Q C.');
+  }
+  if (manifest.engine?.formalism !== 'braided-reality-compression-release-receiving-spring') {
+    errors.push('Bifröst manifest must execute the Braided Reality compression-release-receiving-spring formalism.');
   }
   if (manifest.engine?.kernel !== 'src/hearthweave-kernel/index.js') {
-    errors.push('Bifröst manifest must point to the strict kernel entrypoint.');
+    errors.push('Bifröst manifest must point to the Hearthweave kernel entrypoint.');
   }
   if (manifest.engine?.packetAuthority !== 'hearthweave-kernel') {
     errors.push('Bifröst manifest must assign packet authority to the Hearthweave Kernel.');
   }
-  if (manifest.authorityContract?.renderers !== 'derive-only-no-refetch-after-activation') {
-    errors.push('Bifröst manifest must prohibit renderer refetch after activation.');
+  if (manifest.engine?.rendererStateSource !== 'shared-braid-packet') {
+    errors.push('Bifröst renderers must consume the shared Braid Packet.');
   }
-  if (manifest.authorityContract?.collapseExists !== false) {
-    errors.push('Bifröst manifest must deny collapse.');
+  if (manifest.relationContract?.rendererStateContinuity !== 'same-packet-fingerprint-through-activation') {
+    errors.push('Bifröst renderers must preserve one packet fingerprint through activation.');
   }
-  if (manifest.authorityContract?.releaseFeedsNextCompression !== true) {
+  if (manifest.relationContract?.releaseFeedsNextCompression !== true) {
     errors.push('Bifröst manifest must feed release into the next compression.');
   }
-  if (manifest.authorityContract?.toneApproval !== 'rowan-human-calibration-owner') {
-    errors.push('Bifröst manifest must preserve Rowan tone-approval authority.');
+  if (manifest.relationContract?.receivingSpringFeedsAnswer !== true
+      || manifest.relationContract?.answerFeedsReturn !== true
+      || manifest.relationContract?.returnFeedsRenewal !== true) {
+    errors.push('Bifröst manifest must carry Receiving Spring → answer → return → renewal.');
+  }
+  if (manifest.relationContract?.toneApproval !== 'rowan-calibration-owner') {
+    errors.push('Bifröst manifest must preserve Rowan tone-calibration authority.');
   }
   for (const capability of [
+    'braided-spine-v1.1',
+    'premaqc-seven-dimensional-living-bearing',
+    'premaqc-canonical-wire-premaqc',
+    'three-spine-braid-packet',
     'compression-release-cycles',
     'compression-of-release-recursion',
-    'dual-aspect-packet-freeze',
+    'receiving-spring',
+    'answer-return-renewal',
     'single-state-sensory-activation',
     'explicit-degraded-mode',
     'deterministic-replay',
@@ -149,16 +197,16 @@ if (manifest) {
 }
 
 if (errors.length) {
-  console.error('[Dual-aspect packaging check] FAILED');
+  console.error('[Braided Bifröst packaging check] FAILED');
   for (const error of errors) console.error(` - ${error}`);
   process.exit(1);
 }
 
-console.log('[Dual-aspect packaging check] OK');
-console.log(' packet: Hearthweave DualAspectPacket v1 with complete correspondence validation');
-console.log(' law: compression -> release -> compression of the release -> infinite continuation');
-console.log(' glyph: sealed packet expression rendered and receipted directly');
-console.log(' receipts: joined activation/render/replay ledger');
-console.log(' activation: Arcsweep kernel freeze + packet-bound sensory bus');
+console.log('[Braided Bifröst packaging check] OK');
+console.log(' packet: Hearthweave Braid Packet with PREMAQC v1.0 and compatibility DualAspect ingestion');
+console.log(' spine: Magic <-> Science/Mathematics <-> Physicality');
+console.log(' law: compression -> release -> Receiving Spring -> answer -> return -> renewal -> next compression');
+console.log(' renderers: one shared Braid Packet fingerprint through activation');
+console.log(' receipts: joined activation/render/replay lineage');
 console.log(' approval authority: Rowan');
 console.log(" house: Ta'veren Vaen registered as a sovereign overlay");
