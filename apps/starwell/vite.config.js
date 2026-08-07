@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const STARWELL_BASE = process.env.STARWELL_BASE || '/';
+const STARWELL_BASE_SLASH = STARWELL_BASE.endsWith('/') ? STARWELL_BASE : `${STARWELL_BASE}/`;
 const REPO_ROOT = process.cwd();
 const OUT_DIR = resolve(REPO_ROOT, 'dist/starwell');
 
@@ -14,6 +15,34 @@ const legacyPages = [
   ['starwell/groundwire.html', 'starwell/groundwire.html'],
   ['starwell/deep-groundwire-mobius.html', 'starwell/deep-groundwire-mobius.html'],
 ];
+
+function injectArcsweepShell() {
+  return {
+    name: 'inject-arcsweep-global-shell',
+    transformIndexHtml() {
+      return [
+        {
+          tag: 'link',
+          attrs: {
+            rel: 'stylesheet',
+            href: `${STARWELL_BASE_SLASH}shell/arcsweep-shell.css`,
+            'data-arcsweep-shell-asset': 'style',
+          },
+          injectTo: 'head',
+        },
+        {
+          tag: 'script',
+          attrs: {
+            type: 'module',
+            src: `${STARWELL_BASE_SLASH}shell/arcsweep-shell.js`,
+            'data-arcsweep-shell-asset': 'runtime',
+          },
+          injectTo: 'head',
+        },
+      ];
+    },
+  };
+}
 
 function publishLegacyObservatoryPages() {
   return {
@@ -73,7 +102,7 @@ function publishLegacyObservatoryPages() {
 }
 
 export default defineConfig({
-  plugins: [react(), publishLegacyObservatoryPages()],
+  plugins: [react(), injectArcsweepShell(), publishLegacyObservatoryPages()],
   root: 'apps/starwell',
   base: STARWELL_BASE,
   build: {
