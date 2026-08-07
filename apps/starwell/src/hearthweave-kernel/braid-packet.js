@@ -1,13 +1,14 @@
 import {
   BRAIDED_SPINE_SCHEMA,
-  PREMAQ_NAMES,
-  PREMAQ_READING_ORDER,
-  PREMAQ_WIRE_ORDER,
+  PREMAQC_NAMES,
+  PREMAQC_READING_ORDER,
+  PREMAQC_SCHEMA,
+  PREMAQC_WIRE_ORDER,
   REALITY_AXIOM,
   SEVENFOLD_CHORUS,
   THIRTEENFOLD_COUNCIL,
   THREE_SPINES,
-  assertCanonicalPremaqState,
+  assertCanonicalPremaqcState,
 } from './braided-spine.js';
 
 export const BRAID_PACKET_SCHEMA = 'hearthgate.braid/v1';
@@ -43,19 +44,19 @@ function componentValue(component) {
   return null;
 }
 
-function canonicalPremaqState(premaq) {
-  const state = premaq?.state ?? premaq ?? {};
-  const canonical = Object.fromEntries(PREMAQ_WIRE_ORDER.map((axis) => [
+function canonicalPremaqcState(premaqc) {
+  const state = premaqc?.state ?? premaqc ?? {};
+  const canonical = Object.fromEntries(PREMAQC_WIRE_ORDER.map((axis) => [
     axis,
     state[axis] ?? null,
   ]));
-  assertCanonicalPremaqState(canonical);
+  assertCanonicalPremaqcState(canonical);
   return canonical;
 }
 
-function premaqValues(premaq) {
-  const state = canonicalPremaqState(premaq);
-  return Object.fromEntries(PREMAQ_WIRE_ORDER.map((axis) => [axis, componentValue(state[axis])]));
+function premaqcValues(premaqc) {
+  const state = canonicalPremaqcState(premaqc);
+  return Object.fromEntries(PREMAQC_WIRE_ORDER.map((axis) => [axis, componentValue(state[axis])]));
 }
 
 function worldIdentity(source = {}) {
@@ -71,9 +72,28 @@ function makeId(prefix = 'braid') {
   return `${prefix}-${uuid ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
 }
 
+function premaqcBody(source) {
+  const canonicalState = canonicalPremaqcState(source);
+  return {
+    schema: PREMAQC_SCHEMA,
+    reading_order: [...PREMAQC_READING_ORDER],
+    wire_order: [...PREMAQC_WIRE_ORDER],
+    axes: { ...PREMAQC_NAMES },
+    state: clone(canonicalState),
+    values: premaqcValues(canonicalState),
+    source_ref: source?.id ?? source?.premaqc?.id ?? source?.premaq?.id ?? null,
+    registry_version:
+      source?.registry_version
+      ?? source?.premaqc?.registry_version
+      ?? source?.premaq?.registry_version
+      ?? BRAIDED_SPINE_SCHEMA,
+  };
+}
+
 export function createBraidPacket({
   heldMomentId = null,
-  premaq,
+  premaqc = null,
+  premaq = null,
   asking = {},
   magic = {},
   scienceMathematics = {},
@@ -90,8 +110,10 @@ export function createBraidPacket({
   packetId = null,
   createdAt = new Date().toISOString(),
 } = {}) {
-  const canonicalState = canonicalPremaqState(premaq);
-  const values = premaqValues(canonicalState);
+  const sourceBearing = premaqc ?? premaq;
+  if (!sourceBearing) throw new Error('BRAID_PACKET_PREMAQC_REQUIRED');
+
+  const bearing = premaqcBody(sourceBearing);
 
   const body = {
     schema: BRAID_PACKET_SCHEMA,
@@ -100,14 +122,12 @@ export function createBraidPacket({
     packet_id: packetId ?? makeId('braid'),
     created_at: createdAt,
     held_moment_id: heldMomentId,
+    premaqc: clone(bearing),
+    // Compatibility mirror for organs that have not yet renamed their reader.
+    // Its semantics and wire order are PREMAQC.
     premaq: {
-      reading_order: [...PREMAQ_READING_ORDER],
-      wire_order: [...PREMAQ_WIRE_ORDER],
-      axes: { ...PREMAQ_NAMES },
-      state: clone(canonicalState),
-      values,
-      source_ref: premaq?.id ?? premaq?.premaq?.id ?? null,
-      registry_version: premaq?.registry_version ?? premaq?.premaq?.registry_version ?? BRAIDED_SPINE_SCHEMA,
+      ...clone(bearing),
+      superseded_by: 'PREMAQC',
     },
     asking: {
       text: asking?.text ?? '',
@@ -157,12 +177,17 @@ export function braidPacketFromDualAspect(dualAspectPacket, {
     throw new TypeError('A DualAspectPacket or compatible Hearthweave packet is required.');
   }
 
-  const premaq = dualAspectPacket.observable?.premaq
+  const premaqc = dualAspectPacket.observable?.premaqc
+    ?? dualAspectPacket.premaqc
+    ?? dualAspectPacket.temporal?.hearthside?.premaqc
+    ?? dualAspectPacket.temporal?.targetside?.premaqc
+    // Legacy ingest seam. Older DualAspect packets are immediately rewritten as PREMAQC.
+    ?? dualAspectPacket.observable?.premaq
     ?? dualAspectPacket.premaq
     ?? dualAspectPacket.temporal?.hearthside?.premaq
     ?? dualAspectPacket.temporal?.targetside?.premaq;
 
-  if (!premaq) throw new Error('BRAID_PACKET_PREMAQ_REQUIRED');
+  if (!premaqc) throw new Error('BRAID_PACKET_PREMAQC_REQUIRED');
 
   const packetLineage = [
     ...(Array.isArray(dualAspectPacket.history) ? dualAspectPacket.history : []),
@@ -175,7 +200,7 @@ export function braidPacketFromDualAspect(dualAspectPacket, {
     heldMomentId: dualAspectPacket.observable?.deep_snapshot?.id
       ?? dualAspectPacket.snapshot_id
       ?? null,
-    premaq,
+    premaqc,
     asking: asking ?? dualAspectPacket.asking ?? {},
     magic: {
       world: dualAspectPacket.identity?.world_slug ?? null,
