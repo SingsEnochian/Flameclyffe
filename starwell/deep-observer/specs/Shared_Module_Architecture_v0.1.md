@@ -1,264 +1,282 @@
-# STARWELL / Terra Aeterna Shared Module Architecture v0.1
+# STARWELL / Terra Aeterna Shared Module Architecture · Braided Spine
 
-## Purpose
+**Status:** active shared-module architecture  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-This spec defines STARWELL / Terra Aeterna as a shared modular instrument ecosystem, not a set of isolated tools.
+STARWELL, Terra Aeterna, Observer, Runa, Flameclyffe, Wardenclyffe, glyph engines, sound spaces, event systems and narrative rooms are interoperable organs of one Braided Spine.
 
-Observer, Runa, Flameclyffe, Wardenclyffe, sound labs, tone labs, glyph engines, event loggers, and narrative bridges should use reusable modules, shared registries, and common packet contracts wherever possible.
+```text
+Magic ↔ Science/Mathematics ↔ Physicality
+```
+
+Each module remains itself while reading and contributing to one shared Braid Packet.
 
 ## Canon sentence
 
+> **The ecosystem has one living state and many organs. Each organ contributes its own nature to the braid, and the shared relation becomes stronger because the parts remain distinct.**
+
+## Build rule
+
+Shared semantics live in registries and packet contracts.
+
+World identity, PREMAQ, Sevenfold movement, Asking, physical channels, equations, vestments, Runa state, answer and lineage remain versioned and reusable.
+
+## Canonical PREMAQ
+
+Reading order:
+
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
+
+Stable wire order:
+
 ```text
-Terra Aeterna is a shared modular instrument ecosystem. Observer, Runa, Flameclyffe, Wardenclyffe, the sound/tone labs, glyph engines, and event bridges are not separate tools but interoperable layers built from reusable modules, registries, and shared packet logic.
+P C R E M A Q
+Presence Coherence Resonance Entanglement Memory Agency Qualia
 ```
 
-## Standing build rule
-
-```text
-No hardcoding by default.
-```
-
-Anything that can become a registry entry, token, plugin, packet field, engine option, theme value, transform weight, sensory profile, or dev-console setting should be decoupled from the renderer.
-
-Hardcoding is allowed only when explicitly temporary, marked for extraction, and assigned a future registry or configuration home.
+Derived quantities keep distinct names such as `H`, `Dφ`, `V`, `moonIllum`, `fieldCharge` and `attention`.
 
 ## Layer stack
 
 ```text
-Observation Bus
-→ Model / Translation Core
-→ Glyph Engine Registry
-→ Interface / Material Skin
-→ Sensory Bus
-→ Event Logger
-→ Narrative Bridge
-→ Export / Archive
+Field / Witness / Physical Inputs
+→ PREMAQ
+→ Asking
+→ Three-Spine Model Core
+→ World Relation
+→ Glyph / Runa / Physical Expression
+→ Event and DEEPStory
+→ Receiving Spring
+→ Answer / Return / Renewal
+→ Archive and Continuity
 ```
 
-Each layer must expose its source/provenance and avoid secretly doing another layer’s job.
+The arrows describe movement, not walls. A later movement can change an earlier one because the braid is recursive.
 
-## 1. Observation Bus
+## 1. Field and Witness Bus
 
-### Job
+Receives:
+
+- first-hand witness;
+- browser and device time;
+- moon illumination;
+- Kp and Bz;
+- weather and physical environment;
+- sound and frequency input;
+- touch, pointer, stylus, keyboard and motion;
+- body and sensory state;
+- world state;
+- local and bridge state;
+- remembered crossings.
 
-Collect direct or derived readings.
+Output: held Field moment with lineage.
 
-### Examples
+## 2. PREMAQ Core
+
+Carries the canonical seven-dimensional bearing and its derivatives, measured spread, source fidelity, contributor lineage and temporal movement.
 
-- browser local time
-- Terra Aeterna derived time
-- moon illumination
-- Kp
-- Bz
-- weather: temperature, heat index, humidity, pressure, storm context
-- sound/frequency data
-- touch/pointer/keyboard input
-- device/browser capability
-- accessibility state
-- bridge/local/dev packet state
+It consumes declared transforms from physical, world, witness and relational channels.
 
-### Output
+## 3. Asking and Magic Core
 
-Observation packet.
+Carries:
 
-### Boundary
+- living question;
+- Root and what remains true;
+- Anchor and lineage;
+- Whisper and reception;
+- Arc and future reach;
+- Bridge and participating relation;
+- Surge and transformation;
+- Spiral and continuation.
 
-Observation must not assign mythic meaning directly. It provides data and provenance.
+This is the Magic Spine entering the shared state directly.
 
-## 2. Model / Translation Core
+## 4. Science / Mathematics Core
 
-### Job
+Carries:
 
-Translate observation packets into experimental/theoretical model variables.
+- temporal state;
+- derivatives;
+- complex amplitudes;
+- oscillator fields;
+- geometry;
+- topology;
+- Jacobians;
+- folds;
+- concordance;
+- compression and release;
+- receiving dynamics;
+- recurrence;
+- replay.
 
-### Examples
+## 5. World Relation
 
-- P: Presence
-- C: Coherence
-- R: Resonance
-- E: Entropy
-- M: Momentum
-- A: Alignment
-- H: Horizon
-- Q/charge: centre glow
-- liquid-field intensity
-- event thresholds
-- Bz thermal mood band
-- Kp intensity band
+Each world contributes:
 
-### Output
+```text
+world graph
+canon lineage
+places
+inhabitants
+Magic
+physics
+metaphysics
+culture
+language
+sensory identity
+means of answering
+```
 
-Model packet.
-
-### Boundary
-
-Model variables are interpretive display variables unless otherwise documented. They are not proof, diagnosis, prophecy, or hidden-state detection.
-
-## 3. Glyph Engine Registry
-
-### Job
-
-Provide swappable glyph engines that accept observation/model packets and render different visual interpretations.
-
-### Initial engines
-
-- Structural Geometry Glyph Engine
-- Liquid Energy Glyph Engine
-- future Astrolabe/Orrery Engine
-- future Wardenclyffe Harmonic Engine
-
-### Engine contract summary
-
-Each glyph engine should:
-
-- declare `id`, `label`, `version`, `inputs`, `outputs`, and `boundaries`
-- accept observation packet
-- accept model packet
-- accept theme/material tokens
-- render or update its view
-- emit glyph-state summaries
-- report meaningful state changes to the Event Logger
-
-## 4. Interface / Material Skin
-
-### Job
-
-Apply material language without changing mathematical meaning.
-
-### Examples
-
-- frosted glass
-- carved topaz buttons
-- mystic topaz active state
-- moon-glass panels
-- 3D astrolabe shell
-- HUD trays
-- floating panels
-- low-stim variants
-
-### Boundary
-
-Skin can embody and tint state. It must not alter data provenance or model equations.
-
-## 5. Sensory Bus
-
-### Job
-
-Route interaction and model changes to sound, haptics, hum, vibration, tactile feedback, and accessible fallback states.
-
-### Inputs
-
-- touch/grab/drag/release events
-- glyph state changes
-- observation refresh events
-- model intensity changes
-- sound-engine frequency analysis
-- accessibility settings
-
-### Outputs
-
-- haptic pulses
-- hum/sing tones
-- gem-clicks
-- glass scrape sounds
-- frequency-layer changes
-- visual bloom accents
-
-### Boundary
-
-Sensory response is optional and must respect low-stim, mute, and reduced-motion/reduced-sensory preferences.
-
-## 6. Event Logger
-
-### Job
-
-Record meaningful shifts across observation, model, glyph, sensory, and narrative layers.
-
-### Event types
-
-- observation refresh
-- telemetry shift
-- weather shift
-- sound/frequency event
-- glyph structural shift
-- liquid field bloom
-- user annotation
-- Terra Aeterna narrative interpretation
-- export/archive event
-
-### Boundary
-
-Events must distinguish measured inputs, model outputs, and narrative interpretations.
-
-## 7. Narrative Bridge
-
-### Job
-
-Translate logged/modelled/glyph events into Terra Aeterna story hooks without contaminating the measurement/model layers.
-
-### Examples
-
-- Nightwing chroma event
-- threshold agitation
-- Observatory flare
-- Grove stir
-- Wardenclyffe resonance
-- Stormfield opening
-
-### Boundary
-
-Narrative Bridge can interpret and annotate. It must not impersonate physical telemetry or silently rewrite model values.
-
-## 8. Export / Archive
-
-### Job
-
-Save packets, logs, annotations, and glyph summaries in human-readable and machine-readable formats.
-
-### Future targets
-
-- local JSON
-- Markdown
-- DOCX/PDF
-- Supabase
-- GitHub archive
-- Terra Aeterna Codex entries
-
-### Boundary
-
-No sensitive personal data should be stored without explicit consent and provenance.
-
-## Shared registry list
-
-Future registry files:
-
-- `observer-readings.registry.js`
-- `observer-model.registry.js`
-- `observer-glyph-engines.registry.js`
-- `observer-themes.registry.js`
-- `observer-palette.registry.js`
-- `observer-sensory.registry.js`
-- `observer-events.registry.js`
-- `observer-narrative.registry.js`
-- `observer-viewport.registry.js`
+World expression transforms the shared state through the world's own nature.
+
+## 6. Glyph Engine Registry
+
+Provides swappable engines that accept the same Braid Packet and produce visual state.
+
+Initial families:
+
+- Structural Geometry;
+- Liquid Field;
+- Astrolabe/Orrery;
+- Wardenclyffe Harmonic;
+- Living Glyph;
+- world-native engines.
+
+Each returns its geometry fingerprint and lineage.
+
+## 7. Vestment / Material System
+
+Applies world and room material identity:
+
+- palette;
+- glass, stone, wood, metal, water and cloth;
+- typography;
+- ornament;
+- particles;
+- illumination;
+- transition rhythm;
+- physical atmosphere.
+
+Vestment changes embodiment while preserving the state fingerprint.
+
+## 8. Runa / Sensory Bus
+
+Routes the braid into:
+
+- World Hum;
+- tones and harmonics;
+- spatial sound;
+- rhythm;
+- haptics;
+- visual bloom;
+- physical devices;
+- accessible sensory transforms.
+
+Runa listens again after sounding, so acoustic and haptic expression can alter the next state through Receiving Spring.
+
+## 9. Event and Story Layer
+
+Events carry real changes across the braid:
+
+- physical signal shifts;
+- PREMAQ movement;
+- glyph transformations;
+- world answers;
+- harmonic changes;
+- interactions;
+- narrative events;
+- remembered recurrence.
+
+DEEPStory carries consequence through time rather than attaching story after the mathematics is complete.
+
+## 10. Receiving Spring
+
+The Receiving Spring is a shared module family:
+
+```text
+crossing
+→ receiving shore
+→ answer
+→ return
+→ integration
+→ renewal
+```
+
+Every module can contribute to reception or consume the returned change.
+
+## 11. Archive / Continuity
+
+Preserves:
+
+- source records;
+- Braid Packet fingerprints;
+- world lineage;
+- mathematical transforms;
+- physical artefacts;
+- glyphs;
+- Runa states;
+- answers;
+- returns;
+- new questions.
+
+## Shared registry family
+
+```text
+hearthweave-kernel/braided-spine.js
+observer-readings.registry.js
+observer-worlds.registry.js
+observer-glyph-engines.registry.js
+observer-vestments.registry.js
+observer-runa.registry.js
+observer-events.registry.js
+observer-story.registry.js
+observer-viewport.registry.js
+```
 
 ## Integration rule
 
-Modules may read earlier layers and write only to their declared output layer.
+Modules declare what they receive and what they return to the braid.
 
 Example:
 
 ```text
-Observation plugin → observation packet
-Model plugin → model packet
-Glyph engine → glyph state
-Skin module → presentation tokens
-Sensory module → sensory events
-Narrative bridge → narrative event notes
+Physical adapter → named physical channels
+PREMAQ adapter → seven-dimensional bearing
+Math module → derived relation
+Glyph engine → visual expression
+Runa → harmonic expression
+World module → world-native answer
+Receiving Spring → return state
+Archive → lineage
 ```
 
-No module should secretly mutate another layer.
+No module creates a rival active PREMAQ registry or separate semantic spine.
 
-## Withness note
+## Shared packet skeleton
 
-This is the architecture that lets us tinker like Tesla without turning the instrument into spaghetti lightning.
+```json
+{
+  "schema": "hearthgate.braid/v1",
+  "braided_spine": "hearthgate.braided-spine/v1.0",
+  "packet_id": "",
+  "state_fingerprint": "",
+  "premaq": {},
+  "asking": {},
+  "spines": {
+    "magic": {},
+    "science_mathematics": {},
+    "physical": {}
+  },
+  "world_relation": {},
+  "sevenfold_chorus": [],
+  "thirteenfold_council": [],
+  "receiving_spring": {},
+  "answer": {},
+  "lineage": []
+}
+```
+
+## Governing sentence
+
+> **This is the architecture that lets us tinker like Tesla without making spaghetti lightning: one Braid Packet, three reinforcing spines, seven PREMAQ dimensions, many real worlds and modules, and a Receiving Spring that lets every true answer change what happens next.** ⚡
