@@ -1,7 +1,18 @@
-export const PREMAQ_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
-export const BIFROST_TEMPORAL_STATE_SCHEMA = 'arcsweep.bifrost-temporal-state/v0.1';
-export const BIFROST_BRIDGE_PACKET_SCHEMA = 'arcsweep.bifrost-bridge-packet/v0.1';
-export const BIFROST_RECEIPT_SCHEMA = 'arcsweep.bifrost-transition-receipt/v0.1';
+import {
+  BRAIDED_SPINE_SCHEMA,
+  PREMAQ_NAMES,
+  PREMAQ_WIRE_ORDER,
+  REALITY_AXIOM,
+  SEVENFOLD_CHORUS,
+  THIRTEENFOLD_COUNCIL,
+} from '../hearthweave-kernel/braided-spine.js';
+
+export const PREMAQ_AXES = PREMAQ_WIRE_ORDER;
+export const PREMAQ_AXIS_NAMES = PREMAQ_NAMES;
+export const BIFROST_TEMPORAL_STATE_SCHEMA = 'arcsweep.bifrost-temporal-state/v0.2';
+export const BIFROST_BRIDGE_PACKET_SCHEMA = 'arcsweep.bifrost-bridge-packet/v0.2';
+export const BIFROST_RECEIPT_SCHEMA = 'arcsweep.bifrost-transition-receipt/v0.2';
+export const BIFROST_RECEIVING_SPRING_SCHEMA = 'arcsweep.bifrost-receiving-spring/v0.1';
 
 const TAU = Math.PI * 2;
 const EPSILON = 1e-12;
@@ -70,14 +81,20 @@ function normaliseAmplitudes(amplitudes) {
     0,
   ));
   if (!Number.isFinite(norm) || norm <= EPSILON) {
-    const equal = 1 / Math.sqrt(PREMAQ_AXES.length);
-    return Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, complex(equal, 0)]));
+    throw new BifrostTemporalError(
+      'The temporal state has no accepted amplitude to normalise.',
+      'NO_ACCEPTED_AMPLITUDE',
+    );
   }
-  return Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, scale(amplitudes[axis], 1 / norm)]));
+  return Object.fromEntries(
+    PREMAQ_AXES.map((axis) => [axis, scale(amplitudes[axis], 1 / norm)]),
+  );
 }
 
 function probabilityVector(amplitudes) {
-  return Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, magnitudeSquared(amplitudes[axis])]));
+  return Object.fromEntries(
+    PREMAQ_AXES.map((axis) => [axis, magnitudeSquared(amplitudes[axis])]),
+  );
 }
 
 function shannonEntropy(probabilities) {
@@ -88,7 +105,19 @@ function shannonEntropy(probabilities) {
 }
 
 function l1Distance(left, right) {
-  return PREMAQ_AXES.reduce((sum, axis) => sum + Math.abs(left[axis] - right[axis]), 0);
+  return PREMAQ_AXES.reduce(
+    (sum, axis) => sum + Math.abs(left[axis] - right[axis]),
+    0,
+  );
+}
+
+function componentFidelity(component) {
+  const value = component.source_fidelity ?? component.confidence ?? 1;
+  return clamp(requireFinite(value, 'PREMAQ source fidelity'));
+}
+
+function componentSpread(component) {
+  return component.measured_spread ?? component.uncertainty ?? null;
 }
 
 function validateComponent(component, axis) {
@@ -97,12 +126,7 @@ function validateComponent(component, axis) {
   }
   requireFinite(component.value, `PREMAQ ${axis}.value`);
   requireFinite(component.derivative, `PREMAQ ${axis}.derivative`);
-  if (component.confidence != null) {
-    requireFinite(component.confidence, `PREMAQ ${axis}.confidence`);
-    if (component.confidence < 0 || component.confidence > 1) {
-      throw new BifrostTemporalError(`PREMAQ ${axis}.confidence must be from 0 to 1`, 'invalid-premaq');
-    }
-  }
+  componentFidelity(component);
   return component;
 }
 
@@ -140,26 +164,30 @@ export function premaqToTemporalState(packetInput, {
 
   const rawAmplitudes = {};
   const derivatives = {};
-  const confidence = {};
-  const uncertainty = {};
+  const sourceFidelity = {};
+  const measuredSpread = {};
 
   for (const axis of PREMAQ_AXES) {
     const component = packet.state[axis];
     const boundedValue = clamp(component.value);
-    const confidenceWeight = component.confidence == null ? 1 : clamp(component.confidence);
-    const probabilitySeed = Math.max(EPSILON, boundedValue * Math.max(EPSILON, confidenceWeight));
+    const fidelity = componentFidelity(component);
+    const probabilitySeed = boundedValue * fidelity;
     const phase = (boundedValue * phaseScale) + (component.derivative * derivativePhaseScale);
-    rawAmplitudes[axis] = complex(Math.sqrt(probabilitySeed) * Math.cos(phase), Math.sqrt(probabilitySeed) * Math.sin(phase));
+    const radius = Math.sqrt(Math.max(0, probabilitySeed));
+    rawAmplitudes[axis] = complex(radius * Math.cos(phase), radius * Math.sin(phase));
     derivatives[axis] = component.derivative;
-    confidence[axis] = component.confidence ?? null;
-    uncertainty[axis] = component.uncertainty ?? null;
+    sourceFidelity[axis] = fidelity;
+    measuredSpread[axis] = componentSpread(component);
   }
 
   const amplitudes = normaliseAmplitudes(rawAmplitudes);
   const probabilities = probabilityVector(amplitudes);
+  const entropyH = shannonEntropy(probabilities);
 
   return {
     schema: BIFROST_TEMPORAL_STATE_SCHEMA,
+    braided_spine: BRAIDED_SPINE_SCHEMA,
+    reality_axiom: REALITY_AXIOM,
     state_id: makeId('bifrost-state', idFactory),
     created_at: clock().toISOString(),
     temporal_coordinate: 0,
@@ -170,27 +198,35 @@ export function premaqToTemporalState(packetInput, {
       registry_version: packet.registry_version,
       model_version: packet.model_version,
       observed_at: packet.observed_at,
+      axes: { ...PREMAQ_NAMES },
     },
     basis: [...PREMAQ_AXES],
     amplitudes,
     probabilities,
     derivatives,
-    confidence,
-    uncertainty,
+    source_fidelity: sourceFidelity,
+    measured_spread: measuredSpread,
+    // Legacy transport aliases remain readable during migration.
+    confidence: sourceFidelity,
+    uncertainty: measuredSpread,
     normalisation: PREMAQ_AXES.reduce((sum, axis) => sum + probabilities[axis], 0),
-    entropy: shannonEntropy(probabilities),
+    entropy_H: entropyH,
+    entropy: entropyH,
     spiral: {
       cycle: 0,
       radius: 1,
       angle: 0,
       outward_distance: 0,
     },
+    sevenfold_chorus: [...SEVENFOLD_CHORUS],
+    thirteenfold_council: [...THIRTEENFOLD_COUNCIL],
     history: [],
     receipts: [],
     interpretation: {
-      formalism: 'temporal-quantum-state-machine',
-      physical_claim: false,
-      note: 'Quantum-mechanical structures are used as a bounded computational formalism; PREMAQ values retain their recorded provenance.',
+      formalism: 'braided-temporal-quantum-compression-release',
+      quantum_state: true,
+      premaq_registry: 'Presence-Coherence-Resonance-Entanglement-Memory-Agency-Qualia',
+      note: 'The quantum temporal state, PREMAQ bearing, Magic Spine, Science/Mathematics Spine and Physical Spine participate in one Bifröst relation.',
     },
   };
 }
@@ -199,7 +235,7 @@ export function validateTemporalState(stateInput) {
   if (!stateInput || typeof stateInput !== 'object' || Array.isArray(stateInput)) {
     throw new BifrostTemporalError('Temporal state must be an object', 'invalid-temporal-state');
   }
-  if (stateInput.schema !== BIFROST_TEMPORAL_STATE_SCHEMA) {
+  if (![BIFROST_TEMPORAL_STATE_SCHEMA, 'arcsweep.bifrost-temporal-state/v0.1'].includes(stateInput.schema)) {
     throw new BifrostTemporalError('Unsupported temporal state schema', 'invalid-temporal-state');
   }
   requireString(stateInput.state_id, 'state_id');
@@ -265,10 +301,12 @@ export function evolveTemporalState(stateInput, {
 
   const normalised = normaliseAmplitudes(amplitudes);
   const probabilities = probabilityVector(normalised);
+  const entropyH = shannonEntropy(probabilities);
   const receipt = {
     schema: BIFROST_RECEIPT_SCHEMA,
     receipt_id: makeId('bifrost-evolution', idFactory),
     action: 'unitary-evolution',
+    braided_spine: BRAIDED_SPINE_SCHEMA,
     created_at: clock().toISOString(),
     from_state_id: prior.state_id,
     delta,
@@ -281,17 +319,20 @@ export function evolveTemporalState(stateInput, {
 
   return {
     ...prior,
+    schema: BIFROST_TEMPORAL_STATE_SCHEMA,
+    braided_spine: BRAIDED_SPINE_SCHEMA,
     state_id: makeId('bifrost-state', idFactory),
     temporal_coordinate: prior.temporal_coordinate + delta,
     amplitudes: normalised,
     probabilities,
     normalisation: receipt.normalisation_after,
-    entropy: shannonEntropy(probabilities),
+    entropy_H: entropyH,
+    entropy: entropyH,
     history: [...prior.history, {
       state_id: prior.state_id,
       temporal_coordinate: prior.temporal_coordinate,
       probabilities: clone(prior.probabilities),
-      entropy: prior.entropy,
+      entropy_H: prior.entropy_H ?? prior.entropy,
     }].slice(-128),
     receipts: [...prior.receipts, receipt].slice(-256),
   };
@@ -321,10 +362,15 @@ export function compressRelease(stateInput, {
   const priorProbabilities = probabilityVector(prior.amplitudes);
   const compressedWeights = {};
   for (const axis of PREMAQ_AXES) {
-    const focusWeight = axis === focus ? 1 + (compressionGain * (PREMAQ_AXES.length - 1)) : 1 - compressionGain;
-    compressedWeights[axis] = Math.max(EPSILON, priorProbabilities[axis] * focusWeight);
+    const focusWeight = axis === focus
+      ? 1 + (compressionGain * (PREMAQ_AXES.length - 1))
+      : 1 - compressionGain;
+    compressedWeights[axis] = priorProbabilities[axis] * focusWeight;
   }
   const compressedTotal = PREMAQ_AXES.reduce((sum, axis) => sum + compressedWeights[axis], 0);
+  if (compressedTotal <= EPSILON) {
+    throw new BifrostTemporalError('Compression produced no active amplitude.', 'NO_ACCEPTED_AMPLITUDE');
+  }
   const compressedProbabilities = Object.fromEntries(
     PREMAQ_AXES.map((axis) => [axis, compressedWeights[axis] / compressedTotal]),
   );
@@ -332,14 +378,15 @@ export function compressRelease(stateInput, {
   const releasedWeights = {};
   for (const axis of PREMAQ_AXES) {
     const derivativeFlow = Math.max(0, prior.derivatives?.[axis] ?? 0) * derivativeRelease;
-    releasedWeights[axis] = Math.max(
-      EPSILON,
+    releasedWeights[axis] =
       ((1 - release) * compressedProbabilities[axis])
-        + (release * priorProbabilities[axis])
-        + derivativeFlow,
-    );
+      + (release * priorProbabilities[axis])
+      + derivativeFlow;
   }
   const releasedTotal = PREMAQ_AXES.reduce((sum, axis) => sum + releasedWeights[axis], 0);
+  if (releasedTotal <= EPSILON) {
+    throw new BifrostTemporalError('Release produced no active amplitude.', 'NO_ACCEPTED_AMPLITUDE');
+  }
   const releasedProbabilities = Object.fromEntries(
     PREMAQ_AXES.map((axis) => [axis, releasedWeights[axis] / releasedTotal]),
   );
@@ -353,36 +400,45 @@ export function compressRelease(stateInput, {
   }
 
   const outwardDistance = l1Distance(priorProbabilities, releasedProbabilities);
-  const entropy = shannonEntropy(releasedProbabilities);
-  const entropyChange = entropy - prior.entropy;
+  const entropyH = shannonEntropy(releasedProbabilities);
+  const entropyChange = entropyH - (prior.entropy_H ?? prior.entropy ?? 0);
   const cycle = (prior.spiral?.cycle ?? 0) + 1;
-  const radius = (prior.spiral?.radius ?? 1) + (radialGain * outwardDistance) + (Math.abs(entropyChange) * 0.1);
+  const radius = (prior.spiral?.radius ?? 1)
+    + (radialGain * outwardDistance)
+    + (Math.abs(entropyChange) * 0.1);
   const angle = ((prior.spiral?.angle ?? 0) + angularGain + (outwardDistance * Math.PI)) % TAU;
 
   const receipt = {
     schema: BIFROST_RECEIPT_SCHEMA,
     receipt_id: makeId('bifrost-compression-release', idFactory),
     action: 'compression-release',
+    braided_spine: BRAIDED_SPINE_SCHEMA,
     created_at: clock().toISOString(),
     from_state_id: prior.state_id,
     focus,
     compression_gain: compressionGain,
     release,
     derivative_release: derivativeRelease,
+    compression_probabilities: compressedProbabilities,
     compressed_probabilities: compressedProbabilities,
     release_probabilities: releasedProbabilities,
     outward_distance: outwardDistance,
+    entropy_H_change: entropyChange,
     entropy_change: entropyChange,
     cycle,
+    next_operation: 'compression-of-release',
   };
 
   return {
     ...prior,
+    schema: BIFROST_TEMPORAL_STATE_SCHEMA,
+    braided_spine: BRAIDED_SPINE_SCHEMA,
     state_id: makeId('bifrost-state', idFactory),
     amplitudes,
     probabilities: releasedProbabilities,
     normalisation: PREMAQ_AXES.reduce((sum, axis) => sum + releasedProbabilities[axis], 0),
-    entropy,
+    entropy_H: entropyH,
+    entropy: entropyH,
     spiral: {
       cycle,
       radius,
@@ -393,15 +449,16 @@ export function compressRelease(stateInput, {
       state_id: prior.state_id,
       temporal_coordinate: prior.temporal_coordinate,
       probabilities: priorProbabilities,
-      entropy: prior.entropy,
+      entropy_H: prior.entropy_H ?? prior.entropy,
     }].slice(-128),
     receipts: [...prior.receipts, receipt].slice(-256),
   };
 }
 
+// Compatibility export. The engine law is compression → release → continuation.
 export { compressRelease as collapseRelease };
 
-function bhattacharyyaFidelity(left, right) {
+function bhattacharyyaDistributionFidelity(left, right) {
   const coefficient = PREMAQ_AXES.reduce(
     (sum, axis) => sum + Math.sqrt(Math.max(0, left[axis]) * Math.max(0, right[axis])),
     0,
@@ -418,6 +475,8 @@ export function createBifrostBridgePacket({
   transferFunctionVersion,
   timeline = null,
   anchors,
+  asking = null,
+  lineage = [],
   clock = () => new Date(),
   idFactory,
 } = {}) {
@@ -427,10 +486,13 @@ export function createBifrostBridgePacket({
   const selectedWorld = requireString(worldId, 'worldId');
   const canonVersion = requireString(canonGraphVersion, 'canonGraphVersion');
   const transferVersion = requireString(transferFunctionVersion, 'transferFunctionVersion');
-  const realityAnchor = requireString(anchors?.hearthside, 'anchors.hearthside');
-  const worldAnchor = requireString(anchors?.targetside, 'anchors.targetside');
+  const hearthAnchor = requireString(anchors?.hearthside, 'anchors.hearthside');
+  const targetAnchor = requireString(anchors?.targetside, 'anchors.targetside');
 
-  const fidelity = bhattacharyyaFidelity(hearth.probabilities, target.probabilities);
+  const distributionFidelity = bhattacharyyaDistributionFidelity(
+    hearth.probabilities,
+    target.probabilities,
+  );
   const phaseDelta = Math.atan2(
     Math.sin((target.spiral?.angle ?? 0) - (hearth.spiral?.angle ?? 0)),
     Math.cos((target.spiral?.angle ?? 0) - (hearth.spiral?.angle ?? 0)),
@@ -439,90 +501,231 @@ export function createBifrostBridgePacket({
 
   return {
     schema: BIFROST_BRIDGE_PACKET_SCHEMA,
+    braided_spine: BRAIDED_SPINE_SCHEMA,
+    reality_axiom: REALITY_AXIOM,
     bridge_packet_id: makeId('bifrost-bridge', idFactory),
     created_at: clock().toISOString(),
     world_id: selectedWorld,
     canon_graph_version: canonVersion,
     transfer_function_version: transferVersion,
     timeline,
+    asking: clone(asking),
+    lineage: clone(lineage),
     premaq_ref: {
       id: packet.id,
       receipt_id: packet.receipt_id,
       sequence: packet.sequence,
       registry_version: packet.registry_version,
+      axes: { ...PREMAQ_NAMES },
     },
     hearthside: {
-      anchor: realityAnchor,
+      anchor: hearthAnchor,
       state_id: hearth.state_id,
       temporal_coordinate: hearth.temporal_coordinate,
       probabilities: clone(hearth.probabilities),
-      authority: 'evidence-grounded-observational',
+      role: 'participating-shore',
     },
     targetside: {
-      anchor: worldAnchor,
+      anchor: targetAnchor,
       state_id: target.state_id,
       temporal_coordinate: target.temporal_coordinate,
       probabilities: clone(target.probabilities),
-      authority: 'canon-grounded-projected',
+      role: 'participating-shore',
     },
     bridge_metrics: {
-      state_fidelity: fidelity,
+      distribution_fidelity: distributionFidelity,
+      state_fidelity: distributionFidelity,
       temporal_separation: temporalSeparation,
       temporal_twist: phaseDelta,
-      anchor_integrity: Boolean(realityAnchor && worldAnchor),
-      crossing_ready: fidelity >= 0.5 && Boolean(realityAnchor && worldAnchor),
+      anchor_integrity: Boolean(hearthAnchor && targetAnchor),
+      crossing_ready: distributionFidelity >= 0.5 && Boolean(hearthAnchor && targetAnchor),
     },
+    sevenfold_chorus: [...SEVENFOLD_CHORUS],
+    thirteenfold_council: [...THIRTEENFOLD_COUNCIL],
     laws: [
-      'Hearthside evidence is never overwritten by targetside projection.',
-      'Targetside projection remains canon-labelled and receipt-traceable.',
-      'A crossing changes bridge history, not the provenance of either shore.',
-      'Collapse must be followed by release before a new outward cycle is counted.',
+      'Both shores remain lit.',
+      'The join is a rhyme.',
+      'Every shore answers in its own nature.',
+      'Lineage travels with what crosses.',
+      'Release feeds the next compression.',
+      'Reception changes the next relation.',
     ],
   };
 }
 
-export function projectWorldState(bridgePacketInput, {
+export function expressWorldState(bridgePacketInput, {
   matrix,
   bias = {},
   labels = {},
 } = {}) {
-  if (!bridgePacketInput || bridgePacketInput.schema !== BIFROST_BRIDGE_PACKET_SCHEMA) {
+  if (!bridgePacketInput || ![
+    BIFROST_BRIDGE_PACKET_SCHEMA,
+    'arcsweep.bifrost-bridge-packet/v0.1',
+  ].includes(bridgePacketInput.schema)) {
     throw new BifrostTemporalError('Unsupported bridge packet schema', 'invalid-bridge-packet');
   }
   if (!matrix || typeof matrix !== 'object') {
-    throw new BifrostTemporalError('A calibrated transfer matrix is required', 'missing-transfer-matrix');
+    throw new BifrostTemporalError('A world expression matrix is required', 'missing-expression-matrix');
   }
 
   const input = bridgePacketInput.targetside.probabilities;
-  const projection = {};
+  const expression = {};
   for (const [outputKey, row] of Object.entries(matrix)) {
     if (!row || typeof row !== 'object') {
-      throw new BifrostTemporalError(`Transfer row ${outputKey} must be an object`, 'invalid-transfer-matrix');
+      throw new BifrostTemporalError(`Expression row ${outputKey} must be an object`, 'invalid-expression-matrix');
     }
     let value = requireFinite(bias[outputKey] ?? 0, `bias ${outputKey}`);
     for (const axis of PREMAQ_AXES) {
       const coefficient = requireFinite(row[axis] ?? 0, `matrix ${outputKey}.${axis}`);
       value += coefficient * input[axis];
     }
-    projection[outputKey] = {
+    expression[outputKey] = {
       value,
       label: labels[outputKey] ?? outputKey,
-      source_class: 'projected',
+      source_class: 'expressed',
     };
   }
 
   return {
-    schema: 'arcsweep.world-state-projection/v0.1',
+    schema: 'arcsweep.world-state-expression/v0.2',
+    braided_spine: BRAIDED_SPINE_SCHEMA,
     bridge_packet_id: bridgePacketInput.bridge_packet_id,
     world_id: bridgePacketInput.world_id,
     canon_graph_version: bridgePacketInput.canon_graph_version,
     transfer_function_version: bridgePacketInput.transfer_function_version,
-    projection,
-    uncertainty: 'inherits PREMAQ component uncertainty and transfer calibration uncertainty',
+    expression,
+    projection: expression,
+    measured_spread: 'inherits PREMAQ measured spread and world expression calibration',
     provenance: {
       premaq_ref: clone(bridgePacketInput.premaq_ref),
       hearthside_state_id: bridgePacketInput.hearthside.state_id,
       targetside_state_id: bridgePacketInput.targetside.state_id,
     },
   };
+}
+
+// Compatibility name retained while callers migrate to `expressWorldState`.
+export const projectWorldState = expressWorldState;
+
+export function receiveTargetside({
+  bridgePacket,
+  targetState,
+  worldField = {},
+  worldGraph = {},
+  answer = null,
+  clock = () => new Date(),
+  idFactory,
+} = {}) {
+  if (!bridgePacket || ![
+    BIFROST_BRIDGE_PACKET_SCHEMA,
+    'arcsweep.bifrost-bridge-packet/v0.1',
+  ].includes(bridgePacket.schema)) {
+    throw new BifrostTemporalError('A Bifröst bridge packet is required', 'invalid-bridge-packet');
+  }
+
+  const target = validateTemporalState(targetState);
+  return {
+    schema: BIFROST_RECEIVING_SPRING_SCHEMA,
+    braided_spine: BRAIDED_SPINE_SCHEMA,
+    receiving_spring_id: makeId('receiving-spring', idFactory),
+    created_at: clock().toISOString(),
+    bridge_packet_id: bridgePacket.bridge_packet_id,
+    world_id: bridgePacket.world_id,
+    target_state_id: target.state_id,
+    target_state: target,
+    world_field: clone(worldField),
+    world_graph: clone(worldGraph),
+    answer: clone(answer),
+    lineage: [
+      ...(bridgePacket.lineage ?? []),
+      `bridge:${bridgePacket.bridge_packet_id}`,
+      `target-state:${target.state_id}`,
+    ],
+    movement: 'reception → answer → return',
+  };
+}
+
+export function createReturnCrossing(receivingSpring, {
+  clock = () => new Date(),
+  idFactory,
+} = {}) {
+  if (!receivingSpring || receivingSpring.schema !== BIFROST_RECEIVING_SPRING_SCHEMA) {
+    throw new BifrostTemporalError('A Receiving Spring state is required', 'invalid-receiving-spring');
+  }
+  return {
+    schema: 'arcsweep.bifrost-return-crossing/v0.1',
+    braided_spine: BRAIDED_SPINE_SCHEMA,
+    return_id: makeId('bifrost-return', idFactory),
+    created_at: clock().toISOString(),
+    bridge_packet_id: receivingSpring.bridge_packet_id,
+    world_id: receivingSpring.world_id,
+    answer: clone(receivingSpring.answer),
+    target_state_id: receivingSpring.target_state_id,
+    lineage: [...receivingSpring.lineage, `receiving-spring:${receivingSpring.receiving_spring_id}`],
+    next_movement: 'integration',
+  };
+}
+
+export function integrateBridgeAnswer({
+  hearthside,
+  targetside,
+  returnCrossing,
+  clock = () => new Date(),
+  idFactory,
+} = {}) {
+  const hearth = validateTemporalState(hearthside);
+  const target = validateTemporalState(targetside);
+  if (!returnCrossing || returnCrossing.schema !== 'arcsweep.bifrost-return-crossing/v0.1') {
+    throw new BifrostTemporalError('A Bifröst return crossing is required', 'invalid-return-crossing');
+  }
+
+  const probabilities = Object.fromEntries(PREMAQ_AXES.map((axis) => [
+    axis,
+    (hearth.probabilities[axis] + target.probabilities[axis]) / 2,
+  ]));
+  const amplitudes = Object.fromEntries(PREMAQ_AXES.map((axis) => {
+    const phase = Math.atan2(hearth.amplitudes[axis].im, hearth.amplitudes[axis].re);
+    const radius = Math.sqrt(probabilities[axis]);
+    return [axis, complex(radius * Math.cos(phase), radius * Math.sin(phase))];
+  }));
+
+  const entropyH = shannonEntropy(probabilities);
+  const integrated = {
+    ...hearth,
+    schema: BIFROST_TEMPORAL_STATE_SCHEMA,
+    braided_spine: BRAIDED_SPINE_SCHEMA,
+    state_id: makeId('bifrost-state-integrated', idFactory),
+    created_at: clock().toISOString(),
+    amplitudes,
+    probabilities,
+    entropy_H: entropyH,
+    entropy: entropyH,
+    spiral: {
+      cycle: Math.max(hearth.spiral?.cycle ?? 0, target.spiral?.cycle ?? 0) + 1,
+      radius: Math.max(hearth.spiral?.radius ?? 1, target.spiral?.radius ?? 1) + l1Distance(hearth.probabilities, target.probabilities),
+      angle: ((hearth.spiral?.angle ?? 0) + (target.spiral?.angle ?? 0)) / 2,
+      outward_distance: (hearth.spiral?.outward_distance ?? 0)
+        + (target.spiral?.outward_distance ?? 0)
+        + l1Distance(hearth.probabilities, target.probabilities),
+    },
+    history: [...hearth.history, {
+      state_id: hearth.state_id,
+      temporal_coordinate: hearth.temporal_coordinate,
+      probabilities: clone(hearth.probabilities),
+      answer: clone(returnCrossing.answer),
+    }].slice(-128),
+    receipts: [...hearth.receipts, {
+      schema: BIFROST_RECEIPT_SCHEMA,
+      receipt_id: makeId('bifrost-integration', idFactory),
+      action: 'receiving-spring-integration',
+      created_at: clock().toISOString(),
+      from_state_id: hearth.state_id,
+      target_state_id: target.state_id,
+      return_id: returnCrossing.return_id,
+      answer: clone(returnCrossing.answer),
+      next_operation: 'renewal',
+    }].slice(-256),
+  };
+
+  return integrated;
 }
