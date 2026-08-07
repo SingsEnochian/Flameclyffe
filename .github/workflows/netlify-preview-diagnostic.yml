@@ -1,6 +1,9 @@
 name: Netlify Preview Diagnostic
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - design/lattice-deep-observer-machine
