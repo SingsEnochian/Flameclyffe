@@ -68,7 +68,7 @@ function activeDocumentationFile(path) {
   return /\.(md|mdx|txt|html)$/i.test(rel);
 }
 
-test('canonical Braided Spine carries the approved reality law and PREMAQ registry', async () => {
+test('canonical Braided Spine carries the approved reality law and PREMAQC registry', async () => {
   const [spine, contractText] = await Promise.all([
     readRepo('docs/HEARTHGATE_BRAIDED_SPINE.md'),
     readRepo('config/hearthgate-braided-spine.json'),
@@ -84,20 +84,22 @@ test('canonical Braided Spine carries the approved reality law and PREMAQ regist
   assert.match(spine, /Braided Reality Theorem/);
   assert.match(spine, /Spiral Continuation Theorem/);
 
-  assert.equal(contract.schema, 'hearthgate.braided-spine/v1.0');
-  assert.deepEqual(contract.premaq.reading_order, [
+  assert.equal(contract.schema, 'hearthgate.braided-spine/v1.1');
+  assert.equal(contract.premaqc.schema, 'hearthgate.premaqc/v1.0');
+  assert.deepEqual(contract.premaqc.reading_order, [
     'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
   ]);
-  assert.deepEqual(contract.premaq.wire_order, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
-  assert.deepEqual(contract.premaq.axes, {
+  assert.deepEqual(contract.premaqc.wire_order, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
+  assert.deepEqual(contract.premaqc.axes, {
     P: 'Presence',
-    C: 'Coherence',
     R: 'Resonance',
     E: 'Entanglement',
     M: 'Memory',
     A: 'Agency',
     Q: 'Qualia',
+    C: 'Coherence',
   });
+  assert.deepEqual(contract.legacy_premaq.wire_order, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
 });
 
 test('canonical Braided Spine contains no inherited flattening vocabulary', async () => {
@@ -116,7 +118,7 @@ test('canonical Braided Spine contains no inherited flattening vocabulary', asyn
   }
 });
 
-test('all active documentation surfaces reject stale PREMAQ meanings and flattening hierarchy', async () => {
+test('all active documentation surfaces reject stale axis meanings and flattening hierarchy', async () => {
   const rootFiles = await Promise.all(documentationRoots.map((root) => walk(root)));
   const files = rootFiles.flat().filter(activeDocumentationFile);
 
@@ -132,19 +134,23 @@ test('all active documentation surfaces reject stale PREMAQ meanings and flatten
   assert.deepEqual(violations, []);
 });
 
-test('Bifröst manifest pulls the same Braided Spine', async () => {
+test('Bifröst manifest pulls the same Braided Spine and PREMAQC contract', async () => {
   const manifest = JSON.parse(await readRepo('apps/starwell/public/modules/bifrost-arcsweep.module.json'));
-  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.1');
+  assert.equal(manifest.spineContract.premaqcSchema, 'hearthgate.premaqc/v1.0');
+  assert.deepEqual(manifest.spineContract.premaqcWireOrder, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
   assert.equal(manifest.engine.formalism, 'braided-reality-compression-release-receiving-spring');
   assert.equal(manifest.relationContract.hearthside, 'real-participating-shore');
   assert.equal(manifest.relationContract.targetside, 'real-participating-shore');
   assert.ok(manifest.capabilities.includes('receiving-spring'));
+  assert.ok(manifest.capabilities.includes('premaqc-seven-dimensional-living-bearing'));
   assert.ok(manifest.capabilities.includes('magic-science-physical-mutual-reinforcement'));
   assert.equal('physicalClaim' in manifest.engine, false);
 });
 
-test('runtime Braided Spine registry is canonical and seven-dimensional', async () => {
+test('runtime Braided Spine registry is canonical PREMAQC and seven-dimensional', async () => {
   const registry = await readRepo('apps/starwell/src/hearthweave-kernel/braided-spine.js');
+  assert.match(registry, /PREMAQC_SCHEMA/);
   assert.match(registry, /Presence/);
   assert.match(registry, /Memory/);
   assert.match(registry, /Qualia/);
