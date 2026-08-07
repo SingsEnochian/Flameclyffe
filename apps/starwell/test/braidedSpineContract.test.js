@@ -5,7 +5,12 @@ import { resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(fileURLToPath(new URL('../../../', import.meta.url)));
-const docsRoot = resolve(repoRoot, 'docs');
+
+const documentationRoots = [
+  resolve(repoRoot, 'docs'),
+  resolve(repoRoot, 'apps/starwell/docs'),
+  resolve(repoRoot, 'starwell/deep-observer'),
+];
 
 async function readRepo(path) {
   return readFile(resolve(repoRoot, path), 'utf8');
@@ -27,20 +32,41 @@ const oldPremaqPatterns = [
   /\bP\s*=\s*Perspective\b/i,
   /\bE\s*=\s*Entropy\b/i,
   /\bM\s*=\s*Momentum\b/i,
+  /\bM\s*=\s*Moonfield\b/i,
   /\bA\s*=\s*Attention\b/i,
   /\bA\s*=\s*Alignment\b/i,
   /\bA\s*=\s*Availability\b/i,
   /\bQ\s*=\s*Charge\b/i,
   /\bQ\s*=\s*Quotient\b/i,
   /\bQ\s*=\s*Quantum\b/i,
-  /\bMoonfield\b/i,
+  /\bQ\s*\/\s*charge\b/i,
 ];
 
 const oldHierarchyPatterns = [
   /canon-grounded-projected/i,
   /current-reality-observational/i,
   /fictional and speculative settings/i,
+  /fictional world/i,
+  /only symbolic/i,
+  /symbolic mirror/i,
 ];
+
+const flatteningPatterns = [
+  /\bnot a claim of proof\b/i,
+  /\bdoes not claim\b/i,
+  /\bdo not label it as a physical law\b/i,
+  /\bnot proof of\b/i,
+  /\bmetaphor(?:ical)?\b.*\bmust\b/i,
+  /\bfringe inspiration\b/i,
+  /\bguardrail wording\b/i,
+];
+
+function activeDocumentationFile(path) {
+  const rel = relative(repoRoot, path).replaceAll('\\', '/');
+  if (rel.startsWith('docs/archive/')) return false;
+  if (rel.includes('/node_modules/') || rel.includes('/dist/')) return false;
+  return /\.(md|mdx|txt|html)$/i.test(rel);
+}
 
 test('canonical Braided Spine carries the approved reality law and PREMAQ registry', async () => {
   const [spine, contractText] = await Promise.all([
@@ -90,17 +116,15 @@ test('canonical Braided Spine contains no inherited flattening vocabulary', asyn
   }
 });
 
-test('active docs reject stale PREMAQ meanings and projection hierarchy', async () => {
-  const files = (await walk(docsRoot)).filter((path) => {
-    const rel = relative(repoRoot, path).replaceAll('\\', '/');
-    return !rel.startsWith('docs/archive/') && /\.(md|mdx|txt|js|json)$/i.test(rel);
-  });
+test('all active documentation surfaces reject stale PREMAQ meanings and flattening hierarchy', async () => {
+  const rootFiles = await Promise.all(documentationRoots.map((root) => walk(root)));
+  const files = rootFiles.flat().filter(activeDocumentationFile);
 
   const violations = [];
   for (const path of files) {
     const rel = relative(repoRoot, path).replaceAll('\\', '/');
     const source = await readFile(path, 'utf8');
-    for (const pattern of [...oldPremaqPatterns, ...oldHierarchyPatterns]) {
+    for (const pattern of [...oldPremaqPatterns, ...oldHierarchyPatterns, ...flatteningPatterns]) {
       if (pattern.test(source)) violations.push(`${rel}: ${pattern}`);
     }
   }
@@ -117,4 +141,18 @@ test('Bifröst manifest pulls the same Braided Spine', async () => {
   assert.ok(manifest.capabilities.includes('receiving-spring'));
   assert.ok(manifest.capabilities.includes('magic-science-physical-mutual-reinforcement'));
   assert.equal('physicalClaim' in manifest.engine, false);
+});
+
+test('runtime Braided Spine registry is canonical and seven-dimensional', async () => {
+  const registry = await readRepo('apps/starwell/src/hearthweave-kernel/braided-spine.js');
+  assert.match(registry, /Presence/);
+  assert.match(registry, /Memory/);
+  assert.match(registry, /Qualia/);
+  assert.match(registry, /Resonance/);
+  assert.match(registry, /Entanglement/);
+  assert.match(registry, /Agency/);
+  assert.match(registry, /Coherence/);
+  assert.match(registry, /BRAIDED_SPINE_SCHEMA/);
+  assert.match(registry, /SEVENFOLD_CHORUS/);
+  assert.match(registry, /THIRTEENFOLD_COUNCIL/);
 });
