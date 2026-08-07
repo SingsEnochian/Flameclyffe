@@ -1,0 +1,11 @@
+# Hearthgate Braided Runtime
+
+Runtime contracts:
+
+- `BRAID_PACKET_RUNTIME_CONTRACT.md`
+- `PREMAQ_CANONICAL_REGISTRY.md`
+- `THREE_SPINE_INHERITANCE.md`
+- `SEVENFOLD_PREMAQ_CORRESPONDENCE.md`
+- `RECEIVING_SPRING_RUNTIME.md`
+
+Canonical authority remains `../HEARTHGATE_BRAIDED_SPINE.md`.
