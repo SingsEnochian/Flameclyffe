@@ -40,14 +40,20 @@ if (manifest.spineContract?.document !== 'docs/HEARTHGATE_BRAIDED_SPINE.md') {
 if (manifest.spineContract?.machine !== 'config/hearthgate-braided-spine.json') {
   errors.push('Bifröst manifest must point at the Braided Spine machine contract.');
 }
-if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.0') {
-  errors.push('Bifröst manifest must inherit hearthgate.braided-spine/v1.0.');
+if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.1') {
+  errors.push('Bifröst manifest must inherit hearthgate.braided-spine/v1.1.');
+}
+if (manifest.spineContract?.premaqcSchema !== 'hearthgate.premaqc/v1.0') {
+  errors.push('Bifröst manifest must inherit PREMAQC v1.0.');
 }
 if (manifest.spineContract?.realityAxiom !== 'Everything is real') {
   errors.push('Bifröst manifest must carry the Everything is real axiom.');
 }
-if (spine.schema !== 'hearthgate.braided-spine/v1.0') {
+if (spine.schema !== 'hearthgate.braided-spine/v1.1') {
   errors.push('Canonical Braided Spine machine contract has the wrong schema.');
+}
+if (spine.premaqc?.schema !== 'hearthgate.premaqc/v1.0') {
+  errors.push('Canonical machine contract must carry PREMAQC v1.0.');
 }
 
 const version = String(manifest.version || '').split('.').map(Number);
@@ -62,7 +68,9 @@ for (const capability of [
   'compression-release-cycles',
   'compression-of-release-recursion',
   'receiving-spring',
-  'braided-spine-v1',
+  'braided-spine-v1.1',
+  'premaqc-seven-dimensional-living-bearing',
+  'premaqc-canonical-wire-premaqc',
   'magic-science-physical-mutual-reinforcement',
   'three-spine-braid-packet',
 ]) {
@@ -90,22 +98,32 @@ if (manifest.relationContract?.hearthside !== 'real-participating-shore') {
 if (manifest.relationContract?.targetside !== 'real-participating-shore') {
   errors.push('Targetside must be a real participating shore.');
 }
+if (manifest.relationContract?.rendererStateContinuity !== 'same-packet-fingerprint-through-activation') {
+  errors.push('Renderers must carry one Braid Packet fingerprint through activation.');
+}
 
 const expectedReadingOrder = [
   'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
 ];
-const expectedWireOrder = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
-if (JSON.stringify(manifest.spineContract?.premaqReadingOrder) !== JSON.stringify(expectedReadingOrder)) {
-  errors.push('Bifröst PREMAQ reading order diverges from the Braided Spine.');
+const expectedWireOrder = ['P', 'R', 'E', 'M', 'A', 'Q', 'C'];
+const legacyWireOrder = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
+if (JSON.stringify(manifest.spineContract?.premaqcReadingOrder) !== JSON.stringify(expectedReadingOrder)) {
+  errors.push('Bifröst PREMAQC reading order diverges from the Braided Spine.');
 }
-if (JSON.stringify(manifest.spineContract?.premaqWireOrder) !== JSON.stringify(expectedWireOrder)) {
-  errors.push('Bifröst PREMAQ wire order diverges from the Braided Spine.');
+if (JSON.stringify(manifest.spineContract?.premaqcWireOrder) !== JSON.stringify(expectedWireOrder)) {
+  errors.push('Bifröst PREMAQC wire order diverges from the Braided Spine.');
 }
-if (JSON.stringify(spine.premaq?.reading_order) !== JSON.stringify(expectedReadingOrder)) {
-  errors.push('Canonical PREMAQ reading order is incorrect.');
+if (JSON.stringify(manifest.spineContract?.legacyPremaqWireOrder) !== JSON.stringify(legacyWireOrder)) {
+  errors.push('Bifröst legacy PREMAQ decoder order is not explicitly preserved as lineage.');
 }
-if (JSON.stringify(spine.premaq?.wire_order) !== JSON.stringify(expectedWireOrder)) {
-  errors.push('Canonical PREMAQ wire order is incorrect.');
+if (JSON.stringify(spine.premaqc?.reading_order) !== JSON.stringify(expectedReadingOrder)) {
+  errors.push('Canonical PREMAQC reading order is incorrect.');
+}
+if (JSON.stringify(spine.premaqc?.wire_order) !== JSON.stringify(expectedWireOrder)) {
+  errors.push('Canonical PREMAQC wire order is incorrect.');
+}
+if (JSON.stringify(spine.legacy_premaq?.wire_order) !== JSON.stringify(legacyWireOrder)) {
+  errors.push('Canonical machine contract must preserve the legacy PREMAQ decoder order as lineage.');
 }
 
 if (manifest.schemas?.braidPacket !== 'schemas/braid-packet-v1.schema.json') {
@@ -117,10 +135,14 @@ if (!manifest.installContract?.verifySchemas?.includes('schemas/braid-packet-v1.
 
 const pkg = JSON.parse(read('package.json'));
 if (pkg.engines?.node !== '24.x' || pkg.engines?.npm !== '11.x') {
-  errors.push('Root package engine contract must remain Node 24.x and npm 11.x.');
+  errors.push('Root package engine contract must remain Node 24.x LTS and npm 11.x.');
 }
 if (pkg.packageManager !== 'npm@11.16.0') {
   errors.push('Root packageManager must remain pinned to npm@11.16.0.');
+}
+const nvmrc = read('.nvmrc').trim();
+if (nvmrc !== '24.19.0') {
+  errors.push(`.nvmrc must pin the current Node 24 LTS patch, found ${nvmrc}.`);
 }
 
 const lock = JSON.parse(read('package-lock.json'));
@@ -171,7 +193,8 @@ if (errors.length) {
 console.log('[Hearthgate Braided Spine provenance guard] PASSED');
 console.log(` lockfile records: ${lockEntries.length}`);
 console.log(` Bifröst version: ${manifest.version}`);
-console.log(' spine: hearthgate.braided-spine/v1.0');
-console.log(' PREMAQ: Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence');
+console.log(' spine: hearthgate.braided-spine/v1.1');
+console.log(' PREMAQC: Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence');
+console.log(' wire: P R E M A Q C');
 console.log(' cycle: compression → release → crossing → Receiving Spring → answer → return → renewal');
 console.log(' naming authority: Rowan');
