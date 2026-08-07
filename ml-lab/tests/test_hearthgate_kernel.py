@@ -20,7 +20,7 @@ from flameclyffe_ml.hearthgate_kernel import (
 from flameclyffe_ml.provenance import content_hash
 
 FIXED_TIME = datetime(2026, 8, 2, 6, 0, tzinfo=timezone.utc)
-FIXED_PREMAQ = PREMAQ(P=0.82, C=0.88, R=0.79, E=0.22, M=0.76, A=0.84)
+FIXED_PREMAQ = PREMAQ(P=0.82, C=0.88, R=0.79, E=0.22, M=0.76, A=0.84, Q=0.73)
 
 
 def provenance(label: str) -> tuple[ProvenanceRecord, ...]:
@@ -73,6 +73,13 @@ def packet(
         observed_at=FIXED_TIME,
         causal_order=causal_order,
     )
+
+
+def test_premaq_uses_independent_qualia_axis() -> None:
+    assert FIXED_PREMAQ.Q == 0.73
+    assert FIXED_PREMAQ.legacy_q_aggregate_v0 != FIXED_PREMAQ.Q
+    with pytest.raises(ValidationError):
+        PREMAQ(P=0.82, C=0.88, R=0.79, E=0.22, M=0.76, A=0.84)
 
 
 def test_every_house_has_a_distinct_harmonic_signature() -> None:
