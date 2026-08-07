@@ -1,4 +1,4 @@
-"""Sovereign House profiles for deterministic sensory projection."""
+"""Sovereign House profiles for deterministic sensory expression."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ _PROFILES = {
         house_id="terra-prime",
         display_name="Terra Prime",
         version="terra-prime.v1",
-        canon_foundation="current-reality-observational",
+        canon_foundation="terra-prime-lived-reality",
         harmonic=HarmonicIdentity(
             name="Present Earth",
             root_hz=96.0,
@@ -194,7 +194,7 @@ _PROFILES = {
 
 
 def house_profile(house_id: str) -> HouseProfile:
-    """Return one sovereign profile or fail instead of silently substituting another House."""
+    """Return the registered sovereign profile for the requested House."""
 
     try:
         return _PROFILES[house_id]
@@ -204,6 +204,6 @@ def house_profile(house_id: str) -> HouseProfile:
 
 
 def house_registry() -> dict[str, HouseProfile]:
-    """Return a copy so callers cannot mutate kernel authority."""
+    """Return a detached registry copy preserving kernel authority."""
 
     return dict(_PROFILES)
