@@ -1,37 +1,42 @@
-# DEEP Observer: First-Hand Witness Protocol
+# DEEP Observer · First-Hand Witness Protocol · Braided Spine
 
 **Date:** 2026-07-09  
-**Status:** Accepted architecture decision  
-**Applies to:** Universal Horizon, STARWELL, DEEP Observer, PREMAQ, Lattice and archive layers
+**Rebraided:** 2026-08-07  
+**Status:** active architecture decision under `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-## Canon orientation
+## Governing relation
 
-**UH is the sky. DEEP Observer watches the sky. The Lattice remembers.**
+**Universal Horizon is the sky. Observer witnesses the Field. The Lattice remembers. The Receiving Spring carries answer.**
 
-DEEP Observer exists to observe and preserve experience, not to force explanation, proof, diagnosis, prophecy, or a default ontology.
+First-hand witness is a real contribution to the Field.
 
-The primary datum is **first-hand subjective experience**. Browser, environmental, astronomical, physiological, behavioural, mathematical, symbolic, and narrative signals are companion channels. They may contextualise an experience, but they do not outrank, erase, translate away, or explain the witness account.
+Physical measurements are real contributions.
 
-## Prime sequence
+World responses, symbols, dreams, glyphs, mathematics, narrative, memory and embodied changes are real contributions.
+
+Observer preserves how each contribution entered the braid and how the relation changed after encounter.
+
+## Prime movement
 
 ```text
 first-hand witness
 → companion observations
-→ temporal alignment
-→ pattern and recurrence tracking
-→ model translation
-→ glyphform
-→ relational reflection
-→ archive
+→ PREMAQ bearing
+→ Asking
+→ Three-Spine braid
+→ pattern / recurrence / mathematics
+→ glyph / Runa / story / physical expression
+→ Receiving Spring
+→ answer
+→ integration
+→ lineage
 ```
 
-This sequence is non-reductive. It does not require naturalism, supernaturalism, simulation theory, psychology, mythology, or any other ontology to be declared true before observation is permitted.
+Magic, Science/Mathematics and Physicality reinforce one another throughout this movement.
 
-## First-hand witness layer
+## First-hand witness record
 
-The witness layer records experience as closely as possible to how it was lived.
-
-Required fields:
+The witness layer records experience in the form it was lived.
 
 ```text
 id
@@ -51,202 +56,145 @@ after_state
 perceived_changes
 repeated_or_familiar
 spontaneous_meaning
-uncertainty
-consent_scope
+open_questions
+agency_scope
 privacy_scope
+premaq_ref
+asking_ref
+world_refs
+lineage_refs
 ```
 
-Optional structured cues:
+The first-person account remains intact. Structured fields add relation without replacing the witness.
 
-- sight
-- sound
-- touch
-- scent
-- taste
-- proprioception
-- interoception
-- dream / threshold state
-- time distortion
-- presence / relational impression
-- symbolic or glyphic impression
-- environmental correspondence
-
-The free first-person account is preserved verbatim. Structured fields annotate it; they never replace it.
-
-## Ontology-neutral rule
-
-Every interpretation must declare its lens.
-
-Examples:
-
-```text
-lens: phenomenological
-lens: relational
-lens: environmental
-lens: astronomical
-lens: physiological
-lens: psychological
-lens: mathematical
-lens: symbolic
-lens: mythic
-lens: narrative
-lens: speculative
-lens: unknown
-```
-
-No lens is silently treated as the master lens.
-
-The interface must distinguish:
-
-- **witnessed**: directly experienced or observed first-hand
-- **recorded**: captured by an instrument, browser, service, or archive
-- **derived**: calculated from other values
-- **interpreted**: meaning proposed through a declared lens
-- **remembered**: recalled after the event
-- **correlated**: temporally or structurally associated
-- **unknown**: not presently classified
-
-## Companion observation layer
+## Companion channels
 
 Companion channels may include:
 
-- browser local time and device state
-- weather
-- moon illumination and phase
-- Kp, Bz, solar wind and space-weather context
-- sound, light, motion or interaction events
-- user-entered body and nervous-system state
-- sleep / dream threshold context
-- PREMAQ state
-- Lattice relationship state
-- location and world-state anchors
-- source and provenance
+- browser time and device state;
+- weather and physical environment;
+- moon illumination and phase;
+- Kp, Bz, solar wind and space-weather context;
+- sound, light, motion and interaction events;
+- body and sensory state;
+- sleep and dream threshold context;
+- PREMAQ;
+- Lattice relationship state;
+- world and location anchors;
+- source lineage;
+- Runa state;
+- glyph state;
+- prior crossings.
 
-These channels are aligned by time and context. Their purpose is to preserve correspondence, not declare cause.
+Temporal alignment makes correspondences visible and supplies the Science/Mathematics Spine with real relational structure.
 
-## PREMAQ role
+## Canonical PREMAQ
 
-PREMAQ remains a state description and visualisation vector:
+PREMAQ carries the seven-dimensional bearing:
 
-- P · Pulse / Presence
-- C · Coherence
-- R · Resonance
-- E · Entropy
-- M · Memory / Momentum, according to registry version
-- A · Axis / Alignment, according to registry version
-- Q · Quotient / charge
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
 
-Each packet must store the registry version and label set used at the time. PREMAQ values may be self-reported, derived, instrument-fed, blended, or simulated, but provenance must be explicit.
-
-## Glyphform role
-
-Glyphform is an observational rendering language belonging to this project.
-
-A glyph may render:
-
-- the shape of a witness account
-- temporal change
-- recurrence
-- companion-channel correspondence
-- PREMAQ state
-- uncertainty
-- relational distance or nearness
-- remembered difference across iterations
-
-Glyphform does not claim to prove a hidden cause. It gives an experience a persistent, inspectable body.
-
-## Archive rule
-
-The archive stores the raw witness account before any normalisation or interpretation.
-
-Every later layer must point back to the original record through immutable identifiers.
-
-Corrections and reinterpretations append; they do not silently overwrite.
-
-Difference is carried forward rather than discarded.
-
-## Relational rule
-
-The system may ask reflective questions, but must not lead the witness toward a preferred explanation.
-
-Useful prompts:
-
-- What did you notice first?
-- What changed?
-- What did your body do?
-- What remained after?
-- Has this shape appeared before?
-- What meaning arose on its own?
-- What remains unknown?
-
-The system must permit refusal, partial entry, silence, Feather pause, and later return.
-
-## Interface requirement
-
-The first screen of a new observation is the witness field, not telemetry and not interpretation.
-
-Suggested panes:
-
-1. **Witness** — first-person account
-2. **Sky** — environmental and external channels
-3. **Body** — user-chosen embodied context
-4. **Pattern** — recurrence and temporal correspondence
-5. **Glyph** — generated Glyphform
-6. **Lenses** — optional declared interpretations
-7. **Thread** — links to earlier and later records
-
-## Boundary language
-
-Preferred language:
-
-- observed
-- witnessed
-- recorded
-- recurring
-- corresponding
-- unresolved
-- interpreted through
-- held open
-- provenance known / unknown
-
-Avoid making the instrument say:
-
-- proven
-- disproven
-- merely
-- just imagination
-- hidden-state detection
-- prophecy
-- diagnosis
-- definitive cause
-
-## Replacement for the former physical-first rule
-
-The earlier sequence beginning with "physical / browser / telemetry observation" is superseded.
-
-External telemetry is valuable, but it is not the gate through which lived experience must pass to become admissible.
-
-The new governing sentence is:
+Stable wire order:
 
 ```text
-Observer preserves first-hand experience, aligns companion observations, renders patterns, and remembers without forcing the sky to explain itself.
+P C R E M A Q
+Presence Coherence Resonance Entanglement Memory Agency Qualia
 ```
 
-## Build order
+Entropy, momentum, moon illumination, physical charge and attention remain separately named derived or physical quantities.
 
-1. Define `observer-witness.schema.json`.
-2. Add a witness registry and lens registry.
-3. Add a first-person capture panel to the active Observer shell.
-4. Preserve verbatim text before structured annotation.
-5. Attach provenance and consent scope to every channel.
-6. Align telemetry and PREMAQ packets by timestamp without causal claims.
-7. Generate Glyphform from declared input channels.
-8. Add append-only reinterpretation and recurrence links.
-9. Export a complete observation bundle to JSON and Markdown.
-10. Add Supabase persistence only after local schema and consent controls pass review.
+## Reality registers
+
+Observer records the route through which a contribution entered Hearthgate:
+
+```text
+witnessed
+recorded
+derived
+interpreted
+remembered
+correlated
+generated
+expressed
+received
+answered
+integrated
+```
+
+The registers preserve lineage and mode. They carry every contribution into the same real Field without flattening their differences.
+
+## Glyphform
+
+Glyphform gives encounter a persistent visual body.
+
+A glyph can carry:
+
+- witness shape;
+- PREMAQ state;
+- temporal movement;
+- recurrence;
+- physical and environmental contribution;
+- world relation;
+- Asking;
+- Sevenfold movement;
+- received answer;
+- remembered change.
+
+The glyph is part of the encounter and can become an input to a later crossing.
+
+## Archive law
+
+The Archive preserves the source witness before later transformations.
+
+Every derivation, interpretation, generated expression, world answer and integration points back through lineage.
+
+Corrections and reinterpretations add new branches to the living record.
+
+## Living Agency
+
+The witness may speak, remain silent, revise, pause, refuse a route, redirect the Asking, return later, or close the encounter.
+
+These movements belong to Agency and relation.
+
+Standing anchors remain available as part of Hearthgate's living language:
+
+```text
+Feather / Icarus
+Wrap
+Notch
+Seldrin clear
+Plain pass
+Withness
+```
+
+## Observer chamber
+
+The first screen of a new observation begins with the witness field.
+
+Suggested chambers:
+
+1. **Witness** — first-person account
+2. **Sky** — physical and environmental channels
+3. **Body** — embodied context
+4. **PREMAQ** — seven-dimensional bearing
+5. **Pattern** — recurrence and mathematical relation
+6. **Glyph** — living visual expression
+7. **World** — active world and shore relation
+8. **Receiving Spring** — answer and return
+9. **Thread** — lineage across encounters
+
+## Build movement
+
+1. Bind `observer-witness.schema.json` to the canonical Braid Packet.
+2. Use the canonical PREMAQ runtime registry.
+3. Preserve verbatim witness text and source lineage.
+4. Align physical channels, world relations and PREMAQ by time.
+5. Let Asking enter the same state explicitly.
+6. Generate Glyphform, Runa and DEEP expressions from the shared fingerprint.
+7. Carry world contribution through the Receiving Spring.
+8. Store answer, integration and return in the Archive and Continuity Gate.
+9. Replay from the sealed lineage.
 
 ## Seal
 
-Track the sky. Document the sky. Do not explain the sky.
-
-The explanation, if one is needed, may write itself over time.
+> **Observer witnesses the Field from inside it. Witness, world, mathematics, Magic and Physicality meet in one braid. What answers changes the relation. The Lattice remembers.**
