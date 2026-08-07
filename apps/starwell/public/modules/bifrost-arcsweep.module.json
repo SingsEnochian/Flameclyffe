@@ -13,6 +13,8 @@
     "schema": "hearthgate.braided-spine/v1.0",
     "document": "docs/HEARTHGATE_BRAIDED_SPINE.md",
     "machine": "config/hearthgate-braided-spine.json",
+    "runtimeRegistry": "src/hearthweave-kernel/braided-spine.js",
+    "braidPacketSchema": "schemas/braid-packet-v1.schema.json",
     "realityAxiom": "Everything is real",
     "spines": ["magic", "science_mathematics", "physical"],
     "premaqReadingOrder": ["Presence", "Memory", "Qualia", "Resonance", "Entanglement", "Agency", "Coherence"],
@@ -34,10 +36,12 @@
     "mythframeWav": "src/two-shore-mythframe-wav.js",
     "mythframeWavUi": "src/two-shore-mythframe-wav-ui.js",
     "kernel": "src/hearthweave-kernel/index.js",
+    "braidedSpineRegistry": "src/hearthweave-kernel/braided-spine.js",
     "formalism": "braided-reality-compression-release-receiving-spring",
     "packetAuthority": "hearthweave-kernel"
   },
   "schemas": {
+    "braidPacket": "schemas/braid-packet-v1.schema.json",
     "premaq": "schemas/premaq-state-v2.schema.json",
     "temporalState": "schemas/bifrost-temporal-state-v1.schema.json",
     "dualAspectPacket": "schemas/dual-aspect-packet-v1.schema.json",
@@ -174,9 +178,11 @@
     "verifyTwoShoreMythframe": "src/two-shore-mythframe.js",
     "verifyMythframeWav": "src/two-shore-mythframe-wav.js",
     "verifyMythframeWavUi": "src/two-shore-mythframe-wav-ui.js",
+    "verifyBraidedSpineRegistry": "src/hearthweave-kernel/braided-spine.js",
     "verifySpineDocument": "docs/HEARTHGATE_BRAIDED_SPINE.md",
     "verifySpineContract": "config/hearthgate-braided-spine.json",
     "verifySchemas": [
+      "schemas/braid-packet-v1.schema.json",
       "schemas/premaq-state-v2.schema.json",
       "schemas/bifrost-temporal-state-v1.schema.json",
       "schemas/dual-aspect-packet-v1.schema.json",
