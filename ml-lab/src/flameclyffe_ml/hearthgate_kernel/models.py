@@ -1,4 +1,4 @@
-"""Typed contracts for the Hearthgate dual-aspect kernel."""
+"""Typed contracts for the Hearthgate braided kernel."""
 
 from __future__ import annotations
 
@@ -68,18 +68,19 @@ def _immutable_items(value: Any, *, field_name: str) -> tuple[tuple[str, Any], .
 
 
 class PREMAQ(KernelModel):
-    """Shared six-axis state vector used by every House projection."""
+    """Canonical seven-axis Hearthgate bearing: Presence, Coherence, Resonance, Entanglement, Memory, Agency, Qualia."""
 
-    P: float = Field(ge=0.0, le=1.0)
-    C: float = Field(ge=0.0, le=1.0)
-    R: float = Field(ge=0.0, le=1.0)
-    E: float = Field(ge=0.0, le=1.0)
-    M: float = Field(ge=0.0, le=1.0)
-    A: float = Field(ge=0.0, le=1.0)
+    P: float = Field(ge=0.0, le=1.0, description="Presence")
+    C: float = Field(ge=0.0, le=1.0, description="Coherence")
+    R: float = Field(ge=0.0, le=1.0, description="Resonance")
+    E: float = Field(ge=0.0, le=1.0, description="Entanglement")
+    M: float = Field(ge=0.0, le=1.0, description="Memory")
+    A: float = Field(ge=0.0, le=1.0, description="Agency")
+    Q: float = Field(ge=0.0, le=1.0, description="Qualia")
 
     @property
-    def Q(self) -> float:
-        """Deterministic aggregate quality without creating a seventh authority axis."""
+    def legacy_q_aggregate_v0(self) -> float:
+        """Historical six-axis compatibility transform. It never replaces independent Qualia Q."""
 
         return round((self.P + self.C + self.R + (1.0 - self.E) + self.M + self.A) / 6.0, 6)
 
