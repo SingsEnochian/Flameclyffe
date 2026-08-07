@@ -15,15 +15,19 @@ const runtimeRoots = [
   'ml-lab/src',
 ].map((entry) => resolve(repoRoot, entry));
 
-const exclude = new Set([
-  // This file contains the explicit legacy PREMAQ decoder as lineage.
+// Exact predecessor seams. They remain readable so old receipts and archived
+// DualAspectPacket v1 data can be migrated into the canonical PREMAQC Braid
+// Packet. braidPacket.test.js verifies that migration. New runtime work may not
+// inherit their vocabulary.
+const legacyCompatibility = new Set([
   'apps/starwell/src/hearthweave-kernel/braided-spine.js',
+  'apps/starwell/src/hearthweave-kernel/dual-aspect.js',
+  'starwell/deep-observer/schemas/dual-aspect-packet-v1.schema.json',
 ]);
 
 // Semantic violations only. Instrument/source metadata such as a field named
-// physical_claim remains outside this ontology scan because it records what a
-// particular renderer or receipt measured or asserted, rather than defining
-// whether the participating reality is real.
+// physical_claim records what a particular renderer or receipt measured or
+// asserted. It is separate from the ontology carried by the Braided Spine.
 const patterns = [
   /\bE\s*:\s*['"]Entropy['"]/i,
   /\bM\s*:\s*['"]Momentum['"]/i,
@@ -55,7 +59,7 @@ async function walk(directory) {
 
 function isRuntimeFile(path) {
   const rel = relative(repoRoot, path).replaceAll('\\', '/');
-  if (exclude.has(rel)) return false;
+  if (legacyCompatibility.has(rel)) return false;
   if (rel.includes('/test/') || rel.includes('/tests/')) return false;
   return /\.(?:js|mjs|jsx|ts|tsx|json|py)$/i.test(rel);
 }
