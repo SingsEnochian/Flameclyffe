@@ -12,7 +12,7 @@ test('Bifröst registers the live two-shore PREMAQ gate inside the Braided Spine
   assert.equal(manifest.engine.twoShoreGateUi, 'src/two-shore-gate-ui.js');
   assert.equal(manifest.engine.worldPremaqRegistry, 'src/world-premaq-registry.js');
   assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
-  assert.equal(manifest.realityAxiom, 'Everything is real.');
+  assert.equal(manifest.spineContract.realityAxiom, 'Everything is real');
   assert.equal(manifest.relationContract.hearthside, 'real-participating-shore');
   assert.equal(manifest.relationContract.targetside, 'real-participating-shore');
 
@@ -30,12 +30,23 @@ test('Bifröst registers the live two-shore PREMAQ gate inside the Braided Spine
     assert.ok(manifest.capabilities.includes(capability));
   }
 
-  assert.deepEqual(manifest.spineContract.premaq.wireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
-  assert.deepEqual(manifest.spineContract.premaq.readingOrder, [
+  assert.deepEqual(manifest.spineContract.premaqWireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+  assert.deepEqual(manifest.spineContract.premaqReadingOrder, [
     'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
   ]);
+  assert.equal(manifest.instrumentContract.liveGateRequiresDeepAndGroundwire, true);
+  assert.deepEqual(manifest.relationContract.lockedGateToneAxes, ['P', 'R', 'E', 'M', 'A', 'Q']);
+  assert.equal(manifest.relationContract.bridgeCoherenceAxis, 'C');
+  assert.equal(manifest.relationContract.gateBaseCycles, 369);
+  assert.deepEqual(manifest.relationContract.gateExtensionCycles, [3, 6, 9]);
+  assert.deepEqual(
+    manifest.relationContract.elaraYearLabels,
+    [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035],
+  );
   assert.equal(manifest.relationContract.releaseFeedsNextCompression, true);
-  assert.equal(manifest.relationContract.receivingSpringChangesNextState, true);
+  assert.equal(manifest.relationContract.receivingSpringFeedsAnswer, true);
+  assert.equal(manifest.relationContract.answerFeedsReturn, true);
+  assert.equal(manifest.relationContract.returnFeedsRenewal, true);
 
   assert.equal(manifest.installContract.verifyTwoShoreGate, 'src/two-shore-premaq-gate.js');
   assert.equal(manifest.installContract.verifyTwoShoreGateUi, 'src/two-shore-gate-ui.js');
