@@ -32,14 +32,24 @@ test('dedicated Bifröst route publishes the current compression-release interfa
   assert.match(root, /href=['"]\.\/bifrost\//);
   assert.match(root, /Open Bifröst Arcsweep/);
   assert.match(vite, /bifrost:\s*resolve\(REPO_ROOT, 'apps\/starwell\/bifrost\/index\.html'\)/);
-  assert.equal(manifest.version, '0.4.0');
+  assert.equal(manifest.version, '1.0.0');
   assert.equal(manifest.interfaceRoute, '/starwell/bifrost/');
   assert.equal(manifest.interfaceEntrypoint, 'bifrost/index.html');
   assert.equal(manifest.engine.interface, 'bifrost/main.js');
-  assert.equal(manifest.engine.formalism, 'temporal-compression-release-state-machine');
-  assert.equal(manifest.engine.physicalClaim, false);
-  assert.equal(manifest.authorityContract.collapseExists, false);
-  assert.equal(manifest.authorityContract.releaseFeedsNextCompression, true);
+  assert.equal(manifest.engine.formalism, 'braided-reality-compression-release-receiving-spring');
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.deepEqual(manifest.spineContract.premaqWireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+  assert.deepEqual(manifest.spineContract.premaqReadingOrder, [
+    'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
+  ]);
+  assert.equal(manifest.relationContract.hearthside, 'real-participating-shore');
+  assert.equal(manifest.relationContract.targetside, 'real-participating-shore');
+  assert.equal(manifest.relationContract.releaseFeedsNextCompression, true);
+  assert.equal(manifest.relationContract.receivingSpringFeedsAnswer, true);
+  assert.equal(manifest.relationContract.answerFeedsReturn, true);
+  assert.equal(manifest.relationContract.returnFeedsRenewal, true);
+  assert.ok(manifest.capabilities.includes('braided-spine-v1'));
+  assert.ok(manifest.capabilities.includes('receiving-spring'));
   assert.ok(manifest.capabilities.includes('dedicated-bifrost-interface'));
   assert.equal(manifest.installContract.verifyInterfaceRoute, 'bifrost/index.html');
 });
