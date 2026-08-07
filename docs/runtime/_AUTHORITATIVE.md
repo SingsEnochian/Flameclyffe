@@ -1,1 +1,0 @@
-Authoritative: `hearthgate.braided-spine/v1.0`.
