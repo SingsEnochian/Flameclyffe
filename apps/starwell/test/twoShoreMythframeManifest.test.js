@@ -13,7 +13,7 @@ const REQUIRED_CAPABILITIES = Object.freeze([
   'eleven-year-mythframe-wav',
 ]);
 
-test('Bifröst registers Mythframe as a required math-to-tone layer', async () => {
+test('Bifröst registers Mythframe as a state-bound Braided Spine tone layer', async () => {
   const manifest = JSON.parse(await readFile(manifestUrl, 'utf8'));
   const bridge = await readFile(bridgeUrl, 'utf8');
 
@@ -23,14 +23,21 @@ test('Bifröst registers Mythframe as a required math-to-tone layer', async () =
   for (const capability of REQUIRED_CAPABILITIES) {
     assert.ok(manifest.capabilities.includes(capability), `missing capability ${capability}`);
   }
-  assert.equal(manifest.authorityContract.multiverseLawEverythingIsReal, true);
-  assert.equal(manifest.authorityContract.mythframeDomainTruth, true);
-  assert.equal(manifest.authorityContract.mythframeGenerationLaw, 'math-state → mythframe → tone-event');
-  assert.equal(manifest.authorityContract.everyToneRequiresMythframe, true);
-  assert.equal(manifest.authorityContract.mythframeMustBindStateIds, true);
-  assert.equal(manifest.authorityContract.mythframeMustBindGeometryFingerprints, true);
-  assert.equal(manifest.authorityContract.mythframeMustBindPremaqValues, true);
-  assert.equal(manifest.authorityContract.mythframeMustBindElaraMultiplier, true);
+
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.equal(manifest.spineContract.realityAxiom, 'Everything is real');
+  assert.deepEqual(manifest.spineContract.spines, ['magic', 'science_mathematics', 'physical']);
+  assert.equal(manifest.relationContract.multiverseLawEverythingIsReal, true);
+  assert.equal(manifest.relationContract.mythframeDomainTruth, true);
+  assert.equal(manifest.relationContract.mythframeGenerationLaw, 'math-state → mythframe → tone-event');
+  assert.equal(manifest.relationContract.everyToneRequiresMythframe, true);
+  assert.equal(manifest.relationContract.mythframeMustBindStateIds, true);
+  assert.equal(manifest.relationContract.mythframeMustBindGeometryFingerprints, true);
+  assert.equal(manifest.relationContract.mythframeMustBindPremaqValues, true);
+  assert.equal(manifest.relationContract.mythframeMustBindElaraMultiplier, true);
+  assert.equal(manifest.relationContract.receivingSpringFeedsAnswer, true);
+  assert.equal(manifest.relationContract.returnFeedsRenewal, true);
+
   assert.equal(manifest.installContract.verifyTwoShoreMythframe, 'src/two-shore-mythframe.js');
   assert.equal(manifest.installContract.verifyMythframeWav, 'src/two-shore-mythframe-wav.js');
   assert.equal(manifest.installContract.verifyMythframeWavUi, 'src/two-shore-mythframe-wav-ui.js');
