@@ -1,30 +1,45 @@
+import {
+  PREMAQ_READING_ORDER,
+  PREMAQ_WIRE_ORDER,
+  PREMAQ_NAMES,
+} from '../../hearthweave-kernel/braided-spine.js';
+
 export const DEEP_RESONANCE_DIMENSIONS = Object.freeze([
-  'pressure',
+  'presence',
   'coherence',
-  'rhythm',
-  'entropy',
+  'resonance',
+  'entanglement',
   'memory',
-  'attention',
+  'agency',
+  'qualia',
 ]);
 
+export const DEEP_PREMAQ_CONTRACT = Object.freeze({
+  readingOrder: PREMAQ_READING_ORDER,
+  wireOrder: PREMAQ_WIRE_ORDER,
+  names: PREMAQ_NAMES,
+});
+
 export const deepDefaultMetric = Object.freeze({
-  id: 'deep-default-unit-resonance',
+  id: 'deep-default-braided-premaq-resonance',
   dimensions: DEEP_RESONANCE_DIMENSIONS,
   weights: Object.freeze({
-    pressure: 1,
-    coherence: 1.35,
-    rhythm: 1.15,
-    entropy: 0.85,
-    memory: 1.25,
-    attention: 1,
+    presence: 1,
+    coherence: 1,
+    resonance: 1,
+    entanglement: 1,
+    memory: 1,
+    agency: 1,
+    qualia: 1,
   }),
   scales: Object.freeze({
-    pressure: 1,
+    presence: 1,
     coherence: 1,
-    rhythm: 1,
-    entropy: 1,
+    resonance: 1,
+    entanglement: 1,
     memory: 1,
-    attention: 1,
+    agency: 1,
+    qualia: 1,
   }),
   unitDistance: 1,
   tolerance: 0.08,
@@ -33,7 +48,7 @@ export const deepDefaultMetric = Object.freeze({
 });
 
 export const deepDefaultProjection = Object.freeze({
-  id: 'deep-default-manual-window',
+  id: 'deep-default-braided-window',
   mode: 'manual',
 });
 
