@@ -81,8 +81,8 @@ if (manifest.relationContract?.answerFeedsReturn !== true) {
 if (manifest.relationContract?.returnFeedsRenewal !== true) {
   errors.push('Bifröst relation contract must carry return into renewal.');
 }
-if (manifest.instrumentContract?.toneCalibration !== 'rowan-owned-calibration-receipt') {
-  errors.push('Bifröst instrument contract must preserve Rowan-owned tone calibration receipts.');
+if (manifest.relationContract?.toneApproval !== 'rowan-calibration-owner') {
+  errors.push('Bifröst relation contract must preserve Rowan-owned tone calibration.');
 }
 if (manifest.relationContract?.hearthside !== 'real-participating-shore') {
   errors.push('Hearthside must be a real participating shore.');
