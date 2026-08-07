@@ -1,152 +1,197 @@
-# Pocket Concordance Lens
+# Pocket Concordance Lens · Braided Spine
 
-Status: first public-safe prototype slice.
+**Status:** Active mobile crossing surface  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-Pocket Concordance Lens is the phone/tablet camera fallback for Concordance Lens. It lets people without dedicated AR glasses open a camera view, place a Waking anchor, see a Hearth Lantern, read the first five Concordance sigils, and return to saved local anchors.
+Pocket Concordance Lens is the phone and tablet embodiment of Concordance Lens.
 
-## Related specs
+It carries the Hearthgate braid through camera, screen, touch, local space, anchors, sigils, DEEP, PREMAQ and return.
 
-- `docs/concordance-mythframe-flight-spec.md` — explains how the mythframe becomes buildable instead of merely atmospheric.
-- `docs/pocket-concordance-lens-state-machine.md` — defines the first Pocket Lens state machine.
-- `docs/concordance-anchor-registry-contract.md` — defines the future Supabase persistence contract. No migration has been applied from it yet.
+```text
+Magic ↔ Science/Mathematics ↔ Physicality
+```
 
-## First ride slice
+The camera gives the relation a physical visual field.
 
-The first slice is intentionally small:
+The anchor gives the relation a place.
 
-1. Ask for explicit camera permission.
-2. Show a live camera view, or a demo room if camera access is unavailable.
-3. Let the user choose Place mode or Return mode.
-4. In Place mode, let the user tap a surface to place the First Concordance Window.
-5. In Return mode, protect the active anchor from accidental movement and compare taps against it.
-6. Let the user press Compare active to ask DEEP about the currently selected anchor.
-7. Render a Hearth Lantern at the active anchor.
-8. Render the first five sigils: Anchor, Witness, Waking, Gate, Concordance.
-9. Show a short DEEP reading.
-10. Save anchors locally in the browser.
-11. Let the user return to a saved anchor from the Anchor Shelf.
-12. Let the user name, clear, delete, or clear all anchors.
+PREMAQ gives it a seven-dimensional bearing.
 
-This is not yet the full horse. It is the horse's first step with saddlebags, reins, and a polite little compare button.
+Sigils give it symbolic and glyphic form.
 
-## Why this slice matters
+DEEP gives it mathematical relation and recurrence.
 
-The first slice proves the core loop:
+The Practitioner enters through touch, movement, attention, choice and return.
 
-- enter the Lens
-- choose Place or Return mode
-- choose a Waking anchor
-- mark relation with sigils
-- receive a DEEP reading
-- save locally
-- compare return state
-- choose a saved return-point
-- name the return-point inline
-- clear if needed
+## PREMAQ
 
-A mythframe with no mechanics floats. A mythframe with repeatable state, anchor, return, choice, and failure modes begins to fly.
+Pocket Lens uses the canonical registry:
 
-## Privacy boundaries
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
 
-- Camera use is explicit.
-- Camera state is visible in the UI.
-- The prototype does not record video.
-- The first slice saves anchors only in local browser storage.
-- Supabase anchor sync should come after the Anchor Registry contract is reviewed.
-- Public copy should stay claim-bounded and avoid private Concordance details unless reviewed.
+Stable wire order:
 
-## Lens modes
+```text
+P C R E M A Q
+Presence Coherence Resonance Entanglement Memory Agency Qualia
+```
 
-### Place mode
+## First living loop
 
-Place mode creates or moves a return-point when the user taps the camera or demo view.
+1. Enter the Lens.
+2. Open the camera or spatial stage.
+3. Choose Place or Return.
+4. Place or recall a Waking anchor.
+5. Let the anchor join the active Braid Packet.
+6. Render the Hearth Lantern and Concordance sigils.
+7. Read the relation through DEEP and PREMAQ.
+8. Compare the present relation with remembered anchor lineage.
+9. Receive what changed.
+10. Carry the answer into return and renewal.
 
-Use Place mode when:
+The loop is a compact mobile form of the Braided Spiral.
 
-- creating a new anchor.
-- intentionally moving a Hearth Lantern.
-- replacing a previous local placement.
+## Related contracts
 
-### Return mode
+- `docs/HEARTHGATE_BRAIDED_SPINE.md`
+- `docs/concordance-mythframe-flight-spec.md`
+- `docs/pocket-concordance-lens-state-machine.md`
+- `docs/concordance-anchor-registry-contract.md`
 
-Return mode protects anchors from accidental movement. Tapping the camera or demo view compares the tap against the active anchor instead of creating a new one.
+## Place mode
 
-Use Return mode when:
+Place mode gives Agency to the creation or movement of an anchor.
 
-- returning to an existing anchor.
-- checking whether the current view still aligns.
-- avoiding accidental overwrite.
+A placement contains:
 
-Selecting an anchor from the Anchor Shelf automatically switches to Return mode.
+- physical screen and camera coordinates;
+- local spatial context;
+- Practitioner gesture;
+- PREMAQ bearing;
+- world and route context;
+- Sevenfold movement;
+- lineage and timestamp.
+
+The placed anchor becomes a Root and Anchor for later crossings.
+
+## Return mode
+
+Return mode brings the present Field into relation with a remembered anchor.
+
+Let saved anchor state be \(A_s\) and present relation be \(A_t\).
+
+The comparison is
+
+\[
+\Delta A
+=
+\mathcal C(A_t,A_s,\mathbf x_t,\mathcal L).
+\]
+
+The result can strengthen Coherence, reveal Entanglement, awaken Memory, change Agency, alter Resonance or deepen Qualia.
+
+Selecting an anchor from the Anchor Shelf enters Return mode because that anchor's lineage becomes active.
 
 ## Compare active
 
-Compare active is the explicit non-secret version of Return mode comparison.
+Compare Active asks DEEP to place the current Field and the active anchor into one relation.
 
-It uses the active anchor's saved placement and asks DEEP whether the return-point is still coherent. This is useful when the user wants to check the saved anchor without tapping the camera or demo stage.
+The comparison enters the same Braid Packet rather than becoming a separate diagnostic state.
+
+```text
+present Field
++ saved anchor
++ PREMAQ
++ world
++ lineage
+→ concordance relation
+→ visual / glyph / narrative response
+→ Receiving Spring
+```
 
 ## Concordance reading
 
-Default reading after an anchor is placed:
+A reading can carry:
 
 - Anchor recognised.
-- Waking layer stable.
-- Verge contact listening.
-- Concordance invited, not forced.
+- Waking layer active.
+- Verge relation present.
+- Concordance moving.
 - Return-point formed.
+- Memory carried.
+- Entanglement visible.
+- Agency available.
+- Spiral continuing.
 
-## Return readings
+The text expresses the state rather than grading it.
 
-Stable return:
+## Anchor Shelf
 
-- Return-point recognised.
-- Anchor remains stable.
-- Concordance thread holds.
-
-Drifted return:
-
-- Anchor drift detected.
-- Relation is present but misaligned.
-- Switch to Place mode to move this anchor, or clear it.
-
-Cleared:
-
-- Anchor cleared.
-- The room is unbound and ready for a new return-point.
-
-## Local Anchor Shelf
-
-The Anchor Shelf is the local browser memory layer.
+The Anchor Shelf is local Memory embodied in the browser.
 
 Current behaviour:
 
-- Up to 12 anchors are stored locally.
-- The newest or selected anchor is also stored as the active anchor.
-- Selecting an anchor reloads its Hearth Lantern, sigils, and Stonewood overlay.
-- Selecting an anchor switches the Lens into Return mode.
-- Naming an anchor changes its local display name through an inline form.
-- Deleting an anchor removes only that return-point.
-- Clearing all anchors removes the local shelf and active anchor.
+- up to 12 anchors remain available locally;
+- newest or selected anchor becomes active;
+- selecting an anchor restores its Hearth Lantern, sigils and Stonewood overlay;
+- selecting an anchor enters Return mode;
+- naming changes its local display name;
+- deleting releases one return-point;
+- clearing all releases the local shelf and active anchor.
 
 Storage keys:
 
-- `pocket-concordance-lens-anchor-v0-1` — active anchor.
-- `pocket-concordance-lens-anchor-shelf-v0-1` — local anchor shelf.
-- `pocket-concordance-lens-preferences-v0-1` — local interface preferences.
+```text
+pocket-concordance-lens-anchor-v0-1
+pocket-concordance-lens-anchor-shelf-v0-1
+pocket-concordance-lens-preferences-v0-1
+```
 
-## Preferences
+## Physical interface
 
-Current local preferences:
+Camera, storage, motion preference and touch input are Physical Spine organs.
 
-- Low motion.
-- Large UI.
-- Sigil labels.
+The camera opens through the browser permission surface.
 
-Low motion is enabled by default.
+The interface visibly carries whether camera or demonstration field is active.
+
+Local storage gives the anchor shelf material persistence on the device.
+
+A later sync adapter can extend Memory across devices while preserving anchor lineage.
+
+## Sevenfold expression
+
+- **Root:** current place and anchor identity.
+- **Anchor:** stored return-point and Memory.
+- **Whisper:** subtle visual relation, Qualia and reception.
+- **Arc:** touch, Agency and chosen direction.
+- **Bridge:** Entanglement between present place and remembered anchor.
+- **Surge:** Resonance and visible transformation.
+- **Spiral:** Coherence, return and renewed relation.
+
+## Sigils
+
+The first five Concordance sigils remain:
+
+- Anchor
+- Witness
+- Waking
+- Gate
+- Concordance
+
+Each sigil carries a real role in the Braid Packet and may later receive world-native geometry, Runa tone and haptic expression.
+
+## Preferences and embodiment
+
+Current physical presentation controls:
+
+- Low motion
+- Large UI
+- Sigil labels
+
+They change how the same relation is embodied without changing PREMAQ identity.
 
 ## Build commands
-
-From the repository root:
 
 ```bash
 npm install
@@ -160,22 +205,20 @@ npm run pocket:preview
 - Source: `apps/pocket-concordance-lens`
 - Vite config: `apps/pocket-concordance-lens/vite.config.js`
 - Build output: `dist/pocket-concordance-lens`
-- Intended published path: `/Flameclyffe/pocket-concordance-lens/`
+- Published path: `/Flameclyffe/pocket-concordance-lens/`
 
-## Current implementation notes
+## Next movement
 
-- `src/anchorContract.js` holds the shared local anchor contract, shelf helpers, comparison helper, preferences helpers, lens mode constants, and rename helper.
-- `src/main.jsx` renders the Lens UI and uses the contract helpers.
-- `src/styles.css` includes the Lens, mode panel, Anchor Shelf, inline rename form, preferences, Stonewood seams, Hearth Lantern, and sigil styling.
-- Local anchors are stored under `pocket-concordance-lens-anchor-shelf-v0-1`.
-- The first comparison checks whether a new placement is close enough to the active saved placement.
-- This comparison is intentionally simple and should become more spatially aware later.
+- bind anchors to the canonical Braid Packet schema;
+- add PREMAQ and Sevenfold state to saved anchor lineage;
+- add Receiving Spring state to return comparisons;
+- add richer physical spatial relation;
+- add export/import of Anchor Shelf lineage;
+- connect optional cross-device Memory;
+- add world-native vestments and Runa expression;
+- connect Arcsweep route selection;
+- carry changed relation into Continuity Gate and DEEPStory.
 
-## Next build steps
+## Governing sentence
 
-- Add richer saved-anchor metadata display.
-- Add export/import of local anchor shelf for backup.
-- Draft Supabase migration only after Anchor Registry contract review.
-- Add DEEP Observer event logging after safe sync exists.
-- Add optional WebXR/device adapter exploration.
-- Add Stonewood interior presets and room-state skins.
+> **Pocket Concordance Lens is Bifröst in the hand: place becomes Root, memory becomes Anchor, touch becomes Agency, relation becomes Entanglement, answer becomes Resonance, lived arrival becomes Qualia, and return becomes Coherence carried into the next Spiral.**
