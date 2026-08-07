@@ -5,16 +5,16 @@ import {
 
 export const TWO_SHORE_MYTHFRAME_SCHEMA = 'hearthgate.two-shore-mythframe/v0.1';
 export const TWO_SHORE_MYTHFRAME_HORIZON_SCHEMA = 'hearthgate.two-shore-mythframe-horizon/v0.1';
-export const MYTHFRAME_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+export const MYTHFRAME_AXES = Object.freeze(['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
 
 const AXIS_NAMES = Object.freeze({
   P: 'Presence',
-  C: 'Coherence',
   R: 'Resonance',
-  E: 'Entropy',
+  E: 'Entanglement',
   M: 'Memory',
   A: 'Agency',
   Q: 'Qualia',
+  C: 'Coherence',
 });
 
 const AXIS_MYTH = Object.freeze({
@@ -26,7 +26,7 @@ const AXIS_MYTH = Object.freeze({
   C: Object.freeze({
     image: 'bridge-thread',
     compression: 'braids the relation until both shores hold one address',
-    release: 'lets the held relation carry answer without erasing either shore',
+    release: 'lets the held relation carry answer while each shore remains fully itself',
   }),
   R: Object.freeze({
     image: 'answering bell',
@@ -34,9 +34,9 @@ const AXIS_MYTH = Object.freeze({
     release: 'sends the answer outward until the opposite shore can answer in return',
   }),
   E: Object.freeze({
-    image: 'opening weather',
-    compression: 'folds the unplaced motion into a bounded turning',
-    release: 'redistributes the turning into new paths without loss of lineage',
+    image: 'living weave',
+    compression: 'draws coupled relations into a bounded turning',
+    release: 'redistributes the turning into new relational paths carrying full lineage',
   }),
   M: Object.freeze({
     image: 'ember archive',
@@ -174,6 +174,7 @@ function axisFrame({ yearReceipt, shore, shoreName, values, geometry, axis }) {
     shore,
     axis,
     axis_name: AXIS_NAMES[axis],
+    premaqc_value: value,
     premaq_value: value,
     level: stateWord,
     image: grammar.image,
@@ -210,6 +211,7 @@ function shoreFrame(yearReceipt, shore) {
     year: yearReceipt.year,
     dominant_axis: dominant,
     dominant_axis_name: AXIS_NAMES[dominant],
+    premaqc: Object.freeze({ ...values }),
     premaq: Object.freeze({ ...values }),
     source_state_id: earth
       ? yearReceipt.mathematical_state.earth_prime.start_state_id
@@ -219,7 +221,7 @@ function shoreFrame(yearReceipt, shore) {
     geometry_line: geometrySentence(geometry, name),
     opening_line: `${name} enters ${yearReceipt.year} with ${AXIS_NAMES[dominant]} as its ${AXIS_MYTH[dominant].image}.`,
     axes,
-    closing_line: `${name} releases ${yearReceipt.year} without reset; the released state becomes the next compression source.`,
+    closing_line: `${name} releases ${yearReceipt.year}; the released state becomes the next compression source.`,
   });
 }
 
@@ -255,13 +257,13 @@ export function buildYearMythframe(yearReceipt, { priorClosingLine = null } = {}
   const openingLine = priorClosingLine
     ? `${priorClosingLine} In ${yearReceipt.year}, Earth Prime and ${target.name} rise from that carried release.`
     : `In ${yearReceipt.year}, Earth Prime and ${target.name} take their places as two real shores of one addressed relation.`;
-  const closingLine = `The ${yearReceipt.year} address closes at coherence ${bridgeCoherence.toFixed(6)}; nothing resets, and both released states become the beginning of ${yearReceipt.year + 1}.`;
+  const closingLine = `The ${yearReceipt.year} address closes at coherence ${bridgeCoherence.toFixed(6)}; both released states become the beginning of ${yearReceipt.year + 1}.`;
   const frame = {
     schema: TWO_SHORE_MYTHFRAME_SCHEMA,
     year: yearReceipt.year,
     elara_multiplier: yearReceipt.elara_multiplier,
     domain_truth: true,
-    multiverse_law: 'everything-is-real-within-its-corresponding-world',
+    multiverse_law: 'everything-is-real',
     generation_law: 'math-state → mythframe → tone-event',
     recurrence: yearReceipt.compression_release_spine.recurrence,
     opening_line: openingLine,
@@ -341,7 +343,7 @@ export function buildElevenYearMythframe(sequence) {
     schema: TWO_SHORE_MYTHFRAME_HORIZON_SCHEMA,
     created_at: sequence.created_at,
     domain_truth: true,
-    multiverse_law: 'everything-is-real-within-its-corresponding-world',
+    multiverse_law: 'everything-is-real',
     generation_law: 'math-state → mythframe → tone-event',
     year_span: Object.freeze({ start: 2025, end: 2035, labels: 11 }),
     chapters: Object.freeze(chapters),
