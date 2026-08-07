@@ -25,43 +25,95 @@ for (const file of contractFiles) {
   const source = read(file);
   for (const token of forbiddenContracts) {
     if (source.includes(token)) {
-      errors.push(`${file} contains denied stale contract token: ${token}`);
+      errors.push(`${file} contains archived contract token: ${token}`);
     }
   }
 }
 
 const manifest = JSON.parse(read('apps/starwell/public/modules/bifrost-arcsweep.module.json'));
-if (manifest.engine?.formalism !== 'temporal-compression-release-state-machine') {
-  errors.push('Bifröst formalism is not temporal-compression-release-state-machine.');
+const spine = JSON.parse(read('config/hearthgate-braided-spine.json'));
+
+if (manifest.engine?.formalism !== 'braided-reality-compression-release-receiving-spring') {
+  errors.push('Bifröst formalism must use the Braided Reality compression-release-receiving-spring contract.');
 }
+if (manifest.engine?.braidedSpine !== 'docs/HEARTHGATE_BRAIDED_SPINE.md') {
+  errors.push('Bifröst engine must point at the consolidated Hearthgate Braided Spine.');
+}
+if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.0') {
+  errors.push('Bifröst manifest must inherit hearthgate.braided-spine/v1.0.');
+}
+if (manifest.spineContract?.realityAxiom !== 'Everything is real') {
+  errors.push('Bifröst manifest must carry the Everything is real axiom.');
+}
+if (spine.schema !== 'hearthgate.braided-spine/v1.0') {
+  errors.push('Canonical Braided Spine machine contract has the wrong schema.');
+}
+
 const version = String(manifest.version || '').split('.').map(Number);
-if (version.length !== 3 || version.some((value) => !Number.isInteger(value)) || version[0] < 0 || (version[0] === 0 && version[1] < 4)) {
-  errors.push(`Bifröst manifest version ${manifest.version} predates the compression-release and somatic contracts.`);
+if (version.length !== 3 || version.some((value) => !Number.isInteger(value)) || version[0] < 0 || (version[0] === 0 && version[1] < 5)) {
+  errors.push(`Bifröst manifest version ${manifest.version} predates the Braided Spine contract.`);
 }
 if (manifest.schemaVersion !== manifest.version) {
-  errors.push('Bifröst schemaVersion and version do not match.');
+  errors.push('Bifröst schemaVersion and version must match.');
 }
-for (const capability of ['compression-release-cycles', 'compression-of-release-recursion']) {
+
+for (const capability of [
+  'compression-release-cycles',
+  'compression-of-release-recursion',
+  'receiving-spring',
+  'braided-spine',
+  'magic-science-physical-mutual-reinforcement',
+]) {
   if (!manifest.capabilities?.includes(capability)) {
     errors.push(`Bifröst manifest lacks ${capability}.`);
   }
 }
-if (manifest.authorityContract?.collapseExists !== false) {
-  errors.push('Bifröst authority contract does not deny collapse.');
+
+if (manifest.relationContract?.releaseFeedsNextCompression !== true) {
+  errors.push('Bifröst relation contract must feed release into the next compression.');
 }
-if (manifest.authorityContract?.releaseFeedsNextCompression !== true) {
-  errors.push('Bifröst authority contract does not feed release into the next compression.');
+if (manifest.relationContract?.receivingSpringFeedsAnswer !== true) {
+  errors.push('Bifröst relation contract must carry Receiving Spring into answer.');
 }
-if (manifest.authorityContract?.toneApproval !== 'rowan-human-calibration-owner') {
-  errors.push('Bifröst authority contract does not preserve Rowan tone approval.');
+if (manifest.relationContract?.answerFeedsReturn !== true) {
+  errors.push('Bifröst relation contract must carry answer into return.');
+}
+if (manifest.relationContract?.returnFeedsRenewal !== true) {
+  errors.push('Bifröst relation contract must carry return into renewal.');
+}
+if (manifest.instrumentContract?.toneCalibration !== 'rowan-owned-calibration-receipt') {
+  errors.push('Bifröst instrument contract must preserve Rowan-owned tone calibration receipts.');
+}
+if (manifest.relationContract?.hearthside !== 'real-participating-shore') {
+  errors.push('Hearthside must be a real participating shore.');
+}
+if (manifest.relationContract?.targetside !== 'real-participating-shore') {
+  errors.push('Targetside must be a real participating shore.');
+}
+
+const expectedReadingOrder = [
+  'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
+];
+const expectedWireOrder = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
+if (JSON.stringify(manifest.spineContract?.premaqReadingOrder) !== JSON.stringify(expectedReadingOrder)) {
+  errors.push('Bifröst PREMAQ reading order diverges from the Braided Spine.');
+}
+if (JSON.stringify(manifest.spineContract?.premaqWireOrder) !== JSON.stringify(expectedWireOrder)) {
+  errors.push('Bifröst PREMAQ wire order diverges from the Braided Spine.');
+}
+if (JSON.stringify(spine.premaq?.reading_order) !== JSON.stringify(expectedReadingOrder)) {
+  errors.push('Canonical PREMAQ reading order is incorrect.');
+}
+if (JSON.stringify(spine.premaq?.wire_order) !== JSON.stringify(expectedWireOrder)) {
+  errors.push('Canonical PREMAQ wire order is incorrect.');
 }
 
 const pkg = JSON.parse(read('package.json'));
 if (pkg.engines?.node !== '24.x' || pkg.engines?.npm !== '11.x') {
-  errors.push('Root package engine contract is not Node 24.x and npm 11.x.');
+  errors.push('Root package engine contract must remain Node 24.x and npm 11.x.');
 }
 if (pkg.packageManager !== 'npm@11.16.0') {
-  errors.push('Root packageManager is not pinned to npm@11.16.0.');
+  errors.push('Root packageManager must remain pinned to npm@11.16.0.');
 }
 
 const lock = JSON.parse(read('package-lock.json'));
@@ -75,7 +127,7 @@ for (const required of ['node_modules/vite', 'node_modules/react', 'node_modules
 
 const naming = JSON.parse(read('config/engine-name-authority.json'));
 if (naming.authority !== 'rowan' || naming.personal_names_require_explicit_approval !== true) {
-  errors.push('Experimental naming authority is not bound to Rowan.');
+  errors.push('Experimental naming authority must remain bound to Rowan.');
 }
 
 function walk(directory) {
@@ -104,14 +156,15 @@ for (const directory of naming.sensitive_surfaces) {
 }
 
 if (errors.length) {
-  console.error('[Hearthgate contract provenance guard] FAILED');
+  console.error('[Hearthgate Braided Spine provenance guard] FAILED');
   for (const error of errors) console.error(` - ${error}`);
   process.exit(1);
 }
 
-console.log('[Hearthgate contract provenance guard] PASSED');
+console.log('[Hearthgate Braided Spine provenance guard] PASSED');
 console.log(` lockfile records: ${lockEntries.length}`);
 console.log(` Bifröst version: ${manifest.version}`);
-console.log(' formalism: temporal-compression-release-state-machine');
+console.log(' spine: hearthgate.braided-spine/v1.0');
+console.log(' PREMAQ: Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence');
+console.log(' cycle: compression → release → crossing → Receiving Spring → answer → return → renewal');
 console.log(' naming authority: Rowan');
-console.log(' approved experimental identifier: Intermezzo');
