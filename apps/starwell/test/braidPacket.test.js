@@ -9,26 +9,27 @@ import {
 
 const state = {
   P: { value: 0.8, derivative: 0, source_fidelity: 1, contributors: [] },
-  C: { value: 0.7, derivative: 0, source_fidelity: 1, contributors: [] },
   R: { value: 0.9, derivative: 0, source_fidelity: 1, contributors: [] },
   E: { value: 0.75, derivative: 0, source_fidelity: 1, contributors: [] },
   M: { value: 0.85, derivative: 0, source_fidelity: 1, contributors: [] },
   A: { value: 0.65, derivative: 0, source_fidelity: 1, contributors: [] },
   Q: { value: 0.95, derivative: 0, source_fidelity: 1, contributors: [] },
+  C: { value: 0.7, derivative: 0, source_fidelity: 1, contributors: [] },
 };
 
-function premaq() {
+function premaqc() {
   return {
-    schema_version: '2.0.0',
-    id: 'premaq-test',
-    registry_version: 'hearthgate.braided-spine/v1.0',
+    schema: 'hearthgate.premaqc/v1.0',
+    schema_version: '1.0.0',
+    id: 'premaqc-test',
+    registry_version: 'hearthgate.braided-spine/v1.1',
     state,
   };
 }
 
 test('creates the canonical three-spine Braid Packet', () => {
   const packet = createBraidPacket({
-    premaq: premaq(),
+    premaqc: premaqc(),
     asking: { text: 'Open the bridge and receive what answers.' },
     magic: { sevenfold: ['Bridge'] },
     scienceMathematics: { fold: 0.42 },
@@ -40,26 +41,46 @@ test('creates the canonical three-spine Braid Packet', () => {
   });
 
   assert.equal(packet.schema, BRAID_PACKET_SCHEMA);
-  assert.equal(packet.braided_spine, 'hearthgate.braided-spine/v1.0');
+  assert.equal(packet.braided_spine, 'hearthgate.braided-spine/v1.1');
   assert.equal(packet.reality_axiom, 'Everything is real.');
-  assert.deepEqual(packet.premaq.reading_order, [
+  assert.equal(packet.premaqc.schema, 'hearthgate.premaqc/v1.0');
+  assert.deepEqual(packet.premaqc.reading_order, [
     'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
   ]);
-  assert.deepEqual(packet.premaq.wire_order, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
-  assert.equal(packet.premaq.axes.E, 'Entanglement');
-  assert.equal(packet.premaq.axes.Q, 'Qualia');
-  assert.equal(packet.premaq.values.M, 0.85);
+  assert.deepEqual(packet.premaqc.wire_order, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
+  assert.equal(packet.premaqc.axes.E, 'Entanglement');
+  assert.equal(packet.premaqc.axes.Q, 'Qualia');
+  assert.equal(packet.premaqc.values.M, 0.85);
+  assert.equal(packet.premaq.superseded_by, 'PREMAQC');
+  assert.deepEqual(packet.premaq.wire_order, packet.premaqc.wire_order);
   assert.equal(packet.asking.text, 'Open the bridge and receive what answers.');
   assert.ok(packet.state_fingerprint.startsWith('fnv1a32:'));
   assert.ok(packet.sevenfold_chorus.includes('Spiral'));
   assert.equal(packet.thirteenfold_council.length, 13);
 });
 
-test('adapts a legacy DualAspectPacket into one canonical Braid Packet', () => {
+test('adapts a legacy DualAspectPacket into one canonical PREMAQC Braid Packet', () => {
+  const legacyState = {
+    P: state.P,
+    C: state.C,
+    R: state.R,
+    E: state.E,
+    M: state.M,
+    A: state.A,
+    Q: state.Q,
+  };
   const dual = {
     packet_id: 'dual-1',
     identity: { world_slug: 'terra-aeterna', house_id: 'hearthweave' },
-    observable: { premaq: premaq(), sky: { kp: 3 } },
+    observable: {
+      premaq: {
+        schema_version: '2.0.0',
+        id: 'legacy-premaq-test',
+        registry_version: 'premaq-registry/2.0',
+        state: legacyState,
+      },
+      sky: { kp: 3 },
+    },
     temporal: {
       hearthside: { state_id: 'h-1' },
       targetside: { state_id: 't-1' },
@@ -79,6 +100,8 @@ test('adapts a legacy DualAspectPacket into one canonical Braid Packet', () => {
   });
 
   assert.equal(packet.schema, BRAID_PACKET_SCHEMA);
+  assert.equal(packet.premaqc.schema, 'hearthgate.premaqc/v1.0');
+  assert.deepEqual(packet.premaqc.wire_order, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
   assert.equal(packet.world, 'terra-aeterna');
   assert.equal(packet.world_relation.hearthside.role, 'real-participating-shore');
   assert.equal(packet.world_relation.targetside.role, 'real-participating-shore');
