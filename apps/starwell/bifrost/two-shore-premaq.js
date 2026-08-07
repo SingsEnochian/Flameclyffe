@@ -10,16 +10,12 @@ import {
   bridgeBlocksCertifiedExecution,
   short,
 } from './bifrost-runtime-state.js';
+import {
+  PREMAQ_NAMES,
+  BRAIDED_SPINE_SCHEMA,
+} from '../src/hearthweave-kernel/braided-spine.js';
 
-const AXIS_NAMES = Object.freeze({
-  P: 'Presence',
-  C: 'Coherence',
-  R: 'Resonance',
-  E: 'Entropy',
-  M: 'Memory',
-  A: 'Agency',
-  Q: 'Qualia',
-});
+const AXIS_NAMES = PREMAQ_NAMES;
 
 const panelId = 'two-shore-premaq-panel';
 const runtimeStatusId = 'two-shore-runtime-status';
@@ -61,7 +57,7 @@ function createBars(source) {
 
     const readout = document.createElement('span');
     readout.className = 'axis-value';
-    readout.textContent = value == null ? 'UNKNOWN' : value.toFixed(4);
+    readout.textContent = value == null ? 'OPEN' : value.toFixed(4);
 
     row.append(label, track, readout);
     container.append(row);
@@ -76,7 +72,7 @@ function createPanel() {
   panel.innerHTML = `
     <header class="panel-header">
       <div>
-        <p class="eyebrow">TWO-SHORE PREMAQ INDICATOR</p>
+        <p class="eyebrow">TWO-SHORE PREMAQ · BRAIDED SPINE</p>
         <h2>Hearthside and Targetside</h2>
       </div>
       <div class="two-shore-actions">
@@ -90,7 +86,7 @@ function createPanel() {
       <section class="shore-card" data-shore="targetside" aria-label="Targetside PREMAQ indicator"></section>
     </div>
     <p id="${runtimeStatusId}" class="engine-message" role="status">TWO-SHORE CHECK · waiting for active packet.</p>
-    <p class="boundary-note">This panel is read-only. It exposes both shores and the bridge status without mutating the active packet, writing canon, approving tone, or claiming external physical evidence.</p>
+    <p class="boundary-note">Both shores remain lit. This chamber reads their shared relation from the same Braid Packet and carries their lineage into the bridge receipt.</p>
   `;
   panel.querySelector('#refresh-two-shore-premaq')?.addEventListener('click', renderTwoShorePanel);
   panel.querySelector('#export-two-shore-receipt')?.addEventListener('click', () => exportTwoShoreReceipt('manual-two-shore-export'));
@@ -111,8 +107,8 @@ function renderShore(container, title, shore) {
   meta.className = 'shore-meta';
   meta.innerHTML = `
     <div><dt>Fingerprint</dt><dd>${short(shore.fingerprint, 34)}</dd></div>
-    <div><dt>Temporal state</dt><dd>${shore.temporal ? 'YES' : 'NO'}</dd></div>
-    <div><dt>Note</dt><dd>${shore.note}</dd></div>
+    <div><dt>Temporal state</dt><dd>${shore.temporal ? 'YES' : 'OPEN'}</dd></div>
+    <div><dt>Relation</dt><dd>${shore.note}</dd></div>
   `;
 
   container.append(header, createBars(shore.source), meta);
@@ -128,10 +124,11 @@ function renderBridge(container, runtime) {
       <code>${short(runtime.packet_id, 34)}</code>
     </div>
     <dl class="shore-meta bridge-meta">
+      <div><dt>Braided Spine</dt><dd>${BRAIDED_SPINE_SCHEMA}</dd></div>
       <div><dt>Shared state</dt><dd>${short(runtime.shared_state_fingerprint, 34)}</dd></div>
       <div><dt>Hearthside</dt><dd>${short(hearthside.fingerprint, 30)}</dd></div>
       <div><dt>Targetside</dt><dd>${short(targetside.fingerprint, 30)}</dd></div>
-      <div><dt>Crossing ready</dt><dd>${bridge.crossing_ready ? 'YES' : 'NO'}</dd></div>
+      <div><dt>Crossing ready</dt><dd>${bridge.crossing_ready ? 'YES' : 'OPEN'}</dd></div>
       <div><dt>Gate</dt><dd>${bridge.detail}</dd></div>
     </dl>
   `;
@@ -152,7 +149,7 @@ function setRuntimeStatus(runtime) {
   if (!status) return;
   status.className = `engine-message${bridgeBlocksCertifiedExecution(runtime) ? ' error' : ''}`;
   status.textContent = bridgeBlocksCertifiedExecution(runtime)
-    ? `BLOCKED · ${runtime.bridge.status} · Bifröst execution controls are disabled until the packet is corrected.`
+    ? `BLOCKED · ${runtime.bridge.status} · the packet relation must be restored before this crossing continues.`
     : `${runtime.bridge.status} · ${runtime.bridge.detail}`;
 }
 
@@ -164,7 +161,7 @@ function setControlGuard(runtime) {
     button.disabled = blocked;
     button.setAttribute('aria-disabled', String(blocked));
     button.title = blocked
-      ? `${runtime.bridge.status}: correct the two-shore packet before execution.`
+      ? `${runtime.bridge.status}: restore the two-shore packet relation before execution.`
       : '';
   }
 }
@@ -174,9 +171,9 @@ function renderTwoShorePanel() {
   if (!panel) return;
   const packet = readPacket();
   currentRuntimeState = buildBifrostRuntimeState(packet);
-  renderShore(panel.querySelector('[data-shore="hearthside"]'), 'HEARTHSIDE / OBSERVABLE', currentRuntimeState.hearthside);
+  renderShore(panel.querySelector('[data-shore="hearthside"]'), 'HEARTHSIDE', currentRuntimeState.hearthside);
   renderBridge(panel.querySelector('[data-shore="bridge"]'), currentRuntimeState);
-  renderShore(panel.querySelector('[data-shore="targetside"]'), 'TARGETSIDE / EXPERIENTIAL', currentRuntimeState.targetside);
+  renderShore(panel.querySelector('[data-shore="targetside"]'), 'TARGETSIDE', currentRuntimeState.targetside);
   setRuntimeStatus(currentRuntimeState);
   setControlGuard(currentRuntimeState);
   window.dispatchEvent(new CustomEvent('bifrost:runtime-state', { detail: currentRuntimeState }));
@@ -199,7 +196,8 @@ function exportTwoShoreReceipt(reason) {
   const sidecar = buildBifrostReceiptSidecar(runtime, {
     notes: [
       reason,
-      'Sidecar export records both Bifröst shores and bridge status. It does not certify physical device testing, canon write or tone approval.',
+      `Braided Spine: ${BRAIDED_SPINE_SCHEMA}`,
+      'Sidecar carries both shores, bridge state, shared fingerprint and lineage.',
     ],
   });
   exportJson(sidecar, `bifrost-two-shore-${runtime.bridge.status.toLowerCase().replaceAll('_', '-')}.json`);
