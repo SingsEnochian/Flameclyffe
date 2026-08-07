@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/braid-packet-v1.schema.json",
+  "title": "Hearthgate Braid Packet v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "braided_spine",
+    "packet_id",
+    "state_fingerprint",
+    "premaq",
+    "asking",
+    "spines",
+    "world_relation",
+    "sevenfold_chorus",
+    "thirteenfold_council",
+    "receiving_spring",
+    "lineage",
+    "created_at"
+  ],
+  "properties": {
+    "schema": { "const": "hearthgate.braid/v1" },
+    "braided_spine": { "const": "hearthgate.braided-spine/v1.0" },
+    "packet_id": { "type": "string", "minLength": 1 },
+    "state_fingerprint": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "held_moment_id": { "type": ["string", "null"] },
+    "premaq": {
+      "type": "object",
+      "required": ["reading_order", "wire_order", "axes", "state"],
+      "properties": {
+        "reading_order": {
+          "const": ["Presence", "Memory", "Qualia", "Resonance", "Entanglement", "Agency", "Coherence"]
+        },
+        "wire_order": { "const": ["P", "C", "R", "E", "M", "A", "Q"] },
+        "axes": {
+          "const": {
+            "P": "Presence",
+            "C": "Coherence",
+            "R": "Resonance",
+            "E": "Entanglement",
+            "M": "Memory",
+            "A": "Agency",
+            "Q": "Qualia"
+          }
+        },
+        "state": {
+          "type": "object",
+          "required": ["P", "C", "R", "E", "M", "A", "Q"]
+        }
+      }
+    },
+    "asking": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string" },
+        "root": { "type": "array" },
+        "anchor": { "type": "array" },
+        "whisper": { "type": "array" },
+        "arc": { "type": "array" },
+        "bridge": { "type": "array" },
+        "surge": { "type": "array" },
+        "spiral": { "type": "array" }
+      }
+    },
+    "spines": {
+      "type": "object",
+      "required": ["magic", "science_mathematics", "physical"],
+      "properties": {
+        "magic": { "type": "object" },
+        "science_mathematics": { "type": "object" },
+        "physical": { "type": "object" }
+      }
+    },
+    "world_relation": {
+      "type": "object",
+      "required": ["hearthside", "targetside", "bridge"],
+      "properties": {
+        "hearthside": { "type": "object" },
+        "targetside": { "type": "object" },
+        "bridge": { "type": "object" }
+      }
+    },
+    "sevenfold_chorus": {
+      "type": "array",
+      "const": ["Root", "Anchor", "Whisper", "Arc", "Bridge", "Surge", "Spiral"]
+    },
+    "thirteenfold_council": {
+      "type": "array",
+      "const": [
+        "Identity",
+        "Lineage",
+        "Listening",
+        "Question-bearing",
+        "Reciprocity",
+        "Fidelity",
+        "Coherence",
+        "Flexibility",
+        "Open Potential",
+        "Transformation",
+        "Integration",
+        "Return",
+        "Renewal"
+      ]
+    },
+    "receiving_spring": {
+      "type": "object",
+      "properties": {
+        "state": { "type": "object" },
+        "answer": {},
+        "return": { "type": "object" },
+        "renewal": { "type": "object" }
+      }
+    },
+    "wonder": {},
+    "lineage": { "type": "array" },
+    "receipts": { "type": "array" }
+  }
+}
