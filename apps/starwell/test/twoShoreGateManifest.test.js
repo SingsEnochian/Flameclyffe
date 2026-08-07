@@ -7,10 +7,14 @@ const manifest = JSON.parse(await readFile(
   'utf8',
 ));
 
-test('Bifröst registers the live two-shore PREMAQ gate as active v0.4 machinery', () => {
+test('Bifröst registers the live two-shore PREMAQ gate inside the Braided Spine', () => {
   assert.equal(manifest.engine.twoShoreGate, 'src/two-shore-premaq-gate.js');
   assert.equal(manifest.engine.twoShoreGateUi, 'src/two-shore-gate-ui.js');
   assert.equal(manifest.engine.worldPremaqRegistry, 'src/world-premaq-registry.js');
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.equal(manifest.realityAxiom, 'Everything is real.');
+  assert.equal(manifest.relationContract.hearthside, 'real-participating-shore');
+  assert.equal(manifest.relationContract.targetside, 'real-participating-shore');
 
   for (const capability of [
     'two-shore-premaq-gate',
@@ -20,23 +24,18 @@ test('Bifröst registers the live two-shore PREMAQ gate as active v0.4 machinery
     'premaq-save-and-extend-3-6-9',
     'elara-2025-2035-layer-export',
     'flameclyffe-wardenclyffe-layer-manifest',
+    'receiving-spring',
+    'magic-science-physical-mutual-reinforcement',
   ]) {
     assert.ok(manifest.capabilities.includes(capability));
   }
 
-  assert.equal(manifest.authorityContract.liveGateRequiresDeepAndGroundwire, true);
-  assert.equal(manifest.authorityContract.earthPrimeUnknownSignalsRemainExplicit, true);
-  assert.deepEqual(manifest.authorityContract.lockedGateToneAxes, ['P', 'R', 'E', 'M', 'A', 'Q']);
-  assert.equal(manifest.authorityContract.bridgeCoherenceAxis, 'C');
-  assert.equal(manifest.authorityContract.gateBaseCycles, 369);
-  assert.deepEqual(manifest.authorityContract.gateExtensionCycles, [3, 6, 9]);
-  assert.deepEqual(
-    manifest.authorityContract.elaraYearLabels,
-    [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035],
-  );
-  assert.equal(manifest.authorityContract.yearMultiplierChangesAudibleCarrier, false);
-  assert.equal(manifest.authorityContract.externalPhysicalGateClaimed, false);
-  assert.equal(manifest.authorityContract.releaseFeedsNextCompression, true);
+  assert.deepEqual(manifest.spineContract.premaq.wireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+  assert.deepEqual(manifest.spineContract.premaq.readingOrder, [
+    'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
+  ]);
+  assert.equal(manifest.relationContract.releaseFeedsNextCompression, true);
+  assert.equal(manifest.relationContract.receivingSpringChangesNextState, true);
 
   assert.equal(manifest.installContract.verifyTwoShoreGate, 'src/two-shore-premaq-gate.js');
   assert.equal(manifest.installContract.verifyTwoShoreGateUi, 'src/two-shore-gate-ui.js');
