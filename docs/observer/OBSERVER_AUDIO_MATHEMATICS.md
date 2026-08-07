@@ -1,75 +1,30 @@
-# Observer Audio Mathematics
+# Observer Audio Mathematics · Braided Spine Inheritance
 
-**Status:** Canonical audio projection contract  
-**Engine:** `assets/observer-audio-engine.js`  
-**Applies to:** Möbius Audio Bus, Runa harmonic playback, STARWELL sound fields, binaural stacks, isochronic layers, haptic routing, and future C++/WASM DSP implementations
+**Status:** ACTIVE AUDIO CONTRACT UNDER THE BRAIDED SPINE  
+**Canonical authority:** [`../HEARTHGATE_BRAIDED_SPINE.md`](../HEARTHGATE_BRAIDED_SPINE.md)
 
-## Boundary
+Observer audio and Runa now draw from one Braided Spine and one sealed Braid Packet.
 
-Audio is a projected rendering of an accepted PREMAQ Observation State. It is not evidence, measurement, diagnosis, or proof of an external cause.
+PREMAQ is **Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**, carried on stable wire order `P C R E M A Q`.
 
-```text
-accepted PREMAQ state
-→ versioned audio transfer function
-→ bounded control vector
-→ audio renderer
-→ projection receipt
-```
+The shared harmonic mappings, world-native sound transform, Bridge Tone, temporal twist, physical quantity grammar, embodiment operator, accessibility transform, instrument operating envelope, and Feather Stop operator are all defined in `docs/HEARTHGATE_BRAIDED_SPINE.md`.
 
-The raw PREMAQ packet remains immutable. The audio engine stores or returns the packet ID, registry version, calibration version, engine version, output classification, diagnostics, and receipt.
-
-## Deterministic transfer
-
-For a PREMAQ packet `x = (P,C,R,E,M,A,Q)` with component derivatives, uncertainty, and confidence, the default transfer computes:
-
-- carrier frequency from Presence, Coherence, and Charge (Q);
-- binaural difference from Resonance, Memory, and derivative energy;
-- pulse rate from Memory and its rate of change;
-- spectral brightness from Attention and Coherence;
-- stereo width from Resonance reduced by uncertainty;
-- return-path gain from Entanglement weighted by confidence;
-- master gain from Presence, Charge (Q), and confidence;
-- phase inversion as an explicit, inspectable Entanglement threshold rule.
-
-Linear interpolation is used for bounded gains and rates. Exponential interpolation is used for perceptual frequency ranges:
+The audio braid is:
 
 ```text
-linear(a,b,t) = a + (b-a) clamp(t,0,1)
-exponential(a,b,t) = a (b/a)^clamp(t,0,1)
+PREMAQ bearing
++ Asking
++ Magic Spine
++ Science/Mathematics Spine
++ Physical Spine
++ World identity
++ Shore relation
+→ Runa shared harmonic state
+→ world-native sound
+→ Bridge Tone
+→ embodied sound / haptic expression
+→ Receiving Spring
+→ changed state
 ```
 
-Derivative energy is the root-mean-square of the seven bounded PREMAQ derivatives:
-
-```text
-d = sqrt((dP²+dC²+dR²+dE²+dM²+dA²+dQ²)/7)
-```
-
-This is a control statistic, not physical energy.
-
-## Safety and signal integrity
-
-- Frequency, gain, pulse rate, return level, and stereo width remain bounded by the calibration profile.
-- Master level is constrained below the existing Möbius Audio Bus ceiling.
-- The existing dynamics compressor remains the final protection stage.
-- Parameter changes use smoothing rather than discontinuous jumps.
-- Mono-safe routing, phase inversion, and return-side selection remain explicit controls.
-- Hearing accessibility profiles may narrow bandwidth, remove binaural difference, disable high-frequency content, or select haptic substitution without changing PREMAQ.
-
-## Versioning
-
-A replayable audio projection requires:
-
-- source PREMAQ packet and registry version;
-- audio engine version;
-- calibration profile ID and version;
-- render options and duration;
-- output control vector;
-- receipt timestamp.
-
-Changing any coefficient or bound requires a new calibration or engine version. Historical receipts must retain their original versions.
-
-## Implementation rule
-
-The Möbius Audio Bus remains the low-level Web Audio renderer. `ObserverAudioEngine` is the canonical Observer v2 adapter. New sound-space, binaural, harmonic, Runa, and world-profile features should request an audio projection from this adapter rather than reading PREMAQ dimensions ad hoc.
-
-World-specific sound spaces may apply a second, versioned canon transfer after this shared control vector. They must label the result `projected`, preserve the shared PREMAQ source, and issue a separate receipt.
+The historical standalone audio projection language remains preserved in the archive lineage recorded at [`../archive/pre-braided-spine-2026-08-07/ARCHIVE_MANIFEST.md`](../archive/pre-braided-spine-2026-08-07/ARCHIVE_MANIFEST.md).
