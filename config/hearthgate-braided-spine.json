@@ -1,6 +1,6 @@
 {
-  "schema": "hearthgate.braided-spine/v1.0",
-  "version": "1.0.0",
+  "schema": "hearthgate.braided-spine/v1.1",
+  "version": "1.1.0",
   "status": "canonical",
   "approved_at": "2026-08-07T06:18:00-04:00",
   "canonical_document": "docs/HEARTHGATE_BRAIDED_SPINE.md",
@@ -10,7 +10,8 @@
     "science_mathematics",
     "physical"
   ],
-  "premaq": {
+  "premaqc": {
+    "schema": "hearthgate.premaqc/v1.0",
     "reading_order": [
       "Presence",
       "Memory",
@@ -20,17 +21,22 @@
       "Agency",
       "Coherence"
     ],
-    "wire_order": ["P", "C", "R", "E", "M", "A", "Q"],
+    "wire_order": ["P", "R", "E", "M", "A", "Q", "C"],
     "axes": {
       "P": "Presence",
-      "C": "Coherence",
       "R": "Resonance",
       "E": "Entanglement",
       "M": "Memory",
       "A": "Agency",
-      "Q": "Qualia"
+      "Q": "Qualia",
+      "C": "Coherence"
     },
-    "sevenfold_correspondence": "hearthgate.sevenfold-premaq/v0.1"
+    "sevenfold_correspondence": "hearthgate.sevenfold-premaqc/v1.0"
+  },
+  "legacy_premaq": {
+    "status": "predecessor-lineage",
+    "wire_order": ["P", "C", "R", "E", "M", "A", "Q"],
+    "migration": "decode by legacy symbol, then emit canonical PREMAQC wire order"
   },
   "sevenfold_chorus": [
     "Root",
@@ -110,7 +116,7 @@
     "DEEP",
     "DEQPTheory",
     "DEEPStory",
-    "PREMAQ",
+    "PREMAQC",
     "Arcsweep",
     "Bifrost",
     "Runa",
