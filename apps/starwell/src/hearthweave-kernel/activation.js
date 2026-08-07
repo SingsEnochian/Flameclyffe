@@ -8,6 +8,13 @@ import {
   fingerprint,
 } from './dual-aspect.js';
 import { validateDualAspectPacket } from './validation.js';
+import {
+  BRAID_PACKET_EVENT,
+  BRAID_PACKET_STORAGE_KEY,
+  braidPacketFromDualAspect,
+  readActiveBraidPacket,
+  writeActiveBraidPacket,
+} from './braid-packet.js';
 
 const RENDERERS = Object.freeze(['glyph', 'tone', 'visual', 'haptic', 'narrative']);
 const SENSORY_ACTIVATION_KEY = 'hearthweave:sensory-activation:active:v1';
@@ -131,6 +138,8 @@ export function readActiveDualAspectPacket({ storage } = {}) {
   }
 }
 
+export { readActiveBraidPacket };
+
 export function readDualAspectReceipt(receiptId, { storage } = {}) {
   if (!receiptId) return null;
   const ledger = readLedger(resolveStorage(storage));
@@ -147,20 +156,43 @@ export function publishDualAspectActivation(packetInput, {
   storage,
   eventTarget = globalThis,
   clock = () => new Date(),
+  asking = null,
+  receivingSpring = null,
+  answer = null,
 } = {}) {
   const packet = validateDualAspectPacket(packetInput);
   const selectedStorage = resolveStorage(storage);
   writeJson(selectedStorage, DUAL_ASPECT_ACTIVE_PACKET_KEY, packet);
+
   const receipt = createActivationReceipt(packet, clock);
   writeReceipt(selectedStorage, receipt);
+
+  const braidPacket = braidPacketFromDualAspect(packet, {
+    asking: asking ?? packet.asking ?? {},
+    receivingSpring: receivingSpring ?? packet.receiving_spring ?? {},
+    answer: answer ?? packet.answer ?? null,
+    lineage: [
+      `activation-receipt:${receipt.receipt_id}`,
+      `dual-aspect-fingerprint:${packet.packet_fingerprint}`,
+    ],
+  });
+  writeActiveBraidPacket(braidPacket, {
+    storage: selectedStorage,
+    eventTarget,
+  });
+
   dispatch(eventTarget, DUAL_ASPECT_ACTIVATION_EVENT, {
     packet_id: packet.packet_id,
     packet_fingerprint: packet.packet_fingerprint,
     shared_state_fingerprint: packet.correspondence.shared_state_fingerprint,
+    braid_packet_id: braidPacket.packet_id,
+    braid_state_fingerprint: braidPacket.state_fingerprint,
     receipt_id: receipt.receipt_id,
     packet: clone(packet),
+    braid_packet: clone(braidPacket),
   });
-  return { packet: clone(packet), receipt };
+
+  return { packet: clone(packet), braidPacket: clone(braidPacket), receipt };
 }
 
 export function recordDualAspectRender(packetInput, {
@@ -237,8 +269,21 @@ export function clearDualAspectActivation({
 } = {}) {
   const selectedStorage = resolveStorage(storage);
   const packet = readActiveDualAspectPacket({ storage: selectedStorage });
+  const braidPacket = readActiveBraidPacket({ storage: selectedStorage });
+
   selectedStorage?.removeItem?.(DUAL_ASPECT_ACTIVE_PACKET_KEY);
   selectedStorage?.removeItem?.(SENSORY_ACTIVATION_KEY);
+  selectedStorage?.removeItem?.(BRAID_PACKET_STORAGE_KEY);
+
+  if (braidPacket) {
+    dispatch(eventTarget, BRAID_PACKET_EVENT, {
+      packet: null,
+      previous_packet_id: braidPacket.packet_id,
+      previous_state_fingerprint: braidPacket.state_fingerprint,
+      reason,
+    });
+  }
+
   if (packet) {
     const receipt = readDualAspectReceiptForPacket(packet.packet_id, { storage: selectedStorage });
     if (receipt) {
@@ -255,6 +300,7 @@ export function clearDualAspectActivation({
     dispatch(eventTarget, DUAL_ASPECT_DEACTIVATION_EVENT, {
       packet_id: packet.packet_id,
       packet_fingerprint: packet.packet_fingerprint,
+      braid_packet_id: braidPacket?.packet_id ?? null,
       reason,
     });
   }
@@ -267,11 +313,18 @@ export function subscribeToDualAspectActivation(listener, {
   emitCurrent = true,
 } = {}) {
   if (typeof listener !== 'function') throw new Error('Activation listener must be a function');
-  const handler = (event) => listener(event.detail?.packet ?? readActiveDualAspectPacket({ storage }), event.detail ?? null);
+  const handler = (event) => listener(
+    event.detail?.packet ?? readActiveDualAspectPacket({ storage }),
+    event.detail ?? null,
+  );
   eventTarget?.addEventListener?.(DUAL_ASPECT_ACTIVATION_EVENT, handler);
   if (emitCurrent) {
     const current = readActiveDualAspectPacket({ storage });
-    if (current) listener(current, { restored: true, packet_id: current.packet_id });
+    if (current) listener(current, {
+      restored: true,
+      packet_id: current.packet_id,
+      braid_packet: readActiveBraidPacket({ storage }),
+    });
   }
   return () => eventTarget?.removeEventListener?.(DUAL_ASPECT_ACTIVATION_EVENT, handler);
 }
