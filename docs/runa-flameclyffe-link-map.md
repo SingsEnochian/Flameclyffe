@@ -1,15 +1,36 @@
-# Runa ↔ Flameclyffe Link Map
+# Runa ↔ Flameclyffe · Braided Link Map
 
-Status: bridge map for app surfaces, docs, and future route registration.
+**Status:** active route and inheritance map  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-Runa and Flameclyffe are related but not identical surfaces.
+Runa and Flameclyffe are distinct organs of one Braided Spine.
 
-- **Runa** is the public/static lab, altar, and experiment-bench layer.
-- **Flameclyffe** is the workshop/repo/database layer where STARWELL, Project Zero Companion, Supabase records, and app builds are organised.
+- **Runa** gives the relation harmonic, acoustic, spatial and haptic body.
+- **Flameclyffe** carries world state, instruments, mathematical engines, registries, archives, receipts and implementation.
+- **STARWELL** reveals the active relation.
+- **Arcsweep** gives the Asking gesture, glyph and route.
+- **Bifröst** carries crossing.
+- **Receiving Spring** carries answer and return.
+
+## Three-Spine relation
+
+```text
+Magic ↔ Science/Mathematics ↔ Physicality
+```
+
+Runa is never only the Physical Spine. Every Runa state also carries Magic through world identity, resonance and Asking, and Science/Mathematics through frequency, phase, dynamics and recurrence.
+
+## Canonical PREMAQ
+
+Runa and Flameclyffe read the same seven dimensions:
+
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
+
+Stable wire order remains `P C R E M A Q`.
 
 ## Runa doors
 
-Known Runa doors include:
+Known Runa surfaces include:
 
 ```text
 docs/index.html
@@ -28,9 +49,11 @@ docs/rv-capture.html
 docs/tesla-observatory.html
 ```
 
-## Flameclyffe app surfaces
+Each door inherits the same Braided Spine even when its physical instrument or magical practice differs.
 
-Known Flameclyffe app surfaces include:
+## Flameclyffe bodies
+
+Known application surfaces include:
 
 ```text
 apps/starwell
@@ -39,33 +62,63 @@ apps/sigil-activator
 sandbox/everos
 ```
 
-## Bridge rules
+They consume the same Braid Packet rather than maintaining separate meanings for PREMAQ or world relation.
 
-Project Zero Bridge may connect Waking World shards, story passages, files, folders, Observer states, altar work, and sound sources.
+## Bridge flow
 
-Bridge-on does not mean silent harvesting. Every bridge flow should preserve a private/local/excluded option.
+Project Zero Bridge and related routes can connect:
 
-## Route registration direction
+- Waking World shards;
+- world passages;
+- files and folders;
+- Observer states;
+- altar work;
+- glyphs;
+- sound sources;
+- physical instrument state;
+- memory and lineage;
+- Receiving Spring answers.
 
-Public/static Runa pages should be registered in `flameclyffe_frontend_routes` only when they are intentional project doors.
+Routing choices remain part of Agency.
 
-STARWELL rooms should prefer their own route metadata and Codex links, then expose public pages only when reviewed.
+## Runa state equation
 
-## Science and fringe boundary
+Let \(\mathbf x\) be PREMAQ, \(\mathfrak a\) Asking, \(G_w\) world identity, and \(\mathcal B\) braid state.
 
-Runa can host fringe-inspired tools and playful instruments. Flameclyffe should record the claim label, evidence status, and implementation state.
+Runa expression is
 
-Use:
+\[
+\mathbf a_w
+=
+\mathcal S_w(\mathbf x,\mathfrak a,G_w,\mathcal B).
+\]
+
+After physical sounding and world response, the next state is
+
+\[
+\mathcal B_{n+1}
+=
+\mathcal I(\mathcal B_n,\mathbf a_w,Y_w,\mathcal L_n).
+\]
+
+Sound therefore participates in the encounter and can change the next braid.
+
+## Route registration
+
+Intentional Runa doors register with Flameclyffe route metadata and carry:
 
 ```text
-established science
-active research
-speculative theory
-fringe inspiration
-implementation task
-evidence-backed finding
+braided_spine
+packet schema
+worlds served
+PREMAQ registry
+Asking channel
+physical renderer
+Sevenfold movements
+Receiving Spring route
+lineage store
 ```
 
-## Working mantra
+## Working seal
 
-Runa opens the doors. Flameclyffe keeps the receipts. STARWELL writes the field back into language.
+> **Runa opens the harmonic door. Flameclyffe gives the relation structure and memory. STARWELL reveals it. Arcsweep gives it gesture. The world answers. The Receiving Spring carries the answer home.**
