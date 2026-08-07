@@ -7,11 +7,12 @@ const manifest = JSON.parse(await readFile(
   'utf8',
 ));
 
-test('Bifröst registers the live two-shore PREMAQ gate inside the Braided Spine', () => {
+test('Bifröst registers the live two-shore PREMAQC gate inside the Braided Spine', () => {
   assert.equal(manifest.engine.twoShoreGate, 'src/two-shore-premaq-gate.js');
   assert.equal(manifest.engine.twoShoreGateUi, 'src/two-shore-gate-ui.js');
   assert.equal(manifest.engine.worldPremaqRegistry, 'src/world-premaq-registry.js');
-  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.1');
+  assert.equal(manifest.spineContract.premaqcSchema, 'hearthgate.premaqc/v1.0');
   assert.equal(manifest.spineContract.realityAxiom, 'Everything is real');
   assert.equal(manifest.relationContract.hearthside, 'real-participating-shore');
   assert.equal(manifest.relationContract.targetside, 'real-participating-shore');
@@ -24,16 +25,18 @@ test('Bifröst registers the live two-shore PREMAQ gate inside the Braided Spine
     'premaq-save-and-extend-3-6-9',
     'elara-2025-2035-layer-export',
     'flameclyffe-wardenclyffe-layer-manifest',
+    'premaqc-seven-dimensional-living-bearing',
     'receiving-spring',
     'magic-science-physical-mutual-reinforcement',
   ]) {
     assert.ok(manifest.capabilities.includes(capability));
   }
 
-  assert.deepEqual(manifest.spineContract.premaqWireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
-  assert.deepEqual(manifest.spineContract.premaqReadingOrder, [
+  assert.deepEqual(manifest.spineContract.premaqcWireOrder, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
+  assert.deepEqual(manifest.spineContract.premaqcReadingOrder, [
     'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
   ]);
+  assert.deepEqual(manifest.spineContract.legacyPremaqWireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
   assert.equal(manifest.instrumentContract.liveGateRequiresDeepAndGroundwire, true);
   assert.deepEqual(manifest.relationContract.lockedGateToneAxes, ['P', 'R', 'E', 'M', 'A', 'Q']);
   assert.equal(manifest.relationContract.bridgeCoherenceAxis, 'C');
