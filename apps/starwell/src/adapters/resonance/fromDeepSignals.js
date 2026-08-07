@@ -2,20 +2,28 @@ import { DEEP_RESONANCE_DIMENSIONS } from '../../configs/resonance/deep-default.
 import { makeVectorFromRecord, mergeVectorRecords } from '../../math-kernels/unit-resonance/index.js';
 
 const FIELD_ALIASES = Object.freeze({
-  pressure: 'P',
-  coherence: 'C',
-  rhythm: 'R',
-  entropy: 'E',
-  memory: 'M',
-  attention: 'A',
+  presence: ['presence', 'P', 'pressure'],
+  coherence: ['coherence', 'C'],
+  resonance: ['resonance', 'R', 'rhythm'],
+  entanglement: ['entanglement', 'E'],
+  memory: ['memory', 'M'],
+  agency: ['agency', 'A'],
+  qualia: ['qualia', 'Q', 'charge'],
 });
+
+function firstFinite(source, aliases) {
+  for (const alias of aliases) {
+    const value = source?.[alias];
+    if (Number.isFinite(value)) return value;
+  }
+  return 0;
+}
 
 function readDeepField(packet = {}) {
   const source = packet.field || packet;
 
   return DEEP_RESONANCE_DIMENSIONS.reduce((field, dimension) => {
-    const alias = FIELD_ALIASES[dimension];
-    field[dimension] = source[dimension] ?? source[alias] ?? 0;
+    field[dimension] = firstFinite(source, FIELD_ALIASES[dimension]);
     return field;
   }, {});
 }
@@ -33,6 +41,7 @@ export function nodeFromDeepSignal(packet = {}, options = {}) {
       visible: packet.visible ?? true,
       consent: packet.consent ?? true,
       source: packet.source || 'deep-observer',
+      premaq_registry: 'hearthgate.braided-spine/v1.0',
       position: packet.position,
       raw: packet,
     },
