@@ -1,19 +1,21 @@
-# Bifrost Runtime-State Strengthening Pass
+# Bifröst Runtime-State Strengthening Pass · Lineage
 
-**Date:** 2026-08-04  
-**Branch:** `feature/bifrost-arcsweep-current-ui-v0.4`  
-**Status:** PARTIAL / STRENGTHENED  
-**Scope:** Bifrost two-shore PREMAQ visibility, bridge gate behaviour, receipt sidecar, automated contract tests
+**Original date:** 2026-08-04  
+**Rebraided:** 2026-08-07  
+**Original branch:** `feature/bifrost-arcsweep-current-ui-v0.4`  
+**Current authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`
 
-## What changed
+This handoff records the step that first made both Bifröst shores simultaneously visible and bound execution to one shared runtime adapter. The Braided Spine carries that work forward into the full Braid Packet and Receiving Spring.
 
-This pass strengthens the prior two-shore visibility pass by adding a shared pure runtime adapter:
+## What this pass established
+
+The pass introduced:
 
 ```text
 apps/starwell/bifrost/bifrost-runtime-state.js
 ```
 
-The adapter builds one `bifrost.runtime-state/v0.1` object from the active `DualAspectPacket`:
+and one runtime state containing:
 
 ```text
 packet_id
@@ -25,11 +27,11 @@ bridge
 active_execution_side
 ```
 
-The two-shore PREMAQ panel now renders from that adapter instead of owning a separate shore-resolution law.
+The two-shore panel began rendering from that shared adapter rather than maintaining a separate shore-resolution law.
 
 ## Runtime statuses
 
-The adapter exposes the following visible statuses:
+The original visible state family remains useful implementation lineage:
 
 ```text
 LOCAL REFERENCE
@@ -43,11 +45,13 @@ HIDDEN_STATE_DIVERGENCE
 TWO_SHORE_PREMAQ_VISIBLE
 ```
 
-`SHORE_STATE_INCOMPLETE` and `HIDDEN_STATE_DIVERGENCE` set `blocks_execution: true`.
+The Braided Spine now interprets Hearthside and Targetside as two real participating shores. The old Observable/Experiential labels remain compatibility transport where code still emits them.
 
-## Control hardening
+## Execution relation
 
-The two-shore panel now disables and capture-blocks the primary execution/audio controls when the bridge is incomplete or divergent:
+`SHORE_STATE_INCOMPLETE` and `HIDDEN_STATE_DIVERGENCE` suspend crossing execution until the shared relation is restored.
+
+The guarded controls are:
 
 ```text
 run-window
@@ -55,19 +59,11 @@ sound-pair
 play-premaq-song
 ```
 
-This is a safety gate for certified crossing execution. Local reference remains labelled as reference mode and does not claim certification.
+This preserves one Braid Packet and one state fingerprint across the crossing.
 
-## Receipt hardening
+## Receipt sidecar
 
-The panel now adds an explicit bridge receipt export:
-
-```text
-Export bridge receipt
-```
-
-It also hooks the existing `export-receipts` button and emits an automatic two-shore sidecar export whenever local cycle receipts are exported.
-
-The sidecar includes:
+The bridge receipt carries:
 
 ```text
 packet_id
@@ -79,71 +75,49 @@ hearthside_fingerprint
 targetside_fingerprint
 bridge_status
 crossing_ready
-certified
 active_execution_side
-blocks_execution
-authority flags
+lineage
 ```
 
-Authority flags remain false for canon write, tone approval and physical-device testing.
+Current Braided Spine receipts add PREMAQ registry, Asking, three-spine state, Receiving Spring, answer, return and renewal.
 
-## Automated tests added
+## Canonical PREMAQ
+
+The historical pass predated the final registry. Current meaning is:
+
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
+
+Stable wire order remains `P C R E M A Q`.
+
+## What followed
+
+The current migration completes the old next slice by:
+
+- binding the runtime to `hearthgate.braided-spine/v1.0`;
+- making both shores participating relation states;
+- replacing the world-projection ontology with world expression;
+- keeping PREMAQ seven-dimensional and canonical;
+- adding Receiving Spring runtime functions;
+- carrying Targetside answer through return and integration;
+- binding Arcsweep, Living Glyph, Runa and STARWELL to the same Braid Packet lineage.
+
+## Current movement
 
 ```text
-apps/starwell/test/bifrostTwoShorePremaq.test.js
+Field
+→ PREMAQ
+→ Asking
+→ Braid
+→ compression
+→ release
+→ crossing
+→ Receiving Spring
+→ answer
+→ return
+→ integration
+→ renewal
 ```
 
-The test file asserts:
+## Lineage seal
 
-```text
-- /bifrost/ loads the two-shore script
-- the panel names Hearthside / Observable
-- the panel names Targetside / Experiential
-- local reference is visible and uncertified
-- a complete temporal two-shore packet is crossing-ready
-- missing shore data becomes SHORE_STATE_INCOMPLETE and blocks execution
-- mismatched fingerprints become HIDDEN_STATE_DIVERGENCE and block execution
-- the sidecar receipt includes both shore ids/fingerprints and bridge status
-```
-
-## Honest boundary
-
-This pass still does not fully promote Bifrost into a two-shore mutable engine loop inside `main.js`. The strengthened adapter exists and guards the page, but the compression-release engine still uses the existing current released state path.
-
-Therefore the status is:
-
-```text
-Two-shore indicator:       STRENGTHENED
-Bridge execution guard:    PARTIAL / UI-GUARDED
-Two-shore sidecar receipt: FUNCTIONAL IN BROWSER EXPORT PATH
-Core main.js runtime:      NOT YET FULLY PROMOTED
-Physical platforms:        NOT TESTED
-Boxfire review:            REQUIRED
-```
-
-## Next implementation slice
-
-The next pass should remove the remaining split by importing `bifrost-runtime-state.js` directly into `main.js` and making `BifrostRuntimeState` the single source for:
-
-```text
-sourceState
-currentState
-exportReceipts()
-runWindow()
-soundPair()
-premaq-song source
-```
-
-Safe order:
-
-```text
-1. Import buildBifrostRuntimeState into main.js.
-2. Replace stateFromActivePacket(packet) with a runtime adapter call.
-3. Select active_execution_side deliberately.
-4. Block runWindow and soundPair before execution if bridge.blocks_execution is true.
-5. Add both-shore fields directly to exportReceipts() payload.
-6. Add tests proving main.js imports the adapter and names both-shore export fields.
-7. Only then update the PR verification matrix head.
-```
-
-> The bridge now has a shared adapter, visible shore-lanterns, a breaker for bad current, and a sidecar receipt. The next pass must wire the engine heart directly into that same adapter.
+> **This pass gave Bifröst two visible shores and one shared current. The Braided Spine gives that current a complete reciprocal life: both shores remain lit, the world answers, and the answer changes the next crossing.**
