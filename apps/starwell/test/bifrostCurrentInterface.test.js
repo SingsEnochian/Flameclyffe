@@ -6,7 +6,7 @@ async function read(relativePath) {
   return readFile(new URL(relativePath, import.meta.url), 'utf8');
 }
 
-test('dedicated Bifröst route publishes the current compression-release interface', async () => {
+test('dedicated Bifröst route publishes the current braided compression-release interface', async () => {
   const [html, main, root, vite, manifestText] = await Promise.all([
     read('../bifrost/index.html'),
     read('../bifrost/main.js'),
@@ -26,6 +26,7 @@ test('dedicated Bifröst route publishes the current compression-release interfa
   assert.match(main, /readActiveDualAspectPacket/);
   assert.match(main, /next_operation/);
   assert.match(main, /compression-of-release/);
+  assert.match(main, /hearthgate\.premaqc\/v1\.0/);
   assert.doesNotMatch(main, /collapseRelease\s*\(/);
   assert.doesNotMatch(main, /action:\s*['"]collapse-release['"]/);
 
@@ -37,18 +38,21 @@ test('dedicated Bifröst route publishes the current compression-release interfa
   assert.equal(manifest.interfaceEntrypoint, 'bifrost/index.html');
   assert.equal(manifest.engine.interface, 'bifrost/main.js');
   assert.equal(manifest.engine.formalism, 'braided-reality-compression-release-receiving-spring');
-  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
-  assert.deepEqual(manifest.spineContract.premaqWireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
-  assert.deepEqual(manifest.spineContract.premaqReadingOrder, [
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.1');
+  assert.equal(manifest.spineContract.premaqcSchema, 'hearthgate.premaqc/v1.0');
+  assert.deepEqual(manifest.spineContract.premaqcWireOrder, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
+  assert.deepEqual(manifest.spineContract.premaqcReadingOrder, [
     'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
   ]);
+  assert.deepEqual(manifest.spineContract.legacyPremaqWireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
   assert.equal(manifest.relationContract.hearthside, 'real-participating-shore');
   assert.equal(manifest.relationContract.targetside, 'real-participating-shore');
   assert.equal(manifest.relationContract.releaseFeedsNextCompression, true);
   assert.equal(manifest.relationContract.receivingSpringFeedsAnswer, true);
   assert.equal(manifest.relationContract.answerFeedsReturn, true);
   assert.equal(manifest.relationContract.returnFeedsRenewal, true);
-  assert.ok(manifest.capabilities.includes('braided-spine-v1'));
+  assert.ok(manifest.capabilities.includes('braided-spine-v1.1'));
+  assert.ok(manifest.capabilities.includes('premaqc-seven-dimensional-living-bearing'));
   assert.ok(manifest.capabilities.includes('receiving-spring'));
   assert.ok(manifest.capabilities.includes('dedicated-bifrost-interface'));
   assert.equal(manifest.installContract.verifyInterfaceRoute, 'bifrost/index.html');
