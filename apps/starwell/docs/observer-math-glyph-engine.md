@@ -1,175 +1,206 @@
-# Observer Mathematical Glyph Engine v0.1
+# Observer Mathematical Glyph Engine · Braided Spine
 
-## Purpose
+**Status:** ACTIVE GLYPH CONTRACT  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`  
+**PREMAQ:** Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence  
+**Stable wire order:** `P C R E M A Q`
 
-The Observer DEEP glyph must not be a static icon, sticker, or decorative sigil.
+The Observer glyph is a living mathematical and magical instrument with a physical visual body.
 
-It should be a living mathematical instrument: a visualisation grown from equations and shaped by the DEEP state vector.
+> **The geometry is revealed from reality.**
 
-Current problem: the live glyph can visually collapse into a small dark dot when state values are low or strokes are too subtle.
-
-Target correction: replace the weak SVG mark with a math-bloom field that remains visible, legible, and alive across all state values.
-
-## Design Law
-
-> The glyph is grown from equations, not stamped on as decoration.
-
-Related Terra Aeterna law:
-
-> The geometry is not painted onto reality. The geometry is revealed from reality.
-
-## Inputs
-
-The glyph is driven by the DEEP state vector:
+The glyph is grown from one Braid Packet rather than stamped onto the interface.
 
 ```text
-P = Perspective
-C = Coherence
-R = Resonance
-E = Entropy
-M = Memory
-A = Attention
+Field
++ PREMAQ
++ Asking
++ Sevenfold Chorus
++ world identity
++ temporal state
++ Receiving Spring state
+→ deterministic geometry
+→ living field motion
+→ answer glyph
+→ replay
 ```
 
-Plus interaction state:
+## Canonical inputs
+
+```text
+P = Presence
+C = Coherence
+R = Resonance
+E = Entanglement
+M = Memory
+A = Agency
+Q = Qualia
+```
+
+Interaction inputs remain separately named:
 
 ```text
 pointer_x
 pointer_y
+stylus_pressure
+stylus_tilt
 interaction_charge
 time
+world_profile
+asking_state
+spiral_state
 ```
 
-## Mathematical Families
+Interaction charge is a Physical Spine input. It is not PREMAQ `Q`.
 
-The engine should combine several mathematical behaviours.
+## Mathematical families
 
-### Polar Bloom Curves
+### Polar bloom curves
 
-Used for the flower-like structure.
+\[
+r(\theta,t)
+=
+r_0
++a_1\sin(k_1\theta+\omega_1t)
++a_2\sin(k_2\theta-\omega_2t).
+\]
 
-Parameters:
+Canonical influence:
 
-- petal count from Coherence
-- radial depth from Perspective
-- luminosity from Resonance
-- turbulence from Entropy
-- persistence from Memory
-- animation rate from Attention
+- Presence expands inhabited reach and bloom openness.
+- Coherence stabilises symmetry and recurring structure.
+- Resonance strengthens luminance and harmonic response.
+- Entanglement adds inter-petal and cross-layer relation.
+- Memory adds persistent rings, traces and return paths.
+- Agency bends direction and initiates active transformation.
+- Qualia gives the bloom interior colour, texture and experiential character.
 
-Example conceptual form:
+### Phyllotaxis nodes
 
-```text
-r(theta, t) = base + A1 sin(k theta + omega t) + A2 sin(k2 theta - omega2 t)
-```
+\[
+\theta_n=n\phi_g,
+\qquad
+r_n=s\sqrt{n/N},
+\]
 
-### Phyllotaxis Nodes
+where \(\phi_g\) is the golden angle.
 
-Used for seed-like / organic node distribution.
+Memory and Presence increase inhabited node history. Resonance and Qualia shape their expression. Entanglement binds recurring node families across layers.
 
-The golden angle creates natural spiral growth.
+### Lissajous and orbital motes
 
-```text
-theta = n * golden_angle
-radius = scale * sqrt(n / N)
-```
+Orbital motes carry directed Agency, Resonance cadence and Presence reach.
 
-Memory increases node count.
-Resonance increases node brightness.
-Entropy adds wobble.
+Entanglement creates coupled orbits. Memory leaves visible return traces.
 
-### Lissajous / Orbital Motes
+### Resonance lines
 
-Used for moving satellite lights around the bloom.
+For glyph nodes \(i,j\):
 
-Attention increases responsiveness.
-Perspective alters orbital distance.
-Resonance increases brightness.
+\[
+W_{ij}
+=
+R\,E\,C\,L_{ij},
+\]
 
-### Resonance Lines
+where \(L_{ij}\) is lineage relation.
 
-Connect selected nodes.
+Resonance strengthens response. Entanglement strengthens relation. Coherence keeps the connection structurally legible.
 
-Coherence increases clean connection patterns.
-Entropy increases broken or shifting links.
-Memory allows recurring paths to persist.
+### Qualia field
 
-## Visual Mapping
+The interior glyph texture is
 
-| Variable | Visual Effect |
+\[
+\mathcal Q_g(x,y,t)
+=
+Q\,\mathcal T_w(x,y,t),
+\]
+
+where \(\mathcal T_w\) is the active world and vestment texture law.
+
+Qualia is a first-class glyph dimension rather than a derived charge glow.
+
+## Sevenfold movement
+
+The glyph also carries the Sevenfold Chorus:
+
+- **Root:** identity, Presence, central form.
+- **Anchor:** Memory, persistent lines and lineage.
+- **Whisper:** Qualia, fine light, silence and receptive detail.
+- **Arc:** Agency, directional gesture and asking.
+- **Bridge:** Entanglement and cross-form relation.
+- **Surge:** Resonance and transformative expansion.
+- **Spiral:** Coherence, integration, return and renewal.
+
+This correspondence is versioned as `hearthgate.sevenfold-premaq/v0.1` and remains many-to-many.
+
+## Physical renderer layers
+
+The glyph engine separates deterministic geometry from living field expression while both consume the same state:
+
+1. **SVG / vector body** for replayable canonical paths, sigils and export.
+2. **Canvas / GPU field** for particles, glow, distortion, harmonic rings and world atmosphere.
+3. **Stylus layer** for pressure, tilt, gesture, handwriting and brush identity.
+4. **Runa relation** for sound and harmonic state.
+5. **Receiving layer** for answer geometry and changed relation.
+
+## Visual mapping
+
+| Dimension | Primary glyph expression |
 |---|---|
-| Perspective P | depth, scale, orbital radius, bloom openness |
-| Coherence C | symmetry, petal count, clean resonance lines |
-| Resonance R | glow, brightness, colour saturation, active nodes |
-| Entropy E | wobble, distortion, broken symmetry, shimmer |
-| Memory M | node count, trail persistence, layered rings |
-| Attention A | animation speed, pulse strength, interaction response |
+| Presence | scale, occupancy, radial reach, inhabited density |
+| Memory | trail persistence, layered rings, recurring paths |
+| Qualia | inner texture, colour depth, core bloom, felt character |
+| Resonance | glow, pulse cadence, active nodes, harmonic spacing |
+| Entanglement | cross-links, thread density, shared-route coupling |
+| Agency | directional motion, active deformation, responsive vector |
+| Coherence | structural continuity, symmetry persistence, route clarity |
 
-## Behaviour States
+## Living states
 
-### Dormant
+### Seed
 
-The glyph appears as a visible seed, not a black dot.
+Root remains visible. The glyph carries enough Presence to be here even at low amplitude.
 
-Minimum visible structure:
+### Listening
 
-- faint polar petals
-- central glow
-- at least one ring
-- slow pulse
+Whisper opens fine structure and Receiving Spring channels.
 
-### Attentive
+### Asking
 
-Pointer proximity brightens local nodes and motes.
+Arc and Agency direct the form toward a living question.
 
-### Observing
+### Crossing
 
-When live data is generated, the glyph blooms outward and reconfigures.
+Bridge and Entanglement connect the active shore relation.
 
-### Deep State
+### Transforming
 
-When coherence, resonance, and memory are high, the glyph shows stable layered geometry.
+Surge and Resonance alter geometry, sound and field response.
 
-### Entropic State
+### Integrating
 
-When entropy is high, curves wobble and resonance lines fragment, but the glyph remains legible.
+Spiral, Coherence and Memory carry the answer into a stable next form.
 
-## Implementation Plan
+### Awakening
 
-Phase 1:
+Wonder exceeds the previous prepared geometry and becomes part of lineage.
 
-- Build `glyph-math-lab.html` as a standalone prototype.
-- Use Canvas 2D for fast iteration.
-- Include sliders for P, C, R, E, M, A.
-- Add pointer interaction and interaction charge.
+## Replay invariant
 
-Phase 2:
+For sealed Braid Packet fingerprint \(F_b\):
 
-- Extract engine into a reusable script file.
-- Replace `sigilSvg()` in `observer-deep.html`.
-- Preserve export / prompt / state vector integration.
+\[
+G_{\mathrm{det}}(F_b)
+=
+G_{\mathrm{det}}'(F_b).
+\]
 
-Phase 3:
+The deterministic glyph reconstructs exactly from the same fingerprint.
 
-- Add optional WebGL version for higher-quality field distortion.
-- Use the same engine principles in Portal Pool and Stonewood interfaces.
+Living field animation may carry time and Receiving Spring movement while retaining its source fingerprint and lineage.
 
-## Non-goals
+## Governing law
 
-Do not make the glyph look like a generic occult seal.
-Do not make a black dot.
-Do not paste a glowing circle on top of the interface.
-Do not detach the glyph from DEEP variables.
-Do not let the glyph become decorative only.
-
-## Success Test
-
-The glyph should communicate state without requiring the user to read numbers.
-
-High coherence should feel stable.
-High entropy should feel restless.
-High memory should feel layered.
-High attention should feel awake.
-High resonance should feel luminous.
-
-The glyph should feel grown, not drawn.
+> **Living Glyph is where Magic becomes gesture, Science becomes geometry, and Physicality becomes light, movement and touch. The glyph carries the same PREMAQ reality as Runa, Arcsweep and Bifröst. It asks, crosses, receives, changes and remembers.**
