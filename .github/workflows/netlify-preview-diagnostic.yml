@@ -1,0 +1,41 @@
+name: Netlify Preview Diagnostic
+
+on:
+  push:
+    branches:
+      - design/lattice-deep-observer-machine
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    env:
+      STARWELL_BASE: /
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Pin npm 11.16.0
+        run: npm install --global npm@11.16.0
+
+      - name: Versions
+        run: |
+          node --version
+          npm --version
+
+      - name: npm ci
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: contracts verify
+        run: npm run contracts:verify
+
+      - name: STARWELL tests
+        run: npm run starwell:test
+
+      - name: STARWELL build
+        run: npm run starwell:build
