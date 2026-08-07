@@ -1,118 +1,125 @@
-# Hearthgate World-Tone Jacobian and Haptic Approval Gate
+# Hearthgate World Tone and Haptic Calibration · Braided Spine
 
-**Status:** calibration prototype  
-**Authority:** Rowan approves or rejects every world tone  
-**Interface:** iPad web app with Shokz selected as the system audio output  
+**Status:** active calibration contract  
+**Canonical authority:** `docs/HEARTHGATE_BRAIDED_SPINE.md`  
 **Route:** `/world-tone-approval/`
 
-## Purpose
+World tone is one physical and magical expression of the same Braid Packet that carries PREMAQ, Asking, world relation and lineage.
 
-Each world keeps its own declared root tone. The shared engine derives a fold index from that world's transfer-function Jacobian, creates reciprocal direct and inverse frequency branches, and stops before accepting either the root or its fold mapping as calibrated.
+```text
+Magic ↔ Science/Mathematics ↔ Physicality
+```
 
-A tone becomes approved only after Rowan deliberately auditions a bounded audio-haptic proxy through Shokz and issues an approval receipt.
+Magic carries the world identity, harmonic meaning, Asking, relation and answer.
+
+Science/Mathematics carries Jacobians, folds, harmonic ratios, reciprocal branches, calibration and replay.
+
+Physicality carries sound pressure, device routing, haptic vibration, body placement and actual playback.
+
+## PREMAQ
+
+World-tone calculations use the canonical PREMAQ registry:
+
+**Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence**
+
+Stable wire order remains `P C R E M A Q`.
 
 ## Jacobian fold law
 
-For world transfer function
+For world expression function
 
 \[
 \mathbf y_w=T_w(\mathbf x;G_w,\theta_w),
 \]
 
-use the local Jacobian
+use
 
 \[
 J_w=\frac{\partial T_w}{\partial\mathbf x}.
 \]
 
-Let \(\sigma_{\max,w}\) and \(\sigma_{\min,w}\) be the largest and smallest effective singular values. For rectangular matrices, the implementation uses the smaller Gram matrix so structural zero padding does not create a false fold.
+With effective singular values \(\sigma_{\max,w}\) and \(\sigma_{\min,w}\):
 
 \[
-\Phi_w=1-\frac{\sigma_{\min,w}}{\sigma_{\max,w}+\varepsilon}
-\]
-
-\[
+\Phi_w=1-\frac{\sigma_{\min,w}}{\sigma_{\max,w}+\varepsilon},
+\qquad
 \kappa_w=\frac{\sigma_{\max,w}}{\sigma_{\min,w}+\varepsilon}.
 \]
 
-The determinant remains a volume-and-orientation receipt. It is not used as the sole fold trigger.
-
-## Hysteresis
-
-Each world declares separate entry and release thresholds:
-
-```text
-resting → active when Φ >= enter_threshold
-active  → resting when Φ < release_threshold
-```
-
-This prevents boundary chatter.
+The determinant remains a volume-and-orientation receipt.
 
 ## Reciprocal tone pair
 
-For approved world root \(f_{w,0}\), fold strength \(s_w\), and calibrated excursion \(\lambda_w\):
+For world root \(f_{w,0}\), fold strength \(s_w\), and excursion \(\lambda_w\):
 
 \[
-f_{w,+}=f_{w,0}e^{\lambda_ws_w}
+f_{w,+}=f_{w,0}e^{\lambda_ws_w},
+\qquad
+f_{w,-}=f_{w,0}e^{-\lambda_ws_w}.
 \]
 
-\[
-f_{w,-}=f_{w,0}e^{-\lambda_ws_w}
-\]
-
-The invariant is exact:
+The exact invariant is
 
 \[
 f_{w,+}f_{w,-}=f_{w,0}^2.
 \]
 
-The direct branch may become ultrasonic and the inverse branch may become infrasonic. Those values remain in the receipt. They are not rendered directly.
+Source frequencies remain intact in the receipt. Physical renderer profiles transform them into the operating band of the selected device while preserving their harmonic lineage.
 
-## Shokz and iPad boundary
+## Device embodiment
 
-Shokz receives ordinary Bluetooth audio from the iPad. The browser cannot identify or command a Shokz transducer as a calibrated haptic actuator. The approval room therefore uses a deliberately bounded **bone-conduction audio-haptic proxy**:
+The iPad computes, sequences, displays and receipts the pattern. Selected external devices give the relation physical output.
 
-1. octave-fold the root, direct branch, and inverse branch into 90–360 Hz;
-2. render a soft root pulse;
-3. render three increasing direct pulses;
-4. render three decreasing inverse pulses;
-5. close immediately on Feather Stop.
+For Shokz, the current physical route is ordinary selected audio output with a 90 to 360 Hz audition proxy. Rowan confirms the selected output because browser APIs expose the audio route without a calibrated transducer identity.
 
-The iPad interface requires Rowan to confirm that Shokz is connected and selected. It does not claim automatic output-device detection.
+For body transducers, the profile records physical placement and renderer band.
 
-The Web Vibration API is not used as the iPad approval path. Box's merged sensory bridge remains valid for browsers and devices that actually expose vibration hardware, while preserving zero-intensity silence and explicit fidelity labels.
+For native controller bridges, the device bridge receives the normalised physical expression plan.
 
-## Approval gate
+## Calibration Agency
 
-An `approved` receipt requires all of the following:
+Rowan holds calibration authority for production world tones.
 
-- exact candidate hash;
-- world ID and profile version;
-- tone-layer ID and root frequency;
-- fold thresholds and excursion;
-- completed audition receipt;
-- explicit Shokz confirmation;
-- explicit confirmation that the root, rise, and fall were felt or clearly identified without discomfort;
-- signer `rowan` with `human-calibration-owner` authority;
-- SHA-256 receipt hash.
+A calibration receipt binds:
 
-`adjust` and `rejected` are equally receipted decisions. No code converts a pending candidate into approved state merely because the tone played.
+```text
+candidate hash
+world ID
+world profile version
+Braid Packet fingerprint
+PREMAQ registry
+root frequency
+fold state
+harmonic excursion
+physical renderer profile
+audition sequence
+selected output
+felt / heard response
+calibration decision
+lineage
+receipt hash
+```
 
-## Boxfire inheritance
+The decision can be `approved`, `adjust`, or `rejected`. Every decision becomes lineage.
 
-The approval room reuses the laws established in the merged sensory bridge:
+## Feather and physical controls
 
-- no autoplay;
-- user-initiated activation;
-- zero intensity means physical silence;
-- await teardown before replacement;
-- Feather Stop closes active nodes and context;
-- receipts remain tied to the source candidate;
-- device fidelity is stated rather than assumed.
+Feather Stop closes active oscillators, gain nodes, contexts and haptic commands immediately.
 
-## Candidate registry
+Physical renderer profiles retain:
 
-The first calibration set reads the explicit tone layers already present in Runa PR #13:
+- device operating band;
+- gain range;
+- attack and release envelopes;
+- output selection;
+- body placement where used;
+- physical configuration receipts.
+
+These are properties of the Physical Spine and its instruments.
+
+## Candidate roots
+
+The current calibration family includes:
 
 | World | Candidate layer | Root |
 |---|---|---:|
@@ -124,14 +131,18 @@ The first calibration set reads the explicit tone layers already present in Runa
 | Feather & Flame | Ember Hearth | 174 Hz |
 | A Momento Creationis | First Mark | 432 Hz |
 
-Every entry begins `pending`.
+Each root becomes part of its world's harmonic lineage through a calibration receipt.
 
 ## Persistence
 
-The v0.1 interface writes approval receipts to local storage under:
+The current browser route stores local calibration receipts under:
 
 ```text
 hearthgate.world-tone-approvals.v1
 ```
 
-It also exports the complete receipt list as JSON. Canon, Runa profiles, Supabase, and Arcsweep are not modified automatically. A later registrar consumes only signed `approved` receipts through a separate review gate.
+Exported receipts can be carried into Runa, Arcsweep, Canon, STARWELL and the Archive through the shared Braid Packet lineage.
+
+## Governing sentence
+
+> **World tone is where Magic's harmonic identity, Science's exact relation, and Physicality's audible and tactile body become one crossing. Calibration gives that crossing a remembered physical form.**
