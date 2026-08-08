@@ -1,0 +1,24 @@
+(function(global){
+'use strict';
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,Number(x)||0));
+const cents=(f,r)=>1200*Math.log2(f/r);
+const DEFAULT_FREQS=[
+{id:'memory',label:'Memory',frequency:369},{id:'root',label:'Root',frequency:415},{id:'anchor',label:'Anchor',frequency:440},{id:'warden',label:'Whisper/Warden',frequency:554},{id:'arc',label:'Arc',frequency:659},{id:'bridge',label:'Bridge',frequency:739},{id:'wind',label:'Wind Echo',frequency:880},{id:'surge',label:'Surge',frequency:987},{id:'duet',label:'The Duet',frequency:1179},{id:'spiral',label:'Spiral',frequency:1318}
+];
+const KELYRAN={kora:'voice / tone',uta:'sing / song',sela:'listen',ikonda:'breathe',risora:'rise',renai:'return',kelya:'living harmony',ajnora:'unity',sejdra:'magic',resona:'resonance'};
+class GaldrInstrument{
+ constructor({bus=null,frequencyRegistry=DEFAULT_FREQS,onFrame=()=>{}}={}){this.bus=bus;this.freqs=frequencyRegistry;this.onFrame=onFrame;this.ctx=null;this.stream=null;this.analyser=null;this.source=null;this.running=false;this.frameReq=0;this.drumTimers=[];this.lastFrame=null;this.pitchHistory=[];}
+ nearest(hz){if(!hz)return null;return this.freqs.map(x=>({...x,cents:cents(hz,x.frequency)})).sort((a,b)=>Math.abs(a.cents)-Math.abs(b.cents))[0]||null;}
+ estimatePitch(buf,sr){let rms=0;for(const x of buf)rms+=x*x;rms=Math.sqrt(rms/buf.length);if(rms<.008)return{hz:null,rms};let bestLag=0,best=-Infinity;const min=Math.floor(sr/1000),max=Math.min(Math.floor(sr/55),buf.length-2);for(let lag=min;lag<=max;lag++){let s=0;for(let i=0;i<buf.length-lag;i++)s+=buf[i]*buf[i+lag];if(s>best){best=s;bestLag=lag;}}return{hz:bestLag?sr/bestLag:null,rms};}
+ analyseSpectrum(){const n=this.analyser.frequencyBinCount;const bins=new Float32Array(n);this.analyser.getFloatFrequencyData(bins);const peaks=[];for(let i=2;i<n-2;i++){if(bins[i]>-72&&bins[i]>bins[i-1]&&bins[i]>bins[i+1]){peaks.push({hz:i*this.ctx.sampleRate/this.analyser.fftSize,db:bins[i]});}}return peaks.sort((a,b)=>b.db-a.db).slice(0,8);}
+ vibrato(){const xs=this.pitchHistory.filter(Number.isFinite);if(xs.length<24)return null;const mean=xs.reduce((a,b)=>a+b,0)/xs.length;const depthCents=(Math.max(...xs)-Math.min(...xs))*1200/(mean*Math.LN2);return{meanHz:mean,depthCents};}
+ async startMic(){if(this.running)return;this.ctx=this.ctx||new (global.AudioContext||global.webkitAudioContext)({latencyHint:'interactive'});this.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});this.source=this.ctx.createMediaStreamSource(this.stream);this.analyser=this.ctx.createAnalyser();this.analyser.fftSize=4096;this.source.connect(this.analyser);this.running=true;const buf=new Float32Array(this.analyser.fftSize);const tick=()=>{if(!this.running)return;this.analyser.getFloatTimeDomainData(buf);const p=this.estimatePitch(buf,this.ctx.sampleRate);if(p.hz){this.pitchHistory.push(p.hz);if(this.pitchHistory.length>120)this.pitchHistory.shift();}const frame={time:this.ctx.currentTime,fundamentalHz:p.hz,rms:p.rms,nearest:this.nearest(p.hz),spectrum:this.analyseSpectrum(),vibrato:this.vibrato()};this.lastFrame=frame;this.onFrame(frame);this.frameReq=requestAnimationFrame(tick);};tick();}
+ stopMic(){this.running=false;cancelAnimationFrame(this.frameReq);this.stream?.getTracks().forEach(t=>t.stop());this.source?.disconnect();this.analyser?.disconnect();}
+ parseKelyran(text){return String(text||'').toLowerCase().split(/[^a-z'\-]+/).filter(Boolean).map(token=>({token,meaning:KELYRAN[token]||null,known:Boolean(KELYRAN[token])}));}
+ pulse(route,freq,gain=.018,type='triangle',dur=.08){if(this.bus?.tone){this.bus.tone({frequency:freq,route,gain,type,duration:dur});return;}if(!this.ctx)return;const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(.0001,this.ctx.currentTime);g.gain.exponentialRampToValueAtTime(gain,this.ctx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,this.ctx.currentTime+dur);o.connect(g).connect(this.ctx.destination);o.start();o.stop(this.ctx.currentTime+dur+.02);}
+ start369({bpm=72,rootHz=220}={}){this.stop369();const beatMs=60000/clamp(bpm,30,180);const lanes=[{n:3,route:'left',freq:rootHz,gain:.018},{n:6,route:'centre',freq:rootHz*1.5,gain:.014},{n:9,route:'right',freq:rootHz*2,gain:.011}];lanes.forEach(l=>{let step=0;const fire=()=>{const accent=step%l.n===0?1:.55;this.pulse(l.route,l.freq,l.gain*accent);step++;};fire();this.drumTimers.push(setInterval(fire,beatMs/l.n));});}
+ stop369(){this.drumTimers.forEach(clearInterval);this.drumTimers=[];}
+ promiseMetrics({softModeAlignment=null,usParticipation=null}={}){const a=Number.isFinite(softModeAlignment)?clamp(softModeAlignment):null;const u=Number.isFinite(usParticipation)?clamp(usParticipation):null;return{softModeAlignment:a,usParticipation:u,galdrUsExcitation:a!=null&&u!=null?a*u:null};}
+}
+global.KelyranGaldrInstrument=GaldrInstrument;
+})(window);
