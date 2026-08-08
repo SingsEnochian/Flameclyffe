@@ -5,7 +5,7 @@
  * Runa → Heimdall → Wardenclyffe → Flameclyffe/Möbius.
  */
 (function(global){
-  const VERSION='1.2.0';
+  const VERSION='1.2.1';
   const MATH_SPINE='hearthgate.math-spine/v1.8';
   const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,Number.isFinite(Number(x))?Number(x):a));
 
@@ -68,6 +68,7 @@
 
   function renderWithMobius(bus,plan,{held=false}={}){
     if(!bus)throw new TypeError('Möbius Audio Bus is required.');
+    if(typeof bus.setMaster==='function')bus.setMaster(0.22);
     const spec=global.WardenclyffeV18LayerEngine?.toMobiusSpec?.(plan)||plan;
     if(typeof bus.setLayeredSpec==='function')bus.setLayeredSpec(spec);
     const layers=Array.isArray(spec.layers)?spec.layers:[];
