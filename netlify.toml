@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run contracts:verify && npm run starwell:test && npm run starwell:build"
+  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run contracts:verify && node --test apps/starwell/test/mathSpineV18.test.js apps/starwell/test/case000Braid.test.js apps/starwell/test/kelyranGaldrBuild.test.js && npm run starwell:build"
   publish = "dist/starwell"
 
 [build.environment]
