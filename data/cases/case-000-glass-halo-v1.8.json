@@ -45,8 +45,8 @@
     }
   },
   "premaqc": {
-    "P": {"form": "OPEN", "source": "no contemporaneous scalar packet"},
-    "C": {"form": "OPEN", "source": "no contemporaneous scalar packet"},
+    "P": {"form": "OPEN", "source": "contemporaneous scalar state carried as OPEN"},
+    "C": {"form": "OPEN", "source": "contemporaneous scalar state carried as OPEN"},
     "R": {"form": "SYMBOLIC", "value": "mirror-offset correspondence"},
     "E": {"form": "SYMBOLIC", "value": "Rowan-Bii coupled observation"},
     "M": {"form": "DIRECT", "value": "contemporaneous record before sleep"},
