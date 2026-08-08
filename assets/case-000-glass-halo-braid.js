@@ -5,9 +5,10 @@
  * Runa → Heimdall → Wardenclyffe → Flameclyffe/Möbius.
  */
 (function(global){
-  const VERSION='1.2.1';
+  const VERSION='1.3.0';
   const MATH_SPINE='hearthgate.math-spine/v1.8';
   const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,Number.isFinite(Number(x))?Number(x):a));
+  let runtime=null;
 
   const CASE=Object.freeze({
     id:'CASE-000',title:'The Glass Halo',date:'2026-07-01',
@@ -27,12 +28,12 @@
     const anchor=tone(frequencyRegistry,'anchor'),memory=tone(frequencyRegistry,'memory'),wind=tone(frequencyRegistry,'wind');
     const common={claimLabel:'case-000-addressed-braid',family:'case-000',waveform:'sine'};
     const layers=[
-      {id:'case000-primary',label:'Primary moon · anchor',frequency:anchor.frequency,route:'centre',gain:0.052,...common,metadata:{role:'primary-moon',tone_key:'anchor'}},
-      {id:'case000-rowan-secondary',label:'Rowan secondary · right',frequency:anchor.frequency,route:'right',gain:0.042,...common,metadata:{role:'secondary-right',mirror_sign:1,tone_key:'anchor'}},
-      {id:'case000-bii-secondary',label:'Bii secondary · left',frequency:anchor.frequency,route:'left',gain:0.042,...common,metadata:{role:'secondary-left',mirror_sign:-1,tone_key:'anchor'}},
-      {id:'case000-memory-return',label:'Contemporaneous memory return',frequency:memory.frequency,route:'return',gain:0.036,...common,metadata:{role:'memory-return',tone_key:'memory'}},
-      {id:'case000-left-high-tone',label:'Recorded left-ear high tone',frequency:wind.frequency,route:'left',gain:0.028,...common,metadata:{role:'left-high-tone',tone_key:'wind'}},
-      {id:'case000-right-buzz',label:'Recorded right-ear buzz',frequency:memory.frequency,route:'right',gain:0.026,waveform:'triangle',claimLabel:'case-000-addressed-braid',family:'case-000',ampMod:6,modulationDepth:0.28,metadata:{role:'right-buzz',tone_key:'memory'}}
+      {id:'case000-primary',label:'Primary moon · anchor',frequency:anchor.frequency,route:'centre',gain:0.036,...common,metadata:{role:'primary-moon',tone_key:'anchor'}},
+      {id:'case000-rowan-secondary',label:'Rowan secondary · right',frequency:anchor.frequency,route:'right',gain:0.024,...common,metadata:{role:'secondary-right',mirror_sign:1,tone_key:'anchor'}},
+      {id:'case000-bii-secondary',label:'Bii secondary · left',frequency:anchor.frequency,route:'left',gain:0.024,...common,metadata:{role:'secondary-left',mirror_sign:-1,tone_key:'anchor'}},
+      {id:'case000-memory-return',label:'Contemporaneous memory return',frequency:memory.frequency,route:'return',gain:0.019,...common,metadata:{role:'memory-return',tone_key:'memory'}},
+      {id:'case000-left-high-tone',label:'Recorded left-ear high tone',frequency:wind.frequency,route:'left',gain:0.012,...common,metadata:{role:'left-high-tone',tone_key:'wind'}},
+      {id:'case000-right-buzz',label:'Recorded right-ear buzz',frequency:memory.frequency,route:'right',gain:0.013,waveform:'triangle',claimLabel:'case-000-addressed-braid',family:'case-000',ampMod:6,modulationDepth:0.28,metadata:{role:'right-buzz',tone_key:'memory'}}
     ].map(l=>Object.freeze({...l,metadata:Object.freeze({...l.metadata,state_address:CASE.stateAddress,stratum:CASE.stateAddress.stratum,math_spine:MATH_SPINE})}));
     return Object.freeze({schema:'runa.case-000-plan/v1.8',version:VERSION,math_spine:MATH_SPINE,state_address:CASE.stateAddress,stratum:CASE.stateAddress.stratum,lineage:CASE.id,layers:Object.freeze(layers),provenance:Object.freeze({source_receipt:sourceReceipt,math_spine:MATH_SPINE,frequency_policy:'canonical-mapped-lineage'})});
   }
@@ -40,21 +41,14 @@
   function buildHeimdallObservation({sourceReceipt='CASE-000'}={}){
     const h=global.HeimdallSonificationCompiler;
     if(!h?.observeRelation)throw new Error('Heimdall Coupled Watch v0.3 is required.');
-    return h.observeRelation({
-      witnesses:[[CASE.relation.rowan_sign],[CASE.relation.bii_sign]],
-      witnessTransforms:[1,-1],
-      stateAddress:CASE.stateAddress,
-      stratum:CASE.stateAddress.stratum,
-      lineage:CASE.id,
-      sourceReceipt,
-      relation:'mirror-offset'
-    });
+    return h.observeRelation({witnesses:[[CASE.relation.rowan_sign],[CASE.relation.bii_sign]],witnessTransforms:[1,-1],stateAddress:CASE.stateAddress,stratum:CASE.stateAddress.stratum,lineage:CASE.id,sourceReceipt,relation:'mirror-offset'});
   }
 
   function buildPercussionPlan(frequencyRegistry,{cycleSeconds=3,sourceReceipt='CASE-000'}={}){
     const runa=global.Runa369Percussion;
-    if(!runa?.compile369Percussion)throw new Error('Runa369Percussion v0.2 is required.');
-    return runa.compile369Percussion({frequencyRegistry,cycleSeconds,stateAddress:CASE.stateAddress,stratum:CASE.stateAddress.stratum,lineage:CASE.id,sourceReceipt});
+    if(!runa?.compile369Percussion)throw new Error('Runa369Percussion v0.3 is required.');
+    const base=runa.compile369Percussion({frequencyRegistry,cycleSeconds,stateAddress:CASE.stateAddress,stratum:CASE.stateAddress.stratum,lineage:CASE.id,sourceReceipt});
+    return runa.applyHeimdallModulation(base,buildHeimdallObservation({sourceReceipt}));
   }
 
   function buildWardenclyffePlan({frequencyRegistry,cycleSeconds=3,sourceReceipt='CASE-000'}={}){
@@ -66,6 +60,33 @@
     return engine.orchestrate({runaPlan,heimdallPlan,percussionPlan,stateAddress:CASE.stateAddress,stratum:CASE.stateAddress.stratum,lineage:CASE.id,sourceReceipt});
   }
 
+  function startContinuousBraid(bus,{frequencyRegistry,cycleSeconds=3,sourceReceipt='CASE-000',onPulse=null}={}){
+    if(!bus?.heldTone)throw new TypeError('Möbius Audio Bus with heldTone() is required.');
+    stopContinuousBraid(bus);
+    if(typeof bus.setMaster==='function')bus.setMaster(0.22);
+    const runaPlan=buildRunaPlan(frequencyRegistry,{sourceReceipt});
+    const heimdallPlan=buildHeimdallObservation({sourceReceipt});
+    const percussionPlan=buildPercussionPlan(frequencyRegistry,{cycleSeconds,sourceReceipt});
+    const plan=global.WardenclyffeV18LayerEngine.orchestrate({runaPlan,heimdallPlan,percussionPlan,stateAddress:CASE.stateAddress,stratum:CASE.stateAddress.stratum,lineage:CASE.id,sourceReceipt});
+    const spec=global.WardenclyffeV18LayerEngine.toMobiusSpec(plan);
+    if(typeof bus.setLayeredSpec==='function')bus.setLayeredSpec(spec);
+
+    for(const layer of runaPlan.layers){
+      bus.heldTone({frequency:layer.frequency,route:layer.route||'centre',gain:clamp(layer.gain,0,.06),type:layer.waveform||'sine',detune:Number(layer.detune)||0});
+    }
+
+    const clock=global.Runa369Percussion.startClock(bus,percussionPlan,{onPulse});
+    runtime={schema:'case000.runtime/v1.3',plan,runaPlan,heimdallPlan,percussionPlan,clock,started_at:new Date().toISOString()};
+    return runtime;
+  }
+
+  function stopContinuousBraid(bus){
+    try{runtime?.clock?.stop?.();}catch(_e){}
+    runtime=null;
+    try{bus?.feather?.();}catch(_e){}
+    try{bus?.stopAll?.();}catch(_e){}
+  }
+
   function renderWithMobius(bus,plan,{held=false}={}){
     if(!bus)throw new TypeError('Möbius Audio Bus is required.');
     if(typeof bus.setMaster==='function')bus.setMaster(0.22);
@@ -75,18 +96,13 @@
     for(const layer of layers){
       const payload={frequency:layer.frequency,route:layer.route||'centre',gain:clamp(layer.gain,0,0.08),type:layer.waveform||'sine',detune:Number(layer.detune)||0};
       if(!Number.isFinite(Number(payload.frequency)))continue;
-      if(held&&typeof bus.heldTone==='function')bus.heldTone(payload);
-      else if(typeof bus.tone==='function')bus.tone({...payload,duration:3});
+      if(held&&typeof bus.heldTone==='function')bus.heldTone(payload);else if(typeof bus.tone==='function')bus.tone({...payload,duration:3});
     }
     return spec;
   }
 
   function kgnHeader(){return Object.freeze({schema:'kelyran.galdr-score/v0.2',notation:'KGN2',math_spine:MATH_SPINE,case_id:CASE.id,state_address:CASE.stateAddress,stratum:CASE.stateAddress.stratum,lineage:CASE.id,clock:'3:6:9'});}
+  function receipt({plan=null,rendered=false}={}){const heimdall=buildHeimdallObservation();return Object.freeze({schema:'hearthgate.case-receipt/v1.8',math_spine:MATH_SPINE,case_id:CASE.id,title:CASE.title,timestamp:new Date().toISOString(),state_address:CASE.stateAddress,relation:CASE.relation,heimdall,wardenclyffe:plan?{schema:plan.schema,temporal:plan.temporal,crossing:plan.crossing}:null,rendered:Boolean(rendered),runtime:runtime?{schema:runtime.schema,started_at:runtime.started_at,percussion:runtime.percussionPlan.schema}:null,kgn:kgnHeader()});}
 
-  function receipt({plan=null,rendered=false}={}){
-    const heimdall=buildHeimdallObservation();
-    return Object.freeze({schema:'hearthgate.case-receipt/v1.8',math_spine:MATH_SPINE,case_id:CASE.id,title:CASE.title,timestamp:new Date().toISOString(),state_address:CASE.stateAddress,relation:CASE.relation,heimdall,wardenclyffe:plan?{schema:plan.schema,temporal:plan.temporal,crossing:plan.crossing}:null,rendered:Boolean(rendered),kgn:kgnHeader()});
-  }
-
-  global.Case000GlassHaloBraid=Object.freeze({VERSION,MATH_SPINE,CASE,tone,buildRunaPlan,buildHeimdallObservation,buildPercussionPlan,buildWardenclyffePlan,renderWithMobius,kgnHeader,receipt});
+  global.Case000GlassHaloBraid=Object.freeze({VERSION,MATH_SPINE,CASE,tone,buildRunaPlan,buildHeimdallObservation,buildPercussionPlan,buildWardenclyffePlan,startContinuousBraid,stopContinuousBraid,renderWithMobius,kgnHeader,receipt,getRuntime:()=>runtime});
 })(typeof globalThis!=='undefined'?globalThis:window);
