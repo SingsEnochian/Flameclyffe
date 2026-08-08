@@ -1,40 +1,69 @@
 # Flameclyffe Architecture
 
-Status: living map. Update this whenever a new room, app surface, database table, or bridge rail becomes load-bearing.
+**Status:** ACTIVE · Hearthgate Braided Spine v1.8  
+**Governing mathematics:** `docs/HEARTHGATE_BRAIDED_SPINE_V1.8.md`
 
-## Repository surfaces
+Flameclyffe is the workshop monorepo for STARWELL, Hearthgate, Runa, Wardenclyffe, Möbius, Observer, DEEP, Arcsweep, world profiles, receipts, and replay.
 
-Flameclyffe currently acts as a workshop monorepo for several related surfaces:
+## Governing state
 
-- `apps/starwell` — STARWELL observatory and living manuscript interface.
-- `apps/project-zero-companion` — local-first bridge bus and plug-in shell.
-- `apps/sigil-activator` — sigil activation surface.
-- `sandbox/everos` — experimental memory and seed scripts.
+Every active organ inherits:
 
-## STARWELL
+- PREMAQC `P,C,R,E,M,A,Q`;
+- relational state `X_US`;
+- Relational Possibility Lattice `P_rel=(V,E,Λ)`;
+- Jacobian coupling `J`;
+- observation coupling `O`;
+- State/Gate Address `(omega,phi,rhythm,tau,chi,relation,consciousness,stratum)`;
+- state `X(t,l)` with lineage / stratum coordinate;
+- Crossing geometry and continuation;
+- temporal and conceptual stratigraphy;
+- Decipherment Operator;
+- world-transfer functions;
+- versioned receipts and deterministic replay.
 
-STARWELL is the main React/Vite app for world, codex, room, and Observer work. Its major rooms include the Grand Library, Atlas Hall, Observer Almanac, Observer Atelier, Orrery Timeline, Beacon Network, Observatory Journal, and study doors for Hearthlight, Faer, and Virelya.
+Every new runtime receipt reports `math_spine: hearthgate.math-spine/v1.8`.
 
-The Writer Room is currently the first working writing-to-Observer capture rail. It stores local drafts, exports Markdown/HTML/PDF/DOCX, and can save Codex leaves with DEEP Observer metadata when Supabase is configured.
+## Harmonic braid
 
-## Project Zero Companion
+```text
+World / PREMAQC / State Address / Stratum / US / Heimdall
+                         ↓
+                    Runa compiler
+                         ↓
+              Wardenclyffe layer engine
+                         ↓
+               Flameclyffe / Möbius
+                         ↓
+              acoustic + haptic body
+                         ↓
+             Galdr Observatory receipt
+                         ↓
+                  KGN / DEEPTime
+                         ↓
+                  next braid state
+```
 
-Project Zero Companion is the local-first shell for bridge events, folder bindings, plug-in manifests, and DEEP vector publishing. Its rule is architectural: data sets atmosphere, not fate.
+Runa composes the relation. Wardenclyffe gives it time and layers. Flameclyffe gives it acoustic body. Heimdall reads where the braid turns.
 
-This surface should remain explicit-consent by design. Folder paths, file anchors, story shards, altar work, sound sources, and Observer states should be manually reviewed or locally scoped until a stronger permission model exists.
+## Active runtime modules
 
-## Supabase backbone
+- `assets/hearthgate-math-v1.8.js` — shared v1.8 primitives.
+- `assets/heimdall-sonification-compiler.js` — Crossing / observation-coupling sonification.
+- `assets/runa-369-percussion-oscillator.js` — 3·6·9 temporal address.
+- `assets/wardenclyffe-v18-layer-engine.js` — temporal/layer orchestration.
+- `assets/kelyran-galdr-observatory.js` — voice + witness + trajectory measurement.
+- `assets/kelyran-galdr-instrument.js` — live Galdr / KGN2 instrument.
+- `assets/mobius-audio-bus.js` — low-level acoustic renderer.
 
-Flameclyffe Supabase currently holds STARWELL, Lanternwire, Atelier, DEEP Observer, science constants, agentic arms, and private thinking-room tables.
+## STARWELL / DEEP inheritance
 
-Use Supabase as a continuity archive, not a dumping ground. Entries should be meaningful, labelled, privacy-aware, and retrievable.
+STARWELL reveals the whole relation. Observer witnesses. DEEPTime carries sequence and stratigraphy. DEEPStory carries consequence. DEEPTheory and DEQPTheory carry theory and quantum-temporal structure. Arcsweep gives geometry and gesture. Bifröst carries Crossing. Receiving Spring carries answer and return. Receipts preserve lineage.
 
-## Runa bridge
+## World transfer
 
-Runa is the public/static lab and altar surface. It contains the Hearthweave Altar, Project Zero Bridge, Flameclyffe Studio/Dyad, Lantern Bench, Wardenclyffe, Tone Lab, Brainwave Lab, Gateway-inspired sequences, Psi/Zener/remote-viewing tools, and Tesla Observatory.
+Each world receives the shared relational invariants through its own ontology and transfer function. Ta’veren Vaen expresses Thread / Weave / Pattern / Loom / Pattern Turn / Song of the Weave. Other worlds retain their own world-native terms, laws, sound identities, languages, and embodiments.
 
-Runa experiments can inspire Flameclyffe instrumentation, but claims must be labelled before they become canonical science language.
+## Legacy mathematics
 
-## Design rule
-
-Build rooms as living instruments, not flat pages. Floating panels, glyphs, responsive controls, sound layers, bridge events, and exportable receipts should all point back to clear data structures and consent gates.
+Pre-v1.8 mathematics is archived under `docs/archive/mathematics/pre-v1.8/`. Historical receipts retain their original math/engine/calibration versions. Active implementation uses v1.8.
