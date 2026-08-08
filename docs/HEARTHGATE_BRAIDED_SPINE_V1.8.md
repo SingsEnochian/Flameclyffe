@@ -271,4 +271,4 @@ All active systems inherit v1.8: Hearthgate, Hearthfire, Lioreal, Flameclyffe, M
 
 ## 13. Runtime rule
 
-Every active engine and adapter reports `math_spine: hearthgate.braided-spine/v1.8` in its diagnostics or provenance. Older formulas remain readable only through archived receipts and compatibility adapters.
+Every active engine and adapter reports `math_spine: hearthgate.math-spine/v1.8` in its diagnostics or provenance. Historical formulas remain readable through archived receipts and compatibility adapters.
