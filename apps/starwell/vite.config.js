@@ -12,6 +12,7 @@ const legacyPages = [
   ['starwell/mobius-audio-bus.html', 'starwell/mobius-audio-bus.html'],
   ['starwell/kelyran-galdr.html', 'starwell/kelyran-galdr.html'],
   ['starwell/case-000-glass-halo.html', 'starwell/case-000-glass-halo.html'],
+  ['starwell/heimdall-case000-live.html', 'starwell/heimdall-case000-live.html'],
   ['starwell/elara-codex.html', 'starwell/elara-codex.html'],
   ['starwell/groundwire.html', 'starwell/groundwire.html'],
   ['starwell/deep-groundwire-mobius.html', 'starwell/deep-groundwire-mobius.html'],
