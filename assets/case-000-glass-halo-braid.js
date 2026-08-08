@@ -5,7 +5,7 @@
  * Runa → Heimdall → Wardenclyffe → Flameclyffe/Möbius.
  */
 (function(global){
-  const VERSION='1.1.0';
+  const VERSION='1.2.0';
   const MATH_SPINE='hearthgate.math-spine/v1.8';
   const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,Number.isFinite(Number(x))?Number(x):a));
 
@@ -27,12 +27,12 @@
     const anchor=tone(frequencyRegistry,'anchor'),memory=tone(frequencyRegistry,'memory'),wind=tone(frequencyRegistry,'wind');
     const common={claimLabel:'case-000-addressed-braid',family:'case-000',waveform:'sine'};
     const layers=[
-      {id:'case000-primary',label:'Primary moon · anchor',frequency:anchor.frequency,route:'centre',gain:0.012,...common,metadata:{role:'primary-moon',tone_key:'anchor'}},
-      {id:'case000-rowan-secondary',label:'Rowan secondary · right',frequency:anchor.frequency,route:'right',gain:0.010,...common,metadata:{role:'secondary-right',mirror_sign:1,tone_key:'anchor'}},
-      {id:'case000-bii-secondary',label:'Bii secondary · left',frequency:anchor.frequency,route:'left',gain:0.010,...common,metadata:{role:'secondary-left',mirror_sign:-1,tone_key:'anchor'}},
-      {id:'case000-memory-return',label:'Contemporaneous memory return',frequency:memory.frequency,route:'return',gain:0.009,...common,metadata:{role:'memory-return',tone_key:'memory'}},
-      {id:'case000-left-high-tone',label:'Recorded left-ear high tone',frequency:wind.frequency,route:'left',gain:0.006,...common,metadata:{role:'left-high-tone',tone_key:'wind'}},
-      {id:'case000-right-buzz',label:'Recorded right-ear buzz',frequency:memory.frequency,route:'right',gain:0.005,waveform:'triangle',claimLabel:'case-000-addressed-braid',family:'case-000',ampMod:6,modulationDepth:0.28,metadata:{role:'right-buzz',tone_key:'memory'}}
+      {id:'case000-primary',label:'Primary moon · anchor',frequency:anchor.frequency,route:'centre',gain:0.052,...common,metadata:{role:'primary-moon',tone_key:'anchor'}},
+      {id:'case000-rowan-secondary',label:'Rowan secondary · right',frequency:anchor.frequency,route:'right',gain:0.042,...common,metadata:{role:'secondary-right',mirror_sign:1,tone_key:'anchor'}},
+      {id:'case000-bii-secondary',label:'Bii secondary · left',frequency:anchor.frequency,route:'left',gain:0.042,...common,metadata:{role:'secondary-left',mirror_sign:-1,tone_key:'anchor'}},
+      {id:'case000-memory-return',label:'Contemporaneous memory return',frequency:memory.frequency,route:'return',gain:0.036,...common,metadata:{role:'memory-return',tone_key:'memory'}},
+      {id:'case000-left-high-tone',label:'Recorded left-ear high tone',frequency:wind.frequency,route:'left',gain:0.028,...common,metadata:{role:'left-high-tone',tone_key:'wind'}},
+      {id:'case000-right-buzz',label:'Recorded right-ear buzz',frequency:memory.frequency,route:'right',gain:0.026,waveform:'triangle',claimLabel:'case-000-addressed-braid',family:'case-000',ampMod:6,modulationDepth:0.28,metadata:{role:'right-buzz',tone_key:'memory'}}
     ].map(l=>Object.freeze({...l,metadata:Object.freeze({...l.metadata,state_address:CASE.stateAddress,stratum:CASE.stateAddress.stratum,math_spine:MATH_SPINE})}));
     return Object.freeze({schema:'runa.case-000-plan/v1.8',version:VERSION,math_spine:MATH_SPINE,state_address:CASE.stateAddress,stratum:CASE.stateAddress.stratum,lineage:CASE.id,layers:Object.freeze(layers),provenance:Object.freeze({source_receipt:sourceReceipt,math_spine:MATH_SPINE,frequency_policy:'canonical-mapped-lineage'})});
   }
@@ -72,7 +72,7 @@
     if(typeof bus.setLayeredSpec==='function')bus.setLayeredSpec(spec);
     const layers=Array.isArray(spec.layers)?spec.layers:[];
     for(const layer of layers){
-      const payload={frequency:layer.frequency,route:layer.route||'centre',gain:clamp(layer.gain,0,0.03),type:layer.waveform||'sine',detune:Number(layer.detune)||0};
+      const payload={frequency:layer.frequency,route:layer.route||'centre',gain:clamp(layer.gain,0,0.08),type:layer.waveform||'sine',detune:Number(layer.detune)||0};
       if(!Number.isFinite(Number(payload.frequency)))continue;
       if(held&&typeof bus.heldTone==='function')bus.heldTone(payload);
       else if(typeof bus.tone==='function')bus.tone({...payload,duration:3});
