@@ -92,7 +92,7 @@ Render order follows meaning and readability.
 |---|---|
 | Tap state | Reveal the corresponding coordinate and lineage |
 | Tap relation | Reveal coupling and path structure |
-| Drag | Rotate or navigate the current projection of the lattice |
+| Drag | Rotate or navigate the current lattice view |
 | Hold | Isolate a state, relation, or layer |
 | Trace | Follow or replay a relational path |
 | Voice | Enter Galdr / acoustic measurement channel |
@@ -178,5 +178,5 @@ Geometry reveals relationship.
 Sound carries relationship through time.
 World transfer preserves the mathematics and releases the world into its own language.
 Accessibility changes presentation, preserving state.
-Playfulness belongs to expression; the machine remains the machine.
+The machine remains the machine through every expression.
 ```
