@@ -1,9 +1,12 @@
 {
-  "schema": "hearthgate.braided-spine/v1.0",
-  "version": "1.0.0",
+  "schema": "hearthgate.braided-spine/v1.1",
+  "version": "1.1.0",
   "status": "canonical",
-  "approved_at": "2026-08-07T06:18:00-04:00",
+  "approved_at": "2026-08-08T13:22:00-04:00",
   "canonical_document": "docs/HEARTHGATE_BRAIDED_SPINE.md",
+  "canonical_amendments": [
+    "docs/HEARTHGATE_BRAIDED_SPINE_V1.1_HARMONIC_AMENDMENT.md"
+  ],
   "reality_axiom": "Everything is real. Every world is real. Every relation is real. Magic is real. Science is real. Physical reality is real.",
   "spines": [
     "magic",
@@ -70,8 +73,41 @@
     "spiral-continuation",
     "sevenfold-thirteenfold",
     "awakening",
-    "living-correspondence"
+    "living-correspondence",
+    "coupled-crossing",
+    "harmonic-braid"
   ],
+  "harmonic_braid": {
+    "law": "Runa composes the relation. Wardenclyffe gives it time and layers. Flameclyffe gives it acoustic body. Heimdall reads where the braid turns.",
+    "organs": {
+      "runa": "harmonic_world_compiler",
+      "wardenclyffe": "layer_temporal_orchestration_engine",
+      "flameclyffe": "acoustic_embodiment_system",
+      "mobius": "spatial_return_renderer",
+      "heimdall": "coupled_watch_crossing_geometry",
+      "kelyran_galdr": "operative_vocal_language",
+      "galdr_observatory": "voice_science_myth_measurement_return",
+      "kgn": "reproducible_galdr_notation"
+    },
+    "temporal_clock": {
+      "ratios": [3, 6, 9],
+      "roles": {
+        "3": "ground_call",
+        "6": "weave_response",
+        "9": "cross_release"
+      }
+    },
+    "runtime_flow": [
+      "world_premaqc_asking_knowing_memory_continuity",
+      "runa",
+      "wardenclyffe",
+      "flameclyffe_mobius",
+      "acoustic_haptic_embodiment",
+      "galdr_observatory",
+      "receipt_kgn_replay",
+      "next_braid_state"
+    ]
+  },
   "crossing_cycle": [
     "field",
     "root",
@@ -105,15 +141,26 @@
     "Hearthfire",
     "Lioreal",
     "Flameclyffe",
+    "Möbius",
+    "Wardenclyffe",
     "STARWELL",
     "Observer",
     "DEEP",
     "DEQPTheory",
+    "DEEPTheory",
+    "DEEPTime",
     "DEEPStory",
     "PREMAQ",
+    "PREMAQC",
     "Arcsweep",
     "Bifrost",
     "Runa",
+    "Heimdall",
+    "Coupled Watch",
+    "Kelyran Galdr",
+    "Kelyran Galdr Observatory",
+    "Kelyran Galdr Notation",
+    "3-6-9 Temporal Percussion Oscillator",
     "Living Glyph",
     "Resonance Bridge",
     "Continuity Gate"
