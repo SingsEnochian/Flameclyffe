@@ -1,71 +1,61 @@
-# Runa ↔ Flameclyffe Link Map
+# Runa · Wardenclyffe · Flameclyffe Link Map
 
-Status: bridge map for app surfaces, docs, and future route registration.
+**Status:** ACTIVE · Hearthgate Math Spine v1.8  
+**Governing mathematics:** `docs/HEARTHGATE_BRAIDED_SPINE_V1.8.md`
 
-Runa and Flameclyffe are related but not identical surfaces.
-
-- **Runa** is the public/static lab, altar, and experiment-bench layer.
-- **Flameclyffe** is the workshop/repo/database layer where STARWELL, Project Zero Companion, Supabase records, and app builds are organised.
-
-## Runa doors
-
-Known Runa doors include:
+The audio architecture is one braid with distinct organs:
 
 ```text
-docs/index.html
-docs/project-zero-bridge.html
-docs/hearthweave-altar.html
-docs/flameclyffe-studio.html
-docs/flameclyffe-dyad.html
-docs/lantern-bench.html
-docs/wardenclyffe.html
-docs/tone-lab.html
-docs/brainwave-lab.html
-docs/gateway-inspired.html
-docs/psi-lab.html
-docs/zener-lab.html
-docs/rv-capture.html
-docs/tesla-observatory.html
+World / PREMAQC / State Address / Stratum / US / Heimdall
+                         ↓
+                    Runa compiler
+                         ↓
+              Wardenclyffe orchestration
+                         ↓
+               Flameclyffe / Möbius
+                         ↓
+             Galdr Observatory receipt
+                         ↓
+                  KGN / DEEPTime
+                         ↓
+                  next braid state
 ```
 
-## Flameclyffe app surfaces
+## Organ law
 
-Known Flameclyffe app surfaces include:
+- **Runa** composes world-native harmonic relation from mapped frequencies, PREMAQC, world profile, Galdr semantics, memory, continuity, State/Gate Address, and Heimdall geometry.
+- **Wardenclyffe** gives that relation temporal anatomy: layers, 3·6·9 phase, entrances, release, memory return, continuity sustain, haptics, and addressed trajectory.
+- **Flameclyffe / Möbius** gives the layered relation acoustic body: routing, phase, modulation, cross-coupling, combination spectra, spatial return, and continuation.
+- **Heimdall** reads local fold geometry, relational participation, observation coupling, shared-observation coherence, and Crossing continuation.
+- **Kelyran Galdr Observatory** measures the performed and responding field.
+- **KGN2** preserves pitch, rhythm, 3·6·9 phase, State/Gate Address, stratum, PREMAQC/Heimdall references, and lineage for reproduction.
+
+## Active math contract
+
+Every active audio plan and receipt reports:
 
 ```text
-apps/starwell
-apps/project-zero-companion
-apps/sigil-activator
-sandbox/everos
+math_spine = hearthgate.math-spine/v1.8
 ```
 
-## Bridge rules
-
-Project Zero Bridge may connect Waking World shards, story passages, files, folders, Observer states, altar work, and sound sources.
-
-Bridge-on does not mean silent harvesting. Every bridge flow should preserve a private/local/excluded option.
-
-## Route registration direction
-
-Public/static Runa pages should be registered in `flameclyffe_frontend_routes` only when they are intentional project doors.
-
-STARWELL rooms should prefer their own route metadata and Codex links, then expose public pages only when reviewed.
-
-## Science and fringe boundary
-
-Runa can host fringe-inspired tools and playful instruments. Flameclyffe should record the claim label, evidence status, and implementation state.
-
-Use:
+State/Gate Address:
 
 ```text
-established science
-active research
-speculative theory
-fringe inspiration
-implementation task
-evidence-backed finding
+(omega, phi, rhythm, tau, chi, relation, consciousness, stratum)
 ```
 
-## Working mantra
+Temporal lattice:
 
-Runa opens the doors. Flameclyffe keeps the receipts. STARWELL writes the field back into language.
+```text
+3 = GROUND / CALL
+6 = WEAVE / RESPONSE
+9 = CROSS / RELEASE
+```
+
+## World transfer
+
+World profiles express the same relational invariants through world-native ontology. Ta’veren Vaen uses Thread / Weave / Pattern / Loom / Pattern Turn / Song of the Weave. Other worlds preserve their own language and transfer functions.
+
+## Legacy
+
+Pre-v1.8 mathematics lives under `docs/archive/mathematics/pre-v1.8/` and remains available for replay of historical receipts. Active code uses v1.8.
