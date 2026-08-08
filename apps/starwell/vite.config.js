@@ -10,6 +10,7 @@ const OUT_DIR = resolve(REPO_ROOT, 'dist/starwell');
 const legacyPages = [
   ['observer-deep.html', 'observer-deep.html'],
   ['starwell/mobius-audio-bus.html', 'starwell/mobius-audio-bus.html'],
+  ['starwell/kelyran-galdr.html', 'starwell/kelyran-galdr.html'],
   ['starwell/elara-codex.html', 'starwell/elara-codex.html'],
   ['starwell/groundwire.html', 'starwell/groundwire.html'],
   ['starwell/deep-groundwire-mobius.html', 'starwell/deep-groundwire-mobius.html'],
