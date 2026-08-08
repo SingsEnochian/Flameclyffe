@@ -11,6 +11,7 @@ const legacyPages = [
   ['observer-deep.html', 'observer-deep.html'],
   ['starwell/mobius-audio-bus.html', 'starwell/mobius-audio-bus.html'],
   ['starwell/kelyran-galdr.html', 'starwell/kelyran-galdr.html'],
+  ['starwell/case-000-glass-halo.html', 'starwell/case-000-glass-halo.html'],
   ['starwell/elara-codex.html', 'starwell/elara-codex.html'],
   ['starwell/groundwire.html', 'starwell/groundwire.html'],
   ['starwell/deep-groundwire-mobius.html', 'starwell/deep-groundwire-mobius.html'],
@@ -28,47 +29,14 @@ function publishLegacyObservatoryPages() {
         await cp(source, destination, { force: true });
       }
 
-      await cp(
-        resolve(REPO_ROOT, 'starwell/deep-observer'),
-        resolve(OUT_DIR, 'starwell/deep-observer'),
-        {
-          recursive: true,
-          force: true,
-        },
-      );
-
-      await cp(resolve(REPO_ROOT, 'assets'), resolve(OUT_DIR, 'assets'), {
-        recursive: true,
-        force: true,
-      });
-
-      await cp(resolve(REPO_ROOT, 'resonance'), resolve(OUT_DIR, 'resonance'), {
-        recursive: true,
-        force: true,
-      });
-
-      await cp(
-        resolve(REPO_ROOT, 'starwell/deep-observer/schemas'),
-        resolve(OUT_DIR, 'schemas'),
-        {
-          recursive: true,
-          force: true,
-        },
-      );
-
-      // Deep Observer (The Laboratory) — served at /starwell/deep-observer/
+      await cp(resolve(REPO_ROOT, 'starwell/deep-observer'), resolve(OUT_DIR, 'starwell/deep-observer'), { recursive: true, force: true });
+      await cp(resolve(REPO_ROOT, 'assets'), resolve(OUT_DIR, 'assets'), { recursive: true, force: true });
+      await cp(resolve(REPO_ROOT, 'resonance'), resolve(OUT_DIR, 'resonance'), { recursive: true, force: true });
+      await cp(resolve(REPO_ROOT, 'starwell/deep-observer/schemas'), resolve(OUT_DIR, 'schemas'), { recursive: true, force: true });
       await mkdir(resolve(OUT_DIR, 'deep-observer'), { recursive: true });
-      await cp(resolve(REPO_ROOT, 'starwell', 'deep-observer'), resolve(OUT_DIR, 'deep-observer'), {
-        recursive: true,
-        force: true,
-      });
-
-      // Hearthgate house landing — served at /starwell/hearthgate/
+      await cp(resolve(REPO_ROOT, 'starwell', 'deep-observer'), resolve(OUT_DIR, 'deep-observer'), { recursive: true, force: true });
       await mkdir(resolve(OUT_DIR, 'hearthgate'), { recursive: true });
-      await cp(resolve(REPO_ROOT, 'starwell', 'hearthgate'), resolve(OUT_DIR, 'hearthgate'), {
-        recursive: true,
-        force: true,
-      });
+      await cp(resolve(REPO_ROOT, 'starwell', 'hearthgate'), resolve(OUT_DIR, 'hearthgate'), { recursive: true, force: true });
     },
   };
 }
