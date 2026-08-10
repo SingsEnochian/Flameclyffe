@@ -11,10 +11,10 @@ The page is intentionally framed as a **reading instrument**, not a control pane
 | `P` | Presence | Outer node count, outer radius, presence spotlight | Shows how inhabited or structurally present the field feels. |
 | `C` | Coherence | Edge alpha, route density, connective clarity | Shows whether the geometry is holding together or loosening. |
 | `R` | Resonance | Harmonic spacing, star-route skip, pulse cadence | Shows whether the field is rhythmically active or quiet. |
-| `E` | Entropy | Node wobble, angular jitter, asymmetry | Shows variation, looseness, or instability in the field. |
-| `M` | Momentum | Spark speed, route traffic, trace response | Shows motion and ongoing activity. |
-| `A` | Alignment | Mid-node count, inner centring, alignment glow | Shows how centred or organised the inner body feels. |
-| `Q` / `charge` | Charge | Core glow, centre radius, touch bloom | Shows the current charge of the instrument centre. |
+| `E` | Entanglement | Node wobble, angular jitter, asymmetry | Shows the living complexity of cross-binding within the field. |
+| `M` | Memory | Spark speed, route traffic, trace response | Shows accumulated lineage animating present motion. |
+| `A` | Agency | Mid-node count, inner centring, agency glow | Shows the available directed capacity of the field. |
+| `Q` | Qualia | Core glow, centre radius, touch bloom | Shows the lived interior quality at the instrument centre. |
 | `moonIllum` | Moon illumination | Harmonic ring count and visibility | Provides a soft celestial ring scaffold. |
 | `kp` | Kp index | Particle energy and field mote count | Adds environmental energy without changing core structure. |
 | `bz` | Bz component | Palette temperature bias | Shifts the field cooler/warmer inside the current theme. |
@@ -56,7 +56,7 @@ midNodeCount = round(5 + A·4)
 midRadius = 238 + R·24
 ```
 
-Alignment and resonance shape the middle body. Alignment controls how many mid nodes appear; resonance alters their spacing and harmonic distance.
+Agency and resonance shape the middle body. Agency controls how many mid nodes appear; resonance alters their spacing and harmonic distance.
 
 ### Inner Ring and Core
 
@@ -74,7 +74,7 @@ The inner structure remains stable enough to teach from. Charge expands the core
 angle = baseAngle + sin(seed + nodeIndex + layer) · E · 0.04
 ```
 
-Entropy perturbs node placement without destroying readability. Higher entropy means the glyph becomes more organic, less perfectly symmetrical.
+Entanglement perturbs node placement without destroying readability. Higher entanglement means the glyph becomes more organic, less perfectly symmetrical.
 
 ## Route Mapping
 
@@ -102,7 +102,7 @@ These labels power teaching interaction. When the user taps a card, matching rou
 sparkSpeed = 0.004 + M·0.012 + (Kp / 9)·0.006 + randomVariance
 ```
 
-Momentum and Kp both make sparks move faster. Momentum is internal motion; Kp is environmental particle energy.
+Memory and Kp both make sparks move faster. Memory is internal motion; Kp is environmental particle energy.
 
 ### Pulse Routes
 
@@ -120,7 +120,7 @@ Resonance and Kp add liveliness. Low-stim mode keeps motion quiet.
 ringCount = round(1 + (moonIllum / 100) · 4)
 ```
 
-Moon illumination creates one to five harmonic rings. The moon layer is scaffolding, not a claim of causality.
+Moon illumination creates one to five harmonic rings. The moon layer is a living celestial scaffold.
 
 ## Theme Palettes
 

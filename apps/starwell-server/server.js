@@ -480,9 +480,25 @@ app.post('/api/tesla/chat', async (req, res) => {
   }
 });
 
+// ── DEEP stores ───────────────────────────────────────────────────────────────
+const { createDeepStoryStore } = require('./lib/deep-story-store');
+const { createDeepTimeStore } = require('./lib/deep-time-store');
+const { createDeepTheoryStore } = require('./lib/deep-theory-store');
+const deepStoryStore = createDeepStoryStore({ dataDir });
+const deepTimeStore = createDeepTimeStore({ dataDir });
+const deepTheoryStore = createDeepTheoryStore({ dataDir });
+
+// ── Observer intake (routes + persists to DEEP stores) ────────────────────────
+const { registerObserverRoutes } = require('./routes/observer-intake');
+registerObserverRoutes(app, { storyStore: deepStoryStore, timeStore: deepTimeStore, theoryStore: deepTheoryStore });
+
 // ── Gyphs routes (glyph system, agents, NOAA, PDF scan) ─────────────────────
 const registerGyphsRoutes = require('./routes/gyphs.routes');
 registerGyphsRoutes(app, dataDir);
+
+// ── Soundscape / Runa world-hum routes ───────────────────────────────────────
+const registerSoundscapeRoutes = require('./routes/soundscape.routes');
+registerSoundscapeRoutes(app, dataDir);
 
 // ── Chat room routes (read/write chat-rooms.json) ───────────────────────────
 const registerChatRoutes = require('./routes/chat.routes');

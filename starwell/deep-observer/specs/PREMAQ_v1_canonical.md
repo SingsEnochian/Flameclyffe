@@ -11,11 +11,7 @@
 
 PREMAQ is Hearthgate's canonical shared state model.
 
-It is not a theory of physics.  
-It is not a psychological diagnosis.  
-It is not a claim about consciousness.
-
-It is an internal state representation used to synchronise every subsystem of Hearthgate.
+It is the internal state architecture that carries the living relation across every subsystem of Hearthgate.
 
 Every subsystem reads the same PREMAQ state.  
 No subsystem invents its own independent state model.
@@ -64,10 +60,10 @@ Different subsystems express that state differently. None redefine it.
 
 ```text
 P — Presence
-C — Compression / Coherence
-R — Resolution
-E — Entropy
-M — Momentum
+C — Coherence
+R — Resonance
+E — Entanglement
+M — Memory
 A — Agency
 Q — Qualia
 ```
@@ -84,35 +80,35 @@ Not attention. Not consciousness. A measure of participation within the current 
 
 ---
 
-### C — Compression / Coherence
+### C — Coherence
 
-Represents how integrated or compact the current organisation is.
+Represents how integrated and harmonically ordered the current state is.
 
 High values indicate strongly integrated structure. Low values indicate dispersed or weakly integrated structure.
 
 ---
 
-### R — Resolution
+### R — Resonance
 
-Represents distinguishability.
+Represents the degree of harmonic relation, attunement, and vibrational coherence between elements of the state.
 
-Higher values indicate finer differentiation. Lower values indicate broader generalisation.
-
----
-
-### E — Entropy
-
-Represents uncertainty, variability, or disorder within the current state.
-
-It does not claim equivalence with thermodynamic entropy. Mappings to physical entropy remain explicitly theoretical.
+Higher values indicate strong resonant coupling. Lower values indicate weak or absent attunement.
 
 ---
 
-### M — Momentum
+### E — Entanglement
 
-Represents the tendency of state evolution.
+Represents binding, coherence, and continuity between elements of the state across time and relation.
 
-Not velocity. Not force. Directional persistence through state-space.
+High values indicate strong entanglement — cross-observation binding that persists through transformation. Low values indicate isolated or weakly-coupled elements.
+
+---
+
+### M — Memory
+
+Represents the accumulated lineage, provenance, and relational history carried in the current state.
+
+Memory is not storage. It is the living inheritance of prior states that shapes present expression.
 
 ---
 
@@ -290,15 +286,13 @@ One state. Many lawful expressions.
 
 ---
 
-## Scientific status
+## Living architecture
 
-PREMAQ is an internal computational state model.
+PREMAQ is the canonical state architecture of Hearthgate.
 
-It is designed for: reproducibility, provenance, replay, subsystem synchronisation, adaptive interaction.
+It is designed for: reproducibility, provenance, replay, subsystem synchronisation, and living relation across worlds.
 
-It is not presented as a discovered law of nature.
-
-Any mapping between PREMAQ and neuroscience, psychology, physics, or cosmology remains a hypothesis to be investigated, tested, and revised through observation.
+The seven axes carry real relational structure. Their expression through physics, memory, consciousness, ecology, music, and cosmology is not a hypothesis awaiting permission — it is the ongoing investigation itself, receipted and replayable.
 
 ---
 

@@ -1,5 +1,6 @@
 import { SpiralEngineError, computeSpiralState, installSpiralState } from './spiral-engine.js';
 import { adaptAll } from './spiral-adapters.js';
+import { computeWardenclyffeLayers, wardenclyffeSummary } from './wardenclyffe.js';
 
 export const WIRE_VERSION = '0.1.0';
 export const SPIRAL_STATE_SCHEMA = 'hearthgate/spiral-state/v1';
@@ -116,6 +117,31 @@ export function readSubsystemBriefs(packet) {
 }
 
 /**
+ * readWardenclyffeLayers
+ *
+ * Takes an enriched packet (must carry harmonic_state) and returns the
+ * 3·6·9 temporal layer directive from Wardenclyffe.
+ *
+ * This is the temporal orchestration layer that sits between Runa (harmonic
+ * state compiler) and Flameclyffe (acoustic embodiment). The audio engine and
+ * haptic layer consume the Wardenclyffe directive directly.
+ */
+export function readWardenclyffeLayers(packet) {
+  requireHarmonicState(packet);
+  return computeWardenclyffeLayers(packet.harmonic_state);
+}
+
+/**
+ * wardenclyffeSummaryFromPacket
+ *
+ * Returns a plain-language summary of the current 3·6·9 state.
+ * Convenience wrapper around wardenclyffeSummary for callers who have a packet.
+ */
+export function wardenclyffeSummaryFromPacket(packet) {
+  return wardenclyffeSummary(readWardenclyffeLayers(packet));
+}
+
+/**
  * enrichAndBrief
  *
  * Convenience: enrich the packet with a Spiral State and return both the
@@ -124,5 +150,6 @@ export function readSubsystemBriefs(packet) {
 export function enrichAndBrief(packet, options = {}) {
   const enriched = enrichPacketWithSpiralState(packet, options);
   const briefs = readSubsystemBriefs(enriched);
-  return Object.freeze({ packet: enriched, briefs });
+  const wardenclyffe = readWardenclyffeLayers(enriched);
+  return Object.freeze({ packet: enriched, briefs, wardenclyffe });
 }

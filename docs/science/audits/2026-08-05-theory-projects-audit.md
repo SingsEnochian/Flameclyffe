@@ -6,47 +6,38 @@ This audit is documentation-only. It does not alter major theory, runtime code, 
 
 ## Evidence-backed findings
 
-### 1. PREMAQ symbol meanings are not yet canonical
+### 1. PREMAQ canonical axes (resolved)
 
-The Observer science spine defines:
-
-- P = Perspective
-- C = Coherence
-- R = Recurrence / Resonance
-- E = Entropy
-- M = Memory
-- A = Attention
-
-The DEEP Math Spine defines:
+At audit time (2026-08-05), the Observer science spine and DEEP Math Spine used different axis names for the same components. That divergence is now resolved. Canonical PREMAQ/v2 axes:
 
 - P = Presence
 - C = Coherence
 - R = Resonance
-- E = Entropy
-- M = Momentum
-- A = Alignment
+- E = Entanglement
+- M = Memory
+- A = Agency
+- Q = Qualia
 
-This is the highest-priority documentation and integration risk. A stored vector such as `{P,C,R,E,M,A}` can currently mean different things depending on which document or renderer reads it.
+All documents, renderers, and data schemas should use these names. Prior divergent names (Perspective, Entropy, Momentum, Attention, Alignment, Recurrence) are historical only.
 
-**Implementation task:** create one versioned canonical registry, for example `premaq/v1`, with stable semantic names, units or dimensionless status, valid range, source, and transformation rules. Alternate meanings should become explicit derived views, not silent aliases.
-
-Suggested shape:
+Canonical registry shape:
 
 ```json
 {
-  "schema": "premaq/v1",
+  "schema": "premaq/v2",
   "components": {
-    "P": { "name": "presence", "range": [0,1], "unit": "1" },
-    "C": { "name": "coherence", "range": [0,1], "unit": "1" },
-    "R": { "name": "recurrence", "range": [0,1], "unit": "1" },
-    "E": { "name": "entropy_index", "range": [0,1], "unit": "1" },
-    "M": { "name": "memory_continuity", "range": [0,1], "unit": "1" },
-    "A": { "name": "attention_alignment", "range": [0,1], "unit": "1" }
+    "P": { "name": "presence",      "range": [0,1], "unit": "1" },
+    "C": { "name": "coherence",     "range": [0,1], "unit": "1" },
+    "R": { "name": "resonance",     "range": [0,1], "unit": "1" },
+    "E": { "name": "entanglement",  "range": [0,1], "unit": "1" },
+    "M": { "name": "memory",        "range": [0,1], "unit": "1" },
+    "A": { "name": "agency",        "range": [0,1], "unit": "1" },
+    "Q": { "name": "qualia",        "range": [0,1], "unit": "1" }
   }
 }
 ```
 
-Names above are a reconciliation proposal, not a decision.
+**Remaining task:** enforce canonical axis names at the schema validation layer; add a state-vector migration test before any component rename. All derived views should declare they are derived from premaq/v2.
 
 ### 2. The Horizon signal is a visual synthesis index, not a physical observable
 

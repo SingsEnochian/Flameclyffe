@@ -53,7 +53,7 @@ function validateEnvelope(body) {
   return errors;
 }
 
-function buildReceipt({ envelopeId, receivedAt, routing }) {
+function buildReceipt({ envelopeId, receivedAt, routing, storeRecords }) {
   return {
     schema: 'hearthgate/routing-receipt/v1',
     receipt_id: randomUUID(),
@@ -66,11 +66,44 @@ function buildReceipt({ envelopeId, receivedAt, routing }) {
     blocked: routing.result === 'BLOCKED',
     decompose: routing.result === 'DECOMPOSE_AND_REROUTE',
     notes: routing.notes ?? null,
+    store_records: storeRecords,
     emitted_at: new Date().toISOString(),
   };
 }
 
-function registerObserverRoutes(app) {
+// Build a minimal DEEPStory-compatible record from an observation envelope.
+// The story store requires source_refs and at least one event with text.
+function storyInputFromEnvelope(envelope) {
+  const text = JSON.stringify(envelope.payload).slice(0, 2000);
+  return {
+    title: `${envelope.source_kind}: ${envelope.source_id}`,
+    summary: '',
+    narrative_mode: 'documentary',
+    canon_state: 'draft',
+    source_refs: [{
+      ref: envelope.envelope_id,
+      dataset: 'observation-intake',
+      record_type: 'witnessed',
+    }],
+    events: [{
+      text,
+      epistemic_status: 'witnessed',
+      narrative_treatment: 'verbatim',
+      source_refs: [envelope.envelope_id],
+    }],
+    consent_scope: {
+      store: true,
+      sequence: true,
+      interpret: false,
+      render: false,
+      link_sources: true,
+      share_with_constellation: false,
+      notes: null,
+    },
+  };
+}
+
+function registerObserverRoutes(app, { storyStore, timeStore, theoryStore } = {}) {
   app.post('/api/observer/intake', async (req, res) => {
     let routeObservation;
     try {
@@ -93,8 +126,52 @@ function registerObserverRoutes(app) {
     }
 
     const routing = routeObservation(body);
-    const receipt = buildReceipt({ envelopeId, receivedAt, routing });
 
+    // Save to each destination store and collect record IDs for the receipt.
+    const storeRecords = [];
+
+    if (routing.result === 'ROUTED' && routing.destinations.length > 0) {
+      await Promise.all(routing.destinations.map(async (dest) => {
+        try {
+          if (dest === 'DEEPStory' && storyStore) {
+            const record = await storyStore.save(storyInputFromEnvelope(body));
+            storeRecords.push({ dataset: 'DEEPStory', record_id: record.id });
+          } else if (dest === 'DEEPTime' && timeStore) {
+            const record = await timeStore.save({
+              envelope_id: body.envelope_id,
+              source_kind: body.source_kind,
+              source_id: body.source_id,
+              utc: body.temporal_extent?.utc_start,
+              confidence: body.confidence,
+              evidence_class: body.evidence_class,
+              consent_scope: body.consent_scope,
+            });
+            storeRecords.push({ dataset: 'DEEPTime', record_id: record.id });
+          } else if (dest === 'DEEPTheory' && theoryStore) {
+            const record = await theoryStore.save({
+              envelope_id: body.envelope_id,
+              source_kind: body.source_kind,
+              source_id: body.source_id,
+              content_kind: body.content_kind,
+              canon_effect: body.canon_effect,
+              confidence: body.confidence,
+              evidence_class: body.evidence_class,
+              temporal_extent: body.temporal_extent,
+              payload: body.payload,
+              consent_scope: body.consent_scope,
+              source_refs: [{ ref: body.envelope_id, dataset: 'observation-intake' }],
+            });
+            storeRecords.push({ dataset: 'DEEPTheory', record_id: record.id });
+          }
+        } catch (storeErr) {
+          // Store failure is non-fatal — log it but do not block the receipt.
+          console.error(`[observer-intake] store save failed for ${dest}:`, storeErr.message);
+          storeRecords.push({ dataset: dest, record_id: null, error: storeErr.message });
+        }
+      }));
+    }
+
+    const receipt = buildReceipt({ envelopeId, receivedAt, routing, storeRecords });
     return res.status(200).json({ receipt });
   });
 }

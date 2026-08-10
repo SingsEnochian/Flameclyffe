@@ -5,6 +5,7 @@ import { subscribeToDualAspectActivation, readActiveDualAspectPacket } from './h
 import DSP_PROFILES from './runa/dsp-profiles/world-hum-experimental-v0.1.json';
 import { computeObserverAudioControl, computeDerivativeEnergy } from './audio/observer-audio-control.js';
 import { audioEngine, ORGAN_TONE } from './audio/hearthweave-audio-engine.js';
+import { computeWardenclyffeLayers, wardenclyffeSummary } from './harmonic-spiral/wardenclyffe.js';
 
 const BRIDGE_OUTPUT_KEY    = 'starwell:runa-bridge:active-profile:v1';
 const HARMONIC_PACKET_KEY  = 'hearthweave:harmonic-packet:v1';
@@ -56,25 +57,56 @@ const WORLD_VOICE = {
 const CHORUS_TONES = [415, 440, 554, 659, 739, 987, 1318, 2637];
 const CHORUS_NAMES = ['Root', 'Anchor', 'Whisper', 'Arc', 'Bridge', 'Surge', 'Spiral', 'Awakening'];
 
-function modulateDSP(profile, premaqState) {
+function modulateDSP(profile, premaqState, wardenclyffe) {
   const axisValue = premaqState?.[profile.filter.premaq_axis]?.value ?? 0.5;
   const modulatedCutoff = profile.filter.base_hz + (axisValue * profile.filter.premaq_depth);
   const masterGain = profile.master_gain * (0.7 + (premaqState?.P?.value ?? 0.5) * 0.6);
+
+  // Wardenclyffe: primary oscillator shapes LFO rate and overall gain presence
+  let lfoRate = profile.lfo.rate_hz;
+  let wardScale = 1.0;
+  if (wardenclyffe && !wardenclyffe.degraded) {
+    const primary = wardenclyffe.layers.find((l) => l.is_primary);
+    if (primary) {
+      lfoRate = profile.lfo.rate_hz * primary.rate_modifier;
+      wardScale = 0.72 + primary.gain * 0.56;  // [0.72, 1.0] range
+    }
+  } else if (wardenclyffe?.degraded) {
+    wardScale = 0.60;  // hold back — 3·6·9 minimal
+  }
+
   return {
     root_hz: profile.root_hz,
     macro_cycle_seconds: profile.macro_cycle_seconds,
     harmonics: profile.harmonics,
     filter: { ...profile.filter, modulated_cutoff_hz: Math.round(modulatedCutoff), modulation_axis: profile.filter.premaq_axis, modulation_axis_value: axisValue },
-    lfo: profile.lfo,
+    lfo: { ...profile.lfo, rate_hz: Math.round(lfoRate * 100000) / 100000, base_rate_hz: profile.lfo.rate_hz, wardenclyffe_modulated: wardenclyffe != null },
     reverb: profile.reverb,
     master_gain: profile.master_gain,
-    modulated_master_gain: Math.round(masterGain * 1000) / 1000,
+    modulated_master_gain: Math.round(masterGain * wardScale * 1000) / 1000,
   };
 }
 
-function storeBridgeOutput(worldSlug, modulated, packet) {
+function storeBridgeOutput(worldSlug, modulated, packet, wardenclyffe) {
   try {
-    const output = { schema: 'arcsweep.runa-bridge-output/v1', world_slug: worldSlug, packet_id: packet?.packet_id, packet_fingerprint: packet?.packet_fingerprint, computed_at: new Date().toISOString(), dsp: modulated };
+    const output = {
+      schema: 'arcsweep.runa-bridge-output/v1',
+      world_slug: worldSlug,
+      packet_id: packet?.packet_id,
+      packet_fingerprint: packet?.packet_fingerprint,
+      computed_at: new Date().toISOString(),
+      dsp: modulated,
+      wardenclyffe: wardenclyffe ? {
+        schema: wardenclyffe.schema,
+        spiral_state_id: wardenclyffe.spiral_state_id,
+        primary_oscillator: wardenclyffe.primary_oscillator,
+        phase: wardenclyffe.phase,
+        direction: wardenclyffe.direction,
+        confidence: wardenclyffe.confidence,
+        degraded: wardenclyffe.degraded,
+        layers: wardenclyffe.layers,
+      } : null,
+    };
     sessionStorage.setItem(BRIDGE_OUTPUT_KEY, JSON.stringify(output));
     window.dispatchEvent(new CustomEvent(RUNA_PROFILE_READY_EVENT, { detail: output }));
     return output;
@@ -90,12 +122,18 @@ function computeBridge(packet) {
   const worldSlug = packet.identity?.world_slug;
   if (!worldSlug) return null;
   const dspKey = WORLD_SLUG_TO_DSP[worldSlug];
-  if (!dspKey || !DSP_PROFILES.worlds?.[dspKey]) return { worldSlug, dspKey: null, profile: null, modulated: null };
+  if (!dspKey || !DSP_PROFILES.worlds?.[dspKey]) return { worldSlug, dspKey: null, profile: null, modulated: null, wardenclyffe: null };
   const profile = DSP_PROFILES.worlds[dspKey];
   const premaqState = packet.observable?.premaq?.state;
-  const modulated = modulateDSP(profile, premaqState);
-  storeBridgeOutput(worldSlug, modulated, packet);
-  return { worldSlug, dspKey, profile, modulated };
+  let wardenclyffe = null;
+  try {
+    if (packet.harmonic_state?.schema === 'hearthgate/spiral-state/v1') {
+      wardenclyffe = computeWardenclyffeLayers(packet.harmonic_state);
+    }
+  } catch { /* degrade gracefully if packet lacks harmonic_state */ }
+  const modulated = modulateDSP(profile, premaqState, wardenclyffe);
+  storeBridgeOutput(worldSlug, modulated, packet, wardenclyffe);
+  return { worldSlug, dspKey, profile, modulated, wardenclyffe };
 }
 
 const mono = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
@@ -210,6 +248,51 @@ function TargetsideReadout({ worldSlug, dspKey, profile, modulated }) {
         </dl>
       </section>
     </div>
+  );
+}
+
+// ── Wardenclyffe Panel ────────────────────────────────────────────────────────
+
+const BEAT_COLOR = { 3: '#6aaa86', 6: '#9a8ebe', 9: '#e08050' };
+const BEAT_LABEL = { 3: '3 · GROUND / CALL', 6: '6 · WEAVE / RESPONSE', 9: '9 · CROSS / RELEASE' };
+
+function WardenclyffPanel({ wardenclyffe }) {
+  if (!wardenclyffe) return (
+    <section style={{ padding: '1rem 1.1rem', border: '1px solid rgba(114,204,166,.08)', borderRadius: 8, background: 'rgba(10,20,16,.5)', color: '#2a3830', fontSize: '.72rem' }}>
+      WARDENCLYFFE — no harmonic_state in packet
+    </section>
+  );
+  const summary = wardenclyffe.degraded ? 'DEGRADED — 3·6·9 minimal, CROSS silent' : wardenclyffeSummary(wardenclyffe);
+  return (
+    <section style={{ padding: '1rem 1.1rem', border: `1px solid ${wardenclyffe.degraded ? 'rgba(180,60,60,.2)' : 'rgba(114,204,166,.16)'}`, borderRadius: 8, background: 'rgba(14,24,20,.7)' }}>
+      <p style={{ fontSize: '.6rem', color: wardenclyffe.degraded ? '#9a4a4a' : '#3a5045', letterSpacing: '.08em', marginBottom: '.4rem' }}>
+        WARDENCLYFFE · 3·6·9 TEMPORAL ORCHESTRATION
+      </p>
+      <p style={{ fontSize: '.7rem', color: wardenclyffe.degraded ? '#7a3a3a' : '#567060', fontStyle: 'italic', lineHeight: 1.55, marginBottom: '.7rem' }}>{summary}</p>
+      <div style={{ display: 'grid', gap: '.35rem' }}>
+        {wardenclyffe.layers.map((layer) => {
+          const col = BEAT_COLOR[layer.beat];
+          const isPrimary = layer.is_primary;
+          return (
+            <div key={layer.beat} style={{
+              display: 'grid', gridTemplateColumns: '10rem 6rem 6rem 1fr',
+              gap: '.5rem', fontSize: '.7rem', padding: '.3rem .5rem',
+              borderRadius: 4,
+              background: isPrimary ? `${col}12` : 'transparent',
+              border: isPrimary ? `1px solid ${col}30` : '1px solid transparent',
+            }}>
+              <span style={{ color: isPrimary ? col : '#2a3830' }}>{BEAT_LABEL[layer.beat]}</span>
+              <span style={{ color: '#3a5045' }}>gain <span style={{ color: isPrimary ? col : '#4d6e5d', fontWeight: isPrimary ? 600 : 400 }}>{layer.gain.toFixed(3)}</span></span>
+              <span style={{ color: '#3a5045' }}>rate <span style={{ color: isPrimary ? col : '#4d6e5d' }}>×{layer.rate_modifier.toFixed(3)}</span></span>
+              {isPrimary && <span style={{ fontSize: '.6rem', color: col, letterSpacing: '.06em' }}>● PRIMARY</span>}
+            </div>
+          );
+        })}
+      </div>
+      <p style={{ fontSize: '.6rem', color: '#1a2820', marginTop: '.6rem', letterSpacing: '.04em' }}>
+        spiral_state_id: {wardenclyffe.spiral_state_id} · confidence: {(wardenclyffe.confidence * 100).toFixed(0)}%
+      </p>
+    </section>
   );
 }
 
@@ -393,6 +476,9 @@ function ResonanceBridge() {
               modulated={bridge?.modulated}
             />
           </div>
+
+          {/* Wardenclyffe 3·6·9 temporal orchestration */}
+          <WardenclyffPanel wardenclyffe={bridge?.wardenclyffe} />
 
           {/* Bridge tone */}
           <BridgeToneReadout hearthside={hearthside} targetside={bridge?.modulated} lambda={lambda} />

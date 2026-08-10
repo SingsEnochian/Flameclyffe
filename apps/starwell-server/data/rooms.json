@@ -28,15 +28,15 @@
     "public_private": "private",
     "archive_policy": "archived on exit",
     "metrics": {
-      "P": 0.58,
-      "C": 0.52,
-      "R": 0.71,
-      "E": 0.64,
-      "M": 0.48,
-      "A": 0.61,
-      "Q": 0.59
+      "P": 0.043,
+      "C": 0.413,
+      "R": 0.297,
+      "E": 0.783,
+      "M": 0.667,
+      "A": 0.037,
+      "Q": 0.407
     },
-    "chamberState": "Anchored: Wraithtide Shore",
-    "currentPlace": "Wraithtide Shore"
+    "chamberState": "Anchored: The Withinwood",
+    "currentPlace": "The Withinwood"
   }
 ]

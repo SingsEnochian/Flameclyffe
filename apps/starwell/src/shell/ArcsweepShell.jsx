@@ -7,8 +7,28 @@ import {
 } from '../hearthweave-kernel/braid-packet.js';
 import './arcsweep-shell.css';
 
+const IS_EMBEDDED = typeof window !== 'undefined' && window.parent !== window;
+
+function broadcastWorld(slug) {
+  if (!slug) return;
+  sessionStorage.setItem('arcsweep:world', slug);
+  if (IS_EMBEDDED) window.parent.postMessage({ type: 'arcsweep:world', slug }, '*');
+}
+
+function broadcastPremaq(packet) {
+  if (!IS_EMBEDDED || !packet) return;
+  const s = packet?.accepted_premaq_state?.state;
+  if (!s) return;
+  const state = {};
+  PREMAQ_AXES.forEach((axis) => {
+    state[axis] = typeof s[axis]?.value === 'number' ? s[axis].value : 0.5;
+  });
+  window.parent.postMessage({ type: 'arcsweep:premaq', state }, '*');
+}
+
 // Nav organ list — same across every page
 const NAV_ORGANS = [
+  { href: '/',                            label: 'Hearthgate' },
   { href: '/starwell/',                   label: 'Home' },
   { href: '/starwell/living-glyph/',      label: 'Living Glyph' },
   { href: '/starwell/echo-index/',        label: 'Echo Index' },
@@ -65,7 +85,11 @@ export default function ArcsweepShell({ currentHref, title, children }) {
   const [packet, setPacket] = useState(() => readBraidPacket());
 
   useEffect(() => {
-    return subscribeToBraidPacket(setPacket, { emitCurrent: false });
+    return subscribeToBraidPacket((p) => {
+      setPacket(p);
+      broadcastWorld(p?.world_profile?.world_slug);
+      broadcastPremaq(p);
+    }, { emitCurrent: true });
   }, []);
 
   const worldSlug = packet?.world_profile?.world_slug ?? null;
@@ -85,8 +109,8 @@ export default function ArcsweepShell({ currentHref, title, children }) {
       data-world={worldSlug || undefined}
       data-phase={phase || undefined}
     >
-      {/* Navigation */}
-      <nav className="shell-nav" aria-label="Arcsweep">
+      {/* Navigation — hidden when loaded inside the Hearthgate shell iframe */}
+      <nav className="shell-nav" aria-label="Arcsweep" style={IS_EMBEDDED ? { display: 'none' } : undefined}>
         <a href="/starwell/" className="shell-nav__wordmark">
           <strong>ARCSWEEP</strong> · STARWELL
         </a>

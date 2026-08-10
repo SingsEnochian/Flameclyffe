@@ -29,10 +29,10 @@
   --glass-edge:        rgba(255, 255, 255, 0.055);
 
   /* Text */
-  --shell-text-primary:   #d7e4dc;
-  --shell-text-mid:       #7aaa90;
-  --shell-text-dim:       #4d6e5d;
-  --shell-text-ghost:     #2a3830;
+  --shell-text-primary:   #e8f2ee;
+  --shell-text-mid:       #98c4ae;
+  --shell-text-dim:       #7a9e8e;
+  --shell-text-ghost:     #567868;
   --shell-text-accent:    #72c8a4;
 
   /* State class colours */
@@ -137,7 +137,7 @@ body {
 }
 
 .shell-nav__wordmark {
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   letter-spacing: 0.14em;
   color: var(--shell-text-dim);
   text-decoration: none;
@@ -156,7 +156,7 @@ body {
 }
 
 .shell-nav__link {
-  font-size: 0.62rem;
+  font-size: 0.76rem;
   letter-spacing: 0.06em;
   color: var(--shell-text-dim);
   text-decoration: none;
@@ -181,7 +181,7 @@ body {
 }
 
 .shell-nav__packet-status {
-  font-size: 0.6rem;
+  font-size: 0.74rem;
   letter-spacing: 0.08em;
   color: var(--shell-text-ghost);
   white-space: nowrap;
@@ -216,7 +216,7 @@ body {
   -webkit-backdrop-filter: var(--glass-blur-mid);
   border-bottom: 1px solid rgba(114,204,166,0.08);
   box-shadow: 0 2px 12px rgba(0,0,0,0.30);
-  font-size: 0.6rem;
+  font-size: 0.74rem;
   letter-spacing: 0.08em;
   overflow: hidden;
 }
@@ -286,7 +286,7 @@ body {
 }
 
 .premaq-axis__letter {
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   color: var(--shell-text-dim);
   letter-spacing: 0.1em;
 }
@@ -357,7 +357,7 @@ body {
 }
 
 .state-panel__label {
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   letter-spacing: 0.1em;
   margin-bottom: 0.4rem;
   text-transform: uppercase;
@@ -371,7 +371,7 @@ body {
 /* ── Typography ─────────────────────────────────────────────────────────────── */
 
 .shell-label {
-  font-size: 0.6rem;
+  font-size: 0.74rem;
   letter-spacing: 0.08em;
   color: var(--shell-text-ghost);
   text-transform: uppercase;
@@ -391,7 +391,7 @@ body {
   padding: 0.3rem 0.8rem;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   letter-spacing: 0.06em;
   cursor: pointer;
   border: 1px solid rgba(114,204,166,0.18);
@@ -491,7 +491,7 @@ body {
     gap: var(--sp-sm);
   }
   .shell-nav__links { gap: 2px; }
-  .shell-nav__link  { font-size: 0.58rem; padding: 0.15rem 0.35rem; }
+  .shell-nav__link  { font-size: 0.70rem; padding: 0.15rem 0.35rem; }
   .shell-main       { padding: var(--sp-md) var(--sp-sm); }
   .shell-ribbon     { padding: 0 var(--sp-sm); gap: var(--sp-sm); }
 }

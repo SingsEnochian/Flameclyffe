@@ -6,14 +6,14 @@
 
 ## Boundary
 
-Audio is a projected rendering of an accepted PREMAQ Observation State. It is not evidence, measurement, diagnosis, or proof of an external cause.
+Audio is a living expression of an accepted PREMAQ state. It carries the state into the acoustic field.
 
 ```text
 accepted PREMAQ state
 → versioned audio transfer function
 → bounded control vector
 → audio renderer
-→ projection receipt
+→ expression receipt
 ```
 
 The raw PREMAQ packet remains immutable. The audio engine stores or returns the packet ID, registry version, calibration version, engine version, output classification, diagnostics, and receipt.
@@ -22,13 +22,13 @@ The raw PREMAQ packet remains immutable. The audio engine stores or returns the 
 
 For a PREMAQ packet `x = (P,C,R,E,M,A,Q)` with component derivatives, uncertainty, and confidence, the default transfer computes:
 
-- carrier frequency from Presence, Coherence, and Charge (Q);
+- carrier frequency from Presence, Coherence, and Qualia (Q);
 - binaural difference from Resonance, Memory, and derivative energy;
 - pulse rate from Memory and its rate of change;
-- spectral brightness from Attention and Coherence;
+- spectral brightness from Agency and Coherence;
 - stereo width from Resonance reduced by uncertainty;
 - return-path gain from Entanglement weighted by confidence;
-- master gain from Presence, Charge (Q), and confidence;
+- master gain from Presence, Qualia (Q), and confidence;
 - phase inversion as an explicit, inspectable Entanglement threshold rule.
 
 Linear interpolation is used for bounded gains and rates. Exponential interpolation is used for perceptual frequency ranges:
@@ -57,7 +57,7 @@ This is a control statistic, not physical energy.
 
 ## Versioning
 
-A replayable audio projection requires:
+A replayable audio expression requires:
 
 - source PREMAQ packet and registry version;
 - audio engine version;
@@ -72,4 +72,4 @@ Changing any coefficient or bound requires a new calibration or engine version. 
 
 The Möbius Audio Bus remains the low-level Web Audio renderer. `ObserverAudioEngine` is the canonical Observer v2 adapter. New sound-space, binaural, harmonic, Runa, and world-profile features should request an audio projection from this adapter rather than reading PREMAQ dimensions ad hoc.
 
-World-specific sound spaces may apply a second, versioned canon transfer after this shared control vector. They must label the result `projected`, preserve the shared PREMAQ source, and issue a separate receipt.
+World-specific sound spaces may apply a second, versioned canon transfer after this shared control vector. They carry canon-grounded experiential records, preserve the shared PREMAQ source, and issue a separate receipt.

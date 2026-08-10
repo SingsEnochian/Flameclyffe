@@ -95,6 +95,8 @@ function saveConfig(input) {
 }
 
 function primaryApplicationUrl() {
+  const shellEntry = path.join(runtimeRoot(), 'public', 'hearthgate-shell.html');
+  if (fs.existsSync(shellEntry)) return `http://localhost:${PORT}/hearthgate-shell.html`;
   const starwellEntry = path.join(runtimeRoot(), 'public', 'starwell', 'index.html');
   return fs.existsSync(starwellEntry)
     ? `http://localhost:${PORT}/starwell/`

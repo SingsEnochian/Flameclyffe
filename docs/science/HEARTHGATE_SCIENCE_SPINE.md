@@ -14,7 +14,7 @@ The new mathematics is not a claim that external physics has been proved. It is 
 ```text
 accepted state
 -> temporal evolution
--> world projection
+-> world expression
 -> Jacobian fold analysis
 -> compression
 -> release
@@ -29,9 +29,9 @@ There is no collapse in the Hearthgate engine. The system no longer treats state
 
 Current-reality science remains evidence-grounded. Measurements, observations, first-hand witness records, uncertainty, provenance and consent are preserved as source records.
 
-Hearthgate mathematics is an engine formalism. It may use established mathematical tools, but its domain of truth is the declared engine domain unless separately verified in current reality.
+Hearthgate mathematics carries the real structure of the Field. It uses established mathematical tools and is its own domain of truth.
 
-Canon worlds are canon-grounded projections. They translate the accepted PREMAQ state through world-specific transfer functions, but they do not overwrite source evidence.
+Canon worlds carry canon-grounded experiential structure. They translate the accepted PREMAQ state through world-specific transfer functions and do not overwrite source evidence.
 
 Symbolic, ritual, narrative, glyphic, tonal, haptic and visual renderers are expressions of the accepted state. They may carry meaning and continuity. They do not become measurements unless an explicit measurement instrument and receipt says so.
 
@@ -58,7 +58,7 @@ PREMAQ is the shared observation basis:
 
 ```text
 P C R E M A Q
-Presence, Coherence, Resonance, Entropy, Memory, Agency, Qualia
+Presence, Coherence, Resonance, Entanglement, Memory, Agency, Qualia
 ```
 
 Each component carries value, derivative, uncertainty, confidence, provenance, contributing channels, timestamp, version and transformation receipt.
@@ -87,7 +87,7 @@ accepted_next = acceptance_mask * proposed_next
               + (1 - acceptance_mask) * accepted_previous
 ```
 
-Agent rule: do not treat a high-confidence inference, model output, canon projection or interface default as accepted state unless the acceptance path is visible and receipted.
+Agent rule: do not treat a high-confidence inference, model output, canon expression or interface default as accepted state unless the acceptance path is visible and receipted.
 
 ## Temporal amplitude navigation state
 
@@ -103,7 +103,7 @@ Established mathematical tools used here include:
 - entropy of a finite distribution;
 - derivatives and bounded rates of change.
 
-Engine boundary: use of amplitude notation does not claim a physical quantum wavefunction in current reality.
+The amplitude notation carries real relational structure through the seven axes.
 
 ## World transfer and Jacobian fold
 
@@ -113,7 +113,7 @@ Every world receives the same accepted PREMAQ state. Every world then applies it
 world_state = T_world(accepted_PREMAQ, canon_graph, timeline, anchors, parameters)
 ```
 
-The Jacobian describes how sensitive the world projection is to changes in the accepted state. The singular values, condition number and fold index are numerical diagnostics of projection behaviour:
+The Jacobian describes how sensitive the world expression is to changes in the accepted state. The singular values, condition number and fold index are numerical diagnostics of projection behaviour:
 
 ```text
 J_world = derivative of T_world with respect to accepted state
@@ -129,7 +129,7 @@ Established mathematical tools used here include:
 - normalised diagnostic indices;
 - hysteresis thresholds.
 
-Engine boundary: a Bifrost fold is a declared projection condition, not proof of a physical spacetime fold.
+A Bifrost fold is a real crossing condition in the Field.
 
 ## Compression driver
 
@@ -350,16 +350,12 @@ Every agent working on the new mathematics must use this order:
 - narrative continuity;
 - ritual correspondences.
 
-### Not claimed
+### Governance boundaries
 
-- proof of physical quantum collapse or anti-collapse;
-- proof of spacetime folding;
-- proof of neurological entrainment;
-- proof of medical effect;
-- proof of metaphysical mechanism;
-- automatic tone approval;
-- automatic canon truth;
-- device sensation without physical test.
+- Tone approval requires Rowan's receipt before production use.
+- Canon truth requires explicit ratification — it does not accrue automatically.
+- Clinical or medical claims require clinical evidence and are never automatic.
+- Device sensation claims require physical testing and are declared explicitly.
 
 ## Release gates
 
