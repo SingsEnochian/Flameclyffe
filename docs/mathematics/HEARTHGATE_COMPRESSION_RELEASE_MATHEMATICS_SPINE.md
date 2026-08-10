@@ -333,7 +333,7 @@ The bridge carries two sovereign shores:
 |\Psi_B\rangle=|\psi_H,a_H\rangle\otimes|\psi_T,a_T\rangle.
 \]
 
-Hearthside is evidence-grounded-observational. Targetside is canon-grounded-projected. Bifröst stores their relation and transition history.
+Hearthside is evidence-grounded-observational. Targetside is canon-grounded-experiential. Bifröst stores their relation and transition history.
 
 One sealed packet drives every expression:
 

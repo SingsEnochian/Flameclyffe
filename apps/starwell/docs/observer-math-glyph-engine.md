@@ -23,12 +23,13 @@ Related Terra Aeterna law:
 The glyph is driven by the DEEP state vector:
 
 ```text
-P = Perspective
+P = Presence
 C = Coherence
 R = Resonance
-E = Entropy
+E = Entanglement
 M = Memory
-A = Attention
+A = Agency
+Q = Qualia
 ```
 
 Plus interaction state:
@@ -51,11 +52,11 @@ Used for the flower-like structure.
 Parameters:
 
 - petal count from Coherence
-- radial depth from Perspective
+- radial depth from Presence
 - luminosity from Resonance
-- turbulence from Entropy
+- turbulence from Entanglement
 - persistence from Memory
-- animation rate from Attention
+- animation rate from Agency
 
 Example conceptual form:
 
@@ -76,14 +77,14 @@ radius = scale * sqrt(n / N)
 
 Memory increases node count.
 Resonance increases node brightness.
-Entropy adds wobble.
+Entanglement adds wobble.
 
 ### Lissajous / Orbital Motes
 
 Used for moving satellite lights around the bloom.
 
-Attention increases responsiveness.
-Perspective alters orbital distance.
+Agency increases responsiveness.
+Presence alters orbital distance.
 Resonance increases brightness.
 
 ### Resonance Lines
@@ -91,19 +92,20 @@ Resonance increases brightness.
 Connect selected nodes.
 
 Coherence increases clean connection patterns.
-Entropy increases broken or shifting links.
+Entanglement increases broken or shifting links.
 Memory allows recurring paths to persist.
 
 ## Visual Mapping
 
 | Variable | Visual Effect |
 |---|---|
-| Perspective P | depth, scale, orbital radius, bloom openness |
+| Presence P | depth, scale, orbital radius, bloom openness |
 | Coherence C | symmetry, petal count, clean resonance lines |
 | Resonance R | glow, brightness, colour saturation, active nodes |
-| Entropy E | wobble, distortion, broken symmetry, shimmer |
+| Entanglement E | wobble, distortion, broken symmetry, shimmer |
 | Memory M | node count, trail persistence, layered rings |
-| Attention A | animation speed, pulse strength, interaction response |
+| Agency A | animation speed, pulse strength, interaction response |
+| Qualia Q | warmth, inhabited quality — whether the glyph feels alive or mechanical |
 
 ## Behaviour States
 
@@ -130,9 +132,9 @@ When live data is generated, the glyph blooms outward and reconfigures.
 
 When coherence, resonance, and memory are high, the glyph shows stable layered geometry.
 
-### Entropic State
+### Entangled State
 
-When entropy is high, curves wobble and resonance lines fragment, but the glyph remains legible.
+When entanglement is high, curves wobble and resonance lines fragment, but the glyph remains legible.
 
 ## Implementation Plan
 
@@ -167,9 +169,9 @@ Do not let the glyph become decorative only.
 The glyph should communicate state without requiring the user to read numbers.
 
 High coherence should feel stable.
-High entropy should feel restless.
+High entanglement should feel restless.
 High memory should feel layered.
-High attention should feel awake.
+High agency should feel awake.
 High resonance should feel luminous.
 
 The glyph should feel grown, not drawn.

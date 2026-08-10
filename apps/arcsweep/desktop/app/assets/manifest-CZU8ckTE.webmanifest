@@ -1,0 +1,11 @@
+{
+  "name": "Hearthgate: Arcsweep",
+  "short_name": "Arcsweep",
+  "description": "A private, local-first Desired Reality planning and continuity instrument.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0f0e",
+  "theme_color": "#111816",
+  "orientation": "any"
+}

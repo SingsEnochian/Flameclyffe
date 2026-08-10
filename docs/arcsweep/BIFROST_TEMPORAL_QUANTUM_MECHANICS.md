@@ -10,7 +10,7 @@ Bifröst carries one accepted state between two sovereign shores. It evolves tha
 
 ```text
 HEARTHSIDE: evidence-grounded observation and provenance
-TARGETSIDE: canon-grounded world projection
+TARGETSIDE: canon-grounded world expression
 BIFRÖST: temporal evolution, compression, release and receipts
 ```
 
@@ -135,7 +135,7 @@ Infrasonic and ultrasonic source frequencies remain receipted and silent. Rowan 
 |\Psi_B\rangle=|\psi_H,a_H\rangle\otimes|\psi_T,a_T\rangle.
 \]
 
-Hearthside evidence remains evidence. Targetside projection remains projection. The bridge stores relation and transition history.
+Hearthside evidence remains evidence. Targetside canon remains experiential. The bridge stores relation and transition history.
 
 ## Software flow
 

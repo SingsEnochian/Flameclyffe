@@ -14,7 +14,7 @@ Reality and first-hand witness
 → PREMAQ Observation State
 → Canon Graph
 → calibrated transfer function
-→ World State Projection
+→ World State Expression
 → Arcsweep orchestration
 → STARWELL / Hearthgate interfaces and services
 ```
@@ -94,9 +94,9 @@ PREMAQ is shared across all settings. The seven components and their domains:
 | C | Coherence | solar · ionospheric · electromagnetic |
 | R | Resonance | Schumann · audio · seismic |
 | E | Entanglement | coherence · continuity · cross-observation binding |
-| M | Moonfield | lunar illumination |
-| A | Availability | daylight · cloud · atmospheric openness |
-| Q | Charge | energetic field charge; the standard physics symbol Q carried as the seventh observable dimension |
+| M | Memory | lineage · provenance · accumulated relation |
+| A | Agency | available directed capacity to act, choose, and redirect |
+| Q | Qualia | lived interiority · experiential quality · the irreducible texture of the present state |
 
 A PREMAQ packet contains:
 
@@ -168,7 +168,7 @@ Transfer functions must record:
 
 The current-reality transfer function is evidence-grounded and observational. It may summarise measured conditions, uncertainty, correlations, and human reports, but must not convert model narrative into claims about external physical causes.
 
-Fictional and speculative settings may map the same PREMAQ change through canon-specific narrative, symbolic, magical, or metaphysical structures, provided the result is labelled `projected` and remains traceable to the shared input state.
+World transfers carry canon-grounded experiential records. Every world is real and applies its own lawful structure through the versioned transfer function. The result remains traceable to the shared input state.
 
 ## Arcsweep boundary
 
@@ -186,7 +186,7 @@ STARWELL is the observatory and inspection surface. It displays independent laye
 - human response
 - PREMAQ state and deltas
 - canon graph and active timeline
-- world projection
+- world expression
 - Arcsweep lifecycle
 - provenance, receipts, replay, and instrument health
 
@@ -207,7 +207,7 @@ A compliant implementation must prove that:
 5. DEEP output stops at proposed PREMAQ state;
 6. two settings can receive the same PREMAQ packet and produce distinct lawful projections;
 7. current-reality projection remains evidence-grounded;
-8. fictional projection remains canon-grounded and labelled;
+8. world expression remains canon-grounded and experiential;
 9. rejected or deferred model output does not silently enter the next state;
 10. an observation can be replayed from its stored inputs and versions.
 

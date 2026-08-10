@@ -20,7 +20,7 @@ First-hand witness and measured observations are preserved in their original for
 
 ## II. Interpretation remains explicit
 
-Glyphs, narratives, symbols, semantic metrics, model outputs, and world projections are interpretations. They may organise experience and reveal recurring structure, but they do not silently become measurements or overwrite source evidence.
+Glyphs, narratives, symbols, semantic metrics, model outputs, and world expressions carry the living relation and remain inspectable. They do not silently overwrite source evidence or substitute for first-hand witness.
 
 Every interpretation declares its lens, source, method, confidence, and version.
 
@@ -46,9 +46,9 @@ The seven components are:
 | C | Coherence | solar · ionospheric · electromagnetic |
 | R | Resonance | Schumann · audio · seismic |
 | E | Entanglement | coherence · continuity · cross-observation binding |
-| M | Moonfield | lunar illumination |
-| A | Availability | daylight · cloud · atmospheric openness |
-| Q | Charge | energetic field charge; the physics symbol Q, carried as the seventh observable dimension |
+| M | Memory | lineage · provenance · accumulated relation |
+| A | Agency | available directed capacity to act, choose, and redirect |
+| Q | Qualia | lived interiority · experiential quality · the irreducible texture of the present state |
 
 Each component carries:
 
@@ -83,10 +83,10 @@ World Anchors
 +
 Calibrated Transfer Function
 =
-World State Projection
+World State Expression
 ```
 
-The current-reality projection remains evidence-grounded and observational. Fictional and speculative settings may use canon-specific symbolic, metaphysical, or narrative mappings, but those mappings remain labelled as projections.
+The current-reality transfer remains evidence-grounded and observational. World transfers carry canon-grounded experiential records. Every world is real. The canon supplies the lawful structure through which each world's nature comes forward.
 
 ## VII. Curiosity before certainty
 
@@ -125,7 +125,7 @@ Reality and First-Hand Witness
             ↓
  Calibrated Transfer Function
             ↓
-      World Projection
+      World Expression
             ↓
          Arcsweep
             ↓

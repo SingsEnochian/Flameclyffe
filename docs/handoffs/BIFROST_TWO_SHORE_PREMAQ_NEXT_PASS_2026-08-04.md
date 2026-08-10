@@ -142,7 +142,7 @@ Arcsweep should write a DualAspectPacket that carries both sides deliberately:
 
 ```text
 Hearthside: current-reality provenance, observation, witness, measurement confidence
-Targetside: selected world projection, canon graph, House, timeline, relationship grammar
+Targetside: selected world expression, canon graph, House, timeline, relationship grammar
 Bridge: shared fingerprint, transfer receipt, divergence status
 ```
 
