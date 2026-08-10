@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hearthfire.graph-patch-proposal/v1",
+  "title": "Graph Patch Proposal",
+  "description": "AI-produced proposal for adding nodes and edges to the canonical graph. The AI extracts; a Steward commits. The original extraction receipt is always retained regardless of review outcome.",
+  "type": "object",
+  "required": [
+    "schema", "proposalId", "sourceId", "sourceType", "worldId",
+    "proposedNodes", "proposedEdges", "reviewStatus",
+    "extractionModel", "extractedAt"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "hearthfire.graph-patch-proposal/v1" },
+    "proposalId": { "type": "string", "format": "uuid" },
+    "sourceId": {
+      "type": "string",
+      "description": "ID of the document, observation, telemetry packet, or conversation this was extracted from"
+    },
+    "sourceType": {
+      "type": "string",
+      "enum": [
+        "document", "observation", "telemetry", "conversation",
+        "code", "image", "audio", "research-paper", "world-canon",
+        "character-record", "theory", "experiment-log", "field-note"
+      ]
+    },
+    "worldId": {
+      "type": "string",
+      "description": "World context. Moon in waking-earth ≠ moon in terra-aeterna. Never merge across worlds without explicit correspondence.",
+      "enum": ["earth", "terra-aeterna", "luna", "feather-and-flame", "dreaming-grove", "cross-world"]
+    },
+    "proposedNodes": {
+      "type": "array",
+      "description": "New or updated entities proposed for the graph",
+      "items": {
+        "type": "object",
+        "required": ["tempId", "kind", "label", "epistemicStatus"],
+        "properties": {
+          "tempId": {
+            "type": "string",
+            "description": "Local ID within this proposal. Replaced by canonical ID on Steward commit."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "entity", "concept", "place", "person", "instrument",
+              "theory", "motif", "event", "world", "signal", "glyph"
+            ]
+          },
+          "label": { "type": "string" },
+          "aliases": { "type": "array", "items": { "type": "string" } },
+          "properties": { "type": "object", "additionalProperties": true },
+          "worldId": { "type": "string" },
+          "epistemicStatus": {
+            "type": "string",
+            "enum": [
+              "established-science", "active-research", "speculative-theory",
+              "fringe-inspiration", "mythic-worldbuilding", "subjective-observation",
+              "implementation-task", "evidence-backed-finding"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Extraction confidence (0–1). Not a claim about physical truth."
+          },
+          "sourceSpan": {
+            "type": "object",
+            "description": "Where in the source this entity was found",
+            "properties": {
+              "start": { "type": "integer" },
+              "end": { "type": "integer" },
+              "excerpt": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "proposedEdges": {
+      "type": "array",
+      "description": "Typed relationships between nodes",
+      "items": {
+        "type": "object",
+        "required": ["fromId", "toId", "relation", "epistemicStatus"],
+        "properties": {
+          "fromId": {
+            "type": "string",
+            "description": "tempId (this proposal) or canonical node ID (existing graph)"
+          },
+          "toId": { "type": "string" },
+          "relation": {
+            "type": "string",
+            "description": "Typed relation. Examples: is-a, part-of, observes, corresponds-to, contradicts, measures, inhabits, authored-by, temporally-follows"
+          },
+          "worldId": { "type": "string" },
+          "epistemicStatus": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "sourceSpan": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "integer" },
+              "end": { "type": "integer" },
+              "excerpt": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "entityResolutions": {
+      "type": "array",
+      "description": "Proposed merges or cross-world correspondences. Must not silently merge across worlds.",
+      "items": {
+        "type": "object",
+        "required": ["candidateId", "canonicalId", "confidence"],
+        "properties": {
+          "candidateId": { "type": "string", "description": "tempId or existing node ID" },
+          "canonicalId": { "type": "string", "description": "The node this should resolve to" },
+          "isCrossWorld": {
+            "type": "boolean",
+            "description": "If true, this is a correspondence, not a merge. Separate nodes remain."
+          },
+          "worldNote": { "type": "string", "description": "e.g. Moon in waking-earth and moon in terra-aeterna are distinct nodes linked by correspondence" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "description": "Conflicts detected between extracted content and existing graph",
+      "items": {
+        "type": "object",
+        "required": ["description", "severity"],
+        "properties": {
+          "description": { "type": "string" },
+          "conflictingNodeIds": { "type": "array", "items": { "type": "string" } },
+          "severity": { "type": "string", "enum": ["minor", "significant", "critical"] },
+          "resolution": { "type": "string", "description": "Suggested resolution if any" }
+        }
+      }
+    },
+    "epistemicRegisters": {
+      "type": "array",
+      "description": "All claim registers present in this proposal",
+      "items": {
+        "type": "string",
+        "enum": [
+          "established-science", "active-research", "speculative-theory",
+          "fringe-inspiration", "mythic-worldbuilding", "subjective-observation",
+          "implementation-task", "evidence-backed-finding"
+        ]
+      }
+    },
+    "extractionModel": {
+      "type": "object",
+      "required": ["provider", "model"],
+      "properties": {
+        "provider": { "type": "string", "description": "anthropic | openai | ollama | local" },
+        "model": { "type": "string" },
+        "version": { "type": "string" },
+        "promptVersion": { "type": "string" },
+        "recipeId": { "type": "string", "description": "Agent recipe used" }
+      }
+    },
+    "extractedAt": { "type": "string", "format": "date-time" },
+    "reviewStatus": {
+      "type": "string",
+      "enum": ["pending", "accepted", "rejected", "needs-revision", "superseded"],
+      "default": "pending",
+      "description": "Set by Steward, never by the extracting agent"
+    },
+    "stewardReview": {
+      "type": "object",
+      "description": "Filled in by authorised Steward after review",
+      "properties": {
+        "reviewedBy": { "type": "string" },
+        "reviewedAt": { "type": "string", "format": "date-time" },
+        "note": { "type": "string" },
+        "commitId": { "type": "string", "description": "Graph commit ID after acceptance" },
+        "acceptedNodeIds": { "type": "object", "description": "tempId → canonical ID mapping" }
+      }
+    }
+  }
+}

@@ -146,7 +146,7 @@ In that reading:
 - Horizon shows the edge of the field.
 - Moonlight lays down harmonic rings.
 
-This is symbolic language for orientation, not a claim that the browser has secret access to a hidden world.
+This is the instrument's mythic language. It renders the present state — the browser is not reaching through to a hidden world.
 
 The mythic layer makes the model emotionally and narratively legible.
 

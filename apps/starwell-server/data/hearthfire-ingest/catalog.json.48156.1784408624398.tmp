@@ -1,0 +1,1357 @@
+{
+  "schema": "hearthfire.ingest-catalog/v1",
+  "litAt": "2026-07-18T20:04:13.244Z",
+  "documents": [
+    {
+      "id": "fd58fc79-fcd3-40fe-9ed9-9812c79df5a1",
+      "name": "rooms.json",
+      "extension": ".json",
+      "mimeType": "application/octet-stream",
+      "sha256": "b308bf8132864932fd0a4e98e1ba8a15e8bde2d1787a886d680039e8d1b63987",
+      "importedAt": "2026-07-18T20:04:13.249Z",
+      "bootstrap": true,
+      "source": {
+        "kind": "hearthfire-first-light",
+        "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\seed-data\\rooms.json",
+        "originalRetainedBy": "source-path"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "fd58fc79-fcd3-40fe-9ed9-9812c79df5a1.txt",
+        "pageCount": null,
+        "characterCount": 492,
+        "wordCount": 49,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "442465b5-4c14-446a-abad-1c60e9b6f124",
+      "name": "bridges.json",
+      "extension": ".json",
+      "mimeType": "application/octet-stream",
+      "sha256": "c7e00bea78d310687c213b14c6a0684926012285673c91580ab34b7dcde9e898",
+      "importedAt": "2026-07-18T20:04:13.253Z",
+      "bootstrap": true,
+      "source": {
+        "kind": "hearthfire-first-light",
+        "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\seed-data\\bridges.json",
+        "originalRetainedBy": "source-path"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "442465b5-4c14-446a-abad-1c60e9b6f124.txt",
+        "pageCount": null,
+        "characterCount": 326,
+        "wordCount": 31,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "2e414d81-e3bd-4450-a774-5837221fc0aa",
+      "name": "signals.json",
+      "extension": ".json",
+      "mimeType": "application/octet-stream",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "importedAt": "2026-07-18T20:04:13.257Z",
+      "bootstrap": true,
+      "source": {
+        "kind": "hearthfire-first-light",
+        "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\seed-data\\signals.json",
+        "originalRetainedBy": "source-path"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "2e414d81-e3bd-4450-a774-5837221fc0aa.txt",
+        "pageCount": null,
+        "characterCount": 2,
+        "wordCount": 1,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "492282cf-464c-41cf-92b9-e570a18d787c",
+      "name": "hearthgate-archive.example.json",
+      "extension": ".json",
+      "mimeType": "application/octet-stream",
+      "sha256": "8c27c9c8b34c08d65918b00bafe6206851c56b95d5531762b9fc97366f3fa821",
+      "importedAt": "2026-07-18T20:04:13.261Z",
+      "bootstrap": true,
+      "source": {
+        "kind": "hearthfire-first-light",
+        "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\public\\hearthgate-archive.example.json",
+        "originalRetainedBy": "source-path"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "492282cf-464c-41cf-92b9-e570a18d787c.txt",
+        "pageCount": null,
+        "characterCount": 1823,
+        "wordCount": 158,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "dc380bae-e6e9-4ab2-b01a-8aae9a8c7975",
+      "name": "hearthgate-archive.example.json",
+      "extension": ".json",
+      "mimeType": "application/octet-stream",
+      "sha256": "39c57404793a2d8ee02da5f8486fed0ff5c522cdbc2df33f5aa940c4fcad9014",
+      "importedAt": "2026-07-18T21:00:41.132Z",
+      "bootstrap": true,
+      "source": {
+        "kind": "hearthfire-first-light",
+        "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\public\\hearthgate-archive.example.json",
+        "originalRetainedBy": "source-path"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "dc380bae-e6e9-4ab2-b01a-8aae9a8c7975.txt",
+        "pageCount": null,
+        "characterCount": 1823,
+        "wordCount": 158,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "72d2b36c-fc9a-4ca2-a3a7-6fe996552587",
+      "name": "The Dreaming & Waking - 2026-07-18.md",
+      "extension": ".md",
+      "mimeType": "text/markdown",
+      "sha256": "1d9e32301ba27f381d34b8959a5cbffe7f9b230f96e6746ae7526f694d8cc98e",
+      "importedAt": "2026-07-18T21:02:00.900Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "72d2b36c-fc9a-4ca2-a3a7-6fe996552587.txt",
+        "pageCount": null,
+        "characterCount": 4144,
+        "wordCount": 662,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "86a6e924-ad1f-4d3a-8c40-1a459c652e8c",
+      "name": "Hearthweave Templhouse - 2026-07-18.md",
+      "extension": ".md",
+      "mimeType": "text/markdown",
+      "sha256": "cf5afa38cbbedd8afbd1c5e9c51167e5d0b1229dc932580786b59fb552c420ab",
+      "importedAt": "2026-07-18T21:02:00.932Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "86a6e924-ad1f-4d3a-8c40-1a459c652e8c.txt",
+        "pageCount": null,
+        "characterCount": 4656,
+        "wordCount": 678,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "4b8b9040-1f04-4b35-b72c-dfeb7c5cd05a",
+      "name": "Hearthweave Templhouse - 2026-07-18.html",
+      "extension": ".html",
+      "mimeType": "text/html",
+      "sha256": "92f86a9fd51daf075700daff338bb17eac4d727d87ac5d81fbfa4e0160c5a75d",
+      "importedAt": "2026-07-18T21:02:00.959Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "4b8b9040-1f04-4b35-b72c-dfeb7c5cd05a.txt",
+        "pageCount": null,
+        "characterCount": 4363,
+        "wordCount": 643,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "51969c4c-2709-4174-a38b-ce68e7d95440",
+      "name": "The Dreaming & Waking - 2026-07-18.html",
+      "extension": ".html",
+      "mimeType": "text/html",
+      "sha256": "68512c5831c92d27fb9c4c05bfbc80fb8374faab19372fb85f7d9f5de65d19e4",
+      "importedAt": "2026-07-18T21:02:00.980Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "51969c4c-2709-4174-a38b-ce68e7d95440.txt",
+        "pageCount": null,
+        "characterCount": 3918,
+        "wordCount": 626,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "ef0c57db-b2d2-4e04-98dd-389d1b6e838f",
+      "name": "Chat with Richie on Spicychat - 2026-07-18 (1).html",
+      "extension": ".html",
+      "mimeType": "text/html",
+      "sha256": "52abfd74d4899d3c231b529d3539d16cffb715329d167509ce05c3713a17960c",
+      "importedAt": "2026-07-18T21:02:01.006Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "ef0c57db-b2d2-4e04-98dd-389d1b6e838f.txt",
+        "pageCount": null,
+        "characterCount": 36878,
+        "wordCount": 5962,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "57134aef-3ae2-4a82-aeb0-951de10cc19b",
+      "name": "Chat with Archangel Gabriel on Spicychat - 2026-07-18.html",
+      "extension": ".html",
+      "mimeType": "text/html",
+      "sha256": "9827bd2fc74f749e0683a417d6c61725bacd20d694c4ac3d35690ba757724a1d",
+      "importedAt": "2026-07-18T21:02:01.038Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "57134aef-3ae2-4a82-aeb0-951de10cc19b.txt",
+        "pageCount": null,
+        "characterCount": 55636,
+        "wordCount": 8823,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "15469759-b2f1-416d-b36b-b91589c0843a",
+      "name": "Astral Projection.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "3dcb99e185b65e44fcdf8f7b447c9a5f7dcea5030efd8431e0985a3e69e2be75",
+      "importedAt": "2026-07-18T21:02:27.863Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "15469759-b2f1-416d-b36b-b91589c0843a.txt",
+        "pageCount": 1,
+        "characterCount": 2129,
+        "wordCount": 349,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "be8e1a42-3587-47f9-8869-5866bba7a5fb",
+      "name": "Death Magick For Adepts.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "1000ca4555dd71f0c00eb2ec2b002a272714b433040a3f9b2c69819699d4ebea",
+      "importedAt": "2026-07-18T21:02:27.984Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "be8e1a42-3587-47f9-8869-5866bba7a5fb.txt",
+        "pageCount": 2,
+        "characterCount": 2573,
+        "wordCount": 459,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "2d6fc633-502d-4afe-bd05-b2bfcabbbef9",
+      "name": "Death spells.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "472ce5b0965feca8c3b15101f215f782d8cf0e573146df79244b9fca0a667fec",
+      "importedAt": "2026-07-18T21:02:28.207Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "2d6fc633-502d-4afe-bd05-b2bfcabbbef9.txt",
+        "pageCount": 1,
+        "characterCount": 1318,
+        "wordCount": 258,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "eb2e4595-4b99-4437-8e33-0fc67f1fdeb5",
+      "name": "Demoniac Grimoire.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "72c15b5796f102b846aec6b4a6a276d674b29f722c5b0ee515f325b32fd1176a",
+      "importedAt": "2026-07-18T21:02:29.839Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "eb2e4595-4b99-4437-8e33-0fc67f1fdeb5.txt",
+        "pageCount": 128,
+        "characterCount": 152853,
+        "wordCount": 25005,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "4cbb30fc-f419-4c22-a731-930512317873",
+      "name": "Principles Of Dicordian Magick.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "873127e17dc23b91784a10b1e812bf645b612d493a961758f5f4013e3af69b2e",
+      "importedAt": "2026-07-18T21:02:30.098Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "4cbb30fc-f419-4c22-a731-930512317873.txt",
+        "pageCount": 6,
+        "characterCount": 10415,
+        "wordCount": 1739,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "e0617a78-fe2c-4c36-8170-4ec89095a4c7",
+      "name": "Rite Of Misraim.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "7cef2c98301eb4fe24406413289ca1d94914587cc06ef28def5f10578ab864e2",
+      "importedAt": "2026-07-18T21:02:30.433Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "e0617a78-fe2c-4c36-8170-4ec89095a4c7.txt",
+        "pageCount": 8,
+        "characterCount": 32551,
+        "wordCount": 5471,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "c700e987-d3af-424d-a45b-2280b36e419d",
+      "name": "The Book Of Alkhemi.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "81bbf9ba7a8511c9dac9ce578bf31fcea94d1715296405f63e154a32e54adacc",
+      "importedAt": "2026-07-18T21:02:30.539Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "c700e987-d3af-424d-a45b-2280b36e419d.txt",
+        "pageCount": 4,
+        "characterCount": 7536,
+        "wordCount": 1338,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "40dc6e35-94f3-4473-bb81-364a3ce6526c",
+      "name": "The Book Of Enoch.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "b4f2f5090e1a5237e95bc22ec36ad50aae5b76cc46b232e075fda2fc97edf2ad",
+      "importedAt": "2026-07-18T21:02:31.874Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "40dc6e35-94f3-4473-bb81-364a3ce6526c.txt",
+        "pageCount": 74,
+        "characterCount": 196084,
+        "wordCount": 37521,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "e64a5e6b-0bf9-4093-90a2-6895ac2f8a10",
+      "name": "The Greater ritual Of The Pentagra.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "575adc22970e49b7e2aa8c73625e7f1e74717d0115d23403d9ec7406f08572d3",
+      "importedAt": "2026-07-18T21:02:31.999Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "e64a5e6b-0bf9-4093-90a2-6895ac2f8a10.txt",
+        "pageCount": 3,
+        "characterCount": 3811,
+        "wordCount": 629,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "06032a4c-1ef6-4ac2-9cbe-7a250c2e1ed3",
+      "name": "Witchcraft And The Illuminati.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "dded0b93c02d9e2add05cb2847d694b1a4f078ad82818d1821d4017bd78dff71",
+      "importedAt": "2026-07-18T21:02:32.423Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "06032a4c-1ef6-4ac2-9cbe-7a250c2e1ed3.txt",
+        "pageCount": 11,
+        "characterCount": 31581,
+        "wordCount": 5854,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "a615a61d-5096-43cf-8f20-5e09cbe176fc",
+      "name": "A Devil_s Avatar.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "149109183707620e44610b45a2283a520cdf401c47197a4fed8b56a304c075c1",
+      "importedAt": "2026-07-18T21:02:46.706Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "a615a61d-5096-43cf-8f20-5e09cbe176fc.txt",
+        "pageCount": 39,
+        "characterCount": 96329,
+        "wordCount": 16033,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "95bacaf7-d51a-4df2-9b05-ff4fc3223af3",
+      "name": "A Manual Of Occultism.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "d732cf026339cc54b0f92581bb0ffa1c1f37d1b27d8ffce871f9f30b3b846eab",
+      "importedAt": "2026-07-18T21:02:49.041Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "95bacaf7-d51a-4df2-9b05-ff4fc3223af3.txt",
+        "pageCount": 237,
+        "characterCount": 430431,
+        "wordCount": 74609,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "f05e9646-d9fc-44c4-9eb2-fefe8ffad36f",
+      "name": "A Modified Hexagram Ritual For Enochian Workings(1).pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "e1a642b29950912315aed273dff655da2211b2d6e708304fd0b6516cea1f6dfd",
+      "importedAt": "2026-07-18T21:02:49.264Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "f05e9646-d9fc-44c4-9eb2-fefe8ffad36f.txt",
+        "pageCount": 11,
+        "characterCount": 27095,
+        "wordCount": 4505,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "1f01d506-d93a-4fa3-95c2-69b7d4cc0132",
+      "name": "A Practical Guide To Witchcraft And Magic Spells.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "5f8d3211eb9cb8c48720d16de5a0b0007aa7a48edea7ca0a0bff763fafb138f3",
+      "importedAt": "2026-07-18T21:02:51.752Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "1f01d506-d93a-4fa3-95c2-69b7d4cc0132.txt",
+        "pageCount": 283,
+        "characterCount": 597068,
+        "wordCount": 104313,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "e784c118-07da-4c8d-b736-28927ab950d6",
+      "name": "A Short Course In Scrying.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "e6f1f9bbf0dc97456b3575626f273a032d11001637b2239c758c575336938808",
+      "importedAt": "2026-07-18T21:02:52.367Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "e784c118-07da-4c8d-b736-28927ab950d6.txt",
+        "pageCount": 38,
+        "characterCount": 92612,
+        "wordCount": 16058,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "8ddbc1ad-de89-4f82-b26f-910ba8dae10b",
+      "name": "A True History Of Witchcraft.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "14b61a7b46381de6e45162ae546e4f0ecb9e2560d9bf4dfd057c3c60ac385fea",
+      "importedAt": "2026-07-18T21:02:53.114Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "8ddbc1ad-de89-4f82-b26f-910ba8dae10b.txt",
+        "pageCount": 25,
+        "characterCount": 66808,
+        "wordCount": 11439,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "e8c61a46-5d7a-4203-a0e3-3831ea7d6ee1",
+      "name": "Advanced Magick For Beginners.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "435ad307c5993a5b5278595c3e399ea55b3f220e820ad10b432947de81bd0040",
+      "importedAt": "2026-07-18T21:02:55.564Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "e8c61a46-5d7a-4203-a0e3-3831ea7d6ee1.txt",
+        "pageCount": 170,
+        "characterCount": 180128,
+        "wordCount": 31981,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "85fb22a8-7b56-4b7c-92ef-d2beead6d693",
+      "name": "An Analysis Of LaVey_s Early Writings.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "ced49f1e5b0a4db82b7680efa952d001b31d5062cd2c02172c87fd654add789c",
+      "importedAt": "2026-07-18T21:02:56.941Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "85fb22a8-7b56-4b7c-92ef-d2beead6d693.txt",
+        "pageCount": 19,
+        "characterCount": 71676,
+        "wordCount": 11123,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "024b3718-e029-4b9b-a238-dd2c17da425b",
+      "name": "Analisys Ot The Church Of Satan.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "8cb5d1ae132b67ecf8bd5779cfe476595f566b482ddce65ad6b43a1dc6087141",
+      "importedAt": "2026-07-18T21:02:57.708Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "024b3718-e029-4b9b-a238-dd2c17da425b.txt",
+        "pageCount": 30,
+        "characterCount": 134507,
+        "wordCount": 22478,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "7d568f05-77b1-4de6-9d21-6576ae4479d9",
+      "name": "Apikorsus  (Chaos Magick).pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "d928866c8c46a49393a3ef5ed7da6abae27e07933c26c133337a69d341a7f76e",
+      "importedAt": "2026-07-18T21:02:57.967Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "7d568f05-77b1-4de6-9d21-6576ae4479d9.txt",
+        "pageCount": 21,
+        "characterCount": 33188,
+        "wordCount": 5604,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "5009c864-d7c6-4c99-8b77-ddc4bf71e5ad",
+      "name": "Arbatel Of Magick.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "51668af4ab2c9b3bd8eea01afcd00a0bbedf330d26c003664799d8a8ff007ee1",
+      "importedAt": "2026-07-18T21:02:58.694Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "5009c864-d7c6-4c99-8b77-ddc4bf71e5ad.txt",
+        "pageCount": 36,
+        "characterCount": 74843,
+        "wordCount": 13299,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "d62ccbc9-254a-45a0-83d1-90f451daa5e4",
+      "name": "Ars Notoria.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "18a253141b97516b988716c93663cf5b307c0f1b47a45e9d8656ef8b4d4d3217",
+      "importedAt": "2026-07-18T21:03:00.051Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "d62ccbc9-254a-45a0-83d1-90f451daa5e4.txt",
+        "pageCount": 54,
+        "characterCount": 139678,
+        "wordCount": 24556,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "23c02058-c56b-403f-a4b6-8f6ea171e5f8",
+      "name": "Aspects Of Evocation.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "940587d58e94cc9bc3c294a5e03e02aaea6085e0cb469effc5fa7c0d0ec63d22",
+      "importedAt": "2026-07-18T21:03:00.802Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "23c02058-c56b-403f-a4b6-8f6ea171e5f8.txt",
+        "pageCount": 42,
+        "characterCount": 71429,
+        "wordCount": 11701,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "27f526b9-bfbd-4c2d-aa04-2f4224fd2999",
+      "name": "Black Magic Curses & Spells.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "5289631e46bbdeb08af7a376770bbcb4672599d8f01f0344fb6b487c4a505078",
+      "importedAt": "2026-07-18T21:03:00.990Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "27f526b9-bfbd-4c2d-aa04-2f4224fd2999.txt",
+        "pageCount": 8,
+        "characterCount": 14377,
+        "wordCount": 2754,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "547d69cc-57f5-4be0-b241-7ef774e6a4a3",
+      "name": "Book One Of Wicca.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "455fea939bc43864abe8050ea95b4e6d56f540f3507ce2102902385b51d042e5",
+      "importedAt": "2026-07-18T21:03:02.175Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "547d69cc-57f5-4be0-b241-7ef774e6a4a3.txt",
+        "pageCount": 62,
+        "characterCount": 255852,
+        "wordCount": 44639,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "9a6f7bf1-8c9b-4678-ba72-0be22de5bcec",
+      "name": "Chaos Magick (Oven-Ready).pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "87c4e080f4fe1261e86cab8a6b0eb554e4ca004902473f735df909344917bd30",
+      "importedAt": "2026-07-18T21:03:02.927Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "9a6f7bf1-8c9b-4678-ba72-0be22de5bcec.txt",
+        "pageCount": 68,
+        "characterCount": 94787,
+        "wordCount": 15660,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "054d6e1c-264c-4b18-b09d-35fc2651ae98",
+      "name": "Chaos Magick Theory.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "693b8c7e31cb9d047a3560ab88dc693802c9b2ca68de6e94bea987b0424164ee",
+      "importedAt": "2026-07-18T21:03:03.080Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "054d6e1c-264c-4b18-b09d-35fc2651ae98.txt",
+        "pageCount": 7,
+        "characterCount": 18009,
+        "wordCount": 3016,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "a2161a11-c649-4415-b742-d8d97d6d600a",
+      "name": "Chaos Sorcery.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "fb3e21c4055dc03ac2bf4e92959cd8eb03aca35316b57e61d1f712fd4c3751b3",
+      "importedAt": "2026-07-18T21:03:06.970Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "a2161a11-c649-4415-b742-d8d97d6d600a.txt",
+        "pageCount": 65,
+        "characterCount": 307283,
+        "wordCount": 53876,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "f2d8d057-53e6-4396-883d-14d69520a3a3",
+      "name": "Chaos Theory (And The Evolution Of Mind And Consciousness).pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "458e9cde95eafe903d1118415bcdf9981d53c08dd5253b8ca5ec3d3dba8c280a",
+      "importedAt": "2026-07-18T21:03:07.110Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "metadata-only",
+        "textFile": null,
+        "pageCount": 21,
+        "characterCount": 0,
+        "wordCount": 0,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "613b8983-0637-4fa9-82e2-514078af91f4",
+      "name": "31 Hymns To The Star Goddess.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "4c27bbed4a4e16998d5f61731d1ea1e152ce9144aac941caf53ed909e146ca30",
+      "importedAt": "2026-07-18T21:03:26.312Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "613b8983-0637-4fa9-82e2-514078af91f4.txt",
+        "pageCount": 33,
+        "characterCount": 24505,
+        "wordCount": 4733,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "06fe0ba4-db7e-4cab-bc95-251a0c3329d7",
+      "name": "101 Contradictions In The Bible.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "67041e7f8aeaec34673bc822d7fa5c8b02dfc4c35658d0321849208d201cb109",
+      "importedAt": "2026-07-18T21:03:26.534Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "06fe0ba4-db7e-4cab-bc95-251a0c3329d7.txt",
+        "pageCount": 21,
+        "characterCount": 22182,
+        "wordCount": 3971,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "32560fe4-7c1b-4bec-924d-2f475678939e",
+      "name": "Church Of Satan Informational Pack 1.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "c08b6568adf93f17d4f00f8b84e6d9c2020fc8384ad4bf4801178ff03d46d319",
+      "importedAt": "2026-07-18T21:03:27.080Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "32560fe4-7c1b-4bec-924d-2f475678939e.txt",
+        "pageCount": 54,
+        "characterCount": 109507,
+        "wordCount": 18383,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "ea2102f9-aa88-418c-9a92-f5e0feae00fb",
+      "name": "Church Of Satan Informational Pack 2.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "9443f8bd696587ff55f6e09712dabedd4027ed6474880d9f596a0c31d32e85a5",
+      "importedAt": "2026-07-18T21:03:28.038Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "ea2102f9-aa88-418c-9a92-f5e0feae00fb.txt",
+        "pageCount": 54,
+        "characterCount": 117409,
+        "wordCount": 19581,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "2485c924-71da-4814-a4bf-d89ccdfcc5d8",
+      "name": "Comselha (An Enochian Macrocosmic Ritual).pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "57e1fcf85b66c6ede5c942a9409b2c66ddfc75320b15c13cfa6dff2a29bf6281",
+      "importedAt": "2026-07-18T21:03:28.277Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "2485c924-71da-4814-a4bf-d89ccdfcc5d8.txt",
+        "pageCount": 13,
+        "characterCount": 24225,
+        "wordCount": 4143,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "f0296db7-f47b-4657-b9ac-f3de871d0d36",
+      "name": "Course Magic Of The Future.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "f20b9eab81677deea005aae2268aa6101a48f304a75c582bd3a8f29d2b0e2de1",
+      "importedAt": "2026-07-18T21:03:33.684Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "f0296db7-f47b-4657-b9ac-f3de871d0d36.txt",
+        "pageCount": 64,
+        "characterCount": 202878,
+        "wordCount": 34713,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "a23d3e20-9e56-4af0-9ca9-bcc400c6f478",
+      "name": "A Course In Lucid Dreaming.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "d023a6ea16f713f4891a171a098362394448e73ab8b1a4a4e3eb5a6c37b37109",
+      "importedAt": "2026-07-18T21:03:35.683Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "a23d3e20-9e56-4af0-9ca9-bcc400c6f478.txt",
+        "pageCount": 95,
+        "characterCount": 186642,
+        "wordCount": 33417,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "0e8558f2-a405-48cb-b311-ad36f7cbe1f3",
+      "name": "Alchemy (Ancient And Modern).pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "b46a62e78ad3e3525b210223e7d4a59f737575383822fb6f3ca3a635a9cd26b6",
+      "importedAt": "2026-07-18T21:03:37.271Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "0e8558f2-a405-48cb-b311-ad36f7cbe1f3.txt",
+        "pageCount": 104,
+        "characterCount": 260945,
+        "wordCount": 44875,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "4d6ba6d2-95e1-4b7a-af66-a4db72185ffd",
+      "name": "Amazing New Mind Power Secret.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "086b00b55f97dbcd9f389e730e9176d6ffa6abcaa5f7331483879ddd250b7751",
+      "importedAt": "2026-07-18T21:03:37.590Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "4d6ba6d2-95e1-4b7a-af66-a4db72185ffd.txt",
+        "pageCount": 5,
+        "characterCount": 8806,
+        "wordCount": 1647,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "a2450cea-e925-42a0-b2d8-b4022d5b5dff",
+      "name": "Demonographia.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "2684b0e40fb3e7cf501e38e8edf478bb063f0ff7e9cdd4c5c63cae5eb1eac6b2",
+      "importedAt": "2026-07-18T21:03:38.662Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "a2450cea-e925-42a0-b2d8-b4022d5b5dff.txt",
+        "pageCount": 30,
+        "characterCount": 1,
+        "wordCount": 1,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "1309086c-072c-4420-94d4-bb1222f85eb0",
+      "name": "An Astrological Judgement Touching Theft.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "e2ded308115c10ae4febe9a33415a645fd9560f21f3dd8a78c9bcdf9d3031c58",
+      "importedAt": "2026-07-18T21:03:39.243Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "1309086c-072c-4420-94d4-bb1222f85eb0.txt",
+        "pageCount": 36,
+        "characterCount": 62564,
+        "wordCount": 11818,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "ee1f75a3-a141-480d-8c2b-660d97c8d6af",
+      "name": "An Open Entrance.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "0c56246fcb6904fddfb8c040605f88d08c896ec16eadca2af809421c6d583cd2",
+      "importedAt": "2026-07-18T21:03:39.612Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "ee1f75a3-a141-480d-8c2b-660d97c8d6af.txt",
+        "pageCount": 20,
+        "characterCount": 82796,
+        "wordCount": 14619,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "6b2fef5a-c144-460a-b3cc-9cb46214861d",
+      "name": "Anathema Of Zos.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "f8a6be610156edcb7a5adcf1e01757a98bcce810883f3f1dd7bb311bf2689a75",
+      "importedAt": "2026-07-18T21:03:42.263Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "6b2fef5a-c144-460a-b3cc-9cb46214861d.txt",
+        "pageCount": 11,
+        "characterCount": 20394,
+        "wordCount": 3468,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    },
+    {
+      "id": "5bf8a115-1dbe-4410-a449-ca9594689779",
+      "name": "Dogma Et Rituel.pdf",
+      "extension": ".pdf",
+      "mimeType": "application/pdf",
+      "sha256": "f70841d689ac0a798a5e7830e85987616ae0931d1df3f635e70e247592e90303",
+      "importedAt": "2026-07-18T21:03:44.365Z",
+      "bootstrap": false,
+      "source": {
+        "kind": "user-upload",
+        "path": null,
+        "originalRetainedBy": "user-archive"
+      },
+      "extraction": {
+        "status": "complete",
+        "textFile": "5bf8a115-1dbe-4410-a449-ca9594689779.txt",
+        "pageCount": 123,
+        "characterCount": 323993,
+        "wordCount": 55891,
+        "ocr": {
+          "status": "not-needed"
+        },
+        "warnings": []
+      }
+    }
+  ],
+  "updatedAt": "2026-07-18T21:03:44.365Z"
+}

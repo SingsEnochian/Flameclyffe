@@ -73,6 +73,18 @@ export function normaliseProject(project) {
     ...source,
     schemaVersion: GLYPH_PROJECT_SCHEMA,
     glyphs,
+    kerningPairs: (Array.isArray(source.kerningPairs) ? source.kerningPairs : []).map((pair) => ({
+      id: pair.id || makeId('kern'),
+      leftGlyphId: String(pair.leftGlyphId || ''),
+      rightGlyphId: String(pair.rightGlyphId || ''),
+      value: Math.max(-1000, Math.min(1000, Number(pair.value || 0))),
+    })),
+    ligatures: (Array.isArray(source.ligatures) ? source.ligatures : []).map((rule) => ({
+      id: rule.id || makeId('liga'),
+      feature: ['liga', 'dlig', 'rlig'].includes(rule.feature) ? rule.feature : 'liga',
+      inputGlyphIds: (Array.isArray(rule.inputGlyphIds) ? rule.inputGlyphIds : []).map(String),
+      outputGlyphId: String(rule.outputGlyphId || ''),
+    })),
     activeGlyphId: glyphs.some((glyph) => glyph.id === source.activeGlyphId) ? source.activeGlyphId : glyphs[0].id,
     updatedAt: new Date().toISOString(),
   };

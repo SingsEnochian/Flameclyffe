@@ -1,0 +1,662 @@
+Liber Primus – Notes and Translations
+(Notes and tranlsations copyright © 1999 Raymond and Susan Drewry. Page numbers
+refer to Clay Holden’s transcription; taking Page 1 as the first page of Dee’s text after the
+Anno 1581:1582 Mysteriorum Liber Primus title page.)
+Page 1
+Praeter alias meas extemporaneas preces, et ejaculationes ad Deum vehementiores: Haec
+una, maxime usitata fuit
+Oratio mea Matutina, Vespertinaque: pro Sapientia.
+Among my other extemporaneous prayers and most fervent outpourings to God:
+this one was most customarily used. My Morning and Evening Prayer: for
+wisdom.
+In nomine Dei Patris, Dei Filii, Dei Spiritus Sancti Amen
+In the name of God the Father, God the Son and God the Holy Ghost. Amen
+“In Nomine Dei Patris…”
+Dee implies (here and elsewhere) that he started all his Actions with the prayers on this page. This
+particular phrase is the standard Western Christian formula for marking the ritual start of an
+Office, Service, or other ceremony or rite. It is also used within a service to mark a change of
+focus or as a section boundary. As an example of the former, it is used at the start of the Mass,
+and after it is said the priest is instructed to ignore anything else going on in the church, even the
+elevation of the Host at another Mass. As an example of the latter, it is used in the Anglican rite to
+introduce the sermon or homily.
+Omnipotens, Sempiterne, vere, et vive Deus, in adiutorium meum intende: Domine
+Dominantium, Rex Regum, Jeovah Zebaoth, ad adiuvandum me festina:
+Gloria Deo, Patri, Filio, et spiritui Sancto: Sicut erat in principio, et nunc, et semper et in
+saecula saeculorum: Amen.
+Almighty, Everlasting, True and Living God, make haste to deliver me. Lord of
+Lords, King of Kings Jehovah Zebaoth, make haste to help me.
+Glory be to God, Father, Son and Holy Ghost: As it was in the beginning, is now
+and forever, world without end: Amen.
+Translator’s Note: ‘semper et in saecula saeculorum” is generally given in English translations as
+“forever, world without end” or “for ever and ever.” Literally, it is “always, unto an Age of
+Ages”, and is done in imitation of a Hebrew idiom.
+“Omnipotens…Amen”
+Christian communal life (monastic and secular) was, until the Reformation, built around the Daily
+(or Divine) Office, a series of eight liturgical services centered on the recitation of psalms and
+prayers. It was also common for individuals to structure their private devotions around parts of
+the Office.
+Almost every service of the Daily Office opened with the psalm verse “Deus ad adiuvandum me
+festina”, followed by the lesser doxology. (The exception was Matins, the first service of the day,
+
+where “Deus ad adiuvandum” usually came as the second element.) See the notes below for
+details of the psalm and the doxology.
+The elaboration of the simple biblical “God” to a longer list of names and attributes is a cabbalistic
+practice, detailed by Reuchlin and Agrippa. See, for example, the works cited in the discussions
+of PELE and NA later in Liber Primus.
+The daily office ended with a simple “Benedicamus Domino” (“Let us bless the Lord.”) Every
+Action in Liber Primus is closed with a more elaborate blessing (e.g. the doxology, Soli Deo
+honor omnis, “Glorie, thanks, and honor be unto the Almighty Trinitie”, etc.)
+Thus, Dee not only marked out his ritual time and space using the same formula a religious service
+would use (see note on “In nomine” above), but also began the Actions with the standard
+introductory formula from the daily cycle of prayer and devotion, and ended each one with an
+elaboration of the traditional closing.
+“Ad adiuvandum me festina” – Ps 69:2 (Vulgate), Ps 70:1 (English Bibles)
+Vulgate ex Septuaginto: Deus in adiutorium meum intende Domine ad adiuvandum me festina;
+Vulgate ex Hebraeo: Deus ut liberes me, Domine ut auxilieris mihi festina
+BCP: Haste thee, O God, to deliver me: make haste to helpe me, O Lord.
+Geneva Bible: O god, haste thee to deliver me: make haste to helpe me, O Lord.
+KJV: Make haste, O god, to deliver me; make haste to help me O LORD
+“Gloria…”
+This is the short doxology, generally used after psalms, hymns, and canticles. Generally, though,
+it begins “Gloria Patri” rather than “Gloria Deo, Patri.”
+Recte sapere, et intelligere doceto me, (o rerum omnium Creator,) Nam Sapientia tua,
+totum est, quod volo: Da verbum tuum in ore meo, (o rerum omnium Creator,) et
+sapientiam tuam in corde meo fige.
+Teach me to know aright and to understand (O Creator of all things) for thy
+wisdom is all that I desire. Give thy word in my mouth (O Creator of all things)
+and fix thy wisdom in my heart.
+“Fige” Note that figo is also the word used for driving nails.
+O Domine Jesu Christe (qui sapientia vera es, aeterni et Omnipotentis
+tui Patri) humilime tuam oro Divinam Majestatem, expeditum
+mihi ut mittere digneris, alicuius pii, sapientis expertiquie, Philosophi
+auxilium, ad illa plenissime intelligenda perficiendaque, quae maximi
+valoris erunt ad tuam laudem et gloriam amplificandam: Et si
+Mortalis nullus iam in terris vivat, qui ad hoc munus aptus sit: vel
+qui ex aeterna tua providentia, ad istud mihi praestandum beneficium
+assignatus fuerit: Tunc equidem humilime, ardentissime et constan-
+tissime a tua Divina Majestate requiro, ut ad me de caelis mittere
+digneris bonos tuos Spirituales Ministros, Angelosque, videlicet Mi=
+chaelem, Gabrielem, Raphaelem ac Urielem: et (ex Divino tuo
+favore) quoscunque, alios, veros, fidelesque tuos Angelos, qui me plene
+et perfecte informent et instruant, in cognitione, intelligentiaque
+
+vera et exacta, Arcanorum et Magnalium tuorum (Creaturs omnes
+tuas, illarumque naturas, proprietates, et optimos usus, concernentium)
+et nobis Mortalibus scitu necessariorum; ad tui nominis laudem,
+honorem, et gloriam; et ad solidam meam, aliorumque (per me,) plurimorum
+tuorum fidelium consolationem: et ad Inimincorum tuorum confusionem,
+et subversionem. Amen.
+O Lord Jesus Christ (who art the true wisdom of thine eternal and almighty
+Father), I most humbly beseech thy Divine Majesty, that thou deignest to send me
+the speedy aid of some pious, wise and expert philosopher for the complete
+understanding and accomplishing of that which will be of the greatest worth for
+the increase of thy praise and glory: And if there should be no Mortal now living
+on earth who might be fitting for this gift, or who by thy divine providence might
+be assigned to the fulfillment of this my prayer, then equally most humbly, most
+ardently and most constantly, I request from thy Divine Majesty that thou
+deignest to send to me from the heavens thy good Spiritual Ministers and Angels,
+which is to say, Michael, Gabriel, Raphael and Uriel: and (out of thy Divine
+favor) whatever other true and faithful of thy Angels, who might completely and
+perfectly inform and instruct in the knowledge and in the true and exact
+intelligence of thy Secrets and Miracles (concerning all thy Creatures and their
+natures, properties and best uses) the understanding of which is necessary to us
+Mortals; to the praise, honor and glory of thy name and to my thorough
+consolation and (through me) that of many others of thy faithful, and to the
+confusion and subversion of thine enemies. Amen.
+“Spirituales”
+“Spirituales” has senses of form (as in spiritual beings – i.e. Angels) and function (as in ‘Spiritual
+Father’, when applied to a priest.)
+Fiat Jeovah Zebaoth: Fiat Adonay,
+Fiat Elohim. O beata, et superbenedicta Omnipotens
+Trinitas, Concedas mihi (Joanni Dee) petitionem hanc, modo tali , qui tibi maxime
+placebit.
+Amen
+Let it be so, Jehovah Zebaoth: Let it be so Adonai, let it be so Elohim. Oh Holy
+and Surpassingly Blessed Almighty Trinity, May you grant me (John Dee) this
+petition in the way that is most pleasing to you. Amen.
+“Fiat” “Let it be so" is one translation of "Fiat" which may have many translations. This one was chosen
+for its resemblance to "Fiat Lux" commonly translated "Let there be light". Alternative
+translations for "Fiat" are “May it be so" and "Make it so.”
+Ab anno 1579. hoc fere modo: Latine, vel Anglice; (ast circa annum 1569 alio et
+peculiari, particulari modo: interdum pro Raphaele, interdum pro Michaele) ad Deum
+
+preces fundere: mihi gratissimum fuit:
+Mirabilem in me faciat Deus Misericordiam suum.
+Amen.
+From the year 1579, it was done in this way: in Latin and in English; (but around
+the year 1569 in another and peculiar, particular way: sometimes for Raphael,
+sometimes for Michael. To pour prayers out to God: this was most pleasing to me.
+May God bring forth his marvelous mercy in me. Amen.
+John Dee His Note (Page 2)
+Angelus sive Intelligentia, nunc toti mundo praedominens
+The Angel or Intelligence now ruling over the whole world.
+“Intelligentia”
+In a theological sense intelligentia is a ‘a non-corporeal Being or Intelligence’, and is commonly
+used for angels and spiritual beings. Agrippa, Ficino, and Aquinas use it in this sense.
+‘Intelligentia’ can also be a ‘rational activity, rational comprehension’, in a more philosophical
+than theological way (also used by Aquinas and various neoplatonizing Christians.) Here, it is
+easy to opt for the former meaning, though in Liber Tertius the choice is not so clear.
+“Annael praedominens”
+Oddly enough, Trithemius in his De Septem Secundeis (also called Chronologia Mystica) says
+that Gabriel is the Angel currently (in 1582) presiding over the world. Annael is problematic in
+other ways as well. (See below.)
+Etymologia: {Gratiosa/Afflicta} misericors Dei
+Etymology: The Gracious/Afflicted Merciful … of God.
+Translator’s Note: This is a little problematic, since there is no noun here. (The four other Angels
+in the Note are all described with nouns.) It could be, for instance, the “merciful nature” or
+“merciful things” of God. “Gratiosa/afflicta” can be explained in Christian terms, in which God’s
+mercy is both gracious (in many senses of the word) and suffering (because of the Passion and
+Death of Christ.)
+4 Angeli praesidentes 4 Cardinibus Caeli: ut Agrippa notat in scala Quarternarii.
+4 Angels presiding over the 4 cardinal points of Heaven, as Agrippa notes in his
+scale of fours.
+“scala Quarternarii”
+Note that this reads “scale of fours”, not “scale of four”. This is translated “The Scale of the
+Number of Four” in James Freake’s edition of 1651. The table can be found in Agrippa, De
+Occulta Philosophia, II.7
+Etymologiae --
+Etymologies --
+Fortitudo Dei
+The Strength of God
+Praevalescentia -- sive praepotentia -- sive Fortitudo Praevalesecens -- Dei
+
+The growing strong -- or the great power -- or the Prevailing Strength -- of God
+Medicina Dei
+The Medicine of God
+Lux Dei
+The Light of God
+Anna, et Annah, obsecrantis, et confitentis particula est. Hac ratione, non absurde
+innuere videtur, Orantem et confitentem Deum.
+Anna, and Annah, is a particle of one beseeching or acknowledging. By this
+reason, it is seen, not absurdly, to signify praying to and acknowledging God.
+Translator’s Note: “Confiteor” is more commonly translated “confess”, as in “confess the strength
+of Christ crucified”. “Acknowledge” was chosen instead as it might be less ambiguous to a
+modern reader.
+“ratione”
+For expanding “roe” to “ratione”, see Dizionario di Abbreviature latine ed italiane. Other editors
+have taken the text as “coe”, which has no satisfactory expansion.
+First Page of text after prayer (Page 3)
+Ad Deum Omnipotentem Protestatio fidelis:
+ad pertetuam rei memoriam Anno 1582
+A faithful declaration to Almighty God for the perpetual memory of the event(s)
+in the year 1582.
+Translator’s Note: In more modern English, this might read “I swear to Almighty God that this is
+an accurate account of what happened in 1582”. Also, the phrase “Protestatio fidelis” might make
+one think of Dee as a faithful Protestant, but this is a mere hint or interpretation and not a literal
+rendering.
+Si quis autem vestrum indiget sapientia, postulet a Deo etc.
+For if any of you is in need of wisdom, let him ask of God, etc.
+“Si quis…” – James 1:5
+The text in the microfilm of Sloane 3188 may have a dot over the final “a” or it may not. If it
+does, this would then read “sapientiam”, which is also grammatically correct, and the reading in
+the Vulgate.
+Vulgate: si quis autem vestrum indiget sapientiam postulet a Deo qui dat omnibus affluenter et
+non inproperat et dabitur ei.
+KJV: If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and
+upbraideth not; and it shall be given him.
+Geneva Bible: If any of you lacke wisdome, let him aske of God, which giveth to all men liberally,
+and reprocheth no man, and it shall be given him.
+Mittas lucem tuam et veritatem tuam, que me ducant etc.
+
+Send forth thy light and thy truth, which may lead me, etc.
+“Mittas lucem…” Psalm 42:3 (Vulgate), Psalm 43:3 (English Bibles)
+Though this echoes Psalm 42:3 in the Vulgate (Ps 43:3 in the English Bibles and Psalter), it is not
+an exact quotation.
+Vulgate ex Septuaginto: emitte lucem tuam et veritatem tuam ipsa me deduxerunt et adduxerunt
+in montem sanctum tuum et in tabernacula tua
+Vulgate ex Hebraeo: mitte lucem tuam et veritatem tuam ipsae ducent me et introducent ad
+montem sanctum tuum et ad tabernaculum tuum
+BCP: Oh sende out thy light and thy trueth, that they may leade me: and bring me unto thy holy
+hill, and to thy dwelling.
+Geneva Bible: Sende thy light and thy trueth: let them leade me: let then bring me unto thine holy
+Mountaine and to thy Tabernacles.
+KJV: O send out thy light and thy truth: let the lead me; let them bring me unto thy holy hill, and
+to thy tabernacle.
+Recte Sapere et Intelligere doceto me, Nam sapientia tua totum est quod volo,etc.
+Teach me to know well and to understand for thy wisdom is all that I desire, etc..
+Da verbum tuum in ore meo, et sapientiam tuam in corde meo fige, etc.
+Give thy word in my mouth and fix thy wisdom in my heart.
+Translator’s Note: “Give thy word in my mouth, and thy meditation in my heart” is used by some
+traditionally-minded Episcopalian and Anglican priests before officiating at Holy Communion.
+Page 4
+Castra metatur Angelus Domini, in Circuitu timentium eum,...
+The Angel of the Lord measures out his camp, encircling those that fear him, ....
+“Castra metatur” – Psalm 33:8 (Vulgate); Psalm 34:7 (English)
+Ex Septuaginto: vallabit angelus Domini in circuitu timentium eum et eripeit eos
+Ex Hebraeo: circumdat angelus Domini in gyro timentes eum et eruet eos.
+BCP: The Angel of the Lord tarieth round about them that feare him: and delivereth them.
+KJV: The angel of the LORD encampeth round about them that fear him, and delivereth them.
+Geneva Bible: The Angel of the Lord pitcheth round about them, that feare him, and deliuereth
+them.
+Dee’s version is slightly different from either of these. “Metatur” has the sense of surveying or
+measuring out an area, unlike either ‘circumdat’ or ‘vallabit.’ The more precise word is
+consonant with the angelically directed mathematical construction and subdivision of the Sigillum
+Aemeth in the second book. It could also be that Dee the mathematician found the surveying term
+more congenial than the less technical wordings in the Vulgate.
+De mirabili potestate Artis et Naturae.
+Concerning the miraculous power of Art and Nature.
+Facilius (sine comparatione) a Deo impetrandum foret, vel a bonis spiritibus, quicquid
+homini utile reputare etc.
+Whatever is considered useful to man is more easily (immeasurably so) entreated
+from God, or from good spirits, etc.
+
+“Facilius….”
+The Bacon work is variously titled Epistola Fratris Rogerii Baconis de Secretis Operibus Artis et
+Naturae, et de Nullitate Magiae or Epistola Rogerii Bacon de Potestae Artis et Naturae. Dee gives
+yet a third notion of the title. (I have picked and chosen the manuscript variants that most closely
+match Dee’s text. One of Dee’s copies seems to have embodied a state of the text not otherwise
+known – see Roberts and Watson, p. 62, and their notes on catalog numbers D4 and DM163. One
+wonders whether Dee’s text was lacking de Nullitate Magiae -- “on the Nullity of Magic”, or
+whether he suppressed the thought.)
+Et adhuc erratur, quando per invocationes, et deprecationes, et sacrificia nituntur homines
+eos placare et adducere pro utilitate vocantium; facilius enim sine comparatione a Deo
+impetrandum foret, vel a bonis spiritibus, quicquid homini debet utile reputare.
+And still it is mistaken, when men strive, through invocations and prayers and sacrifices,
+to please and persuade them for the benefit of the callers; for it is incomparably easier to
+obtain from God, or from good spirits, anything which ought to be deemed useful for
+man.
+Whitby (p 202-23) cites a 1659 English translation Frier Bacon his Discovery of the Miracles of
+Nature, and Magick, about which he notes “This edition bears the notice on the title-page that it
+has been ‘faithfully translated out of Dr. Dee’s own copy, by T.M.” The translation could just as
+well have been made out of the Froben edition of 1618, which also claims to be taken from Dee’s
+copy – see Roberts and Watson above.
+without all question the way is incomparable more easie to obtain any thing, that is truly
+good for men, of God, or good angels, then of wicked Spirits” (pp.3-4)
+Numquid non est Deus in Israel, ut eatis ad consulendum Beelzebub deum Accaron.
+Reg. 4 cap. 1
+Is it not because there is not a God in Israel, that you go to consult Beelzebub, the
+god of Accaron? II Kings , 1:3
+“numquid…” – IV Malachim 1:3 (Vulgate); II Kings 1:3 (KJV, Geneva)
+Vulgate: numquid non est Deus in Israhel ut eatis ad consulendum Beelzebub deum Accaron
+KJV: Is it not because there is not a God in Israel, that ye go to enquire of Baal-zebub the god of
+Ekron?
+Geneva Bible: Is it not because there is no God in Israel, that ye goe to enquire of Baal-zebub the
+god of Ekron?
+Dee is just adding biblical support to the Bacon text – the children of Israel only consult a false
+god because they no longer know their own God.
+Various editions of the Vulgate call the book of Kings ‘Malachim’ (borrowed from the Hebrew) or
+‘Regum’ (more strictly Latin.)
+Page 5
+Anno 1581 Decembris 22. Mane
+1581, December 22. In the morning.
+In Nomine Jesu Christi, Quis tu es?
+In the name of Jesus Christ, who are you?
+Potestas omnis, in me sita est.
+
+All power is centered in me.
+Quae?
+Which?
+Bona, et mala.
+Good, and Evil.
+“Bona, et mala”
+Genesis 3:5
+Vulgate: et eritis sicut dii scientes bonum et malum
+Geneva Bible, KJV: and ye shall be as gods, knowing good and evil
+de Thesauro abscondito:
+concerning the hidden Treasure:
+Ne perturbes: Nam hae sunt Nugae.
+Be not troubled: for these are trifles.
+Ubi est potestas tua?
+Where is your power?
+Cur quaeris de postestate aliqua mea?
+Why do you inquire of any power of mine?
+Cur? Signifi, non mihi placet.
+Why? Show it, I am not pleased.
+“Cur? Signifi…”
+By attempting to turn divert Dee’s questions back on to Dee himself, and by challenging Dee’s
+authority, Annael is conforming to the standard recorded behavior of summoned beings from
+classical times through to the 19th century. Dee does not succumb to the diversion, or give in to
+the threats.
+An bonus aliquis Angelus, assignatus est huic speculo?
+Is some good Angel assigned to this mirror?
+Etiam.
+Even so.
+Quis?
+Who?
+Bonus ne ille Angelus, de quo in scripturis fit mentio
+Is it not that Good Angel of whom mention is made in the scriptures?
+“in scripturis fit mentio”
+
+There are many scriptural references to Michael the Archangel , e.g. Jude I:9 and Rev. 12:7 . The
+Michael referred to in the Book of Daniel 10:13, 10:21 and 12:1 is also probably the Archangel,
+though he is referred to only as a “great prince” (KJV) or “unus de princibus primis” (Vulgate.)
+See following note on “princeps.”
+Maxime.
+Most Certainly.
+Fieri ne potest, quod ego eundem videam, et cum illo agam?
+Can it be that I might see that one and deal with him?
+“agam”"Do" or "have doing" or "traffic" are all possible translations for “agam.” Dee uses “deal” to
+describe his actions with spirits in other places, e.g. “I have byn long at this time, in my dealing
+with you” at the end of the last Action in Liber Primus.
+Ita.
+Yes
+Quid per hoc, significare velis?
+What do you wish to signify through this?
+Alterius Angeli character est.
+It is the character of another Angel.
+Cur hic, et nunc ostendis?
+Why do you show this here and now?
+Causam ob magnam.
+For a great purpose.
+Page 6
+“Pray contynually”
+I Thessalonians V:17
+Gloria patri et filio et spiritui sancto, sicut erat in principio et nunc et semper: et in
+saecula saeculorum. Amen
+Glory be to the father and to the son and to the holy ghost as it was in the
+beginning, is now and forever world without end. Amen
+“Gloria patri…”
+This is exactly the lesser doxology, without the extra Deo between Gloria and patri. See the note
+on the introduction to the opening prayer.
+Annael....praepositus orbis veneris
+Annael.....in charge over the sphere of Venus
+Translator’s Note: “Praepositus” is literally ‘placed over’ or ‘set over’, but can also mean a chief
+or commander. In classical Latin, it is used for the governor of a province.
+
+Annael See Trithemius, De Septem Secundeis §2.
+In Agrippa, De Occulta Philosophia, this Angel is named Haniel. (See for instance the tables in
+II.10 and II.12, and III.10 ‘Of Divine Emanations’.)
+Annael/Haniel/Anael is problematic in both primary and secondary sources. The attribution to
+Venus is constant in Agrippa, and seems likely in Picatrix III.ix.23, but the spelling, derivation,
+and meaning of the name seem obscure. A Dictionary of Angels claims that Annael and Haniel
+are synonymous, but gives very different descriptions under the two names. See also the
+difficulties with the etymology given in “John Dee His Note” above.
+Anno 1582 Novembris 20. -- Vide post
+In the year 1582, November 20 -- see what follows
+Page 7
+In nomine Jesu Christi Amen
+In the name of Jesus Christ Amen
+Marti die .10. hora 11 ¼ Ante Meridiem
+In the year 1582 the 10th day of March, 11:15 am.
+Aliqui Angeli boni
+Some good Angels
+Michael est princeps in operibus nostris
+Michael is first in our works
+Translator’s Note: “Princeps” is a heavily loaded word -- “first (in time or in precedence)”, “pre-
+eminent”, “leader”, “originator”, “prince”, are all possible renderings.
+“Soyga”
+Could be seen as ‘αγιοσ (Greek for “holy”) backwards.
+“my boke, of Soyga”
+Dee’s Book of Soyga is probably Sloane 8, with the inscription “Aldaraia, sive Soyga vocor”; this
+incipit matches Ashmole’s description of Dee’s book. It contains astrology and demonology; the
+‘tables’ which so interested Dee are algorithmically generated, and of unknown use. They could
+be cryptographic, for instance, or for use in generating magical apparatus or rites. Please see Jim
+Reeds’ paper for details.
+Ur: Liber ille, erat Adae in Paradiso revelatus per Angelos Dei bonos.
+That book was revealed to Adam in paradise by the good Angels of God.
+Ur. ...solus Michael illius libri est interpretator.
+Only Michael is the interpreter of that book.
+Ur. Praesentias nostras postulate et invocate, sinceritate et humilitate. Et Anchor,
+Anachor, et Anilos, non sunt in hunc Lapidem Invocandi
+
+Ask and invoke our presences with sincerity and humility. And Anchor, Anachor,
+and Anilos are not to be invoked into this stone.
+Ur. Haec maxime respiciunt Michaelem. Michael est Angelus,
+qui illuminat gressus tuos. Et haec revelantur in virtute et veritate non vi.
+These things most of all are the concern of Michael. Michael is the Angel who
+illuminates your steps. And these things are revealed in virtue and truth, not
+force.
+Translator’s Note: Here vis is “force”, to avoid confusion with fortitudo (”strength.”)
+Ur. Omnis hora, est hora nobis.
+Every hour is our hour.
+(in margin) Libri Quinti Appendice
+In the Appendix of the fifth book
+Page 8
+Sigillum hoc in auro sculpendum ad defensionem corporis, omni loco, tempore et
+occasione: et in pectus gestandum.
+This seal is to be graven in gold for the defense of the body at every time, place
+and occasion: and is to be worn on the breast.
+∆: Soli Deo Honor omnis, et gloria. Amen.
+To God alone all honor and glory. Amen.
+Hora 5
+At the Fifth Hour
+“the Seven psalmes”
+The seven penitential psalms are
+(Vulgate) 6, 31, 37, 50, 101, 129, 142
+(English) 6, 32, 38, 51, 102, 130, 143
+Page 9
+Sigillum Divinitatis Dei
+Seal of the Divinity of God
+(in margin) Erronice contra ignorantiam meam vide post
+Mistakenly, against my ignorance. see what follows.
+“AGLA”
+Nortaricon for ‘Ateh Gebir Leilam Adonai ‘– “Thou art mighty forever, O Lord.”
+See Agrippa, De Occulta Philosophia III.xi.
+
+Cave: quia angelus tenebrarum se intrusit hic ut libri Quinti appendice apparabit.
+Beware: For an angel of darkness intruded himself here as will appear in the
+appendix of the Fifth book.
+(On the table)
+In fronte
+On the forehead
+A sinistro A dextro
+On the left on the right
+juxta pectus
+next to the breast
+Directions regarding the table
+These markings make most sense for someone resting or lying on the table. They would work
+well if one were to kneel before it and then fall forward (in fear, supplication, exhaustion, etc.)
+Page 10
+Gloria Patri et filio et Spiritui Sancto sicut, etc. Amen.
+Glory be to the Father and to the son and to the Holy Ghost as, etc. Amen
+1582 Martii 11 Sonday a Meridie hora 3a circiter
+1582 March 11 Sonday from noon about the third hour
+Translator’s Note: i.e., about 3:00 PM
+Page 11
+Gloria, Laus, honor, virtus et Imperium Deo immortali invisibili, et Omnipotenti, in
+saecula saeculorum. Amen.
+Glory, praise, honor, power and Dominion to immortal, invisible and Almighty
+God, forever and ever. Amen.
+Page 12
+Marti11 14 Wensday mane circa horam 9a
+March 14 Wednesday, in the morning about the 9th hour.
+(in margin) Agrippa hath so, cap. 24, Lib. 3, Occultae Philosophiae
+(in margin) Agrippa has so, in chapter 24, Book 3, of The Occult Philosophy
+“Nariel”
+Agrippa, in De Occ Phil III.24 gives a long compilation of things (mansions of the moon, signs of
+the zodiac, ages of the world, planets, etc) and the angels that preside over them. In particular,
+Noriel (qui ab aliis Uriel dicitur) super australem.
+Noriel (by others called Uriel) over the south (i.e. wind and quarter.)
+Fortitudo Dei, tecum semper est.
+The strength of God is always with you.
+
+(In margin) potius erat dicendum Michael: nam Gabriel est Praevalescentia Dei: et ita,
+fortitudo quidem, sed altioris gradus
+Perhaps Michael should have been said: for Gabriel is the prevailing of God: and
+thus, the same strength, but of a higher grade.
+Page 13
+ANGELVS TVAE PROFESSIONIS.
+The Angel of your profession.
+Translator’s Note: “Professio” is the technical term for a declaration of a vocation, e.g. a
+profession of faith, as when one takes holy orders. See note on “de Triplici hominis custode”
+below.
+(In margin) vide Agrippam de Triplici hominis custode, Lib 3, cap 22
+see Agrippa “On the Three-fold Guardian of Man”, Book 3, Chapter 22
+“de Triplici hominis custode”
+This is the title of Agrippa, De Occulta Philosophia III.22, which begins
+Triplex unicuique homini demon bonus est proprius custos: unus quidem sacer, alter
+geniturae, tertius professionis.
+For every man there is a threefold good spirit as a proper keeper: one holy, another of the
+nativity, the third of profession.
+The first spirit is similar to the concept of “guardian angel”, the second sprit is like the Classical
+concept of “Genius” or a person’s innate (and astrologically influenced) spirit or potential, and the
+third is the spirit of one’s profession, path, etc. There is happiness when the second and third are
+in agreement, and unhappiness when they are not.
+Book III, chapter 23 of Ficino’s De Vita Libri Tres is about making Genius and Profession agree.
+Dee owned a copy of this work.
+Laudate Dominum in operibus suis.
+Praise the Lord in his works.
+“Laudate…” – Sirach 39: 19 (Vulgate); Ecclesiasticus 39:14 (English)
+Vulgate: florete flores quasi lilium date odorem et frondete in gratiam et conlaudate canticum et
+benedicite Dominum in operibus suis
+KJV apocrypha: And give ye a sweet savour as frankincense, and flourish as a lily, send forth a
+smell, and sing a song of praise, bless the Lord in all his works
+Geneva: And give ye a sweete smel as incense, and bring forth flowres as the lilie: give a smel,
+and sing a song of praise: blesse the Lorde in all his workes.
+(In margin) vide Reuchlinum de Verbo Mirifico, de nomine NA
+see Reuchlin “On the Marvellous Word”, concerning the name NA
+“NA” Reuclin de verbo mirifico, II, sig e6v, (Stuttgart facsimile p 72)
+Et sequitur: Nequaqum Jacob appellabit nomen tuum sed Israel: quoniam cum deo &
+homine praevaluisti: Ut est item vocabulum Na: quod in animi molestia
+
+turbationibusquae utimur. Sicut Moyses in numeris: Dimitte Na peccatum populi tui:
+quod vos interpretatum habetis: Dimitte obsecro. Et psalmo centesimo ac decimoseptimo:
+A na domine salvificia na. A na domine fortunatifica na: quod vos elegantius sic: O
+domine salvum me fac: o domine bene prosperare.
+And it follows: No more shall thy name be called Jacob, but Israel: for with god and man
+thou hast prevailed. And so it is with the name Na: which we use in trouble and
+disturbances of spirit. For instance Moses in Numbers: “Na, pardon the iniquity of thy
+people”, which you will have interpreted “Pardon, I beseech thee.” And also in Psalm
+CXVII “Ah Na, Lord, fortune-giving Na”, which you find more elegantly thus: “Save
+now, I beseech thee, O Lord: O Lord, I beseech thee, send now prosperity.”
+The psalm is Vulgate 117:25, English 118:25.
+‘A Na’ in the context of beseeching is reminiscent of the note on Anna and Annah in ‘John Dee
+His Note.’
+Also, see Agrippa De Occulta Philosophia III.11
+Et est nomen Dei Na nun-aleph, in perturbationibus et molestiis invocandum. – p 428,
+Brill edition
+And the name of God Na is to be invocated in purturbations and troubles. –p. 474, Tyson
+edition.
+(In margin) vide Reuclini librum de verbo mirifico de nomine PELE
+see Reuchlin’s book On The Marvellous Word concerning the name PELE
+“PELE”
+Reuclin, De verbo mirifico II, sig e2r, (p 63 in the Stuttgart facsimile)
+Quoque vos legitis in eo Iudicum loco: Nomen meum quod est mirabile. Sed tenet non
+eandem hic significationem quomodo in psalmo octavo: Domine dominus noster Quae
+admirabile est nomen tuum in universa terra: id est admiratione dignum & gloriosum:
+quod vocabulum Adir significat: hic vero peli: quod est miraculorum operator.
+Also, you read in that place in Judges: My name which is wonderful. (But this does not
+have the same significance as in the eighth psalm: O Lord our Lord, how wonderful is
+your name in all the earth: that is, “worthy of admiration” and “glorious”: which the word
+Adir signifies.) here truly peli: which is “worker of miracles“
+Agrippa , De Occulta Philosophia III.11
+Origenes, splendidissimis quibusque philosophis non inferior, adserit contra Celsum in
+quibusdam divinis verbis mirandam latere virtutem; et in libro Iudicum ait Dominus:
+“Nomen meum quod est Pele (Peh Lamed Aleph), quod interpretatur apud nos
+‘miraculorum operator’ sive ‘efficiens mirabilia.’
+Origen, not inferior to the most brilliant philosophers, asserts against Celsus that
+wondrous virtue lied hidden in certain divine Words. And in the book of Judges the Lord
+says “My name which is Pele”, which signifies to us “a worker of miracles” or “bringing
+forth wonders.”
+Page 14
+(In margin) De sigillo Emeth vide Reuclini Artem Cabalisticam lib 3 et Agrippam lib 3
+
+cap 11
+On the seal of Emeth, Reuclin’s “The Cabalistic Art”, book 3, and Agrippa book
+3, chapter 11
+“Emeth”
+The Seal of Emeth has a long history. The sources Dee cites are:
+Agrippa De Occulta Philosophia III.11
+nomen Emeth, quod interpretatur ‘veritas’ est, et est sigillum Dei.
+the name Emeth, which is interpreted ‘truth’ and is the seal of God
+Reuchlin, De Arte Cabalistica III, fol. LXIIr (p 284 in Bison Book edition)
+Ehieh sigillat per Emeth, hoc est essentiam per veritatem. Sicut nobilis ille dictator ait
+Eliezar Haklir AMTh ChRTMD, Emeth est sigillum eius. Probat hoc ratio arithmetica
+quam imitantes si multiplicaverimus Ehieh per Ehieh surgent quadringenta quadraginta &
+unum, Quae simul sunt AMTh hoc est verum seu veritas, sicut Adonai Shalom – Domini
+Pax.
+Ehieh seals through Emeth, that is though essential truth. As that excellent teacher
+Eliezar Haklir says “Emeth is his seal.” Arithmetic reasoning proves this; for if we in
+such a way multiply Ehieh by Ehieh, four hundred forty one will arise, which is at once
+Emeth, that is ‘true’ or ‘truth’ and Adonai Shalom “Peace of the Lord.”
+ibid, fol. LXVIr (p 300 in Bison edition)
+Ubi post Tetragrammaton repitur YHV quod est symbolum ipsius Ehieh, hoc est entis per
+aequalitate numeri…..Est enim sigillum Dei YHV quo Ehieh sigillavit mundum, et
+dicitur AMTh, id est verum, quippe quod in se ipsum arithmetice multiplicando nascitur.
+And after the Tetragrammaton is found YHV which is a symbol of that Ehieh, which is
+“Being”, by equality of number….And YHV is a Seal of God, by which Ehieh has sealed
+the world., and it is called Emeth, that is “truth”, since it is born by multiplying it
+arithmetically by itself.
+SIGILLUM DEI
+The Seal of God
+Valete
+Farewell
+Soli Deo omnis honor Laus et Gloria Amen.
+To God alone, all honor praise and glory. Amen.
+“Soli Deo…” I Timothy 1:17
+Vulgate -- regi autem saeculorum inmortali invisibili soli Deo honor et gloria in saecula
+saeculorum amen
+KJV--Now unto the King eternal, immortal, invisible, the only wise God, be honour and glory for
+ever and ever. Amen.
+Geneva – Now unto the King everlasting, immortal, invisible, unto God onely wise, be honour and
+glorie for ever and ever, Amen.
+Page 15
+
+Martii 15. Thursday. Hora 1 1/4 a meridie
+March 15. Thursday. From midday 1 1/4 hours.
+Translator’s Note: 1:15 PM
+Invocate nomen Domini, et agnoscetis eum.
+Invoke the name of the Lord, and you will know him.
+“Invocate….agnoscetis”
+Invoco/agnosco is a nice pair of synonyms for obsecro/confiteor, the words used for the
+etymology of Annael in “John Dee His Note” above.
+Deus misereatur nostri, et benedicat nobis&c.
+May God be merciful unto us and bless us, etc.
+“Deus misereatur…” -- Psalm 66:1 (Vulgate); Psalm 67:1 (English)
+Vulgate ex Septuaginto: Deus misereatur nostri et benedicat nobis iluminet vultum suum super nos
+et misereatur nostri DIAPSALMA
+Vulgate ex Hebraeo: Deus misereatur nostri et benedicat nobis inlustret faciem suam super nos
+SEMPER
+BCP: God be merciful unto us, and blesse us: and shew us the light of his countenance, and be
+mercifull unto us.
+KJV: God be merciful unto us, and bless us; and cause his face to shine upon us; Selah.”
+Geneva Bible: God be merciful unto us, and blesse us, and cause his face to shine among us.
+Selah.
+(In margin) Of Salamian you may read in the call Diei Dominicae in Elementis Magicis
+Petri de Abano.
+Of Salamian you may read in the call of Sunday in “Magical Elements” of Peter
+of Abano
+“Salamian”
+De Elementis Magicis (attributed to Peter of Abano) is part of De Occulta Philosophia Liber
+Quartus.
+per nomina sanctorum Angelorum, qui dominantur in quarto exercitu, et serviunt coram
+potentissimo Salamia, Angelo magno et honorato: et per nomen stellæ, quæ est Sol, et per
+signum, & per immensum nomen Dei vivi, et per nomina omnia prædicta, conjuro te
+Michael angele magne, qui es præpositus Diei Dominicæ: et per nomen Adona, Dei
+Israel, qui creavit mundum et quicquid in eo est, quod pro me labores, et admoleas
+omnem meam petitionem, juxta meum velle & votum meum, in negotio et causa mea.
+By the names of the holy Angels, who rule in the fourth company, and serve before the
+face of the most powerful Salamia, a great and honored Angel, and by the name of the
+star, which is Sun, and by the sign and unfathomable name of the living God, and by all
+the aforesaid names, I summon thee, great angel Michael, who art placed over the Lord’s
+Day, and by the name Adonai, the God of Israel, who created the world and whatsoever
+is in it, that thou labor for me, and undertake all my petitions, according to my will and
+my desire, in my business and cause.
+“admoleas” – Translator’s Note:
+This word is not to be found in any of the dictionaries cited in the bibliography. Here, it
+
+is taken as admolior, turned non-deponent, and made 3rd instead of 4th conjugation. This
+is a not unreasonable medievalism. It is also a plausible scribal or transcription error
+(medieval or later.)
+Page 16
+(In margin) De OCH vide in libello Arbatel in (sol sign)
+About OCH, see Arbatel’s little book, under Sun.
+“OCH”In Arbatel de Magia Veterum (printed as part of De Occulta Philosophia Liber Quartus) Och is
+the spirit of the Sun. Raphael confirms this two lines later when he says OCH is “mighty in the
+sonne beames.” OCH is also associated with gold and wealth.
+I am Fortitudo Dei
+I am the Strength of God.
+Fortitudo Dei
+This is what Dee calls Michael in ‘John Dee His Note’; this, combined with all of the solar
+references immediately preceding (see the note on OCH), makes Dee’s conclusion that this angel
+is Gabriel pretty inexplicable. The angel neither confirms nor denies Dee’s assertion about the
+visitor’s identity.
+See page 16 for another example of potential Michael/Gabriel confusion.
+“What thow hast written, that hast thow written”
+cf Pilate’s words “What I have written, I have written.” (John 19:22, Geneva Bible and KJV.)
+“POLIPOS”
+Mi: Dost thow understand it?
+Dee: No, God knoweth.
+In De Occulta Philosophia, III.34, Agrippa gives the Hebrew names of the twelve apostles, including
+quartus PEH-VAU-LAMED-YOD-PEH-VAU-SHIN Polipos, quem nuncupamus Philippum.
+The fourth Polipos, whom we call Philip.
+Dee may be missing the significance of the name, not the immediate reference, but it seems out of character
+for him not to have added a marginal note in such a case.
+(In margin) It is in Elementis Magicis Petri de Abano, printed with Clavis Agrippae
+It is in Peter of Abano’s “Magical Elements”, printed with the “Key” of Agrippa.
+Page 17
+“I lived with Esdras”
+Uriel appears in books 4-13 of II Esdras in the Apocrypha, where he leads Esdras through dreams
+about the mystery of human destiny and visions of the Last Days.
+“I lived with Tobie: Tobie the younger”
+Tobias’ adventures with Raphael are found in Chapters 4-12 of the apocryphal Book of Tobit.

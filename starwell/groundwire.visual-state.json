@@ -1,0 +1,106 @@
+{
+  "$schema": "../contracts/surface_visual_receipt_v0_1.schema.json",
+  "surface_id": "starwell-groundwire",
+  "surface_path": "starwell/groundwire.html",
+  "receipt_version": "0.1",
+  "hearthfire_gate": "targeted_receipt_allowed",
+  "gate_scope": "new pilot surface, read-only telemetry, no persistence, no database write",
+  "surface_label": "built_partial",
+  "primary_truth_lit_rule": "Every Hearthfire surface should glow because something is true.",
+  "state_sources": [
+    "starwell/groundwire.html",
+    "assets/groundwire.js",
+    "hearthfire/lib/consent-gates.js",
+    "docs/hearthfire/02-truth-lit-surface-rule.md",
+    "contracts/surface_visual_receipt_v0_1.schema.json",
+    "contracts/surface_visual_state_v0_1.schema.json"
+  ],
+  "declared_direct_readings": [
+    "geolocation_coordinates",
+    "geolocation_accuracy",
+    "network_effective_type",
+    "network_downlink",
+    "network_rtt",
+    "hardware_concurrency",
+    "device_memory",
+    "microphone_rms",
+    "battery_charging",
+    "battery_level"
+  ],
+  "declared_model_variables": [],
+  "visual_receipts": [
+    {
+      "effect_id": "location_card",
+      "truth_kind": "user_activation_for_sound_or_haptics",
+      "state_source": "navigator.geolocation.getCurrentPosition, requested only after a button press",
+      "plain_language_reading": "Shows real coordinates and accuracy after you grant location permission, or the exact reason it can't (denied, unsupported, timed out).",
+      "plain_language_reason": "Location is never requested on load and never fabricated. The card is empty until you ask for it.",
+      "confidence": "verified"
+    },
+    {
+      "effect_id": "network_card",
+      "truth_kind": "data_source_or_provenance",
+      "state_source": "navigator.connection (Network Information API)",
+      "plain_language_reading": "Shows effective connection type, downlink, and round-trip time as estimated by the browser, or 'unsupported' where the API doesn't exist (Firefox, Safari).",
+      "plain_language_reason": "These are real but approximate, browser-estimated values, not exact measurements, and are labelled 'observed' rather than 'verified' for that reason.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "hardware_card",
+      "truth_kind": "data_source_or_provenance",
+      "state_source": "navigator.hardwareConcurrency, navigator.deviceMemory",
+      "plain_language_reading": "Shows logical core count and bucketed device memory as reported by the browser, or 'not exposed' where a value is withheld for privacy.",
+      "plain_language_reason": "Browsers deliberately bucket or clamp these values for fingerprinting resistance; they are real but not exact ground truth.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "microphone_meter",
+      "truth_kind": "user_activation_for_sound_or_haptics",
+      "state_source": "getUserMedia + a live AnalyserNode RMS reading, started only after a button press",
+      "plain_language_reading": "A live input-level meter driven by your actual microphone signal, or the exact reason it isn't running (denied, unsupported, stopped).",
+      "plain_language_reason": "No audio is captured, stored, or transmitted; the meter reads level only, and the stream is released on Stop.",
+      "confidence": "verified"
+    },
+    {
+      "effect_id": "battery_card",
+      "truth_kind": "data_source_or_provenance",
+      "state_source": "navigator.getBattery (Battery Status API)",
+      "plain_language_reading": "Shows charging state and level where the API is available, or 'unsupported' where it has been removed or restricted (most current desktop browsers).",
+      "plain_language_reason": "This API is deprecated in most browsers; an honest 'unsupported' is the expected, common result, not a bug.",
+      "confidence": "observed"
+    },
+    {
+      "effect_id": "live_state_dump",
+      "truth_kind": "readiness_state",
+      "state_source": "the full in-memory state object driving every card above",
+      "plain_language_reading": "A raw JSON view of exactly what the page currently believes about each signal, including its confidence tag and reason.",
+      "plain_language_reason": "Nothing is hidden between what the instrument reads and what it displays.",
+      "confidence": "observed"
+    }
+  ],
+  "accessibility_requirements": {
+    "low_stim_control_present": false,
+    "motion_state_visible": true,
+    "sound_requires_activation": false,
+    "haptics_feature_gated": false,
+    "browser_fallbacks_declared": true,
+    "next_review_needed": [
+      "verify reduced-motion CSS behaviour",
+      "verify keyboard path for Request Location / Start Microphone Meter / Stop buttons",
+      "consider a low-stim mode if animated meters prove distracting"
+    ]
+  },
+  "non_authorizations": [
+    "no database write",
+    "no Supabase write",
+    "no persistence of any reading beyond the current page session",
+    "no audio capture, storage, or transmission beyond a live level reading",
+    "no Arkfire branding or mythology",
+    "no fabricated or randomly-generated values"
+  ],
+  "next_passes": [
+    "accessibility review for reduced-motion and keyboard paths",
+    "consider a low-stim mode for the microphone meter animation",
+    "optional: add a local-only export of the current reading set, matching DEEP Observer's copy/save pattern, if requested"
+  ]
+}

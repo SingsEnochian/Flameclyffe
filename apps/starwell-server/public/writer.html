@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Writing Room · Hearthgate</title>
+  <script>
+    if (self !== top || new URLSearchParams(location.search).has('embedded'))
+      document.documentElement.classList.add('embedded');
+  </script>
+  <style>
+    :root {
+      --bg: #080a09; --panel: #101612; --ink: #e8eee9; --dim: #8ca095;
+      --green: #54d9a1; --gold: #d7b464; --line: rgba(160,220,190,.17);
+      --danger: #e78979; --accent: rgba(84,217,161,.09);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: radial-gradient(circle at 10% 0, #173126, transparent 32rem), var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
+    button, input, select, textarea { font: inherit; color: var(--ink); }
+
+    /* ── Top bar ── */
+    .top { height: 52px; display: flex; align-items: center; gap: .4rem; padding: .5rem .65rem; border-bottom: 1px solid var(--line); background: rgba(5,9,7,.92); overflow-x: auto; flex-shrink: 0; }
+    .btn { border: 1px solid var(--line); border-radius: 7px; padding: .36rem .6rem; background: rgba(8,14,11,.8); color: var(--ink); text-decoration: none; cursor: pointer; white-space: nowrap; font-size: .78rem; }
+    .btn.primary { border-color: var(--green); color: var(--green); }
+    .btn.danger  { color: var(--danger); border-color: rgba(231,121,121,.35); }
+    .btn:hover   { border-color: rgba(84,217,161,.5); }
+    .brand { margin-right: auto; }
+    .brand strong { display: block; font-size: .87rem; }
+    .brand small  { display: block; color: var(--dim); font-size: .66rem; }
+    .file-label { border: 1px solid var(--line); border-radius: 7px; padding: .36rem .6rem; background: rgba(8,14,11,.8); color: var(--ink); cursor: pointer; font-size: .78rem; white-space: nowrap; }
+    .file-label input { display: none; }
+    .export-group { display: flex; gap: .2rem; }
+    .export-group .btn { font-size: .72rem; padding: .32rem .46rem; }
+
+    /* ── Layout ── */
+    .app { height: calc(100% - 52px); display: grid; grid-template-columns: 266px minmax(0,1fr) 296px; }
+
+    /* ── Shelf ── */
+    .shelf { display: flex; flex-direction: column; border-right: 1px solid var(--line); overflow: hidden; }
+    .shelf-controls { padding: .55rem .6rem; display: grid; gap: .38rem; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+    .search { width: 100%; background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 7px; color: var(--ink); padding: .44rem .54rem; }
+    .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: .28rem; }
+    .filter-row select { width: 100%; background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 6px; color: var(--ink); padding: .3rem .38rem; font-size: .72rem; }
+    .docs { flex: 1; overflow-y: auto; padding: .45rem .55rem; display: grid; gap: .38rem; align-content: start; scrollbar-width: thin; }
+    .doc { padding: .52rem .6rem; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; background: rgba(255,255,255,.018); }
+    .doc.active, .doc:hover { border-color: var(--green); background: var(--accent); }
+    .doc strong { display: block; font-size: .82rem; }
+    .doc small   { display: block; color: var(--dim); margin-top: .18rem; font-size: .68rem; }
+    .doc-chip { display: inline-block; background: rgba(84,217,161,.09); border: 1px solid rgba(84,217,161,.18); border-radius: 4px; padding: .04rem .3rem; font-size: .6rem; margin-right: .28rem; }
+    .empty { color: var(--dim); padding: .75rem; font-size: .78rem; }
+
+    /* ── Editor ── */
+    .editor { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; }
+    #title { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; width: 100%; padding: .8rem 1.2rem; font-family: Georgia, serif; font-size: clamp(1.4rem, 2.4vw, 2.1rem); outline: none; }
+    #content { border: 0; border-radius: 0; resize: none; width: 100%; padding: 1rem clamp(.8rem, 4vw, 3.5rem); font: 1.05rem/1.78 Georgia, serif; background: rgba(6,9,7,.42); outline: none; }
+    .status-bar { display: flex; justify-content: space-between; align-items: center; padding: .4rem .8rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .7rem; flex-shrink: 0; }
+
+    /* ── Meta panel ── */
+    .meta { overflow-y: auto; padding: .65rem .7rem; display: flex; flex-direction: column; gap: .6rem; border-left: 1px solid var(--line); scrollbar-width: thin; }
+    .meta h2 { font-family: Georgia, serif; color: var(--gold); margin: 0; font-size: .98rem; }
+    .meta label { display: grid; gap: .26rem; color: var(--dim); font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; }
+    .meta label input, .meta label select, .meta label textarea {
+      text-transform: none; font-size: .8rem; padding: .4rem .5rem; letter-spacing: 0;
+      width: 100%; background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 6px; color: var(--ink);
+    }
+    .meta label textarea { resize: vertical; min-height: 60px; line-height: 1.55; }
+    .meta label textarea.tall  { min-height: 88px; }
+    .meta label textarea.xtall { min-height: 120px; }
+    .meta-divider { border: 0; border-top: 1px solid var(--line); margin: 0; }
+    .meta-section-head { font-size: .67rem; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; padding-bottom: .28rem; border-bottom: 1px solid var(--line); }
+
+    /* Type-specific section groups */
+    .meta-group { display: grid; gap: .6rem; }
+    .meta-group[hidden] { display: none !important; }
+
+    /* Source provenance box */
+    .source-box { padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 7px; font-size: .68rem; color: var(--dim); overflow-wrap: anywhere; line-height: 1.5; }
+
+    /* Related documents */
+    .related-section { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .related-section summary { padding: .42rem .6rem; cursor: pointer; font-size: .74rem; color: var(--dim); list-style: none; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.025); }
+    .related-section summary:hover { color: var(--ink); }
+    .related-count { font-size: .66rem; color: var(--green); }
+    .related-list { padding: .45rem .55rem; display: grid; gap: .3rem; }
+    .related-item { padding: .36rem .48rem; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; font-size: .72rem; background: rgba(255,255,255,.018); }
+    .related-item:hover { border-color: var(--green); }
+    .related-item strong { display: block; font-size: .76rem; }
+    .related-item small  { color: var(--dim); }
+    .related-empty { color: var(--dim); font-size: .72rem; padding: .35rem; }
+
+    /* Delete confirmation overlay */
+    .delete-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 100; align-items: center; justify-content: center; }
+    .delete-overlay.visible { display: flex; }
+    .delete-dialog { background: var(--panel); border: 1px solid rgba(231,121,121,.45); border-radius: 12px; padding: 1.35rem; max-width: 360px; width: 90%; }
+    .delete-dialog p { margin: 0 0 .9rem; font-size: .88rem; color: var(--dim); }
+    .delete-dialog strong { color: var(--ink); }
+    .delete-dialog .btn-row { display: flex; gap: .45rem; justify-content: flex-end; }
+
+    /* Embedded in shell */
+    html.embedded .top { display: none; }
+    html.embedded .app { height: 100dvh; }
+    .shelf, .meta { background: linear-gradient(145deg, rgba(255,255,255,.065), transparent 30%), rgba(8,16,13,.64); backdrop-filter: blur(22px) saturate(145%); box-shadow: inset 0 1px rgba(255,255,255,.08); }
+
+    @media (max-width: 980px) { .app { grid-template-columns: 220px minmax(0,1fr) 256px; } }
+    @media (max-width: 760px)  { .app { grid-template-columns: 200px minmax(0,1fr); } .meta { display: none; } }
+    @media (max-width: 560px)  { .app { display: block; overflow: auto; } .shelf { max-height: 200px; border-right: 0; border-bottom: 1px solid var(--line); } .editor { height: calc(100vh - 252px); } }
+  </style>
+</head>
+<body>
+
+<header class="top">
+  <a href="/laboratory.html#home" class="btn">⌂ Home</a>
+  <div class="brand"><strong>Writing Room</strong><small>Hearthgate · long-form work</small></div>
+  <button id="new" class="btn primary">+ New</button>
+  <label class="file-label">Import<input id="import" type="file" accept=".pdf,.docx,.txt,.md,.markdown,.rtf,.html,.htm,.json,.yaml,.yml,.xml,.csv,.png,.jpg,.jpeg,.webp,.tif,.tiff"></label>
+  <div class="export-group">
+    <button id="exp-md"   class="btn" title="Export as Markdown">.md</button>
+    <button id="exp-txt"  class="btn" title="Export plain text">.txt</button>
+    <button id="exp-json" class="btn" title="Export as JSON">.json</button>
+  </div>
+</header>
+
+<main class="app">
+
+  <!-- ── Shelf ── -->
+  <aside class="shelf">
+    <div class="shelf-controls">
+      <input id="search" class="search" type="search" placeholder="Search documents…">
+      <div class="filter-row">
+        <select id="filter-type" title="Filter by type">
+          <option value="">All types</option>
+          <optgroup label="Narrative Fiction">
+            <option>story</option><option>scene</option><option>chapter</option>
+            <option>vignette</option><option>snippet</option>
+          </optgroup>
+          <optgroup label="World · Terra Aeterna">
+            <option>lorebook</option><option>character-profile</option>
+            <option>location-record</option><option>lore-entry</option><option>timeline-entry</option>
+          </optgroup>
+          <optgroup label="DR Practice">
+            <option>dr-script</option><option>dr-anchor</option><option>dr-evidence</option>
+          </optgroup>
+          <optgroup label="STARWELL">
+            <option>observation-log</option><option>field-notes</option><option>session-record</option>
+          </optgroup>
+          <optgroup label="Research">
+            <option>research-synthesis</option><option>source-adaptation</option>
+          </optgroup>
+          <optgroup label="Continuity">
+            <option>continuity-record</option>
+          </optgroup>
+          <optgroup label="General">
+            <option>notes</option>
+          </optgroup>
+        </select>
+        <select id="filter-status" title="Filter by status">
+          <option value="">All statuses</option>
+          <option>idea</option><option>outline</option><option>draft</option>
+          <option>revision</option><option>canon</option><option>archived</option>
+        </select>
+      </div>
+    </div>
+    <div id="docs" class="docs"></div>
+  </aside>
+
+  <!-- ── Editor ── -->
+  <section class="editor">
+    <input id="title" placeholder="Untitled">
+    <textarea id="content" spellcheck="true" placeholder="Begin writing…"></textarea>
+    <div class="status-bar">
+      <span id="save-status">Ready.</span>
+      <span id="counts">0 words · 0 characters</span>
+    </div>
+  </section>
+
+  <!-- ── Meta panel ── -->
+  <aside class="meta">
+    <h2>Document</h2>
+
+    <label>Type
+      <select id="type">
+        <optgroup label="Narrative Fiction">
+          <option value="story">Story / Novel</option>
+          <option value="scene">Scene</option>
+          <option value="chapter">Chapter</option>
+          <option value="vignette">Vignette</option>
+          <option value="snippet">Snippet / Fragment</option>
+        </optgroup>
+        <optgroup label="World · Terra Aeterna">
+          <option value="lorebook">Lorebook Entry</option>
+          <option value="character-profile">Character Profile</option>
+          <option value="location-record">Location Record</option>
+          <option value="lore-entry">Lore Entry</option>
+          <option value="timeline-entry">Timeline Entry</option>
+        </optgroup>
+        <optgroup label="DR Practice">
+          <option value="dr-script">DR Script</option>
+          <option value="dr-anchor">DR Anchor / Affirmation</option>
+          <option value="dr-evidence">DR Evidence Log</option>
+        </optgroup>
+        <optgroup label="STARWELL">
+          <option value="observation-log">Observation Log</option>
+          <option value="field-notes">Field Notes</option>
+          <option value="session-record">Session Record</option>
+        </optgroup>
+        <optgroup label="Research">
+          <option value="research-synthesis">Research Synthesis</option>
+          <option value="source-adaptation">Source Adaptation</option>
+        </optgroup>
+        <optgroup label="Continuity">
+          <option value="continuity-record">Continuity Record</option>
+        </optgroup>
+        <optgroup label="General">
+          <option value="notes">Notes</option>
+        </optgroup>
+      </select>
+    </label>
+
+    <label>Status
+      <select id="doc-status">
+        <option>idea</option><option>outline</option>
+        <option selected>draft</option><option>revision</option>
+        <option>canon</option><option>archived</option>
+      </select>
+    </label>
+
+    <label>Tags
+      <input id="tags" placeholder="angel, canon-confirmed, chapter-3">
+    </label>
+
+    <!-- Continuity field — hidden for notes -->
+    <div class="meta-group" id="sec-continuity">
+      <label>Continuity / universe
+        <input id="continuity" placeholder="Between the Dreaming · July 2027">
+      </label>
+    </div>
+
+    <!-- Tone palette — narrative types and dr-script -->
+    <div class="meta-group" id="sec-tone-palette" hidden>
+      <div class="meta-section-head">Tone</div>
+      <label>Tone palette
+        <input id="tone" list="tone-list" placeholder="lyrical, intimate, mythic">
+        <datalist id="tone-list">
+          <option value="lyrical, intimate, mythic">
+          <option value="cinematic, adventurous">
+          <option value="gothic, atmospheric">
+          <option value="grounded, tender">
+          <option value="romantic, sensual">
+          <option value="wry, irreverent">
+          <option value="suspenseful, uncanny">
+          <option value="sacred, contemplative">
+          <option value="grief, elegy">
+          <option value="fierce, determined">
+          <option value="playful, light">
+          <option value="epistolary, formal">
+          <option value="cosmic, liminal">
+          <option value="witnessing, precise">
+          <option value="aspirational, embodied, present">
+          <option value="tender, directed, affirmative">
+          <option value="humorous, absurdist">
+        </datalist>
+      </label>
+    </div>
+
+    <!-- Narrative: POV + Tense — story, scene, chapter, vignette, snippet -->
+    <div class="meta-group" id="sec-narrative" hidden>
+      <label>Point of view
+        <select id="pov">
+          <option>first person</option>
+          <option>first person plural</option>
+          <option>second person</option>
+          <option>third person limited</option>
+          <option>third person omniscient</option>
+          <option>epistolary / mixed</option>
+        </select>
+      </label>
+      <label>Tense
+        <select id="tense">
+          <option>past</option><option>present</option>
+          <option>future</option><option>mixed</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Snippet fields -->
+    <div class="meta-group" id="sec-snippet" hidden>
+      <div class="meta-section-head">Snippet</div>
+      <label>Source context
+        <textarea id="snip-context" placeholder="Where this came from, what was cut, or why it matters…"></textarea>
+      </label>
+    </div>
+
+    <!-- World-building fields -->
+    <div class="meta-group" id="sec-world" hidden>
+      <div class="meta-section-head">World</div>
+      <label>World / era
+        <input id="world-era" placeholder="Terra Aeterna · post-Sundering">
+      </label>
+      <label>Category
+        <input id="world-category" placeholder="magic system, geography, faction, cosmology…">
+      </label>
+    </div>
+
+    <!-- Character profile fields -->
+    <div class="meta-group" id="sec-character" hidden>
+      <div class="meta-section-head">Character</div>
+      <label>Character name
+        <input id="char-name" placeholder="Full canonical name">
+      </label>
+      <label>Aliases
+        <input id="char-aliases" placeholder="Known-as, epithet, code name…">
+      </label>
+      <label>Species / nature
+        <input id="char-species" placeholder="Human, angel, construct, hybrid…">
+      </label>
+      <label>Faction / allegiance
+        <input id="char-faction" placeholder="House, order, constellation…">
+      </label>
+      <label>Relationships
+        <textarea id="char-relationships" placeholder="Bonds, connections, history…"></textarea>
+      </label>
+    </div>
+
+    <!-- DR base fields — all DR types -->
+    <div class="meta-group" id="sec-dr" hidden>
+      <div class="meta-section-head">DR Practice</div>
+      <label>Target state
+        <textarea id="dr-target" class="tall" placeholder="The state this is oriented toward…"></textarea>
+      </label>
+      <label>Session type
+        <select id="dr-session">
+          <option value="">—</option>
+          <option>morning · rising</option>
+          <option>evening · settling</option>
+          <option>immersive · extended</option>
+          <option>loop · repeated</option>
+          <option>spoken aloud</option>
+          <option>written reflection</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Affirmation anchors — dr-script and dr-anchor -->
+    <div class="meta-group" id="sec-dr-anchors" hidden>
+      <label>Affirmation anchors
+        <textarea id="dr-anchors" class="tall" placeholder="Core affirmations and anchor phrases…"></textarea>
+      </label>
+    </div>
+
+    <!-- DR Script-only: bridge phrases + reality markers -->
+    <div class="meta-group" id="sec-dr-script" hidden>
+      <label>Bridge phrases
+        <textarea id="dr-bridge" placeholder="Transition language, if / when phrases…"></textarea>
+      </label>
+      <label>Reality markers
+        <textarea id="dr-markers" placeholder="Sensory and felt markers of the target state…"></textarea>
+      </label>
+    </div>
+
+    <!-- STARWELL fields — observation-log, field-notes, session-record -->
+    <div class="meta-group" id="sec-starwell" hidden>
+      <div class="meta-section-head">STARWELL</div>
+      <label>Observation date
+        <input id="obs-date" type="date">
+      </label>
+      <label>Celestial / environmental context
+        <textarea id="obs-celestial" placeholder="Moon phase, planetary positions, atmospheric conditions…"></textarea>
+      </label>
+      <label>Instrument / method
+        <input id="obs-instrument" placeholder="Unaided eye, binoculars, reflector…">
+      </label>
+      <label>Epistemic status
+        <select id="obs-epistemic">
+          <option value="">—</option>
+          <option value="observation">observation · raw sensory</option>
+          <option value="inference">inference · reasoned from observation</option>
+          <option value="interpretation">interpretation · my framing</option>
+          <option value="symbolic">symbolic · associative / creative</option>
+          <option value="verified">verified · cross-referenced</option>
+        </select>
+      </label>
+      <label>Raw observation
+        <small style="color:var(--dim);font-size:.63rem;text-transform:none;letter-spacing:0">What was actually observed — separate from the main content / interpretation</small>
+        <textarea id="obs-raw" class="xtall" placeholder="Precise record of what was observed…"></textarea>
+      </label>
+    </div>
+
+    <hr class="meta-divider">
+
+    <label>Synopsis
+      <textarea id="synopsis" class="tall" placeholder="What this document contains…"></textarea>
+    </label>
+    <label>Canon &amp; continuity notes
+      <textarea id="canon-notes" class="xtall" placeholder="Facts, boundaries, unresolved threads…"></textarea>
+    </label>
+
+    <div id="source-box" class="source-box">Original work · no imported source.</div>
+
+    <!-- Related documents in same continuity -->
+    <details class="related-section" id="related-panel" hidden>
+      <summary>In this continuity <span id="related-count" class="related-count"></span></summary>
+      <div id="related-list" class="related-list"></div>
+    </details>
+
+    <hr class="meta-divider">
+    <button id="delete-btn" class="btn danger">Delete document</button>
+  </aside>
+
+</main>
+
+<!-- Delete confirmation — no confirm() / no prompt() blocking dialogs -->
+<div class="delete-overlay" id="delete-overlay">
+  <div class="delete-dialog">
+    <p>Delete <strong id="delete-title-display">this document</strong>?<br>
+    <small style="color:var(--dim)">This cannot be undone.</small></p>
+    <div class="btn-row">
+      <button id="delete-cancel" class="btn">Cancel</button>
+      <button id="delete-ok" class="btn danger">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  let documents = [], current = null, timer = null, saving = false, relatedTimer = null;
+
+  // ── Type → which meta sections are visible ──
+  const TYPE_SECTIONS = {
+    'story':              ['continuity', 'tone-palette', 'narrative'],
+    'scene':              ['continuity', 'tone-palette', 'narrative'],
+    'chapter':            ['continuity', 'tone-palette', 'narrative'],
+    'vignette':           ['continuity', 'tone-palette', 'narrative'],
+    'snippet':            ['continuity', 'tone-palette', 'narrative', 'snippet'],
+    'lorebook':           ['continuity', 'world'],
+    'character-profile':  ['continuity', 'world', 'character'],
+    'location-record':    ['continuity', 'world'],
+    'lore-entry':         ['continuity', 'world'],
+    'timeline-entry':     ['continuity', 'world'],
+    'dr-script':          ['continuity', 'tone-palette', 'dr', 'dr-anchors', 'dr-script'],
+    'dr-anchor':          ['continuity', 'dr', 'dr-anchors'],
+    'dr-evidence':        ['continuity', 'dr'],
+    'observation-log':    ['continuity', 'starwell'],
+    'field-notes':        ['continuity', 'starwell'],
+    'session-record':     ['continuity', 'starwell'],
+    'research-synthesis': ['continuity'],
+    'source-adaptation':  ['continuity'],
+    'continuity-record':  ['continuity'],
+    'notes':              [],
+  };
+
+  const ALL_SECTIONS = ['continuity', 'tone-palette', 'narrative', 'snippet', 'world', 'character', 'dr', 'dr-anchors', 'dr-script', 'starwell'];
+
+  function updateSections(type) {
+    const active = new Set(TYPE_SECTIONS[type] || []);
+    ALL_SECTIONS.forEach(id => {
+      const el = $(`#sec-${id}`);
+      if (el) el.hidden = !active.has(id);
+    });
+  }
+
+  // ── Field helpers ──
+  function setVal(id, val) { const el = $(id); if (el) el.value = val ?? ''; }
+  function getVal(id) { const el = $(id); return el ? el.value : ''; }
+
+  // ── Build extendedMeta payload ──
+  function extPayload() {
+    return {
+      pointOfView:            getVal('#pov'),
+      tense:                  getVal('#tense'),
+      characterName:          getVal('#char-name').trim(),
+      characterAliases:       getVal('#char-aliases').trim(),
+      characterSpecies:       getVal('#char-species').trim(),
+      characterFaction:       getVal('#char-faction').trim(),
+      characterRelationships: getVal('#char-relationships'),
+      worldEra:               getVal('#world-era').trim(),
+      worldCategory:          getVal('#world-category').trim(),
+      targetState:            getVal('#dr-target'),
+      bridgePhrases:          getVal('#dr-bridge'),
+      affirmationAnchors:     getVal('#dr-anchors'),
+      realityMarkers:         getVal('#dr-markers'),
+      sessionType:            getVal('#dr-session'),
+      observationDate:        getVal('#obs-date'),
+      celestialContext:       getVal('#obs-celestial'),
+      instrument:             getVal('#obs-instrument').trim(),
+      epistemicStatus:        getVal('#obs-epistemic'),
+      rawObservation:         getVal('#obs-raw'),
+      snippetContext:         getVal('#snip-context'),
+    };
+  }
+
+  function payload() {
+    return {
+      title:        getVal('#title').trim() || 'Untitled',
+      documentType: getVal('#type'),
+      status:       getVal('#doc-status'),
+      continuity:   getVal('#continuity').trim(),
+      tone:         getVal('#tone').trim(),
+      synopsis:     getVal('#synopsis'),
+      canonNotes:   getVal('#canon-notes'),
+      tags:         getVal('#tags').split(',').map(x => x.trim()).filter(Boolean),
+      content:      getVal('#content'),
+      extendedMeta: extPayload(),
+    };
+  }
+
+  // ── Word / character count ──
+  function updateCounts() {
+    const text = getVal('#content');
+    const w = text.trim() ? text.trim().split(/\s+/).length : 0;
+    $('#counts').textContent = `${w.toLocaleString()} words · ${text.length.toLocaleString()} characters`;
+  }
+
+  // ── Render shelf ──
+  function renderShelf() {
+    const q  = $('#search').value.toLowerCase();
+    const ft = $('#filter-type').value;
+    const fs = $('#filter-status').value;
+
+    const rows = documents.filter(d => {
+      if (ft && d.documentType !== ft) return false;
+      if (fs && d.status !== fs) return false;
+      if (!q) return true;
+      const m = d.extendedMeta || {};
+      const hay = [d.title, d.documentType, d.status, d.continuity, d.tone, d.synopsis, ...(d.tags || []), m.characterName || ''].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+
+    $('#docs').innerHTML = rows.length
+      ? rows.map(d => `<article class="doc${d.id === current?.id ? ' active' : ''}" data-id="${d.id}">
+            <strong>${esc(d.title)}</strong>
+            <small><span class="doc-chip">${esc(d.documentType)}</span>${esc(d.status || 'draft')}${d.continuity ? ` · ${esc(d.continuity)}` : ''}</small>
+            <small>${(d.wordCount || 0).toLocaleString()} words · ${new Date(d.updatedAt).toLocaleString()}</small>
+          </article>`).join('')
+      : '<div class="empty">No documents match.</div>';
+  }
+
+  // ── Normalize legacy document type values ──
+  const LEGACY_TYPE_MAP = {
+    'DR script':          'dr-script',
+    'character profile':  'character-profile',
+    'continuity':         'continuity-record',
+    'research synthesis': 'research-synthesis',
+    'source adaptation':  'source-adaptation',
+  };
+
+  // ── Load a document ──
+  function load(d) {
+    current = d;
+    const m = d.extendedMeta || {};
+
+    setVal('#title',      d.title);
+    setVal('#content',    d.content || '');
+    setVal('#doc-status', d.status || 'draft');
+    setVal('#continuity', d.continuity || '');
+    setVal('#tone',       d.tone || '');
+    setVal('#synopsis',   d.synopsis || '');
+    setVal('#canon-notes', d.canonNotes || '');
+    setVal('#tags', (d.tags || []).join(', '));
+
+    // Resolve type (normalize legacy values)
+    const typeEl = $('#type');
+    const known  = [...typeEl.options].map(o => o.value);
+    const resolved = LEGACY_TYPE_MAP[d.documentType] || d.documentType;
+    typeEl.value = known.includes(resolved) ? resolved : 'notes';
+
+    // Extended meta — narrative
+    setVal('#pov',   m.pointOfView || d.pointOfView || 'first person');
+    setVal('#tense', m.tense       || d.tense       || 'past');
+
+    // Extended meta — character
+    setVal('#char-name',          m.characterName          || '');
+    setVal('#char-aliases',       m.characterAliases       || '');
+    setVal('#char-species',       m.characterSpecies       || '');
+    setVal('#char-faction',       m.characterFaction       || '');
+    setVal('#char-relationships', m.characterRelationships || '');
+
+    // Extended meta — world
+    setVal('#world-era',      m.worldEra      || '');
+    setVal('#world-category', m.worldCategory || '');
+
+    // Extended meta — DR
+    setVal('#dr-target',  m.targetState        || '');
+    setVal('#dr-session', m.sessionType        || '');
+    setVal('#dr-anchors', m.affirmationAnchors || '');
+    setVal('#dr-bridge',  m.bridgePhrases      || '');
+    setVal('#dr-markers', m.realityMarkers     || '');
+
+    // Extended meta — STARWELL
+    setVal('#obs-date',      m.observationDate  || '');
+    setVal('#obs-celestial', m.celestialContext || '');
+    setVal('#obs-instrument', m.instrument      || '');
+    setVal('#obs-epistemic', m.epistemicStatus  || '');
+    setVal('#obs-raw',       m.rawObservation   || '');
+
+    // Extended meta — snippet
+    setVal('#snip-context', m.snippetContext || '');
+
+    // Source provenance
+    $('#source-box').textContent = d.sourceDocumentId
+      ? `Extraction: ${d.sourceName || 'unknown'} · SHA-256 ${d.sourceSha256 || 'not recorded'} · id ${d.sourceDocumentId}`
+      : 'Original work · no imported source.';
+
+    updateSections(typeEl.value);
+    updateCounts();
+    refreshRelated();
+    renderShelf();
+    $('#save-status').textContent = `Loaded · ${new Date(d.updatedAt).toLocaleString()}`;
+  }
+
+  // ── Related documents in same continuity ──
+  function refreshRelated() {
+    const continuity = getVal('#continuity').trim();
+    const panel = $('#related-panel');
+    if (!continuity || !current) { panel.hidden = true; return; }
+    panel.hidden = false;
+
+    const others = documents.filter(d =>
+      d.id !== current?.id &&
+      d.continuity?.trim().toLowerCase() === continuity.toLowerCase()
+    );
+
+    $('#related-count').textContent = others.length ? `(${others.length})` : '';
+    $('#related-list').innerHTML = others.length
+      ? others.map(d => `<div class="related-item" data-id="${d.id}">
+            <strong>${esc(d.title)}</strong>
+            <small>${esc(d.documentType)} · ${esc(d.status || 'draft')}</small>
+          </div>`).join('')
+      : '<div class="related-empty">No other documents in this continuity yet.</div>';
+  }
+
+  // ── Fetch all documents ──
+  async function refresh(preferred) {
+    const r = await fetch('/api/v1/writer');
+    const p = await r.json();
+    documents = p.documents || [];
+    renderShelf();
+    const target = documents.find(d => d.id === (preferred || current?.id)) || documents[0];
+    if (target) load(target);
+    else await create();
+  }
+
+  // ── Create new document ──
+  async function create(seed = {}) {
+    const r = await fetch('/api/v1/writer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Untitled', documentType: 'story', content: '', ...seed }),
+    });
+    const p = await r.json();
+    if (!r.ok) throw new Error(p.error);
+    documents.unshift(p.document);
+    load(p.document);
+    $('#title').focus();
+    $('#title').select();
+  }
+
+  // ── Autosave ──
+  function schedule() {
+    updateCounts();
+    $('#save-status').textContent = 'Unsaved changes…';
+    clearTimeout(timer);
+    timer = setTimeout(save, 700);
+  }
+
+  async function save() {
+    if (!current || saving) return;
+    saving = true;
+    $('#save-status').textContent = 'Saving…';
+    try {
+      const r = await fetch(`/api/v1/writer/${current.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload()),
+      });
+      const p = await r.json();
+      if (!r.ok) throw new Error(p.error);
+      current = p.document;
+      documents = documents.map(d => d.id === current.id ? current : d);
+      $('#save-status').textContent = `Saved · ${new Date(current.updatedAt).toLocaleTimeString()}`;
+      renderShelf();
+    } catch (e) {
+      $('#save-status').textContent = `Save failed: ${e.message}`;
+    } finally {
+      saving = false;
+    }
+  }
+
+  // ── Export ──
+  function exportAs(format) {
+    if (!current) return;
+    const p = payload();
+    const m = p.extendedMeta || {};
+    const safeName = (p.title || 'document').replace(/[^a-z0-9 _-]/gi, '').trim().replace(/\s+/g, '-') || 'document';
+
+    let body, type;
+    if (format === 'json') {
+      body = JSON.stringify({ ...current, ...p }, null, 2);
+      type = 'application/json';
+    } else if (format === 'md') {
+      const lines = [`# ${p.title}`, ''];
+      lines.push(`**Type:** ${p.documentType}  `, `**Status:** ${p.status}  `);
+      if (p.continuity)      lines.push(`**Continuity:** ${p.continuity}  `);
+      if (p.tone)            lines.push(`**Tone:** ${p.tone}  `);
+      if (p.tags?.length)    lines.push(`**Tags:** ${p.tags.join(', ')}  `);
+      if (m.characterName)   lines.push(`**Character:** ${m.characterName}  `);
+      if (m.observationDate) lines.push(`**Date:** ${m.observationDate}  `);
+      if (m.epistemicStatus) lines.push(`**Epistemic:** ${m.epistemicStatus}  `);
+      if (m.targetState)     lines.push('', `**Target state:** ${m.targetState}`);
+      if (p.synopsis)        lines.push('', `**Synopsis:** ${p.synopsis}`);
+      if (m.rawObservation)  lines.push('', '## Raw Observation', '', m.rawObservation);
+      lines.push('', '---', '', p.content);
+      if (m.affirmationAnchors) lines.push('', '## Anchors', '', m.affirmationAnchors);
+      if (p.canonNotes)      lines.push('', '## Canon Notes', '', p.canonNotes);
+      body = lines.join('\n');
+      type = 'text/markdown';
+    } else {
+      body = p.content;
+      type = 'text/plain';
+    }
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([body], { type }));
+    a.download = `${safeName}.${format}`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // ── Delete flow (in-page overlay, no confirm()) ──
+  $('#delete-btn').onclick = () => {
+    if (!current) return;
+    $('#delete-title-display').textContent = `"${current.title}"`;
+    $('#delete-overlay').classList.add('visible');
+  };
+  $('#delete-cancel').onclick = () => $('#delete-overlay').classList.remove('visible');
+  $('#delete-ok').onclick = async () => {
+    if (!current) return;
+    $('#delete-overlay').classList.remove('visible');
+    await fetch(`/api/v1/writer/${current.id}`, { method: 'DELETE' });
+    current = null;
+    refresh();
+  };
+
+  // ── Type change → update visible sections ──
+  $('#type').onchange = () => {
+    updateSections($('#type').value);
+    schedule();
+  };
+
+  // ── Continuity change → refresh related (debounced) ──
+  $('#continuity').addEventListener('input', () => {
+    schedule();
+    clearTimeout(relatedTimer);
+    relatedTimer = setTimeout(refreshRelated, 500);
+  });
+
+  // ── Shelf: document click ──
+  $('#docs').onclick = async e => {
+    const id = e.target.closest('[data-id]')?.dataset.id;
+    const d  = documents.find(x => x.id === id);
+    if (!d || d.id === current?.id) return;
+    clearTimeout(timer);
+    await save();
+    load(d);
+  };
+
+  // ── Related docs: click to navigate ──
+  $('#related-list').onclick = async e => {
+    const id = e.target.closest('[data-id]')?.dataset.id;
+    const d  = documents.find(x => x.id === id);
+    if (!d) return;
+    clearTimeout(timer);
+    await save();
+    load(d);
+  };
+
+  // ── Input listeners ──
+  const TEXT_IDS = ['title', 'content', 'tone', 'tags', 'synopsis', 'canon-notes',
+    'snip-context', 'world-era', 'world-category',
+    'char-name', 'char-aliases', 'char-species', 'char-faction', 'char-relationships',
+    'dr-target', 'dr-anchors', 'dr-bridge', 'dr-markers',
+    'obs-celestial', 'obs-instrument', 'obs-raw'];
+  TEXT_IDS.forEach(id => { const el = $(`#${id}`); if (el) el.addEventListener('input', schedule); });
+
+  const SELECT_IDS = ['doc-status', 'pov', 'tense', 'dr-session', 'obs-epistemic'];
+  SELECT_IDS.forEach(id => { const el = $(`#${id}`); if (el) el.onchange = schedule; });
+  $('#obs-date').onchange = schedule;
+
+  // ── Shelf filters ──
+  $('#search').oninput = renderShelf;
+  $('#filter-type').onchange = renderShelf;
+  $('#filter-status').onchange = renderShelf;
+
+  // ── Export buttons ──
+  $('#exp-md').onclick   = () => exportAs('md');
+  $('#exp-txt').onclick  = () => exportAs('txt');
+  $('#exp-json').onclick = () => exportAs('json');
+
+  // ── New document ──
+  $('#new').onclick = () => {
+    clearTimeout(timer);
+    save().then(() => create()).catch(e => { $('#save-status').textContent = e.message; });
+  };
+
+  // ── Import via ingest ──
+  $('#import').onchange = async e => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    $('#save-status').textContent = `Importing ${file.name}…`;
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const ir = await fetch('/api/v1/ingest', { method: 'POST', body: fd });
+      const ip = await ir.json();
+      if (!ir.ok) throw new Error(ip.error);
+      const wr = await fetch(`/api/v1/writer/import-source/${ip.document.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+      const wp = await wr.json();
+      if (!wr.ok) throw new Error(wp.message || wp.error);
+      await refresh(wp.document.id);
+    } catch (err) {
+      $('#save-status').textContent = `Import failed: ${err.message}`;
+    }
+  };
+
+  // ── Flush on hide / blur ──
+  addEventListener('visibilitychange', () => { if (document.hidden && timer) { clearTimeout(timer); save(); } });
+  addEventListener('blur', () => { if (timer) { clearTimeout(timer); save(); } });
+
+  // ── Init ──
+  refresh().catch(e => { $('#save-status').textContent = e.message; });
+})();
+</script>
+
+</body>
+</html>

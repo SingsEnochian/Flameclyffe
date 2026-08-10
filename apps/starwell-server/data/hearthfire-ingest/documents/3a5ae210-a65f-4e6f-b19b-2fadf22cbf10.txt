@@ -1,0 +1,71 @@
+# Lantern HUD — collaborator context & co-design
+
+**Status:** working notes. Captures who Lantern HUD is being designed *with* and *for*, the
+collaborator's stated priorities, and the co-design posture (guideline G8). This is durable
+context for every Lantern PRD — read it before writing one.
+
+## Who
+
+- **Peter (this repo's owner)** — eye-tracking UI expertise from **Eyefluence** (the gaze-
+  interaction company later acquired by Google). Doubly relevant: (a) deep eye-tracking UX
+  knowledge — accidental-activation avoidance, dwell alternatives, calibration realities; (b)
+  **FTO/patent awareness** — the PMEyeUI FTO bundle (A1+B8+C2+E1–E4) exists precisely to avoid
+  Eyefluence-style gaze-interaction infringement, so Peter's input also guards patent posture.
+- **The collaborator** — originator of the "Lantern HUD" concept (the founding notes). Early-
+  stage, privacy- and scope-careful, building on Maverick. Reached out to Peter specifically for
+  the gaze-first accessibility layer. Given the first-person framing of the founding notes
+  (night/fatigue/pain-flare scenarios), the collaborator likely has **relevant lived experience**
+  — making them both a **domain partner and the co-design tester** (the "one potential tester"
+  on record). This is the G8 "nothing about us without us" partner.
+
+## She delivered a full v0.1 spec (2026-06-09)
+
+Catherine sent a complete **"Maverick Accessibility Lantern Stack — Shareable Product & Technical
+Specification v0.1"** (captured faithfully in `source-spec-lantern-stack-v0.1.md`; original PDF at
+repo root). It is well-structured and in places more specified than our slate was — we **adopted**
+its architecture (substrate + Caption / Sentinel / Voice + Concordance Lens), its **Risk Levels
+L0–L5 + Safety Gate**, the **"gaze is attention, not consent"** principle, the reclined/bed +
+minimal-head-movement modes, the Status Bead, and its data model. The spec is a *shareable draft
+for expert review* — Peter's Eyefluence review is exactly what she's asking for (§19). Hardware/SDK
+assumptions in it are flagged "verify against final SDK + shipping device."
+
+## The collaborator's framing (their words, 2026-06-09)
+
+> "My project is **less 'eye tracking as a cursor' and more a fatigue-aware interaction system
+> for hands-reduced use**: live captions, gaze-controlled repeat/pause/enlarge/pin/clear actions,
+> **basic environment controls**, and eventually **caregiver/safety flows for situations where
+> voice or hands may not be reliable**."
+
+What this fixed in the design:
+- **Confirms 7.4 Low-Effort Control is the substrate and is written FIRST** — the whole project
+  is the fatigue-aware layer; captions and the rest hang off it.
+- **Added scope:** *basic environment controls* (lights / simple IoT) as a first real-action
+  surface of the layer (goals-and-guidelines §7.4).
+- **Caregiver/safety flows** for when voice/hands fail — in scope **only** as wearer-*initiated*
+  help, never caregiver *monitoring* (red line R3).
+
+## What the collaborator explicitly asked the PRD to cover
+
+They want Peter's eye-tracking experience to "save them from reinventing several cursed wheels."
+Each Lantern PRD therefore carries these required sections (mirrored in goals-and-guidelines §7):
+
+1. **Eye-tracking UI patterns** (Eyefluence-informed) — and the FTO/patent-posture check.
+2. **Accidental-activation avoidance** — defeating Midas-touch / unintended commits.
+3. **Calibration assumptions** — assumed accuracy + graceful degradation when it breaks.
+4. **Dwell alternatives** — non-dwell path for every action; dwell only if reversible + counting-down.
+5. **Fatigue / energy budget** — resting cost, gaze-rest, resumability, interaction-cost proxies.
+6. **What should wait until real HMD testing** — items the simulator can't honestly validate
+   (we are simulator-only — `project_simulator_only`), deferred to hardware + real-tester testing.
+
+## Co-design posture
+
+- The PRD is partly **written for the collaborator to read and co-author** — keep it self-
+  contained, jargon-light where possible, and honest about what's speculative vs grounded.
+- **Privacy & scope discipline are shared values** — bias to on-device, wearer-owned, minimal
+  scope (G6); flag anything that expands data capture.
+- Co-design is an **active gate**, not a pending checkbox: open design questions get the
+  collaborator's input before they're locked, and lived-experience feedback outranks researcher
+  assumptions (G8).
+- **What waits for the collaborator/hardware:** anything whose value is the *felt* experience of
+  low-effort, non-exhausting interaction — that cannot be settled from the simulator and is
+  explicitly deferred to real testing with the collaborator on hardware.

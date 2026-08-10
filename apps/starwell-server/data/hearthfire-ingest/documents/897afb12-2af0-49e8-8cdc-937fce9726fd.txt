@@ -1,0 +1,495 @@
+# Caption Lantern — app PRD (v1)
+
+**Status:** ASPIRATIONAL — design only, no code.
+
+The FIRST concrete Lantern HUD app, and the surface that *proves the Lantern substrate*
+(Input Layer + Intent Resolver + Safety Gate + design law G1–G10). It is the
+highest-validated Lantern app (`research/01-live-captions.md` is the deepest dossier) and
+the one Catherine names first (`source-spec-lantern-stack-v0.1.md` §11, §17 Phase 2).
+
+This PRD declares **nouns + intent** and assembles **shared** widgets; it does NOT
+redefine the substrate. The Safety Gate, Risk Levels, redundant-input arbiter, Status
+Bead, Low-Energy / posture modes, and confirm/cancel/undo machinery are **owned by
+`app-prd-lantern-substrate.md`** (written in parallel). This PRD *references* them and
+declares each control's Risk Level. Read first: `goals-and-guidelines.md` (G1–G10, §5
+Risk Levels, §7.A), `source-spec-lantern-stack-v0.1.md` (§10 HUD UX, §11), and the
+research dossier `research/01-live-captions.md`.
+
+---
+
+## 1. Purpose
+
+Put a **calm, glanceable live-caption pane in the wearer's line of sight** so a
+late-deafened / HoH user can follow 1:1 and small-group speech **without staring at a
+phone** — and control that pane (repeat / pause / enlarge / dim / pin / clear / move /
+hide) **hands-free, low-effort, and privacy-first**. The signature win the device's
+eye-tracking unlocks (unique to this HMD): the pane **gets out of the way when the user
+looks at the speaker and returns when their gaze drops to read** — solving the
+read-vs-eye-contact tension passively, with zero input (`01` §5 "gaze-adaptive pane").
+
+The recurring complaint Lantern must beat is the **"phone-glance"** problem (`01` §3) —
+and avoid re-creating it at small scale (the "observer, not participant" latency trap,
+`01` §3): hence the ≤300 ms latency floor and the commit-before-display pipeline.
+
+## 2. Target users (honest scope)
+
+**Primary: late-deafened and hard-of-hearing users who read English natively**, in **1:1
+and small-group** conversation. This is the population captioning glasses actually fit
+(`01` §3, §4.9). Also serves the **fatigue / motor / cognitive** cohorts who want
+hands-free repeat/pause/enlarge without a phone (`goals-and-guidelines.md` §2; this app
+must pass the fatigue cohort's constraints, §8 below).
+
+**Explicitly NOT scoped to:** ASL-first / born-Deaf users who prefer interpreters —
+English captions are a second language to them and captioning glasses are "mainly a tool
+to interface with the hearing public" (`01` §3). Lantern is positioned as a tool *for
+late-deafened/HoH users and for interfacing with the hearing world*, complementing — never
+replacing — ASL, interpreters, or CART (R-COMM below; G8).
+
+## 3. Scope
+
+**MVP (Catherine §11 + our research adds):**
+
+- Live caption display from **phone mic or an approved source** (the phone does ASR; see §10).
+- **Repeat last** utterance (without storing the full transcript by default).
+- **Pause / resume.**
+- **Enlarge / reduce** (caption font tier).
+- **Dim / brighten** (caption luminance within the additive-legible floor).
+- **Pin** an important line (session-local, not persisted by default).
+- **Clear** the visible buffer.
+- **Move window** (a small set of named anchor positions; no free-drag).
+- **Hide temporarily** (caption pane off; Status Bead remains).
+- **Privacy-mode indicator** + **local-only mode**.
+- *Research adds:* **commit-before-display** word pipeline (no streaming flicker);
+  **confidence rendering** (red squiggle for low-confidence words, glance-to-reveal
+  alternatives); **per-speaker color** + an **IMU/head-direction speaker pointer**;
+  **peripheral non-speech sound alerts**.
+
+**Later (Catherine §11, NOT MVP):** speaker *labelling* (names), translation, summarise
+recent conversation, export-only-when-enabled, hearing-device route awareness (that lives
+in Voice Lantern), context-aware caption positioning, phone-side LLM post-correction toggle
+(`01` §2; accuracy at a latency cost — list as a later opt-in).
+
+## 4. Non-goals
+
+- **Not a hearing device / medical device** (R1). No "restores hearing" / WER claim in
+  any surface or doc (G7 regulatory honesty; audited like `claims-audit`).
+- **No recording of bystanders without lawful consent** (R5): on-device by default,
+  no audio/transcript persisted, transcribe-on-request, two-party-consent respected.
+- **No always-on camera; no cloud by default** (§15 of the source spec; G6).
+- **No multi-speaker diarization-as-promise.** v1 is honestly scoped to 1:1 / small group;
+  multi-speaker is the credibility test that breaks demos (`01` §4.1, §6) — we give a
+  color + pointer *aid*, not a guarantee.
+- **No free-form world-locked caption text.** The Maverick is IMU-only 3DoF with a small
+  FOV and a slow AI-only camera (`goals-and-guidelines.md` §1) — world-anchored text
+  swims and causes discomfort (`01` §6). Captions are head-locked / head-relative; only a
+  *peripheral cue* is IMU-aimed.
+- **Does not own the Safety Gate / Risk Levels / Status Bead** — that is the substrate PRD.
+
+---
+
+## 5. UX
+
+### 5.1 The caption pane (the default HUD)
+
+Per `source-spec` §10: the default HUD is **minimal** — caption pane + the substrate's
+**Status Bead** + optional privacy indicator. No persistent menu.
+
+- **Resting state = ~2 lines, ~3 words/line.** SeEar found more text *raises* cognitive
+  load and *lowers* comprehension (`01` §6, §2 SeEar); resist a fat scrollback at rest.
+- **Head-locked / head-relative placement**, default **below and offset from the
+  speaker's face line** — never over the mouth (HoH users lip-read in parallel; `01` §6,
+  §2 SeEar "directly-below-speaker won"). 87.5% of VR users preferred head-locked stability
+  (`01` §2, 2210.15072).
+- **Move window** = a small set of **named angular anchors** (e.g. `lower`, `lower-left`,
+  `lower-right`, `center-low`) declared in `CaptionLayout` in degrees — NOT a free drag.
+  Each anchor is a substrate confirm-card choice.
+- **Gaze-adaptive (signature):** gaze on the pane → enlarge / un-dim / reveal short
+  scrollback; saccade back toward the speaker → shrink / dim to resting. This is an **L0
+  passive HUD** behaviour (no confirm — it only changes presentation, never commits), and
+  it must be **disable-able** (some users want a fixed pane; G3 reduced-motion, §8).
+
+### 5.2 Caption design rules (hard requirements — `source-spec` §10.3, `01` §6)
+
+- Readable at small FOV; **high contrast on the additive optic** — all caption colours go
+  through the shared `Palette`/Theme floor (no raw `rgb()`; sub-floor brightness is dropped
+  on the optic, `CLAUDE.md` additive-display caveat). Per-speaker hues drawn from
+  high-luminance low-saturation set (white / cyan / amber, `01` §5).
+- **Low flicker, no rapid flashing, no strobe** (G3). The **commit-before-display
+  pipeline** is what makes this true: tentative streaming-ASR words are held until
+  stabilized (or rendered visually-distinct from committed text) so the pane never
+  rewrites itself and strobes (`01` §6, §4.2).
+- **Configurable size + position** (enlarge/reduce + move).
+- **Avoid blocking the real-world view** (G4) — periphery/edge bias, brief; never occlude
+  the speaker's face line.
+- **Short caption history**; **"repeat last" WITHOUT storing the full transcript** by
+  default (R5).
+- **Low-confidence words → red squiggly underline** (SeEar's most-preferred uncertainty
+  cue, `01` §2) — colour through the Palette floor. **Glance-to-reveal alternatives** on an
+  uncertain word turns eye-tracking into error recovery (`01` §5).
+- **Peripheral non-speech sound alerts:** a small **FOV-edge directional glyph** (name
+  called / alarm / doorbell / vehicle) — kept *out* of the caption pane so it never
+  competes for reading attention (`01` §5, HoloSound/SoundWatch). Needs no audio-output
+  path; serves fully-deaf users. Which sounds matter is user-personalizable (later:
+  ProtoSound-style). Direction is **IMU/head-relative, low-fidelity** — an edge glow toward
+  a bearing, not a precise world anchor.
+
+### 5.3 Speaker pointer + colour channel
+
+A **stable caption block + a peripheral directional cue** to the active speaker is the
+RTTD-ID-proven winner (73% preferred the pointer over fixed or pop-up captions; deaf users
+have heightened peripheral attention — `01` §2, §5). The pointer bearing comes from the
+**HMD IMU** (head orientation), is **low-fidelity** (an edge arrow/glow toward a coarse
+bearing, NOT a world-locked label on a face), and degrades to "absent" when the bearing is
+unknown. Per-speaker **colour** (Ava-style "who said what") is best-effort voice-fingerprint
+diarization done on the phone; v1 colour, not names (names are Later).
+
+### 5.4 Status Bead integration
+
+The pane participates in the substrate's **Status Bead** (`source-spec` §10): the bead
+shows **mic/caption active**, **privacy mode**, **local-only**, **paused**, and **hidden**
+states. Caption Lantern *contributes* these states to the bead's model; it does not draw
+its own status chrome. The bead expands only on focus (substrate behaviour).
+
+### 5.5 Menu behaviour
+
+Per `source-spec` §10 + G-law: controls live in a **strip or card** menu (radial optional
+per SDK), **summoned** (reveal-gated, substrate gesture), **no tiny buttons** (every target
+≥ the config gaze floor 2.8°/3.2° in *both* axes, `CLAUDE.md` eye-tracking law), **clear
+focus state on every selectable target** (select highlight — the recurring missing-highlight
+bug class), and **no ambiguous activation zones**. The menu auto-dismisses on timeout
+(substrate). The pane itself is also a target set (the edge controls in §6).
+
+### 5.6 Phone-preview ≡ HMD parity (required)
+
+`PhoneCanvasSink` renders the **same `HmdRenderer` draw commands** as the M2 sink — there
+is no separate `drawCaptionPreview`; the phone preview is a renderer, not an independent UI
+(`CLAUDE.md` Multi-device rule 3). Same variable names, metrics, labels, conditional
+structure. Divergence is a defect; verified by the parity oracle (§7) + the bitmap-parity
+tests (§8).
+
+---
+
+## 6. Interaction — every control → substrate grammar, all L1
+
+Every actionable control routes through the substrate's **select → ACT → CONFIRM** plus
+**redundant input** (G1: reachable by ≥2 of {gaze-select, head gesture, voice, tap/switch,
+phone}). **Dwell is not the default** (`CLAUDE.md`, G9); where offered it is reversible +
+counting-down (§8 Dwell alternatives).
+
+| Control | Risk | Activation (select→ACT→CONFIRM) | Redundant paths | Undo |
+|---|---|---|---|---|
+| Repeat last | **L1** | glance edge target `↺` → saccade-confirm | voice "repeat", head-nod, phone | n/a (read-only) |
+| Pause / resume | **L1** | glance `⏸/▶` → confirm | voice, head, switch, phone | toggle |
+| Enlarge / reduce | **L1** | glance `🔍±` → confirm | voice "bigger/smaller", phone | revert |
+| Dim / brighten | **L1** | glance `🌙±` → confirm | voice, phone | revert |
+| Pin line | **L1** | glance the line → ACT → confirm | voice "pin", phone | unpin |
+| Clear buffer | **L1** | glance `⌫` → confirm | voice "clear", phone | undo-snackbar (substrate) |
+| Move window | **L1** | glance `⤢` → anchor card → confirm | phone, voice | revert anchor |
+| Hide temporarily | **L1** | glance `hide` → confirm; bead remains | head, voice, phone | re-show |
+| Privacy mode | **L1** (indicator/toggle of a local posture; **not** a capture-consent grant) | glance indicator → confirm | phone, voice | toggle |
+| Local-only mode | **L1** | glance → confirm | phone, voice | toggle |
+| Reveal-to-alternatives (low-conf word) | **L0** | glance the squiggled word | — | dismiss on look-away |
+| Gaze-adaptive dim/expand | **L0** | passive (gaze on pane vs speaker) | disable in settings | — |
+
+**All caption controls are L1** (local UI change) per the Risk Levels — *reference* the
+substrate's Safety Gate; do not redefine it. L1 = simple confirm OK, **undo preferred**,
+timeout dismisses the menu (`goals-and-guidelines.md` §5). The two L0 rows are passive HUD
+(no confirm). Nothing here is L2+; Caption Lantern never actuates a device or contacts a
+person — that is Sentinel/Voice.
+
+**Gaze-aware behaviours, honestly bounded:** dim-on-eye-contact / expand-on-read (§5.1) and
+the speaker pointer (§5.3) rely only on **gaze within the small FOV** (reliable) and **head
+bearing from the IMU** (reliable, low-fidelity). **No world-anchored AR, no face tracking,
+no continuous CV** — the slow AI-only camera can't deliver it and we don't design for it
+(`goals-and-guidelines.md` §1).
+
+---
+
+## 7. Multiplatform & multidevice (#330)
+
+Rides `plan-kmp-cross-platform.md`. Caption Lantern is **platform-free logic + per-platform
+sinks**:
+
+- **Angular units (deg) + milliseconds only.** `CaptionLayout` (pane rect, anchor set,
+  font tiers, pointer geometry, edge-glyph positions) is in degrees; all timings (latency
+  budget, commit-hold window, gaze-adaptive ease, menu timeout, undo-snackbar duration) are
+  `Long` ms. **No pixel or frame-count constants** in caption logic/layout (`CLAUDE.md`
+  Portability; `tools/portable-core-audit` after #330 Phase 2 enforces it).
+- **Dual-sink parity now:** M2 sink + `PhoneCanvasSink` from the *same* `HmdRenderer` draw
+  commands. Adds the **iOS sink** and **v2-Maverick sink** rows when #330 Phases 4–5 land —
+  no caption-widget edits, only sink scale.
+- **Device matrix v1:** Maverick AI Pro 640×400 / 22°. **v2:** 1280×720 / 28°. **Raven:**
+  30° off-axis (Python sink, #330 Phase 6). The angular-units contract is what makes the
+  ports free (`CLAUDE.md` Portability §5/§6).
+- **Library-first widgets (G10):** the caption pane, edge controls, confidence underline,
+  speaker pointer, peripheral sound glyph, and anchor card are **shared widgets** (in
+  `HmdWidgets` / a new `CaptionWidgets` library home + `CaptionLayout`), reachable by object
+  renderers and the app generator — never private to `HmdRenderer` (`CLAUDE.md` library-first
+  law; `tools/shared-pattern-audit`).
+- **Parity verified via the `scene_snapshot` oracle** (#330 §6 / `tools/parity-snapshot`):
+  same input snapshot → same M2 drawable tree on every platform; build fails on divergence.
+
+---
+
+## 8. Required collaborator sections
+
+### 8.1 Accidental-activation avoidance (defeat Midas-touch)
+
+- **"Gaze is attention, not consent"** (the headline principle): gaze only *focuses /
+  previews / makes selectable*. Every control needs the explicit second signal of
+  select→ACT→CONFIRM — a glance never commits. This is the substrate's job; Caption Lantern
+  inherits it and adds **no shortcut path**.
+- The **resting caption pane is L0** (display only) — gazing at it to read can NEVER trigger
+  an action; only the *summoned* control strip is actionable, and only via CONFIRM.
+- Edge controls sit **outside** the reading line so saccades while reading don't graze them;
+  controls appear only when the strip is revealed (reveal-gated), so a stray fixation on an
+  empty edge does nothing.
+- Confidence "reveal-alternatives" is L0 and **dismisses on look-away** — reading a squiggled
+  word can't mutate the transcript.
+- Walk gate: a **random-gaze fuzz** over the resting pane must produce **zero commits**
+  (§9 test `CaptionMidasFuzzTest`).
+
+### 8.2 Calibration assumptions
+
+- **Assumed gaze accuracy: the config floor (2.8°/3.2°), no finer.** Every caption target
+  is sized to it in both axes; the gaze-adaptive pane uses a **coarse pane-vs-speaker
+  region discrimination**, not pixel-precise fixation — so it tolerates calibration drift.
+- **Graceful degradation (G9 reconciliation):** if ET is unavailable / unstable / not yet
+  exposed by the SDK, captions still display (L0 needs no gaze) and **every control stays
+  reachable via the G1 non-gaze paths** (voice / head / switch / phone). Gaze-adaptive
+  dim/expand falls back to a **fixed pane**; the speaker pointer falls back to **absent**.
+- **Calibration retry** is a substrate affordance (`source-spec` §16); Caption Lantern does
+  not block on calibration — it is usable with none.
+- **VERIFY against final SDK** (§8.5): the Everysight portal lists ET capability but raw vs
+  semantic GazeIntent, coordinate system, and confidence signal are unconfirmed
+  (`goals-and-guidelines.md` §8 open Q3; `source-spec` §18).
+
+### 8.3 Dwell alternatives
+
+- **No action requires dwell.** The default path is saccade-confirm (select→ACT→CONFIRM),
+  which is dwell-free by construction. The redundant paths (head-nod / voice / switch /
+  phone) give a non-gaze CONFIRM for gaze-rest and ET dropout (G1/G9).
+- Where a short dwell is *offered* as one option (substrate `interaction_mode`), it is **only
+  on the reversible L1 controls** and **must show the standard countdown affordance**
+  (`CLAUDE.md` eye-tracking law; ~0.6 s, exact TBD on hardware). It is never the only path.
+- **Calibration-light smooth-pursuit (Pursuits/Orbits) selection** is preferred over
+  per-target dwell where it lowers effort (G9) — a substrate capability this app opts into.
+
+### 8.4 Fatigue / energy budget (spoon-aware, G3)
+
+- **Resting interaction cost ≈ zero:** captions are passive; the gaze-adaptive pane removes
+  the *manual* dim/enlarge loop entirely (the eye does it for free). The steady-state render
+  path is ~zero-allocation (`CLAUDE.md` GC-is-the-enemy) so no per-frame churn.
+- **Gaze-rest paths:** every control has a non-gaze fallback; the user can drive the whole
+  app by voice / phone for a gaze break without losing captions.
+- **Resumability:** pause/hide/clear are interruption-friendly; leaving and returning never
+  penalizes (no modal mid-flow that must be completed). Pinned lines survive a pause.
+- **Posture modes (required, `source-spec` §16):** **reclined/bed mode** (caption anchor +
+  control reach re-mapped for a head-tilted-back user — anchors and the pointer respect head
+  angle) and **minimal-head-movement mode** (controls reachable within a small gaze cone; no
+  required head turns). Plus night mode / low-brightness / reduced-motion (disables
+  gaze-adaptive animation) / no-strobe — all inherited from the substrate, all switchable.
+- **Interaction-cost test discipline (substrate):** acts-per-task and gaze-dwell budgets are
+  measured, not screenshotted — see §9 `CaptionInteractionCostTest`.
+
+### 8.5 What waits for real HMD testing
+
+Simulator-only today (`project_simulator_only`). The sim cannot honestly validate:
+
+- **End-to-end caption latency ≤300 ms** on real hardware (sim has no real mic→ASR→display
+  path; we assert the *render/pipeline* budget, not the felt latency — G5).
+- **Felt readability / focal-depth eye strain** of the additive optic at real luminance
+  (`01` §6 face-occlusion / refocus) — needs the wearer + glasses.
+- **Gaze-adaptive dim/expand comfort** and whether it preserves the *social* eye-contact
+  signal — a felt experience, deferred to the collaborator on hardware (G8;
+  `collaborator-and-codesign.md`).
+- **Real ET accuracy / drift / confidence**, dwell/confirm comfort timings, smooth-pursuit
+  viability — tune on device (§8.2, `source-spec` §18).
+- **Peripheral sound-glyph salience** and **speaker-pointer usefulness** with a real IMU
+  bearing in a real room.
+- **Battery / heat** of continuous captioning (the peers' 2–3 h kill-switch, `01` §4.4).
+
+### 8.6 Eye-tracking UI patterns (Eyefluence-informed) + FTO check
+
+- **FTO posture:** Caption Lantern uses **only the shared FTO bundle** (A1 + B8 + C2 +
+  E1–E4 from `design-pmeyeui-fto-bundle.md`) for activation — the B8 pursuit/morph lives in
+  the shared widget (`drawActionTargetIcon` / `pursuitIconRect`), **not** re-implemented per
+  app (patent invariant is widget-level; forking it is a regression flagged in review,
+  `CLAUDE.md`). `tools/fto-check` gates it.
+- **Eyefluence-informed patterns to USE:** gaze-to-focus + explicit-second-signal-to-commit
+  (Midas defense); large targets; saccade not dwell; a select highlight on every selectable
+  target; calibration-light pursuit selection.
+- **Patterns to AVOID** (Peter's expertise — `collaborator-and-codesign.md`, `source-spec`
+  §19): per-target dwell as the only path; small targets; long fixation requirements;
+  gaze-only commit of anything consequential (none here, but the rule stands); fusing gaze +
+  IMU for *intent inference* (`CLAUDE.md` — IMU places/gates the pointer, gaze selects; never
+  fused). The speaker pointer is IMU-placed, gaze-interacted — FTO-clean.
+- *(Peter to fold Eyefluence review notes here — calibration-drift handling, comfortable
+  gaze-confirmation models, min viable gaze-UI test harness; `source-spec` §19.)*
+
+---
+
+## 9. Red lines & community position
+
+- **R5 — no recording bystanders without lawful consent.** Default **on-device / on-phone
+  ASR, no audio persisted, no transcript stored, transcribe-on-request**; **two-party-consent
+  jurisdictions respected**; a visible **recording-posture / privacy indicator** at all times
+  (the camera-glasses-bystander backlash is real and LED indicators are an inadequate consent
+  signal — `01` §4.3, §6). "Repeat last" works from a **short rolling buffer**, not a stored
+  transcript. Marketed as a *pro*: "only the wearer sees it; nothing is recorded" (`01` §3,
+  §5.6).
+- **R1 — not a medical / hearing device.** No "hearing"/"restores"/WER claim in any surface
+  or doc (G7; audited). Positioned as an *accessibility tool* and a *caption companion*, like
+  the Meta Ray-Ban Display's explicit "situational captioning companion, not a hearing-aid
+  replacement" framing (`01` §1).
+- **R-COMM — ASL-first Deaf-community framing (G8).** Captions are a tool for
+  **late-deafened/HoH English readers** and for interfacing with the hearing world; they
+  **complement, never replace** ASL, interpreters, or CART (the accuracy gold standard,
+  `01` §2). Do not position Lantern as a Deaf-community product or imply it serves the whole
+  community (`01` §3, §4.9). "Nothing about us without us": contested choices go to the
+  co-design tester.
+- **R6 — accessibility is not a hidden mode.** Caption Lantern is a normal app available to
+  everyone; the calm defaults and redundant input are the product (`goals-and-guidelines.md`
+  R6).
+- **Honest accuracy:** never lead with raw WER (it doesn't track DHH usability; salient
+  errors hurt most — `01` §2 Kafle/Huenerfauth, §6). Surface *confidence* (the squiggle), not
+  a vanity number.
+
+---
+
+## 10. Data model (from `source-spec` §7 — starting schema)
+
+`CaptionSession`: `session_id`, `started_at`, `source` (phone-mic / approved-source),
+`is_recording_allowed`, `transcript_storage_policy` (default `none`),
+`current_caption_buffer` (short rolling buffer — the only thing "repeat last" reads),
+`pinned_lines` (session-local), `paused_state`, `hidden_state`. `UserSettings` (subset
+this app reads/writes): `caption_font_size`, `caption_contrast_mode`,
+`caption_window_position` (named anchor), `hud_brightness`, `interaction_mode`,
+`confirmation_mode`, `privacy_mode`, `cloud_services_enabled` (default off → local-only).
+ASR runs on the **phone** (default on-device; cloud is an explicit opt-in accuracy boost at
+a latency cost, Later). The Maverick draws; the phone is the brain (consistent with the
+two-IMUs / phone-is-the-brain project memory).
+
+---
+
+## 11. Test plan (over-specified — 5 dimensions, per sub-state)
+
+Coverage is **per SUB-STATE**, deterministic, driven through the **real dispatch path**
+(`step:*` seams + `adb input`), on **both sinks**, under **≥2 configs (C2 + D5)**, per
+`CLAUDE.md` #16. Sub-states enumerated: **active / paused / pinned / cleared / hidden /
+privacy-mode / enlarged / reduced / dimmed / moved(each anchor) / multi-speaker(color) /
+low-confidence-words / empty / loading / ASR-fail / mic-permission-denied / no-source /
+gaze-adaptive-expanded / pointer-present / pointer-absent / sound-alert.** `[x]` = covered,
+`[ ]` = required-not-yet-written.
+
+### 11.1 Functionality (real seams / dispatch)
+
+- [ ] `CaptionControlDispatchTest` — each L1 control (repeat/pause/resume/enlarge/reduce/
+      dim/brighten/pin/clear/move/hide/privacy/local-only) drives select→ACT→CONFIRM and
+      asserts the `CaptionSession`/`UserSettings` field changed.
+- [ ] `CaptionRedundantInputTest` — every control reachable by ≥2 paths (gaze + voice/head/
+      switch/phone); G1.
+- [ ] `CaptionUndoTest` — clear / move / enlarge / dim are revertible via the substrate
+      undo-snackbar; pin↔unpin; pause↔resume.
+- [ ] `CaptionMoveAnchorTest` — each named anchor selectable, pane re-anchors, no overflow.
+- [ ] `CaptionCommitBeforeDisplayTest` — tentative words held/visually-distinct until
+      committed; the pane never rewrites a committed word (no flicker).
+- [ ] `CaptionConfidenceRevealTest` — low-confidence word squiggled; glance reveals
+      alternatives; look-away dismisses; transcript unchanged (L0).
+- [ ] `CaptionSpeakerColorPointerTest` — multi-speaker color channel; IMU bearing drives the
+      peripheral pointer; pointer absent when bearing unknown.
+- [ ] `CaptionSoundAlertTest` — non-speech event → FOV-edge directional glyph, outside the
+      pane, dismissable.
+- [ ] `CaptionStatusBeadTest` — mic/caption/privacy/local-only/paused/hidden states reach the
+      substrate Status Bead model.
+
+### 11.2 Appearance — BOTH sinks (capture + read inline)
+
+- [ ] `CaptionRendererParityTest` — M2 vs `PhoneCanvasSink` draw-command transcript parity
+      for every sub-state (no `drawCaptionPreview`; same `HmdRenderer` path).
+- [ ] `CaptionBitmapParityTest` — pixel/SSIM parity of the two sinks per sub-state (catches
+      the fill-as-bar / additive-floor-drop class, `CLAUDE.md`).
+- [ ] `CaptionTextFitTest` — at the **minimum font tier**, ~2 lines/~3 words/line, **no
+      overflow**, **no overlap** (use `MeasuringHmdDrawSink`); for the no-source / ASR-fail
+      strings too (error strings jam unusual text into happy slots).
+- [ ] `CaptionColorFloorTest` — every caption / squiggle / speaker hue / pointer / glyph
+      colour passes the Palette additive floor (`tools/color-audit`); none below near-black.
+- [ ] `CaptionSelectionHighlightTest` — every selectable control shows a select highlight;
+      sized ≥ config floor (2.8°/3.2°) in **both** axes.
+- [ ] `CaptionFaceLineTest` — pane stays below/offset from the speaker face line; never over
+      the mouth region; G4 occlusion check.
+- [ ] Inline-read both `.hmdframe.png` + `.avd.png` per sub-state in the walk; state the
+      active-area fraction the pane/text occupies on each (`CLAUDE.md` #6/#12).
+
+### 11.3 Error / empty / loading (FORCE each)
+
+- [ ] `CaptionMicPermissionDeniedTest` — revoke mic perm: clear non-overflowing message,
+      no crash, recoverable.
+- [ ] `CaptionAsrFailTest` — ASR source drops: pane shows a bounded error state, captions
+      resume on recovery.
+- [ ] `CaptionNoSourceTest` — no approved source: honest empty state (not a blank pane that
+      looks frozen).
+- [ ] `CaptionEmptyBufferTest` — repeat-last with empty buffer is a safe no-op.
+- [ ] `CaptionLoadingTest` — pre-first-word loading state distinguishable from frozen/failed.
+- [ ] `CaptionLocalOnlyEnforcedTest` — with `cloud_services_enabled=false`, no network call
+      is attempted (R5/G6); privacy indicator reflects it.
+
+### 11.4 Timing (#222 frame budget + G5 latency)
+
+- [ ] `CaptionLatencyBudgetTest` — the **render+commit pipeline** stays within the **≤300 ms**
+      budget model; the commit-hold window is bounded; **>5 s = fail** the model (felt latency
+      waits for hardware, §8.5).
+- [ ] `CaptionNoFlickerTest` — commit-before-display ⇒ zero per-word rewrite of committed text.
+- [ ] `CaptionAtRestAllocationTest` — captions at rest (no new speech) cause **zero
+      snapshot/placement rebuild** churn (`AtRestAllocationTest` model; GC-is-the-enemy).
+- [ ] `CaptionFrameBudgetTest` — gaze-adaptive expand/dim transition within one frame
+      (16.7 ms @60 Hz / 22 ms @45 Hz sim); no cold-rebuild freeze on open.
+
+### 11.5 Failed use cases (atomicity / boundaries / leaks / security)
+
+- [ ] `CaptionMidasFuzzTest` — random-gaze fuzz over the **resting pane** produces **zero
+      commits** (§8.1); reading never activates a control.
+- [ ] `CaptionNoPersistByDefaultTest` — no audio / no transcript written to disk by default;
+      "repeat last" reads only the rolling buffer (R5).
+- [ ] `CaptionClearAtomicityTest` — a cancelled clear leaves the buffer intact; a confirmed
+      clear leaves nothing behind (and is undoable).
+- [ ] `CaptionLeakTest` — Caption→Home→another-app + app→app direct transition: `scene_snapshot`
+      carries **no caption text** afterward (the #199 park-offscreen leak class).
+- [ ] `CaptionInterruptTest` — mid-confirm interruption (look-away / timeout) cancels cleanly;
+      no half-applied setting.
+- [ ] `CaptionInteractionCostTest` — substrate acts-per-task / gaze-dwell budget for the
+      common flows (repeat, enlarge, move) within the fatigue budget (§8.4).
+- [ ] `CaptionResumabilityTest` — pause→leave→return resumes with pinned lines intact; no
+      penalty.
+- [ ] `CaptionGracefulNoEtTest` — with ET disabled, captions display and every control is
+      driveable by a non-gaze path (G9; §8.2).
+
+**What waits for real HMD** (not gateable in sim — §8.5): felt ≤300 ms; additive-optic
+readability/eye-strain; gaze-adaptive comfort + social-signal preservation; real ET
+accuracy/drift; sound-glyph + pointer real-room salience; battery/heat. Tracked, not faked
+green.
+
+---
+
+## 12. Open design questions
+
+1. **(Most important — for the user/Peter)** *Default placement of the gaze-adaptive
+   behaviour:* should dim-on-eye-contact / expand-on-read be **ON by default** (the signature
+   passive win) or **OFF by default** (some users want a fixed, predictable pane; G3
+   reduced-motion)? This is a co-design + Eyefluence call and shapes the whole resting UX.
+2. **(For the user/Peter)** *Speaker-pointer fidelity floor:* with IMU-only 3DoF and no face
+   tracking, is a coarse edge-glow-toward-a-bearing useful, or does its inaccuracy mislead
+   more than it helps in 1:1 (where there's only one speaker anyway)? Scope it to small-group
+   only, or cut from MVP?
+3. **(For Catherine)** *Privacy posture surfacing to bystanders:* R5 wants a visible recording
+   posture, but the wearer-only optic means **bystanders can't see it** (unlike a phone
+   screen). Is "only the wearer sees it; nothing is recorded" sufficient ethically, or do we
+   need an outward indicator (and does the Maverick even have one)?
+4. *ASR source contract:* what counts as an "approved source" beyond the phone mic — paired
+   room mic, conferencing-app audio, Voice Lantern's TTS mirror? Affects R5 consent posture
+   per source.
+5. *Commit-hold vs latency tradeoff:* the commit-before-display hold *adds* latency to *kill*
+   flicker — what hold window best balances the ≤300 ms floor against the no-strobe rule?
+   Tune on hardware (§8.5), but a starting target is needed.
+6. *Move anchors set:* which named angular anchors ship in v1, and do reclined/bed + minimal-
+   head-movement modes need their own anchor sets?

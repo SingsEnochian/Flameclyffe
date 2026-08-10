@@ -1,0 +1,3324 @@
+www.JapanBestCars.com
+
+Y
+I
+TRANSCRIBED, TRANSLATED AND ANNOTATED
+BY
+ALAN H. GARDINKR D. LITT.
+LAYCOCK STUDENT OF EGYPTOLOGY AT WORCESTER COLLEGE, OXFORD
+SERIES I: 	LITERARY TEXTS
+OF THE 	NEW 	KINGDOM
+DXRBCTOR’S LI’BR~RY
+OBIENTAI, INSTITUTE
+~ 	~ 	I 	V 	~ 	~ 	I 	~ 	Y	OF CHICAGO	PART I
+T H E PAPYRUS ANASTASI I AND T H E PAPYRUS KOLLER,
+TOGETHER WITH THE PARALLEL TEXTS
+L E I P Z I G
+J. C. H I N R I C H S ’ S C H E B U C H H A N D E U N G
+191I
+
+The following extracts from the Prospectus in which the present work is announced
+will explain its scope and arrangement :-
+“It is proposed to divide the whole material into a number of 	es, each dealing with
+a different class of text: the first series will contain Liternvy Texts, the subject of the second
+will be Hngicnl Texts; other series will be devoted to Business Documents, 3’wistic Texts,
+Letters, etc. Every series will comprise a certain number of parts, e a c h o f w h i c h will b e
+c o m p l e t e i n itself, containing one or more entire texts, together with bibliographical intro-
+ductions, translations and notes. 	When a sufficient number of parts in any series has been
+issued, a volume will be concluded; the separate volumes will include full indices to the words
+discussed in the notes, and to personal, royal and geographical names; and the numbering of
+the pages will be so arranged that the printed portion containing the translations and intro-
+ductions, and the autographed portion containing the text, may be bound up separately.
+“In the autographed portion, the left-hand page will contain the hieroglyphic trans-
+script, while the palaeographical comments will occupy the opposite page. 	T h e d i r e c t i o n
+a n d m u t u a l p o s i t i o n o f t h e s i g n s in the original will be r e t a i n e d in the transcript, in
+order to facilitate comparison with the hieratic. 	For economy of space and for other reasons
+the text will not be split up into sentences; nor will the restoration of lacunae be undertaken
+beyond a limited extent. 	Where more than one manuscript is preserved, the parallel texts
+will be reproduced in extemo side by side. It need hardly be said that the series aims at the
+most exemplary accuracy, particularly in the establishment of the text , the originals having
+been diligently collated in almost every case.
+“The printed portion will consist of bibliographical introductiops, c o m p l e t e E n g l i s h
+t r a n s l a t i o n s , and such philological notes, with abundant references, as can be given without
+the use of hieroglyphic type. 	In the preparation of the translations all previous renderings
+will be carefully compared, so that no earlier suggestions of value may be ignored. 	The
+translations will err rather on the side of literalness than on that of freedom, but the notes will
+supply a certain corrective in the way of paraphrases and explanations of passages where
+the English rendering is obscure.”
+Title-pages, Preface and Indices will follow later at the conclusion of Volume I.
+For the immediate convenience of the reader the following facts should be noted.
+The printed portion of the work is separately paged with numbers accompanied by asterisks
+( I * ~2*, 3 9 and in seeking cross-references In the foot-notes this fact is strictly to be borne
+in mind. 	Such references as p. 5 , line 9, or p. 5 a, note I I d refer to the autographed text
+and to the autographed notes accompanying the same; and the page-numbers thus alluded
+to are those that will be found following the words Lit. Texts at the top right-hand corner
+of the autographed pages; the numbers at the bottom of the autographed pages will be
+omitted in subsequent parts, and should be disregarded altogether. 	The double mode of
+paginatioii has been adopted in order that the printed and autographed portions may later
+be bound up separately.
+The references to Egyptological literature are given in the forms commonly used
+in Egyptological books. 	The Semitic scholar should note that MAX MULLER,As. 21. Ear. =
+w. MAX MULLER,Asien und Ewo$n nach Altkgyjtischeiz 	Denkmalern, Leipzig I 893; and
+that BURCH.stands for MAXBUIXCHARDT,	Bie nZthnnnan8ischen Fyemdworte und Ez&vznnmen
+ip% Aegyjtiscken: zzueiter (Schlass-) Ted, Listen der sydlabisch geschriebenen Wovte, Leipzig 19IO.
+For the the transcription of Egyptian words the symbols used in the graniniar of
+A. ERMAN	have been retained, except t h a t j is replaced by y. 	A good comparative table of
+Egyptian and Semitic consonantal values (for Semitic words written in Egyptian of the New
+Kingdom) will be found in the above-quoted book by BURCI-IARDT, erster Teil, p. 52.
+~--.____	-
+
+4. 	A 	satirical letter.
+Sources of the text. 	I. T h e P a p y r u s A n a s t a s i I (Pap. Brit. Mts. 10247) was
+purchased for the British Museum in 1839 from Signor ANASTASI,the Swedish Consul in Egypt.
+It measures 8 */4 metres in length; its height is 20.5 cni., i. e. it is of the normal height of literary
+papyri of the second Theban period, Both in respect of size and of calligraphy the papyrus is one
+of the finest specimens of a Ramesside book. 	The text, written upon the horizontal fibres, com-
+prises 28 pages of 8 or g lines apiece; at the beginning there is a protecting strip of IO.5 CM.
+The vei-so is uninscribed, save for a few large illegible signs at the back of the 19th. page. 	The
+papyrus contains but a single composition, which is complete except for the losses caused by
+lacunae; these are very abundant, especially in the earlier pages. 	The composition is divided
+into nineteen paragraphs, of which the first words are always written in red. Verse-points occur
+on the 9th. and 10th. pages. 	Corrections are to be found here and there; one written at the
+top of page 3 is probably due to a teacher’s hand. 	The type of handwriting is closely similar
+to, b u t not identical with, that of Ennene, the scribe to whose industry we owe several of
+the finest of the London hieratic papyri. 	The papyrus Anastnsi I may therefore be dated
+with approximate accuracy to the reign of Sethos I1 (see MOLLER, Paliiographie I1 1111. -
+A good hand-facsimile by J. NETHERCLIFT is published in the Select Papyri in the hiemtic
+chmactev f r o m 	the collections of 	the British Mkseum, London 	I 842, plates XXXV-LXII2.
+In CHABAS’book Le Voyage d’un Eg-@ie~the plates, comprising Arzast. 1 8 ; 18,3-8; 	19 to
+28, s~eemto have been merely reproduced from the official publication. - The transcript
+here given is based on that made by K. SETHEfor the purposes of the Berlin hieroglyphic
+dictionary; this has been diligently collated with the original on several separate occasions 3.
+2. O s t r a c o n b e l o n g i n g t o P r o f e s s o r P e t r i e (abbreviated 0. P.). A slab of lime-
+stone 2 1 x 2 6 cm., containing a half-obliterated duplicate of Anast. I I, 1-4 with some additions.
+Unpublished.
+3. O s t r a c o n in t h e B i b l i o t h 6 q u e N a t i o n a l e , P a r i s (abbrev. 0. B. N.), a limestone
+tablet 	containing 	Aiznst. I 1,6-2,6 	with 	iiumerous 	variants 	and additions. 	Published by
+W. SPIEGELBERG,	Btitrage guy Erklhrung des Pnpyvus Annstnsi I in the Zeitschr@ f i r agyp-
+tische Spyache 44 (1908)~I 19-122 	and Tafel V. VI, with (I) a photograph of the stone in its
+present much deteriorated condition, (2) a hand-copy of the hieratic made in 1892, and (3)
+a hieroglyphic transcription.
+4. O s t r a c o n in t h e B r u s s e l s c o l l e c t i o n 	(abbrev. 0. Br.), a broken potsherd
+containing portions of Annst. 1 2 , 1-5 	and closely following the ostracon of the Bibliothkque
+My text is based on a comparison of these materials.
+I) According to M ~ L L E REnnene was a scribe of the Memphite school. The same would doubtless
+2) This is sometimes referred to in my notes upon the text as “the facsimile”.
+3) The proofs of this edition were finally compared with the original in September 1910.
+hold good of the writer of Anastasz I.
+G a r d i n e r . 	I
+
+2* 	Literary Texts of the New Kingdom
+Nationale in its text. 	Published here for the first time from a photograph and a transcription
+provided b y Professor SPIEGELBERG	1.
+5. O s t r a c o n i n t h e L i b r a r y of Queen’s College, O x f o r d (abbrev. 0. Q. C.),
+a limestone fragment measuring 17,5x13 cm., containing the text of Anast. I3,4-4,1 	with
+sundry additions. 	Brought back from Egypt b y BELZONI.Hitherto unpublished.
+6. O s t r a c o n in t h e T u r i n M u s e u m (abbrev. 0. T.), a duplicate of Annst. I 6,5-7,3,
+on a fragment 	of limestone measuring 21x18 cm. 	Published PL.EYTE-ROSSI,Papyrus de
+Tzliin, plate CXLIX.
+7. O s t r a c o n in t h e L o u v r e (abbrev. 0. L.), a potsherd neatly inscribed with the
+text of Annst. I 8,3-g,~. 	An admirable facsimile is given by J. DE HORRACIC,Sur uiz
+ostrncon du f i A d e du Louvre in the Zeitschrzftf.’r 	iigyptische Sprache 6 (1868)~I--6, 	reprinted
+in the Bibliothhque Egj.ptologiqzie t. 17, p. 60-69. 	Here transcribed from the publication.
+8. O s t r a c o n Cailliaud (abbrev. 0. C.), one of several inscribed fragments of lime-
+stone described as ‘itrouv& dans les hypogkes de Gournah A Thkbes”, containing the same
+passage as the Louvre ostracon in a slightly inferior but closely related version. 	A t the end
+there is a mention of the Vizier To’, who lived in the reign of Rameses 111. A n adequate
+facsimile is given in FREDERIC	CAILLIAUD,Y o y q e ii Z’Onsis de Thkbes (deuxihme partie,
+Paris 1862)~pl. 25, no. I ; and thence CHARAS,op. cit., pl. 12. 	Transcribed from the publications.
+9. O s t r a c o n i n t h e B e r l i n c o l l e c t i o n (abbrev. 0. B.), a potsherd (P. 11236) coii-
+taining the text of Anast. I9,9-10,4, 	but with extensive lacunae. 	A small fragment of this
+potsherd which was acquired for the Leipzig collection together with bther ostraca has now
+been joined to the larger portion in Berlin. 	Published in Hie?patisc/zePnpyras nus dez ko~z&-
+Zicheiz L%fZ.S&FZ 	zu BerliTz, Bd. 111, Tafel 28.
+IO. P a p y r u s in t h e T u r i n M u s e u m (abbrev. P. T.), a badly-written palimpsest,
+21 cm. in height and 45 cni. in breadth, bearing upon the recto, i. e. upon the horizontal
+fibres, a duplicate of Aiznst. I 12,G-151. 	The verso gives the full titulature of Rameses IV.
+Published in facsimile PLEYTE-ROSSI,Pn$~wzis de Tzwin, pl. 62 (the wrso, pl. 63). 	Collated
+for the present edition with the original.
+Bibliographical notice. 	The third and last instalnient (1S44) of the Select Papyri
+(first series) contains some prefatory remarks, by Samuel BIncI-r, on the manuscripts com-
+prised in the entire work. 	Here we find A~znstnsiI characterised as a “continuous series of
+statements made apparently by a royal scribe in command of the troops”, and the various
+paragraphs into which the papyrus is divided are briefly and somewhat vaguely summarized.
+Some years later Dr. HINCICSset himself to study the foreign place-names in the latter
+portions of the text, and in the E ~ ~ ~ Z S L W ~ ~ O J Z S	o f the Royal Irish Acndeiizy for 1848 was able
+to announce the discovery of the names of Berytus, Sidon and Sarepta. Consecutive trans-
+lations, b y Dr. BIRCH,of certain passages interesting for their geographical data were embodied
+in a paper entitled Repknim nizd their comexion with Egyptian History, which Miss Fanny
+CORBAUXpublished in the yoz~ri~nl	o f Sac?*edLiterature for January 1852. In H. BRUGSCH’S
+volume Die Geogrnphie der Nachba?#Z&zderAegypteizs (Geogmnphische Inschrgtm nltag-.ptisc/zer
+De?zzlt.inhle?p, zweiter Band, Leipzig 1858) constant reference is made to our papyrus, 	and
+many of the Syrian towns mentioned in it are brilliantly identified. 	A remarkable attempt
+to cope with the difficulties of the text was next made by GOODWINin his epoch-making
+article on Hieratic Papyri in the Cnmbri&e Essays of 1858; GOODWINnot only gives a short
+analysis of the entire composition from beginning to end, but also translates a considerable part
+of the last ten pages, often with astonishing accuracy and success. 	It is hardly to be wondered
+at if at this stage the literary tendency of the document was not yet recognized; GOODWIN
+Collated with the original.
+My transcript is made from the original.
+I ) I am greatly indebted to M. CAPART for calling my attention to this ostracon and giving me
+permission to publish it; and to Prof. SPIEGELBERGfor surrendering his prior claim in my favour.
+
+Anastasi I 	3*
+pronounced it to be the “biographical memoir of a scribe, written by his pupil, and addressed
+to the object of the memoir himself.” Much the same view was taken by Fransois CHABAS
+in his justly celebrated work Voyage d’un Earyptien en Syrie, en Phe‘nicie, en Palestine, &c;
+nu X I V m e sihcle nvnizt notre &e, published with GOODWIN’S	collaboration in 1866. The book, a
+bulky quarto, is chiefly concerned with the last ten pages of the papyrus, which CHABASregarded
+as the authentic narrative of a voyage in Syria retold to the scribe who had undertaken it
+b y his pupil. 	This portion of the text is dealt with in great detail, the translation being
+accompanied by an elaborate philological commentary. 	For the earlier parts of the papyrus
+CHABASis content to give trailslations or abstracts of the sense, though allowing himself
+occasional digressions 	on linguistic points. 	The importance of the book as a contribution
+to Egyptian philology was at the time of its appearance very considerable, its renderings
+marking a great advance on what had thitherto been achieved. 	CIIABAS’ conception of the
+text as a whole is superior to that of GOODWINonly in the recognitioii of the fact that the
+writer here and there complains of his correspondent’s style, and when attacked defends himself
+against the latter’s sdathing comments. 	A n ill-tempered review of CHAEAS’nzagnum opz~s
+was printed by BRUGSCHin the Revue Critique of 1867 1, and led to an acrimonious contro-
+versy between the two scholars. 	CHABAS’Reyonse h In C~itiqz~e	(Chalon-sur-Sa6ne and Paris,
+1868; recently reprinted in Bibliothique Egyptologique, tome I I, p. 203-340) 	is not wholly
+lacking in scientific interest, but contains a preponderance of recrimination hardly to be
+excused by the fact that it certainly was not unprovoked. 	BRUCSCH’Scritique had the merit
+of showing the voyage recounted in the papyrus in a much truer perspective than thereto-
+fore; it was now seen to be no authentic relation of travels in Syria, but an imaginative
+picture of the perils attendant on such travels, the object being, as RRUGSCHthought, to
+deter the colleague addressed from fancying himself equal to heroic enterprises of the kind.2
+This approximates very closely to the view of the text that is now accepted. 	In a pamphlet
+which 	appeared 	in 	1868 	F. J. 	LAUTH,sought 	to 	prove 	that 	the 	Mohar, 	i. e. the
+Egyptian traveller whose adventures in Syria are described in Annstasi 4 was none other
+than the biblical Moses (Moses der Ebraer nnch zwei agyptisckeiz Pnpyvzts- Uf,Kunden in
+hie?*atischerSchriftnrt, Miinchen, 1868). This hypothesis, which was principally based on Annst. I
+18, 2, has deservedly passed into oblivion, but the book merits more attention than it has
+received on account of the complete translations of Annstasi I and Pap. Leiden 350 (recto)
+contained in its appendices; here LAUTHshows himself, according to his wont, as enterprising,
+acute; and unsound. 	Considerable portions 	of the first ten pages 	of the papyrus were
+translated 	by 	MASPERO in 	his 	thesis Du 	Genre kpistolnive 	chez 	Zes 	anciens Eg-$tiexs
+(Paris 1872)~p. 106-114. 	For thirteen years after this no event of importance has to be
+recorded in the bibliographical history of the papyrus. 	A n English version of CHABAS’and
+GOODWIN’Stranslation by S. M. DRACHwas printed in the Records of the Past (first series,
+no date) vol. 2, p. 107-116 	under the title Travels of niz Egyptian. A fragmentary papyrus
+in Turin and an ostracon in the Louvre were recognized as containing portions of the text
+of Azastnsi I; an ostracoii practically identical with that in the Louvre had long since been
+published by CAILLIAUDand used in CHABAS’book.3 In 1885 Adolf ERMAN’S	work Aegypten
+uizd agyptisches Lebeiz appeared, shedding new light on almost every province of Egypto-
+I ) Also obtainable separately at the Librairie A. Franck in Paris under the title Exalnen Critique
+du Livre de M . Chabas intituld Voyage d’un Egyptien e n Syvie, e n Phe’nicie, e n Palestine, &c. a u
+X I V m e siBcle avant notre &e.
+BRUGSCHis certainly right in translating the numerous
+sentences of the type bw Sln-k, bw ptvi-k, not as rhetorical questions (so CHABASand ERMAN),	but as simple
+negative statements “tu n’es pas parti” ‘‘tu n’as pas vu”.
+3) See above under the heading Sources of the T e x t for particulars as to the publication of these
+duplicates.
+2) See particularly p. I I of the Critique.
+I *
+
+4"
+logical science. 	Here the first Annsfnsi papyrus obtained its due in the shape of an admirable
+analysis interspersed with translations (p. 508-513); 	and the real subject of the book was lucidly
+and convincingly proved to be a literary controversy between two scribes, the form adopted
+being that of a letter pretending to be the answer to an ill-worded and pretentious com-
+munication. 	ERMAN'S	general interpretation requires hardly any modificatioii today, and his
+translations need but little change, though naturally the latter embrace only the more easily
+intelligible and picturesque passages.
+For the past five and twenty years no dew edition or translation has to be noted,
+so that for complete, or nearly complete, renderings of the papyrus recourse must still be
+had to the works of CHABASand LAUTH. 	A hieroglyphic transcription of Anast. I 18,3 to
+28,s (the voyage) is given in E. A. W. BUDGE'SEgyptian Rending Rook (18%) p. 157-169,
+and in the larger edition of the same work (1896) p. 274-294. 	The geographical problems
+are minutely discussed in W. MAX MULLER'SAsien und Ezlropn nach altizgyptischen De?&=
+intilern (1893), particularly pp. 172-175. 	MASPEROhas dealt with two passages of the voyage
+in his articles Entrp Yoppe' et Mngeddo in the &tudes . . . . de'die'es h N le Dr. C. Lee?nnns,
+p. 4-6; 	and Notes SZM la ge'ographie kgyptienne de In Syrie, 111 in the Recueil de Tvnvnux
+19, 68-73; 	SPIEGELBERG	has given a rendering of, and commentary on, 9,4-10,6 	under
+the title Eine Pyobe der 2gyptischen personlichen Sative in his %eitrage zzw ErKGiiiwzg des
+Papyrz~sAnnstasi 1 (A. Z 44 [1908], 118-125). 	A fine ostracon belonging to the Biblio-
+thi.que Nationale, Paris, and supplementing the beginning of the papyrus is also published
+in the last-named article.
+Literary Texts of the New I.ingdom
+General remarks. 	The composition contained in the first Aitlastnsi papyrus was
+written certainly not earlier, but probably also not later, than the reign of Rameses 11, the
+name of that king occurring in several passages (12,3; IS$: 	27J. 5). 	Of the ten ostraca and
+papyri preserving greater or less portions of the text none is of more recent date than about
+the middle of the 20th. Dynasty; and this quite unusual number of manuscripts, scattered
+over so brief a period, bears eloquent testimony to the popularity which the work enjoyed
+in the Ramesside schools. 	Nor is its popularity hard to explain, if the standards of taste
+current in those times are carefully borne in mind. 	In the first place the theme upon which
+the entire composition turns is the profession of the scribe, and no lesson was more assi-
+duously instilled into the mind of the Egyptian schoolboy than the belief in the dignity and
+the advantages 	of that career. 	Thus from one aspect Annstasi I ought to be regarded
+' as akin to the numerous effLisions in which the student is bidden apply himself diligently
+to 	the art of writingf, or where 	other occupations are invidiously compared with 	the
+labours of the scribe2. 	Secondly, its wealth of topics and consequent variety of vocabulary
+must have given the text particular value as a model of style and as a means of teaching
+orthography. 	The abundant use made of foreign words and the display of erudition with
+regard to outlandish place-names agree well with what we know of the predilections of the
+age3. 	Lastly, the good-humoured raillery which is the dominant note of the papyrus springs
+from one of most attractive sides of the Egyptian temperament. 	Hints of the Egyptian's
+love of repartee and appreciation of irony may be found in the snatches of conversation
+written above the scenes on the walls of tombs, or in the paintings and sculptures them-
+selves, or in the rare caricatures that have survived, and samples are to be found here and
+there in the literature 4 ; but nowhere are these attributes more strikingly illustrated than in
+I) See ERMAN,	Aegypten p. 442 foll.
+2) E. g . Anust. I V 9, 4 foll.
+3) See ERMAN,	Aegypten p. 683.
+4) See especially the letter Pup. Babl. Nut. 198, 2 published by SPIEGELBERG,Cowespondances
+du Temps des Rois-PY&tvesp. 68-74.
+
+Anastasi I 	5”
+Aizastnsi 1: If it must be confessed that the quality of the wit is poor, and that the satirical
+vein is intolerably insistent, still, that a Ramesside author should so well have understood
+to use language in a way not immediately suggested by its plain face-value is an achievement
+to be respected.
+The whole character of the book would make it impossible to translate satisfactorily
+into any modern language, even if its vocabulary were more familiar to us. 	As it is, our
+ignorance of many of the actual words often leaves the sense totally obscure; and the
+difficulties are 	further 	increased 	by 	the 	frequency 	of the lacunae and by the textual
+corruptions. 	In the rare cases where more than two manuscripts are preserved Anastnsi I
+is as a rule found to stand alone in its readings; the Brussels ostracon agrees closely with
+that of the Biblioth6que Nationale, the Cailliaud ostracon still more closely with that of the
+Louvre. 	Possibly the reason may be that Anastnsi I ‘ i s a Memphitic textl, whereas the
+ostraca without 	exceptioii are of Thebaii provenance. 	Perhaps 	of 	all 	the 	sources 	the
+Louvre 	ostracon 	has 	the 	least 	corrupt 	text; 	the most corrupt is certainly 	the Turin
+papyrus. 	As for Annstasi 4 in many passages it is obviously in error (see for a parti-
+cularly glaring case 4~);but it would not be wise in the present state of our knowledge
+to pronounce a very definite verdict on the degree of its inaccuracy. 	The language is
+similar to that of other literary texts of the period, i. e. a mixture between the vulgar spoken
+dialect and the old classical style.
+The argument. 	(I) The scribe Hori, a man of great erudition and celebrity, etn-
+ployed in the Royal stables, (11) writes to his friend the scribe Amenemope, (111) wishing
+him all prosperity in this world and all happiness in the next, 	(IV) Hori writes to say that
+his friend’s letter reached him at a moment of leisure; bis joy at its reception was lessened
+by a perusal of the contents, which appeared to him to be very mediocre. 	(V) In spite of
+his having called many helpers to his aid, Amenemope has contrived to make a bad job of
+the commission he was called upon to perform. 	(VI) Hori will now reply in a letter of the
+same kind, and will excel Amenemope a t every point, dealing with the very same topics.
+At the outset Amenemope has had the discourtesy to omit the usual salutations. 	(VII) H e
+has also expressed his contempt of Hori’s ability. 	The latter replies ironically, naming
+various persons who have attained to positions of ease and wealth in spite of some ludicrous
+moral or physical defect; the exact point of the answer is not clear. 	(VIII) Hori goes 011
+to poke fun at his friend’s pretensions to learning and ends by advising him not to meddle
+with ancient lore. (IX) Accused of having no right to his title of scribe, Hori refers Amene-
+mope to the official registers. 	(X) An obscure competition between the rivals. 	(XI) Again
+accused of being no true scribe, Hori asks that the god Onuris shall be appealed to as
+arbiter. 	(XII) When commanded to undertake any difficult calculation, Amenemope either
+turns to others for advice, or else fails to give any answer; this is illustrated by several
+examples, the building of a ramp, (XIII) the transport of an obelisk, (XIV) the erection of
+a colossus, and (XV) the furnishing of supplies for the troops on a foreign military expedition.
+(XVI) Amenemope has laid claim to the title of Maher; Hori replies by enumerating a
+number of places in Northern Syria never visited by Amenernope, and an imaginary picture
+of the latter enduring the discomforts of the Maher’s life is conjured up. 	(XVII) Amenemope
+is questioned as to the towns of Phoenicia (XVIII) and as to the towns further southwards.
+(XIX) Sundry other places frequented by the Maher are named, and Amenemope is imagined
+as experiencing the adventures of the Maher’s life - the traversing of a precipitous region,
+the danger from wild beasts, the breaking of the chariot, the arrival at Joppa, 	and finally
+the repairing of the chariot and the start 011 a new journey. 	(XX) Hori cross-examines his
+friend as to the places on the high-road to Gaza, and finds him totally ignorant of them.
+I) See above p. I*, footnote I.
+e
+
+6“ 	Literary Texts of the New IGngdom
+I-Ie regards his own superiority as now fully proved, and bids Amenemope not to be angry
+but to listen coolly; in this way he too will learn to discourse about foreign parts and the
+incidents of travel.
+I. The rank and qualifications of the writer.
+T h e scribe of noble parts, patient in discussion’, at whose utterances men
+rejoice when they are heard, skilled in the hieroglyphs; there is nothing he does
+not 	know. 	H e 	is a champion in valour 	and in the art of Seshyt2; servant 	of
+the 	lord 	of 	Khmun3 in the4 hall 	of 	writing; 	assistant-teacher5 in the 	office of
+writing‘. 	First 	of 	his 	companions, foremost 	of his 	fellows, 	prince 	of 	his 	con-
+temporaries, without his peer. 	His merit is proved7 in every stripling. 	His hand
+goes 	forth(??)’, his fingers magnify 	the young(??). 	Noble, 	keen 	of witg, adept
+in 	knowledge; 	fortunate 	because 	of 	it (??)io. 	Protecting 	himself 	by 	his 	good
+qualities; beloved in (men’s) hearts, without being repelled (?)I1; men like to make
+a friend of him, they do not tire of him. 	Swift to inscribei2 empty rolls. 	Youthful,
+eminent of charm, pleasant 	of gracei3. 	Unravelling the 	obscurities of the annals
+like him who made themi4. 	All 	that 	goes forth 	from his mouth is steeped in
+honey”; 	the heart is refreshed with it as it were with medicine. 	Groomi6 of his
+Majesty, 	follower 	of the Sovereign, 	trainer 	of the steeds” of 	the king, 	ardent
+cultivatoris of the stabley9. T h e 	old man who doeth like himz0is beaten(?)2i. He
+I ) Ndwd-vi only here; perhaps read n_d-ri,as the
+Petvie Ostvncon (0. P.)may have had; cf too (Lit.
+Texis) p. 4, 1. 6. 7.
+2) The goddess of writing.
+3) Thoth of Hermopolis Magna.
+4) Variant 0. P. “his hall”.
+5 ) 0.P.obviouslybetter “teacher of subordinates”.
+6 ) 0. P.continues differently thus: “[skilled in(?)]
+his profession; knowing the secrets of heaven and earth
+. . . . . ; there is none who repels(?) . . . . . . . . in writing.
+First of his fellows in the midst of his neighbours;
+chief of his contemporaries, they are not equal [to him];
+teacher of subordinates in the office of writing; his
+merit is proved in every stripling. Lamp.. . . . .” (end).
+7) Literally: “one makes sure of him for every
+stripling”, i. e. he is a successful teacher of the young;
+ivt nan m cf. WEILL, Sinai 63,s. In 0. P. this sentence
+more appropriately follows sb3y n &&-<.
+8 ) That PY h v d-tf is not to be taken with hwnw n b
+(“every stripling who passes through his hands”) seems
+probable from 0. P. Hv should perhaps be omitted.
+9) ip d-t “to apprehend, take stock of (one’s
+own) body”, an Egyptian phrase for “to have one’s
+wits about one”, cf. Pyr. 2084; Leiden V 93; Urk.
+IV 160. - The preposition hr is superfluous.
+IO) Emend hr-s referring to s3v-t?
+1 1 ) The reading i t n is rather uncertain.
+12) Reading sp_hr, cf. 12, I.
+I 3 ) ‘11%-t, 3 bw-t “charm of appearance” [‘love-
+liness of appearance”; cf. esp. A n a s t . I I I q , ~ z ; O s t r .Brit.
+Mus. 29549. - T w t , a rare adjective meaning “plea-
+sant” “delightful” or the like, cf. Cairo, Hymn to
+Amon I I J ; ’twt h3-t, epithet of Ptah, MAR, Denzd. I
+39c. 71; I1 57d: twt k d epithet of Osiris, ROCHEM.,
+Edfou I 1 5 , 37; I 317.
+14) M i ir-sn, cf. Ostr. Brit. Mus. 29549.
+IS) Variant Ostv. Bibl. ATat. (0.B . N.) “all
+that goes out over his limb (read “lip”) is mixed
+with honey.”
+16) M r i , 	cf. BURCHARDT,Aliknnaanaische
+Fvemdworte (henceforth cited as BURCH.)no. 466.
+17) Shpr, cf. p ih n shpr, PIEHL,Inscr. 111 45.
+Nfrw, wrongly determined in A n a s t . I ; cf. Piankhi
+64; 0. R.N.variant htri.
+I S ) Mniti cf. Sall. I I 4, 9 ; Pap. Turin 147,
+col. 2, I 2, and possibly Pap. Kahun 14, 5 ; here meta-
+phorically.
+19) Variant 0. B. N. “excellent cultivator of his
+position.”
+20) An obscure phrase thus to be rendered
+literally; sense perhaps “outstripping all his olde
+colleagues”.
+21) 0. B. N., supported in part by the Brussels
+ostracon, 	continues as follows: - “wzb-priest of
+Sekhme, excellent (?) beyond (?) men of the future (?);
+directing the two limits of time according to their
+needs(?); over the secrets of the horizons; keen in con-
+verse, never yielding (?); servant of Wsrti, admitted to
+sacred ground; not revealing (?) what he knows to the
+H3w-nb; web-priest of Sekhme, Hori son of Onnofre.”
+
+Anastasi I 	7”
+who looses the yoke, [Hori] son of Onnofre of the region of Abydos, island‘ 	of
+the just; born of Tewosre in the district of Belbeis’, 	singer of Ubast in S ‘ @ [ ~ Z L Y ] ~ .
+XI. He sends greetings to his friend, the scribe Amenemope.
+He greets his friend, his excellent brother, the royal scribe in corninand
+of the 	victorious 	army4; noble 	of 	parts, 	goodly 	of 	qualities, 	adept 	in 	know-
+ledge; who has not his equal in any scribe. 	Beloved of all men; beautiful to him
+2 , s who 	beholds 	his 	charm; 	like a flower of 	the marshes in the heart of others5.
+A scribe (writing) in every 	style(?)6; there 	is nothing 	that he does not know.
+Men inquire after his response 	in quest 	of 	choice words. 	Keen of wit7, patient
+of heart, loving mankind; 	rejoicing at deeds of Justice, he turns 	his back upon
+iniquity. 	(The scribe of steeds(?) . . . . . . . . . . . Amenemope, son of the steward
+Mose, the reveredP
+111. Wishes for the welfare of the friend.
+Mayest thou 	live and prosper 	and be hale, 	my 	excellent 	brother, 	well-
+equipped, strongly-established, without a wish; thy needs of life and of sustenance
+satisfied, 	joy 	and 	delight 	united in thy path. 	May {. . . . . . .’) 	come forth 	for
+3,1 thee in thy lifetime, 	and his(?) gate(??)1° decay not; 	mayest thou 	see the rays
+of the sun and sate thyself with him; mayest thou pass [thy] term . . . . . . . . . ~ . .
+thy gods pleased with thee”, 	not being wroth . . . . . . . ; may thy reward be . . .
+. . . . . . after 	old 	age, thy love1’(??) in the hearts of(?) the Just; 	mayest 	thou
+enter into thy tomb in the holy [ground] and mix with the noble spirits; mayest
+thou 	be judged 	among them and be acquitted 	in Busiris before Onnofre, being
+established 	in Abydos 	in the presence 	of Shu-On6risi3; mayest 	thou 	cross 	[to
+3,s U-peqer]14 in the train 	of the 	godi5; mayest 	thou traverse 	the 	divine region in
+I) For iw m3‘tizu, an epithet of Abydos, see
+below p. 15,l. 5 ; Havhotep 93. 506; Totb. ed. NAV.,
+2 ) Bvs-t, Belbeis on the border of the desert
+in the Bubastite nome, see NAVILLE,M o u n d of the
+Jew p. 22. 23.
+3) The region of Bubastis, cf. BR., Dict. Gdogr.
+381; Proc. S . B. A . 13,36.
+4) The name of Hori’s rival was read Nht-stp
+by ERMAN;	the version of 0. B. N . finally disproves
+this view. 	For mi‘ nht cf. below I ~ J ; A n a s t . I;S
+5,1; Urk. I V 654. 659, there varying with mi’ n
+n&w, 654. 655.
+5) Variant 0. B. N.: - “Beloved of all men,
+without fault, charming, pleasant and praiseworthy (?)
+in the sight of others.”
+6 ) M t n w n b “of all sorts”, cf. Koller 4 7 ;
+H a r r i s I 72, 5 ; Rec. de Trav. 30, 216.
+7 ) This and the following epithets are lacking
+in 0. R. N .
+17, 24.
+8) Restored from 0. B. N.
+9) The name of a god (e. g. Nepri) must be
+IO) For this word cf. Anast. 111,5,z; instead of
+11) @tp m‘, cf. Anast. I I I 4,s.
+12) Read vw-t for mvh (?).
+supplied.
+“his” it is just possible to read “thy”.
+But ( z 3 t i might be
+read tz3t-t L‘finest oil”; then the sentence would read
+“thy oil being of the best [like (??)I 	the Just (I?)”.
+I 3) Elsewhere 	always “Onuiis-Shu”; 	he was
+“the son of Re” “with the high plumes” “lord of
+Thinis”.
+14) W-p&(r),the burialplace of Osiris in Abydos,
+see SCHAFER’S	article A. 2.41 (1904), 107-110.
+1 5 ) The ostracon in Queen’s College, Oxford
+(0. Q.C.) here inserts: “mayest thou eat (?) bread
+and herbs (7) in the Region of Food (i3-t & 3 ) ; may
+there be presented to thee offering-loaves made beside
+(the god?), besprinkled from the two ds“r-t vases with
+the water of _T3w-wr”.
+
+8” 	Literary Texts of the New Kingdom
+the 	train 	of Sokaris; mayest thou join the crew of the Neshmet barki, without
+being turned back; mayest thou see the sun in heaven when he opens the year;
+may Anubis 	attach 	for 	thee 	thy 	head 	to 	thy 	bones2; mayest 	thou 	come forth
+from the Hidden Place3, without being destroyed; mayest thou [behold] the sheen4
+in the Netherworld as it passes by thee; may Nun5 be abundant in thy domain,
+may 	he 	inundate 	thy 	path, 	may 	he 	overflow (the land 	to) 	seven 	ells (depth)
+beside thy tomb6; mayest thou sit at the river’s brink in thy moment of repose;
+mayest thou lave thy face and thy hand; mayest thou receive offerings; ma? thy
+nose inhale7 the 	breeze; mayest thou 	relax thy throat; the 	clothes 	of Tayt(?)8
+. . . , . . . . . . . . ; may 	Nepri 	give 	thee 	bread, and Hathor 	beerg; mayest 	thou
+suck a t the breast of the Cow S&i’yyt-@riO;	may the best oils(?) be opened for(?)
+theell; 	mayest thou 	enter . . . . . . . . . . . . . ., mayest 	thou 	set him 	on 	his seat;
+may 	the Ushebti-figures receive thee(?) . . . . . . . . carrying sand 	from 	the East
+to the West; mayest t h o u . . . . . . . .” [the goddess in] thy 	sycamore, 	may 	she
+moisten thy throat; mayest thou repel [thy enemies (?); mayest thou be p~werful(?)’~
+on] earth, mayest thou 	be 	brighti4 . . . . . . . . . . . ., mayest thou be justified in
+heaveni5 . , . . . . . . .; 	mayest 	thou 	descend 	to 	the 	. . . . . . . . , without 	being
+4,5 destroyed; mayest thou make thy transformations as thou listest like the Phoenix,
+every form of thine being a god when thou . . , . , . , . , .
+IV. 	Reception of a letter from Amenemope.
+Another 	topic. 	Thy 	letter 	reached 	me 	in 	an 	hour 	of 	IeisurelG. 	Thy
+messenger found me“ 	is I sat beside the horse which is in my charge. 	I rejoiced
+. 	I) The boat of Osiris; CHASSINAThas given
+a good collection of references Rec. de Trav. 16, 121.
+2) 0. Q . C. adds: “mayest thou be pure, may
+thy flesh become divine before the brothers Horus
+and Seth, may Thoth and Haralrhti (?) carry thy soul
+aloft.”
+3) W-iinn only here; a name for the place
+of embalmment.
+4) I. e. the sheen of the sun in his nightly
+journey through the Netherworld. 	W(3)w(?w), see
+BR., Wovterb. 324; PIEHL,Inscr. I 118.
+5) Nun is the god of the waters; N w t in
+Anast. I is a wrong reading, as the suffix of thb-f
+shows.
+6) The “water of 	7 ells (depth)” seems to
+have been proverbial, cf. Anast. I V I b, 8.
+7) For &nm in Anast. I the duplicate 0. Q. C.
+has the rare verb &np(i)“to breathe”; cf. Rec. de
+Trav. 27, 29; good examples in the Theban tomb
+of Nbwnnf (unpublished).
+8) The goddess of weaving.
+9) Nepri is the corn-god; for the connection
+of Hathor with beer, cf. Deslructio.ii of M a n k i n d
+(Sethos) 23.
+IO) Snk m mnd “to suck at the breast” cf.
+Pap. Lezden 343, recto 6 1 1 ; “to suckle at the
+breast” Urk. IV 237. 239; and for the cow Sb3yt-Hr
+in this context cf. P y r . 1375; CAPART,Recueil 148.
+11) Very doubtful; 	read wn n k 	instead of
+12) S j d “to grasp” occurs once on a M . K .
+coffin (A.2. 47 [ I ~ I O ] ,101); here meaning and
+construction are obscure.
+13) Read wsr-k (?).
+14) It is tempting to find in this damaged
+passage a variation of the common formula “mayest
+thou be bright (is’@) 	in heaven, mayest thou be
+powerful on earth, mayest thou be justified in the
+netherworld’, In this case the spelling of is’&-k here
+would need some alteration.
+wn-k 	(?).
+15) One expects dw3-t; see last note.
+16) Lit. “of resting for a while”.
+17) For gm-z’ “I found” emend gm-wi “found
+me” cf. Sznache R 19.
+
+9”
+and was glad, I made ready 	to reply1. 	I entered into 	my 	stable2 to examine
+thy letter. 	I found it consisted neither of praises nor of insults3. 	Thy utterances
+confuse this with that, all thy words are perverted, they are not coherent4. 	All
+5,1 thy writing is . . . . . . . . . . . . . . . . . . . . . . . . . 	mixing(?) [evil things] with choice,
+the 	best 	with . . . . . . . 	Thy 	sayings 	are 	[not(?)] sweet; 	they 	are 	not 	bitter.
+mellowed wine 5.
+Anastasi I
+. . . . . . . . . . . . . . . . . . . . with 	honey; 	thou 	dost 	excel must mingled 	with un-
+V. 	The way in which Amenemope wrote his letter is describedG.
+. . . . . . . . . . . . . . . . .	I [send] to thee and bear witness unto thee like 	* >
+but not excellent(?). As for me, when [I] say [to] thee . . . . . . . . . . . speak coolly(?)7.
+5 , 5 Thy speeches . . . . . . . . . . . . . . . . . . perturbed(?), to frighten me(?)8. But I feel
+no 	awe 	before 	thee, 	I 	know 	thy 	nature, 	I 	feel 	sureg that 	thou 	wilt 	answer
+itio alor,e by 	thyselfi1. 	But loi2, thy 	protector^'^ stand behind 	thee; 	thou 	hast
+assembled many . . . . . . . . of(?) helpersi4 such as thou wouldst (collect(??)) for a
+bench 	of judges15. 	Thy 	looks 	are 	troubled, whilst 	thou 	standest 	coaxing 	the
+assistants(?)16 and saying: “Come (join) with me and lend a hand to me!” 	Thou
+I) HY r, cf. especially R., I. H . 227, 62. -
+@sf “to answer” a letter ( S ‘ - f ) , clear in P a p . Lezden
+365 verso 3; 367, 6. 	Cf. too Lezpzig ostracon 5,
+verso; beLow 5, 5 ; 7, 4; 28, 5.
+2 ) Smm-t 	has 	more 	than 	one 	meaning:
+(I) “stable” cf. P i a n k h i 109. 113. 114; ‘3 “vz imm(-t),
+a title, SaZZ. I 4, I O ; ( 2 ) “granary”, certain from
+P a p . T u r z n 51, 4 (fern.); cf. also P a p . T u r i n 100, 5.
+7; r57, 3 (masc.); (3) as part(?) of a magazine full of
+sand employed in the erection of a colossus, below 16,8.
+3) The sense of shwri as “insults” “offensive
+words” is fixed by 8, 2 and by P a p . Bibl. N u t . 198, 2 ,
+recto 4; 6, 2 below is very obscure.
+4) _Ts lit., “tied” “connected”
+5) P w r , a kind of wine drunk by the servants
+cf. Anast. I V 16, I = Anast. III 8, 2 ; together with
+irp and Sdh, A n a s t . I V 7, 4; in the Golenischeff
+Vocabulary (7, 7) next to hm_d “vinegar”.
+6) No new paragraph is marked in the original,
+but I have indicated one in the translation, since the
+writer here passes on to review the way in which
+he imagines Amenemope must have written his letter.
+The first sentences are utterly obscure owing to
+the lacunae. Hori finds to his surprise that Amene-
+mope has taken other scribes to help him-with his
+writing, having won their assistance by giving them
+presents. From 6, 3 and the following lines it appears
+that Amenemope’s letter was in some way concerned
+with the fetching of grain from the granary for the
+rations of the soldiers; here too Amenemope had
+proved his incompetence, his accounts being confused
+and inexact. 	The last sentences of the section are
+difficult to understand.
+G a r d i n e r .
+7) K b , lit. “cool”, “coolly” occurs in several
+obscure sentences in A n a s t . I . 	Almost certainly
+“vain”, “meaningless” in 13, I . Sense doubtful here
+and in 7, :.
+8) [Sr]ir(?),cf. Sr[Sr](?)5, 8, a mere guess. -
+R sndzu-i, cf. I I , 4, lit. perhaps “for my fear”.
+9) ’ I b “to believe”, “imagine”, again below 24,8 ;
+also Shipwrecked Sailor 58 ; perhaps already QUIBELL,
+Excavations a t Saqqava I11 p. 83, 1. I O (0. K.).
+IO) H s f , see n. I on this page. 	The suffix refers
+to 5‘-t “the letter”.
+I I) Hr tp-k, cf. 7,6; Sall. III 8, 7; rather diffe-
+rently 5 , 7 end.
+12)The author’s expectations are deceived; Amene-
+mope gets others to help him with his letter.
+13) Read w‘wnf, as is hinted by the variant of
+the Louvre Ostracon to 9, I. For the word, which jn
+late texts is parallel to n h y and n_d, both of them
+meaning “protector”, cf. Siut 3 , 3 ; Mzllingen 2, 2 ;
+Rec. de Trav. 4, 131; P i a n k h i 124; Goshen 2, I ;
+ROCHEM.,Edf0.u I 278. 280. 542; I1 39. 47.
+14) Kpw is a word used for men who, together
+with wh‘w, bring tribute of wild fowl Harris I 12 b, 6;
+32b,9; 69,8; the title ‘3 R. kpze,, P a p . Bibl. N u t .
+203, 4. 5. 6 (= SPIEGELBERG,Rechnungen). - For
+‘dr, in Hebrew ’IW, see the references BURCH.no. 303.
+15) The sense may be guessed to be “thou hast
+enough helpers to compose a whole bench of judges
+in a court of justice”. A verb is perhaps lost after iwk.
+16) P s d y again in 9, 2, and in the plural ny-w
+p s d y parallel to ny-ze, ‘& “their helpers” in an ob-
+scure context Petrze Ustracon 6 (a fragmentary hymn
+to Amon).
+In 28, 8 probably “dispassionately”.
+’
+2
+
+ro* 	Literary Texts of the New Kinzdom
+presentest 	them with 	giftsi, each man 	separately, 	and they 	say to thee: 	“Take
+heart, we will overcome himg”. Thou standest p e r t ~ r b e d ( ? ) ~	. . . . . . . . . . before
+them(?); and 	they 	sit deliberating, 	the six scribes. 	Thou 	hastenest with 	them
+. . . . . . 	. . . . . . . . . . . . seven(?)4. 	Thou 	givest 	two 	section^(?)^ 	in 	charge 	to
+each 	man, and completest thy letter again. 	[One] (scribe ~pealts[?]jpraises, two
+(utter [?I) insults(?)6. A n ~ t h e r ( ? ) ~	stands and examines them according to the rules.
+[The fifth] says: “DO not hurry, be patient about it in making (it) perfect”. 	The
+sixth’ hastens to measure the [corn(?)I9;he exerts himself(?)1°to have it delivered1’.
+The seventh stands at (his) side in the act of receiving the rations for the soldiers.
+Thy listsx2 are confused, and 	cannot be 	made right. 	Kharofi3 plays the 	deaf
+man 	and 	will not hearken, 	H e 	takes an oath by Ptahx4 saying: “I will not let
+the 	seali5 be 	set 	upon 	the 	granary”. 	H e goes 	forth in 	a 	ragexG. By 	what
+(number) 	of 	bushels 	is 	one short(?)I7? 	(What[?]) is the loss 	of pints 	in it for
+every measure”? 	Beholdlg thou 	art 	a scribe in 	command 	of the 	army. 	Men
+hearken to what thou sayest, thou art not disregarded”! 	Thou art clever as a
+scribe, 	there is nothing thou dost not know! 	Thy letter is deemed too second-
+I ) B r k is akin to the Hebrew 33’13, see BURCII.
+2 ) I. e. probably Amenemope’s rival, the author
+3) See above p. g*, n. 8.
+4) The sense may be “in order to get a seventh
+scribe”. 	Without some such statement there would
+be a curious contradiction between the mention of
+the six scribes in the preceding sentence and the
+naming of a seventh below in 6,4.
+5) Sd-t is found again only in 7, 8 ; the sense
+may be “columns”, “pages”, “sections” (cf. the German
+“Spalte”).
+6) For jzsy and s@wi see above p. 9*, n. 3 ;
+jzv is possibly the common ellipse for hv _dd (see
+ERMAN,	A e g . Gramm.2 Q 380). The different kind
+of 	aid 	rendered 	by 	the 	seven scribes is here
+detailed. 	Three apparently assist in the actual com-
+position of the letter, one suggesting complimentary
+things, and two supplying insulting or unpleasant
+phrases (cf. 4, 7. 8 for the mixed nature of Amene-
+mope’s letter). A fourth scribe contents himself with
+criticism, while a fifth is lavish of encouraging words.
+The sixth and seventh scribes busy themselves with
+the practical task connected with the letter (see p. 9*,
+n. 6), namely the fetching of grain from the granary.
+7 ) P h y “the other” must refer to the fourth
+scribe, but the presence of the definite article is
+disconcerting.
+8) For the formation of ordinal numbers with
+prefixed p-ntz’, see SETHEi n d . 2 . 3 8 goo), 144-145.
+9) RIat the end of the line should perhaps be
+omitted. 	Sd-twf in 6, 4 shows that a word for “corn”
+or the like is lost in the lacuna.
+no. 360 for references.
+of the book.
+IO) The sense is guessed
+I I ) Sd is shown by the Pap. Rollin ( P a p . Bibl.
+N u t . 204. 205) and other documents to have been
+the technical term for “withdrawing” corn from the
+granary; Sp, conversely, is the term for “receiving”
+it when withdrawn.
+12) For wp-wt “specifications” see GRIFFITHon
+P a p . KaJtun g, 2 and my own note Admonitions
+13) Hrize-f is the pretended name of the super-
+14) Ptah is invoked as the “lord of Truth”, cf. 8,4.
+15) gt 	[‘a seal” 	(quite 	distinct 	from 	h t m
+“signet-ring”) cf. Abbott 5, 8; Inscr. . . . h e r . Char.
+18, 6: P a p . T u r i n 51, 4; in demotic see SPIEGEL-
+BERG, Petzdbastis, index no. 314. The Turin passage
+well illustrates what is here meant. After the govern-
+ment granaries had beeneopened, the proper official
+closed them again with his own seal, this serving as a
+token that he had cognisance of the proceeding.
+16) Hdn “to be angry”, cf. below 28,s; Unamon I,
+x + 8; 2,46; P a p . Bibl. Nat. rg8, 2,4; Max. d’Anii
+2, 5 ; P a p . B r i t . Mzx. 10,335 (Proc. S . B. A. IO, 44).
+17) G3b may have a somewhat similar sense
+below 7, I . 	The T u r i n Ostvacon (0. T.) has tw-k
+g3b-2i “art thou short” instead of twtw g3b.
+I S ) This 	sentence 	is 	obscure 	grammatically.
+Leipzig Ostracon z deals with a complaint of the
+workmen that the measure ( i p - t ome) used for mea-
+suring their rations showed a shortage of pints
+(hn-w).
+19) The next sentences, down to “disregarded”
+are wanting in 0. T .
+20) For zun “neglect” see SETHE,Einsetzung des
+Veziers p. 21, n. go. These sentences are of course
+ironically meant.
+P. 48.
+intendent of the granary.
+
+Anastasi I 	I I*
+rate(?)I to be listened to. 	Thou hast parted from(?) thy papyrus to no purpose’(??).
+Thou didst enter3 knowing beforehand(?): “it is not good(?); do 	cause it to
+be 	brought”, saying: 	“the 	. . . . . . . . . are 	continually . . . . . . .5 	at my 	finger-
+ends(?), like 	a 	book 	of incantations(?) at the neck 	of 	a 	sick manfi; it is con-
+tinually . . . . . . , it does not tire of being fastened by the thread’ of my ring”.
+VI. 	The author reproves Amenemope’s discourtesy.
+7 2 5 	I reply to thee in like fashionS, in a letter newly (-composed) from the first
+word(?)9, down to 	the finis(?)l0, filled with 	expressions of 	my 	lips invented 	by
+myself alone, none 	other being with me. 	I made it
+by myself, without summoning any scribe that he might help”. 	I will give thee
+more thaii(?)I3 twenty themes(?), I will repeat for thee what thou hast said, (every)
+theme in its place, (from) the fourteen columns(?)l4 (of) thy letter. 	Take for thyself(?)l’
+a sheet of papyrus; I will tell thee many things, and will pour out for thee choice
+8,r words16. - T h e Nile spreads abroad (its) flood when(?) the inundation season is
+bright(??); it takes possession 	of the 	- All my words are sweet and
+pleasant in the saying(?)aS; I do not 	act as thou 	dost when 	[I] invoke(?) thee.
+Thou 	startest with insults to me”; 	thou dost not salute me at the beginning of
+thy letter. 	Thy words are far from me, they do not come near (me); for Thoth,
+By the might of Thoth’l!
+I) S-&ri-‘ seems to mean “to underestimate”
+(causative from _hvi-‘ “subordinate”) in 8, 7; 17,6.
+Here possibly “to think inferior”. Obscure in P a p .
+T u r i n 146, 11.
+2 ) Very uncertain. G3b-ti (so 0. T.) may mean
+‘[thou art bereft of”, “short of”, see p. IO*, n. 17. For
+k b cf. p. g*, n. 7. -0.T. here adds an obscure sentence.
+3) The final sentences of the section are ex-
+ceedingly obscure, and my translation is merely ten-
+tative. 	What may be meant is that Amenemope,
+though aware of the inferior quality of his writing,
+yet boasts that he has his learning at his finger-tips,
+and that it clings to him as closely as the magical
+charm round the neck of a sick man.
+4) Grammatically it would be also possible to
+translate “it is not good that thou shouldst not cause
+it to be brought”, tm-k then being infinitive (see
+SETHE, Verbum I1 5 587. But this gives no sense.
+T m - k may be the sdm-f form optatively used, a use
+perhaps confined to Anast. I; cf. g, 7(?); 13,4;28, 7.
+5) B-g and w-t-m are unknown words.
+6) Charms were often hung around the necks
+of sufferers; compare for example the directions given
+in ERMAN,Zaubevs9r. f. Mutter u. K i n d 1,4; 8 , ~ ;
+7) H s 3 , in Coptic p c , cf. Harris I 13b, 3;
+21 a, S; 52b, 2. SPIEGELBERG	gives an archaeological
+illustration A. 2. 44 (1go7),123.
+8) Lit. “with the like of it”, scil. of your letter.
+9, 3. 7.
+9) A corrupt word.
+IO)K-r, only here.
+11)Thoth is invoked as the patron deity of
+scribes.
+12) The translation of the word mtr in this text
+often gives difficulty. 	The root meaning appears to
+be “to be present”; secondary meanings are “to bear
+witness”, “to assist” (both in the English sense and in
+that of the French “assister”) and even “to instruct”.
+13) Di-t h3w n elsewhere means (‘to surpass”,
+but there are no instances of this sense with the
+name of a person after the preposition. 	The trans-
+lation here given is doubtful; “more than” ought to
+be h3w hr, not hs’w m.
+14) Sd-t, see above p. IO*, n. 5 ; the construction
+of these words is not clear.
+15) One expects i-mh-tw vn or i-mh nk vn; see
+Rec. de Trao. 27, 205.
+16) Stp-w, cf. 2, 6 ; 5, I.
+17) The simile here abruptly inserted clearly
+alludes to the copiousness of the writer’s eloquence,
+- The construction of bk 3h-t is quite obscure, -
+’I3d-t cf. Eloquent Peasant B I, 143; Totb. ed. NAV.
+169,5 ; L.,D. I11 140b,8; Dachel stele 12; MAR.,
+Dend. I 61a.
+IS) M _dd usually means “to wit”, and introduces
+a quotation; this seems hardly to be possible here.
+19) Lit. ‘<thou dost begin against me with in-
+sults”; for shwri cf. p. g*, n. 3.
+2*
+
+12” 	Literary Texts of the New Kingdom
+my god, is a shield about me. 	By the might of Ptah, the Lord of Truth, . . , .
+. . . . . . . . . . . Behold 	make 	thy 	words 	so 	that(?) they 	come 	to 	pass’; 	make
+(Yet[?]) shall I be
+buried in Abydos [in] the abode’ of my father; for I ani the son of Truth in the
+city of the Lord(?)3(of Truth). 	I shall be buried among my compeers(?) in the hill of
+the Sacred Land. 	Wherefore am I (as) a reprobate in thy heart? 	Then visit(?) it
+(upon me[?])4. T o whom have I recalled thee with an evil r e ~ a l l i n g ? ~I will make
+for 	thee 	a 	volumeG as 	a 	pleasant 	jest 	(so that) 	thou becomest 	the sport of
+everybody’.
+8,s every 	utterance 	of thy 	mouth 	into 	every (kind 	of) enemy.
+VII. Amenemope vilifies the author and is answered.
+Again 	thou 	sayest 	(concerning me8): “Feeble9 of arm, strengthless one”!
+Thou dost undervaluelo me as scribe, and sayest: “He knows nothing!” - I have
+9,1 notTi spent a moment beside thee coaxing thee and saying: ‘LBemy protector1’,
+someone is persecuting 	mei3!” 	(By) the decree 	of the Victorious 	Lord, whose
+name is powerful, whose statutes are firmly-established like (those of) Thoth; I am
+the helperI4 of all my fellow-men! Thou sayest, “Thou fallest(?)”, again(?) concerning
+me . . . . . . . . 	I know15 many men without strength, feeble of arm, weak of fore-
+arm, lacking in power. 	And (yet) they are rich in houses, in food and sustenance,
+and they speak no wish [concerning anything(?)Ii6. 	Come, let me tell to thee the
+I) Note that w3 v hpv means “come to pass”,
+not “are far from happening”, see Adwzonitions p. 53.
+- If I grasp the drift of these sentences it is: (‘DO
+thy very worst, make thy words as hostile as thou
+wilt; yet thou canst not prevent my being buried
+in Abydos in the tomb of my father”. It is significant
+that the name of the writer is Hori, and that of his
+father Onnofre. - The Louvre and Cailliaud ostraca
+(0.L. a n d 0 . C.) omit from “By the might of Ptah”
+down to “come to pass”.
+2) Variant 0. L. and 0. C. “tomb”.
+3 ) A n a s t . I has n-t nb, which can hardly here
+mean “every town”; I therefore take n b as “lord”
+and assume that M3‘-t has been erroneously omitted.
+0. L. and 0. C. have “I am the son of Right (Truth)
+in the island of the Righteous” i. e. Abydos, see
+p. 7*, n. I.
+4) Lit. “then thou bringest it”. 	The ostraca
+have wlsy-k wi, which suggests a similar meaning;
+wjs sometimes means “to inform against”, “accuse”,
+see ERMAN’Snote on Westcnv 12, 23.
+5) The text of the papyrus is corrupt; 0. L.
+supplies the true reading and, together with 0. C.,
+gives the variant “with evil words” for “with a bad
+recalling”.
+6) Shvy seems to be the technical word for “a
+papyrus“; so gsti hn‘ shv-t, “palette and papyrus”
+Decvee of Havemheb, 13; shy-t n S‘-t “a papyrus-
+letter” P a p . Leiden 369; P a p . Bibl.N a t . 198, I , 19;
+the same word too above 4,8.
+7) 0. L. and 0. C. substitute “people rejoice
+at reading it (sdm “to listen to” someone reading
+aloud, practically equivalent to our “to read”) as it
+were a sport.”
+8) “Concerning me”, so the ostraca.
+9) Lit. “broken”.
+IO) SJgi-‘, see above p. II*, n. I .
+11) The ostraca have n(3) i r - y i. e. probably
+“have I spent?” - 4 3 ) being the equivalent of in.
+12) M’wnf, see above p. 9*, n. 13.
+13) Lit.: “another is hurting me”. - ’I3d “to
+persecute”, “hurt”, actively, cf. Totb. ed. LEPS., 162,3;
+R., I. W . 141,21.
+14) P s d y , see above p.9*, n. 16. The author
+seems to state that he was a helper of other men by
+royal appointment. 	The wit of this passage is not
+very intelligible to the Western mind.
+15) Here begins a long descriptive passage where
+various persons with moral or physical defects are
+named, who yet have attained to wealth and dignities.
+T h e implication seems to be that Amenemope, the
+royal scribe, is only one grade better than them.
+SPIEGELBERGhas dealt with the passage A. 2. 44
+(19071, 123-125.
+16) Cf. for example Uvk. IV 61; here however
+there is not room for v ht n b in the lacuna.
+
+13’”
+He
+Anastasi I
+9,s likeness of the scribe Roy, who was called the firebrand(?)’ of the granary.
+I0,I
+10,s
+never moved’ 	and never ran since (the day of) his birth. 	He detested the work
+of an active man, and never (came to) know it. 	And (yet) he rests in the Amente,
+his skin whole, and the dread of the Goode God3 overtakes him not. 	Thou art
+more(?) foolish4 than(?) Kasa, the reckoner 	of 	cattle5. 	Run(??), for(?) I will tell
+thee his likeness; 	do not(?) . . . . . . . . . . . . . . . .6. 	Thou hast 	surely heard the
+name of Amen-wah-se, an old man in [the] Treasury. 	He passed his lifetime as
+controller in the workshop beside the armoury’. 	Come let me tell thee of Nakht,
+him ofs the wine-store; he will please thee ten times better than these. 	Let me
+tell thee of P-har-pideg who lives in Heliopolis; [he is an old] man of the Palace.
+He is smaller (than)10 a cat, and bigger than an ape; he prospers in his house
+a n d . . . . . . . . . ., (while[?]) thou 	wilt be here in the stable for ever(?)’l. 	Thou
+hast heard the name of Ke-sop(??), the . . . . . . .(?)i2, 	who moves over the ground
+~nnoticed‘~,di~orderly(?)*~	of 	attire and tightly swathed15. 	If thou wert to 	see
+him 	at evening in the darkness, 	thou 	wouldst 	fancy him a passing bird. 	Put
+him in the scale and see how heavy 	he is. 	He will come outi6 at ten pounds
+or even lighter stilli7. 	If 	thou 	blowest beside him 	as he passes, 	he will drop
+down 	far off like a leaf 	of foliage“. 	If I tell thee of Wah, him ‘of the cattle-
+I) M - k , a &zag ? b ~ y 6 p ~ ~ ~ v .
+2 ) K m ( 3 ) , the Coptic KIM, only here in late-
+Egyptian.
+3) Lit. “the dread of the Good God did not take
+him away”. 	“The Good God” is a constant epithet
+of the reigning Pharaoh. 	It is probably meant that
+this lazy official is now safe from the resentment
+of the king his master.
+4) Swg is the Coptic cod “stultus”, “insanus”,
+see GRIFFITH, Rylands P a p y r i , p. 232 note 1 2 for
+the demotic equivalent. 	In late-Egyptian, cf. swg-
+t i w n mi 3pdw “ye were senseless as geese”, MAR.,
+Kavnak 5 2 , 17; nhn swg, i w t i it-/ “a witless child,
+without a father”, Metternich stele 196. 170 (also 171.
+201 not so clearly); mS‘ swg [‘a foolish expedition”,
+Unamon 2, 23. 22. The comparative “more foolish”
+is here doubtful.
+5) In the papyrus the verse-point precedes p hsb-
+ihw instead of following it; but as all the other names
+quoted in this passage are accompanied by titles, it
+is probably misplaced. 	H p t perhaps imperative of
+the verb studied in BRUGSCH,	Worterb. 949; S u p p l . 81 I.
+6) _T-n(r)-han unknown word; _t-r-h, differently
+spelt, occurs in the sentence “do not sin (? _t-r-h)
+against (m) an aged man or woman when the7 are
+old’ Petvze Ostvacon I I. BURCHARDT’S	identification
+with h5b “pardon” (no. 1155) gives no suitab!e sense.
+7) @pS, cf. below 26, 4; Anast. IV 11, 2 ; else-
+where only in the titles “overseer of the workshop
+([zm-t) of the armoury of Pharaoh” P a p . Bologna
+1094, I, 3; and “scribe of the workshop of the ar-
+moury of Pharaoh“ zbid. I , 9; 3, 5 ; 4, I ; 5, I ; 7, IO.
+8 ) M i n k , abbreviated for mi s_dd-i f i k , cf.
+A n a s t . 111 s , 9 = Anast. I V 9, 7; also mi nh r,
+Florence Ostvacon 2619 = A. 2. 17 (1880), 96. -
+P-n for p(3)n cf. below IO, 6; p-n lJt3, Sal1 111
+4, 7. 	In a neuter sense p-n si nb “every man’s
+share” below 1 7 , ~ ;p-n ’Imn?atp“the feast of Ame-
+nothes” Ostr. Queen’s Coll. Oxford.
+9) P-hri-pdt as proper name, cf. A n a s t . V I I
+7, 5 ; P a p . Bibl. N u t . 204 col. I, 11 (quoted by
+SPIEGELBERG).
+IO) Emend r m y .
+11) R Sw is perhaps the equivalent of a Swe
+in Demotic; cf. P a p . mag. 13, 9; I K h a m . 3, 33;
+11 K h a m . 2, 7; 6, 2. However THOMPSON	points out
+that all the Dem. instances are in negative sentences.
+Another doubtful hieroglyphic example BR., Grosse
+Oase 16, 32.
+12) 3’-h-k, an unknown word.
+13) The Berlin ostracon (0. B.) shows how the
+ambiguously-written verb in Anast. I is to be under-
+stood.
+14) 3’-(n)r-f,only again in 24, 1-2; 	perhaps “to
+be ruffled”, originally of hair.
+IS) Btzd, corruptly written b d n below 28, 3; cf.
+Totb. ed. LETS. 163,16; P a p . Turin 137,8. 0. B.
+has here the more appropriate determinatives.
+16) Pr, cf. I I , ~ ;SPIEG. further quotes Urh.
+IV 119.
+17) Wi3-tw,see my note A.Z.47(1910),134-136.
+18) G3b ,,leaf” is the Coptic d w k , Boh. .zrwhr.
+Dbw is a rarer word with similar meaning, preserved
+in Sah. Tookkq (SPIEG., Rec. de Trav. 26, 37).
+
+Literary Texts of the New Kingdom	14”
+stalls, thou 	wilt reward 	me with thrice refined(?) gold’. 	I swear by 	the Lord
+of 	Khmun’ 	and 	Nehem-awayt, 	thou 	art 	strong 	of 	arm, 	thou 	wilt 	overthrow
+them3. 	Let 	[them(?)] b e 	examined, these(?) with those. 	I will smite them with
+my arm, [nor shall any turn(?)l‘ aside my hands. - Good Sir’, 	my friend, who
+dost not know what thou sayest, I solve thy riddles; arduous things I make easy!
+VIII. The writer mocks at Amenemope’s pretended wisdom.
+Thou art come furnished with great secrets. 	Thou tellest 	me a proverb
+of Hardedef‘, 	and knowest not whether it be good or bad; what chapter comes
+before it . . . . . . . . ? 	Thou art one clever beyond his fellows; the lore of boolts
+is graven in thy heart. 	Felicitous is thy 	tongue; broad 	are thy words. 	One
+saying from thy mouth weighs more than three pounds. 	Thou . . . . . . . . . .7 to me
+in order to frighten me(?)s. 	My 	eyes are dazzled(?)9 at what thou doest; I am
+agape(?)‘’ when 	thou 	sayest: “More profound’‘ 	as scribe am I than heaven and
+earth and the netherworld; I know the (measure of the) mountains in pounds and
+in 	pints.” 	T h e 	house 	of books 	is hidden, it is not 	seen1?; its divine 	cycle is
+concealed and . . . . . . . . . . . . . . . . 	Tell me what thou ltnowest (of them). 	Then
+shall I answer thee: “Beware lest thy fingers approach the hier~glyphs‘~”.S o say
+I: “. . . . . . . . . . . . . . as when . . . . . . . sits to play draughts”14.
+IX. 	The writer vindicates his title to the name of scribe.
+Thou sayest to me: “Thou art no scribe, thou art no soldier! 	Thou (alone)
+makest 	thyself 	out 	to 	be 	one 	in 	authority(?)15! 	Thou 	art 	not 	on the 	listlG!”
+- Thou (forsooth) art a scribe of the king, one who enrols the soldiers. 	All the
+I ) Fs’ nz “to reward with“, cf. d’Orbiney 14, 8 ;
+15, 5. - SPIIIG.compares .Izb .~zsp 3, H a w i s I 78, 5.
+2) I. e. Thoth, cf. I, z and note thereon.
+3) Sarcastic comfort seems here to be offered
+to Amenemope; such rivals at least as these he will
+be able to overcome.
+4) Emend nzn svwi? - The meaning of this
+sentence is very obscure.
+5) Mi-pw, a mode of address found again below
+14, 8 ; 18, I ; 26,9; and A n a s f . 111 4,4. 	Doubtless
+rightly explained by PIEHL,Proc. S . B. B.13, 239--240
+as derived from mi-pw “who is it?” The word is
+used like the Arabic a&.
+6) A royal prince of the age of Mycerinus re-
+nowned for his wisdom and literary achievements. See
+ERMAN,	Die Marchen des P a p y r u s Westcar I 18-19.
+7) g-n(r)-f, only here.
+8) R sndw-i, cf. above 5,4.
+9) D d t , unknown word.
+IO) K-f, only here; perhaps connected with the
+obscure word g-f, A n a s t . V 7, 2.
+1 1 ) Mcj as verb, cf. P i a n k h i 72.
+12) .Hf is frequent in Greek timcs for “to see”,
+e. g. MAR., Dend. I 43b; I1 60c; in earlier texts
+here only.
+13) In reality, the writer argues, Amenemope
+knows nothing of the profound mysteries into which
+he claims to have been initiated. 	He will therefore
+do well to refrain altogether from nieddling with the
+hieroglyphs.
+14) The last words of this passage (not under-
+stood by me when the text was autographed) should
+be emended to hb‘ sn-t, cf. Totb. ed. NAV., 17, 2.
+The complexities of the art of letters are compared
+with those of the game of draughts.
+15) For iry-k tw m “thou dost represent thyself
+as”, cf. 20,4, and the variant of 0. T. to 6,s. - It
+is very tempting to restore ri-&vi after “ry, but the
+traces are against this.
+16) Hr ‘wti, see my Inscription of M e s , p. 17.
+- With the next words hv mntk Hori‘s rejoinder
+begins.
+
+Anastasi I 	I 5”
+. . . . . . . .(?)I 	of heaven are open before thee. 	Haste thee to the place [of the12
+books, that they may let thee see the chest with the 	register^]^, taking an offering
+to ili_y-i4 that he may 	quickly disclose(?) to thee my(?) reputation’. 	Thou wilt
+find my name upon the roll as officer6 of the great stable of Sese7-miamun. Thou
+wilt bear witness 	to the command in the stable (which I hold), for provisions(?)g
+are 	enteredg in my name. 	So I 	have 	served 	as 	officer! 	So I have 	been 	a
+There is no stripling of thy(?) generation who can measure himself with
+mei”. 	Hie thee’’ 	to my superior officers,
+that they may declare to thee mp reputation.
+12,s scribe!
+Let 	a man 	inquire from his mother!
+X. 	An imaginary competition in which the writer’s superiority is proved.
+Again thou sayest concerning me: “A high . . . treei2 is before thee; enter
+thou into the difficult(?) . . . . . . tree; thou canst not do it!” 	Enter thou in before
+me, and I will come after thee. 	Admit(?)I3, thou hast never approached it, nor
+canst thou(?) draw nigh to it”. 	If thou discoverest the ‘inner part of it”, I have
+Beware of laying hands on me in order to pull me out.	I ~ , Iretreated (still further).
+XI. 	The writer is again accused of being no true scribe.
+Thou sayest to me: “In very soothlG thou art no scribe; it is a vain17 and
+empty name. 	Thou bearest the palette wrongfullyls, without being . . . . . . .I!’(?)’’
+- I am foolish(?)20[and without a(?)] teacher. 	Tell me(?) the . . . . . . . . . . . . . .
+I) A word for ‘[secrets”(?); the determinative
+2) Or t s-t [s3m] sSw “the place of the [keepers]
+3) ’Imi-rnf seems a fairly certain conjecture.
+4) This name, which belongs to an imagined
+“keeper of the books”, is not found elsewhere.
+5) Sml-i, without the possessive article, is found
+below in 1z,6. 	The sentence might run; wn-f nk
+3[s] [hr(?)] j 1 3 - 2 ( ? ) 	smi, but the construction and
+several words are doubtful. 	The sense however is
+obvious.
+6) This title, of which the reading and the exact
+meaning are unknown, occurs in the GoIe9zischeff
+Vocabulavy (3, IO) between the “armour-bearer” (j3y
+h‘w) and the “groom” (yn-r-2); for other instances
+see p. 21 a, note gm. 	Another hieroglyphic instance
+Brit. Mus. 321.
+7) The shortened form of the name Rameses;
+the most recent discussion is that of VON CALICE,
+does not suit ‘<gates”.
+of the books.
+8. 2.46 (1909), 111.
+8) D-r-w-t, an unknown word.
+9) Lit. “are in writing”.
+IO) Emend s_tni-f Y (z‘w-l as in 28, 2 ; and cf. i_t
+s1n-f n @n-k “who can compare himself to thy
+k j e s t y ” , MAR., A b y d . I1 54, 11.
+I I) ’ I h , cf. Paheri 5 ; NAV., Deir-el-Bahavi Sg;
+Amherst Papyri 20, IV; WIEDEMANN,	A e g . Grab-
+reliefs . . . . . zu Knrlsruhe 7 ; Sphinx stele 11;
+Leipzig Ostracon 8.
+12) It must be assumed that h&w, if this be the
+original reading (see critical note), was the name of
+a lofty tree difficult to climb. Here there is a figura-
+tive competition between the two scribes, to see which
+of them can penetrate farthest into the midst of the
+tree (the branches?). In idiomatic English it might
+be said that they are trying to test which of them
+can get nearer “to the top of the tree”. 	The arti-
+ficiality of 	the long-sustained metaphor makes it
+difficult for a modern reader to appreciate.
+13) H n occurs several times thus obscurely before
+a negative, cf. Anast. I V 13, I ; MAR., Kavnak 55, 77;
+the sense is not by any means certain.
+14) These words are omitted in 	the 	T u r i n
+15) Lit. “if thou findest its interior”. 	Variant
+16) ’ I ( w ) n ( j ) ,Coptic an, has here its original
+17) K b , see above p. 9*, n. 7.
+18) A+? @i(w)-t only here; for _d3-t see A. 2.42
+19) Dn, a difficult and rather uncertain word,
+cf. Rec. de Trav. 16, 129; Leipzig Ostracon 23, recto.
+20) g - n (&?-&-iw),cf. Israel Stele 14; possibly
+also R., I . H . 144, 46-47.
+P a p y r u s ( P . T.).
+P. T. “if thou art found in its interior”.
+emphatic meaning, cf. A. 2.41 (1904), 130.
+(19051, 58.
+
+I 6* 	Literary Texts of the New Kingdom
+. . . . . . . . . able to exhaust(?)l me(?>. Thou dost harness’ 	thyself against me yet
+again. 	Thy sayings do injustice; they will not be hearkened to. 	Let thy letters3
+be taken before OnGris4, that he may decide for us who is in the right; do not
+be angry5.
+XII. 	Two instances of the incompetence of Amenemope: in the supplying
+of rations for the troops, and in the building of a ramp.
+Another 	topic. 	Behold 	I 	am come full of 	thy 	office; 	I cause thee to
+know how matters stand with thee6 when 	thou 	sayest: “I am the scribe, com-
+mander 	of soldiers”. 	Thou comest to
+me to inquire concerning the giving of rations‘ 	to the soldiers, and sayest to me:
+‘LReckonit out”. 	Thou desertest thy office; the (task of) teaching thee to per-
+form it falls upon 	my 	shoulders*. 	Come, I will tell 	thee more than thou hast
+said(?). 	I will disclose to thee a command
+of thy Lord, since thou art his royal scribe, (since) thou art despatched to conveylo
+great monuments for Horus, the Lord of the Two Lands. 	For thou (in sooth)
+art the clever 	scribe who is at the head of the soldiers! - There is madeTi a
+ramp of 730 cubits, with a breadth of 55 cubits, consisting of 1 2 0 compartments(?),
+There is given to thee a lake to dig.
+I will cause thee to be abashed(?)’.
+filIed12 with 	reedsi3 and 	beams, 	with 	a 	height 	of14 60 cubits 	at its summit, its
+I) Pnk “to draw water”, or “to bale” water out
+of a boat, the Coptic nwrrr; cf. BORCHARDT,	B a u g .
+d. Amonstempels 41; Eloquent Peasant, B I, 94, 278;
+Totb. ed. NAV. 99, 24. 	Here probably in a meta-
+phorical sense. 	The determinative in the papyrus
+seems to be borrowed from pn‘.
+2) Lit. “yokest thyself”.
+3) P. T .has the variant “my letters”, which is per-
+haps better; Hori is rebutting an attack upon himself.
+4) Oniiris receives the epithet w_d‘ ~ ~ 3 ‘ 4	“ad-
+judicating the truth” on a late stele Leaden VLDJ 4;
+and a Thinite temple mentioned in Harris I 5 7 , I I ;
+61 a, 3 bears the name “Rameses judging Truth (wd‘
+m3‘-t) in the house of Oniiris”.
+5 ) For tnz-k optatively, see p. II*, n. 4.
+6) Lit. “I cause thee to know thy condition”
+(shy, “way”, “plan”, “condition”).
+7) The 	reading 	of this common word for
+“rations” (ci. 6, 4) is not yet established. 	Its sense
+cannot easily be connected that of the stem spd, and
+it appears to me almost certain that the word is a
+derivative of d i “to give”, since the three hieroglyphic
+examples known to me (TYLOR,T o m b of Sebeknekht
+7, 13 [collated]; Uvk. IV 64; Decree of Haremheb,
+right side) write it with the old triangular sign for
+di. 	SETHEhowever points out that the signs for
+spd 	and d i are occasionally interchanged in the
+18th Dynasty. and quotes U r k . IV 240 as an instance.
+8) H r nhbl-i “upon my neck”; in the same
+metaphorical sense cf. NEWBERRY,Rekhmara 2, 1.2.
+9) F - n ( r ) - g only here with the determinative of
+evil; with that of weariness, cf. “there is none who
+drives his horses(?) into his neighbourhood; every
+land is abashed (? hn(r)g) by his power (m k3-j)”
+DE MORGAN,Cat. d . Mon. I 7 (I owe the example
+to M. D ~ V A U D ) .Whether this word is akin to ?L3g,
+6-r-g “to be pleased”, “content“, is not clear; for the
+latter cf. Rzfeh, tomb 7, IO. 26; MAR., A b y d . 1 2 9 ;
+ROCHEM.,Edjou I 74; cf. z’hd and the reduplicated
+form hjg’gs’g.
+IO) P. T . reads “thou art sent beneath the
+(Royal) balcony with regard to all kinds of goodly
+works, (when) the mountains are disgorging (read
+&r kc, cf. Hood I, 2) great monuments” etc.
+I I ) At this point there begins the description
+of 	one of 	three engineering problems by which
+Amenemope’s vaunted skill is to be put to the test
+and proved non-existent. 	The technical details are
+discussed in the Appendix that follows the trans-
+lation.
+12) Anast. I rightly mh, masculine, agreeing with
+st3; P. T . mh-Li, which could onIy agree with r-g-t.
+“Filled” here means “provided with”, “containing” ;
+the literal sense must not be too closely pressed,
+13) G-S, in Coptic SLAY(the exceptional equi-
+valence g = K should be noted), cf. A n a s t . I V I b, 3;
+13, 11; 14, 7 (= Koller 5 , 8); Harvis I 19b, I O ; 72, I ;
+MAR., Devid. IV 39, 15 I .
+14) M b y “with a height of”, followed by a
+genitive, cf. Harris I 59, 2.
+
+I7*
+middle of 30 cubits, its batter(?) 1 5 cubits, its base(??) of 5 cubits. 	The quantity
+of bricks needed for it is asked of the commander of the army. 	All the scribes
+They put 	their 	faith’ 	in thee, all of
+them, 	saying: “Thou 	art 	a 	clever scribe’, 	my 	friend! 	Decide 	for us 	quickly!
+Behold thy name is 	famous; let 	one be 	found in this place 	(able) to magnify3
+the other thirty! 	Let it not be said of thee that there is aught that thou dost
+not know! 	Answer us (as to) the quantity of bricks needed! 	Behold its measure-
+m e n t ~ ( ? ? ) ~	are before thee; each one of its compartments(?) is of 30 cubits (long)
+and 7 cubits broad”j.
+Anastasi I
+14,s together 	lack knowledge among them(?).
+XIIL 	Amenemope is unable to 	determine the number of men required
+in the transport of an obelisk of given dimensions.
+1 5 9 1 	Come, good sir, vigilant scribe, who art at the head of the army, distin-
+guished when thou standest at the great Palace-gates, comely when thou bowest
+down beneath the Balcony6! 	A 	despatch has 	come from the 	crown-prince7 at
+R‘-Kj8t o rejoice the heart of the Horus of Gold, to extol(?) the raging Lion(?)’,
+telling 	that 	an 	obelisk” 	has been 	newly made, 	graven 	with the 	name 	of His
+Majesty, of 	I I O cubits in length of shaft; its pedestal I O cubits (square), the block
+at its base making 7 cubits in every direction; it goes in a slope(?) towards the
+15,s summit(?), one 	cubit 	and 	one finger(?); its pyramidion one cubit in height, 	its
+point(?) (measuring) 	two 	fingers. 	Add 	them together(??) so as to make 	them
+into 	a 	list(??)’’, so 	that 	thou 	mayest 	appoint 	every 	man 	needed 	to(??) drag
+them, 	and 	send 	them 	to 	the 	Red 	Mountain“. 	Behold, 	they 	are 	waiting 	for
+I) M h i b only here exactly-in this sense; but
+the phrase is used of having confidence in something
+asserted or believed; see my Inscription of M e s
+p. 15, n. 23.
+2) Variant P. T . “thou art keen of wit”.
+3) I. e. able, by solving the problem, to save
+the reputation of his colleagues. - Gm with object,
+closely followed by Y with an infinitive, is an idiom
+with various slight shades of meaning e. g. “to find
+someone able”, “ready”, “competent” to do something.
+Cf. below 23, 2; 28, 8; P a p . Leiden 370, recto 16;
+A n a s t . V 9, 4; 17, 7; Turin Lowesongs I , 14.
+4) H t i w might mean either (I) “pedestals”,
+L‘steps’’, or (2) “threshing-floors”; neither of these
+senses is here suitable. 	What we clearly need is a
+word for “measurements”, and perhaps the original
+reading was ny-f h3y “its measurements”; for h3y cf.
+DARESSY,Ostraca 25262 (Cairo); P a p . Twin 71, I
+(omitted in facsimile).
+5) Amenemope makes no answer, and thesub-
+ject is dismissed in silence.
+6) SSd, g o a y 7 fenestra; see H~LSCHER,	D a s
+hohe T o r won Medinet H a b a , p. 49-50 	for a good
+archaeological illustration.
+G a r d i n e r .
+7) R$‘ti in the New Kingdom is as a rule the
+designation of the Crown-prince; convincing examples
+are d’orbiney 19, 2. 6 ; Harris I 42, 8 ; P a p . T u r i n
+17, I , 102, 2, 9; Inscr. de’dic. 44.
+8) R‘ probably here means “district of” or the
+like. 	A canal or branch of the Nile named K3 is
+mentioned on several wine-jars from the Ramesseum,
+viz. SPIEGELBERG,	Hier. Ostr. nos. 209. 217. 218. 269.
+289. 292. In the last-quoted instance K3 is connected
+with “the water of Ptah”, which is found in a list of
+canals etc. appended to the Catalogue of Lower Egyp-
+tian nomes (see BRUGSCH,Dict. Gkogr. 239); but that
+the word k 3 in the same list (op. cit. 1271) is no
+geographical name seems fairly clear. For the loca-
+tion of KS’ note that the Red Mountain is implied
+in 15, 6 to have been the quarry where the obelisk
+was made; this is the Gebel Ahmar near Cairo, see
+my Notes on the Story of Sinuhe, on B 14-15.
+9) I. e. the Pharaoh. Probably we should read
+Y swh m3i nSn; for swh with a direct object see
+Admonitions p. 28.
+IO) For the technical words see the Appendix.
+11) A very difficult and uncertain sentence.
+12) See above n. 8.
+3
+
+18“ 	Literary Texts of the New Kingdom
+[them] 	Prepare(?) the way for!?) the crown-prince Mi-ifn. Approach(?)’ and decide
+for us the number of men who (shall go) before him. 	Let them not have to write
+again! 	T h e 	monument 	(lies ready) 	in 	the 	quarry. 	Answer 	quickly, 	do 	not
+dawdle3! 	Behold 	thou 	art seeking them4 for thyself! 	Get thee 	on5! 	Behold
+thou art bestirring thyself(?)6. I cause thee to rejoice; I used formerly to . . . . . .
+like thee. 	Let LIS join the fray together7, for my heart is tried, my fingers are
+apt and 	clever’ 	when thou 	goest astray. 	Do not weep!
+Thy helperi9 stands behind 	thee! 	I will cause thee to 	say: 	“There is a royal
+scribe with the Horus, the Victorious Bull”, and thou 	shalt order men to make
+chests into which to put letters“. 	I would 	have written for thee stealthily(??)i2,
+like a bull at a festival at every festival of . . . . . . . , . .
+Get thee (onwards)’!
+but(?) behold thou art seeking it for thyselfl3. 	Thou settest my fingers , , . , . . . .14
+XIV. 	Amenemope proves himself incapable of supervising the erection
+of a colossus.
+It is said to thee: 	the magazine that has been loaded with sand
+under the monument of thy Lord which has been brought from the Red Mountain.
+It makes 30 cubits stretched upon the ground, and 	2 0 cubits in breadth, 	. . . . . .
+-ed with 	IOO(??) chambers16 filled with sand from the river-bank. 	T h e . . , . . . . . . .
+of its(?) chambers have a breadth of 44(?) cubits and a height of 5 0 	cubits, 	all
+of them, . . . . . . . . . . in t h e i r . . . . I . . . . .”17 	Thou art commanded to find out
+what is before 	(the Pharaoh) (??)”. 	How
+I ) Sin (written like, but a totally different word
+from, sin <‘to hasten”) means “to wait” cf. Sinuhe
+R 21; Sphinx stele 11; sin n “to wait for” cf.
+d’Orbiney 3, I ; Anast. I V 5, I ; Pap.Turin 136, 2;
+68, col. 3, 3. 12; Pap.Leiden 345 verso G 4, 2. 3.4. 7.
+2) If the sentences are here rightly divided,
+imi ws’-t must mean “prepare the way” for the crown-
+prince, who would be unable to start without the
+men who are to drag the obelisk from the quarry.
+But it is not certain that hn “approach” is here an
+imperative; ”it might be equivalent to in, and hn
+predicate “make way, the crown-prince approaches”.
+But the meaning would then be very obscure.
+3) ’Intnt “to linger”, “to hesitate”, see A. Z. 45,
+(1908), 61.
+4) Them, i. e. the number of men required;
+or, the solution of the problem.
+5) M s reflexively Westcnr IO, 12; Turin,statue
+of Haremheb 15; R., I . H . 223 = Snll. I I I 7,6; in
+the imperative as here, cf. Pyr. 586. 645. 1657;
+ROCHEM.,Edfou I1 pl. 30 c; L., D. IV 57 a.
+6) Read ms-k tw(?); for similar corruptions see
+the critical note p. 36a, note 5 f .
+7) The writer appears to be offering his help,
+alleging that he himself was once in similar straits and
+manyi9 men will (it take to) demolish
+therefore knows how to cope with such difficulties. _Ts
+skw, see Admonitions p. 20; n s p is the Coptic iicon.
+8) Lit. “hear (understand) cleverness”.
+9) ERMAN	rightly emends ims-tw as in I j, 8.
+IO) For ‘cjr see above p. 9*, n. 14.
+11) The meaning perhaps is that Amenemope,
+having found a helper, not only loudly exclaims that
+Pharaoh possesses in himself a competent royal scribe,
+but even goes so far as to order the boxes into which
+his letters are to be put. -- The suffix -sn makes
+it necessary to emend the plural p d s w “boxes”.
+12) H-r-j-j only here.
+13) See above 1 5 8 , and n. 4 on this page.
+14) Nsns, $?tag ~ E ~ ~ ~ E Y O Y .	Here again the sense
+1 5 ) For the mode of erection contemplated see
+16) Smm see above p. 9*, n. 2.
+17) Ds’y,twlzze, (?) and sg3 are unknown words.
+18) It is hardly possible to translate differently,
+but my rendering gives no satisfactory sense. M b3h
+seems to be used in reference to ascertained dimen-
+sions in 14, 8.
+20, 5 ; Unavnon I, x + 15.
+is utterly obscure.
+the Appendix.
+19) Wr, Coptic OTHp, cf. below 27, 8 ; Anast.
+
+Anastasi I 	I g*
+‘7>5
+I8,I
+it’ in six hours - (if[?])2 apt are their minds(?), but small their desire to demo-
+lish it without there coming a pause 	when 	thou 	givest 	a rest3 to the soldiers,
+that they may take their meal4 - so that the monument may be established in
+its place? 	It is Pharaoh’s desire to see it beautiful!
+XV. 	Amenemope fails to make proper provision for a military expedition.
+0 scribe, keen of (wit), understanding of heart’, 	to whom nothing what-
+soever 	is 	unknown, 	flame‘ 	in the darkness 	before 	the soldiers, giving light 	to
+them! 	Thou art sent on an expedition to Phoet~icia(?)~	at the head of the victorious
+army, 	in 	order to 	smite those rebels who 	are called 	NeArin*. 	T h e troops 	of
+soldiers 	who 	are before thee amount 	to 	1900; (of) Sherden 	5 2 0 ( ? ) , 	of Kehek
+1600, of Mesliwesh { I O O ( ? ) ) ~ , Negroes making 880; total 5000 	in all, not coun-
+tingle their officers. 	A complimentary giftll has been brought 	for thee (and set)
+before thee, bread and 	cattle and wine. 	T h e number of men is too 	great 	for
+thee, the provisioni2 (made) is too small for them: loaves of . . . . . 	300;
+cakesi4, I 800; goats of various sorts, I 2 0 ; wine, 30 (measures). T h e soldiers are too
+numerous, the provisions are underrated15 as compared with(??)that which thou takest
+of them. Thou receivest(?) (them, and) they are placed in the camp. T h e soldiers are
+prepared and ready. 	Register them quickly, the share oEiF every man t o his hand.
+T h e Beduins look on in secreti7. 	0 sapient scribeiR, midday has come, the camp is
+hot. 	Do not make the commander” 	angry!
+Long is the march before us!” 	But I say: “What means it, that there is no(??)
+bread 	at allz2? Our night-quarters are far off! 	What means, good sir, this scour-
+They sayi9: “It is time to startz”!
+I ) @m doubtless originally “to demolish” a wall ;
+“to force open” a tomb, cf. P a p . A m h e r s t z , ~ ;M a y e v
+B 9: elsewhere chiefly metaphorically, e. g. P y v . 3 1 1 .
+Cf. Coptic 5 0 ~ c t d e ~ tconfvingeve.
+2) The difficult words that follow seem to refer
+to the likelihood that the workers, though competent,
+will show themselves unwilling to work for six hours
+continuously without a break for a meal; in cal-
+culating the number of men required this factor must
+be taken into account.
+3) R d i t svf n,Sphinx stele 6 ; FRASER,	Scavabs
+263, 14; Decvee of Havemheb 25; ibid. right side IO;
+cf. cpqe otiavi.
+4) The word ‘3 only here.
+5) Wh‘ ib, see A. Z. 45 (19091, 136.
+6) For the metaphor cf. L., D . I1 150a, 4 (Ham-
+mamat).
+7) All translators have here emended Rhn, Ham-
+mamat, but the context demands the name of a well-
+known country in the direction of Syria. For my conjec-
+ture D3hi see the note on the reading p. zga, note I b.
+8) hT-‘-v-n, 	D V P ? “warriors”, a sense that is
+found in the 0. T.
+9) The Meshwesh and the Negroes are never
+See BURCH.no. 559.
+elsewhere linked together as the Ms. reading suggests;
+hence a number may have fallen out of the text. See
+p. 29a, note 4c.
+IO) Wis’-tw, see 11. 2. 47 ( I ~ I O ) , 134-136.
+1 1 ) From the stem b h ; BURCH.no. 871.
+I 2 ) N k t ‘provisions”, an exceptional sense of
+13) Bmh, an ancient Egyptian word related to
+14) ’I-p-t, from 3DH “to bake”, BURCH.no. 39.
+15) S-bvi-‘, see above p, I I * , n. I .
+16) P-n, see above p. 13*, n. 8.
+17) M !3w(t), Coptic fixrose fuvtim, cf. below
+18) Two Semitic words, which in Hebrew would
+19) The reading is uncertain; seep. 29a, note IGi.
+2 0 ) F3 “to start”, cf. 20, I.
+21) _Ts pd-t, cf. MAR., Abydos I 5 3 ; Ros., Man.
+Stov. I 125.
+2 2 ) M kf 	is elsewhere found at the end of
+negative sentences for emphasis (like in an), cf. 27,3;
+Anast. I V 13, 5 ; Anast. V 7, I ; 17,7. 	Hence the
+conjecture b.12 here.
+3”
+the word found again Aqzast. 117 13, 12.
+Hebrew hnp; BURCH.no. 984.
+20, 4; Anast. I V 4, 1 1 .
+be 3 . i ~?DO.
+
+20” 	Literary Texts of the New Kingdom
+ging of us? 	Nay, 	but 	thou 	art a 	clever scribe! 	Approach to give the food*!
+An hour’ becomes(?) a day without the scribe from(??) the Ruler. 	(What means(??))
+thy being brought to punish us? 	This is not good; let Mose3 hear (of it), and
+he will send to destroy thee!”
+x 	XVI. 	Amenemope’s ignorance of Northern Syria.
+Thy letter abounds in pointed speeche~(?)~,	is overloaded with big words.
+Behold they will(?) reward thee with that which they demand(??)5;thou hast piled
+up (words) at thy good pleasure‘. 	“I am a scribe, a Maher7”, thou dost retort.
+18,s (If) there is truth in what thou sayest, say Is, come forth that thou mayest be tested.
+A horse is harnessed for thee, swift as the jackal red of ear9; it is like a storm
+of wind when it goes forth. 	Thou loosest 	the reins”, 	and seizest the bow. 	Let
+us see what thy hand will do! 	1 will expound to thee the manner of a Maher,
+I will cause thee to 	see what 	he does. 	Thou hast 	not gone“ to the land of
+of Upe“. 	As 	for &l-wz, 	thou 	knowest	Khatti; thou 	hast 	not 	beheld the land
+I) Mkw “food”, cf. A n a s t . IF‘ 13, 12; 17,6;
+P a p . K a h u n 40,29; P a p . Twin 69, col. 1,9.
+2) The construction and the sense of the next
+two sentences are highly problematical.
+3) In Salt 2, 18 the word M s y seems to be
+used as an appellation or nickname of the Pharaoh;
+so too perhaps here. - This is the passage in which
+LAUTHsought to find the name of Moses.
+4) h’-s-k,see BR., Worterb. S u p p l . 658, where
+the Coptic ’AWKC ‘[pungere” is compared. 	“Pointed
+sayings”, “pungent sayings”, seems a likelier meaning
+than ‘koupures”, the rendering of CHABAS,or “para-
+graphes”, that of BRUGSCH.
+5) This obscure sentence may possibly mean:
+thou hast piled up big words in a reckless manner,
+and must now accept from me the retort which they
+seem themselves to ask for. Fk3 means “to reward’
+(to be distinguished from fk3 “to pluck”, see the
+note on Kollev 2,8); here perhaps fk3-w tw should
+be emended.
+6) Lit. “as thou didst wish”.
+7) The word Yn-h-v, which is found frequently
+in the next pages of Anastasi I but nowhere else,
+must be the technical name given to the Egyptian
+emissary in Syria. The derivation from 7 5 ~	“speedy”
+suggested by CHABAS(p. 81) is very uncertain, but
+has not been bettered. 	If “speedy” were the etymolo-
+gical sense one might expect the determinatives of
+movement. 	The determinative of the child, which
+in some instances precedes or replaces that of violent
+action, is borrowed from a word for “suckling” (cf.
+DE MORGAN,Cat. des Mon., I I I 7, a I ; Rec. de Trav.
+18, 162) that is itself derived from a word meaning
+“to provide with milk” discussed by PIEHL,S p h i n x
+IV 12-14; 	thence too comes Ynhr “milkman” in
+Hood 2, 13 =Golenischeff Vocabulavy 2, 12, where the
+context and (in one case) the determinatives render
+the meaning certain.
+8) ’In-n “I say” (lit. “we say”) can stand either
+before or after the words quoted; after, cf. above
+11, 7; P a p . Bibl. N a t . 198, 2, 12; before, here 17, 8
+and P a p . Bibl. N a t . 198, 3, 16.
+9) SvS “to be swift”, cf. Uvkunden IV 697; P a p .
+T u v i n 26 col. 3, 6 ; late examples MAR.,Dend. I 46b;
+I11 28h; 52p; DUM.,Geogv. Inscv. IV 123. - The
+jackal as an image of speed, cf. L., D. I11 195a. -
+It is not clear whether the epithet “red-eared” refers
+to the horse or the jackal.
+IO) Hnr “reins”, see BURCH.no 727.
+I I ) CHABAStranslates this and the numerous
+sentences of similar type in the next pages inter-
+rogatively, “n’es-tu pas all&’ “n’as-tu pas vu”, etc.
+BRUGSCHrightly animadverts on this mistake in his
+article in the Revue- Cvitique; though it must be
+admitted that the blending of the denials that Amene-
+mope has ever been in Syria with the descriptions
+of what would have happened to him if he had been
+there is very misleading. 	The most conclusive evi-
+dence that the sentences in questioli are negative
+statements, intended, like many of the preceding
+sections, to demonstrate the ignorance of Amenemope,
+will be found in the c1ausese“thou answerest me
+neither good nor evil, thou renderest no report”, 27,z;
+“thou hast never trodden it a t all (vn kf)”, 27, 3;
+“thou hast never seen them since t h y birth”, 27, 7
+(cf. 9, 5 ) ; notice particularly the italicized words.
+ERMAN	( A g y p t e n 5 I O foll.) was mistaken in returning
+to CHABAS’view.
+12) ’I-p is a land situated at the northern ex-
+tremity of H3rzu (Syria), Damascus being one of its
+towns. 	Identical with Ube of the Amarna letters,
+cf. E. MEYER, Festschvift f . G. Ebevs, p. 71. 	See
+too KNUDTZON,	El-Avnavna- Tafeln, p. I I IO- 	I I I I.
+
+Anastasi I 	21”
+not 	the nature 	of it, 	and 	Fg-d-y in 	like manner‘. 	What 	is the D-WY(?)~	- 	of
+19,1 Sese 	like? 	On 	which 	side 	of it 	is the town 	of 	H-Y-	. . . . . . 3 ? 	What 	is its
+stream4 like? 	Thou 	hast 	never 	set 	forth 	to Kadesh5 and 	to 	D-d-h6. Thou
+hast not gone to the region of the Shosu with the troops of the army’. 	Thou
+hast [not] trodden the way to the M - ~ - Y * ,	(where) the sky is dark by day, and
+it is overgrown with cypresses(?)’ and oaks1° and cedars that reach the heavens;
+(where) lions are more plenteous than leopards“ 	and hyenas12(?), and (it) is girt
+about with Sliosu on (every) side. 	Thou hast not climbed the mountain of 3-7~‘~.
+thy 	chariot 	worni5 by 	ropes, thy horse being dragged(??). Prithee let 	[me tell
+thee of] . . . . . . -6-y-P(?). Thou 	shrinkest frorn(?)l7 its 	ascent, and crossest its
+stream because 	of it(?). 	Thy
+chariot rests upon thy [shoulder(?)]19. Thy [assistant(?)] is worn outz0. Thou makest
+19,s Thou hast 	not 	trodden 	(the road(?))14, thy 	hands placed 	upon . . . . . . . . . . . - 1
+Thou beholdest how 	it 	tastes to b e a Maher“!
+I ) Unknown localities.
+2) M. MULLER(0.L. 2. I 382-3) 	reads-“the
+g-m-r of Sese” i. e. of Rameses 11; this he would
+separate from the Simyra near Arvad (Urk. IV 689),
+as too far north for a fortress of Rameses 11, and
+accordingly he identifies it with the Sumur of the
+letters of Ribaddi, which WINCKLERconjectured to
+be much nearer to Byblos. The present tendency is
+to identify Sumur with Simyra, the modern Sumra
+on the Nahr el KebPr, rejecting WINCKLERS	view (see
+KNUDTZOn, 09. cit. 1141). 	If d-m-r is the right
+reading, as is probable, it must be understood as
+Simyra.
+3) CHABAShere readg-r-b, Aleppo, but wrongly;
+see p. 30a, note 171.
+4) &ld is surely not 	“ford“, 	but “stream”
+(BRUGSCHrightly “courant”) ; it is clearly derived
+from the verb “LO flow down”, ([to sail downstream”.
+Elsewhere only as name of a canal, Berlin 15393
+(Saitic stele); MAR., Dend. I 66b.
+5 ) Probably Kadesh on the Orontes; so MASPERO,
+Rec. de Trav. 19, 68-72, 	where the entire context
+is discussed. MAXMULLERrejects this view, perhaps
+only for the reason that Kadesh occurs again below
+22,4, 	and identifies Kadesh here with the Galilaean
+town of that name, KidSa in the Amarna letters
+and perhaps 	the 	first 	name in Thutmosis 111’s
+Retenu list (Urk. IV 781); see As. u. Eur. 173.
+MASPERO’Stheory is far preferable; all the identi-
+fiable names in this passage are in the far North
+of Syria.
+6) D-b-Jj (UrR. IV 781,6) is h2’3 (11Sam. 8, 8,
+LXX), the TubiJji of the Amarna letters; probably
+a little S. of Damascus, see MAX MULLER, Die
+Palastinaliste Th. 111 p. 9
+7 ) Pd-t m?, cf. 17,4.
+8) P-m-g-r, unknown; for suggested etymolo-
+gies see MASPERO,1. c.; it is uncertain whether p ( 3 )
+is here the article or not.
+9) The wood of the tree ‘wn-t was used for
+making “staves” (03iZi) cf. Mallet I, 7; Pa$.Turin 2,9.
+IO) ’I-n(r)-n “oak” j?5!, 	BURCH.no. 76.
+11) R 3by should not be misread as d 3 b y ; this
+would be an impossible spelling for 35 “bears”,
+which MAX MULLERstill upholds, As. u.Eur. 89.
+12) Ytm-t only here, below 20, 7, and in the very
+late text BRUGSCH,Rec. I1 71,4; in the last instance
+with a dog-like determinative. CHABASunwarrantably
+identified htm-t and ht-t, ZOITE. 	I retain the rende-
+ring “hyena” for want of a better.
+13) 3-w, identified by MAXMULLER(As. u. Euv.
+199) with a peak of the Lebanon called Saua in an
+inscription of Tiglat-pilesar. 	BURCHARDT	considers
+this phonetically impossible,
+14) Emend bw dgs-k (sw)or (w3-t).
+15) ShtZ lit. “beaten”.
+16) H3-my may be compared with h3n3 my 27,4.
+M y , below 20, 8; 21, 5; 22, I. 7; 27, 4, is clearly the
+enclitic particle discussed Admonitions p. 105. 	The
+place-name -b-r-t cannot be Berytus, as MASPERO
+would have it, on account of the unintelligible traces
+preceding, which must belong to the word.
+17) H - f 4 , here apparently an active verb with
+the meaning “to fly from something in terror”, is
+doubtless the Hebrew 7bh; BURCH.no. 675 gives the
+word a wrong meaning. Perhaps in the sense “terror”
+“dreadfulness”, CHAMP.,Mon. 228 (collated).
+18) Lit. “the taste of a Maher”; for the metaphor
+see Admonitions p. 41.
+19) Sense perhaps: thou hast to support thy
+chariot.
+20) W h s , cf. 25,6; Rnast. I I I 4,3 (= Anast. V
+9, I corrupt).
+
+22* 	Literary Texts of the New IGngdoni
+a 	halt 	in 	the 	evening’; 	all 	thy 	body 	is 	crushed 	and battered(?)2; thy 	[limbs1
+Thou 	wakest, 	and 	it 	is the 	hour 	for
+starting5 in 	the drear(?) night, 	Thou art alone to harness (the horse); 	brother
+comes not to brother. 	A fugitive(??)6has entered into the camp. 	T h e horse has
+been 	let loose7. 	Thy clothes
+have been 	taken 	away. 	Thy groom has awoke in the night, 	and marked what
+he 	has 	done(?)g; he takes what remains 	and joins 	(the ranks 	of) 	the 	wicked,
+he mingles 	with the people of the Shosu and 	disguises himselflo as an Asiatic.
+2015 The enemy comes to 	pillage” 	in secret. 	They 	find 	thee 	inert. 	Thou 	wakest
+up and findest no trace of them12; they have made awayi3 with thy things, 	Thou
+art becoming a fully-equippedt4 Maher, thou fillest thy ear(?)l5.
+20,1 are b r u i ~ e d ( ? ) ~	. . . . . . . . . from sleep4.
+T h e . , . . . . . . has turned back(?)’ in the night.
+XVII. 	The Phoenician cities.
+I will tell thee of another mysterious city. 	BybloslG is its name; 	what is
+Thou hast not 	trodden it. 	Come
+Where 	is 	the
+it like - and its(?) goddess, 	once again?
+teach 	mei7 about Berytus”, 	and 	about Sidonlg and 	Sarepta2’.
+I) Lit. “proceedest to stop”; for spr as an
+auxiliary verb cf. A n a s t . I V 9, 11; A n a s t . V IO, 7.
+- Wh‘ perhaps properly “to stop”, “leave off”
+work, so Pahevi 3; derivatively, “to return” from
+work, so d’Orbiney 4, 3; R., I . H . 248, 85: wh‘
+wz rwh? also, in a somewhat similar sense, d’Orbiney
+4>7; 13, 7.
+2 ) H d h d , only here in this sense; cf. Urk. 1V
+710 for hdhd in a quite different sense.
+3) WS(3)wS(3),cf. Boh. O G E ~ O G W Y - , properly
+“to bruise” “crush”, cf. A n a s t . I V 9, 7 = Anast. 111
+.5, 9 ; A n a s t . V IO, 7 = Sall. I 3, 9 ; derivatively “to
+break” “smash”, see below 26, I ; then “to break
+open”, M a y e r A , recto 3, 4 ; unpublished Turin
+p a p y r u s = SPmG., Z w e i Reitrage, p, 12.
+4) I now believe that the word jnm (sic ?) is on
+a misplaced fragment. The restoration of the passage
+is quite obscure.
+5) FS’ in this sense, see above 17, 8.
+6) N-h-’r elsewhere (R., I . H . 143,41) means
+“to flee” and is probably connected with Semitic
+“to flow”. Here the feminine article t3 is incomprehen-
+sible, and the sense is obscure.
+7) _Tt “to untie” “loose”, cf. Pap. Turin 23, 6;
+33, 9; 73, IO; Israel stele 6; Harris 500 recto 4, 8;
+Vatican Magical P a p . = A. 2. 31 (1893), 122.
+8) @tbt-(tw), the pseudoparticiple *&ethGt; it is
+tempting to render “has been ransacked”, comparing
+~ O T ~ T	: do~deT,but no evidence for this meaning
+is forthcoming in late-Egyptian.
+9) ’Ir-nf can 	hardly 	be 	meant 	for “what
+has been done to him”, cf. 18, 7; the sense is
+obscure.
+IO) See above p. 14*, n. 15.
+11) S(S’)d(5)),probably l Y t 5 “to be violent”, “to
+violate”, see BURCH.no. 593.
+12) For ‘ “trace” cf. Anast. V 20, 4; obscure
+L., D . 111 140d, 5.
+13) Rmn only once again in this sense, Urk.
+I11 106; cf. mnmn.
+14) S d b h “to furnish” “equip”, cf. Anasb. I V
+I Z , ~= Anast. V 3 ; Anast. I V 13, I O = Koller 5, 8 ;
+A n a s t . I V 16 verso, 6 ; Hnvvis I 77,9.
+15) The wa of mh-k 9% msdr-k is perhaps to be
+omitted; see Koller 3, 2. 	The sense may perhaps
+be : thou art listening attentively, and gradually acqui-
+ring the experience of a ,Maher.
+16) For Byblos and its goddess Hathor see
+especially SETHE’Sarticle, 6 .2. 45 (1908), 7-14. 	-
+The list of Phoenician towns is in correct geogra-
+phical order from North to South.
+17) Mtr-t”m y r also 21, 5; 22, I . 7; the infinitive
+here probably replaces the imperative, see SETHE,
+V e r b u m I1 5 566. 	Mtr Y “to instruct” someone
+about something, cf. A n a s t . I V 14, 8; Decree of
+Haremheb, right side, 5.
+18) B-r-t, 	Berytus, 	be-Tu-tu in the Amarna
+tablets; only here in Egyptian texts, see BURCH.
+no. 366.
+19) D-d-n, Sidon, T W S , mentioned also Unn-
+m o n I, x f 24.
+20) 0-r-p-t, hb%, 2apenza, Sariptu of the ‘Taylor
+cylinder of Sennacherib, on the high road between
+Tyre and Sidon. 	In Egyptian only here.
+
+23 *
+They 	tell 	of 	another 	city in the 	sea,
+Water is taken over to it in boats, 	and it is richer
+Anastasi I
+stream 	of 	N-_t-n’? What 	is ?(_t2 	like?
+Tyre-the-port” is its name.
+in fishes than in sand.
+XVIII. 	Places further southwards.
+I will 	tell 	to 	thee another misery4 - the crossing 	of D - Y - ‘ - ~ ~ .	Thou
+wilt say: “It burns more than a (hornet-)sting‘!” 	How ill it goes with the Maher!
+Come, set me on the road southward to the region of A c c ~ ( ? ) ~ .Where is the
+road 	of Achshaphs? 	Pray teach me about
+the mountain of T44~~;	what is its peak like? 	Where is the mountain of Shecheml’?
+Who , . . . . . , . . . . . . . ? T h e Maher - where 	does he make the journey 	to
+Hazor”? 	What is its stream like? 	Put me (on) the route 	to fl-~-P,	D-g-yg
+and D-g-rf-tZ’,the playground13 of all Mahers. 	Pray ,teach me about his road.
+Make 	me 	behold 	Y-‘-n-	. , .’! 	If 	one 	is travelling 	to ’Jd-?n-?yz14,	whither 	turns
+the face? 	Do 	not make 	(me(?)> withdraw(?)’5 from thy teaching, 	lead me(?) to
+-
+Beside(?) what 	city (does it pass)?
+know them!
+._ _ _ ~ 	.~
+I) The stream of X-t-vz can only be the Nahr
+el Icasimfye, i. e. the lower courses of the LitBni,
+see M~SPERO,H i s t . Anc., 11 p. 6, note 6; the identi-
+fication of the name N-L-YLwith LitAnP is however
+open to serious objections, see MAXMULLER,As u.
+Euv. 185.
+2 ) ’I-&(BURCH.no. 190) is Uzu in the Tyrian
+series of the Amarna letters; ED. MEYER, Encycl.
+Babl. col. 3733, accepts PRA~FK’S	identification with
+Palaetyrus.
+3) D-Y, often in Egyptian (BURCH.no, 1227),
+is 7 3 , Tipog. The island of Tyre lies about a mile
+from the shore and lacks both water and vegetation.
+For the translation “Tyre-the-Port”, see MAXMULLER,
+As. u. Euv. 185, note I .
+4) Tp-ksn only here; but t p is used with various
+adjectives in a similar way, cf. tp-nfv, tp-mtv, tp-w‘,
+5) The locality D-v-‘-m (the final “r?z may well
+be a corruption of ?zM[3])is compared by MAXMULLER
+with h Y 7 ~& p a 	of Judges 1 8 , ~ ;Joshua 19,41,
+which was in Dan. This seems too far south for the
+context. 	DE ROUGB (quoted by BRUGSCHin the
+Cvzttque) cleverly suggested that there is here a pun
+upon the word
+6) D d b “to sting” is not elsewhere determined
+with the sign for fire; but ddm, demonstrably only
+another form of the same word, is so determined
+P a p . Twin 133, 12. Thus DE ROUGB’Singenious
+suggestion mentioned in the last note is brilliantly
+confirmed.
+7) The word “southward” shows that the writer
+is following, or at least intends to follow, some
+tp-sw.
+“hornets”; see next note.
+geographical older. 	Almost immediately after Tyre
+no place could more appropriately named than Acco,
+for which ‘-k+z is doubtless a corruption. 	All the
+known localities in this section lie to the S. of Carmel
+with the exception of Hazor.
+8) It is probable that ‘-k-s-p is a misspelling
+of i-k-s-p ( Uvk. Iv 782, 40), i. e. ;112JK on the border
+of Asher; see BURCH.no. 168. E. MEYm (Encycl.
+Bzbl. 3733) identifies ‘-k-s-p with z%&; 	this is a
+particularly attractive suggestion, since Achzib is in
+the near neighbourhood of Acco; the equivalence
+s = T is however open to serious objections.
+9) Unknown name.
+IO) S-k-m, evidently the b:.j 	of the old Testa-
+ment, see MAXMULLER,As.u. Euv. 394; probably
+it is Mount Ebal that is meant,
+1 1 ) H - l - v clear!y 	corresponds to Hebiew Y l Y h
+(BURCH.no. 709) and to &?u-zu-~iof the Amarna
+Tablets. This town was situated near the waters of
+Merom, not far from ICedesh.
+12) H-m-t here and in the Palestine list of
+Thutmosis I11 is thought to be Hammath nnh south
+of the Sea of Galilee, see MAXMULLER,Die Palnstina-
+liste T h u t m . 111, p. I I ; BURCH.no. 678.
+13) T is-t swtwt lit. “the place ofpromenading”;
+swtwt means “to walk for pleasure” “LO promenade”
+“make an excursion”.
+14) ’I-d-m-nz (cf. ’I-i-m-~vlin the list of Th. 111)
+has been compared with the tr”l?ilN 	h??? on the
+border betweenBenjamin and Judah; seeMAx MULLER,
+Dze Palastinnlzste Thzitm. 111, p. 1 5 .
+15) Utterly corrupt; emend s?zn(zn-i(?).
+
+24* 	Literary Texts of the New Kingdom
+XIX. 	Various other towns visited by the Maher.
+Come let me tell thee of other towns, which are above(??)*them. 	Thou
+hast not gone to the land 	of 	T-&-sql	K-W-Y-PZ-Z-Y-~~,	T-m-n-t4,Kadesh61 D+-Y‘,
+(-dy3,H-Y-w~z~.	Thou hast 	not 	beheld 	Kirjath-anab and 	Beth-Sepher7. 	Thou
+dost not know ’Jd-r-n8,nor yet D-d-p-tg. Thou 	dost not 	know 	the 	name 	of
+&-n(Y)-&O 	which is in the land of Upe“, 	a bull upon its boundary, 	the scene of
+the 	battles 	of 	every warrior. 	Pray 	teach 	me 	concerning the appearance(?) of
+<y-eia;	acquaint me with R e l i ~ b ’ ~ ;	explain Beth-~ha-el’~	and T - Y - & - ~ ’ ~ .	T h e stream
+-
+of Jordani6, how is it crossed?
+Cause 	me 	to 	know1‘ 	the 	way 	of 	crossing 	over
+is 	above 	it(??)18 	Thou 	art a Maher 	skilled in the deeds
+Maher such as thou art is found (able) to 	at the
+to 	Megiddo 	which
+of 	the 	bravet9! 	A
+head of an army! 	0
+I ) H r y is perhaps corrupted from the form of
+the preposition hr used before the suffixes -tn and
+-sn; a difficult phrase nti hr-f again below 23, I. -
+The places here mentioned appear to range from
+the North of Syria to the extreme South of Pa-
+lestine.
+2 ) T-h-s is very frequent in Egyptian texts;
+Tah-si of the Amarna letters, where it is mentioned
+together with the land of Ube, see BURCH.no. 1128.
+3) Unknown name.
+4) T-m-n-t is surely not h38h in Judah; for
+while of the seven names here given four are un-
+known, the other three are N. of Damascus.
+5) KdS is Kadesh on the Orontes, see especially
+BREASTED,T h e Battle of Kadesh, 13-21. 	A Kadesh
+was mentioned above in r9, I , see p. ZI*, n. 5.
+6) D-p-r, a town stormed by Rameses 11, pro-
+bably quite close to Kadesh, see MAXMULLER,As.u.
+Eur. 221; BREASTED(Ancient Records I11 159) places
+it further south.
+7) The Ms. has Kirjath-‘-n-b and Beth-i-p-r.
+MAX MULLER(As. u. Eur. 170) formerly proposed
+to interchange Kirjath and Beth in these names, since
+Y?b-h;T? 	(so LXX rightly) is mentioned in con-
+junction with 322 in Joshua I 5,49. However DARESSY
+reads Kirjath-‘-n-b(w) in a list of foreign names at
+Abydos ( R e c . de Trav. 21, z ) , where MARIETTEread
+Kirjath-‘-n-l(w); and MAXMULLERhimself has found
+Kirjath-‘-n-b-w in a palimpsest list at Karnak (Re-
+searches I 57, 14). There can be little doubt, in any
+case, that the same places are meant as are referred
+to the passage of Joshua; these are situated in the
+hill-country of Judah.
+8) For i-d-r-n the i-d-r-m of the list of She-
+shonk (19) and !F?~,u	have been compared, see
+BURCH.no, 201. The Adoraim of the 0. T. is iden-
+tified with modern Dura, to the S. W. of Hebron in
+Southern Judaea.
+9) Cf. the name D-d-p-t-r in the Sheshonlr
+list (34) ; otherwise unknown.
+IO) Unidentified.
+1 1 ) See above p. zo*, n. 12.
+12) 8 - y - n is very probably identical with K n
+in the Annals of Thutmosis I11 (Urk. IV 655. 657),
+near Megiddo, the Gina of the Amarna letters; see
+MAX MULLER in Encycl. Bibl. col. 3547. - The
+injured word for “appearance” (or “statue”??) is read
+sdi by BRUGSCHand compared, probably wrongly,
+with the late word s_dd (Wdrterb. 1357).
+13) R-h-b is 	in Asher, often mentionedin
+Egyptian texts; see BURCH.no. 628, and MAXMULLER,
+As. u. E w . 153.
+14) Byl-S-ir, a jN-U%h>, often named in hiero-
+glyphs, see BURCH.no. 388; not localised, but it
+occurs 	next Rehob, 	~s 	here, 	in the Sheshonk
+list (16).
+I S ) Unknown; it is tempting to transpose and
+read k-v-t-ir i. e. a h-hYp; so CHABAS,but see
+MAX MULLER,A s . u. E w . 175, footnote.
+16) Y-v-d-n, in Hebrew jil?’, 	only here; the
+word ought to have the determinative of water.
+17) See the critical note.
+18) N l i hr-f can hardly be translated “which is
+upon it”, since Megiddo is not on the Jordan, while
+the writer’s knowledge of Palestinian geography was
+evidently admirable. 	On the other hand to render
+“qui est en outre de cela” (CHABAS),comparing n t i
+hry-sn 22, 3, is a very bold expedient.
+19) Pr-‘-ib, cf. 26, 9; A n a s t . 11 3, 6; Sall. 11
+IO, I. 9.
+20) S-g here only. - For the idiom gw Y see
+above p. 17*, n. 3.
+
+25*
+Mariannu’, forward to shoot(?)’! 	Behold the . . . . . . . 3 is in a ravine* two thousand
+cubits 	deep, 	filled 	with 	boulders5 and pebbles6. 	Thou 	drawest 	back(?)’, 	thou
+graspest the bow, thou dost . . . . . . . . . .’ thy left hand, thou causest the great
+23,s ones to look. 	Their eyes are good, thy hand grows weak(?)q. DYI 1 	7 	~	+IS ~3 ~ X I N ’ ’ ” .
+Anastasi I
+Thou 	makest the name 	of every Maher, officers 	of 	the land of Egypt”. 	Thy
+name becomes like (that of) IC&-d-y, 	the chief of ’I-s-y’’, when the hyenai3 found
+him in the balsam-tree“. - The(?) narrow defile‘‘ is infested(?) with Shosu con-
+cealed beneath the bushes; some of them 	are of 	four 	cubits 	or of five cubits,
+from head(??) to foot(?)16, fierce of fake, their heart is not mild, and they hearken
+not 	to coaxing. 	Thou 	art alone, 	there is no 	helper(?)I7 with thee, 	no 	army’*
+behind 	thee. 	Thou 	findest 	no . . . . . .” 	to 	make for thee 	a way of crossing.
+I) M - r - y - n , a word found often in Egyptian
+texts in reference to Syrian ‘farriors” (BURCH.no. 470).
+The translation “lords” 	seems to me erroneous,
+though doubtless the warrior-class was held in high
+honour in the small Syrian states. 	This translation
+is probably due to the old etymology from Aramaic
+k t ~ n(CHABAS); another Semitic derivation that has
+been proposed is from h?n “to be contentious”
+“rebellious”. 	WINCKLERhas recently found the word
+in the form mariannu in the tablets from Boghaz-
+koi, and boldly connects the word with the Vedic
+mndryu “man” 	“hero” 	(Or. Lit. Zeit., 13 [ I ~ I O ] ,
+291-298). 	Both here and in 28, I it is apparently
+parallel to m-h-r (Maher).
+2) N hr-k, cf. 15,8; 24, I ; cf. too DUM.,Hist.
+Inschr. I1 47,4 and the passages quoted by GRIFFITH,
+Proc. S. B. A. 19,298. 	N hr-tn rs is used as an
+exclamation “forward I ” in P i a n k h i 95.
+3) A corrupt word with the determinative of
+land; probably from the stem n‘ ‘. - It seems neces-
+sary tQ delete the preposition hr after mik.
+4) 3-d-r-t only here and in 24,3; the approxi-
+mate sense seems certain.
+5 ) Dh-wt only here and 2 4 , ~ .
+6) The word ‘-n(r)is the Coptic &’A, see BURCH.
+no. 270 274.
+7) S-w-b-b is thought to be 2 2 1 ~“to turn back“
+(BURCH.no. 768), though neither determinative nor
+sense seems very appropriate. 	The word cannot be
+identified with 22b, as CHABASsuqposed.
+8) P-r-$, an unknown verb.
+9) W r w nfr (sic) is usually divided from what
+follows; thus ERMAN	translated “so ermudet ihr Auge
+auf deiner Hand’. 	But gnn is not used of the eye,
+nor does it mean “to grow tired’; and the preposition
+hr would be strangely used. 	Probably hr should
+be omitted; for gnn dt-k cf. Koller 5, 3; R., I . H.
+24I,43*
+IO) So BURCHARDT	(under no. 32), who proposes
+as the meaning of these words “thou slayest like a
+lion, o . .. . Maher”. 	Whether the remainder of this
+translation be correct or not, it seems probable, in
+G a r d i n e r .
+spite of BURCHARDT’S	objections, that the last word
+is b?! “pleasant”, “delightful”.
+11) Without emending it is impossible to trans-
+late otherwise; nb cannot here mean “lord’.
+12) ’I-s-r (mentioned among South-Palestinian
+names under Sethos I, L., D. 111 140”) is probably
+the tribal name ?t$; see E. MEYER, Die Israeliten
+und ihre Nachbnvslamme, p. 540.
+13) Htm-t, see above p. 21*, n. 12.
+14) BkZ, Hebrew ma, only here (BURCH.no. 374).
+15) Hitherto it has been customary to connect
+hr 13 gs’w-t 	and what follows with the preceding
+simile, which then only ends with szvnzvn-w in 23,8.
+This view is untenable for several reasons: (I) the
+first sentence of the simile (“when the hyena found
+him in the balsam-tree in the narrow defile, infested
+with Shosu concealed beneath the branches”) 	is
+breathlessly long and gives no good sense; the
+presence of the Shosu would diminish, rather than
+increase, the dangerousness of the hyena; (2) the
+words “some of them” are incompatible with the
+singular word “the hyena” in the text of A n a s t . I.
+The difficulty is at once solved by the omission of
+hr before t3 g3w-t; from this ppint onwards it is the
+journey of the Mahar in the mountainous pass (g3w-t
+also in the sequel 24,6) that is described, not the
+adventures of the prince of Asher. 	The statement
+“some were of four cubits or five cubits” (i. e. 6 foot
+I O inches to 8 foot 6 inches) now refers to the Shosu,
+as with due allowance for Egyptian exaggeration it well
+may do; and the words “they do not listen tb coaxing”
+obtain a more natural and less metaphorical meaning.
+16) Whether the suggestion fnd in the critical
+note is correct remains quite uncertain. 	For the
+(collective?) form rd-yt I have no parallel.
+17) For d-r the context clearly demands some
+word for “helper”, and I propose ‘-&q comparing
+1 6 , ~ ;7-s “messenger” is not appropriate.
+18) D-b-i, the Hebrew xi; cf. 27, I and BURCH.
+no. 1207.
+19) ’I-r-i-r, an unlrnown word; the sense required
+is “guide” or the like. 	BURCH.no. 9 2 differently.
+4
+
+26* 	Literary Texts of the New Kingdom
+Thou decidest(?) (the matter) bv marching onward’, though thou knowest not the
+road. 	Shuddering(?) seizes thee’, 	(the hair 	of) thy head stands up(?)3, thy soul
+is in thy hand. 	Thy path is filled with boulders and pebbles*, without a passable
+track(??)j, overgrown with 	reeds 	The
+ravineg is on one side of thee, 	the mountain 	rises(?)“ on the 	other. 	On thou
+%5 	goest jolting(?)l’, thy chariot on its side. 	Thou fearest to crush(?)” thy horse. 	If
+it be thrown towards the abyss(?)I3, thy ~ollar-piece(?)’~	is left bare(?), thy girth(?)15
+falls. 	Thou unfastenest the horse1‘ so as to repair’’ the collar-piece(?) at the top of
+the defile. 	Thou art not expert in the way of binding it together; thou knowest
+not how to tie(?)’* it. 	The , . , . . , . . , .Ig is left where it is; the 	chariot is too
+heavy to bear the loadzo of it(?). 	Thou startest trotting(?)21.
+and brambles’, 	briers (?) and 	wolfs-pads.
+Thy heart is weary.
+I ) W@-rZ-tw appears to be a compound verb
+construed as a pseudoparticiple; 	for pseudoparti-
+ciple 2nd p. sing. absolutely cf. ‘h‘-tw 5, 6; snd-tw
+24,4; in any case the sense is clear. 	N hv-k, see
+p. 25*, n. 2.
+2) D-n-n may be connected with i > Y “to be
+cold’; cf. for the construction l3y-k p isdd 24,s.
+3) S-n(r)-f see above p. 13*, n. 14.
+4) For db-mt and ‘ - n ( r ) see p. 25*, notes 5
+5) A desperate guess.
+6 ) ’I-s-b-r, also Sall. I 7, 5 as a tall kind of
+reed, probably a species of bamboo; the common
+word 	for 	“whip” (BURCH.no. 134) is obviously
+related.
+7) K-d, Hebrew rip, see BURCH.no. 955.
+8) The plants n-h “the dangerous” and $bwC
+zvnS “wolf‘ssandals” are not named elsewhere.
+9) S-d-r-t, only in 23,3 above.
+and 6.
+IO) Read 	here 	the verb ‘4‘; with a postu-
+lated word ‘h‘ “cliff” the construction would be
+awkward.
+1 1 ) H-s-k-t, to judge from the determinatives
+a verb of motion, only here.
+12) Mdd “to press”, here possibly of crushing
+the horse against the side of the mountain; a less
+probable rendering would be “to press forward’
+“urge on”.
+13) Without emendation this sentence can only
+mean: if the horse be let slip at the edge of the chasm.
+It is clear from what follows that the horse is not
+pictured as completely lost over the precipice, but
+as having slipped and broken part of its harness. For
+“abyss” the word dw3-t “netherworld’ (misspelled)
+is used.
+14) 0 - t , a part of the chariot, to which something
+made of leather was attached, cf. 26,6; named also in
+“the d-t (plural) of thy chariot are Anat and Astarte”
+Edinburgh, Poem concersing the chariot, verso I 2.
+Since in ‘the latter passage a two-horse chariot is
+envisaged, whereas our text only refers to a chariot
+with one horse (an interesting point, as one-horse
+chariots are rare in Ancient Egypt, see WILKINSON,
+W a y s and M a n n e r s [ed. Birch], I1 p. 7-34), it seems
+clear that the singular here must point to some
+portion of the vehicle directly connected with the
+horse. This cannot be the ‘pole” or “shaft” (‘), nor
+yet the “yoke” (nhb);possibly the “saddle” or “collar-
+piece” is meant. 	When it is said that this is “un-
+covered’ “left bare” it may be meant that the leather
+padding (m-S-y cf. 26, 6 ) is torn off. K-w-S-n might
+then be “the girth”, which would naturally fall
+simultaneously. 	The horse has then to be extricated
+from the chariot in order that the “collar-piece” may
+be mended; this is “tied’ or “lashed” on to the
+yoke (?). 	This explanation however is purely con-
+jectural.
+I S ) K-w-S-n only here; see last note.
+16) Ntf “to untie” “loosen”, cf. Israel stele 6;
+P a p . mag. Harris, verso A 6 ; P a p . T u r i n I8+73, I .
+- Htri here and below seems to mean the horse
+and chariot combined, whereas ssm-t is the horse
+alone.
+17) Sm3m ‘Yo slay” makes no sense; emend
+sm wi “renew”.
+18) G-w-t-n, only here and in Koller 3, 2 =
+A n a s t . I V 3, I, an obscure passage where the object
+is p-t-r “threads”.
+19) ’Inkfkf-t, only here.
+20) “Chariot” is here hi%, i. e. horse and chariot
+combined; jitp-st probably means “to load it” (the
+inkfkf-t) in the chariot, my rendering above being
+a paraphrase,
+21) F3 reflexively, cf. d’0rbiney 6 , 3 ; IO, 6 ; 13, I ;
+Sall. I 2, 11; NEWBERRY,Amherst P a p y r i 21, I, 2 ;
+the idiom is preserved in Demotic and Coptic, see
+SPIEGELBERG,Petubastis, Index, p. 22*, footnote. -
+-Tntn only here; A n a s t . I V 8, 8 has &i apparently in
+a similar sense.
+
+2 7”
+The sky is revealed’. 	Thou fanciest2 that the enemy is behind thee; trembling
+seizes thee3. 	Would that thou hadst a hedge4 of . . . . . . to put-upon the other
+side! 	The chariot is damaged(?)6at the moment thou findest a ~arnping-place(?)~.
+Thou perceivest the taste’ of pain! 	Thou hast entered Joppa8, and findest the flowers
+Anastasi I
+blossomingg in 	their 	season. 	Thou 	forcest 	a
+findest the 	fair maiden who keeps watch over
+herself for a companion, and surrenders to thee
+and bearest witness 	(against thyself[?]). 	Thou
+of) Maher. 	Thy 	shirt 	of fine linen of Upper
+how(??)12thou liest every night, with a piece of
+slumberest, for thou 	art worn 	outi4. 	A . . . .
+way in(?) . . . . . . . . . . .‘O 	Thou
+the gardens. 	‘ S h e takes thee to
+her charms. 	Thou art recognized,
+art 	disrnissed(?)’l from 	(the rank
+Egypt, thou 	sellest it. 	Tell me
+woollen cloth(?)l3 over thee. 	Thou
+I . . .15 takes 	away thy 	bow, 	thy
+knife for the belti6, and thy quiver“. 	Thy reins have been cut in the darkness.
+Thy horse is gone and is speeding(??)” over 	the slippery groundig. 	The road
+stretches before 	it. 	It 	smashes2’ thy 	chariot 	and 	makes thy . . . . . . . . . 2 1 ; 	thy
+weapons fall to the ground, and are buried(?)” in the sand; they become desert(?).
+I ) Lit. “the sky is opened”; the Maher emerges
+from the narrow thickly-wooded defile. 	MASPERO
+(in the k t u d e s de‘die’es d Leemans, p. 4-6) 	rightly
+jdentifies the defile (g3w-t) here described with that
+mentioned in the Annals of Thutmosis I11 as in the
+vicinity of Megiddo; it is the Wady el Arah, a wooded
+pass that would be the natural haunt of brigand
+Beduins.
+2) ’Ib, see above p. 9*, n. 9.
+3) Lit. “thou takest the terror”; for the con-
+struction and the use of the definite article, cf. 24, I .
+4 ) ’ I n b seems to be simply the word for “wall”
+in a specialized sense. 	It is impossible to connect
+2nb here with the plant inbi mentioned Eloquent
+Peasqnt R 26 = Butler 12; Ebers 2 1 , 17; 8 3 , ~ .
+5 ) H‘h literally 	“to shave”; apparently the
+chariot is damaged at the very moment when the
+Maher is about to stop for the night.
+6 ) For the temporal sentence gm-k sgry (pro-
+bably read s_dy-t, cf. sgr-t 1 8 , I ) without a retro-
+spective pronoun governed by a preposition cf. above
+I 7, I -2.
+7) On this metaphor see p. 21*, n. 18.
+8) Y-p, Hebrew W, ia-pu in the El Amarna
+letters; BURGH.no. 215.
+9) GOODWINtranslated “thou findest the fruit
+trees blooming in their season”; 3b3&is “to bloom”,
+but could not possibly refer to the ripeness of fruit. In
+Anast. IF‘ 1 2 , s ( i ) 3 & (this reading seems more pro-
+bable than $3, see the analogous word “field” and
+SPIEGELBERG’S	notes Rec. de Trav. 24,180--2) 	does
+seem to mean “fruit”, but everywhere else it signifies
+“flowers” (e. g. MAR., Karnak 34, 2 8 ; Urk. IV 462),
+which suits the verb 3h3h far better.
+I O ) W t n is usually “to make a breach in a wall”
+cf. Abbott 2, 13. 1 7 ; DARESSY,	Oslraca 25269; “to
+pierce”, A n a s t . 111 6,g. SETHEobjects to the word
+on grammatical grounds and emends wstn (Verbum
+I1 $ 195). The crux lies in the last words of the
+sentence, which look like n wnrn “of eating”. 	The
+preceding sentence has however nothing to do with
+fruit (see last note), and it is rather doubtful whether
+wnm “eating” should be read, as the same group
+occurs below in 28, 5 , where any reference to eating
+seems out of the question.
+1 1 ) Wd‘ “to sever”; wd‘ rndi only here.
+1 2 ) Corrupt words.
+13) S-g only here; the determinative suggests
+14) Whs, see above p. 21*, n. 20.
+1 5 ) Hmy is apparently subject, but is puzzling; it
+cannot be a fitting of the chariot (cf. KoZZer1,4), unless
+ty-k h m y - t be emended; i_t3 would then be passive.
+16) S f t n kniw, here only.
+17) ’I-s-$4, Hebrew hQt5K,.see BURCH.no. 137.
+18) _Ts’ m-r-i is probably an idiomatic expression
+for “to speed” or the like. M-r-i cannot be the word
+for “groom” for several reasons: I) the first radical is
+differently spelt, cf. I, 8; 20, 3 ; 2) the definite article is
+wanting; 3) 43 would require an object, which is lacking.
+wool.
+19) g-r-k-t, Hebrew Bp3R, only here.
+20) WS(s’)wS(3), see above p. zz*, n. 3.
+2 1 ) Corrupt words.
+22) T(i)ms “to cover” or “bury” is undoubtedly
+the same word as trns in the sentence “bury your
+staves in it” (scil. “the barley”), Pap. RyZands IX
+1 1 , 5 ; and both are clearly identical with ‘FWMC “to
+bury”. 	The derivation of the latter from sm3-t3
+seems to rest on nothing but the similarity of
+meaning; and it is difficult to save this etymology
+by assuming that t m s is a variant spelling of sm3-t~’~
+metathesis having already occurred.
+4*
+
+28* 	Literary Texts of the New Kingdom
+Thy . . . . , begs the . . . . . . . thy mouth’: “Give (me) food and water, for I have
+arrived safely”. 	They turn a deaf ear, they do not listen, they do not heed2 thy
+tales. 	Thou makest thy way into the armoury3; workshops surround thee4; smiths
+2 6 5 and leather-workers’ are all about thee. 	They do all that thou wishest. 	They
+attend to thy chariot, so that it may cease from lying idle. 	Thy pole6 is newly
+~ h a p e d ( ? ) ~ ,	its . . . . . . . . .8 are adjusted. 	They give leather 	covering^(?)^ to thy
+collar-piece(?)iO . . . 	They supply“ thy yoke. 	They adjust(?) thy . . . .12 (worked)
+‘with the chisel(?)13 to(?) the . . . . . . . . . .I4 	They give a . . . . . , . (of metal)i5 to
+thy whip16; they fasten [to] it lashes17. 	Forth thou goest quickly to fight on the
+open field, to accomplish the deeds of the brave18!
+XX. 	The first stations on the Syrian high-road. 	End of the Controversy,
+Conclusion.
+27,I 	Good sir, thou honoured scribe, Maher cunning of hand, at the head of
+the 	in front 	of the 	army20, [I will describe to] thee the [lands] of the
+extremity of the land 	of Canaanz1. 	Thou 	answerest 	me neither good nor evil;
+thou returnest me no report. 	Come I will tell thee [of many things(??)]; (turn(?))
+I ) Difficult and corrupt words.
+2) H n “to heed‘, see SETHE,Die Eznsetzung
+3) @pS, see above p. 13*, n. 7.
+4) l i d “to surround”, cf. especially Anast.
+5) Tb-w properly “sandal-makers”.
+6) The ‘ is certainly the “pole” of the chariot
+(also in the case of a single-horse chariot doubtless
+the double shafts); for the pole particularly good
+wood was selected, cf. Koller 2, I ; the pole comes
+from Upe, Anast. I V 16, 11; a chariot is bought,
+“its pole c ) for 3 dbn, the chariot (itself) for 5 dbn”,
+Anast. 111 6, 7.
+7) G-r-p occurs only here, but is certainly iden-
+tical with g-r-b, An&. I V 16, 11 = Koller 2, I , also
+in reference to the chariot-pole. 	In Aramaic 253 is
+a knife for cutting, in Phoenician a barber.
+8 ) Dby-wt, only here; sense unknown.
+9) M-S-y, again only in Koller 2, I .
+des Vezievs, p. 21, note 91.
+I V 12, 4.
+IO) D-t, see above p. 26*, n. 14. The following
+word h3w is quite obscure.
+XI) For ‘r‘r cf. Pap. Turin 67, IO; Unamon 2,4z;
+R., I . H . 201, 8 ; metaphorically “to acomplish” plans,
+commands, cf. Unamon 2,32; R., I. H . 145,551; Pap.
+Bibl. Nut. 197, 3, 4. 6.
+12) The dbw must be an important part of the
+chariot; it might b e of gold, see Uvk. IV 663. 669.
+13) The usual phrase for “worked with the
+chisel” is j3(w) m bsn-t, cf. Harris 1 6 , 7. 9; 47, 3. 4.
+_Ts’(w) w j 3 bsn occurs Koller I, 7 , where as in
+the present passage it is hard to explain.
+14) M-h-t occurs (with determinative of wood)
+once again Anast. I V 16, 12, where it is a part of
+the chariot adorned with metal; the meaning is un-
+known.
+15) ’I-j-m-y, only here.
+16) ’I-s-b-r, see BURCH.no. 134.
+17) M-t-d-i, only here.
+IS) Pr-<-tb,see above p. 24*, n. 19.
+19) N-‘-r-n, see above p. 19*, n. 8.
+20) D-b-t”, see above p. 25*, n. 18.
+21) T3 n p K-nc-n, in Hebrew ’ p 2 Y%, 	only
+here with t3 n. P K-n‘-n is not very often mentioned
+in the Egyptian texts, see BURCH.no. 988; except in
+Anast. I I I 8 , 5 = Anast. I V 16, 4 it has always the
+definite article. So far as the Egyptian texts are con-
+cerned, Canaan might be the name of merely the
+south of Philistia; but Kinahhi in the Amarna letters
+appears to indicate a wider extension. 	The present
+passage describes the localities lying between the
+fortress-town of Zaru and the Philistine city of Gaza,
+and is strikingly illustrated by the scenes on the N.
+Wall of Karnak depicting the conquests of Sethos I
+(L., D. 111 Iz8b; Tz8a; 127a; 126b in this order).
+The accuracy of the author’s geographical knowledge
+is convincingly attested by a comparison with these
+sculptures.
+
+29”
+thy face(?) (towards(?))’ the fortress of the “Ways of Horusoa. I begin for thee
+with 	the “House 	of Sese”3. 	Thou 	hast 	never trodden 	it; 	thou hast not eaten
+the fish of (the waters of) . . . . . . ,; thou hast not bathed in them. 	Come prithee4
+27,s let me recount to thee H-ty-9~~;	where is its fortress? 	Come let me tell thee about
+the district o t Buto of Sese‘, 	“In(?) his house of victories(?) of U ~ i m a r & ” ~ ,	S-b-ZP
+and %-s-@’. 	Let me describe to thee the manner of ‘y-n-nlo;thou knowest not
+its position’l. 	N-&-s’~	and &&5-r-ti3,	thou 	hast never 	seen them since thy birth.
+0 Mohar, where is RaphiaI4? What is its wall like? 	How many leaguesi5 march
+is it to Gazai6? 	Render me a report, that I may 	call thee a
+2 0 Maher, that I may boast to others of thy name of MariannuI7. 	So will I say to
+them(?). 	I am experienced
+in 	every 	rankI8. 	My 	father 	taught 	me, 	he 	knew 	and 	instructed(??) (me) very
+often. 	There is no
+Anastasi I
+Answer quickly!
+Thou 	art angry at the thing I [have] said to thee.
+I know how 	to hold the reinsig, beyond thy skill indeed!
+I) The text here is damaged and probably also
+corrupt. 	The crux of the passage is to determine
+the grammatical construction of the words p 	n
+W 3 - w t Hr.
+2 ) W3-wt [Hr] is now known to be an alter-
+native name for the celebrated frontier fortress of
+r 3 r w (Zaru), see ERMAN’Sarticle A. 2. 43 (1906),
+72-73. 	This was the starting-point of the great
+military road to Palestine followed by all the early
+armies; thus by that of Sethos I, cf. p &tmn _T3rw,
+L., D. !I1 128b, completed by CHAMP.,Not. Descr.
+I1 94. 	Hitherto Zaru has been placed in the neigh-
+bourhood of the modern town Ismailiyeh; but Herr
+KUTHMANN,	whose researches on the subject will be
+published in a thesis entitled Die Ostgrenze Aegyptens,
+appears to have good reasons for placing it much
+farther to the North, in the vicinity of El Kantara.
+3) T ‘-t Ssw, identical with T ‘4 R‘mssw-mry-
+’ I m n ; which was reachable by boat from Zaru, see
+Anast. V24,8. Also doubtless the same as T ‘4 fl Ms’i
+‘ T h e House of the Lion” in the Setlios reliefs, L., D.
+111 128a; this too is connected with Zaru by water,
+possibly, as KUTHMANNsuggests, the Pelusiac branch
+of the Nile.
+4) H ( 3 ) n ( 3 )“would that”, cf. A n a s t . I V 11, 12;
+Sall. III 6, 7 (the hieroglyphic texts have here (233);
+cf. too h3 m y , above 19,6.
+5) H-j-y-n is very plausibly compared by MAX
+MULLER( A s . 2.1. Eur. 134) with the name of a well
+in L., D . I11 128a (under the horse’s tail), but all the
+copyists confirm the reading &-p-?-n, (not h-4-n)
+there. The name is now destroyed, as N. de G. DAVIES,
+to whom I am deeply indebted for a collation of the
+Karnak reliefs, informs me.
+6) Identical with W3_dy-t n S t y - M r - n - Ptlz in
+L., D . I11 128a. - M i &(read n k ? ) r , seep. 13*, n. 8.
+7) In the Karnak scenes (L., D.111 127a) the
+next fortress to that of But0 is called P-n&tw n(?)
+S t y - M r - n - P t h ; with the natural change of the royal
+name Sethos into that of Rameses I1 (cf. last note),
+this name becomes clearly similar to m py-f n&tw
+Wsr-m3‘t-R‘ in the papyrus. The, meaning of nhtw
+(masc. sing.) is not certain; possibly the preposition
+m should be omitted.
+8) S-b-21, an unknown locality.
+9) ’Ib-s-k-b, apparently a pool rather than a
+well, occurs in its right ppsition L., D . I11 127a.
+IO) The locality ‘-y-n-n is unknown.
+I I) Tp-rd, lit. “principle” or “rule”, doubtless here
+means the “position” in relation to other places; cf.28,8.
+12) N-h-s occurs in the Sethos reliefs, though
+it is not depicted in any of the publications. DAVIES
+writes to me that under the horses’ tails in L., D.
+I11 126b there should be inserted a small fortress
+over a pool or well; this bears the name ‘“(3)-
+h(?)-s(w) (det. of water) of the Prince . . . . . . I ’
+13) Before H-b-r-t in the papyrus there is an r,
+which should probably be omitted. 	This name also
+possibly occurs, though in a damaged form, in the
+Sethos reliefs; it is the fortress at the top of L.,
+D. I11 126b, with the inscription “The town which
+his Majesty newly built at the-well of H-b(?)-[r]-t”
+the stroke after the second letter shows that this can
+be neither w nor 3 as the publications give,
+14) R - p h , Raphia, the modern Rafah, a town
+not far from the sea about 2 2 or 23 miles south of
+Gam. 	Also mentionea in the palimpsest list of
+Sethos I, MAXMULLER,Eg. Researches 157,16; 58,17.
+15) W r , see above p. 18*, n. 19. - The length
+.of the itr, or schoenus, is not yet determined, see
+8. 2. 41 (ig04), 58-60.
+16) K-&-t, h W , r a & 	the southernmost of the
+Philistine cities; elsewhere in Egyptian spelt G-$4,
+BURCH.no. 1071.
+17) S w h M ‘<toboast of”, see Admonitions p. 28.
+- n4-r-y-n, see ab0v.e p. 25*, n. I.
+18) Hori goes on to contrast his own knowledge
+and skill with the ignorance of Amenemope. These
+sentences are very obscure in part.
+19) @ n - ( r ) - y , see above p. zo*, n. IO.
+
+30* 	Literary Texts of the New Kingdom
+brave man 	who 	can measure himself with me’! 	I am initiated in the decrees(?)
+of Month2.
+How
+feeble3 are thy sentences! 	Thou comest to me wrapt up4 in confusions, loaded
+with 	errors. 	Thou 	art not
+wearied 	of groping6. 	Be 	strong! 	Forwards! 	Get thee 	along(?)7! Thou 	dost
+not fall. 	What is it like not to know what one has reached8? And how will it
+28,s end’? 	I retreat”. 	Behold, I have arrived. 	Thy passion is soothed(??)’l, thy heart
+is calm. 	Do not be angry1’. 	. . . . . . . . . . . . . . . . i 3 . 	I curtail(?)i4 for thee the
+end of thy letter, I answer(?) for thee what thou hast said. 	Thy narratives are
+collected 	upon 	my 	tongue, 	established 	upon 	my lips. 	They 	are confusing 	to
+heari5; none who converses(?)16 (with thee) can unravel them. 	They are like the
+talk of a man of the Delta with a man of ElephantineI7.
+Nay, but thou 	art 	a 	scribe of the Great’ Gates, reporting the affairs of
+the lands, goodly 	and 	fair [to] him who 	sees it”. 	Say not 	that I have made
+thy name stinki9 before 	others(?). 	Behold, 	I have told thee the nature 	of the
+Maher; I have traversed for thee Retenu”. 	I have marshalled beforez1 thee the
+foreign countries all at 	once, and 	the towns in their order. 	Attend(?)2zto me,
+and look at them 	calmlyz3; (thus) thou 	shalt be found able to describe themz4,
+How 	marred 	is 	every (word) that 	cometh out over thy 	tongue!
+Thou 	splittest words 	asunder, plunging ahead(?)5.
+25
+	and shalt become a travelled(?) . . . . . . . . . . .
+I ) S_tn v h‘w-j, see above p. 15*, n. IO.
+2) W n m occurs once again on a writing-board
+in University College, London (= Rec. de. Tvav. I9,95),
+where wn-2 tw should be emended for wn-twi. The
+determinatives of wd are perhaps wrongly borrowed
+from wdb. 	Month is here the war-god, so that the
+sentence is a further assertion of the martial qualities
+3) TVi(3)wc”(3),cf. Bevlin Ostracon 10616; Pap.
+Bibl. N a t . 198, 2, 21 ; Mediwt Habu, unpublished,
+under the Balcony in the southern colonnade.
+’ of Hori.
+4) Bnd, see p. 13*, n. 1 5 .
+5) Lit. “in entering before thyself”; the sense
+is apparently that Amenemope continues to write in
+haste, heedless of the injuries which his precipitate
+behaviour causes him to inflict upon the language.
+- N hv-k, see p. 25*, n. 2.
+6) Gmgm “touchings” “fingerings”; for gmgrn
+thus as the equivalent of ~ O M ~ M	+alpare, 	cf.
+Harris 500, recto I , 2 ; 7, 12.
+7) The writer sarcastically encourages Amene-
+mope to persevere in his writing. - I suspect that
+the words imi &s-3st-tw are simply a corruption of
+ms-tw (cf. 15, 8), with elements borrowed from 3s
+“to hasten” and s&s “to run”.
+8) I. e. thou art ignorant of thy plight.
+9) Phwi nn m i&; this phrase occurs again on
+Petrie Ostracon 45.
+IO) Read bh3-i. 	Hori announces his intention
+I I) Hn-twmight possibly be imperative: “give in I ”
+12) Hdn, see above p. IO*, n. 16.
+13) S y is unknown; for n imw cf. p. 27*, n. IO.
+14) H‘k lit. “shave”, probably here in the sense
+15) Lit. “confused in hearing”.
+16) For 3“ 	cf. Israel stele 22, where “conver-
+sing’’ clearly seems to be meant; so too perhaps
+Sall. I 8, I . 	Compare too the difficult epithet (or
+title) 3“ 	of which SPIEGELBERG	has collected the
+examples Rec. de Tvav. 14, 41.
+17) This sentence is rightly often quoted in proof
+of the existence of dialects during the New Kingdom.
+18) I. e. probably, “who sees what thou doest”.
+19) Tm-k optatively, seep. I I*, n.4.-@n5,Coptic
+g ~ o g ,only here transitively.
+20) Xnw is doubtless a corruption of Rtnw, as
+throughout in the great Berlin manuscript of Sinuhe.
+21) Lit. “I have led to thee”.
+22) H n ‘‘to bow” 9ncline”, with the meaning
+“to attend to”, cf. above 26, 3.
+23) K b , see above p. 9*, n. 7.
+24) Gm r, see p. 17*, n. 3.
+25) For the sense cf. 20, 6.
+of retiring from the contest.
+“to curtail” or “to summarize”.
+Hori holds out to
+Amenemope the hope that he may some day appear
+to be a much-travelled warrior.
+
+3 I*	Anastasi I
+Appendix. 	The three technical problems of Anastasi I (14,2-17,2).
+In the course of the controversy the, scribe Hori propounds three problems con-
+nected with the building and erection of monuments such as a “royal scribe in command
+of the soldiers” might be called upon to solve. 	Amenemope’s vaunted skill in his profession
+is thereby put to a very severe test, and in every instance he finds himself unable to reply.
+The technicalities of these passages are such that the modern Egyptologist is placed in a
+far worse quandary than this ancient scribe; so far from being able to supply the answers, he is
+barely able to understand the questions. 	I shall here attempt, as far as is possible, to define the
+nature of the three problems; in dealing with this difficult subject I have had the great
+advantage of consulting with Professor BORCHARDT,the first authority in such matters, and
+I am indebted to him for a number of valuable hints.
+P r o b l e m I (14,2-8). 	This deals with the building of a brick ramp of unusually
+large dimensions. 	The Egyptian word is st3, which etymologically means a place over which
+something is dragged or drawn. 	In the royal tombs the sloping, downward, passages were
+called st.3 ntr “the divine passage”. In Piarzkki gr st.3 is an ascending ramp used for scaling
+the walls of a hostile fortress. 	That st3 here is an ascending ramp is clear from the description,
+the length being 730 cubits (more than 383 metres), and the breadth 5 5 cubits (nearly
+29 metres). The ramp is said to consist “of 120 r-x-t”,concerning which we later learn that each
+measured “30 cubits, by a breadth of 7 cubits”, BORCHARDTconjectures with great proba-
+bility that these were “compartments” (“Kasten”) in the interior of the ramp, formed b y
+brick partition-walls of no great thickness; these compartments would be filled with sand, a
+great saving of bricks thus being effected. 	A ramp constructed exactly in this manner
+has been found just to the South of the mortuary temple of the Second Pyramid, and
+belongs to about the 19th. Dynasty‘. 	If the view of the r-g-t here takeh be correct, the
+word may possibly be derived from rz’ “mouth’ (cf. rz’-st3, rz’-w3t) and g(2)t(z’)“shrine” “box”
+(BRUGSCH,Worterd. 1520; SgjpZ. 1289; Pap. Turin 105~21;107,1g). With a length of 30 cubits,
+the 7-g-t would leave a reasonable thickness of 	= 1 2 . 5 cubits for the exterior walls
+of the ramp2. 	On the other hand the indication 	that the “compartments” (r-g-t) were
+7 cubits broad 	is impossible; this would already give 120 x 7 = 840 cubits for the length
+of the ramp, without reckoning either the thickness of the partition-walls between the com-
+partments or that of the end-walls at the top and the bottom of the ramp. 	In spite of this
+serious difficulty, RORCHARDT’S	view of the r-g-t seems the only way of accounting for their
+number and their length,
+The ramp, (i. e. its exterior walls) is stated to have been “filled with reeds and
+beams”. 	This of course alludes to the practice of strengthening vast brick walls with reed-
+mats interposed between the courses and with transverse wooden beams inserted at a distance
+of some feet from one another. 	This mode of building is exemplified in the fortresses in
+the Second Cataract and elsewhere; see HOLSCHER,	Das Hoke Tor von.Medinet H a h , p. 36.
+The height of the ramp a t its highest part was 60 cubits3 and, if I understand the
+next words rightly, the height in the middle of its upward slant was 30 cubits. 	To me it
+I ) Regierungsbaumeister HOLSCHER,in whose forthcoming book on the temple of the Second
+Pyramid a plan and section of the ramp will be found, tells me that the breadth of the compartments averages
+about 3 	5 metres, i. e. approximately 7 cubits.
+2) Measured at the top; the thickness at the bottom would be 27 . 5 cubits, owing to the batter,
+if my hypothesis (see below) be correct.
+3) ‘This gives a slant of 8 z cubits in every 100; that of the ramp leading to the pyramid of Ne-
+user-Re was’lequal to 7,75 cubits in every IOO (BORCHARDT,Das Grabde?zkYnal des Ne-user-re, p. 44).
+
+Literary Texts of the New Kingdom
+appears that ~ Y ~ - z % A	following immediately upon hr &&-f, 	must be correlated with the same,
+and must therefore represent the height of the ramp at its centre; unless this view be taken,
+the words &Y d3&-f 	would be redundant, the height at the top being sufficiently clearly
+expressed by the words sn by alone. 	BORCHARDT	points out, however, that the measurement
+at the middle is quite superfluous, and proposes to understand hri-2b-f as “its interior”, i. e.
+the space between the two sides of the ramp. 	It may be objected to this view that the
+space referred to is later mentioned as the length of the Y-g-t“compartments” (30 cubits);
+and the philological objection already mentioned is considerable 1.
+The
+phrase m i-sp (sp sn) occurs only once again, namely in the description of the obelisk ( € 5 , 4).
+The exact words there are h u t - f nz 2-sp (sp sn) Y ‘-tp m m& I, &‘ I(?)2. 	BORCHARDT	agrees
+with me that this sentence must refer to the tapering of the obelisk towards its summit,
+though he disagrees in his translation of m 2-sp (sp sn). H e conjectures that 2-sp (sp sn) is a
+peculiar phrase for (‘end’, so that the rendering of 15,4 would be “it goes from end to top
+as I cubit and I finger”, i. e. the falling away from the perpendicular on the entire height
+of the obelisk (110 cubits) amounts to I cubit and I finger; this is equivalent to rather
+more than 	Applying
+the sense thus obtained for i-sp (sp sz) to the problem of the ramp, BORCHARDTsupposes
+that the “end” meant is the thickness of‘ the short wall that joined the side-walls at the top of
+the ramp; the thickness of the top end would then be 1 5 cubits4. 	It appears to me that
+2-sp (sp sn) is a very unlikely kind of expression for so concrete an idea as the “end”; and
+a greater similarity of meaning might be expected in the two sentences. 	Now let it be
+noted that the sense of 15, 4 would not be modified if we translate (‘it goes with a g ~ a d u a d
+slope (m 2-sp [sp-sn])towards the top as I cubit and I finger”. 	On this view i-sp (sp sn)
+would be a technical term expressing the extent of divergence from the perpendicular at
+the summit of a monument. 	Applying this hypothesis to our ramp, we there find that a
+slope or batter of 15 cubits is indicateds. 	This batter must of course be that of the long
+exterior walls of the ramp, and the 1 5 cubits are reckoned, as in the case of the obelisk,
+at the top of the monument. 	The height of the ramp being 60 cubits, this gives a batter
+of I in 4, br 13/4 spans to the cubit, or an angle of 7 5 0 ; and it adds greatly to the pro-
+bability of the theory here put forward that the ramp leading up to the pyramid ofSahure
+Lastly, the ns-t of the ramp is said to measure 5 cubits. 	In the story of Sethon
+ns-t is the name given to the mastaba or stone bench outside house-doors (cf. GRIFFITH’s
+note on I Khamuas 5 , 11). 	BORCHARDTconjectures that the end-wall at the bottom of the
+ramp, corresponding with 2-sp, the end-wall (according to him), at the top, may be meant.
+Another possibility suggested by HOLSCHERis that ns-t may here signify the brick floor or
+surface of the ramp above the compartments (y-g-t) and the sand; this might well have a depth
+of 5 cubits in so vast a monument.
+3 2”
+The dimension next named, m i-sp (sp sn) rnh 15, is still more problematical.
+of a finger to every cubit, which gives a quite reasonable angle3.
+. exhibits precisely the same batter 6.
+I ) For the space between the walls, the interior, we should expect knw rather than hvi-ib.
+2) The sign
+3) The Egyptians usually expressed this angle by a term skd, which states the number of spans
+divergence from the perpendicular for a height of one cubit; see the article by BORCHARDT,	A . 2. 31 (1893), 1 5 .
+4) It is not absolutely essential that there should have been an end-wall at the top, if the ramp was
+built against some other structure.
+5 ) The literal translation would be “with a batter of 15 cubits”.
+6) See BORCHARDT,Das Grabdenkmal des Konigs Sahu-re, p. 39. Unfortunately my hypothesis
+was framed too late to be submitted to Professor BORCHARDT’S	criticism; Herr HOLSCHERfinds no technical
+difficulties in it.
+in the Ms. is probably a corruption of db‘.
+
+33*	Anastasi I
+The problem before the scribe Amenemope was to reckon out the quantity of
+that would be needed in constructing the ramp. 	All the requisite data are givenl;
+would sorely tax the powers of a modern builder to give even an approximate estimate
+number of bricks needed.
+bricks
+but it
+of the
+730 ELEVATION.
+> <5@) A
+55
+GROUND-PLAN,
+< 	$30 	2.
+SECTION ATTOP,
+The accompanying diagrams display the proportions of the ramp, so
+far as they can be understood from the papyrus. 	Where different suggestions
+have been made, BORCHARDT’S	opinion is indicated by (B), HOLSCHER’S	by
+(H), and my own by (G).
+A n obelisk that has been hewn in the
+quarries of the Gebel Akhmar near Heliopolis lies ready to be conveyed to
+the Capital. All its dimensions are given, and the problem which Amenemope
+is called upon to solve is the number of men needed for its transport. 	Most
+of the technical terms employed in the text are &rag ley6pevcul but their
+sense is for the most part not difficult to determine. The first measurement
+given, “ I IO cubits ?z h n n &nt(?)”,clearly refers to the length of shaft 2; iwn,
+the most important element in the compound expression used, is of course
+the word for “column”. 	The “ddy-t3 of IO cubits” next named must be the
+pedestal; the measurement is obviously the length of the sides, the height,
+which must have been less, being omitted. 	With this identification of the
+dby-t agrees the next datum, ‘lp-snw (or p-Snw)4 n p&wz’-fmakes 7 cubits on
+every side”; the size of the obelisk at the base of its shaft is here evidently
+intended. 	Next comes the clause with the problematical term j-sp (sp sn)
+discussed in dealing with the first problem; as we saw, this must refer to the
+P r o b l e m z (14,8-16,s).
+I) The size of the brick is assumed to be known.
+2) The obelisk is thus far taller than any that has been preserved. PETRIEhas however calculated
+that the Constantinople obelisk may have measured 172 feet in height (see PETRIE,History I1 132); in the
+NovthamPton stele two obelisks of 108 cubits each (= 185 feet) are mentioned (Urk. IV 425).
+3) The word occurs once again on an ostracon in my own possession (no. 3) giving a list of objects
+of wood; among the latter is 	2wt m E-t m mitt ty-f dby-t “the statue of wood and also its pedestal”,
+dby-t naturally being determined with the sign for wood. 	Dby-t is probably to be distinguished from db-t
+“brick”, though the latter is occasionally used of “blocks” of stone.
+4) Apparently only here.
+G a r d i n er. 	5
+
+34” 	Literary Texts of the New Kingdom
+extent of the divergence from the perpendicular, which amounted to I cubit and I finger(?) on
+the entire height of I I O cubits, or o . 26 fingers in every cubit 1. 	The pyramidion ( @ - - brbr) is
+stated to have been I cubit in height, of course an impossibly small measurement. 	Lastly,
+the point of the pyramidion (&ty, only here) is said to have measured two fingers; BORCHARDT
+understands 	this to refer to the length of the sides of the tiny square surface at the
+summit of the pyramidion. 	For all these measurements, see the figure on the preceding
+page. 	All the dimensions required for determining the content of the obelisk, and hence
+also its weight, appear to be given.
+P r o b l e m 3 (16~6-17~2).The last problem is, of the three, by far the most difficult
+to 	understand. 	It 	is 	at all events clear 	that 	it 	concerns 	the 	erection 	of 	a 	colossal
+statue, and that this statue had to b e gradually lowered to its ultimate position by the
+removal of a great artificial magazine of sand on to which it had been hauled(?). The statue
+covers 30 cubits as it lies stretched upon the ground, and has a breadth of 20 cubits. 	The
+word for magazine is m & y , the ordinary word for a store-house in which corn or other things
+were kept; and its sub-divisions(?) are called Smm,also a known word. 	All the other technical
+terms and dimensions are quite obscure. 	The Smm are stated to have been filled with sand
+from the river-banks, and the magazine, which was situated under (&Y) the colossus, has to
+be “emptied” (sSW). 	The question asked of Amenemope is as to the number of men to be
+employed in order to remove the sand (bm “demolish” “overturn”) in six hours. 	The use
+of sand for the gradual lowering of monuments is, as BORCHARDT	points out, exemplied b y
+the late tombs near the Pyramid of Onnos (see BARSANTI’Sarticle, Annnlts 	du Seruice
+I 283-4) 	where the massive lid of a sarcophagus was supported upon wooden pillars resting
+upon sand; when it was desired to bring the lid into its final position, the sand was gradually
+allowed to escape from under the wooden pillarsz.
+I ) It is probable that the h after mh I should be emended into db‘. 	The batter of the obelisk is
+quite unusually steep.
+2) One may also compare BONOMI’S	theory of the manner in which the colossus known as the Vocal
+Memnon was erected ( A . 2 . 4 5 [1908], 32-34); 	however BORCHARDTis of the opinion that sand cannot have
+been used in that case.
+
+II. 	A 	collection 	o f model letters.
+Description of the manuscript. T h e P a p y r u s K o l l e r (Paf. Bedin 3043) is known
+to have passed directly from the collection of Baron KOLLERinto that of the Berlin Museum,
+b u t no record has been kept of the exact date when this occurred. 	The manuscript measures
+136cm in length, and has the normal height of 21 cm. 	It is-on the whole well preserved,
+though it has suffered damage through rough handling. 	A Museum register dating from the
+days of PASSALACQUA	informs us that the. verso once exhibited a drawing of the lower part
+of the double crown of the Pharaohs, and that there also was a brief hieratic inscription;
+but the manuscript having been early gummed upon cardboard, this statement can no longer
+be checked. 	At a subsequent period the edges of the cardboard around the lacunae were
+carelessly trimmed, with disastrous results. 	A t present the papyrus is safely preserved under
+glass in four sections. 	The writing of the recto is upon the horizontal fibres, and comprises
+five complete columns or pages; these consist of eight lines apiece, except the second page,
+which has nine lines. 	It is well-nigh certain that some pages are missing at the end, since
+the text breaks off in the middle of a sentence. 	Whether anything is lost at the beginning
+is more doubtful, the main text of the first letter being complete, though the salutations
+that 	usually 	precede 	are 	absent. 	The 	handwriting 	is 	of 	the 	fine 	type 	characteristic
+of Ramesside literary papyri, and may be dated approximately to the end of the 19th
+Dynasty. 	If the criteria set up by MOI.LER~can be trusted, the papyrus is a product of
+the Memphite school of calligraphy. 	There are no verse-points, but the usual sign, written
+in red, serves to divide the sections from one another. 	A. WIEDEMANN	printed 	a not
+entirely satisfactory hand-facsimile of the manuscript in his book Hieratische Texte (Leipzig
+1879)~Tafel X-XIV, 	and up to the present this has remained the sole edition of the text.
+Many of the finest literary papyri of the New
+Kingdom belong to a class to which ERMANhas aptly given the name of SchiiZerhand-
+schriften2. 	They are the work of youthful scribes employed in one or other of the public
+administrative departments, where they seem to have received, after the manner of apprentices,
+some tuition from the superior scribes. 	Often the appointed task was the copying of some
+wellknown literary piece, such as the Instmctions of Amenenzhet I to his son, or the Poetical
+accoant of Rameses 11’s victovies; in such cases it is impossible to detect the pupil’s hand,
+unless it betrays itself b y dates jotted down in the margin to indicate the amount written
+daily, or by the presence of corrections in the teacher’s hands. 	Often however the subject-
+Contents and general remarks.
+I ) Hieratische Paliographie I1 p. 2-3.
+2) On the whole subject of the Schulhefte or Schulerhandschriften, see ERMAN,	Aegypten 446-448.
+3) Purely calligraphical corrections, such as that at the top of p. 3 of Anastasi I, seem sufficient
+proof of a Schulerhandschrift. - For dates see ERMAN,	loc. cit.; they occur very frequently both in papyri
+and on ostraca.
+5 *
+
+Literary Texts of the New Kingdom
+matter 	of the 	texts 	copied 	ill 	conceals 	their 	educational aim; 	this is particularly 	the
+case with the collections of model letters, or miscellaniesi, of which the Papyrus Koller
+affords 	a 	very 	typical 	example. 	The 	letters 	contained 	in 	these 	miscellanies 	are 	of
+diverse kinds. 	The simplest consist of little beyond the elaborate salutations demanded b y
+Egyptian good-breeding. 	Others, even less readable, are mere lists of articles to be manu-
+factured 	or foodstuffs to be provided and are simply designed for the purpose of widening
+the pupil's vocabulary. 	The majority concern such cominissions or affairs of everyday life as
+might later claim the scribe's attention in the course of his professional career. 	When the
+subject-matter permitted, the pupil frequently substituted his own and his teacher's names
+for those of the original writer and recipient of the letter; Koller 5,s for example, mentions
+the names of two scribes, of which Amenemope may be that of the master, and Paibes that of
+the pupil 2. 	Besides letters, the miscellanies here described often contain short compositions
+of a more purely literary character; hymns to Thoth or Amon, eulogies of the Pharaoh or
+of the Capital, and above all homilies (as a rule not lacking in humorous touches) on the
+dignity of the scribe's profession.
+The KolZer comprises four letters, the first lacking the customary salutations and
+the last ending abruptly after a few opening sentences.
+a) The equipment of a Syrian expedition ( I,I-2,2).
+b) Warnings to an idle scribe (2,2-3,3).
+c) A letter concerning Nubian tribute (3,3-54).
+d) A n order to make preparations for Pharaoh's arrival (5,5-5,8).
+Short introductions with bibliographical 	notes being prefixed to the translations
+of each section, only a few general remarks are here ne5essary. 	The KoZZer is particularly
+closely related to the London papyrus Aiznstnsi IV, with which it has two sections in common.
+The orthography is good, and mistakes or corruptions seem to be relatively few. The pupil
+by whom the KoZZev was written seems to have aspired to erudition, for the texts chosen are
+full of technical and foreign words.
+The first to translate the papyrus was A . WIEDEMANN,	whose 	renderings 	(op. cit.
+p. 19-23) 	are accompanied b y brief notes on the subject-matter but without a philological
+commentary. The only other treatment of the papyrus as a whole is that ofERMAN in the
+handbook entitled Aus den Pn$yrus der KiinigZichen &!useen, Berlin 1899, belonging to the
+.official series of Hnndbiichev de!? Kb'nigZichen Museen xu BevZiz (p. 93-97).
+3f5*
+The subjects are as follows:
+.
+a. The equipment of a Syrian expedition,
+. 	This is a short model letter describing the preparations to be made for an expe-
+dition to Syria and enumerating in detail the horses, attendants, chariots and weapons that
+have to be made ready. 	The point of the composition doubtless lay in it? copious use of
+foreign and technical words, which would serve at once to exhibit the teacher's erudition and
+to increase the store of the pupil's learning. 	No duplicate of this letter is known, but it is
+shown by its last words to be closely related to a letter preserved 	entire in Annstasi I V
+(13,8-end), 	the 	beginning of which 	is found 	on the last page 	of the 	Koller. 	Other
+texts which mention the various parts of the chariot and the weapons contained in it are
+I ) The best-known of these are Anastasi I I . I I I . I V . V ; Sallier I , in the British Museum; Pap.
+2) It is not always the name of the pupil which stands first, as may be seen by comparing
+It is curious that the names of the scribes in Anast. 111 are Amenemope
+Bologna rog4; P a p . Leiden 348, recto.
+Anast. 111 I , I I with ibid. 3, 9.
+and Paibes as in I<ollev; the papyri do not seem to be written by the same hand.
+
+37*Koller
+Anastasi I and the Edinbuvgh Poem about the Chariot (A. 2.18 [1880], 94-95). 	No trans-
+lations of this section seem to have published besides those named above in the general
+introduction. 	~
+(The scribe Amenope writes to the scribe Paibes‘,? saying: - Take good
+heed to make ready the array(?)’ of horses which is (bound) for Syria, together with
+their stable-men3, and likewise their grooms4; their coats5 . . . . -ed and filled with
+provender 	and 	straw, 	rubbed 	down 	twice 	over; 	their 	corn-bags(?)6 filled with
+kyllestis-bread’, a single ass(?)in the charge ofa (every) two men. 	Their chariots are of
+b r y - ~ o o d ( ? ) ~	filled with (all kinds of(?)? weapons of warfare”; 	eighty arrows in the
+the . . . . . . . . . , . IF, the whip17 of _t3g-wood1*furnished with 	lashes“, 	the chariot-
+clubao, the staff(?)2iof watchfulness, the javelin” of Kheta, the rein-l~oser(?)’~,	their
+facings (of) bronze of six-fold alloyz4, graven with chiselling(?)z5,. . , . . . -ed, and
+. . . . . . -ed26. 	The bows are adjust-
+1,5 quiver”, 	the . . . . . . , . la, the lance(?)13,the swordi4, the dagger, the . . . . . . . . . 15,
+Their cuirassesz7 are placed 	beside them.
+I ) The names are restored from 5, 5.
+2 ) R k s 	is 	possibly identical with the rare
+Hebrew collective word for “horses” t h 7 ; see BURCH.
+no. 642, where the phonetic difficulty is pointed
+out. - For grg we should expect grg-tw (cf. 5,6),
+but in 3, 5 and d’0rbiney 2, 2 the ending is similarly
+omitted.
+3) H r y ib, a very common title, which in itself
+probably indicates quite a low rank.
+4) Mri, see p. 6*, n. 16.
+5) gnw lit. “hair”, only here of horses’ coats.
+6) Here the provisions for the stable-men and
+grooms appear to be referred to; these were carried
+on asses. - H3r, properly a corn-measure, is occa-
+sionally determined 	with the sign for the hide,
+cf. Rhind Math. P a p . 4 1 ~ 3 .4 ; 43, I, MAR., Karnak
+7) The k-r-S-t was a small loaf weighing from
+about half to three-quarters of a pound, see EISEN-
+LOHR, Proc. S. B. A . 19, 263; the name is preserved
+in the Greek xvL?.fang, a word known from Hdt. I1 77
+and other sources (see A. 2. 47 [ I ~ I O ] , 159 footnote).
+8) R iwd as preposition means either ( I ) “in
+the charge of“, so here and P a p . Bologna 1094, 6,7;
+P a p . Bibl. Nut. 187, 3, 4. 6; or ( 2 ) “with” (apud)
+cf. Salt 124, verso I,I; P a p . Turin 57, I ; 103, I, 16.
+9) B r y , only here and A n a s t . I V 16,7, where
+it is likewise a kind of wood of which chariots
+were made.
+IO) Probably emend h‘w (nb) n rc h-t; note that
+in this expression h-t is written with t and stroke
+during the 18th. Dynasty, (cf. Urk. IV 699).
+11) ’Is-p-t, see above p. 27*, n. 17,
+12) Hnay-t, as a weapon belonging to the chariot,
+Edinburgh Poena about Chariot, recto 11.
+13) M-r-h, only here and A n a s f . I V 17,r; cf.
+mepep, but this comparison perhaps fails if the
+54,46.
+Boheiric form mepe5 quoted by Peyron is well authen-
+ticated.
+14) H-r-p, Hebrew >2?, also Anast. I V 17,1;
+Edinburgh Poena, recto 13.
+15) K-w-t, only here.
+16) Sk-hna(w), again only Anast. IV 17, I.
+17) ’Is-b-r,seeBuRcH.no.134	and above p.26*,n.6.
+18) _T3g, a species of wood; whips are made of
+it, as here, A n a s t . IT/‘ 1 7 , ~ ;the chariot-pole, below
+2 , I ; chariots, U r k . I V 707; the word also ib. 701.
+705. 732.
+19) Rwd-(wt) “lashes”, only here; Anast. I26,S
+uses another word; for rwd-(wt) as bow-string cf. below
+1 8 ; LACAU,Sarcophages I I , Index.
+20) So too t ‘wn-t n ty-k mrkb-t, Edinburgh
+Poem, verso 9.
+21) H‘(w), elsewhere only d’0rbiney 13,1 (con-
+clusive as to sense); Anast. I V I ~ J .
+2 2 ) The weapon niw seems from the hieroglyphic
+determinative in R., I. H . 215,31; 240, 37; 241,44
+to be a javelin; for javelins, see WILKINSON,	A n c .
+Egyptians (ed. BIRCH),1208. Cf. p niw n ty-k mrkb-t,
+Edinburgh Poena, recto 1 1 .
+23) For it “to loose” see p. zz*, n. 7, and for
+hnr see p. zo*, n. IO; what instrument is here meant
+is hard to say.
+24) Sna(3) n sis is evidently an alloy of six in-
+gredients; from this passage and from Harris I 45,s;
+47,6; 52 b 9 it is plainly a kind of bronze, and from
+ibid. 6,g; 47,4 we know that it was of the colour of
+gold, i. e. probably like brass, 	Other references,
+Harris I59,3; P a p . Turin 3 2 ~ .9; A n a s t . I V 16,12.
+25) For this difficult phrase see p. 28*, n. 13.
+26) Fti and na-s-&, unknown verbs.
+27) R-b-S-y, from Hebrew rr53.5; see SPIEGELBERG,
+Petubastis, Index no. 235-236 	€or demotic instances
+and some important remarks.
+
+38* 	Literary Texts of the New Kingdom
+ed(??) to their 	strings’, 	their 	wood2 being 	tested in drawing, their(?) binding^(?)^
+consisting 	of clean . . . . leather(?)4. 	T h e 	pole5 is 	of 	&g-woodG,. . . . . . . -ed7,
+shaped(?)8,fitted with leatherg, finished off(?), oiled‘O and polished(?)l‘.
+I) Rwd-(wt), see above note 18; the meaning
+of _tsy here is obscure.
+2 ) Dbw lit. “horns”, here clearly the wooden
+part of the bows; the word for bow in other lan-
+guages not seldom alludes to its shape, cf. arcus,
+Bogen.
+3) M-S-y, only here and Anast. I 26,6.
+4) For mtr-t we may possibly compare P a p .
+K a h u n 19,57.
+5) For the word ‘ see p. z8*, n. 6.
+6) _Ts’g, see p. 37*, n. 18.
+7) G-p does not 	occur in the parallel text
+Anast. I V 16, 11-12, 	and has evidently nothing
+to do with g-p below 2 , s ; it may be for g-r-p, a gloss
+on g-r-b (see next note).
+8) G-r-b (so too A n a s t . I V 16, 11) is identical
+with g-r-p, A n a s t . I 26, 5; see p. z8*, n. 7.
+9) T b y is clearly derived from _tbw “sandal-
+maker”, “leather-worker”; in the sense “shod”, cf.
+A n a s t . 1118,6 = Anast. I V 16, 5.
+IO) Sgnn “to oil”, cf.Anast. I I I 8 , 4 = Anast. I V
+16,3; A n a s t . I V 15,4; 16,12; Sall. I4,10; 5,3; Har-
+ris 500, verso 5,g.
+I I ) M-S-r-v (also in A n a s t . I V 16,1z) looks like
+a Semitic passive participle *wzashr.iir; the word is
+unknown.
+b. Warnings to the idle scribe.
+Almost all the great miscellanies of the New Kingdom contain threats and warnings
+addressed to the idle scribe, most of which begin with the stereotyped words found here
+(e. g. Snl‘l‘. I 6 , r ; Anast. IV I 1,8; Anast. V 6,1). The present text, fragmentary duplicates of
+which are found in Anastnsi IV 2,4-3,2 	and Anastnsi V 51,is peculiar in the fact that it
+consists almost entirely of a long drawn out simile, the pupil being compared to a careless
+sailor. 	The end of the section is much damaged and practically unintelligible. 	The parallel
+texts from Anast. IV and Anast. V are reproduced in facsimile in the SeZect Papyri in the
+Hieratic 	Charactev (London 1842 and 1 8 4 ) ~plates LXXXIII. LXXXIV and plate XCIX
+respectively; for a complete description of these Mss. the reader must be referred to a sub-
+sequent instalment of this work. 	A few phrases were translated by CHABASin his Voyage
+dun Egjytien, pp. 141. 241, and the whole, so far as it is preserved 	in Annst. IV and
+Anast. V , was rendered into French by MASPERO, Bu g e w e 	e)istoZaire chex l‘es anciens
+Egyptiens (Paris 1872), p. 28-30. 	The version of the Kol‘Zer was first utilized by LAUTH,Die
+,aZtizgyptische HochschuZe von Chenzu, in Sitd. d.K. Bayr. Ahad. d. Wiss., 1872, p. 66; then
+more completely by WIEDEMANN	in 1879. The only other translations seem to be those of
+ERMAN	in Aegypten (1885)~p. 514 (mainly a paraphrase) 	and in the handbook mentioned
+above in the general introduction.
+They1 tell me that 	thou 	forsakest 	writing’, 	and departest and dost flee;
+that thou forsakest writing and usest thy legs3 like horses of the riding-s~hool(??)~.
+Thy 	heart 	is 	fluttered; 	thou 	art 	like 	an ‘ky-bird5. 	Thy 	ear 	is deaf(?)6; thou
+I) The section opens with the usual epistolary
+formula r nti “to wit”, which is best omitted in
+translating.
+2) Not “books”; for SS “to write” so-determined
+cf. Anast. V 8,3; Inscr. of M e s N 14.
+3) The expression wzh-k m rdwi-k, lit. “thou
+seizest (or “art full of”) thy legs”, seems to occur
+only here; Anast. I V has a superfluous wz before mh.
+4) _T-h-b only here; the sense is quite proble-
+matical. - H t r i seems never to be used in late-
+Egyptian for simply one horse; it means a pair, or
+a horse and chariot.
+5) The bird ‘ b y is also mentioned A n a s t . I V
+I b, I ; P a p . wed. Berlin 21,z.
+6) D-n(r)-gonly here; however the proper name
+D-n(r)-g (BURCH.no. rI8g), older D3g (e. g. Cairo
+stele M . K. 20007; L. D.I1 147b), is often deterqined
+with the ear, implying that the verb was common.
+
+39”
+art like an ass in taking beatings’. 	Thou 	art 	like an antilope in fleeing. 	Thou
+Thou art one who
+is 	deaf 	and does not 	hear5, to whom men 	make (signs) with the hand. 	Thou
+art like 	the 	mate 	of 	a skipper 	skilled 	in 	(managing) 	the 	boat. 	When 	he 	is
+skipper6 in ,the boat, 	he 	stands 	at the prow(?)7, he 	does 	not 	look 	out 	for
+dangerous winds, he does not 	search 	for the 	current*; if the 	outer(?)9 rope 	is
+let go, the rope 	in 	front(?)’O is in his neck(?)ii. 	When he is pulling the rope1’,
+Koller
+2,s art not2 a hunter3 of the desert, nor a Mazoi4 of the West!
+he ~atches(?)’~	the . . . . . . -birds, he plucksi4 . . . . . 	flower^(?)'^ on the banks, he
+cuts awayrGclods of earth(??)’?. His . . . . . . . . . . . . . . . . -trees, he . . . . . . . .
+His . . . . . . 2o is of seven cubits, he 	cuts 	reeds(?). 	His tresses(??)2i
+in work 	of 	the 	overseer of . . . . . . . .23. 	He 	binds 	threadsz4 to 	its(??) end, in
+‘ 8
+ksb-treesi9. 22
+3,r . . . . . . to his feet, in work of Kush. 	His . . . . . . . . . is of bright. . . . . . . . .
+I) I. e. thou art as stubborn and unresponsive
+2 ) A n a s t . I V wrongly omits the negation here
+when punished as a beaten ass.
+and inserts it before mntk shy.
+sense see the determinative in Urk. I 2 ) cf. Urk. IV
+994; Harris I28,4; L.,D. I11 356.
+4) For the Mazoi as hunters, 	cf. especially
+A n a s t . I V 	IO,^; in Urk. IV 994 the titles “great
+one of the MdJ’w” and “overseer of hunters“ occur
+in parallelism with one another. See now MAXMULLER,
+Egypt. Researches I1 p. 76-77.
+I 	3) For similar writings of nw “hunter” (for the
+5) Cf. A n a s t . I 6,6; 26,3.
+6) I. e, when the mate (&vi-‘ “subordinate”) is
+acting as the skipper or rkis.
+7) Tpli, probably a special nautical term; tp-t is
+the name of a part or an appurtenance of a boat made
+of cedar-wood and measuring 20-30 	cubits ( T u r i n .
+P a p . unpublished); tpti may be a nisbe-form from it.
+8) H-(y)-n,Coptic ~ O E I M(Rec. de Trav. 28,214);
+elsewhere the word clearly means “waves”, not “cur-
+rent”, e. g. Anast. I V Ib, 2.
+9) If n bn(r) is read with Koller, this must be
+a genitive qualifying p nwh; if the reading of Anast. I V
+be preferred hJ’‘ Y bn(r) means Yo let go”.
+IO)@nt-t is possibly a technical term for the
+rope attached at the prow.
+11) I. e. probably, becomes entangled with his
+neck, 	WIEDEMANNtakes this clause to mean, “the
+towing-rope is placed round his neck”, but this cannot
+be correct, as the sentence clearly continues the des-
+cription of what happens when the mate is acting as
+skipper. - &@wZ-k, which KOLLERreads instead of
+hzwi-f (Anast. I V ) , is certainly a mistake, like rdw2-K
+in 3,I; the scribe is still influenced by the pronouns
+of the second person with which the text began.
+12) Wnn-f ith p n w h (parallel to wnn-f m n j w
+above) introduces a new picture of the mate’s heed-
+lessness; he is now imagined as towing on the river-
+bank. 	For 2th p nwh the Modern Egyptian would
+say quite similarly 	+..
+13)G-p is here probably the equivalent of k p
+(see above p. 9*,n. 14); the substitution of g for k is
+however difficult to parallel at this period.
+14)Fg, so written also P a p . Leiden 345, recto
+G Z,I,is the equivalent of f k in P a p . Turiva 8g,5;
+doubtless Coptic qwde: qczr euellere.
+15)Sri(zw), only here.
+16) Pns means “to cut off” the head (e. g. MAR.,
+Must. D IO; M i s s i o n V 622) or the ribs (cf. NAV.,
+Deiv el B a h a r i 107; Mission V 617) of a bull to
+be sacrificed; also 	cut away” hair, Ebers 63,13.
+Here I imagine the meaning to be that the idle sailor,
+instead of attending to his towing, amuses himself
+with hunting the birds or picking the flowers on
+the bank, or else in knocking away the heavy lumps
+of muddy earth at the edge of which he is walking.
+17)M - k - k , cf. A n a s t . 111 2,4, where the word
+occurs together with 3h-t “fields”.
+IS) Mtr-? here is of unknown meaning.
+19)Before ksb, a kind of tree mentioned already
+in the Pyramidtexts (e. g. 456. 994), an infinitive is
+expected; perhaps emend in ‘‘to bring”.
+20) WJ’h-t,meaning unknown.
+21) Nbd-t means “tressed hair” in d o r b i n e y IO,^.
+9; I I,Z. 4; A n a s t . 111 3,3; masculine in Harris 500,
+recto 6,1. The damaged word following is perhaps
+a verb “to dangle” “hang down” or the like. 	For
+the erroneous reading rdzwi-k of KOLLERsee above
+n. 11. - The very obscure sentences which follow
+may allude to the foppish attire of the skipper’s
+mate, another sign of his disinclination for regular
+work.
+22) The words i-t-t and n-f-‘ are 8naE A E Y ~ ~ E V C Z .
+23) Reading and meaning uncertain; the title
+occurs again Harris I7,y (see A. 2 . 2 3 [1885], 60-61),
+where its connection with cattle suggests that it means
+‘(overseer of horns”.
+24) G-w-in seems from Anust. I 24,6 to mean
+“to bind“ or “tie”. - P-t-r probably the Hebrew
+h D , see BURCH.no. 430. 	The meaning of the
+sentence i s quite obscure.
+
+Literary Texts, of the New Kingdom	40”
+order to wear a loin-cloth(??)’.
+of the ass; (he is) a rudder on the day of the boat.
+to him3, if he turns his back4 on 	his office.
+He is one who pricks up(?) the ear’ on the day
+I will do all these things
+I ) This garment, the transcription of which is
+unknown, is often mentioned in late-Egyptian texts
+e. g. below 4,6; BERGMANN,	Hierat. Texte 1 , 2 . 5;
+P a p . Berlin 9784,6; Harris 500, verso I , I I ; and
+six times in Harris I .
+z ) M h msdr, lit. “to fill the ear”, i. e. probably
+to <‘listen” “hear” “hearken”; cf. Anast. I z0,6 (with
+a superfluous m); Anast. I V 5 4 ; both rather obscure
+passages.
+3) These words must refer to the lazy pupil
+addressed in the first words of this effusion, and
+we should therefore expect the second person; this
+however is given by neither text, though Koller has
+had two examples of the suffix 2nd. pers. sing. where
+it was not required (see p. 39*, n. I I). Nor is it plain
+to what the words “all these things” refer, since no
+punishments have been threatened or described.
+4) H3‘ h3-f Y, cf. Anast. V 6,1; 15,7 = Sall. I
+6 , 2 ; P a p . T u r i n 88, 11; Israel stele 11; Berlin
+Ostracon 11 247 (Hierat. P a p . 111, 35).
+c. A letter concerning Nubian tribute.
+This is a letter supposed to be sent by a high official named Paser, probably the
+Viceroy himself, to a Nubian chieftain, ordering him to make ready the tribute of his district
+without delay. 	The interest of the section centres in the long enumeration of the Nubian
+products, the best list of the kind that exists among our literary records. 	A shorter but
+interesting list occurs in the letter from Rameses XI1 to his Viceroy Pinehasi (PLEYTE-ROSSI.
+Papyrus de Turin 66. 67). A duplicate of the beginning of the present letter, with a rather
+different text, occurs on a potsherd discovered by QUIBELLin the course of his excavations
+at the Ramesseum; it has been published by SPIEGELBERG	in his volume Hieratic Ostraka
+and Papyri (Egyptian Research Account, extra volume, 1898)~plate 5, no. 39a. 	Besides the
+translations by WIEDEMANNand ERMAN	already mentioned, there is an incomplete rendering
+by H. RRUGSCHin his book Sieben yahve der Hungermoth (Leipzig 1891)~p. 115.
+The 	fan-bearer 	at 	the 	right 	hand 	of the king, 	the 	captain 	of 	auxiliary
+troops, the overseer of the countries of Kush, Paser*, writes to him who protects
+his people’, to wit: - This communication is brought to thee saying: 	when my
+letter reaches thee thou shalt cause the tribute to be made ready3 in all its items4, in
+iw+bulls, young g+bulls, wndw-bulls, gazelles, 	oryxes‘, 	ibexes6, ostriches7; their
+broad-boats, 	cattle-boats’ 	and 	(ordinary) 	boats 	being 	ready 	to 	hand(?)9, their
+I ) The titles are unusual, but “fanbearer” etc.
+and “overseer of the lands of Kush” suggest that
+the “Royal Son of Kush” is meant. 	One “Royal
+Son” or “Viceroy” named Paser lived in the reign
+of Eye (stelae at Gebel Addeh); another seems to
+be mentioned under Rameses I1 on a monument at
+Naples, see BRUGSCH,Thesaurus, 953.
+z ) Mik rm_t-f is found nowhere else either as
+a title or as a proper name. 	Sr., H . 0. had a
+different reading: “[to . . . . . . . . . . the overseer(?)
+of the . . . . . . of] Kush”.
+3) Variant of SP., H . O., “thou shalt take heed
+to have [the tribute] made ready”.
+4) Lit. “in all its things”.
+5) M.’-h_d, for this animal see VON BISSING,Mast.
+d. Gemnikai I 3 4 , and for the spelling cf. Harris I4,S;
+zoa, 12. 13 etc.
+6) Nr3w, a late writing of the old word nis’w,
+found first in Benihasan I1 4. 13; for the animal, see
+VON BISSING,09. cit., p. 35.
+7) Niw, already P y r . 46ga; a good instance
+Urk. IV 19; cf. too below 4.1.
+8) Hn-ihw, cf. Anast. I V 6,r I ; 7 , 6 ; Harris I
+Izb, 1 1 ; 69,13.
+9) Tpti-dt, only here.
+
+Koller 	4 I *
+skippers and their crews prepared 	for starting; much gold wrought into dishes’,
+refined gold(?) in bushels(?), good gold, precious stones(?)’ of the desert in bags
+41 of red cloth, ivory and ebony, ostrich3 feathers, nebk fruit in . . . . . . . . . , bread
+of 	the 	nebk4, 	i-&-r-&-dy	of(?) m-y-n-y-&s5,&-&-&6, 	Ssy’, 	panther skins, 	gums,
+didy-berriesg, red jasper“, 	arnethyst(?)‘l, crystal‘’, 	cats of M ~ w ‘ ~ ,	baboons, apes,
+Saw-vessels containing &nfi(?)-pigmei~t’~,	cyperus-roots (?)‘5, sacks(?)andfs-packets(??)*6;
+numerous men of %-m-ii7 in front of the revenues, their staves(??)18	adorned with
+20 	22
+4,s gold, . . . . . . . . . . . . . . . . . . .” 	containing . . . . . . . . . . , 	. . . . . . . -ed2I with . . . . . . . .
+I) Dd-t, so written too Anast. I V 16,2, is a
+flat dish, cf. Urk. IV 631; the word occurs already
+in the Old Kingdom, cf. L., D. 1128, and its connection
+with the Hebrew ’T’i’? seems very doubtful.
+2 ) Gmw,an unknown word.
+3) N r w is a spelling for niw (see above p. 40*,
+n. 7) cf. Pap. Turin 1256.
+4) The tree called nbs in Egyptian, in Old Coptic
+rrosplc (A. Z. 38 [ I ~ o o ] ,87), is the zizyphus, or
+Christ’s thorn-tree, called by the Arabs +; 	its fruit
+is sweet and palatable when ripe; the “bread of the
+nbs-tree”, mentioned here and in the lists of offerings,
+is probably a cake made from the dried fruit. 	See
+MASPERO’Sarticle Proc. S. B. A. 13, 496-498. 	-
+g w @ n is unknown.
+5) Two unknown Nubian words, of which the
+first is probably the name of a fruit, the second that
+of a tree.
+6) H-(i+, a fruit of some kind, conjectured by
+BRUGSCHto be that of the dum-palm, sec Worterb.
+Sufi@ 855; further examples in the Petrie Ostraca
+31. 37; for the spelling here cf. Harris I 19b, 12;
+7) 3s-y, probably a fruit, is mentioned next to
+h-k-k in Harris I 65a, 4. 5 and again ibid. 74, 3. 4.
+8) Krny “gum”, x o , u p ~in Greek and KOMH in
+Boheiric, see especially KRALL,Studien z. Gesch. d.
+alten Aegypten IV, ~ 7 ~ 3 0 .
+9) Didy, according to BRUGSCH(A. 2. 29,
+[1891], 31-33) 	the magically 	potent 	red berry of
+the mandrake; this plant was particularly abundant
+in Elephantine, cf. besides BRUGSCH’S	references Urk.
+IV, 5 5 . Pliny (Hist. Nat. 24, 102) mentions a plant
+called ophiusa which grew at Elephantine and posses-
+sed very remarkable properties.
+IO) Hnm-t, probably either red jasper or carne-
+lian; for the colour cf. L., D. I11 117 = CHAMP.,Not.
+Descr. I 479; Zauberspr. f. Mutter u. K i n d I , I ;
+Turin Loue-songs 2,3. 	The knot-amulet, which is
+usually of jasper or cornelian, is said in Totb. ed.
+LEPS., 159 to be made of hnna-t. The Hebrew h h t t
+was compared with hnrn-t by BRUGSCH,	Wortevb. I 100;
+but LXX interprets this as 8pud8v~t0g. grim-t as
+a product of Nubia, cf. Pap. Turan 67,11; Sehel,
+Famine Inscrifition 16.
+11) H - w k is without doubt merely a variant
+36b, 5.
+G a r d i n e r .
+writing of hm3g34 which is mentioned elsewhere as
+a product of Nubia, see BRUGSCH,Sieben Jahre der
+Hungersnot, p. I 29. 	LEPSIUS-BEREND	(Les Mktazcx,
+p. 21 footnote) cites HOSKINSfor the fact that this
+precious stone is depicted as red. 	If this evidence
+be relied upon, hmlg3-t might be carnelian, hnm-t
+being red jasper; or vice versa. 	However a word
+for “amethyst” is still wanting, and I prefer provisio-
+nally to identify hrn3g3-t with this.
+12) ’I-r-k-b-s is rightly identified by BONDI,Lehn-
+worter 28, with Hebrew thh Assyrian algarnls‘u.
+13) Miw, a Nubian district, mentioned Urk. IV
+796 and often.
+14) &TntZ(?)is often mentioned as a material used
+in writing, e. g. Pap. Leiden 347, 12,9; Totb. ed.
+NAV., 130,44; I34,17; together with other colours
+used for writing or painting, cf. Mission XV 26 (Luxor) ;
+Ostracon Cairo 25 247; Sny-vessels containing hnti(?),
+cf. Harris I 6 5 a , 3; 742. Possibly this is the name
+of the raw material out of which the ordinary red
+paint was made.
+I 5) Nfwis compared by NEWBERRY (Proc. S. B.A.
+22, 146-148) 	to a vegetable product, the root of
+the Cypevus esculentus, L., still known in the Sudan
+under the name $.
+16) Ps, cf. Harris I 65a, 8 ; 746, in connection
+with nfw.
+17) ‘IY-mi,a well known tribe of the Sudan, cf.
+Urk. IV 333. 796; L., D. 111 218 c and elsewhere.
+MASPERO (Rec. de Trav. 8,84) 	recalled the 	fact
+that the Galla race call themselves Ihn Ornaa “the
+sons of Orma”, and concluded that the ancient word
+’Ir-nz-i is preserved in the modern Ilna; TOMKINS
+(Rec. de Trau. 10,98) prefers to identify ’Ir-rn-iwith
+Orma, and if the name Ilm Orma has anything at all
+to do with ’Ir-m-i, this surely is the more likely view
+of the two, Ilm meaning simply “sons of” like
+Arabic A.
+18) ’I-b-r-$(?)-i,an unknown word.
+19) K-r-k-r-t-b-iis unknown, and the verb (?)s-U-w
+20) S-n(r)-wis a BnaE Aeydpmov.
+21) Tftf in Pap. Turin 74,5 means “to be dis.
+turbed” “fluttered” like the simplex ifi; its sense here
+is unknown.
+has a very suspicious appearance.
+22) &lpi-t, another unknown word.
+6
+
+Literary Texts of the New Kingdom	42”
+and 	with 	all 	precious stones; tall men 	of 	T - Y ~ ‘in loin-cloths(?), their 	fans2 of
+gold, wearing high feathers3, their bracelets (??)4 	of woven thread; many Negroes
+of 	all sorts5. 	Increase 	thy 	contribution 	every year! 	Have 	a care for thy head,
+and turn 	thee 	from thy 	indolence. 	Thou 	art 	[old]; look 	to it diligently6, and
+beware! 	Be mindful of the day7 when the revenues are brought, and thou passest
+into 	the Presence 	beneath 	the Balcony8; the 	nobles 	ranged 	on 	either 	side 	in
+front of his Majesty, the 	chiefs and envoysg of 	every land 	standing gazing and
+loaking at the revenues. 	Thou art afraid and shrinltest(?)lO,thy hand grows feeble,
+and thou knowest not whether it be death or life that lies before thee’’. 	Thou
+art profuse in prayers 	[to] thy gods: “Save me, prosper mela this 	one time!”
+I ) T-r-k does not seem to occur elsewhere,
+unless the name hitherto read 3-r-k (URK. IV 796;
+DE MORGAN,Cat. d. Mon. I 67) should really be
+read with the liw bird.
+2) Bh-t, cf. Harris I 21a, 2 ; Harris 500,
+recto 3,’11; the phrase hbs bh-t “to carry(?) the fan”
+cf. DAVIES, A m a v n a VI 2 0 ; Anast. 111 8,6 =
+Anast. I V 16,5; L., D. 111 218 c.
+3) ERMAN	regards the words “high of feathers”
+as an attribute of the fans; this appears to me less
+probable.
+4) K-r-m-t occurs again only in the description
+of Negroes Anast. I11 8,7 = Anast. I V 16,6 “their
+k-r-m-t are upon (Y) their hands”.
+5) M tnw nb, see above p. 7*, n. 6.
+6) For b‘, see ERMAN’S	remarks A . 2. 42 (1905),
+7) Cf. sh? nk hrw n krs, Sinuhe B 190.
+8) SSd, see p. 17*, n. 6.
+9) MS‘yti, only here; from mi‘ “to travel”.
+107.
+IO) Thbh is probably to be emended into tnbh,
+for which see Admonitions p. 67.
+11) For n . . . n “whether . . . . or”, see 1%-
+scription of Mes, p. 16.
+12) Sw/d?-i, probably infinitive used as impera-
+tive, see SETHE, Verbum I1 S 566; see above p. 22*,
+n. 17, and cf. in-i, P a p . Bzbl. Nat. 197, 4, 6; int-i,
+P a p . Bzbl. Nat. 197,6, 2.
+d. An order to make preparations for Pharaoh’s arrival.
+The three remaining lines of the fifth page of the KoZZe‘der, after which the papyrus
+abruptly ends, contain the beginning of a long letter that is more completely preserved in
+AnnstnsiIV 13,8-17,g. 	A detailed consideration of this letter would here be out of place,
+and the 	translation 	of the 	three lines 	preserved 	in the KoZiw is given below only for
+the sake of completeness. 	The entire text will be dealt with later in connection with
+Annstnsi IV.
+5>5 	The scribe Amenope writes (to) the scribe Paibes. 	This letter is brought
+unto 	thee 	to say: - Take 	heed 	to 	have 	preparations 	made 	for Pharaoh, thy
+good 	lord, in 	fair 	and 	excellent 	order. 	Do 	not 	draw 	down punishment upon
+thyself. 	List of all the
+things 	that 	thou 	shalt cause to 	be provided. - Let 	materials be procured for
+the basket-makers consisting of reeds and and is-r-grass; and likewise . . . . . . , .
+. . . . . . . . . . . . . , . (End).
+Look 	to 	it 	diligently, and beware! 	Do not be remiss!
+Druck von A u g u s t P r i e s in Leipzig.
+
+
+/
+2
+3
+4
+5-
+6
+7
+P
+7
+0
+
+a.
+a.
+b
+4 -
+
+4
+
+
+6
+
+
+0
+
+
+?/
+
+I
+
+M 	D
+I
+c 	&.Zl
+
+'9
+/.5
+
+anad& 	143-7.
+
+3 P
+, b
+
+c
+0
+
+4
+
+
+0
+
+
+1
+as
+
+
+40
+
+
+t 1 IQ
+
+
+’7
+94
+
+Lihw-ibGIq,t-S
+
+
+40
+5
+
+
+e :
+e
+1 .
+6%
+
+4
+
+.
+
+I
+
+
+L
+
+Y
+
+
+' h
+
+
+60
+
+
+zf
+4
+4.
+5- .c
+d
+7.
+e
+7 .
++f
+I
+9201- 4UOn
+
+
+6 8
+
+
+s
+/Q
+f 5
+
+
+74
+
+
+77
+
+
+.
+80
+
+
+2. a cxd%cLmolPmod$ &,
+U
+
+
+B
+
+
+5"
+/O
+/3-
+
+X&J# 	4 -7.
+
+L i 	k
+5
+IO
+1
+/S
+
+k
+a :
+(Si
+.
+
+1
+
+
+5
+to
+15

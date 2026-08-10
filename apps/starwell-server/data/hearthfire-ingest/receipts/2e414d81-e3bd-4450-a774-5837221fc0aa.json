@@ -1,0 +1,24 @@
+{
+  "schema": "hearthfire.ingest-receipt/v1",
+  "action": "ingest",
+  "documentId": "2e414d81-e3bd-4450-a774-5837221fc0aa",
+  "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+  "importedAt": "2026-07-18T20:04:13.257Z",
+  "provenance": {
+    "kind": "hearthfire-first-light",
+    "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\seed-data\\signals.json",
+    "originalRetainedBy": "source-path"
+  },
+  "originalCopied": false,
+  "extraction": {
+    "status": "complete",
+    "textFile": "2e414d81-e3bd-4450-a774-5837221fc0aa.txt",
+    "pageCount": null,
+    "characterCount": 2,
+    "wordCount": 1,
+    "ocr": {
+      "status": "not-needed"
+    },
+    "warnings": []
+  }
+}

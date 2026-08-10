@@ -7,66 +7,66 @@
   const CODEX = {
     P: {
       title: 'Presence', rune: 'ᛈ', plain: 'inhabited structure', value: v => `${v.toFixed(2)} · inhabited structure`,
-      science: 'An interpretive DEEP variable that controls how populated and dense the outer architecture appears.',
+      science: 'A DEEP variable that controls how populated and dense the outer architecture appears.',
       instrument: 'Higher Presence adds or emphasises outer nodes, making the glyph feel more occupied and easier to inspect.',
       myth: 'The field feels more witnessed. More lights gather around the Well.',
-      boundary: 'Presence is theoretical display language. It is not a claim that the instrument detects a person’s hidden inner state.'
+      boundary: 'Presence measures inhabited structure. The instrument reads field density, not a person’s hidden inner state.'
     },
     C: {
       title: 'Coherence', rune: 'ᚲ', plain: 'structural clarity', value: v => `${v.toFixed(2)} · structural clarity`,
-      science: 'An interpretive stability variable for how strongly the model’s edges and relationships hold together.',
+      science: ‘A stability variable for how strongly the model’s edges and relationships hold together.’,
       instrument: 'Higher Coherence sharpens route legibility, strengthens lines, and makes the geometry feel more orderly.',
       myth: 'The pattern remembers its shape. The Well answers in cleaner lines.',
-      boundary: 'Coherence is a visual/model translation variable, not proof that an event is objectively meaningful or ordered.'
+      boundary: 'Coherence reads structural clarity. It is not proof that an event is objectively meaningful or ordered.'
     },
     R: {
       title: 'Resonance', rune: 'ᚱ', plain: 'harmonic response', value: v => `${v.toFixed(2)} · harmonic response`,
-      science: 'An interpretive variable for rhythmic emphasis, ring behaviour, and pulse cadence.',
+      science: 'A variable for rhythmic emphasis, ring behaviour, and pulse cadence.',
       instrument: 'Higher Resonance makes rings and path traffic feel more musical, lively, and synchronised.',
       myth: 'The instrument hums back. Signal becomes song around the Well.',
-      boundary: 'Resonance is an experimental visual metaphor for rhythmic response, not a measured emotional frequency.'
+      boundary: 'Resonance maps rhythmic activity to ring and pulse behaviour. It is not a measurement of emotional frequency.'
     },
     E: {
       title: 'Entropy', rune: 'ᛇ', plain: 'field looseness', value: v => `${v.toFixed(2)} · field looseness`,
-      science: 'An interpretive variation variable that adds wobble, asymmetry, and looseness to the glyph.',
+      science: 'A variation variable that adds wobble, asymmetry, and looseness to the glyph.',
       instrument: 'Higher Entropy makes nodes drift, lines feel less rigid, and the geometry become more irregular.',
       myth: 'The pattern frays at the edges. The Well shows weather, not failure.',
-      boundary: 'Entropy here is model-display language. It does not diagnose chaos in the user or world.'
+      boundary: 'Entropy reads field looseness and variation. It does not diagnose chaos in the user or world.'
     },
     M: {
       title: 'Momentum', rune: 'ᛗ', plain: 'motion pressure', value: v => `${v.toFixed(2)} · motion pressure`,
-      science: 'An interpretive motion variable that affects visible speed and liveliness of animated traffic.',
+      science: 'A motion variable that affects visible speed and liveliness of animated traffic.',
       instrument: 'Higher Momentum increases spark speed, pulse travel, and responsiveness of the field.',
       myth: 'Light packets hurry through the channels. The story is moving quickly.',
-      boundary: 'Momentum is display behaviour, not a literal measurement of destiny, urgency, or inevitability.'
+      boundary: 'Momentum maps motion pressure to visible speed. It does not measure destiny, urgency, or inevitability.'
     },
     A: {
       title: 'Alignment', rune: 'ᚨ', plain: 'axis stability', value: v => `${v.toFixed(2)} · axis stability`,
-      science: 'An interpretive centring variable for how tightly the inner body and core geometry hold their axis.',
+      science: 'A centring variable for how tightly the inner body and core geometry hold their axis.',
       instrument: 'Higher Alignment steadies the central structure and makes the inner geometry feel more disciplined.',
       myth: 'The compass of the Well steadies. The field remembers where centre is.',
-      boundary: 'Alignment is a visual axis variable, not a moral or spiritual score.'
+      boundary: 'Alignment reads axis stability. It is not a moral or spiritual score.'
     },
     H: {
       title: 'Horizon', rune: 'ᚺ', plain: 'edge signal', value: v => `${v.toFixed(2)} · edge signal`,
       science: 'A derived edge variable blended from coherence, entropy, resonance, alignment, Bz, Kp, charge, and pulse state.',
       instrument: 'Higher Horizon brightens edge effects and makes the outer field feel more awake.',
       myth: 'The boundary of the field glows. Something is visible at the rim.',
-      boundary: 'Horizon is a derived display signal, not a prediction or omen.'
+      boundary: 'Horizon is a derived edge signal. It is not a prediction or omen.'
     },
     Q: {
       title: 'Charge', rune: 'ᛩ', plain: 'centre glow', value: v => `${v.toFixed(2)} · centre glow`,
-      science: 'An interpretive variable that wakes the centre point and amplifies local response brightness.',
+      science: 'A variable that wakes the centre point and amplifies local response brightness.',
       instrument: 'Higher Charge expands the core glow and makes touch responses feel brighter and more immediate.',
       myth: 'The Well warms. The centre is listening more visibly.',
-      boundary: 'Charge is a visual response variable, not a medical, emotional, or spiritual measurement.'
+      boundary: 'Charge reads centre response intensity. It is not a medical, emotional, or spiritual measurement.'
     },
     moon: {
       title: 'Moon Illumination', rune: '☾', plain: 'harmonic rings', value: v => `${Math.round(v)}% · harmonic rings`,
       science: 'A direct or fallback reading for the current lunar illumination percentage.',
       instrument: 'More moon illumination increases harmonic ring count or ring visibility around the core.',
       myth: 'The tide-turner adds layers. The Well gains more visible circles of reflection.',
-      boundary: 'The moon layer is a visual scaffold, not a claim that lunar phase causes model truth.'
+      boundary: 'The moon layer provides harmonic ring scaffolding. It is not a claim that lunar phase causes model truth.'
     },
     kp: {
       title: 'Kp Index', rune: '✶', plain: 'geomagnetic activity', value: v => `${v.toFixed(1)} · ${v < 3 ? 'quiet magnetic field' : v < 6 ? 'active magnetic field' : 'storming magnetic field'}`,
@@ -80,7 +80,7 @@
       science: 'A north-south component of the interplanetary magnetic field. In this instrument, positive Bz is treated as quieter/holding, near-zero Bz as balanced or liminal, and negative Bz as more open/active.',
       instrument: 'Bz sets the thermal mood of the palette: positive values cool and quiet the instrument, near-zero values hold neutral silver, and negative values warm and activate the field.',
       myth: 'Positive Bz closes the gate into moon-glass quiet. Near-zero Bz holds the silver threshold. Negative Bz opens the gate; the sky-current heats and the field grows teeth.',
-      boundary: 'Bz is used here as an experimental palette and field-orientation input, not as standalone prediction, proof, or prophecy.'
+      boundary: 'Bz orients the field's thermal palette. It is not a prediction, proof, or prophecy.'
     },
     source: {
       title: 'Data Source', rune: '⟁', plain: 'packet provenance', value: v => `${v} · packet provenance`,
@@ -146,11 +146,11 @@
         <span class="codex-badge" id="codexRune">ᚲ</span>
       </div>
       <div class="codex-grid">
-        <div class="codex-card"><strong>Science</strong><span id="codexScience">Experimental and theoretical readings are kept distinct from direct telemetry.</span></div>
+        <div class="codex-card"><strong>Science</strong><span id="codexScience">Each reading has a science source, an instrument behaviour, and a Terra Aeterna expression.</span></div>
         <div class="codex-card"><strong>Instrument</strong><span id="codexInstrument">The meter shows what visual behaviour changes on the glyph.</span></div>
-        <div class="codex-card"><strong>Terra Aeterna</strong><span id="codexMyth">The mythic layer gives the reading story-language without pretending it proves hidden truth.</span></div>
+        <div class="codex-card"><strong>Terra Aeterna</strong><span id="codexMyth">The mythic layer gives the reading its Terra Aeterna story-language.</span></div>
       </div>
-      <p class="codex-boundary" id="codexBoundary"><b>Boundary:</b> This is an experimental translation layer: readable, interpretive, and deliberately labelled.</p>
+      <p class="codex-boundary" id="codexBoundary"><b>Boundary:</b> The codex translates each DEEP variable into science, instrument behaviour, and Terra Aeterna expression.</p>
     `;
     teach.insertAdjacentElement('afterend', panel);
   }
@@ -199,7 +199,7 @@
     setText('codexScience', data.science);
     setText('codexInstrument', data.instrument);
     setText('codexMyth', data.myth);
-    document.getElementById('codexBoundary').innerHTML = `<b>Boundary:</b> ${data.boundary} Experimental/theoretical layer; interpretive, not proof.`;
+    document.getElementById('codexBoundary').innerHTML = `<b>Boundary:</b> ${data.boundary}`;
   }
 
   function setText(id, value) {

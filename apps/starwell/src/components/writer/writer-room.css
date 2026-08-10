@@ -230,9 +230,126 @@
   background: rgba(231,196,119,0.25);
 }
 
+/* ── Type-specific metadata sections ── */
+.writer-type-section {
+  display: grid;
+  gap: 0.85rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(126,61,41,0.14);
+}
+
+.sky-night .writer-type-section,
+.sky-dusk .writer-type-section {
+  border-color: rgba(231,196,119,0.14);
+}
+
+.writer-type-section-head {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.writer-meta-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.writer-meta-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.writer-field-full {
+  grid-column: 1 / -1;
+}
+
+.writer-field-full textarea {
+  width: 100%;
+  border: 1px solid rgba(126,61,41,0.22);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.42);
+  color: inherit;
+  font: inherit;
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14);
+  min-height: 5rem;
+  padding: 0.75rem 0.85rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.sky-night .writer-field-full textarea,
+.sky-dusk .writer-field-full textarea {
+  border-color: rgba(231,196,119,0.22);
+  background: rgba(0,0,0,0.18);
+}
+
+.writer-epistemic-note {
+  font-size: 0.7rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.62;
+  display: block;
+  margin-top: 0.15rem;
+}
+
+/* ── Publish panel ── */
+.writer-publish-panel {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(140,202,192,0.28);
+  border-radius: 22px;
+  background: linear-gradient(120deg, rgba(81,111,77,0.08), rgba(140,202,192,0.10), rgba(231,196,119,0.07));
+}
+
+.writer-publish-panel label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.writer-publish-panel label select {
+  width: 100%;
+  border: 1px solid rgba(126,61,41,0.22);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.42);
+  color: inherit;
+  font: inherit;
+  outline: none;
+  min-height: 2.75rem;
+  padding: 0 0.8rem;
+}
+
+.sky-night .writer-publish-panel label select,
+.sky-dusk .writer-publish-panel label select {
+  border-color: rgba(231,196,119,0.22);
+  background: rgba(0,0,0,0.18);
+}
+
+.writer-publish-panel p {
+  margin: 0;
+  font-size: 0.82rem;
+  opacity: 0.78;
+  line-height: 1.5;
+}
+
+.publish-action {
+  justify-self: start;
+}
+
 @media (max-width: 880px) {
   .writer-header,
   .writer-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .writer-meta-grid-2,
+  .writer-meta-grid-3 {
     grid-template-columns: 1fr;
   }
 

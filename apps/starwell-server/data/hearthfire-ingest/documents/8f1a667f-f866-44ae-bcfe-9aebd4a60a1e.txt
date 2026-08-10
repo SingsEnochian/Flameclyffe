@@ -1,0 +1,588 @@
+# Lantern Substrate — PRD (shared interaction layer for the Lantern HUD suite)
+
+**Status:** ASPIRATIONAL — design only, no code.
+
+The Lantern Substrate is **not a user-facing app.** It is the shared, fatigue-aware,
+hands-reduced interaction layer that every Lantern app builds on: the **Input Layer +
+Intent Resolver + Safety Gate (Risk Levels L0–L5)**, the **redundant-input binding model
+(G1)**, **Low-Energy / posture modes (G3)**, the **Confirm/Cancel/Undo patterns**, the
+**Status Bead**, and the enforced principle **"gaze is attention, not consent."** It lives
+in the shared library (`commonMain`) so every renderer and every Lantern app inherits it and
+*cannot* get it wrong (G10).
+
+This PRD is the **single owner** of these mechanisms. The app PRDs —
+`app-prd-caption-lantern.md`, `app-prd-voice-lantern.md`, `app-prd-sentinel-lantern.md`,
+`app-prd-concordance-lens.md` — **reference** this document for all of the above and **must
+not redefine** them. They declare nouns + intent and a Risk Level per action; the substrate
+owns the grammar.
+
+Read first: `goals-and-guidelines.md` (G1–G10, R1–R6, §5 Risk Levels, §6 PMEyeUI
+relationship, §7 slate), `source-spec-lantern-stack-v0.1.md` (Catherine's authoritative
+spec — §5, §7–10, §16), `collaborator-and-codesign.md`. Project contracts: root `CLAUDE.md`
+(pre-commit checklist, test-plan 5 dimensions, Multi-device design rules, Portability),
+`docs/pme-eye-ui/plan-kmp-cross-platform.md` (#330).
+
+---
+
+## 1. Status banner
+
+**Status:** ASPIRATIONAL — design only, no code. (Repeated for `claims-audit`: nothing here
+is implemented; every capability claim below is a design intent, not a shipped behaviour.)
+
+## 2. Purpose & scope — what the substrate owns vs what apps own
+
+### 2.1 The substrate OWNS (apps reference, never reimplement)
+- The **Input Layer** — normalizes every input modality into a common `InputSignal` stream.
+- The **Intent Resolver** — combines signals into a candidate `ActionIntent`; gaze alone
+  only focuses/previews/selects.
+- The **Safety Gate** — classifies every intent by Risk Level (L0–L5) and enforces the
+  per-level confirm / cancel / timeout / logging contract.
+- The **Redundant-input binding model (G1)** — `LanternAction` registration that yields all
+  modalities from a single declaration.
+- **Low-Energy / spoon mode + posture modes (reclined/bed, minimal-head-movement)** and the
+  **globally-disable-able** "fatigue ceremony is a MODE over base PMEyeUI, not a fork."
+- The shared **Confirm / Cancel / Undo** widgets (low/medium/high-risk cards, cancel paths,
+  universal undo snackbar).
+- The **Status Bead** (the default-HUD glanceable status indicator).
+- The data model primitives (`UserSettings`, `ActionIntent`, `SafetyEvent`, plus
+  `InputSignal`, `LanternAction`, `RiskLevel`).
+
+### 2.2 Apps OWN (the substrate provides the machinery they plug into)
+- Their **nouns** (caption window, room device, voice route) and their **intents**
+  (`repeat last`, `light on`, `call caregiver`).
+- The **Risk Level each intent declares** (Caption controls = L1; audio route = L2; room
+  control = L3; caregiver = L4). The app *declares*; the gate *enforces*.
+- Their layout/content within `appArea`, assembled from shared widgets.
+- App-specific latency floors (G5) — the substrate provides the timing harness; the app
+  states its floor.
+
+### 2.3 Out of scope for the substrate
+- Any concrete external adapter (STT, TTS, smart-home, contacts). The substrate defines the
+  `ActionIntent` → adapter boundary; the adapters live in apps / platform shells.
+- World-anchored AR (out of scope on Maverick per `goals-and-guidelines.md` §1).
+
+---
+
+## 3. Architecture — Input Layer / Intent Resolver / Safety Gate + Risk Levels
+
+### 3.1 Pipeline (adapter-based, from spec §7)
+
+```
+Input Layer ──▶ Intent Resolver ──▶ Safety Gate ──▶ Action Dispatch ──▶ App / Adapter
+  (signals)      (candidate          (risk-gated      (executes once       (effect)
+                  ActionIntent)        confirm)         confirmed)
+                       │                   │
+                  gaze = focus/        emits SafetyEvent
+                  preview/select       (local-only log)
+                  only
+```
+
+- **Input Layer.** Each modality (gaze-select, head gesture/nod/LOS, voice, physical
+  tap/switch, phone tap, simulator injection) is an adapter producing a normalized
+  `InputSignal { modality, kind (focus|select|confirm|cancel|nav), targetId?, confidence,
+  tsMs }`. The simulator and `step:*` seams inject `InputSignal`s identically to real
+  hardware — the resolver cannot tell them apart (this is what makes the sim a faithful
+  surrogate). Confidence is carried so the resolver can degrade gracefully (G9).
+- **Intent Resolver.** Maps signals to a candidate `ActionIntent` for a focused
+  `LanternAction`. **Hard rule:** a gaze `focus`/`select` signal can produce an intent in a
+  `proposed` state but **never** an `executed` one — `gaze is attention, not consent` (§3.4).
+  A `confirm` signal from *any non-gaze modality*, or a risk-appropriate gaze+second-signal,
+  advances `proposed → confirmed`. The resolver is platform-free; it consumes `InputSignal`
+  and emits `ActionIntent`, both in `commonMain`.
+- **Safety Gate.** A shared-library component (peer to the CAT/Commit machinery, **not** a
+  per-app object). It receives the candidate `ActionIntent`, reads the action's declared
+  `RiskLevel`, and enforces the per-level contract below: required confirm strength, allowed
+  confirm modalities, cancel paths, timeout, and **logging** (`SafetyEvent`). It is the only
+  path from intent to effect — no app may dispatch an effect around it (enforced by review +
+  a `shared-pattern-audit`-style gate: object renderers and app reducers must route
+  consequential actions through `SafetyGate.submit`, never call an adapter directly).
+
+### 3.2 Map onto the EXISTING select→ACT→CONFIRM (CAT/Commit) machinery — extend, don't reinvent
+
+Per `goals-and-guidelines.md` §6, the substrate **extends** the project's existing gaze
+grammar rather than forking it:
+
+| PMEyeUI grammar stage | Substrate role | Risk-scaled change |
+|---|---|---|
+| **select** (gaze focus) | `InputSignal{focus}` → resolver makes target selectable; Status Bead / tooltip expand | unchanged; gaze-only, no consequence |
+| **ACT** (CAT — pursuit/morph toward follow target) | the substrate's "propose" step; produces `ActionIntent{proposed}` | for L0/L1 reversible actions, the substrate may COLLAPSE ACT+CONFIRM into one signal + universal undo (scale ceremony to consequence) |
+| **CONFIRM** (Commit) | Safety-Gate-enforced confirmation, **modality-agnostic** | CONFIRM may be a head-nod / voice / switch / phone tap — NOT required to be a second gaze act (G1, fatigue relief) |
+
+The B8 pursuit/morph animation and C2 follow-target geometry stay in the **shared widget
+layer** (`HmdRenderer.drawActionTargetIcon` / `pursuitIconRect`) — the substrate does **not**
+fork the activation animation per app (patent posture; `feedback_widget_level_patent_guard`).
+What the substrate adds is: (a) the CONFIRM signal can arrive from any modality; (b) ceremony
+is scaled to the declared Risk Level; (c) a universal undo backs reversible actions so they
+don't need full ceremony.
+
+### 3.3 Risk Level table (L0–L5) — confirm / cancel / timeout / logging per level
+
+Authoritative taxonomy: `source-spec-lantern-stack-v0.1.md` §8; `goals-and-guidelines.md` §5.
+All timings are **ms** (portable); none are frame counts. Values marked *(assume)* are
+**assumptions-to-verify on hardware** (§6.5).
+
+| Risk | Example actions | Confirm required | Allowed confirm modalities | Cancel paths | Timeout (auto-dismiss) | Logging (`SafetyEvent`) |
+|---|---|---|---|---|---|---|
+| **L0 Passive HUD** | show captions, status, preview menu, highlight a control | none | n/a (no consequence) | look-away; any nav | menus auto-tuck ~4000 ms *(assume)* idle | none (no `SafetyEvent`) |
+| **L1 Local UI change** | enlarge / dim / move / pause / clear / pin caption | simple (single confirm signal) OR immediate + undo | gaze+dwell(reversible only, counting-down), tap, voice, head-nod, phone | look-away, tap, voice "cancel", timeout | confirm card ~3000 ms *(assume)* | optional, local-only; undo snackbar always |
+| **L2 Local device/audio** | switch audio route, replay, volume, pin transcript | confirm if persistent; immediate feedback | as L1 (no gaze-ONLY for persistent change) | as L1 + revert/undo | ~3000 ms *(assume)* | `SafetyEvent` for persistent changes, local-only |
+| **L3 Room control** | light/fan on/off | **two-step**; named target shown; **NO gaze-only** | tap, voice, head-nod, switch, phone (gaze focuses; a second non-gaze signal confirms) | look-away, voice "cancel", tap, **panic-stop**, countdown lapse | countdown ~5000 ms *(assume)* then cancel | `SafetyEvent` mandatory, local-only; device-safety rules checked |
+| **L4 Aid/caregiver** | call caregiver, "I need help", Drop In | **strong**; protected card showing recipient; **no silent / no gaze-only** | explicit non-gaze confirm (tap/voice/switch/phone), held or double | look-away, voice "cancel", tap, **panic-stop** until final execution | countdown ~7000 ms *(assume)*; cancellable to the last moment | `SafetyEvent` mandatory; post-action visible status ("alert sent" vs "nothing sent") |
+| **L5 Emergency** (if ever built) | emergency contact/services | **very strong** unless pre-configured; distinct UI | explicit, deliberate; audible+visible countdown | panic-stop; explicit cancel until execution | distinct, longer countdown; **testing mode** that sends nothing | `SafetyEvent` mandatory; never claims medical/emergency reliability without validation (R1) |
+
+**Cross-cutting gate rules (all levels):**
+- **No L3+ action from gaze alone, ever** (spec §3, §8; R3 for L4+). The gate rejects an
+  `ActionIntent` whose only confirm signal is gaze for L3+.
+- **Every consequential action (L1+) gets a universal undo snackbar** where the action is
+  reversible; where it is not (L4 sent alert), the gate substitutes a **post-action status**
+  and a **cancel countdown before** execution.
+- **`SafetyEvent` is local-only by default** (G6) — `{event_id, action, risk_level,
+  confirmation_method, result, timestamp, local_only}`. No cloud, no caregiver feed of the
+  log (R3). Dev logs are scrubbed of transcript/audio/camera unless explicit debug mode.
+- **Logging records the confirmation METHOD** so accidental-activation analysis (§9
+  interaction-cost proxies) can see *which modality* committed.
+
+### 3.4 "Gaze is attention, not consent" — enforced principle
+
+The headline principle (spec §5.1, goals §5). Enforced, not aspirational:
+- The resolver **cannot** advance an intent past `proposed` on a gaze-only signal (a unit
+  invariant: `Resolver.advance(gazeOnly) ⇒ state == proposed`).
+- The Safety Gate **rejects** any L3+ `ActionIntent` whose `confirmation_method` is gaze.
+- Gaze drives only focus / preview / selectability / Status-Bead expansion. The crispest
+  statement of the Midas-touch defense (§6.2) and the rationale for select→ACT→CONFIRM.
+
+---
+
+## 4. Redundant input binding (G1) · Low-Energy mode · posture modes · globally-disable-able
+
+### 4.1 Redundant input binding model (G1)
+
+An app binds an action **once** and gets all modalities. The substrate owns the binding
+abstraction:
+
+```
+LanternAction {
+  id: String                 // "caption:repeat_last"
+  label: String              // shown on confirm card / Status Bead
+  riskLevel: RiskLevel       // app declares; gate enforces
+  reversible: Boolean        // gates dwell-eligibility + undo
+  target: () -> Effect       // the app's effect, dispatched only post-gate
+  // NO modality wiring here — the substrate supplies all of {gaze-select,
+  // head gesture/nod, voice, physical tap/switch, phone} automatically.
+}
+```
+
+- Registering a `LanternAction` makes it reachable by **≥2 of** {gaze-select, head
+  gesture/nod, voice, physical tap/switch, phone} — the G1 floor — **without the app wiring
+  any modality.** Voice grammar (the action's `label` + synonyms), head-nod confirm, switch
+  scanning, and phone-tap targets are all derived from the single registration.
+- **No single point of input failure** (G1 rationale): gaze itself fatigues and drops, voice
+  fails for dysarthria, head movement is restricted in bed mode — so the substrate guarantees
+  an alternate path is always live. An app that registers an action gets this for free; it
+  *cannot* ship a gaze-only action (the registration has no per-modality opt-out for the
+  required floor).
+- This is **redundant fallback, never mandatory fusion** (G1) — IMU + gaze are never fused
+  for intent inference (project law); the substrate consumes them as separate `InputSignal`s.
+
+### 4.2 Low-Energy / spoon mode (G3)
+
+A global mode (in `UserSettings.interaction_mode`) that, when on:
+- **Larger targets** (raise the per-config interactive floor toward the upper bound, e.g.
+  3.2° both axes), **shorter decision paths**, **more forgiving timeouts** (lengthen the
+  ms timeouts in §3.3), **fewer simultaneous on-screen elements** (tighter overlay budget).
+- **Resting interaction cost ~zero** — nothing on screen at rest (G2); no per-frame work
+  (project zero-alloc law).
+- **Resumable flows** — a multi-step action (e.g. an L4 confirm) interrupted by brain-fog /
+  PEM can be **resumed** from where it stopped, with no penalty and no silent timeout-commit
+  (timeout always **cancels**, never commits — §9 failed-use-cases).
+- Prefers **calibration-light smooth-pursuit selection** (Pursuits/Orbits) over per-target
+  dwell where it reduces effort (G9, §6.3).
+
+### 4.3 Posture modes (G3, spec §16)
+
+- **Reclined / bed mode.** HUD layout + controls work for a bedbound/reclined user — gravity,
+  head angle, and reach all change. Controls migrate to within a reduced comfortable gaze/head
+  cone; the substrate re-anchors action targets so none require an upward/large head turn.
+- **Minimal-head-movement mode.** No action requires a head turn to reach a control; head
+  gestures fall back to gaze+voice/switch; LOS-based pointing is suppressed in favor of
+  on-screen selection. (Distinct from bed mode — a seated user may need this without reclining.)
+- Plus **night mode, low-brightness, reduced-motion, no-strobe** — all switchable
+  (`UserSettings`).
+
+### 4.4 Globally disable-able (a MODE over base PMEyeUI, not a fork)
+
+The fatigue-aware ceremony/throttling/large-targets are **not necessarily good for
+non-disabled users**, so the whole substrate-fatigue behaviour is a **mode over** the base
+PMEyeUI grammar that is **cleanly switchable off**:
+- With the mode **off**, actions fall back to the base project select→ACT→CONFIRM grammar and
+  default sizes; the Safety Gate + Risk Levels **still apply** (safety is never a fatigue
+  feature — it is the product, R6, accessibility-is-never-a-hidden-mode).
+- With the mode **on**, the §4.2/§4.3 adaptations layer **over** the same code path — there is
+  **one** grammar, one set of widgets; the mode tunes parameters (sizes in degrees, timeouts
+  in ms, overlay budget), it does not branch into a second renderer. (Enforced like the
+  `PMEYE_UI`/`IUI` switch: every fork reads a mode flag in the snapshot; no duplicate drawers.)
+
+---
+
+## 5. Confirm/Cancel/Undo · Status Bead · data model
+
+### 5.1 Confirm / Cancel / Undo patterns (spec §9.3–9.4)
+
+Shared widgets (in `HmdWidgets`/`DwellWidget`/`PageNavWidget` homes), parameterized by Risk
+Level — **one** widget family, not per-app:
+- **Low-risk (L0/L1) confirmation:** focus + (dwell-if-reversible-and-counting-down | tap |
+  nod | voice) → immediate result + **undo snackbar**.
+- **Medium-risk (L2) confirmation card:** focus + confirmation card + confirm via
+  touch/voice/second deliberate action; cancel by look-away / tap / timeout.
+- **High-risk (L3/L4) protected card:** shows **recipient / device / action** explicitly +
+  **countdown** + explicit confirm signal + cancel available until final execution.
+- **Cancel patterns (all):** look-away for an interval; touch cancel; voice "cancel"; phone
+  cancel; timeout (always **dismiss/cancel**, never commit); **panic-stop** (hardware
+  button/gesture) that aborts any pending action immediately. Blink/gesture cancel only if
+  reliable on hardware (deferred, §6.5).
+- **Universal undo snackbar:** every reversible L1+ action posts an undo affordance for a
+  bounded window (ms); undo itself is L0 (reverting is never riskier than the action).
+
+### 5.2 The Status Bead (spec §10.2)
+
+The default-HUD glanceable status indicator — the only persistent chrome besides captions.
+- **Glanceable at rest:** a small bead encoding the live state set: **connection, battery,
+  mic/caption active, privacy mode, audio route, safety lock, caregiver-flow state.** Small,
+  readable, non-distracting; high-contrast (additive-optic-honest, G2 — bright marks, never a
+  dim wash).
+- **Expands on focus:** gaze focus (L0 — no consent needed) expands the bead into a labeled
+  status panel; look-away collapses it. Expansion is the canonical "gaze is attention"
+  example — it previews/reveals, commits nothing.
+- **Privacy & safety states are first-class:** a visible **privacy-mode** indicator and a
+  visible **safety-lock** indicator (Sentinel) live here so the user always knows what is
+  active (G6); a caregiver-flow-in-progress state shows here with its cancel countdown.
+- It is a **shared widget** reachable by every renderer (library-first); no app draws its own
+  status indicator.
+
+### 5.3 Data model (start from spec §7)
+
+Substrate-owned primitives (platform-free, `commonMain`). Apps extend, never redefine:
+
+```
+UserSettings {                         // global, local-only, wearer-owned
+  caption_font_size, caption_contrast_mode, caption_window_position,
+  hud_brightness, interaction_mode (incl. LOW_ENERGY / RECLINED / MIN_HEAD),
+  confirmation_mode, audio_output_route, privacy_mode,
+  safe_contacts, room_devices, emergency_enabled, cloud_services_enabled,
+  fatigue_ceremony_enabled (the §4.4 globally-disable-able switch)
+}
+ActionIntent {                         // produced by the resolver, gated by the Safety Gate
+  intent_id, source_signal, target_action, risk_level, confidence,
+  requires_confirmation, expires_at (ms), cancel_available, confirmed_at,
+  confirmation_method, state ∈ {proposed, confirming, confirmed, executed, cancelled, expired}
+}
+SafetyEvent {                          // local-only audit record (§3.3)
+  event_id, action, risk_level, confirmation_method, result, timestamp, local_only
+}
+InputSignal { modality, kind, targetId?, confidence, tsMs }     // Input Layer
+LanternAction { id, label, riskLevel, reversible, target }      // §4.1 binding
+RiskLevel ∈ { L0, L1, L2, L3, L4, L5 }
+```
+
+App data models referenced (owned by the apps, not the substrate): `CaptionSession`,
+`VoiceRoute` (spec §7).
+
+---
+
+## 6. Collaborator-required sections
+
+### 6.1 Accidental-activation avoidance (Midas-touch defense)
+
+The substrate is the Midas-touch defense. Layered:
+- **Gaze never consents** (§3.4) — a fixation, accidental or curious, can only focus/preview;
+  it cannot commit. This is the primary defense and is enforced at the resolver + gate.
+- **Second-signal requirement scales with risk** — L0 dismissible, L1 undoable, L3+ requires
+  a **non-gaze** second signal. The single highest-leverage anti-Midas rule: consequential
+  actions cannot be triggered by looking.
+- **Dwell is restricted** — only on reversible (L0/L1) actions, only with a visible
+  counting-down affordance (§6.3); never on L3+ (an accidental long fixation on a light
+  switch must not turn it on).
+- **Countdown + cancel-until-execution** on L3+ means even a mistaken confirm is recoverable
+  before the effect fires; **panic-stop** aborts globally.
+- **Confidence gating** — low-confidence gaze signals (poor calibration, drift) do not even
+  produce a selectable focus; they degrade to a non-gaze path (G9).
+
+### 6.2 Calibration assumptions (assumed gaze accuracy + graceful degradation, G9)
+
+- **Assumed accuracy:** the project's per-config interactive floor (**2.8° or 3.2° in every
+  axis**, config-dependent) is the assumed achievable gaze accuracy. Lantern targets sit at or
+  above the floor; Low-Energy mode raises toward 3.2°. *These are assumptions-to-verify on the
+  final SDK + hardware (§6.5).*
+- **No assumption of perfect calibration** (spec §3, §6). The substrate degrades gracefully:
+  - **Calibration drift / low ET confidence** → the resolver suppresses gaze focus and the UI
+    falls back to the G1 non-gaze paths (head/voice/switch/phone); the Status Bead can surface
+    a "gaze unsteady" hint and offer **calibration retry** (spec §16).
+  - **ET unavailable / not-yet-exposed by the SDK** → every surface is **fully operable**
+    through the G1 fallbacks (this is the G9 reconciliation with Catherine's spec: design
+    ET-first, but every action reachable without gaze, so it degrades exactly as her §6
+    requires — same code satisfies both views, and is what keeps the non-ET Raven port usable).
+  - **Prefer calibration-light smooth-pursuit (Pursuits/Orbits)** over per-target dwell where
+    it reduces effort and tolerates drift better.
+- The Everysight dev portal lists eye-tracking capability — but per goals §6 / spec §18 this
+  is **verify-against-final-SDK**, and the fallbacks exist regardless.
+
+### 6.3 Dwell alternatives (non-dwell path for every action)
+
+- **Every action has a non-dwell path** — guaranteed by the G1 binding (§4.1): tap, head-nod,
+  voice, switch, or phone always works without any dwell.
+- **Dwell is allowed only when the action is reversible** (L0/L1) **and** shows a **standard
+  dwell affordance that visibly counts down** (~600 ms target, exact TBD —
+  `docs/pme-eye-ui/future-todo.md`). Dwell on L3+ is **forbidden** by the gate.
+- Preference order for the lowest-fatigue path: **smooth-pursuit/Orbit select** >
+  **gaze-focus + non-gaze confirm** > **counting-down dwell (reversible only)**. The substrate
+  never *requires* dwell for anything.
+
+### 6.4 Fatigue / energy budget
+
+- **Resting cost ~zero** — nothing on screen at rest (G2); no per-frame allocation/rebuild
+  (project zero-alloc law). The Status Bead is the only persistent element and is cheap.
+- **Gaze-rest paths** — Low-Energy mode + the G1 non-gaze fallbacks let a user operate without
+  sustained fixation; smooth-pursuit reduces repetitive dwell.
+- **Resumability** — flows survive PEM/brain-fog interruption (§4.2); timeout cancels, never
+  commits, so stopping mid-task is free.
+- **Interaction-cost proxies (the collaborator's flag)** — the substrate is instrumented and
+  tested against: **acts-per-task** (count of `InputSignal`s to complete a flow),
+  **gaze-dwell-time budget** (cumulative fixation ms per task), and **resumability** (a flow
+  interrupted and resumed completes without re-doing prior steps). These are first-class test
+  metrics (§9), because a fatigue-aware layer's value is **not** captured by a screenshot.
+
+### 6.5 What waits for real HMD testing (we are simulator-only)
+
+The simulator faithfully validates *logic, geometry, parity, and the gate state machine*; it
+**cannot** honestly validate the *felt* and *physical*:
+- **Real gaze accuracy / calibration drift behaviour** — the 2.8°/3.2° assumption, dwell
+  timing (~600 ms), and pursuit-select comfort are **assumptions-to-verify**.
+- **Latency floors on hardware** (G5) — captions ≤300 ms etc. are budgeted; real end-to-end
+  latency needs the device + SDK.
+- **Fatigue truth** — whether a flow is *actually* low-effort for the fatigue cohort is the
+  collaborator's lived-experience test on hardware (`collaborator-and-codesign.md`).
+- **Posture modes** (reclined/bed, minimal-head) — gravity/reach/head-angle realities only
+  test on a real wearer in a real posture.
+- **Panic-stop hardware button / blink-cancel reliability** — depend on the shipping device's
+  controls.
+- **Which ET events the SDK exposes** (raw coords vs GazeIntent vs high-level) — spec §18,
+  overlaps #330 SDK questions.
+- The simulator is the **product surface** until hardware ships, so it must never lie about
+  these (project rule); items above are deferred to hardware + the collaborator-tester, not
+  claimed done from the sim.
+
+### 6.6 Eye-tracking UI patterns (Eyefluence-informed) + FTO/patent-posture check
+
+*Hook for Peter Milford's Eyefluence expertise (Google-acquired Eyefluence; gaze-interaction
+models). To be folded in as Peter-authored notes (goals §8 open-Q 4, spec §19).* Requested
+topics: ET patterns to **avoid**, dwell-click alternatives, comfortable gaze-confirmation
+models, calibration-drift handling, combining gaze+head+touch+voice without overload, and the
+minimum viable gaze-UI test harness.
+
+**FTO / patent-posture check.** The PMEyeUI FTO bundle (**A1 + B8 + C2 + E1–E4**) exists to
+avoid Eyefluence-style gaze-interaction infringement. The substrate's activation grammar
+**reuses the bundle's widget-level implementation** (B8 morph, C2 follow target) and adds only
+modality-agnostic CONFIRM + risk-scaling — it **does not** introduce a new gaze-activation
+mechanism. Any new substrate activation pattern (e.g. a specific pursuit/Orbit geometry, a
+specific dwell affordance) is FTO-reviewed against the bundle before it lands, and is
+implemented **once** in the shared widget layer (not forked per app — patent posture,
+`feedback_widget_level_patent_guard`). Enforced by `tools/fto-check` in the precommit-walk.
+
+---
+
+## 7. Red lines & community position (R1–R6)
+
+The substrate enforces, and the apps inherit:
+- **R1 — Not a medical device.** The Safety Gate's L5 must **never claim medical/emergency
+  reliability without validation**; substrate copy is audited like `claims-audit`. The
+  substrate routes "the user's own already-cleared devices," it does not provide a medical
+  function.
+- **R2 — Never a mobility-aid replacement.** Latency-sensitive safety cues (any future hazard
+  surface) are gated and labeled; the substrate provides no real-time world-CV path that could
+  masquerade as a cane replacement.
+- **R3 — No surveillance; caregiver flows are wearer-INITIATED.** L4 caregiver actions are
+  always wearer-triggered, with visible recipient + cancel; the `SafetyEvent` log is
+  **local-only**, never a caregiver-monitoring feed. The wearer is always sender and owner.
+- **R4 — Contested "fix the disabled person" framings off by default, wearer-owned.** The
+  substrate's defaults are off for contested features; emotion/affect (homed later in
+  Concordance Lens) is governed: default-off, wearer-only output, no coach, no caregiver feed.
+- **R5 — No recording of bystanders without lawful consent.** The substrate defaults to
+  no-persist; the privacy-mode indicator (Status Bead) is always visible when capture is
+  possible; two-party-consent jurisdictions respected.
+- **R6 — Accessibility is never a hidden mode.** There is no "accessibility build." The
+  redundancy + calm defaults are the product for everyone; the §4.4 fatigue ceremony is a
+  user-switchable mode, not a separate SKU.
+
+**Community position (G8):** "nothing about us without us." Co-design is an active gate; the
+collaborator (likely lived-experience domain partner + tester) reviews open questions before
+they lock; lived-experience feedback outranks researcher assumptions.
+
+---
+
+## 8. Multiplatform & multidevice (#330 contract)
+
+The substrate is the **shared core** that makes the #330 cross-platform parity provable.
+
+- **Angular units (degrees) + milliseconds only — NO pixel/frame constants in logic.** Every
+  size (target floor, Status Bead, confirm card, dwell affordance) is in **degrees**; every
+  duration (timeouts, countdowns, undo window, dwell ~600 ms) is in **ms**. A `const val
+  FOO_PX` / `BAR_FRAMES` anywhere in substrate logic is a portability defect (project law).
+  Pixel/scale conversion happens only at the sink boundary via `AngleMapper`.
+- **Lives in `commonMain` (library-first).** The Input Layer, Intent Resolver, Safety Gate,
+  Risk Levels, `LanternAction` binding, Confirm/Cancel/Undo widgets, and Status Bead are all
+  in the shared module, reachable by **every renderer** (M2 HMD sink + `PhoneCanvasSink` today;
+  iOS sink + Raven/Python sink under #330). Object renderers and the synthesized-app generator
+  can reach them — never private to `HmdRenderer` (`shared-pattern-audit`).
+- **Dual-sink parity.** The same `HomeSnapshot` (carrying substrate state: pending intents,
+  gate countdown, Status Bead state, mode flags) renders identically on the M2 HMD sink and
+  `PhoneCanvasSink` — phone preview ≡ HMD render, line-for-line.
+- **Runs on Android + iOS + Linux/Raven** via the shared core (#330 Phases 4/6): the substrate
+  is platform-free; only the sinks and input/device adapters are `actual` per platform. The
+  same Safety Gate logic runs on every target (`commonTest` proves logic parity — a divergence
+  cannot compile-and-pass on one platform only).
+- **Device matrix:** **Maverick v1 (640×400, ~22°)**, **v2 (1280×720, ~28°)**, **Raven (~30°
+  off-axis)**. Because every metric is angular, the substrate paints to all three with **no
+  widget edits** — only sink-level scale changes. The §3.3 timeouts (ms) are device-independent.
+- **Parity verified via the `scene_snapshot` oracle.** `tools/parity-snapshot` drives the same
+  controller state (including a pending L4 confirm, an expanded Status Bead, a counting-down
+  dwell) through each platform's sink, captures the sim's platform-neutral `scene_snapshot` M2
+  tree, and diffs vs a golden and cross-platform. The build fails on divergence. The
+  scene-graph text drawables are the device-faithful oracle for "is the confirm card / bead /
+  countdown actually present and correct" on each platform/device-class.
+
+---
+
+## 9. Test plan (5 dimensions; ASCII-marked [x]/[ ])
+
+Per CLAUDE.md, all five dimensions, per **sub-state**, driven through the **real** dispatch
+path (`step:*` seams + `adb input` / `InputSignal` injection), both sinks captured + read
+inline. Everything is `[ ]` (ASPIRATIONAL — no code yet). Named test classes/cases below.
+
+### 9.1 Functionality
+- [ ] `SafetyGateRiskRoutingTest` — for **each** L0–L5, an `ActionIntent` is routed with the
+      correct confirm strength / allowed modalities / cancel paths / timeout / logging.
+- [ ] `SafetyGateRejectsGazeOnlyL3PlusTest` — an L3/L4/L5 intent whose only confirm signal is
+      gaze is **rejected** (gaze-is-attention; R3).
+- [ ] `ResolverGazeNeverConsentsTest` — gaze-only signal never advances an intent past
+      `proposed` for any risk level.
+- [ ] `RedundantInputEquivalenceTest` — for a representative action **at each level**, the
+      action completes **via every modality** {gaze-select+confirm, head-nod, voice,
+      tap/switch, phone}; assert the same `SafetyEvent.result` regardless of modality.
+- [ ] `LanternActionBindingFloorTest` — registering a `LanternAction` yields ≥2 modalities
+      automatically (G1 floor); a registration cannot produce a gaze-only action.
+- [ ] `ConfirmCancelUndoFlowTest` — propose → confirm executes; cancel (each path) aborts;
+      undo snackbar reverts a reversible action; panic-stop aborts any pending action.
+- [ ] `LowEnergyModeTest` — mode on raises target floor toward 3.2°, lengthens timeouts,
+      tightens overlay budget; mode off restores base PMEyeUI sizes/grammar.
+- [ ] `PostureModeReclinedTest` / `PostureModeMinHeadTest` — controls re-anchor within the
+      reduced cone; no action requires a head turn in min-head mode.
+- [ ] `GloballyDisableableTest` — `fatigue_ceremony_enabled=false` falls back to base grammar;
+      Safety Gate + Risk Levels **still apply** (safety is not a fatigue feature).
+- [ ] `StatusBeadStateTest` — bead encodes each state (connection/battery/mic/privacy/route/
+      safety-lock/caregiver); gaze-focus expands, look-away collapses; expansion commits nothing.
+
+### 9.2 Appearance (BOTH sinks — HMD fullpage + AVD screencap, read inline; state active-area fraction)
+- [ ] `ConfirmCardParityTest` — low/medium/high-risk cards render in phone↔HMD parity; recipient/
+      device/action + countdown legible; colours clear the additive-optic floor; HMD fill ≥20%
+      where a backdrop is painted.
+- [ ] `StatusBeadParityTest` — bead + expanded panel identical angular position/size on both
+      sinks; no overlap with captions.
+- [ ] `DwellAffordanceCountdownParityTest` — the counting-down dwell affordance animates on both
+      sinks (reversible actions only).
+- [ ] `UiOverlapBoundsSweepTest` extension — substrate overlays (confirm card, bead, undo
+      snackbar, countdown) never overlap content / exit active bounds, across C/D configs.
+
+### 9.3 Error / empty / loading (FORCE each)
+- [ ] `LowConfidenceGazeFallbackTest` — degraded ET confidence suppresses gaze focus, falls
+      back to non-gaze paths, surfaces "gaze unsteady" + calibration-retry (G9).
+- [ ] `EtUnavailableFullyOperableTest` — with ET unavailable, every substrate action remains
+      reachable via G1 fallbacks (the #330 / Raven path too).
+- [ ] `LongLabelNoOverflowTest` — a long recipient/device/action string on a confirm card does
+      not overflow the active display (the #310 overflow class on the gate's card).
+- [ ] `AdapterFailureCleanStateTest` — an effect adapter failing leaves a clean state +
+      "nothing happened" status, never a half-executed action (atomicity).
+- [ ] `EmptyBindingTest` — an app surface with no registered actions renders a stable bead-only
+      HUD, no phantom targets.
+
+### 9.4 Timing
+- [ ] `GateCountdownTimingTest` — L3/L4/L5 countdowns match their ms spec; timeout **cancels**,
+      never commits.
+- [ ] `AtRestAllocationTest` extension — substrate adds **zero** per-frame rebuild/allocation at
+      rest (Status Bead at rest is cheap; #302/#297).
+- [ ] `FrameBudgetTest` — confirm-card open / bead expand / countdown tick stay within the #222
+      frame budget; no cold-rebuild freeze.
+- [ ] `LatencyHarnessTest` — the substrate's timing harness measures an app's declared latency
+      floor (G5) so each app PRD can assert against it.
+
+### 9.5 Failed use cases
+- [ ] `TimeoutNeverCommitsTest` — every pending action that times out is **cancelled**, leaving
+      nothing behind (atomicity; resumability premise).
+- [ ] `ResumabilityAfterInterruptionTest` — a flow interrupted mid-confirm and resumed completes
+      **without re-doing** prior steps and without a stale commit (the collaborator's
+      resumability proxy).
+- [ ] `PanicStopAbortsEverythingTest` — panic-stop aborts any in-flight pending action at any
+      risk level immediately; post-state shows "nothing sent."
+- [ ] `DoubleConfirmIdempotentTest` — rapid double-confirm executes at most once.
+- [ ] `NoLeakBetweenSurfacesTest` — pending intent / bead state does not leak across X→Home→Y
+      (`scene_snapshot` clean; #199 app→app leak class).
+- [ ] **Interaction-cost proxies (collaborator-flagged):** `ActsPerTaskBudgetTest` (signal count
+      to complete a flow ≤ budget), `GazeDwellBudgetTest` (cumulative fixation ms ≤ budget),
+      `ResumabilityProxyTest` (above) — a fatigue layer's value is not a screenshot.
+
+### 9.6 Cross-platform & per-device-class parity (#330)
+- [ ] `SubstrateScenePARITY_AndroidVsIos` — same input snapshot (incl. pending L4 confirm,
+      expanded bead, dwell countdown) → same `scene_snapshot` on Android vs iOS.
+- [ ] `SubstrateScenePARITY_AndroidVsRaven` — same, Android vs Raven (or pixel/SSIM if no
+      scene_snapshot-equivalent).
+- [ ] `SubstrateDeviceClassParity` — substrate widgets render at correct angular size on
+      **v1 (640×400/22°)**, **v2 (1280×720/28°)**, **Raven (~30°)** with no widget edits.
+- [ ] `SafetyGateLogicCommonTest` — gate state machine runs in `commonTest` (logic parity across
+      all KMP targets; a divergence can't pass on one platform only).
+
+### 9.7 Hardware-only (cannot be honestly validated on the simulator — §6.5)
+- [ ] **(hardware)** real gaze accuracy vs the 2.8°/3.2° assumption; dwell ~600 ms comfort.
+- [ ] **(hardware)** end-to-end latency floors (G5).
+- [ ] **(hardware + collaborator)** felt fatigue / Low-Energy + posture-mode comfort.
+- [ ] **(hardware)** panic-stop button / blink-cancel reliability; which ET events the SDK exposes.
+
+---
+
+## 10. Open design questions
+
+1. **Implement now or after #330?** Writing this PRD now is correct (design, not code), but
+   *implementing* the substrate likely wants to land **after/with #330 Phase 3** (the
+   HomeController decomposition + renderer split reshape exactly this shared interaction layer)
+   to avoid rework. Recommend: PRDs now, implement post-#330. **(goals §8 open-Q 2)**
+2. **Which substrate timings/sizes are real vs assumptions-to-verify?** The ms timeouts/
+   countdowns, dwell ~600 ms, and the 2.8°/3.2° floor are assumptions until the final SDK +
+   hardware answer them (spec §18, overlaps #330 SDK questions). Each must be tagged and the
+   "what waits for HMD" section carries it. **(goals §8 open-Q 3)**
+3. **What ET events does the Maverick SDK actually expose** (raw coords vs semantic GazeIntent
+   vs only high-level actions), and at what latency/confidence? This determines how much of the
+   resolver's gaze handling is native vs synthesized, and how aggressive the G9 degradation
+   must be. **(spec §18)**
+4. **Panic-stop mechanism** — hardware button vs gesture vs phone; reliability and discover-
+   ability for the fatigue/motor cohort. Needed before L4/L5 are buildable.
+5. **Interaction-cost budgets** — concrete target numbers for acts-per-task and gaze-dwell-time
+   per representative flow (the proxies are defined; the thresholds need the collaborator's
+   lived-experience input to set).
+6. **Smooth-pursuit / Orbit selection geometry** — adopt as the calibration-light default? FTO-
+   review against the bundle, and Peter's Eyefluence input on comfort/avoid-patterns (§6.6).
+
+### Top 3 for the user (Peter)
+- **Q1 — implement post-#330?** Sequencing the substrate's implementation against the #330
+  Phase-3 reshape is the biggest planning decision and blocks scheduling.
+- **Q3 — SDK ET event model.** The single largest source of "assumption-to-verify" risk; it
+  shapes the resolver, the G9 degradation depth, and how faithful the sim path is.
+- **Q6 — smooth-pursuit/Orbit as default + Eyefluence FTO review.** Your Eyefluence expertise
+  is needed both for the lowest-fatigue selection pattern and for the patent-posture check
+  before any new gaze-activation geometry lands in the shared widget layer.
+
+---
+
+*Cross-references:* `app-prd-caption-lantern.md`, `app-prd-voice-lantern.md`,
+`app-prd-sentinel-lantern.md`, `app-prd-concordance-lens.md` (apps reference this substrate
+for Input/Intent/Safety-Gate/Risk-Levels, redundant binding, modes, Confirm/Cancel/Undo, and
+the Status Bead — they must not redefine them). Foundational: `goals-and-guidelines.md`,
+`source-spec-lantern-stack-v0.1.md`, `collaborator-and-codesign.md`,
+`docs/pme-eye-ui/plan-kmp-cross-platform.md`, root `CLAUDE.md`.

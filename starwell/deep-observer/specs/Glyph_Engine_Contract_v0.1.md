@@ -232,7 +232,7 @@ These names are mathematical/design lenses, not claims of literal proof:
 
 ### Boundary
 
-The liquid glyph is experimental and theoretical. It visualises changing relationships and possible correlations. It does not prove causality by itself.
+The liquid glyph visualises changing relationships and correlations. It is not a causality proof.
 
 ## Engine 3: Astrolabe / Orrery Glyph
 
@@ -258,7 +258,7 @@ Show layered celestial/instrument relationships in a spatial form that can be tu
 
 ### Boundary
 
-This engine expresses relationships spatially. It does not replace direct measurement.
+This engine expresses relationships spatially. Direct measurement is a separate responsibility.
 
 ## Event candidate rules
 

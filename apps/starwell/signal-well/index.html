@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#020609" />
+    <meta name="description" content="STARWELL Signal Well: live Radio JOVE listening, local radio astronomy waterfall analysis, and human-led candidate sifting." />
+    <title>STARWELL Signal Well</title>
+    <style>
+      .signal-live-observatory{width:min(1440px,calc(100% - 2rem));margin:1rem auto 2rem;padding:1rem;border:1px solid rgba(231,196,119,.28);border-radius:24px;background:linear-gradient(145deg,rgba(2,6,9,.96),rgba(9,25,28,.92));color:#f7efd9;box-shadow:0 22px 70px rgba(0,0,0,.34)}
+      .signal-live-heading{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;align-items:end;margin-bottom:.8rem}
+      .signal-live-heading p{margin:0;color:rgba(247,239,217,.66);line-height:1.45}.signal-live-heading h2{margin:.12rem 0;color:#e7c477;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.6rem,4vw,2.7rem)}
+      .signal-live-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.48rem .72rem;border:1px solid rgba(109,224,179,.34);border-radius:999px;background:rgba(109,224,179,.09);color:#a7f0d4;font-weight:800;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}.signal-live-badge:before{content:"";width:.58rem;height:.58rem;border-radius:50%;background:#6de0b3;box-shadow:0 0 14px #6de0b3}
+      .signal-live-frame{position:relative;overflow:hidden;width:100%;aspect-ratio:16/9;border:1px solid rgba(231,196,119,.22);border-radius:18px;background:#000}.signal-live-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+      .signal-live-meta{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.75rem}.signal-live-meta span,.signal-live-meta a{padding:.42rem .65rem;border:1px solid rgba(231,196,119,.18);border-radius:999px;background:rgba(255,255,255,.04);color:rgba(247,239,217,.82);font-size:.78rem;text-decoration:none}.signal-live-meta a:hover{border-color:rgba(231,196,119,.55);color:#fff2b8}
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <section class="signal-live-observatory" aria-labelledby="radio-jove-live-title">
+      <div class="signal-live-heading">
+        <div>
+          <p>Bundled live adapter · NASA Radio JOVE Project</p>
+          <h2 id="radio-jove-live-title">Radio JOVE Live Observatory</h2>
+          <p>Live spectrograph across 16–24 MHz with radio audio centred near 20.1 MHz.</p>
+        </div>
+        <span class="signal-live-badge">Live listening</span>
+      </div>
+      <div class="signal-live-frame">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/live_stream?channel=UCtawz3MnMBwjz9ShhSC0ygQ&amp;rel=0"
+          title="Radio JOVE live spectrograph and audio"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <div class="signal-live-meta">
+        <span>Station: K4LED / Larry Dodd</span>
+        <span>Spectrograph: 16–24 MHz</span>
+        <span>Audio: 20.1 MHz</span>
+        <a href="https://radiojove.gsfc.nasa.gov/" target="_blank" rel="noreferrer">Radio JOVE source</a>
+        <a href="https://youtube.com/channel/UCtawz3MnMBwjz9ShhSC0ygQ/live" target="_blank" rel="noreferrer">Open live channel</a>
+      </div>
+    </section>
+    <script type="module" src="../src/signal-well-main.jsx"></script>
+  </body>
+</html>

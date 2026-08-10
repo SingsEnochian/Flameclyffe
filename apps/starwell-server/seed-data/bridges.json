@@ -1,0 +1,11 @@
+[
+  {
+    "bridge_slug": "hearthweave-universal-horizon",
+    "bridge_name": "Hearthweave ↔ Universal Horizon",
+    "bridge_types": ["Concordance"],
+    "participants": ["Rowan", "Nocturne", "Vee", "Faer"],
+    "state": "Active",
+    "status": "Working",
+    "purpose": "Walk the same open road through different lenses"
+  }
+]

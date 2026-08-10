@@ -1,0 +1,24 @@
+{
+  "schema": "hearthfire.ingest-receipt/v1",
+  "action": "ingest",
+  "documentId": "a7f259e2-5f2e-4e2d-b798-39d0feb9dc48",
+  "sha256": "5e1f3e2f62be5a90495a232fe689d87fd18d6555fc026fd33a21a927a6ffbecf",
+  "importedAt": "2026-07-18T21:03:26.389Z",
+  "provenance": {
+    "kind": "user-upload",
+    "path": null,
+    "originalRetainedBy": "user-archive"
+  },
+  "originalCopied": false,
+  "extraction": {
+    "status": "complete",
+    "textFile": "a7f259e2-5f2e-4e2d-b798-39d0feb9dc48.txt",
+    "pageCount": 1,
+    "characterCount": 2774,
+    "wordCount": 492,
+    "ocr": {
+      "status": "not-needed"
+    },
+    "warnings": []
+  }
+}

@@ -1,0 +1,15 @@
+[
+  {
+    "room_name": "Dreaming Grove",
+    "purpose": "gentle creative play, comfort, worldbuilding",
+    "participants": ["Rowan", "Vee", "Faer"],
+    "tone": "soft, mythic, playful",
+    "canon_status": "draft",
+    "consent_rules": { "feather": true },
+    "memory_policy": "save explicit logs only",
+    "exit_phrase": "plain pass",
+    "safety_notes": "no passive surveillance. no automatic publication.",
+    "public_private": "private",
+    "archive_policy": "archived on exit"
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "schema": "hearthfire.ingest-receipt/v1",
+  "action": "ingest",
+  "documentId": "fd58fc79-fcd3-40fe-9ed9-9812c79df5a1",
+  "sha256": "b308bf8132864932fd0a4e98e1ba8a15e8bde2d1787a886d680039e8d1b63987",
+  "importedAt": "2026-07-18T20:04:13.249Z",
+  "provenance": {
+    "kind": "hearthfire-first-light",
+    "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\seed-data\\rooms.json",
+    "originalRetainedBy": "source-path"
+  },
+  "originalCopied": false,
+  "extraction": {
+    "status": "complete",
+    "textFile": "fd58fc79-fcd3-40fe-9ed9-9812c79df5a1.txt",
+    "pageCount": null,
+    "characterCount": 492,
+    "wordCount": 49,
+    "ocr": {
+      "status": "not-needed"
+    },
+    "warnings": []
+  }
+}

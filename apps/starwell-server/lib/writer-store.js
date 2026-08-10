@@ -25,21 +25,56 @@ function createWriterStore({ dataDir }) {
     }
   }
 
+  function cleanExtended(input, existing = {}) {
+    const src = (typeof input.extendedMeta === 'object' && input.extendedMeta !== null)
+      ? input.extendedMeta
+      : (typeof existing.extendedMeta === 'object' && existing.extendedMeta !== null ? existing.extendedMeta : {});
+    const str = (key, max = 2000) => String(src[key] ?? '').slice(0, max);
+    return {
+      // narrative
+      pointOfView: str('pointOfView', 80) || String(input.pointOfView ?? existing.pointOfView ?? 'first person').slice(0, 80),
+      tense: str('tense', 80) || String(input.tense ?? existing.tense ?? 'past').slice(0, 80),
+      // character
+      characterName: str('characterName', 240),
+      characterAliases: str('characterAliases', 240),
+      characterSpecies: str('characterSpecies', 240),
+      characterFaction: str('characterFaction', 240),
+      characterRelationships: str('characterRelationships', 4000),
+      // world
+      worldEra: str('worldEra', 240),
+      worldCategory: str('worldCategory', 240),
+      // dr practice
+      targetState: str('targetState', 4000),
+      bridgePhrases: str('bridgePhrases', 4000),
+      affirmationAnchors: str('affirmationAnchors', 4000),
+      realityMarkers: str('realityMarkers', 4000),
+      sessionType: str('sessionType', 80),
+      // starwell / observation
+      observationDate: str('observationDate', 80),
+      celestialContext: str('celestialContext', 4000),
+      instrument: str('instrument', 240),
+      epistemicStatus: str('epistemicStatus', 80),
+      rawObservation: str('rawObservation', 20000),
+      // snippet
+      snippetContext: str('snippetContext', 2000),
+    };
+  }
+
   function clean(input, existing = {}) {
     const now = new Date().toISOString();
+    const extended = cleanExtended(input, existing);
     return {
       id: existing.id || crypto.randomUUID(),
       title: String(input.title ?? existing.title ?? 'Untitled').slice(0, 240),
       documentType: String(input.documentType ?? existing.documentType ?? 'story').slice(0, 80),
       continuity: String(input.continuity ?? existing.continuity ?? '').slice(0, 240),
       tone: String(input.tone ?? existing.tone ?? '').slice(0, 240),
-      pointOfView: String(input.pointOfView ?? existing.pointOfView ?? 'first person').slice(0, 80),
-      tense: String(input.tense ?? existing.tense ?? 'past').slice(0, 80),
       status: String(input.status ?? existing.status ?? 'draft').slice(0, 80),
       synopsis: String(input.synopsis ?? existing.synopsis ?? '').slice(0, 12000),
       canonNotes: String(input.canonNotes ?? existing.canonNotes ?? '').slice(0, 20000),
       tags: Array.isArray(input.tags) ? input.tags.map(String).map(x => x.trim()).filter(Boolean).slice(0, 80) : (existing.tags || []),
       content: String(input.content ?? existing.content ?? ''),
+      extendedMeta: extended,
       sourceDocumentId: input.sourceDocumentId ?? existing.sourceDocumentId ?? null,
       sourceSha256: input.sourceSha256 ?? existing.sourceSha256 ?? null,
       sourceName: input.sourceName ?? existing.sourceName ?? null,

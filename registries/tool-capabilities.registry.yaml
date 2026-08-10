@@ -1,0 +1,234 @@
+# Hearthfire Tool Capabilities Registry
+# Defines every tool a recipe may call. Tools are whitelisted here before any recipe can use them.
+# No model goes directly from HuggingFace into autonomous tool access.
+# consentScope: the maximum scope under which this tool may be called
+# live: true  → reaches an external network endpoint
+# pii: true   → may handle personally identifying information — requires consent layer
+
+schema: hearthfire.tool-capabilities.registry/v1
+version: "0.1.0"
+updatedAt: "2026-07-19T00:00:00Z"
+
+tools:
+
+  # ─── EARTH SIGNAL / LIVE DATA ─────────────────────────────────────────────
+
+  - id: noaa-solar-wind
+    label: NOAA DSCOVR Solar Wind (Magnetic)
+    description: Real-time solar wind magnetic field data from DSCOVR, 1-minute cadence. Bz component is the primary geomagnetic driver.
+    endpoint: "https://services.swpc.noaa.gov/json/rtsw/rtsw_mag_1m.json"
+    live: true
+    pii: false
+    epistemicStatus: established-science
+    updateFrequencySeconds: 60
+    consentScope: local-only
+    outputSchema: raw-json
+    notes: No API key required. Public NOAA endpoint. Cache at 60s minimum.
+
+  - id: noaa-kp
+    label: NOAA Planetary K-index
+    description: Geomagnetic disturbance index (0–9). Kp≥5 indicates geomagnetic storm.
+    endpoint: "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
+    live: true
+    pii: false
+    epistemicStatus: established-science
+    updateFrequencySeconds: 180
+    consentScope: local-only
+    outputSchema: raw-json
+
+  - id: noaa-sunspots
+    label: NOAA Sunspot Report
+    description: Daily sunspot number and smoothed 12-month average.
+    endpoint: "https://services.swpc.noaa.gov/json/sunspot_report.json"
+    live: true
+    pii: false
+    epistemicStatus: established-science
+    updateFrequencySeconds: 3600
+    consentScope: local-only
+    outputSchema: raw-json
+
+  - id: usgs-seismic
+    label: USGS Significant Earthquakes (30 day)
+    description: GeoJSON feed of significant seismic events in the past 30 days.
+    endpoint: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson"
+    live: true
+    pii: false
+    epistemicStatus: established-science
+    updateFrequencySeconds: 900
+    consentScope: local-only
+    outputSchema: geojson
+
+  - id: gwosc-gw-catalog
+    label: GWOSC Gravitational Wave Event Catalog
+    description: LIGO/Virgo/KAGRA confirmed gravitational wave event catalog (GWTC).
+    endpoint: "https://gwosc.org/eventapi/json/GWTC/"
+    live: true
+    pii: false
+    epistemicStatus: established-science
+    updateFrequencySeconds: 3600
+    consentScope: local-only
+    outputSchema: raw-json
+    notes: Static catalog updated per observing run. Live alerts via GraceDB (not yet registered).
+
+  - id: meeus-lunar
+    label: Meeus Lunar Ephemeris (Computed)
+    description: >
+      Pure JavaScript implementation of Meeus (1998) lunar algorithms.
+      Returns moon phase, illumination, elongation, and waxing/waning status.
+      Computed locally — no network call. Accurate to < 1% for most purposes.
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    outputSchema: structured-json
+    implementedIn: observer-environment.mjs
+
+  - id: starwell-observer-environment
+    label: Starwell Observer Environment Bridge
+    description: >
+      Calls the starwell-server /api/observer/environment endpoint and returns
+      a hearthfire.environment/v1 packet with PREMAQ vector, J-space fiber position,
+      and per-channel live signal data. Aggregates all Earth signal channels.
+    endpoint: "http://localhost:4173/api/observer/environment"
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    updateFrequencySeconds: 60
+    consentScope: local-only
+    outputSchema: "hearthfire.environment/v1"
+
+  # ─── MODEL WORKSPACE / JLENS ──────────────────────────────────────────────
+
+  - id: jlens-workspace-query
+    label: Jacobian Lens Workspace Query
+    description: >
+      Queries the local jlens FastAPI service to read what tokens an open-weight model
+      holds in its internal workspace band (the global workspace mid-layer zone identified
+      by Anthropic jlens research). Available only when a supported open-weight model is
+      loaded and the jlens service is running. Returns null if service unavailable.
+      Claude and other closed models cannot be queried this way.
+    endpoint: "http://localhost:8765/workspace"
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    outputSchema: structured-json
+    notes: Service is optional. Recipes must degrade gracefully if unavailable.
+    requiresService: jlens-service
+
+  # ─── GRAPH & RETRIEVAL ────────────────────────────────────────────────────
+
+  - id: graph-query
+    label: Hearthfire Knowledge Graph Query
+    description: >
+      Query the Hearthfire canonical knowledge graph by node ID, type filter, label search,
+      or typed relationship traversal. Returns nodes, edges, and contextual envelopes.
+      Multi-hop traversal limited to 4 hops by default to contain depth.
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    outputSchema: structured-json
+    status: planned
+    notes: Graph not yet built. Placeholder — implement with graph DB when graph layer exists.
+
+  - id: vector-search
+    label: Hearthfire Vector Search
+    description: >
+      Semantic similarity search over world-aware contextual embeddings.
+      Each indexed chunk carries a contextual envelope (world_id, canonical_status,
+      epistemic_status, entities, motifs, theory_lenses) prepended before embedding.
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    outputSchema: structured-json
+    status: planned
+    notes: Embedding model and index not yet built.
+
+  - id: bm25-search
+    label: BM25 Keyword Search
+    description: Sparse keyword retrieval over the document corpus as a complement to vector search.
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    outputSchema: structured-json
+    status: planned
+
+  - id: discover-tools
+    label: Semantic Tool Discovery
+    description: >
+      Given a query or task description, returns a ranked list of tool IDs from this
+      registry that are most likely to help. Uses embedding similarity over tool
+      descriptions. Recipes call this to dynamically select from the tool registry
+      rather than hard-coding tool lists.
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    outputSchema: structured-json
+    status: planned
+
+  # ─── EXTERNAL RESEARCH ────────────────────────────────────────────────────
+
+  - id: arxiv-search
+    label: arXiv Paper Search
+    description: >
+      Searches arXiv for papers by keyword or arXiv category. Returns structured
+      metadata (title, authors, abstract, arXiv ID, date). Does not retrieve full PDFs.
+      Useful for Theory Lens Steward to check whether a speculative theory has
+      any measurable-observable backing in the literature.
+    endpoint: "https://export.arxiv.org/api/query"
+    live: true
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    outputSchema: atom-xml
+    notes: Publicly available. No auth required. Rate limit politely — 1 request / 3 seconds.
+
+  # ─── MONITOR-ONLY (read, no API) ──────────────────────────────────────────
+
+  - id: schumann-visual-monitor
+    label: Schumann Resonance Visual Monitor (no API)
+    description: >
+      No public Schumann resonance API exists. Physical Schumann measurements are available
+      only at research station dashboards. The observer-environment.mjs uses a
+      UTC-hour ionospheric lightning activity model as a computed proxy.
+      These URLs are for Steward/human reference — not callable by recipes.
+    live: false
+    pii: false
+    epistemicStatus: speculative-theory
+    consentScope: local-only
+    monitorOnly: true
+    monitorUrls:
+      - "https://sosrff.tsu.ru/new/shm.jpg"
+      - "https://www.heartmath.org/research/global-coherence/gcms-live-data/"
+
+  - id: radio-telescope-monitor
+    label: Radio Telescope / Pulsar Timing Arrays (no live API)
+    description: >
+      NANOGrav and IPTA pulsar timing array data are not available via real-time API.
+      The NANOGrav 15yr stochastic background (h_c~2.4e-15) is used as a fixed anchor.
+      Live radio telescope access requires institutional allocation — not callable by recipes.
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    monitorOnly: true
+    monitorUrls:
+      - "https://nanograv.org/data"
+
+  - id: intermagnet-monitor
+    label: INTERMAGNET Global Geomagnetic Observatory Network (no live API)
+    description: >
+      Real-time geomagnetic field data from the global INTERMAGNET network.
+      Data is available in near-real-time but not via a simple unauthenticated JSON API.
+      NOAA Kp serves as the live proxy. INTERMAGNET is for Steward-level verification.
+    live: false
+    pii: false
+    epistemicStatus: established-science
+    consentScope: local-only
+    monitorOnly: true
+    monitorUrls:
+      - "https://intermagnet.org/data-donnee/download-minute.php"

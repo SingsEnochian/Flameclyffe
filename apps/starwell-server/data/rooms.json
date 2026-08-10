@@ -28,15 +28,15 @@
     "public_private": "private",
     "archive_policy": "archived on exit",
     "metrics": {
-      "P": 0.58,
-      "C": 0.52,
-      "R": 0.71,
-      "E": 0.64,
-      "M": 0.48,
+      "P": 0.64,
+      "C": 0.38,
+      "R": 0.42,
+      "E": 0.72,
+      "M": 0.55,
       "A": 0.61,
-      "Q": 0.59
+      "Q": 0.54
     },
-    "chamberState": "Anchored: Wraithtide Shore",
+    "chamberState": "[claude-haiku] dreaming-grove: \"Boxfire, why's my API wrong?\"",
     "currentPlace": "Wraithtide Shore"
   }
 ]

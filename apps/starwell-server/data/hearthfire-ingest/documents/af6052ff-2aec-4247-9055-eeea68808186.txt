@@ -1,0 +1,199 @@
+# Source spec — Maverick Accessibility Lantern Stack v0.1 (L. Catherine Dion, 2026-06-09)
+
+**This is a faithful capture of the collaborator's own specification**, the authoritative
+statement of *her* product intent. Our `goals-and-guidelines.md` is reconciled against it; where
+the two differ, this doc records what Catherine asked for and the reconciliation note says how we
+resolved it. Original PDF: `lantern-stack-spec-v0.1-source.pdf` (in this folder; also at repo root
+as `Maverick_Accessibility_Lantern_Stack_Spec_v0_1_L_Catherine_Dion.pdf`). Status of the spec itself: shareable draft for expert review; hardware assumptions to
+be verified against the final Maverick SDK + shipping device.
+
+> **Core premise (hers, verbatim):** "gaze is attention, not consent. The system should be quiet
+> until needed, bright when called, and safe by design."
+
+## 1. Project summary
+A gaze-aware accessibility HUD + control layer for Maverick AI Pro, for **hands-reduced,
+low-energy, situationally-constrained** use (when hands, voice, sustained attention, or phone
+interaction may be unavailable). **Eye tracking is NOT a mouse replacement** — gaze is one signal
+in a larger intent model that includes dwell, head movement, touch, voice, timeout, explicit
+confirm, cancel, and contextual safety rules. Three primary apps: **Caption Lantern, Sentinel
+Lantern, Voice Lantern**; a fourth later layer, **Concordance Lens** (contextual overlays / object
+& scene help / reading / multimodal AI), is **not required for MVP**.
+
+## 2. Product goals
+Glanceable live captions; low-effort caption actions (repeat/pause/enlarge/dim/pin/clear);
+non-emergency room control with explicit confirm + undo/cancel; aid/caregiver escalation with
+stronger confirmation + visible status; route AI/assistant voices through phone/glasses/Shokz/
+BAHA/hearing aids while showing matching captions; simulator-friendly dev before hardware;
+local-first + privacy-protective; avoid accidental activations, clutter, motion fatigue, alert
+overload.
+
+## 3. Non-goals (v1)
+Not a full OS / full AR world / medical device / emergency medical response / always-on
+surveillance. No always-on camera. No default storage of captions/audio/camera/sensitive history.
+**No emergency escalation, caregiver contact, device actuation, or room control from gaze alone.**
+No long staring / head-still / repeated precise eye movements / high visual stimulation. No
+assumption of perfect calibration, lighting, posture, or device fit.
+
+## 4. Target users
+**Primary:** limited hand mobility; post-surgery/injury recovery; chronically ill (fatigue/pain/
+fluctuating capacity); Deaf/HoH wanting captions; people who want quick repeat/pause/enlarge
+without a phone; bedbound/reclined/low-movement; users who sometimes can't speak clearly/
+consistently. **Secondary:** caregivers/household receiving explicit aid notifications; developers
+testing gaze-aware workflows; smart-glasses early adopters.
+
+## 5. Design principles
+- **5.1 Gaze is attention, not consent.** Gaze may be focus/curiosity/accidental fixation; never
+  permission for important actions. Any external-consequence action needs an additional confirm.
+  (External-consequence examples: calling someone, Alexa Drop In, caregiver alert, appliances
+  on/off, emergency flow, persistent settings, recording/storing data.)
+- **5.2 Low fatigue first.** Minimise sustained fixation, repetitive dwell, small targets, clutter,
+  context switching. Prefer large targets, short decision paths, forgiving timeouts, easy escapes.
+- **5.3 Quiet by default.** HUD appears only when useful. Captions + critical status may persist;
+  menus/overlays stay tucked until summoned by gaze/touch/head/voice.
+- **5.4 Confirm, Cancel, Undo.** Every risky/external action: visible confirmation state; clear
+  cancel path; timeout that safely dismisses; undo where practical; visible "what just happened."
+- **5.5 Local-first privacy.** Prefer local state; cloud calls explicit, minimal, visible; no
+  hidden telemetry / silent cloud logging / default storage of caption/audio/camera data.
+- **5.6 Simulator first, hardware honest.** Phone/web simulator mimics gaze, head movement, HUD
+  rendering, safety flows before glasses; final comfort/accuracy/latency claims need real hardware.
+
+## 6. Hardware & SDK assumptions (to verify)
+Target: Maverick AI Pro. Assumes: full-colour in-lens/visor HUD; iOS + Android companion dev; SDK
+supports rendering, UI-kit elements, sensor access, LOS/head-orientation, simulator, native dev
+tooling; **Maverick may expose native eye-tracking or "GazeIntent"-style interaction**; constrained
+display (compact/high-contrast/glanceable); battery/brightness/heat/connectivity/outdoor-readability
+are design constraints; **must degrade gracefully when eye tracking is unavailable/unstable/not yet
+exposed.** Fallback inputs: touch controller, phone tap, head orientation/LOS, voice, external
+switch/accessibility button, timed confirmation, caregiver/companion-app confirmation for protected
+flows.
+
+## 7. System architecture (adapter-based)
+**Core layers:** Input Layer (gaze, LOS/head, touch, voice, phone taps, switches, simulator) ->
+**Intent Resolver** (combines inputs into high-confidence intent; gaze alone only focuses/previews;
+confirmation needs an explicit second signal or safe dwell per risk) -> **Safety Gate** (classifies
+by risk level; enforces confirm/cancel/timeout/logging) -> HUD Renderer -> App Modules -> Local
+State Store -> External Service Adapters (STT, TTS, AI, smart-home, contacts, caregiver
+notifications, emergency) -> Simulator.
+**Data model:** `UserSettings` (caption_font_size, caption_contrast_mode, caption_window_position,
+hud_brightness, interaction_mode, confirmation_mode, audio_output_route, privacy_mode,
+safe_contacts, room_devices, emergency_enabled, cloud_services_enabled); `CaptionSession`
+(session_id, started_at, source, is_recording_allowed, transcript_storage_policy,
+current_caption_buffer, pinned_lines, paused_state); `VoiceRoute` (route_id, voice_name,
+audio_output, caption_mirror_enabled, latency_status, volume, fallback_route); `ActionIntent`
+(intent_id, source_signal, target_action, risk_level, confidence, requires_confirmation,
+expires_at, cancel_available, confirmed_at); `SafetyEvent` (event_id, action, risk_level,
+confirmation_method, result, timestamp, local_only).
+
+## 8. Risk levels (the Safety Gate taxonomy — load-bearing)
+- **L0 Passive HUD** — show captions/status, preview menu, highlight a control. No confirm; easy
+  to dismiss.
+- **L1 Local UI change** — enlarge/dim/move/pause/clear captions. Simple confirm OK; undo
+  preferred; timeout dismisses menus.
+- **L2 Local device/audio action** — switch audio route, replay voice, change volume, pin
+  transcript locally. Confirm if persistent; clear feedback; undo/revert.
+- **L3 Room control** — light/fan on/off (coffee-maker etc. only if safety constraints met).
+  Two-step confirm; visible target name; countdown/cancel; undo where possible; **no gaze-only
+  activation; device safety rules required.**
+- **L4 Aid/caregiver flow** — Alexa Drop In, call caregiver, send "I need help." Strong confirm;
+  visible recipient; cancel countdown; post-action visible status; **no silent triggering; no
+  gaze-only.**
+- **L5 Emergency flow** — emergency contact/services escalation (if ever built). Very strong
+  confirm unless manually configured; distinct UI; audible/visible countdown; cancel path;
+  post-action status; clear config + testing mode. **Must not claim medical/emergency reliability
+  without validation.**
+
+## 9. Interaction model
+- **Gaze focus** highlights / expands tooltip / makes selectable — does NOT activate high-risk.
+- **Selection options:** short dwell (low-risk only); gaze+touch; gaze+head-nod; gaze+voice; phone
+  tap; external switch; two-stage dwell only for low-risk and only if comfort-testing supports it.
+- **Confirmation patterns:** low-risk = focus + dwell/tap + immediate result + undo snackbar;
+  medium = focus + confirmation card + confirm via touch/voice/second deliberate action, cancel by
+  looking away/tap/timeout; high = focus + protected confirmation card showing recipient/device/
+  action + countdown + explicit confirm signal + cancel until final execution.
+- **Cancel patterns:** look away for an interval; blink/gesture (only if reliable); touch cancel;
+  voice "cancel"; phone cancel; timeout; emergency-stop gesture/hardware button.
+
+## 10. HUD UX
+- **Default HUD** minimal: caption window + small **status bead** + optional audio-route indicator
+  + optional privacy indicator. No persistent full menu unless requested.
+- **Status bead** may show: glasses connection, battery, mic/caption active, privacy mode, audio
+  route, safety lock, caregiver-flow state. Small/readable/non-distracting; expands only on focus.
+- **Caption window controls:** repeat last / pause-resume / enlarge / dim / pin / clear / move /
+  hide temporarily / privacy mode. **Caption design:** readable at small FOV, high contrast, low
+  flicker, configurable size/position, no rapid flashing, avoid blocking the real-world view, short
+  caption history, "repeat last" without storing full transcript by default.
+- **Menus:** radial / strip / card per SDK constraints; no tiny buttons; clear focus states; no
+  ambiguous activation zones.
+
+## 11-14. App modules
+- **Caption Lantern** — live captions + gaze-aware caption control. *MVP:* live caption from phone
+  mic/approved source, repeat, pause/resume, enlarge/reduce, dim/brighten, pin, clear, privacy-mode
+  indicator, local-only mode. *Later:* speaker labelling, translation, summarise recent
+  conversation, export-only-when-enabled, hearing-device route awareness, context-aware positioning.
+- **Sentinel Lantern** — safety-aware room control + aid flows. *MVP:* lights/fan on/off (if
+  connected & safe), preconfigured "call for help" to trusted contact, Alexa Drop In (if configured),
+  visible safety lock, testing mode. *Safety rules:* no emergency/caregiver flow from gaze alone; no
+  appliance activation without explicit confirm; coffee-maker-class deferred until reliable
+  device-state feedback exists; aid flows need visible recipient confirm; room actions need
+  cancel/timeout. *Later:* caregiver dashboard, routine check-ins, escalation ladder, fall-risk/
+  immobility context (opt-in), smart-home platform integration.
+- **Voice Lantern** — routes assistant/system voices through available audio outputs while mirroring
+  speech as captions. *MVP:* select voice route; output to phone/glasses/Shokz/BAHA/hearing aid/
+  other paired path; show matching captions; repeat last output; volume; fallback route if device
+  disconnects. *Later:* per-voice routing prefs, latency compensation, voice-profile display, offline
+  TTS, caption/audio sync tuning.
+- **Concordance Lens** (later) — read environment text, identify objects, summarise signs/papers/
+  screens, gentle visual prompts, "what am I looking at?", focus-aware AI queries. *Constraints:* no
+  always-on camera, no cloud vision by default, no image storage by default, clear capture indicator,
+  explicit capture/analysis command.
+
+## 15. Privacy & data handling
+Default: don't store audio/captions/camera frames; no cloud unless a feature needs it (explicit);
+clear active-indicators for mic/camera/cloud/external-service; local settings stay local; user can
+delete logs/settings; sensitive logs off by default; dev logs scrubbed of transcript/audio/camera
+unless explicit debug mode.
+
+## 16. Accessibility requirements
+Large text; high contrast; reduced motion; low-brightness mode; **night mode**; one-handed phone
+fallback; no-hands fallback; no-voice fallback; touch fallback; voice fallback; timeout
+customisation; dwell customisation; **calibration retry**; easy pause; easy exit; no strobe/flashing;
+**minimal head-movement mode**; **reclined/bed mode**.
+
+## 17. Development plan (Catherine's)
+Phase 0 Research & PRD; Phase 1 Simulator Prototype (build sim, render caption HUD, simulate gaze
+focus/dwell + LOS/head, safety gate, test controls for repeat/pause/enlarge/dim/pin/clear); Phase 2
+Caption Lantern MVP; Phase 3 Maverick SDK integration (port HUD renderer, map SDK input events,
+validate display/latency/readability/battery/heat); Phase 4 Sentinel Lantern MVP; Phase 5 Voice
+Lantern MVP; Phase 6 Hardware comfort & usability testing (fatigue, accidental activations, tune
+dwell/confirm timings + caption placement, reclined/bed mode, low/bright-light readability).
+*(NB: her plan uses "Phase 0..6"; our internal tracking uses ASCII Phase 1..N under one #NNN per
+the project's task-tracking rule — map when we schedule Lantern implementation.)*
+
+## 18. Key technical questions (hers — many answered by #330 + Peter's Eyefluence input)
+*Maverick/SDK:* what ET events are exposed (raw coords vs semantic GazeIntent vs only high-level
+actions)? display coordinate system? gaze/LOS latency expectations? direct mic/camera stream access?
+persistent overlays? background services? how does the sim work? permissions for display/mic/camera/
+BT/sensors? preferred iOS+Android architecture? local-only apps? companion-phone-service comms?
+*UX:* least-fatiguing gaze actions? selection patterns to avoid? safest confirmation for
+accessibility users? menu behaviour when gaze isn't steady? handling calibration drift? behaviour
+when ET confidence is low? *Safety:* which actions need two-step? preventing accidental caregiver
+calls? testing emergency-like flows without sending real alerts? panic-cancel hardware button/gesture?
+communicating "nothing was sent" vs "alert sent"?
+
+## 19-20. Expert feedback requested / success criteria
+Wants expert review of: ET UI patterns to avoid, dwell-click alternatives, comfortable
+gaze-confirmation models, calibration-drift handling, fatigue/low-mobility patterns, reclined-user
+design, combining gaze+head+touch+voice without overload, simulator strategy, minimum viable gaze-UI
+test harness, hardware constraints likely to matter first. **Success:** a first prototype where a
+user can see readable captions; repeat/pause/enlarge/dim/pin/clear without a phone UI; avoid
+accidental activation; cancel pending actions easily; know when mic/cloud/audio/safety is active; use
+it low-energy; operate in the simulator pre-hardware; with a clear upgrade path to Maverick. *"...less
+like controlling a gadget and more like having a small, reliable accessibility lantern in the user's
+line of sight: quiet until needed, bright when called, and never grabbing the user's hand without
+permission."*
+
+## 21. Reference context
+Catherine cites Peter Milford's **Eyefluence** background (Google acquired Eyefluence, Oct 2016; the
+Voices of VR eye-interaction-model interview; Embedded Vision Summit 2020 speaker bio) as directly
+relevant to the gaze-first accessibility layer. The spec is explicit that no Maverick hardware/SDK
+feature is guaranteed — verify against the final SDK + shipping device.

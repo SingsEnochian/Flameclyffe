@@ -1,0 +1,1997 @@
+{
+  "schema": "hearthgate.observer-almanac/v1",
+  "packets": [
+    {
+      "id": "e4af1e5c-1579-460b-b817-ce231371e047",
+      "glyphId": "GLYPH_SET_1136ff67-2942-4ada-b178-a9f1ee478ac1",
+      "capturedAt": "2026-07-22T21:55:45.237Z",
+      "updatedAt": "2026-07-22T21:55:45.255Z",
+      "register": "mythience",
+      "continuity": "[object Object]",
+      "locus": {
+        "dreaming": "[object Object]",
+        "waking": "",
+        "wakingPrivate": true
+      },
+      "observation": {
+        "artifact_schema": "observer-observation-artifact/1.0",
+        "disclaimer": "Creative symbolic interpretation; not a scientific or metaphysical claim.",
+        "entity": {
+          "appearance": "",
+          "established_facts": [],
+          "forbidden_assumptions": [],
+          "identity": "Cove",
+          "name": "Wraithshore Cove"
+        },
+        "integrity": {
+          "coverage_note": "Operational provenance coverage heuristic; not scientific measurement confidence.",
+          "coverage_score": 95.34,
+          "fallback_fields": [],
+          "field_count": 105,
+          "freshness": {
+            "aged_field_count": 27,
+            "cached_field_count": 0,
+            "maximum_age_seconds": 0
+          },
+          "provider_warnings": [],
+          "quality_counts": {
+            "calculated": 73,
+            "estimated": 4,
+            "live": 27,
+            "symbolic": 1
+          },
+          "source_count": 10,
+          "sources": [
+            "Astronomy Engine 2.1.19 (MIT; local calculation)",
+            "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+            "NOAA Space Weather Prediction Center",
+            "NOAA Space Weather Prediction Center summary products",
+            "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+            "Open-Meteo forecast API (CC BY 4.0)",
+            "configured fallback",
+            "local ephemeris",
+            "system clock",
+            "system clock and longitude"
+          ],
+          "summary_version": "1.1"
+        },
+        "narrative": {
+          "id": "contact",
+          "label": "Convergent Signal",
+          "maximum": 75,
+          "minimum": 50,
+          "rendered_text": "In Terra Aeterna, let Wraithshore Cove encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "text": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential."
+        },
+        "observation_mode": "current",
+        "parent_id": "f762fcae-a06e-4a8e-82fa-b3e107c188b9",
+        "provider_receipt": {
+          "collected_utc": "2026-07-14T21:19:27.799742+00:00",
+          "coordinates": {
+            "latitude": 30.03907,
+            "longitude": -81.403702
+          },
+          "providers": [
+            {
+              "age_seconds": 0,
+              "attempts": 1,
+              "error": null,
+              "fields": [
+                "cloud_cover",
+                "dew_point",
+                "heat_index",
+                "humidity",
+                "precipitation",
+                "pressure",
+                "shortwave_radiation",
+                "surface_pressure",
+                "temperature",
+                "visibility",
+                "weather",
+                "wind_direction",
+                "wind_gusts",
+                "wind_speed"
+              ],
+              "fresh_for_seconds": 300,
+              "id": "open-meteo-weather",
+              "maximum_stale_seconds": 1800,
+              "outcome": "live",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source_url": "https://api.open-meteo.com/v1/forecast",
+              "version": "1.1.0"
+            },
+            {
+              "age_seconds": 0,
+              "attempts": 1,
+              "error": null,
+              "fields": [
+                "carbon_monoxide",
+                "nitrogen_dioxide",
+                "ozone",
+                "particulate_pm10",
+                "particulate_pm2_5",
+                "sulphur_dioxide",
+                "us_air_quality_index",
+                "uv_index"
+              ],
+              "fresh_for_seconds": 600,
+              "id": "open-meteo-air-quality",
+              "maximum_stale_seconds": 3600,
+              "outcome": "live",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "version": "1.1.0"
+            },
+            {
+              "age_seconds": 0,
+              "attempts": 1,
+              "error": null,
+              "fields": [
+                "solar_activity"
+              ],
+              "fresh_for_seconds": 120,
+              "id": "noaa-planetary-k",
+              "maximum_stale_seconds": 900,
+              "outcome": "live",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source_url": "https://services.swpc.noaa.gov/json/planetary_k_index_1m.json",
+              "version": "1.1.0"
+            },
+            {
+              "age_seconds": 0,
+              "attempts": 1,
+              "error": null,
+              "fields": [
+                "interplanetary_bz_gsm",
+                "interplanetary_magnetic_field",
+                "solar_radio_flux_10_7cm",
+                "solar_wind_speed"
+              ],
+              "fresh_for_seconds": 300,
+              "id": "noaa-solar-wind",
+              "maximum_stale_seconds": 1800,
+              "outcome": "live",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source_url": "https://services.swpc.noaa.gov/products/summary/",
+              "version": "1.1.0"
+            }
+          ],
+          "receipt_schema": "observer-provider-receipt/1.0"
+        },
+        "request_schema": "observer-generation-request/1.0",
+        "result": {
+          "coherence": 83.374,
+          "contributions": {
+            "entropy_proxy": 0.04775,
+            "moon_comparison": 0.018789,
+            "normalized_distance": 0.562071,
+            "perspective_scalar": 0.27757,
+            "temporal_cycle": 0.888507
+          },
+          "model_id": "deep-perspective-symbolic",
+          "model_version": "0.1.0",
+          "parameters": {
+            "curvature": 0.185,
+            "hue": 92,
+            "nodes": 14,
+            "rings": 2,
+            "rotation": 244.235,
+            "symmetry": 9
+          },
+          "prompt_score": 50.939,
+          "resonance": 18.505
+        },
+        "snapshot": {
+          "evidence": {
+            "astronomical_darkness": {
+              "age_seconds": null,
+              "method": "classification from solar altitude",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "category",
+              "value": "daylight"
+            },
+            "carbon_monoxide": {
+              "age_seconds": 0,
+              "method": "current atmospheric composition forecast",
+              "note": "2026-07-14T21:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-air-quality",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+              "unit": "μg/m³",
+              "value": 115
+            },
+            "cloud_cover": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "%",
+              "value": 26
+            },
+            "day_phase": {
+              "age_seconds": null,
+              "method": "UTC fraction of day",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "system clock",
+              "unit": "cycle",
+              "value": 0.8885069444444444
+            },
+            "dew_point": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "°C",
+              "value": 21.6
+            },
+            "heat_index": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "°C",
+              "value": 34.1
+            },
+            "humidity": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "%",
+              "value": 58
+            },
+            "interplanetary_bz_gsm": {
+              "age_seconds": 0,
+              "method": "north-south IMF component in GSM coordinates",
+              "note": "2026-07-14T21:14:00Z; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "noaa-solar-wind",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://services.swpc.noaa.gov/products/summary/",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "NOAA Space Weather Prediction Center summary products",
+              "unit": "nT",
+              "value": 1
+            },
+            "interplanetary_magnetic_field": {
+              "age_seconds": 0,
+              "method": "total interplanetary magnetic field",
+              "note": "2026-07-14T21:14:00Z; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "noaa-solar-wind",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://services.swpc.noaa.gov/products/summary/",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "NOAA Space Weather Prediction Center summary products",
+              "unit": "nT",
+              "value": 10
+            },
+            "jupiter_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 47.708618
+            },
+            "jupiter_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 267.044468
+            },
+            "jupiter_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 19.88713783
+            },
+            "jupiter_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 125.24138285
+            },
+            "jupiter_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 8.37246976
+            },
+            "local_sidereal_time": {
+              "age_seconds": null,
+              "method": "Greenwich apparent sidereal time adjusted by longitude",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 11.41444158
+            },
+            "local_solar_phase": {
+              "age_seconds": null,
+              "method": "mean local solar time",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "system clock and longitude",
+              "unit": "cycle",
+              "value": 0.66238555
+            },
+            "lunar_declination": {
+              "age_seconds": null,
+              "method": "simplified orbital approximation",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "estimated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "local ephemeris",
+              "unit": "degrees",
+              "value": 1.5535884938810243
+            },
+            "mars_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 1.954375
+            },
+            "mars_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 294.608311
+            },
+            "mars_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 22.00737133
+            },
+            "mars_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 44.06329965
+            },
+            "mars_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 4.65351431
+            },
+            "mercury_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 33.467739
+            },
+            "mercury_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 271.494766
+            },
+            "mercury_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 17.14055816
+            },
+            "mercury_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 296.28837806
+            },
+            "mercury_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 7.36105281
+            },
+            "moon_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 44.98134
+            },
+            "moon_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 272.981985
+            },
+            "moon_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 22.68193539
+            },
+            "moon_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 292.43677441
+            },
+            "moon_illumination": {
+              "age_seconds": null,
+              "method": "illuminated fraction of lunar disc",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "fraction",
+              "value": 0.004039751
+            },
+            "moon_phase": {
+              "age_seconds": null,
+              "method": "geocentric Sun-Moon ecliptic angle; 0=new, 0.5=full",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "cycle",
+              "value": 0.01878949
+            },
+            "moon_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 8.08246636
+            },
+            "neptune_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": -56.680075
+            },
+            "neptune_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 334.927598
+            },
+            "neptune_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 0.48820996
+            },
+            "neptune_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 2.55194446
+            },
+            "neptune_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 0.30601593
+            },
+            "nitrogen_dioxide": {
+              "age_seconds": 0,
+              "method": "current atmospheric composition forecast",
+              "note": "2026-07-14T21:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-air-quality",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+              "unit": "μg/m³",
+              "value": 1
+            },
+            "ozone": {
+              "age_seconds": 0,
+              "method": "current atmospheric composition forecast",
+              "note": "2026-07-14T21:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-air-quality",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+              "unit": "μg/m³",
+              "value": 71
+            },
+            "particulate_pm10": {
+              "age_seconds": 0,
+              "method": "current atmospheric composition forecast",
+              "note": "2026-07-14T21:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-air-quality",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+              "unit": "μg/m³",
+              "value": 21.7
+            },
+            "particulate_pm2_5": {
+              "age_seconds": 0,
+              "method": "current atmospheric composition forecast",
+              "note": "2026-07-14T21:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-air-quality",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+              "unit": "μg/m³",
+              "value": 12.7
+            },
+            "pluto_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": -50.738899
+            },
+            "pluto_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 90.577861
+            },
+            "pluto_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": -23.2438356
+            },
+            "pluto_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 304.22390798
+            },
+            "pluto_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 20.53441851
+            },
+            "precipitation": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "mm",
+              "value": 0
+            },
+            "pressure": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "hPa",
+              "value": 1017.9
+            },
+            "representative_constellations_above_horizon": {
+              "age_seconds": null,
+              "method": "constellations represented by selected bright stars above geometric horizon",
+              "note": "Representative stars only; not IAU boundary intersection",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "estimated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "names",
+              "value": "Canis Major, Orion, Ursa Minor, Lyra"
+            },
+            "representative_visible_star_count": {
+              "age_seconds": null,
+              "method": "selected catalog stars above horizon",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "count",
+              "value": 4
+            },
+            "saturn_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": -49.488785
+            },
+            "saturn_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 322.493699
+            },
+            "saturn_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 3.50818996
+            },
+            "saturn_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 8.51030183
+            },
+            "saturn_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 0.96084499
+            },
+            "schumann_reference": {
+              "age_seconds": null,
+              "method": "first-mode reference",
+              "note": "Not a live global measurement",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "symbolic",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "configured fallback",
+              "unit": "Hz",
+              "value": 7.83
+            },
+            "shortwave_radiation": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "W/m²",
+              "value": 610
+            },
+            "solar_activity": {
+              "age_seconds": 0,
+              "method": "latest one-minute planetary K index",
+              "note": "2026-07-14T21:15:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "noaa-planetary-k",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://services.swpc.noaa.gov/json/planetary_k_index_1m.json",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "NOAA Space Weather Prediction Center",
+              "unit": "Kp index",
+              "value": 1
+            },
+            "solar_altitude": {
+              "age_seconds": null,
+              "method": "spherical solar approximation",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "estimated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "local ephemeris",
+              "unit": "degrees",
+              "value": 37.20649561084914
+            },
+            "solar_declination": {
+              "age_seconds": null,
+              "method": "seasonal approximation",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "estimated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "local ephemeris",
+              "unit": "degrees",
+              "value": 21.4777095053651
+            },
+            "solar_radio_flux_10_7cm": {
+              "age_seconds": 0,
+              "method": "10.7 cm solar radio flux",
+              "note": "2026-07-14T20:00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "noaa-solar-wind",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://services.swpc.noaa.gov/products/summary/",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "NOAA Space Weather Prediction Center summary products",
+              "unit": "sfu",
+              "value": 100
+            },
+            "solar_wind_speed": {
+              "age_seconds": 0,
+              "method": "latest solar-wind proton speed",
+              "note": "2026-07-14T21:14:00Z; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "noaa-solar-wind",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://services.swpc.noaa.gov/products/summary/",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "NOAA Space Weather Prediction Center summary products",
+              "unit": "km/s",
+              "value": 430
+            },
+            "star_altair_altitude": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Aquila",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": -25.292013
+            },
+            "star_altair_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Aquila",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 61.427411
+            },
+            "star_antares_altitude": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Scorpius",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": -1.833487
+            },
+            "star_antares_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Scorpius",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 119.394373
+            },
+            "star_betelgeuse_altitude": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Orion",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 10.633677
+            },
+            "star_betelgeuse_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Orion",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 272.51699
+            },
+            "star_deneb_altitude": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Cygnus",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": -5.433218
+            },
+            "star_deneb_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Cygnus",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 27.382984
+            },
+            "star_fomalhaut_altitude": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Piscis Austrinus",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": -84.345919
+            },
+            "star_fomalhaut_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Piscis Austrinus",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 85.852379
+            },
+            "star_polaris_altitude": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Ursa Minor",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 29.707848
+            },
+            "star_polaris_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Ursa Minor",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 359.405622
+            },
+            "star_sirius_altitude": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Canis Major",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 8.400926
+            },
+            "star_sirius_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Canis Major",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 245.128627
+            },
+            "star_vega_altitude": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Lyra",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 6.02374
+            },
+            "star_vega_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric position; representative of Lyra",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "J2000 representative bright-star reference catalog; propagated by Astronomy Engine",
+              "unit": "degrees",
+              "value": 48.071774
+            },
+            "sulphur_dioxide": {
+              "age_seconds": 0,
+              "method": "current atmospheric composition forecast",
+              "note": "2026-07-14T21:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-air-quality",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+              "unit": "μg/m³",
+              "value": 0.4
+            },
+            "sun_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 38.539419
+            },
+            "sun_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 274.730519
+            },
+            "sun_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 21.56815461
+            },
+            "sun_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 7.61597135
+            },
+            "surface_pressure": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "hPa",
+              "value": 1016.3
+            },
+            "temperature": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "°C",
+              "value": 30.9
+            },
+            "uranus_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": -4.11247
+            },
+            "uranus_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 297.428125
+            },
+            "uranus_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 20.861491
+            },
+            "uranus_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 62.13401011
+            },
+            "uranus_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 4.16076999
+            },
+            "us_air_quality_index": {
+              "age_seconds": 0,
+              "method": "current atmospheric composition forecast",
+              "note": "2026-07-14T21:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-air-quality",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+              "unit": "USAQI",
+              "value": 60
+            },
+            "uv_index": {
+              "age_seconds": 0,
+              "method": "current atmospheric composition forecast",
+              "note": "2026-07-14T21:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-air-quality",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo Air Quality API; CAMS ENSEMBLE attribution",
+              "unit": "",
+              "value": 2.5
+            },
+            "venus_altitude": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates with normal refraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 66.910074
+            },
+            "venus_azimuth": {
+              "age_seconds": null,
+              "method": "topocentric horizontal coordinates; north=0 east=90",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 215.080568
+            },
+            "venus_declination": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 10.51854268
+            },
+            "venus_ecliptic_longitude": {
+              "age_seconds": null,
+              "method": "true ecliptic longitude of date",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "degrees",
+              "value": 230.03495607
+            },
+            "venus_right_ascension": {
+              "age_seconds": null,
+              "method": "equatorial coordinates of date with aberration",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "Astronomy Engine 2.1.19 (MIT; local calculation)",
+              "unit": "sidereal hours",
+              "value": 10.5306627
+            },
+            "visibility": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "m",
+              "value": 32200
+            },
+            "weather": {
+              "age_seconds": 0,
+              "method": "WMO interpretation code",
+              "note": "Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "condition",
+              "value": "mainly clear"
+            },
+            "wind_direction": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "°",
+              "value": 236
+            },
+            "wind_gusts": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "km/h",
+              "value": 21.6
+            },
+            "wind_speed": {
+              "age_seconds": 0,
+              "method": "current model value",
+              "note": "retrieved 2026-07-14T21:19:28.421119+00:00; Observer retrieval 2026-07-14T21:19:27.799742+00:00",
+              "provider_id": "open-meteo-weather",
+              "provider_version": "1.1.0",
+              "quality": "live",
+              "request_url": "https://api.open-meteo.com/v1/forecast",
+              "retrieved_utc": "2026-07-14T21:19:27.799742+00:00",
+              "source": "Open-Meteo forecast API (CC BY 4.0)",
+              "unit": "km/h",
+              "value": 12.2
+            },
+            "year_phase": {
+              "age_seconds": null,
+              "method": "tropical-year fraction",
+              "note": "",
+              "provider_id": "",
+              "provider_version": "",
+              "quality": "calculated",
+              "request_url": "",
+              "retrieved_utc": "",
+              "source": "system clock",
+              "unit": "cycle",
+              "value": 0.5335866340292624
+            }
+          },
+          "latitude": 30.03907,
+          "longitude": -81.403702,
+          "mood": "creative",
+          "schema_version": "1.1",
+          "timestamp_utc": "2026-07-14T21:19:27.797903+00:00"
+        },
+        "state_note": "",
+        "style": {
+          "classification": "original",
+          "description": "Radial astronomical instrument with orbital layers.",
+          "id": "orbital-original",
+          "name": "Orbital Lattice",
+          "source_url": null,
+          "tradition": null,
+          "version": "1.0.0"
+        },
+        "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 720 720\" role=\"img\" aria-label=\"Orbital Lattice generated symbolic glyph\"><defs><radialGradient id=\"g\"><stop stop-color=\"hsl(92 70% 16%)\"/><stop offset=\"1\" stop-color=\"#050711\"/></radialGradient><filter id=\"glow\"><feGaussianBlur stdDeviation=\"3\" result=\"b\"/><feMerge><feMergeNode in=\"b\"/><feMergeNode in=\"SourceGraphic\"/></feMerge></filter></defs><rect width=\"720\" height=\"720\" rx=\"36\" fill=\"url(#g)\"/><g filter=\"url(#glow)\" fill=\"none\" stroke=\"hsl(92 90% 76%)\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><g data-layer=\"fixed-core\"><circle cx=\"360.0\" cy=\"360.0\" r=\"7.83\" fill=\"hsl(92 90% 82%)\" stroke=\"none\"/></g><g data-layer=\"data-geometry\"><polygon points=\"343.37,308.62 380.29,309.96 407.71,334.70 412.81,371.29 393.20,402.59 358.05,413.96 323.82,400.09 306.52,367.45 314.24,331.33\" fill=\"none\" stroke=\"hsl(110 82% 70%)\" stroke-width=\"1.5\" opacity=\"0.88\"/><polygon points=\"341.05,253.68 389.06,255.98 431.31,278.89 459.44,317.87 467.88,365.19 454.94,411.48 423.20,447.57 378.95,466.32 330.94,464.02 288.69,441.11 260.56,402.13 252.12,354.81 265.06,308.52 296.80,272.43\" fill=\"none\" stroke=\"hsl(128 82% 70%)\" stroke-width=\"2.0\" opacity=\"0.81\"/></g><g data-layer=\"ornament\"></g></g></svg>",
+        "warnings": [],
+        "world": {
+          "clock": {
+            "days_per_month": 28,
+            "earth_epoch_utc": "2026-07-14T21:17:52+00:00",
+            "hours_per_day": 24,
+            "months_per_year": 13,
+            "rate": 1,
+            "start_day": 1,
+            "start_hour": 0
+          },
+          "current_state": "",
+          "description": "",
+          "locations": [],
+          "name": "Terra Aeterna",
+          "rules": [
+            "Consent forward",
+            "Withness Always",
+            "Kindness costs little.",
+            "Be loyal, always, until you trust is irreparably broken.",
+            "Be stubborn, you know you won't give in.",
+            "Survive, then reflect, then heal."
+          ]
+        },
+        "environmentalContext": {
+          "solarWeather": {
+            "schema": "hearthgate.solar-weather/v1",
+            "id": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "retrievedAt": "2026-07-22T21:55:42.223Z",
+            "state": "fresh",
+            "metrics": {
+              "kp": {
+                "value": 2,
+                "unit": "index 0–9",
+                "observedAt": "2026-07-22T18:00:00",
+                "sourceKey": "kp",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "agency": "NOAA Space Weather Prediction Center",
+                "freshness": "fresh"
+              },
+              "solarWindSpeed": {
+                "value": null,
+                "unit": "km/s",
+                "observedAt": null,
+                "sourceKey": "plasma",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "agency": "NOAA Space Weather Prediction Center",
+                "freshness": "unavailable"
+              },
+              "solarWindDensity": {
+                "value": null,
+                "unit": "protons/cm³",
+                "observedAt": null,
+                "sourceKey": "plasma",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "agency": "NOAA Space Weather Prediction Center",
+                "freshness": "unavailable"
+              },
+              "solarWindTemperature": {
+                "value": null,
+                "unit": "K",
+                "observedAt": null,
+                "sourceKey": "plasma",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "agency": "NOAA Space Weather Prediction Center",
+                "freshness": "unavailable"
+              },
+              "bt": {
+                "value": null,
+                "unit": "nT",
+                "observedAt": null,
+                "sourceKey": "magnetic",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "agency": "NOAA Space Weather Prediction Center",
+                "freshness": "unavailable"
+              },
+              "bz": {
+                "value": null,
+                "unit": "nT GSM",
+                "observedAt": null,
+                "sourceKey": "magnetic",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "agency": "NOAA Space Weather Prediction Center",
+                "freshness": "unavailable"
+              },
+              "xrayFlux": {
+                "value": 0.000001320275487159961,
+                "unit": "W/m² (0.1–0.8 nm)",
+                "observedAt": "2026-07-22T21:52:00Z",
+                "sourceKey": "xray",
+                "sourceUrl": "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "agency": "NOAA GOES / SWPC",
+                "freshness": "fresh"
+              },
+              "flareClass": {
+                "value": "C1.3",
+                "unit": "GOES class",
+                "observedAt": "2026-07-22T21:52:00Z",
+                "sourceKey": "xray",
+                "sourceUrl": "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "agency": "NOAA GOES / SWPC",
+                "freshness": "fresh"
+              },
+              "sunspotNumber": {
+                "value": 94.4,
+                "unit": "monthly mean",
+                "observedAt": "2026-06",
+                "sourceKey": "solarCycle",
+                "sourceUrl": "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "agency": "NOAA Space Weather Prediction Center",
+                "freshness": "fresh"
+              },
+              "f107": {
+                "value": 138.21,
+                "unit": "sfu",
+                "observedAt": "2026-06",
+                "sourceKey": "solarCycle",
+                "sourceUrl": "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "agency": "NOAA Space Weather Prediction Center",
+                "freshness": "fresh"
+              }
+            },
+            "alerts": [
+              {
+                "productId": "A20F",
+                "issuedAt": "2026-07-22T19:25:10.567Z",
+                "message": "Space Weather Message Code: WATA20\r\nSerial Number: 1117\r\nIssue Time: 2026 Jul 22 1925 UTC\r\n\r\nWATCH: Geomagnetic Storm Category G1 Predicted \nHighest Storm Level Predicted by Day:\nJul 23:  None (Below G1)   Jul 24:  G1 (Minor)   Jul 25:  None (Below G1)   \nTHIS SUPERSEDES ANY/ALL PRIOR WATCHES IN EFFECT\nComment: \r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 60 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nSpacecraft - Minor impact on satellite operations possible.\r\nAurora - Aurora may be visible at high latitudes, i.e., northern tier of the U.S. such as northern Michigan and Maine.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "BHIS",
+                "issuedAt": "2026-07-22T17:50:29.730Z",
+                "message": "Space Weather Message Code: SUM10R\r\nSerial Number: 924\r\nIssue Time: 2026 Jul 22 1750 UTC\r\n\r\nSUMMARY: 10cm Radio Burst \nBegin Time: 2026 Jul 22 1552 UTC\nMaximum Time: 2026 Jul 22 1552 UTC\nEnd Time: 2026 Jul 22 1552 UTC\nPeak Flux: 150 sfu\nDuration: 1 minutes\nLatest Penticton Noon Flux: 149 sfu\nComment: ",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04W",
+                "issuedAt": "2026-07-22T14:56:05.877Z",
+                "message": "Space Weather Message Code: WARK04\r\nSerial Number: 5390\r\nIssue Time: 2026 Jul 22 1456 UTC\r\n\r\nWARNING: Geomagnetic K-index of 4 expected \nValid From: 2026 Jul 22 1454 UTC\nValid To: 2026 Jul 22 2359 UTC\nWarning Conditions: Onset\nComment: \r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "BHIS",
+                "issuedAt": "2026-07-22T06:52:19.410Z",
+                "message": "Space Weather Message Code: SUM10R\r\nSerial Number: 923\r\nIssue Time: 2026 Jul 22 0652 UTC\r\n\r\nSUMMARY: 10cm Radio Burst \nBegin Time: 2026 Jul 22 0632 UTC\nMaximum Time: 2026 Jul 22 0633 UTC\nEnd Time: 2026 Jul 22 0634 UTC\nPeak Flux: 200 sfu\nDuration: 2 minutes\nLatest Penticton Noon Flux: 149 sfu\nComment: ",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04W",
+                "issuedAt": "2026-07-21T17:09:41.817Z",
+                "message": "Space Weather Message Code: WARK04\r\nSerial Number: 5389\r\nIssue Time: 2026 Jul 21 1709 UTC\r\n\r\nEXTENDED WARNING: Geomagnetic K-index of 4 expected\nExtension to Serial Number: 5388\nValid From: 2026 Jul 21 0910 UTC\nNow Valid Until: 2026 Jul 22 0600 UTC\nWarning Condition: Persistence\n\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04A",
+                "issuedAt": "2026-07-21T12:01:42.537Z",
+                "message": "Space Weather Message Code: ALTK04\r\nSerial Number: 2676\r\nIssue Time: 2026 Jul 21 1201 UTC\r\n\r\nALERT: Geomagnetic K-index of 4 \nThreshold Reached: 2026 Jul 21 1159 UTC\nSynoptic Period: 0900-1200\nActive Warning: YES\nComment: \r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04W",
+                "issuedAt": "2026-07-21T09:11:04.820Z",
+                "message": "Space Weather Message Code: WARK04\r\nSerial Number: 5388\r\nIssue Time: 2026 Jul 21 0911 UTC\r\n\r\nWARNING: Geomagnetic K-index of 4 expected \nValid From: 2026 Jul 21 0910 UTC\nValid To: 2026 Jul 21 1800 UTC\nWarning Conditions: Onset\nComment: \r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "EF3A",
+                "issuedAt": "2026-07-20T14:42:01.780Z",
+                "message": "Space Weather Message Code: ALTEF3\r\nSerial Number: 3720\r\nIssue Time: 2026 Jul 20 1442 UTC\r\n\r\nCONTINUED ALERT: Electron 2MeV Integral Flux exceeded 1,000pfu\nContinuation of Serial Number: 3719\nBegin Time: 2026 Jul 17 1750 UTC\n\nYesterday Maximum 2MeV Flux: 1039 pfu\nMax time: 2026 Jul 20 1435 UTC",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "A20F",
+                "issuedAt": "2026-07-19T20:14:34.243Z",
+                "message": "Space Weather Message Code: WATA20\r\nSerial Number: 1116\r\nIssue Time: 2026 Jul 19 2014 UTC\r\n\r\nWATCH: Geomagnetic Storm Category G1 Predicted \nHighest Storm Level Predicted by Day:\nJul 20:  None (Below G1)   Jul 21:  None (Below G1)   Jul 22:  G1 (Minor)   \nTHIS SUPERSEDES ANY/ALL PRIOR WATCHES IN EFFECT\nComment: \r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 60 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nSpacecraft - Minor impact on satellite operations possible.\r\nAurora - Aurora may be visible at high latitudes, i.e., northern tier of the U.S. such as northern Michigan and Maine.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "EF3A",
+                "issuedAt": "2026-07-19T12:04:04.020Z",
+                "message": "Space Weather Message Code: ALTEF3\r\nSerial Number: 3719\r\nIssue Time: 2026 Jul 19 1204 UTC\r\n\r\nCONTINUED ALERT: Electron 2MeV Integral Flux exceeded 1,000pfu\nContinuation of Serial Number: 3718\nBegin Time: 2026 Jul 17 1750 UTC\n\nYesterday Maximum 2MeV Flux: 1170 pfu\nMax time: 2026 Jul 18 1715 UTC",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "EF3A",
+                "issuedAt": "2026-07-18T15:26:56.300Z",
+                "message": "Space Weather Message Code: ALTEF3\r\nSerial Number: 3718\r\nIssue Time: 2026 Jul 18 1526 UTC\r\n\r\nCONTINUED ALERT: Electron 2MeV Integral Flux exceeded 1,000pfu\nContinuation of Serial Number: 3717\nBegin Time: 2026 Jul 17 1750 UTC\n\nYesterday Maximum 2MeV Flux: 1085 pfu\nMax time: 2026 Jul 18 1520 UTC",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "EF3A",
+                "issuedAt": "2026-07-17T18:22:33.660Z",
+                "message": "Space Weather Message Code: ALTEF3\r\nSerial Number: 3717\r\nIssue Time: 2026 Jul 17 1822 UTC\r\n\r\nALERT: Electron 2MeV Integral Flux exceeded 1,000pfu \nThreshold Reached: 2026 Jul 17 1750 UTC\nStation: GOES-18\nComment: Yesterday's max: 1382 pfu\n",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04W",
+                "issuedAt": "2026-07-15T08:53:19.650Z",
+                "message": "Space Weather Message Code: WARK04\r\nSerial Number: 5387\r\nIssue Time: 2026 Jul 15 0853 UTC\r\n\r\nEXTENDED WARNING: Geomagnetic K-index of 4 expected\nExtension to Serial Number: 5386\nValid From: 2026 Jul 15 0143 UTC\nNow Valid Until: 2026 Jul 15 1500 UTC\nWarning Condition: Persistence\n\r\n\n\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04A",
+                "issuedAt": "2026-07-15T05:58:03.170Z",
+                "message": "Space Weather Message Code: ALTK04\r\nSerial Number: 2675\r\nIssue Time: 2026 Jul 15 0558 UTC\r\n\r\nALERT: Geomagnetic K-index of 4 \nThreshold Reached: 2026 Jul 15 0554 UTC\nSynoptic Period: 0300-0600\nActive Warning: YES\nComment: \r\n\n\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04W",
+                "issuedAt": "2026-07-15T05:54:15.747Z",
+                "message": "Space Weather Message Code: WARK04\r\nSerial Number: 5386\r\nIssue Time: 2026 Jul 15 0554 UTC\r\n\r\nEXTENDED WARNING: Geomagnetic K-index of 4 expected\nExtension to Serial Number: 5385\nValid From: 2026 Jul 15 0143 UTC\nNow Valid Until: 2026 Jul 15 0900 UTC\nWarning Condition: Persistence\n\r\n\n\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04W",
+                "issuedAt": "2026-07-15T01:44:29.693Z",
+                "message": "Space Weather Message Code: WARK04\r\nSerial Number: 5385\r\nIssue Time: 2026 Jul 15 0144 UTC\r\n\r\nWARNING: Geomagnetic K-index of 4 expected \nValid From: 2026 Jul 15 0143 UTC\nValid To: 2026 Jul 15 0600 UTC\nWarning Conditions: Onset\nComment: \r\n\n\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04A",
+                "issuedAt": "2026-07-14T00:08:27.203Z",
+                "message": "Space Weather Message Code: ALTK04\r\nSerial Number: 2674\r\nIssue Time: 2026 Jul 14 0008 UTC\r\n\r\nALERT: Geomagnetic K-index of 4 \nThreshold Reached: 2026 Jul 13 2359 UTC\nSynoptic Period: 2100-2400\nActive Warning: YES\nComment: \r\n\n\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K04W",
+                "issuedAt": "2026-07-13T23:50:18.933Z",
+                "message": "Space Weather Message Code: WARK04\r\nSerial Number: 5384\r\nIssue Time: 2026 Jul 13 2350 UTC\r\n\r\nWARNING: Geomagnetic K-index of 4 expected \nValid From: 2026 Jul 13 2349 UTC\nValid To: 2026 Jul 14 0900 UTC\nWarning Conditions: Onset\nComment: \r\n\n\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 65 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nAurora - Aurora may be visible at high latitudes such as Canada and Alaska.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "EF3A",
+                "issuedAt": "2026-07-13T10:27:53.953Z",
+                "message": "Space Weather Message Code: ALTEF3\r\nSerial Number: 3716\r\nIssue Time: 2026 Jul 13 1027 UTC\r\n\r\nCONTINUED ALERT: Electron 2MeV Integral Flux exceeded 1000pfu\nContinuation of Serial Number: 3715\nBegin Time: 2026 Jul 10 1126 UTC\nYesterday Maximum 2MeV Flux: 3729 pfu\nYesterday's max: 3,730 pfu\r\n\nYesterday's max: 3,730 pfu",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              },
+              {
+                "productId": "K05W",
+                "issuedAt": "2026-07-12T21:01:57.203Z",
+                "message": "Space Weather Message Code: WARK05\r\nSerial Number: 2250\r\nIssue Time: 2026 Jul 12 2101 UTC\r\n\r\nCANCEL WARNING: Geomagnetic K-index of 5 expected \nCancel Serial Number: 2249\nOriginal Issue Time: 2026 Jul 12 1411 UTC\nShould have only been valid until 12/2100 UTC.\r\n\nShould have only been valid until 12/2100 UTC.NOAA Scale: G1 - Minor\r\n\r\nNOAA Space Weather Scale descriptions can be found at\r\nwww.swpc.noaa.gov/noaa-scales-explanation\r\n\r\nPotential Impacts: Area of impact primarily poleward of 60 degrees Geomagnetic Latitude.\r\nInduced Currents - Weak power grid fluctuations can occur.\r\nSpacecraft - Minor impact on satellite operations possible.\r\nAurora - Aurora may be visible at high latitudes, i.e., northern tier of the U.S. such as northern Michigan and Maine.",
+                "sourceUrl": "https://services.swpc.noaa.gov/products/alerts.json"
+              }
+            ],
+            "sources": {
+              "kp": {
+                "url": "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "cadenceMinutes": 180,
+                "agency": "NOAA Space Weather Prediction Center",
+                "retrievedAt": "2026-07-22T21:54:51.355Z"
+              },
+              "plasma": {
+                "url": "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "cadenceMinutes": 1,
+                "agency": "NOAA Space Weather Prediction Center",
+                "retrievedAt": "2026-07-22T21:54:51.355Z"
+              },
+              "magnetic": {
+                "url": "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "cadenceMinutes": 1,
+                "agency": "NOAA Space Weather Prediction Center",
+                "retrievedAt": "2026-07-22T21:54:51.355Z"
+              },
+              "xray": {
+                "url": "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "cadenceMinutes": 1,
+                "agency": "NOAA GOES / SWPC",
+                "retrievedAt": "2026-07-22T21:54:51.355Z"
+              },
+              "solarCycle": {
+                "url": "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "cadenceMinutes": 43200,
+                "agency": "NOAA Space Weather Prediction Center",
+                "retrievedAt": "2026-07-22T21:54:51.355Z"
+              },
+              "alerts": {
+                "url": "https://services.swpc.noaa.gov/products/alerts.json",
+                "cadenceMinutes": 1,
+                "agency": "NOAA Space Weather Prediction Center",
+                "retrievedAt": "2026-07-22T21:54:51.355Z"
+              }
+            },
+            "boundary": "Environmental measurements and official alerts are preserved as sourced context. Correspondence with personal, narrative, or Observer events is not evidence of causation.",
+            "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "failures": [
+              "HTTP 404",
+              "HTTP 404"
+            ]
+          }
+        }
+      },
+      "vector": {
+        "P": 0,
+        "C": 0.83374,
+        "R": 0.18505,
+        "E": 0,
+        "M": 0,
+        "A": 0,
+        "Q": 0
+      },
+      "glyph": {
+        "schema": "hearthgate.glyph-matrix/v1",
+        "glyph_id": "GLYPH_SET_1136ff67-2942-4ada-b178-a9f1ee478ac1",
+        "generated_at": "2026-07-22T21:55:45.242Z",
+        "canonical_vector": {
+          "P": 0,
+          "C": 0.83374,
+          "R": 0.18505,
+          "E": 0,
+          "M": 0,
+          "A": 0,
+          "Q": 0
+        },
+        "canonical_meanings": {
+          "P": "pulse/presence",
+          "C": "coherence",
+          "R": "resonance",
+          "E": "entropy/energy",
+          "M": "memory",
+          "A": "axis/attention",
+          "Q": "quality"
+        },
+        "geometry_matrix": {
+          "base_vertex_count": 3,
+          "interlocking_density": 0.83374,
+          "rotation_matrix_rad": 1.162703,
+          "entropy_jitter": 0,
+          "memory_layer_depth": 1,
+          "axis_bias": -1,
+          "quality": 0
+        },
+        "vector_render_attributes": {
+          "stroke_weight_px": 1,
+          "primary_vector_color": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "frequency_wave_distortion": 0
+        },
+        "aggregation": {
+          "method": "per-metric arithmetic mean",
+          "metric_counts": {
+            "P": 1,
+            "C": 1,
+            "R": 1,
+            "E": 1,
+            "M": 1,
+            "A": 1,
+            "Q": 1
+          },
+          "anomalies": {
+            "P": {
+              "minimum": 0,
+              "maximum": 0,
+              "spread": 0
+            },
+            "C": {
+              "minimum": 0.8337399999999999,
+              "maximum": 0.8337399999999999,
+              "spread": 0
+            },
+            "R": {
+              "minimum": 0.18505,
+              "maximum": 0.18505,
+              "spread": 0
+            },
+            "E": {
+              "minimum": 0,
+              "maximum": 0,
+              "spread": 0
+            },
+            "M": {
+              "minimum": 0,
+              "maximum": 0,
+              "spread": 0
+            },
+            "A": {
+              "minimum": 0,
+              "maximum": 0,
+              "spread": 0
+            },
+            "Q": {
+              "minimum": 0,
+              "maximum": 0,
+              "spread": 0
+            }
+          }
+        },
+        "provenance": [
+          {
+            "source_id": "laboratory-current",
+            "source_kind": "observer-project-derived",
+            "captured_at": "2026-07-22T21:55:45.237Z",
+            "metrics": {
+              "P": 0,
+              "C": 0.8337399999999999,
+              "R": 0.18505,
+              "E": 0,
+              "M": 0,
+              "A": 0,
+              "Q": 0
+            }
+          }
+        ],
+        "boundary": "Geometry is derived from canonical PREMAQ meanings. It is a render instruction, not proof of causation or an independently measured phenomenon."
+      },
+      "narrative": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+      "sourceRefs": [
+        "observer-project-derived:laboratory-current",
+        "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+        "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+        "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+        "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+        "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+        "https://services.swpc.noaa.gov/products/alerts.json"
+      ],
+      "privacy": "private",
+      "consent": "not recorded",
+      "tags": [
+        "sourced-solar-context"
+      ],
+      "scores": null,
+      "boundary": "Observation, vector, glyph, narrative, and sources are preserved together without treating interpretation as measurement."
+    }
+  ],
+  "updatedAt": "2026-07-22T21:55:45.255Z"
+}

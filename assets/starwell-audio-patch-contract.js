@@ -7,8 +7,8 @@
   external audio ingress, and the Starwell Concurrent Field Engine.
 
   Audio routing is established engineering. DEEP, Barbault, geometry,
-  somatic, Terra Aeterna, and ritual mappings remain explicitly declared
-  interpretive layers. No theory output starts audio by itself.
+  somatic, Terra Aeterna, and ritual mappings are explicitly declared
+  layers. No theory output starts audio by itself.
 */
 
 (function installAudioPatchContract(global) {

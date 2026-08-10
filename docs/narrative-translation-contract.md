@@ -146,7 +146,7 @@ The JSON is a build artifact. Check it into the repo after each rebuild.
 ## Hearthweave boundary
 
 The narrative translation layer does not make claims about what Terra Aeterna "really means".
-It maps text to a phase space and back — symbolically. It is an instrument, not an oracle.
+It maps text to a phase space and back. It is an instrument, not an oracle.
 
 Consent applies at the use layer: a visitor to the living site should know when a page's
 field state is seeded by a narrative query. Label it. The instrument is transparent or it is

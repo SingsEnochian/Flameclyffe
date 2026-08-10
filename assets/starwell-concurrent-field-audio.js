@@ -220,7 +220,7 @@
       project: snapshot.project,
       mode: snapshot.mode,
       provenance: snapshot.provenance,
-      boundary: 'Shared interpretive state only. Audio remains user-invoked.'
+      boundary: 'Shared field state for audio. Audio remains user-invoked.'
     };
   }
 

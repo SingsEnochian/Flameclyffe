@@ -1,0 +1,69 @@
+# Observer Continuity Chronicle: Rowan / Earth
+
+> Creative narrative record. Glyph scores and meanings are symbolic story inputs, not scientific or metaphysical claims.
+
+Chronicle version: 1.0
+Branch tip: `d342ed5b-bf76-409f-b5a1-0bd2f1b7d9ae`
+Events: 3
+
+---
+
+## 1. Convergent Signal
+
+- Observation: `a643ab0b-2650-43e5-88a8-72bb55cbcbe7`
+- Recorded: 2026-07-14T18:04:35.770127+00:00
+- Observed instant: 2026-07-14T18:04:33.541672+00:00
+- Resonance: 48.498
+- Coherence: 67.014
+- Mood: tired
+- Style: Orbital Lattice
+
+### Narrative directive
+
+In Earth, let Rowan encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.
+
+### Scene
+
+_No scene saved for this observation._
+
+---
+
+## 2. Convergent Signal
+
+- Observation: `6c073e26-7439-4899-98d8-1507d1732966`
+- Recorded: 2026-07-14T18:59:14.020289+00:00
+- Observed instant: 2026-07-14T18:59:12.912055+00:00
+- Resonance: 20.678
+- Coherence: 80.824
+- Mood: tired
+- Style: Angular Signal
+
+### Narrative directive
+
+In Earth, let Rowan encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.
+
+### Scene
+
+_No scene saved for this observation._
+
+---
+
+## 3. Convergent Signal
+
+- Observation: `d342ed5b-bf76-409f-b5a1-0bd2f1b7d9ae`
+- Recorded: 2026-07-14T21:09:26.499117+00:00
+- Observed instant: 2026-07-14T21:09:24.702118+00:00
+- Resonance: 18.109
+- Coherence: 83.743
+- Mood: tired
+- Style: Angular Signal
+
+### Narrative directive
+
+In Earth, let Rowan encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.
+
+### Scene
+
+_No scene saved for this observation._
+
+---

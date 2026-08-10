@@ -229,6 +229,8 @@ export function makeProject() {
     updatedAt: new Date().toISOString(),
     activeGlyphId: glyph.id,
     glyphs: [glyph],
+    kerningPairs: [],
+    ligatures: [],
   };
 }
 

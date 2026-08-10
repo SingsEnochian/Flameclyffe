@@ -1,0 +1,24 @@
+{
+  "schema": "hearthfire.ingest-receipt/v1",
+  "action": "ingest",
+  "documentId": "442465b5-4c14-446a-abad-1c60e9b6f124",
+  "sha256": "c7e00bea78d310687c213b14c6a0684926012285673c91580ab34b7dcde9e898",
+  "importedAt": "2026-07-18T20:04:13.253Z",
+  "provenance": {
+    "kind": "hearthfire-first-light",
+    "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\seed-data\\bridges.json",
+    "originalRetainedBy": "source-path"
+  },
+  "originalCopied": false,
+  "extraction": {
+    "status": "complete",
+    "textFile": "442465b5-4c14-446a-abad-1c60e9b6f124.txt",
+    "pageCount": null,
+    "characterCount": 326,
+    "wordCount": 31,
+    "ocr": {
+      "status": "not-needed"
+    },
+    "warnings": []
+  }
+}

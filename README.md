@@ -20,7 +20,7 @@ This project mixes established science, active research, speculative theory, myt
 - **Implementation task** — engineering work to build or repair.
 - **Evidence-backed finding** — observed directly in code, database, logs, or cited source.
 
-The DEEP/Observer glyphs are symbolic instruments and continuity interfaces. Data sets atmosphere, not fate.
+The DEEP/Observer glyphs are instruments and continuity interfaces. Data sets atmosphere, not fate.
 
 ## Baseline constants
 

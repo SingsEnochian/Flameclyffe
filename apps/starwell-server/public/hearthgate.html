@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <script>if(self!==top||new URLSearchParams(location.search).has('embedded'))document.documentElement.classList.add('embedded');if(new URLSearchParams(location.search).has('pane'))document.documentElement.classList.add('direct-pane')</script>
   <title>Templehouse · Hearthgate</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
@@ -168,7 +169,7 @@
       background:var(--bg);
       overflow:hidden;
     }
-    .draw-canvas { position:absolute; inset:0; touch-action:none; cursor:crosshair; }
+    .draw-canvas { position:absolute; inset:0; z-index:2; touch-action:none; cursor:crosshair; }.trace-image{position:absolute;inset:0;z-index:0;width:auto;height:100%;max-width:calc(100% - 360px);object-fit:contain;pointer-events:none;opacity:.35}.trace-text{position:absolute;inset:10% 360px 10% 4%;z-index:1;display:grid;place-items:center;pointer-events:none;color:rgba(230,255,245,.24);font:clamp(3rem,12vw,10rem) Georgia,serif;overflow:hidden;text-align:center;white-space:pre-wrap}.layer-row{display:grid;grid-template-columns:auto 1fr auto;gap:.35rem;align-items:center;padding:.25rem;border:1px solid var(--border);border-radius:5px;margin:.2rem 0}.layer-row.active{border-color:var(--green)}
 
     /* NOAA panel */
     .noaa-panel {
@@ -184,9 +185,9 @@
 
     /* Glyph controls */
     .glyph-controls {
-      position:absolute; top:0; right:0; bottom:0; width:200px;
-      background:rgba(8,10,9,.96); border-left:1px solid var(--border);
-      display:flex; flex-direction:column; z-index:10; overflow:hidden;
+      position:absolute; top:12px; right:12px; bottom:12px; width:clamp(240px,22vw,340px); min-height:0;
+      background:linear-gradient(145deg,rgba(255,255,255,.10),transparent 28%),linear-gradient(315deg,rgba(80,80,150,.10),transparent 48%),rgba(9,14,18,.68); border:1px solid rgba(190,225,235,.22); border-radius:15px;
+      display:flex; flex-direction:column; z-index:10; overflow:hidden;backdrop-filter:blur(24px) saturate(155%);box-shadow:inset 0 1px rgba(255,255,255,.16),inset 0 -1px rgba(0,0,0,.42),0 22px 55px rgba(0,0,0,.34);
     }
     .gc-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
     .gc-tab { flex:1; background:none; border:none; border-bottom:2px solid transparent; color:#2e4438; font-family:var(--font-ui); font-size:.58rem; letter-spacing:.06em; text-transform:uppercase; padding:.32rem 0; cursor:pointer; transition:all .14s; }
@@ -194,8 +195,9 @@
     .gc-tab.active { color:var(--green); border-bottom-color:var(--green); }
     .gc-panel { display:none; flex-direction:column; gap:0; overflow-y:auto; flex:1; padding:6px 8px 10px; }
     .gc-panel.active { display:flex; }
-    .gc-panel::-webkit-scrollbar { width:2px; }
-    .gc-panel::-webkit-scrollbar-thumb { background:rgba(46,214,144,.15); }
+    .gc-panel::-webkit-scrollbar { width:7px; }
+    .gc-panel::-webkit-scrollbar-thumb { background:rgba(120,210,180,.28);border-radius:99px }
+    html.embedded .house-nav{display:none}html.embedded .shell{height:100dvh}html.embedded.direct-pane .main-tab-bar{display:none}html.embedded.direct-pane .shell{grid-template-columns:1fr}html.embedded.direct-pane .grove-sidebar{display:none}.canvas-zone{background:radial-gradient(circle at 35% 30%,rgba(45,130,110,.10),transparent 30rem),radial-gradient(circle at 70% 65%,rgba(80,70,150,.10),transparent 28rem),var(--bg)}
     .gc-label { font-size:.54rem; letter-spacing:.1em; text-transform:uppercase; color:#3a5444; font-weight:700; margin-top:7px; margin-bottom:2px; display:block; }
     .gc-divider { border:none; border-top:1px solid var(--border); margin:6px 0 2px; }
     .gc-select { font-family:inherit; font-size:.68rem; background:var(--raised); border:1px solid var(--border); color:var(--text); border-radius:4px; padding:3px 5px; width:100%; margin-bottom:3px; }
@@ -469,6 +471,8 @@
 </div>
 
 <nav class="house-nav">
+  <a href="/laboratory.html">⌂ Home</a>
+  <span class="sep">·</span>
   <a href="/hearthgate.html" class="active">⬡ Hearthgate</a>
   <span class="sep">·</span>
   <a href="/hearthroom.html">Hearthroom</a>
@@ -604,7 +608,7 @@
           <span class="noaa-value" id="noaa-val">—</span>
           <span class="noaa-sub"  id="noaa-sub"></span>
         </div>
-        <canvas id="draw-canvas" class="draw-canvas"></canvas>
+        <img id="trace-image" class="trace-image" alt="Tracing reference" hidden><div id="trace-text" class="trace-text"></div><canvas id="draw-canvas" class="draw-canvas"></canvas>
         <div class="glyph-controls" id="glyph-controls">
           <div class="gc-tabs">
             <button class="gc-tab active" data-tab="brush">Brush</button>
@@ -691,6 +695,9 @@
               <button class="tog-btn danger" id="btn-clear">clear all</button>
               <button class="tog-btn" id="btn-undo">undo</button>
             </div>
+            <hr class="gc-divider"><span class="gc-label">Layers</span><div id="layer-list"></div><button class="tog-btn" id="add-layer">+ drawing layer</button>
+            <hr class="gc-divider"><span class="gc-label">Trace & language reference</span><input type="file" id="trace-file" accept="image/*" style="display:none"><button class="tog-btn" id="load-trace">load reference image</button><label class="sl-label">Reference opacity<input id="trace-opacity" class="sl-input" type="range" min="0" max="1" step=".01" value=".35"></label><select class="gc-select" id="trace-language"><option>English</option><option>Japanese</option><option>Old Norse</option><option>Gaelic</option><option>Enochian</option><option>Hebrew</option><option>Arabic</option><option>Greek</option><option>Chinese</option><option>Custom / conlang</option></select><textarea id="trace-copy" placeholder="Paste a glyph, word, sentence, or script reference" style="min-height:70px"></textarea>
+            <hr class="gc-divider"><span class="gc-label">Export</span><div class="toggle-row"><button class="tog-btn" id="export-glyph-png">PNG</button><button class="tog-btn" id="export-glyph-project">project JSON</button><button class="tog-btn" id="import-glyph-project">load project</button></div><input id="glyph-project-file" type="file" accept=".json" style="display:none">
           </div>
         </div><!-- /.glyph-controls -->
       </div><!-- /.canvas-zone -->
@@ -746,6 +753,8 @@ document.querySelectorAll('.main-tab').forEach(tab=>{
     document.getElementById('grove-sidebar').classList.remove('open');
   });
 });
+const requestedPane=new URLSearchParams(location.search).get('pane');
+if(requestedPane)document.querySelector(`.main-tab[data-pane="${requestedPane}"]`)?.click();
 
 // ── Sidebar toggle (mobile) ───────────────────────────────────────────────────
 document.getElementById('sb-toggle').addEventListener('click',e=>{
@@ -804,6 +813,7 @@ const MATERIALS = {
 };
 
 let gStrokes=[], gLivePts=[], gDrawing=false;
+let gLayers=[{id:'ink-1',name:'Ink 1',visible:true}],gCurrentLayer='ink-1';
 let gInfluences=['norse'], gStaffVisible=true, gSnapOn=false;
 let slX=0,slY=0,mfX=0,mfY=0;
 
@@ -821,7 +831,7 @@ function snapY(y,h){ if(!gSnapOn)return y; const ls=getStaffLines(h); let b=ls[0
 function drawStaff(){ staffCtx.clearRect(0,0,staffCanvas.width,staffCanvas.height); if(!gStaffVisible)return; staffCtx.strokeStyle='rgba(46,214,144,0.10)';staffCtx.lineWidth=1; for(const y of getStaffLines(staffCanvas.height)){staffCtx.beginPath();staffCtx.moveTo(staffCanvas.width*.02,y);staffCtx.lineTo(staffCanvas.width*.98,y);staffCtx.stroke();} }
 
 // ── WebGL context ─────────────────────────────────────────────────────────────
-const gl = canvasEl.getContext('webgl',{alpha:true,premultipliedAlpha:false,preserveDrawingBuffer:false,antialias:false});
+const gl = canvasEl.getContext('webgl',{alpha:true,premultipliedAlpha:false,preserveDrawingBuffer:true,antialias:false});
 
 // ── Shaders ───────────────────────────────────────────────────────────────────
 const VS_BRUSH=`attribute vec2 aPos;attribute vec2 aUV;attribute float aAlpha;uniform vec2 uRes;varying vec2 vUV;varying float vAlpha;void main(){vec2 c=(aPos/uRes)*2.0-1.0;c.y=-c.y;gl_Position=vec4(c,0.0,1.0);vUV=aUV;vAlpha=aAlpha;}`;
@@ -961,6 +971,7 @@ function rebuildCommitted(){
   clearFBO(committedFBO);
   const tmp=_fbo(W,H);
   for(const s of gStrokes){
+    if(!gLayers.find(layer=>layer.id===(s.layerId||'ink-1'))?.visible)continue;
     clearFBO(tmp);
     const vd=buildStampVerts(s.pts,s.brush);
     if(vd.length){renderToFBO(vd,s.brush,tmp.fbo,false);blitTex(tmp.tex,s.brush.opacity||1,committedFBO.fbo);}
@@ -976,7 +987,7 @@ function redrawCanvas(){
 }
 
 function resizeGl(){
-  W=Math.max(1,zone.clientWidth-200);H=Math.max(1,zone.clientHeight);
+  const controls=document.getElementById('glyph-controls');W=Math.max(1,zone.clientWidth-(controls?.offsetWidth||260)-24);H=Math.max(1,zone.clientHeight);
   canvasEl.width=W;canvasEl.height=H;staffCanvas.width=W;staffCanvas.height=H;
   const newC=_fbo(W,H),newL=_fbo(W,H);
   if(committedFBO){gl.deleteFramebuffer(committedFBO.fbo);gl.deleteTexture(committedFBO.tex);}
@@ -986,8 +997,9 @@ function resizeGl(){
 }
 
 // ── Persist ───────────────────────────────────────────────────────────────────
-function persistGStrokes(){try{localStorage.setItem('gyphs:strokes:v3',JSON.stringify(gStrokes.slice(-80).map(s=>({pts:s.pts.slice(0,300),brush:{...s.brush,grainImg:null,shapeImg:null}}))));}catch{}}
+function persistGStrokes(){try{localStorage.setItem('gyphs:strokes:v3',JSON.stringify(gStrokes.slice(-200).map(s=>({pts:s.pts.slice(0,600),layerId:s.layerId||'ink-1',brush:{...s.brush,grainImg:null,shapeImg:null}}))));localStorage.setItem('gyphs:layers:v1',JSON.stringify(gLayers));}catch{}}
 try{const sv=JSON.parse(localStorage.getItem('gyphs:strokes:v3')||'[]');gStrokes=sv.filter(s=>s.pts?.length>1);}catch{}
+try{const savedLayers=JSON.parse(localStorage.getItem('gyphs:layers:v1')||'[]');if(savedLayers.length)gLayers=savedLayers;}catch{}
 
 // ── Pointer events ────────────────────────────────────────────────────────────
 canvasEl.addEventListener('pointerdown',e=>{
@@ -1016,7 +1028,7 @@ canvasEl.addEventListener('pointerup',()=>{
   if(!gDrawing)return;gDrawing=false;
   if(gLivePts.length>1){
     blitTex(liveFBO.tex,BRUSH.opacity,committedFBO.fbo);
-    gStrokes.push({pts:[...gLivePts],brush:{...BRUSH,grainImg:BRUSH.grainImg,shapeImg:BRUSH.shapeImg}});
+    gStrokes.push({pts:[...gLivePts],layerId:gCurrentLayer,brush:{...BRUSH,grainImg:BRUSH.grainImg,shapeImg:BRUSH.shapeImg}});
     persistGStrokes();
     document.getElementById('stroke-count').textContent=`${gStrokes.length} stroke${gStrokes.length!==1?'s':''}`;
   }
@@ -1126,6 +1138,14 @@ togSnap.onclick=()=>{gSnapOn=!gSnapOn;togSnap.textContent=gSnapOn?'snap on':'sna
 // ── Undo / Clear ──────────────────────────────────────────────────────────────
 document.getElementById('btn-clear').onclick=()=>{gStrokes=[];gLivePts=[];clearFBO(committedFBO);clearFBO(liveFBO);persistGStrokes();redrawCanvas();document.getElementById('stroke-count').textContent='0 strokes';};
 document.getElementById('btn-undo').onclick=()=>{if(gStrokes.length){gStrokes.pop();rebuildCommitted();persistGStrokes();redrawCanvas();document.getElementById('stroke-count').textContent=`${gStrokes.length} stroke${gStrokes.length!==1?'s':''}`;}};
+
+// ── Layers, tracing, and portable glyph projects ─────────────────────────────
+function renderLayers(){const host=document.getElementById('layer-list');host.innerHTML='';for(const layer of gLayers){const row=document.createElement('div');row.className=`layer-row ${layer.id===gCurrentLayer?'active':''}`;row.innerHTML=`<input type="checkbox" ${layer.visible?'checked':''} aria-label="Layer visibility"><button class="tog-btn" data-layer="${esc(layer.id)}">${esc(layer.name)}</button><button class="tog-btn danger" aria-label="Remove layer">×</button>`;row.querySelector('input').onchange=e=>{layer.visible=e.target.checked;persistGStrokes();rebuildCommitted();redrawCanvas()};row.querySelector('[data-layer]').onclick=()=>{gCurrentLayer=layer.id;renderLayers()};row.lastElementChild.onclick=()=>{if(gLayers.length===1)return;gStrokes=gStrokes.filter(s=>(s.layerId||'ink-1')!==layer.id);gLayers=gLayers.filter(x=>x.id!==layer.id);if(gCurrentLayer===layer.id)gCurrentLayer=gLayers[0].id;persistGStrokes();rebuildCommitted();redrawCanvas();renderLayers()};host.appendChild(row)}}
+document.getElementById('add-layer').onclick=()=>{const id=`ink-${Date.now()}`;gLayers.push({id,name:`Ink ${gLayers.length+1}`,visible:true});gCurrentLayer=id;persistGStrokes();renderLayers()};renderLayers();
+const traceImg=document.getElementById('trace-image'),traceFile=document.getElementById('trace-file'),traceText=document.getElementById('trace-text');document.getElementById('load-trace').onclick=()=>traceFile.click();traceFile.onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{traceImg.src=reader.result;traceImg.hidden=false};reader.readAsDataURL(file)};document.getElementById('trace-opacity').oninput=e=>{traceImg.style.opacity=e.target.value;traceText.style.opacity=e.target.value};document.getElementById('trace-copy').oninput=e=>traceText.textContent=e.target.value;document.getElementById('trace-language').onchange=e=>traceText.dataset.language=e.target.value;
+function glyphProject(){return{schema:'hearthgate.glyph-project/v1',createdAt:new Date().toISOString(),canvas:{width:W,height:H},layers:gLayers,strokes:gStrokes.map(s=>({layerId:s.layerId,pts:s.pts,brush:{...s.brush,grainImg:null,shapeImg:null}})),trace:{language:document.getElementById('trace-language').value,text:document.getElementById('trace-copy').value,opacity:+document.getElementById('trace-opacity').value,image:traceImg.src?.startsWith('data:')&&traceImg.src.length<5_000_000?traceImg.src:null},influences:gInfluences,staff:{type:document.getElementById('staff-type').value,visible:gStaffVisible,snap:gSnapOn}}}
+function localDownload(name,data,type){const a=document.createElement('a');a.href=type==='data'?data:URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();if(type!=='data')setTimeout(()=>URL.revokeObjectURL(a.href),600)}
+document.getElementById('export-glyph-png').onclick=()=>{redrawCanvas();localDownload(`hearthgate-glyph-${Date.now()}.png`,canvasEl.toDataURL('image/png'),'data')};document.getElementById('export-glyph-project').onclick=()=>localDownload(`hearthgate-glyph-${Date.now()}.json`,JSON.stringify(glyphProject(),null,2),'application/json');document.getElementById('import-glyph-project').onclick=()=>document.getElementById('glyph-project-file').click();document.getElementById('glyph-project-file').onchange=async e=>{try{const p=JSON.parse(await e.target.files[0].text());if(p.schema!=='hearthgate.glyph-project/v1')throw new Error('Not a Hearthgate glyph project');gLayers=p.layers?.length?p.layers:gLayers;gCurrentLayer=gLayers[0].id;gStrokes=Array.isArray(p.strokes)?p.strokes:[];gInfluences=Array.isArray(p.influences)?p.influences:gInfluences;document.getElementById('trace-language').value=p.trace?.language||'English';document.getElementById('trace-copy').value=p.trace?.text||'';traceText.textContent=p.trace?.text||'';document.getElementById('trace-opacity').value=p.trace?.opacity??.35;traceImg.style.opacity=p.trace?.opacity??.35;if(p.trace?.image){traceImg.src=p.trace.image;traceImg.hidden=false}persistGStrokes();renderLayers();rebuildCommitted();redrawCanvas()}catch(err){alert(err.message)}};
 
 // ── Location ──────────────────────────────────────────────────────────────────
 const togLoc=document.getElementById('tog-loc'),locInfo=document.getElementById('loc-info');

@@ -1,0 +1,45 @@
+{
+  "schema": "hearthgate.archive.v1",
+  "exportedAt": "2026-07-16T00:00:00Z",
+  "records": [
+    {
+      "id": "example-research-source",
+      "title": "Instrument Source Contract",
+      "filename": "instrument-source-contract.pdf",
+      "notebook": "Research",
+      "privacy": "public",
+      "classification": "implementation task",
+      "sourceDate": "2026-07-16",
+      "tags": ["DEEP", "provenance", "schema"],
+      "summary": "Example record showing how a source can be indexed without committing the source file itself.",
+      "epistemicNote": "Supports an implementation decision. It does not certify a physical claim.",
+      "ingestStatus": "metadata only"
+    },
+    {
+      "id": "example-continuity-source",
+      "title": "Continuity Practice Note",
+      "filename": "continuity-practice.md",
+      "notebook": "Continuity",
+      "privacy": "private",
+      "classification": "personal continuity",
+      "sourceDate": "2026-07-16",
+      "tags": ["consent", "session rhythm", "withness"],
+      "summary": "Example private continuity record kept in the local browser archive.",
+      "epistemicNote": "A relational practice record, not an empirical proof claim.",
+      "ingestStatus": "indexed summary"
+    },
+    {
+      "id": "example-trend-source",
+      "title": "Threshold Language Trend",
+      "filename": "threshold-trend.json",
+      "notebook": "Trends",
+      "privacy": "restricted",
+      "classification": "active research",
+      "sourceDate": "2026-07-16",
+      "tags": ["qualitative", "recurrence", "language"],
+      "summary": "Example comparative note tracking recurring threshold language across records.",
+      "epistemicNote": "A qualitative pattern hypothesis requiring source traceability and independent comparison.",
+      "ingestStatus": "indexed summary"
+    }
+  ]
+}

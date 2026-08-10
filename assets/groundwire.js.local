@@ -1,0 +1,280 @@
+'use strict';
+
+/*
+  Groundwire v0.1
+  Purpose: an honest instrument for real browser/device signals.
+  Confidence rule (Truth-Lit Surface Rule, contracts/surface_visual_state_v0_1.schema.json):
+  - "verified": read after your explicit permission grant, fresh at read time (location, microphone).
+  - "observed": passively available, no permission gate, but browser-reported and possibly
+    bucketed/clamped for privacy (network, hardware, battery) — real, not exact ground truth.
+  - "unknown": unsupported by this browser, or permission denied/not yet granted. Always paired
+    with a plain-language reason. Never a fabricated value.
+*/
+
+import { ConsentGates } from '../hearthfire/lib/consent-gates.js';
+
+const gates = new ConsentGates();
+
+const state = {
+  location: { value: null, confidence: 'unknown', reason: 'Not requested yet.' },
+  network: { value: null, confidence: 'unknown', reason: 'Checking…' },
+  hardware: { value: null, confidence: 'unknown', reason: 'Checking…' },
+  microphone: { value: null, confidence: 'unknown', reason: 'Not started.' },
+  battery: { value: null, confidence: 'unknown', reason: 'Checking…' },
+};
+
+const $ = (id) => document.getElementById(id);
+const statusEl = $('groundwire-status');
+const stateEl = $('groundwire-state');
+
+function setStatus(text) {
+  statusEl.textContent = text;
+}
+
+function confidenceBadge(confidence) {
+  return `<span class="confidence ${confidence}">${confidence}</span>`;
+}
+
+function renderFieldRows(containerId, rows) {
+  const el = $(containerId);
+  el.innerHTML = rows
+    .map(
+      ({ label, value, confidence }) =>
+        `<div class="field-row"><span class="field-label">${label}</span><span class="field-value">${value}${confidenceBadge(
+          confidence
+        )}</span></div>`
+    )
+    .join('');
+}
+
+function renderAll() {
+  const loc = state.location;
+  renderFieldRows('location-fields', [
+    {
+      label: 'Coordinates',
+      value: loc.value ? `${loc.value.latitude.toFixed(5)}, ${loc.value.longitude.toFixed(5)}` : loc.reason,
+      confidence: loc.confidence,
+    },
+    {
+      label: 'Accuracy',
+      value: loc.value ? `±${Math.round(loc.value.accuracy)} m` : '—',
+      confidence: loc.confidence,
+    },
+  ]);
+
+  const net = state.network;
+  renderFieldRows('network-fields', [
+    { label: 'Effective type', value: net.value?.effectiveType ?? net.reason, confidence: net.confidence },
+    { label: 'Downlink', value: net.value ? `${net.value.downlink} Mb/s (est.)` : '—', confidence: net.confidence },
+    { label: 'Round-trip time', value: net.value ? `${net.value.rtt} ms (est.)` : '—', confidence: net.confidence },
+  ]);
+
+  const hw = state.hardware;
+  renderFieldRows('hardware-fields', [
+    {
+      label: 'Logical cores',
+      value: hw.value?.hardwareConcurrency ?? hw.reason,
+      confidence: hw.value?.hardwareConcurrency != null ? hw.confidence : 'unknown',
+    },
+    {
+      label: 'Device memory',
+      value: hw.value?.deviceMemory != null ? `${hw.value.deviceMemory} GB (bucketed)` : 'Not exposed by this browser.',
+      confidence: hw.value?.deviceMemory != null ? hw.confidence : 'unknown',
+    },
+  ]);
+
+  const mic = state.microphone;
+  renderFieldRows('mic-fields', [
+    { label: 'Status', value: mic.reason, confidence: mic.confidence },
+  ]);
+
+  const bat = state.battery;
+  renderFieldRows('battery-fields', [
+    { label: 'Charging', value: bat.value ? (bat.value.charging ? 'Yes' : 'No') : bat.reason, confidence: bat.confidence },
+    { label: 'Level', value: bat.value ? `${Math.round(bat.value.level * 100)}%` : '—', confidence: bat.confidence },
+  ]);
+
+  stateEl.textContent = JSON.stringify(state, null, 2);
+}
+
+// --- Location -----------------------------------------------------------
+
+function requestLocation() {
+  if (!('geolocation' in navigator)) {
+    state.location = { value: null, confidence: 'unknown', reason: 'Geolocation is not supported in this browser.' };
+    renderAll();
+    return;
+  }
+
+  setStatus('Requesting location permission…');
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      state.location = {
+        value: {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        },
+        confidence: 'verified',
+        reason: 'Granted and read just now.',
+      };
+      setStatus('Location granted and read.');
+      renderAll();
+    },
+    (error) => {
+      state.location = { value: null, confidence: 'unknown', reason: `Location unavailable: ${error.message}` };
+      setStatus('Location request did not succeed.');
+      renderAll();
+    },
+    { enableHighAccuracy: false, timeout: 10000 }
+  );
+}
+
+// --- Network (read-only, no permission) ---------------------------------
+
+function readNetworkInfo() {
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (!connection) {
+    state.network = { value: null, confidence: 'unknown', reason: 'Network Information API unsupported in this browser.' };
+    renderAll();
+    return;
+  }
+
+  const readConnection = () => {
+    state.network = {
+      value: {
+        effectiveType: connection.effectiveType,
+        downlink: connection.downlink,
+        rtt: connection.rtt,
+      },
+      confidence: 'observed',
+      reason: 'Reported by the Network Information API.',
+    };
+    renderAll();
+  };
+
+  readConnection();
+  connection.addEventListener?.('change', readConnection);
+}
+
+// --- Hardware (read-only, no permission) ---------------------------------
+
+function readHardwareInfo() {
+  const hardwareConcurrency = 'hardwareConcurrency' in navigator ? navigator.hardwareConcurrency : null;
+  const deviceMemory = 'deviceMemory' in navigator ? navigator.deviceMemory : null;
+
+  state.hardware = {
+    value: { hardwareConcurrency, deviceMemory },
+    confidence: 'observed',
+    reason: hardwareConcurrency == null && deviceMemory == null ? 'Neither value is exposed by this browser.' : 'Reported by the browser.',
+  };
+  renderAll();
+}
+
+// --- Microphone level (button-gated) -------------------------------------
+
+let micStream = null;
+let micAudioCtx = null;
+let micAnalyser = null;
+let micFrame = null;
+
+function startMicMeter() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    state.microphone = { value: null, confidence: 'unknown', reason: 'Microphone capture is not supported in this browser.' };
+    renderAll();
+    return;
+  }
+
+  setStatus('Requesting microphone permission…');
+  navigator.mediaDevices
+    .getUserMedia({ audio: true })
+    .then((stream) => {
+      micStream = stream;
+      micAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = micAudioCtx.createMediaStreamSource(stream);
+      micAnalyser = micAudioCtx.createAnalyser();
+      micAnalyser.fftSize = 2048;
+      source.connect(micAnalyser);
+
+      const buffer = new Float32Array(micAnalyser.fftSize);
+      const meterEl = $('mic-meter');
+
+      const tick = () => {
+        micAnalyser.getFloatTimeDomainData(buffer);
+        let sumSquares = 0;
+        for (let i = 0; i < buffer.length; i += 1) sumSquares += buffer[i] * buffer[i];
+        const rms = Math.sqrt(sumSquares / buffer.length);
+        meterEl.style.width = `${Math.min(100, rms * 400)}%`;
+        state.microphone = { value: { rms }, confidence: 'verified', reason: 'Live RMS from your microphone.' };
+        renderAll();
+        micFrame = requestAnimationFrame(tick);
+      };
+      tick();
+      setStatus('Microphone meter running. Press Stop to release the microphone.');
+    })
+    .catch((error) => {
+      state.microphone = { value: null, confidence: 'unknown', reason: `Microphone unavailable: ${error.message}` };
+      setStatus('Microphone request did not succeed.');
+      renderAll();
+    });
+}
+
+function stopMicMeter() {
+  if (micFrame) cancelAnimationFrame(micFrame);
+  micFrame = null;
+  micStream?.getTracks().forEach((track) => track.stop());
+  micStream = null;
+  micAudioCtx?.close();
+  micAudioCtx = null;
+  micAnalyser = null;
+  const meterEl = $('mic-meter');
+  if (meterEl) meterEl.style.width = '0%';
+  state.microphone = { value: null, confidence: 'unknown', reason: 'Stopped. Microphone released.' };
+  setStatus('Microphone meter stopped.');
+  renderAll();
+}
+
+// --- Battery (best-effort, read-only) -------------------------------------
+
+function readBatteryInfo() {
+  if (!navigator.getBattery) {
+    state.battery = { value: null, confidence: 'unknown', reason: 'Battery Status API unsupported or restricted in this browser.' };
+    renderAll();
+    return;
+  }
+
+  navigator
+    .getBattery()
+    .then((battery) => {
+      const readBattery = () => {
+        state.battery = {
+          value: { charging: battery.charging, level: battery.level },
+          confidence: 'observed',
+          reason: 'Reported by the Battery Status API.',
+        };
+        renderAll();
+      };
+      readBattery();
+      battery.addEventListener('chargingchange', readBattery);
+      battery.addEventListener('levelchange', readBattery);
+    })
+    .catch(() => {
+      state.battery = { value: null, confidence: 'unknown', reason: 'Battery Status API present but the read failed.' };
+      renderAll();
+    });
+}
+
+// --- Wire up --------------------------------------------------------------
+
+document.querySelector('[data-action="request-location"]').addEventListener('click', requestLocation);
+document.querySelector('[data-action="start-mic"]').addEventListener('click', startMicMeter);
+document.querySelector('[data-action="stop-mic"]').addEventListener('click', stopMicMeter);
+
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  gates.setAccessibility('reducedMotion', true);
+}
+
+readNetworkInfo();
+readHardwareInfo();
+readBatteryInfo();
+renderAll();

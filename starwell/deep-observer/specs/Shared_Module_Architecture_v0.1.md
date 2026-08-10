@@ -92,7 +92,7 @@ Model packet.
 
 ### Boundary
 
-Model variables are interpretive display variables unless otherwise documented. They are not proof, diagnosis, prophecy, or hidden-state detection.
+Model variables are not proof, diagnosis, prophecy, or hidden-state detection.
 
 ## 3. Glyph Engine Registry
 

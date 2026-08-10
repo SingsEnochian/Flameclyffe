@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hearthfire.evidence-packet/v1",
+  "title": "Evidence Packet",
+  "description": "A structured receipt of what an agent found and how it synthesized it. Every substantive claim in the synthesis must be directly supported by a cited source. The Citation Steward enforces the Evidence Conservation Gate: citations may only be added where a source directly supports the claim; the synthesis may not be changed while adding citations.",
+  "type": "object",
+  "required": [
+    "schema", "packetId", "agentRunId", "query", "worldScope",
+    "evidence", "synthesis", "claimsSupported", "claimsUnsupported",
+    "uncertainty", "methodsUsed", "createdAt"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "hearthfire.evidence-packet/v1" },
+    "packetId": { "type": "string", "format": "uuid" },
+    "agentRunId": { "type": "string" },
+    "query": { "type": "string" },
+    "worldScope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["earth", "terra-aeterna", "luna", "feather-and-flame", "dreaming-grove", "cross-world"]
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "description": "Each source retrieved and its relevance to the query",
+      "items": {
+        "type": "object",
+        "required": ["sourceId", "sourceType", "worldId", "retrievalScore", "excerpt"],
+        "properties": {
+          "sourceId": { "type": "string" },
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "document", "observation", "telemetry", "conversation",
+              "code", "image", "audio", "research-paper", "world-canon",
+              "character-record", "theory", "experiment-log", "field-note",
+              "graph-node", "graph-path"
+            ]
+          },
+          "worldId": { "type": "string" },
+          "canonicalStatus": {
+            "type": "string",
+            "enum": ["canonical", "draft", "superseded", "disputed", "unknown"]
+          },
+          "epistemicStatus": { "type": "string" },
+          "retrievalScore": {
+            "type": "number",
+            "description": "Combined retrieval score (graph + vector + BM25 + rerank)"
+          },
+          "retrievalMethod": {
+            "type": "string",
+            "enum": ["graph-traversal", "vector-search", "bm25", "hybrid", "rerank", "direct-lookup"]
+          },
+          "graphPath": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Node IDs of the multi-hop path if found via graph traversal"
+          },
+          "excerpt": { "type": "string" },
+          "contextualEnvelope": {
+            "type": "object",
+            "description": "World-aware context added at indexing time",
+            "properties": {
+              "worldId": { "type": "string" },
+              "datasetVersion": { "type": "string" },
+              "sourceType": { "type": "string" },
+              "canonicalStatus": { "type": "string" },
+              "timeRange": { "type": "string" },
+              "entities": { "type": "array", "items": { "type": "string" } },
+              "motifs": { "type": "array", "items": { "type": "string" } },
+              "theoryLenses": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "stale": { "type": "boolean" },
+          "staleReason": { "type": "string" },
+          "supersededBy": { "type": "string" },
+          "privacyScope": {
+            "type": "string",
+            "enum": ["local-only", "review-required", "shared", "public"]
+          }
+        }
+      }
+    },
+    "synthesis": {
+      "type": "string",
+      "description": "The agent's synthesis. Every factual claim here must appear in claimsSupported with sourceIds. Causation is not inferred from correlation. Units and uncertainty are preserved."
+    },
+    "claimsSupported": {
+      "type": "array",
+      "description": "Claims in the synthesis that are directly backed by retrieved evidence",
+      "items": {
+        "type": "object",
+        "required": ["claim", "sourceIds", "epistemicStatus"],
+        "properties": {
+          "claim": { "type": "string" },
+          "sourceIds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "sourceId values from evidence array that directly support this claim"
+          },
+          "epistemicStatus": { "type": "string" },
+          "measurement": {
+            "type": "object",
+            "description": "If the claim includes a measurement",
+            "properties": {
+              "value": {},
+              "unit": { "type": "string" },
+              "uncertainty": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "claimsUnsupported": {
+      "type": "array",
+      "description": "Claims the agent considered but could not support from retrieved evidence",
+      "items": {
+        "type": "object",
+        "required": ["claim", "reason"],
+        "properties": {
+          "claim": { "type": "string" },
+          "reason": {
+            "type": "string",
+            "description": "Why not supported: no evidence found | evidence insufficient | data stale | world scope mismatch | privacy restricted"
+          }
+        }
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "description": "Contradictions found between retrieved sources",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "sourceIds": { "type": "array", "items": { "type": "string" } },
+          "severity": { "type": "string", "enum": ["minor", "significant", "critical"] }
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "string",
+      "description": "Explicit statement of what is uncertain, missing, or unknown"
+    },
+    "suggestedGraphPatches": {
+      "type": "array",
+      "description": "IDs or descriptions of graph patch proposals this evidence warrants",
+      "items": { "type": "string" }
+    },
+    "testsRequired": {
+      "type": "array",
+      "description": "Specific tests needed to verify unsupported claims or resolve contradictions",
+      "items": { "type": "string" }
+    },
+    "methodsUsed": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "graph-traversal", "vector-search", "bm25", "rerank",
+          "theory-lens", "temporal-filter", "spatial-filter",
+          "model-workspace-readout", "tool-call", "multi-hop"
+        ]
+      }
+    },
+    "toolsUsed": { "type": "array", "items": { "type": "string" } },
+    "agentTrace": {
+      "type": "object",
+      "description": "Which specialists contributed to this packet",
+      "properties": {
+        "archivist": { "type": "boolean" },
+        "graphCartographer": { "type": "boolean" },
+        "earthSignalSurveyor": { "type": "boolean" },
+        "theoryLensSteward": { "type": "boolean" },
+        "contradictionExaminer": { "type": "boolean" },
+        "citationSteward": { "type": "boolean" }
+      }
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "boundary": {
+      "type": "string",
+      "description": "Explicit statement of this packet's limitations and scope"
+    }
+  }
+}

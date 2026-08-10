@@ -1,0 +1,24 @@
+{
+  "schema": "hearthfire.ingest-receipt/v1",
+  "action": "ingest",
+  "documentId": "492282cf-464c-41cf-92b9-e570a18d787c",
+  "sha256": "8c27c9c8b34c08d65918b00bafe6206851c56b95d5531762b9fc97366f3fa821",
+  "importedAt": "2026-07-18T20:04:13.261Z",
+  "provenance": {
+    "kind": "hearthfire-first-light",
+    "path": "C:\\Users\\light\\Flameclyffe\\apps\\starwell-server\\public\\hearthgate-archive.example.json",
+    "originalRetainedBy": "source-path"
+  },
+  "originalCopied": false,
+  "extraction": {
+    "status": "complete",
+    "textFile": "492282cf-464c-41cf-92b9-e570a18d787c.txt",
+    "pageCount": null,
+    "characterCount": 1823,
+    "wordCount": 158,
+    "ocr": {
+      "status": "not-needed"
+    },
+    "warnings": []
+  }
+}

@@ -1,0 +1,678 @@
+# Sentinel Lantern — app PRD
+
+**Status:** ASPIRATIONAL — design only, no code. No Sentinel Lantern surface exists in the
+repo. This PRD is the design contract; nothing here is "implemented" until earned by code +
+the proving tests below (`tools/claims-audit` rules apply). Many numbers (latency, dwell,
+countdown durations) are **assumptions-to-verify** against the final Maverick SDK + hardware —
+each is tagged `[VERIFY]`.
+
+Source of intent: L. Catherine Dion's Lantern Stack spec v0.1 §12
+(`source-spec-lantern-stack-v0.1.md`), reconciled with the Lantern design law
+(`goals-and-guidelines.md`). Sentinel is **§7.C** of the slate and the **highest-risk** Lantern
+app — it is where the Safety Gate earns its keep. **Two design decisions are on record here
+(user-directed, 2026-06-09):** (1) Sentinel targets **real smart-home integrations with device-state
+feedback**, not a sim stub (§8); (2) the aid flow is reframed as a non-medical **"Reliable Contact"**
+("reach your person"), with pre-syncope brace + L5 emergency SOS **removed from MVP** (§3.4).
+Research grounding: `research/03-lowvision-navigation-safety.md` (§4 — pre-syncope/SOS, now a
+deferred future-with-validation item) and `research/04-low-effort-interaction.md`.
+
+> This PRD is partly written for Catherine to read and co-author. It is deliberately honest
+> about what is grounded vs speculative, and about what only real hardware + a real tester can
+> settle. Open questions she/Peter must resolve are flagged in §11.
+
+---
+
+## 0. Substrate ownership (read first — do not redefine here)
+
+The **Lantern substrate** (`app-prd-lantern-substrate.md`, parallel, OWNER) defines and owns,
+once, in the shared library:
+
+- the **Safety Gate** + the **Risk Levels L0–L5** taxonomy (spec §8);
+- **redundant input** (G1 — every action reachable by ≥2 of {gaze-select, head gesture, voice,
+  tap/switch, phone}; never mandatory fusion);
+- the **confirm / cancel / undo** patterns + the **protected confirmation card** (spec §9);
+- **panic-cancel** (hardware button / emergency-stop gesture);
+- **Low-Energy / reclined-bed / minimal-head-movement** posture modes (G3, spec §16);
+- the **Status Bead** default-HUD element (spec §10);
+- the `ActionIntent` / `SafetyEvent` / `UserSettings` data model (spec §7).
+
+Sentinel **references** these. It **declares each action's Risk Level**, **assembles** the
+substrate's shared widgets, and **does not** invent its own activation/confirm/cancel machinery.
+A per-app confirm card, a per-app dwell ring, a per-app countdown timer = a substrate violation
+(`tools/shared-pattern-audit`-class) and a patent-posture regression (widget-level invariants,
+not per-app). Sentinel's job is **nouns + intent + Risk-Level tags + recipient/device config**.
+
+---
+
+## 1. Purpose
+
+Sentinel Lantern lets a **hands-reduced / bedbound / fatigue / chronically-ill** wearer do two
+things, hands-free and voice-optional, when hands or voice aren't reliable:
+
+1. **Control their immediate environment** — lights on/off, fan on/off, simple IoT — without
+   a phone, without standing up, without speaking. (`L3`.)
+2. **Reach a pre-chosen reliable contact** — a wearer-INITIATED message or call to a trusted
+   person the wearer configured in advance ("Reliable Contact"); optionally Alexa Drop In (if the
+   wearer set it up). This is framed as a **communication convenience for hands-reduced use** —
+   *"reach your person"* — **NOT** an emergency / medical / SOS / "summon help" function. The wearer
+   is **always the sender and owner**. (`L4`.)
+
+The point is **agency in a moment of low capacity**: the bedbound user turns the light off
+without reaching; the fatigued user reaches their partner without finding the phone or forming
+words. **Reliable Contact is convenience, not a lifeline** — it does not promise that help
+arrives, and nothing in Sentinel is framed as emergency or medical (R1).
+
+## 2. Target users, scope, non-goals
+
+**Target users** (spec §4): limited hand mobility; post-surgery/injury recovery; chronically ill
+(fatigue/pain/fluctuating capacity, ME/CFS, MS, EDS, POTS); bedbound/reclined/low-movement; users
+who sometimes can't speak clearly. **Secondary:** the household/Reliable Contact who *receives* a
+wearer-sent message (never watches the wearer).
+
+**In scope (MVP, spec §12):** lights on/off + fan on/off (only if connected AND safe);
+a preconfigured **Reliable Contact** message/call to a pre-chosen trusted person (a
+hands-reduced communication convenience, **not** SOS); Alexa Drop In or equivalent (only if
+user-configured); a **visible safety lock**; a **testing mode**.
+
+**Later (spec §12):** caregiver dashboard (CAUTION — R3, see §5), routine check-ins, escalation
+ladder, fall-risk/immobility context (opt-in only), broader smart-home ecosystem adapters (§8).
+
+**Deferred / out of scope (would require medical validation; never claim medical/emergency
+reliability — R1):** the `03` low-vision **pre-syncope brace** prompt and any **L5 emergency /
+countdown SOS** (with GPS / Medical ID). These are **removed from MVP.** They remain documented as
+a *future-with-validation* item only: building them at all requires co-design **plus** a real
+medical-validation plan, and even then Sentinel must never present them as a guaranteed lifeline.
+Reliable Contact deliberately does **not** cover this ground — it is "reach your person," not
+"summon emergency help." See §3.4, §11.5.
+
+**Non-goals (red lines — violating these is a defect, not a tradeoff):**
+
+- **NOT a medical or emergency-response device (R1).** Sentinel does not detect falls reliably,
+  does not monitor vitals as a medical function, and **must not claim emergency/medical
+  reliability** in any surface or doc. **Reliable Contact is a communication convenience, never an
+  SOS/lifeline** — it is a wearer-initiated message/call to a pre-chosen person, framed as "reach
+  your person," and it is **not** marketed or worded as "summon help" / "call for help" /
+  emergency. (Emergency/SOS and pre-syncope brace are removed from MVP, §2.) Marketing/onboarding
+  say so. Language audited like `claims-audit` (G7).
+- **NOT surveillance of the wearer (R3).** No caregiver-facing monitoring dashboard, no silent
+  data exfiltration, no compliance tracking, no "is grandma up yet" feed. See §5.
+- **NO Reliable-Contact flow from gaze alone** (spec §3, R3). **NO appliance activation
+  without explicit confirm** (spec §5.1). **Coffee-maker-class devices (anything that heats,
+  starts a motor, or is unsafe to leave on) are DEFERRED** until reliable device-state feedback
+  exists (spec §12) — MVP devices are limited to lights + fan, which are safe to toggle blind.
+  (Note §8: Matter subscriptions / Hue SSE / HA WebSocket now provide that state feedback, so the
+  deferral can be lifted **per-device, when proven on a real adapter**, not by fiat.)
+- **NOT a home-automation platform.** Sentinel is a *safe control surface* over a small set of
+  the wearer's *already-configured* devices/contacts. It does not discover, provision, or manage
+  a smart home.
+
+## 3. UX — room control, Reliable Contact, the safety lock, testing mode, status
+
+### 3.1 Default HUD (quiet by default — G2)
+
+At rest Sentinel draws **nothing** beyond the substrate **Status Bead** (which may carry the
+**safety-lock** glyph and any **caregiver-flow state**). No persistent menu. Quiet-by-default is
+mandatory; the additive optic cannot render a "dim" recessive panel, so calm = *absent until
+summoned* (G2). The Sentinel control strip is **summoned** (gaze-to-bead / head / voice / tap),
+not always shown.
+
+### 3.2 Room control (L3) — lights / fan / simple IoT
+
+A summoned **device strip**: one large card per configured device (≥ config floor in *both* axes,
+spec §10 "no tiny buttons"), each showing **device name + current state if known** (e.g. "Bedroom
+lamp — ON"). Flow:
+
+1. **Focus** (gaze / head / pointer) highlights a device card — `L0`, no consequence, just a
+   selection highlight (every selectable card shows the substrate selection highlight).
+2. **ACT** stages the intended change (toggle) and opens the substrate **confirmation card**:
+   *named target* + *action* + a visible **countdown** (`[VERIFY]` ~3 s) + explicit **confirm**
+   signal + **cancel-until-execution**. This is **two-step, no gaze-only** (G1/L3) — the confirm
+   must come from a *non-gaze-includable* second signal (head-nod / voice "yes" / tap / switch);
+   a gaze saccade alone may select but **may not** be the L3 confirm.
+3. **CONFIRM** executes; the card shows **"Bedroom lamp → ON"** result + an **undo** affordance
+   (lights/fan are reversible). If no device-state feedback is available, the result line says
+   **"sent — state unknown"**, never a false "ON".
+
+**Device safety rules (L3):** only devices the wearer pre-registered as `room_devices` appear;
+only **safe-to-toggle-blind** classes (light, fan) are enabled in MVP. Coffee-maker-class
+appears **greyed with a "needs device feedback" note**, never actionable (claim honesty).
+
+### 3.3 Reliable Contact (L4) — reach a pre-chosen person (NOT SOS)
+
+A summoned **Reliable-Contact strip** (visually distinct from the room strip — different color
+band, a contact glyph), one card per configured contact/flow. This is a **wearer-initiated
+message or call to a pre-chosen trusted person** — a *communication convenience for hands-reduced
+use*, **not** emergency/medical/SOS. Wording throughout is "reach your person," never "summon
+help." Flow (substrate protected confirmation card, `L4`):
+
+1. **Focus** highlights the contact card — `L0`.
+2. **ACT** opens the **protected confirmation card**: **visible recipient** ("Reach: Jess
+   (sister)"), the action ("Send message" / "Call"), a **cancel countdown** (`[VERIFY]` ~5 s,
+   longer than L3), explicit **confirm** signal, **cancel-until-execution**. **No silent trigger;
+   no gaze-only** (G1/L4) — confirm requires an explicit non-gaze second signal.
+3. **CONFIRM** sends/calls, then shows **post-action status**: **"Sent to Jess — confirmed"** /
+   **"…— no confirmation yet"** / **"Failed — retry?"** (the honest four-status model, §3.7).
+   Reliable Contact shows **visible recipient confirmation** of receipt where the channel returns
+   a receipt; where it doesn't, the status says so honestly (no fake "confirmed"). It never claims
+   the contact will respond or that help is coming — it reports only what the *channel* reports.
+
+Drop In (if `cloud_services_enabled` + a configured target): same `L4` card; the recipient is the
+Drop-In endpoint; status shows the connection state. Still framed as "reach your person," not SOS.
+
+### 3.4 Deferred — pre-syncope brace + L5 emergency SOS (REMOVED from MVP)
+
+**Removed from MVP (user direction, 2026-06-09).** The `03` §4 **pre-syncope "find a seat / brace"
+prompt** and any **L5 countdown SOS** (GPS + Medical ID escalation) are **not built** and are not
+part of the Reliable-Contact feature. They are documented here only as a **future-with-validation**
+possibility: building them at all would require co-design **plus** a real medical-validation plan,
+and — load-bearing — they **MUST NOT claim medical/emergency reliability without validation (R1)**.
+The low-vision pre-syncope idea from `research/03` stays a documented future item, never an MVP
+deliverable. Reliable Contact (§3.3) intentionally does **not** approximate an SOS: it is "reach
+your person," not "summon emergency help," precisely so Sentinel makes no emergency/medical claim.
+
+### 3.5 The visible safety lock
+
+A **wearer-controlled lock** (spec §12) shown in the Status Bead. While **locked**, all `L3+`
+actions are unavailable (focus still previews, but ACT is refused with "Sentinel is locked").
+Unlock is itself a deliberate non-gaze action. Purpose: a fatigued/sleeping/seizing wearer, or
+one whose gaze is wandering, cannot fire a real action; the lock is the coarse Midas-touch
+backstop *on top of* the per-action ceremony. Default state and auto-relock timeout are
+co-design questions (§11).
+
+### 3.6 Testing mode (Catherine §18 — exercise the L4 Reliable-Contact flow WITHOUT sending)
+
+A first-class, **clearly-indicated** mode (distinct banner color + a persistent "TEST MODE" tag
+in the Bead) in which **every Reliable-Contact flow runs the full UI — recipient card, countdown,
+confirm, cancel, post-action status — but the External Service Adapter is a no-op stub**: nothing
+is sent. The result line reads **"TEST — nothing was sent"**. This lets the wearer (and Catherine
+as tester) rehearse the exact flow, learn the timings, and verify cancel/panic-cancel, with zero
+risk of a real message/call going out. Room control (`L3`) in test mode actuates the **sim-stub
+device** (§8 — demo/offline only), never a real bulb. Testing mode is **per-session, never sticky
+into real use silently** — leaving it requires an explicit toggle and the Bead tag clears.
+
+### 3.7 "What just happened" — nothing-sent vs sent (load-bearing, spec §5.4, §18)
+
+Every Sentinel action ends in an **unambiguous, persistent-until-dismissed status line**, because
+the failure mode here is catastrophic (a wearer who thinks help is coming when it isn't, or who
+fired an alert they meant to cancel). The four canonical statuses, each visually distinct:
+
+| Status | When | Copy |
+|---|---|---|
+| **NOTHING SENT** | cancelled / timed out / panic-cancel / test mode | "Cancelled — nothing was sent." / "TEST — nothing was sent." |
+| **SENT** | dispatched, awaiting receipt | "Sent to Jess — waiting for confirmation…" |
+| **CONFIRMED** | recipient/channel confirmed receipt | "Jess got it." |
+| **FAILED** | dispatch error | "Couldn't send — retry?" |
+
+"Nothing sent" and "Sent" must never be visually confusable. Atomicity (§4) guarantees a
+cancelled/timed-out action leaves **no** SafetyEvent-as-sent and **no** partial dispatch.
+
+## 4. Risk-Level mapping for EVERY action
+
+Each action declares its Risk Level; the Safety Gate enforces the row. `[VERIFY]` = timing to
+confirm on hardware.
+
+| Action | Risk | Gate behaviour (enforced by substrate) |
+|---|---|---|
+| Summon device/Reliable-Contact strip; focus a card; preview state | **L0** | no confirm; easy dismiss; selection highlight only |
+| Toggle safety lock (lock direction) | **L1** | simple confirm; undo (unlock) |
+| Toggle safety lock (unlock direction) | **L2** | confirm (deliberate, non-gaze); it re-arms actions, so treat as persistent |
+| Enter/leave testing mode | **L2** | confirm; persistent; clear Bead indicator |
+| **Light on/off** | **L3** | two-step; named target; countdown `[VERIFY]`~3 s; **no gaze-only**; cancel-until-exec; undo; device safety rules |
+| **Fan on/off** | **L3** | as above |
+| Coffee-maker-class | **deferred** | greyed; not actionable until reliable device-state feedback (R1 honesty) |
+| **Reliable Contact — message / call a pre-chosen person** | **L4** | strong confirm; **visible recipient**; cancel countdown `[VERIFY]`~5 s; **no silent trigger; no gaze-only**; post-action status; visible recipient confirmation. **NOT SOS** — framed "reach your person" (R1) |
+| **Alexa Drop In (if configured)** | **L4** | as L4; recipient = Drop-In target; connection-state status; still "reach your person," not SOS |
+| **Pre-syncope brace prompt / L5 emergency SOS** | **deferred (REMOVED from MVP)** | future-with-validation only; never built without co-design + a medical-validation plan; **never claims medical/emergency reliability (R1)** (§3.4) |
+
+**Protected confirmation card (L3+):** always shows **recipient/device + action + countdown +
+explicit confirm + cancel-until-execution**. **Panic-cancel** (hardware button / emergency-stop
+gesture, substrate-owned) aborts any pending or counting-down action at any instant and lands on
+the **NOTHING SENT** status. Panic-cancel is reachable **without gaze** by definition.
+
+## 5. Caregiver vs surveillance (R3) — handled explicitly
+
+**The line (R3, verbatim intent):** *the wearer is always the sender and owner, never the
+surveilled. A caregiver may RECEIVE a wearer-sent alert but never WATCH the wearer.*
+
+Design consequences, non-negotiable:
+
+- **No monitoring dashboard ships.** There is no caregiver-facing app that shows the wearer's
+  state, location, activity, "last seen", or compliance. The only thing a Reliable Contact ever
+  gets is a **discrete message the wearer explicitly sent** (an SMS/call/notification/Drop-In *the
+  wearer confirmed*), plus whatever that one message contains.
+- **Every outbound flow is wearer-initiated and wearer-confirmed.** There is no "auto-notify if
+  no movement for N hours" in MVP. Even the later opt-in fall-risk/immobility context (§10) must
+  be **wearer-owned, default-off, and only ever surfaces a prompt *to the wearer* who then
+  chooses to send** — it never sends on the wearer's behalf silently.
+- **The wearer owns and can revoke recipients.** `safe_contacts` are wearer-configured, locally
+  stored, wearer-deletable; removing a contact removes their ability to be sent to. No recipient
+  can add themselves or request data.
+- **Pull, never push, of state.** Nothing about the wearer's state leaves the device except
+  inside a message the wearer confirmed. No background telemetry, no location beacon, no
+  "presence" channel (G6).
+- **If a caregiver dashboard is ever built (later, CAUTION):** it must be **wearer-owned and
+  wearer-explicit** — the wearer chooses to share specific, named, time-bounded things, sees
+  exactly what's shared, and can revoke instantly. A dashboard that the *caregiver* controls or
+  that shows anything the wearer didn't choose to share is an R3 violation and does not ship.
+  This bar is high enough that MVP simply does not include it.
+
+The community grounding (`05` §5–6, G8): vulnerable-user distrust of "monitoring" is universal;
+memory/safety aids must **reduce dependence, not create it**. Sentinel's safety value comes from
+*the wearer's amplified agency*, not from someone watching them.
+
+## 6. Collaborator's required sections
+
+### 6.1 Accidental-activation avoidance (CRITICAL here — no accidental Reliable-Contact sends / toggles)
+
+This is the app where Midas-touch is most dangerous. Layers, all substrate-provided, stacked:
+
+1. **Gaze is attention, not consent (spec §5.1).** Gaze only focuses/previews. It can **never**
+   be the confirm for `L3+`. The substrate enforces "no gaze-only" on these levels.
+2. **Visible safety lock (§3.5)** — a coarse global off-switch the wearer holds; while locked,
+   no real action can fire regardless of gaze.
+3. **Two-step + named target + countdown (L3) / protected card + recipient + longer countdown
+   (L4).** Ceremony scales to consequence (spec §8). (No L5 in MVP — §3.4.)
+4. **Non-gaze confirm requirement** for `L3+` — the second signal must be a deliberate
+   head-nod / voice / tap / switch, decoupled from "looking" (the research-favored Midas breaker,
+   `04` §2). A wandering or fatigued gaze cannot complete the action.
+5. **Cancel-until-execution + panic-cancel + timeout-dismisses** — an action mid-countdown is
+   abortable by any input incl. look-away/timeout, and the hardware panic-cancel always wins.
+6. **Debounce / ignore-repeat** (substrate, `04` §4) — a single intent never double-fires; a
+   tremor/jitter can't re-trigger a just-cancelled flow.
+7. **Testing mode** so rehearsal never risks a real send.
+
+Failure to defeat accidental activation here is not a polish gap — it is a safety defect. The
+test plan's accidental-activation **fuzz** (§10) is mandatory and HARD.
+
+### 6.2 Calibration assumptions
+
+- **Assumed gaze accuracy:** the project's config floor (≥2.8°/3.2° in both axes); Sentinel cards
+  are sized at or above it. **Assumption-to-verify** against the final SDK's reported gaze
+  accuracy (`[VERIFY]`).
+- **This population breaks standard calibration** (`03` §6, `04` §6): nystagmus, strabismus,
+  eccentric PRL, ME/CFS jerky pursuit, dry eye/ptosis. So Sentinel **does not assume gaze
+  calibrates** for its users. Every action is reachable by the G1 non-gaze paths (head / voice /
+  switch / phone) hitting the *same* Safety Gate. A wearer who can't calibrate gaze can still lock
+  the house, toggle a light, and reach their Reliable Contact — **and the L3+ "no gaze-only" rule
+  means this is not even a degraded path, it's a first-class one.**
+- **Graceful degradation (spec §6):** on low ET confidence / drift / dropout, Sentinel falls back
+  to non-gaze selection automatically and shows the substrate "gaze unavailable" affordance;
+  pending actions are never auto-confirmed by a recovering/noisy gaze signal.
+
+### 6.3 Dwell alternatives (NO gaze-only for L3+)
+
+- **No `L3+` action uses dwell as its confirm.** Dwell is gaze-only by nature; the "no gaze-only"
+  rule forbids it for room control, aid, and emergency. Confirm = head-nod / voice / tap / switch
+  (substrate), or the project saccade-to-follow-target as the *select* step (not the L3+ commit).
+- **Where dwell appears at all** (e.g. dismissing an `L0` preview), it is only on **fully
+  reversible** targets and shows the **substrate counting-down affordance**; duration is tunable
+  (`[VERIFY]` ~0.6 s) and a non-dwell path exists in parallel (G1, `04` goblin #2/#7).
+- **Calibration-light smooth-pursuit** (Pursuits/Orbits, `04` §2) is the preferred *selection*
+  primitive for the strip where it lowers effort — but it still routes into a non-gaze **confirm**
+  for `L3+`. Pursuit selects; it never commits a consequential action alone.
+
+### 6.4 Fatigue / energy budget (G3)
+
+- **Resting cost ~zero:** at rest Sentinel is the Bead only; no per-frame work, no polling of
+  devices that isn't event-driven (the substrate's at-rest-allocation discipline applies).
+- **Low-Energy mode (substrate):** larger targets, longer/forgiving countdowns and timeouts,
+  head-nod/voice confirm preferred over sustained gaze, fewer cards shown at once. Toggleable from
+  the phone so a wearer on a bad day sets it without HUD interaction (`04` impl #1).
+- **Reclined/bed + minimal-head-movement modes (G3, spec §16):** the device strip and
+  Reliable-Contact strip must be reachable and confirmable **without head turns** and **while
+  reclined** — this is the bedbound user's core scenario. The substrate owns these modes; Sentinel
+  must not place a card or a confirm target that requires a head turn to reach in
+  minimal-head-movement mode.
+- **Resumability:** a flow interrupted by PEM/brain-fog/look-away is **abandoned cleanly**
+  (atomicity, §4) — Sentinel never leaves a half-armed action that the wearer must remember to
+  finish or cancel. (For a *safety* app, "resume the pending Reliable-Contact send later" would be
+  a hazard; here resumability means "interruption safely cancels", not "resume mid-send".)
+
+### 6.5 What waits for real HMD testing (simulator can't honestly validate)
+
+- **Real device actuation** — toggling an actual bulb/fan via a real bridge/webhook/Alexa.
+  Simulator uses a labeled stub (§8). Hardware-gated.
+- **Reliable device-state feedback** — knowing a device's *actual* state (the gate for un-deferring
+  coffee-maker-class). The §8 real adapters (Matter subscriptions / Hue SSE / HA WebSocket) provide
+  this; what waits for hardware is **confirming the round-trip latency + reliability on-device**
+  per adapter; **`[VERIFY]`**.
+- **Real Reliable-Contact delivery + recipient confirmation** — actual SMS/call/Drop-In send +
+  delivery receipt. Sim stubs the send; only real-channel testing validates delivery and the
+  CONFIRMED status.
+- **Comfort/accuracy/latency of the confirm signals** — whether head-nod/voice/dwell timings feel
+  right, and whether accidental activation actually stays at zero, can only be settled with
+  Catherine on real hardware (spec §5.6, §18).
+- **Panic-cancel hardware button / gesture** — depends on which physical input the Maverick
+  exposes (spec §18). Sim approximates with a key; real button is hardware-gated.
+- **The pre-syncope IMU+HR inference** — deferred / removed from MVP (§3.4); needs real sensors +
+  a medical-validation plan before it could ever be built; never validated in sim.
+
+### 6.6 Eye-tracking UI patterns (Eyefluence-informed) + FTO check
+
+- **Patent posture:** Sentinel implements **no** activation animation, pursuit, reveal, or confirm
+  of its own. It reuses the FTO-bundle widget-level invariants (A1+B8+C2+E1–E4) via the substrate /
+  shared `HmdRenderer` helpers. Forking the activation/confirm into a per-app drawer is a
+  patent-posture regression (Eyefluence-style infringement is exactly what the bundle avoids) —
+  flag in review; caught by `tools/fto-check`.
+- **Eyefluence-informed patterns to USE:** gaze=select + decoupled deliberate confirm (Midas
+  breaker); large well-spaced targets; selection highlight on every card; saccade-to-follow-target
+  for *select*; smooth-pursuit for calibration-light selection.
+- **Patterns to AVOID** (Peter's expertise hook, `04` goblins): gaze-only commit on consequential
+  actions; per-key/ per-action dwell as the primary commit; tiny targets; ambiguous activation
+  zones; forced multimodal *fusion* (look AND nod AND speak) — redundancy is offered, never
+  required. Peter's review (spec §19) on comfortable gaze-confirmation models and calibration-drift
+  handling folds into the substrate, not here.
+
+## 7. Red lines & community position
+
+- **R1 — Not a medical/emergency device.** Sentinel does **not** diagnose, monitor vitals as a
+  medical function, or guarantee help arrives. **Reliable Contact is a wearer-initiated
+  communication convenience ("reach your person"), not an SOS / lifeline / clinical safety system**
+  — it is deliberately scoped away from emergency framing precisely to stay clear of R1. Emergency
+  SOS + pre-syncope brace are **removed from MVP** (§3.4); fall detection is known-unreliable
+  (`03` §4: wrist fall-detection 4.7%–77% sensitivity; a head IMU is worse, not better, as a sole
+  detector), which is part of why those flows are deferred behind a medical-validation plan. **No
+  surface or doc may imply emergency/medical reliability without validation.** Onboarding states:
+  *Reliable Contact reaches a person you chose; it is not an emergency service. Sentinel augments
+  your existing safety plan; it does not replace a medical alert, a caregiver, or 911.* Language
+  audited (G7, `claims-audit`). This is the **R1 home** for the whole Lantern slate's safety claims.
+- **R2 — Never a mobility-aid replacement.** Sentinel is room control + Reliable Contact, not
+  navigation; it does not position itself as a cane/guide-dog substitute.
+- **R3 — No surveillance; wearer-initiated only.** See §5 in full. The wearer is the sender and
+  owner; a caregiver receives wearer-sent alerts and never watches the wearer. No monitoring
+  dashboard, no silent exfiltration, no compliance tracking. Community grounding: `05` §5–6 —
+  vulnerable-user distrust of monitoring is universal; aids must reduce dependence, not create it.
+  Co-design (G8): this is the most contested area; Catherine's lived-experience input outranks
+  researcher assumptions and gates §5 before it locks.
+
+## 8. Smart-home integration plan (real APIs first; sim is demo/offline only)
+
+**Decision (user direction, 2026-06-09):** Sentinel does **not** target a sim stub. It targets
+**real smart-home control with reliable device-state feedback** on real phones; the labeled sim
+stub is **retained but only for demo / offline / CI / pre-hardware testing — explicitly NOT the
+ship target.** Device-state feedback is the whole game here: it is the property that lets the
+result line say a *true* "ON" (not "sent — state unknown") and is the documented gate
+(spec §12, R1 honesty) for ever un-deferring coffee-maker-class devices. The good news from the
+2025–26 landscape survey below: **several mainstream APIs now provide reliable device-state
+feedback** (Matter subscriptions, Hue's SSE event stream, Home Assistant's WebSocket state
+events, the ecosystem controller APIs), so state-feedback is no longer the blocker it was when
+this app was first scoped.
+
+### 8.1 The 2025–26 control-API landscape (researched; URLs in §Cross-references)
+
+The unifying fact: **Matter** (CSA standard; v1.4.1 May 2025, v1.5 Nov 2025) is now the
+local-control + state standard the whole industry is converging on. Matter gives **local control
+and real device-state via attribute *subscriptions*** (push state, not poll). The catch: becoming
+a *raw* Matter **controller/commissioner** requires CSA **Adopter** membership + a **Vendor ID** +
+the DAC/PKI attestation chain — real licensing friction. The practical move is therefore **ride an
+ecosystem's Matter controller** (Google Home / Apple Home / SmartThings each wrap Matter +
+commissioning + their own cloud devices behind one app-facing API) rather than embedding a bare
+Matter stack. Per-platform survey:
+
+| Platform | iOS / Android / Linux | Local / cloud | Reliable device-state feedback | Commissioning / auth model | Friction |
+|---|---|---|---|---|---|
+| **Matter (direct, via ecosystem controller)** | iOS + Android (Linux via HA) | **local** (+ Thread/Wi-Fi) | **Yes — attribute subscriptions (push)** | ecosystem controller does commissioning; raw controller needs CSA Adopter + Vendor ID + DAC | Med–High (raw); Low–Med via an ecosystem API |
+| **Google Home APIs** (Device / Structure / Commissioning / Automation) | **Android** public beta now; **iOS** beta coming | local control of Matter **+** 600M cloud devices | **Yes** (unified Device API state; local for Matter) | Google sign-in / OAuth; Developer Console project; Fast Pair commissioning | Med (Console project, beta caps ~100 users) |
+| **Apple HomeKit** (`HMHomeManager`/HomeKit framework) | **iOS / iPadOS only** | **local** (HAP) + Matter | **Yes** (HAP + Matter accessory state, change notifications) | user-permission dialog; no fee; HomeKit entitlement | Low on iOS; **zero reach on Android/Linux** |
+| **Amazon Alexa** (Smart Home Skill API; ACK; Drop In) | iOS + Android (Alexa app) | **cloud round-trip** (Lambda) | Partial — `ReportState` / `ChangeReport`, but cloud-latency + opaque | Login-with-Amazon account linking; skill certification; ACK = Amazon-managed cloud | **High** (skill cert + account linking); Drop In is a feature, not a clean public control API |
+| **Home Assistant** (REST + **WebSocket** APIs) | **iOS + Android + Linux** (anything HTTP) | **local** (LAN) | **Yes — WebSocket state-changed events (real-time push)** + REST `/states` | **long-lived access token** (≤10 yr) or OAuth2 | **Lowest** — no vendor approval; user self-hosts; one integration reaches Z-Wave/Zigbee/Matter/Hue/Tuya behind HA |
+| **Philips Hue** (local bridge **CLIP v2** + SSE) | iOS + Android + Linux (HTTPS) | **local** bridge (+ cloud remote API) | **Yes — `/eventstream/clip/v2` SSE push** + GET state | bridge **link-button** pairing → `hue-application-key`; developer program | Low (local); single-vendor (lights/plugs) |
+| **Samsung SmartThings** (cloud REST + Home API) | iOS + Android (cloud) | **cloud** (+ local hubs) | **Yes** — `GET /devices/{id}/status` (poll); cloud | OAuth2 (24 h tokens) / PAT; **Home API (Matter) is gated** (st.matter@samsung.com) | Med (cloud, token refresh); Home API request-gated |
+| **IFTTT / generic webhook** (Node-RED, etc.) | any (HTTP) | cloud (IFTTT) / local (self-host) | **No** (fire-and-forget; ≥5 min polling on IFTTT) | per-service OAuth / a webhook URL | Lowest to wire; **no state → cannot un-defer appliances** |
+| **Tuya / Smart Life, Govee** | iOS + Android (cloud) | cloud | Partial (Tuya cloud API has state; Govee mostly via IFTTT) | Tuya IoT cloud project / OAuth | Med; usually reached **via HA or IFTTT** rather than direct |
+| **Thread** | transport, not an app API | local mesh | n/a (carries Matter) | n/a | n/a — plan *for* it under Matter |
+| **Z-Wave / Zigbee** | via a hub | local (hub) | Yes (via the hub) | hub-dependent | reach **through HA / SmartThings / a Matter bridge**, never direct |
+
+### 8.2 Strategy — Matter-first, ecosystem adapters layered, HA as the first real integration
+
+1. **Matter-first as the through-line.** Design the shared `RoomDeviceAdapter` contract around
+   the **Matter capability model** (on/off, level, plus an attribute-*subscription* state channel),
+   because (a) it is the one model that reaches the most ecosystems, (b) it is **local + push-state**
+   (un-defers appliances honestly), and (c) every ecosystem adapter below either *is* Matter or maps
+   cleanly onto it. We do **not** embed a raw Matter controller in MVP (CSA Vendor-ID/DAC friction);
+   we reach Matter **through** an ecosystem controller (Google Home on Android, HomeKit on iOS) or
+   through Home Assistant.
+2. **Ecosystem adapters behind the one shared interface** (the #330 per-platform split, §9):
+   - **Home Assistant adapter** — *platform-neutral, local, real-time state via WebSocket.* **The
+     recommended FIRST real integration** (§8.3).
+   - **Google Home APIs adapter** — *Android-centric*; Matter local control + 600M cloud devices +
+     unified state; ride this for Android users with a Google home.
+   - **Apple HomeKit adapter** — *iOS/iPadOS only*; local HAP + Matter with state. The iOS-native
+     counterpart to Google Home; **note it gives zero reach on Android/Linux** (drives the #330 split).
+   - **Philips Hue adapter** — *local bridge*, SSE push-state; cheap, single-vendor, great for a
+     real lights/plugs demo without a whole ecosystem.
+   - **SmartThings adapter** — cloud REST + Matter (Home API gated); broad reach where the wearer
+     already lives in SmartThings.
+   - **Alexa adapter** — cloud; primarily relevant to the **aid** side (Drop In) more than L3 room
+     control; high friction, opaque state → not a state-feedback source for un-deferring appliances.
+   - **Generic webhook / IFTTT adapter** — keep as a *no-state* fallback for power users; explicitly
+     **cannot** un-defer coffee-maker-class (no reliable state).
+3. **Sim stub retained, demoted.** The labeled sim-stub device (`§8` old plan) stays for
+   demo / offline / CI / pre-hardware, clearly tagged "SIM", and is the adapter `commonTest`
+   exercises — **but it is not the ship target** and never reports a fake real "ON".
+
+### 8.3 Phased recommendation (which real integration first, and why)
+
+- **Phase 1 (first REAL integration): Home Assistant adapter.** It is the **only option that is
+  (a) cross-platform** (iOS + Android + Linux/Raven — the whole #330 matrix in one adapter),
+  **(b) fully local, (c) real-time state-feedback-rich** (WebSocket `state_changed` push),
+  **(d) zero vendor-approval friction** (a user-generated long-lived token; no Console project, no
+  skill certification, no CSA membership), and **(e) a single integration that already fronts
+  Z-Wave / Zigbee / Matter / Hue / Tuya** behind HA. That combination makes it the fastest path to
+  a **feedback-rich demo on real devices on real phones** — exactly the user's "start closer to a
+  real app" goal — and it is the cleanest target to *prove the state-feedback contract* that
+  un-defers appliance-class devices.
+- **Phase 2 (single-vendor local, no hub): Philips Hue adapter.** Local bridge + SSE push state;
+  trivial pairing; lets a wearer with only Hue lights/plugs use Sentinel without running HA.
+- **Phase 3 (native ecosystems): Google Home (Android) + HomeKit (iOS).** The mainstream path for
+  wearers who live in Google/Apple homes; both give Matter + state; this is where the #330
+  per-platform adapter split earns its keep (HomeKit cannot run on Android; Google Home APIs are
+  Android-first with iOS in beta).
+- **Phase 4 (breadth): SmartThings + Alexa (aid-side Drop In) + generic webhook fallback.**
+- **Coffee-maker-class stays deferred** until an adapter actually delivers reliable device-state
+  feedback for *that device* — which Matter subscriptions / Hue SSE / HA WebSocket now make
+  technically reachable, so the deferral can be lifted **per-device, when proven**, not by fiat.
+  The L3 safety rules (two-step, named target, countdown/cancel, **no gaze-only**, device safety
+  rules) hold across every adapter unchanged.
+
+> **Flag for the user/Catherine (§11.1):** confirm **Home Assistant as the first real integration**
+> (and the Matter-first adapter contract). Secondary: which of Google Home / HomeKit / Hue is the
+> next priority given the target wearer's existing ecosystem.
+
+All integrations are **phone-side / platform adapters** (External Service Adapters, spec §7),
+per-platform, behind the shared `RoomDeviceAdapter` / `AidChannelAdapter` interfaces (see §9). The
+sim stub is the same interface, used only for demo/offline/test.
+
+## 9. Multiplatform & multidevice (#330)
+
+Sentinel rides task #330 (KMP shared core: Android + iOS + Raven). Contract:
+
+- **Angular units (deg) + milliseconds only** in shared code — card sizes, strip layout, countdown
+  durations, confirm timeouts. No pixel/frame constants in Sentinel logic (portability defect if
+  present). Per-sink calibration stays in the sink.
+- **Dual-sink parity:** Sentinel draws through `HmdRenderer` → {M2 sink, `PhoneCanvasSink`}; the
+  phone preview is the same renderer, not a parallel drawer. Both sinks derive from the same
+  angular constants. **`scene_snapshot` is the device-faithful parity oracle** (and the #330
+  cross-platform oracle asserts same-input → same-`scene_snapshot` across Android/iOS/Raven).
+- **Device matrix:** Maverick **v1** (640×400, 22°) / **v2** (1280×720, 28°) / **Raven** (30°
+  off-axis) — same Sentinel code, sink handles scale; v2/Raven add to the parity matrix, nothing
+  leaves.
+- **Library-first:** Sentinel declares nouns/intent + Risk-Level tags + recipient/device config;
+  it assembles substrate + shared widgets. No private capability on `HmdRenderer`.
+
+**Shared-core vs platform-adapter split (load-bearing — room/caregiver integrations are
+phone-side):**
+
+| Shared core (`:shared/commonMain`) | Platform adapter (per platform) |
+|---|---|
+| Sentinel reducer + models (device list, aid list, lock state, test-mode flag, pending `ActionIntent`, status) | `RoomDeviceAdapter` impls (Home Assistant WS / Hue CLIP v2 / Google Home (Android) / HomeKit (iOS) / SmartThings / webhook / sim stub) — Matter-shaped contract (on/off, level, **state subscription**) |
+| Risk-Level tags; Safety-Gate invocation; status state machine | `AidChannelAdapter` impls (Reliable-Contact SMS / call / push / Drop-In) + delivery-receipt plumbing |
+| Strip/card layout (angular); selection highlight; confirm-card assembly | Panic-cancel **hardware button** binding |
+| Draw-command emission against abstract `DrawSink` | Persistence of `safe_contacts`/`room_devices` (Keystore/Keychain) |
+| Testing-mode stubbing of adapters (the no-op send) | Real network/IoT/cloud calls; permissions |
+
+The adapters are **interfaces in shared core, implemented per platform** — so the *safety logic*
+(when a confirm is required, what "sent vs nothing-sent" means, atomicity) is identical and
+provable across platforms, while the *actuation/delivery* is platform-native.
+
+## 10. Test plan (exhaustive — 5 dimensions, per sub-state AND per Risk Level)
+
+`[x]` = covered (proving test exists), `[ ]` = required, not yet written. The suite ratchets up.
+Drive the REAL dispatch path (`step:*` seams + `adb input` through the FOV rect), both sinks,
+read both bitmaps inline. Sentinel is the highest-risk app — **failed-use-cases and safety-case
+dimensions are mandatory and HARD.**
+
+### 10.1 Functionality (per sub-state, real dispatch path)
+
+- [ ] Summon device strip; focus each card (L0); selection highlight present on every card.
+- [ ] Light on/off full L3 path: focus → ACT (named target + countdown + non-gaze confirm) →
+      CONFIRM → result + undo; undo reverts.
+- [ ] Fan on/off full L3 path (bug-class parity with lights).
+- [ ] Coffee-maker-class card is greyed + non-actionable (ACT refused with honest note).
+- [ ] Real `RoomDeviceAdapter` (Home Assistant first, §8.3) toggles a real device AND reflects its
+      *actual* device-state in the result line (true "ON", not "sent — state unknown"); state-push
+      (WebSocket/SSE/Matter-subscription) updates the card when the device changes out-of-band.
+- [ ] Summon Reliable-Contact strip; full L4 path: focus → protected card (visible recipient
+      "Reach: Jess" + cancel countdown) → non-gaze confirm → SENT → CONFIRMED/FAILED status.
+- [ ] Message path AND call path; Alexa Drop In L4 path (if configured); not-configured → flow
+      absent. Copy is "reach your person," never "summon help"/SOS (asserted, R1).
+- [ ] Safety lock: lock (L1) blocks all L3+ ACT; unlock (L2) re-arms; lock state in Bead.
+- [ ] Testing mode: enter (L2) → run a full L4 Reliable-Contact flow → "TEST — nothing was sent";
+      adapter no-op asserted; leaving test mode is explicit + Bead tag clears.
+- [ ] Every action reachable by ≥2 input paths (gaze-select+confirm / head / voice / switch /
+      phone) hitting the SAME Safety Gate (G1).
+- [ ] Reclined/bed + minimal-head-movement modes: every card + confirm reachable without head turn.
+
+### 10.2 Appearance (BOTH sinks, fraction stated in prose)
+
+- [ ] Device strip, Reliable-Contact strip, confirm card, protected card, each status line —
+      captured on M2 fullpage + AVD screencap, read inline, active-area fraction stated; parity verified.
+- [ ] Colour floor: all functional fills above the OpticParity near-black threshold; aid/room/test
+      bands visually distinct; "nothing sent" vs "sent" never confusable (color + glyph).
+- [ ] Selection highlight on every selectable card (bug-class audit — files/streaming shipped
+      without it; do not repeat).
+- [ ] No overflow on long recipient/device names; degree/other glyphs render on M2 (no en-dash/°).
+- [ ] HMD-lens fill coverage ≥ 20% on backdrop-painting surfaces (#186 fill-as-bar class).
+- [ ] Both renderers, every C-config + ≥2 D-configs (e.g. C2 + D5).
+
+### 10.3 Error / empty / loading (FORCE each)
+
+- [ ] No devices configured → empty device strip with honest "no devices set up" (not a blank).
+- [ ] No safe_contacts → Reliable-Contact flow absent / "set up a contact first" (no dead confirm).
+- [ ] Device unreachable on toggle → "sent — state unknown" / "couldn't reach device", never a
+      false ON; no fake undo.
+- [ ] Real adapter unreachable (HA token expired / bridge offline / cloud down) → honest "couldn't
+      reach <adapter>"; no false state; gracefully falls back to sim-stub only if explicitly in demo mode.
+- [ ] Reliable-Contact send fails → FAILED status + retry; no false SENT/CONFIRMED.
+- [ ] No cloud / Drop-In not linked → flow disabled with honest reason (R1/G7 language).
+- [ ] Gaze unavailable / low confidence → auto non-gaze fallback; no auto-confirm on noisy gaze.
+- [ ] Long/odd strings (long names, RTL, emoji) jammed into recipient/device slots → no overflow.
+
+### 10.4 Timing (#222 frame budget / #288 latency / zero at rest)
+
+- [ ] At rest = Bead only; AtRestAllocation-style assertion: no Sentinel rebuild on quiet frames.
+- [ ] Confirm-card countdown is accurate and matches the stated `[VERIFY]` durations.
+- [ ] Full L3/L4 dispatch within frame + latency budget; no cold-rebuild freeze on strip open.
+- [ ] Cancel/timeout/panic-cancel respond within one frame (no lag that lets a send slip through).
+
+### 10.5 Failed use cases (ESPECIALLY important — safety-case tests, HARD)
+
+- [ ] **No Reliable-Contact / L4 from gaze alone** — a gaze saccade can NEVER complete an L3+
+      confirm; assert the Gate refuses gaze-only and requires a non-gaze second signal. (R3/spec §3.)
+- [ ] **No appliance toggle without confirm** — ACT alone never actuates; only CONFIRM does.
+- [ ] **Cancel/timeout always works** — at every point in every L3/L4 countdown, cancel (any
+      input) and timeout both abort cleanly.
+- [ ] **Panic-cancel** — hardware/gesture panic-cancel aborts any pending/counting action at any
+      instant, reachable without gaze, lands on NOTHING SENT.
+- [ ] **Atomicity** — a cancelled/timed-out/panic-cancelled action leaves NOTHING behind: no
+      partial dispatch, no SafetyEvent marked sent, no half-toggled device, no orphaned UI.
+- [ ] **"Nothing sent" vs "sent" status correctness** — every cancel/timeout/test path yields
+      NOTHING SENT; only a true dispatch yields SENT; FAILED never masquerades as SENT.
+- [ ] **Testing mode never sends a real message/call** — adapter no-op asserted at the boundary; a
+      test run produces a SafetyEvent flagged test-only, never a real send.
+- [ ] **Accidental-activation fuzz** — random/jittery gaze + spurious head/tremor input across
+      every sub-state (incl. locked, test mode, mid-countdown) NEVER completes an L3+ action;
+      debounce/ignore-repeat asserted; double-tap never double-fires.
+- [ ] **Safety lock holds** — while locked, no fuzz/input combination fires any L3+ action.
+- [ ] **Leak-free navigation** — Sentinel → Home → other app leaves no Sentinel text/pending
+      action in `scene_snapshot` (app→app direct-transition leak check, #199).
+- [ ] **R1 claim audit** — no surface/doc string implies medical/emergency reliability (G7); **no
+      Reliable-Contact surface uses SOS / "summon help" / "call for help" / emergency wording**
+      (assert "reach your person" framing); no L5/SOS/brace flow exists in the MVP build.
+- [ ] **R3 surveillance audit** — no outbound channel exists that the wearer didn't confirm; no
+      monitoring/presence/telemetry channel present.
+
+### 10.6 What waits for real hardware (stated, not silently skipped)
+
+- [ ] On-device latency/reliability of each real adapter (HA WebSocket / Hue SSE / Matter
+      subscription / Google Home / HomeKit / SmartThings round-trip); real Reliable-Contact delivery
+      + recipient confirmation; confirm-signal comfort/accuracy/latency; panic-cancel hardware
+      button — all deferred to hardware + a real tester (§6.5). The sim stub is demo/offline-only
+      (§8) and the deferral is explicit in onboarding and this PRD. (Pre-syncope/L5 removed entirely,
+      §3.4 — not merely hardware-deferred.)
+
+## 11. Open design questions (flag the most important for the user)
+
+1. **★ Smart-home integration sequencing (§8) — MOST IMPORTANT.** **Recommendation now on
+   record (user-directed): target REAL integrations, sim stub demo-only; Matter-shaped adapter
+   contract; Home Assistant as the FIRST real integration** (cross-platform + local + push-state +
+   zero approval friction). **Confirm HA-first**, and pick the **next** ecosystem priority (Google
+   Home / HomeKit / Hue) based on the target wearer's existing setup. This still gates whether
+   coffee-maker-class is un-deferred per-device.
+2. **Safety-lock defaults** — locked or unlocked by default? Auto-relock timeout? Per-mode (e.g.
+   auto-lock in bed mode)? Co-design with Catherine (lived experience).
+3. **Countdown durations** — L3 ~3 s / L4 ~5 s are `[VERIFY]` placeholders; real comfortable values
+   need hardware + tester. (No L5 — removed from MVP.)
+4. **Reliable-Contact recipient confirmation** — which channels actually return a delivery/read
+   receipt (SMS vs call vs push vs Drop-In)? Where none exists, is "Sent — can't confirm receipt"
+   acceptable to Catherine, or should such a channel be disabled for Reliable Contact? (Honesty is
+   load-bearing precisely *because* this is framed as convenience, not a lifeline — a fake
+   "confirmed" would be worst here.)
+5. **Reliable-Contact framing — confirm the non-medical reframe is right.** Is "reach your person"
+   the right wearer-facing label, and is **removing pre-syncope/L5 SOS from MVP** the right call?
+   (Recommendation: yes — it strengthens R1; the pre-syncope idea stays a future-with-validation
+   item only, never built without co-design + a medical-validation plan.) Catherine's
+   lived-experience input gates this before it locks.
+6. **Caregiver dashboard (later)** — confirm it stays out of MVP and, if ever built, is fully
+   wearer-owned/explicit (§5). Recommend: not in MVP.
+7. **Panic-cancel binding** — which physical Maverick input is the emergency-stop? (Overlaps spec
+   §18 / #330 SDK questions.)
+
+---
+
+### Cross-references
+- Substrate (owner of Safety Gate / Risk Levels / confirm-cancel-undo / posture modes / Status
+  Bead): `app-prd-lantern-substrate.md` *(parallel — write/reference, do not redefine here)*.
+- Design law + red lines: `goals-and-guidelines.md` (§4 R1–R6, §5 Risk Levels, §7.C).
+- Source intent: `source-spec-lantern-stack-v0.1.md` §8–9, §12, §16, §18.
+- Research: `research/03-lowvision-navigation-safety.md` (§4 — pre-syncope/SOS, now a deferred
+  future-with-validation item, §3.4), `research/04-low-effort-interaction.md` (fatigue/dwell/redundant input).
+- Co-design: `collaborator-and-codesign.md`.
+- Portability: `docs/pme-eye-ui/plan-kmp-cross-platform.md` (#330).
+- PRD/test-plan shape: `docs/pme-eye-ui/app-prd-sensors.md` §9, `app-prd-files.md`.
+- **Smart-home control-API landscape (§8 research, 2025–26):**
+  - Matter / Thread: <https://developers.home.google.com/matter>,
+    <https://en.wikipedia.org/wiki/Matter_(standard)>,
+    Matter controller certification (CSA Adopter + Vendor ID + DAC): <https://handbook.buildwithmatter.com/certification/certifying-a-product/membership/>
+  - Google Home APIs (Android beta; Device/Structure/Commissioning/Automation; local Matter + 600M cloud):
+    <https://developers.home.google.com/apis>,
+    <https://developers.googleblog.com/build-the-future-of-home-with-google-home-apis/>,
+    <https://developers.home.google.com/apis/android/commissioning>
+  - Apple HomeKit (iOS/iPadOS only; HAP + Matter; `HMHomeManager`):
+    <https://developer.apple.com/documentation/homekit/hmhomemanager>,
+    <https://developer.apple.com/apple-home/matter/>
+  - Amazon Alexa Smart Home Skill API (cloud; ReportState/ChangeReport; ACK):
+    <https://developer.amazon.com/en-US/docs/alexa/smarthome/state-reporting-for-a-smart-home-skill.html>,
+    <https://developer.amazon.com/en-US/docs/alexa/smarthome/understand-the-smart-home-skill-api.html>
+  - Home Assistant (local REST + WebSocket state events; long-lived tokens):
+    <https://developers.home-assistant.io/docs/auth_api/>,
+    <https://deepwiki.com/home-assistant/developers.home-assistant/6.2-rest-and-websocket-apis>
+  - Philips Hue (local bridge CLIP v2 + SSE event stream):
+    <https://developers.meethue.com/new-hue-api/>,
+    <https://developers.meethue.com/develop/get-started-2/>
+  - Samsung SmartThings (cloud REST + OAuth/PAT; Home API for Matter — gated):
+    <https://developer.smartthings.com/docs/api/public>,
+    <https://developer.samsung.com/smartthings/blog/en/2023/12/14/developing-a-matter-iot-application-with-the-smartthings-home-api>
+  - IFTTT / webhooks / Tuya / Govee (no reliable state):
+    <https://developer.tuya.com/en/docs/iot/smart-life?id=Kel80drledy6h>,
+    <https://ifttt.com/connect/maker_webhooks/smartlife>

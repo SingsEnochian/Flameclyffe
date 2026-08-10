@@ -44,7 +44,7 @@ const DIRECT_READINGS = {
     label: 'Moon', source: 'Bridge, local packet, or fallback value', affects: 'Harmonic ring count, ring brightness, and ring visibility.',
     path: 'Moon → harmonic rings → ring count → ring glow',
     explanation: 'Moon illumination controls the harmonic ring scaffold. A brighter moon value shows more rings or stronger ring visibility.',
-    boundary: 'The moon layer is a visual scaffold, not a claim that the moon causes the model state.', tiny: 'Moon shows the harmonic scaffold.'
+    boundary: 'The moon layer provides harmonic ring scaffolding. It is not a claim that the moon causes the model state.', tiny: 'Moon shows the harmonic scaffold.'
   },
   kp: {
     label: 'Kp', source: 'Bridge, local packet, or fallback value', affects: 'Particle energy, mote activity, pulse liveliness, and spark intensity.',

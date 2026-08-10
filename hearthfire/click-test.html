@@ -1,0 +1,11 @@
+<!doctype html>
+<html><body style="background:#111;color:#eee;font:1rem sans-serif;padding:2rem">
+<p id="out">nothing yet</p>
+<button onclick="document.getElementById('out').textContent='inline click works'">inline onclick</button>
+<button id="b2">addEventListener click</button>
+<script>
+document.getElementById('b2').addEventListener('click',function(){
+  document.getElementById('out').textContent='addEventListener works';
+});
+</script>
+</body></html>

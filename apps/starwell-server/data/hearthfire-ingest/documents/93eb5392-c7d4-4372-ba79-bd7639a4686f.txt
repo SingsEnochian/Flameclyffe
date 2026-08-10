@@ -1,0 +1,560 @@
+# Concordance Lens — PRD (the LATER contextual-overlay + on-request recognition layer)
+
+**Status:** ASPIRATIONAL — LATER layer, design only, no code. **Post-MVP.** Concordance Lens
+is the **fourth and last** piece of the Lantern Stack and is **explicitly NOT required for
+MVP** (Catherine's spec §1, §14; `goals-and-guidelines.md` §7.D). It is designed only after
+the MVP trio — **Caption Lantern → Voice Lantern → Sentinel Lantern** — and the **Lantern
+Substrate** that all four ride on are real. Nothing here is implemented; every capability
+below is a design intent, not a shipped behaviour (repeated for `tools/claims-audit`).
+
+> **Why LATER, restated for every reader:** this layer carries the highest-risk, lowest-
+> validated, most-hardware-gated features in the whole suite (on-request scene/text/object
+> recognition on a *slow, AI-only camera*; cognitive/memory + neurodivergent overlays whose
+> value is *felt*, not screenshot-able; governed emotion/affect recognition that the autistic
+> community contests). It must not block, distract from, or destabilise the MVP. It is written
+> now so the design is coherent and so the substrate it needs is shaped correctly — **not** so
+> it ships next.
+
+Read first: `goals-and-guidelines.md` (design law **G1–G10**, red lines esp. **R3/R4**, §1
+device-reality caveat, §5 Risk Levels, §7.D Concordance Lens), `source-spec-lantern-stack-v0.1.md`
+(§14 Concordance Lens, §5 principles, §15 privacy, §16 accessibility), the two research
+dossiers this layer is mined from — `research/05-cognitive-neurodivergent-overlays.md` and
+`research/03-lowvision-navigation-safety.md` — and `collaborator-and-codesign.md`.
+**Owner of the shared machinery:** `app-prd-lantern-substrate.md` owns the **Safety Gate,
+Risk Levels (L0–L5), redundant input (G1), Low-Energy / posture modes (G3), Confirm/Cancel/
+Undo, the Status Bead, and the overlay budget** — this PRD **references** them, **declares
+Risk Levels**, and **assembles its shared widgets**; it does **not** redefine them. Project
+contracts: root `CLAUDE.md` (pre-commit checklist, test-plan 5 dimensions, Multi-device
+design rules, Portability, additive-display caveats), `docs/pme-eye-ui/plan-kmp-cross-platform.md`
+(#330), and `docs/pme-eye-ui/app-prd-sensors.md` §9 + `app-prd-files.md` for PRD/test-plan shape.
+
+---
+
+## 1. Status banner
+
+**Status:** ASPIRATIONAL — LATER layer, design only, no code. Post-MVP; build order is
+**substrate → Caption → Voice → Sentinel → Concordance Lens (this doc)**. Nothing here is
+implemented; capability claims are design intent (`tools/claims-audit`).
+
+## 2. Purpose, target users, scope, non-goals
+
+### 2.1 Purpose
+
+A **wearer-summoned, on-request contextual layer** that, when the wearer asks, helps them
+**understand what is in front of them** and **remember the things that fall out of their
+head** — reading environment text, identifying objects, summarising a sign / paper / screen,
+answering "what am I looking at?", a focus-aware AI query, gentle just-in-time prompts when a
+routine stalls, a private name/face recall card, an ambient-time arc for time-blindness, and
+(for low-vision) dark-scene edge outlining + a peripheral "look-here" arrow — all on a
+device that does **on-request snapshot recognition, not real-time AR** (§4.1, `goals` §1).
+
+The spine, inherited from `research/05` and the calm-tech + autistic-autonomy critiques:
+**silence is the default; restraint is in WHEN/IF you show, not dimness (G2); the wearer owns
+the config and the data; never coach, never monitor for a third party (R3/R4).**
+
+### 2.2 Target users
+
+Three overlapping cohorts (most users live in more than one — `goals` §2):
+
+- **Cognitive / memory** — TBI, MCI / early dementia, aphasia (word-finding), ADHD (executive
+  function, time-blindness, "out of sight = out of mind" / object-permanence). Needs:
+  just-in-time prompts; <2 s frictionless capture; context-gated re-surfacing; a memory aid
+  that *reduces* dependence (landmark learning, wearer-owned recall), never creates it (R3).
+- **Neurodivergent** — autistic and ADHD users. Needs: **predictability and control** above
+  all (unexpected pop-ups are sensory aggressors — `05` §5); wearer-summoned > pushed; a hard
+  overlay budget + quiet-mode; emotion/affect support governed against the autistic-autonomy
+  critique (§5, R4).
+- **Low-vision / field-loss / night-blind** — AMD, RP/Usher, glaucoma. Needs (additive-optic-
+  honest, `03`): **dark-scene-only** edge/hazard outlining (washes out in daylight); a
+  peripheral-field directional "look-here" arrow for field loss; on-request snapshot text/scene
+  reading. Never a mobility-aid replacement (R2); audio/haptic is the primary hazard channel,
+  the HUD is a glanceable supplement (`03` §3).
+
+### 2.3 Scope (v-later)
+
+From Catherine's spec §14 (verbatim feature set): read environment text; identify objects;
+summarise signs / papers / screens; gentle visual prompts; "what am I looking at?"; focus-
+aware AI queries. Plus the mined research features (§4). All under her constraints (§7).
+
+### 2.4 Non-goals
+
+- **Not real-time AR.** No continuous world-anchored labels, no live object/face overlay, no
+  gaze-steered audio (the small FOV + slow AI-only camera make this impossible on this device —
+  `goals` §1, `03` §6). On-request snapshot only.
+- **Not always-on capture.** No always-on camera; capture is an explicit per-instance command
+  with a clear capture indicator (spec §3, §14, §15; R5).
+- **Not cloud-by-default.** No cloud vision by default; on-device-first; cloud is explicit,
+  minimal, visible, revocable (G6, spec §5.5, §15).
+- **Not stored.** No image storage by default; frames are analysed and discarded unless the
+  wearer explicitly saves (spec §14, §15; R5).
+- **Not a coach, not a monitor, not a medical/mobility device.** Emotion/affect is a private
+  wearer-only reference, never corrective (R4); no caregiver dashboard / no surveillance (R3);
+  not a cane/guide-dog replacement (R2); not a diagnosis or vision/hearing-restoration claim (R1).
+- **Not a Lantern Stack dependency.** No MVP app depends on Concordance Lens; it is additive.
+
+---
+
+## 3. The "calm by absence" overlay model (G2)
+
+On this additive optic, **calm cannot mean dim** — dark = transparent, only bright low-
+saturation marks are legible (`05` §4, `03` §6). So Concordance Lens implements calm as a
+property of **WHEN / IF** it shows, never of how dimly it draws:
+
+- **Default state of every Concordance surface is nothing on screen.** At rest the layer
+  contributes **zero** drawables (and zero per-frame cost — project zero-alloc law). The Status
+  Bead (owned by the substrate) is the only persistent chrome; Concordance does not add its own.
+- **Wearer-summoned, not pushed (autonomy + anti-sensory-overload — `05` §5, R4).** The primary
+  interaction is **pull**: an eye-summon / single gesture / voice ("what is this?", "what's
+  next?", "who is this?") brings a card up; it is read in a glance and **clears**. Unexpected
+  central-FOV pop-ups are sensory aggressors for autistic users — Concordance does **not** push.
+- **The COACH show-only-when-stalled pattern (the one inferred surface — `05` §2, COACH/
+  Mihailidis).** The just-in-time step prompter is the *single* feature allowed to appear
+  without an explicit pull, and **only** when the system infers a stall (dwell / hesitation /
+  GPS-or-time context). It surfaces the next step of a wearer-configured routine **one step at
+  a time, then clears.** This is the cleanest way to be calm on an optic that can't whisper:
+  silence is the default; a cue appears only on inferred difficulty. Any such inferred push is
+  **wearer-pre-approved, fades in (never jumps), and is fully mutable in advance** so it is
+  *predictable* (`05` §5; adaptive-MR-notifications).
+- **The global overlay budget + quiet-mode are owned by the substrate** (`goals` §G2;
+  `app-prd-lantern-substrate.md`). Concordance **spends from** that budget; it does not define
+  its own. A hard cap on simultaneous elements + a global "mute everything but the essential"
+  gesture apply to every Concordance overlay. Treating overlay frequency / dwell-time as a
+  *budget the system spends sparingly* is the device-level enforcement of "calm = restraint."
+- **Ambient-time arc — the one earned always-present element.** A shrinking peripheral arc /
+  remaining-time mark (Tiimo / Time-Timer style) at a **fixed, expected** peripheral position,
+  read in one glance, for time-blindness. It earns its persistence precisely because it is
+  *predictable and single-glance* (object-permanence for time — `05` §4 design-implication 5).
+  The wearer sets where/when it shows; it is opt-in and counts against the overlay budget.
+
+---
+
+## 4. Feature set, mapped to Risk Levels + device reality
+
+**Honest device reality (load-bearing — `goals` §1, `03` §6, `05` §6).** The Maverick is a
+small-FOV (~22°), **additive** optic with a **slow, AI-only camera** (not a real-time CV feed):
+
+- Recognition is **on-request snapshot**: "look → ask → wait for the AI → glanceable result,"
+  not continuous AR. Expect seconds, not frames; show a working/queued state, never block.
+- The additive optic **ADDS light only — it cannot dim, darken, occlude, or replace** the real
+  world. **Overlays must never hide hazards or faces (G4).** Edge outlining works **only in
+  dark scenes** and must auto-disable in bright light (Hwang & Peli — `03` §2); the "look-here"
+  arrow **cues attention at the edge** rather than redrawing the scene.
+- Everything here is **L0 passive HUD** or **L1 local** except the **capture/analysis** action
+  (an explicit, indicated camera capture + analysis), which is **L1–L2**. **Nothing in this
+  layer is L3+** (no room control, no caregiver/aid, no emergency — those live in Sentinel).
+
+Risk Levels are **declared here, enforced by the substrate's Safety Gate** (`app-prd-lantern-
+substrate.md` §3.3). The substrate supplies redundant input (G1), Confirm/Cancel/Undo, the
+overlay budget, and Low-Energy / posture modes; this PRD only declares nouns + intents.
+
+| # | Feature (source) | What it does | Risk | Device-reality note |
+|---|---|---|---|---|
+| F1 | **"What am I looking at?" / read text / identify object / summarise sign-paper-screen** (spec §14) | Wearer summons → explicit capture (indicated) → on-device-first recognition → one glanceable card (text read / object name / short summary) → clears | **L1** focus+summon; **L2** if it touches a persistent setting or an explicit cloud call | On-request snapshot, seconds-latency, working-state shown; result is advisory, accuracy-honest (show uncertainty) |
+| F2 | **Focus-aware AI query** (spec §14) | Wearer asks a question *about the captured frame* ("what does this say?", "is this expired?"); answer rendered as a card | **L1**, **L2** if cloud | Cloud is explicit/visible/revocable (G6); on-device adapter preferred; never auto-fires |
+| F3 | **Just-in-time stall prompter — COACH** (`05` §2 design-impl 1) | Next step of a wearer-configured routine, shown **only on inferred stall**, one step, then clears | **L0** passive HUD (shows; commits nothing) | The only inferred (non-pull) surface; wearer-pre-approved + mutable; fades in |
+| F4 | **Wearer-summoned glanceable cards** (`05` §5 design-impl 2) | Pull-based cue layer ("what's next?"); fades in, single glance, clears | **L0** | No surprise push; predictability/control (R4) |
+| F5 | **Frictionless eyes-up capture** (`05` §5 design-impl 3) | One gesture / wake-word captures a thought/task/"where did I put X" to the phone companion in **<2 s**, no phone; optional **context-gated** (geofence/object) re-surface | **L1** (capture); re-surface is **L0** | Context over volume to beat reminder-fatigue; capture must be <2 s or it won't be used |
+| F6 | **Landmark wayfinding + private name/face recall** (`05` §5 design-impl 4) | Cue toward **durable landmarks** (teach, don't foster turn-by-turn dependence); a **wearer-owned** name/relationship card appears **only on the wearer's request** when looking at a pre-enrolled person | **L1** (recall card on request) | Strictly private, never logged, never broadcast (R3); recognition is on-request snapshot |
+| F7 | **Ambient-time arc** (`05` §5 design-impl 5) | Peripheral shrinking arc / remaining-time mark at a fixed expected position; one-glance; opt-in | **L0** (persistent, earned — §3) | The one acceptable always-present element; predictable + single-glance |
+| F8 | **Aphasia word-finding scaffold** (`05` §5 design-impl 7) | On request, a small set of relevant nouns/icons (object looked at / "things in this room") as a **speech scaffold** — never auto-speaks *for* the user | **L1** | Multimodal, low cognitive+physical effort; on-request |
+| F9 | **Low-light edge / hazard outlining** (`03` § design-impl 1) | In **dim scenes only**, draw a **bright outline at a hazard's edge, never filling/occluding it**; **auto-disables in bright light** via the ambient-lux sensor | **L0** passive HUD | Dark-scene-only (additive washout); HUD is a *supplement* — haptic/audio is the primary hazard channel (`03` §3); never a cane replacement (R2) |
+| F10 | **Peripheral field-loss "look-here" arrow** (`03` § design-impl 2) | A single high-luminance arrow at the edge of the residual field points toward an off-axis turn/hazard — **attention cueing, not scene redraw** | **L0** | Respects 22° FOV; avoids binocular-rivalry of full superimposition |
+| F11 | **Emotion / affect recognition** (R4 — §5 below) | **Default-OFF**, on-request snapshot, wearer-only output, accuracy-honest, never a coach, never a caregiver feed | **L1** (wearer-summoned), gated by the §5 governance | Slow AI-only camera ⇒ on-request only anyway; classifiers are shaky (`05` §3) — show uncertainty, never assert |
+
+**Cross-cutting per-feature rules:** every actionable feature goes through the substrate's
+select → ACT → CONFIRM with a **non-gaze** confirm path available (G1); every selectable
+result/target shows a **select highlight** (eye-tracking law, `CLAUDE.md`); every surface
+exposes the required full-screen affordances (reveal + Back + Home + BottomMenu) via the
+shared widgets; the **capture indicator is visible whenever the camera is active** (R5,
+spec §15); colours clear the additive-optic luminance floor (G2).
+
+---
+
+## 5. Emotion / affect recognition — governance (R4) and the autistic-autonomy critique
+
+Emotion/affect recognition is **RETAINED but governed**, and is the **highest-risk feature in
+the entire Lantern Stack** (`05` §6 goblin 2). It is designed **head-on against** the autistic-
+autonomy critique, not in spite of it.
+
+### 5.1 The critique we are designing against (cite, don't footnote — `05` §3)
+
+- **ASAN / "nothing about us without us."** Autism is natural human variation, **not something
+  to be fixed**; interventions aimed at making someone "less autistic" are opposed; disabled
+  people are the experts in their own experience and must co-design (`05` §3; ASAN, Williams &
+  Gilbert). Emotion-recognition glasses framed as a *therapy that coaches a child toward
+  normative behaviour*, plus a **caregiver dashboard that monitors "progress,"** read to many
+  self-advocates as **surveillance + a compliance project, not support.**
+- **Weak / temporary evidence + wrong target.** The Stanford "Superpower Glass" RCT showed
+  **small, temporary effects** that had disappeared at 6-week follow-up; recent work suggests
+  autistic adults have **precise emotion representations** — the premise that they need to be
+  "taught" emotions by an emoji may target the wrong problem (`05` §3).
+- **Emotion-AI is inaccurate in the wild.** Classifiers lose ~half their accuracy under
+  occlusion and routinely confuse disgust/sadness/anger — a glasses overlay that confidently
+  labels a face "angry" may simply be **wrong**, and the wearer pays the social cost (`05` §3).
+
+### 5.2 What we ship instead (R4 design constraints — all mandatory)
+
+Per `goals` §R4, emotion/affect is **broadened beyond autism** to a **general wearer-only
+assist** (social/meeting context; users who can't see faces well) and is **never scoped or
+marketed as "fixing" autistic people.** Whenever it is built, **all** of the following hold:
+
+- **Default OFF.** Ships disabled; the wearer must explicitly enable it. It is a contested
+  feature; contested features default off, wearer-owned (R4, G8).
+- **On-request snapshot only.** No always-on affect read — the slow AI-only camera can't do
+  live affect anyway (`goals` §1). The wearer summons it for a single frame; a clear capture
+  indicator is shown (R5).
+- **Wearer-owned output; output goes ONLY to the wearer.** Never broadcast, never logged to a
+  third party, never a caregiver feed (R3). The wearer is always the sender and owner.
+- **Never a coach.** It is a **private optional reference**, not a corrective instructor; it
+  does **not** tell the wearer how to behave or "improve."
+- **Accuracy-honest.** It **shows uncertainty and never asserts** an emotion ("possibly
+  uncertain" / a hedge, never "angry"). Confidence is rendered; low confidence = no claim.
+- **Co-designed, configurable.** Built **with** the communities served, not for them; the
+  wearer decides whether it exists at all and what it surfaces (G8).
+- **Better default = predictability & control.** Per `05` §3, what autistic users actually ask
+  for is predictability and control (the §3 calm model, the overlay budget, wearer-summoned
+  cards) — those are the first-class features; emotion-labelling of other humans is the
+  last-resort, opt-in, governed edge.
+
+---
+
+## 6. Collaborator-required sections
+
+### 6.1 Accidental-activation avoidance (Midas-touch defense)
+
+Owned by the substrate (`app-prd-lantern-substrate.md` §6.1) and inherited here; Concordance
+specifics:
+
+- **Gaze never consents** (substrate §3.4). A fixation — accidental, curious, or just *reading*
+  a sign — must never fire a capture or an AI query. Capture/analysis (F1/F2/F11) requires an
+  **explicit second signal** (the substrate's CONFIRM) and shows the capture indicator; gaze
+  alone only focuses/previews. This matters acutely here: the wearer's eyes are *on the world*,
+  so "looking at a face/sign" is the resting state, not an activation.
+- **No inferred capture.** Recognition never auto-fires from gaze dwell on a person or text.
+  The only inferred surface is F3 (COACH stall prompt), which is **L0** and **commits nothing**.
+- **Capture is L1–L2, undoable / discarded.** A mistaken capture is discarded (no storage by
+  default — R5); the universal undo snackbar (substrate §5.1) backs the reversible cases.
+- **Quiet-mode + overlay budget** prevent a runaway of cards even if the wearer over-summons.
+
+### 6.2 Calibration assumptions (assumed accuracy + graceful degradation, G9)
+
+- **Assumed accuracy:** the project per-config interactive floor (**2.8° or 3.2° in every
+  axis**, config-dependent); Low-Energy mode raises toward 3.2°. **Assumptions-to-verify on
+  hardware** (§6.5).
+- **This cohort breaks gaze calibration the most** (`03` §6 goblin 5): nystagmus, strabismus,
+  and AMD/low-vision **eccentric preferred retinal loci** all defeat standard fixation-based
+  calibration. So Concordance must degrade **especially** gracefully — every feature reachable
+  via the substrate G1 non-gaze paths (voice / head / switch / phone); a calibration-free dwell
+  mode; and the layer must remain useful with **no gaze input at all** (voice "what is this?" +
+  a head/switch confirm is a complete path). This is also what keeps the non-ET Raven port
+  usable (#330).
+- **Pursuit/Orbit preferred** over per-target dwell where it lowers effort and tolerates drift.
+
+### 6.3 Dwell alternatives (non-dwell path for every action)
+
+- **Every action has a non-dwell path** via the G1 binding (tap / head-nod / voice / switch /
+  phone). Voice is the natural primary for this layer ("what is this?", "who is this?",
+  "what's next?") — it removes the eyes-on-target requirement entirely.
+- **Dwell only on reversible (L0/L1) surfaces, with a visible counting-down affordance**
+  (~600 ms target, TBD). Capture/analysis is reachable without any dwell. No L3+ here, so no
+  dwell-on-consequential-action question arises.
+
+### 6.4 Fatigue / energy budget — especially **cognitive** load
+
+This is the section that matters most for *this* layer: **an overlay that ADDS cognitive load
+defeats the entire purpose** (`05` §6 goblin 1; AR demonstrably *increases* load and can cause
+inattentional blindness). Rules:
+
+- **The split-attention test for every element.** A Concordance overlay is justified **only if
+  it co-locates info with the task and REDUCES total effort** — not if it merely adds a thing to
+  the visual field. Every feature in §4 is screened against this; anything that fails is cut.
+- **Resting cost ~zero.** Default = nothing on screen (§3); no per-frame rebuild/alloc.
+- **Cognitive-load proxies are first-class test metrics** (extending the substrate's interaction-
+  cost proxies, substrate §6.4): **elements-on-screen-at-once** (must stay within the overlay
+  budget), **time-to-clear** (a summoned card is read and gone in a single glance), and
+  **acts-per-task** for capture+result. A fatigue/cognitive layer's value is **not** captured by
+  a screenshot — these proxies are.
+- **Gaze-rest paths + resumability** inherited from the substrate (Low-Energy mode, non-gaze
+  fallbacks, timeout-cancels-never-commits). A capture/query interrupted by brain-fog/PEM is
+  resumable; a slow recognition never blocks and is cancellable.
+- **Dementia learnability + dignity (`05` §6 goblins 3,4).** Extreme simplicity, consistency,
+  zero hidden gestures, audio support, and **support-side (caregiver) configuration so the
+  wearer never has to learn an interface** — configuration is support, never monitoring (R3).
+
+### 6.5 What waits for real HMD testing (simulator-only — `project_simulator_only`)
+
+The simulator faithfully validates *logic, geometry, dual-sink parity, the gate state machine,
+and the overlay budget*. It **cannot** honestly validate — and this layer is **unusually**
+hardware/model-gated:
+
+- **The slow AI-only camera itself** — capture latency, frame quality, and the felt experience
+  of "look → ask → wait" are device-gated. The sim can stub a recognition adapter but cannot
+  tell us the real wait.
+- **Recognition / AI quality** — OCR accuracy on real signs, object/scene ID, summarisation
+  usefulness, and **emotion-AI accuracy** (known shaky — `05` §3) are **model-gated**; only real
+  models on real frames answer "is the result good enough to be trustworthy?"
+- **Low-light edge outlining** — whether bright additive outlines actually help in a real dim
+  scene without occluding the hazard (G4) needs the real optic in real low light; daylight
+  washout is a physics fact but the *useful* threshold is empirical.
+- **Field-loss arrow legibility** at the residual-field edge, and binocular-rivalry on the
+  monocular optic — real wearer, real field loss.
+- **Felt cognitive load** — whether each overlay *actually* reduces effort for the cohort is the
+  collaborator's lived-experience test on hardware (`collaborator-and-codesign.md`).
+- **Real gaze accuracy / calibration drift** for the low-vision cohort specifically (§6.2).
+- The simulator is the **product surface** until hardware ships and must never lie about these;
+  all above are deferred to hardware + the collaborator-tester, **not** claimed done from the sim.
+
+### 6.6 Eye-tracking UI patterns (Eyefluence-informed) + FTO / patent-posture check
+
+*Hook for Peter Milford's Eyefluence expertise (Google-acquired Eyefluence; gaze-interaction
+models), to be folded in as Peter-authored notes (goals §8 open-Q 4, spec §19).* For this
+layer the most relevant Eyefluence-informed asks: **how to make "look-then-ask" feel
+intentional, not Midas** (the wearer's eyes are on the world the whole time); the lowest-
+fatigue summon gesture for a recognition request; and confirmation models for capture that
+don't require a precise second fixation.
+
+**FTO / patent posture.** Concordance Lens introduces **no new gaze-activation mechanism** — it
+reuses the PMEyeUI FTO bundle's widget-level implementation (**A1 + B8 + C2 + E1–E4**: the B8
+morph and C2 follow target) through the **shared** widget layer, exactly as the substrate
+mandates. Per-feature drawers here declare **nouns + visual assets only**; they do **not** fork
+the pursuit/reveal animation (patent-posture regression — `feedback_widget_level_patent_guard`).
+The COACH inferred-prompt and the recognition card are **content** rendered by shared widgets,
+not new activation grammar. Enforced by `tools/fto-check` in the precommit-walk.
+
+---
+
+## 7. Red lines & community position (R1–R6)
+
+- **R3 — No surveillance of vulnerable users; memory aids reduce dependence, never create it.**
+  This layer is squarely in the population the GPS-tracking-of-dementia literature warns about
+  (`05` §1, §6 goblin 5). So: **no caregiver-monitoring dashboard, no silent exfiltration, no
+  "compliance tracking."** Name/face recall (F6) is **wearer-summoned, private, never logged,
+  never broadcast.** Wayfinding (F6) cues **durable landmarks to teach spatial skill** rather
+  than fostering turn-by-turn dependence (NavMarkAR — `05` §5). Caregiver *configuration* of the
+  routine prompter (F3) is support-side help (so a dementia user need not learn an interface),
+  **never** a feed of what the wearer did. The wearer is always sender and owner.
+- **R4 — Contested features off-by-default, wearer-owned.** Emotion/affect (F11) ships **OFF**,
+  wearer-only, accuracy-honest, never a coach, never a caregiver feed (§5). Designed *with* the
+  community ("nothing about us without us" — ASAN), against the autistic-autonomy critique.
+- **Dementia learnability + dignity.** Extreme simplicity, consistency, no hidden gestures,
+  audio support, support-side configuration (§6.4). Memory aids carry stigma + a dependence
+  risk; glasses are *less* visibly stigmatising than a hovering caregiver **if discreet** — a
+  dignity win the design must protect (`05` §5).
+- **Privacy (G6, spec §15).** **No always-on camera; clear capture indicator whenever the
+  camera is active; no cloud vision by default; no image storage by default.** Frames are
+  analysed and discarded unless the wearer explicitly saves; cloud is explicit/minimal/visible/
+  revocable; settings stay local; the wearer can delete everything. **R5:** no recording of
+  bystanders without lawful consent; two-party-consent jurisdictions respected.
+- **R1 — Not a medical device.** No diagnosis, no vision/hearing-restoration claim; copy audited
+  like `claims-audit` (G7). **R2 — Never a mobility-aid replacement** (F9/F10): the HUD is a
+  low-light *supplement*; haptic/audio is the primary hazard channel; **keep using your cane /
+  guide dog** is first-run + persistent messaging; in bright light overlays are limited (`03`
+  §6, design-impl 7). **R6 — Accessibility is never a hidden mode**: Concordance is part of the
+  one product, not an "accessibility build."
+
+**Community position (G8):** co-design is an **active gate**. The collaborator (lived-experience
+domain partner + tester) reviews the open questions (§10) — especially the emotion/affect and
+memory-aid features — **before** they lock; lived-experience feedback outranks researcher
+assumptions. Because this is the highest-risk layer, **no contested feature here lands without
+explicit community co-design sign-off**, not just a researcher citation.
+
+---
+
+## 8. Multiplatform & multidevice (#330)
+
+Concordance Lens is built on the shared core and inherits the #330 cross-platform contract
+(`docs/pme-eye-ui/plan-kmp-cross-platform.md`; substrate §8):
+
+- **Angular units (degrees) + milliseconds only — NO pixel/frame constants in logic.** Card
+  sizes, the ambient-time arc, the look-here arrow, the edge-outline stroke, the dwell
+  affordance are in **degrees**; capture/recognition timeouts, working-state animation, card
+  auto-clear, dwell ~600 ms are in **ms**. A `const val FOO_PX` / `BAR_FRAMES` in logic is a
+  portability defect; pixel/scale conversion happens only at the sink boundary (`AngleMapper`).
+- **Dual-sink parity — phone preview ≡ HMD render, line-for-line.** The same `HomeSnapshot`
+  (carrying Concordance state: pending capture, working/queued state, the result card, the
+  COACH step, the ambient-time arc value, the look-here arrow bearing) renders identically on
+  the M2 HMD sink and `PhoneCanvasSink`. No `drawXPreview` divergence.
+- **Android + iOS + Raven** via the shared core (#330 Phases 4/6): the Concordance reducer +
+  widgets are platform-free (`commonMain`); only sinks and device adapters are `actual`.
+- **Device matrix:** **Maverick v1 (640×400, ~22°)**, **v2 (1280×720, ~28°)**, **Raven (~30°
+  off-axis)** — every metric angular, so the layer paints to all three with **no widget edits**;
+  only sink-level scale changes. The look-here arrow + edge outline respect each device's FOV.
+- **Library-first widgets (G10).** The result card, COACH step card, recall card, word-finding
+  scaffold, ambient-time arc, look-here arrow, and edge-outline overlay are **shared widgets**
+  reachable by every renderer + the synthesized-app generator (`shared-pattern-audit`) — never
+  private to `HmdRenderer`. Where any of these is genuinely cross-app (e.g. the result card),
+  it lands in the shared library, not in a Concordance-private drawer.
+- **`scene_snapshot` parity oracle.** `tools/parity-snapshot` drives the same controller state
+  (a pending capture, a working state, a result card, a COACH step, the ambient arc, the
+  look-here arrow) through each platform's sink and diffs the sim's platform-neutral
+  `scene_snapshot` M2 tree vs golden + cross-platform; the build fails on divergence. Scene-graph
+  text drawables are the device-faithful oracle for "is the card/arc/arrow actually present and
+  correct."
+- **The recognition / AI backend is a per-platform / cloud-optional ADAPTER behind a shared
+  interface.** Concordance declares a `RecognitionRequest → RecognitionResult` boundary in
+  `commonMain` (text-read / object-id / scene-summary / focus-query / affect, each with a
+  confidence + uncertainty field). Concrete adapters are `actual` per platform (on-device ML on
+  Android/iOS; a different stack on Raven) and may be **cloud-optional** — but **on-device-first /
+  no cloud by default** (G6, spec §5.5). The shared layer never assumes cloud; the sim uses a
+  stub adapter; swapping adapters never touches the widgets, the reducer, or the parity tests.
+
+---
+
+## 9. Test plan (5 dimensions; ASCII `[x]`/`[ ]`, per sub-state)
+
+Per `CLAUDE.md` (5 dimensions, per **sub-state**, driven through the **real** dispatch path —
+`step:*` seams + `adb input` / `InputSignal` injection — with **both** sinks captured + read
+inline and the active-area fraction stated in prose). Everything is `[ ]` (ASPIRATIONAL — no
+code; this is a LATER layer). **Sub-states covered:** idle/quiet · COACH stall-triggered prompt
+· wearer-summoned card · capture+analysis · name/face recall · ambient-time arc · low-light
+edge-outline · field-loss arrow · emotion-recog ON · emotion-recog OFF · empty/no-result ·
+recognition-fail · camera-permission-denied.
+
+### 9.1 Functionality (real dispatch path, per sub-state)
+- [ ] `IdleQuietContributesNothingTest` — at rest Concordance adds **zero** drawables (only the
+      substrate Status Bead persists); ambient-time arc shows **only** when opted-in.
+- [ ] `CoachStallPromptInferredOnlyTest` — the COACH step (F3) appears **only** on an inferred
+      stall (dwell/hesitation/GPS-time), one step at a time, then clears; **commits nothing** (L0).
+- [ ] `SummonedCardPullOnlyTest` — F4 cards appear **only** on an explicit pull (gaze-summon /
+      gesture / voice); never auto-push; fade in (never jump); single-glance; auto-clear.
+- [ ] `CaptureAnalysisFlowTest` — summon → explicit capture (indicator shown) → working state →
+      result card (F1/F2); routed at the declared **L1/L2** through the substrate Safety Gate.
+- [ ] `NameFaceRecallOnRequestTest` — F6 recall card appears **only on the wearer's request**
+      when looking at a pre-enrolled person; never logged/broadcast (R3).
+- [ ] `AmbientTimeArcTest` — F7 arc renders at the fixed peripheral position, shrinks over the
+      configured window, single-glance; opt-in; counts against overlay budget.
+- [ ] `WordFindingScaffoldTest` — F8 surfaces a small relevant noun/icon set on request; never
+      auto-speaks for the user.
+- [ ] `LowLightEdgeOutlineGatesOnLuxTest` — F9 outlines a hazard **edge** (never fills/occludes,
+      G4) **only** below the dark-scene lux threshold; **auto-disables** in bright light.
+- [ ] `FieldLossArrowTest` — F10 draws a single high-luminance edge arrow toward an off-axis
+      target; attention-cue only, does not redraw the scene; respects FOV.
+- [ ] `EmotionRecogDefaultOffTest` — F11 is **OFF** on first run; cannot fire until explicitly
+      enabled; when on, on-request snapshot only, output to wearer only.
+- [ ] `RedundantInputEquivalenceTest` — F1/F4/F11 complete via **every** modality {gaze+confirm,
+      head-nod, voice, tap/switch, phone}; same result regardless (G1).
+- [ ] `SelectHighlightOnEveryTargetTest` — every selectable result/target shows a select
+      highlight (eye-tracking law); full-screen affordances (reveal/Back/Home/BottomMenu) present.
+
+### 9.2 Appearance (BOTH sinks — HMD fullpage + AVD screencap, read inline; state active-area fraction)
+- [ ] `ResultCardParityTest` — F1/F2 card renders phone↔HMD parity; text legible; colours clear
+      the additive floor; HMD fill ≥20% where a backdrop is painted; capture indicator visible.
+- [ ] `CoachStepParityTest` / `RecallCardParityTest` / `WordScaffoldParityTest` — each card
+      identical angular position/size on both sinks; no overlap with the Status Bead or captions.
+- [ ] `AmbientArcParityTest` — the arc animates identically on both sinks at the fixed position.
+- [ ] `EdgeOutlineParityTest` — the bright edge outline (F9) and look-here arrow (F10) render at
+      the same angular position on both sinks; outline never fills the hazard region (G4).
+- [ ] `DwellAffordanceCountdownParityTest` — the counting-down dwell affordance animates on both
+      sinks (reversible actions only).
+- [ ] `UiOverlapBoundsSweepTest` extension — every Concordance overlay (cards, arc, arrow,
+      outline, working state) never overlaps content / exits active bounds, across C/D configs.
+
+### 9.3 Error / empty / loading (FORCE each)
+- [ ] `EmptyNoResultTest` — recognition returns nothing → an honest "couldn't find anything"
+      card, no overflow, no phantom result, clears cleanly.
+- [ ] `RecognitionFailTest` — the recognition adapter errors/times out → clean state +
+      "couldn't read that" status; **no half-result**; the working state never hangs (atomicity).
+- [ ] `CameraPermissionDeniedTest` — capture with camera permission denied → a clear "camera
+      unavailable" state + how to grant; **no crash, no capture indicator stuck on** (forces the
+      `03`/`05` error path; the long unusual string must fit — #310 overflow class).
+- [ ] `CloudDisabledOnDeviceFallbackTest` — with `cloud_services_enabled=false`, F2 stays
+      on-device-first; no silent cloud call; if a feature *needs* cloud it says so and stays off.
+- [ ] `LowConfidenceUncertaintyShownTest` — a low-confidence F1/F11 result **shows uncertainty /
+      never asserts** (the accuracy-honest rule; emotion-AI shakiness — `05` §3).
+- [ ] `WorkingStateNeverBlocksTest` — a slow recognition shows a working/queued state, stays
+      cancellable, and never blocks the UI or busts the frame budget.
+
+### 9.4 Timing
+- [ ] `CardAutoClearTimingTest` — summoned cards auto-clear on their ms spec; timeout dismisses,
+      never commits.
+- [ ] `AtRestAllocationTest` extension — Concordance adds **zero** per-frame rebuild/alloc at
+      rest (#302/#297); the ambient arc, when on, is cheap.
+- [ ] `FrameBudgetTest` — card open / arc tick / outline draw / arrow draw stay within the #222
+      frame budget; no cold-rebuild freeze on capture.
+- [ ] `CaptureLatencyHarnessTest` — measures the on-request capture→result latency against the
+      declared budget (real value is hardware/model-gated — §6.5 / 9.7).
+
+### 9.5 Failed use cases
+- [ ] `NoInferredCaptureTest` — gaze dwell on a face/sign **never** fires a capture or query
+      (gaze-is-attention); only the explicit summon does.
+- [ ] `MistakenCaptureDiscardedTest` — a mistaken capture is discarded (no storage by default,
+      R5) / undoable; nothing persists.
+- [ ] `EmotionRecogNeverCoachNeverFeedTest` — F11 output goes **only** to the wearer; never a
+      coach instruction; never written to a caregiver feed or a remote log (R4/R3).
+- [ ] `NoSurprisePushTest` — no Concordance surface (except the inferred, wearer-pre-approved,
+      mutable F3) ever appears unbidden in the central FOV (`05` §5 sensory-aggressor rule).
+- [ ] `OverlayBudgetEnforcedTest` — over-summoning cannot exceed the substrate overlay budget;
+      quiet-mode mutes all but the essential.
+- [ ] `NoLeakBetweenSurfacesTest` — a pending capture / result card / arc does not leak across
+      X→Home→Y (`scene_snapshot` clean; #199 app→app leak class).
+- [ ] `DoubleSummonIdempotentTest` — rapid double-summon produces at most one capture/card.
+- [ ] **Cognitive-load proxies (§6.4):** `ElementsOnScreenBudgetTest`, `TimeToClearTest`
+      (single-glance), `ActsPerCaptureTest` — a cognitive layer's value is not a screenshot.
+
+### 9.6 Cross-platform & per-device-class parity (#330)
+- [ ] `ConcordanceScenePARITY_AndroidVsIos` — same input snapshot (pending capture, result card,
+      COACH step, ambient arc, look-here arrow) → same `scene_snapshot` on Android vs iOS.
+- [ ] `ConcordanceScenePARITY_AndroidVsRaven` — same, Android vs Raven (pixel/SSIM if no
+      scene_snapshot-equivalent).
+- [ ] `ConcordanceDeviceClassParity` — widgets render at correct angular size on **v1
+      (640×400/22°)**, **v2 (1280×720/28°)**, **Raven (~30°)** with no widget edits.
+- [ ] `RecognitionAdapterBoundaryTest` — the `RecognitionRequest→RecognitionResult` interface is
+      platform-free in `commonTest`; swapping the stub adapter never touches widgets/reducer/parity.
+
+### 9.7 Hardware / model-only (cannot be honestly validated on the simulator — §6.5)
+- [ ] **(hardware)** real on-request capture latency + felt "look→ask→wait" experience.
+- [ ] **(model)** recognition quality — OCR / object-id / summary usefulness; **emotion-AI
+      accuracy** (known shaky — `05` §3); is the result trustworthy enough to surface?
+- [ ] **(hardware/optic)** low-light edge-outline usefulness without hazard occlusion (G4);
+      field-loss arrow legibility at the residual-field edge; monocular binocular-rivalry.
+- [ ] **(hardware + collaborator)** felt **cognitive** load — does each overlay reduce or add
+      effort for the cohort? (the most important validation this layer needs).
+- [ ] **(hardware)** real gaze accuracy / calibration drift for the low-vision cohort (§6.2).
+
+---
+
+## 10. Open design questions
+
+In-doc; the collaborator reviews these before any contested feature locks (§7, G8).
+
+1. **Emotion/affect (F11) — build it at all?** Even fully governed (§5), it is the most
+   contested feature in the suite and the autistic community broadly rejects the framing. **The
+   most important open question:** does co-design with the served communities actually want it,
+   or is the right answer to ship only the predictability/control features (§3) and **not** the
+   emotion read? Lived-experience sign-off, not a researcher citation, decides (G8).
+2. **Recognition/AI backend — on-device feasibility vs cloud.** Which features (text-read,
+   object-id, scene-summary, focus-query, affect) are good enough **on-device** on the v1/v2/
+   Raven hardware, and which would *need* cloud (and so default off / require explicit consent)?
+   Determines how much of §4 is realistic without breaking "no cloud by default."
+3. **COACH stall-inference signal.** What actually constitutes a reliable "stall" (dwell time?
+   GPS+time? task model?) without false-positive nagging — the line between a helpful just-in-
+   time cue and a reminder-fatigue / sensory-aggressor pop-up (`05` §5,6). Needs the cohort.
+4. **Name/face recall enrolment + consent (F6).** How are faces pre-enrolled, where is that data
+   stored (wearer-owned, local — R3), and what is the *bystander* consent posture when the camera
+   captures a face for recall? Sharpest privacy question after F11.
+5. **Capture-indicator sufficiency (R5).** Is an in-lens indicator enough for bystander consent,
+   or does the platform/jurisdiction require an external (outward-facing) indicator? Affects
+   whether F1/F2/F6/F11 are lawful in two-party-consent jurisdictions.
+6. **Ambient-time arc as the one always-present element** — does its persistence survive the
+   overlay-budget discipline in practice, or does even one always-on mark violate "calm by
+   absence" for some users? Make it strictly opt-in and per-user (current design), pending cohort.
+
+### Top 3 for the user (Peter)
+- **Q1 — ship emotion/affect at all?** It is the highest-risk feature in the suite; the
+  community position may be "don't," and that outranks the researchers. Needs an explicit
+  co-design decision before any code.
+- **Q2 — on-device vs cloud recognition feasibility.** Decides how much of the §14 feature set
+  is buildable without breaking "no cloud / no storage by default" (G6); shapes the adapter.
+- **Q5 — capture-indicator / bystander-consent sufficiency.** An in-lens-only indicator may be
+  legally insufficient in two-party-consent jurisdictions; gates whether the recognition
+  features are lawful at all.
+
+---
+
+*Cross-references:* `app-prd-lantern-substrate.md` (OWNS Safety Gate / Risk Levels / redundant
+input / Low-Energy+posture modes / Confirm·Cancel·Undo / Status Bead / overlay budget — this
+PRD references, never redefines), `app-prd-caption-lantern.md`, `app-prd-voice-lantern.md`,
+`app-prd-sentinel-lantern.md` (the MVP trio Concordance Lens follows). Foundational:
+`goals-and-guidelines.md`, `source-spec-lantern-stack-v0.1.md`,
+`research/05-cognitive-neurodivergent-overlays.md`, `research/03-lowvision-navigation-safety.md`,
+`collaborator-and-codesign.md`, `docs/pme-eye-ui/plan-kmp-cross-platform.md`, root `CLAUDE.md`.

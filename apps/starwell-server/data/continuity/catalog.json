@@ -1,0 +1,1275 @@
+{
+  "schema": "hearthgate.continuity/v1",
+  "rebuiltAt": "2026-07-22T21:55:26.632Z",
+  "continuities": [
+    {
+      "id": "continuity-c9a560c74de368dc",
+      "name": "[object Object]",
+      "summary": "",
+      "privacy": "private",
+      "consent": "not recorded",
+      "boundaries": "",
+      "establishedFacts": [],
+      "canonRecords": [],
+      "unresolvedThreads": [],
+      "manualContradictions": [],
+      "sources": [
+        {
+          "ref": "observer:0",
+          "kind": "observer",
+          "sourceId": "0",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "0"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:1",
+          "kind": "observer",
+          "sourceId": "1",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "1"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:2",
+          "kind": "observer",
+          "sourceId": "2",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "2"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:3",
+          "kind": "observer",
+          "sourceId": "3",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "3"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:4",
+          "kind": "observer",
+          "sourceId": "4",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "4"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:5",
+          "kind": "observer",
+          "sourceId": "5",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "5"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:6",
+          "kind": "observer",
+          "sourceId": "6",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "6"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:7",
+          "kind": "observer",
+          "sourceId": "7",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "7"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:8",
+          "kind": "observer",
+          "sourceId": "8",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "8"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:9",
+          "kind": "observer",
+          "sourceId": "9",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "9"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:10",
+          "kind": "observer",
+          "sourceId": "10",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "10"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:11",
+          "kind": "observer",
+          "sourceId": "11",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "11"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        },
+        {
+          "ref": "observer:12",
+          "kind": "observer",
+          "sourceId": "12",
+          "title": "[object Object]",
+          "excerpt": "In {world}, let {entity} encounter a pattern that seems synchronized with an unknown distant observer. Keep its meaning uncertain but consequential.",
+          "occurredAt": null,
+          "importedAt": null,
+          "classification": "observed-or-authored",
+          "provenance": {
+            "store": "Observer project",
+            "path": "12"
+          },
+          "rawMetrics": null,
+          "sourceFacts": null,
+          "parseError": false
+        }
+      ],
+      "metrics": {
+        "sourceCount": {
+          "value": 13,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Unique source references after ref-based deduplication"
+        },
+        "observerCount": {
+          "value": 13,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Observer project references"
+        },
+        "archiveAnalysisCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Archive continuity links produced by semantic analysis"
+        },
+        "writingCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Writing Chamber documents explicitly assigned to this continuity"
+        },
+        "environmentalObservationCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Sourced NOAA SWPC snapshots retained as environmental context"
+        },
+        "provenanceCoverage": {
+          "value": 1,
+          "unit": "ratio",
+          "classification": "derived",
+          "method": "Sources carrying at least one provenance field"
+        },
+        "unresolvedCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "mixed",
+          "method": "User-authored unresolved threads plus source-analysis uncertainty"
+        },
+        "citedFactCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Source-derived facts carrying a sourceRef"
+        },
+        "contradictionCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "mixed",
+          "method": "Automatically surfaced variant values plus user-authored contradiction records"
+        },
+        "temporalSpan": {
+          "value": null,
+          "unit": "milliseconds",
+          "classification": "derived",
+          "method": "Newest minus oldest valid source date",
+          "first": null,
+          "last": null
+        }
+      },
+      "timeline": [],
+      "sourceFacts": {
+        "dates": [],
+        "mathematics": [],
+        "magicAndCorrespondence": [],
+        "entities": [],
+        "places": [],
+        "relationships": [],
+        "claims": []
+      },
+      "contradictions": []
+    },
+    {
+      "id": "continuity-d76d37b762e1ba3d",
+      "name": "Solar activity & space weather",
+      "summary": "",
+      "privacy": "private",
+      "consent": "not recorded",
+      "boundaries": "",
+      "establishedFacts": [],
+      "canonRecords": [],
+      "unresolvedThreads": [],
+      "manualContradictions": [],
+      "sources": [
+        {
+          "ref": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+          "kind": "environmental-observation",
+          "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+          "title": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+          "excerpt": "kp: 2 index 0–9 · xrayFlux: 0.000001281152890442172 W/m² (0.1–0.8 nm) · flareClass: C1.3 GOES class · sunspotNumber: 94.4 monthly mean · f107: 138.21 sfu",
+          "occurredAt": "2026-07-22T21:53:45.048Z",
+          "importedAt": "2026-07-22T21:53:45.048Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          },
+          "sourceFacts": {
+            "dates": [
+              {
+                "label": "kp observed",
+                "value": "2026-07-22T18:00:00"
+              },
+              {
+                "label": "xrayFlux observed",
+                "value": "2026-07-22T21:50:00Z"
+              },
+              {
+                "label": "flareClass observed",
+                "value": "2026-07-22T21:50:00Z"
+              },
+              {
+                "label": "sunspotNumber observed",
+                "value": "2026-06"
+              },
+              {
+                "label": "f107 observed",
+                "value": "2026-06"
+              }
+            ],
+            "mathematics": [
+              {
+                "label": "kp",
+                "value": "2 index 0–9",
+                "classification": "direct measurement"
+              },
+              {
+                "label": "xrayFlux",
+                "value": "0.000001281152890442172 W/m² (0.1–0.8 nm)",
+                "classification": "direct measurement"
+              },
+              {
+                "label": "flareClass",
+                "value": "C1.3 GOES class",
+                "classification": "direct measurement"
+              },
+              {
+                "label": "sunspotNumber",
+                "value": "94.4 monthly mean",
+                "classification": "direct measurement"
+              },
+              {
+                "label": "f107",
+                "value": "138.21 sfu",
+                "classification": "direct measurement"
+              }
+            ],
+            "magicAndCorrespondence": [],
+            "entities": [],
+            "places": [],
+            "relationships": [],
+            "claims": []
+          }
+        },
+        {
+          "ref": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+          "kind": "environmental-observation",
+          "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+          "title": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+          "excerpt": "kp: 2 index 0–9 · xrayFlux: 0.000001320275487159961 W/m² (0.1–0.8 nm) · flareClass: C1.3 GOES class · sunspotNumber: 94.4 monthly mean · f107: 138.21 sfu",
+          "occurredAt": "2026-07-22T21:54:51.355Z",
+          "importedAt": "2026-07-22T21:54:51.355Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          },
+          "sourceFacts": {
+            "dates": [
+              {
+                "label": "kp observed",
+                "value": "2026-07-22T18:00:00"
+              },
+              {
+                "label": "xrayFlux observed",
+                "value": "2026-07-22T21:52:00Z"
+              },
+              {
+                "label": "flareClass observed",
+                "value": "2026-07-22T21:52:00Z"
+              },
+              {
+                "label": "sunspotNumber observed",
+                "value": "2026-06"
+              },
+              {
+                "label": "f107 observed",
+                "value": "2026-06"
+              }
+            ],
+            "mathematics": [
+              {
+                "label": "kp",
+                "value": "2 index 0–9",
+                "classification": "direct measurement"
+              },
+              {
+                "label": "xrayFlux",
+                "value": "0.000001320275487159961 W/m² (0.1–0.8 nm)",
+                "classification": "direct measurement"
+              },
+              {
+                "label": "flareClass",
+                "value": "C1.3 GOES class",
+                "classification": "direct measurement"
+              },
+              {
+                "label": "sunspotNumber",
+                "value": "94.4 monthly mean",
+                "classification": "direct measurement"
+              },
+              {
+                "label": "f107",
+                "value": "138.21 sfu",
+                "classification": "direct measurement"
+              }
+            ],
+            "magicAndCorrespondence": [],
+            "entities": [],
+            "places": [],
+            "relationships": [],
+            "claims": []
+          }
+        }
+      ],
+      "metrics": {
+        "sourceCount": {
+          "value": 2,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Unique source references after ref-based deduplication"
+        },
+        "observerCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Observer project references"
+        },
+        "archiveAnalysisCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Archive continuity links produced by semantic analysis"
+        },
+        "writingCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Writing Chamber documents explicitly assigned to this continuity"
+        },
+        "environmentalObservationCount": {
+          "value": 2,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Sourced NOAA SWPC snapshots retained as environmental context"
+        },
+        "provenanceCoverage": {
+          "value": 1,
+          "unit": "ratio",
+          "classification": "derived",
+          "method": "Sources carrying at least one provenance field"
+        },
+        "unresolvedCount": {
+          "value": 0,
+          "unit": "count",
+          "classification": "mixed",
+          "method": "User-authored unresolved threads plus source-analysis uncertainty"
+        },
+        "citedFactCount": {
+          "value": 20,
+          "unit": "count",
+          "classification": "derived",
+          "method": "Source-derived facts carrying a sourceRef"
+        },
+        "contradictionCount": {
+          "value": 3,
+          "unit": "count",
+          "classification": "mixed",
+          "method": "Automatically surfaced variant values plus user-authored contradiction records"
+        },
+        "temporalSpan": {
+          "value": 66307,
+          "unit": "milliseconds",
+          "classification": "derived",
+          "method": "Newest minus oldest valid source date",
+          "first": "2026-07-22T21:53:45.048Z",
+          "last": "2026-07-22T21:54:51.355Z"
+        }
+      },
+      "timeline": [
+        {
+          "label": "sunspotNumber observed",
+          "value": "2026-06",
+          "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+          "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "f107 observed",
+          "value": "2026-06",
+          "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+          "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "sunspotNumber observed",
+          "value": "2026-06",
+          "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+          "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "f107 observed",
+          "value": "2026-06",
+          "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+          "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "xrayFlux observed",
+          "value": "2026-07-22T21:50:00Z",
+          "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+          "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "flareClass observed",
+          "value": "2026-07-22T21:50:00Z",
+          "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+          "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "xrayFlux observed",
+          "value": "2026-07-22T21:52:00Z",
+          "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+          "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "flareClass observed",
+          "value": "2026-07-22T21:52:00Z",
+          "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+          "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+          "value": "2026-07-22T21:53:45.048Z",
+          "context": "kp: 2 index 0–9 · xrayFlux: 0.000001281152890442172 W/m² (0.1–0.8 nm) · flareClass: C1.3 GOES class · sunspotNumber: 94.4 monthly mean · f107: 138.21 sfu",
+          "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+          "classification": "direct-environmental-measurement"
+        },
+        {
+          "label": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+          "value": "2026-07-22T21:54:51.355Z",
+          "context": "kp: 2 index 0–9 · xrayFlux: 0.000001320275487159961 W/m² (0.1–0.8 nm) · flareClass: C1.3 GOES class · sunspotNumber: 94.4 monthly mean · f107: 138.21 sfu",
+          "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+          "classification": "direct-environmental-measurement"
+        },
+        {
+          "label": "kp observed",
+          "value": "2026-07-22T18:00:00",
+          "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+          "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        },
+        {
+          "label": "kp observed",
+          "value": "2026-07-22T18:00:00",
+          "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+          "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+          "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+          "classification": "direct-environmental-measurement",
+          "provenance": {
+            "store": "Solar Observatory",
+            "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "agency": "NOAA Space Weather Prediction Center",
+            "sourceUrls": [
+              "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+              "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+              "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+              "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+              "https://services.swpc.noaa.gov/products/alerts.json"
+            ]
+          }
+        }
+      ],
+      "sourceFacts": {
+        "dates": [
+          {
+            "label": "kp observed",
+            "value": "2026-07-22T18:00:00",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "xrayFlux observed",
+            "value": "2026-07-22T21:50:00Z",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "flareClass observed",
+            "value": "2026-07-22T21:50:00Z",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "sunspotNumber observed",
+            "value": "2026-06",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "f107 observed",
+            "value": "2026-06",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "kp observed",
+            "value": "2026-07-22T18:00:00",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "xrayFlux observed",
+            "value": "2026-07-22T21:52:00Z",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "flareClass observed",
+            "value": "2026-07-22T21:52:00Z",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "sunspotNumber observed",
+            "value": "2026-06",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "f107 observed",
+            "value": "2026-06",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "classification": "direct-environmental-measurement",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          }
+        ],
+        "mathematics": [
+          {
+            "label": "kp",
+            "value": "2 index 0–9",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "xrayFlux",
+            "value": "0.000001281152890442172 W/m² (0.1–0.8 nm)",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "flareClass",
+            "value": "C1.3 GOES class",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "sunspotNumber",
+            "value": "94.4 monthly mean",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "f107",
+            "value": "138.21 sfu",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+            "sourceId": "96843993-961b-447f-8917-01ed9c196f68",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:53:45.048Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "kp",
+            "value": "2 index 0–9",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "xrayFlux",
+            "value": "0.000001320275487159961 W/m² (0.1–0.8 nm)",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "flareClass",
+            "value": "C1.3 GOES class",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "sunspotNumber",
+            "value": "94.4 monthly mean",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          },
+          {
+            "label": "f107",
+            "value": "138.21 sfu",
+            "classification": "direct-environmental-measurement",
+            "sourceRef": "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+            "sourceId": "096e9be8-447d-4b99-8ebd-b108b211a55f",
+            "sourceTitle": "NOAA SWPC snapshot · 2026-07-22T21:54:51.355Z",
+            "provenance": {
+              "store": "Solar Observatory",
+              "identity": "54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e",
+              "agency": "NOAA Space Weather Prediction Center",
+              "sourceUrls": [
+                "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+                "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json",
+                "https://services.swpc.noaa.gov/json/goes/primary/xrays-6-hour.json",
+                "https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
+                "https://services.swpc.noaa.gov/products/alerts.json"
+              ]
+            }
+          }
+        ],
+        "magicAndCorrespondence": [],
+        "entities": [],
+        "places": [],
+        "relationships": [],
+        "claims": []
+      },
+      "contradictions": [
+        {
+          "field": "dates:xrayflux observed",
+          "status": "review",
+          "variants": [
+            {
+              "value": "2026-07-22T21:50:00Z",
+              "sourceRefs": [
+                "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72"
+              ]
+            },
+            {
+              "value": "2026-07-22T21:52:00Z",
+              "sourceRefs": [
+                "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e"
+              ]
+            }
+          ],
+          "method": "Different source-derived values share the same normalised label; human review required."
+        },
+        {
+          "field": "dates:flareclass observed",
+          "status": "review",
+          "variants": [
+            {
+              "value": "2026-07-22T21:50:00Z",
+              "sourceRefs": [
+                "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72"
+              ]
+            },
+            {
+              "value": "2026-07-22T21:52:00Z",
+              "sourceRefs": [
+                "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e"
+              ]
+            }
+          ],
+          "method": "Different source-derived values share the same normalised label; human review required."
+        },
+        {
+          "field": "mathematics:xrayflux",
+          "status": "review",
+          "variants": [
+            {
+              "value": "0.000001281152890442172 W/m² (0.1–0.8 nm)",
+              "sourceRefs": [
+                "solar:641344ab299df1dab643e81156e570267ce2b5553437a785fc6c1522023b9c72"
+              ]
+            },
+            {
+              "value": "0.000001320275487159961 W/m² (0.1–0.8 nm)",
+              "sourceRefs": [
+                "solar:54e925e4905c62421c32f11a40094e5ef8518eea46b3f86c34a247e3e9226d6e"
+              ]
+            }
+          ],
+          "method": "Different source-derived values share the same normalised label; human review required."
+        }
+      ]
+    }
+  ],
+  "sourceSummary": {
+    "observer": 13,
+    "archive": 151,
+    "writing": 0,
+    "solarWeather": 2
+  },
+  "boundary": "Continuity links preserve source identity. Archive analysis remains interpretation; narrative treatments remain authored material; NOAA space-weather records remain environmental context. Temporal proximity is not evidence of causation."
+}

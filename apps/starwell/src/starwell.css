@@ -1,19 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;600;800&family=Marcellus+SC&display=swap');
 
 :root {
-  --obsidian: #14131b;
-  --twilight: #202033;
-  --stonewood: #efe2c7;
-  --parchment: #f7edda;
-  --copper: #b65f3d;
-  --copper-dark: #7e3d29;
-  --gold: #e7c477;
-  --moss: #516f4d;
-  --emerald: #1f7a5a;
-  --seaglass: #8ccac0;
-  --moon: #eaf4ef;
-  --ink: #2d231e;
-  --shadow: rgba(17, 12, 12, 0.38);
+  color-scheme: dark;
+
+  /* Hearthgate palette */
+  --mint: #64ddb0;
+  --gold: #e0bd68;
+  --line: rgba(135, 202, 180, 0.2);
+  --glass: rgba(13, 25, 22, 0.72);
+
+  /* Semantic tokens (dark-first) */
+  --obsidian: #050807;
+  --twilight: #0c1812;
+  --stonewood: #e5eee8;
+  --parchment: #c8ddd2;
+  --copper: #64ddb0;
+  --copper-dark: #4ab894;
+  --moss: #1a3328;
+  --emerald: #3db88a;
+  --seaglass: #64ddb0;
+  --moon: #e5eee8;
+  --ink: #e5eee8;
+  --shadow: rgba(0, 0, 0, 0.52);
 }
 
 * { box-sizing: border-box; }
@@ -31,59 +39,73 @@ body {
   padding: clamp(1rem, 3vw, 2.5rem);
   position: relative;
   overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 0, #173b30, transparent 34rem),
+    radial-gradient(circle at 90% 0, #1f1535, transparent 30rem),
+    var(--obsidian);
+  color: var(--ink);
   transition: background 900ms ease;
 }
 
-.starwell::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
+/* Sky-phase tinting — all dark, subtle hue shifts */
+.sky-dawn {
   background:
-    radial-gradient(circle at 18% 16%, rgba(255,255,255,0.38), transparent 14rem),
-    radial-gradient(circle at 78% 12%, rgba(140,202,192,0.34), transparent 19rem),
-    radial-gradient(circle at 55% 108%, rgba(182,95,61,0.34), transparent 24rem);
-  opacity: 0.8;
+    radial-gradient(circle at 10% 0, #173b30, transparent 34rem),
+    radial-gradient(circle at 90% 0, #2a1a0f, transparent 28rem),
+    #060508;
 }
 
-.sky-dawn { background: linear-gradient(145deg, #eabf91 0%, #a2c5bf 42%, #5f6c92 100%); }
-.sky-day { background: linear-gradient(145deg, #d9f0ef 0%, #b6ddcf 38%, #f1d7a6 100%); }
-.sky-dusk { background: linear-gradient(145deg, #402f5b 0%, #a35d5b 44%, #e2a86e 100%); }
-.sky-night { background: linear-gradient(145deg, #101420 0%, #1b2540 44%, #183c3b 100%); color: var(--moon); }
+.sky-day {
+  background:
+    radial-gradient(circle at 10% 0, #143327, transparent 34rem),
+    radial-gradient(circle at 90% 0, #1c1c2e, transparent 28rem),
+    #060a07;
+}
+
+.sky-dusk {
+  background:
+    radial-gradient(circle at 10% 0, #1a1030, transparent 30rem),
+    radial-gradient(circle at 90% 0, #2d1612, transparent 28rem),
+    #050407;
+}
+
+.sky-night {
+  background:
+    radial-gradient(circle at 10% 0, #173b30, transparent 34rem),
+    radial-gradient(circle at 90% 0, #1f1535, transparent 30rem),
+    #050807;
+}
 
 .stars {
   position: fixed;
   inset: 0;
   pointer-events: none;
   background-image:
-    radial-gradient(circle, rgba(255,255,255,0.9) 0 1px, transparent 1.6px),
-    radial-gradient(circle, rgba(231,196,119,0.9) 0 1px, transparent 1.7px);
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 1.6px),
+    radial-gradient(circle, rgba(100, 221, 176, 0.7) 0 1px, transparent 1.7px);
   background-size: 84px 84px, 137px 137px;
   opacity: 0;
   transition: opacity 900ms ease;
 }
 
-.sky-night .stars, .sky-dusk .stars { opacity: 0.52; }
+.sky-night .stars,
+.sky-dusk .stars { opacity: 0.38; }
 
 .observatory-shell {
   width: min(1180px, 96vw);
   margin: 0 auto;
   position: relative;
   z-index: 2;
-  border: 1px solid rgba(231, 196, 119, 0.38);
+  border: 1px solid var(--line);
   border-radius: 42px;
   background:
-    linear-gradient(180deg, rgba(247,237,218,0.92), rgba(239,226,199,0.78)),
-    radial-gradient(circle at 50% 0, rgba(140,202,192,0.32), transparent 34rem);
-  box-shadow: 0 24px 90px var(--shadow), inset 0 0 0 1px rgba(255,255,255,0.34);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 35%),
+    var(--glass);
+  backdrop-filter: blur(24px) saturate(145%);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.1),
+    0 24px 90px var(--shadow);
   overflow: hidden;
-}
-
-.sky-night .observatory-shell, .sky-dusk .observatory-shell {
-  background:
-    linear-gradient(180deg, rgba(28, 25, 34, 0.9), rgba(52, 42, 43, 0.76)),
-    radial-gradient(circle at 50% 0, rgba(140,202,192,0.22), transparent 34rem);
-  color: var(--moon);
 }
 
 .dome {
@@ -101,9 +123,9 @@ body {
   width: min(980px, 108vw);
   height: min(980px, 108vw);
   bottom: -760px;
-  border: 2px solid rgba(231,196,119,0.35);
+  border: 1px solid var(--line);
   border-radius: 50%;
-  box-shadow: inset 0 0 80px rgba(140,202,192,0.17);
+  box-shadow: inset 0 0 80px rgba(100, 221, 176, 0.06);
 }
 
 .eyebrow {
@@ -111,11 +133,9 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: 0.78rem;
-  color: var(--copper-dark);
+  color: var(--mint);
   font-weight: 800;
 }
-
-.sky-night .eyebrow, .sky-dusk .eyebrow { color: var(--gold); }
 
 h1 {
   font-family: Cinzel, serif;
@@ -123,38 +143,29 @@ h1 {
   line-height: 0.86;
   letter-spacing: 0.04em;
   margin: 0;
-  color: var(--copper-dark);
-  text-shadow: 0 12px 32px rgba(126,61,41,0.18);
+  color: var(--gold);
+  text-shadow: 0 12px 32px rgba(100, 221, 176, 0.14);
 }
-
-.sky-night h1, .sky-dusk h1 { color: var(--gold); }
 
 .subtitle {
   font-family: 'Cormorant Garamond', serif;
   max-width: 720px;
   margin: 1rem auto 0;
   font-size: clamp(1.35rem, 3vw, 2rem);
-  color: rgba(45,35,30,0.82);
+  color: var(--parchment);
+  opacity: 0.9;
 }
-
-.sky-night .subtitle, .sky-dusk .subtitle { color: rgba(234,244,239,0.84); }
 
 .inscription {
   display: inline-block;
   margin-top: 1.4rem;
   padding: 0.7rem 1rem;
-  border: 1px solid rgba(182,95,61,0.35);
+  border: 1px solid rgba(224, 189, 104, 0.32);
   border-radius: 999px;
-  background: rgba(255,255,255,0.22);
-  color: var(--copper-dark);
+  background: rgba(100, 221, 176, 0.06);
+  color: var(--moon);
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.1rem;
-}
-
-.sky-night .inscription, .sky-dusk .inscription {
-  border-color: rgba(231,196,119,0.34);
-  color: var(--moon);
-  background: rgba(0,0,0,0.18);
 }
 
 .instrument-grid {
@@ -165,23 +176,24 @@ h1 {
 }
 
 .instrument-card {
-  border: 1px solid rgba(126,61,41,0.24);
+  border: 1px solid var(--line);
   border-radius: 28px;
   padding: 1.2rem;
   background:
-    linear-gradient(145deg, rgba(255,255,255,0.48), rgba(247,237,218,0.28)),
-    radial-gradient(circle at 15% 0, rgba(140,202,192,0.24), transparent 12rem);
-  box-shadow: 0 16px 38px rgba(56,37,28,0.12);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), transparent 35%),
+    rgba(13, 25, 22, 0.52);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24);
   min-height: 185px;
   position: relative;
   overflow: hidden;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.sky-night .instrument-card, .sky-dusk .instrument-card {
-  background:
-    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(0,0,0,0.18)),
-    radial-gradient(circle at 15% 0, rgba(140,202,192,0.18), transparent 12rem);
-  border-color: rgba(231,196,119,0.24);
+.instrument-card:hover,
+.instrument-card.active {
+  border-color: var(--mint);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(100, 221, 176, 0.2);
 }
 
 .instrument-card::after {
@@ -191,7 +203,7 @@ h1 {
   bottom: -2.5rem;
   width: 9rem;
   height: 9rem;
-  border: 1px solid rgba(182,95,61,0.18);
+  border: 1px solid var(--line);
   border-radius: 50%;
 }
 
@@ -201,21 +213,25 @@ h1 {
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 50%;
-  background: rgba(140,202,192,0.28);
-  color: var(--copper-dark);
-  border: 1px solid rgba(182,95,61,0.24);
+  background: rgba(100, 221, 176, 0.12);
+  color: var(--mint);
+  border: 1px solid var(--line);
   margin-bottom: 0.8rem;
 }
-
-.sky-night .glyph, .sky-dusk .glyph { color: var(--gold); }
 
 .instrument-card h2 {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.55rem;
   margin: 0 0 0.45rem;
+  color: var(--stonewood);
 }
 
-.instrument-card p { margin: 0; opacity: 0.84; line-height: 1.55; }
+.instrument-card p {
+  margin: 0;
+  opacity: 0.72;
+  line-height: 1.55;
+  color: var(--parchment);
+}
 
 .study-row {
   display: grid;
@@ -228,19 +244,21 @@ h1 {
   border-radius: 30px;
   padding: 1rem;
   min-height: 155px;
-  border: 1px solid rgba(140,202,192,0.28);
-  background: linear-gradient(160deg, rgba(81,111,77,0.2), rgba(231,196,119,0.14));
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(160deg, rgba(100, 221, 176, 0.06), rgba(224, 189, 104, 0.06));
+  transition: border-color 180ms ease;
 }
+
+.study-door:hover { border-color: rgba(100, 221, 176, 0.42); }
 
 .study-door h3 {
   font-family: Cinzel, serif;
   margin: 0 0 0.5rem;
-  color: var(--emerald);
+  color: var(--mint);
 }
 
-.sky-night .study-door h3, .sky-dusk .study-door h3 { color: var(--seaglass); }
-
-.study-door p { margin: 0; opacity: 0.84; }
+.study-door p { margin: 0; opacity: 0.78; }
 
 @media (max-width: 720px) {
   .starwell { padding: 0.7rem; }

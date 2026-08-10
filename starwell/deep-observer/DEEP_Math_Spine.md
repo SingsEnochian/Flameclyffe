@@ -120,7 +120,7 @@ Resonance and Kp add liveliness. Low-stim mode keeps motion quiet.
 ringCount = round(1 + (moonIllum / 100) · 4)
 ```
 
-Moon illumination creates one to five harmonic rings. The moon layer is scaffolding, not a claim of causality.
+Moon illumination creates one to five harmonic rings. The moon layer provides harmonic ring structure — it is not a claim of causality.
 
 ## Theme Palettes
 

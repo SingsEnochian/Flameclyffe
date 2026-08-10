@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>STARWELL</title>
+  <meta name='description' content='STARWELL Hearthweave Observatory, a living manuscript observatory for Terra Aeterna.'/>
+  <script type="module" crossorigin src="/starwell/assets/main-CrYR0Dys.js"></script>
+  <link rel="modulepreload" crossorigin href="/starwell/assets/jsx-runtime-CcGnvS2e.js">
+  <link rel="modulepreload" crossorigin href="/starwell/assets/modulepreload-polyfill-Dezn_h7o.js">
+  <link rel="modulepreload" crossorigin href="/starwell/assets/supabase-62IQbFES.js">
+  <link rel="modulepreload" crossorigin href="/starwell/assets/starwell-living-rooms-C1iiLnDo.js">
+  <link rel="modulepreload" crossorigin href="/starwell/assets/stonewood-typography-BAP6eep5.js">
+  <link rel="stylesheet" crossorigin href="/starwell/assets/starwell-living-rooms-BhjVc3cG.css">
+  <link rel="stylesheet" crossorigin href="/starwell/assets/deep-observer-boundary-e-bWy4Jy.css">
+  <link rel="stylesheet" crossorigin href="/starwell/assets/stonewood-typography-CzS1IeFG.css">
+  <link rel="stylesheet" crossorigin href="/starwell/assets/main-Bcow47ti.css">
+  <link rel="stylesheet" crossorigin href="/starwell/assets/starwell-KYg2XK4p.css">
+</head>
+<body>
+  <div id='root'></div>
+  <nav class='framework-door-rack' aria-label='STARWELL framework doors'>
+    <a class='living-room-doorway' href='./living-room.html' aria-label='Enter the STARWELL Living Room'>
+      <span class='living-room-doorway-mark' aria-hidden='true'>✴</span>
+      <span class='living-room-doorway-copy'>
+        <strong>Enter the Living Room</strong>
+        <em>Hearth, doors, anchor field, and Fifth Form centre.</em>
+      </span>
+    </a>
+    <a class='glyph-studio-doorway framework-doorway-glyph' href='./glyph-studio/' aria-label='Open the STARWELL Glyph Studio'>
+      <span class='glyph-studio-doorway-mark' aria-hidden='true'>◇</span>
+      <span class='glyph-studio-doorway-copy'>
+        <strong>Open Glyph Studio</strong>
+        <em>Apple Pencil canvas, brushes, colour, layers, text, and local FontForge handoff.</em>
+      </span>
+    </a>
+    <a class='living-room-doorway framework-doorway-signal' href='./signal-well/' aria-label='Open the STARWELL Signal Well'>
+      <span class='living-room-doorway-mark' aria-hidden='true'>⌁</span>
+      <span class='living-room-doorway-copy'>
+        <strong>Open Signal Well</strong>
+        <em>Local radio waterfall, human-led sifting, RFI ledger, candidates, and provenance export.</em>
+      </span>
+    </a>
+    <a class='living-room-doorway framework-doorway-hearthgate' id='hearthgate-local-door' href='../hearthgate.html' aria-label='Open the local Hearthgate rooms' hidden>
+      <span class='living-room-doorway-mark' aria-hidden='true'>⬡</span>
+      <span class='living-room-doorway-copy'>
+        <strong>Open Hearthgate</strong>
+        <em>Local rooms, Grove chat, Archive, notes, and House configuration.</em>
+      </span>
+    </a>
+  </nav>
+  <div id='city-state-motion-root'></div>
+  <script>
+    (() => {
+      const localShell = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)
+        && window.location.pathname.startsWith('/starwell/');
+      const door = document.getElementById('hearthgate-local-door');
+      if (localShell && door) door.hidden = false;
+    })();
+  </script>
+</body>
+</html>

@@ -58,7 +58,7 @@ Experimental and theoretical variables used to transform observation into visibl
 - H: Horizon
 - Q / charge: centre glow
 
-These variables are interpretive display variables, not proof of hidden truth.
+These are model variables, not proof of hidden truth.
 
 ### 3. Glyph engine layer
 

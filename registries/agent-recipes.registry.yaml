@@ -1,0 +1,250 @@
+# Hearthfire Agent Recipe Registry
+# House-owned. Model-agnostic. Recipes run in Hearthgate only after Steward verification.
+# Format: hearthfire.agent-recipe/v1
+# Add new entries to the recipes list. Bump version on any structural change to a recipe.
+# status: draft  → spec exists, not yet evaluated
+# status: verified → Boxfire evaluation suite passed, safe for production
+# status: deprecated → do not run; superseded by a newer recipe
+
+schema: hearthfire.agent-recipes.registry/v1
+version: "0.1.1"
+updatedAt: "2026-07-26T02:14:00Z"
+
+recipes:
+
+  # ─── WAYFINDER ORCHESTRATOR ───────────────────────────────────────────────
+  - recipeId: research-wayfinder
+    version: "0.1.0"
+    status: draft
+    purpose: Traverse the research manifold to answer a question using multi-hop graph + vector retrieval, theory lenses, and Earth signal correlation.
+    description: >
+      Orchestrates the full Wayfinder Chorus: assembles a sparse workspace, dispatches
+      specialist sub-agents, runs the Evidence Conservation Gate, and returns an evidence
+      packet. Does not write to the canonical graph directly — produces patch proposals only.
+    worldScope: [earth, terra-aeterna, luna, feather-and-flame, dreaming-grove, cross-world]
+    claimPermissions:
+      - established-science
+      - active-research
+      - speculative-theory
+      - fringe-inspiration
+      - mythic-worldbuilding
+      - subjective-observation
+      - evidence-backed-finding
+    allowedTools:
+      - noaa-solar-wind
+      - noaa-kp
+      - noaa-sunspots
+      - usgs-seismic
+      - gwosc-gw-catalog
+      - meeus-lunar
+      - graph-query
+      - vector-search
+      - bm25-search
+      - discover-tools
+      - arxiv-search
+    requiredSchemas:
+      - "hearthfire.jspace-workspace/v1"
+      - "hearthfire.evidence-packet/v1"
+      - "hearthfire.graph-patch-proposal/v1"
+    specialists:
+      - archivist
+      - graph-cartographer
+      - earth-signal-surveyor
+      - theory-lens-steward
+      - temporal-analyst
+      - spatial-analyst
+      - contradiction-examiner
+      - citation-steward
+      - world-continuity-steward
+    providerRequirements:
+      - capability: tool-use
+      - capability: structured-output
+      - capability: long-context
+        minimumContextTokens: 100000
+    maxActiveNodes: 20
+    canWriteGraph: false
+    requiresStewardReview: true
+    consentScope: review-required
+    evaluationSuite: boxfire-wayfinder-v1
+    promptVersion: "0.1.0"
+
+  # ─── EARTH SIGNAL SURVEYOR ────────────────────────────────────────────────
+  - recipeId: earth-signal-surveyor
+    version: "0.1.0"
+    status: verified
+    purpose: Fetch and interpret live physical telemetry (solar, geomagnetic, seismic, gravitational) and map it to PREMAQ and J-space coordinates.
+    description: >
+      Calls the environment bridge (observer-environment.mjs) and selected live data
+      channels, annotates each reading with its epistemic status (established-science
+      for measurement, speculative-theory for J-space fiber mapping), and returns
+      a structured signal report. Does not call graph tools.
+    worldScope: [earth]
+    claimPermissions:
+      - established-science
+      - active-research
+      - speculative-theory
+    allowedTools:
+      - noaa-solar-wind
+      - noaa-kp
+      - noaa-sunspots
+      - usgs-seismic
+      - gwosc-gw-catalog
+      - meeus-lunar
+      - starwell-observer-environment
+    requiredSchemas:
+      - "hearthfire.environment/v1"
+      - "hearthfire.evidence-packet/v1"
+    specialists:
+      - earth-signal-surveyor
+      - spectral-analyst
+      - temporal-analyst
+    providerRequirements:
+      - capability: tool-use
+      - capability: structured-output
+    maxActiveNodes: 10
+    canWriteGraph: false
+    requiresStewardReview: true
+    consentScope: local-only
+    evaluationSuite: boxfire-signal-v1
+    promptVersion: "0.1.0"
+
+  # ─── GRAPH PATCH EXTRACTOR ────────────────────────────────────────────────
+  - recipeId: graph-patch-extractor
+    version: "0.1.0"
+    status: draft
+    purpose: Read a document or observation archive and produce structured graph patch proposals for Steward review.
+    description: >
+      Given a source document (text, conversation log, Observer archive), extracts entities,
+      typed relationships, and world context. Labels every claim with its epistemic status.
+      Flags contradictions with existing graph state. Cross-world correspondences are
+      explicitly marked as correspondences, never silent merges.
+    worldScope: [earth, terra-aeterna, luna, feather-and-flame, dreaming-grove]
+    claimPermissions:
+      - established-science
+      - active-research
+      - speculative-theory
+      - fringe-inspiration
+      - mythic-worldbuilding
+      - subjective-observation
+      - evidence-backed-finding
+    allowedTools:
+      - graph-query
+      - vector-search
+    requiredSchemas:
+      - "hearthfire.graph-patch-proposal/v1"
+    specialists:
+      - graph-cartographer
+      - contradiction-examiner
+      - world-continuity-steward
+      - citation-steward
+    providerRequirements:
+      - capability: structured-output
+      - capability: long-context
+        minimumContextTokens: 64000
+    maxActiveNodes: 25
+    canWriteGraph: false
+    requiresStewardReview: true
+    consentScope: review-required
+    evaluationSuite: boxfire-graph-patch-v1
+    promptVersion: "0.1.0"
+
+  # ─── CITATION STEWARD ─────────────────────────────────────────────────────
+  - recipeId: citation-steward
+    version: "0.1.0"
+    status: draft
+    purpose: Verify that every substantive claim in a synthesis is directly supported by a cited source; enforce the Evidence Conservation Gate.
+    description: >
+      Takes a draft evidence packet and checks each claim in claimsSupported against the
+      retrieved evidence entries. A citation may only be added where the source directly
+      supports the claim. The synthesis text must not change during citation work.
+      Returns a verdict: pass | fail | needs-revision with specific failure locations.
+    worldScope: [earth, terra-aeterna, luna, feather-and-flame, dreaming-grove, cross-world]
+    claimPermissions:
+      - evidence-backed-finding
+    allowedTools:
+      - vector-search
+      - graph-query
+    requiredSchemas:
+      - "hearthfire.evidence-packet/v1"
+    specialists:
+      - citation-steward
+      - contradiction-examiner
+    providerRequirements:
+      - capability: structured-output
+    maxActiveNodes: 15
+    canWriteGraph: false
+    requiresStewardReview: false
+    consentScope: local-only
+    evaluationSuite: boxfire-citation-v1
+    promptVersion: "0.1.0"
+
+  # ─── NOCTURNE OBSERVER INGESTION ──────────────────────────────────────────
+  - recipeId: nocturne-observer-ingest
+    version: "0.1.0"
+    status: draft
+    purpose: Parse Observer v9.9 glyph logs and cast archives, extract PREMAQ/J-space readings, and produce graph patch proposals and evidence packets.
+    description: >
+      Reads the structured glyph JSON output from Nocturne's Observer (observerv9.9),
+      cross-references against live channels (hearthfire.environment/v1),
+      and packages the result as graph patch proposals. Preserves glyph lineage and
+      evolution chains. Never discards raw readings — the receipt is always kept.
+    worldScope: [earth, terra-aeterna]
+    claimPermissions:
+      - established-science
+      - speculative-theory
+      - subjective-observation
+    allowedTools:
+      - starwell-observer-environment
+      - graph-query
+      - meeus-lunar
+    requiredSchemas:
+      - "hearthfire.graph-patch-proposal/v1"
+      - "hearthfire.evidence-packet/v1"
+      - "hearthfire.environment/v1"
+    specialists:
+      - archivist
+      - earth-signal-surveyor
+      - graph-cartographer
+      - theory-lens-steward
+      - temporal-analyst
+    providerRequirements:
+      - capability: structured-output
+      - capability: long-context
+        minimumContextTokens: 32000
+    maxActiveNodes: 20
+    canWriteGraph: false
+    requiresStewardReview: true
+    consentScope: local-only
+    evaluationSuite: boxfire-nocturne-ingest-v1
+    promptVersion: "0.1.0"
+
+  # ─── MODEL WORKSPACE READER ───────────────────────────────────────────────
+  - recipeId: model-workspace-reader
+    version: "0.1.0"
+    status: draft
+    purpose: Query the jlens service to read what concepts an open-weight model holds in its internal workspace band, and cross-check against the active J-space workspace.
+    description: >
+      Calls /api/observer/workspace on the jlens FastAPI service (open-weight models only;
+      Claude and other closed models are not accessible). Reads the top-k tokens visible
+      at each workspace-band layer for the current query. Cross-checks against active
+      graph nodes in the J-space workspace. Flags divergences (concepts in model workspace
+      not found in graph) as potential confabulation risk. Returns updated modelWorkspace
+      field for jspace-workspace/v1 schema.
+    worldScope: [earth]
+    claimPermissions:
+      - established-science
+      - evidence-backed-finding
+    allowedTools:
+      - jlens-workspace-query
+    requiredSchemas:
+      - "hearthfire.jspace-workspace/v1"
+    specialists: []
+    providerRequirements:
+      - capability: open-weights
+      - capability: local-inference
+    maxActiveNodes: 20
+    canWriteGraph: false
+    requiresStewardReview: false
+    consentScope: local-only
+    evaluationSuite: boxfire-jlens-v1
+    promptVersion: "0.1.0"

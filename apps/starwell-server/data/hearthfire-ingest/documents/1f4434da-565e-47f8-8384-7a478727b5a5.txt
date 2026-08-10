@@ -1,0 +1,87 @@
+# Lantern HUD — Cross-area research synthesis
+
+**Status:** ASPIRATIONAL design research. Consolidates the five dossiers under `research/`.
+Every claim here is sourced in its dossier; this file pulls out the patterns that recur
+*across* cohorts, the strongest prior art to learn from, and the consolidated goblin list.
+
+---
+
+## 1. The five patterns that recur across every cohort
+
+1. **Gaze/head direction is the unexploited accessibility lever.** Independently, four of the
+   five dossiers converge on "direct the help where the user looks": caption the faced speaker
+   (`01`), beamform toward the watched talker — VGHA eye-gaze steering lifted speech
+   intelligibility **39%→79%** (`02`), point to off-screen hazards/fields (`03`), label/recall
+   what you glance at (`05`). No shipping product combines see-through optic + eye-tracking +
+   phone compute this way. This is Lantern's core thesis.
+
+2. **The phone-glance problem is the adoption driver — and the trap.** Captioning glasses exist
+   *because* looking down at a phone breaks the conversation (`01`). But the same applies to
+   every cohort: the value of the HUD is keeping attention *up and forward*. Any feature that
+   pulls the eyes into a dense panel re-creates the problem it set out to solve.
+
+3. **Reliability and energy beat capability.** Across r/deaf, r/Blind, r/cfs, AAC, and ADHD
+   communities the abandonment story is identical: flaky, slow, exhausting, or untrustworthy AT
+   gets dropped regardless of feature count (LV-device abandonment 17–50%; ALS gaze under-use
+   23%). "Daily-driver reliability" is the product, not the demo.
+
+4. **The preferred modality is often NOT visual.** Navigation research favors haptic+audio over
+   visual (`03`); hearing support is fundamentally an audio-routing problem the HUD only
+   *assists* (`02`); calm cognitive prompts must be rare and peripheral (`05`). A see-through
+   visual HUD is one channel among several — design for the *right* channel per task, not the
+   one the device happens to make easy.
+
+5. **Autonomy, privacy, and "don't fix me" are non-negotiable.** Every vulnerable cohort
+   distrusts monitoring; the autistic community rejects emotion-"correction"; Deaf identity
+   complicates the caption framing; memory aids carry stigma and dependence risk. Wearer-owned,
+   default-off-contested, no-surveillance is a hard design input, not a compliance afterthought.
+
+## 2. Strongest prior art to learn from (and beat)
+
+| Area | Best-in-class today | What to take | Where it falls short |
+|---|---|---|---|
+| Captions | TranscribeGlass ($377, <300 ms, speaker-numbering); Ava (~99% w/ human-in-loop); CART (gold standard) | low latency, speaker ID, on-device | multi-speaker still unsolved; battery/weight; recording law |
+| Caption micro-design | SeEar; RTTD-ID | red-squiggle uncertainty, ≤2 lines/3 words, caption below speaker, stable block + directional pointer (beat pop-ups, 73%) | research prototypes, not products |
+| Hearing routing | Nuance Audio glasses (FDA OTC, 6-mic beamform, ~$1,100); Meta "Conversation Focus" (<20 ms, ~1.8 m bubble) | open-ear beamforming, regulatory path | not gaze-steered; not routing to the user's *own* aids |
+| Gaze beamforming | VGHA / Eriksholm-DTU eye-gaze steering | the 39%→79% result — the headline evidence | lab; needs the HUD to provide the gaze vector |
+| Low-vision enhance | Hwang & Peli edge-enhancement on Glass; Peli multiplexing prisms (+34–38% reading) | works *only on dark scene areas* on see-through optics (matches our constraint exactly) | washes out in bright; monocular field-expansion is niche |
+| Mobility | biped.ai NOA (97% feel safer, spatial audio); WeWALK | audio-first hazard cueing | bulky, £2,399, "augments" not replaces cane |
+| Low-effort input | Apple Eye Tracking (iOS 18); Tobii Dynavox; smooth-pursuit (Pursuits/Orbits) | calibration-free pursuit selection; gaze+confirm | dwell over-used and fatiguing; Midas-touch |
+| Cognitive prompting | COACH (Mihailidis, real dementia deployment) | **prompt only when the user stalls** — silence as default | not on glasses yet |
+| Autism AR | Stanford Superpower Glass; Brain Power | cautionary tale | small/temporary effects; contested premise; community rejection |
+
+## 3. The consolidated goblin list (hard-won warnings, all cohorts)
+
+- **The additive optic adds light, it cannot dim or occlude.** No black text, no faint/calm
+  wash, no "improve a too-bright scene," and overlays can *hide* the very hazards/faces the user
+  needs (`03`,`05`). "Calm" must be timing, not opacity. Edge-enhancement only works on dark
+  scene regions and washes out in daylight (`03`).
+- **Eye-tracking calibration fails for the target users** — nystagmus, strabismus, eccentric PRL,
+  ME/CFS oculomotor impairment (`03`,`04`). A gaze-only product excludes the people it's for.
+- **Gaze control is itself fatiguing; dwell is hostile yet over-used** (`04`). The fatigue aid
+  must not exhaust the eyes. Prefer pursuit + gaze-and-confirm; never make dwell the sole commit.
+- **Hearing aids hold ONE audio source at a time** — the HUD competes with the phone/TV for the
+  aid's single stream; the glasses' own speaker is useless to an aid user (`02`).
+- **The medical-device line is bright and legal.** Can't claim hearing/vision restoration without
+  FDA/CE; OTC-hearing-aid rules apply (`02`,R1). Position as accessibility + control of the
+  user's own cleared devices.
+- **Recording bystanders is a legal/ethical landmine** (two-party-consent states) — on-device,
+  no-persist, transcribe-on-request defaults (`01`).
+- **Latency is a safety and credibility variable**, not a polish item: >5 s captions unusable,
+  >40 ms audio desyncs lips, hazard lag is a trip risk (`01`,`02`,`03`).
+- **Emotion-AI for autism is ethically fraught and largely unwanted** (`05`). Default off,
+  wearer-owned, never a coach — or don't build it.
+- **Overlays can ADD cognitive load and sensory overload**, defeating the purpose, and surprise
+  pop-ups are sensory aggressors for autistic users (`05`). Wearer-summoned, predictable, budgeted.
+- **Voice input fails for dysarthria/mutism/fatigue (~50–60% accuracy)** — never a sole input (`04`).
+- **Abandonment is the default outcome of AT.** Bulk, stigma, cost, training burden, and "my
+  needs changed" kill devices. Reliability, low friction, customization, and honest scope are the
+  countermeasures (all dossiers).
+
+## 4. What this means for the PRD slate
+
+The synthesis points to a clear build logic: **a shared low-effort/calibration-free interaction
+substrate (the `04` layer) underneath five surfaces, with Captions (`01`) as the most validated,
+highest-demand, best-bounded first app, and Look-to-Hear (`02`) as the most differentiated but
+most hardware-gated.** See `goals-and-guidelines.md` §7 for the proposed five PRDs and §8 for the
+open sequencing questions.

@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hearthfire.jspace-workspace/v1",
+  "title": "J-space Workspace",
+  "description": "The Wayfinder's sparse, temporary conceptual manifold for a specific query. Not the full graph — only what's active for the present question. Capacity limit ~20 simultaneously active nodes before concepts compete and degrade (per jlens capacity experiments). The external J-space fiber position (Jacobian world-sheet model) and the model's internal workspace band (Jacobian lens, if available) are recorded separately and may be compared.",
+  "type": "object",
+  "required": [
+    "schema", "workspaceId", "query", "activeWorlds",
+    "activeNodes", "activeEdges", "createdAt"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "hearthfire.jspace-workspace/v1" },
+    "workspaceId": { "type": "string", "format": "uuid" },
+    "query": { "type": "string" },
+    "activeWorlds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["earth", "terra-aeterna", "luna", "feather-and-flame", "dreaming-grove"]
+      }
+    },
+    "activeNodes": {
+      "type": "array",
+      "description": "Nodes currently active in this workspace. Keep under 20 to avoid capacity interference.",
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "required": ["nodeId", "label", "worldId", "activationScore"],
+        "properties": {
+          "nodeId": { "type": "string" },
+          "label": { "type": "string" },
+          "kind": { "type": "string" },
+          "worldId": { "type": "string" },
+          "activationScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "How strongly this node was retrieved and scored"
+          },
+          "retrievedBy": {
+            "type": "string",
+            "enum": ["graph-traversal", "vector-search", "bm25", "rerank", "model-workspace", "theory-lens"]
+          },
+          "fiberPosition": {
+            "type": "integer",
+            "enum": [0, 1, 2],
+            "description": "J-space fiber index: 0=earth-p1, 1=conjugate-p2, 2=conjugate-p3 (speculative-theory)"
+          },
+          "epistemicStatus": { "type": "string" }
+        }
+      }
+    },
+    "activeEdges": {
+      "type": "array",
+      "description": "Relationships active between nodes in this workspace",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fromId": { "type": "string" },
+          "toId": { "type": "string" },
+          "relation": { "type": "string" },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "retrievedEvidence": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Evidence packet IDs associated with this workspace"
+    },
+    "candidateTools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tool IDs selected by discover_tools() for this query"
+    },
+    "candidateTheoryLenses": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Theory lens IDs applicable to this query (only those with measurable observables)"
+    },
+    "temporalWindow": {
+      "type": "object",
+      "properties": {
+        "from": { "type": "string", "format": "date-time" },
+        "to": { "type": "string", "format": "date-time" }
+      }
+    },
+    "spatialWindow": {
+      "type": "object",
+      "properties": {
+        "worldId": { "type": "string" },
+        "locationHint": { "type": "string" },
+        "anchorId": { "type": "string" }
+      }
+    },
+    "externalJspace": {
+      "type": "object",
+      "description": "External J-space fiber position derived from current environmental PREMAQ state. Jacobian world-sheet model: F: ℂ³→ℂ³, det(DF)=-2, three fiber preimages at p1=(0,0,-0.25), p2=(1,-1.5,6.5), p3=(-1,1.5,6.5). Only p1 is physically reachable from real coordinates. (speculative-theory)",
+      "properties": {
+        "state": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "[x, y, z] normalized coordinate in J-space"
+        },
+        "closestFiber": { "type": "integer", "enum": [0, 1, 2] },
+        "closestFiberLabel": {
+          "type": "string",
+          "enum": ["earth-p1", "conjugate-p2", "conjugate-p3"]
+        },
+        "fiberDistances": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "[dist_to_p1, dist_to_p2, dist_to_p3]"
+        },
+        "premaqSnapshot": {
+          "type": "object",
+          "description": "PREMAQ vector at time of workspace creation",
+          "properties": {
+            "pulse": { "type": "number" },
+            "coherence": { "type": "number" },
+            "resonance": { "type": "number" },
+            "entropy": { "type": "number" },
+            "memory": { "type": "number" },
+            "axis": { "type": "number" }
+          }
+        },
+        "claimLabel": { "type": "string", "const": "speculative-theory" }
+      }
+    },
+    "modelWorkspace": {
+      "type": "object",
+      "description": "Jacobian lens readout of what the model holds in its internal workspace band. Available only for open-weight models. For closed models (Claude), the external J-space serves as proxy. (established-science for the jlens computation itself)",
+      "properties": {
+        "available": { "type": "boolean" },
+        "model": { "type": "string" },
+        "lensVersion": { "type": "string" },
+        "workspaceBand": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "description": "Layer indices that constitute the workspace band for this model"
+        },
+        "topConcepts": {
+          "type": "array",
+          "description": "Top-k tokens visible in the workspace band at the query's final position",
+          "items": {
+            "type": "object",
+            "required": ["token", "rank", "layer"],
+            "properties": {
+              "token": { "type": "string" },
+              "rank": { "type": "integer", "minimum": 0 },
+              "layer": { "type": "integer" },
+              "position": { "type": "integer", "description": "Token position in the prompt (-1 = last)" }
+            }
+          }
+        },
+        "ignitionThreshold": {
+          "type": "number",
+          "description": "If set, the activation score at which a concept was detected as 'ignited' in the workspace (ref: jlens ignition experiments)"
+        },
+        "crossChecked": {
+          "type": "boolean",
+          "description": "Whether model workspace concepts were cross-checked against retrieved graph nodes"
+        },
+        "divergences": {
+          "type": "array",
+          "description": "Concepts in model workspace not found in retrieved graph nodes (potential confabulation risk)",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "unresolvedQuestions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Questions this workspace could not answer; candidates for follow-up"
+    },
+    "discardedCandidates": {
+      "type": "array",
+      "description": "Nodes or edges retrieved but discarded from the active workspace",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nodeId": { "type": "string" },
+          "label": { "type": "string" },
+          "reason": {
+            "type": "string",
+            "description": "Why discarded: low relevance | world mismatch | superseded | privacy restriction | capacity limit"
+          }
+        }
+      }
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "closedAt": { "type": "string", "format": "date-time" },
+    "linkedEvidencePacketIds": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Evidence packets produced during this workspace session"
+    }
+  }
+}

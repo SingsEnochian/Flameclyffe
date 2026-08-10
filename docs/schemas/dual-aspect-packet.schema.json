@@ -1,0 +1,235 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hearthfire.dual-aspect-packet/v1",
+  "title": "DualAspectPacket",
+  "description": "An immutable, sealed record of one dual-aspect field crossing. Every downstream renderer — glyph, tone, image, haptic, narrative — derives its state from this packet by ID. Nothing renders before DualAspectActivation fires with this packet's ID. The observable aspect is the measured shore (environmental signals). The experiential aspect is the felt shore (loom/text). Both are frozen at seal time and cannot be updated in place; rendered consequences are recorded in the 'rendered' sub-object after activation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "packetId",
+    "sealedAt",
+    "mode",
+    "house_id",
+    "premaq",
+    "receipt_ids"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "hearthfire.dual-aspect-packet/v1"
+    },
+    "packetId": {
+      "type": "string",
+      "description": "UUID. The identity of this sealed packet. Consumers fetch the packet by this ID after receiving a DualAspectActivation event."
+    },
+    "sealedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp at which this packet was frozen. The temporal coordinate of the crossing."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["LIVE", "DEGRADED"],
+      "description": "LIVE: both shores contributed real data. DEGRADED: one or both shores were unavailable; the degraded object describes what was substituted."
+    },
+    "degraded": {
+      "type": ["object", "null"],
+      "description": "Present and non-null only when mode is DEGRADED. Describes what failed and what was substituted. Null when mode is LIVE.",
+      "additionalProperties": false,
+      "required": ["reason", "substitution"],
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "DEEP_SOURCE_UNAVAILABLE",
+            "KERNEL_UNAVAILABLE",
+            "BOTH_SHORES_UNAVAILABLE",
+            "CONSENT_DENIED"
+          ]
+        },
+        "substitution": {
+          "type": "string",
+          "description": "What was used instead: e.g. 'DEFAULT_DEEP_STATE', 'kernel-only', 'none'"
+        }
+      }
+    },
+    "house_id": {
+      "type": "string",
+      "description": "Which House or world identity this crossing belongs to."
+    },
+    "sanctum_anchor": {
+      "type": ["string", "null"],
+      "description": "Optional sanctum or location reference at the time of the crossing."
+    },
+    "observable": {
+      "type": ["object", "null"],
+      "description": "The measured shore — environmental signals frozen at seal time. Null in KERNEL_UNAVAILABLE degraded packets.",
+      "additionalProperties": false,
+      "required": ["source", "claim_label"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Which system produced this shore, e.g. 'observer-environment'."
+        },
+        "claim_label": {
+          "type": "string",
+          "description": "Epistemic label for this shore's authority, e.g. 'established-science + speculative-theory weights'."
+        },
+        "deep": {
+          "type": ["object", "null"],
+          "description": "Frozen DEEP observer packet state at seal time.",
+          "properties": {
+            "P":         { "type": "number", "minimum": 0, "maximum": 1 },
+            "C":         { "type": "number", "minimum": 0, "maximum": 1 },
+            "R":         { "type": "number", "minimum": 0, "maximum": 1 },
+            "E":         { "type": "number", "minimum": 0, "maximum": 1 },
+            "M":         { "type": "number", "minimum": 0, "maximum": 1 },
+            "A":         { "type": "number", "minimum": 0, "maximum": 1 },
+            "H":         { "type": "number", "minimum": 0, "maximum": 1 },
+            "charge":    { "type": "number", "minimum": 0, "maximum": 1 },
+            "moonIllum": { "type": "number", "minimum": 0, "maximum": 100 },
+            "sky":       { "type": "string" },
+            "kp":        { "type": "number", "minimum": 0 },
+            "bz":        { "type": "number" },
+            "source":    { "type": "string" }
+          }
+        },
+        "premaq_measured": {
+          "type": ["object", "null"],
+          "description": "The environmental PREMAQ proxy values — lowercase field names from observer-environment.",
+          "properties": {
+            "pulse":     { "type": "number", "minimum": 0, "maximum": 1 },
+            "coherence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "resonance": { "type": "number", "minimum": 0, "maximum": 1 },
+            "entropy":   { "type": "number", "minimum": 0, "maximum": 1 },
+            "memory":    { "type": "number", "minimum": 0, "maximum": 1 },
+            "axis":      { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "experiential": {
+      "type": ["object", "null"],
+      "description": "The felt shore — loom/text output frozen at seal time. Null in DEEP_SOURCE_UNAVAILABLE degraded packets where no kernel crossing occurred.",
+      "additionalProperties": false,
+      "required": ["source", "claim_label"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Which system produced this shore, e.g. 'hearthgate-kernel-loom'."
+        },
+        "claim_label": {
+          "type": "string",
+          "description": "Epistemic label, e.g. 'field_model'."
+        },
+        "premaq_felt": {
+          "type": ["object", "null"],
+          "description": "The loom-layer PREMAQ values — uppercase single-letter keys.",
+          "properties": {
+            "P": { "type": "number", "minimum": 0, "maximum": 1 },
+            "C": { "type": "number", "minimum": 0, "maximum": 1 },
+            "R": { "type": "number", "minimum": 0, "maximum": 1 },
+            "E": { "type": "number", "minimum": 0, "maximum": 1 },
+            "M": { "type": "number", "minimum": 0, "maximum": 1 },
+            "A": { "type": "number", "minimum": 0, "maximum": 1 },
+            "Q": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "text_input_hash": {
+          "type": ["string", "null"],
+          "description": "SHA-256 of the text input that produced this felt shore. The text itself is not stored."
+        },
+        "epistemic_modes": {
+          "type": "array",
+          "description": "Per-character epistemic mode: 0=SYNTHETIC 1=CALIBRATED 2=DERIVED 3=OBSERVED.",
+          "items": { "type": "integer", "minimum": 0, "maximum": 3 }
+        }
+      }
+    },
+    "premaq": {
+      "type": "object",
+      "description": "The blended dual-aspect PREMAQ. When both shores are present: 60% measured + 40% felt. When only one shore is available: 100% of that shore. This is the value all renderers use.",
+      "additionalProperties": false,
+      "required": ["P", "C", "R", "E", "M", "A", "Q"],
+      "properties": {
+        "P": { "type": "number", "minimum": 0, "maximum": 1 },
+        "C": { "type": "number", "minimum": 0, "maximum": 1 },
+        "R": { "type": "number", "minimum": 0, "maximum": 1 },
+        "E": { "type": "number", "minimum": 0, "maximum": 1 },
+        "M": { "type": "number", "minimum": 0, "maximum": 1 },
+        "A": { "type": "number", "minimum": 0, "maximum": 1 },
+        "Q": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "blend_weights": {
+      "type": ["object", "null"],
+      "description": "The weights used to blend measured and felt shores into premaq. Recorded for auditability.",
+      "additionalProperties": false,
+      "properties": {
+        "measured": { "type": "number", "minimum": 0, "maximum": 1 },
+        "felt":     { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "provenance": {
+      "type": ["object", "null"],
+      "description": "Origin chain for this crossing.",
+      "additionalProperties": false,
+      "properties": {
+        "depth":        { "type": "integer", "minimum": 0 },
+        "origin_house": { "type": "string" }
+      }
+    },
+    "receipt_ids": {
+      "type": "object",
+      "description": "Receipt identifiers linking this packet to other system records.",
+      "additionalProperties": false,
+      "properties": {
+        "kernel_receipt": {
+          "type": ["string", "null"],
+          "description": "The Python kernel REC-xxxx receipt ID from CrossingTransactionLogger."
+        },
+        "activation_receipt": {
+          "type": ["string", "null"],
+          "description": "The rendered-consequences receipt ID. Null at seal time; populated after rendering completes."
+        }
+      }
+    },
+    "rendered": {
+      "type": ["object", "null"],
+      "description": "Rendered consequences — null at seal time. Populated after DualAspectActivation fires and all renderers have resolved against this packet.",
+      "additionalProperties": false,
+      "properties": {
+        "glyph_seed": {
+          "type": ["string", "null"]
+        },
+        "glyph_geometry": {
+          "type": ["string", "null"]
+        },
+        "tone_profile": {
+          "type": ["object", "null"],
+          "description": "Reference to the tone map output for this packet.",
+          "properties": {
+            "world_slug":       { "type": "string" },
+            "dominant_universe":{ "type": "string" },
+            "fold_count":       { "type": "integer" }
+          }
+        },
+        "somatic": {
+          "type": ["object", "null"],
+          "description": "Somatic interpretation snapshot at render time.",
+          "properties": {
+            "dominant_register": { "type": "string" },
+            "dominant_universe": { "type": "string" },
+            "texture":           { "type": "string" },
+            "thermal":           { "type": "string" }
+          }
+        },
+        "render_timestamp": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

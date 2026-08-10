@@ -1,0 +1,836 @@
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 1
+Categorization of Modern Satanism—An Analysis of
+LaVey's Early Writings
+by Amina Olander Lap, 2008
+Abstract
+Researchers have classified Anton LaVey's so-called “modern Satanism” as a self-spirituality (as
+defined by Paul Heelas) New Age group, and as a Human Potential Movement group. This paper
+analyzes LaVey's view of human nature and the human ego in his early works with respect to
+these classifications by identifying similarities and differences between the characteristics of
+these classifications and the early writings of LaVey. The analysis concludes that it is reasonable
+to categorize LaVey's Satanism as both a self-spirituality New Age group and as a Human Poten-
+tial Movement group; however, this paper proposes that LaVey's modern Satanism is more accu-
+rately described as a member of the “prosperity wing” sub-classification of self-spirituality New
+Age.
+Table of Contents
+1. Introduction........................................................................................................................................2
+2. Research in Modern Satanism............................................................................................................2
+3. Categorization of Modern Satanism...................................................................................................3
+4. Humanistic Psychology and the Human Potential Movement.............................................................4
+5. SelfSpirituality ..................................................................................................................................4
+6. Primary Sources.................................................................................................................................6
+7. LaVey's View of Humans....................................................................................................................7
+7.1 The Damaged Self.............................................................................................................7
+7.2 The Actualized Self..........................................................................................................9
+7.3 Liberating Magic.............................................................................................................11
+7.4 The Satanic Self..............................................................................................................12
+8. Summary..........................................................................................................................................13
+9. Recategorization as the Prosperity Wing..........................................................................................14
+Sources................................................................................................................................................15
+Appendix 1: Bibliography of Significant Research..............................................................................17
+Appendix 2: The Nine Satanic Statements...........................................................................................18
+Appendix 3: The LaVey Personality Synthesizer.................................................................................19
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 2
+1. Introduction
+The very name “Satanism” makes it a controversial topic in Christian cultures. It is therefore not sur
+prising that Satanism has sparked numerous gloomy imaginations and has been a darling subject in
+both Christian gospel literature, anticult movements, and popular culture. However, in spite of this in
+terest sociologists have only recently begun to take Satanism seriously.
+The socalled “modern Satanism,” i.e., the form of Satanism that was founded by Anton LaVey in the
+1960ies in the US, and which is generally accepted as the first genuine, organized Satanism, has earlier
+been classified as a new religious movement in the same category as modern occultism or neopagan
+ism. More recent research has augmented or replaced this categorization with Paul Heelas' term “self
+spirituality,” which refers to the kind of spirituality found in New Age (NA) movements or within part
+of the Human Potential Movement (HPM). However, modern Satanism is a rather new field of socio
+logical interest, and although LaVey's writings still occupy a key role within the movement, only few
+indepth text analyses have been made, and virtually no further discussions have been made in terms
+of the categorization of modern Satanism.
+This paper summarizes my analysis of LaVey's writing with respect to selfspirituality and HPM, with
+particular focus on his concept of the human nature and self. This focus was chosen in part because
+humans occupy a key role both in terms of modern Satanism, HPM, and selfspirituality, and because I
+expected that this approch would illuminate both similarities and differences between modern Sa
+tanism and generic selfspirituality and HPM. This paper thus attempts to answer the question: “How
+does Anton LaVey describe human nature; and how does this description harmonize with general ten
+dencies within the Human Potential Movement and Heelas' term, selfspirituality?”
+This paper is organized as follows: firstly, research in modern Satanism is briefly summarized and ear
+lier categorizations are outlined. This historic information is followed by an introduction to humanistic
+psychology, HPM, and selfspirituality. The analysis, which is the main focus of this paper, is intro
+duced with a description of the primary sources, and LaVey's view of humans is described and com
+pared with NA and HPM. The paper concludes with a recategorization proposal and arguments sup
+porting this proposal.
+2. Research in Modern Satanism
+Research in modern Satanism has accelerated only within the last decade. In the 1970es a few anthro
+pological studies were performed (Moody 1974, Alfred 1976), but otherwise Satanism has mostly
+been described by Satanists themselves, journalists, and Christian countercult movements. In the
+1980es, Satanism became interesting to sociologists and folklorists as a result of the socalled “Satanic
+Panic,” a moral panic that focused on the supposed existence of a subversive, Satanic conspiracy. The
+public fear of Satanists, the ensuing lawsuits, and the vast amount of literature published by counter
+cult and anticult movements triggered a fair amount of academic papers and books on Satanism as
+Christian demonology, urban legend, rumor panic, ostensive acting among teenagers, media dis
+course, etc. Academic interest lay on the use of Satanism as a myth, and with few exceptions existing
+Satanism was only mentioned in order to reject alleged connections between existing Satanism and
+myth. Even so, the mention was so cursory that in a review of perhaps the most important book on Sa
+tanism in that period, The Satanism Scare (Bromley 1991), British sociologist Graham Harvey felt
+compelled to ask whether Satanists really existed (Harvey 1995). Descriptions of modern Satanism
+were usually limited to brief summaries of LaVey's books, uncritically supplemented with information
+from LaVey's partially fabricated biographies.
+This lack of contemporary sources and sociological data is not necessarily indicative of superficiality
+or lacking interest, but may be explained otherwise: in 1975, modern Satanism had become a splin
+tered and disorganized movement, and from the mid1970es until the mid1990es, Satanism seemed to
+exist in such relative obscurity that Gordon Melton almost declared it extinct (Melton 1997, 608). This
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 3
+picture changed in the mid1990es when Satanism began to appear on the Internet where it became
+easier for Satanists to share material, communicate, and network (Petersen 2002). This flourishing
+probably explains a renewed interest among sociologists, including papers and books by US sociolo
+gist James R. Lewis and Ph. D. studies in Sweden and Norway (Mathisen 2008). The new studies have
+mostly been of sociological interest and have mainly focused on minor, local groups and interaction on
+the Internet, and to a lesser degree on the textual sources of modern Satanism.
+The explanation of the lacking academic interest in modern Satanism is thus presumably a combina
+tion of two things: the small number of Satanists, and the fact that Satanism was a rather decentralized
+movement. In 1971, in the early years of the Church of Satan, the membership count was estimated at
+400 to 500 individuals, and in 19681969 while the organization still conducted group rituals, only
+about 50 to 60 individuals regularly attended the rituals (Alfred 2008, 490f). Observing Satanism in its
+current, decentralized form, and ignoring those teenagers that appear to be using Satanism as a part of
+a youth rebellion, Graham Harvey assessed the number of Satanists in England in 1995 to be fewer
+than 100 (Harvey 1995), and sociologist Jesper Aagaard Petersen conjectured the number of Danish
+Satanists to be no more than a few hundred individuals in 2002 (Batchelor 2002), which is presumably
+still the case. The Church of Satan originally had a centralized structure, membership, and organiza
+tion, similar to those found in contemporary new religious groups. However, after LaVey had ceased
+to conduct group rituals, workshops, and other activities in his own house in 1972 and the system of
+local groups (“grottos”) had been abandoned in 1975, the group became highly decentralized and be
+came organized as an “audience cult,” as it is termed in the NA movement (Aldridge 2002, 207), using
+the Internet as its primary medium for contact and information exchange (Lewis 2001, Lap 2002). Ap
+pendix 1 provides a bibliography of the most important research literature in modern Satanism.
+3. Categorization of Modern Satanism
+Categorizations of modern Satanism have been strongly influenced by popular culture and theological
+imaginations, usually resulting in Satanism being described in terms of medieval concepts of witches'
+Sabbaths and demon worship, or in terms of theological notions about Satanism as inverse Christian
+ity. This tendency is exemplified in Opslagsbog i Religion/Livsanskuelse (a Danish handbook of reli
+gions) from 1983:
+Satanism, Satan cult: worship of forces of evil, with °occult ceremonies, the so-called °black
+masses. S involves a blasphemous attitude towards anything sacred, in particular the Christian
+worship of evil: the “Lord's Supper” is celebrated by drinking sacrifical blood, the mass is read
+from behind, the “Apostle's Creed” uses the name of the °Antichrist. These practices may be
+combined with elements from traditional °fertility cults, °witchcraft, black °magic, and sex
+cults. S has primarily been mentioned in the US (e.g., the Manson sect) and England, e.g., as
+°exorcism and as part of °new religious movements.
+Most of this explanation, which appears to be an attempt to unite medieval, theological concepts with
+the study of new religious movements, has been rejected by sociologists that have studied modern Sa
+tanism. They have instead described Satanism as a new religious movement, such as in the book: Nye
+religiøse bevægelser i Danmark [i.e., New Religious Movements in Denmark] (Pade 1999), and in sev
+eral of Gordon Melton's papers, including Modern Alternative Religions in the West. In this paper,
+Melton includes Satanism in “The Magical Family” together with Crowleyinspired occultism and
+modern witchcraft (Melton 1997, 608). This categorization is somewhat problematic, however, be
+cause Satanism became strongly decentralized and thus lost much of its structural similarity with other
+new religious movements as early as 1975. Olav Hammer, on the other hand, classifies Satanism as
+part of NA, but Hammer seems to be rather uninformed about modern Satanism: for example, in the
+few lines he spends on his description of Satanism, Hammer writes about the Temple of Set that they:
+“worship a being that is called the Prince of Darkness,” which is somewhat misleading at best (Ham
+mer 1997, 112f). Depating from these earlier classifications, today researchers seem to have reached
+an agreement that modern Satanism should be categorized as HPM and/or selfspirituality (Petersen
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 4
+2005, Dyrendal 2007, La Fontaine 1999), but few researchers clarify this categorization. The next sec
+tion provides a brief introduction to these terms, beginning with an outline of humanistic psychology,
+which served as a foundation for both HPM and NA.
+4. Humanistic Psychology and the Human Potential Movement
+Humanistic psychology was originally an objection against the industrialization, urbanization, materi
+alism, and environmental destruction of the 1950es and 1960es. It was also intended as an alternative
+to the behavioristic and psychoanalytical fields of psychology which humanistic psychologists thought
+objectified humans or focused only on our illnesses. The new approach of humanistic psychology was
+to focus on the “healthy” human being, humans as conscious actors, and human strengths and abilities
+and options for lifelong development.
+Abraham Maslow, who represented the movement together with colleagues such as Carl Rogers, Rolly
+May, and others, believed that every person possesses a huge potential and a natural desire to become
+selfactualized. The reason why the prosperous Western society sported only about 10% selfactual
+ized people according to Maslow, was undesirable influence and upbringing, for example when a child
+experienced a conflict between its own feelings and the expectations of its surroundings. If an individ
+ual managed to deliberate himself or herself from undesirable external influences, then not only would
+this individual be able to realize his or her hidden potential, the person would also reach his or her “au
+thentic self.” This authentic self was considered naturally “good” and able to instinctively act properly
+and responsibly to the advantage of itself and its surroundings (Schultz 2004:461ff).
+Humanistic psychology has been accused of promoting narcissism without social responsibility. This
+conflicts with the selfunderstanding of humanistic psychology, however, as it describes insight, love
+to oneself, and love of others as inseparable and mutually reinforcing (Puttick 2000, 205).
+The term “The Human Potential Movement” has been used as an umbrella description for a large array
+of groups, activities, people, and techniques that are found in the tension between spirituality and psy
+chology, and which have a particular focus on furthering the physical, emotional, mental, creative, or
+spiritual potential that each individual is believed to possess (Wallis 1985, 129). HPM became what
+Elizabeth Puttick coins the “psychospiritual” part of the countercultural movement that began to grow
+in the 1960es in the US with inspiration from humanistic psychology. From its onset, HPM was an ob
+jection against established psychology, organized religion, philosophical and theological intellectual
+ism, and what was considered destructive, scientific materialism (Puttick 2000). It is more difficult to
+distinguish New Age (NA) and HPM today, and some consider HPM to be a less spiritual branch of
+NA while others consider HPM and NA to be partially overlapping.
+The two categories share many traits in content and organization. Structurally, HPM resembles NA be
+cause of their widespread eclecticism and loose structures. Members participate in many different con
+texts, and each individual selects and combines whatever makes sense to him or her. Some groups
+(e.g., Scientology) are organized as new religious movements that demand strong loyalty or maintain
+an orthodox belief or ritual system, and are found in the periphery of HPM (Stone 1976, 94). HPM is
+typically less spiritual than NA, but spirituality is also found in HPM, especially in the shape of Bud
+dhist or Eastern influence. If a god appears in HPM, typically it is not a god in a common, Christian
+sense, but rather a form of cosmic energy, the person's true nature, or some shared life force (Stone
+1976, 103).
+5. Self-Spirituality
+Heelas uses the expression “selfspirituality” as a reference to the shared paradigm or core ideology of
+NA. Selfspirituality encompasses three basic elements according to Heelas: an explanation of what is
+wrong with life and the world, a vision of the goal of perfection, and a set of methods to achieve it
+(Heelas 1996, 18ff). This section outlines these three elements and compares the spiritual self with two
+other perceptions of self that we find in today's society.
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 5
+NA has inherited the explanation of what is wrong with society and humans from HPM: the problem is
+first and foremost improper socialization caused by a society that has ruined our authentic selves and
+induced in us guilt, fear, inhibitions, poor selfesteem, victim roles, unnecessary selfrestrictions, and a
+wish to impress others. These external influences are often described as a person's ego, lower self, in
+tellect, or consciousness (ibid).
+Perfection or salvation is believed to be achievable by letting go of one's ego by which one supposedly
+is able to uncover one's authentic or higher self, and thus one's true spiritual nature. There are varying
+perceptions of the spiritual self within NA, but central to many of the other shared notions is the belief
+that it is connected to something greater than man, i.e., the divine, the eternal, or cosmos. This belief is
+reflected in the attitude towards authority, ethics, and responsibility.
+NA has also inherited HPM's emphasis on personal experience. Personal experience is the only or
+highest authority in NA, because the spiritual self promises more direct access to true knowledge than
+handeddown religions, gurus, scientists, or experts can offer. This prioritization of authority is re
+flected in the practitioner's ethics where his or her “inner voice” or intuition is preferred to tradition
+and dogma. The spiritual self makes each individual fully responsible for his or her own life, because
+the relinquishment of the ego is presumed to also have freed the person from those external influences
+that the person might otherwise have blamed (e.g., childhood or society) for his or her shortcomings.
+In some NA segments this concept of personal responsibility is extended to include responsibility for
+the birth of one's parents or reality as such, but in a less radical form it may simply convey a sense of
+responsibility towards the world and one's fellow man, or the view that everyone is responsible for his
+or her own life and that interference with the lives of others will only impede their ability to relinquish
+their egos and find their true ways that only their spiritual selves can show them.
+NA offers a large number of techniques for letting go of one's ego and realizing one's spiritual self or
+hidden potential. The breadth of methods and goals are characteristic of NA, but they may be arranged
+by applying Heelas' distinction (which he borrows from the study of new religious groups) between
+groups that are “worldrejecting,” “harmonial,” or “worldaffirming.” The first category applies to
+those segments of NA that are primarily occupied with letting go of the ego and realizing a spiritual
+self and spiritual reality. The second category is the largest one and includes those NA groups that seek
+to obtain the “best of both worlds,” that is, to strike a balance between the spiritual and the material or
+corporeal. The last category, which will prove to be the most interesting one for this study, is the
+“prosperity wing” segment of NA. This segment of NA is the one that resembles HPM the most, and it
+is less concerned with letting go of the ego and more with realizing one's potential in one's profes
+sional life or realizing more materialistic goals (ibid).
+There is a smooth transition between those ideas that are found in NA and those that are found in soci
+ety in general. Heelas notes that in some cases NA simply states common tendencies in a more radical
+or spiritual form. Such similarities are also found in the perception of self. Heelas borrows Steven Hip
+ton's distinction between the expressive self and the utilitaristic self: the utilitaristic individualist is fo
+cused on satisfying his or her own desires and interests, and to use his or her power, will, determina
+tion, initiative, ability to reason, etc. to maximize what the world may offer. The self is viewed as sep
+arate from family, religion, calling, authority, duty, moral exemplars, etc. The utilitaristic self serves as
+a foundation of several assumptions in society, such as the belief that there is something powerful in
+each individual that can be utilized and improved, enabling the person to increase his or her benefit
+from the material world. This utilitaristic self is most visible in NA's “prosperity wing,” for example in
+the shape of selfhelp literature and techniques employing positive thinking as methods to achieve suc
+cess and financial gains. This segment of NA is often found in a gray zone between the secular and the
+spiritual by associating psychological mechanisms (or something that resembles psychological mecha
+nisms) with magical effects, for example by stipulating that positive thinking alone can alter physical
+reality.
+The expressive self that is radicalized by NA to a spiritual self contrasts the utilitaristic self to some
+degree. The expressive individualist believes that there is more to life than the satisfaction of arbitrary
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 6
+desires, in particular those desires that are stimulated by the capitalist emphasis on increase and mate
+rialistic consumerism. Instead, one attempts to identify and act out an authentic self. Materialistic
+goals are avoided as they are assumed to lead to greed, envy, and superficiality. Values are found in
+side of oneself, and one works on personal growth, meaningful relations, and the ability to be in touch
+with oneself (ibid, 160ff).
+6. Primary Sources
+The primary sources require a brief introduction, because their differences and forms are of interest to
+the analysis. The primary sources are LaVey's first three books: The Satanic Bible (1969), The Com-
+pleat Witch (1970), and The Satanic Rituals (1972). The later books, The Devil's Notebook (1992) and
+Satan Speaks! (1998) and various magazine articles and interviews have been omitted, as these sour
+ces either represent a much later period in LaVey's writing or have reached a much smaller audience1.
+Of LaVey's three books, it is The Satanic Bible that had a major impact on modern Satanism. James
+Lewis describes The Satanic Bible as “a kind of quasi-scripture within the Satanic subculture” and
+“the single most influential document shaping the contemporary Satanic movement” (Lewis 2002).
+Both Lewis' and my own research indicates that it was LaVey's books, and in particular The Satanic
+Bible, that occupy a central position in modern Satanism both in terms of market dominance and sta
+tus. In a survey that I conduced in 2002, only a single respondent did not indicate that he or she had
+read at least one of LaVey's books.2 Both Lewis' and my own research also indicate that the respon
+dents did not consider The Satanic Bible a “Bible in the Christian sense” and that most of them knew
+LaVey's writings and had formed an opinion of them by either supporting or repudiating them.
+The Satanic Bible is divided into four sections. The first section is an antiChristian diatribe that serves
+as a powerful attack on Christianity and Christian morals, proposing social Darwinism as an alterna
+tive. The second section is a compilation of a number of short texts that explain LaVey's attitude to
+wards issues such as love and hate, sex, desire versus compulsion, the necessity of being able to say
+no, the black mass, etc. These texts refer to the socalled “Nine Satanic Statements,” which may be
+viewed as a condensed version of LaVey's philosophy (see Appendix 2). The last two sections of the
+book describe LaVey's view on magic and include practical instructions for rituals. The book has been
+in print since 1969 with varying prefaces, and has been published in several languages.
+The Satanic Rituals is LaVey's secondmost popular book in terms of number of readers within the Sa
+tanic subculture. The book includes a handful of rituals that are inspired by both known groups and re
+ligions, such as the Yezidi religion and freemasonry, and the fiction of H. P. Lovecraft. The rituals are
+an indistinct combination of borrowed scripture and the author's own writing, but in most cases the rit
+uals are presented as authentic rituals founded in real traditions. This presentation is put in perspective
+in the introduction to the book, however, where LaVey states that the Satanist has access to all the
+mysteries of the world but as opposed to, e.g., Christians, the Satanist admits that they are fairy tales
+(LaVey 1972, 27).
+The Compleat Witch, or The Satanic Witch, as it was later entitled, was published in 1970 and 1971,
+and then was not republished until 1989. The book describes the kind of everyday manipulation that
+LaVey terms “lesser magic” in The Satanic Witch. It is introduced as an extension of the workshops
+that LaVey conducted prior to the establishment of the Church of Satan and until around 1972. The
+book is aimed at female readers and explains how female attractiveness can be used to enchant and
+1 A cautious estimate of the relative popularity can be gauged via the Internet bookstore Amazon.com's list of best
+selling books. On May 26, 2008, The Satanic Bible ranked no. 5,608, The Satanic Witch no. 19,979, and The Sa-
+tanic Rituals no. 26,499. The Devil's Notebook ranked no. 43,230 and Satan Speaks! no. 93,323. The Satanic
+Witch has a higher sales rank than The Satanic Rituals; it is fair to explain this phenomenon by assuming that The
+Satanic Witch is read outside of the Satanic subculture.
+2 This survey was conducted in 20012002 via the Internet and questionnaires that were included with the magazi
+ne ”Satanisk Bulletin,” which is the only Danish magazine on Satanism. The 39 answers is limited statistical ma
+terial, but since the number of Satanists in Denmark is usually estimated in the few hundreds, they can be
+expected to represent a large percentage of the Danish Satanists.
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 7
+manipulate men. The book is based on the premises that females are almost entirely dependent on
+men, and that men can be manipulated by means of sexual attraction. The book is also a deliberately
+reactionary commentary on the female movement and the unisex movement of the 1960es and 1970es
+which according to LaVey are misogynist inventions. The book concludes with a bibliography with
+more than 170 entries covering genres such as psychology, anthropology, folklore, sociology, biology,
+etc., many of which deal with sexuality and body language. There are virtually no references or dis
+cussions of sources in the main text, however, leaving an impression that the bibliography serves to ei
+ther pretend a scientific foundation, that is, to legitimize LaVey as a learned person, or to inspire fur
+ther reading.
+LaVey's books are easy to read as most of the contents are written in a clear and direct language, yet at
+the same time difficult to work with as many aspects are stated vaguely or ambiguously, some with
+tongue in cheek or in a deliberately occult or blasphemous language in order to appeal to the reader's
+fantasy or emotions. LaVey focuses on making the Satanic philosophy and rituals accessible so that
+each individual can use Satanism to obtain pleasure and success in his or her life, here and now. It is
+much more difficult to find clear explanations on how LaVey expects magic to work, what he believes
+happens after death, or where the divine or demonic fits into the equation. LaVey concludes his pref
+ace to The Satanic Bible with a statement that the reader will find fantasy and truth, and that both of
+these must be taken for what they are. Which is which is an open question that apparently LaVey
+leaves to the reader to answer.
+7. LaVey's View of Humans
+Recall that Heelas operates with three basic elements: an explanation of what is wrong with life and
+the world; a description of the goal of perfection; and methods to reach salvation. In the following sub
+sections, I will show how these elements can be found in LaVey's writing, and I will attempt to map
+LaVey's perception of self to the spiritual, the expressive, and the utilitaristic selves.
+7.1 The Damaged Self
+Keeping tradition with NA and HPM, LaVey identifies numerous defects and shortcomings in society
+that cause life and humans to function poorly.
+LaVey describes his Satanism as a religion that opposes all other religions, considering Satanism the
+only religion that celebrates flesh and earthly life, and embraces the entire human being whether good
+or evil (LaVey 1969, 52). LaVey does not only oppose Christianity but also the spirituality of, e.g.,
+Eastern religions or neopaganism is considered problematic; in particular the modern witchcraft move
+ment is criticized intensely, indicating that LaVey considers it a contesting movement (ibid, 50ff, 84f.
+LaVey 1970, 12ff).
+Most of LaVey's criticism against religion is aimed at Christianity, but he aims at its historical impact
+on the Western culture, as LaVey believes Christianity to be dying (LaVey 1969, 43ff. 1972, 33), leav
+ing the contemporary new religious movements as a more present threat to mankind. When Christian
+ity nonetheless receives the most of the blame for the troubles of mankind, it is both because of the
+Christian teachings and the Christian morals that LaVey believes have been institutionalized and still
+guide people even if they have liberated themselves from the dogma of the church. LaVey believes
+that Christianity has demonized human nature by defining natural instincts and emotions as sinful,
+trapping mankind in a perpetual state of feeling guilty that served to ensure the church its power and
+influence (LaVey 1969, 50ff, 82ff). This demonization and guiltinducement causes a large number of
+impediments to human emotions, sexuality, selfesteem, interpersonal relations, chances of selfreal
+ization, health, etc. The Christian “Great Commandment” is reprehended for encouraging uncritical
+love towards both friends and foes. LaVey does not only consider this impossible and unnatural, but
+also highly damaging. To LaVey, both love and hate are strong, vital, and natural emotions, and only
+by recognizing and accepting both emotions can humans distinguish between them and use them con
+structively. Otherwise humans will lose the ability to love those that deserve it, and the suppressed
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 8
+hate will lead to both mental and physical problems and diseases, or the suppressed hate may be di
+rected at innocent people (LaVey 1969, 64f. 1989, 247f).
+LaVey also strongly reprehends the attitude of the church towards sexuality, but also takes opportunity
+to criticize the attitudes towards sexuality of Eastern religions, society, counterculture, and psychol
+ogy. LaVey believes that Christianity has made sexuality wrong and sinful, and although Western
+world people in the 1960es may have intellectually accepted sex as natural and healthy, they still had
+feelings of guilt, especially towards masturbation and fetishes. LaVey advocates free sex but is not
+only critical against Christian norms; also the new sexual morals proposed by the counterculture is
+criticized. LaVey considers all kinds of sex legal as long as the parties involved are adults and respon
+sible people, and noone is forced to act against his or her will. He also considers it important that oth
+ers should not define what is natural or healthy sexuality, which he believes is the case in contempo
+rary sexual liberation. LaVey does not limit healthy and liberated sexuality to intercourse between two
+or more partners, but also includes asexuality, sadism, masochism, fetishism, masturbation, homosexu
+ality, transsexuality, etc. in his definition. This broad view of sexuality implies that the celibacy of the
+ascetic or the monk becomes sexually deviant, according to LaVey, because it is either asexuality or
+unacknowledged masochism (LaVey 1969, 84). He believes that it is necessary to deliberate oneself
+from feelings of sexual guilt, also unconsciously, because otherwise it will lead to neuroses and the
+passing of guilt to future generations (ibid, 66ff).
+Relinquishing the ego and uncovering the authentic self are important themes in NA and HPM. The
+ego plays a similarly important role to LaVey, but he defines it differently. Some of the influences that
+LaVey wants to free the individual from, such as internalized morals, would be considered undesired
+functions of the ego in other groups within NA or HPM, and in that sense LaVey agrees with the no
+tions of NA and HPM. However, with the exception of these unwanted influences, LaVey considers
+the ego to be unconditionally positive and associated with qualities such as pride, selfrespect and self
+realization, and he sees the possession of a healthy and strong ego as necessary to treat others well. To
+LaVey, the ego question is therefore not limited to the influence of the ego but also the attempts of
+Christianity and other religions to suppress the ego or, as is the case of Eastern religions, the attempts
+to eliminate it. LaVey describes Satanism as a religion that believes in total satisfaction of the ego and
+as the only religion that advocates intensification and encouragement of the ego (LaVey 1969, 94).
+Feelings such as envy, greed, etc., which are found among the seven deadly sins of the Catholic
+church, and which are seen as functions of the ego by NA and HPM, are also welcomed by LaVey,
+who sees these emotions as both natural, necessary, and generally human. In LaVeys interpretation,
+envy and greed become motivating for ambition (ibid, 46f), and egoism and selfrespect become the
+necessary foundation for a vital life and for loving and respecting others. LaVey believes that the idea
+of dissolving the ego and rejecting material wealth was developed in areas where material success was
+difficult to obtain, and that faith could pacify people and make them satisfied with what little they had.
+LaVey considers this a commendable strategy from the powers that be, but outright stupid in a society
+of plenty (ibid, 92f). Satanists would never willingly choose selfdenial according to LaVey, and as
+will be evident later in this paper, many of LaVey's techniques for deliberating and developing the in
+dividual are aimed at developing what LaVey considers a strong ego.
+Another topic that is stressed in LaVey's books is the problematic interaction with other people. Ed
+ward J. Moody, who studied the Church of Satan during its early years, described its teaching as a kind
+of “magical therapy” that helped the members of the church overcome their social disabilities that
+caused them to fail in their relations with other people (Moody 2008). Solutions to relationship prob
+lems with other people require special techniques that may exceed conventional measures, according
+to LaVey. Poor human relations may come in the shape of a superior that treats one badly and cannot
+be told off; it may be a crush on someone that is not returned; it may be a threatening enemy or com
+petitor; or it may be the “psychic vampire” that is draining energy and mental resources. In each of
+these examples, other people become obstacles that must be conquered via magic, manipulation, or
+otherwise prevented from taking advantage of oneself. Cooperation is found as the “modified golden
+rule,” which is a titfortat principle of treating others as they treat you. The human interaction in a
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 9
+love relationships also seems to become a game to be won, and altruism is displayed as the Satanist's
+acts of kindness towards those that he or she appreciates because their happiness pleases the Satanist
+(LaVey 1969, 51).
+LaVey's notion of sexuality, drives, the idea of suppressed feelings, the importance of the conscious
+and the subconscious, the possibility of developing neuroses, the realization of potential, etc. are
+clearly inspired by both the psychoanalytical and humanistic psychology. As mentioned earlier, The
+Satanic Witch includes a long list of books written by psychologists, and in a later official reading list
+for Satanists, LaVey mentions Freud, Jung, and Reich (Barton 1990, 163ff). The reason behind this
+significant interest in psychology appears to be part an acknowledgment of science as authoritative,
+and part a theory that psychological insight is required because of the human intelligence. LaVey de
+scribes humans as the only animal capable of lying to itself and believing the lie, which according to
+LaVey forces humans to constantly pursue selfawareness (LaVey 1972, 15). The evident inspiration
+from psychology is not a loving relationship, however. Arthur Lyons, who wrote about LaVey's philos
+ophy in the beginning of the 1970es, described the Church of Satan as “antipsychiatric” (Lyons 1970,
+186), and in The Satanic Rituals LaVey refers to psychologist Thomas S. Szasz when he identifies Sa
+tanists with the role of the mentally ill as social critics or opposition to society (LaVey 1972, 16f).
+Szasz became associated with the antipsychiatry movement in the US in the 1960'es and 1970'es, and
+was known for considering psychiatry a pseudoscientific movement that used diagnostics of mental
+illnesses to control the population. Today the antipsychiatric movement is remembered for its postu
+late that schizophrenia is the healthy reaction to a sick society, and Szasz' ideas have found their way
+into in Scientology. LaVey's critical towards psychiatry is much more moderate in his books and seems
+to be limited to those “hangups” of fetishes that part of psychology and NA considers problematic or
+to be signs of mental illnesses. LaVey instead considers them natural and more or less human as long
+as one is able to control one's desires, because according to LaVey it is exactly through liberation of
+emotions and drives that one avoids obsessive or selfdestructive behavior (LaVey 1969, 81). LaVey
+does not wish to eliminate these “hangups,” but instead wants to transform them to “hangons,” that
+is, activities that supplement an individual's personality and contribute to the individual's satisfaction.
+The only problem, according to LaVey, is the shame that society attributes to the use of alcohol or
+fetishes, and the exercise is not about changing behavior but in not feeling shameful (Lyons 1970,
+178). LaVey's criticism of established society and his view of human nature is thus based on LaVey's
+interpretation of contemporary psychology, but with emphasis on each person's own right to define
+what is best to him or her.
+7.2 The Actualized Self
+As was explained in the previous section, LaVey's considers the authentic self to be devoid of inhibi
+tions and guilt, involving a strong and healthy ego. LaVey's concept of human nature and the special
+status that he attributes to children and nonhuman animals, as well as his notion of a successful life,
+provide an indication of his concept of the ideal human being.
+The seventh statement of “The Nine Satanic Statements,” LaVey's condensed explanation of Satanism,
+explains that:
+Satan represents man as just another animal, sometimes better, more often worse than those that
+walk on all-fours, who, because of his “divine spiritual and intellectual development,” has be-
+come the most vicious animal of all! (LaVey 1969, 25).
+The notion that humans are animals like all others and thus can be understood on the same premises as
+other animals, combined with the assumption that our intellect introduces all kinds of problems, is fun
+damental to LaVey's view of humans. LaVey's understanding of the human animal is inspired by Dar
+win, among others, but it is the sociologist Herbert Spencer that applied Darwin's theory on human in
+teractions and, ignoring Darwin's objections, created the social Darwinism hypothesis, who appears on
+the Church of Satan's reading list (Barton 1990, 163) and who may have influenced LaVey more than
+did Darwin. LaVey does not attribute any negative qualities to the carnal element that might somehow
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 10
+oppose a spiritual self, but it is not the “Disneyesque” concept that is found on some NA circles. Hu
+mans are animals according to LaVey with all that implies, and as such is an integral part of nature. If
+humans are not always kind and gentle, but also driven by hate and aggression, then it is not because
+there is anything wrong with humans, or because humans are different from other animals; it is be
+cause humans live in a dangerous and brutal world. Hate and aggression are not wrong or undesired
+feelings but are necessary and advantageous for survival. This brutal interpretation of mankind and the
+world is emphasized in the first section of The Satanic Bible, where LaVey includes an edited except
+of the book Might Is Right. This except declares that: “Blessed are the strong, for they shall possess
+the earth—Cursed are the weak, for they shall inherit the yoke!” (LaVey 1969, 34). This excerpt was
+in part meant to provoke and challenge the reader (Redbeard 1996, 3ff) but it also reflects the social
+Darwinism and cynicism that LaVey gathered from people such as Herbert Spencer, Friedrich Niet
+zsche, and Ayn Rand. LaVey's social Darwinistic leanings are also found in his understanding of the
+human evolution, which he believes is on its way to unseen heights: where children of the past were
+born to work in the fields and in the factories, today human quality has become more important than
+quantity, and in the future LaVey expects one child that can create to be more important than two that
+can manufacture, and more than fifty that can believe (LaVey 1972, 12). LaVey not only supports eu
+genics but also expects it to be a necessity in the future—not to produce a specific race or a specific
+look, but to create physically and mentally healthy and creative individuals. According to LaVey's
+daughter Zeena Schreck's preface to The Satanic Witch, the book is in part intended as a guide to eu
+genics or “selective breeding” (LaVey 1989, II), a subject that LaVey himself also discusses, and
+which seems to serve two goals: firstly, he encourages women to find partners that are their psychical
+and mental opposites because he considers the “attraction of opposites” to be a fundamental mecha
+nism of nature to avoid inbreeding and promote healthy individuals (ibid, 62). Secondly, the book is
+largely a guide to finding the right husband, and according to LaVey, men and women come in varying
+quality. Rephrasing Crowley's statement that “everyone is a star,” LaVey agrees that anyone may be a
+star, but Crowley and others forget that stars come in different sizes (ibid, 192).
+In addition to serving as a foundation for an understanding of human nature, children and animals rep
+resent an ideal that LaVey refers to as “the purest form of carnal existence” (LaVey 1969, 89) and as
+creatures that are sacred to Satanists which Satanists would never harm on purpose. Children and ani
+mals are described as “natural magicians” that Satanists may learn from, because children and animals
+do not deny their natural desires and drives and are thus better suited for the pursuit of their goals
+(LaVey 1969, 89, 122. 1979, 74). The special status attributed to children is also illustrated in the dif
+ference between adult and child baptisms: the adult symbolically casts off the falsehoods, hypocrisy
+and shame of the past, but the child is celebrated as a perfect being. The child baptism is only intended
+for children under four years of age, as older children are assumed to have been influenced by ideas
+that are alien to the Satanic philosophy (LaVey 1972, 205).
+It is also within children and animals that LaVey finds values such as emotional spontaneity and au
+thenticity, uninhibitedness, fantasy, superior senses, naturalness in terms of one's own needs, and the
+absence of socially induced neuroses, guilt, and shame. Many of these qualities are more difficult to
+find among adults than among children, because of man's “divine spiritual and intellectual develop
+ment,” which accoring to LaVey has made humans “the most vicious animal of all” (LaVey 1969, 25).
+Nonetheless, LaVey appears to be somewhat undecided on his stance towards the intellect: our intel
+lect may be the root of many of our problems, but our intellect is also the source of rationality and cre
+ativity that LaVey stresses in his deep respect for artists and scientists, and in his tribute to the children
+of the future that will create rather than produce or believe. In addition, rationality, logic and science
+are considered the Satanist's weapons against Christianity and other religions, and Satan is described
+as “the spirit of progress, the inspirer of all great movements that contribute to the development of civ
+ilization and the advancement of mankind” and is connected with qualities such as creativity and en
+lightenment (LaVey 1972, 77). In addition, intellect and creativity are highly present in the successful
+human being that—in departure from the philosophical ideal that is exemplified by children and ani
+mals—is the actual or realistic ideal that is used to measure people's success. LaVey declares in The
+Satanic Bible that the philosophy and techniques described in the book are the same as those applied
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 11
+by the most selfrealized and powerful people in the world, providing examples of financial experts,
+industrialists, popes, poets, dictators, opinion shapers, etc. (LaVey 1969, 104). This referral to earthly
+success as a measure of worth is repeated in several places, including The Satanic Witch, where the
+competent witch is identified by her ability to find the right husband, the better job, to avoid unwanted
+pregnancy, and in general to lead a competent life (LaVey 1989, 3) rather than by her “spiritual val
+ues.” As will be discussed in the next section, LaVey's religious techniques are aimed at attaining these
+and other mundane goals.
+7.3 Liberating Magic
+LaVey refers to his techniques for changing and improving people and their environments as magic
+and defines magic as “[t]he change in situations or events in accordance with one's will, which would,
+using normally accepted methods, be unchangeable” (LaVey 1969, 110). This leaves room for inter
+pretation that is not narrowed by LaVey's explanation of magic as including a portion of applied psy
+chology described in “magical terms,” combined with a rest that cannot (yet) be explained scientifi
+cally (ibid, 119). This description of magic makes it difficult to determine when LaVey believes to be
+supported by psychology, and when he believes to use magic in a more classical sense.
+LaVey divides magic into “greater magic” and “lesser magic.” Lesser magic is LaVey's term for vari
+ous types of manipulation such as body language, scents, looks, strategic flashing, etc., and it is mostly
+this kind of magic that is found in The Satanic Witch. The use of lesser magic in The Satanic Witch is
+derived from LaVey's “personality clock” (see Appendix 2), which is a model that divides humans into
+twelve different types of people. These types combine body shape with various personality traits; for
+example, the skinny “threeo'clock” is associated with abstract thinking and asocial behavior while the
+chubby “nineo'clock” is associated with action rather than thinking and a sense of humor. The model
+is intended to aid the witch to identify the type of her quarry. Once identified, she may apply LaVey's
+principle of the “attraction of opposites” to spellbind the quarry by assuming the quarry's opposite role
+in terms of personality and physique. This “role play” may imply a change of weight, hair color, gait,
+voice, use of colors, name, etc. For example, if the quarry is a dominant person, the witch must be sub
+missive, and if he is loud, she must be quiet. In addition to this use of the model where the goal is to
+find a partner or manipulate men by attraction to the witch, the personality clock has another function
+with respect to the personality of the witch herself: by finding her natural position on the clock dial,
+the witch is able to change her position or perfect it. LaVey believes that if the witch perfects her type
+so that hair, body shape, voice, scent, etc. harmonize, the witch will gain more interest and hence more
+success. According to LaVey, his personality typification is based on models created by the psycholo
+gists William Herbert Sheldon (b. 1898) and Ernst Kretschmer (b. 1888). LaVey appears to be aware
+that these models have been abandoned because of lacking scientific evidence but defends his model
+with references to personal experience and people that have applied the model successfully (LaVey
+1989, 25f).
+LaVey subdivides greater magic into rituals and ceremonies. He describes ceremonies as rites that are
+intended to celebrate or remember a particular event, an aspect of life, a role model, or to declare one's
+faith. Ceremonies thus concentrate on the existing, such as in the baptism rituals which differ from,
+e.g., Christian baptisms in that they are intended only as symbolic acts that are not expected to cause
+change. Rituals, on the other hand, are rites that are intended to cause change (LaVey 1972, 17). It is
+difficult to find any clarifications on how these changes are expected to occur, however. LaVey de
+scribes the rituals both as psychodramas in the psychological sense where the purpose to change the
+practitioner's own psyche, and as a way to change the outside world or other people. This change is as
+sumed to be caused by bioelectric energy discharged through strong emotions such as blind hate or
+sexual orgasm (LaVey 1969, 88), og via deeply felt wishes, such as when a child strongly desires
+something (ibid, 122). Rituals are thus intended as tools that an individual may apply therapeutically
+against old problems and as a way to obtain future goals on both a psychical and a material level. An
+example of the former is found in LaVey's version of “The Black Mass,” which LaVey considers a
+psychodrama that is intended to free the practitioner from feelings of guilt and religious beliefs, or to
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 12
+free the practitioner from unnecessary faith in contemporary dogma and values. The other type of rit
+ual, which is directed at obtaining specific goals, is divided into three types by LaVey, who bases them
+on feelings of lust, hate, or compassion. In each type the rituals are used to focus emotion and energy
+on the desired goal, and in addition to enabling the possibility that the ritual may have the desired ef
+fect, the ritual is also expected to make the practitioner function better afterwards because the pentup
+emotions have been released. That is, if a hate ritual does not kill the victim, at least the Satanist's ag
+gressions have been released, and the Satanist can get on with his or her life.
+LaVey's rituals are somewhat difficult to analyze as rituals in a classical sense. LaVey himself sees
+many similarities between his own rites (and perhaps in particular the ceremonies) and modern theatri
+cal plays, and he also feels a need to distinguish them from contemporary encounter groups.3 LaVey
+believed that Satanism fills an important void between psychology and religion, because psychology
+did not meet the human need for rituals and dogma (LaVey 1969, 52f). In the context of this goal and
+the desired function of the rituals, LaVey's rituals are perhaps better understood as therapeutic tech
+niques than as classic, religious rituals. This view is supported by the role that LaVey ascribes to
+magic in practice: magic may be a powerful tool, but LaVey stresses that success is not achieved by
+positive thinking alone; a combination of positive thoughts and positive action is required (ibid, 41). In
+addition, LaVey introduces the term “the balance factor” as an ability to set realistic goals, as a key el
+ement in magic (ibid, 127ff). An unknown and regular person should not expect even the most power
+ful magic to suffice to attract a popular actress, and magic is not expected to help a person gain suc
+cess if the person does not already have tangible talents.
+7.4 The Satanic Self
+The spiritual self, where the spiritual or divine has fused with the self, is a central theme in selfspiritu
+ality. In LaVey's Satanism the relationship between self and divinity is not trivial, however. To begin
+with, LaVey appears to be using several different concepts of the divine and its relationship to life
+without attempting to unify them. The divine is thus described both as nonexistent, as a kind of force
+in nature, as a symbol, and as a person's own ego. Furthermore, the rituals provide ample opportunity
+for a theistic view of Satan and other beings. This wide array of options has later been narrowed by
+LaVey and the Church of Satan after the theistic Temple of Set broke off from the Church of Satan in
+1975 and the Church of Satan felt compelled to clarify that it is founded on atheism. Beyond this clari
+fication, the Church of Satan has encouraged its members to find each their own concept of Satan, and
+today there are many different interpretations of Satan among Satanists that have been inspired by
+LaVey (Lewis 2001:8f).
+LaVey rejects the existence of all gods by default. To LaVey, gods are an externalization of the human
+ego which was created because humans would not acknowledge their egos and instead placed their
+forbidden wishes in the hands of their gods. The gods are thus created in man's image rather than vice
+versa, and by worshiping the gods of the existing religions, according to LaVey one worships those
+people that externalized the ego and created the god (LaVey 1969, 44f). In the same vein, LaVey inter
+prets religious concepts involving the killing of a god as an expression of selfhate (ibid, 89). LaVey
+believes that dogma and rituals are necessary for humans, and LaVey instead proposes that we create
+gods according to our own emotional needs, or promote ourselves to gods, so that the worship of gods
+becomes egoaffirming rather than egosuppressing. He believes that the externalized gods thus be
+come internalized, and that humans will realize that there never was a difference between the spiritual
+and the physical worlds, which had at all times been physical only (ibid 44f, 96). The concept of the
+spiritual existing as something independently of the body is thus rejected, and the role as god does not
+imply any divine characteristics, except the right to define good and evil, and as the state of each per
+son being the most important person to himself or herself—the importance of which is shown by se
+lecting the Satanist's birthday as the most important holiday (ibid, 96). LaVey's Satanism can thus be
+considered a pure veneration of the ego where gods are not united with the ego but rather replaced by
+it. At the same time, it is Satan (and other demonic entities) that are addressed in the actual rituals, and
+3 Encounter groups is a form of group therapy that was developed by the humanistic psychologist Carl Rogers.
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 13
+it is Satan that is associated with a set of values and qualities in “The Nine Satanic Statements” that
+LaVey considers material to Satanism. As such, the rituals can be seen both as a celebration of the per
+son's ego and the Satanic values, and as a celebration of an idealized self.
+Other concepts indicate theistic leanings: the gods are rejected as an externalization of the human ego,
+but LaVey states that it is wrong to believe that Satanists do not believe in god. Instead, Satanists be
+lieve in god as a dark force that permeates and balances nature, and which can neither be explained
+nor used by religion or science, and which is too impersonal to care about life on Earth (ibid, 40, 62).
+This dark (presumably meaning “unknown”) force appears to be connected with Satan, but it does not
+appear to play an independent role, perhaps because the divine is defined as something that has no
+practical implications for the earthly life that occupies LaVey. LaVey's Satanism thus includes a vari
+ety of characteristics that indicate spiritual leanings, but in practice it is the material and utilitaristic
+facets that dominate.
+8. Summary
+LaVey believes that his Satanism distinguishes itself from other religions by focusing on the physical
+instead of the spiritual. In contrast to NA, LaVey does not consider humans as spiritual beings or as
+possessing a duality between body and soul, but as an animal, for better or for worse. LaVey's under
+standing of the divine is open to a wide array of possible interpretations, however, which harmonize
+with those interpretations that are found in the less spiritual segments of NA and HPM, where the di
+vine is seen as a person's true self, cosmic energy, or other forms of immanent perceptions of the di
+vine.
+Children and animals occupy a special place in Satanism because of their unspoiled nature while
+LaVey, similarly to NA, considers the adult person's intellect to be problematic. In spite of the intellec
+t's ability to lead humans astray from its carnal nature, it is the same intellect that LaVey cherishes
+when he stresses man's rationality and creativity, and unlike NA, LaVey sees indulgence, material suc
+cess, and power as the highest goals.
+Unlike NA and HPM in general, LaVey does not consider Eastern spirituality a viable alternative to
+the established religions, and is generally highly critical towards other religious and spiritual groups
+and techniques. He explains his own use of religious techniques instead of psychological methods in
+his solution by arguing that these techniques are used consciously, because humans need rituals and
+dogma, and that psychology does not meet this demand. LaVey's use of magic can thus be seen as
+therapeutic rather than religious; however, this view is refuted when LaVey attempts to borrow scien
+tific authority for the magical processes; for example, by including theories about bioelectrical energy
+to explain how magic works. The tendency to attribute a magical effect to mechanisms that presum
+ably are psychological is a characteristic of the segment of selfspirituality that Heelas terms “the pros
+perity wing.” LaVey's Satanism fits into this segment in particular because the goal of magic is non
+spiritual, and instead seeks to liberate the practitioners from their inhibitions to develop their potential
+and thus obtain their goals of power and influence.
+LaVey shares NA's and HPM's view of humans as inhibited and damaged by external and internalized
+moral concepts that have been induced by culture and established religions. LaVey's view of the ego is
+uncharacteristic of NA and HPM, however, part of the reason being that LaVey has a different concept
+of the nature of the ego. LaVey wishes to liberate humans from their inhibitions, but it is not the ego as
+such that poses a problem, as he finds it necessary to maintain a strong and healthy ego. LaVey's solu
+tion is not to let go of the ego, but rather to repair the damages done to it. This view lies closer to the
+HPM concept of the authentic self than the NA notion of the spiritual self, even if LaVey's social Dar
+winistic definition of the authentic self is less peaceful than imagined by the humanistic psychologists.
+LaVey primarily distinguishes himself from the general traits of NA and HPM through his use of sci
+ence to legitimize his views. This appeal to scientific authority appears to be an nonbinding, ideologi
+cal argument, however, as he often favors personal experience and preference. Examples of this can be
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 14
+found in terms of sexual preferences, or in his weighing of personal experience when magic conflicts
+with scientific facts. He thus shares his use of personal experience as the higher authority against sci
+entific facts with HPM and NA, and his use of obsolete or controversial science as authority is also
+commonly found in NA.
+My analysis indicates that although LaVey's Satanism is clearly consistent with general characteristics
+of worldaffirming HPM and selfspirituality NA, the Devil's in the details in terms of some significant
+differences. Most importantly, LaVey's Satanism is largely materialistic and antispiritual, and em
+braces the ego rather than attempts to suppress it.
+9. Recategorization as the Prosperity Wing
+I introduced my analysis by asking the question: “How does Anton LaVey describe human nature; and
+how does this description harmonize with general tendencies within the Human Potential Movement
+and Heelas' term, selfspirituality?” Both NA and HPM are terms that are applied to a variety of diffe
+rent groups, activities, techniques, etc. that share certain similarities. One should expect to find both si
+milarities and differences when compared with Anton LaVey's Satanism, and this proved to be the
+case.
+It is meaningful to categorize LaVey's early Satanism as a selfspirituality group based on the general
+differences and similarities between LaVey's Satanism and NA and HPM. However, it seems relevant
+and important to further categorize LaVey's Satanism as “the prosperity wing,” as this placement ex
+plains many of the differences between LaVey's Satanism and the general characteristics of selfspiri
+tuality. It is also meaningful to categorize LaVey's Satanism as HPM, but since HPM largely overlaps
+with the less spiritual segment of selfspirituality where the prosperity wing is also found, the catego
+rization as a part of the HPM in addition to the prosperity wing does not offer enough additional in
+sights into LaVey's Satanism to warrant a dual categorization.
+LaVey's Satanism has traditionally been grouped with modern witchcraft and occultism. However, the
+meaningful categorization as part of “the prosperity wing” indicates that comparisons with related
+groups may rather be found in the selfhelp literature and groups that focus on improving human inter
+action and psychological techniques aimed at meeting material goals. A more thorough examination of
+LaVey's Satanism would encompass additional elements of his worldview, and would take into ac
+count the development of LaVey's writing since the early Church of Satan to the period where LaVey
+witnessed the decentralization of Satanism, changes in the religious landscape, and the failing disap
+pearance of Christianity that he predicted in The Satanic Rituals.
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 15
+Sources
+Aagaard, Jesper Petersen
+2002 Binary Satanism: The Construction of Community in a Digital World, SYZYGY, vol. 11
+2005 Modern Satanism: Dark Doctrines and Black Flames in Controversial New Religions, Ox
+ford University Press, New York.
+Aldridge, Alan
+2000 Religion in the Contemporary World, Polity Press, Cambridge.
+Alfred, Randall H.
+2008 The Church of Satan in James R. Lewis & Jesper Aagaard Petersen, eds., The Encyclopedic
+Sourcebook of Satanism, Prometheus Books, New York.
+Batchelor, Oliver
+2002 Satanisterne organiserer sig, in Nordjyske stiftstidende, Mondag July 22, p. 5.
+Bovbjerg, Kirsten Marie
+2001 Følsomhedens etik: tilpasning af personligheden i New Age og moderne management, Hov
+edland.
+Bromley, David G. (Ed.)
+1991 The satanism scare, Aldine De Gruyter, New York.
+Barton, Blanche
+1990 The Church of Satan, Hell's Kitchen Productions, Inc., New York.
+Dyrendal, Asbjørn
+2007 Satanismens historie, i Humanist no. 1, 2007.
+Harvey, Graham
+1995 Satanism in Britain Today, Journal of Contemporary Religion, Vol. 10, No. 3.
+Hammer, Olav
+1997 På jagt efter helheden. New Age – En ny folketro?, Fremad, Århus.
+Heelas, Paul
+1996 Chapter 1 Manifestations & Chapter 6 Certainties of Modernity in The New Age Movement,
+Blackwell Publishers Ltd., Oxford.
+LaVey, Anton Szandor
+1969* The Satanic Bible, Avon Books, New York.
+1972* The Satanic Rituals, Avon Books, New York.
+1989 The Satanic Witch, Feral House, Portland.
+La Fontaine, Jean
+1999 Satanism and Satanic Mythology, in Witchcraft and Magic in Europe: The Twentieth Cen-
+tury, The Athlone Press, London.
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 16
+Lap, Amina
+2002 Dansk satanisme, Satanisk Bulletin, No. 7.
+Lewis, James R.
+2001 Who Serves Satan? A Demographic and Ideological Profile, Marburg Journal of Religion,
+Vol. 6, No. 2.
+2002 Diabolical Authority: Anton LaVey, The Satanic Bible and the Satanist “Tradition”, Mar-
+burg Journal of Religion, Vol. 7, No. 1.
+Lewis, R. James & Petersen, Jesper Aagaard (eds.)
+2008 The Encyclopedic Sourcebook of Satanism, Prometheus Books, New York.
+Lyons, Arthur
+1970 The Second Coming: Satanism in America, Dodd, Mead & Company, New York.
+Mathisen, Stian
+2008 Et helvetes forskningsprosjekt, Under Dusken, January 28, 2008, http://www.under
+dusken.no/nyhet/2008/1/437814/et+helvetes+forskningsprosjekt, downloaded on April 3,
+2008.
+Melton, J. Gordon
+1997 Modern Alternative Religions in the West in Handbook of living religions, John R. Hinnells
+(ed.), Blackwell Publishers Ltd, Cambridge.
+Moody, Edward J.
+2008 Magical Therapy – An antropological investigation of contemporary satanism in James R.
+Lewis & Jesper Aagaard Petersen, eds., The Encyclopedic Sourcebook of Satanism,
+Prometheus Books, New York.
+Puttick, Elizabeth
+2000 Personal Development: the Spiritualisation and Secularisation of the Human Potential
+Movement in Steven Sutcliffe & Marion Bowman (ed.) Beyond New Age. Exploring Alterna-
+tive Spirituality, Edinburgh University Press, Edinburgh.
+Redbeard, Ragnar
+1996 Might is Right, M.H.P. & Co., Ltd, Chicago.
+Schultz, Duane P. & Schultz, Sydney Ellen
+2004 A History of Modern Psychology, 8. udgave, Thomson & Wadsworth, Belmont.
+Stone, Donald
+1976 The Human Potential Movement in Charles Y. Glock & Robert N. Bellah (ed.) The New Re-
+ligious Consciousness”, University of California Press, Berkeley.
+Wallis, Roy
+1985 The Dynamics of Change in the Human Potential Movement in Rodney Stark (ed.) Religious
+Movements: Genesis, Exodus, and Numbers, Paragon House Publishers, New York.
+(*) These books do not include information on the publication year. However, the edition of The Sa-
+tanic Bible quoted in this article includes a preface by Burton H. Wolfe that is dated December 1976
+whereas the original 1969 edition had a different preface.
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 17
+Appendix 1: Bibliography of Significant Research
+Chronologically Ordered:
+(1970) Lyons, Arthur: The Second Coming: Satanism in America.
+(1971) Lyons, Arthur: Satan Wants You: The Cult of Devil Worship in America.
+(1974) Moody , Edward J.: Magical Therapy – An antropological investigation of contemporary
+satanism. Reprinted in The Encyclopedic Sourcebook of Satanism 2008.
+(1976) Alfred, Randall H.: The Church of Satan. Reprinted in The Encyclopedic Sourcebook of Sa-
+tanism 2008.
+(1991) Bromley, David G. (Ed). The satanism scare.
+(1995) Lowney, Kathleen S.: Teenage Satanism as Oppositional Youth Subculture. Reprinted in
+The Encyclopedic Sourcebook of Satanism 2008.
+Bromley, David G., og Susan Ainsley: Satanism and Satanic Churches: The Contemporary
+Incarnations in America's Alternative Religions.
+(1997) Melton, J. Gordon Modern Alternative Religions in the West in Handbook of living reli-
+gions.
+(1999) Wium-Andersen, Dorit: Moderne satanisme in Nye religiøse bevægelser i Danmark.
+Gads Religionsleksikon: Definitions of “Church of Satan” and “Satanisme”.
+Gavin, Baddeley: Lucifer Rising: Sin, Devil Worship and Rock 'n' Roll.
+La Fontaine, Jean: Satanism and Satanic Mythology, Witchcraft and Magic in Europe: The
+Twentieth Century.
+(2001) Hermonen, Merja: Rationalistic Satanism. The Individual as a Member of a Countercul-
+tural Tribe. Reprinted in The Encyclopedic Sourcebook of Satanism 2008.
+Lewis, James R.: Who Serves Satan? A Demographic and Ideological Profile, Marburg
+Journal of Religion, Vol. 6, No. 2.
+Lewis, James R.: Satanism Today. (Dictionary of groups, people popular cultre, etc.)
+(2002) Lewis, James R.: Diabolical Authority: Anton LaVey, The Satanic Bible and the Satanist
+“Tradition”. Reprinted in The Encyclopedic Sourcebook of Satanism 2008.
+SYZYGY special edition on Satanism, including Petersen, Jesper Aagaard: Binary Sa-
+tanism: The Construction of Community in a Digital World. Other articles reprinted.
+(2003) Drury, Nevill: Magic and Witchcraft.
+(2004) Dyrendal, Asbjørn: Et satans mannfolk: Den autoriserte Anton LaVey in DIN no. 23.
+Dyrendal, Asbjørn: Satanisme – En innføring in DIN no. 4.
+Fibiger, Marianne C. Qvortrup: Satanisk Forum, Eclipse in Religiøs mangfoldighed.
+(2005) Aagaard, Jesper Petersen: Modern Satanism: Dark Doctrines and Black Flames in Con-
+troversial New Religions.
+Dyrendal, Asbjørn: Satanisme og populærkultur in DIN no. 34.
+(2007) Dyrendal, Asbjørn: Satanismens historie in Humanist no. 1, 2007 p. 433.
+(2008) Lewis, R. James & Petersen, Jesper Aagaard: The Encyclopedic Sourcebook of Satanism.
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 18
+Appendix 2: The Nine Satanic Statements
+1. Satan represents indulgence, instead of abstinence!
+2. Satan represents vital existence, instead of spiritual pipe dreams!
+3. Satan represents undefiled wisdom, instead of hypocritical selfdeceit!
+4. Satan represents kindness to those who deserve it, instead of love wasted on ingrates!
+5. Satan represents vengeance, instead of turning the other cheek!
+6. Satan represents responsibility to the responsible, instead of concern for psychic vampires!
+7. Satan represents man as just another animal, sometimes better, more often worse than those
+that walk on allfours, who, because of his “divine spiritual and intellectual development,” has
+become the most vicious animal of all!
+8. Satan represents all of the socalled sins, as they all lead to physical, mental, or emotional
+gratification!
+9. Satan has been the best friend the church has ever had, because he has kept it in business all
+these years!
+Amina Olander Lap 2008
+
+Categorization of Modern Satanism—An Analysis of LaVey's Early Writings Page 19
+Appendix 3: The LaVey Personality Synthesizer
+Amina Olander Lap 2008

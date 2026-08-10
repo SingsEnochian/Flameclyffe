@@ -1,0 +1,479 @@
+# Voice Lantern — `app-prd-voice-lantern.md`
+
+**Status:** ASPIRATIONAL — design only, no code. No Voice Lantern app exists in the codebase.
+This PRD defines intent, UX, interaction, the hearing-device reality, the test plan, and the
+open questions for the third app in the Lantern Stack build order (substrate → Caption Lantern
+→ **Voice Lantern** → Sentinel Lantern → Concordance Lens later). It is the *feasible* slice of
+the formerly-parked "Look-to-Hear" hearing idea.
+
+Grounded in: `goals-and-guidelines.md` (design law G1–G10, red lines esp. **R1**, §5 Risk
+Levels, §7.B Voice Lantern), `source-spec-lantern-stack-v0.1.md` (§8 Risk Levels, §10 HUD /
+Status Bead, §13/§14 Voice Lantern, §15 privacy), `research/02-hearing-audio-routing.md` (the
+connectivity landscape, the one-source constraint, the goblins), `collaborator-and-codesign.md`.
+
+**Parallel-PRD ownership — REFERENCE, do not redefine.** The substrate
+(`app-prd-lantern-substrate.md`, parallel/forthcoming) OWNS the Safety Gate, the Risk Levels
+(L0–L5), redundant input (G1), the Confirm/Cancel/Undo patterns, Low-Energy / reclined-bed /
+minimal-head-movement modes, and the **Status Bead** (including the AUDIO-ROUTE indicator on the
+bead). Voice Lantern *declares its actions' Risk Levels and assembles the substrate's shared
+widgets* (G10). It does not implement its own activation grammar, its own bead, or its own
+confirm/undo machinery. Caption rendering is OWNED by Caption Lantern
+(`app-prd-caption-lantern.md`, parallel/forthcoming); Voice Lantern *mirrors spoken output
+through Caption Lantern's caption renderer* and never reinvents caption layout/typography.
+
+---
+
+## 1. Purpose, users, scope
+
+### 1.1 Purpose
+Route the assistant's / system's **voice OUTPUT** (TTS, alerts, audio responses) through
+whichever audio path the user has — phone, glasses speaker, Shokz/bone-conduction, BAHA,
+hearing aid, or any other paired/cleared audio device — and **mirror that same spoken output
+as on-HUD captions** so the user can read what was said regardless of whether the audio reached
+a usable ear. It is the achievable, output-side half of the hearing idea: **output-audio
+routing + caption mirroring.**
+
+### 1.2 Target users (from source spec §4, dossier `02`)
+- Hearing-device users (MFi/ASHA aids, BAHA/bone-conduction, cochlear implants) who want
+  *their own already-paired* devices to carry the assistant's voice.
+- Deaf / late-deafened / HoH users for whom captions are the primary channel and audio routing
+  is secondary or irrelevant.
+- Users who can't wear in-ear audio (BAHA candidates, earbud-refusers) and rely on
+  bone-conduction / open-ear temple audio for *non-critical* extras only.
+- Any user who wants assistant speech to land on the right device hands-free, with a readable
+  fallback when the audio path drops.
+
+### 1.3 In scope (MVP — source spec §13, goals §7.B)
+Select voice route; output to phone / glasses speaker / Shokz / BAHA / hearing aid / other paired
+audio path **where the platform exposes it**; show matching captions for the spoken output;
+repeat last assistant/audio output; volume controls; **fallback route if the active device
+disconnects.** Switching route / replay / volume are all **L2** (local device/audio: confirm if
+persistent, clear feedback, undo/revert) per the Safety Gate.
+
+### 1.4 Explicit non-goals (red lines — R1, parked items)
+- **NOT a hearing aid or any medical / hearing-device function (R1, dossier `02` §6).** Voice
+  Lantern routes the user's *own already-paired and (where applicable) cleared* audio devices
+  and mirrors captions. No "improves your hearing" / "treats hearing loss" / "FDA-approved"
+  language anywhere in the surface, copy, or marketing. It is an accessibility + control tool.
+- **NOT environmental beamforming / "Look-to-Hear."** Gaze-steered capture of *the world's*
+  sound and streaming a cleaned voice into the user's ears is **PARKED, hardware-gated** —
+  it needs a mic array and tight (~20–40 ms) latency the Maverick likely lacks (dossier `02`
+  §3,6). Voice Lantern is OUTPUT routing only; it never opens a microphone for beamforming.
+- **PARKED (still hardware-gated, note explicitly):** gaze-steered beamformer; Auracast
+  *slot-steering* / Assistant; hearing-aid **program/volume/directional control surface**
+  (writing to the aid). These need mic-array / LE-Audio capabilities and per-brand SDKs the
+  Maverick is not confirmed to have. Revisit when hardware/SDK confirms (dossier `02` §6
+  goblins 1,5,6). Voice Lantern's volume control is over the **assistant output stream level**,
+  not the hearing aid's internal program/gain.
+
+---
+
+## 2. Relationship to the substrate and Caption Lantern (library-first, G10)
+
+| Capability | Owner | Voice Lantern's role |
+|---|---|---|
+| Safety Gate + Risk Levels L0–L5 | substrate | declares each action's level; routes through the gate |
+| Redundant input (gaze/head/voice/tap/phone), G1 | substrate | assembles; never single-path |
+| Confirm / Cancel / Undo patterns | substrate | uses for L2 persistent-route confirm + undo |
+| Status Bead incl. **audio-route indicator** | substrate | *feeds* the bead its current route + state; does not draw its own bead |
+| Low-Energy / reclined-bed / minimal-head-movement modes | substrate | inherits; states its resting cost (§6.D) |
+| Caption rendering (typography, layout, contrast, no-flicker) | Caption Lantern | mirrors spoken output through it; cites it; no reinvention |
+| Shared widgets (`AppScaffold`/`HmdWidgets`/`Palette`/`PmTextLayout`/`*Layout`) | shared library | assembles; never hand-rolls an interactive element |
+
+Per the existing project law (`CLAUDE.md` library-first), if Voice Lantern needs a capability a
+sibling already has (e.g. a route-list row, a confirm card, a snackbar undo), it is extracted to
+/ reused from the shared library — never copy-pasted into a Voice-Lantern-private drawer.
+
+---
+
+## 3. UX
+
+### 3.1 Default HUD (quiet by default — G2, source spec §10)
+At rest Voice Lantern shows **nothing of its own** beyond the substrate's Status Bead, which
+carries a small **audio-route indicator** (e.g. a glyph: `phone` / `glasses` / `aid` / `bone` /
+`route?`). The route picker, volume, and replay surfaces are tucked until summoned. Captions
+appear *only when the assistant actually speaks* (and only if caption-mirror is on), rendered by
+Caption Lantern's caption renderer.
+
+### 3.2 Voice-route selection surface
+A compact **route list** (strip/card per SDK constraints; no tiny buttons — source spec §10),
+summoned by gaze/touch/head/voice. Each row = one available output path:
+
+```
+   Audio route                          [route?]  <- bead reflects current
+ ┌──────────────────────────────────────────────┐
+ │ ▶ Phone speaker                  (active)      │   each row >= config
+ │   Glasses speaker                             │   button floor in BOTH
+ │   Shokz OpenRun        (bone-conduction)      │   axes (2.8/3.2 deg)
+ │   Right hearing aid    (ASHA)        (unavail)│   unavailable rows are
+ │   BAHA 6 Max           (paired)              │   shown disabled, not hidden
+ └──────────────────────────────────────────────┘
+```
+
+- Rows are **enumerated from the per-platform audio adapter** (§8). A row carries: human name,
+  path-type tag (phone / glasses / bone-conduction / aid-ASHA / aid-MFi / other), and a state
+  (active / available / unavailable / disconnected).
+- **Every selectable row shows a select highlight** (the shared selection ring; eye-tracking
+  design law) and meets the config's interactive-shape floor in **both** axes.
+- **Unavailable / disconnected** paths are shown **disabled, not omitted**, so the user
+  understands *why* a device they own isn't an option right now (pairing dropped, single-source
+  contended, platform doesn't expose it). Honest about capability (dossier `02` §6 goblin 5).
+- An explicit **"Mirror captions" toggle** (on/off) lives on this surface — when off, audio
+  still routes but no captions are drawn; when on (default for the deaf/HoH cohort), every spoken
+  output is mirrored.
+
+### 3.3 Audio-route indicator on the Status Bead
+The bead's route glyph (substrate-owned) reflects the *current* route and a fault state: a
+distinct mark when the active route has **disconnected** and Voice Lantern has fallen back
+(§3.6). Tapping/focusing the bead expands to the route picker (substrate bead behaviour).
+
+### 3.4 Caption mirroring of spoken output
+When the assistant speaks, the *exact text being spoken* is mirrored as captions via Caption
+Lantern's renderer, anchored in the caption window. This is the load-bearing accessibility
+guarantee: **if the audio path fails or the ear can't use it, the words are still on the HUD.**
+Captions are **L0** (passive HUD). Mirror text is the source TTS string (we own it — no STT
+round-trip, so no recognition error and minimal latency). Sync target: caption onset within the
+audio/caption budget (§5).
+
+### 3.5 Volume and repeat-last
+- **Volume** controls the **assistant output stream level** (not the aid's internal gain). L2.
+  Adjusted via the substrate's redundant inputs; immediate audible+visible feedback; revertable.
+- **Repeat last** replays the most recent assistant/audio output (and re-shows its captions). L2,
+  reversible (it's just a replay), so it gets the lightest L2 ceremony. By default we replay from
+  a **short last-utterance buffer**, not a stored transcript — privacy-first (source spec §15;
+  Caption Lantern's "repeat last without storing full transcript by default").
+
+### 3.6 Fallback route on disconnect
+If the active route disconnects mid-output (aid drops, BT glitch, single-source contention steals
+the slot), Voice Lantern **fails over to a configured fallback route** and:
+1. continues / re-emits the current utterance on the fallback path (best-effort);
+2. **always keeps captions up** (the deaf-safe guarantee — captions never depend on the audio
+   path succeeding);
+3. updates the bead's route glyph to the fault+fallback state;
+4. surfaces a **non-modal notice** ("Aid disconnected → Phone speaker") with an **undo/switch-back**
+   affordance (L2 undo). The fallback *switch* is automatic (safety/continuity), but its
+   persistence is user-revertable — auto-failover is a transient action, not a silent permanent
+   re-route. The fallback target is part of `VoiceRoute.fallback_route` (source spec §7 data model).
+
+---
+
+## 4. Interaction (substrate grammar; all L2)
+
+Every action maps onto the substrate's **select → ACT (CAT) → CONFIRM** path with **redundant
+input** (G1): any action reachable by ≥2 of {gaze-select, head-nod, voice, phone/controller tap,
+external switch}. Voice Lantern adds **no new activation path** (CLAUDE.md / FTO law).
+
+| Action | Risk | Ceremony |
+|---|---|---|
+| Open route picker / focus bead | L0 | none (focus/preview only — "gaze is attention, not consent") |
+| Toggle caption-mirror on/off | L1 | simple confirm; undo (it's a local UI state) |
+| Select / switch audio route (session-only) | L2 | select→ACT→CONFIRM; immediate feedback; **undo snackbar** |
+| Select / switch audio route (**persist as default**) | L2 | **confirm-if-persistent** (a deliberate second signal) + undo/revert |
+| Volume up/down | L2 | confirm-light (continuous adjust); audible+visible feedback; revertable |
+| Repeat last | L2 | reversible replay → lightest L2 ceremony |
+| Accept/override auto-failover | L2 | non-modal; undo to switch back |
+
+**Confirm-if-persistent** is the L2 rule from the Safety Gate: a *session* route switch gets the
+light path; making it the **persisted default** (`UserSettings.audio_output_route`) needs the
+deliberate confirm because it changes future behaviour. Both are undoable.
+
+---
+
+## 5. The hearing-device reality (dossier `02`)
+
+These constraints *shape the design*; they are not edge cases.
+
+- **The single-source goblin (`02` §6.1).** Most hearing aids hold **ONE audio source at a time**
+  — the assistant's voice **competes** with the user's phone, TV, music, and any other stream for
+  that one slot. Design law for Voice Lantern: routing to an aid is a **deliberate, user-invoked,
+  visibly-claimed, auto-releasing** action, never an always-on hijack. The route picker shows
+  *what currently holds the slot* where the platform exposes it, and Voice Lantern **releases the
+  slot** when output ends (don't squat). We do **not** push a competing stream silently.
+- **Multi-device handoff (`02` §5).** Phone / TV / glasses all contend; switching is clunky and
+  often needs separate accessories. Voice Lantern's job is to make *the assistant's output*
+  land cleanly and to **fail over gracefully** (§3.6) when handoff steals the slot — not to manage
+  the user's whole audio topology.
+- **Shokz / bone-conduction / BAHA / open-ear (`02` §3,6.2).** For users who can't wear in-ear
+  audio, bone-conduction / open-ear temple paths are a natural fit **for non-critical assistant
+  output**. They are NOT the primary hearing path for aid/CI users (goblin 2: "our speaker is
+  useless to them"), and **load-bearing info must never live only on a channel the user can't
+  hear** — which is exactly why caption mirroring is non-optional.
+- **Latency budget for audio/caption sync (`02` §6.4, goals G5).** Any audio path that adds a
+  network hop (phone-does-compute) risks lip-sync/echo; the SIG LE-Audio target is **20 ms**, and
+  generic BT can exceed 100 ms. Voice Lantern's relevant budget is **caption-to-audio sync**:
+  the mirrored caption should appear within **≤300 ms** of (and ideally aligned to) audio onset
+  (caption latency floor, G5 / `01` §2). The walk asserts the sync window (§9). True end-to-end
+  audio latency to a specific aid is **hardware-gated** and only honestly measurable on device
+  (§6.E).
+- **Regulatory framing held throughout (`02` §6.3, R1).** Voice Lantern routes the user's own
+  cleared devices; it never processes-and-delivers amplified *environmental* audio as a hearing
+  solution. Crossing that line would make it a regulated OTC hearing aid (cf. Nuance Audio).
+
+---
+
+## 6. Collaborator's required sections
+
+### 6.A Accidental-activation avoidance (Midas-touch defense)
+- **Gaze is attention, not consent** (headline law). Gazing at a route row only *focuses/previews*
+  it; switching requires the explicit ACT→CONFIRM second signal.
+- Route switching is **L2** with confirm-if-persistent + undo — even an accidental session switch
+  is one undo away and never silently permanent.
+- **No gaze-only commit** for any route change. The picker uses big targets (≥ config floor in
+  both axes), clear focus states, and **no ambiguous activation zones** (source spec §10).
+- Volume uses bounded, repeatable nudges with immediate feedback — a stray fixation can't run the
+  volume to an extreme without visible, revertable steps.
+- Auto-failover (§3.6) is a *safety* action, not a user commit; it is announced and undoable, so
+  it can't be mistaken for an intended re-route.
+
+### 6.B Calibration assumptions
+- Per goals **G9 reconciliation**: ET-first design, but every action fully operable via the G1
+  non-gaze fallbacks, so it degrades gracefully when ET is unavailable/unstable/not-yet-exposed
+  (source spec §6).
+- Assumed gaze accuracy = the home-screen config's interactive floor (**2.8°/3.2°, config-
+  dependent**); every route row and control is sized to it in **both** axes. Numbers are
+  **assumptions-to-verify against the final SDK** (goals §8 open #3).
+- **Calibration drift** must not strand the user on the wrong route: because every action also
+  has a non-gaze path (head/voice/tap), a drifting calibration never blocks a route switch or a
+  fall-back-undo. Prefer **calibration-light smooth-pursuit selection** for the route list where
+  it lowers effort (G9).
+
+### 6.C Dwell alternatives
+- A **non-dwell path exists for every action** (G1): route select via head-nod / voice ("route
+  to phone") / tap; repeat via voice ("repeat") / tap; volume via head-tilt / voice / tap.
+- **Dwell is only used where reversible and counting-down** (eye-tracking law): acceptable for the
+  reversible *repeat-last* and *session* route preview; a persistent-default switch is **not** a
+  dwell target. Any dwell shows the standard counting-down affordance (~0.6 s; exact TBD).
+
+### 6.D Fatigue / energy budget (spoon-aware, G3)
+- **Resting cost ≈ zero:** at rest Voice Lantern draws nothing of its own (only feeds the bead);
+  no per-frame work, no animation, no polling render (CLAUDE.md zero-alloc-at-rest law). Route
+  enumeration is event-driven (device connect/disconnect), not a render-loop poll.
+- **Gaze-rest paths:** voice ("repeat", "route to aid") and head/tap fully operate the app, so a
+  fatigued user need not stare.
+- **Resumable:** the route picker is dismissable and re-summonable with no penalty; an interrupted
+  switch leaves the prior route intact (atomicity, §9).
+- **Posture modes:** inherits reclined/bed + minimal-head-movement modes from the substrate; the
+  route picker must be reachable and operable without head turns in minimal-head-movement mode
+  (controls within FOV, voice path available).
+
+### 6.E What waits for real HMD testing (`project_simulator_only`)
+The simulator can mock *routes and route states* but cannot validate the real audio plumbing.
+Explicitly deferred to hardware + real-tester testing:
+- **Real audio routing to real aids/BAHA/CI/Shokz** — actual delivery to an MFi/ASHA aid, a BAHA
+  6 Max, a Cochlear Nucleus 8, a Shokz, depends on the device's pairing stack and the platform
+  adapter on real hardware. The sim only mocks a route table and connect/disconnect events.
+- **True end-to-end audio latency** to a specific device (the ~20–40 ms / 100 ms+ reality) — only
+  measurable on hardware; the sim measures only caption-render timing.
+- **The single-source contention behaviour** — whether routing to the aid actually steals the
+  phone/TV slot, and whether release is clean, is device-and-OS-specific (only verifiable on real
+  aids).
+- **Battery drain** of sustained streaming to an aid (30–50%+, `02` §5) — hardware-only.
+- **Felt comfort / non-exhaustion** of the route-switch flow — deferred to the collaborator on
+  hardware (`collaborator-and-codesign.md`).
+The sim *can* and the walk *must* validate: the HUD route picker, the bead route indicator,
+caption mirroring, the fallback-on-disconnect *logic* (driven by mocked disconnect events), and
+dual-sink parity.
+
+### 6.F Eye-tracking UI patterns (Eyefluence-informed + FTO check)
+- **Reuse the FTO bundle, do not fork it (A1 + B8 + C2 + E1–E4).** Route selection uses the
+  shared select→ACT→CONFIRM (CAT/Commit) machinery and the shared B8 pursuit/morph widget;
+  Voice Lantern's drawer **only declares nouns (routes) + intent**, never its own activation
+  animation. Forking activation into a Voice-Lantern drawer is a patent-posture regression
+  (`feedback_widget_level_patent_guard`).
+- **Patterns to avoid (Eyefluence-informed):** no dwell on consequential actions; no tiny targets;
+  no ambiguous activation zones; no gaze-only commit; no long sustained fixation to operate.
+- **Eyefluence-positive patterns adopted:** big targets, saccade-based activation, a clear select
+  highlight on every row, and a separate deliberate confirm — the Midas-touch defenses the bundle
+  was built around.
+- This section is a hook for Peter's expert review (goals §8 open #4 / spec §19): least-fatiguing
+  route-select pattern, smooth-pursuit vs dwell for the list, calibration-drift handling.
+
+---
+
+## 7. Red lines & community position
+
+- **R1 — never a hearing-aid / medical claim (the hard regulatory line).** Voice Lantern routes
+  the user's OWN already-paired/cleared audio devices and mirrors captions; it is an accessibility
+  / control tool. **Forbidden language anywhere:** "improves your hearing," "treats hearing loss,"
+  "hearing aid," "FDA-approved" (the FDA never "approves" hearing aids). This is audited like
+  `claims-audit` audits capability claims (goals G7). The line we must not cross (dossier `02`
+  §6.3): the moment Voice Lantern processes-and-delivers amplified *environmental* audio *as the
+  hearing solution*, it is a regulated OTC hearing aid needing FDA/CE clearance (cf. Nuance
+  Audio). Output-routing of the assistant's own voice + captioning stays safely on the
+  accessibility side.
+- **The hearing-aid-user complaints we design around (dossier `02` §5):**
+  - **Pairing hell + multi-device handoff** — intermittent drops, OS-update breakage, "only one
+    ear streams." Our answer: graceful fallback (§3.6), honest "unavailable/disconnected" rows,
+    never silently assume a clean path (`02` §6.5).
+  - **The one-source problem** — the aid holds one slot and our stream competes with phone/TV.
+    Our answer: deliberate, visibly-claimed, auto-releasing routing; never an always-on hijack
+    (§5, `02` §6.1).
+  - **Battery drain** — streaming costs 30–50%+ aid battery. Our answer: minimise stream time,
+    release the slot promptly, and keep captions (which cost the aid nothing) as the always-on
+    channel.
+- **Community position (G8, "nothing about us without us"):** the Deaf/HoH and hearing-device
+  communities are wary of devices that overpromise "hearing" and of being marketed *at*. Voice
+  Lantern's posture: it never claims to fix hearing; captions (a community-trusted channel) are
+  the guaranteed output; routing serves the user's *own* devices on the user's terms. Contested
+  / hardware-gated features (beamforming, aid program control) stay parked and off, not shipped
+  half-built. Co-design with the collaborator (lived experience) gates the open questions (§10).
+
+---
+
+## 8. Multiplatform & multidevice (#330)
+
+- **Angular units + milliseconds only.** Every visual metric (route-row size, bead glyph,
+  caption size, picker geometry) is in degrees; every timing (sync window, failover timeout,
+  undo-snackbar duration, dwell) is in ms. **No pixel or frame-count constants** in Voice
+  Lantern's layout/controller/reducer code (CLAUDE.md physical-units contract). Pixels live only
+  at the sink boundary via `AngleMapper`.
+- **Dual-sink parity.** The HUD parts (route picker, bead route indicator, captions, volume,
+  failover notice) render through the **shared `HmdRenderer`/`DrawSink`**; `PhoneCanvasSink` and
+  the M2 sink are pure renderers of the same snapshot. **No `drawVoiceLanternPreview` divergence**
+  — phone preview ≡ HMD render, line-for-line. `scene_snapshot` is the device-faithful parity
+  oracle for the HUD parts.
+- **Shared core vs platform adapter — the key split.** Audio routing is **NOT portable** the way
+  the HUD is: it is a **per-platform ADAPTER behind one shared interface**:
+  - `AudioRouteAdapter` (interface, in `:shared`/`commonMain`): `enumerateRoutes()`,
+    `select(routeId)`, `currentRoute()`, `setVolume()`, `onDisconnect(callback)`,
+    `releaseSlot()` — plus the `VoiceRoute` model (source spec §7).
+  - **Android** `actual`: ASHA / Bluetooth Classic / `AudioManager` / MFi-equivalent where
+    available.
+  - **iOS** `actual`: MFi (Made for iPhone) hearing-device + AVAudioSession routing.
+  - **Raven** `actual`: Linux audio (PipeWire/ALSA/BlueZ) routing.
+  The **shared core** (the route-list reducer, the failover state machine, the Risk-Level
+  classification, the caption-mirror logic, the HUD draw-command emission) lives in `commonMain`
+  and is identical on every platform; only the adapter `actual`s differ. This rides #330's
+  `expect`/`actual` model and the Phase-3 decomposition; the Android-free build gate
+  (`tools/portable-core-audit`) keeps the shared core free of `android.*`.
+- **Device matrix (joins the existing parity matrix, #330 §5.2):** Maverick v1 (640×400, ~22°) /
+  Maverick v2 (1280×720, ~28°) / Raven (30° off-axis) for the HUD; the angular-units contract
+  means no widget edits across them. Audio adapters are tested per platform; the HUD parts are
+  tested cross-platform via the `scene_snapshot` oracle.
+
+---
+
+## 9. Test plan
+
+Exhaustive, **per sub-state**, all five dimensions (functionality / appearance-both-sinks /
+error-empty-loading / timing / failed-use-cases). Drive the REAL dispatch path (`step:*` seams +
+`adb input` + mocked route/disconnect events), capture BOTH sinks, READ both inline. The suite
+ratchets up. `[x]` = covered (to be written before "DONE"), `[ ]` = required, not yet written.
+**Everything here is `[ ]` until code exists (Status: ASPIRATIONAL).**
+
+Sub-states enumerated: **route-selected**, **route-switched (session)**, **route-switched
+(persisted-default)**, **disconnected-fallback**, **volume**, **repeat**, **caption-mirror-on**,
+**caption-mirror-off**, **no-paired-device**, **route-unavailable**.
+
+### 9.1 Functionality (real dispatch path, per sub-state)
+- [ ] Route picker enumerates mocked routes; each row shows name + type-tag + state.
+- [ ] Select a route (session) via select→ACT→CONFIRM → `currentRoute()` updates; bead reflects it.
+- [ ] Switch route mid-flight → previous output redirected; no orphaned route state.
+- [ ] **Persist route as default** → `UserSettings.audio_output_route` set **only after the
+      confirm-if-persistent second signal**; session switch does NOT persist.
+- [ ] **Route-switch confirm + undo:** confirm card shown; undo snackbar reverts the switch.
+- [ ] Caption-mirror toggle on/off changes whether captions render for spoken output.
+- [ ] Repeat-last replays the last utterance from the short buffer (not a stored transcript) and
+      re-shows captions.
+- [ ] Volume up/down changes the assistant output stream level; revert restores prior level.
+- [ ] **Fallback-on-disconnect correctness:** inject a disconnect on the active route → failover
+      to `fallback_route`; utterance best-effort re-emitted; **captions stay up**; bead shows
+      fault+fallback; undo switches back.
+- [ ] Each action reachable by **≥2 input paths** (G1): verify gaze AND a non-gaze path per action.
+- [ ] Redundant-input parity: head-nod / voice / tap produce identical state transitions to gaze.
+
+### 9.2 Appearance — BOTH sinks (HMD fullpage + AVD screencap), read inline
+- [ ] Route picker: each row meets the config interactive floor in **both** axes; **selection
+      highlight** present on the focused row; no tiny buttons; no ambiguous zones.
+- [ ] **Audio-route indicator on the Status Bead renders with parity on BOTH sinks** (glyph state:
+      phone/glasses/aid/bone/route?/fault).
+- [ ] Caption mirror renders via Caption Lantern's renderer with parity on both sinks (size,
+      contrast, no flicker, doesn't block the real-world view per G4).
+- [ ] Unavailable/disconnected rows render **disabled (shown), not hidden**, on both sinks.
+- [ ] State active-area fraction in prose for picker + captions on each sink; assert they match
+      (parity defect #73 guard).
+- [ ] HMD-lens fill coverage ≥ 20% if any backdrop wash is used (fill-as-bar guard, #186).
+- [ ] Colour floor: every functional fill/text above the OpticParity near-black threshold.
+
+### 9.3 Error / empty / loading (FORCE each)
+- [ ] **no-paired-device:** route table empty → picker shows an honest empty state ("No paired
+      audio device"); captions still mirror to the HUD (the deaf-safe guarantee holds with zero
+      audio routes); no overflow of the empty-state string.
+- [ ] **route-unavailable:** a paired device exists but the platform won't expose it → row shown
+      disabled with a reason; selecting it is a no-op with feedback, not a crash.
+- [ ] Disconnect with **no fallback configured** → captions stay up; bead shows fault; a clear
+      "audio unavailable, captions only" notice; no silent failure.
+- [ ] Loading/enumerating routes (slow adapter) → picker shows a loading state, not a frozen UI.
+- [ ] Malformed/duplicate route ids from the adapter → de-duped/ignored gracefully.
+- [ ] Long device names ("Right hearing aid (ASHA, MultiBeam)") jammed into a row slot → wraps/
+      truncates, no overflow off the active area (error-state-overflow guard, `02`/#310 class).
+
+### 9.4 Timing
+- [ ] **Caption/audio sync within budget:** mirrored caption onset ≤300 ms of audio onset
+      (caption latency floor, G5); assert in the walk via the sim's render timing.
+- [ ] Failover transition completes within its ms budget; undo-snackbar duration in ms.
+- [ ] **Zero per-frame cost at rest** (PmLink push ≈1–2/s): route enumeration is event-driven,
+      not polled; `AtRestAllocationTest`-style assertion that no snapshot/placement rebuild occurs
+      on a quiet frame.
+- [ ] All HUD work within the #222 frame budget; no cold-rebuild freeze on opening the picker.
+
+### 9.5 Failed use cases / boundaries
+- [ ] **Atomicity:** a rejected/cancelled route switch leaves the prior route intact and persists
+      nothing; volume cancel restores the prior level exactly.
+- [ ] **Secure-by-default:** persisted-default route requires the confirm-if-persistent signal —
+      no gaze-only persistence; no silent re-route.
+- [ ] **Boundary no-ops:** selecting the already-active route is a no-op; double-confirm is
+      idempotent; volume at min/max clamps.
+- [ ] **Mid-flight interruption:** disconnect *during* a route-switch confirm → coherent state
+      (lands on a valid route, captions up), never a half-applied switch.
+- [ ] **Leak-free navigation:** Voice Lantern → Home → another app leaves `scene_snapshot` clean
+      (no Voice-Lantern route rows / captions bleeding onto the next surface; app→app direct
+      transition leak check, #199).
+- [ ] **Single-source release:** ending output releases the (mocked) aid slot; verify no squat.
+
+### 9.6 What waits for real hardware (cannot be asserted in the sim — §6.E)
+- [ ] (HW) Real routing to a real aid / BAHA / CI / Shokz actually delivers audio.
+- [ ] (HW) True end-to-end audio latency ≤ target on a specific device.
+- [ ] (HW) Real single-source contention + clean slot release on the user's aid.
+- [ ] (HW) Streaming battery-drain measurement.
+- [ ] (HW + collaborator) Felt comfort / non-exhaustion of the route-switch flow.
+
+### 9.7 Multiplatform parity
+- [ ] `scene_snapshot` oracle: same input snapshot → same HUD tree on Android (and, post-#330,
+      iOS / Raven) for picker / bead / captions / failover notice.
+- [ ] `AudioRouteAdapter` interface has an `actual` per target; shared core has no `android.*`
+      (portable-core-audit).
+- [ ] Angular-units sweep: picker + captions occupy the same angular fraction on v1 / v2 / Raven
+      sinks (RendererTextParityTest matrix).
+
+---
+
+## 10. Open design questions
+
+In-doc; the starred ones need the user's / collaborator's input before locking (co-design is an
+active gate, G8).
+
+1. **★ Which audio paths does the Maverick + companion-phone actually expose, and via which
+   adapter?** The whole MVP hinges on the platform exposing aid/BAHA/Shokz routing (Android ASHA,
+   iOS MFi, glasses speaker, generic A2DP). Until the SDK + hardware answer (goals §8 open #3),
+   the route table is partly assumptions-to-verify, and some paths may resolve to "platform won't
+   expose it → disabled row." **This is the top question.**
+2. **★ Is "repeat last" buffer-only, or is an opt-in short history acceptable?** Privacy-first
+   says replay from a transient last-utterance buffer with no stored transcript (source spec §15);
+   but users may want to repeat further back. Buffer-only for MVP, opt-in history later — confirm.
+3. **★ Auto-failover persistence policy:** when an aid drops and we fall back to phone, should the
+   *default* route silently stay the aid (so it reclaims on reconnect) or follow the fallback?
+   Proposed: session falls back, default unchanged, undo offered — but confirm this matches the
+   hearing-device user's mental model.
+4. **Volume semantics on a single-source aid:** our volume is the assistant *stream* level, not
+   the aid's program/gain (program control is parked, R1-adjacent). Is a stream-level-only volume
+   clear enough to users, or does it confuse with the aid's own volume? (Likely needs explicit
+   labelling.)
+5. **Bone-conduction / open-ear as a default for non-aid users:** should Shokz/temple audio be a
+   first-class default route for earbud-refusers, gated off for aid/CI users (goblin 2)? Needs the
+   per-user capability flag design.
+6. **Caption-mirror default per cohort:** on by default for deaf/HoH; what's the sensible default
+   for a hearing user who only wants routing? (Proposed: mirror on, dismissable.)
+7. **How much of the route table is honestly mock-able in the sim vs. needs hardware** to be a
+   credible demo for the collaborator (overlaps §6.E and goals §8 open #1's "honestly-labeled
+   stubs" posture).

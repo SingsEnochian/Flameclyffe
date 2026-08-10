@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hearthfire.agent-recipe/v1",
+  "title": "Agent Recipe",
+  "description": "A provider-neutral specification for an agent task. The recipe is House property. The model is the current electrical source. Any model that meets providerRequirements can execute a recipe; the recipe itself does not name a model.",
+  "type": "object",
+  "required": [
+    "schema", "recipeId", "version", "purpose",
+    "allowedTools", "requiredSchemas", "worldScope",
+    "claimPermissions", "evaluationSuite", "promptVersion",
+    "consentScope", "canWriteGraph", "status"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "hearthfire.agent-recipe/v1" },
+    "recipeId": {
+      "type": "string",
+      "description": "Stable identifier. Kebab-case. Examples: research-wayfinder, earth-signal-surveyor, graph-patch-extractor, citation-steward"
+    },
+    "version": { "type": "string", "description": "Semantic version of this recipe" },
+    "purpose": { "type": "string", "description": "One sentence: what this recipe accomplishes" },
+    "description": { "type": "string" },
+    "allowedTools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tool IDs from tool-capabilities.registry.yaml that this recipe may invoke. Empty = no tools."
+    },
+    "requiredSchemas": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Schema $id values this recipe produces or consumes"
+    },
+    "worldScope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["earth", "terra-aeterna", "luna", "feather-and-flame", "dreaming-grove", "cross-world", "any"]
+      }
+    },
+    "claimPermissions": {
+      "type": "array",
+      "description": "Epistemic claim labels this recipe is allowed to produce. Recipes that only produce established-science claims must not emit speculative-theory claims.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "established-science", "active-research", "speculative-theory",
+          "fringe-inspiration", "mythic-worldbuilding", "subjective-observation",
+          "implementation-task", "evidence-backed-finding"
+        ]
+      }
+    },
+    "providerRequirements": {
+      "type": "array",
+      "description": "Minimum capabilities the executing model must have",
+      "items": {
+        "type": "object",
+        "required": ["capability"],
+        "properties": {
+          "capability": {
+            "type": "string",
+            "enum": [
+              "tool-use", "structured-output", "multimodal",
+              "long-context", "code-execution", "streaming",
+              "open-weights", "local-inference"
+            ]
+          },
+          "minimumContextTokens": { "type": "integer" }
+        }
+      }
+    },
+    "evaluationSuite": {
+      "type": "string",
+      "description": "Name of the Boxfire evaluation suite that must pass before this recipe reaches VERIFIED status"
+    },
+    "promptVersion": {
+      "type": "string",
+      "description": "Version of the prompt template used by this recipe. Prompt templates live in Flameclyffe/prompts/."
+    },
+    "consentScope": {
+      "type": "string",
+      "enum": ["local-only", "review-required", "shared", "public"],
+      "description": "Maximum consent scope for outputs produced by this recipe"
+    },
+    "maxActiveNodes": {
+      "type": "integer",
+      "default": 20,
+      "description": "Workspace capacity limit. Informed by jlens capacity experiments: ~20 before interference."
+    },
+    "canWriteGraph": {
+      "type": "boolean",
+      "default": false,
+      "description": "If false, produces patch proposals only. True requires explicit Steward authorisation in the registry."
+    },
+    "requiresStewardReview": {
+      "type": "boolean",
+      "default": true,
+      "description": "If true, all outputs require Steward review before they are considered accepted"
+    },
+    "specialists": {
+      "type": "array",
+      "description": "Specialist agents this recipe may invoke",
+      "items": {
+        "type": "string",
+        "enum": [
+          "archivist", "graph-cartographer", "earth-signal-surveyor",
+          "temporal-analyst", "spatial-analyst", "spectral-analyst",
+          "theory-lens-steward", "world-continuity-steward",
+          "contradiction-examiner", "citation-steward", "boxfire-verification"
+        ]
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "verified", "deprecated"],
+      "description": "Only VERIFIED recipes may run in production Hearthgate contexts"
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

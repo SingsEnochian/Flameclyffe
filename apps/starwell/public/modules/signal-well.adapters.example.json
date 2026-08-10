@@ -1,0 +1,11 @@
+{
+  "apiVersion": "0.1.0",
+  "moduleId": "signal-well",
+  "adapters": [
+    {
+      "adapterId": "radio-jove-live",
+      "delivery": "bundled",
+      "enabled": true
+    }
+  ]
+}
