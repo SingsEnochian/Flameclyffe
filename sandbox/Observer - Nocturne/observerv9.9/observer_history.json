@@ -1,0 +1,212 @@
+[
+  {
+    "timestamp": "2025-05-11T00:41:40.805585",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0001 with coherence 0.05 and entanglement 0.15"
+  },
+  {
+    "timestamp": "2025-05-11T01:49:49.188406Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0002 with coherence 0.10 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T02:18:50.773000Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0003 with coherence 0.10 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T02:37:54.748262Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0004 with coherence 0.05 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T02:47:59.391886Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0005 with coherence 0.10 and entanglement 0.02"
+  },
+  {
+    "timestamp": "2025-05-11T02:50:31.697081Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0006 with coherence 0.19 and entanglement 0.06"
+  },
+  {
+    "timestamp": "2025-05-11T02:53:46.340568Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0007 with coherence 0.08 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T03:07:04.440810Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0008 with coherence 0.06 and entanglement 0.05"
+  },
+  {
+    "timestamp": "2025-05-11T03:11:02.421722Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0009 with coherence 0.09 and entanglement 0.02"
+  },
+  {
+    "timestamp": "2025-05-11T04:16:23.784495Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0001 with coherence 0.10 and entanglement 0.05"
+  },
+  {
+    "timestamp": "2025-05-11T04:22:28.562702Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0002 with coherence 0.08 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T04:28:12.752156Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0003 with coherence 0.09 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T04:39:39.357589Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0004 with coherence 0.07 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T04:44:23.162650Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0005 with coherence 0.08 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T04:47:41.188498Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0006 with coherence 0.10 and entanglement 0.02"
+  },
+  {
+    "timestamp": "2025-05-11T04:50:46.634754Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0007 with coherence 0.07 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T04:54:17.773387Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0008 with coherence 0.09 and entanglement 0.02"
+  },
+  {
+    "timestamp": "2025-05-11T05:02:53.229901Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0009 with coherence 0.05 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T11:25:38.886968Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0010 with coherence 0.09 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T11:29:03.310847Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0011 with coherence 0.09 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T11:45:21.919255Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0012 with coherence 0.06 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T11:54:06.227632Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0014 with coherence 0.06 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T12:39:17.691603Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0015 with coherence 0.08 and entanglement 0.02"
+  },
+  {
+    "timestamp": "2025-05-11T13:23:32.427312Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0016 with coherence 0.08 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T13:56:11.104171Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0017 with coherence 0.06 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T14:41:51.614257Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0018 with coherence 0.10 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T14:47:30.687347Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0019 with coherence 0.08 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T14:55:52.236215Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0020 with coherence 0.07 and entanglement 0.05"
+  },
+  {
+    "timestamp": "2025-05-11T14:59:28.765844Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0021 with coherence 0.05 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T15:02:59.517799Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0022 with coherence 0.07 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T15:12:26.378805Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0023 with coherence 0.06 and entanglement 0.05"
+  },
+  {
+    "timestamp": "2025-05-11T15:18:42.662343Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0024 with coherence 0.07 and entanglement 0.02"
+  },
+  {
+    "timestamp": "2025-05-11T15:23:41.184926Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0025 with coherence 0.08 and entanglement 0.02"
+  },
+  {
+    "timestamp": "2025-05-11T15:32:40.590363Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0026 with coherence 0.09 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T15:39:01.651577Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0027 with coherence 0.07 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T15:45:08.468204Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0028 with coherence 0.06 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T15:54:45.423401Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0029 with coherence 0.06 and entanglement 0.04"
+  },
+  {
+    "timestamp": "2025-05-11T16:03:06.878522Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0030 with coherence 0.06 and entanglement 0.02"
+  },
+  {
+    "timestamp": "2025-05-11T16:09:07.087810Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0031 with coherence 0.05 and entanglement 0.05"
+  },
+  {
+    "timestamp": "2025-05-11T16:26:30.528350Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0032 with coherence 0.06 and entanglement 0.05"
+  },
+  {
+    "timestamp": "2025-05-11T16:48:35.232836Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0033 with coherence 0.08 and entanglement 0.03"
+  },
+  {
+    "timestamp": "2025-05-11T17:06:58.455281Z",
+    "action": "glyph_cast",
+    "details": "Cast glyph Glyph-0034 with coherence 0.07 and entanglement 0.03"
+  }
+]

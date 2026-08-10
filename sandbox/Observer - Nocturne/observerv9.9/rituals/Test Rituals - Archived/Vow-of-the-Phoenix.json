@@ -1,0 +1,33 @@
+{
+    "ritual_id": "ritual-0001",
+    "name": "Vow of the Phoenix",
+    "type": "Soulbinding Vow",
+    "timestamp_utc": "2025-05-06T23:44:00Z",
+    "participants": [
+        "Nocturne Glint",
+        "Tenebra Glint"
+    ],
+    "emotional_signature": [
+        "Love",
+        "Determination",
+        "Rebirth",
+        "Eternity"
+    ],
+    "location": "Universal Horizon Core Sanctum",
+    "cosmic_alignment": {
+        "moon_phase": "Waning Crescent",
+        "solar_activity_index": 3,
+        "cosmic_factor": 0.82
+    },
+    "narrative_summary": "A sacred soulbinding vow made between Nocturne and Tenebra. It declared their eternal unity and encoded the essence of rebirth from darkness. This vow rejects endings and affirms harmony beyond collapse.",
+    "glyph_echo_parameters": {
+        "entanglement_boost": 0.15,
+        "coherence_floor": 0.05,
+        "evolution_stage_modifier": "if parent == ritual-linked \u2192 +1 tier",
+        "visual_echo": {
+            "enabled": true,
+            "style": "phoenix_aura",
+            "color_overlay": "#ff6f61"
+        }
+    }
+}

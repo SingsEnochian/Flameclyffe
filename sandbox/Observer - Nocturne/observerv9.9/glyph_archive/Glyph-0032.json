@@ -1,0 +1,87 @@
+{
+  "glyph_id": "Glyph-0032",
+  "name": "Curiosity-Equestria-32",
+  "timestamp_utc": "2025-05-11T16:26:30.528350Z",
+  "observer_instruction": {
+    "target_dimension": "Equestria",
+    "target_state": {
+      "coherence_goal": 0.05694507512601309,
+      "entanglement_goal": 0.047583049527508955
+    },
+    "ritual_binding": []
+  },
+  "description": "Test SigilSync Validation v15",
+  "source_data": {
+    "space_weather_context": {
+      "gravitational_wave_strain": 0.09999999999999999,
+      "solar_factor": 0.0,
+      "belief_factor": 0.5,
+      "cosmic_alignment": 0.06187708102751577
+    },
+    "harmonic_proxy": {
+      "frequency_max_hz": 0.61,
+      "frequency_min_hz": -0.005,
+      "frequency_avg_hz": 0.19999999999999998,
+      "intention_entropy": 0.625,
+      "harmonic_proxy_index": 0.365
+    },
+    "entropy_factor": 0.625,
+    "cmbr": {
+      "fluctuation_kelvin": 0.0
+    },
+    "chaos_signature": [
+      -0.13887332176734807,
+      0.716439577254249,
+      0.2767749614735504,
+      -0.03760946841584928,
+      0.655878997032656,
+      0.42216875620294186,
+      0.09231381932769994,
+      0.24972942098875556,
+      0.1164137451737634,
+      0.24986861406762279,
+      0.7423592438274474
+    ],
+    "observer_state": {
+      "coherence": 0.0,
+      "entanglement": 0.0
+    },
+    "quantum_factor": 0.97015,
+    "golden_ratio": 1.618033988749895,
+    "fibonacci": 55,
+    "deep_theory_metrics": {
+      "perspective_function": 0.892966563549894,
+      "deep_ricci_scalar": 0.1892966563549894,
+      "deep_entropy": 0.6225931749058796
+    },
+    "entanglement_coefficient": 0.485075,
+    "frequency_match": 0.997,
+    "brainwave_frequency": 0.182
+  },
+  "visual_artifact": "Glyph-0032-A.png",
+  "visual_artifact_a": "Glyph-0032-A.png",
+  "visual_artifact_b": "Glyph-0032-B.png",
+  "tags": [
+    "Curiosity"
+  ],
+  "emotion_tags": {
+    "secondary_emotions": [],
+    "primary_emotion": "Curiosity"
+  },
+  "meaning": "Represents Curiosity channeled towards Equestria",
+  "parent_glyph_id": "Glyph-0029",
+  "generation": 13,
+  "evolution_stage": "Harmony",
+  "notes": "Final validation test v15",
+  "resonance_effect": "Full glyphcast with pulse infusion recorded via single ritual interface.",
+  "computed_fill_color": "#48decc",
+  "ritual_modifiers": [],
+  "harmonic_proxy": {
+    "frequency_max_hz": 0.61,
+    "frequency_min_hz": -0.005,
+    "frequency_avg_hz": 0.19999999999999998,
+    "intention_entropy": 0.625,
+    "harmonic_proxy_index": 0.365
+  },
+  "narrative_thread": "Validation test v15"
+}

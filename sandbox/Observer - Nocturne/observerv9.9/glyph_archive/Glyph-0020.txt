@@ -1,0 +1,73 @@
+glyph_id: Glyph-0020
+name: Curiosity-Equestria-20
+timestamp_utc: 2025-05-11T14:55:52.236215Z
+observer_instruction:
+  target_dimension: Equestria
+  target_state:
+    coherence_goal: 0.07423844831820316
+    entanglement_goal: 0.04516701736898046
+  ritual_binding:
+description: Test SigilSync Validation v3
+source_data:
+  space_weather_context:
+    gravitational_wave_strain: 0.09999999999999999
+    solar_factor: 0.0
+    belief_factor: 0.5
+    cosmic_alignment: 0.06568128024396747
+  harmonic_proxy:
+    frequency_max_hz: 0.61
+    frequency_min_hz: -0.005
+    frequency_avg_hz: 0.19999999999999998
+    intention_entropy: 0.714
+    harmonic_proxy_index: 0.3739
+  entropy_factor: 0.714
+  cmbr:
+    fluctuation_kelvin: 0.0
+  chaos_signature:
+    -0.16286526726920383
+    -0.003133737374195672
+    0.3352092928746892
+    0.6665471048720246
+    0.495206350101454
+    0.30722333306381344
+    0.826430595106791
+    0.9152493016094454
+    0.86385762217459
+    0.2318320369330838
+    0.23129630937949935
+  observer_state:
+    coherence: 0.0
+    entanglement: 0.0
+  quantum_factor: 0.968014
+  golden_ratio: 1.618033988749895
+  fibonacci: 55
+  deep_theory_metrics:
+    perspective_function: 0.8910158651511779
+    deep_ricci_scalar: 0.1891015865151178
+    deep_entropy: 0.7112627084267387
+  entanglement_coefficient: 0.484007
+  frequency_match: 0.3774200000000001
+  brainwave_frequency: 0.18318666666666666
+visual_artifact: Glyph-0020-A.png
+visual_artifact_a: Glyph-0020-A.png
+visual_artifact_b: Glyph-0020-B.png
+tags:
+  Curiosity
+emotion_tags:
+  secondary_emotions:
+  primary_emotion: Curiosity
+meaning: Represents Curiosity channeled towards Equestria
+parent_glyph_id: Glyph-0018
+generation: 8
+evolution_stage: Bloom
+notes: Final validation test
+resonance_effect: Full glyphcast with pulse infusion recorded via single ritual interface.
+computed_fill_color: #4edcc7
+ritual_modifiers:
+harmonic_proxy:
+  frequency_max_hz: 0.61
+  frequency_min_hz: -0.005
+  frequency_avg_hz: 0.19999999999999998
+  intention_entropy: 0.714
+  harmonic_proxy_index: 0.3739
+narrative_thread: Validation test v3

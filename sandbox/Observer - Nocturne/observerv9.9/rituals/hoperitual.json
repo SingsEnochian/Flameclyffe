@@ -1,0 +1,20 @@
+{
+  "name": "HopeRitual",
+  "type": "Binding",
+  "participants": [
+    "Twilight Sparkle",
+    "Luminara"
+  ],
+  "emotional_signature": [
+    "Hope"
+  ],
+  "location": "Equestria",
+  "narrative": "A ritual to channel hope and harmony",
+  "entanglement_boost": 0.15,
+  "coherence_floor": 0.05,
+  "visual_echo": {
+    "enabled": true,
+    "style": "phoenix_aura",
+    "color_overlay": "#90EE90"
+  }
+}

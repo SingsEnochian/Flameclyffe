@@ -1,0 +1,136 @@
+{
+  "mappings": [
+    {
+      "zodiac_sign": "Aries",
+      "element": "Compassion",
+      "soul_note": "E",
+      "emotional_signature": "Courage that shields, empathy in action, fire directed outward.",
+      "alignment_keywords": [
+        "initiative",
+        "self-sacrifice",
+        "protection"
+      ]
+    },
+    {
+      "zodiac_sign": "Taurus",
+      "element": "Resilience",
+      "soul_note": "C",
+      "emotional_signature": "Enduring strength, comfort in stillness, loyalty under weight.",
+      "alignment_keywords": [
+        "persistence",
+        "rootedness",
+        "silent power"
+      ]
+    },
+    {
+      "zodiac_sign": "Gemini",
+      "element": "Joy",
+      "soul_note": "A\u266d",
+      "emotional_signature": "Curious delight, shared energy, mirth woven into motion.",
+      "alignment_keywords": [
+        "playfulness",
+        "mental spark",
+        "social flow"
+      ]
+    },
+    {
+      "zodiac_sign": "Cancer",
+      "element": "Devotion",
+      "soul_note": "F",
+      "emotional_signature": "Fierce care, emotional loyalty, sacred bonds through storms.",
+      "alignment_keywords": [
+        "family",
+        "emotional protection",
+        "deep nurturing"
+      ]
+    },
+    {
+      "zodiac_sign": "Leo",
+      "element": "Generosity",
+      "soul_note": "B",
+      "emotional_signature": "Abundance radiated outward, pride through giving, fierce love.",
+      "alignment_keywords": [
+        "magnanimity",
+        "expression",
+        "open-heartedness"
+      ]
+    },
+    {
+      "zodiac_sign": "Virgo",
+      "element": "Kindness",
+      "soul_note": "A",
+      "emotional_signature": "Gentle correction, quiet care, love through service.",
+      "alignment_keywords": [
+        "healing",
+        "discernment",
+        "small sacred acts"
+      ]
+    },
+    {
+      "zodiac_sign": "Libra",
+      "element": "Unison",
+      "soul_note": "G\u266f",
+      "emotional_signature": "Interwoven truths, harmony-in-motion, resonance of opposites.",
+      "alignment_keywords": [
+        "balance",
+        "binding",
+        "dimensional symmetry"
+      ]
+    },
+    {
+      "zodiac_sign": "Scorpio",
+      "element": "Magic",
+      "soul_note": "D",
+      "emotional_signature": "Transmutation, deep mystery, soul fire controlled through will.",
+      "alignment_keywords": [
+        "depth",
+        "intensity",
+        "mysticism"
+      ]
+    },
+    {
+      "zodiac_sign": "Sagittarius",
+      "element": "Wisdom",
+      "soul_note": "E\u266d",
+      "emotional_signature": "Truth earned through journey, guiding stars of experience.",
+      "alignment_keywords": [
+        "teaching",
+        "seeking",
+        "inner compass"
+      ]
+    },
+    {
+      "zodiac_sign": "Capricorn",
+      "element": "Honesty",
+      "soul_note": "F\u266f",
+      "emotional_signature": "Grounded truth, unflinching awareness, self-alignment through clarity.",
+      "alignment_keywords": [
+        "accountability",
+        "maturity",
+        "foundational clarity"
+      ]
+    },
+    {
+      "zodiac_sign": "Aquarius",
+      "element": "Generosity (Earth Echo)",
+      "soul_note": "G",
+      "emotional_signature": "Boundless offering, systemic compassion, visionary inclusion.",
+      "alignment_keywords": [
+        "reform",
+        "community",
+        "collective elevation"
+      ]
+    },
+    {
+      "zodiac_sign": "Ophiuchus",
+      "element": "Laughter",
+      "soul_note": "D\u266f",
+      "emotional_signature": "Truth-disarming mirth, chaos-to-clarity inversion, light in shadows.",
+      "alignment_keywords": [
+        "joy as defiance",
+        "emotional alchemy",
+        "sacred mischief"
+      ]
+    }
+  ]
+}

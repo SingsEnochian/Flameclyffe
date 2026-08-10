@@ -1,0 +1,21 @@
+{
+  "glyph_id": "Glyph-0027",
+  "style": "B",
+  "validation_status": "\u26a0\ufe0f",
+  "validation_report": {
+    "chaos_trace": {
+      "success": true,
+      "message": "Average point distance 163.24 within threshold"
+    },
+    "visual_drift": {
+      "success": true,
+      "message": "SSIM score 0.734 above threshold"
+    },
+    "metadata_alignment": [
+      "\u26a0\ufe0f Primary emotion color mismatch: expected outline color ~(129, 0, 236), found [(np.int64(107), np.int64(118), np.int64(39))]",
+      "\u2705 Chaos variance reflected in complexity",
+      "\u2705 Coherence/entanglement rings present"
+    ],
+    "summary": "Visual mismatch \u2014 needs review"
+  }
+}

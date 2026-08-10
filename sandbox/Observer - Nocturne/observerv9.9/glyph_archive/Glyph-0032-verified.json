@@ -1,0 +1,21 @@
+{
+  "glyph_id": "Glyph-0032",
+  "style": "B",
+  "validation_status": "\u2705",
+  "validation_report": {
+    "chaos_trace": {
+      "success": true,
+      "message": "Average point distance 137.14 within threshold"
+    },
+    "visual_drift": {
+      "success": true,
+      "message": "SSIM score 0.773 above threshold"
+    },
+    "metadata_alignment": [
+      "\u2705 Primary emotion color respected",
+      "\u2705 Chaos variance reflected in complexity",
+      "\u2705 Coherence/entanglement rings present"
+    ],
+    "summary": "Visual aligned to data"
+  }
+}

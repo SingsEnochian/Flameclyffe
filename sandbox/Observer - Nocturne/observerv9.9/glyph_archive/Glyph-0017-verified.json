@@ -1,0 +1,21 @@
+{
+  "glyph_id": "Glyph-0017",
+  "style": "B",
+  "validation_status": "\u274c",
+  "validation_report": {
+    "chaos_trace": {
+      "success": false,
+      "message": "Number of points mismatch"
+    },
+    "visual_drift": {
+      "success": true,
+      "message": "SSIM score 1.000 above threshold"
+    },
+    "metadata_alignment": [
+      "\u26a0\ufe0f Primary emotion color mismatch: expected #50dbc6, found [(np.int64(158), np.int64(158), np.int64(155)), (np.int64(0), np.int64(0), np.int64(0)), (np.int64(234), np.int64(234), np.int64(233)), (np.int64(111), np.int64(122), np.int64(49)), (np.int64(52), np.int64(56), np.int64(35))]",
+      "\u26a0\ufe0f Chaos complexity mismatch: expected 16.89, found 1.38",
+      "\u26a0\ufe0f Coherence/entanglement rings mismatch: expected ~0 white pixels, found 2431"
+    ],
+    "summary": "Visual divergence \u2014 do not train AI on this glyph"
+  }
+}

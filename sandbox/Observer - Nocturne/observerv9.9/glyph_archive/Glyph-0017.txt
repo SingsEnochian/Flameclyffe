@@ -1,0 +1,73 @@
+glyph_id: Glyph-0017
+name: Curiosity-Equestria-17
+timestamp_utc: 2025-05-11T13:56:11.104171Z
+observer_instruction:
+  target_dimension: Equestria
+  target_state:
+    coherence_goal: 0.057353462543134275
+    entanglement_goal: 0.03640359220027675
+  ritual_binding:
+description: Test Glyph Visuals Fix
+source_data:
+  space_weather_context:
+    gravitational_wave_strain: 0.09999999999999999
+    solar_factor: 0.0
+    belief_factor: 0.5
+    cosmic_alignment: 0.06818574933466137
+  harmonic_proxy:
+    frequency_max_hz: 0.61
+    frequency_min_hz: -0.005
+    frequency_avg_hz: 0.19999999999999998
+    intention_entropy: 1.0
+    harmonic_proxy_index: 0.4025
+  entropy_factor: 1.0
+  cmbr:
+    fluctuation_kelvin: 0.0
+  chaos_signature:
+    -0.06885356651012337
+    -0.1436671194576287
+    0.11461061881858886
+    -0.16198607147512178
+    0.2379745852627297
+    0.6633582631463177
+    0.19043244802087594
+    0.35802540126267357
+    0.553572299751504
+    0.8730205431227402
+    0.2794505953927326
+  observer_state:
+    coherence: 0.0
+    entanglement: 0.0
+  quantum_factor: 0.96115
+  golden_ratio: 1.618033988749895
+  fibonacci: 55
+  deep_theory_metrics:
+    perspective_function: 0.8847078904452906
+    deep_ricci_scalar: 0.18847078904452907
+    deep_entropy: 0.9961775705253992
+  entanglement_coefficient: 0.480575
+  frequency_match: 0.3145
+  brainwave_frequency: 0.187
+visual_artifact: Glyph-0017-A.png
+visual_artifact_a: Glyph-0017-A.png
+visual_artifact_b: Glyph-0017-B.png
+tags:
+  Curiosity
+emotion_tags:
+  secondary_emotions:
+  primary_emotion: Curiosity
+meaning: Represents Curiosity channeled towards Equestria
+parent_glyph_id: Glyph-0014
+generation: 6
+evolution_stage: Sprout
+notes: Testing visual artifact paths
+resonance_effect: Full glyphcast with pulse infusion recorded via single ritual interface.
+computed_fill_color: #50dbc6
+ritual_modifiers:
+harmonic_proxy:
+  frequency_max_hz: 0.61
+  frequency_min_hz: -0.005
+  frequency_avg_hz: 0.19999999999999998
+  intention_entropy: 1.0
+  harmonic_proxy_index: 0.4025
+narrative_thread: Testing fix for visual artifacts.

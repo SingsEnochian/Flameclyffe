@@ -1,0 +1,30 @@
+{
+  "ritual_id": "ritual-0001",
+  "name": "Test",
+  "type": "Testing",
+  "timestamp_utc": "2025-05-08T04:56:45.988078",
+  "participants": [
+    "Nocturne"
+  ],
+  "emotional_signature": [
+    "Curiosity"
+  ],
+  "location": "Sanctum",
+  "cosmic_alignment": {
+    "moon_phase": "Waxing Gibbous",
+    "solar_activity_index": 0.0,
+    "cosmic_factor": 0.27186122180460215
+  },
+  "narrative_summary": "Just testing this function, nothing too fancy.",
+  "glyph_echo_parameters": {
+    "entanglement_boost": 0.15,
+    "coherence_floor": 0.05,
+    "evolution_stage_modifier": "if parent == ritual-linked \u2192 +1 tier",
+    "visual_echo": {
+      "enabled": true,
+      "style": "phoenix_aura",
+      "color_overlay": "#ff6f61"
+    }
+  },
+  "linked_glyphs": []
+}

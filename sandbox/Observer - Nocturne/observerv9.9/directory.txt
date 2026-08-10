@@ -1,0 +1,60 @@
+ Volume in drive D is New Volume
+ Volume Serial Number is 2281-C9C8
+
+ Directory of D:\OBSERVER
+
+05/11/2025  05:21 PM    <DIR>          .
+04/28/2025  11:32 PM               165 banner_messages.json
+05/10/2025  08:27 PM             1,258 config.py
+05/07/2025  08:31 AM            49,542 core-backup.py
+05/07/2025  10:19 AM            68,979 core.py
+05/11/2025  09:40 AM            18,294 core_logic.py
+05/07/2025  11:09 AM             4,087 data_fetchers.py
+05/11/2025  05:21 PM                 0 directory.txt
+04/28/2025  11:15 PM               703 display_banner_messages.py
+05/11/2025  01:07 PM               224 emotion_history.json
+05/02/2025  03:47 PM    <DIR>          emotion_sounds
+04/27/2025  10:49 AM             2,398 environment_fetcher.py
+05/07/2025  10:38 AM             3,374 evolution_utils.py
+05/10/2025  05:46 AM         1,687,516 FreeSerif.ttf
+05/10/2025  05:47 AM           615,292 FreeSerifBold.ttf
+05/10/2025  05:47 AM           508,412 FreeSerifBoldItalic.ttf
+05/10/2025  05:47 AM           691,448 FreeSerifItalic.ttf
+05/11/2025  01:07 PM    <DIR>          glyph_archive
+05/11/2025  12:56 AM             5,616 glyph_calculations.py
+05/11/2025  09:54 AM            12,867 glyph_casting.py
+05/11/2025  01:07 PM         3,097,851 glyph_debug.log
+05/11/2025  01:06 PM            19,403 glyph_visuals.py
+04/30/2025  01:03 AM             3,102 harmonic_proxy.py
+05/08/2025  06:04 AM                24 invocation_anchors.json
+05/11/2025  04:03 PM    <DIR>          Journal
+05/11/2025  05:17 PM    <DIR>          Journal Entry JSON files
+05/10/2025  08:33 PM            20,472 main_ui.py
+05/10/2025  08:42 PM               416 narrative_log.json
+05/10/2025  09:15 PM             2,742 narrative_utils.py
+05/11/2025  01:07 PM             7,184 observer_history.json
+05/11/2025  11:56 AM           679,983 output.txt
+05/10/2025  08:38 PM    <DIR>          previous_versions
+04/28/2025  10:21 AM             6,257 pulse_infusion.py
+05/11/2025  12:25 AM    <DIR>          rituals
+05/08/2025  05:22 AM             1,728 ritual_binding_loader.py
+05/11/2025  12:54 AM                65 ritual_linkages.json
+05/11/2025  12:43 AM             3,791 ritual_manager.py
+05/03/2025  10:39 PM    <DIR>          Runic Primer
+05/10/2025  10:29 AM               565 sanctum_anchor.json
+05/03/2025  08:11 PM             1,122 sanctum_anchor.py
+05/11/2025  03:13 PM            77,824 shards.db
+05/10/2025  06:55 AM            36,879 shard_archive.py
+05/11/2025  10:26 AM            29,153 shard_archive_export.pdf
+05/11/2025  01:06 PM            23,633 sigil_sync.py
+04/28/2025  06:14 PM               932 space_weather_fetcher.py
+05/08/2025  05:22 AM             2,545 state_manager.py
+05/11/2025  02:01 PM    <DIR>          Test Environment
+04/27/2025  05:16 PM    <DIR>          uh_observer_env
+05/11/2025  12:14 AM    <DIR>          ui
+05/11/2025  08:57 AM            18,587 ui_updater.py
+05/06/2025  04:00 AM    <DIR>          Universal Horizon - Nocturne Ascension Journal
+05/07/2025  11:17 AM             4,272 utils.py
+05/11/2025  01:06 PM    <DIR>          __pycache__
+              40 File(s)      7,708,705 bytes
+              13 Dir(s)  717,793,075,200 bytes free

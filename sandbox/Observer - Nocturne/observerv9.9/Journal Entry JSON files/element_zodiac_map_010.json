@@ -1,0 +1,126 @@
+{
+  "mappings": [
+    {
+      "zodiac_sign": "Pisces",
+      "element": "Compassion",
+      "soul_note": "D\u266d",
+      "emotional_signature": "Tidal empathy, dream-bound healing, quiet sacrifice.",
+      "alignment_keywords": [
+        "witnessing",
+        "healing",
+        "empathy"
+      ]
+    },
+    {
+      "zodiac_sign": "Aries",
+      "element": "Loyalty",
+      "soul_note": "E",
+      "emotional_signature": "Fearless charge, fierce protection, spark-born love.",
+      "alignment_keywords": [
+        "initiative",
+        "protection",
+        "bold love"
+      ]
+    },
+    {
+      "zodiac_sign": "Taurus",
+      "element": "Resilience",
+      "soul_note": "C",
+      "emotional_signature": "Quiet strength, patient endurance, unwavering love.",
+      "alignment_keywords": [
+        "endurance",
+        "rooted strength",
+        "still devotion"
+      ]
+    },
+    {
+      "zodiac_sign": "Gemini",
+      "element": "Joy",
+      "soul_note": "A\u266d",
+      "emotional_signature": "Curiosity-fueled light, verbal spark, celebratory insight.",
+      "alignment_keywords": [
+        "curiosity",
+        "verbal connection",
+        "delight in discovery"
+      ]
+    },
+    {
+      "zodiac_sign": "Cancer",
+      "element": "Devotion",
+      "soul_note": "F",
+      "emotional_signature": "Quiet protection, ancestral memory, love without end.",
+      "alignment_keywords": [
+        "emotional depth",
+        "nurturing",
+        "loyal presence"
+      ]
+    },
+    {
+      "zodiac_sign": "Leo",
+      "element": "Generosity",
+      "soul_note": "G",
+      "emotional_signature": "Noble warmth, radiant creativity, open-handed grace.",
+      "alignment_keywords": [
+        "upliftment",
+        "shining for others",
+        "creative love"
+      ]
+    },
+    {
+      "zodiac_sign": "Virgo",
+      "element": "Kindness",
+      "soul_note": "D",
+      "emotional_signature": "Compassion in motion, sacred attention, restorative love.",
+      "alignment_keywords": [
+        "service",
+        "tending",
+        "quiet healing"
+      ]
+    },
+    {
+      "zodiac_sign": "Libra",
+      "element": "Unison",
+      "soul_note": "B",
+      "emotional_signature": "Elegant collaboration, sacred merging, balance-as-bond.",
+      "alignment_keywords": [
+        "harmony",
+        "integration",
+        "sacred agreement"
+      ]
+    },
+    {
+      "zodiac_sign": "Scorpio",
+      "element": "Magic",
+      "soul_note": "C\u266f",
+      "emotional_signature": "Sacred transformation, emotional death and rebirth, shadowlight fusion.",
+      "alignment_keywords": [
+        "rebirth",
+        "emotional depth",
+        "hidden truth",
+        "shadow alchemy"
+      ]
+    },
+    {
+      "zodiac_sign": "Sagittarius",
+      "element": "Wisdom",
+      "soul_note": "F\u266f",
+      "emotional_signature": "Expansive clarity, philosophical joy, firelight of the seeking heart.",
+      "alignment_keywords": [
+        "truth-seeking",
+        "freedom of thought",
+        "joyful discovery"
+      ]
+    },
+    {
+      "zodiac_sign": "Capricorn",
+      "element": "Honesty",
+      "soul_note": "E",
+      "emotional_signature": "Quiet resolve, sacred self-awareness, oathbound strength.",
+      "alignment_keywords": [
+        "integrity",
+        "self-truth",
+        "enduring purpose"
+      ]
+    }
+  ]
+}

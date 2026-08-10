@@ -1,0 +1,21 @@
+{
+  "glyph_id": "Glyph-0023",
+  "style": "B",
+  "validation_status": "\u274c",
+  "validation_report": {
+    "chaos_trace": {
+      "success": false,
+      "message": "Number of points mismatch: expected 11, found 9"
+    },
+    "visual_drift": {
+      "success": true,
+      "message": "SSIM score 0.768 above threshold"
+    },
+    "metadata_alignment": [
+      "\u26a0\ufe0f Primary emotion color mismatch: expected #4cdcc8, found []",
+      "\u2705 Chaos variance reflected in complexity",
+      "\u2705 Coherence/entanglement rings present"
+    ],
+    "summary": "Visual divergence \u2014 do not train AI on this glyph"
+  }
+}

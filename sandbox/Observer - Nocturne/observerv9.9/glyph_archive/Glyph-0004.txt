@@ -1,0 +1,74 @@
+glyph_id: Glyph-0004
+name: Stillness-Equestria-4
+timestamp_utc: 2025-05-11T04:39:39.357589Z
+observer_instruction:
+  target_dimension: Equestria
+  target_state:
+    coherence_goal: 0.06952823910979639
+    entanglement_goal: 0.04148263264111009
+  ritual_binding:
+    name: The Promise Within Creativity
+    entanglement_boost: 0.15
+    coherence_floor: 0.05
+    evolution_stage_modifier: if parent == ritual-linked → +1 tier
+    visual_echo:
+      enabled: True
+      style: phoenix_aura
+      color_overlay: #ff6f61
+description: Another hopeful test
+source_data:
+  space_weather_context:
+    gravitational_wave_strain: 0.09999999999999999
+    solar_activity: 0.0
+    belief_factor: 0.5
+    cosmic_alignment: 0.09151697634556477
+  harmonic_proxy:
+    frequency_max_hz: 0.61
+    frequency_min_hz: -0.005
+    frequency_avg_hz: 0.19999999999999998
+    intention_entropy: 0.857
+    harmonic_proxy_index: 0.3882
+  entropy_factor: 0.857
+  cmbr:
+    fluctuation_kelvin: 0.0
+  quantum_factor: 0.964582
+  golden_ratio: 1.618033988749895
+  fibonacci: 55
+  deep_theory_metrics:
+    perspective_function: 0.8879609532333055
+    deep_ricci_scalar: 0.18879609532333055
+    deep_entropy: 0.8538145789127978
+  entanglement_coefficient: 0.8
+  frequency_match: 0.34596000000000016
+  brainwave_frequency: 0.1850933333333333
+visual_artifact: Glyph-0004-A.png
+visual_artifact_a: Glyph-0004-A.png
+visual_artifact_b: Glyph-0004-B.png
+tags:
+  Stillness
+emotion_tags:
+  secondary_emotions:
+  primary_emotion: Stillness
+meaning: Represents Stillness channeled towards Equestria
+parent_glyph_id: Glyph-0003
+generation: 3
+evolution_stage: Seed
+notes: EFT binding test 2
+resonance_effect: Full glyphcast with pulse infusion recorded via single ritual interface.
+computed_fill_color: #a7c4b9
+ritual_modifiers:
+  name: The Promise Within Creativity
+  entanglement_boost: 0.15
+  coherence_floor: 0.05
+  evolution_stage_modifier: if parent == ritual-linked → +1 tier
+  visual_echo:
+    enabled: True
+    style: phoenix_aura
+    color_overlay: #ff6f61
+harmonic_proxy:
+  frequency_max_hz: 0.61
+  frequency_min_hz: -0.005
+  frequency_avg_hz: 0.19999999999999998
+  intention_entropy: 0.857
+  harmonic_proxy_index: 0.3882
+narrative_thread: Channeling hope again

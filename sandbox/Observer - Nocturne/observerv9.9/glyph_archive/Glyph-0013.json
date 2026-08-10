@@ -1,0 +1,107 @@
+{
+  "glyph_id": "Glyph-0013",
+  "name": "Hope-Equestria-13",
+  "timestamp_utc": "2025-05-11T11:49:46.072643Z",
+  "observer_instruction": {
+    "target_dimension": "Equestria",
+    "target_state": {
+      "coherence_goal": 0.08707057353947693,
+      "entanglement_goal": 0.025881380055259483
+    },
+    "ritual_binding": [
+      {
+        "name": "The Promise Within Creativity",
+        "entanglement_boost": 0.15,
+        "coherence_floor": 0.05,
+        "evolution_stage_modifier": "if parent == ritual-linked \u2192 +1 tier",
+        "visual_echo": {
+          "enabled": true,
+          "style": "phoenix_aura",
+          "color_overlay": "#ff6f61"
+        }
+      }
+    ]
+  },
+  "description": "Test SigilSync Order",
+  "source_data": {
+    "space_weather_context": {
+      "gravitational_wave_strain": 0.09999999999999999,
+      "solar_factor": 0.0,
+      "belief_factor": 0.5,
+      "cosmic_alignment": 0.07348888486786598
+    },
+    "harmonic_proxy": {
+      "frequency_max_hz": 0.61,
+      "frequency_min_hz": -0.005,
+      "frequency_avg_hz": 0.19999999999999998,
+      "intention_entropy": 0.833,
+      "harmonic_proxy_index": 0.3858
+    },
+    "entropy_factor": 0.833,
+    "cmbr": {
+      "fluctuation_kelvin": 0.0
+    },
+    "chaos_signature": [
+      0.12474020907647893,
+      0.38739289986088354,
+      0.5979039663259977,
+      0.4964016961761317,
+      -0.05262933275879583,
+      0.6033136033405989,
+      0.03934152805553881,
+      0.16464322744404786,
+      0.044369943035122705,
+      0.3384749794267037,
+      0.8976319133064138
+    ],
+    "quantum_factor": 0.965158,
+    "golden_ratio": 1.618033988749895,
+    "fibonacci": 55,
+    "deep_theory_metrics": {
+      "perspective_function": 0.8884184944549495,
+      "deep_ricci_scalar": 0.18884184944549498,
+      "deep_entropy": 0.8298358752011759
+    },
+    "entanglement_coefficient": 0.482579,
+    "frequency_match": 0.75124,
+    "brainwave_frequency": 0.3181066666666667
+  },
+  "visual_artifact": "Glyph-0013.png",
+  "visual_artifact_a": "",
+  "visual_artifact_b": "",
+  "tags": [
+    "Hope"
+  ],
+  "emotion_tags": {
+    "secondary_emotions": [],
+    "primary_emotion": "Hope"
+  },
+  "meaning": "Represents Hope channeled towards Equestria",
+  "parent_glyph_id": "Glyph-0008",
+  "generation": 4,
+  "evolution_stage": "Sprout",
+  "notes": "Testing validation order",
+  "resonance_effect": "Full glyphcast with pulse infusion recorded via single ritual interface.",
+  "computed_fill_color": "#99d18e",
+  "ritual_modifiers": [
+    {
+      "name": "The Promise Within Creativity",
+      "entanglement_boost": 0.15,
+      "coherence_floor": 0.05,
+      "evolution_stage_modifier": "if parent == ritual-linked \u2192 +1 tier",
+      "visual_echo": {
+        "enabled": true,
+        "style": "phoenix_aura",
+        "color_overlay": "#ff6f61"
+      }
+    }
+  ],
+  "harmonic_proxy": {
+    "frequency_max_hz": 0.61,
+    "frequency_min_hz": -0.005,
+    "frequency_avg_hz": 0.19999999999999998,
+    "intention_entropy": 0.833,
+    "harmonic_proxy_index": 0.3858
+  },
+  "narrative_thread": "Channeling hope for validation"
+}

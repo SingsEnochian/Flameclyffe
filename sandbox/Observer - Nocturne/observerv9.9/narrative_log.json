@@ -1,0 +1,17 @@
+[
+  {
+    "glyph_id": "Glyph-0001",
+    "timestamp": "2025-05-11T00:42:26.660279",
+    "coherence": 0.1,
+    "entanglement": 0.175,
+    "narrative": "Twilight Sparkle is looking out the Castle of Friendship window, gazing up at the sky.",
+    "emotion_tags": {
+      "primary_emotion": "Curiosity",
+      "secondary_emotions": [
+        "Stillness",
+        "Fear",
+        "Hope"
+      ]
+    }
+  }
+]

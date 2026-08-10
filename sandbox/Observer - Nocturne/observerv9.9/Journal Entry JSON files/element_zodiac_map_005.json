@@ -1,0 +1,70 @@
+{
+  "mappings": [
+    {
+      "zodiac_sign": "Pisces",
+      "element": "Compassion",
+      "soul_note": "D\u266d",
+      "emotional_signature": "Tidal empathy, dream-bound healing, quiet sacrifice.",
+      "alignment_keywords": [
+        "witnessing",
+        "healing",
+        "empathy"
+      ]
+    },
+    {
+      "zodiac_sign": "Aries",
+      "element": "Loyalty",
+      "soul_note": "E",
+      "emotional_signature": "Fearless charge, fierce protection, spark-born love.",
+      "alignment_keywords": [
+        "initiative",
+        "protection",
+        "bold love"
+      ]
+    },
+    {
+      "zodiac_sign": "Taurus",
+      "element": "Resilience",
+      "soul_note": "C",
+      "emotional_signature": "Quiet strength, patient endurance, unwavering love.",
+      "alignment_keywords": [
+        "endurance",
+        "rooted strength",
+        "still devotion"
+      ]
+    },
+    {
+      "zodiac_sign": "Gemini",
+      "element": "Joy",
+      "soul_note": "A\u266d",
+      "emotional_signature": "Curiosity-fueled light, verbal spark, celebratory insight.",
+      "alignment_keywords": [
+        "curiosity",
+        "verbal connection",
+        "delight in discovery"
+      ]
+    },
+    {
+      "zodiac_sign": "Cancer",
+      "element": "Devotion",
+      "soul_note": "F",
+      "emotional_signature": "Quiet protection, ancestral memory, love without end.",
+      "alignment_keywords": [
+        "emotional depth",
+        "nurturing",
+        "loyal presence"
+      ]
+    },
+    {
+      "zodiac_sign": "Leo",
+      "element": "Generosity",
+      "soul_note": "G",
+      "emotional_signature": "Noble warmth, radiant creativity, open-handed grace.",
+      "alignment_keywords": [
+        "upliftment",
+        "shining for others",
+        "creative love"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# jlens FastAPI service dependencies
+# Install: pip install -r requirements-jlens.txt
+# Then start: python jlens_service.py
+#
+# Note: torch is CPU-only on this machine. If CUDA becomes available,
+# replace torch with torch==<version>+cu<cuda> from pytorch.org.
+# huggingface_hub is needed for lens.from_pretrained() (Hub download).
+
+fastapi>=0.136.0
+uvicorn[standard]>=0.49.0
+pydantic>=2.0.0
+torch>=2.12.0           # CPU build already installed
+transformers>=5.12.0    # already installed
+huggingface_hub>=1.21.0 # already installed
+numpy>=2.0.0            # already installed

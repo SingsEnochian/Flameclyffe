@@ -1,0 +1,21 @@
+{
+  "glyph_id": "Glyph-0026",
+  "style": "B",
+  "validation_status": "\u274c",
+  "validation_report": {
+    "chaos_trace": {
+      "success": false,
+      "message": "Average point distance 156.51 exceeds threshold 150"
+    },
+    "visual_drift": {
+      "success": true,
+      "message": "SSIM score 0.764 above threshold"
+    },
+    "metadata_alignment": [
+      "\u26a0\ufe0f Primary emotion color mismatch: expected outline color ~(129, 0, 236), found [(np.int64(114), np.int64(126), np.int64(45))]",
+      "\u2705 Chaos variance reflected in complexity",
+      "\u2705 Coherence/entanglement rings present"
+    ],
+    "summary": "Visual divergence \u2014 do not train AI on this glyph"
+  }
+}
