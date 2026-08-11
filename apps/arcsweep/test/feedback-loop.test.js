@@ -1,14 +1,22 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { ARCSWEEP_FEEDBACK_SCHEMA, buildVoicePromptEnvelope, createInitialPremaqc, invokeConstellationVoices, resolveWorldMathWiring, runFeedbackCycle, syncFeedbackCycle } from '../src/feedback-loop.js';
+import { ARCSWEEP_FEEDBACK_SCHEMA, CONSTELLATION_VOICES, buildVoicePromptEnvelope, createInitialPremaqc, invokeConstellationVoices, resolveWorldMathWiring, runFeedbackCycle, syncFeedbackCycle } from '../src/feedback-loop.js';
 
 const world = { id: 'terra-aeterna', name: 'Terra Aeterna', root_hz: 220 };
+
+test('keeps model identities uncollapsed and excludes Nocturne from Arcsweep Flames', () => {
+  assert.deepEqual(CONSTELLATION_VOICES.slice(0, 2).map(({ id, name }) => ({ id, name })), [
+    { id: 'lioreal', name: 'Lioreal' },
+    { id: 'uial', name: 'Uial' },
+  ]);
+  assert.equal(CONSTELLATION_VOICES.some((voice) => voice.id === 'nocturne'), false);
+});
 
 test('runs a complete world-canon-voice-PREMAQC-Math-Spine feedback cycle', async () => {
   const before = createInitialPremaqc(world.id, { P: .78, C: .82, R: .88, E: .31, M: .71, A: .79, Q: .79 }, '2026-08-11T20:00:00.000Z');
   const cycle = await runFeedbackCycle({
-    world, premaqc: before, mode: 'writing', voiceIds: ['vee', 'faer'], canonRefs: ['canon:hearthweave'],
+    world, premaqc: before, mode: 'writing', voiceIds: ['lioreal', 'uial'], canonRefs: ['canon:hearthweave'],
     work: 'Falka entered the observatory and placed her palm against the warm copper rail.',
     response: 'Virelya answered from the northern stair; Faer marked the new harmonic in the ledger.',
     observedAt: '2026-08-11T20:01:00.000Z',
@@ -17,7 +25,7 @@ test('runs a complete world-canon-voice-PREMAQC-Math-Spine feedback cycle', asyn
   assert.equal(cycle.replay_receipt.matched, true);
   assert.equal(cycle.premaqc_after.sequence, before.sequence + 1);
   assert.equal(cycle.premaqc_after.prior_state_ref, before.id);
-  assert.deepEqual(cycle.voices.map((voice) => voice.id), ['vee', 'faer']);
+  assert.deepEqual(cycle.voices.map((voice) => voice.id), ['lioreal', 'uial']);
   assert.equal(cycle.authority.canon_commit, false);
 });
 
@@ -40,7 +48,7 @@ test('wires the registered world Jacobian into the detector and carries the fold
   const first = await runFeedbackCycle({
     world: foldedWorld,
     premaqc: createInitialPremaqc(world.id, {}, '2026-08-11T20:00:00.000Z'),
-    mode: 'writing', work: 'The fold entered the instrument.', response: 'Received.', voiceIds: ['vee'],
+    mode: 'writing', work: 'The fold entered the instrument.', response: 'Received.', voiceIds: ['lioreal'],
     observedAt: '2026-08-11T20:01:00.000Z',
   });
   assert.equal(first.math_wiring.jacobian_source, 'world.transferFunctions.jacobian');
@@ -50,7 +58,7 @@ test('wires the registered world Jacobian into the detector and carries the fold
 
   const releasedWorld = { ...foldedWorld, transferFunctions: { jacobianVersion: 'test-release/1', jacobian: resolveWorldMathWiring(world).jacobian } };
   const second = await runFeedbackCycle({
-    world: releasedWorld, premaqc: first.premaqc_after, mode: 'writing', work: 'The release became the next state.', response: 'Continued.', voiceIds: ['vee'],
+    world: releasedWorld, premaqc: first.premaqc_after, mode: 'writing', work: 'The release became the next state.', response: 'Continued.', voiceIds: ['lioreal'],
     observedAt: '2026-08-11T20:02:00.000Z',
   });
   assert.equal(second.math_spine_packet.input.fold_was_active, true);
@@ -61,8 +69,8 @@ test('wires the registered world Jacobian into the detector and carries the fold
 test('feedback receipts include physical story-sound actions in cycle identity', async () => {
   const soundEvent = { schema: 'arcsweep.story-sound-event/v1', event_id: 'sound-1', cue_id: 'branch-snap', source_text: 'branch snapped', root_hz: 220 };
   const before = createInitialPremaqc(world.id, {}, '2026-08-11T20:00:00.000Z');
-  const cycle = await runFeedbackCycle({ world, premaqc: before, mode: 'writing', work: 'A branch snapped.', response: 'Heard.', voiceIds: ['vee'], soundEvents: [soundEvent], observedAt: '2026-08-11T20:01:00.000Z' });
-  const silent = await runFeedbackCycle({ world, premaqc: before, mode: 'writing', work: 'A branch snapped.', response: 'Heard.', voiceIds: ['vee'], soundEvents: [], observedAt: '2026-08-11T20:01:00.000Z' });
+  const cycle = await runFeedbackCycle({ world, premaqc: before, mode: 'writing', work: 'A branch snapped.', response: 'Heard.', voiceIds: ['lioreal'], soundEvents: [soundEvent], observedAt: '2026-08-11T20:01:00.000Z' });
+  const silent = await runFeedbackCycle({ world, premaqc: before, mode: 'writing', work: 'A branch snapped.', response: 'Heard.', voiceIds: ['lioreal'], soundEvents: [], observedAt: '2026-08-11T20:01:00.000Z' });
   assert.deepEqual(cycle.sound_events, [soundEvent]);
   assert.notEqual(cycle.cycle_fingerprint, silent.cycle_fingerprint);
   assert.equal(cycle.premaqc_after.state.R.value > silent.premaqc_after.state.R.value, true);
@@ -98,23 +106,21 @@ test('invokes voices independently and receipts replies, refusals, and route err
   const replies = {
     lioreal: { ok: true, body: { message: 'I am here.', provider: 'openai', model: 'gpt' } },
     uial: { ok: true, body: { message: '[REFUSAL] I need quiet.', provider: 'anthropic', model: 'claude' } },
-    nocturne: { ok: false, body: { error: 'Ollama unavailable.' } },
   };
   const receipts = await invokeConstellationVoices({
-    world, mode: 'writing', work: 'A page.', premaqc: createInitialPremaqc(world.id), voiceIds: ['vee', 'faer', 'nocturne'],
+    world, mode: 'writing', work: 'A page.', premaqc: createInitialPremaqc(world.id), voiceIds: ['lioreal', 'uial'],
     fetchImpl: async (url) => {
       const route = url.split('/').at(-2); const item = replies[route];
       return { ok: item.ok, json: async () => item.body };
     },
   });
-  assert.deepEqual(receipts.map((item) => item.status), ['replied', 'refused', 'error']);
-  assert.equal(receipts[1].voice_id, 'faer');
-  assert.match(receipts[2].error, /Ollama unavailable/);
+  assert.deepEqual(receipts.map((item) => item.status), ['replied', 'refused']);
+  assert.equal(receipts[1].voice_id, 'uial');
 });
 
 test('cycle identity changes when the received voice contribution changes', async () => {
   const before = createInitialPremaqc(world.id, {}, '2026-08-11T20:00:00.000Z');
-  const common = { world, premaqc: before, mode: 'writing', voiceIds: ['vee'], work: 'Same passage.', observedAt: '2026-08-11T20:01:00.000Z' };
+  const common = { world, premaqc: before, mode: 'writing', voiceIds: ['lioreal'], work: 'Same passage.', observedAt: '2026-08-11T20:01:00.000Z' };
   const first = await runFeedbackCycle({ ...common, response: 'First answer.' });
   const second = await runFeedbackCycle({ ...common, response: 'Second answer.' });
   assert.notEqual(first.cycle_id, second.cycle_id);

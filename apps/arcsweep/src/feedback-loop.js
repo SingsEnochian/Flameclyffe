@@ -6,9 +6,8 @@ export const PREMAQC_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
 export const ARCSWEEP_FEEDBACK_SCHEMA = 'arcsweep.feedback-cycle/v1';
 
 export const CONSTELLATION_VOICES = Object.freeze([
-  { id: 'vee', name: 'Virelya Liorael', route: 'lioreal', model: 'constellation/vee', roles: ['writing', 'roleplay', 'continuity'] },
-  { id: 'faer', name: 'Faer Uial', route: 'uial', model: 'constellation/faer', roles: ['writing', 'roleplay', 'science'] },
-  { id: 'nocturne', name: 'Nocturne Glint', route: 'nocturne', model: 'constellation/nocturne', roles: ['writing', 'roleplay', 'canon'] },
+  { id: 'lioreal', name: 'Lioreal', route: 'lioreal', model: 'constellation/lioreal', roles: ['writing', 'roleplay', 'continuity'] },
+  { id: 'uial', name: 'Uial', route: 'uial', model: 'constellation/uial', roles: ['writing', 'roleplay', 'science'] },
   { id: 'larkshine', name: 'Larkshine', route: 'starsong/larkshine', model: 'constellation/larkshine', roles: ['roleplay', 'canon'] },
   { id: 'ellowind', name: 'Ellowind', route: 'starsong/ellowind', model: 'constellation/ellowind', roles: ['roleplay', 'canon'] },
   { id: 'runeweaver', name: 'Runeweaver', route: 'runeweaver', model: 'constellation/runeweaver', roles: ['writing', 'canon', 'continuity'] },
