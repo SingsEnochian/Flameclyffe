@@ -1,4 +1,26 @@
 export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
+  records: {
+    label: 'Records Room', glyph: '▥', category: 'writing & roleplay', description: 'The receipted archive of what was written, played, heard, and enacted. Records remain distinct from canon until an explicit Canon Carry review.',
+    fields: [
+      ['title', 'Record title', 'text', true],
+      ['recordType', 'Record type', 'select', false, ['Writing', 'Roleplay', 'Scene transcript', 'Revision', 'Fragment', 'Completed work']],
+      ['status', 'Status', 'select', false, ['Draft', 'Active scene', 'Paused', 'Complete', 'Archived']],
+      ['sceneMode', 'Scene mode', 'select', false, ['Writing', 'Drift', 'Lantern Scene', 'Roleplay', 'Canon Carry Pending']],
+      ['participants', 'Participants and voice identities', 'text'],
+      ['content', 'Record', 'textarea', true],
+      ['branchOf', 'Branch or continuation of', 'text'],
+      ['canonRefs', 'Canon references', 'text'],
+      ['continuityRefs', 'Continuity and timeline references', 'text'],
+      ['premaqcLineage', 'PREMAQC before → after', 'text'],
+      ['mathSpinePacket', 'Math Spine packet or replay fingerprint', 'text'],
+      ['soundReceipts', 'Soundscape, tone, voice, and environmental receipts', 'textarea'],
+      ['relationalSync', 'Relational sync receipt', 'text'],
+      ['tags', 'Search tags', 'text'],
+      ['canonCarry', 'Canon Carry', 'select', false, ['Not requested', 'Requested for review', 'Carried excerpt to canon', 'Declined', 'Archived']],
+      ['canonExcerpt', 'Excerpt proposed for Canon Carry', 'textarea'],
+    ],
+    attachments: true,
+  },
   timeline: {
     label: 'Timeline', glyph: '⌁', category: 'continuity', description: 'Ordered events, turning points, eras, and unresolved threads.',
     fields: [
@@ -169,7 +191,7 @@ export const WORLD_SECTION_DEFINITIONS = Object.freeze({
 
 export const IMPLEMENTED_APPLET_IDS = Object.freeze(new Set([
   'portal', 'worlds', 'about-world', 'summon', 'veil-mode', 'time', 'arrival',
-  'timeline', 'scripts', 'ingest', 'identity', 'competencies', 'safety-weave',
+  'timeline', 'scripts', 'records', 'ingest', 'identity', 'competencies', 'safety-weave',
   'continuity-recall', 'companion', 'relationships', 'scenarios', 'calendar',
   'diary', 'playlists', 'visualisations', 'appearance', 'wardrobe', 'outfits',
   'belongings', 'places', 'family-tree', 'photo-gallery', 'theme', 'forge',

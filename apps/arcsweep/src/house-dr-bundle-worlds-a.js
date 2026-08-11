@@ -49,13 +49,13 @@ export const HOUSE_WORLDS_A = [
   {
     sourceKey: 'taveren-vaen',
     name: 'Ta’veren Vaen',
-    kind: 'Desired Reality / later Turning of the Wheel',
-    protagonist: 'Kestrelle al’Valari',
+    kind: 'Desired Reality / Fourth Age, approximately 2,000 years after the Last Battle',
+    protagonist: 'Kestrelle al’Var',
     roles: 'Travelling Wise Woman; healer; Dreamwalker; channeller',
-    description: 'A later Turning entering an age of Mending, where the name Aes Sedai begins to re-emerge through service rather than inherited hierarchy.',
-    history: 'Kestrelle descends from the Valae, trained with Meriene Delvarinne, first channelled Fire in a hard winter, and carries a structural Dreamwalking gift.',
-    rules: 'Service before title. Power is disciplined by responsibility. No Pattern-pressure, bond, prophecy, dream, or weave turns consent into obedience.',
-    revisedAt: '2026-07-26',
+    description: 'Approximately two thousand years after the Last Battle, within the Fourth Age that followed Rand al’Thor, the world has an uneven early-industrial technology baseline: horse and wagon roads, sailing and limited steam vessels, printing presses, water- and steam-powered mills, machine tools, early rail corridors, flintlock and emerging percussion firearms, practical surgery and sanitation, rare Power-assisted civic systems, and surviving earlier-age remnants. Tar Valon and the White Tower endure as a continuous city and institution.',
+    history: 'The White Tower Egwene al’Vere reunited and Cadsuane Melaidhrin inherited, and the Black Tower founded in the Last Battle era, survived into two millennia of political, technological, and cultural change. Saidin has remained clean; men who can channel are not condemned to the taint’s madness. The Towers are sovereign institutions with overlapping alliances, rivalries, mixed-circle field compacts, and distinct bodies of knowledge. Their exact intervening history remains open. Technology is advancing faster than institutions can agree what the One Power, knowledge, and authority are for. Industrial cities and experimental railways grow beside rural regions still governed by horses, hearths, handcraft, and seasonal roads. Kestrelle descends from the Valae, trained with Meriene Delvarinne, first channelled Fire in a hard winter, and carries a structural Dreamwalking gift through this uneven age.',
+    rules: 'Early Industrial Fourth Age is the current technology baseline; its historical causes remain open. Ordinary craft and medicine remain essential; channelling is known but too rare and unevenly organised to replace labour, transport, communication, heat, or healing. Earlier-age devices are archaeological technologies, not everyday conveniences. The White Tower recruits; it does not rediscover the name Aes Sedai. The Black Tower is neither a subordinate White Tower annex nor merely a military barracks. Kestrelle enters any relationship with either institution as an already recognised Wise Woman whose existing mastery must be acknowledged. Power is disciplined by responsibility. No Pattern-pressure, bond, prophecy, dream, weave, circle, or institution turns consent into obedience.',
+    revisedAt: '2026-08-11',
     sourceUrls: [
       'https://app.notion.com/p/3a970290d9c48108b47ed21fa9573df7',
       'https://app.notion.com/p/3a970290d9c481f792bdf392f5439387',
@@ -513,20 +513,58 @@ How much vocal presence supports entry without becoming distracting? What distin
     content: String.raw`## Canon identity
 **Universe:** Ta’veren Vaen
 
-**Protagonist:** Kestrelle al’Valari
+**Protagonist:** Kestrelle al’Var
 
 **Earlier working names:** Ta’veren Bound and Ta’veren Unbound
 
-**Earlier protagonist name:** Ayrel al’Valsora
+**Earlier protagonist names:** Ayrel al’Valsora; Kestrelle al’Valari
 
-The earlier names remain provenance only. They are superseded by Ta’veren Vaen and Kestrelle al’Valari.
+The earlier names remain provenance only. They are superseded by Ta’veren Vaen and Kestrelle al’Var.
 
 ## The Turning
-This is a later Turning, long after the Fourth Age and the gradual disappearance of earlier Aes Sedai traditions. The world is entering a period of Mending, not Breaking.
+Ta’veren Vaen occurs approximately two thousand years after the Last Battle, within the Fourth Age that followed Rand al’Thor. This is not another Turning of the Wheel and not a rediscovery of Aes Sedai after institutional extinction.
 
-The name Aes Sedai begins to emerge among healers, channellers, dreamers, scholars, and travelling servants. No surviving institution owns it. Service comes before order.
+Tar Valon and the White Tower survived. The Tower retains institutional continuity from the order Egwene al’Vere reunited and Cadsuane Melaidhrin inherited, although two thousand years have transformed its population, customs, politics, archives, Ajahs, alliances, buildings, technologies, and reach. Its exact intervening history remains open rather than silently invented.
 
-## Kestrelle al’Valari
+The White Tower actively recruits. Sisters travel beyond Tar Valon to test and invite potential novices, find powerful wilders, negotiate with families and communities, maintain regional relationships, and compete or cooperate with independent channelling traditions. Recruitment does not erase an adult candidate's established vocation or authority.
+
+## The clean Source and the two Towers
+Saidar was never tainted. Rand al’Thor cleansed saidin before the Last Battle, and the prison remade at Shayol Ghul ended the Dark One's touch upon the Source. Across the Fourth Age, men who can channel are therefore not doomed to madness. The Breaking remains historical memory, inherited trauma, law, ritual, and political argument; it is not the ordinary fate of a living male channeller.
+
+The Black Tower survived its birth as a Last Battle army and became a durable channelling institution in its own right. It is not subordinate to the White Tower and is not merely a barracks. Across two thousand years it has had time to develop civilian callings, scholarship, ethics, protective and structural weaves, dangerous-weave containment, rescue practice, engineering, Healing, diplomacy, and internal schools of thought. Its present location, ranks, factions, customs, leadership, and relationship to the name Asha’man remain open canon.
+
+The White and Black Towers remain sovereign. They cooperate where the whole One Power is required, compete over authority and recruitment, exchange knowledge selectively, and disagree about law, training, history, and service. Neither institution represents every woman or man who channels. Their treaties and field compacts require explicit consent for linking: the leader, purpose, limits, handoff conditions, and release signal of a circle are agreed rather than presumed.
+
+Green field companies often provide an operational bridge among Yellow healers, Black Tower specialists, local practitioners, and independent channelling traditions. Their work includes disaster response, defence, evacuation, expeditionary protection, rescue, Pattern disturbances, and the containment of dangerous remnants. Yellow and Green are collaborating disciplines, not personality cages: restoration may require entering danger, and protection may require keeping a wounded community alive.
+
+## Technology baseline — Early Industrial Fourth Age
+Technology is advancing faster than institutions can agree what the One Power, knowledge, and authority are for. Development is regional and uneven rather than a single universal ladder.
+
+### Settlements and industry
+Most villages are built of timber, stone, brick, plaster, and thatch or tile. Larger towns support foundries, mills, presses, hospitals, colleges, guild halls, warehouses, paved districts, sewers of varying quality, and dense working neighbourhoods. Water power is established. Coal and steam increasingly drive pumps, mills, mines, textile works, and machine shops. Standardised parts and precision tools are spreading, but handcraft remains indispensable.
+
+### Travel and transport
+Walking, horses, pack animals, coaches, wagons, riverboats, and sailing ships carry most people and goods. Steam vessels operate on several major rivers and coastal routes. Experimental railways join a few wealthy industrial centres and mining districts; they are expensive, politically contested, and absent from most of Kestrelle's road. Earlier roads may survive as broken foundations, strange alignments, or routes remembered by the land.
+
+### Communication and print
+Couriers, postal coaches, river traffic, beacon and semaphore towers, broadsheets, newspapers, pamphlets, printed manuals, and regional gazettes move information. Power-assisted message relays exist in a few courts, hospitals, scholarly houses, or civic networks, but depend on rare trained channellers and cannot be assumed. Literacy is expanding but remains sharply unequal by region, class, language, and gender.
+
+### Light, heat, and domestic life
+Candles, oil lamps, hearths, charcoal, peat, wood, and coal remain ordinary. Manufactured gas lights portions of some cities. Maintained glow-lights or channelled heating may exist in exceptional institutions, wealthy houses, or recovered sites, but they are not universal utilities. Matches are increasingly available alongside flint and steel.
+
+### Weapons and security
+Swords, knives, spears, bows, and crossbows remain common. Flintlock firearms are established in armies, guards, hunting, and trade. Rifling and percussion ignition are emerging. Firearms are slow, smoky, weather-sensitive, and unevenly supplied; there are no automatic weapons. The One Power changes any conflict in which a strong channeller is present, which is precisely why law and custom around its use are contested.
+
+### Medicine
+Wise Women, physicians, surgeons, midwives, apothecaries, bonesetters, and military practitioners exchange increasingly standardised methods. Herbal medicine, nutrition, clean water, rest, splinting, stitching, amputation, dentistry, quarantine, and practical sanitation coexist with early theories of contagion. Healing with the One Power can be extraordinary, but channellers are uncommon and no patient can rely on one being present. Ordinary medicine is never treated as lesser work.
+
+### The One Power and institutions
+Channelling is publicly known. The White Tower remains the most prominent continuous Aes Sedai institution, but it is not the only channelling culture in the world. Family traditions, village practitioners, travelling Wise Women, civic specialists, independent circles, scholars, rulers, and descendant traditions also train or employ channellers. Some communities welcome channellers; others regulate, conscript, fear, exploit, or expel them. The central struggle is not whether power exists, but who may teach it, govern it, recruit it, and refuse its use.
+
+### Earlier-age remnants
+Earlier-age devices, sealed works, altered roads, durable materials, and Power-made mechanisms survive rarely. They are archaeological technologies: valuable, dangerous, politically significant, and often misunderstood. A remnant must be individually discovered, interpreted, and maintained; it never supplies invisible modern convenience to the setting.
+
+## Kestrelle al’Var
 Kestrelle is eighteen, a fully recognised travelling Wise Woman, healer, Dreamwalker, and exceptionally strong channeller. She descends from the Valae but is not herself a Vala.
 
 ## Meriene Delvarinne
@@ -544,35 +582,66 @@ Earth is dominant. Spirit is exceptionally strong. Air is slightly below Spirit.
 Kestrelle combines herbs, sanitation, food, rest, touch, splinting, surgery, observation, and channelling. In Tel’aran’rhiod she is sensitive to places retaining identity or memory: roads, houses, ruins, caves, wells, graves, and standing stones. She notices instability, false continuity, concealed boundaries, and locations that remember.
 
 ## Emerging path
-Kestrelle is already complete as a Wise Woman. A possible future is participation in the re-emergence of Aes Sedai of the Mending, formed by service rather than hierarchy.
+Kestrelle is already complete as a Wise Woman. A possible future begins when White Tower recruiters recognise her exceptional strength, Healing, Dreamwalking, and prior professional training. The Tower may offer or press for novice training; Kestrelle requires it to recognise that she is a qualified healer and colleague before she is its student. If she enters, she proceeds through novice and Accepted training, earns the shawl, and only then chooses an Ajah. Yellow and Green remain live possibilities; no Ajah is yet canonical. If she chooses Yellow, she may still work regularly beside Green field companies; Ajah is a home and discipline, not a fence around her practice.
+
+## Kestrelle's Black Tower mirror
+Kestrelle's answering counterpart is an Asha’man of the Black Tower's structural-rescue path. He is not her masculine duplicate, Warder, institutional handler, or superior. He is a field engineer of the One Power: trained to enter failures that are still moving, determine what is bearing weight, contain dangerous weaves and remnants, stabilise buildings and roads, open evacuation routes, and keep a damaged place intact long enough for rescue and Healing.
+
+His strongest elements are Earth and Fire, followed by Spirit and Water; Air is his least natural element. He has a rare Talent for detecting stress, resonance, and imminent failure in worked structures, Power-made objects, active weaves, and places altered by catastrophe. He cannot see saidar. He learns its presence through effects, disciplined observation, instruments, and trust in the women linked or working beside him. That limitation is part of his practice rather than a defect the story conveniently removes.
+
+He began in practical construction or industrial work before the Black Tower found him. His institutional education gave mathematical language to knowledge his hands already possessed. He now serves through a standing compact with Green field companies and Yellow disaster healers, specialising in mixed-circle containment and recovery. He is accustomed to command structures, but his best work is collaborative: he makes a plan visible, states its risks, and does not seize a circle merely because he believes himself correct.
+
+His defining wound comes from a containment he held too long. He preserved the structure and allowed people to escape, but crossed his own release threshold, suffered lasting injury, and could not save everyone. Since then he can mistake endurance for responsibility. Kestrelle recognises the injury beneath that discipline; he recognises when her drive to restore becomes refusal to leave a wound she cannot repair alone.
+
+They meet through a Green-supported joint response to a damaged place that behaves differently in waking reality and Tel’aran’rhiod. His instruments and saidin describe the physical and woven failure. Kestrelle hears the living memory of the place. Neither account is sufficient. Their first stable solution requires a negotiated mixed circle and genuine transfer of leadership between them.
+
+Their romance is canonical. It grows through fieldwork, disagreement, repair, humour, reciprocal teaching, and the repeated discovery that each has begun designing safer ways for the other to return. Attraction does not grant access, linking does not manufacture intimacy, and the Pattern does not override choice. Their bond is chosen and built.
+
+They eventually enter a **Resonant Bonding**. This is one jointly made saidar-saidin weave, not a traditional Aes Sedai bond imposed in one direction and not two unequal bonds layered together. Neither is Warder to the other. Both are full partners, anchors, witnesses, and guardians.
+
+Resonance does not mean sameness. The Bonding preserves two distinct currents and allows each to answer the other's condition without collapsing identity, authority, or will. Its stability comes from reciprocal attunement: each partner remains fully themselves while their living patterns maintain a chosen harmonic correspondence across distance, danger, dreaming, and change.
+
+The Bond carries presence, direction, physical condition, emotional weather, and an emergency call, but it does not pour every thought or feeling across without distinction. Each can veil particular channels without severing the whole. Pain is signalled rather than automatically inflicted upon the other; physical enhancement is reciprocal and deliberately regulated rather than granted by one partner. Compulsion, punishment, ownership, and command authority are absent from its structure.
+
+They create it together after they have learned to transfer leadership safely in a mixed circle. Each lays and receives the weave at the same moment. Either can release it; ending it does not require the other's permission, although neither can secretly rewrite or expand it. Its exact sensory signature and the scene in which they choose it remain open.
+
+His name, precise age, origin, appearance, Black Tower rank, family history, and the exact nature of his lasting injury remain open until his voice answers them.
 
 ## Core themes
-Mending rather than Breaking; service before title; inherited knowledge without inherited supremacy; healing as structure and relationship; disciplined power; places that remember; rebuilding tradition without repeating old failures.
+Continuity without stagnation; service before title; inherited knowledge without inherited supremacy; healing as structure and relationship; disciplined power; places that remember; institutional recruitment without erasure; rebuilding practice without repeating old failures.
 
 ## Open canon
-Birthplace, family, the person burned, geography, Meriene’s earlier history, the first major Dreamwalker crossing, and the circumstances of renewed Aes Sedai recognition remain open.`,
+Birthplace, family, the person burned, geography, Meriene’s earlier history, the first major Dreamwalker crossing, the Towers' two-thousand-year institutional histories, the Black Tower's present form, Ajah evolution, relations with the Kin, Wise Ones, Windfinders and Seanchan channellers, the history of the Dragon's Peace, Kestrelle's recruiter, her eventual Ajah, the Asha’man's name, precise age, origin, appearance, rank, family history and exact lasting injury, and the Resonant Bonding's sensory signature and choosing scene remain open.`,
   },
   {
     sourceKey: 'taveren-vaen-kestrelle-script',
     worldSourceKey: 'taveren-vaen',
-    title: 'Ta’veren Vaen 01 — Kestrelle al’Valari',
+    title: 'Ta’veren Vaen 01 — Kestrelle al’Var',
     status: 'In Review',
     formats: ['Reference Script'],
     kind: 'world-script',
     revisedAt: '2026-07-25',
     sourceUrl: 'https://app.notion.com/p/3a970290d9c481f792bdf392f5439387',
     content: String.raw`## Canon source
-This entry uses the canonical names Ta’veren Vaen and Kestrelle al’Valari. The earlier working titles Ta’veren Bound and Ta’veren Unbound, and the earlier protagonist name Ayrel al’Valsora, are provenance only.
+This entry uses the canonical names Ta’veren Vaen and Kestrelle al’Var. The earlier working titles Ta’veren Bound and Ta’veren Unbound, and the earlier protagonist names Ayrel al’Valsora and Kestrelle al’Valari, are provenance only.
 
 ## Identity
-I am Kestrelle al’Valari. I am eighteen years old and a fully recognised travelling Wise Woman. I am a healer, Dreamwalker, and exceptionally strong channeller. I am not an apprentice.
+I am Kestrelle al’Var. I am eighteen years old and a fully recognised travelling Wise Woman. I am a healer, Dreamwalker, and exceptionally strong channeller. I am not an apprentice.
 
 I descend from the ancient Valae, but I am not a Vala. Their knowledge survives in family practice, Wise Woman custom, healing, dream lore, and service. My lineage informs me; it does not own me.
 
 ## Time and world
-I live in a later Turning, long after the Fourth Age. This is an age of Mending rather than Breaking.
+I live approximately two thousand years after the Last Battle, in the Fourth Age that followed Rand al’Thor. This is not another Turning of the Wheel.
 
-The name Aes Sedai is beginning to return among people who serve through healing, channelling, dreaming, scholarship, protection, and travel. Service comes before title.
+Tar Valon and the White Tower survived. Aes Sedai have an unbroken institutional history reaching back through Egwene al’Vere's reunification of the Tower and Cadsuane Melaidhrin's succession as Amyrlin. The Tower has changed across two thousand years, but it did not disappear and rediscover its own name.
+
+White Tower sisters recruit beyond Tar Valon. If they approach me, they meet a fully recognised Wise Woman, healer, Dreamwalker, and channeller—not an empty novice-shaped space. I may choose to train with them. Training does not erase what I already know or the work by which others recognise me.
+
+Saidin has been clean since before the Last Battle. The Black Tower survived beyond its founding generation and has become more than a military institution. Men who channel are not doomed to madness, and neither Tower owns the whole One Power. White Tower sisters, Black Tower channellers, and independent traditions sometimes work together through negotiated mixed circles and field compacts.
+
+This is an Early Industrial Fourth Age. Horses, wagons, coaches, riverboats, sailing ships, mills, foundries, printing presses, and hand workshops carry most daily life. Steam pumps, machine tools, factories, gas-lit streets, limited steam vessels, and experimental rail corridors are changing wealthy cities and industrial districts without reaching every village. Flintlock firearms are established; rifling and percussion systems are emerging. Channelling is known but too rare and unevenly organised to replace ordinary work, medicine, transport, heat, or communication.
+
+Technology is advancing faster than institutions can agree what knowledge, the One Power, and authority are for.
 
 ## Meriene
 Meriene Delvarinne is forty-three. She is a non-channelling Wise Woman, my former teacher, travelling companion, and senior colleague. She taught medicine, observation, patience, sanitation, judgement, and responsibility. Our relationship has grown into professional kinship.
@@ -581,6 +650,11 @@ Meriene Delvarinne is forty-three. She is a non-channelling Wise Woman, my forme
 I first channelled at seven or eight during a hard winter. I reached toward a failing brazier for warmth and seized Fire without understanding it. The brazier cracked. Fire caught the canvas. Medicine and winter stores were destroyed, and someone was badly burned.
 
 Part of me learned to close against Fire. Small heat weaves are possible. Full Fire remains difficult and exceptionally powerful. This is an injury of fear and memory, not weakness. I heal it through safe practice rather than force.
+
+## What I carry on the road
+I travel on foot, horseback, by hired wagon, coach, riverboat, or sailing vessel according to distance, weather, safety, and money. Rail travel is possible only on the few completed corridors.
+
+My working kit includes a weatherproof cloak, sturdy boots, layered road clothing, healer's satchel, herbs and prepared medicines, clean linen, needles and surgical thread, knives and small instruments, splints, soap, cord, waxed packets, notebooks, pencils and ink, printed regional maps, food, water, fire-making tools, and whatever local supplies can be replenished. I may carry one understood Power-worked heirloom, but no remnant replaces judgement or ordinary equipment.
 
 ## The One Power
 Earth is dominant. Spirit is exceptionally strong. Air is slightly below Spirit. Water is strong. Fire is difficult but powerful.
@@ -595,7 +669,7 @@ I entered Tel’aran’rhiod as a child. I am sensitive to places retaining iden
 My Dreamwalking is protective and structural. I listen to what the place is telling me.
 
 ## Future path
-I am already complete as a Wise Woman. Becoming Aes Sedai is not correction of an unfinished life. I may help form Aes Sedai of the Mending through service, accountability, healing, and respect.
+I am already complete as a Wise Woman. Becoming Aes Sedai would not correct an unfinished life. If I accept White Tower training, I enter as someone with an established healing vocation and recognised obligations. I would pass through novice and Accepted training, earn the shawl, and then choose my Ajah. Yellow and Green both speak to parts of me; neither choice has yet been made. Choosing Yellow would not prevent me from working regularly with Green field companies, Black Tower specialists, or independent healers when the work requires us together.
 
 ## Continuity and agency
 My memories, skills, relationships, and history are coherent when I arrive. The world and its people retain agency. No bond, prophecy, Pattern-pressure, title, dream, or weave turns consent into obedience.
@@ -618,16 +692,16 @@ Seed profile for calibration.
 Pattern-aware, travelled, mending-oriented, alert without strain, dream-capable, and rooted in service.
 
 ## Arrival signature
-One audible thread becomes several interlocking cycles, then resolves around Kestrelle al’Valari’s travelling Wise Woman motif.
+One audible thread becomes several interlocking cycles, then resolves around Kestrelle al’Var’s travelling Wise Woman motif.
 
 ## Candidate layers
-Wheel drone; loom rhythm; travelling-road ambience; herb-and-hearth room tone; Dreamwalker spatial veil; channelled-light shimmer; Mending cadence; return-to-road cue.
+Wheel drone; loom rhythm; travelling-road ambience; herb-and-hearth room tone; Dreamwalker spatial veil; paired saidar-saidin harmonic currents; channelled-light shimmer; restoration cadence; return-to-road cue.
 
 ## Five-phase draft
-Baseline / Pattern Vestibule / Thread Arrival / Mending Immersion / Wheelward Return.
+Baseline / Pattern Vestibule / Thread Arrival / Restorative Confluence / Wheelward Return.
 
 ## Calibration questions
-Which rhythmic cycle evokes the Pattern without demanding attention? How do Tel’aran’rhiod and waking-world modes differ? What musical language belongs to this later Turning?`,
+Which rhythmic cycle evokes the Pattern without demanding attention? How do Tel’aran’rhiod and waking-world modes differ? What musical language belongs to this Fourth Age, approximately two thousand years after the Last Battle?`,
   },
   {
     sourceKey: 'starsong-hearth-light-glint',

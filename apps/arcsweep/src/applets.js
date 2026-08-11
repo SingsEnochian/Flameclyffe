@@ -8,6 +8,7 @@ export const APPLET_CATALOGUE = [
   { id: 'arrival', label: 'Arrival Context', glyph: '⌖', category: 'continuity', defaultVisible: true },
   { id: 'timeline', label: 'Timeline', glyph: '⌁', category: 'core', defaultVisible: true },
   { id: 'scripts', label: 'Scripts', glyph: '▤', category: 'world', defaultVisible: true },
+  { id: 'records', label: 'Records Room', glyph: '▥', category: 'writing', defaultVisible: true },
   { id: 'ingest', label: 'Non-Canon Ingest', glyph: '⇣', category: 'evidence', defaultVisible: true },
   { id: 'identity', label: 'About Me', glyph: '◇', category: 'world', defaultVisible: true },
   { id: 'competencies', label: 'World Competencies', glyph: '✣', category: 'world', defaultVisible: true },

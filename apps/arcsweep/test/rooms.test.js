@@ -44,6 +44,19 @@ test('non-canon ingest is visible, attachment-backed, and has no direct canon st
   assert.deepEqual(boundaryField[4], ['Non-canon source', 'Candidate for Steward review']);
 });
 
+test('Records Room archives writing and roleplay without automatic canon carry', () => {
+  const applet = APPLET_CATALOGUE.find((item) => item.id === 'records');
+  const definition = COLLECTION_ROOM_DEFINITIONS.records;
+  assert.equal(applet?.defaultVisible, true);
+  assert.equal(definition.attachments, true);
+  assert.match(definition.description, /distinct from canon/i);
+  for (const field of ['recordType', 'sceneMode', 'content', 'premaqcLineage', 'mathSpinePacket', 'soundReceipts', 'canonCarry', 'canonExcerpt']) {
+    assert.ok(definition.fields.some(([name]) => name === field), `missing Records Room field ${field}`);
+  }
+  const carry = definition.fields.find(([name]) => name === 'canonCarry');
+  assert.deepEqual(carry[4], ['Not requested', 'Requested for review', 'Carried excerpt to canon', 'Declined', 'Archived']);
+});
+
 test('world section rooms cover identity, safety, recall, companion, and theme', () => {
   for (const id of ['identity', 'safety-weave', 'continuity-recall', 'companion', 'theme']) {
     assert.ok(WORLD_SECTION_DEFINITIONS[id]);

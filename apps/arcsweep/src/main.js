@@ -36,6 +36,7 @@ let activeRoom = 'portal';
 let selectedWorldId = state.activeWorldId;
 let selectedScriptId = state.scripts[0]?.id || null;
 let selectedRecords = {};
+let recordQueries = {};
 let returnOpen = false;
 let notice = 'Arcsweep ready.';
 let storageInfo = await getStorageInfo().catch(() => null);
@@ -49,6 +50,7 @@ const PRIMARY_NAV = [
   ['portal', 'Portal', '◉'],
   ['worlds', 'Worlds', '✧'],
   ['scripts', 'Scripts', '▤'],
+  ['records', 'Records', '▥'],
   ['feedback', 'Feedback', '∞'],
   ['waking-thread', 'Waking Thread', '⌁'],
   ['forge', 'Forge', '✦'],
@@ -270,23 +272,29 @@ function renderAttachments(record, roomId) {
 function renderCollectionRoom(roomId) {
   const definition = COLLECTION_ROOM_DEFINITIONS[roomId];
   const world = activeWorld();
-  const records = (state.records[roomId] || []).filter((record) => record.worldId === world.id);
+  const query = String(recordQueries[roomId] || '').trim().toLowerCase();
+  const records = (state.records[roomId] || []).filter((record) => record.worldId === world.id)
+    .filter((item) => !query || Object.values(item).some((value) => typeof value === 'string' && value.toLowerCase().includes(query)));
   const record = recordForRoom(roomId);
   const isIngest = roomId === 'ingest';
+  const isRecords = roomId === 'records';
   const committed = isIngest && record?.canonBoundary === 'Committed to canon';
   const commitEligible = isIngest && record && !committed
     && (record.canonBoundary === 'Candidate for Steward review' || record.reviewStatus === 'Canon candidate');
+  const recordsCommitted = isRecords && record?.canonCarry === 'Carried excerpt to canon';
+  const recordsCarryEligible = isRecords && record && record.canonCarry === 'Requested for review' && String(record.canonExcerpt || '').trim();
   const stewardControls = isIngest && record ? (
     committed
       ? `<p class="commit-badge">✦ Committed to canon${record.canonisedAt ? ' · ' + new Date(record.canonisedAt).toLocaleDateString() : ''}</p><button type="button" class="quiet" data-action="edit-canon-script" data-ingest-id="${attr(record.id)}">Edit canon script →</button>`
       : commitEligible
         ? `<button type="button" class="steward-commit" data-action="commit-to-canon" data-room-id="${attr(roomId)}" data-record-id="${attr(record.id)}">Commit to canon ✦</button>`
         : ''
-  ) : '';
+  ) : isRecords && record ? `<div class="records-actions"><button type="button" class="quiet" data-action="export-record-markdown" data-record-id="${attr(record.id)}">Export Markdown</button><button type="button" class="quiet" data-action="export-record-json" data-record-id="${attr(record.id)}">Export JSON</button>${recordsCommitted ? '<p class="commit-badge">✦ Carried excerpt to canon</p>' : recordsCarryEligible ? `<button type="button" class="steward-commit" data-action="carry-record-to-canon" data-record-id="${attr(record.id)}">Carry reviewed excerpt to canon ✦</button>` : ''}</div>` : '';
   const itemLabel = (item) => isIngest
     ? escapeHtml(item.reviewStatus || item.canonBoundary || 'Non-canon intake')
     : escapeHtml(item.date || item.status || item.category || 'Local record');
   return `<section class="section-heading"><div><p class="eyebrow">${escapeHtml(world.name)} · ${escapeHtml(definition.category)}</p><h1>${escapeHtml(definition.label)}</h1><p class="lede">${escapeHtml(definition.description)}</p></div><button data-action="new-record" data-room-id="${attr(roomId)}">New entry</button></section>
+    ${isRecords ? `<section class="panel records-toolbar"><label>Search this world's records<input type="search" data-record-search="${attr(roomId)}" value="${attr(recordQueries[roomId] || '')}" placeholder="Title, participant, scene, tag, canon reference, receipt…" /></label><p class="muted">${records.length} matching record${records.length === 1 ? '' : 's'} · Canon Carry never occurs automatically.</p></section>` : ''}
     <section class="split-layout"><aside class="panel item-list">${records.length ? records.map((item) => `<button class="item-card ${item.id === record?.id ? 'active' : ''}" data-record-room="${attr(roomId)}" data-record-id="${attr(item.id)}"><strong>${escapeHtml(item.title || 'Untitled')}</strong><span>${itemLabel(item)}</span></button>`).join('') : '<p class="muted">No entries in this world yet.</p>'}</aside>
     <article class="panel"><form id="record-form" data-room-id="${attr(roomId)}" class="stack"><input type="hidden" name="id" value="${attr(record?.id || '')}" />${definition.fields.map((field) => fieldMarkup(field, record)).join('')}${definition.attachments ? renderAttachments(record, roomId) : ''}<div class="button-row"><button type="submit">${record ? 'Save entry' : 'Create entry'}</button>${record ? `<button type="button" class="quiet danger" data-action="delete-record" data-room-id="${attr(roomId)}" data-record-id="${attr(record.id)}">Delete</button>` : ''}${stewardControls}</div></form></article></section>`;
 }
@@ -377,6 +385,20 @@ function downloadSoundscape(blob) {
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadRecord(filename, content, type) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const link = document.createElement('a');
+  link.href = url; link.download = filename; document.body.appendChild(link); link.click(); link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function recordMarkdown(record, world) {
+  const lines = [`# ${record.title || 'Untitled record'}`, '', `- World: ${world.name}`, `- Type: ${record.recordType || ''}`, `- Status: ${record.status || ''}`, `- Scene mode: ${record.sceneMode || ''}`, `- Participants: ${record.participants || ''}`, `- PREMAQC: ${record.premaqcLineage || ''}`, `- Math Spine: ${record.mathSpinePacket || ''}`, `- Canon Carry: ${record.canonCarry || 'Not requested'}`, '', record.content || ''];
+  if (record.soundReceipts) lines.push('', '## Instrument receipts', '', record.soundReceipts);
+  if (record.canonExcerpt) lines.push('', '## Canon Carry excerpt', '', record.canonExcerpt);
+  return lines.join('\n');
 }
 
 function renderWakingThread() {
@@ -677,6 +699,29 @@ app.addEventListener('click', async (event) => {
       persist('Committed to canon. Canon script created.', 'commit-canon');
     }
   }
+  if (action === 'carry-record-to-canon') {
+    const record = state.records.records?.find((item) => item.id === button.dataset.recordId);
+    if (record && record.canonCarry === 'Requested for review' && String(record.canonExcerpt || '').trim()) {
+      const world = state.worlds.find((item) => item.id === record.worldId) || activeWorld();
+      const script = { id: newId('canon-script'), name: `${record.title} — carried excerpt`, worldId: world.id, world: world.name, status: 'Canon', content: record.canonExcerpt.trim(), updatedAt: isoNow(), formats: ['Canon Carry'], recordSourceId: record.id };
+      state.scripts.unshift(script);
+      record.canonCarry = 'Carried excerpt to canon';
+      record.canonScriptId = script.id;
+      record.canonCarriedAt = isoNow();
+      record.updatedAt = isoNow();
+      persist('Reviewed excerpt carried to canon. The complete record remains in the Records Room.', 'records-canon-carry');
+    }
+  }
+  if (action === 'export-record-markdown' || action === 'export-record-json') {
+    const record = state.records.records?.find((item) => item.id === button.dataset.recordId);
+    if (record) {
+      const world = state.worlds.find((item) => item.id === record.worldId) || activeWorld();
+      const safe = String(record.title || 'record').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'record';
+      if (action === 'export-record-markdown') downloadRecord(`${safe}.md`, recordMarkdown(record, world), 'text/markdown');
+      else downloadRecord(`${safe}.json`, JSON.stringify({ schema: 'arcsweep.record/v1', world: { id: world.id, name: world.name }, record }, null, 2), 'application/json');
+      notice = `${record.title || 'Record'} exported.`;
+    }
+  }
   if (action === 'edit-canon-script') {
     const ingestId = button.dataset.ingestId;
     const script = state.scripts.find((s) => s.ingestSourceId === ingestId);
@@ -715,6 +760,13 @@ app.addEventListener('change', async (event) => {
 });
 
 app.addEventListener('input', (event) => {
+  if (event.target.matches('[data-record-search]')) {
+    recordQueries[event.target.dataset.recordSearch] = event.target.value;
+    render();
+    const input = app.querySelector(`[data-record-search="${event.target.dataset.recordSearch}"]`);
+    if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+    return;
+  }
   if (event.target.matches('textarea[name="work"]')) {
     const fired = storySoundscape.handleText(event.target.value);
     if (fired.length) { setLiveNotice(`${fired.map((item) => item.cue_label).join(', ')} fired into the room.`); refreshStorySoundscape(); }

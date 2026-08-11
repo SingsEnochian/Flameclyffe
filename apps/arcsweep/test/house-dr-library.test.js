@@ -35,6 +35,72 @@ test('the bundle preserves Notion status and canon boundaries', () => {
   assert.match(sourceIngest.canonBoundary, /Protagonist.*remain open authored fields/i);
 });
 
+test('Kestrelle al’Var is canonical and earlier names remain provenance only', () => {
+  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
+  const script = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
+  assert.equal(world.identity.name, 'Kestrelle al’Var');
+  assert.equal(world.houseProfile.protagonist, 'Kestrelle al’Var');
+  assert.equal(script.name, 'Ta’veren Vaen 01 — Kestrelle al’Var');
+  assert.match(script.content, /I am Kestrelle al’Var\./);
+  assert.match(script.content, /Kestrelle al’Valari, are provenance only/);
+});
+
+test('Ta’veren Vaen carries the Early Industrial Fourth Age technology baseline', () => {
+  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
+  const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
+  const kestrelle = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
+  assert.match(world.description, /approximately two thousand years after the Last Battle/i);
+  assert.match(world.description, /Tar Valon and the White Tower endure/);
+  assert.match(world.history, /Technology is advancing faster than institutions/);
+  assert.match(world.rules, /archaeological technologies, not everyday conveniences/);
+  for (const term of ['experimental railways', 'Power-assisted message relays', 'Flintlock firearms', 'Medicine', 'Earlier-age remnants']) {
+    assert.match(wiki.content, new RegExp(term, 'i'));
+  }
+  assert.match(kestrelle.content, /What I carry on the road/);
+  assert.match(kestrelle.content, /healer's satchel/);
+});
+
+test('White Tower continuity and Kestrelle recruitment replace the discarded later-Turning premise', () => {
+  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
+  const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
+  const kestrelle = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
+  assert.match(world.kind, /Fourth Age/);
+  assert.match(wiki.content, /White Tower actively recruits/);
+  assert.match(wiki.content, /Egwene al’Vere/);
+  assert.match(wiki.content, /Cadsuane Melaidhrin/);
+  assert.match(kestrelle.content, /fully recognised Wise Woman/);
+  assert.match(kestrelle.content, /Yellow and Green/);
+  assert.doesNotMatch(`${world.description}\n${world.history}\n${world.rules}\n${wiki.content}\n${kestrelle.content}`, /later Turning|long after the Fourth Age|re-emergence of Aes Sedai|No surviving institution owns it/i);
+});
+
+test('clean saidin supports sovereign Towers, consent-bound circles, and Kestrelle’s Asha’man mirror', () => {
+  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
+  const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
+  const kestrelle = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
+  assert.match(world.history, /Saidin has remained clean/);
+  assert.match(world.rules, /neither a subordinate White Tower annex nor merely a military barracks/);
+  assert.match(wiki.content, /The White and Black Towers remain sovereign/);
+  assert.match(wiki.content, /explicit consent for linking/);
+  assert.match(wiki.content, /Green field companies/);
+  assert.match(wiki.content, /Kestrelle's Black Tower mirror/);
+  assert.match(wiki.content, /structural-rescue path/);
+  assert.match(wiki.content, /strongest elements are Earth and Fire/);
+  assert.match(wiki.content, /cannot see saidar/);
+  assert.match(wiki.content, /containment he held too long/);
+  assert.match(wiki.content, /Their romance is canonical/);
+  assert.match(wiki.content, /Their bond is chosen and built/);
+  assert.match(wiki.content, /enter a \*\*Resonant Bonding\*\*/);
+  assert.match(wiki.content, /one jointly made saidar-saidin weave/);
+  assert.match(wiki.content, /Resonance does not mean sameness/);
+  assert.match(wiki.content, /Neither is Warder to the other/);
+  assert.match(wiki.content, /Either can release it/);
+  assert.match(kestrelle.content, /Choosing Yellow would not prevent me from working regularly with Green field companies/);
+});
+
 test('relaunching the current bundle is idempotent', () => {
   const first = installCurrentHouseDrLibrary(createDefaultState(), NOW);
   const second = installCurrentHouseDrLibrary(first.state, '2026-07-26T23:31:00.000Z');

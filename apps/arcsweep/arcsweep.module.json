@@ -51,6 +51,9 @@
     "per-world-applet-deck",
     "applet-order-label-glyph-customisation",
     "script-editor",
+    "writing-and-roleplay-records-room",
+    "record-branching-search-and-export",
+    "explicit-canon-carry-review",
     "waking-thread",
     "time-ratio-calculator",
     "arc-session-ledger",
@@ -96,7 +99,7 @@
   "deviceRequirements": ["Windows x64 for NSIS installer"],
   "routes": ["/arcsweep/"],
   "rooms": [
-    "Portal", "World Registry", "About this World", "Summon", "Veil Mode", "World Clock", "Arrival Context", "Timeline", "Scripts", "About Me", "World Competencies", "Safety Weave", "Continuity Recall", "Companion Interface", "Relationships", "Scenarios", "Calendar", "Diary", "Playlists", "Visualisations", "Appearance", "Wardrobe", "Outfits", "Belongings", "Places", "Family Tree", "Photo Gallery", "Theme", "Forge", "Waking Thread", "Settings and Recovery"
+    "Portal", "World Registry", "About this World", "Summon", "Veil Mode", "World Clock", "Arrival Context", "Timeline", "Scripts", "Records Room", "About Me", "World Competencies", "Safety Weave", "Continuity Recall", "Companion Interface", "Relationships", "Scenarios", "Calendar", "Diary", "Playlists", "Visualisations", "Appearance", "Wardrobe", "Outfits", "Belongings", "Places", "Family Tree", "Photo Gallery", "Theme", "Forge", "Waking Thread", "Settings and Recovery"
   ],
   "commands": ["arcsweep:dev", "arcsweep:test", "arcsweep:build", "electron:build:win"],
   "configurationSchema": null,
@@ -129,6 +132,9 @@
     "launch when renderer readiness is delayed",
     "second launch recalls and focuses existing window",
     "create and edit every room type",
+    "archive writing and roleplay with PREMAQC, Math Spine, sound, replay, and relational-sync references",
+    "search and export a record without changing canon",
+    "carry only an explicitly reviewed excerpt from a record into canon",
     "restart and recover state",
     "export and import archive",
     "create and restore backup",
