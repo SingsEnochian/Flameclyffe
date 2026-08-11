@@ -8,7 +8,11 @@ const rgba = (rgb, a) => `rgba(${rgb},${a})`;
 const n = (v, fallback = 0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
 
 const filters = { pulse: true, field: true, geometry: true, horizon: true, moons: true };
-const D = { P: .55, C: .50, R: .45, E: .38, M: .30, A: .65, H: .50, charge: .20, moonIllum: 50, sky: 'Night', kp: 1, bz: 0, source: 'fallback' };
+const D = {
+  P: .55, C: .50, R: .45, E: .38, M: .30, A: .65, H: .50,
+  Q: .20, charge: .20, moonIllum: 50, sky: 'Night', kp: 1, bz: 0, source: 'fallback',
+  rawInputs: { bridge: null, local: null }, transformationReceipts: { bridge: [], local: [] }
+};
 
 const TIDES = ['Hearth Signal', 'Lantern Hold', 'Atlas Pulse', 'Quiet Gate', 'Dream Opening', 'Moon Thread'];
 const THEMES = [
@@ -22,11 +26,11 @@ const TEACH = {
   P: ['Presence', 'Presence controls the outer architecture. Higher P adds more outer nodes and makes the glyph feel more inhabited.', 'P → outer node count, outer radius, and presence spotlight'],
   C: ['Coherence', 'Coherence controls how clearly edges hold together. Higher C strengthens the connective bones between nodes.', 'C → edge alpha, route legibility, and structural clarity'],
   R: ['Resonance', 'Resonance changes harmonic spacing and pulse rhythm. Higher R makes rings and route traffic feel more musical.', 'R → harmonic ring emphasis, star-route skip, and pulse cadence'],
-  E: ['Entropy', 'Entropy adds wobble. Higher E makes the structure less perfectly symmetrical, which helps show instability or variation.', 'E → node displacement, angular jitter, and field looseness'],
-  M: ['Momentum', 'Momentum controls motion. Higher M makes sparks travel faster and keeps the field more animated.', 'M → particle speed, pulse traffic, and trace response'],
-  A: ['Alignment', 'Alignment tightens the inner body of the glyph. Higher A makes the core triad and mid-structure feel more centred.', 'A → inner radius, centre discipline, and alignment glow'],
-  H: ['Horizon', 'Horizon is a derived edge signal. It combines coherence, entropy, resonance, alignment, Bz, Kp, charge, and a small pulse term.', 'H = C·.28 + (1-E)·.20 + R·.16 + A·.14 + Bz⁻·.09 + Kp·.06 + Q·.04 + pulse·.03'],
-  Q: ['Charge', 'Charge wakes the centre. Higher charge expands the core glow and makes touch responses feel brighter.', 'Q → centre glow, core radius, and local charge bloom'],
+  E: ['Entanglement', 'Entanglement carries continuity and cross-observation binding. Higher E strengthens relational routes through the glyph.', 'E → route binding, connective density, and cross-observation continuity'],
+  M: ['Memory', 'Memory carries lineage, provenance, and accumulated relation. Higher M lengthens visible traces and continuity tails.', 'M → trace persistence, tail length, and continuity recall'],
+  A: ['Agency', 'Agency carries available directed capacity to act, choose, and redirect. Higher A increases response speed and active routes.', 'A → response speed, directed motion, and interaction force'],
+  H: ['Horizon', 'Horizon is a derived edge signal. It combines Coherence, Entanglement, Resonance, Agency, Qualia, Bz, Kp, and a pulse term.', 'H = C·.28 + E·.20 + R·.16 + A·.14 + Bz⁻·.09 + Kp·.06 + Q·.04 + pulse·.03'],
+  Q: ['Qualia', 'Qualia carries lived interiority and the experiential texture of the present state. Higher Q warms and inhabits the centre.', 'Q → centre texture, core warmth, and inhabited glow'],
   moon: ['Moon illumination', 'Moon illumination controls harmonic ring count and visibility. More moon means more visible ring structure.', 'moonIllum → 1 to 5 harmonic rings'],
   kp: ['Kp index', 'Kp is treated as particle energy. Higher Kp increases field motes and pulse activity without changing the core structure.', 'Kp → particle count, pulse intensity, and field energy'],
   bz: ['Bz component', 'Bz shifts colour temperature inside the current palette. Negative Bz leans cooler, positive Bz leans brighter or warmer.', 'Bz → cool/warm colour bias within theme bounds'],
@@ -37,50 +41,50 @@ const DIRECT_READINGS = {
   time: {
     label: 'Time', source: 'Browser local time', affects: 'Clock labels, packet timestamp, glyph freshness, and ambient phase.',
     path: 'Time → timing ring → clock labels → packet timestamp → ambient phase',
-    explanation: 'Time is a direct reading. It timestamps the current state, updates the observatory clock, and gives the reading a moment. It does not decide what the field means by itself.',
-    boundary: 'Time is ordinary clock context, not a hidden spiritual sensor.', tiny: 'Time gives the reading a moment.'
+    explanation: 'Time timestamps the current state, updates the observatory clock, and gives the reading its temporal receipt.',
+    boundary: 'Time interpretation, correlation, and causal analysis each require their own named receipt.', tiny: 'Time gives the reading a moment.'
   },
   moon: {
     label: 'Moon', source: 'Bridge, local packet, or fallback value', affects: 'Harmonic ring count, ring brightness, and ring visibility.',
     path: 'Moon → harmonic rings → ring count → ring glow',
     explanation: 'Moon illumination controls the harmonic ring scaffold. A brighter moon value shows more rings or stronger ring visibility.',
-    boundary: 'The moon layer is a visual scaffold, not a claim that the moon causes the model state.', tiny: 'Moon shows the harmonic scaffold.'
+    boundary: 'Lunar telemetry, visual projection, and causal analysis remain separate named layers.', tiny: 'Moon shows the harmonic scaffold.'
   },
   kp: {
     label: 'Kp', source: 'Bridge, local packet, or fallback value', affects: 'Particle energy, mote activity, pulse liveliness, and spark intensity.',
     path: 'Kp → field layer → motes → pulse energy',
-    explanation: 'Kp is treated as particle energy. Higher Kp makes the field feel more electrically active without changing the underlying geometry.',
-    boundary: 'Kp does not diagnose anything about the user or the world-state. It is used as an environmental energy input.', tiny: 'Kp wakes the particle field.'
+    explanation: 'Kp enters the renderer as particle energy. Higher Kp increases field activity while the received Kp value remains unchanged.',
+    boundary: 'Environmental telemetry, embodied correlation, and world-state analysis remain separate named layers.', tiny: 'Kp wakes the particle field.'
   },
   bz: {
     label: 'Bz', source: 'Bridge, local packet, or fallback value', affects: 'Palette temperature, horizon tint, and cool/warm bias inside the active theme.',
     path: 'Bz → palette wash → horizon tint → colour temperature',
-    explanation: 'Bz shifts colour temperature inside the current theme. It does not rebuild the geometry; it changes how the field is coloured.',
-    boundary: 'Bz is used visually as a colour-temperature input, not as a standalone interpretation of the model.', tiny: 'Bz colours the weather.'
+    explanation: 'Bz shifts colour temperature inside the current theme while the received Bz value remains unchanged.',
+    boundary: 'Bz telemetry, palette projection, and field interpretation remain separate named layers.', tiny: 'Bz colours the weather.'
   },
   source: {
     label: 'Source', source: 'Bridge, bridge+local, local, stale, or fallback', affects: 'Source badge, packet provenance, trust context, and transparency text.',
     path: 'Source → provenance badge → packet panel → trust context',
     explanation: 'Source tells you where the current state came from so you know what kind of reading you are seeing.',
-    boundary: 'A source label is provenance, not authority. It tells where the data came from, not whether the model is objectively true.', tiny: 'Source shows where the packet came from.'
+    boundary: 'The source label records provenance. Authority and interpretation carry their own receipts.', tiny: 'Source shows where the packet came from.'
   },
   local: {
     label: 'Local', source: 'Browser local storage', affects: 'Saved observations, local continuity, packet recall, and export context.',
     path: 'Local → browser storage → packet panel → saved observation state',
     explanation: 'Local refers to browser-side observations saved on this device. They stay local unless deliberately copied, saved, exported, or routed.',
-    boundary: 'Local does not mean private files are being read. It only refers to browser-side packets this page is designed to use.', tiny: 'Local keeps the packet on this device.'
+    boundary: 'Local names browser-side packets explicitly supplied to this instrument.', tiny: 'Local keeps the packet on this device.'
   },
   motion: {
     label: 'Motion', source: 'Browser reduced-motion preference, Toy mode, and Low Stim setting', affects: 'Animation speed, mote density, pulse count, glow intensity, and toy responses.',
     path: 'Motion → animation layer → pulse speed → mote density → low-stim behaviour',
     explanation: 'Motion shows how active the instrument is allowed to be. Accessibility settings are part of the instrument state, not an afterthought.',
-    boundary: 'Motion settings adjust presentation. They do not change the underlying model variables.', tiny: 'Motion decides how loudly the instrument moves.'
+    boundary: 'Motion settings adjust presentation; the underlying model variables remain unchanged.', tiny: 'Motion decides how loudly the instrument moves.'
   },
   touch: {
     label: 'Touch', source: 'Pointer, touch, click, hold, trace, or keyboard activation', affects: 'Node bloom, spark release, route highlighting, charge boost, focus mode, teaching spotlight, and reset.',
     path: 'Touch → active node or route → spark/bloom → teaching panel',
     explanation: 'Touch is a direct reading. Your taps, holds, drags, traces, and keyboard actions ask the model to show one relationship more clearly.',
-    boundary: 'Touch is interaction input, not personal surveillance. The page responds to what you do on the instrument surface.', tiny: 'Touch asks the model to answer.'
+    boundary: 'Touch records explicit actions performed on the instrument surface.', tiny: 'Touch asks the model to answer.'
   }
 };
 
@@ -132,12 +136,33 @@ function seeded(seed,i){ const v = Math.sin(seed*.0001 + i*12.9898)*43758.5453; 
 function polar(a,r){ return {x: Math.cos(a)*r, y: Math.sin(a)*r}; }
 function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
 
-function applyDeep(raw, source){
+function copyExact(value){
+  if(typeof structuredClone === 'function') return structuredClone(value);
+  return JSON.parse(JSON.stringify(value));
+}
+function receipt(channel, field, input, output, operation){
+  if(Object.is(input, output) && typeof input === 'number') return;
+  D.transformationReceipts[channel].push({ field, input: input ?? null, output, operation, lossless_source: true });
+}
+function applyDeep(raw, source, channel = source){
   if(!raw || typeof raw !== 'object') return;
-  ['P','C','R','E','M','A','charge'].forEach(k => { if(raw[k] !== undefined) D[k === 'charge' ? 'charge' : k] = clamp(n(raw[k], D[k])); });
-  if(raw.moonIllum !== undefined) D.moonIllum = n(raw.moonIllum, D.moonIllum) <= 1 ? clamp(n(raw.moonIllum,0))*100 : clamp(n(raw.moonIllum,D.moonIllum),0,100);
-  if(raw.kp !== undefined) D.kp = clamp(n(raw.kp,D.kp),0,9);
-  if(raw.bz !== undefined) D.bz = clamp(n(raw.bz,D.bz),-20,20);
+  D.rawInputs[channel] = copyExact(raw);
+  D.transformationReceipts[channel] = [];
+  ['P','C','R','E','M','A','Q','charge'].forEach(k => {
+    if(raw[k] === undefined) return;
+    const numeric = n(raw[k], D[k]);
+    const projected = clamp(numeric);
+    receipt(channel, k, raw[k], projected, numeric === projected ? 'numeric-coercion' : 'bounded-render-projection');
+    D[k] = projected;
+  });
+  if(raw.moonIllum !== undefined){
+    const numeric = n(raw.moonIllum,D.moonIllum);
+    const projected = numeric <= 1 ? clamp(numeric)*100 : clamp(numeric,0,100);
+    receipt(channel, 'moonIllum', raw.moonIllum, projected, numeric <= 1 ? 'fraction-to-percent' : 'bounded-render-projection');
+    D.moonIllum = projected;
+  }
+  if(raw.kp !== undefined){ const numeric=n(raw.kp,D.kp), projected=clamp(numeric,0,9); receipt(channel,'kp',raw.kp,projected,numeric===projected?'numeric-coercion':'bounded-render-projection'); D.kp=projected; }
+  if(raw.bz !== undefined){ const numeric=n(raw.bz,D.bz), projected=clamp(numeric,-20,20); receipt(channel,'bz',raw.bz,projected,numeric===projected?'numeric-coercion':'bounded-render-projection'); D.bz=projected; }
   if(raw.sky !== undefined) D.sky = String(raw.sky);
   D.source = source;
 }
@@ -146,7 +171,7 @@ async function fetchBridge(){
     const r = await fetch(BRIDGE, { cache: 'no-store' });
     if(!r.ok) throw new Error(String(r.status));
     const data = await r.json();
-    applyDeep(data.deep || data.DEEP || data.state || data.observer, 'bridge');
+    applyDeep(data.deep || data.DEEP || data.state || data.observer, 'bridge', 'bridge');
   }catch(e){ if(D.source === 'bridge') D.source = 'stale'; }
 }
 function pollLocal(){
@@ -155,20 +180,20 @@ function pollLocal(){
     try{
       const raw = localStorage.getItem(key); if(!raw) continue;
       const data = JSON.parse(raw), field = data.field || {}, entry = data.entries && data.entries[0] && data.entries[0].d ? data.entries[0].d : {}, local = {};
-      ['P','C','R','E','M','A'].forEach(k => { if(typeof field[k] === 'number') local[k] = field[k]; });
+      ['P','C','R','E','M','A','Q'].forEach(k => { if(typeof field[k] === 'number') local[k] = field[k]; });
       if(typeof entry.kp === 'number') local.kp = entry.kp;
       if(typeof entry.bz === 'number') local.bz = entry.bz;
       if(entry.moon && typeof entry.moon.illumination === 'number') local.moonIllum = entry.moon.illumination;
       if(entry.sky) local.sky = entry.sky;
       if(typeof data.charge === 'number') local.charge = data.charge;
-      applyDeep(local, D.source === 'bridge' ? 'bridge+local' : 'local');
+      applyDeep(local, D.source === 'bridge' ? 'bridge+local' : 'local', 'local');
       break;
     }catch(e){}
   }
 }
 function calcHorizon(t){
   const bz = clamp(-D.bz / 20), aurora = clamp(D.kp / 9), pulse = .5 + .5*Math.sin(t*.00009 + D.M*TAU + D.P);
-  D.H = clamp(D.C*.28 + (1-D.E)*.20 + D.R*.16 + D.A*.14 + bz*.09 + aurora*.06 + (D.charge+I.chargeBoost)*.04 + pulse*.03);
+  D.H = clamp(D.C*.28 + D.E*.20 + D.R*.16 + D.A*.14 + bz*.09 + aurora*.06 + (D.Q+I.chargeBoost)*.04 + pulse*.03);
   return D.H;
 }
 
@@ -189,12 +214,12 @@ function buildNodes(breath, seed){
     { count: outer, rad: 324, offset: -Math.PI/2, layer: 0, label: 'presence', varKey: 'P' },
     { count: mid, rad: 222 + D.R*20, offset: -Math.PI/2 + Math.PI/mid, layer: 1, label: 'coherence', varKey: 'C' },
     { count: inner, rad: 144 + D.R*16, offset: -Math.PI/2 + Math.PI/6, layer: 2, label: 'resonance', varKey: 'R' },
-    { count: core, rad: 72 + D.charge*22, offset: -Math.PI/2, layer: 3, label: 'charge', varKey: 'Q' }
+    { count: core, rad: 72 + D.Q*22, offset: -Math.PI/2, layer: 3, label: 'qualia', varKey: 'Q' }
   ];
   const nodes = [];
   rings.forEach(ring => {
     for(let i=0;i<ring.count;i++){
-      const wobble = Math.sin(seed*.00001 + i*1.7 + ring.layer) * D.E * .04;
+      const wobble = Math.sin(seed*.00001 + i*1.7 + ring.layer) * (1-D.E) * .04;
       const a = ring.offset + i/ring.count*TAU + wobble;
       const rad = ring.rad * breath;
       const p = polar(a, rad);
@@ -240,8 +265,8 @@ function buildRoutes(nodes, directNodes){
 }
 function routeAlpha(r){
   if(r.kind.startsWith('direct-')) return .10;
-  if(r.kind.includes('star')) return .04 + D.C*.16;
-  if(r.kind === 'radial') return .04 + D.C*.08;
+  if(r.kind.includes('star')) return .04 + D.C*.10 + D.E*.08;
+  if(r.kind === 'radial') return .04 + D.C*.05 + D.E*.05;
   if(r.kind === 'core-spoke') return .10 + D.C*.12;
   if(r.kind === 'triad') return .34 + D.C*.18;
   return .18 + D.C*.18;
@@ -267,7 +292,7 @@ function readingBoost(r, now){
   return r.kind.startsWith('direct-') ? .45 : 1;
 }
 
-function spawnSpark(r,count=1){ if(!I.toy) return; for(let j=0;j<count;j++) I.sparks.push({a:r.a,b:r.b,color:r.color,t:seeded(performance.now(),j)*.2,speed:.004+D.M*.012+(D.kp/9)*.006+Math.random()*.007,age:0,life:900+Math.random()*700,size:2+Math.random()*2.5}); }
+function spawnSpark(r,count=1){ if(!I.toy) return; for(let j=0;j<count;j++) I.sparks.push({a:r.a,b:r.b,color:r.color,t:seeded(performance.now(),j)*.2,speed:.004+D.A*.012+(D.kp/9)*.006+Math.random()*.007,age:0,life:900+D.M*900+Math.random()*700,size:2+Math.random()*2.5}); }
 function addBurst(x,y,color=theme().spark,count=14,life=720){ if(!I.toy) return; I.bursts.push({x,y,color,count:I.lowStim?Math.ceil(count*.45):count,life,age:0,seed:Math.random()*9999}); }
 function addRipple(x,y,r,color=theme().spark,life=900){ if(!I.toy && I.lowStim) return; I.ripples.push({x,y,r,age:0,life,color}); }
 function updateToy(dt){
@@ -287,7 +312,7 @@ function drawPulseLines(t,horizon,routes){
   ctx.save(); ctx.globalCompositeOperation='lighter';
   const active = I.lowStim ? 3 : Math.max(5, Math.round(5 + D.R*8 + D.kp*.35));
   for(let i=0;i<active;i++){
-    const r=pulseRoutes[i%pulseRoutes.length], phase=(t*(.00007+D.M*.0001)+i/active)%1, tail=.16+horizon*.08;
+    const r=pulseRoutes[i%pulseRoutes.length], phase=(t*(.00007+D.A*.0001)+i/active)%1, tail=.12+D.M*.12+horizon*.08;
     const p0=clamp(phase-tail,0,1), p1=phase, s={x:r.a.x+(r.b.x-r.a.x)*p0,y:r.a.y+(r.b.y-r.a.y)*p0}, e={x:r.a.x+(r.b.x-r.a.x)*p1,y:r.a.y+(r.b.y-r.a.y)*p1};
     drawLine(s,e,r.color,.18+horizon*.1,4.5,16); drawLine(s,e,r.color,.46+horizon*.1,1.2,7);
   }
@@ -303,9 +328,10 @@ function drawTimePulsePath(now, routes){
 
 function buildPacket(time,glyphId){
   return { timestamp:new Date().toISOString(), localTime:time.full, source:D.source, glyphId, theme:theme().name, selectedReading:I.selectedReading,
-    deep:{P:D.P,C:D.C,R:D.R,E:D.E,M:D.M,A:D.A,H:D.H,charge:D.charge,moonIllum:D.moonIllum,kp:D.kp,bz:D.bz,sky:D.sky},
+    rawInputs:copyExact(D.rawInputs), transformationReceipts:copyExact(D.transformationReceipts),
+    deep:{P:D.P,C:D.C,R:D.R,E:D.E,M:D.M,A:D.A,Q:D.Q,H:D.H,charge:D.charge,moonIllum:D.moonIllum,kp:D.kp,bz:D.bz,sky:D.sky},
     directReadings:{time:'browser local time',moon:'bridge/local/fallback',kp:'bridge/local/fallback',bz:'bridge/local/fallback',source:D.source,local:'browser local storage',motion:'browser/user setting',touch:'pointer/touch/keyboard event'},
-    mapping:{P:'outer node count',C:'edge clarity and density',R:'harmonic spacing and pulse cadence',E:'jitter and asymmetry',M:'spark speed',A:'inner alignment',H:'derived horizon edge signal',charge:'centre glow',moonIllum:'harmonic ring count',kp:'particle energy',bz:'palette temperature'} };
+    mapping:{P:'outer node count',C:'edge clarity',R:'harmonic spacing and pulse cadence',E:'route binding and connective density',M:'trace persistence and continuity tails',A:'response speed and directed motion',Q:'centre texture and inhabited glow',H:'derived horizon edge signal',charge:'local touch bloom',moonIllum:'harmonic ring count',kp:'particle energy',bz:'palette temperature'} };
 }
 
 function draw(t){
@@ -320,12 +346,12 @@ function draw(t){
   if(filters.field){ const count=I.lowStim?9:Math.round(14+D.kp*2.2); for(let i=0;i<count;i++){ const a=i/count*TAU+t*.00004, rad=(88+i*(I.lowStim?24:12)+Math.sin(t*.0009+i)*8)*breath, color=pal.field[i%pal.field.length]; drawCircle(Math.cos(a)*rad,Math.sin(a)*rad,1.4+(i%4)*.45,color,.16+D.kp*.013,true,1,4); } }
   drawPulseLines(t,horizon,routes); drawTimePulsePath(now,routes); drawToys();
   if(filters.horizon){ for(let i=0;i<(I.lowStim?7:18);i++){ const p=(t*.000035+i*.061)%1, a=i/(I.lowStim?7:18)*TAU+t*.000045, rad=(360+p*42)*breath, alpha=(1-p)*(.045+horizon*.10); drawCircle(Math.cos(a)*rad,Math.sin(a)*rad,1.6+horizon*3,layerColor(2),alpha,true,1,6); } }
-  nodes.forEach((node,i)=>{ const phase=.5+.5*Math.sin(t*.001+i*.73), color=layerColor(node.layer), selected=(node.id===I.activeNodeId&&now<I.focusUntil)||(I.spotlight&&node.varKey===I.spotlight&&now<I.spotlightUntil), radius=(node.layer===0?7:node.layer===1?6:node.layer===2?5.2:6.4)+phase*(node.layer===3?2.4:1.3)+D.A*1.2+(selected?3.2:0); drawCircle(node.x,node.y,radius*2.7,color,.10+D.charge*.05+(selected?.08:0),true,1,selected?24:14); drawCircle(node.x,node.y,radius+2,'2,5,12',.96,true,1,0); drawCircle(node.x,node.y,radius,color,selected?.95:.78,true,1,selected?24:14); drawCircle(node.x,node.y,Math.max(2.1,radius*.42),'2,5,12',.9,true,1,0); });
+  nodes.forEach((node,i)=>{ const phase=.5+.5*Math.sin(t*.001+i*.73), color=layerColor(node.layer), selected=(node.id===I.activeNodeId&&now<I.focusUntil)||(I.spotlight&&node.varKey===I.spotlight&&now<I.spotlightUntil), radius=(node.layer===0?7:node.layer===1?6:node.layer===2?5.2:6.4)+phase*(node.layer===3?2.4:1.3)+D.A*1.2+(selected?3.2:0); drawCircle(node.x,node.y,radius*2.7,color,.10+D.Q*.05+(selected?.08:0),true,1,selected?24:14); drawCircle(node.x,node.y,radius+2,'2,5,12',.96,true,1,0); drawCircle(node.x,node.y,radius,color,selected?.95:.78,true,1,selected?24:14); drawCircle(node.x,node.y,Math.max(2.1,radius*.42),'2,5,12',.9,true,1,0); });
   directNodes.forEach(d=>{ const active=I.selectedReading===d.key&&now<I.readingUntil, color=active?'231,196,119':'168,204,224'; drawCircle(d.x,d.y,13,color,active?.32:.13,true,1,active?16:8); drawCircle(d.x,d.y,6,'2,5,12',.95,true); drawCircle(d.x,d.y,6,color,active?.9:.55,false,1.2,active?14:5); });
-  ctx.rotate(-totalRot*.8); const coreBoost=D.charge+I.chargeBoost, glow=ctx.createRadialGradient(0,0,0,0,0,78+D.A*32+I.chargeBoost*70); glow.addColorStop(0,'rgba(234,244,239,.95)'); glow.addColorStop(.27,rgba(pal.core,.42)); glow.addColorStop(.58,rgba(pal.bg,.18)); glow.addColorStop(1,rgba(pal.bg,0)); ctx.beginPath(); ctx.arc(0,0,78+D.A*32+I.chargeBoost*70,0,TAU); ctx.fillStyle=glow; ctx.fill(); drawCircle(0,0,14+coreBoost*8,pal.core,.95,true,1,16+I.chargeBoost*35); drawCircle(0,0,4+coreBoost*3,'234,244,239',.86,true,1,10); ctx.restore();
+  ctx.rotate(-totalRot*.8); const coreBoost=D.Q+I.chargeBoost, glow=ctx.createRadialGradient(0,0,0,0,0,78+D.Q*32+I.chargeBoost*70); glow.addColorStop(0,'rgba(234,244,239,.95)'); glow.addColorStop(.27,rgba(pal.core,.42)); glow.addColorStop(.58,rgba(pal.bg,.18)); glow.addColorStop(1,rgba(pal.bg,0)); ctx.beginPath(); ctx.arc(0,0,78+D.Q*32+I.chargeBoost*70,0,TAU); ctx.fillStyle=glow; ctx.fill(); drawCircle(0,0,14+coreBoost*8,pal.core,.95,true,1,16+I.chargeBoost*35); drawCircle(0,0,4+coreBoost*3,'234,244,239',.86,true,1,10); ctx.restore();
   const packet=buildPacket(time,glyphId); lastFrame.packet=packet;
   document.getElementById('heroClock').textContent='DEEP Observer · STARWELL Time '+time.full; document.getElementById('glyphId').textContent=glyphId; document.getElementById('tideName').textContent=TIDES[hash%TIDES.length];
-  document.getElementById('mP').textContent='P '+D.P.toFixed(2); document.getElementById('mC').textContent='C '+D.C.toFixed(2); document.getElementById('mR').textContent='R '+D.R.toFixed(2); document.getElementById('mE').textContent='E '+D.E.toFixed(2); document.getElementById('mM').textContent='M '+D.M.toFixed(2); document.getElementById('mA').textContent='A '+D.A.toFixed(2); document.getElementById('mH').textContent='H '+D.H.toFixed(2); document.getElementById('mQ').textContent='Q '+D.charge.toFixed(2); document.getElementById('mMoon').textContent='Moon '+Math.round(D.moonIllum)+'%'; document.getElementById('mKp').textContent='Kp '+D.kp.toFixed(1); document.getElementById('mBz').textContent='Bz '+D.bz.toFixed(1); document.getElementById('mSource').textContent=D.source;
+  document.getElementById('mP').textContent='P '+D.P.toFixed(2); document.getElementById('mC').textContent='C '+D.C.toFixed(2); document.getElementById('mR').textContent='R '+D.R.toFixed(2); document.getElementById('mE').textContent='E '+D.E.toFixed(2); document.getElementById('mM').textContent='M '+D.M.toFixed(2); document.getElementById('mA').textContent='A '+D.A.toFixed(2); document.getElementById('mH').textContent='H '+D.H.toFixed(2); document.getElementById('mQ').textContent='Q '+D.Q.toFixed(2); document.getElementById('mMoon').textContent='Moon '+Math.round(D.moonIllum)+'%'; document.getElementById('mKp').textContent='Kp '+D.kp.toFixed(1); document.getElementById('mBz').textContent='Bz '+D.bz.toFixed(1); document.getElementById('mSource').textContent=D.source;
   packetEl.textContent=JSON.stringify(packet,null,2); document.querySelectorAll('.meter').forEach(m=>m.classList.toggle('active',m.dataset.meter===I.spotlight&&now<I.spotlightUntil)); document.querySelectorAll('.sensor-node').forEach(btn=>btn.classList.toggle('active',btn.dataset.reading===I.selectedReading&&now<I.readingUntil)); requestAnimationFrame(draw);
 }
 

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "arcsweep.ingest-primer/v0.1",
+  "primerId": "universal-canon-ingest-primer",
+  "name": "Universal Canon Ingest Primer",
+  "scope": {
+    "appliesToAllCanons": true,
+    "worldIds": [],
+    "overlayOf": null
+  },
+  "sourcePolicy": {
+    "acceptedExtensions": [".txt", ".md", ".json", ".html", ".htm", ".pdf", ".docx", ".rtf", ".epub", ".csv", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".mp3", ".wav", ".flac", ".m4a", ".mp4", ".webm"],
+    "copyIntoPrivateStore": true,
+    "hashAlgorithm": "sha256",
+    "preserveOriginalName": true,
+    "preserveRelativePath": true,
+    "automaticExternalReads": false,
+    "deduplicateByHash": true,
+    "maximumFileBytes": null
+  },
+  "canonPolicy": {
+    "authorityLevels": ["primary-canon", "working-canon", "author-note", "adaptation", "reference", "inspiration", "deprecated", "unknown"],
+    "statusValues": ["canonical", "working", "candidate", "contradicted", "retired", "reference-only", "unclassified"],
+    "neverOverwriteWithoutApproval": true,
+    "rawSourceIsImmutable": true,
+    "canonMayContainMultipleTimelines": true,
+    "variantsRemainNamed": true
+  },
+  "classification": {
+    "canonKinds": [
+      "world",
+      "character",
+      "relationship",
+      "location",
+      "timeline",
+      "scene-or-event",
+      "culture-or-society",
+      "magic-psi-or-power-system",
+      "science-or-technology",
+      "language-glyph-or-pronunciation",
+      "cosmology-or-religion",
+      "ritual-or-practice",
+      "law-politics-or-economy",
+      "creature-ecology-or-botany",
+      "material-object-or-artefact",
+      "wardrobe-or-appearance",
+      "audio-music-or-reception-profile",
+      "visual-reference",
+      "production-note",
+      "alternate-universe-or-variant",
+      "meta-continuity"
+    ],
+    "entityKinds": [
+      "world",
+      "timeline",
+      "character",
+      "group",
+      "relationship-edge",
+      "place",
+      "event",
+      "object",
+      "creature",
+      "plant",
+      "language",
+      "glyph",
+      "term",
+      "ability",
+      "rule",
+      "ritual",
+      "song",
+      "tone-stack",
+      "reception-profile",
+      "source-note"
+    ],
+    "worldResolution": "ask-if-ambiguous",
+    "timelineResolution": "preserve-all",
+    "relationshipResolution": "both"
+  },
+  "extraction": {
+    "proposalOnly": true,
+    "requiredProvenance": ["sourceId", "sourceHash", "sourceName", "relativePath", "page", "heading", "lineRange", "extractedAt", "extractor"],
+    "extractors": [
+      "document-metadata",
+      "headings-and-sections",
+      "named-entities",
+      "dates-and-timelines",
+      "relationships",
+      "rules-and-constraints",
+      "glossary-and-pronunciation",
+      "assets-and-attachments",
+      "canon-status-language",
+      "contradiction-candidates"
+    ],
+    "plainTextFallback": true,
+    "ocrAllowed": false,
+    "crossSourceSynthesis": "proposal-only"
+  },
+  "conflictPolicy": {
+    "detect": true,
+    "quarantine": true,
+    "resolutionModes": ["keep-both-as-variants", "promote-one", "merge-with-notes", "mark-unresolved", "retire-older"],
+    "automaticWinnerSelection": false
+  },
+  "approvalPolicy": {
+    "approvalRequiredBeforeCanonWrite": true,
+    "batchApprovalAllowed": true,
+    "reversible": true,
+    "receiptRequired": true
+  },
+  "exportPolicy": {
+    "formats": ["json", "arcsweep-canon-json", "portable-canon-folder", "markdown"],
+    "includeSourceReceipts": true,
+    "includePrimer": true,
+    "sourceInclusionModes": ["none", "selected", "all"],
+    "redactionBeforeExport": true
+  }
+}

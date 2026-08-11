@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run contracts:verify && npm run starwell:test && npm run starwell:build"
+  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run contracts:verify && npm run starwell:test && npm run arcsweep:test && npm run starwell:build && npm run arcsweep:build && npm run arcsweep:stage:netlify"
   publish = "dist/starwell"
 
 [build.environment]
@@ -35,6 +35,16 @@
 [[redirects]]
   from = "/api/v1/residents/tesla/chat"
   to = "/.netlify/functions/tesla-chat"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/math-spine/ingest"
+  to = "/.netlify/functions/math-spine-ingest"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/arcsweep/feedback"
+  to = "/.netlify/functions/arcsweep-feedback"
   status = 200
 
 [[redirects]]

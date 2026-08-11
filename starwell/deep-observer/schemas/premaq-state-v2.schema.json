@@ -47,9 +47,9 @@
         "C": { "$ref": "#/$defs/component", "description": "Coherence — solar, ionospheric, and electromagnetic" },
         "R": { "$ref": "#/$defs/component", "description": "Resonance — Schumann, audio, and seismic" },
         "E": { "$ref": "#/$defs/component", "description": "Entanglement — coherence, continuity, and cross-observation binding" },
-        "M": { "$ref": "#/$defs/component", "description": "Moonfield — lunar illumination" },
-        "A": { "$ref": "#/$defs/component", "description": "Availability — daylight, cloud, and atmospheric openness" },
-        "Q": { "$ref": "#/$defs/component", "description": "Charge — energetic field charge; the standard physics symbol Q, carried as the seventh observable dimension" }
+        "M": { "$ref": "#/$defs/component", "description": "Memory — lineage, provenance, and accumulated relation" },
+        "A": { "$ref": "#/$defs/component", "description": "Agency — available directed capacity to act, choose, and redirect" },
+        "Q": { "$ref": "#/$defs/component", "description": "Qualia — lived interiority, experiential quality, and the irreducible texture of the present state" }
       }
     },
     "receipt_id": { "type": "string", "minLength": 1 },

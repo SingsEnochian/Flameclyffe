@@ -1,4 +1,4 @@
-import { DEFAULT_DEEP_STATE, normaliseDeepState } from './deepState.js';
+import { DEFAULT_DEEP_STATE, projectDeepState } from './deepState.js';
 import {
   DEEP_MODES,
   fingerprint,
@@ -53,6 +53,7 @@ export function parseBridgePulsePayload(payload, {
   }
 
   const [contractKey, rawDeep] = candidates[0];
+  const projection = projectDeepState(rawDeep);
   const capturedAtIso = capturedAt.toISOString();
   const sourceTimestamp = validDateTime(payload.observed_at ?? payload.timestamp ?? payload.updated_at);
   const observedAt = sourceTimestamp ?? capturedAtIso;
@@ -95,7 +96,9 @@ export function parseBridgePulsePayload(payload, {
       contract: BRIDGE_PULSE_CONTRACT,
       contract_key: contractKey,
     },
-    state: normaliseDeepState(rawDeep),
+    raw_state: projection.raw,
+    state: projection.state,
+    transformations: projection.transformations,
     substitutions,
     errors: [],
     warnings,

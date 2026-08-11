@@ -23,7 +23,13 @@ function temporalState(id, fingerprint = 'shared-fp') {
   };
 }
 
-function packet({ hearthside = temporalState('hearth-state'), targetside = temporalState('target-state') } = {}) {
+function packet(options = {}) {
+  const hearthside = Object.hasOwn(options, 'hearthside')
+    ? options.hearthside
+    : temporalState('hearth-state');
+  const targetside = Object.hasOwn(options, 'targetside')
+    ? options.targetside
+    : temporalState('target-state');
   const temporal = {};
   if (hearthside !== undefined) temporal.hearthside = hearthside;
   if (targetside !== undefined) temporal.targetside = targetside;

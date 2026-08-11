@@ -56,6 +56,11 @@ function publishLegacyObservatoryPages() {
         },
       );
 
+      // Stable Arcsweep route. The root remains compatible while /arcsweep/
+      // becomes the explicit, testable threshold URL.
+      await mkdir(resolve(OUT_DIR, 'arcsweep'), { recursive: true });
+      await cp(resolve(OUT_DIR, 'index.html'), resolve(OUT_DIR, 'arcsweep', 'index.html'), { force: true });
+
       // Deep Observer (The Laboratory) — served at /starwell/deep-observer/
       await mkdir(resolve(OUT_DIR, 'deep-observer'), { recursive: true });
       await cp(resolve(REPO_ROOT, 'starwell', 'deep-observer'), resolve(OUT_DIR, 'deep-observer'), {

@@ -134,7 +134,11 @@ export function validateDeepSnapshot(snapshotInput) {
     : { kind: 'unknown', locator: 'unknown' };
   snapshot.source.kind = requireString(snapshot.source.kind, 'deep.source.kind');
   snapshot.source.locator = requireString(snapshot.source.locator, 'deep.source.locator');
+  snapshot.raw_state = snapshot.raw_state && typeof snapshot.raw_state === 'object' && !Array.isArray(snapshot.raw_state)
+    ? clone(snapshot.raw_state)
+    : clone(snapshot.state);
   snapshot.state = validateDeepState(snapshot.state);
+  snapshot.transformations = Array.isArray(snapshot.transformations) ? clone(snapshot.transformations) : [];
   snapshot.substitutions = Array.isArray(snapshot.substitutions) ? snapshot.substitutions : [];
   snapshot.errors = Array.isArray(snapshot.errors) ? snapshot.errors : [];
   if (snapshot.mode === DEEP_MODES.DEGRADED && snapshot.substitutions.length === 0) {
@@ -144,7 +148,9 @@ export function validateDeepSnapshot(snapshotInput) {
     mode: snapshot.mode,
     observed_at: snapshot.observed_at,
     source: snapshot.source,
+    raw_state: snapshot.raw_state,
     state: snapshot.state,
+    transformations: snapshot.transformations,
     substitutions: snapshot.substitutions,
   });
   return snapshot;

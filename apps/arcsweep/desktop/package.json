@@ -1,0 +1,56 @@
+{
+  "name": "hearthgate-arcsweep",
+  "productName": "Hearthgate Arcsweep",
+  "version": "0.2.1",
+  "description": "A private, local-first world planning, continuity, and return instrument.",
+  "type": "commonjs",
+  "main": "main.cjs",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "electron:dev": "electron .",
+    "electron:pack:win": "electron-builder --win dir --x64 --publish never",
+    "electron:build:win": "electron-builder --win nsis --x64 --publish never",
+    "runtime:receipt": "node runtime-receipt.cjs"
+  },
+  "devDependencies": {
+    "electron": "43.2.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.hearthweave.arcsweep",
+    "productName": "Hearthgate Arcsweep",
+    "artifactName": "Hearthgate-Arcsweep-Setup-${version}-${arch}.${ext}",
+    "copyright": "Hearthweave",
+    "directories": {
+      "output": "../../../dist/arcsweep-desktop"
+    },
+    "asar": true,
+    "files": [
+      "app/**/*",
+      "main.cjs",
+      "preload.cjs",
+      "store.cjs",
+      "register-arcsweep-ipc.cjs",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Hearthgate Arcsweep",
+      "uninstallDisplayName": "Hearthgate Arcsweep",
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}
