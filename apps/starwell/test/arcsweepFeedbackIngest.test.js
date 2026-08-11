@@ -4,7 +4,7 @@ import { createHandler } from '../../../netlify/functions/arcsweep-feedback.mjs'
 import { createInitialPremaqc, runFeedbackCycle } from '../../arcsweep/src/feedback-loop.js';
 
 test('server verifies replay before writing Math Spine then feedback receipt', async () => {
-  const cycle = await runFeedbackCycle({ world: { id: 'terra-aeterna', name: 'Terra Aeterna', root_hz: 220 }, premaqc: createInitialPremaqc('terra-aeterna'), mode: 'writing', work: 'A new page.', response: 'A response.', voiceIds: ['vee'] });
+  const cycle = await runFeedbackCycle({ world: { id: 'terra-aeterna', name: 'Terra Aeterna', root_hz: 220 }, premaqc: createInitialPremaqc('terra-aeterna'), mode: 'writing', work: 'A new page.', response: 'A response.', voiceIds: ['lioreal'] });
   const writes = [];
   const handler = createHandler({ env: { MATH_SPINE_INGEST_TOKEN: 'secret', SUPABASE_URL: 'https://example.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'role' }, fetchImpl: async (url, options) => { writes.push({ url, row: JSON.parse(options.body) }); return { ok: true, text: async () => '' }; } });
   const response = await handler({ httpMethod: 'POST', headers: { authorization: 'Bearer secret' }, body: JSON.stringify(cycle) });
