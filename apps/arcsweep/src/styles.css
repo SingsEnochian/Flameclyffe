@@ -280,6 +280,10 @@ code.deep-formula { display: block; font-size: 0.72rem; color: var(--muted); fon
 .soundfont-controls { display: grid; grid-template-columns: auto minmax(12rem, 1fr) auto; align-items: end; gap: .65rem; }
 .soundfont-controls label:not(.file-button) { display: grid; gap: .3rem; font-size: .76rem; }
 .soundfont-bank-list { display: flex; flex-wrap: wrap; gap: .4rem .8rem; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .72rem; }
+.soundfont-map { border-top: 1px solid var(--line-soft); margin-top: .75rem; padding-top: .75rem; }
+.soundfont-map ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .55rem; margin: .5rem 0; padding: 0; list-style: none; }
+.soundfont-map li { border: 1px solid var(--line-soft); border-radius: .65rem; background: rgba(0,0,0,.18); padding: .65rem; }
+.soundfont-map small { color: var(--muted); line-height: 1.35; }
 .sound-output-row { align-items: center; }
 .sound-output-row .file-button { padding: .55rem .75rem; }
 .soundscape-lower { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(13rem, .7fr); gap: .8rem; }

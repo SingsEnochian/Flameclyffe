@@ -101,6 +101,50 @@ test('clean saidin supports sovereign Towers, consent-bound circles, and Kestrel
   assert.match(kestrelle.content, /Choosing Yellow would not prevent me from working regularly with Green field companies/);
 });
 
+test('the Fourth Age Black Tower has a complete institutional backbone without flattening open history', () => {
+  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
+  assert.match(wiki.content, /The Black Tower keeps its name/);
+  assert.match(wiki.content, /Asha’man.*guardian and servant of all/);
+  assert.match(wiki.content, /families already living at the Tower/i);
+  assert.match(wiki.content, /First Asha’man.*bounded term/);
+  assert.match(wiki.content, /M’Hael.*condemnatory use/);
+  assert.match(wiki.content, /construction and structural rescue/);
+  assert.match(wiki.content, /holding is not the same as saving/);
+  assert.match(wiki.content, /Reds have evolved/);
+  assert.match(wiki.content, /Resonant Bonding emerges/);
+  assert.match(wiki.content, /detailed year-by-year Tower history.*remain open/);
+});
+
+test('Tavian Corren carries the authored structural-rescue path into Kestrelle’s first case', () => {
+  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
+  assert.match(wiki.content, /His name is \*\*Tavian Corren\*\*/);
+  assert.match(wiki.content, /twenty-four, a fully raised Asha’man of Greyspan House/);
+  assert.match(wiki.content, /construction and structural rescue as his primary path/);
+  assert.match(wiki.content, /dry, badly timed/);
+  assert.match(wiki.content, /weakness and intermittent tremor in his left hand/);
+  assert.match(wiki.content, /Harrowspan Wayhouse/);
+  assert.match(wiki.content, /both are exact/);
+  assert.match(wiki.content, /appearance, named family.*remain open/);
+});
+
+test('Harrowspan gives the first joint response exact waking, Dream, acoustic, and transfer geometry', () => {
+  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
+  assert.match(wiki.content, /Harrowspan Wayhouse/);
+  assert.match(wiki.content, /River Miren/);
+  assert.match(wiki.content, /five effective bays/);
+  assert.match(wiki.content, /older three-arch stone bridge/);
+  assert.match(wiki.content, /The Nine-Lantern Collapse/);
+  assert.match(wiki.content, /repeating groups of three, six, and nine/);
+  assert.match(wiki.content, /Not yet; they are not all across/);
+  assert.match(wiki.content, /Matter must be led first; memory must lead last/);
+  assert.match(wiki.content, /I have the far bank/);
+  assert.match(wiki.content, /All living souls are across/);
+  assert.match(wiki.content, /Either may break the circle on \*\*Feather\*\*/);
+});
+
 test('relaunching the current bundle is idempotent', () => {
   const first = installCurrentHouseDrLibrary(createDefaultState(), NOW);
   const second = installCurrentHouseDrLibrary(first.state, '2026-07-26T23:31:00.000Z');

@@ -531,11 +531,91 @@ The White Tower actively recruits. Sisters travel beyond Tar Valon to test and i
 ## The clean Source and the two Towers
 Saidar was never tainted. Rand al’Thor cleansed saidin before the Last Battle, and the prison remade at Shayol Ghul ended the Dark One's touch upon the Source. Across the Fourth Age, men who can channel are therefore not doomed to madness. The Breaking remains historical memory, inherited trauma, law, ritual, and political argument; it is not the ordinary fate of a living male channeller.
 
-The Black Tower survived its birth as a Last Battle army and became a durable channelling institution in its own right. It is not subordinate to the White Tower and is not merely a barracks. Across two thousand years it has had time to develop civilian callings, scholarship, ethics, protective and structural weaves, dangerous-weave containment, rescue practice, engineering, Healing, diplomacy, and internal schools of thought. Its present location, ranks, factions, customs, leadership, and relationship to the name Asha’man remain open canon.
+The Black Tower survived its birth as a Last Battle army and became a durable channelling institution in its own right. It is not subordinate to the White Tower and is not merely a barracks. Across two thousand years it developed civilian callings, scholarship, ethics, protective and structural weaves, dangerous-weave containment, rescue practice, engineering, Healing, diplomacy, and internal schools of thought. Its institutional backbone is established below; named leaders, regional houses, detailed factions, local customs, and exact historical chronology remain open canon.
 
 The White and Black Towers remain sovereign. They cooperate where the whole One Power is required, compete over authority and recruitment, exchange knowledge selectively, and disagree about law, training, history, and service. Neither institution represents every woman or man who channels. Their treaties and field compacts require explicit consent for linking: the leader, purpose, limits, handoff conditions, and release signal of a circle are agreed rather than presumed.
 
 Green field companies often provide an operational bridge among Yellow healers, Black Tower specialists, local practitioners, and independent channelling traditions. Their work includes disaster response, defence, evacuation, expeditionary protection, rescue, Pattern disturbances, and the containment of dangerous remnants. Yellow and Green are collaborating disciplines, not personality cages: restoration may require entering danger, and protection may require keeping a wounded community alive.
+
+## The Black Tower across two thousand years
+The Black Tower keeps its name. What began as a threat spoken against frightened rulers becomes a declaration that no half of the Source will ever again be hunted into ignorance. Its institutional memory holds both liberation and betrayal: Rand al’Thor's command that men be found and trained; Logain Ablar's part in breaking the Shadow's control; the forced Turning of men within the Tower; and the cost of treating human beings as weapons before teaching them how to live.
+
+### The founding generations
+The first generations survive by doing three things at once: fighting the remaining wars of the Last Battle's aftermath, finding men who can channel before fear finds them, and turning a military camp into a lawful community. Families already living at the Tower prevent it from becoming an isolated order. Partners, children, craftspeople, farmers, healers, clerks, refugees, and non-channelling teachers are part of the institution from its beginning, not decorative dependants outside its history.
+
+The titles Soldier and Dedicated remain in the earliest records but gradually lose their universal military meaning. **Asha’man** becomes the fully earned standing: a guardian and servant of all, not simply a battle rank. No man earns it through strength in the Power alone. Control, judgement, ordinary competence, history, cooperative practice, refusal of unlawful command, and the ability to release saidin are required.
+
+### From fortress to civic order
+As the immediate wars recede, Black Tower houses spread along major roads, rivers, borders, mining regions, industrial centres, and places where remnants are common. The founding ground remains an ancestral seat and archive, but it is no longer the only place where men learn. Regional houses answer to shared law while adapting to local languages, trades, governments, and independent channelling customs.
+
+The Tower becomes known for work in which immense force must be joined to exact restraint: bridges, deep foundations, mines, canals, harbours, firebreaks, collapsed buildings, unstable terrain, remnant containment, long-distance evacuation, and recovery after flood, earthquake, war, or failed weaving. It also develops Healing, scholarship, diplomacy, agriculture, weather work, manufacturing, and the making and testing of Power-worked instruments. Battle remains one discipline among many.
+
+### Governance
+The present Black Tower is governed by a First Asha’man and a deliberative council drawn from regional houses, teaching orders, field disciplines, archives, and the resident non-channelling community. The First Asha’man serves a bounded term and may be removed. No leader controls recruitment, discipline, field command, archives, and external treaties alone.
+
+The title **M’Hael** survives only in historical and condemnatory use because Mazrim Taim poisoned it. Black Tower law treats secret coercion, forced Turning, involuntary bonding, punishment through the Power, and concealed alteration of a circle as foundational crimes. Orders do not absolve the person who carries them out. Every student is taught the institution's betrayals alongside its victories.
+
+### Training and paths
+Training begins with safe seizure and release of saidin, bodily regulation, literacy where needed, mathematics, history, law, first aid, ordinary tools, and work performed without the Power. Students learn why a weave works before being rewarded for its magnitude. Advancement requires field competence and the ability to collaborate with people who cannot see their weaves.
+
+After common formation, a Dedicated may enter one or more recognised paths: protection and defence; Healing and living systems; construction and structural rescue; weather and land; travel, gateways, and logistics; scholarship and remnants; civic craft and industry; diplomacy and mixed-circle practice. These are disciplines rather than permanent castes. Asha’man commonly carry a primary path and one supporting practice.
+
+The structural-rescue path joins engineering, resonance mathematics, materials knowledge, disaster medicine, evacuation command, remnant containment, and live-weave analysis. Its members train beside ordinary builders and rescue crews. Their first law is that holding is not the same as saving: a structure, weave, or man kept beyond its release threshold becomes another collapse.
+
+### Relations with the White Tower
+The Towers recognise one another without merging. They maintain embassies, archive exchanges, disputed jurisdictions, teaching visits, joint field compacts, and long memories of insult. Recruitment remains a point of friction, especially around families containing both girls and boys who can channel or communities with their own teachers.
+
+Mixed circles are never treated as proof that one Tower completes or commands the other. Leadership follows the work and may transfer during an operation. Yellow and Black Tower healers exchange knowledge; Greens train and deploy with Black Tower field companies; Browns and remnant scholars argue over custody; Reds have evolved into specialists in unlawful channelling, coercive weaves, and Power crime across gender rather than hunters of men.
+
+Resonant Bonding emerges from this long culture of mixed practice. It is recognised by both Towers but belongs exclusively to neither. It is uncommon because equality must be present in the weave's construction, not merely promised by the people entering it.
+
+### Present tensions
+The Black Tower is powerful, useful, and imperfect. Regional houses disagree over central authority. Industrial patrons want exclusive access to its engineers. Governments want its gateways, weapons, and disaster workers while fearing its independence. Some Asha’man believe the Tower has become too civic and cautious; others believe its martial inheritance still governs too much of its imagination. Independent male channellers question why the Tower should license them at all.
+
+Kestrelle's Asha’man was formed inside these arguments. He believes in the Tower because it gave disciplined language and public purpose to knowledge his hands already carried. He also knows an institution can praise sacrifice so beautifully that it fails to notice when one of its people is being consumed.
+
+## Tavian Corren
+His name is **Tavian Corren**. He is twenty-four, a fully raised Asha’man of Greyspan House, with construction and structural rescue as his primary path and mixed-circle field practice as his supporting discipline. He holds no grand office. His authority comes from qualification, field appointment, and the willingness of other people to trust the plan he places before them.
+
+Tavian was born in a river-and-foundry district where stone bridge piers, timber scaffolds, steam pumps, barges, mills, and seasonal floods shaped ordinary life. His family worked across practical trades; he learned load, grain, heat, current, leverage, and the sound of material approaching failure before anyone tested him for saidin. Greyspan House did not replace that knowledge. It taught him how the same truths travelled through the Power.
+
+He speaks quietly and exactly, especially when afraid. His humour is dry, badly timed, and usually deployed while something is on fire. He does not perform mystery around saidin or mistake silence for depth. When he knows, he says what he knows. When he does not, he names the missing measurement. He dislikes being called heroic because the word has too often been used to make preventable sacrifice sound holy.
+
+Tavian's structural Talent is not a picture floating over the world. Stress arrives through him as an involuntary harmonic perception: pressure, beating interference, a wrongness between expected and actual resonance. With his hands on stone, metal, timber, or a Power-worked object, the information becomes sharply spatial. Active saidin is visible to him; saidar is known through its physical effects, instruments, and the testimony of the woman weaving it.
+
+Three years before he meets Kestrelle, Tavian leads containment during the failure of an industrial river crossing built around a recovered Power-made anchor. The evacuation plan works until the anchor begins changing the load paths faster than the crews can withdraw. Tavian holds the central span beyond the declared release signal so the last rescue team can cross. Most of them live. Two do not.
+
+The collapse drives metal and stone through his left side and burns a saidin resonance through his nervous system. Healing saves his life and restores much, but not everything. He retains weakness and intermittent tremor in his left hand, pain along the shoulder and ribs, and episodes in which dense vibration becomes physically disorienting. He can channel. He can work. He cannot pretend the injury vanishes because a Yellow or Black Tower healer touched it.
+
+Greyspan clears him for field service with thresholds, instrumentation, a second structural lead, and mandatory transfer conditions. Tavian obeys every rule except the one inside him that says another person's life is always worth more than his continued wholeness. That is the live fault Kestrelle finds.
+
+## Harrowspan and the Miren Bridge
+Tavian first encounters Kestrelle at **Harrowspan Wayhouse**, where the Northbank coaching road crosses the River Miren between the mill village of Bellfound and the western market roads. Harrowspan is an inhabited working place: inn, stable yard, toll office, repair shed, river landing, kitchen garden, and a small treatment room kept for road injuries. The people endangered there are not spectral furniture. They have homes, work, grudges, animals, debts, and reasons not to abandon the crossing.
+
+The present Miren Bridge is an early-industrial composite built through three eras. Two broad stone piers and their buried footings survive from a much older Power-made crossing. Later masons built three stone arches upon them. Forty-six years before Kestrelle and Tavian arrive, engineers replaced the flood-damaged centre with a riveted iron through-span while retaining the outer arches. The waking bridge therefore carries load through five effective bays: two approach arches, two transition bays, and the central iron span.
+
+In Tel’aran’rhiod, the iron has never become the bridge's defining shape. The Miren crossing appears as the older three-arch stone bridge, complete and dry beneath nine lit wayhouse lanterns. People are absent, yet the repeated gestures of departure remain: a cup cooling on a sill, harness hung ready, a ledger open to the same page, a child's red scarf caught without moving on the eastern parapet. The place is not haunted by a person. It is held by an unfinished communal act.
+
+### The Nine-Lantern Collapse
+Forty-six years earlier, spring floodwater undermined the centre pier while a night coach, mill workers, wayhouse guests, and a refugee wagon were crossing. The wayhouse keeper lit nine lanterns along the parapet to guide people through rain and steam. The central arch failed before everyone reached shore. Twenty-seven people survived because residents formed a rope line from both banks; eleven died in the river and masonry.
+
+At the instant of collapse, an unknown channeller used the buried Power-made footings to hold the bridge's last coherent shape long enough for the rope line to clear. The weave preserved a structural instruction without completing its release. The waking bridge fell. Its Tel’aran’rhiod reflection remained fixed at the final moment when saving was still possible.
+
+The iron reconstruction redistributed weight successfully in ordinary engineering terms, but every major flood, heavy convoy, or channelled repair excites the unreleased instruction below it. Stone creeps towards the former three-arch geometry. Rivets loosen in repeating groups of three, six, and nine. Survey marks migrate overnight. Repairs are not undone randomly: the bridge is trying to become the shape in which it remembers being held.
+
+### Present failure
+Recent dredging has altered the River Miren's current around the western footing. A steam traction engine crossing with two millstone wagons drove the composite bridge into resonance. The buried footings woke; the Dream bridge asserted its older load path; the iron centre began receiving force from a pier that no longer exists in waking reality.
+
+The first visible failures are diagonal cracking in the west transition masonry, rivet-head movement along the lower chord, doors jamming throughout the wayhouse, and cups trembling in a three–six–nine temporal pulse. Horses refuse the eastern approach. At night, all nine lantern hooks carry light in Tel’aran’rhiod even when only four waking lamps are lit.
+
+Tavian can map every physical failure and still cannot explain why repaired stones resume their broken positions. Kestrelle can hear the place insisting, *Not yet; they are not all across*, and still cannot keep the waking span standing. Their accounts contradict each other until they realise both are exact.
+
+The problem cannot be solved by destroying the old footings, forcing the waking bridge into its remembered form, or persuading the Dream to forget the dead. The unfinished holding weave must be entered, witnessed, given the release it never received, and translated into a new load path that belongs to the living bridge. Matter must be led first; memory must lead last.
+
+### First-response constraints
+Harrowspan cannot be emptied immediately: an injured mill worker cannot survive rough transport, floodwater has cut the south road, and several local families depend upon the crossing to reach higher ground. Tavian's Greyspan team can establish shoring and evacuation lines but cannot safely touch the Dream-held instruction. Kestrelle can enter and interpret the remembered crossing but cannot alter the waking iron from Tel’aran’rhiod.
+
+Their working compact therefore requires an explicit mixed circle. Tavian leads while saidin establishes a temporary five-bay waking load path. The agreed transfer cue is three low strikes followed by Kestrelle saying, **“I have the far bank.”** Kestrelle then leads through Spirit and Earth, carrying the circle across the boundary between structural instruction and communal memory. The release phrase is **“All living souls are across.”** Either may break the circle on **Feather** or if Tavian's left-hand tremor prevents two consecutive instrument readings.
 
 ## Technology baseline — Early Industrial Fourth Age
 Technology is advancing faster than institutions can agree what the One Power, knowledge, and authority are for. Development is regional and uneven rather than a single universal ladder.
@@ -605,13 +685,13 @@ The Bond carries presence, direction, physical condition, emotional weather, and
 
 They create it together after they have learned to transfer leadership safely in a mixed circle. Each lays and receives the weave at the same moment. Either can release it; ending it does not require the other's permission, although neither can secretly rewrite or expand it. Its exact sensory signature and the scene in which they choose it remain open.
 
-His name, precise age, origin, appearance, Black Tower rank, family history, and the exact nature of his lasting injury remain open until his voice answers them.
+His appearance, family members, the name of his home district, teachers, the exact river-crossing disaster, and the private words he uses for saidin remain open until his voice answers them.
 
 ## Core themes
 Continuity without stagnation; service before title; inherited knowledge without inherited supremacy; healing as structure and relationship; disciplined power; places that remember; institutional recruitment without erasure; rebuilding practice without repeating old failures.
 
 ## Open canon
-Birthplace, family, the person burned, geography, Meriene’s earlier history, the first major Dreamwalker crossing, the Towers' two-thousand-year institutional histories, the Black Tower's present form, Ajah evolution, relations with the Kin, Wise Ones, Windfinders and Seanchan channellers, the history of the Dragon's Peace, Kestrelle's recruiter, her eventual Ajah, the Asha’man's name, precise age, origin, appearance, rank, family history and exact lasting injury, and the Resonant Bonding's sensory signature and choosing scene remain open.`,
+Birthplace, family, the person burned, wider geography beyond the Miren crossing, Meriene’s earlier history, the first major Dreamwalker crossing, detailed year-by-year Tower history, Black Tower regional houses beyond Greyspan, named present leaders and factions, Ajah evolution beyond the established working relationships, relations with the Kin, Wise Ones, Windfinders and Seanchan channellers, the history of the Dragon's Peace, Kestrelle's recruiter, her eventual Ajah, Tavian's appearance, named family, home district and teachers, details of his earlier river-crossing disaster, his private language for saidin, the unknown channeller at the Nine-Lantern Collapse, and the Resonant Bonding's sensory signature and choosing scene remain open.`,
   },
   {
     sourceKey: 'taveren-vaen-kestrelle-script',

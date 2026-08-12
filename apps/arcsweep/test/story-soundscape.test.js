@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { findStorySoundCues, resolveWorldTone } from '../src/story-soundscape.js';
+import { findStorySoundCues, resolveWorldSoundfontMap, resolveWorldTone } from '../src/story-soundscape.js';
 
 test('story language resolves to exact sound actions', () => {
   const text = 'A branch snapped behind her. Thunder rolled, and the bell rang.';
@@ -22,4 +22,15 @@ test('world tone resolver carries established roots into the mixer', () => {
   assert.equal(resolveWorldTone({ id: 'house-world-luna', houseSourceKey: 'luna' }).rootHz, 432);
   assert.equal(resolveWorldTone({ id: 'house-world-taveren-vaen', houseSourceKey: 'taveren-vaen' }).rootHz, 120);
   assert.equal(resolveWorldTone({ id: 'house-world-starsong', houseSourceKey: 'starsong' }).rootHz, 528);
+});
+
+test('Ta’veren Vaen maps Tavian, Kestrelle, the Dream, and Resonant Bonding to a reproducible SoundFont programme', () => {
+  const map = resolveWorldSoundfontMap({ id: 'house-world-taveren-vaen', houseSourceKey: 'taveren-vaen' });
+  assert.equal(map.id, 'taveren-vaen-greyspan-v1');
+  assert.equal(map.tuning.rootHz, 120);
+  assert.deepEqual(map.voices.map((voice) => voice.id), ['tavian', 'kestrelle', 'dream', 'greyspan', 'resonant-bonding', 'failure']);
+  assert.equal(map.voices.find((voice) => voice.id === 'tavian').program, 42);
+  assert.equal(map.voices.find((voice) => voice.id === 'kestrelle').program, 15);
+  assert.equal(map.voices.find((voice) => voice.id === 'resonant-bonding').program, 48);
+  assert.equal(resolveWorldSoundfontMap({ id: 'house-world-luna' }), null);
 });

@@ -25,6 +25,23 @@ const WORLD_ROOTS = Object.freeze({
   'hearthweave-foundation': 144,
 });
 
+export const WORLD_SOUNDFONT_MAPS = Object.freeze({
+  'taveren-vaen': Object.freeze({
+    id: 'taveren-vaen-greyspan-v1',
+    title: 'Greyspan · Two Currents',
+    tuning: Object.freeze({ rootHz: 120, referenceNote: 47, referencePitchHz: 123.47, centsFromReference: -49.4 }),
+    voices: Object.freeze([
+      Object.freeze({ id: 'tavian', label: 'Tavian · bearing line', channel: 0, bankMSB: 0, bankLSB: 0, program: 42, gmName: 'Cello', register: 'C2–C4', rootRatio: 0.5, velocity: 82, purpose: 'Earth-led load, restraint, endurance without glorification' }),
+      Object.freeze({ id: 'kestrelle', label: 'Kestrelle · living thread', channel: 1, bankMSB: 0, bankLSB: 0, program: 15, gmName: 'Dulcimer', register: 'C4–C6', rootRatio: 2, velocity: 76, purpose: 'Medicine, memory, movement, precise restorative touch' }),
+      Object.freeze({ id: 'dream', label: 'Tel’aran’rhiod · remembered span', channel: 2, bankMSB: 0, bankLSB: 0, program: 89, gmName: 'Warm Pad', register: 'C3–C6', rootRatio: 1.5, velocity: 54, purpose: 'The intact remembered structure behind waking failure' }),
+      Object.freeze({ id: 'greyspan', label: 'Greyspan · field company', channel: 3, bankMSB: 0, bankLSB: 0, program: 60, gmName: 'French Horn', register: 'C3–C5', rootRatio: 1, velocity: 68, purpose: 'Collective arrival, warning, and transfer of command' }),
+      Object.freeze({ id: 'resonant-bonding', label: 'Resonant Bonding · chosen confluence', channel: 4, bankMSB: 0, bankLSB: 0, program: 48, gmName: 'String Ensemble 1', register: 'C3–C6', rootRatio: 1, velocity: 72, purpose: 'Two audible lines in correspondence; never collapsed to unison' }),
+      Object.freeze({ id: 'failure', label: 'Imminent failure · interference', channel: 9, bankMSB: 128, bankLSB: 0, program: 0, gmName: 'Standard Drum Kit', notes: [41, 45, 47], velocity: 46, purpose: 'Low frame/tom triplet for structural stress, never a heroic impact boom' }),
+    ]),
+    intervals: Object.freeze({ tavian: [1, 1.5, 2], kestrelle: [2, 2.5, 3], confluence: [1, 1.5, 2, 2.5, 3], warningBeatSeconds: [0, 0.36, 0.96] }),
+  }),
+});
+
 const BUS_DEFAULTS = Object.freeze({ master: 0.72, hum: 0.22, tones: 0.48, effects: 0.72, ambience: 0.5 });
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, Number(value) || 0));
 
@@ -38,6 +55,11 @@ export function resolveWorldTone(world = {}) {
     waveform: world.soundscape?.waveform || 'triangle',
     overtones: Math.max(1, Math.min(6, Number(world.soundscape?.overtones) || 3)),
   });
+}
+
+export function resolveWorldSoundfontMap(world = {}) {
+  const key = String(world.houseSourceKey || world.id || '').replace(/^house-world-/, '').toLowerCase();
+  return WORLD_SOUNDFONT_MAPS[key] || null;
 }
 
 export function findStorySoundCues(text, { fromIndex = 0 } = {}) {
@@ -88,6 +110,7 @@ export class StorySoundscape {
   setWorld(world) {
     const previousRoot = this.world.rootHz;
     this.world = { ...this.world, ...resolveWorldTone(world) };
+    this.soundfontMap = resolveWorldSoundfontMap(world);
     if (this.humActive && previousRoot !== this.world.rootHz) this.restartHum();
     return this.snapshot();
   }
@@ -471,6 +494,7 @@ export class StorySoundscape {
       soundfont: Boolean(this.soundfontSynth),
       soundfontBanks: [...this.soundfontBanks.values()].map((bank) => ({ ...bank })),
       soundfontPresets: this.soundfontPresets.map((preset) => ({ ...preset, key: this.presetKey(preset) })),
+      soundfontMap: this.soundfontMap,
       selectedSoundfontPreset: this.selectedSoundfontPreset ? { ...this.selectedSoundfontPreset } : null,
       world: { ...this.world },
       buses: { ...this.busValues },
