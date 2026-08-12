@@ -4,6 +4,15 @@ import { completedWordsFromInsertion, keystrokeTone, typingDelta, wordTone } fro
 const MAX_KEYS_PER_INPUT = 48;
 const MAX_WORDS_PER_INPUT = 12;
 const MAX_TYPING_RECEIPTS = 96;
+const KNOWN_WORLD_ROOTS = Object.freeze({
+  'terra aeterna': 220,
+  luna: 432,
+  'ta’veren vaen': 120,
+  "ta'veren vaen": 120,
+  starsong: 528,
+  'equestria starsong': 528,
+  'hearthweave foundation': 144,
+});
 
 function transient(soundscape, frequency, { duration = 0.045, peak = 0.026, waveform = 'sine', delay = 0 } = {}) {
   if (!soundscape.context || !soundscape.buses?.tones) return false;
@@ -25,6 +34,16 @@ function remember(soundscape, receipt) {
   soundscape.typingReceipts ||= [];
   soundscape.typingReceipts.unshift(Object.freeze(receipt));
   soundscape.typingReceipts = soundscape.typingReceipts.slice(0, MAX_TYPING_RECEIPTS);
+}
+
+function liveWorldHint(soundscape) {
+  const visibleName = document.querySelector('.sidebar-world strong')?.textContent?.trim() || soundscape.world.worldName || 'Unassigned World';
+  const visibleRoot = Number(document.querySelector('[data-sound-root]')?.value);
+  const knownRoot = KNOWN_WORLD_ROOTS[visibleName.toLocaleLowerCase('en-US')];
+  const rootHz = Number.isFinite(visibleRoot) && visibleRoot > 0 ? visibleRoot : (knownRoot || soundscape.world.rootHz || 369);
+  const existingId = soundscape.world.worldId && soundscape.world.worldId !== 'unassigned-world' ? soundscape.world.worldId : null;
+  const slug = visibleName.toLocaleLowerCase('en-US').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'unassigned-world';
+  return { id: existingId || `typing-${slug}`, name: visibleName, rootHz, soundscape: { rootHz, waveform: soundscape.world.waveform, overtones: soundscape.world.overtones } };
 }
 
 function playKey(soundscape, character, index = 0) {
@@ -103,6 +122,11 @@ if (!StorySoundscape.prototype.__typingSonifierInstalled) {
   StorySoundscape.prototype.handleText = function handleTextWithTypingSonification(text) {
     const previous = String(this.lastText || '');
     const next = String(text || '');
+    if (!this.armed && this.typingSonificationEnabled !== false) {
+      const world = liveWorldHint(this);
+      this.setWorld(world);
+      void this.arm(world).catch(() => null);
+    }
     sonifyEdit(this, previous, next);
     return originalHandleText.call(this, next);
   };
