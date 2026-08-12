@@ -28,7 +28,6 @@ import {
 } from './worlds.js';
 import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, runFeedbackCycle, syncFeedbackCycle } from './feedback-loop.js';
 import { StorySoundscape } from './story-soundscape.js';
-import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -45,7 +44,7 @@ let backups = await listBackups().catch(() => []);
 let deepData = null;
 let deepDataFetching = false;
 let deepDataError = null;
-const isHosted = Boolean(window.__hearthgateHost) || isHostedBrowser(window.location);
+const isHosted = Boolean(window.__hearthgateHost);
 
 const PRIMARY_NAV = [
   ['portal', 'Portal', '◉'],
@@ -59,7 +58,15 @@ const PRIMARY_NAV = [
   ['settings', 'Settings', '⚙'],
 ];
 
-const DEEP_CHANNELS = FIELD_AXES;
+const DEEP_CHANNELS = [
+  ['P', 'Presence', 'accepted PREMAQC component', 'state.P.value'],
+  ['C', 'Coherence', 'accepted PREMAQC component', 'state.C.value'],
+  ['R', 'Resonance', 'accepted PREMAQC component', 'state.R.value'],
+  ['E', 'Entanglement', 'accepted PREMAQC component', 'state.E.value'],
+  ['M', 'Memory', 'accepted PREMAQC component', 'state.M.value'],
+  ['A', 'Agency', 'accepted PREMAQC component', 'state.A.value'],
+  ['Q', 'Qualia', 'accepted PREMAQC component', 'state.Q.value'],
+];
 
 function escapeHtml(value = '') {
   return String(value)
@@ -319,7 +326,7 @@ function renderFeedback() {
         <label class="checkbox"><input type="checkbox" name="invokeModels" checked /> Invoke each selected voice through its own model route</label>
         <label>Optional manual response or fallback<textarea name="response" rows="6" placeholder="Add a spoken, imported, or otherwise received contribution. It remains separately visible in the receipt."></textarea></label>
         <label class="checkbox"><input type="checkbox" name="syncLive" /> Sync the verified receipt to the relational ledger</label>
-        <div data-runtime-auth><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">Never persisted in Arcsweep state.</p></div>
+        <label>Session-only sync token<input type="password" name="syncToken" autocomplete="off" placeholder="Never persisted in Arcsweep state" /></label>
         <button type="submit">Run feedback cycle ∞</button>
       </form></article>
       <article class="panel feedback-ledger"><h2>Receipts & replay</h2>${cycles.length ? cycles.map((cycle) => `<article class="working-card"><div class="working-head"><strong>${escapeHtml(cycle.turn.mode)} · ${escapeHtml(cycle.voices.map((voice) => voice.name).join(', '))}</strong><small>${new Date(cycle.created_at).toLocaleString()}</small></div><p>${escapeHtml(cycle.turn.work)}</p>${cycle.voice_invocations?.length ? `<div class="voice-receipts">${cycle.voice_invocations.map((item) => `<p data-status="${attr(item.status)}"><b>${escapeHtml(item.name)} · ${escapeHtml(item.status)}</b>${item.text ? `<br>${escapeHtml(item.text)}` : item.error ? `<br>${escapeHtml(item.error)}` : ''}</p>`).join('')}</div>` : cycle.turn.response ? `<p><b>Response:</b> ${escapeHtml(cycle.turn.response)}</p>` : ''}${cycle.sound_events?.length ? `<div class="sound-receipts">${cycle.sound_events.map((item) => `<p><b>♪ ${escapeHtml(item.cue_label)}</b> · “${escapeHtml(item.source_text)}” · ${Number(item.root_hz).toFixed(2)} Hz</p>`).join('')}</div>` : ''}<dl class="facts"><div><dt>Math Spine</dt><dd>${escapeHtml(cycle.math_spine_packet.packet_id)}</dd></div><div><dt>Replay</dt><dd>${cycle.replay_receipt.matched ? 'Exact match' : 'Mismatch'}</dd></div><div><dt>PREMAQC</dt><dd>${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence}</dd></div><div><dt>Story sound</dt><dd>${cycle.sound_events?.length || 0} fired event${cycle.sound_events?.length === 1 ? '' : 's'}</dd></div></dl></article>`).join('') : '<p class="muted">No cycle has run for this world yet.</p>'}</article>
@@ -335,7 +342,7 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
   </div>`).join('') : '<p class="muted">Load local audio stems for rain, rooms, machinery, forest, voices, or any world texture. Files remain on this device and are not uploaded.</p>';
   const eventRows = sound.recentReceipts.length ? sound.recentReceipts.slice(0, 5).map((item) => `<li><b>${escapeHtml(item.cue_label)}</b> ← “${escapeHtml(item.source_text)}”</li>`).join('') : '<li>Waiting for story events.</li>';
   const soundfontBanks = sound.soundfontBanks.length
-    ? sound.soundfontBanks.map((bank) => `<li><b>${escapeHtml(bank.name)}</b> · ${(bank.size / 1048576).toFixed(1)} MB · local</li>`).join('')
+    ? sound.soundfontBanks.map((bank) => `<li><b>${escapeHtml(bank.name)}</b> · ${(bank.size / 1048576).toFixed(1)} MB · ${bank.presetCount ?? '—'} presets · local</li>`).join('')
     : '<li>No SoundFont bank loaded.</li>';
   const soundfontOptions = sound.soundfontPresets.length
     ? sound.soundfontPresets.map((preset) => `<option value="${attr(preset.key)}" ${sound.selectedSoundfontPreset?.key === preset.key ? 'selected' : ''}>${escapeHtml(preset.name)} · ${preset.isDrum ? 'drum' : `bank ${preset.bankMSB}/${preset.bankLSB}`} · program ${preset.program}</option>`).join('')
@@ -430,12 +437,11 @@ async function fetchDeepData() {
   notice = 'Reading field…';
   render();
   try {
-    const res = await fetch('/api/v1/field/current', { cache: 'no-store' });
+    const res = await fetch('https://singsenochian.github.io/Flameclyffe/data/deep-current.json');
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     deepData = await res.json();
     deepDataError = null;
-    const age = deepData?.generated_at ? Date.now() - Date.parse(deepData.generated_at) : null;
-    notice = age !== null && age > 6 * 60 * 60 * 1000 ? `Field source received · stale (${formatFieldAge(age)}).` : 'Field source received.';
+    notice = 'Field data received.';
   } catch (err) {
     deepDataError = err.message;
     notice = `Field unavailable: ${err.message}`;
@@ -467,29 +473,26 @@ function renderDeepObserver() {
   </section>`;
 
   const world = activeWorld();
-  const cycles = (state.feedbackCycles || []).filter((cycle) => cycle.world?.id === world.id);
-  const latestCycle = cycles[0] || null;
-  const acceptedPremaqc = state.premaqcByWorld[world.id] || cycles[0]?.premaqc_after || null;
-  const instrument = classifyFieldInstrument({ acceptedPremaqc, ambient: deepData });
+  const acceptedPremaqc = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
+  const field = Object.fromEntries(DEEP_CHANNELS.map(([axis]) => [axis, acceptedPremaqc.state?.[axis]?.value ?? null]));
   const current = deepData.weather?.current || {};
   const sw = deepData.space_weather || {};
   const moon = deepData.moon || {};
   const sky = deepData.weather?.sky || '';
 
-  function channelCard([key, name]) {
-    const axis = instrument.axes[key];
-    const raw = axis.value;
+  function channelCard([key, name, source, formula]) {
+    const raw = field[key];
     const val = (raw !== null && raw !== undefined) ? Number(raw) : null;
     const pct = val !== null ? Math.round(val * 100) : 0;
     const display = val !== null ? val.toFixed(3) : '—';
     return `<article class="panel deep-channel">
       <div class="deep-channel-header">
         <span class="deep-letter" aria-hidden="true">${escapeHtml(key)}</span>
-        <div><strong>${escapeHtml(name)}</strong><span class="muted">${escapeHtml(axis.status)}</span></div>
+        <div><strong>${escapeHtml(name)}</strong><span class="muted">${escapeHtml(source)}</span></div>
         <span class="deep-value${val === null ? ' muted' : ''}">${escapeHtml(display)}</span>
       </div>
       <div class="deep-bar-track"><div class="deep-bar-fill" data-ch="${attr(key)}" style="width:${pct}%"></div></div>
-      <code class="deep-formula">${escapeHtml(axis.provenance ? `${axis.provenanceType}: ${axis.provenance}` : 'no observed value')}</code>
+      <code class="deep-formula">${escapeHtml(formula)}</code>
     </article>`;
   }
 
@@ -531,58 +534,23 @@ function renderDeepObserver() {
     </article>
   </section>`;
 
-  const spineRows = DEEP_CHANNELS.map(([key, name]) => {
-    const axis = instrument.axes[key];
-    const val = axis.value;
+  const spineRows = DEEP_CHANNELS.map(([key, name, , formula]) => {
+    const val = field[key];
     const display = (val !== null && val !== undefined) ? Number(val).toFixed(3) : '—';
     return `<div class="deep-spine-row">
       <span class="deep-letter small">${escapeHtml(key)}</span>
       <span>${escapeHtml(name)}</span>
-      <code class="deep-formula">${escapeHtml(axis.status)}</code>
+      <code class="deep-formula">${escapeHtml(formula)}</code>
       <span class="deep-spine-val">${escapeHtml(display)}</span>
     </div>`;
   }).join('');
 
-  const packet = latestCycle?.math_spine_packet || null;
-  const fold = packet?.projection?.fold || null;
-  const jacobian = packet?.projection?.jacobian || null;
-  const spineTitle = packet
-    ? `Mathematics Spine · PREMAQC sequence ${escapeHtml(String(acceptedPremaqc.sequence))}`
-    : 'Mathematics Spine · awaiting receipted Field cycle';
-  const sourceWarning = instrument.source === 'ambient-projection'
-    ? `<p class="callout">Ambient projection only · ${escapeHtml(formatFieldAge(instrument.ageMs))}${instrument.stale ? ' · STALE' : ''}. It is source evidence, not accepted relational state.</p>`
-    : instrument.source === 'unavailable' ? '<p class="callout">No accepted or projected PREMAQC evidence is available.</p>' : '';
   const spineHtml = `<section class="panel">
-    <h2>${spineTitle}</h2>
-    ${sourceWarning}
-    ${packet ? `<dl class="facts">
-      <div><dt>Observer receipt</dt><dd>${escapeHtml(latestCycle.premaqc_before.receipt_id)}</dd></div>
-      <div><dt>Cycle receipt</dt><dd>${escapeHtml(latestCycle.cycle_id)}</dd></div>
-      <div><dt>Math Spine packet</dt><dd>${escapeHtml(packet.packet_id)}</dd></div>
-      <div><dt>Fingerprint</dt><dd>${escapeHtml(packet.packet_fingerprint)}</dd></div>
-      <div><dt>Jacobian</dt><dd>${escapeHtml(latestCycle.math_wiring.jacobian_source)} · ${escapeHtml(latestCycle.math_wiring.jacobian_version)}</dd></div>
-      <div><dt>Fold detector</dt><dd>${fold?.active ? 'ACTIVE' : 'clear'} · index ${Number(jacobian?.fold_index ?? 0).toFixed(4)}</dd></div>
-      <div><dt>Deterministic replay</dt><dd>${latestCycle.replay_receipt?.matched ? 'Exact match' : 'MISMATCH'}</dd></div>
-      <div><dt>Voices</dt><dd>${escapeHtml(latestCycle.voices.map((voice) => voice.name).join(', '))} · ${latestCycle.voice_invocations?.length ? escapeHtml(latestCycle.voice_invocations.map((item) => `${item.name}: ${item.status}`).join(', ')) : 'model routes not invoked'}</dd></div>
-    </dl>` : ''}
+    <h2>Mathematics spine · PREMAQC sequence ${escapeHtml(String(acceptedPremaqc.sequence))}</h2>
     <div class="deep-spine">
       ${spineRows}
     </div>
-    <form id="field-feedback-form" class="stack" style="margin-top:1rem">
-      <h3>${packet ? 'Run next Field feedback cycle' : 'Run Field feedback cycle'}</h3>
-      <p class="muted">Six ambient projections enter through Observer. Qualia enters only through your firsthand report. The resulting PREMAQC packet is then compiled and replay-verified by the Math Spine.</p>
-      <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">Roleplaying</option></select></label>
-      <label>What is entering from the world now?<textarea name="work" rows="5" required placeholder="Write the event without sanding its teeth off."></textarea></label>
-      <label>Firsthand Qualia · Q (0–1)<input name="qualia" type="number" min="0" max="1" step="0.01" placeholder="Unmeasured — enter your observation" required /></label>
-      <fieldset><legend>Constellation voices</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" ${voice.id === 'boxfire' ? 'checked' : ''} /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset>
-      <label class="checkbox conditional-toggle"><input type="checkbox" name="invokeModels" /> Invoke each selected voice through its model route</label>
-      <div class="conditional-body"><p class="callout">Invocation waits for replies or refusals from every selected route. If every route errors, the cycle stops and PREMAQC does not advance.</p></div>
-      <label>Optional received contribution<textarea name="response" rows="3"></textarea></label>
-      <label class="checkbox conditional-toggle"><input type="checkbox" name="syncLive" /> Sync the verified cycle to the relational ledger</label>
-      <div class="conditional-body"><p class="muted">The verified receipt will use the same session-only House runtime token.</p></div>
-      <div data-runtime-auth hidden><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">The token is used for this submission and is never written into Arcsweep state.</p></div>
-      <button type="submit">Observe → PREMAQC → Math Spine → Receipt ∞</button>
-    </form>
+    <p class="muted" style="margin-top:1rem;font-size:.8rem">The accepted seven-axis state is shown without relabelling. Ambient Open-Meteo, NOAA SWPC, and lunar readings remain source evidence; feedback cycles and transformations remain separately receipted.</p>
   </section>`;
 
   return header + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
@@ -606,8 +574,7 @@ function currentView() {
 function render() {
   applyPresentation();
   const world = activeWorld();
-  const runtimeLabel = isDesktopRuntime() ? 'Native local store' : isHosted ? 'Hosted browser · local state' : 'Browser development mode';
-  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''}><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div><p class="privacy-seal">${runtimeLabel}<br />Relational sync requires a receipted cycle</p></aside><main class="content">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${renderReturnDialog()}</div>`;
+  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''}><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div><p class="privacy-seal">${isDesktopRuntime() ? 'Native local store' : 'Browser development mode'}<br />No automatic upload</p></aside><main class="content">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${renderReturnDialog()}</div>`;
 }
 
 function formValues(form) {
@@ -779,11 +746,6 @@ app.addEventListener('click', async (event) => {
 });
 
 app.addEventListener('change', async (event) => {
-  if (event.target.matches('input[name="invokeModels"], input[name="syncLive"]')) {
-    const form = event.target.form;
-    const runtime = form?.querySelector('[data-runtime-auth]');
-    if (runtime) runtime.hidden = !(form.elements.invokeModels?.checked || form.elements.syncLive?.checked);
-  }
   const status = event.target.closest('[data-action="forge-status"]');
   if (status) { const item = state.manifestations.find((entry) => entry.id === status.dataset.id); if (item) item.status = status.value; persist('Forge status updated.', 'forge-status'); render(); return; }
   if (event.target.id === 'soundscape-files' && event.target.files?.length) {
@@ -843,7 +805,7 @@ app.addEventListener('submit', async (event) => {
       const canon = state.scripts.filter((script) => canonRefs.includes(script.id));
       const current = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
       const voiceInvocations = form.elements.invokeModels.checked
-        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: current, canon, voiceIds, token: v.runtimeToken })
+        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: current, canon, voiceIds })
         : [];
       const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
       const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nManual contribution:\n');
@@ -858,52 +820,10 @@ app.addEventListener('submit', async (event) => {
       storySoundscape.clearTurn();
       persist(`Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} replay-matched in the local ledger.`, 'feedback-cycle');
       if (form.elements.syncLive.checked) {
-        await syncFeedbackCycle(cycle, v.runtimeToken);
+        await syncFeedbackCycle(cycle, v.syncToken);
         notice = `Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} synced to the relational ledger.`;
       }
     } catch (error) { notice = `Feedback cycle stopped: ${error.message}`; }
-  }
-  if (form.id === 'field-feedback-form') {
-    try {
-      if (!deepData) throw new Error('Read the live Field before running the cycle.');
-      const world = activeWorld();
-      const voiceIds = [...form.querySelectorAll('input[name="voiceIds"]:checked')].map((input) => input.value);
-      if (!voiceIds.length) throw new Error('Select at least one Constellation voice.');
-      const prior = state.premaqcByWorld[world.id] || null;
-      const observedAt = new Date().toISOString();
-      const observerPremaqc = createFieldObservationPremaqc({
-        worldId: world.id, ambient: deepData, qualia: v.qualia, narrative: v.work,
-        priorPremaqc: prior, observedAt,
-      });
-      const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
-      const voiceInvocations = form.elements.invokeModels.checked
-        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: observerPremaqc, canon, voiceIds, token: v.runtimeToken })
-        : [];
-      const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
-      const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nReceived contribution:\n');
-      if (form.elements.invokeModels.checked && !combinedResponse) throw new Error('Every selected voice route failed; no cycle was accepted.');
-      const evidence = [{
-        schema: 'arcsweep.field-evidence/v1', source: deepData.source,
-        generated_at: deepData.generated_at, location: deepData.location,
-        weather_time: deepData.weather?.time || null,
-        space_weather_time: deepData.space_weather?.solar_wind?.time_tag || null,
-        projected_axes: structuredClone(deepData.field || {}),
-        qualia: { value: Number(v.qualia), source: 'firsthand report' },
-      }];
-      const cycle = await runFeedbackCycle({
-        world, premaqc: observerPremaqc, mode: v.mode, work: v.work,
-        response: combinedResponse, voiceIds, canonRefs: canon.map((item) => item.id),
-        voiceInvocations, soundEvents: storySoundscape.getTurnReceipts(), evidence, observedAt,
-      });
-      state.feedbackCycles.unshift(cycle);
-      state.premaqcByWorld[world.id] = cycle.premaqc_after;
-      storySoundscape.clearTurn();
-      persist(`Field cycle accepted · PREMAQC ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} · replay exact.`, 'field-feedback-cycle');
-      if (form.elements.syncLive.checked) {
-        await syncFeedbackCycle(cycle, v.runtimeToken);
-        notice = `Field cycle ${cycle.cycle_id} synced to the relational ledger.`;
-      }
-    } catch (error) { notice = `Field cycle stopped: ${error.message}`; }
   }
   if (form.id === 'continuity-form') { state.continuity.unshift({ id: newId('thread'), title: v.title.trim(), source: v.source, details: v.details.trim(), createdAt: isoNow() }); persist('Entry added to the Waking Thread.', 'thread'); }
   if (form.id === 'forge-form') { state.manifestations.unshift({ id: newId('working'), intention: v.intention.trim(), meaning: v.meaning.trim(), action: v.action.trim(), markers: v.markers.trim(), status: 'Seeded', createdAt: isoNow() }); persist('Forge working seeded.', 'forge'); }

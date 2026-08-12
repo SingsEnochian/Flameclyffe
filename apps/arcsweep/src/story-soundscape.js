@@ -1,4 +1,5 @@
 import { WorkletSynthesizer } from 'spessasynth_lib';
+import { SoundBankLoader } from 'spessasynth_core';
 
 const SPESSASYNTH_WORKLET_URL = new URL('../../../node_modules/spessasynth_lib/dist/spessasynth_processor.min.js', import.meta.url).href;
 
@@ -222,7 +223,6 @@ export class StorySoundscape {
     await this.context.audioWorklet.addModule(SPESSASYNTH_WORKLET_URL);
     const synth = new WorkletSynthesizer(this.context);
     synth.connect(this.buses.tones);
-    await synth.isReady;
     this.soundfontSynth = synth;
     return synth;
   }
@@ -250,8 +250,22 @@ export class StorySoundscape {
     for (const file of [...files]) {
       if (!/\.(?:sf2|sf3|sfogg|dls)$/iu.test(file.name)) throw new Error(`${file.name} is not an SF2, SF3, SFOGG, or DLS bank.`);
       const id = `soundfont-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      await synth.soundBankManager.addSoundBank(await file.arrayBuffer(), id);
-      this.soundfontBanks.set(id, { id, name: file.name, size: file.size, type: file.type || 'application/octet-stream' });
+      const buffer = await file.arrayBuffer();
+      let parsed;
+      try {
+        parsed = SoundBankLoader.fromArrayBuffer(buffer.slice(0));
+      } catch (error) {
+        throw new Error(`${file.name} could not be parsed as a SoundFont bank: ${error.message}`);
+      }
+      await synth.soundBankManager.addSoundBank(buffer, id);
+      await synth.isReady;
+      this.soundfontBanks.set(id, {
+        id,
+        name: file.name,
+        size: file.size,
+        type: file.type || 'application/octet-stream',
+        presetCount: parsed.presets?.length || 0,
+      });
       loaded.push(id);
     }
     this.soundfontPresets = synth.presetList.map((preset) => ({ ...preset }));
