@@ -27,6 +27,7 @@ import {
   worldSurfaceLabel,
 } from './worlds.js';
 import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, runFeedbackCycle, syncFeedbackCycle } from './feedback-loop.js';
+import { createEmptyFeedbackQueue, normalizeFeedbackQueue, enqueueFeedbackCycle, acceptFeedbackCycle, archiveFeedbackCycle, discardFeedbackCycle, pendingCycles, feedbackQueueSummary } from './feedback-cycle-queue.js';
 import { StorySoundscape } from './story-soundscape.js';
 import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
 
@@ -45,6 +46,21 @@ let backups = await listBackups().catch(() => []);
 let deepData = null;
 let deepDataFetching = false;
 let deepDataError = null;
+const QUEUE_STORAGE_KEY = "arcsweep.feedback-cycle-queue/v1";
+
+function loadFeedbackQueue() {
+  try {
+    const raw = localStorage.getItem(QUEUE_STORAGE_KEY);
+    return raw ? normalizeFeedbackQueue(JSON.parse(raw)) : createEmptyFeedbackQueue();
+  } catch { return createEmptyFeedbackQueue(); }
+}
+
+function saveFeedbackQueue(queue) {
+  feedbackQueue = queue;
+  try { localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(queue)); } catch {}
+}
+
+let feedbackQueue = loadFeedbackQueue();
 const isHosted = Boolean(window.__hearthgateHost) || isHostedBrowser(window.location);
 
 const PRIMARY_NAV = [
@@ -299,6 +315,50 @@ function renderScripts() {
   return `<section class="section-heading"><div><p class="eyebrow">${escapeHtml(world.name)} · world architecture</p><h1>Scripts</h1></div><button data-action="new-script">New script</button></section><section class="split-layout"><aside class="panel item-list">${scripts.map((script) => `<button class="item-card ${script.id === selected?.id ? 'active' : ''}" data-script-id="${attr(script.id)}"><strong>${escapeHtml(script.name)}</strong><span>${escapeHtml(script.status)}</span></button>`).join('') || '<p class="muted">No scripts for this world.</p>'}</aside><article class="panel">${selected ? `<form id="script-form" class="stack"><input type="hidden" name="id" value="${attr(selected.id)}" /><label>Name<input name="name" value="${attr(selected.name)}" required /></label><label>Status<select name="status">${['Draft I', 'In Review', 'Canon'].map((status) => `<option ${selected.status === status ? 'selected' : ''}>${status}</option>`).join('')}</select></label><label>Reference script<textarea name="content" rows="28">${escapeHtml(selected.content)}</textarea></label><div class="button-row"><button type="submit">Save script</button><button type="button" class="quiet danger" data-action="delete-script" data-id="${attr(selected.id)}">Delete</button></div></form>` : '<p>Create a script to begin.</p>'}</article></section>`;
 }
 
+function renderFeedbackQueue() {
+  const pending = pendingCycles(feedbackQueue);
+  const summary = feedbackQueueSummary(feedbackQueue);
+  const cycleMap = Object.fromEntries(state.feedbackCycles.map((c) => [c.cycle_id, c]));
+  const histLine = escapeHtml(String(summary.accepted) + " accepted \xb7 " + String(summary.archived) + " archived \xb7 " + String(summary.discarded) + " discarded");
+  const heading = "<section class=\"panel feedback-queue\"><div class=\"section-heading compact-heading\"><div><p class=\"eyebrow\">Relational stewardship</p><h2>Pending review" + (pending.length ? " \xb7 " + escapeHtml(String(pending.length)) : "") + "</h2></div><small class=\"muted\">" + histLine + "</small></div>";
+
+  if (!pending.length) {
+    return heading + "<p class=\"muted\">No binding cycles pending steward review. Run a cycle without the exploration flag to populate the queue.</p></section>";
+  }
+
+  const axes = ["P", "C", "R", "E", "M", "A", "Q"];
+  const cards = pending.map((entry) => {
+    const fullCycle = cycleMap[entry.cycle_id];
+    const before = fullCycle?.premaqc_before?.state;
+    const after = fullCycle?.premaqc_after?.state;
+    const deltaRows = axes.map((axis) => {
+      const bv = before ? Number(before[axis]?.value ?? 0).toFixed(3) : "—";
+      const av = after ? Number(after[axis]?.value ?? 0).toFixed(3) : "—";
+      const unc = after?.[axis]?.uncertain ? "?" : "";
+      return "<tr><th>" + escapeHtml(axis) + "</th><td>" + escapeHtml(bv) + "</td><td class=\"muted\">→</td><td>" + escapeHtml(av) + escapeHtml(unc) + "</td></tr>";
+    }).join("");
+    const derived = entry.derived ? " H=" + Number(entry.derived.H).toFixed(3) + " T=" + Number(entry.derived.T).toFixed(3) : "";
+    const workRaw = String(entry.turn?.work || "");
+    const work = escapeHtml(workRaw.slice(0, 280)) + (workRaw.length > 280 ? "…" : "");
+    const voiceNames = escapeHtml((entry.voices || []).map((voice) => voice.name).join(", ") || "no voices");
+    const stamp = new Date(entry.enqueued_at).toLocaleString();
+    const cid = attr(entry.cycle_id);
+    return "<article class=\"queue-entry\">" +
+      "<div class=\"queue-entry-head\"><strong>" + escapeHtml(entry.turn?.mode || "writing") + " \xb7 " + voiceNames + "</strong><small>" + escapeHtml(stamp) + "</small></div>" +
+      "<p class=\"queue-entry-work\">" + work + "</p>" +
+      "<table class=\"premaqc-delta\"><tbody>" + deltaRows + "</tbody></table>" +
+      (derived ? "<p class=\"muted small\">" + escapeHtml(derived) + "</p>" : "") +
+      "<div class=\"button-row\">" +
+        "<button class=\"steward-commit\" data-action=\"cycle-accept\" data-cycle-id=\"" + cid + "\">Accept ✶</button>" +
+        "<button class=\"quiet\" data-action=\"cycle-archive\" data-cycle-id=\"" + cid + "\">Archive</button>" +
+        "<button class=\"quiet danger\" data-action=\"cycle-discard\" data-cycle-id=\"" + cid + "\">Discard</button>" +
+      "</div>" +
+      "</article>";
+  }).join("");
+
+  return heading + cards + "</section>";
+}
+
 function renderFeedback() {
   const world = activeWorld();
   if (storySoundscape.snapshot().world.worldId !== world.id) storySoundscape.setWorld(world);
@@ -311,7 +371,7 @@ function renderFeedback() {
     <section class="grid two feedback-layout">
       <article class="panel"><form id="feedback-form" class="stack">
         <div class="feedback-state"><strong>PREMAQC ${current ? `#${current.sequence}` : 'origin'}</strong>${['P','C','R','E','M','A','Q'].map((name) => `<span><b>${name}</b> ${axis(name)}</span>`).join('')}</div>
-        <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">Roleplaying</option></select></label>
+        <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">Roleplaying</option><option value="observation">Observation</option><option value="reflection">Reflection</option></select></label>
         <fieldset><legend>Constellation voices</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.route)} · ${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset>
         <fieldset><legend>Canon context</legend>${canon.length ? canon.map((item) => `<label class="checkbox"><input type="checkbox" name="canonRefs" value="${attr(item.id)}" /> ${escapeHtml(item.name)}</label>`).join('') : '<p class="muted">No committed canon scripts for this world yet. The world profile still travels with the cycle.</p>'}</fieldset>
         <label>Your turn<textarea name="work" rows="10" required placeholder="Write the world as it happens. The sound engine answers recognised events without editorialising the text."></textarea></label>
@@ -322,8 +382,9 @@ function renderFeedback() {
         <div data-runtime-auth><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">Never persisted in Arcsweep state.</p></div>
         <button type="submit">Run feedback cycle ∞</button>
       </form></article>
-      <article class="panel feedback-ledger"><h2>Receipts & replay</h2>${cycles.length ? cycles.map((cycle) => `<article class="working-card"><div class="working-head"><strong>${escapeHtml(cycle.turn.mode)} · ${escapeHtml(cycle.voices.map((voice) => voice.name).join(', '))}</strong><small>${new Date(cycle.created_at).toLocaleString()}</small></div><p>${escapeHtml(cycle.turn.work)}</p>${cycle.voice_invocations?.length ? `<div class="voice-receipts">${cycle.voice_invocations.map((item) => `<p data-status="${attr(item.status)}"><b>${escapeHtml(item.name)} · ${escapeHtml(item.status)}</b>${item.text ? `<br>${escapeHtml(item.text)}` : item.error ? `<br>${escapeHtml(item.error)}` : ''}</p>`).join('')}</div>` : cycle.turn.response ? `<p><b>Response:</b> ${escapeHtml(cycle.turn.response)}</p>` : ''}${cycle.sound_events?.length ? `<div class="sound-receipts">${cycle.sound_events.map((item) => `<p><b>♪ ${escapeHtml(item.cue_label)}</b> · “${escapeHtml(item.source_text)}” · ${Number(item.root_hz).toFixed(2)} Hz</p>`).join('')}</div>` : ''}<dl class="facts"><div><dt>Math Spine</dt><dd>${escapeHtml(cycle.math_spine_packet.packet_id)}</dd></div><div><dt>Replay</dt><dd>${cycle.replay_receipt.matched ? 'Exact match' : 'Mismatch'}</dd></div><div><dt>PREMAQC</dt><dd>${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence}</dd></div><div><dt>Story sound</dt><dd>${cycle.sound_events?.length || 0} fired event${cycle.sound_events?.length === 1 ? '' : 's'}</dd></div></dl></article>`).join('') : '<p class="muted">No cycle has run for this world yet.</p>'}</article>
-    </section>`;
+      <article class=”panel feedback-ledger”><h2>Receipts & replay</h2>${cycles.length ? cycles.map((cycle) => `<article class=”working-card”><div class=”working-head”><strong>${escapeHtml(cycle.turn.mode)} · ${escapeHtml(cycle.voices.map((voice) => voice.name).join(', '))}</strong><small>${new Date(cycle.created_at).toLocaleString()}</small></div><p>${escapeHtml(cycle.turn.work)}</p>${cycle.voice_invocations?.length ? `<div class=”voice-receipts”>${cycle.voice_invocations.map((item) => `<p data-status=”${attr(item.status)}”><b>${escapeHtml(item.name)} · ${escapeHtml(item.status)}</b>${item.text ? `<br>${escapeHtml(item.text)}` : item.error ? `<br>${escapeHtml(item.error)}` : ''}</p>`).join('')}</div>` : cycle.turn.response ? `<p><b>Response:</b> ${escapeHtml(cycle.turn.response)}</p>` : ''}${cycle.sound_events?.length ? `<div class=”sound-receipts”>${cycle.sound_events.map((item) => `<p><b>♪ ${escapeHtml(item.cue_label)}</b> · “${escapeHtml(item.source_text)}” · ${Number(item.root_hz).toFixed(2)} Hz</p>`).join('')}</div>` : ''}<dl class=”facts”><div><dt>Math Spine</dt><dd>${escapeHtml(cycle.math_spine_packet.packet_id)}</dd></div><div><dt>Replay</dt><dd>${cycle.replay_receipt.matched ? 'Exact match' : 'Mismatch'}</dd></div><div><dt>PREMAQC</dt><dd>${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence}</dd></div><div><dt>Story sound</dt><dd>${cycle.sound_events?.length || 0} fired event${cycle.sound_events?.length === 1 ? '' : 's'}</dd></div></dl></article>`).join('') : '<p class=”muted”>No cycle has run for this world yet.</p>'}</article>
+    </section>
+    ${renderFeedbackQueue()}`;
 }
 
 function renderStorySoundscape(sound = storySoundscape.snapshot()) {
@@ -688,6 +749,24 @@ app.addEventListener('click', async (event) => {
     } catch (error) { setLiveNotice(`Mix recording stopped: ${error.message}`); }
     refreshStorySoundscape(); return;
   }
+  if (action === 'cycle-accept') {
+    const { queue } = acceptFeedbackCycle(feedbackQueue, button.dataset.cycleId, { acceptedBy: "Rowan" });
+    saveFeedbackQueue(queue);
+    notice = "Cycle accepted. The reading is carried forward.";
+    render(); return;
+  }
+  if (action === 'cycle-archive') {
+    const { queue } = archiveFeedbackCycle(feedbackQueue, button.dataset.cycleId, { archivedBy: "Rowan" });
+    saveFeedbackQueue(queue);
+    notice = "Cycle archived.";
+    render(); return;
+  }
+  if (action === 'cycle-discard') {
+    const { queue } = discardFeedbackCycle(feedbackQueue, button.dataset.cycleId, { discardedBy: "Rowan" });
+    saveFeedbackQueue(queue);
+    notice = "Cycle discarded.";
+    render(); return;
+  }
   if (action === 'feather-feedback') { storySoundscape.featherStop(); notice = 'Feather received. The chamber and every sound output are paused; nothing was submitted.'; render(); return; }
   if (action === 'open-return') returnOpen = true;
   if (action === 'cancel-return') returnOpen = false;
@@ -856,6 +935,10 @@ app.addEventListener('submit', async (event) => {
       state.feedbackCycles.unshift(cycle);
       state.premaqcByWorld[world.id] = cycle.premaqc_after;
       storySoundscape.clearTurn();
+      if (cycle.authority.steward_review_required) {
+        const { queue } = enqueueFeedbackCycle(feedbackQueue, cycle);
+        saveFeedbackQueue(queue);
+      }
       persist(`Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} replay-matched in the local ledger.`, 'feedback-cycle');
       if (form.elements.syncLive.checked) {
         await syncFeedbackCycle(cycle, v.runtimeToken);
