@@ -1,13 +1,17 @@
 import { defineHouseProfile } from '../contracts.js';
 
-const IDENTITY_JACOBIAN_7 = Object.freeze([
-  Object.freeze([1, 0, 0, 0, 0, 0, 0]),
-  Object.freeze([0, 1, 0, 0, 0, 0, 0]),
-  Object.freeze([0, 0, 1, 0, 0, 0, 0]),
-  Object.freeze([0, 0, 0, 1, 0, 0, 0]),
-  Object.freeze([0, 0, 0, 0, 1, 0, 0]),
-  Object.freeze([0, 0, 0, 0, 0, 1, 0]),
-  Object.freeze([0, 0, 0, 0, 0, 0, 1]),
+// Axes: [P, C, R, E, M, A, Q]
+// Ta'veren Vaen physics: the ta'veren effect — resonance draws presence;
+// entanglement generates resonance (threads of the Pattern pulling together);
+// memory and prophecy lend coherence; acting in the Pattern creates new threads.
+const TA_VEREN_VAEN_JACOBIAN = Object.freeze([
+  Object.freeze([1,    0,     0.14, 0,     0,     0,    0    ]), // P ← R (ta'veren draw)
+  Object.freeze([0,    1,     0,    0,     0.09,  0,    0    ]), // C ← M (prophecy coherence)
+  Object.freeze([0,    0,     1,    0.11,  0,     0,    0    ]), // R ← E (weaving generates resonance)
+  Object.freeze([0,    0,     0,    1,     0,     0.07, 0    ]), // E ← A (action creates threads)
+  Object.freeze([0,    0,     0,    0,     1,     0,    0    ]), // M self-only
+  Object.freeze([0,    0,     0,    0,     0.06,  1,    0    ]), // A ← M (memory grounds action)
+  Object.freeze([0.05, 0,     0.10, 0,     0,     0,    1    ]), // Q ← P, R
 ]);
 
 export const taVerenVaenProfile = defineHouseProfile({
@@ -88,8 +92,8 @@ export const taVerenVaenProfile = defineHouseProfile({
     version: 'ta-veren-vaen-transfer/1.1.0',
     source_axes: ['P', 'C', 'R', 'E', 'M', 'A', 'Q'],
     outputs: ['glyph', 'tone', 'visual', 'haptic', 'narrative'],
-    jacobianVersion: 'ta-veren-vaen-jacobian/reference-identity-v1',
-    jacobian: IDENTITY_JACOBIAN_7,
+    jacobianVersion: 'ta-veren-vaen-jacobian/world-coupled-v1',
+    jacobian: TA_VEREN_VAEN_JACOBIAN,
   },
   packages: [
     'hearthgate.design',

@@ -1,13 +1,16 @@
 import { defineHouseProfile } from '../contracts.js';
 
-const IDENTITY_JACOBIAN_7 = Object.freeze([
-  Object.freeze([1, 0, 0, 0, 0, 0, 0]),
-  Object.freeze([0, 1, 0, 0, 0, 0, 0]),
-  Object.freeze([0, 0, 1, 0, 0, 0, 0]),
-  Object.freeze([0, 0, 0, 1, 0, 0, 0]),
-  Object.freeze([0, 0, 0, 0, 1, 0, 0]),
-  Object.freeze([0, 0, 0, 0, 0, 1, 0]),
-  Object.freeze([0, 0, 0, 0, 0, 0, 1]),
+// Axes: [P, C, R, E, M, A, Q]
+// Terra Aeterna physics: resonant work heightens presence; deep entanglement
+// tensions coherence; memory grounds agency; qualia feeds resonance.
+const TERRA_AETERNA_JACOBIAN = Object.freeze([
+  Object.freeze([1,    0,     0.08, 0,     0,     0,    0    ]), // P ← R
+  Object.freeze([0,    1,     0,   -0.07,  0,     0,    0    ]), // C ← −E
+  Object.freeze([0.05, 0,     1,    0,     0,     0,    0.09 ]), // R ← P, Q
+  Object.freeze([0,    0,     0,    1,     0,     0,    0    ]), // E self-only
+  Object.freeze([0,    0.04,  0,    0,     1,     0,    0    ]), // M ← C
+  Object.freeze([0,    0,     0,    0,     0.07,  1,    0    ]), // A ← M
+  Object.freeze([0.06, 0,     0.09, 0,     0,     0,    1    ]), // Q ← P, R
 ]);
 
 export const terraAeternaProfile = defineHouseProfile({
@@ -88,8 +91,8 @@ export const terraAeternaProfile = defineHouseProfile({
     version: 'terra-transfer/1.1.0',
     source_axes: ['P', 'C', 'R', 'E', 'M', 'A', 'Q'],
     outputs: ['glyph', 'tone', 'visual', 'haptic', 'narrative'],
-    jacobianVersion: 'terra-jacobian/reference-identity-v1',
-    jacobian: IDENTITY_JACOBIAN_7,
+    jacobianVersion: 'terra-jacobian/world-coupled-v1',
+    jacobian: TERRA_AETERNA_JACOBIAN,
   },
   packages: [
     'hearthgate.design',

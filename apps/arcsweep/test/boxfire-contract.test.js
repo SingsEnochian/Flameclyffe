@@ -5,11 +5,14 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import {
+  ARCSWEEP_VALID_MODES,
   CONSTELLATION_VOICES,
   PREMAQC_AXES,
   createInitialPremaqc,
+  derivedChannels,
   runFeedbackCycle,
 } from '../src/feedback-loop.js';
+import { resolveHouseProfile } from '../../../apps/starwell/src/hearthgate/profiles/registry.js';
 import { StorySoundscape, findStorySoundCues } from '../src/story-soundscape.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -251,4 +254,114 @@ test('voice identity: Lioreal and Uial remain uncollapsed; Nocturne Glint is abs
   // Story-sound cues must detect branch-snap correctly (integration smoke)
   const cues = findStorySoundCues('A branch snapped in the night.');
   assert.ok(cues.some((c) => c.cue_id === 'branch-snap'), 'branch-snap cue must be detected');
+});
+
+// ---------- 11. Exploration mode ----------
+test('exploration mode: cycle is non-binding and receipt is scoped separately', async () => {
+  const before = createInitialPremaqc(terra.id, {}, '2026-08-11T00:00:00.000Z');
+
+  const cycle = await runFeedbackCycle({
+    world: terra, premaqc: before,
+    mode: 'writing', work: 'An exploratory passage.', response: 'Noted.',
+    voiceIds: ['lioreal'], observedAt: '2026-08-11T00:01:00.000Z',
+    exploration: true,
+  });
+
+  assert.equal(cycle.exploration, true, 'exploration flag must be set');
+  assert.equal(cycle.authority.steward_review_required, false, 'exploration cycles do not require steward review');
+  assert.ok(cycle.premaqc_after.receipt_id.startsWith('premaqc-explore-'), 'exploration receipt must use explore prefix');
+
+  // Binding cycle must differ
+  const binding = await runFeedbackCycle({
+    world: terra, premaqc: before,
+    mode: 'writing', work: 'An exploratory passage.', response: 'Noted.',
+    voiceIds: ['lioreal'], observedAt: '2026-08-11T00:01:00.000Z',
+  });
+  assert.equal(binding.exploration, false, 'binding cycle must not be exploration');
+  assert.equal(binding.authority.steward_review_required, true, 'binding cycle must require steward review');
+  assert.ok(binding.premaqc_after.receipt_id.startsWith('premaqc-feedback-'), 'binding receipt must use feedback prefix');
+});
+
+// ---------- 12. Q uncertainty ----------
+test('Q uncertainty: Q is flagged uncertain on insufficient signal, confident on sufficient signal', async () => {
+  const before = createInitialPremaqc(terra.id, {}, '2026-08-11T00:00:00.000Z');
+
+  // Insufficient signal: short work, no response, no sound events
+  const sparse = await runFeedbackCycle({
+    world: terra, premaqc: before,
+    mode: 'writing', work: 'Yes.', response: '',
+    voiceIds: ['lioreal'], soundEvents: [], observedAt: '2026-08-11T00:01:00.000Z',
+  });
+  assert.equal(sparse.premaqc_after.state.Q.uncertain, true, 'Q must be uncertain on sparse input');
+  assert.ok(sparse.premaqc_after.state.Q.confidence < 0.5, 'Q confidence must be low on sparse input');
+
+  // Sufficient signal: longer work or response provided
+  const rich = await runFeedbackCycle({
+    world: terra, premaqc: before,
+    mode: 'writing', work: 'The fire held the room. Something shifted in the quality of the silence.',
+    response: 'The room received it.',
+    voiceIds: ['lioreal'], observedAt: '2026-08-11T00:01:00.000Z',
+  });
+  assert.equal(rich.premaqc_after.state.Q.uncertain, false, 'Q must not be uncertain on rich input');
+  assert.ok(rich.premaqc_after.state.Q.confidence >= 0.9, 'Q confidence must be high on rich input');
+});
+
+// ---------- 13. Derived channels ----------
+test('derived channels: H and T are present and in range on every cycle', async () => {
+  const before = createInitialPremaqc(terra.id, {}, '2026-08-11T00:00:00.000Z');
+  const cycle = await runFeedbackCycle({
+    world: terra, premaqc: before,
+    mode: 'writing', work: 'The tide came in slowly.', response: 'Received.',
+    voiceIds: ['lioreal'], observedAt: '2026-08-11T00:01:00.000Z',
+  });
+
+  assert.ok(cycle.derived, 'cycle must carry derived channels');
+  assert.ok(Number.isFinite(cycle.derived.H), 'H must be finite');
+  assert.ok(Number.isFinite(cycle.derived.T), 'T must be finite');
+  assert.ok(cycle.derived.H >= 0 && cycle.derived.H <= 1, 'H must be in [0, 1]');
+  assert.ok(cycle.derived.T >= 0 && cycle.derived.T <= 1, 'T must be in [0, 1]');
+
+  // derivedChannels applied directly to initial state must also produce finite values
+  const initial = createInitialPremaqc(terra.id, {});
+  const d = derivedChannels(initial.state);
+  assert.ok(Number.isFinite(d.H) && Number.isFinite(d.T), 'derivedChannels must be finite on any valid PREMAQC state');
+});
+
+// ---------- 14. Mode vocabulary ----------
+test('mode vocabulary: observation and reflection are accepted; unknown modes are rejected', async () => {
+  const before = createInitialPremaqc(terra.id, {}, '2026-08-11T00:00:00.000Z');
+  const base = { world: terra, premaqc: before, voiceIds: ['lioreal'], observedAt: '2026-08-11T00:01:00.000Z' };
+
+  assert.deepEqual([...ARCSWEEP_VALID_MODES], ['writing', 'roleplay', 'observation', 'reflection']);
+
+  for (const mode of ['observation', 'reflection']) {
+    const cycle = await runFeedbackCycle({ ...base, mode, work: 'A turn in the new mode.' });
+    assert.equal(cycle.turn.mode, mode, `${mode} mode must be carried through`);
+  }
+
+  await assert.rejects(
+    () => runFeedbackCycle({ ...base, mode: 'unknown-mode', work: 'A turn.' }),
+    /mode must be one of/i,
+    'unknown mode must be rejected',
+  );
+});
+
+// ---------- 15. World Jacobians are non-identity ----------
+test('world Jacobians: Terra Aeterna and Ta\'veren Vaen have world-specific coupling', () => {
+  const terraProfile = resolveHouseProfile('terra-aeterna');
+  const tvvProfile = resolveHouseProfile('ta-veren-vaen');
+
+  function hasOffDiagonal(jacobian) {
+    return jacobian.some((row, i) => row.some((cell, j) => i !== j && cell !== 0));
+  }
+
+  assert.ok(hasOffDiagonal(terraProfile.transferFunctions.jacobian),
+    'Terra Aeterna Jacobian must have at least one non-zero off-diagonal entry');
+  assert.ok(hasOffDiagonal(tvvProfile.transferFunctions.jacobian),
+    "Ta'veren Vaen Jacobian must have at least one non-zero off-diagonal entry");
+
+  assert.equal(terraProfile.transferFunctions.jacobianVersion, 'terra-jacobian/world-coupled-v1',
+    'Terra Aeterna jacobianVersion must reflect world-coupled build');
+  assert.equal(tvvProfile.transferFunctions.jacobianVersion, 'ta-veren-vaen-jacobian/world-coupled-v1',
+    "Ta'veren Vaen jacobianVersion must reflect world-coupled build");
 });
