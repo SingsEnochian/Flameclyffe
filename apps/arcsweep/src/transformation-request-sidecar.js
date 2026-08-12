@@ -51,7 +51,14 @@ function render(world, record, message = '') {
     <div class="section-heading compact-heading"><div><p class="eyebrow">Ask → Actuate → Listen → Measure</p><h2>Requested Transformation</h2><p class="muted">${esc(world.name)} · Intention enters as a bounded control input, never as a manufactured observation.</p></div></div>
     ${message ? `<p class="callout">${esc(message)}</p>` : ''}
     <form data-transformation-form class="stack">
+      <label>Where are we asking?<select name="domain"><option value="story-world">Story world</option><option value="waking-world">The Waking World</option></select></label>
       <label>What change are we asking for?<textarea name="description" rows="3" required placeholder="State the requested change without declaring that it occurred."></textarea></label>
+      <fieldset class="waking-world-ask" data-waking-world-grounding hidden><legend>Waking World grounding</legend><p class="muted">Required for Waking World Asks. Name our work separately from the world’s answer.</p>
+        <label>Action within our control<textarea name="actionWithinControl" rows="2" placeholder="What we will actually do."></textarea></label>
+        <label>Required external cooperation<textarea name="externalCooperation" rows="2" placeholder="Who or what must answer freely."></textarea></label>
+        <label>Observable evidence<textarea name="observableEvidence" rows="2" placeholder="What events would count as an answer."></textarea></label>
+        <label>Review date<input name="reviewAt" type="date" /></label>
+      </fieldset>
       <fieldset><legend>Observable PREMAQC targets</legend><div class="transformation-axis-grid">${TRANSFORMATION_AXES.map((axis) => `<label class="checkbox"><input type="checkbox" name="axis" value="${axis}" /> ${axis}</label>`).join('')}</div></fieldset>
       <div class="grid three compact-grid"><label>Direction<select name="direction"><option value="increase">Increase</option><option value="decrease">Decrease</option></select></label><label>Minimum observed Δ<input name="minimumDelta" type="number" min="0.001" max="1" step="0.001" value="0.03" /></label><label>Intervention strength<input name="strength" type="number" min="0.01" max="1" step="0.01" value="0.35" /></label></div>
       <div class="grid three compact-grid"><label>Intervention type<input name="type" value="soundscape-and-writing" /></label><label>Maximum cycles<input name="maximumCycles" type="number" min="1" max="24" step="1" value="3" /></label><label>Requested by<input name="authority" value="Rowan" required /></label></div>
@@ -59,11 +66,17 @@ function render(world, record, message = '') {
       <label class="checkbox"><input name="consent" type="checkbox" /> I authorise this bounded request; Feather stops it.</label>
       <button type="submit">Receipt the Ask</button>
     </form>
-    ${latest ? `<div class="transformation-latest"><p class="eyebrow">Latest request</p><p><b>${esc(latest.request.description)}</b></p><dl class="facts"><div><dt>Status</dt><dd>${esc(latest.request.status)}</dd></div><div><dt>Targets</dt><dd>${esc(latest.target.axes.join(', '))} · ${esc(latest.target.direction)}</dd></div><div><dt>Strength</dt><dd>${latest.intervention.strength}</dd></div><div><dt>Window</dt><dd>${latest.bounds.maximum_cycles} cycles</dd></div><div><dt>Baseline</dt><dd>PREMAQC ${esc(latest.baseline.sequence)} · ${esc(latest.baseline.receipt_id)}</dd></div></dl>
+    ${latest ? `<div class="transformation-latest"><p class="eyebrow">Latest request · ${esc(latest.request.domain || 'story-world')}</p><p><b>${esc(latest.request.description)}</b></p><dl class="facts"><div><dt>Status</dt><dd>${esc(latest.request.status)}</dd></div><div><dt>Targets</dt><dd>${esc(latest.target.axes.join(', '))} · ${esc(latest.target.direction)}</dd></div><div><dt>Strength</dt><dd>${latest.intervention.strength}</dd></div><div><dt>Window</dt><dd>${latest.bounds.maximum_cycles} cycles</dd></div><div><dt>Baseline</dt><dd>PREMAQC ${esc(latest.baseline.sequence)} · ${esc(latest.baseline.receipt_id)}</dd></div></dl>
+      ${latest.waking_world ? `<div class="waking-world-receipt"><p><b>Our action:</b> ${esc(latest.waking_world.action_within_control)}</p><p><b>Free cooperation:</b> ${esc(latest.waking_world.external_cooperation)}</p><p><b>Evidence:</b> ${esc(latest.waking_world.observable_evidence)}</p><p><b>Review:</b> ${esc(latest.waking_world.review_at.slice(0, 10))} · silence is not agreement</p></div>` : ''}
       <div class="grid two compact-grid"><label>Observed structure · a<input data-transformation-field="structure" type="number" step="0.01" value="-1" /></label><label>Observed order parameter · x<input data-transformation-field="order-parameter" type="number" step="0.01" value="0" /></label></div>
       <div class="button-row"><button type="button" data-transformation-action="twine" data-request-id="${esc(latest.request_id)}">Twine Ask through latest feedback cycle</button><button type="button" class="quiet" data-transformation-action="measure" data-request-id="${esc(latest.request_id)}">Measure latest receipted response</button></div>
       ${circuit ? `<p class="callout"><b>Circuit closed</b> · ${esc(circuit.measured_response.classification.status)} · ${esc(circuit.measured_response.classification.coupling)} · b ${Number(circuit.control.cusp_intention_b).toFixed(3)} · ${esc(circuit.circuit_id)}</p>` : '<p class="muted">The Ask has not yet crossed a later feedback receipt.</p>'}${responseSummary(response)}</div>` : '<p class="muted">No requested transformation is active for this world.</p>'}
   </section>`;
+}
+
+function toggleWakingWorldGrounding(form) {
+  const grounding = form.querySelector('[data-waking-world-grounding]');
+  if (grounding) grounding.hidden = form.elements.domain?.value !== 'waking-world';
 }
 
 function injectStyle() {
@@ -102,6 +115,13 @@ document.addEventListener('submit', async (event) => {
       world,
       baselinePremaqc: premaqc,
       description: data.get('description'),
+      domain: data.get('domain'),
+      wakingWorld: {
+        actionWithinControl: data.get('actionWithinControl'),
+        externalCooperation: data.get('externalCooperation'),
+        observableEvidence: data.get('observableEvidence'),
+        reviewAt: data.get('reviewAt'),
+      },
       targetAxes: data.getAll('axis'),
       direction: data.get('direction'),
       minimumDelta: data.get('minimumDelta'),
@@ -120,6 +140,10 @@ document.addEventListener('submit', async (event) => {
     output.className = 'callout'; output.textContent = `Request stopped: ${error.message}`;
     if (!output.parentElement) panel.prepend(output);
   }
+});
+
+document.addEventListener('change', (event) => {
+  if (event.target.matches('[data-transformation-form] select[name="domain"]')) toggleWakingWorldGrounding(event.target.form);
 });
 
 document.addEventListener('click', async (event) => {

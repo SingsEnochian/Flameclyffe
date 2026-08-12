@@ -43,6 +43,28 @@ test('the intervention gate refuses missing consent, authority, bounds, and obse
   await assert.rejects(() => request({ targetAxes: [] }), /target axis/);
 });
 
+test('a Waking World Ask separates our action, free cooperation, evidence, and review window', async () => {
+  const receipt = await request({
+    domain: 'waking-world',
+    description: 'Ask the Waking World to open a viable path for material support.',
+    wakingWorld: {
+      actionWithinControl: 'Publish one demonstration and send three invitations.',
+      externalCooperation: 'Readers and collaborators may answer freely.',
+      observableEvidence: 'Replies, introductions, use, funding, or concrete offers.',
+      reviewAt: '2026-09-12',
+    },
+  });
+  assert.equal(receipt.request.domain, 'waking-world');
+  assert.equal(receipt.waking_world.action_within_control, 'Publish one demonstration and send three invitations.');
+  assert.equal(receipt.waking_world.cooperation_may_be_compelled, false);
+  assert.equal(receipt.waking_world.silence_is_agreement, false);
+  assert.equal(receipt.waking_world.review_at, '2026-09-12T00:00:00.000Z');
+});
+
+test('a Waking World Ask cannot pass without earthly grounding', async () => {
+  await assert.rejects(() => request({ domain: 'waking-world', wakingWorld: {} }), /waking_world_grounding/);
+});
+
 test('response measurement reports susceptibility and resonant target attainment', async () => {
   const receipt = await request();
   const observed = response({ P: .71, C: .67, R: .72, E: .34, M: .7, A: .75, Q: .73 });

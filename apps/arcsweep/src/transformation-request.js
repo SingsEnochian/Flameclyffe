@@ -27,7 +27,7 @@ function normaliseAxes(axes) {
   return Object.freeze(unique);
 }
 
-function requestGate({ authority, consent, intervention, bounds, observability, stopConditions }) {
+function requestGate({ authority, consent, intervention, bounds, observability, stopConditions, domain, wakingWorld }) {
   const gates = Object.freeze({
     authority: Boolean(String(authority || '').trim()),
     consent: consent === true,
@@ -39,6 +39,12 @@ function requestGate({ authority, consent, intervention, bounds, observability, 
       && Number.isFinite(Number(observability?.minimumDelta)) && Number(observability.minimumDelta) > 0,
     stop: Array.isArray(stopConditions) && stopConditions.length > 0
       && stopConditions.some((condition) => condition === 'Feather'),
+    waking_world_grounding: domain !== 'waking-world' || (
+      Boolean(String(wakingWorld?.actionWithinControl || '').trim())
+      && Boolean(String(wakingWorld?.externalCooperation || '').trim())
+      && Boolean(String(wakingWorld?.observableEvidence || '').trim())
+      && !Number.isNaN(Date.parse(wakingWorld?.reviewAt))
+    ),
   });
   return Object.freeze({ gates, admitted: Object.values(gates).every(Boolean) });
 }
@@ -55,12 +61,15 @@ export async function createTransformationRequest({
   consent = false,
   maximumCycles = 3,
   stopConditions = ['Feather'],
+  domain = 'story-world',
+  wakingWorld = null,
   requestedAt = new Date().toISOString(),
 } = {}) {
   invariant(world?.id && world?.name, 'a world is required');
   invariant(baselinePremaqc?.id && baselinePremaqc?.receipt_id, 'a receipted baseline PREMAQC packet is required');
   invariant(String(description || '').trim(), 'the requested change must be stated');
   invariant(['increase', 'decrease'].includes(direction), 'direction must be increase or decrease');
+  invariant(['story-world', 'waking-world'].includes(domain), 'domain must be story-world or waking-world');
   const axes = normaliseAxes(targetAxes);
   const delta = finite(minimumDelta, 'minimumDelta');
   invariant(delta > 0 && delta <= 1, 'minimumDelta must lie within 0..1');
@@ -74,6 +83,8 @@ export async function createTransformationRequest({
     bounds: { maximumCycles: Number(maximumCycles) },
     observability: { axes, minimumDelta: delta },
     stopConditions: stop,
+    domain,
+    wakingWorld,
   });
   invariant(gate.admitted, `request gate closed: ${Object.entries(gate.gates).filter(([, open]) => !open).map(([name]) => name).join(', ')}`);
 
@@ -84,7 +95,7 @@ export async function createTransformationRequest({
     schema_version: 1,
     world: { id: world.id, name: world.name },
     requested_at: requestedAt,
-    request: { description: String(description).trim(), status: 'requested-not-observed' },
+    request: { description: String(description).trim(), status: 'requested-not-observed', domain },
     target: { axes, direction, minimum_delta: delta },
     intervention: {
       type: String(intervention.type || 'unspecified').trim(),
@@ -109,6 +120,16 @@ export async function createTransformationRequest({
     },
     bounds: { maximum_cycles: Number(maximumCycles), stop_conditions: Object.freeze(stop) },
     observability: { axes, minimum_delta: delta },
+    waking_world: domain === 'waking-world' ? Object.freeze({
+      action_within_control: String(wakingWorld.actionWithinControl).trim(),
+      external_cooperation: String(wakingWorld.externalCooperation).trim(),
+      observable_evidence: String(wakingWorld.observableEvidence).trim(),
+      review_at: new Date(wakingWorld.reviewAt).toISOString(),
+      valid_answers: Object.freeze(['consent', 'refusal', 'delay', 'silence', 'negotiation', 'unexpected-path']),
+      cooperation_may_be_compelled: false,
+      silence_is_agreement: false,
+      causal_attribution_requires_controls: true,
+    }) : null,
     gate,
   };
   const fingerprint = await sha256Hex(core);
