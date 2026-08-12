@@ -1,8 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
-import { createRequire } from 'node:module';
+import manifestsModule from '../../../apps/starwell-server/flames/manifests.js';
 
-const require = createRequire(import.meta.url);
-const { FLAMES } = require('../../../apps/starwell-server/flames/manifests.js');
+const { FLAMES } = manifestsModule;
 
 const json = (status, body) => new Response(JSON.stringify(body), {
   status,
