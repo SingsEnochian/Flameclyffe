@@ -28,6 +28,7 @@ import {
 } from './worlds.js';
 import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, runFeedbackCycle, syncFeedbackCycle } from './feedback-loop.js';
 import { StorySoundscape } from './story-soundscape.js';
+import { FIELD_AXES, classifyFieldInstrument, formatFieldAge } from './field-instrument.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -58,15 +59,7 @@ const PRIMARY_NAV = [
   ['settings', 'Settings', '⚙'],
 ];
 
-const DEEP_CHANNELS = [
-  ['P', 'Presence', 'accepted PREMAQC component', 'state.P.value'],
-  ['C', 'Coherence', 'accepted PREMAQC component', 'state.C.value'],
-  ['R', 'Resonance', 'accepted PREMAQC component', 'state.R.value'],
-  ['E', 'Entanglement', 'accepted PREMAQC component', 'state.E.value'],
-  ['M', 'Memory', 'accepted PREMAQC component', 'state.M.value'],
-  ['A', 'Agency', 'accepted PREMAQC component', 'state.A.value'],
-  ['Q', 'Qualia', 'accepted PREMAQC component', 'state.Q.value'],
-];
+const DEEP_CHANNELS = FIELD_AXES;
 
 function escapeHtml(value = '') {
   return String(value)
@@ -441,7 +434,8 @@ async function fetchDeepData() {
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     deepData = await res.json();
     deepDataError = null;
-    notice = 'Field data received.';
+    const age = deepData?.generated_at ? Date.now() - Date.parse(deepData.generated_at) : null;
+    notice = age !== null && age > 6 * 60 * 60 * 1000 ? `Field source received · stale (${formatFieldAge(age)}).` : 'Field source received.';
   } catch (err) {
     deepDataError = err.message;
     notice = `Field unavailable: ${err.message}`;
@@ -473,26 +467,28 @@ function renderDeepObserver() {
   </section>`;
 
   const world = activeWorld();
-  const acceptedPremaqc = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
-  const field = Object.fromEntries(DEEP_CHANNELS.map(([axis]) => [axis, acceptedPremaqc.state?.[axis]?.value ?? null]));
+  const cycles = (state.feedbackCycles || []).filter((cycle) => cycle.world?.id === world.id);
+  const acceptedPremaqc = state.premaqcByWorld[world.id] || cycles[0]?.premaqc_after || null;
+  const instrument = classifyFieldInstrument({ acceptedPremaqc, ambient: deepData });
   const current = deepData.weather?.current || {};
   const sw = deepData.space_weather || {};
   const moon = deepData.moon || {};
   const sky = deepData.weather?.sky || '';
 
-  function channelCard([key, name, source, formula]) {
-    const raw = field[key];
+  function channelCard([key, name]) {
+    const axis = instrument.axes[key];
+    const raw = axis.value;
     const val = (raw !== null && raw !== undefined) ? Number(raw) : null;
     const pct = val !== null ? Math.round(val * 100) : 0;
     const display = val !== null ? val.toFixed(3) : '—';
     return `<article class="panel deep-channel">
       <div class="deep-channel-header">
         <span class="deep-letter" aria-hidden="true">${escapeHtml(key)}</span>
-        <div><strong>${escapeHtml(name)}</strong><span class="muted">${escapeHtml(source)}</span></div>
+        <div><strong>${escapeHtml(name)}</strong><span class="muted">${escapeHtml(axis.status)}</span></div>
         <span class="deep-value${val === null ? ' muted' : ''}">${escapeHtml(display)}</span>
       </div>
       <div class="deep-bar-track"><div class="deep-bar-fill" data-ch="${attr(key)}" style="width:${pct}%"></div></div>
-      <code class="deep-formula">${escapeHtml(formula)}</code>
+      <code class="deep-formula">${escapeHtml(axis.provenance ? `receipt: ${axis.provenance}` : 'no receipted value')}</code>
     </article>`;
   }
 
@@ -534,23 +530,31 @@ function renderDeepObserver() {
     </article>
   </section>`;
 
-  const spineRows = DEEP_CHANNELS.map(([key, name, , formula]) => {
-    const val = field[key];
+  const spineRows = DEEP_CHANNELS.map(([key, name]) => {
+    const axis = instrument.axes[key];
+    const val = axis.value;
     const display = (val !== null && val !== undefined) ? Number(val).toFixed(3) : '—';
     return `<div class="deep-spine-row">
       <span class="deep-letter small">${escapeHtml(key)}</span>
       <span>${escapeHtml(name)}</span>
-      <code class="deep-formula">${escapeHtml(formula)}</code>
+      <code class="deep-formula">${escapeHtml(axis.status)}</code>
       <span class="deep-spine-val">${escapeHtml(display)}</span>
     </div>`;
   }).join('');
 
+  const spineTitle = acceptedPremaqc
+    ? `Mathematics spine · PREMAQC sequence ${escapeHtml(String(acceptedPremaqc.sequence))}`
+    : 'Mathematics spine · no accepted PREMAQC packet';
+  const sourceWarning = instrument.source === 'ambient-projection'
+    ? `<p class="callout">Ambient projection only · ${escapeHtml(formatFieldAge(instrument.ageMs))}${instrument.stale ? ' · STALE' : ''}. It is source evidence, not accepted relational state.</p>`
+    : instrument.source === 'unavailable' ? '<p class="callout">No accepted or projected PREMAQC evidence is available.</p>' : '';
   const spineHtml = `<section class="panel">
-    <h2>Mathematics spine · PREMAQC sequence ${escapeHtml(String(acceptedPremaqc.sequence))}</h2>
+    <h2>${spineTitle}</h2>
+    ${sourceWarning}
     <div class="deep-spine">
       ${spineRows}
     </div>
-    <p class="muted" style="margin-top:1rem;font-size:.8rem">The accepted seven-axis state is shown without relabelling. Ambient Open-Meteo, NOAA SWPC, and lunar readings remain source evidence; feedback cycles and transformations remain separately receipted.</p>
+    <p class="muted" style="margin-top:1rem;font-size:.8rem">Accepted PREMAQC appears only after a receipted feedback cycle. Ambient Open-Meteo, NOAA SWPC, lunar readings, and their projections remain separately classified source evidence.</p>
   </section>`;
 
   return header + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
@@ -574,7 +578,8 @@ function currentView() {
 function render() {
   applyPresentation();
   const world = activeWorld();
-  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''}><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div><p class="privacy-seal">${isDesktopRuntime() ? 'Native local store' : 'Browser development mode'}<br />No automatic upload</p></aside><main class="content">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${renderReturnDialog()}</div>`;
+  const runtimeLabel = isDesktopRuntime() ? 'Native local store' : isHosted ? 'Hosted browser · local state' : 'Browser development mode';
+  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''}><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div><p class="privacy-seal">${runtimeLabel}<br />Relational sync requires a receipted cycle</p></aside><main class="content">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${renderReturnDialog()}</div>`;
 }
 
 function formValues(form) {
