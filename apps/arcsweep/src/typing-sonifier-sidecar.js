@@ -1,8 +1,16 @@
 import { StorySoundscape } from './story-soundscape.js';
-import { completedWordsFromInsertion, keystrokeTone, typingDelta, wordTone } from './typing-sonification.js';
+import {
+  completedSentencesFromInsertion,
+  completedWordsFromInsertion,
+  keystrokeTone,
+  sentenceTone,
+  typingDelta,
+  wordTone,
+} from './typing-sonification.js';
 
 const MAX_KEYS_PER_INPUT = 48;
 const MAX_WORDS_PER_INPUT = 12;
+const MAX_SENTENCES_PER_INPUT = 4;
 const MAX_TYPING_RECEIPTS = 96;
 const KNOWN_WORLD_ROOTS = Object.freeze({
   'terra aeterna': 220,
@@ -89,12 +97,41 @@ function playWord(soundscape, word, index = 0) {
   });
 }
 
+function playSentence(soundscape, sentence, index = 0) {
+  const tone = sentenceTone(sentence, soundscape.world.rootHz);
+  if (!tone) return;
+  const delay = Math.min(index * 0.08, 0.24);
+  const [centre, opening, closing] = tone.voice_frequencies_hz;
+  const audible = transient(soundscape, centre, { duration: 0.58, peak: 0.065, waveform: 'sine', delay });
+  transient(soundscape, opening, { duration: 0.42, peak: 0.022, waveform: 'triangle', delay: delay + 0.018 });
+  if (closing !== opening) transient(soundscape, closing, { duration: 0.48, peak: 0.024, waveform: 'sine', delay: delay + 0.035 });
+  soundscape.playSoundfontNote(centre, 0.52, 68);
+  soundscape.sendMidi(centre, 480);
+  remember(soundscape, {
+    schema: 'arcsweep.typing-sentence-tone/v1',
+    role: 'sentence-resolution',
+    sentence: tone.sentence,
+    words: tone.words,
+    frequency_hz: tone.frequency_hz,
+    word_frequencies_hz: tone.word_frequencies_hz,
+    voice_frequencies_hz: tone.voice_frequencies_hz,
+    terminal: tone.terminal,
+    cadence_semitones: tone.cadence_semitones,
+    algorithm: tone.algorithm,
+    root_hz: tone.root_hz,
+    world_id: soundscape.world.worldId,
+    audible,
+    created_at: new Date().toISOString(),
+  });
+}
+
 function sonifyEdit(soundscape, previousText, nextText) {
   if (!soundscape.armed || soundscape.typingSonificationEnabled === false) return;
   const delta = typingDelta(previousText, nextText);
   if (delta.inserted) {
     [...delta.inserted].slice(0, MAX_KEYS_PER_INPUT).forEach((character, index) => playKey(soundscape, character, index));
     completedWordsFromInsertion(previousText, nextText).slice(-MAX_WORDS_PER_INPUT).forEach((word, index) => playWord(soundscape, word, index));
+    completedSentencesFromInsertion(previousText, nextText).slice(-MAX_SENTENCES_PER_INPUT).forEach((sentence, index) => playSentence(soundscape, sentence, index));
   }
   if (delta.deleted) {
     const tone = keystrokeTone('', soundscape.world.rootHz);
