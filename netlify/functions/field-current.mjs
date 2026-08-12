@@ -44,8 +44,10 @@ export function buildObservation({ weather, kpRows, magRows, plasmaRows }, now =
   const kpRow = latest(kpRows) || {};
   const mag = latest(magRows) || [];
   const plasma = latest(plasmaRows) || [];
-  const bz = Number(mag[3] ?? 0), bt = Number(mag[6] ?? mag[2] ?? 0);
-  const density = Number(plasma[1] ?? 0), speed = Number(plasma[2] ?? 0), kp = Number(kpRow.Kp ?? 0);
+  const bz = Number(mag.bz_gsm ?? mag[3] ?? 0), bt = Number(mag.bt ?? mag[6] ?? mag[2] ?? 0);
+  const densityValue = plasma.proton_density ?? plasma[1];
+  const density = densityValue == null ? null : Number(densityValue);
+  const speed = Number(plasma.proton_speed ?? plasma[2] ?? 0), kp = Number(kpRow.Kp ?? 0);
   const cloud = Number(current.cloud_cover ?? 0), precip = Number(current.precipitation ?? 0);
   const humidity = Number(current.relative_humidity_2m ?? 0), wind = Number(current.wind_speed_10m ?? 0);
   const isDay = Number(current.is_day ?? 0), moon = moonInfo(now);
@@ -60,7 +62,7 @@ export function buildObservation({ weather, kpRows, magRows, plasmaRows }, now =
     source: { weather: 'Open-Meteo Forecast API', space_weather: 'NOAA SWPC JSON products', transport: 'live Netlify function' },
     location: { lat: LAT, lon: LON, label: LABEL, public_precision: 'coarse' },
     weather: { time: current.time || null, sky: skyFor(Number(current.weather_code ?? 0), isDay), current },
-    space_weather: { kp: { value: kp, time_tag: kpRow.time_tag || null, a_running: kpRow.a_running ?? null }, solar_wind: { time_tag: mag[0] || plasma[0] || null, bz, bt, density, speed } },
+    space_weather: { kp: { value: kp, time_tag: kpRow.time_tag || null, a_running: kpRow.a_running ?? null }, solar_wind: { time_tag: mag.time_tag || plasma.time_tag || mag[0] || plasma[0] || null, bz, bt, density, speed } },
     moon, field: { P, C, R, E, M, A },
     observer_note: 'Live source evidence and source projection. Not an accepted PREMAQC packet.',
   };
@@ -78,7 +80,7 @@ export function createHandler({ fetchImpl = fetch, now = () => new Date() } = {}
     try {
       const [weather, kpRows, magRows, plasmaRows] = await Promise.all([
         readJson(fetchImpl, weatherUrl), readJson(fetchImpl, 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
-        readJson(fetchImpl, 'https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json'), readJson(fetchImpl, 'https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json'),
+        readJson(fetchImpl, 'https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json'), readJson(fetchImpl, 'https://services.swpc.noaa.gov/products/summary/solar-wind-speed.json'),
       ]);
       return response(200, buildObservation({ weather, kpRows, magRows, plasmaRows }, now()));
     } catch (error) { return response(502, { error: 'Live field sources unavailable.', detail: error.message }); }

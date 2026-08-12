@@ -4,7 +4,7 @@ import { buildObservation, createHandler } from '../../../netlify/functions/fiel
 
 const inputs = {
   weather: { current: { time: '2026-08-12T12:00', pressure_msl: 1018, is_day: 1, cloud_cover: 20, precipitation: 0, relative_humidity_2m: 60, wind_speed_10m: 8, weather_code: 1 } },
-  kpRows: [{ Kp: 2, time_tag: 'now' }], magRows: [['now', null, null, '-2', null, null, '5']], plasmaRows: [['now', '4', '420']],
+  kpRows: [{ Kp: 2, time_tag: 'now' }], magRows: [{ time_tag: 'now', bz_gsm: -2, bt: 5 }], plasmaRows: [{ time_tag: 'now', proton_speed: 420 }],
 };
 
 test('live observation remains source evidence and does not manufacture Qualia', () => {
@@ -13,6 +13,7 @@ test('live observation remains source evidence and does not manufacture Qualia',
   assert.equal(value.source.transport, 'live Netlify function');
   assert.equal(value.field.Q, undefined);
   assert.ok(value.field.R > 0);
+  assert.equal(value.space_weather.solar_wind.density, null);
 });
 
 test('field endpoint accepts GET only', async () => {
