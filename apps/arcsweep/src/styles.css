@@ -328,3 +328,5 @@ html[data-reduce-motion="true"] *, html[data-reduce-motion="true"] *::before, ht
   .sound-track { grid-template-columns: auto minmax(0,1fr) auto; }
   .sound-track input { grid-column: 1 / -1; }
 }
+.conditional-body { display: none; }
+.conditional-toggle:has(input:checked) + .conditional-body { display: block; }

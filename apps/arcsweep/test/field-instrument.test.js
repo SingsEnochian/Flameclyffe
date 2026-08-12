@@ -49,3 +49,9 @@ test('Observer receipts six ambient projections plus firsthand Qualia as a compl
   assert.equal(packet.state.Q.contributors[0].source_kind, 'firsthand-qualia');
   assert.match(packet.receipt_id, /^observer-field-/);
 });
+
+test('Observer refuses an unmeasured or out-of-range firsthand Qualia value', () => {
+  const ambient = { generated_at: '2026-08-12T05:00:00Z', field: { P: .5, C: .4, R: .7, E: .6, M: .2, A: .8 } };
+  assert.throws(() => createFieldObservationPremaqc({ worldId: 'ta-veren-vaen', ambient, qualia: '' }), /Qualia/);
+  assert.throws(() => createFieldObservationPremaqc({ worldId: 'ta-veren-vaen', ambient, qualia: 1.2 }), /Qualia/);
+});

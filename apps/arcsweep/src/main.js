@@ -573,12 +573,13 @@ function renderDeepObserver() {
       <p class="muted">Six ambient projections enter through Observer. Qualia enters only through your firsthand report. The resulting PREMAQC packet is then compiled and replay-verified by the Math Spine.</p>
       <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">Roleplaying</option></select></label>
       <label>What is entering from the world now?<textarea name="work" rows="5" required placeholder="Write the event without sanding its teeth off."></textarea></label>
-      <label>Firsthand Qualia · Q (0–1)<input name="qualia" type="number" min="0" max="1" step="0.01" value="0.78" required /></label>
+      <label>Firsthand Qualia · Q (0–1)<input name="qualia" type="number" min="0" max="1" step="0.01" placeholder="Unmeasured — enter your observation" required /></label>
       <fieldset><legend>Constellation voices</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" ${voice.id === 'boxfire' ? 'checked' : ''} /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset>
-      <label class="checkbox"><input type="checkbox" name="invokeModels" /> Invoke the selected model routes before compilation</label>
+      <label class="checkbox conditional-toggle"><input type="checkbox" name="invokeModels" /> Invoke each selected voice through its model route</label>
+      <div class="conditional-body"><p class="callout">Invocation waits for replies or refusals from every selected route. If every route errors, the cycle stops and PREMAQC does not advance.</p></div>
       <label>Optional received contribution<textarea name="response" rows="3"></textarea></label>
-      <label class="checkbox"><input type="checkbox" name="syncLive" /> Sync the verified cycle to the relational ledger</label>
-      <label>Session-only sync token<input type="password" name="syncToken" autocomplete="off" /></label>
+      <label class="checkbox conditional-toggle"><input type="checkbox" name="syncLive" /> Sync the verified cycle to the relational ledger</label>
+      <div class="conditional-body"><label>Session-only sync token<input type="password" name="syncToken" autocomplete="off" placeholder="Required only for relational sync" /></label><p class="muted">The token is used for this submission and is never written into Arcsweep state.</p></div>
       <button type="submit">Observe → PREMAQC → Math Spine → Receipt ∞</button>
     </form>
   </section>`;
