@@ -1,5 +1,6 @@
 import { loadState } from './storage.js';
 import { TRANSFORMATION_AXES, assessTransformationResponse, createTransformationRequest } from './transformation-request.js';
+import { runRequestedTransformationCircuit } from './requested-transformation-circuit.js';
 
 const STORE_KEY = 'hearthgate.arcsweep.transformation-requests.v1';
 let mounting = false;
@@ -23,7 +24,8 @@ function esc(value = '') {
 }
 
 function worldRecord(store, worldId) {
-  store.byWorld[worldId] ||= { requests: [], responses: [] };
+  store.byWorld[worldId] ||= { requests: [], responses: [], circuits: [] };
+  store.byWorld[worldId].circuits ||= [];
   return store.byWorld[worldId];
 }
 
@@ -32,7 +34,7 @@ async function context() {
   const world = state.worlds.find((item) => item.id === state.activeWorldId) || state.worlds[0];
   const cycles = (state.feedbackCycles || []).filter((cycle) => cycle.world?.id === world?.id);
   const premaqc = state.premaqcByWorld?.[world?.id] || cycles[0]?.premaqc_after || null;
-  return { state, world, premaqc };
+  return { state, world, premaqc, cycles };
 }
 
 function responseSummary(response) {
@@ -44,6 +46,7 @@ function responseSummary(response) {
 function render(world, record, message = '') {
   const latest = record.requests.at(-1) || null;
   const response = latest ? [...record.responses].reverse().find((item) => item.request_id === latest.request_id) : null;
+  const circuit = latest ? [...record.circuits].reverse().find((item) => item.request.request_id === latest.request_id) : null;
   return `<section class="panel transformation-request-panel" data-transformation-sidecar>
     <div class="section-heading compact-heading"><div><p class="eyebrow">Ask → Actuate → Listen → Measure</p><h2>Requested Transformation</h2><p class="muted">${esc(world.name)} · Intention enters as a bounded control input, never as a manufactured observation.</p></div></div>
     ${message ? `<p class="callout">${esc(message)}</p>` : ''}
@@ -56,7 +59,10 @@ function render(world, record, message = '') {
       <label class="checkbox"><input name="consent" type="checkbox" /> I authorise this bounded request; Feather stops it.</label>
       <button type="submit">Receipt the Ask</button>
     </form>
-    ${latest ? `<div class="transformation-latest"><p class="eyebrow">Latest request</p><p><b>${esc(latest.request.description)}</b></p><dl class="facts"><div><dt>Status</dt><dd>${esc(latest.request.status)}</dd></div><div><dt>Targets</dt><dd>${esc(latest.target.axes.join(', '))} · ${esc(latest.target.direction)}</dd></div><div><dt>Strength</dt><dd>${latest.intervention.strength}</dd></div><div><dt>Window</dt><dd>${latest.bounds.maximum_cycles} cycles</dd></div><div><dt>Baseline</dt><dd>PREMAQC ${esc(latest.baseline.sequence)} · ${esc(latest.baseline.receipt_id)}</dd></div></dl><button type="button" class="quiet" data-transformation-action="measure" data-request-id="${esc(latest.request_id)}">Measure latest receipted response</button>${responseSummary(response)}</div>` : '<p class="muted">No requested transformation is active for this world.</p>'}
+    ${latest ? `<div class="transformation-latest"><p class="eyebrow">Latest request</p><p><b>${esc(latest.request.description)}</b></p><dl class="facts"><div><dt>Status</dt><dd>${esc(latest.request.status)}</dd></div><div><dt>Targets</dt><dd>${esc(latest.target.axes.join(', '))} · ${esc(latest.target.direction)}</dd></div><div><dt>Strength</dt><dd>${latest.intervention.strength}</dd></div><div><dt>Window</dt><dd>${latest.bounds.maximum_cycles} cycles</dd></div><div><dt>Baseline</dt><dd>PREMAQC ${esc(latest.baseline.sequence)} · ${esc(latest.baseline.receipt_id)}</dd></div></dl>
+      <div class="grid two compact-grid"><label>Observed structure · a<input data-transformation-field="structure" type="number" step="0.01" value="-1" /></label><label>Observed order parameter · x<input data-transformation-field="order-parameter" type="number" step="0.01" value="0" /></label></div>
+      <div class="button-row"><button type="button" data-transformation-action="twine" data-request-id="${esc(latest.request_id)}">Twine Ask through latest feedback cycle</button><button type="button" class="quiet" data-transformation-action="measure" data-request-id="${esc(latest.request_id)}">Measure latest receipted response</button></div>
+      ${circuit ? `<p class="callout"><b>Circuit closed</b> · ${esc(circuit.measured_response.classification.status)} · ${esc(circuit.measured_response.classification.coupling)} · b ${Number(circuit.control.cusp_intention_b).toFixed(3)} · ${esc(circuit.circuit_id)}</p>` : '<p class="muted">The Ask has not yet crossed a later feedback receipt.</p>'}${responseSummary(response)}</div>` : '<p class="muted">No requested transformation is active for this world.</p>'}
   </section>`;
 }
 
@@ -117,6 +123,32 @@ document.addEventListener('submit', async (event) => {
 });
 
 document.addEventListener('click', async (event) => {
+  const twine = event.target.closest('[data-transformation-action="twine"]');
+  if (twine) {
+    const panel = twine.closest('[data-transformation-sidecar]');
+    twine.disabled = true;
+    try {
+      const { world, cycles } = await context();
+      const store = readStore(); const record = worldRecord(store, world.id);
+      const request = record.requests.find((item) => item.request_id === twine.dataset.requestId);
+      if (!request) throw new Error('The request receipt is unavailable.');
+      const cycle = cycles.find((item) => Number(item.premaqc_after?.sequence) > Number(request.baseline.sequence));
+      if (!cycle) throw new Error('Run a later receipted feedback cycle before twining this Ask.');
+      const structure = Number(panel.querySelector('[data-transformation-field="structure"]').value);
+      const orderParameter = Number(panel.querySelector('[data-transformation-field="order-parameter"]').value);
+      const cuspHistory = record.circuits.map((item) => item.cusp?.observation_packet).filter(Boolean);
+      const circuit = await runRequestedTransformationCircuit({ request, feedbackCycle: cycle, structure, orderParameter, cuspHistory });
+      record.circuits.push(structuredClone(circuit));
+      record.responses.push(structuredClone(circuit.measured_response));
+      writeStore(store);
+      panel.outerHTML = render(world, record, `Circuit closed as ${circuit.circuit_id}. Ask remained control; response remained observed.`);
+    } catch (error) {
+      const output = panel.querySelector('.callout') || document.createElement('p');
+      output.className = 'callout'; output.textContent = `Circuit stopped: ${error.message}`;
+      if (!output.parentElement) panel.prepend(output);
+    } finally { twine.disabled = false; }
+    return;
+  }
   const button = event.target.closest('[data-transformation-action="measure"]');
   if (!button) return;
   const panel = button.closest('[data-transformation-sidecar]');
