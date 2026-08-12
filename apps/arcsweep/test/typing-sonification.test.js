@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { completedWordsFromInsertion, keystrokeTone, typingDelta, wordTone } from '../src/typing-sonification.js';
+import {
+  completedSentencesFromInsertion,
+  completedWordsFromInsertion,
+  keystrokeTone,
+  sentenceTone,
+  typingDelta,
+  wordTone,
+} from '../src/typing-sonification.js';
 
 test('typing delta isolates an insertion without replaying unchanged text', () => {
   assert.deepEqual(typingDelta('bone', 'bones'), { start: 4, inserted: 's', deleted: '' });
@@ -39,4 +46,26 @@ test('word completion fires only when the inserted edit crosses a boundary', () 
   assert.deepEqual(completedWordsFromInsertion('bones', 'bones '), ['bones']);
   assert.deepEqual(completedWordsFromInsertion('bones ', 'bones ash '), ['ash']);
   assert.deepEqual(completedWordsFromInsertion('', 'bones, ash.'), ['bones', 'ash']);
+});
+
+test('a completed sentence composes the ordered word tones and terminal cadence', () => {
+  const tone = sentenceTone('Bones ash intention.', 220);
+  assert.deepEqual(tone.words, ['Bones', 'ash', 'intention']);
+  assert.deepEqual(tone.word_frequencies_hz, [
+    wordTone('Bones', 220).frequency_hz,
+    wordTone('ash', 220).frequency_hz,
+    wordTone('intention', 220).frequency_hz,
+  ]);
+  assert.equal(tone.terminal, '.');
+  assert.equal(tone.algorithm, 'weighted-log-word-composition/v1');
+  assert.deepEqual(sentenceTone('Bones ash intention.', 220), sentenceTone('Bones ash intention.', 220));
+  assert.notEqual(sentenceTone('Bones ash intention.', 220).frequency_hz, sentenceTone('Intention ash bones.', 220).frequency_hz);
+  assert.notEqual(sentenceTone('Bones ash intention.', 220).frequency_hz, sentenceTone('Bones ash intention?', 220).frequency_hz);
+});
+
+test('sentence completion fires only across hard cadence boundaries', () => {
+  assert.deepEqual(completedSentencesFromInsertion('Bones ash', 'Bones ash intention'), []);
+  assert.deepEqual(completedSentencesFromInsertion('Bones ash intention', 'Bones ash intention.'), ['Bones ash intention.']);
+  assert.deepEqual(completedSentencesFromInsertion('', 'I see you. Eye C U?'), ['I see you.', 'Eye C U?']);
+  assert.deepEqual(completedSentencesFromInsertion('First sentence. Second', 'First sentence. Second line\n'), ['Second line']);
 });
