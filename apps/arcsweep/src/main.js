@@ -319,7 +319,7 @@ function renderFeedback() {
         <label class="checkbox"><input type="checkbox" name="invokeModels" checked /> Invoke each selected voice through its own model route</label>
         <label>Optional manual response or fallback<textarea name="response" rows="6" placeholder="Add a spoken, imported, or otherwise received contribution. It remains separately visible in the receipt."></textarea></label>
         <label class="checkbox"><input type="checkbox" name="syncLive" /> Sync the verified receipt to the relational ledger</label>
-        <label>Session-only sync token<input type="password" name="syncToken" autocomplete="off" placeholder="Never persisted in Arcsweep state" /></label>
+        <div data-runtime-auth><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">Never persisted in Arcsweep state.</p></div>
         <button type="submit">Run feedback cycle ∞</button>
       </form></article>
       <article class="panel feedback-ledger"><h2>Receipts & replay</h2>${cycles.length ? cycles.map((cycle) => `<article class="working-card"><div class="working-head"><strong>${escapeHtml(cycle.turn.mode)} · ${escapeHtml(cycle.voices.map((voice) => voice.name).join(', '))}</strong><small>${new Date(cycle.created_at).toLocaleString()}</small></div><p>${escapeHtml(cycle.turn.work)}</p>${cycle.voice_invocations?.length ? `<div class="voice-receipts">${cycle.voice_invocations.map((item) => `<p data-status="${attr(item.status)}"><b>${escapeHtml(item.name)} · ${escapeHtml(item.status)}</b>${item.text ? `<br>${escapeHtml(item.text)}` : item.error ? `<br>${escapeHtml(item.error)}` : ''}</p>`).join('')}</div>` : cycle.turn.response ? `<p><b>Response:</b> ${escapeHtml(cycle.turn.response)}</p>` : ''}${cycle.sound_events?.length ? `<div class="sound-receipts">${cycle.sound_events.map((item) => `<p><b>♪ ${escapeHtml(item.cue_label)}</b> · “${escapeHtml(item.source_text)}” · ${Number(item.root_hz).toFixed(2)} Hz</p>`).join('')}</div>` : ''}<dl class="facts"><div><dt>Math Spine</dt><dd>${escapeHtml(cycle.math_spine_packet.packet_id)}</dd></div><div><dt>Replay</dt><dd>${cycle.replay_receipt.matched ? 'Exact match' : 'Mismatch'}</dd></div><div><dt>PREMAQC</dt><dd>${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence}</dd></div><div><dt>Story sound</dt><dd>${cycle.sound_events?.length || 0} fired event${cycle.sound_events?.length === 1 ? '' : 's'}</dd></div></dl></article>`).join('') : '<p class="muted">No cycle has run for this world yet.</p>'}</article>
@@ -579,7 +579,8 @@ function renderDeepObserver() {
       <div class="conditional-body"><p class="callout">Invocation waits for replies or refusals from every selected route. If every route errors, the cycle stops and PREMAQC does not advance.</p></div>
       <label>Optional received contribution<textarea name="response" rows="3"></textarea></label>
       <label class="checkbox conditional-toggle"><input type="checkbox" name="syncLive" /> Sync the verified cycle to the relational ledger</label>
-      <div class="conditional-body"><label>Session-only sync token<input type="password" name="syncToken" autocomplete="off" placeholder="Required only for relational sync" /></label><p class="muted">The token is used for this submission and is never written into Arcsweep state.</p></div>
+      <div class="conditional-body"><p class="muted">The verified receipt will use the same session-only House runtime token.</p></div>
+      <div data-runtime-auth hidden><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">The token is used for this submission and is never written into Arcsweep state.</p></div>
       <button type="submit">Observe → PREMAQC → Math Spine → Receipt ∞</button>
     </form>
   </section>`;
@@ -778,6 +779,11 @@ app.addEventListener('click', async (event) => {
 });
 
 app.addEventListener('change', async (event) => {
+  if (event.target.matches('input[name="invokeModels"], input[name="syncLive"]')) {
+    const form = event.target.form;
+    const runtime = form?.querySelector('[data-runtime-auth]');
+    if (runtime) runtime.hidden = !(form.elements.invokeModels?.checked || form.elements.syncLive?.checked);
+  }
   const status = event.target.closest('[data-action="forge-status"]');
   if (status) { const item = state.manifestations.find((entry) => entry.id === status.dataset.id); if (item) item.status = status.value; persist('Forge status updated.', 'forge-status'); render(); return; }
   if (event.target.id === 'soundscape-files' && event.target.files?.length) {
@@ -837,7 +843,7 @@ app.addEventListener('submit', async (event) => {
       const canon = state.scripts.filter((script) => canonRefs.includes(script.id));
       const current = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
       const voiceInvocations = form.elements.invokeModels.checked
-        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: current, canon, voiceIds })
+        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: current, canon, voiceIds, token: v.runtimeToken })
         : [];
       const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
       const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nManual contribution:\n');
@@ -852,7 +858,7 @@ app.addEventListener('submit', async (event) => {
       storySoundscape.clearTurn();
       persist(`Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} replay-matched in the local ledger.`, 'feedback-cycle');
       if (form.elements.syncLive.checked) {
-        await syncFeedbackCycle(cycle, v.syncToken);
+        await syncFeedbackCycle(cycle, v.runtimeToken);
         notice = `Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} synced to the relational ledger.`;
       }
     } catch (error) { notice = `Feedback cycle stopped: ${error.message}`; }
@@ -871,7 +877,7 @@ app.addEventListener('submit', async (event) => {
       });
       const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
       const voiceInvocations = form.elements.invokeModels.checked
-        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: observerPremaqc, canon, voiceIds })
+        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: observerPremaqc, canon, voiceIds, token: v.runtimeToken })
         : [];
       const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
       const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nReceived contribution:\n');
@@ -894,7 +900,7 @@ app.addEventListener('submit', async (event) => {
       storySoundscape.clearTurn();
       persist(`Field cycle accepted · PREMAQC ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} · replay exact.`, 'field-feedback-cycle');
       if (form.elements.syncLive.checked) {
-        await syncFeedbackCycle(cycle, v.syncToken);
+        await syncFeedbackCycle(cycle, v.runtimeToken);
         notice = `Field cycle ${cycle.cycle_id} synced to the relational ledger.`;
       }
     } catch (error) { notice = `Field cycle stopped: ${error.message}`; }

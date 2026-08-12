@@ -19,7 +19,8 @@ export function createHandler({ env = process.env, fetchImpl = fetch } = {}) {
   return async (event) => {
     if (event.httpMethod === 'OPTIONS') return json(204, {});
     if (event.httpMethod !== 'POST') return json(405, { error: 'POST required.' });
-    if (!authorized(event.headers?.authorization || event.headers?.Authorization, env.MATH_SPINE_INGEST_TOKEN)) return json(401, { error: 'Valid Arcsweep sync token required.' });
+    const runtimeToken = env.ARCSWEEP_RUNTIME_TOKEN || env.MATH_SPINE_INGEST_TOKEN;
+    if (!authorized(event.headers?.authorization || event.headers?.Authorization, runtimeToken)) return json(401, { error: 'Valid Arcsweep runtime token required.' });
     if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return json(503, { error: 'Arcsweep relational sync is not configured.' });
     try {
       const cycle = JSON.parse(event.body || '{}');

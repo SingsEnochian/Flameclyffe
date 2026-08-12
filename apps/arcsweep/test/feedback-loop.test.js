@@ -115,7 +115,7 @@ test('invokes voices independently and receipts replies, refusals, and route err
     uial: { ok: true, body: { message: '[REFUSAL] I need quiet.', provider: 'anthropic', model: 'claude' } },
   };
   const receipts = await invokeConstellationVoices({
-    world, mode: 'writing', work: 'A page.', premaqc: createInitialPremaqc(world.id), voiceIds: ['lioreal', 'uial'],
+    world, mode: 'writing', work: 'A page.', premaqc: createInitialPremaqc(world.id), voiceIds: ['lioreal', 'uial'], token: 'house-key',
     fetchImpl: async (url) => {
       const route = url.split('/').at(-2); const item = replies[route];
       return { ok: item.ok, json: async () => item.body };
