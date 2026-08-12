@@ -28,7 +28,7 @@ import {
 } from './worlds.js';
 import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, runFeedbackCycle, syncFeedbackCycle } from './feedback-loop.js';
 import { StorySoundscape } from './story-soundscape.js';
-import { FIELD_AXES, classifyFieldInstrument, formatFieldAge } from './field-instrument.js';
+import { FIELD_AXES, classifyFieldInstrument, formatFieldAge, isHostedBrowser } from './field-instrument.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -45,7 +45,7 @@ let backups = await listBackups().catch(() => []);
 let deepData = null;
 let deepDataFetching = false;
 let deepDataError = null;
-const isHosted = Boolean(window.__hearthgateHost);
+const isHosted = Boolean(window.__hearthgateHost) || isHostedBrowser(window.location);
 
 const PRIMARY_NAV = [
   ['portal', 'Portal', '◉'],
@@ -430,7 +430,7 @@ async function fetchDeepData() {
   notice = 'Reading field…';
   render();
   try {
-    const res = await fetch('https://singsenochian.github.io/Flameclyffe/data/deep-current.json');
+    const res = await fetch('/api/v1/field/current', { cache: 'no-store' });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     deepData = await res.json();
     deepDataError = null;
@@ -488,7 +488,7 @@ function renderDeepObserver() {
         <span class="deep-value${val === null ? ' muted' : ''}">${escapeHtml(display)}</span>
       </div>
       <div class="deep-bar-track"><div class="deep-bar-fill" data-ch="${attr(key)}" style="width:${pct}%"></div></div>
-      <code class="deep-formula">${escapeHtml(axis.provenance ? `receipt: ${axis.provenance}` : 'no receipted value')}</code>
+      <code class="deep-formula">${escapeHtml(axis.provenance ? `${axis.provenanceType}: ${axis.provenance}` : 'no observed value')}</code>
     </article>`;
   }
 

@@ -3,6 +3,11 @@ export const FIELD_AXES = Object.freeze([
   ['M', 'Memory'], ['A', 'Agency'], ['Q', 'Qualia'],
 ]);
 
+export function isHostedBrowser(location = globalThis.location) {
+  if (!location || !['http:', 'https:'].includes(location.protocol)) return false;
+  return !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+}
+
 function finite(value) {
   if (value === null || value === undefined || value === '') return null;
   const number = Number(value);
@@ -26,7 +31,10 @@ export function classifyFieldInstrument({ acceptedPremaqc = null, ambient = null
           : 'unavailable',
       provenance: source === 'accepted-feedback'
         ? acceptedPremaqc.receipt_id || acceptedPremaqc.id || null
-        : source === 'ambient-projection' ? generatedAt : null,
+        : source === 'ambient-projection' && value !== null ? generatedAt : null,
+      provenanceType: source === 'accepted-feedback' && value !== null ? 'receipt'
+        : source === 'ambient-projection' && value !== null ? 'source observation'
+          : null,
     }];
   }));
   return Object.freeze({ source, axes, generatedAt, ageMs, stale, acceptedPremaqc });

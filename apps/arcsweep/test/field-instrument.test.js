@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { classifyFieldInstrument, formatFieldAge } from '../src/field-instrument.js';
+import { classifyFieldInstrument, formatFieldAge, isHostedBrowser } from '../src/field-instrument.js';
 
 test('ambient axes are source projections, never silently accepted PREMAQC', () => {
   const instrument = classifyFieldInstrument({
@@ -11,9 +11,17 @@ test('ambient axes are source projections, never silently accepted PREMAQC', () 
   assert.equal(instrument.source, 'ambient-projection');
   assert.equal(instrument.axes.P.status, 'source-projected');
   assert.equal(instrument.axes.R.status, 'unavailable');
+  assert.equal(instrument.axes.R.provenance, null);
+  assert.equal(instrument.axes.P.provenanceType, 'source observation');
   assert.equal(instrument.axes.Q.status, 'unavailable');
   assert.equal(instrument.stale, true);
   assert.match(formatFieldAge(instrument.ageMs), /days old/);
+});
+
+test('production HTTP routes identify as hosted while local development does not', () => {
+  assert.equal(isHostedBrowser({ protocol: 'https:', hostname: 'flameclyffe-starwell.netlify.app' }), true);
+  assert.equal(isHostedBrowser({ protocol: 'http:', hostname: 'localhost' }), false);
+  assert.equal(isHostedBrowser({ protocol: 'file:', hostname: '' }), false);
 });
 
 test('a receipted feedback state takes precedence and exposes its lineage', () => {

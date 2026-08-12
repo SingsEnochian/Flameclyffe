@@ -48,6 +48,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/v1/field/current"
+  to = "/.netlify/functions/field-current"
+  status = 200
+
+[[redirects]]
   from = "/templehouse/tesla-observatory"
   to = "/templehouse/tesla-observatory.html"
   status = 200
