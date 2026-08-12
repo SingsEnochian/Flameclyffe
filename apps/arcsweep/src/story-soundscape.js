@@ -1,6 +1,7 @@
 import { WorkletSynthesizer } from 'spessasynth_lib';
 import { SoundBankLoader } from 'spessasynth_core';
 
+
 const SPESSASYNTH_WORKLET_URL = new URL('../../../node_modules/spessasynth_lib/dist/spessasynth_processor.min.js', import.meta.url).href;
 
 export const STORY_SOUND_CUES = Object.freeze([
@@ -221,6 +222,7 @@ export class StorySoundscape {
     if (this.soundfontSynth) return this.soundfontSynth;
     if (!this.context?.audioWorklet) throw new Error('AudioWorklet is required for SoundFont playback in this browser.');
     await this.context.audioWorklet.addModule(SPESSASYNTH_WORKLET_URL);
+    const { WorkletSynthesizer } = await import('spessasynth_lib');
     const synth = new WorkletSynthesizer(this.context);
     synth.connect(this.buses.tones);
     this.soundfontSynth = synth;
