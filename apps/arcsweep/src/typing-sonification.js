@@ -1,5 +1,7 @@
 const SCALE = Object.freeze([0, 2, 3, 5, 7, 9, 10, 12]);
 const CADENCE = Object.freeze({ ' ': -12, '\t': -7, '\n': -5, '.': 0, ',': -2, ';': -3, ':': 2, '!': 7, '?': 5, '…': -5 });
+const SENTENCE_BOUNDARY = /[.!?…\n]/u;
+const WORD_PATTERN = /[\p{L}\p{N}'’_-]+/gu;
 
 function positive(value, field) {
   const n = Number(value);
@@ -63,6 +65,38 @@ export function wordTone(word, rootHz) {
   return Object.freeze({ word: characters.join(''), frequency_hz: frequency, root_hz: root, key_frequencies_hz: Object.freeze(keys.map((key) => key.frequency_hz)), first_key_hz: keys[0].frequency_hz, last_key_hz: keys.at(-1).frequency_hz, algorithm: 'weighted-log-key-composition/v1' });
 }
 
+export function sentenceTone(sentence, rootHz) {
+  const root = positive(rootHz, 'rootHz');
+  const source = String(sentence || '').normalize('NFKC').trim();
+  const words = [...source.matchAll(WORD_PATTERN)].map((match) => match[0]);
+  if (!words.length) return null;
+  const wordTones = words.map((word) => wordTone(word, root));
+  let weighted = 0;
+  let totalWeight = 0;
+  wordTones.forEach((tone, index) => {
+    const weight = index + 1;
+    weighted += weight * Math.log(tone.frequency_hz / root);
+    totalWeight += weight;
+  });
+  const terminal = [...source].at(-1) || '.';
+  const cadenceSemitones = Object.hasOwn(CADENCE, terminal) ? CADENCE[terminal] : 0;
+  const cadencePull = cadenceSemitones / 48;
+  const frequency = fold(root * Math.exp(weighted / totalWeight) * 2 ** cadencePull, root);
+  const firstWordHz = wordTones[0].frequency_hz;
+  const lastWordHz = wordTones.at(-1).frequency_hz;
+  return Object.freeze({
+    sentence: source,
+    words: Object.freeze([...words]),
+    frequency_hz: frequency,
+    root_hz: root,
+    word_frequencies_hz: Object.freeze(wordTones.map((tone) => tone.frequency_hz)),
+    voice_frequencies_hz: Object.freeze([frequency, firstWordHz, lastWordHz]),
+    terminal,
+    cadence_semitones: cadenceSemitones,
+    algorithm: 'weighted-log-word-composition/v1',
+  });
+}
+
 export function completedWordsFromInsertion(previousText, nextText) {
   const delta = typingDelta(previousText, nextText);
   if (!delta.inserted) return Object.freeze([]);
@@ -72,6 +106,27 @@ export function completedWordsFromInsertion(previousText, nextText) {
   for (const char of [...delta.inserted]) {
     if (/[\p{L}\p{N}'’_-]/u.test(char)) token += char;
     else if (token) { completed.push(token); token = ''; }
+  }
+  return Object.freeze(completed);
+}
+
+export function completedSentencesFromInsertion(previousText, nextText) {
+  const delta = typingDelta(previousText, nextText);
+  if (!delta.inserted) return Object.freeze([]);
+  const prefix = String(previousText).slice(0, delta.start);
+  const lastBoundary = Math.max(
+    prefix.lastIndexOf('.'), prefix.lastIndexOf('!'), prefix.lastIndexOf('?'),
+    prefix.lastIndexOf('…'), prefix.lastIndexOf('\n'),
+  );
+  let sentence = prefix.slice(lastBoundary + 1);
+  const completed = [];
+  for (const char of [...delta.inserted]) {
+    sentence += char;
+    if (SENTENCE_BOUNDARY.test(char)) {
+      const resolved = sentence.trim();
+      if (/[\p{L}\p{N}]/u.test(resolved)) completed.push(resolved);
+      sentence = '';
+    }
   }
   return Object.freeze(completed);
 }
