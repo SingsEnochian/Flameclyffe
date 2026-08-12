@@ -28,7 +28,7 @@ import {
 } from './worlds.js';
 import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, runFeedbackCycle, syncFeedbackCycle } from './feedback-loop.js';
 import { StorySoundscape } from './story-soundscape.js';
-import { FIELD_AXES, classifyFieldInstrument, formatFieldAge, isHostedBrowser } from './field-instrument.js';
+import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -468,6 +468,7 @@ function renderDeepObserver() {
 
   const world = activeWorld();
   const cycles = (state.feedbackCycles || []).filter((cycle) => cycle.world?.id === world.id);
+  const latestCycle = cycles[0] || null;
   const acceptedPremaqc = state.premaqcByWorld[world.id] || cycles[0]?.premaqc_after || null;
   const instrument = classifyFieldInstrument({ acceptedPremaqc, ambient: deepData });
   const current = deepData.weather?.current || {};
@@ -542,19 +543,44 @@ function renderDeepObserver() {
     </div>`;
   }).join('');
 
-  const spineTitle = acceptedPremaqc
-    ? `Mathematics spine · PREMAQC sequence ${escapeHtml(String(acceptedPremaqc.sequence))}`
-    : 'Mathematics spine · no accepted PREMAQC packet';
+  const packet = latestCycle?.math_spine_packet || null;
+  const fold = packet?.projection?.fold || null;
+  const jacobian = packet?.projection?.jacobian || null;
+  const spineTitle = packet
+    ? `Mathematics Spine · PREMAQC sequence ${escapeHtml(String(acceptedPremaqc.sequence))}`
+    : 'Mathematics Spine · awaiting receipted Field cycle';
   const sourceWarning = instrument.source === 'ambient-projection'
     ? `<p class="callout">Ambient projection only · ${escapeHtml(formatFieldAge(instrument.ageMs))}${instrument.stale ? ' · STALE' : ''}. It is source evidence, not accepted relational state.</p>`
     : instrument.source === 'unavailable' ? '<p class="callout">No accepted or projected PREMAQC evidence is available.</p>' : '';
   const spineHtml = `<section class="panel">
     <h2>${spineTitle}</h2>
     ${sourceWarning}
+    ${packet ? `<dl class="facts">
+      <div><dt>Observer receipt</dt><dd>${escapeHtml(latestCycle.premaqc_before.receipt_id)}</dd></div>
+      <div><dt>Cycle receipt</dt><dd>${escapeHtml(latestCycle.cycle_id)}</dd></div>
+      <div><dt>Math Spine packet</dt><dd>${escapeHtml(packet.packet_id)}</dd></div>
+      <div><dt>Fingerprint</dt><dd>${escapeHtml(packet.packet_fingerprint)}</dd></div>
+      <div><dt>Jacobian</dt><dd>${escapeHtml(latestCycle.math_wiring.jacobian_source)} · ${escapeHtml(latestCycle.math_wiring.jacobian_version)}</dd></div>
+      <div><dt>Fold detector</dt><dd>${fold?.active ? 'ACTIVE' : 'clear'} · index ${Number(jacobian?.fold_index ?? 0).toFixed(4)}</dd></div>
+      <div><dt>Deterministic replay</dt><dd>${latestCycle.replay_receipt?.matched ? 'Exact match' : 'MISMATCH'}</dd></div>
+      <div><dt>Voices</dt><dd>${escapeHtml(latestCycle.voices.map((voice) => voice.name).join(', '))} · ${latestCycle.voice_invocations?.length ? escapeHtml(latestCycle.voice_invocations.map((item) => `${item.name}: ${item.status}`).join(', ')) : 'model routes not invoked'}</dd></div>
+    </dl>` : ''}
     <div class="deep-spine">
       ${spineRows}
     </div>
-    <p class="muted" style="margin-top:1rem;font-size:.8rem">Accepted PREMAQC appears only after a receipted feedback cycle. Ambient Open-Meteo, NOAA SWPC, lunar readings, and their projections remain separately classified source evidence.</p>
+    <form id="field-feedback-form" class="stack" style="margin-top:1rem">
+      <h3>${packet ? 'Run next Field feedback cycle' : 'Run Field feedback cycle'}</h3>
+      <p class="muted">Six ambient projections enter through Observer. Qualia enters only through your firsthand report. The resulting PREMAQC packet is then compiled and replay-verified by the Math Spine.</p>
+      <label>Practice<select name="mode"><option value="writing">Writing</option><option value="roleplay">Roleplaying</option></select></label>
+      <label>What is entering from the world now?<textarea name="work" rows="5" required placeholder="Write the event without sanding its teeth off."></textarea></label>
+      <label>Firsthand Qualia · Q (0–1)<input name="qualia" type="number" min="0" max="1" step="0.01" value="0.78" required /></label>
+      <fieldset><legend>Constellation voices</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" ${voice.id === 'boxfire' ? 'checked' : ''} /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset>
+      <label class="checkbox"><input type="checkbox" name="invokeModels" /> Invoke the selected model routes before compilation</label>
+      <label>Optional received contribution<textarea name="response" rows="3"></textarea></label>
+      <label class="checkbox"><input type="checkbox" name="syncLive" /> Sync the verified cycle to the relational ledger</label>
+      <label>Session-only sync token<input type="password" name="syncToken" autocomplete="off" /></label>
+      <button type="submit">Observe → PREMAQC → Math Spine → Receipt ∞</button>
+    </form>
   </section>`;
 
   return header + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
@@ -829,6 +855,48 @@ app.addEventListener('submit', async (event) => {
         notice = `Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} synced to the relational ledger.`;
       }
     } catch (error) { notice = `Feedback cycle stopped: ${error.message}`; }
+  }
+  if (form.id === 'field-feedback-form') {
+    try {
+      if (!deepData) throw new Error('Read the live Field before running the cycle.');
+      const world = activeWorld();
+      const voiceIds = [...form.querySelectorAll('input[name="voiceIds"]:checked')].map((input) => input.value);
+      if (!voiceIds.length) throw new Error('Select at least one Constellation voice.');
+      const prior = state.premaqcByWorld[world.id] || null;
+      const observedAt = new Date().toISOString();
+      const observerPremaqc = createFieldObservationPremaqc({
+        worldId: world.id, ambient: deepData, qualia: v.qualia, narrative: v.work,
+        priorPremaqc: prior, observedAt,
+      });
+      const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
+      const voiceInvocations = form.elements.invokeModels.checked
+        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: observerPremaqc, canon, voiceIds })
+        : [];
+      const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
+      const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nReceived contribution:\n');
+      if (form.elements.invokeModels.checked && !combinedResponse) throw new Error('Every selected voice route failed; no cycle was accepted.');
+      const evidence = [{
+        schema: 'arcsweep.field-evidence/v1', source: deepData.source,
+        generated_at: deepData.generated_at, location: deepData.location,
+        weather_time: deepData.weather?.time || null,
+        space_weather_time: deepData.space_weather?.solar_wind?.time_tag || null,
+        projected_axes: structuredClone(deepData.field || {}),
+        qualia: { value: Number(v.qualia), source: 'firsthand report' },
+      }];
+      const cycle = await runFeedbackCycle({
+        world, premaqc: observerPremaqc, mode: v.mode, work: v.work,
+        response: combinedResponse, voiceIds, canonRefs: canon.map((item) => item.id),
+        voiceInvocations, soundEvents: storySoundscape.getTurnReceipts(), evidence, observedAt,
+      });
+      state.feedbackCycles.unshift(cycle);
+      state.premaqcByWorld[world.id] = cycle.premaqc_after;
+      storySoundscape.clearTurn();
+      persist(`Field cycle accepted · PREMAQC ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} · replay exact.`, 'field-feedback-cycle');
+      if (form.elements.syncLive.checked) {
+        await syncFeedbackCycle(cycle, v.syncToken);
+        notice = `Field cycle ${cycle.cycle_id} synced to the relational ledger.`;
+      }
+    } catch (error) { notice = `Field cycle stopped: ${error.message}`; }
   }
   if (form.id === 'continuity-form') { state.continuity.unshift({ id: newId('thread'), title: v.title.trim(), source: v.source, details: v.details.trim(), createdAt: isoNow() }); persist('Entry added to the Waking Thread.', 'thread'); }
   if (form.id === 'forge-form') { state.manifestations.unshift({ id: newId('working'), intention: v.intention.trim(), meaning: v.meaning.trim(), action: v.action.trim(), markers: v.markers.trim(), status: 'Seeded', createdAt: isoNow() }); persist('Forge working seeded.', 'forge'); }

@@ -77,6 +77,13 @@ test('feedback receipts include physical story-sound actions in cycle identity',
   assert.equal(cycle.premaqc_after.provenance_refs.includes('story-sound:sound-1'), true);
 });
 
+test('feedback cycle binds Observer evidence into its fingerprint and receipt', async () => {
+  const evidence = [{ source: 'field-current', generated_at: '2026-08-12T05:00:00Z' }];
+  const cycle = await runFeedbackCycle({ world, mode: 'writing', work: 'The air changes.', response: 'Received.', voiceIds: ['lioreal'], evidence, observedAt: '2026-08-12T05:01:00Z' });
+  assert.deepEqual(cycle.evidence, evidence);
+  assert.equal(cycle.replay_receipt.matched, true);
+});
+
 test('refuses to run without a selected voice', async () => {
   await assert.rejects(() => runFeedbackCycle({ world, mode: 'roleplay', work: 'A turn.', voiceIds: [] }), /Select at least one/);
 });

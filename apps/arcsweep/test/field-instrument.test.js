@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { classifyFieldInstrument, formatFieldAge, isHostedBrowser } from '../src/field-instrument.js';
+import { classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from '../src/field-instrument.js';
 
 test('ambient axes are source projections, never silently accepted PREMAQC', () => {
   const instrument = classifyFieldInstrument({
@@ -38,4 +38,14 @@ test('missing evidence remains unavailable rather than receiving seed decimals',
   assert.equal(instrument.source, 'unavailable');
   assert.equal(instrument.axes.P.value, null);
   assert.equal(instrument.axes.P.status, 'unavailable');
+});
+
+test('Observer receipts six ambient projections plus firsthand Qualia as a complete PREMAQC input', () => {
+  const ambient = { generated_at: '2026-08-12T05:00:00Z', field: { P: .5, C: .4, R: .7, E: .6, M: .2, A: .8 } };
+  const packet = createFieldObservationPremaqc({ worldId: 'ta-veren-vaen', ambient, qualia: .91, narrative: 'The branch snapped.', observedAt: '2026-08-12T05:01:00Z' });
+  assert.equal(packet.state.Q.value, .91);
+  assert.equal(packet.state.P.value, .5);
+  assert.equal(packet.state.P.contributors[0].source_kind, 'ambient-source-projection');
+  assert.equal(packet.state.Q.contributors[0].source_kind, 'firsthand-qualia');
+  assert.match(packet.receipt_id, /^observer-field-/);
 });

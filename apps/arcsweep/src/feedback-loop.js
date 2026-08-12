@@ -132,7 +132,7 @@ function nextPremaqc(packet, feedback, observedAt, soundEvents = []) {
   };
 }
 
-export async function runFeedbackCycle({ world, premaqc, mode, work, response = '', voiceIds = [], canonRefs = [], voiceInvocations = [], soundEvents = [], observedAt = new Date().toISOString() }) {
+export async function runFeedbackCycle({ world, premaqc, mode, work, response = '', voiceIds = [], canonRefs = [], voiceInvocations = [], soundEvents = [], evidence = [], observedAt = new Date().toISOString() }) {
   if (!world?.id || !world?.name) throw new Error('Feedback cycle requires a world.');
   if (!['writing', 'roleplay'].includes(mode)) throw new Error('Feedback mode must be writing or roleplay.');
   if (!String(work || '').trim()) throw new Error('A writing or roleplay turn is required.');
@@ -156,7 +156,7 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
   if (!replay.matched) throw new Error('Math Spine replay did not match.');
   const feedback = { mode, work: String(work).trim(), response: String(response).trim() };
   const next = nextPremaqc(packet, feedback, observedAt, soundEvents);
-  const cycleFingerprint = await sha256Hex({ packet_fingerprint: packet.packet_fingerprint, feedback, voice_ids: voices.map((voice) => voice.id), canon_refs: canonRefs, voice_invocations: voiceInvocations, sound_events: soundEvents });
+  const cycleFingerprint = await sha256Hex({ packet_fingerprint: packet.packet_fingerprint, feedback, voice_ids: voices.map((voice) => voice.id), canon_refs: canonRefs, voice_invocations: voiceInvocations, sound_events: soundEvents, evidence });
   return Object.freeze({
     schema: ARCSWEEP_FEEDBACK_SCHEMA,
     cycle_id: `arcsweep-cycle-${cycleFingerprint.slice(0, 24)}`,
@@ -166,6 +166,7 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
     voices: voices.map(({ id, name, route, model }) => ({ id, name, route, model })),
     voice_invocations: structuredClone(voiceInvocations),
     sound_events: structuredClone(soundEvents),
+    evidence: structuredClone(evidence),
     turn: feedback,
     premaqc_before: current,
     math_spine_packet: packet,
