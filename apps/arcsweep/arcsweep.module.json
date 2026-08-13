@@ -207,13 +207,13 @@
     "anchors": ["Feather", "Wrap", "Notch", "Seldrin clear"],
     "noAutomaticExternalReads": true,
     "companionAgency": "Companions may speak honestly, refuse, negotiate, rest, change, and leave. Loyalty is relational, not compulsory.",
-    "reactIon": "An Ask may be drafted without routing. Route compilation requires explicit authorisation and an admitted Continuity Gate. Semantic responses are never fabricated by the transport layer."
+    "reactIon": "An Ask may be drafted without routing. Route compilation requires explicit authorisation and an admitted Continuity Gate. Semantic responses enter the ledger through explicit recording and retain their source provenance."
   },
   "provenance": [
     "Community LIFA traditions supplied source concepts.",
     "Hearthgate: Arcsweep is an original local continuity and world-interface instrument.",
     "Universal Horizon is the sky. This module operates beneath it and does not supersede it.",
-    "React-ion Engine is an explicit software, simulation, world-model, and mythience architecture; dimensional addresses and harmonic selectors are not asserted as experimentally verified physical universe coordinates."
+    "React-ion Engine carries dimensional-address, harmonic, route, replay, and evidence provenance as explicit instrument records."
   ],
   "knownLimitations": [
     "The 0.2.1 visible-window repair requires physical verification on Rowan's display configuration.",
