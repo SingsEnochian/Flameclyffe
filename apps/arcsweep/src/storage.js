@@ -5,10 +5,89 @@ import { createEmptyRoomCollections, normaliseRoomCollections } from './rooms.js
 import { createWorld, normaliseWorld } from './worlds.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
+const REACTION_REGISTRY_STORAGE_KEY = 'hearthgate.arcsweep.react-ion-registry.v1';
+const REACTION_HELM_STORAGE_KEY = 'hearthgate.arcsweep.react-ion-helm.v1';
 const desktop = typeof window !== 'undefined' ? (window.arcsweepDesktop ?? window.arcsweep ?? null) : null;
 
 function uid(prefix = 'item') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function emptyReactionState() {
+  return {
+    registry: {
+      schema: 'reaction.destination-registry-store/v1',
+      version: 1,
+      destinations: [],
+      corridors: [],
+    },
+    helm: {
+      version: 1,
+      receipts: [],
+    },
+  };
+}
+
+function normaliseReactionState(value) {
+  const defaults = emptyReactionState();
+  const source = value && typeof value === 'object' ? value : {};
+  const registry = source.registry && typeof source.registry === 'object' ? source.registry : {};
+  const helm = source.helm && typeof source.helm === 'object' ? source.helm : {};
+  return {
+    registry: {
+      schema: 'reaction.destination-registry-store/v1',
+      version: 1,
+      destinations: Array.isArray(registry.destinations) ? registry.destinations : [],
+      corridors: Array.isArray(registry.corridors) ? registry.corridors : [],
+    },
+    helm: {
+      version: 1,
+      receipts: Array.isArray(helm.receipts) ? helm.receipts : [],
+    },
+  };
+}
+
+function readLocalJson(key) {
+  try {
+    const raw = globalThis.localStorage?.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalJson(key, value) {
+  try { globalThis.localStorage?.setItem(key, JSON.stringify(value)); } catch {}
+}
+
+function mergeReactionSidecars(state) {
+  const reaction = normaliseReactionState(state.reaction);
+  const registry = readLocalJson(REACTION_REGISTRY_STORAGE_KEY);
+  const helm = readLocalJson(REACTION_HELM_STORAGE_KEY);
+  if (registry?.version === 1 && Array.isArray(registry.destinations) && Array.isArray(registry.corridors)) {
+    reaction.registry = {
+      schema: 'reaction.destination-registry-store/v1',
+      version: 1,
+      destinations: registry.destinations,
+      corridors: registry.corridors,
+    };
+  }
+  if (helm?.version === 1 && Array.isArray(helm.receipts)) {
+    reaction.helm = { version: 1, receipts: helm.receipts };
+  }
+  state.reaction = reaction;
+  return state;
+}
+
+function seedReactionSidecars(reactionInput, { force = false } = {}) {
+  const reaction = normaliseReactionState(reactionInput);
+  if (force || !readLocalJson(REACTION_REGISTRY_STORAGE_KEY)) {
+    writeLocalJson(REACTION_REGISTRY_STORAGE_KEY, reaction.registry);
+  }
+  if (force || !readLocalJson(REACTION_HELM_STORAGE_KEY)) {
+    writeLocalJson(REACTION_HELM_STORAGE_KEY, reaction.helm);
+  }
+  return reaction;
 }
 
 export function createDefaultState() {
@@ -57,6 +136,7 @@ export function createDefaultState() {
     feedbackCycles: [],
     premaqcByWorld: {},
     houseBundles: [],
+    reaction: emptyReactionState(),
     provenance: {
       createdAt: now,
       updatedAt: now,
@@ -116,6 +196,7 @@ export function normaliseState(value) {
     feedbackCycles: Array.isArray(imported.feedbackCycles) ? imported.feedbackCycles : [],
     premaqcByWorld: imported.premaqcByWorld && typeof imported.premaqcByWorld === 'object' ? imported.premaqcByWorld : {},
     houseBundles: Array.isArray(imported.houseBundles) ? imported.houseBundles : [],
+    reaction: normaliseReactionState(imported.reaction),
     provenance: {
       ...defaults.provenance,
       ...(imported.provenance || {}),
@@ -155,6 +236,8 @@ export async function loadState() {
     const legacy = result?.state ? null : readBrowserState();
     const initial = result?.state || legacy || createDefaultState();
     const installed = installCurrentHouseDrLibrary(initial);
+    mergeReactionSidecars(installed.state);
+    seedReactionSidecars(installed.state.reaction);
     if (installed.changed) {
       if (result?.state && desktop.createBackup) {
         await desktop.createBackup('before-house-dr-library-update').catch(() => null);
@@ -171,12 +254,15 @@ export async function loadState() {
   }
 
   const installed = installCurrentHouseDrLibrary(readBrowserState() || createDefaultState());
+  mergeReactionSidecars(installed.state);
+  seedReactionSidecars(installed.state.reaction);
   if (installed.changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(installed.state));
   return installed.state;
 }
 
 let saveChain = Promise.resolve();
 export function saveState(state, meta = {}) {
+  mergeReactionSidecars(state);
   state.provenance = {
     ...(state.provenance || {}),
     updatedAt: new Date().toISOString(),
@@ -189,6 +275,12 @@ export function saveState(state, meta = {}) {
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
   return Promise.resolve({ ok: true, mode: 'browser-development-fallback' });
+}
+
+export async function persistReactionSidecars(meta = {}) {
+  const state = await loadState();
+  mergeReactionSidecars(state);
+  return saveState(state, { reason: 'reaction-sidecar-sync', ...meta });
 }
 
 export function newId(prefix) {
@@ -209,7 +301,9 @@ function browserDownload(state) {
 }
 
 export async function exportState(state) {
-  return desktop?.exportState ? desktop.exportState(state) : browserDownload(state);
+  const snapshot = JSON.parse(JSON.stringify(state));
+  mergeReactionSidecars(snapshot);
+  return desktop?.exportState ? desktop.exportState(snapshot) : browserDownload(snapshot);
 }
 
 export async function importState(file = null) {
@@ -221,7 +315,10 @@ export async function importState(file = null) {
     const text = await file.text();
     imported = JSON.parse(text);
   }
-  return imported ? installCurrentHouseDrLibrary(imported).state : null;
+  if (!imported) return null;
+  const installed = installCurrentHouseDrLibrary(imported).state;
+  seedReactionSidecars(installed.reaction, { force: true });
+  return installed;
 }
 
 export async function getStorageInfo() {
@@ -230,7 +327,9 @@ export async function getStorageInfo() {
 }
 
 export async function createBackup(reason = 'manual') {
-  return desktop?.createBackup ? desktop.createBackup(reason) : { ok: false, unavailable: true };
+  if (!desktop?.createBackup) return { ok: false, unavailable: true };
+  await persistReactionSidecars({ source: 'backup-preflight' });
+  return desktop.createBackup(reason);
 }
 
 export async function listBackups() {
@@ -240,7 +339,10 @@ export async function listBackups() {
 export async function restoreBackup(name) {
   if (!desktop?.restoreBackup) return null;
   const result = await desktop.restoreBackup(name);
-  return result?.state ? installCurrentHouseDrLibrary(result.state).state : null;
+  if (!result?.state) return null;
+  const installed = installCurrentHouseDrLibrary(result.state).state;
+  seedReactionSidecars(installed.reaction, { force: true });
+  return installed;
 }
 
 export async function addAttachments() {
