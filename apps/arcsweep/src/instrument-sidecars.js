@@ -12,3 +12,4 @@ import './react-ion-historical-replay-sidecar.js';
 import './react-ion-world-tone-sync-sidecar.js';
 import './react-ion-concordance-anchor-sidecar.js';
 import './react-ion-replay-room-sidecar.js';
+import './react-ion-deepstory-sidecar.js';
