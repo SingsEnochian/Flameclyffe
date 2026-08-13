@@ -41,8 +41,8 @@ export async function createProjectionGraphSnapshot({
     edge_count: nodes.reduce((sum, node) => sum + node.edges.length, 0),
     nodes: Object.freeze(nodes),
     authority: Object.freeze({
-      snapshot_captures_declared_software_graph_only: true,
-      physical_topology_claimed: false,
+      snapshot_scope: 'projection-routing-graph',
+      replay_basis: 'captured-routing-state',
     }),
   };
   const fingerprint = await sha256Hex(core);
