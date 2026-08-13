@@ -52,7 +52,7 @@ function renderTrace(trace, graphSnapshot) {
     <p class="eyebrow">Trans-Cosmic Protocol · flight recorder</p>
     <p><b>${trace.delivered ? 'Packet delivered to route endpoint' : 'Packet expired before endpoint'}</b> · ${esc(trace.final_code)} · ${trace.hops.length} hop${trace.hops.length === 1 ? '' : 's'}</p>
     ${graphSnapshot ? `<p class="muted"><b>Captured graph:</b> ${esc(graphSnapshot.snapshot_id)} · ${graphSnapshot.node_count} nodes · ${graphSnapshot.edge_count} edges</p>` : ''}
-    <details><summary>Transport hops</summary><ol>${hops}</ol><p class="muted">Delivery is transport state only. It does not declare the requested transformation fulfilled.</p></details>
+    <details><summary>Transport hops</summary><ol>${hops}</ol><p class="muted">Transport receipt and transformation-state receipt remain separate links in the same chain.</p></details>
   </div>`;
 }
 
