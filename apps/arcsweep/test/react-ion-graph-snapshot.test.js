@@ -67,5 +67,5 @@ test('captured graph can reproduce an original route after the live graph has ch
 
   assert.equal(currentReplay.matched, false);
   assert.equal(historicalReplay.matched, true);
-  assert.equal(snapshot.authority.physical_topology_claimed, false);
+  assert.equal(snapshot.authority.snapshot_scope, 'projection-routing-graph');
 });
