@@ -28,21 +28,29 @@ export async function inspectProjectionRoutes({
   maximumHops = 8,
   limit = 5,
   maximumCandidates = 512,
+  maximumExploredStates = 4096,
 } = {}) {
   invariant(request?.schema === REACTION_NAV_SCHEMA, 'a compiled navigation request is required');
   invariant(graph && typeof graph === 'object', 'graph is required');
   const hopLimit = finitePositiveInteger(maximumHops, 'maximumHops', 8);
   const resultLimit = finitePositiveInteger(limit, 'limit', 5);
   const candidateLimit = finitePositiveInteger(maximumCandidates, 'maximumCandidates', 512);
+  const explorationLimit = finitePositiveInteger(maximumExploredStates, 'maximumExploredStates', 4096);
 
   const start = request.source;
   const target = request.target;
   const rawCandidates = [];
   const stack = [{ node: start, path: [start], edges: [], cost: 0 }];
   let truncated = false;
+  let exploredStates = 0;
 
   while (stack.length) {
+    if (exploredStates >= explorationLimit) {
+      truncated = true;
+      break;
+    }
     const current = stack.pop();
+    exploredStates += 1;
     if (current.node === target) {
       rawCandidates.push(current);
       if (rawCandidates.length >= candidateLimit) {
@@ -108,6 +116,8 @@ export async function inspectProjectionRoutes({
     maximum_hops: hopLimit,
     result_limit: resultLimit,
     candidate_limit: candidateLimit,
+    exploration_limit: explorationLimit,
+    explored_states: exploredStates,
     truncated,
     candidates: Object.freeze(candidates),
   };
