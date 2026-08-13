@@ -78,7 +78,7 @@ test('continuity gate blocks missing and below-floor invariants', () => {
   assert.ok(gate.blocked_by.includes('missing:crew'));
 });
 
-test('builds route edges from dimensional distance, the real Jacobian analyser, Runa and Continuity Gate', () => {
+test('builds route edges from dimensional distance, the Jacobian analyser, Runa and Continuity Gate', () => {
   const from = createReactionEndpoint({
     name: 'earth.anchor',
     world: { id: 'waking-world', name: 'Waking World' },
@@ -108,12 +108,12 @@ test('builds route edges from dimensional distance, the real Jacobian analyser, 
   assert.equal(edge.diagnostics.continuity.admitted, true);
 });
 
-test('binds a Bifrost Ask to the existing Requested Transformation instrument without declaring success', async () => {
+test('binds a Bifrost Ask to the existing Requested Transformation instrument with separate outcome provenance', async () => {
   const packet = await createAskPacket({
     sender: 'Rowan',
     target: 'TerraAeterna',
     world: 'Terra Aeterna',
-    intention: 'Ask for a bounded change and listen for the measured response',
+    intention: 'Ask for a specified change and listen for the measured response',
     transformation: 'Increase observable relational coherence',
     constraints: { preserve: ['agency', 'continuity'] },
     consent: { required: true, granted: true, revocable: true, scope: 'this request only' },
@@ -172,7 +172,8 @@ test('writes a projection route as a DEEPTime extension with receipted PREMAQC p
   assert.equal(receipt.dataset, 'DEEPTime');
   assert.equal(receipt.schema, REACTION_DEEPTIME_SCHEMA);
   assert.equal(receipt.reaction.route_id, route.route_id);
-  assert.equal(receipt.authority.route_is_observation, false);
+  assert.equal(receipt.authority.route_record_class, 'projection-path');
+  assert.equal(receipt.authority.source_state_class, 'receipted-premaqc');
   assert.match(receipt.provenance.accepted_state_hash, /^[0-9a-f]{64}$/);
   assert.ok(receipt.provenance.source_receipt_hashes.includes(route.fingerprint));
 });
