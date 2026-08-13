@@ -1,0 +1,51 @@
+name: Arcsweep build check
+
+on:
+  push:
+    branches:
+      - main
+      - codex/arcsweep-feedback-loop
+      - feature/react-ion-engine-v0.1
+    paths:
+      - 'apps/arcsweep/**'
+      - 'apps/starwell/src/world-tone-fold-approval.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.nvmrc'
+      - '.github/workflows/arcsweep-build.yml'
+  pull_request:
+    branches:
+      - main
+      - codex/arcsweep-feedback-loop
+    paths:
+      - 'apps/arcsweep/**'
+      - 'apps/starwell/src/world-tone-fold-approval.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.nvmrc'
+      - '.github/workflows/arcsweep-build.yml'
+  workflow_dispatch:
+
+jobs:
+  test-and-build-arcsweep:
+    name: Test and build Arcsweep
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test Arcsweep
+        run: npm run arcsweep:test
+
+      - name: Build Arcsweep
+        run: npm run arcsweep:build
