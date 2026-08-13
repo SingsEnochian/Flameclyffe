@@ -209,6 +209,10 @@ function registrationToEndpoint(registration) {
   });
 }
 
+function endpointNames(endpoint) {
+  return uniqueStrings([endpoint.name, ...(endpoint.aliases || [])].map((value) => String(value).toLowerCase()));
+}
+
 function addGraphEdge(graph, from, edge) {
   graph[from] ||= [];
   graph[from].push(edge);
@@ -217,12 +221,12 @@ function addGraphEdge(graph, from, edge) {
 export function compileReactionRegistry(storeInput) {
   const store = normaliseReactionRegistryStore(storeInput);
   const diagnostics = [];
-  const approved = [];
+  const parsedApproved = [];
 
   for (const registration of store.destinations) {
     if (registration?.state !== 'approved') continue;
     try {
-      approved.push(registrationToEndpoint(registration));
+      parsedApproved.push(registrationToEndpoint(registration));
     } catch (error) {
       diagnostics.push(Object.freeze({
         kind: 'destination-invalid',
@@ -232,12 +236,33 @@ export function compileReactionRegistry(storeInput) {
     }
   }
 
+  const claimedNames = new Map();
+  const admitted = [];
+  for (const endpoint of parsedApproved) {
+    const names = endpointNames(endpoint);
+    const conflicts = names.filter((name) => claimedNames.has(name));
+    if (conflicts.length) {
+      diagnostics.push(Object.freeze({
+        kind: 'destination-name-conflict',
+        registration_id: endpoint.provenance?.registration_id ?? null,
+        conflicting_names: Object.freeze(conflicts),
+        conflicts_with: Object.freeze(uniqueStrings(conflicts.map((name) => claimedNames.get(name)))),
+        message: `destination quarantined because approved DNS name(s) already exist: ${conflicts.join(', ')}`,
+      }));
+      continue;
+    }
+    admitted.push(endpoint);
+    for (const name of names) claimedNames.set(name, endpoint.provenance?.registration_id || endpoint.name);
+  }
+
   let registry;
+  let runtimeDestinations = admitted;
   try {
-    registry = createReactionDestinationRegistry(approved);
+    registry = createReactionDestinationRegistry(admitted);
   } catch (error) {
     diagnostics.push(Object.freeze({ kind: 'registry-conflict', message: error.message }));
     registry = createReactionDestinationRegistry([]);
+    runtimeDestinations = [];
   }
 
   const graph = {};
@@ -309,7 +334,7 @@ export function compileReactionRegistry(storeInput) {
   return Object.freeze({
     schema: REACTION_REGISTRY_RUNTIME_SCHEMA,
     registry,
-    destinations: Object.freeze(approved),
+    destinations: Object.freeze(runtimeDestinations),
     graph: Object.freeze(Object.fromEntries(Object.entries(graph).map(([key, edges]) => [key, Object.freeze(edges)]))),
     corridors: Object.freeze(corridors),
     diagnostics: Object.freeze(diagnostics),
