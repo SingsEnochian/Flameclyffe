@@ -137,7 +137,7 @@ function render(world, store, message = '') {
       <label>What must remain unchanged?<input name="preserve" value="identity, continuity, agency, causal-history" /></label>
       <details class="reaction-instrument-bay"><summary>Instrument Bay</summary>
         <p class="muted">When an approved DNS name resolves, its registered address and Runa signature win. These fields remain the manual fallback and direct-route candidate.</p>
-        <div class="grid two compact-grid"><label>Source address<input name="sourceAddress" value="1.1.1.1" required /></label><label>Target address<input name="targetAddress" placeholder="137.42.219.88@220:φ=1.724" required /></label></div>
+        <div class="grid two compact-grid"><label>Source address<input name="sourceAddress" value="1.1.1.1" /></label><label>Target address<input name="targetAddress" placeholder="137.42.219.88@220:φ=1.724" /></label></div>
         <div class="grid two compact-grid"><label>Target world ID<input name="targetWorldId" value="${esc(world.id)}" /></label><label>Target world name<input name="targetWorldName" value="${esc(world.name)}" /></label></div>
         <div class="grid four compact-grid"><label>Source Runa Hz<input name="sourceHz" type="number" min="0.001" step="0.001" /></label><label>Source phase φ<input name="sourcePhase" type="number" step="0.001" /></label><label>Target Runa Hz<input name="targetHz" type="number" min="0.001" step="0.001" /></label><label>Target phase φ<input name="targetPhase" type="number" step="0.001" /></label></div>
         <div class="grid three compact-grid"><label>Identity continuity<input name="identityScore" type="number" min="0" max="1" step="0.01" value="0.95" /></label><label>Thread continuity<input name="continuityScore" type="number" min="0" max="1" step="0.01" value="0.95" /></label><label>Agency continuity<input name="agencyScore" type="number" min="0" max="1" step="0.01" value="0.95" /></label></div>
@@ -253,6 +253,7 @@ document.addEventListener('submit', async (event) => {
       },
       vetoes: authorised ? [] : ['ask-not-authorised'],
     });
+    const canRoute = authorised && operatorGate.admitted;
     const directEdge = buildProjectionEdge({
       from: source,
       to: target,
@@ -267,12 +268,12 @@ document.addEventListener('submit', async (event) => {
     });
 
     const graph = Object.fromEntries(Object.entries(runtime.graph).map(([key, edges]) => [key, [...edges]]));
-    if (authorised && form.elements.allowDirect.checked && !directEdge.blocked) addEdge(graph, navigation.source, directEdge);
+    if (canRoute && form.elements.allowDirect.checked && !directEdge.blocked) addEdge(graph, navigation.source, directEdge);
 
     let route = null;
     let inspection = null;
     let routeError = null;
-    if (authorised) {
+    if (canRoute) {
       try {
         inspection = await inspectProjectionRoutes({ request: navigation, graph, limit: 5, maximumHops: 8 });
         route = await chooseProjectionRoute({ request: navigation, graph, maximumHops: 32 });
@@ -280,7 +281,7 @@ document.addEventListener('submit', async (event) => {
         routeError = error.message;
       }
     } else {
-      routeError = 'ask-not-authorised';
+      routeError = operatorGate.blocked_by.join(', ') || 'route-gate-closed';
     }
 
     const packet = await createAskPacket({
@@ -351,6 +352,7 @@ document.addEventListener('submit', async (event) => {
         route_compiled: Boolean(route),
         ask_authorised: authorised,
         operator_continuity_gate_admitted: operatorGate.admitted,
+        route_gate_admitted: canRoute,
         physical_travel_claimed: false,
       },
     };
