@@ -69,7 +69,7 @@ export function classifyProjectionState({
   const cusp = 1 - min / (max + Math.abs(finite(epsilon, 'epsilon')));
   const cuspScore = Number(Math.max(0, Math.min(1, cusp)).toFixed(9));
 
-  const state = continuityValue < continuityFloor ? 'CONTINUITY_UNSAFE'
+  const state = continuityValue < continuityFloor ? 'CONTINUITY_VETO'
     : cuspScore >= cuspThreshold ? 'CUSP_NEARBY'
       : harmonic > harmonicCeiling ? 'DEGRADED'
         : 'READY';
@@ -111,8 +111,8 @@ export async function compileNavigationRequest({
     source_lattice: await resolveE8x32Coordinate(sourceAddress),
     target_lattice: await resolveE8x32Coordinate(targetAddress),
     authority: Object.freeze({
-      navigation_is_projection_model: true,
-      physical_multiverse_travel_claimed: false,
+      navigation_mode: 're-projection',
+      coordinate_resolution: 'bifrost-e8x32',
       continuity_required: true,
     }),
   };
