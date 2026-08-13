@@ -160,6 +160,7 @@ export async function chooseProjectionRoute({
 
     const edges = Array.isArray(graph[current]) ? graph[current] : [];
     for (const edge of edges) {
+      if (edge?.blocked === true || edge?.admitted === false) continue;
       const next = String(edge?.to ?? '').trim();
       invariant(next, `graph edge from ${current} is missing to`);
       if (visited.has(next)) continue;
