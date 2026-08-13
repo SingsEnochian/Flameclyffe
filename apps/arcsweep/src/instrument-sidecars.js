@@ -9,3 +9,4 @@ import './react-ion-route-map-sidecar.js';
 import './react-ion-response-console-sidecar.js';
 import './react-ion-replay-console-sidecar.js';
 import './react-ion-world-tone-sync-sidecar.js';
+import './react-ion-concordance-anchor-sidecar.js';
