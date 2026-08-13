@@ -12,10 +12,12 @@ function endpoint({ consentScope = 'private', visibility = 'private', status = '
       name: 'First Window',
       consent_scope: consentScope,
       confidence_mode: 'observed',
-      visibility,
-      status,
     } : null,
     address: anchor ? '10.20.30.40@220' : '1.2.3.4@220',
+    provenance: anchor ? {
+      anchor_visibility: visibility,
+      anchor_status: status,
+    } : {},
   });
 }
 
