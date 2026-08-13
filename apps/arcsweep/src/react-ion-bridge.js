@@ -84,8 +84,8 @@ export function createRunaHarmonicSignature({
       weight: unit(component?.weight ?? 1, `components[${index}].weight`),
     }))),
     authority: Object.freeze({
-      harmonic_signature_is_profile_data: true,
-      physical_universe_locator_claimed: false,
+      harmonic_signature_role: 'routing-compatibility-profile',
+      provenance_class: evidenceClass,
     }),
   });
 }
@@ -430,9 +430,8 @@ export async function createReactionDeepTimeReceipt({
       transformation_request_id: transformationRequest?.request_id ?? null,
     }),
     authority: Object.freeze({
-      route_is_modelled_projection_path: true,
-      route_is_observation: false,
-      physical_travel_claimed: false,
+      route_record_class: 'projection-path',
+      source_state_class: 'receipted-premaqc',
       accepted_premaqc_remains_source_state: true,
       append_only_intent: true,
     }),
