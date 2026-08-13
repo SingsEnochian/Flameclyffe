@@ -107,10 +107,10 @@ export async function routeProtocolResponse({
     hops: Object.freeze(hops),
     authority: Object.freeze({
       semantic_response_is_distinct_from_transport_ack: true,
-      transport_scope: 'response-delivery',
-      transformation_state_source: 'separate-receipt-chain',
+      response_delivery_does_not_prove_requested_transformation_occurred: true,
       accept_means_accepted_not_observed: response.code === 'ACCEPT',
       reverse_route_is_solved_not_assumed: true,
+      physical_transport_claimed: false,
     }),
   };
   const fingerprint = await sha256Hex(core);
