@@ -102,6 +102,10 @@ export async function createDestinationRegistration({
   locationName = null,
   anchorId = null,
   anchorName = null,
+  anchorConsentScope = null,
+  anchorConfidenceMode = null,
+  anchorVisibility = null,
+  anchorStatus = null,
   address,
   rootHz = null,
   phase = null,
@@ -127,6 +131,10 @@ export async function createDestinationRegistration({
     anchor: anchorId || anchorName ? Object.freeze({
       id: String(anchorId ?? '').trim() || null,
       name: String(anchorName ?? '').trim() || null,
+      consent_scope: String(anchorConsentScope ?? '').trim() || null,
+      confidence_mode: String(anchorConfidenceMode ?? '').trim() || null,
+      visibility: String(anchorVisibility ?? '').trim() || null,
+      status: String(anchorStatus ?? '').trim() || null,
     }) : null,
     address: text(address, 'address'),
     harmonic: rootHz == null || String(rootHz).trim() === '' ? null : Object.freeze({
@@ -204,6 +212,8 @@ function registrationToEndpoint(registration) {
       registration_fingerprint: registration.fingerprint,
       registration_kind: registration.kind,
       registration_state: registration.state,
+      anchor_visibility: registration.anchor?.visibility ?? null,
+      anchor_status: registration.anchor?.status ?? null,
       source: 'react-ion-registry',
     },
   });
