@@ -55,7 +55,7 @@ function responseCards(receipt) {
 function render(receipt, message = '') {
   if (!receipt?.ask || !receipt?.route) return '';
   return `<section class="reaction-response-console" data-reaction-response-console>
-    <div class="section-heading compact-heading"><div><p class="eyebrow">Bifröst · semantic return channel</p><h3>Response Console</h3><p class="muted">Record a response that was actually received or intentionally authored in a story/simulation. The engine never manufactures one. Semantic response and transport ACK remain separate.</p></div></div>
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Bifröst · semantic return channel</p><h3>Response Console</h3><p class="muted">Responses enter the ledger through explicit recording and retain their evidence source. Semantic response and transport ACK remain separate protocol layers.</p></div></div>
     ${message ? `<p class="callout">${esc(message)}</p>` : ''}
     <form data-reaction-response-form class="stack compact-stack">
       <div class="grid three compact-grid"><label>Response<select name="code">${RESPONSE_CODES.map((code) => `<option>${esc(code)}</option>`).join('')}</select></label><label>Responder<input name="responder" value="${esc(receipt.target.name || 'Target')}" required /></label><label>Return TTL<input name="ttl" type="number" min="1" max="64" value="8" /></label></div>
