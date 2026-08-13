@@ -10,6 +10,12 @@ function normalise(value, fallback = '') {
   return String(value ?? fallback).trim().toLowerCase();
 }
 
+function defaultVisibility(consentScope) {
+  if (consentScope === 'private') return 'private';
+  if (consentScope === 'circle') return 'circle';
+  return 'public';
+}
+
 export function evaluateEndpointAccessPolicy({
   endpoint,
   globalAuthorised = false,
@@ -23,9 +29,15 @@ export function evaluateEndpointAccessPolicy({
   if (!globalAuthorised) blockedBy.push('global-helm-authorisation-required');
 
   const anchor = endpoint.anchor;
-  const visibility = normalise(anchor?.visibility, 'private');
   const consentScope = normalise(anchor?.consent_scope, anchor ? 'private' : 'local');
-  const anchorStatus = normalise(anchor?.status, anchor ? 'active' : 'not-anchor');
+  const visibility = normalise(
+    anchor?.visibility ?? endpoint.provenance?.anchor_visibility,
+    anchor ? defaultVisibility(consentScope) : 'local',
+  );
+  const anchorStatus = normalise(
+    anchor?.status ?? endpoint.provenance?.anchor_status,
+    anchor ? 'active' : 'not-anchor',
+  );
 
   if (anchor && anchorStatus !== 'active') blockedBy.push(`anchor-status:${anchorStatus}`);
 
@@ -61,6 +73,7 @@ export function evaluateEndpointAccessPolicy({
       endpoint_policy_cannot_override_global_helm_authorisation: true,
       private_anchor_does_not_become_public_by_dns_registration: true,
       no_passive_inheritance_requires_explicit_targeting: true,
+      registry_provenance_may_supply_anchor_visibility_and_status: true,
     }),
   });
 }
