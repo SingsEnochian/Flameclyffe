@@ -8,19 +8,19 @@ import {
 } from '../src/react-ion-engine.js';
 
 test('weights continuity and Jacobian risk more heavily than ordinary projection distance', () => {
-  const safer = edgeProjectionCost({
+  const admitted = edgeProjectionCost({
     projection_distance: 0.6,
     jacobian_risk: 0.05,
     harmonic_mismatch: 0.1,
     continuity_risk: 0.02,
   });
-  const dangerous = edgeProjectionCost({
+  const highRisk = edgeProjectionCost({
     projection_distance: 0.1,
     jacobian_risk: 0.6,
     harmonic_mismatch: 0.05,
     continuity_risk: 0.5,
   });
-  assert.ok(safer < dangerous);
+  assert.ok(admitted < highRisk);
 });
 
 test('classifies a nearly singular navigation Jacobian as cusp-nearby', () => {
@@ -34,14 +34,14 @@ test('classifies a nearly singular navigation Jacobian as cusp-nearby', () => {
   assert.ok(state.cusp_score > 0.9);
 });
 
-test('puts continuity failure ahead of all other navigation states', () => {
+test('puts a continuity veto ahead of all other navigation states', () => {
   const state = classifyProjectionState({
     sigmaMin: 0.8,
     sigmaMax: 1,
     continuity: 0.4,
     harmonicMismatch: 0.05,
   });
-  assert.equal(state.state, 'CONTINUITY_UNSAFE');
+  assert.equal(state.state, 'CONTINUITY_VETO');
 });
 
 test('compiles a navigation request into compact and E8x32 representations', async () => {
@@ -55,14 +55,15 @@ test('compiles a navigation request into compact and E8x32 representations', asy
   assert.equal(request.target, '0137.0042.0219.0088@7.835769:φ=1.724');
   assert.equal(request.source_lattice.dimensions, 256);
   assert.equal(request.target_lattice.blocks.length, 32);
-  assert.equal(request.authority.physical_multiverse_travel_claimed, false);
+  assert.equal(request.authority.navigation_mode, 're-projection');
+  assert.equal(request.authority.coordinate_resolution, 'bifrost-e8x32');
 });
 
 test('routes around a cheap-looking edge when its continuity and cusp costs are worse', async () => {
   const request = await compileNavigationRequest({
     source: '1.1.1.1@220',
     target: '4.4.4.4@528',
-    intention: 'Find the safest available projection path',
+    intention: 'Find the lowest-cost continuity-admitted projection path',
     requestedAt: '2026-08-13T04:30:00.000Z',
   });
   const start = request.source;
