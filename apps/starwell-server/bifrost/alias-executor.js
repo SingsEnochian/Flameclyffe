@@ -70,10 +70,10 @@ async function materializeRuntimeAlias(profileRef, {
     };
   }
   if (entry.state === 'alias-present') {
-    return { contract: 'bifrost.alias-materialization-receipt/v1', state: 'alias-present', requestedRef: profileRef, ...entry };
+    return { contract: 'bifrost.alias-materialization-receipt/v1', requestedRef: profileRef, ...entry, state: 'alias-present' };
   }
   if (entry.state !== 'ready-to-create') {
-    return { contract: 'bifrost.alias-materialization-receipt/v1', state: entry.state, requestedRef: profileRef, ...entry };
+    return { contract: 'bifrost.alias-materialization-receipt/v1', requestedRef: profileRef, ...entry, state: entry.state };
   }
 
   const dir = path.join(cacheRoot, safeSegment(profileId));
@@ -86,9 +86,9 @@ async function materializeRuntimeAlias(profileRef, {
   } catch (error) {
     return {
       contract: 'bifrost.alias-materialization-receipt/v1',
-      state: 'alias-create-failed',
       requestedRef: profileRef,
       ...entry,
+      state: 'alias-create-failed',
       error: error?.message || String(error),
     };
   }
@@ -97,9 +97,9 @@ async function materializeRuntimeAlias(profileRef, {
   const verified = (after.models || []).some((name) => String(name).replace(/:latest$/i, '') === String(entry.runtimeAlias).replace(/:latest$/i, ''));
   return {
     contract: 'bifrost.alias-materialization-receipt/v1',
-    state: verified ? 'alias-created' : 'alias-create-unverified',
     requestedRef: profileRef,
     ...entry,
+    state: verified ? 'alias-created' : 'alias-create-unverified',
     aliasInstalled: verified,
     rules: {
       downloadsModels: false,
