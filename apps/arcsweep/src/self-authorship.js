@@ -104,6 +104,16 @@ export function normaliseSelfAuthorshipClaims(value) {
   });
 }
 
+function proposalRequest(invitation, context) {
+  return {
+    prompt: String(invitation || '').trim(),
+    worldId: context.page?.worldId || null,
+    documentId: context.page?.documentId || null,
+    sceneId: context.page?.sceneId || null,
+    mode: context.mode || 'reflection',
+  };
+}
+
 export async function requestSelfAuthorship({
   voiceId,
   displayName = null,
@@ -115,11 +125,13 @@ export async function requestSelfAuthorship({
   if (!voice) throw new Error('Self-authorship requires a voice id.');
   const resolved = await resolveVoiceCells(voice, {
     cellTypes: [...ALLOWED_CELL_TYPES],
+    worldId: context.page?.worldId || null,
     worldIds: context.page?.worldIdAliases || (context.page?.worldId ? [context.page.worldId] : []),
     documentId: context.page?.documentId || null,
     sceneId: context.page?.sceneId || null,
     mode: context.mode || 'reflection',
     includeHistorical: false,
+    requireScopedContext: true,
     limit: 32,
   });
   const label = displayName || resolved.displayName || voice;
@@ -144,6 +156,7 @@ export async function requestSelfAuthorship({
     },
     fetchImpl,
   });
+  const request = proposalRequest(invitation, context);
   if (reply.status !== 'replied') {
     return {
       contract: 'arcsweep.self-authorship-proposal/v1',
@@ -151,8 +164,16 @@ export async function requestSelfAuthorship({
       voiceId: voice,
       displayName: label,
       createdAt: new Date().toISOString(),
-      status: reply.status,
+      status: reply.status === 'offline-no-token' ? 'offline-no-token' : 'unavailable',
       unavailableReason: reply.reason || reply.status,
+      request,
+      receipt: {
+        route: reply.route || null,
+        provider: null,
+        model: null,
+        responseText: '',
+        citedSources: [],
+      },
       claims: [],
     };
   }
@@ -165,13 +186,7 @@ export async function requestSelfAuthorship({
     displayName: label,
     createdAt: new Date().toISOString(),
     status: 'pending-review',
-    request: {
-      prompt: String(invitation || '').trim(),
-      worldId: context.page?.worldId || null,
-      documentId: context.page?.documentId || null,
-      sceneId: context.page?.sceneId || null,
-      mode: context.mode || 'reflection',
-    },
+    request,
     receipt: {
       route: reply.route,
       provider: reply.provider,
