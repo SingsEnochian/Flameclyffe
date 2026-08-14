@@ -54,16 +54,35 @@ test('normaliseState upgrades an older archive while retaining Observatory recei
     receipts: [{ review_receipt_id: 'feedback-review-1' }],
     updated_at: '2026-08-14T14:00:00.000Z',
   };
+  legacy.transformationRequests = {
+    version: 1,
+    byWorld: {
+      'terra-aeterna': {
+        requests: [{ request_id: 'ask-keep-me' }],
+        responses: [{ response_id: 'response-keep-me' }],
+        circuits: [{ circuit_id: 'circuit-keep-me' }],
+      },
+    },
+  };
   const upgraded = normaliseState(legacy);
   assert.equal(upgraded.version, '0.3.0');
   assert.equal(upgraded.observatory.deep_time_records[0].id, 'deep-time-keep-me');
   assert.equal(upgraded.observatory.theory_reviews[0].receipt_id, 'review-keep-me');
   assert.equal(upgraded.feedbackQueue.entries.c1.status, 'accepted');
+  assert.equal(upgraded.transformationRequests.byWorld['terra-aeterna'].requests[0].request_id, 'ask-keep-me');
+  assert.equal(upgraded.transformationRequests.byWorld['terra-aeterna'].circuits[0].circuit_id, 'circuit-keep-me');
 });
 
 test('import validation refuses malformed Observatory collections', () => {
   assert.throws(
     () => validateImportedState({ observatory: { deep_time_records: {} } }),
     /observatory deep_time_records must be an array/i,
+  );
+});
+
+test('import validation refuses malformed persisted transformation receipt collections', () => {
+  assert.throws(
+    () => validateImportedState({ transformationRequests: { version: 1, byWorld: { terra: { requests: {} } } } }),
+    /transformationRequests terra.requests must be an array/i,
   );
 });
