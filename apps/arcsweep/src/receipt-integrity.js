@@ -125,6 +125,26 @@ async function verifyRuna(node) {
   return verifyHash(node, receipt?.suggestion_fingerprint, cloneWithout(receipt, ['suggestion_id', 'suggestion_fingerprint']));
 }
 
+async function verifyRunaRendererCandidate(node) {
+  const receipt = node.receipt;
+  return verifyHash(node, receipt?.candidate_fingerprint, cloneWithout(receipt, ['candidate_id', 'candidate_fingerprint']));
+}
+
+async function verifyRunaRendererReview(node) {
+  const receipt = node.receipt;
+  return verifyHash(node, receipt?.review_fingerprint, cloneWithout(receipt, ['review_id', 'review_fingerprint']));
+}
+
+async function verifyProvenanceExport(node) {
+  const receipt = node.receipt;
+  return verifyHash(node, receipt?.export_receipt_fingerprint, cloneWithout(receipt, ['export_receipt_id', 'export_receipt_fingerprint']));
+}
+
+async function verifyPriorIntegrityReport(node) {
+  const receipt = node.receipt;
+  return verifyHash(node, receipt?.report_fingerprint, cloneWithout(receipt, ['report_id', 'report_fingerprint']));
+}
+
 const VERIFIERS = Object.freeze({
   ask: verifyAsk,
   response: verifyResponse,
@@ -138,6 +158,10 @@ const VERIFIERS = Object.freeze({
   domain_mapping: verifyDomainMapping,
   advisor: verifyAdvisor,
   runa: verifyRuna,
+  runa_renderer_candidate: verifyRunaRendererCandidate,
+  runa_renderer_review: verifyRunaRendererReview,
+  provenance_export: verifyProvenanceExport,
+  integrity_report: verifyPriorIntegrityReport,
 });
 
 export async function verifyProvenanceGraph(graph, { generatedAt } = {}) {
