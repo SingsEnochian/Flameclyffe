@@ -1,0 +1,44 @@
+name: Arcsweep Bifrost Ignition Gate
+
+on:
+  push:
+    branches:
+      - feature/arcsweep-rich-text-core
+  pull_request:
+    paths:
+      - 'apps/arcsweep/**'
+      - 'apps/starwell-server/bifrost/**'
+      - 'apps/starwell-server/flames/**'
+      - 'apps/starwell-server/test/bifrost-*.test.js'
+      - 'apps/starwell/src/constellation/models/**'
+      - '.github/workflows/arcsweep-bifrost-ignition.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ignition-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Use Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Run Bifrost server contract tests
+        run: >-
+          node --test
+          apps/starwell-server/test/bifrost-model-profiles.test.js
+          apps/starwell-server/test/bifrost-manifest-drift.test.js
+          apps/starwell-server/test/bifrost-ignition.test.js
+
+      - name: Run Arcsweep model and provenance tests
+        run: >-
+          node --test
+          apps/arcsweep/test/runtime-model-binding.test.js
+          apps/arcsweep/test/scene-cognition.test.js
+          apps/arcsweep/test/self-authorship.test.js
