@@ -87,6 +87,7 @@ export function validateImportedState(value) {
       'runa_suggestions',
       'runa_renderer_candidates',
       'runa_renderer_reviews',
+      'runa_preview_palettes',
       'runa_preview_plans',
       'runa_preview_renders',
       'runa_preview_evidence_arms',
