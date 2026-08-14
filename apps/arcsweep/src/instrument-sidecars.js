@@ -10,6 +10,7 @@ import './theory-review-advisor-sidecar.js';
 import './deep-time-trajectory-sidecar.js';
 import './runa-trajectory-sidecar.js';
 import './runa-renderer-sidecar.js';
+import './field-review-sidecar.js';
 import './runa-preview-observation-link-sidecar.js';
 import './runa-preview-return-sidecar.js';
 import './runa-intervention-arc-sidecar.js';
