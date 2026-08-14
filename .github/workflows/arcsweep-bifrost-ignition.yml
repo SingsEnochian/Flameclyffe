@@ -15,6 +15,7 @@ on:
       - 'apps/starwell/src/constellation/models/**'
       - 'IGNITE-*.ps1'
       - 'IGNITE-*.cmd'
+      - 'BIFROST-*.cmd'
       - '.github/workflows/arcsweep-bifrost-ignition.yml'
 
 permissions:
@@ -39,6 +40,7 @@ jobs:
           apps/starwell-server/test/bifrost-model-profiles.test.js
           apps/starwell-server/test/bifrost-manifest-drift.test.js
           apps/starwell-server/test/bifrost-profile-resolution.test.js
+          apps/starwell-server/test/bifrost-preflight.test.js
           apps/starwell-server/test/bifrost-ignition.test.js
           apps/starwell-server/test/bifrost-ignition-policy.test.js
 
@@ -56,6 +58,7 @@ jobs:
           node --check apps/starwell-server/scripts/bifrost-ignite.js
           node --check apps/starwell-server/scripts/bifrost-ignite-fleet.js
           node --check apps/starwell-server/scripts/bifrost-model-prepare.js
+          node --check apps/starwell-server/scripts/bifrost-preflight.js
 
       - name: Syntax-check Windows ignition keys
         shell: pwsh
