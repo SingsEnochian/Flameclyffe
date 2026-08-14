@@ -1,0 +1,61 @@
+name: Arcsweep Feedback Loop Gate
+
+on:
+  push:
+    branches:
+      - codex/arcsweep-feedback-loop
+    paths:
+      - 'apps/arcsweep/**'
+      - 'apps/starwell/src/math-spine/**'
+      - 'apps/starwell/src/world-tone-fold-approval.js'
+      - 'starwell/deep-observer/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/arcsweep-feedback-loop.yml'
+  pull_request:
+    paths:
+      - 'apps/arcsweep/**'
+      - 'apps/starwell/src/math-spine/**'
+      - 'apps/starwell/src/world-tone-fold-approval.js'
+      - 'starwell/deep-observer/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/arcsweep-feedback-loop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arcsweep-feedback-loop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  arcsweep-test-build:
+    name: Test and build Arcsweep
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: npm
+
+      - name: Pin npm 11.16.0
+        run: npm install --global npm@11.16.0
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify engine contracts
+        run: npm run contracts:verify
+
+      - name: Run Arcsweep tests
+        run: npm run arcsweep:test
+
+      - name: Build Arcsweep
+        run: npm run arcsweep:build
