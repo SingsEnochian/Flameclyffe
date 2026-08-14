@@ -6,7 +6,7 @@
   "status": "IMPLEMENTED_PENDING_PHYSICAL_WINDOWS_VERIFICATION",
   "owner": "Rowan",
   "maintainers": [],
-  "description": "A private, local-first world planning, continuity, scripting, timing, asset, return, relational-observation, topology, and receipted trajectory instrument.",
+  "description": "A private, local-first world planning, continuity, scripting, timing, asset, return, relational-observation, topology, receipted trajectory, and provenance instrument.",
   "standalone": true,
   "standaloneEntrypoints": {
     "webDevelopment": "npm run arcsweep:dev",
@@ -90,6 +90,7 @@
     "windows-nsis-installer",
     "receipted-relational-feedback",
     "requested-transformation-circuit",
+    "transformation-receipt-core-persistence",
     "bone-ash-intention-topology",
     "domain-semantic-cusp-controls",
     "jacobian-fold-observation",
@@ -100,10 +101,16 @@
     "deep-time-accepted-trajectories",
     "theory-grounded-acceptance-advice",
     "explicit-cross-domain-applicability-mapping",
-    "runa-semantic-trajectory-suggestions"
+    "runa-semantic-trajectory-suggestions",
+    "receipt-provenance-graph",
+    "focused-provenance-bundle-export",
+    "provenance-export-receipts",
+    "structural-provenance-audit",
+    "deterministic-receipt-integrity-replay",
+    "fingerprinted-integrity-report-history"
   ],
   "dataContracts": [
-    "arcsweep.state/v0.2",
+    "arcsweep.state/v0.3",
     "arcsweep.attachment/v1",
     "arcsweep.storage-receipt/v1",
     "arcsweep.desktop-diagnostic/v1",
@@ -118,7 +125,11 @@
     "deep_time/0.1.0",
     "arcsweep.theory-grounded-acceptance-advisor/v1",
     "arcsweep.domain-context-mapping/v1",
-    "arcsweep.runa-trajectory-suggestion/v1"
+    "arcsweep.runa-trajectory-suggestion/v1",
+    "arcsweep.receipt-provenance-graph/v1",
+    "arcsweep.receipt-provenance-bundle/v1",
+    "arcsweep.receipt-provenance-export/v1",
+    "arcsweep.receipt-integrity-report/v1"
   ],
   "dataOwnership": [
     "worlds",
@@ -131,11 +142,14 @@
     "themes",
     "desktop-diagnostics",
     "feedback-receipts",
+    "transformation-request-receipts",
     "topology-receipts",
     "deep-theory-review-receipts",
     "deep-time-records",
     "advisor-receipts",
-    "runa-suggestion-receipts"
+    "runa-suggestion-receipts",
+    "provenance-export-receipts",
+    "integrity-report-receipts"
   ],
   "storageLocations": ["%APPDATA%/Hearthgate/Arcsweep"],
   "optionalIntegrations": ["Hearthgate: Arkfire host adapter", "local companion model adapter", "Notion import adapter", "calendar import adapter", "Runa semantic trajectory bridge"],
@@ -175,7 +189,11 @@
     "DEEPTime lambda remains monotonic within a revision",
     "DEEPTheory candidate cannot self-accept",
     "advisor cannot auto-accept state",
-    "Runa suggestion cannot publish sensory activation"
+    "Runa suggestion cannot publish sensory activation",
+    "provenance graph reports dangling receipt references instead of inventing links",
+    "provenance graph reports receipt-id collisions instead of silently resolving them",
+    "integrity replay reports fingerprint mismatch instead of rewriting receipts",
+    "integrity reports and provenance export receipts survive archive persistence"
   ],
   "acceptanceTests": [
     "launch without Hearthgate or Hearthfire",
@@ -198,6 +216,12 @@
     "refuse cross-domain theory application without an explicit applicability mapping",
     "produce advisor recommendations without automatic state acceptance",
     "produce a Runa semantic trajectory suggestion without DSP assignment, autoplay, tone change, haptic change, or sensory-bus publication",
+    "focus a provenance graph on one Ask and follow its explicit receipt joins through downstream observations",
+    "export a focused provenance bundle without mutating source receipts",
+    "receipt provenance export metadata without duplicating the entire source graph in core state",
+    "report unresolved provenance links and identifier collisions without inventing or repairing joins",
+    "recompute deterministic receipt fingerprints and report mutated payloads as mismatches",
+    "fingerprint the integrity verification report itself and preserve it across archive restart",
     "install and uninstall on Windows x64"
   ],
   "languageContract": {
@@ -212,7 +236,8 @@
     "companionAgency": "Companions may speak honestly, refuse, negotiate, rest, change, and leave. Loyalty is relational, not compulsory.",
     "theoryAcceptance": "Analytical candidates require explicit human review before accepted status.",
     "domainMapping": "Cross-domain applicability requires a separate human-declared receipt and never implies numerical equivalence.",
-    "runaRendering": "Trajectory suggestions remain semantic until a separate user-approved renderer assigns DSP or haptic parameters."
+    "runaRendering": "Trajectory suggestions remain semantic until a separate user-approved renderer assigns DSP or haptic parameters.",
+    "receiptIntegrity": "Integrity replay verifies deterministic receipt bytes and explicit links only; it does not convert a hash match into an external, physical, experiential, or canonical truth claim."
   },
   "provenance": [
     "Community LIFA traditions supplied source concepts.",
@@ -224,6 +249,7 @@
     "Live companion inference remains an optional adapter.",
     "External calendar and Notion reads are not automatic.",
     "DEEPTime v0.1 currently adapts accepted Arcsweep feedback; additional real-world anchor registries remain future work.",
-    "Runa trajectory packets stop at semantic suggestion and do not yet feed a reviewed DSP compiler."
+    "Runa trajectory packets stop at semantic suggestion and do not yet feed a reviewed DSP compiler.",
+    "Receipt integrity replay verifies deterministic packet integrity where source contracts expose enough reconstruction data; some legacy or embedded receipt kinds may remain structurally linked but hash-unverifiable."
   ]
 }
