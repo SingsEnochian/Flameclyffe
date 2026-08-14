@@ -93,6 +93,13 @@ function installedInOllama(profile, probe) {
   return probe.models.some((name) => normaliseModelName(name) === wanted);
 }
 
+function artifactBaseInstalled(profile, probe) {
+  const base = profile.artifact?.model;
+  if (!base) return false;
+  if (normaliseModelName(base) === normaliseModelName(profile.runtime.model)) return false;
+  return probe.models.some((name) => normaliseModelName(name) === normaliseModelName(base));
+}
+
 async function warmOllamaProfile(profile, fetchImpl = globalThis.fetch) {
   const endpoint = profile.runtime.base_url || 'http://127.0.0.1:11434';
   const data = await fetchJson(`${endpoint}/api/chat`, {
@@ -180,13 +187,19 @@ async function inspectProfile(profileId, fetchImpl = globalThis.fetch) {
     const probe = await probeOllama(profile.runtime.base_url, fetchImpl);
     if (!probe.reachable) return { ...base, state: 'route-unavailable', detail: probe.error };
     const installed = installedInOllama(profile, probe);
+    const aliasPending = !installed && artifactBaseInstalled(profile, probe);
     const previous = ignitionReceipts.get(profileId);
     if (installed && previous?.state === 'runtime-verified') return { ...base, ...publicReceipt(previous), installed: true };
     return {
       ...base,
-      state: installed ? 'installed' : 'activation-pending',
+      state: installed ? 'installed' : aliasPending ? 'alias-pending' : 'activation-pending',
       installed,
-      detail: installed ? 'assigned model is present in Ollama' : 'assigned model is not installed in Ollama',
+      baseInstalled: aliasPending,
+      detail: installed
+        ? 'assigned runtime alias is present in Ollama'
+        : aliasPending
+          ? `base artifact is installed; assigned runtime alias ${profile.runtime.model} is missing`
+          : 'assigned model weights are not installed in Ollama',
     };
   }
 
@@ -233,7 +246,12 @@ async function igniteProfile(profileId, {
         probe = startup.probe || probe;
       }
       if (!probe.reachable) throw new Error(`route-unavailable: ${probe.error || 'Ollama unreachable'}`);
-      if (!installedInOllama(profile, probe)) throw new Error(`activation-pending: ${profile.runtime.model} is not installed`);
+      if (!installedInOllama(profile, probe)) {
+        if (artifactBaseInstalled(profile, probe)) {
+          throw new Error(`alias-pending: base artifact ${profile.artifact.model} is installed; runtime alias ${profile.runtime.model} is missing`);
+        }
+        throw new Error(`activation-pending: ${profile.runtime.model} is not installed`);
+      }
       const warm = await warmOllamaProfile(profile, fetchImpl);
       Object.assign(receipt, {
         state: 'runtime-verified',
@@ -271,7 +289,6 @@ async function igniteOptionalProfile(profileId, options = {}) {
   if (!profile.opt_in_only) return igniteProfile(profileId, options);
   const clone = { ...profile, opt_in_only: false };
   const original = MODEL_PROFILES[profileId];
-  // Do not mutate MODEL_PROFILES. Inline the same verified ignition path.
   if (clone.runtime.provider !== 'ollama') throw new Error(`provider-not-supported: ${clone.runtime.provider}`);
   const receipt = {
     profileId: clone.profile_id,
@@ -290,7 +307,12 @@ async function igniteOptionalProfile(profileId, options = {}) {
       probe = startup.probe || probe;
     }
     if (!probe.reachable) throw new Error(`route-unavailable: ${probe.error || 'Ollama unreachable'}`);
-    if (!installedInOllama(clone, probe)) throw new Error(`activation-pending: ${clone.runtime.model} is not installed`);
+    if (!installedInOllama(clone, probe)) {
+      if (artifactBaseInstalled(clone, probe)) {
+        throw new Error(`alias-pending: base artifact ${clone.artifact.model} is installed; runtime alias ${clone.runtime.model} is missing`);
+      }
+      throw new Error(`activation-pending: ${clone.runtime.model} is not installed`);
+    }
     const warm = await warmOllamaProfile(clone, options.fetchImpl || globalThis.fetch);
     Object.assign(receipt, {
       state: 'runtime-verified',
@@ -323,6 +345,7 @@ async function ignitionStatus({ includeOptIn = true, fetchImpl = globalThis.fetc
       remoteProviderProbeRequiresExplicitAction: true,
       optionalProfilesRequireExplicitOptIn: true,
       runtimeVerifiedRequiresChallengeRoundTrip: true,
+      aliasPendingMeansBaseInstalledAliasMissing: true,
     },
   };
 }
@@ -342,6 +365,8 @@ module.exports = {
   IGNITION_ACK,
   probeOllama,
   startOllamaServer,
+  installedInOllama,
+  artifactBaseInstalled,
   inspectProfile,
   igniteProfile,
   igniteOptionalProfile,
