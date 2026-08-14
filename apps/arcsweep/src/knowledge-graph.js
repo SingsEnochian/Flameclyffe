@@ -25,7 +25,7 @@ function sameSubject(cell, requested) {
   });
 }
 
-function temporalMatch(cell, at) {
+function temporalDateMatch(cell, at) {
   if (!at || !cell.temporal) return true;
   const point = Date.parse(at);
   if (!Number.isFinite(point)) return true;
@@ -34,6 +34,21 @@ function temporalMatch(cell, at) {
   if (Number.isFinite(from) && point < from) return false;
   if (Number.isFinite(until) && point > until) return false;
   return true;
+}
+
+function temporalStoryOrderMatch(cell, storyOrder) {
+  if (storyOrder == null || !cell.temporal) return true;
+  const point = Number(storyOrder);
+  if (!Number.isFinite(point)) return true;
+  const from = cell.temporal.storyOrderFrom == null ? null : Number(cell.temporal.storyOrderFrom);
+  const until = cell.temporal.storyOrderUntil == null ? null : Number(cell.temporal.storyOrderUntil);
+  if (Number.isFinite(from) && point < from) return false;
+  if (Number.isFinite(until) && point > until) return false;
+  return true;
+}
+
+function temporalMatch(cell, request = {}) {
+  return temporalDateMatch(cell, request.at) && temporalStoryOrderMatch(cell, request.storyOrder);
 }
 
 function intersects(left = [], right = []) {
@@ -76,6 +91,12 @@ export function validateKnowledgeCell(cell) {
   if (cell.authority?.confidence != null && (cell.authority.confidence < 0 || cell.authority.confidence > 1)) {
     errors.push('authority confidence must be between 0 and 1');
   }
+  if (cell.temporal?.storyOrderFrom != null && !Number.isFinite(Number(cell.temporal.storyOrderFrom))) {
+    errors.push('temporal storyOrderFrom must be finite when present');
+  }
+  if (cell.temporal?.storyOrderUntil != null && !Number.isFinite(Number(cell.temporal.storyOrderUntil))) {
+    errors.push('temporal storyOrderUntil must be finite when present');
+  }
   return errors;
 }
 
@@ -91,7 +112,7 @@ export function resolveKnowledgeCells(cells, request = {}) {
     .filter((cell) => !cellTypes.size || cellTypes.has(cell.cellType))
     .filter((cell) => !EXCLUDED_STATUSES.has(cell.status))
     .filter((cell) => includeHistorical || cell.status !== 'historical')
-    .filter((cell) => temporalMatch(cell, request.at))
+    .filter((cell) => temporalMatch(cell, request))
     .filter((cell) => scopeMatch(cell, request))
     .sort((a, b) => {
       const authorityDelta = (AUTHORITY_WEIGHT[b.authority.kind] || 0) - (AUTHORITY_WEIGHT[a.authority.kind] || 0);
