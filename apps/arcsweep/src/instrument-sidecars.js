@@ -9,5 +9,6 @@ import './deep-theory-sidecar.js';
 import './theory-review-advisor-sidecar.js';
 import './deep-time-trajectory-sidecar.js';
 import './runa-trajectory-sidecar.js';
+import './runa-renderer-sidecar.js';
 import './receipt-provenance-sidecar.js';
 import './receipt-integrity-sidecar.js';
