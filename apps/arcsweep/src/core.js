@@ -85,6 +85,8 @@ export function validateImportedState(value) {
       'advisor_receipts',
       'domain_mappings',
       'runa_suggestions',
+      'provenance_exports',
+      'integrity_reports',
     ]) {
       if (value.observatory[key] !== undefined && !Array.isArray(value.observatory[key])) {
         throw new Error(`Arcsweep observatory ${key} must be an array.`);
