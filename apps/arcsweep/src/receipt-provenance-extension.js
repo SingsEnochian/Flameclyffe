@@ -15,6 +15,11 @@ const EXTENDED_STAGE = Object.freeze({
 function clone(value) { return value == null ? value : structuredClone(value); }
 function nonEmpty(value) { return typeof value === 'string' && value.trim().length > 0; }
 function worldMatches(worldId, candidate) { return !worldId || !candidate || candidate === worldId; }
+function observationLabel(source) {
+  if (source === 'field') return 'Field Observation';
+  if (source === 'relational-observation') return 'Relational Observation';
+  return 'Feedback Observation';
+}
 
 function node(id, kind, label, receipt, extra = {}) {
   if (!nonEmpty(id)) return null;
@@ -131,7 +136,7 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
 
   for (const arm of obs.runa_preview_evidence_arms || []) {
     if (!worldMatches(worldId, arm?.world_id)) continue;
-    addNode(nodes, node(arm.arm_id, 'runa_preview_evidence_arm', 'Runa Preview Evidence Arm · next Feedback cycle', arm, {
+    addNode(nodes, node(arm.arm_id, 'runa_preview_evidence_arm', 'Runa Preview Evidence Arm · next reviewable observation', arm, {
       world_id: arm.world_id || null,
       timestamp: arm.armed_at || null,
     }), collisions);
@@ -141,12 +146,15 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
 
   for (const link of obs.runa_preview_observation_links || []) {
     if (!worldMatches(worldId, link?.world_id)) continue;
-    addNode(nodes, node(link.link_id, 'runa_preview_observation_link', 'Runa Preview → Feedback Observation', link, {
+    const source = link.source?.observation_source || link.observation?.source || 'relational-feedback';
+    addNode(nodes, node(link.link_id, 'runa_preview_observation_link', `Runa Preview → ${observationLabel(source)}`, link, {
       world_id: link.world_id || null,
       timestamp: link.linked_at || null,
+      observation_source: source,
     }), collisions);
     const armRelation = edge(link.source?.arm_id, link.link_id, 'applies-to-next-observation');
-    const cycleRelation = edge(link.source?.feedback_cycle_id, link.link_id, 'observed-after-preview');
+    const cycleId = link.source?.observation_cycle_id || link.source?.feedback_cycle_id;
+    const cycleRelation = edge(cycleId, link.link_id, 'observed-after-preview');
     if (armRelation) rawEdges.push(armRelation);
     if (cycleRelation) rawEdges.push(cycleRelation);
   }
@@ -212,6 +220,7 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
       downstream_renderer_receipts_included: true,
       preview_palette_receipts_included: true,
       preview_intervention_receipts_included: true,
+      field_and_feedback_observation_links_included: true,
       accepted_deep_time_to_ash_provenance_included: true,
       feedback_loop_may_be_cyclic: true,
       observation_links_are_context_not_causation_claims: true,
