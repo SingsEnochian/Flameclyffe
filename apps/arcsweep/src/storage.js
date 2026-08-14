@@ -24,6 +24,8 @@ export function createEmptyObservatoryStore() {
     advisor_receipts: [],
     domain_mappings: [],
     runa_suggestions: [],
+    runa_renderer_candidates: [],
+    runa_renderer_reviews: [],
     provenance_exports: [],
     integrity_reports: [],
     active_profile_id: null,
@@ -46,6 +48,8 @@ export function normaliseObservatoryStore(value) {
     'advisor_receipts',
     'domain_mappings',
     'runa_suggestions',
+    'runa_renderer_candidates',
+    'runa_renderer_reviews',
     'provenance_exports',
     'integrity_reports',
   ];
@@ -76,6 +80,8 @@ function observatoryHasData(store) {
     || value.advisor_receipts.length
     || value.domain_mappings.length
     || value.runa_suggestions.length
+    || value.runa_renderer_candidates.length
+    || value.runa_renderer_reviews.length
     || value.provenance_exports.length
     || value.integrity_reports.length
   );
