@@ -17,6 +17,10 @@ test('Arcsweep 0.3 owns Observatory, transformation and feedback review state in
   assert.deepEqual(state.observatory.theory_reviews, []);
   assert.deepEqual(state.observatory.runa_renderer_candidates, []);
   assert.deepEqual(state.observatory.runa_renderer_reviews, []);
+  assert.deepEqual(state.observatory.runa_preview_plans, []);
+  assert.deepEqual(state.observatory.runa_preview_renders, []);
+  assert.deepEqual(state.observatory.runa_preview_evidence_arms, []);
+  assert.deepEqual(state.observatory.runa_preview_observation_links, []);
   assert.deepEqual(state.observatory.provenance_exports, []);
   assert.deepEqual(state.observatory.integrity_reports, []);
   assert.equal(state.feedbackQueue.schema, 'arcsweep.feedback-cycle-queue/v1');
@@ -37,6 +41,10 @@ test('Observatory normalisation preserves receipted organs and repairs malformed
     runa_suggestions: [{ suggestion_id: 'runa-1' }],
     runa_renderer_candidates: [{ candidate_id: 'renderer-1' }],
     runa_renderer_reviews: [{ review_id: 'renderer-review-1' }],
+    runa_preview_plans: [{ plan_id: 'preview-plan-1' }],
+    runa_preview_renders: [{ render_id: 'preview-render-1' }],
+    runa_preview_evidence_arms: [{ arm_id: 'preview-arm-1' }],
+    runa_preview_observation_links: [{ link_id: 'preview-link-1' }],
     provenance_exports: [{ export_receipt_id: 'export-1' }],
     integrity_reports: [{ report_id: 'integrity-1' }],
     custom_profiles: 'not-an-array',
@@ -47,6 +55,10 @@ test('Observatory normalisation preserves receipted organs and repairs malformed
   assert.equal(store.runa_suggestions[0].suggestion_id, 'runa-1');
   assert.equal(store.runa_renderer_candidates[0].candidate_id, 'renderer-1');
   assert.equal(store.runa_renderer_reviews[0].review_id, 'renderer-review-1');
+  assert.equal(store.runa_preview_plans[0].plan_id, 'preview-plan-1');
+  assert.equal(store.runa_preview_renders[0].render_id, 'preview-render-1');
+  assert.equal(store.runa_preview_evidence_arms[0].arm_id, 'preview-arm-1');
+  assert.equal(store.runa_preview_observation_links[0].link_id, 'preview-link-1');
   assert.equal(store.provenance_exports[0].export_receipt_id, 'export-1');
   assert.equal(store.integrity_reports[0].report_id, 'integrity-1');
   assert.deepEqual(store.custom_profiles, []);
@@ -61,6 +73,10 @@ test('normaliseState upgrades an older archive while retaining Observatory, tran
     theory_reviews: [{ receipt_id: 'review-keep-me' }],
     runa_renderer_candidates: [{ candidate_id: 'renderer-keep-me' }],
     runa_renderer_reviews: [{ review_id: 'renderer-review-keep-me' }],
+    runa_preview_plans: [{ plan_id: 'preview-plan-keep-me' }],
+    runa_preview_renders: [{ render_id: 'preview-render-keep-me' }],
+    runa_preview_evidence_arms: [{ arm_id: 'preview-arm-keep-me' }],
+    runa_preview_observation_links: [{ link_id: 'preview-link-keep-me' }],
     provenance_exports: [{ export_receipt_id: 'export-keep-me' }],
     integrity_reports: [{ report_id: 'integrity-keep-me' }],
   };
@@ -87,6 +103,10 @@ test('normaliseState upgrades an older archive while retaining Observatory, tran
   assert.equal(upgraded.observatory.theory_reviews[0].receipt_id, 'review-keep-me');
   assert.equal(upgraded.observatory.runa_renderer_candidates[0].candidate_id, 'renderer-keep-me');
   assert.equal(upgraded.observatory.runa_renderer_reviews[0].review_id, 'renderer-review-keep-me');
+  assert.equal(upgraded.observatory.runa_preview_plans[0].plan_id, 'preview-plan-keep-me');
+  assert.equal(upgraded.observatory.runa_preview_renders[0].render_id, 'preview-render-keep-me');
+  assert.equal(upgraded.observatory.runa_preview_evidence_arms[0].arm_id, 'preview-arm-keep-me');
+  assert.equal(upgraded.observatory.runa_preview_observation_links[0].link_id, 'preview-link-keep-me');
   assert.equal(upgraded.observatory.provenance_exports[0].export_receipt_id, 'export-keep-me');
   assert.equal(upgraded.observatory.integrity_reports[0].report_id, 'integrity-keep-me');
   assert.equal(upgraded.feedbackQueue.entries.c1.status, 'accepted');
@@ -106,6 +126,14 @@ test('import validation refuses malformed Observatory collections', () => {
   assert.throws(
     () => validateImportedState({ observatory: { runa_renderer_reviews: {} } }),
     /observatory runa_renderer_reviews must be an array/i,
+  );
+  assert.throws(
+    () => validateImportedState({ observatory: { runa_preview_renders: {} } }),
+    /observatory runa_preview_renders must be an array/i,
+  );
+  assert.throws(
+    () => validateImportedState({ observatory: { runa_preview_observation_links: {} } }),
+    /observatory runa_preview_observation_links must be an array/i,
   );
 });
 
