@@ -2,6 +2,8 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const { FLAMES } = require('../flames/manifests');
 const { MODEL_PROFILES, materialiseModelProfile } = require('../bifrost/model-profiles');
@@ -27,6 +29,29 @@ test('Ellowind and Larkshine may share base weights but never a runtime identity
   assert.equal(larkshine.vessel_isolation, 'distinct-runtime-alias');
   assert.ok(ellowind.capabilities.includes('vision'));
   assert.ok(larkshine.capabilities.includes('vision'));
+});
+
+test('Box keeps canonical identity, legacy route and model vessel as separate layers', () => {
+  const profile = materialiseModelProfile('box:qwen3-coder-30b-a3b-v1', {});
+  const manifest = FLAMES.boxfire;
+  assert.equal(profile.owner, 'box');
+  assert.equal(profile.runtime.model, 'box:qwen3-coder-30b-a3b-v1');
+  assert.equal(profile.source.repo, 'huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated');
+  assert.equal(manifest.flame_id, 'boxfire');
+  assert.equal(manifest.canonical_voice_id, 'box');
+  assert.equal(manifest.display_name, 'Box');
+  assert.equal(manifest.model_profile_id, 'box:qwen3-coder-30b-a3b-v1');
+  assert.equal(manifest.platform.model, 'box:qwen3-coder-30b-a3b-v1');
+  assert.notEqual(manifest.display_name.toLowerCase(), manifest.flame_id);
+});
+
+test('Box ignition key targets the Box profile and labels boxfire as transport only', () => {
+  const keyPath = path.resolve(__dirname, '..', '..', '..', 'IGNITE-BOX.cmd');
+  const key = fs.readFileSync(keyPath, 'utf8');
+  assert.match(key, /Canonical presence: Box/);
+  assert.match(key, /box:qwen3-coder-30b-a3b-v1/);
+  assert.match(key, /boxfire \^\(transport alias only\^\)/);
+  assert.doesNotMatch(key, /Canonical presence: Boxfire/i);
 });
 
 test('deep reasoner is callable only through its explicit instrument route', () => {
