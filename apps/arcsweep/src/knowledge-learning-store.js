@@ -43,47 +43,66 @@ function transactionDone(tx) {
   });
 }
 
-export async function appendLearnedCell(cell) {
-  if (!cell?.id || !cell?.subject?.id) throw new Error('A provenance-bearing knowledge cell is required.');
+function assertCellShape(cell) {
+  if (!cell?.id || !cell?.subject?.id || !cell?.subject?.kind) {
+    throw new Error('A provenance-bearing knowledge cell with subject kind/id is required.');
+  }
+}
+
+export async function appendKnowledgeCells(cells = []) {
+  const batch = (Array.isArray(cells) ? cells : [cells]).map((cell) => structuredClone(cell));
+  if (!batch.length) return { stored: true, cells: [] };
+  batch.forEach(assertCellShape);
+  const ids = new Set();
+  for (const cell of batch) {
+    if (ids.has(cell.id)) throw new Error(`Duplicate knowledge cell id in batch: ${cell.id}`);
+    ids.add(cell.id);
+  }
+
   const db = await openDb();
-  if (!db) return { stored: false, reason: 'indexeddb-unavailable', cell };
+  if (!db) return { stored: false, reason: 'indexeddb-unavailable', cells: batch };
   try {
     const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).add(structuredClone(cell));
+    const store = tx.objectStore(STORE);
+    batch.forEach((cell) => store.add(cell));
     await transactionDone(tx);
-    return { stored: true, cell };
+    return { stored: true, cells: batch };
+  } finally {
+    db.close();
+  }
+}
+
+export async function appendLearnedCell(cell) {
+  const result = await appendKnowledgeCells([cell]);
+  return { ...result, cell: result.cells?.[0] || cell };
+}
+
+export async function listLocalKnowledgeCells({ subjectKind = null, subjectId = null, includeArchived = false } = {}) {
+  const id = String(subjectId || '').trim().toLowerCase();
+  const kind = String(subjectKind || '').trim().toLowerCase();
+  const db = await openDb();
+  if (!db) return [];
+  try {
+    const tx = db.transaction(STORE, 'readonly');
+    const store = tx.objectStore(STORE);
+    const cells = id
+      ? await requestPromise(store.index('subjectId').getAll(id))
+      : await requestPromise(store.getAll());
+    return (cells || [])
+      .filter((cell) => !kind || String(cell.subject?.kind || '').toLowerCase() === kind)
+      .filter((cell) => includeArchived || cell.status !== 'deprecated')
+      .sort((a, b) => String(b.provenance?.createdAt || '').localeCompare(String(a.provenance?.createdAt || '')));
   } finally {
     db.close();
   }
 }
 
 export async function listLearnedCellsForVoice(voiceId, { includeArchived = false } = {}) {
-  const id = String(voiceId || '').trim().toLowerCase();
-  if (!id) return [];
-  const db = await openDb();
-  if (!db) return [];
-  try {
-    const tx = db.transaction(STORE, 'readonly');
-    const index = tx.objectStore(STORE).index('subjectId');
-    const cells = await requestPromise(index.getAll(id));
-    return (cells || []).filter((cell) => includeArchived || cell.status !== 'deprecated');
-  } finally {
-    db.close();
-  }
+  return listLocalKnowledgeCells({ subjectKind: 'constellation_voice', subjectId: voiceId, includeArchived });
 }
 
 export async function listAllLearnedCells({ includeArchived = false } = {}) {
-  const db = await openDb();
-  if (!db) return [];
-  try {
-    const tx = db.transaction(STORE, 'readonly');
-    const cells = await requestPromise(tx.objectStore(STORE).getAll());
-    return (cells || [])
-      .filter((cell) => includeArchived || cell.status !== 'deprecated')
-      .sort((a, b) => String(b.provenance?.createdAt || '').localeCompare(String(a.provenance?.createdAt || '')));
-  } finally {
-    db.close();
-  }
+  return listLocalKnowledgeCells({ includeArchived });
 }
 
 async function changeLearnedCell(cellId, updater) {
@@ -114,10 +133,8 @@ export async function archiveLearnedCell(cellId) {
 
 export async function restoreLearnedCell(cellId) {
   return changeLearnedCell(cellId, (cell) => {
-    cell.status = 'provisional';
-    if (cell.temporal) {
-      cell.temporal = { ...cell.temporal, validUntil: null };
-    }
+    cell.status = cell.authority?.kind === 'self_authored' ? 'active' : 'provisional';
+    if (cell.temporal) cell.temporal = { ...cell.temporal, validUntil: null };
     return cell;
   });
 }
