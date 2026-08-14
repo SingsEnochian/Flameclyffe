@@ -7,6 +7,20 @@
       "banks": ["./cells/characters/kestrelle.cells.json"],
       "sourceIndex": "./source-index.d/kestrelle.json",
       "status": "active-canon-cortex"
+    },
+    "narrative_voice:taaveren-vaen-narrator": {
+      "label": "Ta’veren Vaen Narrative Voice",
+      "worldIds": ["taaveren-vaen", "taveren-vaen"],
+      "banks": ["./cells/narrative-voices/taaveren-vaen-narrator.cells.json"],
+      "sourceIndex": "./source-index.d/taaveren-vaen-narrator.json",
+      "status": "provisional-derived-cortex"
+    },
+    "writing_style:taaveren-vaen-longform": {
+      "label": "Ta’veren Vaen Longform",
+      "worldIds": ["taaveren-vaen", "taveren-vaen"],
+      "banks": ["./cells/writing-styles/taaveren-vaen-longform.cells.json"],
+      "sourceIndex": "./source-index.d/taaveren-vaen-longform.json",
+      "status": "provisional-derived-cortex"
     }
   },
   "rules": {
@@ -15,6 +29,7 @@
     "sourceDocumentsRemainAuthoritative": true,
     "characterKnowledgeMustRespectTemporalScope": true,
     "narrativeVoiceMustNotGrantCharacterKnowledge": true,
-    "modelObservationCannotSilentlyPromoteCanon": true
+    "modelObservationCannotSilentlyPromoteCanon": true,
+    "provisionalDerivedCortexMustRemainExplicit": true
   }
 }
