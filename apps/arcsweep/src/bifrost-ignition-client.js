@@ -1,9 +1,19 @@
-import { loadConstellationRuntimeRoutes } from './constellation-runtime-adapter.js';
+import {
+  constellationRuntimeAuthorizationHeaders,
+  loadConstellationRuntimeRoutes,
+} from './constellation-runtime-adapter.js';
 
 async function jsonRequest(url, options = {}, fetchImpl = fetch) {
   const response = await fetchImpl(url, options);
   const data = await response.json().catch(() => ({}));
   return { ok: response.ok, status: response.status, data };
+}
+
+function privilegedHeaders() {
+  return {
+    'content-type': 'application/json',
+    ...constellationRuntimeAuthorizationHeaders(),
+  };
 }
 
 export async function getBifrostIgnitionStatus(fetchImpl = fetch) {
@@ -15,7 +25,7 @@ export async function getBifrostIgnitionStatus(fetchImpl = fetch) {
 export async function startBifrostOllama(fetchImpl = fetch) {
   const result = await jsonRequest('/api/v1/bifrost/ignition/start-ollama', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: privilegedHeaders(),
     body: JSON.stringify({ confirm: true }),
   }, fetchImpl);
   return { ...result.data, ok: result.ok, httpStatus: result.status };
@@ -28,7 +38,7 @@ export async function materializeBifrostAlias(profileRef, {
   if (!profileRef) throw new Error('Alias materialization requires a Bifröst profile or identity reference.');
   const result = await jsonRequest(`/api/v1/bifrost/ignition/profile/${encodeURIComponent(profileRef)}/materialize-alias`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: privilegedHeaders(),
     body: JSON.stringify({ confirm: true, opt_in: optIn === true }),
   }, fetchImpl);
   return { ...result.data, ok: result.ok, httpStatus: result.status };
@@ -43,7 +53,7 @@ export async function igniteBifrostProfile(profileId, {
   if (!profileId) throw new Error('Ignition requires a Bifröst profile id.');
   const result = await jsonRequest(`/api/v1/bifrost/ignition/profile/${encodeURIComponent(profileId)}`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: privilegedHeaders(),
     body: JSON.stringify({
       confirm: true,
       start_ollama: startOllama === true,
