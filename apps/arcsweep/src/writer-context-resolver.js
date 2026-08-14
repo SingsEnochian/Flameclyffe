@@ -57,24 +57,24 @@ function fieldCellTypes(fieldContext = {}) {
   if (relationship) return ['identity', 'relationship', 'boundary', 'thinking_pattern', 'open_question', LEARNED_CELL_TYPE];
   if (canon || temporal) return ['identity', 'boundary', 'relationship', 'continuity_event', 'shared_doctrine', 'open_question', LEARNED_CELL_TYPE];
   if (narrative) return ['identity', 'thinking_pattern', 'speaking_pattern', 'preference', 'boundary', 'drift_marker', 'relationship', 'shared_doctrine', 'open_question', LEARNED_CELL_TYPE];
-  return ['identity', 'thinking_pattern', 'preference', 'boundary', 'relationship', 'shared_doctrine', LEARNED_CELL_TYPE];
+  return ['identity', 'thinking_pattern', 'preference', 'boundary', 'relationship', 'shared_doctrine', 'open_question', LEARNED_CELL_TYPE];
 }
 
 function subjectCellTypes(kind) {
   if (kind === 'character') {
     return [
       'identity', 'speaking_pattern', 'thinking_pattern', 'preference', 'boundary', 'relationship',
-      'character_knowledge', 'character_motivation', 'character_state', 'chronology', LEARNED_CELL_TYPE,
+      'character_knowledge', 'character_motivation', 'character_state', 'chronology', 'open_question', LEARNED_CELL_TYPE,
     ];
   }
   if (kind === 'narrative_voice') {
     return [
       'identity', 'writing_style_rule', 'thinking_pattern', 'speaking_pattern', 'preference',
-      'boundary', 'sensory_voice', 'drift_marker', LEARNED_CELL_TYPE,
+      'boundary', 'sensory_voice', 'drift_marker', 'open_question', LEARNED_CELL_TYPE,
     ];
   }
   if (kind === 'writing_style') {
-    return ['writing_style_rule', 'preference', 'boundary', 'sensory_voice', 'drift_marker', LEARNED_CELL_TYPE];
+    return ['writing_style_rule', 'preference', 'boundary', 'sensory_voice', 'drift_marker', 'open_question', LEARNED_CELL_TYPE];
   }
   return [LEARNED_CELL_TYPE];
 }
@@ -267,6 +267,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       characterKnowledgeMustRespectStoryOrder: true,
       narrativeVoiceMayShapeProseButMayNotGrantCharacterKnowledge: true,
       subjectKindsRemainDistinct: true,
+      unresolvedStyleAxesRemainExplicit: true,
     },
   };
 }
