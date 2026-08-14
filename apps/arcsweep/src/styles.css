@@ -277,6 +277,13 @@ code.deep-formula { display: block; font-size: 0.72rem; color: var(--muted); fon
 .soundfont-rack { display: grid; gap: .75rem; padding: .8rem; border: 1px solid var(--line-soft); border-radius: .75rem; background: rgba(0,0,0,.18); }
 .soundfont-rack h4, .soundfont-rack p { margin: 0 0 .35rem; }
 .soundfont-rack a { color: var(--gold); }
+.synaptic-heartfield { border-color: color-mix(in srgb, var(--gold) 48%, var(--line-soft)); background: radial-gradient(circle at 90% 0%, rgba(200,150,80,.12), transparent 38%), rgba(0,0,0,.2); }
+.heartfield-controls { display: flex; flex-wrap: wrap; align-items: end; gap: .7rem; }
+.heartfield-controls label { flex: 1 1 13rem; }
+.heartfield-layer-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(15rem,1fr)); gap: .5rem; }
+.heartfield-layer { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .55rem; padding: .55rem; border: 1px solid var(--line-soft); border-radius: .65rem; background: rgba(0,0,0,.16); }
+.heartfield-layer label { display: grid; gap: .18rem; font-size: .76rem; }
+.heartfield-layer small { color: var(--muted); }
 .soundfont-controls { display: grid; grid-template-columns: auto minmax(12rem, 1fr) auto; align-items: end; gap: .65rem; }
 .soundfont-controls label:not(.file-button) { display: grid; gap: .3rem; font-size: .76rem; }
 .soundfont-bank-list { display: flex; flex-wrap: wrap; gap: .4rem .8rem; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .72rem; }

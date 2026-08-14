@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { findStorySoundCues, resolveWorldSoundfontMap, resolveWorldTone } from '../src/story-soundscape.js';
+import { SYNAPTIC_HEARTFIELD_PROFILE, createHeartfieldReceipt, validateHeartfieldProfile } from '../src/synaptic-heartfield.js';
 
 test('story language resolves to exact sound actions', () => {
   const text = 'A branch snapped behind her. Thunder rolled, and the bell rang.';
@@ -10,6 +11,24 @@ test('story language resolves to exact sound actions', () => {
   assert.equal(cues[0].text, 'branch snapped');
   assert.deepEqual(cues[0].source_span, undefined);
   assert.equal(text.slice(cues[0].start, cues[0].end), cues[0].text);
+});
+
+test('Synaptic Heartfield keeps binaural differences and modulation clocks mathematically distinct', () => {
+  const validation = validateHeartfieldProfile();
+  assert.equal(validation.valid, true);
+  assert.equal(validation.byId['theta-core'].rightHz - validation.byId['theta-core'].leftHz, 4);
+  assert.equal(validation.byId['alpha-theta-bridge'].rightHz - validation.byId['alpha-theta-bridge'].leftHz, 8);
+  assert.equal(validation.byId['sub-heart'].modulationHz, 2.25);
+  assert.equal(validation.byId['heart-phi'].modulationHz, 1.61803398875);
+  assert.deepEqual(validation.byId['harmonic-field'].frequencies, [216,224,432,888,1110,1760,2880]);
+});
+
+test('Heartfield receipt never invents physiology or missing Qualia', () => {
+  const receipt = createHeartfieldReceipt({ world: { id: 'waking-world', name: 'The Waking World' }, layerState: {}, startedAt: '2026-08-14T01:00:00.000Z' });
+  assert.equal(receipt.profile_id, SYNAPTIC_HEARTFIELD_PROFILE.id);
+  assert.equal(receipt.observation.firsthand_qualia, null);
+  assert.equal(receipt.observation.physiology_measured, false);
+  assert.equal(receipt.authority.physiological_response_inferred, false);
 });
 
 test('incremental cue search does not replay completed earlier phrases', () => {

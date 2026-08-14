@@ -404,6 +404,15 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
   const mappedVoices = sound.soundfontMap?.voices?.length
     ? `<div class="soundfont-map"><p class="eyebrow">Mapped programme · ${escapeHtml(sound.soundfontMap.title)}</p><ol>${sound.soundfontMap.voices.map((voice) => `<li><b>${escapeHtml(voice.label)}</b> · ${escapeHtml(voice.gmName)} · ${voice.channel === 9 ? `drum notes ${voice.notes.join('/')}` : `bank ${voice.bankMSB}/${voice.bankLSB} · programme ${voice.program} · ch ${voice.channel + 1}`}<br><small>${escapeHtml(voice.purpose)}</small></li>`).join('')}</ol><p class="muted">120 Hz sits 49.4 cents below MIDI B2; preserve the world root with fine tuning when the loaded bank supports it.</p></div>`
     : '';
+  const heartfield = sound.heartfield;
+  const heartfieldLayers = heartfield.profile.layers.map((layer) => {
+    const layerState = heartfield.layers[layer.id];
+    const truth = layer.kind === 'binaural' ? `${layer.leftHz}/${layer.rightHz} Hz · Δ ${layer.beatHz} Hz`
+      : layer.kind === 'am' ? `${layer.carrierHz} Hz carrier · ${Number(layer.modulationHz).toFixed(3)} Hz AM`
+        : layer.kind === 'harmonic-bank' ? `${layer.frequencies.join(' / ')} Hz`
+          : `pink noise · ${layer.driftHz} Hz drift`;
+    return `<div class="heartfield-layer"><button type="button" class="quiet mini" data-action="heartfield-layer" data-layer-id="${attr(layer.id)}">${layerState.enabled ? 'On' : 'Off'}</button><label><b>${escapeHtml(layer.label)}</b><small>${escapeHtml(truth)}</small><input type="range" min="0" max="0.3" step="0.005" value="${layerState.gain}" data-heartfield-level="${attr(layer.id)}" /></label></div>`;
+  }).join('');
   return `<section class="story-soundscape" data-story-soundscape>
     <div class="soundscape-head"><div><p class="eyebrow">Story → tone → room</p><h3>World Sound Mixer</h3><p class="muted">${sound.armed ? 'Audio armed' : 'Audio waits for a user gesture'} · ${sound.world.rootHz.toFixed(2)} Hz · ${escapeHtml(sound.world.worldName)}</p></div><div class="button-row"><button type="button" data-action="sound-arm">${sound.armed ? 'Re-arm' : 'Arm sound'}</button><button type="button" class="quiet" data-action="sound-toggle-hum">${sound.humActive ? 'Stop hum' : 'Start hum'}</button><button type="button" class="quiet" data-action="sound-world-tone">Strike world tone</button><button type="button" class="quiet" data-action="sound-audition">Hear written events</button></div></div>
     <div class="sound-mixer-grid">
@@ -417,6 +426,12 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
       <div class="soundfont-controls"><label class="file-button">Load SoundFont bank<input id="soundfont-files" type="file" accept=".sf2,.sf3,.sfogg,.dls" multiple /></label><label>Preset<select data-soundfont-preset ${sound.soundfontPresets.length ? '' : 'disabled'}>${soundfontOptions}</select></label><button type="button" class="quiet" data-action="soundfont-tone" ${sound.selectedSoundfontPreset ? '' : 'disabled'}>Play preset at world tone</button></div>
       <ul class="soundfont-bank-list">${soundfontBanks}</ul>
       ${mappedVoices}
+    </div>
+    <div class="soundfont-rack synaptic-heartfield">
+      <div><p class="eyebrow">Runa experimental auditory–autonomic instrument</p><h4>${escapeHtml(heartfield.profile.name)} · ${escapeHtml(heartfield.profile.subtitle)}</h4><p class="muted">Exact DSP is receipted separately from experiential meaning. Headphones are required for the 4 Hz and 8 Hz binaural layers; physiological response is recorded only when measured.</p></div>
+      <div class="heartfield-controls"><label>Firsthand Qualia · Q (optional)<input type="number" min="0" max="1" step="0.01" data-heartfield-qualia placeholder="0–1, never inferred" /></label><button type="button" data-action="heartfield-toggle">${heartfield.active ? 'Stop Heartfield' : 'Enter Heartfield'}</button></div>
+      <div class="heartfield-layer-grid">${heartfieldLayers}</div>
+      <p class="muted">Feather stops every oscillator, modulation clock, noise source, stem, SoundFont voice, and output route.</p>
     </div>
     <div class="button-row sound-output-row"><label class="file-button">Load soundscape stems<input id="soundscape-files" type="file" accept="audio/*" multiple /></label><button type="button" class="quiet" data-action="sound-haptics">Haptics · ${sound.haptics ? 'On' : 'Off'}</button><button type="button" class="quiet" data-action="sound-midi">MIDI · ${sound.midi ? 'On' : 'Connect'}</button><button type="button" class="quiet" data-action="sound-record">${sound.recording ? 'Stop & save mix' : 'Record mix'}</button></div>
     <div class="soundscape-lower"><div><h4>Soundscape stems</h4><div class="sound-tracks">${trackRows}</div></div><div><h4>Fired story actions</h4><ol class="sound-event-log">${eventRows}</ol></div></div>
@@ -733,6 +748,20 @@ app.addEventListener('click', async (event) => {
     catch (error) { setLiveNotice(`SoundFont tone stopped: ${error.message}`); }
     return;
   }
+  if (action === 'heartfield-toggle') {
+    try {
+      await storySoundscape.arm(activeWorld());
+      if (storySoundscape.heartfieldActive) { storySoundscape.stopHeartfield(); setLiveNotice('Synaptic Heartfield stopped.'); }
+      else {
+        const raw=app.querySelector('[data-heartfield-qualia]')?.value; const qualia=raw===''||raw==null?null:Number(raw);
+        const premaqc=state.premaqcByWorld?.[activeWorld().id] || null;
+        const receipt=storySoundscape.startHeartfield({world:activeWorld(),premaqc,qualia});
+        setLiveNotice(`Synaptic Heartfield entered · ${receipt.started_at} · physiology not inferred.`);
+      }
+    } catch(error){setLiveNotice(`Heartfield stopped: ${error.message}`);}
+    refreshStorySoundscape(); return;
+  }
+  if (action === 'heartfield-layer') { storySoundscape.toggleHeartfieldLayer(button.dataset.layerId); refreshStorySoundscape(); return; }
   if (action === 'sound-haptics') { storySoundscape.haptics = !storySoundscape.haptics; setLiveNotice(`Story haptics ${storySoundscape.haptics ? 'armed' : 'off'}.`); refreshStorySoundscape(); return; }
   if (action === 'sound-midi') {
     try { await storySoundscape.enableMidi(); setLiveNotice('MIDI environment output connected.'); }
@@ -898,6 +927,8 @@ app.addEventListener('input', (event) => {
   if (event.target.matches('[data-sound-root]')) { storySoundscape.setRoot(event.target.value); return; }
   if (event.target.matches('[data-sound-overtones]')) { storySoundscape.setOvertones(event.target.value); return; }
   const trackId = event.target.dataset.soundTrackLevel;
+  const heartfieldLayer = event.target.dataset.heartfieldLevel;
+  if (heartfieldLayer) { storySoundscape.setHeartfieldLayer(heartfieldLayer, event.target.value); return; }
   if (trackId) storySoundscape.setTrackLevel(trackId, event.target.value);
 });
 
