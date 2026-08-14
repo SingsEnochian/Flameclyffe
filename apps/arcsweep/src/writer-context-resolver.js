@@ -7,6 +7,7 @@ const SELECTION_KEY = 'arcsweep.constellation-selection/v1';
 const READY_EVENT = 'arcsweep:writer-context-ready';
 const ERROR_EVENT = 'arcsweep:writer-context-error';
 const SELECTION_EVENT = 'arcsweep:constellation-selection-changed';
+const LEARNED_CELL_TYPE = 'model_observation';
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
@@ -52,10 +53,10 @@ function fieldCellTypes(fieldContext = {}) {
   const canon = /canon|source|provenance|status|continuity/.test(label);
   const temporal = /date|time|age|year|era|timeline|chronology/.test(label) || /date|time/.test(type);
 
-  if (relationship) return ['identity', 'relationship', 'boundary', 'thinking_pattern', 'open_question'];
-  if (canon || temporal) return ['identity', 'boundary', 'relationship', 'continuity_event', 'shared_doctrine', 'open_question'];
-  if (narrative) return ['identity', 'thinking_pattern', 'speaking_pattern', 'preference', 'boundary', 'drift_marker', 'relationship', 'shared_doctrine', 'open_question'];
-  return ['identity', 'thinking_pattern', 'preference', 'boundary', 'relationship', 'shared_doctrine'];
+  if (relationship) return ['identity', 'relationship', 'boundary', 'thinking_pattern', 'open_question', LEARNED_CELL_TYPE];
+  if (canon || temporal) return ['identity', 'boundary', 'relationship', 'continuity_event', 'shared_doctrine', 'open_question', LEARNED_CELL_TYPE];
+  if (narrative) return ['identity', 'thinking_pattern', 'speaking_pattern', 'preference', 'boundary', 'drift_marker', 'relationship', 'shared_doctrine', 'open_question', LEARNED_CELL_TYPE];
+  return ['identity', 'thinking_pattern', 'preference', 'boundary', 'relationship', 'shared_doctrine', LEARNED_CELL_TYPE];
 }
 
 function requestedMode(fieldContext = {}) {
@@ -139,6 +140,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       displayName: resolved.displayName,
       availability: resolved.cells.length ? 'context-ready' : 'no-indexed-cells',
       cells: resolved.cells,
+      learnedCellCount: resolved.learnedCellCount || 0,
     });
   }
 
@@ -165,6 +167,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       noRawChainOfThought: true,
       unavailableVoiceMayNotBeImpersonated: true,
       modelInferenceMayNotOverrideStableCore: true,
+      localLearningRequiresUserKeepAction: true,
     },
   };
 }
