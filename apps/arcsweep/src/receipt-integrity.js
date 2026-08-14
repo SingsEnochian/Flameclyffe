@@ -160,13 +160,15 @@ export async function verifyProvenanceGraph(graph, { generatedAt } = {}) {
     : structural.status === 'INCOMPLETE'
       ? 'INCOMPLETE'
       : 'PASS';
-  return Object.freeze({
+  const core = {
     schema: ARCSWEEP_RECEIPT_INTEGRITY_SCHEMA,
+    schema_version: 1,
     generated_at: generatedAt ?? new Date().toISOString(),
     world_id: graph?.world_id ?? null,
     focus_id: graph?.focus_id ?? null,
     status,
     structural,
+    source_receipt_ids: Object.freeze((graph?.nodes || []).map((node) => node.id)),
     counts: Object.freeze({
       verified: counts.VERIFIED || 0,
       unverifiable: counts.UNVERIFIABLE || 0,
@@ -179,7 +181,33 @@ export async function verifyProvenanceGraph(graph, { generatedAt } = {}) {
       verifies_physical_claim: false,
       unverified_does_not_mean_false: true,
       mismatch_is_reported_not_repaired: true,
+      source_receipts_mutable: false,
       canon_commit: false,
+    }),
+  };
+  const fingerprint = await sha256Hex(core);
+  return Object.freeze({
+    ...core,
+    report_id: `arcsweep-integrity-${fingerprint.slice(0, 24)}`,
+    report_fingerprint: fingerprint,
+  });
+}
+
+export async function verifyIntegrityReport(report) {
+  if (report?.schema !== ARCSWEEP_RECEIPT_INTEGRITY_SCHEMA) {
+    return Object.freeze({ matched: false, reason: 'Unsupported integrity report schema.', expected: report?.report_fingerprint ?? null, actual: null });
+  }
+  const expected = report.report_fingerprint;
+  const actual = await sha256Hex(cloneWithout(report, ['report_id', 'report_fingerprint']));
+  return Object.freeze({
+    matched: actual === expected,
+    expected,
+    actual,
+    report_id: report.report_id,
+    authority: Object.freeze({
+      report_integrity_only: true,
+      source_receipt_truth_verified: false,
+      external_truth_verified: false,
     }),
   });
 }
