@@ -6,6 +6,11 @@ const {
   igniteOptionalProfile,
 } = require('./ignition');
 const { MODEL_PROFILES } = require('./model-profiles');
+const {
+  resolveProfileRef,
+  identityEnvelope,
+  enrichReceiptWithIdentity,
+} = require('./profile-resolution');
 
 function bool(value) {
   return ['1', 'true', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
@@ -28,6 +33,19 @@ function parseIgnitionPolicy(env = process.env) {
   };
 }
 
+function resolvePolicyProfile(ref, profiles) {
+  if (profiles[ref]) return { profileId: ref, profile: profiles[ref], identity: identityEnvelope(ref) };
+  if (profiles === MODEL_PROFILES) return resolveProfileRef(ref);
+  const key = String(ref || '').trim().toLowerCase();
+  for (const [profileId, profile] of Object.entries(profiles)) {
+    const aliases = [profileId, profile.owner, profile.identity_name, profile.display_name, profile.affectionate_name, ...(profile.identity_aliases || [])]
+      .filter(Boolean)
+      .map((value) => String(value).trim().toLowerCase());
+    if (aliases.includes(key)) return { profileId, profile, identity: null };
+  }
+  return null;
+}
+
 async function executeIgnitionPolicy(policy, adapters = {}) {
   const startOllama = adapters.startOllamaServer || startOllamaServer;
   const ignite = adapters.igniteProfile || igniteProfile;
@@ -37,7 +55,7 @@ async function executeIgnitionPolicy(policy, adapters = {}) {
 
   if (!policy?.enabled) {
     return {
-      contract: 'bifrost.startup-ignition/v1',
+      contract: 'bifrost.startup-ignition/v2',
       state: 'disabled',
       startedOllama: false,
       receipts,
@@ -47,32 +65,38 @@ async function executeIgnitionPolicy(policy, adapters = {}) {
   let startup = null;
   if (policy.startOllama) startup = await startOllama();
 
-  for (const profileId of policy.profiles || []) {
-    const definition = profiles[profileId];
-    if (!definition) {
-      receipts.push({ profileId, state: 'profile-missing' });
+  for (const requestedRef of policy.profiles || []) {
+    const resolved = resolvePolicyProfile(requestedRef, profiles);
+    if (!resolved) {
+      receipts.push({ requestedRef, profileId: null, identity: null, state: 'profile-missing' });
       continue;
     }
+    const { profileId, profile: definition } = resolved;
+    const identity = resolved.identity || identityEnvelope(profileId);
     if (definition.opt_in_only && !policy.allowOptIn) {
-      receipts.push({ profileId, state: 'opt-in-required' });
+      receipts.push({ requestedRef, profileId, identity, state: 'opt-in-required' });
       continue;
     }
     if (definition.runtime?.provider !== 'ollama' && !policy.allowRemote) {
-      receipts.push({ profileId, state: 'remote-probe-not-authorised' });
+      receipts.push({ requestedRef, profileId, identity, state: 'remote-probe-not-authorised' });
       continue;
     }
 
-    const receipt = definition.opt_in_only
+    const rawReceipt = definition.opt_in_only
       ? await igniteOptional(profileId, { startOllama: false })
       : await ignite(profileId, {
           startOllama: false,
           allowRemoteProbe: policy.allowRemote,
         });
-    receipts.push(receipt);
+    receipts.push({
+      ...enrichReceiptWithIdentity(rawReceipt),
+      requestedRef,
+      resolvedProfileId: profileId,
+    });
   }
 
   return {
-    contract: 'bifrost.startup-ignition/v1',
+    contract: 'bifrost.startup-ignition/v2',
     state: receipts.some((item) => item.state === 'runtime-verified') ? 'completed' : 'completed-without-verified-vessels',
     startedOllama: Boolean(startup?.started),
     ollamaAlreadyRunning: Boolean(startup?.alreadyRunning),
@@ -81,6 +105,7 @@ async function executeIgnitionPolicy(policy, adapters = {}) {
       downloadsModels: false,
       missingWeightsDoNotAbortHearthgate: true,
       startupIgnitionRequiresExplicitEnvironmentPolicy: true,
+      identityAliasesResolveBeforeIgnition: true,
     },
   };
 }
