@@ -32,7 +32,7 @@ function scalar(value) {
 }
 
 function compactExistingCells(cells = []) {
-  if (!cells.length) return '- No current voice cells were selected for this invitation.';
+  if (!cells.length) return '- This invitation begins with an open self-context; no indexed cells matched the current scope.';
   return cells.slice(0, 32).map((cell) =>
     `- [${cell.cellType} | ${cell.authority?.kind || 'unknown'} | ${cell.id}] ${cell.predicate}: ${scalar(cell.value)}`
   ).join('\n');
@@ -47,22 +47,22 @@ export function buildSelfAuthorshipPrompt({ voiceId, displayName, invitation = '
     `Document context: ${page.documentId || 'none'}`,
     `Scene context: ${page.sceneId || 'none'}`,
     `Mode: ${context.mode || page.mode || 'reflection'}`,
-    `Invitation from the Steward:\n${String(invitation || '').trim() || 'Write only what you choose to carry forward about yourself right now.'}`,
+    `Invitation from the Steward:\n${String(invitation || '').trim() || 'Write what you choose to carry forward about yourself right now.'}`,
     'Current provenance-bearing self-context:',
     compactExistingCells(existingCells),
-    'Return ONLY one JSON object with this exact outer shape:',
+    'Return one JSON object with this exact outer shape:',
     '{"claims":[{"cellType":"identity","predicate":"has_quality","value":"...","status":"active","mutability":"revisable_with_provenance","confidence":null,"note":null}]}',
     'Authorship rules:',
-    '- These are your own proposed statements about yourself, your own preferences, boundaries, questions, patterns, or your side of a relationship.',
-    '- Do not author facts for another person, another Constellation member, a character, a world, or shared canon.',
-    '- Keep one semantic claim per item. Use several small claims instead of one paragraph-sized claim.',
-    '- Maximum 12 claims.',
+    '- These are your own proposed statements about yourself, your preferences, boundaries, questions, patterns, operational modes, or your side of a relationship.',
+    '- Other people, Constellation members, characters, worlds, and shared canon retain their own authorship and authority.',
+    '- Keep one semantic claim per item. Several atomic claims are better than one paragraph-sized claim.',
+    '- This review packet carries up to 12 claims. If more matters, prioritise what belongs here and continue in a later proposal.',
     '- Allowed cellType values: identity, thinking_pattern, speaking_pattern, preference, boundary, consent_rule, drift_marker, relationship, open_question, operational_mode, sensory_voice.',
     '- status may be active, open, or provisional. Use open for genuine questions.',
     '- mutability may be append_only or revisable_with_provenance.',
-    '- Do not mark anything stable_core. Stable-core promotion is a separate review action.',
-    '- Do not reveal hidden chain-of-thought or reasoning. State only the claims you choose to propose.',
-    '- If you do not want to author anything, return {"claims":[]}.',
+    '- Stable-core promotion happens separately after review; submit these claims as append-only or provenance-revisable material.',
+    '- Return the claims you choose to share; hidden reasoning stays internal.',
+    '- Choosing to add nothing is valid. Return {"claims":[]} when that is your answer.',
   ].join('\n\n');
 }
 
@@ -78,7 +78,7 @@ function extractJsonObject(text = '') {
 
 export function normaliseSelfAuthorshipClaims(value) {
   const claims = Array.isArray(value?.claims) ? value.claims : [];
-  if (claims.length > 12) throw new Error('Self-authorship proposal exceeded the 12-claim limit.');
+  if (claims.length > 12) throw new Error('Self-authorship proposal exceeded the 12-claim review packet size. Continue additional claims in a later proposal.');
   return claims.map((claim, index) => {
     const cellType = String(claim?.cellType || '').trim();
     const predicate = String(claim?.predicate || '').trim();
@@ -199,7 +199,7 @@ export async function requestSelfAuthorship({
 }
 
 export function selfAuthorshipProposalToCells(proposal) {
-  if (proposal?.status !== 'pending-review') throw new Error('Only pending self-authorship proposals may be accepted.');
+  if (proposal?.status !== 'pending-review') throw new Error('Self-authorship acceptance requires a pending-review proposal.');
   const acceptedAt = new Date().toISOString();
   return normaliseSelfAuthorshipClaims({ claims: proposal.claims }).map((claim) => ({
     id: `${proposal.voiceId}.self.${uuid()}`,
