@@ -1,5 +1,6 @@
 import { attachCuspObservationToFeedbackCycle } from './cusp-feedback-observer.js';
 import { ashHistoryFromCuspPackets, createBaiTopologyReceipt, projectBoneToCuspStructure } from './bone-ash-intention.js';
+import { ashHistoryFromDeepTimeRecords } from './deep-time-ash.js';
 import { TRANSFORMATION_REQUEST_SCHEMA, assessTransformationResponse } from './transformation-request.js';
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 
@@ -45,6 +46,10 @@ function baiControlSemantics(projection) {
  *
  * BAI is one semantic projection of the domain-general cusp machinery. Here,
  * and only here, control B is intentionally the declared Ask.
+ *
+ * Ash prefers accepted DEEPTime trajectories when they exist. Cusp packet
+ * history remains a receipted fallback for live work that has not yet crossed
+ * the human acceptance gate into DEEPTime.
  */
 export async function runRequestedTransformationCircuit({
   request,
@@ -53,6 +58,7 @@ export async function runRequestedTransformationCircuit({
   bone = null,
   structureScale = 2,
   ashHistory = null,
+  deepTimeRecords = [],
   orderParameter,
   cuspHistory = [],
   generatedAt,
@@ -63,6 +69,7 @@ export async function runRequestedTransformationCircuit({
   invariant(Number(feedbackCycle.premaqc_after?.sequence) > Number(request.baseline.sequence), 'the feedback response must follow the Ask baseline');
   invariant(feedbackCycle.premaqc_after?.receipt_id, 'the feedback cycle must carry a receipted PREMAQC response');
   invariant(ashHistory === null || Array.isArray(ashHistory), 'ashHistory must be an array when supplied');
+  invariant(Array.isArray(deepTimeRecords), 'deepTimeRecords must be an array');
 
   const intention = signedAskIntention(request);
   const structureProjection = structure === null || structure === undefined
@@ -85,7 +92,15 @@ export async function runRequestedTransformationCircuit({
     generatedAt: generatedAt ?? feedbackCycle.created_at,
   });
 
-  const resolvedAshHistory = ashHistory ?? ashHistoryFromCuspPackets(cuspHistory);
+  const deepTimeAsh = ashHistoryFromDeepTimeRecords(deepTimeRecords, { worldId: request.world.id });
+  const ashSource = ashHistory !== null
+    ? 'explicit-receipted-history'
+    : deepTimeAsh.length
+      ? 'accepted-deep-time'
+      : 'cusp-receipt-fallback';
+  const resolvedAshHistory = ashHistory
+    ?? (deepTimeAsh.length ? deepTimeAsh : ashHistoryFromCuspPackets(cuspHistory));
+
   const baiReceipt = await createBaiTopologyReceipt({
     worldId: request.world.id,
     bone,
@@ -145,6 +160,8 @@ export async function runRequestedTransformationCircuit({
       model: structuredClone(baiReceipt.model),
       topology: structuredClone(baiReceipt.topology),
       authority: structuredClone(baiReceipt.authority),
+      ash_source: ashSource,
+      ash_source_receipt_ids: resolvedAshHistory.map((item) => item.receipt_id),
     },
     measured_response: structuredClone(response),
     authority: {
@@ -155,6 +172,8 @@ export async function runRequestedTransformationCircuit({
       structure_is_bone_projection: structure === null || structure === undefined,
       bone_is_structure_not_qualia: true,
       ash_is_receipted_history: true,
+      accepted_deep_time_preferred_for_ash: true,
+      cusp_history_is_provisional_ash_fallback: true,
       order_parameter_is_explicit_observation: true,
       intention_is_declared_not_inferred: true,
       intention_is_premaqc_agency: false,
