@@ -34,7 +34,8 @@ async function context() {
   const world = state.worlds.find((item) => item.id === state.activeWorldId) || state.worlds[0];
   const cycles = (state.feedbackCycles || []).filter((cycle) => cycle.world?.id === world?.id);
   const premaqc = state.premaqcByWorld?.[world?.id] || cycles[0]?.premaqc_after || null;
-  return { state, world, premaqc, cycles };
+  const deepTimeRecords = (state.observatory?.deep_time_records || []).filter((record) => record.world_id === world?.id);
+  return { state, world, premaqc, cycles, deepTimeRecords };
 }
 
 function responseSummary(response) {
@@ -48,7 +49,7 @@ function render(world, record, message = '') {
   const response = latest ? [...record.responses].reverse().find((item) => item.request_id === latest.request_id) : null;
   const circuit = latest ? [...record.circuits].reverse().find((item) => item.request.request_id === latest.request_id) : null;
   return `<section class="panel transformation-request-panel" data-transformation-sidecar>
-    <div class="section-heading compact-heading"><div><p class="eyebrow">Ask → Actuate → Listen → Measure</p><h2>Requested Transformation</h2><p class="muted">${esc(world.name)} · Intention enters as a bounded control input, never as a manufactured observation.</p></div></div>
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Ask → Actuate → Listen → Measure</p><h2>Requested Transformation</h2><p class="muted">${esc(world.name)} · Intention enters as a bounded control input, never as a manufactured observation. Accepted DEEPTime is preferred as Ash when it exists.</p></div></div>
     ${message ? `<p class="callout">${esc(message)}</p>` : ''}
     <form data-transformation-form class="stack">
       <label>Where are we asking?<select name="domain"><option value="story-world">Story world</option><option value="waking-world">The Waking World</option></select></label>
@@ -70,7 +71,7 @@ function render(world, record, message = '') {
       ${latest.waking_world ? `<div class="waking-world-receipt"><p><b>Our action:</b> ${esc(latest.waking_world.action_within_control)}</p><p><b>Free cooperation:</b> ${esc(latest.waking_world.external_cooperation)}</p><p><b>Evidence:</b> ${esc(latest.waking_world.observable_evidence)}</p><p><b>Review:</b> ${esc(latest.waking_world.review_at.slice(0, 10))} · silence is not agreement</p></div>` : ''}
       <div class="grid two compact-grid"><label>Observed structure · a<input data-transformation-field="structure" type="number" step="0.01" value="-1" /></label><label>Observed order parameter · x<input data-transformation-field="order-parameter" type="number" step="0.01" value="0" /></label></div>
       <div class="button-row"><button type="button" data-transformation-action="twine" data-request-id="${esc(latest.request_id)}">Twine Ask through latest feedback cycle</button><button type="button" class="quiet" data-transformation-action="measure" data-request-id="${esc(latest.request_id)}">Measure latest receipted response</button></div>
-      ${circuit ? `<p class="callout"><b>Circuit closed</b> · ${esc(circuit.measured_response.classification.status)} · ${esc(circuit.measured_response.classification.coupling)} · b ${Number(circuit.control.cusp_intention_b).toFixed(3)} · ${esc(circuit.circuit_id)}</p>` : '<p class="muted">The Ask has not yet crossed a later feedback receipt.</p>'}${responseSummary(response)}</div>` : '<p class="muted">No requested transformation is active for this world.</p>'}
+      ${circuit ? `<p class="callout"><b>Circuit closed</b> · ${esc(circuit.measured_response.classification.status)} · ${esc(circuit.measured_response.classification.coupling)} · b ${Number(circuit.control.cusp_intention_b).toFixed(3)} · Ash ${esc(circuit.bai.ash_source || 'receipted-history')} · ${esc(circuit.circuit_id)}</p>` : '<p class="muted">The Ask has not yet crossed a later feedback receipt.</p>'}${responseSummary(response)}</div>` : '<p class="muted">No requested transformation is active for this world.</p>'}
   </section>`;
 }
 
@@ -152,7 +153,7 @@ document.addEventListener('click', async (event) => {
     const panel = twine.closest('[data-transformation-sidecar]');
     twine.disabled = true;
     try {
-      const { world, cycles } = await context();
+      const { world, cycles, deepTimeRecords } = await context();
       const store = readStore(); const record = worldRecord(store, world.id);
       const request = record.requests.find((item) => item.request_id === twine.dataset.requestId);
       if (!request) throw new Error('The request receipt is unavailable.');
@@ -161,11 +162,18 @@ document.addEventListener('click', async (event) => {
       const structure = Number(panel.querySelector('[data-transformation-field="structure"]').value);
       const orderParameter = Number(panel.querySelector('[data-transformation-field="order-parameter"]').value);
       const cuspHistory = record.circuits.map((item) => item.cusp?.observation_packet).filter(Boolean);
-      const circuit = await runRequestedTransformationCircuit({ request, feedbackCycle: cycle, structure, orderParameter, cuspHistory });
+      const circuit = await runRequestedTransformationCircuit({
+        request,
+        feedbackCycle: cycle,
+        structure,
+        orderParameter,
+        cuspHistory,
+        deepTimeRecords,
+      });
       record.circuits.push(structuredClone(circuit));
       record.responses.push(structuredClone(circuit.measured_response));
       writeStore(store);
-      panel.outerHTML = render(world, record, `Circuit closed as ${circuit.circuit_id}. Ask remained control; response remained observed.`);
+      panel.outerHTML = render(world, record, `Circuit closed as ${circuit.circuit_id}. Ask remained control; response remained observed; Ash source ${circuit.bai.ash_source}.`);
     } catch (error) {
       const output = panel.querySelector('.callout') || document.createElement('p');
       output.className = 'callout'; output.textContent = `Circuit stopped: ${error.message}`;
