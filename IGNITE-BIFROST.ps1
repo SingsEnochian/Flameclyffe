@@ -15,6 +15,7 @@ $Ack = 'BIFROST_IGNITION_ACK'
 $ServerDir = Join-Path $PSScriptRoot 'apps\starwell-server'
 $IgniteScript = Join-Path $ServerDir 'scripts\bifrost-ignite.js'
 $PrepareScript = Join-Path $ServerDir 'scripts\bifrost-model-prepare.js'
+$AliasScript = Join-Path $ServerDir 'scripts\bifrost-materialize-aliases.js'
 $ReceiptDir = Join-Path $ServerDir 'data\ignition-receipts'
 $RequestedProfileRef = $ProfileId
 $ResolvedProfileId = $null
@@ -73,11 +74,30 @@ function Invoke-Ignition($Profile) {
 function Save-Receipt($Profile, $Receipt, [string]$Raw) {
   New-Item -ItemType Directory -Force -Path $ReceiptDir | Out-Null
   $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-  $safe = ($Profile.owner + '-' + $Profile.profileId) -replace '[^a-zA-Z0-9._-]', '_'
+  $identityId = if ($null -ne $Profile.identity -and $Profile.identity.identityId) { [string]$Profile.identity.identityId } else { [string]$Profile.owner }
+  $identityName = if ($null -ne $Profile.identity -and $Profile.identity.identityName) { [string]$Profile.identity.identityName } else { [string]$Profile.owner }
+  $safe = ($identityName + '-' + $Profile.profileId) -replace '[^a-zA-Z0-9._-]', '_'
   $path = Join-Path $ReceiptDir "$safe-$stamp.json"
-  if ($null -ne $Receipt) { $Receipt | ConvertTo-Json -Depth 12 | Set-Content -Encoding UTF8 $path }
-  else { $Raw | Set-Content -Encoding UTF8 $path }
+  $latest = Join-Path $ReceiptDir (("latest-" + $identityId + ".json") -replace '[^a-zA-Z0-9._-]', '_')
+  if ($null -ne $Receipt) {
+    $json = $Receipt | ConvertTo-Json -Depth 12
+    $json | Set-Content -Encoding UTF8 $path
+    $json | Set-Content -Encoding UTF8 $latest
+  }
+  else {
+    $Raw | Set-Content -Encoding UTF8 $path
+    $Raw | Set-Content -Encoding UTF8 $latest
+  }
   Write-Host "Receipt: $path" -ForegroundColor DarkGray
+  Write-Host "Latest:  $latest" -ForegroundColor DarkGray
+}
+
+function Assert-Verified($Profile, $Attempt, [int]$ModelCode, [int]$ChallengeCode) {
+  if ($Attempt.ExitCode -ne 0 -or $null -eq $Attempt.Receipt) { return $false }
+  if ($Attempt.Receipt.state -ne 'runtime-verified') { return $false }
+  if ($Attempt.Receipt.actualModel -ne $Profile.model) { Fail "Attestation mismatch: expected $($Profile.model), got $($Attempt.Receipt.actualModel)." $ModelCode }
+  if ($Attempt.Receipt.challenge -ne $Ack) { Fail "Challenge mismatch: expected $Ack, got $($Attempt.Receipt.challenge)." $ChallengeCode }
+  return $true
 }
 
 function Confirm-Install($Profile) {
@@ -93,9 +113,25 @@ function Confirm-Install($Profile) {
   return $answer -match '^(y|yes)$'
 }
 
+function Materialize-Alias($Profile) {
+  Write-Stage 'Materializing assigned runtime alias · no download'
+  $aliasArgs = @($AliasScript, '--profile', $ResolvedProfileId, '--execute')
+  if ($Profile.optInOnly) { $aliasArgs += '--include-opt-in' }
+  Push-Location $ServerDir
+  try {
+    & node @aliasArgs
+    $aliasCode = $LASTEXITCODE
+  }
+  finally {
+    Pop-Location
+  }
+  if ($aliasCode -ne 0) { Fail "Runtime alias materialization failed with exit code $aliasCode." 24 }
+}
+
 if (-not (Test-Path $ServerDir)) { Fail "Cannot find apps\starwell-server beneath $PSScriptRoot." 13 }
 if (-not (Test-Path $IgniteScript)) { Fail "Ignition CLI is missing: $IgniteScript" 14 }
 if (-not (Test-Path $PrepareScript)) { Fail "Model preparation CLI is missing: $PrepareScript" 15 }
+if (-not (Test-Path $AliasScript)) { Fail "Alias materializer is missing: $AliasScript" 18 }
 Require-Command 'node' 'Install/use Node 24 before ignition.'
 
 $profile = Get-ProfileDefinition
@@ -126,15 +162,27 @@ elseif (-not $AllowRemote) {
 Write-Stage 'First ignition attempt'
 $first = Invoke-Ignition $profile
 
-if ($first.ExitCode -eq 0 -and $null -ne $first.Receipt -and $first.Receipt.state -eq 'runtime-verified') {
-  if ($first.Receipt.actualModel -ne $profile.model) { Fail "Attestation mismatch: expected $($profile.model), got $($first.Receipt.actualModel)." 21 }
-  if ($first.Receipt.challenge -ne $Ack) { Fail "Challenge mismatch: expected $Ack, got $($first.Receipt.challenge)." 22 }
+if (Assert-Verified $profile $first 21 22) {
   Save-Receipt $profile $first.Receipt $first.Raw
   Write-Host "`n🔥 RUNTIME VERIFIED · $($profile.identity.identityName) · $($first.Receipt.actualModel)" -ForegroundColor Green
   exit 0
 }
 
 $state = if ($null -ne $first.Receipt) { [string]$first.Receipt.state } else { '' }
+
+if ($state -eq 'alias-pending') {
+  Materialize-Alias $profile
+  Write-Stage 'Retrying ignition after alias materialization'
+  $aliasRetry = Invoke-Ignition $profile
+  Save-Receipt $profile $aliasRetry.Receipt $aliasRetry.Raw
+  if (-not (Assert-Verified $profile $aliasRetry 25 26)) {
+    $retryState = if ($null -ne $aliasRetry.Receipt) { [string]$aliasRetry.Receipt.state } else { '<no-receipt>' }
+    Fail "Post-alias ignition stopped in state '$retryState'." 27
+  }
+  Write-Host "`n🔥 RUNTIME VERIFIED · $($profile.identity.identityName) · $($aliasRetry.Receipt.actualModel)" -ForegroundColor Green
+  exit 0
+}
+
 if ($state -ne 'activation-pending') {
   Save-Receipt $profile $first.Receipt $first.Raw
   Fail "Ignition stopped in state '$state'. Read the receipt before changing the runtime." 20
@@ -167,10 +215,10 @@ Write-Stage 'Second ignition attempt'
 $second = Invoke-Ignition $profile
 Save-Receipt $profile $second.Receipt $second.Raw
 
-if ($second.ExitCode -ne 0 -or $null -eq $second.Receipt) { Fail 'Post-install ignition did not return a verified JSON receipt.' 40 }
-if ($second.Receipt.state -ne 'runtime-verified') { Fail "Post-install ignition stopped in state '$($second.Receipt.state)'." 41 }
-if ($second.Receipt.actualModel -ne $profile.model) { Fail "Attestation mismatch: expected $($profile.model), got $($second.Receipt.actualModel)." 42 }
-if ($second.Receipt.challenge -ne $Ack) { Fail "Challenge mismatch: expected $Ack, got $($second.Receipt.challenge)." 43 }
+if (-not (Assert-Verified $profile $second 42 43)) {
+  $secondState = if ($null -ne $second.Receipt) { [string]$second.Receipt.state } else { '<no-receipt>' }
+  Fail "Post-install ignition stopped in state '$secondState'." 41
+}
 
 Write-Host "`n🔥 RUNTIME VERIFIED · $($profile.identity.identityName) · $($second.Receipt.actualModel)" -ForegroundColor Green
 exit 0
