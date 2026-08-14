@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const { requireRuntimeToken } = require('../security/runtime-token');
 const {
   resolveProfileRef,
   enrichReceiptWithIdentity,
@@ -46,13 +47,17 @@ router.get('/', async (_req, res) => {
         ...item,
         identity: identityEnvelope(item.profileId),
       })),
+      security: {
+        readOnlyStatus: 'loopback-readable',
+        privilegedActions: 'house-runtime-token-required',
+      },
     });
   } catch (error) {
     res.status(500).json({ error: 'ignition-status-failed', detail: error?.message || String(error) });
   }
 });
 
-router.post('/start-ollama', requireExplicitConfirmation, async (req, res) => {
+router.post('/start-ollama', requireRuntimeToken, requireExplicitConfirmation, async (req, res) => {
   try {
     const endpoint = req.body?.endpoint || process.env.OLLAMA_ENDPOINT || 'http://127.0.0.1:11434';
     const result = await startOllamaServer({ endpoint });
@@ -60,7 +65,7 @@ router.post('/start-ollama', requireExplicitConfirmation, async (req, res) => {
     res.status(status).json({
       contract: 'bifrost.ollama-start/v1',
       ...result,
-      rules: { installsModels: false, explicitAction: true },
+      rules: { installsModels: false, explicitAction: true, runtimeTokenRequired: true },
     });
   } catch (error) {
     res.status(500).json({ error: 'ollama-start-failed', detail: error?.message || String(error) });
@@ -93,7 +98,7 @@ router.get('/profile/:profile_ref/receipt', (req, res) => {
   });
 });
 
-router.post('/profile/:profile_ref/materialize-alias', requireExplicitConfirmation, async (req, res) => {
+router.post('/profile/:profile_ref/materialize-alias', requireRuntimeToken, requireExplicitConfirmation, async (req, res) => {
   const resolved = resolveOr404(req.params.profile_ref, res);
   if (!resolved) return;
   if (resolved.profile.opt_in_only && req.body?.opt_in !== true) {
@@ -102,7 +107,7 @@ router.post('/profile/:profile_ref/materialize-alias', requireExplicitConfirmati
       state: 'opt-in-required',
       profileId: resolved.profileId,
       identity: resolved.identity,
-      rules: { downloadsModels: false, optionalProfileRequiresExplicitOptIn: true },
+      rules: { downloadsModels: false, optionalProfileRequiresExplicitOptIn: true, runtimeTokenRequired: true },
     });
   }
   try {
@@ -122,6 +127,7 @@ router.post('/profile/:profile_ref/materialize-alias', requireExplicitConfirmati
         explicitAction: true,
         downloadsModels: false,
         selectedIdentityOnly: true,
+        runtimeTokenRequired: true,
       },
     });
   } catch (error) {
@@ -134,7 +140,7 @@ router.post('/profile/:profile_ref/materialize-alias', requireExplicitConfirmati
   }
 });
 
-router.post('/profile/:profile_ref', requireExplicitConfirmation, async (req, res) => {
+router.post('/profile/:profile_ref', requireRuntimeToken, requireExplicitConfirmation, async (req, res) => {
   const resolved = resolveOr404(req.params.profile_ref, res);
   if (!resolved) return;
   const { profileId, profile: definition, identity } = resolved;
@@ -145,7 +151,7 @@ router.post('/profile/:profile_ref', requireExplicitConfirmation, async (req, re
       profileId,
       identity,
       state: 'opt-in-required',
-      rules: { downloadsModels: false, optionalProfileRequiresExplicitOptIn: true },
+      rules: { downloadsModels: false, optionalProfileRequiresExplicitOptIn: true, runtimeTokenRequired: true },
     });
   }
 
@@ -173,6 +179,7 @@ router.post('/profile/:profile_ref', requireExplicitConfirmation, async (req, re
         runtimeVerifiedRequiresChallengeRoundTrip: true,
         identityAliasesResolveToOneProfile: true,
         aliasPendingMeansBaseInstalledAliasMissing: true,
+        runtimeTokenRequired: true,
       },
     });
   } catch (error) {
