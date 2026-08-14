@@ -1,6 +1,7 @@
 import { resolveVoiceCells } from './knowledge-bank-loader.js';
 import { CONSTELLATION_LENS_EVENTS } from './constellation-lens.js';
 import { loadState } from './storage.js';
+import { expandWorldIds, normaliseWorldId } from './world-id-aliases.js';
 
 const SELECTION_KEY = 'arcsweep.constellation-selection/v1';
 const READY_EVENT = 'arcsweep:writer-context-ready';
@@ -73,28 +74,33 @@ function findDocument(state, documentId) {
   return null;
 }
 
-export async function hydrateWriterFieldContext(fieldContext, { stateLoader = loadState } = {}) {
+export async function hydrateWriterFieldContext(fieldContext, { stateLoader } = {}) {
   const hydrated = structuredClone(fieldContext || {});
   hydrated.page = { ...(hydrated.page || {}) };
   hydrated.form = { ...(hydrated.form || {}) };
-  if (typeof document === 'undefined' || typeof stateLoader !== 'function') return hydrated;
+  const loader = stateLoader || (typeof document !== 'undefined' ? loadState : null);
+  if (typeof loader !== 'function') return hydrated;
 
   try {
-    const state = await stateLoader();
+    const state = await loader();
     const documentId = hydrated.page.documentId || hydrated.form.recordId || null;
     const found = findDocument(state, documentId);
-    const worldId = hydrated.page.worldId
+    const rawWorldId = hydrated.page.worldId
       || found?.value?.worldId
       || (hydrated.form.id === 'world-registry-form' ? documentId : null)
       || state.activeWorldId
       || null;
-    const world = (state.worlds || []).find((item) => item.id === worldId) || null;
+    const worldAliases = expandWorldIds(rawWorldId);
+    const world = (state.worlds || []).find((item) => worldAliases.includes(String(item.id || '').toLowerCase()))
+      || (state.worlds || []).find((item) => item.id === state.activeWorldId)
+      || null;
 
     hydrated.page.documentId = documentId;
     hydrated.page.documentKind = found?.kind || null;
-    hydrated.page.worldId = worldId;
+    hydrated.page.worldId = normaliseWorldId(rawWorldId);
+    hydrated.page.worldIdAliases = worldAliases;
     hydrated.page.worldName = hydrated.page.worldName || world?.name || null;
-    hydrated.page.activeWorldId = state.activeWorldId || null;
+    hydrated.page.activeWorldId = normaliseWorldId(state.activeWorldId) || null;
   } catch {
     // Context hydration is best-effort. The field packet remains valid with local form data only.
   }
@@ -104,21 +110,27 @@ export async function hydrateWriterFieldContext(fieldContext, { stateLoader = lo
 export async function buildWriterContextPacket(fieldContext, options = {}) {
   const hydratedFieldContext = options.resolveLocalState === false
     ? fieldContext
-    : await hydrateWriterFieldContext(fieldContext, { stateLoader: options.stateLoader || loadState });
+    : await hydrateWriterFieldContext(fieldContext, { stateLoader: options.stateLoader });
   const selected = parseVoiceList(options.voiceIds?.length ? options.voiceIds : getSelectedConstellationVoices());
   const cellTypes = options.cellTypes || fieldCellTypes(hydratedFieldContext);
   const mode = options.mode || requestedMode(hydratedFieldContext);
   const voiceContexts = [];
+  const worldId = hydratedFieldContext.page?.worldId || null;
+  const worldIds = hydratedFieldContext.page?.worldIdAliases?.length
+    ? hydratedFieldContext.page.worldIdAliases
+    : expandWorldIds(worldId);
 
   for (const voiceId of selected) {
     const resolved = await resolveVoiceCells(voiceId, {
       cellTypes,
       mode,
-      worldId: hydratedFieldContext.page?.worldId || null,
+      worldId,
+      worldIds,
       documentId: hydratedFieldContext.page?.documentId || null,
       sceneId: hydratedFieldContext.page?.sceneId || null,
       at: options.at || null,
       includeHistorical: Boolean(options.includeHistorical),
+      requireScopedContext: true,
       limit: options.perVoiceLimit || 36,
     });
 
@@ -142,6 +154,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
     },
     activation: {
       cellTypes,
+      worldIds,
       includeHistorical: Boolean(options.includeHistorical),
       perVoiceLimit: options.perVoiceLimit || 36,
     },
