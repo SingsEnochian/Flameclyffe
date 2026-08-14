@@ -21,6 +21,19 @@ export async function startBifrostOllama(fetchImpl = fetch) {
   return { ...result.data, ok: result.ok, httpStatus: result.status };
 }
 
+export async function materializeBifrostAlias(profileRef, {
+  optIn = false,
+  fetchImpl = fetch,
+} = {}) {
+  if (!profileRef) throw new Error('Alias materialization requires a Bifröst profile or identity reference.');
+  const result = await jsonRequest(`/api/v1/bifrost/ignition/profile/${encodeURIComponent(profileRef)}/materialize-alias`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ confirm: true, opt_in: optIn === true }),
+  }, fetchImpl);
+  return { ...result.data, ok: result.ok, httpStatus: result.status };
+}
+
 export async function igniteBifrostProfile(profileId, {
   startOllama = false,
   allowRemoteProbe = false,
@@ -57,6 +70,25 @@ export async function igniteConstellationVoice(voiceId, options = {}) {
   const receipt = await igniteBifrostProfile(entry.profileId, {
     startOllama: options.startOllama === true,
     allowRemoteProbe: options.allowRemoteProbe === true,
+    fetchImpl: options.fetchImpl || fetch,
+  });
+  return { ...receipt, voiceId: voice };
+}
+
+export async function materializeConstellationVoiceAlias(voiceId, options = {}) {
+  const registry = await loadConstellationRuntimeRoutes(options.fetchImpl || fetch);
+  const voice = String(voiceId || '').trim().toLowerCase();
+  const entry = registry.routes?.[voice];
+  if (!entry?.profileId) {
+    return {
+      ok: false,
+      state: entry?.status || 'vessel-unselected',
+      voiceId: voice,
+      profileId: null,
+      error: 'No model vessel is selected for this voice.',
+    };
+  }
+  const receipt = await materializeBifrostAlias(entry.profileId, {
     fetchImpl: options.fetchImpl || fetch,
   });
   return { ...receipt, voiceId: voice };
