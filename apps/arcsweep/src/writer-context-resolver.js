@@ -1,4 +1,5 @@
 import { resolveVoiceCells } from './knowledge-bank-loader.js';
+import { resolveKnowledgeSubjectCells } from './knowledge-subject-loader.js';
 import { CONSTELLATION_LENS_EVENTS } from './constellation-lens.js';
 import { loadState } from './storage.js';
 import { expandWorldIds, normaliseWorldId } from './world-id-aliases.js';
@@ -59,6 +60,25 @@ function fieldCellTypes(fieldContext = {}) {
   return ['identity', 'thinking_pattern', 'preference', 'boundary', 'relationship', 'shared_doctrine', LEARNED_CELL_TYPE];
 }
 
+function subjectCellTypes(kind) {
+  if (kind === 'character') {
+    return [
+      'identity', 'speaking_pattern', 'thinking_pattern', 'preference', 'boundary', 'relationship',
+      'character_knowledge', 'character_motivation', 'character_state', 'chronology', LEARNED_CELL_TYPE,
+    ];
+  }
+  if (kind === 'narrative_voice') {
+    return [
+      'identity', 'writing_style_rule', 'thinking_pattern', 'speaking_pattern', 'preference',
+      'boundary', 'sensory_voice', 'drift_marker', LEARNED_CELL_TYPE,
+    ];
+  }
+  if (kind === 'writing_style') {
+    return ['writing_style_rule', 'preference', 'boundary', 'sensory_voice', 'drift_marker', LEARNED_CELL_TYPE];
+  }
+  return [LEARNED_CELL_TYPE];
+}
+
 function requestedMode(fieldContext = {}) {
   if (typeof document === 'undefined') return fieldContext.mode || 'writing';
   return document.body?.dataset.constellationMode || fieldContext.mode || 'writing';
@@ -73,6 +93,28 @@ function findDocument(state, documentId) {
     if (record) return { kind: roomId, value: record };
   }
   return null;
+}
+
+function splitIds(value) {
+  if (Array.isArray(value)) return unique(value.map((item) => String(item).trim().toLowerCase()));
+  return unique(String(value || '').split(',').map((item) => item.trim().toLowerCase()));
+}
+
+function subjectSpecs(page = {}) {
+  const specs = [];
+  if (page.writingStyleId) specs.push({ kind: 'writing_style', id: String(page.writingStyleId).toLowerCase(), label: page.writingStyleLabel || page.writingStyleId });
+  if (page.narrativeVoiceId) specs.push({ kind: 'narrative_voice', id: String(page.narrativeVoiceId).toLowerCase(), label: page.narrativeVoiceLabel || page.narrativeVoiceId });
+  if (page.povCharacterId) specs.push({ kind: 'character', id: String(page.povCharacterId).toLowerCase(), label: page.povCharacterLabel || page.povCharacterId });
+  for (const id of splitIds(page.sceneCharacterIds)) {
+    specs.push({ kind: 'character', id, label: id });
+  }
+  const seen = new Set();
+  return specs.filter((subject) => {
+    const key = `${subject.kind}:${subject.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export async function hydrateWriterFieldContext(fieldContext, { stateLoader } = {}) {
@@ -102,6 +144,11 @@ export async function hydrateWriterFieldContext(fieldContext, { stateLoader } = 
     hydrated.page.worldIdAliases = worldAliases;
     hydrated.page.worldName = hydrated.page.worldName || world?.name || null;
     hydrated.page.activeWorldId = normaliseWorldId(state.activeWorldId) || null;
+    hydrated.page.storyAt = hydrated.page.storyAt || found?.value?.storyAt || found?.value?.chronologyAt || found?.value?.date || null;
+    hydrated.page.povCharacterId = hydrated.page.povCharacterId || found?.value?.povCharacterId || found?.value?.pov_character_id || null;
+    hydrated.page.narrativeVoiceId = hydrated.page.narrativeVoiceId || found?.value?.narrativeVoiceId || found?.value?.narrative_voice_id || null;
+    hydrated.page.writingStyleId = hydrated.page.writingStyleId || found?.value?.writingStyleId || found?.value?.writing_style_id || null;
+    hydrated.page.sceneCharacterIds = hydrated.page.sceneCharacterIds || found?.value?.sceneCharacterIds || found?.value?.scene_character_ids || [];
   } catch {
     // Context hydration is best-effort. The field packet remains valid with local form data only.
   }
@@ -116,10 +163,12 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
   const cellTypes = options.cellTypes || fieldCellTypes(hydratedFieldContext);
   const mode = options.mode || requestedMode(hydratedFieldContext);
   const voiceContexts = [];
+  const subjectContexts = [];
   const worldId = hydratedFieldContext.page?.worldId || null;
   const worldIds = hydratedFieldContext.page?.worldIdAliases?.length
     ? hydratedFieldContext.page.worldIdAliases
     : expandWorldIds(worldId);
+  const storyAt = options.at || hydratedFieldContext.page?.storyAt || null;
 
   for (const voiceId of selected) {
     const resolved = await resolveVoiceCells(voiceId, {
@@ -129,7 +178,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       worldIds,
       documentId: hydratedFieldContext.page?.documentId || null,
       sceneId: hydratedFieldContext.page?.sceneId || null,
-      at: options.at || null,
+      at: storyAt,
       includeHistorical: Boolean(options.includeHistorical),
       requireScopedContext: true,
       limit: options.perVoiceLimit || 36,
@@ -144,8 +193,31 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
     });
   }
 
+  for (const subject of subjectSpecs(hydratedFieldContext.page)) {
+    const resolved = await resolveKnowledgeSubjectCells(subject, {
+      cellTypes: subjectCellTypes(subject.kind),
+      mode,
+      worldId,
+      worldIds,
+      documentId: hydratedFieldContext.page?.documentId || null,
+      sceneId: hydratedFieldContext.page?.sceneId || null,
+      at: storyAt,
+      includeHistorical: Boolean(options.includeHistorical),
+      requireScopedContext: true,
+      limit: options.perSubjectLimit || 40,
+    });
+    subjectContexts.push({
+      kind: resolved.subject.kind,
+      id: resolved.subject.id,
+      label: resolved.label,
+      availability: resolved.cells.length ? 'context-ready' : 'no-indexed-cells',
+      cells: resolved.cells,
+      localCellCount: resolved.localCellCount || 0,
+    });
+  }
+
   return {
-    contract: 'arcsweep.writer-context-packet/v1',
+    contract: 'arcsweep.writer-context-packet/v2',
     requestId: options.requestId || globalThis.crypto?.randomUUID?.() || `writer-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     createdAt: new Date().toISOString(),
     mode,
@@ -153,14 +225,18 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
     selection: {
       requestedVoiceIds: selected,
       resolvedVoiceIds: voiceContexts.map((voice) => voice.voiceId),
+      subjects: subjectContexts.map((subject) => ({ kind: subject.kind, id: subject.id })),
     },
     activation: {
       cellTypes,
       worldIds,
+      storyAt,
       includeHistorical: Boolean(options.includeHistorical),
       perVoiceLimit: options.perVoiceLimit || 36,
+      perSubjectLimit: options.perSubjectLimit || 40,
     },
     voices: voiceContexts,
+    subjects: subjectContexts,
     rules: {
       sourceDocumentsRemainAuthoritative: true,
       noSilentFieldMutation: true,
@@ -168,6 +244,9 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       unavailableVoiceMayNotBeImpersonated: true,
       modelInferenceMayNotOverrideStableCore: true,
       localLearningRequiresUserKeepAction: true,
+      characterKnowledgeMustRespectTemporalScope: true,
+      narrativeVoiceMayShapeProseButMayNotGrantCharacterKnowledge: true,
+      subjectKindsRemainDistinct: true,
     },
   };
 }
