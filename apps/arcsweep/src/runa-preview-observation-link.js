@@ -1,4 +1,5 @@
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
+import { feedbackCycleSource } from './feedback-cycle-queue.js';
 import { RUNA_PREVIEW_EVIDENCE_ARM_SCHEMA } from './runa-preview-render.js';
 
 export const RUNA_PREVIEW_OBSERVATION_LINK_SCHEMA = 'arcsweep.runa-preview-observation-link/v1';
@@ -12,7 +13,7 @@ function timestamp(value) {
   return Number.isFinite(time) ? time : null;
 }
 
-export function findNextFeedbackCycleForEvidenceArm({ arm, feedbackCycles = [], existingLinks = [] } = {}) {
+export function findNextReviewableCycleForEvidenceArm({ arm, feedbackCycles = [], existingLinks = [] } = {}) {
   invariant(arm?.schema === RUNA_PREVIEW_EVIDENCE_ARM_SCHEMA, 'a Runa preview evidence arm is required');
   const alreadyLinked = new Set((existingLinks || []).map((item) => item.source?.arm_id));
   if (alreadyLinked.has(arm.arm_id)) return null;
@@ -26,13 +27,16 @@ export function findNextFeedbackCycleForEvidenceArm({ arm, feedbackCycles = [], 
     .sort((left, right) => (timestamp(left.created_at) ?? 0) - (timestamp(right.created_at) ?? 0))[0] || null;
 }
 
+export const findNextFeedbackCycleForEvidenceArm = findNextReviewableCycleForEvidenceArm;
+
 export async function createRunaPreviewObservationLink({ arm, feedbackCycle, linkedAt } = {}) {
   invariant(arm?.schema === RUNA_PREVIEW_EVIDENCE_ARM_SCHEMA, 'a Runa preview evidence arm is required');
-  invariant(feedbackCycle?.schema === 'arcsweep.feedback-cycle/v1', 'a receipted feedback cycle is required');
-  invariant(feedbackCycle.world?.id === arm.world_id, 'evidence arm and feedback cycle must share a world');
+  invariant(feedbackCycle?.schema === 'arcsweep.feedback-cycle/v1', 'a receipted reviewable observation cycle is required');
+  invariant(feedbackCycle.world?.id === arm.world_id, 'evidence arm and observation cycle must share a world');
   const armTime = timestamp(arm.armed_at);
   const cycleTime = timestamp(feedbackCycle.created_at);
-  invariant(armTime === null || cycleTime === null || cycleTime >= armTime, 'feedback cycle must not precede evidence arming');
+  invariant(armTime === null || cycleTime === null || cycleTime >= armTime, 'observation cycle must not precede evidence arming');
+  const observationSource = feedbackCycleSource(feedbackCycle);
 
   const core = {
     schema: RUNA_PREVIEW_OBSERVATION_LINK_SCHEMA,
@@ -44,22 +48,31 @@ export async function createRunaPreviewObservationLink({ arm, feedbackCycle, lin
       arm_fingerprint: arm.arm_fingerprint,
       render_id: arm.source.render_id,
       render_fingerprint: arm.source.render_fingerprint,
+      observation_source: observationSource,
+      observation_cycle_id: feedbackCycle.cycle_id,
+      observation_cycle_fingerprint: feedbackCycle.cycle_fingerprint,
+      // Compatibility aliases remain while older provenance readers still use
+      // the Feedback-specific field names.
       feedback_cycle_id: feedbackCycle.cycle_id,
       feedback_cycle_fingerprint: feedbackCycle.cycle_fingerprint,
     },
     observation: {
+      source: observationSource,
       cycle_created_at: feedbackCycle.created_at,
       mode: feedbackCycle.turn?.mode || null,
       premaqc_before_receipt_id: feedbackCycle.premaqc_before?.receipt_id || null,
       premaqc_after_receipt_id: feedbackCycle.premaqc_after?.receipt_id || null,
+      evidence_schemas: Object.freeze((feedbackCycle.evidence || []).map((item) => item?.schema).filter(Boolean)),
       steward_review_required: Boolean(feedbackCycle.authority?.steward_review_required),
     },
     authority: {
       explicit_arm_preceded_cycle: true,
+      shared_review_queue_required: true,
+      field_and_feedback_cycles_supported: true,
       link_is_context_not_causation_claim: true,
       render_effect_inferred: false,
       response_content_inferred: false,
-      feedback_cycle_mutable: false,
+      observation_cycle_mutable: false,
       premaqc_mutable: false,
       qualia_inferred: false,
       physical_claim: false,
