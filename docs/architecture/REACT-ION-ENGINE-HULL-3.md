@@ -6,9 +6,9 @@
 
 ## Purpose
 
-Hull 3 turns the first React-ion projection engine into a navigable software vessel rather than a collection of isolated formulas.
+Hull 3 turns the first React-ion projection engine into a navigable vessel.
 
-The new layer adds:
+It adds:
 
 - a Dimensional Naming Service;
 - approved destination registrations;
@@ -20,23 +20,19 @@ The new layer adds:
 - closed-loop holonomy analysis;
 - a dedicated Arcsweep test/build CI gate.
 
-The central rule remains unchanged:
+The central rule is:
 
-> Travel is modelled as re-projection, not displacement.
-
-This is an executable software / simulation / mythience architecture. It does not assert experimentally demonstrated physical multiverse transport, perspective-only propulsion, or physically verified universe-frequency addressing.
+> Travel is re-projection.
 
 ---
 
 ## 1. Dimensional Naming Service
 
-The compact address remains:
+The compact address is:
 
 `X.Y.Z.T@frequency:φ=phase`
 
-Humans should not be expected to remember it.
-
-Hull 3 therefore adds an approved destination registry. A destination may be registered as a:
+Hull 3 adds an approved destination registry. A destination may be registered as a:
 
 - world;
 - place;
@@ -56,36 +52,22 @@ Each registration may carry:
 - provenance;
 - lifecycle state.
 
-Lifecycle states are:
+Lifecycle states are `draft`, `approved`, and `deprecated`.
 
-- `draft`;
-- `approved`;
-- `deprecated`.
+Approved destinations enter the runtime naming table. Drafts remain editable records.
 
-Only `approved` destinations enter the runtime naming table.
-
-A draft may therefore be authored, inspected and revised without silently becoming navigable.
-
-### Implementation
+Implementation:
 
 - `apps/arcsweep/src/react-ion-registry.js`
 - `apps/arcsweep/src/react-ion-registry-sidecar.js`
 
-The registry desk mounts in Arcsweep's Worlds room and can link directly to existing World and Place records. Manual entries may carry Concordance anchor identifiers.
-
-The first persistence layer is a dedicated local registry store:
-
-`hearthgate.arcsweep.react-ion-registry.v1`
-
-This is deliberately separate from the main Arcsweep state in Hull 3. Migration into exported/imported Arcsweep state remains a later hull task.
+The registry desk mounts in Arcsweep's Worlds room and links to existing World and Place records. Manual entries may carry Concordance anchor identifiers.
 
 ---
 
 ## 2. Projection corridors
 
-An address tells the Helm where an endpoint is in the model. It does not prove that every endpoint may be reached directly from every other endpoint.
-
-Hull 3 adds explicit corridors.
+An address identifies an endpoint. A corridor identifies an admitted path between endpoints.
 
 A corridor declares:
 
@@ -100,31 +82,25 @@ A corridor declares:
 - one-way or bidirectional topology;
 - registration state.
 
-Only approved corridors enter the route graph.
+Approved corridors enter the route graph.
 
-Bidirectional corridors compile a reverse edge using the transposed Jacobian rather than pretending the forward matrix is automatically identical in reverse.
+Bidirectional corridors compile a reverse edge using the transposed Jacobian.
 
-Every corridor edge is compiled through the existing STARWELL Jacobian analyser and React-ion Continuity Gate.
-
-A failed gate becomes a blocked edge.
-
-Blocked edges remain inspectable but are not routable.
+Every corridor edge passes through the STARWELL Jacobian analyser and React-ion Continuity Gate. A failed gate becomes a blocked edge. Blocked edges remain inspectable and stay outside route selection.
 
 ---
 
 ## 3. Helm name resolution
 
-The Living Helm now resolves approved DNS names before reading manual Instrument Bay addressing.
+The Living Helm resolves approved DNS names before reading manual Instrument Bay addressing.
 
 Resolution order:
 
 1. exact approved DNS name or alias;
-2. for the source only, an approved world-level endpoint matching the active Arcsweep world;
+2. approved world-level source endpoint matching the active Arcsweep world;
 3. manual Instrument Bay fallback.
 
-When a DNS registration resolves, the registered dimensional address and Runa profile take precedence over manual fallback values.
-
-This prevents the visible interface from requiring repeated entry of already-approved machine state.
+When a DNS registration resolves, its registered dimensional address and Runa profile take precedence over manual fallback values.
 
 The operator-facing questions remain simple:
 
@@ -135,43 +111,31 @@ The operator-facing questions remain simple:
 - What transformation do you intend?
 - What must remain unchanged?
 
-The Instrument Bay remains expandable.
-
 ---
 
 ## 4. Operator continuity is a global route gate
 
-Hull 3 strengthens the Helm route law.
-
-Authorization alone is not enough to route.
-
-The operator continuity gate evaluates:
-
-- identity;
-- continuity;
-- agency.
+The operator continuity gate evaluates identity, continuity, and agency.
 
 The Helm computes:
 
 `canRoute = authorised && operatorContinuityGate.admitted`
 
-If that gate closes, neither a direct candidate nor an otherwise-approved registry corridor may bypass it.
+When the gate closes, every candidate path is vetoed at the Helm level.
 
-The distinction is preserved in the receipt:
+The receipt preserves:
 
 - `ask_authorised`;
 - `operator_continuity_gate_admitted`;
 - `route_gate_admitted`.
 
-An authorised Ask can therefore still produce a correctly receipted route veto.
+An authorised Ask can therefore produce a route veto with full provenance.
 
 ---
 
 ## 5. Alternate-route inspection
 
-The minimum-cost route remains Dijkstra-style.
-
-Hull 3 adds a bounded simple-path inspector so the Helm can retain alternatives rather than discarding every route except the winner.
+Hull 3 adds a bounded simple-path inspector.
 
 Implementation:
 
@@ -186,30 +150,21 @@ The inspector:
 - breaks ties by hop count and deterministic path order;
 - fingerprints each retained candidate.
 
-The Helm currently retains up to five candidates.
-
-The best route is still compiled through the main route engine. Alternatives are inspection artefacts, not automatically travelled paths.
+The Helm retains up to five candidates. The primary route still comes from the main route engine.
 
 ---
 
 ## 6. DEEPTime route extension
 
-If the Helm has both:
+When the Helm has an admitted route and a receipted PREMAQC source state, it emits a DEEPTime React-ion extension.
 
-- an admitted route; and
-- a receipted PREMAQC source state,
-
-it emits a DEEPTime React-ion extension.
-
-Hull 3 deliberately gives each navigation request its own sequence:
+Each navigation request receives its own sequence:
 
 `sequence_id = reaction-<navigation-request-id>`
 
 with:
 
 `lambda = 0`
-
-This avoids manufacturing a false continuous temporal series when multiple Helm compilations occur against the same PREMAQC snapshot.
 
 The extension carries:
 
@@ -221,13 +176,11 @@ The extension carries:
 - Ask fingerprint;
 - route path and cost;
 - explicit missing harmonic-profile fields;
-- the authority statement that the route is a modelled projection path, not an observation.
+- route provenance.
 
 ---
 
 ## 7. Trans-Cosmic Protocol traceroute
-
-The TCP joke now has an executable transport layer.
 
 Implementation:
 
@@ -243,17 +196,9 @@ Each hop records:
 - loopback state;
 - acknowledgement code.
 
-If TTL is exhausted before the target, the traceroute closes with:
+TTL exhaustion closes with `EXPIRED`. Reaching the target closes with `ACK`.
 
-`EXPIRED`
-
-If the target is reached, it closes with:
-
-`ACK`
-
-The transport receipt explicitly states:
-
-> Delivery is transport state, not fulfilment of the requested transformation.
+Transport state and transformation state remain separate receipts in the same chain.
 
 ### BCEP/1
 
@@ -261,13 +206,9 @@ Recoverable transport loopback remains eligible for:
 
 `ACK-THPPPT`
 
-The Bill the Cat diagnostic is not emitted for serious consent, continuity or data-integrity failure.
+Consent, continuity, access, and data-integrity failures keep their own native diagnostics.
 
-The Helm flight-recorder sidecar enriches completed Helm route receipts with this traceroute and displays the hop list beneath the main receipt.
-
-Implementation:
-
-`apps/arcsweep/src/react-ion-flight-recorder-sidecar.js`
+The Helm flight recorder enriches completed Helm route receipts with traceroute data and displays the hop list beneath the main receipt.
 
 ---
 
@@ -277,7 +218,7 @@ Implementation:
 
 `apps/arcsweep/src/react-ion-replay.js`
 
-A route can be recomputed from the original navigation request and a supplied graph.
+Replay recomputes a route from the original navigation request and supplied graph.
 
 Replay checks:
 
@@ -285,9 +226,7 @@ Replay checks:
 - cost equality;
 - fingerprint equality.
 
-If the graph or weighting environment changes enough to produce a different route, replay reports drift rather than silently blessing the new result as identical.
-
-Replay verifies declared software inputs only. It is not independent physical validation.
+Changed routing conditions produce `DRIFT`.
 
 ---
 
@@ -295,31 +234,24 @@ Replay verifies declared software inputs only. It is not independent physical va
 
 Hull 3 adds a formal return-with-difference receipt.
 
-A chain of route receipts may be analysed when:
-
-- every route begins where the previous one ended; and
-- the final destination equals the initial source.
+A chain may be analysed when every route begins where the previous route ended and the final destination equals the initial source.
 
 The loop receipt records:
 
-- all route IDs and fingerprints;
+- route IDs and fingerprints;
 - total hop count;
 - accumulated route cost;
 - maximum Jacobian risk;
 - maximum harmonic mismatch;
 - maximum continuity risk.
 
-An optional declared model-orientation vector may be supplied before and after the loop.
+Optional before/after orientation vectors produce an orientation delta.
 
-If the closed path returns to the same address while the declared orientation changes beyond tolerance, the model records:
+A closed path that returns to the same address with orientation change beyond tolerance records:
 
 `holonomy_detected = true`
 
-This is model holonomy. It does not claim measured physical spacetime holonomy.
-
-It gives the architecture a rigorous software form for:
-
-> same home, same address, different return orientation.
+Same address, changed return orientation.
 
 ---
 
@@ -329,22 +261,20 @@ Hull 3 adds:
 
 `.github/workflows/arcsweep-build.yml`
 
-The workflow runs on relevant Arcsweep pushes and pull requests and performs:
+The workflow performs:
 
 1. Node setup from `.nvmrc`;
 2. dependency installation;
 3. `npm run arcsweep:test`;
 4. `npm run arcsweep:build`.
 
-This closes the earlier gap where Vercel could prove that the browser build compiled but the Node contract suite was not executing for this branch.
-
-The React-ion PR should remain draft whenever this gate is red or unavailable.
+The PR stays draft while this gate is red or unavailable.
 
 ---
 
-## 11. New contract tests
+## 11. Contract tests
 
-Hull 3 adds tests for:
+Hull 3 covers:
 
 - approved vs draft DNS registrations;
 - alias resolution;
@@ -357,47 +287,17 @@ Hull 3 adds tests for:
 - TTL expiry;
 - deterministic route replay;
 - replay drift;
-- closed-loop model holonomy.
+- closed-loop holonomy.
 
 ---
 
-## 12. Current persistence boundary
+## 12. Persistence boundary at Hull 3
 
-Two React-ion UI stores remain sidecar-local in Hull 3:
+Hull 3 stores the registry and Helm ledger in sidecar-local stores.
 
-- registry store;
-- Helm / flight receipt store.
-
-That gives the prototype durable browser continuity but does not yet make those records part of Arcsweep's primary exported state or desktop backup contract.
-
-This is an explicit unfinished boundary, not an implied integration.
-
-### Next persistence migration
-
-Move both stores into versioned Arcsweep state with:
-
-- import/export support;
-- desktop backups;
-- schema migration;
-- append-only receipt history;
-- explicit deletion / deprecation semantics;
-- DEEPTime and Replay indexing.
+That boundary is the starting point for Hull 4 migration into primary Arcsweep persistence, export, backup, and restore.
 
 ---
-
-## 13. Next hull
-
-The next useful construction pass is:
-
-1. migrate DNS, corridor and Helm receipts into the primary Arcsweep state;
-2. add a route-map visualizer to the Helm Instrument Bay;
-3. add replay controls to existing Helm receipts;
-4. add a closed-loop / holonomy workbench;
-5. allow approved Runa World Reception Profiles to register harmonic signatures without retyping them;
-6. allow Concordance Anchor Registry records to publish approved DNS endpoints;
-7. add signed protocol responses and return-path receipts;
-8. expose transport failures separately from semantic refusal, delay and counterproposal;
-9. keep BCEP/1 exactly where it belongs: lurking in the recoverable diagnostics ductwork.
 
 ## Seal
 
