@@ -55,8 +55,19 @@ function fieldKey(control) {
   return control.dataset.constellationFieldKey;
 }
 
+function formRecordId(form) {
+  if (!form) return null;
+  const idControl = form.elements?.namedItem?.('id') || form.querySelector?.('input[name="id"]');
+  return idControl?.value || form.dataset.documentId || form.dataset.recordId || null;
+}
+
+function visibleWorldName() {
+  return document.querySelector('.sidebar-world strong')?.textContent?.trim() || null;
+}
+
 export function buildFieldContext(control, trigger = 'pause') {
   const form = control.closest?.('form');
+  const documentId = formRecordId(form) || document.body?.dataset.documentId || null;
   return {
     contract: 'arcsweep.constellation-field-context/v1',
     trigger,
@@ -74,14 +85,16 @@ export function buildFieldContext(control, trigger = 'pause') {
       id: form?.id || null,
       name: form?.getAttribute('name') || null,
       roomId: form?.dataset.roomId || form?.closest('[data-room-id]')?.dataset.roomId || null,
+      recordId: documentId,
     },
     page: {
       path: window.location?.pathname || null,
-      worldId: document.body?.dataset.worldId || null,
-      documentId: document.body?.dataset.documentId || null,
-      sceneId: document.body?.dataset.sceneId || null,
-      povCharacterId: document.body?.dataset.povCharacterId || null,
-      narrativeVoiceId: document.body?.dataset.narrativeVoiceId || null,
+      worldId: form?.dataset.worldId || document.body?.dataset.worldId || null,
+      worldName: document.body?.dataset.worldName || visibleWorldName(),
+      documentId,
+      sceneId: form?.dataset.sceneId || document.body?.dataset.sceneId || null,
+      povCharacterId: form?.dataset.povCharacterId || document.body?.dataset.povCharacterId || null,
+      narrativeVoiceId: form?.dataset.narrativeVoiceId || document.body?.dataset.narrativeVoiceId || null,
     },
   };
 }
@@ -177,7 +190,7 @@ function receiveResponse(event) {
   card.innerHTML = thoughtMarkup(detail);
   thoughts.append(card);
   thoughts.hidden = false;
-  state.textContent = detail.kind === 'question' ? 'question available' : detail.kind === 'continuity' ? 'continuity flag' : detail.kind === 'canon' ? 'canon flag' : 'thought available';
+  state.textContent = detail.kind === 'question' ? 'question available' : detail.kind === 'continuity' ? 'continuity flag' : detail.kind === 'canon' ? 'canon flag' : detail.kind === 'refusal' ? 'voice paused' : 'thought available';
 }
 
 function injectStyles() {
