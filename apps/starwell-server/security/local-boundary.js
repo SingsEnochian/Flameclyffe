@@ -11,6 +11,7 @@ const DEFAULT_ALLOWED_ORIGINS = Object.freeze([
 
 const PROTECTED_ENV_NAMES = new Set([
   'APPDATA',
+  'ARCSWEEP_RUNTIME_TOKEN',
   'COMSPEC',
   'DYLD_INSERT_LIBRARIES',
   'ELECTRON_RUN_AS_NODE',
@@ -115,6 +116,7 @@ function sanitiseHearthgateConfig(input) {
     steward: cleanString(input.steward, 'steward', 32, { required: true }),
     theme: cleanString(input.theme, 'theme', 64) || 'grove',
     keys: {
+      runtime: cleanString(keys.runtime, 'keys.runtime', 8192),
       anthropic: cleanString(keys.anthropic, 'keys.anthropic', 8192),
       openai: cleanString(keys.openai, 'keys.openai', 8192),
       exa: cleanString(keys.exa, 'keys.exa', 8192),
@@ -135,6 +137,7 @@ function redactHearthgateConfig(input) {
     steward: config.steward,
     theme: config.theme,
     keys: {
+      runtime: Boolean(config.keys.runtime),
       anthropic: Boolean(config.keys.anthropic),
       openai: Boolean(config.keys.openai),
       exa: Boolean(config.keys.exa),
