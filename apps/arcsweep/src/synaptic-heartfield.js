@@ -6,8 +6,10 @@ export const SYNAPTIC_HEARTFIELD_PROFILE = Object.freeze({
   id: 'synaptic-heartfield-8-4-v1',
   name: 'The Synaptic Heartfield',
   subtitle: '8 Hz / 4 Hz Coherence Engine',
-  evidence_label: 'experimental-auditory-autonomic-instrument',
+  evidence_label: 'auditory-coherence-instrument',
   headphone_required_for_binaural_layers: true,
+  entry_ramp_seconds: 2.5,
+  output_ceiling: .35,
   layers: Object.freeze([
     Object.freeze({ id: 'theta-core', label: '4 Hz Binaural Core', kind: 'binaural', leftHz: 96, rightHz: 100, beatHz: 4, gain: .12 }),
     Object.freeze({ id: 'alpha-theta-bridge', label: '8 Hz Bridge', kind: 'binaural', leftHz: 144, rightHz: 152, beatHz: 8, gain: .1 }),
@@ -20,8 +22,9 @@ export const SYNAPTIC_HEARTFIELD_PROFILE = Object.freeze({
   ]),
   claims: Object.freeze({
     dsp: 'Exact carrier, difference-frequency, amplitude-modulation, harmonic-bank, noise, and spatial-motion specification.',
-    experiential: 'Designed for calm, centring, meditation, and subjective coherence practice.',
-    physiological: 'Physiological response is measured when sensors or firsthand reports are supplied; it is never inferred from playback.',
+    experiential: 'A layered auditory coherence instrument for meditation, centring, nervous-system regulation practice, emotional reset, and exploration of heart-brain rhythmic relationship.',
+    evidence: 'DSP structure, firsthand experience, and sensor measurements remain distinct evidence streams carried in one relational receipt.',
+    physiological: 'Physiological response requires an instrumented sensor channel. Firsthand Qualia records experience; neither is inferred from playback.',
   }),
 });
 
@@ -36,9 +39,10 @@ export function validateHeartfieldProfile(profile = SYNAPTIC_HEARTFIELD_PROFILE)
   return Object.freeze({ valid: errors.length === 0, errors: Object.freeze(errors), byId: Object.freeze(byId) });
 }
 
-export function createHeartfieldReceipt({ world, premaqc = null, qualia = null, layerState, startedAt = new Date().toISOString() } = {}) {
+export function createHeartfieldReceipt({ world, premaqc = null, qualia = null, qualiaText = '', layerState, startedAt = new Date().toISOString() } = {}) {
   const qualiaNumber = qualia === null || qualia === undefined || qualia === '' ? null : Number(qualia);
   const firsthandQualia = Number.isFinite(qualiaNumber) && qualiaNumber >= 0 && qualiaNumber <= 1 ? qualiaNumber : null;
+  const firsthandQualiaText = String(qualiaText || '').trim().slice(0, 4000) || null;
   return Object.freeze({
     schema: SYNAPTIC_HEARTFIELD_RECEIPT_SCHEMA,
     profile_id: SYNAPTIC_HEARTFIELD_PROFILE.id,
@@ -49,8 +53,9 @@ export function createHeartfieldReceipt({ world, premaqc = null, qualia = null, 
       premaqc_receipt_id: premaqc?.receipt_id || null,
       premaqc_sequence: premaqc?.sequence ?? null,
       firsthand_qualia: firsthandQualia,
+      firsthand_qualia_text: firsthandQualiaText,
       physiology_measured: false,
     }),
-    authority: Object.freeze({ playback_is_observation: false, physiological_response_inferred: false, feather_stop_available: true }),
+    authority: Object.freeze({ playback_is_observation: false, physiological_response_inferred: false, firsthand_qualia_is_physiological_measurement: false, feather_stop_available: true }),
   });
 }

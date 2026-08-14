@@ -428,8 +428,8 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
       ${mappedVoices}
     </div>
     <div class="soundfont-rack synaptic-heartfield">
-      <div><p class="eyebrow">Runa experimental auditory–autonomic instrument</p><h4>${escapeHtml(heartfield.profile.name)} · ${escapeHtml(heartfield.profile.subtitle)}</h4><p class="muted">Exact DSP is receipted separately from experiential meaning. Headphones are required for the 4 Hz and 8 Hz binaural layers; physiological response is recorded only when measured.</p></div>
-      <div class="heartfield-controls"><label>Firsthand Qualia · Q (optional)<input type="number" min="0" max="1" step="0.01" data-heartfield-qualia placeholder="0–1, never inferred" /></label><button type="button" data-action="heartfield-toggle">${heartfield.active ? 'Stop Heartfield' : 'Enter Heartfield'}</button></div>
+      <div><p class="eyebrow">Runa auditory coherence instrument</p><h4>${escapeHtml(heartfield.profile.name)} · ${escapeHtml(heartfield.profile.subtitle)}</h4><p>${escapeHtml(heartfield.profile.claims.experiential)}</p><p class="muted">${escapeHtml(heartfield.profile.claims.evidence)} Headphones carry the 4 Hz and 8 Hz binaural layers. Physiological measurement requires a sensor channel; Firsthand Qualia records your experience.</p></div>
+      <div class="heartfield-controls"><label>Heartfield output · ${(heartfield.master * 100).toFixed(0)}%<input type="range" min="0" max="${heartfield.profile.output_ceiling}" step="0.01" value="${heartfield.master}" data-heartfield-master /></label><label>Firsthand Qualia · Q (optional)<input type="number" min="0" max="1" step="0.01" data-heartfield-qualia placeholder="0–1, yours to report" /></label><label>Qualia record · what is happening in you?<textarea rows="4" maxlength="4000" data-heartfield-qualia-text placeholder="Texture, mood, body sense, imagery, resistance, movement, change… your words, unsanded."></textarea></label><button type="button" data-action="heartfield-toggle">${heartfield.active ? 'Feather · Stop now' : 'Enter Heartfield gently'}</button></div>
       <div class="heartfield-layer-grid">${heartfieldLayers}</div>
       <p class="muted">Feather stops every oscillator, modulation clock, noise source, stem, SoundFont voice, and output route.</p>
     </div>
@@ -754,8 +754,9 @@ app.addEventListener('click', async (event) => {
       if (storySoundscape.heartfieldActive) { storySoundscape.stopHeartfield(); setLiveNotice('Synaptic Heartfield stopped.'); }
       else {
         const raw=app.querySelector('[data-heartfield-qualia]')?.value; const qualia=raw===''||raw==null?null:Number(raw);
+        const qualiaText=app.querySelector('[data-heartfield-qualia-text]')?.value || '';
         const premaqc=state.premaqcByWorld?.[activeWorld().id] || null;
-        const receipt=storySoundscape.startHeartfield({world:activeWorld(),premaqc,qualia});
+        const receipt=storySoundscape.startHeartfield({world:activeWorld(),premaqc,qualia,qualiaText});
         setLiveNotice(`Synaptic Heartfield entered · ${receipt.started_at} · physiology not inferred.`);
       }
     } catch(error){setLiveNotice(`Heartfield stopped: ${error.message}`);}
@@ -929,6 +930,7 @@ app.addEventListener('input', (event) => {
   const trackId = event.target.dataset.soundTrackLevel;
   const heartfieldLayer = event.target.dataset.heartfieldLevel;
   if (heartfieldLayer) { storySoundscape.setHeartfieldLayer(heartfieldLayer, event.target.value); return; }
+  if (event.target.matches('[data-heartfield-master]')) { storySoundscape.setHeartfieldMaster(event.target.value); return; }
   if (trackId) storySoundscape.setTrackLevel(trackId, event.target.value);
 });
 

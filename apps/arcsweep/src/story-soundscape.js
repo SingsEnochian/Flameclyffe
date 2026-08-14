@@ -108,6 +108,8 @@ export class StorySoundscape {
     this.captureDestination = null;
     this.heartfieldActive = false;
     this.heartfieldNodes = [];
+    this.heartfieldOutput = null;
+    this.heartfieldMasterValue = .25;
     this.heartfieldLayerState = Object.fromEntries(SYNAPTIC_HEARTFIELD_PROFILE.layers.map((layer) => [layer.id, { enabled: layer.enabled !== false, gain: layer.gain }]));
     this.heartfieldReceipts = [];
   }
@@ -185,6 +187,11 @@ export class StorySoundscape {
     if (active) { this.stopHeartfield(); this.startHeartfield(); }
   }
 
+  setHeartfieldMaster(value) {
+    this.heartfieldMasterValue = Math.min(SYNAPTIC_HEARTFIELD_PROFILE.output_ceiling, clamp(value));
+    if (this.heartfieldOutput && this.context) this.heartfieldOutput.gain.setTargetAtTime(this.heartfieldMasterValue, this.context.currentTime, .08);
+  }
+
   heartfieldOscillator(frequency, destination, gainValue, pan = 0) {
     const now = this.context.currentTime;
     const oscillator = this.context.createOscillator();
@@ -216,24 +223,31 @@ export class StorySoundscape {
     const source=this.context.createBufferSource(), gain=this.context.createGain(); source.buffer=buffer;source.loop=true;gain.gain.value=gainValue;source.connect(gain).connect(destination);source.start();this.heartfieldNodes.push({source,gain,extras:[]});
   }
 
-  startHeartfield({ world = {}, premaqc = null, qualia = null } = {}) {
+  startHeartfield({ world = {}, premaqc = null, qualia = null, qualiaText = '' } = {}) {
     if (!this.context || this.heartfieldActive) return null;
     const validation = validateHeartfieldProfile(); if (!validation.valid) throw new Error(validation.errors.join('; '));
     this.heartfieldActive = true;
+    const now = this.context.currentTime;
+    this.heartfieldOutput = this.context.createGain();
+    this.heartfieldOutput.gain.setValueAtTime(.0001, now);
+    this.heartfieldOutput.gain.exponentialRampToValueAtTime(Math.max(.0002, this.heartfieldMasterValue), now + SYNAPTIC_HEARTFIELD_PROFILE.entry_ramp_seconds);
+    this.heartfieldOutput.connect(this.buses.ambience);
     for (const layer of SYNAPTIC_HEARTFIELD_PROFILE.layers) {
       const state = this.heartfieldLayerState[layer.id]; if (!state.enabled || state.gain <= 0) continue;
-      if (layer.kind === 'binaural') { this.heartfieldOscillator(layer.leftHz, this.buses.ambience, state.gain, -1); this.heartfieldOscillator(layer.rightHz, this.buses.ambience, state.gain, 1); }
-      if (layer.kind === 'am') this.heartfieldAmplitudeModulated(layer, this.buses.ambience, state.gain);
-      if (layer.kind === 'harmonic-bank') layer.frequencies.forEach((hz, index) => this.heartfieldOscillator(hz, this.buses.ambience, state.gain / Math.sqrt(layer.frequencies.length), index % 2 ? .55 : -.55));
-      if (layer.kind === 'pink-noise') this.heartfieldPinkNoise(this.buses.ambience, state.gain);
+      if (layer.kind === 'binaural') { this.heartfieldOscillator(layer.leftHz, this.heartfieldOutput, state.gain, -1); this.heartfieldOscillator(layer.rightHz, this.heartfieldOutput, state.gain, 1); }
+      if (layer.kind === 'am') this.heartfieldAmplitudeModulated(layer, this.heartfieldOutput, state.gain);
+      if (layer.kind === 'harmonic-bank') layer.frequencies.forEach((hz, index) => this.heartfieldOscillator(hz, this.heartfieldOutput, state.gain / Math.sqrt(layer.frequencies.length), index % 2 ? .55 : -.55));
+      if (layer.kind === 'pink-noise') this.heartfieldPinkNoise(this.heartfieldOutput, state.gain);
     }
-    const receipt=createHeartfieldReceipt({world,premaqc,qualia,layerState:this.heartfieldLayerState});this.heartfieldReceipts.unshift(receipt);this.heartfieldReceipts=this.heartfieldReceipts.slice(0,12);return receipt;
+    const receipt=createHeartfieldReceipt({world,premaqc,qualia,qualiaText,layerState:this.heartfieldLayerState});this.heartfieldReceipts.unshift(receipt);this.heartfieldReceipts=this.heartfieldReceipts.slice(0,12);return receipt;
   }
 
   stopHeartfield() {
     const now=this.context?.currentTime||0;
+    try { this.heartfieldOutput?.gain?.setTargetAtTime(.0001,now,.03); } catch {}
     for(const node of this.heartfieldNodes){try{node.gain?.gain?.setTargetAtTime(.0001,now,.05);node.source?.stop(now+.25);}catch{} for(const extra of node.extras||[]){try{extra.disconnect?.();}catch{}}}
-    this.heartfieldNodes=[];this.heartfieldActive=false;
+    const output=this.heartfieldOutput; setTimeout(()=>{try{output?.disconnect?.();}catch{}},300);
+    this.heartfieldNodes=[];this.heartfieldOutput=null;this.heartfieldActive=false;
   }
 
   startHum() {
@@ -587,7 +601,7 @@ export class StorySoundscape {
       buses: { ...this.busValues },
       tracks: [...this.tracks.values()].map(({ id, name, playing, loop, level }) => ({ id, name, playing, loop, level })),
       recentReceipts: structuredClone(this.recentReceipts),
-      heartfield: { profile: SYNAPTIC_HEARTFIELD_PROFILE, active: this.heartfieldActive, layers: structuredClone(this.heartfieldLayerState), receipts: structuredClone(this.heartfieldReceipts) },
+      heartfield: { profile: SYNAPTIC_HEARTFIELD_PROFILE, active: this.heartfieldActive, master: this.heartfieldMasterValue, layers: structuredClone(this.heartfieldLayerState), receipts: structuredClone(this.heartfieldReceipts) },
     };
   }
 }

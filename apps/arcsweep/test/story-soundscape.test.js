@@ -27,8 +27,24 @@ test('Heartfield receipt never invents physiology or missing Qualia', () => {
   const receipt = createHeartfieldReceipt({ world: { id: 'waking-world', name: 'The Waking World' }, layerState: {}, startedAt: '2026-08-14T01:00:00.000Z' });
   assert.equal(receipt.profile_id, SYNAPTIC_HEARTFIELD_PROFILE.id);
   assert.equal(receipt.observation.firsthand_qualia, null);
+  assert.equal(receipt.observation.firsthand_qualia_text, null);
   assert.equal(receipt.observation.physiology_measured, false);
   assert.equal(receipt.authority.physiological_response_inferred, false);
+  assert.equal(receipt.authority.firsthand_qualia_is_physiological_measurement, false);
+});
+
+test('Heartfield receipt carries the writer\'s qualitative account without relabelling it', () => {
+  const receipt = createHeartfieldReceipt({ world: { id: 'terra', name: 'Terra Aeterna' }, qualia: .84, qualiaText: '  Warmth gathered behind the sternum; copper light widened.  ', layerState: {} });
+  assert.equal(receipt.observation.firsthand_qualia, .84);
+  assert.equal(receipt.observation.firsthand_qualia_text, 'Warmth gathered behind the sternum; copper light widened.');
+  assert.equal(receipt.observation.physiology_measured, false);
+});
+
+test('Heartfield profile carries embodied entry controls and distinct evidence streams', () => {
+  assert.equal(SYNAPTIC_HEARTFIELD_PROFILE.entry_ramp_seconds, 2.5);
+  assert.equal(SYNAPTIC_HEARTFIELD_PROFILE.output_ceiling, .35);
+  assert.match(SYNAPTIC_HEARTFIELD_PROFILE.claims.evidence, /distinct evidence streams/);
+  assert.match(SYNAPTIC_HEARTFIELD_PROFILE.claims.physiological, /sensor channel/);
 });
 
 test('incremental cue search does not replay completed earlier phrases', () => {
