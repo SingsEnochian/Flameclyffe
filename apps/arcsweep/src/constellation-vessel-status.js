@@ -30,6 +30,7 @@ function stateLabel(state = '') {
     igniting: 'igniting',
     'runtime-verified': '🔥 runtime verified',
     'activation-pending': 'weights not installed',
+    'alias-pending': 'base installed · identity alias pending',
     'credential-ready': 'credential ready',
     'credential-needed': 'credential needed',
     'route-unavailable': 'runtime unavailable',
@@ -62,7 +63,7 @@ function ensureStatusArea(root) {
     </div>
     <div class="constellation-vessel-list" aria-live="polite"><p class="muted">Loading vessel bindings…</p></div>
     <div class="constellation-instrument-list" aria-live="polite"></div>
-    <p class="constellation-vessel-note">Probe is read-only. Ignite warms an already-installed assigned vessel and requires the exact Bifröst challenge reply before it becomes runtime verified. No ignition action downloads model weights.</p>
+    <p class="constellation-vessel-note">Probe is read-only. Ignite warms an assigned vessel and requires the exact Bifröst challenge reply before it becomes runtime verified. If the base artifact exists but an identity-specific alias is missing, the local ignition key can materialize that alias without downloading another copy of the weights.</p>
   `;
   runtimeHeading.insertAdjacentElement('afterend', section);
   return section;
