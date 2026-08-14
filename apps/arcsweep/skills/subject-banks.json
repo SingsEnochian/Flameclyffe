@@ -1,0 +1,12 @@
+{
+  "contract": "arcsweep.subject-bank-manifest/v1",
+  "subjects": {},
+  "rules": {
+    "supportedKinds": ["character", "narrative_voice", "writing_style"],
+    "localCellsMayExistWithoutStaticBank": true,
+    "sourceDocumentsRemainAuthoritative": true,
+    "characterKnowledgeMustRespectTemporalScope": true,
+    "narrativeVoiceMustNotGrantCharacterKnowledge": true,
+    "modelObservationCannotSilentlyPromoteCanon": true
+  }
+}
