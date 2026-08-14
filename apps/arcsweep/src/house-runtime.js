@@ -77,3 +77,18 @@ export function readHouseCommons(token, fetchImpl = fetch) {
 export function appendHouseCommons(token, entry, fetchImpl = fetch) {
   return commonsRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(entry) }, fetchImpl);
 }
+
+export async function readHouseObservations(token, worldId = null, fetchImpl = fetch) {
+  if (!token) throw new Error('Connect the House Runtime first.');
+  const params = new URLSearchParams();
+  if (worldId) params.set('world_id', worldId);
+  const suffix = params.size ? `?${params}` : '';
+  const response = await fetchImpl(`/api/v1/house/observations${suffix}`, {
+    headers: bearerHeaders(token),
+    credentials: 'same-origin',
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `House observation live read ${response.status}`);
+  return data;
+}

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { authoriseHouseRequest, houseSessionCookie, issueHouseSession, validateStewardCredential, verifyHouseSessionToken } from '../../../netlify/functions/_shared/house-session.mjs';
-import { connectHouseRuntime, disconnectHouseRuntime, HOUSE_COOKIE_SESSION, restoreHouseRuntimeSession } from '../src/house-runtime.js';
+import { connectHouseRuntime, disconnectHouseRuntime, HOUSE_COOKIE_SESSION, readHouseObservations, restoreHouseRuntimeSession } from '../src/house-runtime.js';
 
 const env = (values) => ({ get: (name) => values[name] });
 
@@ -33,4 +33,17 @@ test('browser exchanges the credential and retains only the opaque cookie-sessio
   await disconnectHouseRuntime({ hosted: true, storage: null, fetchImpl });
   assert.deepEqual(calls.map((call) => call.method || 'GET'), ['POST', 'GET', 'DELETE']);
   assert.ok(calls.every((call) => call.credentials === 'same-origin'));
+});
+
+test('every House surface reads the same world-scoped observation endpoint', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options = {}) => {
+    calls.push({ url, options });
+    return new Response(JSON.stringify({ schema: 'hearthgate.runtime-observation-live-read/v1', snapshots: [] }), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+  const live = await readHouseObservations(HOUSE_COOKIE_SESSION, 'terra-aeterna', fetchImpl);
+  assert.equal(live.schema, 'hearthgate.runtime-observation-live-read/v1');
+  assert.equal(calls[0].url, '/api/v1/house/observations?world_id=terra-aeterna');
+  assert.equal(calls[0].options.credentials, 'same-origin');
+  assert.deepEqual(calls[0].options.headers, {});
 });

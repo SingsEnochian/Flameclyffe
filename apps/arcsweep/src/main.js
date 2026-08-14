@@ -30,7 +30,7 @@ import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, 
 import { createEmptyFeedbackQueue, normalizeFeedbackQueue, enqueueFeedbackCycle, acceptFeedbackCycle, archiveFeedbackCycle, discardFeedbackCycle, pendingCycles, feedbackQueueSummary } from './feedback-cycle-queue.js';
 import { StorySoundscape } from './story-soundscape.js';
 import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
-import { appendHouseCommons, connectHouseRuntime, disconnectHouseRuntime, readFlameStatuses, readHouseCommons, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import { appendHouseCommons, connectHouseRuntime, disconnectHouseRuntime, readFlameStatuses, readHouseCommons, readHouseObservations, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -52,6 +52,8 @@ let flameStatuses = [];
 let flameStatusChecking = false;
 let commonsEntries = [];
 let commonsReading = false;
+let observationLiveRead = null;
+let observationLiveReading = false;
 const QUEUE_STORAGE_KEY = "arcsweep.feedback-cycle-queue/v1";
 
 function loadFeedbackQueue() {
@@ -99,6 +101,20 @@ function attr(value = '') {
 
 function activeWorld() {
   return getActiveWorld(state);
+}
+
+async function refreshObservationLiveRead(worldId = activeWorld()?.id) {
+  if (!houseRuntimeToken) {
+    observationLiveRead = null;
+    return null;
+  }
+  observationLiveReading = true;
+  try {
+    observationLiveRead = await readHouseObservations(houseRuntimeToken, worldId);
+    return observationLiveRead;
+  } finally {
+    observationLiveReading = false;
+  }
 }
 
 function selectedWorld() {
@@ -366,6 +382,27 @@ function renderFeedbackQueue() {
   return heading + cards + "</section>";
 }
 
+function runtimeObservationCard(snapshot) {
+  const review = String(snapshot.review?.status || 'pending_review').replaceAll('_', ' ');
+  const continuity = String(snapshot.continuity?.status || 'awaiting-review').replaceAll('-', ' ');
+  const evidence = snapshot.evidence?.schemas?.join(' · ') || snapshot.evidence?.class || 'unclassified';
+  const receipt = snapshot.latest_receipt;
+  const provenance = [snapshot.observation?.cycle_id, snapshot.provenance?.math_spine_packet_id, snapshot.provenance?.review_receipt_id].filter(Boolean).join(' · ') || 'no receipt chain';
+  const stamp = snapshot.observation?.observed_at ? new Date(snapshot.observation.observed_at).toLocaleString() : 'time unavailable';
+  return `<article class="queue-entry runtime-observation" data-observation-source="${attr(snapshot.evidence?.class || '')}"><div class="queue-entry-head"><strong>${escapeHtml(snapshot.evidence?.class || 'observation')} · ${escapeHtml(review)}</strong><small>${escapeHtml(stamp)}</small></div><p>${escapeHtml(String(snapshot.observation?.work || '').slice(0, 360))}</p><dl class="facts"><div><dt>Continuity</dt><dd>${escapeHtml(continuity)}</dd></div><div><dt>Evidence</dt><dd>${escapeHtml(evidence)}</dd></div><div><dt>Provenance</dt><dd>${escapeHtml(provenance)}</dd></div><div><dt>Review receipt</dt><dd>${escapeHtml(snapshot.review?.receipt_id || 'awaiting human decision')}</dd></div><div><dt>Latest receipt</dt><dd>${escapeHtml(receipt ? `${receipt.stage} · ${receipt.receipt_id}` : 'none')}</dd></div></dl></article>`;
+}
+
+function renderRuntimeObservationLiveRead({ log = false } = {}) {
+  if (!houseRuntimeToken) return '<section class="panel runtime-observation-read"><p class="eyebrow">Shared House snapshot</p><h2>Live observation read</h2><p class="muted">Connect the House Runtime to read the persisted observation and review ledgers.</p></section>';
+  if (observationLiveReading && !observationLiveRead) return '<section class="panel runtime-observation-read"><p class="eyebrow">Shared House snapshot</p><h2>Live observation read</h2><p class="muted">Reading the observation and review ledgers…</p></section>';
+  const snapshots = observationLiveRead?.snapshots || [];
+  const summary = observationLiveRead?.summary;
+  const heading = `<div class="section-heading compact-heading"><div><p class="eyebrow">One canonical snapshot · every surface</p><h2>${log ? 'Live observation log' : 'Current observation state'}</h2><p class="muted">Observation, review, evidence, provenance, continuity, and latest receipt are read without reclassification.</p></div><button type="button" class="quiet" data-action="runtime-observations-refresh">${observationLiveReading ? 'Reading…' : 'Refresh'}</button></div>`;
+  const counts = summary ? `<p class="callout">${summary.total} observations · ${summary.pending_review} awaiting review · ${summary.accepted} accepted · ${summary.in_deep_time} in DEEPTime</p>` : '';
+  const visible = log ? snapshots.slice(0, 24) : snapshots.slice(0, 1);
+  return `<section class="panel runtime-observation-read">${heading}${counts}${visible.length ? visible.map(runtimeObservationCard).join('') : '<p class="muted">No persisted observation snapshot is available for this world yet.</p>'}</section>`;
+}
+
 function renderFeedback() {
   const world = activeWorld();
   if (storySoundscape.snapshot().world.worldId !== world.id) storySoundscape.setWorld(world);
@@ -391,13 +428,14 @@ function renderFeedback() {
       </form></article>
       <article class=”panel feedback-ledger”><h2>Receipts & replay</h2>${cycles.length ? cycles.map((cycle) => `<article class=”working-card”><div class=”working-head”><strong>${escapeHtml(cycle.turn.mode)} · ${escapeHtml(cycle.voices.map((voice) => voice.name).join(', '))}</strong><small>${new Date(cycle.created_at).toLocaleString()}</small></div><p>${escapeHtml(cycle.turn.work)}</p>${cycle.voice_invocations?.length ? `<div class=”voice-receipts”>${cycle.voice_invocations.map((item) => `<p data-status=”${attr(item.status)}”><b>${escapeHtml(item.name)} · ${escapeHtml(item.status)}</b>${item.text ? `<br>${escapeHtml(item.text)}` : item.error ? `<br>${escapeHtml(item.error)}` : ''}</p>`).join('')}</div>` : cycle.turn.response ? `<p><b>Response:</b> ${escapeHtml(cycle.turn.response)}</p>` : ''}${cycle.sound_events?.length ? `<div class=”sound-receipts”>${cycle.sound_events.map((item) => `<p><b>♪ ${escapeHtml(item.cue_label)}</b> · “${escapeHtml(item.source_text)}” · ${Number(item.root_hz).toFixed(2)} Hz</p>`).join('')}</div>` : ''}<dl class=”facts”><div><dt>Math Spine</dt><dd>${escapeHtml(cycle.math_spine_packet.packet_id)}</dd></div><div><dt>Replay</dt><dd>${cycle.replay_receipt.matched ? 'Exact match' : 'Mismatch'}</dd></div><div><dt>PREMAQC</dt><dd>${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence}</dd></div><div><dt>Story sound</dt><dd>${cycle.sound_events?.length || 0} fired event${cycle.sound_events?.length === 1 ? '' : 's'}</dd></div></dl></article>`).join('') : '<p class=”muted”>No cycle has run for this world yet.</p>'}</article>
     </section>
+    ${renderRuntimeObservationLiveRead()}
     ${renderFeedbackQueue()}`;
 }
 
 function renderCommons() {
   const statusRows = flameStatuses.length ? flameStatuses.map((item) => `<div class="runtime-flame" data-state="${attr(item.state)}"><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.state)}</span><small>${escapeHtml([item.provider, item.model].filter(Boolean).join(' · ') || item.missing?.join(', ') || item.error || '')}</small></div>`).join('') : '<p class="muted">Connect the House Runtime to read the Constellation.</p>';
   const log = commonsEntries.length ? commonsEntries.map((entry) => `<article class="commons-entry" data-kind="${attr(entry.kind)}" data-status="${attr(entry.status)}"><div><b>${escapeHtml(entry.author)}</b><span>${new Date(entry.created_at).toLocaleString()} · ${escapeHtml(entry.status)}</span></div><p>${escapeHtml(entry.text)}</p></article>`).join('') : '<p class="muted">The Commons is quiet. Speak when ready.</p>';
-  return `<section class="section-heading"><div><p class="eyebrow">House Runtime · live conversation</p><h1>House Commons</h1><p>One room for Rowan and the Constellation. Replies, refusals, route failures, and receipts remain visibly attributed.</p></div><div class="button-row"><button class="quiet" data-action="commons-refresh">${commonsReading ? 'Reading…' : 'Refresh live read'}</button><button class="quiet" data-action="runtime-refresh">Check models</button></div></section><section class="panel"><h2>Constellation live read</h2><div class="runtime-grid">${statusRows}</div></section><section class="commons-layout"><article class="panel commons-log"><h2>Live feedback log</h2>${log}</article><article class="panel"><form id="commons-form" class="stack"><h2>Speak into the room</h2><fieldset><legend>Who may answer this turn?</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" ${voice.id === 'boxfire' ? 'checked' : ''} /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset><label>Your words<textarea name="message" rows="8" required placeholder="Speak plainly, mythically, technically, or all three. The room keeps the receipt."></textarea></label><button type="submit">Send to the Commons ∞</button></form></article></section>`;
+  return `<section class="section-heading"><div><p class="eyebrow">House Runtime · live conversation</p><h1>House Commons</h1><p>One room for Rowan and the Constellation. Replies, refusals, route failures, and receipts remain visibly attributed.</p></div><div class="button-row"><button class="quiet" data-action="commons-refresh">${commonsReading ? 'Reading…' : 'Refresh live read'}</button><button class="quiet" data-action="runtime-refresh">Check models</button></div></section><section class="panel"><h2>Constellation live read</h2><div class="runtime-grid">${statusRows}</div></section>${renderRuntimeObservationLiveRead({ log: true })}<section class="commons-layout"><article class="panel commons-log"><h2>Live conversation log</h2>${log}</article><article class="panel"><form id="commons-form" class="stack"><h2>Speak into the room</h2><fieldset><legend>Who may answer this turn?</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" ${voice.id === 'boxfire' ? 'checked' : ''} /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset><label>Your words<textarea name="message" rows="8" required placeholder="Speak plainly, mythically, technically, or all three. The room keeps the receipt."></textarea></label><button type="submit">Send to the Commons ∞</button></form></article></section>`;
 }
 
 function renderStorySoundscape(sound = storySoundscape.snapshot()) {
@@ -675,7 +713,7 @@ function renderDeepObserver() {
     </form>
   </section>`;
 
-  return header + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
+  return header + renderRuntimeObservationLiveRead() + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
 }
 
 function currentView() {
@@ -725,7 +763,7 @@ function saveWorldSection(section, form) {
 
 app.addEventListener('click', async (event) => {
   const room = event.target.closest('[data-room]');
-  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.all([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken)]).then(([log, statuses]) => { commonsEntries = log.entries || []; flameStatuses = statuses; notice = 'House Commons live read received.'; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
+  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (['deep-observer', 'feedback'].includes(activeRoom) && houseRuntimeToken) { refreshObservationLiveRead().catch((error) => { notice = `Observation live read unavailable: ${error.message}`; }).finally(render); } if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.allSettled([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]).then(([log, statuses, observations]) => { if (log.status === 'rejected') throw log.reason; if (statuses.status === 'rejected') throw statuses.reason; commonsEntries = log.value.entries || []; flameStatuses = statuses.value; if (observations.status === 'fulfilled') { observationLiveRead = observations.value; notice = 'House Commons live read received.'; } else notice = `Commons received; observation live read unavailable: ${observations.reason.message}`; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
   const worldButton = event.target.closest('[data-world-id]');
   if (worldButton) { selectedWorldId = worldButton.dataset.worldId; render(); return; }
   const scriptButton = event.target.closest('[data-script-id]');
@@ -738,7 +776,8 @@ app.addEventListener('click', async (event) => {
 
   if (action === 'runtime-disconnect') { await disconnectHouseRuntime({ hosted: isHosted }); houseRuntimeToken = ''; flameStatuses = []; notice = 'House Runtime session closed.'; render(); return; }
   if (action === 'runtime-refresh') { flameStatusChecking = true; render(); flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); flameStatusChecking = false; notice = 'House Runtime route board refreshed.'; render(); return; }
-  if (action === 'commons-refresh') { try { commonsReading = true; render(); const log = await readHouseCommons(houseRuntimeToken); commonsEntries = log.entries || []; notice = 'House Commons live read refreshed.'; } catch (error) { notice = `House Commons unavailable: ${error.message}`; } finally { commonsReading = false; render(); } return; }
+  if (action === 'runtime-observations-refresh') { try { await refreshObservationLiveRead(); notice = 'Canonical observation live read refreshed.'; } catch (error) { notice = `Observation live read unavailable: ${error.message}`; } render(); return; }
+  if (action === 'commons-refresh') { try { commonsReading = true; render(); const [log, observations] = await Promise.all([readHouseCommons(houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]); commonsEntries = log.entries || []; observationLiveRead = observations; notice = 'House Commons live read refreshed.'; } catch (error) { notice = `House Commons unavailable: ${error.message}`; } finally { commonsReading = false; render(); } return; }
 
   if (action === 'open-wrp') { const url = activeWorld()?.arrival?.wrpRunaUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer'); return; }
   if (action === 'refresh-deep') { deepData = null; deepDataFetching = false; fetchDeepData(); return; }
@@ -959,7 +998,7 @@ app.addEventListener('submit', async (event) => {
     persist('Arc begun. Return remains available.', 'begin-arc');
   }
   if (form.id === 'house-runtime-form') {
-    try { houseRuntimeToken = await connectHouseRuntime(v.runtimeToken, { hosted: isHosted }); flameStatusChecking = true; flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); form.reset(); notice = 'House Runtime sealed session connected.'; }
+    try { houseRuntimeToken = await connectHouseRuntime(v.runtimeToken, { hosted: isHosted }); flameStatusChecking = true; flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); try { observationLiveRead = await readHouseObservations(houseRuntimeToken, activeWorld().id); notice = 'House Runtime sealed session and observation live read connected.'; } catch (error) { notice = `House Runtime connected; observation live read unavailable: ${error.message}`; } form.reset(); }
     catch (error) { notice = `House Runtime stopped: ${error.message}`; }
     finally { flameStatusChecking = false; render(); }
     return;
