@@ -63,3 +63,8 @@ jobs:
 
       - name: Build Arcsweep
         run: npm run arcsweep:build
+
+      - name: Show minimal audited lockfile repair
+        run: |
+          npm audit fix --package-lock-only
+          git diff -- package-lock.json
