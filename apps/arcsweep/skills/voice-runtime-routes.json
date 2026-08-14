@@ -1,0 +1,18 @@
+{
+  "contract": "arcsweep.voice-runtime-routes/v1",
+  "routes": {
+    "uial": { "route": "uial", "status": "configured" },
+    "lioreal": { "route": "lioreal", "status": "configured" },
+    "vethraluf": { "route": "vethrlauf", "status": "configured", "legacyRuntimeId": "vethrlauf" },
+    "ellowind": { "route": "starsong/ellowind", "status": "configured" },
+    "larkshine": { "route": "starsong/larkshine", "status": "configured" },
+    "box": { "route": "boxfire", "status": "configured", "legacyRuntimeId": "boxfire" },
+    "bluebird": { "route": "bluebird", "status": "configured" },
+    "sonata": { "route": null, "status": "staged-no-runtime-route" }
+  },
+  "rules": {
+    "noFallbackImpersonation": true,
+    "sessionTokenOnly": true,
+    "noTokenPersistence": true
+  }
+}
