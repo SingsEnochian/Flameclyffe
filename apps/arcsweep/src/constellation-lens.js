@@ -7,6 +7,9 @@ const EDITABLE_SELECTOR = [
 
 const REQUEST_EVENT = 'arcsweep:constellation-context-request';
 const RESPONSE_EVENT = 'arcsweep:constellation-response';
+const LEARNING_PROPOSAL_EVENT = 'arcsweep:constellation-learning-proposal';
+const LEARNING_SAVED_EVENT = 'arcsweep:constellation-learning-saved';
+const LEARNING_ERROR_EVENT = 'arcsweep:constellation-learning-error';
 const DEBOUNCE_MS = 1100;
 
 export function normaliseControlValue(control) {
@@ -116,6 +119,10 @@ function thoughtMarkup(detail = {}) {
       <span>${escapeHtml(kind)}</span>
     </div>
     <div class="constellation-thought-body">${escapeHtml(text)}</div>
+    <div class="constellation-thought-actions">
+      <button type="button" class="quiet mini" data-thought-action="keep">Keep note</button>
+      <button type="button" class="quiet mini" data-thought-action="dismiss">Dismiss</button>
+    </div>
   `;
 }
 
@@ -178,22 +185,77 @@ function attachAll(root = document) {
   root.querySelectorAll(EDITABLE_SELECTOR).forEach(ensureLens);
 }
 
+function controlForKey(key) {
+  return [...document.querySelectorAll('[data-constellation-field-key]')]
+    .find((control) => control.dataset.constellationFieldKey === key) || null;
+}
+
+function lensForKey(key) {
+  return [...document.querySelectorAll('.constellation-lens')]
+    .find((candidate) => candidate.dataset.forField === key) || null;
+}
+
 function receiveResponse(event) {
   const detail = event.detail || {};
   const key = detail.fieldKey;
   if (!key) return;
-  const lens = [...document.querySelectorAll('.constellation-lens')]
-    .find((candidate) => candidate.dataset.forField === key);
-  if (!lens) return;
+  const lens = lensForKey(key);
+  const control = controlForKey(key);
+  if (!lens || !control) return;
 
   const state = lens.querySelector('.constellation-lens-state');
   const thoughts = lens.querySelector('.constellation-thoughts');
   const card = document.createElement('article');
   card.className = `constellation-thought constellation-thought-${String(detail.kind || 'thought')}`;
+  card.dataset.requestId = detail.requestId || '';
+  card.dataset.voiceId = detail.voiceId || '';
   card.innerHTML = thoughtMarkup(detail);
+
+  card.querySelector('[data-thought-action="keep"]')?.addEventListener('click', (clickEvent) => {
+    const button = clickEvent.currentTarget;
+    button.disabled = true;
+    button.textContent = 'Keeping…';
+    state.textContent = 'saving note';
+    document.dispatchEvent(new CustomEvent(LEARNING_PROPOSAL_EVENT, {
+      detail: {
+        ...detail,
+        mode: document.body?.dataset.constellationMode || 'writing',
+        fieldContext: buildFieldContext(control, 'keep-note'),
+      },
+    }));
+  });
+
+  card.querySelector('[data-thought-action="dismiss"]')?.addEventListener('click', () => {
+    card.remove();
+    if (!thoughts.children.length) {
+      thoughts.hidden = true;
+      state.textContent = 'quiet';
+    }
+  });
+
   thoughts.append(card);
   thoughts.hidden = false;
   state.textContent = detail.kind === 'question' ? 'question available' : detail.kind === 'continuity' ? 'continuity flag' : detail.kind === 'canon' ? 'canon flag' : detail.kind === 'refusal' ? 'voice paused' : 'thought available';
+}
+
+function receiveLearningSaved(event) {
+  const cell = event.detail?.cell;
+  const locator = String(cell?.source?.locator || '');
+  if (!locator.startsWith('arcsweep-margin:')) return;
+  const key = locator.slice('arcsweep-margin:'.length);
+  const lens = lensForKey(key);
+  if (!lens) return;
+  const state = lens.querySelector('.constellation-lens-state');
+  if (state) state.textContent = event.detail?.stored === false ? 'note not stored' : 'note kept';
+  lens.querySelectorAll(`.constellation-thought[data-request-id="${CSS.escape(cell.source?.receiptId || '')}"] [data-thought-action="keep"]`).forEach((button) => {
+    button.textContent = 'Kept';
+    button.disabled = true;
+  });
+}
+
+function receiveLearningError(event) {
+  const message = event.detail?.message || 'Learning note could not be stored.';
+  console.warn('[Arcsweep learning]', message);
 }
 
 function injectStyles() {
@@ -209,6 +271,7 @@ function injectStyles() {
     .constellation-thought-head { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:.25rem; font-size:.82rem; }
     .constellation-thought-head span { opacity:.68; text-transform:capitalize; }
     .constellation-thought-body { line-height:1.45; white-space:pre-wrap; }
+    .constellation-thought-actions { display:flex; justify-content:flex-end; gap:.35rem; margin-top:.45rem; }
   `;
   document.head.append(style);
 }
@@ -217,6 +280,8 @@ export function installConstellationLens() {
   injectStyles();
   attachAll();
   document.addEventListener(RESPONSE_EVENT, receiveResponse);
+  document.addEventListener(LEARNING_SAVED_EVENT, receiveLearningSaved);
+  document.addEventListener(LEARNING_ERROR_EVENT, receiveLearningError);
 
   const app = document.querySelector('#app');
   if (app) new MutationObserver(() => attachAll(app)).observe(app, { childList: true, subtree: true });
@@ -225,6 +290,9 @@ export function installConstellationLens() {
 export const CONSTELLATION_LENS_EVENTS = Object.freeze({
   request: REQUEST_EVENT,
   response: RESPONSE_EVENT,
+  learningProposal: LEARNING_PROPOSAL_EVENT,
+  learningSaved: LEARNING_SAVED_EVENT,
+  learningError: LEARNING_ERROR_EVENT,
 });
 
 if (typeof document !== 'undefined') installConstellationLens();
