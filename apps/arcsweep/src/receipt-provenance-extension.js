@@ -3,12 +3,13 @@ import { buildArcsweepProvenanceGraph } from './receipt-provenance-graph.js';
 const EXTENDED_STAGE = Object.freeze({
   runa_renderer_candidate: 7,
   runa_renderer_review: 8,
-  runa_preview_plan: 9,
-  runa_preview_render: 10,
-  runa_preview_evidence_arm: 11,
-  runa_preview_observation_link: 12,
-  provenance_export: 13,
-  integrity_report: 13,
+  runa_preview_palette: 9,
+  runa_preview_plan: 10,
+  runa_preview_render: 11,
+  runa_preview_evidence_arm: 12,
+  runa_preview_observation_link: 13,
+  provenance_export: 14,
+  integrity_report: 14,
 });
 
 function clone(value) { return value == null ? value : structuredClone(value); }
@@ -58,12 +59,6 @@ function byKind(nodes) {
   }, {}));
 }
 
-/**
- * Extends the core receipt graph with receipts downstream of Runa and with
- * audit/export receipts about the chain itself. The feedback loop is allowed to
- * curve back toward Feedback after a preview render; the graph is provenance,
- * not a promise that every edge is a left-to-right DAG.
- */
 export function buildExtendedArcsweepProvenanceGraph(input = {}) {
   const base = buildArcsweepProvenanceGraph(input);
   const worldId = input.worldId ?? base.world_id ?? null;
@@ -75,10 +70,6 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
     ...(base.unresolved_edges || []).map((item) => ({ from: item.from, to: item.to, relation: item.relation })),
   ];
 
-  // If a Requested Transformation circuit explicitly says accepted DEEPTime
-  // supplied Ash, carry those source receipt ids into the graph. This is a
-  // provenance join only; it does not turn historical association into a
-  // causal claim.
   for (const circuitNode of base.nodes.filter((item) => item.kind === 'circuit')) {
     const baiId = circuitNode.receipt?.bai?.receipt_id;
     for (const recordId of circuitNode.receipt?.bai?.ash_source_receipt_ids || []) {
@@ -89,78 +80,71 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
 
   for (const candidate of obs.runa_renderer_candidates || []) {
     if (!worldMatches(worldId, candidate?.world_id)) continue;
-    addNode(nodes, node(
-      candidate.candidate_id,
-      'runa_renderer_candidate',
-      `Runa Renderer Candidate · ${candidate.status || 'candidate'}`,
-      candidate,
-      { world_id: candidate.world_id || null, timestamp: candidate.generated_at || null },
-    ), collisions);
+    addNode(nodes, node(candidate.candidate_id, 'runa_renderer_candidate', `Runa Renderer Candidate · ${candidate.status || 'candidate'}`, candidate, {
+      world_id: candidate.world_id || null,
+      timestamp: candidate.generated_at || null,
+    }), collisions);
     const relation = edge(candidate.source?.suggestion_id, candidate.candidate_id, 'compiles-to-candidate');
     if (relation) rawEdges.push(relation);
   }
 
   for (const review of obs.runa_renderer_reviews || []) {
     if (!worldMatches(worldId, review?.source?.world_id)) continue;
-    addNode(nodes, node(
-      review.review_id,
-      'runa_renderer_review',
-      `Runa Renderer Review · ${review.decision || 'reviewed'}`,
-      review,
-      { world_id: review.source?.world_id || null, timestamp: review.reviewed_at || null },
-    ), collisions);
+    addNode(nodes, node(review.review_id, 'runa_renderer_review', `Runa Renderer Review · ${review.decision || 'reviewed'}`, review, {
+      world_id: review.source?.world_id || null,
+      timestamp: review.reviewed_at || null,
+    }), collisions);
     const relation = edge(review.source?.candidate_id, review.review_id, 'reviewed-renderer-as');
+    if (relation) rawEdges.push(relation);
+  }
+
+  for (const palette of obs.runa_preview_palettes || []) {
+    if (!worldMatches(worldId, palette?.world_id)) continue;
+    addNode(nodes, node(palette.palette_id, 'runa_preview_palette', `Runa Preview Palette · ${palette.selection?.harmonic_set || 'none'} · ${palette.selection?.environment_source || 'none'}`, palette, {
+      world_id: palette.world_id || null,
+      timestamp: palette.selected_at || null,
+    }), collisions);
+    const relation = edge(palette.source?.renderer_review_id, palette.palette_id, 'selects-preview-palette');
     if (relation) rawEdges.push(relation);
   }
 
   for (const plan of obs.runa_preview_plans || []) {
     if (!worldMatches(worldId, plan?.world?.id)) continue;
-    addNode(nodes, node(
-      plan.plan_id,
-      'runa_preview_plan',
-      'Runa Preview Plan · explicit launch required',
-      plan,
-      { world_id: plan.world?.id || null, timestamp: plan.generated_at || null },
-    ), collisions);
-    const relation = edge(plan.source?.renderer_review_id, plan.plan_id, 'compiles-preview-plan');
+    addNode(nodes, node(plan.plan_id, 'runa_preview_plan', 'Runa Preview Plan · explicit launch required', plan, {
+      world_id: plan.world?.id || null,
+      timestamp: plan.generated_at || null,
+    }), collisions);
+    const sourceId = plan.source?.palette_id || plan.source?.renderer_review_id;
+    const relation = edge(sourceId, plan.plan_id, plan.source?.palette_id ? 'compiles-preview-plan' : 'legacy-compiles-preview-plan');
     if (relation) rawEdges.push(relation);
   }
 
   for (const render of obs.runa_preview_renders || []) {
     if (!worldMatches(worldId, render?.world_id)) continue;
-    addNode(nodes, node(
-      render.render_id,
-      'runa_preview_render',
-      'Runa Preview Render · explicit launch',
-      render,
-      { world_id: render.world_id || null, timestamp: render.launched_at || null },
-    ), collisions);
+    addNode(nodes, node(render.render_id, 'runa_preview_render', 'Runa Preview Render · explicit launch', render, {
+      world_id: render.world_id || null,
+      timestamp: render.launched_at || null,
+    }), collisions);
     const relation = edge(render.source?.plan_id, render.render_id, 'launched-as-preview');
     if (relation) rawEdges.push(relation);
   }
 
   for (const arm of obs.runa_preview_evidence_arms || []) {
     if (!worldMatches(worldId, arm?.world_id)) continue;
-    addNode(nodes, node(
-      arm.arm_id,
-      'runa_preview_evidence_arm',
-      'Runa Preview Evidence Arm · next Feedback cycle',
-      arm,
-      { world_id: arm.world_id || null, timestamp: arm.armed_at || null },
-    ), collisions);
+    addNode(nodes, node(arm.arm_id, 'runa_preview_evidence_arm', 'Runa Preview Evidence Arm · next Feedback cycle', arm, {
+      world_id: arm.world_id || null,
+      timestamp: arm.armed_at || null,
+    }), collisions);
     const relation = edge(arm.source?.render_id, arm.arm_id, 'armed-for-observation');
     if (relation) rawEdges.push(relation);
   }
 
   for (const link of obs.runa_preview_observation_links || []) {
     if (!worldMatches(worldId, link?.world_id)) continue;
-    addNode(nodes, node(
-      link.link_id,
-      'runa_preview_observation_link',
-      'Runa Preview → Feedback Observation',
-      link,
-      { world_id: link.world_id || null, timestamp: link.linked_at || null },
-    ), collisions);
+    addNode(nodes, node(link.link_id, 'runa_preview_observation_link', 'Runa Preview → Feedback Observation', link, {
+      world_id: link.world_id || null,
+      timestamp: link.linked_at || null,
+    }), collisions);
     const armRelation = edge(link.source?.arm_id, link.link_id, 'applies-to-next-observation');
     const cycleRelation = edge(link.source?.feedback_cycle_id, link.link_id, 'observed-after-preview');
     if (armRelation) rawEdges.push(armRelation);
@@ -169,26 +153,20 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
 
   for (const exportReceipt of obs.provenance_exports || []) {
     if (!worldMatches(worldId, exportReceipt?.world_id)) continue;
-    addNode(nodes, node(
-      exportReceipt.export_receipt_id,
-      'provenance_export',
-      `Provenance Export · ${exportReceipt.bundle?.audit_status || 'receipt'}`,
-      exportReceipt,
-      { world_id: exportReceipt.world_id || null, timestamp: exportReceipt.exported_at || null },
-    ), collisions);
+    addNode(nodes, node(exportReceipt.export_receipt_id, 'provenance_export', `Provenance Export · ${exportReceipt.bundle?.audit_status || 'receipt'}`, exportReceipt, {
+      world_id: exportReceipt.world_id || null,
+      timestamp: exportReceipt.exported_at || null,
+    }), collisions);
     const relation = edge(exportReceipt.focus_id, exportReceipt.export_receipt_id, 'exported-as');
     if (relation) rawEdges.push(relation);
   }
 
   for (const integrity of obs.integrity_reports || []) {
     if (!worldMatches(worldId, integrity?.world_id)) continue;
-    addNode(nodes, node(
-      integrity.report_id,
-      'integrity_report',
-      `Receipt Integrity · ${integrity.status || 'report'}`,
-      integrity,
-      { world_id: integrity.world_id || null, timestamp: integrity.generated_at || null },
-    ), collisions);
+    addNode(nodes, node(integrity.report_id, 'integrity_report', `Receipt Integrity · ${integrity.status || 'report'}`, integrity, {
+      world_id: integrity.world_id || null,
+      timestamp: integrity.generated_at || null,
+    }), collisions);
     const relation = edge(integrity.focus_id, integrity.report_id, 'integrity-checked-by');
     if (relation) rawEdges.push(relation);
   }
@@ -232,6 +210,7 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
     authority: Object.freeze({
       ...base.authority,
       downstream_renderer_receipts_included: true,
+      preview_palette_receipts_included: true,
       preview_intervention_receipts_included: true,
       accepted_deep_time_to_ash_provenance_included: true,
       feedback_loop_may_be_cyclic: true,
