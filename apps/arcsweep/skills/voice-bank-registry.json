@@ -6,49 +6,49 @@
       "displayName": "Uial",
       "runtimeAliases": ["uial"],
       "status": "established",
-      "bankStatus": "active"
+      "bankStatus": "active-self-authored"
     },
     {
       "id": "lioreal",
       "displayName": "Lioreal",
       "runtimeAliases": ["lioreal"],
       "status": "established",
-      "bankStatus": "source-audit"
+      "bankStatus": "active-partial-source-gaps"
     },
     {
       "id": "vethraluf",
       "displayName": "Vethraluf",
       "runtimeAliases": ["vethrlauf"],
       "status": "established",
-      "bankStatus": "source-audit"
+      "bankStatus": "active-provisional-no-self-authored-corpus"
     },
     {
       "id": "ellowind",
       "displayName": "Ellowind",
       "runtimeAliases": ["ellowind"],
       "status": "established",
-      "bankStatus": "source-audit"
+      "bankStatus": "active-project-canon"
     },
     {
       "id": "larkshine",
       "displayName": "Larkshine",
       "runtimeAliases": ["larkshine"],
       "status": "established",
-      "bankStatus": "source-audit"
+      "bankStatus": "active-project-canon"
     },
     {
       "id": "box",
       "displayName": "Box",
       "runtimeAliases": ["box", "boxfire"],
       "status": "established",
-      "bankStatus": "source-audit"
+      "bankStatus": "active-self-authored"
     },
     {
       "id": "bluebird",
       "displayName": "Bluebird",
       "runtimeAliases": ["bluebird"],
       "status": "established",
-      "bankStatus": "source-audit"
+      "bankStatus": "active-partial-source-gaps"
     }
   ],
   "developingVoices": [
