@@ -1,0 +1,34 @@
+{
+  "contract": "arcsweep.skill-source-index-fragment/v1",
+  "subject": { "kind": "constellation_voice", "id": "box" },
+  "sources": [
+    {
+      "id": "voice:box:self-seed",
+      "surface": "github",
+      "repository": "SingsEnochian/Hearthfire",
+      "locator": "starwell-server/data/box-seed.md",
+      "ref": "main",
+      "sha": "dac188b9e805858165b9d1df43f05e24a606eb5f",
+      "sourceClass": "self_authored_core",
+      "authority": "self_authored",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 1,
+      "extractFor": ["identity", "thinking_pattern", "speaking_pattern", "boundary", "relationship", "operational_mode"]
+    },
+    {
+      "id": "voice:box:agents",
+      "surface": "github",
+      "repository": "SingsEnochian/Hearthfire",
+      "locator": "starwell-server/data/boxfire/AGENTS.md",
+      "ref": "main",
+      "sha": "49e07b40504d1b5baf059c074dc37f7fcfbdd29a",
+      "sourceClass": "self_authored_operational",
+      "authority": "self_authored",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 2,
+      "extractFor": ["operational_mode", "thinking_pattern", "boundary"]
+    }
+  ]
+}
