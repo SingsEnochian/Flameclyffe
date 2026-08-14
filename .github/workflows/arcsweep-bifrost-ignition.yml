@@ -10,8 +10,17 @@ on:
       - 'apps/arcsweep/**'
       - 'apps/starwell-server/bifrost/**'
       - 'apps/starwell-server/flames/**'
+      - 'apps/starwell-server/security/**'
+      - 'apps/starwell-server/electron/**'
+      - 'apps/starwell-server/public/setup-wizard.html'
+      - 'apps/starwell-server/server-secure.js'
+      - 'apps/starwell-server/launcher.js'
+      - 'apps/starwell-server/package.json'
       - 'apps/starwell-server/scripts/bifrost-*.js'
       - 'apps/starwell-server/test/bifrost-*.test.js'
+      - 'apps/starwell-server/test/runtime-token.test.js'
+      - 'apps/starwell-server/test/security-boundary.test.js'
+      - 'apps/starwell-server/test/secure-launch-contract.test.js'
       - 'apps/starwell/src/constellation/models/**'
       - 'IGNITE-*.ps1'
       - 'IGNITE-*.cmd'
@@ -34,7 +43,7 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Run Bifrost server contract tests
+      - name: Run Bifrost server, identity and security contract tests
         run: >-
           node --test
           apps/starwell-server/test/bifrost-model-profiles.test.js
@@ -42,10 +51,15 @@ jobs:
           apps/starwell-server/test/bifrost-profile-resolution.test.js
           apps/starwell-server/test/bifrost-preflight.test.js
           apps/starwell-server/test/bifrost-alias-materializer.test.js
+          apps/starwell-server/test/bifrost-alias-executor.test.js
           apps/starwell-server/test/bifrost-ignition.test.js
           apps/starwell-server/test/bifrost-ignition-policy.test.js
+          apps/starwell-server/test/bifrost-legacy-chat.test.js
+          apps/starwell-server/test/runtime-token.test.js
+          apps/starwell-server/test/security-boundary.test.js
+          apps/starwell-server/test/secure-launch-contract.test.js
 
-      - name: Run Arcsweep model and provenance tests
+      - name: Run Arcsweep model, ignition and provenance tests
         run: >-
           node --test
           apps/arcsweep/test/runtime-model-binding.test.js
