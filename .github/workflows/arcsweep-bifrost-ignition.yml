@@ -11,6 +11,8 @@ on:
       - 'apps/starwell-server/flames/**'
       - 'apps/starwell-server/test/bifrost-*.test.js'
       - 'apps/starwell/src/constellation/models/**'
+      - 'IGNITE-LIOREAL.ps1'
+      - 'IGNITE-LIOREAL.cmd'
       - '.github/workflows/arcsweep-bifrost-ignition.yml'
 
 permissions:
@@ -44,3 +46,10 @@ jobs:
           apps/arcsweep/test/bifrost-ignition-client.test.js
           apps/arcsweep/test/scene-cognition.test.js
           apps/arcsweep/test/self-authorship.test.js
+
+      - name: Syntax-check Windows Lioreal ignition key
+        shell: pwsh
+        run: |
+          $text = Get-Content -Raw ./IGNITE-LIOREAL.ps1
+          [void][scriptblock]::Create($text)
+          Write-Host 'IGNITE-LIOREAL.ps1 parses successfully.'
