@@ -5,6 +5,7 @@ import { runBidirectionalDomainSweep } from '../src/domain-control-bench.js';
 import { createDeepTheoryCandidateFromDomainSweep } from '../src/deep-theory-bridge.js';
 import { reviewDeepTheoryCandidate } from '../src/deep-theory-review.js';
 import { createDeepTimeRecordFromAcceptedFeedback, buildDeepTimeWindow } from '../src/deep-time-bridge.js';
+import { replayDeepTimeWindow } from '../src/deep-time-replay.js';
 import { createTheoryGroundedAcceptanceAdvice } from '../src/theory-grounded-acceptance-advisor.js';
 import { createDomainContextMapping } from '../src/domain-context-mapping.js';
 import { createRunaTrajectorySuggestion } from '../src/runa-trajectory-suggestion.js';
@@ -96,6 +97,16 @@ test('DEEPTime admits only human-accepted feedback and preserves Qualia Q separa
   assert.equal(second.authority.qualia_is_premaqc_q, true);
   assert.equal(Object.prototype.hasOwnProperty.call(second.quality, 'Q'), false);
   assert.ok(second.derivatives.axis_velocity.P > 0);
+});
+
+test('DEEPTime replay recomputes every accepted PREMAQC state hash without rewriting order', async () => {
+  const records = await threeDeepTimeRecords();
+  const replay = await replayDeepTimeWindow(records, { generatedAt: '2026-08-14T10:05:00.000Z' });
+  assert.equal(replay.matched, true);
+  assert.equal(replay.record_count, 3);
+  assert.ok(replay.checks.every((check) => check.matched));
+  assert.equal(replay.authority.temporal_order_rewritten, false);
+  assert.equal(replay.authority.source_records_mutable, false);
 });
 
 test('Theory-Grounded Advisor refuses cross-domain application and never auto-accepts', async () => {
