@@ -5,4 +5,5 @@ import './bai-topology-sidecar.js';
 import './domain-control-bench-sidecar.js';
 import './deep-theory-sidecar.js';
 import './theory-review-advisor-sidecar.js';
+import './deep-time-trajectory-sidecar.js';
 import './runa-trajectory-sidecar.js';
