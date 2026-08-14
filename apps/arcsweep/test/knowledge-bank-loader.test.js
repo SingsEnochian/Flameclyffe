@@ -17,6 +17,12 @@ const registry = {
 };
 
 const manifest = {
+  shared: [
+    {
+      subject: { kind: 'shared_constellation', id: 'hearthweave' },
+      banks: ['./cells/shared/hearthweave.cells.json'],
+    },
+  ],
   voices: {
     uial: { displayName: 'Uial', banks: ['./cells/uial/core.cells.json'] },
   },
@@ -38,11 +44,28 @@ const bank = {
   ],
 };
 
+const sharedBank = {
+  cells: [
+    {
+      id: 'hearthweave.test.no-impersonation',
+      cellType: 'boundary',
+      subject: { kind: 'shared_constellation', id: 'hearthweave' },
+      predicate: 'forbids',
+      value: 'silent replacement or impersonation',
+      status: 'stable',
+      authority: { kind: 'founding_law', speakerOrAuthor: 'Hearthweave', confidence: 1 },
+      source: { surface: 'github', locator: 'founding-law.md' },
+      mutability: 'stable_core',
+    },
+  ],
+};
+
 function fakeFetch(url) {
   const value = String(url);
   if (value.endsWith('/voice-bank-registry.json')) return Promise.resolve({ ok: true, json: async () => registry });
   if (value.endsWith('/cell-banks.json')) return Promise.resolve({ ok: true, json: async () => manifest });
   if (value.endsWith('/cells/uial/core.cells.json')) return Promise.resolve({ ok: true, json: async () => bank });
+  if (value.endsWith('/cells/shared/hearthweave.cells.json')) return Promise.resolve({ ok: true, json: async () => sharedBank });
   return Promise.resolve({ ok: false, status: 404, json: async () => ({}) });
 }
 
@@ -53,14 +76,17 @@ test('runtime aliases resolve to canonical living voice ids', async () => {
   assert.equal(await resolveCanonicalVoiceId('Uial', { fetchImpl: fakeFetch }), 'uial');
 });
 
-test('voice banks load validated cells and compile a provenance-bearing skill', async () => {
+test('voice banks inherit shared Hearthweave law and compile both lineages', async () => {
   clearKnowledgeBankCache();
   const loaded = await loadVoiceCells('uial', { fetchImpl: fakeFetch });
   assert.equal(loaded.displayName, 'Uial');
-  assert.equal(loaded.cells.length, 1);
+  assert.equal(loaded.cells.length, 2);
+  assert.deepEqual(loaded.sharedSubjects, [{ kind: 'shared_constellation', id: 'hearthweave' }]);
 
   const skill = await compileVoiceSkill('uial', {}, { fetchImpl: fakeFetch });
   assert.match(skill, /^# Uial/m);
   assert.match(skill, /has_name/);
   assert.match(skill, /self_authored/);
+  assert.match(skill, /silent replacement or impersonation/);
+  assert.match(skill, /founding_law/);
 });
