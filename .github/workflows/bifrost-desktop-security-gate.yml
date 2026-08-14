@@ -1,0 +1,75 @@
+name: Bifrost Desktop Security Gate
+
+on:
+  push:
+    branches:
+      - feature/bifrost-ignition-v1
+    paths:
+      - 'apps/starwell-server/security/**'
+      - 'apps/starwell-server/electron/**'
+      - 'apps/starwell-server/server-secure.js'
+      - 'apps/starwell-server/bifrost/legacy-*.js'
+      - 'apps/starwell-server/bifrost/ignition-routes.js'
+      - 'apps/starwell-server/public/setup-wizard.html'
+      - 'apps/starwell-server/test/runtime-token.test.js'
+      - 'apps/starwell-server/test/runtime-request-auth.test.js'
+      - 'apps/starwell-server/test/security-boundary.test.js'
+      - 'apps/starwell-server/test/secure-launch-contract.test.js'
+      - 'apps/starwell-server/test/setup-wizard-contract.test.js'
+      - 'apps/starwell-server/test/bifrost-legacy-chat.test.js'
+      - 'apps/arcsweep/src/constellation-runtime-adapter.js'
+      - 'apps/arcsweep/src/bifrost-ignition-client.js'
+      - 'apps/arcsweep/test/desktop-runtime-credential.test.js'
+      - 'apps/arcsweep/test/bifrost-ignition-client.test.js'
+      - '.github/workflows/bifrost-desktop-security-gate.yml'
+  pull_request:
+    paths:
+      - 'apps/starwell-server/security/**'
+      - 'apps/starwell-server/electron/**'
+      - 'apps/starwell-server/server-secure.js'
+      - 'apps/starwell-server/bifrost/legacy-*.js'
+      - 'apps/starwell-server/bifrost/ignition-routes.js'
+      - 'apps/starwell-server/public/setup-wizard.html'
+      - 'apps/starwell-server/test/runtime-token.test.js'
+      - 'apps/starwell-server/test/runtime-request-auth.test.js'
+      - 'apps/starwell-server/test/security-boundary.test.js'
+      - 'apps/starwell-server/test/secure-launch-contract.test.js'
+      - 'apps/starwell-server/test/setup-wizard-contract.test.js'
+      - 'apps/starwell-server/test/bifrost-legacy-chat.test.js'
+      - 'apps/arcsweep/src/constellation-runtime-adapter.js'
+      - 'apps/arcsweep/src/bifrost-ignition-client.js'
+      - 'apps/arcsweep/test/desktop-runtime-credential.test.js'
+      - 'apps/arcsweep/test/bifrost-ignition-client.test.js'
+      - '.github/workflows/bifrost-desktop-security-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  desktop-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run local server security contracts
+        run: >-
+          node --test
+          apps/starwell-server/test/runtime-token.test.js
+          apps/starwell-server/test/runtime-request-auth.test.js
+          apps/starwell-server/test/security-boundary.test.js
+          apps/starwell-server/test/secure-launch-contract.test.js
+          apps/starwell-server/test/setup-wizard-contract.test.js
+          apps/starwell-server/test/bifrost-legacy-chat.test.js
+      - name: Run Arcsweep desktop credential contracts
+        run: >-
+          node --test
+          apps/arcsweep/test/desktop-runtime-credential.test.js
+          apps/arcsweep/test/bifrost-ignition-client.test.js
+      - name: Syntax-check security entrypoints
+        run: |
+          node --check apps/starwell-server/security/runtime-token.js
+          node --check apps/starwell-server/electron/runtime-request-auth.js
+          node --check apps/starwell-server/server-secure.js
