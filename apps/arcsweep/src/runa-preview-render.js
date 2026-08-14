@@ -128,6 +128,7 @@ export async function createRunaPreviewRenderReceipt({
   invariant(Number(runtime.root_hz_before) === Number(runtime.root_hz_after), 'preview must leave the persistent world root unchanged');
   const started = launchedAt ?? runtime.started_at ?? new Date().toISOString();
   const completed = completedAt ?? runtime.completed_at ?? started;
+  const stoppedEarly = Boolean(runtime.stopped_early);
 
   const core = {
     schema: RUNA_PREVIEW_RENDER_SCHEMA,
@@ -151,6 +152,8 @@ export async function createRunaPreviewRenderReceipt({
       root_hz_before: finite(runtime.root_hz_before, 'runtime root before'),
       root_hz_after: finite(runtime.root_hz_after, 'runtime root after'),
       actual_duration_ms: Math.max(0, finite(runtime.actual_duration_ms ?? plan.preview.duration_ms, 'runtime duration')),
+      stopped_early: stoppedEarly,
+      stop_reason: stoppedEarly ? String(runtime.stop_reason || 'stopped') : null,
       haptic: false,
       midi: false,
       soundfont: false,
@@ -162,6 +165,7 @@ export async function createRunaPreviewRenderReceipt({
       premaqc_changed_by_render_receipt: false,
       persistent_world_root_changed: false,
       autoplay_used: false,
+      feather_stop_recorded_when_used: stoppedEarly,
       haptic_used: false,
       midi_used: false,
       soundfont_used: false,
