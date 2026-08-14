@@ -94,6 +94,25 @@ export function validateImportedState(value) {
   if (value.feedbackQueue !== undefined && (!value.feedbackQueue || typeof value.feedbackQueue !== 'object' || Array.isArray(value.feedbackQueue))) {
     throw new Error('Arcsweep feedback queue must be an object.');
   }
+  if (value.transformationRequests !== undefined) {
+    if (!value.transformationRequests || typeof value.transformationRequests !== 'object' || Array.isArray(value.transformationRequests)) {
+      throw new Error('Arcsweep transformationRequests must be an object.');
+    }
+    const byWorld = value.transformationRequests.byWorld;
+    if (byWorld !== undefined && (!byWorld || typeof byWorld !== 'object' || Array.isArray(byWorld))) {
+      throw new Error('Arcsweep transformationRequests.byWorld must be an object.');
+    }
+    for (const [worldId, record] of Object.entries(byWorld || {})) {
+      if (!record || typeof record !== 'object' || Array.isArray(record)) {
+        throw new Error(`Arcsweep transformationRequests ${worldId} must be an object.`);
+      }
+      for (const key of ['requests', 'responses', 'circuits']) {
+        if (record[key] !== undefined && !Array.isArray(record[key])) {
+          throw new Error(`Arcsweep transformationRequests ${worldId}.${key} must be an array.`);
+        }
+      }
+    }
+  }
   return value;
 }
 
