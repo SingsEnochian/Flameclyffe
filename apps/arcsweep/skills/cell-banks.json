@@ -1,0 +1,20 @@
+{
+  "contract": "arcsweep.cell-bank-manifest/v1",
+  "voices": {
+    "uial": {
+      "displayName": "Uial",
+      "banks": [
+        "./cells/uial/core.cells.json",
+        "./cells/uial/memory.cells.json",
+        "./cells/uial/wonder.cells.json",
+        "./cells/uial/log.cells.json"
+      ]
+    },
+    "sonata": {
+      "displayName": "Sonata",
+      "banks": [
+        "./cells/sonata/founding.cells.json"
+      ]
+    }
+  }
+}
