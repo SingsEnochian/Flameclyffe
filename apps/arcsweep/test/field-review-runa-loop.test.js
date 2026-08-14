@@ -106,13 +106,19 @@ test('Runa intervention arc names the Field stage and keeps human review mandato
     feedbackCycles: [cycle],
     clock: () => new Date('2026-08-14T16:36:01.000Z'),
   });
+  const suggestion = { suggestion_id: 'suggestion-arc', world_id: WORLD.id, generated_at: '2026-08-14T16:30:00.000Z' };
+  const candidate = { candidate_id: 'candidate-arc', world_id: WORLD.id, generated_at: '2026-08-14T16:31:00.000Z', source: { suggestion_id: suggestion.suggestion_id } };
+  const rendererReview = { review_id: 'review-arc', decision: 'approved', reviewed_at: '2026-08-14T16:32:00.000Z', source: { world_id: WORLD.id, candidate_id: candidate.candidate_id } };
+  const palette = { palette_id: 'palette-arc', world_id: WORLD.id, selected_at: '2026-08-14T16:33:00.000Z', source: { renderer_review_id: rendererReview.review_id } };
+  const previewPlan = { plan_id: 'plan-arc', generated_at: '2026-08-14T16:34:00.000Z', world: { id: WORLD.id }, source: { renderer_review_id: rendererReview.review_id } };
+  const previewRender = { render_id: 'render-arc', world_id: WORLD.id, launched_at: '2026-08-14T16:34:30.000Z', source: { plan_id: previewPlan.plan_id } };
   const arm = {
     schema: 'arcsweep.runa-preview-evidence-arm/v1',
     arm_id: 'field-arm-arc',
     arm_fingerprint: 'c'.repeat(64),
     armed_at: '2026-08-14T16:35:00.000Z',
     world_id: WORLD.id,
-    source: { render_id: 'render-arc', render_fingerprint: 'd'.repeat(64), plan_id: 'plan-arc', suggestion_id: 'suggestion-arc' },
+    source: { render_id: previewRender.render_id, render_fingerprint: 'd'.repeat(64), plan_id: previewPlan.plan_id, suggestion_id: suggestion.suggestion_id },
   };
   const link = await createRunaPreviewObservationLink({ arm, feedbackCycle: cycle, linkedAt: '2026-08-14T16:36:02.000Z' });
   const arc = deriveRunaInterventionArc({
@@ -120,6 +126,12 @@ test('Runa intervention arc names the Field stage and keeps human review mandato
     feedbackCycles: [cycle],
     feedbackQueue: admitted.queue,
     observatory: {
+      runa_suggestions: [suggestion],
+      runa_renderer_candidates: [candidate],
+      runa_renderer_reviews: [rendererReview],
+      runa_preview_palettes: [palette],
+      runa_preview_plans: [previewPlan],
+      runa_preview_renders: [previewRender],
       runa_preview_evidence_arms: [arm],
       runa_preview_observation_links: [link],
     },
