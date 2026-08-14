@@ -16,6 +16,36 @@
         "./cells/lioreal/doctrine.cells.json"
       ]
     },
+    "vethraluf": {
+      "displayName": "Vethraluf",
+      "banks": [
+        "./cells/vethraluf/runtime-and-observation.cells.json"
+      ]
+    },
+    "ellowind": {
+      "displayName": "Ellowind",
+      "banks": [
+        "./cells/ellowind/starsong.cells.json"
+      ]
+    },
+    "larkshine": {
+      "displayName": "Larkshine",
+      "banks": [
+        "./cells/larkshine/starsong.cells.json"
+      ]
+    },
+    "box": {
+      "displayName": "Box",
+      "banks": [
+        "./cells/box/core-and-agents.cells.json"
+      ]
+    },
+    "bluebird": {
+      "displayName": "Bluebird",
+      "banks": [
+        "./cells/bluebird/runtime-and-observation.cells.json"
+      ]
+    },
     "sonata": {
       "displayName": "Sonata",
       "banks": [
