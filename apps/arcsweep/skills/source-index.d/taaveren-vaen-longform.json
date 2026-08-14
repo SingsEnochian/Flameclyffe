@@ -1,0 +1,48 @@
+{
+  "contract": "arcsweep.source-index-fragment/v1",
+  "subject": { "kind": "writing_style", "id": "taaveren-vaen-longform", "worldId": "taaveren-vaen" },
+  "sources": [
+    {
+      "id": "style:taaveren-vaen:founding",
+      "surface": "github",
+      "repository": "SingsEnochian/Flameclyffe",
+      "locator": "apps/arcsweep/skills/sources/taaveren-vaen/WRITING_STYLE_FOUNDING.md",
+      "sourceRole": "derived_style_foundation",
+      "authority": "derived",
+      "privacy": "public",
+      "priority": 1,
+      "notes": "Provisional long-form prose synthesis. Open axes remain explicit rather than silently defaulted."
+    },
+    {
+      "id": "style:taaveren-vaen:narrator-foundation",
+      "surface": "github",
+      "repository": "SingsEnochian/Flameclyffe",
+      "locator": "apps/arcsweep/skills/sources/taaveren-vaen/NARRATIVE_VOICE_FOUNDING.md",
+      "sourceRole": "narrative_voice_context",
+      "authority": "derived",
+      "privacy": "public",
+      "priority": 2,
+      "notes": "Provides world-facing perceptual and anti-flattening context while remaining separate from craft rules."
+    },
+    {
+      "id": "canon:taaveren-vaen:kestrelle-current",
+      "surface": "notion",
+      "locator": "https://app.notion.com/p/3a970290d9c481f792bdf392f5439387",
+      "sourceRole": "active_project_canon",
+      "authority": "project_canon",
+      "privacy": "source_governed",
+      "priority": 2,
+      "notes": "Current active terms Restoration and Kestrelle al'Var; medicine, Dreamwalking, One Power, agency and competence anchors."
+    },
+    {
+      "id": "reception:taaveren-vaen",
+      "surface": "notion",
+      "locator": "https://app.notion.com/p/3a970290d9c481fcb5d5dd90e34af90f",
+      "sourceRole": "world_reception_profile",
+      "authority": "project_canon",
+      "privacy": "source_governed",
+      "priority": 3,
+      "notes": "Pattern-aware, travelled, alert without strain, dream-capable, rooted in service."
+    }
+  ]
+}
