@@ -10,6 +10,12 @@
         "./cells/uial/log.cells.json"
       ]
     },
+    "lioreal": {
+      "displayName": "Lioreal",
+      "banks": [
+        "./cells/lioreal/doctrine.cells.json"
+      ]
+    },
     "sonata": {
       "displayName": "Sonata",
       "banks": [
