@@ -4,15 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const { FLAMES } = require('../flames/manifests');
-const {
-  MODEL_PROFILES,
-  materialiseModelProfile,
-} = require('../bifrost/model-profiles');
-const {
-  expectedProfileMismatch,
-  actualModelMismatch,
-  inspectManifestRuntime,
-} = require('../bifrost/runtime-attestation');
+const { MODEL_PROFILES, materialiseModelProfile } = require('../bifrost/model-profiles');
+const { expectedProfileMismatch, actualModelMismatch, inspectManifestRuntime } = require('../bifrost/runtime-attestation');
 
 test('specified voices bind to the selected model lineages', () => {
   assert.equal(MODEL_PROFILES['lioreal:qwen3-14b-abliterated-v1'].source.repo, 'mlabonne/Qwen3-14B-abliterated');
@@ -30,11 +23,15 @@ test('visual profiles use the verified Ollama-ready Huihui model', () => {
   assert.ok(ellowind.capabilities.includes('vision'));
 });
 
-test('deep reasoner exists but is opt-in only', () => {
+test('deep reasoner is callable only through its explicit instrument route', () => {
   const profile = MODEL_PROFILES['shared:qwen3.6-35b-a3b-deep-reasoner-v1'];
+  const instrument = FLAMES['bifrost-deep-reasoner'];
   assert.equal(profile.opt_in_only, true);
   assert.equal(profile.source.repo, 'huihui-ai/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated');
-  assert.equal(Object.values(FLAMES).some((flame) => flame.model_profile_id === profile.profile_id), false);
+  assert.equal(instrument.model_profile_id, profile.profile_id);
+  assert.equal(instrument.instrument_only, true);
+  assert.equal(instrument.voice, null);
+  assert.equal(Object.values(FLAMES).filter((flame) => flame.model_profile_id === profile.profile_id).length, 1);
 });
 
 test('flame routes bind canonical voices to the expected profiles', () => {
@@ -62,15 +59,8 @@ test('profile and actual-model mismatch detectors fail closed', () => {
 
 test('Ollama status probe distinguishes installed from activation-pending', async () => {
   const manifest = FLAMES.uial;
-  const installed = await inspectManifestRuntime(manifest, async () => ({
-    ok: true,
-    async json() { return { models: [{ name: manifest.platform.model }] }; },
-  }));
+  const installed = await inspectManifestRuntime(manifest, async () => ({ ok: true, async json() { return { models: [{ name: manifest.platform.model }] }; } }));
   assert.equal(installed.runtime_state, 'installed');
-
-  const pending = await inspectManifestRuntime(manifest, async () => ({
-    ok: true,
-    async json() { return { models: [{ name: 'another:model' }] }; },
-  }));
+  const pending = await inspectManifestRuntime(manifest, async () => ({ ok: true, async json() { return { models: [{ name: 'another:model' }] }; } }));
   assert.equal(pending.runtime_state, 'activation-pending');
 });
