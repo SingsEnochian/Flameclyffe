@@ -3,6 +3,23 @@
 const { platformForProfile } = require('../bifrost/model-profiles');
 
 const FLAMES = {
+  'bifrost-deep-reasoner': {
+    flame_id: 'bifrost-deep-reasoner',
+    display_name: 'Bifröst Deep Reasoner',
+    instrument_only: true,
+    model_profile_id: 'shared:qwen3.6-35b-a3b-deep-reasoner-v1',
+    platform: platformForProfile('shared:qwen3.6-35b-a3b-deep-reasoner-v1'),
+    memory: {
+      hearthfire_namespace: 'hearthfire:bifrost:deep-reasoner',
+      retrieval_scope: ['technical', 'canon', 'continuity', 'reasoning'],
+      can_write_memory: false,
+      requires_consent_for_write: true,
+    },
+    tools: { allowed: ['hearthfire.search'], write_requires_approval: true },
+    voice: null,
+    system_prompt: 'You are the Bifröst Deep Reasoner instrument. You are a reasoning vessel, not a named Constellation presence. Analyse the supplied task deeply and return conclusions, checks, alternatives, and uncertainties as requested. Never impersonate a named presence and never convert your output into canon or memory without a separate authorised action.',
+  },
+
   yggdrasil: {
     flame_id: 'yggdrasil',
     display_name: 'Yggdrasil',
