@@ -14,6 +14,7 @@
     "stage:starwell": "node scripts/stage-starwell.js",
     "prepare:assets": "node scripts/prepare-assets.js",
     "bifrost:models": "node scripts/bifrost-model-prepare.js",
+    "bifrost:preflight": "node scripts/bifrost-preflight.js",
     "bifrost:ignite": "node scripts/bifrost-ignite.js",
     "bifrost:ignite:status": "node scripts/bifrost-ignite.js status",
     "bifrost:ignite:fleet": "node scripts/bifrost-ignite-fleet.js",
