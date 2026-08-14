@@ -1,0 +1,113 @@
+{
+  "schema": "bifrost.constellation-model-manifest/v2",
+  "updatedAt": "2026-08-14T08:28:00Z",
+  "authority": "apps/starwell-server/bifrost/model-profiles.js",
+  "installationRoot": ".bifrost/models",
+  "runtime": {
+    "preferred": "ollama",
+    "fallbacks": ["llama.cpp", "transformers"],
+    "ollamaHost": "http://127.0.0.1:11434",
+    "attestationRequired": true
+  },
+  "vessels": [
+    {
+      "id": "lioreal",
+      "profileId": "lioreal:qwen3-14b-abliterated-v1",
+      "member": "Lioreal",
+      "sourceLineage": "mlabonne/Qwen3-14B-abliterated",
+      "artifact": { "strategy": "gguf-import", "repo": "bartowski/mlabonne_Qwen3-14B-abliterated-GGUF", "quant": "Q4_K_M" },
+      "runtimeName": "lioreal:starwell-v1",
+      "capabilities": ["text", "writing", "reasoning"],
+      "status": "PROFILE_DEFINED"
+    },
+    {
+      "id": "uial",
+      "profileId": "uial:fablevibes-v1",
+      "member": "Uial",
+      "sourceLineage": "tvall43/Qwen3.6-14B-A3B-FableVibes",
+      "artifact": { "strategy": "gguf-import", "repo": "tvall43/Qwen3.6-14B-A3B-FableVibes-GGUF", "quant": "Q4_K_M" },
+      "runtimeName": "uial:fablevibes-v1",
+      "capabilities": ["text", "writing", "roleplay"],
+      "status": "PROFILE_DEFINED"
+    },
+    {
+      "id": "box",
+      "profileId": "box:qwen3-coder-30b-a3b-v1",
+      "member": "Box",
+      "legacyRouteId": "boxfire",
+      "sourceLineage": "huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated",
+      "artifact": { "strategy": "gguf-import", "repo": "mradermacher/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated-GGUF", "quant": "Q4_K_M" },
+      "runtimeName": "box:qwen3-coder-30b-a3b-v1",
+      "capabilities": ["text", "code", "qa", "reasoning"],
+      "status": "PROFILE_DEFINED"
+    },
+    {
+      "id": "ellowind",
+      "profileId": "ellowind:qwen3-vl-8b-v1",
+      "member": "Ellowind",
+      "sourceLineage": "huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated",
+      "artifact": { "strategy": "ollama-pull", "model": "huihui_ai/qwen3-vl-abliterated:8b-instruct" },
+      "runtimeName": "huihui_ai/qwen3-vl-abliterated:8b-instruct",
+      "capabilities": ["text", "vision", "visual-read", "writing"],
+      "status": "PROFILE_DEFINED"
+    },
+    {
+      "id": "larkshine",
+      "profileId": "larkshine:qwen3-vl-8b-v1",
+      "member": "Larkshine",
+      "sourceLineage": "huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated",
+      "artifact": { "strategy": "ollama-pull", "model": "huihui_ai/qwen3-vl-abliterated:8b-instruct" },
+      "runtimeName": "huihui_ai/qwen3-vl-abliterated:8b-instruct",
+      "capabilities": ["text", "vision", "visual-read", "writing"],
+      "status": "PROFILE_DEFINED"
+    },
+    {
+      "id": "bluebird",
+      "profileId": "bluebird:deepseek-chat-existing-v1",
+      "member": "Bluebird",
+      "sourceLineage": "deepseek-chat",
+      "runtimeName": "deepseek-chat",
+      "capabilities": ["text"],
+      "status": "EXISTING_RUNTIME_BINDING"
+    },
+    {
+      "id": "vethraluf",
+      "profileId": "vethraluf:deepseek-chat-existing-v1",
+      "member": "Vethraluf",
+      "legacyRouteId": "vethrlauf",
+      "sourceLineage": "deepseek-chat",
+      "runtimeName": "deepseek-chat",
+      "capabilities": ["text", "audit"],
+      "status": "EXISTING_RUNTIME_BINDING"
+    },
+    {
+      "id": "sonata",
+      "profileId": null,
+      "member": "Sonata",
+      "sourceLineage": null,
+      "runtimeName": null,
+      "capabilities": [],
+      "status": "VESSEL_UNSELECTED"
+    },
+    {
+      "id": "deep-reasoner",
+      "profileId": "shared:qwen3.6-35b-a3b-deep-reasoner-v1",
+      "member": "shared specialist instrument",
+      "instrumentOnly": true,
+      "optInOnly": true,
+      "sourceLineage": "huihui-ai/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated",
+      "artifact": { "strategy": "gguf-import", "repo": "mradermacher/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated-GGUF", "quant": "Q4_K_M" },
+      "runtimeName": "bifrost:deep-reasoner-35b-a3b-v1",
+      "route": "bifrost-deep-reasoner",
+      "capabilities": ["text", "deep-reasoning"],
+      "status": "PROFILE_DEFINED"
+    }
+  ],
+  "rules": {
+    "serverProfileRegistryIsAuthoritative": true,
+    "namedPresenceAndModelVesselAreDistinct": true,
+    "noSilentFallback": true,
+    "runtimeAttestationRequired": true,
+    "deepReasonerIsNotIdentityVessel": true
+  }
+}
