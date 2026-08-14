@@ -4,6 +4,7 @@ const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
 const { FLAMES } = require('./manifests');
 const { MODEL_PROFILES, publicModelProfile } = require('../bifrost/model-profiles');
+const ignitionRouter = require('../bifrost/ignition-routes');
 const {
   modelReceipt,
   expectedProfileMismatch,
@@ -186,6 +187,8 @@ router.get('/bifrost/model-profiles', (_req, res) => {
     },
   });
 });
+
+router.use('/bifrost/ignition', ignitionRouter);
 
 router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
   const manifest = req.flame;
