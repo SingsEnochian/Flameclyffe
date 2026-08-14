@@ -14,3 +14,4 @@ import './react-ion-world-tone-sync-sidecar.js';
 import './react-ion-concordance-anchor-sidecar.js';
 import './react-ion-replay-room-sidecar.js';
 import './react-ion-deepstory-sidecar.js';
+import './glyph-drift-observatory-sidecar.js';
