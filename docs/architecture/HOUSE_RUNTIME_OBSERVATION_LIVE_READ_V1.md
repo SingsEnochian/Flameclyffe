@@ -1,6 +1,6 @@
 # House Runtime Observation Live Read v1
 
-**Status:** implemented; live migration and release verification pending
+**Status:** released and verified on 2026-08-14; write-side Braid v1 included
 
 ## Purpose
 
@@ -49,6 +49,6 @@ The migration adds private, RLS-enabled ledgers:
 
 Both are readable through the sealed broker only. The observation mode constraint is expanded to the already-supported `writing`, `roleplay`, `observation`, and `reflection` modes.
 
-## Next cut
+## Write-side continuation
 
-Mount the write side of the same broker: sync explicit review receipts and admitted DEEPTime records, then make live state update by Supabase Realtime without polling or relaxing the human gate.
+House Runtime Braid v1 mounts explicit review and DEEPTime commands plus a brokered Supabase Realtime stream without relaxing the human gate. See `HOUSE_RUNTIME_BRAID_V1.md` for its packet, event-spine, command, and release contracts.

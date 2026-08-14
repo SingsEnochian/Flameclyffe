@@ -92,3 +92,132 @@ export async function readHouseObservations(token, worldId = null, fetchImpl = f
   if (!response.ok) throw new Error(data.error || `House observation live read ${response.status}`);
   return data;
 }
+
+function commandId(prefix = 'braid-command') {
+  const uuid = globalThis.crypto?.randomUUID?.();
+  return `${prefix}-${uuid || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+}
+
+export async function commandHouseObservation(token, {
+  action,
+  cycleId,
+  decision = null,
+  reviewedBy = 'Rowan',
+  commandId: suppliedCommandId = null,
+  requestedAt = new Date().toISOString(),
+} = {}, fetchImpl = fetch) {
+  if (!token) throw new Error('Connect the House Runtime first.');
+  const body = {
+    schema: 'hearthgate.runtime-braid-command/v1',
+    command_id: suppliedCommandId || commandId(action || 'braid-command'),
+    action,
+    cycle_id: cycleId,
+    reviewed_by: reviewedBy,
+    requested_at: requestedAt,
+  };
+  if (decision) body.decision = decision;
+  const response = await fetchImpl('/api/v1/house/observations', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...bearerHeaders(token) },
+    credentials: 'same-origin',
+    cache: 'no-store',
+    body: JSON.stringify(body),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `House Runtime command ${response.status}`);
+  return data;
+}
+
+export function reviewHouseObservation(token, cycleId, decision, options = {}, fetchImpl = fetch) {
+  return commandHouseObservation(token, { ...options, action: 'review-observation', cycleId, decision }, fetchImpl);
+}
+
+export function admitHouseObservationToDeepTime(token, cycleId, options = {}, fetchImpl = fetch) {
+  return commandHouseObservation(token, { ...options, action: 'admit-deeptime', cycleId }, fetchImpl);
+}
+
+function parseSseBlock(block) {
+  if (!block || block.startsWith(':')) return null;
+  const message = { event: 'message', id: null, data: '' };
+  for (const line of block.split(/\r?\n/)) {
+    const split = line.indexOf(':');
+    const field = split < 0 ? line : line.slice(0, split);
+    const value = split < 0 ? '' : line.slice(split + 1).replace(/^ /, '');
+    if (field === 'event') message.event = value;
+    if (field === 'id') message.id = value;
+    if (field === 'data') message.data += `${value}\n`;
+  }
+  message.data = message.data.replace(/\n$/, '');
+  return message;
+}
+
+const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+export function startHouseBraidLiveUpdates(token, {
+  worldId = null,
+  cursor = 0,
+  onEvent = () => {},
+  onState = () => {},
+  fetchImpl = fetch,
+  reconnect = true,
+  reconnectDelayMs = 1_500,
+} = {}) {
+  if (!token) throw new Error('Connect the House Runtime first.');
+  const controller = new AbortController();
+  let stopped = false;
+  let activeCursor = Number.isSafeInteger(Number(cursor)) ? Number(cursor) : 0;
+
+  const done = (async () => {
+    do {
+      const params = new URLSearchParams({ cursor: String(activeCursor) });
+      if (worldId) params.set('world_id', worldId);
+      try {
+        onState({ state: 'connecting', cursor: activeCursor });
+        const response = await fetchImpl(`/api/v1/house/braid/stream?${params}`, {
+          headers: { accept: 'text/event-stream', ...bearerHeaders(token) },
+          credentials: 'same-origin',
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        if (!response.ok || !response.body) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || `Runtime Braid stream ${response.status}`);
+        }
+        onState({ state: 'live', cursor: activeCursor });
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (!stopped) {
+          const { value, done: ended } = await reader.read();
+          buffer += decoder.decode(value || new Uint8Array(), { stream: !ended });
+          const blocks = buffer.split(/\r?\n\r?\n/);
+          buffer = blocks.pop() || '';
+          for (const block of blocks) {
+            const message = parseSseBlock(block);
+            if (!message) continue;
+            let data = null;
+            try { data = message.data ? JSON.parse(message.data) : null; } catch {}
+            if (message.id && Number.isSafeInteger(Number(message.id))) activeCursor = Math.max(activeCursor, Number(message.id));
+            if (message.event === 'braid' && data?.event) onEvent(data.event, { cursor: activeCursor, envelope: data });
+            if (['ready', 'reconnect', 'error'].includes(message.event)) onState({ state: message.event, cursor: activeCursor, data });
+          }
+          if (ended) break;
+        }
+      } catch (error) {
+        if (stopped || error?.name === 'AbortError') break;
+        onState({ state: 'error', cursor: activeCursor, error });
+      }
+      if (!stopped && reconnect) await delay(reconnectDelayMs);
+    } while (!stopped && reconnect);
+    onState({ state: 'closed', cursor: activeCursor });
+  })();
+
+  return Object.freeze({
+    stop() {
+      stopped = true;
+      controller.abort();
+    },
+    get cursor() { return activeCursor; },
+    done,
+  });
+}

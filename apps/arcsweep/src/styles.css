@@ -291,6 +291,12 @@ code.deep-formula { display: block; font-size: 0.72rem; color: var(--muted); fon
 .runtime-flame[data-state="live"] { border-color: var(--sea); }
 .runtime-flame[data-state="live"] span { color: var(--sea); }
 .runtime-flame[data-state="unauthorised"], .runtime-flame[data-state="route-error"], .runtime-flame[data-state="offline"] { border-color: var(--danger); }
+.runtime-braid-status { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .55rem; }
+.runtime-braid-status .bai-topology-badge { white-space: nowrap; }
+.runtime-braid-status [data-braid-live-state="live"], .runtime-braid-status [data-braid-live-state="ready"] { color: var(--sea); border-color: var(--sea); }
+.runtime-braid-status [data-braid-live-state="error"], .runtime-braid-status [data-braid-live-state="offline"] { color: var(--danger); border-color: var(--danger); }
+.runtime-braid-actions { margin-top: .85rem; padding-top: .75rem; border-top: 1px solid var(--line-soft); }
+.runtime-observation[data-continuity-packet-id]:not([data-continuity-packet-id=""]) { border-left: 3px solid var(--sea); }
 .commons-layout { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(18rem,.65fr); gap: 1rem; margin-top: 1rem; }
 .commons-log { display: grid; gap: .65rem; align-content: start; max-height: 70vh; overflow: auto; }
 .commons-entry { padding: .75rem; border: 1px solid var(--line-soft); border-radius: .7rem; background: rgba(0,0,0,.16); }

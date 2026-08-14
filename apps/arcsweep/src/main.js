@@ -30,7 +30,19 @@ import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, 
 import { createEmptyFeedbackQueue, normalizeFeedbackQueue, enqueueFeedbackCycle, acceptFeedbackCycle, archiveFeedbackCycle, discardFeedbackCycle, pendingCycles, feedbackQueueSummary } from './feedback-cycle-queue.js';
 import { StorySoundscape } from './story-soundscape.js';
 import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
-import { appendHouseCommons, connectHouseRuntime, disconnectHouseRuntime, readFlameStatuses, readHouseCommons, readHouseObservations, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import {
+  admitHouseObservationToDeepTime,
+  appendHouseCommons,
+  connectHouseRuntime,
+  disconnectHouseRuntime,
+  readFlameStatuses,
+  readHouseCommons,
+  readHouseObservations,
+  readHouseRuntimeToken,
+  restoreHouseRuntimeSession,
+  reviewHouseObservation,
+  startHouseBraidLiveUpdates,
+} from './house-runtime.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -54,6 +66,12 @@ let commonsEntries = [];
 let commonsReading = false;
 let observationLiveRead = null;
 let observationLiveReading = false;
+let braidLiveConnection = null;
+let braidLiveState = houseRuntimeToken ? 'connecting' : 'offline';
+let braidLiveCursor = 0;
+let braidLiveWorldId = null;
+let braidRefreshTimer = null;
+let braidLiveGeneration = 0;
 const QUEUE_STORAGE_KEY = "arcsweep.feedback-cycle-queue/v1";
 
 function loadFeedbackQueue() {
@@ -115,6 +133,44 @@ async function refreshObservationLiveRead(worldId = activeWorld()?.id) {
   } finally {
     observationLiveReading = false;
   }
+}
+
+function stopBraidLiveUpdates() {
+  braidLiveGeneration += 1;
+  braidLiveConnection?.stop();
+  braidLiveConnection = null;
+  braidLiveWorldId = null;
+  if (braidRefreshTimer) clearTimeout(braidRefreshTimer);
+  braidRefreshTimer = null;
+}
+
+function ensureBraidLiveUpdates(worldId = activeWorld()?.id) {
+  if (!houseRuntimeToken || !worldId) return;
+  if (braidLiveConnection && braidLiveWorldId === worldId) return;
+  stopBraidLiveUpdates();
+  const generation = braidLiveGeneration;
+  braidLiveWorldId = worldId;
+  braidLiveConnection = startHouseBraidLiveUpdates(houseRuntimeToken, {
+    worldId,
+    cursor: braidLiveCursor,
+    onEvent: () => {
+      if (generation !== braidLiveGeneration) return;
+      if (braidRefreshTimer) clearTimeout(braidRefreshTimer);
+      braidRefreshTimer = setTimeout(() => {
+        braidRefreshTimer = null;
+        void refreshObservationLiveRead(worldId)
+          .then(() => { notice = 'Runtime Braid event received; the shared state is current.'; })
+          .catch((error) => { notice = `Runtime Braid refresh stopped: ${error.message}`; })
+          .finally(render);
+      }, 40);
+    },
+    onState: ({ state: nextState, cursor }) => {
+      if (generation !== braidLiveGeneration) return;
+      braidLiveState = nextState;
+      braidLiveCursor = Math.max(braidLiveCursor, Number(cursor) || 0);
+      if (['commons', 'feedback', 'deep-observer'].includes(activeRoom)) render();
+    },
+  });
 }
 
 function selectedWorld() {
@@ -387,9 +443,16 @@ function runtimeObservationCard(snapshot) {
   const continuity = String(snapshot.continuity?.status || 'awaiting-review').replaceAll('-', ' ');
   const evidence = snapshot.evidence?.schemas?.join(' · ') || snapshot.evidence?.class || 'unclassified';
   const receipt = snapshot.latest_receipt;
-  const provenance = [snapshot.observation?.cycle_id, snapshot.provenance?.math_spine_packet_id, snapshot.provenance?.review_receipt_id].filter(Boolean).join(' · ') || 'no receipt chain';
+  const packet = observationLiveRead?.braid_packets?.find((item) => item.observation?.cycle_id === snapshot.observation?.cycle_id) || null;
+  const provenance = [packet?.continuity_packet_id, snapshot.provenance?.math_spine_packet_id, snapshot.provenance?.review_receipt_id].filter(Boolean).join(' · ') || 'no receipt chain';
   const stamp = snapshot.observation?.observed_at ? new Date(snapshot.observation.observed_at).toLocaleString() : 'time unavailable';
-  return `<article class="queue-entry runtime-observation" data-observation-source="${attr(snapshot.evidence?.class || '')}"><div class="queue-entry-head"><strong>${escapeHtml(snapshot.evidence?.class || 'observation')} · ${escapeHtml(review)}</strong><small>${escapeHtml(stamp)}</small></div><p>${escapeHtml(String(snapshot.observation?.work || '').slice(0, 360))}</p><dl class="facts"><div><dt>Continuity</dt><dd>${escapeHtml(continuity)}</dd></div><div><dt>Evidence</dt><dd>${escapeHtml(evidence)}</dd></div><div><dt>Provenance</dt><dd>${escapeHtml(provenance)}</dd></div><div><dt>Review receipt</dt><dd>${escapeHtml(snapshot.review?.receipt_id || 'awaiting human decision')}</dd></div><div><dt>Latest receipt</dt><dd>${escapeHtml(receipt ? `${receipt.stage} · ${receipt.receipt_id}` : 'none')}</dd></div></dl></article>`;
+  const cycleId = attr(snapshot.observation?.cycle_id || '');
+  const reviewActions = snapshot.review?.status === 'pending_review'
+    ? `<div class="button-row runtime-braid-actions"><button type="button" class="steward-commit" data-action="runtime-observation-review" data-decision="accepted" data-cycle-id="${cycleId}">Accept ✶</button><button type="button" class="quiet" data-action="runtime-observation-review" data-decision="archived" data-cycle-id="${cycleId}">Archive</button><button type="button" class="quiet danger" data-action="runtime-observation-review" data-decision="discarded" data-cycle-id="${cycleId}">Discard</button></div>`
+    : snapshot.continuity?.status === 'accepted-awaiting-deeptime'
+      ? `<div class="button-row runtime-braid-actions"><button type="button" class="steward-commit" data-action="runtime-deeptime-admit" data-cycle-id="${cycleId}">Admit to DEEPTime ⧖</button></div>`
+      : '';
+  return `<article class="queue-entry runtime-observation" data-observation-source="${attr(snapshot.evidence?.class || '')}" data-continuity-packet-id="${attr(packet?.continuity_packet_id || '')}"><div class="queue-entry-head"><strong>${escapeHtml(snapshot.evidence?.class || 'observation')} · ${escapeHtml(review)}</strong><small>${escapeHtml(stamp)}</small></div><p>${escapeHtml(String(snapshot.observation?.work || '').slice(0, 360))}</p><dl class="facts"><div><dt>Continuity</dt><dd>${escapeHtml(continuity)}</dd></div><div><dt>Braid revision</dt><dd>${escapeHtml(packet ? `${packet.revision} · ${packet.stage}` : 'awaiting packet')}</dd></div><div><dt>Evidence</dt><dd>${escapeHtml(evidence)}</dd></div><div><dt>Provenance</dt><dd>${escapeHtml(provenance)}</dd></div><div><dt>Review receipt</dt><dd>${escapeHtml(snapshot.review?.receipt_id || 'awaiting human decision')}</dd></div><div><dt>Latest receipt</dt><dd>${escapeHtml(receipt ? `${receipt.stage} · ${receipt.receipt_id}` : 'none')}</dd></div></dl>${reviewActions}</article>`;
 }
 
 function renderRuntimeObservationLiveRead({ log = false } = {}) {
@@ -397,7 +460,8 @@ function renderRuntimeObservationLiveRead({ log = false } = {}) {
   if (observationLiveReading && !observationLiveRead) return '<section class="panel runtime-observation-read"><p class="eyebrow">Shared House snapshot</p><h2>Live observation read</h2><p class="muted">Reading the observation and review ledgers…</p></section>';
   const snapshots = observationLiveRead?.snapshots || [];
   const summary = observationLiveRead?.summary;
-  const heading = `<div class="section-heading compact-heading"><div><p class="eyebrow">One canonical snapshot · every surface</p><h2>${log ? 'Live observation log' : 'Current observation state'}</h2><p class="muted">Observation, review, evidence, provenance, continuity, and latest receipt are read without reclassification.</p></div><button type="button" class="quiet" data-action="runtime-observations-refresh">${observationLiveReading ? 'Reading…' : 'Refresh'}</button></div>`;
+  const liveLabel = String(braidLiveState || 'offline').replaceAll('-', ' ');
+  const heading = `<div class="section-heading compact-heading"><div><p class="eyebrow">One canonical snapshot · every surface</p><h2>${log ? 'Live observation log' : 'Current observation state'}</h2><p class="muted">Observation, review, evidence, provenance, continuity, and latest receipt are read without reclassification.</p></div><div class="runtime-braid-status"><span class="bai-topology-badge" data-braid-live-state="${attr(braidLiveState)}">${escapeHtml(liveLabel)} · ${braidLiveCursor}</span><button type="button" class="quiet" data-action="runtime-observations-refresh">${observationLiveReading ? 'Reading…' : 'Refresh'}</button></div></div>`;
   const counts = summary ? `<p class="callout">${summary.total} observations · ${summary.pending_review} awaiting review · ${summary.accepted} accepted · ${summary.in_deep_time} in DEEPTime</p>` : '';
   const visible = log ? snapshots.slice(0, 24) : snapshots.slice(0, 1);
   return `<section class="panel runtime-observation-read">${heading}${counts}${visible.length ? visible.map(runtimeObservationCard).join('') : '<p class="muted">No persisted observation snapshot is available for this world yet.</p>'}</section>`;
@@ -763,7 +827,7 @@ function saveWorldSection(section, form) {
 
 app.addEventListener('click', async (event) => {
   const room = event.target.closest('[data-room]');
-  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (['deep-observer', 'feedback'].includes(activeRoom) && houseRuntimeToken) { refreshObservationLiveRead().catch((error) => { notice = `Observation live read unavailable: ${error.message}`; }).finally(render); } if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.allSettled([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]).then(([log, statuses, observations]) => { if (log.status === 'rejected') throw log.reason; if (statuses.status === 'rejected') throw statuses.reason; commonsEntries = log.value.entries || []; flameStatuses = statuses.value; if (observations.status === 'fulfilled') { observationLiveRead = observations.value; notice = 'House Commons live read received.'; } else notice = `Commons received; observation live read unavailable: ${observations.reason.message}`; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
+  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (['deep-observer', 'feedback', 'commons'].includes(activeRoom) && houseRuntimeToken) ensureBraidLiveUpdates(activeWorld().id); if (['deep-observer', 'feedback'].includes(activeRoom) && houseRuntimeToken) { refreshObservationLiveRead().catch((error) => { notice = `Observation live read unavailable: ${error.message}`; }).finally(render); } if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.allSettled([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]).then(([log, statuses, observations]) => { if (log.status === 'rejected') throw log.reason; if (statuses.status === 'rejected') throw statuses.reason; commonsEntries = log.value.entries || []; flameStatuses = statuses.value; if (observations.status === 'fulfilled') { observationLiveRead = observations.value; notice = 'House Commons live read received.'; } else notice = `Commons received; observation live read unavailable: ${observations.reason.message}`; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
   const worldButton = event.target.closest('[data-world-id]');
   if (worldButton) { selectedWorldId = worldButton.dataset.worldId; render(); return; }
   const scriptButton = event.target.closest('[data-script-id]');
@@ -774,10 +838,28 @@ app.addEventListener('click', async (event) => {
   if (!button) return;
   const { action, id } = button.dataset;
 
-  if (action === 'runtime-disconnect') { await disconnectHouseRuntime({ hosted: isHosted }); houseRuntimeToken = ''; flameStatuses = []; notice = 'House Runtime session closed.'; render(); return; }
+  if (action === 'runtime-disconnect') { stopBraidLiveUpdates(); await disconnectHouseRuntime({ hosted: isHosted }); houseRuntimeToken = ''; flameStatuses = []; braidLiveState = 'offline'; notice = 'House Runtime session closed.'; render(); return; }
   if (action === 'runtime-refresh') { flameStatusChecking = true; render(); flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); flameStatusChecking = false; notice = 'House Runtime route board refreshed.'; render(); return; }
-  if (action === 'runtime-observations-refresh') { try { await refreshObservationLiveRead(); notice = 'Canonical observation live read refreshed.'; } catch (error) { notice = `Observation live read unavailable: ${error.message}`; } render(); return; }
-  if (action === 'commons-refresh') { try { commonsReading = true; render(); const [log, observations] = await Promise.all([readHouseCommons(houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]); commonsEntries = log.entries || []; observationLiveRead = observations; notice = 'House Commons live read refreshed.'; } catch (error) { notice = `House Commons unavailable: ${error.message}`; } finally { commonsReading = false; render(); } return; }
+  if (action === 'runtime-observations-refresh') { try { ensureBraidLiveUpdates(activeWorld().id); await refreshObservationLiveRead(); notice = 'Canonical observation live read refreshed.'; } catch (error) { notice = `Observation live read unavailable: ${error.message}`; } render(); return; }
+  if (action === 'commons-refresh') { try { commonsReading = true; ensureBraidLiveUpdates(activeWorld().id); render(); const [log, observations] = await Promise.all([readHouseCommons(houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]); commonsEntries = log.entries || []; observationLiveRead = observations; notice = 'House Commons live read refreshed.'; } catch (error) { notice = `House Commons unavailable: ${error.message}`; } finally { commonsReading = false; render(); } return; }
+  if (action === 'runtime-observation-review') {
+    try {
+      const result = await reviewHouseObservation(houseRuntimeToken, button.dataset.cycleId, button.dataset.decision, { reviewedBy: 'Rowan' });
+      await refreshObservationLiveRead();
+      ensureBraidLiveUpdates(activeWorld().id);
+      notice = result.idempotent ? `Observation was already ${button.dataset.decision}.` : `Observation ${button.dataset.decision}; Runtime Braid revision ${result.packet.revision} receipted.`;
+    } catch (error) { notice = `Observation review stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (action === 'runtime-deeptime-admit') {
+    try {
+      const result = await admitHouseObservationToDeepTime(houseRuntimeToken, button.dataset.cycleId, { reviewedBy: 'Rowan' });
+      await refreshObservationLiveRead();
+      ensureBraidLiveUpdates(activeWorld().id);
+      notice = result.idempotent ? 'Observation is already present in DEEPTime.' : `Accepted observation entered DEEPTime through ${result.packet.packet_id}.`;
+    } catch (error) { notice = `DEEPTime admission stopped: ${error.message}`; }
+    render(); return;
+  }
 
   if (action === 'open-wrp') { const url = activeWorld()?.arrival?.wrpRunaUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer'); return; }
   if (action === 'refresh-deep') { deepData = null; deepDataFetching = false; fetchDeepData(); return; }
@@ -838,18 +920,30 @@ app.addEventListener('click', async (event) => {
     refreshStorySoundscape(); return;
   }
   if (action === 'cycle-accept') {
+    if (houseRuntimeToken && observationLiveRead?.snapshots?.some((item) => item.observation?.cycle_id === button.dataset.cycleId)) {
+      try { await reviewHouseObservation(houseRuntimeToken, button.dataset.cycleId, 'accepted', { reviewedBy: 'Rowan' }); await refreshObservationLiveRead(); }
+      catch (error) { notice = `Live acceptance stopped: ${error.message}`; render(); return; }
+    }
     const { queue } = acceptFeedbackCycle(feedbackQueue, button.dataset.cycleId, { acceptedBy: "Rowan" });
     saveFeedbackQueue(queue);
     notice = "Cycle accepted. The reading is carried forward.";
     render(); return;
   }
   if (action === 'cycle-archive') {
+    if (houseRuntimeToken && observationLiveRead?.snapshots?.some((item) => item.observation?.cycle_id === button.dataset.cycleId)) {
+      try { await reviewHouseObservation(houseRuntimeToken, button.dataset.cycleId, 'archived', { reviewedBy: 'Rowan' }); await refreshObservationLiveRead(); }
+      catch (error) { notice = `Live archive stopped: ${error.message}`; render(); return; }
+    }
     const { queue } = archiveFeedbackCycle(feedbackQueue, button.dataset.cycleId, { archivedBy: "Rowan" });
     saveFeedbackQueue(queue);
     notice = "Cycle archived.";
     render(); return;
   }
   if (action === 'cycle-discard') {
+    if (houseRuntimeToken && observationLiveRead?.snapshots?.some((item) => item.observation?.cycle_id === button.dataset.cycleId)) {
+      try { await reviewHouseObservation(houseRuntimeToken, button.dataset.cycleId, 'discarded', { reviewedBy: 'Rowan' }); await refreshObservationLiveRead(); }
+      catch (error) { notice = `Live discard stopped: ${error.message}`; render(); return; }
+    }
     const { queue } = discardFeedbackCycle(feedbackQueue, button.dataset.cycleId, { discardedBy: "Rowan" });
     saveFeedbackQueue(queue);
     notice = "Cycle discarded.";
@@ -872,7 +966,7 @@ app.addEventListener('click', async (event) => {
     selectedWorldId = world.id;
     persist('New world portal created.', 'new-world');
   }
-  if (action === 'set-active-world') { state.activeWorldId = id; selectedWorldId = id; persist('Active portal changed.', 'active-world'); }
+  if (action === 'set-active-world') { state.activeWorldId = id; selectedWorldId = id; braidLiveCursor = 0; if (houseRuntimeToken) ensureBraidLiveUpdates(id); persist('Active portal changed.', 'active-world'); }
   if (action === 'delete-world') {
     if (state.worlds.length === 1) notice = 'Arcsweep keeps one world portal in the registry.';
     else { state.worlds = state.worlds.filter((world) => world.id !== id); if (state.activeWorldId === id) state.activeWorldId = state.worlds[0].id; selectedWorldId = state.activeWorldId; persist('World portal deleted.', 'delete-world'); }
@@ -998,7 +1092,7 @@ app.addEventListener('submit', async (event) => {
     persist('Arc begun. Return remains available.', 'begin-arc');
   }
   if (form.id === 'house-runtime-form') {
-    try { houseRuntimeToken = await connectHouseRuntime(v.runtimeToken, { hosted: isHosted }); flameStatusChecking = true; flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); try { observationLiveRead = await readHouseObservations(houseRuntimeToken, activeWorld().id); notice = 'House Runtime sealed session and observation live read connected.'; } catch (error) { notice = `House Runtime connected; observation live read unavailable: ${error.message}`; } form.reset(); }
+    try { houseRuntimeToken = await connectHouseRuntime(v.runtimeToken, { hosted: isHosted }); flameStatusChecking = true; flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); ensureBraidLiveUpdates(activeWorld().id); try { observationLiveRead = await readHouseObservations(houseRuntimeToken, activeWorld().id); notice = 'House Runtime sealed session, Runtime Braid, and observation live read connected.'; } catch (error) { notice = `House Runtime connected; observation live read unavailable: ${error.message}`; } form.reset(); }
     catch (error) { notice = `House Runtime stopped: ${error.message}`; }
     finally { flameStatusChecking = false; render(); }
     return;
@@ -1116,4 +1210,5 @@ setInterval(() => {
   if (waking && world) { const times = sessionTimes(); waking.textContent = formatDuration(times.waking); world.textContent = formatDuration(times.world); }
 }, 1000);
 
+if (houseRuntimeToken) ensureBraidLiveUpdates(activeWorld().id);
 render();
