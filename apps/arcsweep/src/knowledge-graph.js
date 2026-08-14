@@ -36,12 +36,31 @@ function temporalMatch(cell, at) {
   return true;
 }
 
+function intersects(left = [], right = []) {
+  const set = new Set(left);
+  return right.some((value) => set.has(value));
+}
+
 function scopeMatch(cell, context) {
   const scope = cell.scope || {};
-  if (scope.worldIds?.length && context.worldId && !scope.worldIds.includes(context.worldId)) return false;
-  if (scope.documentIds?.length && context.documentId && !scope.documentIds.includes(context.documentId)) return false;
-  if (scope.sceneIds?.length && context.sceneId && !scope.sceneIds.includes(context.sceneId)) return false;
-  if (scope.modes?.length && context.mode && !scope.modes.includes(context.mode)) return false;
+  const worldIds = asArray(context.worldIds?.length ? context.worldIds : context.worldId).filter(Boolean);
+  const documentIds = asArray(context.documentIds?.length ? context.documentIds : context.documentId).filter(Boolean);
+  const sceneIds = asArray(context.sceneIds?.length ? context.sceneIds : context.sceneId).filter(Boolean);
+  const modes = asArray(context.modes?.length ? context.modes : context.mode).filter(Boolean);
+
+  if (scope.worldIds?.length) {
+    if (context.requireScopedContext && !worldIds.length) return false;
+    if (worldIds.length && !intersects(scope.worldIds, worldIds)) return false;
+  }
+  if (scope.documentIds?.length) {
+    if (context.requireScopedContext && !documentIds.length) return false;
+    if (documentIds.length && !intersects(scope.documentIds, documentIds)) return false;
+  }
+  if (scope.sceneIds?.length) {
+    if (context.requireScopedContext && !sceneIds.length) return false;
+    if (sceneIds.length && !intersects(scope.sceneIds, sceneIds)) return false;
+  }
+  if (scope.modes?.length && modes.length && !intersects(scope.modes, modes)) return false;
   return true;
 }
 
