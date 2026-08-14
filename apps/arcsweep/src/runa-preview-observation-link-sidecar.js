@@ -23,10 +23,11 @@ async function scan() {
     const obs = structuredClone(state.observatory || {});
     const arms = obs.runa_preview_evidence_arms || [];
     const links = obs.runa_preview_observation_links || [];
+    const reviewableCycles = (state.feedbackCycles || []).filter((cycle) => state.feedbackQueue?.entries?.[cycle.cycle_id]);
     let changed = false;
 
     for (const arm of arms) {
-      const cycle = findNextFeedbackCycleForEvidenceArm({ arm, feedbackCycles: state.feedbackCycles || [], existingLinks: links });
+      const cycle = findNextFeedbackCycleForEvidenceArm({ arm, feedbackCycles: reviewableCycles, existingLinks: links });
       if (!cycle) continue;
       const link = await createRunaPreviewObservationLink({ arm, feedbackCycle: cycle });
       links.push(structuredClone(link));
