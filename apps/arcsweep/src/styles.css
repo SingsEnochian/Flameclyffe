@@ -284,6 +284,22 @@ code.deep-formula { display: block; font-size: 0.72rem; color: var(--muted); fon
 .heartfield-layer { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: .55rem; padding: .55rem; border: 1px solid var(--line-soft); border-radius: .65rem; background: rgba(0,0,0,.16); }
 .heartfield-layer label { display: grid; gap: .18rem; font-size: .76rem; }
 .heartfield-layer small { color: var(--muted); }
+.house-runtime { margin-bottom: 1rem; }
+.runtime-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(13rem,1fr)); gap: .55rem; }
+.runtime-flame { display: grid; gap: .15rem; padding: .7rem; border: 1px solid var(--line-soft); border-radius: .65rem; background: rgba(0,0,0,.16); }
+.runtime-flame span { color: var(--gold); text-transform: uppercase; font-size: .68rem; letter-spacing: .08em; }
+.runtime-flame[data-state="live"] { border-color: var(--sea); }
+.runtime-flame[data-state="live"] span { color: var(--sea); }
+.runtime-flame[data-state="unauthorised"], .runtime-flame[data-state="route-error"], .runtime-flame[data-state="offline"] { border-color: var(--danger); }
+.commons-layout { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(18rem,.65fr); gap: 1rem; margin-top: 1rem; }
+.commons-log { display: grid; gap: .65rem; align-content: start; max-height: 70vh; overflow: auto; }
+.commons-entry { padding: .75rem; border: 1px solid var(--line-soft); border-radius: .7rem; background: rgba(0,0,0,.16); }
+.commons-entry > div { display: flex; justify-content: space-between; gap: 1rem; }
+.commons-entry span { color: var(--muted); font-size: .7rem; }
+.commons-entry p { white-space: pre-wrap; margin-bottom: 0; }
+.commons-entry[data-kind="steward"] { border-left: 3px solid var(--gold); }
+.commons-entry[data-kind="voice"] { border-left: 3px solid var(--sea); }
+@media (max-width: 900px) { .commons-layout { grid-template-columns: 1fr; } }
 .soundfont-controls { display: grid; grid-template-columns: auto minmax(12rem, 1fr) auto; align-items: end; gap: .65rem; }
 .soundfont-controls label:not(.file-button) { display: grid; gap: .3rem; font-size: .76rem; }
 .soundfont-bank-list { display: flex; flex-wrap: wrap; gap: .4rem .8rem; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .72rem; }

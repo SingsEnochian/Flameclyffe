@@ -50,3 +50,4 @@ apps/starwell-server/public/starwell/
 .DS_Store
 .vscode/
 .idea/
+.netlify/

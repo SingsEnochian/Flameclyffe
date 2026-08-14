@@ -30,6 +30,7 @@ import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, 
 import { createEmptyFeedbackQueue, normalizeFeedbackQueue, enqueueFeedbackCycle, acceptFeedbackCycle, archiveFeedbackCycle, discardFeedbackCycle, pendingCycles, feedbackQueueSummary } from './feedback-cycle-queue.js';
 import { StorySoundscape } from './story-soundscape.js';
 import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
+import { appendHouseCommons, clearHouseRuntimeToken, readFlameStatuses, readHouseCommons, readHouseRuntimeToken, writeHouseRuntimeToken } from './house-runtime.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -46,6 +47,11 @@ let backups = await listBackups().catch(() => []);
 let deepData = null;
 let deepDataFetching = false;
 let deepDataError = null;
+let houseRuntimeToken = readHouseRuntimeToken();
+let flameStatuses = [];
+let flameStatusChecking = false;
+let commonsEntries = [];
+let commonsReading = false;
 const QUEUE_STORAGE_KEY = "arcsweep.feedback-cycle-queue/v1";
 
 function loadFeedbackQueue() {
@@ -69,6 +75,7 @@ const PRIMARY_NAV = [
   ['scripts', 'Scripts', '▤'],
   ['records', 'Records', '▥'],
   ['feedback', 'Feedback', '∞'],
+  ['commons', 'House Commons', '☍'],
   ['waking-thread', 'Waking Thread', '⌁'],
   ['forge', 'Forge', '✦'],
   ['deep-observer', 'Field', '◈'],
@@ -379,12 +386,18 @@ function renderFeedback() {
         <label class="checkbox"><input type="checkbox" name="invokeModels" checked /> Invoke each selected voice through its own model route</label>
         <label>Optional manual response or fallback<textarea name="response" rows="6" placeholder="Add a spoken, imported, or otherwise received contribution. It remains separately visible in the receipt."></textarea></label>
         <label class="checkbox"><input type="checkbox" name="syncLive" /> Sync the verified receipt to the relational ledger</label>
-        <div data-runtime-auth><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">Never persisted in Arcsweep state.</p></div>
+        <p class="callout">House Runtime · ${houseRuntimeToken ? 'session connected' : 'offline — connect once in Settings'}.</p>
         <button type="submit">Run feedback cycle ∞</button>
       </form></article>
       <article class=”panel feedback-ledger”><h2>Receipts & replay</h2>${cycles.length ? cycles.map((cycle) => `<article class=”working-card”><div class=”working-head”><strong>${escapeHtml(cycle.turn.mode)} · ${escapeHtml(cycle.voices.map((voice) => voice.name).join(', '))}</strong><small>${new Date(cycle.created_at).toLocaleString()}</small></div><p>${escapeHtml(cycle.turn.work)}</p>${cycle.voice_invocations?.length ? `<div class=”voice-receipts”>${cycle.voice_invocations.map((item) => `<p data-status=”${attr(item.status)}”><b>${escapeHtml(item.name)} · ${escapeHtml(item.status)}</b>${item.text ? `<br>${escapeHtml(item.text)}` : item.error ? `<br>${escapeHtml(item.error)}` : ''}</p>`).join('')}</div>` : cycle.turn.response ? `<p><b>Response:</b> ${escapeHtml(cycle.turn.response)}</p>` : ''}${cycle.sound_events?.length ? `<div class=”sound-receipts”>${cycle.sound_events.map((item) => `<p><b>♪ ${escapeHtml(item.cue_label)}</b> · “${escapeHtml(item.source_text)}” · ${Number(item.root_hz).toFixed(2)} Hz</p>`).join('')}</div>` : ''}<dl class=”facts”><div><dt>Math Spine</dt><dd>${escapeHtml(cycle.math_spine_packet.packet_id)}</dd></div><div><dt>Replay</dt><dd>${cycle.replay_receipt.matched ? 'Exact match' : 'Mismatch'}</dd></div><div><dt>PREMAQC</dt><dd>${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence}</dd></div><div><dt>Story sound</dt><dd>${cycle.sound_events?.length || 0} fired event${cycle.sound_events?.length === 1 ? '' : 's'}</dd></div></dl></article>`).join('') : '<p class=”muted”>No cycle has run for this world yet.</p>'}</article>
     </section>
     ${renderFeedbackQueue()}`;
+}
+
+function renderCommons() {
+  const statusRows = flameStatuses.length ? flameStatuses.map((item) => `<div class="runtime-flame" data-state="${attr(item.state)}"><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.state)}</span><small>${escapeHtml([item.provider, item.model].filter(Boolean).join(' · ') || item.missing?.join(', ') || item.error || '')}</small></div>`).join('') : '<p class="muted">Connect the House Runtime to read the Constellation.</p>';
+  const log = commonsEntries.length ? commonsEntries.map((entry) => `<article class="commons-entry" data-kind="${attr(entry.kind)}" data-status="${attr(entry.status)}"><div><b>${escapeHtml(entry.author)}</b><span>${new Date(entry.created_at).toLocaleString()} · ${escapeHtml(entry.status)}</span></div><p>${escapeHtml(entry.text)}</p></article>`).join('') : '<p class="muted">The Commons is quiet. Speak when ready.</p>';
+  return `<section class="section-heading"><div><p class="eyebrow">House Runtime · live conversation</p><h1>House Commons</h1><p>One room for Rowan and the Constellation. Replies, refusals, route failures, and receipts remain visibly attributed.</p></div><div class="button-row"><button class="quiet" data-action="commons-refresh">${commonsReading ? 'Reading…' : 'Refresh live read'}</button><button class="quiet" data-action="runtime-refresh">Check models</button></div></section><section class="panel"><h2>Constellation live read</h2><div class="runtime-grid">${statusRows}</div></section><section class="commons-layout"><article class="panel commons-log"><h2>Live feedback log</h2>${log}</article><article class="panel"><form id="commons-form" class="stack"><h2>Speak into the room</h2><fieldset><legend>Who may answer this turn?</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" ${voice.id === 'boxfire' ? 'checked' : ''} /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset><label>Your words<textarea name="message" rows="8" required placeholder="Speak plainly, mythically, technically, or all three. The room keeps the receipt."></textarea></label><button type="submit">Send to the Commons ∞</button></form></article></section>`;
 }
 
 function renderStorySoundscape(sound = storySoundscape.snapshot()) {
@@ -492,7 +505,8 @@ function renderAppletManager() {
 
 function renderSettings() {
   const native = isDesktopRuntime();
-  return `<section class="section-heading"><div><p class="eyebrow">Local controls</p><h1>Settings & Recovery</h1></div></section><section class="grid two"><article class="panel"><form id="settings-form" class="stack"><label>Waking label<input name="crLabel" value="${attr(state.settings.crLabel)}" /></label><label>World label<input name="drLabel" value="${attr(state.settings.drLabel)}" /></label><label>Return Anchor<input name="returnAnchor" value="${attr(state.settings.returnAnchor)}" /></label><label class="checkbox"><input name="reduceMotion" type="checkbox" ${state.settings.reduceMotion ? 'checked' : ''} /> Reduce motion</label><label class="checkbox"><input name="largeText" type="checkbox" ${state.settings.largeText ? 'checked' : ''} /> Larger interface text</label><label class="checkbox"><input name="highContrast" type="checkbox" ${state.settings.highContrast ? 'checked' : ''} /> High contrast</label><label>Text scale<input name="fontScale" type="range" min="0.9" max="1.5" step="0.05" value="${state.settings.fontScale || 1}" /></label><button type="submit">Save settings</button></form></article><article class="panel stack"><h2>Native storage</h2><dl class="facts"><div><dt>Mode</dt><dd>${escapeHtml(storageInfo?.mode || 'Loading')}</dd></div><div><dt>Data directory</dt><dd class="path-value">${escapeHtml(storageInfo?.dataDirectory || 'Browser development fallback')}</dd></div><div><dt>Version</dt><dd>${escapeHtml(storageInfo?.version || state.version)}</dd></div></dl><div class="button-row"><button data-action="export">Export archive</button><button class="quiet" data-action="import">Import archive</button>${native ? '<button class="quiet" data-action="show-data-folder">Open data folder</button><button class="quiet" data-action="create-backup">Create backup</button>' : '<label class="file-button">Import JSON<input id="browser-import" type="file" accept="application/json,.json" /></label>'}</div><h3>Recovery snapshots</h3>${native ? (backups.length ? `<div class="backup-list">${backups.map((item) => `<div class="backup-row"><span><strong>${escapeHtml(item.name)}</strong><small>${new Date(item.modifiedAt).toLocaleString()} · ${Number(item.size).toLocaleString()} bytes</small></span><button class="quiet" data-action="restore-backup" data-backup-name="${attr(item.name)}">Restore</button></div>`).join('')}</div>` : '<p class="muted">No backups yet. They are created automatically before state replacement.</p>') : '<p class="muted">The installed Windows edition uses atomic files, attachments, and recovery snapshots. Browser mode is retained only for development.</p>'}</article></section>`;
+  const statusRows = flameStatuses.length ? flameStatuses.map((item) => `<div class="runtime-flame" data-state="${attr(item.state)}"><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.state)}</span><small>${escapeHtml([item.provider, item.model].filter(Boolean).join(' · ') || item.missing?.join(', ') || item.error || '')}</small></div>`).join('') : '<p class="muted">Connect the House Runtime to read every Flame route.</p>';
+  return `<section class="section-heading"><div><p class="eyebrow">House controls</p><h1>Settings & Recovery</h1></div></section><section class="panel house-runtime"><div class="section-heading"><div><p class="eyebrow">One runtime · every organ</p><h2>House Runtime</h2><p class="muted">STARWELL, Arcsweep, Bifröst, Runa, Records, and Feedback share this session connection. Provider credentials remain server-side.</p></div><strong>${houseRuntimeToken ? 'Connected for this tab' : 'Offline'}</strong></div><form id="house-runtime-form" class="stack"><label>Session credential<input type="password" name="runtimeToken" autocomplete="off" placeholder="Held in session storage; cleared when the tab closes" /></label><div class="button-row"><button type="submit">Connect House Runtime</button><button type="button" class="quiet" data-action="runtime-refresh" ${houseRuntimeToken ? '' : 'disabled'}>${flameStatusChecking ? 'Reading routes…' : 'Check every Flame'}</button><button type="button" class="quiet danger" data-action="runtime-disconnect" ${houseRuntimeToken ? '' : 'disabled'}>Disconnect</button></div></form><div class="runtime-grid">${statusRows}</div></section><section class="grid two"><article class="panel"><form id="settings-form" class="stack"><label>Waking label<input name="crLabel" value="${attr(state.settings.crLabel)}" /></label><label>World label<input name="drLabel" value="${attr(state.settings.drLabel)}" /></label><label>Return Anchor<input name="returnAnchor" value="${attr(state.settings.returnAnchor)}" /></label><label class="checkbox"><input name="reduceMotion" type="checkbox" ${state.settings.reduceMotion ? 'checked' : ''} /> Reduce motion</label><label class="checkbox"><input name="largeText" type="checkbox" ${state.settings.largeText ? 'checked' : ''} /> Larger interface text</label><label class="checkbox"><input name="highContrast" type="checkbox" ${state.settings.highContrast ? 'checked' : ''} /> High contrast</label><label>Text scale<input name="fontScale" type="range" min="0.9" max="1.5" step="0.05" value="${state.settings.fontScale || 1}" /></label><button type="submit">Save settings</button></form></article><article class="panel stack"><h2>Native storage</h2><dl class="facts"><div><dt>Mode</dt><dd>${escapeHtml(storageInfo?.mode || 'Loading')}</dd></div><div><dt>Data directory</dt><dd class="path-value">${escapeHtml(storageInfo?.dataDirectory || 'Browser development fallback')}</dd></div><div><dt>Version</dt><dd>${escapeHtml(storageInfo?.version || state.version)}</dd></div></dl><div class="button-row"><button data-action="export">Export archive</button><button class="quiet" data-action="import">Import archive</button>${native ? '<button class="quiet" data-action="show-data-folder">Open data folder</button><button class="quiet" data-action="create-backup">Create backup</button>' : '<label class="file-button">Import JSON<input id="browser-import" type="file" accept="application/json,.json" /></label>'}</div><h3>Recovery snapshots</h3>${native ? (backups.length ? `<div class="backup-list">${backups.map((item) => `<div class="backup-row"><span><strong>${escapeHtml(item.name)}</strong><small>${new Date(item.modifiedAt).toLocaleString()} · ${Number(item.size).toLocaleString()} bytes</small></span><button class="quiet" data-action="restore-backup" data-backup-name="${attr(item.name)}">Restore</button></div>`).join('')}</div>` : '<p class="muted">No backups yet. They are created automatically before state replacement.</p>') : '<p class="muted">The installed Windows edition uses atomic files, attachments, and recovery snapshots. Browser mode is retained only for development.</p>'}</article></section>`;
 }
 
 function renderReturnDialog() {
@@ -656,7 +670,7 @@ function renderDeepObserver() {
       <label>Optional received contribution<textarea name="response" rows="3"></textarea></label>
       <label class="checkbox conditional-toggle"><input type="checkbox" name="syncLive" /> Sync the verified cycle to the relational ledger</label>
       <div class="conditional-body"><p class="muted">The verified receipt will use the same session-only House runtime token.</p></div>
-      <div data-runtime-auth hidden><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">The token is used for this submission and is never written into Arcsweep state.</p></div>
+      <p class="callout">House Runtime · ${houseRuntimeToken ? 'session connected' : 'offline — connect once in Settings'}.</p>
       <button type="submit">Observe → PREMAQC → Math Spine → Receipt ∞</button>
     </form>
   </section>`;
@@ -669,6 +683,7 @@ function currentView() {
   if (activeRoom === 'worlds') return renderWorlds();
   if (activeRoom === 'scripts') return renderScripts();
   if (activeRoom === 'feedback') return renderFeedback();
+  if (activeRoom === 'commons') return renderCommons();
   if (activeRoom === 'waking-thread') return renderWakingThread();
   if (activeRoom === 'forge') return renderForge();
   if (activeRoom === 'settings') return renderSettings();
@@ -710,7 +725,7 @@ function saveWorldSection(section, form) {
 
 app.addEventListener('click', async (event) => {
   const room = event.target.closest('[data-room]');
-  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); render(); return; }
+  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.all([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken)]).then(([log, statuses]) => { commonsEntries = log.entries || []; flameStatuses = statuses; notice = 'House Commons live read received.'; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
   const worldButton = event.target.closest('[data-world-id]');
   if (worldButton) { selectedWorldId = worldButton.dataset.worldId; render(); return; }
   const scriptButton = event.target.closest('[data-script-id]');
@@ -720,6 +735,10 @@ app.addEventListener('click', async (event) => {
   const button = event.target.closest('[data-action]');
   if (!button) return;
   const { action, id } = button.dataset;
+
+  if (action === 'runtime-disconnect') { clearHouseRuntimeToken(); houseRuntimeToken = ''; flameStatuses = []; notice = 'House Runtime disconnected from this tab.'; render(); return; }
+  if (action === 'runtime-refresh') { flameStatusChecking = true; render(); flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); flameStatusChecking = false; notice = 'House Runtime route board refreshed.'; render(); return; }
+  if (action === 'commons-refresh') { try { commonsReading = true; render(); const log = await readHouseCommons(houseRuntimeToken); commonsEntries = log.entries || []; notice = 'House Commons live read refreshed.'; } catch (error) { notice = `House Commons unavailable: ${error.message}`; } finally { commonsReading = false; render(); } return; }
 
   if (action === 'open-wrp') { const url = activeWorld()?.arrival?.wrpRunaUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer'); return; }
   if (action === 'refresh-deep') { deepData = null; deepDataFetching = false; fetchDeepData(); return; }
@@ -888,11 +907,6 @@ app.addEventListener('click', async (event) => {
 });
 
 app.addEventListener('change', async (event) => {
-  if (event.target.matches('input[name="invokeModels"], input[name="syncLive"]')) {
-    const form = event.target.form;
-    const runtime = form?.querySelector('[data-runtime-auth]');
-    if (runtime) runtime.hidden = !(form.elements.invokeModels?.checked || form.elements.syncLive?.checked);
-  }
   const status = event.target.closest('[data-action="forge-status"]');
   if (status) { const item = state.manifestations.find((entry) => entry.id === status.dataset.id); if (item) item.status = status.value; persist('Forge status updated.', 'forge-status'); render(); return; }
   if (event.target.id === 'soundscape-files' && event.target.files?.length) {
@@ -944,6 +958,27 @@ app.addEventListener('submit', async (event) => {
     state.session = { active: true, startedAt: isoNow(), targetWorldId: world.id, targetWorld: world.name, intention: v.intention.trim(), wakingMinutes: world.time.wakingMinutes, worldMinutes: world.time.worldMinutes };
     persist('Arc begun. Return remains available.', 'begin-arc');
   }
+  if (form.id === 'house-runtime-form') {
+    try { houseRuntimeToken = writeHouseRuntimeToken(v.runtimeToken); flameStatusChecking = true; flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); notice = 'House Runtime connected for this tab.'; }
+    catch (error) { notice = `House Runtime stopped: ${error.message}`; }
+    finally { flameStatusChecking = false; render(); }
+    return;
+  }
+  if (form.id === 'commons-form') {
+    try {
+      const world = activeWorld();
+      const voiceIds = [...form.querySelectorAll('input[name="voiceIds"]:checked')].map((input) => input.value);
+      if (!voiceIds.length) throw new Error('Choose at least one Constellation voice.');
+      await appendHouseCommons(houseRuntimeToken, { kind: 'steward', author: 'Rowan', status: 'sent', world: { id: world.id, name: world.name }, text: v.message });
+      const premaqc = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
+      const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
+      const replies = await invokeConstellationVoices({ world, mode: 'reflection', work: v.message, premaqc, canon, voiceIds, token: houseRuntimeToken });
+      for (const reply of replies) await appendHouseCommons(houseRuntimeToken, { kind: 'voice', author: reply.name, voice_id: reply.voice_id, status: reply.status, world: { id: world.id, name: world.name }, text: reply.text || reply.error || 'No contribution returned.' });
+      commonsEntries = (await readHouseCommons(houseRuntimeToken)).entries || [];
+      notice = `Commons turn received from ${replies.map((item) => item.name).join(', ')}.`;
+    } catch (error) { notice = `Commons turn stopped: ${error.message}`; }
+    render(); return;
+  }
   if (form.id === 'world-registry-form') { const world = state.worlds.find((item) => item.id === v.id); if (world) { Object.assign(world, { name: v.name.trim() || 'Untitled World', kind: v.kind.trim(), description: v.description.trim(), updatedAt: isoNow() }); persist('World portal saved.', 'world-registry'); } }
   if (form.id === 'world-section-form') saveWorldSection(form.dataset.section, form);
   if (form.id === 'script-form') { const script = state.scripts.find((item) => item.id === v.id); if (script) { Object.assign(script, { name: v.name.trim() || 'Untitled DR Script', status: v.status, content: v.content, updatedAt: isoNow() }); persist('Script saved locally.', 'script'); } }
@@ -955,7 +990,7 @@ app.addEventListener('submit', async (event) => {
       const canon = state.scripts.filter((script) => canonRefs.includes(script.id));
       const current = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
       const voiceInvocations = form.elements.invokeModels.checked
-        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: current, canon, voiceIds, token: v.runtimeToken })
+        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: current, canon, voiceIds, token: houseRuntimeToken })
         : [];
       const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
       const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nManual contribution:\n');
@@ -974,7 +1009,7 @@ app.addEventListener('submit', async (event) => {
       }
       persist(`Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} replay-matched in the local ledger.`, 'feedback-cycle');
       if (form.elements.syncLive.checked) {
-        await syncFeedbackCycle(cycle, v.runtimeToken);
+        await syncFeedbackCycle(cycle, houseRuntimeToken);
         notice = `Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} synced to the relational ledger.`;
       }
     } catch (error) { notice = `Feedback cycle stopped: ${error.message}`; }
@@ -993,7 +1028,7 @@ app.addEventListener('submit', async (event) => {
       });
       const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
       const voiceInvocations = form.elements.invokeModels.checked
-        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: observerPremaqc, canon, voiceIds, token: v.runtimeToken })
+        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: observerPremaqc, canon, voiceIds, token: houseRuntimeToken })
         : [];
       const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
       const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nReceived contribution:\n');
@@ -1016,7 +1051,7 @@ app.addEventListener('submit', async (event) => {
       storySoundscape.clearTurn();
       persist(`Field cycle accepted · PREMAQC ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} · replay exact.`, 'field-feedback-cycle');
       if (form.elements.syncLive.checked) {
-        await syncFeedbackCycle(cycle, v.runtimeToken);
+        await syncFeedbackCycle(cycle, houseRuntimeToken);
         notice = `Field cycle ${cycle.cycle_id} synced to the relational ledger.`;
       }
     } catch (error) { notice = `Field cycle stopped: ${error.message}`; }
