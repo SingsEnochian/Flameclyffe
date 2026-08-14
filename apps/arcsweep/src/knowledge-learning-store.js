@@ -3,6 +3,7 @@ const DB_VERSION = 1;
 const STORE = 'cells';
 const PROPOSAL_EVENT = 'arcsweep:constellation-learning-proposal';
 const SAVED_EVENT = 'arcsweep:constellation-learning-saved';
+const CHANGED_EVENT = 'arcsweep:constellation-learning-changed';
 const ERROR_EVENT = 'arcsweep:constellation-learning-error';
 
 function indexedDbAvailable() {
@@ -68,28 +69,47 @@ export async function listAllLearnedCells({ includeArchived = false } = {}) {
   try {
     const tx = db.transaction(STORE, 'readonly');
     const cells = await txPromise(tx.objectStore(STORE).getAll());
-    return (cells || []).filter((cell) => includeArchived || cell.status !== 'deprecated');
+    return (cells || [])
+      .filter((cell) => includeArchived || cell.status !== 'deprecated')
+      .sort((a, b) => String(b.provenance?.createdAt || '').localeCompare(String(a.provenance?.createdAt || '')));
+  } finally {
+    db.close();
+  }
+}
+
+async function changeLearnedCell(cellId, updater) {
+  const db = await openDb();
+  if (!db) return null;
+  try {
+    const tx = db.transaction(STORE, 'readwrite');
+    const store = tx.objectStore(STORE);
+    const cell = await txPromise(store.get(cellId));
+    if (!cell) return null;
+    const next = updater(structuredClone(cell));
+    await txPromise(store.put(next));
+    return next;
   } finally {
     db.close();
   }
 }
 
 export async function archiveLearnedCell(cellId) {
-  const db = await openDb();
-  if (!db) return false;
-  try {
-    const tx = db.transaction(STORE, 'readwrite');
-    const store = tx.objectStore(STORE);
-    const cell = await txPromise(store.get(cellId));
-    if (!cell) return false;
+  return changeLearnedCell(cellId, (cell) => {
     const now = new Date().toISOString();
     cell.status = 'deprecated';
     cell.temporal = { ...(cell.temporal || {}), validUntil: now };
-    await txPromise(store.put(cell));
-    return true;
-  } finally {
-    db.close();
-  }
+    return cell;
+  });
+}
+
+export async function restoreLearnedCell(cellId) {
+  return changeLearnedCell(cellId, (cell) => {
+    cell.status = 'provisional';
+    if (cell.temporal) {
+      cell.temporal = { ...cell.temporal, validUntil: null };
+    }
+    return cell;
+  });
 }
 
 export function createLearningCellFromMargin(detail = {}) {
@@ -144,6 +164,7 @@ async function handleProposal(event) {
     const cell = event.detail?.cell || createLearningCellFromMargin(event.detail || {});
     const result = await appendLearnedCell(cell);
     document.dispatchEvent(new CustomEvent(SAVED_EVENT, { detail: result }));
+    document.dispatchEvent(new CustomEvent(CHANGED_EVENT, { detail: { action: 'saved', ...result } }));
   } catch (error) {
     document.dispatchEvent(new CustomEvent(ERROR_EVENT, { detail: { message: error?.message || String(error) } }));
   }
@@ -157,6 +178,7 @@ export function installKnowledgeLearningStore() {
 export const KNOWLEDGE_LEARNING_EVENTS = Object.freeze({
   proposal: PROPOSAL_EVENT,
   saved: SAVED_EVENT,
+  changed: CHANGED_EVENT,
   error: ERROR_EVENT,
 });
 
