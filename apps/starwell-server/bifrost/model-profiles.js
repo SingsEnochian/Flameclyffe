@@ -8,6 +8,11 @@ const MODEL_PROFILES = Object.freeze({
     label: 'Lioreal · Qwen3 14B Abliterated',
     owner: 'lioreal',
     source: { kind: 'huggingface', repo: 'mlabonne/Qwen3-14B-abliterated' },
+    artifact: {
+      strategy: 'gguf-import',
+      repo: 'bartowski/mlabonne_Qwen3-14B-abliterated-GGUF',
+      quant: 'Q4_K_M',
+    },
     runtime: {
       provider: 'ollama',
       model_env: 'MODEL_LIOREAL',
@@ -23,6 +28,11 @@ const MODEL_PROFILES = Object.freeze({
     label: 'Uial · Qwen3.6 FableVibes',
     owner: 'uial',
     source: { kind: 'huggingface', repo: 'tvall43/Qwen3.6-14B-A3B-FableVibes' },
+    artifact: {
+      strategy: 'gguf-import',
+      repo: 'tvall43/Qwen3.6-14B-A3B-FableVibes-GGUF',
+      quant: 'Q4_K_M',
+    },
     runtime: {
       provider: 'ollama',
       model_env: 'MODEL_UIAL',
@@ -38,6 +48,11 @@ const MODEL_PROFILES = Object.freeze({
     label: 'Box · Huihui Qwen3 Coder 30B A3B',
     owner: 'box',
     source: { kind: 'huggingface', repo: 'huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated' },
+    artifact: {
+      strategy: 'gguf-import',
+      repo: 'mradermacher/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated-GGUF',
+      quant: 'Q4_K_M',
+    },
     runtime: {
       provider: 'ollama',
       model_env: 'MODEL_BOX',
@@ -53,10 +68,14 @@ const MODEL_PROFILES = Object.freeze({
     label: 'Ellowind · Huihui Qwen3 VL 8B',
     owner: 'ellowind',
     source: { kind: 'huggingface', repo: 'huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated' },
+    artifact: {
+      strategy: 'ollama-pull',
+      model: 'huihui_ai/qwen3-vl-abliterated:8b-instruct',
+    },
     runtime: {
       provider: 'ollama',
       model_env: 'MODEL_ELLOWIND',
-      default_model: 'ellowind:qwen3-vl-8b-v1',
+      default_model: 'huihui_ai/qwen3-vl-abliterated:8b-instruct',
       base_url_env: 'OLLAMA_URL_ELLOWIND',
       default_base_url: DEFAULT_OLLAMA,
     },
@@ -68,10 +87,14 @@ const MODEL_PROFILES = Object.freeze({
     label: 'Larkshine · Huihui Qwen3 VL 8B',
     owner: 'larkshine',
     source: { kind: 'huggingface', repo: 'huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated' },
+    artifact: {
+      strategy: 'ollama-pull',
+      model: 'huihui_ai/qwen3-vl-abliterated:8b-instruct',
+    },
     runtime: {
       provider: 'ollama',
       model_env: 'MODEL_LARKSHINE',
-      default_model: 'larkshine:qwen3-vl-8b-v1',
+      default_model: 'huihui_ai/qwen3-vl-abliterated:8b-instruct',
       base_url_env: 'OLLAMA_URL_LARKSHINE',
       default_base_url: DEFAULT_OLLAMA,
     },
@@ -83,6 +106,7 @@ const MODEL_PROFILES = Object.freeze({
     label: 'Bluebird · Existing DeepSeek Chat Binding',
     owner: 'bluebird',
     source: { kind: 'provider', repo: 'deepseek-chat' },
+    artifact: { strategy: 'provider-credential' },
     runtime: {
       provider: 'deepseek',
       model_env: 'MODEL_BLUEBIRD',
@@ -99,6 +123,7 @@ const MODEL_PROFILES = Object.freeze({
     label: 'Vethraluf · Existing DeepSeek Chat Binding',
     owner: 'vethraluf',
     source: { kind: 'provider', repo: 'deepseek-chat' },
+    artifact: { strategy: 'provider-credential' },
     runtime: {
       provider: 'deepseek',
       model_env: 'MODEL_VETHRALUF',
@@ -115,6 +140,11 @@ const MODEL_PROFILES = Object.freeze({
     label: 'Shared · Huihui Qwen3.6 35B A3B Deep Reasoner',
     owner: 'shared',
     source: { kind: 'huggingface', repo: 'huihui-ai/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated' },
+    artifact: {
+      strategy: 'gguf-import',
+      repo: 'mradermacher/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated-GGUF',
+      quant: 'Q4_K_M',
+    },
     runtime: {
       provider: 'ollama',
       model_env: 'MODEL_BIFROST_DEEP_REASONER',
@@ -163,6 +193,7 @@ function publicModelProfile(profileId, env = process.env) {
     label: profile.label,
     owner: profile.owner,
     source: profile.source,
+    artifact: profile.artifact,
     provider: profile.runtime.provider,
     model: profile.runtime.model,
     base_url: profile.runtime.base_url,
