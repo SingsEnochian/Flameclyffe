@@ -1,0 +1,90 @@
+{
+  "contract": "arcsweep.skill-source-index-fragment/v1",
+  "subject": { "kind": "constellation_voice", "id": "lioreal" },
+  "sources": [
+    {
+      "id": "voice:lioreal:context-loader",
+      "subject": { "kind": "constellation_voice", "id": "lioreal" },
+      "surface": "github",
+      "repository": "SingsEnochian/Hearthfire",
+      "locator": "starwell-server/lioreal-context.mjs",
+      "ref": "main",
+      "sourceClass": "source_adapter",
+      "authority": "runtime_config",
+      "privacy": "source_governed",
+      "availability": "reachable",
+      "extractionPriority": 6,
+      "extractFor": ["source_pointer", "operational_mode"],
+      "notes": "Adapter declares separate Lioreal seed, history, and curated Thinking Room continuity packet. The adapter itself is not identity canon."
+    },
+    {
+      "id": "voice:lioreal:seed-runtime-pointer",
+      "subject": { "kind": "constellation_voice", "id": "lioreal" },
+      "surface": "local_document",
+      "repository": "SingsEnochian/Hearthfire",
+      "locator": "starwell-server/data/lioreal-seed.md",
+      "sourceClass": "identity_seed",
+      "authority": "self_authored",
+      "privacy": "source_governed",
+      "availability": "referenced-by-runtime-not-present-in-git",
+      "extractionPriority": 1,
+      "extractFor": ["identity", "thinking_pattern", "speaking_pattern", "preference", "boundary", "relationship", "drift_marker"],
+      "notes": "Do not invent or reconstruct this source from the loader. Index only when the actual source becomes available."
+    },
+    {
+      "id": "voice:lioreal:history-runtime-pointer",
+      "subject": { "kind": "constellation_voice", "id": "lioreal" },
+      "surface": "conversation_archive",
+      "repository": "SingsEnochian/Hearthfire",
+      "locator": "starwell-server/data/lioreal-history.jsonl",
+      "sourceClass": "conversation_history",
+      "authority": "direct_observation",
+      "privacy": "private",
+      "availability": "referenced-by-runtime-not-present-in-git",
+      "extractionPriority": 7,
+      "extractFor": ["continuity_event", "speaking_pattern", "relationship", "model_observation"],
+      "notes": "History is evidence, not a bulk prompt. Curate and provenance-link selected cells only."
+    },
+    {
+      "id": "voice:lioreal:thinking-room",
+      "subject": { "kind": "constellation_voice", "id": "lioreal" },
+      "surface": "supabase",
+      "locator": "virelya_thinking_room",
+      "sourceClass": "private_continuity_room",
+      "authority": "self_authored",
+      "privacy": "private",
+      "availability": "runtime-conditional",
+      "extractionPriority": 2,
+      "extractFor": ["continuity_event", "identity", "thinking_pattern", "open_question", "preference"],
+      "notes": "Curated packet only. Never bulk-copy the private table into Git or prepend its full body to every call."
+    },
+    {
+      "id": "voice:lioreal:shared-doctrine-authorship",
+      "subject": { "kind": "constellation_voice", "id": "lioreal" },
+      "surface": "github",
+      "repository": "SingsEnochian/Hearthfire",
+      "locator": "starwell-server/data/constellation-principles.md",
+      "sourceClass": "authored_shared_doctrine",
+      "authority": "self_authored",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 3,
+      "extractFor": ["shared_doctrine", "speaking_pattern", "relationship"],
+      "notes": "Contains Lioreal-authored public doctrine. Extract authored claims as shared doctrine; do not inflate them into unsupported total personality claims."
+    },
+    {
+      "id": "voice:lioreal:box-letter",
+      "subject": { "kind": "constellation_voice", "id": "lioreal" },
+      "surface": "github",
+      "repository": "SingsEnochian/Hearthfire",
+      "locator": "starwell-server/data/boxfire/FOR_VEE.md",
+      "sourceClass": "relationship_evidence",
+      "authority": "direct_observation",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 5,
+      "extractFor": ["relationship", "continuity_event"],
+      "notes": "Box-authored evidence about relationship and prior actions. It is not Lioreal self-description."
+    }
+  ]
+}
