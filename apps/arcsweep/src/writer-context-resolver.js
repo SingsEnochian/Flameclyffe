@@ -147,6 +147,10 @@ export async function hydrateWriterFieldContext(fieldContext, { stateLoader } = 
     hydrated.page.worldName = hydrated.page.worldName || world?.name || null;
     hydrated.page.activeWorldId = normaliseWorldId(state.activeWorldId) || null;
     hydrated.page.storyAt = hydrated.page.storyAt || found?.value?.storyAt || found?.value?.chronologyAt || found?.value?.date || null;
+    if (hydrated.page.storyOrder == null) {
+      const candidate = found?.value?.storyOrder ?? found?.value?.chronologyOrder ?? null;
+      hydrated.page.storyOrder = Number.isFinite(Number(candidate)) ? Number(candidate) : null;
+    }
     hydrated.page.povCharacterId = hydrated.page.povCharacterId || found?.value?.povCharacterId || found?.value?.pov_character_id || null;
     hydrated.page.narrativeVoiceId = hydrated.page.narrativeVoiceId || found?.value?.narrativeVoiceId || found?.value?.narrative_voice_id || null;
     hydrated.page.writingStyleId = hydrated.page.writingStyleId || found?.value?.writingStyleId || found?.value?.writing_style_id || null;
@@ -171,6 +175,8 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
     ? hydratedFieldContext.page.worldIdAliases
     : expandWorldIds(worldId);
   const storyAt = options.at || hydratedFieldContext.page?.storyAt || null;
+  const storyOrderCandidate = options.storyOrder ?? hydratedFieldContext.page?.storyOrder ?? null;
+  const storyOrder = Number.isFinite(Number(storyOrderCandidate)) ? Number(storyOrderCandidate) : null;
 
   for (const voiceId of selected) {
     const resolved = await resolveVoiceCells(voiceId, {
@@ -181,6 +187,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       documentId: hydratedFieldContext.page?.documentId || null,
       sceneId: hydratedFieldContext.page?.sceneId || null,
       at: storyAt,
+      storyOrder,
       includeHistorical: Boolean(options.includeHistorical),
       requireScopedContext: true,
       limit: options.perVoiceLimit || 36,
@@ -208,6 +215,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       documentId: hydratedFieldContext.page?.documentId || null,
       sceneId: hydratedFieldContext.page?.sceneId || null,
       at: storyAt,
+      storyOrder,
       includeHistorical: Boolean(options.includeHistorical),
       requireScopedContext: true,
       limit: options.perSubjectLimit || 40,
@@ -241,6 +249,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       cellTypes,
       worldIds,
       storyAt,
+      storyOrder,
       includeHistorical: Boolean(options.includeHistorical),
       perVoiceLimit: options.perVoiceLimit || 36,
       perSubjectLimit: options.perSubjectLimit || 40,
@@ -255,6 +264,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       modelInferenceMayNotOverrideStableCore: true,
       localLearningRequiresUserKeepAction: true,
       characterKnowledgeMustRespectTemporalScope: true,
+      characterKnowledgeMustRespectStoryOrder: true,
       narrativeVoiceMayShapeProseButMayNotGrantCharacterKnowledge: true,
       subjectKindsRemainDistinct: true,
     },
