@@ -3,7 +3,8 @@ import test from 'node:test';
 
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 import { createProvenanceBundle } from '../src/receipt-provenance-graph.js';
-import { verifyProvenanceBundle, verifyProvenanceGraph } from '../src/receipt-integrity.js';
+import { createProvenanceExportReceipt, verifyProvenanceExportReceipt } from '../src/receipt-provenance-export.js';
+import { verifyIntegrityReport, verifyProvenanceBundle, verifyProvenanceGraph } from '../src/receipt-integrity.js';
 
 async function askReceipt() {
   const core = {
@@ -38,12 +39,15 @@ function graphFor(receipt) {
   };
 }
 
-test('receipt integrity replays a transformation Ask fingerprint', async () => {
+test('receipt integrity replays a transformation Ask fingerprint and receipts the verification', async () => {
   const receipt = await askReceipt();
   const report = await verifyProvenanceGraph(graphFor(receipt), { generatedAt: '2026-08-14T10:10:00.000Z' });
   assert.equal(report.status, 'PASS');
   assert.equal(report.counts.verified, 1);
   assert.equal(report.counts.mismatch, 0);
+  assert.equal(report.report_fingerprint.length, 64);
+  const reportCheck = await verifyIntegrityReport(report);
+  assert.equal(reportCheck.matched, true);
 });
 
 test('receipt integrity reports payload mutation instead of repairing it', async () => {
@@ -65,4 +69,15 @@ test('provenance bundle fingerprint verifies and fails after bundle mutation', a
   mutated.graph.nodes[0].receipt.request.description = 'tampered';
   const failed = await verifyProvenanceBundle(mutated);
   assert.equal(failed.matched, false);
+});
+
+test('provenance export stores lightweight bundle metadata as its own fingerprinted receipt', async () => {
+  const receipt = await askReceipt();
+  const bundle = await createProvenanceBundle({ graph: graphFor(receipt), focusId: receipt.request_id, generatedAt: '2026-08-14T10:11:00.000Z' });
+  const exportReceipt = await createProvenanceExportReceipt({ bundle, exportedBy: 'Rowan', exportedAt: '2026-08-14T10:12:00.000Z' });
+  assert.equal(exportReceipt.bundle.bundle_id, bundle.bundle_id);
+  assert.equal(exportReceipt.bundle.source_receipt_ids.length, 1);
+  assert.equal(Object.prototype.hasOwnProperty.call(exportReceipt, 'graph'), false);
+  const verification = await verifyProvenanceExportReceipt(exportReceipt);
+  assert.equal(verification.matched, true);
 });
