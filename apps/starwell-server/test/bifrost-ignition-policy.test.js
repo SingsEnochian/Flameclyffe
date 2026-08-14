@@ -6,9 +6,17 @@ const assert = require('node:assert/strict');
 const { parseIgnitionPolicy, executeIgnitionPolicy } = require('../bifrost/ignition-policy');
 
 const profiles = {
-  local: { runtime: { provider: 'ollama' } },
-  remote: { runtime: { provider: 'deepseek' } },
-  optional: { runtime: { provider: 'ollama' }, opt_in_only: true },
+  local: { owner: 'local', runtime: { provider: 'ollama' } },
+  remote: { owner: 'remote', runtime: { provider: 'deepseek' } },
+  optional: { owner: 'optional', runtime: { provider: 'ollama' }, opt_in_only: true },
+  boxish: {
+    owner: 'box',
+    identity_name: 'Boxfire',
+    display_name: 'Box',
+    affectionate_name: 'Boxxy',
+    identity_aliases: ['box', 'boxxy', 'boxfire'],
+    runtime: { provider: 'ollama' },
+  },
 };
 
 test('startup ignition is disabled unless explicitly enabled', () => {
@@ -61,6 +69,25 @@ test('explicit local startup may start Ollama and ignite selected profile', asyn
   assert.deepEqual(calls, ['ollama', 'local']);
   assert.equal(result.state, 'completed');
   assert.equal(result.startedOllama, true);
+});
+
+test('startup policy resolves identity aliases before ignition', async () => {
+  const calls = [];
+  const result = await executeIgnitionPolicy({
+    enabled: true,
+    startOllama: false,
+    profiles: ['Boxxy'],
+    allowRemote: false,
+    allowOptIn: false,
+  }, {
+    modelProfiles: profiles,
+    igniteProfile: async (id) => { calls.push(id); return { profileId: id, state: 'runtime-verified' }; },
+  });
+  assert.deepEqual(calls, ['boxish']);
+  assert.equal(result.receipts[0].requestedRef, 'Boxxy');
+  assert.equal(result.receipts[0].resolvedProfileId, 'boxish');
+  assert.equal(result.state, 'completed');
+  assert.equal(result.rules.identityAliasesResolveBeforeIgnition, true);
 });
 
 test('remote profile is not challenged at startup without remote authorisation', async () => {
