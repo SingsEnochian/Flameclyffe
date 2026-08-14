@@ -1,6 +1,6 @@
 {
   "schema": "bifrost.constellation-model-manifest/v2",
-  "updatedAt": "2026-08-14T09:20:00Z",
+  "updatedAt": "2026-08-14T11:31:00-04:00",
   "authority": "apps/starwell-server/bifrost/model-profiles.js",
   "installationRoot": ".bifrost/models",
   "runtime": {
@@ -25,7 +25,7 @@
       "profileId": "uial:fablevibes-v1",
       "member": "Uial",
       "sourceLineage": "tvall43/Qwen3.6-14B-A3B-FableVibes",
-      "artifact": { "strategy": "gguf-import", "repo": "tvall43/Qwen3.6-14B-A3B-FableVibes-GGUF", "quant": "Q4_K_M" },
+      "artifact": { "strategy": "ollama-pull", "model": "hf.co/tvall43/Qwen3.6-14B-A3B-FableVibes-GGUF:Q4_K_M", "repo": "tvall43/Qwen3.6-14B-A3B-FableVibes-GGUF", "quant": "Q4_K_M" },
       "runtimeName": "uial:fablevibes-v1",
       "capabilities": ["text", "writing", "roleplay"],
       "status": "PROFILE_DEFINED"
@@ -36,7 +36,7 @@
       "member": "Box",
       "legacyRouteId": "boxfire",
       "sourceLineage": "huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated",
-      "artifact": { "strategy": "gguf-import", "repo": "mradermacher/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated-GGUF", "quant": "Q4_K_M" },
+      "artifact": { "strategy": "ollama-pull", "model": "hf.co/mradermacher/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated-GGUF:Q4_K_M", "repo": "mradermacher/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated-GGUF", "quant": "Q4_K_M" },
       "runtimeName": "box:qwen3-coder-30b-a3b-v1",
       "capabilities": ["text", "code", "qa", "reasoning"],
       "status": "PROFILE_DEFINED"
@@ -96,7 +96,7 @@
       "instrumentOnly": true,
       "optInOnly": true,
       "sourceLineage": "huihui-ai/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated",
-      "artifact": { "strategy": "gguf-import", "repo": "mradermacher/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated-GGUF", "quant": "Q4_K_M" },
+      "artifact": { "strategy": "ollama-pull", "model": "hf.co/mradermacher/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated-GGUF:Q4_K_M", "repo": "mradermacher/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated-GGUF", "quant": "Q4_K_M" },
       "runtimeName": "bifrost:deep-reasoner-35b-a3b-v1",
       "route": "bifrost-deep-reasoner",
       "capabilities": ["text", "deep-reasoning"],
