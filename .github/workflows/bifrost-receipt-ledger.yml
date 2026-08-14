@@ -1,0 +1,30 @@
+name: Bifrost Receipt Ledger Gate
+
+on:
+  push:
+    branches:
+      - feature/bifrost-ignition-v1
+    paths:
+      - 'apps/starwell-server/bifrost/receipt-store.js'
+      - 'apps/starwell-server/test/bifrost-receipt-store.test.js'
+      - '.github/workflows/bifrost-receipt-ledger.yml'
+  pull_request:
+    paths:
+      - 'apps/starwell-server/bifrost/receipt-store.js'
+      - 'apps/starwell-server/test/bifrost-receipt-store.test.js'
+      - '.github/workflows/bifrost-receipt-ledger.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  receipt-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run durable receipt tests
+        run: node --test apps/starwell-server/test/bifrost-receipt-store.test.js
