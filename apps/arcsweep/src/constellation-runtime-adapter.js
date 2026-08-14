@@ -228,6 +228,13 @@ async function handleWriterContext(event) {
         model: reply.model,
         citedSources: reply.citedSources,
         requestId: packet.requestId,
+        mode: packet.mode,
+        fieldContext: packet.fieldContext,
+        subjectTargets: (packet.subjects || []).map((subject) => ({
+          kind: subject.kind,
+          id: subject.id,
+          label: subject.label || subject.id,
+        })),
       },
     }));
   });
