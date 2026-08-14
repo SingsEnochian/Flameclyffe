@@ -26,6 +26,10 @@ export function createEmptyObservatoryStore() {
     runa_suggestions: [],
     runa_renderer_candidates: [],
     runa_renderer_reviews: [],
+    runa_preview_plans: [],
+    runa_preview_renders: [],
+    runa_preview_evidence_arms: [],
+    runa_preview_observation_links: [],
     provenance_exports: [],
     integrity_reports: [],
     active_profile_id: null,
@@ -50,6 +54,10 @@ export function normaliseObservatoryStore(value) {
     'runa_suggestions',
     'runa_renderer_candidates',
     'runa_renderer_reviews',
+    'runa_preview_plans',
+    'runa_preview_renders',
+    'runa_preview_evidence_arms',
+    'runa_preview_observation_links',
     'provenance_exports',
     'integrity_reports',
   ];
@@ -82,6 +90,10 @@ function observatoryHasData(store) {
     || value.runa_suggestions.length
     || value.runa_renderer_candidates.length
     || value.runa_renderer_reviews.length
+    || value.runa_preview_plans.length
+    || value.runa_preview_renders.length
+    || value.runa_preview_evidence_arms.length
+    || value.runa_preview_observation_links.length
     || value.provenance_exports.length
     || value.integrity_reports.length
   );
