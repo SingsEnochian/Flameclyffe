@@ -12,5 +12,6 @@ import './runa-trajectory-sidecar.js';
 import './runa-renderer-sidecar.js';
 import './runa-preview-observation-link-sidecar.js';
 import './runa-preview-return-sidecar.js';
+import './runa-intervention-arc-sidecar.js';
 import './receipt-provenance-sidecar.js';
 import './receipt-integrity-sidecar.js';
