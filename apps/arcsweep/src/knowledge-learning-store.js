@@ -28,10 +28,18 @@ function openDb() {
   });
 }
 
-function txPromise(request) {
+function requestPromise(request) {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error || new Error('Arcsweep neural learning store operation failed.'));
+  });
+}
+
+function transactionDone(tx) {
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error('Arcsweep neural learning transaction failed.'));
+    tx.onabort = () => reject(tx.error || new Error('Arcsweep neural learning transaction was aborted.'));
   });
 }
 
@@ -41,7 +49,8 @@ export async function appendLearnedCell(cell) {
   if (!db) return { stored: false, reason: 'indexeddb-unavailable', cell };
   try {
     const tx = db.transaction(STORE, 'readwrite');
-    await txPromise(tx.objectStore(STORE).add(structuredClone(cell)));
+    tx.objectStore(STORE).add(structuredClone(cell));
+    await transactionDone(tx);
     return { stored: true, cell };
   } finally {
     db.close();
@@ -56,7 +65,7 @@ export async function listLearnedCellsForVoice(voiceId, { includeArchived = fals
   try {
     const tx = db.transaction(STORE, 'readonly');
     const index = tx.objectStore(STORE).index('subjectId');
-    const cells = await txPromise(index.getAll(id));
+    const cells = await requestPromise(index.getAll(id));
     return (cells || []).filter((cell) => includeArchived || cell.status !== 'deprecated');
   } finally {
     db.close();
@@ -68,7 +77,7 @@ export async function listAllLearnedCells({ includeArchived = false } = {}) {
   if (!db) return [];
   try {
     const tx = db.transaction(STORE, 'readonly');
-    const cells = await txPromise(tx.objectStore(STORE).getAll());
+    const cells = await requestPromise(tx.objectStore(STORE).getAll());
     return (cells || [])
       .filter((cell) => includeArchived || cell.status !== 'deprecated')
       .sort((a, b) => String(b.provenance?.createdAt || '').localeCompare(String(a.provenance?.createdAt || '')));
@@ -81,12 +90,13 @@ async function changeLearnedCell(cellId, updater) {
   const db = await openDb();
   if (!db) return null;
   try {
-    const tx = db.transaction(STORE, 'readwrite');
-    const store = tx.objectStore(STORE);
-    const cell = await txPromise(store.get(cellId));
+    const readTx = db.transaction(STORE, 'readonly');
+    const cell = await requestPromise(readTx.objectStore(STORE).get(cellId));
     if (!cell) return null;
     const next = updater(structuredClone(cell));
-    await txPromise(store.put(next));
+    const writeTx = db.transaction(STORE, 'readwrite');
+    writeTx.objectStore(STORE).put(next);
+    await transactionDone(writeTx);
     return next;
   } finally {
     db.close();
