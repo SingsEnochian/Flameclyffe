@@ -16,6 +16,7 @@
     "bifrost:models": "node scripts/bifrost-model-prepare.js",
     "bifrost:ignite": "node scripts/bifrost-ignite.js",
     "bifrost:ignite:status": "node scripts/bifrost-ignite.js status",
+    "bifrost:ignite:fleet": "node scripts/bifrost-ignite-fleet.js",
     "test": "node --test test/*.test.js",
     "electron:dev": "npm run prepare:assets && electron .",
     "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:dual-aspect-package",
@@ -50,51 +51,12 @@
     "productName": "Hearthgate",
     "artifactName": "Hearthgate-Setup-${version}-${arch}.${ext}",
     "copyright": "Hearthweave",
-    "directories": {
-      "output": "dist-electron"
-    },
+    "directories": { "output": "dist-electron" },
     "asar": true,
-    "asarUnpack": [
-      "server.js",
-      "server-secure.js",
-      "security/**",
-      "fontforge/**",
-      "flames/**",
-      "bifrost/**",
-      "routes/**",
-      "public/**",
-      "build/hearthgate.png",
-      "node_modules/**",
-      "node_modules/better-sqlite3/**"
-    ],
-    "files": [
-      "**/*",
-      "!dist-electron",
-      "!*.md",
-      "!.env",
-      "!env_temp*",
-      "!data/**",
-      "!test/**"
-    ],
-    "win": {
-      "icon": "build/hearthgate.png",
-      "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        }
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "shortcutName": "Hearthgate",
-      "uninstallDisplayName": "Hearthgate"
-    }
+    "asarUnpack": ["server.js", "server-secure.js", "security/**", "fontforge/**", "flames/**", "bifrost/**", "routes/**", "public/**", "build/hearthgate.png", "node_modules/**", "node_modules/better-sqlite3/**"],
+    "files": ["**/*", "!dist-electron", "!*.md", "!.env", "!env_temp*", "!data/**", "!test/**"],
+    "win": { "icon": "build/hearthgate.png", "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "shortcutName": "Hearthgate", "uninstallDisplayName": "Hearthgate" }
   },
-  "allowScripts": {
-    "better-sqlite3@12.11.1": true,
-    "electron@35.7.5": true
-  }
+  "allowScripts": { "better-sqlite3@12.11.1": true, "electron@35.7.5": true }
 }
