@@ -35,10 +35,12 @@ jobs:
           apps/starwell-server/test/bifrost-model-profiles.test.js
           apps/starwell-server/test/bifrost-manifest-drift.test.js
           apps/starwell-server/test/bifrost-ignition.test.js
+          apps/starwell-server/test/bifrost-ignition-policy.test.js
 
       - name: Run Arcsweep model and provenance tests
         run: >-
           node --test
           apps/arcsweep/test/runtime-model-binding.test.js
+          apps/arcsweep/test/bifrost-ignition-client.test.js
           apps/arcsweep/test/scene-cognition.test.js
           apps/arcsweep/test/self-authorship.test.js
