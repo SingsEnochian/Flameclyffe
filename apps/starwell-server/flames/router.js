@@ -3,10 +3,15 @@
 const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
 const { FLAMES } = require('./manifests');
+const { MODEL_PROFILES, publicModelProfile } = require('../bifrost/model-profiles');
+const {
+  modelReceipt,
+  expectedProfileMismatch,
+  actualModelMismatch,
+  inspectManifestRuntime,
+} = require('../bifrost/runtime-attestation');
 
 const router = express.Router();
-
-// ── Provider adapters ────────────────────────────────────────────────────────
 
 async function callAnthropic(manifest, systemPrompt, userMessage) {
   const key = process.env[manifest.platform.api_key_env];
@@ -18,7 +23,7 @@ async function callAnthropic(manifest, systemPrompt, userMessage) {
     system: systemPrompt,
     messages: [{ role: 'user', content: userMessage }],
   });
-  return res.content[0]?.text ?? '';
+  return { text: res.content[0]?.text ?? '', model: res.model || manifest.platform.model, provider: 'anthropic' };
 }
 
 async function callDeepSeek(manifest, systemPrompt, userMessage) {
@@ -39,7 +44,7 @@ async function callDeepSeek(manifest, systemPrompt, userMessage) {
   });
   if (!res.ok) throw new Error(`DeepSeek ${res.status}`);
   const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? '';
+  return { text: data.choices?.[0]?.message?.content ?? '', model: data.model || manifest.platform.model, provider: 'deepseek' };
 }
 
 async function callOpenAI(manifest, systemPrompt, userMessage) {
@@ -61,7 +66,7 @@ async function callOpenAI(manifest, systemPrompt, userMessage) {
   });
   if (!res.ok) throw new Error(`OpenAI ${res.status}`);
   const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? '';
+  return { text: data.choices?.[0]?.message?.content ?? '', model: data.model || manifest.platform.model, provider: 'openai' };
 }
 
 async function callOllama(manifest, systemPrompt, userMessage) {
@@ -81,30 +86,25 @@ async function callOllama(manifest, systemPrompt, userMessage) {
   });
   if (!res.ok) throw new Error(`Ollama ${res.status}`);
   const data = await res.json();
-  return data.message?.content ?? '';
+  return { text: data.message?.content ?? '', model: data.model || manifest.platform.model, provider: 'ollama' };
 }
 
 async function dispatchToProvider(manifest, systemPrompt, userMessage) {
   switch (manifest.platform.provider) {
     case 'anthropic': return callAnthropic(manifest, systemPrompt, userMessage);
-    case 'deepseek':  return callDeepSeek(manifest, systemPrompt, userMessage);
-    case 'openai':    return callOpenAI(manifest, systemPrompt, userMessage);
-    case 'ollama':    return callOllama(manifest, systemPrompt, userMessage);
+    case 'deepseek': return callDeepSeek(manifest, systemPrompt, userMessage);
+    case 'openai': return callOpenAI(manifest, systemPrompt, userMessage);
+    case 'ollama': return callOllama(manifest, systemPrompt, userMessage);
     default: throw new Error(`Provider "${manifest.platform.provider}" not implemented`);
   }
 }
 
-// ── Hearthfire / HydraDB ────────────────────────────────────────────────────
-
-const HYDRADB_BASE  = 'https://api.hydradb.com';
-const HYDRADB_DB    = 'default-tenant';
+const HYDRADB_BASE = 'https://api.hydradb.com';
+const HYDRADB_DB = 'default-tenant';
 
 async function queryHearthfire(namespace, scope, query) {
   const key = process.env.HYDRADB_API_KEY;
-  if (!key) {
-    console.warn('[hearthfire] HYDRADB_API_KEY not set');
-    return { snippets: [], source: 'hearthfire-no-key' };
-  }
+  if (!key) return { snippets: [], source: 'hearthfire-no-key' };
   try {
     const form = new URLSearchParams();
     form.append('query', query);
@@ -118,44 +118,19 @@ async function queryHearthfire(namespace, scope, query) {
     if (!res.ok) throw new Error(`HydraDB ${res.status}`);
     const data = await res.json();
     const chunks = data.data?.results ?? data.data?.chunks ?? [];
-    const snippets = chunks.slice(0, 6).map(c => ({
-      id: c.id ?? c.chunk_id ?? 'unknown',
-      text: c.text ?? c.content ?? '',
-      score: c.score ?? null,
-    }));
-    console.log(`[hearthfire] ${snippets.length} chunks for namespace:${namespace}`);
-    return { snippets, source: 'hydradb' };
-  } catch (err) {
-    console.warn('[hearthfire] query failed:', err.message);
+    return {
+      snippets: chunks.slice(0, 6).map((chunk) => ({
+        id: chunk.id ?? chunk.chunk_id ?? 'unknown',
+        text: chunk.text ?? chunk.content ?? '',
+        score: chunk.score ?? null,
+      })),
+      source: 'hydradb',
+    };
+  } catch (error) {
+    console.warn('[hearthfire] query failed:', error.message);
     return { snippets: [], source: 'hearthfire-error' };
   }
 }
-
-async function ingestToHearthfire(texts, namespace) {
-  const key = process.env.HYDRADB_API_KEY;
-  if (!key) return { ok: false, error: 'no key' };
-  try {
-    const memories = JSON.stringify(texts.map(t => ({ text: t, metadata: { namespace } })));
-    const form = new FormData();
-    form.append('type', 'memory');
-    form.append('database', HYDRADB_DB);
-    form.append('memories', memories);
-    const res = await fetch(`${HYDRADB_BASE}/context/ingest`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'API-Version': '2' },
-      body: form,
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!res.ok) throw new Error(`HydraDB ingest ${res.status}`);
-    const data = await res.json();
-    return { ok: true, count: data.data?.success_count ?? 0, ids: data.data?.results?.map(r => r.id) ?? [] };
-  } catch (err) {
-    console.warn('[hearthfire] ingest failed:', err.message);
-    return { ok: false, error: err.message };
-  }
-}
-
-// ── Supabase logging ─────────────────────────────────────────────────────────
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://frqrxmshxftpylwdtsdm.supabase.co';
 const SUPABASE_KEY_ENV = 'SUPABASE_SERVICE_KEY';
@@ -176,8 +151,8 @@ async function supabaseInsert(table, record) {
       signal: AbortSignal.timeout(5000),
     });
     return res.ok;
-  } catch (err) {
-    console.warn(`[supabase] insert ${table} failed:`, err.message);
+  } catch (error) {
+    console.warn(`[supabase] insert ${table} failed:`, error.message);
     return false;
   }
 }
@@ -192,8 +167,6 @@ async function logMemoryProposal(record) {
   if (!ok) console.log('[supabase] memory proposal (no-op):', record.flame_id, record.status);
 }
 
-// ── Middleware: resolve flame ────────────────────────────────────────────────
-
 function resolveFlame(req, res, next) {
   const manifest = FLAMES[req.params.flame_id];
   if (!manifest) return res.status(404).json({ error: `Unknown flame: ${req.params.flame_id}` });
@@ -201,74 +174,94 @@ function resolveFlame(req, res, next) {
   next();
 }
 
-// ── POST /api/v1/flames/:flame_id/chat ──────────────────────────────────────
+router.get('/bifrost/model-profiles', (_req, res) => {
+  const profiles = Object.keys(MODEL_PROFILES).map((profileId) => publicModelProfile(profileId));
+  res.json({
+    contract: 'bifrost.model-profile-registry/v1',
+    profiles,
+    rules: {
+      profileRegistryOwnsVesselDefinitions: true,
+      noSilentFallback: true,
+      deepReasonerOptInOnly: true,
+    },
+  });
+});
 
 router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
   const manifest = req.flame;
-  const { message, session_id, context = [] } = req.body;
+  const { message, session_id, context = [], metadata = {} } = req.body || {};
   if (!message) return res.status(400).json({ error: 'message required' });
+
+  const profileMismatch = expectedProfileMismatch(manifest, metadata);
+  if (profileMismatch) {
+    return res.status(409).json({
+      error: profileMismatch.code,
+      ...profileMismatch,
+      runtime: modelReceipt(manifest),
+    });
+  }
 
   const hearthCtx = await queryHearthfire(
     manifest.memory.hearthfire_namespace,
     manifest.memory.retrieval_scope,
     message
   );
-
   const contextBlock = context.length
-    ? `Recent conversation:\n${context.map(m => `${m.speaker}: ${m.text}`).join('\n')}\n\n`
+    ? `Recent conversation:\n${context.map((item) => `${item.speaker}: ${item.text}`).join('\n')}\n\n`
     : '';
   const hearthBlock = hearthCtx.snippets.length
-    ? `Hearthfire context:\n${hearthCtx.snippets.map(s => s.text).join('\n')}\n\n`
+    ? `Hearthfire context:\n${hearthCtx.snippets.map((item) => item.text).join('\n')}\n\n`
     : '';
   const userMessage = `${hearthBlock}${contextBlock}${message}`;
 
-  let reply, error;
+  let providerResult;
+  let error;
   try {
-    reply = await dispatchToProvider(manifest, manifest.system_prompt, userMessage);
+    providerResult = await dispatchToProvider(manifest, manifest.system_prompt, userMessage);
+    const mismatch = actualModelMismatch(manifest, providerResult.model);
+    if (mismatch) {
+      return res.status(502).json({
+        error: mismatch.code,
+        ...mismatch,
+        runtime: modelReceipt(manifest, providerResult),
+      });
+    }
   } catch (err) {
     error = err.message;
   }
 
+  const receipt = modelReceipt(manifest, providerResult || {});
   await logRouteInvocation({
     flame_id: manifest.flame_id,
-    provider: manifest.platform.provider,
-    model: manifest.platform.model,
+    provider: receipt.provider,
+    model: receipt.model,
+    model_profile_id: receipt.profile_id,
     session_id: session_id ?? null,
     message_hash: Buffer.from(message).toString('base64').slice(0, 16),
-    retrieved_source_ids: hearthCtx.snippets.map(s => s.id ?? 'unknown'),
+    retrieved_source_ids: hearthCtx.snippets.map((item) => item.id ?? 'unknown'),
     response_mode: error ? 'error' : 'success',
     memory_write_recommendation: false,
   });
 
-  if (error) return res.status(502).json({ flame_id: manifest.flame_id, error });
+  if (error) return res.status(502).json({ ...receipt, error });
 
   res.json({
-    flame_id: manifest.flame_id,
+    ...receipt,
     display_name: manifest.display_name,
-    provider: manifest.platform.provider,
-    model: manifest.platform.model,
-    message: reply,
-    cited_sources: hearthCtx.snippets.map(s => s.id ?? 'hearthfire'),
+    message: providerResult.text,
+    cited_sources: hearthCtx.snippets.map((item) => item.id ?? 'hearthfire'),
     suggested_actions: [],
     memory_write_recommendation: false,
+    runtime_verified: true,
   });
 });
 
-// ── GET /api/v1/flames/:flame_id/status ─────────────────────────────────────
-
-router.get('/flames/:flame_id/status', resolveFlame, (req, res) => {
+router.get('/flames/:flame_id/status', resolveFlame, async (req, res) => {
   const manifest = req.flame;
-  const envVar = manifest.platform.api_key_env;
-  const keyPresent = envVar ? !!process.env[envVar] : null;
-
+  const runtime = await inspectManifestRuntime(manifest);
   res.json({
-    flame_id: manifest.flame_id,
+    ...runtime,
     display_name: manifest.display_name,
-    provider: manifest.platform.provider,
-    model: manifest.platform.model,
-    base_url: manifest.platform.base_url ?? null,
-    api_key_env: envVar,
-    api_key_present: keyPresent,
     hearthfire_namespace: manifest.memory.hearthfire_namespace,
     retrieval_scope: manifest.memory.retrieval_scope,
     can_write_memory: manifest.memory.can_write_memory,
@@ -278,42 +271,44 @@ router.get('/flames/:flame_id/status', resolveFlame, (req, res) => {
   });
 });
 
-// ── POST /api/v1/flames/:flame_id/query-context ──────────────────────────────
-
 router.post('/flames/:flame_id/query-context', resolveFlame, async (req, res) => {
   const manifest = req.flame;
-  const { query } = req.body;
+  const { query } = req.body || {};
   if (!query) return res.status(400).json({ error: 'query required' });
   const result = await queryHearthfire(
     manifest.memory.hearthfire_namespace,
     manifest.memory.retrieval_scope,
     query
   );
-  res.json({ flame_id: manifest.flame_id, ...result });
+  res.json({ ...modelReceipt(manifest), ...result });
 });
-
-// ── POST /api/v1/flames/:flame_id/memory-proposal ────────────────────────────
 
 router.post('/flames/:flame_id/memory-proposal', resolveFlame, async (req, res) => {
   const manifest = req.flame;
-  const { content, metadata = {} } = req.body;
+  const { content, metadata = {} } = req.body || {};
   if (!content) return res.status(400).json({ error: 'content required' });
 
   if (manifest.memory.requires_consent_for_write) {
     const proposal = {
       flame_id: manifest.flame_id,
+      model_profile_id: manifest.model_profile_id || null,
       proposed_content: content,
       proposed_metadata: metadata,
       status: 'pending',
       created_at: new Date().toISOString(),
     };
     await logMemoryProposal(proposal);
-    return res.status(202).json({ status: 'pending', message: 'Consent required — proposal queued for review.', proposal });
+    return res.status(202).json({ status: 'pending', message: 'Consent required; proposal queued for review.', proposal });
   }
 
-  // Routine write (boxfire-class flames)
-  await logMemoryProposal({ flame_id: manifest.flame_id, proposed_content: content, proposed_metadata: metadata, status: 'approved_routine' });
-  res.json({ status: 'written', flame_id: manifest.flame_id });
+  await logMemoryProposal({
+    flame_id: manifest.flame_id,
+    model_profile_id: manifest.model_profile_id || null,
+    proposed_content: content,
+    proposed_metadata: metadata,
+    status: 'approved_routine',
+  });
+  res.json({ status: 'written', ...modelReceipt(manifest) });
 });
 
 module.exports = router;
