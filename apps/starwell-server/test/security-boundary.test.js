@@ -3,6 +3,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const {
+  KEEP_EXISTING_SECRET,
   isAllowedLocalOrigin,
   localCorsOptions,
   mergeHearthgateConfigSecrets,
@@ -88,13 +89,13 @@ test('redacts House runtime token and provider secrets before configuration cros
   assert.equal(serialised.includes('hydra-secret'), false);
 });
 
-test('blank secret fields preserve encrypted existing values during wizard reconfiguration', () => {
+test('blank and renderer preserve-marker fields keep encrypted existing secrets', () => {
   const existing = config();
   const edited = config({
     name: 'Hearthweave II',
     theme: 'stonewood',
     keys: {
-      runtime: '',
+      runtime: KEEP_EXISTING_SECRET,
       anthropic: '',
       openai: 'replacement-openai',
       exa: '',
@@ -114,7 +115,31 @@ test('blank secret fields preserve encrypted existing values during wizard recon
   assert.equal(merged.keys.custom[0].value, 'hydra-secret');
 });
 
-test('first configuration cannot invent a missing runtime token during merge', () => {
-  const first = mergeHearthgateConfigSecrets(config({ keys: { runtime: '', custom: [] } }), null);
+test('custom provider secrets merge by environment name instead of replacing unrelated entries', () => {
+  const existing = config({
+    keys: {
+      custom: [
+        { name: 'HYDRADB_API_KEY', value: 'hydra-old' },
+        { name: 'SOME_SERVICE_TOKEN', value: 'service-old' },
+      ],
+    },
+  });
+  const edited = config({
+    keys: {
+      custom: [
+        { name: 'HYDRADB_API_KEY', value: 'hydra-new' },
+        { name: 'NEW_SERVICE_API_KEY', value: 'new-secret' },
+      ],
+    },
+  });
+  const merged = mergeHearthgateConfigSecrets(edited, existing);
+  const map = new Map(merged.keys.custom.map((entry) => [entry.name, entry.value]));
+  assert.equal(map.get('HYDRADB_API_KEY'), 'hydra-new');
+  assert.equal(map.get('SOME_SERVICE_TOKEN'), 'service-old');
+  assert.equal(map.get('NEW_SERVICE_API_KEY'), 'new-secret');
+});
+
+test('first configuration cannot turn the preserve marker into a runtime token', () => {
+  const first = mergeHearthgateConfigSecrets(config({ keys: { runtime: KEEP_EXISTING_SECRET, custom: [] } }), null);
   assert.equal(first.keys.runtime, '');
 });
