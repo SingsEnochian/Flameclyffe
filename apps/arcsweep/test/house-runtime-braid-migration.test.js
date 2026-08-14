@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const migration = fs.readFileSync(path.join(root, 'supabase/migrations/202608140003_house_runtime_braid.sql'), 'utf8');
+const leastPrivilegeMigration = fs.readFileSync(path.join(root, 'supabase/migrations/202608140004_house_runtime_braid_least_privilege.sql'), 'utf8');
 const streamFunction = fs.readFileSync(path.join(root, 'netlify/functions/house-braid-stream.mts'), 'utf8');
 const main = fs.readFileSync(path.join(root, 'apps/arcsweep/src/main.js'), 'utf8');
 const client = fs.readFileSync(path.join(root, 'apps/arcsweep/src/house-runtime.js'), 'utf8');
@@ -44,6 +45,15 @@ test('Runtime Braid command RPC is transaction-scoped, human-gated, and service-
   assert.match(migration, /Observation cycle already has a different human review/i);
   assert.match(migration, /revoke all on function public\.house_runtime_apply_observation_command\(jsonb\) from public, anon, authenticated/i);
   assert.match(migration, /grant execute on function public\.house_runtime_apply_observation_command\(jsonb\) to service_role/i);
+});
+
+test('Runtime Braid service role receives only the ledger privileges used by the sealed broker', () => {
+  for (const table of ['arcsweep_feedback_cycles', 'arcsweep_feedback_reviews', 'arcsweep_deep_time_records', 'house_runtime_events']) {
+    assert.match(leastPrivilegeMigration, new RegExp(`revoke all on table public\\.${table} from service_role`, 'i'));
+    assert.match(leastPrivilegeMigration, new RegExp(`grant select, insert on table public\\.${table} to service_role`, 'i'));
+  }
+  assert.match(leastPrivilegeMigration, /revoke all on sequence public\.house_runtime_events_event_sequence_seq from service_role/i);
+  assert.match(leastPrivilegeMigration, /grant usage, select on sequence public\.house_runtime_events_event_sequence_seq to service_role/i);
 });
 
 test('Runtime Braid event spine is published to Realtime through the sealed server stream', () => {
