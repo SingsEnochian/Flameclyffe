@@ -1,51 +1,85 @@
-name: Arcsweep build check
+name: Arcsweep authoritative gate
 
 on:
   push:
     branches:
-      - main
-      - codex/arcsweep-feedback-loop
       - feature/react-ion-engine-v0.1
     paths:
       - 'apps/arcsweep/**'
+      - 'apps/starwell/src/math-spine/**'
       - 'apps/starwell/src/world-tone-fold-approval.js'
+      - 'starwell/deep-observer/**'
       - 'package.json'
       - 'package-lock.json'
       - '.nvmrc'
       - '.github/workflows/arcsweep-build.yml'
   pull_request:
     branches:
-      - main
       - codex/arcsweep-feedback-loop
     paths:
       - 'apps/arcsweep/**'
+      - 'apps/starwell/src/math-spine/**'
       - 'apps/starwell/src/world-tone-fold-approval.js'
+      - 'starwell/deep-observer/**'
       - 'package.json'
       - 'package-lock.json'
       - '.nvmrc'
       - '.github/workflows/arcsweep-build.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: arcsweep-authoritative-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-and-build-arcsweep:
-    name: Test and build Arcsweep
+    name: Test, audit and build Arcsweep
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Set up Node
+      - name: Set up Node 24
         uses: actions/setup-node@v6
         with:
-          node-version-file: .nvmrc
+          node-version: '24.x'
           cache: npm
 
-      - name: Install dependencies
-        run: npm install
+      - name: Pin npm 11.16.0
+        run: npm install --global npm@11.16.0
+
+      - name: Repair auditable lockfile metadata
+        run: npm audit fix --package-lock-only
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Verify engine contracts
+        run: npm run contracts:verify
 
       - name: Test Arcsweep
         run: npm run arcsweep:test
 
       - name: Build Arcsweep
         run: npm run arcsweep:build
+
+      - name: Persist minimal lockfile repair
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/react-ion-engine-v0.1'
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo 'Lockfile already clean.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package-lock.json
+          git commit -m 'fix(deps): apply audited lockfile repair'
+          git push
