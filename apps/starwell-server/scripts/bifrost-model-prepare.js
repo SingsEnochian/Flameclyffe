@@ -6,6 +6,7 @@ const { spawnSync } = require('node:child_process');
 const { Readable } = require('node:stream');
 const { pipeline } = require('node:stream/promises');
 const { MODEL_PROFILES, materialiseModelProfile } = require('../bifrost/model-profiles');
+const { resolveProfileRef, identityEnvelope } = require('../bifrost/profile-resolution');
 
 const args = new Set(process.argv.slice(2));
 const profileArgIndex = process.argv.indexOf('--profile');
@@ -31,11 +32,12 @@ function repoFileUrl(repo, filename) {
 
 function chooseProfiles() {
   if (requestedProfile) {
-    if (!MODEL_PROFILES[requestedProfile]) throw new Error(`Unknown Bifrost profile: ${requestedProfile}`);
-    return [requestedProfile];
+    const resolved = resolveProfileRef(requestedProfile);
+    if (!resolved) throw new Error(`Unknown Bifrost profile or identity: ${requestedProfile}`);
+    return [resolved.profileId];
   }
   if (all) return Object.keys(MODEL_PROFILES);
-  throw new Error('Choose --profile <profile-id> or --all. Add --execute to perform downloads/imports.');
+  throw new Error('Choose --profile <profile-id-or-identity> or --all. Add --execute to perform downloads/imports.');
 }
 
 function runOllama(argsList) {
@@ -92,12 +94,14 @@ function createOllamaAlias(profile, fromValue) {
 async function prepareProfile(profileId) {
   const profile = materialiseModelProfile(profileId);
   if (!profile) throw new Error(`Unknown profile ${profileId}`);
+  const identity = identityEnvelope(profileId);
   if (profile.opt_in_only && !includeOptIn) {
     console.log(`SKIP ${profileId} · opt-in profile (use --include-opt-in)`);
     return;
   }
   const artifact = profile.artifact || { strategy: 'profile-defined' };
-  console.log(`\n${profile.label}`);
+  console.log(`\n${identity?.identityName || profile.label}`);
+  if (identity?.aliases?.length) console.log(`  aliases: ${identity.aliases.join(', ')}`);
   console.log(`  profile: ${profile.profile_id}`);
   console.log(`  source: ${profile.source?.repo || 'n/a'}`);
   console.log(`  runtime: ${profile.runtime.provider} · ${profile.runtime.model}`);
