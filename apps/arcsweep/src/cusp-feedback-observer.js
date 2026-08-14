@@ -25,9 +25,14 @@ function normaliseCuspInput(cusp, history) {
   const previousObservation = cusp.previousObservation
     || history.at(-1)?.observation
     || null;
+  const controlA = cusp.controlA ?? cusp.structure;
+  const controlB = cusp.controlB ?? cusp.intention;
   return Object.freeze({
-    structure: finite(cusp.structure, 'structure'),
-    intention: finite(cusp.intention, 'intention'),
+    controlA: finite(controlA, 'control a'),
+    controlB: finite(controlB, 'control b'),
+    controlSemantics: cusp.controlSemantics && typeof cusp.controlSemantics === 'object'
+      ? structuredClone(cusp.controlSemantics)
+      : null,
     orderParameter: cusp.orderParameter === null || cusp.orderParameter === undefined
       ? null
       : finite(cusp.orderParameter, 'orderParameter'),
@@ -55,6 +60,7 @@ function buildObserverEventCandidates(cuspPacket, traceReceipt, observedAt) {
     world_id: cuspPacket.world_id,
     observed_at: observedAt,
     controls: structuredClone(observation.controls),
+    control_semantics: structuredClone(observation.control_semantics),
     selected_equilibrium: structuredClone(observation.selected_equilibrium),
     prior_branch: observation.history.prior_branch,
     branch_changed: observation.history.branch_changed,
@@ -78,6 +84,10 @@ function buildObserverEventCandidates(cuspPacket, traceReceipt, observedAt) {
 /**
  * Adds a cusp observation beside an already receipted feedback cycle.
  * The base feedback cycle and PREMAQC state are never rewritten by this layer.
+ *
+ * The cusp controls are domain-general. `structure` / `intention` remain valid
+ * aliases for BAI callers, while `controlA` / `controlB` plus
+ * `controlSemantics` allow non-intentional physical or computational domains.
  */
 export async function attachCuspObservationToFeedbackCycle({
   cycle,
@@ -90,8 +100,9 @@ export async function attachCuspObservationToFeedbackCycle({
   const input = normaliseCuspInput(cusp, history);
   const cuspPacket = await createCuspObservationPacket({
     mathSpinePacket: cycle.math_spine_packet,
-    structure: input.structure,
-    intention: input.intention,
+    controlA: input.controlA,
+    controlB: input.controlB,
+    controlSemantics: input.controlSemantics,
     orderParameter: input.orderParameter,
     previousObservation: input.previousObservation,
     generatedAt: generatedAt ?? cycle.created_at,
@@ -117,6 +128,8 @@ export async function attachCuspObservationToFeedbackCycle({
       observational_only: true,
       base_cycle_mutable: false,
       premaqc_mutable: false,
+      controls_are_domain_semantic: true,
+      control_b_is_intention: Boolean(cuspPacket.observation.epistemic?.control_b_is_intention),
       intention_is_premaqc_agency: false,
       candidate_is_asserted_event: false,
       candidate_may_drive_sound_automatically: false,

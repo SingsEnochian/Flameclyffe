@@ -21,22 +21,32 @@ function sampleRange(minimum, maximum, count, mapper) {
   });
 }
 
-export function cuspPotential(x, structure, intention) {
+function controlA(observation) {
+  return finite(observation.controls?.a ?? observation.controls?.structure, 'control a');
+}
+
+function controlB(observation) {
+  return finite(observation.controls?.b ?? observation.controls?.intention, 'control b');
+}
+
+export function cuspPotential(x, aInput, bInput) {
   const state = finite(x, 'x');
-  const a = finite(structure, 'structure');
-  const b = finite(intention, 'intention');
+  const a = finite(aInput, 'control a');
+  const b = finite(bInput, 'control b');
   return state ** 4 / 4 + a * state ** 2 / 2 + b * state;
 }
 
 export function sampleCuspPotential({
-  structure,
-  intention,
+  controlA: aInput = null,
+  controlB: bInput = null,
+  structure = null,
+  intention = null,
   minimum = -2,
   maximum = 2,
   samples = 97,
 } = {}) {
-  const a = finite(structure, 'structure');
-  const b = finite(intention, 'intention');
+  const a = finite(aInput ?? structure, 'control a');
+  const b = finite(bInput ?? intention, 'control b');
   const min = finite(minimum, 'minimum');
   const max = finite(maximum, 'maximum');
   invariant(max > min, 'maximum must exceed minimum');
@@ -48,36 +58,46 @@ export function sampleCuspPotential({
 
 /**
  * Samples the canonical cusp fold locus 4a^3 + 27b^2 = 0.
- * The locus only exists for structure a <= 0.
+ * The locus only exists for control a <= 0.
  */
 export function sampleCuspFoldLocus({
+  minimumControlA = null,
+  maximumControlA = null,
   minimumStructure = -2,
   maximumStructure = 0,
   samples = 81,
 } = {}) {
-  const min = finite(minimumStructure, 'minimumStructure');
-  const max = finite(maximumStructure, 'maximumStructure');
-  invariant(min <= max && max <= 0, 'fold-locus structure range must satisfy minimum <= maximum <= 0');
+  const min = finite(minimumControlA ?? minimumStructure, 'minimumControlA');
+  const max = finite(maximumControlA ?? maximumStructure, 'maximumControlA');
+  invariant(min <= max && max <= 0, 'fold-locus control-a range must satisfy minimum <= maximum <= 0');
   const upper = [];
   const lower = [];
-  for (const point of sampleRange(min, max, samples, (structure) => {
-    const magnitude = Math.sqrt(Math.max(0, -(4 * structure ** 3) / 27));
-    return { structure, magnitude };
+  for (const point of sampleRange(min, max, samples, (a) => {
+    const magnitude = Math.sqrt(Math.max(0, -(4 * a ** 3) / 27));
+    return { a, magnitude };
   })) {
-    upper.push(Object.freeze({ structure: point.structure, intention: point.magnitude }));
-    lower.push(Object.freeze({ structure: point.structure, intention: -point.magnitude }));
+    upper.push(Object.freeze({
+      a: point.a,
+      b: point.magnitude,
+      structure: point.a,
+      intention: point.magnitude,
+    }));
+    lower.push(Object.freeze({
+      a: point.a,
+      b: -point.magnitude,
+      structure: point.a,
+      intention: -point.magnitude,
+    }));
   }
   return Object.freeze({ upper: Object.freeze(upper), lower: Object.freeze(lower) });
 }
 
 function equilibriumMarkers(observation) {
+  const a = controlA(observation);
+  const b = controlB(observation);
   return Object.freeze((observation.equilibria || []).map((equilibrium) => Object.freeze({
     x: equilibrium.value,
-    potential: cuspPotential(
-      equilibrium.value,
-      observation.controls.structure,
-      observation.controls.intention,
-    ),
+    potential: cuspPotential(equilibrium.value, a, b),
     branch: equilibrium.branch,
     stability: equilibrium.stability,
     selected: equilibrium.branch === observation.selected_equilibrium?.branch,
@@ -97,16 +117,22 @@ export function buildCuspObserverBench(envelope, {
   const observation = packet.observation;
   const trace = envelope.cusp_trace_receipt?.trace || null;
   const candidate = envelope.observer_event_candidates?.find((item) => item.candidate_type === 'branch-snap') || null;
+  const a = controlA(observation);
+  const b = controlB(observation);
+  const semantics = structuredClone(observation.control_semantics || {
+    a: { role: 'structure', label: 'Structure', intentional: false },
+    b: { role: 'intention', label: 'Intention', intentional: true },
+  });
   const potential = sampleCuspPotential({
-    structure: observation.controls.structure,
-    intention: observation.controls.intention,
+    controlA: a,
+    controlB: b,
     minimum: potentialMinimum,
     maximum: potentialMaximum,
     samples: potentialSamples,
   });
   const foldLocus = sampleCuspFoldLocus({
-    minimumStructure: foldMinimumStructure,
-    maximumStructure: 0,
+    minimumControlA: foldMinimumStructure,
+    maximumControlA: 0,
     samples: foldSamples,
   });
 
@@ -115,6 +141,7 @@ export function buildCuspObserverBench(envelope, {
     world: structuredClone(envelope.world),
     envelope_id: envelope.envelope_id,
     controls: structuredClone(observation.controls),
+    control_semantics: semantics,
     regime: observation.regime,
     fold_polynomial: observation.fold_polynomial,
     cubic_discriminant: observation.cubic_discriminant,
@@ -124,20 +151,26 @@ export function buildCuspObserverBench(envelope, {
     hysteresis: Object.freeze({
       detected: Boolean(trace?.hysteresis_detected),
       witnesses: structuredClone(trace?.witnesses || []),
-      requires_opposite_sweeps: true,
+      requires_opposite_control_b_sweeps: true,
     }),
     event_candidate: candidate ? structuredClone(candidate) : null,
     potential_landscape: Object.freeze({
-      equation: 'V(x)=x^4/4 + structure*x^2/2 + intention*x',
+      equation: 'V(x)=x^4/4 + a*x^2/2 + b*x',
       minimum_x: potentialMinimum,
       maximum_x: potentialMaximum,
       points: potential,
     }),
     control_plane: Object.freeze({
-      equation: '4*structure^3 + 27*intention^2 = 0',
+      equation: '4*a^3 + 27*b^2 = 0',
+      labels: Object.freeze({
+        a: semantics.a?.label || 'Control a',
+        b: semantics.b?.label || 'Control b',
+      }),
       current: Object.freeze({
-        structure: observation.controls.structure,
-        intention: observation.controls.intention,
+        a,
+        b,
+        structure: a,
+        intention: b,
         regime: observation.regime,
       }),
       fold_locus: foldLocus,
@@ -145,6 +178,8 @@ export function buildCuspObserverBench(envelope, {
     authority: Object.freeze({
       observational_only: true,
       controls_explicit_not_inferred: true,
+      controls_are_domain_semantic: true,
+      control_b_is_intention: Boolean(observation.epistemic?.control_b_is_intention),
       intention_is_premaqc_agency: false,
       candidate_is_asserted_event: false,
       canon_commit: false,
