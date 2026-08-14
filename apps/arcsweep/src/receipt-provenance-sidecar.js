@@ -1,5 +1,6 @@
 import { loadState, persistObservatoryStore } from './storage.js';
-import { buildArcsweepProvenanceGraph, connectedProvenanceComponent, createProvenanceBundle } from './receipt-provenance-graph.js';
+import { connectedProvenanceComponent, createProvenanceBundle } from './receipt-provenance-graph.js';
+import { buildExtendedArcsweepProvenanceGraph } from './receipt-provenance-extension.js';
 import { createProvenanceExportReceipt } from './receipt-provenance-export.js';
 
 const TRANSFORMATION_KEY = 'hearthgate.arcsweep.transformation-requests.v1';
@@ -36,7 +37,7 @@ async function model() {
   const world = state.worlds.find((item) => item.id === state.activeWorldId) || state.worlds[0] || null;
   if (!world) return null;
   const transformations = transformationsForState(state);
-  const graph = buildArcsweepProvenanceGraph({
+  const graph = buildExtendedArcsweepProvenanceGraph({
     worldId: world.id,
     transformations,
     feedbackCycles: state.feedbackCycles || [],
@@ -124,7 +125,7 @@ function render(m, message = '') {
   const key = modelSignature(m);
   const latestExport = exportReceipts.at(-1) || null;
   return `<section class="panel receipt-provenance" data-receipt-provenance data-prov-key="${esc(key)}">
-    <div class="section-heading compact-heading"><div><p class="eyebrow">Receipts remember the path</p><h2>Provenance Graph</h2><p class="muted">Trace an Ask through BAI, cusp, Feedback, DEEPTime, Theory, Advisor and Runa. The graph follows explicit receipt identifiers only; it does not invent missing joins.</p></div><span class="bai-topology-badge">${focused.nodes.length} nodes</span></div>
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Receipts remember the path</p><h2>Provenance Graph</h2><p class="muted">Trace an Ask through BAI, cusp, Feedback, DEEPTime, Theory, Advisor, Runa, renderer review, and the chain's own export/audit receipts. Explicit identifiers only. Missing joins stay missing.</p></div><span class="bai-topology-badge">${focused.nodes.length} nodes</span></div>
     ${message ? `<p class="callout">${esc(message)}</p>` : ''}
     <div class="grid two compact-grid prov-controls"><label>Focus<select data-prov-focus>${options}</select></label><div class="prov-actions"><button type="button" data-prov-action="export">Export & receipt connected bundle</button><small>${focused.edges.length} links${orphanCount > 0 ? ` · ${orphanCount} unrelated receipt${orphanCount === 1 ? '' : 's'} hidden` : ''}</small>${structuralMarkup(focused)}</div></div>
     ${graphSvg(focused)}
