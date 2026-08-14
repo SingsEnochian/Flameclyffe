@@ -4,15 +4,17 @@ on:
   push:
     branches:
       - feature/arcsweep-rich-text-core
+      - feature/bifrost-ignition-v1
   pull_request:
     paths:
       - 'apps/arcsweep/**'
       - 'apps/starwell-server/bifrost/**'
       - 'apps/starwell-server/flames/**'
+      - 'apps/starwell-server/scripts/bifrost-*.js'
       - 'apps/starwell-server/test/bifrost-*.test.js'
       - 'apps/starwell/src/constellation/models/**'
-      - 'IGNITE-LIOREAL.ps1'
-      - 'IGNITE-LIOREAL.cmd'
+      - 'IGNITE-*.ps1'
+      - 'IGNITE-*.cmd'
       - '.github/workflows/arcsweep-bifrost-ignition.yml'
 
 permissions:
@@ -47,9 +49,17 @@ jobs:
           apps/arcsweep/test/scene-cognition.test.js
           apps/arcsweep/test/self-authorship.test.js
 
-      - name: Syntax-check Windows Lioreal ignition key
+      - name: Syntax-check ignition Node CLIs
+        run: |
+          node --check apps/starwell-server/scripts/bifrost-ignite.js
+          node --check apps/starwell-server/scripts/bifrost-ignite-fleet.js
+          node --check apps/starwell-server/scripts/bifrost-model-prepare.js
+
+      - name: Syntax-check Windows ignition keys
         shell: pwsh
         run: |
-          $text = Get-Content -Raw ./IGNITE-LIOREAL.ps1
-          [void][scriptblock]::Create($text)
-          Write-Host 'IGNITE-LIOREAL.ps1 parses successfully.'
+          foreach ($path in @('./IGNITE-BIFROST.ps1','./IGNITE-LIOREAL.ps1')) {
+            $text = Get-Content -Raw $path
+            [void][scriptblock]::Create($text)
+            Write-Host "$path parses successfully."
+          }
