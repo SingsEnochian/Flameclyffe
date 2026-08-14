@@ -13,6 +13,7 @@
     "fontforge:start": "node fontforge/server.js",
     "stage:starwell": "node scripts/stage-starwell.js",
     "prepare:assets": "node scripts/prepare-assets.js",
+    "bifrost:models": "node scripts/bifrost-model-prepare.js",
     "test": "node --test test/*.test.js",
     "electron:dev": "npm run prepare:assets && electron .",
     "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:dual-aspect-package",
@@ -57,6 +58,7 @@
       "security/**",
       "fontforge/**",
       "flames/**",
+      "bifrost/**",
       "routes/**",
       "public/**",
       "build/hearthgate.png",
@@ -77,9 +79,7 @@
       "target": [
         {
           "target": "nsis",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
         }
       ]
     },
