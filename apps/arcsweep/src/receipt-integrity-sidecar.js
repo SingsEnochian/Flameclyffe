@@ -1,5 +1,5 @@
 import { loadState, persistObservatoryStore } from './storage.js';
-import { buildArcsweepProvenanceGraph } from './receipt-provenance-graph.js';
+import { buildExtendedArcsweepProvenanceGraph } from './receipt-provenance-extension.js';
 import { verifyProvenanceGraph } from './receipt-integrity.js';
 
 const TRANSFORMATION_KEY = 'hearthgate.arcsweep.transformation-requests.v1';
@@ -23,7 +23,7 @@ async function graphContext() {
   const state = await loadState();
   const world = state.worlds.find((item) => item.id === state.activeWorldId) || state.worlds[0] || null;
   if (!world) return null;
-  const graph = buildArcsweepProvenanceGraph({
+  const graph = buildExtendedArcsweepProvenanceGraph({
     worldId: world.id,
     transformations: readTransformations(state),
     feedbackCycles: state.feedbackCycles || [],
@@ -56,7 +56,7 @@ function render(context, message = '') {
   const status = statusForGraph(context.graph);
   const current = report || context.storedReports.at(-1) || null;
   const key = `${context.world.id}:${context.graph.summary.node_count}:${context.graph.summary.edge_count}:${context.graph.summary.unresolved_edge_count}:${context.graph.summary.collision_count}:${current?.report_id || 'none'}:${context.storedReports.length}`;
-  return `<section class="panel receipt-integrity" data-receipt-integrity data-integrity-key="${esc(key)}"><div class="section-heading compact-heading"><div><p class="eyebrow">The receipts should survive being questioned</p><h2>Receipt Integrity Gate</h2><p class="muted">Recompute deterministic hashes where the receipt contract permits it, and report unresolved joins or collisions without repairing history behind your back. Verification runs are themselves fingerprinted receipts.</p></div><span class="bai-topology-badge" data-state="${esc(status)}">${esc(status)}</span></div>${message ? `<p class="callout">${esc(message)}</p>` : ''}<dl class="facts"><div><dt>Nodes</dt><dd>${context.graph.summary.node_count}</dd></div><div><dt>Links</dt><dd>${context.graph.summary.edge_count}</dd></div><div><dt>Unresolved</dt><dd>${context.graph.summary.unresolved_edge_count}</dd></div><div><dt>Collisions</dt><dd>${context.graph.summary.collision_count}</dd></div><div><dt>Verification receipts</dt><dd>${context.storedReports.length}</dd></div><div><dt>Hash replay</dt><dd>${current ? `${current.counts.verified} verified / ${current.counts.mismatch} mismatch` : 'not run'}</dd></div><div><dt>External truth</dt><dd>not claimed</dd></div>${current ? `<div><dt>Report</dt><dd>${esc(current.report_id)}</dd></div>` : ''}</dl><div class="button-row"><button type="button" data-integrity-action="verify">Verify & receipt current chain</button><button type="button" class="quiet" data-integrity-action="clear" ${current ? '' : 'disabled'}>Hide verification detail</button></div>${unresolvedMarkup(context.graph)}${checkMarkup(current)}</section>`;
+  return `<section class="panel receipt-integrity" data-receipt-integrity data-integrity-key="${esc(key)}"><div class="section-heading compact-heading"><div><p class="eyebrow">The receipts should survive being questioned</p><h2>Receipt Integrity Gate</h2><p class="muted">Recompute deterministic hashes across the extended Ask → Runa renderer chain where each receipt contract permits it, and report unresolved joins or collisions without repairing history behind your back. Verification runs are themselves fingerprinted receipts.</p></div><span class="bai-topology-badge" data-state="${esc(status)}">${esc(status)}</span></div>${message ? `<p class="callout">${esc(message)}</p>` : ''}<dl class="facts"><div><dt>Nodes</dt><dd>${context.graph.summary.node_count}</dd></div><div><dt>Links</dt><dd>${context.graph.summary.edge_count}</dd></div><div><dt>Unresolved</dt><dd>${context.graph.summary.unresolved_edge_count}</dd></div><div><dt>Collisions</dt><dd>${context.graph.summary.collision_count}</dd></div><div><dt>Verification receipts</dt><dd>${context.storedReports.length}</dd></div><div><dt>Hash replay</dt><dd>${current ? `${current.counts.verified} verified / ${current.counts.mismatch} mismatch` : 'not run'}</dd></div><div><dt>External truth</dt><dd>not claimed</dd></div>${current ? `<div><dt>Report</dt><dd>${esc(current.report_id)}</dd></div>` : ''}</dl><div class="button-row"><button type="button" data-integrity-action="verify">Verify & receipt current chain</button><button type="button" class="quiet" data-integrity-action="clear" ${current ? '' : 'disabled'}>Hide verification detail</button></div>${unresolvedMarkup(context.graph)}${checkMarkup(current)}</section>`;
 }
 
 function injectStyle() {
