@@ -3,16 +3,7 @@ import { invokeConstellationRuntimeVoice } from './constellation-runtime-adapter
 
 export const SCENE_COGNITION_DEFAULT_VOICES = Object.freeze(['uial', 'lioreal']);
 
-const OBSERVATION_KINDS = new Set([
-  'dialogue',
-  'narrative',
-  'behaviour',
-  'continuity',
-  'style',
-  'sensory',
-  'relationship',
-  'observation',
-]);
+const OBSERVATION_KINDS = new Set(['dialogue', 'narrative', 'behaviour', 'continuity', 'style', 'sensory', 'relationship', 'observation']);
 
 function uuid() {
   return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -121,9 +112,7 @@ export function normaliseSceneCognitionObservations(value, packet) {
     const claim = String(item?.claim || '').trim();
     const evidence = String(item?.evidence || '').trim().slice(0, 500);
     const confidenceRaw = item?.confidence == null ? null : Number(item.confidence);
-    const confidence = Number.isFinite(confidenceRaw) && confidenceRaw >= 0 && confidenceRaw <= 1
-      ? confidenceRaw
-      : null;
+    const confidence = Number.isFinite(confidenceRaw) && confidenceRaw >= 0 && confidenceRaw <= 1 ? confidenceRaw : null;
     const observationKindRaw = String(item?.observationKind || 'observation').trim().toLowerCase();
     const observationKind = OBSERVATION_KINDS.has(observationKindRaw) ? observationKindRaw : 'observation';
     const targetVerified = allowedTargets.has(targetKey);
@@ -160,6 +149,7 @@ export function parseSceneCognitionResponse(text, packet) {
 
 export function createSceneObservationCell({ passId, voiceResult, packet, observation }) {
   if (!observation?.keepable) throw new Error('Scene observation must have an active target and verified scene evidence before it can be kept.');
+  if (voiceResult.runtimeVerified !== true || !voiceResult.profileId) throw new Error('Scene observation requires an attested runtime vessel receipt.');
   const page = packet.fieldContext?.page || {};
   const field = packet.fieldContext?.field || {};
   const now = new Date().toISOString();
@@ -185,6 +175,11 @@ export function createSceneObservationCell({ passId, voiceResult, packet, observ
       fieldKey: field.key || null,
       excerpt: observation.evidence,
       evidenceVerified: true,
+      modelProfileId: voiceResult.profileId,
+      provider: voiceResult.provider || null,
+      model: voiceResult.model || null,
+      sourceModel: voiceResult.sourceModel || null,
+      runtimeVerified: true,
     },
     scope: {
       worldIds,
@@ -207,14 +202,7 @@ export function createSceneObservationCell({ passId, voiceResult, packet, observ
       extractionMethod: 'runtime_emit',
       reviewedBy: 'user-kept-scene-evidence',
     },
-    tags: [
-      'learned',
-      'scene-cognition',
-      'evidence-verified',
-      voiceResult.voiceId,
-      observation.observationKind,
-      `subject:${observation.target.kind}:${observation.target.id}`,
-    ],
+    tags: ['learned', 'scene-cognition', 'evidence-verified', 'runtime-attested', voiceResult.voiceId, observation.observationKind, `subject:${observation.target.kind}:${observation.target.id}`],
   };
 }
 
@@ -244,6 +232,9 @@ async function invokeCognitionVoice(packet, voiceContext, passId, fetchImpl) {
         status: reply.status,
         reason: reply.reason || reply.status,
         route: reply.route || null,
+        profileId: reply.profileId || null,
+        expected: reply.expected || null,
+        actual: reply.actual || null,
         contribution: '',
         observations: [],
       };
@@ -255,8 +246,12 @@ async function invokeCognitionVoice(packet, voiceContext, passId, fetchImpl) {
       receiptId,
       status: 'replied',
       route: reply.route,
+      profileId: reply.profileId,
+      runtimeVerified: reply.runtimeVerified,
       provider: reply.provider,
       model: reply.model,
+      sourceModel: reply.sourceModel,
+      capabilities: reply.capabilities || [],
       citedSources: reply.citedSources || [],
       rawResponse: reply.message,
       ...parsed,
@@ -278,10 +273,7 @@ export async function runSceneCognitionPass(fieldContext, options = {}) {
   const voiceIds = Array.isArray(options.voiceIds) && options.voiceIds.length
     ? [...new Set(options.voiceIds.map((id) => String(id).trim().toLowerCase()).filter(Boolean))]
     : [...SCENE_COGNITION_DEFAULT_VOICES];
-  const acceptance = await buildSceneCortexAcceptanceReport(fieldContext, {
-    ...options,
-    voiceIds,
-  });
+  const acceptance = await buildSceneCortexAcceptanceReport(fieldContext, { ...options, voiceIds });
   const passId = options.passId || `scene-cognition-${uuid()}`;
   if (!acceptance.passed) {
     return {
@@ -293,23 +285,14 @@ export async function runSceneCognitionPass(fieldContext, options = {}) {
       packet: acceptance.packet,
       voiceIds,
       voices: [],
-      rules: {
-        autoStoresObservations: false,
-        userKeepRequired: true,
-        evidenceRequiredForKeep: true,
-        canonPromotion: false,
-      },
+      rules: { autoStoresObservations: false, userKeepRequired: true, evidenceRequiredForKeep: true, runtimeAttestationRequired: true, canonPromotion: false },
     };
   }
 
   const packet = acceptance.packet;
   const voiceMap = new Map((packet.voices || []).map((voice) => [voice.voiceId, voice]));
   const results = await Promise.all(voiceIds.map((voiceId) => {
-    const voiceContext = voiceMap.get(voiceId) || {
-      voiceId,
-      displayName: voiceId,
-      cells: [],
-    };
+    const voiceContext = voiceMap.get(voiceId) || { voiceId, displayName: voiceId, cells: [] };
     return invokeCognitionVoice(packet, voiceContext, passId, options.fetchImpl || globalThis.fetch);
   }));
 
@@ -326,6 +309,7 @@ export async function runSceneCognitionPass(fieldContext, options = {}) {
       autoStoresObservations: false,
       userKeepRequired: true,
       evidenceRequiredForKeep: true,
+      runtimeAttestationRequired: true,
       activeSubjectTargetRequired: true,
       canonPromotion: false,
       selfAuthorship: false,
