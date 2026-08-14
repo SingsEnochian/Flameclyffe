@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const { MODEL_PROFILES } = require('./model-profiles');
 const {
   ignitionStatus,
   inspectProfile,
@@ -62,20 +63,31 @@ router.get('/profile/:profile_id/receipt', (req, res) => {
 
 router.post('/profile/:profile_id', requireExplicitConfirmation, async (req, res) => {
   const profileId = req.params.profile_id;
+  const definition = MODEL_PROFILES[profileId];
+  if (!definition) return res.status(404).json({ error: 'unknown-profile', profileId });
+  if (definition.opt_in_only && req.body?.opt_in !== true) {
+    return res.status(403).json({
+      contract: 'bifrost.ignition-receipt/v1',
+      error: 'opt-in-required',
+      profileId,
+      state: 'opt-in-required',
+      rules: { downloadsModels: false, optionalProfileRequiresExplicitOptIn: true },
+    });
+  }
+
   try {
     const options = {
       startOllama: req.body?.start_ollama === true,
       allowRemoteProbe: req.body?.allow_remote_probe === true,
     };
-    const receipt = req.body?.opt_in === true
+    const receipt = definition.opt_in_only
       ? await igniteOptionalProfile(profileId, options)
       : await igniteProfile(profileId, options);
     const status = receipt.state === 'runtime-verified' ? 200
-      : receipt.state === 'activation-pending' ? 409
-        : receipt.state === 'credential-needed' ? 409
-          : receipt.state === 'remote-probe-not-authorised' || receipt.state === 'opt-in-required' ? 403
-            : receipt.state === 'route-unavailable' ? 503
-              : 422;
+      : receipt.state === 'activation-pending' || receipt.state === 'credential-needed' ? 409
+        : receipt.state === 'remote-probe-not-authorised' ? 403
+          : receipt.state === 'route-unavailable' ? 503
+            : 422;
     res.status(status).json({
       contract: 'bifrost.ignition-receipt/v1',
       ...receipt,
