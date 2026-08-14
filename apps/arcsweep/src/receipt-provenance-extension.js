@@ -75,6 +75,18 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
     ...(base.unresolved_edges || []).map((item) => ({ from: item.from, to: item.to, relation: item.relation })),
   ];
 
+  // If a Requested Transformation circuit explicitly says accepted DEEPTime
+  // supplied Ash, carry those source receipt ids into the graph. This is a
+  // provenance join only; it does not turn historical association into a
+  // causal claim.
+  for (const circuitNode of base.nodes.filter((item) => item.kind === 'circuit')) {
+    const baiId = circuitNode.receipt?.bai?.receipt_id;
+    for (const recordId of circuitNode.receipt?.bai?.ash_source_receipt_ids || []) {
+      const relation = edge(recordId, baiId, 'contributes-to-ash');
+      if (relation) rawEdges.push(relation);
+    }
+  }
+
   for (const candidate of obs.runa_renderer_candidates || []) {
     if (!worldMatches(worldId, candidate?.world_id)) continue;
     addNode(nodes, node(
@@ -221,6 +233,7 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
       ...base.authority,
       downstream_renderer_receipts_included: true,
       preview_intervention_receipts_included: true,
+      accepted_deep_time_to_ash_provenance_included: true,
       feedback_loop_may_be_cyclic: true,
       observation_links_are_context_not_causation_claims: true,
       audit_and_export_receipts_included_without_source_mutation: true,
