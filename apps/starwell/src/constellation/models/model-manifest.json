@@ -1,6 +1,6 @@
 {
   "schema": "bifrost.constellation-model-manifest/v2",
-  "updatedAt": "2026-08-14T08:28:00Z",
+  "updatedAt": "2026-08-14T09:20:00Z",
   "authority": "apps/starwell-server/bifrost/model-profiles.js",
   "installationRoot": ".bifrost/models",
   "runtime": {
@@ -15,7 +15,7 @@
       "profileId": "lioreal:qwen3-14b-abliterated-v1",
       "member": "Lioreal",
       "sourceLineage": "mlabonne/Qwen3-14B-abliterated",
-      "artifact": { "strategy": "gguf-import", "repo": "bartowski/mlabonne_Qwen3-14B-abliterated-GGUF", "quant": "Q4_K_M" },
+      "artifact": { "strategy": "ollama-pull", "model": "hf.co/bartowski/mlabonne_Qwen3-14B-abliterated-GGUF:Q4_K_M", "repo": "bartowski/mlabonne_Qwen3-14B-abliterated-GGUF", "quant": "Q4_K_M" },
       "runtimeName": "lioreal:starwell-v1",
       "capabilities": ["text", "writing", "reasoning"],
       "status": "PROFILE_DEFINED"
