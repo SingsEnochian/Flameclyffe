@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'node:crypto';
 import { replayMathSpinePacket } from '../../apps/starwell/src/math-spine/math-spine-packet.js';
+import { authoriseHouseRequest } from './_shared/house-session.mjs';
 
 const json = (statusCode, body) => ({ statusCode, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }, body: JSON.stringify(body) });
 const authorized = (header, expected) => {
@@ -20,7 +21,9 @@ export function createHandler({ env = process.env, fetchImpl = fetch } = {}) {
     if (event.httpMethod === 'OPTIONS') return json(204, {});
     if (event.httpMethod !== 'POST') return json(405, { error: 'POST required.' });
     const runtimeToken = env.ARCSWEEP_RUNTIME_TOKEN || env.MATH_SPINE_INGEST_TOKEN;
-    if (!authorized(event.headers?.authorization || event.headers?.Authorization, runtimeToken)) return json(401, { error: 'Valid Arcsweep runtime token required.' });
+    const request = new Request('https://runtime.invalid/api/v1/arcsweep/feedback', { headers: event.headers || {} });
+    const houseEnv = { get: (name) => env[name] };
+    if (!authoriseHouseRequest(request, houseEnv) && !authorized(event.headers?.authorization || event.headers?.Authorization, runtimeToken)) return json(401, { error: 'Valid House Runtime session required.' });
     if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return json(503, { error: 'Arcsweep relational sync is not configured.' });
     try {
       const cycle = JSON.parse(event.body || '{}');

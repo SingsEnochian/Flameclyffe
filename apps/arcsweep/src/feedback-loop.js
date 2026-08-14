@@ -238,12 +238,12 @@ export function buildVoicePromptEnvelope({ world, mode, work, premaqc, canon = [
 export async function invokeConstellationVoices({ world, mode, work, premaqc, canon = [], voiceIds = [], token, fetchImpl = fetch }) {
   const voices = voiceIds.map((id) => CONSTELLATION_VOICES.find((voice) => voice.id === id)).filter(Boolean);
   if (!voices.length) throw new Error('Select at least one Constellation voice.');
-  if (!token) throw new Error('A session-only Arcsweep runtime token is required to invoke models.');
+  if (!token) throw new Error('A House Runtime session is required to invoke models.');
   const prompt = buildVoicePromptEnvelope({ world, mode, work, premaqc, canon });
   const sessionId = `arcsweep-${world.id}-${premaqc.sequence}`;
   const settled = await Promise.allSettled(voices.map(async (voice) => {
     const response = await fetchImpl(`/api/v1/flames/${voice.route}/chat`, {
-      method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+      method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', ...(token !== 'cookie-session' ? { authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify({ message: prompt, session_id: sessionId, context: [] }),
     });
     const data = await response.json().catch(() => ({}));
@@ -259,10 +259,11 @@ export async function invokeConstellationVoices({ world, mode, work, premaqc, ca
 }
 
 export async function syncFeedbackCycle(cycle, token, fetchImpl = fetch) {
-  if (!token) throw new Error('A session-only sync token is required.');
+  if (!token) throw new Error('A House Runtime session is required.');
   const response = await fetchImpl('/api/v1/arcsweep/feedback', {
     method: 'POST',
-    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    credentials: 'same-origin',
+    headers: { 'content-type': 'application/json', ...(token !== 'cookie-session' ? { authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify(cycle),
   });
   const data = await response.json().catch(() => ({}));

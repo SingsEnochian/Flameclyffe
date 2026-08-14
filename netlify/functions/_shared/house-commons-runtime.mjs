@@ -1,16 +1,9 @@
-import { timingSafeEqual } from 'node:crypto';
+import { authoriseHouseRequest } from './house-session.mjs';
 
 const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
-const bearer = (request) => (request.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-const authorised = (actual, expected) => {
-  if (!actual || !expected) return false;
-  const left = Buffer.from(actual), right = Buffer.from(expected);
-  return left.length === right.length && timingSafeEqual(left, right);
-};
-
 export function createHouseCommonsHandler({ env, store, clock = () => new Date(), idFactory = () => crypto.randomUUID() }) {
   return async function handle(request) {
-    if (!authorised(bearer(request), env.get('ARCSWEEP_RUNTIME_TOKEN'))) return json(401, { error: 'Valid House Runtime session required.' });
+    if (!authoriseHouseRequest(request, env)) return json(401, { error: 'Valid House Runtime session required.' });
     if (request.method === 'GET') {
       const { blobs } = await store.list({ prefix: 'entries/' });
       const selected = blobs.sort((a, b) => b.key.localeCompare(a.key)).slice(0, 200);

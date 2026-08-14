@@ -1,5 +1,5 @@
-import { timingSafeEqual } from 'node:crypto';
 import manifestsModule from '../../../apps/starwell-server/flames/manifests.js';
+import { authoriseHouseRequest } from './house-session.mjs';
 
 const { FLAMES } = manifestsModule;
 
@@ -7,17 +7,6 @@ const json = (status, body) => new Response(JSON.stringify(body), {
   status,
   headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
 });
-
-function secretEqual(actual, expected) {
-  if (!actual || !expected) return false;
-  const left = Buffer.from(actual), right = Buffer.from(expected);
-  return left.length === right.length && timingSafeEqual(left, right);
-}
-
-function bearer(request) {
-  const header = request.headers.get('authorization') || '';
-  return header.startsWith('Bearer ') ? header.slice(7) : '';
-}
 
 async function providerJson(fetchImpl, url, options, label) {
   const response = await fetchImpl(url, { ...options, signal: AbortSignal.timeout(45000) });
@@ -71,8 +60,7 @@ export function flameStatus(flameId, env) {
 
 export function createFlameHandler({ env, fetchImpl = fetch } = {}) {
   return async function handle(request, params = {}) {
-    const expected = env.get('ARCSWEEP_RUNTIME_TOKEN');
-    if (!secretEqual(bearer(request), expected)) return json(401, { error: 'Valid Arcsweep runtime token required.' });
+    if (!authoriseHouseRequest(request, env)) return json(401, { error: 'Valid House Runtime session required.' });
     const flameId = params.flame_id;
     const action = params.action;
     const manifest = FLAMES[flameId];
