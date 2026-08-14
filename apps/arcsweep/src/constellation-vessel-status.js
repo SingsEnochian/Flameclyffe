@@ -77,16 +77,31 @@ function ignitionActionMarkup(voiceId, entry, live) {
   return `<button type="button" class="quiet mini" data-ignite-voice="${escapeHtml(voiceId)}" data-provider="${escapeHtml(entry.provider || '')}">${label}</button>`;
 }
 
+function identityMarkup(identity, fallback) {
+  const title = identity?.displayName || identity?.identityName || fallback;
+  const details = [];
+  if (identity?.identityName && identity.identityName !== title) details.push(identity.identityName);
+  if (identity?.affectionateName && identity.affectionateName !== title && identity.affectionateName !== identity.identityName) {
+    details.push(identity.affectionateName);
+  }
+  return {
+    title,
+    detail: details.length ? `<small>identity · ${details.map(escapeHtml).join(' · ')}</small>` : '',
+  };
+}
+
 function bindingMarkup(voiceId, entry, live = null) {
   const state = live?.state || entry?.status || 'route-unavailable';
   const model = live?.model || entry?.runtimeModel || '';
   const source = live?.sourceModel || entry?.sourceModel || '';
   const mismatch = state === 'runtime-mismatch';
+  const identity = identityMarkup(live?.identity, voiceId);
   return `<article class="constellation-vessel ${mismatch ? 'mismatch' : ''}" data-vessel-id="${escapeHtml(voiceId)}">
     <div class="constellation-vessel-title">
-      <strong>${escapeHtml(voiceId)}</strong>
+      <strong>${escapeHtml(identity.title)}</strong>
       <span>${escapeHtml(stateLabel(state))}</span>
     </div>
+    ${identity.detail}
     <div class="constellation-vessel-model">${escapeHtml(shortModel(model) || 'vessel unselected')}</div>
     ${entry?.profileId ? `<small>${escapeHtml(entry.profileId)}</small>` : ''}
     ${source ? `<small>lineage · ${escapeHtml(shortModel(source))}</small>` : ''}
@@ -212,7 +227,7 @@ function injectStyles() {
     .constellation-vessel { padding:.4rem .45rem; border-radius:.45rem; background:color-mix(in srgb,var(--panel-solid) 88%,transparent); }
     .constellation-vessel-instrument { border:1px dashed color-mix(in srgb,var(--gold) 24%,transparent); }
     .constellation-vessel.mismatch { outline:1px solid currentColor; }
-    .constellation-vessel-title { font-size:.74rem; text-transform:capitalize; }
+    .constellation-vessel-title { font-size:.74rem; text-transform:none; }
     .constellation-vessel-title span { opacity:.7; }
     .constellation-vessel-model { margin:.12rem 0; font-size:.72rem; overflow-wrap:anywhere; }
     .constellation-vessel small { display:block; font-size:.62rem; opacity:.58; overflow-wrap:anywhere; }
