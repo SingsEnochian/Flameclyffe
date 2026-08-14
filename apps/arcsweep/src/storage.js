@@ -29,7 +29,6 @@ function emptyReactionState() {
 }
 
 function normaliseReactionState(value) {
-  const defaults = emptyReactionState();
   const source = value && typeof value === 'object' ? value : {};
   const registry = source.registry && typeof source.registry === 'object' ? source.registry : {};
   const helm = source.helm && typeof source.helm === 'object' ? source.helm : {};
@@ -44,6 +43,25 @@ function normaliseReactionState(value) {
       version: 1,
       receipts: Array.isArray(helm.receipts) ? helm.receipts : [],
     },
+  };
+}
+
+function emptyGlyphContinuityState() {
+  return {
+    schema: 'glyph.continuity-ledger/v1',
+    version: 1,
+    heartbeats: [],
+    blindPairs: [],
+  };
+}
+
+function normaliseGlyphContinuityState(value) {
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    schema: 'glyph.continuity-ledger/v1',
+    version: 1,
+    heartbeats: Array.isArray(source.heartbeats) ? source.heartbeats : [],
+    blindPairs: Array.isArray(source.blindPairs) ? source.blindPairs : [],
   };
 }
 
@@ -137,6 +155,7 @@ export function createDefaultState() {
     premaqcByWorld: {},
     houseBundles: [],
     reaction: emptyReactionState(),
+    glyphContinuity: emptyGlyphContinuityState(),
     provenance: {
       createdAt: now,
       updatedAt: now,
@@ -197,6 +216,7 @@ export function normaliseState(value) {
     premaqcByWorld: imported.premaqcByWorld && typeof imported.premaqcByWorld === 'object' ? imported.premaqcByWorld : {},
     houseBundles: Array.isArray(imported.houseBundles) ? imported.houseBundles : [],
     reaction: normaliseReactionState(imported.reaction),
+    glyphContinuity: normaliseGlyphContinuityState(imported.glyphContinuity),
     provenance: {
       ...defaults.provenance,
       ...(imported.provenance || {}),
@@ -263,6 +283,7 @@ export async function loadState() {
 let saveChain = Promise.resolve();
 export function saveState(state, meta = {}) {
   mergeReactionSidecars(state);
+  state.glyphContinuity = normaliseGlyphContinuityState(state.glyphContinuity);
   state.provenance = {
     ...(state.provenance || {}),
     updatedAt: new Date().toISOString(),
@@ -303,6 +324,7 @@ function browserDownload(state) {
 export async function exportState(state) {
   const snapshot = JSON.parse(JSON.stringify(state));
   mergeReactionSidecars(snapshot);
+  snapshot.glyphContinuity = normaliseGlyphContinuityState(snapshot.glyphContinuity);
   return desktop?.exportState ? desktop.exportState(snapshot) : browserDownload(snapshot);
 }
 
