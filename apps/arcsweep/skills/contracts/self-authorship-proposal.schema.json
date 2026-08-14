@@ -12,7 +12,7 @@
     "voiceId": { "type": "string", "minLength": 1 },
     "displayName": { "type": "string", "minLength": 1 },
     "createdAt": { "type": "string", "minLength": 1 },
-    "status": { "enum": ["pending-review", "accepted", "declined"] },
+    "status": { "enum": ["pending-review", "accepted", "declined", "unavailable", "offline-no-token"] },
     "request": {
       "type": "object",
       "additionalProperties": false,
@@ -30,7 +30,7 @@
       "additionalProperties": false,
       "required": ["route", "provider", "model", "responseText"],
       "properties": {
-        "route": { "type": "string" },
+        "route": { "type": ["string", "null"] },
         "provider": { "type": ["string", "null"] },
         "model": { "type": ["string", "null"] },
         "responseText": { "type": "string" },
@@ -39,7 +39,7 @@
     },
     "claims": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "maxItems": 12,
       "items": {
         "type": "object",
