@@ -40,11 +40,13 @@ function cleanIds(value) {
 export function normaliseScriptCortexMetadata(value = {}) {
   const scriptId = String(value.scriptId || '').trim();
   if (!scriptId) throw new Error('Script cortex metadata requires a script id.');
+  const order = value.storyOrder === '' || value.storyOrder == null ? null : Number(value.storyOrder);
   return {
     contract: 'arcsweep.script-cortex-metadata/v1',
     scriptId,
     worldId: String(value.worldId || '').trim().toLowerCase() || null,
     storyAt: String(value.storyAt || '').trim() || null,
+    storyOrder: Number.isFinite(order) ? order : null,
     povCharacterId: String(value.povCharacterId || '').trim().toLowerCase() || null,
     narrativeVoiceId: String(value.narrativeVoiceId || '').trim().toLowerCase() || null,
     writingStyleId: String(value.writingStyleId || '').trim().toLowerCase() || null,
