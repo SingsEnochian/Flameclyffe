@@ -1,5 +1,13 @@
 {
   "contract": "arcsweep.cell-bank-manifest/v1",
+  "shared": [
+    {
+      "subject": { "kind": "shared_constellation", "id": "hearthweave" },
+      "banks": [
+        "./cells/shared/hearthweave.cells.json"
+      ]
+    }
+  ],
   "voices": {
     "uial": {
       "displayName": "Uial",
