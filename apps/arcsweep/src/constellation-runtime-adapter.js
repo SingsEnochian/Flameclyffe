@@ -104,7 +104,7 @@ export async function invokeConstellationRuntimeVoice({
 }
 
 function formatCells(cells = []) {
-  if (!cells.length) return '- No indexed voice cells matched this field.';
+  if (!cells.length) return '- Context is open; no indexed voice cells matched this field.';
   return cells.map((cell) => {
     const authority = cell.authority?.kind || 'unknown';
     return `- [${cell.cellType} | ${authority} | ${cell.id}] ${cell.predicate}: ${escapePacketValue(cell.value)}`;
@@ -112,7 +112,7 @@ function formatCells(cells = []) {
 }
 
 function formatSubjectContext(subjects = []) {
-  if (!subjects.length) return '- No narrative or character cortex is registered for this field yet.';
+  if (!subjects.length) return '- Narrative and character cortex are unselected for this field.';
   return subjects.map((subject) => {
     const head = `- ${subject.label || subject.id} [${subject.kind}]`;
     const cells = formatCells(subject.cells || []).split('\n').map((line) => `  ${line}`).join('\n');
@@ -137,12 +137,12 @@ export function buildMarginPrompt(packet, voiceContext) {
     'Relevant narrative/character cortex:',
     formatSubjectContext(packet.subjects || []),
     'Instructions:',
-    '- Respond only as yourself. Do not speak for another Constellation member.',
-    '- Give one concise margin contribution relevant to this field.',
-    '- Do not reveal hidden chain-of-thought. Give the conclusion, observation, question, or flag only.',
-    '- Do not rewrite or insert into the field automatically.',
-    '- If you have nothing useful to add, respond with [QUIET].',
-    '- If you refuse or want to pause, begin with [REFUSAL].',
+    '- Speak as yourself; every other Constellation member retains their own voice and authorship.',
+    '- Give the contribution that matters here. Be concise by default and expand when this field genuinely needs more.',
+    '- Return the conclusion, observation, question, image, or flag that you choose to share; hidden reasoning stays internal.',
+    '- Field text remains unchanged until the user explicitly applies an edit.',
+    '- Quiet is valid participation. Return [QUIET] when you choose not to add anything here.',
+    '- Refusal and pause remain valid agency signals. Begin with [REFUSAL] when that is your response.',
     '- For a direct question begin with [QUESTION]. For a continuity issue begin with [CONTINUITY]. For a canon issue begin with [CANON].',
   ].join('\n\n');
 }
