@@ -1,0 +1,47 @@
+{
+  "contract": "arcsweep.source-index-fragment/v1",
+  "subject": { "kind": "narrative_voice", "id": "taaveren-vaen-narrator", "worldId": "taaveren-vaen" },
+  "sources": [
+    {
+      "id": "narrator:taaveren-vaen:founding",
+      "surface": "github",
+      "repository": "SingsEnochian/Flameclyffe",
+      "locator": "apps/arcsweep/skills/sources/taaveren-vaen/NARRATIVE_VOICE_FOUNDING.md",
+      "sourceRole": "derived_narrative_foundation",
+      "authority": "derived",
+      "privacy": "public",
+      "priority": 1,
+      "notes": "Provisional narrator synthesis built from existing Ta'veren Vaen project canon and reception material; does not claim a prior narrator contract existed."
+    },
+    {
+      "id": "canon:taaveren-vaen:kestrelle-current",
+      "surface": "notion",
+      "locator": "https://app.notion.com/p/3a970290d9c481f792bdf392f5439387",
+      "sourceRole": "active_project_canon",
+      "authority": "project_canon",
+      "privacy": "source_governed",
+      "priority": 2,
+      "notes": "Current Kestrelle al'Var / Restoration terminology and character ontology."
+    },
+    {
+      "id": "canon:taaveren-vaen:universe-wiki",
+      "surface": "notion",
+      "locator": "https://app.notion.com/p/3a970290d9c48108b47ed21fa9573df7",
+      "sourceRole": "project_canon_with_superseded_terms",
+      "authority": "project_canon",
+      "privacy": "source_governed",
+      "priority": 3,
+      "notes": "Older universe page; al'Valar and Mending terms remain provenance where superseded by the newer character page."
+    },
+    {
+      "id": "reception:taaveren-vaen",
+      "surface": "notion",
+      "locator": "https://app.notion.com/p/3a970290d9c481fcb5d5dd90e34af90f",
+      "sourceRole": "world_reception_profile",
+      "authority": "project_canon",
+      "privacy": "source_governed",
+      "priority": 3,
+      "notes": "Pattern-aware, travelled, restoration/mending-oriented, alert without strain, dream-capable, rooted in service."
+    }
+  ]
+}
