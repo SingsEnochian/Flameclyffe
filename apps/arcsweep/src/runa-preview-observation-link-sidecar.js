@@ -1,7 +1,7 @@
 import { loadState, persistObservatoryStore } from './storage.js';
 import {
   createRunaPreviewObservationLink,
-  findNextFeedbackCycleForEvidenceArm,
+  findNextReviewableCycleForEvidenceArm,
 } from './runa-preview-observation-link.js';
 
 const MAX_LINKS = 48;
@@ -27,7 +27,7 @@ async function scan() {
     let changed = false;
 
     for (const arm of arms) {
-      const cycle = findNextFeedbackCycleForEvidenceArm({ arm, feedbackCycles: reviewableCycles, existingLinks: links });
+      const cycle = findNextReviewableCycleForEvidenceArm({ arm, feedbackCycles: reviewableCycles, existingLinks: links });
       if (!cycle) continue;
       const link = await createRunaPreviewObservationLink({ arm, feedbackCycle: cycle });
       links.push(structuredClone(link));
