@@ -1,11 +1,11 @@
-import { loadState } from './storage.js';
+import { loadState, persistObservatoryStore } from './storage.js';
 import { buildArcsweepProvenanceGraph } from './receipt-provenance-graph.js';
 import { verifyProvenanceGraph } from './receipt-integrity.js';
 
 const TRANSFORMATION_KEY = 'hearthgate.arcsweep.transformation-requests.v1';
+const MAX_REPORTS = 24;
 let mounting = false;
 let report = null;
-let lastGraph = null;
 
 function esc(value = '') {
   return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
@@ -30,7 +30,8 @@ async function graphContext() {
     feedbackQueue: state.feedbackQueue || null,
     observatory: state.observatory || null,
   });
-  return { world, graph };
+  const storedReports = (state.observatory?.integrity_reports || []).filter((item) => item.world_id === world.id);
+  return { state, world, graph, storedReports };
 }
 
 function statusForGraph(graph) {
@@ -53,8 +54,9 @@ function unresolvedMarkup(graph) {
 
 function render(context, message = '') {
   const status = statusForGraph(context.graph);
-  const key = `${context.world.id}:${context.graph.summary.node_count}:${context.graph.summary.edge_count}:${context.graph.summary.unresolved_edge_count}:${context.graph.summary.collision_count}:${report?.generated_at || 'none'}`;
-  return `<section class="panel receipt-integrity" data-receipt-integrity data-integrity-key="${esc(key)}"><div class="section-heading compact-heading"><div><p class="eyebrow">The receipts should survive being questioned</p><h2>Receipt Integrity Gate</h2><p class="muted">Recompute deterministic hashes where the receipt contract permits it, and report unresolved joins or collisions without repairing history behind your back.</p></div><span class="bai-topology-badge" data-state="${esc(status)}">${esc(status)}</span></div>${message ? `<p class="callout">${esc(message)}</p>` : ''}<dl class="facts"><div><dt>Nodes</dt><dd>${context.graph.summary.node_count}</dd></div><div><dt>Links</dt><dd>${context.graph.summary.edge_count}</dd></div><div><dt>Unresolved</dt><dd>${context.graph.summary.unresolved_edge_count}</dd></div><div><dt>Collisions</dt><dd>${context.graph.summary.collision_count}</dd></div><div><dt>Hash replay</dt><dd>${report ? `${report.counts.verified} verified / ${report.counts.mismatch} mismatch` : 'not run'}</dd></div><div><dt>External truth</dt><dd>not claimed</dd></div></dl><div class="button-row"><button type="button" data-integrity-action="verify">Verify current receipt chain</button><button type="button" class="quiet" data-integrity-action="clear" ${report ? '' : 'disabled'}>Clear verification view</button></div>${unresolvedMarkup(context.graph)}${checkMarkup(report)}</section>`;
+  const current = report || context.storedReports.at(-1) || null;
+  const key = `${context.world.id}:${context.graph.summary.node_count}:${context.graph.summary.edge_count}:${context.graph.summary.unresolved_edge_count}:${context.graph.summary.collision_count}:${current?.report_id || 'none'}:${context.storedReports.length}`;
+  return `<section class="panel receipt-integrity" data-receipt-integrity data-integrity-key="${esc(key)}"><div class="section-heading compact-heading"><div><p class="eyebrow">The receipts should survive being questioned</p><h2>Receipt Integrity Gate</h2><p class="muted">Recompute deterministic hashes where the receipt contract permits it, and report unresolved joins or collisions without repairing history behind your back. Verification runs are themselves fingerprinted receipts.</p></div><span class="bai-topology-badge" data-state="${esc(status)}">${esc(status)}</span></div>${message ? `<p class="callout">${esc(message)}</p>` : ''}<dl class="facts"><div><dt>Nodes</dt><dd>${context.graph.summary.node_count}</dd></div><div><dt>Links</dt><dd>${context.graph.summary.edge_count}</dd></div><div><dt>Unresolved</dt><dd>${context.graph.summary.unresolved_edge_count}</dd></div><div><dt>Collisions</dt><dd>${context.graph.summary.collision_count}</dd></div><div><dt>Verification receipts</dt><dd>${context.storedReports.length}</dd></div><div><dt>Hash replay</dt><dd>${current ? `${current.counts.verified} verified / ${current.counts.mismatch} mismatch` : 'not run'}</dd></div><div><dt>External truth</dt><dd>not claimed</dd></div>${current ? `<div><dt>Report</dt><dd>${esc(current.report_id)}</dd></div>` : ''}</dl><div class="button-row"><button type="button" data-integrity-action="verify">Verify & receipt current chain</button><button type="button" class="quiet" data-integrity-action="clear" ${current ? '' : 'disabled'}>Hide verification detail</button></div>${unresolvedMarkup(context.graph)}${checkMarkup(current)}</section>`;
 }
 
 function injectStyle() {
@@ -77,7 +79,6 @@ async function mount(message = '') {
     injectStyle();
     const context = await graphContext();
     if (!context) return;
-    lastGraph = context.graph;
     const existing = document.querySelector('[data-receipt-integrity]');
     const html = render(context, message);
     if (existing) existing.outerHTML = html;
@@ -92,13 +93,27 @@ document.addEventListener('click', async (event) => {
       const context = await graphContext();
       if (!context) throw new Error('No active world is available.');
       report = await verifyProvenanceGraph(context.graph);
-      await mount(`Integrity replay completed as ${report.status}. A hash match verifies receipt integrity, not external truth.`);
+      const observatory = structuredClone(context.state.observatory || {});
+      const reports = (observatory.integrity_reports || []).filter((item) => item.report_id !== report.report_id);
+      observatory.integrity_reports = [...reports, structuredClone(report)].slice(-MAX_REPORTS);
+      await persistObservatoryStore(observatory, {
+        reason: 'receipt-integrity-verification',
+        reportId: report.report_id,
+        reportFingerprint: report.report_fingerprint,
+      });
+      await mount(`Integrity replay receipted as ${report.report_id} · ${report.status}. A hash match verifies receipt integrity, not external truth.`);
     } catch (error) { await mount(`Integrity replay stopped: ${error.message}`); }
     return;
   }
   const clear = event.target.closest('[data-integrity-action="clear"]');
   if (!clear) return;
   report = null;
+  const context = await graphContext();
+  if (context?.storedReports.length) {
+    const panel = document.querySelector('[data-receipt-integrity]');
+    if (panel) panel.outerHTML = render({ ...context, storedReports: [] });
+    return;
+  }
   await mount();
 });
 
