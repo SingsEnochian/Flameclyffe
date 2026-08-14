@@ -7,6 +7,7 @@ import { reviewDeepTheoryCandidate } from '../src/deep-theory-review.js';
 import { createDeepTimeRecordFromAcceptedFeedback, buildDeepTimeWindow } from '../src/deep-time-bridge.js';
 import { createTheoryGroundedAcceptanceAdvice } from '../src/theory-grounded-acceptance-advisor.js';
 import { createDomainContextMapping } from '../src/domain-context-mapping.js';
+import { createRunaTrajectorySuggestion } from '../src/runa-trajectory-suggestion.js';
 
 const AXES = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
 
@@ -131,4 +132,17 @@ test('accepted same-domain theory plus sufficient DEEPTime yields review gate, n
   assert.equal(advice.recommendation.status, 'REVIEW_ACCEPTANCE_GATE');
   assert.equal(advice.recommendation.human_review_required, true);
   assert.equal(advice.authority.accepts_state_automatically, false);
+});
+
+test('Runa receives only a semantic trajectory suggestion and does not activate sound or haptics', async () => {
+  const { review } = await acceptedTheory('arcsweep-feedback');
+  const records = await threeDeepTimeRecords();
+  const advice = await createTheoryGroundedAcceptanceAdvice({ theoryReviewReceipt: review, deepTimeRecords: records, contextDomain: 'arcsweep-feedback' });
+  const suggestion = await createRunaTrajectorySuggestion({ advisorReceipt: advice, deepTimeRecords: records, worldId: 'terra-aeterna', generatedAt: '2026-08-14T10:06:00.000Z' });
+  assert.equal(suggestion.authority.suggestion_only, true);
+  assert.equal(suggestion.authority.semantic_to_dsp_separation_preserved, true);
+  assert.equal(suggestion.authority.sensory_bus_published, false);
+  assert.equal(suggestion.authority.world_tone_changed, false);
+  assert.equal(suggestion.authority.haptic_changed, false);
+  assert.ok(suggestion.subsystem_suggestions.every((item) => item.dsp_parameters_assigned === false));
 });
