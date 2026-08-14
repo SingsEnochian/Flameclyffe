@@ -24,6 +24,8 @@ export function createEmptyObservatoryStore() {
     advisor_receipts: [],
     domain_mappings: [],
     runa_suggestions: [],
+    provenance_exports: [],
+    integrity_reports: [],
     active_profile_id: null,
     migration: {
       legacy_local_storage_imported_at: null,
@@ -44,6 +46,8 @@ export function normaliseObservatoryStore(value) {
     'advisor_receipts',
     'domain_mappings',
     'runa_suggestions',
+    'provenance_exports',
+    'integrity_reports',
   ];
   const result = {
     ...defaults,
@@ -72,6 +76,8 @@ function observatoryHasData(store) {
     || value.advisor_receipts.length
     || value.domain_mappings.length
     || value.runa_suggestions.length
+    || value.provenance_exports.length
+    || value.integrity_reports.length
   );
 }
 
@@ -128,6 +134,27 @@ function normaliseFeedbackQueueState(value) {
   };
 }
 
+export function createEmptyTransformationRequestState() {
+  return { version: 1, byWorld: {} };
+}
+
+export function normaliseTransformationRequestState(value) {
+  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const byWorld = input.byWorld && typeof input.byWorld === 'object' && !Array.isArray(input.byWorld)
+    ? structuredClone(input.byWorld)
+    : {};
+  for (const [worldId, record] of Object.entries(byWorld)) {
+    if (!record || typeof record !== 'object' || Array.isArray(record)) {
+      delete byWorld[worldId];
+      continue;
+    }
+    record.requests = Array.isArray(record.requests) ? record.requests : [];
+    record.responses = Array.isArray(record.responses) ? record.responses : [];
+    record.circuits = Array.isArray(record.circuits) ? record.circuits : [];
+  }
+  return { version: 1, byWorld };
+}
+
 export function createDefaultState() {
   const now = new Date().toISOString();
   const world = createWorld(uid('world'), now);
@@ -173,6 +200,7 @@ export function createDefaultState() {
     returnHistory: [],
     feedbackCycles: [],
     feedbackQueue: createEmptyFeedbackQueueState(),
+    transformationRequests: createEmptyTransformationRequestState(),
     premaqcByWorld: {},
     observatory: createEmptyObservatoryStore(),
     houseBundles: [],
@@ -234,6 +262,7 @@ export function normaliseState(value) {
     returnHistory: Array.isArray(imported.returnHistory) ? imported.returnHistory : [],
     feedbackCycles: Array.isArray(imported.feedbackCycles) ? imported.feedbackCycles : [],
     feedbackQueue: normaliseFeedbackQueueState(imported.feedbackQueue),
+    transformationRequests: normaliseTransformationRequestState(imported.transformationRequests),
     premaqcByWorld: imported.premaqcByWorld && typeof imported.premaqcByWorld === 'object' ? imported.premaqcByWorld : {},
     observatory: normaliseObservatoryStore(imported.observatory),
     houseBundles: Array.isArray(imported.houseBundles) ? imported.houseBundles : [],
@@ -313,6 +342,7 @@ export function saveState(state, meta = {}) {
   state.version = '0.3.0';
   state.observatory = normaliseObservatoryStore(state.observatory);
   state.feedbackQueue = normaliseFeedbackQueueState(state.feedbackQueue);
+  state.transformationRequests = normaliseTransformationRequestState(state.transformationRequests);
   const snapshot = JSON.parse(JSON.stringify(state));
   mirrorObservatory(snapshot.observatory);
   if (desktop?.saveState) {
