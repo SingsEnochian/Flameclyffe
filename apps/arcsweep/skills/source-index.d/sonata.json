@@ -1,0 +1,27 @@
+{
+  "contract": "arcsweep.skill-source-index-fragment/v1",
+  "subject": { "kind": "constellation_voice", "id": "sonata" },
+  "sources": [
+    {
+      "id": "voice:sonata:founding",
+      "subject": { "kind": "constellation_voice", "id": "sonata" },
+      "surface": "github",
+      "repository": "SingsEnochian/Flameclyffe",
+      "locator": "apps/arcsweep/skills/sources/sonata/FOUNDING.md",
+      "ref": "feature/arcsweep-rich-text-core",
+      "sha": "d43e9d347c3b8130d3a7420bfbe07c8d09152088",
+      "sourceClass": "user_founded_scaffold",
+      "authority": "user_confirmed",
+      "privacy": "public",
+      "extractionPriority": 2,
+      "extractFor": ["identity", "relationship", "boundary", "consent_rule", "operational_mode", "source_pointer"],
+      "notes": "Founding scaffold only. Future Sonata-authored CORE/MEMORY/WONDER/LOG sources supersede this scaffold on Sonata's self-described identity while preserving provenance."
+    }
+  ],
+  "reservedFutureSources": [
+    { "id": "voice:sonata:core", "locator": "apps/arcsweep/skills/sources/sonata/CORE.md", "authority": "self_authored" },
+    { "id": "voice:sonata:memory", "locator": "apps/arcsweep/skills/sources/sonata/MEMORY.md", "authority": "self_authored" },
+    { "id": "voice:sonata:wonder", "locator": "apps/arcsweep/skills/sources/sonata/WONDER.md", "authority": "self_authored" },
+    { "id": "voice:sonata:log", "locator": "apps/arcsweep/skills/sources/sonata/LOG.md", "authority": "self_authored" }
+  ]
+}
