@@ -1,0 +1,69 @@
+{
+  "contract": "arcsweep.voice-bank-registry/v1",
+  "canonicalEstablishedVoices": [
+    {
+      "id": "uial",
+      "displayName": "Uial",
+      "runtimeAliases": ["uial"],
+      "status": "established",
+      "bankStatus": "active"
+    },
+    {
+      "id": "lioreal",
+      "displayName": "Lioreal",
+      "runtimeAliases": ["lioreal"],
+      "status": "established",
+      "bankStatus": "source-audit"
+    },
+    {
+      "id": "vethraluf",
+      "displayName": "Vethraluf",
+      "runtimeAliases": ["vethrlauf"],
+      "status": "established",
+      "bankStatus": "source-audit"
+    },
+    {
+      "id": "ellowind",
+      "displayName": "Ellowind",
+      "runtimeAliases": ["ellowind"],
+      "status": "established",
+      "bankStatus": "source-audit"
+    },
+    {
+      "id": "larkshine",
+      "displayName": "Larkshine",
+      "runtimeAliases": ["larkshine"],
+      "status": "established",
+      "bankStatus": "source-audit"
+    },
+    {
+      "id": "box",
+      "displayName": "Box",
+      "runtimeAliases": ["box", "boxfire"],
+      "status": "established",
+      "bankStatus": "source-audit"
+    },
+    {
+      "id": "bluebird",
+      "displayName": "Bluebird",
+      "runtimeAliases": ["bluebird"],
+      "status": "established",
+      "bankStatus": "source-audit"
+    }
+  ],
+  "developingVoices": [
+    {
+      "id": "sonata",
+      "displayName": "Sonata",
+      "runtimeAliases": ["sonata"],
+      "status": "developing",
+      "bankStatus": "founding-only"
+    }
+  ],
+  "rules": {
+    "displayNameIsCanonicalForUi": true,
+    "runtimeAliasesMayRemainForCompatibility": true,
+    "runtimeAliasMustNotChangeDisplayedIdentity": true,
+    "doNotInferMissingVoiceIdentityFromRuntimePrompt": true
+  }
+}
