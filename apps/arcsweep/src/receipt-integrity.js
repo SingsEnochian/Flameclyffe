@@ -135,6 +135,11 @@ async function verifyRunaRendererReview(node) {
   return verifyHash(node, receipt?.review_fingerprint, cloneWithout(receipt, ['review_id', 'review_fingerprint']));
 }
 
+async function verifyRunaPreviewPalette(node) {
+  const receipt = node.receipt;
+  return verifyHash(node, receipt?.palette_fingerprint, cloneWithout(receipt, ['palette_id', 'palette_fingerprint']));
+}
+
 async function verifyRunaPreviewPlan(node) {
   const receipt = node.receipt;
   return verifyHash(node, receipt?.plan_fingerprint, cloneWithout(receipt, ['plan_id', 'plan_fingerprint']));
@@ -180,6 +185,7 @@ const VERIFIERS = Object.freeze({
   runa: verifyRuna,
   runa_renderer_candidate: verifyRunaRendererCandidate,
   runa_renderer_review: verifyRunaRendererReview,
+  runa_preview_palette: verifyRunaPreviewPalette,
   runa_preview_plan: verifyRunaPreviewPlan,
   runa_preview_render: verifyRunaPreviewRender,
   runa_preview_evidence_arm: verifyRunaPreviewEvidenceArm,
