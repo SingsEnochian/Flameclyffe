@@ -15,6 +15,7 @@ const { fork } = require('node:child_process');
 const net = require('node:net');
 const { fileURLToPath, pathToFileURL } = require('node:url');
 const {
+  mergeHearthgateConfigSecrets,
   redactHearthgateConfig,
   sanitiseHearthgateConfig,
 } = require('../security/local-boundary');
@@ -255,7 +256,12 @@ ipcMain.handle('get-config', () => redactHearthgateConfig(loadConfig()));
 
 ipcMain.handle('save-config', async (_event, input) => {
   try {
-    const cfg = saveConfig(input);
+    const existing = loadConfig();
+    const merged = mergeHearthgateConfigSecrets(input, existing);
+    if (!merged.keys.runtime) {
+      throw new Error('House runtime token is required. Generate or enter one in setup.');
+    }
+    const cfg = saveConfig(merged);
     startServer(cfg);
     await waitForServer(PORT);
     win?.loadURL(primaryApplicationUrl());
