@@ -1,5 +1,6 @@
 import { resolveVoiceCells } from './knowledge-bank-loader.js';
 import { CONSTELLATION_LENS_EVENTS } from './constellation-lens.js';
+import { loadState } from './storage.js';
 
 const SELECTION_KEY = 'arcsweep.constellation-selection/v1';
 const READY_EVENT = 'arcsweep:writer-context-ready';
@@ -57,23 +58,65 @@ function fieldCellTypes(fieldContext = {}) {
 }
 
 function requestedMode(fieldContext = {}) {
-  if (typeof document === 'undefined') return 'writing';
+  if (typeof document === 'undefined') return fieldContext.mode || 'writing';
   return document.body?.dataset.constellationMode || fieldContext.mode || 'writing';
 }
 
+function findDocument(state, documentId) {
+  if (!state || !documentId) return null;
+  const script = (state.scripts || []).find((item) => item.id === documentId);
+  if (script) return { kind: 'script', value: script };
+  for (const [roomId, records] of Object.entries(state.records || {})) {
+    const record = (records || []).find((item) => item.id === documentId);
+    if (record) return { kind: roomId, value: record };
+  }
+  return null;
+}
+
+export async function hydrateWriterFieldContext(fieldContext, { stateLoader = loadState } = {}) {
+  const hydrated = structuredClone(fieldContext || {});
+  hydrated.page = { ...(hydrated.page || {}) };
+  hydrated.form = { ...(hydrated.form || {}) };
+  if (typeof document === 'undefined' || typeof stateLoader !== 'function') return hydrated;
+
+  try {
+    const state = await stateLoader();
+    const documentId = hydrated.page.documentId || hydrated.form.recordId || null;
+    const found = findDocument(state, documentId);
+    const worldId = hydrated.page.worldId
+      || found?.value?.worldId
+      || (hydrated.form.id === 'world-registry-form' ? documentId : null)
+      || state.activeWorldId
+      || null;
+    const world = (state.worlds || []).find((item) => item.id === worldId) || null;
+
+    hydrated.page.documentId = documentId;
+    hydrated.page.documentKind = found?.kind || null;
+    hydrated.page.worldId = worldId;
+    hydrated.page.worldName = hydrated.page.worldName || world?.name || null;
+    hydrated.page.activeWorldId = state.activeWorldId || null;
+  } catch {
+    // Context hydration is best-effort. The field packet remains valid with local form data only.
+  }
+  return hydrated;
+}
+
 export async function buildWriterContextPacket(fieldContext, options = {}) {
+  const hydratedFieldContext = options.resolveLocalState === false
+    ? fieldContext
+    : await hydrateWriterFieldContext(fieldContext, { stateLoader: options.stateLoader || loadState });
   const selected = parseVoiceList(options.voiceIds?.length ? options.voiceIds : getSelectedConstellationVoices());
-  const cellTypes = options.cellTypes || fieldCellTypes(fieldContext);
-  const mode = options.mode || requestedMode(fieldContext);
+  const cellTypes = options.cellTypes || fieldCellTypes(hydratedFieldContext);
+  const mode = options.mode || requestedMode(hydratedFieldContext);
   const voiceContexts = [];
 
   for (const voiceId of selected) {
     const resolved = await resolveVoiceCells(voiceId, {
       cellTypes,
       mode,
-      worldId: fieldContext.page?.worldId || null,
-      documentId: fieldContext.page?.documentId || null,
-      sceneId: fieldContext.page?.sceneId || null,
+      worldId: hydratedFieldContext.page?.worldId || null,
+      documentId: hydratedFieldContext.page?.documentId || null,
+      sceneId: hydratedFieldContext.page?.sceneId || null,
       at: options.at || null,
       includeHistorical: Boolean(options.includeHistorical),
       limit: options.perVoiceLimit || 36,
@@ -92,7 +135,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
     requestId: options.requestId || globalThis.crypto?.randomUUID?.() || `writer-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     createdAt: new Date().toISOString(),
     mode,
-    fieldContext,
+    fieldContext: hydratedFieldContext,
     selection: {
       requestedVoiceIds: selected,
       resolvedVoiceIds: voiceContexts.map((voice) => voice.voiceId),
