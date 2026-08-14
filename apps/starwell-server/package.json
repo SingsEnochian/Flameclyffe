@@ -14,6 +14,8 @@
     "stage:starwell": "node scripts/stage-starwell.js",
     "prepare:assets": "node scripts/prepare-assets.js",
     "bifrost:models": "node scripts/bifrost-model-prepare.js",
+    "bifrost:ignite": "node scripts/bifrost-ignite.js",
+    "bifrost:ignite:status": "node scripts/bifrost-ignite.js status",
     "test": "node --test test/*.test.js",
     "electron:dev": "npm run prepare:assets && electron .",
     "electron:pack:win": "npm run prepare:assets && electron-builder --win dir --x64 --publish never && npm run verify:dual-aspect-package",
