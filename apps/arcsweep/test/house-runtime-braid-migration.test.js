@@ -54,6 +54,7 @@ test('Runtime Braid service role receives only the ledger privileges used by the
   }
   assert.match(leastPrivilegeMigration, /revoke all on sequence public\.house_runtime_events_event_sequence_seq from service_role/i);
   assert.match(leastPrivilegeMigration, /grant usage, select on sequence public\.house_runtime_events_event_sequence_seq to service_role/i);
+  assert.match(leastPrivilegeMigration, /create index if not exists house_runtime_events_cycle_id_idx\s+on public\.house_runtime_events \(cycle_id\)/i);
 });
 
 test('Runtime Braid event spine is published to Realtime through the sealed server stream', () => {
