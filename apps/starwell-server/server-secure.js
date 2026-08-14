@@ -4,6 +4,7 @@ const http = require('node:http');
 const originalCors = require('cors');
 const originalExpress = require('express');
 const { localCorsOptions } = require('./security/local-boundary');
+const { createLegacyMemberChatHandler } = require('./bifrost/legacy-chat-adapter');
 
 const corsPath = require.resolve('cors');
 const expressPath = require.resolve('express');
@@ -29,6 +30,18 @@ function hardenedExpress(...args) {
     if (req.path?.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
     next();
   });
+
+  // Compatibility bridge: server.js still registers a historical /api/chat
+  // handler with its own stale provider/model roster. Under the secure desktop
+  // entrypoint this earlier route owns /api/chat and proxies legacy member IDs
+  // into the authoritative Bifröst/Flame router instead. The later stale route
+  // remains unreachable unless somebody deliberately bypasses server-secure.js.
+  app.post(
+    '/api/chat',
+    originalExpress.json({ limit: '1mb' }),
+    createLegacyMemberChatHandler()
+  );
+
   return app;
 }
 for (const key of Reflect.ownKeys(originalExpress)) {
