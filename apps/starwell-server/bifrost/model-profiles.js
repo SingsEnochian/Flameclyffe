@@ -30,7 +30,8 @@ const MODEL_PROFILES = Object.freeze({
     owner: 'uial',
     source: { kind: 'huggingface', repo: 'tvall43/Qwen3.6-14B-A3B-FableVibes' },
     artifact: {
-      strategy: 'gguf-import',
+      strategy: 'ollama-pull',
+      model: 'hf.co/tvall43/Qwen3.6-14B-A3B-FableVibes-GGUF:Q4_K_M',
       repo: 'tvall43/Qwen3.6-14B-A3B-FableVibes-GGUF',
       quant: 'Q4_K_M',
     },
@@ -50,7 +51,8 @@ const MODEL_PROFILES = Object.freeze({
     owner: 'box',
     source: { kind: 'huggingface', repo: 'huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated' },
     artifact: {
-      strategy: 'gguf-import',
+      strategy: 'ollama-pull',
+      model: 'hf.co/mradermacher/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated-GGUF:Q4_K_M',
       repo: 'mradermacher/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated-GGUF',
       quant: 'Q4_K_M',
     },
@@ -142,7 +144,8 @@ const MODEL_PROFILES = Object.freeze({
     owner: 'shared',
     source: { kind: 'huggingface', repo: 'huihui-ai/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated' },
     artifact: {
-      strategy: 'gguf-import',
+      strategy: 'ollama-pull',
+      model: 'hf.co/mradermacher/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated-GGUF:Q4_K_M',
       repo: 'mradermacher/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated-GGUF',
       quant: 'Q4_K_M',
     },
