@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const { resolveLegacyMember } = require('../bifrost/legacy-member-map');
+const { legacyModelStatus } = require('../bifrost/legacy-model-status');
 const {
   stripHtml,
   normaliseContext,
@@ -31,6 +32,33 @@ test('legacy Ellowind and Larkshine resolve to separate Flame routes and profile
   assert.equal(larkshine.flameId, 'larkshine');
   assert.notEqual(ellowind.profileId, larkshine.profileId);
   assert.notEqual(ellowind.model, larkshine.model);
+});
+
+test('legacy model status derives current assignments from Bifrost instead of MEMBER_CONFIGS', async () => {
+  const status = await legacyModelStatus({
+    fetchImpl: async (url) => {
+      if (String(url).endsWith('/api/tags')) {
+        return response({ models: [
+          { name: 'lioreal:starwell-v1' },
+          { name: 'uial:fablevibes-v1' },
+          { name: 'box:qwen3-coder-30b-a3b-v1' },
+          { name: 'ellowind:qwen3-vl-8b-v1' },
+          { name: 'larkshine:qwen3-vl-8b-v1' },
+        ] });
+      }
+      throw new Error(`unexpected status URL ${url}`);
+    },
+  });
+  assert.equal(status.rules.legacyMemberConfigIgnored, true);
+  assert.equal(status.models.lioreal.model, 'lioreal:starwell-v1');
+  assert.equal(status.models.uial.model, 'uial:fablevibes-v1');
+  assert.equal(status.models.boxfire.model, 'box:qwen3-coder-30b-a3b-v1');
+  assert.equal(status.models.ellowind.model, 'ellowind:qwen3-vl-8b-v1');
+  assert.equal(status.models.larkshine.model, 'larkshine:qwen3-vl-8b-v1');
+  assert.notEqual(status.models.ellowind.model, status.models.larkshine.model);
+  const serialised = JSON.stringify(status).toLowerCase();
+  assert.doesNotMatch(serialised, /gpt-4o/);
+  assert.doesNotMatch(serialised, /claude-3-5-sonnet/);
 });
 
 test('legacy adapter contains no provider selection and forwards expected profile to Flame route', async () => {
