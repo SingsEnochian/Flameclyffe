@@ -41,9 +41,23 @@ function edge(from, to, relation, extra = {}) {
   return Object.freeze({ from, to, relation, ...extra });
 }
 
-function addNode(nodes, value) {
+function addNode(nodes, value, collisions) {
   if (!value) return;
-  if (!nodes.has(value.id)) nodes.set(value.id, value);
+  const existing = nodes.get(value.id);
+  if (!existing) {
+    nodes.set(value.id, value);
+    return;
+  }
+  const sameKind = existing.kind === value.kind;
+  const sameReceipt = JSON.stringify(existing.receipt) === JSON.stringify(value.receipt);
+  if (!sameKind || !sameReceipt) {
+    collisions.push(Object.freeze({
+      id: value.id,
+      existing_kind: existing.kind,
+      incoming_kind: value.kind,
+      same_receipt: sameReceipt,
+    }));
+  }
 }
 
 function addEdge(edges, value) {
@@ -76,19 +90,31 @@ export function buildArcsweepProvenanceGraph({
 } = {}) {
   const nodes = new Map();
   const edges = new Map();
+  const collisions = [];
   const obs = observatory && typeof observatory === 'object' ? observatory : {};
+  const putNode = (value) => addNode(nodes, value, collisions);
 
   for (const [recordWorldId, record] of transformationRecords(transformations, worldId)) {
     for (const request of record?.requests || []) {
       if (!worldMatches(worldId, request?.world?.id || recordWorldId)) continue;
-      addNode(nodes, node(request.request_id, 'ask', requestLabel(request), request, {
+      putNode(node(request.request_id, 'ask', requestLabel(request), request, {
         world_id: request?.world?.id || recordWorldId,
         timestamp: request.requested_at || null,
       }));
     }
+
+    for (const response of record?.responses || []) {
+      if (!worldMatches(worldId, response?.world?.id || recordWorldId)) continue;
+      putNode(node(response.response_id, 'response', `Measured Response · ${response.classification?.status || 'observed'}`, response, {
+        world_id: response?.world?.id || recordWorldId,
+        timestamp: response.observed_at || null,
+      }));
+      addEdge(edges, edge(response.request_id, response.response_id, 'measured-response'));
+    }
+
     for (const circuit of record?.circuits || []) {
       if (!worldMatches(worldId, circuitWorld(circuit) || recordWorldId)) continue;
-      addNode(nodes, node(circuit.circuit_id, 'circuit', 'Requested Transformation Circuit', circuit, {
+      putNode(node(circuit.circuit_id, 'circuit', 'Requested Transformation Circuit', circuit, {
         world_id: circuitWorld(circuit) || recordWorldId,
         timestamp: circuit.created_at || null,
       }));
@@ -97,7 +123,7 @@ export function buildArcsweepProvenanceGraph({
 
       const cuspId = circuit.cusp?.envelope_id || circuit.cusp?.observation_packet?.packet_id || null;
       if (cuspId) {
-        addNode(nodes, node(cuspId, 'cusp', 'Cusp Observation', circuit.cusp, {
+        putNode(node(cuspId, 'cusp', 'Cusp Observation', circuit.cusp, {
           world_id: circuitWorld(circuit) || recordWorldId,
           timestamp: circuit.created_at || null,
         }));
@@ -107,7 +133,7 @@ export function buildArcsweepProvenanceGraph({
       const baiId = circuit.bai?.receipt_id || null;
       if (baiId) {
         const topology = circuit.bai?.topology?.state || circuit.bai?.topology?.topology_state || 'BAI Topology';
-        addNode(nodes, node(baiId, 'bai', `BAI · ${topology}`, circuit.bai, {
+        putNode(node(baiId, 'bai', `BAI · ${topology}`, circuit.bai, {
           world_id: circuitWorld(circuit) || recordWorldId,
           timestamp: circuit.created_at || null,
         }));
@@ -117,7 +143,7 @@ export function buildArcsweepProvenanceGraph({
 
       const responseId = circuit.measured_response?.response_id || null;
       if (responseId) {
-        addNode(nodes, node(responseId, 'response', `Measured Response · ${circuit.measured_response?.classification?.status || 'observed'}`, circuit.measured_response, {
+        putNode(node(responseId, 'response', `Measured Response · ${circuit.measured_response?.classification?.status || 'observed'}`, circuit.measured_response, {
           world_id: circuitWorld(circuit) || recordWorldId,
           timestamp: circuit.measured_response?.observed_at || circuit.created_at || null,
         }));
@@ -128,7 +154,7 @@ export function buildArcsweepProvenanceGraph({
 
   for (const cycle of feedbackCycles || []) {
     if (!worldMatches(worldId, cycle?.world?.id)) continue;
-    addNode(nodes, node(cycle.cycle_id, 'feedback', `Feedback · ${cycle.turn?.mode || 'cycle'}`, cycle, {
+    putNode(node(cycle.cycle_id, 'feedback', `Feedback · ${cycle.turn?.mode || 'cycle'}`, cycle, {
       world_id: cycle?.world?.id || null,
       timestamp: cycle.created_at || cycle.premaqc_after?.observed_at || null,
     }));
@@ -138,7 +164,7 @@ export function buildArcsweepProvenanceGraph({
     if (!worldMatches(worldId, entry?.world?.id)) continue;
     const reviewId = entry.review_receipt_id || entry.entry_id;
     if (!reviewId) continue;
-    addNode(nodes, node(reviewId, 'feedback_review', `Feedback Review · ${entry.status || 'pending'}`, entry, {
+    putNode(node(reviewId, 'feedback_review', `Feedback Review · ${entry.status || 'pending'}`, entry, {
       world_id: entry?.world?.id || null,
       timestamp: entry.reviewed_at || entry.enqueued_at || null,
     }));
@@ -147,7 +173,7 @@ export function buildArcsweepProvenanceGraph({
 
   for (const record of obs.deep_time_records || []) {
     if (!worldMatches(worldId, record?.world_id)) continue;
-    addNode(nodes, node(record.id, 'deep_time', `DEEPTime · λ ${record.lambda}`, record, {
+    putNode(node(record.id, 'deep_time', `DEEPTime · λ ${record.lambda}`, record, {
       world_id: record.world_id || null,
       timestamp: record.time?.utc || null,
     }));
@@ -157,7 +183,7 @@ export function buildArcsweepProvenanceGraph({
   }
 
   for (const sweep of obs.sweeps || []) {
-    addNode(nodes, node(sweep.sweep_id, 'domain_sweep', `Domain Sweep · ${sweep.profile?.name || sweep.profile?.domain || 'normal form'}`, sweep, {
+    putNode(node(sweep.sweep_id, 'domain_sweep', `Domain Sweep · ${sweep.profile?.name || sweep.profile?.domain || 'normal form'}`, sweep, {
       world_id: null,
       timestamp: sweep.generated_at || null,
     }));
@@ -165,7 +191,7 @@ export function buildArcsweepProvenanceGraph({
 
   for (const candidate of obs.theory_candidates || []) {
     const id = candidate.receipt_id || candidate.record?.id;
-    addNode(nodes, node(id, 'theory_candidate', `DEEPTheory Candidate · ${candidate.record?.title || 'topology model'}`, candidate, {
+    putNode(node(id, 'theory_candidate', `DEEPTheory Candidate · ${candidate.record?.title || 'topology model'}`, candidate, {
       world_id: null,
       timestamp: candidate.created_at || candidate.record?.created_at || null,
     }));
@@ -173,7 +199,7 @@ export function buildArcsweepProvenanceGraph({
   }
 
   for (const review of obs.theory_reviews || []) {
-    addNode(nodes, node(review.receipt_id, 'theory_review', `DEEPTheory Review · ${review.decision || review.reviewed_record?.status || 'reviewed'}`, review, {
+    putNode(node(review.receipt_id, 'theory_review', `DEEPTheory Review · ${review.decision || review.reviewed_record?.status || 'reviewed'}`, review, {
       world_id: null,
       timestamp: review.reviewed_at || null,
     }));
@@ -181,14 +207,14 @@ export function buildArcsweepProvenanceGraph({
   }
 
   for (const mapping of obs.domain_mappings || []) {
-    addNode(nodes, node(mapping.mapping_id, 'domain_mapping', `Domain Mapping · ${mapping.from_domain} → ${mapping.to_domain}`, mapping, {
+    putNode(node(mapping.mapping_id, 'domain_mapping', `Domain Mapping · ${mapping.from_domain} → ${mapping.to_domain}`, mapping, {
       world_id: null,
       timestamp: mapping.declared_at || null,
     }));
   }
 
   for (const advisor of obs.advisor_receipts || []) {
-    addNode(nodes, node(advisor.receipt_id, 'advisor', `Advisor · ${advisor.recommendation?.status || 'receipt'}`, advisor, {
+    putNode(node(advisor.receipt_id, 'advisor', `Advisor · ${advisor.recommendation?.status || 'receipt'}`, advisor, {
       world_id: null,
       timestamp: advisor.generated_at || null,
     }));
@@ -200,7 +226,7 @@ export function buildArcsweepProvenanceGraph({
   }
 
   for (const suggestion of obs.runa_suggestions || []) {
-    addNode(nodes, node(suggestion.suggestion_id, 'runa', 'Runa Trajectory Suggestion', suggestion, {
+    putNode(node(suggestion.suggestion_id, 'runa', 'Runa Trajectory Suggestion', suggestion, {
       world_id: suggestion.world_id || null,
       timestamp: suggestion.generated_at || null,
     }));
@@ -210,7 +236,15 @@ export function buildArcsweepProvenanceGraph({
     }
   }
 
-  const usableEdges = [...edges.values()].filter((item) => nodes.has(item.from) && nodes.has(item.to));
+  const allEdges = [...edges.values()];
+  const usableEdges = allEdges.filter((item) => nodes.has(item.from) && nodes.has(item.to));
+  const unresolvedEdges = allEdges.filter((item) => !nodes.has(item.from) || !nodes.has(item.to)).map((item) => Object.freeze({
+    ...item,
+    missing: Object.freeze([
+      ...(nodes.has(item.from) ? [] : [item.from]),
+      ...(nodes.has(item.to) ? [] : [item.to]),
+    ]),
+  }));
   const orderedNodes = [...nodes.values()].sort((left, right) => {
     if (left.stage !== right.stage) return left.stage - right.stage;
     const time = String(left.timestamp || '').localeCompare(String(right.timestamp || ''));
@@ -222,9 +256,13 @@ export function buildArcsweepProvenanceGraph({
     world_id: worldId,
     nodes: Object.freeze(orderedNodes),
     edges: Object.freeze(usableEdges),
+    unresolved_edges: Object.freeze(unresolvedEdges),
+    collisions: Object.freeze(collisions),
     summary: Object.freeze({
       node_count: orderedNodes.length,
       edge_count: usableEdges.length,
+      unresolved_edge_count: unresolvedEdges.length,
+      collision_count: collisions.length,
       by_kind: Object.freeze(orderedNodes.reduce((acc, item) => {
         acc[item.kind] = (acc[item.kind] || 0) + 1;
         return acc;
@@ -234,6 +272,7 @@ export function buildArcsweepProvenanceGraph({
       derived_view_only: true,
       source_receipts_mutable: false,
       missing_links_are_not_invented: true,
+      collisions_are_reported_not_silently_resolved: true,
       cross_domain_numeric_equivalence_assumed: false,
       canon_commit: false,
       physical_claim: false,
@@ -241,10 +280,28 @@ export function buildArcsweepProvenanceGraph({
   });
 }
 
+export function auditProvenanceGraph(graph) {
+  const unresolved = graph?.unresolved_edges?.length || 0;
+  const collisions = graph?.collisions?.length || 0;
+  const status = collisions ? 'CONFLICT' : unresolved ? 'INCOMPLETE' : 'CLEAN';
+  return Object.freeze({
+    status,
+    unresolved_edge_count: unresolved,
+    collision_count: collisions,
+    complete: unresolved === 0 && collisions === 0,
+    authority: Object.freeze({
+      audit_is_structural_only: true,
+      absence_of_conflict_is_not_external_verification: true,
+      physical_claim: false,
+      canon_commit: false,
+    }),
+  });
+}
+
 export function connectedProvenanceComponent(graph, rootId) {
   if (!graph?.nodes || !nonEmpty(rootId)) return graph;
   const nodeIds = new Set(graph.nodes.map((item) => item.id));
-  if (!nodeIds.has(rootId)) return Object.freeze({ ...graph, nodes: Object.freeze([]), edges: Object.freeze([]), focus_id: rootId });
+  if (!nodeIds.has(rootId)) return Object.freeze({ ...graph, nodes: Object.freeze([]), edges: Object.freeze([]), unresolved_edges: Object.freeze([]), focus_id: rootId });
   const adjacency = new Map();
   for (const id of nodeIds) adjacency.set(id, new Set());
   for (const item of graph.edges) {
@@ -266,6 +323,7 @@ export function connectedProvenanceComponent(graph, rootId) {
     focus_id: rootId,
     nodes: Object.freeze(graph.nodes.filter((item) => keep.has(item.id))),
     edges: Object.freeze(graph.edges.filter((item) => keep.has(item.from) && keep.has(item.to))),
+    unresolved_edges: Object.freeze((graph.unresolved_edges || []).filter((item) => keep.has(item.from) || keep.has(item.to))),
   });
 }
 
@@ -278,11 +336,13 @@ export async function createProvenanceBundle({ graph, focusId = null, generatedA
     world_id: resolved.world_id ?? null,
     focus_id: focusId,
     graph: clone(resolved),
+    audit: auditProvenanceGraph(resolved),
     source_receipt_ids: resolved.nodes.map((item) => item.id),
     authority: {
       export_is_derived_copy: true,
       source_receipts_mutable: false,
       missing_links_are_not_invented: true,
+      structural_audit_is_not_external_verification: true,
       canon_commit: false,
       physical_claim: false,
     },
