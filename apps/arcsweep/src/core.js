@@ -71,6 +71,29 @@ export function validateImportedState(value) {
       if (!Array.isArray(records)) throw new Error(`Arcsweep room ${roomId} must be an array.`);
     }
   }
+  if (value.observatory !== undefined && (!value.observatory || typeof value.observatory !== 'object' || Array.isArray(value.observatory))) {
+    throw new Error('Arcsweep observatory state must be an object.');
+  }
+  if (value.observatory) {
+    for (const key of [
+      'custom_profiles',
+      'sweeps',
+      'theory_candidates',
+      'theory_reviews',
+      'deep_time_records',
+      'deep_time_replays',
+      'advisor_receipts',
+      'domain_mappings',
+      'runa_suggestions',
+    ]) {
+      if (value.observatory[key] !== undefined && !Array.isArray(value.observatory[key])) {
+        throw new Error(`Arcsweep observatory ${key} must be an array.`);
+      }
+    }
+  }
+  if (value.feedbackQueue !== undefined && (!value.feedbackQueue || typeof value.feedbackQueue !== 'object' || Array.isArray(value.feedbackQueue))) {
+    throw new Error('Arcsweep feedback queue must be an object.');
+  }
   return value;
 }
 
