@@ -26,6 +26,13 @@ function snapshotMirrors() {
   };
 }
 
+function notifyReceiptsUpdated(detail) {
+  const EventClass = globalThis.CustomEvent;
+  if (typeof globalThis.dispatchEvent === 'function' && typeof EventClass === 'function') {
+    globalThis.dispatchEvent(new EventClass('arcsweep:receipts-updated', { detail }));
+  }
+}
+
 async function commitMirrorSnapshot() {
   if (syncing) {
     pending = true;
@@ -49,6 +56,7 @@ async function commitMirrorSnapshot() {
       feedbackQueue: Boolean(snapshot.feedbackQueue),
     });
     lastCommittedSignature = snapshotMirrors().signature;
+    notifyReceiptsUpdated({ observatory: Boolean(snapshot.observatory), feedbackQueue: Boolean(snapshot.feedbackQueue) });
   } finally {
     syncing = false;
     if (pending) {
