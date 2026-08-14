@@ -73,7 +73,7 @@ export function buildFieldContext(control, trigger = 'pause') {
   const form = control.closest?.('form');
   const documentId = formRecordId(form) || document.body?.dataset.documentId || null;
   return {
-    contract: 'arcsweep.constellation-field-context/v1',
+    contract: 'arcsweep.constellation-field-context/v2',
     trigger,
     field: {
       key: fieldKey(control),
@@ -97,8 +97,11 @@ export function buildFieldContext(control, trigger = 'pause') {
       worldName: document.body?.dataset.worldName || visibleWorldName(),
       documentId,
       sceneId: form?.dataset.sceneId || document.body?.dataset.sceneId || null,
+      storyAt: form?.dataset.storyAt || document.body?.dataset.storyAt || null,
       povCharacterId: form?.dataset.povCharacterId || document.body?.dataset.povCharacterId || null,
       narrativeVoiceId: form?.dataset.narrativeVoiceId || document.body?.dataset.narrativeVoiceId || null,
+      writingStyleId: form?.dataset.writingStyleId || document.body?.dataset.writingStyleId || null,
+      sceneCharacterIds: form?.dataset.sceneCharacterIds || document.body?.dataset.sceneCharacterIds || null,
     },
   };
 }
@@ -107,6 +110,23 @@ function dispatchRequest(control, trigger) {
   if (!control?.isConnected || control.disabled) return;
   const detail = buildFieldContext(control, trigger);
   control.dispatchEvent(new CustomEvent(REQUEST_EVENT, { bubbles: true, detail }));
+}
+
+function targetOptionMarkup(detail = {}) {
+  const targets = [
+    { kind: 'constellation_voice', id: detail.voiceId || '', label: detail.voiceLabel || detail.voiceId || 'Voice' },
+    ...(detail.subjectTargets || []),
+  ].filter((target) => target.kind && target.id);
+  const seen = new Set();
+  return targets.filter((target) => {
+    const key = `${target.kind}:${target.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).map((target) => {
+    const prefix = target.kind === 'character' ? 'Character' : target.kind === 'narrative_voice' ? 'Narrator' : target.kind === 'writing_style' ? 'Style' : 'Voice';
+    return `<option value="${escapeHtml(`${target.kind}:${target.id}`)}">${escapeHtml(`${prefix}: ${target.label || target.id}`)}</option>`;
+  }).join('');
 }
 
 function thoughtMarkup(detail = {}) {
@@ -120,6 +140,7 @@ function thoughtMarkup(detail = {}) {
     </div>
     <div class="constellation-thought-body">${escapeHtml(text)}</div>
     <div class="constellation-thought-actions">
+      <select data-thought-target aria-label="Keep this note for">${targetOptionMarkup(detail)}</select>
       <button type="button" class="quiet mini" data-thought-action="keep">Keep note</button>
       <button type="button" class="quiet mini" data-thought-action="dismiss">Dismiss</button>
     </div>
@@ -195,6 +216,13 @@ function lensForKey(key) {
     .find((candidate) => candidate.dataset.forField === key) || null;
 }
 
+function parseTarget(value, detail) {
+  const raw = String(value || '');
+  const split = raw.indexOf(':');
+  if (split < 1) return { kind: 'constellation_voice', id: detail.voiceId };
+  return { kind: raw.slice(0, split), id: raw.slice(split + 1) };
+}
+
 function receiveResponse(event) {
   const detail = event.detail || {};
   const key = detail.fieldKey;
@@ -213,14 +241,18 @@ function receiveResponse(event) {
 
   card.querySelector('[data-thought-action="keep"]')?.addEventListener('click', (clickEvent) => {
     const button = clickEvent.currentTarget;
+    const targetControl = card.querySelector('[data-thought-target]');
+    const targetSubject = parseTarget(targetControl?.value, detail);
     button.disabled = true;
+    if (targetControl) targetControl.disabled = true;
     button.textContent = 'Keeping…';
     state.textContent = 'saving note';
     document.dispatchEvent(new CustomEvent(LEARNING_PROPOSAL_EVENT, {
       detail: {
         ...detail,
-        mode: document.body?.dataset.constellationMode || 'writing',
-        fieldContext: buildFieldContext(control, 'keep-note'),
+        mode: detail.mode || document.body?.dataset.constellationMode || 'writing',
+        fieldContext: detail.fieldContext || buildFieldContext(control, 'keep-note'),
+        targetSubject,
       },
     }));
   });
@@ -246,7 +278,7 @@ function receiveLearningSaved(event) {
   const lens = lensForKey(key);
   if (!lens) return;
   const state = lens.querySelector('.constellation-lens-state');
-  if (state) state.textContent = event.detail?.stored === false ? 'note not stored' : 'note kept';
+  if (state) state.textContent = event.detail?.stored === false ? 'note not stored' : `note kept for ${cell.subject?.id || 'subject'}`;
   lens.querySelectorAll(`.constellation-thought[data-request-id="${CSS.escape(cell.source?.receiptId || '')}"] [data-thought-action="keep"]`).forEach((button) => {
     button.textContent = 'Kept';
     button.disabled = true;
@@ -271,7 +303,8 @@ function injectStyles() {
     .constellation-thought-head { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:.25rem; font-size:.82rem; }
     .constellation-thought-head span { opacity:.68; text-transform:capitalize; }
     .constellation-thought-body { line-height:1.45; white-space:pre-wrap; }
-    .constellation-thought-actions { display:flex; justify-content:flex-end; gap:.35rem; margin-top:.45rem; }
+    .constellation-thought-actions { display:flex; align-items:center; justify-content:flex-end; gap:.35rem; margin-top:.45rem; flex-wrap:wrap; }
+    .constellation-thought-actions select { max-width:13rem; min-width:8rem; font-size:.72rem; }
   `;
   document.head.append(style);
 }
