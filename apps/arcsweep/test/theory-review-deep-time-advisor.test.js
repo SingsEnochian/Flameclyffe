@@ -6,6 +6,7 @@ import { createDeepTheoryCandidateFromDomainSweep } from '../src/deep-theory-bri
 import { reviewDeepTheoryCandidate } from '../src/deep-theory-review.js';
 import { createDeepTimeRecordFromAcceptedFeedback, buildDeepTimeWindow } from '../src/deep-time-bridge.js';
 import { createTheoryGroundedAcceptanceAdvice } from '../src/theory-grounded-acceptance-advisor.js';
+import { createDomainContextMapping } from '../src/domain-context-mapping.js';
 
 const AXES = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
 
@@ -71,6 +72,13 @@ async function acceptedTheory(domain = 'arcsweep-feedback') {
   return { candidate, review };
 }
 
+async function threeDeepTimeRecords() {
+  const r1 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(2, 0.70, '2026-08-14T10:02:00.000Z'), acceptedQueueEntry: acceptedEntry(2) });
+  const r2 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(3, 0.74, '2026-08-14T10:03:00.000Z'), acceptedQueueEntry: acceptedEntry(3), previousRecord: r1 });
+  const r3 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(4, 0.79, '2026-08-14T10:04:00.000Z'), acceptedQueueEntry: acceptedEntry(4), previousRecord: r2 });
+  return [r1, r2, r3];
+}
+
 test('DEEPTheory acceptance preserves candidate immutability and does not assert physics or canon', async () => {
   const { candidate, review } = await acceptedTheory();
   assert.equal(candidate.record.status, 'candidate');
@@ -82,8 +90,7 @@ test('DEEPTheory acceptance preserves candidate immutability and does not assert
 
 test('DEEPTime admits only human-accepted feedback and preserves Qualia Q separately from data quality', async () => {
   await assert.rejects(() => createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(2, 0.7, '2026-08-14T10:02:00.000Z'), acceptedQueueEntry: { ...acceptedEntry(2), status: 'pending_review' } }), /human-accepted/i);
-  const first = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(2, 0.70, '2026-08-14T10:02:00.000Z'), acceptedQueueEntry: acceptedEntry(2) });
-  const second = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(3, 0.74, '2026-08-14T10:03:00.000Z'), acceptedQueueEntry: acceptedEntry(3), previousRecord: first });
+  const [first, second] = await threeDeepTimeRecords();
   assert.ok(second.lambda > first.lambda);
   assert.equal(second.authority.qualia_is_premaqc_q, true);
   assert.equal(Object.prototype.hasOwnProperty.call(second.quality, 'Q'), false);
@@ -92,21 +99,35 @@ test('DEEPTime admits only human-accepted feedback and preserves Qualia Q separa
 
 test('Theory-Grounded Advisor refuses cross-domain application and never auto-accepts', async () => {
   const { review } = await acceptedTheory('requested-transformation');
-  const r1 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(2, 0.70, '2026-08-14T10:02:00.000Z'), acceptedQueueEntry: acceptedEntry(2) });
-  const r2 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(3, 0.73, '2026-08-14T10:03:00.000Z'), acceptedQueueEntry: acceptedEntry(3), previousRecord: r1 });
-  const r3 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(4, 0.77, '2026-08-14T10:04:00.000Z'), acceptedQueueEntry: acceptedEntry(4), previousRecord: r2 });
-  const advice = await createTheoryGroundedAcceptanceAdvice({ theoryReviewReceipt: review, deepTimeRecords: [r1, r2, r3], contextDomain: 'arcsweep-feedback' });
+  const records = await threeDeepTimeRecords();
+  const advice = await createTheoryGroundedAcceptanceAdvice({ theoryReviewReceipt: review, deepTimeRecords: records, contextDomain: 'arcsweep-feedback' });
   assert.equal(advice.recommendation.status, 'DOMAIN_MISMATCH');
+  assert.equal(advice.recommendation.auto_accept, false);
+  assert.equal(advice.domain_resolution.mode, 'blocked');
+});
+
+test('an explicit applicability mapping can bridge domains without asserting numerical equivalence', async () => {
+  const { review } = await acceptedTheory('requested-transformation');
+  const records = await threeDeepTimeRecords();
+  const mapping = await createDomainContextMapping({
+    fromDomain: 'arcsweep-feedback',
+    toDomain: 'requested-transformation',
+    rationale: 'Accepted feedback records are the temporal observation substrate used by this requested-transformation analysis.',
+    declaredBy: 'Rowan',
+    declaredAt: '2026-08-14T10:05:00.000Z',
+  });
+  const advice = await createTheoryGroundedAcceptanceAdvice({ theoryReviewReceipt: review, deepTimeRecords: records, contextDomain: 'arcsweep-feedback', domainMappingReceipt: mapping });
+  assert.equal(advice.domain_resolution.mode, 'explicit-mapping');
+  assert.equal(advice.domain_resolution.numerical_equivalence_assumed, false);
+  assert.equal(advice.recommendation.status, 'REVIEW_ACCEPTANCE_GATE');
   assert.equal(advice.recommendation.auto_accept, false);
 });
 
 test('accepted same-domain theory plus sufficient DEEPTime yields review gate, not acceptance', async () => {
   const { review } = await acceptedTheory('arcsweep-feedback');
-  const r1 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(2, 0.70, '2026-08-14T10:02:00.000Z'), acceptedQueueEntry: acceptedEntry(2) });
-  const r2 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(3, 0.74, '2026-08-14T10:03:00.000Z'), acceptedQueueEntry: acceptedEntry(3), previousRecord: r1 });
-  const r3 = await createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(4, 0.79, '2026-08-14T10:04:00.000Z'), acceptedQueueEntry: acceptedEntry(4), previousRecord: r2 });
-  assert.equal(buildDeepTimeWindow([r1, r2, r3]).sufficient, true);
-  const advice = await createTheoryGroundedAcceptanceAdvice({ theoryReviewReceipt: review, deepTimeRecords: [r1, r2, r3], contextDomain: 'arcsweep-feedback' });
+  const records = await threeDeepTimeRecords();
+  assert.equal(buildDeepTimeWindow(records).sufficient, true);
+  const advice = await createTheoryGroundedAcceptanceAdvice({ theoryReviewReceipt: review, deepTimeRecords: records, contextDomain: 'arcsweep-feedback' });
   assert.equal(advice.recommendation.status, 'REVIEW_ACCEPTANCE_GATE');
   assert.equal(advice.recommendation.human_review_required, true);
   assert.equal(advice.authority.accepts_state_automatically, false);
