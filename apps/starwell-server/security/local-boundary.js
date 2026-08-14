@@ -35,6 +35,15 @@ const PROTECTED_ENV_NAMES = new Set([
 
 const SAFE_CUSTOM_ENV_NAME = /^[A-Z][A-Z0-9_]{1,63}$/;
 const SAFE_CUSTOM_ENV_SUFFIX = /(?:_API_KEY|_TOKEN|_SECRET|_ENDPOINT|_HOST|_URL)$/;
+const PRESERVED_KEY_FIELDS = Object.freeze([
+  'runtime',
+  'anthropic',
+  'openai',
+  'exa',
+  'deepseek_blue',
+  'deepseek_veth',
+  'ollama',
+]);
 
 function cleanString(value, field, maxLength, { required = false } = {}) {
   if (value == null || value === '') {
@@ -128,6 +137,19 @@ function sanitiseHearthgateConfig(input) {
   };
 }
 
+function mergeHearthgateConfigSecrets(input, existingInput) {
+  const next = sanitiseHearthgateConfig(input);
+  if (!existingInput) return next;
+  const existing = sanitiseHearthgateConfig(existingInput);
+  for (const field of PRESERVED_KEY_FIELDS) {
+    if (!next.keys[field] && existing.keys[field]) next.keys[field] = existing.keys[field];
+  }
+  if (!next.keys.custom.length && existing.keys.custom.length) {
+    next.keys.custom = [...existing.keys.custom];
+  }
+  return next;
+}
+
 function redactHearthgateConfig(input) {
   if (!input) return null;
   const config = sanitiseHearthgateConfig(input);
@@ -152,9 +174,11 @@ function redactHearthgateConfig(input) {
 module.exports = {
   DEFAULT_ALLOWED_ORIGINS,
   PROTECTED_ENV_NAMES,
+  PRESERVED_KEY_FIELDS,
   configuredAllowedOrigins,
   isAllowedLocalOrigin,
   localCorsOptions,
+  mergeHearthgateConfigSecrets,
   redactHearthgateConfig,
   sanitiseCustomEnvironment,
   sanitiseHearthgateConfig,
