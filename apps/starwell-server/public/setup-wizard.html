@@ -22,10 +22,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-ui); font-size: 13px; }
 
-    /* ── Stars ── */
     #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-
-    /* ── Shell ── */
     .shell {
       position: relative; z-index: 1;
       min-height: 100vh;
@@ -33,8 +30,6 @@
       align-items: center; justify-content: center;
       padding: 2rem 1rem;
     }
-
-    /* ── Card ── */
     .card {
       width: 100%; max-width: 520px;
       background: rgba(10,16,12,.92);
@@ -44,11 +39,7 @@
       backdrop-filter: blur(12px);
       box-shadow: 0 24px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(46,214,144,.05);
     }
-
-    /* ── Steps ── */
-    .step-dots {
-      display: flex; gap: .5rem; justify-content: center; margin-bottom: 2rem;
-    }
+    .step-dots { display: flex; gap: .5rem; justify-content: center; margin-bottom: 2rem; }
     .step-dot {
       width: 7px; height: 7px; border-radius: 50%;
       background: var(--raised); border: 1px solid var(--border);
@@ -56,11 +47,9 @@
     }
     .step-dot.active  { background: var(--green); border-color: var(--green); }
     .step-dot.done    { background: rgba(46,214,144,.35); border-color: rgba(46,214,144,.5); }
-
     .step { display: none; flex-direction: column; gap: 1.2rem; }
     .step.active { display: flex; }
 
-    /* ── Typography ── */
     .eyebrow {
       font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
       color: var(--dim); margin-bottom: .2rem;
@@ -69,12 +58,9 @@
     h2 { font-family: var(--font-h); font-size: 1.5rem; font-weight: 500; color: #dff8ea; }
     .tagline { font-family: var(--font-h); font-style: italic; font-size: .98rem; color: var(--dim); line-height: 1.6; }
 
-    /* ── Form ── */
     .field { display: flex; flex-direction: column; gap: .4rem; }
-    .field label {
-      font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--dim);
-    }
-    .field .hint { font-size: .62rem; color: #3a5444; margin-top: .1rem; font-style: italic; }
+    .field label { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+    .field .hint { font-size: .62rem; color: #3a5444; margin-top: .1rem; font-style: italic; line-height: 1.4; }
     input[type="text"], input[type="password"] {
       background: rgba(0,0,0,.5); border: 1px solid var(--border);
       border-radius: 7px; color: var(--text); font-family: var(--font-ui); font-size: .82rem;
@@ -83,10 +69,8 @@
     }
     input:focus { border-color: rgba(46,214,144,.42); }
     input::placeholder { color: #2e4438; }
-
     .required-star { color: var(--gold); margin-left: .2rem; }
 
-    /* ── Toggle eye ── */
     .pwd-wrap { position: relative; }
     .pwd-wrap input { padding-right: 2.4rem; }
     .eye-btn {
@@ -95,8 +79,14 @@
       transition: color .15s; line-height: 1;
     }
     .eye-btn:hover { color: var(--green); }
+    .token-row { display: grid; grid-template-columns: 1fr auto; gap: .45rem; align-items: center; }
+    .btn-token {
+      font-family: var(--font-ui); font-size: .64rem; white-space: nowrap;
+      background: transparent; color: #70b894; border: 1px solid rgba(46,214,144,.24);
+      border-radius: 7px; padding: .58rem .7rem; cursor: pointer;
+    }
+    .btn-token:hover { color: var(--green); border-color: rgba(46,214,144,.5); }
 
-    /* ── Theme swatch section ── */
     .theme-section { display: flex; flex-direction: column; gap: .6rem; }
     .theme-label { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
     .theme-grid { display: flex; flex-wrap: wrap; gap: .4rem; }
@@ -106,21 +96,15 @@
     }
     .theme-swatch:hover { transform: scale(1.2); }
     .theme-swatch.active { border-color: rgba(255,255,255,.7); }
-    .theme-preview-label {
-      font-family: var(--font-h); font-style: italic; font-size: .88rem;
-      color: var(--dim); margin-top: .2rem;
-    }
+    .theme-preview-label { font-family: var(--font-h); font-style: italic; font-size: .88rem; color: var(--dim); margin-top: .2rem; }
 
-    /* ── Buttons ── */
     .btn-row { display: flex; gap: .75rem; justify-content: flex-end; margin-top: .4rem; }
     .btn {
       font-family: var(--font-ui); font-size: .72rem; letter-spacing: .04em;
       border-radius: 8px; padding: .55rem 1.2rem; cursor: pointer;
       transition: all .16s; border: 1px solid;
     }
-    .btn-back {
-      background: transparent; border-color: var(--border); color: var(--dim);
-    }
+    .btn-back { background: transparent; border-color: var(--border); color: var(--dim); }
     .btn-back:hover { color: var(--text); border-color: rgba(114,204,166,.35); }
     .btn-next {
       background: linear-gradient(180deg, rgba(36,68,52,.9), rgba(16,38,28,.9));
@@ -137,18 +121,12 @@
     .btn-launch:hover:not(:disabled) { box-shadow: 0 0 22px rgba(46,214,144,.3); }
     .btn-launch:disabled { opacity: .38; cursor: not-allowed; }
 
-    /* ── Status ── */
     .status { font-size: .72rem; font-style: italic; color: var(--dim); min-height: 1.2rem; }
     .status.err { color: #c47a7a; }
     .status.ok  { color: var(--green); }
-
-    /* ── Divider ── */
     .divider { border: none; border-top: 1px solid var(--border); margin: .2rem 0; }
-
-    /* ── Optional badge ── */
     .opt { font-size: .54rem; letter-spacing: .08em; color: #2e4438; text-transform: uppercase; margin-left: .4rem; }
 
-    /* ── Custom API rows ── */
     .custom-api-list { display: flex; flex-direction: column; gap: .55rem; }
     .custom-api-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: .4rem; align-items: center; }
     .custom-api-row input { font-size: .78rem; }
@@ -177,85 +155,97 @@
       <div class="step-dot" id="dot-2"></div>
     </div>
 
-    <!-- ── Step 0 · Welcome ── -->
     <div class="step active" id="step-0">
       <div>
         <div class="eyebrow">Hearthgate · First Light</div>
         <h1>Welcome to<br>your constellation.</h1>
       </div>
-      <p class="tagline">Hearthgate is a personal AI hearth — a place where your chosen models live together as a household. This wizard takes two minutes.</p>
+      <p class="tagline">Hearthgate is a personal AI hearth, where named presences, tools, worlds, and their chosen model vessels can work together without becoming interchangeable.</p>
       <div class="field">
         <label>Your house name <span class="required-star">*</span></label>
-        <input type="text" id="house-name" placeholder="e.g. Hearthweave, Ember House, Nocturne…" maxlength="48" autocomplete="off">
+        <input type="text" id="house-name" placeholder="e.g. Hearthweave, Ember House…" maxlength="48" autocomplete="off">
         <span class="hint">What do you call your constellation?</span>
       </div>
       <div class="field">
         <label>Your name <span class="required-star">*</span></label>
-        <input type="text" id="steward-name" placeholder="e.g. Rowan, your name or handle…" maxlength="32" autocomplete="off">
+        <input type="text" id="steward-name" placeholder="your name or handle…" maxlength="32" autocomplete="off">
         <span class="hint">How should your household address you?</span>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-next" id="next-0">Next →</button>
-      </div>
+      <div class="btn-row"><button class="btn btn-next" id="next-0">Next →</button></div>
     </div>
 
-    <!-- ── Step 1 · API Keys ── -->
     <div class="step" id="step-1">
       <div>
         <div class="eyebrow">Step 2 of 3</div>
-        <h2>Connect your flames.</h2>
+        <h2>Hang the keys.</h2>
       </div>
-      <p class="tagline">Each model needs its own key. You only need the providers whose members you want active.</p>
+      <p class="tagline">Bifröst owns the model-vessel map. The House runtime token authorises privileged local actions; provider keys are optional for remote or specialist services.</p>
+      <hr class="divider">
+
+      <div class="field">
+        <label>House runtime token <span class="required-star">*</span></label>
+        <div class="token-row">
+          <div class="pwd-wrap">
+            <input type="password" id="key-runtime" placeholder="generate or paste a strong local token" autocomplete="new-password">
+            <button class="eye-btn" data-target="key-runtime" type="button">👁</button>
+          </div>
+          <button type="button" class="btn-token" id="generate-runtime-token">Generate</button>
+        </div>
+        <span class="hint">Stored with Hearthgate's secure configuration and exported only to the local core server. Enter the same token into Arcsweep's Runtime bridge for that session. It is never a model identity.</span>
+      </div>
+
       <hr class="divider">
       <div class="field">
-        <label>Anthropic API key <span class="required-star">*</span></label>
+        <label>Anthropic API key <span class="opt">optional compatibility / specialist services</span></label>
         <div class="pwd-wrap">
           <input type="password" id="key-anthropic" placeholder="sk-ant-api03-…" autocomplete="off">
-          <button class="eye-btn" data-target="key-anthropic">👁</button>
+          <button class="eye-btn" data-target="key-anthropic" type="button">👁</button>
         </div>
-        <span class="hint">Powers Claude members (Faer, Boxfire). Required.</span>
+        <span class="hint">Optional provider access. Named Constellation vessel assignments come from Bifröst, not this field.</span>
       </div>
       <div class="field">
-        <label>OpenAI API key <span class="opt">optional</span></label>
+        <label>OpenAI API key <span class="opt">optional compatibility / specialist services</span></label>
         <div class="pwd-wrap">
           <input type="password" id="key-openai" placeholder="sk-proj-…" autocomplete="off">
-          <button class="eye-btn" data-target="key-openai">👁</button>
+          <button class="eye-btn" data-target="key-openai" type="button">👁</button>
         </div>
-        <span class="hint">Powers GPT members (Vee/Caladnaur Lioreal).</span>
+        <span class="hint">Optional provider access. It does not select Lioreal's vessel.</span>
       </div>
       <div class="field">
         <label>Exa API key <span class="opt">optional</span></label>
         <div class="pwd-wrap">
           <input type="password" id="key-exa" placeholder="xxxxxxxx-xxxx-…" autocomplete="off">
-          <button class="eye-btn" data-target="key-exa">👁</button>
+          <button class="eye-btn" data-target="key-exa" type="button">👁</button>
         </div>
-        <span class="hint">Powers the 🔍 web search button in Hearthgate.</span>
+        <span class="hint">Powers web-search features that use Exa.</span>
       </div>
       <hr class="divider">
       <div class="field">
-        <label>DeepSeek key A <span class="opt">optional</span></label>
+        <label>Bluebird DeepSeek key <span class="opt">optional remote binding</span></label>
         <div class="pwd-wrap">
           <input type="password" id="key-deepseek-blue" placeholder="sk-…" autocomplete="off">
-          <button class="eye-btn" data-target="key-deepseek-blue">👁</button>
+          <button class="eye-btn" data-target="key-deepseek-blue" type="button">👁</button>
         </div>
+        <span class="hint">Used only while Bluebird's current remote DeepSeek vessel remains selected.</span>
       </div>
       <div class="field">
-        <label>DeepSeek key B <span class="opt">optional</span></label>
+        <label>Vethraluf DeepSeek key <span class="opt">optional remote binding</span></label>
         <div class="pwd-wrap">
           <input type="password" id="key-deepseek-veth" placeholder="sk-…" autocomplete="off">
-          <button class="eye-btn" data-target="key-deepseek-veth">👁</button>
+          <button class="eye-btn" data-target="key-deepseek-veth" type="button">👁</button>
         </div>
+        <span class="hint">Used only while Vethraluf's current remote DeepSeek vessel remains selected.</span>
       </div>
       <hr class="divider">
       <div class="field">
         <label>Ollama endpoint <span class="opt">local models</span></label>
         <input type="text" id="key-ollama" placeholder="http://localhost:11434" autocomplete="off">
-        <span class="hint">Leave blank if you don't run local models. Powers Yggdrasil and any Ollama member.</span>
+        <span class="hint">Optional override for the local Ollama runtime. Bifröst's default is the local Ollama service.</span>
       </div>
       <hr class="divider">
       <div class="field">
         <label>Custom API fields <span class="opt">optional</span></label>
-        <span class="hint">Add any extra provider keys. The env var name is what the server reads (e.g. MY_API_KEY).</span>
+        <span class="hint">Extra provider keys/endpoints only. Hearthgate reserves its own runtime-security variables.</span>
         <div class="custom-api-list" id="custom-api-list"></div>
         <button class="btn-add-api" id="btn-add-api" type="button">+ Add API field</button>
       </div>
@@ -265,7 +255,6 @@
       </div>
     </div>
 
-    <!-- ── Step 2 · Theme + Launch ── -->
     <div class="step" id="step-2">
       <div>
         <div class="eyebrow">Step 3 of 3</div>
@@ -276,19 +265,17 @@
         <div class="theme-grid" id="theme-grid"></div>
         <div class="theme-preview-label" id="theme-preview-label">Grove</div>
       </div>
-      <p class="tagline" style="margin-top:.4rem">You can change this any time from inside Hearthgate. More themes and a theme creator are waiting for you inside.</p>
+      <p class="tagline" style="margin-top:.4rem">You can change this any time from inside Hearthgate.</p>
       <div class="status" id="launch-status"></div>
       <div class="btn-row">
         <button class="btn btn-back" id="back-2">← Back</button>
         <button class="btn btn-launch" id="btn-launch">⬡ Light the Hearth</button>
       </div>
     </div>
-
   </div>
 </div>
 
 <script>
-// ── Stars ─────────────────────────────────────────────────────────────────────
 (function() {
   const cv = document.getElementById('stars');
   const cx = cv.getContext('2d');
@@ -307,7 +294,6 @@
   requestAnimationFrame(draw);
 })();
 
-// ── Themes ────────────────────────────────────────────────────────────────────
 const THEMES = [
   {id:'grove',          name:'Grove',             dot:'#2ed690'},
   {id:'dreaming-grove', name:'Dreaming Grove',    dot:'#50C060'},
@@ -322,7 +308,7 @@ const THEMES = [
   {id:'ember-and-ink',  name:'Ember & Ink',       dot:'#E06820'},
   {id:'salt-and-iron',  name:'Salt & Iron',       dot:'#A8B8C8'},
   {id:'dark-academia',  name:'Dark Academia',     dot:'#829ea2'},
-  {id:'electric-forest','name':'Electric Forest', dot:'#27C3EE'},
+  {id:'electric-forest',name:'Electric Forest',   dot:'#27C3EE'},
   {id:'tropical-noir',  name:'Tropical Noir',     dot:'#b87030'},
   {id:'cherry-kettle',  name:'Cherry Kettle',     dot:'#c54e3f'},
 ];
@@ -330,7 +316,6 @@ const THEMES = [
 let selectedTheme = 'grove';
 const grid = document.getElementById('theme-grid');
 const previewLabel = document.getElementById('theme-preview-label');
-
 THEMES.forEach(t => {
   const sw = document.createElement('div');
   sw.className = 'theme-swatch' + (t.id === 'grove' ? ' active' : '');
@@ -346,7 +331,6 @@ THEMES.forEach(t => {
   grid.appendChild(sw);
 });
 
-// ── Step logic ────────────────────────────────────────────────────────────────
 let currentStep = 0;
 function goTo(n) {
   document.getElementById('step-' + currentStep).classList.remove('active');
@@ -366,13 +350,12 @@ document.getElementById('next-0').addEventListener('click', () => {
 });
 document.getElementById('back-1').addEventListener('click', () => goTo(0));
 document.getElementById('next-1').addEventListener('click', () => {
-  const antKey = document.getElementById('key-anthropic').value.trim();
-  if (!antKey) { document.getElementById('key-anthropic').focus(); return; }
+  const runtimeToken = document.getElementById('key-runtime').value.trim();
+  if (!runtimeToken) { document.getElementById('key-runtime').focus(); return; }
   goTo(2);
 });
 document.getElementById('back-2').addEventListener('click', () => goTo(1));
 
-// ── Eye toggles ───────────────────────────────────────────────────────────────
 document.querySelectorAll('.eye-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const inp = document.getElementById(btn.dataset.target);
@@ -380,7 +363,19 @@ document.querySelectorAll('.eye-btn').forEach(btn => {
   });
 });
 
-// ── Launch ────────────────────────────────────────────────────────────────────
+function generateRuntimeToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return 'hg_' + Array.from(bytes, value => value.toString(16).padStart(2, '0')).join('');
+}
+document.getElementById('generate-runtime-token').addEventListener('click', () => {
+  const input = document.getElementById('key-runtime');
+  input.value = generateRuntimeToken();
+  input.type = 'text';
+  input.focus();
+  input.select();
+});
+
 document.getElementById('btn-launch').addEventListener('click', async () => {
   const btn = document.getElementById('btn-launch');
   const status = document.getElementById('launch-status');
@@ -396,17 +391,18 @@ document.getElementById('btn-launch').addEventListener('click', async () => {
   });
 
   const cfg = {
-    name:    document.getElementById('house-name').value.trim(),
+    name: document.getElementById('house-name').value.trim(),
     steward: document.getElementById('steward-name').value.trim(),
-    theme:   selectedTheme,
+    theme: selectedTheme,
     keys: {
-      anthropic:     document.getElementById('key-anthropic').value.trim(),
-      openai:        document.getElementById('key-openai').value.trim(),
-      exa:           document.getElementById('key-exa').value.trim(),
+      runtime: document.getElementById('key-runtime').value.trim(),
+      anthropic: document.getElementById('key-anthropic').value.trim(),
+      openai: document.getElementById('key-openai').value.trim(),
+      exa: document.getElementById('key-exa').value.trim(),
       deepseek_blue: document.getElementById('key-deepseek-blue').value.trim(),
       deepseek_veth: document.getElementById('key-deepseek-veth').value.trim(),
-      ollama:        document.getElementById('key-ollama').value.trim(),
-      custom:        customFields,
+      ollama: document.getElementById('key-ollama').value.trim(),
+      custom: customFields,
     },
   };
 
@@ -417,17 +413,13 @@ document.getElementById('btn-launch').addEventListener('click', async () => {
       status.textContent = 'Something went wrong: ' + (result.error || 'unknown');
       btn.disabled = false;
     }
-    // On success, main.js navigates the window — no action needed here
   } else {
-    // Running in a plain browser (dev/testing) — just log
-    console.log('Config (no Electron):', cfg);
     status.className = 'status ok';
-    status.textContent = 'Config ready (not in Electron — check console).';
+    status.textContent = 'Configuration structure is ready. Secret values were not logged.';
     btn.disabled = false;
   }
 });
 
-// ── Custom API field builder ──────────────────────────────────────────────────
 function addCustomApiRow(name='', value='') {
   const list = document.getElementById('custom-api-list');
   const row = document.createElement('div');
@@ -449,7 +441,6 @@ function addCustomApiRow(name='', value='') {
 }
 document.getElementById('btn-add-api').addEventListener('click', () => addCustomApiRow());
 
-// Enter key advances steps
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
   if (currentStep === 0) document.getElementById('next-0').click();
