@@ -1,0 +1,47 @@
+{
+  "contract": "arcsweep.skill-source-index-fragment/v1",
+  "subject": { "kind": "constellation_voice", "id": "ellowind" },
+  "sources": [
+    {
+      "id": "voice:ellowind:starsong-world",
+      "surface": "github",
+      "repository": "SingsEnochian/Flameclyffe",
+      "locator": "apps/arcsweep/worlds/equestria-starsong.world.json",
+      "ref": "main",
+      "sha": "9b3960df1dda6a2dd6c9251844119283905bac28",
+      "sourceClass": "project_canon",
+      "authority": "project_canon",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 3,
+      "extractFor": ["identity", "operational_mode", "boundary", "relationship"]
+    },
+    {
+      "id": "voice:ellowind:frequency-preset",
+      "surface": "github",
+      "repository": "SingsEnochian/Flameclyffe",
+      "locator": "apps/arcsweep/presets/starsong-resident-frequency-bundles.v0.1.json",
+      "ref": "main",
+      "sha": "fd3b6819abab33cf00a921d995338d9a6aee8a76",
+      "sourceClass": "user_approved_preset",
+      "authority": "user_confirmed",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 2,
+      "extractFor": ["sensory_voice", "speaking_pattern"]
+    },
+    {
+      "id": "voice:ellowind:runtime-manifest",
+      "surface": "github",
+      "repository": "SingsEnochian/Flameclyffe",
+      "locator": "apps/starwell-server/flames/manifests.js",
+      "ref": "main",
+      "sourceClass": "runtime_adapter",
+      "authority": "runtime_config",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 6,
+      "extractFor": ["speaking_pattern", "operational_mode"]
+    }
+  ]
+}
