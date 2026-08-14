@@ -158,6 +158,7 @@ function startServer(configInput) {
   };
 
   const keys = cfg.keys;
+  if (keys.runtime) env.ARCSWEEP_RUNTIME_TOKEN = keys.runtime;
   if (keys.anthropic) { env.ANTHROPIC_API_KEY = keys.anthropic; env.UIAL_API_KEY = keys.anthropic; }
   if (keys.openai) { env.OPENAI_API_KEY = keys.openai; env.LIOREAL_API_KEY = keys.openai; }
   if (keys.exa) env.EXA_API_KEY = keys.exa;
