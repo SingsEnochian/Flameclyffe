@@ -143,7 +143,10 @@
         "sha": { "type": ["string", "null"] },
         "startLine": { "type": ["integer", "null"], "minimum": 1 },
         "endLine": { "type": ["integer", "null"], "minimum": 1 },
-        "receiptId": { "type": ["string", "null"] }
+        "receiptId": { "type": ["string", "null"] },
+        "fieldKey": { "type": ["string", "null"] },
+        "excerpt": { "type": ["string", "null"], "maxLength": 500 },
+        "evidenceVerified": { "type": ["boolean", "null"] }
       }
     },
     "scope": {
