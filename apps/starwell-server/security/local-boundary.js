@@ -9,6 +9,8 @@ const DEFAULT_ALLOWED_ORIGINS = Object.freeze([
   'http://127.0.0.1:4173',
 ]);
 
+const KEEP_EXISTING_SECRET = '__HEARTHGATE_KEEP_EXISTING_SECRET__';
+
 const PROTECTED_ENV_NAMES = new Set([
   'APPDATA',
   'ARCSWEEP_RUNTIME_TOKEN',
@@ -139,11 +141,17 @@ function sanitiseHearthgateConfig(input) {
 
 function mergeHearthgateConfigSecrets(input, existingInput) {
   const next = sanitiseHearthgateConfig(input);
-  if (!existingInput) return next;
-  const existing = sanitiseHearthgateConfig(existingInput);
+  const existing = existingInput ? sanitiseHearthgateConfig(existingInput) : null;
+
   for (const field of PRESERVED_KEY_FIELDS) {
-    if (!next.keys[field] && existing.keys[field]) next.keys[field] = existing.keys[field];
+    if (next.keys[field] === KEEP_EXISTING_SECRET) {
+      next.keys[field] = existing?.keys[field] || '';
+    } else if (!next.keys[field] && existing?.keys[field]) {
+      next.keys[field] = existing.keys[field];
+    }
   }
+
+  if (!existing) return next;
 
   const customByName = new Map(existing.keys.custom.map((entry) => [entry.name, entry]));
   for (const entry of next.keys.custom) customByName.set(entry.name, entry);
@@ -177,6 +185,7 @@ function redactHearthgateConfig(input) {
 
 module.exports = {
   DEFAULT_ALLOWED_ORIGINS,
+  KEEP_EXISTING_SECRET,
   PROTECTED_ENV_NAMES,
   PRESERVED_KEY_FIELDS,
   configuredAllowedOrigins,
