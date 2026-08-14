@@ -9,7 +9,8 @@ import {
   hasConstellationRuntimeToken,
   setConstellationRuntimeToken,
 } from '../src/constellation-runtime-adapter.js';
-import { resolveKnowledgeCells } from '../src/knowledge-graph.js';
+import { createLearningCellFromMargin } from '../src/knowledge-learning-store.js';
+import { resolveKnowledgeCells, validateKnowledgeCell } from '../src/knowledge-graph.js';
 import { expandWorldIds, worldIdsEquivalent } from '../src/world-id-aliases.js';
 
 test('password values are never normalised into Lens context', () => {
@@ -49,6 +50,34 @@ test('margin prompt carries bounded cells and explicitly forbids hidden reasonin
   assert.match(prompt, /uial\.core\.thinking\.patterns-before-propositions/);
   assert.match(prompt, /Do not reveal hidden chain-of-thought/);
   assert.match(prompt, /Do not rewrite or insert into the field automatically/);
+});
+
+test('user-kept margin thoughts become provisional model observations, never stable core', () => {
+  const cell = createLearningCellFromMargin({
+    voiceId: 'uial',
+    voiceLabel: 'Uial',
+    text: 'This sentence keeps returning to the threshold before naming it.',
+    requestId: 'writer-request-1',
+    mode: 'writing',
+    fieldContext: {
+      field: { key: 'script-form:content' },
+      page: {
+        worldId: 'taveren-vaen',
+        worldIdAliases: ['taveren-vaen', 'taaveren-vaen'],
+        documentId: 'chapter-1',
+        sceneId: 'scene-1',
+      },
+    },
+  });
+
+  assert.deepEqual(validateKnowledgeCell(cell), []);
+  assert.equal(cell.cellType, 'model_observation');
+  assert.equal(cell.status, 'provisional');
+  assert.equal(cell.authority.kind, 'model_inference');
+  assert.equal(cell.mutability, 'append_only');
+  assert.equal(cell.provenance.reviewedBy, 'user-kept');
+  assert.equal(cell.source.surface, 'runtime');
+  assert.equal(cell.source.locator, 'arcsweep-margin:script-form:content');
 });
 
 test('Sonata has no fallback runtime route and cannot inherit another voice route', async () => {
