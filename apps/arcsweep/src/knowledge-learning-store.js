@@ -139,6 +139,16 @@ export async function restoreLearnedCell(cellId) {
   });
 }
 
+function normaliseTargetSubject(detail, voiceId) {
+  const target = detail?.targetSubject;
+  const kind = String(target?.kind || '').trim().toLowerCase();
+  const id = String(target?.id || '').trim().toLowerCase();
+  if (kind && id && ['character', 'narrative_voice', 'writing_style', 'constellation_voice'].includes(kind)) {
+    return { kind, id };
+  }
+  return { kind: 'constellation_voice', id: voiceId };
+}
+
 export function createLearningCellFromMargin(detail = {}) {
   const voiceId = String(detail.voiceId || '').trim().toLowerCase();
   if (!voiceId) throw new Error('Learning proposal requires a voice id.');
@@ -149,12 +159,14 @@ export function createLearningCellFromMargin(detail = {}) {
   const context = detail.fieldContext || {};
   const page = context.page || {};
   const field = context.field || {};
+  const subject = normaliseTargetSubject(detail, voiceId);
+  const isSelfTarget = subject.kind === 'constellation_voice' && subject.id === voiceId;
 
   return {
-    id: `${voiceId}.learned.${uuid}`,
+    id: `${subject.kind}.${subject.id}.learned.${uuid}`,
     cellType: 'model_observation',
-    subject: { kind: 'constellation_voice', id: voiceId },
-    predicate: 'noted_during_writing',
+    subject,
+    predicate: isSelfTarget ? 'noted_during_writing' : 'observed_during_writing',
     value: text,
     status: 'provisional',
     authority: {
@@ -178,11 +190,11 @@ export function createLearningCellFromMargin(detail = {}) {
     privacy: 'source_governed',
     provenance: {
       createdAt: now,
-      createdBy: detail.voiceId || null,
+      createdBy: voiceId,
       extractionMethod: 'runtime_emit',
       reviewedBy: 'user-kept',
     },
-    tags: ['learned', 'margin-note', voiceId],
+    tags: ['learned', 'margin-note', voiceId, `subject:${subject.kind}:${subject.id}`],
   };
 }
 
