@@ -9,7 +9,8 @@ const MODEL_PROFILES = Object.freeze({
     owner: 'lioreal',
     source: { kind: 'huggingface', repo: 'mlabonne/Qwen3-14B-abliterated' },
     artifact: {
-      strategy: 'gguf-import',
+      strategy: 'ollama-pull',
+      model: 'hf.co/bartowski/mlabonne_Qwen3-14B-abliterated-GGUF:Q4_K_M',
       repo: 'bartowski/mlabonne_Qwen3-14B-abliterated-GGUF',
       quant: 'Q4_K_M',
     },
