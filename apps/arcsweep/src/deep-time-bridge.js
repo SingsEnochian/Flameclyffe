@@ -113,6 +113,7 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
     authority: {
       append_only: true,
       source_cycle_mutable: false,
+      accepted_observation_only: true,
       accepted_feedback_only: true,
       shared_review_queue_required: true,
       field_observation_supported: true,
@@ -131,6 +132,8 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
   assertValidDeepTimeRecord(record);
   return Object.freeze(record);
 }
+
+export const createDeepTimeRecordFromAcceptedObservation = createDeepTimeRecordFromAcceptedFeedback;
 
 export function buildDeepTimeWindow(records, { minimumRecords = 3 } = {}) {
   invariant(Array.isArray(records), 'records must be an array');
