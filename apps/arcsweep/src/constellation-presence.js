@@ -10,6 +10,12 @@ import {
   setConstellationRuntimeToken,
   CONSTELLATION_RUNTIME_EVENTS,
 } from './constellation-runtime-adapter.js';
+import {
+  archiveLearnedCell,
+  listAllLearnedCells,
+  restoreLearnedCell,
+  KNOWLEDGE_LEARNING_EVENTS,
+} from './knowledge-learning-store.js';
 
 const ROOT_ID = 'arcsweep-constellation-presence';
 
@@ -48,6 +54,53 @@ function voiceRow(voice, selected) {
   </label>`;
 }
 
+function learnedCellMarkup(cell) {
+  const archived = cell.status === 'deprecated';
+  const when = cell.provenance?.createdAt ? new Date(cell.provenance.createdAt).toLocaleString() : 'unknown time';
+  const source = cell.source?.locator || 'unknown source';
+  const voice = cell.authority?.speakerOrAuthor || cell.subject?.id || 'voice';
+  return `<article class="constellation-learning-cell ${archived ? 'archived' : ''}" data-learning-cell-id="${escapeHtml(cell.id)}">
+    <div class="constellation-learning-head">
+      <strong>${escapeHtml(voice)}</strong>
+      <span>${archived ? 'archived' : escapeHtml(cell.status || 'provisional')}</span>
+    </div>
+    <div class="constellation-learning-body">${escapeHtml(cell.value)}</div>
+    <div class="constellation-learning-meta">${escapeHtml(when)} · ${escapeHtml(source)} · ${escapeHtml(cell.authority?.kind || 'unknown authority')}</div>
+    <div class="constellation-learning-actions">
+      <button type="button" class="quiet mini" data-learning-action="${archived ? 'restore' : 'archive'}">${archived ? 'Restore' : 'Archive'}</button>
+    </div>
+  </article>`;
+}
+
+async function renderLearningLedger(root) {
+  const list = root.querySelector('.constellation-learning-list');
+  const count = root.querySelector('.constellation-learning-count');
+  if (!list) return;
+  try {
+    const cells = await listAllLearnedCells({ includeArchived: true });
+    const activeCount = cells.filter((cell) => cell.status !== 'deprecated').length;
+    if (count) count.textContent = `${activeCount} active · ${cells.length} total`;
+    list.innerHTML = cells.length
+      ? cells.map(learnedCellMarkup).join('')
+      : '<p class="constellation-learning-empty">No kept notes yet.</p>';
+
+    list.querySelectorAll('[data-learning-action]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const card = button.closest('[data-learning-cell-id]');
+        const cellId = card?.dataset.learningCellId;
+        if (!cellId) return;
+        button.disabled = true;
+        if (button.dataset.learningAction === 'archive') await archiveLearnedCell(cellId);
+        else await restoreLearnedCell(cellId);
+        await renderLearningLedger(root);
+      });
+    });
+  } catch (error) {
+    list.innerHTML = `<p class="constellation-learning-empty">Kept-note ledger unavailable: ${escapeHtml(error?.message || String(error))}</p>`;
+    if (count) count.textContent = 'unavailable';
+  }
+}
+
 async function render(root) {
   const registry = await loadVoiceBankRegistry();
   const selected = new Set(getSelectedConstellationVoices());
@@ -83,10 +136,15 @@ async function render(root) {
         <span class="constellation-runtime-state" aria-live="polite">${runtimeReady ? 'ready · token held in session memory' : 'offline · session token not set'}</span>
         <button type="button" class="quiet" data-constellation-action="forget-token">Forget token</button>
       </div>
+      <div class="constellation-presence-subhead constellation-learning-title">
+        <span>Kept notes</span>
+        <small class="constellation-learning-count">loading…</small>
+      </div>
+      <div class="constellation-learning-list" aria-live="polite"><p class="constellation-learning-empty">Loading kept notes…</p></div>
       <div class="constellation-presence-actions">
         <button type="button" class="quiet" data-constellation-action="clear">Quiet room</button>
       </div>
-      <p class="constellation-presence-note">Selection grants context participation only. It does not grant tool writes, canon commits, or silent edits. The runtime token is never stored in Arcsweep state or local storage and disappears on reload.</p>
+      <p class="constellation-presence-note">Selection grants context participation only. It does not grant tool writes, canon commits, or silent edits. Kept notes are local provisional observations until deliberately promoted elsewhere. Archived notes stop participating and can be restored. The runtime token is never stored in Arcsweep state or local storage and disappears on reload.</p>
     </div>
   `;
 
@@ -126,6 +184,8 @@ async function render(root) {
     setSelectedConstellationVoices([]);
     toggle.querySelector('small').textContent = '0 present';
   });
+
+  await renderLearningLedger(root);
 }
 
 function injectStyles() {
@@ -133,10 +193,10 @@ function injectStyles() {
   const style = document.createElement('style');
   style.id = 'arcsweep-constellation-presence-styles';
   style.textContent = `
-    #${ROOT_ID} { position:fixed; right:1rem; bottom:1rem; z-index:70; width:min(22rem,calc(100vw - 2rem)); font:inherit; }
+    #${ROOT_ID} { position:fixed; right:1rem; bottom:1rem; z-index:70; width:min(23rem,calc(100vw - 2rem)); font:inherit; }
     .constellation-presence-toggle { margin-left:auto; display:flex; align-items:center; gap:.5rem; border-radius:999px; padding:.55rem .8rem; box-shadow:0 .4rem 1.5rem rgb(0 0 0 / .28); }
     .constellation-presence-toggle small { opacity:.68; font-size:.74rem; }
-    .constellation-presence-panel { margin-top:.45rem; max-height:min(76vh,38rem); overflow:auto; padding:.85rem; border:1px solid color-mix(in srgb,var(--gold) 30%,transparent); border-radius:1rem; background:color-mix(in srgb,var(--panel-solid) 96%,black); box-shadow:0 .7rem 2.2rem rgb(0 0 0 / .38); }
+    .constellation-presence-panel { margin-top:.45rem; max-height:min(78vh,42rem); overflow:auto; padding:.85rem; border:1px solid color-mix(in srgb,var(--gold) 30%,transparent); border-radius:1rem; background:color-mix(in srgb,var(--panel-solid) 96%,black); box-shadow:0 .7rem 2.2rem rgb(0 0 0 / .38); }
     .constellation-presence-head { display:grid; gap:.15rem; margin-bottom:.65rem; }
     .constellation-presence-head span,.constellation-presence-note { font-size:.78rem; opacity:.72; }
     .constellation-presence-list { display:grid; gap:.25rem; }
@@ -150,6 +210,17 @@ function injectStyles() {
     .constellation-runtime-row { display:flex; align-items:center; justify-content:space-between; gap:.6rem; margin-top:.35rem; }
     .constellation-runtime-state { font-size:.72rem; opacity:.72; line-height:1.25; }
     .constellation-runtime-row button { flex:none; }
+    .constellation-learning-title { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; }
+    .constellation-learning-title small { text-transform:none; letter-spacing:0; }
+    .constellation-learning-list { display:grid; gap:.4rem; max-height:15rem; overflow:auto; padding-right:.1rem; }
+    .constellation-learning-cell { padding:.5rem .55rem; border:1px solid color-mix(in srgb,var(--green) 20%,transparent); border-radius:.6rem; background:color-mix(in srgb,var(--panel-solid) 88%,transparent); }
+    .constellation-learning-cell.archived { opacity:.55; }
+    .constellation-learning-head { display:flex; justify-content:space-between; gap:.6rem; font-size:.76rem; }
+    .constellation-learning-head span { opacity:.65; text-transform:capitalize; }
+    .constellation-learning-body { margin-top:.25rem; font-size:.78rem; line-height:1.35; white-space:pre-wrap; }
+    .constellation-learning-meta { margin-top:.3rem; font-size:.65rem; opacity:.58; overflow-wrap:anywhere; }
+    .constellation-learning-actions { display:flex; justify-content:flex-end; margin-top:.3rem; }
+    .constellation-learning-empty { margin:.35rem 0; font-size:.75rem; opacity:.65; }
     .constellation-presence-actions { display:flex; justify-content:flex-end; margin-top:.7rem; }
     .constellation-presence-note { margin:.65rem 0 0; line-height:1.35; }
     @media (max-width:700px) { #${ROOT_ID} { right:.6rem; bottom:.6rem; width:calc(100vw - 1.2rem); } }
@@ -187,6 +258,13 @@ export async function installConstellationPresence() {
   document.addEventListener(CONSTELLATION_RUNTIME_EVENTS.state, (event) => {
     const state = root.querySelector('.constellation-runtime-state');
     if (state) state.textContent = runtimeStateLabel(event.detail || {});
+  });
+
+  document.addEventListener(KNOWLEDGE_LEARNING_EVENTS.saved, () => {
+    void renderLearningLedger(root);
+  });
+  document.addEventListener(KNOWLEDGE_LEARNING_EVENTS.changed, () => {
+    void renderLearningLedger(root);
   });
 }
 
