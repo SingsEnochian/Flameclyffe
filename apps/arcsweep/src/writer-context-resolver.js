@@ -100,14 +100,16 @@ function splitIds(value) {
   return unique(String(value || '').split(',').map((item) => item.trim().toLowerCase()));
 }
 
-function subjectSpecs(page = {}) {
-  const specs = [];
+function subjectSpecs(page = {}, explicitSubjects = []) {
+  const specs = [...(explicitSubjects || [])].map((subject) => ({
+    kind: String(subject.kind || '').trim().toLowerCase(),
+    id: String(subject.id || '').trim().toLowerCase(),
+    label: subject.label || subject.name || subject.id,
+  })).filter((subject) => subject.kind && subject.id);
   if (page.writingStyleId) specs.push({ kind: 'writing_style', id: String(page.writingStyleId).toLowerCase(), label: page.writingStyleLabel || page.writingStyleId });
   if (page.narrativeVoiceId) specs.push({ kind: 'narrative_voice', id: String(page.narrativeVoiceId).toLowerCase(), label: page.narrativeVoiceLabel || page.narrativeVoiceId });
   if (page.povCharacterId) specs.push({ kind: 'character', id: String(page.povCharacterId).toLowerCase(), label: page.povCharacterLabel || page.povCharacterId });
-  for (const id of splitIds(page.sceneCharacterIds)) {
-    specs.push({ kind: 'character', id, label: id });
-  }
+  for (const id of splitIds(page.sceneCharacterIds)) specs.push({ kind: 'character', id, label: id });
   const seen = new Set();
   return specs.filter((subject) => {
     const key = `${subject.kind}:${subject.id}`;
@@ -182,6 +184,10 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       includeHistorical: Boolean(options.includeHistorical),
       requireScopedContext: true,
       limit: options.perVoiceLimit || 36,
+    }, {
+      fetchImpl: options.fetchImpl,
+      includeLocalLearning: options.includeLocalLearning !== false,
+      learnedCellLoader: options.learnedCellLoader,
     });
 
     voiceContexts.push({
@@ -193,7 +199,7 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
     });
   }
 
-  for (const subject of subjectSpecs(hydratedFieldContext.page)) {
+  for (const subject of subjectSpecs(hydratedFieldContext.page, options.subjects)) {
     const resolved = await resolveKnowledgeSubjectCells(subject, {
       cellTypes: subjectCellTypes(subject.kind),
       mode,
@@ -205,6 +211,10 @@ export async function buildWriterContextPacket(fieldContext, options = {}) {
       includeHistorical: Boolean(options.includeHistorical),
       requireScopedContext: true,
       limit: options.perSubjectLimit || 40,
+    }, {
+      fetchImpl: options.fetchImpl,
+      includeLocal: options.includeLocalSubjects !== false,
+      localCellLoader: options.localCellLoader,
     });
     subjectContexts.push({
       kind: resolved.subject.kind,
