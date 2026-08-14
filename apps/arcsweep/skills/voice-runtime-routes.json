@@ -1,17 +1,98 @@
 {
-  "contract": "arcsweep.voice-runtime-routes/v1",
+  "contract": "arcsweep.voice-runtime-routes/v2",
   "routes": {
-    "uial": { "route": "uial", "status": "configured" },
-    "lioreal": { "route": "lioreal", "status": "configured" },
-    "vethraluf": { "route": "vethrlauf", "status": "configured", "legacyRuntimeId": "vethrlauf" },
-    "ellowind": { "route": "starsong/ellowind", "status": "configured" },
-    "larkshine": { "route": "starsong/larkshine", "status": "configured" },
-    "box": { "route": "boxfire", "status": "configured", "legacyRuntimeId": "boxfire" },
-    "bluebird": { "route": "bluebird", "status": "configured" },
-    "sonata": { "route": null, "status": "staged-no-runtime-route" }
+    "uial": {
+      "route": "uial",
+      "profileId": "uial:fablevibes-v1",
+      "provider": "ollama",
+      "runtimeModel": "uial:fablevibes-v1",
+      "sourceModel": "tvall43/Qwen3.6-14B-A3B-FableVibes",
+      "capabilities": ["text", "writing", "roleplay"],
+      "status": "profile-defined"
+    },
+    "lioreal": {
+      "route": "lioreal",
+      "profileId": "lioreal:qwen3-14b-abliterated-v1",
+      "provider": "ollama",
+      "runtimeModel": "lioreal:starwell-v1",
+      "sourceModel": "mlabonne/Qwen3-14B-abliterated",
+      "capabilities": ["text", "writing", "reasoning"],
+      "status": "profile-defined"
+    },
+    "vethraluf": {
+      "route": "vethrlauf",
+      "profileId": "vethraluf:deepseek-chat-existing-v1",
+      "provider": "deepseek",
+      "runtimeModel": "deepseek-chat",
+      "sourceModel": "deepseek-chat",
+      "capabilities": ["text", "audit"],
+      "status": "existing-runtime-binding",
+      "legacyRuntimeId": "vethrlauf"
+    },
+    "ellowind": {
+      "route": "ellowind",
+      "profileId": "ellowind:qwen3-vl-8b-v1",
+      "provider": "ollama",
+      "runtimeModel": "ellowind:qwen3-vl-8b-v1",
+      "sourceModel": "huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated",
+      "capabilities": ["text", "vision", "visual-read", "writing"],
+      "status": "profile-defined"
+    },
+    "larkshine": {
+      "route": "larkshine",
+      "profileId": "larkshine:qwen3-vl-8b-v1",
+      "provider": "ollama",
+      "runtimeModel": "larkshine:qwen3-vl-8b-v1",
+      "sourceModel": "huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated",
+      "capabilities": ["text", "vision", "visual-read", "writing"],
+      "status": "profile-defined"
+    },
+    "box": {
+      "route": "boxfire",
+      "profileId": "box:qwen3-coder-30b-a3b-v1",
+      "provider": "ollama",
+      "runtimeModel": "box:qwen3-coder-30b-a3b-v1",
+      "sourceModel": "huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated",
+      "capabilities": ["text", "code", "qa", "reasoning"],
+      "status": "profile-defined",
+      "legacyRuntimeId": "boxfire"
+    },
+    "bluebird": {
+      "route": "bluebird",
+      "profileId": "bluebird:deepseek-chat-existing-v1",
+      "provider": "deepseek",
+      "runtimeModel": "deepseek-chat",
+      "sourceModel": "deepseek-chat",
+      "capabilities": ["text"],
+      "status": "existing-runtime-binding"
+    },
+    "sonata": {
+      "route": null,
+      "profileId": null,
+      "provider": null,
+      "runtimeModel": null,
+      "sourceModel": null,
+      "capabilities": [],
+      "status": "vessel-unselected"
+    }
+  },
+  "optionalProfiles": {
+    "deepReasoner": {
+      "profileId": "shared:qwen3.6-35b-a3b-deep-reasoner-v1",
+      "provider": "ollama",
+      "runtimeModel": "bifrost:deep-reasoner-35b-a3b-v1",
+      "sourceModel": "huihui-ai/Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated",
+      "capabilities": ["text", "deep-reasoning"],
+      "status": "profile-defined",
+      "optInOnly": true
+    }
   },
   "rules": {
+    "bifrostOwnsVesselDefinitions": true,
+    "arcsweepBindsByProfileId": true,
+    "runtimeAttestationRequired": true,
     "noFallbackImpersonation": true,
+    "deepReasonerOptInOnly": true,
     "sessionTokenOnly": true,
     "noTokenPersistence": true
   }
