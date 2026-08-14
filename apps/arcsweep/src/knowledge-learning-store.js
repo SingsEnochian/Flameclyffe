@@ -58,7 +58,6 @@ export async function appendKnowledgeCells(cells = []) {
     if (ids.has(cell.id)) throw new Error(`Duplicate knowledge cell id in batch: ${cell.id}`);
     ids.add(cell.id);
   }
-
   const db = await openDb();
   if (!db) return { stored: false, reason: 'indexeddb-unavailable', cells: batch };
   try {
@@ -85,9 +84,7 @@ export async function listLocalKnowledgeCells({ subjectKind = null, subjectId = 
   try {
     const tx = db.transaction(STORE, 'readonly');
     const store = tx.objectStore(STORE);
-    const cells = id
-      ? await requestPromise(store.index('subjectId').getAll(id))
-      : await requestPromise(store.getAll());
+    const cells = id ? await requestPromise(store.index('subjectId').getAll(id)) : await requestPromise(store.getAll());
     return (cells || [])
       .filter((cell) => !kind || String(cell.subject?.kind || '').toLowerCase() === kind)
       .filter((cell) => includeArchived || cell.status !== 'deprecated')
@@ -154,6 +151,9 @@ export function createLearningCellFromMargin(detail = {}) {
   if (!voiceId) throw new Error('Learning proposal requires a voice id.');
   const text = String(detail.text || '').trim();
   if (!text) throw new Error('Learning proposal requires a non-empty observation.');
+  if (detail.runtimeVerified !== true || !detail.profileId) {
+    throw new Error('Margin learning requires an attested runtime vessel receipt.');
+  }
   const now = new Date().toISOString();
   const uuid = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   const context = detail.fieldContext || {};
@@ -179,6 +179,12 @@ export function createLearningCellFromMargin(detail = {}) {
       locator: `arcsweep-margin:${field.key || 'unknown'}`,
       ref: detail.requestId || null,
       receiptId: detail.requestId || null,
+      fieldKey: field.key || null,
+      modelProfileId: detail.profileId,
+      provider: detail.provider || null,
+      model: detail.model || null,
+      sourceModel: detail.sourceModel || null,
+      runtimeVerified: true,
     },
     scope: {
       worldIds: page.worldId ? [page.worldId, ...(page.worldIdAliases || [])].filter((value, index, array) => array.indexOf(value) === index) : [],
@@ -194,7 +200,7 @@ export function createLearningCellFromMargin(detail = {}) {
       extractionMethod: 'runtime_emit',
       reviewedBy: 'user-kept',
     },
-    tags: ['learned', 'margin-note', voiceId, `subject:${subject.kind}:${subject.id}`],
+    tags: ['learned', 'margin-note', 'runtime-attested', voiceId, `subject:${subject.kind}:${subject.id}`],
   };
 }
 
