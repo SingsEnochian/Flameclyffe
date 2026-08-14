@@ -1,5 +1,6 @@
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 import { RUNA_RENDERER_REVIEW_SCHEMA } from './runa-renderer-candidate.js';
+import { RUNA_PREVIEW_PALETTE_SCHEMA } from './runa-preview-palette.js';
 
 export const RUNA_PREVIEW_PLAN_SCHEMA = 'arcsweep.runa-preview-plan/v1';
 export const RUNA_PREVIEW_RENDER_SCHEMA = 'arcsweep.runa-preview-render/v1';
@@ -22,7 +23,9 @@ function clamp(value, minimum, maximum) {
 
 function resolveRootHz(world) {
   const candidate = Number(world?.soundscape?.rootHz ?? world?.root_hz ?? world?.rootHz);
-  return Number.isFinite(candidate) && candidate >= 20 && candidate <= 20000 ? candidate : 369;
+  // Preview audio stays inside an intentionally conservative audible band even
+  // if a domain profile stores a non-audition frequency elsewhere.
+  return Number.isFinite(candidate) && candidate >= 20 && candidate <= 4000 ? candidate : 369;
 }
 
 function resolveWaveform(world) {
@@ -30,13 +33,61 @@ function resolveWaveform(world) {
   return ['sine', 'triangle', 'sawtooth', 'square'].includes(waveform) ? waveform : 'triangle';
 }
 
-export async function createRunaPreviewPlan({ rendererReview, world, generatedAt } = {}) {
+function compileKeyboardPreview(candidate, palette, baseHz, durationMs) {
+  const ratios = palette?.selection?.harmonic_ratios || [];
+  if (!ratios.length) return Object.freeze({ assigned: false, ratios: [], frequencies_hz: [], gain_ceiling: 0, duration_ms: durationMs });
+  const params = candidate?.compiler?.parameters?.keyboard_harmonics;
+  invariant(params, 'reviewed candidate must expose bounded keyboard-harmonic parameters');
+  const frequencies = ratios.map((ratio) => Number(Math.min(8000, baseHz * finite(ratio, 'harmonic ratio')).toFixed(6)));
+  const gainCeiling = Number(clamp(finite(params.harmonic_blend_delta_limit, 'harmonic blend limit') * 0.22, 0.004, 0.045).toFixed(6));
+  return Object.freeze({
+    assigned: true,
+    harmonic_set: palette.selection.harmonic_set,
+    ratios: structuredClone(ratios),
+    frequencies_hz: frequencies,
+    gain_ceiling: gainCeiling,
+    duration_ms: Math.round(clamp(Number(params.transition_ms), 1200, durationMs)),
+    candidate_blend_delta_limit: Number(params.harmonic_blend_delta_limit),
+  });
+}
+
+function compileEnvironmentPreview(candidate, palette, durationMs) {
+  if (palette?.selection?.environment_source !== 'filtered-noise') {
+    return Object.freeze({ assigned: false, source: 'none', gain_ceiling: 0, filter_start_hz: null, filter_end_hz: null, duration_ms: durationMs });
+  }
+  const params = candidate?.compiler?.parameters?.environmental_soundscape;
+  invariant(params, 'reviewed candidate must expose bounded environmental parameters');
+  const allowedOctaves = Math.max(0, finite(params.filter_motion_octaves_limit, 'filter motion limit'));
+  const auditionOctaves = Number(Math.min(allowedOctaves * 0.5, 0.35).toFixed(6));
+  const startHz = 520;
+  const endHz = Number((startHz * (2 ** auditionOctaves)).toFixed(6));
+  const gainCeiling = Number(clamp(finite(params.layer_mix_delta_limit, 'environment layer mix limit') * 0.22, 0.003, 0.035).toFixed(6));
+  return Object.freeze({
+    assigned: true,
+    source: 'filtered-noise',
+    gain_ceiling: gainCeiling,
+    filter_start_hz: startHz,
+    filter_end_hz: endHz,
+    filter_motion_octaves: auditionOctaves,
+    candidate_filter_motion_octaves_limit: allowedOctaves,
+    candidate_layer_mix_delta_limit: Number(params.layer_mix_delta_limit),
+    duration_ms: Math.round(clamp(Number(params.transition_ms), 1800, durationMs)),
+  });
+}
+
+export async function createRunaPreviewPlan({ rendererReview, world, paletteReceipt = null, generatedAt } = {}) {
   invariant(rendererReview?.schema === RUNA_RENDERER_REVIEW_SCHEMA, 'an explicit Runa renderer review is required');
   invariant(rendererReview.decision === 'approved', 'renderer review must be approved before preview planning');
   invariant(rendererReview.authority?.preview_compilation_allowed === true, 'review must explicitly permit preview compilation');
   invariant(rendererReview.authority?.render_authorized === false, 'review must not already carry render authority');
   invariant(world?.id, 'world is required');
   invariant(rendererReview.source?.world_id === world.id, 'renderer review and preview world must match');
+  if (paletteReceipt) {
+    invariant(paletteReceipt.schema === RUNA_PREVIEW_PALETTE_SCHEMA, 'paletteReceipt must be a receipted Runa preview palette');
+    invariant(paletteReceipt.world_id === world.id, 'preview palette and world must match');
+    invariant(paletteReceipt.source?.renderer_review_id === rendererReview.review_id, 'preview palette must belong to this renderer review');
+    invariant(paletteReceipt.authority?.explicit_human_selection === true, 'preview palette must be explicitly selected');
+  }
 
   const candidate = rendererReview.reviewed_candidate;
   const hum = candidate?.compiler?.parameters?.world_hum;
@@ -48,7 +99,9 @@ export async function createRunaPreviewPlan({ rendererReview, world, generatedAt
   const targetHz = Number((baseHz * (2 ** (auditionCents / 1200))).toFixed(6));
   const requestedDuration = finite(hum.transition_ms, 'world hum transition');
   const durationMs = Math.round(clamp(requestedDuration, 1800, 8000));
-  const gainCeiling = Number(clamp(finite(hum.mix_delta_limit, 'world hum mix delta limit'), 0.015, 0.12).toFixed(6));
+  const gainCeiling = Number(clamp(finite(hum.mix_delta_limit, 'world hum mix delta limit'), 0.012, 0.08).toFixed(6));
+  const keyboard = compileKeyboardPreview(candidate, paletteReceipt, baseHz, durationMs);
+  const environment = compileEnvironmentPreview(candidate, paletteReceipt, durationMs);
 
   const core = {
     schema: RUNA_PREVIEW_PLAN_SCHEMA,
@@ -63,9 +116,11 @@ export async function createRunaPreviewPlan({ rendererReview, world, generatedAt
       renderer_review_fingerprint: rendererReview.review_fingerprint,
       renderer_candidate_id: rendererReview.source.candidate_id,
       suggestion_id: rendererReview.source.suggestion_id,
+      palette_id: paletteReceipt?.palette_id ?? null,
+      palette_fingerprint: paletteReceipt?.palette_fingerprint ?? null,
     },
     preview: {
-      kind: 'temporary-world-hum-audition',
+      kind: 'temporary-runa-audition',
       bus: 'tones',
       duration_ms: durationMs,
       waveform,
@@ -74,15 +129,22 @@ export async function createRunaPreviewPlan({ rendererReview, world, generatedAt
       detune_cents: auditionCents,
       gain_ceiling: gainCeiling,
       trajectory: ['base', 'target', 'base'],
+      keyboard_harmonics: keyboard,
+      environmental_soundscape: environment,
       haptic: false,
       midi: false,
       soundfont: false,
-      source_layers: [],
+      source_layers: environment.assigned ? [environment.source] : [],
     },
     bounds: {
       candidate_detune_limit_cents: ceilingCents,
       candidate_mix_delta_limit: Number(hum.mix_delta_limit),
       audition_within_candidate_bounds: auditionCents <= ceilingCents + 1e-9 && gainCeiling <= Number(hum.mix_delta_limit) + 1e-9,
+      keyboard_within_candidate_bounds: !keyboard.assigned || keyboard.gain_ceiling <= keyboard.candidate_blend_delta_limit + 1e-9,
+      environment_within_candidate_bounds: !environment.assigned || (
+        environment.gain_ceiling <= environment.candidate_layer_mix_delta_limit + 1e-9
+        && environment.filter_motion_octaves <= environment.candidate_filter_motion_octaves_limit + 1e-9
+      ),
     },
     authority: {
       executable_preview_plan: true,
@@ -91,10 +153,13 @@ export async function createRunaPreviewPlan({ rendererReview, world, generatedAt
       persistent_world_root_mutable: false,
       persistent_bus_levels_mutable: false,
       world_tone_commit: false,
+      preview_palette_explicit: Boolean(paletteReceipt),
+      preview_harmonic_set_assigned: keyboard.assigned,
+      preview_environment_source_assigned: environment.assigned,
+      assignments_are_temporary_preview_only: true,
       haptic_authorized: false,
       midi_authorized: false,
       soundfont_authorized: false,
-      source_layers_assigned: false,
       observation_inferred: false,
       premaqc_mutable: false,
       qualia_inferred: false,
@@ -102,7 +167,9 @@ export async function createRunaPreviewPlan({ rendererReview, world, generatedAt
       physical_claim: false,
     },
   };
-  invariant(core.bounds.audition_within_candidate_bounds, 'preview plan exceeds reviewed renderer bounds');
+  invariant(core.bounds.audition_within_candidate_bounds, 'preview plan exceeds reviewed world-hum bounds');
+  invariant(core.bounds.keyboard_within_candidate_bounds, 'preview plan exceeds reviewed keyboard-harmonic bounds');
+  invariant(core.bounds.environment_within_candidate_bounds, 'preview plan exceeds reviewed environmental bounds');
   const fingerprint = await sha256Hex(core);
   return Object.freeze({
     ...core,
@@ -143,6 +210,8 @@ export async function createRunaPreviewRenderReceipt({
       renderer_review_id: plan.source.renderer_review_id,
       renderer_candidate_id: plan.source.renderer_candidate_id,
       suggestion_id: plan.source.suggestion_id,
+      palette_id: plan.source.palette_id,
+      palette_fingerprint: plan.source.palette_fingerprint,
     },
     executed_preview: structuredClone(plan.preview),
     runtime: {
@@ -152,6 +221,8 @@ export async function createRunaPreviewRenderReceipt({
       root_hz_before: finite(runtime.root_hz_before, 'runtime root before'),
       root_hz_after: finite(runtime.root_hz_after, 'runtime root after'),
       actual_duration_ms: Math.max(0, finite(runtime.actual_duration_ms ?? plan.preview.duration_ms, 'runtime duration')),
+      keyboard_harmonics: Boolean(runtime.keyboard_harmonics),
+      environmental_soundscape: Boolean(runtime.environmental_soundscape),
       stopped_early: stoppedEarly,
       stop_reason: stoppedEarly ? String(runtime.stop_reason || 'stopped') : null,
       haptic: false,
@@ -166,6 +237,7 @@ export async function createRunaPreviewRenderReceipt({
       persistent_world_root_changed: false,
       autoplay_used: false,
       feather_stop_recorded_when_used: stoppedEarly,
+      palette_assignments_temporary_only: true,
       haptic_used: false,
       midi_used: false,
       soundfont_used: false,
