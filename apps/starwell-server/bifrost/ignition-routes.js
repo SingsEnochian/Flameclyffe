@@ -117,7 +117,7 @@ router.post('/profile/:profile_ref', requireExplicitConfirmation, async (req, re
       : await igniteProfile(profileId, options);
     const receipt = enrichReceiptWithIdentity(rawReceipt);
     const status = receipt.state === 'runtime-verified' ? 200
-      : receipt.state === 'activation-pending' || receipt.state === 'credential-needed' ? 409
+      : ['activation-pending', 'alias-pending', 'credential-needed'].includes(receipt.state) ? 409
         : receipt.state === 'remote-probe-not-authorised' ? 403
           : receipt.state === 'route-unavailable' ? 503
             : 422;
@@ -130,6 +130,7 @@ router.post('/profile/:profile_ref', requireExplicitConfirmation, async (req, re
         downloadsModels: false,
         runtimeVerifiedRequiresChallengeRoundTrip: true,
         identityAliasesResolveToOneProfile: true,
+        aliasPendingMeansBaseInstalledAliasMissing: true,
       },
     });
   } catch (error) {
