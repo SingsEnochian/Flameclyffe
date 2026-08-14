@@ -42,6 +42,12 @@ function stage(id, label, receipt, status) {
   });
 }
 
+function observationLabel(source) {
+  if (source === 'field') return 'Field observation';
+  if (source === 'relational-observation') return 'Relational observation';
+  return 'Feedback observation';
+}
+
 export function deriveRunaInterventionArc({
   worldId,
   observatory = {},
@@ -84,10 +90,12 @@ export function deriveRunaInterventionArc({
     (item) => item.world_id === worldId && item.source?.arm_id === evidenceArm.arm_id,
     (item) => item.linked_at,
   ) : null;
-  const feedbackCycle = observationLink
-    ? (feedbackCycles || []).find((item) => item.cycle_id === observationLink.source?.feedback_cycle_id) || null
+  const observationCycleId = observationLink?.source?.observation_cycle_id || observationLink?.source?.feedback_cycle_id || null;
+  const feedbackCycle = observationCycleId
+    ? (feedbackCycles || []).find((item) => item.cycle_id === observationCycleId) || null
     : null;
   const feedbackReview = feedbackCycle ? feedbackQueue?.entries?.[feedbackCycle.cycle_id] || null : null;
+  const observationSource = observationLink?.source?.observation_source || feedbackReview?.observation_source || 'relational-feedback';
   const deepTimeRecord = feedbackCycle ? latest(
     observatory.deep_time_records,
     (item) => item.world_id === worldId && item.provenance?.observation_run_id === feedbackCycle.cycle_id,
@@ -130,23 +138,23 @@ export function deriveRunaInterventionArc({
   }
   if (previewRender) {
     state = 'ARM_OBSERVATION';
-    nextAction = 'Arm this render as context for the next reviewable Feedback observation.';
+    nextAction = 'Arm this render as context for the next reviewable observation.';
   }
   if (evidenceArm) {
     state = 'OBSERVE_FEEDBACK';
-    nextAction = 'Run the next reviewable same-world Feedback observation.';
+    nextAction = 'Run the next reviewable same-world Field or Feedback observation.';
   }
   if (observationLink && feedbackCycle) {
     state = 'REVIEW_FEEDBACK';
-    nextAction = 'Review the linked Feedback cycle.';
+    nextAction = `Review the linked ${observationLabel(observationSource).toLowerCase()}.`;
   }
   if (feedbackReview) {
     if (feedbackReview.status === 'accepted') {
       state = 'RETURN_TO_DEEP_TIME';
-      nextAction = 'Admit the accepted observation to DEEPTime.';
+      nextAction = `Admit the accepted ${observationLabel(observationSource).toLowerCase()} to DEEPTime.`;
     } else if (['archived', 'discarded'].includes(feedbackReview.status)) {
       state = 'STOPPED';
-      nextAction = `Feedback path stopped as ${feedbackReview.status}.`;
+      nextAction = `Observation path stopped as ${feedbackReview.status}.`;
     }
   }
   if (deepTimeRecord) {
@@ -164,8 +172,8 @@ export function deriveRunaInterventionArc({
     stage('preview-plan', 'Preview plan', previewPlan, previewPlan ? 'complete' : palette ? 'ready' : 'waiting'),
     stage('preview-render', 'Explicit preview', previewRender, previewRender ? (previewRender.runtime?.stopped_early ? 'stopped-early' : 'complete') : previewPlan ? 'ready' : 'waiting'),
     stage('evidence-arm', 'Observation arm', evidenceArm, evidenceArm ? 'complete' : previewRender ? 'ready' : 'waiting'),
-    stage('feedback-observation', 'Feedback observation', feedbackCycle, feedbackCycle ? 'complete' : evidenceArm ? 'ready' : 'waiting'),
-    stage('feedback-review', 'Feedback review', feedbackReview, feedbackReview?.status || (feedbackCycle ? 'ready' : 'waiting')),
+    stage('feedback-observation', observationLabel(observationSource), feedbackCycle, feedbackCycle ? 'complete' : evidenceArm ? 'ready' : 'waiting'),
+    stage('feedback-review', 'Human observation review', feedbackReview, feedbackReview?.status || (feedbackCycle ? 'ready' : 'waiting')),
     stage('deep-time', 'DEEPTime', deepTimeRecord, deepTimeRecord ? 'complete' : feedbackReview?.status === 'accepted' ? 'ready' : 'waiting'),
     stage('ash', 'Ash history', priorDeepTime && deepTimeRecord ? deepTimeRecord : null, priorDeepTime && deepTimeRecord ? 'ready' : 'waiting'),
   ]);
@@ -175,6 +183,7 @@ export function deriveRunaInterventionArc({
     world_id: worldId,
     state,
     next_action: nextAction,
+    observation_source: observationSource,
     stages,
     receipts: Object.freeze({
       suggestion,
@@ -185,6 +194,7 @@ export function deriveRunaInterventionArc({
       preview_render: previewRender,
       evidence_arm: evidenceArm,
       observation_link: observationLink,
+      observation_cycle: feedbackCycle,
       feedback_cycle: feedbackCycle,
       feedback_review: feedbackReview,
       deep_time_record: deepTimeRecord,
@@ -194,7 +204,9 @@ export function deriveRunaInterventionArc({
       derived_view_only: true,
       source_receipts_mutable: false,
       palette_requires_explicit_selection: true,
+      field_and_feedback_observations_supported: true,
       stage_completion_does_not_infer_causation: true,
+      human_acceptance_required_before_deep_time: true,
       feedback_acceptance_required_before_deep_time: true,
       two_temporal_coordinates_required_for_trajectory_ash: true,
       canon_commit: false,
