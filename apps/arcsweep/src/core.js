@@ -85,6 +85,8 @@ export function validateImportedState(value) {
       'advisor_receipts',
       'domain_mappings',
       'runa_suggestions',
+      'runa_renderer_candidates',
+      'runa_renderer_reviews',
       'provenance_exports',
       'integrity_reports',
     ]) {
