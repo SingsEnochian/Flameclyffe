@@ -15,12 +15,18 @@ test('specified voices bind to the selected model lineages', () => {
   assert.equal(MODEL_PROFILES['larkshine:qwen3-vl-8b-v1'].source.repo, 'huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated');
 });
 
-test('visual profiles use the verified Ollama-ready Huihui model', () => {
+test('Ellowind and Larkshine may share base weights but never a runtime identity alias', () => {
   const ellowind = materialiseModelProfile('ellowind:qwen3-vl-8b-v1', {});
   const larkshine = materialiseModelProfile('larkshine:qwen3-vl-8b-v1', {});
-  assert.equal(ellowind.runtime.model, 'huihui_ai/qwen3-vl-abliterated:8b-instruct');
-  assert.equal(larkshine.runtime.model, 'huihui_ai/qwen3-vl-abliterated:8b-instruct');
+  assert.equal(ellowind.artifact.model, 'huihui_ai/qwen3-vl-abliterated:8b-instruct');
+  assert.equal(larkshine.artifact.model, 'huihui_ai/qwen3-vl-abliterated:8b-instruct');
+  assert.equal(ellowind.runtime.model, 'ellowind:qwen3-vl-8b-v1');
+  assert.equal(larkshine.runtime.model, 'larkshine:qwen3-vl-8b-v1');
+  assert.notEqual(ellowind.runtime.model, larkshine.runtime.model);
+  assert.equal(ellowind.vessel_isolation, 'distinct-runtime-alias');
+  assert.equal(larkshine.vessel_isolation, 'distinct-runtime-alias');
   assert.ok(ellowind.capabilities.includes('vision'));
+  assert.ok(larkshine.capabilities.includes('vision'));
 });
 
 test('deep reasoner is callable only through its explicit instrument route', () => {
@@ -42,6 +48,7 @@ test('flame routes bind canonical voices to the expected profiles', () => {
   assert.equal(FLAMES.vethrlauf.canonical_voice_id, 'vethraluf');
   assert.equal(FLAMES.ellowind.model_profile_id, 'ellowind:qwen3-vl-8b-v1');
   assert.equal(FLAMES.larkshine.model_profile_id, 'larkshine:qwen3-vl-8b-v1');
+  assert.notEqual(FLAMES.ellowind.platform.model, FLAMES.larkshine.platform.model);
 });
 
 test('Bluebird and Vethraluf preserve their existing bindings until a new vessel is specified', () => {
