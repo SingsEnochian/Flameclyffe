@@ -1,4 +1,9 @@
-import { loadState, saveState } from './storage.js';
+import {
+  createEmptyTransformationRequestState,
+  loadState,
+  normaliseTransformationRequestState,
+  saveState,
+} from './storage.js';
 
 export const TRANSFORMATION_MIRROR_KEY = 'hearthgate.arcsweep.transformation-requests.v1';
 const SYNC_DELAY_MS = 80;
@@ -6,37 +11,21 @@ let syncing = false;
 let timer = null;
 let lastMirrorRaw = null;
 
-function emptyStore() { return { version: 1, byWorld: {} }; }
-
-function normalise(value) {
-  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-  const byWorld = input.byWorld && typeof input.byWorld === 'object' && !Array.isArray(input.byWorld)
-    ? structuredClone(input.byWorld)
-    : {};
-  for (const [worldId, record] of Object.entries(byWorld)) {
-    if (!record || typeof record !== 'object' || Array.isArray(record)) {
-      delete byWorld[worldId];
-      continue;
-    }
-    record.requests = Array.isArray(record.requests) ? record.requests : [];
-    record.responses = Array.isArray(record.responses) ? record.responses : [];
-    record.circuits = Array.isArray(record.circuits) ? record.circuits : [];
-  }
-  return { version: 1, byWorld };
-}
-
 function readMirror() {
   try {
     const raw = globalThis.localStorage?.getItem(TRANSFORMATION_MIRROR_KEY) || '';
-    return { raw, store: raw ? normalise(JSON.parse(raw)) : emptyStore() };
+    return {
+      raw,
+      store: raw ? normaliseTransformationRequestState(JSON.parse(raw)) : createEmptyTransformationRequestState(),
+    };
   } catch {
-    return { raw: '', store: emptyStore() };
+    return { raw: '', store: createEmptyTransformationRequestState() };
   }
 }
 
 function writeMirror(store) {
   try {
-    const raw = JSON.stringify(normalise(store));
+    const raw = JSON.stringify(normaliseTransformationRequestState(store));
     globalThis.localStorage?.setItem(TRANSFORMATION_MIRROR_KEY, raw);
     lastMirrorRaw = raw;
   } catch {}
@@ -75,7 +64,7 @@ async function bootstrap() {
   syncing = true;
   try {
     const state = await loadState();
-    const core = normalise(state.transformationRequests);
+    const core = normaliseTransformationRequestState(state.transformationRequests);
     const mirror = readMirror();
     const coreHas = hasData(core);
     const mirrorHas = hasData(mirror.store);
@@ -88,8 +77,7 @@ async function bootstrap() {
       writeMirror(core);
       notifyReceiptsUpdated({ restored_from_core: true });
     } else {
-      state.transformationRequests = emptyStore();
-      await saveState(state, { reason: 'transformation-receipt-state-initialise' });
+      state.transformationRequests = createEmptyTransformationRequestState();
       writeMirror(state.transformationRequests);
     }
   } finally {
@@ -104,7 +92,7 @@ async function syncMirrorIntoCore() {
   syncing = true;
   try {
     const state = await loadState();
-    const core = normalise(state.transformationRequests);
+    const core = normaliseTransformationRequestState(state.transformationRequests);
     const mirrorStore = mirror.store;
     if (JSON.stringify(core) !== JSON.stringify(mirrorStore)) {
       state.transformationRequests = mirrorStore;
