@@ -1,0 +1,32 @@
+name: Bifrost Residency Gate
+
+on:
+  push:
+    branches:
+      - feature/bifrost-ignition-v1
+    paths:
+      - 'apps/starwell-server/bifrost/residency-policy.js'
+      - 'apps/starwell-server/bifrost/local-model-scheduler.js'
+      - 'apps/starwell-server/test/bifrost-residency.test.js'
+      - '.github/workflows/bifrost-residency-gate.yml'
+  pull_request:
+    paths:
+      - 'apps/starwell-server/bifrost/residency-policy.js'
+      - 'apps/starwell-server/bifrost/local-model-scheduler.js'
+      - 'apps/starwell-server/test/bifrost-residency.test.js'
+      - '.github/workflows/bifrost-residency-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  residency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run residency scheduler tests
+        run: node --test apps/starwell-server/test/bifrost-residency.test.js
