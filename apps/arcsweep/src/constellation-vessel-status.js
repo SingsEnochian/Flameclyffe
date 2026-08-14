@@ -3,6 +3,7 @@ import {
   getBifrostIgnitionStatus,
   igniteConstellationVoice,
   igniteDeepReasoner,
+  materializeConstellationVoiceAlias,
   startBifrostOllama,
 } from './bifrost-ignition-client.js';
 
@@ -63,7 +64,7 @@ function ensureStatusArea(root) {
     </div>
     <div class="constellation-vessel-list" aria-live="polite"><p class="muted">Loading vessel bindings…</p></div>
     <div class="constellation-instrument-list" aria-live="polite"></div>
-    <p class="constellation-vessel-note">Probe is read-only. Ignite warms an assigned vessel and requires the exact Bifröst challenge reply before it becomes runtime verified. If the base artifact exists but an identity-specific alias is missing, the local ignition key can materialize that alias without downloading another copy of the weights.</p>
+    <p class="constellation-vessel-note">Probe is read-only. Ignite requires the exact Bifröst challenge reply before a vessel becomes runtime verified. If a shared/base artifact is already present, Create alias mints only that selected identity's assigned runtime alias and downloads nothing.</p>
   `;
   runtimeHeading.insertAdjacentElement('afterend', section);
   return section;
@@ -74,8 +75,16 @@ function ignitionActionMarkup(voiceId, entry, live) {
   const state = live?.state || entry.status;
   if (state === 'runtime-verified') return '<span class="constellation-vessel-fire" aria-label="verified">🔥</span>';
   const remote = entry.provider && entry.provider !== 'ollama';
-  const label = remote ? 'Verify remote' : 'Ignite';
-  return `<button type="button" class="quiet mini" data-ignite-voice="${escapeHtml(voiceId)}" data-provider="${escapeHtml(entry.provider || '')}">${label}</button>`;
+  if (remote) {
+    return `<button type="button" class="quiet mini" data-ignite-voice="${escapeHtml(voiceId)}" data-provider="${escapeHtml(entry.provider || '')}">Verify remote</button>`;
+  }
+  if (state === 'alias-pending') {
+    return `<button type="button" class="quiet mini" data-materialize-alias="${escapeHtml(voiceId)}">Create alias</button>`;
+  }
+  if (state === 'activation-pending') {
+    return '<small class="constellation-vessel-action-note">install with the named local key</small>';
+  }
+  return `<button type="button" class="quiet mini" data-ignite-voice="${escapeHtml(voiceId)}" data-provider="${escapeHtml(entry.provider || '')}">Ignite</button>`;
 }
 
 function identityMarkup(identity, fallback) {
@@ -115,6 +124,9 @@ function bindingMarkup(voiceId, entry, live = null) {
 function reasonerMarkup(entry, live = null) {
   if (!entry?.profileId) return '';
   const state = live?.state || entry.status || 'profile-defined';
+  const aliasAction = state === 'alias-pending'
+    ? '<small>use the explicit deep-reasoner local key to materialize its alias</small>'
+    : '<button type="button" class="quiet mini" data-ignite-reasoner>Ignite instrument</button>';
   return `<article class="constellation-vessel constellation-vessel-instrument" data-vessel-id="deep-reasoner">
     <div class="constellation-vessel-title"><strong>Deep reasoner</strong><span>${escapeHtml(stateLabel(state))}</span></div>
     <div class="constellation-vessel-model">${escapeHtml(shortModel(live?.model || entry.runtimeModel))}</div>
@@ -122,7 +134,7 @@ function reasonerMarkup(entry, live = null) {
     <small>instrument only · explicit opt-in · never an identity fallback</small>
     ${live?.error ? `<small class="constellation-vessel-error">${escapeHtml(live.error)}</small>` : ''}
     <div class="constellation-vessel-row-actions">
-      ${state === 'runtime-verified' ? '<span class="constellation-vessel-fire">🔥</span>' : '<button type="button" class="quiet mini" data-ignite-reasoner>Ignite instrument</button>'}
+      ${state === 'runtime-verified' ? '<span class="constellation-vessel-fire">🔥</span>' : aliasAction}
     </div>
   </article>`;
 }
@@ -156,10 +168,10 @@ async function renderBindings(section, { probe = true, override = null } = {}) {
   instruments.innerHTML = reasoner ? reasonerMarkup(reasoner, liveByProfile.get(reasoner.profileId)) : '';
 }
 
-async function runButton(button, action) {
+async function runButton(button, label, action) {
   const previous = button.textContent;
   button.disabled = true;
-  button.textContent = 'Igniting…';
+  button.textContent = label;
   try {
     return await action();
   } finally {
@@ -185,8 +197,16 @@ function bindActions(section) {
     }
 
     if (button.matches('[data-start-ollama]')) {
-      const result = await runButton(button, () => startBifrostOllama());
+      const result = await runButton(button, 'Starting…', () => startBifrostOllama());
       if (!result.ok && result.error) console.warn('[Bifröst ignition]', result.error);
+      await renderBindings(section, { probe: true });
+      return;
+    }
+
+    if (button.matches('[data-materialize-alias]')) {
+      const voiceId = button.dataset.materializeAlias;
+      const receipt = await runButton(button, 'Creating…', () => materializeConstellationVoiceAlias(voiceId));
+      if (!receipt.ok && receipt.error) console.warn('[Bifröst alias]', receipt.error);
       await renderBindings(section, { probe: true });
       return;
     }
@@ -199,7 +219,7 @@ function bindActions(section) {
         allowRemoteProbe = window.confirm(`Verify ${voiceId} through its remote provider? This sends one tiny model request and may incur provider usage.`);
         if (!allowRemoteProbe) return;
       }
-      const receipt = await runButton(button, () => igniteConstellationVoice(voiceId, {
+      const receipt = await runButton(button, 'Igniting…', () => igniteConstellationVoice(voiceId, {
         startOllama: provider === 'ollama',
         allowRemoteProbe,
       }));
@@ -210,7 +230,7 @@ function bindActions(section) {
     if (button.matches('[data-ignite-reasoner]')) {
       const allowed = window.confirm('Ignite the optional 35B deep-reasoning instrument? This does not make it a Constellation voice and does not download missing weights.');
       if (!allowed) return;
-      const receipt = await runButton(button, () => igniteDeepReasoner({ startOllama: true }));
+      const receipt = await runButton(button, 'Igniting…', () => igniteDeepReasoner({ startOllama: true }));
       await renderBindings(section, { probe: true, override: receipt });
     }
   });
@@ -233,6 +253,7 @@ function injectStyles() {
     .constellation-vessel-model { margin:.12rem 0; font-size:.72rem; overflow-wrap:anywhere; }
     .constellation-vessel small { display:block; font-size:.62rem; opacity:.58; overflow-wrap:anywhere; }
     .constellation-vessel-row-actions { margin-top:.32rem; }
+    .constellation-vessel-action-note { opacity:.7; }
     .constellation-vessel-note { margin:.4rem 0 0; font-size:.68rem; opacity:.66; line-height:1.35; }
     .constellation-vessel-error { color:var(--danger,#e6a0a0); opacity:.9 !important; }
     .constellation-vessel-fire { font-size:.9rem; }
