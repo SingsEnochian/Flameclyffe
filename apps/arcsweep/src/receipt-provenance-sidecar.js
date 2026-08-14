@@ -1,7 +1,9 @@
-import { loadState } from './storage.js';
+import { loadState, persistObservatoryStore } from './storage.js';
 import { buildArcsweepProvenanceGraph, connectedProvenanceComponent, createProvenanceBundle } from './receipt-provenance-graph.js';
+import { createProvenanceExportReceipt } from './receipt-provenance-export.js';
 
 const TRANSFORMATION_KEY = 'hearthgate.arcsweep.transformation-requests.v1';
+const MAX_EXPORT_RECEIPTS = 24;
 let mounting = false;
 let activeNodeId = null;
 let activeFocusId = null;
@@ -47,14 +49,16 @@ async function model() {
   const focused = activeFocusId ? connectedProvenanceComponent(graph, activeFocusId) : graph;
   if (activeNodeId && !focused.nodes.some((item) => item.id === activeNodeId)) activeNodeId = null;
   if (!activeNodeId) activeNodeId = focused.nodes.find((item) => item.id === activeFocusId)?.id || focused.nodes.at(-1)?.id || null;
-  return { state, world, transformations, graph, focused, requests };
+  const exportReceipts = (state.observatory?.provenance_exports || []).filter((item) => item.world_id === world.id);
+  return { state, world, transformations, graph, focused, requests, exportReceipts };
 }
 
 function modelSignature(m) {
   if (!m) return 'none';
   const lastNode = m.graph.nodes.at(-1)?.id || 'none';
   const lastEdge = m.graph.edges.at(-1);
-  return `${m.world.id}:${activeFocusId || 'all'}:${activeNodeId || 'none'}:${m.graph.summary.node_count}:${m.graph.summary.edge_count}:${lastNode}:${lastEdge ? `${lastEdge.from}>${lastEdge.to}` : 'none'}`;
+  const lastExport = m.exportReceipts.at(-1)?.export_receipt_id || 'none';
+  return `${m.world.id}:${activeFocusId || 'all'}:${activeNodeId || 'none'}:${m.graph.summary.node_count}:${m.graph.summary.edge_count}:${lastNode}:${lastEdge ? `${lastEdge.from}>${lastEdge.to}` : 'none'}:${lastExport}`;
 }
 
 function stageColumns(graph) {
@@ -108,18 +112,25 @@ function selectedReceipt(graph) {
   return `<article class="prov-inspector"><div class="section-heading compact-heading"><div><p class="eyebrow">Receipt inspector</p><h3>${esc(selected.label)}</h3><p class="muted">${esc(selected.kind)} · ${esc(selected.id)}</p></div></div><pre>${esc(JSON.stringify(selected.receipt, null, 2))}</pre></article>`;
 }
 
+function structuralMarkup(graph) {
+  if (!graph.summary.unresolved_edge_count && !graph.summary.collision_count) return '<small>Structural audit clean</small>';
+  return `<small>${graph.summary.unresolved_edge_count} unresolved receipt link${graph.summary.unresolved_edge_count === 1 ? '' : 's'} · ${graph.summary.collision_count} collision${graph.summary.collision_count === 1 ? '' : 's'}</small>`;
+}
+
 function render(m, message = '') {
-  const { world, focused, graph, requests } = m;
+  const { world, focused, graph, requests, exportReceipts } = m;
   const options = [`<option value="" ${activeFocusId ? '' : 'selected'}>All connected receipts</option>`, ...requests.map((request) => `<option value="${esc(request.request_id)}" ${request.request_id === activeFocusId ? 'selected' : ''}>Ask · ${esc(requestLabel(request))}</option>`)].join('');
   const orphanCount = graph.nodes.length - focused.nodes.length;
   const key = modelSignature(m);
+  const latestExport = exportReceipts.at(-1) || null;
   return `<section class="panel receipt-provenance" data-receipt-provenance data-prov-key="${esc(key)}">
     <div class="section-heading compact-heading"><div><p class="eyebrow">Receipts remember the path</p><h2>Provenance Graph</h2><p class="muted">Trace an Ask through BAI, cusp, Feedback, DEEPTime, Theory, Advisor and Runa. The graph follows explicit receipt identifiers only; it does not invent missing joins.</p></div><span class="bai-topology-badge">${focused.nodes.length} nodes</span></div>
     ${message ? `<p class="callout">${esc(message)}</p>` : ''}
-    <div class="grid two compact-grid prov-controls"><label>Focus<select data-prov-focus>${options}</select></label><div class="prov-actions"><button type="button" data-prov-action="export">Export connected receipt bundle</button><small>${focused.edges.length} links${orphanCount > 0 ? ` · ${orphanCount} unrelated receipt${orphanCount === 1 ? '' : 's'} hidden` : ''}</small></div></div>
+    <div class="grid two compact-grid prov-controls"><label>Focus<select data-prov-focus>${options}</select></label><div class="prov-actions"><button type="button" data-prov-action="export">Export & receipt connected bundle</button><small>${focused.edges.length} links${orphanCount > 0 ? ` · ${orphanCount} unrelated receipt${orphanCount === 1 ? '' : 's'} hidden` : ''}</small>${structuralMarkup(focused)}</div></div>
     ${graphSvg(focused)}
     ${nodeCards(focused)}
     ${selectedReceipt(focused)}
+    <p class="muted">Provenance exports receipted for this world: ${exportReceipts.length}${latestExport ? ` · latest ${esc(latestExport.export_receipt_id)}` : ''}. The archive stores export metadata and bundle fingerprint, not a second full copy of every source receipt.</p>
   </section>`;
 }
 
@@ -194,8 +205,18 @@ document.addEventListener('click', async (event) => {
     const m = lastModel || await model();
     if (!m) throw new Error('No active world is available.');
     const bundle = await createProvenanceBundle({ graph: m.graph, focusId: activeFocusId || null });
+    const exportReceipt = await createProvenanceExportReceipt({ bundle });
+    const observatory = structuredClone(m.state.observatory || {});
+    const exports = (observatory.provenance_exports || []).filter((item) => item.export_receipt_id !== exportReceipt.export_receipt_id);
+    observatory.provenance_exports = [...exports, structuredClone(exportReceipt)].slice(-MAX_EXPORT_RECEIPTS);
+    await persistObservatoryStore(observatory, {
+      reason: 'provenance-bundle-export',
+      bundleId: bundle.bundle_id,
+      bundleFingerprint: bundle.bundle_fingerprint,
+      exportReceiptId: exportReceipt.export_receipt_id,
+    });
     browserDownload(bundle, m.world.name);
-    await mount(`Exported ${bundle.bundle_id} with ${bundle.graph.nodes.length} source receipt nodes.`);
+    await mount(`Exported ${bundle.bundle_id} with ${bundle.graph.nodes.length} source receipt nodes · export receipted as ${exportReceipt.export_receipt_id}.`);
   } catch (error) {
     await mount(`Provenance export stopped: ${error.message}`);
   }
