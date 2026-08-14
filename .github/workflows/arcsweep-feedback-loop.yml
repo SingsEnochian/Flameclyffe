@@ -51,6 +51,10 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Dependency audit diagnostic
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Verify engine contracts
         run: npm run contracts:verify
 
