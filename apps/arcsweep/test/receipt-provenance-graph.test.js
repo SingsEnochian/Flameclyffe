@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  auditProvenanceGraph,
   buildArcsweepProvenanceGraph,
   connectedProvenanceComponent,
   createProvenanceBundle,
@@ -107,6 +108,7 @@ test('provenance graph joins Ask, BAI/cusp, accepted Feedback, DEEPTime, Theory,
   assert.ok(relations.has(`${THEORY_REVIEW}:grounds:${ADVISOR}`));
   assert.ok(relations.has(`${DEEP_TIME}:grounds-in-time:${ADVISOR}`));
   assert.ok(relations.has(`${ADVISOR}:suggests:${RUNA}`));
+  assert.equal(auditProvenanceGraph(graph).status, 'CLEAN');
 });
 
 test('Ask focus returns the whole connected evidence component, including the theory strand that converges at the Advisor', () => {
@@ -128,11 +130,23 @@ test('unrelated receipts remain outside an Ask-focused component', () => {
   assert.equal(focused.nodes.some((item) => item.id === 'orphan-sweep'), false);
 });
 
-test('provenance export is a derived immutable-copy receipt and does not invent authority', async () => {
+test('dangling explicit receipt references are reported rather than silently invented or discarded', () => {
+  const input = fixture();
+  input.observatory.advisor_receipts[0].deep_time_window.record_ids.push('deep-time-missing');
+  const graph = buildArcsweepProvenanceGraph(input);
+  assert.equal(graph.summary.unresolved_edge_count, 1);
+  assert.deepEqual(graph.unresolved_edges[0].missing, ['deep-time-missing']);
+  const audit = auditProvenanceGraph(graph);
+  assert.equal(audit.status, 'INCOMPLETE');
+  assert.equal(audit.complete, false);
+});
+
+test('provenance export carries a structural audit and remains a derived immutable-copy receipt', async () => {
   const graph = buildArcsweepProvenanceGraph(fixture());
   const bundle = await createProvenanceBundle({ graph, focusId: REQUEST, generatedAt: '2026-08-14T10:10:00.000Z' });
   assert.equal(bundle.schema, 'arcsweep.receipt-provenance-bundle/v1');
   assert.equal(bundle.focus_id, REQUEST);
+  assert.equal(bundle.audit.status, 'CLEAN');
   assert.equal(bundle.authority.export_is_derived_copy, true);
   assert.equal(bundle.authority.source_receipts_mutable, false);
   assert.equal(bundle.authority.physical_claim, false);
