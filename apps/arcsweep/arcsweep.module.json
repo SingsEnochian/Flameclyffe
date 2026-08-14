@@ -89,6 +89,10 @@
     "runa-world-tone-dns-sync",
     "concordance-anchor-dns-bridge",
     "react-ion-replay-room",
+    "glyph-continuity-monitor",
+    "glyph-drift-observatory",
+    "deterministic-glyph-heartbeats",
+    "blinded-paired-narrative-comparison",
     "atomic-persistence",
     "automatic-recovery-snapshots",
     "manual-backup-and-restore",
@@ -119,7 +123,13 @@
     "reaction.protocol-response-return/v1",
     "reaction.route-replay/v1",
     "reaction.holonomy-receipt/v1",
-    "deeptime.reaction-route/v1"
+    "deeptime.reaction-route/v1",
+    "glyph.continuity-ledger/v1",
+    "glyph.heartbeat/v1",
+    "glyph.signature/v1",
+    "glyph.drift-receipt/v1",
+    "glyph.narrative-seal/v1",
+    "glyph.blind-comparison/v1"
   ],
   "dataOwnership": [
     "worlds",
@@ -132,6 +142,9 @@
     "react-ion-projection-corridors",
     "react-ion-helm-receipts",
     "react-ion-transport-and-replay-receipts",
+    "glyph-continuity-heartbeats",
+    "glyph-drift-receipts",
+    "blinded-narrative-seals-and-comparisons",
     "attachments",
     "themes",
     "desktop-diagnostics"
@@ -168,6 +181,8 @@
     "renderer loads",
     "React-ion registry compiles approved DNS and corridor topology",
     "React-ion Helm receipts persist through export and restore",
+    "Glyph Continuity heartbeats persist through export and restore",
+    "Glyph Drift Observatory reproduces deterministic signatures from the same canonical state",
     "Arcsweep test and build workflow is green",
     "window intersects an active display",
     "window title equals Hearthgate: Arcsweep",
@@ -191,6 +206,10 @@
     "replay a route against both current and captured graph state",
     "publish a Concordance anchor only with explicit approval and an explicit dimensional address",
     "sync an approved World Tone only into an already-addressed world destination",
+    "render identical glyph geometry and fingerprint from identical canonical heartbeat input",
+    "classify glyph continuity as stable, local variation, trend shift, structural drift, discontinuity, or insufficient history",
+    "withhold first-side narrative prose from the return stage until the return narrative is sealed",
+    "verify both narrative hashes before reveal and comparison",
     "restart and recover state",
     "export and import archive",
     "create and restore backup",
@@ -213,12 +232,14 @@
     "Community LIFA traditions supplied source concepts.",
     "Hearthgate: Arcsweep is an original local continuity and world-interface instrument.",
     "Universal Horizon is the sky. This module operates beneath it and does not supersede it.",
-    "React-ion Engine carries dimensional-address, harmonic, route, replay, and evidence provenance as explicit instrument records."
+    "React-ion Engine carries dimensional-address, harmonic, route, replay, and evidence provenance as explicit instrument records.",
+    "Glyph Continuity deterministically maps structured heartbeats into glyph signatures and receipts drift against learned local continuity envelopes."
   ],
   "knownLimitations": [
     "The 0.2.1 visible-window repair requires physical verification on Rowan's display configuration.",
     "React-ion Replay is currently mounted through the Arcsweep sidecar navigation layer rather than the core PRIMARY_NAV declaration.",
     "React-ion endpoint-specific shared-user access policy remains a later hull; current local operation relies on global Helm authorisation plus endpoint and anchor consent metadata.",
+    "Glyph Drift v0.1 uses robust statistical continuity envelopes and lexical paired-narrative comparison; learned embedding models are a later training pass.",
     "Live companion inference remains an optional future adapter.",
     "External calendar and Notion reads are not automatic."
   ]
