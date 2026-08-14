@@ -1,0 +1,50 @@
+{
+  "contract": "arcsweep.source-index-fragment/v1",
+  "subject": { "kind": "character", "id": "kestrelle" },
+  "label": "Kestrelle al’Var",
+  "sources": [
+    {
+      "id": "notion:kestrelle-current-canon",
+      "surface": "notion",
+      "locator": "3a970290-d9c4-81f7-92bd-f392f5439387",
+      "title": "T’averen Vaen 01 — Kestrelle al’Var",
+      "sourceType": "canon-character-profile",
+      "authority": "project_canon",
+      "status": "active-primary",
+      "privacy": "house",
+      "lastObserved": "2026-08-13T20:44:57.402Z",
+      "notes": "Current character page explicitly declares Kestrelle al’Var and Restoration as canonical. Primary source for active character identity and present state."
+    },
+    {
+      "id": "notion:taveren-vaen-universe-wiki",
+      "surface": "notion",
+      "locator": "3a970290-d9c4-8108-b47e-d21fa9573df7",
+      "title": "Ta’veren Vaen — Universe Wiki",
+      "sourceType": "canon-world-profile",
+      "authority": "project_canon",
+      "status": "active-with-superseded-fields",
+      "privacy": "house",
+      "lastObserved": "2026-08-04T21:08:57.752Z",
+      "notes": "Still supports lineage, history, affinities, Dreamwalking, and open canon. Its older al’Valar and Mending labels are preserved as superseded provenance where contradicted by the newer character page."
+    },
+    {
+      "id": "notion:taveren-vaen-reception",
+      "surface": "notion",
+      "locator": "3a970290-d9c4-81fc-b5d5-dd90e34af90f",
+      "title": "World Reception Profile — T’averen Vaen",
+      "sourceType": "sensory-runtime-profile",
+      "authority": "project_canon",
+      "status": "seed-calibration",
+      "privacy": "house",
+      "lastObserved": "2026-08-04T21:09:02.771Z",
+      "notes": "Supplies provisional sensory/reception motif only. Older al’Valar/Mending wording does not override current character identity."
+    }
+  ],
+  "resolutionRules": {
+    "newerExplicitCanonicalCharacterPageWinsOnDirectConflict": true,
+    "supersededClaimsRemainTraceable": true,
+    "uncontradictedOlderCanonMayRemainActive": true,
+    "runtimeOrReceptionLanguageDoesNotOverrideCharacterCanon": true,
+    "dialoguePatternsRequireSceneEvidence": true
+  }
+}
