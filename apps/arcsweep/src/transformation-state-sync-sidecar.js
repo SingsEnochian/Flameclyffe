@@ -42,6 +42,13 @@ function writeMirror(store) {
   } catch {}
 }
 
+function notifyReceiptsUpdated(detail = {}) {
+  const EventClass = globalThis.CustomEvent;
+  if (typeof globalThis.dispatchEvent === 'function' && typeof EventClass === 'function') {
+    globalThis.dispatchEvent(new EventClass('arcsweep:receipts-updated', { detail: { transformations: true, ...detail } }));
+  }
+}
+
 function hasData(store) {
   return Object.values(store?.byWorld || {}).some((record) =>
     (record.requests?.length || 0) + (record.responses?.length || 0) + (record.circuits?.length || 0) > 0,
@@ -76,8 +83,10 @@ async function bootstrap() {
       state.transformationRequests = mirror.store;
       await saveState(state, { reason: 'transformation-receipt-mirror-recovery' });
       lastMirrorRaw = mirror.raw;
+      notifyReceiptsUpdated({ recovered_from_mirror: true });
     } else if (coreHas) {
       writeMirror(core);
+      notifyReceiptsUpdated({ restored_from_core: true });
     } else {
       state.transformationRequests = emptyStore();
       await saveState(state, { reason: 'transformation-receipt-state-initialise' });
@@ -100,6 +109,7 @@ async function syncMirrorIntoCore() {
     if (JSON.stringify(core) !== JSON.stringify(mirrorStore)) {
       state.transformationRequests = mirrorStore;
       await saveState(state, { reason: 'transformation-receipt-update' });
+      notifyReceiptsUpdated({ persisted_to_core: true });
     }
     lastMirrorRaw = readMirror().raw;
   } finally {
