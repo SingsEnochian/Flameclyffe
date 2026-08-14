@@ -144,8 +144,12 @@ function mergeHearthgateConfigSecrets(input, existingInput) {
   for (const field of PRESERVED_KEY_FIELDS) {
     if (!next.keys[field] && existing.keys[field]) next.keys[field] = existing.keys[field];
   }
-  if (!next.keys.custom.length && existing.keys.custom.length) {
-    next.keys.custom = [...existing.keys.custom];
+
+  const customByName = new Map(existing.keys.custom.map((entry) => [entry.name, entry]));
+  for (const entry of next.keys.custom) customByName.set(entry.name, entry);
+  next.keys.custom = [...customByName.values()];
+  if (next.keys.custom.length > 24) {
+    throw new TypeError('Merged keys.custom may contain at most 24 entries.');
   }
   return next;
 }
