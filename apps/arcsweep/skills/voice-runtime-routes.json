@@ -33,7 +33,7 @@
       "route": "ellowind",
       "profileId": "ellowind:qwen3-vl-8b-v1",
       "provider": "ollama",
-      "runtimeModel": "ellowind:qwen3-vl-8b-v1",
+      "runtimeModel": "huihui_ai/qwen3-vl-abliterated:8b-instruct",
       "sourceModel": "huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated",
       "capabilities": ["text", "vision", "visual-read", "writing"],
       "status": "profile-defined"
@@ -42,7 +42,7 @@
       "route": "larkshine",
       "profileId": "larkshine:qwen3-vl-8b-v1",
       "provider": "ollama",
-      "runtimeModel": "larkshine:qwen3-vl-8b-v1",
+      "runtimeModel": "huihui_ai/qwen3-vl-abliterated:8b-instruct",
       "sourceModel": "huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated",
       "capabilities": ["text", "vision", "visual-read", "writing"],
       "status": "profile-defined"
