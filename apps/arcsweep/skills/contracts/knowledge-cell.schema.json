@@ -159,10 +159,13 @@
     "temporal": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Calendar-like validity and/or fictional chronology-order validity. Either clock may be used independently.",
       "properties": {
         "observedAt": { "type": ["string", "null"] },
         "validFrom": { "type": ["string", "null"] },
-        "validUntil": { "type": ["string", "null"] }
+        "validUntil": { "type": ["string", "null"] },
+        "storyOrderFrom": { "type": ["number", "null"] },
+        "storyOrderUntil": { "type": ["number", "null"] }
       }
     },
     "mutability": {
