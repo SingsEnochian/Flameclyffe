@@ -151,7 +151,9 @@ export function deriveRunaInterventionArc({
   if (feedbackReview) {
     if (feedbackReview.status === 'accepted') {
       state = 'RETURN_TO_DEEP_TIME';
-      nextAction = `Admit the accepted ${observationLabel(observationSource).toLowerCase()} to DEEPTime.`;
+      nextAction = observationSource === 'field'
+        ? 'Admit the accepted Field observation to DEEPTime.'
+        : 'Admit the accepted observation to DEEPTime.';
     } else if (['archived', 'discarded'].includes(feedbackReview.status)) {
       state = 'STOPPED';
       nextAction = `Observation path stopped as ${feedbackReview.status}.`;
