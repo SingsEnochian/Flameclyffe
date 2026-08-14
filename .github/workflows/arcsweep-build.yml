@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: arcsweep-authoritative-${{ github.ref }}
@@ -53,9 +53,6 @@ jobs:
       - name: Pin npm 11.16.0
         run: npm install --global npm@11.16.0
 
-      - name: Repair auditable lockfile metadata
-        run: npm audit fix --package-lock-only
-
       - name: Install locked dependencies
         run: npm ci
 
@@ -70,16 +67,3 @@ jobs:
 
       - name: Build Arcsweep
         run: npm run arcsweep:build
-
-      - name: Persist minimal lockfile repair
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/react-ion-engine-v0.1'
-        run: |
-          if git diff --quiet -- package-lock.json; then
-            echo 'Lockfile already clean.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add package-lock.json
-          git commit -m 'fix(deps): apply audited lockfile repair'
-          git push
