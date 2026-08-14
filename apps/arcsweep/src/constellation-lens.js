@@ -1,5 +1,5 @@
 const EDITABLE_SELECTOR = [
-  'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not(.richtext-source-field)',
+  'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="password"]):not(.richtext-source-field)',
   'textarea:not(.richtext-source-field)',
   'select',
   '[contenteditable="true"]',
@@ -13,6 +13,7 @@ export function normaliseControlValue(control) {
   if (!control) return null;
   const type = String(control.type || '').toLowerCase();
 
+  if (type === 'password') return null;
   if (type === 'checkbox' || type === 'radio') return Boolean(control.checked);
   if (type === 'file') {
     return [...(control.files || [])].map((file) => ({
@@ -129,6 +130,8 @@ function escapeHtml(value = '') {
 
 function ensureLens(control) {
   if (control.dataset.constellationLens === 'true') return;
+  if (control.type === 'password') return;
+  if (control.closest?.('#arcsweep-constellation-presence, [data-constellation-lens-ignore="true"]')) return;
   control.dataset.constellationLens = 'true';
   const key = fieldKey(control);
 
