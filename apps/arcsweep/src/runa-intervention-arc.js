@@ -4,6 +4,7 @@ export const RUNA_INTERVENTION_ARC_STATES = Object.freeze([
   'WAITING_SUGGESTION',
   'COMPILE_RENDERER',
   'REVIEW_RENDERER',
+  'SELECT_PALETTE',
   'COMPILE_PREVIEW',
   'LAUNCH_PREVIEW',
   'ARM_OBSERVATION',
@@ -30,6 +31,7 @@ function stage(id, label, receipt, status) {
       || receipt?.suggestion_id
       || receipt?.candidate_id
       || receipt?.review_id
+      || receipt?.palette_id
       || receipt?.plan_id
       || receipt?.render_id
       || receipt?.arm_id
@@ -46,11 +48,7 @@ export function deriveRunaInterventionArc({
   feedbackCycles = [],
   feedbackQueue = null,
 } = {}) {
-  const suggestion = latest(
-    observatory.runa_suggestions,
-    (item) => item.world_id === worldId,
-    (item) => item.generated_at,
-  );
+  const suggestion = latest(observatory.runa_suggestions, (item) => item.world_id === worldId, (item) => item.generated_at);
   const candidate = suggestion ? latest(
     observatory.runa_renderer_candidates,
     (item) => item.world_id === worldId && item.source?.suggestion_id === suggestion.suggestion_id,
@@ -60,6 +58,11 @@ export function deriveRunaInterventionArc({
     observatory.runa_renderer_reviews,
     (item) => item.source?.world_id === worldId && item.source?.candidate_id === candidate.candidate_id,
     (item) => item.reviewed_at,
+  ) : null;
+  const palette = rendererReview ? latest(
+    observatory.runa_preview_palettes,
+    (item) => item.world_id === worldId && item.source?.renderer_review_id === rendererReview.review_id,
+    (item) => item.selected_at,
   ) : null;
   const previewPlan = rendererReview ? latest(
     observatory.runa_preview_plans,
@@ -108,14 +111,18 @@ export function deriveRunaInterventionArc({
   }
   if (rendererReview) {
     if (rendererReview.decision === 'approved') {
-      state = 'COMPILE_PREVIEW';
-      nextAction = 'Compile a temporary preview plan.';
+      state = 'SELECT_PALETTE';
+      nextAction = 'Select and receipt the temporary preview palette.';
     } else {
       state = 'STOPPED';
       nextAction = rendererReview.decision === 'adjust'
         ? 'Adjust the renderer design and create a new reviewed candidate.'
         : 'Renderer path stopped by explicit review.';
     }
+  }
+  if (palette) {
+    state = 'COMPILE_PREVIEW';
+    nextAction = 'Compile the reviewed bounds and selected palette into a temporary preview plan.';
   }
   if (previewPlan) {
     state = 'LAUNCH_PREVIEW';
@@ -153,7 +160,8 @@ export function deriveRunaInterventionArc({
     stage('suggestion', 'Runa suggestion', suggestion, suggestion ? 'complete' : 'waiting'),
     stage('renderer-candidate', 'Renderer candidate', candidate, candidate ? 'complete' : suggestion ? 'ready' : 'waiting'),
     stage('renderer-review', 'Renderer review', rendererReview, rendererReview ? rendererReview.decision : candidate ? 'ready' : 'waiting'),
-    stage('preview-plan', 'Preview plan', previewPlan, previewPlan ? 'complete' : rendererReview?.decision === 'approved' ? 'ready' : 'waiting'),
+    stage('preview-palette', 'Preview palette', palette, palette ? 'complete' : rendererReview?.decision === 'approved' ? 'ready' : 'waiting'),
+    stage('preview-plan', 'Preview plan', previewPlan, previewPlan ? 'complete' : palette ? 'ready' : 'waiting'),
     stage('preview-render', 'Explicit preview', previewRender, previewRender ? (previewRender.runtime?.stopped_early ? 'stopped-early' : 'complete') : previewPlan ? 'ready' : 'waiting'),
     stage('evidence-arm', 'Observation arm', evidenceArm, evidenceArm ? 'complete' : previewRender ? 'ready' : 'waiting'),
     stage('feedback-observation', 'Feedback observation', feedbackCycle, feedbackCycle ? 'complete' : evidenceArm ? 'ready' : 'waiting'),
@@ -172,6 +180,7 @@ export function deriveRunaInterventionArc({
       suggestion,
       candidate,
       renderer_review: rendererReview,
+      preview_palette: palette,
       preview_plan: previewPlan,
       preview_render: previewRender,
       evidence_arm: evidenceArm,
@@ -184,6 +193,7 @@ export function deriveRunaInterventionArc({
     authority: Object.freeze({
       derived_view_only: true,
       source_receipts_mutable: false,
+      palette_requires_explicit_selection: true,
       stage_completion_does_not_infer_causation: true,
       feedback_acceptance_required_before_deep_time: true,
       two_temporal_coordinates_required_for_trajectory_ash: true,
