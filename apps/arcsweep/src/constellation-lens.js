@@ -72,6 +72,8 @@ function visibleWorldName() {
 export function buildFieldContext(control, trigger = 'pause') {
   const form = control.closest?.('form');
   const documentId = formRecordId(form) || document.body?.dataset.documentId || null;
+  const rawStoryOrder = form?.dataset.storyOrder || document.body?.dataset.storyOrder || '';
+  const parsedStoryOrder = rawStoryOrder === '' ? null : Number(rawStoryOrder);
   return {
     contract: 'arcsweep.constellation-field-context/v2',
     trigger,
@@ -98,6 +100,7 @@ export function buildFieldContext(control, trigger = 'pause') {
       documentId,
       sceneId: form?.dataset.sceneId || document.body?.dataset.sceneId || null,
       storyAt: form?.dataset.storyAt || document.body?.dataset.storyAt || null,
+      storyOrder: Number.isFinite(parsedStoryOrder) ? parsedStoryOrder : null,
       povCharacterId: form?.dataset.povCharacterId || document.body?.dataset.povCharacterId || null,
       narrativeVoiceId: form?.dataset.narrativeVoiceId || document.body?.dataset.narrativeVoiceId || null,
       writingStyleId: form?.dataset.writingStyleId || document.body?.dataset.writingStyleId || null,
