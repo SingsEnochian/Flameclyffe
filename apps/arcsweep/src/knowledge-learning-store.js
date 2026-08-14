@@ -82,8 +82,9 @@ export async function archiveLearnedCell(cellId) {
     const store = tx.objectStore(STORE);
     const cell = await txPromise(store.get(cellId));
     if (!cell) return false;
+    const now = new Date().toISOString();
     cell.status = 'deprecated';
-    cell.provenance = { ...(cell.provenance || {}), archivedAt: new Date().toISOString() };
+    cell.temporal = { ...(cell.temporal || {}), validUntil: now };
     await txPromise(store.put(cell));
     return true;
   } finally {
@@ -115,8 +116,8 @@ export function createLearningCellFromMargin(detail = {}) {
       confidence: null,
     },
     source: {
-      surface: 'user_input',
-      locator: `arcsweep-field:${field.key || 'unknown'}`,
+      surface: 'runtime',
+      locator: `arcsweep-margin:${field.key || 'unknown'}`,
       ref: detail.requestId || null,
       receiptId: detail.requestId || null,
     },
