@@ -48,6 +48,10 @@ export function hasConstellationRuntimeToken() {
   return Boolean(sessionToken);
 }
 
+export function constellationRuntimeAuthorizationHeaders() {
+  return sessionToken ? { authorization: `Bearer ${sessionToken}` } : {};
+}
+
 export async function constellationRuntimeRouteForVoice(voiceId, fetchImpl = fetch) {
   const voice = normalise(voiceId);
   const registry = await loadConstellationRuntimeRoutes(fetchImpl);
@@ -96,7 +100,7 @@ export async function getConstellationRuntimeVoiceStatus(voiceId, fetchImpl = fe
   if (!route.available) return { status: route.status, voiceId: route.voiceId, route };
   if (!sessionToken) return { status: 'offline-no-token', voiceId: route.voiceId, route };
   const response = await fetchImpl(`/api/v1/flames/${route.route}/status`, {
-    headers: { authorization: `Bearer ${sessionToken}` },
+    headers: constellationRuntimeAuthorizationHeaders(),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) return { status: 'route-unavailable', voiceId: route.voiceId, route, detail: data.error || response.status };
@@ -146,7 +150,7 @@ export async function invokeConstellationRuntimeVoice({
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      authorization: `Bearer ${sessionToken}`,
+      ...constellationRuntimeAuthorizationHeaders(),
     },
     body: JSON.stringify({
       message: String(message).trim(),
