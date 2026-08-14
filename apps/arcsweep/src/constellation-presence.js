@@ -59,12 +59,16 @@ function learnedCellMarkup(cell) {
   const when = cell.provenance?.createdAt ? new Date(cell.provenance.createdAt).toLocaleString() : 'unknown time';
   const source = cell.source?.locator || 'unknown source';
   const voice = cell.authority?.speakerOrAuthor || cell.subject?.id || 'voice';
+  const evidence = cell.source?.excerpt
+    ? `<blockquote class="constellation-learning-evidence"><span>Evidence</span>${escapeHtml(cell.source.excerpt)}</blockquote>`
+    : '';
   return `<article class="constellation-learning-cell ${archived ? 'archived' : ''}" data-learning-cell-id="${escapeHtml(cell.id)}">
     <div class="constellation-learning-head">
       <strong>${escapeHtml(voice)}</strong>
       <span>${archived ? 'archived' : escapeHtml(cell.status || 'provisional')}</span>
     </div>
     <div class="constellation-learning-body">${escapeHtml(cell.value)}</div>
+    ${evidence}
     <div class="constellation-learning-meta">${escapeHtml(when)} · ${escapeHtml(source)} · ${escapeHtml(cell.authority?.kind || 'unknown authority')}</div>
     <div class="constellation-learning-actions">
       <button type="button" class="quiet mini" data-learning-action="${archived ? 'restore' : 'archive'}">${archived ? 'Restore' : 'Archive'}</button>
@@ -144,7 +148,7 @@ async function render(root) {
       <div class="constellation-presence-actions">
         <button type="button" class="quiet" data-constellation-action="clear">Quiet room</button>
       </div>
-      <p class="constellation-presence-note">Selection grants context participation only. It does not grant tool writes, canon commits, or silent edits. Kept notes are local provisional observations until deliberately promoted elsewhere. Archived notes stop participating and can be restored. The runtime token is never stored in Arcsweep state or local storage and disappears on reload.</p>
+      <p class="constellation-presence-note">Selection opens the writing context to the chosen voices. Tool writes, canon commits, and prose edits remain separate authorised actions. Kept notes are local provisional observations until deliberately promoted elsewhere; evidence-bearing scene notes retain their supporting excerpt. Archived notes stop participating and can be restored. The runtime token stays in session memory and disappears on reload.</p>
     </div>
   `;
 
@@ -218,6 +222,8 @@ function injectStyles() {
     .constellation-learning-head { display:flex; justify-content:space-between; gap:.6rem; font-size:.76rem; }
     .constellation-learning-head span { opacity:.65; text-transform:capitalize; }
     .constellation-learning-body { margin-top:.25rem; font-size:.78rem; line-height:1.35; white-space:pre-wrap; }
+    .constellation-learning-evidence { margin:.35rem 0 .25rem; padding:.3rem .45rem; border-left:2px solid color-mix(in srgb,var(--gold) 38%,transparent); font-size:.72rem; line-height:1.3; }
+    .constellation-learning-evidence span { display:block; margin-bottom:.15rem; font-size:.62rem; text-transform:uppercase; letter-spacing:.06em; opacity:.58; }
     .constellation-learning-meta { margin-top:.3rem; font-size:.65rem; opacity:.58; overflow-wrap:anywhere; }
     .constellation-learning-actions { display:flex; justify-content:flex-end; margin-top:.3rem; }
     .constellation-learning-empty { margin:.35rem 0; font-size:.75rem; opacity:.65; }
