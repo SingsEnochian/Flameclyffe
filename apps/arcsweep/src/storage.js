@@ -5,17 +5,134 @@ import { createEmptyRoomCollections, normaliseRoomCollections } from './rooms.js
 import { createWorld, normaliseWorld } from './worlds.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
+export const OBSERVATORY_MIRROR_KEY = 'hearthgate.arcsweep.domain-control-bench.v1';
 const desktop = typeof window !== 'undefined' ? (window.arcsweepDesktop ?? window.arcsweep ?? null) : null;
 
 function uid(prefix = 'item') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+export function createEmptyObservatoryStore() {
+  return {
+    version: 1,
+    custom_profiles: [],
+    sweeps: [],
+    theory_candidates: [],
+    theory_reviews: [],
+    deep_time_records: [],
+    deep_time_replays: [],
+    advisor_receipts: [],
+    domain_mappings: [],
+    runa_suggestions: [],
+    active_profile_id: null,
+    migration: {
+      legacy_local_storage_imported_at: null,
+    },
+  };
+}
+
+export function normaliseObservatoryStore(value) {
+  const defaults = createEmptyObservatoryStore();
+  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const arrayKeys = [
+    'custom_profiles',
+    'sweeps',
+    'theory_candidates',
+    'theory_reviews',
+    'deep_time_records',
+    'deep_time_replays',
+    'advisor_receipts',
+    'domain_mappings',
+    'runa_suggestions',
+  ];
+  const result = {
+    ...defaults,
+    ...input,
+    version: 1,
+    active_profile_id: typeof input.active_profile_id === 'string' ? input.active_profile_id : null,
+    migration: {
+      ...defaults.migration,
+      ...(input.migration && typeof input.migration === 'object' ? input.migration : {}),
+    },
+  };
+  for (const key of arrayKeys) result[key] = Array.isArray(input[key]) ? structuredClone(input[key]) : [];
+  return result;
+}
+
+function observatoryHasData(store) {
+  const value = normaliseObservatoryStore(store);
+  return Boolean(
+    value.active_profile_id
+    || value.custom_profiles.length
+    || value.sweeps.length
+    || value.theory_candidates.length
+    || value.theory_reviews.length
+    || value.deep_time_records.length
+    || value.deep_time_replays.length
+    || value.advisor_receipts.length
+    || value.domain_mappings.length
+    || value.runa_suggestions.length
+  );
+}
+
+function readLegacyObservatoryMirror() {
+  try {
+    const parsed = JSON.parse(globalThis.localStorage?.getItem(OBSERVATORY_MIRROR_KEY) || 'null');
+    return parsed?.version === 1 ? normaliseObservatoryStore(parsed) : null;
+  } catch {
+    return null;
+  }
+}
+
+function mirrorObservatory(store) {
+  try {
+    globalThis.localStorage?.setItem(OBSERVATORY_MIRROR_KEY, JSON.stringify(normaliseObservatoryStore(store)));
+  } catch {}
+}
+
+function migrateLegacyObservatory(state) {
+  const current = normaliseObservatoryStore(state.observatory);
+  const legacy = readLegacyObservatoryMirror();
+  if (observatoryHasData(current) || !legacy || !observatoryHasData(legacy)) {
+    state.observatory = current;
+    return false;
+  }
+  state.observatory = {
+    ...legacy,
+    migration: {
+      ...(legacy.migration || {}),
+      legacy_local_storage_imported_at: new Date().toISOString(),
+    },
+  };
+  return true;
+}
+
+function createEmptyFeedbackQueueState() {
+  return {
+    schema: 'arcsweep.feedback-cycle-queue/v1',
+    version: 1,
+    entries: {},
+    receipts: [],
+    updated_at: null,
+  };
+}
+
+function normaliseFeedbackQueueState(value) {
+  const defaults = createEmptyFeedbackQueueState();
+  if (!value || typeof value !== 'object' || Array.isArray(value) || value.schema !== defaults.schema) return defaults;
+  return {
+    ...defaults,
+    entries: value.entries && typeof value.entries === 'object' && !Array.isArray(value.entries) ? structuredClone(value.entries) : {},
+    receipts: Array.isArray(value.receipts) ? structuredClone(value.receipts) : [],
+    updated_at: typeof value.updated_at === 'string' ? value.updated_at : null,
+  };
+}
+
 export function createDefaultState() {
   const now = new Date().toISOString();
   const world = createWorld(uid('world'), now);
   return {
-    version: '0.2.1',
+    version: '0.3.0',
     settings: {
       crLabel: 'Waking World',
       drLabel: 'Desired Reality',
@@ -55,7 +172,9 @@ export function createDefaultState() {
     },
     returnHistory: [],
     feedbackCycles: [],
+    feedbackQueue: createEmptyFeedbackQueueState(),
     premaqcByWorld: {},
+    observatory: createEmptyObservatoryStore(),
     houseBundles: [],
     provenance: {
       createdAt: now,
@@ -102,7 +221,7 @@ export function normaliseState(value) {
   return {
     ...defaults,
     ...imported,
-    version: '0.2.1',
+    version: '0.3.0',
     settings: { ...defaults.settings, ...(imported.settings || {}) },
     worlds,
     activeWorldId,
@@ -114,7 +233,9 @@ export function normaliseState(value) {
     appearance: { ...defaults.appearance, ...(imported.appearance || {}) },
     returnHistory: Array.isArray(imported.returnHistory) ? imported.returnHistory : [],
     feedbackCycles: Array.isArray(imported.feedbackCycles) ? imported.feedbackCycles : [],
+    feedbackQueue: normaliseFeedbackQueueState(imported.feedbackQueue),
     premaqcByWorld: imported.premaqcByWorld && typeof imported.premaqcByWorld === 'object' ? imported.premaqcByWorld : {},
+    observatory: normaliseObservatoryStore(imported.observatory),
     houseBundles: Array.isArray(imported.houseBundles) ? imported.houseBundles : [],
     provenance: {
       ...defaults.provenance,
@@ -155,23 +276,30 @@ export async function loadState() {
     const legacy = result?.state ? null : readBrowserState();
     const initial = result?.state || legacy || createDefaultState();
     const installed = installCurrentHouseDrLibrary(initial);
-    if (installed.changed) {
-      if (result?.state && desktop.createBackup) {
-        await desktop.createBackup('before-house-dr-library-update').catch(() => null);
+    const observatoryMigrated = migrateLegacyObservatory(installed.state);
+    const shouldSave = installed.changed || observatoryMigrated || !result?.state;
+    if (shouldSave) {
+      if (result?.state && desktop.createBackup && (installed.changed || observatoryMigrated)) {
+        await desktop.createBackup(observatoryMigrated ? 'before-observatory-state-migration' : 'before-house-dr-library-update').catch(() => null);
       }
       await desktop.saveState(installed.state, {
-        reason: result?.state ? 'house-dr-library-update' : (legacy ? 'browser-migration-house-library' : 'first-run-house-library'),
-        bundleId: installed.receipt.id,
-        bundleVersion: installed.receipt.version,
+        reason: observatoryMigrated
+          ? 'observatory-state-migration'
+          : installed.changed
+            ? (result?.state ? 'house-dr-library-update' : (legacy ? 'browser-migration-house-library' : 'first-run-house-library'))
+            : (legacy ? 'browser-migration' : 'first-run'),
+        bundleId: installed.receipt?.id ?? null,
+        bundleVersion: installed.receipt?.version ?? null,
       });
-    } else if (!result?.state) {
-      await desktop.saveState(installed.state, { reason: legacy ? 'browser-migration' : 'first-run' });
     }
+    mirrorObservatory(installed.state.observatory);
     return installed.state;
   }
 
   const installed = installCurrentHouseDrLibrary(readBrowserState() || createDefaultState());
-  if (installed.changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(installed.state));
+  const observatoryMigrated = migrateLegacyObservatory(installed.state);
+  if (installed.changed || observatoryMigrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(installed.state));
+  mirrorObservatory(installed.state.observatory);
   return installed.state;
 }
 
@@ -182,13 +310,29 @@ export function saveState(state, meta = {}) {
     updatedAt: new Date().toISOString(),
     storage: desktop ? 'desktop-local-store' : 'browser-development-fallback',
   };
+  state.version = '0.3.0';
+  state.observatory = normaliseObservatoryStore(state.observatory);
+  state.feedbackQueue = normaliseFeedbackQueueState(state.feedbackQueue);
   const snapshot = JSON.parse(JSON.stringify(state));
+  mirrorObservatory(snapshot.observatory);
   if (desktop?.saveState) {
     saveChain = saveChain.catch(() => {}).then(() => desktop.saveState(snapshot, meta));
     return saveChain;
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
   return Promise.resolve({ ok: true, mode: 'browser-development-fallback' });
+}
+
+let observatorySaveChain = Promise.resolve();
+export function persistObservatoryStore(store, meta = {}) {
+  const snapshot = normaliseObservatoryStore(store);
+  mirrorObservatory(snapshot);
+  observatorySaveChain = observatorySaveChain.catch(() => {}).then(async () => {
+    const state = await loadState();
+    state.observatory = snapshot;
+    return saveState(state, { reason: 'observatory-store-update', ...meta });
+  });
+  return observatorySaveChain;
 }
 
 export function newId(prefix) {
