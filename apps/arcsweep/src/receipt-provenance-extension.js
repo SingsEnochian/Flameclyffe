@@ -3,8 +3,12 @@ import { buildArcsweepProvenanceGraph } from './receipt-provenance-graph.js';
 const EXTENDED_STAGE = Object.freeze({
   runa_renderer_candidate: 7,
   runa_renderer_review: 8,
-  provenance_export: 9,
-  integrity_report: 9,
+  runa_preview_plan: 9,
+  runa_preview_render: 10,
+  runa_preview_evidence_arm: 11,
+  runa_preview_observation_link: 12,
+  provenance_export: 13,
+  integrity_report: 13,
 });
 
 function clone(value) { return value == null ? value : structuredClone(value); }
@@ -55,9 +59,10 @@ function byKind(nodes) {
 }
 
 /**
- * Extends the core receipt graph with receipts that are downstream of Runa and
- * with audit/export receipts about the chain itself. The core graph remains the
- * source of truth for Ask → Runa links; this layer only appends explicit IDs.
+ * Extends the core receipt graph with receipts downstream of Runa and with
+ * audit/export receipts about the chain itself. The feedback loop is allowed to
+ * curve back toward Feedback after a preview render; the graph is provenance,
+ * not a promise that every edge is a left-to-right DAG.
  */
 export function buildExtendedArcsweepProvenanceGraph(input = {}) {
   const base = buildArcsweepProvenanceGraph(input);
@@ -94,6 +99,60 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
     ), collisions);
     const relation = edge(review.source?.candidate_id, review.review_id, 'reviewed-renderer-as');
     if (relation) rawEdges.push(relation);
+  }
+
+  for (const plan of obs.runa_preview_plans || []) {
+    if (!worldMatches(worldId, plan?.world?.id)) continue;
+    addNode(nodes, node(
+      plan.plan_id,
+      'runa_preview_plan',
+      'Runa Preview Plan · explicit launch required',
+      plan,
+      { world_id: plan.world?.id || null, timestamp: plan.generated_at || null },
+    ), collisions);
+    const relation = edge(plan.source?.renderer_review_id, plan.plan_id, 'compiles-preview-plan');
+    if (relation) rawEdges.push(relation);
+  }
+
+  for (const render of obs.runa_preview_renders || []) {
+    if (!worldMatches(worldId, render?.world_id)) continue;
+    addNode(nodes, node(
+      render.render_id,
+      'runa_preview_render',
+      'Runa Preview Render · explicit launch',
+      render,
+      { world_id: render.world_id || null, timestamp: render.launched_at || null },
+    ), collisions);
+    const relation = edge(render.source?.plan_id, render.render_id, 'launched-as-preview');
+    if (relation) rawEdges.push(relation);
+  }
+
+  for (const arm of obs.runa_preview_evidence_arms || []) {
+    if (!worldMatches(worldId, arm?.world_id)) continue;
+    addNode(nodes, node(
+      arm.arm_id,
+      'runa_preview_evidence_arm',
+      'Runa Preview Evidence Arm · next Feedback cycle',
+      arm,
+      { world_id: arm.world_id || null, timestamp: arm.armed_at || null },
+    ), collisions);
+    const relation = edge(arm.source?.render_id, arm.arm_id, 'armed-for-observation');
+    if (relation) rawEdges.push(relation);
+  }
+
+  for (const link of obs.runa_preview_observation_links || []) {
+    if (!worldMatches(worldId, link?.world_id)) continue;
+    addNode(nodes, node(
+      link.link_id,
+      'runa_preview_observation_link',
+      'Runa Preview → Feedback Observation',
+      link,
+      { world_id: link.world_id || null, timestamp: link.linked_at || null },
+    ), collisions);
+    const armRelation = edge(link.source?.arm_id, link.link_id, 'applies-to-next-observation');
+    const cycleRelation = edge(link.source?.feedback_cycle_id, link.link_id, 'observed-after-preview');
+    if (armRelation) rawEdges.push(armRelation);
+    if (cycleRelation) rawEdges.push(cycleRelation);
   }
 
   for (const exportReceipt of obs.provenance_exports || []) {
@@ -161,6 +220,9 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
     authority: Object.freeze({
       ...base.authority,
       downstream_renderer_receipts_included: true,
+      preview_intervention_receipts_included: true,
+      feedback_loop_may_be_cyclic: true,
+      observation_links_are_context_not_causation_claims: true,
       audit_and_export_receipts_included_without_source_mutation: true,
     }),
   });
