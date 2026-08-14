@@ -1,4 +1,4 @@
-import { assertValidDeepTheoryRecord } from '../../starwell/deep-observer/deep-theory-validator.js';
+import { assertValidDeepTheoryRecord } from '../../../starwell/deep-observer/deep-theory-validator.js';
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 import { DOMAIN_CONTROL_SWEEP_SCHEMA } from './domain-control-bench.js';
 
