@@ -16,6 +16,8 @@ $ServerDir = Join-Path $PSScriptRoot 'apps\starwell-server'
 $IgniteScript = Join-Path $ServerDir 'scripts\bifrost-ignite.js'
 $PrepareScript = Join-Path $ServerDir 'scripts\bifrost-model-prepare.js'
 $ReceiptDir = Join-Path $ServerDir 'data\ignition-receipts'
+$RequestedProfileRef = $ProfileId
+$ResolvedProfileId = $null
 
 function Write-Stage([string]$Text) {
   Write-Host "`n🔥 $Text" -ForegroundColor Yellow
@@ -35,19 +37,19 @@ function Require-Command([string]$Name, [string]$Hint) {
 function Get-ProfileDefinition {
   Push-Location $ServerDir
   try {
-    $json = & node -e "const {materialiseModelProfile}=require('./bifrost/model-profiles'); const p=materialiseModelProfile(process.argv[1]); if(!p) process.exit(2); console.log(JSON.stringify({profileId:p.profile_id,label:p.label,owner:p.owner,provider:p.runtime.provider,model:p.runtime.model,optInOnly:!!p.opt_in_only,artifact:p.artifact||null}));" $ProfileId 2>&1
+    $json = & node -e "const {resolveProfileRef}=require('./bifrost/profile-resolution'); const r=resolveProfileRef(process.argv[1]); if(!r) process.exit(2); const p=r.profile; console.log(JSON.stringify({profileId:r.profileId,label:p.label,owner:p.owner,identity:r.identity,provider:p.runtime.provider,model:p.runtime.model,optInOnly:!!p.opt_in_only,artifact:p.artifact||null}));" $RequestedProfileRef 2>&1
     $code = $LASTEXITCODE
   }
   finally {
     Pop-Location
   }
-  if ($code -ne 0) { Fail "Unknown or unreadable Bifröst profile: $ProfileId" 11 }
+  if ($code -ne 0) { Fail "Unknown or unreadable Bifröst profile/identity: $RequestedProfileRef" 11 }
   try { return (($json | ForEach-Object { "$_" }) -join "`n") | ConvertFrom-Json -ErrorAction Stop }
-  catch { Fail "Could not parse Bifröst profile definition for $ProfileId." 12 }
+  catch { Fail "Could not parse Bifröst profile definition for $RequestedProfileRef." 12 }
 }
 
 function Invoke-Ignition($Profile) {
-  $args = @($IgniteScript, 'profile', $ProfileId, '--yes')
+  $args = @($IgniteScript, 'profile', $ResolvedProfileId, '--yes')
   if ($Profile.provider -eq 'ollama') { $args += '--start-ollama' }
   if ($AllowRemote) { $args += '--allow-remote' }
   if ($OptIn) { $args += '--opt-in' }
@@ -97,14 +99,21 @@ if (-not (Test-Path $PrepareScript)) { Fail "Model preparation CLI is missing: $
 Require-Command 'node' 'Install/use Node 24 before ignition.'
 
 $profile = Get-ProfileDefinition
+$ResolvedProfileId = [string]$profile.profileId
 Write-Host 'BIFRÖST · ATTESTED PROFILE IGNITION' -ForegroundColor Magenta
-Write-Host "Profile: $($profile.profileId)"
-Write-Host "Presence/instrument: $($profile.label)"
+Write-Host "Requested as: $RequestedProfileRef"
+Write-Host "Resolved profile: $ResolvedProfileId"
+if ($null -ne $profile.identity) {
+  Write-Host "Identity: $($profile.identity.identityName)"
+  if ($profile.identity.displayName) { Write-Host "Display: $($profile.identity.displayName)" }
+  if ($profile.identity.affectionateName) { Write-Host "Affectionate alias: $($profile.identity.affectionateName)" }
+  if ($profile.identity.aliases) { Write-Host "Aliases: $($profile.identity.aliases -join ', ')" }
+}
 Write-Host "Provider: $($profile.provider)"
 Write-Host "Expected runtime model: $($profile.model)"
 
 if ($profile.optInOnly -and -not $OptIn) {
-  Fail "$($profile.profileId) is opt-in only. Re-run with -OptIn when you deliberately want this instrument." 16
+  Fail "$ResolvedProfileId is opt-in only. Re-run with -OptIn when you deliberately want this instrument." 16
 }
 
 if ($profile.provider -eq 'ollama') {
@@ -121,7 +130,7 @@ if ($first.ExitCode -eq 0 -and $null -ne $first.Receipt -and $first.Receipt.stat
   if ($first.Receipt.actualModel -ne $profile.model) { Fail "Attestation mismatch: expected $($profile.model), got $($first.Receipt.actualModel)." 21 }
   if ($first.Receipt.challenge -ne $Ack) { Fail "Challenge mismatch: expected $Ack, got $($first.Receipt.challenge)." 22 }
   Save-Receipt $profile $first.Receipt $first.Raw
-  Write-Host "`n🔥 RUNTIME VERIFIED · $($profile.label) · $($first.Receipt.actualModel)" -ForegroundColor Green
+  Write-Host "`n🔥 RUNTIME VERIFIED · $($profile.identity.identityName) · $($first.Receipt.actualModel)" -ForegroundColor Green
   exit 0
 }
 
@@ -142,7 +151,7 @@ if (-not (Confirm-Install $profile)) {
 }
 
 Write-Stage 'Preparing the selected vessel'
-$prepareArgs = @($PrepareScript, '--profile', $ProfileId, '--execute')
+$prepareArgs = @($PrepareScript, '--profile', $ResolvedProfileId, '--execute')
 if ($profile.optInOnly) { $prepareArgs += '--include-opt-in' }
 Push-Location $ServerDir
 try {
@@ -163,5 +172,5 @@ if ($second.Receipt.state -ne 'runtime-verified') { Fail "Post-install ignition 
 if ($second.Receipt.actualModel -ne $profile.model) { Fail "Attestation mismatch: expected $($profile.model), got $($second.Receipt.actualModel)." 42 }
 if ($second.Receipt.challenge -ne $Ack) { Fail "Challenge mismatch: expected $Ack, got $($second.Receipt.challenge)." 43 }
 
-Write-Host "`n🔥 RUNTIME VERIFIED · $($profile.label) · $($second.Receipt.actualModel)" -ForegroundColor Green
+Write-Host "`n🔥 RUNTIME VERIFIED · $($profile.identity.identityName) · $($second.Receipt.actualModel)" -ForegroundColor Green
 exit 0
