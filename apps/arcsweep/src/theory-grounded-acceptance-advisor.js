@@ -1,5 +1,6 @@
 import { DEEP_THEORY_REVIEW_RECEIPT_SCHEMA } from './deep-theory-review.js';
 import { buildDeepTimeWindow } from './deep-time-bridge.js';
+import { mappingBridges } from './domain-context-mapping.js';
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 
 export const THEORY_GROUNDED_ADVISOR_RECEIPT_SCHEMA = 'arcsweep.theory-grounded-acceptance-advisor/v1';
@@ -35,12 +36,18 @@ function temporalSummary(records) {
   };
 }
 
-function recommendationFor({ acceptedTheory, window, contextDomain, summary, minimumRecords }) {
+function domainResolution(theoryDomain, contextDomain, mapping) {
+  if (theoryDomain === contextDomain) return { allowed: true, mode: 'direct', mapping: null };
+  if (mappingBridges(mapping, contextDomain, theoryDomain)) return { allowed: true, mode: 'explicit-mapping', mapping };
+  return { allowed: false, mode: 'blocked', mapping: null };
+}
+
+function recommendationFor({ acceptedTheory, window, contextDomain, summary, minimumRecords, domain }) {
   if (acceptedTheory.status !== 'accepted') {
     return { status: 'THEORY_NOT_ACCEPTED', rationale: 'The analytical model has not passed the explicit DEEPTheory acceptance gate.' };
   }
-  if (contextDomain !== acceptedTheory.domain) {
-    return { status: 'DOMAIN_MISMATCH', rationale: `Accepted theory domain ${acceptedTheory.domain} cannot be silently applied to ${contextDomain}.` };
+  if (!domain.allowed) {
+    return { status: 'DOMAIN_MISMATCH', rationale: `Accepted theory domain ${acceptedTheory.domain} cannot be silently applied to ${contextDomain}. An explicit applicability mapping receipt is required.` };
   }
   if (!window.valid) {
     return { status: 'INVALID_TEMPORAL_WINDOW', rationale: window.errors.join(' ') || 'The DEEPTime window failed validation.' };
@@ -56,13 +63,15 @@ function recommendationFor({ acceptedTheory, window, contextDomain, summary, min
   if (movement < 1e-6) {
     return { status: 'OBSERVE_LONGER', rationale: 'The accepted temporal window contains no measurable PREMAQC displacement.' };
   }
-  return { status: 'REVIEW_ACCEPTANCE_GATE', rationale: 'Accepted theory and a sufficient, validated temporal window are both present. Human review may now consider an acceptance gate.' };
+  const mapped = domain.mode === 'explicit-mapping' ? ' through an explicit applicability mapping' : '';
+  return { status: 'REVIEW_ACCEPTANCE_GATE', rationale: `Accepted theory and a sufficient, validated temporal window are both present${mapped}. Human review may now consider an acceptance gate.` };
 }
 
 export async function createTheoryGroundedAcceptanceAdvice({
   theoryReviewReceipt,
   deepTimeRecords = [],
   contextDomain,
+  domainMappingReceipt = null,
   acceptanceMaskId = 'theory-grounded-advisor/manual-review/v1',
   acceptanceMaskVersion = '1',
   minimumRecords = 3,
@@ -73,26 +82,37 @@ export async function createTheoryGroundedAcceptanceAdvice({
   invariant(Number.isInteger(minimumRecords) && minimumRecords >= 2, 'minimumRecords must be at least 2');
 
   const theory = theoryReviewReceipt.reviewed_record;
+  const context = contextDomain.trim();
+  const domain = domainResolution(theory.domain, context, domainMappingReceipt);
   const window = buildDeepTimeWindow(deepTimeRecords, { minimumRecords });
   const summary = window.records.length ? temporalSummary(window.records) : null;
   const recommendation = recommendationFor({
     acceptedTheory: theory,
     window,
-    contextDomain: contextDomain.trim(),
+    contextDomain: context,
     summary: summary || { delta: {} },
     minimumRecords,
+    domain,
   });
   const dataQuality = summary?.mean_data_quality;
   const coverageScore = Math.min(1, window.records.length / minimumRecords);
+  const mappingFactor = domain.mode === 'explicit-mapping' ? 0.9 : 1;
   const confidence = recommendation.status === 'REVIEW_ACCEPTANCE_GATE'
-    ? clamp01((dataQuality ?? 0.5) * 0.7 + coverageScore * 0.3)
-    : clamp01((dataQuality ?? 0) * coverageScore);
+    ? clamp01(((dataQuality ?? 0.5) * 0.7 + coverageScore * 0.3) * mappingFactor)
+    : clamp01((dataQuality ?? 0) * coverageScore * mappingFactor);
 
   const core = {
     schema: THEORY_GROUNDED_ADVISOR_RECEIPT_SCHEMA,
     schema_version: 1,
     generated_at: generatedAt ?? new Date().toISOString(),
-    context_domain: contextDomain.trim(),
+    context_domain: context,
+    domain_resolution: {
+      allowed: domain.allowed,
+      mode: domain.mode,
+      mapping_id: domain.mapping?.mapping_id ?? null,
+      mapping_fingerprint: domain.mapping?.mapping_fingerprint ?? null,
+      numerical_equivalence_assumed: false,
+    },
     theory_source: {
       review_receipt_id: theoryReviewReceipt.receipt_id,
       review_receipt_fingerprint: theoryReviewReceipt.receipt_fingerprint,
@@ -133,6 +153,7 @@ export async function createTheoryGroundedAcceptanceAdvice({
       overwrites_deep_time: false,
       overwrites_deep_theory: false,
       cross_domain_application_forbidden_without_explicit_mapping: true,
+      mapping_never_asserts_numeric_equivalence: true,
       qualia_inferred: false,
       canon_commit: false,
       physical_claim: false,
