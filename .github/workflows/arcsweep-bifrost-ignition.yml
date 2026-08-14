@@ -38,6 +38,7 @@ jobs:
           node --test
           apps/starwell-server/test/bifrost-model-profiles.test.js
           apps/starwell-server/test/bifrost-manifest-drift.test.js
+          apps/starwell-server/test/bifrost-profile-resolution.test.js
           apps/starwell-server/test/bifrost-ignition.test.js
           apps/starwell-server/test/bifrost-ignition-policy.test.js
 
