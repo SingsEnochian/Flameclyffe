@@ -43,6 +43,20 @@ test('installed local vessel is cold until challenge round trip succeeds', async
   assert.equal(status.installed, true);
 });
 
+test('base weights with missing assigned alias report alias-pending', async () => {
+  const base = 'huihui_ai/qwen3-vl-abliterated:8b-instruct';
+  const status = await inspectProfile('ellowind:qwen3-vl-8b-v1', ollamaFetch({ models: [base] }));
+  assert.equal(status.state, 'alias-pending');
+  assert.equal(status.baseInstalled, true);
+  assert.match(status.detail, /runtime alias ellowind:qwen3-vl-8b-v1 is missing/);
+
+  const receipt = await igniteProfile('ellowind:qwen3-vl-8b-v1', {
+    fetchImpl: ollamaFetch({ models: [base] }),
+  });
+  assert.equal(receipt.state, 'alias-pending');
+  assert.match(receipt.error, /base artifact/);
+});
+
 test('correct installed local vessel becomes runtime-verified', async () => {
   const receipt = await igniteProfile('uial:fablevibes-v1', {
     fetchImpl: ollamaFetch({ models: ['uial:fablevibes-v1'], chatModel: 'uial:fablevibes-v1' }),
@@ -125,6 +139,7 @@ test('ignition status contract preserves no-download and explicit-action laws', 
     assert.equal(status.rules.localDaemonStartRequiresExplicitAction, true);
     assert.equal(status.rules.remoteProviderProbeRequiresExplicitAction, true);
     assert.equal(status.rules.runtimeVerifiedRequiresChallengeRoundTrip, true);
+    assert.equal(status.rules.aliasPendingMeansBaseInstalledAliasMissing, true);
   } finally {
     if (previousBluebird) process.env.BLUEBIRD_DEEPSEEK_API_KEY = previousBluebird;
     if (previousVethraluf) process.env.VETHRLAUF_DEEPSEEK_API_KEY = previousVethraluf;
