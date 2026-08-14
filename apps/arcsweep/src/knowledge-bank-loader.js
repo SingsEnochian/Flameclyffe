@@ -1,4 +1,5 @@
 import { compileSkillMarkdown, resolveKnowledgeCells, validateKnowledgeCell } from './knowledge-graph.js';
+import { listLearnedCellsForVoice } from './knowledge-learning-store.js';
 
 const MANIFEST_URL = new URL('../skills/cell-banks.json', import.meta.url);
 const VOICE_REGISTRY_URL = new URL('../skills/voice-bank-registry.json', import.meta.url);
@@ -65,26 +66,37 @@ function dedupeCells(cells) {
   return [...byId.values()];
 }
 
-export async function loadVoiceCells(input, { fetchImpl } = {}) {
+export async function loadVoiceCells(input, {
+  fetchImpl,
+  includeLocalLearning = true,
+  learnedCellLoader = listLearnedCellsForVoice,
+} = {}) {
   const voiceId = await resolveCanonicalVoiceId(input, { fetchImpl }) || String(input || '').trim();
   if (!voiceId) throw new Error('Voice id is required.');
   const manifest = await loadCellBankManifest({ fetchImpl });
   const entry = manifest.voices?.[voiceId];
-  if (!entry) return { voiceId, displayName: await voiceDisplayName(voiceId, { fetchImpl }), cells: [], bankUrls: [] };
-
-  const bankUrls = (entry.banks || []).map((path) => new URL(path, MANIFEST_URL));
+  const displayName = entry?.displayName || await voiceDisplayName(voiceId, { fetchImpl });
+  const bankUrls = (entry?.banks || []).map((path) => new URL(path, MANIFEST_URL));
   const banks = await Promise.all(bankUrls.map((url) => readJson(url, fetchImpl)));
-  const cells = dedupeCells(banks.flatMap((bank) => bank.cells || []));
+  const learnedCells = includeLocalLearning && typeof learnedCellLoader === 'function'
+    ? await learnedCellLoader(voiceId).catch(() => [])
+    : [];
+  const cells = dedupeCells([
+    ...banks.flatMap((bank) => bank.cells || []),
+    ...(learnedCells || []),
+  ]);
+
   return {
     voiceId,
-    displayName: entry.displayName || await voiceDisplayName(voiceId, { fetchImpl }),
+    displayName,
     cells,
     bankUrls: bankUrls.map(String),
+    learnedCellCount: learnedCells?.length || 0,
   };
 }
 
-export async function resolveVoiceCells(input, request = {}, { fetchImpl } = {}) {
-  const bank = await loadVoiceCells(input, { fetchImpl });
+export async function resolveVoiceCells(input, request = {}, options = {}) {
+  const bank = await loadVoiceCells(input, options);
   return {
     ...bank,
     cells: resolveKnowledgeCells(bank.cells, {
@@ -94,8 +106,8 @@ export async function resolveVoiceCells(input, request = {}, { fetchImpl } = {})
   };
 }
 
-export async function compileVoiceSkill(input, options = {}, { fetchImpl } = {}) {
-  const bank = await loadVoiceCells(input, { fetchImpl });
+export async function compileVoiceSkill(input, options = {}, runtimeOptions = {}) {
+  const bank = await loadVoiceCells(input, runtimeOptions);
   return compileSkillMarkdown(bank.cells, {
     ...options,
     label: options.label || bank.displayName,
