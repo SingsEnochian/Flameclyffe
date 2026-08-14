@@ -6,6 +6,7 @@ const {
   enrichReceiptWithIdentity,
   identityEnvelope,
 } = require('./profile-resolution');
+const { materializeRuntimeAlias } = require('./alias-executor');
 const {
   ignitionStatus,
   inspectProfile,
@@ -90,6 +91,47 @@ router.get('/profile/:profile_ref/receipt', (req, res) => {
     ...enrichReceiptWithIdentity(receipt),
     resolvedFrom: req.params.profile_ref,
   });
+});
+
+router.post('/profile/:profile_ref/materialize-alias', requireExplicitConfirmation, async (req, res) => {
+  const resolved = resolveOr404(req.params.profile_ref, res);
+  if (!resolved) return;
+  if (resolved.profile.opt_in_only && req.body?.opt_in !== true) {
+    return res.status(403).json({
+      contract: 'bifrost.alias-materialization-receipt/v1',
+      state: 'opt-in-required',
+      profileId: resolved.profileId,
+      identity: resolved.identity,
+      rules: { downloadsModels: false, optionalProfileRequiresExplicitOptIn: true },
+    });
+  }
+  try {
+    const receipt = await materializeRuntimeAlias(resolved.profileId, {
+      includeOptIn: req.body?.opt_in === true,
+    });
+    const status = ['alias-created', 'alias-present'].includes(receipt.state) ? 200
+      : receipt.state === 'base-missing' ? 409
+        : receipt.state === 'route-unavailable' ? 503
+          : receipt.state === 'opt-in-required' ? 403
+            : 422;
+    res.status(status).json({
+      ...receipt,
+      resolvedFrom: req.params.profile_ref,
+      rules: {
+        ...(receipt.rules || {}),
+        explicitAction: true,
+        downloadsModels: false,
+        selectedIdentityOnly: true,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'alias-materialization-failed',
+      detail: error?.message || String(error),
+      profileId: resolved.profileId,
+      identity: resolved.identity,
+    });
+  }
 });
 
 router.post('/profile/:profile_ref', requireExplicitConfirmation, async (req, res) => {
