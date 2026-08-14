@@ -1,6 +1,7 @@
 export const FEEDBACK_QUEUE_SCHEMA = 'arcsweep.feedback-cycle-queue/v1';
 export const FEEDBACK_QUEUE_RECEIPT_SCHEMA = 'arcsweep.feedback-cycle-queue-receipt/v1';
 export const FEEDBACK_CYCLE_SCHEMA = 'arcsweep.feedback-cycle/v1';
+export const FIELD_EVIDENCE_SCHEMA = 'arcsweep.field-evidence/v1';
 
 export class FeedbackCycleQueueError extends Error {
   constructor(message, code = 'feedback-cycle-queue-error') {
@@ -25,6 +26,22 @@ function makeId(prefix = 'fq') {
   const uuid = globalThis.crypto?.randomUUID?.();
   if (uuid) return `${prefix}-${uuid}`;
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+export function feedbackCycleSource(cycle) {
+  const evidence = Array.isArray(cycle?.evidence) ? cycle.evidence : [];
+  if (evidence.some((item) => item?.schema === FIELD_EVIDENCE_SCHEMA)) return 'field';
+  if (cycle?.turn?.mode === 'observation') return 'relational-observation';
+  return 'relational-feedback';
+}
+
+function evidenceRefs(cycle) {
+  return Object.freeze((cycle?.evidence || []).map((item, index) => Object.freeze({
+    index,
+    schema: item?.schema || null,
+    generated_at: item?.generated_at || item?.observed_at || null,
+    source: item?.source || null,
+  })));
 }
 
 export function createEmptyFeedbackQueue() {
@@ -82,6 +99,7 @@ export function enqueueFeedbackCycle(queueInput, cycle, {
 
   const enqueuedAt = clock().toISOString();
   const entryId = makeId('fce');
+  const observationSource = feedbackCycleSource(validCycle);
 
   const entry = {
     entry_id: entryId,
@@ -96,6 +114,8 @@ export function enqueueFeedbackCycle(queueInput, cycle, {
     voices: Array.isArray(validCycle.voices) ? clone(validCycle.voices) : [],
     authority: clone(validCycle.authority),
     exploration: Boolean(validCycle.exploration),
+    observation_source: observationSource,
+    evidence_refs: clone(evidenceRefs(validCycle)),
     status: 'pending_review',
     enqueued_at: enqueuedAt,
     enqueued_by: enqueuedBy.trim(),
@@ -113,6 +133,7 @@ export function enqueueFeedbackCycle(queueInput, cycle, {
     entry_id: entryId,
     cycle_id: validCycle.cycle_id,
     world_id: validCycle.world.id,
+    observation_source: observationSource,
     enqueued_at: enqueuedAt,
     enqueued_by: enqueuedBy.trim(),
     exploration: Boolean(validCycle.exploration),
@@ -146,6 +167,7 @@ function reviewEntry(queueInput, cycleId, status, { reviewedBy, clock }) {
     entry_id: entry.entry_id,
     cycle_id: cycleId,
     world_id: entry.world.id,
+    observation_source: entry.observation_source || 'relational-feedback',
     reviewed_at: reviewedAt,
     reviewed_by: reviewedBy.trim(),
   });
@@ -188,6 +210,7 @@ export function feedbackQueueSummary(queueInput) {
     accepted: entries.filter((e) => e.status === 'accepted').length,
     archived: entries.filter((e) => e.status === 'archived').length,
     discarded: entries.filter((e) => e.status === 'discarded').length,
+    field: entries.filter((e) => e.observation_source === 'field').length,
     receipt_count: queue.receipts.length,
     worlds: [...new Set(entries.map((e) => e.world.id))],
   };
