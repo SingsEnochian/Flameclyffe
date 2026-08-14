@@ -41,6 +41,7 @@ jobs:
           apps/starwell-server/test/bifrost-manifest-drift.test.js
           apps/starwell-server/test/bifrost-profile-resolution.test.js
           apps/starwell-server/test/bifrost-preflight.test.js
+          apps/starwell-server/test/bifrost-alias-materializer.test.js
           apps/starwell-server/test/bifrost-ignition.test.js
           apps/starwell-server/test/bifrost-ignition-policy.test.js
 
@@ -59,6 +60,7 @@ jobs:
           node --check apps/starwell-server/scripts/bifrost-ignite-fleet.js
           node --check apps/starwell-server/scripts/bifrost-model-prepare.js
           node --check apps/starwell-server/scripts/bifrost-preflight.js
+          node --check apps/starwell-server/scripts/bifrost-materialize-aliases.js
 
       - name: Syntax-check Windows ignition keys
         shell: pwsh
