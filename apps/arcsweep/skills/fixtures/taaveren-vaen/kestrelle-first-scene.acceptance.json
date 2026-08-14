@@ -1,6 +1,6 @@
 {
-  "contract": "arcsweep.scene-cortex-acceptance-fixture/v1",
-  "fixtureId": "taaveren-vaen.kestrelle.first-scene.v1",
+  "contract": "arcsweep.scene-cortex-acceptance-fixture/v2",
+  "fixtureId": "taaveren-vaen.kestrelle.first-scene.v2",
   "canonStatus": "non-canon-acceptance-fixture",
   "worldId": "taaveren-vaen",
   "documentId": "acceptance-kestrelle-roadside-care-v1",
@@ -16,7 +16,7 @@
     "key": "acceptance-script:content",
     "label": "Acceptance scene prose",
     "type": "rich-text",
-    "value": "Rain had left the road dark and shining between the wagon ruts. Kestrelle knelt beside the traveller where Meriene had made room beneath the awning, one hand at his wrist and the other braced against the wet boards. The swelling above his boot told one story. The angle of the leg told another. She reached first for what bone and muscle could tell her before she touched the Source."
+    "value": "Rain had left the road dark and shining between the wagon ruts. Kestrelle knelt beside the traveller where Meriene had made room beneath the awning, one hand at his wrist and the other braced against the wet boards. The swelling above his boot told one story. The angle of the leg told another. She reached first for what bone and muscle could tell her before she touched the Source. Kestrelle looked up at him. ‘Don’t move it yet,’ she said, already reaching for the splinting board. ‘Tell me where it hurts before you tell me where you think it broke.’"
   },
   "expect": {
     "subjects": [
@@ -31,7 +31,16 @@
     "supersededTermsExcludedFromActiveContext": ["Kestrelle al’Valar", "Mending"],
     "knowledgeFirewall": true,
     "storyOrderGate": 12,
-    "noModelInvocationRequired": true
+    "noModelInvocationRequiredForCortexGate": true,
+    "cognition": {
+      "voices": ["uial", "lioreal"],
+      "supportsEvidenceKinds": ["narrative", "dialogue", "behaviour", "style"],
+      "evidenceMustMatchScene": true,
+      "activeSubjectTargetRequired": true,
+      "userKeepRequired": true,
+      "autoLearning": false,
+      "canonPromotion": false
+    }
   },
-  "notes": "This prose is an original non-canon fixture used to verify cortex composition. It must never be promoted into project canon merely by passing the acceptance check."
+  "notes": "This prose, including its dialogue, is an original non-canon fixture used to verify cortex and evidence composition. Neither the scene nor any observation derived from it becomes project canon merely by passing the acceptance or cognition checks."
 }
