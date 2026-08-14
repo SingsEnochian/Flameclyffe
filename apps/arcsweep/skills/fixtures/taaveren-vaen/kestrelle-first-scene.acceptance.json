@@ -1,0 +1,37 @@
+{
+  "contract": "arcsweep.scene-cortex-acceptance-fixture/v1",
+  "fixtureId": "taaveren-vaen.kestrelle.first-scene.v1",
+  "canonStatus": "non-canon-acceptance-fixture",
+  "worldId": "taaveren-vaen",
+  "documentId": "acceptance-kestrelle-roadside-care-v1",
+  "sceneId": "acceptance-roadside-care",
+  "storyAt": "Restoration · roadside care after rain",
+  "storyOrder": 12,
+  "povCharacterId": "kestrelle",
+  "narrativeVoiceId": "taaveren-vaen-narrator",
+  "writingStyleId": "taaveren-vaen-longform",
+  "sceneCharacterIds": [],
+  "selectedVoices": ["uial", "lioreal"],
+  "field": {
+    "key": "acceptance-script:content",
+    "label": "Acceptance scene prose",
+    "type": "rich-text",
+    "value": "Rain had left the road dark and shining between the wagon ruts. Kestrelle knelt beside the traveller where Meriene had made room beneath the awning, one hand at his wrist and the other braced against the wet boards. The swelling above his boot told one story. The angle of the leg told another. She reached first for what bone and muscle could tell her before she touched the Source."
+  },
+  "expect": {
+    "subjects": [
+      { "kind": "character", "id": "kestrelle" },
+      { "kind": "narrative_voice", "id": "taaveren-vaen-narrator" },
+      { "kind": "writing_style", "id": "taaveren-vaen-longform" }
+    ],
+    "activeTerms": {
+      "character": "Kestrelle al’Var",
+      "era": "Restoration"
+    },
+    "supersededTermsExcludedFromActiveContext": ["Kestrelle al’Valar", "Mending"],
+    "knowledgeFirewall": true,
+    "storyOrderGate": 12,
+    "noModelInvocationRequired": true
+  },
+  "notes": "This prose is an original non-canon fixture used to verify cortex composition. It must never be promoted into project canon merely by passing the acceptance check."
+}
