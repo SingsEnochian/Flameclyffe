@@ -1,6 +1,14 @@
 {
   "contract": "arcsweep.subject-bank-manifest/v1",
-  "subjects": {},
+  "subjects": {
+    "character:kestrelle": {
+      "label": "Kestrelle al’Var",
+      "worldIds": ["taaveren-vaen", "taveren-vaen"],
+      "banks": ["./cells/characters/kestrelle.cells.json"],
+      "sourceIndex": "./source-index.d/kestrelle.json",
+      "status": "active-canon-cortex"
+    }
+  },
   "rules": {
     "supportedKinds": ["character", "narrative_voice", "writing_style"],
     "localCellsMayExistWithoutStaticBank": true,
