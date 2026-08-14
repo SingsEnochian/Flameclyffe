@@ -66,9 +66,14 @@ function dedupeCells(cells) {
   return [...byId.values()];
 }
 
+function bankUrls(entries = []) {
+  return entries.flatMap((entry) => (entry.banks || []).map((path) => new URL(path, MANIFEST_URL)));
+}
+
 export async function loadVoiceCells(input, {
   fetchImpl,
   includeLocalLearning = true,
+  includeShared = true,
   learnedCellLoader = listLearnedCellsForVoice,
 } = {}) {
   const voiceId = await resolveCanonicalVoiceId(input, { fetchImpl }) || String(input || '').trim();
@@ -76,13 +81,19 @@ export async function loadVoiceCells(input, {
   const manifest = await loadCellBankManifest({ fetchImpl });
   const entry = manifest.voices?.[voiceId];
   const displayName = entry?.displayName || await voiceDisplayName(voiceId, { fetchImpl });
-  const bankUrls = (entry?.banks || []).map((path) => new URL(path, MANIFEST_URL));
-  const banks = await Promise.all(bankUrls.map((url) => readJson(url, fetchImpl)));
+  const voiceBankUrls = (entry?.banks || []).map((path) => new URL(path, MANIFEST_URL));
+  const sharedEntries = includeShared ? (manifest.shared || []) : [];
+  const sharedBankUrls = bankUrls(sharedEntries);
+  const [voiceBanks, sharedBanks] = await Promise.all([
+    Promise.all(voiceBankUrls.map((url) => readJson(url, fetchImpl))),
+    Promise.all(sharedBankUrls.map((url) => readJson(url, fetchImpl))),
+  ]);
   const learnedCells = includeLocalLearning && typeof learnedCellLoader === 'function'
     ? await learnedCellLoader(voiceId).catch(() => [])
     : [];
   const cells = dedupeCells([
-    ...banks.flatMap((bank) => bank.cells || []),
+    ...voiceBanks.flatMap((bank) => bank.cells || []),
+    ...sharedBanks.flatMap((bank) => bank.cells || []),
     ...(learnedCells || []),
   ]);
 
@@ -90,7 +101,10 @@ export async function loadVoiceCells(input, {
     voiceId,
     displayName,
     cells,
-    bankUrls: bankUrls.map(String),
+    voiceBankUrls: voiceBankUrls.map(String),
+    sharedBankUrls: sharedBankUrls.map(String),
+    bankUrls: [...voiceBankUrls, ...sharedBankUrls].map(String),
+    sharedSubjects: sharedEntries.map((item) => item.subject).filter(Boolean),
     learnedCellCount: learnedCells?.length || 0,
   };
 }
@@ -101,7 +115,10 @@ export async function resolveVoiceCells(input, request = {}, options = {}) {
     ...bank,
     cells: resolveKnowledgeCells(bank.cells, {
       ...request,
-      subject: { kind: 'constellation_voice', id: bank.voiceId },
+      subjects: [
+        { kind: 'constellation_voice', id: bank.voiceId },
+        ...(bank.sharedSubjects || []),
+      ],
     }),
   };
 }
@@ -113,7 +130,10 @@ export async function compileVoiceSkill(input, options = {}, runtimeOptions = {}
     label: options.label || bank.displayName,
     request: {
       ...(options.request || {}),
-      subject: { kind: 'constellation_voice', id: bank.voiceId },
+      subjects: [
+        { kind: 'constellation_voice', id: bank.voiceId },
+        ...(bank.sharedSubjects || []),
+      ],
     },
   });
 }
