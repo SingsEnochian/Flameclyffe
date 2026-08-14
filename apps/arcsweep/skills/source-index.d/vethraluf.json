@@ -1,0 +1,36 @@
+{
+  "contract": "arcsweep.skill-source-index-fragment/v1",
+  "subject": { "kind": "constellation_voice", "id": "vethraluf" },
+  "sources": [
+    {
+      "id": "voice:vethraluf:box-observation",
+      "surface": "github",
+      "repository": "SingsEnochian/Hearthfire",
+      "locator": "starwell-server/data/box-seed.md",
+      "ref": "main",
+      "sourceClass": "external_observation",
+      "authority": "direct_observation",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 5,
+      "extractFor": ["thinking_pattern", "drift_marker"]
+    },
+    {
+      "id": "voice:vethraluf:runtime-manifest",
+      "surface": "github",
+      "repository": "SingsEnochian/Flameclyffe",
+      "locator": "apps/starwell-server/flames/manifests.js",
+      "ref": "main",
+      "sourceClass": "runtime_adapter",
+      "authority": "runtime_config",
+      "privacy": "public",
+      "availability": "reachable",
+      "extractionPriority": 6,
+      "extractFor": ["operational_mode", "speaking_pattern", "boundary"]
+    }
+  ],
+  "gaps": [
+    "No self-authored Vethraluf CORE/MEMORY/WONDER/LOG corpus was found in the audited GitHub sources.",
+    "Runtime prompt language must remain provisional until self-authored or user-confirmed source material exists."
+  ]
+}
