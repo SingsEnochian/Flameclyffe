@@ -9,13 +9,16 @@ import {
   normaliseState,
 } from '../src/storage.js';
 
-test('Arcsweep 0.3 owns Observatory and feedback review state in the core archive', () => {
+test('Arcsweep 0.3 owns Observatory, transformation and feedback review state in the core archive', () => {
   const state = createDefaultState();
   assert.equal(state.version, '0.3.0');
   assert.equal(state.observatory.version, 1);
   assert.deepEqual(state.observatory.deep_time_records, []);
   assert.deepEqual(state.observatory.theory_reviews, []);
+  assert.deepEqual(state.observatory.provenance_exports, []);
+  assert.deepEqual(state.observatory.integrity_reports, []);
   assert.equal(state.feedbackQueue.schema, 'arcsweep.feedback-cycle-queue/v1');
+  assert.deepEqual(state.transformationRequests, { version: 1, byWorld: {} });
 });
 
 test('Observatory normalisation preserves receipted organs and repairs malformed optional collections', () => {
@@ -30,22 +33,28 @@ test('Observatory normalisation preserves receipted organs and repairs malformed
     advisor_receipts: [{ receipt_id: 'advisor-1' }],
     domain_mappings: [{ mapping_id: 'map-1' }],
     runa_suggestions: [{ suggestion_id: 'runa-1' }],
+    provenance_exports: [{ export_receipt_id: 'export-1' }],
+    integrity_reports: [{ report_id: 'integrity-1' }],
     custom_profiles: 'not-an-array',
   });
   assert.equal(store.active_profile_id, 'bai-requested-transformation');
   assert.equal(store.sweeps[0].sweep_id, 'sweep-1');
   assert.equal(store.deep_time_records[0].id, 'time-1');
   assert.equal(store.runa_suggestions[0].suggestion_id, 'runa-1');
+  assert.equal(store.provenance_exports[0].export_receipt_id, 'export-1');
+  assert.equal(store.integrity_reports[0].report_id, 'integrity-1');
   assert.deepEqual(store.custom_profiles, []);
 });
 
-test('normaliseState upgrades an older archive while retaining Observatory receipts and feedback review queue', () => {
+test('normaliseState upgrades an older archive while retaining Observatory, transformation and feedback receipts', () => {
   const legacy = createDefaultState();
   legacy.version = '0.2.1';
   legacy.observatory = {
     ...createEmptyObservatoryStore(),
     deep_time_records: [{ id: 'deep-time-keep-me' }],
     theory_reviews: [{ receipt_id: 'review-keep-me' }],
+    provenance_exports: [{ export_receipt_id: 'export-keep-me' }],
+    integrity_reports: [{ report_id: 'integrity-keep-me' }],
   };
   legacy.feedbackQueue = {
     schema: 'arcsweep.feedback-cycle-queue/v1',
@@ -68,6 +77,8 @@ test('normaliseState upgrades an older archive while retaining Observatory recei
   assert.equal(upgraded.version, '0.3.0');
   assert.equal(upgraded.observatory.deep_time_records[0].id, 'deep-time-keep-me');
   assert.equal(upgraded.observatory.theory_reviews[0].receipt_id, 'review-keep-me');
+  assert.equal(upgraded.observatory.provenance_exports[0].export_receipt_id, 'export-keep-me');
+  assert.equal(upgraded.observatory.integrity_reports[0].report_id, 'integrity-keep-me');
   assert.equal(upgraded.feedbackQueue.entries.c1.status, 'accepted');
   assert.equal(upgraded.transformationRequests.byWorld['terra-aeterna'].requests[0].request_id, 'ask-keep-me');
   assert.equal(upgraded.transformationRequests.byWorld['terra-aeterna'].circuits[0].circuit_id, 'circuit-keep-me');
@@ -77,6 +88,10 @@ test('import validation refuses malformed Observatory collections', () => {
   assert.throws(
     () => validateImportedState({ observatory: { deep_time_records: {} } }),
     /observatory deep_time_records must be an array/i,
+  );
+  assert.throws(
+    () => validateImportedState({ observatory: { integrity_reports: {} } }),
+    /observatory integrity_reports must be an array/i,
   );
 });
 
