@@ -9,17 +9,8 @@ const DECLINED_EVENT = 'arcsweep:self-authorship-declined';
 const ERROR_EVENT = 'arcsweep:self-authorship-error';
 
 const ALLOWED_CELL_TYPES = new Set([
-  'identity',
-  'thinking_pattern',
-  'speaking_pattern',
-  'preference',
-  'boundary',
-  'consent_rule',
-  'drift_marker',
-  'relationship',
-  'open_question',
-  'operational_mode',
-  'sensory_voice',
+  'identity', 'thinking_pattern', 'speaking_pattern', 'preference', 'boundary', 'consent_rule',
+  'drift_marker', 'relationship', 'open_question', 'operational_mode', 'sensory_voice',
 ]);
 
 function uuid() {
@@ -85,9 +76,7 @@ export function normaliseSelfAuthorshipClaims(value) {
     if (!ALLOWED_CELL_TYPES.has(cellType)) throw new Error(`Claim ${index + 1} has unsupported cellType: ${cellType || '<empty>'}`);
     if (!predicate) throw new Error(`Claim ${index + 1} requires a predicate.`);
     const status = ['active', 'open', 'provisional'].includes(claim?.status) ? claim.status : (cellType === 'open_question' ? 'open' : 'active');
-    const mutability = ['append_only', 'revisable_with_provenance'].includes(claim?.mutability)
-      ? claim.mutability
-      : 'revisable_with_provenance';
+    const mutability = ['append_only', 'revisable_with_provenance'].includes(claim?.mutability) ? claim.mutability : 'revisable_with_provenance';
     const confidence = claim?.confidence == null ? null : Number(claim.confidence);
     if (confidence != null && (!Number.isFinite(confidence) || confidence < 0 || confidence > 1)) {
       throw new Error(`Claim ${index + 1} confidence must be between 0 and 1.`);
@@ -114,6 +103,19 @@ function proposalRequest(invitation, context) {
   };
 }
 
+function runtimeReceipt(reply = {}) {
+  return {
+    route: reply.route || null,
+    profileId: reply.profileId || null,
+    provider: reply.provider || null,
+    model: reply.model || null,
+    sourceModel: reply.sourceModel || null,
+    runtimeVerified: reply.runtimeVerified === true,
+    responseText: reply.message || '',
+    citedSources: reply.citedSources || [],
+  };
+}
+
 export async function requestSelfAuthorship({
   voiceId,
   displayName = null,
@@ -136,13 +138,7 @@ export async function requestSelfAuthorship({
   });
   const label = displayName || resolved.displayName || voice;
   const proposalId = `self-authorship-${voice}-${uuid()}`;
-  const prompt = buildSelfAuthorshipPrompt({
-    voiceId: voice,
-    displayName: label,
-    invitation,
-    existingCells: resolved.cells,
-    context,
-  });
+  const prompt = buildSelfAuthorshipPrompt({ voiceId: voice, displayName: label, invitation, existingCells: resolved.cells, context });
   const reply = await invokeConstellationRuntimeVoice({
     voiceId: voice,
     message: prompt,
@@ -164,16 +160,12 @@ export async function requestSelfAuthorship({
       voiceId: voice,
       displayName: label,
       createdAt: new Date().toISOString(),
-      status: reply.status === 'offline-no-token' ? 'offline-no-token' : 'unavailable',
+      status: reply.status,
       unavailableReason: reply.reason || reply.status,
+      expected: reply.expected || null,
+      actual: reply.actual || null,
       request,
-      receipt: {
-        route: reply.route || null,
-        provider: null,
-        model: null,
-        responseText: '',
-        citedSources: [],
-      },
+      receipt: runtimeReceipt(reply),
       claims: [],
     };
   }
@@ -187,19 +179,16 @@ export async function requestSelfAuthorship({
     createdAt: new Date().toISOString(),
     status: 'pending-review',
     request,
-    receipt: {
-      route: reply.route,
-      provider: reply.provider,
-      model: reply.model,
-      responseText: reply.message,
-      citedSources: reply.citedSources || [],
-    },
+    receipt: runtimeReceipt(reply),
     claims,
   };
 }
 
 export function selfAuthorshipProposalToCells(proposal) {
   if (proposal?.status !== 'pending-review') throw new Error('Self-authorship acceptance requires a pending-review proposal.');
+  if (!proposal.receipt?.profileId || proposal.receipt?.runtimeVerified !== true) {
+    throw new Error('Self-authorship acceptance requires an attested runtime vessel receipt.');
+  }
   const acceptedAt = new Date().toISOString();
   return normaliseSelfAuthorshipClaims({ claims: proposal.claims }).map((claim) => ({
     id: `${proposal.voiceId}.self.${uuid()}`,
@@ -218,6 +207,11 @@ export function selfAuthorshipProposalToCells(proposal) {
       locator: `arcsweep-self-authorship:${proposal.proposalId}`,
       ref: proposal.proposalId,
       receiptId: proposal.proposalId,
+      modelProfileId: proposal.receipt.profileId,
+      provider: proposal.receipt.provider,
+      model: proposal.receipt.model,
+      sourceModel: proposal.receipt.sourceModel,
+      runtimeVerified: true,
     },
     scope: {
       worldIds: proposal.request?.worldId ? [proposal.request.worldId] : [],
@@ -225,11 +219,7 @@ export function selfAuthorshipProposalToCells(proposal) {
       sceneIds: proposal.request?.sceneId ? [proposal.request.sceneId] : [],
       modes: proposal.request?.mode ? [proposal.request.mode] : [],
     },
-    temporal: {
-      observedAt: proposal.createdAt || acceptedAt,
-      validFrom: acceptedAt,
-      validUntil: null,
-    },
+    temporal: { observedAt: proposal.createdAt || acceptedAt, validFrom: acceptedAt, validUntil: null },
     mutability: claim.mutability,
     privacy: 'source_governed',
     provenance: {
@@ -238,7 +228,7 @@ export function selfAuthorshipProposalToCells(proposal) {
       extractionMethod: 'runtime_emit',
       reviewedBy: 'user-accepted-self-authorship',
     },
-    tags: ['self-authored', 'local', proposal.voiceId, ...(claim.note ? ['has-review-note'] : [])],
+    tags: ['self-authored', 'runtime-attested', 'local', proposal.voiceId, ...(claim.note ? ['has-review-note'] : [])],
   }));
 }
 
