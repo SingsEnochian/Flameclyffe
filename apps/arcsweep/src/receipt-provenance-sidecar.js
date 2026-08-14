@@ -19,7 +19,7 @@ function readJson(key, fallback) {
 }
 
 function transformationsForState(state) {
-  const core = state.observatory?.transformations;
+  const core = state.transformationRequests || state.observatory?.transformations;
   if (core?.byWorld) return core;
   return readJson(TRANSFORMATION_KEY, { version: 1, byWorld: {} });
 }
@@ -48,6 +48,13 @@ async function model() {
   if (activeNodeId && !focused.nodes.some((item) => item.id === activeNodeId)) activeNodeId = null;
   if (!activeNodeId) activeNodeId = focused.nodes.find((item) => item.id === activeFocusId)?.id || focused.nodes.at(-1)?.id || null;
   return { state, world, transformations, graph, focused, requests };
+}
+
+function modelSignature(m) {
+  if (!m) return 'none';
+  const lastNode = m.graph.nodes.at(-1)?.id || 'none';
+  const lastEdge = m.graph.edges.at(-1);
+  return `${m.world.id}:${activeFocusId || 'all'}:${activeNodeId || 'none'}:${m.graph.summary.node_count}:${m.graph.summary.edge_count}:${lastNode}:${lastEdge ? `${lastEdge.from}>${lastEdge.to}` : 'none'}`;
 }
 
 function stageColumns(graph) {
@@ -105,7 +112,7 @@ function render(m, message = '') {
   const { world, focused, graph, requests } = m;
   const options = [`<option value="" ${activeFocusId ? '' : 'selected'}>All connected receipts</option>`, ...requests.map((request) => `<option value="${esc(request.request_id)}" ${request.request_id === activeFocusId ? 'selected' : ''}>Ask · ${esc(requestLabel(request))}</option>`)].join('');
   const orphanCount = graph.nodes.length - focused.nodes.length;
-  const key = `${world.id}:${activeFocusId || 'all'}:${activeNodeId || 'none'}:${graph.summary.node_count}:${graph.summary.edge_count}`;
+  const key = modelSignature(m);
   return `<section class="panel receipt-provenance" data-receipt-provenance data-prov-key="${esc(key)}">
     <div class="section-heading compact-heading"><div><p class="eyebrow">Receipts remember the path</p><h2>Provenance Graph</h2><p class="muted">Trace an Ask through BAI, cusp, Feedback, DEEPTime, Theory, Advisor and Runa. The graph follows explicit receipt identifiers only; it does not invent missing joins.</p></div><span class="bai-topology-badge">${focused.nodes.length} nodes</span></div>
     ${message ? `<p class="callout">${esc(message)}</p>` : ''}
@@ -136,10 +143,16 @@ async function mount(message = '') {
   mounting = true;
   try {
     injectStyle();
-    lastModel = await model();
-    if (!lastModel) return;
+    const next = await model();
+    if (!next) return;
     const existing = document.querySelector('[data-receipt-provenance]');
-    const html = render(lastModel, message);
+    const key = modelSignature(next);
+    if (!message && existing?.dataset.provKey === key) {
+      lastModel = next;
+      return;
+    }
+    lastModel = next;
+    const html = render(next, message);
     if (existing) existing.outerHTML = html;
     else document.querySelector('main.content')?.insertAdjacentHTML('beforeend', html);
   } finally { mounting = false; }
@@ -195,6 +208,8 @@ document.addEventListener('keydown', (event) => {
   activeNodeId = node.dataset.provSvgNode;
   void mount();
 });
+
+globalThis.addEventListener?.('arcsweep:receipts-updated', () => { void mount(); });
 
 const observer = new MutationObserver(() => { if (!document.querySelector('[data-receipt-provenance]')) void mount(); });
 observer.observe(document.documentElement, { childList: true, subtree: true });
