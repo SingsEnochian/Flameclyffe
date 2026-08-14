@@ -6,24 +6,20 @@
 
 ## Purpose
 
-Hull 4 makes the React-ion vessel less like a clever navigation experiment and more like a persistent, inspectable machine.
+Hull 4 makes the React-ion vessel persistent, inspectable, and replayable.
 
-It adds four things the earlier hulls deliberately left unfinished:
+It adds four major systems:
 
-1. React-ion state now rides inside primary Arcsweep persistence and export/backup flow.
-2. The Helm can display and replay its route topology instead of preserving only opaque receipts.
-3. Semantic responses have an explicit return channel that does not confuse `ACCEPT`, `REFUSE`, or `COUNTER` with transport acknowledgement.
-4. Existing Runa World Tone approvals and Pocket Concordance anchors can enter the dimensional registry without retyping or collapsing their provenance.
-
-The scientific boundary remains unchanged. The React-ion Engine is a software, simulation, world-model and mythience architecture. It does not establish experimentally demonstrated physical multiverse transport, perspective-only propulsion, or a physical universe locator encoded by audible frequency.
+1. React-ion state rides inside primary Arcsweep persistence and export/backup flow.
+2. The Helm displays and replays route topology.
+3. Semantic responses have an explicit return channel separate from transport acknowledgement.
+4. Runa World Tone approvals and Pocket Concordance anchors enter dimensional DNS with their provenance intact.
 
 ---
 
 ## 1. Primary Arcsweep persistence
 
-React-ion originally used dedicated local sidecar stores while the routing contract settled.
-
-Hull 4 migrates those ledgers into the main Arcsweep state shape:
+React-ion state now lives inside the main Arcsweep state shape:
 
 ```text
 reaction
@@ -34,19 +30,17 @@ reaction
     └── receipts[]
 ```
 
-The browser sidecars remain useful as the live UI working stores, but `storage.js` now merges them into the primary snapshot whenever Arcsweep saves or exports.
+The browser sidecars remain the live UI working stores. `storage.js` merges them into the primary snapshot whenever Arcsweep saves or exports.
 
-Import and backup restoration seed the live sidecar stores from the imported primary state.
+Import and backup restoration seed the live sidecar stores from primary state.
 
-Therefore dimensional destinations, corridors, Helm receipts, traceroutes, protocol responses, replays and closed-loop analysis are no longer excluded from the main Arcsweep portability contract.
+Persistence rules:
 
-### Persistence rules
-
-- Existing sidecar data is migrated into primary state rather than discarded.
-- Primary export captures the latest sidecar ledgers.
-- Imported primary React-ion state repopulates the browser working stores.
-- Desktop backup performs a React-ion persistence preflight.
-- The bridge uses versioned keys and schema-normalised collections.
+- existing sidecar data migrates into primary state;
+- primary export captures current React-ion ledgers;
+- imported React-ion state repopulates browser working stores;
+- desktop backup performs a React-ion persistence preflight;
+- versioned keys and schema-normalised collections govern migration.
 
 Implementation:
 
@@ -58,7 +52,7 @@ Implementation:
 
 ## 2. Route map
 
-The Helm now has a topology view generated from the same graph that routing uses.
+The Helm topology view is generated from the same graph used by route selection.
 
 Implementation:
 
@@ -73,30 +67,24 @@ The map distinguishes:
 - continuity-vetoed corridors;
 - source endpoint;
 - target endpoint;
-- route-only manual addresses not present in DNS.
+- manual route-only addresses.
 
-The layout is deterministic interface geometry.
-
-It is explicitly **not physical spacetime cartography**.
-
-The map exists so the operator can inspect why a route was selected or rejected without flying raw graph data.
+The 2D layout is deterministic interface geometry and remains the inspectable truth surface for route topology.
 
 ---
 
 ## 3. Alternate-route exploration is bounded
 
-The route inspector already limited candidate count and hop count. Hull 4 adds a separate hard exploration-state ceiling.
+The route inspector carries a hard exploration-state ceiling in addition to candidate count and hop count.
 
-This matters because a highly branching graph with no successful destination path could otherwise keep expanding partial paths while producing no completed candidates.
-
-The inspector now records:
+The inspector records:
 
 - candidate limit;
 - exploration-state limit;
-- number of explored states;
-- whether exploration was truncated.
+- explored-state count;
+- truncation state.
 
-This is an engineering bound, not a claim about the topology of any external reality.
+This keeps route search finite and receipted even in a highly branching graph.
 
 Implementation:
 
@@ -107,18 +95,16 @@ Implementation:
 
 ## 4. DNS conflict quarantine
 
-Earlier registry compilation treated a duplicate approved name or alias as a registry-wide failure.
+Approved destinations enter the registry in deterministic registration order.
 
-Hull 4 changes the failure domain.
-
-Approved destinations are admitted in deterministic registration order. If a later registration claims an already-owned DNS name or alias:
+When a later registration claims an existing DNS name or alias:
 
 - the conflicting destination is quarantined;
-- the healthy destinations remain available;
-- the diagnostic identifies the conflicting names and prior registration IDs;
-- corridors referencing the quarantined destination remain unresolved rather than silently retargeting.
+- healthy destinations remain available;
+- diagnostics identify conflicting names and prior registration IDs;
+- corridors referencing the quarantined destination remain unresolved.
 
-One bad signpost no longer demolishes the entire atlas.
+One bad signpost no longer demolishes the atlas.
 
 Implementation:
 
@@ -129,7 +115,7 @@ Implementation:
 
 ## 5. Semantic response return channel
 
-The Bifröst response vocabulary is semantic:
+The Bifröst semantic vocabulary is:
 
 - `ACK`
 - `ACCEPT`
@@ -140,9 +126,9 @@ The Bifröst response vocabulary is semantic:
 - `UNKNOWN`
 - `EXPIRED`
 
-Transport acknowledgement is a different layer.
+Transport acknowledgement and semantic response are separate layers.
 
-Hull 4 therefore adds an explicit return-path solver for protocol responses.
+Hull 4 adds an explicit return-path solver for protocol responses.
 
 Implementation:
 
@@ -152,29 +138,17 @@ Implementation:
 
 ### Governing law
 
-The return route is **solved**, not assumed.
+The return route is solved from the current graph.
 
-If an outbound corridor is one-way, the response does not magically travel backwards along it.
+A one-way outbound corridor gives no automatic reverse path. A semantic response can therefore be recorded while return transport is `UNREACHABLE`.
 
-A semantic response may therefore exist while its return transport state is:
+`ACCEPT` records acceptance. Observation and transformation outcome continue through their own receipts.
 
-`UNREACHABLE`
-
-Likewise:
-
-`ACCEPT`
-
-means accepted, not yet observed.
-
-A delivered response means the response packet reached the sender endpoint in the software transport model. It does not prove that the requested transformation occurred.
-
-The Response Console never invents a response. It records one explicitly entered by the operator, with an evidence class and source.
+The Response Console records an explicitly supplied response together with evidence class, source, response fingerprint, return route, and delivery state.
 
 ---
 
 ## 6. Replay and closed-loop workbench
-
-Core replay and model holonomy existed in Hull 3. Hull 4 puts them in the Helm.
 
 Implementation:
 
@@ -185,35 +159,29 @@ Implementation:
 
 A stored route can be recomputed against the current graph.
 
-The workbench reports independently:
+The workbench reports:
 
 - path match;
 - cost match;
 - fingerprint match.
 
-If the registry, corridor costs, harmonic profile, continuity result or route topology changes, the replay can report `DRIFT` rather than pretending the old and new route are identical.
+Changed registry state, corridor cost, harmonic profile, continuity result, or topology can produce `DRIFT`.
 
 ### Closed-loop analysis
 
 The workbench searches recent routed Helm receipts for a contiguous chain that returns to its starting address.
 
-An optional pair of declared model-orientation vectors may be supplied.
-
-A closed loop with an orientation change can be recorded as model holonomy:
-
-`same address, different declared internal orientation`
-
-This remains software/model holonomy. It is not a claim of measured physical spacetime holonomy.
+Optional declared orientation vectors supply before/after state. A closed loop with changed orientation records return-with-difference as holonomy.
 
 ---
 
 ## 7. Runa World Tone approval sync
 
-The existing World Tone Approval instrument stores human calibration decisions in:
+The World Tone Approval instrument stores human calibration decisions in:
 
 `hearthgate.world-tone-approvals.v1`
 
-Hull 4 can read those receipts and hydrate existing world-level dimensional registrations with the latest still-approved profile.
+Hull 4 reads those receipts and hydrates existing world-level dimensional registrations with the latest still-approved profile.
 
 Implementation:
 
@@ -221,30 +189,22 @@ Implementation:
 - `apps/arcsweep/src/react-ion-world-tone-sync-sidecar.js`
 - `apps/arcsweep/test/react-ion-world-tone-sync.test.js`
 
-### Important boundary
-
-A World Tone approval may supply:
+World Tone contributes:
 
 - world identity;
 - root frequency;
 - profile version;
 - calibration receipt lineage.
 
-It does **not** supply a dimensional address.
+The dimensional registry contributes the address.
 
-Therefore the sync operation only enriches a world destination that already has an explicitly registered address.
-
-If an approved World Tone exists without a world-level dimensional destination, the sync report says the destination is missing.
-
-It does not fabricate one from frequency.
-
-The imported harmonic signature remains profile data with explicit source receipt provenance.
+The sync joins those two sources in one endpoint while preserving both provenances. Missing world-level addresses remain explicit in the sync report.
 
 ---
 
 ## 8. Pocket Concordance anchor bridge
 
-Pocket Concordance Lens already keeps local anchor metadata such as:
+Pocket Concordance Lens keeps anchor metadata including:
 
 - anchor ID and display name;
 - layer;
@@ -255,7 +215,7 @@ Pocket Concordance Lens already keeps local anchor metadata such as:
 - device mode;
 - screen-percent placement.
 
-Hull 4 adds an explicit bridge from that local metadata into dimensional DNS.
+Hull 4 bridges selected anchor metadata into dimensional DNS.
 
 Implementation:
 
@@ -265,28 +225,22 @@ Implementation:
 
 ### Privacy and agency rules
 
-An anchor can be created as a draft without becoming routable.
+Draft anchors remain non-routable.
 
-To create an `approved` anchor destination:
+An `approved` anchor destination requires:
 
-- the anchor must still be active;
-- publication must be explicitly authorised;
-- the operator must select the Arcsweep world;
-- the operator must provide the dimensional address.
+- active anchor status;
+- explicit publication authorisation;
+- selected Arcsweep world;
+- explicit dimensional address.
 
-The bridge carries consent scope and confidence mode into the endpoint metadata.
+The bridge carries consent scope, confidence mode, visibility, status, and anchor identity into endpoint provenance.
 
-It does not copy camera image or video.
-
-It does not convert screen coordinates into dimensional coordinates.
-
-A cleared or inactive anchor cannot be approved for routing.
+Camera media stays outside the bridge. Screen placement stays screen placement. Dimensional address remains an explicit registry field.
 
 ---
 
 ## 9. Living interface layout
-
-The React-ion organs currently mount through the existing Arcsweep sidecar system.
 
 ### Worlds room
 
@@ -303,17 +257,13 @@ The React-ion organs currently mount through the existing Arcsweep sidecar syste
 - Response Console
 - Replay / closed-loop workbench
 
-The intent remains progressive disclosure:
-
-The user asks simple questions at the Helm.
-
-The machinery is available for inspection without becoming the front-door burden.
+The operator sees simple questions first. The machinery remains available beneath them.
 
 ---
 
 ## 10. Test gate
 
-React-ion is now covered by the dedicated workflow:
+React-ion is covered by:
 
 `.github/workflows/arcsweep-build.yml`
 
@@ -324,7 +274,7 @@ npm run arcsweep:test
 npm run arcsweep:build
 ```
 
-New Hull 4 tests cover:
+Hull 4 tests cover:
 
 - primary persistence migration;
 - route-map topology;
@@ -332,42 +282,41 @@ New Hull 4 tests cover:
 - DNS conflict quarantine;
 - semantic response return routing;
 - unreachable return paths;
-- ACCEPT vs observed fulfilment;
+- ACCEPT and outcome separation;
 - approved World Tone sync;
-- refusal to derive addresses from frequency;
+- dimensional address preservation;
 - explicit Concordance publication authorisation;
 - anchor consent/confidence propagation;
-- refusal to derive addresses from screen placement.
+- screen-placement/address separation.
 
-The PR remains draft while construction continues, even when the current gate is green.
+The PR remains draft while construction continues.
 
 ---
 
 ## 11. Next hull
 
-The next useful construction pass is:
+The next construction pass is:
 
-1. give routes a signed graph snapshot so replay can distinguish historical exact replay from replay-against-current-registry;
-2. add endpoint-specific access policies on top of global Helm authorisation;
-3. add protocol response chains and conversation threading rather than one isolated response at a time;
-4. index Helm, response, traceroute and replay receipts into an explicit Replay room view;
-5. bind React-ion route events to DEEPStory as narrative events without collapsing them into DEEPTime;
-6. let the route map expand into a 3D WebGL instrument while retaining the deterministic 2D fallback;
-7. add a formal DNS export/import manifest for sharing registered world addresses without sharing private anchors;
-8. give BCEP/1 its visual cat only after the recoverable diagnostic actually fires.
+1. signed graph snapshots and export receipts;
+2. endpoint-specific access policy at the Helm;
+3. protocol response chains and conversation threading;
+4. Replay room indexing for Helm, response, traceroute, DEEPStory, and replay receipts;
+5. 3D route-map instrument skin over the deterministic 2D truth surface;
+6. DNS export/import manifests with private-anchor filtering;
+7. BCEP/1 visual cat after recoverable diagnostic fire.
 
 ## Seal
 
 The atlas survives a bad name.
 
-The navigator cannot wander forever.
+The navigator stays bounded.
 
-The reply needs its own road home.
+The reply finds its own road home.
 
-The world hum may tune the address, but cannot invent it.
+The world hum tunes its profile.
 
-The anchor may be private and still remembered.
+The anchor keeps its consent.
 
-The loop may close and still return changed.
+The loop may close and return changed.
 
-And `ACK-THPPPT` remains a transport diagnostic, not a cosmological theorem.
+And `ACK-THPPPT` still owns a socket.
