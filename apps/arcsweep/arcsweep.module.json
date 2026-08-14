@@ -2,11 +2,11 @@
   "schemaVersion": "arkfire.module/v1",
   "moduleId": "arkfire.arcsweep",
   "canonicalName": "Hearthgate: Arcsweep",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "status": "IMPLEMENTED_PENDING_PHYSICAL_WINDOWS_VERIFICATION",
   "owner": "Rowan",
   "maintainers": [],
-  "description": "A private, local-first world planning, continuity, scripting, timing, asset, and return instrument.",
+  "description": "A private, local-first world planning, continuity, scripting, timing, asset, return, relational-observation, topology, and receipted trajectory instrument.",
   "standalone": true,
   "standaloneEntrypoints": {
     "webDevelopment": "npm run arcsweep:dev",
@@ -23,7 +23,7 @@
       "status": "connected-web-and-native-ipc",
       "optional": true,
       "reversible": true,
-      "notes": "Web path: npm run arcsweep:deploy:server stages the build to starwell-server/public/arcsweep/ with __hearthgateHost injection. Native IPC path: window.arcsweep exposed in Hearthgate preload; handlers registered via registerArcsweepIpc in starwell-server/electron/main.js; storage.js detects window.arcsweep as host bridge. Single-writer lock (step 5) is pending."
+      "notes": "Web path: npm run arcsweep:deploy:server stages the build to starwell-server/public/arcsweep/ with __hearthgateHost injection. Native IPC path: window.arcsweep exposed in Hearthgate preload; handlers registered via registerArcsweepIpc in starwell-server/electron/main.js; storage.js detects window.arcsweep as host bridge. Single-writer lock remains a separate verification item."
     }
   ],
   "storage": {
@@ -87,23 +87,69 @@
     "explicit-window-title",
     "desktop-startup-diagnostics",
     "single-instance-window-recall",
-    "windows-nsis-installer"
+    "windows-nsis-installer",
+    "receipted-relational-feedback",
+    "requested-transformation-circuit",
+    "bone-ash-intention-topology",
+    "domain-semantic-cusp-controls",
+    "jacobian-fold-observation",
+    "bidirectional-domain-control-sweeps",
+    "hysteresis-witnessing",
+    "deep-theory-candidate-generation",
+    "deep-theory-explicit-review",
+    "deep-time-accepted-trajectories",
+    "theory-grounded-acceptance-advice",
+    "explicit-cross-domain-applicability-mapping",
+    "runa-semantic-trajectory-suggestions"
   ],
-  "dataContracts": ["arcsweep.state/v0.2", "arcsweep.attachment/v1", "arcsweep.storage-receipt/v1", "arcsweep.desktop-diagnostic/v1"],
-  "dataOwnership": ["worlds", "scripts", "room-records", "waking-thread", "forge-workings", "return-history", "attachments", "themes", "desktop-diagnostics"],
+  "dataContracts": [
+    "arcsweep.state/v0.2",
+    "arcsweep.attachment/v1",
+    "arcsweep.storage-receipt/v1",
+    "arcsweep.desktop-diagnostic/v1",
+    "arcsweep.feedback-cycle/v1",
+    "arcsweep.transformation-request/v1",
+    "arcsweep.requested-transformation-circuit/v1",
+    "arcsweep.bone-ash-intention-topology/v1",
+    "arcsweep.domain-control-profile/v1",
+    "arcsweep.domain-control-sweep/v1",
+    "arcsweep.deep-theory-candidate-receipt/v1",
+    "arcsweep.deep-theory-review-receipt/v1",
+    "deep_time/0.1.0",
+    "arcsweep.theory-grounded-acceptance-advisor/v1",
+    "arcsweep.domain-context-mapping/v1",
+    "arcsweep.runa-trajectory-suggestion/v1"
+  ],
+  "dataOwnership": [
+    "worlds",
+    "scripts",
+    "room-records",
+    "waking-thread",
+    "forge-workings",
+    "return-history",
+    "attachments",
+    "themes",
+    "desktop-diagnostics",
+    "feedback-receipts",
+    "topology-receipts",
+    "deep-theory-review-receipts",
+    "deep-time-records",
+    "advisor-receipts",
+    "runa-suggestion-receipts"
+  ],
   "storageLocations": ["%APPDATA%/Hearthgate/Arcsweep"],
-  "optionalIntegrations": ["Hearthgate: Arkfire host adapter", "local companion model adapter", "Notion import adapter", "calendar import adapter"],
+  "optionalIntegrations": ["Hearthgate: Arkfire host adapter", "local companion model adapter", "Notion import adapter", "calendar import adapter", "Runa semantic trajectory bridge"],
   "permissions": ["local-file-read-on-explicit-selection", "local-file-write", "open-local-attachment"],
-  "consentRequirements": ["explicit-file-selection", "explicit-import", "explicit-restore", "explicit-external-adapter-enable"],
+  "consentRequirements": ["explicit-file-selection", "explicit-import", "explicit-restore", "explicit-external-adapter-enable", "explicit-theory-review", "explicit-cross-domain-applicability-mapping", "explicit-runa-render-approval"],
   "networkRequirements": [],
   "deviceRequirements": ["Windows x64 for NSIS installer"],
   "routes": ["/arcsweep/"],
   "rooms": [
-    "Portal", "World Registry", "About this World", "Summon", "Veil Mode", "World Clock", "Arrival Context", "Timeline", "Scripts", "Records Room", "About Me", "World Competencies", "Safety Weave", "Continuity Recall", "Companion Interface", "Relationships", "Scenarios", "Calendar", "Diary", "Playlists", "Visualisations", "Appearance", "Wardrobe", "Outfits", "Belongings", "Places", "Family Tree", "Photo Gallery", "Theme", "Forge", "Waking Thread", "Settings and Recovery"
+    "Portal", "World Registry", "About this World", "Summon", "Veil Mode", "World Clock", "Arrival Context", "Timeline", "Scripts", "Records Room", "About Me", "World Competencies", "Safety Weave", "Continuity Recall", "Companion Interface", "Relationships", "Scenarios", "Calendar", "Diary", "Playlists", "Visualisations", "Appearance", "Wardrobe", "Outfits", "Belongings", "Places", "Family Tree", "Photo Gallery", "Theme", "Forge", "Waking Thread", "Relational Feedback Chamber", "Field · DEEP Observer", "Settings and Recovery"
   ],
   "commands": ["arcsweep:dev", "arcsweep:test", "arcsweep:build", "electron:build:win"],
   "configurationSchema": null,
-  "migrationVersion": "0.2.0",
+  "migrationVersion": "0.3.0",
   "lifecycle": {
     "install": "Run the Windows NSIS installer.",
     "launchStandalone": "Launch Hearthgate Arcsweep from the Start Menu or desktop shortcut.",
@@ -124,7 +170,12 @@
     "window intersects an active display",
     "window title equals Hearthgate: Arcsweep",
     "fallback show occurs when ready-to-show is absent",
-    "desktop diagnostic log records launch state"
+    "desktop diagnostic log records launch state",
+    "cusp observation replay remains deterministic",
+    "DEEPTime lambda remains monotonic within a revision",
+    "DEEPTheory candidate cannot self-accept",
+    "advisor cannot auto-accept state",
+    "Runa suggestion cannot publish sensory activation"
   ],
   "acceptanceTests": [
     "launch without Hearthgate or Hearthfire",
@@ -139,6 +190,14 @@
     "export and import archive",
     "create and restore backup",
     "attach and open a local file",
+    "run a Bone-Ash-Intention requested transformation through cusp topology",
+    "run forward and reverse domain-control sweeps and receipt hysteresis witnesses",
+    "generate a DEEPTheory candidate without accepting it",
+    "accept or retire DEEPTheory only through explicit human review",
+    "build DEEPTime only from human-accepted feedback cycles",
+    "refuse cross-domain theory application without an explicit applicability mapping",
+    "produce advisor recommendations without automatic state acceptance",
+    "produce a Runa semantic trajectory suggestion without DSP assignment, autoplay, tone change, haptic change, or sensory-bus publication",
     "install and uninstall on Windows x64"
   ],
   "languageContract": {
@@ -150,7 +209,10 @@
     "returnAlwaysAvailable": true,
     "anchors": ["Feather", "Wrap", "Notch", "Seldrin clear"],
     "noAutomaticExternalReads": true,
-    "companionAgency": "Companions may speak honestly, refuse, negotiate, rest, change, and leave. Loyalty is relational, not compulsory."
+    "companionAgency": "Companions may speak honestly, refuse, negotiate, rest, change, and leave. Loyalty is relational, not compulsory.",
+    "theoryAcceptance": "Analytical candidates require explicit human review before accepted status.",
+    "domainMapping": "Cross-domain applicability requires a separate human-declared receipt and never implies numerical equivalence.",
+    "runaRendering": "Trajectory suggestions remain semantic until a separate user-approved renderer assigns DSP or haptic parameters."
   },
   "provenance": [
     "Community LIFA traditions supplied source concepts.",
@@ -158,8 +220,10 @@
     "Universal Horizon is the sky. This module operates beneath it and does not supersede it."
   ],
   "knownLimitations": [
-    "The 0.2.1 visible-window repair requires physical verification on Rowan's display configuration.",
-    "Live companion inference remains an optional future adapter.",
-    "External calendar and Notion reads are not automatic."
+    "The 0.3.0 visible-window repair still requires physical verification on Rowan's display configuration.",
+    "Live companion inference remains an optional adapter.",
+    "External calendar and Notion reads are not automatic.",
+    "DEEPTime v0.1 currently adapts accepted Arcsweep feedback; additional real-world anchor registries remain future work.",
+    "Runa trajectory packets stop at semantic suggestion and do not yet feed a reviewed DSP compiler."
   ]
 }
