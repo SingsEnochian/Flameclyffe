@@ -17,6 +17,7 @@ test('Arcsweep 0.3 owns Observatory, transformation and feedback review state in
   assert.deepEqual(state.observatory.theory_reviews, []);
   assert.deepEqual(state.observatory.runa_renderer_candidates, []);
   assert.deepEqual(state.observatory.runa_renderer_reviews, []);
+  assert.deepEqual(state.observatory.runa_preview_palettes, []);
   assert.deepEqual(state.observatory.runa_preview_plans, []);
   assert.deepEqual(state.observatory.runa_preview_renders, []);
   assert.deepEqual(state.observatory.runa_preview_evidence_arms, []);
@@ -41,6 +42,7 @@ test('Observatory normalisation preserves receipted organs and repairs malformed
     runa_suggestions: [{ suggestion_id: 'runa-1' }],
     runa_renderer_candidates: [{ candidate_id: 'renderer-1' }],
     runa_renderer_reviews: [{ review_id: 'renderer-review-1' }],
+    runa_preview_palettes: [{ palette_id: 'preview-palette-1' }],
     runa_preview_plans: [{ plan_id: 'preview-plan-1' }],
     runa_preview_renders: [{ render_id: 'preview-render-1' }],
     runa_preview_evidence_arms: [{ arm_id: 'preview-arm-1' }],
@@ -55,6 +57,7 @@ test('Observatory normalisation preserves receipted organs and repairs malformed
   assert.equal(store.runa_suggestions[0].suggestion_id, 'runa-1');
   assert.equal(store.runa_renderer_candidates[0].candidate_id, 'renderer-1');
   assert.equal(store.runa_renderer_reviews[0].review_id, 'renderer-review-1');
+  assert.equal(store.runa_preview_palettes[0].palette_id, 'preview-palette-1');
   assert.equal(store.runa_preview_plans[0].plan_id, 'preview-plan-1');
   assert.equal(store.runa_preview_renders[0].render_id, 'preview-render-1');
   assert.equal(store.runa_preview_evidence_arms[0].arm_id, 'preview-arm-1');
@@ -73,6 +76,7 @@ test('normaliseState upgrades an older archive while retaining Observatory, tran
     theory_reviews: [{ receipt_id: 'review-keep-me' }],
     runa_renderer_candidates: [{ candidate_id: 'renderer-keep-me' }],
     runa_renderer_reviews: [{ review_id: 'renderer-review-keep-me' }],
+    runa_preview_palettes: [{ palette_id: 'preview-palette-keep-me' }],
     runa_preview_plans: [{ plan_id: 'preview-plan-keep-me' }],
     runa_preview_renders: [{ render_id: 'preview-render-keep-me' }],
     runa_preview_evidence_arms: [{ arm_id: 'preview-arm-keep-me' }],
@@ -103,6 +107,7 @@ test('normaliseState upgrades an older archive while retaining Observatory, tran
   assert.equal(upgraded.observatory.theory_reviews[0].receipt_id, 'review-keep-me');
   assert.equal(upgraded.observatory.runa_renderer_candidates[0].candidate_id, 'renderer-keep-me');
   assert.equal(upgraded.observatory.runa_renderer_reviews[0].review_id, 'renderer-review-keep-me');
+  assert.equal(upgraded.observatory.runa_preview_palettes[0].palette_id, 'preview-palette-keep-me');
   assert.equal(upgraded.observatory.runa_preview_plans[0].plan_id, 'preview-plan-keep-me');
   assert.equal(upgraded.observatory.runa_preview_renders[0].render_id, 'preview-render-keep-me');
   assert.equal(upgraded.observatory.runa_preview_evidence_arms[0].arm_id, 'preview-arm-keep-me');
@@ -126,6 +131,10 @@ test('import validation refuses malformed Observatory collections', () => {
   assert.throws(
     () => validateImportedState({ observatory: { runa_renderer_reviews: {} } }),
     /observatory runa_renderer_reviews must be an array/i,
+  );
+  assert.throws(
+    () => validateImportedState({ observatory: { runa_preview_palettes: {} } }),
+    /observatory runa_preview_palettes must be an array/i,
   );
   assert.throws(
     () => validateImportedState({ observatory: { runa_preview_renders: {} } }),
