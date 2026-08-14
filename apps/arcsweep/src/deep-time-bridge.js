@@ -1,5 +1,6 @@
 import { assertValidDeepTimeRecord, validateDeepTimeWindow, DEEP_TIME_PREMAQC_AXES } from '../../../starwell/deep-observer/deep-time-validator.js';
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
+import { feedbackCycleSource } from './feedback-cycle-queue.js';
 
 export const ARCSWEEP_DEEP_TIME_RECORD_SCHEMA = 'arcsweep.deep-time-feedback-record/v1';
 
@@ -42,23 +43,25 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
   acceptanceMaskId = 'arcsweep-feedback-human-review/v1',
   generatedAt = null,
 } = {}) {
-  invariant(cycle?.schema === 'arcsweep.feedback-cycle/v1', 'a receipted feedback cycle is required');
-  invariant(acceptedQueueEntry?.cycle_id === cycle.cycle_id, 'accepted queue entry must match the feedback cycle');
-  invariant(acceptedQueueEntry?.status === 'accepted', 'feedback cycle must be human-accepted before entering DEEPTime');
-  invariant(cycle.premaqc_after?.state, 'feedback cycle must carry PREMAQC after-state');
-  invariant(cycle.premaqc_after?.receipt_id, 'feedback cycle must carry a PREMAQC receipt');
+  invariant(cycle?.schema === 'arcsweep.feedback-cycle/v1', 'a receipted observation cycle is required');
+  invariant(acceptedQueueEntry?.cycle_id === cycle.cycle_id, 'accepted queue entry must match the observation cycle');
+  invariant(acceptedQueueEntry?.status === 'accepted', 'observation cycle must be human-accepted before entering DEEPTime');
+  invariant(cycle.premaqc_after?.state, 'observation cycle must carry PREMAQC after-state');
+  invariant(cycle.premaqc_after?.receipt_id, 'observation cycle must carry a PREMAQC receipt');
   if (previousRecord) {
     assertValidDeepTimeRecord(previousRecord);
     invariant(previousRecord.world_id === cycle.world.id, 'DEEPTime predecessor must remain in the same world');
   }
 
   const utc = generatedAt ?? cycle.created_at ?? cycle.premaqc_after.observed_at;
-  invariant(!Number.isNaN(Date.parse(utc)), 'feedback cycle UTC timestamp is required');
-  const seq = sequenceId || previousRecord?.sequence_id || `arcsweep:${cycle.world.id}:accepted-feedback`;
+  invariant(!Number.isNaN(Date.parse(utc)), 'observation cycle UTC timestamp is required');
+  const observationSource = acceptedQueueEntry.observation_source || feedbackCycleSource(cycle);
+  const seq = sequenceId || previousRecord?.sequence_id || `arcsweep:${cycle.world.id}:accepted-observation`;
   const revision = Number(sequenceRevision);
   invariant(Number.isInteger(revision) && revision >= 1, 'sequenceRevision must be a positive integer');
   const lambda = previousRecord ? Number(previousRecord.lambda) + 1 : Number(cycle.premaqc_after.sequence);
   const acceptedStateHash = await sha256Hex(cycle.premaqc_after);
+  const evidenceHashes = await Promise.all((cycle.evidence || []).map((item) => sha256Hex(item)));
   const seconds = intervalSeconds(previousRecord, utc);
   const confidenceValues = DEEP_TIME_PREMAQC_AXES.map((axis) => Number(cycle.premaqc_after.state[axis].confidence)).filter(Number.isFinite);
   const dataQuality = mean(confidenceValues);
@@ -79,10 +82,14 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
     premaqc: structuredClone(cycle.premaqc_after),
     provenance: {
       observation_run_id: cycle.cycle_id,
+      observation_source: observationSource,
+      observation_evidence_schemas: (cycle.evidence || []).map((item) => item?.schema).filter(Boolean),
+      observation_evidence_hashes: evidenceHashes,
       acceptance_mask_id: acceptanceMaskId,
       acceptance_mask_version: '1',
+      review_queue_schema: 'arcsweep.feedback-cycle-queue/v1',
       feedback_review_receipt_id: acceptedQueueEntry.review_receipt_id,
-      source_receipt_hashes: [cycle.cycle_fingerprint, cycle.math_spine_packet?.packet_fingerprint].filter(Boolean),
+      source_receipt_hashes: [cycle.cycle_fingerprint, cycle.math_spine_packet?.packet_fingerprint, ...evidenceHashes].filter(Boolean),
       accepted_state_hash: acceptedStateHash,
     },
     interval: {
@@ -107,6 +114,8 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
       append_only: true,
       source_cycle_mutable: false,
       accepted_feedback_only: true,
+      shared_review_queue_required: true,
+      field_observation_supported: true,
       qualia_is_premaqc_q: true,
       engineering_data_quality_is_q: false,
       physical_claim: false,
