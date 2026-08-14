@@ -48,6 +48,7 @@ jobs:
           apps/arcsweep/test/bifrost-ignition-client.test.js
           apps/arcsweep/test/scene-cognition.test.js
           apps/arcsweep/test/self-authorship.test.js
+          apps/arcsweep/test/voice-identity-aliases.test.js
 
       - name: Syntax-check ignition Node CLIs
         run: |
