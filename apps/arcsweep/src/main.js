@@ -316,7 +316,7 @@ function renderWorlds() {
         <input type="hidden" name="id" value="${attr(world.id)}" />
         <div class="grid two compact-grid"><label>World name<input name="name" value="${attr(world.name)}" required /></label><label>World type<input name="kind" value="${attr(world.kind)}" /></label></div>
         <label>Description<textarea name="description" rows="5">${escapeHtml(world.description)}</textarea></label>
-        <div class="button-row"><button type="submit">Save world</button><button type="button" class="quiet" data-action="set-active-world" data-id="${attr(world.id)}">Set active portal</button><button type="button" class="quiet" data-room="about-world">Open full world room</button><button type="button" class="quiet danger" data-action="delete-world" data-id="${attr(world.id)}">Delete world</button></div>
+        <div class="button-row"><button type="button" data-action="save-world">Save world</button><button type="button" class="quiet" data-action="set-active-world" data-id="${attr(world.id)}">Set active portal</button><button type="button" class="quiet" data-room="about-world">Open full world room</button><button type="button" class="quiet danger" data-action="delete-world" data-id="${attr(world.id)}">Delete world</button></div>
       </form></article>
     </section>`;
 }
@@ -1035,6 +1035,24 @@ function formValues(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
 
+function saveWorldRegistry(form) {
+  if (!form) return false;
+  const v = formValues(form);
+  const world = state.worlds.find((item) => item.id === v.id);
+  if (!world) {
+    notice = 'World save stopped: the selected portal is no longer in the registry.';
+    return false;
+  }
+  Object.assign(world, {
+    name: String(v.name || '').trim() || 'Untitled World',
+    kind: String(v.kind || '').trim(),
+    description: String(v.description || '').trim(),
+    updatedAt: isoNow(),
+  });
+  persist('World portal saved.', 'world-registry');
+  return true;
+}
+
 function saveWorldSection(section, form) {
   const world = selectedWorld();
   const v = formValues(form);
@@ -1097,6 +1115,11 @@ app.addEventListener('click', async (event) => {
   if (action === 'houseglass-reviewed') {
     const receipt = houseglassState().receipts.find((item) => item.id === button.dataset.receiptId);
     if (receipt) { receipt.reviewStatus = 'reviewed'; receipt.reviewedAt = isoNow(); persist('Houseglass packet marked reviewed.', 'houseglass-reviewed'); }
+    render(); return;
+  }
+
+  if (action === 'save-world') {
+    saveWorldRegistry(button.closest('#world-registry-form'));
     render(); return;
   }
 
@@ -1451,7 +1474,7 @@ app.addEventListener('submit', async (event) => {
     persist('Houseglass settings saved. No external authority changed.', 'houseglass-settings');
     render(); return;
   }
-  if (form.id === 'world-registry-form') { const world = state.worlds.find((item) => item.id === v.id); if (world) { Object.assign(world, { name: v.name.trim() || 'Untitled World', kind: v.kind.trim(), description: v.description.trim(), updatedAt: isoNow() }); persist('World portal saved.', 'world-registry'); } }
+  if (form.id === 'world-registry-form') saveWorldRegistry(form);
   if (form.id === 'world-section-form') saveWorldSection(form.dataset.section, form);
   if (form.id === 'script-form') { const script = state.scripts.find((item) => item.id === v.id); if (script) { Object.assign(script, { name: v.name.trim() || 'Untitled DR Script', status: v.status, content: v.content, updatedAt: isoNow() }); persist('Script saved locally.', 'script'); } }
   if (form.id === 'feedback-form') {
