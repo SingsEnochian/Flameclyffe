@@ -103,6 +103,9 @@ export function validateImportedState(value) {
   if (value.feedbackQueue !== undefined && (!value.feedbackQueue || typeof value.feedbackQueue !== 'object' || Array.isArray(value.feedbackQueue))) {
     throw new Error('Arcsweep feedback queue must be an object.');
   }
+  if (value.houseglass !== undefined && (!value.houseglass || typeof value.houseglass !== 'object' || Array.isArray(value.houseglass))) {
+    throw new Error('Arcsweep Houseglass state must be an object.');
+  }
   if (value.transformationRequests !== undefined) {
     if (!value.transformationRequests || typeof value.transformationRequests !== 'object' || Array.isArray(value.transformationRequests)) {
       throw new Error('Arcsweep transformationRequests must be an object.');

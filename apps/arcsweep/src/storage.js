@@ -3,6 +3,12 @@ import { HOUSE_DR_BUNDLE } from './house-dr-bundle.js';
 import { applyHouseDrBundle } from './house-dr-library.js';
 import { createEmptyRoomCollections, normaliseRoomCollections } from './rooms.js';
 import { createWorld, normaliseWorld } from './worlds.js';
+import {
+  createDefaultHouseglassSettings,
+  createDefaultHouseglassState,
+  normaliseHouseglassSettings,
+  normaliseHouseglassState,
+} from './houseglass.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 export const OBSERVATORY_MIRROR_KEY = 'hearthgate.arcsweep.domain-control-bench.v1';
@@ -179,6 +185,7 @@ export function normaliseTransformationRequestState(value) {
 export function createDefaultState() {
   const now = new Date().toISOString();
   const world = createWorld(uid('world'), now);
+  const houseglassSettings = createDefaultHouseglassSettings();
   return {
     version: '0.3.0',
     settings: {
@@ -191,6 +198,7 @@ export function createDefaultState() {
       largeText: false,
       highContrast: false,
       fontScale: 1,
+      houseglass: houseglassSettings,
     },
     worlds: [world],
     activeWorldId: world.id,
@@ -224,6 +232,7 @@ export function createDefaultState() {
     transformationRequests: createEmptyTransformationRequestState(),
     premaqcByWorld: {},
     observatory: createEmptyObservatoryStore(),
+    houseglass: createDefaultHouseglassState(houseglassSettings),
     houseBundles: [],
     provenance: {
       createdAt: now,
@@ -267,11 +276,17 @@ export function normaliseState(value) {
     firstWorld.identity = { ...firstWorld.identity, ...imported.appearance };
   }
 
+  const settings = {
+    ...defaults.settings,
+    ...(imported.settings || {}),
+    houseglass: normaliseHouseglassSettings(imported.settings?.houseglass),
+  };
+
   return {
     ...defaults,
     ...imported,
     version: '0.3.0',
-    settings: { ...defaults.settings, ...(imported.settings || {}) },
+    settings,
     worlds,
     activeWorldId,
     session,
@@ -286,6 +301,7 @@ export function normaliseState(value) {
     transformationRequests: normaliseTransformationRequestState(imported.transformationRequests),
     premaqcByWorld: imported.premaqcByWorld && typeof imported.premaqcByWorld === 'object' ? imported.premaqcByWorld : {},
     observatory: normaliseObservatoryStore(imported.observatory),
+    houseglass: normaliseHouseglassState(imported.houseglass, settings.houseglass),
     houseBundles: Array.isArray(imported.houseBundles) ? imported.houseBundles : [],
     provenance: {
       ...defaults.provenance,

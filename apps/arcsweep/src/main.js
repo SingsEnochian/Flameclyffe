@@ -43,6 +43,16 @@ import {
   reviewHouseObservation,
   startHouseBraidLiveUpdates,
 } from './house-runtime.js';
+import {
+  buildHouseglassSynthesisPacket,
+  buildHouseglassTaskPacket,
+  createHouseglassReceipt,
+  finishHouseglassReceipt,
+  makeHouseglassScope,
+  normaliseHouseglassSettings,
+  normaliseHouseglassState,
+  planHouseglassSwarm,
+} from './houseglass.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -72,6 +82,10 @@ let braidLiveCursor = 0;
 let braidLiveWorldId = null;
 let braidRefreshTimer = null;
 let braidLiveGeneration = 0;
+let houseglassOpen = false;
+let houseglassRunning = false;
+let houseglassDraft = '';
+let houseglassSectionFocus = null;
 const QUEUE_STORAGE_KEY = "arcsweep.feedback-cycle-queue/v1";
 
 function loadFeedbackQueue() {
@@ -101,6 +115,8 @@ const PRIMARY_NAV = [
   ['deep-observer', 'Field', '◈'],
   ['settings', 'Settings', '⚙'],
 ];
+
+const ROOM_LABELS = new Map(PRIMARY_NAV.map(([id, label]) => [id, label]));
 
 const DEEP_CHANNELS = FIELD_AXES;
 
@@ -183,6 +199,7 @@ function applyPresentation() {
   document.documentElement.dataset.reduceMotion = state.settings.reduceMotion || theme.lowMotion ? 'true' : 'false';
   document.documentElement.dataset.largeText = state.settings.largeText ? 'true' : 'false';
   document.documentElement.dataset.highContrast = state.settings.highContrast ? 'true' : 'false';
+  document.documentElement.dataset.houseglassSolid = state.settings.houseglass?.solidSurface ? 'true' : 'false';
   document.documentElement.style.setProperty('--font-scale', String(state.settings.fontScale || 1));
   document.documentElement.style.setProperty('--bg', theme.background || '#0b0f0e');
   document.documentElement.style.setProperty('--panel-solid', theme.panel || '#18221f');
@@ -605,10 +622,133 @@ function renderAppletManager() {
   }).join('')}</div><button type="submit">Save applet deck</button></form></section>`;
 }
 
+function houseglassSettings() {
+  state.settings.houseglass = normaliseHouseglassSettings(state.settings.houseglass);
+  return state.settings.houseglass;
+}
+
+function houseglassState() {
+  state.houseglass = normaliseHouseglassState(state.houseglass, houseglassSettings());
+  return state.houseglass;
+}
+
+function roomLabel(roomId = activeRoom) {
+  return ROOM_LABELS.get(roomId)
+    || COLLECTION_ROOM_DEFINITIONS[roomId]?.label
+    || WORLD_SECTION_DEFINITIONS[roomId]?.label
+    || (roomId === 'applet-deck' ? 'Applet Deck' : roomId);
+}
+
+function syncHouseglassScope(force = false) {
+  const glass = houseglassState();
+  if (glass.pinned && glass.scope && !force) return glass.scope;
+  const roomScope = makeHouseglassScope(activeWorld(), activeRoom, roomLabel());
+  glass.scope = houseglassSectionFocus?.roomId === activeRoom
+    ? { ...roomScope, sectionId: houseglassSectionFocus.sectionId, sectionLabel: houseglassSectionFocus.sectionLabel }
+    : roomScope;
+  return glass.scope;
+}
+
+function activeHouseglassReceipt() {
+  const glass = houseglassState();
+  return glass.receipts.find((item) => item.id === glass.activeReceiptId) || glass.receipts[0] || null;
+}
+
+function renderHouseglassReceipt(receipt) {
+  if (!receipt) return '<p class="muted">No work packet yet. A task begins only when you submit it.</p>';
+  const synthesis = receipt.synthesis?.text || '';
+  const fallback = receipt.contributions.filter((item) => item.text).map((item) => `${item.name}:\n${item.text}`).join('\n\n');
+  const result = synthesis || fallback || receipt.error || (receipt.status === 'running' ? 'The quorum is working. You may fold the glass; the task will keep its place.' : 'No route returned usable material.');
+  const routes = receipt.contributions.length ? receipt.contributions.map((item) => `<article class="houseglass-route" data-status="${attr(item.status)}"><div><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.status)} · ${escapeHtml(item.model || item.route || 'route')}</span></div><p>${escapeHtml(item.text || item.error || 'No contribution returned.')}</p></article>`).join('') : '<p class="muted">Routes have not returned yet.</p>';
+  return `<article class="houseglass-result" data-status="${attr(receipt.status)}">
+    <div class="houseglass-result-head"><span>${escapeHtml(receipt.stage)} · ${escapeHtml(receipt.status)}</span><time>${new Date(receipt.updatedAt || receipt.createdAt).toLocaleString()}</time></div>
+    <p class="houseglass-task">${escapeHtml(receipt.task)}</p>
+    <div class="houseglass-synthesis">${escapeHtml(result)}</div>
+    <details><summary>Route receipts · ${receipt.contributions.length}</summary><div class="houseglass-routes">${routes}</div></details>
+    ${receipt.reviewStatus === 'unread' && receipt.status !== 'running' ? `<button type="button" class="quiet mini" data-action="houseglass-reviewed" data-receipt-id="${attr(receipt.id)}">Mark reviewed</button>` : ''}
+  </article>`;
+}
+
+function renderHouseglass() {
+  const settings = houseglassSettings();
+  const glass = houseglassState();
+  if (!settings.enabled || !houseglassOpen) return '';
+  const scope = syncHouseglassScope();
+  const receipt = activeHouseglassReceipt();
+  const unread = glass.receipts.filter((item) => item.reviewStatus === 'unread' && item.status !== 'running').length;
+  const geometry = glass.geometry;
+  const plan = planHouseglassSwarm({
+    stage: 'seed',
+    routing: settings.routing,
+    selectedVoiceIds: settings.defaultVoiceIds,
+    voices: CONSTELLATION_VOICES,
+  });
+  const planNames = plan.voiceIds.map((id) => CONSTELLATION_VOICES.find((voice) => voice.id === id)?.name || id).join(' → ');
+  const tray = glass.receipts.length ? `<div class="houseglass-tray" aria-label="Houseglass review tray">${glass.receipts.slice(0, 12).map((item) => `<button type="button" class="houseglass-tray-item ${item.id === glass.activeReceiptId ? 'active' : ''}" data-action="houseglass-receipt" data-receipt-id="${attr(item.id)}"><span>${escapeHtml(item.stage)} · ${escapeHtml(item.status)}</span><small>${escapeHtml(item.task.slice(0, 54))}${item.task.length > 54 ? '…' : ''}</small>${item.reviewStatus === 'unread' && item.status !== 'running' ? '<i aria-label="Unread"></i>' : ''}</button>`).join('')}</div>` : '';
+  const disabledReason = settings.presence === 'off'
+    ? 'Presence is Off in Settings. The tray remains readable, but routes will not be invoked.'
+    : !houseRuntimeToken ? 'Connect the House Runtime in Settings before invoking the quorum.' : '';
+  return `<aside id="houseglass" class="houseglass" data-layout="${attr(glass.layout)}" style="--houseglass-x:${geometry.x}px;--houseglass-y:${geometry.y}px;--houseglass-width:${geometry.width}px;--houseglass-height:${geometry.height}px" role="dialog" aria-modal="false" aria-labelledby="houseglass-title">
+    <header class="houseglass-header" data-houseglass-drag-handle>
+      <div><p class="eyebrow">House Swarm · ${escapeHtml(settings.presence)}</p><h2 id="houseglass-title">Houseglass</h2></div>
+      <div class="houseglass-window-controls" aria-label="Houseglass placement">
+        <button type="button" class="quiet mini" data-action="houseglass-float" aria-pressed="${glass.layout === 'float'}" title="Float">◇</button>
+        <button type="button" class="quiet mini" data-action="houseglass-dock-section" aria-pressed="${glass.layout === 'dock-section'}" title="Dock in this section">▤</button>
+        <button type="button" class="quiet mini" data-action="houseglass-dock-right" aria-pressed="${glass.layout === 'dock-right'}" title="Dock right">▥</button>
+        <button type="button" class="quiet mini" data-action="houseglass-pin" aria-pressed="${glass.pinned}" title="${glass.pinned ? 'Unpin scope' : 'Pin scope'}">⌖</button>
+        <button type="button" class="quiet mini" data-action="houseglass-fold" title="Fold Houseglass">—</button>
+      </div>
+    </header>
+    <div class="houseglass-breadcrumb"><span>${escapeHtml(scope.worldName)}</span><b>→</b><span>${escapeHtml(scope.sectionLabel)}</span>${glass.pinned ? '<em>pinned</em>' : ''}</div>
+    <div class="houseglass-body">
+      <form id="houseglass-task-form" class="stack">
+        <div class="houseglass-stage-row"><label>Stage<select name="stage"><option value="seed">Seed · expand</option><option value="tend">Tend · develop</option><option value="harvest">Harvest · reconcile</option></select></label><div><span>Smallest quorum</span><strong>${escapeHtml(planNames)}</strong></div></div>
+        <label>Task<textarea name="task" rows="5" required data-houseglass-draft placeholder="Give the House one seed, fragment, field group, or desired result.">${escapeHtml(houseglassDraft)}</textarea></label>
+        ${disabledReason ? `<p class="callout">${escapeHtml(disabledReason)}</p>` : ''}
+        <button type="submit" ${houseglassRunning || settings.presence === 'off' || !houseRuntimeToken ? 'disabled' : ''}>${houseglassRunning ? 'Quorum working…' : 'Send to Houseglass'}</button>
+      </form>
+      <section class="houseglass-output" aria-live="polite"><div class="houseglass-output-heading"><h3>Returned packet</h3><span>${unread ? `${unread} waiting` : 'tray clear'}</span></div>${renderHouseglassReceipt(receipt)}</section>
+      ${tray ? `<details class="houseglass-tray-wrap"><summary>Review Tray · ${glass.receipts.length}</summary>${tray}</details>` : ''}
+    </div>
+  </aside>`;
+}
+
 function renderSettings() {
   const native = isDesktopRuntime();
+  const glass = houseglassSettings();
   const statusRows = flameStatuses.length ? flameStatuses.map((item) => `<div class="runtime-flame" data-state="${attr(item.state)}"><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.state)}</span><small>${escapeHtml([item.provider, item.model].filter(Boolean).join(' · ') || item.missing?.join(', ') || item.error || '')}</small></div>`).join('') : '<p class="muted">Connect the House Runtime to read every Flame route.</p>';
-  return `<section class="section-heading"><div><p class="eyebrow">House controls</p><h1>Settings & Recovery</h1></div></section><section class="panel house-runtime"><div class="section-heading"><div><p class="eyebrow">One runtime · every organ</p><h2>House Runtime Broker</h2><p class="muted">One sealed Steward session serves STARWELL, Arcsweep, Bifröst, Runa, Records, Commons, and Feedback. The browser never retains the master House key; provider credentials remain server-side.</p></div><strong>${houseRuntimeToken ? 'Steward session live' : 'Offline'}</strong></div><form id="house-runtime-form" class="stack"><label>Steward credential<input type="password" name="runtimeToken" autocomplete="current-password" placeholder="Exchanged once for a sealed House session" /></label><div class="button-row"><button type="submit">Open House Runtime</button><button type="button" class="quiet" data-action="runtime-refresh" ${houseRuntimeToken ? '' : 'disabled'}>${flameStatusChecking ? 'Reading routes…' : 'Check every Flame'}</button><button type="button" class="quiet danger" data-action="runtime-disconnect" ${houseRuntimeToken ? '' : 'disabled'}>Close session</button></div></form><div class="runtime-grid">${statusRows}</div></section><section class="grid two"><article class="panel"><form id="settings-form" class="stack"><label>Waking label<input name="crLabel" value="${attr(state.settings.crLabel)}" /></label><label>World label<input name="drLabel" value="${attr(state.settings.drLabel)}" /></label><label>Return Anchor<input name="returnAnchor" value="${attr(state.settings.returnAnchor)}" /></label><label class="checkbox"><input name="reduceMotion" type="checkbox" ${state.settings.reduceMotion ? 'checked' : ''} /> Reduce motion</label><label class="checkbox"><input name="largeText" type="checkbox" ${state.settings.largeText ? 'checked' : ''} /> Larger interface text</label><label class="checkbox"><input name="highContrast" type="checkbox" ${state.settings.highContrast ? 'checked' : ''} /> High contrast</label><label>Text scale<input name="fontScale" type="range" min="0.9" max="1.5" step="0.05" value="${state.settings.fontScale || 1}" /></label><button type="submit">Save settings</button></form></article><article class="panel stack"><h2>Native storage</h2><dl class="facts"><div><dt>Mode</dt><dd>${escapeHtml(storageInfo?.mode || 'Loading')}</dd></div><div><dt>Data directory</dt><dd class="path-value">${escapeHtml(storageInfo?.dataDirectory || 'Browser development fallback')}</dd></div><div><dt>Version</dt><dd>${escapeHtml(storageInfo?.version || state.version)}</dd></div></dl><div class="button-row"><button data-action="export">Export archive</button><button class="quiet" data-action="import">Import archive</button>${native ? '<button class="quiet" data-action="show-data-folder">Open data folder</button><button class="quiet" data-action="create-backup">Create backup</button>' : '<label class="file-button">Import JSON<input id="browser-import" type="file" accept="application/json,.json" /></label>'}</div><h3>Recovery snapshots</h3>${native ? (backups.length ? `<div class="backup-list">${backups.map((item) => `<div class="backup-row"><span><strong>${escapeHtml(item.name)}</strong><small>${new Date(item.modifiedAt).toLocaleString()} · ${Number(item.size).toLocaleString()} bytes</small></span><button class="quiet" data-action="restore-backup" data-backup-name="${attr(item.name)}">Restore</button></div>`).join('')}</div>` : '<p class="muted">No backups yet. They are created automatically before state replacement.</p>') : '<p class="muted">The installed Windows edition uses atomic files, attachments, and recovery snapshots. Browser mode is retained only for development.</p>'}</article></section>`;
+  const voiceChoices = CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="defaultVoiceIds" value="${attr(voice.id)}" ${glass.defaultVoiceIds.includes(voice.id) ? 'checked' : ''} /><span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.roles.join(' · '))}</small></span></label>`).join('');
+  return `<section class="section-heading"><div><p class="eyebrow">House controls</p><h1>Settings & Recovery</h1></div></section>
+    <section class="panel house-runtime"><div class="section-heading"><div><p class="eyebrow">One runtime · every organ</p><h2>House Runtime Broker</h2><p class="muted">One sealed Steward session serves STARWELL, Arcsweep, Bifröst, Runa, Records, Commons, Feedback, and Houseglass. The browser never retains the master House key; provider credentials remain server-side.</p></div><strong>${houseRuntimeToken ? 'Steward session live' : 'Offline'}</strong></div><form id="house-runtime-form" class="stack"><label>Steward credential<input type="password" name="runtimeToken" autocomplete="current-password" placeholder="Exchanged once for a sealed House session" /></label><div class="button-row"><button type="submit">Open House Runtime</button><button type="button" class="quiet" data-action="runtime-refresh" ${houseRuntimeToken ? '' : 'disabled'}>${flameStatusChecking ? 'Reading routes…' : 'Check every Flame'}</button><button type="button" class="quiet danger" data-action="runtime-disconnect" ${houseRuntimeToken ? '' : 'disabled'}>Close session</button></div></form><div class="runtime-grid">${statusRows}</div></section>
+    <section class="panel houseglass-settings"><form id="houseglass-settings-form" class="stack">
+      <div class="section-heading compact-heading"><div><p class="eyebrow">Ambient · permissioned · resumable</p><h2>Houseglass & Swarm</h2><p class="muted">The glass is closed on every fresh launch and opens only when summoned. Suggestions wait in its Review Tray; there are no unsolicited pop-ups.</p></div><button type="button" class="quiet" data-action="houseglass-toggle" ${glass.enabled ? '' : 'disabled'}>Open Houseglass</button></div>
+      <div class="houseglass-settings-grid">
+        <fieldset><legend>Presence</legend>
+          <label class="checkbox"><input type="checkbox" name="enabled" ${glass.enabled ? 'checked' : ''} /> Show the Houseglass summon control</label>
+          <label>Default presence<select name="presence">${options([['off','Off · tray only'],['quiet','Quiet · summoned only'],['observe','Observe · prepare observations'],['assist','Assist · prepare requested work'],['act','Act · only inside explicit gates']], glass.presence)}</select></label>
+          <label>Interruptions<select name="interruptions">${options([['never','Never'],['tray-only','Review Tray only'],['urgent-only','Urgent runtime failure only']], glass.interruptions)}</select></label>
+          <label>Pacing<select name="pacing">${options([['open','Open · normal packet'],['contained','Contained · one packet at a time'],['isa','Isa · concise and entirely manual']], glass.pacing)}</select></label>
+          <label>Opening layout<select name="defaultLayout">${options([['float','Floating glass'],['dock-section','Dock in active section'],['dock-right','Dock at right']], glass.defaultLayout)}</select></label>
+          <label class="checkbox"><input type="checkbox" name="solidSurface" ${glass.solidSurface ? 'checked' : ''} /> Solid surface instead of transparency</label>
+        </fieldset>
+        <fieldset><legend>Routing</legend>
+          <label>Quorum selection<select name="routing">${options([['smallest-quorum','Automatic smallest quorum'],['selected','Use selected routes']], glass.routing)}</select></label>
+          <div class="voice-grid houseglass-voice-grid">${voiceChoices}</div>
+          <p class="muted">Automatic routing chooses two stage-relevant contributors and one synthesiser. Selected routing uses no more than three routes.</p>
+        </fieldset>
+        <fieldset><legend>Delegation permissions</legend>
+          <label class="checkbox"><input type="checkbox" name="readContext" ${glass.permissions.readContext ? 'checked' : ''} /> Read the active world and section context</label>
+          <label class="checkbox"><input type="checkbox" name="draftProposals" ${glass.permissions.draftProposals ? 'checked' : ''} /> Draft proposals and prose</label>
+          <label class="checkbox"><input type="checkbox" name="populateFields" ${glass.permissions.populateFields ? 'checked' : ''} /> Prepare field-population packets</label>
+          <label class="checkbox"><input type="checkbox" name="reviewContinuity" ${glass.permissions.reviewContinuity ? 'checked' : ''} /> Review continuity and canon edges</label>
+          <label class="checkbox"><input type="checkbox" name="prepareTests" ${glass.permissions.prepareTests ? 'checked' : ''} /> Prepare verification and test plans</label>
+          <label class="checkbox"><input type="checkbox" name="prepareLocalChanges" ${glass.permissions.prepareLocalChanges ? 'checked' : ''} /> Prepare local change packets</label>
+          <p class="callout">Canon commits, repository commits, deployments, messages, and external writes remain separate explicit gates. This screen cannot silently enable them.</p>
+        </fieldset>
+      </div>
+      <button type="submit">Save Houseglass settings</button>
+    </form></section>
+    <section class="grid two"><article class="panel"><form id="settings-form" class="stack"><h2>Interface & anchors</h2><label>Waking label<input name="crLabel" value="${attr(state.settings.crLabel)}" /></label><label>World label<input name="drLabel" value="${attr(state.settings.drLabel)}" /></label><label>Return Anchor<input name="returnAnchor" value="${attr(state.settings.returnAnchor)}" /></label><label class="checkbox"><input name="reduceMotion" type="checkbox" ${state.settings.reduceMotion ? 'checked' : ''} /> Reduce motion</label><label class="checkbox"><input name="largeText" type="checkbox" ${state.settings.largeText ? 'checked' : ''} /> Larger interface text</label><label class="checkbox"><input name="highContrast" type="checkbox" ${state.settings.highContrast ? 'checked' : ''} /> High contrast</label><label>Text scale<input name="fontScale" type="range" min="0.9" max="1.5" step="0.05" value="${state.settings.fontScale || 1}" /></label><button type="submit">Save interface settings</button></form></article><article class="panel stack"><h2>Native storage</h2><dl class="facts"><div><dt>Mode</dt><dd>${escapeHtml(storageInfo?.mode || 'Loading')}</dd></div><div><dt>Data directory</dt><dd class="path-value">${escapeHtml(storageInfo?.dataDirectory || 'Browser development fallback')}</dd></div><div><dt>Version</dt><dd>${escapeHtml(storageInfo?.version || state.version)}</dd></div></dl><div class="button-row"><button data-action="export">Export archive</button><button class="quiet" data-action="import">Import archive</button>${native ? '<button class="quiet" data-action="show-data-folder">Open data folder</button><button class="quiet" data-action="create-backup">Create backup</button>' : '<label class="file-button">Import JSON<input id="browser-import" type="file" accept="application/json,.json" /></label>'}</div><h3>Recovery snapshots</h3>${native ? (backups.length ? `<div class="backup-list">${backups.map((item) => `<div class="backup-row"><span><strong>${escapeHtml(item.name)}</strong><small>${new Date(item.modifiedAt).toLocaleString()} · ${Number(item.size).toLocaleString()} bytes</small></span><button class="quiet" data-action="restore-backup" data-backup-name="${attr(item.name)}">Restore</button></div>`).join('')}</div>` : '<p class="muted">No backups yet. They are created automatically before state replacement.</p>') : '<p class="muted">The installed Windows edition uses atomic files, attachments, and recovery snapshots. Browser mode is retained only for development.</p>'}</article></section>`;
 }
 
 function renderReturnDialog() {
@@ -796,11 +936,99 @@ function currentView() {
   return renderPortal();
 }
 
+function installHouseglassSectionScopes() {
+  const candidates = [...app.querySelectorAll('main.content section, main.content article.panel')]
+    .filter((element) => !element.closest('#houseglass'));
+  candidates.forEach((element, index) => {
+    const heading = element.querySelector('h1, h2, h3, legend, .eyebrow');
+    const sectionId = `${activeRoom}:${index}`;
+    const sectionLabel = String(heading?.textContent || roomLabel()).trim();
+    element.dataset.houseglassSection = sectionId;
+    element.addEventListener('pointerdown', () => {
+      houseglassSectionFocus = { roomId: activeRoom, sectionId, sectionLabel };
+    }, { passive: true });
+    element.addEventListener('focusin', () => {
+      houseglassSectionFocus = { roomId: activeRoom, sectionId, sectionLabel };
+    });
+  });
+}
+
+function mountHouseglassInSection() {
+  const glass = houseglassState();
+  if (glass.layout !== 'dock-section') return;
+  const panel = app.querySelector('#houseglass');
+  if (!panel) return;
+  const sectionId = glass.scope?.sectionId;
+  const target = sectionId
+    ? [...app.querySelectorAll('[data-houseglass-section]')].find((element) => element.dataset.houseglassSection === sectionId)
+    : null;
+  (target || app.querySelector('main.content'))?.append(panel);
+}
+
+function installHouseglassInteractions() {
+  const panel = app.querySelector('#houseglass[data-layout="float"]');
+  if (!panel) return;
+  const handle = panel.querySelector('[data-houseglass-drag-handle]');
+  if (!handle) return;
+
+  const storeGeometry = () => {
+    const rect = panel.getBoundingClientRect();
+    const glass = houseglassState();
+    glass.geometry = {
+      x: Math.max(0, Math.round(rect.left)),
+      y: Math.max(0, Math.round(rect.top)),
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    };
+    persist(null, 'houseglass-geometry');
+  };
+
+  handle.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || event.target.closest('button, input, select, textarea, a')) return;
+    const rect = panel.getBoundingClientRect();
+    const start = { pointerX: event.clientX, pointerY: event.clientY, left: rect.left, top: rect.top };
+    handle.setPointerCapture(event.pointerId);
+    panel.dataset.dragging = 'true';
+
+    const move = (moveEvent) => {
+      const maxLeft = Math.max(0, window.innerWidth - Math.min(rect.width, window.innerWidth));
+      const maxTop = Math.max(0, window.innerHeight - 96);
+      const left = Math.min(maxLeft, Math.max(0, start.left + moveEvent.clientX - start.pointerX));
+      const top = Math.min(maxTop, Math.max(0, start.top + moveEvent.clientY - start.pointerY));
+      panel.style.setProperty('--houseglass-x', `${left}px`);
+      panel.style.setProperty('--houseglass-y', `${top}px`);
+    };
+    const end = () => {
+      panel.dataset.dragging = 'false';
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', end);
+      handle.removeEventListener('pointercancel', end);
+      storeGeometry();
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+  });
+  panel.addEventListener('pointerup', (event) => {
+    if (event.target === handle || handle.contains(event.target)) return;
+    storeGeometry();
+  });
+}
+
 function render() {
   applyPresentation();
   const world = activeWorld();
+  const glassSettings = houseglassSettings();
+  const glass = houseglassState();
+  syncHouseglassScope();
+  const glassMarkup = renderHouseglass();
+  const unread = glass.receipts.filter((item) => item.reviewStatus === 'unread' && item.status !== 'running').length;
+  const glassLaunch = glassSettings.enabled ? `<button type="button" class="houseglass-launch quiet" data-action="houseglass-toggle" aria-expanded="${houseglassOpen}" aria-controls="houseglass"><span aria-hidden="true">▱</span><span>Houseglass</span>${houseglassRunning ? '<i>working</i>' : unread ? `<i>${unread}</i>` : ''}</button>` : '';
   const runtimeLabel = isDesktopRuntime() ? 'Native local store' : isHosted ? 'Hosted browser · local state' : 'Browser development mode';
-  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''}><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div><p class="privacy-seal">${runtimeLabel}<br />Relational sync requires a receipted cycle</p></aside><main class="content">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${renderReturnDialog()}</div>`;
+  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''} data-houseglass-open="${houseglassOpen && glassSettings.enabled}" data-houseglass-layout="${attr(glass.layout)}"><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div>${glassLaunch}<p class="privacy-seal">${runtimeLabel}<br />Relational sync requires a receipted cycle</p></aside><main class="content" data-houseglass-room="${attr(activeRoom)}">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${glassMarkup}${renderReturnDialog()}</div>`;
+  installHouseglassSectionScopes();
+  mountHouseglassInSection();
+  installHouseglassInteractions();
 }
 
 function formValues(form) {
@@ -827,7 +1055,7 @@ function saveWorldSection(section, form) {
 
 app.addEventListener('click', async (event) => {
   const room = event.target.closest('[data-room]');
-  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (['deep-observer', 'feedback', 'commons'].includes(activeRoom) && houseRuntimeToken) ensureBraidLiveUpdates(activeWorld().id); if (['deep-observer', 'feedback'].includes(activeRoom) && houseRuntimeToken) { refreshObservationLiveRead().catch((error) => { notice = `Observation live read unavailable: ${error.message}`; }).finally(render); } if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.allSettled([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]).then(([log, statuses, observations]) => { if (log.status === 'rejected') throw log.reason; if (statuses.status === 'rejected') throw statuses.reason; commonsEntries = log.value.entries || []; flameStatuses = statuses.value; if (observations.status === 'fulfilled') { observationLiveRead = observations.value; notice = 'House Commons live read received.'; } else notice = `Commons received; observation live read unavailable: ${observations.reason.message}`; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
+  if (room) { houseglassSectionFocus = null; activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (['deep-observer', 'feedback', 'commons'].includes(activeRoom) && houseRuntimeToken) ensureBraidLiveUpdates(activeWorld().id); if (['deep-observer', 'feedback'].includes(activeRoom) && houseRuntimeToken) { refreshObservationLiveRead().catch((error) => { notice = `Observation live read unavailable: ${error.message}`; }).finally(render); } if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.allSettled([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]).then(([log, statuses, observations]) => { if (log.status === 'rejected') throw log.reason; if (statuses.status === 'rejected') throw statuses.reason; commonsEntries = log.value.entries || []; flameStatuses = statuses.value; if (observations.status === 'fulfilled') { observationLiveRead = observations.value; notice = 'House Commons live read received.'; } else notice = `Commons received; observation live read unavailable: ${observations.reason.message}`; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
   const worldButton = event.target.closest('[data-world-id]');
   if (worldButton) { selectedWorldId = worldButton.dataset.worldId; render(); return; }
   const scriptButton = event.target.closest('[data-script-id]');
@@ -837,6 +1065,40 @@ app.addEventListener('click', async (event) => {
   const button = event.target.closest('[data-action]');
   if (!button) return;
   const { action, id } = button.dataset;
+
+  if (action === 'houseglass-toggle') {
+    if (!houseglassSettings().enabled) return;
+    houseglassOpen = !houseglassOpen;
+    if (houseglassOpen) syncHouseglassScope();
+    render(); return;
+  }
+  if (action === 'houseglass-fold') { houseglassOpen = false; render(); return; }
+  if (action === 'houseglass-float' || action === 'houseglass-dock-section' || action === 'houseglass-dock-right') {
+    const layout = action === 'houseglass-float' ? 'float' : action === 'houseglass-dock-section' ? 'dock-section' : 'dock-right';
+    houseglassState().layout = layout;
+    houseglassOpen = true;
+    syncHouseglassScope();
+    persist(`Houseglass ${layout === 'float' ? 'floating' : layout === 'dock-section' ? 'docked in this section' : 'docked at right'}.`, 'houseglass-layout');
+    render(); return;
+  }
+  if (action === 'houseglass-pin') {
+    const glass = houseglassState();
+    glass.pinned = !glass.pinned;
+    if (!glass.pinned) syncHouseglassScope(true);
+    persist(glass.pinned ? 'Houseglass scope pinned.' : 'Houseglass scope follows the active section.', 'houseglass-pin');
+    render(); return;
+  }
+  if (action === 'houseglass-receipt') {
+    const glass = houseglassState();
+    if (glass.receipts.some((item) => item.id === button.dataset.receiptId)) glass.activeReceiptId = button.dataset.receiptId;
+    houseglassOpen = true;
+    render(); return;
+  }
+  if (action === 'houseglass-reviewed') {
+    const receipt = houseglassState().receipts.find((item) => item.id === button.dataset.receiptId);
+    if (receipt) { receipt.reviewStatus = 'reviewed'; receipt.reviewedAt = isoNow(); persist('Houseglass packet marked reviewed.', 'houseglass-reviewed'); }
+    render(); return;
+  }
 
   if (action === 'runtime-disconnect') { stopBraidLiveUpdates(); await disconnectHouseRuntime({ hosted: isHosted }); houseRuntimeToken = ''; flameStatuses = []; braidLiveState = 'offline'; notice = 'House Runtime session closed.'; render(); return; }
   if (action === 'runtime-refresh') { flameStatusChecking = true; render(); flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); flameStatusChecking = false; notice = 'House Runtime route board refreshed.'; render(); return; }
@@ -1058,6 +1320,10 @@ app.addEventListener('change', async (event) => {
 });
 
 app.addEventListener('input', (event) => {
+  if (event.target.matches('[data-houseglass-draft]')) {
+    houseglassDraft = event.target.value;
+    return;
+  }
   if (event.target.matches('[data-record-search]')) {
     recordQueries[event.target.dataset.recordSearch] = event.target.value;
     render();
@@ -1097,6 +1363,49 @@ app.addEventListener('submit', async (event) => {
     finally { flameStatusChecking = false; render(); }
     return;
   }
+  if (form.id === 'houseglass-task-form') {
+    const glass = houseglassState();
+    const settings = houseglassSettings();
+    const task = String(v.task || '').trim();
+    if (houseglassRunning || !task) return;
+    const scope = structuredClone(syncHouseglassScope());
+    const plan = planHouseglassSwarm({ stage: v.stage, routing: settings.routing, selectedVoiceIds: settings.defaultVoiceIds, voices: CONSTELLATION_VOICES });
+    const receipt = createHouseglassReceipt({ id: newId('houseglass'), task, stage: v.stage, scope, plan });
+    glass.receipts = [receipt, ...glass.receipts].slice(0, 60);
+    glass.activeReceiptId = receipt.id;
+    houseglassRunning = true;
+    persist('Houseglass quorum entered the task.', 'houseglass-start');
+    render();
+    try {
+      const world = state.worlds.find((item) => item.id === scope.worldId) || activeWorld();
+      const premaqc = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
+      const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
+      const mode = plan.stage === 'seed' ? 'writing' : 'reflection';
+      const work = buildHouseglassTaskPacket({ task, stage: plan.stage, scope, settings });
+      const contributions = await invokeConstellationVoices({ world, mode, work, premaqc, canon, voiceIds: plan.contributorIds, token: houseRuntimeToken });
+      let synthesis = null;
+      if (plan.synthesizerId) {
+        const synthesisWork = buildHouseglassSynthesisPacket({ task, stage: plan.stage, scope, contributions });
+        [synthesis] = await invokeConstellationVoices({ world, mode: 'reflection', work: synthesisWork, premaqc, canon, voiceIds: [plan.synthesizerId], token: houseRuntimeToken });
+      } else {
+        synthesis = contributions.find((item) => item.status === 'replied') || contributions[0] || null;
+      }
+      const current = houseglassState().receipts.find((item) => item.id === receipt.id);
+      if (current) Object.assign(current, finishHouseglassReceipt(current, { contributions, synthesis }));
+      houseglassDraft = '';
+      notice = `Houseglass returned a ${plan.stage} packet from ${plan.voiceIds.map((id) => CONSTELLATION_VOICES.find((voice) => voice.id === id)?.name || id).join(', ')}.`;
+      persist(null, 'houseglass-finish');
+    } catch (error) {
+      const current = houseglassState().receipts.find((item) => item.id === receipt.id);
+      if (current) Object.assign(current, finishHouseglassReceipt(current, { error: error.message }));
+      notice = `Houseglass stopped: ${error.message}`;
+      persist(null, 'houseglass-error');
+    } finally {
+      houseglassRunning = false;
+      render();
+    }
+    return;
+  }
   if (form.id === 'commons-form') {
     try {
       const world = activeWorld();
@@ -1110,6 +1419,36 @@ app.addEventListener('submit', async (event) => {
       commonsEntries = (await readHouseCommons(houseRuntimeToken)).entries || [];
       notice = `Commons turn received from ${replies.map((item) => item.name).join(', ')}.`;
     } catch (error) { notice = `Commons turn stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (form.id === 'houseglass-settings-form') {
+    const defaultVoiceIds = [...form.querySelectorAll('input[name="defaultVoiceIds"]:checked')].map((input) => input.value);
+    if (v.routing === 'selected' && !defaultVoiceIds.length) {
+      notice = 'Choose at least one Houseglass route for selected routing.';
+      render(); return;
+    }
+    state.settings.houseglass = normaliseHouseglassSettings({
+      enabled: form.elements.enabled.checked,
+      presence: v.presence,
+      interruptions: v.interruptions,
+      pacing: v.pacing,
+      defaultLayout: v.defaultLayout,
+      solidSurface: form.elements.solidSurface.checked,
+      routing: v.routing,
+      defaultVoiceIds,
+      permissions: {
+        readContext: form.elements.readContext.checked,
+        draftProposals: form.elements.draftProposals.checked,
+        populateFields: form.elements.populateFields.checked,
+        reviewContinuity: form.elements.reviewContinuity.checked,
+        prepareTests: form.elements.prepareTests.checked,
+        prepareLocalChanges: form.elements.prepareLocalChanges.checked,
+      },
+    });
+    const glass = houseglassState();
+    glass.layout = state.settings.houseglass.defaultLayout;
+    if (!state.settings.houseglass.enabled) houseglassOpen = false;
+    persist('Houseglass settings saved. No external authority changed.', 'houseglass-settings');
     render(); return;
   }
   if (form.id === 'world-registry-form') { const world = state.worlds.find((item) => item.id === v.id); if (world) { Object.assign(world, { name: v.name.trim() || 'Untitled World', kind: v.kind.trim(), description: v.description.trim(), updatedAt: isoNow() }); persist('World portal saved.', 'world-registry'); } }
