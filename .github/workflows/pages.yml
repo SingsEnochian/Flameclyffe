@@ -68,6 +68,11 @@ jobs:
             "Formalism: compression → release → compression of the release" \
             > /tmp/bifrost-live/LIVE-BUILD-RECEIPT.txt
 
+      - name: Build Arcsweep
+        run: |
+          npm run arcsweep:build
+          test -f dist/arcsweep/index.html
+
       - name: Build Pocket Concordance Lens
         run: npm run pocket:build
 
@@ -85,6 +90,10 @@ jobs:
             --exclude 'node_modules' \
             --exclude 'sandbox' \
             --exclude 'package-lock.json'
+
+          mkdir -p _site/apps/arcsweep
+          cp -a dist/arcsweep/. _site/apps/arcsweep/
+          test -f _site/apps/arcsweep/index.html
 
           mkdir -p _site/starwell-react-lab
           cp -a /tmp/starwell-react-lab/. _site/starwell-react-lab/
