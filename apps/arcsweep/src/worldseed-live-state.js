@@ -1,9 +1,11 @@
 import { compileWorldseed } from './worldseed.js';
 import { replayWorldseed } from './worldseed-replay.js';
 import { buildWorldLineageGraph, lineagePath } from './world-lineage.js';
+import { comparePossibleWorlds } from './possible-worlds.js';
 
 export const WORLDSEED_LIVE_STATE_SCHEMA = 'arcsweep.worldseed-live-state/v1';
 export const WORLDSEED_FORK_RECEIPT_SCHEMA = 'arcsweep.worldseed-fork-receipt/v1';
+export const WORLDSEED_COMPARISON_RECEIPT_SCHEMA = 'arcsweep.possible-worlds-comparison-receipt/v1';
 
 function worldById(state, worldId) {
   return state?.worlds?.find((world) => world.id === worldId) || null;
@@ -127,6 +129,23 @@ export function receiptWorldseedReplay(state, worldId, expectedFingerprint, repl
   state.worldseedReplayReceipts = Array.isArray(state.worldseedReplayReceipts) ? state.worldseedReplayReceipts : [];
   state.worldseedReplayReceipts.unshift({ id: `worldseed-replay:${worldId}:${replayedAt}`, ...replay });
   return replay;
+}
+
+export function receiptPossibleWorldsComparison(state, leftWorldId, rightWorldId, comparedAt = new Date().toISOString()) {
+  if (leftWorldId === rightWorldId) throw new Error('Possible Worlds comparison requires two different worlds.');
+  const left = compileWorldseedForState(state, leftWorldId, comparedAt);
+  const right = compileWorldseedForState(state, rightWorldId, comparedAt);
+  const comparison = comparePossibleWorlds(left, right);
+  const receipt = {
+    schema: WORLDSEED_COMPARISON_RECEIPT_SCHEMA,
+    version: 1,
+    id: `possible-worlds:${leftWorldId}:${rightWorldId}:${comparedAt}`,
+    comparedAt,
+    ...comparison,
+  };
+  state.worldseedComparisonReceipts = Array.isArray(state.worldseedComparisonReceipts) ? state.worldseedComparisonReceipts : [];
+  state.worldseedComparisonReceipts.unshift(receipt);
+  return receipt;
 }
 
 export function worldseedLiveSnapshot(state, worldId) {
