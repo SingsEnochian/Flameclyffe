@@ -73,7 +73,7 @@ test('complete two-shore temporal packet is crossing-ready', () => {
 });
 
 test('missing shore fails visibly and blocks execution', () => {
-  const runtime = buildBifrostRuntimeState(packet({ targetside: undefined }), {
+  const runtime = buildBifrostRuntimeState(packet({ targetside: null }), {
     now: '2026-08-04T18:05:00.000Z',
   });
 
