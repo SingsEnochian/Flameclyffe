@@ -21,6 +21,23 @@ export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
     ],
     attachments: true,
   },
+  seedhouse: {
+    label: 'Seedhouse', glyph: '✤', category: 'worldseed', description: 'The Worldseed Foundry: what a world must preserve, what may change, what descendants inherit, and what can be carried into another world without erasing lineage.',
+    fields: [
+      ['title', 'Seed name', 'text', true],
+      ['seedType', 'Seed type', 'select', false, ['World Constitution', 'Continuity Genome', 'Inheritance Rule', 'Culture Seed', 'Material World Seed', 'Relationship Seed', 'Embodied / Runa Seed', 'Worldmind Role', 'Threshold Rule', 'Fork / Lineage', 'Ark Export']],
+      ['status', 'Rooting status', 'select', false, ['Germinating', 'Rooted', 'Canonical', 'Export-ready', 'Archived']],
+      ['mustSurvive', 'What must survive?', 'textarea'],
+      ['mayChange', 'What may change?', 'textarea'],
+      ['mayBeLost', 'What can be lost?', 'textarea'],
+      ['descendantsInherit', 'What should descendants inherit?', 'textarea'],
+      ['transferableSeed', 'What can this world teach another world?', 'textarea'],
+      ['lineageRefs', 'Parent, branch point, ancestors, or descendant references', 'text'],
+      ['sourceRefs', 'Canon, Records, Timeline, DEEPTime, Runa, model, or asset references', 'textarea'],
+      ['notes', 'Seed notes, invariants, and export requirements', 'textarea'],
+    ],
+    attachments: true,
+  },
   timeline: {
     label: 'Timeline', glyph: '⌁', category: 'continuity', description: 'Ordered events, turning points, eras, and unresolved threads.',
     fields: [
@@ -191,7 +208,7 @@ export const WORLD_SECTION_DEFINITIONS = Object.freeze({
 
 export const IMPLEMENTED_APPLET_IDS = Object.freeze(new Set([
   'portal', 'worlds', 'about-world', 'summon', 'veil-mode', 'time', 'arrival',
-  'timeline', 'scripts', 'records', 'ingest', 'identity', 'competencies', 'safety-weave',
+  'timeline', 'scripts', 'records', 'seedhouse', 'ingest', 'identity', 'competencies', 'safety-weave',
   'continuity-recall', 'companion', 'relationships', 'scenarios', 'calendar',
   'diary', 'playlists', 'visualisations', 'appearance', 'wardrobe', 'outfits',
   'belongings', 'places', 'family-tree', 'photo-gallery', 'theme', 'forge',
