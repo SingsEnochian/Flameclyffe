@@ -106,6 +106,9 @@ export function validateImportedState(value) {
   if (value.houseglass !== undefined && (!value.houseglass || typeof value.houseglass !== 'object' || Array.isArray(value.houseglass))) {
     throw new Error('Arcsweep Houseglass state must be an object.');
   }
+  if (value.kelyranSchool !== undefined && (!value.kelyranSchool || typeof value.kelyranSchool !== 'object' || Array.isArray(value.kelyranSchool))) {
+    throw new Error('Arcsweep Kelyran School state must be an object.');
+  }
   if (value.transformationRequests !== undefined) {
     if (!value.transformationRequests || typeof value.transformationRequests !== 'object' || Array.isArray(value.transformationRequests)) {
       throw new Error('Arcsweep transformationRequests must be an object.');

@@ -9,6 +9,7 @@ import {
   normaliseHouseglassSettings,
   normaliseHouseglassState,
 } from './houseglass.js';
+import { createDefaultKelyranSchool, normaliseKelyranSchool } from './kelyran-school.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 export const OBSERVATORY_MIRROR_KEY = 'hearthgate.arcsweep.domain-control-bench.v1';
@@ -233,6 +234,7 @@ export function createDefaultState() {
     premaqcByWorld: {},
     observatory: createEmptyObservatoryStore(),
     houseglass: createDefaultHouseglassState(houseglassSettings),
+    kelyranSchool: createDefaultKelyranSchool(now),
     houseBundles: [],
     provenance: {
       createdAt: now,
@@ -302,6 +304,7 @@ export function normaliseState(value) {
     premaqcByWorld: imported.premaqcByWorld && typeof imported.premaqcByWorld === 'object' ? imported.premaqcByWorld : {},
     observatory: normaliseObservatoryStore(imported.observatory),
     houseglass: normaliseHouseglassState(imported.houseglass, settings.houseglass),
+    kelyranSchool: normaliseKelyranSchool(imported.kelyranSchool),
     houseBundles: Array.isArray(imported.houseBundles) ? imported.houseBundles : [],
     provenance: {
       ...defaults.provenance,
@@ -380,6 +383,7 @@ export function saveState(state, meta = {}) {
   state.observatory = normaliseObservatoryStore(state.observatory);
   state.feedbackQueue = normaliseFeedbackQueueState(state.feedbackQueue);
   state.transformationRequests = normaliseTransformationRequestState(state.transformationRequests);
+  state.kelyranSchool = normaliseKelyranSchool(state.kelyranSchool);
   const snapshot = JSON.parse(JSON.stringify(state));
   mirrorObservatory(snapshot.observatory);
   if (desktop?.saveState) {

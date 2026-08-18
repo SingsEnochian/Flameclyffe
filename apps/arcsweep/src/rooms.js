@@ -196,6 +196,7 @@ export const IMPLEMENTED_APPLET_IDS = Object.freeze(new Set([
   'diary', 'playlists', 'visualisations', 'appearance', 'wardrobe', 'outfits',
   'belongings', 'places', 'family-tree', 'photo-gallery', 'theme', 'forge',
   'waking-thread',
+  'kelyran-school',
 ]));
 
 export function createEmptyRoomCollections() {

@@ -14,6 +14,13 @@ test('every registered applet resolves to an implemented room', () => {
   assert.deepEqual(missing, []);
 });
 
+test('Kelyran School is a visible implemented language room', () => {
+  const applet = APPLET_CATALOGUE.find((item) => item.id === 'kelyran-school');
+  assert.equal(applet?.defaultVisible, true);
+  assert.equal(applet?.category, 'language');
+  assert.equal(IMPLEMENTED_APPLET_IDS.has('kelyran-school'), true);
+});
+
 test('room collections include every collection-backed room', () => {
   const collections = createEmptyRoomCollections();
   assert.deepEqual(Object.keys(collections).sort(), Object.keys(COLLECTION_ROOM_DEFINITIONS).sort());

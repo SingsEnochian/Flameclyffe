@@ -53,6 +53,7 @@ import {
   normaliseHouseglassState,
   planHouseglassSwarm,
 } from './houseglass.js';
+import { KELYRAN_LEVELS, answerExercise, createLexemeProposal, dueCards, reviewCard, reviewLexemeProposal } from './kelyran-school.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -108,6 +109,7 @@ const PRIMARY_NAV = [
   ['worlds', 'Worlds', '✧'],
   ['scripts', 'Scripts', '▤'],
   ['records', 'Records', '▥'],
+  ['kelyran-school', 'Kelyran School', 'ᚲ'],
   ['feedback', 'Feedback', '∞'],
   ['commons', 'House Commons', '☍'],
   ['waking-thread', 'Waking Thread', '⌁'],
@@ -920,6 +922,33 @@ function renderDeepObserver() {
   return header + renderRuntimeObservationLiveRead() + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
 }
 
+function renderKelyranSchool() {
+  const school = state.kelyranSchool;
+  const reviewable = dueCards(school);
+  const unit = school.units[0], lesson = unit?.lessons?.[0], exercise = lesson?.exercises?.[0];
+  const progress = lesson ? school.learner.lessonProgress[`${unit.id}:${lesson.id}`] : null;
+  const proposals = school.proposals.filter((item) => item.status === 'proposed');
+  const lexicon = [...school.lexicon].sort((a, b) => a.lemma.localeCompare(b.lemma));
+  const level = KELYRAN_LEVELS.find(([id]) => id === school.learner.level)?.[1] || school.learner.level;
+  return `
+    <section class="section-heading"><div><p class="eyebrow">ArcSweep · Living language school</p><h1>Kelyran School</h1><p class="lede">A canon-bound classroom. The tutor may teach what is attested or approved; everything else waits at the proposal gate.</p></div></section>
+    <section class="grid three kelyran-status">
+      <article class="panel"><p class="eyebrow">Learner path</p><h2>${escapeHtml(level)}</h2><p>${school.learner.receipts.length} practice receipts</p></article>
+      <article class="panel"><p class="eyebrow">Canon revision</p><h2>${escapeHtml(school.canonRevision)}</h2><p>${lexicon.filter((item) => ['attested', 'approved'].includes(item.status)).length} teachable forms</p></article>
+      <article class="panel"><p class="eyebrow">Review hearth</p><h2>${reviewable.length} due</h2><p>${proposals.length} proposal${proposals.length === 1 ? '' : 's'} awaiting review</p></article>
+    </section>
+    <section class="grid two kelyran-school-grid">
+      <article class="panel stack"><div><p class="eyebrow">Ember lesson</p><h2>${escapeHtml(unit?.title || 'No unit')}</h2><p>${escapeHtml(unit?.description || '')}</p></div>
+        ${lesson && exercise ? `<div class="kelyran-lesson"><h3>${escapeHtml(lesson.title)}</h3><p>${escapeHtml(lesson.teaching)}</p><form id="kelyran-exercise-form" class="stack"><input type="hidden" name="unitId" value="${attr(unit.id)}" /><input type="hidden" name="lessonId" value="${attr(lesson.id)}" /><input type="hidden" name="exerciseId" value="${attr(exercise.id)}" /><fieldset><legend>${escapeHtml(exercise.prompt)}</legend>${exercise.choices.map((choice) => `<label class="checkbox"><input type="radio" name="answer" value="${attr(choice)}" required /> ${escapeHtml(choice)}</label>`).join('')}</fieldset><button type="submit">Answer with receipt</button>${progress ? `<p class="muted">Attempts ${progress.attempts} · correct ${progress.correct}${progress.completed ? ' · lesson passed' : ''}</p>` : ''}</form></div>` : '<p class="muted">No lesson is mounted.</p>'}</article>
+      <article class="panel stack"><div><p class="eyebrow">Spaced repetition</p><h2>Review the living lexicon</h2></div>
+        ${reviewable.length ? reviewable.map((entry) => `<div class="kelyran-card"><div><strong>${escapeHtml(entry.lemma)}</strong><span>${escapeHtml(entry.gloss)}</span><small>${escapeHtml(entry.status)} · ${escapeHtml(entry.partOfSpeech || 'unclassified')}</small></div><div class="button-row"><button type="button" class="quiet mini" data-action="kelyran-review" data-id="${attr(entry.id)}" data-quality="1">Again</button><button type="button" class="quiet mini" data-action="kelyran-review" data-id="${attr(entry.id)}" data-quality="3">Hard</button><button type="button" class="mini" data-action="kelyran-review" data-id="${attr(entry.id)}" data-quality="5">Known</button></div></div>`).join('') : '<p class="callout">Nothing is due. The vocabulary dragon is asleep on the flashcards.</p>'}</article>
+    </section>
+    <section class="grid two kelyran-school-grid">
+      <article class="panel stack"><div><p class="eyebrow">Sovereign canon</p><h2>Lexicon</h2></div><div class="kelyran-lexicon">${lexicon.map((entry) => `<details><summary><strong>${escapeHtml(entry.lemma)}</strong><span>${escapeHtml(entry.gloss)}</span><i>${escapeHtml(entry.status)}</i></summary><dl class="facts"><div><dt>Class</dt><dd>${escapeHtml(entry.partOfSpeech || 'Unclassified')}</dd></div><div><dt>Pronunciation</dt><dd>${escapeHtml(entry.pronunciation || 'Awaiting phonology')}</dd></div><div><dt>Lineage</dt><dd>${escapeHtml(entry.lineage || 'Not yet recorded')}</dd></div></dl></details>`).join('')}</div></article>
+      <article class="panel stack"><div><p class="eyebrow">Proposal gate</p><h2>Offer a word</h2><p class="muted">Creating a proposal never creates canon.</p></div><form id="kelyran-proposal-form" class="stack"><label>Candidate form<input name="lemma" required /></label><label>English gloss<input name="gloss" required /></label><label>Part of speech<input name="partOfSpeech" /></label><label>Pronunciation or phoneme notes<input name="pronunciation" /></label><label>Lineage and reason<textarea name="lineage" rows="3"></textarea></label><button type="submit">Send to proposal gate</button></form>${proposals.length ? `<div class="proposal-list"><h3>Awaiting Steward review</h3>${proposals.map((proposal) => `<form class="kelyran-proposal-review stack" data-proposal-id="${attr(proposal.id)}"><p><strong>${escapeHtml(proposal.candidate.lemma)}</strong> — ${escapeHtml(proposal.candidate.gloss)}</p><label>Source receipt<input name="sourceReceipt" placeholder="Required for approval" /></label><div class="button-row"><button type="submit" name="decision" value="approve">Approve into canon</button><button type="submit" name="decision" value="decline" class="quiet danger">Decline</button></div></form>`).join('')}</div>` : ''}</article>
+    </section>`;
+}
+
 function currentView() {
   if (activeRoom === 'portal') return renderPortal();
   if (activeRoom === 'worlds') return renderWorlds();
@@ -931,6 +960,7 @@ function currentView() {
   if (activeRoom === 'settings') return renderSettings();
   if (activeRoom === 'applet-deck') return renderAppletManager();
   if (activeRoom === 'deep-observer') return renderDeepObserver();
+  if (activeRoom === 'kelyran-school') return renderKelyranSchool();
   if (COLLECTION_ROOM_DEFINITIONS[activeRoom]) return renderCollectionRoom(activeRoom);
   if (WORLD_SECTION_DEFINITIONS[activeRoom] || activeRoom === 'appearance') return renderWorldSection(activeRoom);
   return renderPortal();
@@ -1083,6 +1113,14 @@ app.addEventListener('click', async (event) => {
   const button = event.target.closest('[data-action]');
   if (!button) return;
   const { action, id } = button.dataset;
+
+  if (action === 'kelyran-review') {
+    try {
+      state.kelyranSchool = reviewCard(state.kelyranSchool, id, button.dataset.quality, isoNow());
+      persist(`Kelyran review receipted. Next review scheduled from quality ${button.dataset.quality}/5.`, 'kelyran-srs-review');
+    } catch (error) { notice = `Kelyran review stopped: ${error.message}`; }
+    render(); return;
+  }
 
   if (action === 'houseglass-toggle') {
     if (!houseglassSettings().enabled) return;
@@ -1374,6 +1412,31 @@ app.addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.target;
   const v = formValues(form);
+  if (form.id === 'kelyran-exercise-form') {
+    try {
+      const result = answerExercise(state.kelyranSchool, v.unitId, v.lessonId, v.exerciseId, v.answer, isoNow());
+      state.kelyranSchool = result.school;
+      persist(result.correct ? `Correct. ${result.exercise.explanation}` : 'Not this time. The attempt was receipted without altering canon.', 'kelyran-exercise');
+    } catch (error) { notice = `Kelyran exercise stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (form.id === 'kelyran-proposal-form') {
+    try {
+      const proposal = createLexemeProposal({ lemma: v.lemma, gloss: v.gloss, partOfSpeech: v.partOfSpeech, pronunciation: v.pronunciation, lineage: v.lineage }, state.kelyranSchool.lexicon, isoNow());
+      state.kelyranSchool.proposals.unshift(proposal);
+      state.kelyranSchool.updatedAt = isoNow();
+      persist(`“${proposal.candidate.lemma}” entered the proposal gate; canon is unchanged.`, 'kelyran-proposal');
+    } catch (error) { notice = `Kelyran proposal stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (form.matches('.kelyran-proposal-review')) {
+    try {
+      const decision = event.submitter?.value;
+      state.kelyranSchool = reviewLexemeProposal(state.kelyranSchool, form.dataset.proposalId, decision, v.sourceReceipt, isoNow());
+      persist(decision === 'approve' ? 'Kelyran lexeme approved with a source receipt.' : 'Kelyran proposal declined; canon remains unchanged.', 'kelyran-proposal-review');
+    } catch (error) { notice = `Kelyran review stopped: ${error.message}`; }
+    render(); return;
+  }
   if (form.id === 'session-form') {
     const world = state.worlds.find((item) => item.id === v.targetWorldId) || activeWorld();
     state.activeWorldId = world.id; selectedWorldId = world.id;
