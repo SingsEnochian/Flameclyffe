@@ -21,14 +21,19 @@ test('Kelyran School is a visible implemented language room', () => {
   assert.equal(IMPLEMENTED_APPLET_IDS.has('kelyran-school'), true);
 });
 
-test('Seedhouse is a visible worldseed room with inheritance and lineage fields', () => {
+test('Seedhouse is a visible worldseed room with inheritance, lineage, and Continuity Genome fields', () => {
   const applet = APPLET_CATALOGUE.find((item) => item.id === 'seedhouse');
   const definition = COLLECTION_ROOM_DEFINITIONS.seedhouse;
   assert.equal(applet?.defaultVisible, true);
   assert.equal(applet?.category, 'worldseed');
   assert.equal(definition.attachments, true);
   assert.match(definition.description, /Worldseed Foundry/i);
-  for (const field of ['seedType', 'mustSurvive', 'mayChange', 'mayBeLost', 'descendantsInherit', 'transferableSeed', 'lineageRefs', 'sourceRefs']) {
+  for (const field of [
+    'seedType', 'mustSurvive', 'mayChange', 'mayBeLost', 'descendantsInherit', 'transferableSeed',
+    'emotionalLaws', 'aestheticGrammar', 'cosmology', 'relationalPatterning', 'sacredTaboos',
+    'characteristicTensions', 'harmonicIdentity', 'sensorySignature', 'narrativeGait', 'valuesCore',
+    'lineageRefs', 'sourceRefs',
+  ]) {
     assert.ok(definition.fields.some(([name]) => name === field), `missing Seedhouse field ${field}`);
   }
   const seedType = definition.fields.find(([name]) => name === 'seedType');
