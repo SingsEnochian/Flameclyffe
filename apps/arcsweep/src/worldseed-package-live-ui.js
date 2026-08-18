@@ -73,6 +73,7 @@ async function mount() {
     ${latestImport ? `<p class="commit-badge">✦ Last exact import · ${esc(latestImport.importedAt)} · <code>${esc(latestImport.fingerprint)}</code></p>` : ''}
   </article>`;
   const current = document.getElementById(ROOT_ID);
+  if (current?.outerHTML === markup) return;
   if (current) current.outerHTML = markup;
   else host.insertAdjacentHTML('beforeend', markup);
 }
