@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld('arcsweepDesktop', Object.freeze({
   restoreBackup: (name) => ipcRenderer.invoke('arcsweep:backup:restore', name),
   addAttachments: () => ipcRenderer.invoke('arcsweep:attachment:add'),
   openAttachment: (attachment) => ipcRenderer.invoke('arcsweep:attachment:open', attachment),
+  readAttachmentPayload: (attachment) => ipcRenderer.invoke('arcsweep:attachment:read-payload', attachment),
+  writeAttachmentPayload: (payload) => ipcRenderer.invoke('arcsweep:attachment:write-payload', payload),
   showDataFolder: () => ipcRenderer.invoke('arcsweep:storage:show'),
   runtime: Object.freeze({ desktop: true, platform: process.platform }),
 }));
