@@ -58,6 +58,30 @@ export function flameStatus(flameId, env) {
   };
 }
 
+async function resolvedFlameStatus(flameId, env, fetchImpl) {
+  const status = flameStatus(flameId, env);
+  if (!status || status.provider !== 'hearthgate-gateway' || !status.configured) return status;
+  const manifest = FLAMES[flameId];
+  const base = env.get('HEARTHGATE_GATEWAY_URL');
+  const token = env.get('HEARTHGATE_GATEWAY_TOKEN');
+  try {
+    const data = await providerJson(fetchImpl, `${base.replace(/\/$/, '')}/api/v1/flames/${manifest.flame_id}/status`, {
+      headers: { authorization: `Bearer ${token}` },
+    }, 'Hearthgate gateway');
+    return {
+      ...status,
+      configured: data.runtime_reachable === true && data.model_available === true,
+      gateway_configured: true,
+      runtime_reachable: data.runtime_reachable,
+      model_available: data.model_available,
+      runtime_error: data.runtime_error || null,
+      missing: data.model_available === true ? [] : [`OLLAMA_MODEL:${manifest.platform.model}`],
+    };
+  } catch (error) {
+    return { ...status, configured: false, gateway_configured: true, runtime_reachable: false, model_available: false, runtime_error: error.message, missing: ['HEARTHGATE_GATEWAY_REACHABLE'] };
+  }
+}
+
 export async function invokeFlame(flameId, body, env, fetchImpl = fetch) {
   const manifest = FLAMES[flameId];
   if (!manifest) throw new Error(`Unknown Constellation voice: ${flameId}`);
@@ -76,7 +100,7 @@ export function createFlameHandler({ env, fetchImpl = fetch } = {}) {
     const action = params.action;
     const manifest = FLAMES[flameId];
     if (!manifest) return json(404, { error: `Unknown Constellation voice: ${flameId}` });
-    if (request.method === 'GET' && action === 'status') return json(200, flameStatus(flameId, env));
+    if (request.method === 'GET' && action === 'status') return json(200, await resolvedFlameStatus(flameId, env, fetchImpl));
     if (request.method !== 'POST' || action !== 'chat') return json(405, { error: 'POST chat or GET status required.' });
     let body;
     try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }

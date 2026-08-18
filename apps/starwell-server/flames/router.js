@@ -256,10 +256,29 @@ router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
 
 // ── GET /api/v1/flames/:flame_id/status ─────────────────────────────────────
 
-router.get('/flames/:flame_id/status', resolveFlame, (req, res) => {
+router.get('/flames/:flame_id/status', resolveFlame, async (req, res) => {
   const manifest = req.flame;
   const envVar = manifest.platform.api_key_env;
   const keyPresent = envVar ? !!process.env[envVar] : null;
+
+  let modelAvailable = null;
+  let runtimeReachable = null;
+  let runtimeError = null;
+  if (manifest.platform.provider === 'ollama') {
+    const endpoint = manifest.platform.base_url || process.env.OLLAMA_ENDPOINT || 'http://127.0.0.1:11434';
+    try {
+      const response = await fetch(`${endpoint}/api/tags`, { signal: AbortSignal.timeout(4000) });
+      if (!response.ok) throw new Error(`Ollama ${response.status}`);
+      const data = await response.json();
+      const installed = (data.models || []).flatMap((item) => [item.name, item.model]).filter(Boolean);
+      runtimeReachable = true;
+      modelAvailable = installed.includes(manifest.platform.model);
+    } catch (error) {
+      runtimeReachable = false;
+      modelAvailable = false;
+      runtimeError = error.message;
+    }
+  }
 
   res.json({
     flame_id: manifest.flame_id,
@@ -269,6 +288,9 @@ router.get('/flames/:flame_id/status', resolveFlame, (req, res) => {
     base_url: manifest.platform.base_url ?? null,
     api_key_env: envVar,
     api_key_present: keyPresent,
+    runtime_reachable: runtimeReachable,
+    model_available: modelAvailable,
+    runtime_error: runtimeError,
     hearthfire_namespace: manifest.memory.hearthfire_namespace,
     retrieval_scope: manifest.memory.retrieval_scope,
     can_write_memory: manifest.memory.can_write_memory,

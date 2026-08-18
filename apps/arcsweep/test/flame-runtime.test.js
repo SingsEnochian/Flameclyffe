@@ -38,3 +38,19 @@ test('local voices require the protected Hearthgate gateway instead of localhost
   assert.equal(response.status, 503);
   assert.match((await response.json()).error, /HEARTHGATE_GATEWAY/);
 });
+
+test('local status relays exact Ollama model readiness through Hearthgate', async () => {
+  const env = makeEnv({ ARCSWEEP_RUNTIME_TOKEN: 'house-key', HEARTHGATE_GATEWAY_URL: 'https://hearthgate.test', HEARTHGATE_GATEWAY_TOKEN: 'gateway-key' });
+  const handler = createFlameHandler({ env, fetchImpl: async (url, options) => {
+    assert.equal(url, 'https://hearthgate.test/api/v1/flames/altair/status');
+    assert.equal(options.headers.authorization, 'Bearer gateway-key');
+    return new Response(JSON.stringify({ runtime_reachable: true, model_available: false }), { status: 200 });
+  } });
+  const response = await handler(new Request('https://example.test/api/v1/flames/altair/status', { headers: { authorization: 'Bearer house-key' } }), { flame_id: 'altair', action: 'status' });
+  const data = await response.json();
+  assert.equal(data.gateway_configured, true);
+  assert.equal(data.runtime_reachable, true);
+  assert.equal(data.model_available, false);
+  assert.equal(data.configured, false);
+  assert.match(data.missing[0], /OLLAMA_MODEL/);
+});

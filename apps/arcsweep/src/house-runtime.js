@@ -55,7 +55,7 @@ export async function readFlameStatuses(voices, token, fetchImpl = fetch) {
       const data = await response.json().catch(() => ({}));
       if (response.status === 401) return { id: voice.id, name: voice.name, state: 'unauthorised', configured: false, missing: [] };
       if (!response.ok) return { id: voice.id, name: voice.name, state: 'route-error', configured: false, missing: [], error: data.error || `${response.status}` };
-      return { id: voice.id, name: voice.name, state: data.configured ? 'live' : 'provider-unavailable', configured: Boolean(data.configured), provider: data.provider, model: data.model, missing: data.missing || [] };
+      return { id: voice.id, name: voice.name, state: data.configured ? 'live' : data.gateway_configured && data.runtime_reachable ? 'model-not-pulled' : 'provider-unavailable', configured: Boolean(data.configured), provider: data.provider, model: data.model, missing: data.missing || [], gatewayConfigured: data.gateway_configured ?? null, runtimeReachable: data.runtime_reachable ?? null, modelAvailable: data.model_available ?? null, runtimeError: data.runtime_error || null };
     } catch (error) {
       return { id: voice.id, name: voice.name, state: 'offline', configured: false, missing: [], error: error.message };
     }

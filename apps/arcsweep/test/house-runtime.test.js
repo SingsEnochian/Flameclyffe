@@ -28,6 +28,13 @@ test('House Runtime board distinguishes live, unavailable, and unauthorised Flam
   assert.deepEqual(statuses.map((item) => item.state), ['live', 'provider-unavailable', 'unauthorised']);
 });
 
+test('House Runtime distinguishes a reachable gateway from an unpulled model', async () => {
+  const statuses = await readFlameStatuses([{ id: 'altair', name: 'Altair' }], 'house-key', async () => new Response(JSON.stringify({ configured: false, gateway_configured: true, runtime_reachable: true, model_available: false, provider: 'hearthgate-gateway', model: 'altair-model', missing: ['OLLAMA_MODEL:altair-model'] }), { status: 200 }));
+  assert.equal(statuses[0].state, 'model-not-pulled');
+  assert.equal(statuses[0].runtimeReachable, true);
+  assert.equal(statuses[0].modelAvailable, false);
+});
+
 test('model-capable organs consume one House Runtime instead of per-form token boxes', async () => {
   const source = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
   assert.equal((source.match(/name="runtimeToken"/g) || []).length, 1);
