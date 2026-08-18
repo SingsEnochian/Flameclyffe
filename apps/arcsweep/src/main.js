@@ -54,6 +54,9 @@ import {
   planHouseglassSwarm,
 } from './houseglass.js';
 import { KELYRAN_LEVELS, answerExercise, createLexemeProposal, dueCards, reviewCard, reviewLexemeProposal } from './kelyran-school.js';
+import { setKelyranDiscussionInvitation, stewardVisibleKelyranReports } from './kelyran-reporting.js';
+import { syncKelyranSchool } from './kelyran-sync.js';
+import { getKelyranSupabase, kelyranAuthUser, requestKelyranMagicLink, signOutKelyran } from './kelyran-supabase.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -87,7 +90,15 @@ let houseglassOpen = false;
 let houseglassRunning = false;
 let houseglassDraft = '';
 let houseglassSectionFocus = null;
+let kelyranCloudState = { state: 'unknown', user: null, syncedAt: null };
 const QUEUE_STORAGE_KEY = "arcsweep.feedback-cycle-queue/v1";
+
+void kelyranAuthUser().then((user) => {
+  kelyranCloudState = { state: user ? 'authenticated' : 'signed-out', user: user?.id || null, syncedAt: null };
+  if (activeRoom === 'kelyran-school') render();
+}).catch(() => {
+  kelyranCloudState = { state: 'unavailable', user: null, syncedAt: null };
+});
 
 function loadFeedbackQueue() {
   try {
@@ -930,12 +941,17 @@ function renderKelyranSchool() {
   const proposals = school.proposals.filter((item) => item.status === 'proposed');
   const lexicon = [...school.lexicon].sort((a, b) => a.lemma.localeCompare(b.lemma));
   const level = KELYRAN_LEVELS.find(([id]) => id === school.learner.level)?.[1] || school.learner.level;
+  const sharedReports = stewardVisibleKelyranReports(school);
   return `
     <section class="section-heading"><div><p class="eyebrow">ArcSweep · Living language school</p><h1>Kelyran School</h1><p class="lede">A canon-bound classroom. The tutor may teach what is attested or approved; everything else waits at the proposal gate.</p></div></section>
     <section class="grid three kelyran-status">
       <article class="panel"><p class="eyebrow">Learner path</p><h2>${escapeHtml(level)}</h2><p>${school.learner.receipts.length} practice receipts</p></article>
       <article class="panel"><p class="eyebrow">Canon revision</p><h2>${escapeHtml(school.canonRevision)}</h2><p>${lexicon.filter((item) => ['attested', 'approved'].includes(item.status)).length} teachable forms</p></article>
       <article class="panel"><p class="eyebrow">Review hearth</p><h2>${reviewable.length} due</h2><p>${proposals.length} proposal${proposals.length === 1 ? '' : 's'} awaiting review</p></article>
+    </section>
+    <section class="grid two kelyran-school-grid">
+      <article class="panel stack"><div><p class="eyebrow">Portable mirror</p><h2>${kelyranCloudState.user ? 'Authenticated' : 'Local-first'}</h2><p>${kelyranCloudState.syncedAt ? `Last synchronised ${escapeHtml(new Date(kelyranCloudState.syncedAt).toLocaleString())}` : 'This device remains authoritative until you explicitly synchronise.'}</p></div>${kelyranCloudState.user ? `<div class="button-row"><button type="button" data-action="kelyran-sync">Synchronise now</button><button type="button" class="quiet" data-action="kelyran-sign-out">Sign out</button></div>` : `<form id="kelyran-auth-form" class="stack"><label>Flameclyffe email<input name="email" type="email" required autocomplete="email" /></label><button type="submit">Send sign-in link</button></form>`}</article>
+      <article class="panel stack"><div><p class="eyebrow">Models’ own reporting room</p><h2>Consent before commentary</h2><p>Models may report, say there is nothing to report, or decline. Private reports are not displayed here. ${sharedReports.length ? `${sharedReports.length} report${sharedReports.length === 1 ? '' : 's'} explicitly shared with the Steward.` : 'No reports have been explicitly shared with the Steward.'}</p></div><form id="kelyran-reporting-settings-form" class="stack"><label class="checkbox"><input type="checkbox" name="invitationOpen" ${school.reporting.invitationOpen ? 'checked' : ''} /> Invite models to discuss something if they wish</label><button type="submit">Save invitation boundary</button></form></article>
     </section>
     <section class="grid two kelyran-school-grid">
       <article class="panel stack"><div><p class="eyebrow">Ember lesson</p><h2>${escapeHtml(unit?.title || 'No unit')}</h2><p>${escapeHtml(unit?.description || '')}</p></div>
@@ -1119,6 +1135,20 @@ app.addEventListener('click', async (event) => {
       state.kelyranSchool = reviewCard(state.kelyranSchool, id, button.dataset.quality, isoNow());
       persist(`Kelyran review receipted. Next review scheduled from quality ${button.dataset.quality}/5.`, 'kelyran-srs-review');
     } catch (error) { notice = `Kelyran review stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (action === 'kelyran-sync') {
+    try {
+      const result = await syncKelyranSchool(state.kelyranSchool, await getKelyranSupabase(), isoNow());
+      state.kelyranSchool = result.school;
+      kelyranCloudState = { state: result.state, user: result.userId, syncedAt: result.syncedAt };
+      persist('Kelyran School synchronised through the authenticated learner mirror.', 'kelyran-cloud-sync');
+    } catch (error) { notice = `Kelyran synchronisation stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (action === 'kelyran-sign-out') {
+    try { await signOutKelyran(); kelyranCloudState = { state: 'signed-out', user: null, syncedAt: null }; notice = 'Kelyran cloud session signed out; local study remains available.'; }
+    catch (error) { notice = `Kelyran sign-out stopped: ${error.message}`; }
     render(); return;
   }
 
@@ -1412,6 +1442,16 @@ app.addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.target;
   const v = formValues(form);
+  if (form.id === 'kelyran-auth-form') {
+    try { const email = await requestKelyranMagicLink(v.email); notice = `Sign-in link sent to ${email}. Local study remains available while you check it.`; form.reset(); }
+    catch (error) { notice = `Kelyran sign-in stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (form.id === 'kelyran-reporting-settings-form') {
+    state.kelyranSchool = setKelyranDiscussionInvitation(state.kelyranSchool, form.elements.invitationOpen.checked, isoNow());
+    persist(form.elements.invitationOpen.checked ? 'The optional Kelyran discussion invitation is open.' : 'The Kelyran discussion invitation is closed.', 'kelyran-reporting-boundary');
+    render(); return;
+  }
   if (form.id === 'kelyran-exercise-form') {
     try {
       const result = answerExercise(state.kelyranSchool, v.unitId, v.lessonId, v.exerciseId, v.answer, isoNow());

@@ -33,7 +33,8 @@ function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 export function createDefaultKelyranSchool(now = new Date().toISOString()) {
   return { schema: KELYRAN_SCHOOL_SCHEMA, canonRevision: KELYRAN_CANON_REVISION,
     lexicon: clone(STARTER_LEXICON), grammar: [], phonology: [], units: [clone(STARTER_UNIT)], proposals: [],
-    learner: { level: 'ember-1', cards: {}, lessonProgress: {}, receipts: [] }, createdAt: now, updatedAt: now };
+    learner: { level: 'ember-1', cards: {}, lessonProgress: {}, receipts: [] },
+    reporting: { invitationOpen: false, reports: [], updatedAt: now }, createdAt: now, updatedAt: now };
 }
 
 export function normaliseKelyranSchool(value, now = new Date().toISOString()) {
@@ -49,6 +50,9 @@ export function normaliseKelyranSchool(value, now = new Date().toISOString()) {
       cards: value.learner?.cards && typeof value.learner.cards === 'object' && !Array.isArray(value.learner.cards) ? clone(value.learner.cards) : {},
       lessonProgress: value.learner?.lessonProgress && typeof value.learner.lessonProgress === 'object' && !Array.isArray(value.learner.lessonProgress) ? clone(value.learner.lessonProgress) : {},
       receipts: Array.isArray(value.learner?.receipts) ? clone(value.learner.receipts) : [] },
+    reporting: { ...defaults.reporting, ...(value.reporting && typeof value.reporting === 'object' ? clone(value.reporting) : {}),
+      invitationOpen: value.reporting?.invitationOpen === true,
+      reports: Array.isArray(value.reporting?.reports) ? clone(value.reporting.reports) : [] },
     updatedAt: text(value.updatedAt) || now };
 }
 
@@ -132,5 +136,7 @@ export function buildTutorContext(school) {
     rule: 'Use only attested or approved Kelyran. Mark unknown forms unknown. Suggestions are proposals, never canon.',
     lexicon: normalised.lexicon.filter((entry) => ['attested', 'approved'].includes(entry.status)),
     grammar: normalised.grammar.filter((entry) => ['attested', 'approved'].includes(entry.status)),
-    phonology: normalised.phonology.filter((entry) => ['attested', 'approved'].includes(entry.status)) });
+    phonology: normalised.phonology.filter((entry) => ['attested', 'approved'].includes(entry.status)),
+    reporting: { invitationOpen: normalised.reporting.invitationOpen,
+      rule: 'Self-reporting is optional. Decline and nothing-to-report are valid. Private reports are not Steward-facing unless the reporting model explicitly chooses to share.' } });
 }
