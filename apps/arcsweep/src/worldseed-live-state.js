@@ -27,6 +27,26 @@ function inheritanceSnapshot(seed) {
   };
 }
 
+function cloneSeedhouseBaseline(state, sourceWorldId, childWorldId, createdAt) {
+  const source = seedRecords(state).filter((record) => record?.worldId === sourceWorldId);
+  const inherited = source.map((record, index) => ({
+    ...structuredClone(record),
+    id: `${childWorldId}:seed:${index + 1}:${String(record.id || 'record')}`,
+    worldId: childWorldId,
+    lineageRefs: [
+      String(record.lineageRefs || '').trim(),
+      `inherited-from:${sourceWorldId}:${record.id || index + 1}`,
+    ].filter(Boolean).join(' · '),
+    createdAt,
+    updatedAt: createdAt,
+    inheritedFromWorldId: sourceWorldId,
+    inheritedFromSeedhouseRecordId: record.id || null,
+  }));
+  state.records = state.records && typeof state.records === 'object' ? state.records : {};
+  state.records.seedhouse = [...inherited, ...seedRecords(state)];
+  return inherited;
+}
+
 export function compileWorldseedForState(state, worldId, generatedAt = new Date().toISOString()) {
   const world = worldById(state, worldId);
   if (!world) throw new Error(`World ${worldId} is not in the registry.`);
@@ -75,6 +95,7 @@ export function forkWorldInState(state, {
     updatedAt: createdAt,
   });
 
+  const inheritedSeedhouseRecords = cloneSeedhouseBaseline(state, parent.id, child.id, createdAt);
   parentForLink.descendantWorldIds = unique([...(parentForLink.descendantWorldIds || []), child.id]);
   parentForLink.updatedAt = createdAt;
   state.worlds.unshift(child);
@@ -94,10 +115,11 @@ export function forkWorldInState(state, {
     branchPoint: child.branchPoint,
     reason: child.forkReason,
     inherited: inheritanceSnapshot(seed),
+    inheritedSeedhouseRecordIds: inheritedSeedhouseRecords.map((record) => record.id),
   };
   state.worldseedForkReceipts.unshift(receipt);
 
-  return { state, seed, child, receipt };
+  return { state, seed, child, receipt, inheritedSeedhouseRecords };
 }
 
 export function receiptWorldseedReplay(state, worldId, expectedFingerprint, replayedAt = new Date().toISOString()) {
