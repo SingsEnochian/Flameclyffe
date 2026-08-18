@@ -1,4 +1,4 @@
-import { compileWorldseedForState } from './worldseed-live-state.js';
+import { compileWorldseedForState, receiptPossibleWorldsComparison } from './worldseed-live-state.js';
 import { comparePossibleWorlds } from './possible-worlds.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
@@ -16,6 +16,18 @@ async function readState() {
   }
 }
 
+async function writeState(state, reason = 'possible-worlds-comparison') {
+  state.provenance = { ...(state.provenance || {}), updatedAt: new Date().toISOString() };
+  if (desktop?.saveState) return desktop.saveState(state, { reason });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  return { ok: true };
+}
+
+function notice(message) {
+  const status = document.querySelector('.notice');
+  if (status) status.textContent = message;
+}
+
 function esc(value = '') {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -27,10 +39,6 @@ function esc(value = '') {
 
 function selectedWorldId(state) {
   return document.querySelector('[data-world-id].active')?.dataset.worldId || state?.activeWorldId || state?.worlds?.[0]?.id;
-}
-
-function deltaCount(change) {
-  return (change?.added?.length || 0) + (change?.removed?.length || 0);
 }
 
 function renderComparison(state, leftId, rightId) {
@@ -75,16 +83,21 @@ async function mount() {
   }
   if (!comparisonTargetId || !candidates.some((world) => world.id === comparisonTargetId)) comparisonTargetId = candidates[0].id;
   const left = state.worlds.find((world) => world.id === leftId);
+  const right = state.worlds.find((world) => world.id === comparisonTargetId);
   const options = candidates.map((world) => `<option value="${esc(world.id)}" ${world.id === comparisonTargetId ? 'selected' : ''}>${esc(world.name)}</option>`).join('');
+  const latestReceipt = (state.worldseedComparisonReceipts || []).find((receipt) => (
+    receipt.left?.world?.id === leftId && receipt.right?.world?.id === comparisonTargetId
+  ));
   let body;
   try {
     body = renderComparison(state, leftId, comparisonTargetId);
   } catch (error) {
     body = `<p class="callout">Possible Worlds comparison stopped: ${esc(error.message)}</p>`;
   }
-  const markup = `<article id="${ROOT_ID}" class="worldseed-live-card">
-    <div class="section-heading compact-heading"><div><p class="eyebrow">Possible Worlds Observatory</p><h3>Compare without overwrite</h3><p class="muted">${esc(left?.name || leftId)} remains intact while another branch is read beside it.</p></div><label>Compare with<select data-possible-world-target>${options}</select></label></div>
+  const markup = `<article id="${ROOT_ID}" class="worldseed-live-card" data-left-world-id="${esc(leftId)}" data-right-world-id="${esc(comparisonTargetId)}">
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Possible Worlds Observatory</p><h3>Compare without overwrite</h3><p class="muted">${esc(left?.name || leftId)} remains intact while ${esc(right?.name || comparisonTargetId)} is read beside it.</p></div><div class="button-row"><label>Compare with<select data-possible-world-target>${options}</select></label><button type="button" class="quiet" data-possible-world-receipt>Receipt comparison</button></div></div>
     ${body}
+    <p class="muted">${latestReceipt ? `Latest receipt · ${esc(latestReceipt.comparedAt)} · ${esc(latestReceipt.id)}` : 'This reading has not been receipted yet.'}</p>
   </article>`;
   const current = document.getElementById(ROOT_ID);
   if (current) current.outerHTML = markup;
@@ -96,6 +109,24 @@ document.addEventListener('change', (event) => {
   if (!select) return;
   comparisonTargetId = select.value;
   void mount();
+});
+
+document.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-possible-world-receipt]');
+  if (!button) return;
+  const root = button.closest(`#${ROOT_ID}`);
+  const leftId = root?.dataset.leftWorldId;
+  const rightId = root?.dataset.rightWorldId;
+  const state = await readState();
+  if (!state || !leftId || !rightId) return;
+  try {
+    const receipt = receiptPossibleWorldsComparison(state, leftId, rightId);
+    await writeState(state);
+    notice(`Possible Worlds comparison receipted · ${receipt.id}.`);
+    await mount();
+  } catch (error) {
+    notice(`Possible Worlds receipt stopped: ${error.message}`);
+  }
 });
 
 const observer = new MutationObserver(() => queueMicrotask(() => { void mount(); }));
