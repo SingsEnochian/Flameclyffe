@@ -29,6 +29,7 @@ const SECTION_BY_TYPE = Object.freeze({
 });
 
 const SECTION_KEYS = Object.freeze([...new Set(Object.values(SECTION_BY_TYPE))]);
+const VOLATILE_FINGERPRINT_KEYS = new Set(['generatedAt', 'createdAt', 'updatedAt', 'fingerprint']);
 
 function text(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -41,6 +42,16 @@ function sortDeep(value) {
     Object.keys(value)
       .sort()
       .map((key) => [key, sortDeep(value[key])]),
+  );
+}
+
+function stripVolatile(value) {
+  if (Array.isArray(value)) return value.map(stripVolatile);
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !VOLATILE_FINGERPRINT_KEYS.has(key))
+      .map(([key, entry]) => [key, stripVolatile(entry)]),
   );
 }
 
@@ -86,10 +97,7 @@ function nonEmpty(values) {
 }
 
 export function worldseedFingerprint(payload) {
-  const copy = structuredClone(payload);
-  delete copy.generatedAt;
-  delete copy.fingerprint;
-  return `ws-${fnv1a32(stableStringify(copy))}`;
+  return `ws-${fnv1a32(stableStringify(stripVolatile(payload)))}`;
 }
 
 export function compileWorldseed(world, seedhouseRecords = [], generatedAt = new Date().toISOString()) {
