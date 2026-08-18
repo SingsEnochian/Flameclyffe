@@ -1,0 +1,55 @@
+{
+  "family": "arcsweep.worldseed",
+  "version": 1,
+  "identity": "Worldseed Foundry",
+  "schemas": {
+    "worldseed": "arcsweep.worldseed/v1",
+    "forkReceipt": "arcsweep.worldseed-fork-receipt/v1",
+    "replayReceipt": "arcsweep.worldseed-replay-receipt/v1",
+    "arkArchive": "arcsweep.worldseed-archive/v1",
+    "lineageGraph": "arcsweep.world-lineage-graph/v1"
+  },
+  "worldStateFields": [
+    "parentWorldId",
+    "parentSeedFingerprint",
+    "branchPoint",
+    "lineageLabel",
+    "worldseedFingerprint",
+    "descendantWorldIds",
+    "forkReason",
+    "worldseedInheritance"
+  ],
+  "continuityGenomeFields": [
+    "emotionalLaws",
+    "aestheticGrammar",
+    "cosmology",
+    "relationalPatterning",
+    "sacredTaboos",
+    "characteristicTensions",
+    "harmonicIdentity",
+    "sensorySignature",
+    "narrativeGait",
+    "valuesCore"
+  ],
+  "arkPaths": [
+    "manifest.json",
+    "worldseed.json",
+    "canon/",
+    "timeline/",
+    "records/",
+    "runa/",
+    "worldmind/",
+    "provenance/",
+    "attachments/",
+    "replay/"
+  ],
+  "invariants": [
+    "Forking never mutates or overwrites the parent world.",
+    "A descendant keeps the fingerprint of the parent seed from which it branched.",
+    "Worldseed inheritance separates what must survive from what may change or be lost.",
+    "Continuity Genome changes alter the Worldseed fingerprint.",
+    "Replay reports fingerprint mismatch rather than rewriting expected history.",
+    "Ark reconstruction retains lineage references and source Seedhouse record ids.",
+    "Lineage graph integrity reports dangling parents and ancestry cycles."
+  ]
+}
