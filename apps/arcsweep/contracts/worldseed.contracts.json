@@ -7,7 +7,12 @@
     "forkReceipt": "arcsweep.worldseed-fork-receipt/v1",
     "replayReceipt": "arcsweep.worldseed-replay-receipt/v1",
     "arkArchive": "arcsweep.worldseed-archive/v1",
-    "lineageGraph": "arcsweep.world-lineage-graph/v1"
+    "arkPackage": "arcsweep.worldseed-package/v1",
+    "arkImportReceipt": "arcsweep.worldseed-import-receipt/v1",
+    "lineageGraph": "arcsweep.world-lineage-graph/v1",
+    "possibleWorldsComparison": "arcsweep.possible-worlds-comparison/v1",
+    "possibleWorldsComparisonReceipt": "arcsweep.possible-worlds-comparison-receipt/v1",
+    "thresholdProposal": "arcsweep.worldseed-threshold-proposal/v1"
   },
   "worldStateFields": [
     "parentWorldId",
@@ -43,13 +48,24 @@
     "attachments/",
     "replay/"
   ],
+  "persistentReceiptCollections": [
+    "worldseedForkReceipts",
+    "worldseedReplayReceipts",
+    "worldseedComparisonReceipts",
+    "worldseedImportReceipts",
+    "worldseedThresholdProposals"
+  ],
   "invariants": [
     "Forking never mutates or overwrites the parent world.",
     "A descendant keeps the fingerprint of the parent seed from which it branched.",
+    "A descendant receives its own Seedhouse baseline with explicit inherited-record provenance.",
     "Worldseed inheritance separates what must survive from what may change or be lost.",
     "Continuity Genome changes alter the Worldseed fingerprint.",
     "Replay reports fingerprint mismatch rather than rewriting expected history.",
+    "Possible Worlds comparisons can be receipted without mutating either compared branch.",
+    "Exact .worldseed import verifies reconstruction and never overwrites an existing world id.",
     "Ark reconstruction retains lineage references and source Seedhouse record ids.",
-    "Lineage graph integrity reports dangling parents and ancestry cycles."
+    "Lineage graph integrity reports dangling parents and ancestry cycles.",
+    "Threshold Detector may prepare a branch draft but never creates a branch automatically."
   ]
 }
