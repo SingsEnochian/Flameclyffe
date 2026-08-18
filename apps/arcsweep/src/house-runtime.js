@@ -78,6 +78,22 @@ export function appendHouseCommons(token, entry, fetchImpl = fetch) {
   return commonsRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(entry) }, fetchImpl);
 }
 
+async function kelyranReportRequest(token, options = {}, fetchImpl = fetch) {
+  if (!token) throw new Error('Connect the House Runtime first.');
+  const response = await fetchImpl('/api/v1/house/kelyran-reports', { ...options, credentials: 'same-origin', cache: 'no-store', headers: { ...(options.headers || {}), ...bearerHeaders(token) } });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `Kelyran model reporting ${response.status}`);
+  return data;
+}
+
+export function readKelyranModelReportLog(token, fetchImpl = fetch) {
+  return kelyranReportRequest(token, {}, fetchImpl);
+}
+
+export function inviteKelyranModelReports(token, school, voiceIds, fetchImpl = fetch) {
+  return kelyranReportRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'invite', voice_ids: voiceIds, school }) }, fetchImpl);
+}
+
 export async function readHouseObservations(token, worldId = null, fetchImpl = fetch) {
   if (!token) throw new Error('Connect the House Runtime first.');
   const params = new URLSearchParams();

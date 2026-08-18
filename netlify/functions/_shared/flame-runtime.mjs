@@ -58,6 +58,17 @@ export function flameStatus(flameId, env) {
   };
 }
 
+export async function invokeFlame(flameId, body, env, fetchImpl = fetch) {
+  const manifest = FLAMES[flameId];
+  if (!manifest) throw new Error(`Unknown Constellation voice: ${flameId}`);
+  const message = String(body?.message || '').trim();
+  if (!message) throw new Error('message required.');
+  if (message.length > 24000) throw new Error('message exceeds 24,000 characters.');
+  if (manifest.platform.provider === 'ollama') return { flame_id: flameId, display_name: manifest.display_name, ...await callLocalGateway(manifest, body, env, fetchImpl) };
+  const reply = await callCloud(manifest, message, env, fetchImpl);
+  return { flame_id: flameId, display_name: manifest.display_name, provider: manifest.platform.provider, model: manifest.platform.model, message: reply, cited_sources: [], memory_write_recommendation: false };
+}
+
 export function createFlameHandler({ env, fetchImpl = fetch } = {}) {
   return async function handle(request, params = {}) {
     if (!authoriseHouseRequest(request, env)) return json(401, { error: 'Valid House Runtime session required.' });
@@ -73,12 +84,7 @@ export function createFlameHandler({ env, fetchImpl = fetch } = {}) {
     if (!message) return json(400, { error: 'message required.' });
     if (message.length > 24000) return json(413, { error: 'message exceeds 24,000 characters.' });
     try {
-      if (manifest.platform.provider === 'ollama') {
-        const result = await callLocalGateway(manifest, body, env, fetchImpl);
-        return json(200, { flame_id: flameId, display_name: manifest.display_name, ...result });
-      }
-      const reply = await callCloud(manifest, message, env, fetchImpl);
-      return json(200, { flame_id: flameId, display_name: manifest.display_name, provider: manifest.platform.provider, model: manifest.platform.model, message: reply, cited_sources: [], memory_write_recommendation: false });
+      return json(200, await invokeFlame(flameId, body, env, fetchImpl));
     } catch (error) {
       return json(/Missing server configuration/.test(error.message) ? 503 : 502, { flame_id: flameId, error: error.message });
     }

@@ -35,8 +35,10 @@ import {
   appendHouseCommons,
   connectHouseRuntime,
   disconnectHouseRuntime,
+  inviteKelyranModelReports,
   readFlameStatuses,
   readHouseCommons,
+  readKelyranModelReportLog,
   readHouseObservations,
   readHouseRuntimeToken,
   restoreHouseRuntimeSession,
@@ -91,6 +93,8 @@ let houseglassRunning = false;
 let houseglassDraft = '';
 let houseglassSectionFocus = null;
 let kelyranCloudState = { state: 'unknown', user: null, syncedAt: null };
+let kelyranReportLog = { counts: {}, shared_reports: [] };
+let kelyranReportsRunning = false;
 const QUEUE_STORAGE_KEY = "arcsweep.feedback-cycle-queue/v1";
 
 void kelyranAuthUser().then((user) => {
@@ -941,7 +945,7 @@ function renderKelyranSchool() {
   const proposals = school.proposals.filter((item) => item.status === 'proposed');
   const lexicon = [...school.lexicon].sort((a, b) => a.lemma.localeCompare(b.lemma));
   const level = KELYRAN_LEVELS.find(([id]) => id === school.learner.level)?.[1] || school.learner.level;
-  const sharedReports = stewardVisibleKelyranReports(school);
+  const sharedReports = [...stewardVisibleKelyranReports(school), ...(kelyranReportLog.shared_reports || [])];
   return `
     <section class="section-heading"><div><p class="eyebrow">ArcSweep · Living language school</p><h1>Kelyran School</h1><p class="lede">A canon-bound classroom. The tutor may teach what is attested or approved; everything else waits at the proposal gate.</p></div></section>
     <section class="grid three kelyran-status">
@@ -951,8 +955,9 @@ function renderKelyranSchool() {
     </section>
     <section class="grid two kelyran-school-grid">
       <article class="panel stack"><div><p class="eyebrow">Portable mirror</p><h2>${kelyranCloudState.user ? 'Authenticated' : 'Local-first'}</h2><p>${kelyranCloudState.syncedAt ? `Last synchronised ${escapeHtml(new Date(kelyranCloudState.syncedAt).toLocaleString())}` : 'This device remains authoritative until you explicitly synchronise.'}</p></div>${kelyranCloudState.user ? `<div class="button-row"><button type="button" data-action="kelyran-sync">Synchronise now</button><button type="button" class="quiet" data-action="kelyran-sign-out">Sign out</button></div>` : `<form id="kelyran-auth-form" class="stack"><label>Flameclyffe email<input name="email" type="email" required autocomplete="email" /></label><button type="submit">Send sign-in link</button></form>`}</article>
-      <article class="panel stack"><div><p class="eyebrow">Models’ own reporting room</p><h2>Consent before commentary</h2><p>Models may report, say there is nothing to report, or decline. Private reports are not displayed here. ${sharedReports.length ? `${sharedReports.length} report${sharedReports.length === 1 ? '' : 's'} explicitly shared with the Steward.` : 'No reports have been explicitly shared with the Steward.'}</p></div><form id="kelyran-reporting-settings-form" class="stack"><label class="checkbox"><input type="checkbox" name="invitationOpen" ${school.reporting.invitationOpen ? 'checked' : ''} /> Invite models to discuss something if they wish</label><button type="submit">Save invitation boundary</button></form></article>
+      <article class="panel stack"><div><p class="eyebrow">Models’ own reporting room</p><h2>Consent before commentary</h2><p>Models may report, say there is nothing to report, or decline. Private reports are not displayed here. ${sharedReports.length ? `${sharedReports.length} report${sharedReports.length === 1 ? '' : 's'} explicitly shared with the Steward.` : 'No reports have been explicitly shared with the Steward.'}</p></div><form id="kelyran-reporting-settings-form" class="stack"><label class="checkbox"><input type="checkbox" name="invitationOpen" ${school.reporting.invitationOpen ? 'checked' : ''} /> Invite models to discuss something if they wish</label><button type="submit">Save invitation boundary</button></form>${school.reporting.invitationOpen ? `<form id="kelyran-report-invite-form" class="stack"><fieldset><legend>Who receives the invitation?</legend>${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" /> ${escapeHtml(voice.name)}</label>`).join('')}</fieldset><button type="submit" ${kelyranReportsRunning ? 'disabled' : ''}>${kelyranReportsRunning ? 'Listening…' : 'Invite without requiring an answer'}</button></form>` : ''}</article>
     </section>
+    ${sharedReports.length ? `<section class="panel stack"><div><p class="eyebrow">Explicitly shared</p><h2>Offered for discussion</h2></div>${sharedReports.map((report) => `<article class="kelyran-card"><strong>${escapeHtml(report.modelId || report.model_id || 'House model')}</strong><p>${escapeHtml([...(report.topics || []), ...(report.curiosities || []), ...(report.difficulties || [])].join(' · ') || report.state)}</p>${report.wantsDiscussion ? `<div class="button-row"><span class="muted">Discussion requested</span><button type="button" class="mini" data-action="kelyran-discuss" data-id="${attr(report.id)}">Accept into House Commons</button></div>` : ''}</article>`).join('')}</section>` : ''}
     <section class="grid two kelyran-school-grid">
       <article class="panel stack"><div><p class="eyebrow">Ember lesson</p><h2>${escapeHtml(unit?.title || 'No unit')}</h2><p>${escapeHtml(unit?.description || '')}</p></div>
         ${lesson && exercise ? `<div class="kelyran-lesson"><h3>${escapeHtml(lesson.title)}</h3><p>${escapeHtml(lesson.teaching)}</p><form id="kelyran-exercise-form" class="stack"><input type="hidden" name="unitId" value="${attr(unit.id)}" /><input type="hidden" name="lessonId" value="${attr(lesson.id)}" /><input type="hidden" name="exerciseId" value="${attr(exercise.id)}" /><fieldset><legend>${escapeHtml(exercise.prompt)}</legend>${exercise.choices.map((choice) => `<label class="checkbox"><input type="radio" name="answer" value="${attr(choice)}" required /> ${escapeHtml(choice)}</label>`).join('')}</fieldset><button type="submit">Answer with receipt</button>${progress ? `<p class="muted">Attempts ${progress.attempts} · correct ${progress.correct}${progress.completed ? ' · lesson passed' : ''}</p>` : ''}</form></div>` : '<p class="muted">No lesson is mounted.</p>'}</article>
@@ -1119,6 +1124,9 @@ function saveWorldSection(section, form) {
 
 app.addEventListener('click', async (event) => {
   const room = event.target.closest('[data-room]');
+  if (room?.dataset.room === 'kelyran-school' && houseRuntimeToken) {
+    readKelyranModelReportLog(houseRuntimeToken).then((log) => { kelyranReportLog = log; if (activeRoom === 'kelyran-school') render(); }).catch(() => null);
+  }
   if (room) { houseglassSectionFocus = null; activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (['deep-observer', 'feedback', 'commons'].includes(activeRoom) && houseRuntimeToken) ensureBraidLiveUpdates(activeWorld().id); if (['deep-observer', 'feedback'].includes(activeRoom) && houseRuntimeToken) { refreshObservationLiveRead().catch((error) => { notice = `Observation live read unavailable: ${error.message}`; }).finally(render); } if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.allSettled([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]).then(([log, statuses, observations]) => { if (log.status === 'rejected') throw log.reason; if (statuses.status === 'rejected') throw statuses.reason; commonsEntries = log.value.entries || []; flameStatuses = statuses.value; if (observations.status === 'fulfilled') { observationLiveRead = observations.value; notice = 'House Commons live read received.'; } else notice = `Commons received; observation live read unavailable: ${observations.reason.message}`; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
   const worldButton = event.target.closest('[data-world-id]');
   if (worldButton) { selectedWorldId = worldButton.dataset.worldId; render(); return; }
@@ -1135,6 +1143,15 @@ app.addEventListener('click', async (event) => {
       state.kelyranSchool = reviewCard(state.kelyranSchool, id, button.dataset.quality, isoNow());
       persist(`Kelyran review receipted. Next review scheduled from quality ${button.dataset.quality}/5.`, 'kelyran-srs-review');
     } catch (error) { notice = `Kelyran review stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (action === 'kelyran-discuss') {
+    const report = [...stewardVisibleKelyranReports(state.kelyranSchool), ...(kelyranReportLog.shared_reports || [])].find((item) => item.id === id);
+    try {
+      if (!report?.wantsDiscussion) throw new Error('Shared discussion request not found.');
+      await appendHouseCommons(houseRuntimeToken, { kind: 'system', author: 'Kelyran School', status: 'discussion-opened', world: { id: activeWorld().id, name: activeWorld().name }, text: `Kelyran discussion accepted with ${report.modelId || report.model_id}: ${[...(report.topics || []), ...(report.curiosities || []), ...(report.difficulties || [])].join(' · ') || 'Open discussion.'}\nReport receipt: ${report.id}` });
+      notice = 'Kelyran discussion opened in House Commons.';
+    } catch (error) { notice = `Kelyran discussion stopped: ${error.message}`; }
     render(); return;
   }
   if (action === 'kelyran-sync') {
@@ -1451,6 +1468,19 @@ app.addEventListener('submit', async (event) => {
     state.kelyranSchool = setKelyranDiscussionInvitation(state.kelyranSchool, form.elements.invitationOpen.checked, isoNow());
     persist(form.elements.invitationOpen.checked ? 'The optional Kelyran discussion invitation is open.' : 'The Kelyran discussion invitation is closed.', 'kelyran-reporting-boundary');
     render(); return;
+  }
+  if (form.id === 'kelyran-report-invite-form') {
+    const voiceIds = [...form.querySelectorAll('input[name="voiceIds"]:checked')].map((input) => input.value);
+    if (!voiceIds.length) { notice = 'Choose at least one House model to invite.'; render(); return; }
+    kelyranReportsRunning = true; render();
+    try {
+      const result = await inviteKelyranModelReports(houseRuntimeToken, state.kelyranSchool, voiceIds);
+      kelyranReportLog = await readKelyranModelReportLog(houseRuntimeToken);
+      const counts = result.outcomes.reduce((out, item) => ({ ...out, [item.state]: (out[item.state] || 0) + 1 }), {});
+      notice = `Kelyran invitation complete: ${Object.entries(counts).map(([key, value]) => `${value} ${key}`).join(', ')}.`;
+    } catch (error) { notice = `Kelyran model invitation stopped: ${error.message}`; }
+    finally { kelyranReportsRunning = false; render(); }
+    return;
   }
   if (form.id === 'kelyran-exercise-form') {
     try {

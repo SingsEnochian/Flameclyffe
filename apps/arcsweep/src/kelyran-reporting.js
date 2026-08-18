@@ -77,3 +77,50 @@ export function buildKelyranModelReportingLayer(school, modelId) {
 export function stewardVisibleKelyranReports(school) {
   return normaliseKelyranSchool(school).reporting.reports.filter((item) => item.shareWithSteward === true);
 }
+
+export function buildKelyranReportPrompt(layer) {
+  if (layer?.schema !== KELYRAN_MODEL_REPORTING_SCHEMA) throw new Error('A Kelyran model reporting layer is required.');
+  const canon = layer.tutor;
+  return [
+    'KELYRAN MODEL SELF-REPORT · OPTIONAL',
+    `You are responding only as ${layer.modelId}. Never speak for another model.`,
+    'You may report, say nothing-to-report, or decline. Declining needs no explanation and carries no penalty.',
+    `Discussion invitation: ${layer.invitationOpen ? 'open, if you want it' : 'closed'}.`,
+    `Canon revision: ${canon.canonRevision}`,
+    `Authority: ${canon.rule}`,
+    `Teachable lexicon: ${JSON.stringify(canon.lexicon)}`,
+    `Teachable grammar: ${JSON.stringify(canon.grammar)}`,
+    `Teachable phonology: ${JSON.stringify(canon.phonology)}`,
+    `Your previous reports: ${JSON.stringify(layer.ownReports)}`,
+    'Return exactly one JSON object and no surrounding prose:',
+    JSON.stringify({ state: 'report | nothing-to-report | declined', topics: [], unknown_forms: [], curiosities: [], difficulties: [], wants_discussion: false, share_with_steward: false }),
+    'Never place an invented Kelyran form into canon. Put uncertain forms in unknown_forms.',
+  ].join('\n\n');
+}
+
+function responseObject(raw) {
+  const source = clean(raw);
+  if (source.startsWith('[REFUSAL]')) return { state: 'declined' };
+  const fenced = source.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
+  const candidate = fenced || source;
+  try { return JSON.parse(candidate); } catch { throw new Error('Model report must be exactly one valid JSON object.'); }
+}
+
+export function parseKelyranModelReport(raw, expectedModelId, now = new Date().toISOString()) {
+  const value = responseObject(raw);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Model report must be a JSON object.');
+  if (value.model_id && clean(value.model_id) !== clean(expectedModelId)) throw new Error('Model report identity does not match its bound route.');
+  const allowed = new Set(['state', 'model_id', 'topics', 'unknown_forms', 'curiosities', 'difficulties', 'wants_discussion', 'share_with_steward']);
+  const unknown = Object.keys(value).filter((key) => !allowed.has(key));
+  if (unknown.length) throw new Error(`Unknown model-report fields: ${unknown.join(', ')}.`);
+  return createKelyranModelReport({
+    modelId: expectedModelId,
+    state: value.state,
+    topics: value.topics,
+    unknownForms: value.unknown_forms,
+    curiosities: value.curiosities,
+    difficulties: value.difficulties,
+    wantsDiscussion: value.wants_discussion,
+    shareWithSteward: value.share_with_steward,
+  }, now);
+}
