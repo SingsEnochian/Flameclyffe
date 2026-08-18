@@ -25,12 +25,16 @@ function worldScripts(state, worldId, status = null) {
     .map(clone);
 }
 
-function attachmentIds(roomRecords) {
-  return Object.values(roomRecords)
-    .flatMap((records) => records)
-    .flatMap((record) => Array.isArray(record.attachments) ? record.attachments : [])
-    .map((attachment) => attachment?.id || attachment?.path || attachment?.name)
-    .filter(Boolean);
+function attachmentIds(groups) {
+  return [...new Set(groups
+    .flatMap((records) => Array.isArray(records) ? records : [])
+    .flatMap((record) => Array.isArray(record?.attachments) ? record.attachments : [])
+    .map((attachment) => attachment?.id || attachment?.path || attachment?.relativePath || attachment?.name)
+    .filter(Boolean))];
+}
+
+function worldReceipts(state, key, predicate) {
+  return (Array.isArray(state?.[key]) ? state[key] : []).filter(predicate).map(clone);
 }
 
 export function buildWorldseedPackage(state, worldId, packagedAt = new Date().toISOString()) {
@@ -48,15 +52,21 @@ export function buildWorldseedPackage(state, worldId, packagedAt = new Date().to
       .map((roomId) => [roomId, worldRecords(state, worldId, roomId)])
       .filter(([, records]) => records.length),
   );
-  const replayReceipts = (Array.isArray(state?.worldseedReplayReceipts) ? state.worldseedReplayReceipts : [])
-    .filter((receipt) => receipt?.worldId === worldId)
-    .map(clone);
-  const forkReceipts = (Array.isArray(state?.worldseedForkReceipts) ? state.worldseedForkReceipts : [])
-    .filter((receipt) => [receipt?.sourceWorldId, receipt?.parentWorldId, receipt?.childWorldId].includes(worldId))
-    .map(clone);
-  const comparisonReceipts = (Array.isArray(state?.worldseedComparisonReceipts) ? state.worldseedComparisonReceipts : [])
-    .filter((receipt) => [receipt?.left?.world?.id, receipt?.right?.world?.id].includes(worldId))
-    .map(clone);
+  const replayReceipts = worldReceipts(state, 'worldseedReplayReceipts', (receipt) => receipt?.worldId === worldId);
+  const braidReplayReceipts = worldReceipts(state, 'worldseedBraidReplayReceipts', (receipt) => receipt?.worldId === worldId);
+  const forkReceipts = worldReceipts(state, 'worldseedForkReceipts', (receipt) => (
+    [receipt?.sourceWorldId, receipt?.parentWorldId, receipt?.childWorldId].includes(worldId)
+  ));
+  const comparisonReceipts = worldReceipts(state, 'worldseedComparisonReceipts', (receipt) => (
+    [receipt?.left?.world?.id, receipt?.right?.world?.id].includes(worldId)
+  ));
+  const canonCarryReceipts = worldReceipts(state, 'canonCarryReceipts', (receipt) => receipt?.worldId === worldId);
+  const canonSeedReceipts = worldReceipts(state, 'canonSeedReceipts', (receipt) => receipt?.worldId === worldId);
+  const thresholdProposals = worldReceipts(state, 'worldseedThresholdProposals', (proposal) => proposal?.world?.id === worldId);
+  const seedLibraryEntries = worldReceipts(state, 'worldseedSeedLibrary', (entry) => entry?.sourceWorld?.id === worldId);
+  const plantReceipts = worldReceipts(state, 'worldseedPlantReceipts', (receipt) => (
+    receipt?.sourceWorldId === worldId || receipt?.targetWorldId === worldId
+  ));
 
   const runaRefs = seedhouseRecords
     .filter((record) => record.seedType === 'Embodied / Runa Seed')
@@ -67,6 +77,7 @@ export function buildWorldseedPackage(state, worldId, packagedAt = new Date().to
     .map((record) => record.id)
     .filter(Boolean);
   const roomRecordIds = Object.values(rooms).flat().map((record) => record.id).filter(Boolean);
+  const allAssetIds = attachmentIds([seedhouseRecords, canon, timeline, ...Object.values(rooms)]);
 
   const manifest = buildWorldseedArkManifest(worldseed, {
     canonRefs: canon.map((script) => script.id).filter(Boolean),
@@ -77,9 +88,15 @@ export function buildWorldseedPackage(state, worldId, packagedAt = new Date().to
     provenanceRefs: [
       ...(worldseed.provenance?.sourceRefs || []),
       ...(worldseed.provenance?.lineageRefs || []),
+      ...canonCarryReceipts.map((receipt) => receipt.id).filter(Boolean),
+      ...canonSeedReceipts.map((receipt) => receipt.id).filter(Boolean),
+      ...plantReceipts.map((receipt) => receipt.id).filter(Boolean),
     ],
-    attachmentRefs: attachmentIds(rooms),
-    replayRefs: replayReceipts.map((receipt) => receipt.id).filter(Boolean),
+    attachmentRefs: allAssetIds,
+    replayRefs: [
+      ...replayReceipts.map((receipt) => receipt.id).filter(Boolean),
+      ...braidReplayReceipts.map((receipt) => receipt.id).filter(Boolean),
+    ],
   }, packagedAt);
 
   return {
@@ -97,8 +114,14 @@ export function buildWorldseedPackage(state, worldId, packagedAt = new Date().to
       timeline,
       rooms,
       replayReceipts,
+      braidReplayReceipts,
       forkReceipts,
       comparisonReceipts,
+      canonCarryReceipts,
+      canonSeedReceipts,
+      thresholdProposals,
+      seedLibraryEntries,
+      plantReceipts,
     },
     reconstruction: {
       expectedWorldseedFingerprint: worldseed.fingerprint,
@@ -165,6 +188,13 @@ function ensureNoIdCollision(existing, incoming, label) {
   if (collisions.length) throw new Error(`${label} id collision: ${collisions.join(', ')}`);
 }
 
+function mergeReceipts(state, key, incoming) {
+  state[key] = [
+    ...(Array.isArray(incoming) ? incoming : []).map(clone),
+    ...(Array.isArray(state[key]) ? state[key] : []),
+  ];
+}
+
 export function importWorldseedPackage(state, worldseedPackage, importedAt = new Date().toISOString()) {
   if (!state || !Array.isArray(state.worlds)) throw new Error('Worldseed import requires an Arcsweep state.');
   const verification = verifyWorldseedPackage(worldseedPackage, importedAt);
@@ -197,18 +227,15 @@ export function importWorldseedPackage(state, worldseedPackage, importedAt = new
     state.records[roomId] = [...records, ...(state.records[roomId] || [])];
   }
   state.scripts = [...canon, ...(state.scripts || [])];
-  state.worldseedReplayReceipts = [
-    ...(worldseedPackage.content?.replayReceipts || []).map(clone),
-    ...(state.worldseedReplayReceipts || []),
-  ];
-  state.worldseedForkReceipts = [
-    ...(worldseedPackage.content?.forkReceipts || []).map(clone),
-    ...(state.worldseedForkReceipts || []),
-  ];
-  state.worldseedComparisonReceipts = [
-    ...(worldseedPackage.content?.comparisonReceipts || []).map(clone),
-    ...(state.worldseedComparisonReceipts || []),
-  ];
+  mergeReceipts(state, 'worldseedReplayReceipts', worldseedPackage.content?.replayReceipts);
+  mergeReceipts(state, 'worldseedBraidReplayReceipts', worldseedPackage.content?.braidReplayReceipts);
+  mergeReceipts(state, 'worldseedForkReceipts', worldseedPackage.content?.forkReceipts);
+  mergeReceipts(state, 'worldseedComparisonReceipts', worldseedPackage.content?.comparisonReceipts);
+  mergeReceipts(state, 'canonCarryReceipts', worldseedPackage.content?.canonCarryReceipts);
+  mergeReceipts(state, 'canonSeedReceipts', worldseedPackage.content?.canonSeedReceipts);
+  mergeReceipts(state, 'worldseedThresholdProposals', worldseedPackage.content?.thresholdProposals);
+  mergeReceipts(state, 'worldseedSeedLibrary', worldseedPackage.content?.seedLibraryEntries);
+  mergeReceipts(state, 'worldseedPlantReceipts', worldseedPackage.content?.plantReceipts);
   state.worldseedImportReceipts = Array.isArray(state.worldseedImportReceipts) ? state.worldseedImportReceipts : [];
 
   const receipt = {
@@ -223,6 +250,8 @@ export function importWorldseedPackage(state, worldseedPackage, importedAt = new
     canonCount: canon.length,
     timelineCount: timeline.length,
     roomRecordCount: Object.values(rooms).reduce((sum, records) => sum + records.length, 0),
+    seedLibraryEntryCount: worldseedPackage.content?.seedLibraryEntries?.length || 0,
+    plantReceiptCount: worldseedPackage.content?.plantReceipts?.length || 0,
     verification,
   };
   state.worldseedImportReceipts.unshift(receipt);
