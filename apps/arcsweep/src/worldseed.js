@@ -14,6 +14,19 @@ export const WORLDSEED_TYPES = Object.freeze([
   'Ark Export',
 ]);
 
+export const CONTINUITY_GENOME_FIELDS = Object.freeze([
+  'emotionalLaws',
+  'aestheticGrammar',
+  'cosmology',
+  'relationalPatterning',
+  'sacredTaboos',
+  'characteristicTensions',
+  'harmonicIdentity',
+  'sensorySignature',
+  'narrativeGait',
+  'valuesCore',
+]);
+
 const SECTION_BY_TYPE = Object.freeze({
   'World Constitution': 'constitution',
   'Continuity Genome': 'continuityGenome',
@@ -70,7 +83,7 @@ function fnv1a32(value) {
 
 export function normaliseWorldseedRecord(record = {}) {
   const seedType = WORLDSEED_TYPES.includes(record.seedType) ? record.seedType : 'Inheritance Rule';
-  return {
+  const normalised = {
     id: text(record.id),
     title: text(record.title) || 'Untitled seed',
     seedType,
@@ -86,6 +99,8 @@ export function normaliseWorldseedRecord(record = {}) {
     createdAt: text(record.createdAt),
     updatedAt: text(record.updatedAt),
   };
+  for (const field of CONTINUITY_GENOME_FIELDS) normalised[field] = text(record[field]);
+  return normalised;
 }
 
 function recordSortKey(record) {
@@ -94,6 +109,19 @@ function recordSortKey(record) {
 
 function nonEmpty(values) {
   return values.map(text).filter(Boolean);
+}
+
+function genomeSummary(records) {
+  const genomeRecords = records.filter((record) => record.seedType === 'Continuity Genome');
+  const fields = Object.fromEntries(CONTINUITY_GENOME_FIELDS.map((field) => [
+    field,
+    nonEmpty(genomeRecords.map((record) => record[field])),
+  ]));
+  return {
+    recordCount: genomeRecords.length,
+    definedFieldCount: Object.values(fields).filter((values) => values.length).length,
+    fields,
+  };
 }
 
 export function worldseedFingerprint(payload) {
@@ -111,6 +139,7 @@ export function compileWorldseed(world, seedhouseRecords = [], generatedAt = new
   const sections = Object.fromEntries(SECTION_KEYS.map((key) => [key, []]));
   for (const record of records) sections[SECTION_BY_TYPE[record.seedType]].push(record);
 
+  const continuityGenome = genomeSummary(records);
   const payload = {
     schema: WORLDSEED_SCHEMA,
     version: 1,
@@ -129,6 +158,7 @@ export function compileWorldseed(world, seedhouseRecords = [], generatedAt = new
       descendantsInherit: nonEmpty(records.map((record) => record.descendantsInherit)),
       transferableSeeds: nonEmpty(records.map((record) => record.transferableSeed)),
     },
+    continuityGenome,
     provenance: {
       seedhouseRecordIds: records.map((record) => record.id).filter(Boolean),
       sourceRefs: nonEmpty(records.map((record) => record.sourceRefs)),
@@ -137,6 +167,7 @@ export function compileWorldseed(world, seedhouseRecords = [], generatedAt = new
     readiness: {
       rooted: records.some((record) => ['Rooted', 'Canonical', 'Export-ready'].includes(record.status)),
       exportReady: records.some((record) => record.seedType === 'Ark Export' && record.status === 'Export-ready'),
+      continuityGenomeDefined: continuityGenome.definedFieldCount > 0,
       recordCount: records.length,
     },
   };
