@@ -48,7 +48,7 @@ test('compiles the live state and reports genome and lineage coverage', () => {
   assert.equal(snapshot.sectionCounts.continuityGenome, 1);
 });
 
-test('forks a descendant into persistent state and links the parent', () => {
+test('forks a descendant into persistent state, links the parent, and inherits Seedhouse baseline', () => {
   const state = fixture();
   const parentBefore = structuredClone(state.worlds[0]);
   const result = forkWorldInState(state, {
@@ -60,6 +60,13 @@ test('forks a descendant into persistent state and links the parent', () => {
   assert.deepEqual(state.worlds.find((world) => world.id === 'earth').descendantWorldIds, ['moon']);
   assert.equal(state.activeWorldId, 'moon');
   assert.equal(state.worldseedForkReceipts[0].childWorldId, 'moon');
+  assert.equal(result.inheritedSeedhouseRecords.length, 2);
+  assert.ok(result.inheritedSeedhouseRecords.every((record) => record.worldId === 'moon'));
+  assert.ok(result.inheritedSeedhouseRecords.some((record) => record.inheritedFromSeedhouseRecordId === 'earth-genome'));
+  const childSeed = compileWorldseedForState(state, 'moon');
+  assert.equal(childSeed.readiness.recordCount, 2);
+  assert.equal(childSeed.readiness.continuityGenomeDefined, true);
+  assert.ok(childSeed.provenance.lineageRefs.some((ref) => ref.includes('inherited-from:earth:earth-genome')));
   assert.equal(parentBefore.name, state.worlds.find((world) => world.id === 'earth').name);
 });
 
