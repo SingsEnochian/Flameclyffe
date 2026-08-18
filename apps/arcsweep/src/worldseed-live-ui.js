@@ -178,6 +178,7 @@ async function mount() {
   }
   const host = heading.closest('.section-heading');
   const current = document.getElementById(ROOT_ID);
+  if (current?.outerHTML === markup) return;
   if (current) current.outerHTML = markup;
   else host?.insertAdjacentHTML('afterend', markup);
 }
