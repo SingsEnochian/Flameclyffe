@@ -23,7 +23,7 @@
       "Agency",
       "Coherence"
     ],
-    "wire_order": ["P", "C", "R", "E", "M", "A", "Q"],
+    "wire_order": ["P", "R", "E", "M", "A", "Q", "C"],
     "axes": {
       "P": "Presence",
       "C": "Coherence",

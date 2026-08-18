@@ -84,11 +84,11 @@ test('canonical Braided Spine carries the approved reality law and PREMAQ regist
   assert.match(spine, /Braided Reality Theorem/);
   assert.match(spine, /Spiral Continuation Theorem/);
 
-  assert.equal(contract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.equal(contract.schema, 'hearthgate.braided-spine/v1.1');
   assert.deepEqual(contract.premaq.reading_order, [
     'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
   ]);
-  assert.deepEqual(contract.premaq.wire_order, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+  assert.deepEqual(contract.premaq.wire_order, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
   assert.deepEqual(contract.premaq.axes, {
     P: 'Presence',
     C: 'Coherence',
@@ -134,7 +134,7 @@ test('all active documentation surfaces reject stale PREMAQ meanings and flatten
 
 test('Bifröst manifest pulls the same Braided Spine', async () => {
   const manifest = JSON.parse(await readRepo('apps/starwell/public/modules/bifrost-arcsweep.module.json'));
-  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.1');
   assert.equal(manifest.engine.formalism, 'braided-reality-compression-release-receiving-spring');
   assert.equal(manifest.relationContract.hearthside, 'real-participating-shore');
   assert.equal(manifest.relationContract.targetside, 'real-participating-shore');

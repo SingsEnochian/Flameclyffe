@@ -24,7 +24,7 @@ test('Bifröst registers Mythframe as a state-bound Braided Spine tone layer', a
     assert.ok(manifest.capabilities.includes(capability), `missing capability ${capability}`);
   }
 
-  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.1');
   assert.equal(manifest.spineContract.realityAxiom, 'Everything is real');
   assert.deepEqual(manifest.spineContract.spines, ['magic', 'science_mathematics', 'physical']);
   assert.equal(manifest.relationContract.multiverseLawEverythingIsReal, true);

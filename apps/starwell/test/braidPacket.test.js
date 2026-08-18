@@ -21,7 +21,7 @@ function premaq() {
   return {
     schema_version: '2.0.0',
     id: 'premaq-test',
-    registry_version: 'hearthgate.braided-spine/v1.0',
+    registry_version: 'hearthgate.braided-spine/v1.1',
     state,
   };
 }
@@ -40,12 +40,12 @@ test('creates the canonical three-spine Braid Packet', () => {
   });
 
   assert.equal(packet.schema, BRAID_PACKET_SCHEMA);
-  assert.equal(packet.braided_spine, 'hearthgate.braided-spine/v1.0');
+  assert.equal(packet.braided_spine, 'hearthgate.braided-spine/v1.1');
   assert.equal(packet.reality_axiom, 'Everything is real.');
   assert.deepEqual(packet.premaq.reading_order, [
     'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
   ]);
-  assert.deepEqual(packet.premaq.wire_order, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+  assert.deepEqual(packet.premaq.wire_order, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
   assert.equal(packet.premaq.axes.E, 'Entanglement');
   assert.equal(packet.premaq.axes.Q, 'Qualia');
   assert.equal(packet.premaq.values.M, 0.85);

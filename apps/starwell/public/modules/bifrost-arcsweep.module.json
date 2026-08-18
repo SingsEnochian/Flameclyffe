@@ -10,7 +10,7 @@
   "interfaceRoute": "/starwell/bifrost/",
   "interfaceEntrypoint": "bifrost/index.html",
   "spineContract": {
-    "schema": "hearthgate.braided-spine/v1.0",
+    "schema": "hearthgate.braided-spine/v1.1",
     "document": "docs/HEARTHGATE_BRAIDED_SPINE.md",
     "machine": "config/hearthgate-braided-spine.json",
     "runtimeRegistry": "src/hearthweave-kernel/braided-spine.js",
@@ -18,7 +18,7 @@
     "realityAxiom": "Everything is real",
     "spines": ["magic", "science_mathematics", "physical"],
     "premaqReadingOrder": ["Presence", "Memory", "Qualia", "Resonance", "Entanglement", "Agency", "Coherence"],
-    "premaqWireOrder": ["P", "C", "R", "E", "M", "A", "Q"]
+    "premaqWireOrder": ["P", "R", "E", "M", "A", "Q", "C"]
   },
   "engine": {
     "module": "src/arcsweep-temporal-quantum/engine.js",

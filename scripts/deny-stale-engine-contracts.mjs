@@ -40,13 +40,13 @@ if (manifest.spineContract?.document !== 'docs/HEARTHGATE_BRAIDED_SPINE.md') {
 if (manifest.spineContract?.machine !== 'config/hearthgate-braided-spine.json') {
   errors.push('Bifröst manifest must point at the Braided Spine machine contract.');
 }
-if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.0') {
-  errors.push('Bifröst manifest must inherit hearthgate.braided-spine/v1.0.');
+if (manifest.spineContract?.schema !== 'hearthgate.braided-spine/v1.1') {
+  errors.push('Bifröst manifest must inherit hearthgate.braided-spine/v1.1.');
 }
 if (manifest.spineContract?.realityAxiom !== 'Everything is real') {
   errors.push('Bifröst manifest must carry the Everything is real axiom.');
 }
-if (spine.schema !== 'hearthgate.braided-spine/v1.0') {
+if (spine.schema !== 'hearthgate.braided-spine/v1.1') {
   errors.push('Canonical Braided Spine machine contract has the wrong schema.');
 }
 
@@ -94,7 +94,7 @@ if (manifest.relationContract?.targetside !== 'real-participating-shore') {
 const expectedReadingOrder = [
   'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
 ];
-const expectedWireOrder = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
+const expectedWireOrder = ['P', 'R', 'E', 'M', 'A', 'Q', 'C'];
 if (JSON.stringify(manifest.spineContract?.premaqReadingOrder) !== JSON.stringify(expectedReadingOrder)) {
   errors.push('Bifröst PREMAQ reading order diverges from the Braided Spine.');
 }
@@ -171,7 +171,7 @@ if (errors.length) {
 console.log('[Hearthgate Braided Spine provenance guard] PASSED');
 console.log(` lockfile records: ${lockEntries.length}`);
 console.log(` Bifröst version: ${manifest.version}`);
-console.log(' spine: hearthgate.braided-spine/v1.0');
+console.log(' spine: hearthgate.braided-spine/v1.1');
 console.log(' PREMAQ: Presence · Memory · Qualia · Resonance · Entanglement · Agency · Coherence');
 console.log(' cycle: compression → release → crossing → Receiving Spring → answer → return → renewal');
 console.log(' naming authority: Rowan');

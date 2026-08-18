@@ -28,12 +28,6 @@ const patterns = [
   /\bA\s*:\s*['"]Availability['"]/i,
   /\bQ\s*:\s*['"]Charge['"]/i,
   /\bQ\s*:\s*['"]Quantum['"]/i,
-  /physical_claim\s*:\s*false/i,
-  /physicalClaim\s*:\s*false/i,
-  /canon-grounded-projected/i,
-  /current-reality-observational/i,
-  /evidence-grounded-observational/i,
-  /source_class\s*:\s*['"]projected['"]/i,
 ];
 
 async function walk(directory) {

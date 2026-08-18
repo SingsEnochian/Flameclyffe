@@ -86,7 +86,7 @@ test('every selectable target world has an explicit PREMAQ origin', () => {
     assert.ok(world.slug);
     assert.ok(world.name);
     assert.ok(world.root_hz > 0);
-    assert.deepEqual(Object.keys(world.premaq), ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+    assert.deepEqual(Object.keys(world.premaq), ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
     for (const value of Object.values(world.premaq)) {
       assert.ok(Number.isFinite(value));
       assert.ok(value >= 0 && value <= 1);
@@ -104,7 +104,7 @@ test('Earth Prime LIVE calibration consumes DEEP and Groundwire without inventin
   assert.equal(calibration.unknowns.length, 0);
   assert.equal(calibration.browser.family, 'Safari-family');
   assert.equal(calibration.browser.platform, 'iPad');
-  assert.deepEqual(Object.keys(calibration.values), ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+  assert.deepEqual(Object.keys(calibration.values), ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
   for (const value of Object.values(calibration.values)) {
     assert.ok(Number.isFinite(value));
     assert.ok(value >= 0 && value <= 1);

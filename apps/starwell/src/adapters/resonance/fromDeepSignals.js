@@ -41,7 +41,7 @@ export function nodeFromDeepSignal(packet = {}, options = {}) {
       visible: packet.visible ?? true,
       consent: packet.consent ?? true,
       source: packet.source || 'deep-observer',
-      premaq_registry: 'hearthgate.braided-spine/v1.0',
+      premaq_registry: 'hearthgate.braided-spine/v1.1',
       position: packet.position,
       raw: packet,
     },

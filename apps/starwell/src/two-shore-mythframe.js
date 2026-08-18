@@ -11,7 +11,7 @@ const AXIS_NAMES = Object.freeze({
   P: 'Presence',
   C: 'Coherence',
   R: 'Resonance',
-  E: 'Entropy',
+  E: 'Entanglement',
   M: 'Memory',
   A: 'Agency',
   Q: 'Qualia',

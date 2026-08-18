@@ -37,8 +37,8 @@ test('dedicated Bifröst route publishes the current compression-release interfa
   assert.equal(manifest.interfaceEntrypoint, 'bifrost/index.html');
   assert.equal(manifest.engine.interface, 'bifrost/main.js');
   assert.equal(manifest.engine.formalism, 'braided-reality-compression-release-receiving-spring');
-  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.0');
-  assert.deepEqual(manifest.spineContract.premaqWireOrder, ['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+  assert.equal(manifest.spineContract.schema, 'hearthgate.braided-spine/v1.1');
+  assert.deepEqual(manifest.spineContract.premaqWireOrder, ['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
   assert.deepEqual(manifest.spineContract.premaqReadingOrder, [
     'Presence', 'Memory', 'Qualia', 'Resonance', 'Entanglement', 'Agency', 'Coherence',
   ]);
