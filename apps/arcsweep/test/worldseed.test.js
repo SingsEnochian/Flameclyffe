@@ -15,6 +15,8 @@ const records = [
     mayChange: 'Institutions and offices may change.',
     descendantsInherit: 'The hearth is a civic technology.',
     sourceRefs: 'canon:hearthweave',
+    createdAt: '2026-08-18T13:45:00.000Z',
+    updatedAt: '2026-08-18T13:45:00.000Z',
   },
   {
     id: 'seed-lineage',
@@ -65,9 +67,12 @@ test('aggregates inheritance questions into the portable package', () => {
   assert.deepEqual(seed.inheritance.transferableSeeds, ['Branches preserve ancestry rather than overwriting it.']);
 });
 
-test('fingerprint is deterministic across generation time and input ordering', () => {
+test('fingerprint is deterministic across generation time, record timestamps, and input ordering', () => {
   const first = compileWorldseed(world, records, '2026-08-18T13:45:00.000Z');
-  const second = compileWorldseed(world, [...records].reverse(), '2030-01-01T00:00:00.000Z');
+  const retimed = [...records].reverse().map((record) => record.id === 'seed-constitution'
+    ? { ...record, createdAt: '2029-01-01T00:00:00.000Z', updatedAt: '2030-01-01T00:00:00.000Z' }
+    : record);
+  const second = compileWorldseed(world, retimed, '2030-01-01T00:00:00.000Z');
   assert.equal(first.fingerprint, second.fingerprint);
 });
 
