@@ -9,9 +9,14 @@ import { buildWorldseedArkManifest } from './worldseed-ark.js';
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 const ROOT_ID = 'worldseed-live-instrument';
 const STYLE_ID = 'worldseed-live-style';
+const desktop = window.arcsweepDesktop ?? window.arcsweep ?? null;
 
-function readState() {
+async function readState() {
   try {
+    if (desktop?.loadState) {
+      const result = await desktop.loadState();
+      return result?.state || null;
+    }
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
@@ -19,8 +24,17 @@ function readState() {
   }
 }
 
-function writeState(state) {
+async function writeState(state, reason = 'worldseed-live-state') {
+  const now = new Date().toISOString();
+  state.version = state.version || '0.3.0';
+  state.provenance = {
+    ...(state.provenance || {}),
+    updatedAt: now,
+    storage: desktop?.saveState ? 'desktop-local-store' : 'browser-development-fallback',
+  };
+  if (desktop?.saveState) return desktop.saveState(state, { reason });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  return { ok: true, mode: 'browser-development-fallback' };
 }
 
 function activeWorldId(state) {
@@ -143,7 +157,7 @@ function worldsMarkup(state, worldId) {
   </section>`;
 }
 
-function mount() {
+async function mount() {
   ensureStyle();
   const existing = document.getElementById(ROOT_ID);
   const heading = document.querySelector('main.content h1');
@@ -152,7 +166,7 @@ function mount() {
     existing?.remove();
     return;
   }
-  const state = readState();
+  const state = await readState();
   if (!state?.worlds?.length) return;
   const worldId = title === 'Worlds' ? selectedWorldId(state) : activeWorldId(state);
   if (!worldId) return;
@@ -172,12 +186,12 @@ function makeChildId(name) {
   return `world-${slug(name)}-${Date.now().toString(36)}`;
 }
 
-document.addEventListener('click', (event) => {
+document.addEventListener('click', async (event) => {
   const button = event.target.closest('[data-worldseed-action]');
   if (!button) return;
   const instrument = button.closest(`#${ROOT_ID}`);
   const worldId = instrument?.dataset.worldId;
-  const state = readState();
+  const state = await readState();
   if (!state || !worldId) return;
   try {
     const seed = compileWorldseedForState(state, worldId);
@@ -185,9 +199,9 @@ document.addEventListener('click', (event) => {
       const world = state.worlds.find((item) => item.id === worldId);
       world.worldseedFingerprint = seed.fingerprint;
       world.updatedAt = new Date().toISOString();
-      writeState(state);
+      await writeState(state, 'worldseed-compile');
       notice(`Worldseed compiled · ${seed.fingerprint}.`);
-      mount();
+      await mount();
       return;
     }
     if (button.dataset.worldseedAction === 'export') {
@@ -199,23 +213,23 @@ document.addEventListener('click', (event) => {
     if (button.dataset.worldseedAction === 'replay') {
       const expected = state.worlds.find((item) => item.id === worldId)?.worldseedFingerprint || seed.fingerprint;
       const replay = receiptWorldseedReplay(state, worldId, expected);
-      writeState(state);
+      await writeState(state, 'worldseed-replay');
       notice(replay.matched ? `Replay exact · ${replay.actualFingerprint}.` : `Replay mismatch · expected ${replay.expectedFingerprint}, rebuilt ${replay.actualFingerprint}.`);
-      mount();
+      await mount();
     }
   } catch (error) {
     notice(`Worldseed action stopped: ${error.message}`);
   }
 });
 
-document.addEventListener('submit', (event) => {
+document.addEventListener('submit', async (event) => {
   const form = event.target.closest('[data-worldseed-fork-form]');
   if (!form) return;
   event.preventDefault();
   event.stopPropagation();
   const instrument = form.closest(`#${ROOT_ID}`);
   const worldId = instrument?.dataset.worldId;
-  const state = readState();
+  const state = await readState();
   if (!state || !worldId) return;
   const values = Object.fromEntries(new FormData(form).entries());
   try {
@@ -227,7 +241,7 @@ document.addEventListener('submit', (event) => {
       branchPoint: values.branchPoint,
       reason: values.reason,
     });
-    writeState(state);
+    await writeState(state, 'worldseed-fork');
     notice(`World forked · ${result.child.name} carries ${result.seed.fingerprint}. Reloading into the descendant.`);
     location.reload();
   } catch (error) {
@@ -235,6 +249,6 @@ document.addEventListener('submit', (event) => {
   }
 }, true);
 
-const observer = new MutationObserver(() => queueMicrotask(mount));
+const observer = new MutationObserver(() => queueMicrotask(() => { void mount(); }));
 observer.observe(document.getElementById('app'), { childList: true, subtree: true });
-mount();
+void mount();
