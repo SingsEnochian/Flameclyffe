@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   compileWorldseedForState,
   forkWorldInState,
+  receiptPossibleWorldsComparison,
   receiptWorldseedReplay,
   worldseedLiveSnapshot,
 } from '../src/worldseed-live-state.js';
@@ -80,4 +81,22 @@ test('replay receipts persist without rewriting a changed expected fingerprint',
   const mismatch = receiptWorldseedReplay(state, 'earth', compiled.fingerprint, '2032-01-01T00:00:00.000Z');
   assert.equal(mismatch.matched, false);
   assert.equal(state.worldseedReplayReceipts[0].result, 'fingerprint-mismatch');
+});
+
+test('Possible Worlds comparison becomes a persistent receipt without changing either branch', () => {
+  const state = fixture();
+  forkWorldInState(state, {
+    worldId: 'earth', childId: 'moon', childName: 'Moon Hearth', mode: 'descendant', createdAt: '2030-01-01T00:00:00.000Z',
+  });
+  const moonGenome = state.records.seedhouse.find((record) => record.worldId === 'moon' && record.seedType === 'Continuity Genome');
+  moonGenome.valuesCore = 'Memory, craft, reciprocity, plural homes.';
+  const earthBefore = structuredClone(state.worlds.find((world) => world.id === 'earth'));
+  const moonBefore = structuredClone(state.worlds.find((world) => world.id === 'moon'));
+  const receipt = receiptPossibleWorldsComparison(state, 'earth', 'moon', '2031-02-03T04:05:06.000Z');
+  assert.equal(receipt.schema, 'arcsweep.possible-worlds-comparison-receipt/v1');
+  assert.equal(receipt.sameFingerprint, false);
+  assert.ok(receipt.changedGenomeFields.includes('valuesCore'));
+  assert.equal(state.worldseedComparisonReceipts[0].id, receipt.id);
+  assert.deepEqual(state.worlds.find((world) => world.id === 'earth'), earthBefore);
+  assert.deepEqual(state.worlds.find((world) => world.id === 'moon'), moonBefore);
 });
