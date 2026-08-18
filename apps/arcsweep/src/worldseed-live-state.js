@@ -112,8 +112,10 @@ export function worldseedLiveSnapshot(state, worldId) {
   const graph = buildWorldLineageGraph(state.worlds || []);
   const path = lineagePath(state.worlds || [], worldId);
   const sectionCounts = Object.fromEntries(Object.entries(seed.sections || {}).map(([key, records]) => [key, records.length]));
-  const genome = seed.continuityGenome || {};
-  const genomeFields = Object.entries(genome).filter(([, value]) => Array.isArray(value) ? value.length : Boolean(value));
+  const genomeFields = seed.continuityGenome?.fields || {};
+  const defined = Object.entries(genomeFields)
+    .filter(([, values]) => Array.isArray(values) && values.length)
+    .map(([key]) => key);
   return {
     schema: WORLDSEED_LIVE_STATE_SCHEMA,
     seed,
@@ -121,9 +123,9 @@ export function worldseedLiveSnapshot(state, worldId) {
     lineagePath: path,
     sectionCounts,
     genomeCoverage: {
-      defined: genomeFields.map(([key]) => key),
-      count: genomeFields.length,
-      total: Object.keys(genome).length,
+      defined,
+      count: seed.continuityGenome?.definedFieldCount || defined.length,
+      total: Object.keys(genomeFields).length,
     },
   };
 }
