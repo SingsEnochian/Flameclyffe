@@ -4,7 +4,14 @@ import {
   importWorldseedPackage,
   parseWorldseedPackage,
   serializeWorldseedPackage,
+  verifyWorldseedPackage,
 } from './worldseed-package.js';
+import {
+  binaryArkStatus,
+  collectWorldseedPackageAttachments,
+  embedWorldseedBinaryPayloads,
+  remapWorldseedPackageAttachments,
+} from './worldseed-binary.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 const ROOT_ID = 'worldseed-package-live';
@@ -56,6 +63,25 @@ function downloadPackage(filename, text) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+async function packBinaryAttachments(pkg) {
+  const attachments = collectWorldseedPackageAttachments(pkg);
+  if (!attachments.length) return embedWorldseedBinaryPayloads(pkg, []);
+  if (!desktop?.readAttachmentPayload) return pkg;
+  const payloads = await Promise.all(attachments.map((attachment) => desktop.readAttachmentPayload(attachment)));
+  return embedWorldseedBinaryPayloads(pkg, payloads);
+}
+
+async function materializeBinaryAttachments(pkg) {
+  const entries = Array.isArray(pkg?.binary?.entries) ? pkg.binary.entries : [];
+  if (!entries.length) return pkg;
+  if (!desktop?.writeAttachmentPayload) {
+    throw new Error('This .worldseed contains embedded assets. Import it in the Arcsweep desktop runtime so the Ark can materialize them.');
+  }
+  const receipts = [];
+  for (const entry of entries) receipts.push(await desktop.writeAttachmentPayload(entry));
+  return remapWorldseedPackageAttachments(pkg, receipts);
+}
+
 async function mount() {
   const heading = document.querySelector('main.content h1');
   if (heading?.textContent?.trim() !== 'Seedhouse') {
@@ -67,9 +93,13 @@ async function mount() {
   const world = state?.worlds?.find((item) => item.id === state.activeWorldId) || state?.worlds?.[0];
   if (!host || !world) return;
   const latestImport = (state.worldseedImportReceipts || []).find((receipt) => receipt.worldId === world.id);
+  const binaryMode = desktop?.readAttachmentPayload && desktop?.writeAttachmentPayload
+    ? 'Binary Ark packing active · maps, images, audio, documents, and other attached bytes travel inside the .worldseed.'
+    : 'Reference Ark mode · world data travels now; embedded local asset materialization is available in the desktop runtime.';
   const markup = `<article id="${ROOT_ID}" class="worldseed-live-card" data-world-id="${esc(world.id)}">
-    <div class="section-heading compact-heading"><div><p class="eyebrow">Ark Transfer · .worldseed v1</p><h3>Carry the world</h3><p class="muted">One file carries the compiled seed, its Seedhouse roots, canon, timeline, world records, lineage receipts, and reconstruction fingerprint.</p></div><div class="button-row"><button type="button" data-worldseed-package-export>Export .worldseed</button><label class="file-button">Import .worldseed<input type="file" accept=".worldseed,${WORLDSEED_MIME},application/json" data-worldseed-package-import /></label></div></div>
-    <p class="muted">Exact import preserves the source world id and never overwrites an existing world. Local attachment references remain indexed for later binary Ark packing.</p>
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Ark Transfer · .worldseed v1</p><h3>Carry the world</h3><p class="muted">One file carries the compiled seed, its Seedhouse roots, canon, timeline, world records, lineage receipts, reconstruction fingerprint, and portable assets.</p></div><div class="button-row"><button type="button" data-worldseed-package-export>Export .worldseed</button><label class="file-button">Import .worldseed<input type="file" accept=".worldseed,${WORLDSEED_MIME},application/json" data-worldseed-package-import /></label></div></div>
+    <p class="muted">${esc(binaryMode)}</p>
+    <p class="muted">Exact import preserves the source world id, reconstructs the fingerprint before admission, and never overwrites an existing world.</p>
     ${latestImport ? `<p class="commit-badge">✦ Last exact import · ${esc(latestImport.importedAt)} · <code>${esc(latestImport.fingerprint)}</code></p>` : ''}
   </article>`;
   const current = document.getElementById(ROOT_ID);
@@ -86,10 +116,12 @@ document.addEventListener('click', async (event) => {
   const state = await readState();
   if (!state || !worldId) return;
   try {
-    const pkg = buildWorldseedPackage(state, worldId);
+    let pkg = buildWorldseedPackage(state, worldId);
+    pkg = await packBinaryAttachments(pkg);
+    const status = binaryArkStatus(pkg);
     const text = serializeWorldseedPackage(pkg);
     downloadPackage(`${slug(pkg.world.name)}.worldseed`, text);
-    notice(`Ark exported · ${pkg.worldseed.fingerprint} · ${pkg.world.name}.worldseed`);
+    notice(`Ark exported · ${pkg.worldseed.fingerprint} · ${status.embeddedCount}/${status.attachmentCount} assets embedded.`);
   } catch (error) {
     notice(`Worldseed export stopped: ${error.message}`);
   }
@@ -102,10 +134,15 @@ document.addEventListener('change', async (event) => {
   if (!state) return;
   try {
     const text = await input.files[0].text();
-    const pkg = parseWorldseedPackage(text);
+    let pkg = parseWorldseedPackage(text);
+    const verification = verifyWorldseedPackage(pkg);
+    if (!verification.matched) throw new Error('Worldseed package does not reconstruct to its declared fingerprint.');
+    if (state.worlds?.some((world) => world.id === pkg.world?.id)) throw new Error(`World ${pkg.world.id} already exists. Exact import never overwrites an existing world.`);
+    pkg = await materializeBinaryAttachments(pkg);
     const result = importWorldseedPackage(state, pkg);
     await writeState(state, 'worldseed-package-import');
-    notice(`Worldseed imported exactly · ${result.world.name} · ${result.verification.actualFingerprint}.`);
+    const status = binaryArkStatus(pkg);
+    notice(`Worldseed imported exactly · ${result.world.name} · ${status.embeddedCount} assets materialized.`);
     location.reload();
   } catch (error) {
     notice(`Worldseed import stopped: ${error.message}`);
