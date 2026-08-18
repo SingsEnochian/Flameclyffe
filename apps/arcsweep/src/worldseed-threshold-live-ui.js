@@ -67,9 +67,9 @@ async function mount() {
     proposal = (state.worldseedThresholdProposals || []).find((item) => item.world?.id === worldId)
       || readWorldseedThreshold(state, worldId);
   } catch (error) {
-    proposal = null;
     const markup = `<article id="${ROOT_ID}" class="worldseed-live-card"><p class="callout">Threshold Detector stopped: ${esc(error.message)}</p></article>`;
     const current = document.getElementById(ROOT_ID);
+    if (current?.outerHTML === markup) return;
     if (current) current.outerHTML = markup;
     else host.insertAdjacentHTML('beforeend', markup);
     return;
@@ -80,6 +80,7 @@ async function mount() {
     ${proposal.branchDraft ? `<article class="worldseed-live-card"><h4>Prepared branch</h4><p><b>${esc(proposal.branchDraft.childName)}</b></p><p>${esc(proposal.branchDraft.branchPoint)}</p><p class="muted">${esc(proposal.branchDraft.reason)}</p></article>` : ''}
   </article>`;
   const current = document.getElementById(ROOT_ID);
+  if (current?.outerHTML === markup) return;
   if (current) current.outerHTML = markup;
   else host.insertAdjacentHTML('beforeend', markup);
 }
