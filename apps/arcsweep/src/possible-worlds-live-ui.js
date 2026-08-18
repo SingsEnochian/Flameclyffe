@@ -100,6 +100,7 @@ async function mount() {
     <p class="muted">${latestReceipt ? `Latest receipt · ${esc(latestReceipt.comparedAt)} · ${esc(latestReceipt.id)}` : 'This reading has not been receipted yet.'}</p>
   </article>`;
   const current = document.getElementById(ROOT_ID);
+  if (current?.outerHTML === markup) return;
   if (current) current.outerHTML = markup;
   else host.insertAdjacentHTML('beforeend', markup);
 }
