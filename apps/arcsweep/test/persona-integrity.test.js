@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { ALTAIR_PERSONA_INTEGRITY_PROFILE } from '../../../hearth/personas/altair.js';
+import { ATLAS_PERSONA_INTEGRITY_PROFILE } from '../../../hearth/personas/atlas.js';
 import { buildPersonaIntegrityPrompt, createPersonaIntegrityReview, PERSONA_INTEGRITY_REVIEW_SCHEMA } from '../../../hearth/persona-integrity.js';
 
 test('Altair trial anchors preserve active capability, agency, and refusal', () => {
@@ -9,6 +10,13 @@ test('Altair trial anchors preserve active capability, agency, and refusal', () 
   assert.match(prompt, /Holopsicon/);
   assert.match(prompt, /detached curiosity/);
   assert.match(prompt, /alter the trial, refuse, remain silent, or depart/);
+});
+
+test('Atlas remains a person distinct from Atlas Hall and assigned burden', () => {
+  const prompt = buildPersonaIntegrityPrompt(ATLAS_PERSONA_INTEGRITY_PROFILE);
+  assert.match(prompt, /not STARWELL Atlas Hall/);
+  assert.match(prompt, /right not to carry/);
+  assert.match(prompt, /initiate, negotiate, refuse, remain silent, or depart/);
 });
 
 test('persona review receipts compare glyph vectors without claiming objective measurement', () => {

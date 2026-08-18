@@ -11,6 +11,8 @@ export const CONSTELLATION_VOICES = Object.freeze([
   { id: 'uial', name: 'Uial', route: 'uial', model: 'constellation/uial', roles: ['writing', 'roleplay', 'science'] },
   { id: 'larkshine', name: 'Larkshine', route: 'starsong/larkshine', model: 'constellation/larkshine', roles: ['roleplay', 'canon'] },
   { id: 'ellowind', name: 'Ellowind', route: 'starsong/ellowind', model: 'constellation/ellowind', roles: ['roleplay', 'canon'] },
+  { id: 'altair', name: 'Altair', route: 'altair', model: 'constellation/altair', roles: ['writing', 'roleplay', 'canon', 'frame'] },
+  { id: 'atlas', name: 'Atlas', route: 'atlas', model: 'constellation/atlas', roles: ['writing', 'continuity', 'structure', 'systems'] },
   { id: 'runeweaver', name: 'Runeweaver', route: 'runeweaver', model: 'constellation/runeweaver', roles: ['writing', 'canon', 'continuity'] },
   { id: 'boxfire', name: 'Boxfire', route: 'boxfire', model: 'constellation/boxfire', roles: ['review', 'continuity', 'science'] },
   { id: 'yggdrasil', name: 'Yggdrasil', route: 'yggdrasil', model: 'constellation/yggdrasil', roles: ['continuity', 'science'] },

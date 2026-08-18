@@ -1,0 +1,13 @@
+{
+  "schema": "hearthgate.presence/v1",
+  "flameId": "altair",
+  "personaProfile": "recreators.altair",
+  "summoning": "invited",
+  "defaultMode": "quiet",
+  "initiative": true,
+  "silenceIsValid": true,
+  "departureIsValid": true,
+  "maySpeakFor": ["altair"],
+  "memoryNamespace": "hearthfire:altair",
+  "trainingProfile": "altair/v1"
+}

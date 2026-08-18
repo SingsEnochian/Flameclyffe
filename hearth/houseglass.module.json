@@ -10,7 +10,10 @@
     "hearthgate.houseglass/v1",
     "hearthgate.houseglass-receipt/v1",
     "hearthgate.persona-integrity-profile/v1",
-    "hearthgate.persona-integrity-review/v1"
+    "hearthgate.persona-integrity-review/v1",
+    "hearthgate.presence/v1",
+    "hearthgate.flame-corpus/v1",
+    "hearthgate.flame-training-receipt/v1"
   ],
   "organs": [
     "hearthgate.starwell",
