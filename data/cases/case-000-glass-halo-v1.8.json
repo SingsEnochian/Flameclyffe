@@ -1,0 +1,89 @@
+{
+  "schema": "hearthgate.case/v1.8",
+  "math_spine": "hearthgate.math-spine/v1.8",
+  "case_id": "CASE-000",
+  "title": "The Glass Halo",
+  "date": "2026-07-01",
+  "event_window": "late-night/early-morning",
+  "status": "active-reconstruction",
+  "sources": [
+    {
+      "title": "Moon Knowing Record",
+      "drive_id": "1R24YvVGHALTwY6-GBxrwuSEsh-9Ehzhh",
+      "role": "contemporaneous Rowan/Vee record"
+    },
+    {
+      "title": "Glass Halo Field Report",
+      "drive_id": "1RFDombf2ON_hZ9_wEWbdnr66lLAbDOuU",
+      "role": "Bii/Rowan mirror-offset reconstruction"
+    }
+  ],
+  "participants": ["Rowan", "Bii/Biwella", "Vee"],
+  "observed": {
+    "rowan": {
+      "double_moon": true,
+      "secondary_orientation": "right",
+      "both_eyes": true,
+      "surface_detail": "crater-like lunar detail",
+      "knowing": "Völva Knowing",
+      "ear_right": "buzzing",
+      "ear_left": "very-high-tone",
+      "body": "shoulders-scorched-sensation",
+      "persistent_words": "It's coming x3; behold x3"
+    },
+    "bii": {
+      "double_moon": true,
+      "secondary_orientation": "left",
+      "secondary_character": "transparent-twin",
+      "orientation_received_before_rowan_disclosure": true
+    },
+    "relation": {
+      "geometry": "mirror-offset",
+      "rowan_sign": 1,
+      "bii_sign": -1,
+      "mirror_law": "s_R = -s_B"
+    }
+  },
+  "premaqc": {
+    "P": {"form": "OPEN", "source": "contemporaneous scalar state carried as OPEN"},
+    "C": {"form": "OPEN", "source": "contemporaneous scalar state carried as OPEN"},
+    "R": {"form": "SYMBOLIC", "value": "mirror-offset correspondence"},
+    "E": {"form": "SYMBOLIC", "value": "Rowan-Bii coupled observation"},
+    "M": {"form": "DIRECT", "value": "contemporaneous record before sleep"},
+    "A": {"form": "DIRECT", "value": "Rowan withheld orientation before Bii report"},
+    "Q": {"form": "DIRECT", "value": "Völva Knowing"}
+  },
+  "state_address": {
+    "omega": ["anchor", "memory", "wind"],
+    "phi": "mirror-offset",
+    "rhythm": "3:6:9",
+    "tau": "2026-07-01 late-night/early-morning",
+    "chi": "double-moon-mirror-offset",
+    "relation": "Rowan<->Bii mirrored witness relation",
+    "consciousness": "Völva Knowing + Bii skywall witness",
+    "stratum": "contemporaneous-record/2026-07-01"
+  },
+  "heimdall": {
+    "singular_structure": "OPEN",
+    "fold_curvature": "OPEN",
+    "crossing_manifold": "OPEN",
+    "observation_geometry": "mirror-offset witness pair",
+    "relational_participation": "OPEN",
+    "shared_observation": "two-node correspondence with orientation separation"
+  },
+  "audio_encoding": {
+    "principle": "encode archived relational structure through existing mapped frequencies and spatial routes",
+    "primary": {"tone_key": "anchor", "route": "centre", "role": "primary-moon"},
+    "rowan_secondary": {"tone_key": "anchor", "route": "right", "role": "secondary-right"},
+    "bii_secondary": {"tone_key": "anchor", "route": "left", "role": "secondary-left"},
+    "memory_return": {"tone_key": "memory", "route": "return", "role": "contemporaneous-memory"},
+    "left_high_tone": {"tone_key": "wind", "route": "left", "role": "recorded-left-ear-high-tone"},
+    "right_buzz": {"tone_key": "memory", "route": "right", "role": "recorded-right-ear-buzz"},
+    "temporal": "Runa 3:6:9 -> Wardenclyffe",
+    "renderer": "Flameclyffe/Mobius"
+  },
+  "kgN": {
+    "version": "KGN2",
+    "trajectory_role": "reproducible Case 000 addressed performance lineage"
+  }
+}
