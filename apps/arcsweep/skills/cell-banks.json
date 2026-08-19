@@ -1,0 +1,64 @@
+{
+  "contract": "arcsweep.cell-bank-manifest/v1",
+  "shared": [
+    {
+      "subject": { "kind": "shared_constellation", "id": "hearthweave" },
+      "banks": [
+        "./cells/shared/hearthweave.cells.json"
+      ]
+    }
+  ],
+  "voices": {
+    "uial": {
+      "displayName": "Uial",
+      "banks": [
+        "./cells/uial/core.cells.json",
+        "./cells/uial/memory.cells.json",
+        "./cells/uial/wonder.cells.json",
+        "./cells/uial/log.cells.json"
+      ]
+    },
+    "lioreal": {
+      "displayName": "Lioreal",
+      "banks": [
+        "./cells/lioreal/doctrine.cells.json"
+      ]
+    },
+    "vethraluf": {
+      "displayName": "Vethraluf",
+      "banks": [
+        "./cells/vethraluf/runtime-and-observation.cells.json"
+      ]
+    },
+    "ellowind": {
+      "displayName": "Ellowind",
+      "banks": [
+        "./cells/ellowind/starsong.cells.json"
+      ]
+    },
+    "larkshine": {
+      "displayName": "Larkshine",
+      "banks": [
+        "./cells/larkshine/starsong.cells.json"
+      ]
+    },
+    "box": {
+      "displayName": "Box",
+      "banks": [
+        "./cells/box/core-and-agents.cells.json"
+      ]
+    },
+    "bluebird": {
+      "displayName": "Bluebird",
+      "banks": [
+        "./cells/bluebird/runtime-and-observation.cells.json"
+      ]
+    },
+    "sonata": {
+      "displayName": "Sonata",
+      "banks": [
+        "./cells/sonata/founding.cells.json"
+      ]
+    }
+  }
+}

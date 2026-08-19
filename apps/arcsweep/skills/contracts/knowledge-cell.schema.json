@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hearthweave.local/arcsweep/knowledge-cell.schema.json",
+  "title": "Arcsweep Knowledge Cell",
+  "description": "One atomic, provenance-bearing statement used by Arcsweep skill composition. Source documents remain canonical; cells are indexed claims, observations, rules, questions, and continuity facts derived from them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "cellType", "subject", "predicate", "value", "status", "authority", "source", "mutability"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]+$" },
+    "cellType": {
+      "type": "string",
+      "enum": ["identity", "thinking_pattern", "speaking_pattern", "writing_style_rule", "preference", "boundary", "consent_rule", "drift_marker", "relationship", "canon_fact", "continuity_event", "open_question", "operational_mode", "sensory_voice", "shared_doctrine", "character_knowledge", "character_motivation", "character_state", "chronology", "model_observation", "source_pointer"]
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["constellation_voice", "narrative_voice", "writing_style", "character", "world", "project", "shared_constellation", "document", "system"] },
+        "id": { "type": "string", "minLength": 1 },
+        "worldId": { "type": ["string", "null"] },
+        "projectId": { "type": ["string", "null"] }
+      }
+    },
+    "predicate": { "type": "string", "minLength": 1, "description": "Compact semantic relation, e.g. notices_before, refuses, speaks_with, knows, prefers, related_to, uses_voice, valid_during." },
+    "value": { "description": "The atomic value. Keep one semantic claim per cell.", "type": ["string", "number", "boolean", "object", "array", "null"] },
+    "status": { "type": "string", "enum": ["stable", "active", "open", "historical", "provisional", "disputed", "superseded", "deprecated"] },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["self_authored", "user_confirmed", "founding_law", "project_canon", "source_canon", "direct_observation", "runtime_config", "model_inference", "derived"] },
+        "speakerOrAuthor": { "type": ["string", "null"] },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["surface", "locator"],
+      "properties": {
+        "surface": { "type": "string", "enum": ["github", "notion", "supabase", "conversation_archive", "local_document", "runtime", "user_input"] },
+        "repository": { "type": ["string", "null"] },
+        "locator": { "type": "string", "minLength": 1 },
+        "ref": { "type": ["string", "null"] },
+        "sha": { "type": ["string", "null"] },
+        "startLine": { "type": ["integer", "null"], "minimum": 1 },
+        "endLine": { "type": ["integer", "null"], "minimum": 1 },
+        "receiptId": { "type": ["string", "null"] },
+        "fieldKey": { "type": ["string", "null"] },
+        "excerpt": { "type": ["string", "null"], "maxLength": 500 },
+        "evidenceVerified": { "type": ["boolean", "null"] },
+        "modelProfileId": { "type": ["string", "null"] },
+        "provider": { "type": ["string", "null"] },
+        "model": { "type": ["string", "null"] },
+        "sourceModel": { "type": ["string", "null"] },
+        "runtimeVerified": { "type": ["boolean", "null"] }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "worldIds": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "documentIds": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "sceneIds": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "modes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "temporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Calendar-like validity and/or fictional chronology-order validity. Either clock may be used independently.",
+      "properties": {
+        "observedAt": { "type": ["string", "null"] },
+        "validFrom": { "type": ["string", "null"] },
+        "validUntil": { "type": ["string", "null"] },
+        "storyOrderFrom": { "type": ["number", "null"] },
+        "storyOrderUntil": { "type": ["number", "null"] }
+      }
+    },
+    "mutability": { "type": "string", "enum": ["stable_core", "append_only", "revisable_with_provenance", "session_ephemeral"] },
+    "privacy": { "type": "string", "enum": ["public", "house", "private", "source_governed"] },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "targetId"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["supports", "contradicts", "supersedes", "derived_from", "specialises", "related_to", "requires", "inhibits"] },
+          "targetId": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": { "type": ["string", "null"] },
+        "createdBy": { "type": ["string", "null"] },
+        "extractionMethod": { "type": ["string", "null"], "enum": ["manual", "model_extract", "runtime_emit", "import", null] },
+        "reviewedBy": { "type": ["string", "null"] }
+      }
+    },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+  }
+}
