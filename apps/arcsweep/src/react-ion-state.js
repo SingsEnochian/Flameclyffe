@@ -6,6 +6,7 @@ import { loadState, saveState } from './storage.js';
 
 export const REACTION_STATE_SCHEMA = 'arcsweep.react-ion-state/v1';
 export const REACTION_STATE_MIGRATION_SCHEMA = 'arcsweep.react-ion-state-migration/v1';
+export const REACTION_STATE_UPDATED_EVENT = 'arcsweep:reaction-state-updated';
 export const LEGACY_REACTION_REGISTRY_KEY = 'hearthgate.arcsweep.react-ion-registry.v1';
 export const LEGACY_REACTION_HELM_KEY = 'hearthgate.arcsweep.react-ion-helm.v1';
 
@@ -15,6 +16,18 @@ function invariant(condition, message) {
 
 function clone(value) {
   return structuredClone(value);
+}
+
+function notifyReactionState(reaction, meta = {}) {
+  const EventClass = globalThis.CustomEvent;
+  if (typeof globalThis.dispatchEvent === 'function' && typeof EventClass === 'function') {
+    globalThis.dispatchEvent(new EventClass(REACTION_STATE_UPDATED_EVENT, {
+      detail: {
+        reaction: clone(reaction),
+        meta: clone(meta),
+      },
+    }));
+  }
 }
 
 export function createEmptyReactionState() {
@@ -153,7 +166,9 @@ export function persistReactionState(reactionInput, meta = {}) {
   persistChain = persistChain.catch(() => {}).then(async () => {
     const state = await loadState();
     state.reaction = clone(reaction);
-    return saveState(state, { reason: 'react-ion-state-update', ...meta });
+    const result = await saveState(state, { reason: 'react-ion-state-update', ...meta });
+    notifyReactionState(reaction, meta);
+    return result;
   });
   return persistChain;
 }
