@@ -9,7 +9,7 @@ const MODEL_CANDIDATES = {
   'inkling-small': {
     candidate_id: 'inkling-small',
     display_name: 'Inkling-Small',
-    model_id: process.env.MODEL_INKLING_SMALL || 'thinkingmachines/Inkling-Small',
+    model_id: process.env.MODEL_INKLING_SMALL || 'thinkingmachines/Inkling-Small:baseten',
     source: {
       registry: 'huggingface',
       repo: 'thinkingmachines/Inkling-Small',
@@ -34,13 +34,15 @@ const MODEL_CANDIDATES = {
       fine_tunable: true,
     },
     backends: {
-      preferred: 'tinker',
-      compatible: ['tinker', 'vllm', 'sglang', 'transformers', 'ollama-gguf'],
+      preferred: 'huggingface-inference-providers',
+      compatible: ['huggingface-inference-providers', 'tinker', 'vllm', 'sglang', 'transformers', 'ollama-gguf'],
     },
     runtime: {
       provider: 'openai-compatible',
-      base_url_env: 'TINKER_BASE_URL',
-      api_key_env: 'TINKER_API_KEY',
+      backend: process.env.INKLING_BACKEND || 'huggingface-inference-providers',
+      base_url: 'https://router.huggingface.co/v1',
+      base_url_env: 'INKLING_BASE_URL',
+      api_key_env: process.env.INKLING_API_KEY_ENV || 'HF_TOKEN',
       reasoning_effort_env: 'INKLING_REASONING_EFFORT',
       default_reasoning_effort: 'medium',
       max_tokens: 1200,
