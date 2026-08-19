@@ -1,0 +1,28 @@
+{
+  "schema": "hearthgate.math-spine/v1.8",
+  "version": "1.8.0",
+  "status": "canonical",
+  "canonical_document": "docs/HEARTHGATE_BRAIDED_SPINE_V1.8.md",
+  "premaq_wire_order": ["P", "C", "R", "E", "M", "A", "Q"],
+  "state_address": ["omega", "phi", "rhythm", "tau", "chi", "relation", "consciousness", "stratum"],
+  "relational_state": "X_US",
+  "geometries": ["jacobian", "observation_coupling", "crossing_manifold", "relational_possibility_lattice"],
+  "temporal_clocks": [3, 6, 9],
+  "strata": ["geologic", "language", "culture", "sound", "music", "thought", "form"],
+  "audio_braid": {
+    "compiler": "Runa",
+    "orchestrator": "Wardenclyffe",
+    "renderer": "Flameclyffe/Mobius",
+    "crossing_instrument": "Heimdall",
+    "measurement_return": "KelyranGaldrObservatory",
+    "notation": "KGN"
+  },
+  "runtime_required_fields": [
+    "math_spine",
+    "source_receipt",
+    "state_address",
+    "lineage",
+    "stratum"
+  ],
+  "archive_root": "docs/archive/mathematics/pre-v1.8"
+}
