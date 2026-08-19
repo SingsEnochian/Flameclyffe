@@ -137,11 +137,12 @@ export function receiptPossibleWorldsComparison(state, leftWorldId, rightWorldId
   const right = compileWorldseedForState(state, rightWorldId, comparedAt);
   const comparison = comparePossibleWorlds(left, right);
   const receipt = {
+    ...comparison,
     schema: WORLDSEED_COMPARISON_RECEIPT_SCHEMA,
     version: 1,
+    comparisonSchema: comparison.schema,
     id: `possible-worlds:${leftWorldId}:${rightWorldId}:${comparedAt}`,
     comparedAt,
-    ...comparison,
   };
   state.worldseedComparisonReceipts = Array.isArray(state.worldseedComparisonReceipts) ? state.worldseedComparisonReceipts : [];
   state.worldseedComparisonReceipts.unshift(receipt);
