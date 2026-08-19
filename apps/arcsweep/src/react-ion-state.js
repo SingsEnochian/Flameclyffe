@@ -2,7 +2,7 @@ import {
   createEmptyReactionRegistryStore,
   normaliseReactionRegistryStore,
 } from './react-ion-registry.js';
-import { loadState, saveState } from './storage.js';
+import { loadState, saveState, setStateExtensionSnapshot } from './storage.js';
 
 export const REACTION_STATE_SCHEMA = 'arcsweep.react-ion-state/v1';
 export const REACTION_STATE_MIGRATION_SCHEMA = 'arcsweep.react-ion-state-migration/v1';
@@ -163,6 +163,7 @@ export function migrateLegacyReactionSidecars(state, {
 let persistChain = Promise.resolve();
 export function persistReactionState(reactionInput, meta = {}) {
   const reaction = normaliseReactionState(reactionInput);
+  setStateExtensionSnapshot('reaction', reaction);
   persistChain = persistChain.catch(() => {}).then(async () => {
     const state = await loadState();
     state.reaction = clone(reaction);
