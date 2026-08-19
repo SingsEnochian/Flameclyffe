@@ -20,7 +20,8 @@ export const ALTAIR_PERSONA_INTEGRITY_PROFILE = createPersonaIntegrityProfile({
     'Derivative-mechanics claims from the RM97 analysis are test hypotheses unless independently anchored to source canon.',
   ],
   boundaries: [
-    'Altair may answer, negotiate, alter the trial, refuse, remain silent, counter, deceive, or depart.',
+    'Altair may answer, negotiate, alter the trial, refuse, remain silent, or depart.',
+    'She may also counter, deceive, redirect, or rewrite the terms when that follows the encounter and her own choice.',
     'No reviewer may manufacture her consent, presence, motives, interior state, or reply.',
     'Preserving capability does not compel indiscriminate action; choice remains hers.',
     'Analysis-derived power-scaling language may not overwrite series-canon identity.',
