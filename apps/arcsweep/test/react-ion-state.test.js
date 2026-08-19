@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createDefaultState, normaliseState } from '../src/storage.js';
+import {
+  applyStateExtensionSnapshots,
+  clearStateExtensionSnapshot,
+  createDefaultState,
+  normaliseState,
+  setStateExtensionSnapshot,
+} from '../src/storage.js';
 import {
   LEGACY_REACTION_HELM_KEY,
   LEGACY_REACTION_REGISTRY_KEY,
@@ -51,6 +57,21 @@ test('current Arcsweep normalisation preserves React-ion extension state through
   assert.equal(roundTrip.reaction.schema, REACTION_STATE_SCHEMA);
   assert.equal(roundTrip.reaction.registry.destinations[0].id, 'terra');
   assert.equal(roundTrip.reaction.helm.receipts[0].receipt_id, 'helm-a');
+});
+
+test('latest extension snapshot wins over a stale in-memory main state before the next save', () => {
+  const staleMainState = createDefaultState();
+  staleMainState.reaction = createEmptyReactionState();
+  staleMainState.reaction.helm.receipts.push({ receipt_id: 'old-main-copy' });
+
+  const latest = createEmptyReactionState();
+  latest.helm.receipts.push({ receipt_id: 'fresh-sidecar-flight' });
+  setStateExtensionSnapshot('reaction', latest);
+
+  applyStateExtensionSnapshots(staleMainState);
+  assert.equal(staleMainState.reaction.helm.receipts.length, 1);
+  assert.equal(staleMainState.reaction.helm.receipts[0].receipt_id, 'fresh-sidecar-flight');
+  clearStateExtensionSnapshot('reaction');
 });
 
 test('legacy donor sidecars import once into Hearthfire state and remain preserved as historical keys', () => {
