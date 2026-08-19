@@ -14,6 +14,28 @@ import { createDefaultKelyranSchool, normaliseKelyranSchool } from './kelyran-sc
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 export const OBSERVATORY_MIRROR_KEY = 'hearthgate.arcsweep.domain-control-bench.v1';
 const desktop = typeof window !== 'undefined' ? (window.arcsweepDesktop ?? window.arcsweep ?? null) : null;
+const stateExtensionSnapshots = new Map();
+
+export function setStateExtensionSnapshot(key, value) {
+  if (!key || typeof key !== 'string') throw new TypeError('State extension key is required.');
+  if (value === undefined) {
+    stateExtensionSnapshots.delete(key);
+    return null;
+  }
+  const snapshot = structuredClone(value);
+  stateExtensionSnapshots.set(key, snapshot);
+  return structuredClone(snapshot);
+}
+
+export function clearStateExtensionSnapshot(key) {
+  return stateExtensionSnapshots.delete(key);
+}
+
+export function applyStateExtensionSnapshots(state) {
+  if (!state || typeof state !== 'object' || Array.isArray(state)) throw new TypeError('Arcsweep state object is required.');
+  for (const [key, value] of stateExtensionSnapshots.entries()) state[key] = structuredClone(value);
+  return state;
+}
 
 function uid(prefix = 'item') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -346,6 +368,7 @@ export async function loadState() {
     const initial = result?.state || legacy || createDefaultState();
     const installed = installCurrentHouseDrLibrary(initial);
     const observatoryMigrated = migrateLegacyObservatory(installed.state);
+    applyStateExtensionSnapshots(installed.state);
     const shouldSave = installed.changed || observatoryMigrated || !result?.state;
     if (shouldSave) {
       if (result?.state && desktop.createBackup && (installed.changed || observatoryMigrated)) {
@@ -367,6 +390,7 @@ export async function loadState() {
 
   const installed = installCurrentHouseDrLibrary(readBrowserState() || createDefaultState());
   const observatoryMigrated = migrateLegacyObservatory(installed.state);
+  applyStateExtensionSnapshots(installed.state);
   if (installed.changed || observatoryMigrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(installed.state));
   mirrorObservatory(installed.state.observatory);
   return installed.state;
@@ -374,6 +398,7 @@ export async function loadState() {
 
 let saveChain = Promise.resolve();
 export function saveState(state, meta = {}) {
+  applyStateExtensionSnapshots(state);
   state.provenance = {
     ...(state.provenance || {}),
     updatedAt: new Date().toISOString(),
@@ -424,6 +449,7 @@ function browserDownload(state) {
 }
 
 export async function exportState(state) {
+  applyStateExtensionSnapshots(state);
   return desktop?.exportState ? desktop.exportState(state) : browserDownload(state);
 }
 
@@ -436,7 +462,9 @@ export async function importState(file = null) {
     const text = await file.text();
     imported = JSON.parse(text);
   }
-  return imported ? installCurrentHouseDrLibrary(imported).state : null;
+  const state = imported ? installCurrentHouseDrLibrary(imported).state : null;
+  if (state) applyStateExtensionSnapshots(state);
+  return state;
 }
 
 export async function getStorageInfo() {
@@ -455,7 +483,9 @@ export async function listBackups() {
 export async function restoreBackup(name) {
   if (!desktop?.restoreBackup) return null;
   const result = await desktop.restoreBackup(name);
-  return result?.state ? installCurrentHouseDrLibrary(result.state).state : null;
+  const state = result?.state ? installCurrentHouseDrLibrary(result.state).state : null;
+  if (state) applyStateExtensionSnapshots(state);
+  return state;
 }
 
 export async function addAttachments() {
