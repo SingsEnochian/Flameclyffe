@@ -83,15 +83,34 @@ export function ensureReactionState(state) {
   return state.reaction;
 }
 
-export function setReactionRegistry(state, registry) {
-  const reaction = ensureReactionState(state);
+function writableReactionSlice(target) {
+  invariant(target && typeof target === 'object' && !Array.isArray(target), 'an Arcsweep state or reaction slice is required');
+
+  if (target.schema === REACTION_STATE_SCHEMA) {
+    const normalised = normaliseReactionState(target);
+    Object.assign(target, normalised);
+    return target;
+  }
+
+  if (target.reaction && typeof target.reaction === 'object' && !Array.isArray(target.reaction)) {
+    const slice = target.reaction;
+    Object.assign(slice, normaliseReactionState(slice));
+    target.reaction = slice;
+    return slice;
+  }
+
+  return ensureReactionState(target);
+}
+
+export function setReactionRegistry(stateOrReaction, registry) {
+  const reaction = writableReactionSlice(stateOrReaction);
   reaction.registry = clone(normaliseReactionRegistryStore(registry));
   return reaction.registry;
 }
 
-export function appendReactionHelmReceipt(state, receipt) {
+export function appendReactionHelmReceipt(stateOrReaction, receipt) {
   invariant(receipt && typeof receipt === 'object' && !Array.isArray(receipt), 'a Helm receipt object is required');
-  const reaction = ensureReactionState(state);
+  const reaction = writableReactionSlice(stateOrReaction);
   reaction.helm.receipts.push(clone(receipt));
   return reaction.helm.receipts.at(-1);
 }
