@@ -15,6 +15,8 @@ const legacyPages = [
   ['starwell/elara-codex.html', 'starwell/elara-codex.html'],
   ['starwell/groundwire.html', 'starwell/groundwire.html'],
   ['starwell/deep-groundwire-mobius.html', 'starwell/deep-groundwire-mobius.html'],
+  ['starwell/case-000-glass-halo.html', 'starwell/case-000-glass-halo.html'],
+  ['starwell/heimdall-case000-live.html', 'starwell/heimdall-case000-live.html'],
 ];
 
 const shellStyleTag = `<link rel="stylesheet" href="${STARWELL_BASE_SLASH}shell/arcsweep-shell.css" data-arcsweep-shell-asset="style">`;
