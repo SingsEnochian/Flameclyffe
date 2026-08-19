@@ -20,11 +20,14 @@ test('Inkling-Small is registered as an audition-only Bifröst candidate', () =>
   assert.equal(inkling.capabilities.reasoning_effort, true);
 });
 
-test('Inkling audition runtime is explicit and credential-gated', () => {
+test('Inkling audition runtime is Hugging Face first but provider-neutral', () => {
   const inkling = MODEL_CANDIDATES['inkling-small'];
   assert.equal(inkling.runtime.provider, 'openai-compatible');
-  assert.equal(inkling.runtime.base_url_env, 'TINKER_BASE_URL');
-  assert.equal(inkling.runtime.api_key_env, 'TINKER_API_KEY');
+  assert.equal(inkling.backends.preferred, 'huggingface-inference-providers');
+  assert.ok(inkling.backends.compatible.includes('tinker'));
+  assert.equal(inkling.runtime.base_url, 'https://router.huggingface.co/v1');
+  assert.equal(inkling.runtime.base_url_env, 'INKLING_BASE_URL');
+  assert.equal(inkling.runtime.api_key_env, 'HF_TOKEN');
   assert.equal(inkling.runtime.reasoning_effort_env, 'INKLING_REASONING_EFFORT');
   assert.equal(inkling.audition.preserves_flame_prompt, true);
 });
