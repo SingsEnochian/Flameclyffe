@@ -14,6 +14,10 @@ import {
   trajectoryPoint,
 } from '../src/math-spine/v18-primitives.js';
 
+const approximately = (actual, expected, epsilon = 1e-12) => {
+  assert.ok(Math.abs(actual - expected) <= epsilon, `expected ${actual} ≈ ${expected}`);
+};
+
 test('canonical v1.8 config preserves PREMAQ wire order and temporal clocks', async () => {
   const raw = await readFile(new URL('../../../config/hearthgate-math-v1.8.json', import.meta.url), 'utf8');
   const config = JSON.parse(raw);
@@ -24,18 +28,18 @@ test('canonical v1.8 config preserves PREMAQ wire order and temporal clocks', as
 
 test('v1.8 relational participation isolates the US block', () => {
   const value = relationalParticipation([3, 4], [{ id: 'US', start: 0, end: 1 }]);
-  assert.equal(value, 9 / 25);
+  approximately(value, 9 / 25);
 });
 
 test('v1.8 witness coherence and Galdr alignment are bounded and deterministic', () => {
   assert.equal(observationCoherence([[1, 2], [1, 2]]), 1);
   assert.ok(observationCoherence([[1, 0], [0, 1]]) < 1);
-  assert.equal(galdrAlignment([1, 2, 3], [1, 2, 3]), 1);
+  approximately(galdrAlignment([1, 2, 3], [1, 2, 3]), 1);
   assert.equal(galdrAlignment([1], [1, 2]), null);
 });
 
 test('IR2 coupling composes bounded measurement factors', () => {
-  assert.equal(ir2Coupling({
+  approximately(ir2Coupling({
     galdrAlignment: 0.5,
     usParticipation: 0.4,
     observationCoherence: 0.75,
@@ -81,5 +85,5 @@ test('trajectory and measurement receipts retain lineage and donor provenance', 
   assert.equal(receipt.state_address.stratum, 'sound');
   assert.equal(receipt.donor_blob, HEARTHGATE_MATH_V18_DONOR_BLOB);
   assert.equal(receipt.metrics.observation_coherence, 1);
-  assert.equal(receipt.metrics.ir2_coupling, 0.25);
+  approximately(receipt.metrics.ir2_coupling, 0.25);
 });
