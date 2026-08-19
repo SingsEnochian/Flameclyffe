@@ -1,0 +1,123 @@
+{
+  "schema": "hearthfire.consolidation-archive/v1",
+  "status": "in-progress",
+  "living_branch": "integration/hearthfire-consolidation-v1",
+  "base_branch": "codex/arcsweep-feedback-loop",
+  "base_sha": "7725aa58da97760199ff1163ad4b25ca1df812cb",
+  "pull_request": 128,
+  "rules": {
+    "current_organ_is_authoritative_until_donor_proves_stronger": true,
+    "graft_code_and_tests_together": true,
+    "preserve_donor_provenance": true,
+    "single_runtime_truth_store": "House Runtime Broker/Braid",
+    "archive_only_after_harvest_or_rejection_is_receipted": true
+  },
+  "grafts": [
+    {
+      "id": "rich-text-core",
+      "donor_branch": "feature/arcsweep-rich-text-core",
+      "status": "harvested",
+      "replacement_paths": [
+        "apps/arcsweep/src/rich-text-core.js",
+        "apps/arcsweep/test/rich-text-core.test.js",
+        "apps/arcsweep/index.html"
+      ],
+      "consolidation_head_evidence": "e5cf9ffeddfcc12cda8c3ca7124f42166f2f69d4",
+      "gate_evidence": ["Arcsweep Feedback Loop Gate: success", "Arcsweep Worldseed Foundry: success"]
+    },
+    {
+      "id": "knowledge-skills-core",
+      "donor_branch": "feature/arcsweep-rich-text-core",
+      "status": "harvested",
+      "donor_blobs": {
+        "apps/arcsweep/src/knowledge-graph.js": "73cfa914f15c70a91cb70f06990da5d3c5faf69d",
+        "apps/arcsweep/src/knowledge-learning-store.js": "f8f1c5e03703f5313c92eb791197864dba8bbe24",
+        "apps/arcsweep/src/knowledge-bank-loader.js": "b3c8be4aeae0c52943cd95ce302b148854ad5523"
+      },
+      "consolidation_commits": [
+        "e47a81e3018a6a5d6d1fe1c655c9df366f38beb5",
+        "417885cfc3b82a88dfc71044820ade89ec6b62dd"
+      ],
+      "rejected": [
+        {
+          "path": "apps/arcsweep/test/neural-context-security.test.js",
+          "reason": "stale learning test omitted runtime vessel attestation required by the stronger donor implementation"
+        }
+      ],
+      "gate_evidence": ["Arcsweep Feedback Loop Gate: success", "Arcsweep Worldseed Foundry: success"]
+    },
+    {
+      "id": "math-spine-v1.8-compatibility",
+      "donor_branch": "math-spine-v1.8-project-rollout",
+      "donor_pr": 124,
+      "status": "harvested-with-adaptation",
+      "donor_blobs": {
+        "config/hearthgate-math-v1.8.json": "33ce0073ea4ee87702d3e6c7921d6aac64462a0d",
+        "assets/hearthgate-math-v1.8.js": "d9a7fde2a922281d56ee2354bdec476ca6713b98"
+      },
+      "replacement_paths": [
+        "config/hearthgate-math-v1.8.json",
+        "apps/starwell/src/math-spine/v18-primitives.js",
+        "apps/starwell/test/mathSpineV18Primitives.test.js"
+      ],
+      "preserved_current_paths": ["apps/starwell/src/math-spine/math-spine-packet.js"],
+      "reason": "current deterministic packet/replay engine is stronger; donor low-level v1.8 primitives were adapted as additive measurements",
+      "consolidation_commits": [
+        "c34d6d8ed0fe1d77ab0e1e26484fcbb631911047",
+        "a4c62b764040493256ab224824f27fcddb60ccc4",
+        "8582e982f13aee90056a6a5ba06b0682ed9d279e",
+        "c8a64064a8091761dda6260ddc254d1fe9f819fa"
+      ],
+      "gate_evidence": ["Arcsweep Feedback Loop Gate: success before IEEE-754 test correction", "Arcsweep Worldseed Foundry: success before IEEE-754 test correction", "STARWELL Static Bundle rerun pending"]
+    },
+    {
+      "id": "bifrost-sync-policy",
+      "donor_branch": "feature/bifrost-full-assembly-v1",
+      "donor_pr": 117,
+      "status": "protocol-harvested-transport-rejected",
+      "donor_blobs": {
+        "apps/starwell/src/bifrost-sync/contracts.js": "ba1b838b5f52b1bf34452eda221e61abfc501c9b"
+      },
+      "replacement_paths": [
+        "apps/starwell/src/bifrost-sync/contracts.js",
+        "apps/arcsweep/src/runtime-braid-sync-policy.js",
+        "apps/arcsweep/test/runtime-braid-sync-policy.test.js"
+      ],
+      "rejected": [
+        {
+          "path": "apps/starwell/src/bifrost-sync/adapters/supabase-remote.js",
+          "donor_blob": "2a2aad1c6bdebf86f5a71e0965fdf7649d47a475",
+          "reason": "would create a second bifrost_sync_envelopes transport and rival runtime truth store; current House Runtime Braid remains authoritative"
+        }
+      ],
+      "consolidation_commits": [
+        "25615bc6d0a8a85b7a14f207b418faf2a5b0d9d4",
+        "d7c78830fd21d2b322eed2796d02ac3d085c62a9",
+        "76f113ac5e7632a5c4ab2577c9134c425dac6d50"
+      ]
+    }
+  ],
+  "donors_pending": [
+    {
+      "branch": "feature/react-ion-engine-v0.1",
+      "pr": 126,
+      "plan": [
+        "Hull 1: Bifrost protocol + navigation engine + traceroute transport",
+        "Hull 2: bridge + endpoint access policy + response return",
+        "Hull 3: registry + persistence + route map/inspector + graph snapshot/replay/flight recording",
+        "Hull 4: Glyph Continuity + Drift Observatory + UI sidecars"
+      ]
+    },
+    {
+      "branch": "design/lattice-deep-observer-machine",
+      "pr": 122,
+      "plan": ["shell/navigation/theme refinements after organ topology stabilises"]
+    }
+  ],
+  "archive_candidates": [
+    {
+      "branch": "feature/bifrost-multimodel-runtime-v2",
+      "reason": "0 unique commits ahead of living Arcsweep at inventory; fully subsumed pending final provenance check"
+    }
+  ]
+}
