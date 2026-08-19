@@ -1,71 +1,26 @@
-:root{
-  --hg-bg:#07100d;
-  --hg-surface:#0d1713;
-  --hg-raised:#14221c;
-  --hg-ink:#edf2ec;
-  --hg-muted:#a9b8ae;
-  --hg-gold:#d7bd79;
-  --hg-green:#79b99a;
-  --hg-line:rgba(215,189,121,.20);
-  --hg-radius:18px;
+/* ARCSWEEP runtime compatibility seam.
+
+   The global visual shell now lives in /public/shell/arcsweep-shell.css.
+   This module remains imported by hearthgate-arcsweep.js because that file owns
+   the Bifröst runtime entry, but runtime installation has no authority to
+   restyle or flatten room organs.
+
+   Faer wrapper law:
+   - the shell coordinates navigation, atmosphere, spacing and shared tokens;
+   - DEEP, Writing, Foundry, Signal Well, Bifröst and other rooms retain their
+     own internal instrument geometry;
+   - no global rule here may hide sigil rings, axes, instrumentation, or room
+     controls merely to make different organs look identical.
+*/
+
+:root {
+  --hg-bg: var(--arc-void, #030a0d);
+  --hg-surface: var(--arc-glass, rgba(8, 20, 25, 0.86));
+  --hg-raised: var(--arc-glass-strong, rgba(4, 13, 17, 0.96));
+  --hg-ink: var(--arc-text, #edf4f2);
+  --hg-muted: var(--arc-muted, #9fb0b1);
+  --hg-gold: var(--arc-gold, #e1c77e);
+  --hg-green: var(--arc-teal, #72c8bd);
+  --hg-line: var(--arc-line, rgba(225, 199, 126, 0.22));
+  --hg-radius: 18px;
 }
-*{box-sizing:border-box}
-html,body,#root{min-height:100%;background:var(--hg-bg)}
-body{margin:0;color:var(--hg-ink);background:linear-gradient(180deg,#07100d,#09130f 48%,#0b1511)}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 14% 0,rgba(121,185,154,.09),transparent 30rem),radial-gradient(circle at 86% 4%,rgba(215,189,121,.08),transparent 26rem)}
-.hearthgate-housebar{position:sticky;top:0;z-index:1000;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:1rem;min-height:64px;padding:.7rem clamp(.8rem,2.5vw,1.5rem);background:rgba(7,16,13,.96);border-bottom:1px solid var(--hg-line);backdrop-filter:blur(16px)}
-.hearthgate-nameplate{display:flex;flex-direction:column;text-decoration:none;color:var(--hg-ink)}
-.hearthgate-nameplate strong{font-family:Cinzel,serif;letter-spacing:.16em;font-size:.82rem;color:var(--hg-gold)}
-.hearthgate-nameplate span{font-size:.65rem;color:var(--hg-muted);margin-top:.1rem}
-.hearthgate-rail{display:flex;justify-content:center;gap:.3rem;overflow:auto;scrollbar-width:none}
-.hearthgate-rail::-webkit-scrollbar{display:none}
-.hearthgate-rail a{white-space:nowrap;text-decoration:none;color:var(--hg-muted);font-size:.72rem;font-weight:700;padding:.5rem .68rem;border-radius:999px;border:1px solid transparent}
-.hearthgate-rail a:hover,.hearthgate-rail a[aria-current="page"]{color:var(--hg-ink);border-color:var(--hg-line);background:rgba(215,189,121,.07)}
-.hearthgate-reception{white-space:nowrap;color:var(--hg-gold);font-size:.68rem;border:1px solid var(--hg-line);border-radius:999px;padding:.46rem .68rem;background:rgba(215,189,121,.05)}
-.starwell{min-height:auto!important;padding:1rem!important;background:transparent!important;color:var(--hg-ink)!important;overflow:visible!important}
-.starwell::before,.stars{display:none!important}
-.grove-state{position:static!important;width:min(1120px,100%)!important;margin:0 auto .8rem!important;border:1px solid var(--hg-line)!important;border-radius:var(--hg-radius)!important;background:rgba(13,23,19,.88)!important;box-shadow:none!important}
-.observatory-shell{display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:min(1120px,100%)!important;margin:0 auto!important;border:1px solid var(--hg-line)!important;border-radius:24px!important;background:rgba(13,23,19,.92)!important;color:var(--hg-ink)!important;box-shadow:none!important;overflow:hidden!important}
-.dome{min-height:0!important;padding:1.4rem 1.2rem 1.1rem!important;text-align:left!important;display:block!important;border-bottom:1px solid var(--hg-line)!important;background:linear-gradient(180deg,rgba(215,189,121,.04),transparent)!important}
-.dome::before{display:none!important}
-.dome-inner{width:100%!important;max-width:none!important}
-.dome .eyebrow{margin:0 0 .4rem!important;color:var(--hg-muted)!important;font-size:.66rem!important;letter-spacing:.13em!important}
-.dome h1{font-size:clamp(1.9rem,5vw,3.2rem)!important;line-height:1!important;letter-spacing:.08em!important;color:var(--hg-gold)!important;text-shadow:none!important}
-.dome h1::after{content:none!important}
-.dome .subtitle{max-width:720px!important;margin:.45rem 0 0!important;color:var(--hg-ink)!important;font-size:clamp(1rem,2vw,1.2rem)!important;line-height:1.45!important}
-.dome .subtitle::after{content:none!important}
-.inscription{margin:.7rem 0 0!important;padding:.42rem .66rem!important;border:1px solid var(--hg-line)!important;border-radius:999px!important;background:rgba(255,255,255,.025)!important;color:var(--hg-muted)!important;font-size:.82rem!important}
-.observatory-map{padding:1rem!important;border:0!important;background:transparent!important}
-.map-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:1rem!important;margin:0 0 .8rem!important;padding:0!important}
-.map-heading span{color:var(--hg-muted)!important;font-size:.68rem!important;text-transform:uppercase!important;letter-spacing:.12em!important}
-.map-heading strong{color:var(--hg-gold)!important}
-.starwell-sigil-console{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:.9rem!important}
-.sigil-field{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;gap:.65rem!important;min-height:0!important;padding:0!important;border:0!important;background:transparent!important;aspect-ratio:auto!important}
-.sigil-ring,.sigil-axis{display:none!important}
-.sigil-node-layer{display:contents!important}
-.sigil-node{position:static!important;transform:none!important;inset:auto!important;width:auto!important;min-height:116px!important;padding:.8rem!important;border:1px solid var(--hg-line)!important;border-radius:16px!important;background:rgba(255,255,255,.025)!important;color:var(--hg-ink)!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;text-align:left!important;gap:.45rem!important}
-.sigil-node:hover,.sigil-node.active{transform:none!important;background:rgba(121,185,154,.08)!important;border-color:rgba(121,185,154,.38)!important}
-.sigil-node strong{font-size:.82rem!important;color:var(--hg-ink)!important}
-.sigil-medallion{width:2.5rem!important;height:2.5rem!important;box-shadow:none!important}
-.sigil-core{grid-column:1/-1!important;position:static!important;transform:none!important;width:auto!important;min-height:0!important;padding:1rem!important;border:1px solid var(--hg-line)!important;border-radius:16px!important;background:rgba(215,189,121,.05)!important;text-align:left!important;display:grid!important;grid-template-columns:auto 1fr!important;column-gap:.8rem!important;align-items:center!important}
-.sigil-core .sigil-core-medallion{grid-row:1/4!important}
-.sigil-core p,.sigil-core h2,.sigil-core span{margin:0!important}
-.sigil-core h2{color:var(--hg-gold)!important;font-size:1.2rem!important}
-.sigil-instruction{margin:0!important;color:var(--hg-muted)!important;text-align:left!important}
-.terra-instrument-panel{border:1px solid var(--hg-line)!important;border-radius:16px!important;background:rgba(0,0,0,.12)!important;box-shadow:none!important;padding:1rem!important}
-.chamber-card,.seed-card,.codex-reader,.entry-tab,.instrument-card,.room-card,.study-door{border-radius:var(--hg-radius)!important;border-color:var(--hg-line)!important;background:rgba(255,255,255,.025)!important;color:var(--hg-ink)!important;box-shadow:none!important}
-.chamber-card{margin:0 1rem 1rem!important;padding:1rem!important}
-.study-row{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))!important;gap:.65rem!important;padding:0 1rem 1rem!important}
-.room-card{min-height:120px!important;padding:.85rem!important;text-align:left!important}
-.room-card:hover,.room-card.active,.entry-tab:hover,.entry-tab.active{transform:none!important;background:rgba(121,185,154,.08)!important;border-color:rgba(121,185,154,.38)!important}
-.room-title,.chamber-card h2,.chamber-card h3,.map-heading strong{color:var(--hg-gold)!important}
-.room-text,.chamber-card p,.chamber-card span,.seed-card span,.codex-reader span{color:var(--hg-muted)!important}
-.framework-door-rack{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important;width:min(1120px,calc(100% - 2rem))!important;margin:1rem auto 2rem!important;gap:.65rem!important;padding:0!important;background:transparent!important}
-.framework-door-rack a{min-height:96px!important;border-radius:16px!important;border:1px solid var(--hg-line)!important;background:rgba(13,23,19,.9)!important;color:var(--hg-ink)!important;box-shadow:none!important}
-.framework-door-rack a:hover{transform:none!important;background:rgba(215,189,121,.06)!important;border-color:rgba(215,189,121,.38)!important}
-.framework-door-rack strong{color:var(--hg-gold)!important}.framework-door-rack em{color:var(--hg-muted)!important}
-button,input,textarea,select{font:inherit}
-button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--hg-gold);outline-offset:3px}
-@media(max-width:760px){.hearthgate-housebar{grid-template-columns:1fr auto}.hearthgate-rail{grid-column:1/-1;justify-content:flex-start}.hearthgate-reception{grid-column:2}.starwell{padding:.65rem!important}.observatory-shell{border-radius:18px!important}.sigil-field{grid-template-columns:repeat(2,minmax(0,1fr))!important}.chamber-card{margin:0 .65rem .65rem!important}.study-row{padding:0 .65rem .65rem!important}.framework-door-rack{width:calc(100% - 1.3rem)!important}}
-@media(max-width:480px){.hearthgate-reception{display:none}.sigil-field{grid-template-columns:1fr!important}.sigil-core{grid-template-columns:1fr!important}.sigil-core .sigil-core-medallion{grid-row:auto!important}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

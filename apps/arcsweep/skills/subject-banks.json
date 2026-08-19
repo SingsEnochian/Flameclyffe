@@ -1,0 +1,33 @@
+{
+  "contract": "arcsweep.subject-bank-manifest/v1",
+  "subjects": {
+    "character:kestrelle": {
+      "label": "Kestrelle al’Valari",
+      "worldIds": ["taaveren-vaen", "taveren-vaen"],
+      "banks": ["./cells/characters/kestrelle.cells.json"],
+      "status": "active-canon-cortex"
+    },
+    "narrative_voice:taaveren-vaen-narrator": {
+      "label": "Ta’veren Vaen Narrative Voice",
+      "worldIds": ["taaveren-vaen", "taveren-vaen"],
+      "banks": ["./cells/narrative-voices/taaveren-vaen-narrator.cells.json"],
+      "status": "provisional-derived-cortex"
+    },
+    "writing_style:taaveren-vaen-longform": {
+      "label": "Ta’veren Vaen Longform",
+      "worldIds": ["taaveren-vaen", "taveren-vaen"],
+      "banks": ["./cells/writing-styles/taaveren-vaen-longform.cells.json"],
+      "status": "provisional-derived-cortex"
+    }
+  },
+  "rules": {
+    "supportedKinds": ["character", "narrative_voice", "writing_style"],
+    "localCellsMayExistWithoutStaticBank": true,
+    "sourceDocumentsRemainAuthoritative": true,
+    "currentCanonOverlaySupersedesHistoricalBundleClaims": true,
+    "characterKnowledgeMustRespectTemporalScope": true,
+    "narrativeVoiceMustNotGrantCharacterKnowledge": true,
+    "modelObservationCannotSilentlyPromoteCanon": true,
+    "provisionalDerivedCortexMustRemainExplicit": true
+  }
+}
