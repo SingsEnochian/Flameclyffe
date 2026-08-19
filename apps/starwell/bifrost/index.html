@@ -11,6 +11,7 @@
   <title>Bifröst Arcsweep v0.4 · Hearthgate</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./premaq-song.css" />
+  <link rel="stylesheet" href="./model-audition.css" />
 </head>
 <body>
   <header class="topbar">
@@ -19,6 +20,7 @@
       <span><strong>BIFRÖST ARCSWEEP</strong><small>Current interface · v0.4</small></span>
     </a>
     <nav aria-label="Bifröst rooms">
+      <a href="#model-audition">Model Audition</a>
       <a href="../arcsweep-continuity/">Continuity Gate</a>
       <a href="../world-tone-approval/">Rowan Approval Gate</a>
       <a href="../">STARWELL</a>
@@ -175,6 +177,58 @@
         </ol>
       </article>
 
+      <article class="panel model-audition-panel" id="model-audition">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">BIFRÖST MODEL AUDITION</p>
+            <h2>Larkshine · the ridiculous trenchcoat</h2>
+          </div>
+          <span class="device-chip">candidate route · no promotion</span>
+        </header>
+
+        <dl class="lineage-list">
+          <div><dt>Primary</dt><dd id="model-audition-baseline-model">Qwythos · reading runtime…</dd></div>
+          <div><dt>Candidate</dt><dd id="model-audition-candidate-model">Inkling-Small · reading runtime…</dd></div>
+          <div><dt>Identity</dt><dd>Larkshine on both routes</dd></div>
+          <div><dt>Promotion</dt><dd>None · Qwythos remains primary</dd></div>
+        </dl>
+
+        <form id="model-audition-form" class="model-audition-form">
+          <div class="control-grid">
+            <label>
+              <span>Inkling reasoning effort</span>
+              <select id="model-audition-effort">
+                <option value="minimal">minimal</option>
+                <option value="low">low</option>
+                <option value="medium" selected>medium</option>
+                <option value="high">high</option>
+                <option value="xhigh">xhigh</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            <span>Same turn to both routes</span>
+            <textarea id="model-audition-message" rows="6" placeholder="Give Larkshine something worthy of a 276B-parameter trenchcoat."></textarea>
+          </label>
+          <div class="action-row">
+            <button id="model-audition-run" type="submit" class="primary" disabled>Don the trenchcoat</button>
+          </div>
+        </form>
+
+        <p id="model-audition-status" class="engine-message" data-kind="ready" role="status">CHECKING · reading House Runtime and candidate route.</p>
+        <div class="model-audition-results">
+          <article class="model-audition-output">
+            <h3>Qwythos · primary</h3>
+            <div id="model-audition-baseline-output"><p>Awaiting audition.</p></div>
+          </article>
+          <article class="model-audition-output">
+            <h3>Inkling-Small · candidate</h3>
+            <div id="model-audition-candidate-output"><p>Awaiting trenchcoat.</p></div>
+          </article>
+        </div>
+        <p class="boundary-note">Both responses use Larkshine’s identity route. The candidate call is explicit, receipted as an audition, and cannot silently replace her Qwythos primary.</p>
+      </article>
+
       <article class="panel song-panel">
         <header class="panel-header">
           <div>
@@ -235,6 +289,7 @@
   <script type="module" src="./main.js"></script>
   <script type="module" src="./two-shore-premaq.js"></script>
   <script type="module" src="./premaq-song.js"></script>
+  <script type="module" src="./model-audition.js"></script>
   <script type="module" src="../src/premaq-shokz-soundfont.js"></script>
   <script type="module" src="../src/premaq-shokz-feather-stop-bridge.js"></script>
 </body>
