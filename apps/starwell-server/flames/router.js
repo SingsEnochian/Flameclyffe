@@ -85,13 +85,31 @@ async function callOllama(manifest, systemPrompt, userMessage) {
   return data.message?.content ?? '';
 }
 
+function candidateRuntimeStatus(candidate) {
+  const runtime = candidate.runtime || {};
+  const apiKeyEnv = runtime.api_key_env || null;
+  const baseUrl = (runtime.base_url_env && process.env[runtime.base_url_env]) || runtime.base_url || null;
+  const missing = [];
+  if (apiKeyEnv && !process.env[apiKeyEnv]) missing.push(apiKeyEnv);
+  if (!baseUrl) missing.push(runtime.base_url_env || 'CANDIDATE_BASE_URL');
+  return {
+    backend: runtime.backend || runtime.provider || 'candidate',
+    provider: runtime.provider || 'candidate',
+    base_url: baseUrl,
+    api_key_env: apiKeyEnv,
+    api_key_present: apiKeyEnv ? Boolean(process.env[apiKeyEnv]) : null,
+    configured: missing.length === 0,
+    missing,
+  };
+}
+
 async function callOpenAICompatibleCandidate(candidate, systemPrompt, userMessage, requestedEffort) {
   const runtime = candidate.runtime || {};
   const key = process.env[runtime.api_key_env];
   if (!key) throw new Error(`Env var ${runtime.api_key_env} not set`);
 
-  const baseUrl = process.env[runtime.base_url_env];
-  if (!baseUrl) throw new Error(`Env var ${runtime.base_url_env} not set`);
+  const baseUrl = (runtime.base_url_env && process.env[runtime.base_url_env]) || runtime.base_url;
+  if (!baseUrl) throw new Error(`Candidate base URL not configured (${runtime.base_url_env || 'no env override'}).`);
 
   const reasoningEffort = requestedEffort || process.env[runtime.reasoning_effort_env] || runtime.default_reasoning_effort;
   const body = {
@@ -245,6 +263,16 @@ function resolveFlame(req, res, next) {
   next();
 }
 
+function resolveCandidateForFlame(manifest, candidateId) {
+  const candidate = getModelCandidate(candidateId);
+  if (!candidate) return { error: `Unknown model candidate: ${candidateId}` };
+  if (!candidate.deployment?.audition_route) return { error: 'Candidate audition route is not armed', status: 409 };
+  if (!candidate.candidate_for.includes(manifest.flame_id)) {
+    return { error: `${candidate.candidate_id} is not registered for ${manifest.flame_id}`, status: 403 };
+  }
+  return { candidate };
+}
+
 // ── POST /api/v1/flames/:flame_id/chat ──────────────────────────────────────
 
 router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
@@ -304,16 +332,32 @@ router.get('/model-candidates', (req, res) => {
   res.json({ candidates: listModelCandidates() });
 });
 
+router.get('/flames/:flame_id/audition/:candidate_id', resolveFlame, (req, res) => {
+  const manifest = req.flame;
+  const resolved = resolveCandidateForFlame(manifest, req.params.candidate_id);
+  if (resolved.error) return res.status(resolved.status || 404).json({ error: resolved.error });
+  const { candidate } = resolved;
+  const runtimeStatus = candidateRuntimeStatus(candidate);
+  return res.json({
+    flame_id: manifest.flame_id,
+    display_name: manifest.display_name,
+    candidate_id: candidate.candidate_id,
+    model: candidate.model_id,
+    status: candidate.status,
+    audition: true,
+    audition_route: true,
+    primary_route_unchanged: true,
+    capabilities: candidate.capabilities,
+    ...runtimeStatus,
+  });
+});
+
 router.post('/flames/:flame_id/audition/:candidate_id', resolveFlame, async (req, res) => {
   const manifest = req.flame;
-  const candidate = getModelCandidate(req.params.candidate_id);
+  const resolved = resolveCandidateForFlame(manifest, req.params.candidate_id);
+  if (resolved.error) return res.status(resolved.status || 404).json({ error: resolved.error });
+  const { candidate } = resolved;
   const { message, session_id, context = [], reasoning_effort } = req.body;
-
-  if (!candidate) return res.status(404).json({ error: `Unknown model candidate: ${req.params.candidate_id}` });
-  if (!candidate.deployment?.audition_route) return res.status(409).json({ error: 'Candidate audition route is not armed' });
-  if (!candidate.candidate_for.includes(manifest.flame_id)) {
-    return res.status(403).json({ error: `${candidate.candidate_id} is not registered for ${manifest.flame_id}` });
-  }
   if (!message) return res.status(400).json({ error: 'message required' });
 
   const hearthCtx = await queryHearthfire(
@@ -342,7 +386,7 @@ router.post('/flames/:flame_id/audition/:candidate_id', resolveFlame, async (req
 
   await logRouteInvocation({
     flame_id: manifest.flame_id,
-    provider: candidate.runtime?.provider || 'candidate',
+    provider: candidate.runtime?.backend || candidate.runtime?.provider || 'candidate',
     model: candidate.model_id,
     session_id: session_id ?? null,
     message_hash: Buffer.from(message).toString('base64').slice(0, 16),
@@ -366,7 +410,7 @@ router.post('/flames/:flame_id/audition/:candidate_id', resolveFlame, async (req
     flame_id: manifest.flame_id,
     display_name: manifest.display_name,
     candidate_id: candidate.candidate_id,
-    provider: candidate.runtime.provider,
+    provider: candidate.runtime.backend || candidate.runtime.provider,
     model: candidate.model_id,
     audition: true,
     primary_route_unchanged: true,
