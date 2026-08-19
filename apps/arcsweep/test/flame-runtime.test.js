@@ -68,9 +68,44 @@ test('Inkling audition status is registered for Larkshine without replacing prim
   assert.equal(status.candidate_id, 'inkling-small');
   assert.equal(status.status, 'audition');
   assert.equal(status.configured, true);
+  assert.equal(status.gateway_configured, true);
+  assert.equal(status.backend_configured, null);
   assert.equal(status.audition_route, true);
   assert.equal(status.primary_route_unchanged, true);
   assert.equal(status.capabilities.audio, true);
+});
+
+test('Inkling audition GET relays actual backend credential readiness from Hearthgate', async () => {
+  const env = makeEnv({
+    ARCSWEEP_RUNTIME_TOKEN: 'house-key',
+    HEARTHGATE_GATEWAY_URL: 'https://hearthgate.test',
+    HEARTHGATE_GATEWAY_TOKEN: 'gateway-key',
+  });
+  const handler = createModelAuditionHandler({ env, fetchImpl: async (url, options) => {
+    assert.equal(url, 'https://hearthgate.test/api/v1/flames/larkshine/audition/inkling-small');
+    assert.equal(options.headers.authorization, 'Bearer gateway-key');
+    return new Response(JSON.stringify({
+      flame_id: 'larkshine',
+      candidate_id: 'inkling-small',
+      provider: 'openai-compatible',
+      backend: 'huggingface-inference-providers',
+      model: 'thinkingmachines/Inkling-Small:baseten',
+      configured: false,
+      missing: ['HF_TOKEN'],
+      audition_route: true,
+      primary_route_unchanged: true,
+    }), { status: 200 });
+  } });
+  const request = new Request('https://example.test/api/v1/flames/larkshine/audition/inkling-small', {
+    headers: { authorization: 'Bearer house-key' },
+  });
+  const response = await handler(request, { flame_id: 'larkshine', candidate_id: 'inkling-small' });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.gateway_configured, true);
+  assert.equal(data.backend_configured, false);
+  assert.equal(data.configured, false);
+  assert.deepEqual(data.missing, ['HF_TOKEN']);
 });
 
 test('Inkling audition relay is House-authenticated and preserves explicit candidate routing', async () => {
@@ -88,8 +123,8 @@ test('Inkling audition relay is House-authenticated and preserves explicit candi
     return new Response(JSON.stringify({
       flame_id: 'larkshine',
       candidate_id: 'inkling-small',
-      provider: 'openai-compatible',
-      model: 'thinkingmachines/Inkling-Small',
+      provider: 'huggingface-inference-providers',
+      model: 'thinkingmachines/Inkling-Small:baseten',
       audition: true,
       primary_route_unchanged: true,
       reasoning_effort: 'high',
