@@ -59,7 +59,7 @@ async function callModelAudition(manifest, candidate, body, env, fetchImpl) {
     flame_id: manifest.flame_id,
     display_name: manifest.display_name,
     candidate_id: candidate.candidate_id,
-    provider: data.provider || candidate.runtime?.provider || 'candidate',
+    provider: data.provider || candidate.runtime?.backend || candidate.runtime?.provider || 'candidate',
     model: data.model || candidate.model_id,
     audition: true,
     primary_route_unchanged: true,
@@ -96,6 +96,8 @@ export function modelAuditionStatus(flameId, candidateId, env) {
     model: candidate.model_id,
     status: candidate.status,
     configured: missing.length === 0,
+    gateway_configured: missing.length === 0,
+    backend_configured: null,
     missing,
     audition_route: Boolean(candidate.deployment?.audition_route),
     primary_route_unchanged: true,
@@ -124,6 +126,38 @@ async function resolvedFlameStatus(flameId, env, fetchImpl) {
     };
   } catch (error) {
     return { ...status, configured: false, gateway_configured: true, runtime_reachable: false, model_available: false, runtime_error: error.message, missing: ['HEARTHGATE_GATEWAY_REACHABLE'] };
+  }
+}
+
+async function resolvedModelAuditionStatus(flameId, candidateId, env, fetchImpl) {
+  const status = modelAuditionStatus(flameId, candidateId, env);
+  if (!status || !status.gateway_configured) return status;
+  const base = env.get('HEARTHGATE_GATEWAY_URL');
+  const token = env.get('HEARTHGATE_GATEWAY_TOKEN');
+  try {
+    const data = await providerJson(fetchImpl, `${base.replace(/\/$/, '')}/api/v1/flames/${flameId}/audition/${candidateId}`, {
+      headers: { authorization: `Bearer ${token}` },
+    }, 'Hearthgate model audition status');
+    return {
+      ...status,
+      configured: data.configured === true && data.audition_route === true,
+      backend_configured: data.configured === true,
+      backend: data.backend || data.provider || null,
+      provider: data.provider || null,
+      api_key_env: data.api_key_env || null,
+      api_key_present: data.api_key_present ?? null,
+      runtime_reachable: data.runtime_reachable ?? null,
+      missing: data.missing || [],
+    };
+  } catch (error) {
+    return {
+      ...status,
+      configured: false,
+      backend_configured: false,
+      runtime_reachable: false,
+      runtime_error: error.message,
+      missing: ['HEARTHGATE_GATEWAY_REACHABLE'],
+    };
   }
 }
 
@@ -180,7 +214,7 @@ export function createModelAuditionHandler({ env, fetchImpl = fetch } = {}) {
     const candidateId = params.candidate_id;
     const status = modelAuditionStatus(flameId, candidateId, env);
     if (!status) return json(404, { error: 'Unknown or unregistered model audition.' });
-    if (request.method === 'GET') return json(200, status);
+    if (request.method === 'GET') return json(200, await resolvedModelAuditionStatus(flameId, candidateId, env, fetchImpl));
     if (request.method !== 'POST') return json(405, { error: 'POST audition or GET audition status required.' });
     let body;
     try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
