@@ -9,7 +9,7 @@ const MODEL_CANDIDATES = {
   'inkling-small': {
     candidate_id: 'inkling-small',
     display_name: 'Inkling-Small',
-    model_id: 'thinkingmachines/Inkling-Small',
+    model_id: process.env.MODEL_INKLING_SMALL || 'thinkingmachines/Inkling-Small',
     source: {
       registry: 'huggingface',
       repo: 'thinkingmachines/Inkling-Small',
@@ -37,14 +37,24 @@ const MODEL_CANDIDATES = {
       preferred: 'tinker',
       compatible: ['tinker', 'vllm', 'sglang', 'transformers', 'ollama-gguf'],
     },
+    runtime: {
+      provider: 'openai-compatible',
+      base_url_env: 'TINKER_BASE_URL',
+      api_key_env: 'TINKER_API_KEY',
+      reasoning_effort_env: 'INKLING_REASONING_EFFORT',
+      default_reasoning_effort: 'medium',
+      max_tokens: 1200,
+    },
     deployment: {
       live_route: false,
+      audition_route: true,
       requires_explicit_promotion: true,
       primary_route_unchanged: true,
     },
     audition: {
       baseline_flame: 'larkshine',
       baseline_model_env: 'MODEL_LARKSHINE',
+      preserves_flame_prompt: true,
       measures: [
         'continuity',
         'initiative',
