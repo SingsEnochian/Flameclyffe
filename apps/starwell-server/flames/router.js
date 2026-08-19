@@ -3,6 +3,7 @@
 const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
 const { FLAMES } = require('./manifests');
+const { getModelCandidate, listModelCandidates } = require('./model-candidates');
 
 const router = express.Router();
 
@@ -82,6 +83,49 @@ async function callOllama(manifest, systemPrompt, userMessage) {
   if (!res.ok) throw new Error(`Ollama ${res.status}`);
   const data = await res.json();
   return data.message?.content ?? '';
+}
+
+async function callOpenAICompatibleCandidate(candidate, systemPrompt, userMessage, requestedEffort) {
+  const runtime = candidate.runtime || {};
+  const key = process.env[runtime.api_key_env];
+  if (!key) throw new Error(`Env var ${runtime.api_key_env} not set`);
+
+  const baseUrl = process.env[runtime.base_url_env];
+  if (!baseUrl) throw new Error(`Env var ${runtime.base_url_env} not set`);
+
+  const reasoningEffort = requestedEffort || process.env[runtime.reasoning_effort_env] || runtime.default_reasoning_effort;
+  const body = {
+    model: candidate.model_id,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userMessage },
+    ],
+    max_tokens: runtime.max_tokens || 1200,
+  };
+
+  if (candidate.capabilities.reasoning_effort && reasoningEffort) {
+    body.reasoning_effort = reasoningEffort;
+  }
+
+  const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(120000),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`OpenAI-compatible candidate ${res.status}${detail ? `: ${detail.slice(0, 240)}` : ''}`);
+  }
+
+  const data = await res.json();
+  return {
+    message: data.choices?.[0]?.message?.content ?? '',
+    reasoning_effort: reasoningEffort ?? null,
+    usage: data.usage ?? null,
+  };
 }
 
 async function dispatchToProvider(manifest, systemPrompt, userMessage) {
@@ -251,6 +295,85 @@ router.post('/flames/:flame_id/chat', resolveFlame, async (req, res) => {
     cited_sources: hearthCtx.snippets.map(s => s.id ?? 'hearthfire'),
     suggested_actions: [],
     memory_write_recommendation: false,
+  });
+});
+
+// ── Bifröst model audition routes ────────────────────────────────────────────
+
+router.get('/model-candidates', (req, res) => {
+  res.json({ candidates: listModelCandidates() });
+});
+
+router.post('/flames/:flame_id/audition/:candidate_id', resolveFlame, async (req, res) => {
+  const manifest = req.flame;
+  const candidate = getModelCandidate(req.params.candidate_id);
+  const { message, session_id, context = [], reasoning_effort } = req.body;
+
+  if (!candidate) return res.status(404).json({ error: `Unknown model candidate: ${req.params.candidate_id}` });
+  if (!candidate.deployment?.audition_route) return res.status(409).json({ error: 'Candidate audition route is not armed' });
+  if (!candidate.candidate_for.includes(manifest.flame_id)) {
+    return res.status(403).json({ error: `${candidate.candidate_id} is not registered for ${manifest.flame_id}` });
+  }
+  if (!message) return res.status(400).json({ error: 'message required' });
+
+  const hearthCtx = await queryHearthfire(
+    manifest.memory.hearthfire_namespace,
+    manifest.memory.retrieval_scope,
+    message
+  );
+
+  const contextBlock = context.length
+    ? `Recent conversation:\n${context.map(m => `${m.speaker}: ${m.text}`).join('\n')}\n\n`
+    : '';
+  const hearthBlock = hearthCtx.snippets.length
+    ? `Hearthfire context:\n${hearthCtx.snippets.map(s => s.text).join('\n')}\n\n`
+    : '';
+  const userMessage = `${hearthBlock}${contextBlock}${message}`;
+
+  let result, error;
+  try {
+    if (candidate.runtime?.provider !== 'openai-compatible') {
+      throw new Error(`Candidate provider "${candidate.runtime?.provider}" not implemented`);
+    }
+    result = await callOpenAICompatibleCandidate(candidate, manifest.system_prompt, userMessage, reasoning_effort);
+  } catch (err) {
+    error = err.message;
+  }
+
+  await logRouteInvocation({
+    flame_id: manifest.flame_id,
+    provider: candidate.runtime?.provider || 'candidate',
+    model: candidate.model_id,
+    session_id: session_id ?? null,
+    message_hash: Buffer.from(message).toString('base64').slice(0, 16),
+    retrieved_source_ids: hearthCtx.snippets.map(s => s.id ?? 'unknown'),
+    response_mode: error ? 'audition_error' : 'audition_success',
+    memory_write_recommendation: false,
+  });
+
+  if (error) {
+    return res.status(502).json({
+      flame_id: manifest.flame_id,
+      candidate_id: candidate.candidate_id,
+      model: candidate.model_id,
+      audition: true,
+      primary_route_unchanged: true,
+      error,
+    });
+  }
+
+  res.json({
+    flame_id: manifest.flame_id,
+    display_name: manifest.display_name,
+    candidate_id: candidate.candidate_id,
+    provider: candidate.runtime.provider,
+    model: candidate.model_id,
+    audition: true,
+    primary_route_unchanged: true,
+    reasoning_effort: result.reasoning_effort,
+    message: result.message,
+    usage: result.usage,
+    cited_sources: hearthCtx.snippets.map(s => s.id ?? 'hearthfire'),
   });
 });
 
