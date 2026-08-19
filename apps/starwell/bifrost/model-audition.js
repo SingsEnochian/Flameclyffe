@@ -84,9 +84,12 @@ async function refreshStatus() {
     elements.candidateModel.textContent = candidate.model || 'thinkingmachines/Inkling-Small';
     elements.run.disabled = !(baseline.configured && candidate.configured && candidate.audition_route);
     const baselineState = baseline.configured ? 'QWYTHOS READY' : `QWYTHOS WAITING · ${(baseline.missing || []).join(', ') || 'provider unavailable'}`;
+    const candidateMissing = candidate.missing || [];
     const candidateState = candidate.configured && candidate.audition_route
       ? 'INKLING COAT ARMED'
-      : `INKLING WAITING · ${(candidate.missing || []).join(', ') || 'audition route unavailable'}`;
+      : candidateMissing.includes('HF_TOKEN')
+        ? 'INKLING WAITING · add HF_TOKEN in Hearthgate Setup → Custom API fields'
+        : `INKLING WAITING · ${candidateMissing.join(', ') || 'audition route unavailable'}`;
     setStatus(`${baselineState} · ${candidateState} · primary route remains Qwythos.`, elements.run.disabled ? 'blocked' : 'ready');
   } catch (error) {
     elements.run.disabled = true;
