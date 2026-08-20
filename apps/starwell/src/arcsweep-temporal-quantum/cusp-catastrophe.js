@@ -1,6 +1,25 @@
 const DEFAULT_EPSILON = 1e-10;
 const TWO_PI = Math.PI * 2;
 
+export const DEFAULT_CUSP_CONTROL_SEMANTICS = Object.freeze({
+  a: Object.freeze({
+    key: 'a',
+    role: 'structure',
+    label: 'Structure',
+    unit: null,
+    source: 'explicit-control',
+    intentional: false,
+  }),
+  b: Object.freeze({
+    key: 'b',
+    role: 'intention',
+    label: 'Intention',
+    unit: null,
+    source: 'explicit-control',
+    intentional: true,
+  }),
+});
+
 function invariant(condition, message) {
   if (!condition) throw new Error(`CUSP_CATASTROPHE: ${message}`);
 }
@@ -17,6 +36,37 @@ function deepFreeze(value) {
   return Object.freeze(value);
 }
 
+function nonEmpty(value, fallback) {
+  const text = String(value ?? '').trim();
+  return text || fallback;
+}
+
+function normaliseSemantic(input, fallback) {
+  const source = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
+  const role = nonEmpty(source.role, fallback.role);
+  return deepFreeze({
+    key: fallback.key,
+    role,
+    label: nonEmpty(source.label, fallback.label),
+    unit: source.unit == null || String(source.unit).trim() === '' ? null : String(source.unit).trim(),
+    source: nonEmpty(source.source, fallback.source),
+    intentional: source.intentional == null ? role === 'intention' : Boolean(source.intentional),
+  });
+}
+
+export function normaliseCuspControlSemantics(input = null) {
+  const source = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
+  return deepFreeze({
+    a: normaliseSemantic(source.a, DEFAULT_CUSP_CONTROL_SEMANTICS.a),
+    b: normaliseSemantic(source.b, DEFAULT_CUSP_CONTROL_SEMANTICS.b),
+  });
+}
+
+function resolveControl(primary, legacy, field) {
+  if (primary !== null && primary !== undefined) return finite(primary, field);
+  return finite(legacy, field);
+}
+
 function cubeRoot(value) {
   return Math.cbrt ? Math.cbrt(value) : Math.sign(value) * Math.abs(value) ** (1 / 3);
 }
@@ -28,9 +78,9 @@ function uniqueSorted(values, epsilon) {
     .filter((value, index, all) => index === 0 || Math.abs(value - all[index - 1]) > epsilon);
 }
 
-function depressedCubicRoots(structure, intention, epsilon) {
-  const p = structure;
-  const q = intention;
+function depressedCubicRoots(controlA, controlB, epsilon) {
+  const p = controlA;
+  const q = controlB;
   const cardano = (q / 2) ** 2 + (p / 3) ** 3;
 
   if (cardano > epsilon) {
@@ -58,10 +108,10 @@ function depressedCubicRoots(structure, intention, epsilon) {
   ], epsilon);
 }
 
-function classifyEquilibria(roots, structure, epsilon) {
+function classifyEquilibria(roots, controlA, epsilon) {
   const lastIndex = roots.length - 1;
   return roots.map((value, index) => {
-    const curvature = 3 * value ** 2 + structure;
+    const curvature = 3 * value ** 2 + controlA;
     const stability = curvature > epsilon ? 'stable' : curvature < -epsilon ? 'unstable' : 'neutral-fold';
     const branch = roots.length === 1
       ? 'single'
@@ -82,12 +132,12 @@ function nearestEquilibrium(equilibria, orderParameter) {
   }, null);
 }
 
-function previousControls(previous) {
-  if (!previous || typeof previous !== 'object') return null;
-  const controls = previous.controls || previous;
-  const structure = Number(controls.structure);
-  const intention = Number(controls.intention);
-  return Number.isFinite(structure) && Number.isFinite(intention) ? { structure, intention } : null;
+function controlPairFromObservation(value) {
+  if (!value || typeof value !== 'object') return null;
+  const controls = value.controls || value;
+  const a = Number(controls.a ?? controls.structure);
+  const b = Number(controls.b ?? controls.intention);
+  return Number.isFinite(a) && Number.isFinite(b) ? { a, b } : null;
 }
 
 function previousSelection(previous) {
@@ -98,16 +148,16 @@ function previousSelection(previous) {
   return Number.isFinite(value) ? { ...selected, value } : null;
 }
 
-function intentionDirection(currentIntention, previous) {
-  const controls = previousControls(previous);
+function controlBDirection(currentControlB, previous) {
+  const controls = controlPairFromObservation(previous);
   if (!controls) return 'unknown';
-  if (currentIntention > controls.intention) return 'increasing';
-  if (currentIntention < controls.intention) return 'decreasing';
+  if (currentControlB > controls.b) return 'increasing';
+  if (currentControlB < controls.b) return 'decreasing';
   return 'stationary';
 }
 
-function classifyRegime(foldPolynomial, structure, intention, epsilon) {
-  if (Math.abs(structure) <= epsilon && Math.abs(intention) <= epsilon) return 'cusp-point';
+function classifyRegime(foldPolynomial, controlA, controlB, epsilon) {
+  if (Math.abs(controlA) <= epsilon && Math.abs(controlB) <= epsilon) return 'cusp-point';
   if (Math.abs(foldPolynomial) <= epsilon) return 'fold-boundary';
   if (foldPolynomial < 0) return 'multistable';
   return 'single-stable';
@@ -116,23 +166,29 @@ function classifyRegime(foldPolynomial, structure, intention, epsilon) {
 /**
  * Canonical cusp normal form.
  *
- * Potential: V(x) = x^4/4 + structure*x^2/2 + intention*x
- * Equilibria: x^3 + structure*x + intention = 0
- * Fold locus: 4*structure^3 + 27*intention^2 = 0
+ * Potential: V(x) = x^4/4 + a*x^2/2 + b*x
+ * Equilibria: x^3 + a*x + b = 0
+ * Fold locus: 4*a^3 + 27*b^2 = 0
  *
- * `intention` is a control parameter, not PREMAQC Agency. `structure` is the
- * second independent control required by the generic cusp. The result is a
- * model observation and carries no physical-causality claim.
+ * `controlA` and `controlB` are the domain-general controls. `structure` and
+ * `intention` remain supported aliases for the BAI / Requested Transformation
+ * projection. Control semantics carry the domain meaning so natural systems do
+ * not acquire manufactured intention merely because they use the same cusp
+ * mathematics.
  */
 export function analyseCuspCatastrophe({
-  structure,
-  intention,
+  controlA = null,
+  controlB = null,
+  structure = null,
+  intention = null,
+  controlSemantics = null,
   orderParameter = null,
   previous = null,
   epsilon = DEFAULT_EPSILON,
 } = {}) {
-  const a = finite(structure, 'structure');
-  const b = finite(intention, 'intention');
+  const a = resolveControl(controlA, structure, 'control a');
+  const b = resolveControl(controlB, intention, 'control b');
+  const semantics = normaliseCuspControlSemantics(controlSemantics);
   invariant(Number.isFinite(epsilon) && epsilon > 0, 'epsilon must be positive');
   const x = orderParameter === null || orderParameter === undefined
     ? null
@@ -144,19 +200,26 @@ export function analyseCuspCatastrophe({
   const roots = depressedCubicRoots(a, b, epsilon);
   const equilibria = classifyEquilibria(roots, a, epsilon);
   const selected = nearestEquilibrium(equilibria, x);
-  const direction = intentionDirection(b, previous);
+  const direction = controlBDirection(b, previous);
   const priorSelection = previousSelection(previous);
   const branchChanged = Boolean(selected && priorSelection && selected.branch !== priorSelection.branch);
   const pathDependencePossible = regime === 'multistable' || regime === 'fold-boundary';
+  const controlBIsIntention = semantics.b.role === 'intention' || semantics.b.intentional === true;
 
   return deepFreeze({
     schema: 'hearthgate.cusp-catastrophe-observation/v1',
     model: 'canonical-cusp-potential/v1',
-    controls: { structure: a, intention: b },
+    controls: {
+      a,
+      b,
+      structure: a,
+      intention: b,
+    },
+    control_semantics: semantics,
     order_parameter: x,
     potential: {
-      form: 'x^4/4 + structure*x^2/2 + intention*x',
-      equilibrium_equation: 'x^3 + structure*x + intention = 0',
+      form: 'x^4/4 + a*x^2/2 + b*x',
+      equilibrium_equation: 'x^3 + a*x + b = 0',
     },
     fold_polynomial: foldPolynomial,
     cubic_discriminant: cubicDiscriminant,
@@ -164,7 +227,9 @@ export function analyseCuspCatastrophe({
     equilibria,
     selected_equilibrium: selected,
     history: {
-      intention_direction: direction,
+      control_b_direction: direction,
+      sweep_label: semantics.b.label,
+      intention_direction: controlBIsIntention ? direction : null,
       prior_branch: priorSelection?.branch ?? null,
       branch_changed: branchChanged,
       path_dependence_possible: pathDependencePossible,
@@ -173,7 +238,10 @@ export function analyseCuspCatastrophe({
     epistemic: {
       observational_model: true,
       physical_claim: false,
+      controls_are_domain_semantic: true,
+      control_b_is_intention: controlBIsIntention,
       intention_is_premaqc_agency: false,
+      legacy_structure_intention_aliases_present: true,
       hysteresis_requires_trace: true,
     },
   });
@@ -184,9 +252,15 @@ function oppositeDirections(left, right) {
     || (left === 'decreasing' && right === 'increasing');
 }
 
+function observationSweepDirection(observation) {
+  return observation?.history?.control_b_direction
+    ?? observation?.history?.intention_direction
+    ?? 'unknown';
+}
+
 /**
  * Detects a hysteresis witness only when two observations revisit approximately
- * the same controls from opposite intention sweep directions and occupy
+ * the same controls from opposite control-B sweep directions and occupy
  * different stable branches. A single branch jump is not called hysteresis.
  */
 export function analyseCuspTrace(observations, {
@@ -202,10 +276,12 @@ export function analyseCuspTrace(observations, {
     const left = observations[leftIndex];
     for (let rightIndex = leftIndex + 1; rightIndex < observations.length; rightIndex += 1) {
       const right = observations[rightIndex];
-      if (!left?.controls || !right?.controls) continue;
-      if (Math.abs(left.controls.structure - right.controls.structure) > controlTolerance) continue;
-      if (Math.abs(left.controls.intention - right.controls.intention) > controlTolerance) continue;
-      if (!oppositeDirections(left.history?.intention_direction, right.history?.intention_direction)) continue;
+      const leftControls = controlPairFromObservation(left);
+      const rightControls = controlPairFromObservation(right);
+      if (!leftControls || !rightControls) continue;
+      if (Math.abs(leftControls.a - rightControls.a) > controlTolerance) continue;
+      if (Math.abs(leftControls.b - rightControls.b) > controlTolerance) continue;
+      if (!oppositeDirections(observationSweepDirection(left), observationSweepDirection(right))) continue;
       const leftSelected = left.selected_equilibrium;
       const rightSelected = right.selected_equilibrium;
       if (!leftSelected || !rightSelected) continue;
@@ -216,9 +292,14 @@ export function analyseCuspTrace(observations, {
         left_index: leftIndex,
         right_index: rightIndex,
         controls: {
-          structure: (left.controls.structure + right.controls.structure) / 2,
-          intention: (left.controls.intention + right.controls.intention) / 2,
+          a: (leftControls.a + rightControls.a) / 2,
+          b: (leftControls.b + rightControls.b) / 2,
+          structure: (leftControls.a + rightControls.a) / 2,
+          intention: (leftControls.b + rightControls.b) / 2,
         },
+        control_semantics: left.control_semantics
+          ? structuredClone(left.control_semantics)
+          : normaliseCuspControlSemantics(),
         left_branch: leftSelected.branch,
         right_branch: rightSelected.branch,
         state_separation: Math.abs(leftSelected.value - rightSelected.value),
@@ -234,7 +315,8 @@ export function analyseCuspTrace(observations, {
     epistemic: {
       observational_model: true,
       physical_claim: false,
-      requires_opposite_sweeps: true,
+      requires_opposite_control_b_sweeps: true,
+      legacy_intention_sweep_alias_supported: true,
     },
   });
 }

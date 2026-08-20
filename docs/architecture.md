@@ -1,40 +1,95 @@
 # Flameclyffe Architecture
 
-Status: living map. Update this whenever a new room, app surface, database table, or bridge rail becomes load-bearing.
+**Status:** living map · Hearthgate Braided Spine v1.8  
+**Governing mathematics:** `docs/HEARTHGATE_BRAIDED_SPINE_V1.8.md`
 
-## Repository surfaces
+Flameclyffe is one House with many sovereign organs. STARWELL, Arcsweep, House Runtime, Observer/DEEP, Runa, Wardenclyffe, Möbius, Bifröst compatibility surfaces, canon, receipts, and replay share explicit contracts without becoming duplicate authorities.
 
-Flameclyffe currently acts as a workshop monorepo for several related surfaces:
+## Architectural law
 
-- `apps/starwell` — STARWELL observatory and living manuscript interface.
-- `apps/project-zero-companion` — local-first bridge bus and plug-in shell.
-- `apps/sigil-activator` — sigil activation surface.
-- `sandbox/everos` — experimental memory and seed scripts.
+- `integration/hearthfire-consolidation-v1` is the current consolidation line while PR #128 remains in review.
+- House Runtime Broker / Braid is the model and runtime transport authority.
+- Hearthfire state is the general browser-state authority; sidecars join it through typed extension state rather than creating competing stores.
+- Canon, model observation, software receipts, and external-world claims remain distinct provenance classes.
+- Hidden reasoning is neither requested nor persisted. Visible contributions, decisions, evidence, and receipts may persist.
+- Historical implementations remain replayable through versioned receipts and archived contracts.
 
-## STARWELL
+## Governing state and mathematics
 
-STARWELL is the main React/Vite app for world, codex, room, and Observer work. Its major rooms include the Grand Library, Atlas Hall, Observer Almanac, Observer Atelier, Orrery Timeline, Beacon Network, Observatory Journal, and study doors for Hearthlight, Faer, and Virelya.
+Active mathematical organs inherit Hearthgate Math Spine v1.8:
 
-The Writer Room is currently the first working writing-to-Observer capture rail. It stores local drafts, exports Markdown/HTML/PDF/DOCX, and can save Codex leaves with DEEP Observer metadata when Supabase is configured.
+```text
+PREMAQC: P C R E M A Q
+A = Agency
+Q = Qualia
+US = X_US
+State = X(t, l)
+State/Gate Address = (omega, phi, rhythm, tau, chi, relation, consciousness, stratum)
+Math spine = hearthgate.math-spine/v1.8
+```
 
-## Project Zero Companion
+The active geometry includes the Relational Possibility Lattice, Jacobian coupling, observation coupling, relational participation, temporal/conceptual stratigraphy, world transfer, versioned receipts, and deterministic replay.
 
-Project Zero Companion is the local-first shell for bridge events, folder bindings, plug-in manifests, and DEEP vector publishing. Its rule is architectural: data sets atmosphere, not fate.
+The newer deterministic Math Spine packet/replay engine remains authoritative. Browser v1.8 primitives and orchestration are additive organs around that engine, not a replacement for it.
 
-This surface should remain explicit-consent by design. Folder paths, file anchors, story shards, altar work, sound sources, and Observer states should be manually reviewed or locally scoped until a stronger permission model exists.
+## Primary surfaces
 
-## Supabase backbone
+### STARWELL
 
-Flameclyffe Supabase currently holds STARWELL, Lanternwire, Atelier, DEEP Observer, science constants, agentic arms, and private thinking-room tables.
+`apps/starwell` is the shared observatory, House threshold, DEEP/Observer surface, world/codex interface, and static-instrument publisher. The global Arcsweep shell owns shared navigation, atmosphere, focus grammar, and vestments while sovereign instruments retain their own geometry.
 
-Use Supabase as a continuity archive, not a dumping ground. Entries should be meaningful, labelled, privacy-aware, and retrievable.
+### Arcsweep
 
-## Runa bridge
+`apps/arcsweep` is the living workbench for canon, Records/Scripts, Rich Text, Subject/Voice Cortex, Constellation presence, Scene Cognition, Self-Authorship review, React-ion Helm/Registry/Route Map, Glyph Continuity, Replay, Worldseed, and related instruments.
 
-Runa is the public/static lab and altar surface. It contains the Hearthweave Altar, Project Zero Bridge, Flameclyffe Studio/Dyad, Lantern Bench, Wardenclyffe, Tone Lab, Brainwave Lab, Gateway-inspired sequences, Psi/Zener/remote-viewing tools, and Tesla Observatory.
+### House Runtime
 
-Runa experiments can inspire Flameclyffe instrumentation, but claims must be labelled before they become canonical science language.
+The House Runtime Broker/Braid resolves living Flame identities, model/provider routes, session attestation, Commons, observation commands, and runtime braid events. Static donor model registries and duplicate token boxes are not runtime authorities.
+
+### Observer / DEEP
+
+Observer receives and classifies evidence-bearing state. DEEPStory records sourced events and declared interpretation; DEEPTime carries temporal sequences and lineage; DEEPTheory carries sourced candidate patterns/theory. UI renderers do not silently promote observations into canon or external-world success.
+
+### React-ion
+
+React-ion compiles and receipts Ask routes through approved registry entries, access policy, continuity corridors, graph snapshots, replay, transport, semantic response, and return routing. Delivery is not fulfilment, transport ACK is not semantic acceptance, and an address is not inferred from frequency or camera geometry.
+
+## Harmonic braid
+
+```text
+World / PREMAQC / State Address / Stratum / US / Heimdall
+                         ↓
+                    Runa compiler
+                         ↓
+              Wardenclyffe orchestration
+                         ↓
+               Flameclyffe / Möbius
+                         ↓
+              acoustic + haptic body
+                         ↓
+             Galdr Observatory receipt
+                         ↓
+                  KGN / DEEPTime
+                         ↓
+                  next braid state
+```
+
+Runa composes harmonic relation. Wardenclyffe gives it temporal and layered anatomy. Flameclyffe/Möbius renders acoustic body. Heimdall reads turning and observation geometry. Galdr provides voiced performance and measurement; KGN preserves trajectory lineage.
+
+## Persistence and provenance
+
+Use one authority per state class. General browser state travels through Hearthfire storage and its extension snapshots. Runtime events travel through House Runtime Braid. Canon retains source/status provenance. DEEP and software receipts are append-only evidence records, not automatic canon.
+
+Backups, exports, imports, replay, and migration must preserve the original source, schema/version, lineage, and authority boundary.
+
+## Compatibility surfaces
+
+Older Bifröst, Project Zero, and legacy/static pages may remain directly reachable when they still provide compatibility or replay value. They are not promoted as parallel architectural authorities when their living function has moved into Hearthfire.
+
+## Legacy mathematics
+
+Pre-v1.8 mathematics is preserved under `docs/archive/mathematics/pre-v1.8/` for deterministic replay and historical lineage. New mathematical work records `math_spine: hearthgate.math-spine/v1.8` where the contract applies.
 
 ## Design rule
 
-Build rooms as living instruments, not flat pages. Floating panels, glyphs, responsive controls, sound layers, bridge events, and exportable receipts should all point back to clear data structures and consent gates.
+Build rooms as living instruments, not flat pages. Geometry, sound, haptics, language, model contribution, canon, and receipts may braid together, but each organ keeps its identity, provenance, authority, and replay path.

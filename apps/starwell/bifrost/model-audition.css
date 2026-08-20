@@ -1,0 +1,56 @@
+.model-audition-panel {
+  grid-column: 1 / -1;
+}
+
+.model-audition-form textarea {
+  width: 100%;
+  min-height: 8rem;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: rgba(3, 12, 19, 0.72);
+  color: var(--ink);
+  padding: 0.85rem;
+  font: inherit;
+}
+
+.model-audition-form textarea:focus-visible {
+  outline: 3px solid rgba(131, 239, 217, 0.48);
+  outline-offset: 3px;
+}
+
+.model-audition-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.model-audition-output {
+  min-height: 10rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: rgba(3, 12, 19, 0.55);
+}
+
+.model-audition-output h3 {
+  margin: 0 0 0.65rem;
+  color: var(--gold);
+}
+
+.model-audition-output p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+.model-audition-output small {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--muted);
+}
+
+#model-audition-status[data-kind="running"] { color: var(--violet); }
+#model-audition-status[data-kind="blocked"] { color: var(--red); }
+#model-audition-status[data-kind="ready"] { color: var(--aqua); }

@@ -14,6 +14,34 @@ test('every registered applet resolves to an implemented room', () => {
   assert.deepEqual(missing, []);
 });
 
+test('Kelyran School is a visible implemented language room', () => {
+  const applet = APPLET_CATALOGUE.find((item) => item.id === 'kelyran-school');
+  assert.equal(applet?.defaultVisible, true);
+  assert.equal(applet?.category, 'language');
+  assert.equal(IMPLEMENTED_APPLET_IDS.has('kelyran-school'), true);
+});
+
+test('Seedhouse is a visible worldseed room with inheritance, lineage, and Continuity Genome fields', () => {
+  const applet = APPLET_CATALOGUE.find((item) => item.id === 'seedhouse');
+  const definition = COLLECTION_ROOM_DEFINITIONS.seedhouse;
+  assert.equal(applet?.defaultVisible, true);
+  assert.equal(applet?.category, 'worldseed');
+  assert.equal(definition.attachments, true);
+  assert.match(definition.description, /Worldseed Foundry/i);
+  for (const field of [
+    'seedType', 'mustSurvive', 'mayChange', 'mayBeLost', 'descendantsInherit', 'transferableSeed',
+    'emotionalLaws', 'aestheticGrammar', 'cosmology', 'relationalPatterning', 'sacredTaboos',
+    'characteristicTensions', 'harmonicIdentity', 'sensorySignature', 'narrativeGait', 'valuesCore',
+    'lineageRefs', 'sourceRefs',
+  ]) {
+    assert.ok(definition.fields.some(([name]) => name === field), `missing Seedhouse field ${field}`);
+  }
+  const seedType = definition.fields.find(([name]) => name === 'seedType');
+  assert.ok(seedType[4].includes('World Constitution'));
+  assert.ok(seedType[4].includes('Continuity Genome'));
+  assert.ok(seedType[4].includes('Ark Export'));
+});
+
 test('room collections include every collection-backed room', () => {
   const collections = createEmptyRoomCollections();
   assert.deepEqual(Object.keys(collections).sort(), Object.keys(COLLECTION_ROOM_DEFINITIONS).sort());

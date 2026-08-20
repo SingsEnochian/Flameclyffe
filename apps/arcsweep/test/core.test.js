@@ -55,4 +55,5 @@ test('builds a return record from the ratio captured when the arc began', () => 
 test('rejects malformed imported collections', () => {
   assert.throws(() => validateImportedState({ scripts: {} }), /scripts must be an array/);
   assert.throws(() => validateImportedState({ worlds: {} }), /worlds must be an array/);
+  assert.throws(() => validateImportedState({ houseglass: [] }), /Houseglass state must be an object/);
 });

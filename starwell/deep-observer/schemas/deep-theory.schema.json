@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/deep-theory.schema.json",
+  "title": "DEEPTheory Analytical Pattern Record",
+  "description": "Append-only analytical records for patterns, correlations, topology models, transition models, hypotheses and comparisons across receipted observations. DEEPTheory does not replace DEEPStory or DEEPTime.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset_kind",
+    "id",
+    "created_at",
+    "title",
+    "domain",
+    "theory_kind",
+    "status",
+    "source_refs",
+    "models",
+    "findings",
+    "source_integrity",
+    "review",
+    "authority"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "0.1.0" },
+    "dataset_kind": { "type": "string", "const": "deep_theory" },
+    "parallel_datasets": {
+      "type": "array",
+      "items": { "enum": ["DEEPStory", "DEEPTime"] },
+      "uniqueItems": true,
+      "default": ["DEEPStory", "DEEPTime"]
+    },
+    "id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "title": { "type": "string", "minLength": 1 },
+    "summary": { "type": ["string", "null"] },
+    "domain": { "type": "string", "minLength": 1 },
+    "theory_kind": {
+      "enum": ["correlation", "topology_model", "transition_model", "temporal_pattern", "hypothesis", "comparison", "other"]
+    },
+    "status": { "enum": ["candidate", "reviewed", "accepted", "superseded", "retired"] },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceRef" }
+    },
+    "models": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/model" }
+    },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "source_integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_sources_immutable", "analyses_append_only", "silent_canonicalisation_forbidden"],
+      "properties": {
+        "raw_sources_immutable": { "type": "boolean", "const": true },
+        "analyses_append_only": { "type": "boolean", "const": true },
+        "silent_canonicalisation_forbidden": { "type": "boolean", "const": true }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["human_review_required"],
+      "properties": {
+        "human_review_required": { "type": "boolean" },
+        "reviewed_by": { "type": ["string", "null"] },
+        "reviewed_at": { "type": ["string", "null"], "format": "date-time" },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["physical_claim", "canon_commit", "domain_semantics_explicit", "cross_domain_numeric_equivalence_assumed"],
+      "properties": {
+        "physical_claim": { "type": "boolean" },
+        "canon_commit": { "type": "boolean" },
+        "domain_semantics_explicit": { "type": "boolean", "const": true },
+        "cross_domain_numeric_equivalence_assumed": { "type": "boolean", "const": false }
+      }
+    },
+    "append_only_revisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["created_at", "kind", "text"],
+        "properties": {
+          "created_at": { "type": "string", "format": "date-time" },
+          "kind": { "enum": ["correction", "addition", "reinterpretation", "model_change", "source_change", "review_change", "retirement"] },
+          "text": { "type": "string" },
+          "author_id": { "type": ["string", "null"] },
+          "source_refs": { "type": "array", "items": { "type": "string" }, "default": [] }
+        }
+      },
+      "default": []
+    }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "dataset", "record_type"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "dataset": { "enum": ["DEEPTime", "DEEPStory", "PREMAQ", "Arcsweep", "Observer", "external", "other"] },
+        "record_type": { "enum": ["witnessed", "recorded", "derived", "interpreted", "correlated", "model", "unknown"] },
+        "checksum": { "type": ["string", "null"] },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "controlSemantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "role", "label", "source", "intentional"],
+      "properties": {
+        "key": { "enum": ["a", "b"] },
+        "role": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "unit": { "type": ["string", "null"] },
+        "source": { "type": "string", "minLength": 1 },
+        "intentional": { "type": "boolean" }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "equation", "control_semantics", "calibration_state", "physical_claim"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "equation": { "type": "string", "minLength": 1 },
+        "control_semantics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["a", "b"],
+          "properties": {
+            "a": { "$ref": "#/$defs/controlSemantic" },
+            "b": { "$ref": "#/$defs/controlSemantic" }
+          }
+        },
+        "calibration_state": { "enum": ["normal-form-only", "model-calibrated", "domain-calibrated"] },
+        "calibration_note": { "type": ["string", "null"] },
+        "physical_claim": { "type": "boolean" }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "text", "source_refs"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["regime", "branching", "hysteresis", "fold", "cusp", "correlation", "comparison", "limitation", "other"] },
+        "text": { "type": "string", "minLength": 1 },
+        "source_refs": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

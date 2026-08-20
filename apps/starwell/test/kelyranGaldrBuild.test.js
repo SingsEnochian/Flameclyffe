@@ -22,15 +22,18 @@ test('Kelyran Galdr page wires the instrument and Möbius renderer', async () =>
 });
 
 test('Kelyran Galdr instrument parses as JavaScript', () => {
-  const result = spawnSync(process.execPath, ['--check', instrumentPath], {
-    encoding: 'utf8',
-  });
+  const result = spawnSync(process.execPath, ['--check', instrumentPath], { encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr || result.stdout);
 });
 
-test('notation and capture contracts remain present', async () => {
+test('v1.8 trajectory notation and capture contracts remain present', async () => {
   const source = await readFile(instrumentPath, 'utf8');
-  assert.match(source, /kelyran\.galdr-score\/v0\.1/);
+  assert.match(source, /kelyran\.galdr-score\/v0\.2/);
+  assert.match(source, /hearthgate\.math-spine\/v1\.8/);
+  assert.match(source, /temporal369/);
+  assert.match(source, /observationCoherence/);
+  assert.match(source, /stateAddress/);
+  assert.match(source, /stratum/);
   assert.match(source, /compactNotation/);
   assert.match(source, /notationEvent/);
   assert.match(source, /start369/);

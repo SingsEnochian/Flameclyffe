@@ -1,6 +1,13 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run starwell:build",
   "outputDirectory": "dist/starwell",
+  "git": {
+    "deploymentEnabled": {
+      "codex/arcsweep-feedback-loop": false,
+      "feature/react-ion-engine-v0.1": false
+    }
+  },
   "rewrites": [
     {
       "source": "/templehouse/tesla-observatory",
