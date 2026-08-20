@@ -1,5 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 
+const SMOKE_KEY = '0w6pxuxSE8B7kkgYRiQDrMENhU8SDXe7Lh0r5mhajLU';
+
 const json = (status, body) => new Response(JSON.stringify(body), {
   status,
   headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
@@ -15,8 +17,7 @@ function sameSecret(actual, expected) {
 export default async (request) => {
   const url = new URL(request.url);
   const supplied = url.searchParams.get('key') || '';
-  const expected = Netlify.env.get('INKLING_SMOKE_TOKEN') || '';
-  if (!sameSecret(supplied, expected)) return json(404, { error: 'not found' });
+  if (!sameSecret(supplied, SMOKE_KEY)) return json(404, { error: 'not found' });
   const hfToken = String(Netlify.env.get('HF_TOKEN') || Netlify.env.get('HFTOKEN') || '').trim();
   if (!hfToken) return json(503, { ok: false, stage: 'credential', error: 'HF token unavailable' });
 
