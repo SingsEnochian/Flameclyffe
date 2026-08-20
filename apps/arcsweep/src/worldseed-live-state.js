@@ -2,6 +2,7 @@ import { compileWorldseed } from './worldseed.js';
 import { replayWorldseed } from './worldseed-replay.js';
 import { buildWorldLineageGraph, lineagePath } from './world-lineage.js';
 import { comparePossibleWorlds } from './possible-worlds.js';
+import { recordWorldBirth } from './world-registry-operations.js';
 
 export const WORLDSEED_LIVE_STATE_SCHEMA = 'arcsweep.worldseed-live-state/v1';
 export const WORLDSEED_FORK_RECEIPT_SCHEMA = 'arcsweep.worldseed-fork-receipt/v1';
@@ -120,8 +121,14 @@ export function forkWorldInState(state, {
     inheritedSeedhouseRecordIds: inheritedSeedhouseRecords.map((record) => record.id),
   };
   state.worldseedForkReceipts.unshift(receipt);
+  const worldBirthReceipt = recordWorldBirth(state, child, {
+    bornAt: createdAt,
+    source: 'worldseed-fork',
+    sourceRef: receipt.id,
+    seedFingerprint: seed.fingerprint,
+  });
 
-  return { state, seed, child, receipt, inheritedSeedhouseRecords };
+  return { state, seed, child, receipt, worldBirthReceipt, inheritedSeedhouseRecords };
 }
 
 export function receiptWorldseedReplay(state, worldId, expectedFingerprint, replayedAt = new Date().toISOString()) {
