@@ -1,3 +1,5 @@
+import { ensureWorldBirthReceipts } from './world-registry-operations.js';
+
 export function clampPositiveNumber(value, fallback = 1) {
   const number = Number(value);
   return Number.isFinite(number) && number > 0 ? number : fallback;
@@ -58,7 +60,7 @@ export function validateImportedState(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('Arcsweep import must be a JSON object.');
   }
-  for (const key of ['worlds', 'scripts', 'continuity', 'manifestations', 'returnHistory', 'feedbackCycles']) {
+  for (const key of ['worlds', 'scripts', 'continuity', 'manifestations', 'returnHistory', 'feedbackCycles', 'worldBirthReceipts']) {
     if (value[key] !== undefined && !Array.isArray(value[key])) {
       throw new Error(`Arcsweep ${key} must be an array.`);
     }
@@ -126,6 +128,18 @@ export function validateImportedState(value) {
           throw new Error(`Arcsweep transformationRequests ${worldId}.${key} must be an array.`);
         }
       }
+    }
+  }
+
+  if (Array.isArray(value.worlds) && value.worlds.length) {
+    const worldsWithStableIds = value.worlds.filter((world) => world && typeof world === 'object' && String(world.id || '').trim());
+    if (worldsWithStableIds.length) {
+      const birthState = {
+        worlds: worldsWithStableIds,
+        worldBirthReceipts: Array.isArray(value.worldBirthReceipts) ? value.worldBirthReceipts : [],
+      };
+      ensureWorldBirthReceipts(birthState, { originalWorlds: value.worlds });
+      value.worldBirthReceipts = birthState.worldBirthReceipts;
     }
   }
   return value;
