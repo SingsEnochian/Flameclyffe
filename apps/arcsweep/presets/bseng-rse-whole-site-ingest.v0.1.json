@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "arcsweep.ingest-primer/v0.1",
+  "primerId": "bseng-rse-whole-site-ingest",
+  "name": "Braun Science & Engineering RSE Whole-Site Research Ingest",
+  "scope": {
+    "appliesToAllCanons": false,
+    "worldIds": [],
+    "overlayOf": null
+  },
+  "sourcePolicy": {
+    "acceptedExtensions": [".html", ".htm", ".pdf", ".txt", ".md", ".json", ".xml"],
+    "copyIntoPrivateStore": true,
+    "hashAlgorithm": "sha256",
+    "preserveOriginalName": true,
+    "preserveRelativePath": true,
+    "automaticExternalReads": false,
+    "deduplicateByHash": true,
+    "maximumFileBytes": 104857600
+  },
+  "canonPolicy": {
+    "authorityLevels": ["reference", "author-note", "deprecated", "unknown"],
+    "statusValues": ["candidate", "retired", "reference-only", "unclassified"],
+    "neverOverwriteWithoutApproval": true,
+    "rawSourceIsImmutable": true,
+    "canonMayContainMultipleTimelines": true,
+    "variantsRemainNamed": true
+  },
+  "classification": {
+    "canonKinds": [
+      "research-theory",
+      "mathematics",
+      "physics-ontology",
+      "identity-continuity",
+      "phenomenology",
+      "ai-ethics",
+      "memory",
+      "epistemology",
+      "conversation-precursor",
+      "guest-author",
+      "site-meta",
+      "historical-version"
+    ],
+    "entityKinds": [
+      "paper",
+      "web-page",
+      "conversation",
+      "author",
+      "framework",
+      "principle",
+      "equation",
+      "term",
+      "version",
+      "doi",
+      "claim",
+      "application",
+      "source-note"
+    ],
+    "worldResolution": "explicit-first",
+    "timelineResolution": "preserve-all",
+    "relationshipResolution": "named-edges"
+  },
+  "extraction": {
+    "proposalOnly": true,
+    "requiredProvenance": [
+      "sourceId",
+      "sourceHash",
+      "sourceName",
+      "relativePath",
+      "page",
+      "heading",
+      "lineRange",
+      "quotedFragment",
+      "extractedAt",
+      "extractor"
+    ],
+    "extractors": [
+      "document-metadata",
+      "headings-and-sections",
+      "authors-and-credits",
+      "publication-and-update-dates",
+      "versions-and-dois",
+      "framework-tier",
+      "definitions-and-symbols",
+      "equations-and-constraints",
+      "identity-and-continuity-claims",
+      "ethics-and-epistemology-claims",
+      "supersession-and-lineage-language",
+      "references-and-citations",
+      "assets-and-attachments",
+      "contradiction-candidates",
+      "hearthfire-correspondence-candidates"
+    ],
+    "plainTextFallback": true,
+    "ocrAllowed": false,
+    "crossSourceSynthesis": "proposal-only"
+  },
+  "conflictPolicy": {
+    "detect": true,
+    "quarantine": true,
+    "resolutionModes": [
+      "keep-both-as-variants",
+      "promote-one",
+      "merge-with-notes",
+      "mark-unresolved",
+      "retire-older"
+    ],
+    "automaticWinnerSelection": false
+  },
+  "approvalPolicy": {
+    "approvalRequiredBeforeCanonWrite": true,
+    "batchApprovalAllowed": true,
+    "reversible": true,
+    "receiptRequired": true
+  },
+  "exportPolicy": {
+    "formats": ["json", "arcsweep-canon-json", "portable-canon-folder", "markdown"],
+    "includeSourceReceipts": true,
+    "includePrimer": true,
+    "sourceInclusionModes": ["none", "selected", "all"],
+    "redactionBeforeExport": false
+  }
+}
