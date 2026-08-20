@@ -61,7 +61,7 @@ test('authorised Helm compilation receipts route, residual, graph snapshot and t
   assert.equal(receipt.admissibility_residual.authority.route_admissibility_is_fulfilment, false);
 });
 
-test('unauthorised Helm compilation keeps the Ask receipted, compiles no route, and still records an unsafe route-envelope residual', async () => {
+test('unauthorised Helm compilation keeps route permission separate from geometric envelope admissibility', async () => {
   const receipt = await compileHelmReceipt({
     reaction: createEmptyReactionState(),
     world,
@@ -76,7 +76,11 @@ test('unauthorised Helm compilation keeps the Ask receipted, compiles no route, 
   assert.equal(receipt.transport, null);
   assert.match(receipt.route_error, /ask-not-authorised/);
   assert.equal(receipt.ask.consent.granted, false);
-  assert.equal(receipt.admissibility_residual.classification, 'ROUTE_ENVELOPE_RESIDUAL');
-  assert.ok(receipt.admissibility_residual.residual.residual_norm > 0);
+
+  // The proposed direct geometry may still lie inside its declared envelope.
+  // Permission remains a separate Helm gate and cannot be inferred from this residual.
+  assert.equal(receipt.admissibility_residual.classification, 'WITHIN_ROUTE_ENVELOPE');
+  assert.equal(receipt.admissibility_residual.residual.residual_norm, 0);
+  assert.equal(receipt.admissibility_residual.authority.route_admissibility_is_fulfilment, false);
   assert.equal(receipt.admissibility_residual.authority.within_route_envelope_is_fulfilment, false);
 });
