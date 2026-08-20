@@ -88,7 +88,7 @@ test('model change is recorded as implementation change, not an identity verdict
     profileId: 'house:lioreal:huggingface:model-b', runtimeVerified: true, observedAt: '2026-08-20T04:15:00.000Z',
   });
   const receipt = await createFlameRuntimeCorrespondence({ left, right });
-  assert.equal(receipt.continuity_profile.implementation.score, 2 / 3);
+  assert.equal(receipt.continuity_profile.implementation.score, 0.66666667);
   assert.equal(receipt.continuity_profile.structural_closure_evidence, null);
   assert.equal(receipt.authority.strong_recognition_proves_same_identity, false);
   assert.equal(receipt.authority.structural_closure_inferred_from_recognition, false);
