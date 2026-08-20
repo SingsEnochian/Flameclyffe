@@ -6,7 +6,10 @@ import {
   readHouseRuntimeToken,
   restoreHouseRuntimeSession,
 } from './house-runtime.js';
-import { readActiveRuntimeWorldContext } from './runtime-world-context.js';
+import {
+  bindRuntimeWorldContextMessage,
+  readActiveRuntimeWorldContext,
+} from './runtime-world-context.js';
 
 const STATE_EVENT = 'arcsweep:constellation-runtime-state';
 
@@ -103,6 +106,7 @@ export async function invokeConstellationRuntimeVoice({
     runtimeMetadata.world_id = resolvedWorldContext.identity_anchor.world_id;
     runtimeMetadata.world_context = resolvedWorldContext;
   }
+  const runtimeMessage = bindRuntimeWorldContextMessage(String(message).trim(), resolvedWorldContext);
 
   const startedAt = globalThis.performance?.now?.() ?? Date.now();
   const response = await fetchImpl(`/api/v1/flames/${route.route}/chat`, {
@@ -111,7 +115,7 @@ export async function invokeConstellationRuntimeVoice({
     credentials: 'same-origin',
     cache: 'no-store',
     body: JSON.stringify({
-      message: String(message).trim(),
+      message: runtimeMessage,
       session_id: sessionId || `arcsweep-${route.voiceId}-${Date.now()}`,
       context: Array.isArray(context) ? context : [],
       metadata: runtimeMetadata,
