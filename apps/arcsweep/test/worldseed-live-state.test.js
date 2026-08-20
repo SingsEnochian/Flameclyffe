@@ -7,6 +7,7 @@ import {
   receiptWorldseedReplay,
   worldseedLiveSnapshot,
 } from '../src/worldseed-live-state.js';
+import { WORLD_BIRTH_RECEIPT_SCHEMA } from '../src/world-registry-operations.js';
 
 function fixture() {
   return {
@@ -49,7 +50,7 @@ test('compiles the live state and reports genome and lineage coverage', () => {
   assert.equal(snapshot.sectionCounts.continuityGenome, 1);
 });
 
-test('forks a descendant into persistent state, links the parent, and inherits Seedhouse baseline', () => {
+test('forks a descendant into persistent state, links the parent, inherits Seedhouse baseline, and receipts its birth', () => {
   const state = fixture();
   const parentBefore = structuredClone(state.worlds[0]);
   const result = forkWorldInState(state, {
@@ -61,6 +62,13 @@ test('forks a descendant into persistent state, links the parent, and inherits S
   assert.deepEqual(state.worlds.find((world) => world.id === 'earth').descendantWorldIds, ['moon']);
   assert.equal(state.activeWorldId, 'moon');
   assert.equal(state.worldseedForkReceipts[0].childWorldId, 'moon');
+  assert.equal(result.worldBirthReceipt.schema, WORLD_BIRTH_RECEIPT_SCHEMA);
+  assert.equal(result.worldBirthReceipt.event, 'WORLD_BORN');
+  assert.equal(result.worldBirthReceipt.worldId, 'moon');
+  assert.equal(result.worldBirthReceipt.source, 'worldseed-fork');
+  assert.equal(result.worldBirthReceipt.sourceRef, result.receipt.id);
+  assert.equal(result.worldBirthReceipt.seedFingerprint, result.seed.fingerprint);
+  assert.equal(state.worldBirthReceipts[0].id, result.worldBirthReceipt.id);
   assert.equal(result.inheritedSeedhouseRecords.length, 2);
   assert.ok(result.inheritedSeedhouseRecords.every((record) => record.worldId === 'moon'));
   assert.ok(result.inheritedSeedhouseRecords.some((record) => record.inheritedFromSeedhouseRecordId === 'earth-genome'));
