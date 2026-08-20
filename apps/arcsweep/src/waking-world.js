@@ -3,7 +3,7 @@ import { createWorld } from './worlds.js';
 export const WAKING_WORLD_SCHEMA = 'arcsweep.waking-world/v1';
 export const TERRA_PRIME_NAME = 'Terra Prime';
 export const CURRENT_REALITY_ANCHOR_URL = 'https://app.notion.com/p/3a870290d9c481c5b8f2cdfb2cab70fc';
-export const CURRENT_REALITY_ANCHOR_REVISED_AT = '2026-07-25T19:11:27.741Z';
+export const CURRENT_REALITY_ANCHOR_REVISED_AT = '2026-08-20T20:49:26.216Z';
 
 const WAKE_NAMES = new Set(['terra prime', 'waking world', 'current reality']);
 
@@ -39,6 +39,7 @@ export function wakingWorldLiveEntries(state, { limit = 12 } = {}) {
 
 export function wakingWorldMetadata(world) {
   return {
+    ...(world?.wakingWorld && typeof world.wakingWorld === 'object' ? world.wakingWorld : {}),
     schema: WAKING_WORLD_SCHEMA,
     canonical_name: TERRA_PRIME_NAME,
     aliases: ['Waking World', 'Current Reality'],
@@ -49,7 +50,6 @@ export function wakingWorldMetadata(world) {
     },
     live_sources: ['arcsweep:waking-thread', 'house-runtime:observations', 'deep-time'],
     freshness_law: 'stable-anchor-plus-timestamped-live-state',
-    ...(world?.wakingWorld && typeof world.wakingWorld === 'object' ? world.wakingWorld : {}),
   };
 }
 
