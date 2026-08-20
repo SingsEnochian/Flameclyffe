@@ -46,7 +46,7 @@ export async function createDeepTheoryCandidateFromContinuityTrial({ trial, gene
         a: { key: 'a', role: 'baseline', label: 'Receipted operational baseline', source: trial.baseline_id, intentional: true },
         b: { key: 'b', role: 'observed-perturbation', label: 'Observed changed dimensions', source: trial.perturbation.perturbation_id, intentional: false },
       },
-      calibration_state: 'experiment-calibrated',
+      calibration_state: 'domain-calibrated',
       calibration_note: 'Threshold profile is baseline-derived and operational only. It is not an ontic identity boundary.',
       physical_claim: false,
     }],
