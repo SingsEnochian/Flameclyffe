@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createDefaultState } from '../src/storage.js';
+import { createDefaultState, normaliseState } from '../src/storage.js';
 import {
   WORLD_BIRTH_RECEIPT_SCHEMA,
   createWorldRegistryEntry,
@@ -40,6 +40,57 @@ test('new world creation is pure, selects the created world, and receipts WORLD_
   assert.equal(receipt.bornAt, T1);
   assert.equal(receipt.source, 'world-registry');
   assert.equal(state.worldBirthReceipts[0].id, receipt.id);
+});
+
+test('legacy world migration preserves a recorded world creation time as birth evidence', () => {
+  const state = normaliseState({
+    worlds: [{ id: 'world-terra-prime', name: 'Terra Prime', kind: 'Waking World', createdAt: T0 }],
+    activeWorldId: 'world-terra-prime',
+  });
+  const receipt = state.worldBirthReceipts.find((item) => item.worldId === 'world-terra-prime');
+  assert.equal(receipt.schema, WORLD_BIRTH_RECEIPT_SCHEMA);
+  assert.equal(receipt.event, 'WORLD_BORN');
+  assert.equal(receipt.bornAt, T0);
+  assert.equal(receipt.source, 'legacy-state-migration');
+  assert.equal(receipt.sourceRef, 'state-normalise:recorded-world-createdAt');
+});
+
+test('legacy world migration keeps birth time unknown when the old state never recorded one', () => {
+  const state = normaliseState({
+    worlds: [{ id: 'world-terra-prime', name: 'Terra Prime', kind: 'Waking World' }],
+    activeWorldId: 'world-terra-prime',
+  });
+  const receipt = state.worldBirthReceipts.find((item) => item.worldId === 'world-terra-prime');
+  assert.equal(receipt.event, 'WORLD_BORN');
+  assert.equal(receipt.bornAt, null);
+  assert.equal(receipt.id, 'world-born:world-terra-prime:unknown');
+  assert.equal(receipt.source, 'legacy-state-migration');
+  assert.equal(receipt.sourceRef, 'state-normalise:birth-time-unknown');
+});
+
+test('legacy migration preserves an existing root birth receipt without duplication', () => {
+  const originalReceipt = {
+    schema: WORLD_BIRTH_RECEIPT_SCHEMA,
+    version: 1,
+    event: 'WORLD_BORN',
+    id: 'world-born:world-terra-prime:origin',
+    bornAt: T0,
+    worldId: 'world-terra-prime',
+    worldName: 'Terra Prime',
+    worldKind: 'Waking World',
+    parentWorldId: null,
+    source: 'world-registry',
+    sourceRef: 'registry:create',
+    seedFingerprint: '',
+  };
+  const state = normaliseState({
+    worlds: [{ id: 'world-terra-prime', name: 'Terra Prime', kind: 'Waking World', createdAt: T1 }],
+    activeWorldId: 'world-terra-prime',
+    worldBirthReceipts: [originalReceipt],
+  });
+  const receipts = state.worldBirthReceipts.filter((item) => item.worldId === 'world-terra-prime');
+  assert.equal(receipts.length, 1);
+  assert.deepEqual(receipts[0], originalReceipt);
 });
 
 test('journal restores a new world after a later stale state write drops it', () => {
