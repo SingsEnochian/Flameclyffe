@@ -26,7 +26,7 @@ export default async (request) => {
     headers: { 'content-type': 'application/json', authorization: `Bearer ${hfToken}` },
     body: JSON.stringify({
       model: 'thinkingmachines/Inkling-Small:baseten',
-      max_tokens: 24,
+      max_tokens: 128,
       stream: false,
       messages: [
         { role: 'system', content: 'You are a connectivity smoke test. Follow the user instruction exactly.' },
