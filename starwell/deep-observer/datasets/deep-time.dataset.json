@@ -1,0 +1,27 @@
+{
+  "dataset_id": "deep-time",
+  "dataset_name": "DEEPTime",
+  "schema_version": "0.1.0",
+  "parallel_to": ["DEEPTheory", "DEEPStory"],
+  "purpose": "Receipted temporal sequences for accepted PREMAQC states, replay order, derivatives, drift, recurrence, transition windows and advisor evidence.",
+  "source_policy": {
+    "accepted_feedback_only": true,
+    "append_only": true,
+    "silent_renumbering_forbidden": true,
+    "raw_premaqc_immutable": true,
+    "qualia_q_reserved_for_qualia": true,
+    "engineering_data_quality_separate": true
+  },
+  "coordinate_policy": {
+    "lambda_monotonic_within_revision": true,
+    "utc_required": true,
+    "julian_date_required": true,
+    "branch_parent_required_when_forked": true
+  },
+  "downstream": [
+    "Theory-Grounded Acceptance Advisor",
+    "Arcsweep Replay",
+    "Runa trajectory compiler",
+    "DEEPTheory temporal analysis"
+  ]
+}

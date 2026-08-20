@@ -224,6 +224,14 @@
         <span class="hint">Powers GPT members (Vee/Caladnaur Lioreal).</span>
       </div>
       <div class="field">
+        <label>Hugging Face inference token <span class="opt">optional · Inkling</span></label>
+        <div class="pwd-wrap">
+          <input type="password" id="key-huggingface" placeholder="hf_…" autocomplete="off">
+          <button class="eye-btn" data-target="key-huggingface">👁</button>
+        </div>
+        <span class="hint">Powers Inkling-Small and future Hugging Face Inference Provider auditions. Requires Inference Providers permission; stored locally as HF_TOKEN.</span>
+      </div>
+      <div class="field">
         <label>Exa API key <span class="opt">optional</span></label>
         <div class="pwd-wrap">
           <input type="password" id="key-exa" placeholder="xxxxxxxx-xxxx-…" autocomplete="off">
@@ -315,7 +323,7 @@ const THEMES = [
   {id:'lochflame',      name:'Lochflame',         dot:'#40C8A8'},
   {id:'stonewood',      name:'Stonewood',         dot:'#B89A4E'},
   {id:'terra-aeterna',  name:'Terra Aeterna',     dot:'#C8A860'},
-  {id:'starfall',       name:'Starfall',          dot:'#C0A030'},
+  {id:'starfall',       name:'Starfall',           dot:'#C0A030'},
   {id:'moonwater',      name:'Moonwater',         dot:'#90B8E0'},
   {id:'void-lilac',     name:'Void Lilac',        dot:'#A880E0'},
   {id:'obsidian',       name:'Obsidian',          dot:'#6F9487'},
@@ -394,6 +402,13 @@ document.getElementById('btn-launch').addEventListener('click', async () => {
     const envVal  = row.querySelector('.custom-val').value.trim();
     if (envName && envVal) customFields.push({ name: envName, value: envVal });
   });
+
+  const huggingFaceToken = document.getElementById('key-huggingface').value.trim();
+  if (huggingFaceToken) {
+    const existing = customFields.find((entry) => entry.name === 'HF_TOKEN');
+    if (existing) existing.value = huggingFaceToken;
+    else customFields.push({ name: 'HF_TOKEN', value: huggingFaceToken });
+  }
 
   const cfg = {
     name:    document.getElementById('house-name').value.trim(),

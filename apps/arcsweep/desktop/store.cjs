@@ -168,6 +168,60 @@ function resolveAttachment(paths, attachment) {
   return path.join(paths.attachmentDir, storedName);
 }
 
+async function readAttachmentPayload(paths, attachment) {
+  await ensureStore(paths);
+  const target = resolveAttachment(paths, attachment);
+  const bytes = await fsp.readFile(target);
+  const digest = sha256(bytes);
+  if (attachment?.sha256 && attachment.sha256 !== digest) {
+    throw new Error(`Attachment ${attachment.name || attachment.id || 'file'} failed its stored SHA-256 check.`);
+  }
+  return {
+    schema: 'arcsweep.worldseed-binary-entry/v1',
+    attachmentId: attachment?.id || null,
+    name: attachment?.name || path.basename(target),
+    extension: String(attachment?.extension || path.extname(target)).slice(0, 12).toLowerCase(),
+    size: bytes.length,
+    sha256: digest,
+    base64: bytes.toString('base64'),
+  };
+}
+
+async function writeAttachmentPayload(paths, payload) {
+  await ensureStore(paths);
+  if (!payload || payload.schema !== 'arcsweep.worldseed-binary-entry/v1') {
+    throw new Error('Worldseed attachment payload has an unsupported schema.');
+  }
+  if (typeof payload.base64 !== 'string' || !payload.base64) throw new Error('Worldseed attachment payload is empty.');
+  const bytes = Buffer.from(payload.base64, 'base64');
+  const digest = sha256(bytes);
+  if (payload.sha256 && payload.sha256 !== digest) throw new Error(`Worldseed attachment ${payload.name || payload.attachmentId || 'file'} failed SHA-256 verification.`);
+  if (Number.isFinite(Number(payload.size)) && Number(payload.size) !== bytes.length) throw new Error(`Worldseed attachment ${payload.name || 'file'} failed byte-length verification.`);
+
+  const rawExt = String(payload.extension || path.extname(payload.name || '')).toLowerCase();
+  const extension = /^\.[a-z0-9]{1,11}$/.test(rawExt) ? rawExt : '';
+  const id = crypto.randomUUID();
+  const storedName = `${id}${extension}`;
+  const destination = path.join(paths.ingestDir, storedName);
+  await fsp.writeFile(destination, bytes);
+  const receipt = {
+    id,
+    name: path.basename(String(payload.name || storedName)),
+    storedName,
+    relativePath: path.join('ingest', storedName),
+    size: bytes.length,
+    extension,
+    sha256: digest,
+    canonStatus: 'non-canon',
+    reviewStatus: 'unreviewed',
+    sourceClass: 'worldseed-ark-import',
+    importedFromAttachmentId: payload.attachmentId || null,
+    addedAt: new Date().toISOString(),
+  };
+  await appendReceipt(paths, { action: 'worldseed-attachment-import', ...receipt });
+  return receipt;
+}
+
 module.exports = {
   appendReceipt,
   copyAttachment,
@@ -175,10 +229,12 @@ module.exports = {
   createStorePaths,
   ensureStore,
   listBackups,
+  readAttachmentPayload,
   readState,
   resolveAttachment,
   restoreBackup,
   rotateBackups,
   sha256,
+  writeAttachmentPayload,
   writeStateAtomic,
 };

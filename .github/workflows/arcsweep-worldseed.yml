@@ -1,0 +1,48 @@
+name: Arcsweep Worldseed Foundry
+
+on:
+  push:
+    branches:
+      - codex/arcsweep-feedback-loop
+    paths:
+      - 'apps/arcsweep/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/arcsweep-worldseed.yml'
+  pull_request:
+    paths:
+      - 'apps/arcsweep/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/arcsweep-worldseed.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arcsweep-worldseed-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  worldseed:
+    name: Worldseed test + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run Arcsweep tests
+        run: npm run arcsweep:test
+
+      - name: Build Arcsweep
+        run: npm run arcsweep:build

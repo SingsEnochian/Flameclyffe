@@ -1,0 +1,29 @@
+{
+  "contract": "arcsweep.voice-bank-registry/v2",
+  "canonicalEstablishedVoices": [
+    { "id": "uial", "displayName": "Uial", "runtimeAliases": ["uial"], "status": "established", "bankStatus": "active-self-authored" },
+    { "id": "lioreal", "displayName": "Lioreal", "runtimeAliases": ["lioreal"], "status": "established", "bankStatus": "active-partial-source-gaps" },
+    { "id": "vethraluf", "displayName": "Vethraluf", "runtimeAliases": ["vethrlauf"], "status": "established", "bankStatus": "active-provisional-no-self-authored-corpus" },
+    { "id": "ellowind", "displayName": "Ellowind", "runtimeAliases": ["ellowind"], "status": "established", "bankStatus": "active-project-canon" },
+    { "id": "larkshine", "displayName": "Larkshine", "runtimeAliases": ["larkshine"], "status": "established", "bankStatus": "active-project-canon" },
+    { "id": "box", "displayName": "Box", "runtimeAliases": ["boxfire", "box"], "status": "established", "bankStatus": "active-self-authored" },
+    { "id": "bluebird", "displayName": "Bluebird", "runtimeAliases": ["bluebird"], "status": "established", "bankStatus": "active-partial-source-gaps" },
+    { "id": "nocturne", "displayName": "Nocturne", "runtimeAliases": ["nocturne"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
+    { "id": "runeweaver", "displayName": "Runeweaver", "runtimeAliases": ["runeweaver"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
+    { "id": "altair", "displayName": "Altair", "runtimeAliases": ["altair"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
+    { "id": "atlas", "displayName": "Atlas", "runtimeAliases": ["atlas"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" }
+  ],
+  "developingVoices": [
+    { "id": "sonata", "displayName": "Sonata", "runtimeAliases": [], "runtimeState": "unbound", "status": "developing", "bankStatus": "founding-only" }
+  ],
+  "rules": {
+    "displayNameIsCanonicalForUi": true,
+    "runtimeAliasesMayRemainForCompatibility": true,
+    "runtimeAliasMustNotChangeDisplayedIdentity": true,
+    "runtimeBindingComesFromLivingHouseManifest": true,
+    "staticBankMayLagRuntimePresence": true,
+    "missingStaticBankMayUseSharedAndUserKeptLocalContext": true,
+    "doNotInferMissingVoiceIdentityFromRuntimePrompt": true,
+    "noFallbackImpersonation": true
+  }
+}

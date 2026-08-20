@@ -24,7 +24,44 @@ test('multistable region exposes two stable branches separated by an unstable br
 test('intention remains distinct from PREMAQC Agency in the observation contract', () => {
   const observation = analyseCuspCatastrophe({ structure: -1, intention: 0 });
   assert.equal(observation.epistemic.intention_is_premaqc_agency, false);
+  assert.equal(observation.epistemic.control_b_is_intention, true);
   assert.equal(observation.epistemic.physical_claim, false);
+});
+
+test('domain-general controls do not manufacture intention for natural systems', () => {
+  const semantics = {
+    a: {
+      role: 'envelope-density',
+      label: 'Envelope density',
+      unit: 'normalised',
+      source: 'model-input',
+      intentional: false,
+    },
+    b: {
+      role: 'accretion-rate',
+      label: 'Accretion rate',
+      unit: 'normalised',
+      source: 'model-input',
+      intentional: false,
+    },
+  };
+  const observation = analyseCuspCatastrophe({
+    controlA: -1,
+    controlB: 0.05,
+    controlSemantics: semantics,
+    orderParameter: 1,
+    previous: { controls: { a: -1, b: -0.05 } },
+  });
+
+  assert.equal(observation.controls.a, -1);
+  assert.equal(observation.controls.b, 0.05);
+  assert.equal(observation.control_semantics.a.role, 'envelope-density');
+  assert.equal(observation.control_semantics.b.role, 'accretion-rate');
+  assert.equal(observation.control_semantics.b.intentional, false);
+  assert.equal(observation.history.control_b_direction, 'increasing');
+  assert.equal(observation.history.intention_direction, null);
+  assert.equal(observation.epistemic.control_b_is_intention, false);
+  assert.equal(observation.epistemic.controls_are_domain_semantic, true);
 });
 
 test('hysteresis requires opposite sweeps at comparable controls on different stable branches', () => {
@@ -44,4 +81,29 @@ test('hysteresis requires opposite sweeps at comparable controls on different st
   assert.equal(trace.hysteresis_detected, true);
   assert.equal(trace.witnesses.length, 1);
   assert.notEqual(trace.witnesses[0].left_branch, trace.witnesses[0].right_branch);
+});
+
+test('hysteresis detector follows generic control-b sweep direction as well as BAI intention sweeps', () => {
+  const semantics = {
+    a: { role: 'density', label: 'Density', intentional: false },
+    b: { role: 'forcing', label: 'External forcing', intentional: false },
+  };
+  const increasing = analyseCuspCatastrophe({
+    controlA: -1,
+    controlB: 0,
+    controlSemantics: semantics,
+    orderParameter: 1,
+    previous: { controls: { a: -1, b: -0.1 } },
+  });
+  const decreasing = analyseCuspCatastrophe({
+    controlA: -1,
+    controlB: 0,
+    controlSemantics: semantics,
+    orderParameter: -1,
+    previous: { controls: { a: -1, b: 0.1 } },
+  });
+  const trace = analyseCuspTrace([increasing, decreasing]);
+  assert.equal(trace.hysteresis_detected, true);
+  assert.equal(trace.epistemic.requires_opposite_control_b_sweeps, true);
+  assert.equal(trace.witnesses[0].control_semantics.b.label, 'External forcing');
 });

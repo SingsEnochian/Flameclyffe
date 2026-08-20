@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "arkfire.module/v1",
+  "moduleId": "hearthgate.houseglass",
+  "canonicalName": "Houseglass",
+  "version": "1.0.0",
+  "status": "IMPLEMENTED_IN_ARCSWEEP_ADOPTABLE_BY_OTHER_ORGANS",
+  "owner": "Rowan",
+  "description": "A summoned, consent-governed, dockable House swarm surface shared by every Flameclyffe organ.",
+  "contracts": [
+    "hearthgate.houseglass/v1",
+    "hearthgate.houseglass-receipt/v1",
+    "hearthgate.persona-integrity-profile/v1",
+    "hearthgate.persona-integrity-review/v1",
+    "hearthgate.presence/v1",
+    "hearthgate.flame-corpus/v1",
+    "hearthgate.flame-training-receipt/v1"
+  ],
+  "organs": [
+    "hearthgate.starwell",
+    "arkfire.arcsweep",
+    "hearthgate.bifrost",
+    "hearthgate.runa",
+    "hearthgate.records",
+    "hearthgate.commons",
+    "hearthgate.feedback"
+  ],
+  "sharedDependencies": [
+    "hearthgate:house-runtime-session/v1",
+    "constellation voice registry",
+    "House Runtime Flame chat routes"
+  ],
+  "authority": {
+    "summonedOnly": true,
+    "silentCanonCommit": false,
+    "silentFileWrite": false,
+    "silentSettingsWrite": false,
+    "silentCommit": false,
+    "silentDeploy": false,
+    "silentExternalMessage": false,
+    "voiceRefusalValid": true,
+    "humanReviewRequired": true
+  },
+  "integration": {
+    "sharedContract": "hearth/houseglass.js",
+    "firstAdapter": "apps/arcsweep/src/houseglass.js",
+    "scopeFields": ["organId", "organLabel", "worldId", "worldName", "roomId", "sectionId", "sectionLabel"],
+    "layoutModes": ["float", "dock-section", "dock-right"],
+    "mobileLayout": "bottom-sheet",
+    "maximumRoutes": 3,
+    "receiptRule": "one synthesis over inspectable contributor receipts"
+  },
+  "integrityLens": {
+    "sharedContract": "hearth/persona-integrity.js",
+    "firstProfile": "hearth/personas/altair.js",
+    "baselineResultGlyphComparison": true,
+    "verbatimEvidenceRequiredByReviewPractice": true,
+    "objectivePersonaMeasurement": false,
+    "automaticRouteBlock": false
+  }
+}

@@ -3,19 +3,214 @@ import { HOUSE_DR_BUNDLE } from './house-dr-bundle.js';
 import { applyHouseDrBundle } from './house-dr-library.js';
 import { createEmptyRoomCollections, normaliseRoomCollections } from './rooms.js';
 import { createWorld, normaliseWorld } from './worlds.js';
+import {
+  createDefaultHouseglassSettings,
+  createDefaultHouseglassState,
+  normaliseHouseglassSettings,
+  normaliseHouseglassState,
+} from './houseglass.js';
+import { createDefaultKelyranSchool, normaliseKelyranSchool } from './kelyran-school.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
+export const OBSERVATORY_MIRROR_KEY = 'hearthgate.arcsweep.domain-control-bench.v1';
 const desktop = typeof window !== 'undefined' ? (window.arcsweepDesktop ?? window.arcsweep ?? null) : null;
+const stateExtensionSnapshots = new Map();
+
+export function setStateExtensionSnapshot(key, value) {
+  if (!key || typeof key !== 'string') throw new TypeError('State extension key is required.');
+  if (value === undefined) {
+    stateExtensionSnapshots.delete(key);
+    return null;
+  }
+  const snapshot = structuredClone(value);
+  stateExtensionSnapshots.set(key, snapshot);
+  return structuredClone(snapshot);
+}
+
+export function clearStateExtensionSnapshot(key) {
+  return stateExtensionSnapshots.delete(key);
+}
+
+export function applyStateExtensionSnapshots(state) {
+  if (!state || typeof state !== 'object' || Array.isArray(state)) throw new TypeError('Arcsweep state object is required.');
+  for (const [key, value] of stateExtensionSnapshots.entries()) state[key] = structuredClone(value);
+  return state;
+}
 
 function uid(prefix = 'item') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+export function createEmptyObservatoryStore() {
+  return {
+    version: 1,
+    custom_profiles: [],
+    sweeps: [],
+    theory_candidates: [],
+    theory_reviews: [],
+    deep_time_records: [],
+    deep_time_replays: [],
+    advisor_receipts: [],
+    domain_mappings: [],
+    runa_suggestions: [],
+    runa_renderer_candidates: [],
+    runa_renderer_reviews: [],
+    runa_preview_palettes: [],
+    runa_preview_plans: [],
+    runa_preview_renders: [],
+    runa_preview_evidence_arms: [],
+    runa_preview_observation_links: [],
+    provenance_exports: [],
+    integrity_reports: [],
+    active_profile_id: null,
+    migration: {
+      legacy_local_storage_imported_at: null,
+    },
+  };
+}
+
+export function normaliseObservatoryStore(value) {
+  const defaults = createEmptyObservatoryStore();
+  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const arrayKeys = [
+    'custom_profiles',
+    'sweeps',
+    'theory_candidates',
+    'theory_reviews',
+    'deep_time_records',
+    'deep_time_replays',
+    'advisor_receipts',
+    'domain_mappings',
+    'runa_suggestions',
+    'runa_renderer_candidates',
+    'runa_renderer_reviews',
+    'runa_preview_palettes',
+    'runa_preview_plans',
+    'runa_preview_renders',
+    'runa_preview_evidence_arms',
+    'runa_preview_observation_links',
+    'provenance_exports',
+    'integrity_reports',
+  ];
+  const result = {
+    ...defaults,
+    ...input,
+    version: 1,
+    active_profile_id: typeof input.active_profile_id === 'string' ? input.active_profile_id : null,
+    migration: {
+      ...defaults.migration,
+      ...(input.migration && typeof input.migration === 'object' ? input.migration : {}),
+    },
+  };
+  for (const key of arrayKeys) result[key] = Array.isArray(input[key]) ? structuredClone(input[key]) : [];
+  return result;
+}
+
+function observatoryHasData(store) {
+  const value = normaliseObservatoryStore(store);
+  return Boolean(
+    value.active_profile_id
+    || value.custom_profiles.length
+    || value.sweeps.length
+    || value.theory_candidates.length
+    || value.theory_reviews.length
+    || value.deep_time_records.length
+    || value.deep_time_replays.length
+    || value.advisor_receipts.length
+    || value.domain_mappings.length
+    || value.runa_suggestions.length
+    || value.runa_renderer_candidates.length
+    || value.runa_renderer_reviews.length
+    || value.runa_preview_palettes.length
+    || value.runa_preview_plans.length
+    || value.runa_preview_renders.length
+    || value.runa_preview_evidence_arms.length
+    || value.runa_preview_observation_links.length
+    || value.provenance_exports.length
+    || value.integrity_reports.length
+  );
+}
+
+function readLegacyObservatoryMirror() {
+  try {
+    const parsed = JSON.parse(globalThis.localStorage?.getItem(OBSERVATORY_MIRROR_KEY) || 'null');
+    return parsed?.version === 1 ? normaliseObservatoryStore(parsed) : null;
+  } catch {
+    return null;
+  }
+}
+
+function mirrorObservatory(store) {
+  try {
+    globalThis.localStorage?.setItem(OBSERVATORY_MIRROR_KEY, JSON.stringify(normaliseObservatoryStore(store)));
+  } catch {}
+}
+
+function migrateLegacyObservatory(state) {
+  const current = normaliseObservatoryStore(state.observatory);
+  const legacy = readLegacyObservatoryMirror();
+  if (observatoryHasData(current) || !legacy || !observatoryHasData(legacy)) {
+    state.observatory = current;
+    return false;
+  }
+  state.observatory = {
+    ...legacy,
+    migration: {
+      ...(legacy.migration || {}),
+      legacy_local_storage_imported_at: new Date().toISOString(),
+    },
+  };
+  return true;
+}
+
+function createEmptyFeedbackQueueState() {
+  return {
+    schema: 'arcsweep.feedback-cycle-queue/v1',
+    version: 1,
+    entries: {},
+    receipts: [],
+    updated_at: null,
+  };
+}
+
+function normaliseFeedbackQueueState(value) {
+  const defaults = createEmptyFeedbackQueueState();
+  if (!value || typeof value !== 'object' || Array.isArray(value) || value.schema !== defaults.schema) return defaults;
+  return {
+    ...defaults,
+    entries: value.entries && typeof value.entries === 'object' && !Array.isArray(value.entries) ? structuredClone(value.entries) : {},
+    receipts: Array.isArray(value.receipts) ? structuredClone(value.receipts) : [],
+    updated_at: typeof value.updated_at === 'string' ? value.updated_at : null,
+  };
+}
+
+export function createEmptyTransformationRequestState() {
+  return { version: 1, byWorld: {} };
+}
+
+export function normaliseTransformationRequestState(value) {
+  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const byWorld = input.byWorld && typeof input.byWorld === 'object' && !Array.isArray(input.byWorld)
+    ? structuredClone(input.byWorld)
+    : {};
+  for (const [worldId, record] of Object.entries(byWorld)) {
+    if (!record || typeof record !== 'object' || Array.isArray(record)) {
+      delete byWorld[worldId];
+      continue;
+    }
+    record.requests = Array.isArray(record.requests) ? record.requests : [];
+    record.responses = Array.isArray(record.responses) ? record.responses : [];
+    record.circuits = Array.isArray(record.circuits) ? record.circuits : [];
+  }
+  return { version: 1, byWorld };
+}
+
 export function createDefaultState() {
   const now = new Date().toISOString();
   const world = createWorld(uid('world'), now);
+  const houseglassSettings = createDefaultHouseglassSettings();
   return {
-    version: '0.2.1',
+    version: '0.3.0',
     settings: {
       crLabel: 'Waking World',
       drLabel: 'Desired Reality',
@@ -26,6 +221,7 @@ export function createDefaultState() {
       largeText: false,
       highContrast: false,
       fontScale: 1,
+      houseglass: houseglassSettings,
     },
     worlds: [world],
     activeWorldId: world.id,
@@ -55,7 +251,12 @@ export function createDefaultState() {
     },
     returnHistory: [],
     feedbackCycles: [],
+    feedbackQueue: createEmptyFeedbackQueueState(),
+    transformationRequests: createEmptyTransformationRequestState(),
     premaqcByWorld: {},
+    observatory: createEmptyObservatoryStore(),
+    houseglass: createDefaultHouseglassState(houseglassSettings),
+    kelyranSchool: createDefaultKelyranSchool(now),
     houseBundles: [],
     provenance: {
       createdAt: now,
@@ -99,11 +300,17 @@ export function normaliseState(value) {
     firstWorld.identity = { ...firstWorld.identity, ...imported.appearance };
   }
 
+  const settings = {
+    ...defaults.settings,
+    ...(imported.settings || {}),
+    houseglass: normaliseHouseglassSettings(imported.settings?.houseglass),
+  };
+
   return {
     ...defaults,
     ...imported,
-    version: '0.2.1',
-    settings: { ...defaults.settings, ...(imported.settings || {}) },
+    version: '0.3.0',
+    settings,
     worlds,
     activeWorldId,
     session,
@@ -114,7 +321,12 @@ export function normaliseState(value) {
     appearance: { ...defaults.appearance, ...(imported.appearance || {}) },
     returnHistory: Array.isArray(imported.returnHistory) ? imported.returnHistory : [],
     feedbackCycles: Array.isArray(imported.feedbackCycles) ? imported.feedbackCycles : [],
+    feedbackQueue: normaliseFeedbackQueueState(imported.feedbackQueue),
+    transformationRequests: normaliseTransformationRequestState(imported.transformationRequests),
     premaqcByWorld: imported.premaqcByWorld && typeof imported.premaqcByWorld === 'object' ? imported.premaqcByWorld : {},
+    observatory: normaliseObservatoryStore(imported.observatory),
+    houseglass: normaliseHouseglassState(imported.houseglass, settings.houseglass),
+    kelyranSchool: normaliseKelyranSchool(imported.kelyranSchool),
     houseBundles: Array.isArray(imported.houseBundles) ? imported.houseBundles : [],
     provenance: {
       ...defaults.provenance,
@@ -155,40 +367,68 @@ export async function loadState() {
     const legacy = result?.state ? null : readBrowserState();
     const initial = result?.state || legacy || createDefaultState();
     const installed = installCurrentHouseDrLibrary(initial);
-    if (installed.changed) {
-      if (result?.state && desktop.createBackup) {
-        await desktop.createBackup('before-house-dr-library-update').catch(() => null);
+    const observatoryMigrated = migrateLegacyObservatory(installed.state);
+    applyStateExtensionSnapshots(installed.state);
+    const shouldSave = installed.changed || observatoryMigrated || !result?.state;
+    if (shouldSave) {
+      if (result?.state && desktop.createBackup && (installed.changed || observatoryMigrated)) {
+        await desktop.createBackup(observatoryMigrated ? 'before-observatory-state-migration' : 'before-house-dr-library-update').catch(() => null);
       }
       await desktop.saveState(installed.state, {
-        reason: result?.state ? 'house-dr-library-update' : (legacy ? 'browser-migration-house-library' : 'first-run-house-library'),
-        bundleId: installed.receipt.id,
-        bundleVersion: installed.receipt.version,
+        reason: observatoryMigrated
+          ? 'observatory-state-migration'
+          : installed.changed
+            ? (result?.state ? 'house-dr-library-update' : (legacy ? 'browser-migration-house-library' : 'first-run-house-library'))
+            : (legacy ? 'browser-migration' : 'first-run'),
+        bundleId: installed.receipt?.id ?? null,
+        bundleVersion: installed.receipt?.version ?? null,
       });
-    } else if (!result?.state) {
-      await desktop.saveState(installed.state, { reason: legacy ? 'browser-migration' : 'first-run' });
     }
+    mirrorObservatory(installed.state.observatory);
     return installed.state;
   }
 
   const installed = installCurrentHouseDrLibrary(readBrowserState() || createDefaultState());
-  if (installed.changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(installed.state));
+  const observatoryMigrated = migrateLegacyObservatory(installed.state);
+  applyStateExtensionSnapshots(installed.state);
+  if (installed.changed || observatoryMigrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(installed.state));
+  mirrorObservatory(installed.state.observatory);
   return installed.state;
 }
 
 let saveChain = Promise.resolve();
 export function saveState(state, meta = {}) {
+  applyStateExtensionSnapshots(state);
   state.provenance = {
     ...(state.provenance || {}),
     updatedAt: new Date().toISOString(),
     storage: desktop ? 'desktop-local-store' : 'browser-development-fallback',
   };
+  state.version = '0.3.0';
+  state.observatory = normaliseObservatoryStore(state.observatory);
+  state.feedbackQueue = normaliseFeedbackQueueState(state.feedbackQueue);
+  state.transformationRequests = normaliseTransformationRequestState(state.transformationRequests);
+  state.kelyranSchool = normaliseKelyranSchool(state.kelyranSchool);
   const snapshot = JSON.parse(JSON.stringify(state));
+  mirrorObservatory(snapshot.observatory);
   if (desktop?.saveState) {
     saveChain = saveChain.catch(() => {}).then(() => desktop.saveState(snapshot, meta));
     return saveChain;
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
   return Promise.resolve({ ok: true, mode: 'browser-development-fallback' });
+}
+
+let observatorySaveChain = Promise.resolve();
+export function persistObservatoryStore(store, meta = {}) {
+  const snapshot = normaliseObservatoryStore(store);
+  mirrorObservatory(snapshot);
+  observatorySaveChain = observatorySaveChain.catch(() => {}).then(async () => {
+    const state = await loadState();
+    state.observatory = snapshot;
+    return saveState(state, { reason: 'observatory-store-update', ...meta });
+  });
+  return observatorySaveChain;
 }
 
 export function newId(prefix) {
@@ -209,6 +449,7 @@ function browserDownload(state) {
 }
 
 export async function exportState(state) {
+  applyStateExtensionSnapshots(state);
   return desktop?.exportState ? desktop.exportState(state) : browserDownload(state);
 }
 
@@ -221,7 +462,9 @@ export async function importState(file = null) {
     const text = await file.text();
     imported = JSON.parse(text);
   }
-  return imported ? installCurrentHouseDrLibrary(imported).state : null;
+  const state = imported ? installCurrentHouseDrLibrary(imported).state : null;
+  if (state) applyStateExtensionSnapshots(state);
+  return state;
 }
 
 export async function getStorageInfo() {
@@ -240,7 +483,9 @@ export async function listBackups() {
 export async function restoreBackup(name) {
   if (!desktop?.restoreBackup) return null;
   const result = await desktop.restoreBackup(name);
-  return result?.state ? installCurrentHouseDrLibrary(result.state).state : null;
+  const state = result?.state ? installCurrentHouseDrLibrary(result.state).state : null;
+  if (state) applyStateExtensionSnapshots(state);
+  return state;
 }
 
 export async function addAttachments() {

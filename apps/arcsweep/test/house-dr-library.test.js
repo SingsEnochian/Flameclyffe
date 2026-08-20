@@ -35,45 +35,47 @@ test('the bundle preserves Notion status and canon boundaries', () => {
   assert.match(sourceIngest.canonBoundary, /Protagonist.*remain open authored fields/i);
 });
 
-test('Kestrelle al’Var is canonical and earlier names remain provenance only', () => {
+test('Kestrelle al’Valari is canonical and older names remain provenance only', () => {
   const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
   const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
   const script = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
-  assert.equal(world.identity.name, 'Kestrelle al’Var');
-  assert.equal(world.houseProfile.protagonist, 'Kestrelle al’Var');
-  assert.equal(script.name, 'Ta’veren Vaen 01 — Kestrelle al’Var');
-  assert.match(script.content, /I am Kestrelle al’Var\./);
-  assert.match(script.content, /Kestrelle al’Valari, are provenance only/);
+  assert.equal(world.identity.name, 'Kestrelle al’Valari');
+  assert.equal(world.houseProfile.protagonist, 'Kestrelle al’Valari');
+  assert.equal(script.name, 'Ta’veren Vaen 01 — Kestrelle al’Valari');
+  assert.match(script.content, /I am Kestrelle al’Valari\./);
+  assert.match(script.content, /Kestrelle al’Var.*provenance only/i);
+  assert.doesNotMatch(script.content, /Kestrelle al’Valari, are provenance only/);
 });
 
-test('Ta’veren Vaen carries the Early Industrial Fourth Age technology baseline', () => {
+test('Ta’veren Vaen uses the Age of Restoration later-Turning canon while technology remains open', () => {
   const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
   const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
   const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
   const kestrelle = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
-  assert.match(world.description, /approximately two thousand years after the Last Battle/i);
+  assert.match(world.kind, /Age of Restoration/i);
+  assert.match(world.kind, /later Turning/i);
+  assert.match(world.description, /approximately two thousand years after Rand al’Thor/i);
+  assert.match(world.description, /technology baseline.*open/i);
+  assert.match(world.rules, /Do not inherit the superseded Fourth Age or fixed early-industrial premise/i);
+  assert.match(wiki.content, /Current canon overlay/i);
+  assert.match(wiki.content, /technology baseline.*deliberately open/i);
+  assert.match(kestrelle.content, /Current canon overlay/i);
+  assert.match(kestrelle.content, /Age of Restoration/i);
+});
+
+test('White Tower continuity survives into the later Turning rather than becoming an Aes Sedai re-emergence story', () => {
+  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
+  const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
+  const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
+  const kestrelle = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
+  assert.match(world.kind, /later Turning/);
   assert.match(world.description, /Tar Valon and the White Tower endure/);
-  assert.match(world.history, /Technology is advancing faster than institutions/);
-  assert.match(world.rules, /archaeological technologies, not everyday conveniences/);
-  for (const term of ['experimental railways', 'Power-assisted message relays', 'Flintlock firearms', 'Medicine', 'Earlier-age remnants']) {
-    assert.match(wiki.content, new RegExp(term, 'i'));
-  }
-  assert.match(kestrelle.content, /What I carry on the road/);
-  assert.match(kestrelle.content, /healer's satchel/);
-});
-
-test('White Tower continuity and Kestrelle recruitment replace the discarded later-Turning premise', () => {
-  const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
-  const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
-  const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
-  const kestrelle = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
-  assert.match(world.kind, /Fourth Age/);
+  assert.match(world.history, /White Tower and Black Tower survive/);
   assert.match(wiki.content, /White Tower actively recruits/);
   assert.match(wiki.content, /Egwene al’Vere/);
   assert.match(wiki.content, /Cadsuane Melaidhrin/);
   assert.match(kestrelle.content, /fully recognised Wise Woman/);
   assert.match(kestrelle.content, /Yellow and Green/);
-  assert.doesNotMatch(`${world.description}\n${world.history}\n${world.rules}\n${wiki.content}\n${kestrelle.content}`, /later Turning|long after the Fourth Age|re-emergence of Aes Sedai|No surviving institution owns it/i);
 });
 
 test('clean saidin supports sovereign Towers, consent-bound circles, and Kestrelle’s Asha’man mirror', () => {
@@ -81,8 +83,8 @@ test('clean saidin supports sovereign Towers, consent-bound circles, and Kestrel
   const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
   const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
   const kestrelle = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
-  assert.match(world.history, /Saidin has remained clean/);
-  assert.match(world.rules, /neither a subordinate White Tower annex nor merely a military barracks/);
+  assert.match(world.history, /Saidin remains clean/);
+  assert.match(world.rules, /White and Black Towers remain sovereign/);
   assert.match(wiki.content, /The White and Black Towers remain sovereign/);
   assert.match(wiki.content, /explicit consent for linking/);
   assert.match(wiki.content, /Green field companies/);
@@ -101,7 +103,7 @@ test('clean saidin supports sovereign Towers, consent-bound circles, and Kestrel
   assert.match(kestrelle.content, /Choosing Yellow would not prevent me from working regularly with Green field companies/);
 });
 
-test('the Fourth Age Black Tower has a complete institutional backbone without flattening open history', () => {
+test('the Age of Restoration Black Tower retains its institutional backbone without flattening open history', () => {
   const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
   const wiki = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-universe-wiki');
   assert.match(wiki.content, /The Black Tower keeps its name/);
@@ -159,7 +161,7 @@ test('a later source bundle updates untouched House fields and scripts', () => {
   const first = installCurrentHouseDrLibrary(createDefaultState(), NOW).state;
   const nextBundle = {
     ...HOUSE_DR_BUNDLE,
-    version: '2026.07.27.1',
+    version: '2026.08.19.2',
     worlds: HOUSE_DR_BUNDLE.worlds.map((world) => (
       world.sourceKey === 'terra-aeterna'
         ? { ...world, description: 'Updated from the authored Notion source.' }
@@ -172,7 +174,7 @@ test('a later source bundle updates untouched House fields and scripts', () => {
     )),
   };
 
-  const updated = applyHouseDrBundle(first, nextBundle, '2026-07-27T00:00:00.000Z').state;
+  const updated = applyHouseDrBundle(first, nextBundle, '2026-08-19T08:20:00.000Z').state;
   const terra = updated.worlds.find((world) => world.houseSourceKey === 'terra-aeterna');
   const sleep = updated.scripts.find((script) => script.houseSourceKey === 'terra-aeterna-hearthlight-sleep-script');
 
@@ -191,7 +193,7 @@ test('a later source bundle preserves independent local world overrides and addi
 
   const nextBundle = {
     ...HOUSE_DR_BUNDLE,
-    version: '2026.07.27.2',
+    version: '2026.08.19.3',
     worlds: HOUSE_DR_BUNDLE.worlds.map((world) => (
       world.sourceKey === 'terra-aeterna'
         ? { ...world, description: 'Later Notion description.' }
@@ -199,7 +201,7 @@ test('a later source bundle preserves independent local world overrides and addi
     )),
   };
 
-  const updated = applyHouseDrBundle(first, nextBundle, '2026-07-27T00:05:00.000Z').state;
+  const updated = applyHouseDrBundle(first, nextBundle, '2026-08-19T08:25:00.000Z').state;
   const updatedTerra = updated.worlds.find((world) => world.houseSourceKey === 'terra-aeterna');
 
   assert.equal(updatedTerra.description, 'Rowan local field note that must remain.');

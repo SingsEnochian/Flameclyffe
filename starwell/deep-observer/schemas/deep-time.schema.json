@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/deep-time.schema.json",
+  "title": "DEEPTime Accepted Temporal Record",
+  "description": "Append-only temporal coordinate for human-accepted Arcsweep observations. PREMAQC Q remains Qualia; engineering data quality is separate.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "dataset_kind", "id", "world_id", "sequence_id", "sequence_revision", "lambda", "time", "premaqc", "provenance", "quality", "authority"],
+  "properties": {
+    "schema_version": { "const": "0.1.0" },
+    "dataset_kind": { "const": "deep_time" },
+    "id": { "type": "string", "minLength": 1 },
+    "world_id": { "type": "string", "minLength": 1 },
+    "sequence_id": { "type": "string", "minLength": 1 },
+    "sequence_revision": { "type": "integer", "minimum": 1 },
+    "lambda": { "type": "number" },
+    "time": {
+      "type": "object",
+      "required": ["utc", "julian_date", "julian_time_scale"],
+      "properties": {
+        "utc": { "type": "string", "format": "date-time" },
+        "julian_date": { "type": "number" },
+        "julian_time_scale": { "const": "UTC" }
+      }
+    },
+    "premaqc": { "type": "object" },
+    "provenance": {
+      "type": "object",
+      "required": ["observation_run_id", "acceptance_mask_id", "source_receipt_hashes", "accepted_state_hash"],
+      "properties": {
+        "observation_run_id": { "type": "string" },
+        "acceptance_mask_id": { "type": "string" },
+        "source_receipt_hashes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "accepted_state_hash": { "type": "string", "minLength": 64, "maxLength": 64 }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "properties": {
+        "data_quality": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "uncertainty": { "type": "object" },
+        "missing": { "type": "array" },
+        "stale": { "type": "array" }
+      },
+      "not": { "required": ["Q"] }
+    },
+    "authority": {
+      "type": "object",
+      "required": ["append_only", "qualia_is_premaqc_q", "engineering_data_quality_is_q"],
+      "properties": {
+        "append_only": { "const": true },
+        "qualia_is_premaqc_q": { "const": true },
+        "engineering_data_quality_is_q": { "const": false }
+      }
+    }
+  }
+}

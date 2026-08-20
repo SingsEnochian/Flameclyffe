@@ -38,6 +38,10 @@ function mergeAppletLayout(importedLayout) {
   });
 }
 
+function stringList(value) {
+  return Array.isArray(value) ? value.filter((item) => typeof item === 'string' && item.trim()) : [];
+}
+
 export function createWorld(id, now = new Date().toISOString()) {
   return {
     id,
@@ -46,6 +50,21 @@ export function createWorld(id, now = new Date().toISOString()) {
     description: '',
     history: '',
     rules: '',
+    parentWorldId: null,
+    parentSeedFingerprint: '',
+    branchPoint: '',
+    lineageLabel: 'Root world',
+    worldseedFingerprint: '',
+    descendantWorldIds: [],
+    forkReason: '',
+    worldseedInheritance: {
+      sourceFingerprint: '',
+      mustSurvive: [],
+      mayChange: [],
+      mayBeLost: [],
+      descendantsInherit: [],
+      transferableSeeds: [],
+    },
     surface: {
       type: 'portal',
       name: 'Arcsweep',
@@ -129,10 +148,30 @@ export function normaliseWorld(value, fallbackId, now = new Date().toISOString()
   const defaults = createWorld(fallbackId, now);
   const world = value && typeof value === 'object' ? value : {};
   const legacyAppearance = world.appearance && typeof world.appearance === 'object' ? world.appearance : {};
+  const inheritance = world.worldseedInheritance && typeof world.worldseedInheritance === 'object'
+    ? world.worldseedInheritance
+    : {};
   return {
     ...defaults,
     ...world,
     id: world.id || fallbackId,
+    parentWorldId: typeof world.parentWorldId === 'string' && world.parentWorldId ? world.parentWorldId : null,
+    parentSeedFingerprint: typeof world.parentSeedFingerprint === 'string' ? world.parentSeedFingerprint : '',
+    branchPoint: typeof world.branchPoint === 'string' ? world.branchPoint : '',
+    lineageLabel: typeof world.lineageLabel === 'string' && world.lineageLabel ? world.lineageLabel : defaults.lineageLabel,
+    worldseedFingerprint: typeof world.worldseedFingerprint === 'string' ? world.worldseedFingerprint : '',
+    descendantWorldIds: stringList(world.descendantWorldIds),
+    forkReason: typeof world.forkReason === 'string' ? world.forkReason : '',
+    worldseedInheritance: {
+      ...defaults.worldseedInheritance,
+      ...inheritance,
+      sourceFingerprint: typeof inheritance.sourceFingerprint === 'string' ? inheritance.sourceFingerprint : '',
+      mustSurvive: stringList(inheritance.mustSurvive),
+      mayChange: stringList(inheritance.mayChange),
+      mayBeLost: stringList(inheritance.mayBeLost),
+      descendantsInherit: stringList(inheritance.descendantsInherit),
+      transferableSeeds: stringList(inheritance.transferableSeeds),
+    },
     surface: { ...defaults.surface, ...(world.surface || {}) },
     time: { ...defaults.time, ...(world.time || {}) },
     arrival: { ...defaults.arrival, ...(world.arrival || {}) },

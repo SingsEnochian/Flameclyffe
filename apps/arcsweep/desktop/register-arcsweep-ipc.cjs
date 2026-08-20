@@ -4,9 +4,11 @@ const {
   copyAttachment,
   createBackup,
   listBackups,
+  readAttachmentPayload,
   readState,
   resolveAttachment,
   restoreBackup,
+  writeAttachmentPayload,
   writeStateAtomic,
 } = require('./store.cjs');
 
@@ -106,6 +108,9 @@ module.exports = function registerArcsweepIpc({
     const error = await shell.openPath(target);
     return { ok: !error, error: error || null };
   });
+
+  ipcMain.handle('arcsweep:attachment:read-payload', async (_event, attachment) => readAttachmentPayload(storePaths, attachment));
+  ipcMain.handle('arcsweep:attachment:write-payload', async (_event, payload) => writeAttachmentPayload(storePaths, payload));
 
   ipcMain.handle('arcsweep:storage:show', async () => {
     const error = await shell.openPath(storePaths.root);

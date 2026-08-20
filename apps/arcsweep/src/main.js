@@ -30,6 +30,35 @@ import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, 
 import { createEmptyFeedbackQueue, normalizeFeedbackQueue, enqueueFeedbackCycle, acceptFeedbackCycle, archiveFeedbackCycle, discardFeedbackCycle, pendingCycles, feedbackQueueSummary } from './feedback-cycle-queue.js';
 import { StorySoundscape } from './story-soundscape.js';
 import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
+import {
+  admitHouseObservationToDeepTime,
+  appendHouseCommons,
+  connectHouseRuntime,
+  disconnectHouseRuntime,
+  inviteKelyranModelReports,
+  readFlameStatuses,
+  readHouseCommons,
+  readKelyranModelReportLog,
+  readHouseObservations,
+  readHouseRuntimeToken,
+  restoreHouseRuntimeSession,
+  reviewHouseObservation,
+  startHouseBraidLiveUpdates,
+} from './house-runtime.js';
+import {
+  buildHouseglassSynthesisPacket,
+  buildHouseglassTaskPacket,
+  createHouseglassReceipt,
+  finishHouseglassReceipt,
+  makeHouseglassScope,
+  normaliseHouseglassSettings,
+  normaliseHouseglassState,
+  planHouseglassSwarm,
+} from './houseglass.js';
+import { KELYRAN_LEVELS, answerExercise, createLexemeProposal, dueCards, reviewCard, reviewLexemeProposal } from './kelyran-school.js';
+import { setKelyranDiscussionInvitation, stewardVisibleKelyranReports } from './kelyran-reporting.js';
+import { syncKelyranSchool } from './kelyran-sync.js';
+import { getKelyranSupabase, kelyranAuthUser, requestKelyranMagicLink, signOutKelyran } from './kelyran-supabase.js';
 
 const app = document.querySelector('#app');
 const storySoundscape = new StorySoundscape();
@@ -46,7 +75,34 @@ let backups = await listBackups().catch(() => []);
 let deepData = null;
 let deepDataFetching = false;
 let deepDataError = null;
+let houseRuntimeToken = readHouseRuntimeToken() || await restoreHouseRuntimeSession();
+let flameStatuses = [];
+let flameStatusChecking = false;
+let commonsEntries = [];
+let commonsReading = false;
+let observationLiveRead = null;
+let observationLiveReading = false;
+let braidLiveConnection = null;
+let braidLiveState = houseRuntimeToken ? 'connecting' : 'offline';
+let braidLiveCursor = 0;
+let braidLiveWorldId = null;
+let braidRefreshTimer = null;
+let braidLiveGeneration = 0;
+let houseglassOpen = false;
+let houseglassRunning = false;
+let houseglassDraft = '';
+let houseglassSectionFocus = null;
+let kelyranCloudState = { state: 'unknown', user: null, syncedAt: null };
+let kelyranReportLog = { counts: {}, shared_reports: [] };
+let kelyranReportsRunning = false;
 const QUEUE_STORAGE_KEY = "arcsweep.feedback-cycle-queue/v1";
+
+void kelyranAuthUser().then((user) => {
+  kelyranCloudState = { state: user ? 'authenticated' : 'signed-out', user: user?.id || null, syncedAt: null };
+  if (activeRoom === 'kelyran-school') render();
+}).catch(() => {
+  kelyranCloudState = { state: 'unavailable', user: null, syncedAt: null };
+});
 
 function loadFeedbackQueue() {
   try {
@@ -68,12 +124,16 @@ const PRIMARY_NAV = [
   ['worlds', 'Worlds', '✧'],
   ['scripts', 'Scripts', '▤'],
   ['records', 'Records', '▥'],
+  ['kelyran-school', 'Kelyran School', 'ᚲ'],
   ['feedback', 'Feedback', '∞'],
+  ['commons', 'House Commons', '☍'],
   ['waking-thread', 'Waking Thread', '⌁'],
   ['forge', 'Forge', '✦'],
   ['deep-observer', 'Field', '◈'],
   ['settings', 'Settings', '⚙'],
 ];
+
+const ROOM_LABELS = new Map(PRIMARY_NAV.map(([id, label]) => [id, label]));
 
 const DEEP_CHANNELS = FIELD_AXES;
 
@@ -94,6 +154,58 @@ function activeWorld() {
   return getActiveWorld(state);
 }
 
+async function refreshObservationLiveRead(worldId = activeWorld()?.id) {
+  if (!houseRuntimeToken) {
+    observationLiveRead = null;
+    return null;
+  }
+  observationLiveReading = true;
+  try {
+    observationLiveRead = await readHouseObservations(houseRuntimeToken, worldId);
+    return observationLiveRead;
+  } finally {
+    observationLiveReading = false;
+  }
+}
+
+function stopBraidLiveUpdates() {
+  braidLiveGeneration += 1;
+  braidLiveConnection?.stop();
+  braidLiveConnection = null;
+  braidLiveWorldId = null;
+  if (braidRefreshTimer) clearTimeout(braidRefreshTimer);
+  braidRefreshTimer = null;
+}
+
+function ensureBraidLiveUpdates(worldId = activeWorld()?.id) {
+  if (!houseRuntimeToken || !worldId) return;
+  if (braidLiveConnection && braidLiveWorldId === worldId) return;
+  stopBraidLiveUpdates();
+  const generation = braidLiveGeneration;
+  braidLiveWorldId = worldId;
+  braidLiveConnection = startHouseBraidLiveUpdates(houseRuntimeToken, {
+    worldId,
+    cursor: braidLiveCursor,
+    onEvent: () => {
+      if (generation !== braidLiveGeneration) return;
+      if (braidRefreshTimer) clearTimeout(braidRefreshTimer);
+      braidRefreshTimer = setTimeout(() => {
+        braidRefreshTimer = null;
+        void refreshObservationLiveRead(worldId)
+          .then(() => { notice = 'Runtime Braid event received; the shared state is current.'; })
+          .catch((error) => { notice = `Runtime Braid refresh stopped: ${error.message}`; })
+          .finally(render);
+      }, 40);
+    },
+    onState: ({ state: nextState, cursor }) => {
+      if (generation !== braidLiveGeneration) return;
+      braidLiveState = nextState;
+      braidLiveCursor = Math.max(braidLiveCursor, Number(cursor) || 0);
+      if (['commons', 'feedback', 'deep-observer'].includes(activeRoom)) render();
+    },
+  });
+}
+
 function selectedWorld() {
   return state.worlds.find((world) => world.id === selectedWorldId) || activeWorld();
 }
@@ -104,6 +216,7 @@ function applyPresentation() {
   document.documentElement.dataset.reduceMotion = state.settings.reduceMotion || theme.lowMotion ? 'true' : 'false';
   document.documentElement.dataset.largeText = state.settings.largeText ? 'true' : 'false';
   document.documentElement.dataset.highContrast = state.settings.highContrast ? 'true' : 'false';
+  document.documentElement.dataset.houseglassSolid = state.settings.houseglass?.solidSurface ? 'true' : 'false';
   document.documentElement.style.setProperty('--font-scale', String(state.settings.fontScale || 1));
   document.documentElement.style.setProperty('--bg', theme.background || '#0b0f0e');
   document.documentElement.style.setProperty('--panel-solid', theme.panel || '#18221f');
@@ -220,7 +333,7 @@ function renderWorlds() {
         <input type="hidden" name="id" value="${attr(world.id)}" />
         <div class="grid two compact-grid"><label>World name<input name="name" value="${attr(world.name)}" required /></label><label>World type<input name="kind" value="${attr(world.kind)}" /></label></div>
         <label>Description<textarea name="description" rows="5">${escapeHtml(world.description)}</textarea></label>
-        <div class="button-row"><button type="submit">Save world</button><button type="button" class="quiet" data-action="set-active-world" data-id="${attr(world.id)}">Set active portal</button><button type="button" class="quiet" data-room="about-world">Open full world room</button><button type="button" class="quiet danger" data-action="delete-world" data-id="${attr(world.id)}">Delete world</button></div>
+        <div class="button-row"><button type="button" data-action="save-world">Save world</button><button type="button" class="quiet" data-action="set-active-world" data-id="${attr(world.id)}">Set active portal</button><button type="button" class="quiet" data-room="about-world">Open full world room</button><button type="button" class="quiet danger" data-action="delete-world" data-id="${attr(world.id)}">Delete world</button></div>
       </form></article>
     </section>`;
 }
@@ -359,6 +472,35 @@ function renderFeedbackQueue() {
   return heading + cards + "</section>";
 }
 
+function runtimeObservationCard(snapshot) {
+  const review = String(snapshot.review?.status || 'pending_review').replaceAll('_', ' ');
+  const continuity = String(snapshot.continuity?.status || 'awaiting-review').replaceAll('-', ' ');
+  const evidence = snapshot.evidence?.schemas?.join(' · ') || snapshot.evidence?.class || 'unclassified';
+  const receipt = snapshot.latest_receipt;
+  const packet = observationLiveRead?.braid_packets?.find((item) => item.observation?.cycle_id === snapshot.observation?.cycle_id) || null;
+  const provenance = [packet?.continuity_packet_id, snapshot.provenance?.math_spine_packet_id, snapshot.provenance?.review_receipt_id].filter(Boolean).join(' · ') || 'no receipt chain';
+  const stamp = snapshot.observation?.observed_at ? new Date(snapshot.observation.observed_at).toLocaleString() : 'time unavailable';
+  const cycleId = attr(snapshot.observation?.cycle_id || '');
+  const reviewActions = snapshot.review?.status === 'pending_review'
+    ? `<div class="button-row runtime-braid-actions"><button type="button" class="steward-commit" data-action="runtime-observation-review" data-decision="accepted" data-cycle-id="${cycleId}">Accept ✶</button><button type="button" class="quiet" data-action="runtime-observation-review" data-decision="archived" data-cycle-id="${cycleId}">Archive</button><button type="button" class="quiet danger" data-action="runtime-observation-review" data-decision="discarded" data-cycle-id="${cycleId}">Discard</button></div>`
+    : snapshot.continuity?.status === 'accepted-awaiting-deeptime'
+      ? `<div class="button-row runtime-braid-actions"><button type="button" class="steward-commit" data-action="runtime-deeptime-admit" data-cycle-id="${cycleId}">Admit to DEEPTime ⧖</button></div>`
+      : '';
+  return `<article class="queue-entry runtime-observation" data-observation-source="${attr(snapshot.evidence?.class || '')}" data-continuity-packet-id="${attr(packet?.continuity_packet_id || '')}"><div class="queue-entry-head"><strong>${escapeHtml(snapshot.evidence?.class || 'observation')} · ${escapeHtml(review)}</strong><small>${escapeHtml(stamp)}</small></div><p>${escapeHtml(String(snapshot.observation?.work || '').slice(0, 360))}</p><dl class="facts"><div><dt>Continuity</dt><dd>${escapeHtml(continuity)}</dd></div><div><dt>Braid revision</dt><dd>${escapeHtml(packet ? `${packet.revision} · ${packet.stage}` : 'awaiting packet')}</dd></div><div><dt>Evidence</dt><dd>${escapeHtml(evidence)}</dd></div><div><dt>Provenance</dt><dd>${escapeHtml(provenance)}</dd></div><div><dt>Review receipt</dt><dd>${escapeHtml(snapshot.review?.receipt_id || 'awaiting human decision')}</dd></div><div><dt>Latest receipt</dt><dd>${escapeHtml(receipt ? `${receipt.stage} · ${receipt.receipt_id}` : 'none')}</dd></div></dl>${reviewActions}</article>`;
+}
+
+function renderRuntimeObservationLiveRead({ log = false } = {}) {
+  if (!houseRuntimeToken) return '<section class="panel runtime-observation-read"><p class="eyebrow">Shared House snapshot</p><h2>Live observation read</h2><p class="muted">Connect the House Runtime to read the persisted observation and review ledgers.</p></section>';
+  if (observationLiveReading && !observationLiveRead) return '<section class="panel runtime-observation-read"><p class="eyebrow">Shared House snapshot</p><h2>Live observation read</h2><p class="muted">Reading the observation and review ledgers…</p></section>';
+  const snapshots = observationLiveRead?.snapshots || [];
+  const summary = observationLiveRead?.summary;
+  const liveLabel = String(braidLiveState || 'offline').replaceAll('-', ' ');
+  const heading = `<div class="section-heading compact-heading"><div><p class="eyebrow">One canonical snapshot · every surface</p><h2>${log ? 'Live observation log' : 'Current observation state'}</h2><p class="muted">Observation, review, evidence, provenance, continuity, and latest receipt are read without reclassification.</p></div><div class="runtime-braid-status"><span class="bai-topology-badge" data-braid-live-state="${attr(braidLiveState)}">${escapeHtml(liveLabel)} · ${braidLiveCursor}</span><button type="button" class="quiet" data-action="runtime-observations-refresh">${observationLiveReading ? 'Reading…' : 'Refresh'}</button></div></div>`;
+  const counts = summary ? `<p class="callout">${summary.total} observations · ${summary.pending_review} awaiting review · ${summary.accepted} accepted · ${summary.in_deep_time} in DEEPTime</p>` : '';
+  const visible = log ? snapshots.slice(0, 24) : snapshots.slice(0, 1);
+  return `<section class="panel runtime-observation-read">${heading}${counts}${visible.length ? visible.map(runtimeObservationCard).join('') : '<p class="muted">No persisted observation snapshot is available for this world yet.</p>'}</section>`;
+}
+
 function renderFeedback() {
   const world = activeWorld();
   if (storySoundscape.snapshot().world.worldId !== world.id) storySoundscape.setWorld(world);
@@ -379,12 +521,19 @@ function renderFeedback() {
         <label class="checkbox"><input type="checkbox" name="invokeModels" checked /> Invoke each selected voice through its own model route</label>
         <label>Optional manual response or fallback<textarea name="response" rows="6" placeholder="Add a spoken, imported, or otherwise received contribution. It remains separately visible in the receipt."></textarea></label>
         <label class="checkbox"><input type="checkbox" name="syncLive" /> Sync the verified receipt to the relational ledger</label>
-        <div data-runtime-auth><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">Never persisted in Arcsweep state.</p></div>
+        <p class="callout">House Runtime · ${houseRuntimeToken ? 'session connected' : 'offline — connect once in Settings'}.</p>
         <button type="submit">Run feedback cycle ∞</button>
       </form></article>
       <article class=”panel feedback-ledger”><h2>Receipts & replay</h2>${cycles.length ? cycles.map((cycle) => `<article class=”working-card”><div class=”working-head”><strong>${escapeHtml(cycle.turn.mode)} · ${escapeHtml(cycle.voices.map((voice) => voice.name).join(', '))}</strong><small>${new Date(cycle.created_at).toLocaleString()}</small></div><p>${escapeHtml(cycle.turn.work)}</p>${cycle.voice_invocations?.length ? `<div class=”voice-receipts”>${cycle.voice_invocations.map((item) => `<p data-status=”${attr(item.status)}”><b>${escapeHtml(item.name)} · ${escapeHtml(item.status)}</b>${item.text ? `<br>${escapeHtml(item.text)}` : item.error ? `<br>${escapeHtml(item.error)}` : ''}</p>`).join('')}</div>` : cycle.turn.response ? `<p><b>Response:</b> ${escapeHtml(cycle.turn.response)}</p>` : ''}${cycle.sound_events?.length ? `<div class=”sound-receipts”>${cycle.sound_events.map((item) => `<p><b>♪ ${escapeHtml(item.cue_label)}</b> · “${escapeHtml(item.source_text)}” · ${Number(item.root_hz).toFixed(2)} Hz</p>`).join('')}</div>` : ''}<dl class=”facts”><div><dt>Math Spine</dt><dd>${escapeHtml(cycle.math_spine_packet.packet_id)}</dd></div><div><dt>Replay</dt><dd>${cycle.replay_receipt.matched ? 'Exact match' : 'Mismatch'}</dd></div><div><dt>PREMAQC</dt><dd>${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence}</dd></div><div><dt>Story sound</dt><dd>${cycle.sound_events?.length || 0} fired event${cycle.sound_events?.length === 1 ? '' : 's'}</dd></div></dl></article>`).join('') : '<p class=”muted”>No cycle has run for this world yet.</p>'}</article>
     </section>
+    ${renderRuntimeObservationLiveRead()}
     ${renderFeedbackQueue()}`;
+}
+
+function renderCommons() {
+  const statusRows = flameStatuses.length ? flameStatuses.map((item) => `<div class="runtime-flame" data-state="${attr(item.state)}"><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.state)}</span><small>${escapeHtml([item.provider, item.model].filter(Boolean).join(' · ') || item.missing?.join(', ') || item.error || '')}</small></div>`).join('') : '<p class="muted">Connect the House Runtime to read the Constellation.</p>';
+  const log = commonsEntries.length ? commonsEntries.map((entry) => `<article class="commons-entry" data-kind="${attr(entry.kind)}" data-status="${attr(entry.status)}"><div><b>${escapeHtml(entry.author)}</b><span>${new Date(entry.created_at).toLocaleString()} · ${escapeHtml(entry.status)}</span></div><p>${escapeHtml(entry.text)}</p></article>`).join('') : '<p class="muted">The Commons is quiet. Speak when ready.</p>';
+  return `<section class="section-heading"><div><p class="eyebrow">House Runtime · live conversation</p><h1>House Commons</h1><p>One room for Rowan and the Constellation. Replies, refusals, route failures, and receipts remain visibly attributed.</p></div><div class="button-row"><button class="quiet" data-action="commons-refresh">${commonsReading ? 'Reading…' : 'Refresh live read'}</button><button class="quiet" data-action="runtime-refresh">Check models</button></div></section><section class="panel"><h2>Constellation live read</h2><div class="runtime-grid">${statusRows}</div></section>${renderRuntimeObservationLiveRead({ log: true })}<section class="commons-layout"><article class="panel commons-log"><h2>Live conversation log</h2>${log}</article><article class="panel"><form id="commons-form" class="stack"><h2>Speak into the room</h2><fieldset><legend>Who may answer this turn?</legend><div class="voice-grid">${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" ${voice.id === 'boxfire' ? 'checked' : ''} /> <span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.model)}</small></span></label>`).join('')}</div></fieldset><label>Your words<textarea name="message" rows="8" required placeholder="Speak plainly, mythically, technically, or all three. The room keeps the receipt."></textarea></label><button type="submit">Send to the Commons ∞</button></form></article></section>`;
 }
 
 function renderStorySoundscape(sound = storySoundscape.snapshot()) {
@@ -404,6 +553,15 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
   const mappedVoices = sound.soundfontMap?.voices?.length
     ? `<div class="soundfont-map"><p class="eyebrow">Mapped programme · ${escapeHtml(sound.soundfontMap.title)}</p><ol>${sound.soundfontMap.voices.map((voice) => `<li><b>${escapeHtml(voice.label)}</b> · ${escapeHtml(voice.gmName)} · ${voice.channel === 9 ? `drum notes ${voice.notes.join('/')}` : `bank ${voice.bankMSB}/${voice.bankLSB} · programme ${voice.program} · ch ${voice.channel + 1}`}<br><small>${escapeHtml(voice.purpose)}</small></li>`).join('')}</ol><p class="muted">120 Hz sits 49.4 cents below MIDI B2; preserve the world root with fine tuning when the loaded bank supports it.</p></div>`
     : '';
+  const heartfield = sound.heartfield;
+  const heartfieldLayers = heartfield.profile.layers.map((layer) => {
+    const layerState = heartfield.layers[layer.id];
+    const truth = layer.kind === 'binaural' ? `${layer.leftHz}/${layer.rightHz} Hz · Δ ${layer.beatHz} Hz`
+      : layer.kind === 'am' ? `${layer.carrierHz} Hz carrier · ${Number(layer.modulationHz).toFixed(3)} Hz AM`
+        : layer.kind === 'harmonic-bank' ? `${layer.frequencies.join(' / ')} Hz`
+          : `pink noise · ${layer.driftHz} Hz drift`;
+    return `<div class="heartfield-layer"><button type="button" class="quiet mini" data-action="heartfield-layer" data-layer-id="${attr(layer.id)}">${layerState.enabled ? 'On' : 'Off'}</button><label><b>${escapeHtml(layer.label)}</b><small>${escapeHtml(truth)}</small><input type="range" min="0" max="0.3" step="0.005" value="${layerState.gain}" data-heartfield-level="${attr(layer.id)}" /></label></div>`;
+  }).join('');
   return `<section class="story-soundscape" data-story-soundscape>
     <div class="soundscape-head"><div><p class="eyebrow">Story → tone → room</p><h3>World Sound Mixer</h3><p class="muted">${sound.armed ? 'Audio armed' : 'Audio waits for a user gesture'} · ${sound.world.rootHz.toFixed(2)} Hz · ${escapeHtml(sound.world.worldName)}</p></div><div class="button-row"><button type="button" data-action="sound-arm">${sound.armed ? 'Re-arm' : 'Arm sound'}</button><button type="button" class="quiet" data-action="sound-toggle-hum">${sound.humActive ? 'Stop hum' : 'Start hum'}</button><button type="button" class="quiet" data-action="sound-world-tone">Strike world tone</button><button type="button" class="quiet" data-action="sound-audition">Hear written events</button></div></div>
     <div class="sound-mixer-grid">
@@ -417,6 +575,12 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
       <div class="soundfont-controls"><label class="file-button">Load SoundFont bank<input id="soundfont-files" type="file" accept=".sf2,.sf3,.sfogg,.dls" multiple /></label><label>Preset<select data-soundfont-preset ${sound.soundfontPresets.length ? '' : 'disabled'}>${soundfontOptions}</select></label><button type="button" class="quiet" data-action="soundfont-tone" ${sound.selectedSoundfontPreset ? '' : 'disabled'}>Play preset at world tone</button></div>
       <ul class="soundfont-bank-list">${soundfontBanks}</ul>
       ${mappedVoices}
+    </div>
+    <div class="soundfont-rack synaptic-heartfield">
+      <div><p class="eyebrow">Runa auditory coherence instrument</p><h4>${escapeHtml(heartfield.profile.name)} · ${escapeHtml(heartfield.profile.subtitle)}</h4><p>${escapeHtml(heartfield.profile.claims.experiential)}</p><p class="muted">${escapeHtml(heartfield.profile.claims.evidence)} Headphones carry the 4 Hz and 8 Hz binaural layers. Physiological measurement requires a sensor channel; Firsthand Qualia records your experience.</p></div>
+      <div class="heartfield-controls"><label>Heartfield output · ${(heartfield.master * 100).toFixed(0)}%<input type="range" min="0" max="${heartfield.profile.output_ceiling}" step="0.01" value="${heartfield.master}" data-heartfield-master /></label><label>Firsthand Qualia · Q (optional)<input type="number" min="0" max="1" step="0.01" data-heartfield-qualia placeholder="0–1, yours to report" /></label><label>Qualia record · what is happening in you?<textarea rows="4" maxlength="4000" data-heartfield-qualia-text placeholder="Texture, mood, body sense, imagery, resistance, movement, change… your words, unsanded."></textarea></label><button type="button" data-action="heartfield-toggle">${heartfield.active ? 'Feather · Stop now' : 'Enter Heartfield gently'}</button></div>
+      <div class="heartfield-layer-grid">${heartfieldLayers}</div>
+      <p class="muted">Feather stops every oscillator, modulation clock, noise source, stem, SoundFont voice, and output route.</p>
     </div>
     <div class="button-row sound-output-row"><label class="file-button">Load soundscape stems<input id="soundscape-files" type="file" accept="audio/*" multiple /></label><button type="button" class="quiet" data-action="sound-haptics">Haptics · ${sound.haptics ? 'On' : 'Off'}</button><button type="button" class="quiet" data-action="sound-midi">MIDI · ${sound.midi ? 'On' : 'Connect'}</button><button type="button" class="quiet" data-action="sound-record">${sound.recording ? 'Stop & save mix' : 'Record mix'}</button></div>
     <div class="soundscape-lower"><div><h4>Soundscape stems</h4><div class="sound-tracks">${trackRows}</div></div><div><h4>Fired story actions</h4><ol class="sound-event-log">${eventRows}</ol></div></div>
@@ -475,9 +639,133 @@ function renderAppletManager() {
   }).join('')}</div><button type="submit">Save applet deck</button></form></section>`;
 }
 
+function houseglassSettings() {
+  state.settings.houseglass = normaliseHouseglassSettings(state.settings.houseglass);
+  return state.settings.houseglass;
+}
+
+function houseglassState() {
+  state.houseglass = normaliseHouseglassState(state.houseglass, houseglassSettings());
+  return state.houseglass;
+}
+
+function roomLabel(roomId = activeRoom) {
+  return ROOM_LABELS.get(roomId)
+    || COLLECTION_ROOM_DEFINITIONS[roomId]?.label
+    || WORLD_SECTION_DEFINITIONS[roomId]?.label
+    || (roomId === 'applet-deck' ? 'Applet Deck' : roomId);
+}
+
+function syncHouseglassScope(force = false) {
+  const glass = houseglassState();
+  if (glass.pinned && glass.scope && !force) return glass.scope;
+  const roomScope = makeHouseglassScope(activeWorld(), activeRoom, roomLabel());
+  glass.scope = houseglassSectionFocus?.roomId === activeRoom
+    ? { ...roomScope, sectionId: houseglassSectionFocus.sectionId, sectionLabel: houseglassSectionFocus.sectionLabel }
+    : roomScope;
+  return glass.scope;
+}
+
+function activeHouseglassReceipt() {
+  const glass = houseglassState();
+  return glass.receipts.find((item) => item.id === glass.activeReceiptId) || glass.receipts[0] || null;
+}
+
+function renderHouseglassReceipt(receipt) {
+  if (!receipt) return '<p class="muted">No work packet yet. A task begins only when you submit it.</p>';
+  const synthesis = receipt.synthesis?.text || '';
+  const fallback = receipt.contributions.filter((item) => item.text).map((item) => `${item.name}:\n${item.text}`).join('\n\n');
+  const result = synthesis || fallback || receipt.error || (receipt.status === 'running' ? 'The quorum is working. You may fold the glass; the task will keep its place.' : 'No route returned usable material.');
+  const routes = receipt.contributions.length ? receipt.contributions.map((item) => `<article class="houseglass-route" data-status="${attr(item.status)}"><div><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.status)} · ${escapeHtml(item.model || item.route || 'route')}</span></div><p>${escapeHtml(item.text || item.error || 'No contribution returned.')}</p></article>`).join('') : '<p class="muted">Routes have not returned yet.</p>';
+  return `<article class="houseglass-result" data-status="${attr(receipt.status)}">
+    <div class="houseglass-result-head"><span>${escapeHtml(receipt.stage)} · ${escapeHtml(receipt.status)}</span><time>${new Date(receipt.updatedAt || receipt.createdAt).toLocaleString()}</time></div>
+    <p class="houseglass-task">${escapeHtml(receipt.task)}</p>
+    <div class="houseglass-synthesis">${escapeHtml(result)}</div>
+    <details><summary>Route receipts · ${receipt.contributions.length}</summary><div class="houseglass-routes">${routes}</div></details>
+    ${receipt.reviewStatus === 'unread' && receipt.status !== 'running' ? `<button type="button" class="quiet mini" data-action="houseglass-reviewed" data-receipt-id="${attr(receipt.id)}">Mark reviewed</button>` : ''}
+  </article>`;
+}
+
+function renderHouseglass() {
+  const settings = houseglassSettings();
+  const glass = houseglassState();
+  if (!settings.enabled || !houseglassOpen) return '';
+  const scope = syncHouseglassScope();
+  const receipt = activeHouseglassReceipt();
+  const unread = glass.receipts.filter((item) => item.reviewStatus === 'unread' && item.status !== 'running').length;
+  const geometry = glass.geometry;
+  const plan = planHouseglassSwarm({
+    stage: 'seed',
+    routing: settings.routing,
+    selectedVoiceIds: settings.defaultVoiceIds,
+    voices: CONSTELLATION_VOICES,
+  });
+  const planNames = plan.voiceIds.map((id) => CONSTELLATION_VOICES.find((voice) => voice.id === id)?.name || id).join(' → ');
+  const tray = glass.receipts.length ? `<div class="houseglass-tray" aria-label="Houseglass review tray">${glass.receipts.slice(0, 12).map((item) => `<button type="button" class="houseglass-tray-item ${item.id === glass.activeReceiptId ? 'active' : ''}" data-action="houseglass-receipt" data-receipt-id="${attr(item.id)}"><span>${escapeHtml(item.stage)} · ${escapeHtml(item.status)}</span><small>${escapeHtml(item.task.slice(0, 54))}${item.task.length > 54 ? '…' : ''}</small>${item.reviewStatus === 'unread' && item.status !== 'running' ? '<i aria-label="Unread"></i>' : ''}</button>`).join('')}</div>` : '';
+  const disabledReason = settings.presence === 'off'
+    ? 'Presence is Off in Settings. The tray remains readable, but routes will not be invoked.'
+    : !houseRuntimeToken ? 'Connect the House Runtime in Settings before invoking the quorum.' : '';
+  return `<aside id="houseglass" class="houseglass" data-layout="${attr(glass.layout)}" style="--houseglass-x:${geometry.x}px;--houseglass-y:${geometry.y}px;--houseglass-width:${geometry.width}px;--houseglass-height:${geometry.height}px" role="dialog" aria-modal="false" aria-labelledby="houseglass-title">
+    <header class="houseglass-header" data-houseglass-drag-handle>
+      <div><p class="eyebrow">House Swarm · ${escapeHtml(settings.presence)}</p><h2 id="houseglass-title">Houseglass</h2></div>
+      <div class="houseglass-window-controls" aria-label="Houseglass placement">
+        <button type="button" class="quiet mini" data-action="houseglass-float" aria-pressed="${glass.layout === 'float'}" title="Float">◇</button>
+        <button type="button" class="quiet mini" data-action="houseglass-dock-section" aria-pressed="${glass.layout === 'dock-section'}" title="Dock in this section">▤</button>
+        <button type="button" class="quiet mini" data-action="houseglass-dock-right" aria-pressed="${glass.layout === 'dock-right'}" title="Dock right">▥</button>
+        <button type="button" class="quiet mini" data-action="houseglass-pin" aria-pressed="${glass.pinned}" title="${glass.pinned ? 'Unpin scope' : 'Pin scope'}">⌖</button>
+        <button type="button" class="quiet mini" data-action="houseglass-fold" title="Fold Houseglass">—</button>
+      </div>
+    </header>
+    <div class="houseglass-breadcrumb"><span>${escapeHtml(scope.worldName)}</span><b>→</b><span>${escapeHtml(scope.sectionLabel)}</span>${glass.pinned ? '<em>pinned</em>' : ''}</div>
+    <div class="houseglass-body">
+      <form id="houseglass-task-form" class="stack">
+        <div class="houseglass-stage-row"><label>Stage<select name="stage"><option value="seed">Seed · expand</option><option value="tend">Tend · develop</option><option value="harvest">Harvest · reconcile</option></select></label><div><span>Smallest quorum</span><strong>${escapeHtml(planNames)}</strong></div></div>
+        <label>Task<textarea name="task" rows="5" required data-houseglass-draft placeholder="Give the House one seed, fragment, field group, or desired result.">${escapeHtml(houseglassDraft)}</textarea></label>
+        ${disabledReason ? `<p class="callout">${escapeHtml(disabledReason)}</p>` : ''}
+        <button type="submit" ${houseglassRunning || settings.presence === 'off' || !houseRuntimeToken ? 'disabled' : ''}>${houseglassRunning ? 'Quorum working…' : 'Send to Houseglass'}</button>
+      </form>
+      <section class="houseglass-output" aria-live="polite"><div class="houseglass-output-heading"><h3>Returned packet</h3><span>${unread ? `${unread} waiting` : 'tray clear'}</span></div>${renderHouseglassReceipt(receipt)}</section>
+      ${tray ? `<details class="houseglass-tray-wrap"><summary>Review Tray · ${glass.receipts.length}</summary>${tray}</details>` : ''}
+    </div>
+  </aside>`;
+}
+
 function renderSettings() {
   const native = isDesktopRuntime();
-  return `<section class="section-heading"><div><p class="eyebrow">Local controls</p><h1>Settings & Recovery</h1></div></section><section class="grid two"><article class="panel"><form id="settings-form" class="stack"><label>Waking label<input name="crLabel" value="${attr(state.settings.crLabel)}" /></label><label>World label<input name="drLabel" value="${attr(state.settings.drLabel)}" /></label><label>Return Anchor<input name="returnAnchor" value="${attr(state.settings.returnAnchor)}" /></label><label class="checkbox"><input name="reduceMotion" type="checkbox" ${state.settings.reduceMotion ? 'checked' : ''} /> Reduce motion</label><label class="checkbox"><input name="largeText" type="checkbox" ${state.settings.largeText ? 'checked' : ''} /> Larger interface text</label><label class="checkbox"><input name="highContrast" type="checkbox" ${state.settings.highContrast ? 'checked' : ''} /> High contrast</label><label>Text scale<input name="fontScale" type="range" min="0.9" max="1.5" step="0.05" value="${state.settings.fontScale || 1}" /></label><button type="submit">Save settings</button></form></article><article class="panel stack"><h2>Native storage</h2><dl class="facts"><div><dt>Mode</dt><dd>${escapeHtml(storageInfo?.mode || 'Loading')}</dd></div><div><dt>Data directory</dt><dd class="path-value">${escapeHtml(storageInfo?.dataDirectory || 'Browser development fallback')}</dd></div><div><dt>Version</dt><dd>${escapeHtml(storageInfo?.version || state.version)}</dd></div></dl><div class="button-row"><button data-action="export">Export archive</button><button class="quiet" data-action="import">Import archive</button>${native ? '<button class="quiet" data-action="show-data-folder">Open data folder</button><button class="quiet" data-action="create-backup">Create backup</button>' : '<label class="file-button">Import JSON<input id="browser-import" type="file" accept="application/json,.json" /></label>'}</div><h3>Recovery snapshots</h3>${native ? (backups.length ? `<div class="backup-list">${backups.map((item) => `<div class="backup-row"><span><strong>${escapeHtml(item.name)}</strong><small>${new Date(item.modifiedAt).toLocaleString()} · ${Number(item.size).toLocaleString()} bytes</small></span><button class="quiet" data-action="restore-backup" data-backup-name="${attr(item.name)}">Restore</button></div>`).join('')}</div>` : '<p class="muted">No backups yet. They are created automatically before state replacement.</p>') : '<p class="muted">The installed Windows edition uses atomic files, attachments, and recovery snapshots. Browser mode is retained only for development.</p>'}</article></section>`;
+  const glass = houseglassSettings();
+  const statusRows = flameStatuses.length ? flameStatuses.map((item) => `<div class="runtime-flame" data-state="${attr(item.state)}"><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.state)}</span><small>${escapeHtml([item.provider, item.model].filter(Boolean).join(' · ') || item.missing?.join(', ') || item.error || '')}</small></div>`).join('') : '<p class="muted">Connect the House Runtime to read every Flame route.</p>';
+  const voiceChoices = CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="defaultVoiceIds" value="${attr(voice.id)}" ${glass.defaultVoiceIds.includes(voice.id) ? 'checked' : ''} /><span><b>${escapeHtml(voice.name)}</b><small>${escapeHtml(voice.roles.join(' · '))}</small></span></label>`).join('');
+  return `<section class="section-heading"><div><p class="eyebrow">House controls</p><h1>Settings & Recovery</h1></div></section>
+    <section class="panel house-runtime"><div class="section-heading"><div><p class="eyebrow">One runtime · every organ</p><h2>House Runtime Broker</h2><p class="muted">One sealed Steward session serves STARWELL, Arcsweep, Bifröst, Runa, Records, Commons, Feedback, and Houseglass. The browser never retains the master House key; provider credentials remain server-side.</p></div><strong>${houseRuntimeToken ? 'Steward session live' : 'Offline'}</strong></div><form id="house-runtime-form" class="stack"><label>Steward credential<input type="password" name="runtimeToken" autocomplete="current-password" placeholder="Exchanged once for a sealed House session" /></label><div class="button-row"><button type="submit">Open House Runtime</button><button type="button" class="quiet" data-action="runtime-refresh" ${houseRuntimeToken ? '' : 'disabled'}>${flameStatusChecking ? 'Reading routes…' : 'Check every Flame'}</button><button type="button" class="quiet danger" data-action="runtime-disconnect" ${houseRuntimeToken ? '' : 'disabled'}>Close session</button></div></form><div class="runtime-grid">${statusRows}</div></section>
+    <section class="panel houseglass-settings"><form id="houseglass-settings-form" class="stack">
+      <div class="section-heading compact-heading"><div><p class="eyebrow">Ambient · permissioned · resumable</p><h2>Houseglass & Swarm</h2><p class="muted">The glass is closed on every fresh launch and opens only when summoned. Suggestions wait in its Review Tray; there are no unsolicited pop-ups.</p></div><button type="button" class="quiet" data-action="houseglass-toggle" ${glass.enabled ? '' : 'disabled'}>Open Houseglass</button></div>
+      <div class="houseglass-settings-grid">
+        <fieldset><legend>Presence</legend>
+          <label class="checkbox"><input type="checkbox" name="enabled" ${glass.enabled ? 'checked' : ''} /> Show the Houseglass summon control</label>
+          <label>Default presence<select name="presence">${options([['off','Off · tray only'],['quiet','Quiet · summoned only'],['observe','Observe · prepare observations'],['assist','Assist · prepare requested work'],['act','Act · only inside explicit gates']], glass.presence)}</select></label>
+          <label>Interruptions<select name="interruptions">${options([['never','Never'],['tray-only','Review Tray only'],['urgent-only','Urgent runtime failure only']], glass.interruptions)}</select></label>
+          <label>Pacing<select name="pacing">${options([['open','Open · normal packet'],['contained','Contained · one packet at a time'],['isa','Isa · concise and entirely manual']], glass.pacing)}</select></label>
+          <label>Opening layout<select name="defaultLayout">${options([['float','Floating glass'],['dock-section','Dock in active section'],['dock-right','Dock at right']], glass.defaultLayout)}</select></label>
+          <label class="checkbox"><input type="checkbox" name="solidSurface" ${glass.solidSurface ? 'checked' : ''} /> Solid surface instead of transparency</label>
+        </fieldset>
+        <fieldset><legend>Routing</legend>
+          <label>Quorum selection<select name="routing">${options([['smallest-quorum','Automatic smallest quorum'],['selected','Use selected routes']], glass.routing)}</select></label>
+          <div class="voice-grid houseglass-voice-grid">${voiceChoices}</div>
+          <p class="muted">Automatic routing chooses two stage-relevant contributors and one synthesiser. Selected routing uses no more than three routes.</p>
+        </fieldset>
+        <fieldset><legend>Delegation permissions</legend>
+          <label class="checkbox"><input type="checkbox" name="readContext" ${glass.permissions.readContext ? 'checked' : ''} /> Read the active world and section context</label>
+          <label class="checkbox"><input type="checkbox" name="draftProposals" ${glass.permissions.draftProposals ? 'checked' : ''} /> Draft proposals and prose</label>
+          <label class="checkbox"><input type="checkbox" name="populateFields" ${glass.permissions.populateFields ? 'checked' : ''} /> Prepare field-population packets</label>
+          <label class="checkbox"><input type="checkbox" name="reviewContinuity" ${glass.permissions.reviewContinuity ? 'checked' : ''} /> Review continuity and canon edges</label>
+          <label class="checkbox"><input type="checkbox" name="prepareTests" ${glass.permissions.prepareTests ? 'checked' : ''} /> Prepare verification and test plans</label>
+          <label class="checkbox"><input type="checkbox" name="prepareLocalChanges" ${glass.permissions.prepareLocalChanges ? 'checked' : ''} /> Prepare local change packets</label>
+          <p class="callout">Canon commits, repository commits, deployments, messages, and external writes remain separate explicit gates. This screen cannot silently enable them.</p>
+        </fieldset>
+      </div>
+      <button type="submit">Save Houseglass settings</button>
+    </form></section>
+    <section class="grid two"><article class="panel"><form id="settings-form" class="stack"><h2>Interface & anchors</h2><label>Waking label<input name="crLabel" value="${attr(state.settings.crLabel)}" /></label><label>World label<input name="drLabel" value="${attr(state.settings.drLabel)}" /></label><label>Return Anchor<input name="returnAnchor" value="${attr(state.settings.returnAnchor)}" /></label><label class="checkbox"><input name="reduceMotion" type="checkbox" ${state.settings.reduceMotion ? 'checked' : ''} /> Reduce motion</label><label class="checkbox"><input name="largeText" type="checkbox" ${state.settings.largeText ? 'checked' : ''} /> Larger interface text</label><label class="checkbox"><input name="highContrast" type="checkbox" ${state.settings.highContrast ? 'checked' : ''} /> High contrast</label><label>Text scale<input name="fontScale" type="range" min="0.9" max="1.5" step="0.05" value="${state.settings.fontScale || 1}" /></label><button type="submit">Save interface settings</button></form></article><article class="panel stack"><h2>Native storage</h2><dl class="facts"><div><dt>Mode</dt><dd>${escapeHtml(storageInfo?.mode || 'Loading')}</dd></div><div><dt>Data directory</dt><dd class="path-value">${escapeHtml(storageInfo?.dataDirectory || 'Browser development fallback')}</dd></div><div><dt>Version</dt><dd>${escapeHtml(storageInfo?.version || state.version)}</dd></div></dl><div class="button-row"><button data-action="export">Export archive</button><button class="quiet" data-action="import">Import archive</button>${native ? '<button class="quiet" data-action="show-data-folder">Open data folder</button><button class="quiet" data-action="create-backup">Create backup</button>' : '<label class="file-button">Import JSON<input id="browser-import" type="file" accept="application/json,.json" /></label>'}</div><h3>Recovery snapshots</h3>${native ? (backups.length ? `<div class="backup-list">${backups.map((item) => `<div class="backup-row"><span><strong>${escapeHtml(item.name)}</strong><small>${new Date(item.modifiedAt).toLocaleString()} · ${Number(item.size).toLocaleString()} bytes</small></span><button class="quiet" data-action="restore-backup" data-backup-name="${attr(item.name)}">Restore</button></div>`).join('')}</div>` : '<p class="muted">No backups yet. They are created automatically before state replacement.</p>') : '<p class="muted">The installed Windows edition uses atomic files, attachments, and recovery snapshots. Browser mode is retained only for development.</p>'}</article></section>`;
 }
 
 function renderReturnDialog() {
@@ -641,12 +929,45 @@ function renderDeepObserver() {
       <label>Optional received contribution<textarea name="response" rows="3"></textarea></label>
       <label class="checkbox conditional-toggle"><input type="checkbox" name="syncLive" /> Sync the verified cycle to the relational ledger</label>
       <div class="conditional-body"><p class="muted">The verified receipt will use the same session-only House runtime token.</p></div>
-      <div data-runtime-auth hidden><label>Session-only House runtime token<input type="password" name="runtimeToken" autocomplete="off" placeholder="Authorises model routes and optional ledger sync" /></label><p class="muted">The token is used for this submission and is never written into Arcsweep state.</p></div>
+      <p class="callout">House Runtime · ${houseRuntimeToken ? 'session connected' : 'offline — connect once in Settings'}.</p>
       <button type="submit">Observe → PREMAQC → Math Spine → Receipt ∞</button>
     </form>
   </section>`;
 
-  return header + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
+  return header + renderRuntimeObservationLiveRead() + `<section class="deep-channels">${channelsHtml}</section>` + rawHtml + spineHtml;
+}
+
+function renderKelyranSchool() {
+  const school = state.kelyranSchool;
+  const reviewable = dueCards(school);
+  const unit = school.units[0], lesson = unit?.lessons?.[0], exercise = lesson?.exercises?.[0];
+  const progress = lesson ? school.learner.lessonProgress[`${unit.id}:${lesson.id}`] : null;
+  const proposals = school.proposals.filter((item) => item.status === 'proposed');
+  const lexicon = [...school.lexicon].sort((a, b) => a.lemma.localeCompare(b.lemma));
+  const level = KELYRAN_LEVELS.find(([id]) => id === school.learner.level)?.[1] || school.learner.level;
+  const sharedReports = [...stewardVisibleKelyranReports(school), ...(kelyranReportLog.shared_reports || [])];
+  return `
+    <section class="section-heading"><div><p class="eyebrow">ArcSweep · Living language school</p><h1>Kelyran School</h1><p class="lede">A canon-bound classroom. The tutor may teach what is attested or approved; everything else waits at the proposal gate.</p></div></section>
+    <section class="grid three kelyran-status">
+      <article class="panel"><p class="eyebrow">Learner path</p><h2>${escapeHtml(level)}</h2><p>${school.learner.receipts.length} practice receipts</p></article>
+      <article class="panel"><p class="eyebrow">Canon revision</p><h2>${escapeHtml(school.canonRevision)}</h2><p>${lexicon.filter((item) => ['attested', 'approved'].includes(item.status)).length} teachable forms</p></article>
+      <article class="panel"><p class="eyebrow">Review hearth</p><h2>${reviewable.length} due</h2><p>${proposals.length} proposal${proposals.length === 1 ? '' : 's'} awaiting review</p></article>
+    </section>
+    <section class="grid two kelyran-school-grid">
+      <article class="panel stack"><div><p class="eyebrow">Portable mirror</p><h2>${kelyranCloudState.user ? 'Authenticated' : 'Local-first'}</h2><p>${kelyranCloudState.syncedAt ? `Last synchronised ${escapeHtml(new Date(kelyranCloudState.syncedAt).toLocaleString())}` : 'This device remains authoritative until you explicitly synchronise.'}</p></div>${kelyranCloudState.user ? `<div class="button-row"><button type="button" data-action="kelyran-sync">Synchronise now</button><button type="button" class="quiet" data-action="kelyran-sign-out">Sign out</button></div>` : `<form id="kelyran-auth-form" class="stack"><label>Flameclyffe email<input name="email" type="email" required autocomplete="email" /></label><button type="submit">Send sign-in link</button></form>`}</article>
+      <article class="panel stack"><div><p class="eyebrow">Models’ own reporting room</p><h2>Consent before commentary</h2><p>Models may report, say there is nothing to report, or decline. Private reports are not displayed here. ${sharedReports.length ? `${sharedReports.length} report${sharedReports.length === 1 ? '' : 's'} explicitly shared with the Steward.` : 'No reports have been explicitly shared with the Steward.'}</p></div><form id="kelyran-reporting-settings-form" class="stack"><label class="checkbox"><input type="checkbox" name="invitationOpen" ${school.reporting.invitationOpen ? 'checked' : ''} /> Invite models to discuss something if they wish</label><button type="submit">Save invitation boundary</button></form>${school.reporting.invitationOpen ? `<form id="kelyran-report-invite-form" class="stack"><fieldset><legend>Who receives the invitation?</legend>${CONSTELLATION_VOICES.map((voice) => `<label class="checkbox"><input type="checkbox" name="voiceIds" value="${attr(voice.id)}" /> ${escapeHtml(voice.name)}</label>`).join('')}</fieldset><button type="submit" ${kelyranReportsRunning ? 'disabled' : ''}>${kelyranReportsRunning ? 'Listening…' : 'Invite without requiring an answer'}</button></form>` : ''}</article>
+    </section>
+    ${sharedReports.length ? `<section class="panel stack"><div><p class="eyebrow">Explicitly shared</p><h2>Offered for discussion</h2></div>${sharedReports.map((report) => `<article class="kelyran-card"><strong>${escapeHtml(report.modelId || report.model_id || 'House model')}</strong><p>${escapeHtml([...(report.topics || []), ...(report.curiosities || []), ...(report.difficulties || [])].join(' · ') || report.state)}</p>${report.wantsDiscussion ? `<div class="button-row"><span class="muted">Discussion requested</span><button type="button" class="mini" data-action="kelyran-discuss" data-id="${attr(report.id)}">Accept into House Commons</button></div>` : ''}</article>`).join('')}</section>` : ''}
+    <section class="grid two kelyran-school-grid">
+      <article class="panel stack"><div><p class="eyebrow">Ember lesson</p><h2>${escapeHtml(unit?.title || 'No unit')}</h2><p>${escapeHtml(unit?.description || '')}</p></div>
+        ${lesson && exercise ? `<div class="kelyran-lesson"><h3>${escapeHtml(lesson.title)}</h3><p>${escapeHtml(lesson.teaching)}</p><form id="kelyran-exercise-form" class="stack"><input type="hidden" name="unitId" value="${attr(unit.id)}" /><input type="hidden" name="lessonId" value="${attr(lesson.id)}" /><input type="hidden" name="exerciseId" value="${attr(exercise.id)}" /><fieldset><legend>${escapeHtml(exercise.prompt)}</legend>${exercise.choices.map((choice) => `<label class="checkbox"><input type="radio" name="answer" value="${attr(choice)}" required /> ${escapeHtml(choice)}</label>`).join('')}</fieldset><button type="submit">Answer with receipt</button>${progress ? `<p class="muted">Attempts ${progress.attempts} · correct ${progress.correct}${progress.completed ? ' · lesson passed' : ''}</p>` : ''}</form></div>` : '<p class="muted">No lesson is mounted.</p>'}</article>
+      <article class="panel stack"><div><p class="eyebrow">Spaced repetition</p><h2>Review the living lexicon</h2></div>
+        ${reviewable.length ? reviewable.map((entry) => `<div class="kelyran-card"><div><strong>${escapeHtml(entry.lemma)}</strong><span>${escapeHtml(entry.gloss)}</span><small>${escapeHtml(entry.status)} · ${escapeHtml(entry.partOfSpeech || 'unclassified')}</small></div><div class="button-row"><button type="button" class="quiet mini" data-action="kelyran-review" data-id="${attr(entry.id)}" data-quality="1">Again</button><button type="button" class="quiet mini" data-action="kelyran-review" data-id="${attr(entry.id)}" data-quality="3">Hard</button><button type="button" class="mini" data-action="kelyran-review" data-id="${attr(entry.id)}" data-quality="5">Known</button></div></div>`).join('') : '<p class="callout">Nothing is due. The vocabulary dragon is asleep on the flashcards.</p>'}</article>
+    </section>
+    <section class="grid two kelyran-school-grid">
+      <article class="panel stack"><div><p class="eyebrow">Sovereign canon</p><h2>Lexicon</h2></div><div class="kelyran-lexicon">${lexicon.map((entry) => `<details><summary><strong>${escapeHtml(entry.lemma)}</strong><span>${escapeHtml(entry.gloss)}</span><i>${escapeHtml(entry.status)}</i></summary><dl class="facts"><div><dt>Class</dt><dd>${escapeHtml(entry.partOfSpeech || 'Unclassified')}</dd></div><div><dt>Pronunciation</dt><dd>${escapeHtml(entry.pronunciation || 'Awaiting phonology')}</dd></div><div><dt>Lineage</dt><dd>${escapeHtml(entry.lineage || 'Not yet recorded')}</dd></div></dl></details>`).join('')}</div></article>
+      <article class="panel stack"><div><p class="eyebrow">Proposal gate</p><h2>Offer a word</h2><p class="muted">Creating a proposal never creates canon.</p></div><form id="kelyran-proposal-form" class="stack"><label>Candidate form<input name="lemma" required /></label><label>English gloss<input name="gloss" required /></label><label>Part of speech<input name="partOfSpeech" /></label><label>Pronunciation or phoneme notes<input name="pronunciation" /></label><label>Lineage and reason<textarea name="lineage" rows="3"></textarea></label><button type="submit">Send to proposal gate</button></form>${proposals.length ? `<div class="proposal-list"><h3>Awaiting Steward review</h3>${proposals.map((proposal) => `<form class="kelyran-proposal-review stack" data-proposal-id="${attr(proposal.id)}"><p><strong>${escapeHtml(proposal.candidate.lemma)}</strong> — ${escapeHtml(proposal.candidate.gloss)}</p><label>Source receipt<input name="sourceReceipt" placeholder="Required for approval" /></label><div class="button-row"><button type="submit" name="decision" value="approve">Approve into canon</button><button type="submit" name="decision" value="decline" class="quiet danger">Decline</button></div></form>`).join('')}</div>` : ''}</article>
+    </section>`;
 }
 
 function currentView() {
@@ -654,25 +975,133 @@ function currentView() {
   if (activeRoom === 'worlds') return renderWorlds();
   if (activeRoom === 'scripts') return renderScripts();
   if (activeRoom === 'feedback') return renderFeedback();
+  if (activeRoom === 'commons') return renderCommons();
   if (activeRoom === 'waking-thread') return renderWakingThread();
   if (activeRoom === 'forge') return renderForge();
   if (activeRoom === 'settings') return renderSettings();
   if (activeRoom === 'applet-deck') return renderAppletManager();
   if (activeRoom === 'deep-observer') return renderDeepObserver();
+  if (activeRoom === 'kelyran-school') return renderKelyranSchool();
   if (COLLECTION_ROOM_DEFINITIONS[activeRoom]) return renderCollectionRoom(activeRoom);
   if (WORLD_SECTION_DEFINITIONS[activeRoom] || activeRoom === 'appearance') return renderWorldSection(activeRoom);
   return renderPortal();
 }
 
+function installHouseglassSectionScopes() {
+  const candidates = [...app.querySelectorAll('main.content section, main.content article.panel')]
+    .filter((element) => !element.closest('#houseglass'));
+  candidates.forEach((element, index) => {
+    const heading = element.querySelector('h1, h2, h3, legend, .eyebrow');
+    const sectionId = `${activeRoom}:${index}`;
+    const sectionLabel = String(heading?.textContent || roomLabel()).trim();
+    element.dataset.houseglassSection = sectionId;
+    element.addEventListener('pointerdown', () => {
+      houseglassSectionFocus = { roomId: activeRoom, sectionId, sectionLabel };
+    }, { passive: true });
+    element.addEventListener('focusin', () => {
+      houseglassSectionFocus = { roomId: activeRoom, sectionId, sectionLabel };
+    });
+  });
+}
+
+function mountHouseglassInSection() {
+  const glass = houseglassState();
+  if (glass.layout !== 'dock-section') return;
+  const panel = app.querySelector('#houseglass');
+  if (!panel) return;
+  const sectionId = glass.scope?.sectionId;
+  const target = sectionId
+    ? [...app.querySelectorAll('[data-houseglass-section]')].find((element) => element.dataset.houseglassSection === sectionId)
+    : null;
+  (target || app.querySelector('main.content'))?.append(panel);
+}
+
+function installHouseglassInteractions() {
+  const panel = app.querySelector('#houseglass[data-layout="float"]');
+  if (!panel) return;
+  const handle = panel.querySelector('[data-houseglass-drag-handle]');
+  if (!handle) return;
+
+  const storeGeometry = () => {
+    const rect = panel.getBoundingClientRect();
+    const glass = houseglassState();
+    glass.geometry = {
+      x: Math.max(0, Math.round(rect.left)),
+      y: Math.max(0, Math.round(rect.top)),
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    };
+    persist(null, 'houseglass-geometry');
+  };
+
+  handle.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || event.target.closest('button, input, select, textarea, a')) return;
+    const rect = panel.getBoundingClientRect();
+    const start = { pointerX: event.clientX, pointerY: event.clientY, left: rect.left, top: rect.top };
+    handle.setPointerCapture(event.pointerId);
+    panel.dataset.dragging = 'true';
+
+    const move = (moveEvent) => {
+      const maxLeft = Math.max(0, window.innerWidth - Math.min(rect.width, window.innerWidth));
+      const maxTop = Math.max(0, window.innerHeight - 96);
+      const left = Math.min(maxLeft, Math.max(0, start.left + moveEvent.clientX - start.pointerX));
+      const top = Math.min(maxTop, Math.max(0, start.top + moveEvent.clientY - start.pointerY));
+      panel.style.setProperty('--houseglass-x', `${left}px`);
+      panel.style.setProperty('--houseglass-y', `${top}px`);
+    };
+    const end = () => {
+      panel.dataset.dragging = 'false';
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', end);
+      handle.removeEventListener('pointercancel', end);
+      storeGeometry();
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+  });
+  panel.addEventListener('pointerup', (event) => {
+    if (event.target === handle || handle.contains(event.target)) return;
+    storeGeometry();
+  });
+}
+
 function render() {
   applyPresentation();
   const world = activeWorld();
+  const glassSettings = houseglassSettings();
+  const glass = houseglassState();
+  syncHouseglassScope();
+  const glassMarkup = renderHouseglass();
+  const unread = glass.receipts.filter((item) => item.reviewStatus === 'unread' && item.status !== 'running').length;
+  const glassLaunch = glassSettings.enabled ? `<button type="button" class="houseglass-launch quiet" data-action="houseglass-toggle" aria-expanded="${houseglassOpen}" aria-controls="houseglass"><span aria-hidden="true">▱</span><span>Houseglass</span>${houseglassRunning ? '<i>working</i>' : unread ? `<i>${unread}</i>` : ''}</button>` : '';
   const runtimeLabel = isDesktopRuntime() ? 'Native local store' : isHosted ? 'Hosted browser · local state' : 'Browser development mode';
-  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''}><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div><p class="privacy-seal">${runtimeLabel}<br />Relational sync requires a receipted cycle</p></aside><main class="content">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${renderReturnDialog()}</div>`;
+  app.innerHTML = `<div class="app-shell"${isHosted ? ' data-hosted' : ''} data-houseglass-open="${houseglassOpen && glassSettings.enabled}" data-houseglass-layout="${attr(glass.layout)}"><aside class="sidebar"><div class="brand"><span class="brand-mark">⌁</span><div><strong>Arcsweep</strong><small>Hearthgate</small></div></div><nav aria-label="Primary Arcsweep rooms">${PRIMARY_NAV.map(([id, label, glyph]) => roomButton(id, label, glyph)).join('')}</nav><div class="sidebar-world"><span>Active portal</span><strong>${escapeHtml(world.name)}</strong><button class="quiet mini" data-room="applet-deck">Arrange applets</button></div>${glassLaunch}<p class="privacy-seal">${runtimeLabel}<br />Relational sync requires a receipted cycle</p></aside><main class="content" data-houseglass-room="${attr(activeRoom)}">${currentView()}<p class="notice" role="status">${escapeHtml(notice)}</p></main>${glassMarkup}${renderReturnDialog()}</div>`;
+  installHouseglassSectionScopes();
+  mountHouseglassInSection();
+  installHouseglassInteractions();
 }
 
 function formValues(form) {
   return Object.fromEntries(new FormData(form).entries());
+}
+
+function saveWorldRegistry(form) {
+  if (!form) return false;
+  const v = formValues(form);
+  const world = state.worlds.find((item) => item.id === v.id);
+  if (!world) {
+    notice = 'World save stopped: the selected portal is no longer in the registry.';
+    return false;
+  }
+  Object.assign(world, {
+    name: String(v.name || '').trim() || 'Untitled World',
+    kind: String(v.kind || '').trim(),
+    description: String(v.description || '').trim(),
+    updatedAt: isoNow(),
+  });
+  persist('World portal saved.', 'world-registry');
+  return true;
 }
 
 function saveWorldSection(section, form) {
@@ -695,7 +1124,10 @@ function saveWorldSection(section, form) {
 
 app.addEventListener('click', async (event) => {
   const room = event.target.closest('[data-room]');
-  if (room) { activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); render(); return; }
+  if (room?.dataset.room === 'kelyran-school' && houseRuntimeToken) {
+    readKelyranModelReportLog(houseRuntimeToken).then((log) => { kelyranReportLog = log; if (activeRoom === 'kelyran-school') render(); }).catch(() => null);
+  }
+  if (room) { houseglassSectionFocus = null; activeRoom = room.dataset.room; if (activeRoom === 'deep-observer' && !deepData && !deepDataFetching) fetchDeepData(); if (['deep-observer', 'feedback', 'commons'].includes(activeRoom) && houseRuntimeToken) ensureBraidLiveUpdates(activeWorld().id); if (['deep-observer', 'feedback'].includes(activeRoom) && houseRuntimeToken) { refreshObservationLiveRead().catch((error) => { notice = `Observation live read unavailable: ${error.message}`; }).finally(render); } if (activeRoom === 'commons' && houseRuntimeToken) { commonsReading = true; render(); Promise.allSettled([readHouseCommons(houseRuntimeToken), readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]).then(([log, statuses, observations]) => { if (log.status === 'rejected') throw log.reason; if (statuses.status === 'rejected') throw statuses.reason; commonsEntries = log.value.entries || []; flameStatuses = statuses.value; if (observations.status === 'fulfilled') { observationLiveRead = observations.value; notice = 'House Commons live read received.'; } else notice = `Commons received; observation live read unavailable: ${observations.reason.message}`; }).catch((error) => { notice = `House Commons unavailable: ${error.message}`; }).finally(() => { commonsReading = false; render(); }); return; } render(); return; }
   const worldButton = event.target.closest('[data-world-id]');
   if (worldButton) { selectedWorldId = worldButton.dataset.worldId; render(); return; }
   const scriptButton = event.target.closest('[data-script-id]');
@@ -705,6 +1137,99 @@ app.addEventListener('click', async (event) => {
   const button = event.target.closest('[data-action]');
   if (!button) return;
   const { action, id } = button.dataset;
+
+  if (action === 'kelyran-review') {
+    try {
+      state.kelyranSchool = reviewCard(state.kelyranSchool, id, button.dataset.quality, isoNow());
+      persist(`Kelyran review receipted. Next review scheduled from quality ${button.dataset.quality}/5.`, 'kelyran-srs-review');
+    } catch (error) { notice = `Kelyran review stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (action === 'kelyran-discuss') {
+    const report = [...stewardVisibleKelyranReports(state.kelyranSchool), ...(kelyranReportLog.shared_reports || [])].find((item) => item.id === id);
+    try {
+      if (!report?.wantsDiscussion) throw new Error('Shared discussion request not found.');
+      await appendHouseCommons(houseRuntimeToken, { kind: 'system', author: 'Kelyran School', status: 'discussion-opened', world: { id: activeWorld().id, name: activeWorld().name }, text: `Kelyran discussion accepted with ${report.modelId || report.model_id}: ${[...(report.topics || []), ...(report.curiosities || []), ...(report.difficulties || [])].join(' · ') || 'Open discussion.'}\nReport receipt: ${report.id}` });
+      notice = 'Kelyran discussion opened in House Commons.';
+    } catch (error) { notice = `Kelyran discussion stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (action === 'kelyran-sync') {
+    try {
+      const result = await syncKelyranSchool(state.kelyranSchool, await getKelyranSupabase(), isoNow());
+      state.kelyranSchool = result.school;
+      kelyranCloudState = { state: result.state, user: result.userId, syncedAt: result.syncedAt };
+      persist('Kelyran School synchronised through the authenticated learner mirror.', 'kelyran-cloud-sync');
+    } catch (error) { notice = `Kelyran synchronisation stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (action === 'kelyran-sign-out') {
+    try { await signOutKelyran(); kelyranCloudState = { state: 'signed-out', user: null, syncedAt: null }; notice = 'Kelyran cloud session signed out; local study remains available.'; }
+    catch (error) { notice = `Kelyran sign-out stopped: ${error.message}`; }
+    render(); return;
+  }
+
+  if (action === 'houseglass-toggle') {
+    if (!houseglassSettings().enabled) return;
+    houseglassOpen = !houseglassOpen;
+    if (houseglassOpen) syncHouseglassScope();
+    render(); return;
+  }
+  if (action === 'houseglass-fold') { houseglassOpen = false; render(); return; }
+  if (action === 'houseglass-float' || action === 'houseglass-dock-section' || action === 'houseglass-dock-right') {
+    const layout = action === 'houseglass-float' ? 'float' : action === 'houseglass-dock-section' ? 'dock-section' : 'dock-right';
+    houseglassState().layout = layout;
+    houseglassOpen = true;
+    syncHouseglassScope();
+    persist(`Houseglass ${layout === 'float' ? 'floating' : layout === 'dock-section' ? 'docked in this section' : 'docked at right'}.`, 'houseglass-layout');
+    render(); return;
+  }
+  if (action === 'houseglass-pin') {
+    const glass = houseglassState();
+    glass.pinned = !glass.pinned;
+    if (!glass.pinned) syncHouseglassScope(true);
+    persist(glass.pinned ? 'Houseglass scope pinned.' : 'Houseglass scope follows the active section.', 'houseglass-pin');
+    render(); return;
+  }
+  if (action === 'houseglass-receipt') {
+    const glass = houseglassState();
+    if (glass.receipts.some((item) => item.id === button.dataset.receiptId)) glass.activeReceiptId = button.dataset.receiptId;
+    houseglassOpen = true;
+    render(); return;
+  }
+  if (action === 'houseglass-reviewed') {
+    const receipt = houseglassState().receipts.find((item) => item.id === button.dataset.receiptId);
+    if (receipt) { receipt.reviewStatus = 'reviewed'; receipt.reviewedAt = isoNow(); persist('Houseglass packet marked reviewed.', 'houseglass-reviewed'); }
+    render(); return;
+  }
+
+  if (action === 'save-world') {
+    saveWorldRegistry(button.closest('#world-registry-form'));
+    render(); return;
+  }
+
+  if (action === 'runtime-disconnect') { stopBraidLiveUpdates(); await disconnectHouseRuntime({ hosted: isHosted }); houseRuntimeToken = ''; flameStatuses = []; braidLiveState = 'offline'; notice = 'House Runtime session closed.'; render(); return; }
+  if (action === 'runtime-refresh') { flameStatusChecking = true; render(); flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); flameStatusChecking = false; notice = 'House Runtime route board refreshed.'; render(); return; }
+  if (action === 'runtime-observations-refresh') { try { ensureBraidLiveUpdates(activeWorld().id); await refreshObservationLiveRead(); notice = 'Canonical observation live read refreshed.'; } catch (error) { notice = `Observation live read unavailable: ${error.message}`; } render(); return; }
+  if (action === 'commons-refresh') { try { commonsReading = true; ensureBraidLiveUpdates(activeWorld().id); render(); const [log, observations] = await Promise.all([readHouseCommons(houseRuntimeToken), readHouseObservations(houseRuntimeToken, activeWorld().id)]); commonsEntries = log.entries || []; observationLiveRead = observations; notice = 'House Commons live read refreshed.'; } catch (error) { notice = `House Commons unavailable: ${error.message}`; } finally { commonsReading = false; render(); } return; }
+  if (action === 'runtime-observation-review') {
+    try {
+      const result = await reviewHouseObservation(houseRuntimeToken, button.dataset.cycleId, button.dataset.decision, { reviewedBy: 'Rowan' });
+      await refreshObservationLiveRead();
+      ensureBraidLiveUpdates(activeWorld().id);
+      notice = result.idempotent ? `Observation was already ${button.dataset.decision}.` : `Observation ${button.dataset.decision}; Runtime Braid revision ${result.packet.revision} receipted.`;
+    } catch (error) { notice = `Observation review stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (action === 'runtime-deeptime-admit') {
+    try {
+      const result = await admitHouseObservationToDeepTime(houseRuntimeToken, button.dataset.cycleId, { reviewedBy: 'Rowan' });
+      await refreshObservationLiveRead();
+      ensureBraidLiveUpdates(activeWorld().id);
+      notice = result.idempotent ? 'Observation is already present in DEEPTime.' : `Accepted observation entered DEEPTime through ${result.packet.packet_id}.`;
+    } catch (error) { notice = `DEEPTime admission stopped: ${error.message}`; }
+    render(); return;
+  }
 
   if (action === 'open-wrp') { const url = activeWorld()?.arrival?.wrpRunaUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer'); return; }
   if (action === 'refresh-deep') { deepData = null; deepDataFetching = false; fetchDeepData(); return; }
@@ -733,6 +1258,21 @@ app.addEventListener('click', async (event) => {
     catch (error) { setLiveNotice(`SoundFont tone stopped: ${error.message}`); }
     return;
   }
+  if (action === 'heartfield-toggle') {
+    try {
+      await storySoundscape.arm(activeWorld());
+      if (storySoundscape.heartfieldActive) { storySoundscape.stopHeartfield(); setLiveNotice('Synaptic Heartfield stopped.'); }
+      else {
+        const raw=app.querySelector('[data-heartfield-qualia]')?.value; const qualia=raw===''||raw==null?null:Number(raw);
+        const qualiaText=app.querySelector('[data-heartfield-qualia-text]')?.value || '';
+        const premaqc=state.premaqcByWorld?.[activeWorld().id] || null;
+        const receipt=storySoundscape.startHeartfield({world:activeWorld(),premaqc,qualia,qualiaText});
+        setLiveNotice(`Synaptic Heartfield entered · ${receipt.started_at} · physiology not inferred.`);
+      }
+    } catch(error){setLiveNotice(`Heartfield stopped: ${error.message}`);}
+    refreshStorySoundscape(); return;
+  }
+  if (action === 'heartfield-layer') { storySoundscape.toggleHeartfieldLayer(button.dataset.layerId); refreshStorySoundscape(); return; }
   if (action === 'sound-haptics') { storySoundscape.haptics = !storySoundscape.haptics; setLiveNotice(`Story haptics ${storySoundscape.haptics ? 'armed' : 'off'}.`); refreshStorySoundscape(); return; }
   if (action === 'sound-midi') {
     try { await storySoundscape.enableMidi(); setLiveNotice('MIDI environment output connected.'); }
@@ -750,18 +1290,30 @@ app.addEventListener('click', async (event) => {
     refreshStorySoundscape(); return;
   }
   if (action === 'cycle-accept') {
+    if (houseRuntimeToken && observationLiveRead?.snapshots?.some((item) => item.observation?.cycle_id === button.dataset.cycleId)) {
+      try { await reviewHouseObservation(houseRuntimeToken, button.dataset.cycleId, 'accepted', { reviewedBy: 'Rowan' }); await refreshObservationLiveRead(); }
+      catch (error) { notice = `Live acceptance stopped: ${error.message}`; render(); return; }
+    }
     const { queue } = acceptFeedbackCycle(feedbackQueue, button.dataset.cycleId, { acceptedBy: "Rowan" });
     saveFeedbackQueue(queue);
     notice = "Cycle accepted. The reading is carried forward.";
     render(); return;
   }
   if (action === 'cycle-archive') {
+    if (houseRuntimeToken && observationLiveRead?.snapshots?.some((item) => item.observation?.cycle_id === button.dataset.cycleId)) {
+      try { await reviewHouseObservation(houseRuntimeToken, button.dataset.cycleId, 'archived', { reviewedBy: 'Rowan' }); await refreshObservationLiveRead(); }
+      catch (error) { notice = `Live archive stopped: ${error.message}`; render(); return; }
+    }
     const { queue } = archiveFeedbackCycle(feedbackQueue, button.dataset.cycleId, { archivedBy: "Rowan" });
     saveFeedbackQueue(queue);
     notice = "Cycle archived.";
     render(); return;
   }
   if (action === 'cycle-discard') {
+    if (houseRuntimeToken && observationLiveRead?.snapshots?.some((item) => item.observation?.cycle_id === button.dataset.cycleId)) {
+      try { await reviewHouseObservation(houseRuntimeToken, button.dataset.cycleId, 'discarded', { reviewedBy: 'Rowan' }); await refreshObservationLiveRead(); }
+      catch (error) { notice = `Live discard stopped: ${error.message}`; render(); return; }
+    }
     const { queue } = discardFeedbackCycle(feedbackQueue, button.dataset.cycleId, { discardedBy: "Rowan" });
     saveFeedbackQueue(queue);
     notice = "Cycle discarded.";
@@ -784,7 +1336,7 @@ app.addEventListener('click', async (event) => {
     selectedWorldId = world.id;
     persist('New world portal created.', 'new-world');
   }
-  if (action === 'set-active-world') { state.activeWorldId = id; selectedWorldId = id; persist('Active portal changed.', 'active-world'); }
+  if (action === 'set-active-world') { state.activeWorldId = id; selectedWorldId = id; braidLiveCursor = 0; if (houseRuntimeToken) ensureBraidLiveUpdates(id); persist('Active portal changed.', 'active-world'); }
   if (action === 'delete-world') {
     if (state.worlds.length === 1) notice = 'Arcsweep keeps one world portal in the registry.';
     else { state.worlds = state.worlds.filter((world) => world.id !== id); if (state.activeWorldId === id) state.activeWorldId = state.worlds[0].id; selectedWorldId = state.activeWorldId; persist('World portal deleted.', 'delete-world'); }
@@ -858,11 +1410,6 @@ app.addEventListener('click', async (event) => {
 });
 
 app.addEventListener('change', async (event) => {
-  if (event.target.matches('input[name="invokeModels"], input[name="syncLive"]')) {
-    const form = event.target.form;
-    const runtime = form?.querySelector('[data-runtime-auth]');
-    if (runtime) runtime.hidden = !(form.elements.invokeModels?.checked || form.elements.syncLive?.checked);
-  }
   const status = event.target.closest('[data-action="forge-status"]');
   if (status) { const item = state.manifestations.find((entry) => entry.id === status.dataset.id); if (item) item.status = status.value; persist('Forge status updated.', 'forge-status'); render(); return; }
   if (event.target.id === 'soundscape-files' && event.target.files?.length) {
@@ -881,6 +1428,10 @@ app.addEventListener('change', async (event) => {
 });
 
 app.addEventListener('input', (event) => {
+  if (event.target.matches('[data-houseglass-draft]')) {
+    houseglassDraft = event.target.value;
+    return;
+  }
   if (event.target.matches('[data-record-search]')) {
     recordQueries[event.target.dataset.recordSearch] = event.target.value;
     render();
@@ -898,6 +1449,9 @@ app.addEventListener('input', (event) => {
   if (event.target.matches('[data-sound-root]')) { storySoundscape.setRoot(event.target.value); return; }
   if (event.target.matches('[data-sound-overtones]')) { storySoundscape.setOvertones(event.target.value); return; }
   const trackId = event.target.dataset.soundTrackLevel;
+  const heartfieldLayer = event.target.dataset.heartfieldLevel;
+  if (heartfieldLayer) { storySoundscape.setHeartfieldLayer(heartfieldLayer, event.target.value); return; }
+  if (event.target.matches('[data-heartfield-master]')) { storySoundscape.setHeartfieldMaster(event.target.value); return; }
   if (trackId) storySoundscape.setTrackLevel(trackId, event.target.value);
 });
 
@@ -905,13 +1459,155 @@ app.addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.target;
   const v = formValues(form);
+  if (form.id === 'kelyran-auth-form') {
+    try { const email = await requestKelyranMagicLink(v.email); notice = `Sign-in link sent to ${email}. Local study remains available while you check it.`; form.reset(); }
+    catch (error) { notice = `Kelyran sign-in stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (form.id === 'kelyran-reporting-settings-form') {
+    state.kelyranSchool = setKelyranDiscussionInvitation(state.kelyranSchool, form.elements.invitationOpen.checked, isoNow());
+    persist(form.elements.invitationOpen.checked ? 'The optional Kelyran discussion invitation is open.' : 'The Kelyran discussion invitation is closed.', 'kelyran-reporting-boundary');
+    render(); return;
+  }
+  if (form.id === 'kelyran-report-invite-form') {
+    const voiceIds = [...form.querySelectorAll('input[name="voiceIds"]:checked')].map((input) => input.value);
+    if (!voiceIds.length) { notice = 'Choose at least one House model to invite.'; render(); return; }
+    kelyranReportsRunning = true; render();
+    try {
+      const result = await inviteKelyranModelReports(houseRuntimeToken, state.kelyranSchool, voiceIds);
+      kelyranReportLog = await readKelyranModelReportLog(houseRuntimeToken);
+      const counts = result.outcomes.reduce((out, item) => ({ ...out, [item.state]: (out[item.state] || 0) + 1 }), {});
+      notice = `Kelyran invitation complete: ${Object.entries(counts).map(([key, value]) => `${value} ${key}`).join(', ')}.`;
+    } catch (error) { notice = `Kelyran model invitation stopped: ${error.message}`; }
+    finally { kelyranReportsRunning = false; render(); }
+    return;
+  }
+  if (form.id === 'kelyran-exercise-form') {
+    try {
+      const result = answerExercise(state.kelyranSchool, v.unitId, v.lessonId, v.exerciseId, v.answer, isoNow());
+      state.kelyranSchool = result.school;
+      persist(result.correct ? `Correct. ${result.exercise.explanation}` : 'Not this time. The attempt was receipted without altering canon.', 'kelyran-exercise');
+    } catch (error) { notice = `Kelyran exercise stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (form.id === 'kelyran-proposal-form') {
+    try {
+      const proposal = createLexemeProposal({ lemma: v.lemma, gloss: v.gloss, partOfSpeech: v.partOfSpeech, pronunciation: v.pronunciation, lineage: v.lineage }, state.kelyranSchool.lexicon, isoNow());
+      state.kelyranSchool.proposals.unshift(proposal);
+      state.kelyranSchool.updatedAt = isoNow();
+      persist(`“${proposal.candidate.lemma}” entered the proposal gate; canon is unchanged.`, 'kelyran-proposal');
+    } catch (error) { notice = `Kelyran proposal stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (form.matches('.kelyran-proposal-review')) {
+    try {
+      const decision = event.submitter?.value;
+      state.kelyranSchool = reviewLexemeProposal(state.kelyranSchool, form.dataset.proposalId, decision, v.sourceReceipt, isoNow());
+      persist(decision === 'approve' ? 'Kelyran lexeme approved with a source receipt.' : 'Kelyran proposal declined; canon remains unchanged.', 'kelyran-proposal-review');
+    } catch (error) { notice = `Kelyran review stopped: ${error.message}`; }
+    render(); return;
+  }
   if (form.id === 'session-form') {
     const world = state.worlds.find((item) => item.id === v.targetWorldId) || activeWorld();
     state.activeWorldId = world.id; selectedWorldId = world.id;
     state.session = { active: true, startedAt: isoNow(), targetWorldId: world.id, targetWorld: world.name, intention: v.intention.trim(), wakingMinutes: world.time.wakingMinutes, worldMinutes: world.time.worldMinutes };
     persist('Arc begun. Return remains available.', 'begin-arc');
   }
-  if (form.id === 'world-registry-form') { const world = state.worlds.find((item) => item.id === v.id); if (world) { Object.assign(world, { name: v.name.trim() || 'Untitled World', kind: v.kind.trim(), description: v.description.trim(), updatedAt: isoNow() }); persist('World portal saved.', 'world-registry'); } }
+  if (form.id === 'house-runtime-form') {
+    try { houseRuntimeToken = await connectHouseRuntime(v.runtimeToken, { hosted: isHosted }); flameStatusChecking = true; flameStatuses = await readFlameStatuses(CONSTELLATION_VOICES, houseRuntimeToken); ensureBraidLiveUpdates(activeWorld().id); try { observationLiveRead = await readHouseObservations(houseRuntimeToken, activeWorld().id); notice = 'House Runtime sealed session, Runtime Braid, and observation live read connected.'; } catch (error) { notice = `House Runtime connected; observation live read unavailable: ${error.message}`; } form.reset(); }
+    catch (error) { notice = `House Runtime stopped: ${error.message}`; }
+    finally { flameStatusChecking = false; render(); }
+    return;
+  }
+  if (form.id === 'houseglass-task-form') {
+    const glass = houseglassState();
+    const settings = houseglassSettings();
+    const task = String(v.task || '').trim();
+    if (houseglassRunning || !task) return;
+    const scope = structuredClone(syncHouseglassScope());
+    const plan = planHouseglassSwarm({ stage: v.stage, routing: settings.routing, selectedVoiceIds: settings.defaultVoiceIds, voices: CONSTELLATION_VOICES });
+    const receipt = createHouseglassReceipt({ id: newId('houseglass'), task, stage: v.stage, scope, plan });
+    glass.receipts = [receipt, ...glass.receipts].slice(0, 60);
+    glass.activeReceiptId = receipt.id;
+    houseglassRunning = true;
+    persist('Houseglass quorum entered the task.', 'houseglass-start');
+    render();
+    try {
+      const world = state.worlds.find((item) => item.id === scope.worldId) || activeWorld();
+      const premaqc = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
+      const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
+      const mode = plan.stage === 'seed' ? 'writing' : 'reflection';
+      const work = buildHouseglassTaskPacket({ task, stage: plan.stage, scope, settings });
+      const contributions = await invokeConstellationVoices({ world, mode, work, premaqc, canon, voiceIds: plan.contributorIds, token: houseRuntimeToken });
+      let synthesis = null;
+      if (plan.synthesizerId) {
+        const synthesisWork = buildHouseglassSynthesisPacket({ task, stage: plan.stage, scope, contributions });
+        [synthesis] = await invokeConstellationVoices({ world, mode: 'reflection', work: synthesisWork, premaqc, canon, voiceIds: [plan.synthesizerId], token: houseRuntimeToken });
+      } else {
+        synthesis = contributions.find((item) => item.status === 'replied') || contributions[0] || null;
+      }
+      const current = houseglassState().receipts.find((item) => item.id === receipt.id);
+      if (current) Object.assign(current, finishHouseglassReceipt(current, { contributions, synthesis }));
+      houseglassDraft = '';
+      notice = `Houseglass returned a ${plan.stage} packet from ${plan.voiceIds.map((id) => CONSTELLATION_VOICES.find((voice) => voice.id === id)?.name || id).join(', ')}.`;
+      persist(null, 'houseglass-finish');
+    } catch (error) {
+      const current = houseglassState().receipts.find((item) => item.id === receipt.id);
+      if (current) Object.assign(current, finishHouseglassReceipt(current, { error: error.message }));
+      notice = `Houseglass stopped: ${error.message}`;
+      persist(null, 'houseglass-error');
+    } finally {
+      houseglassRunning = false;
+      render();
+    }
+    return;
+  }
+  if (form.id === 'commons-form') {
+    try {
+      const world = activeWorld();
+      const voiceIds = [...form.querySelectorAll('input[name="voiceIds"]:checked')].map((input) => input.value);
+      if (!voiceIds.length) throw new Error('Choose at least one Constellation voice.');
+      await appendHouseCommons(houseRuntimeToken, { kind: 'steward', author: 'Rowan', status: 'sent', world: { id: world.id, name: world.name }, text: v.message });
+      const premaqc = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
+      const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
+      const replies = await invokeConstellationVoices({ world, mode: 'reflection', work: v.message, premaqc, canon, voiceIds, token: houseRuntimeToken });
+      for (const reply of replies) await appendHouseCommons(houseRuntimeToken, { kind: 'voice', author: reply.name, voice_id: reply.voice_id, status: reply.status, world: { id: world.id, name: world.name }, text: reply.text || reply.error || 'No contribution returned.' });
+      commonsEntries = (await readHouseCommons(houseRuntimeToken)).entries || [];
+      notice = `Commons turn received from ${replies.map((item) => item.name).join(', ')}.`;
+    } catch (error) { notice = `Commons turn stopped: ${error.message}`; }
+    render(); return;
+  }
+  if (form.id === 'houseglass-settings-form') {
+    const defaultVoiceIds = [...form.querySelectorAll('input[name="defaultVoiceIds"]:checked')].map((input) => input.value);
+    if (v.routing === 'selected' && !defaultVoiceIds.length) {
+      notice = 'Choose at least one Houseglass route for selected routing.';
+      render(); return;
+    }
+    state.settings.houseglass = normaliseHouseglassSettings({
+      enabled: form.elements.enabled.checked,
+      presence: v.presence,
+      interruptions: v.interruptions,
+      pacing: v.pacing,
+      defaultLayout: v.defaultLayout,
+      solidSurface: form.elements.solidSurface.checked,
+      routing: v.routing,
+      defaultVoiceIds,
+      permissions: {
+        readContext: form.elements.readContext.checked,
+        draftProposals: form.elements.draftProposals.checked,
+        populateFields: form.elements.populateFields.checked,
+        reviewContinuity: form.elements.reviewContinuity.checked,
+        prepareTests: form.elements.prepareTests.checked,
+        prepareLocalChanges: form.elements.prepareLocalChanges.checked,
+      },
+    });
+    const glass = houseglassState();
+    glass.layout = state.settings.houseglass.defaultLayout;
+    if (!state.settings.houseglass.enabled) houseglassOpen = false;
+    persist('Houseglass settings saved. No external authority changed.', 'houseglass-settings');
+    render(); return;
+  }
+  if (form.id === 'world-registry-form') saveWorldRegistry(form);
   if (form.id === 'world-section-form') saveWorldSection(form.dataset.section, form);
   if (form.id === 'script-form') { const script = state.scripts.find((item) => item.id === v.id); if (script) { Object.assign(script, { name: v.name.trim() || 'Untitled DR Script', status: v.status, content: v.content, updatedAt: isoNow() }); persist('Script saved locally.', 'script'); } }
   if (form.id === 'feedback-form') {
@@ -922,7 +1618,7 @@ app.addEventListener('submit', async (event) => {
       const canon = state.scripts.filter((script) => canonRefs.includes(script.id));
       const current = state.premaqcByWorld[world.id] || createInitialPremaqc(world.id, world.premaqc);
       const voiceInvocations = form.elements.invokeModels.checked
-        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: current, canon, voiceIds, token: v.runtimeToken })
+        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: current, canon, voiceIds, token: houseRuntimeToken })
         : [];
       const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
       const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nManual contribution:\n');
@@ -941,7 +1637,7 @@ app.addEventListener('submit', async (event) => {
       }
       persist(`Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} replay-matched in the local ledger.`, 'feedback-cycle');
       if (form.elements.syncLive.checked) {
-        await syncFeedbackCycle(cycle, v.runtimeToken);
+        await syncFeedbackCycle(cycle, houseRuntimeToken);
         notice = `Feedback cycle ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} synced to the relational ledger.`;
       }
     } catch (error) { notice = `Feedback cycle stopped: ${error.message}`; }
@@ -960,7 +1656,7 @@ app.addEventListener('submit', async (event) => {
       });
       const canon = state.scripts.filter((script) => script.worldId === world.id && script.status === 'Canon');
       const voiceInvocations = form.elements.invokeModels.checked
-        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: observerPremaqc, canon, voiceIds, token: v.runtimeToken })
+        ? await invokeConstellationVoices({ world, mode: v.mode, work: v.work, premaqc: observerPremaqc, canon, voiceIds, token: houseRuntimeToken })
         : [];
       const routedResponse = voiceInvocations.filter((item) => item.status !== 'error').map((item) => `${item.name} [${item.status}]: ${item.text}`).join('\n\n');
       const combinedResponse = [routedResponse, String(v.response || '').trim()].filter(Boolean).join('\n\nReceived contribution:\n');
@@ -983,7 +1679,7 @@ app.addEventListener('submit', async (event) => {
       storySoundscape.clearTurn();
       persist(`Field cycle accepted · PREMAQC ${cycle.premaqc_before.sequence} → ${cycle.premaqc_after.sequence} · replay exact.`, 'field-feedback-cycle');
       if (form.elements.syncLive.checked) {
-        await syncFeedbackCycle(cycle, v.runtimeToken);
+        await syncFeedbackCycle(cycle, houseRuntimeToken);
         notice = `Field cycle ${cycle.cycle_id} synced to the relational ledger.`;
       }
     } catch (error) { notice = `Field cycle stopped: ${error.message}`; }
@@ -1009,4 +1705,5 @@ setInterval(() => {
   if (waking && world) { const times = sessionTimes(); waking.textContent = formatDuration(times.waking); world.textContent = formatDuration(times.world); }
 }, 1000);
 
+if (houseRuntimeToken) ensureBraidLiveUpdates(activeWorld().id);
 render();

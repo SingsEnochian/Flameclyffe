@@ -6,11 +6,12 @@ async function read(relativePath) {
   return readFile(new URL(relativePath, import.meta.url), 'utf8');
 }
 
-test('dedicated Bifröst route publishes the current compression-release interface', async () => {
-  const [html, main, root, vite, manifestText] = await Promise.all([
+test('dedicated Bifröst compatibility route retains the current compression-release interface', async () => {
+  const [html, main, root, shell, vite, manifestText] = await Promise.all([
     read('../bifrost/index.html'),
     read('../bifrost/main.js'),
     read('../index.html'),
+    read('../public/shell/arcsweep-shell.js'),
     read('../vite.config.js'),
     read('../public/modules/bifrost-arcsweep.module.json'),
   ]);
@@ -29,9 +30,11 @@ test('dedicated Bifröst route publishes the current compression-release interfa
   assert.doesNotMatch(main, /collapseRelease\s*\(/);
   assert.doesNotMatch(main, /action:\s*['"]collapse-release['"]/);
 
-  assert.match(root, /href=['"]\.\/bifrost\//);
-  assert.match(root, /Open Bifröst Arcsweep/);
+  assert.doesNotMatch(root, /href=['"]\.\/bifrost\//);
+  assert.doesNotMatch(shell, /label:\s*['"]Bifröst['"]/);
+  assert.match(shell, /livingArcsweepUrl/);
   assert.match(vite, /bifrost:\s*resolve\(REPO_ROOT, 'apps\/starwell\/bifrost\/index\.html'\)/);
+
   assert.equal(manifest.version, '0.4.0');
   assert.equal(manifest.interfaceRoute, '/starwell/bifrost/');
   assert.equal(manifest.interfaceEntrypoint, 'bifrost/index.html');

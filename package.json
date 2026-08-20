@@ -41,6 +41,7 @@
     "everos:search": "node sandbox/everos/search-memory.mjs"
   },
   "dependencies": {
+    "@netlify/blobs": "^10.7.13",
     "@react-three/drei": "latest",
     "@react-three/fiber": "latest",
     "@supabase/supabase-js": "latest",
