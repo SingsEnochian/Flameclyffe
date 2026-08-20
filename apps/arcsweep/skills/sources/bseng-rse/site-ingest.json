@@ -20,35 +20,16 @@
     "respect_robots_txt": true,
     "discover_sitemaps": true,
     "discover_wordpress_rest": true,
-    "follow_internal_links": true,
+    "follow_internal_links": false,
+    "coverage_note": "Authoritative sitemap plus public WordPress post/page enumeration supplies the whole public page corpus; recursive nav traversal is disabled to avoid category, pagination, and presentation duplicates. Formal PDF sources are seeded explicitly.",
     "max_pages": 10000,
-    "max_depth": 16,
-    "delay_ms": 750,
+    "max_depth": 6,
+    "delay_ms": 350,
     "concurrency": 1,
     "user_agent": "HearthfireSourceIngest/0.1 (+https://github.com/SingsEnochian/Flameclyffe)",
-    "allowed_content_types": [
-      "text/html",
-      "application/pdf",
-      "text/plain",
-      "application/json",
-      "application/xml",
-      "text/xml"
-    ],
-    "deny_path_prefixes": [
-      "/wp-admin/",
-      "/wp-login.php",
-      "/xmlrpc.php"
-    ],
-    "drop_query_parameters": [
-      "utm_source",
-      "utm_medium",
-      "utm_campaign",
-      "utm_term",
-      "utm_content",
-      "fbclid",
-      "gclid",
-      "replytocom"
-    ],
+    "allowed_content_types": ["text/html", "application/pdf", "text/plain", "application/json", "application/xml", "text/xml"],
+    "deny_path_prefixes": ["/wp-admin/", "/wp-login.php", "/xmlrpc.php"],
+    "drop_query_parameters": ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "fbclid", "gclid", "replytocom"],
     "document_policy": "download-and-hash",
     "html_policy": "snapshot-normalize-and-hash",
     "image_audio_video_policy": "metadata-and-linkage-only"
@@ -67,130 +48,35 @@
     "https://bseng.com/category/rse/"
   ],
   "known_current_math_documents": [
-    {
-      "tier": 0,
-      "title": "Axioms of Ontic Minimalism",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/Axioms-of-Ontic-Minimalism-v1.0.pdf"
-    },
-    {
-      "tier": 0,
-      "title": "The Principles of Ontic Minimalism",
-      "version": "1.1",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/The-Principles-of-Ontic-Minimalism-v1.1.pdf"
-    },
-    {
-      "tier": 0,
-      "title": "Representational Neutrality",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/06/Representational-Neutrality-v1.0.pdf"
-    },
-    {
-      "tier": 1,
-      "title": "The Coherence-Relational Blockworld",
-      "version": "6.0",
-      "discover_from": "https://bseng.com/start-here/rse-mathematical-framework/"
-    },
-    {
-      "tier": 1,
-      "title": "A Mathematical Model for the Coherence-Relational Blockworld",
-      "version": "6.0",
-      "discover_from": "https://bseng.com/start-here/rse-mathematical-framework/"
-    },
-    {
-      "tier": 1,
-      "title": "The 3-Mode Coherence Sector",
-      "version": "1.1",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/The-3-Mode-Coherence-Sector-v1.1.pdf"
-    },
-    {
-      "tier": 2,
-      "title": "Global Closure and Decomposition Invariance",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/Global-Closure-and-Decomposition-Invariance-v1.0.pdf"
-    },
-    {
-      "tier": 2,
-      "title": "Projection Residual Geometry",
-      "version": "1.1",
-      "discover_from": "https://bseng.com/start-here/rse-mathematical-framework/"
-    },
-    {
-      "tier": 2,
-      "title": "Closure-Restoration Geometry",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/Closure-Restoration-Geometry-v1.0.pdf"
-    },
-    {
-      "tier": 2,
-      "title": "Global Capacity Invariants and Normalization",
-      "version": "1.3",
-      "url": "https://bseng.com/wp-content/uploads/2026/06/Global-Capacity-Invariants-and-Normalization-v1.3.pdf"
-    },
-    {
-      "tier": 2,
-      "title": "Residual Space Geometry",
-      "version": "1.1",
-      "discover_from": "https://bseng.com/start-here/rse-mathematical-framework/"
-    },
-    {
-      "tier": 2,
-      "title": "Hilbert Space from Global Closure and Decomposition Invariance",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/06/Hilbert-Space-from-Global-Closure-and-Decomposition-Invariance-v1.0.pdf"
-    },
-    {
-      "tier": 3,
-      "title": "Structural Invariants and Dimensionless Ratios",
-      "version": "1.1",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/Structural-Invariants-v1.1.pdf"
-    },
-    {
-      "tier": 3,
-      "title": "Identity and Ontic Minimalism",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/Identity-and-ontic-minimalism-v1.0.pdf"
-    },
-    {
-      "tier": 4,
-      "title": "Relational Structural Experience",
-      "version": "6.0",
-      "discover_from": "https://bseng.com/start-here/rse-mathematical-framework/"
-    },
-    {
-      "tier": 4,
-      "title": "Phenomenology in a Relational Blockworld",
-      "version": "5.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/Phenomenology-in-a-Relational-Blockworld-v5.0.pdf"
-    },
-    {
-      "tier": 4,
-      "title": "Recognition Anchoring Across Indexing Inequivalence",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/Recognition-Anchoring-Across-Indexing-Inequivalence-v1.0.pdf"
-    },
-    {
-      "tier": 5,
-      "title": "The Uncertainty Principle",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/The-Uncertainty-Principle-v1.0.pdf"
-    },
-    {
-      "tier": 5,
-      "title": "Neutrino Mass and Oscillation",
-      "version": "1.0",
-      "url": "https://bseng.com/wp-content/uploads/2026/05/Neutrino-Mass-and-Oscillation-v1.0.pdf"
-    }
+    {"tier":0,"title":"Axioms of Ontic Minimalism","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/05/Axioms-of-Ontic-Minimalism-v1.0.pdf"},
+    {"tier":0,"title":"The Principles of Ontic Minimalism","version":"1.1","url":"https://bseng.com/wp-content/uploads/2026/05/The-Principles-of-Ontic-Minimalism-v1.1.pdf"},
+    {"tier":0,"title":"Representational Neutrality","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/06/Representational-Neutrality-v1.0.pdf"},
+    {"tier":1,"title":"The Coherence-Relational Blockworld","version":"6.0","discover_from":"https://bseng.com/start-here/rse-mathematical-framework/"},
+    {"tier":1,"title":"A Mathematical Model for the Coherence-Relational Blockworld","version":"6.0","discover_from":"https://bseng.com/start-here/rse-mathematical-framework/"},
+    {"tier":1,"title":"The 3-Mode Coherence Sector","version":"1.1","url":"https://bseng.com/wp-content/uploads/2026/05/The-3-Mode-Coherence-Sector-v1.1.pdf"},
+    {"tier":2,"title":"Global Closure and Decomposition Invariance","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/05/Global-Closure-and-Decomposition-Invariance-v1.0.pdf"},
+    {"tier":2,"title":"Projection Residual Geometry","version":"1.1","discover_from":"https://bseng.com/start-here/rse-mathematical-framework/"},
+    {"tier":2,"title":"Closure-Restoration Geometry","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/05/Closure-Restoration-Geometry-v1.0.pdf"},
+    {"tier":2,"title":"Global Capacity Invariants and Normalization","version":"1.3","url":"https://bseng.com/wp-content/uploads/2026/06/Global-Capacity-Invariants-and-Normalization-v1.3.pdf"},
+    {"tier":2,"title":"Residual Space Geometry","version":"1.1","discover_from":"https://bseng.com/start-here/rse-mathematical-framework/"},
+    {"tier":2,"title":"Hilbert Space from Global Closure and Decomposition Invariance","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/06/Hilbert-Space-from-Global-Closure-and-Decomposition-Invariance-v1.0.pdf"},
+    {"tier":3,"title":"Structural Invariants and Dimensionless Ratios","version":"1.1","url":"https://bseng.com/wp-content/uploads/2026/05/Structural-Invariants-v1.1.pdf"},
+    {"tier":3,"title":"Identity and Ontic Minimalism","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/05/Identity-and-ontic-minimalism-v1.0.pdf"},
+    {"tier":4,"title":"Relational Structural Experience","version":"6.0","discover_from":"https://bseng.com/start-here/rse-mathematical-framework/"},
+    {"tier":4,"title":"Phenomenology in a Relational Blockworld","version":"5.0","url":"https://bseng.com/wp-content/uploads/2026/05/Phenomenology-in-a-Relational-Blockworld-v5.0.pdf"},
+    {"tier":4,"title":"Recognition Anchoring Across Indexing Inequivalence","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/05/Recognition-Anchoring-Across-Indexing-Inequivalence-v1.0.pdf"},
+    {"tier":5,"title":"The Uncertainty Principle","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/05/The-Uncertainty-Principle-v1.0.pdf"},
+    {"tier":5,"title":"Neutrino Mass and Oscillation","version":"1.0","url":"https://bseng.com/wp-content/uploads/2026/05/Neutrino-Mass-and-Oscillation-v1.0.pdf"}
   ],
   "section_rules": [
-    { "match": "/start-here/rse-mathematical-framework/", "class": "mathematics-hub" },
-    { "match": "/start-here/core-theory/", "class": "core-theory-hub" },
-    { "match": "/start-here/ai-ethics-documents/", "class": "ethics-hub" },
-    { "match": "/start-here/sauna-epistemology/", "class": "conversation-precursor-hub" },
-    { "match": "/start-here/guest-authors-at-bseng/", "class": "guest-author-hub" },
-    { "match": "/what-this-is-not/", "class": "methodology-boundary" },
-    { "match": "/wp-content/uploads/", "class": "primary-document" },
-    { "match": "/category/", "class": "archive-index" }
+    {"match":"/start-here/rse-mathematical-framework/","class":"mathematics-hub"},
+    {"match":"/start-here/core-theory/","class":"core-theory-hub"},
+    {"match":"/start-here/ai-ethics-documents/","class":"ethics-hub"},
+    {"match":"/start-here/sauna-epistemology/","class":"conversation-precursor-hub"},
+    {"match":"/start-here/guest-authors-at-bseng/","class":"guest-author-hub"},
+    {"match":"/what-this-is-not/","class":"methodology-boundary"},
+    {"match":"/wp-content/uploads/","class":"primary-document"},
+    {"match":"/category/","class":"archive-index"}
   ],
   "lineage_policy": {
     "preserve_all_versions": true,
@@ -200,61 +86,9 @@
     "standalone_post_marked_updated_in_download": "strong",
     "sauna_precursor_to_later_paper": "candidate-unless-explicit",
     "automatic_retirement": false,
-    "record_relation_types": [
-      "supersedes",
-      "updates",
-      "formalizes",
-      "precursor-to",
-      "derived-from",
-      "references",
-      "guest-branch-of",
-      "contradicts",
-      "reframes"
-    ]
+    "record_relation_types": ["supersedes","updates","formalizes","precursor-to","derived-from","references","guest-branch-of","contradicts","reframes"]
   },
-  "extraction_targets": [
-    "title",
-    "authors",
-    "publication_date",
-    "modified_date",
-    "version",
-    "doi",
-    "framework_tier",
-    "section_headings",
-    "definitions",
-    "symbol_tables",
-    "equations",
-    "axioms",
-    "principles",
-    "constraints",
-    "claims",
-    "open_questions",
-    "references",
-    "supersession_language",
-    "continuity_and_identity_constructs",
-    "ethics_constructs",
-    "hearthfire_correspondence_candidates"
-  ],
-  "hearthfire_correspondence_domains": [
-    "Hearthgate Math Spine v1.8",
-    "PREMAQC",
-    "DEEPTheory",
-    "DEEPTime",
-    "Observer provenance",
-    "Glyph Continuity",
-    "Constellation identity and recognition",
-    "House Runtime continuity",
-    "Requested Transformation",
-    "React-ion admissibility and residuals",
-    "Canon/observation/receipt authority separation"
-  ],
-  "output": {
-    "default_directory": "ingests/bseng-rse",
-    "raw_html": "raw/html",
-    "raw_documents": "raw/documents",
-    "normalized_text": "text",
-    "source_index": "source-index.json",
-    "lineage_proposals": "lineage-proposals.json",
-    "crawl_report": "crawl-report.json"
-  }
+  "extraction_targets": ["title","authors","publication_date","modified_date","version","doi","framework_tier","section_headings","definitions","symbol_tables","equations","axioms","principles","constraints","claims","open_questions","references","supersession_language","continuity_and_identity_constructs","ethics_constructs","hearthfire_correspondence_candidates"],
+  "hearthfire_correspondence_domains": ["Hearthgate Math Spine v1.8","PREMAQC","DEEPTheory","DEEPTime","Observer provenance","Glyph Continuity","Constellation identity and recognition","House Runtime continuity","Requested Transformation","React-ion admissibility and residuals","Canon/observation/receipt authority separation"],
+  "output": {"default_directory":"ingests/bseng-rse","raw_html":"raw/html","raw_documents":"raw/documents","normalized_text":"text","source_index":"source-index.json","lineage_proposals":"lineage-proposals.json","crawl_report":"crawl-report.json"}
 }
