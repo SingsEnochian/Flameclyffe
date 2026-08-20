@@ -14,6 +14,12 @@ import {
   normaliseContinuityEvidenceLedger,
 } from '../src/continuity-evidence-state.js';
 import { buildContinuityEvidenceProvenance } from '../src/continuity-evidence-provenance.js';
+import {
+  applyStateExtensionSnapshots,
+  clearStateExtensionSnapshot,
+  createDefaultState,
+  setStateExtensionSnapshot,
+} from '../src/storage.js';
 
 const world = { id: 'terra-aeterna', name: 'Terra Aeterna', root_hz: 220 };
 
@@ -91,6 +97,22 @@ test('normalisation rejects malformed evidence and bounds recent history', async
   const ledger = normaliseContinuityEvidenceLedger({ entries });
   assert.equal(ledger.entries.length, MAX_CONTINUITY_EVIDENCE_ENTRIES);
   assert.equal(ledger.entries.some((entry) => entry.receipt.schema === 'wrong'), false);
+});
+
+test('continuity evidence extension snapshot overwrites stale main-state evidence before save', async () => {
+  const stale = createDefaultState();
+  const staleLedger = createEmptyContinuityEvidenceLedger();
+  appendContinuityEvidence(staleLedger, { receipt: await recognition('2026-08-20T04:05:00.000Z'), worldId: world.id });
+  stale.continuityEvidence = staleLedger;
+
+  const latest = createEmptyContinuityEvidenceLedger();
+  appendContinuityEvidence(latest, { receipt: await recognition('2026-08-20T04:06:00.000Z'), worldId: world.id });
+  setStateExtensionSnapshot('continuityEvidence', latest);
+  applyStateExtensionSnapshots(stale);
+
+  assert.equal(stale.continuityEvidence.entries.length, 1);
+  assert.equal(stale.continuityEvidence.entries[0].receipt.generated_at, '2026-08-20T04:06:00.000Z');
+  clearStateExtensionSnapshot('continuityEvidence');
 });
 
 test('embedded transformation residual is harvested without altering its source circuit', async () => {
