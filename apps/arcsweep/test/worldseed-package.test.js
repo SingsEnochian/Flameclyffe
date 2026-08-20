@@ -95,7 +95,7 @@ test('package carries an existing root birth receipt without rebirthing the worl
   const pkg = buildWorldseedPackage(source, 'earth', '2030-01-01T00:00:00.000Z');
   assert.equal(pkg.content.birthReceipts.length, 1);
   assert.equal(pkg.content.birthReceipts[0].id, 'world-born:earth:origin');
-  assert.ok(pkg.manifest.refs.provenance.includes('world-born:earth:origin'));
+  assert.ok(pkg.manifest.included.provenanceRefs.includes('world-born:earth:origin'));
 
   const target = emptyState();
   const result = importWorldseedPackage(target, pkg, '2035-05-05T05:05:05.000Z');
