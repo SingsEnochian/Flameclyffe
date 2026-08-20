@@ -1,5 +1,6 @@
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 import { loadState } from './storage.js';
+import { isWakingWorld, wakingWorldLiveEntries, wakingWorldMetadata } from './waking-world.js';
 
 export const RUNTIME_WORLD_CONTEXT_SCHEMA = 'arcsweep.runtime-world-context/v1';
 
@@ -24,6 +25,20 @@ function deepFreeze(value) {
 function birthReceiptFor(state, worldId) {
   return (Array.isArray(state?.worldBirthReceipts) ? state.worldBirthReceipts : [])
     .find((receipt) => receipt?.event === 'WORLD_BORN' && receipt?.worldId === worldId) || null;
+}
+
+function wakingLayer(state, world) {
+  if (!isWakingWorld(world)) return null;
+  const entries = wakingWorldLiveEntries(state);
+  return {
+    ...wakingWorldMetadata(world),
+    live_state: {
+      source: 'arcsweep:waking-thread',
+      entry_count: entries.length,
+      latest_observed_at: entries[0]?.observed_at || null,
+      entries,
+    },
+  };
 }
 
 export async function buildRuntimeWorldContext(state, worldId = state?.activeWorldId, mintedAt = new Date().toISOString()) {
@@ -73,6 +88,7 @@ export async function buildRuntimeWorldContext(state, worldId = state?.activeWor
         form: text(world.identity?.form),
       },
     },
+    waking_world: wakingLayer(state, world),
     lineage: {
       lineage_label: text(world.lineageLabel) || 'Root world',
       branch_point: text(world.branchPoint),
@@ -82,6 +98,7 @@ export async function buildRuntimeWorldContext(state, worldId = state?.activeWor
     authority: {
       source: 'arcsweep-active-world-state',
       world_selection_explicit: true,
+      stable_anchor_and_live_state_are_distinct: true,
       runtime_context_is_canon_commit: false,
       model_may_rewrite_world_identity: false,
     },
