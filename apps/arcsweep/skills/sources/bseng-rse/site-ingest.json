@@ -5,6 +5,13 @@
   "prepared_at": "2026-08-19",
   "base_url": "https://bseng.com/",
   "primer": "apps/arcsweep/presets/bseng-rse-whole-site-ingest.v0.1.json",
+  "sealed_outputs": {
+    "live_harvest_receipt": "apps/arcsweep/skills/sources/bseng-rse/live-harvest-receipt.2026-08-20.json",
+    "lineage_diff": "apps/arcsweep/skills/sources/bseng-rse/lineage-diff.2025-2026.json",
+    "human_lineage_handoff": "docs/handoffs/BSENG_RSE_LINEAGE_DIFF_2025_TO_2026.md",
+    "successful_workflow_run_id": 32328392442,
+    "successful_artifact_id": 9392236386
+  },
   "intent": "Preserve the full substantive public BSENG corpus as a versioned research lineage, including current formal papers, historical posts, precursor conversations, ethics material, guest-author branches, and site-level methodological context.",
   "authority": {
     "corpus_class": "external-research-lineage",
@@ -21,7 +28,7 @@
     "discover_sitemaps": true,
     "discover_wordpress_rest": true,
     "follow_internal_links": false,
-    "coverage_note": "Authoritative sitemap plus public WordPress post/page enumeration supplies the whole public page corpus; recursive nav traversal is disabled to avoid category, pagination, and presentation duplicates. Formal PDF sources are seeded explicitly.",
+    "coverage_note": "Authoritative sitemap plus public WordPress post/page enumeration supplies the whole public page corpus; recursive nav traversal is disabled to avoid category, pagination, and presentation duplicates. Formal PDF sources are discovered directly from the live mathematics hub and seeded explicitly.",
     "max_pages": 10000,
     "max_depth": 6,
     "delay_ms": 350,
