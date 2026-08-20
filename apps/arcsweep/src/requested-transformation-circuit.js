@@ -1,6 +1,7 @@
 import { attachCuspObservationToFeedbackCycle } from './cusp-feedback-observer.js';
 import { ashHistoryFromCuspPackets, createBaiTopologyReceipt, projectBoneToCuspStructure } from './bone-ash-intention.js';
 import { ashHistoryFromDeepTimeRecords } from './deep-time-ash.js';
+import { createTransformationAdmissibilityResidual } from './admissibility-residual.js';
 import { TRANSFORMATION_REQUEST_SCHEMA, assessTransformationResponse } from './transformation-request.js';
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 
@@ -42,7 +43,7 @@ function baiControlSemantics(projection) {
 
 /**
  * Ask -> feedback -> domain-semantic cusp -> Bone/Ash/Intention topology ->
- * measured PREMAQC.
+ * measured PREMAQC -> admissibility residual.
  *
  * BAI is one semantic projection of the domain-general cusp machinery. Here,
  * and only here, control B is intentionally the declared Ask.
@@ -50,6 +51,10 @@ function baiControlSemantics(projection) {
  * Ash prefers accepted DEEPTime trajectories when they exist. Cusp packet
  * history remains a receipted fallback for live work that has not yet crossed
  * the human acceptance gate into DEEPTime.
+ *
+ * The admissibility residual is a derived representation over the measured
+ * PREMAQC response. It does not turn the Ask into a cause claim or the residual
+ * classification into a declaration of fulfilment.
  */
 export async function runRequestedTransformationCircuit({
   request,
@@ -121,6 +126,11 @@ export async function runRequestedTransformationCircuit({
     cycleCount,
     observedAt: generatedAt ?? feedbackCycle.created_at,
   });
+  const admissibilityResidual = await createTransformationAdmissibilityResidual({
+    request,
+    response,
+    generatedAt: generatedAt ?? feedbackCycle.created_at,
+  });
 
   const core = {
     schema: REQUESTED_TRANSFORMATION_CIRCUIT_SCHEMA,
@@ -164,6 +174,7 @@ export async function runRequestedTransformationCircuit({
       ash_source_receipt_ids: resolvedAshHistory.map((item) => item.receipt_id),
     },
     measured_response: structuredClone(response),
+    admissibility_residual: structuredClone(admissibilityResidual),
     authority: {
       ask_is_control_not_observation: true,
       cusp_controls_are_domain_semantic: true,
@@ -181,6 +192,8 @@ export async function runRequestedTransformationCircuit({
       premaqc_rewritten: false,
       qualia_inferred: false,
       candidate_is_asserted_event: false,
+      admissibility_projection_is_observed_transformation: false,
+      admissibility_within_corridor_is_fulfilment: false,
       canon_commit: false,
       feather_stop_available: true,
     },
