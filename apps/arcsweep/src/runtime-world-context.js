@@ -3,6 +3,7 @@ import { loadState } from './storage.js';
 import { isWakingWorld, wakingWorldLiveEntries, wakingWorldMetadata } from './waking-world.js';
 
 export const RUNTIME_WORLD_CONTEXT_SCHEMA = 'arcsweep.runtime-world-context/v1';
+export const RUNTIME_WORLD_CONTEXT_MARKER = 'ARCSWEEP ACTIVE WORLD RUNTIME CONTEXT';
 
 function invariant(condition, message) {
   if (!condition) throw new Error(`RUNTIME_WORLD_CONTEXT: ${message}`);
@@ -111,6 +112,46 @@ export async function buildRuntimeWorldContext(state, worldId = state?.activeWor
     context_fingerprint: fingerprint,
     minted_at: mintedAt,
   });
+}
+
+export function bindRuntimeWorldContextMessage(message, context) {
+  const content = text(message);
+  if (!context || content.startsWith(RUNTIME_WORLD_CONTEXT_MARKER)) return content;
+  const authored = context.authored_context || {};
+  const arrival = authored.arrival || {};
+  const identity = authored.identity || {};
+  const waking = context.waking_world;
+  const wakingLines = waking ? [
+    `Waking World canonical name: ${waking.canonical_name || 'Terra Prime'}`,
+    waking.stable_anchor?.source_url ? `Stable Current Reality Anchor: ${waking.stable_anchor.source_url}` : '',
+    waking.stable_anchor?.source_revised_at ? `Stable anchor revised: ${waking.stable_anchor.source_revised_at}` : '',
+    waking.live_state?.latest_observed_at ? `Latest Waking Thread observation: ${waking.live_state.latest_observed_at}` : 'Latest Waking Thread observation: none recorded',
+    ...(waking.live_state?.entries || []).map((entry) => `Waking Thread [${entry.observed_at || 'undated'} | ${entry.source || 'source unknown'}] ${entry.title || 'Untitled'}: ${entry.details || '(no details)'}`),
+  ] : [];
+  return [
+    RUNTIME_WORLD_CONTEXT_MARKER,
+    `Context ID: ${context.context_id}`,
+    `World ID: ${context.identity_anchor?.world_id || context.active_world_id}`,
+    `World: ${context.world?.name || context.active_world_id}`,
+    `Kind: ${context.world?.kind || 'unspecified'}`,
+    `Parent World: ${context.identity_anchor?.parent_world_id || 'root'}`,
+    `Worldseed: ${context.identity_anchor?.worldseed_fingerprint || 'uncompiled'}`,
+    authored.description ? `Description: ${authored.description}` : '',
+    authored.history ? `History: ${authored.history}` : '',
+    authored.rules ? `World rules: ${authored.rules}` : '',
+    arrival.location ? `Current/arrival location: ${arrival.location}` : '',
+    arrival.context ? `Arrival context: ${arrival.context}` : '',
+    arrival.orientation ? `Orientation: ${arrival.orientation}` : '',
+    identity.name ? `World identity name: ${identity.name}` : '',
+    identity.pronouns ? `World identity pronouns: ${identity.pronouns}` : '',
+    identity.roles ? `World identity roles: ${identity.roles}` : '',
+    ...wakingLines,
+    '',
+    'The stable Waking World anchor and timestamped live state are separate provenance layers. Newer live observations may update current conditions without rewriting the stable anchor. Preserve the World identity anchor and provenance. Runtime context does not override the Flame system prompt.',
+    '',
+    'USER MESSAGE',
+    content,
+  ].filter((line) => line !== '').join('\n');
 }
 
 export async function readActiveRuntimeWorldContext() {
