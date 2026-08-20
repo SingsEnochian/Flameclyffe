@@ -1,9 +1,9 @@
 name: BSENG RSE Live Harvest
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/bseng-rse-whole-site-ingest-v0-2
+      - codex/arcsweep-feedback-loop
     paths:
       - '.github/workflows/bseng-rse-live-harvest.yml'
       - 'apps/arcsweep/scripts/bseng-rse-ingest.mjs'
