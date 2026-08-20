@@ -164,14 +164,37 @@ jobs:
           if ($manifest.moduleId -ne "bifrost-arcsweep") {
             throw "Packaged Bifröst manifest has the wrong moduleId."
           }
-          if ($manifest.engine.formalism -ne "temporal-quantum-state-machine" -or $manifest.engine.physicalClaim -ne $false) {
-            throw "Packaged Bifröst manifest violates the bounded formalism contract."
+          if ($manifest.engine.formalism -ne "temporal-compression-release-state-machine") {
+            throw "Packaged Bifröst manifest does not execute the compression-release formalism."
+          }
+          if ($manifest.engine.physicalClaim -ne $false) {
+            throw "Packaged Bifröst manifest violates the physical-claim boundary."
           }
           if ($manifest.authorityContract.hearthside -ne "evidence-grounded-observational") {
             throw "Packaged Bifröst manifest does not preserve Hearthside evidence authority."
           }
           if ($manifest.authorityContract.targetside -ne "canon-grounded-projected") {
             throw "Packaged Bifröst manifest does not preserve Targetside projection authority."
+          }
+          if ($manifest.authorityContract.collapseExists -ne $false) {
+            throw "Packaged Bifröst manifest reintroduces collapse."
+          }
+          if ($manifest.authorityContract.releaseFeedsNextCompression -ne $true) {
+            throw "Packaged Bifröst manifest breaks compression of the release."
+          }
+          if ($manifest.authorityContract.toneApproval -ne "rowan-human-calibration-owner") {
+            throw "Packaged Bifröst manifest removes Rowan tone-approval authority."
+          }
+          foreach ($capability in @(
+            "premaq-v2-ingest",
+            "compression-release-cycles",
+            "compression-of-release-recursion",
+            "world-specific-tone-sequences",
+            "rowan-owned-tone-approval"
+          )) {
+            if ($manifest.capabilities -notcontains $capability) {
+              throw "Packaged Bifröst manifest is missing capability: $capability"
+            }
           }
 
           $premaqSchema = Get-Content -Raw -Path $unpackedPremaqSchema | ConvertFrom-Json
@@ -199,6 +222,7 @@ jobs:
           - Packaging: ASAR enabled with explicit runtime unpack boundary
           - Security: sandboxed renderer, loopback-only services, restricted origins, redacted IPC
           - Framework: bundled STARWELL + Glyph Studio + Bifröst Arcsweep
+          - Formalism: compression → release → compression of the release
           - State contracts: PREMAQ v2 + Bifröst Temporal Quantum State v1
           - Font compiler: local FontForge sidecar adapter
           - Signing: unsigned development build
