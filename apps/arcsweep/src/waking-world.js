@@ -1,4 +1,5 @@
 import { createWorld } from './worlds.js';
+import { recordWorldBirth } from './world-registry-operations.js';
 
 export const WAKING_WORLD_SCHEMA = 'arcsweep.waking-world/v1';
 export const TERRA_PRIME_NAME = 'Terra Prime';
@@ -84,5 +85,16 @@ export function ensureTerraPrimeWakingWorld(state, now = new Date().toISOString(
   }
   if (changed && !created) world.updatedAt = now;
 
-  return { state, world, created, changed };
+  const existingBirth = Array.isArray(state.worldBirthReceipts)
+    ? state.worldBirthReceipts.find((receipt) => receipt?.event === 'WORLD_BORN' && receipt?.worldId === world.id)
+    : null;
+  const receipt = existingBirth || recordWorldBirth(state, world, {
+    bornAt: created ? now : (world.createdAt || null),
+    source: 'waking-world-migration',
+    sourceRef: created ? 'terra-prime:create' : (world.createdAt ? 'terra-prime:adopt-recorded-createdAt' : 'terra-prime:adopt-birth-time-unknown'),
+    seedFingerprint: world.worldseedFingerprint,
+  });
+  if (!existingBirth) changed = true;
+
+  return { state, world, receipt, created, changed };
 }
