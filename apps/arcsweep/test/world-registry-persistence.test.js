@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createDefaultState } from '../src/storage.js';
 import {
+  WORLD_BIRTH_RECEIPT_SCHEMA,
   createWorldRegistryEntry,
   deleteWorldRegistryEntry,
   updateWorldRegistryEntry,
@@ -18,15 +19,27 @@ const T1 = '2026-08-19T20:01:00.000Z';
 const T2 = '2026-08-19T20:02:00.000Z';
 const T3 = '2026-08-19T20:03:00.000Z';
 
-test('new world creation is pure and selects the created world', () => {
+test('new world creation is pure, selects the created world, and receipts WORLD_BORN', () => {
   const original = createDefaultState();
   const before = structuredClone(original);
-  const { state, world } = createWorldRegistryEntry(original, { id: 'world-terra-prime', now: T1 });
+  const { state, world, receipt } = createWorldRegistryEntry(original, {
+    id: 'world-terra-prime',
+    name: 'Terra Prime',
+    now: T1,
+  });
 
   assert.deepEqual(original, before);
   assert.equal(world.id, 'world-terra-prime');
+  assert.equal(world.name, 'Terra Prime');
   assert.equal(state.activeWorldId, world.id);
   assert.equal(state.worlds[0].id, world.id);
+  assert.equal(receipt.schema, WORLD_BIRTH_RECEIPT_SCHEMA);
+  assert.equal(receipt.event, 'WORLD_BORN');
+  assert.equal(receipt.worldId, world.id);
+  assert.equal(receipt.worldName, 'Terra Prime');
+  assert.equal(receipt.bornAt, T1);
+  assert.equal(receipt.source, 'world-registry');
+  assert.equal(state.worldBirthReceipts[0].id, receipt.id);
 });
 
 test('journal restores a new world after a later stale state write drops it', () => {
