@@ -5,6 +5,12 @@ import {
   worldseedLiveSnapshot,
 } from './worldseed-live-state.js';
 import { buildWorldseedArkManifest } from './worldseed-ark.js';
+import {
+  WORLD_REGISTRY_JOURNAL_KEY,
+  createWorldRegistryJournal,
+  normaliseWorldRegistryJournal,
+  recordWorldSnapshot,
+} from './world-registry-journal.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 const ROOT_ID = 'worldseed-live-instrument';
@@ -35,6 +41,25 @@ async function writeState(state, reason = 'worldseed-live-state') {
   if (desktop?.saveState) return desktop.saveState(state, { reason });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   return { ok: true, mode: 'browser-development-fallback' };
+}
+
+function readRegistryJournal() {
+  try {
+    const raw = localStorage.getItem(WORLD_REGISTRY_JOURNAL_KEY);
+    return normaliseWorldRegistryJournal(raw ? JSON.parse(raw) : createWorldRegistryJournal());
+  } catch {
+    return createWorldRegistryJournal();
+  }
+}
+
+function writeRegistryWorldSnapshot(world, writtenAt) {
+  const journal = recordWorldSnapshot(readRegistryJournal(), world, writtenAt);
+  try {
+    localStorage.setItem(WORLD_REGISTRY_JOURNAL_KEY, JSON.stringify(journal));
+  } catch {
+    throw new Error('the durable World Registry recovery journal could not record this fork');
+  }
+  return journal;
 }
 
 function activeWorldId(state) {
@@ -242,6 +267,7 @@ document.addEventListener('submit', async (event) => {
       branchPoint: values.branchPoint,
       reason: values.reason,
     });
+    writeRegistryWorldSnapshot(result.child, result.receipt.createdAt);
     await writeState(state, 'worldseed-fork');
     notice(`World forked · ${result.child.name} carries ${result.seed.fingerprint}. Reloading into the descendant.`);
     location.reload();
