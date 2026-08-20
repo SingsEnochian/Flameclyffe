@@ -44,9 +44,7 @@ export function observationsForFlame(ledgerInput, voiceId) {
 }
 
 export function theoryCandidatesForFlame(ledgerInput, voiceId) {
-  return normaliseFlameContinuityLedger(ledgerInput).theory_candidates.filter((item) => item.record?.domain === 'flame-runtime-continuity' && item.record?.title?.includes(voiceId) === false
-    ? item.source_voice_id === voiceId
-    : item.source_voice_id === voiceId);
+  return normaliseFlameContinuityLedger(ledgerInput).theory_candidates.filter((item) => item.source_voice_id === voiceId);
 }
 
 export function appendFlameRuntimeObservation(ledgerInput, observation) {
