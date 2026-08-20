@@ -39,7 +39,7 @@ export async function synchroniseTerraPrimeWakingWorld(now = new Date().toISOStr
     worldId: result.world.id,
     worldBirthReceiptId: result.receipt?.id || null,
   });
-  document?.dispatchEvent?.(new CustomEvent(SYNC_EVENT, {
+  globalThis.document?.dispatchEvent?.(new CustomEvent(SYNC_EVENT, {
     detail: {
       worldId: result.world.id,
       created: result.created,
