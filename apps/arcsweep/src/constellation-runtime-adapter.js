@@ -6,6 +6,7 @@ import {
   readHouseRuntimeToken,
   restoreHouseRuntimeSession,
 } from './house-runtime.js';
+import { readActiveRuntimeWorldContext } from './runtime-world-context.js';
 
 const STATE_EVENT = 'arcsweep:constellation-runtime-state';
 
@@ -54,13 +55,15 @@ export async function getConstellationRuntimeVoiceStatus(voiceId, fetchImpl = fe
   if (!route.available) return { status: route.status, voiceId: route.voiceId, route };
   const session = await activeHouseSession(fetchImpl);
   if (!session) return { status: 'house-offline', voiceId: route.voiceId, route };
+  const startedAt = globalThis.performance?.now?.() ?? Date.now();
   const response = await fetchImpl(`/api/v1/flames/${route.route}/status`, {
     headers: authHeaders(session), credentials: 'same-origin', cache: 'no-store',
   });
+  const latencyMs = Math.max(0, Math.round((globalThis.performance?.now?.() ?? Date.now()) - startedAt));
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) return { status: 'route-unavailable', voiceId: route.voiceId, route, detail: data.error || response.status };
+  if (!response.ok) return { status: 'route-unavailable', voiceId: route.voiceId, route, detail: data.error || response.status, latencyMs };
   if (normalise(data.flame_id) !== normalise(route.route)) {
-    return { status: 'runtime-mismatch', voiceId: route.voiceId, route, actual: data.flame_id || null };
+    return { status: 'runtime-mismatch', voiceId: route.voiceId, route, actual: data.flame_id || null, latencyMs };
   }
   return {
     status: data.runtime_reachable === false ? 'runtime-unreachable' : data.model_available === false ? 'model-unavailable' : 'ready',
@@ -72,6 +75,7 @@ export async function getConstellationRuntimeVoiceStatus(voiceId, fetchImpl = fe
     runtimeReachable: data.runtime_reachable ?? null,
     modelAvailable: data.model_available ?? null,
     runtimeError: data.runtime_error || null,
+    latencyMs,
   };
 }
 
@@ -81,6 +85,7 @@ export async function invokeConstellationRuntimeVoice({
   sessionId,
   metadata = {},
   context = [],
+  worldContext = null,
   fetchImpl = fetch,
 } = {}) {
   const route = await constellationRuntimeRouteForVoice(voiceId, fetchImpl);
@@ -89,6 +94,17 @@ export async function invokeConstellationRuntimeVoice({
   const session = await activeHouseSession(fetchImpl);
   if (!session) return { status: 'house-offline', voiceId: route.voiceId, route: route.route };
 
+  let resolvedWorldContext = worldContext || metadata.world_context || null;
+  if (!resolvedWorldContext) {
+    try { resolvedWorldContext = await readActiveRuntimeWorldContext(); } catch {}
+  }
+  const runtimeMetadata = { ...metadata, voice_id: route.voiceId };
+  if (resolvedWorldContext?.identity_anchor?.world_id) {
+    runtimeMetadata.world_id = resolvedWorldContext.identity_anchor.world_id;
+    runtimeMetadata.world_context = resolvedWorldContext;
+  }
+
+  const startedAt = globalThis.performance?.now?.() ?? Date.now();
   const response = await fetchImpl(`/api/v1/flames/${route.route}/chat`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(session) },
@@ -98,11 +114,12 @@ export async function invokeConstellationRuntimeVoice({
       message: String(message).trim(),
       session_id: sessionId || `arcsweep-${route.voiceId}-${Date.now()}`,
       context: Array.isArray(context) ? context : [],
-      metadata: { ...metadata, voice_id: route.voiceId },
+      metadata: runtimeMetadata,
     }),
   });
+  const latencyMs = Math.max(0, Math.round((globalThis.performance?.now?.() ?? Date.now()) - startedAt));
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) return { status: 'route-error', reason: data.error || `${route.voiceId} route failed (${response.status})`, voiceId: route.voiceId, route: route.route };
+  if (!response.ok) return { status: 'route-error', reason: data.error || `${route.voiceId} route failed (${response.status})`, voiceId: route.voiceId, route: route.route, latencyMs };
 
   const runtimeVerified = normalise(data.flame_id) === normalise(route.route)
     && Boolean(data.provider)
@@ -113,10 +130,12 @@ export async function invokeConstellationRuntimeVoice({
       reason: 'House response did not attest the selected Flame route/provider/model.',
       voiceId: route.voiceId,
       route: route.route,
+      latencyMs,
       actual: { flameId: data.flame_id || null, provider: data.provider || null, model: data.model || null },
     };
   }
 
+  const returnedWorldContext = data.world_context || resolvedWorldContext || null;
   return {
     status: 'replied',
     voiceId: route.voiceId,
@@ -128,6 +147,10 @@ export async function invokeConstellationRuntimeVoice({
     model: data.model || null,
     sourceModel: data.model || null,
     citedSources: data.cited_sources || [],
+    latencyMs,
+    worldId: returnedWorldContext?.identity_anchor?.world_id || runtimeMetadata.world_id || null,
+    runtimeWorldContextId: returnedWorldContext?.context_id || null,
+    worldContext: returnedWorldContext,
   };
 }
 
@@ -232,6 +255,9 @@ async function handleWriterContext(event) {
         model: reply.model,
         sourceModel: reply.sourceModel,
         citedSources: reply.citedSources,
+        latencyMs: reply.latencyMs,
+        worldId: reply.worldId,
+        runtimeWorldContextId: reply.runtimeWorldContextId,
         requestId: packet.requestId,
         mode: packet.mode,
         fieldContext: packet.fieldContext,
