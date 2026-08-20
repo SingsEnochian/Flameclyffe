@@ -8,6 +8,7 @@ import {
   serializeWorldseedPackage,
   verifyWorldseedPackage,
 } from '../src/worldseed-package.js';
+import { WORLD_BIRTH_RECEIPT_SCHEMA } from '../src/world-registry-operations.js';
 
 function sourceState() {
   return {
@@ -55,7 +56,7 @@ test('serializes a one-file .worldseed envelope that reconstructs exactly', () =
   assert.equal(verification.actualFingerprint, pkg.worldseed.fingerprint);
 });
 
-test('exact import restores world, Seedhouse, canon, timeline, and room records', () => {
+test('exact import restores world, Seedhouse, canon, timeline, room records, and synthesizes a legacy birth receipt', () => {
   const pkg = buildWorldseedPackage(sourceState(), 'earth');
   const target = emptyState();
   const result = importWorldseedPackage(target, pkg, '2035-05-05T05:05:05.000Z');
@@ -67,6 +68,41 @@ test('exact import restores world, Seedhouse, canon, timeline, and room records'
   assert.equal(target.records.records.some((record) => record.id === 'record-earth'), true);
   assert.equal(target.scripts.some((script) => script.id === 'canon-earth'), true);
   assert.equal(target.worldseedImportReceipts[0].fingerprint, pkg.worldseed.fingerprint);
+  assert.equal(result.worldBirthReceipt.schema, WORLD_BIRTH_RECEIPT_SCHEMA);
+  assert.equal(result.worldBirthReceipt.event, 'WORLD_BORN');
+  assert.equal(result.worldBirthReceipt.worldId, 'earth');
+  assert.equal(result.worldBirthReceipt.source, 'worldseed-import');
+  assert.equal(result.worldBirthReceipt.seedFingerprint, pkg.worldseed.fingerprint);
+  assert.equal(target.worldseedImportReceipts[0].worldBirthReceiptId, result.worldBirthReceipt.id);
+});
+
+test('package carries an existing root birth receipt without rebirthing the world', () => {
+  const source = sourceState();
+  source.worldBirthReceipts = [{
+    schema: WORLD_BIRTH_RECEIPT_SCHEMA,
+    version: 1,
+    event: 'WORLD_BORN',
+    id: 'world-born:earth:origin',
+    bornAt: '2020-01-01T00:00:00.000Z',
+    worldId: 'earth',
+    worldName: 'Earth',
+    worldKind: 'Birth World',
+    parentWorldId: null,
+    source: 'world-registry',
+    sourceRef: 'registry:create',
+    seedFingerprint: '',
+  }];
+  const pkg = buildWorldseedPackage(source, 'earth', '2030-01-01T00:00:00.000Z');
+  assert.equal(pkg.content.birthReceipts.length, 1);
+  assert.equal(pkg.content.birthReceipts[0].id, 'world-born:earth:origin');
+  assert.ok(pkg.manifest.refs.provenance.includes('world-born:earth:origin'));
+
+  const target = emptyState();
+  const result = importWorldseedPackage(target, pkg, '2035-05-05T05:05:05.000Z');
+  assert.equal(result.worldBirthReceipt.id, 'world-born:earth:origin');
+  assert.equal(result.worldBirthReceipt.bornAt, '2020-01-01T00:00:00.000Z');
+  assert.equal(target.worldBirthReceipts.length, 1);
+  assert.equal(target.worldseedImportReceipts[0].worldBirthReceiptId, 'world-born:earth:origin');
 });
 
 test('exact import refuses to overwrite a world with the same id', () => {
