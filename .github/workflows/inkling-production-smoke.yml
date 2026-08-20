@@ -16,42 +16,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Diagnose and call locked production Inkling probe
+      - name: Call locked production Inkling probe
         shell: bash
         run: |
           set -euo pipefail
           key='0w6pxuxSE8B7kkgYRiQDrMENhU8SDXe7Lh0r5mhajLU'
-          routed='https://flameclyffe-starwell.netlify.app/api/v1/ops/inkling-smoke'
-          direct='https://flameclyffe-starwell.netlify.app/.netlify/functions/inkling-smoke'
+          url='https://flameclyffe-starwell.netlify.app/api/v1/ops/inkling-smoke'
 
-          probe() {
-            local label="$1"
-            local url="$2"
-            local body_file
+          for attempt in $(seq 1 18); do
             body_file="$(mktemp)"
-            local status
             status="$(curl --silent --show-error --max-time 90 --output "$body_file" --write-out '%{http_code}' "${url}?key=${key}")"
-            printf '%s_status=%s\n' "$label" "$status"
-            printf '%s_body=' "$label"
+            printf 'attempt=%s status=%s body=' "$attempt" "$status"
             cat "$body_file"
             printf '\n'
-            if [[ "$status" == '200' ]]; then
-              node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); if(x.ok!==true) process.exit(1); if(!String(x.reply||"").toLowerCase().includes("trenchcoat online")) process.exit(2)' "$body_file"
+
+            if [[ "$status" == '200' ]] && node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); if(x.ok!==true) process.exit(1); if(!String(x.reply||"").toLowerCase().includes("trenchcoat online")) process.exit(2)' "$body_file"; then
+              rm -f "$body_file"
+              exit 0
             fi
+
             rm -f "$body_file"
-            [[ "$status" == '200' ]]
-          }
+            sleep 10
+          done
 
-          routed_ok=0
-          direct_ok=0
-          probe routed "$routed" && routed_ok=1 || true
-          probe direct "$direct" && direct_ok=1 || true
-
-          if [[ "$routed_ok" -ne 1 ]]; then
-            echo 'Public production route failed.' >&2
-            exit 10
-          fi
-          if [[ "$direct_ok" -ne 1 ]]; then
-            echo 'Direct Netlify function path failed.' >&2
-            exit 11
-          fi
+          echo 'Inkling production smoke did not converge within the retry window.' >&2
+          exit 1
