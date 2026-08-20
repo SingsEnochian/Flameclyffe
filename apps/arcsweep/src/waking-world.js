@@ -49,7 +49,8 @@ export function wakingWorldMetadata(world) {
       source_url: CURRENT_REALITY_ANCHOR_URL,
       source_revised_at: CURRENT_REALITY_ANCHOR_REVISED_AT,
     },
-    live_sources: ['arcsweep:waking-thread', 'house-runtime:observations', 'deep-time'],
+    live_sources: ['arcsweep:waking-thread'],
+    eligible_live_sources: ['house-runtime:observations', 'deep-time'],
     freshness_law: 'stable-anchor-plus-timestamped-live-state',
   };
 }
@@ -64,7 +65,7 @@ export function ensureTerraPrimeWakingWorld(state, now = new Date().toISOString(
     world = createWorld('terra-prime', now);
     world.name = TERRA_PRIME_NAME;
     world.kind = 'Waking World';
-    world.description = 'The Waking World / current reality anchor. Stable foundation is paired with timestamped live Waking Thread and Observer state.';
+    world.description = 'The Waking World / current reality anchor. Stable foundation is paired with timestamped live Waking Thread state; Observer and DEEP records remain separately receipted eligible layers.';
     world.lineageLabel = 'Root world · Waking World';
     state.worlds.push(world);
     created = true;
