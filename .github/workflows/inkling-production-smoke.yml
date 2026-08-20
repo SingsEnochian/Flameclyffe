@@ -1,0 +1,22 @@
+name: Inkling Production Smoke
+
+on:
+  push:
+    branches:
+      - ops/inkling-smoke-run
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call locked production Inkling probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail-with-body --silent --show-error --max-time 90 'https://flameclyffe-starwell.netlify.app/api/v1/ops/inkling-smoke?key=0w6pxuxSE8B7kkgYRiQDrMENhU8SDXe7Lh0r5mhajLU')"
+          printf '%s\n' "$response"
+          node -e 'const x=JSON.parse(process.argv[1]); if(x.ok!==true) process.exit(1); if(!String(x.reply||"").toLowerCase().includes("trenchcoat online")) process.exit(2)' "$response"
