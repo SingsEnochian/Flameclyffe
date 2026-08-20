@@ -12,6 +12,12 @@ import {
   embedWorldseedBinaryPayloads,
   remapWorldseedPackageAttachments,
 } from './worldseed-binary.js';
+import {
+  WORLD_REGISTRY_JOURNAL_KEY,
+  createWorldRegistryJournal,
+  normaliseWorldRegistryJournal,
+  recordWorldSnapshot,
+} from './world-registry-journal.js';
 
 const STORAGE_KEY = 'hearthgate.arcsweep.local.v0.1';
 const ROOT_ID = 'worldseed-package-live';
@@ -32,6 +38,25 @@ async function writeState(state, reason = 'worldseed-package') {
   if (desktop?.saveState) return desktop.saveState(state, { reason });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   return { ok: true };
+}
+
+function readRegistryJournal() {
+  try {
+    const raw = localStorage.getItem(WORLD_REGISTRY_JOURNAL_KEY);
+    return normaliseWorldRegistryJournal(raw ? JSON.parse(raw) : createWorldRegistryJournal());
+  } catch {
+    return createWorldRegistryJournal();
+  }
+}
+
+function writeRegistryWorldSnapshot(world, writtenAt) {
+  const journal = recordWorldSnapshot(readRegistryJournal(), world, writtenAt);
+  try {
+    localStorage.setItem(WORLD_REGISTRY_JOURNAL_KEY, JSON.stringify(journal));
+  } catch {
+    throw new Error('the durable World Registry recovery journal could not record this Worldseed admission');
+  }
+  return journal;
 }
 
 function esc(value = '') {
@@ -140,6 +165,7 @@ document.addEventListener('change', async (event) => {
     if (state.worlds?.some((world) => world.id === pkg.world?.id)) throw new Error(`World ${pkg.world.id} already exists. Exact import never overwrites an existing world.`);
     pkg = await materializeBinaryAttachments(pkg);
     const result = importWorldseedPackage(state, pkg);
+    writeRegistryWorldSnapshot(result.world, result.receipt.importedAt);
     await writeState(state, 'worldseed-package-import');
     const status = binaryArkStatus(pkg);
     notice(`Worldseed imported exactly · ${result.world.name} · ${status.embeddedCount} assets materialized.`);
