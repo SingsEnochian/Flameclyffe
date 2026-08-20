@@ -1,4 +1,5 @@
 export const RUNTIME_WORLD_CONTEXT_SCHEMA = 'arcsweep.runtime-world-context/v1';
+export const RUNTIME_WORLD_CONTEXT_MARKER = 'ARCSWEEP ACTIVE WORLD RUNTIME CONTEXT';
 
 const text = (value) => String(value ?? '').trim();
 
@@ -90,7 +91,7 @@ export function normaliseRuntimeWorldContext(body = {}) {
 
 export function bindMessageToRuntimeWorld(message, context) {
   const content = text(message);
-  if (!context) return content;
+  if (!context || content.startsWith(RUNTIME_WORLD_CONTEXT_MARKER)) return content;
   const authored = context.authored_context || {};
   const arrival = authored.arrival || {};
   const identity = authored.identity || {};
@@ -103,8 +104,8 @@ export function bindMessageToRuntimeWorld(message, context) {
     waking.live_state?.latest_observed_at ? `Latest Waking Thread observation: ${waking.live_state.latest_observed_at}` : 'Latest Waking Thread observation: none recorded',
     ...liveEntries.map((entry) => `Waking Thread [${entry.observed_at || 'undated'} | ${entry.source || 'source unknown'}] ${entry.title || 'Untitled'}: ${entry.details || '(no details)'}`),
   ] : [];
-  const lines = [
-    'ARCSWEEP ACTIVE WORLD RUNTIME CONTEXT',
+  return [
+    RUNTIME_WORLD_CONTEXT_MARKER,
     `Context ID: ${context.context_id}`,
     `World ID: ${context.identity_anchor.world_id}`,
     `World: ${context.world.name}`,
@@ -127,18 +128,27 @@ export function bindMessageToRuntimeWorld(message, context) {
     'USER MESSAGE',
     content,
   ].filter((line) => line !== '').join('\n');
-  return lines;
 }
 
-export function responseWithRuntimeWorld(response, context) {
+export async function responseWithRuntimeWorld(response, context) {
   if (!context) return response;
-  return response.json().then((data) => new Response(JSON.stringify({
-    ...data,
-    world_context: context,
-    runtime_world_id: context.identity_anchor.world_id,
-    runtime_world_context_id: context.context_id,
-  }), {
-    status: response.status,
-    headers: response.headers,
-  })).catch(() => response);
+  try {
+    const data = await response.clone().json();
+    const headers = new Headers(response.headers);
+    headers.delete('content-length');
+    headers.set('content-type', 'application/json; charset=utf-8');
+    headers.set('cache-control', 'no-store');
+    return new Response(JSON.stringify({
+      ...data,
+      world_context: context,
+      runtime_world_id: context.identity_anchor.world_id,
+      runtime_world_context_id: context.context_id,
+    }), {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  } catch {
+    return response;
+  }
 }
