@@ -1,14 +1,16 @@
 import { loadState, saveState, setStateExtensionSnapshot } from './storage.js';
+import { ARCSWEEP_DEEP_THEORY_CANDIDATE_SCHEMA } from './deep-theory-bridge.js';
 import { FLAME_RUNTIME_OBSERVATION_SCHEMA } from './flame-continuity.js';
 
 export const FLAME_CONTINUITY_LEDGER_SCHEMA = 'arcsweep.flame-continuity-ledger/v1';
 export const FLAME_CONTINUITY_UPDATED_EVENT = 'arcsweep:flame-continuity-updated';
 export const MAX_FLAME_RUNTIME_OBSERVATIONS = 512;
+export const MAX_FLAME_THEORY_CANDIDATES = 64;
 
 function clone(value) { return structuredClone(value); }
 
 export function createEmptyFlameContinuityLedger() {
-  return { schema: FLAME_CONTINUITY_LEDGER_SCHEMA, version: 1, observations: [] };
+  return { schema: FLAME_CONTINUITY_LEDGER_SCHEMA, version: 1, observations: [], theory_candidates: [] };
 }
 
 export function normaliseFlameContinuityLedger(value) {
@@ -18,10 +20,16 @@ export function normaliseFlameContinuityLedger(value) {
     if (observation?.schema !== FLAME_RUNTIME_OBSERVATION_SCHEMA || !observation?.fingerprint) continue;
     map.set(observation.fingerprint, clone(observation));
   }
+  const candidateMap = new Map();
+  for (const candidate of Array.isArray(source.theory_candidates) ? source.theory_candidates : []) {
+    if (candidate?.schema !== ARCSWEEP_DEEP_THEORY_CANDIDATE_SCHEMA || !candidate?.receipt_id || !candidate?.record_fingerprint) continue;
+    candidateMap.set(candidate.receipt_id, clone(candidate));
+  }
   return {
     schema: FLAME_CONTINUITY_LEDGER_SCHEMA,
     version: 1,
     observations: [...map.values()].slice(-MAX_FLAME_RUNTIME_OBSERVATIONS),
+    theory_candidates: [...candidateMap.values()].slice(-MAX_FLAME_THEORY_CANDIDATES),
   };
 }
 
@@ -33,6 +41,12 @@ export function ensureFlameContinuityLedger(state) {
 
 export function observationsForFlame(ledgerInput, voiceId) {
   return normaliseFlameContinuityLedger(ledgerInput).observations.filter((item) => item.flame.voice_id === voiceId);
+}
+
+export function theoryCandidatesForFlame(ledgerInput, voiceId) {
+  return normaliseFlameContinuityLedger(ledgerInput).theory_candidates.filter((item) => item.record?.domain === 'flame-runtime-continuity' && item.record?.title?.includes(voiceId) === false
+    ? item.source_voice_id === voiceId
+    : item.source_voice_id === voiceId);
 }
 
 export function appendFlameRuntimeObservation(ledgerInput, observation) {
@@ -48,6 +62,21 @@ export function appendFlameRuntimeObservation(ledgerInput, observation) {
   }
   Object.assign(ledgerInput, ledger);
   return ledgerInput.observations.find((item) => item.fingerprint === observation.fingerprint);
+}
+
+export function appendFlameTheoryCandidate(ledgerInput, candidate, voiceId) {
+  if (candidate?.schema !== ARCSWEEP_DEEP_THEORY_CANDIDATE_SCHEMA || !candidate?.receipt_id || !candidate?.record_fingerprint) {
+    throw new Error('FLAME_CONTINUITY_STATE: valid DEEPTheory candidate receipt required');
+  }
+  const ledger = normaliseFlameContinuityLedger(ledgerInput);
+  if (!ledger.theory_candidates.some((item) => item.receipt_id === candidate.receipt_id)) {
+    ledger.theory_candidates.push({ ...clone(candidate), source_voice_id: String(voiceId || '') });
+  }
+  if (ledger.theory_candidates.length > MAX_FLAME_THEORY_CANDIDATES) {
+    ledger.theory_candidates.splice(0, ledger.theory_candidates.length - MAX_FLAME_THEORY_CANDIDATES);
+  }
+  Object.assign(ledgerInput, ledger);
+  return ledgerInput.theory_candidates.find((item) => item.receipt_id === candidate.receipt_id);
 }
 
 function notify(ledger, meta) {
