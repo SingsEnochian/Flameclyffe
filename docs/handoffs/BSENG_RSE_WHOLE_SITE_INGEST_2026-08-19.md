@@ -1,118 +1,145 @@
-# BSENG / Chet Braun RSE-RBW Whole-Site Ingest
+# BSENG / Chet RSE-RBW Whole-Site Ingest
 
-Prepared: 2026-08-19  
-Target branch: `feature/bseng-rse-whole-site-ingest`  
-Living base: `codex/arcsweep-feedback-loop`
+## Status
 
-## Purpose
+**Prepared, live-harvested, lineage-mapped, and reproducible.**
 
-Prepare a whole-site, lineage-preserving research ingest for `https://bseng.com/`, treating Braun Science & Engineering as the evolving Chet Braun / RSE-RBW corpus already related to earlier material carried by Hearthfire.
+The BSENG source ingest is an operator-run research-corpus pipeline for Braun Science & Engineering (`bseng.com`). It preserves Chet Braun / Spiral RSE-RBW material as a versioned external research lineage rather than flattening the site into a single current-theory snapshot.
 
-This is not a four-paper cherry-pick. The ingest is designed to capture the substantive public site:
+The final live harvest completed successfully on 2026-08-20 from PR #131 head `1b22a2036806a38bd257287e27c1a7e57ce85794` using GitHub Actions run `32328392442`.
 
-- current formal RSE / cRBW mathematics and downloadable papers;
-- Core Theory pages and downloadable documents;
-- Truth and Ethics material;
-- Sauna Epistemology conversations as precursor strata;
-- historical posts and category archives;
-- guest-author branches, preserving distinct authorship;
-- methodological boundary pages such as `What This Is Not`;
-- version, DOI, publication/update, citation and supersession relationships;
-- linked PDFs as immutable hashed source documents;
-- images/audio/video as linkage metadata unless separately promoted for capture.
+Final coverage:
 
-## Source law
+- 8 sitemap documents resolved;
+- 402 public site pages enumerated;
+- 19/19 current mathematical-framework PDFs discovered directly from the live framework hub;
+- 421 final seeds;
+- 421 sources fetched;
+- 421 unique source hashes;
+- 421 unique URLs;
+- 0 fetch failures;
+- 0 queued remainder;
+- no max-page truncation;
+- robots.txt retrieved and respected.
 
-1. Raw source snapshots are immutable and SHA-256 addressed.
-2. Every version remains available even when the site explicitly supersedes it.
-3. A newer document creates a lineage edge; it does not erase the older stratum.
-4. Explicit site-authored `updated`, `supersedes`, `formalizes`, or equivalent language is strong lineage evidence.
-5. Same-title/higher-version matching is only a candidate lineage edge until corroborated.
-6. Sauna conversations are precursor material unless an explicit later-paper relation is stated or reviewed.
-7. Guest authors remain their own provenance branches and are never silently folded into the Chet/Spiral author line.
-8. The corpus enters Hearthfire as external research/reference material and DEEPTheory candidates. It does not silently become project canon, accepted physics, or executable Math Spine law.
-9. Any proposed Hearthfire implementation mapping remains proposal-only until reviewed.
+The successful immutable crawl artefact is `bseng-rse-live-harvest`, artifact ID `9392236386`, SHA-256 `9a04dcd78d698e699b6f409d638e5919afe3ba3995850b6a1be101c4a99c95ba`.
 
-## Current site topology used as ingest seeds
+## Corpus law
 
-The present navigation exposes the following major corpus doors:
+This corpus is an **external research lineage / DEEPTheory candidate source**.
 
-- `/start-here/`
-- `/start-here/core-theory/`
-- `/start-here/rse-mathematical-framework/`
-- `/start-here/ai-ethics-documents/`
-- `/start-here/sauna-epistemology/`
-- `/start-here/the-lighter-side-of-a-mobius-strip/`
-- `/start-here/guest-authors-at-bseng/`
-- `/what-this-is-not/`
-- `/category/rse/`
-- site root and About
+It is not automatic project canon, accepted physics, an external-world observation, or executable Hearthgate Math Spine law.
 
-The crawler also attempts sitemap discovery and the public WordPress REST post/page indexes before recursive same-origin link discovery, so older posts not reachable from the current Start Here hierarchy are still discoverable.
+Raw-source and interpretation layers remain distinct:
 
-## Current mathematical spine observed on 2026-08-19
+```text
+BSENG source snapshot
+  -> immutable source hash / provenance
+  -> extracted construct or lineage proposal
+  -> DEEPTheory candidate
+  -> implementation correspondence proposal
+  -> explicit review / adoption
+```
 
-The RSE-RBW Mathematical Framework page currently organizes the formal corpus by tiers:
+No crawler output silently promotes itself between those layers.
 
-- Tier 0: Axioms of Ontic Minimalism; Principles of Ontic Minimalism; Representational Neutrality.
-- Tier 1: Coherence-Relational Blockworld v6.0; Mathematical Model v6.0; 3-Mode Coherence Sector v1.1.
-- Tier 2: Global Closure and Decomposition Invariance; Projection Residual Geometry; Closure-Restoration Geometry; Global Capacity Invariants and Normalization; Residual Space Geometry; Hilbert Space from Global Closure and Decomposition Invariance.
-- Tier 3: Structural Invariants; Identity and Ontic Minimalism.
-- Tier 4: Relational Structural Experience v6.0; Phenomenology in a Relational Blockworld v5.0; Recognition Anchoring Across Indexing Inequivalence v1.0.
-- Tier 5: Uncertainty Principle; Neutrino Mass and Oscillation; additional announced work may appear later.
+## What the ingest preserves
 
-Known direct PDF URLs are seeded where verified. Documents whose current URLs are not hard-coded are discovered from the live mathematical-framework hub, preventing us from inventing filenames.
+The pipeline keeps:
 
-## Hearthfire correspondence targets
+- current mathematical-framework documents;
+- earlier site essays and theory posts;
+- historical formulations that current papers supersede or reframe;
+- Sauna epistemology/conversation material as precursor strata unless a stronger formalisation edge is established;
+- ethics material;
+- methodological boundary pages;
+- guest-author branches with distinct authorship;
+- versions, hashes, canonical URLs, publication/modified metadata where available;
+- current site-authored tier structure;
+- candidate supersession relationships without destructive replacement.
 
-Extraction should propose, but never automatically assert, correspondences with:
+## Live discovery model
 
-- Hearthgate Math Spine v1.8;
-- PREMAQC;
-- DEEPTheory / DEEPTime;
-- Observer provenance classes;
-- Glyph Continuity;
-- Constellation identity, recognition, and continuity;
-- House Runtime continuity across sessions/routes;
-- Requested Transformation;
-- React-ion admissibility, residual, and return geometry;
-- canon / model-observation / software-receipt / external-world authority separation.
+The final crawler does **not** wander the site recursively through pagination/category mirrors.
 
-Particular attention should be paid to changes between the earlier Chet papers already known to the House and the current corpus: renamed primitives, retired assumptions, new mathematical derivations, versioned identity criteria, recognition across indexing inequivalence, residual-space geometry, and representational-neutrality rules.
+Instead it uses the site's own authoritative public indexes:
+
+1. recursively resolve the sitemap hierarchy, including CDATA-wrapped child sitemap URLs;
+2. enumerate public WordPress pages/posts as an additive discovery path;
+3. read the live RSE Mathematical Framework hub and extract every PDF download URL actually linked there;
+4. combine those sources with stable seed pages;
+5. fetch each unique canonical source once;
+6. hash and snapshot HTML/PDF content;
+7. emit crawl report, source index, and reviewable lineage proposals.
+
+This produced complete current public coverage without duplicate navigation traversal.
 
 ## Files
 
-- `apps/arcsweep/presets/bseng-rse-whole-site-ingest.v0.1.json` — Arcsweep ingest primer.
-- `apps/arcsweep/skills/sources/bseng-rse/site-ingest.json` — source/crawl/lineage configuration and current framework seeds.
-- `apps/arcsweep/scripts/bseng-rse-ingest.mjs` — operator-run crawler/snapshotter.
-- `apps/arcsweep/test/bseng-rse-ingest.test.js` — URL, robots, classification, version and lineage guards.
+Core ingest:
 
-## Operator run
+- `apps/arcsweep/presets/bseng-rse-whole-site-ingest.v0.1.json`
+- `apps/arcsweep/skills/sources/bseng-rse/site-ingest.json`
+- `apps/arcsweep/scripts/bseng-rse-ingest.mjs`
+- `apps/arcsweep/test/bseng-rse-ingest.test.js`
 
-```bash
-node apps/arcsweep/scripts/bseng-rse-ingest.mjs --dry-run
-node apps/arcsweep/scripts/bseng-rse-ingest.mjs --out ingests/bseng-rse
+Live authoritative-seed layer:
+
+- `apps/arcsweep/scripts/bseng-rse-live-seeds.mjs`
+- `apps/arcsweep/test/bseng-rse-live-seeds.test.js`
+- `.github/workflows/bseng-rse-live-harvest.yml`
+
+Receipts and lineage:
+
+- `apps/arcsweep/skills/sources/bseng-rse/live-harvest-receipt.2026-08-20.json`
+- `apps/arcsweep/skills/sources/bseng-rse/lineage-diff.2025-2026.json`
+- `docs/handoffs/BSENG_RSE_LINEAGE_DIFF_2025_TO_2026.md`
+
+## Lineage findings already established
+
+The 2025 -> 2026 comparison is not a simple replacement story.
+
+The broad sequence is:
+
+```text
+early recursive/field RSE
+  -> RSE <-> RBW bridge
+  -> GA / Grassmannian / Regge hardening
+  -> closure-first cRBW + Ontic Minimalism
 ```
 
-The live crawl intentionally does not happen merely because the app loads. It is an explicit operator action, while the crawler itself respects `robots.txt`, stays same-origin, rate-limits requests, hashes every captured source, and records failures rather than inventing missing material.
+Important changes include:
 
-## Output
+- global closure moved from a paired RBW constraint layer to the governing ontic starting point;
+- lamination and coherence-gradient mathematics remain active, chiefly at the phenomenological/local-registration layer;
+- identity was substantially tightened from lamination-density / relational-field-tension threshold models toward closure-class continuity of path-connected worldtubes, while recognition became explicitly epistemic;
+- projection grew into PRG / CRG / RSG residual and restoration geometries;
+- Representational Neutrality formalized the rule that a successful mathematical representation does not automatically acquire ontological status;
+- Recognition Anchoring formalized continuity across indexing inequivalence.
 
-A completed run writes:
+One provenance edge is explicit rather than inferred: the current Recognition Anchoring paper names **"Thread-walking (Ryan and Solas, The Circle)"** and formalizes it as an anchor-based recognition procedure. The machine lineage map records this as a directed Circle -> Chet formalisation edge.
 
-- immutable raw HTML snapshots;
-- immutable downloaded PDF documents;
-- normalized HTML text;
-- `source-index.json` with URL/hash/title/author/date/version/provenance metadata;
-- `lineage-proposals.json` with reviewable supersession candidates;
-- `crawl-report.json` with coverage, failures, robots state and truncation status.
+## Hearthfire correspondence targets
 
-PDF text extraction is deliberately deferred to the House document parser so the web crawler does not create a second PDF interpretation stack.
+The first high-value donor surfaces are:
 
-## Next integration step after a successful crawl
+1. **Recognition Correspondence** for Constellation / Glyph Continuity and context recovery;
+2. **Admissibility Residual** for Requested Transformation / React-ion;
+3. **Multi-layer Identity Profile** separating implementation, memory, behavior, relational invariants, recognition, and structural evidence;
+4. **Representational-status provenance tags** for DEEPTheory / Math Spine / Observer outputs.
 
-Compile the source index into a `bseng-rse` research bank for DEEPTheory / Knowledge, then run an explicit **Chet lineage diff**:
+These are implementation proposals, not silent replacements for existing Hearthgate authority.
 
-`earlier Chet corpus → current BSENG source version → changed/retired/new construct → Hearthfire correspondence → proposed action`
+## Re-run
 
-The diff should preserve convergence where Hearthfire and Chet independently evolved toward similar structures, while retaining disagreements and incompatible assumptions rather than flattening them into one synthesis.
+The live harvest remains reproducible through the `BSENG RSE Live Harvest` GitHub Actions workflow. Raw crawl payloads stay out of ordinary Git history; their hashes and successful artefact receipt are committed so the source state used for lineage analysis remains auditable.
+
+## Seal
+
+Crawl the source.
+
+Preserve the strata.
+
+Name the direction of influence when provenance allows it.
+
+Do not confuse a representation with the thing represented.
