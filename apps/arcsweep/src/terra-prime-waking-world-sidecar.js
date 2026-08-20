@@ -4,6 +4,7 @@ import {
   WORLD_REGISTRY_JOURNAL_KEY,
   createWorldRegistryJournal,
   normaliseWorldRegistryJournal,
+  reconcileWorldRegistry,
   recordWorldSnapshot,
 } from './world-registry-journal.js';
 
@@ -29,25 +30,29 @@ function writeJournalWorld(world, writtenAt) {
 }
 
 export async function synchroniseTerraPrimeWakingWorld(now = new Date().toISOString()) {
-  const state = await loadState();
-  const result = ensureTerraPrimeWakingWorld(state, now);
-  if (!result.changed) return result;
+  const loaded = await loadState();
+  const reconciled = reconcileWorldRegistry(loaded, readJournal());
+  const result = ensureTerraPrimeWakingWorld(reconciled.state, now);
+  const changed = Boolean(reconciled.changed || result.changed);
+  if (!changed) return { ...result, changed: false, registryRecovered: false };
 
   writeJournalWorld(result.world, now);
   await saveState(result.state, {
     reason: 'terra-prime-waking-world-sync',
     worldId: result.world.id,
     worldBirthReceiptId: result.receipt?.id || null,
+    registryRecovered: reconciled.changed,
   });
   globalThis.document?.dispatchEvent?.(new CustomEvent(SYNC_EVENT, {
     detail: {
       worldId: result.world.id,
       created: result.created,
       birthReceiptId: result.receipt?.id || null,
+      registryRecovered: reconciled.changed,
       stableAnchorRevisedAt: result.world.wakingWorld?.stable_anchor?.source_revised_at || null,
     },
   }));
-  return result;
+  return { ...result, changed: true, registryRecovered: reconciled.changed };
 }
 
 export function installTerraPrimeWakingWorldSidecar() {
