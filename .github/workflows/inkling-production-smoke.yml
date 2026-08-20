@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - ops/inkling-smoke-run
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
