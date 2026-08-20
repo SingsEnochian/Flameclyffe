@@ -28,15 +28,24 @@ async function vaultSecret(env, provider) {
   return String(data || '').trim();
 }
 
+function directCredential(envName, env) {
+  const names = envName === 'HF_TOKEN' ? ['HF_TOKEN', 'HFTOKEN'] : [envName];
+  for (const name of names.filter(Boolean)) {
+    const value = String(env.get(name) || '').trim();
+    if (value) return { value, source: 'environment', source_name: name };
+  }
+  return { value: '', source: null, source_name: null };
+}
+
 async function candidateCredential(candidate, env) {
   const envName = candidate.runtime?.api_key_env;
-  const direct = envName ? String(env.get(envName) || '').trim() : '';
-  if (direct) return { value: direct, source: 'environment' };
+  const direct = directCredential(envName, env);
+  if (direct.value) return direct;
   if (envName === 'HF_TOKEN') {
     const value = await vaultSecret(env, 'huggingface');
-    if (value) return { value, source: 'provider-vault' };
+    if (value) return { value, source: 'provider-vault', source_name: 'huggingface' };
   }
-  return { value: '', source: null };
+  return { value: '', source: null, source_name: null };
 }
 
 function isWebDirect(candidate) {
