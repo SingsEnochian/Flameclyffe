@@ -90,17 +90,34 @@ if (fs.existsSync(bifrostManifestPath)) {
     if (manifest.route !== '/starwell/arcsweep-continuity/' || manifest.entrypoint !== 'arcsweep-continuity/index.html') {
       errors.push('Bifröst Arcsweep manifest has an invalid packaged route or entrypoint.');
     }
-    if (manifest.engine?.formalism !== 'temporal-quantum-state-machine' || manifest.engine?.physicalClaim !== false) {
-      errors.push('Bifröst Arcsweep must preserve its bounded temporal-quantum interpretation contract.');
+    if (manifest.engine?.formalism !== 'temporal-compression-release-state-machine' || manifest.engine?.physicalClaim !== false) {
+      errors.push('Bifröst Arcsweep must execute the temporal compression-release formalism while preserving the physical-claim boundary.');
     }
-    if (!manifest.capabilities?.includes('premaq-v2-ingest') || !manifest.capabilities?.includes('collapse-release-cycles')) {
-      errors.push('Bifröst Arcsweep manifest is missing PREMAQ or collapse-release capability.');
+    for (const capability of [
+      'premaq-v2-ingest',
+      'compression-release-cycles',
+      'compression-of-release-recursion',
+      'world-specific-tone-sequences',
+      'rowan-owned-tone-approval',
+    ]) {
+      if (!manifest.capabilities?.includes(capability)) {
+        errors.push(`Bifröst Arcsweep manifest is missing capability: ${capability}`);
+      }
     }
     if (manifest.authorityContract?.hearthside !== 'evidence-grounded-observational') {
       errors.push('Bifröst Arcsweep must preserve Hearthside evidence authority.');
     }
     if (manifest.authorityContract?.targetside !== 'canon-grounded-projected') {
       errors.push('Bifröst Arcsweep must preserve Targetside projection authority.');
+    }
+    if (manifest.authorityContract?.collapseExists !== false) {
+      errors.push('Bifröst Arcsweep must declare collapse nonexistent.');
+    }
+    if (manifest.authorityContract?.releaseFeedsNextCompression !== true) {
+      errors.push('Bifröst Arcsweep must feed every release into the next compression.');
+    }
+    if (manifest.authorityContract?.toneApproval !== 'rowan-human-calibration-owner') {
+      errors.push('Bifröst Arcsweep must preserve Rowan tone-approval authority.');
     }
   } catch (error) {
     errors.push(`Bifröst Arcsweep manifest is invalid JSON: ${error.message}`);
@@ -224,9 +241,9 @@ console.log('[Hearthgate packaging check] OK');
 console.log(` product: ${pkg.productName}`);
 console.log(` version: ${pkg.version}`);
 console.log(` main: ${pkg.main}`);
+console.log(' law: compression -> release -> compression of the release -> infinite continuation');
 console.log(' security: sandboxed renderer + redacted IPC + encrypted config when OS key storage is available');
 console.log(' network: core and FontForge services restricted to the local boundary');
-console.log(' packaging: ASAR enabled with explicit runtime unpack list and generated Hearthgate icon');
 console.log(' framework: /starwell/ + Glyph Studio + Signal Well + Bifröst Arcsweep bundled');
 console.log(' schemas: PREMAQ v2 + Bifröst temporal state bundled');
 console.log(` installer: ${pkg.build.artifactName}`);
