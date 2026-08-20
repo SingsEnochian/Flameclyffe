@@ -1,5 +1,7 @@
 import { createWorld } from './worlds.js';
 
+export const WORLD_BIRTH_RECEIPT_SCHEMA = 'arcsweep.world-birth-receipt/v1';
+
 function invariant(condition, message) {
   if (!condition) throw new Error(`WORLD_REGISTRY: ${message}`);
 }
@@ -11,6 +13,40 @@ function cloneState(value) {
 
 function text(value) {
   return String(value ?? '').trim();
+}
+
+export function recordWorldBirth(state, world, {
+  bornAt = new Date().toISOString(),
+  source = 'world-registry',
+  sourceRef = '',
+  seedFingerprint = '',
+} = {}) {
+  invariant(state && typeof state === 'object', 'state is required');
+  invariant(world && typeof world === 'object', 'world is required');
+  invariant(text(world.id), 'world id is required');
+
+  state.worldBirthReceipts = Array.isArray(state.worldBirthReceipts) ? state.worldBirthReceipts : [];
+  const existing = state.worldBirthReceipts.find((receipt) => (
+    receipt?.event === 'WORLD_BORN' && receipt?.worldId === world.id
+  ));
+  if (existing) return existing;
+
+  const receipt = {
+    schema: WORLD_BIRTH_RECEIPT_SCHEMA,
+    version: 1,
+    event: 'WORLD_BORN',
+    id: `world-born:${world.id}:${bornAt}`,
+    bornAt,
+    worldId: world.id,
+    worldName: text(world.name) || world.id,
+    worldKind: text(world.kind),
+    parentWorldId: text(world.parentWorldId) || null,
+    source: text(source) || 'world-registry',
+    sourceRef: text(sourceRef),
+    seedFingerprint: text(seedFingerprint) || text(world.worldseedFingerprint),
+  };
+  state.worldBirthReceipts.unshift(receipt);
+  return receipt;
 }
 
 export function createWorldRegistryEntry(stateInput, {
@@ -30,7 +66,12 @@ export function createWorldRegistryEntry(stateInput, {
   world.updatedAt = now;
   state.worlds.unshift(world);
   state.activeWorldId = world.id;
-  return { state, world };
+  const receipt = recordWorldBirth(state, world, {
+    bornAt: now,
+    source: 'world-registry',
+    sourceRef: 'registry:create',
+  });
+  return { state, world, receipt };
 }
 
 export function updateWorldRegistryEntry(stateInput, {
