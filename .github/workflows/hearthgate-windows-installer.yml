@@ -202,8 +202,11 @@ jobs:
           if ($premaqSchema.title -ne "PREMAQ Observation State v2") {
             throw "Packaged PREMAQ schema is not v2."
           }
-          if ($bifrostSchema.title -ne "Bifrost Temporal Quantum State v1") {
-            throw "Packaged Bifröst temporal schema is invalid."
+          if ($bifrostSchema.'$id' -ne "https://flameclyffe.local/schemas/bifrost-temporal-state-v1.schema.json") {
+            throw "Packaged Bifröst temporal schema has the wrong machine identity."
+          }
+          if ($bifrostSchema.properties.compression_release.properties.law.const -ne "compression-release-compression-of-release-infinite-recursion") {
+            throw "Packaged Bifröst temporal schema is missing the compression-release law."
           }
 
           $hash = Get-FileHash -Path $installer.FullName -Algorithm SHA256
@@ -223,7 +226,7 @@ jobs:
           - Security: sandboxed renderer, loopback-only services, restricted origins, redacted IPC
           - Framework: bundled STARWELL + Glyph Studio + Bifröst Arcsweep
           - Formalism: compression → release → compression of the release
-          - State contracts: PREMAQ v2 + Bifröst Temporal Quantum State v1
+          - State contracts: PREMAQ v2 + Bifröst compression-release state v1
           - Font compiler: local FontForge sidecar adapter
           - Signing: unsigned development build
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
