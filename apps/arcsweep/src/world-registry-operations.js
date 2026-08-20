@@ -31,12 +31,13 @@ export function recordWorldBirth(state, world, {
   ));
   if (existing) return existing;
 
+  const knownBornAt = text(bornAt);
   const receipt = {
     schema: WORLD_BIRTH_RECEIPT_SCHEMA,
     version: 1,
     event: 'WORLD_BORN',
-    id: `world-born:${world.id}:${bornAt}`,
-    bornAt,
+    id: `world-born:${world.id}:${knownBornAt || 'unknown'}`,
+    bornAt: knownBornAt || null,
     worldId: world.id,
     worldName: text(world.name) || world.id,
     worldKind: text(world.kind),
@@ -47,6 +48,39 @@ export function recordWorldBirth(state, world, {
   };
   state.worldBirthReceipts.unshift(receipt);
   return receipt;
+}
+
+export function ensureWorldBirthReceipts(state, {
+  originalWorlds = [],
+  source = 'legacy-state-migration',
+  sourceRef = 'state-normalise',
+} = {}) {
+  invariant(state && typeof state === 'object', 'state is required');
+  invariant(Array.isArray(state.worlds), 'state.worlds must be an array');
+
+  const originals = new Map(
+    (Array.isArray(originalWorlds) ? originalWorlds : [])
+      .filter((world) => world && typeof world === 'object' && text(world.id))
+      .map((world) => [text(world.id), world]),
+  );
+
+  return state.worlds.map((world) => {
+    const existing = Array.isArray(state.worldBirthReceipts)
+      ? state.worldBirthReceipts.find((receipt) => receipt?.event === 'WORLD_BORN' && receipt?.worldId === world.id)
+      : null;
+    if (existing) return existing;
+
+    const original = originals.get(world.id);
+    const recordedCreatedAt = text(original?.createdAt);
+    return recordWorldBirth(state, world, {
+      bornAt: recordedCreatedAt || null,
+      source,
+      sourceRef: recordedCreatedAt
+        ? `${sourceRef}:recorded-world-createdAt`
+        : `${sourceRef}:birth-time-unknown`,
+      seedFingerprint: world.worldseedFingerprint,
+    });
+  });
 }
 
 export function createWorldRegistryEntry(stateInput, {
