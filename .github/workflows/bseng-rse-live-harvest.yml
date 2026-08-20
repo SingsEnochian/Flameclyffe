@@ -7,7 +7,9 @@ on:
     paths:
       - '.github/workflows/bseng-rse-live-harvest.yml'
       - 'apps/arcsweep/scripts/bseng-rse-ingest.mjs'
+      - 'apps/arcsweep/scripts/bseng-rse-live-seeds.mjs'
       - 'apps/arcsweep/skills/sources/bseng-rse/site-ingest.json'
+      - 'apps/arcsweep/test/bseng-rse-live-seeds.test.js'
   workflow_dispatch:
 
 permissions:
@@ -27,25 +29,24 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Build exhaustive live seed config
+        run: |
+          node apps/arcsweep/scripts/bseng-rse-live-seeds.mjs \
+            --out /tmp/bseng-rse-live-config.json
+
       - name: Crawl BSENG public corpus
         run: |
           node apps/arcsweep/scripts/bseng-rse-ingest.mjs \
+            --config /tmp/bseng-rse-live-config.json \
             --out ingests/bseng-rse-live \
             --max-pages 2500
 
       - name: Summarise harvest
         if: always()
         run: |
-          if [ -f ingests/bseng-rse-live/crawl-report.json ]; then
-            cat ingests/bseng-rse-live/crawl-report.json
-          fi
+          test -f ingests/bseng-rse-live/crawl-report.json && cat ingests/bseng-rse-live/crawl-report.json || true
           if [ -f ingests/bseng-rse-live/source-index.json ]; then
-            node - <<'NODE'
-            const fs = require('fs');
-            const rows = JSON.parse(fs.readFileSync('ingests/bseng-rse-live/source-index.json','utf8'));
-            const counts = rows.reduce((a,r) => ((a[r.source_class]=(a[r.source_class]||0)+1),a),{});
-            console.log(JSON.stringify({source_count: rows.length, classes: counts}, null, 2));
-            NODE
+            node -e "const fs=require('fs');const rows=JSON.parse(fs.readFileSync('ingests/bseng-rse-live/source-index.json','utf8'));const counts=rows.reduce((a,r)=>{a[r.source_class]=(a[r.source_class]||0)+1;return a;},{});console.log(JSON.stringify({source_count:rows.length,classes:counts},null,2));"
           fi
 
       - name: Upload BSENG corpus snapshot
