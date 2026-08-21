@@ -27,6 +27,11 @@ import {
 } from '../src/artifactContract.js';
 import { createTerraAeternaArtifact } from '../src/terraAeternaRootAdapter.js';
 import { createWriterRoomArtifact } from '../src/writerRoomRailAdapter.js';
+import {
+  ASSET_WATCHER_SCHEMA,
+  createAssetWatcherArtifact,
+  isNativeAssetWatcherAvailable,
+} from '../src/assetWatcherAdapter.js';
 
 test('Companion socket envelopes are Flameclyffe-owned, typed, local and provenance-bearing', () => {
   const receipt = createSocketEnvelope({ pluginId: 'project-zero-companion-flame-channel', channel: 'chat', type: 'chat.flame.received', payload: { voice_id: 'lioreal' } });
@@ -106,6 +111,38 @@ test('Terra Aeterna and Writer Room adapters share one artifact law without shar
   assert.equal(writer.project_zero_core_authority, false);
 });
 
+test('Asset Watcher stays inert in browsers and converts native metadata into reviewable artifacts', () => {
+  assert.equal(isNativeAssetWatcherAvailable({}), false);
+  assert.equal(isNativeAssetWatcherAvailable({
+    selectAssetWatchDirectory() {},
+    startAssetWatch() {},
+    stopAssetWatch() {},
+    onAssetWatchEvent() {},
+  }), true);
+  const artifact = createAssetWatcherArtifact({
+    schema: 'flameclyffe.hearthgate.asset-watch-event/v1',
+    watch_id: 'watch-1',
+    root_label: 'TerraAeterna',
+    event_type: 'change',
+    relative_path_alias: 'Images/moon.png',
+    name: 'moon.png',
+    extension: '.png',
+    exists: true,
+    is_directory: false,
+    size_bytes: 2048,
+    modified_at: '2026-08-21T01:50:00-04:00',
+    observed_at: '2026-08-21T01:50:01-04:00',
+    content_read: false,
+  });
+  assert.equal(ASSET_WATCHER_SCHEMA, 'flameclyffe.project-zero-companion.asset-watcher/v1');
+  assert.equal(artifact.kind, 'image');
+  assert.equal(artifact.source.local_path_alias, 'TerraAeterna/Images/moon.png');
+  assert.equal(artifact.source.raw_local_path_persisted, false);
+  assert.equal(artifact.metadata.content_read, false);
+  assert.equal(artifact.authority.canon_commit, false);
+  assert.equal(artifact.authority.claims_project_zero_adoption, false);
+});
+
 test('Flame Channel keeps attestation, multi-Flame broadcast, ownership boundary and native rich text', async () => {
   const source = await readFile(new URL('../src/FlameChannel.jsx', import.meta.url), 'utf8');
   assert.match(source, /runtimeVerified/);
@@ -129,14 +166,27 @@ test('artifact rail is native rich text and exposes both active Companion adapte
   assert.doesNotMatch(source, /claims_project_zero_adoption:\s*true/);
 });
 
+test('Asset Watcher panel requires explicit native selection and has a visible stop control', async () => {
+  const source = await readFile(new URL('../src/AssetWatcherPanel.jsx', import.meta.url), 'utf8');
+  assert.match(source, /selectAssetWatchDirectory/);
+  assert.match(source, /startAssetWatch/);
+  assert.match(source, /stopAssetWatch/);
+  assert.match(source, /Choose folder/);
+  assert.match(source, /Stop \+ release/);
+  assert.match(source, /contents were not read/);
+});
+
 test('adapter registry contains no Project Zero core-service claims', async () => {
   const source = await readFile(new URL('../src/pluginRegistry.js', import.meta.url), 'utf8');
   assert.match(source, /active-companion-service/);
+  assert.match(source, /active-native-companion-service/);
   assert.match(source, /integration_target: 'nocturne-project-zero'/);
   assert.match(source, /DEEP Observer Bridge Adapter/);
   assert.match(source, /Terra Aeterna Root Adapter/);
   assert.match(source, /Writer Room Rail Adapter/);
+  assert.match(source, /Asset Watcher Adapter/);
   assert.match(source, /shared-artifact-contract/);
+  assert.match(source, /native-selected-folder-watcher/);
   assert.doesNotMatch(source, /active-core-service/);
   assert.doesNotMatch(source, /Own semantic visual tokens.*Project Zero shell/i);
 });
