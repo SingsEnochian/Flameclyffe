@@ -6,6 +6,7 @@ import ArtifactBridgePanel from './ArtifactBridgePanel.jsx';
 import { applyProjectZeroTheme, loadProjectZeroTheme } from './themeEngine.js';
 import './deepObserverBridge.js';
 import './extensions.css';
+import './artifactBridge.css';
 
 function CompanionBridgeExtensions() {
   const [theme, setTheme] = useState(() => {
