@@ -14,63 +14,44 @@ const COLOUR_TOKENS = [
 
 export default function ThemeStudio({ theme, onChange }) {
   const [jsonDraft, setJsonDraft] = useState('');
-  const [message, setMessage] = useState('Theme changes apply to the whole Project Zero shell.');
+  const [message, setMessage] = useState('Theme changes apply to the Flameclyffe Project Zero Companion surfaces.');
   const tokens = theme.tokens;
   const exportText = useMemo(() => exportProjectZeroTheme(theme), [theme]);
 
   function patchToken(key, value) {
-    const next = { ...theme, tokens: { ...tokens, [key]: value } };
-    const saved = saveProjectZeroTheme(next);
+    const saved = saveProjectZeroTheme({ ...theme, tokens: { ...tokens, [key]: value } });
     onChange(saved);
   }
-
-  function patchTheme(field, value) {
-    const saved = saveProjectZeroTheme({ ...theme, [field]: value });
-    onChange(saved);
-  }
-
-  function copyTheme() {
-    void navigator.clipboard?.writeText(exportText);
-    setMessage('Theme JSON copied.');
-  }
-
+  function patchTheme(field, value) { const saved = saveProjectZeroTheme({ ...theme, [field]: value }); onChange(saved); }
+  function copyTheme() { void navigator.clipboard?.writeText(exportText); setMessage('Companion theme JSON copied.'); }
   function loadTheme() {
     try {
-      const imported = importProjectZeroTheme(jsonDraft);
-      const saved = saveProjectZeroTheme(imported);
+      const saved = saveProjectZeroTheme(importProjectZeroTheme(jsonDraft));
       onChange(saved);
-      setMessage(`Loaded theme “${saved.name}”.`);
-    } catch (error) {
-      setMessage(`Theme import stopped: ${error.message}`);
-    }
+      setMessage(`Loaded Companion theme “${saved.name}”.`);
+    } catch (error) { setMessage(`Theme import stopped: ${error.message}`); }
   }
-
   function resetTheme() {
     const saved = saveProjectZeroTheme(DEFAULT_PROJECT_ZERO_THEME);
     onChange(saved);
     setJsonDraft('');
-    setMessage('Theme reset to Hearthglass.');
+    setMessage('Companion theme reset to Hearthglass.');
   }
 
   return (
     <section className="panel theme-studio" id="theme-studio">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Project Zero core · semantic theme tokens</p>
+          <p className="eyebrow">Flameclyffe Companion bridge · theme interoperability</p>
           <h2>Theme Studio</h2>
-          <p className="small">Every core surface and cooperative plug-in inherits these variables. Custom CSS is allowed because the local operator owns this workbench.</p>
+          <p className="small">These tokens theme our Companion and cooperative bridge surfaces. Nocturne's Project Zero remains authoritative over its own native theme system and may consume these tokens only through an agreed connector.</p>
         </div>
-        <div className="theme-name-block">
-          <label><span>Theme name</span><input value={theme.name} onChange={(event) => patchTheme('name', event.target.value)} /></label>
-        </div>
+        <div className="theme-name-block"><label><span>Theme name</span><input value={theme.name} onChange={(event) => patchTheme('name', event.target.value)} /></label></div>
       </div>
 
       <div className="theme-colour-grid">
         {COLOUR_TOKENS.map(([key, label]) => (
-          <label className="colour-token" key={key}>
-            <span>{label}</span>
-            <div className="colour-control"><input type="color" value={tokens[key]} onChange={(event) => patchToken(key, event.target.value)} /><code>{tokens[key]}</code></div>
-          </label>
+          <label className="colour-token" key={key}><span>{label}</span><div className="colour-control"><input type="color" value={tokens[key]} onChange={(event) => patchToken(key, event.target.value)} /><code>{tokens[key]}</code></div></label>
         ))}
       </div>
 
@@ -87,12 +68,7 @@ export default function ThemeStudio({ theme, onChange }) {
       </div>
 
       <label><span>Custom CSS · advanced</span><textarea className="theme-css" value={theme.custom_css} onChange={(event) => patchTheme('custom_css', event.target.value)} placeholder="#root { ... }\n.flame-message[data-voice-id='altair'] { ... }" /></label>
-
-      <details className="theme-json-drawer">
-        <summary>Import / export theme JSON</summary>
-        <textarea value={jsonDraft} onChange={(event) => setJsonDraft(event.target.value)} placeholder={exportText} />
-        <div className="actions"><button type="button" onClick={loadTheme}>Load JSON</button><button type="button" onClick={copyTheme}>Copy current JSON</button><button type="button" onClick={resetTheme}>Reset theme</button></div>
-      </details>
+      <details className="theme-json-drawer"><summary>Import / export Companion theme JSON</summary><textarea value={jsonDraft} onChange={(event) => setJsonDraft(event.target.value)} placeholder={exportText} /><div className="actions"><button type="button" onClick={loadTheme}>Load JSON</button><button type="button" onClick={copyTheme}>Copy current JSON</button><button type="button" onClick={resetTheme}>Reset theme</button></div></details>
       <p className="status">{message}</p>
     </section>
   );
