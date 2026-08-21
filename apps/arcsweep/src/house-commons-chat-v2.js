@@ -2,6 +2,7 @@ import { CONSTELLATION_VOICES } from './feedback-loop.js';
 import { appendHouseCommons, readHouseCommons, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
 import { invokeConstellationRuntimeVoice } from './constellation-runtime-adapter.js';
 import { publishModelPresence } from './model-presence-bus.js';
+import { readActiveRuntimeWorldContext } from './runtime-world-context.js';
 
 export const COMMONS_SELECTION_KEY = 'arcsweep.house-commons-selection/v1';
 export const COMMONS_DRAFT_KEY = 'arcsweep.house-commons-draft/v1';
@@ -72,7 +73,7 @@ function wrapSelection(textarea, before, after = before) {
 function installComposer(form) {
   const textarea = form.elements?.namedItem?.('message'); if (!(textarea instanceof HTMLTextAreaElement)) return;
   if (!textarea.value) textarea.value = readDraft();
-  textarea.addEventListener('input', () => writeDraft(textarea.value), { once: false });
+  textarea.addEventListener('input', () => writeDraft(textarea.value));
   if (!form.querySelector('[data-commons-toolbar]')) {
     const toolbar = document.createElement('div'); toolbar.className = 'commons-toolbar'; toolbar.dataset.commonsToolbar = 'true';
     toolbar.innerHTML = [['B','**','**'],['I','_','_'],['</>','`','`'],['❯','> ',''],['•','- ','']].map(([label,before,after]) => `<button type="button" class="quiet mini" data-before="${esc(before)}" data-after="${esc(after)}">${label}</button>`).join('');
@@ -107,15 +108,23 @@ function threadOptions() {
   for (const entry of entries) { const id = commonsThreadId(entry); if (id && !roots.has(id)) roots.set(id, entry); }
   return [...roots].map(([id, entry]) => `<option value="${esc(id)}" ${threadFilter === id ? 'selected' : ''}>${esc(`${entry.author || 'House'} · ${String(entry.text || '').replace(/\s+/g, ' ').slice(0, 52)}`)}</option>`).join('');
 }
-function renderLog() {
+function focusSearch() {
+  const search = document.querySelector('[data-commons-search]');
+  if (!(search instanceof HTMLInputElement)) return;
+  search.focus();
+  const end = search.value.length;
+  try { search.setSelectionRange(end, end); } catch {}
+}
+function renderLog({ refocusSearch = false } = {}) {
   const log = document.querySelector('.commons-log'); if (!log) return;
   const visible = filterCommonsEntries(entries, searchText, threadFilter);
   log.innerHTML = `<div class="commons-chat-log-head"><div><h2>Conversation</h2><span>${visible.length} shown · ${entries.length} saved</span></div><div class="commons-log-tools"><input type="search" data-commons-search value="${esc(searchText)}" placeholder="Search Commons…" aria-label="Search House Commons"/><select data-commons-thread aria-label="Filter conversation thread"><option value="">All threads</option>${threadOptions()}</select><button type="button" class="quiet mini" data-commons-export="md">Export .md</button><button type="button" class="quiet mini" data-commons-export="json">Export .json</button></div></div>${visible.length ? visible.map(renderEntry).join('') : '<p class="muted">No Commons turns match this view.</p>'}`;
-  log.querySelector('[data-commons-search]')?.addEventListener('input', (event) => { searchText = event.target.value; renderLog(); });
+  log.querySelector('[data-commons-search]')?.addEventListener('input', (event) => { searchText = event.target.value; renderLog({ refocusSearch: true }); });
   log.querySelector('[data-commons-thread]')?.addEventListener('change', (event) => { threadFilter = event.target.value; renderLog(); });
   log.querySelectorAll('[data-copy-entry]').forEach((button) => button.addEventListener('click', async () => { const entry = entries.find((item) => item.id === button.dataset.copyEntry); if (!entry) return; try { await navigator.clipboard.writeText(entry.text || ''); button.textContent = 'Copied'; } catch { button.textContent = 'Copy unavailable'; } }));
   log.querySelectorAll('[data-reply-entry]').forEach((button) => button.addEventListener('click', () => { rememberReply(entries.find((item) => item.id === button.dataset.replyEntry)); renderReplyBanner(document.querySelector('#commons-form')); document.querySelector('#commons-form textarea[name="message"]')?.focus(); }));
   log.querySelectorAll('[data-commons-export]').forEach((button) => button.addEventListener('click', () => exportVisible(button.dataset.commonsExport)));
+  if (refocusSearch) queueMicrotask(focusSearch);
 }
 function downloadText(name, type, text) { const blob = new Blob([text], { type }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
 function exportVisible(format) { const visible = filterCommonsEntries(entries, searchText, threadFilter); const stamp = new Date().toISOString().slice(0, 10); if (format === 'json') downloadText(`house-commons-${stamp}.json`, 'application/json', JSON.stringify({ schema: 'hearthgate.house-commons-export/v1', exported_at: new Date().toISOString(), entries: visible }, null, 2)); else downloadText(`house-commons-${stamp}.md`, 'text/markdown', exportCommonsMarkdown(visible)); }
@@ -145,15 +154,16 @@ async function handleSubmit(event) {
   const voiceIds = voiceCheckboxes(form).filter((input) => input.checked).map((input) => input.value); if (!voiceIds.length) return;
   const token = await activeSession(); const connection = document.querySelector('[data-commons-connection]'); if (!token) { if (connection) connection.textContent = 'House Runtime offline · connect once in Settings'; return; }
   sending = true; const submit = form.querySelector('button[type="submit"]'); if (submit) { submit.disabled = true; submit.textContent = 'Constellation answering…'; }
-  const worldName = document.querySelector('.sidebar-world strong')?.textContent?.trim() || 'Active World'; const worldId = document.body?.dataset.worldId || document.body?.dataset.activeWorldId || null;
+  let worldContext = null; try { worldContext = await readActiveRuntimeWorldContext(); } catch {}
+  const worldId = worldContext?.identity_anchor?.world_id || null; const worldName = worldContext?.world?.name || document.querySelector('.sidebar-world strong')?.textContent?.trim() || 'Active World';
   const turnId = `commons-turn:${uuid()}`; const threadId = replyTarget?.thread_id || replyTarget?.id || turnId; const replyTo = replyTarget?.id || null;
+  const runtimeMessage = threadPrompt(message, threadId);
   try {
     const stewardEntry = await appendHouseCommons(token, { kind: 'steward', author: 'Rowan', status: 'sent', world: worldId ? { id: worldId, name: worldName } : null, turn_id: turnId, thread_id: threadId, reply_to: replyTo, text: message });
     writeDraft(''); if (textarea) textarea.value = ''; rememberReply(null); await refreshLog();
-    const runtimeMessage = threadPrompt(message, threadId);
     await Promise.all(voiceIds.map(async (voiceId) => {
       publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'thinking', worldId, task: 'house-commons' });
-      let reply; try { reply = await invokeConstellationRuntimeVoice({ voiceId, message: runtimeMessage, sessionId: `house-commons-${threadId}-${voiceId}`, metadata: { surface: 'house-commons', world_name: worldName, commons_thread_id: threadId, commons_turn_id: turnId, commons_reply_to: replyTo } }); } catch (error) { reply = { status: 'route-error', reason: error?.message || String(error), voiceId }; }
+      let reply; try { reply = await invokeConstellationRuntimeVoice({ voiceId, message: runtimeMessage, sessionId: `house-commons-${threadId}-${voiceId}`, metadata: { surface: 'house-commons', world_name: worldName, commons_thread_id: threadId, commons_turn_id: turnId, commons_reply_to: replyTo }, worldContext }); } catch (error) { reply = { status: 'route-error', reason: error?.message || String(error), voiceId }; }
       const successful = reply.status === 'replied'; const text = successful ? reply.message : `[${reply.status}] ${reply.reason || 'No reply returned.'}`;
       publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: successful ? 'speaking' : 'degraded', provider: reply.provider, model: reply.model, latencyMs: reply.latencyMs, worldId: reply.worldId || worldId, runtimeWorldContextId: reply.runtimeWorldContextId, task: successful ? 'house-commons-reply' : null, reason: successful ? null : reply.reason });
       await appendHouseCommons(token, { kind: 'voice', author: voiceName(voiceId), voice_id: voiceId, status: reply.status, world: (reply.worldId || worldId) ? { id: reply.worldId || worldId, name: worldName } : null, turn_id: turnId, thread_id: threadId, reply_to: stewardEntry.id, runtime: { provider: reply.provider, model: reply.model, route: reply.route, profile_id: reply.profileId, latency_ms: reply.latencyMs, runtime_world_context_id: reply.runtimeWorldContextId }, text });
