@@ -16,6 +16,10 @@ function sessionId() {
   return globalThis.crypto?.randomUUID?.() || `arcsweep-runtime-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function worldId(world) {
+  return world?.identity_anchor?.world_id || world?.world_id || world?.id || world?.world?.id || null;
+}
+
 export function presenceMapFromRecords(records = []) {
   return Object.fromEntries(
     (Array.isArray(records) ? records : [])
@@ -51,26 +55,31 @@ export async function bootstrapRuntimeIntegration({
   readWorld = readActiveRuntimeWorldContext,
   readPresence = currentModelPresence,
 } = {}) {
-  const persisted = loadRuntimeIntegrationEnvelope(storage);
   let world = null;
   try {
     world = await readWorld();
   } catch {
-    world = persisted?.world || null;
+    world = null;
   }
+
+  const scopeWorldId = worldId(world);
+  const persisted = loadRuntimeIntegrationEnvelope(storage, scopeWorldId)
+    || (!scopeWorldId ? loadRuntimeIntegrationEnvelope(storage) : null);
+  if (!world) world = persisted?.world || null;
 
   const envelope = buildBootstrapEnvelope({
     persisted,
     world,
     presenceRecords: readPresence() || [],
   });
+  const resolvedWorldId = worldId(envelope.world);
 
   installRuntimeIntegrationBridge({
     initialEnvelope: envelope,
     target,
-    onChange: (next) => saveRuntimeIntegrationEnvelope(next, storage),
+    onChange: (next) => saveRuntimeIntegrationEnvelope(next, storage, resolvedWorldId),
   });
-  saveRuntimeIntegrationEnvelope(envelope, storage);
+  saveRuntimeIntegrationEnvelope(envelope, storage, resolvedWorldId);
 
   const ready = readRuntimeIntegrationEnvelope();
   if (target?.dispatchEvent && typeof CustomEvent !== 'undefined') {
