@@ -62,3 +62,11 @@ test('Flame Channel keeps attestation, multi-Flame broadcast, ownership boundary
   assert.doesNotMatch(source, /Project Zero core/);
   assert.doesNotMatch(source, /marked\(|markdown-it|react-markdown/i);
 });
+
+test('adapter registry contains no Project Zero core-service claims', async () => {
+  const source = await readFile(new URL('../src/pluginRegistry.js', import.meta.url), 'utf8');
+  assert.match(source, /active-companion-service/);
+  assert.match(source, /integration_target: 'nocturne-project-zero'/);
+  assert.doesNotMatch(source, /active-core-service/);
+  assert.doesNotMatch(source, /Own semantic visual tokens.*Project Zero shell/i);
+});
