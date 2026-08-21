@@ -239,7 +239,7 @@ jobs:
           - Formalism: compression → release → compression of the release
           - Somatic gate: packaged and Rowan-owned
           - Project Zero Companion: packaged at ``/project-zero-companion/`` with native selected-folder watcher IPC
-          - Project Zero authority: remains Nocturne-owned; Companion is Flameclyffe integration only
+          - Project Zero authority: external/project-owned; Companion is Flameclyffe integration only
           - Naming authority: Rowan, fail-closed
           - Security: loopback-only services, restricted origins, metadata-only explicit folder watcher
           - Signing: unsigned development build
