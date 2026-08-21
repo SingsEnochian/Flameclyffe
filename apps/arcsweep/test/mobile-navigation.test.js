@@ -24,3 +24,9 @@ test('mobile bar keeps four stable rooms and exposes every desktop room through 
   assert.match(sidecar, /desktopRoomButtons\(\)\.map\(roomDescriptor\)/);
   assert.match(css, /min-height:\s*4\.65rem/);
 });
+
+test('mobile navigation never mounts over bootstrap or recovery screens', () => {
+  assert.match(sidecar, /app\?\.querySelector\('\.app-shell'\)/);
+  assert.match(sidecar, /if \(!media\.matches \|\| !applicationReady\)/);
+  assert.match(sidecar, /clearShell\(shell\)/);
+});
