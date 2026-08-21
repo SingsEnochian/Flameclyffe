@@ -22,7 +22,19 @@ test('House session startup fetch receives a timeout signal without affecting ot
   assert.equal(installStartupFetchGuard(target, 25), false, 'guard installs only once');
 });
 
-test('startup guard is mounted before main.js in the browser shell', async () => {
+test('startup guard and visible bootstrap are mounted before the application module', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  assert.ok(html.indexOf('./src/startup-fetch-guard.js') < html.indexOf('./src/main.js'));
+  const guard = html.indexOf('./src/startup-fetch-guard.js');
+  const bootstrap = html.indexOf('./src/main-bootstrap.js');
+  assert.ok(guard >= 0, 'startup fetch guard must be mounted');
+  assert.ok(bootstrap > guard, 'visible bootstrap must follow the fetch guard');
+  assert.equal(html.includes('<script type="module" src="./src/main.js"></script>'), false, 'main.js must be imported through the visible bootstrap');
+});
+
+test('visible bootstrap paints first and fails persistence soft', async () => {
+  const source = await readFile(new URL('../src/main-bootstrap.js', import.meta.url), 'utf8');
+  assert.match(source, /Opening the house/);
+  assert.match(source, /persistence unavailable; continuing in memory/);
+  assert.match(source, /await import\('\.\/main\.js'\)/);
+  assert.match(source, /The house did not finish opening/);
 });
