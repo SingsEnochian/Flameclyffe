@@ -8,6 +8,7 @@ export const CORE_CAPABILITIES = [
   'theme-interoperability',
   'native-rich-text',
   'live-flame-channel',
+  'shared-artifact-contract',
 ];
 
 export const PLUGIN_MANIFESTS = [
@@ -32,11 +33,11 @@ export const PLUGIN_MANIFESTS = [
   {
     id: 'terra-aeterna-root',
     name: 'Terra Aeterna Root Adapter',
-    status: 'planned',
-    purpose: 'Prepare consented Terra Aeterna folder, artifact, writing, image, and music metadata for Flameclyffe-side bridge events.',
-    permissions: ['selected-folders', 'metadata-read', 'manual-attach'],
-    emits: ['folder_anchor', 'file_anchor', 'artifact_added'],
-    listens: ['observer_bridge_event', 'deep_state_update'],
+    status: 'active-companion-service',
+    purpose: 'Package consented Terra Aeterna artifact, image, audio, document, and file metadata into the shared Companion artifact contract without persisting raw local paths or claiming Project Zero adoption.',
+    permissions: ['local-storage', 'manual-metadata-attach'],
+    emits: ['artifact.terra_aeterna.received'],
+    listens: ['manual-artifact-receipt'],
   },
   {
     id: 'deep-observer-bridge',
@@ -50,11 +51,11 @@ export const PLUGIN_MANIFESTS = [
   {
     id: 'writer-room-rail',
     name: 'Writer Room Rail Adapter',
-    status: 'planned',
-    purpose: 'Prepare passages, drafts, and atmospheric prompts as Companion bridge events without claiming Project Zero writing-surface ownership.',
-    permissions: ['selected-folders', 'manual-attach'],
-    emits: ['story_shard', 'reverse_watch_request'],
-    listens: ['observer_condition_set', 'deep_state_update'],
+    status: 'active-companion-service',
+    purpose: 'Package passages, drafts, prompts, and documents with native rich text into the shared Companion artifact contract without claiming canon or Project Zero writing-surface ownership.',
+    permissions: ['local-storage', 'rich-text-compose', 'manual-attach'],
+    emits: ['writer.artifact.received'],
+    listens: ['manual-writer-receipt'],
   },
   {
     id: 'hearthweave-altar-sound',
