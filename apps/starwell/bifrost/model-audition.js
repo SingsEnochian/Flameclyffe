@@ -3,6 +3,7 @@ import {
   readHouseRuntimeToken,
   restoreHouseRuntimeSession,
 } from '../../arcsweep/src/house-runtime.js';
+import { modelAuditionAvailability, modelAuditionRunPlan } from './model-audition-state.js';
 
 const BASELINE_FLAME = 'larkshine';
 const CANDIDATE_ID = 'inkling-small';
@@ -21,6 +22,7 @@ const elements = {
 };
 
 let runtimeToken = '';
+let availability = modelAuditionAvailability();
 
 function authHeaders(extra = {}) {
   if (runtimeToken && runtimeToken !== HOUSE_COOKIE_SESSION) {
@@ -66,35 +68,52 @@ async function resolveRuntimeSession() {
   return runtimeToken;
 }
 
+function settledValue(result, fallbackLabel) {
+  if (result.status === 'fulfilled') return result.value;
+  return { configured: false, missing: [result.reason?.message || fallbackLabel] };
+}
+
+function missingText(values, fallback) {
+  return (Array.isArray(values) ? values : []).filter(Boolean).join(', ') || fallback;
+}
+
 async function refreshStatus() {
   if (!elements.form) return;
   const token = await resolveRuntimeSession();
   if (!token) {
+    availability = modelAuditionAvailability();
     setStatus('HOUSE OFFLINE · connect the House Runtime in Arcsweep Settings before auditioning.', 'blocked');
     elements.run.disabled = true;
     return;
   }
 
-  try {
-    const [baseline, candidate] = await Promise.all([
-      runtimeFetch(`/api/v1/flames/${BASELINE_FLAME}/status`),
-      runtimeFetch(`/api/v1/flames/${BASELINE_FLAME}/audition/${CANDIDATE_ID}`),
-    ]);
-    elements.baselineModel.textContent = baseline.model || 'Qwythos primary';
-    elements.candidateModel.textContent = candidate.model || 'thinkingmachines/Inkling-Small';
-    elements.run.disabled = !(baseline.configured && candidate.configured && candidate.audition_route);
-    const baselineState = baseline.configured ? 'QWYTHOS READY' : `QWYTHOS WAITING · ${(baseline.missing || []).join(', ') || 'provider unavailable'}`;
-    const candidateMissing = candidate.missing || [];
-    const candidateState = candidate.configured && candidate.audition_route
-      ? 'INKLING COAT ARMED'
-      : candidateMissing.includes('HF_TOKEN')
-        ? 'INKLING WAITING · add HF_TOKEN in Hearthgate Setup → Custom API fields'
-        : `INKLING WAITING · ${candidateMissing.join(', ') || 'audition route unavailable'}`;
-    setStatus(`${baselineState} · ${candidateState} · primary route remains Qwythos.`, elements.run.disabled ? 'blocked' : 'ready');
-  } catch (error) {
-    elements.run.disabled = true;
-    setStatus(`AUDITION UNAVAILABLE · ${error.message}`, 'blocked');
-  }
+  const [baselineResult, candidateResult] = await Promise.allSettled([
+    runtimeFetch(`/api/v1/flames/${BASELINE_FLAME}/status`),
+    runtimeFetch(`/api/v1/flames/${BASELINE_FLAME}/audition/${CANDIDATE_ID}`),
+  ]);
+  const baseline = settledValue(baselineResult, 'local baseline unavailable');
+  const candidate = settledValue(candidateResult, 'candidate route unavailable');
+  availability = modelAuditionAvailability({ baseline, candidate });
+
+  elements.baselineModel.textContent = baseline.model || 'Qwythos · local primary';
+  elements.candidateModel.textContent = candidate.model || 'thinkingmachines/Inkling-Small:baseten';
+  elements.run.disabled = !availability.run_enabled;
+
+  const baselineState = availability.baseline_ready
+    ? 'QWYTHOS READY'
+    : `QWYTHOS LOCAL SHORE OFFLINE · ${missingText(availability.baseline_missing, 'local gateway unavailable')}`;
+  const candidateState = availability.candidate_ready
+    ? `INKLING READY · ${candidate.execution_path || candidate.backend || candidate.provider || 'candidate route'}`
+    : availability.candidate_missing.includes('HF_TOKEN')
+      ? 'INKLING WAITING · Hugging Face credential unavailable'
+      : `INKLING WAITING · ${missingText(availability.candidate_missing, 'audition route unavailable')}`;
+  const modeState = availability.mode === 'dual-route'
+    ? 'DUAL-ROUTE MODE'
+    : availability.mode === 'candidate-only'
+      ? 'CANDIDATE-ONLY MODE · Inkling can run while the local Qwythos shore is offline'
+      : 'AUDITION BLOCKED';
+
+  setStatus(`${baselineState} · ${candidateState} · ${modeState} · Qwythos remains primary.`, availability.run_enabled ? 'ready' : 'blocked');
 }
 
 async function runAudition(event) {
@@ -105,32 +124,47 @@ async function runAudition(event) {
     elements.message?.focus();
     return;
   }
+  if (!availability.candidate_ready) {
+    setStatus('INKLING NOT READY · refreshing runtime status.', 'blocked');
+    await refreshStatus();
+    return;
+  }
 
+  const plan = modelAuditionRunPlan(availability);
   elements.run.disabled = true;
-  setOutput(elements.baselineOutput, 'Qwythos is answering…');
+  if (plan.run_baseline) setOutput(elements.baselineOutput, 'Qwythos is answering…');
+  else setOutput(elements.baselineOutput, 'LOCAL BASELINE OFFLINE · no Qwythos call made.', 'Candidate-only audition · primary route unchanged');
   setOutput(elements.candidateOutput, 'Inkling is finding all the trenchcoat pockets…');
-  setStatus('AUDITION RUNNING · identical turn, same Larkshine identity, two model routes.', 'running');
+  setStatus(
+    plan.mode === 'dual-route'
+      ? 'AUDITION RUNNING · identical turn, same Larkshine identity route, two model routes.'
+      : 'AUDITION RUNNING · Inkling web-direct candidate-only mode; local Qwythos baseline is offline.',
+    'running',
+  );
 
   const body = { message, context: [] };
   const candidateBody = { ...body, reasoning_effort: elements.effort?.value || 'medium' };
-  const [baselineResult, candidateResult] = await Promise.allSettled([
-    runtimeFetch(`/api/v1/flames/${BASELINE_FLAME}/chat`, {
+  const baselinePromise = plan.run_baseline
+    ? runtimeFetch(`/api/v1/flames/${BASELINE_FLAME}/chat`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
-    }),
-    runtimeFetch(`/api/v1/flames/${BASELINE_FLAME}/audition/${CANDIDATE_ID}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(candidateBody),
-    }),
-  ]);
+    })
+    : Promise.resolve({ skipped: true });
+  const candidatePromise = runtimeFetch(`/api/v1/flames/${BASELINE_FLAME}/audition/${CANDIDATE_ID}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(candidateBody),
+  });
+  const [baselineResult, candidateResult] = await Promise.allSettled([baselinePromise, candidatePromise]);
 
-  if (baselineResult.status === 'fulfilled') {
-    const data = baselineResult.value;
-    setOutput(elements.baselineOutput, data.message, `${data.provider || 'primary'} · ${data.model || 'Qwythos'}`);
-  } else {
-    setOutput(elements.baselineOutput, `ROUTE ERROR · ${baselineResult.reason.message}`);
+  if (plan.run_baseline) {
+    if (baselineResult.status === 'fulfilled') {
+      const data = baselineResult.value;
+      setOutput(elements.baselineOutput, data.message, `${data.provider || 'primary'} · ${data.model || 'Qwythos'}`);
+    } else {
+      setOutput(elements.baselineOutput, `ROUTE ERROR · ${baselineResult.reason.message}`);
+    }
   }
 
   if (candidateResult.status === 'fulfilled') {
@@ -138,20 +172,25 @@ async function runAudition(event) {
     setOutput(
       elements.candidateOutput,
       data.message,
-      `${data.provider || 'candidate'} · ${data.model || 'Inkling-Small'} · effort ${data.reasoning_effort || candidateBody.reasoning_effort}`,
+      `${data.provider || 'candidate'} · ${data.model || 'Inkling-Small'} · ${data.execution_path || 'audition'} · effort ${data.reasoning_effort || candidateBody.reasoning_effort}`,
     );
   } else {
     setOutput(elements.candidateOutput, `AUDITION ERROR · ${candidateResult.reason.message}`);
   }
 
-  const both = baselineResult.status === 'fulfilled' && candidateResult.status === 'fulfilled';
+  const candidateSucceeded = candidateResult.status === 'fulfilled';
+  const baselineSucceeded = !plan.run_baseline || baselineResult.status === 'fulfilled';
   setStatus(
-    both
-      ? 'AUDITION COMPLETE · compare the voices; no primary-model promotion occurred.'
-      : 'AUDITION PARTIAL · one route failed; the primary Larkshine route was not changed.',
-    both ? 'ready' : 'blocked',
+    candidateSucceeded && plan.mode === 'candidate-only'
+      ? 'INKLING AUDITION COMPLETE · candidate-only result received; Qwythos primary remains unchanged.'
+      : candidateSucceeded && baselineSucceeded
+        ? 'AUDITION COMPLETE · compare the voices; no primary-model promotion occurred.'
+        : candidateSucceeded
+          ? 'AUDITION PARTIAL · Inkling answered; the local Qwythos baseline failed.'
+          : 'AUDITION FAILED · Inkling candidate route did not return a result.',
+    candidateSucceeded ? 'ready' : 'blocked',
   );
-  elements.run.disabled = false;
+  elements.run.disabled = !availability.candidate_ready;
 }
 
 if (elements.form) {

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { ADMISSIBILITY_RESIDUAL_SCHEMA } from '../src/admissibility-residual.js';
 import { createInitialPremaqc, runFeedbackCycle } from '../src/feedback-loop.js';
 import { createTransformationRequest } from '../src/transformation-request.js';
 import {
@@ -45,7 +46,7 @@ function deepTimeRecord(id, lambda, values, quality = .9) {
   };
 }
 
-test('Ask control is twined to cusp observation and later PREMAQC response', async () => {
+test('Ask control is twined to cusp observation, later PREMAQC response, and a separate admissibility residual', async () => {
   const ask = await request();
   const cycle = await feedback();
   const receipt = await runRequestedTransformationCircuit({
@@ -57,6 +58,12 @@ test('Ask control is twined to cusp observation and later PREMAQC response', asy
   assert.equal(receipt.cusp.observation_packet.input.intention, .4);
   assert.equal(receipt.cusp.observation_packet.input.structure, -1);
   assert.equal(receipt.measured_response.response.receipt_id, cycle.premaqc_after.receipt_id);
+  assert.equal(receipt.admissibility_residual.schema, ADMISSIBILITY_RESIDUAL_SCHEMA);
+  assert.equal(receipt.admissibility_residual.mode, 'transformation-response');
+  assert.equal(receipt.admissibility_residual.source.response_id, receipt.measured_response.response_id);
+  assert.equal(receipt.admissibility_residual.authority.zero_residual_is_fulfilment, false);
+  assert.equal(receipt.authority.admissibility_projection_is_observed_transformation, false);
+  assert.equal(receipt.authority.admissibility_within_corridor_is_fulfilment, false);
   assert.equal(receipt.authority.ask_is_control_not_observation, true);
   assert.equal(receipt.authority.success_declared_by_request, false);
   assert.equal(receipt.authority.intention_is_premaqc_agency, false);

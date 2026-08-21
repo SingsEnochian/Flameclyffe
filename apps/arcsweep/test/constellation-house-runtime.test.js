@@ -28,6 +28,8 @@ function liveFetch(mismatched = false) {
       const body = JSON.parse(options.body);
       assert.equal(body.metadata.world_id, 'terra-prime');
       assert.equal(body.metadata.world_context.schema, 'arcsweep.runtime-world-context/v1');
+      assert.match(body.message, /^ARCSWEEP ACTIVE WORLD RUNTIME CONTEXT/);
+      assert.match(body.message, /World: Terra Prime/);
       return response({ flame_id: mismatched ? 'uial' : 'lioreal', provider: 'openai', model: 'gpt-4o', message: '[CONTINUITY] Current surname: al’Valari.', cited_sources: ['canon-overlay'], world_context: body.metadata.world_context });
     }
     throw new Error(`Unexpected fetch: ${url}`);

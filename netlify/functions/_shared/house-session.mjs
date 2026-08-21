@@ -3,7 +3,8 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 const PROD_COOKIE = '__Host-hearthgate_session';
 const DEV_COOKIE = 'hearthgate_session';
 const VERSION = 1;
-const DEFAULT_TTL_SECONDS = 8 * 60 * 60;
+const DEFAULT_TTL_SECONDS = 30 * 24 * 60 * 60;
+const MAX_TTL_SECONDS = 90 * 24 * 60 * 60;
 
 function secretEqual(actual, expected) {
   if (!actual || !expected) return false;
@@ -42,7 +43,7 @@ function bearer(request) {
 export function issueHouseSession(env, now = Date.now()) {
   const secret = signingSecret(env);
   if (!secret) throw new Error('House Runtime session signing is not configured.');
-  const ttl = Math.max(300, Math.min(Number(env.get('HOUSE_SESSION_TTL_SECONDS')) || DEFAULT_TTL_SECONDS, 24 * 60 * 60));
+  const ttl = Math.max(300, Math.min(Number(env.get('HOUSE_SESSION_TTL_SECONDS')) || DEFAULT_TTL_SECONDS, MAX_TTL_SECONDS));
   const claims = { v: VERSION, role: 'steward', iat: Math.floor(now / 1000), exp: Math.floor(now / 1000) + ttl, nonce: randomBytes(18).toString('base64url') };
   const payload = encode(JSON.stringify(claims));
   return { token: `${payload}.${signature(payload, secret)}`, claims, ttl };

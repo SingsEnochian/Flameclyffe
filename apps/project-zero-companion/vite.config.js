@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+const companionBase = process.env.PROJECT_ZERO_BASE || '/Flameclyffe/project-zero-companion/';
+
 export default defineConfig({
   plugins: [react()],
   root: 'apps/project-zero-companion',
-  base: '/Flameclyffe/project-zero-companion/',
+  base: companionBase,
   build: {
     outDir: '../../dist/project-zero-companion',
     emptyOutDir: true,
