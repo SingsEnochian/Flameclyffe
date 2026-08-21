@@ -25,10 +25,28 @@ async function sessionRequest(options = {}, fetchImpl = fetch) {
   return { response, data };
 }
 
-export async function restoreHouseRuntimeSession(fetchImpl = fetch) {
+async function signedInSupabaseAccessToken() {
   try {
-    const { response } = await sessionRequest({}, fetchImpl);
-    return response.ok ? HOUSE_COOKIE_SESSION : '';
+    const { getKelyranSupabase } = await import('./kelyran-supabase.js');
+    const client = await getKelyranSupabase();
+    const { data, error } = await client.auth.getSession();
+    if (error) return '';
+    return data.session?.access_token || '';
+  } catch { return ''; }
+}
+
+export async function restoreHouseRuntimeSession(fetchImpl = fetch, accessTokenProvider = signedInSupabaseAccessToken) {
+  try {
+    const current = await sessionRequest({}, fetchImpl);
+    if (current.response.ok) return HOUSE_COOKIE_SESSION;
+    const accessToken = String(await accessTokenProvider() || '').trim();
+    if (!accessToken) return '';
+    const exchanged = await sessionRequest({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ supabase_access_token: accessToken }),
+    }, fetchImpl);
+    return exchanged.response.ok ? HOUSE_COOKIE_SESSION : '';
   } catch { return ''; }
 }
 

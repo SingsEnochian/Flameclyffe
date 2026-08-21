@@ -1,10 +1,12 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 const PROD_COOKIE = '__Host-hearthgate_session';
 const DEV_COOKIE = 'hearthgate_session';
 const VERSION = 1;
 const DEFAULT_TTL_SECONDS = 30 * 24 * 60 * 60;
 const MAX_TTL_SECONDS = 90 * 24 * 60 * 60;
+const DEFAULT_SUPABASE_URL = 'https://rufrmjyusalnifpegllj.supabase.co';
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_z69-aAbQvzFFDRk4SHDYrQ_FuqirkLD';
 
 function secretEqual(actual, expected) {
   if (!actual || !expected) return false;
@@ -17,11 +19,22 @@ const encode = (value) => Buffer.from(value).toString('base64url');
 const decode = (value) => Buffer.from(value, 'base64url').toString('utf8');
 
 function signingSecret(env) {
-  return env.get('HOUSE_SESSION_SECRET') || env.get('ARCSWEEP_RUNTIME_TOKEN');
+  const explicit = env.get('HOUSE_SESSION_SECRET') || env.get('ARCSWEEP_RUNTIME_TOKEN');
+  if (explicit) return explicit;
+  const hostedRoot = env.get('HFTOKEN') || env.get('HF_TOKEN');
+  if (!hostedRoot) return null;
+  return createHash('sha256').update(`hearthgate-house-session/v1\0${hostedRoot}`).digest('base64url');
 }
 
 function stewardCredential(env) {
   return env.get('ARCSWEEP_STEWARD_KEY') || env.get('ARCSWEEP_RUNTIME_TOKEN');
+}
+
+function stewardUserIds(env) {
+  return new Set(String(env.get('HOUSE_STEWARD_USER_IDS') || env.get('HOUSE_STEWARD_USER_ID') || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean));
 }
 
 function signature(payload, secret) {
@@ -38,6 +51,29 @@ function cookiesFrom(header = '') {
 function bearer(request) {
   const header = request.headers.get('authorization') || '';
   return header.startsWith('Bearer ') ? header.slice(7) : '';
+}
+
+export async function validateSupabaseStewardToken(accessToken, env, fetchImpl = fetch) {
+  const token = String(accessToken || '').trim();
+  const allowed = stewardUserIds(env);
+  if (!token || allowed.size === 0) return false;
+  const baseUrl = String(env.get('SUPABASE_URL') || DEFAULT_SUPABASE_URL).replace(/\/$/, '');
+  const publishableKey = env.get('SUPABASE_PUBLISHABLE_KEY') || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
+  try {
+    const response = await fetchImpl(`${baseUrl}/auth/v1/user`, {
+      method: 'GET',
+      headers: {
+        apikey: publishableKey,
+        authorization: `Bearer ${token}`,
+      },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!response.ok) return false;
+    const user = await response.json().catch(() => null);
+    return Boolean(user?.id && allowed.has(String(user.id)));
+  } catch {
+    return false;
+  }
 }
 
 export function issueHouseSession(env, now = Date.now()) {
