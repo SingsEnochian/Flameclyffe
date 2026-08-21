@@ -41,11 +41,11 @@ export const PLUGIN_MANIFESTS = [
   {
     id: 'deep-observer-bridge',
     name: 'DEEP Observer Bridge Adapter',
-    status: 'planned',
-    purpose: 'Expose Flameclyffe DEEP vectors, Observer state, condition sets, and sigil signatures through a reversible integration seam.',
-    permissions: ['local-storage', 'supabase-sync-optional'],
-    emits: ['deep_state_update', 'observer_condition_set', 'sigil_signature'],
-    listens: ['file_anchor', 'story_shard', 'altar_working'],
+    status: 'active-companion-service',
+    purpose: 'Translate the existing Flameclyffe DEEP Observer vector pulse into bounded, replayable Companion bridge receipts and typed socket envelopes. This does not claim Project Zero consumed or adopted the event.',
+    permissions: ['local-storage'],
+    emits: ['deep_state_update'],
+    listens: ['deep-observer:update', 'runaDeepObserverState:restore'],
   },
   {
     id: 'writer-room-rail',
