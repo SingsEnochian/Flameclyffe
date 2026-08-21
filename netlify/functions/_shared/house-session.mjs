@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 const PROD_COOKIE = '__Host-hearthgate_session';
 const DEV_COOKIE = 'hearthgate_session';
@@ -19,7 +19,11 @@ const encode = (value) => Buffer.from(value).toString('base64url');
 const decode = (value) => Buffer.from(value, 'base64url').toString('utf8');
 
 function signingSecret(env) {
-  return env.get('HOUSE_SESSION_SECRET') || env.get('ARCSWEEP_RUNTIME_TOKEN');
+  const explicit = env.get('HOUSE_SESSION_SECRET') || env.get('ARCSWEEP_RUNTIME_TOKEN');
+  if (explicit) return explicit;
+  const hostedRoot = env.get('HFTOKEN') || env.get('HF_TOKEN');
+  if (!hostedRoot) return null;
+  return createHash('sha256').update(`hearthgate-house-session/v1\0${hostedRoot}`).digest('base64url');
 }
 
 function stewardCredential(env) {
