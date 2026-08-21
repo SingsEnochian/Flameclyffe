@@ -5,31 +5,26 @@ import FlameChannel from './FlameChannel.jsx';
 import { applyProjectZeroTheme, loadProjectZeroTheme } from './themeEngine.js';
 import './extensions.css';
 
-function CoreExtensions() {
+function CompanionBridgeExtensions() {
   const [theme, setTheme] = useState(() => {
     const current = loadProjectZeroTheme();
     applyProjectZeroTheme(current);
     return current;
   });
 
-  return (
-    <>
-      <FlameChannel />
-      <ThemeStudio theme={theme} onChange={setTheme} />
-    </>
-  );
+  return <><FlameChannel /><ThemeStudio theme={theme} onChange={setTheme} /></>;
 }
 
 function mount() {
   const shell = document.querySelector('.shell');
-  if (!shell || document.querySelector('[data-project-zero-core-extensions]')) return false;
+  if (!shell || document.querySelector('[data-project-zero-companion-bridge]')) return false;
   const host = document.createElement('div');
-  host.dataset.projectZeroCoreExtensions = 'true';
-  host.className = 'project-zero-core-extensions';
+  host.dataset.projectZeroCompanionBridge = 'true';
+  host.className = 'project-zero-companion-bridge';
   const hero = shell.querySelector('.hero');
   if (hero?.nextSibling) shell.insertBefore(host, hero.nextSibling);
   else shell.prepend(host);
-  createRoot(host).render(<CoreExtensions />);
+  createRoot(host).render(<CompanionBridgeExtensions />);
   return true;
 }
 
