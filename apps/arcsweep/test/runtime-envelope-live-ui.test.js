@@ -46,9 +46,9 @@ test('Commons runtime feedback view keeps receipts visible and escapes visible p
 });
 
 test('Arcsweep mounts runtime envelope live read after House Commons', async () => {
-  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  const commons = html.indexOf('./src/house-commons-chat-v3.js');
-  const liveRead = html.indexOf('./src/runtime-envelope-live-ui.js');
+  const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
+  const commons = manifest.indexOf('./house-commons-chat-v3.js');
+  const liveRead = manifest.indexOf('./runtime-envelope-live-ui.js');
   assert.ok(commons >= 0, 'House Commons v3 must be mounted');
   assert.ok(liveRead > commons, 'Runtime envelope live read must mount after House Commons v3');
 });
