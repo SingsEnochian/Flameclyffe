@@ -1,0 +1,35 @@
+name: Project Zero Core Gate
+
+on:
+  pull_request:
+    paths:
+      - 'apps/project-zero-companion/**'
+      - '.github/workflows/project-zero-core.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-build:
+    name: Test and build Project Zero
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Pin npm 11.16.0
+        run: npm install --global npm@11.16.0
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run Project Zero contract tests
+        run: node --test apps/project-zero-companion/test/*.test.js
+      - name: Build Project Zero
+        run: npm run project-zero:build
