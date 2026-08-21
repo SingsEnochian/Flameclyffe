@@ -62,7 +62,7 @@ function roomGridMarkup(active) {
 }
 
 function renderShell(shell) {
-  if (!media.matches) return;
+  if (!media.matches || !app?.querySelector('.app-shell')) return;
   const active = activeRoomId();
   const moreActive = !PINNED_ROOMS.some((room) => room.id === active);
   const houseglassAvailable = Boolean(document.querySelector('.sidebar [data-action="houseglass-toggle"]'));
@@ -81,14 +81,19 @@ function renderShell(shell) {
   `;
 }
 
+function clearShell(shell) {
+  shell?.remove();
+  document.documentElement.classList.remove('mobile-room-menu-open');
+  document.body.classList.remove('mobile-room-menu-open');
+  menuOpen = false;
+}
+
 function ensureShell() {
   scheduled = false;
   let shell = document.querySelector('#arcsweep-mobile-navigation');
-  if (!media.matches) {
-    shell?.remove();
-    document.documentElement.classList.remove('mobile-room-menu-open');
-    document.body.classList.remove('mobile-room-menu-open');
-    menuOpen = false;
+  const applicationReady = Boolean(app?.querySelector('.app-shell'));
+  if (!media.matches || !applicationReady) {
+    clearShell(shell);
     return;
   }
   if (!shell) {

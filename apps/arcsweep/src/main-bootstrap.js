@@ -2,16 +2,36 @@ const app = document.querySelector('#app');
 const params = new URLSearchParams(location.search);
 const safeBoot = params.get('safe') === '1';
 
+const safeBootMarkup = () => safeBoot ? '' : `
+  <div style="margin-top:1.25rem;display:grid;gap:.55rem;justify-items:start">
+    <button id="arcsweep-safe-boot" type="button" style="min-height:48px;min-width:12rem;padding:.75rem 1rem;border:1px solid #d8b56a;border-radius:.75rem;background:#1a211e;color:#f3d48e;font:700 1rem/1.2 system-ui,sans-serif;touch-action:manipulation;cursor:pointer;pointer-events:auto;position:relative;z-index:2">Open with Safe Boot →</button>
+    <small style="opacity:.72;line-height:1.45">Safe Boot leaves your existing local state untouched and starts with a temporary in-memory state.</small>
+  </div>`;
+
+function openSafeBoot() {
+  const target = new URL(location.href);
+  target.searchParams.set('safe', '1');
+  location.assign(target.toString());
+}
+
+function installSafeBootAction() {
+  const button = document.querySelector('#arcsweep-safe-boot');
+  if (!button || button.dataset.safeBootBound === '1') return;
+  button.dataset.safeBootBound = '1';
+  button.addEventListener('click', openSafeBoot);
+}
+
 if (app && !app.hasChildNodes()) {
   app.innerHTML = `
-    <main style="min-height:100vh;display:grid;place-items:center;padding:2rem;background:#0b0f0e;color:#f0eadb;font-family:system-ui,sans-serif">
-      <section style="max-width:42rem">
+    <main data-arcsweep-recovery="boot" style="min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:2rem;background:#0b0f0e;color:#f0eadb;font-family:system-ui,sans-serif;position:relative;z-index:1;pointer-events:auto">
+      <section style="max-width:42rem;width:100%">
         <p style="letter-spacing:.12em;text-transform:uppercase;opacity:.72">Hearthgate · Arcsweep</p>
         <h1 style="font-size:clamp(2rem,6vw,4rem);margin:.25rem 0 1rem">Opening the house…</h1>
         <p id="arcsweep-boot-status" style="line-height:1.6;opacity:.86">${safeBoot ? 'Safe Boot active. Opening without reading or overwriting saved local state.' : 'Loading local state. Runtime services may join after the interface is ready.'}</p>
-        ${safeBoot ? '' : '<p style="margin-top:1.25rem"><a href="?safe=1" style="color:#d8b56a;font-weight:700">Open with Safe Boot →</a><br><small style="opacity:.72">Safe Boot leaves your existing local state untouched and starts with a temporary in-memory state.</small></p>'}
+        ${safeBootMarkup()}
       </section>
     </main>`;
+  installSafeBootAction();
 }
 
 const status = (message) => {
@@ -90,14 +110,15 @@ try {
   console.error('[Arcsweep] bootstrap failed', error);
   if (app) {
     app.innerHTML = `
-      <main style="min-height:100vh;display:grid;place-items:center;padding:2rem;background:#0b0f0e;color:#f0eadb;font-family:system-ui,sans-serif">
-        <section style="max-width:46rem">
+      <main data-arcsweep-recovery="error" style="min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:2rem;background:#0b0f0e;color:#f0eadb;font-family:system-ui,sans-serif;position:relative;z-index:1;pointer-events:auto">
+        <section style="max-width:46rem;width:100%">
           <p style="letter-spacing:.12em;text-transform:uppercase;opacity:.72">Hearthgate · Arcsweep</p>
           <h1 style="font-size:clamp(2rem,6vw,4rem);margin:.25rem 0 1rem">The house did not finish opening.</h1>
           <p style="line-height:1.6">Startup failed visibly instead of spinning forever. ${safeBoot ? 'Safe Boot was active, so saved local state was not involved.' : 'Try Safe Boot to isolate the saved local state without deleting it.'}</p>
-          ${safeBoot ? '' : '<p><a href="?safe=1" style="color:#d8b56a;font-weight:700">Open with Safe Boot →</a></p>'}
+          ${safeBootMarkup()}
           <pre style="white-space:pre-wrap;overflow-wrap:anywhere;padding:1rem;background:#111816;border:1px solid #34443e;border-radius:.75rem">${String(error?.message || error).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}</pre>
         </section>
       </main>`;
+    installSafeBootAction();
   }
 }
