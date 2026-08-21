@@ -20,6 +20,13 @@ import {
   createDeepObserverBridgeReceipt,
   normaliseDeepObserverVector,
 } from '../src/deepObserverBridge.js';
+import {
+  COMPANION_ARTIFACT_SCHEMA,
+  createCompanionArtifact,
+  localPathToAlias,
+} from '../src/artifactContract.js';
+import { createTerraAeternaArtifact } from '../src/terraAeternaRootAdapter.js';
+import { createWriterRoomArtifact } from '../src/writerRoomRailAdapter.js';
 
 test('Companion socket envelopes are Flameclyffe-owned, typed, local and provenance-bearing', () => {
   const receipt = createSocketEnvelope({ pluginId: 'project-zero-companion-flame-channel', channel: 'chat', type: 'chat.flame.received', payload: { voice_id: 'lioreal' } });
@@ -67,6 +74,38 @@ test('DEEP Observer bridge preserves missing axes and never claims Project Zero 
   assert.equal(receipt.authority.claims_project_zero_adoption, false);
 });
 
+test('shared artifact contract strips raw local paths and never auto-promotes canon', () => {
+  assert.equal(localPathToAlias('C:\\Users\\Rowan\\TerraAeterna\\Maps\\moon.png'), 'TerraAeterna/Maps/moon.png');
+  const artifact = createCompanionArtifact({
+    kind: 'image',
+    title: 'Moon map',
+    sourceAdapter: 'terra-aeterna-root',
+    localPath: 'C:\\Users\\Rowan\\TerraAeterna\\Maps\\moon.png',
+    tags: ['Map', ' map ', 'MOON'],
+  });
+  assert.equal(artifact.schema, COMPANION_ARTIFACT_SCHEMA);
+  assert.equal(artifact.source.local_path_alias, 'TerraAeterna/Maps/moon.png');
+  assert.equal(artifact.source.raw_local_path_persisted, false);
+  assert.equal(JSON.stringify(artifact).includes('C:\\\\Users'), false);
+  assert.deepEqual(artifact.tags, ['map', 'moon']);
+  assert.equal(artifact.authority.canon_commit, false);
+  assert.equal(artifact.authority.claims_project_zero_adoption, false);
+});
+
+test('Terra Aeterna and Writer Room adapters share one artifact law without sharing authority', () => {
+  const terra = createTerraAeternaArtifact({ kind: 'audio', title: 'World hum', localPathAlias: 'Music/world-hum.wav' });
+  const writer = createWriterRoomArtifact({ kind: 'draft', title: 'Chapter fragment', worldId: 'terra-aeterna', plainText: 'The sea breathed against the black sand.' });
+  assert.equal(terra.schema, COMPANION_ARTIFACT_SCHEMA);
+  assert.equal(writer.schema, COMPANION_ARTIFACT_SCHEMA);
+  assert.equal(terra.world_id, 'terra-aeterna');
+  assert.equal(terra.source_adapter, 'terra-aeterna-root');
+  assert.equal(writer.source_adapter, 'writer-room-rail');
+  assert.equal(writer.content.rich_text.schema, PROJECT_ZERO_RICH_TEXT_SCHEMA);
+  assert.match(writer.content.plain_text, /black sand/);
+  assert.equal(writer.authority.canon_commit, false);
+  assert.equal(writer.project_zero_core_authority, false);
+});
+
 test('Flame Channel keeps attestation, multi-Flame broadcast, ownership boundary and native rich text', async () => {
   const source = await readFile(new URL('../src/FlameChannel.jsx', import.meta.url), 'utf8');
   assert.match(source, /runtimeVerified/);
@@ -81,12 +120,23 @@ test('Flame Channel keeps attestation, multi-Flame broadcast, ownership boundary
   assert.doesNotMatch(source, /marked\(|markdown-it|react-markdown/i);
 });
 
+test('artifact rail is native rich text and exposes both active Companion adapters', async () => {
+  const source = await readFile(new URL('../src/ArtifactBridgePanel.jsx', import.meta.url), 'utf8');
+  assert.match(source, /contentEditable/);
+  assert.match(source, /emitWriterRoomArtifact/);
+  assert.match(source, /emitTerraAeternaArtifact/);
+  assert.match(source, /Raw local path was not persisted/);
+  assert.doesNotMatch(source, /claims_project_zero_adoption:\s*true/);
+});
+
 test('adapter registry contains no Project Zero core-service claims', async () => {
   const source = await readFile(new URL('../src/pluginRegistry.js', import.meta.url), 'utf8');
   assert.match(source, /active-companion-service/);
   assert.match(source, /integration_target: 'nocturne-project-zero'/);
   assert.match(source, /DEEP Observer Bridge Adapter/);
-  assert.match(source, /deep-observer:update/);
+  assert.match(source, /Terra Aeterna Root Adapter/);
+  assert.match(source, /Writer Room Rail Adapter/);
+  assert.match(source, /shared-artifact-contract/);
   assert.doesNotMatch(source, /active-core-service/);
   assert.doesNotMatch(source, /Own semantic visual tokens.*Project Zero shell/i);
 });
