@@ -1,20 +1,20 @@
-const SOCKET_SCHEMA = 'project-zero.socket-envelope/v1';
+const SOCKET_SCHEMA = 'flameclyffe.project-zero-companion.socket-envelope/v1';
 const bus = new EventTarget();
 
-function uid(prefix = 'pz') {
+function uid(prefix = 'pz-companion') {
   return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`}`;
 }
 
 export function createSocketEnvelope({
-  pluginId = 'project-zero-core',
-  channel = 'core',
+  pluginId = 'flameclyffe-project-zero-companion',
+  channel = 'bridge',
   type,
   payload = {},
   requestId = null,
-  projectId = 'project-zero',
+  projectId = 'project-zero-external',
   createdAt = new Date().toISOString(),
 } = {}) {
-  if (!String(type || '').trim()) throw new Error('Project Zero socket envelope requires a type.');
+  if (!String(type || '').trim()) throw new Error('Project Zero Companion socket envelope requires a type.');
   return Object.freeze({
     schema: SOCKET_SCHEMA,
     envelope_id: uid('socket'),
@@ -26,7 +26,9 @@ export function createSocketEnvelope({
     payload: structuredClone(payload),
     created_at: createdAt,
     provenance: {
-      transport: 'project-zero-local-eventtarget',
+      owner: 'flameclyffe',
+      integration_target: 'nocturne-project-zero',
+      transport: 'flameclyffe-project-zero-companion-local-eventtarget',
       local_only: true,
     },
   });
@@ -36,7 +38,7 @@ export function publishSocketEnvelope(input) {
   const envelope = input?.schema === SOCKET_SCHEMA ? input : createSocketEnvelope(input);
   bus.dispatchEvent(new CustomEvent(envelope.channel, { detail: envelope }));
   bus.dispatchEvent(new CustomEvent('*', { detail: envelope }));
-  globalThis.dispatchEvent?.(new CustomEvent('project-zero:socket', { detail: envelope }));
+  globalThis.dispatchEvent?.(new CustomEvent('project-zero-companion:socket', { detail: envelope }));
   return envelope;
 }
 
