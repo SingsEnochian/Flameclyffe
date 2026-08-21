@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import ThemeStudio from './ThemeStudio.jsx';
 import FlameChannel from './FlameChannel.jsx';
+import ArtifactBridgePanel from './ArtifactBridgePanel.jsx';
 import { applyProjectZeroTheme, loadProjectZeroTheme } from './themeEngine.js';
 import './deepObserverBridge.js';
 import './extensions.css';
@@ -13,7 +14,7 @@ function CompanionBridgeExtensions() {
     return current;
   });
 
-  return <><FlameChannel /><ThemeStudio theme={theme} onChange={setTheme} /></>;
+  return <><FlameChannel /><ArtifactBridgePanel /><ThemeStudio theme={theme} onChange={setTheme} /></>;
 }
 
 function mount() {
