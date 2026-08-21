@@ -1,4 +1,5 @@
 import { createAskPacket, diagnosticAcknowledgement } from './bifrost-protocol-stack.js';
+import { createProjectionAdmissibilityResidual } from './admissibility-residual.js';
 import {
   chooseProjectionRoute,
   classifyProjectionState,
@@ -196,6 +197,10 @@ export async function compileHelmReceipt({
   });
 
   const projectionState = worstRouteState(route, directEdge);
+  const admissibilityResidual = await createProjectionAdmissibilityResidual({
+    projectionState,
+    generatedAt: timestamp.toISOString(),
+  });
   const diagnostic = diagnosticAcknowledgement({
     reason: route ? 'helm route received' : routeError || operatorGate.blocked_by.join(', '),
     recoverable: Boolean(route && source.address_text === target.address_text),
@@ -253,6 +258,7 @@ export async function compileHelmReceipt({
     route_error: routeError,
     route_inspection: inspection,
     projection_state: projectionState,
+    admissibility_residual: admissibilityResidual,
     deep_time: deepTime,
     graph_snapshot: graphSnapshot,
     transport,
@@ -264,6 +270,8 @@ export async function compileHelmReceipt({
       route_gate_admitted: canRoute,
       transport_delivery_is_fulfilment: false,
       ask_acceptance_is_observed_transformation: false,
+      projection_residual_is_fulfilment: false,
+      route_envelope_admission_is_observed_transformation: false,
       physical_travel_claimed: false,
     }),
   });
