@@ -10,6 +10,8 @@ import './continuity-replay-sidecar.js';
 import './continuity-deep-theory-sidecar.js';
 import './flame-continuity-sidecar.js';
 import './semantic-projection-sidecar.js';
+import './constellation-reasoning-toggle-sidecar.js';
+import './constellation-rationale-sidecar.js';
 import './theory-review-advisor-sidecar.js';
 import './deep-time-trajectory-sidecar.js';
 import './runa-trajectory-sidecar.js';
