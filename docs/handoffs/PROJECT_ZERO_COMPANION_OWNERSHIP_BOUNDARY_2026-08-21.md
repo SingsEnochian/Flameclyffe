@@ -2,7 +2,7 @@
 
 ## Decision
 
-Project Zero is Nocturne's project.
+**Project Zero is Nocturne's project.**
 
 Flameclyffe does not own or redefine Project Zero's core, project-management surface, socket/plugin architecture, native themes, persistence, instruments, UI, or release decisions.
 
@@ -12,15 +12,7 @@ The code in `apps/project-zero-companion/` is the **Flameclyffe Project Zero Com
 
 `Nocturne / Project Zero ⇄ agreed connector ⇄ Flameclyffe / Project Zero Companion`
 
-Companion responsibilities may include:
-
-- consented local metadata and folder bindings
-- reversible bridge events
-- Flameclyffe House Runtime chat responses
-- native rich-text Companion documents
-- theme-interoperability tokens
-- typed Companion socket envelopes
-- adapter-side DEEP / Writer Room / Altar / asset events
+Companion responsibilities may include consented local metadata and folder bindings, reversible bridge events, Flameclyffe House Runtime chat responses, native rich-text Companion documents, theme-interoperability tokens, typed Companion socket envelopes, and adapter-side DEEP / Writer Room / Altar / asset events.
 
 Project Zero decides whether and how to consume those capabilities.
 
@@ -38,11 +30,15 @@ Current schemas include:
 
 Receipts identify `bridge_owner: flameclyffe` / `owner: flameclyffe` and `integration_target: nocturne-project-zero` where applicable.
 
+The Companion adapter registry uses `active-companion-service`; `active-core-service` is prohibited by regression test.
+
 ## CI law
 
 The former `Project Zero Core Gate` name is retired.
 
 The active workflow is **Project Zero Companion Bridge Gate** and tests/builds only the Flameclyffe Companion bridge.
+
+Latest ownership-boundary seal at this handoff: **Project Zero Companion Bridge Gate #5 ✅** on `dda6e9591756e16ca7e02636da9f27fac2be3643`.
 
 ## Boundary equations
 
