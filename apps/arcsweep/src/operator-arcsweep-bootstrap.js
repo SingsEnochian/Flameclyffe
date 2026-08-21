@@ -1,35 +1,35 @@
-const MODULES = [
-  './observer-bridge.js',
-  './feedback-queue-bootstrap.js',
-  './rich-text-core.js',
-  './main.js',
-  './world-registry-persistence-sidecar.js',
-  './terra-prime-waking-world-sidecar.js',
-  './instrument-sidecars.js',
-  './react-ion-helm-sidecar.js',
-  './glyph-drift-observatory-sidecar.js',
-  './continuity-evidence-sidecar.js',
-  './continuity-experiment-sidecar.js',
-  './constellation-runtime-adapter.js',
-  './model-presence-bus.js',
-  './model-presence-live-ui.js',
-  './runtime-presence-diagnostics.js',
-  './runtime-integration-bootstrap.js',
-  './house-commons-chat-v3.js',
-  './runtime-envelope-live-ui.js',
-  './canon-intelligence-live-ui.js',
-  './constellation-presence.js',
-  './runtime-world-presence.js',
-  './self-authorship-panel.js',
-  './script-cortex-controls.js',
-  './scene-cognition-ui.js',
-  './worldseed-live-ui.js',
-  './possible-worlds-live-ui.js',
-  './worldseed-package-live-ui.js',
-  './worldseed-threshold-live-ui.js',
-  './worldseed-braid-live-ui.js',
-  './worldseed-seed-library-live-ui.js',
-  './canon-web-link-sidecar.js',
+const MODULE_LOADERS = [
+  () => import('./observer-bridge.js'),
+  () => import('./feedback-queue-bootstrap.js'),
+  () => import('./rich-text-core.js'),
+  () => import('./main.js'),
+  () => import('./world-registry-persistence-sidecar.js'),
+  () => import('./terra-prime-waking-world-sidecar.js'),
+  () => import('./instrument-sidecars.js'),
+  () => import('./react-ion-helm-sidecar.js'),
+  () => import('./glyph-drift-observatory-sidecar.js'),
+  () => import('./continuity-evidence-sidecar.js'),
+  () => import('./continuity-experiment-sidecar.js'),
+  () => import('./constellation-runtime-adapter.js'),
+  () => import('./model-presence-bus.js'),
+  () => import('./model-presence-live-ui.js'),
+  () => import('./runtime-presence-diagnostics.js'),
+  () => import('./runtime-integration-bootstrap.js'),
+  () => import('./house-commons-chat-v3.js'),
+  () => import('./runtime-envelope-live-ui.js'),
+  () => import('./canon-intelligence-live-ui.js'),
+  () => import('./constellation-presence.js'),
+  () => import('./runtime-world-presence.js'),
+  () => import('./self-authorship-panel.js'),
+  () => import('./script-cortex-controls.js'),
+  () => import('./scene-cognition-ui.js'),
+  () => import('./worldseed-live-ui.js'),
+  () => import('./possible-worlds-live-ui.js'),
+  () => import('./worldseed-package-live-ui.js'),
+  () => import('./worldseed-threshold-live-ui.js'),
+  () => import('./worldseed-braid-live-ui.js'),
+  () => import('./worldseed-seed-library-live-ui.js'),
+  () => import('./canon-web-link-sidecar.js'),
 ];
 
 const ARCSWEEP_STORAGE_PREFIXES = ['arcsweep.', 'hearthgate.arcsweep.'];
@@ -85,11 +85,22 @@ function installOperatorBadge(profile, workspace, onExit) {
   const badge = document.createElement('aside');
   badge.id = 'arcsweep-operator-badge';
   badge.setAttribute('aria-label', 'Private Arcsweep operator workspace');
-  badge.innerHTML = `
-    <strong>${workspace.display_name}</strong>
-    <span>${workspace.variant_label}</span>
-    <button type="button">Return to Varutóra Gate</button>
-  `;
+
+  const title = document.createElement('strong');
+  title.textContent = workspace.display_name;
+  title.style.display = 'block';
+
+  const subtitle = document.createElement('span');
+  subtitle.textContent = workspace.variant_label;
+  subtitle.style.display = 'block';
+  subtitle.style.opacity = '.72';
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = 'Return to Varutóra Gate';
+  button.addEventListener('click', onExit);
+
+  badge.append(title, subtitle, button);
   Object.assign(badge.style, {
     position: 'fixed',
     zIndex: '99999',
@@ -104,10 +115,6 @@ function installOperatorBadge(profile, workspace, onExit) {
     boxShadow: '0 14px 50px rgba(0,0,0,.45)',
     font: '12px/1.35 system-ui, sans-serif',
   });
-  badge.querySelector('strong').style.display = 'block';
-  badge.querySelector('span').style.display = 'block';
-  badge.querySelector('span').style.opacity = '.72';
-  const button = badge.querySelector('button');
   Object.assign(button.style, {
     marginTop: '.55rem',
     width: '100%',
@@ -118,7 +125,6 @@ function installOperatorBadge(profile, workspace, onExit) {
     color: '#eef9ff',
     cursor: 'pointer',
   });
-  button.addEventListener('click', onExit);
   document.body.append(badge);
 }
 
@@ -150,7 +156,12 @@ export async function bootOperatorArcsweep({ supabase, profile, workspace, onExi
     app.innerHTML = '';
   }
 
-  for (const modulePath of MODULES) await import(modulePath);
+  try {
+    for (const loadModule of MODULE_LOADERS) await loadModule();
+  } catch (error) {
+    restoreStorage();
+    throw error;
+  }
 
   installOperatorBadge(profile, workspace, () => {
     restoreStorage();
