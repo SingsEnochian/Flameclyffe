@@ -22,5 +22,5 @@ test('mobile bar keeps four stable rooms and exposes every desktop room through 
   }
   assert.match(sidecar, /data-mobile-more/);
   assert.match(sidecar, /desktopRoomButtons\(\)\.map\(roomDescriptor\)/);
-  assert.match(sidecar, /min-height:\s*4\.65rem/);
+  assert.match(css, /min-height:\s*4\.65rem/);
 });
