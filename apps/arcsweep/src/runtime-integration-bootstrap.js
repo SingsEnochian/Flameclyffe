@@ -1,6 +1,5 @@
 import { buildRuntimeIntegrationEnvelope } from './runtime-integration-envelope.js';
 import {
-  initialiseRuntimeIntegrationEnvelope,
   installRuntimeIntegrationBridge,
   readRuntimeIntegrationEnvelope,
 } from './runtime-integration-bridge.js';
@@ -65,13 +64,13 @@ export async function bootstrapRuntimeIntegration({
     world,
     presenceRecords: readPresence() || [],
   });
-  initialiseRuntimeIntegrationEnvelope(envelope);
-  saveRuntimeIntegrationEnvelope(envelope, storage);
+
   installRuntimeIntegrationBridge({
     initialEnvelope: envelope,
     target,
     onChange: (next) => saveRuntimeIntegrationEnvelope(next, storage),
   });
+  saveRuntimeIntegrationEnvelope(envelope, storage);
 
   const ready = readRuntimeIntegrationEnvelope();
   if (target?.dispatchEvent && typeof CustomEvent !== 'undefined') {
