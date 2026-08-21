@@ -13,6 +13,7 @@
     "flames:bootstrap": "node scripts/bootstrap-local-flames.js",
     "fontforge:start": "node fontforge/server.js",
     "stage:starwell": "node scripts/stage-starwell.js",
+    "stage:project-zero-companion": "node scripts/stage-project-zero-companion.js",
     "prepare:assets": "node scripts/prepare-assets.js",
     "test": "node --test test/*.test.js",
     "electron:dev": "npm run prepare:assets && electron .",
