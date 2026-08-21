@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { authoriseHouseRequest, houseSessionCookie, issueHouseSession, validateStewardCredential, verifyHouseSessionToken } from '../../../netlify/functions/_shared/house-session.mjs';
+import {
+  authoriseHouseRequest,
+  houseSessionCookie,
+  issueHouseSession,
+  validateStewardCredential,
+  validateSupabaseStewardToken,
+  verifyHouseSessionToken,
+} from '../../../netlify/functions/_shared/house-session.mjs';
 import {
   HOUSE_COOKIE_SESSION,
   connectHouseRuntime,
@@ -30,6 +37,21 @@ test('sealed cookie authenticates House requests while bearer remains available 
   assert.equal(authoriseHouseRequest(new Request('https://house.example/api', { headers: { authorization: 'Bearer native-key' } }), runtime)?.mode, 'bearer');
 });
 
+test('Supabase web identity is accepted only for the configured Steward user', async () => {
+  const runtime = env({ HOUSE_STEWARD_USER_ID: 'steward-user' });
+  const accepted = await validateSupabaseStewardToken('signed-user-token', runtime, async (url, options) => {
+    assert.equal(url, 'https://rufrmjyusalnifpegllj.supabase.co/auth/v1/user');
+    assert.equal(options.headers.authorization, 'Bearer signed-user-token');
+    assert.ok(options.headers.apikey.startsWith('sb_publishable_'));
+    return new Response(JSON.stringify({ id: 'steward-user' }), { status: 200, headers: { 'content-type': 'application/json' } });
+  });
+  const refused = await validateSupabaseStewardToken('other-user-token', runtime, async () => (
+    new Response(JSON.stringify({ id: 'someone-else' }), { status: 200, headers: { 'content-type': 'application/json' } })
+  ));
+  assert.equal(accepted, true);
+  assert.equal(refused, false);
+});
+
 test('browser exchanges the credential and retains only the opaque cookie-session state', async () => {
   const calls = [];
   const fetchImpl = async (_url, options = {}) => {
@@ -41,6 +63,21 @@ test('browser exchanges the credential and retains only the opaque cookie-sessio
   await disconnectHouseRuntime({ hosted: true, storage: null, fetchImpl });
   assert.deepEqual(calls.map((call) => call.method || 'GET'), ['POST', 'GET', 'DELETE']);
   assert.ok(calls.every((call) => call.credentials === 'same-origin'));
+});
+
+test('hosted startup exchanges an existing Supabase login for the sealed House cookie', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (!options.method) return new Response(JSON.stringify({ connected: false }), { status: 401, headers: { 'content-type': 'application/json' } });
+    assert.equal(options.method, 'POST');
+    assert.deepEqual(JSON.parse(options.body), { supabase_access_token: 'supabase-access-token' });
+    return new Response(JSON.stringify({ connected: true, mode: 'supabase-auth' }), { status: 201, headers: { 'content-type': 'application/json' } });
+  };
+  const restored = await restoreHouseRuntimeSession(fetchImpl, async () => 'supabase-access-token');
+  assert.equal(restored, HOUSE_COOKIE_SESSION);
+  assert.deepEqual(calls.map(({ options }) => options.method || 'GET'), ['GET', 'POST']);
+  assert.ok(calls.every(({ options }) => options.credentials === 'same-origin'));
 });
 
 test('every House surface reads the same world-scoped observation endpoint', async () => {
