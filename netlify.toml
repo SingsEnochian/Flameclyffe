@@ -27,6 +27,20 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "microphone=(self), geolocation=(self), accelerometer=(self), gyroscope=(self)"
 
+# Canonical public Arcsweep route is /arcsweep/. The /apps/arcsweep path is a
+# repository/source path, so send old or guessed links to the deployed route.
+[[redirects]]
+  from = "/apps/arcsweep"
+  to = "/arcsweep/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/apps/arcsweep/*"
+  to = "/arcsweep/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/starwell/*"
   to = "/:splat"
