@@ -11,6 +11,7 @@ function uid(prefix = 'deep-bridge') {
 }
 
 function clamp01(value) {
+  if (value == null || (typeof value === 'string' && !value.trim())) return null;
   const n = Number(value);
   return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : null;
 }
