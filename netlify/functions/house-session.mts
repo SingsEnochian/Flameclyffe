@@ -1,4 +1,11 @@
-import { authoriseHouseRequest, clearHouseSessionCookies, houseSessionCookie, issueHouseSession, validateStewardCredential } from './_shared/house-session.mjs';
+import {
+  authoriseHouseRequest,
+  clearHouseSessionCookies,
+  houseSessionCookie,
+  issueHouseSession,
+  validateStewardCredential,
+  validateSupabaseStewardToken,
+} from './_shared/house-session.mjs';
 
 const json = (status, body, headers = {}) => new Response(JSON.stringify(body), {
   status,
@@ -19,10 +26,21 @@ export default async (request) => {
   if (request.method !== 'POST') return json(405, { error: 'GET, POST, or DELETE required.' });
   let body;
   try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
-  if (!validateStewardCredential(String(body.credential || ''), env)) return json(401, { error: 'Steward credential refused.' });
+
+  const supabaseAccessToken = String(body.supabase_access_token || '').trim();
+  const authorised = supabaseAccessToken
+    ? await validateSupabaseStewardToken(supabaseAccessToken, env)
+    : validateStewardCredential(String(body.credential || ''), env);
+  if (!authorised) return json(401, { error: 'Steward identity refused.' });
+
   try {
     const session = issueHouseSession(env);
-    return json(201, { connected: true, role: 'steward', expires_at: new Date(session.claims.exp * 1000).toISOString() }, { 'set-cookie': houseSessionCookie(request, session.token, session.ttl) });
+    return json(201, {
+      connected: true,
+      role: 'steward',
+      mode: supabaseAccessToken ? 'supabase-auth' : 'credential',
+      expires_at: new Date(session.claims.exp * 1000).toISOString(),
+    }, { 'set-cookie': houseSessionCookie(request, session.token, session.ttl) });
   } catch (error) { return json(503, { error: error.message }); }
 };
 
