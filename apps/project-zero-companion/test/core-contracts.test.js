@@ -15,6 +15,11 @@ import {
   escapeRichText,
   visibleTextToRichHtml,
 } from '../src/richText.js';
+import {
+  DEEP_OBSERVER_BRIDGE_SCHEMA,
+  createDeepObserverBridgeReceipt,
+  normaliseDeepObserverVector,
+} from '../src/deepObserverBridge.js';
 
 test('Companion socket envelopes are Flameclyffe-owned, typed, local and provenance-bearing', () => {
   const receipt = createSocketEnvelope({ pluginId: 'project-zero-companion-flame-channel', channel: 'chat', type: 'chat.flame.received', payload: { voice_id: 'lioreal' } });
@@ -49,6 +54,19 @@ test('visible response text becomes escaped native rich-text paragraphs', () => 
   assert.equal(escapeRichText('<script>'), '&lt;script&gt;');
 });
 
+test('DEEP Observer bridge preserves missing axes and never claims Project Zero consumption', () => {
+  const vector = normaliseDeepObserverVector({ P: 0.55, C: 1.2, E: -0.2, A: 0.654 });
+  assert.deepEqual(vector, { P: 0.55, C: 1, R: null, E: 0, M: null, A: 0.654, Q: null });
+  const receipt = createDeepObserverBridgeReceipt({ vector, source: 'deep-observer:update', observedAt: '2026-08-21T00:40:00-04:00' });
+  assert.equal(receipt.schema, DEEP_OBSERVER_BRIDGE_SCHEMA);
+  assert.equal(receipt.bridge_owner, 'flameclyffe');
+  assert.equal(receipt.integration_target, 'nocturne-project-zero');
+  assert.equal(receipt.project_zero_core_authority, false);
+  assert.equal(receipt.availability.Q, 'unavailable');
+  assert.equal(receipt.authority.claims_external_consumption, false);
+  assert.equal(receipt.authority.claims_project_zero_adoption, false);
+});
+
 test('Flame Channel keeps attestation, multi-Flame broadcast, ownership boundary and native rich text', async () => {
   const source = await readFile(new URL('../src/FlameChannel.jsx', import.meta.url), 'utf8');
   assert.match(source, /runtimeVerified/);
@@ -67,6 +85,8 @@ test('adapter registry contains no Project Zero core-service claims', async () =
   const source = await readFile(new URL('../src/pluginRegistry.js', import.meta.url), 'utf8');
   assert.match(source, /active-companion-service/);
   assert.match(source, /integration_target: 'nocturne-project-zero'/);
+  assert.match(source, /DEEP Observer Bridge Adapter/);
+  assert.match(source, /deep-observer:update/);
   assert.doesNotMatch(source, /active-core-service/);
   assert.doesNotMatch(source, /Own semantic visual tokens.*Project Zero shell/i);
 });
