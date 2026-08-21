@@ -68,11 +68,11 @@ test('runtime integration heartbeat carries presence and feedback through persis
 });
 
 test('Arcsweep startup mounts the runtime integration bootstrap after the model presence bus', async () => {
-  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  const bus = html.indexOf('./src/model-presence-bus.js');
-  const diagnostics = html.indexOf('./src/runtime-presence-diagnostics.js');
-  const bootstrap = html.indexOf('./src/runtime-integration-bootstrap.js');
-  const commons = html.indexOf('./src/house-commons-chat-v3.js');
+  const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
+  const bus = manifest.indexOf('./model-presence-bus.js');
+  const diagnostics = manifest.indexOf('./runtime-presence-diagnostics.js');
+  const bootstrap = manifest.indexOf('./runtime-integration-bootstrap.js');
+  const commons = manifest.indexOf('./house-commons-chat-v3.js');
   assert.ok(bus >= 0, 'Model Presence Bus must be mounted');
   assert.ok(diagnostics > bus, 'Runtime presence diagnostics must mount after Model Presence Bus');
   assert.ok(bootstrap > diagnostics, 'Runtime integration bootstrap must mount after diagnostics');
