@@ -36,17 +36,16 @@ export function sanitiseRichHtml(html = '', documentRef = globalThis.document) {
         continue;
       }
       if (!ALLOWED_TAGS.has(child.tagName)) {
+        clean(child);
         child.replaceWith(...child.childNodes);
         continue;
       }
+      const href = child.tagName === 'A' ? safeHref(child.getAttribute('href') || '') : '';
       for (const attr of [...child.attributes]) child.removeAttribute(attr.name);
-      if (child.tagName === 'A') {
-        const href = safeHref(child.getAttribute?.('href') || '');
-        if (href) {
-          child.setAttribute('href', href);
-          child.setAttribute('rel', 'noreferrer');
-          child.setAttribute('target', '_blank');
-        }
+      if (child.tagName === 'A' && href) {
+        child.setAttribute('href', href);
+        child.setAttribute('rel', 'noreferrer');
+        child.setAttribute('target', '_blank');
       }
       clean(child);
     }
