@@ -7,6 +7,7 @@ const DEFAULT_TTL_SECONDS = 30 * 24 * 60 * 60;
 const MAX_TTL_SECONDS = 90 * 24 * 60 * 60;
 const DEFAULT_SUPABASE_URL = 'https://rufrmjyusalnifpegllj.supabase.co';
 const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_z69-aAbQvzFFDRk4SHDYrQ_FuqirkLD';
+const DEFAULT_STEWARD_USER_SHA256 = '9d3b4543cb480f113880f0f7f2e68b28945c09eaff37955db08ca07a55ef723b';
 
 function secretEqual(actual, expected) {
   if (!actual || !expected) return false;
@@ -30,11 +31,17 @@ function stewardCredential(env) {
   return env.get('ARCSWEEP_STEWARD_KEY') || env.get('ARCSWEEP_RUNTIME_TOKEN');
 }
 
-function stewardUserIds(env) {
-  return new Set(String(env.get('HOUSE_STEWARD_USER_IDS') || env.get('HOUSE_STEWARD_USER_ID') || '')
+function stewardUserAllowed(userId, env) {
+  const value = String(userId || '').trim();
+  if (!value) return false;
+  const explicit = new Set(String(env.get('HOUSE_STEWARD_USER_IDS') || env.get('HOUSE_STEWARD_USER_ID') || '')
     .split(',')
-    .map((value) => value.trim())
+    .map((item) => item.trim())
     .filter(Boolean));
+  if (explicit.size) return explicit.has(value);
+  const expected = env.get('HOUSE_STEWARD_USER_SHA256') || DEFAULT_STEWARD_USER_SHA256;
+  const actual = createHash('sha256').update(value).digest('hex');
+  return secretEqual(actual, expected);
 }
 
 function signature(payload, secret) {
@@ -55,8 +62,7 @@ function bearer(request) {
 
 export async function validateSupabaseStewardToken(accessToken, env, fetchImpl = fetch) {
   const token = String(accessToken || '').trim();
-  const allowed = stewardUserIds(env);
-  if (!token || allowed.size === 0) return false;
+  if (!token) return false;
   const baseUrl = String(env.get('SUPABASE_URL') || DEFAULT_SUPABASE_URL).replace(/\/$/, '');
   const publishableKey = env.get('SUPABASE_PUBLISHABLE_KEY') || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
   try {
@@ -70,7 +76,7 @@ export async function validateSupabaseStewardToken(accessToken, env, fetchImpl =
     });
     if (!response.ok) return false;
     const user = await response.json().catch(() => null);
-    return Boolean(user?.id && allowed.has(String(user.id)));
+    return stewardUserAllowed(user?.id, env);
   } catch {
     return false;
   }
