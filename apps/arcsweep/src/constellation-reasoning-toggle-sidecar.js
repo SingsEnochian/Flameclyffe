@@ -24,12 +24,14 @@ function mount() {
   if (!['settings', 'deep-observer', 'commons'].includes(room)) return;
   mounting = true;
   try {
-    const html = markup(reasoningSummariesEnabled());
+    const enabled = reasoningSummariesEnabled();
     const existing = document.querySelector('[data-constellation-reasoning-toggle-panel]');
     if (existing) {
-      existing.outerHTML = html;
+      const input = existing.querySelector('[data-constellation-reasoning-toggle]');
+      if (input && input.checked !== enabled) input.checked = enabled;
       return;
     }
+    const html = markup(enabled);
     const semantic = document.querySelector('[data-semantic-projection-panel]');
     if (semantic && room !== 'settings') semantic.insertAdjacentHTML('beforebegin', html);
     else document.querySelector('main.content')?.insertAdjacentHTML('beforeend', html);
