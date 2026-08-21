@@ -31,10 +31,14 @@ test('startup guard and visible bootstrap are mounted before the application mod
   assert.equal(html.includes('<script type="module" src="./src/main.js"></script>'), false, 'main.js must be imported through the visible bootstrap');
 });
 
-test('visible bootstrap paints first and fails persistence soft', async () => {
+test('visible bootstrap paints first, fails persistence soft, and offers safe boot', async () => {
   const source = await readFile(new URL('../src/main-bootstrap.js', import.meta.url), 'utf8');
   assert.match(source, /Opening the house/);
   assert.match(source, /persistence unavailable; continuing in memory/);
   assert.match(source, /await import\('\.\/main\.js'\)/);
   assert.match(source, /The house did not finish opening/);
+  assert.match(source, /\?safe=1/);
+  assert.match(source, /Safe Boot active/);
+  assert.match(source, /return null/);
+  assert.match(source, /__arcsweepSafeBoot/);
 });
