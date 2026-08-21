@@ -1,4 +1,7 @@
 import { defineConfig } from 'vite';
+import { fileURLToPath } from 'node:url';
+
+const rootDir = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
   root: 'apps/arcsweep',
@@ -6,6 +9,12 @@ export default defineConfig({
   build: {
     outDir: '../../dist/arcsweep',
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        arcsweep: `${rootDir}index.html`,
+        varutoraGate: `${rootDir}varutora-gate.html`,
+      },
+    },
   },
   server: {
     host: '127.0.0.1',
