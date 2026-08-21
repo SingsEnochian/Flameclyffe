@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import ThemeStudio from './ThemeStudio.jsx';
 import FlameChannel from './FlameChannel.jsx';
 import { applyProjectZeroTheme, loadProjectZeroTheme } from './themeEngine.js';
+import './deepObserverBridge.js';
 import './extensions.css';
 
 function CompanionBridgeExtensions() {
