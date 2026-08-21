@@ -4,8 +4,8 @@ import {
   updateRuntimePresence,
   appendRuntimeFeedback,
 } from './runtime-integration-envelope.js';
-import { CONSTELLATION_RUNTIME_EVENTS } from './constellation-runtime-adapter.js';
 import { CONSTELLATION_LENS_EVENTS } from './constellation-lens.js';
+import { MODEL_PRESENCE_EVENT } from './model-presence-bus.js';
 
 export const RUNTIME_INTEGRATION_EVENTS = Object.freeze({
   changed: 'arcsweep:runtime-integration-changed',
@@ -31,6 +31,7 @@ const STATUS_TO_PRESENCE = Object.freeze({
 });
 
 let activeEnvelope = null;
+const installedTargets = new WeakSet();
 
 function clone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
@@ -63,6 +64,13 @@ export function applyRuntimeStatusToEnvelope(envelope, detail = {}) {
   return updateRuntimePresence(envelope, voiceId, runtimePresenceFromStatus(detail.state || detail.status));
 }
 
+export function applyModelPresenceToEnvelope(envelope, detail = {}) {
+  return applyRuntimeStatusToEnvelope(envelope, {
+    voiceId: detail.voice_id || detail.voiceId,
+    state: detail.state,
+  });
+}
+
 export function applyLensReplyToEnvelope(envelope, detail = {}) {
   const voiceId = String(detail.voiceId || detail.voice_id || '').trim();
   if (!voiceId) return clone(envelope);
@@ -81,24 +89,29 @@ export function applyLensReplyToEnvelope(envelope, detail = {}) {
   return next;
 }
 
-function publish() {
-  if (typeof document === 'undefined' || !activeEnvelope) return;
-  document.dispatchEvent(new CustomEvent(RUNTIME_INTEGRATION_EVENTS.changed, { detail: clone(activeEnvelope) }));
+function publish(target, onChange) {
+  if (!activeEnvelope) return;
+  const snapshot = clone(activeEnvelope);
+  onChange?.(snapshot);
+  if (target?.dispatchEvent && typeof CustomEvent !== 'undefined') {
+    target.dispatchEvent(new CustomEvent(RUNTIME_INTEGRATION_EVENTS.changed, { detail: snapshot }));
+  }
 }
 
-export function installRuntimeIntegrationBridge({ initialEnvelope } = {}) {
+export function installRuntimeIntegrationBridge({ initialEnvelope, target = globalThis.document, onChange } = {}) {
   if (initialEnvelope) replaceRuntimeIntegrationEnvelope(initialEnvelope);
-  if (typeof document === 'undefined') return;
+  if (!target?.addEventListener || installedTargets.has(target)) return;
+  installedTargets.add(target);
 
-  document.addEventListener(CONSTELLATION_RUNTIME_EVENTS.state, (event) => {
+  target.addEventListener(MODEL_PRESENCE_EVENT, (event) => {
     if (!activeEnvelope) return;
-    activeEnvelope = applyRuntimeStatusToEnvelope(activeEnvelope, event.detail || {});
-    publish();
+    activeEnvelope = applyModelPresenceToEnvelope(activeEnvelope, event.detail || {});
+    publish(target, onChange);
   });
 
-  document.addEventListener(CONSTELLATION_LENS_EVENTS.response, (event) => {
+  target.addEventListener(CONSTELLATION_LENS_EVENTS.response, (event) => {
     if (!activeEnvelope) return;
     activeEnvelope = applyLensReplyToEnvelope(activeEnvelope, event.detail || {});
-    publish();
+    publish(target, onChange);
   });
 }
