@@ -1,7 +1,7 @@
 import { publishSocketEnvelope } from './projectZeroSocket.js';
 
-export const PROJECT_ZERO_THEME_SCHEMA = 'project-zero.theme/v1';
-export const PROJECT_ZERO_THEME_STORAGE_KEY = 'project-zero:theme/v1';
+export const PROJECT_ZERO_THEME_SCHEMA = 'flameclyffe.project-zero-companion.theme/v1';
+export const PROJECT_ZERO_THEME_STORAGE_KEY = 'flameclyffe:project-zero-companion:theme/v1';
 
 export const DEFAULT_PROJECT_ZERO_THEME = Object.freeze({
   schema: PROJECT_ZERO_THEME_SCHEMA,
@@ -34,27 +34,7 @@ export const DEFAULT_PROJECT_ZERO_THEME = Object.freeze({
 });
 
 const TOKEN_CSS = Object.freeze({
-  bg: '--pz-bg',
-  bgAlt: '--pz-bg-alt',
-  panel: '--pz-panel',
-  panelRaised: '--pz-panel-raised',
-  input: '--pz-input',
-  line: '--pz-line',
-  text: '--pz-text',
-  muted: '--pz-muted',
-  accent: '--pz-accent',
-  accentSecondary: '--pz-accent-secondary',
-  accentCool: '--pz-accent-cool',
-  accentViolet: '--pz-accent-violet',
-  danger: '--pz-danger',
-  success: '--pz-success',
-  radiusPanel: '--pz-radius-panel',
-  radiusControl: '--pz-radius-control',
-  density: '--pz-density',
-  blur: '--pz-blur',
-  fontUi: '--pz-font-ui',
-  fontReading: '--pz-font-reading',
-  fontMono: '--pz-font-mono',
+  bg: '--pz-bg', bgAlt: '--pz-bg-alt', panel: '--pz-panel', panelRaised: '--pz-panel-raised', input: '--pz-input', line: '--pz-line', text: '--pz-text', muted: '--pz-muted', accent: '--pz-accent', accentSecondary: '--pz-accent-secondary', accentCool: '--pz-accent-cool', accentViolet: '--pz-accent-violet', danger: '--pz-danger', success: '--pz-success', radiusPanel: '--pz-radius-panel', radiusControl: '--pz-radius-control', density: '--pz-density', blur: '--pz-blur', fontUi: '--pz-font-ui', fontReading: '--pz-font-reading', fontMono: '--pz-font-mono',
 });
 
 export function normaliseProjectZeroTheme(value = {}) {
@@ -64,34 +44,21 @@ export function normaliseProjectZeroTheme(value = {}) {
     const n = Number(tokens[key]);
     tokens[key] = Number.isFinite(n) ? n : DEFAULT_PROJECT_ZERO_THEME.tokens[key];
   }
-  return {
-    schema: PROJECT_ZERO_THEME_SCHEMA,
-    id: String(source.id || DEFAULT_PROJECT_ZERO_THEME.id),
-    name: String(source.name || DEFAULT_PROJECT_ZERO_THEME.name),
-    tokens,
-    custom_css: String(source.custom_css || ''),
-  };
+  return { schema: PROJECT_ZERO_THEME_SCHEMA, id: String(source.id || DEFAULT_PROJECT_ZERO_THEME.id), name: String(source.name || DEFAULT_PROJECT_ZERO_THEME.name), tokens, custom_css: String(source.custom_css || '') };
 }
 
 export function loadProjectZeroTheme(storage = globalThis.localStorage) {
   try {
     const raw = storage?.getItem(PROJECT_ZERO_THEME_STORAGE_KEY);
     return raw ? normaliseProjectZeroTheme(JSON.parse(raw)) : normaliseProjectZeroTheme();
-  } catch {
-    return normaliseProjectZeroTheme();
-  }
+  } catch { return normaliseProjectZeroTheme(); }
 }
 
 export function saveProjectZeroTheme(theme, storage = globalThis.localStorage) {
   const value = normaliseProjectZeroTheme(theme);
   try { storage?.setItem(PROJECT_ZERO_THEME_STORAGE_KEY, JSON.stringify(value)); } catch {}
   applyProjectZeroTheme(value);
-  publishSocketEnvelope({
-    pluginId: 'project-zero-theme-engine',
-    channel: 'theme',
-    type: 'theme.changed',
-    payload: { id: value.id, name: value.name, schema: value.schema },
-  });
+  publishSocketEnvelope({ pluginId: 'project-zero-companion-theme-bridge', channel: 'theme', type: 'theme.changed', payload: { id: value.id, name: value.name, schema: value.schema } });
   return value;
 }
 
@@ -103,23 +70,21 @@ export function applyProjectZeroTheme(theme, root = globalThis.document?.documen
     if (token === 'radiusPanel' || token === 'radiusControl' || token === 'blur') tokenValue = `${tokenValue}px`;
     root.style.setProperty(cssVar, String(tokenValue));
   }
-  let custom = globalThis.document?.getElementById('project-zero-custom-theme');
+  let custom = globalThis.document?.getElementById('project-zero-companion-custom-theme');
   if (!custom && globalThis.document) {
     custom = globalThis.document.createElement('style');
-    custom.id = 'project-zero-custom-theme';
+    custom.id = 'project-zero-companion-custom-theme';
     globalThis.document.head.append(custom);
   }
   if (custom) custom.textContent = value.custom_css;
-  root.dataset.projectZeroTheme = value.id;
+  root.dataset.projectZeroCompanionTheme = value.id;
   return value;
 }
 
-export function exportProjectZeroTheme(theme) {
-  return JSON.stringify(normaliseProjectZeroTheme(theme), null, 2);
-}
+export function exportProjectZeroTheme(theme) { return JSON.stringify(normaliseProjectZeroTheme(theme), null, 2); }
 
 export function importProjectZeroTheme(text) {
   const parsed = JSON.parse(String(text || ''));
-  if (parsed?.schema && parsed.schema !== PROJECT_ZERO_THEME_SCHEMA) throw new Error(`Unsupported Project Zero theme schema: ${parsed.schema}`);
+  if (parsed?.schema && parsed.schema !== PROJECT_ZERO_THEME_SCHEMA) throw new Error(`Unsupported Project Zero Companion theme schema: ${parsed.schema}`);
   return normaliseProjectZeroTheme(parsed);
 }
