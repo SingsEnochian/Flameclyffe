@@ -1,4 +1,4 @@
-export const PROJECT_ZERO_RICH_TEXT_SCHEMA = 'project-zero.rich-text/v1';
+export const PROJECT_ZERO_RICH_TEXT_SCHEMA = 'flameclyffe.project-zero-companion.rich-text/v1';
 
 const ALLOWED_TAGS = new Set(['P', 'DIV', 'BR', 'STRONG', 'B', 'EM', 'I', 'U', 'S', 'DEL', 'H1', 'H2', 'H3', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'PRE', 'CODE', 'A']);
 
@@ -18,7 +18,7 @@ export function visibleTextToRichHtml(text = '') {
 
 function safeHref(value = '') {
   try {
-    const url = new URL(value, globalThis.location?.href || 'https://project-zero.local/');
+    const url = new URL(value, globalThis.location?.href || 'https://project-zero-companion.local/');
     return ['http:', 'https:', 'mailto:'].includes(url.protocol) ? value : '';
   } catch { return ''; }
 }
@@ -31,10 +31,7 @@ export function sanitiseRichHtml(html = '', documentRef = globalThis.document) {
   function clean(node) {
     for (const child of [...node.childNodes]) {
       if (child.nodeType === 3) continue;
-      if (child.nodeType !== 1) {
-        child.remove();
-        continue;
-      }
+      if (child.nodeType !== 1) { child.remove(); continue; }
       if (!ALLOWED_TAGS.has(child.tagName)) {
         clean(child);
         child.replaceWith(...child.childNodes);
@@ -63,11 +60,7 @@ export function richHtmlToPlainText(html = '', documentRef = globalThis.document
 
 export function createRichTextDocument({ html = '', plainText = null } = {}) {
   const safeHtml = sanitiseRichHtml(html);
-  return Object.freeze({
-    schema: PROJECT_ZERO_RICH_TEXT_SCHEMA,
-    html: safeHtml,
-    plain_text: plainText == null ? richHtmlToPlainText(safeHtml) : String(plainText),
-  });
+  return Object.freeze({ schema: PROJECT_ZERO_RICH_TEXT_SCHEMA, html: safeHtml, plain_text: plainText == null ? richHtmlToPlainText(safeHtml) : String(plainText) });
 }
 
 export function visibleTextToRichDocument(text = '') {
