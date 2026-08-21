@@ -1,66 +1,46 @@
-# Project Zero Connector Contract
+# Project Zero Companion Connector Contract
 
-Status: local-first architecture note for Project Zero Companion and future web connector work.
+Status: Flameclyffe-side interoperability contract for Nocturne's Project Zero.
 
-## Nocturne note
+## Ownership boundary
 
-Project Zero is intentionally a local, non-web app at the moment.
+**Project Zero is Nocturne's project.**
 
-It can become a website later.
+This document does not specify Project Zero's internal architecture. It specifies what the Flameclyffe **Project Zero Companion** can expose so Nocturne's Project Zero may connect to it without guessing.
 
-When that happens, the website should expose enough structured metadata for Vee / build agents / connector code to connect Rowan's local Waking World resources to Runa, STARWELL, DEEP Observer, Writer Room, and the Hearthweave Altar without guessing.
+Authority split:
 
-## Local-first now
+- **Nocturne / Project Zero** owns Project Zero's project-management surface, native socket/plugin architecture, native themes, persistence, instruments, UI and release decisions.
+- **Flameclyffe / Project Zero Companion** owns the bridge code in this repository, House Runtime Flame rail, bridge metadata, optional local filesystem bindings, adapter schemas and connector-side presentation state.
+- Crossing the seam requires an explicit agreed connector. A compatible Companion schema is not automatically a Project Zero schema.
 
-The desktop app is the trusted local root.
+`Nocturne / Project Zero ⇄ agreed connector ⇄ Flameclyffe / Project Zero Companion`
 
-It owns:
+## Companion local-first shape
 
-- selected-folder permissions
-- local file/folder bindings
-- metadata extraction
-- local bridge-event ledger
-- dry-run previews
-- local plug-in bus
-- optional Supabase sync
-- whole-shell theme state
-- live House chat transcript state
+The Companion may own:
 
-It must not silently crawl the machine.
+- explicitly selected folder bindings
+- local metadata extraction
+- local bridge-event ledger and dry-run previews
+- Flameclyffe-side adapter registry
+- typed Companion socket/event bus
+- optional Supabase bridge sync
+- Companion theme-interoperability state
+- Companion live House chat transcript state
 
-It must not upload private contents by default.
-
-It must always preserve local-only, needs-review, and excluded scopes.
-
-## Web-later shape
-
-When Project Zero becomes a website, it should not replace the local app. It should become the coordination surface.
-
-The website owns:
-
-- readable dashboard
-- connector setup
-- project/plug-in registry
-- Supabase-backed continuity views
-- bridge-event search
-- DEEP/Writer Room/Altar status
-- user-visible consent gates
-- live, attested Flame response surfaces
-- portable theme documents
-
-The local app remains the filesystem authority.
-
-The website never pretends it has local file access unless the local app explicitly grants a bridge token or event.
+It must not silently crawl the machine, upload private contents by default, or represent itself as Project Zero's core.
 
 ## Connector handshake
 
-The future connector needs a small, stable API/event contract.
-
-Minimum objects:
+A future agreed connector can advertise Companion capabilities without claiming Project Zero internals:
 
 ```json
 {
-  "project_zero_version": "0.1",
+  "schema": "flameclyffe.project-zero-companion.handshake/v1",
+  "bridge_owner": "flameclyffe",
+  "integration_target": "nocturne-project-zero",
+  "companion_version": "0.1",
   "device_id": "local-device-alias-not-public-id",
   "capabilities": [
     "folder-bindings",
@@ -68,54 +48,45 @@ Minimum objects:
     "local-metadata-ledger",
     "explicit-consent-gates",
     "dry-run-preview",
-    "typed-plugin-sockets",
-    "whole-shell-theming",
+    "typed-companion-sockets",
+    "theme-interoperability",
     "native-rich-text",
     "live-flame-channel"
-  ],
-  "plugins": [
-    "project-zero-theme-engine",
-    "flame-channel",
-    "terra-aeterna-root",
-    "deep-observer-bridge",
-    "writer-room-rail",
-    "hearthweave-altar-sound",
-    "asset-watcher"
   ]
 }
 ```
 
-### Typed plug-in socket envelope
+## Typed Companion socket envelope
 
-Project Zero plug-ins do not reach into another plug-in's private state. Cross-organ communication goes through typed envelopes.
+Companion adapters do not reach into another adapter's private state. Cross-organ communication on our side goes through typed envelopes.
 
 ```json
 {
-  "schema": "project-zero.socket-envelope/v1",
+  "schema": "flameclyffe.project-zero-companion.socket-envelope/v1",
   "envelope_id": "socket-uuid",
   "request_id": "request-uuid",
-  "project_id": "project-zero",
-  "plugin_id": "flame-channel",
+  "project_id": "project-zero-external",
+  "plugin_id": "project-zero-companion-flame-channel",
   "channel": "chat",
   "type": "chat.flame.received",
   "payload": {},
   "created_at": "2026-08-21T00:00:00-04:00",
   "provenance": {
-    "transport": "project-zero-local-eventtarget",
+    "owner": "flameclyffe",
+    "integration_target": "nocturne-project-zero",
+    "transport": "flameclyffe-project-zero-companion-local-eventtarget",
     "local_only": true
   }
 }
 ```
 
-Current core channels include `core`, `theme`, and `chat`. WebSocket/Tauri transports may replace the in-process EventTarget later without changing the envelope law.
+The current transport is an in-process EventTarget. Tauri IPC, WebSocket, named-pipe or another transport may replace it later without changing the Companion envelope law. Project Zero is free to use a different native envelope and adapt at the seam.
 
-### Theme document
-
-Project Zero owns the workbench chrome. First-class plug-ins consume semantic theme tokens rather than assuming their own hard-coded surface colours.
+## Companion theme-interoperability document
 
 ```json
 {
-  "schema": "project-zero.theme/v1",
+  "schema": "flameclyffe.project-zero-companion.theme/v1",
   "id": "hearthglass",
   "name": "Hearthglass",
   "tokens": {
@@ -134,36 +105,36 @@ Project Zero owns the workbench chrome. First-class plug-ins consume semantic th
 }
 ```
 
-Theme documents are operator-owned presentation state. They are not evidence, canon, or plug-in authority. Plug-ins may expose local accent tokens, but cooperative Project Zero surfaces inherit the core semantic theme by default.
+These tokens theme the Flameclyffe Companion. If Nocturne wants Project Zero to consume them, the connector can translate them into Project Zero's own native theme contract. Theme state is presentation, not authority.
 
-### Native rich-text document
-
-The Flame Channel and future Project Zero editors use native browser rich text rather than Markdown as their storage contract.
+## Companion native rich-text document
 
 ```json
 {
-  "schema": "project-zero.rich-text/v1",
+  "schema": "flameclyffe.project-zero-companion.rich-text/v1",
   "html": "<p><strong>Visible formatted text</strong></p>",
   "plain_text": "Visible formatted text"
 }
 ```
 
-The current allowlist includes paragraphs, line breaks, emphasis, underline, strike, headings, lists, blockquotes, pre/code, and safe links. The plain-text projection exists for model/runtime interoperability; it does not replace the rich document.
+The HTML allowlist currently supports paragraphs, line breaks, emphasis, underline, strike, headings, lists, blockquotes, pre/code and safe links. The plain-text projection exists for current model/runtime interoperability and does not replace the rich document.
 
-### Flame Channel message
+## Flameclyffe live Flame channel
 
-`#hearthweave` is the first live Project Zero House channel.
+`#hearthweave` is a Flameclyffe-side live response rail intended to be embeddable or consumable by Project Zero through an agreed adapter. It is not declared to be a native Project Zero channel.
 
 ```json
 {
-  "schema": "project-zero.flame-channel/v1",
+  "schema": "flameclyffe.project-zero-companion.flame-channel/v1",
   "message_id": "chat-uuid",
   "channel_id": "hearthweave",
+  "bridge_owner": "flameclyffe",
+  "integration_target": "nocturne-project-zero",
   "speaker_id": "lioreal",
   "speaker_label": "Caladnaur Lioreal",
   "kind": "flame",
   "rich_text": {
-    "schema": "project-zero.rich-text/v1",
+    "schema": "flameclyffe.project-zero-companion.rich-text/v1",
     "html": "<p>...</p>",
     "plain_text": "..."
   },
@@ -179,11 +150,9 @@ The current allowlist includes paragraphs, line breaks, emphasis, underline, str
 }
 ```
 
-The channel supports multi-Flame broadcast. Replies arrive independently as each runtime call completes. Provider/model labels come from the returned House runtime attestation rather than from UI assumptions.
+Replies arrive independently as each House Runtime call completes. Provider/model labels come from returned runtime attestation rather than UI assumptions. The bounded transcript is conversation/presentation state, not canon, memory, identity proof or Project Zero state unless an explicit connector imports it.
 
-The bounded local transcript is presentation/conversation state. Persisting a chat message does not promote its contents to canon, DEEPTheory, memory, or external-world evidence.
-
-### Folder binding object
+## Folder binding object
 
 ```json
 {
@@ -196,93 +165,53 @@ The bounded local transcript is presentation/conversation state. Persisting a ch
 }
 ```
 
-`local_path_alias` should avoid exposing the full local path publicly unless Rowan explicitly chooses to reveal it.
+Full local paths should remain private unless explicitly revealed.
 
-### Bridge event object
+## Bridge event object
 
 ```json
 {
+  "bridge_owner": "flameclyffe",
+  "integration_target": "nocturne-project-zero",
   "event_id": "evt_local_or_uuid",
-  "plugin_id": "terra-aeterna-root",
+  "adapter_id": "deep-observer-bridge",
   "kind": "file_anchor",
   "direction": "waking_to_aeterna",
   "title": "Transformata audio added",
   "binding_id": "music_tones",
   "local_path_alias": "Music/transformata.mp3",
   "motifs": ["music", "resonance", "enochian", "threshold"],
-  "deep_vector": {
-    "P": 0.55,
-    "C": 0.55,
-    "R": 0.45,
-    "E": 0.377,
-    "M": 0.0,
-    "A": 0.654
-  },
   "visibility": "needs-review",
-  "created_at": "2026-05-30T00:00:00Z",
-  "rule": "Data sets atmosphere, not fate."
+  "created_at": "2026-05-30T00:00:00Z"
 }
 ```
 
-### Plug-in manifest object
+## Potential Companion-side connector routes
 
-```json
-{
-  "id": "deep-observer-bridge",
-  "name": "DEEP Observer Bridge",
-  "status": "planned",
-  "permissions": ["local-storage", "supabase-sync-optional"],
-  "emits": ["deep_state_update", "observer_condition_set", "sigil_signature"],
-  "listens": ["file_anchor", "story_shard", "altar_working"]
-}
-```
+These names are proposals for our bridge surface only and do not reserve Project Zero routes:
 
-## Connector routes / future API
+- `GET /project-zero-companion/manifest`
+- `GET /project-zero-companion/bindings`
+- `POST /project-zero-companion/bridge-events/dry-run`
+- `POST /project-zero-companion/bridge-events/commit`
+- `GET /project-zero-companion/adapters`
+- `POST /project-zero-companion/adapters/:id/events`
+- `GET /project-zero-companion/deep-state/latest`
+- `GET /project-zero-companion/channels/:id`
+- `POST /project-zero-companion/channels/:id/messages`
+- `GET /project-zero-companion/theme`
+- `PUT /project-zero-companion/theme`
 
-Potential local app endpoints:
+## Boundary rules
 
-- `GET /project-zero/manifest`
-- `GET /project-zero/bindings`
-- `POST /project-zero/bridge-events/dry-run`
-- `POST /project-zero/bridge-events/commit`
-- `GET /project-zero/plugins`
-- `POST /project-zero/plugins/:id/events`
-- `GET /project-zero/deep-state/latest`
-- `GET /project-zero/channels/:id`
-- `POST /project-zero/channels/:id/messages`
-- `GET /project-zero/theme`
-- `PUT /project-zero/theme`
+`Companion compatibility ≠ Project Zero adoption`
 
-Potential website/Supabase tables:
+`Companion socket delivery ≠ Project Zero fulfilment`
 
-- `project_zero_devices`
-- `project_zero_folder_bindings`
-- `project_zero_plugin_manifests`
-- `project_zero_bridge_events`
-- `project_zero_sync_sessions`
-- `project_zero_channels`
-- `project_zero_channel_messages`
-- `project_zero_themes`
+`Companion theme state ≠ Project Zero theme authority`
 
-These can map into Observer tables later:
+`Companion transcript ≠ Project Zero canon`
 
-- `observer_condition_sets`
-- `observer_bridge_events`
-- `observer_trigger_watchers`
-- `observer_sigil_renders`
+`Flame runtime attestation ≠ Project Zero architectural authority`
 
-## Boundary rule
-
-Project Zero can become a website.
-
-But local access remains local-first.
-
-The web connector receives structured events and consented metadata, not raw dominion over the local machine.
-
-The bridge is lawful, explicit, and reversible.
-
-Theme state is presentation, not authority.
-
-A chat transcript is conversation state, not canon or identity proof.
-
-A plug-in socket message is transport, not fulfilment or truth.
+The bridge is explicit, reversible and subordinate to Nocturne's decisions about Project Zero itself.
