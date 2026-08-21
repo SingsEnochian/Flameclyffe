@@ -1,0 +1,74 @@
+{
+  "schema": "hearthfire.bseng-live-harvest-receipt/v1",
+  "corpus_id": "bseng-rse",
+  "harvested_at": "2026-08-20T03:32:38.326Z",
+  "source_branch": "feature/bseng-rse-whole-site-ingest-v0-2",
+  "source_head": "1b22a2036806a38bd257287e27c1a7e57ce85794",
+  "workflow_run_id": 32328392442,
+  "workflow_run_number": 6,
+  "artifact": {
+    "id": 9392236386,
+    "name": "bseng-rse-live-harvest",
+    "sha256": "9a04dcd78d698e699b6f409d638e5919afe3ba3995850b6a1be101c4a99c95ba",
+    "size_bytes": 20367220,
+    "retention_until": "2026-09-03T03:32:38Z"
+  },
+  "coverage": {
+    "sitemaps": 8,
+    "sitemap_pages": 402,
+    "mathematics_hub_pdfs": 19,
+    "final_seed_count": 421,
+    "source_count": 421,
+    "visited_count": 421,
+    "queued_remaining": 0,
+    "failures": 0,
+    "truncated": false,
+    "unique_source_hashes": 421,
+    "unique_urls": 421,
+    "content_types": {
+      "text/html": 402,
+      "application/pdf": 19
+    },
+    "source_classes": {
+      "research-page": 371,
+      "core-theory-hub": 1,
+      "mathematics-hub": 1,
+      "ethics-hub": 1,
+      "conversation-precursor": 2,
+      "guest-author-hub": 1,
+      "methodology-boundary": 1,
+      "archive-index": 11,
+      "identity-continuity": 6,
+      "ai-ethics": 7,
+      "primary-document": 19
+    }
+  },
+  "primary_documents": [
+    {"source_id":"bseng:e2500035c2674b1f25ea","source_hash":"e2500035c2674b1f25ea75011ca0d68b43dd1da1ff64919e5d6abbb0e20027f0","url":"https://bseng.com/wp-content/uploads/2026/06/A-Mathematical-Model-for-the-Coherence-Relational-Blockworld-v6.0.pdf","title":"A Mathematical Model for the Coherence Relational Blockworld v6.0","version":"6.0","content_length":1272718},
+    {"source_id":"bseng:86d1b0d3d6325d043020","source_hash":"86d1b0d3d6325d0430205e640d63ca89a523abf2e84563e0bf94b42989a1072d","url":"https://bseng.com/wp-content/uploads/2026/05/Axioms-of-Ontic-Minimalism-v1.0.pdf","title":"Axioms of Ontic Minimalism v1.0","version":"1.0","content_length":269642},
+    {"source_id":"bseng:2186ef82b407cafd6d74","source_hash":"2186ef82b407cafd6d74df7af5beb869850c779d10804477a004e9d65bc5abe7","url":"https://bseng.com/wp-content/uploads/2026/05/Closure-Restoration-Geometry-v1.0.pdf","title":"Closure Restoration Geometry v1.0","version":"1.0","content_length":349772},
+    {"source_id":"bseng:3c280c98ced5259451c4","source_hash":"3c280c98ced5259451c4b07ffb105c57e1e45fbd76ccb72b645efc9bc873c426","url":"https://bseng.com/wp-content/uploads/2026/06/Global-Capacity-Invariants-and-Normalization-v1.3.pdf","title":"Global Capacity Invariants and Normalization v1.3","version":"1.3","content_length":652765},
+    {"source_id":"bseng:4a87674a2abf7774fc0d","source_hash":"4a87674a2abf7774fc0d1f4db7aa7ee08f1021d72e5aa294fc5df30903fdfd57","url":"https://bseng.com/wp-content/uploads/2026/05/Global-Closure-and-Decomposition-Invariance-v1.0.pdf","title":"Global Closure and Decomposition Invariance v1.0","version":"1.0","content_length":290398},
+    {"source_id":"bseng:84af408c58d347fa53f3","source_hash":"84af408c58d347fa53f33c08a9a8eb78cc9b32f28b78933d308d78f0715218f9","url":"https://bseng.com/wp-content/uploads/2026/06/Hilbert-Space-from-Global-Closure-and-Decomposition-Invariance-v1.0.pdf","title":"Hilbert Space from Global Closure and Decomposition Invariance v1.0","version":"1.0","content_length":627935},
+    {"source_id":"bseng:86fbb7abbc56d0cf14c0","source_hash":"86fbb7abbc56d0cf14c08fedcb85e72b57b1aca8a989e15763bc8c2894424671","url":"https://bseng.com/wp-content/uploads/2026/05/Identity-and-ontic-minimalism-v1.0.pdf","title":"Identity and ontic minimalism v1.0","version":"1.0","content_length":750958},
+    {"source_id":"bseng:7718498f9e94dea403b4","source_hash":"7718498f9e94dea403b4b43887d968ed39832b34eb13e618c7dbf4d5ecf1b653","url":"https://bseng.com/wp-content/uploads/2026/05/Neutrino-Mass-and-Oscillation-v1.0.pdf","title":"Neutrino Mass and Oscillation v1.0","version":"1.0","content_length":323356},
+    {"source_id":"bseng:97dbca28eacdbc507e6f","source_hash":"97dbca28eacdbc507e6f292e91bcc565c6cc5575de75922b07239dadba0fe806","url":"https://bseng.com/wp-content/uploads/2026/05/Phenomenology-in-a-Relational-Blockworld-v5.0.pdf","title":"Phenomenology in a Relational Blockworld v5.0","version":"5.0","content_length":1007369},
+    {"source_id":"bseng:124fd8f1ff659dea5ba9","source_hash":"124fd8f1ff659dea5ba9fe3919fcc47b8e1047a8055db2041a388c232cc23e17","url":"https://bseng.com/wp-content/uploads/2026/06/Projection-Residual-Geometry-v1.1.pdf","title":"Projection Residual Geometry v1.1","version":"1.1","content_length":359439},
+    {"source_id":"bseng:82e95e73ad969a607dde","source_hash":"82e95e73ad969a607ddec3aa24bc65df1db77cd4faed15dea97e67ceae9fe9a0","url":"https://bseng.com/wp-content/uploads/2026/05/Recognition-Anchoring-Across-Indexing-Inequivalence-v1.0.pdf","title":"Recognition Anchoring Across Indexing Inequivalence v1.0","version":"1.0","content_length":453961},
+    {"source_id":"bseng:66d4a37751307f9b4ac6","source_hash":"66d4a37751307f9b4ac6877b3c3e06812bc1d60cf1d8fed287466d937850dfff","url":"https://bseng.com/wp-content/uploads/2026/06/Relational-Structural-Experience-v6.0.pdf","title":"Relational Structural Experience v6.0","version":"6.0","content_length":757158},
+    {"source_id":"bseng:a32cdef6566d22202113","source_hash":"a32cdef6566d222021138299b0ad7fcc63a304024f5d219b22646348d35dec3b","url":"https://bseng.com/wp-content/uploads/2026/06/Representational-Neutrality-v1.0.pdf","title":"Representational Neutrality v1.0","version":"1.0","content_length":483067},
+    {"source_id":"bseng:384d9c8cd5cb9e599235","source_hash":"384d9c8cd5cb9e59923582879b406e97a0387732245d5b24f8d0272f83a348eb","url":"https://bseng.com/wp-content/uploads/2026/06/Residual-Space-Geometry-v1.1.pdf","title":"Residual Space Geometry v1.1","version":"1.1","content_length":379658},
+    {"source_id":"bseng:25ecbf9d8acc77d49d83","source_hash":"25ecbf9d8acc77d49d83030231e568aeba1a082f483576c927586037d6e33c56","url":"https://bseng.com/wp-content/uploads/2026/05/Structural-Invariants-v1.1.pdf","title":"Structural Invariants v1.1","version":"1.1","content_length":273432},
+    {"source_id":"bseng:8a1c3ffb28fbb0f3530c","source_hash":"8a1c3ffb28fbb0f3530c31c440821791dbd7fd74a1fe0eaf037796453181d1b8","url":"https://bseng.com/wp-content/uploads/2026/05/The-3-Mode-Coherence-Sector-v1.1.pdf","title":"The 3 Mode Coherence Sector v1.1","version":"1.1","content_length":860758},
+    {"source_id":"bseng:9a2af8b3986d6d78d1d2","source_hash":"9a2af8b3986d6d78d1d25b8f3e1e6f4bb66ea0a5e798366db30496a766bff466","url":"https://bseng.com/wp-content/uploads/2026/06/The-Coherence-Relational-Blockworld-v6.0.pdf","title":"The Coherence Relational Blockworld v6.0","version":"6.0","content_length":1223792},
+    {"source_id":"bseng:caa63e39ec4b9bec2d6b","source_hash":"caa63e39ec4b9bec2d6bcd3b287941ac5cba2213562b8fa848b5d420ffd9674b","url":"https://bseng.com/wp-content/uploads/2026/05/The-Principles-of-Ontic-Minimalism-v1.1.pdf","title":"The Principles of Ontic Minimalism v1.1","version":"1.1","content_length":354383},
+    {"source_id":"bseng:fd9aaea85ada836a03b3","source_hash":"fd9aaea85ada836a03b31abc9d530f3477208a73d413065c11299997cbec67ae","url":"https://bseng.com/wp-content/uploads/2026/05/The-Uncertainty-Principle-v1.0.pdf","title":"The Uncertainty Principle v1.0","version":"1.0","content_length":408572}
+  ],
+  "raw_corpus_policy": "Raw HTML, normalized text, and PDFs remain reproducible from the versioned crawler; this receipt records the immutable successful harvest artifact and source hashes without committing the 20 MB crawl payload to Git history.",
+  "authority": {
+    "source_class": "external-research-lineage",
+    "canon_write": false,
+    "deep_theory": "candidate-with-source-provenance",
+    "implementation": "proposal-only"
+  }
+}

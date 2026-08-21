@@ -8,9 +8,11 @@ const {
   Menu,
   session,
   safeStorage,
+  dialog,
 } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
+const { randomUUID } = require('node:crypto');
 const { fork } = require('node:child_process');
 const net = require('node:net');
 const { fileURLToPath, pathToFileURL } = require('node:url');
@@ -18,6 +20,7 @@ const {
   redactHearthgateConfig,
   sanitiseHearthgateConfig,
 } = require('../security/local-boundary');
+const { startMetadataWatcher } = require('./asset-watcher');
 
 app.enableSandbox();
 
@@ -36,6 +39,8 @@ const LOCAL_HTTP_ORIGINS = new Set([
 let win = null;
 let serverProc = null;
 let fontForgeProc = null;
+const selectedAssetWatchRoots = new Map();
+const assetWatchers = new Map();
 
 function runtimeRoot() {
   return app.isPackaged
@@ -142,6 +147,14 @@ function hardenedWebPreferences({ preload = false } = {}) {
 function stopServers() {
   if (serverProc) { serverProc.kill(); serverProc = null; }
   if (fontForgeProc) { fontForgeProc.kill(); fontForgeProc = null; }
+}
+
+function stopAssetWatchers() {
+  for (const watcher of assetWatchers.values()) {
+    try { watcher.close(); } catch {}
+  }
+  assetWatchers.clear();
+  selectedAssetWatchRoots.clear();
 }
 
 function startServer(configInput) {
@@ -270,6 +283,52 @@ ipcMain.handle('open-wizard', () => {
   win?.loadURL(pathToFileURL(wizardPath).href);
 });
 
+ipcMain.handle('asset-watch-select', async () => {
+  const result = await dialog.showOpenDialog(win, {
+    title: 'Select a folder for the Flameclyffe Companion Asset Watcher',
+    properties: ['openDirectory'],
+  });
+  if (result.canceled || !result.filePaths?.[0]) return { ok: false, canceled: true };
+  const root = path.resolve(result.filePaths[0]);
+  const watchId = `asset-watch-${randomUUID()}`;
+  const rootLabel = path.basename(root) || 'Selected folder';
+  selectedAssetWatchRoots.set(watchId, { root, rootLabel });
+  return { ok: true, watch_id: watchId, root_label: rootLabel };
+});
+
+ipcMain.handle('asset-watch-start', (_event, input = {}) => {
+  const watchId = String(input.watch_id || '');
+  const selection = selectedAssetWatchRoots.get(watchId);
+  if (!selection) return { ok: false, error: 'Select the folder again before starting the watcher.' };
+  try {
+    assetWatchers.get(watchId)?.close();
+    const watcher = startMetadataWatcher(selection.root, (metadata) => {
+      if (!win || win.isDestroyed()) return;
+      win.webContents.send('asset-watch:event', {
+        ...metadata,
+        watch_id: watchId,
+        root_label: selection.rootLabel,
+      });
+    });
+    assetWatchers.set(watchId, watcher);
+    return { ok: true, watch_id: watchId, root_label: selection.rootLabel, metadata_only: true };
+  } catch (error) {
+    console.error('[Hearthgate] Asset watcher failed to start:', error.message);
+    return { ok: false, error: error.message };
+  }
+});
+
+ipcMain.handle('asset-watch-stop', (_event, input = {}) => {
+  const watchId = String(input.watch_id || '');
+  const watcher = assetWatchers.get(watchId);
+  if (watcher) {
+    try { watcher.close(); } catch {}
+    assetWatchers.delete(watchId);
+  }
+  selectedAssetWatchRoots.delete(watchId);
+  return { ok: true, watch_id: watchId };
+});
+
 app.whenReady().then(async () => {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -293,5 +352,5 @@ app.whenReady().then(async () => {
   }
 });
 
-app.on('window-all-closed', () => { stopServers(); app.quit(); });
-app.on('will-quit', () => stopServers());
+app.on('window-all-closed', () => { stopAssetWatchers(); stopServers(); app.quit(); });
+app.on('will-quit', () => { stopAssetWatchers(); stopServers(); });

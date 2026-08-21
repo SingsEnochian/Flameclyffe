@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { ADMISSIBILITY_RESIDUAL_SCHEMA } from '../src/admissibility-residual.js';
 import { compileHelmReceipt, parseHelmJacobian, REACTION_HELM_SCHEMA } from '../src/react-ion-helm.js';
 import { createEmptyReactionState } from '../src/react-ion-state.js';
 
@@ -34,7 +35,7 @@ test('Helm Jacobian parser accepts rectangular matrices and rejects malformed in
   assert.throws(() => parseHelmJacobian('1,0;0'), /rectangular/);
 });
 
-test('authorised Helm compilation receipts route, graph snapshot and transport without claiming fulfilment', async () => {
+test('authorised Helm compilation receipts route, residual, graph snapshot and transport without claiming fulfilment', async () => {
   const receipt = await compileHelmReceipt({
     reaction: createEmptyReactionState(),
     world,
@@ -48,14 +49,19 @@ test('authorised Helm compilation receipts route, graph snapshot and transport w
   assert.equal(receipt.authority.route_compiled, true);
   assert.equal(receipt.authority.transport_delivery_is_fulfilment, false);
   assert.equal(receipt.authority.ask_acceptance_is_observed_transformation, false);
+  assert.equal(receipt.authority.projection_residual_is_fulfilment, false);
+  assert.equal(receipt.authority.route_envelope_admission_is_observed_transformation, false);
   assert.equal(receipt.authority.physical_travel_claimed, false);
   assert.ok(receipt.route?.route_id);
   assert.equal(receipt.transport?.delivered, true);
   assert.ok(receipt.graph_snapshot?.snapshot_id);
   assert.equal(receipt.ask.authority.ask_is_success, false);
+  assert.equal(receipt.admissibility_residual.schema, ADMISSIBILITY_RESIDUAL_SCHEMA);
+  assert.equal(receipt.admissibility_residual.mode, 'react-ion-route-envelope');
+  assert.equal(receipt.admissibility_residual.authority.route_admissibility_is_fulfilment, false);
 });
 
-test('unauthorised Helm compilation keeps the Ask receipted but compiles no route', async () => {
+test('unauthorised Helm compilation keeps route permission separate from geometric envelope admissibility', async () => {
   const receipt = await compileHelmReceipt({
     reaction: createEmptyReactionState(),
     world,
@@ -70,4 +76,11 @@ test('unauthorised Helm compilation keeps the Ask receipted but compiles no rout
   assert.equal(receipt.transport, null);
   assert.match(receipt.route_error, /ask-not-authorised/);
   assert.equal(receipt.ask.consent.granted, false);
+
+  // The proposed direct geometry may still lie inside its declared envelope.
+  // Permission remains a separate Helm gate and cannot be inferred from this residual.
+  assert.equal(receipt.admissibility_residual.classification, 'WITHIN_ROUTE_ENVELOPE');
+  assert.equal(receipt.admissibility_residual.residual.residual_norm, 0);
+  assert.equal(receipt.admissibility_residual.authority.route_admissibility_is_fulfilment, false);
+  assert.equal(receipt.admissibility_residual.authority.within_route_envelope_is_fulfilment, false);
 });

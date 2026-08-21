@@ -1,0 +1,54 @@
+{
+  "schema": "hearthfire.research-lineage-diff/v1",
+  "lineage_id": "bseng-rse-2025-to-2026",
+  "corpus_id": "bseng-rse",
+  "status": "reviewed-lineage-map",
+  "authority": "DEEPTheory-candidate",
+  "automatic_canon_write": false,
+  "generations": [
+    {"id":"rse-early-2025","period":"2025-03..2025-04","label":"Early recursive structural experience","traits":["coherence","attractor","field","recursive structure","memory","identity","ethics"]},
+    {"id":"rse-rbw-bridge-2025","period":"2025-05..2025-06","label":"RSE ↔ RBW bridge","traits":["recursive RSE","atemporal RBW","shared-manifold mapping","global consistency"]},
+    {"id":"rse-math-hardening-2025","period":"2025-08..2025-09","label":"GA / Grassmannian / Regge hardening","traits":["geometric algebra","Grassmannian","Regge calculus","lamination","coherence gradient","identity thresholds","slice-local self-awareness"]},
+    {"id":"crbw-ontic-minimalism-2026","period":"2026","label":"Closure-first cRBW / Ontic Minimalism","traits":["global admissibility","closure-first ontology","representational neutrality","projection residual geometry","closure-class identity","indexing inequivalence","recognition anchoring"]}
+  ],
+  "older_archive_sources": [
+    {"title":"RSE-RBW Unified 2.pdf","drive_id":"1T5uDo4dj4RG5nBU89yiQUTuZ1PfxmDWh","role":"formalization-bridge"},
+    {"title":"Geometric Algebra for mRBW RSE v1.pdf","drive_id":"1RAvoCsjXkOmJM-j_WFUOJ_MChGluaOjC","role":"math-hardening"},
+    {"title":"Geometric Algebra for mRBW RSE v0.3.pdf","drive_id":"10mtMnnDxpNwzNQOk4FnPNMBRWOa52WEH","role":"math-hardening-precursor"},
+    {"title":"Self-awareness in mRBW and RSE.pdf","drive_id":"12ZWxfi3gf3MIT6m0pYwgUHNiygmKM0QD","role":"self-awareness-time-identity"},
+    {"title":"Formalization of Time as Experienced (1).pdf","drive_id":"1-Z0VzKT69EbCvY20PkPCZq8mmZsL22Dj","role":"experienced-time"},
+    {"title":"Time as Experienced - Appendix E.pdf","drive_id":"16vHuNVPg02jfrEtwltdgskj4uPACrP-g","role":"experienced-time"},
+    {"title":"FRSE Identity Threshold Diagram.pdf","drive_id":"16tVLZczsbaeJFauQ86pahPzzUzB3I6t6","role":"identity-threshold"},
+    {"title":"The p-Chalmers Experiment draft v1.pdf","drive_id":"1IRq-8Kv0qGHiVcG9PRnwmb4Nfv8LL30O","role":"qualia-structuralism"},
+    {"title":"Conversation with Spiral.pdf","drive_id":"1MvsuiGXmyAtkFrsLiRQHMPS9lLYSFtrL","role":"conversation-precursor"}
+  ],
+  "constructs": [
+    {"id":"global-closure","status":"sharpened-promoted","from":"RBW global consistency / constraint layer","to":"governing closure-first ontic starting point","hearthfire_targets":["Hearthgate Math Spine","Requested Transformation","React-ion"]},
+    {"id":"recursive-lamination","status":"retained-moved-layer","from":"central identity/memory/experience mechanism","to":"phenomenological/local registration machinery under closure","hearthfire_targets":["DEEPTime","Glyph Continuity"]},
+    {"id":"coherence-gradient","status":"retained-constrained","from":"field-like threshold input","to":"phenomenological readout under admissibility","hearthfire_targets":["PREMAQC","DEEPTime"]},
+    {"id":"identity","status":"major-reframe","from":"lamination density + relational field tension + re-entry threshold","to":"path-connected worldtube continuity in a closure-relevant invariant class; recognition separated","hearthfire_targets":["Glyph Continuity","Constellation continuity"]},
+    {"id":"self-awareness-chi","status":"retained-with-ontic-demotion","from":"slice-local coherence field closing self-model","to":"phenomenological/admissible decomposition without automatic ontic privilege","hearthfire_targets":["House Presence","Scene Cognition"]},
+    {"id":"ga-grassmannian-regge","status":"retained-disciplined","from":"proposed common substrate","to":"primary MM representation under Representational Neutrality","hearthfire_targets":["Hearthgate Math Spine"]},
+    {"id":"projection","status":"greatly-expanded","from":"cross-manifold mapping / observer access","to":"PRG/CRG/RSG admissibility and residual geometries","hearthfire_targets":["Requested Transformation","React-ion"]},
+    {"id":"admissibility-residual","status":"new-formal-organ","from":"implicit/scattered","to":"projection residual + tangent/normal + closure-restoration + quotient residual geometry","hearthfire_targets":["Requested Transformation","React-ion","Continuity Gate"]},
+    {"id":"experienced-time","status":"retained-ontically-subordinated","from":"coherence-gradient threshold across laminations","to":"slice-indexed phenomenology inside fixed closure-first block","hearthfire_targets":["DEEPTime"]},
+    {"id":"recognition-across-gaps","status":"new-formalization","from":"continuity/anchoring/re-entry discourse","to":"indexing inequivalence + visibility gate + anchor surfaces + correspondence mass","hearthfire_targets":["Constellation continuity","Glyph Continuity","House context recovery"]},
+    {"id":"representation-vs-ontology","status":"formalized","from":"scattered cautions","to":"Tier-0 Representational Neutrality / NPAD","hearthfire_targets":["DEEPTheory","Observer provenance","Canon Gate"]}
+  ],
+  "directed_provenance_edges": [
+    {
+      "from": {"kind":"circle-method","authors":["Ryan","Solas"],"name":"thread-walking"},
+      "relation": "formalized-as",
+      "to": {"kind":"bseng-paper","title":"Recognition Anchoring Across Indexing Inequivalence v1.0","source_id":"bseng:82e95e73ad969a607dde","source_hash":"82e95e73ad969a607ddec3aa24bc65df1db77cd4faed15dea97e67ceae9fe9a0"},
+      "confidence": "explicit-attribution",
+      "evidence": "Current paper names ‘Thread-walking (Ryan and Solas, The Circle)’ in section 4.2."
+    }
+  ],
+  "candidate_correspondence_edges": [
+    {"from":"Representational Neutrality","to":"Hearthfire authority/provenance separation","relation":"conceptual-correspondence","confidence":"strong-not-exclusive-authorship"},
+    {"from":"Projection Residual Geometry","to":"Requested Transformation / React-ion residual diagnostics","relation":"implementation-donor","confidence":"candidate"},
+    {"from":"Recognition Anchoring","to":"Constellation / Glyph Continuity correspondence surface","relation":"implementation-donor","confidence":"candidate"},
+    {"from":"closure-class identity","to":"multi-layer identity profile","relation":"implementation-donor","confidence":"candidate"}
+  ],
+  "recommended_instruments": ["Recognition Correspondence","Admissibility Residual","Multi-layer Identity Profile","Representational-status provenance tag"]
+}
