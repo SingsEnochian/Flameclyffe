@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import ThemeStudio from './ThemeStudio.jsx';
 import FlameChannel from './FlameChannel.jsx';
 import ArtifactBridgePanel from './ArtifactBridgePanel.jsx';
+import AssetWatcherPanel from './AssetWatcherPanel.jsx';
 import { applyProjectZeroTheme, loadProjectZeroTheme } from './themeEngine.js';
 import './deepObserverBridge.js';
 import './extensions.css';
@@ -15,7 +16,7 @@ function CompanionBridgeExtensions() {
     return current;
   });
 
-  return <><FlameChannel /><ArtifactBridgePanel /><ThemeStudio theme={theme} onChange={setTheme} /></>;
+  return <><FlameChannel /><ArtifactBridgePanel /><AssetWatcherPanel /><ThemeStudio theme={theme} onChange={setTheme} /></>;
 }
 
 function mount() {
