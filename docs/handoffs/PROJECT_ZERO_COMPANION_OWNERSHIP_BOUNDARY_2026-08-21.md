@@ -38,7 +38,7 @@ The former `Project Zero Core Gate` name is retired.
 
 The active workflow is **Project Zero Companion Bridge Gate** and tests/builds only the Flameclyffe Companion bridge.
 
-Latest ownership-boundary seal at this handoff: **Project Zero Companion Bridge Gate #5 ✅** on `dda6e9591756e16ca7e02636da9f27fac2be3643`.
+Ownership-boundary code and docs have passed the renamed Companion gate. Exact-head verification is recorded by GitHub Actions on the branch rather than treated as Project Zero validation.
 
 ## Boundary equations
 
