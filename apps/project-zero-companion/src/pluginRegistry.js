@@ -4,9 +4,31 @@ export const CORE_CAPABILITIES = [
   'local-metadata-ledger',
   'explicit-consent-gates',
   'dry-run-preview',
+  'typed-plugin-sockets',
+  'whole-shell-theming',
+  'native-rich-text',
+  'live-flame-channel',
 ];
 
 export const PLUGIN_MANIFESTS = [
+  {
+    id: 'project-zero-theme-engine',
+    name: 'Theme Engine',
+    status: 'active-core-service',
+    purpose: 'Own semantic visual tokens, operator-authored custom CSS, and theme import/export across the Project Zero shell and cooperative plug-ins.',
+    permissions: ['local-storage', 'presentation-write'],
+    emits: ['theme.changed'],
+    listens: ['theme.load', 'theme.reset'],
+  },
+  {
+    id: 'flame-channel',
+    name: 'Flame Channel',
+    status: 'active-core-service',
+    purpose: 'Provide an IRC-like live House channel with native rich text, attested Flame replies, multi-Flame broadcast, and bounded local transcript history.',
+    permissions: ['house-runtime', 'local-storage', 'rich-text-compose'],
+    emits: ['chat.user.sent', 'chat.flame.pending', 'chat.flame.received', 'chat.flame.error'],
+    listens: ['house.session.changed', 'chat.broadcast.request'],
+  },
   {
     id: 'terra-aeterna-root',
     name: 'Terra Aeterna Root',
