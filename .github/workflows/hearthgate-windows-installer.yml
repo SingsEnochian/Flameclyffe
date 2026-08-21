@@ -6,6 +6,7 @@ on:
     paths:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
+      - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
       - "config/engine-name-authority.json"
       - "scripts/deny-stale-engine-contracts.mjs"
@@ -21,6 +22,7 @@ on:
     paths:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
+      - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
       - "config/engine-name-authority.json"
       - "scripts/deny-stale-engine-contracts.mjs"
@@ -84,13 +86,15 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: npm run contracts:verify
 
-      - name: Test and build packaged STARWELL framework
+      - name: Test and build packaged STARWELL + Companion surfaces
         working-directory: ${{ github.workspace }}
         env:
           STARWELL_BASE: /starwell/
+          PROJECT_ZERO_BASE: /project-zero-companion/
         run: |
           npm run starwell:test
           npm run starwell:build
+          npm run project-zero:build
 
       - name: Install locked Hearthgate dependencies
         run: npm ci
@@ -103,6 +107,9 @@ jobs:
 
       - name: Stage STARWELL inside Hearthgate
         run: npm run stage:starwell
+
+      - name: Stage Project Zero Companion inside Hearthgate
+        run: npm run stage:project-zero-companion
 
       - name: Prepare deterministic installer assets
         run: npm run prepare:assets
@@ -132,6 +139,7 @@ jobs:
           $asar = "$resourcesRoot/app.asar"
           $unpackedRoot = "$resourcesRoot/app.asar.unpacked"
           $starwellRoot = "$unpackedRoot/public/starwell"
+          $companionRoot = "$unpackedRoot/public/project-zero-companion"
           $required = @(
             $asar,
             "$starwellRoot/index.html",
@@ -143,6 +151,7 @@ jobs:
             "$starwellRoot/schemas/bifrost-temporal-state-v1.schema.json",
             "$starwellRoot/schemas/world-tone-approval.schema.json",
             "$starwellRoot/schemas/ipad-somatic-haptic-receipt.schema.json",
+            "$companionRoot/index.html",
             "$unpackedRoot/server-secure.js",
             "$unpackedRoot/security/local-boundary.js",
             "$unpackedRoot/fontforge/server.js"
@@ -163,6 +172,11 @@ jobs:
             if (-not $html.Contains('/starwell/')) {
               throw "Packaged $($page.Name) entry does not use the /starwell/ asset base."
             }
+          }
+
+          $companionHtml = Get-Content -Raw -Path "$companionRoot/index.html"
+          if (-not $companionHtml.Contains('/project-zero-companion/')) {
+            throw "Packaged Project Zero Companion entry does not use the Hearthgate /project-zero-companion/ asset base."
           }
 
           $somaticHtml = Get-Content -Raw -Path "$starwellRoot/world-tone-approval/index.html"
@@ -224,8 +238,10 @@ jobs:
           - SHA-256: ``$($hash.Hash)``
           - Formalism: compression → release → compression of the release
           - Somatic gate: packaged and Rowan-owned
+          - Project Zero Companion: packaged at ``/project-zero-companion/`` with native selected-folder watcher IPC
+          - Project Zero authority: external/project-owned; Companion is Flameclyffe integration only
           - Naming authority: Rowan, fail-closed
-          - Security: loopback-only services and restricted origins
+          - Security: loopback-only services, restricted origins, metadata-only explicit folder watcher
           - Signing: unsigned development build
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
