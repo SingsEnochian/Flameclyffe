@@ -1,4 +1,8 @@
 import { CONSTELLATION_LENS_EVENTS } from './constellation-lens.js';
+import {
+  CONSTELLATION_RATIONALE_EVENT,
+  reasoningSummariesEnabled,
+} from './constellation-reasoning-preference.js';
 import { createVisibleResponseSignature } from './visible-response-correspondence.js';
 import { evaluateVisibleSemanticProjection } from './semantic-projection-evaluator.js';
 import { buildConstellationSemanticProjectionDivergence } from './constellation-semantic-projection-divergence.js';
@@ -21,6 +25,25 @@ function activeSurface() {
   return Boolean(document.querySelector('.nav-button.active[data-room="deep-observer"], .nav-button.active[data-room="commons"]'));
 }
 
+function dispatchRationale(detail, evaluated) {
+  if (!reasoningSummariesEnabled() || !evaluated.rationale) return;
+  document.dispatchEvent(new CustomEvent(CONSTELLATION_RATIONALE_EVENT, {
+    detail: {
+      requestId: detail.requestId || null,
+      voiceId: detail.voiceId,
+      fieldKey: detail.fieldKey || null,
+      rationale: evaluated.rationale,
+      sourceProjectionId: evaluated.projection.projection_id,
+      evaluator: evaluated.projection.evaluator,
+      authority: {
+        visible_shareable_summary: true,
+        hidden_chain_of_thought: false,
+        persisted_with_projection: false,
+      },
+    },
+  }));
+}
+
 async function captureSemanticProjection(event) {
   const detail = event.detail || {};
   if (!detail.runtimeVerified || !detail.voiceId || !String(detail.text || '').trim()) return;
@@ -36,6 +59,7 @@ async function captureSemanticProjection(event) {
       voiceId: detail.voiceId,
       text: detail.text,
       requestId: detail.requestId || null,
+      includeRationale: reasoningSummariesEnabled(),
       generatedAt: signature.generated_at,
     });
     if (evaluated.status !== 'projected') return;
@@ -45,6 +69,7 @@ async function captureSemanticProjection(event) {
       voice_id: detail.voiceId,
       request_id: detail.requestId || null,
     });
+    dispatchRationale(detail, evaluated);
   } catch (error) {
     console.warn('Semantic projection capture stopped:', error);
   } finally {
