@@ -9,6 +9,7 @@ export const CORE_CAPABILITIES = [
   'native-rich-text',
   'live-flame-channel',
   'shared-artifact-contract',
+  'native-selected-folder-watcher',
 ];
 
 export const PLUGIN_MANIFESTS = [
@@ -69,11 +70,11 @@ export const PLUGIN_MANIFESTS = [
   {
     id: 'asset-watcher',
     name: 'Asset Watcher Adapter',
-    status: 'planned-native',
-    purpose: 'Watch explicitly selected Companion folders for new files and generate reviewable bridge-event drafts.',
-    permissions: ['selected-folders', 'file-metadata-read'],
-    emits: ['file_detected', 'file_anchor_draft'],
-    listens: ['folder_binding_changed'],
+    status: 'active-native-companion-service',
+    purpose: 'Use Hearthgate Electron to watch only an explicitly selected folder and translate metadata-only file events into reviewable Companion artifact receipts. Browser mode remains inert.',
+    permissions: ['explicit-folder-picker', 'file-metadata-read', 'native-session-watch'],
+    emits: ['asset.file_detected'],
+    listens: ['electron.asset-watch:event'],
   },
 ];
 
