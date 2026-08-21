@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 test('Arcsweep mounts the durable World Registry persistence controller', async () => {
-  const html = await readFile('apps/arcsweep/index.html', 'utf8');
-  assert.match(html, /world-registry-persistence-sidecar\.js/);
+  const manifest = await readFile('apps/arcsweep/src/sidecar-bootstrap.js', 'utf8');
+  assert.match(manifest, /world-registry-persistence-sidecar\.js/);
 });
 
 test('World Registry persistence controller owns create, save, delete and recovery', async () => {

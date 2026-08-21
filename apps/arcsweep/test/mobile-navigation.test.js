@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const bootstrap = readFileSync(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../src/mobile-navigation.css', import.meta.url), 'utf8');
 const sidecar = readFileSync(new URL('../src/mobile-navigation-sidecar.js', import.meta.url), 'utf8');
 
 test('iPhone navigation uses a dedicated fixed bar plus room sheet', () => {
   assert.match(index, /viewport-fit=cover/);
   assert.match(index, /mobile-navigation\.css/);
-  assert.match(index, /mobile-navigation-sidecar\.js/);
+  assert.match(bootstrap, /mobile-navigation-sidecar\.js/);
   assert.match(css, /grid-template-columns:\s*repeat\(5,/);
   assert.match(css, /\.sidebar\s*\{\s*display:\s*none\s*!important;/);
   assert.match(css, /\.mobile-room-sheet/);

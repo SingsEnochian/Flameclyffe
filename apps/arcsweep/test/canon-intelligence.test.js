@@ -136,9 +136,9 @@ test('live inbox shows source evidence and keeps raw HTML escaped', () => {
 });
 
 test('Arcsweep mounts Canon Intelligence after runtime and Commons surfaces', async () => {
-  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  const runtime = html.indexOf('./src/runtime-integration-bootstrap.js');
-  const commons = html.indexOf('./src/house-commons-chat-v3.js');
-  const intelligence = html.indexOf('./src/canon-intelligence-live-ui.js');
+  const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
+  const runtime = manifest.indexOf('./runtime-integration-bootstrap.js');
+  const commons = manifest.indexOf('./house-commons-chat-v3.js');
+  const intelligence = manifest.indexOf('./canon-intelligence-live-ui.js');
   assert.ok(runtime >= 0 && commons > runtime && intelligence > commons);
 });
