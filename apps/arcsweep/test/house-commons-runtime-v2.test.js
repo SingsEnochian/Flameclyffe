@@ -14,7 +14,7 @@ function harness() {
   return { handler, rows };
 }
 
-test('House Commons v2 persists thread, reply, turn, and runtime provenance', async () => {
+test('House Commons legacy v2 fields survive promotion into the v3 entry schema', async () => {
   const { handler } = harness();
   const request = new Request('https://example.test/api/v1/house/commons', {
     method: 'POST', headers: { authorization: 'Bearer house-test-token', 'content-type': 'application/json' },
@@ -27,7 +27,7 @@ test('House Commons v2 persists thread, reply, turn, and runtime provenance', as
   const response = await handler(request);
   assert.equal(response.status, 201);
   const entry = await response.json();
-  assert.equal(entry.schema, 'hearthgate.house-commons-entry/v2');
+  assert.equal(entry.schema, 'hearthgate.house-commons-entry/v3');
   assert.equal(entry.thread_id, 'thread-1');
   assert.equal(entry.reply_to, 'steward-1');
   assert.equal(entry.turn_id, 'turn-1');
@@ -35,13 +35,14 @@ test('House Commons v2 persists thread, reply, turn, and runtime provenance', as
   assert.equal(entry.runtime.latency_ms, 144);
 });
 
-test('House Commons v2 live read returns saved entries with the v2 log schema', async () => {
+test('House Commons live read promotes legacy-compatible entries into the v3 log schema', async () => {
   const { handler } = harness();
   await handler(new Request('https://example.test/api/v1/house/commons', { method: 'POST', headers: { authorization: 'Bearer house-test-token', 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'steward', author: 'Rowan', text: 'Hello', thread_id: 'thread-1' }) }));
   const response = await handler(new Request('https://example.test/api/v1/house/commons', { headers: { authorization: 'Bearer house-test-token' } }));
   assert.equal(response.status, 200);
   const log = await response.json();
-  assert.equal(log.schema, 'hearthgate.house-commons-log/v2');
+  assert.equal(log.schema, 'hearthgate.house-commons-log/v3');
   assert.equal(log.entries.length, 1);
+  assert.equal(log.entries[0].schema, 'hearthgate.house-commons-entry/v3');
   assert.equal(log.entries[0].thread_id, 'thread-1');
 });
