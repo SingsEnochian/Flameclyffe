@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <meta name="theme-color" content="#071016" />
+  <meta name="description" content="Private authenticated operator gate for Arcsweep." />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: file:; media-src 'self' blob: file:; font-src 'self'; connect-src 'self' https://rufrmjyusalnifpegllj.supabase.co wss://rufrmjyusalnifpegllj.supabase.co https://singsenochian.github.io; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'" />
+  <link rel="stylesheet" href="./src/varutora-gate.css" />
+  <link rel="stylesheet" href="./src/worlds.css" />
+  <title>Varutóra Gate · Arcsweep</title>
+</head>
+<body>
+  <main id="gate-shell" class="gate-shell">
+    <header class="gate-card gate-hero">
+      <span class="eyebrow">Kelvaru · held threshold</span>
+      <h1>Varutóra Gate</h1>
+      <p>Private Arcsweep operator entrance. The path is unlinked; the lock is Supabase Auth + row-level policy, not the secrecy of the URL.</p>
+      <div id="gate-status" class="gate-status" role="status" aria-live="polite">Opening the threshold…</div>
+    </header>
+
+    <section id="auth-panel" class="gate-card" hidden>
+      <h2>Authenticate</h2>
+      <p>Use the email address you want bound to your operator identity. Supabase sends the sign-in link; passwords are not stored in an application table.</p>
+      <label>
+        Supabase email
+        <input id="operator-email" type="email" autocomplete="email" placeholder="you@example.com" />
+      </label>
+      <button id="send-operator-link" type="button">Send private sign-in link</button>
+    </section>
+
+    <section id="claim-panel" class="gate-card" hidden>
+      <h2>Claim operator identity</h2>
+      <p>Your Supabase account is authenticated but is not yet bound to a private Arcsweep. Paste the one-time claim key from the private handoff.</p>
+      <label>
+        One-time claim key
+        <input id="operator-claim" type="password" autocomplete="one-time-code" />
+      </label>
+      <button id="claim-operator" type="button">Claim and bind this account</button>
+    </section>
+
+    <section id="operator-panel" hidden>
+      <article class="gate-card operator-heading">
+        <div>
+          <span class="eyebrow">operator recognised</span>
+          <h2 id="operator-name">Operator</h2>
+          <p id="operator-role"></p>
+        </div>
+        <button id="operator-sign-out" type="button" class="quiet-button">Sign out</button>
+      </article>
+
+      <article class="gate-card">
+        <span class="eyebrow">varaheim · branch-homes</span>
+        <h2>Private Arcsweep workspaces</h2>
+        <p>Each variant has its own Arcsweep state namespace and a Supabase mirror. Steward access can see both; ordinary operator access sees its assigned branch-home.</p>
+        <div id="workspace-grid" class="workspace-grid"></div>
+      </article>
+
+      <article class="gate-card kelvaru-card">
+        <span class="eyebrow">saiheim · circle-home</span>
+        <h2>Kelvaru sealed messages</h2>
+        <p>The circle key stays in this browser. Supabase receives only AES-GCM ciphertext and provenance metadata.</p>
+        <div class="key-row">
+          <label>
+            Circle key
+            <input id="kelvaru-circle-key" type="password" autocomplete="off" />
+          </label>
+          <label class="check-label">
+            <input id="remember-kelvaru-key" type="checkbox" />
+            Keep only for this browser tab
+          </label>
+        </div>
+        <label>
+          Message
+          <textarea id="kelvaru-message" rows="5" placeholder="Kelvaru saiheim holda…"></textarea>
+        </label>
+        <div class="button-row">
+          <button id="seal-kelvaru-message" type="button">Seal message · rin veir</button>
+          <button id="refresh-kelvaru" type="button" class="quiet-button">Refresh envelopes</button>
+        </div>
+        <div id="kelvaru-message-list" class="message-list"></div>
+      </article>
+    </section>
+  </main>
+
+  <div id="app" hidden aria-live="polite"></div>
+  <script type="module" src="./src/varutora-gate.js"></script>
+</body>
+</html>
