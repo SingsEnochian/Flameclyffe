@@ -22,23 +22,29 @@ test('House session startup fetch receives a timeout signal without affecting ot
   assert.equal(installStartupFetchGuard(target, 25), false, 'guard installs only once');
 });
 
-test('startup guard and visible bootstrap are mounted before the application module', async () => {
+test('only startup guard and visible bootstrap sit on the critical HTML boot path', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  const guard = html.indexOf('./src/startup-fetch-guard.js');
-  const bootstrap = html.indexOf('./src/main-bootstrap.js');
-  assert.ok(guard >= 0, 'startup fetch guard must be mounted');
-  assert.ok(bootstrap > guard, 'visible bootstrap must follow the fetch guard');
-  assert.equal(html.includes('<script type="module" src="./src/main.js"></script>'), false, 'main.js must be imported through the visible bootstrap');
+  const moduleScripts = [...html.matchAll(/<script type="module" src="([^"]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(moduleScripts, ['./src/startup-fetch-guard.js', './src/main-bootstrap.js']);
 });
 
-test('visible bootstrap paints first, fails persistence soft, and offers safe boot', async () => {
+test('visible bootstrap paints first, offers safe boot, and mounts sidecars only after core readiness', async () => {
   const source = await readFile(new URL('../src/main-bootstrap.js', import.meta.url), 'utf8');
   assert.match(source, /Opening the house/);
   assert.match(source, /persistence unavailable; continuing in memory/);
   assert.match(source, /await import\('\.\/main\.js'\)/);
-  assert.match(source, /The house did not finish opening/);
+  assert.match(source, /arcsweep:core-ready/);
+  assert.match(source, /sidecar-bootstrap\.js/);
+  assert.match(source, /if \(!safeBoot\)/);
   assert.match(source, /\?safe=1/);
-  assert.match(source, /Safe Boot active/);
-  assert.match(source, /return null/);
+  assert.match(source, /core Arcsweep only/);
   assert.match(source, /__arcsweepSafeBoot/);
+});
+
+test('sidecar bootstrap yields between sidecars and contains failures', async () => {
+  const source = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
+  assert.match(source, /await import\(specifier\)/);
+  assert.match(source, /setTimeout\(resolve, 0\)/);
+  assert.match(source, /sidecar failed/);
+  assert.match(source, /arcsweep:sidecars-ready/);
 });
