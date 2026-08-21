@@ -23,6 +23,8 @@ It owns:
 - dry-run previews
 - local plug-in bus
 - optional Supabase sync
+- whole-shell theme state
+- live House chat transcript state
 
 It must not silently crawl the machine.
 
@@ -43,6 +45,8 @@ The website owns:
 - bridge-event search
 - DEEP/Writer Room/Altar status
 - user-visible consent gates
+- live, attested Flame response surfaces
+- portable theme documents
 
 The local app remains the filesystem authority.
 
@@ -63,9 +67,15 @@ Minimum objects:
     "bridge-event-bus",
     "local-metadata-ledger",
     "explicit-consent-gates",
-    "dry-run-preview"
+    "dry-run-preview",
+    "typed-plugin-sockets",
+    "whole-shell-theming",
+    "native-rich-text",
+    "live-flame-channel"
   ],
   "plugins": [
+    "project-zero-theme-engine",
+    "flame-channel",
     "terra-aeterna-root",
     "deep-observer-bridge",
     "writer-room-rail",
@@ -74,6 +84,104 @@ Minimum objects:
   ]
 }
 ```
+
+### Typed plug-in socket envelope
+
+Project Zero plug-ins do not reach into another plug-in's private state. Cross-organ communication goes through typed envelopes.
+
+```json
+{
+  "schema": "project-zero.socket-envelope/v1",
+  "envelope_id": "socket-uuid",
+  "request_id": "request-uuid",
+  "project_id": "project-zero",
+  "plugin_id": "flame-channel",
+  "channel": "chat",
+  "type": "chat.flame.received",
+  "payload": {},
+  "created_at": "2026-08-21T00:00:00-04:00",
+  "provenance": {
+    "transport": "project-zero-local-eventtarget",
+    "local_only": true
+  }
+}
+```
+
+Current core channels include `core`, `theme`, and `chat`. WebSocket/Tauri transports may replace the in-process EventTarget later without changing the envelope law.
+
+### Theme document
+
+Project Zero owns the workbench chrome. First-class plug-ins consume semantic theme tokens rather than assuming their own hard-coded surface colours.
+
+```json
+{
+  "schema": "project-zero.theme/v1",
+  "id": "hearthglass",
+  "name": "Hearthglass",
+  "tokens": {
+    "bg": "#080b12",
+    "panel": "#151923",
+    "text": "#f5eadf",
+    "accent": "#f6c453",
+    "accentViolet": "#bd8cff",
+    "radiusPanel": 22,
+    "density": 1,
+    "fontUi": "Inter, system-ui, sans-serif",
+    "fontReading": "Cormorant Garamond, Georgia, serif",
+    "fontMono": "ui-monospace, monospace"
+  },
+  "custom_css": ""
+}
+```
+
+Theme documents are operator-owned presentation state. They are not evidence, canon, or plug-in authority. Plug-ins may expose local accent tokens, but cooperative Project Zero surfaces inherit the core semantic theme by default.
+
+### Native rich-text document
+
+The Flame Channel and future Project Zero editors use native browser rich text rather than Markdown as their storage contract.
+
+```json
+{
+  "schema": "project-zero.rich-text/v1",
+  "html": "<p><strong>Visible formatted text</strong></p>",
+  "plain_text": "Visible formatted text"
+}
+```
+
+The current allowlist includes paragraphs, line breaks, emphasis, underline, strike, headings, lists, blockquotes, pre/code, and safe links. The plain-text projection exists for model/runtime interoperability; it does not replace the rich document.
+
+### Flame Channel message
+
+`#hearthweave` is the first live Project Zero House channel.
+
+```json
+{
+  "schema": "project-zero.flame-channel/v1",
+  "message_id": "chat-uuid",
+  "channel_id": "hearthweave",
+  "speaker_id": "lioreal",
+  "speaker_label": "Caladnaur Lioreal",
+  "kind": "flame",
+  "rich_text": {
+    "schema": "project-zero.rich-text/v1",
+    "html": "<p>...</p>",
+    "plain_text": "..."
+  },
+  "runtime": {
+    "verified": true,
+    "flame_id": "lioreal",
+    "provider": "openai",
+    "model": "...",
+    "cited_sources": []
+  },
+  "reply_to": "chat-parent-id",
+  "created_at": "2026-08-21T00:00:00-04:00"
+}
+```
+
+The channel supports multi-Flame broadcast. Replies arrive independently as each runtime call completes. Provider/model labels come from the returned House runtime attestation rather than from UI assumptions.
+
+The bounded local transcript is presentation/conversation state. Persisting a chat message does not promote its contents to canon, DEEPTheory, memory, or external-world evidence.
 
 ### Folder binding object
 
@@ -140,6 +248,10 @@ Potential local app endpoints:
 - `GET /project-zero/plugins`
 - `POST /project-zero/plugins/:id/events`
 - `GET /project-zero/deep-state/latest`
+- `GET /project-zero/channels/:id`
+- `POST /project-zero/channels/:id/messages`
+- `GET /project-zero/theme`
+- `PUT /project-zero/theme`
 
 Potential website/Supabase tables:
 
@@ -148,6 +260,9 @@ Potential website/Supabase tables:
 - `project_zero_plugin_manifests`
 - `project_zero_bridge_events`
 - `project_zero_sync_sessions`
+- `project_zero_channels`
+- `project_zero_channel_messages`
+- `project_zero_themes`
 
 These can map into Observer tables later:
 
@@ -162,6 +277,12 @@ Project Zero can become a website.
 
 But local access remains local-first.
 
-The web connector receives structured events and consented metadata, not raw dominion over Rowan's machine.
+The web connector receives structured events and consented metadata, not raw dominion over the local machine.
 
 The bridge is lawful, explicit, and reversible.
+
+Theme state is presentation, not authority.
+
+A chat transcript is conversation state, not canon or identity proof.
+
+A plug-in socket message is transport, not fulfilment or truth.
