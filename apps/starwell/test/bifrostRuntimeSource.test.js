@@ -82,15 +82,6 @@ test('source binding receipt includes both shores and the selected execution sou
 });
 
 test('native action receipt carries source binding instead of silent targetside assumption', () => {
-  const runtime = promoteBifrostRuntimeSource(packet(), {
-    active_execution_side: 'targetside',
-    now: '2026-08-22T07:49:00.000Z',
-  });
-  globalThis.window = {
-    __BIFROST_RUNTIME_STATE__: runtime,
-    dispatchEvent() {},
-  };
-
   const result = enforceBifrostNativeAction({
     actionId: 'run-window',
     packetReader: () => packet(),
@@ -102,8 +93,6 @@ test('native action receipt carries source binding instead of silent targetside 
   assert.equal(result.receipt.selected_execution_side, 'targetside');
   assert.equal(result.receipt.execution_source.source_state_id, 'target-state');
   assert.equal(result.receipt.source_binding_receipt.schema, 'bifrost.source-binding-receipt/v0.1');
-
-  delete globalThis.window;
 });
 
 test('missing selected source blocks even before legacy engine execution', () => {
