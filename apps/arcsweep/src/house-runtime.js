@@ -73,7 +73,36 @@ export async function readFlameStatuses(voices, token, fetchImpl = fetch) {
       const data = await response.json().catch(() => ({}));
       if (response.status === 401) return { id: voice.id, name: voice.name, state: 'unauthorised', configured: false, missing: [] };
       if (!response.ok) return { id: voice.id, name: voice.name, state: 'route-error', configured: false, missing: [], error: data.error || `${response.status}` };
-      return { id: voice.id, name: voice.name, state: data.configured ? 'live' : data.gateway_configured && data.runtime_reachable ? 'model-not-pulled' : 'provider-unavailable', configured: Boolean(data.configured), provider: data.provider, model: data.model, missing: data.missing || [], gatewayConfigured: data.gateway_configured ?? null, runtimeReachable: data.runtime_reachable ?? null, modelAvailable: data.model_available ?? null, runtimeError: data.runtime_error || null };
+      const fallback = data.hosted_fallback || null;
+      const fallbackReady = fallback?.configured === true;
+      const state = data.configured
+        ? 'live'
+        : fallbackReady
+          ? 'hosted-fallback-ready'
+          : data.gateway_configured && data.runtime_reachable
+            ? 'model-not-pulled'
+            : 'provider-unavailable';
+      return {
+        id: voice.id,
+        name: voice.name,
+        state,
+        configured: Boolean(data.configured),
+        provider: fallbackReady ? fallback.provider : data.provider,
+        model: fallbackReady ? fallback.model : data.model,
+        missing: fallbackReady ? [] : data.missing || [],
+        gatewayConfigured: data.gateway_configured ?? null,
+        runtimeReachable: data.runtime_reachable ?? null,
+        modelAvailable: data.model_available ?? null,
+        runtimeError: data.runtime_error || null,
+        hostedFallback: fallback ? {
+          configured: fallbackReady,
+          provider: fallback.provider || null,
+          model: fallback.model || null,
+          executionPath: fallback.execution_path || null,
+          primaryRouteUnchanged: fallback.primary_route_unchanged === true,
+          missing: fallback.missing || [],
+        } : null,
+      };
     } catch (error) {
       return { id: voice.id, name: voice.name, state: 'offline', configured: false, missing: [], error: error.message };
     }
