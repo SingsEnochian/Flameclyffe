@@ -60,7 +60,8 @@ test('native action guard allows labelled local reference preview without certif
   assert.equal(result.allowed, true);
   assert.equal(result.policy.local_reference, true);
   assert.equal(result.policy.certified, false);
-  assert.equal(result.receipt.schema, 'bifrost.native-action-receipt/v0.1');
+  assert.equal(result.receipt.schema, 'bifrost.native-action-receipt/v0.2');
+  assert.equal(result.receipt.source_kind, 'local-reference');
   assert.equal(result.receipt.execution_allowed, true);
 });
 
@@ -72,9 +73,10 @@ test('native action guard blocks incomplete two-shore packets before engine exec
 
   assert.equal(result.allowed, false);
   assert.equal(result.policy.bridge_status, 'SHORE_STATE_INCOMPLETE');
-  assert.equal(result.receipt.schema, 'bifrost.blocked-action-receipt/v0.1');
-  assert.equal(result.receipt.attempted_action, 'run-window');
-  assert.equal(result.receipt.blocks_execution, true);
+  assert.equal(result.receipt.schema, 'bifrost.native-action-receipt/v0.2');
+  assert.equal(result.receipt.action_id, 'run-window');
+  assert.equal(result.receipt.execution_allowed, false);
+  assert.equal(result.receipt.source_binding_receipt.schema, 'bifrost.source-binding-receipt/v0.1');
 });
 
 test('native action guard allows complete temporal two-shore song export', () => {
@@ -88,4 +90,6 @@ test('native action guard allows complete temporal two-shore song export', () =>
   assert.equal(result.policy.crossing_ready, true);
   assert.equal(result.policy.certified, true);
   assert.equal(result.receipt.action_id, 'export-premaq-song');
+  assert.equal(result.receipt.selected_execution_side, 'targetside');
+  assert.equal(result.receipt.execution_source.source_state_id, 'target-state');
 });
