@@ -12,6 +12,11 @@ import {
   subscribeToDualAspectActivation,
 } from '../src/hearthweave-kernel/activation.js';
 import { enforceBifrostNativeAction } from './bifrost-native-action-guard.js';
+import {
+  buildBifrostSourceBindingReceipt,
+  promoteBifrostRuntimeSource,
+  resolveBifrostExecutionSource,
+} from './bifrost-runtime-source.js';
 
 const SESSION_SCHEMA = 'bifrost.current-interface-session/v0.4';
 const SESSION_KEY = 'bifrost:current-interface-session:v0.4';
@@ -19,6 +24,7 @@ const MAX_WINDOW_CYCLES = 8;
 const AUDIO_GAIN_CEILING = 0.03;
 const PROXY_MIN_HZ = 90;
 const PROXY_MAX_HZ = 360;
+const ACTIVE_EXECUTION_SIDE = 'targetside';
 
 const axisNames = Object.freeze({
   P: 'Presence',
@@ -62,6 +68,9 @@ let cycleReceipts = [];
 let audioContext = null;
 let activeOscillators = new Set();
 let featherStopped = false;
+let runtimeState = null;
+let executionSource = null;
+let sourceBindingReceipt = null;
 
 function clone(value) {
   return value == null ? value : structuredClone(value);
@@ -125,11 +134,37 @@ function readPacket() {
   }
 }
 
-function stateFromActivePacket(packet) {
-  const candidate = packet?.temporal?.targetside;
-  if (!candidate) return null;
+function bindRuntimeSource(packet, { forceReference = false, actionId = 'bind-source' } = {}) {
+  const sourcePacket = forceReference ? null : packet;
+  runtimeState = promoteBifrostRuntimeSource(sourcePacket, {
+    active_execution_side: ACTIVE_EXECUTION_SIDE,
+  });
+  executionSource = resolveBifrostExecutionSource(runtimeState, {
+    active_execution_side: ACTIVE_EXECUTION_SIDE,
+  });
+  sourceBindingReceipt = buildBifrostSourceBindingReceipt(runtimeState, {
+    actionId,
+    active_execution_side: executionSource.selected_side,
+    notes: [
+      'main.js source binding path',
+      'stateFromActivePacket targetside shortcut has been replaced by runtime source promotion.',
+    ],
+  });
+
+  if (window) {
+    window.__BIFROST_RUNTIME_STATE__ = runtimeState;
+    window.__BIFROST_LAST_SOURCE_BINDING_RECEIPT__ = sourceBindingReceipt;
+    window.dispatchEvent(new CustomEvent('bifrost:source-binding', { detail: sourceBindingReceipt }));
+  }
+
+  return executionSource;
+}
+
+function stateFromActivePacket(packet, options = {}) {
+  const source = bindRuntimeSource(packet, options);
+  if (!source?.source_state) return null;
   try {
-    return validateTemporalState(candidate);
+    return validateTemporalState(source.source_state);
   } catch {
     return null;
   }
@@ -161,6 +196,11 @@ function restoreSavedSession(packet) {
     sourceState = validateTemporalState(saved.source_state ?? saved.state);
     sourceMode = saved.source_mode === 'active-packet' ? 'active-packet' : 'reference';
     cycleReceipts = Array.isArray(saved.receipts) ? clone(saved.receipts).slice(-128) : [];
+    if (saved.bifrost_runtime?.runtime_state) runtimeState = saved.bifrost_runtime.runtime_state;
+    if (saved.bifrost_runtime?.execution_source) executionSource = saved.bifrost_runtime.execution_source;
+    if (saved.bifrost_runtime?.source_binding_receipt) {
+      sourceBindingReceipt = saved.bifrost_runtime.source_binding_receipt;
+    }
     return true;
   } catch {
     sessionStorage.removeItem(SESSION_KEY);
@@ -177,6 +217,11 @@ function saveSession() {
       packet_fingerprint: sourceMode === 'active-packet' ? sourceFingerprint(activePacket) : null,
       source_state: sourceState,
       state: currentState,
+      bifrost_runtime: {
+        runtime_state: runtimeState,
+        execution_source: executionSource,
+        source_binding_receipt: sourceBindingReceipt,
+      },
       receipts: cycleReceipts.slice(-128),
     }));
   } catch {
@@ -197,6 +242,7 @@ function enforceNativeAction(actionId, target = 'engine') {
   return enforceBifrostNativeAction({
     actionId,
     packetReader: readPacket,
+    active_execution_side: ACTIVE_EXECUTION_SIDE,
     setStatus: target === 'audio'
       ? (message) => setAudioStatus(message)
       : (message) => setMessage(message, 'error'),
@@ -234,7 +280,9 @@ function currentTonePair() {
 
 function bindSource({ forceReference = false, preserveSaved = false } = {}) {
   activePacket = readPacket();
-  const packetState = forceReference ? null : stateFromActivePacket(activePacket);
+  const packetState = forceReference
+    ? null
+    : stateFromActivePacket(activePacket, { forceReference, actionId: 'bind-source' });
   sourceMode = packetState ? 'active-packet' : 'reference';
   sourceState = packetState ?? buildReferenceState();
   currentState = clone(sourceState);
@@ -244,9 +292,12 @@ function bindSource({ forceReference = false, preserveSaved = false } = {}) {
   if (preserveSaved && restoreSavedSession(activePacket)) {
     setMessage(`RESTORED · cycle ${currentState.spiral?.cycle ?? 0} remains the next compression source.`);
   } else if (sourceMode === 'active-packet') {
-    setMessage(`BOUND · ${activePacket.packet_id} supplies the released source state.`);
+    setMessage(
+      `BOUND · ${activePacket.packet_id} supplies ${executionSource.selected_side} as explicit ${executionSource.source_kind} execution source.`,
+    );
   } else {
-    setMessage('REFERENCE · no active DualAspectPacket was found. The local reference state is explicitly labelled.');
+    bindRuntimeSource(null, { forceReference: true, actionId: 'bind-reference-source' });
+    setMessage('REFERENCE · no executable active DualAspectPacket source was found. The local reference state is explicitly labelled.');
   }
   saveSession();
   renderAll();
@@ -290,7 +341,7 @@ function runWindow() {
     saveSession();
     renderAll();
     setMessage(
-      `VERIFIED · cycle ${currentState.spiral.cycle} released from its immediate predecessor. Next: compression-of-release.`,
+      `VERIFIED · cycle ${currentState.spiral.cycle} released from ${executionSource?.selected_side ?? ACTIVE_EXECUTION_SIDE}. Next: compression-of-release.`,
     );
   } catch (error) {
     setMessage(`BLOCKED · ${error.message}`, 'error');
@@ -390,7 +441,8 @@ async function soundPair() {
 
 function renderLineage() {
   const packet = sourceMode === 'active-packet' ? activePacket : null;
-  const sourceReceipt = packet?.provenance?.compression_release_receipt_id
+  const sourceReceipt = sourceBindingReceipt?.schema
+    ?? packet?.provenance?.compression_release_receipt_id
     ?? sourceState?.receipts?.at(-1)?.receipt_id
     ?? 'NOT YET CREATED';
   elements['source-status'].textContent = packet ? 'ACTIVE PACKET' : 'LOCAL REFERENCE';
@@ -402,7 +454,7 @@ function renderLineage() {
   elements['premaq-id'].textContent = packet?.observable?.premaq?.id ?? sourceState?.premaq?.id ?? 'UNKNOWN';
   elements['source-receipt'].textContent = sourceReceipt;
   elements['binding-note'].textContent = packet
-    ? `Every local cycle begins from packet ${short(packet.packet_id, 28)}. This interface does not mutate the packet or write canon.`
+    ? `Every local cycle begins from explicit ${executionSource?.selected_side ?? ACTIVE_EXECUTION_SIDE} source ${short(executionSource?.source_state_id, 28)}. This interface does not mutate the packet or write canon.`
     : 'No active packet is bound. Reference mode is declared, local, non-canon, and replaceable by the Continuity Gate.';
   elements['bind-active'].textContent = packet ? 'Rebind active packet' : 'Check for active packet';
 }
@@ -579,9 +631,14 @@ function exportReceipts() {
       packet_fingerprint: activePacket?.packet_fingerprint ?? null,
       shared_state_fingerprint: activePacket?.correspondence?.shared_state_fingerprint ?? null,
       source_state_id: sourceState?.state_id ?? null,
+      selected_execution_side: executionSource?.selected_side ?? ACTIVE_EXECUTION_SIDE,
+      execution_source: executionSource,
+      source_binding_receipt: sourceBindingReceipt,
     },
     bifrost_runtime: {
-      runtime_state: gate.runtimeState,
+      runtime_state: runtimeState,
+      execution_source: executionSource,
+      source_binding_receipt: sourceBindingReceipt,
       execution_policy: gate.policy,
       native_action_receipt: gate.receipt,
     },
@@ -650,8 +707,9 @@ window.addEventListener('pagehide', () => stopAudio('FEATHER STOP · page hidden
 
 subscribeToDualAspectActivation((packet) => {
   activePacket = packet;
+  bindRuntimeSource(packet, { actionId: 'packet-available' });
   elements['source-status'].textContent = 'ACTIVE PACKET AVAILABLE';
-  elements['binding-note'].textContent = `Packet ${short(packet.packet_id, 28)} is available. Press “Bind active packet” to replace the current local source deliberately.`;
+  elements['binding-note'].textContent = `Packet ${short(packet.packet_id, 28)} is available with ${executionSource?.selected_side ?? ACTIVE_EXECUTION_SIDE} as explicit selectable source. Press “Bind active packet” to replace the current local source deliberately.`;
 }, { storage: sessionStorage, eventTarget: window, emitCurrent: false });
 
 loadManifest();
