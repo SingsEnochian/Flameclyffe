@@ -38,6 +38,7 @@ Known project history contains successful workflow evidence on descendant heads.
 
 These are architectural authority; release evidence is recorded separately:
 
+- PREMAQC is the canonical state-model name; legacy `PREMAQ` identifiers remain historical/versioned names until deliberately migrated.
 - `A = Agency`; `Q = Qualia`; Alignment is derived.
 - sealed packets remain immutable;
 - Arcsweep consumes Spiral/Harmonic State rather than raw DEEP datasets;
