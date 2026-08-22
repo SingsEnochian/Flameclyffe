@@ -80,7 +80,7 @@ The fix has been committed, but the current head has not yet produced a fresh wo
 Current head after fixture repair and triage handoff:
 
 ```text
-0dbbf037bb91ac8b6d3807990b3b8b2f0838d877
+6f6f3f9a849cb873a0e987c01d05655002bef66c
 ```
 
 Latest PR metadata after the handoff reports `mergeable: false`; this may be transient while GitHub recomputes after new commits, or it may indicate a real stacked-branch merge issue that must be checked after CI starts.
