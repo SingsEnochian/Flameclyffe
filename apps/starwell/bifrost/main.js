@@ -11,6 +11,7 @@ import {
   readActiveDualAspectPacket,
   subscribeToDualAspectActivation,
 } from '../src/hearthweave-kernel/activation.js';
+import { enforceBifrostNativeAction } from './bifrost-native-action-guard.js';
 
 const SESSION_SCHEMA = 'bifrost.current-interface-session/v0.4';
 const SESSION_KEY = 'bifrost:current-interface-session:v0.4';
@@ -188,6 +189,21 @@ function setMessage(message, kind = 'ready') {
   elements['engine-message'].className = `engine-message${kind === 'error' ? ' error' : ''}`;
 }
 
+function setAudioStatus(message) {
+  elements['audio-status'].textContent = message;
+}
+
+function enforceNativeAction(actionId, target = 'engine') {
+  return enforceBifrostNativeAction({
+    actionId,
+    packetReader: readPacket,
+    setStatus: target === 'audio'
+      ? (message) => setAudioStatus(message)
+      : (message) => setMessage(message, 'error'),
+    notes: ['main.js native engine action guard'],
+  });
+}
+
 function packetTonePair(packet) {
   return packet?.experiential?.tone?.compression_release_sequence?.source_pair ?? null;
 }
@@ -237,6 +253,8 @@ function bindSource({ forceReference = false, preserveSaved = false } = {}) {
 }
 
 function runWindow() {
+  const gate = enforceNativeAction('run-window');
+  if (!gate.allowed) return;
   featherStopped = false;
   const focus = elements['focus-axis'].value;
   const compressionStrength = clamp(numberFrom(elements['compression-strength'], 0.65), 0, 1);
@@ -333,6 +351,8 @@ function scheduleTone(context, destination, frequency, startAt, duration) {
 }
 
 async function soundPair() {
+  const gate = enforceNativeAction('sound-pair', 'audio');
+  if (!gate.allowed) return;
   stopAudio('PREPARING · deliberate browser-audio proxy.');
   featherStopped = false;
   const PairContext = window.AudioContext || window.webkitAudioContext;
@@ -541,6 +561,8 @@ function renderAll() {
 }
 
 function exportReceipts() {
+  const gate = enforceNativeAction('export-receipts');
+  if (!gate.allowed) return;
   const pair = currentTonePair();
   const payload = {
     schema: 'bifrost.current-interface-export/v0.4',
@@ -557,6 +579,11 @@ function exportReceipts() {
       packet_fingerprint: activePacket?.packet_fingerprint ?? null,
       shared_state_fingerprint: activePacket?.correspondence?.shared_state_fingerprint ?? null,
       source_state_id: sourceState?.state_id ?? null,
+    },
+    bifrost_runtime: {
+      runtime_state: gate.runtimeState,
+      execution_policy: gate.policy,
+      native_action_receipt: gate.receipt,
     },
     current_state: currentState,
     tone_pair: pair,
