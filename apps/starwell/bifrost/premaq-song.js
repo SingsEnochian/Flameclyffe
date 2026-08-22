@@ -18,6 +18,7 @@ const PLAYBACK_MAX_HZ = 880;
 const DEFAULT_ROOT_HZ = 220;
 const DEFAULT_BPM = 84;
 const EPSILON = 1e-12;
+const ACTIVE_EXECUTION_SIDE = 'targetside';
 
 const AXIS_INTERVALS = Object.freeze({
   P: 0,
@@ -65,6 +66,7 @@ let completionTimer = null;
 let progressTimer = null;
 let currentReceipt = null;
 let currentNativeActionReceipt = null;
+let currentSongSourceBindingReceipt = null;
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -87,6 +89,7 @@ function enforceSongAction(actionId) {
   return enforceBifrostNativeAction({
     actionId,
     packetReader: readPacket,
+    active_execution_side: ACTIVE_EXECUTION_SIDE,
     setStatus: (message) => setStatus(message, 'blocked'),
     statusKind: 'blocked',
     notes: ['premaq-song.js native song action guard'],
@@ -124,14 +127,37 @@ function makeReferenceState() {
   return state;
 }
 
-function readCurrentSourceState() {
+function readSessionSourceBinding() {
   try {
     const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
-    if (session?.state) return validateTemporalState(session.state);
+    const sourceBindingReceipt = session?.bifrost_runtime?.source_binding_receipt ?? null;
+    if (session?.state) {
+      return {
+        state: validateTemporalState(session.state),
+        source_binding_receipt: sourceBindingReceipt,
+        origin: sourceBindingReceipt ? 'session-source-binding' : 'session-state-without-binding',
+      };
+    }
   } catch {
     // The explicit local reference below preserves a runnable path.
   }
-  return makeReferenceState();
+  return {
+    state: makeReferenceState(),
+    source_binding_receipt: null,
+    origin: 'local-reference',
+  };
+}
+
+function readBoundSongSource(nativeActionReceipt = null) {
+  const actionSource = nativeActionReceipt?.execution_source ?? null;
+  if (actionSource?.source_state) {
+    return {
+      state: validateTemporalState(actionSource.source_state),
+      source_binding_receipt: nativeActionReceipt?.source_binding_receipt ?? null,
+      origin: 'native-action-execution-source',
+    };
+  }
+  return readSessionSourceBinding();
 }
 
 function resolveRootHz() {
@@ -175,6 +201,8 @@ export function buildPremaqSongPlan({
   compressionStrength = 0.65,
   compressionGain = 1.2,
   releaseFraction = 0.35,
+  sourceBindingReceipt = null,
+  sourceOrigin = 'unspecified',
 } = {}) {
   let current = validateTemporalState(state);
   const cycles = [];
@@ -240,7 +268,7 @@ export function buildPremaqSongPlan({
   }
 
   return Object.freeze({
-    schema: 'bifrost.premaq-full-song-plan/v0.4',
+    schema: 'bifrost.premaq-full-song-plan/v0.5',
     law: 'compression-release-compression-of-release-infinite-recursion',
     cycles_per_axis: PREMAQ_SONG_CYCLES_PER_AXIS,
     axis_cycle_count: PREMAQ_SONG_AXIS_CYCLES,
@@ -252,6 +280,10 @@ export function buildPremaqSongPlan({
     cycle_duration_seconds: cycleSeconds,
     duration_seconds: cycleSeconds * PREMAQ_SONG_CYCLES_PER_AXIS,
     source_state_id: state.state_id,
+    source_origin: sourceOrigin,
+    selected_execution_side: sourceBindingReceipt?.selected_side ?? null,
+    source_kind: sourceBindingReceipt?.source_kind ?? null,
+    source_binding_receipt: sourceBindingReceipt,
     final_released_state_id: current.state_id,
     next_operation: 'compression-of-release',
     cycles: Object.freeze(cycles),
@@ -351,11 +383,15 @@ function createVoice(context, destination, axis, index, startAt, endAt) {
 async function buildReceipt(plan, nativeActionReceipt = null) {
   const canonical = JSON.stringify(plan);
   return Object.freeze({
-    schema: 'bifrost.premaq-full-song-receipt/v0.4',
+    schema: 'bifrost.premaq-full-song-receipt/v0.5',
     receipt_id: `premaq-song-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`,
     created_at: new Date().toISOString(),
     plan_sha256: await sha256Hex(canonical),
     source_state_id: plan.source_state_id,
+    source_origin: plan.source_origin,
+    selected_execution_side: plan.selected_execution_side,
+    source_kind: plan.source_kind,
+    source_binding_receipt: plan.source_binding_receipt,
     final_released_state_id: plan.final_released_state_id,
     cycles_per_axis: plan.cycles_per_axis,
     axis_cycle_count: plan.axis_cycle_count,
@@ -377,6 +413,9 @@ async function playSong() {
   const gate = enforceSongAction('play-premaq-song');
   if (!gate.allowed) return;
   currentNativeActionReceipt = gate.receipt;
+  currentSongSourceBindingReceipt = gate.receipt.source_binding_receipt ?? null;
+  const songSource = readBoundSongSource(currentNativeActionReceipt);
+  currentSongSourceBindingReceipt = songSource.source_binding_receipt ?? currentSongSourceBindingReceipt;
   stopSong('PREPARING · building all seven PREMAQ voices.');
   const Context = window.AudioContext || window.webkitAudioContext;
   if (!Context) {
@@ -385,7 +424,7 @@ async function playSong() {
   }
 
   const bpm = clamp(finiteNumber(document.getElementById('premaq-song-bpm')?.value, DEFAULT_BPM), 48, 132);
-  const source = readCurrentSourceState();
+  const source = songSource.state;
   const rootHz = resolveRootHz();
   const plan = buildPremaqSongPlan({
     state: source,
@@ -395,6 +434,8 @@ async function playSong() {
     compressionStrength: finiteNumber(document.getElementById('compression-strength')?.value, 0.65),
     compressionGain: finiteNumber(document.getElementById('compression-gain')?.value, 1.2),
     releaseFraction: finiteNumber(document.getElementById('release-fraction')?.value, 0.35),
+    sourceBindingReceipt: currentSongSourceBindingReceipt,
+    sourceOrigin: songSource.origin,
   });
   renderVoiceGrid(plan);
   currentReceipt = await buildReceipt(plan, currentNativeActionReceipt);
@@ -458,7 +499,7 @@ async function playSong() {
     }, Math.ceil((plan.duration_seconds + 0.2) * 1000));
 
     setStatus(
-      `PLAYING · P C R E M A Q · 35 cycles each · ${plan.duration_seconds.toFixed(1)} seconds · gain ceiling ${MASTER_GAIN_CEILING.toFixed(3)}.`,
+      `PLAYING · ${plan.selected_execution_side ?? 'reference'} source · P C R E M A Q · 35 cycles each · ${plan.duration_seconds.toFixed(1)} seconds · gain ceiling ${MASTER_GAIN_CEILING.toFixed(3)}.`,
       'playing',
     );
   } catch (error) {
@@ -476,6 +517,7 @@ function exportSongReceipt() {
   const exportedReceipt = {
     ...currentReceipt,
     export_native_action_receipt: gate.receipt,
+    export_source_binding_receipt: gate.receipt.source_binding_receipt ?? null,
   };
   const blob = new Blob([`${JSON.stringify(exportedReceipt, null, 2)}\n`], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -486,7 +528,7 @@ function exportSongReceipt() {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
-  setStatus(`EXPORTED · ${exportedReceipt.axis_cycle_count} axis-cycles and ${exportedReceipt.scheduled_note_count} scheduled notes.`, 'complete');
+  setStatus(`EXPORTED · ${exportedReceipt.selected_execution_side ?? 'reference'} source · ${exportedReceipt.axis_cycle_count} axis-cycles and ${exportedReceipt.scheduled_note_count} scheduled notes.`, 'complete');
 }
 
 function initialiseSongInterface() {
