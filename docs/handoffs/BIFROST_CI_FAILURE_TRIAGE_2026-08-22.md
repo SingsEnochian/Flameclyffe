@@ -80,10 +80,10 @@ The fix has been committed, but the current head has not yet produced a fresh wo
 Current head after fixture repair and triage handoff:
 
 ```text
-6f6f3f9a849cb873a0e987c01d05655002bef66c
+569d8ef7ce91422f8a771acc2387e6c9cc79c6d7
 ```
 
-Latest PR metadata after the handoff reports `mergeable: false`; this may be transient while GitHub recomputes after new commits, or it may indicate a real stacked-branch merge issue that must be checked after CI starts.
+Latest PR metadata after the handoff reports `mergeable: true`.
 
 Release remains blocked until CI reruns and verifies the full suite/build.
 
