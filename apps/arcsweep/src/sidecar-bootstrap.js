@@ -19,6 +19,7 @@ const SIDECARS = [
   './house-commons-command-room.js',
   './house-commons-thread-restoration.js',
   './house-commons-deep-link-router.js',
+  './house-commons-attachments.js',
   './runtime-envelope-live-ui.js',
   './canon-intelligence-live-ui.js',
   './constellation-presence.js',
