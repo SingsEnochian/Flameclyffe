@@ -16,6 +16,10 @@ const SIDECARS = [
   './runtime-presence-diagnostics.js',
   './runtime-integration-bootstrap.js',
   './house-commons-chat-v3.js',
+  './house-commons-command-room.js',
+  './house-commons-thread-restoration.js',
+  './house-commons-deep-link-router.js',
+  './house-commons-attachments.js',
   './runtime-envelope-live-ui.js',
   './canon-intelligence-live-ui.js',
   './constellation-presence.js',
@@ -43,7 +47,6 @@ export async function mountArcsweepSidecars() {
       failures.push({ specifier, message: error?.message || String(error) });
       console.error(`[Arcsweep] sidecar failed: ${specifier}`, error);
     }
-    // Give WebKit a chance to paint and process touch events between organs.
     await yieldToBrowser();
   }
   window.dispatchEvent(new CustomEvent('arcsweep:sidecars-ready', { detail: { failures } }));
