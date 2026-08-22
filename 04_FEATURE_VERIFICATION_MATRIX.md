@@ -20,7 +20,7 @@
 |---|---|---|---|
 | Full Arcsweep v1 product | PARTIAL | Issue #120 defines the accepted full-Arcsweep architecture and LIVE gate. Existing repo lineage contains Arcsweep runtime/components and later integration work. | Run the Issue #120 LIVE gate against the current integration branch. |
 | Arcsweep Home shell | PARTIAL | Accepted requirement in Issue #120; later branch history is built around Arcsweep as a product surface. | Direct route smoke + Home/return-Home evidence on current baseline. |
-| Shared State ribbon | PARTIAL | Canonical PREMAQ/Shared State contracts are present in the project lineage; Issue #120 requires the ribbon. | Current UI evidence + persistence/update behaviour + canonical labels. |
+| Shared State ribbon | PARTIAL | Canonical PREMAQC/Shared State contracts are present in the project lineage; Issue #120 requires the ribbon. | Current UI evidence + persistence/update behaviour + canonical labels. |
 | Glyph Forge | FUNCTIONAL (provisional) | Existing Glyph Studio/Glyph Forge lineage was inventoried as a real drawing canvas with brushes/layers/text/FontForge. | Current-baseline stroke persistence, restart test, and route smoke. |
 | Brush Foundry | PARTIAL | Brush logic exists in the Glyph Studio lineage; Issue #120 requires ≥3 distinct material brushes. | Verify three distinct materials, persisted settings, stylus/keyboard accessibility. |
 | Living Glyph | PARTIAL | Deterministic packet-glyph renderer and live packet-bound glyph lineage exist; Issue #120 requires Spiral-State-driven evolution + replay. | Current-baseline deterministic evolution test and replay reconstruction. |
@@ -30,7 +30,7 @@
 | Resonance Bridge / Runa | PARTIAL | Runa/World Hum/Spiral State contracts exist; Arcsweep issue requires one glyph-to-Runa preview. | Current glyph→semantic→Runa preview with receipt and user control. |
 | Replay | PARTIAL | Receipt/replay architecture exists broadly; Issue #120 requires glyph evolution reconstruction. | End-to-end replay from persisted receipts on current baseline. |
 | Observer intake / DEEP routing | FUNCTIONAL (provisional) | Observer/DEEP contracts and later continuity bridges exist; active descendant PR #140 includes DEEP Observer bridge work. | Current-baseline intake→receipt→route smoke with explicit missing-data state. |
-| PREMAQ canonical semantics | VERIFIED (contract level) | Canonical project law fixes seven axes and explicitly uses `A=Agency`, `Q=Qualia`; Issue #120 repeats the boundary. | Check UI labels room-by-room. |
+| PREMAQC canonical semantics | VERIFIED (contract level) | Canonical project law fixes seven axes and explicitly uses `A=Agency`, `Q=Qualia`; Issue #120 repeats the boundary. | Check UI labels room-by-room. |
 | Spiral State / `harmonic_state` | FUNCTIONAL (provisional) | Harmonic State is the shared subsystem contract in the current architecture lineage. | Validate current schema version, deterministic emission, degraded/failure path. |
 | Wheel of Time ingest | VERIFIED for captured ingest scope | Canon ingest lineage exists; the project recorded a completed captured-page manifest after resumable ingestion. | Verify current manifest/hash location on integration branch for release packaging. |
 | Canon Library bridge | PARTIAL | PR #107 declares generic canon-library manifest, sovereignty law and bridge client. | Desktop loopback service, web mirror, visible pairing/progress/rollback acceptance are the next gates. |
