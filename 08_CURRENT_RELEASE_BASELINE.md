@@ -3,72 +3,72 @@
 **Repository:** `SingsEnochian/Flameclyffe`  
 **Canonical integration branch:** `codex/arcsweep-feedback-loop`  
 **Observed baseline SHA:** `b5bdfd1bea6c9fd4206707e9ef004258c2a0344d` (current base SHA reported by PR #140 when inspected on 2026-08-22)  
-**Status:** integration baseline, not declared RELEASED by this file
+**Stage:** integration baseline
 
 ## What this baseline means
 
-This branch is the current integration shore against which Forge verification is performed. Descendant feature branches may contain stronger or newer organs, but they do not silently redefine the release baseline.
+This branch is the current integration shore against which Forge verification is performed. Descendant feature branches may contain stronger or newer organs; their evidence remains attached to those lineages until explicit integration brings it into this baseline.
 
 ## Current evidence
 
-- PR #140 is an open draft descendant of this branch and currently reports `mergeable: false`; therefore its additional BSENG/RSE and Project Zero Companion work is not treated as part of this baseline until integrated.
-- PR #112 remains an open draft hardware/PWA line and explicitly records unresolved physical-device and fresh-CI gates.
-- PR #111 remains an open draft mathematics line with independent review/calibration gates.
-- PR #107, #116 and other older branches contain functional organs that may be harvested only through explicit integration and verification.
-- Issue #120 remains the accepted full-Arcsweep LIVE gate and is used as the primary organ-level verification contract for the next milestone.
+- PR #140 is an open draft descendant of this branch and currently reports `mergeable: false`; its additional BSENG/RSE and Project Zero Companion work remains descendant-line evidence pending integration.
+- PR #112 remains an open draft hardware/PWA line with physical-device and fresh-CI gates still to run.
+- PR #111 remains an open draft mathematics line with independent review/calibration gates still to run.
+- PR #107, #116 and other older branches contain functional organs available for explicit harvest, reconciliation, and verification.
+- Issue #120 remains the accepted full-Arcsweep LIVE gate and is the primary organ-level verification contract for the next milestone.
 
-## CI / build truth
+## CI / build state
 
-The connector did not return commit-attached combined statuses or pull-request workflow runs for the observed baseline SHA during this bootstrap. Therefore this file does **not** claim the baseline CI matrix is currently green.
+The connector returned no commit-attached combined statuses or pull-request workflow runs for the observed baseline SHA during this bootstrap. The current baseline CI state is therefore **UNMEASURED in this control file**.
 
-Known project history contains successful workflow evidence on descendant heads, but descendant evidence is not promoted to the baseline without a matching SHA.
+Known project history contains successful workflow evidence on descendant heads. That evidence stays with its matching SHA until integration or a baseline-matched run supplies equivalent evidence here.
 
-**Required before any RELEASED claim:**
+**Evidence packet for a RELEASED state:**
 
-1. identify exact candidate SHA;
-2. run/confirm clean install and build on that SHA;
-3. run named STARWELL/Arcsweep test suites;
-4. run production-style runtime smoke;
-5. verify persistence after restart;
-6. verify packaging/install path where applicable;
-7. record deployment URL and exact deployed commit;
-8. update `04_FEATURE_VERIFICATION_MATRIX.md` with evidence.
+1. exact candidate SHA;
+2. clean install and build result for that SHA;
+3. named STARWELL/Arcsweep test suites;
+4. production-style runtime smoke;
+5. persistence-after-restart evidence;
+6. packaging/install-path evidence where applicable;
+7. deployment URL paired with exact deployed commit;
+8. corresponding evidence entries in `04_FEATURE_VERIFICATION_MATRIX.md`.
 
-## Known-good behavioural laws
+## House invariants
 
-These are architectural authority, not release evidence:
+These are architectural authority; release evidence is recorded separately:
 
 - `A = Agency`; `Q = Qualia`; Alignment is derived.
-- sealed packets are not mutated;
+- sealed packets remain immutable;
 - Arcsweep consumes Spiral/Harmonic State rather than raw DEEP datasets;
-- source canon and project overlays remain separate;
-- no subsystem silently promotes canon;
+- source canon and project overlays remain distinct;
+- canon promotion is explicit and receipted;
 - receipts preserve provenance and replay lineage;
-- user activation/consent precedes sound, haptics and private-source transmission;
+- sound, haptics and private-source transmission begin through explicit user activation;
 - `observation ≠ interpretation ≠ model projection ≠ software receipt ≠ canon ≠ external-world claim`.
 
-## Current known limitations / blockers
+## Current integration work
 
-- Baseline-wide Arcsweep v1 LIVE verification has not been re-run under the new Forge status vocabulary.
-- Open descendant PR #140 is not merge-clean at inspection time.
-- Several older functional branches remain unintegrated or superseded and need harvest/reconciliation rather than blind merge.
-- Physical iPad/Shokz/transducer acceptance remains explicitly unverified on PR #112.
-- Release evidence is fragmented across historical PRs and must be normalised into the verification matrix.
+- Arcsweep v1 LIVE verification is scheduled under the new Forge status vocabulary.
+- Open descendant PR #140 requires merge reconciliation before its organs join this baseline.
+- Older functional branches are candidates for harvest/reconciliation according to the recover-before-replace rule.
+- PR #112 carries the remaining physical iPad/Shokz/transducer acceptance work.
+- Historical release evidence is being normalised into the verification matrix.
 
 ## Release promotion rule
 
-A build may become the next release baseline only when:
+A build becomes the next release baseline when its promotion packet contains:
 
-- its SHA is explicit;
-- required organs are `VERIFIED` in the matrix;
-- failure paths are exercised;
-- persistence/restart is verified where relevant;
-- packaging/deployment evidence matches that SHA;
-- known limitations are recorded;
-- Rowan authorises promotion.
+- explicit SHA;
+- required organs at `VERIFIED` in the matrix;
+- exercised failure paths;
+- persistence/restart evidence where relevant;
+- packaging/deployment evidence matching that SHA;
+- recorded limitations and open edges;
+- Rowan's promotion authorisation.
 
-Until then, call this branch the **integration baseline**, not production-ready.
+The present branch remains the **integration baseline** while M1 gathers that evidence.
 
-## Next safe task
+## Next dependency-ordered task
 
-Run **M1 — Arcsweep Core Verification Baseline** from `03_ACTIVE_ROADMAP.md`, update the matrix organ by organ, and only then open the repair milestone for defects actually observed.
+Run **M1 — Arcsweep Core Verification Baseline** from `03_ACTIVE_ROADMAP.md`, update the matrix organ by organ, then open M2 with the defects and integration work actually observed.
