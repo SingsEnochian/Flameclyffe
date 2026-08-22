@@ -77,11 +77,13 @@ apps/starwell/test/bifrostRuntimeSource.test.js
 
 The fix has been committed, but the current head has not yet produced a fresh workflow result at the time of this handoff.
 
-Current head after fixture repair:
+Current head after fixture repair and triage handoff:
 
 ```text
-7581235323bd7003492416932d3652af7fccc5da
+0dbbf037bb91ac8b6d3807990b3b8b2f0838d877
 ```
+
+Latest PR metadata after the handoff reports `mergeable: false`; this may be transient while GitHub recomputes after new commits, or it may indicate a real stacked-branch merge issue that must be checked after CI starts.
 
 Release remains blocked until CI reruns and verifies the full suite/build.
 
