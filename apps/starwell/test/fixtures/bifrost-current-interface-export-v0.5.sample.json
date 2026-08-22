@@ -1,0 +1,269 @@
+{
+  "schema": "bifrost.current-interface-export/v0.5",
+  "exported_at": "2026-08-22T08:38:00.000Z",
+  "source": {
+    "mode": "active-packet",
+    "packet_fingerprint": "packet-fp",
+    "source_state_id": "target-state",
+    "selected_execution_side": "targetside",
+    "execution_source": {
+      "selected_side": "targetside",
+      "source_kind": "temporal-state",
+      "source_state_id": "target-state",
+      "source_fingerprint": "shared-fp"
+    },
+    "source_binding_receipt": {
+      "schema": "bifrost.source-binding-receipt/v0.1",
+      "selected_side": "targetside",
+      "source_kind": "temporal-state",
+      "source_state_id": "target-state",
+      "source_fingerprint": "shared-fp",
+      "certified_source": true
+    }
+  },
+  "bifrost_runtime": {
+    "runtime_state": {
+      "schema": "bifrost.runtime-state/v0.1",
+      "packet_id": "packet-two-shore",
+      "shared_state_fingerprint": "shared-fp",
+      "active_execution_side": "targetside",
+      "bridge": {
+        "status": "TWO_SHORE_PREMAQ_VISIBLE",
+        "crossing_ready": true,
+        "certified": true
+      },
+      "hearthside": {
+        "id": "hearth-state",
+        "fingerprint": "shared-fp"
+      },
+      "targetside": {
+        "id": "target-state",
+        "fingerprint": "shared-fp"
+      }
+    },
+    "execution_source": {
+      "selected_side": "targetside",
+      "source_kind": "temporal-state",
+      "source_state_id": "target-state",
+      "source_fingerprint": "shared-fp"
+    },
+    "source_binding_receipt": {
+      "schema": "bifrost.source-binding-receipt/v0.1",
+      "selected_side": "targetside",
+      "source_kind": "temporal-state",
+      "source_state_id": "target-state",
+      "source_fingerprint": "shared-fp",
+      "certified_source": true
+    },
+    "execution_policy": {
+      "schema": "bifrost.runtime-execution-policy/v0.1",
+      "bridge_status": "TWO_SHORE_PREMAQ_VISIBLE",
+      "crossing_ready": true,
+      "certified": true,
+      "blocked_actions": []
+    },
+    "native_action_receipt": {
+      "schema": "bifrost.native-action-receipt/v0.2",
+      "action_id": "export-receipts",
+      "selected_execution_side": "targetside",
+      "execution_source": {
+        "selected_side": "targetside",
+        "source_kind": "temporal-state",
+        "source_state_id": "target-state",
+        "source_fingerprint": "shared-fp"
+      },
+      "source_binding_receipt": {
+        "schema": "bifrost.source-binding-receipt/v0.1",
+        "selected_side": "targetside",
+        "source_kind": "temporal-state",
+        "source_state_id": "target-state",
+        "source_fingerprint": "shared-fp",
+        "certified_source": true
+      }
+    }
+  },
+  "current_state": {
+    "state_id": "current-state",
+    "spiral": {
+      "cycle": 2
+    }
+  },
+  "source_state": {
+    "state_id": "target-state"
+  },
+  "cycle_receipts": [
+    {
+      "cycle": 1,
+      "receipt_id": "cycle-receipt-1",
+      "from_state_id": "target-state",
+      "to_state_id": "released-state-1",
+      "next_operation": "compression-of-release"
+    },
+    {
+      "cycle": 2,
+      "receipt_id": "cycle-receipt-2",
+      "from_state_id": "released-state-1",
+      "to_state_id": "released-state-2",
+      "next_operation": "compression-of-release"
+    }
+  ],
+  "cycle_receipt_envelopes": [
+    {
+      "schema": "bifrost.cycle-receipt-envelope/v0.1",
+      "envelope_id": "bifrost-cycle-envelope-1-cycle-receipt-1",
+      "exported_at": "2026-08-22T08:38:00.000Z",
+      "action_id": "export-receipts",
+      "cycle": 1,
+      "cycle_receipt_id": "cycle-receipt-1",
+      "from_state_id": "target-state",
+      "to_state_id": "released-state-1",
+      "next_operation": "compression-of-release",
+      "selected_execution_side": "targetside",
+      "source_kind": "temporal-state",
+      "source_state_id": "target-state",
+      "source_fingerprint": "shared-fp",
+      "bridge_status": "TWO_SHORE_PREMAQ_VISIBLE",
+      "crossing_ready": true,
+      "certified_source": true,
+      "packet_id": "packet-two-shore",
+      "shared_state_fingerprint": "shared-fp",
+      "hearthside_state_id": "hearth-state",
+      "hearthside_fingerprint": "shared-fp",
+      "targetside_state_id": "target-state",
+      "targetside_fingerprint": "shared-fp",
+      "cycle_receipt": {
+        "cycle": 1,
+        "receipt_id": "cycle-receipt-1",
+        "from_state_id": "target-state",
+        "to_state_id": "released-state-1",
+        "next_operation": "compression-of-release"
+      },
+      "source_binding_receipt": {
+        "schema": "bifrost.source-binding-receipt/v0.1",
+        "selected_side": "targetside",
+        "source_kind": "temporal-state",
+        "source_state_id": "target-state",
+        "source_fingerprint": "shared-fp",
+        "certified_source": true
+      },
+      "native_action_receipt": {
+        "schema": "bifrost.native-action-receipt/v0.2",
+        "action_id": "export-receipts",
+        "selected_execution_side": "targetside",
+        "execution_source": {
+          "selected_side": "targetside",
+          "source_kind": "temporal-state",
+          "source_state_id": "target-state",
+          "source_fingerprint": "shared-fp"
+        },
+        "source_binding_receipt": {
+          "schema": "bifrost.source-binding-receipt/v0.1",
+          "selected_side": "targetside",
+          "source_kind": "temporal-state",
+          "source_state_id": "target-state",
+          "source_fingerprint": "shared-fp",
+          "certified_source": true
+        }
+      },
+      "execution_policy": {
+        "schema": "bifrost.runtime-execution-policy/v0.1",
+        "bridge_status": "TWO_SHORE_PREMAQ_VISIBLE",
+        "crossing_ready": true,
+        "certified": true,
+        "blocked_actions": []
+      },
+      "authority": {
+        "canon_write_performed": false,
+        "tone_approval_performed": false,
+        "physical_device_test_performed": false
+      },
+      "notes": [
+        "main-export-v0.5-inline-cycle-passports"
+      ]
+    },
+    {
+      "schema": "bifrost.cycle-receipt-envelope/v0.1",
+      "envelope_id": "bifrost-cycle-envelope-2-cycle-receipt-2",
+      "exported_at": "2026-08-22T08:38:00.000Z",
+      "action_id": "export-receipts",
+      "cycle": 2,
+      "cycle_receipt_id": "cycle-receipt-2",
+      "from_state_id": "released-state-1",
+      "to_state_id": "released-state-2",
+      "next_operation": "compression-of-release",
+      "selected_execution_side": "targetside",
+      "source_kind": "temporal-state",
+      "source_state_id": "target-state",
+      "source_fingerprint": "shared-fp",
+      "bridge_status": "TWO_SHORE_PREMAQ_VISIBLE",
+      "crossing_ready": true,
+      "certified_source": true,
+      "packet_id": "packet-two-shore",
+      "shared_state_fingerprint": "shared-fp",
+      "hearthside_state_id": "hearth-state",
+      "hearthside_fingerprint": "shared-fp",
+      "targetside_state_id": "target-state",
+      "targetside_fingerprint": "shared-fp",
+      "cycle_receipt": {
+        "cycle": 2,
+        "receipt_id": "cycle-receipt-2",
+        "from_state_id": "released-state-1",
+        "to_state_id": "released-state-2",
+        "next_operation": "compression-of-release"
+      },
+      "source_binding_receipt": {
+        "schema": "bifrost.source-binding-receipt/v0.1",
+        "selected_side": "targetside",
+        "source_kind": "temporal-state",
+        "source_state_id": "target-state",
+        "source_fingerprint": "shared-fp",
+        "certified_source": true
+      },
+      "native_action_receipt": {
+        "schema": "bifrost.native-action-receipt/v0.2",
+        "action_id": "export-receipts",
+        "selected_execution_side": "targetside",
+        "execution_source": {
+          "selected_side": "targetside",
+          "source_kind": "temporal-state",
+          "source_state_id": "target-state",
+          "source_fingerprint": "shared-fp"
+        },
+        "source_binding_receipt": {
+          "schema": "bifrost.source-binding-receipt/v0.1",
+          "selected_side": "targetside",
+          "source_kind": "temporal-state",
+          "source_state_id": "target-state",
+          "source_fingerprint": "shared-fp",
+          "certified_source": true
+        }
+      },
+      "execution_policy": {
+        "schema": "bifrost.runtime-execution-policy/v0.1",
+        "bridge_status": "TWO_SHORE_PREMAQ_VISIBLE",
+        "crossing_ready": true,
+        "certified": true,
+        "blocked_actions": []
+      },
+      "authority": {
+        "canon_write_performed": false,
+        "tone_approval_performed": false,
+        "physical_device_test_performed": false
+      },
+      "notes": [
+        "main-export-v0.5-inline-cycle-passports"
+      ]
+    }
+  ],
+  "cycle_envelope_count": 2,
+  "authority": {
+    "canon_write_performed": false,
+    "tone_approval_performed": false,
+    "physical_device_test_performed": false
+  },
+  "compatibility": {
+    "replaces_legacy_export_schema": "bifrost.current-interface-export/v0.4",
+    "legacy_export_click_prevented": true,
+    "sidecar_export_still_available": true
+  }
+}

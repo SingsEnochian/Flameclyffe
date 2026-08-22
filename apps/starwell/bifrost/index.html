@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#08131c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="description" content="Bifröst Arcsweep v0.4 compression-release interface bound to the active Hearthweave packet." />
+  <title>Bifröst Arcsweep v0.4 · Hearthgate</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./premaq-song.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../">
+      <span class="brand-mark" aria-hidden="true">⌁</span>
+      <span><strong>BIFRÖST ARCSWEEP</strong><small>Current interface · v0.4</small></span>
+    </a>
+    <nav aria-label="Bifröst rooms">
+      <a href="../arcsweep-continuity/">Continuity Gate</a>
+      <a href="../world-tone-approval/">Rowan Approval Gate</a>
+      <a href="../">STARWELL</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">HEARTHGATE · ACTIVE ENGINE LAW</p>
+        <h1>Every release becomes the source of the next compression.</h1>
+        <p class="hero-copy">Nothing resets. Nothing disappears. State, memory, provenance, world identity, and receipts continue through every cycle.</p>
+      </div>
+      <div class="law" aria-label="Compression release recurrence">
+        <span>compression</span><b>→</b><span>release</span><b>→</b><span>compression of the release</span><b>→</b><span>∞</span>
+      </div>
+    </section>
+
+    <section class="truth-strip" aria-live="polite">
+      <div><small>Interface</small><strong id="manifest-version">Loading contract…</strong></div>
+      <div><small>Formalism</small><strong id="formalism">temporal-compression-release-state-machine</strong></div>
+      <div><small>External physical claim</small><strong id="physical-claim">false</strong></div>
+      <div><small>Source</small><strong id="source-status">Reading active packet…</strong></div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel lineage-panel">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">SAME-STATE BINDING</p>
+            <h2>Active lineage</h2>
+          </div>
+          <button id="bind-active" type="button" class="quiet">Bind active packet</button>
+        </header>
+        <dl class="lineage-list">
+          <div><dt>World</dt><dd id="world-id">reference-world</dd></div>
+          <div><dt>House</dt><dd id="house-id">reference-house</dd></div>
+          <div><dt>DualAspectPacket</dt><dd id="packet-id">REFERENCE</dd></div>
+          <div><dt>Packet fingerprint</dt><dd id="packet-fingerprint">LOCAL REFERENCE</dd></div>
+          <div><dt>Shared state</dt><dd id="shared-fingerprint">LOCAL REFERENCE</dd></div>
+          <div><dt>PREMAQ</dt><dd id="premaq-id">bifrost-interface-reference</dd></div>
+          <div><dt>Compression-release receipt</dt><dd id="source-receipt">NOT YET CREATED</dd></div>
+        </dl>
+        <p id="binding-note" class="boundary-note">No active packet is required to inspect the engine. Reference mode is labelled and remains local to this browser session.</p>
+      </article>
+
+      <article class="panel controls-panel">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">FINITE EXECUTION WINDOW</p>
+            <h2>Compression-release controls</h2>
+          </div>
+          <span class="cycle-badge">cycle <b id="cycle-number">0</b></span>
+        </header>
+
+        <div class="control-grid">
+          <label>
+            <span>Compression focus</span>
+            <select id="focus-axis">
+              <option value="P">P · Presence</option>
+              <option value="C">C · Coherence</option>
+              <option value="R">R · Resonance</option>
+              <option value="E">E · Entropy</option>
+              <option value="M">M · Memory</option>
+              <option value="A">A · Agency</option>
+              <option value="Q" selected>Q · Qualia</option>
+            </select>
+          </label>
+          <label>
+            <span>Compression strength <output id="strength-value">0.65</output></span>
+            <input id="compression-strength" type="range" min="0" max="1" step="0.01" value="0.65" />
+          </label>
+          <label>
+            <span>Compression gain <output id="gain-value">1.20</output></span>
+            <input id="compression-gain" type="range" min="0" max="2" step="0.05" value="1.2" />
+          </label>
+          <label>
+            <span>Release fraction <output id="release-value">0.35</output></span>
+            <input id="release-fraction" type="range" min="0" max="1" step="0.01" value="0.35" />
+          </label>
+          <label>
+            <span>Cycles in this window</span>
+            <input id="cycle-count" type="number" min="1" max="8" step="1" value="1" />
+          </label>
+        </div>
+
+        <div class="action-row">
+          <button id="run-window" type="button" class="primary">Run compression → release</button>
+          <button id="reset-state" type="button" class="quiet">Reset to source</button>
+          <button id="feather-stop" type="button" class="stop">Feather Stop</button>
+        </div>
+        <p id="engine-message" class="engine-message" role="status">READY · the next operation consumes the current released state.</p>
+      </article>
+
+      <article class="panel spiral-panel">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">OUTWARD MEMORY</p>
+            <h2>Release spiral</h2>
+          </div>
+          <span id="next-operation" class="operation-chip">compression-of-release</span>
+        </header>
+        <canvas id="spiral-canvas" width="800" height="520" aria-label="Bifröst compression-release spiral"></canvas>
+        <div class="metric-grid">
+          <div><small>Radius</small><strong id="spiral-radius">1.0000</strong></div>
+          <div><small>Entropy</small><strong id="entropy-value">0.0000</strong></div>
+          <div><small>Normalisation</small><strong id="normalisation-value">1.000000</strong></div>
+          <div><small>Last outward distance</small><strong id="outward-distance">0.0000</strong></div>
+        </div>
+      </article>
+
+      <article class="panel premaq-panel">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">SHARED PREMAQ BASIS</p>
+            <h2>Released state</h2>
+          </div>
+          <span id="state-id" class="state-chip">initialising</span>
+        </header>
+        <div id="premaq-bars" class="premaq-bars" aria-label="PREMAQ probability distribution"></div>
+      </article>
+
+      <article class="panel tone-panel">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">RECIPROCAL SOUND CANON</p>
+            <h2>Compression-release motif</h2>
+          </div>
+          <span class="device-chip">browser audio proxy</span>
+        </header>
+        <div class="tone-equation">
+          <div><small>World root</small><strong id="root-hz">220.000 Hz</strong></div>
+          <div><small>Compression</small><strong id="compression-hz">—</strong></div>
+          <div><small>Release</small><strong id="release-hz">—</strong></div>
+          <div><small>Invariant</small><strong id="tone-invariant">f₊f₋ = f₀²</strong></div>
+        </div>
+        <div class="action-row">
+          <button id="sound-pair" type="button" class="primary">Sound two-tone motif</button>
+          <span id="audio-status" role="status">RESTING · no autoplay · gain ceiling 0.03</span>
+        </div>
+        <p class="boundary-note">This pair is the compression-release motif, not the full PREMAQ composition. Source frequencies are receipted exactly. Playback is octave-folded into 90–360 Hz and is not calibrated haptic intensity.</p>
+      </article>
+
+      <article class="panel receipts-panel">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">PROVENANCE ACCUMULATES</p>
+            <h2>Cycle receipts</h2>
+          </div>
+          <button id="export-receipts" type="button" class="quiet">Export JSON</button>
+        </header>
+        <ol id="receipt-list" class="receipt-list">
+          <li class="empty">No local cycle receipts yet.</li>
+        </ol>
+      </article>
+
+      <article class="panel song-panel">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">FULL PREMAQ COMPOSITION</p>
+            <h2>Seven voices across thirty-five chained cycles</h2>
+          </div>
+          <span class="song-count-badge">35 cycles × 7 voices</span>
+        </header>
+
+        <div class="premaq-song-summary">
+          <div><small>PREMAQ voices</small><strong>P · C · R · E · M · A · Q</strong></div>
+          <div><small>Cycles per voice</small><strong>35</strong></div>
+          <div><small>Axis-cycles</small><strong>245</strong></div>
+          <div><small>Scheduled notes</small><strong>490</strong></div>
+        </div>
+
+        <div id="premaq-song-voices" class="premaq-song-voices" aria-label="Seven PREMAQ song voices"></div>
+
+        <div class="premaq-song-controls">
+          <label>
+            <span>Cycle tempo</span>
+            <select id="premaq-song-bpm">
+              <option value="60">60 cycles/min · spacious</option>
+              <option value="72">72 cycles/min · measured</option>
+              <option value="84" selected>84 cycles/min · flowing</option>
+              <option value="100">100 cycles/min · bright</option>
+              <option value="120">120 cycles/min · swift</option>
+            </select>
+          </label>
+          <div class="action-row">
+            <button id="play-premaq-song" type="button" class="primary">Play full 35-cycle PREMAQ song</button>
+            <button id="stop-premaq-song" type="button" class="stop">Stop song</button>
+            <button id="export-premaq-song" type="button" class="quiet">Export song receipt</button>
+          </div>
+        </div>
+
+        <progress id="premaq-song-progress" max="1" value="0" aria-label="PREMAQ song playback progress"></progress>
+        <p id="premaq-song-status" data-kind="resting" role="status">RESTING · every voice will receive 35 compression-release cycles. No autoplay. Feather Stop remains immediate.</p>
+        <p class="boundary-note">The song is generated from the current released PREMAQ state. Each later cycle consumes the prior cycle’s release. The browser synthesis is a local musical mapping, performs no canon write, grants no tone approval, and makes no physical-device claim.</p>
+      </article>
+    </section>
+
+    <section class="authority-panel">
+      <div>
+        <p class="eyebrow">AUTHORITY BOUNDARY</p>
+        <h2>The interface executes engine law without manufacturing external evidence.</h2>
+      </div>
+      <ul>
+        <li>Unknown values remain explicit.</li>
+        <li>No canon write occurs here.</li>
+        <li>No tone receives approval automatically.</li>
+        <li>Rowan owns tone calibration and experimental naming.</li>
+        <li>Every new compression consumes the preceding release.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script type="module" src="./bifrost-runtime-bootstrap.js"></script>
+  <script type="module" src="./main.js"></script>
+  <script type="module" src="./two-shore-premaq.js"></script>
+  <script type="module" src="./premaq-song.js"></script>
+  <script type="module" src="../src/premaq-shokz-soundfont.js"></script>
+  <script type="module" src="../src/premaq-shokz-feather-stop-bridge.js"></script>
+</body>
+</html>

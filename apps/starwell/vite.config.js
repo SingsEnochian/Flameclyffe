@@ -27,6 +27,15 @@ function publishLegacyObservatoryPages() {
         await cp(source, destination, { force: true });
       }
 
+      await cp(
+        resolve(REPO_ROOT, 'starwell/deep-observer'),
+        resolve(OUT_DIR, 'starwell/deep-observer'),
+        {
+          recursive: true,
+          force: true,
+        },
+      );
+
       await cp(resolve(REPO_ROOT, 'assets'), resolve(OUT_DIR, 'assets'), {
         recursive: true,
         force: true,
@@ -62,6 +71,7 @@ export default defineConfig({
         livingRoom: resolve(REPO_ROOT, 'apps/starwell/living-room.html'),
         concordance: resolve(REPO_ROOT, 'apps/starwell/concordance/index.html'),
         bridgeRegistry: resolve(REPO_ROOT, 'apps/starwell/bridge-registry/index.html'),
+        bifrost: resolve(REPO_ROOT, 'apps/starwell/bifrost/index.html'),
         arcsweepContinuity: resolve(REPO_ROOT, 'apps/starwell/arcsweep-continuity/index.html'),
         hearthgateSensory: resolve(REPO_ROOT, 'apps/starwell/hearthgate-sensory/index.html'),
         worldToneApproval: resolve(REPO_ROOT, 'apps/starwell/world-tone-approval/index.html'),

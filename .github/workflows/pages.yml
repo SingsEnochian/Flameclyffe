@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/bifrost-arcsweep-current-ui-v0.4
   workflow_dispatch:
 
 permissions:
@@ -20,21 +21,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: npm
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Build STARWELL React Observatory Lab
+      - name: Verify current engine contracts
+        run: |
+          npm run contracts:verify
+          npm run starwell:test
+
+      - name: Build existing STARWELL React Observatory Lab
         env:
           STARWELL_BASE: /Flameclyffe/starwell-react-lab/
-        run: npm run starwell:build
+        run: |
+          npm run starwell:build
+          rm -rf /tmp/starwell-react-lab
+          mkdir -p /tmp/starwell-react-lab
+          cp -a dist/starwell/. /tmp/starwell-react-lab/
+
+      - name: Build current Bifröst Live layer
+        env:
+          STARWELL_BASE: /Flameclyffe/bifrost-live/
+        run: |
+          npm run starwell:build
+          test -f dist/starwell/index.html
+          test -f dist/starwell/bifrost/index.html
+          test -f dist/starwell/arcsweep-continuity/index.html
+          grep -R -F "two-shore-loop-playback" dist/starwell/assets >/dev/null
+          grep -R -F "two-shore-shokz-confirm" dist/starwell/assets >/dev/null
+          grep -R -F "hearthgate.two-shore-coil-release-spiral/v0.1" dist/starwell/assets >/dev/null
+          grep -R -F "hearthgate.two-shore-eleven-year-wav/v0.1" dist/starwell/assets >/dev/null
+          rm -rf /tmp/bifrost-live
+          mkdir -p /tmp/bifrost-live
+          cp -a dist/starwell/. /tmp/bifrost-live/
+          printf '%s\n' \
+            "Flameclyffe Pages · Bifröst Live" \
+            "Source commit: $GITHUB_SHA" \
+            "Both web Arcsweep and Hearthgate Bifröst load the same sensory bundle." \
+            "Formalism: compression → release → compression of the release" \
+            > /tmp/bifrost-live/LIVE-BUILD-RECEIPT.txt
 
       - name: Build Pocket Concordance Lens
         run: npm run pocket:build
@@ -55,13 +87,20 @@ jobs:
             --exclude 'package-lock.json'
 
           mkdir -p _site/starwell-react-lab
-          cp -R dist/starwell/* _site/starwell-react-lab/
+          cp -a /tmp/starwell-react-lab/. _site/starwell-react-lab/
 
           test -f _site/starwell-react-lab/unit-resonance-lab.html
           for route in unit-resonance-lab resonance-lab; do
             mkdir -p "_site/starwell-react-lab/${route}"
             cp _site/starwell-react-lab/unit-resonance-lab.html "_site/starwell-react-lab/${route}/index.html"
           done
+
+          mkdir -p _site/bifrost-live
+          cp -a /tmp/bifrost-live/. _site/bifrost-live/
+          test -f _site/bifrost-live/index.html
+          test -f _site/bifrost-live/bifrost/index.html
+          test -f _site/bifrost-live/arcsweep-continuity/index.html
+          test -f _site/bifrost-live/LIVE-BUILD-RECEIPT.txt
 
           mkdir -p _site/pocket-concordance-lens
           cp -R dist/pocket-concordance-lens/* _site/pocket-concordance-lens/

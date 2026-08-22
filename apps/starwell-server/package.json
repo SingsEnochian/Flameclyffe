@@ -20,8 +20,12 @@
     "electron:build:win": "npm run prepare:assets && electron-builder --win nsis --x64 --publish never && npm run verify:dual-aspect-package",
     "check:base-packaging": "node scripts/check-packaging.js",
     "check:dual-aspect": "node scripts/check-dual-aspect-packaging.js",
-    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect",
-    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js"
+    "check:premaq-shokz": "node scripts/check-premaq-shokz-packaging.js",
+    "check:eleven-year-wav": "node scripts/check-eleven-year-wav-packaging.js",
+    "check:packaging": "npm run check:base-packaging && npm run check:dual-aspect && npm run check:premaq-shokz && npm run check:eleven-year-wav",
+    "verify:eleven-year-wav-package": "node scripts/verify-eleven-year-wav-package.js",
+    "create:bifrost-web-envelope": "node scripts/create-bifrost-web-bundle-envelope.js",
+    "verify:dual-aspect-package": "node scripts/verify-dual-aspect-package.js && npm run verify:eleven-year-wav-package && npm run create:bifrost-web-envelope"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
