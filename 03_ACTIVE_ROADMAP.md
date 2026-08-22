@@ -8,7 +8,7 @@
 
 ## Governing rule
 
-Build the real House. Recover before replacing. No evidence, no completion claim.
+Build the real House. Recover before replacing. Wonder is unrestricted. Implementation is scoped. Claims are classified. Evidence is receipted.
 
 ## Active milestone
 
@@ -16,9 +16,9 @@ Build the real House. Recover before replacing. No evidence, no completion claim
 
 **Status:** ACTIVE
 
-**Outcome:** establish, on the canonical integration branch, the honest functional status of the full Arcsweep organ set before adding new surface area.
+**Outcome:** establish, on the canonical integration branch, the current functional status of the full Arcsweep organ set before expanding implementation surface.
 
-**Why this milestone is next:** Issue #120 remains the accepted full-Arcsweep build gate, but the repository has continued to evolve substantially since that issue was written. Current repo evidence proves there are later integration lines and working descendant systems, but does not by itself prove every Arcsweep v1 LIVE condition on the integration baseline. The next safe step is therefore verification and reconciliation, not greenfield rebuilding.
+**Why this milestone is next:** Issue #120 remains the accepted full-Arcsweep build gate, while the repository has continued to evolve substantially since that issue was written. Current repo evidence covers later integration lines and working descendant systems. M1 measures and reconciles the remaining Arcsweep v1 LIVE conditions on the integration baseline before repair or expansion.
 
 **Organs to verify in order:**
 
@@ -29,7 +29,7 @@ Build the real House. Recover before replacing. No evidence, no completion claim
 5. Brush Foundry with at least three materially distinct brushes.
 6. Continuity Gate fail-closed behaviour.
 7. Echo Index world/character/location resolution.
-8. Canon Studio source-canon/project-overlay separation and no silent promotion.
+8. Canon Studio source-canon/project-overlay separation and explicit promotion.
 9. Resonance Bridge / Runa preview path.
 10. Replay reconstruction with receipts and branches.
 11. Export/import round-trip without receipt loss.
@@ -37,31 +37,31 @@ Build the real House. Recover before replacing. No evidence, no completion claim
 
 **Acceptance:** each organ receives one of `ENVISIONED / SPECIFIED / MOCKED / PARTIAL / FUNCTIONAL / VERIFIED / RELEASED` in `04_FEATURE_VERIFICATION_MATRIX.md`, with named evidence for every `VERIFIED` claim.
 
-**Explicit non-goals for M1:** no redesign, no new world, no new model family, no new speculative mathematics, no replacement of working organs, no production promotion.
+**M1 focus:** verification and reconciliation of the existing Arcsweep organ chain. New worlds, model families, mathematics, and design discoveries may be captured to the backlog as they arise; implementation during M1 remains focused on the dependency-ordered verification pass. Working organs are preserved and strengthened rather than replaced.
 
 ## M2 — Arcsweep Integration Repair
 
 **Status:** QUEUED
 
-Only defects exposed by M1 may enter this milestone. Repair foundations first: persistence → services → API → room integration → UI → accessibility → recovery → tests.
+Defects exposed by M1 enter this milestone. Repair order follows dependencies: persistence → services → API → room integration → UI → accessibility → recovery → tests.
 
 ## M3 — Production-style Runtime Smoke
 
 **Status:** QUEUED
 
-Exercise one real pass across world selection, Shared State, model presence, House Commons, persistence, Observer/receipts, and Replay. No production promotion until this passes.
+Exercise one real pass across world selection, Shared State, model presence, House Commons, persistence, Observer/receipts, and Replay. Successful completion supplies the runtime evidence for promotion consideration.
 
 ## M4 — Canon Intelligence + Worldseed Braid
 
-**Status:** DEFERRED until M1–M3 evidence is green.
+**Status:** QUEUED behind M1–M3 dependency evidence.
 
 ## M5 — Runtime/model finalisation, persistence, UX polish, hardening, release
 
-**Status:** DEFERRED.
+**Status:** QUEUED behind the preceding dependency chain.
 
 ## Active descendant work
 
-PR #140 (`feature/bseng-rse-whole-site-ingest-v0-4`) is a draft extension stacked on `codex/arcsweep-feedback-loop`. It carries BSENG/RSE continuity and the Flameclyffe Project Zero Companion boundary. It is not the release baseline and must not silently redefine the active Arcsweep milestone.
+PR #140 (`feature/bseng-rse-whole-site-ingest-v0-4`) is a draft extension stacked on `codex/arcsweep-feedback-loop`. It carries BSENG/RSE continuity and the Flameclyffe Project Zero Companion boundary. Its evidence belongs to that descendant line until integration explicitly brings those organs into the baseline.
 
 ## Standing epistemic boundary
 
