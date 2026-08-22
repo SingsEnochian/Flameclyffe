@@ -43,7 +43,9 @@ export function openCommonsDeepLink(input) {
 export function installCommonsDeepLinkRouter() {
   if (typeof document === 'undefined') return;
   const style = document.createElement('style'); style.textContent = '.commons-deep-link-target{outline:3px solid var(--gold)!important;outline-offset:4px;box-shadow:0 0 0 8px color-mix(in srgb,var(--gold) 15%,transparent)!important}'; document.head.append(style);
-  document.addEventListener('arcsweep:commons-open-link', (event) => openCommonsDeepLink(event.detail || {}));
+  const handle = (event) => openCommonsDeepLink(event.detail || {});
+  document.addEventListener('arcsweep:commons-open-link', handle);
+  document.addEventListener('arcsweep:commons-cross-link-open', handle);
   const pending = read(); if (pending?.room) { activateRoom(pending.room); queueMicrotask(() => resolve(pending)); }
 }
 if (typeof document !== 'undefined') installCommonsDeepLinkRouter();
