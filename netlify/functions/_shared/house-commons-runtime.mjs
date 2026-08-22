@@ -4,6 +4,7 @@ const json = (status, body) => new Response(JSON.stringify(body), { status, head
 const short = (value, length = 160) => value == null ? null : String(value).slice(0, length);
 const cleanLinks = (links) => Array.isArray(links) ? links.slice(0, 24).map((link) => ({ kind: short(link?.kind, 80), id: short(link?.id, 240), label: short(link?.label, 240) })).filter((link) => link.kind && link.id) : [];
 const cleanMentions = (mentions) => Array.isArray(mentions) ? [...new Set(mentions.map((item) => short(item, 120)).filter(Boolean))].slice(0, 32) : [];
+const cleanAttachments = (attachments) => Array.isArray(attachments) ? attachments.slice(0, 16).map((item) => ({ id: short(item?.id, 240), name: short(item?.name, 240), type: short(item?.type, 160), size: Number.isFinite(Number(item?.size)) ? Number(item.size) : null })).filter((item) => item.id && item.name) : [];
 
 export function createHouseCommonsHandler({ env, store, clock = () => new Date(), idFactory = () => crypto.randomUUID() }) {
   return async function handle(request) {
@@ -12,7 +13,7 @@ export function createHouseCommonsHandler({ env, store, clock = () => new Date()
       const { blobs } = await store.list({ prefix: 'entries/' });
       const selected = blobs.sort((a, b) => b.key.localeCompare(a.key)).slice(0, 500);
       const entries = (await Promise.all(selected.map(({ key }) => store.get(key, { type: 'json' })))).filter(Boolean).sort((a, b) => a.created_at.localeCompare(b.created_at));
-      return json(200, { schema: 'hearthgate.house-commons-log/v3', entries });
+      return json(200, { schema: 'hearthgate.house-commons-log/v4', entries });
     }
     if (request.method !== 'POST') return json(405, { error: 'GET or POST required.' });
     let body; try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
@@ -21,12 +22,12 @@ export function createHouseCommonsHandler({ env, store, clock = () => new Date()
     if (text.length > 24000) return json(413, { error: 'Commons entry exceeds 24,000 characters.' });
     const createdAt = clock().toISOString();
     const entry = {
-      schema: 'hearthgate.house-commons-entry/v3', id: idFactory(), created_at: createdAt,
+      schema: 'hearthgate.house-commons-entry/v4', id: idFactory(), created_at: createdAt,
       kind: ['steward', 'voice', 'system'].includes(body.kind) ? body.kind : 'system',
       author: short(body.author || 'House', 120), voice_id: short(body.voice_id, 120),
       status: short(body.status || 'received', 80), world: body.world && typeof body.world === 'object' ? { id: short(body.world.id || '', 240), name: short(body.world.name || '', 240) } : null,
       thread_id: short(body.thread_id, 240), reply_to: short(body.reply_to, 240), turn_id: short(body.turn_id, 240),
-      mentions: cleanMentions(body.mentions), links: cleanLinks(body.links), summary_of: short(body.summary_of, 240),
+      mentions: cleanMentions(body.mentions), links: cleanLinks(body.links), attachments: cleanAttachments(body.attachments), summary_of: short(body.summary_of, 240),
       runtime: body.runtime && typeof body.runtime === 'object' ? {
         provider: short(body.runtime.provider, 120), model: short(body.runtime.model, 240), route: short(body.runtime.route, 240),
         profile_id: short(body.runtime.profile_id, 320), latency_ms: Number.isFinite(Number(body.runtime.latency_ms)) ? Number(body.runtime.latency_ms) : null,
