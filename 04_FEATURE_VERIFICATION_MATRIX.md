@@ -1,0 +1,54 @@
+# 04 — Feature Verification Matrix
+
+**Repository:** `SingsEnochian/Flameclyffe`  
+**Integration branch:** `codex/arcsweep-feedback-loop`  
+**Updated:** 2026-08-22
+
+## Status vocabulary
+
+`ENVISIONED` — discussed only.  
+`SPECIFIED` — requirements/acceptance recorded.  
+`MOCKED` — visual/structural demonstration only.  
+`PARTIAL` — real behaviour exists but acceptance is incomplete.  
+`FUNCTIONAL` — required user flow works with real integration/persistence.  
+`VERIFIED` — functional plus named evidence.  
+`RELEASED` — verified and present in delivered build.
+
+## Current matrix
+
+| Feature / organ | Current status | Repo evidence | Missing evidence / gate |
+|---|---|---|---|
+| Full Arcsweep v1 product | PARTIAL | Issue #120 defines the accepted full-Arcsweep architecture and LIVE gate. Existing repo lineage contains Arcsweep runtime/components and later integration work. | Re-run the Issue #120 LIVE gate against the current integration branch. |
+| Arcsweep Home shell | PARTIAL | Accepted requirement in Issue #120; later branch history is built around Arcsweep as a product surface. | Direct route smoke + Home/return-Home evidence on current baseline. |
+| Shared State ribbon | PARTIAL | Canonical PREMAQ/Shared State contracts are present in the project lineage; Issue #120 requires the ribbon. | Current UI evidence + persistence/update behaviour + canonical labels. |
+| Glyph Forge | FUNCTIONAL (provisional) | Existing Glyph Studio/Glyph Forge lineage was inventoried as a real drawing canvas with brushes/layers/text/FontForge. | Current-baseline stroke persistence, restart test, and route smoke. |
+| Brush Foundry | PARTIAL | Brush logic exists in the Glyph Studio lineage; Issue #120 requires ≥3 distinct material brushes. | Verify three distinct materials, persisted settings, stylus/keyboard accessibility. |
+| Living Glyph | PARTIAL | Deterministic packet-glyph renderer and live packet-bound glyph lineage exist; Issue #120 requires Spiral-State-driven evolution + replay. | Current-baseline deterministic evolution test and replay reconstruction. |
+| Continuity Gate | FUNCTIONAL (provisional) | Existing Continuity Gate lineage was inventoried as fail-closed import/validate/store/receipt pipeline. | Current-baseline negative-path tests and restart/persistence evidence. |
+| Echo Index | PARTIAL | Echo/continuity/canon work exists in later Arcsweep lineage, but Issue #120 originally listed this as a new organ. | Prove world/character/location resolution from real indexed data on baseline. |
+| Canon Studio | PARTIAL | Canon ingest/library/overlay contracts exist across repo lineage; source canon vs project overlay separation is an explicit law. | Current UI/service path, editing without provenance loss, no-silent-promotion test. |
+| Resonance Bridge / Runa | PARTIAL | Runa/World Hum/Spiral State contracts exist; Arcsweep issue requires one glyph-to-Runa preview. | Current glyph→semantic→Runa preview with receipt and user control. |
+| Replay | PARTIAL | Receipt/replay architecture exists broadly; Issue #120 requires glyph evolution reconstruction. | End-to-end replay from persisted receipts on current baseline. |
+| Observer intake / DEEP routing | FUNCTIONAL (provisional) | Observer/DEEP contracts and later continuity bridges exist; active descendant PR #140 includes DEEP Observer bridge work. | Current-baseline intake→receipt→route smoke with honest missing-data handling. |
+| PREMAQ canonical semantics | VERIFIED (contract level) | Canonical project law fixes seven axes and explicitly uses `A=Agency`, `Q=Qualia`; Issue #120 repeats the boundary. | UI labels must still be checked room-by-room. |
+| Spiral State / `harmonic_state` | FUNCTIONAL (provisional) | Harmonic State is the shared subsystem contract in the current architecture lineage. | Validate current schema version, deterministic emission, degraded/failure path. |
+| Wheel of Time ingest | VERIFIED for captured ingest scope | Canon ingest lineage exists; the project recorded a completed captured-page manifest after resumable ingestion. | Verify current manifest/hash location on integration branch before release packaging. |
+| Canon Library bridge | PARTIAL | PR #107 declares generic canon-library manifest, sovereignty law and bridge client. | Desktop loopback service, web mirror, visible pairing/progress/rollback acceptance remain explicit follow-on gates. |
+| Bifröst Agent Foundry | FUNCTIONAL (branch evidence) | PR #116 reports canonical BifrostState, agent registry, conductor, receipts, Boxfire gate and mounted Foundry panel. | It remains on a separate open branch; not RELEASED on integration baseline. |
+| Project Zero Companion | PARTIAL / descendant branch | PR #140 carries typed sockets, theme interoperability, Flame channel, rich text, Observer bridge and artifact rails with explicit ownership boundary. | Draft branch, mergeability conflict, Nocturne-side handshake intentionally absent. |
+| BSENG/RSE continuity lattice | PARTIAL / descendant branch | PR #140 reports 421-source corpus seal, recognition/admissibility tooling and continuity/replay work. | Draft branch integration and independent acceptance against canonical baseline. |
+| iPad somatic renderer | PARTIAL | PR #112 explicitly lists physical-device, offline PWA, transducer, Shokz and approval gates as still open. | Physical hardware and Rowan approval; fresh current-head CI. |
+| Compression–release maths spine | FUNCTIONAL (branch evidence) | PR #111 declares executable operator, temporal/Jacobian driver, world-native tone sequences and receipts. | Independent Boxfire gate and remaining calibrated/non-reference checks before release. |
+
+## Verification debt rules
+
+1. `FUNCTIONAL (provisional)` must either gain evidence and become `VERIFIED`, or be downgraded after M1 inspection.
+2. Evidence from a descendant/open PR does not automatically promote the integration baseline.
+3. A green route or visible card is not sufficient evidence.
+4. Persistence features require restart evidence.
+5. Sound/haptics require explicit user activation and cannot claim physical-device verification without physical-device evidence.
+6. No feature is `RELEASED` merely because Netlify/Vercel served a build.
+
+## Next-milestone trigger
+
+The matrix selects **M1 — Arcsweep Core Verification Baseline** because the largest concentration of `PARTIAL` and provisional states is in the central Arcsweep organ chain, and current evidence shows substantial existing implementation that should be verified before anything is rebuilt.
