@@ -1,6 +1,6 @@
 # Bifröst CI Failure Triage — 2026-08-22
 
-Status: fixture repair committed
+Status: fixture repair committed; fresh CI queued
 PR: #113
 Branch: feature/bifrost-arcsweep-current-ui-v0.4
 
@@ -75,15 +75,20 @@ apps/starwell/test/bifrostRuntimeSource.test.js
 
 ## Current boundary
 
-The fix has been committed, but the current head has not yet produced a fresh workflow result at the time of this handoff.
-
 Current head after fixture repair and triage handoff:
 
 ```text
-569d8ef7ce91422f8a771acc2387e6c9cc79c6d7
+4cb2e6330ea2502e4938108e7993be0d4f1f9571
 ```
 
-Latest PR metadata after the handoff reports `mergeable: true`.
+Fresh workflows have appeared for the current head:
+
+```text
+STARWELL Static Bundle:       queued · run 32561651950
+Hearthgate Windows Installer: pending · run 32561651865
+```
+
+Latest PR metadata after the handoff reports `mergeable: false`; this may be transient while GitHub recomputes after new commits, or it may indicate a real stacked-branch merge issue that must be checked after CI starts.
 
 Release remains blocked until CI reruns and verifies the full suite/build.
 
