@@ -7,6 +7,7 @@ export const BIFROST_GUARDED_ACTION_IDS = Object.freeze([
   'run-window',
   'sound-pair',
   'play-premaq-song',
+  'export-premaq-song',
   'export-receipts',
 ]);
 
