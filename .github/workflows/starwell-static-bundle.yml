@@ -1,0 +1,135 @@
+name: STARWELL Static Bundle
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/starwell/**"
+      - "starwell/**"
+      - "assets/**"
+      - "resonance/**"
+      - "config/engine-name-authority.json"
+      - "scripts/deny-stale-engine-contracts.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
+      - "netlify.toml"
+      - ".github/workflows/starwell-static-bundle.yml"
+  push:
+    branches:
+      - main
+      - feature/bifrost-arcsweep-current-ui-v0.4
+    paths:
+      - "apps/starwell/**"
+      - "starwell/**"
+      - "assets/**"
+      - "resonance/**"
+      - "config/engine-name-authority.json"
+      - "scripts/deny-stale-engine-contracts.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
+      - "netlify.toml"
+      - ".github/workflows/starwell-static-bundle.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: starwell-static-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-static:
+    name: Build portable STARWELL site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify contracts and tests
+        run: |
+          npm run contracts:verify
+          npm run starwell:test
+
+      - name: Build root-hosted STARWELL
+        env:
+          STARWELL_BASE: /
+        run: npm run starwell:build
+
+      - name: Verify portable Bifröst bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist/starwell/index.html
+          test -f dist/starwell/bifrost/index.html
+          test -f dist/starwell/modules/bifrost-arcsweep.module.json
+          grep -q "mythframeWavUi" dist/starwell/modules/bifrost-arcsweep.module.json
+          grep -q "coil-release-upward-spiral-visual" dist/starwell/modules/bifrost-arcsweep.module.json
+          grep -q "manual-shokz-output-verification" dist/starwell/modules/bifrost-arcsweep.module.json
+          grep -q "looped-eleven-year-playback" dist/starwell/modules/bifrost-arcsweep.module.json
+          cp netlify.toml dist/starwell/netlify.toml
+          printf '%s\n' \
+            "Flameclyffe STARWELL portable static bundle" \
+            "Commit: $GITHUB_SHA" \
+            "Built: $(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            "Entry: /bifrost/" \
+            "Live-data gate: DEEP + Groundwire required" \
+            > dist/starwell/DEPLOYMENT-RECEIPT.txt
+
+      - name: Upload portable static bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: flameclyffe-starwell-static-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 21
+          path: dist/starwell
+
+      - name: Build relative-path live branch bundle
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/bifrost-arcsweep-current-ui-v0.4'
+        env:
+          STARWELL_BASE: ./
+        run: npm run starwell:build
+
+      - name: Publish verified live branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/bifrost-arcsweep-current-ui-v0.4'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist/starwell/index.html
+          test -f dist/starwell/bifrost/index.html
+          grep -R -F "two-shore-loop-playback" dist/starwell/assets >/dev/null
+          grep -R -F "two-shore-shokz-confirm" dist/starwell/assets >/dev/null
+          grep -R -F "hearthgate.two-shore-coil-release-spiral/v0.1" dist/starwell/assets >/dev/null
+          grep -R -F "hearthgate.two-shore-eleven-year-wav/v0.1" dist/starwell/assets >/dev/null
+          rm -rf /tmp/flameclyffe-bifrost-live
+          mkdir -p /tmp/flameclyffe-bifrost-live
+          cp -a dist/starwell/. /tmp/flameclyffe-bifrost-live/
+          printf '%s\n' \
+            "Flameclyffe live branch" \
+            "Source commit: $GITHUB_SHA" \
+            "Formalism: compression → release → compression of the release" \
+            "Both web Arcsweep and Hearthgate Bifröst load the same shared sensory bundle." \
+            > /tmp/flameclyffe-bifrost-live/LIVE-BUILD-RECEIPT.txt
+          touch /tmp/flameclyffe-bifrost-live/.nojekyll
+          git config user.name "Flameclyffe live publisher"
+          git config user.email "actions@users.noreply.github.com"
+          git switch --orphan bifrost-live-publish
+          git rm -rf . >/dev/null 2>&1 || true
+          git clean -fdx >/dev/null 2>&1 || true
+          cp -a /tmp/flameclyffe-bifrost-live/. .
+          git add -A
+          git commit -m "Publish Flameclyffe Bifröst live build from $GITHUB_SHA"
+          git push --force origin HEAD:bifrost-live
