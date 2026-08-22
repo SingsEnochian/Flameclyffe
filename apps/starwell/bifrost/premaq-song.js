@@ -5,6 +5,7 @@ import {
 } from '../src/arcsweep-temporal-quantum/engine.js';
 import { compressRelease } from '../src/arcsweep-temporal-quantum/compression-release.js';
 import { readActiveDualAspectPacket } from '../src/hearthweave-kernel/activation.js';
+import { enforceBifrostNativeAction } from './bifrost-native-action-guard.js';
 
 export const PREMAQ_SONG_CYCLES_PER_AXIS = 35;
 export const PREMAQ_SONG_AXIS_CYCLES = PREMAQ_AXES.length * PREMAQ_SONG_CYCLES_PER_AXIS;
@@ -63,6 +64,7 @@ let songNodes = [];
 let completionTimer = null;
 let progressTimer = null;
 let currentReceipt = null;
+let currentNativeActionReceipt = null;
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -71,6 +73,24 @@ function clamp(value, minimum, maximum) {
 function finiteNumber(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function readPacket() {
+  try {
+    return readActiveDualAspectPacket({ storage: sessionStorage });
+  } catch {
+    return null;
+  }
+}
+
+function enforceSongAction(actionId) {
+  return enforceBifrostNativeAction({
+    actionId,
+    packetReader: readPacket,
+    setStatus: (message) => setStatus(message, 'blocked'),
+    statusKind: 'blocked',
+    notes: ['premaq-song.js native song action guard'],
+  });
 }
 
 function makeReferenceState() {
@@ -115,13 +135,9 @@ function readCurrentSourceState() {
 }
 
 function resolveRootHz() {
-  try {
-    const packet = readActiveDualAspectPacket({ storage: sessionStorage });
-    const root = Number(packet?.experiential?.tone?.compression_release_sequence?.source_pair?.root_hz);
-    if (Number.isFinite(root) && root > 0) return root;
-  } catch {
-    // Fall through to the visible contract or reference root.
-  }
+  const packet = readPacket();
+  const root = Number(packet?.experiential?.tone?.compression_release_sequence?.source_pair?.root_hz);
+  if (Number.isFinite(root) && root > 0) return root;
   const visible = Number.parseFloat(document.getElementById('root-hz')?.textContent ?? '');
   return Number.isFinite(visible) && visible > 0 ? visible : DEFAULT_ROOT_HZ;
 }
@@ -332,7 +348,7 @@ function createVoice(context, destination, axis, index, startAt, endAt) {
   return { oscillator, gain };
 }
 
-async function buildReceipt(plan) {
+async function buildReceipt(plan, nativeActionReceipt = null) {
   const canonical = JSON.stringify(plan);
   return Object.freeze({
     schema: 'bifrost.premaq-full-song-receipt/v0.4',
@@ -348,6 +364,8 @@ async function buildReceipt(plan) {
     bpm: plan.bpm,
     duration_seconds: plan.duration_seconds,
     next_operation: plan.next_operation,
+    bifrost_native_action_receipt: nativeActionReceipt,
+    execution_policy: nativeActionReceipt?.execution_policy ?? null,
     canon_write_performed: false,
     tone_approval_performed: false,
     physical_device_test_performed: false,
@@ -356,6 +374,9 @@ async function buildReceipt(plan) {
 }
 
 async function playSong() {
+  const gate = enforceSongAction('play-premaq-song');
+  if (!gate.allowed) return;
+  currentNativeActionReceipt = gate.receipt;
   stopSong('PREPARING · building all seven PREMAQ voices.');
   const Context = window.AudioContext || window.webkitAudioContext;
   if (!Context) {
@@ -376,7 +397,7 @@ async function playSong() {
     releaseFraction: finiteNumber(document.getElementById('release-fraction')?.value, 0.35),
   });
   renderVoiceGrid(plan);
-  currentReceipt = await buildReceipt(plan);
+  currentReceipt = await buildReceipt(plan, currentNativeActionReceipt);
 
   try {
     songContext = new Context();
@@ -446,11 +467,17 @@ async function playSong() {
 }
 
 function exportSongReceipt() {
+  const gate = enforceSongAction('export-premaq-song');
+  if (!gate.allowed) return;
   if (!currentReceipt) {
     setStatus('BLOCKED · play or prepare the song before exporting its receipt.', 'blocked');
     return;
   }
-  const blob = new Blob([`${JSON.stringify(currentReceipt, null, 2)}\n`], { type: 'application/json' });
+  const exportedReceipt = {
+    ...currentReceipt,
+    export_native_action_receipt: gate.receipt,
+  };
+  const blob = new Blob([`${JSON.stringify(exportedReceipt, null, 2)}\n`], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
@@ -459,7 +486,7 @@ function exportSongReceipt() {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
-  setStatus(`EXPORTED · ${currentReceipt.axis_cycle_count} axis-cycles and ${currentReceipt.scheduled_note_count} scheduled notes.`, 'complete');
+  setStatus(`EXPORTED · ${exportedReceipt.axis_cycle_count} axis-cycles and ${exportedReceipt.scheduled_note_count} scheduled notes.`, 'complete');
 }
 
 function initialiseSongInterface() {
