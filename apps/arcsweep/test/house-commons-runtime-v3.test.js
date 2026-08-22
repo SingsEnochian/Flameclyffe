@@ -15,7 +15,7 @@ function store() {
   };
 }
 
-test('Commons v3 persists mentions, cross-links, summaries, and runtime provenance', async () => {
+test('Commons v3 features survive promotion into the current v4 entry schema', async () => {
   const memory = store();
   const handle = createHouseCommonsHandler({ env: env(), store: memory, clock: () => new Date('2026-08-21T18:00:00Z'), idFactory: () => 'entry-1' });
   const request = new Request('https://example.test/api/v1/house/commons', {
@@ -31,9 +31,10 @@ test('Commons v3 persists mentions, cross-links, summaries, and runtime provenan
   const response = await handle(request);
   assert.equal(response.status, 201);
   const entry = await response.json();
-  assert.equal(entry.schema, 'hearthgate.house-commons-entry/v3');
+  assert.equal(entry.schema, 'hearthgate.house-commons-entry/v4');
   assert.deepEqual(entry.mentions, ['atlas', 'altair']);
   assert.deepEqual(entry.links, [{ kind: 'canon', id: 'rand', label: 'Rand al Thor' }]);
+  assert.deepEqual(entry.attachments, []);
   assert.equal(entry.summary_of, 'thread-1');
   assert.equal(entry.runtime.runtime_world_context_id, 'ctx-1');
 });
