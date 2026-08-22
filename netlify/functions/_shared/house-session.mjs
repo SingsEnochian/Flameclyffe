@@ -20,8 +20,11 @@ function signingSecret(env) {
   return env.get('HOUSE_SESSION_SECRET') || env.get('ARCSWEEP_RUNTIME_TOKEN');
 }
 
-function stewardCredential(env) {
-  return env.get('ARCSWEEP_STEWARD_KEY') || env.get('ARCSWEEP_RUNTIME_TOKEN');
+function stewardCredentials(env) {
+  const primary = env.get('ARCSWEEP_STEWARD_KEY');
+  const secondary = env.get('ARCSWEEP_STEWARD_KEY_SECONDARY');
+  const legacyFallback = primary ? null : env.get('ARCSWEEP_RUNTIME_TOKEN');
+  return [primary, secondary, legacyFallback].filter(Boolean);
 }
 
 function signature(payload, secret) {
@@ -73,7 +76,7 @@ export function authoriseHouseRequest(request, env, now = Date.now()) {
 }
 
 export function validateStewardCredential(credential, env) {
-  return secretEqual(credential, stewardCredential(env));
+  return stewardCredentials(env).some((expected) => secretEqual(credential, expected));
 }
 
 export function houseSessionCookie(request, token, ttl) {
