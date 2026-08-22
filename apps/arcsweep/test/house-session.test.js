@@ -14,12 +14,33 @@ import {
 const env = (values) => ({ get: (name) => values[name] });
 
 test('broker issues an expiring signed Steward session and rejects tampering', () => {
-  const runtime = env({ ARCSWEEP_STEWARD_KEY: 'door-key', HOUSE_SESSION_SECRET: 'signing-key' });
+  const runtime = env({
+    ARCSWEEP_STEWARD_KEY: 'door-key',
+    ARCSWEEP_STEWARD_KEY_SECONDARY: 'second-door-key',
+    HOUSE_SESSION_SECRET: 'signing-key',
+  });
   assert.equal(validateStewardCredential('door-key', runtime), true);
+  assert.equal(validateStewardCredential('second-door-key', runtime), true);
+  assert.equal(validateStewardCredential('wrong-door-key', runtime), false);
   const issued = issueHouseSession(runtime, 1_000_000);
   assert.equal(verifyHouseSessionToken(issued.token, runtime, 1_000_001)?.role, 'steward');
   assert.equal(verifyHouseSessionToken(`${issued.token}x`, runtime, 1_000_001), null);
   assert.equal(verifyHouseSessionToken(issued.token, runtime, (issued.claims.exp + 1) * 1000), null);
+});
+
+test('legacy runtime token remains the Steward credential only when no explicit primary key exists', () => {
+  const legacy = env({ ARCSWEEP_RUNTIME_TOKEN: 'legacy-door', HOUSE_SESSION_SECRET: 'signing-key' });
+  assert.equal(validateStewardCredential('legacy-door', legacy), true);
+
+  const explicit = env({
+    ARCSWEEP_RUNTIME_TOKEN: 'native-only',
+    ARCSWEEP_STEWARD_KEY: 'primary-door',
+    ARCSWEEP_STEWARD_KEY_SECONDARY: 'secondary-door',
+    HOUSE_SESSION_SECRET: 'signing-key',
+  });
+  assert.equal(validateStewardCredential('primary-door', explicit), true);
+  assert.equal(validateStewardCredential('secondary-door', explicit), true);
+  assert.equal(validateStewardCredential('native-only', explicit), false);
 });
 
 test('sealed cookie authenticates House requests while bearer remains available to native clients', () => {
