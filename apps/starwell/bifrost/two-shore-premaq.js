@@ -10,6 +10,10 @@ import {
   bridgeBlocksCertifiedExecution,
   short,
 } from './bifrost-runtime-state.js';
+import {
+  applyBifrostRuntimeExecutionPolicy,
+  installBifrostRuntimeExecutionBridge,
+} from './bifrost-runtime-engine-bridge.js';
 
 const AXIS_NAMES = Object.freeze({
   P: 'Presence',
@@ -23,13 +27,10 @@ const AXIS_NAMES = Object.freeze({
 
 const panelId = 'two-shore-premaq-panel';
 const runtimeStatusId = 'two-shore-runtime-status';
-const guardedButtonIds = Object.freeze([
-  'run-window',
-  'sound-pair',
-  'play-premaq-song',
-]);
 
 let currentRuntimeState = null;
+let currentExecutionPolicy = null;
+let lastBlockedActionReceipt = null;
 
 function readPacket() {
   try {
@@ -118,7 +119,7 @@ function renderShore(container, title, shore) {
   container.append(header, createBars(shore.source), meta);
 }
 
-function renderBridge(container, runtime) {
+function renderBridge(container, runtime, policy) {
   const { bridge, hearthside, targetside } = runtime;
   container.replaceChildren();
   container.innerHTML = `
@@ -132,6 +133,7 @@ function renderBridge(container, runtime) {
       <div><dt>Hearthside</dt><dd>${short(hearthside.fingerprint, 30)}</dd></div>
       <div><dt>Targetside</dt><dd>${short(targetside.fingerprint, 30)}</dd></div>
       <div><dt>Crossing ready</dt><dd>${bridge.crossing_ready ? 'YES' : 'NO'}</dd></div>
+      <div><dt>Execution policy</dt><dd>${policy?.blocks_execution ? 'BLOCKED' : 'OPEN'}</dd></div>
       <div><dt>Gate</dt><dd>${bridge.detail}</dd></div>
     </dl>
   `;
@@ -147,26 +149,15 @@ function ensurePanel() {
   return panel;
 }
 
-function setRuntimeStatus(runtime) {
+function setRuntimeStatus(runtime, policy = currentExecutionPolicy) {
   const status = document.getElementById(runtimeStatusId);
   if (!status) return;
   status.className = `engine-message${bridgeBlocksCertifiedExecution(runtime) ? ' error' : ''}`;
-  status.textContent = bridgeBlocksCertifiedExecution(runtime)
-    ? `BLOCKED · ${runtime.bridge.status} · Bifröst execution controls are disabled until the packet is corrected.`
-    : `${runtime.bridge.status} · ${runtime.bridge.detail}`;
-}
-
-function setControlGuard(runtime) {
-  const blocked = bridgeBlocksCertifiedExecution(runtime);
-  for (const id of guardedButtonIds) {
-    const button = document.getElementById(id);
-    if (!button) continue;
-    button.disabled = blocked;
-    button.setAttribute('aria-disabled', String(blocked));
-    button.title = blocked
-      ? `${runtime.bridge.status}: correct the two-shore packet before execution.`
-      : '';
+  if (policy?.blocks_execution) {
+    status.textContent = `BLOCKED · ${policy.bridge_status} · Bifröst execution and old single-state export are disabled until the packet is corrected.`;
+    return;
   }
+  status.textContent = `${runtime.bridge.status} · ${policy?.action_boundary ?? runtime.bridge.detail}`;
 }
 
 function renderTwoShorePanel() {
@@ -174,11 +165,11 @@ function renderTwoShorePanel() {
   if (!panel) return;
   const packet = readPacket();
   currentRuntimeState = buildBifrostRuntimeState(packet);
+  currentExecutionPolicy = applyBifrostRuntimeExecutionPolicy(currentRuntimeState);
   renderShore(panel.querySelector('[data-shore="hearthside"]'), 'HEARTHSIDE / OBSERVABLE', currentRuntimeState.hearthside);
-  renderBridge(panel.querySelector('[data-shore="bridge"]'), currentRuntimeState);
+  renderBridge(panel.querySelector('[data-shore="bridge"]'), currentRuntimeState, currentExecutionPolicy);
   renderShore(panel.querySelector('[data-shore="targetside"]'), 'TARGETSIDE / EXPERIENTIAL', currentRuntimeState.targetside);
-  setRuntimeStatus(currentRuntimeState);
-  setControlGuard(currentRuntimeState);
+  setRuntimeStatus(currentRuntimeState, currentExecutionPolicy);
   window.dispatchEvent(new CustomEvent('bifrost:runtime-state', { detail: currentRuntimeState }));
 }
 
@@ -196,13 +187,15 @@ function exportJson(payload, filename) {
 
 function exportTwoShoreReceipt(reason) {
   const runtime = currentRuntimeState ?? buildBifrostRuntimeState(readPacket());
+  const policy = currentExecutionPolicy ?? applyBifrostRuntimeExecutionPolicy(runtime);
   const sidecar = buildBifrostReceiptSidecar(runtime, {
     notes: [
       reason,
+      policy.action_boundary,
       'Sidecar export records both Bifröst shores and bridge status. It does not certify physical device testing, canon write or tone approval.',
     ],
   });
-  exportJson(sidecar, `bifrost-two-shore-${runtime.bridge.status.toLowerCase().replaceAll('_', '-')}.json`);
+  exportJson({ ...sidecar, execution_policy: policy }, `bifrost-two-shore-${runtime.bridge.status.toLowerCase().replaceAll('_', '-')}.json`);
 }
 
 function installExportSidecarHook() {
@@ -210,20 +203,11 @@ function installExportSidecarHook() {
   if (!exportButton || exportButton.dataset.twoShoreSidecar === 'installed') return;
   exportButton.dataset.twoShoreSidecar = 'installed';
   exportButton.addEventListener('click', () => {
+    const runtime = currentRuntimeState ?? buildBifrostRuntimeState(readPacket());
+    const policy = currentExecutionPolicy ?? applyBifrostRuntimeExecutionPolicy(runtime);
+    if (policy.blocks_execution) return;
     window.setTimeout(() => exportTwoShoreReceipt('automatic-sidecar-for-cycle-receipt-export'), 0);
   });
-}
-
-function installExecutionCaptureGuard() {
-  document.addEventListener('click', (event) => {
-    const target = event.target instanceof Element ? event.target.closest('button') : null;
-    if (!target || !guardedButtonIds.includes(target.id)) return;
-    const runtime = currentRuntimeState ?? buildBifrostRuntimeState(readPacket());
-    if (!bridgeBlocksCertifiedExecution(runtime)) return;
-    event.preventDefault();
-    event.stopPropagation();
-    setRuntimeStatus(runtime);
-  }, true);
 }
 
 function installStyles() {
@@ -254,7 +238,19 @@ function installStyles() {
 
 function boot() {
   installStyles();
-  installExecutionCaptureGuard();
+  installBifrostRuntimeExecutionBridge({
+    getRuntimeState: () => currentRuntimeState ?? buildBifrostRuntimeState(readPacket()),
+    setStatusMessage: (message) => {
+      const status = document.getElementById(runtimeStatusId);
+      if (!status) return;
+      status.className = 'engine-message error';
+      status.textContent = message;
+    },
+    onBlockedAction: (receipt) => {
+      lastBlockedActionReceipt = receipt;
+      window.__BIFROST_LAST_BLOCKED_ACTION_RECEIPT__ = receipt;
+    },
+  });
   installExportSidecarHook();
   renderTwoShorePanel();
   subscribeToDualAspectActivation(() => renderTwoShorePanel(), {
@@ -263,6 +259,9 @@ function boot() {
     emitCurrent: true,
   });
   window.addEventListener('storage', renderTwoShorePanel);
+  window.addEventListener('bifrost:runtime-state', () => {
+    if (lastBlockedActionReceipt) lastBlockedActionReceipt = null;
+  });
 }
 
 if (document.readyState === 'loading') {
