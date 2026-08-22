@@ -23,7 +23,7 @@ Build the real House. Recover before replacing. Wonder is unrestricted. Implemen
 **Organs to verify in order:**
 
 1. `/arcsweep` Home shell and return-Home navigation.
-2. Shared State ribbon with canonical PREMAQ (`P,C,R,E,M,A,Q`; `A=Agency`, `Q=Qualia`).
+2. Shared State ribbon with canonical PREMAQC (`P,C,R,E,M,A,Q`; `A=Agency`, `Q=Qualia`).
 3. Glyph Forge real stroke persistence.
 4. Living Glyph deterministic Spiral-State-driven evolution.
 5. Brush Foundry with at least three materially distinct brushes.
