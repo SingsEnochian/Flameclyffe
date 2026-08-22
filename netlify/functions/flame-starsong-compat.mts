@@ -1,10 +1,10 @@
 import flameChat from './flame-chat.mts';
 
-const STARS0NG_FLAMES = new Set(['larkshine', 'ellowind']);
+const STARSONG_FLAMES = new Set(['larkshine', 'ellowind']);
 
 export default async (request, context) => {
   const flameId = String(context.params?.flame_id || '');
-  if (!STARS0NG_FLAMES.has(flameId)) {
+  if (!STARSONG_FLAMES.has(flameId)) {
     return new Response(JSON.stringify({ error: `Unknown Starsong Flame: ${flameId}` }), {
       status: 404,
       headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
