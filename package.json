@@ -21,6 +21,7 @@
     "arcsweep:build": "vite build --config apps/arcsweep/vite.config.js",
     "arcsweep:preview": "vite preview --config apps/arcsweep/vite.config.js",
     "arcsweep:test": "node --test apps/arcsweep/test/*.test.js apps/arcsweep/test/*.test.cjs",
+    "arcsweep:smoke:terra-prime": "node scripts/arcsweep-terra-prime-live-smoke.mjs",
     "arcsweep:stage:desktop": "node apps/arcsweep/desktop/stage.cjs",
     "arcsweep:stage:server": "node apps/arcsweep/server-stage.cjs",
     "arcsweep:stage:netlify": "node apps/arcsweep/vercel-stage.cjs",
