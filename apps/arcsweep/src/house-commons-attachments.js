@@ -51,5 +51,6 @@ function renderAttachmentChips() {
     }
   }).catch(() => null);
 }
-export function installHouseCommonsAttachments() { if (typeof document === 'undefined') return; const observer = new MutationObserver(() => { enhance(); renderAttachmentChips(); }); observer.observe(document.body, { childList: true, subtree: true }); document.addEventListener('arcsweep:commons-attachment-saved', () => setTimeout(renderAttachmentChips, 250)); enhance(); renderAttachmentChips(); }
+function mutationNeedsEnhancement(mutations) { return mutations.some((mutation) => [...mutation.addedNodes].some((node) => node?.nodeType === 1 && (node.matches?.('#commons-form,.commons-chat-entry') || node.querySelector?.('#commons-form,.commons-chat-entry')))); }
+export function installHouseCommonsAttachments() { if (typeof document === 'undefined') return; const observer = new MutationObserver((mutations) => { if (!mutationNeedsEnhancement(mutations)) return; enhance(); setTimeout(renderAttachmentChips, 0); }); observer.observe(document.body, { childList: true, subtree: true }); document.addEventListener('arcsweep:commons-attachment-saved', () => setTimeout(() => { enhance(); renderAttachmentChips(); }, 250)); enhance(); renderAttachmentChips(); }
 if (typeof document !== 'undefined') installHouseCommonsAttachments();
