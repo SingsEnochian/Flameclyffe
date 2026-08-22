@@ -11,6 +11,7 @@ import {
   installBifrostRuntimeExecutionBridge,
 } from './bifrost-runtime-engine-bridge.js';
 import { installBifrostCycleEnvelopeExportSidecar } from './bifrost-cycle-envelope-export-sidecar.js';
+import { installBifrostMainExportV05 } from './bifrost-main-export-v05.js';
 
 const BOOTSTRAP_SCHEMA = 'bifrost.runtime-bootstrap/v0.1';
 const BOOTSTRAP_EVENT = 'bifrost:runtime-bootstrap';
@@ -59,6 +60,7 @@ export function buildBootstrapReceipt(runtimeState, policy, notes = []) {
       loaded_before_main: true,
       guard_installed_before_legacy_handlers: true,
       cycle_envelope_export_sidecar_installed: true,
+      main_export_v05_cutover_installed: true,
       event_name: BOOTSTRAP_EVENT,
       guarded_actions: policy.blocked_actions.length
         ? policy.blocked_actions
@@ -126,6 +128,8 @@ export function bootBifrostRuntimeBootstrap(options = {}) {
     getRuntimeState: () => currentRuntimeState,
     getExecutionPolicy: () => currentExecutionPolicy,
   });
+
+  installBifrostMainExportV05({ document: root });
 
   const first = refreshBifrostRuntimeBootstrap({
     document: root,
