@@ -27,8 +27,12 @@ function signingSecret(env) {
   return createHash('sha256').update(`hearthgate-house-session/v1\0${hostedRoot}`).digest('base64url');
 }
 
-function stewardCredential(env) {
-  return env.get('ARCSWEEP_STEWARD_KEY') || env.get('ARCSWEEP_RUNTIME_TOKEN');
+function stewardCredentials(env) {
+  const primary = env.get('ARCSWEEP_STEWARD_KEY');
+  const secondary = env.get('ARCSWEEP_STEWARD_KEY_SECONDARY');
+  if (primary || secondary) return [primary, secondary].filter(Boolean);
+  const runtime = env.get('ARCSWEEP_RUNTIME_TOKEN');
+  return runtime ? [runtime] : [];
 }
 
 function stewardUserAllowed(userId, env) {
@@ -115,7 +119,7 @@ export function authoriseHouseRequest(request, env, now = Date.now()) {
 }
 
 export function validateStewardCredential(credential, env) {
-  return secretEqual(credential, stewardCredential(env));
+  return stewardCredentials(env).some((expected) => secretEqual(credential, expected));
 }
 
 export function houseSessionCookie(request, token, ttl) {
