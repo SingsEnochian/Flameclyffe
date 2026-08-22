@@ -23,3 +23,19 @@ test('truth-controlled Field and SoundFont loading remain mounted together', asy
     'the bank must be supplied before synth readiness is awaited',
   );
 });
+
+test('Arcsweep packages and serves the SpessaSynth AudioWorklet beside the built module', async () => {
+  const [soundscape, vite] = await Promise.all([
+    source('story-soundscape.js'),
+    readFile(new URL('../vite.config.js', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(soundscape, /SPESSASYNTH_WORKLET_URL/);
+  assert.match(vite, /arcsweep-spessasynth-worklet/);
+  assert.match(vite, /spessasynth_lib\/dist\/spessasynth_processor\.min\.js/);
+  assert.match(vite, /fileName: 'assets\/spessasynth_processor\.min\.js'/);
+  assert.match(vite, /\/src\/spessasynth_processor\.min\.js/);
+  assert.match(vite, /SOURCE_WORKLET_DECLARATION/);
+  assert.match(vite, /BUILT_WORKLET_DECLARATION/);
+  assert.match(vite, /import\.meta\.url\.slice/);
+});
