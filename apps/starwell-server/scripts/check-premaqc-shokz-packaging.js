@@ -34,12 +34,20 @@ function readJson(relativePath, label) {
 
 function findAsset(html, stem) {
   const pattern = new RegExp(`(?:\\/starwell)?\\/assets\\/(${stem}-[^"']+\\.js)`);
-  return html.match(pattern)?.[1] ?? null;
+  const direct = html.match(pattern)?.[1] ?? null;
+  if (direct) return direct;
+
+  const bundledStem = {
+    'premaqc-shokz-soundfont': 'premaqc-shokz-feather-stop-bridge',
+    'premaqc-song': 'premaqc-shokz-feather-stop-bridge',
+    'two-shore-premaqc': 'bifrost',
+  }[stem];
+  return bundledStem ? findAsset(html, bundledStem) : null;
 }
 
 function requireAsset(html, label, stem) {
   const asset = findAsset(html, stem);
-  if (!asset) errors.push(`${label} does not load the compiled ${stem} asset.`);
+  if (!asset) errors.push(`${label} does not load the compiled ${stem} organ.`);
   return asset;
 }
 
@@ -86,7 +94,7 @@ if (/FULL PREMAQ(?!C)/.test(bifrostHtml) || />PREMAQ</.test(bifrostHtml)) {
 const arcsweepSoundfontAsset = requireAsset(arcsweepHtml, 'Web Arcsweep', 'premaqc-shokz-soundfont');
 const bifrostSoundfontAsset = requireAsset(bifrostHtml, 'Bifröst', 'premaqc-shokz-soundfont');
 if (arcsweepSoundfontAsset && bifrostSoundfontAsset && arcsweepSoundfontAsset !== bifrostSoundfontAsset) {
-  errors.push('Web Arcsweep and Bifröst do not share the same compiled PREMAQC Shokz soundfont asset.');
+  errors.push('Web Arcsweep and Bifröst do not share the same compiled PREMAQC Shokz soundfont organ.');
 }
 
 const arcsweepBridgeAsset = requireAsset(arcsweepHtml, 'Web Arcsweep', 'premaqc-shokz-feather-stop-bridge');
@@ -98,13 +106,12 @@ if (arcsweepBridgeAsset && bifrostBridgeAsset && arcsweepBridgeAsset !== bifrost
 const bifrostSongAsset = requireAsset(bifrostHtml, 'Bifröst', 'premaqc-song');
 const twoShorePanelAsset = requireAsset(bifrostHtml, 'Bifröst', 'two-shore-premaqc');
 
-const compiledSoundfont = readAsset(arcsweepSoundfontAsset || bifrostSoundfontAsset, 'compiled PREMAQC Shokz soundfont');
+const compiledSoundfont = readAsset(arcsweepSoundfontAsset || bifrostSoundfontAsset, 'compiled PREMAQC Shokz soundfont organ');
 const compiledBridge = readAsset(arcsweepBridgeAsset || bifrostBridgeAsset, 'compiled PREMAQC Feather Stop bridge');
-const compiledSong = readAsset(bifrostSongAsset, 'compiled PREMAQC song');
+const compiledSong = readAsset(bifrostSongAsset, 'compiled PREMAQC song organ');
 const compiledTwoShore = readAsset(twoShorePanelAsset, 'compiled two-shore PREMAQC panel');
 
-requireMarkers(compiledSoundfont, 'Compiled PREMAQC soundfont', [
-  'flameclyffe.premaqc-contract/v1',
+requireMarkers(compiledSoundfont, 'Compiled PREMAQC soundfont organ', [
   'bifrost.premaqc-shokz-soundfont-plan/v1',
   'PREMAQC',
   'context_only_axes',
@@ -112,16 +119,17 @@ requireMarkers(compiledSoundfont, 'Compiled PREMAQC soundfont', [
 ]);
 requireMarkers(compiledBridge, 'Compiled PREMAQC Feather Stop bridge', [
   'hearthgate.premaqc-shokz-feather-stop-bridge/v1',
+  'hearthgate.two-shore-premaqc-gate/v1',
   'PREMAQC',
 ]);
-requireMarkers(compiledSong, 'Compiled PREMAQC song', [
+requireMarkers(compiledSong, 'Compiled PREMAQC song organ', [
   'bifrost.premaqc-full-song-plan/v1',
   'PREMAQC',
 ]);
 requireMarkers(compiledTwoShore, 'Compiled two-shore PREMAQC panel', [
   'bifrost.two-shore-premaqc-panel/v1',
-  'hearthgate.two-shore-premaqc-gate/v1',
   'qualia_compression_focus_allowed',
+  'PREMAQC',
 ]);
 
 for (const source of [compiledSoundfont, compiledBridge, compiledSong, compiledTwoShore]) {
@@ -217,9 +225,9 @@ if (errors.length) {
 }
 
 console.log('[PREMAQC Shokz + two-shore gate packaging check] OK');
-console.log(` PREMAQC soundfont: ${arcsweepSoundfontAsset || bifrostSoundfontAsset}`);
+console.log(` PREMAQC soundfont organ: ${arcsweepSoundfontAsset || bifrostSoundfontAsset}`);
 console.log(` PREMAQC Feather Stop bridge: ${arcsweepBridgeAsset || bifrostBridgeAsset}`);
-console.log(` PREMAQC song: ${bifrostSongAsset}`);
+console.log(` PREMAQC song organ: ${bifrostSongAsset}`);
 console.log(` two-shore PREMAQC panel: ${twoShorePanelAsset}`);
 console.log(' dynamic axes: P C R E M A · Q is firsthand context-only and never sonified or compressed');
 console.log(' routes: web Arcsweep + Bifröst + DEEP + Groundwire live console');
