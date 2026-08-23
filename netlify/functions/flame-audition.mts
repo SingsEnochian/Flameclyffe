@@ -42,6 +42,15 @@ function reasoningEffort(body, candidate) {
   return allowed.has(supplied) ? supplied : candidate.runtime?.default_reasoning_effort || null;
 }
 
+function visibleMessage(data) {
+  const content = data?.choices?.[0]?.message?.content;
+  if (typeof content === 'string') return content.trim();
+  if (Array.isArray(content)) {
+    return content.map((part) => typeof part === 'string' ? part : part?.text || '').join('').trim();
+  }
+  return '';
+}
+
 async function callWebDirect(manifest, candidate, body, env, fetchImpl) {
   const credential = candidateCredential(candidate, env);
   if (!credential.value) throw new Error(`Missing server configuration: ${candidate.runtime.api_key_env}`);
@@ -72,6 +81,7 @@ async function callWebDirect(manifest, candidate, body, env, fetchImpl) {
 
   let data;
   let appliedEffort = effort;
+  let visibleRetry = null;
   try {
     data = await providerJson(fetchImpl, endpoint, options, 'Hugging Face Inference Providers');
   } catch (error) {
@@ -80,6 +90,29 @@ async function callWebDirect(manifest, candidate, body, env, fetchImpl) {
     delete retryPayload.reasoning_effort;
     data = await providerJson(fetchImpl, endpoint, { ...options, body: JSON.stringify(retryPayload) }, 'Hugging Face Inference Providers');
     appliedEffort = null;
+  }
+
+  let visible = visibleMessage(data);
+  if (!visible && effort) {
+    const visiblePayload = { ...payload, reasoning_effort: 'none' };
+    try {
+      data = await providerJson(fetchImpl, endpoint, { ...options, body: JSON.stringify(visiblePayload) }, 'Hugging Face Inference Providers');
+      appliedEffort = 'none';
+      visibleRetry = 'reasoning-none';
+    } catch (error) {
+      if (error.status !== 400) throw error;
+      delete visiblePayload.reasoning_effort;
+      data = await providerJson(fetchImpl, endpoint, { ...options, body: JSON.stringify(visiblePayload) }, 'Hugging Face Inference Providers');
+      appliedEffort = null;
+      visibleRetry = 'reasoning-omitted';
+    }
+    visible = visibleMessage(data);
+  }
+
+  if (!visible) {
+    const error = new Error(`${candidate.candidate_id} returned no visible content; reasoning-only completions are not accepted as a successful audition.`);
+    error.status = 502;
+    throw error;
   }
 
   return {
@@ -93,7 +126,8 @@ async function callWebDirect(manifest, candidate, body, env, fetchImpl) {
     execution_path: 'web-direct',
     credential_source: credential.source,
     reasoning_effort: appliedEffort,
-    message: data.choices?.[0]?.message?.content || '',
+    visible_retry: visibleRetry,
+    message: visible,
     usage: data.usage || null,
     cited_sources: [],
   };
