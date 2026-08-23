@@ -42,11 +42,13 @@ test('persists separate Hearthside and Targetside states plus the bridge packet'
   const runtime = createArcsweepBifrostRuntime({ storage });
   runtime.initialise(premaq(), { idFactory: () => 'initial' });
   runtime.evolve({ delta: 0.5, idFactory: () => 'evolved' });
-  runtime.cycle({ focus: 'Q', idFactory: () => 'cycle' });
+  runtime.cycle({ focus: 'R', idFactory: () => 'cycle' });
 
   assert.ok(storage.getItem(BIFROST_STATE_STORAGE_KEY));
   assert.equal(runtime.getHearthside().spiral.cycle, 0);
   assert.equal(runtime.getTargetside().spiral.cycle, 1);
+  assert.equal(runtime.getTargetside().qualia.authority, 'legacy-unresolved');
+  assert.equal(runtime.getTargetside().qualia.legacy_scalar, 0.84);
 
   const bridge = runtime.bridge({
     premaq: premaq(),
