@@ -61,7 +61,8 @@ for (const marker of [
 
 if (manifest) {
   if (manifest.authorityContract?.allElevenYearsRequired !== true) errors.push('Packed manifest lost the eleven-year completion gate.');
-  if (manifest.authorityContract?.everyYearRequiresFreshTwoShorePremaq !== true) errors.push('Packed manifest lost annual two-shore PREMAQ generation.');
+  if (manifest.authorityContract?.everyYearRequiresFreshTwoShorePremaqc !== true) errors.push('Packed manifest lost annual two-shore PREMAQC generation.');
+  if (!manifest.capabilities?.includes('annual-two-shore-premaqc-regeneration')) errors.push('Packed manifest lost the annual PREMAQC regeneration capability.');
   if (manifest.authorityContract?.deterministicGeometryRequiredPerShorePerYear !== true) errors.push('Packed manifest lost per-shore annual geometry.');
   if (manifest.authorityContract?.audibleElaraCodeLayer !== true) errors.push('Packed manifest lost the audible Elara code layer.');
   if (manifest.authorityContract?.wavExportRequired !== true || manifest.authorityContract?.wavYearCueCount !== 11) {
@@ -85,4 +86,4 @@ if (errors.length) {
 }
 
 console.log('[Packed eleven-year WAV verification] OK');
-console.log(' complete two-shore annual generation, deterministic geometry, eleven cue labels, and WAV save controls are packed');
+console.log(' complete two-shore annual PREMAQC generation, deterministic geometry, eleven cue labels, and WAV save controls are packed');
