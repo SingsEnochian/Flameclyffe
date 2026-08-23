@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const ui = fs.readFileSync(path.join(root, 'apps/arcsweep/src/feedback-chamber-v2.js'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'apps/arcsweep/src/feedback-chamber-v2.css'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'apps/arcsweep/index.html'), 'utf8');
+
+test('new Feedback Chamber UI is the mounted Arcsweep presentation layer', () => {
+  assert.match(html, /feedback-chamber-v2\.css/);
+  assert.match(html, /feedback-chamber-v2\.js/);
+  assert.match(ui, /Relational Feedback Chamber/);
+  for (const className of [
+    'feedback-chamber-v2__premaqc',
+    'feedback-chamber-v2__practice',
+    'feedback-chamber-v2__voices',
+    'feedback-chamber-v2__canon',
+    'feedback-chamber-v2__turn',
+    'feedback-chamber-v2__sound',
+    'feedback-chamber-v2__receipts',
+    'feedback-chamber-v2__action-rail',
+    'feedback-chamber-v2__bottom',
+  ]) assert.match(ui, new RegExp(className));
+});
+
+test('Feedback Chamber repairs malformed smart-quote attributes before layout mapping', () => {
+  assert.match(ui, /repairSmartQuoteAttributes\(root\)/);
+  assert.match(ui, /className\?\.includes\('”'\)/);
+  assert.match(ui, /stripSmartQuotes/);
+});
+
+test('Feedback Chamber uses a bounded boot observer and a narrow Arcsweep-root watcher', () => {
+  assert.match(ui, /bootObserver\?\.disconnect\(\)/);
+  assert.match(ui, /bootObserver = null/);
+  assert.match(ui, /appObserver\.observe\(app, \{ childList: true \}\)/);
+  assert.doesNotMatch(ui, /appObserver\.observe\([^\n]+subtree:\s*true/);
+});
+
+test('new UI keeps the deliberate three-column and lower review geometry', () => {
+  assert.match(css, /grid-template-columns:\s*minmax\(0, 1\.12fr\) minmax\(0, \.95fr\) minmax\(270px, \.72fr\)/);
+  assert.match(css, /feedback-chamber-v2__rail/);
+  assert.match(css, /feedback-chamber-v2__bottom/);
+  assert.match(css, /grid-template-columns:\s*minmax\(0, \.9fr\) minmax\(0, 1\.25fr\)/);
+});
