@@ -1,4 +1,5 @@
 const AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+const DYNAMIC_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A']);
 
 function error(path, message) { return { path, message }; }
 function nonEmpty(value) { return typeof value === 'string' && value.trim().length > 0; }
@@ -19,6 +20,12 @@ export function validateDeepTimeRecord(record) {
   for (const axis of AXES) {
     if (!Number.isFinite(Number(record.premaqc?.state?.[axis]?.value))) errors.push(error(`premaqc.state.${axis}.value`, `${axis} value must be finite.`));
   }
+  const q = Number(record.premaqc?.state?.Q?.value);
+  if (Number.isFinite(q) && ![0, 1].includes(q)) errors.push(error('premaqc.state.Q.value', 'Q must be the binary firsthand-report presence bit (0 or 1).'));
+  const qualia = record.premaqc?.qualia;
+  if (q === 1 && !(qualia?.present === true && qualia?.authority === 'firsthand-only' && qualia?.inferred === false)) {
+    errors.push(error('premaqc.qualia', 'Q=1 requires a receipted firsthand Qualia report.'));
+  }
   if (!nonEmpty(record.provenance?.observation_run_id)) errors.push(error('provenance.observation_run_id', 'Observation run id is required.'));
   if (!nonEmpty(record.provenance?.acceptance_mask_id)) errors.push(error('provenance.acceptance_mask_id', 'Acceptance mask id is required.'));
   if (!nonEmpty(record.provenance?.accepted_state_hash) || record.provenance.accepted_state_hash.length !== 64) errors.push(error('provenance.accepted_state_hash', 'Accepted state hash must be SHA-256.'));
@@ -26,7 +33,9 @@ export function validateDeepTimeRecord(record) {
   if (record.quality?.data_quality != null && (!Number.isFinite(Number(record.quality.data_quality)) || Number(record.quality.data_quality) < 0 || Number(record.quality.data_quality) > 1)) errors.push(error('quality.data_quality', 'Data quality must be between 0 and 1.'));
   if (record.quality && Object.prototype.hasOwnProperty.call(record.quality, 'Q')) errors.push(error('quality.Q', 'Engineering data quality must not be stored as Q.'));
   if (record.authority?.append_only !== true) errors.push(error('authority.append_only', 'DEEPTime records must be append-only.'));
-  if (record.authority?.qualia_is_premaqc_q !== true) errors.push(error('authority.qualia_is_premaqc_q', 'Qualia must remain PREMAQC Q.'));
+  if (record.authority?.qualia_presence_is_premaqc_q !== true) errors.push(error('authority.qualia_presence_is_premaqc_q', 'PREMAQC Q must represent firsthand Qualia report presence.'));
+  if (record.authority?.qualia_report_is_firsthand_only !== true) errors.push(error('authority.qualia_report_is_firsthand_only', 'Qualia reports must remain firsthand-only.'));
+  if (record.authority?.qualia_magnitude_inference_allowed !== false) errors.push(error('authority.qualia_magnitude_inference_allowed', 'Qualia magnitude inference must remain forbidden.'));
   return { valid: errors.length === 0, errors };
 }
 
@@ -52,4 +61,4 @@ export function validateDeepTimeWindow(records) {
   return { valid: errors.length === 0, errors };
 }
 
-export { AXES as DEEP_TIME_PREMAQC_AXES };
+export { AXES as DEEP_TIME_PREMAQC_AXES, DYNAMIC_AXES as DEEP_TIME_DYNAMIC_AXES };
