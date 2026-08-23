@@ -21,9 +21,19 @@ Project Zero reads transformation as a path through a living topology rather tha
 - Qualia remains first-person evidence and is never inferred by the Observer.
 - Agency describes a participant's capacity to influence orientation and traversal.
 
+## Canonical ingest
+
+The governing text is persisted in Flameclyffe Supabase as `starwell_codex_entries.slug = project-zero-possibility-topology-foundational-principles-2026-08-23`.
+
+`apps/arcsweep/src/possibility-principles.js` is the runtime ingest contract. It exposes a stable reference to that row and a compact executable principle set, while keeping the Codex body as the canonical long-form source.
+
+Every emitted possibility topology carries the canonical principle reference so downstream systems can resolve the same governing text instead of relying on conversational memory.
+
 ## Why this matters
 
-A single scalar objective would erase information about path, history, modality, relationship, and local conditions. Project Zero therefore preserves relational evidence rather than producing a universal winner score. The Runtime Broker can eventually use this topology to recognise paths whose present strength and coherence align with an Ask, while retaining the plurality of other paths and the conditions under which they become traversable.
+A single scalar objective erases information about path, history, modality, relationship, and local conditions. Project Zero therefore carries relational evidence rather than producing a universal winner score. The Runtime Broker receives plural route branches, each with the Ask, continuity-pattern, conditions, shared traversal evidence, and path-specific strength/coherence evidence.
+
+This lets the Broker recognise which paths presently align with greater strength and coherence while retaining the other paths and the conditions under which they become traversable.
 
 PREMAQC participates at four levels:
 
@@ -41,12 +51,17 @@ The Translation Circuit asks two complementary questions:
 1. What continuity-pattern travels through translation?
 2. What becomes perceptible or possible because translation occurred?
 
-Story, PREMAQC, mathematics, glyph, Runa, model interpretation, and returned story are therefore not ranked copies. They are different representations encountered along a trajectory. Each can reveal relationships unavailable to another modality.
+Story, PREMAQC, mathematics, glyph, Runa, model interpretation, and returned story are different representations encountered along a trajectory. Each can reveal relationships unavailable to another modality.
 
-## Runtime shape
+## Structural braid
+
+The runtime flow is now:
+
+`Supabase Codex → principle ingest → Great Braid/PREMAQC possibility topology → Project Zero event → plural Broker route set → modality-specific traversal evidence → Observer/DEEP receipt → refined topology`
 
 `apps/arcsweep/src/possibility-topology.js` emits `arcsweep.possibility-topology/v1` with:
 
+- canonical principle reference,
 - Ask/orientation,
 - PREMAQC departure, arrival, delta, and changed axes,
 - trajectory and continuity-pattern,
@@ -55,8 +70,18 @@ Story, PREMAQC, mathematics, glyph, Runa, model interpretation, and returned sto
 - newly legible modalities,
 - explicit absence of a universal optimisation target.
 
-The first deterministic harness runs a Terra Prime → Terra Aeterna crossing and verifies that the resulting read remains trajectory-based, relational, path-aware, and open to topology expansion.
+`apps/arcsweep/src/possibility-broker.js` emits `arcsweep.possibility-route-set/v1`. Route sets remain plural, unranked, and winnerless. Each branch can carry named path-specific evidence and conditions, making differences legible without flattening them into one scalar score.
+
+## Test / observe / refine result
+
+The focused executable harness verifies three structural properties:
+
+1. the topology binds to the canonical Supabase Codex reference;
+2. ambiguous routing preserves multiple branches with `ranking = null` and `winner = null`;
+3. path-specific strength/coherence evidence remains attached to the branch it describes.
+
+The first run exposed that branch evidence was too generic to explain why one path might align more strongly or coherently with an Ask. The refinement added named per-path evidence and conditions while preserving plurality. The focused harness passes after that refinement.
 
 ## CI gate
 
-The branch is intentionally synchronized after PR creation so the repository's pull-request workflows evaluate the executable instrument and its deterministic traversal harness on the current head.
+Repository deployment status and pull-request checks remain separate from the focused executable harness. PR #172 carries the complete structural slice for repository-wide evaluation.
