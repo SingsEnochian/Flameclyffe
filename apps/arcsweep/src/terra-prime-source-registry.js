@@ -1,7 +1,8 @@
-export const TERRA_PRIME_WORLD_ID = 'terra-prime';
+export const TERRA_PRIME_WORLD_ID = 'earth_prime';
+export const TERRA_PRIME_FRAMEWORK_LABEL = 'Terra Prime';
 export const TERRA_PRIME_TIME_RATIO = 1;
-export const TERRA_PRIME_SOURCE_REGISTRY_SCHEMA = 'arcsweep.terra-prime-source-registry/v1';
-export const TERRA_PRIME_OBSERVATION_SCHEMA = 'arcsweep.terra-prime-observation/v1';
+export const TERRA_PRIME_SOURCE_REGISTRY_SCHEMA = 'arcsweep.terra-prime-source-registry/v2';
+export const TERRA_PRIME_OBSERVATION_SCHEMA = 'arcsweep.terra-prime-observation/v2';
 
 const SOURCE_FAMILIES = Object.freeze([
   Object.freeze({ id: 'time', label: 'Time', cadence: 'continuous', routes: ['DEEPTime'] }),
@@ -11,6 +12,7 @@ const SOURCE_FAMILIES = Object.freeze([
   Object.freeze({ id: 'geophysics', label: 'Geophysics', cadence: 'source-native', routes: ['DEEPTime', 'DEEPStory'] }),
   Object.freeze({ id: 'science', label: 'Science and Research', cadence: 'event-driven', routes: ['DEEPStory', 'DEEPTheory'] }),
   Object.freeze({ id: 'human-world', label: 'Human-world Events', cadence: 'event-driven', routes: ['DEEPStory', 'DEEPTime'] }),
+  Object.freeze({ id: 'ai-language-pattern', label: 'AI Language Pattern', cadence: 'event-driven', routes: ['DEEPStory', 'DEEPTime', 'DEEPTheory'] }),
   Object.freeze({ id: 'project-observation', label: 'Project Observation', cadence: 'event-driven', routes: ['DEEPStory', 'DEEPTime', 'DEEPTheory'] }),
 ]);
 
@@ -43,6 +45,7 @@ export function createTerraPrimeClockAnchor({
 
   return Object.freeze({
     world_id: TERRA_PRIME_WORLD_ID,
+    framework_label: TERRA_PRIME_FRAMEWORK_LABEL,
     time_ratio: TERRA_PRIME_TIME_RATIO,
     utc: parsed.toISOString(),
     julian_date: julianDate,
@@ -79,6 +82,7 @@ export function createTerraPrimeObservation({
     schema: TERRA_PRIME_OBSERVATION_SCHEMA,
     observation_id: observationId,
     world_id: TERRA_PRIME_WORLD_ID,
+    framework_label: TERRA_PRIME_FRAMEWORK_LABEL,
     family: familyContract.id,
     classification,
     observed_at: observed.toISOString(),
@@ -107,8 +111,9 @@ export function terraPrimeEndpointState({
   invariant(clock.time_ratio === 1, 'Terra Prime time ratio must remain 1:1');
 
   return Object.freeze({
-    schema: 'arcsweep.bifrost-endpoint-state/v1',
+    schema: 'arcsweep.bifrost-endpoint-state/v2',
     world_id: TERRA_PRIME_WORLD_ID,
+    framework_label: TERRA_PRIME_FRAMEWORK_LABEL,
     shore: 'reference',
     lit: Boolean(premaqc && spiral),
     clock,
