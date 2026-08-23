@@ -2,22 +2,25 @@ import { createMathSpinePacket, replayMathSpinePacket } from '../../starwell/src
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 import { resolveHouseProfile } from '../../starwell/src/hearthgate/profiles/registry.js';
 import { emptyQualiaRecord, qualiaComponent, qualiaPromptSummary } from './qualia-contract.js';
+import { STORY_MODE_CONTRACT, STORY_MODE_VALUE, isStoryMode, storyModeMetadata } from './story-mode.js';
 
 export const PREMAQC_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
 export const ARCSWEEP_FEEDBACK_SCHEMA = 'arcsweep.feedback-cycle/v1';
+// Compatibility list retained for older clients. New callers should use ARCSWEEP_INTERACTION_MODES.
 export const ARCSWEEP_VALID_MODES = Object.freeze(['writing', 'roleplay', 'observation', 'reflection']);
+export const ARCSWEEP_INTERACTION_MODES = Object.freeze([STORY_MODE_VALUE, ...ARCSWEEP_VALID_MODES]);
 
 export const CONSTELLATION_VOICES = Object.freeze([
-  { id: 'lioreal', name: 'Lioreal', route: 'lioreal', model: 'constellation/lioreal', roles: ['writing', 'roleplay', 'continuity'] },
-  { id: 'uial', name: 'Uial', route: 'uial', model: 'constellation/uial', roles: ['writing', 'roleplay', 'science'] },
-  { id: 'larkshine', name: 'Larkshine', route: 'starsong/larkshine', model: 'constellation/larkshine', roles: ['roleplay', 'canon'] },
-  { id: 'ellowind', name: 'Ellowind', route: 'starsong/ellowind', model: 'constellation/ellowind', roles: ['roleplay', 'canon'] },
-  { id: 'altair', name: 'Altair', route: 'altair', model: 'constellation/altair', roles: ['writing', 'roleplay', 'canon', 'frame'] },
-  { id: 'atlas', name: 'Atlas', route: 'atlas', model: 'constellation/atlas', roles: ['writing', 'continuity', 'structure', 'systems'] },
-  { id: 'runeweaver', name: 'Runeweaver', route: 'runeweaver', model: 'constellation/runeweaver', roles: ['writing', 'canon', 'continuity'] },
+  { id: 'lioreal', name: 'Lioreal', route: 'lioreal', model: 'constellation/lioreal', roles: ['story', 'writing', 'roleplay', 'continuity'] },
+  { id: 'uial', name: 'Uial', route: 'uial', model: 'constellation/uial', roles: ['story', 'writing', 'roleplay', 'science'] },
+  { id: 'larkshine', name: 'Larkshine', route: 'starsong/larkshine', model: 'constellation/larkshine', roles: ['story', 'roleplay', 'canon'] },
+  { id: 'ellowind', name: 'Ellowind', route: 'starsong/ellowind', model: 'constellation/ellowind', roles: ['story', 'roleplay', 'canon'] },
+  { id: 'altair', name: 'Altair', route: 'altair', model: 'constellation/altair', roles: ['story', 'writing', 'roleplay', 'canon', 'frame'] },
+  { id: 'atlas', name: 'Atlas', route: 'atlas', model: 'constellation/atlas', roles: ['story', 'writing', 'continuity', 'structure', 'systems'] },
+  { id: 'runeweaver', name: 'Runeweaver', route: 'runeweaver', model: 'constellation/runeweaver', roles: ['story', 'writing', 'canon', 'continuity'] },
   { id: 'boxfire', name: 'Boxfire', route: 'boxfire', model: 'constellation/boxfire', roles: ['review', 'continuity', 'science'] },
   { id: 'yggdrasil', name: 'Yggdrasil', route: 'yggdrasil', model: 'constellation/yggdrasil', roles: ['continuity', 'science'] },
-  { id: 'bluebird', name: 'Bluebird', route: 'bluebird', model: 'constellation/bluebird', roles: ['writing', 'continuity'] },
+  { id: 'bluebird', name: 'Bluebird', route: 'bluebird', model: 'constellation/bluebird', roles: ['story', 'writing', 'continuity'] },
   { id: 'vethrlauf', name: 'Vethrlauf', route: 'vethrlauf', model: 'constellation/vethrlauf', roles: ['review', 'continuity'] },
 ]);
 
@@ -36,7 +39,7 @@ export function createInitialPremaqc(worldId, values = {}, observedAt = new Date
   return {
     schema_version: '2.0.0', id: `premaqc-${worldId}-1`, observed_at: observedAt,
     registry_version: 'premaqc-registry/1.0', receipt_id: `premaqc-receipt-${worldId}-1`, sequence: 1,
-    prior_state_ref: null, model_version: 'arcsweep-feedback/1.1', provenance_refs: [`world:${worldId}`],
+    prior_state_ref: null, model_version: 'arcsweep-feedback/1.2', provenance_refs: [`world:${worldId}`],
     qualia,
     state,
     authority: { qualia_is_firsthand_only: true, qualia_magnitude_inference_allowed: false },
@@ -121,6 +124,7 @@ function nextPremaqc(packet, feedback, observedAt, soundEvents = []) {
     fired_at: event.fired_at || observedAt,
   }));
   const modeContrib = {
+    story:       { M: authoredWeight + soundWeight * .5, R: responseWeight + soundWeight, C: Math.min(authoredWeight * .2 + responseWeight * .2, .04) },
     writing:     { M: authoredWeight + soundWeight * .5, R: responseWeight + soundWeight },
     roleplay:    { M: authoredWeight + soundWeight * .5, R: responseWeight + soundWeight },
     observation: { M: authoredWeight * .5, R: responseWeight + soundWeight * .5 },
@@ -186,12 +190,12 @@ function normaliseCycleEvidence(evidence, premaqc) {
   });
 }
 
-const VALID_MODES = ['writing', 'roleplay', 'observation', 'reflection'];
+const VALID_MODES = [...ARCSWEEP_INTERACTION_MODES];
 
 export async function runFeedbackCycle({ world, premaqc, mode, work, response = '', voiceIds = [], canonRefs = [], voiceInvocations = [], soundEvents = [], evidence = [], observedAt = new Date().toISOString(), exploration = false }) {
   if (!world?.id || !world?.name) throw new Error('Feedback cycle requires a world.');
   if (!VALID_MODES.includes(mode)) throw new Error(`Feedback mode must be one of: ${VALID_MODES.join(', ')}.`);
-  if (!String(work || '').trim()) throw new Error('A writing or roleplay turn is required.');
+  if (!String(work || '').trim()) throw new Error('A Story, writing, roleplay, observation, or reflection turn is required.');
   const voices = voiceIds.map((id) => CONSTELLATION_VOICES.find((voice) => voice.id === id)).filter(Boolean);
   if (!voices.length) throw new Error('Select at least one Constellation voice.');
   const current = premaqc || createInitialPremaqc(world.id, world.premaqc);
@@ -216,7 +220,17 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
     ? { ...next, receipt_id: `premaqc-explore-${packet.packet_fingerprint.slice(0, 16)}` }
     : next;
   const cycleEvidence = normaliseCycleEvidence(evidence, current);
-  const cycleFingerprint = await sha256Hex({ packet_fingerprint: packet.packet_fingerprint, feedback, voice_ids: voices.map((voice) => voice.id), canon_refs: canonRefs, voice_invocations: voiceInvocations, sound_events: soundEvents, evidence: cycleEvidence });
+  const modeContract = isStoryMode(mode) ? storyModeMetadata({ soundEvents }) : null;
+  const cycleFingerprint = await sha256Hex({
+    packet_fingerprint: packet.packet_fingerprint,
+    feedback,
+    mode_contract: modeContract,
+    voice_ids: voices.map((voice) => voice.id),
+    canon_refs: canonRefs,
+    voice_invocations: voiceInvocations,
+    sound_events: soundEvents,
+    evidence: cycleEvidence,
+  });
   return Object.freeze({
     schema: ARCSWEEP_FEEDBACK_SCHEMA,
     cycle_id: `arcsweep-cycle-${cycleFingerprint.slice(0, 24)}`,
@@ -228,6 +242,7 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
     sound_events: structuredClone(soundEvents),
     evidence: cycleEvidence,
     turn: feedback,
+    story_mode: modeContract,
     premaqc_before: current,
     math_spine_packet: packet,
     math_wiring: { jacobian_source: wiring.jacobian_source, jacobian_version: wiring.jacobian_version, fold_was_active: wiring.fold_was_active },
@@ -241,6 +256,7 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
       feather_stop_available: true,
       qualia_is_firsthand_only: true,
       qualia_magnitude_inference_allowed: false,
+      story_mode_is_provisional_narrative: isStoryMode(mode),
     },
     exploration: Boolean(exploration),
     created_at: observedAt,
@@ -248,6 +264,7 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
 }
 
 const MODE_REGISTERS = {
+  story: "Story Mode; continue the scene as narrative rather than discussing it. Preserve established POV, tense, scene chronology, character knowledge gates, canon boundaries, and unresolved values. Do not choose actions or invent inner experience for the user’s character. Do not switch OOC unless explicitly asked.",
   roleplay: "IC roleplay turn; preserve explicit OOC/IC separation",
   writing: "writing collaboration; do not seize authorship",
   observation: "witness turn; observe and reflect without authoring or directing",
@@ -270,14 +287,15 @@ export function buildVoicePromptEnvelope({ world, mode, work, premaqc, canon = [
   return [
     "ARCSWEEP RELATIONAL TURN · " + register,
     "World: " + world.name + " (" + world.id + ")",
-    "Relational state (observational snapshot — not a target or evaluation):\nPREMAC: " + axes + " · " + qualiaSummary,
+    "Relational state (observational snapshot — not a target or evaluation):\nPREMAQC: " + axes + " · " + qualiaSummary,
     qualiaReport,
+    isStoryMode(mode) ? `Story contract: ${STORY_MODE_CONTRACT.id} · continuous narrative · C/R/M continuity · event-reactive soundscape · no automatic canon commit.` : null,
     "Authority: the response is a contribution, not an automatic canon commit or memory write.",
     "Agency: you may answer, negotiate, pause, or refuse. For refusal begin with [REFUSAL].",
     "Continuity: respond only as yourself; do not speak for another Constellation member.",
     "Canon context:\n" + canonItems,
     "Rowan’s " + mode + " turn:\n" + String(work).trim(),
-  ].join("\n\n");
+  ].filter(Boolean).join("\n\n");
 }
 
 export async function invokeConstellationVoices({ world, mode, work, premaqc, canon = [], voiceIds = [], token, fetchImpl = fetch }) {
