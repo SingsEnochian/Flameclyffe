@@ -1,3 +1,5 @@
+import { POSSIBILITY_PRINCIPLES_REF } from './possibility-principles.js';
+
 export const POSSIBILITY_TOPOLOGY_SCHEMA = 'arcsweep.possibility-topology/v1';
 
 const AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
@@ -41,6 +43,7 @@ export function createPossibilityTopology({ arc, runtimePacket, bridgeTest, worl
 
   return freeze({
     schema: POSSIBILITY_TOPOLOGY_SCHEMA,
+    principles_ref: POSSIBILITY_PRINCIPLES_REF,
     arc_id: String(arc.id),
     world_id: String(arc.world_id || runtimePacket.world?.id || ''),
     orientation: {
@@ -121,6 +124,7 @@ export function createPossibilityTopology({ arc, runtimePacket, bridgeTest, worl
       possibility_is_primary: true,
       relationship_gives_possibility_structure: true,
       experience_changes_future_possibility: true,
+      intention_is_orientation: true,
       identity_is_trajectory: true,
       meaning_is_relational: true,
       memory_is_topology: true,
