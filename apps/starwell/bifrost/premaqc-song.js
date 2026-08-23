@@ -3,6 +3,7 @@ import {
   PREMAQC_DYNAMIC_AXES,
   PREMAQC_FULL_SONG_PLAN_SCHEMA,
   PREMAQC_FULL_SONG_RECEIPT_SCHEMA,
+  PREMAQC_NAMING_LAW,
   canonicalisePremaqcEnvelope,
 } from '../src/premaqc-contract.js';
 
@@ -26,13 +27,15 @@ export const PREMAQC_SONG_RECEIPT_SCHEMA = PREMAQC_FULL_SONG_RECEIPT_SCHEMA;
 
 function canonicaliseVisibleSongVocabulary() {
   if (typeof document === 'undefined') return;
+  const legacyTerm = PREMAQC_NAMING_LAW.legacy_term;
+  const canonicalTerm = PREMAQC_NAMING_LAW.canonical;
   for (const id of ['premaq-song-status', 'premaq-song-voices']) {
     const root = document.getElementById(id);
     if (!root) continue;
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
-      if (walker.currentNode.nodeValue?.includes('PREMAQ')) {
-        walker.currentNode.nodeValue = walker.currentNode.nodeValue.replaceAll('PREMAQ', 'PREMAQC');
+      if (walker.currentNode.nodeValue?.includes(legacyTerm)) {
+        walker.currentNode.nodeValue = walker.currentNode.nodeValue.replaceAll(legacyTerm, canonicalTerm);
       }
     }
   }
