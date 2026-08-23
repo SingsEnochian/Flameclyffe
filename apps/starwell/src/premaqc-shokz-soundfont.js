@@ -2,6 +2,7 @@ import * as legacy from './premaq-shokz-soundfont.js';
 import {
   PREMAQC_CONTEXT_ONLY_AXES,
   PREMAQC_DYNAMIC_AXES,
+  PREMAQC_NAMING_LAW,
   PREMAQC_SHOKZ_PLAN_SCHEMA,
   canonicalisePremaqcEnvelope,
 } from './premaqc-contract.js';
@@ -36,6 +37,8 @@ function canonicaliseVisibleText(root = document) {
     '#premaq-shokz-status',
     '#premaq-shokz-source',
   ];
+  const legacyTerm = PREMAQC_NAMING_LAW.legacy_term;
+  const canonicalTerm = PREMAQC_NAMING_LAW.canonical;
   for (const selector of targets) {
     const node = root.querySelector?.(selector);
     if (!node) continue;
@@ -43,8 +46,8 @@ function canonicaliseVisibleText(root = document) {
     const textNodes = [];
     while (walker.nextNode()) textNodes.push(walker.currentNode);
     for (const textNode of textNodes) {
-      if (textNode.nodeValue?.includes('PREMAQ')) {
-        textNode.nodeValue = textNode.nodeValue.replaceAll('PREMAQ', 'PREMAQC');
+      if (textNode.nodeValue?.includes(legacyTerm)) {
+        textNode.nodeValue = textNode.nodeValue.replaceAll(legacyTerm, canonicalTerm);
       }
     }
   }
