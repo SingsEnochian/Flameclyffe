@@ -16,6 +16,10 @@ function topology() {
       continuity_pattern: ['identity_lineage', 'provenance', 'agency', 'declared_intention'],
       source_receipt_ids: ['receipt:departure'],
     },
+    relational_read: {
+      strength: { evidence: { crossing_complete: true, rooted_worldseed: true } },
+      coherence: { evidence: { translation_status: 'TRANSLATED' } },
+    },
     topology: {
       possibility_expansion: { newly_legible_modalities: ['glyph', 'runa'] },
     },
@@ -44,13 +48,22 @@ test('Codex ingest resolves the canonical possibility-topology principle record'
   assert.equal(ingested.runtime_principles.intention_is_orientation, 'Intention is orientation.');
 });
 
-test('Broker retains multiple coherent branches without ranking or winner collapse', () => {
-  const routes = createPossibilityRouteSet({ topology: topology(), availableModalities: ['glyph', 'runa', 'storywork'] });
+test('Broker retains plural branches and carries route-specific strength/coherence evidence', () => {
+  const routes = createPossibilityRouteSet({
+    topology: topology(),
+    availableModalities: [
+      { modality: 'glyph', strength_evidence: { spatial_relation_clarity: true }, coherence_evidence: { symbolic_fit: true } },
+      { modality: 'runa', strength_evidence: { temporal_pattern_support: true }, coherence_evidence: { acoustic_fit: true } },
+      { modality: 'storywork', conditions: { requires_narrative_return: true } },
+    ],
+  });
   assert.equal(routes.branch_count, 3);
   assert.equal(routes.ranking, null);
   assert.equal(routes.winner, null);
   assert.deepEqual(routes.branches.map((branch) => branch.status), ['presently-legible', 'presently-legible', 'available-untraversed']);
-  assert.deepEqual(routes.branches.map((branch) => branch.branch_id), ['route:glyph', 'route:runa', 'route:storywork']);
+  assert.equal(routes.branches[0].strength.path_specific.spatial_relation_clarity, true);
+  assert.equal(routes.branches[1].coherence.path_specific.acoustic_fit, true);
+  assert.equal(routes.branches[2].conditions.requires_narrative_return, true);
 });
 
 test('Great Braid Project Zero event carries orientation and topology downstream intact', () => {
