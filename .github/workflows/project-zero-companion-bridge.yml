@@ -7,6 +7,7 @@ on:
       - 'docs/project-zero-companion.md'
       - 'docs/project-zero-connector-contract.md'
       - '.github/workflows/project-zero-companion-bridge.yml'
+      - 'netlify.toml'
       - 'package.json'
       - 'package-lock.json'
   workflow_dispatch:
@@ -16,7 +17,7 @@ permissions:
 
 jobs:
   test-build:
-    name: Test and build Flameclyffe Companion bridge
+    name: Test, build and stage Flameclyffe Companion bridge
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -33,5 +34,13 @@ jobs:
         run: npm ci
       - name: Run Companion bridge contract tests
         run: node --test apps/project-zero-companion/test/*.test.js
-      - name: Build Companion bridge
+      - name: Build production Companion bridge
+        env:
+          PROJECT_ZERO_BASE: /project-zero-companion/
         run: npm run project-zero:build
+      - name: Stage Companion into Netlify publish tree
+        run: npm run project-zero:stage:netlify
+      - name: Verify staged production organ
+        run: |
+          test -f dist/starwell/project-zero-companion/index.html
+          grep -R -F "arcsweep.great-braid.receipted" dist/starwell/project-zero-companion >/dev/null
