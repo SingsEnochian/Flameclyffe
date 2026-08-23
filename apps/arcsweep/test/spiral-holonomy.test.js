@@ -40,12 +40,16 @@ const returnEnvelope = {
 
 const trajectory = createControlTrajectory({ outboundEnvelope: outbound, returnEnvelope, baselinePrimeSnapshot: control });
 
+function near(actual, expected, epsilon = 1e-12) {
+  assert.ok(Math.abs(actual - expected) < epsilon, `expected ${actual} ≈ ${expected}`);
+}
+
 test('Spiral Holonomy separates journey delta from ordinary Prime control evolution', () => {
   const h = calculateSpiralHolonomy({ controlTrajectory: trajectory, outboundEnvelope: outbound, returnEnvelope });
-  assert.equal(h.journey_delta.premaqc.P, .12);
-  assert.equal(h.control_delta.premaqc.P, .04);
-  assert.ok(Math.abs(h.residual_after_control.premaqc.P - .08) < 1e-12);
-  assert.ok(Math.abs(h.residual_after_control.spiral_confidence - .07) < 1e-12);
+  near(h.journey_delta.premaqc.P, .12);
+  near(h.control_delta.premaqc.P, .04);
+  near(h.residual_after_control.premaqc.P, .08);
+  near(h.residual_after_control.spiral_confidence, .07);
 });
 
 test('Spiral Holonomy remains multidimensional and does not collapse to a scalar', () => {
