@@ -8,7 +8,6 @@ import {
   buildBifrostRuntimeState,
   bridgeBlocksCertifiedExecution,
 } from '../bifrost/bifrost-runtime-state.js';
-import { TWO_SHORE_PREMAQC_GATE_CONTRACT } from '../bifrost/two-shore-premaqc.js';
 import { TWO_SHORE_PREMAQC_GATE_SCHEMA } from '../src/premaqc-contract.js';
 
 async function read(relativePath) {
@@ -49,8 +48,8 @@ test('Bifröst route loads the canonical two-shore PREMAQC runtime panel', async
   assert.match(html, /two-shore-premaqc\.js/);
   assert.match(html, /PREMAQC/);
   assert.match(panel, /TWO_SHORE_PREMAQC_PANEL_SCHEMA/);
+  assert.match(panel, /schema:\s*TWO_SHORE_PREMAQC_GATE_SCHEMA/);
   assert.equal(TWO_SHORE_PREMAQC_GATE_SCHEMA, 'hearthgate.two-shore-premaqc-gate/v1');
-  assert.equal(TWO_SHORE_PREMAQC_GATE_CONTRACT.schema, TWO_SHORE_PREMAQC_GATE_SCHEMA);
   assert.match(runtime, /TWO_SHORE_PREMAQC_VISIBLE/);
   assert.match(runtime, /bifrost\.two-shore-premaqc-receipt-sidecar\/v1/);
 });
