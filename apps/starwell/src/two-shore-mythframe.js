@@ -143,7 +143,7 @@ function toneBinding(yearReceipt, shore, axis) {
     role: 'locked-address-tone',
     locked_hz: round(earth ? tone.earth_prime_locked_hz : tone.target_world_locked_hz),
     inverse_twist_hz: round(earth ? tone.earth_prime_inverse_twist_hz : tone.target_world_inverse_twist_hz),
-    elara_code_hz: round(earth ? tone.earth_prime_elara_code_hz : tone.target_world.elara_code_hz),
+    elara_code_hz: round(earth ? tone.earth_prime_elara_code_hz : tone.target_world_elara_code_hz),
     elara_multiplier: yearReceipt.elara_multiplier,
   });
 }
