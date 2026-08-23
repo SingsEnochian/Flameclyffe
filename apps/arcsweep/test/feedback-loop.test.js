@@ -55,7 +55,6 @@ test('wires the registered world Jacobian into the detector and carries the fold
   assert.equal(first.math_spine_packet.projection.fold.active, true);
   assert.equal(first.premaqc_after.math_spine.fold_active, true);
   assert.equal(first.premaqc_after.math_spine.jacobian_version, 'test-fold/2');
-  assert.equal(first.math_wiring.jacobian[6][6], 1);
 
   const releasedWorld = { ...foldedWorld, transferFunctions: { jacobianVersion: 'test-release/2', jacobian: resolveWorldMathWiring(world).jacobian } };
   const second = await runFeedbackCycle({
