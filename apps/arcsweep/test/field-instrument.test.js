@@ -14,6 +14,7 @@ test('ambient axes are source projections, never silently accepted PREMAQC', () 
   assert.equal(instrument.axes.R.provenance, null);
   assert.equal(instrument.axes.P.provenanceType, 'source observation');
   assert.equal(instrument.axes.Q.status, 'unavailable');
+  assert.equal(instrument.axes.Q.value, null);
   assert.equal(instrument.stale, true);
   assert.match(formatFieldAge(instrument.ageMs), /days old/);
 });
@@ -25,12 +26,30 @@ test('production HTTP routes identify as hosted while local development does not
 });
 
 test('a receipted feedback state takes precedence and exposes its lineage', () => {
-  const acceptedPremaqc = { id: 'premaqc-2', receipt_id: 'receipt-2', sequence: 2, state: { P: { value: .81 }, C: { value: .82 }, R: { value: .83 }, E: { value: .4 }, M: { value: .9 }, A: { value: .85 }, Q: { value: .79 } } };
+  const acceptedPremaqc = {
+    id: 'premaqc-2', receipt_id: 'receipt-2', sequence: 2,
+    qualia: { present: true, report_receipt_id: 'qualia-2' },
+    state: { P: { value: .81 }, C: { value: .82 }, R: { value: .83 }, E: { value: .4 }, M: { value: .9 }, A: { value: .85 }, Q: { value: 1 } },
+  };
   const instrument = classifyFieldInstrument({ acceptedPremaqc, ambient: { field: { P: .1 } } });
   assert.equal(instrument.source, 'accepted-feedback');
   assert.equal(instrument.axes.P.value, .81);
   assert.equal(instrument.axes.P.status, 'accepted');
   assert.equal(instrument.axes.P.provenance, 'receipt-2');
+  assert.equal(instrument.axes.Q.value, 1);
+  assert.equal(instrument.axes.Q.status, 'firsthand-reported');
+  assert.equal(instrument.axes.Q.provenance, 'qualia-2');
+});
+
+test('legacy scalar Q is not mistaken for a firsthand report', () => {
+  const acceptedPremaqc = {
+    id: 'legacy', receipt_id: 'legacy-receipt',
+    state: { P: { value: .8 }, C: { value: .8 }, R: { value: .8 }, E: { value: .3 }, M: { value: .8 }, A: { value: .8 }, Q: { value: .79 } },
+  };
+  const instrument = classifyFieldInstrument({ acceptedPremaqc });
+  assert.equal(instrument.axes.Q.value, 0);
+  assert.equal(instrument.axes.Q.status, 'legacy-scalar-unresolved');
+  assert.equal(instrument.axes.Q.legacyValue, .79);
 });
 
 test('missing evidence remains unavailable rather than receiving seed decimals', () => {
@@ -40,18 +59,27 @@ test('missing evidence remains unavailable rather than receiving seed decimals',
   assert.equal(instrument.axes.P.status, 'unavailable');
 });
 
-test('Observer receipts six ambient projections plus firsthand Qualia as a complete PREMAQC input', () => {
+test('Observer receipts six ambient projections plus a structured firsthand Qualia report', () => {
   const ambient = { generated_at: '2026-08-12T05:00:00Z', field: { P: .5, C: .4, R: .7, E: .6, M: .2, A: .8 } };
-  const packet = createFieldObservationPremaqc({ worldId: 'ta-veren-vaen', ambient, qualia: .91, narrative: 'The branch snapped.', observedAt: '2026-08-12T05:01:00Z' });
-  assert.equal(packet.state.Q.value, .91);
+  const packet = createFieldObservationPremaqc({
+    worldId: 'ta-veren-vaen', ambient,
+    qualia: { text: 'Alert, bright, and bodily still; the snap landed as a sharp change in attention.', texture: 'bright-edged', bodily: 'still', intensity: .72 },
+    narrative: 'The branch snapped.', observedAt: '2026-08-12T05:01:00Z',
+  });
+  assert.equal(packet.state.Q.value, 1);
+  assert.equal(packet.state.Q.semantics, 'firsthand-report-presence-bit');
   assert.equal(packet.state.P.value, .5);
   assert.equal(packet.state.P.contributors[0].source_kind, 'ambient-source-projection');
-  assert.equal(packet.state.Q.contributors[0].source_kind, 'firsthand-qualia');
+  assert.equal(packet.state.Q.contributors[0].source_kind, 'firsthand-qualia-report');
+  assert.equal(packet.qualia.present, true);
+  assert.equal(packet.qualia.authority, 'firsthand-only');
+  assert.equal(packet.qualia.inferred, false);
+  assert.equal(packet.qualia.report.intensity, .72);
   assert.match(packet.receipt_id, /^observer-field-/);
 });
 
-test('Observer refuses an unmeasured or out-of-range firsthand Qualia value', () => {
+test('Observer refuses scalar Q and requires a firsthand report', () => {
   const ambient = { generated_at: '2026-08-12T05:00:00Z', field: { P: .5, C: .4, R: .7, E: .6, M: .2, A: .8 } };
-  assert.throws(() => createFieldObservationPremaqc({ worldId: 'ta-veren-vaen', ambient, qualia: '' }), /Qualia/);
-  assert.throws(() => createFieldObservationPremaqc({ worldId: 'ta-veren-vaen', ambient, qualia: 1.2 }), /Qualia/);
+  assert.throws(() => createFieldObservationPremaqc({ worldId: 'ta-veren-vaen', ambient, qualia: .91 }), /not a magnitude/);
+  assert.throws(() => createFieldObservationPremaqc({ worldId: 'ta-veren-vaen', ambient, qualia: '' }), /within/);
 });
