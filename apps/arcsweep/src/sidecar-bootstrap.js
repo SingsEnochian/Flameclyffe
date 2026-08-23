@@ -34,6 +34,7 @@ const SIDECARS = [
   './worldseed-braid-live-ui.js',
   './worldseed-seed-library-live-ui.js',
   './canon-web-link-sidecar.js',
+  './feedback-chamber-v2.js',
 ];
 
 const yieldToBrowser = () => new Promise((resolve) => setTimeout(resolve, 0));

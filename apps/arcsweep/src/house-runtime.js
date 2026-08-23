@@ -5,7 +5,6 @@ export function readHouseRuntimeToken(storage = globalThis.sessionStorage) {
   try { return storage?.getItem(HOUSE_RUNTIME_SESSION_KEY) || ''; } catch { return ''; }
 }
 
-// Retained for the installed/native build. Hosted browsers exchange the credential for an HttpOnly cookie.
 export function writeHouseRuntimeToken(token, storage = globalThis.sessionStorage) {
   const value = String(token || '').trim();
   if (!value) throw new Error('Enter the Steward credential.');
@@ -75,18 +74,9 @@ export async function readFlameStatuses(voices, token, fetchImpl = fetch) {
       if (!response.ok) return { id: voice.id, name: voice.name, state: 'route-error', configured: false, missing: [], error: data.error || `${response.status}` };
       const fallback = data.hosted_fallback || null;
       const fallbackReady = fallback?.configured === true;
-      const state = data.configured
-        ? 'live'
-        : fallbackReady
-          ? 'hosted-fallback-ready'
-          : data.gateway_configured && data.runtime_reachable
-            ? 'model-not-pulled'
-            : 'provider-unavailable';
+      const state = data.configured ? 'live' : fallbackReady ? 'hosted-fallback-ready' : data.gateway_configured && data.runtime_reachable ? 'model-not-pulled' : 'provider-unavailable';
       return {
-        id: voice.id,
-        name: voice.name,
-        state,
-        configured: Boolean(data.configured),
+        id: voice.id, name: voice.name, state, configured: Boolean(data.configured),
         provider: fallbackReady ? fallback.provider : data.provider,
         model: fallbackReady ? fallback.model : data.model,
         missing: fallbackReady ? [] : data.missing || [],
@@ -95,11 +85,8 @@ export async function readFlameStatuses(voices, token, fetchImpl = fetch) {
         modelAvailable: data.model_available ?? null,
         runtimeError: data.runtime_error || null,
         hostedFallback: fallback ? {
-          configured: fallbackReady,
-          provider: fallback.provider || null,
-          model: fallback.model || null,
-          executionPath: fallback.execution_path || null,
-          primaryRouteUnchanged: fallback.primary_route_unchanged === true,
+          configured: fallbackReady, provider: fallback.provider || null, model: fallback.model || null,
+          executionPath: fallback.execution_path || null, primaryRouteUnchanged: fallback.primary_route_unchanged === true,
           missing: fallback.missing || [],
         } : null,
       };
@@ -117,13 +104,8 @@ async function commonsRequest(token, options = {}, fetchImpl = fetch) {
   return data;
 }
 
-export function readHouseCommons(token, fetchImpl = fetch) {
-  return commonsRequest(token, { cache: 'no-store' }, fetchImpl);
-}
-
-export function appendHouseCommons(token, entry, fetchImpl = fetch) {
-  return commonsRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(entry) }, fetchImpl);
-}
+export function readHouseCommons(token, fetchImpl = fetch) { return commonsRequest(token, { cache: 'no-store' }, fetchImpl); }
+export function appendHouseCommons(token, entry, fetchImpl = fetch) { return commonsRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(entry) }, fetchImpl); }
 
 async function kelyranReportRequest(token, options = {}, fetchImpl = fetch) {
   if (!token) throw new Error('Connect the House Runtime first.');
@@ -133,24 +115,15 @@ async function kelyranReportRequest(token, options = {}, fetchImpl = fetch) {
   return data;
 }
 
-export function readKelyranModelReportLog(token, fetchImpl = fetch) {
-  return kelyranReportRequest(token, {}, fetchImpl);
-}
-
-export function inviteKelyranModelReports(token, school, voiceIds, fetchImpl = fetch) {
-  return kelyranReportRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'invite', voice_ids: voiceIds, school }) }, fetchImpl);
-}
+export function readKelyranModelReportLog(token, fetchImpl = fetch) { return kelyranReportRequest(token, {}, fetchImpl); }
+export function inviteKelyranModelReports(token, school, voiceIds, fetchImpl = fetch) { return kelyranReportRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'invite', voice_ids: voiceIds, school }) }, fetchImpl); }
 
 export async function readHouseObservations(token, worldId = null, fetchImpl = fetch) {
   if (!token) throw new Error('Connect the House Runtime first.');
   const params = new URLSearchParams();
   if (worldId) params.set('world_id', worldId);
   const suffix = params.size ? `?${params}` : '';
-  const response = await fetchImpl(`/api/v1/house/observations${suffix}`, {
-    headers: bearerHeaders(token),
-    credentials: 'same-origin',
-    cache: 'no-store',
-  });
+  const response = await fetchImpl(`/api/v1/house/observations${suffix}`, { headers: bearerHeaders(token), credentials: 'same-origin', cache: 'no-store' });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `House observation live read ${response.status}`);
   return data;
@@ -161,43 +134,18 @@ function commandId(prefix = 'braid-command') {
   return `${prefix}-${uuid || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
 }
 
-export async function commandHouseObservation(token, {
-  action,
-  cycleId,
-  decision = null,
-  reviewedBy = 'Rowan',
-  commandId: suppliedCommandId = null,
-  requestedAt = new Date().toISOString(),
-} = {}, fetchImpl = fetch) {
+export async function commandHouseObservation(token, { action, cycleId, decision = null, reviewedBy = 'Rowan', commandId: suppliedCommandId = null, requestedAt = new Date().toISOString() } = {}, fetchImpl = fetch) {
   if (!token) throw new Error('Connect the House Runtime first.');
-  const body = {
-    schema: 'hearthgate.runtime-braid-command/v1',
-    command_id: suppliedCommandId || commandId(action || 'braid-command'),
-    action,
-    cycle_id: cycleId,
-    reviewed_by: reviewedBy,
-    requested_at: requestedAt,
-  };
+  const body = { schema: 'hearthgate.runtime-braid-command/v1', command_id: suppliedCommandId || commandId(action || 'braid-command'), action, cycle_id: cycleId, reviewed_by: reviewedBy, requested_at: requestedAt };
   if (decision) body.decision = decision;
-  const response = await fetchImpl('/api/v1/house/observations', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', ...bearerHeaders(token) },
-    credentials: 'same-origin',
-    cache: 'no-store',
-    body: JSON.stringify(body),
-  });
+  const response = await fetchImpl('/api/v1/house/observations', { method: 'POST', headers: { 'content-type': 'application/json', ...bearerHeaders(token) }, credentials: 'same-origin', cache: 'no-store', body: JSON.stringify(body) });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `House Runtime command ${response.status}`);
   return data;
 }
 
-export function reviewHouseObservation(token, cycleId, decision, options = {}, fetchImpl = fetch) {
-  return commandHouseObservation(token, { ...options, action: 'review-observation', cycleId, decision }, fetchImpl);
-}
-
-export function admitHouseObservationToDeepTime(token, cycleId, options = {}, fetchImpl = fetch) {
-  return commandHouseObservation(token, { ...options, action: 'admit-deeptime', cycleId }, fetchImpl);
-}
+export function reviewHouseObservation(token, cycleId, decision, options = {}, fetchImpl = fetch) { return commandHouseObservation(token, { ...options, action: 'review-observation', cycleId, decision }, fetchImpl); }
+export function admitHouseObservationToDeepTime(token, cycleId, options = {}, fetchImpl = fetch) { return commandHouseObservation(token, { ...options, action: 'admit-deeptime', cycleId }, fetchImpl); }
 
 function parseSseBlock(block) {
   if (!block || block.startsWith(':')) return null;
@@ -229,24 +177,50 @@ export function startHouseBraidLiveUpdates(token, {
   const controller = new AbortController();
   let stopped = false;
   let activeCursor = Number.isSafeInteger(Number(cursor)) ? Number(cursor) : 0;
+  let reportedState = null;
+  let hasBeenLive = false;
+  let failureSince = null;
+  let failureTimer = null;
+
+  const emitState = (state, extra = {}) => {
+    if (state === reportedState) return;
+    reportedState = state;
+    onState({ state, cursor: activeCursor, ...extra });
+  };
+
+  const clearFailure = () => {
+    failureSince = null;
+    if (failureTimer) clearTimeout(failureTimer);
+    failureTimer = null;
+  };
+
+  const reportSustainedFailure = (error) => {
+    if (stopped) return;
+    if (!failureSince) failureSince = Date.now();
+    if (failureTimer) return;
+    failureTimer = setTimeout(() => {
+      failureTimer = null;
+      if (!stopped && failureSince && Date.now() - failureSince >= 5_000) emitState('error', { error });
+    }, 5_000);
+  };
 
   const done = (async () => {
     do {
       const params = new URLSearchParams({ cursor: String(activeCursor) });
       if (worldId) params.set('world_id', worldId);
       try {
-        onState({ state: 'connecting', cursor: activeCursor });
+        if (!hasBeenLive) emitState('connecting');
         const response = await fetchImpl(`/api/v1/house/braid/stream?${params}`, {
           headers: { accept: 'text/event-stream', ...bearerHeaders(token) },
-          credentials: 'same-origin',
-          cache: 'no-store',
-          signal: controller.signal,
+          credentials: 'same-origin', cache: 'no-store', signal: controller.signal,
         });
         if (!response.ok || !response.body) {
           const data = await response.json().catch(() => ({}));
           throw new Error(data.error || `Runtime Braid stream ${response.status}`);
         }
-        onState({ state: 'live', cursor: activeCursor });
+        clearFailure();
+        hasBeenLive = true;
+        emitState('live');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
@@ -262,24 +236,24 @@ export function startHouseBraidLiveUpdates(token, {
             try { data = message.data ? JSON.parse(message.data) : null; } catch {}
             if (message.id && Number.isSafeInteger(Number(message.id))) activeCursor = Math.max(activeCursor, Number(message.id));
             if (message.event === 'braid' && data?.event) onEvent(data.event, { cursor: activeCursor, envelope: data });
-            if (['ready', 'reconnect', 'error'].includes(message.event)) onState({ state: message.event, cursor: activeCursor, data });
+            if (message.event === 'ready') { clearFailure(); if (!hasBeenLive) { hasBeenLive = true; emitState('live', { data }); } }
+            if (message.event === 'error') reportSustainedFailure(new Error(data?.error || 'Runtime Braid stream error'));
+            // Server reconnect hints are transport chatter. The live state remains stable while this client reconnects.
           }
           if (ended) break;
         }
       } catch (error) {
         if (stopped || error?.name === 'AbortError') break;
-        onState({ state: 'error', cursor: activeCursor, error });
+        reportSustainedFailure(error);
       }
       if (!stopped && reconnect) await delay(reconnectDelayMs);
     } while (!stopped && reconnect);
-    onState({ state: 'closed', cursor: activeCursor });
+    clearFailure();
+    emitState('closed');
   })();
 
   return Object.freeze({
-    stop() {
-      stopped = true;
-      controller.abort();
-    },
+    stop() { stopped = true; clearFailure(); controller.abort(); },
     get cursor() { return activeCursor; },
     done,
   });
