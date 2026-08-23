@@ -8,10 +8,12 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const ui = fs.readFileSync(path.join(root, 'apps/arcsweep/src/feedback-chamber-v2.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'apps/arcsweep/src/feedback-chamber-v2.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'apps/arcsweep/index.html'), 'utf8');
+const sidecars = fs.readFileSync(path.join(root, 'apps/arcsweep/src/sidecar-bootstrap.js'), 'utf8');
 
-test('new Feedback Chamber UI is the mounted Arcsweep presentation layer', () => {
+test('new Feedback Chamber UI is the mounted deferred Arcsweep presentation layer', () => {
   assert.match(html, /feedback-chamber-v2\.css/);
-  assert.match(html, /feedback-chamber-v2\.js/);
+  assert.doesNotMatch(html, /feedback-chamber-v2\.js/);
+  assert.match(sidecars, /['"]\.\/feedback-chamber-v2\.js['"]/);
   assert.match(ui, /Relational Feedback Chamber/);
   for (const className of [
     'feedback-chamber-v2__premaqc',
