@@ -66,23 +66,32 @@ function buildSequence() {
   });
 }
 
-test('all eleven years bind math to Mythframe before every tone event', () => {
+test('all eleven years bind dynamic math to Mythframe before every tone event while Qualia stays context-only', () => {
   const sequence = buildSequence();
   assert.equal(assertCompleteMythframeWavSequence(sequence), true);
   assert.equal(sequence.mythframe.schema, TWO_SHORE_MYTHFRAME_HORIZON_SCHEMA);
   assert.equal(sequence.mythframe.chapter_count, 11);
-  assert.equal(sequence.mythframe.axis_frame_count, 11 * 2 * 7);
+  assert.equal(sequence.mythframe.axis_frame_count, 11 * 2 * 6);
+  assert.deepEqual(sequence.mythframe.context_only_axes, ['Q']);
+  assert.equal(sequence.mythframe.qualia_framed, false);
   assert.equal(sequence.mythframe.chapters[0].year, 2025);
   assert.equal(sequence.mythframe.chapters.at(-1).year, 2035);
   assert.equal(sequence.generation_law, 'math-state → mythframe → tone-event');
   assert.equal(sequence.audio_plan.cues.length, 11);
   assert.equal(sequence.audio_plan.mythframe_event_count, sequence.audio_plan.events.length);
 
+  assert.deepEqual(MYTHFRAME_AXES, ['P', 'C', 'R', 'E', 'M', 'A']);
   for (const [yearIndex, chapter] of sequence.mythframe.chapters.entries()) {
     assert.equal(chapter.domain_truth, true);
     assert.equal(chapter.complete, true);
     assert.deepEqual(Object.keys(chapter.earth_prime.axes), MYTHFRAME_AXES);
     assert.deepEqual(Object.keys(chapter.target_world.axes), MYTHFRAME_AXES);
+    assert.equal(chapter.earth_prime.axes.Q, undefined);
+    assert.equal(chapter.target_world.axes.Q, undefined);
+    assert.equal(chapter.earth_prime.qualia_framed, false);
+    assert.equal(chapter.target_world.qualia_framed, false);
+    assert.deepEqual(chapter.bridge.context_only_axes, ['Q']);
+    assert.equal(chapter.bridge.qualia_framed, false);
     for (const shore of [chapter.earth_prime, chapter.target_world]) {
       for (const axis of MYTHFRAME_AXES) {
         const frame = shore.axes[axis];
@@ -102,6 +111,7 @@ test('all eleven years bind math to Mythframe before every tone event', () => {
   }
 
   for (const event of sequence.audio_plan.events) {
+    assert.notEqual(event.axis, 'Q');
     assert.equal(event.tone_generated_from_mythframe, true);
     assert.ok(event.mythframe_frame_id);
     assert.ok(event.mythframe_compression_line);
@@ -109,12 +119,12 @@ test('all eleven years bind math to Mythframe before every tone event', () => {
   }
 });
 
-test('the eleven-year WAV refuses unframed tone plans and renders the complete framed sequence', () => {
+test('the eleven-year WAV refuses unframed tone plans and renders the complete dynamic framed sequence', () => {
   const sequence = buildSequence();
   const wav = renderCompleteMythframeElevenYearWav(sequence, { sampleRate: 8000 });
   assert.equal(wav.complete, true);
   assert.equal(wav.mythframe_chapter_count, 11);
-  assert.equal(wav.mythframe_axis_frame_count, 154);
+  assert.equal(wav.mythframe_axis_frame_count, 132);
   assert.equal(wav.mythframe_tone_event_count, sequence.audio_plan.events.length);
   assert.equal(new TextDecoder().decode(wav.bytes.slice(0, 4)), 'RIFF');
   assert.equal(new TextDecoder().decode(wav.bytes.slice(8, 12)), 'WAVE');
