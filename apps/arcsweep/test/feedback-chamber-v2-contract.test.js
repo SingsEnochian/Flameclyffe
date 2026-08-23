@@ -39,9 +39,13 @@ test('Feedback Chamber uses a bounded boot observer and a narrow Arcsweep-root w
   assert.doesNotMatch(ui, /appObserver\.observe\([^\n]+subtree:\s*true/);
 });
 
-test('new UI keeps the deliberate three-column and lower review geometry', () => {
-  assert.match(css, /grid-template-columns:\s*minmax\(0, 1\.12fr\) minmax\(0, \.95fr\) minmax\(270px, \.72fr\)/);
-  assert.match(css, /feedback-chamber-v2__rail/);
+test('new UI keeps the deliberate twelve-column workbench and lower review geometry', () => {
+  assert.match(css, /grid-template-columns:\s*repeat\(12, minmax\(0, 1fr\)\)/);
+  assert.match(css, /feedback-chamber-v2__premaqc \{ grid-column: 1 \/ 5/);
+  assert.match(css, /feedback-chamber-v2__practice \{ grid-column: 5 \/ 9/);
+  assert.match(css, /feedback-chamber-v2__receipts \{ grid-column: 9 \/ 13/);
+  assert.match(css, /feedback-chamber-v2__sound \{ grid-column: 1 \/ 9/);
+  assert.match(css, /feedback-chamber-v2__action-rail \{ grid-column: 9 \/ 13/);
   assert.match(css, /feedback-chamber-v2__bottom/);
-  assert.match(css, /grid-template-columns:\s*minmax\(0, \.9fr\) minmax\(0, 1\.25fr\)/);
+  assert.match(css, /grid-template-columns:\s*minmax\(0, \.92fr\) minmax\(0, 1\.18fr\)/);
 });
