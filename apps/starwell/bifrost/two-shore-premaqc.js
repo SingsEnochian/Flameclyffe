@@ -19,10 +19,12 @@ function canonicalisePanelVocabulary() {
   if (typeof document === 'undefined') return;
   const panel = document.getElementById('two-shore-premaq-panel');
   if (!panel) return;
+  const legacyTerm = PREMAQC_NAMING_LAW.legacy_term;
+  const canonicalTerm = PREMAQC_NAMING_LAW.canonical;
   const walker = document.createTreeWalker(panel, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) {
-    if (walker.currentNode.nodeValue?.includes('PREMAQ')) {
-      walker.currentNode.nodeValue = walker.currentNode.nodeValue.replaceAll('PREMAQ', 'PREMAQC');
+    if (walker.currentNode.nodeValue?.includes(legacyTerm)) {
+      walker.currentNode.nodeValue = walker.currentNode.nodeValue.replaceAll(legacyTerm, canonicalTerm);
     }
   }
 }
