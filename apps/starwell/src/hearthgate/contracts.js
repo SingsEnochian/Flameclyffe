@@ -57,7 +57,7 @@ export function defineHouseProfile(profile) {
       initialDelta: 1,
       bridgeCoupling: 0.08,
       compressionRelease: {
-        focusAxis: 'Q',
+        focusAxis: 'R',
         enterThreshold: 0.82,
         releaseThreshold: 0.68,
         compressionGain: 1,
