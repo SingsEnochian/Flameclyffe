@@ -6,7 +6,7 @@ async function read(relativePath) {
   return readFile(new URL(relativePath, import.meta.url), 'utf8');
 }
 
-test('dedicated Bifröst compatibility route retains the current compression-release interface', async () => {
+test('dedicated Bifröst route retains compression-release law and canonical PREMAQC authority', async () => {
   const [html, main, root, shell, vite, manifestText] = await Promise.all([
     read('../bifrost/index.html'),
     read('../bifrost/main.js'),
@@ -18,9 +18,11 @@ test('dedicated Bifröst compatibility route retains the current compression-rel
   const manifest = JSON.parse(manifestText);
 
   assert.match(html, /Bifröst Arcsweep v0\.4/);
+  assert.match(html, /PREMAQC/);
   assert.match(html, /compression of the release/);
   assert.match(html, /Feather Stop/);
   assert.match(html, /Rowan Approval Gate/);
+  assert.doesNotMatch(html, /<option value="Q"/);
   assert.doesNotMatch(html, /\bcollapse\b/i);
 
   assert.match(main, /compressRelease/);
@@ -35,14 +37,21 @@ test('dedicated Bifröst compatibility route retains the current compression-rel
   assert.match(shell, /livingArcsweepUrl/);
   assert.match(vite, /bifrost:\s*resolve\(REPO_ROOT, 'apps\/starwell\/bifrost\/index\.html'\)/);
 
-  assert.equal(manifest.version, '0.4.0');
+  assert.equal(manifest.version, '0.5.0');
   assert.equal(manifest.interfaceRoute, '/starwell/bifrost/');
   assert.equal(manifest.interfaceEntrypoint, 'bifrost/index.html');
   assert.equal(manifest.engine.interface, 'bifrost/main.js');
   assert.equal(manifest.engine.formalism, 'temporal-compression-release-state-machine');
   assert.equal(manifest.engine.physicalClaim, false);
+  assert.equal(manifest.schemas.premaqc, 'schemas/premaqc-state-v2.schema.json');
+  assert.equal(manifest.authorityContract.premaqcCanonicalVocabulary, true);
+  assert.deepEqual(manifest.authorityContract.dynamicPremaqcAxes, ['P', 'C', 'R', 'E', 'M', 'A']);
+  assert.deepEqual(manifest.authorityContract.contextOnlyPremaqcAxes, ['Q']);
+  assert.equal(manifest.authorityContract.qualiaCompressionFocusAllowed, false);
+  assert.equal(manifest.authorityContract.qualiaSonified, false);
   assert.equal(manifest.authorityContract.collapseExists, false);
   assert.equal(manifest.authorityContract.releaseFeedsNextCompression, true);
   assert.ok(manifest.capabilities.includes('dedicated-bifrost-interface'));
   assert.equal(manifest.installContract.verifyInterfaceRoute, 'bifrost/index.html');
+  assert.equal(manifest.legacyAliases.status, 'compatibility-only');
 });
