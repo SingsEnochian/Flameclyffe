@@ -1,6 +1,8 @@
 const ROOT_CLASS = 'feedback-chamber-v2';
 const MOUNTED = 'feedbackChamberV2Mounted';
 let scheduled = false;
+let bootObserver = null;
+let appObserver = null;
 
 function text(node) {
   return String(node?.textContent || '').replace(/\s+/g, ' ').trim();
@@ -111,6 +113,8 @@ function mount() {
 
   buildActionRail(form);
   buildBottom(root, layout);
+  bootObserver?.disconnect();
+  bootObserver = null;
   return true;
 }
 
@@ -123,9 +127,28 @@ function scheduleMount() {
   });
 }
 
+function watchArcsweepRoot() {
+  const app = document.querySelector('#app');
+  if (!app || appObserver) return false;
+  appObserver = new MutationObserver(() => scheduleMount());
+  appObserver.observe(app, { childList: true });
+  return true;
+}
+
 scheduleMount();
-const observer = new MutationObserver(scheduleMount);
-observer.observe(document.documentElement, { childList: true, subtree: true });
+watchArcsweepRoot();
+
+if (!findChamberHeading()) {
+  bootObserver = new MutationObserver(() => {
+    watchArcsweepRoot();
+    scheduleMount();
+  });
+  bootObserver.observe(document.documentElement, { childList: true, subtree: true });
+  window.setTimeout(() => {
+    bootObserver?.disconnect();
+    bootObserver = null;
+  }, 15000);
+}
 
 window.addEventListener('arcsweep:core-ready', scheduleMount);
 window.addEventListener('arcsweep:sidecars-ready', scheduleMount);
