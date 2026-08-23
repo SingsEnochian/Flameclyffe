@@ -1,6 +1,7 @@
 import { createMathSpinePacket, replayMathSpinePacket } from '../../starwell/src/math-spine/math-spine-packet.js';
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 import { resolveHouseProfile } from '../../starwell/src/hearthgate/profiles/registry.js';
+import { emptyQualiaRecord, qualiaComponent, qualiaPromptSummary } from './qualia-contract.js';
 
 export const PREMAQC_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
 export const ARCSWEEP_FEEDBACK_SCHEMA = 'arcsweep.feedback-cycle/v1';
@@ -27,11 +28,18 @@ const component = (value, derivative = 0, contributors = [], uncertain = false) 
 });
 
 export function createInitialPremaqc(worldId, values = {}, observedAt = new Date().toISOString()) {
-  const state = Object.fromEntries(PREMAQC_AXES.map((axis) => [axis, component(values[axis] ?? (axis === 'E' ? .31 : .78))]));
+  const qualia = emptyQualiaRecord({ legacyScalar: values.Q });
+  const state = Object.fromEntries(PREMAQC_AXES.map((axis) => [
+    axis,
+    axis === 'Q' ? qualiaComponent(qualia) : component(values[axis] ?? (axis === 'E' ? .31 : .78)),
+  ]));
   return {
     schema_version: '2.0.0', id: `premaqc-${worldId}-1`, observed_at: observedAt,
     registry_version: 'premaqc-registry/1.0', receipt_id: `premaqc-receipt-${worldId}-1`, sequence: 1,
-    prior_state_ref: null, model_version: 'arcsweep-feedback/1.0', provenance_refs: [`world:${worldId}`], state,
+    prior_state_ref: null, model_version: 'arcsweep-feedback/1.1', provenance_refs: [`world:${worldId}`],
+    qualia,
+    state,
+    authority: { qualia_is_firsthand_only: true, qualia_magnitude_inference_allowed: false },
   };
 }
 
@@ -50,7 +58,7 @@ export function worldMathProfile(world, house = houseForWorld(world)) {
   return {
     worldId: world.id,
     houseProfileId: house.id,
-    focusAxis: compression.focusAxis || 'Q',
+    focusAxis: compression.focusAxis === 'Q' ? 'R' : (compression.focusAxis || 'R'),
     enterThreshold: compression.enterThreshold ?? .82,
     releaseThreshold: compression.releaseThreshold ?? .68,
     compressionGain: compression.compressionGain ?? 1,
@@ -95,12 +103,12 @@ export function resolveWorldMathWiring(world, premaqc = null) {
 
 export function derivedChannels(state) {
   const v = Object.fromEntries(PREMAQC_AXES.map((a) => [a, state[a].value]));
-  const H = clamp01(v.C * 0.28 + v.E * 0.20 + v.R * 0.16 + v.A * 0.14 + v.Q * 0.07);
+  const H = clamp01(v.C * 0.28 + v.E * 0.20 + v.R * 0.16 + v.A * 0.14);
   const T = clamp01(v.P * 0.12 + v.C * 0.16 + v.R * 0.12 + v.E * 0.12 + v.M * 0.08 + v.A * 0.12 + H * 0.13 + 0.15);
   return { H: Number(H.toFixed(4)), T: Number(T.toFixed(4)) };
 }
 
-function nextPremaqc(packet, feedback, observedAt, soundEvents = [], qUncertain = false) {
+function nextPremaqc(packet, feedback, observedAt, soundEvents = []) {
   const probabilities = packet.projection.released_state.probabilities;
   const derivatives = packet.projection.released_state.derivatives;
   const responseWeight = Math.min(String(feedback.response || '').trim().length / 800, .08);
@@ -113,20 +121,19 @@ function nextPremaqc(packet, feedback, observedAt, soundEvents = [], qUncertain 
     fired_at: event.fired_at || observedAt,
   }));
   const modeContrib = {
-    writing:     { M: authoredWeight + soundWeight * .5, R: responseWeight + soundWeight, Q: responseWeight + soundWeight },
-    roleplay:    { M: authoredWeight + soundWeight * .5, R: responseWeight + soundWeight, Q: responseWeight + soundWeight },
-    observation: { M: authoredWeight * .5, R: responseWeight + soundWeight * .5, Q: responseWeight * .5 + soundWeight },
-    reflection:  { M: authoredWeight * 1.2, C: authoredWeight * .4, P: authoredWeight * .2, Q: responseWeight * .4 },
+    writing:     { M: authoredWeight + soundWeight * .5, R: responseWeight + soundWeight },
+    roleplay:    { M: authoredWeight + soundWeight * .5, R: responseWeight + soundWeight },
+    observation: { M: authoredWeight * .5, R: responseWeight + soundWeight * .5 },
+    reflection:  { M: authoredWeight * 1.2, C: authoredWeight * .4, P: authoredWeight * .2 },
   };
   const contrib = modeContrib[feedback.mode] || modeContrib.writing;
+  const inheritedQualia = packet.input.premaq.qualia || emptyQualiaRecord({ legacyScalar: packet.input.premaq.state?.Q?.value });
   const nextState = Object.fromEntries(PREMAQC_AXES.map((axis) => {
-    if (axis === 'Q' && qUncertain) {
-      return [axis, component(probabilities[axis], derivatives[axis], soundContributors, true)];
-    }
+    if (axis === 'Q') return [axis, qualiaComponent(inheritedQualia, packet.input.premaq.state?.Q?.contributors || [])];
     return [axis, component(
       probabilities[axis] + (contrib[axis] || 0),
       derivatives[axis],
-      ['R', 'M', 'Q'].includes(axis) ? soundContributors : [],
+      ['R', 'M'].includes(axis) ? soundContributors : [],
     )];
   }));
   const sequence = Number(packet.source.premaq_sequence) + 1;
@@ -143,6 +150,7 @@ function nextPremaqc(packet, feedback, observedAt, soundEvents = [], qUncertain 
       `feedback:${feedback.mode}`,
       ...soundEvents.map((event) => `story-sound:${event.event_id}`),
     ],
+    qualia: inheritedQualia,
     state: nextState,
     math_spine: {
       packet_id: packet.packet_id,
@@ -152,7 +160,30 @@ function nextPremaqc(packet, feedback, observedAt, soundEvents = [], qUncertain 
       fold_index: packet.projection.jacobian.fold_index,
       replay_required: true,
     },
+    authority: {
+      ...(packet.input.premaq.authority || {}),
+      qualia_is_firsthand_only: true,
+      qualia_magnitude_inference_allowed: false,
+    },
   };
+}
+
+function normaliseCycleEvidence(evidence, premaqc) {
+  const qualia = premaqc?.qualia || null;
+  return (evidence || []).map((item) => {
+    if (!item || typeof item !== 'object' || !Object.hasOwn(item, 'qualia')) return structuredClone(item);
+    return {
+      ...structuredClone(item),
+      qualia: {
+        schema: qualia?.schema || 'premaqc.qualia-report/v1',
+        present: qualia?.present === true,
+        authority: 'firsthand-only',
+        inferred: false,
+        report_receipt_id: qualia?.report_receipt_id || null,
+        report: qualia?.report ? structuredClone(qualia.report) : null,
+      },
+    };
+  });
 }
 
 const VALID_MODES = ['writing', 'roleplay', 'observation', 'reflection'];
@@ -180,12 +211,12 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
   const replay = await replayMathSpinePacket(packet);
   if (!replay.matched) throw new Error('Math Spine replay did not match.');
   const feedback = { mode, work: String(work).trim(), response: String(response).trim() };
-  const qUncertain = !feedback.response && feedback.work.length < 60 && soundEvents.length === 0;
-  const next = nextPremaqc(packet, feedback, observedAt, soundEvents, qUncertain);
+  const next = nextPremaqc(packet, feedback, observedAt, soundEvents);
   const bindingNext = exploration
     ? { ...next, receipt_id: `premaqc-explore-${packet.packet_fingerprint.slice(0, 16)}` }
     : next;
-  const cycleFingerprint = await sha256Hex({ packet_fingerprint: packet.packet_fingerprint, feedback, voice_ids: voices.map((voice) => voice.id), canon_refs: canonRefs, voice_invocations: voiceInvocations, sound_events: soundEvents, evidence });
+  const cycleEvidence = normaliseCycleEvidence(evidence, current);
+  const cycleFingerprint = await sha256Hex({ packet_fingerprint: packet.packet_fingerprint, feedback, voice_ids: voices.map((voice) => voice.id), canon_refs: canonRefs, voice_invocations: voiceInvocations, sound_events: soundEvents, evidence: cycleEvidence });
   return Object.freeze({
     schema: ARCSWEEP_FEEDBACK_SCHEMA,
     cycle_id: `arcsweep-cycle-${cycleFingerprint.slice(0, 24)}`,
@@ -195,7 +226,7 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
     voices: voices.map(({ id, name, route, model }) => ({ id, name, route, model })),
     voice_invocations: structuredClone(voiceInvocations),
     sound_events: structuredClone(soundEvents),
-    evidence: structuredClone(evidence),
+    evidence: cycleEvidence,
     turn: feedback,
     premaqc_before: current,
     math_spine_packet: packet,
@@ -203,7 +234,14 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
     replay_receipt: replay,
     premaqc_after: bindingNext,
     derived: derivedChannels(bindingNext.state),
-    authority: { canon_commit: false, steward_review_required: !exploration, voice_refusal_valid: true, feather_stop_available: true },
+    authority: {
+      canon_commit: false,
+      steward_review_required: !exploration,
+      voice_refusal_valid: true,
+      feather_stop_available: true,
+      qualia_is_firsthand_only: true,
+      qualia_magnitude_inference_allowed: false,
+    },
     exploration: Boolean(exploration),
     created_at: observedAt,
   });
@@ -218,17 +256,22 @@ const MODE_REGISTERS = {
 
 export function buildVoicePromptEnvelope({ world, mode, work, premaqc, canon = [] }) {
   const register = MODE_REGISTERS[mode] || MODE_REGISTERS.writing;
-  const axes = PREMAQC_AXES.map((axis) => {
+  const axes = PREMAQC_AXES.filter((axis) => axis !== 'Q').map((axis) => {
     const s = premaqc.state[axis];
     return axis + "=" + Number(s.value).toFixed(3) + (s.uncertain ? "?" : "");
   }).join(" ");
+  const qualiaSummary = qualiaPromptSummary(premaqc);
+  const qualiaReport = premaqc.qualia?.present && premaqc.qualia?.report?.text
+    ? `Firsthand Qualia report (Rowan-authored; do not infer beyond it):\n${premaqc.qualia.report.text}`
+    : 'Firsthand Qualia report: unreported. Do not infer Q.';
   const canonItems = canon.length
     ? canon.map((item) => "- " + item.name + ": " + String(item.content || "").slice(0, 3000)).join("\n")
     : "- No committed canon excerpt selected.";
   return [
     "ARCSWEEP RELATIONAL TURN · " + register,
     "World: " + world.name + " (" + world.id + ")",
-    "Relational state (observational snapshot — not a target or evaluation):\nPREMAQC: " + axes,
+    "Relational state (observational snapshot — not a target or evaluation):\nPREMAC: " + axes + " · " + qualiaSummary,
+    qualiaReport,
     "Authority: the response is a contribution, not an automatic canon commit or memory write.",
     "Agency: you may answer, negotiate, pause, or refuse. For refusal begin with [REFUSAL].",
     "Continuity: respond only as yourself; do not speak for another Constellation member.",
