@@ -10,20 +10,31 @@ import { createTheoryGroundedAcceptanceAdvice } from '../src/theory-grounded-acc
 import { createDomainContextMapping } from '../src/domain-context-mapping.js';
 import { createRunaTrajectorySuggestion } from '../src/runa-trajectory-suggestion.js';
 
-const AXES = ['P', 'C', 'R', 'E', 'M', 'A', 'Q'];
+const DYNAMIC_AXES = ['P', 'C', 'R', 'E', 'M', 'A'];
 
 function premaq(sequence, value, observedAt) {
+  const receipt = `qualia-${sequence}`;
+  const state = Object.fromEntries(DYNAMIC_AXES.map((axis, index) => [axis, {
+    value: Math.min(1, Math.max(0, value + index * 0.005)),
+    derivative: 0,
+    confidence: 0.9,
+    uncertainty: 0.05,
+  }]));
+  state.Q = { value: 1, derivative: 0, confidence: 1, uncertainty: 0, semantics: 'firsthand-report-presence-bit' };
   return {
     schema_version: '2.0.0',
     id: `premaq-${sequence}`,
     receipt_id: `premaq-receipt-${sequence}`,
     sequence,
     observed_at: observedAt,
-    state: Object.fromEntries(AXES.map((axis, index) => [axis, {
-      value: Math.min(1, Math.max(0, value + index * 0.005)),
-      confidence: 0.9,
-      uncertainty: 0.05,
-    }])),
+    registry_version: 'premaqc-registry/1.0',
+    model_version: 'test/qualia-report-v1',
+    provenance_refs: [`firsthand-qualia:${receipt}`],
+    qualia: {
+      schema: 'premaqc.qualia-report/v1', present: true, authority: 'firsthand-only', inferred: false,
+      report_receipt_id: receipt, observed_at: observedAt, report: { text: `Firsthand test report ${sequence}.` },
+    },
+    state,
   };
 }
 
@@ -90,12 +101,16 @@ test('DEEPTheory acceptance preserves candidate immutability and does not assert
   assert.equal(review.reviewed_record.authority.canon_commit, false);
 });
 
-test('DEEPTime admits only human-accepted feedback and preserves Qualia Q separately from data quality', async () => {
+test('DEEPTime admits only human-accepted feedback and preserves Qualia report separately from data quality', async () => {
   await assert.rejects(() => createDeepTimeRecordFromAcceptedFeedback({ cycle: cycle(2, 0.7, '2026-08-14T10:02:00.000Z'), acceptedQueueEntry: { ...acceptedEntry(2), status: 'pending_review' } }), /human-accepted/i);
   const [first, second] = await threeDeepTimeRecords();
   assert.ok(second.lambda > first.lambda);
-  assert.equal(second.authority.qualia_is_premaqc_q, true);
+  assert.equal(second.premaqc.state.Q.value, 1);
+  assert.equal(second.premaqc.qualia.authority, 'firsthand-only');
+  assert.equal(second.authority.qualia_presence_is_premaqc_q, true);
+  assert.equal(second.authority.qualia_magnitude_inference_allowed, false);
   assert.equal(Object.prototype.hasOwnProperty.call(second.quality, 'Q'), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(second.derivatives.axis_velocity, 'Q'), false);
   assert.ok(second.derivatives.axis_velocity.P > 0);
 });
 
