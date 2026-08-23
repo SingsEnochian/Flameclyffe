@@ -50,10 +50,10 @@ test('Terra Prime shore burns bright only after PREMAQC and Spiral arrive', () =
     observerFreshness: 'fresh',
     premaqc: { schema: 'premaqc/current', P: 0.88, C: 0.9, R: 0.86, E: 0.25, M: 0.8, A: 0.91, Q: 0.84 },
     spiral: { phase: 'release', direction: 'ascending', confidence: 0.93 },
-    receipts: ['terra-prime:swpc-001'],
+    receipts: ['earth-prime:swpc-001'],
   });
   assert.equal(lit.lit, true);
-  assert.equal(lit.world_id, 'terra-prime');
+  assert.equal(lit.world_id, 'earth_prime');
   assert.equal(lit.clock.time_ratio, 1);
   assert.equal(lit.observer_freshness, 'fresh');
 });
