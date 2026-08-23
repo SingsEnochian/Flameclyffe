@@ -1,3 +1,4 @@
+import { PREMAQ_DYNAMIC_AXES } from './arcsweep-temporal-quantum/engine.js';
 import {
   earthPrimeRootHz,
   foldGatePlaybackFrequency,
@@ -5,7 +6,7 @@ import {
 
 export const TWO_SHORE_MYTHFRAME_SCHEMA = 'hearthgate.two-shore-mythframe/v0.1';
 export const TWO_SHORE_MYTHFRAME_HORIZON_SCHEMA = 'hearthgate.two-shore-mythframe-horizon/v0.1';
-export const MYTHFRAME_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+export const MYTHFRAME_AXES = Object.freeze([...PREMAQ_DYNAMIC_AXES]);
 
 const AXIS_NAMES = Object.freeze({
   P: 'Presence',
@@ -14,7 +15,6 @@ const AXIS_NAMES = Object.freeze({
   E: 'Entropy',
   M: 'Memory',
   A: 'Agency',
-  Q: 'Qualia',
 });
 
 const AXIS_MYTH = Object.freeze({
@@ -47,11 +47,6 @@ const AXIS_MYTH = Object.freeze({
     image: 'chosen hand',
     compression: 'concentrates the possible acts into one deliberate motion',
     release: 'completes the chosen motion and leaves its consequence available',
-  }),
-  Q: Object.freeze({
-    image: 'lived color',
-    compression: 'gathers the felt texture into one luminous contour',
-    release: 'opens the contour into the full texture of the reached state',
   }),
 });
 
@@ -148,7 +143,7 @@ function toneBinding(yearReceipt, shore, axis) {
     role: 'locked-address-tone',
     locked_hz: round(earth ? tone.earth_prime_locked_hz : tone.target_world_locked_hz),
     inverse_twist_hz: round(earth ? tone.earth_prime_inverse_twist_hz : tone.target_world_inverse_twist_hz),
-    elara_code_hz: round(earth ? tone.earth_prime_elara_code_hz : tone.target_world_elara_code_hz),
+    elara_code_hz: round(earth ? tone.earth_prime_elara_code_hz : tone.target_world.elara_code_hz),
     elara_multiplier: yearReceipt.elara_multiplier,
   });
 }
@@ -211,6 +206,9 @@ function shoreFrame(yearReceipt, shore) {
     dominant_axis: dominant,
     dominant_axis_name: AXIS_NAMES[dominant],
     premaq: Object.freeze({ ...values }),
+    qualia: Object.freeze(structuredClone(calibration.qualia ?? null)),
+    qualia_framed: false,
+    context_only_axes: Object.freeze(['Q']),
     source_state_id: earth
       ? yearReceipt.mathematical_state.earth_prime.start_state_id
       : yearReceipt.mathematical_state.target_world.start_state_id,
@@ -270,8 +268,10 @@ export function buildYearMythframe(yearReceipt, { priorClosingLine = null } = {}
     bridge: Object.freeze({
       coherence_axis: 'C',
       coherence: bridgeCoherence,
-      locked_axes: Object.freeze(['P', 'R', 'E', 'M', 'A', 'Q']),
-      line: `Coherence holds the address while the six locked voices answer shore to shore at Elara multiplier ${yearReceipt.elara_multiplier.toFixed(6)}.`,
+      locked_axes: Object.freeze(['P', 'R', 'E', 'M', 'A']),
+      context_only_axes: Object.freeze(['Q']),
+      qualia_framed: false,
+      line: `Coherence holds the address while the five locked dynamic voices answer shore to shore at Elara multiplier ${yearReceipt.elara_multiplier.toFixed(6)}.`,
       segments,
     }),
     closing_line: closingLine,
@@ -299,6 +299,8 @@ export function assertCompleteYearMythframe(frame, yearReceipt = null) {
         throw new Error(`MYTHFRAME_GEOMETRY_UNBOUND:${shore}:${axis}`);
       }
     }
+    if (frame[shore]?.axes?.Q) throw new Error(`MYTHFRAME_QUALIA_MUST_NOT_BE_GENERATED:${shore}`);
+    if (frame[shore]?.qualia_framed !== false) throw new Error(`MYTHFRAME_QUALIA_BOUNDARY_MISSING:${shore}`);
   }
   if (yearReceipt) {
     if (frame.source_earth_state_id !== yearReceipt.mathematical_state.earth_prime.start_state_id) {
@@ -347,6 +349,8 @@ export function buildElevenYearMythframe(sequence) {
     chapters: Object.freeze(chapters),
     chapter_count: chapters.length,
     axis_frame_count: chapters.length * 2 * MYTHFRAME_AXES.length,
+    context_only_axes: Object.freeze(['Q']),
+    qualia_framed: false,
     opening_line: chapters[0].opening_line,
     closing_line: chapters.at(-1).closing_line,
     final_earth_state_id: chapters.at(-1).final_earth_state_id,
