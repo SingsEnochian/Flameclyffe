@@ -7,10 +7,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="description" content="Bifröst Arcsweep v0.4 compression-release interface bound to the active Hearthweave packet." />
+  <meta name="description" content="Bifröst Arcsweep v0.4 compression-release interface bound to the active Hearthweave packet and canonical PREMAQC state." />
   <title>Bifröst Arcsweep v0.4 · Hearthgate</title>
   <link rel="stylesheet" href="./styles.css" />
-  <link rel="stylesheet" href="./premaq-song.css" />
+  <link rel="stylesheet" href="./premaqc-song.css" />
   <link rel="stylesheet" href="./model-audition.css" />
 </head>
 <body>
@@ -61,7 +61,7 @@
           <div><dt>DualAspectPacket</dt><dd id="packet-id">REFERENCE</dd></div>
           <div><dt>Packet fingerprint</dt><dd id="packet-fingerprint">LOCAL REFERENCE</dd></div>
           <div><dt>Shared state</dt><dd id="shared-fingerprint">LOCAL REFERENCE</dd></div>
-          <div><dt>PREMAQ</dt><dd id="premaq-id">bifrost-interface-reference</dd></div>
+          <div><dt>PREMAQC</dt><dd id="premaq-id">bifrost-interface-reference</dd></div>
           <div><dt>Compression-release receipt</dt><dd id="source-receipt">NOT YET CREATED</dd></div>
         </dl>
         <p id="binding-note" class="boundary-note">No active packet is required to inspect the engine. Reference mode is labelled and remains local to this browser session.</p>
@@ -82,11 +82,10 @@
             <select id="focus-axis">
               <option value="P">P · Presence</option>
               <option value="C">C · Coherence</option>
-              <option value="R">R · Resonance</option>
-              <option value="E">E · Entropy</option>
+              <option value="R" selected>R · Resonance</option>
+              <option value="E">E · Entanglement</option>
               <option value="M">M · Memory</option>
               <option value="A">A · Agency</option>
-              <option value="Q" selected>Q · Qualia</option>
             </select>
           </label>
           <label>
@@ -112,7 +111,7 @@
           <button id="reset-state" type="button" class="quiet">Reset to source</button>
           <button id="feather-stop" type="button" class="stop">Feather Stop</button>
         </div>
-        <p id="engine-message" class="engine-message" role="status">READY · the next operation consumes the current released state.</p>
+        <p id="engine-message" class="engine-message" role="status">READY · the next operation consumes the current released state. Q remains firsthand context and is not a compression focus.</p>
       </article>
 
       <article class="panel spiral-panel">
@@ -135,12 +134,13 @@
       <article class="panel premaq-panel">
         <header class="panel-header">
           <div>
-            <p class="eyebrow">SHARED PREMAQ BASIS</p>
-            <h2>Released state</h2>
+            <p class="eyebrow">SHARED PREMAQC BASIS</p>
+            <h2>Released relational state</h2>
           </div>
           <span id="state-id" class="state-chip">initialising</span>
         </header>
-        <div id="premaq-bars" class="premaq-bars" aria-label="PREMAQ probability distribution"></div>
+        <div id="premaq-bars" class="premaq-bars" aria-label="PREMAQC relational state"></div>
+        <p class="boundary-note">P/C/R/E/M/A participate in the dynamic state. Q records whether firsthand Qualia evidence is present and carries its separate report; software does not infer or evolve it.</p>
       </article>
 
       <article class="panel tone-panel">
@@ -161,7 +161,7 @@
           <button id="sound-pair" type="button" class="primary">Sound two-tone motif</button>
           <span id="audio-status" role="status">RESTING · no autoplay · gain ceiling 0.03</span>
         </div>
-        <p class="boundary-note">This pair is the compression-release motif, not the full PREMAQ composition. Source frequencies are receipted exactly. Playback is octave-folded into 90–360 Hz and is not calibrated haptic intensity.</p>
+        <p class="boundary-note">This pair is the compression-release motif, not the full PREMAQC composition. Source frequencies are receipted exactly. Playback is octave-folded into 90–360 Hz and is not calibrated haptic intensity.</p>
       </article>
 
       <article class="panel receipts-panel">
@@ -232,20 +232,21 @@
       <article class="panel song-panel">
         <header class="panel-header">
           <div>
-            <p class="eyebrow">FULL PREMAQ COMPOSITION</p>
-            <h2>Seven voices across thirty-five chained cycles</h2>
+            <p class="eyebrow">FULL PREMAQC COMPOSITION</p>
+            <h2>Six dynamic voices across thirty-five chained cycles</h2>
           </div>
-          <span class="song-count-badge">35 cycles × 7 voices</span>
+          <span class="song-count-badge">35 cycles × 6 dynamic voices</span>
         </header>
 
         <div class="premaq-song-summary">
-          <div><small>PREMAQ voices</small><strong>P · C · R · E · M · A · Q</strong></div>
-          <div><small>Cycles per voice</small><strong>35</strong></div>
-          <div><small>Axis-cycles</small><strong>245</strong></div>
-          <div><small>Scheduled notes</small><strong>490</strong></div>
+          <div><small>Dynamic PREMAQC voices</small><strong>P · C · R · E · M · A</strong></div>
+          <div><small>Qualia</small><strong>Q · firsthand context only · not sonified</strong></div>
+          <div><small>Cycles per dynamic voice</small><strong>35</strong></div>
+          <div><small>Axis-cycles</small><strong>210</strong></div>
+          <div><small>Scheduled notes</small><strong>420</strong></div>
         </div>
 
-        <div id="premaq-song-voices" class="premaq-song-voices" aria-label="Seven PREMAQ song voices"></div>
+        <div id="premaq-song-voices" class="premaq-song-voices" aria-label="Six dynamic PREMAQC song voices"></div>
 
         <div class="premaq-song-controls">
           <label>
@@ -259,15 +260,15 @@
             </select>
           </label>
           <div class="action-row">
-            <button id="play-premaq-song" type="button" class="primary">Play full 35-cycle PREMAQ song</button>
+            <button id="play-premaq-song" type="button" class="primary">Play full 35-cycle PREMAQC song</button>
             <button id="stop-premaq-song" type="button" class="stop">Stop song</button>
             <button id="export-premaq-song" type="button" class="quiet">Export song receipt</button>
           </div>
         </div>
 
-        <progress id="premaq-song-progress" max="1" value="0" aria-label="PREMAQ song playback progress"></progress>
-        <p id="premaq-song-status" data-kind="resting" role="status">RESTING · every voice will receive 35 compression-release cycles. No autoplay. Feather Stop remains immediate.</p>
-        <p class="boundary-note">The song is generated from the current released PREMAQ state. Each later cycle consumes the prior cycle’s release. The browser synthesis is a local musical mapping, performs no canon write, grants no tone approval, and makes no physical-device claim.</p>
+        <progress id="premaq-song-progress" max="1" value="0" aria-label="PREMAQC song playback progress"></progress>
+        <p id="premaq-song-status" data-kind="resting" role="status">RESTING · every dynamic voice receives 35 compression-release cycles. Q remains firsthand-only context. No autoplay. Feather Stop remains immediate.</p>
+        <p class="boundary-note">The song is generated from the current released PREMAQC dynamic state. Each later cycle consumes the prior cycle’s release. Q is carried as firsthand context and is never sonified. The browser synthesis is a local musical mapping, performs no canon write, grants no tone approval, and makes no physical-device claim.</p>
       </article>
     </section>
 
@@ -277,7 +278,8 @@
         <h2>The interface executes engine law without manufacturing external evidence.</h2>
       </div>
       <ul>
-        <li>Unknown values remain explicit.</li>
+        <li>Unsupported or ungranted values remain UNKNOWN.</li>
+        <li>Q is firsthand-only Qualia context; it is not a dynamical compression or sound axis.</li>
         <li>No canon write occurs here.</li>
         <li>No tone receives approval automatically.</li>
         <li>Rowan owns tone calibration and experimental naming.</li>
@@ -287,10 +289,10 @@
   </main>
 
   <script type="module" src="./main.js"></script>
-  <script type="module" src="./two-shore-premaq.js"></script>
-  <script type="module" src="./premaq-song.js"></script>
+  <script type="module" src="./two-shore-premaqc.js"></script>
+  <script type="module" src="./premaqc-song.js"></script>
   <script type="module" src="./model-audition.js"></script>
-  <script type="module" src="../src/premaq-shokz-soundfont.js"></script>
-  <script type="module" src="../src/premaq-shokz-feather-stop-bridge.js"></script>
+  <script type="module" src="../src/premaqc-shokz-soundfont.js"></script>
+  <script type="module" src="../src/premaqc-shokz-feather-stop-bridge.js"></script>
 </body>
 </html>
