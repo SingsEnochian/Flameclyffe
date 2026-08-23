@@ -53,7 +53,7 @@ test('Broker retains multiple coherent branches without ranking or winner collap
   assert.deepEqual(routes.branches.map((branch) => branch.branch_id), ['route:glyph', 'route:runa', 'route:storywork']);
 });
 
-test('Great Braid Project Zero event carries possibility topology downstream intact', () => {
+test('Great Braid Project Zero event carries orientation and topology downstream intact', () => {
   const receipt = {
     schema: GREAT_BRAID_SCHEMA,
     receipt_id: 'great-braid:plural-001',
@@ -66,6 +66,7 @@ test('Great Braid Project Zero event carries possibility topology downstream int
   const event = greatBraidProjectZeroEvent(receipt);
   const routes = createPossibilityRouteSet({ topology: event.payload.stages.possibility_topology, availableModalities: ['glyph', 'runa'] });
   assert.equal(routes.branch_count, 2);
-  assert.equal(routes.branches.every((branch) => branch.orientation === receipt.arc.intention), false);
-  assert.equal(event.payload.stages.possibility_topology.orientation.ask, 'Find a path aligned with greater strength and coherence.');
+  assert.equal(routes.orientation, 'Find a path aligned with greater strength and coherence.');
+  assert.equal(routes.branches.every((branch) => branch.orientation === routes.orientation), true);
+  assert.equal(event.payload.stages.possibility_topology.orientation.ask, routes.orientation);
 });
