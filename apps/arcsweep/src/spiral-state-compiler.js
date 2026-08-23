@@ -1,7 +1,8 @@
 import { SPIRAL_STATE_SCHEMA, validateSpiralState } from '../../starwell/src/runa/harmonic-spiral-contract.js';
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 
-const SUPPORT_AXES = Object.freeze(['P', 'C', 'R', 'M', 'A', 'Q']);
+const SUPPORT_AXES = Object.freeze(['P', 'C', 'R', 'M', 'A']);
+const DYNAMIC_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A']);
 const HOLD_EPSILON = 0.0025;
 
 function invariant(condition, message) {
@@ -13,14 +14,14 @@ function clamp01(value) {
 }
 
 function values(record) {
-  return Object.fromEntries(['P', 'C', 'R', 'E', 'M', 'A', 'Q'].map((axis) => [axis, Number(record?.premaqc?.state?.[axis]?.value)]));
+  return Object.fromEntries(DYNAMIC_AXES.map((axis) => [axis, Number(record?.premaqc?.state?.[axis]?.value)]));
 }
 
 function trajectoryDelta(previousRecord, record) {
   if (!previousRecord) return null;
   const before = values(previousRecord);
   const after = values(record);
-  const finite = [...SUPPORT_AXES, 'E'].every((axis) => Number.isFinite(before[axis]) && Number.isFinite(after[axis]));
+  const finite = DYNAMIC_AXES.every((axis) => Number.isFinite(before[axis]) && Number.isFinite(after[axis]));
   if (!finite) return null;
   const support = SUPPORT_AXES.reduce((sum, axis) => sum + (after[axis] - before[axis]), 0) / SUPPORT_AXES.length;
   const entanglement = before.E - after.E;
@@ -57,6 +58,7 @@ export async function compileSpiralStateFromDeepTime({
   const direction = directionFromDelta(delta);
   const confidence = clamp01(record?.quality?.data_quality ?? 0);
   const phase = phaseFromRecord(record, previousRecord);
+  const qualia = record.premaqc.qualia || null;
   const core = {
     schema: SPIRAL_STATE_SCHEMA,
     phase,
@@ -64,10 +66,10 @@ export async function compileSpiralStateFromDeepTime({
     confidence,
     suggested_actions: [],
     subsystem_contexts: {
-      llm: { mode: 'context-only', authority: 'advisory' },
-      audio: { directive: 'hold', automatic: false },
+      llm: { mode: 'context-only', authority: 'advisory', qualia_inference_allowed: false },
+      audio: { directive: 'hold', automatic: false, qualia_inference_allowed: false },
       glyph: { evolution_hint: 'preserve-receipted-state' },
-      ui: { attention_level: confidence },
+      ui: { attention_level: confidence, qualia_report_present: qualia?.present === true },
     },
     supporting_receipts: {
       story: [...new Set(storyReceipts.filter(Boolean))],
@@ -81,9 +83,13 @@ export async function compileSpiralStateFromDeepTime({
       premaqc_receipt_id: record.premaqc.receipt_id,
       previous_record_id: previousRecord?.id || null,
       trajectory_delta: Number.isFinite(delta) ? Number(delta.toFixed(8)) : null,
+      trajectory_axes: [...DYNAMIC_AXES],
+      qualia_report_receipt_id: qualia?.report_receipt_id || null,
     },
     authority: {
       derived_from_accepted_deep_time: true,
+      qualia_is_context_not_trajectory_input: true,
+      qualia_inference_allowed: false,
       automatic_action: false,
       canon_commit: false,
       physical_claim: false,
