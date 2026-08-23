@@ -56,3 +56,7 @@ Story, PREMAQC, mathematics, glyph, Runa, model interpretation, and returned sto
 - explicit absence of a universal optimisation target.
 
 The first deterministic harness runs a Terra Prime → Terra Aeterna crossing and verifies that the resulting read remains trajectory-based, relational, path-aware, and open to topology expansion.
+
+## CI gate
+
+The branch is intentionally synchronized after PR creation so the repository's pull-request workflows evaluate the executable instrument and its deterministic traversal harness on the current head.
