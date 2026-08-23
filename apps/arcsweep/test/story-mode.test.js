@@ -69,10 +69,17 @@ test('Story Mode contract names its texture, state touch, persistence, replay, a
   assert.equal(STORY_MODE_CONTRACT.authority.human_review_required_for_canon, true);
 });
 
-test('Story Mode is visibly mounted after the Feedback Chamber and survives rerenders', () => {
+test('Story Mode has a visible sidebar front door and survives Feedback Chamber rerenders', () => {
   const bootstrap = fs.readFileSync(path.join(srcRoot, 'sidecar-bootstrap.js'), 'utf8');
   const sidecar = fs.readFileSync(path.join(srcRoot, 'story-mode-sidecar.js'), 'utf8');
   assert.match(bootstrap, /feedback-chamber-v2\.js'[\s\S]*story-mode-sidecar\.js'/);
+  assert.match(sidecar, /story-mode-launch/);
+  assert.match(sidecar, /launcher\.dataset\.room = 'feedback'/);
+  assert.match(sidecar, /launcher\.dataset\.storyModeLaunch = 'true'/);
+  assert.match(sidecar, /Open Story Mode/);
+  assert.match(sidecar, /Continue story ❧/);
+  assert.match(sidecar, /data-story-mode-surface/);
+  assert.match(sidecar, /aria-current/);
   assert.match(sidecar, /option\.value = STORY_MODE_VALUE/);
   assert.match(sidecar, /localStorage\.setItem\(STORAGE_KEY, STORY_MODE_VALUE\)/);
   assert.match(sidecar, /MutationObserver/);
