@@ -13,11 +13,26 @@ function optionalUnit(value, label, minimum = 0, maximum = 1) {
   return number;
 }
 
+function parseInput(input) {
+  if (typeof input !== 'string') return input;
+  const raw = input.trim();
+  if (!raw) return { text: '' };
+  if (raw.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch {
+      // A human report that happens to begin with “{” remains ordinary text.
+    }
+  }
+  return { text: raw };
+}
+
 export function normaliseQualiaReport(input) {
   if (typeof input === 'number') {
     throw new TypeError('Qualia is not a magnitude. Provide a firsthand report instead of a scalar Q value.');
   }
-  const source = typeof input === 'string' ? { text: input } : input;
+  const source = parseInput(input);
   if (!source || typeof source !== 'object' || Array.isArray(source)) {
     throw new TypeError('A firsthand Qualia report is required.');
   }
