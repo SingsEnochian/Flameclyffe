@@ -45,31 +45,41 @@ export function defineHouseProfile(profile) {
   if (!profile.transferFunctions?.version) {
     throw new Error('A House Profile requires a versioned transfer function.');
   }
+
+  const compressionRelease = {
+    focusAxis: 'R',
+    enterThreshold: 0.82,
+    releaseThreshold: 0.68,
+    compressionGain: 1,
+    releaseFraction: 0.35,
+    derivativeRelease: 0.08,
+    memoryRelease: 0,
+    phaseReleaseGain: Math.PI / 4,
+    radialGain: 0.5,
+    entropyGain: 0.1,
+    angularGain: Math.PI / 3,
+    temporalWeights: { fold: 0.55, derivative: 0.20, entropy: 0.15, phase: 0.10 },
+    ...(profile.temporalProfile?.compressionRelease || {}),
+  };
+  const temporalProfile = {
+    timeline: null,
+    initialDelta: 1,
+    bridgeCoupling: 0.08,
+    ...(profile.temporalProfile || {}),
+    compressionRelease,
+    // Compatibility surface for older callers. The value is always a dynamic axis;
+    // Q remains receipted firsthand context and is never selected as a dynamical focus.
+    focusAxis: profile.temporalProfile?.focusAxis === 'Q'
+      ? 'R'
+      : (profile.temporalProfile?.focusAxis || compressionRelease.focusAxis || 'R'),
+  };
+
   return defineReceptionProfile({
     kind: 'hearthgate-house',
     sovereignty: {
       foundation_preserved: true,
       overlay_silently_merges: false,
       house_identity_preserved: true,
-    },
-    temporalProfile: {
-      timeline: null,
-      initialDelta: 1,
-      bridgeCoupling: 0.08,
-      compressionRelease: {
-        focusAxis: 'R',
-        enterThreshold: 0.82,
-        releaseThreshold: 0.68,
-        compressionGain: 1,
-        releaseFraction: 0.35,
-        derivativeRelease: 0.08,
-        memoryRelease: 0,
-        phaseReleaseGain: Math.PI / 4,
-        radialGain: 0.5,
-        entropyGain: 0.1,
-        angularGain: Math.PI / 3,
-        temporalWeights: { fold: 0.55, derivative: 0.20, entropy: 0.15, phase: 0.10 },
-      },
     },
     harmonicIdentity: {
       voice: profile.name,
@@ -88,6 +98,7 @@ export function defineHouseProfile(profile) {
       receptionPrompt: `${profile.name} receives the crossing`,
     },
     ...profile,
+    temporalProfile,
   });
 }
 
