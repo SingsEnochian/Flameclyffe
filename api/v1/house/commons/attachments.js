@@ -3,9 +3,24 @@ import { createSupabaseCommonsAttachmentStore } from '../../../_shared/supabase-
 import { vercelEnv as env } from '../../../_shared/vercel-env.mjs';
 
 let store;
-const handle = (request) => {
-  store ||= createSupabaseCommonsAttachmentStore(env);
-  return createHouseCommonsAttachmentHandler({ env, store })(request);
-};
+const backingStore = () => (store ||= createSupabaseCommonsAttachmentStore(env));
+const lazyStore = Object.freeze({
+  get: (...args) => backingStore().get(...args),
+  set: (...args) => backingStore().set(...args),
+  setJSON: (...args) => backingStore().setJSON(...args),
+});
+const handle = createHouseCommonsAttachmentHandler({ env, store: lazyStore });
 
-export default { fetch: handle };
+export default {
+  async fetch(request) {
+    try {
+      return await handle(request);
+    } catch (error) {
+      console.error('House Commons attachment storage failure', error);
+      return new Response(JSON.stringify({ error: 'House Commons attachment storage unavailable.' }), {
+        status: 503,
+        headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
+      });
+    }
+  },
+};

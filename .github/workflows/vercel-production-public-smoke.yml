@@ -72,6 +72,7 @@ jobs:
             method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ credential: 'deliberately-invalid-smoke-credential' })
           });
           await hit('/api/v1/house/commons', 401);
+          await hit('/api/v1/house/commons/attachments', 401);
           await hit('/api/v1/house/observations', 401);
           await hit('/api/v1/house/braid/stream', 401);
           await hit('/api/v1/flames/atlas/status', 401);
