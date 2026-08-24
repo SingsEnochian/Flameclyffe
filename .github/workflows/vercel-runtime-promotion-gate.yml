@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: vercel-runtime-production-promotion
@@ -26,6 +27,7 @@ jobs:
       ARCSWEEP_SUPABASE_ACCESS_TOKEN: ${{ secrets.ARCSWEEP_SUPABASE_ACCESS_TOKEN }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_SCOPE: singsenochian-2527s-projects
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout exact branch
         uses: actions/checkout@v4
@@ -35,32 +37,113 @@ jobs:
         with:
           node-version: 24.x
 
-      - name: Public preview preflight
-        run: node scripts/arcsweep-terra-prime-live-smoke.mjs --public
-
-      - name: Require authenticated smoke authority
+      - name: Smoke, promote, verify, and publish receipt
         shell: bash
         run: |
-          if [[ -z "$ARCSWEEP_SUPABASE_ACCESS_TOKEN" && -z "$ARCSWEEP_STEWARD_KEY" ]]; then
-            echo '::error::Authenticated Vercel smoke requires ARCSWEEP_SUPABASE_ACCESS_TOKEN or ARCSWEEP_STEWARD_KEY in GitHub Actions secrets.'
-            exit 1
+          set +e
+          PUBLIC_STATUS=99
+          AUTH_STATUS=99
+          PROMOTE_STATUS=99
+          PROD_STATUS=99
+          AUTHORITY='missing'
+          PROMOTION_AUTHORITY='missing'
+
+          node scripts/arcsweep-terra-prime-live-smoke.mjs --public > public-smoke.log 2>&1
+          PUBLIC_STATUS=$?
+
+          if [[ -n "$ARCSWEEP_SUPABASE_ACCESS_TOKEN" || -n "$ARCSWEEP_STEWARD_KEY" ]]; then
+            AUTHORITY='present'
+            if [[ $PUBLIC_STATUS -eq 0 ]]; then
+              node scripts/arcsweep-terra-prime-live-smoke.mjs > authenticated-smoke.log 2>&1
+              AUTH_STATUS=$?
+            else
+              AUTH_STATUS=98
+              echo 'Skipped because public preview preflight failed.' > authenticated-smoke.log
+            fi
+          else
+            AUTH_STATUS=97
+            echo 'Missing ARCSWEEP_SUPABASE_ACCESS_TOKEN / ARCSWEEP_STEWARD_KEY GitHub Actions secret.' > authenticated-smoke.log
           fi
 
-      - name: Authenticated Terra Prime runtime smoke
-        run: node scripts/arcsweep-terra-prime-live-smoke.mjs
-
-      - name: Require Vercel promotion authority
-        shell: bash
-        run: |
-          if [[ -z "$VERCEL_TOKEN" ]]; then
-            echo '::error::Production promotion requires VERCEL_TOKEN in GitHub Actions secrets.'
-            exit 1
+          if [[ -n "$VERCEL_TOKEN" ]]; then
+            PROMOTION_AUTHORITY='present'
+            if [[ $PUBLIC_STATUS -eq 0 && $AUTH_STATUS -eq 0 ]]; then
+              npx --yes vercel@latest promote "$VERIFIED_PREVIEW_URL" --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_SCOPE" > promote.log 2>&1
+              PROMOTE_STATUS=$?
+            else
+              PROMOTE_STATUS=98
+              echo 'Skipped because deployed smoke did not pass.' > promote.log
+            fi
+          else
+            PROMOTE_STATUS=97
+            echo 'Missing VERCEL_TOKEN GitHub Actions secret.' > promote.log
           fi
 
-      - name: Promote already-built preview without rebuild
-        run: npx --yes vercel@latest promote "$VERIFIED_PREVIEW_URL" --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_SCOPE"
+          if [[ $PROMOTE_STATUS -eq 0 ]]; then
+            ARCSWEEP_SMOKE_BASE_URL=https://flameclyffe.vercel.app node scripts/arcsweep-terra-prime-live-smoke.mjs > production-smoke.log 2>&1
+            PROD_STATUS=$?
+          else
+            PROD_STATUS=98
+            echo 'Skipped because production promotion did not complete.' > production-smoke.log
+          fi
 
-      - name: Production smoke after promotion
-        env:
-          ARCSWEEP_SMOKE_BASE_URL: https://flameclyffe.vercel.app
-        run: node scripts/arcsweep-terra-prime-live-smoke.mjs
+          RESULT='FAILED'
+          if [[ $PUBLIC_STATUS -eq 0 && $AUTH_STATUS -eq 0 && $PROMOTE_STATUS -eq 0 && $PROD_STATUS -eq 0 ]]; then
+            RESULT='PASSED'
+          fi
+
+          cat > promotion-receipt.md <<EOF
+          ### Vercel Runtime Promotion Gate: ${RESULT}
+
+          Exact already-built preview: \`${VERIFIED_PREVIEW_URL}\`
+
+          | Gate | Exit | Authority |
+          | --- | ---: | --- |
+          | Public preview preflight | ${PUBLIC_STATUS} | public |
+          | Authenticated session → model → Commons smoke | ${AUTH_STATUS} | ${AUTHORITY} |
+          | Promote existing preview without rebuild | ${PROMOTE_STATUS} | ${PROMOTION_AUTHORITY} |
+          | Post-promotion production smoke | ${PROD_STATUS} | inherited House authority |
+
+          Source branch at gate run: \`${GITHUB_SHA}\`
+          Runtime adapter source proven by the preview: \`2bf6c0673c642ad3546bb1954a687c675f5a7d7f\`.
+          GitHub Pages remains the static fallback. Netlify is not part of this promotion.
+          EOF
+
+          {
+            echo ''
+            echo '<details><summary>Public smoke output</summary>'
+            echo ''
+            echo '```text'
+            tail -n 30 public-smoke.log
+            echo '```'
+            echo '</details>'
+            echo ''
+            echo '<details><summary>Authenticated smoke output</summary>'
+            echo ''
+            echo '```text'
+            tail -n 30 authenticated-smoke.log
+            echo '```'
+            echo '</details>'
+            echo ''
+            echo '<details><summary>Promotion output</summary>'
+            echo ''
+            echo '```text'
+            tail -n 30 promote.log
+            echo '```'
+            echo '</details>'
+            echo ''
+            echo '<details><summary>Production smoke output</summary>'
+            echo ''
+            echo '```text'
+            tail -n 30 production-smoke.log
+            echo '```'
+            echo '</details>'
+          } >> promotion-receipt.md
+
+          gh pr comment 174 --body-file promotion-receipt.md || true
+          cat promotion-receipt.md >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$RESULT" != 'PASSED' ]]; then
+            echo '::error::Vercel runtime promotion gate did not pass. See PR #174 receipt.'
+            exit 1
+          fi
