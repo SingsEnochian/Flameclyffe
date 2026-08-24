@@ -1,0 +1,66 @@
+name: Vercel Runtime Promotion Gate
+
+on:
+  push:
+    branches:
+      - feature/two-lit-shores-production-circulation-v1
+    paths:
+      - '.github/workflows/vercel-runtime-promotion-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-runtime-production-promotion
+  cancel-in-progress: false
+
+jobs:
+  smoke-and-promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERIFIED_PREVIEW_URL: https://flameclyffe-git-feature-two-b47ed6-singsenochian-2527s-projects.vercel.app
+      ARCSWEEP_SMOKE_BASE_URL: https://flameclyffe-git-feature-two-b47ed6-singsenochian-2527s-projects.vercel.app
+      ARCSWEEP_STEWARD_KEY: ${{ secrets.ARCSWEEP_STEWARD_KEY }}
+      ARCSWEEP_SUPABASE_ACCESS_TOKEN: ${{ secrets.ARCSWEEP_SUPABASE_ACCESS_TOKEN }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_SCOPE: singsenochian-2527s-projects
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Public preview preflight
+        run: node scripts/arcsweep-terra-prime-live-smoke.mjs --public
+
+      - name: Require authenticated smoke authority
+        shell: bash
+        run: |
+          if [[ -z "$ARCSWEEP_SUPABASE_ACCESS_TOKEN" && -z "$ARCSWEEP_STEWARD_KEY" ]]; then
+            echo '::error::Authenticated Vercel smoke requires ARCSWEEP_SUPABASE_ACCESS_TOKEN or ARCSWEEP_STEWARD_KEY in GitHub Actions secrets.'
+            exit 1
+          fi
+
+      - name: Authenticated Terra Prime runtime smoke
+        run: node scripts/arcsweep-terra-prime-live-smoke.mjs
+
+      - name: Require Vercel promotion authority
+        shell: bash
+        run: |
+          if [[ -z "$VERCEL_TOKEN" ]]; then
+            echo '::error::Production promotion requires VERCEL_TOKEN in GitHub Actions secrets.'
+            exit 1
+          fi
+
+      - name: Promote already-built preview without rebuild
+        run: npx --yes vercel@latest promote "$VERIFIED_PREVIEW_URL" --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_SCOPE"
+
+      - name: Production smoke after promotion
+        env:
+          ARCSWEEP_SMOKE_BASE_URL: https://flameclyffe.vercel.app
+        run: node scripts/arcsweep-terra-prime-live-smoke.mjs
