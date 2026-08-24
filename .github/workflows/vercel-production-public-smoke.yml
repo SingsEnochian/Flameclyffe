@@ -78,3 +78,5 @@ jobs:
             echo 'This probe verifies the live shell and that House session, Commons, observations, Braid, and Flame routes are deployed and enforce their unauthorised boundary. Authenticated persistence/model traversal remains covered by the 663/663 runtime suite because no House credential is installed in GitHub Actions.'
           } > receipt.md
           gh pr comment 184 --body-file receipt.md
+
+# receipt-trigger: post-185
