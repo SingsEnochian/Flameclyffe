@@ -71,7 +71,7 @@ export async function verifyGitHubActionsOidc(token, {
   if (claims.repository !== repository) throw new Error('GitHub OIDC repository is not authorised.');
   if (claims.ref !== 'refs/heads/main') throw new Error('GitHub OIDC ref is not authorised.');
   if (claims.workflow_ref !== workflowRef) throw new Error('GitHub OIDC workflow is not authorised.');
-  if (claims.event_name !== 'workflow_dispatch') throw new Error('GitHub OIDC event is not authorised.');
+  if (!['workflow_dispatch', 'push'].includes(claims.event_name)) throw new Error('GitHub OIDC event is not authorised.');
 
   return Object.freeze({
     repository: claims.repository,
