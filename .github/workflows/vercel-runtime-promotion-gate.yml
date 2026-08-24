@@ -6,11 +6,13 @@ on:
       - feature/two-lit-shores-production-circulation-v1
     paths:
       - '.github/workflows/vercel-runtime-promotion-gate.yml'
+      - 'scripts/arcsweep-terra-prime-live-smoke.mjs'
   workflow_dispatch:
 
 permissions:
   contents: read
   pull-requests: write
+  id-token: write
 
 concurrency:
   group: vercel-runtime-production-promotion
@@ -25,6 +27,7 @@ jobs:
       ARCSWEEP_SMOKE_BASE_URL: https://flameclyffe-git-feature-two-b47ed6-singsenochian-2527s-projects.vercel.app
       ARCSWEEP_STEWARD_KEY: ${{ secrets.ARCSWEEP_STEWARD_KEY }}
       ARCSWEEP_SUPABASE_ACCESS_TOKEN: ${{ secrets.ARCSWEEP_SUPABASE_ACCESS_TOKEN }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_SCOPE: singsenochian-2527s-projects
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -37,8 +40,19 @@ jobs:
         with:
           node-version: 24.x
 
+      - name: Mint trusted GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken();
+            core.setSecret(token);
+            core.setOutput('token', token);
+
       - name: Smoke, promote, verify, and publish receipt
         shell: bash
+        env:
+          VERCEL_TRUSTED_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set +e
           PUBLIC_STATUS=99
@@ -99,13 +113,13 @@ jobs:
 
           | Gate | Exit | Authority |
           | --- | ---: | --- |
-          | Public preview preflight | ${PUBLIC_STATUS} | public |
+          | Public preview preflight | ${PUBLIC_STATUS} | GitHub OIDC / automation bypass |
           | Authenticated session → model → Commons smoke | ${AUTH_STATUS} | ${AUTHORITY} |
           | Promote existing preview without rebuild | ${PROMOTE_STATUS} | ${PROMOTION_AUTHORITY} |
           | Post-promotion production smoke | ${PROD_STATUS} | inherited House authority |
 
           Source branch at gate run: \`${GITHUB_SHA}\`
-          Runtime adapter source proven by the preview: \`2bf6c0673c642ad3546bb1954a687c675f5a7d7f\`.
+          Runtime adapter source proven by the preview lineage: \`2bf6c0673c642ad3546bb1954a687c675f5a7d7f\`.
           GitHub Pages remains the static fallback. Netlify is not part of this promotion.
           EOF
 
