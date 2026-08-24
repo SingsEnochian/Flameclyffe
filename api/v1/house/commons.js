@@ -1,13 +1,18 @@
 import { createHouseCommonsHandler } from '../../../netlify/functions/_shared/house-commons-runtime.mjs';
-import { createSupabaseCommonsLedgerStore } from '../../_shared/supabase-commons-store.mjs';
 import { vercelEnv as env } from '../../_shared/vercel-env.mjs';
 
-let store;
-const backingStore = () => (store ||= createSupabaseCommonsLedgerStore(env));
+let storePromise;
+async function backingStore() {
+  if (!storePromise) {
+    storePromise = import('../../_shared/supabase-commons-store.mjs')
+      .then(({ createSupabaseCommonsLedgerStore }) => createSupabaseCommonsLedgerStore(env));
+  }
+  return storePromise;
+}
 const lazyStore = Object.freeze({
-  list: (...args) => backingStore().list(...args),
-  get: (...args) => backingStore().get(...args),
-  setJSON: (...args) => backingStore().setJSON(...args),
+  async list(...args) { return (await backingStore()).list(...args); },
+  async get(...args) { return (await backingStore()).get(...args); },
+  async setJSON(...args) { return (await backingStore()).setJSON(...args); },
 });
 const handle = createHouseCommonsHandler({ env, store: lazyStore });
 

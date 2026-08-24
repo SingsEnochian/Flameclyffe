@@ -1,13 +1,18 @@
 import { createHouseCommonsAttachmentHandler } from '../../../../netlify/functions/_shared/house-commons-attachments-runtime.mjs';
-import { createSupabaseCommonsAttachmentStore } from '../../../_shared/supabase-commons-store.mjs';
 import { vercelEnv as env } from '../../../_shared/vercel-env.mjs';
 
-let store;
-const backingStore = () => (store ||= createSupabaseCommonsAttachmentStore(env));
+let storePromise;
+async function backingStore() {
+  if (!storePromise) {
+    storePromise = import('../../../_shared/supabase-commons-store.mjs')
+      .then(({ createSupabaseCommonsAttachmentStore }) => createSupabaseCommonsAttachmentStore(env));
+  }
+  return storePromise;
+}
 const lazyStore = Object.freeze({
-  get: (...args) => backingStore().get(...args),
-  set: (...args) => backingStore().set(...args),
-  setJSON: (...args) => backingStore().setJSON(...args),
+  async get(...args) { return (await backingStore()).get(...args); },
+  async set(...args) { return (await backingStore()).set(...args); },
+  async setJSON(...args) { return (await backingStore()).setJSON(...args); },
 });
 const handle = createHouseCommonsAttachmentHandler({ env, store: lazyStore });
 
