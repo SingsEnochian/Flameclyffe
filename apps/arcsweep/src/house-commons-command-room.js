@@ -11,6 +11,24 @@ const readJson = (key, fallback) => { try { return JSON.parse(localStorage.getIt
 const writeJson = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 const threadId = (entry) => entry?.thread_id || entry?.turn_id || entry?.id || null;
 
+let refreshInFlight = null;
+let lastRemoteFingerprint = null;
+let lastRenderedHost = null;
+
+export function commonsEntriesFingerprint(entries = []) {
+  return JSON.stringify(entries.map((entry) => ({
+    id: entry?.id ?? null,
+    thread_id: entry?.thread_id ?? null,
+    turn_id: entry?.turn_id ?? null,
+    kind: entry?.kind ?? null,
+    author: entry?.author ?? null,
+    text: entry?.text ?? null,
+    created_at: entry?.created_at ?? null,
+    summary_of: entry?.summary_of ?? null,
+    world: entry?.world ?? null,
+  })));
+}
+
 export function suggestThreadTitle(entries = []) {
   const root = entries.find((entry) => entry.kind === 'steward') || entries[0];
   const text = String(root?.text || 'New Commons thread').replace(/@[\w/-]+/g, '').replace(/\s+/g, ' ').trim();
@@ -100,7 +118,7 @@ function render(host, entries) {
   host.querySelector('[data-new-thread]')?.addEventListener('click', beginNewThread);
 }
 
-async function refresh() {
+async function performRefresh({ force = false } = {}) {
   const form = document.querySelector('#commons-form');
   if (!form) return;
   let host = document.querySelector('[data-commons-command-room]');
@@ -108,18 +126,42 @@ async function refresh() {
     host = document.createElement('div');
     host.dataset.commonsCommandRoom = 'true';
     (form.closest('.commons-layout') || form.parentElement)?.prepend(host);
+    force = true;
   }
   const token = await session();
   if (!token) {
-    host.innerHTML = '<aside class="commons-command-room"><strong>Command Room</strong><p class="muted">House Runtime offline.</p></aside>';
+    if (force || host !== lastRenderedHost || host.dataset.commonsState !== 'offline') {
+      host.innerHTML = '<aside class="commons-command-room"><strong>Command Room</strong><p class="muted">House Runtime offline.</p></aside>';
+      host.dataset.commonsState = 'offline';
+      lastRenderedHost = host;
+    }
     return;
   }
   try {
     const data = await readHouseCommons(token);
-    render(host, Array.isArray(data?.entries) ? data.entries : []);
+    const entries = Array.isArray(data?.entries) ? data.entries : [];
+    const fingerprint = commonsEntriesFingerprint(entries);
+    const hostChanged = host !== lastRenderedHost;
+    if (!force && !hostChanged && fingerprint === lastRemoteFingerprint) return;
+    render(host, entries);
+    host.dataset.commonsState = 'live';
+    lastRemoteFingerprint = fingerprint;
+    lastRenderedHost = host;
   } catch (error) {
-    host.innerHTML = `<aside class="commons-command-room"><p>${esc(error.message)}</p></aside>`;
+    const message = String(error?.message || error);
+    if (force || host !== lastRenderedHost || host.dataset.commonsError !== message) {
+      host.innerHTML = `<aside class="commons-command-room"><p>${esc(message)}</p></aside>`;
+      host.dataset.commonsError = message;
+      host.dataset.commonsState = 'error';
+      lastRenderedHost = host;
+    }
   }
+}
+
+export function refreshHouseCommonsCommandRoom(options = {}) {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = performRefresh(options).finally(() => { refreshInFlight = null; });
+  return refreshInFlight;
 }
 
 function mutationIntroducedCommons(mutations) {
@@ -131,11 +173,11 @@ export function installHouseCommonsCommandRoom() {
   const style = document.createElement('style');
   style.textContent = '.commons-command-room{display:grid;gap:.7rem;padding:.8rem;border:1px solid var(--line-soft);border-radius:.8rem}.commons-command-room article{display:grid;gap:.35rem;padding:.55rem;border:1px solid var(--line-soft);border-radius:.65rem}.commons-command-room article>button{display:grid;text-align:left;background:transparent;border:0;color:inherit}.commons-command-room small,.commons-command-room em{color:var(--muted);font-size:.72rem}';
   document.head.append(style);
-  new MutationObserver((mutations) => { if (mutationIntroducedCommons(mutations)) void refresh(); }).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver((mutations) => { if (mutationIntroducedCommons(mutations)) void refreshHouseCommonsCommandRoom({ force: true }); }).observe(document.body, { childList: true, subtree: true });
   document.addEventListener(MODEL_PRESENCE_EVENT, () => { const node = document.querySelector('[data-live-answering]'); if (node) node.textContent = statusText(); });
-  document.addEventListener('arcsweep:commons-attachment-saved', () => void refresh());
-  void refresh();
-  setInterval(() => { if (document.querySelector('#commons-form')) void refresh(); }, 10000);
+  document.addEventListener('arcsweep:commons-attachment-saved', () => void refreshHouseCommonsCommandRoom({ force: true }));
+  void refreshHouseCommonsCommandRoom({ force: true });
+  setInterval(() => { if (document.querySelector('#commons-form')) void refreshHouseCommonsCommandRoom(); }, 10000);
 }
 
 if (typeof document !== 'undefined') installHouseCommonsCommandRoom();
