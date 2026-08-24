@@ -1,4 +1,5 @@
 import { RUNA_SENSORY_PLAN_SCHEMA } from './runa-sensory-transfer.js';
+import { createBrowserSurfaceHapticAdapter } from './runa-surface-haptic-adapter.js';
 
 let activeTransfer = null;
 
@@ -25,43 +26,16 @@ function envelopeGain(gainParam, start, end, ceiling, envelope) {
   gainParam.exponentialRampToValueAtTime(0.0001, end);
 }
 
-function expandPattern(pattern, durationMs) {
-  const base = (Array.isArray(pattern) ? pattern : []).map((value) => Math.max(0, Math.round(Number(value) || 0))).filter((value) => value > 0);
-  if (!base.length) return [];
-  const target = Math.max(1, Math.round(Number(durationMs) || 1));
-  const expanded = [];
-  let total = 0;
-  let index = 0;
-  while (total < target && expanded.length < 64) {
-    const next = base[index % base.length];
-    if (total + next > target) {
-      expanded.push(Math.max(1, target - total));
-      total = target;
-      break;
-    }
-    expanded.push(next);
-    total += next;
-    index += 1;
-  }
-  return expanded;
-}
-
-function supportsVibration(navigatorObject) {
-  return Boolean(navigatorObject && typeof navigatorObject.vibrate === 'function');
-}
-
 export function sensoryTransferIsActive() {
   return Boolean(activeTransfer);
 }
 
-export function stopSensoryTransfer(reason = 'Feather', { navigatorObject = globalThis.navigator } = {}) {
+export function stopSensoryTransfer(reason = 'Feather') {
   const active = activeTransfer;
   if (!active) return false;
   active.stoppedEarly = true;
   active.stopReason = String(reason || 'stopped');
-  if (supportsVibration(navigatorObject)) {
-    try { navigatorObject.vibrate(0); } catch {}
-  }
+  try { active.hapticAdapter?.stop?.(); } catch {}
   for (const item of active.audioSources) {
     try { item.gain?.gain?.cancelScheduledValues(active.context?.currentTime); } catch {}
     try { item.gain?.gain?.setTargetAtTime(0.0001, active.context?.currentTime || 0, 0.025); } catch {}
@@ -74,6 +48,7 @@ export function stopSensoryTransfer(reason = 'Feather', { navigatorObject = glob
 export async function launchSensoryTransferPlan(plan, {
   AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext,
   navigatorObject = globalThis.navigator,
+  surfaceHapticAdapter = null,
   clock = () => new Date(),
 } = {}) {
   invariant(plan?.schema === RUNA_SENSORY_PLAN_SCHEMA, 'a compiled sensory transfer plan is required');
@@ -85,7 +60,8 @@ export async function launchSensoryTransferPlan(plan, {
   const hapticPlan = plan.transfer.carrier_plans.find((item) => item.carrier === 'surface_haptic') || null;
   const audioRequested = Boolean(audioPlan);
   const hapticRequested = Boolean(hapticPlan);
-  const hapticSupported = supportsVibration(navigatorObject);
+  const hapticAdapter = surfaceHapticAdapter || createBrowserSurfaceHapticAdapter({ navigatorObject });
+  const hapticSupported = Boolean(hapticRequested && hapticAdapter?.isSupported?.());
   const durationMs = Math.max(...plan.transfer.carrier_plans.map((item) => Number(item.duration_ms) || 0), 350);
   const startedAtDate = clock();
   const startedAt = startedAtDate.toISOString();
@@ -93,6 +69,7 @@ export async function launchSensoryTransferPlan(plan, {
   const audioSources = [];
   let audioRendered = false;
   let hapticRendered = false;
+  let hapticAdapterReceipt = null;
   let settled = false;
 
   if (audioRequested) {
@@ -113,13 +90,10 @@ export async function launchSensoryTransferPlan(plan, {
     audioRendered = true;
   }
 
-  if (hapticRequested && hapticSupported) {
-    const pattern = expandPattern(hapticPlan.pattern_ms, hapticPlan.duration_ms);
-    try {
-      hapticRendered = navigatorObject.vibrate(pattern) !== false;
-    } catch {
-      hapticRendered = false;
-    }
+  if (hapticRequested) {
+    invariant(hapticAdapter && typeof hapticAdapter.render === 'function', 'surface_haptic adapter is unavailable');
+    hapticAdapterReceipt = await hapticAdapter.render(hapticPlan);
+    hapticRendered = Boolean(hapticAdapterReceipt?.rendered);
   }
 
   const runtime = await new Promise((resolve) => {
@@ -129,9 +103,7 @@ export async function launchSensoryTransferPlan(plan, {
       const current = activeTransfer;
       const stoppedEarly = Boolean(current?.stoppedEarly);
       const stopReason = current?.stopReason || null;
-      if (supportsVibration(navigatorObject)) {
-        try { navigatorObject.vibrate(0); } catch {}
-      }
+      try { hapticAdapter?.stop?.(); } catch {}
       activeTransfer = null;
       void closeContext(context);
       const completedAtDate = clock();
@@ -141,6 +113,7 @@ export async function launchSensoryTransferPlan(plan, {
         haptic_requested: hapticRequested,
         haptic_supported: hapticSupported,
         haptic_rendered: hapticRendered,
+        haptic_adapter_receipt: hapticAdapterReceipt ? structuredClone(hapticAdapterReceipt) : null,
         rendered_carriers: [
           audioRendered ? 'air_audio' : null,
           hapticRendered ? 'surface_haptic' : null,
@@ -156,6 +129,7 @@ export async function launchSensoryTransferPlan(plan, {
     activeTransfer = {
       context,
       audioSources,
+      hapticAdapter,
       finish,
       stoppedEarly: false,
       stopReason: null,
