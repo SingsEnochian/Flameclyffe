@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { RUNA_SENSORY_PLAN_SCHEMA } from '../src/runa-sensory-transfer.js';
+import { launchSensoryTransferPlan } from '../src/runa-sensory-transfer-player.js';
 import {
   RUNA_SURFACE_HAPTIC_ADAPTER_RENDER_SCHEMA,
   RUNA_SURFACE_HAPTIC_ADAPTER_SCHEMA,
@@ -68,4 +70,41 @@ test('browser surface haptic adapter refuses non-haptic carrier plans', async ()
     adapter.render({ carrier: 'implant_bone_audio', pattern_ms: [100], duration_ms: 100 }),
     /surface_haptic carrier plan required/i,
   );
+});
+
+test('sensory player delegates surface haptics to an injected adapter and returns its receipt', async () => {
+  const calls = [];
+  const adapterReceipt = Object.freeze({
+    schema: RUNA_SURFACE_HAPTIC_ADAPTER_RENDER_SCHEMA,
+    adapter_id: 'test-surface-haptic',
+    carrier: 'surface_haptic',
+    execution: 'test-adapter',
+    supported: true,
+    rendered: true,
+    requested_pattern_ms: [100, 50],
+    requested_duration_ms: 350,
+    authority: { timing_only: true, actuator_frequency_claimed: false, intensity_control_claimed: false, medical_device_control_used: false, bone_audio_claimed: false },
+  });
+  const adapter = {
+    isSupported() { return true; },
+    async render(plan) { calls.push(['render', plan.carrier]); return adapterReceipt; },
+    stop() { calls.push(['stop']); return true; },
+  };
+  const plan = {
+    schema: RUNA_SENSORY_PLAN_SCHEMA,
+    authority: { requires_explicit_user_launch: true, autoplay_authorized: false },
+    transfer: {
+      carrier_plans: [{ carrier: 'surface_haptic', pattern_ms: [100, 50], duration_ms: 350 }],
+    },
+  };
+
+  const runtime = await launchSensoryTransferPlan(plan, { surfaceHapticAdapter: adapter });
+
+  assert.equal(runtime.haptic_requested, true);
+  assert.equal(runtime.haptic_supported, true);
+  assert.equal(runtime.haptic_rendered, true);
+  assert.equal(runtime.haptic_adapter_receipt.adapter_id, 'test-surface-haptic');
+  assert.deepEqual(runtime.rendered_carriers, ['surface_haptic']);
+  assert.deepEqual(calls[0], ['render', 'surface_haptic']);
+  assert.ok(calls.some(([name]) => name === 'stop'));
 });
