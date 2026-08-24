@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const companionBase = process.env.PROJECT_ZERO_BASE || '/Flameclyffe/project-zero-companion/';
+const companionBase = process.env.PROJECT_ZERO_BASE || '/project-zero-companion/';
 
 export default defineConfig({
   plugins: [react()],

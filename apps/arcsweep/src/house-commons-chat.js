@@ -16,6 +16,8 @@ let refreshTimer = null;
 let observer = null;
 let installed = false;
 let sending = false;
+let lastLogSignature = null;
+let refreshInFlight = null;
 
 function escapeHtml(value = '') {
   return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
@@ -136,7 +138,27 @@ function renderEntry(entry) {
   </article>`;
 }
 
-async function refreshLog() {
+export function commonsLogSignature(entries = []) {
+  return JSON.stringify(entries.map((entry) => [
+    entry.id || null,
+    entry.turn_id || null,
+    entry.created_at || null,
+    entry.status || null,
+    entry.author || null,
+    entry.voice_id || null,
+    entry.text || '',
+  ]));
+}
+
+export function describeCommonsTransportError(error) {
+  const message = String(error?.message || error || '').trim();
+  if (!message || /(?:House Commons|House Runtime)\s+0\b/i.test(message) || /Failed to fetch|NetworkError|Load failed/i.test(message)) {
+    return 'transport unavailable · no HTTP response received';
+  }
+  return message;
+}
+
+async function performRefreshLog({ force = false } = {}) {
   const log = document.querySelector('.commons-log');
   if (!log) return;
   const token = await activeSession();
@@ -149,6 +171,9 @@ async function refreshLog() {
     const data = await readHouseCommons(token);
     const entries = Array.isArray(data?.entries) ? data.entries : [];
     if (connection) connection.textContent = `House Runtime connected · ${entries.length} saved turns loaded`;
+    const signature = commonsLogSignature(entries);
+    if (!force && signature === lastLogSignature) return;
+    lastLogSignature = signature;
     log.innerHTML = `<div class="commons-chat-log-head"><h2>Conversation</h2><span>${entries.length} saved turns</span></div>${entries.length ? entries.map(renderEntry).join('') : '<p class="muted">The Commons is quiet. Speak when ready.</p>'}`;
     log.querySelectorAll('[data-copy-entry]').forEach((button) => {
       button.addEventListener('click', async () => {
@@ -160,14 +185,20 @@ async function refreshLog() {
     });
     log.scrollTop = log.scrollHeight;
   } catch (error) {
-    if (connection) connection.textContent = `House Runtime error · ${error.message}`;
+    if (connection) connection.textContent = `House Runtime error · ${describeCommonsTransportError(error)}`;
   }
+}
+
+export async function refreshLog(options = {}) {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = performRefreshLog(options).finally(() => { refreshInFlight = null; });
+  return refreshInFlight;
 }
 
 function enhanceCommons(form) {
   if (!form || form.dataset.commonsEnhanced === 'true') return;
   form.dataset.commonsEnhanced = 'true';
-  const fieldset = form.querySelector('fieldset');
+  lastLogSignature = null;
   const selected = new Set(readSelection());
   voiceCheckboxes(form).forEach((input) => {
     input.checked = selected.has(input.value);
@@ -188,7 +219,7 @@ function enhanceCommons(form) {
     state.textContent = 'Restoring House Runtime session…';
     heading.querySelector('div')?.append(state);
   }
-  void refreshLog();
+  void refreshLog({ force: true });
 }
 
 async function handleSubmit(event) {

@@ -17,10 +17,12 @@ test('iPhone navigation uses a dedicated fixed bar plus room sheet', () => {
   assert.doesNotMatch(css, /overflow-x:\s*auto/);
 });
 
-test('mobile bar keeps four stable rooms and exposes every desktop room through More', () => {
-  for (const room of ['portal', 'worlds', 'commons', 'deep-observer']) {
+test('mobile bar keeps essential rooms including Settings and exposes every desktop room through More', () => {
+  for (const room of ['portal', 'worlds', 'commons', 'settings']) {
     assert.match(sidecar, new RegExp(`id: '${room}'`));
   }
+  assert.match(sidecar, /label: 'Settings', glyph: '⚙'/);
+  assert.doesNotMatch(sidecar, /id: 'deep-observer', label: 'Field'/);
   assert.match(sidecar, /data-mobile-more/);
   assert.match(sidecar, /desktopRoomButtons\(\)\.map\(roomDescriptor\)/);
   assert.match(css, /min-height:\s*4\.65rem/);
