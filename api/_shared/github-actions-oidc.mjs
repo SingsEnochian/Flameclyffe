@@ -12,7 +12,16 @@ const decodeJson = (value) => JSON.parse(Buffer.from(value, 'base64url').toStrin
 
 async function githubJwks(fetchImpl, now) {
   if (cachedJwks && now - cachedAt < 15 * 60_000) return cachedJwks;
-  const response = await fetchImpl(`${GITHUB_OIDC_ISSUER}/.well-known/jwks`, {
+  const discovery = await fetchImpl(`${GITHUB_OIDC_ISSUER}/.well-known/openid-configuration`, {
+    headers: { accept: 'application/json' },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!discovery.ok) throw new Error(`GitHub OIDC discovery failed: ${discovery.status}`);
+  const metadata = await discovery.json();
+  if (metadata?.issuer !== GITHUB_OIDC_ISSUER || !String(metadata?.jwks_uri || '').startsWith(`${GITHUB_OIDC_ISSUER}/`)) {
+    throw new Error('GitHub OIDC discovery metadata is not trusted.');
+  }
+  const response = await fetchImpl(metadata.jwks_uri, {
     headers: { accept: 'application/json' },
     signal: AbortSignal.timeout(10_000),
   });
