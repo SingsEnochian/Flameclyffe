@@ -58,7 +58,14 @@ function requireStamp(value, field) {
   return value;
 }
 
+function cycleQualia(cycle) {
+  const direct = cycle.premaqc_after?.qualia || cycle.premaqc_before?.qualia || null;
+  if (direct?.schema === 'premaqc.qualia-report/v1') return direct;
+  return (cycle.evidence || []).map((item) => item?.qualia).find((item) => item?.schema === 'premaqc.qualia-report/v1') || null;
+}
+
 function sourceReceiptIds(cycle, review, deepTime) {
+  const qualia = cycleQualia(cycle);
   return [...new Set([
     cycle.cycle_id,
     cycle.cycle_fingerprint,
@@ -66,6 +73,7 @@ function sourceReceiptIds(cycle, review, deepTime) {
     cycle.math_spine_packet?.packet_fingerprint,
     cycle.replay_receipt?.replay_fingerprint,
     ...(cycle.evidence || []).map((item) => item?.receipt_id || item?.record_id || item?.id),
+    qualia?.report_receipt_id,
     review?.review_receipt_id,
     deepTime?.id,
     deepTime?.record_fingerprint,
@@ -144,7 +152,8 @@ export async function createRuntimeBraidPacket({
 
   const continuityPacketId = runtimeContinuityPacketId(cycle);
   const stage = deepTime ? 'entered-deeptime' : review ? `review-${review.decision}` : 'awaiting-review';
-  const qualiaEvidence = (cycle.evidence || []).filter((item) => item?.qualia?.value !== undefined);
+  const qualia = cycleQualia(cycle);
+  const qualiaEvidence = (cycle.evidence || []).filter((item) => item?.qualia?.present === true);
   const core = {
     schema: RUNTIME_BRAID_PACKET_SCHEMA,
     schema_version: 1,
@@ -178,9 +187,12 @@ export async function createRuntimeBraidPacket({
       review_receipt_id: review?.review_receipt_id || null,
     },
     qualia: {
-      present: qualiaEvidence.length > 0,
+      schema: qualia?.schema || 'premaqc.qualia-report/v1',
+      present: qualia?.present === true,
       authority: 'firsthand-only',
       inferred: false,
+      report_receipt_id: qualia?.report_receipt_id || null,
+      report: qualia?.present ? clone(qualia.report) : null,
       source_evidence_count: qualiaEvidence.length,
     },
     lineage: {
@@ -199,6 +211,7 @@ export async function createRuntimeBraidPacket({
       append_only_lineage: true,
       unknown_and_open_are_valid: true,
       qualia_inference_allowed: false,
+      qualia_is_dynamical_axis: false,
       silent_canon_merge: false,
       physical_claim: false,
       canon_commit: false,

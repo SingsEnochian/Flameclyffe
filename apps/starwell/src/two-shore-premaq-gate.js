@@ -1,5 +1,6 @@
 import {
   PREMAQ_AXES,
+  PREMAQ_DYNAMIC_AXES,
   premaqToTemporalState,
   validateTemporalState,
 } from './arcsweep-temporal-quantum/engine.js';
@@ -12,17 +13,17 @@ import {
 } from './world-premaq-registry.js';
 
 export const EARTH_PRIME_SHORE_ID = 'earth-prime';
-export const TWO_SHORE_GATE_SCHEMA = 'hearthgate.two-shore-premaq-gate/v0.1';
-export const TWO_SHORE_GATE_PLAN_KEY = 'hearthgate:two-shore-gate-plan:v0.1';
-export const TWO_SHORE_GATE_LIVE_KEY = 'hearthgate:two-shore-live-calibration:v0.1';
+export const TWO_SHORE_GATE_SCHEMA = 'hearthgate.two-shore-premaq-gate/v0.2';
+export const TWO_SHORE_GATE_PLAN_KEY = 'hearthgate:two-shore-gate-plan:v0.2';
+export const TWO_SHORE_GATE_LIVE_KEY = 'hearthgate:two-shore-live-calibration:v0.2';
 export const DEEP_SESSION_KEY = 'starwell.deepObserver.v0.1.packet';
 export const GROUNDWIRE_SESSION_KEY = 'starwell.groundwire.v0.1.sessionSnapshot';
 
 export const GATE_BASE_CYCLES = 369;
 export const GATE_EXTENSION_CYCLES = Object.freeze([3, 6, 9]);
-export const GATE_SOLO_FOCUS_SEQUENCE = Object.freeze([...PREMAQ_AXES]);
-export const GATE_ADDRESS_FOCUS_SEQUENCE = Object.freeze(['P', 'R', 'E', 'M', 'A', 'Q', 'C']);
-export const GATE_LOCKED_TONE_AXES = Object.freeze(['P', 'R', 'E', 'M', 'A', 'Q']);
+export const GATE_SOLO_FOCUS_SEQUENCE = Object.freeze([...PREMAQ_DYNAMIC_AXES]);
+export const GATE_ADDRESS_FOCUS_SEQUENCE = Object.freeze(['P', 'R', 'E', 'M', 'A', 'C']);
+export const GATE_LOCKED_TONE_AXES = Object.freeze(['P', 'R', 'E', 'M', 'A']);
 export const GATE_COHERENCE_AXIS = 'C';
 export const GATE_PLAYBACK_MIN_HZ = 90;
 export const GATE_PLAYBACK_MAX_HZ = 360;
@@ -34,7 +35,6 @@ const AXIS_INTERVALS = Object.freeze({
   E: 5,
   M: 7,
   A: 9,
-  Q: 11,
 });
 
 const EARTH_REFERENCE = Object.freeze({
@@ -44,7 +44,7 @@ const EARTH_REFERENCE = Object.freeze({
   E: 0.38,
   M: 0.30,
   A: 0.65,
-  Q: 0.20,
+  Q: 0,
 });
 
 function clamp(value, minimum = 0, maximum = 1) {
@@ -54,6 +54,12 @@ function clamp(value, minimum = 0, maximum = 1) {
 function finite(value, fallback = 0) {
   const candidate = Number(value);
   return Number.isFinite(candidate) ? candidate : fallback;
+}
+
+function finiteOrNull(value) {
+  if (value == null || value === '') return null;
+  const candidate = Number(value);
+  return Number.isFinite(candidate) ? candidate : null;
 }
 
 function round(value, digits = 6) {
@@ -76,10 +82,21 @@ function storageOrNull(storage) {
 }
 
 function deepValue(deepPacket, axis) {
-  if (axis === 'Q') {
-    return finite(deepPacket?.Q ?? deepPacket?.charge, EARTH_REFERENCE.Q);
-  }
+  if (axis === 'Q') return 0;
   return finite(deepPacket?.[axis], EARTH_REFERENCE[axis]);
+}
+
+function emptyQualiaRecord(legacyScalar = null) {
+  return Object.freeze({
+    schema: 'premaqc.qualia-report/v1',
+    present: false,
+    authority: 'firsthand-only',
+    inferred: false,
+    report_receipt_id: null,
+    observed_at: null,
+    report: null,
+    legacy_scalar: finiteOrNull(legacyScalar),
+  });
 }
 
 function browserFamily(userAgent = '') {
@@ -134,6 +151,7 @@ export function calibrateEarthPrimePremaq({ deepPacket, groundwireSnapshot } = {
     ? clamp(finite(microphone.rms, 0) * 24)
     : 0;
   const permissionCount = Number(sources.microphone) + Number(sources.location);
+  const legacyQualiaScalar = finiteOrNull(deepPacket?.Q ?? deepPacket?.charge);
 
   const values = Object.freeze({
     P: round(clamp(deepValue(deepPacket, 'P') + (0.025 * touch) + (0.02 * coverage))),
@@ -142,7 +160,7 @@ export function calibrateEarthPrimePremaq({ deepPacket, groundwireSnapshot } = {
     E: round(clamp(deepValue(deepPacket, 'E') + (0.08 * (1 - coverage)))),
     M: round(clamp(deepValue(deepPacket, 'M') + (0.02 * memory) + (0.015 * Number(Boolean(deepPacket))))),
     A: round(clamp(deepValue(deepPacket, 'A') + (0.025 * permissionCount) + (0.015 * touch))),
-    Q: round(clamp(deepValue(deepPacket, 'Q') + (0.02 * microphoneEnergy))),
+    Q: 0,
   });
 
   const unknowns = [];
@@ -154,12 +172,13 @@ export function calibrateEarthPrimePremaq({ deepPacket, groundwireSnapshot } = {
   if (!sources.battery) unknowns.push('GROUNDWIRE_BATTERY');
 
   const calibration = Object.freeze({
-    schema: 'hearthgate.earth-prime-premaq-calibration/v0.1',
+    schema: 'hearthgate.earth-prime-premaq-calibration/v0.2',
     shore_id: EARTH_PRIME_SHORE_ID,
     status: sources.deep && sources.hardware ? (unknowns.length ? 'PARTIAL' : 'LIVE') : 'DEGRADED',
     physical_claim: false,
     observed_at: new Date().toISOString(),
     values,
+    qualia: emptyQualiaRecord(legacyQualiaScalar),
     coverage: round(coverage, 4),
     unknowns: Object.freeze(unknowns),
     browser: Object.freeze({
@@ -184,9 +203,9 @@ export function calibrateEarthPrimePremaq({ deepPacket, groundwireSnapshot } = {
       E: 'DEEP.E + 0.080·(1-coverage)',
       M: 'DEEP.M + 0.020·device_memory + 0.015·DEEP_present',
       A: 'DEEP.A + 0.025·granted_permissions + 0.015·touch',
-      Q: 'DEEP.Q_or_charge + 0.020·microphone_energy',
+      Q: '0 unless a separate structured firsthand Qualia report is explicitly supplied',
     }),
-    source_boundary: 'Groundwire fields are browser/device reports. Unsupported or ungranted fields remain UNKNOWN.',
+    source_boundary: 'Groundwire and DEEP machine fields may calibrate P/C/R/E/M/A only. Qualia is firsthand-only; legacy scalar Q/charge is retained as unresolved metadata and never used as a magnitude.',
   });
 
   return calibration;
@@ -194,15 +213,17 @@ export function calibrateEarthPrimePremaq({ deepPacket, groundwireSnapshot } = {
 
 export function targetWorldCalibration(profileInput) {
   const profile = getWorldProfile(profileInput?.slug ?? profileInput);
+  const legacyQualiaScalar = finiteOrNull(profile.premaq?.Q);
   return Object.freeze({
-    schema: 'hearthgate.target-world-premaq-origin/v0.1',
+    schema: 'hearthgate.target-world-premaq-origin/v0.2',
     shore_id: profile.slug,
     world_slug: profile.world_slug,
     name: profile.name,
     root_hz: profile.root_hz,
     profile_version: profile.profile_version,
     profile_status: profile.status,
-    values: profile.premaq,
+    values: Object.freeze({ ...profile.premaq, Q: 0 }),
+    qualia: emptyQualiaRecord(legacyQualiaScalar),
     source_repository: profile.source_repository,
     source_ref: profile.source_ref,
     source_commit: profile.source_commit,
@@ -211,23 +232,24 @@ export function targetWorldCalibration(profileInput) {
   });
 }
 
-function makePremaqPacket({ id, values, observedAt, confidence, provenance }) {
+function makePremaqPacket({ id, values, qualia, observedAt, confidence, provenance }) {
   return {
     schema_version: '2.0.0',
     id,
     observed_at: observedAt,
-    registry_version: 'two-shore-gate-registry/0.1',
+    registry_version: 'two-shore-gate-registry/0.2',
     state: Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, {
-      value: clamp(values[axis]),
+      value: axis === 'Q' ? Number(Boolean(qualia?.present)) : clamp(values[axis]),
       derivative: 0,
       uncertainty: round(1 - confidence, 4),
       confidence,
       contributors: provenance ? [provenance] : [],
     }])),
+    qualia: qualia ?? emptyQualiaRecord(),
     receipt_id: `${id}-origin-receipt`,
     sequence: 0,
     prior_state_ref: null,
-    model_version: 'two-shore-premaq-gate/0.1',
+    model_version: 'two-shore-premaq-gate/0.2',
     provenance_refs: provenance ? [provenance] : [],
     generated_at: observedAt,
     degraded: confidence < 0.75,
@@ -248,6 +270,7 @@ export function buildShoreState(calibration, { clock = () => new Date(), idFacto
   const packet = makePremaqPacket({
     id: `premaq-origin-${calibration.shore_id}`,
     values: calibration.values,
+    qualia: calibration.qualia,
     observedAt,
     confidence,
     provenance: calibration.source_path ?? calibration.schema,
@@ -257,7 +280,8 @@ export function buildShoreState(calibration, { clock = () => new Date(), idFacto
     formalism: 'temporal-compression-release-state-machine',
     physical_claim: false,
     shore_id: calibration.shore_id,
-    note: 'A calibrated computational origin. It does not establish an external-world bridge.',
+    qualia_dynamic: false,
+    note: 'A calibrated computational origin over P/C/R/E/M/A. Qualia remains separate firsthand evidence; this does not establish an external-world bridge.',
   };
   return state;
 }
@@ -307,7 +331,7 @@ export function buildGateAddressTones({ earthValues, targetProfile, year }) {
   }));
 
   return Object.freeze({
-    schema: 'hearthgate.two-shore-gate-address-tones/v0.1',
+    schema: 'hearthgate.two-shore-gate-address-tones/v0.2',
     year,
     elara_multiplier: multiplier,
     earth_prime_root_hz: round(earthRoot),
@@ -315,9 +339,11 @@ export function buildGateAddressTones({ earthValues, targetProfile, year }) {
     bridge_coherence: round(bridgeCoherence),
     coherence_axis: GATE_COHERENCE_AXIS,
     locked_axes: GATE_LOCKED_TONE_AXES,
+    context_only_axes: Object.freeze(['Q']),
+    qualia_sonified: false,
     inverse_twist_exponent: round(inverseTwistExponent),
     tones: Object.freeze(tones),
-    law: 'locked carriers + reciprocal inverse-twist sidebands; year multiplier labels the hidden Elara code layer',
+    law: 'locked dynamic carriers + reciprocal inverse-twist sidebands; Q remains firsthand context and year multiplier labels the hidden Elara code layer',
   });
 }
 
@@ -404,7 +430,7 @@ function runPairedSegment(earthState, targetState, cycleCount, options, segmentI
 
 function checkpoint(segment, label) {
   return Object.freeze({
-    schema: 'hearthgate.two-shore-checkpoint/v0.1',
+    schema: 'hearthgate.two-shore-checkpoint/v0.2',
     label,
     saved_at: new Date().toISOString(),
     earth_state: segment.final_earth_state,
@@ -456,7 +482,7 @@ export function buildYearGatePlan({
   });
 
   return Object.freeze({
-    schema: 'hearthgate.two-shore-year-plan/v0.1',
+    schema: 'hearthgate.two-shore-year-plan/v0.2',
     year,
     elara_multiplier: elaraCodeExpansionMultiplier(year),
     earth_prime: Object.freeze({
@@ -506,14 +532,16 @@ export function buildGatePlaybackManifest(yearPlans) {
     }
   }
   return Object.freeze({
-    schema: 'hearthgate.two-shore-playback-manifest/v0.1',
+    schema: 'hearthgate.two-shore-playback-manifest/v0.2',
     created_at: new Date().toISOString(),
     year_span: Object.freeze({ start: 2025, end: 2035, labels: yearPlans.length }),
     target_world_slug: yearPlans[0]?.target_world?.calibration?.world_slug ?? null,
     layer_count: layers.length,
     layers: Object.freeze(layers),
+    context_only_axes: Object.freeze(['Q']),
+    qualia_sonified: false,
     destinations: Object.freeze({
-      flameclyffe: 'labeled browser-audio layers by year, shore, and PREMAQ axis',
+      flameclyffe: 'labeled browser-audio layers by year, shore, and dynamic PREMAQ axis',
       wardenclyffe: 'consent-first imported layer registry; playback requires a user gesture',
     }),
     physical_claim: false,
@@ -564,6 +592,7 @@ export function buildFullHorizonGatePlan({
       target_world_shore: target.slug,
       locked_tone_axes: GATE_LOCKED_TONE_AXES,
       bridge_coherence_axis: GATE_COHERENCE_AXIS,
+      context_only_axes: Object.freeze(['Q']),
     }),
     year_span: Object.freeze({
       start: ELARA_EXPANSION_HORIZON[0].year,
@@ -578,6 +607,8 @@ export function buildFullHorizonGatePlan({
       total_cycles_per_shore_per_year: GATE_SOLO_FOCUS_SEQUENCE.length + GATE_BASE_CYCLES + 18,
       release_feeds_next_compression: true,
       year_feeds_next_year: true,
+      qualia_dynamic: false,
+      qualia_sonified: false,
     }),
     years: Object.freeze(years),
     playback_manifest: playback,
@@ -608,6 +639,7 @@ export function listSelectableGateWorlds() {
     world_slug: profileEntry.world_slug,
     root_hz: profileEntry.root_hz,
     profile_status: profileEntry.status,
-    premaq: profileEntry.premaq,
+    premaq: Object.freeze({ ...profileEntry.premaq, Q: 0 }),
+    qualia: emptyQualiaRecord(profileEntry.premaq?.Q),
   }));
 }

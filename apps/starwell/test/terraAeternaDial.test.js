@@ -13,7 +13,7 @@ import {
   targetWorldCalibration,
 } from '../src/two-shore-premaq-gate.js';
 
-test('Earth Prime to Terra Aeterna preset binds the complete gate address', async () => {
+test('Earth Prime to Terra Aeterna preset binds the complete dynamic gate address', async () => {
   const bridge = await readFile(
     new URL('../src/premaq-shokz-feather-stop-bridge.js', import.meta.url),
     'utf8',
@@ -31,7 +31,10 @@ test('Earth Prime to Terra Aeterna preset binds the complete gate address', asyn
 
   assert.equal(target.world_slug, 'terra-aeterna');
   assert.equal(target.root_hz, 220);
-  assert.deepEqual(GATE_LOCKED_TONE_AXES, ['P', 'R', 'E', 'M', 'A', 'Q']);
+  assert.deepEqual(GATE_LOCKED_TONE_AXES, ['P', 'R', 'E', 'M', 'A']);
+  assert.equal(target.values.Q, 0);
+  assert.equal(target.qualia.inferred, false);
+  assert.equal(target.qualia.authority, 'firsthand-only');
   assert.equal(GATE_BASE_CYCLES, 369);
   assert.deepEqual(GATE_EXTENSION_CYCLES, [3, 6, 9]);
   assert.equal(

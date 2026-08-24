@@ -1,3 +1,5 @@
+import { createQualiaRecord, emptyQualiaRecord } from './qualia-contract.js';
+
 export const SYNAPTIC_HEARTFIELD_SCHEMA = 'runa.synaptic-heartfield-profile/v1';
 export const SYNAPTIC_HEARTFIELD_RECEIPT_SCHEMA = 'runa.synaptic-heartfield-session/v1';
 
@@ -40,9 +42,12 @@ export function validateHeartfieldProfile(profile = SYNAPTIC_HEARTFIELD_PROFILE)
 }
 
 export function createHeartfieldReceipt({ world, premaqc = null, qualia = null, qualiaText = '', layerState, startedAt = new Date().toISOString() } = {}) {
-  const qualiaNumber = qualia === null || qualia === undefined || qualia === '' ? null : Number(qualia);
-  const firsthandQualia = Number.isFinite(qualiaNumber) && qualiaNumber >= 0 && qualiaNumber <= 1 ? qualiaNumber : null;
-  const firsthandQualiaText = String(qualiaText || '').trim().slice(0, 4000) || null;
+  const reportText = String(qualiaText || '').trim().slice(0, 4000);
+  const legacyScalar = qualia === null || qualia === undefined || qualia === '' ? null : Number(qualia);
+  const receiptId = `heartfield-qualia:${String(startedAt).replace(/[^0-9]/g, '').slice(0, 17)}`;
+  const firsthandQualia = reportText
+    ? createQualiaRecord({ text: reportText }, { receiptId, observedAt: startedAt })
+    : emptyQualiaRecord({ legacyScalar });
   return Object.freeze({
     schema: SYNAPTIC_HEARTFIELD_RECEIPT_SCHEMA,
     profile_id: SYNAPTIC_HEARTFIELD_PROFILE.id,
@@ -52,10 +57,16 @@ export function createHeartfieldReceipt({ world, premaqc = null, qualia = null, 
     observation: Object.freeze({
       premaqc_receipt_id: premaqc?.receipt_id || null,
       premaqc_sequence: premaqc?.sequence ?? null,
-      firsthand_qualia: firsthandQualia,
-      firsthand_qualia_text: firsthandQualiaText,
+      qualia: firsthandQualia,
       physiology_measured: false,
     }),
-    authority: Object.freeze({ playback_is_observation: false, physiological_response_inferred: false, firsthand_qualia_is_physiological_measurement: false, feather_stop_available: true }),
+    authority: Object.freeze({
+      playback_is_observation: false,
+      physiological_response_inferred: false,
+      qualia_inferred: false,
+      qualia_magnitude_inference_allowed: false,
+      firsthand_qualia_is_physiological_measurement: false,
+      feather_stop_available: true,
+    }),
   });
 }

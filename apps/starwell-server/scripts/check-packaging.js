@@ -108,7 +108,7 @@ if (exists(bifrostManifestPath)) {
       errors.push('Bifröst Arcsweep must preserve the physical-claim boundary.');
     }
     for (const capability of [
-      'premaq-v2-ingest',
+      'premaqc-v2-ingest',
       'compression-release-cycles',
       'compression-of-release-recursion',
       'world-specific-tone-sequences',

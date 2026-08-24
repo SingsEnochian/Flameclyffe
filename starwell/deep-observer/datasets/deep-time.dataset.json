@@ -9,7 +9,9 @@
     "append_only": true,
     "silent_renumbering_forbidden": true,
     "raw_premaqc_immutable": true,
-    "qualia_q_reserved_for_qualia": true,
+    "qualia_q_is_firsthand_report_presence": true,
+    "qualia_report_firsthand_only": true,
+    "qualia_magnitude_inference_forbidden": true,
     "engineering_data_quality_separate": true
   },
   "coordinate_policy": {

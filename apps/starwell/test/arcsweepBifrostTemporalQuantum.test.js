@@ -60,6 +60,10 @@ test('maps PREMAQ v2 into a normalised temporal quantum state', () => {
   assert.equal(state.state_id, 'bifrost-state-initial');
   assert.equal(state.premaq.id, packet.id);
   assert.equal(state.interpretation.physical_claim, false);
+  assert.deepEqual(state.basis, ['P', 'C', 'R', 'E', 'M', 'A']);
+  assert.equal(Object.hasOwn(state.probabilities, 'Q'), false);
+  assert.equal(state.qualia.authority, 'legacy-unresolved');
+  assert.equal(state.qualia.legacy_scalar, 0.84);
   assert.ok(Math.abs(sumProbabilities(state) - 1) < 1e-12);
 });
 
@@ -74,6 +78,8 @@ test('evolves with norm-preserving phase and pair rotations', () => {
   assert.equal(evolved.state_id, 'bifrost-state-evolved');
   assert.equal(evolved.temporal_coordinate, 0.5);
   assert.equal(evolved.receipts.at(-1).action, 'unitary-evolution');
+  assert.equal(evolved.receipts.at(-1).qualia_evolved, false);
+  assert.deepEqual(evolved.qualia, initial.qualia);
   assert.ok(Math.abs(sumProbabilities(evolved) - 1) < 1e-12);
   assert.notDeepEqual(evolved.probabilities, initial.probabilities);
 });
@@ -81,7 +87,7 @@ test('evolves with norm-preserving phase and pair rotations', () => {
 test('compression-release advances the outward spiral rather than resetting it', () => {
   const initial = premaqToTemporalState(premaq(), { idFactory: () => 'initial' });
   const first = collapseRelease(initial, {
-    focus: 'Q',
+    focus: 'R',
     idFactory: () => 'cycle-one',
   });
   const second = collapseRelease(first, {
@@ -94,6 +100,7 @@ test('compression-release advances the outward spiral rather than resetting it',
   assert.ok(first.spiral.radius > initial.spiral.radius);
   assert.ok(second.spiral.radius > first.spiral.radius);
   assert.ok(second.spiral.outward_distance > first.spiral.outward_distance);
+  assert.deepEqual(second.qualia, initial.qualia);
   assert.ok(Math.abs(sumProbabilities(second) - 1) < 1e-12);
 });
 
@@ -146,7 +153,7 @@ test('projects a target state through a versioned calibrated transfer matrix', (
 
   const projection = projectWorldState(bridge, {
     matrix: {
-      veil_luminosity: { A: 0.7, Q: 0.3 },
+      veil_luminosity: { A: 1 },
       temporal_pressure: { P: 0.4, E: 0.6 },
     },
     labels: {

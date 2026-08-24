@@ -26,18 +26,28 @@ test('Synaptic Heartfield keeps binaural differences and modulation clocks mathe
 test('Heartfield receipt never invents physiology or missing Qualia', () => {
   const receipt = createHeartfieldReceipt({ world: { id: 'waking-world', name: 'The Waking World' }, layerState: {}, startedAt: '2026-08-14T01:00:00.000Z' });
   assert.equal(receipt.profile_id, SYNAPTIC_HEARTFIELD_PROFILE.id);
-  assert.equal(receipt.observation.firsthand_qualia, null);
-  assert.equal(receipt.observation.firsthand_qualia_text, null);
+  assert.equal(receipt.observation.qualia.present, false);
+  assert.equal(receipt.observation.qualia.report, null);
   assert.equal(receipt.observation.physiology_measured, false);
   assert.equal(receipt.authority.physiological_response_inferred, false);
+  assert.equal(receipt.authority.qualia_inferred, false);
   assert.equal(receipt.authority.firsthand_qualia_is_physiological_measurement, false);
 });
 
-test('Heartfield receipt carries the writer\'s qualitative account without relabelling it', () => {
-  const receipt = createHeartfieldReceipt({ world: { id: 'terra', name: 'Terra Aeterna' }, qualia: .84, qualiaText: '  Warmth gathered behind the sternum; copper light widened.  ', layerState: {} });
-  assert.equal(receipt.observation.firsthand_qualia, .84);
-  assert.equal(receipt.observation.firsthand_qualia_text, 'Warmth gathered behind the sternum; copper light widened.');
+test('Heartfield receipt carries the writer\'s qualitative account without turning it into a magnitude', () => {
+  const receipt = createHeartfieldReceipt({ world: { id: 'terra', name: 'Terra Aeterna' }, qualia: .84, qualiaText: '  Warmth gathered behind the sternum; copper light widened.  ', layerState: {}, startedAt: '2026-08-14T01:00:00.000Z' });
+  assert.equal(receipt.observation.qualia.present, true);
+  assert.equal(receipt.observation.qualia.authority, 'firsthand-only');
+  assert.equal(receipt.observation.qualia.inferred, false);
+  assert.equal(receipt.observation.qualia.report.text, 'Warmth gathered behind the sternum; copper light widened.');
+  assert.equal(receipt.observation.qualia.legacy_scalar, undefined);
   assert.equal(receipt.observation.physiology_measured, false);
+});
+
+test('a legacy Heartfield scalar without a report is retained only as unresolved metadata', () => {
+  const receipt = createHeartfieldReceipt({ world: { id: 'terra', name: 'Terra Aeterna' }, qualia: .84, layerState: {} });
+  assert.equal(receipt.observation.qualia.present, false);
+  assert.equal(receipt.observation.qualia.legacy_scalar, .84);
 });
 
 test('Heartfield profile carries embodied entry controls and distinct evidence streams', () => {

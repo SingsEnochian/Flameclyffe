@@ -76,6 +76,12 @@ function latestReceipt(cycle, review, deepTime) {
   return candidates.sort((left, right) => String(left.created_at || '').localeCompare(String(right.created_at || ''))).at(-1) || null;
 }
 
+function qualiaFromCycle(cycle, evidence) {
+  const direct = cycle.premaqc_after?.qualia || cycle.premaqc_before?.qualia || null;
+  if (direct?.schema === 'premaqc.qualia-report/v1') return direct;
+  return evidence.map((item) => item?.qualia).find((item) => item?.schema === 'premaqc.qualia-report/v1') || null;
+}
+
 export function buildRuntimeObservationSnapshot({ cycle: cycleInput, review: reviewInput = null, deepTimeRecord: deepTimeInput = null, generatedAt = new Date().toISOString() } = {}) {
   const cycleRow = cycleInput;
   const cycle = cyclePayload(cycleInput);
@@ -92,6 +98,7 @@ export function buildRuntimeObservationSnapshot({ cycle: cycleInput, review: rev
   const source = evidenceClass(cycle);
   const state = reviewState(review);
   const evidence = Array.isArray(cycle.evidence) ? cycle.evidence : [];
+  const qualia = qualiaFromCycle(cycle, evidence);
   const receipt = latestReceipt(cycle, review, deepTime);
   const sourceHashes = [
     cycle.cycle_fingerprint,
@@ -128,8 +135,10 @@ export function buildRuntimeObservationSnapshot({ cycle: cycleInput, review: rev
       count: evidence.length,
       schemas: Object.freeze([...new Set(evidence.map((item) => item?.schema).filter(Boolean))]),
       sources: Object.freeze([...new Set(evidence.map((item) => item?.source).filter(Boolean))]),
-      qualia_present: evidence.some((item) => item?.qualia?.value !== undefined),
+      qualia_present: qualia?.present === true,
       qualia_authority: 'firsthand-only',
+      qualia_inferred: false,
+      qualia_report_receipt_id: qualia?.report_receipt_id || null,
     }),
     provenance: Object.freeze({
       cycle_fingerprint: cycle.cycle_fingerprint || null,
@@ -156,6 +165,7 @@ export function buildRuntimeObservationSnapshot({ cycle: cycleInput, review: rev
       shared_field_feedback_contract: true,
       human_review_required_for_deep_time: true,
       qualia_is_subjective: true,
+      qualia_inference_allowed: false,
       physical_claim: false,
       canon_commit: false,
     }),

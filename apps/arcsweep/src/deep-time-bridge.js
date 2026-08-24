@@ -1,4 +1,4 @@
-import { assertValidDeepTimeRecord, validateDeepTimeWindow, DEEP_TIME_PREMAQC_AXES } from '../../../starwell/deep-observer/deep-time-validator.js';
+import { assertValidDeepTimeRecord, validateDeepTimeWindow, DEEP_TIME_PREMAQC_AXES, DEEP_TIME_DYNAMIC_AXES } from '../../../starwell/deep-observer/deep-time-validator.js';
 import { sha256Hex } from '../../starwell/src/world-tone-fold-approval.js';
 import { feedbackCycleSource } from './feedback-cycle-queue.js';
 
@@ -10,10 +10,6 @@ function invariant(condition, message) {
 
 function julianDate(iso) {
   return Date.parse(iso) / 86400000 + 2440587.5;
-}
-
-function stateValues(premaqc) {
-  return Object.fromEntries(DEEP_TIME_PREMAQC_AXES.map((axis) => [axis, Number(premaqc.state[axis].value)]));
 }
 
 function mean(values) {
@@ -28,7 +24,7 @@ function intervalSeconds(previous, currentUtc) {
 
 function axisVelocity(previous, current, seconds) {
   if (!previous || !seconds || seconds <= 0) return null;
-  return Object.fromEntries(DEEP_TIME_PREMAQC_AXES.map((axis) => [
+  return Object.fromEntries(DEEP_TIME_DYNAMIC_AXES.map((axis) => [
     axis,
     (Number(current.state[axis].value) - Number(previous.premaqc.state[axis].value)) / seconds,
   ]));
@@ -63,9 +59,10 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
   const acceptedStateHash = await sha256Hex(cycle.premaqc_after);
   const evidenceHashes = await Promise.all((cycle.evidence || []).map((item) => sha256Hex(item)));
   const seconds = intervalSeconds(previousRecord, utc);
-  const confidenceValues = DEEP_TIME_PREMAQC_AXES.map((axis) => Number(cycle.premaqc_after.state[axis].confidence)).filter(Number.isFinite);
+  const confidenceValues = DEEP_TIME_DYNAMIC_AXES.map((axis) => Number(cycle.premaqc_after.state[axis].confidence)).filter(Number.isFinite);
   const dataQuality = mean(confidenceValues);
   const velocity = axisVelocity(previousRecord, cycle.premaqc_after, seconds);
+  const qualia = cycle.premaqc_after.qualia || null;
 
   const core = {
     schema_version: '0.1.0',
@@ -89,7 +86,8 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
       acceptance_mask_version: '1',
       review_queue_schema: 'arcsweep.feedback-cycle-queue/v1',
       feedback_review_receipt_id: acceptedQueueEntry.review_receipt_id,
-      source_receipt_hashes: [cycle.cycle_fingerprint, cycle.math_spine_packet?.packet_fingerprint, ...evidenceHashes].filter(Boolean),
+      qualia_report_receipt_id: qualia?.report_receipt_id || null,
+      source_receipt_hashes: [cycle.cycle_fingerprint, cycle.math_spine_packet?.packet_fingerprint, qualia?.report_receipt_id, ...evidenceHashes].filter(Boolean),
       accepted_state_hash: acceptedStateHash,
     },
     interval: {
@@ -102,11 +100,14 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
       smoothing_policy: 'none',
       missing_data_policy: 'no-derivative-without-valid-interval',
       axis_velocity: velocity,
+      excluded_axes: ['Q'],
       source_coordinates: [previousRecord.id, cycle.premaqc_after.receipt_id],
     } : null,
     quality: {
       data_quality: dataQuality == null ? null : Number(dataQuality.toFixed(6)),
-      uncertainty: Object.fromEntries(DEEP_TIME_PREMAQC_AXES.map((axis) => [axis, Number(cycle.premaqc_after.state[axis].uncertainty)])),
+      data_quality_axes: [...DEEP_TIME_DYNAMIC_AXES],
+      uncertainty: Object.fromEntries(DEEP_TIME_DYNAMIC_AXES.map((axis) => [axis, Number(cycle.premaqc_after.state[axis].uncertainty)])),
+      qualia_report_present: qualia?.present === true,
       missing: [],
       stale: [],
     },
@@ -117,7 +118,9 @@ export async function createDeepTimeRecordFromAcceptedFeedback({
       accepted_feedback_only: true,
       shared_review_queue_required: true,
       field_observation_supported: true,
-      qualia_is_premaqc_q: true,
+      qualia_presence_is_premaqc_q: true,
+      qualia_report_is_firsthand_only: true,
+      qualia_magnitude_inference_allowed: false,
       engineering_data_quality_is_q: false,
       physical_claim: false,
       canon_commit: false,

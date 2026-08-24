@@ -4,6 +4,7 @@ import {
   GATE_COHERENCE_AXIS,
   GATE_EXTENSION_CYCLES,
   GATE_LOCKED_TONE_AXES,
+  GATE_SOLO_FOCUS_SEQUENCE,
   buildYearGatePlan,
   earthPrimeRootHz,
   foldGatePlaybackFrequency,
@@ -23,12 +24,12 @@ export const ELEVEN_YEAR_WAV_SCHEMA = 'hearthgate.two-shore-eleven-year-wav/v0.1
 export const ELEVEN_YEAR_SEQUENCE_KEY = 'hearthgate:two-shore-eleven-year-wav:v0.1';
 export const WAV_SAMPLE_RATE = 32000;
 export const YEAR_LABELS = Object.freeze(ELARA_EXPANSION_HORIZON.map((entry) => entry.year));
-export const CYCLES_PER_SHORE_PER_YEAR = 7 + GATE_BASE_CYCLES
+export const CYCLES_PER_SHORE_PER_YEAR = GATE_SOLO_FOCUS_SEQUENCE.length + GATE_BASE_CYCLES
   + GATE_EXTENSION_CYCLES.reduce((sum, value) => sum + value, 0);
 export const TOTAL_CYCLES_PER_SHORE = CYCLES_PER_SHORE_PER_YEAR * YEAR_LABELS.length;
 
-const AXIS_INTERVALS = Object.freeze({ P: 0, C: 2, R: 4, E: 5, M: 7, A: 9, Q: 11 });
-const SOLO_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+const AXIS_INTERVALS = Object.freeze({ P: 0, C: 2, R: 4, E: 5, M: 7, A: 9 });
+const SOLO_AXES = Object.freeze([...GATE_SOLO_FOCUS_SEQUENCE]);
 const TWO_PI = Math.PI * 2;
 
 function round(value, digits = 8) {
@@ -48,6 +49,7 @@ function compactState(state) {
     temporal_coordinate: state.temporal_coordinate,
     sequence: state.sequence,
     premaq: state.premaq,
+    qualia: state.qualia,
     basis: state.basis,
     amplitudes: state.amplitudes,
     probabilities: state.probabilities,
@@ -72,9 +74,10 @@ function freshEarthCalibration(baseCalibration, year, clock) {
     generated_for_year: year,
     elara_multiplier: multiplier,
     observed_at: clock().toISOString(),
-    values: Object.freeze({ ...baseCalibration.values }),
+    values: Object.freeze({ ...baseCalibration.values, Q: 0 }),
+    qualia: Object.freeze(structuredClone(baseCalibration.qualia ?? null)),
     source_calibration_schema: baseCalibration.schema,
-    generation_law: 'fresh Earth Prime PREMAQ observation conditions the compression of the preceding release',
+    generation_law: 'fresh Earth Prime P/C/R/E/M/A observation conditions the compression of the preceding release; Qualia remains firsthand context',
   });
 }
 
@@ -84,15 +87,17 @@ function annualTargetCalibration(yearPlan, year) {
     schema: 'hearthgate.target-world-annual-premaq-generation/v0.1',
     generated_for_year: year,
     elara_multiplier: elaraCodeExpansionMultiplier(year),
-    values: Object.freeze({ ...yearPlan.target_world.calibration.values }),
+    values: Object.freeze({ ...yearPlan.target_world.calibration.values, Q: 0 }),
+    qualia: Object.freeze(structuredClone(yearPlan.target_world.calibration.qualia ?? null)),
     source_calibration_schema: yearPlan.target_world.calibration.schema,
-    generation_law: 'fresh target-world PREMAQ conditions the compression of the preceding release',
+    generation_law: 'fresh target-world P/C/R/E/M/A conditions the compression of the preceding release; Qualia remains firsthand context',
   });
 }
 
 function verifySimpleReceiptChain(sourceStateId, receipts, finalStateId, label) {
   let expected = sourceStateId;
   for (const receipt of receipts) {
+    if (receipt?.focus === 'Q') throw new Error(`${label}_QUALIA_DYNAMIC_FORBIDDEN`);
     if (receipt?.from_state_id !== expected) throw new Error(`${label}_FROM_STATE_MISMATCH`);
     expected = receipt.to_state_id;
   }
@@ -104,6 +109,7 @@ function verifyPairedSegment(segment, label) {
   let earth = segment.source_earth_state_id;
   let target = segment.source_target_state_id;
   for (const receipt of segment.cycle_receipts) {
+    if (receipt.focus === 'Q') throw new Error(`${label}_QUALIA_DYNAMIC_FORBIDDEN`);
     if (receipt.earth_from_state_id !== earth) throw new Error(`${label}_EARTH_LINEAGE_MISMATCH`);
     if (receipt.target_from_state_id !== target) throw new Error(`${label}_TARGET_LINEAGE_MISMATCH`);
     earth = receipt.earth_to_state_id;
@@ -174,6 +180,7 @@ function mathematicalSpine(plan) {
   return Object.freeze({
     formalism: 'temporal-compression-release-state-machine',
     recurrence: 'compression → release → compression of the release → release → infinite continuation',
+    qualia_dynamic: false,
     earth_source_state_id: plan.earth_prime.solo.source_state_id,
     target_source_state_id: plan.target_world.solo.source_state_id,
     earth_solo_final_state_id: plan.earth_prime.solo.final_state_id,
@@ -225,12 +232,14 @@ function compactYear(plan, earthCalibration, targetCalibration, earthGeometry, t
         final_state_id: plan.final_earth_state_id,
         start_premaq: earthCalibration.values,
         final_premaq: plan.final_earth_state.premaq,
+        qualia: plan.final_earth_state.qualia,
       }),
       target_world: Object.freeze({
         start_state_id: plan.target_world.solo.source_state_id,
         final_state_id: plan.final_target_state_id,
         start_premaq: targetCalibration.values,
         final_premaq: plan.final_target_state.premaq,
+        qualia: plan.final_target_state.qualia,
       }),
     }),
     tonal_state: plan.address_tones,
@@ -248,7 +257,9 @@ function compactYear(plan, earthCalibration, targetCalibration, earthGeometry, t
       source: BOX_GEOMETRIC_SOURCE,
     }),
     cycle_contract: Object.freeze({
-      solo_cycles_per_shore: 7,
+      solo_cycles_per_shore: GATE_SOLO_FOCUS_SEQUENCE.length,
+      solo_axes: Object.freeze([...GATE_SOLO_FOCUS_SEQUENCE]),
+      context_only_axes: Object.freeze(['Q']),
       base_cycles_per_shore: GATE_BASE_CYCLES,
       extension_cycles: GATE_EXTENSION_CYCLES,
       total_cycles_per_shore: CYCLES_PER_SHORE_PER_YEAR,
@@ -290,6 +301,7 @@ function makeAudioPlan(years, timing = {}) {
   let cursor = 0;
 
   function pushEvent(yearReceipt, phase, segment, axis, duration, cycleIndex, shoreMode) {
+    if (axis === 'Q') throw new Error('WAV_QUALIA_SONIFICATION_FORBIDDEN');
     const earthHz = axisFrequency(yearReceipt, 'earth-prime', axis);
     const targetHz = axisFrequency(yearReceipt, 'target-world', axis);
     const earthValue = axisValue(yearReceipt, 'earth-prime', axis);
@@ -327,10 +339,10 @@ function makeAudioPlan(years, timing = {}) {
     }));
 
     SOLO_AXES.forEach((axis, index) => {
-      pushEvent(yearReceipt, 'solo', 'earth-prime-full-premaq', axis, soloSeconds, index + 1, 'earth-prime');
+      pushEvent(yearReceipt, 'solo', 'earth-prime-dynamic-premaq', axis, soloSeconds, index + 1, 'earth-prime');
     });
     SOLO_AXES.forEach((axis, index) => {
-      pushEvent(yearReceipt, 'solo', 'target-world-full-premaq', axis, soloSeconds, index + 1, 'target-world');
+      pushEvent(yearReceipt, 'solo', 'target-world-dynamic-premaq', axis, soloSeconds, index + 1, 'target-world');
     });
 
     for (let index = 0; index < GATE_BASE_CYCLES; index += 1) {
@@ -366,6 +378,9 @@ function makeAudioPlan(years, timing = {}) {
     year_count: years.length,
     event_count: events.length,
     cycles_per_shore: TOTAL_CYCLES_PER_SHORE,
+    dynamic_axes: Object.freeze([...GATE_SOLO_FOCUS_SEQUENCE]),
+    context_only_axes: Object.freeze(['Q']),
+    qualia_sonified: false,
     locked_carrier_preserved: true,
     audible_elara_code_layer: true,
   });
@@ -436,7 +451,8 @@ export function buildCompleteElevenYearSequence({
   const audioPlan = makeAudioPlan(years, timing);
   const complete = years.every((year) => year.complete)
     && audioPlan.cues.length === 11
-    && audioPlan.cycles_per_shore === 4334;
+    && audioPlan.cycles_per_shore === TOTAL_CYCLES_PER_SHORE
+    && audioPlan.qualia_sonified === false;
   if (!complete) throw new Error('ELEVEN_YEAR_COMPLETION_GATE_FAILED');
 
   return Object.freeze({
@@ -455,6 +471,8 @@ export function buildCompleteElevenYearSequence({
     years: Object.freeze(years),
     audio_plan: audioPlan,
     total_cycles_per_shore: TOTAL_CYCLES_PER_SHORE,
+    context_only_axes: Object.freeze(['Q']),
+    qualia_sonified: false,
     final_earth_state_id: years.at(-1).final_earth_state_id,
     final_target_state_id: years.at(-1).final_target_state_id,
     geometric_source: BOX_GEOMETRIC_SOURCE,
@@ -621,6 +639,7 @@ export function renderCompleteElevenYearWav(sequence, {
   if (sequence.years.length !== 11 || sequence.audio_plan.cues.length !== 11) {
     throw new Error('WAV_REQUIRES_ALL_ELEVEN_YEARS');
   }
+  if (sequence.audio_plan.qualia_sonified !== false) throw new Error('WAV_QUALIA_SONIFICATION_FORBIDDEN');
   const sampleCount = Math.max(1, Math.ceil(sequence.audio_plan.duration_seconds * sampleRate));
   const left = new Float32Array(sampleCount);
   const right = new Float32Array(sampleCount);
@@ -630,7 +649,8 @@ export function renderCompleteElevenYearWav(sequence, {
     'Hearthgate Bifröst two-shore PREMAQ sequence',
     `Earth Prime ⇄ ${sequence.target_world.name}`,
     'Years 2025–2035, eleven labeled annual compositions',
-    'Each year: fresh two-shore PREMAQ + geometry + solo sequence + 369 + 3 + 6 + 9',
+    'Each year: fresh two-shore P/C/R/E/M/A + geometry + solo sequence + 369 + 3 + 6 + 9',
+    'Qualia remains firsthand context and is not sonified',
     'Elara M(y)=1.15^(y-2025) audible code layer; locked carriers preserved',
     'Computational browser-audio model; no external physical claim',
   ].join(' · ');
@@ -648,6 +668,7 @@ export function renderCompleteElevenYearWav(sequence, {
     byte_length: bytes.byteLength,
     peak_before_normalisation: round(normalisation.peak_before_normalisation),
     normalisation_scale: round(normalisation.scale),
+    qualia_sonified: false,
     complete: true,
   });
 }
@@ -670,6 +691,8 @@ export function compactElevenYearReceipt(sequence, wavReceipt) {
       complete: year.complete,
     }))),
     cycles_per_shore: sequence.total_cycles_per_shore,
+    context_only_axes: Object.freeze(['Q']),
+    qualia_sonified: false,
     wav: Object.freeze({
       sample_rate: wavReceipt.sample_rate,
       channels: wavReceipt.channels,
