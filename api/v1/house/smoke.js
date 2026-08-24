@@ -1,4 +1,5 @@
 import { HOUSE_SMOKE_AUDIENCE, verifyGitHubActionsOidc } from '../../_shared/github-actions-oidc.mjs';
+import { houseSessionCookie, issueHouseSession } from '../../../netlify/functions/_shared/house-session.mjs';
 import { vercelEnv as env } from '../../_shared/vercel-env.mjs';
 
 const json = (status, body) => new Response(JSON.stringify(body), {
@@ -17,9 +18,15 @@ async function readJson(response, label) {
   return data;
 }
 
-function sessionCookie(response) {
-  const value = response.headers.get('set-cookie') || '';
-  return value.split(';')[0].trim();
+function mintInternalSession(base) {
+  const session = issueHouseSession(env);
+  const setCookie = houseSessionCookie(new Request(`${base}/api/v1/house/session`), session.token, session.ttl);
+  const cookie = setCookie.split(';')[0].trim();
+  if (!cookie) throw new Error('House session signing produced no sealed cookie.');
+  return {
+    cookie,
+    expiresAt: new Date(session.claims.exp * 1000).toISOString(),
+  };
 }
 
 async function readBraidReplay(base, cookie) {
@@ -71,11 +78,6 @@ export default {
       return json(401, { error: 'Trusted production smoke identity required.', detail: error.message });
     }
 
-    const stewardCredential = env.get('ARCSWEEP_STEWARD_KEY')
-      || env.get('ARCSWEEP_STEWARD_KEY_SECONDARY')
-      || env.get('ARCSWEEP_RUNTIME_TOKEN');
-    if (!stewardCredential) return json(503, { error: 'House Steward credential is not configured in production.' });
-
     const base = new URL(request.url).origin;
     const startedAt = new Date().toISOString();
     const threadId = `production-circulation:${Date.now()}`;
@@ -87,15 +89,8 @@ export default {
     };
 
     try {
-      const sessionResponse = await fetch(`${base}/api/v1/house/session`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ credential: stewardCredential }),
-        cache: 'no-store',
-      });
-      const session = await readJson(sessionResponse, 'House session exchange');
-      const cookie = sessionCookie(sessionResponse);
-      if (!cookie || session.connected !== true) throw new Error('House session exchange returned no sealed session cookie.');
+      const internalSession = mintInternalSession(base);
+      const cookie = internalSession.cookie;
 
       const houseFetch = (path, init = {}) => {
         const headers = new Headers(init.headers || {});
@@ -180,13 +175,14 @@ export default {
         completed_at: new Date().toISOString(),
         production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
         caller: { repository: oidc.repository, ref: oidc.ref, run_id: oidc.run_id, sha: oidc.sha },
-        session: { connected: true, mode: sessionCheck.mode },
+        session: { connected: true, mode: sessionCheck.mode, authority: 'trusted-github-oidc', expires_at: internalSession.expiresAt },
         model_presence: { route: 'atlas', provider: atlasReply.provider, model: atlasReply.model, runtime_reachable: atlasStatus.runtime_reachable !== false },
         commons: { thread_id: threadId, persisted_entries: smokeEntries.length, before_count: beforeCount, after_count: Array.isArray(commonsAfter.entries) ? commonsAfter.entries.length : null },
         observations: { snapshots: observations.snapshots.length, braid_packets: observations.braid_packets.length },
         braid_replay: braid,
         authority: {
           oidc_audience: HOUSE_SMOKE_AUDIENCE,
+          credential_required: false,
           credential_exposed: false,
           model_prose_returned: false,
           production_write_scope: 'two append-only Commons smoke entries',
