@@ -4,7 +4,7 @@ const PINNED_ROOMS = [
   { id: 'portal', label: 'Home', glyph: '◉' },
   { id: 'worlds', label: 'Worlds', glyph: '✧' },
   { id: 'commons', label: 'Commons', glyph: '☍' },
-  { id: 'deep-observer', label: 'Field', glyph: '◈' },
+  { id: 'settings', label: 'Settings', glyph: '⚙' },
 ];
 
 let menuOpen = false;

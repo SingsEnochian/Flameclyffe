@@ -5,6 +5,8 @@ const publicOnly = process.argv.includes('--public') || String(process.env.ARCSW
 const suppliedCookie = String(process.env.ARCSWEEP_SMOKE_COOKIE || '').trim();
 const supabaseAccessToken = String(process.env.ARCSWEEP_SUPABASE_ACCESS_TOKEN || '').trim();
 const legacyCredential = String(process.env.ARCSWEEP_STEWARD_KEY || '').trim();
+const vercelTrustedOidcToken = String(process.env.VERCEL_TRUSTED_OIDC_TOKEN || '').trim();
+const vercelAutomationBypass = String(process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '').trim();
 
 const appPath = '/arcsweep/';
 const workletPath = '/arcsweep/assets/spessasynth_processor.min.js';
@@ -13,6 +15,11 @@ let cookie = suppliedCookie;
 async function request(path, options = {}) {
   const headers = new Headers(options.headers || {});
   if (cookie) headers.set('cookie', cookie);
+  if (vercelTrustedOidcToken) headers.set('x-vercel-trusted-oidc-idp-token', vercelTrustedOidcToken);
+  if (vercelAutomationBypass) {
+    headers.set('x-vercel-protection-bypass', vercelAutomationBypass);
+    headers.set('x-vercel-set-bypass-cookie', 'true');
+  }
   const response = await fetch(`${base}${path}`, { ...options, headers, redirect: 'manual' });
   const setCookie = response.headers.get('set-cookie');
   if (setCookie) cookie = setCookie.split(';')[0];
@@ -31,11 +38,11 @@ function assert(condition, message) {
 }
 
 const page = await request(appPath);
-assert(page.ok, `Arcsweep page failed: ${page.status}`);
+assert(page.ok, `Arcsweep page failed: ${page.status}${page.headers.get('location') ? ` → ${page.headers.get('location')}` : ''}`);
 assert(String(page.headers.get('content-type') || '').includes('text/html'), 'Arcsweep page did not return HTML.');
 
 const worklet = await request(workletPath);
-assert(worklet.ok, `SpessaSynth worklet failed: ${worklet.status}`);
+assert(worklet.ok, `SpessaSynth worklet failed: ${worklet.status}${worklet.headers.get('location') ? ` → ${worklet.headers.get('location')}` : ''}`);
 assert(/javascript|ecmascript/i.test(String(worklet.headers.get('content-type') || '')), 'SpessaSynth worklet did not return JavaScript.');
 
 const publicChecks = {
@@ -69,6 +76,10 @@ if (cookie) {
     ok: true,
     scope: 'public-production-instrument',
     authenticated: false,
+    deployment_protection: {
+      trusted_oidc: Boolean(vercelTrustedOidcToken),
+      automation_bypass: Boolean(vercelAutomationBypass),
+    },
     base,
     public_checks: publicChecks,
     next: 'Run without --public using ARCSWEEP_SMOKE_COOKIE, ARCSWEEP_SUPABASE_ACCESS_TOKEN, or legacy ARCSWEEP_STEWARD_KEY to exercise House Runtime and Commons.',
@@ -149,6 +160,10 @@ console.log(JSON.stringify({
   scope: 'authenticated-production-instrument',
   authenticated: true,
   auth_mode: authMode,
+  deployment_protection: {
+    trusted_oidc: Boolean(vercelTrustedOidcToken),
+    automation_bypass: Boolean(vercelAutomationBypass),
+  },
   base,
   public_checks: publicChecks,
   thread_id: threadId,

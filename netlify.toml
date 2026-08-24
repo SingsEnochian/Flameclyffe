@@ -1,5 +1,10 @@
 [build]
-  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run contracts:verify && npm run starwell:test && npm run arcsweep:test && npm run starwell:build && npm run arcsweep:build && npm run arcsweep:stage:netlify"
+  # Netlify is retired as a Git deployment target. Keep this file only as
+  # historical/local configuration while Vercel is canonical production and
+  # GitHub Pages remains the static fallback. Exit 0 tells Netlify to stop
+  # Git-triggered builds before the build command runs.
+  ignore = "exit 0"
+  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run contracts:verify && npm run starwell:test && npm run arcsweep:test && npm run starwell:build && npm run arcsweep:build && npm run project-zero:build && npm run arcsweep:stage:netlify && npm run project-zero:stage:netlify"
   publish = "dist/starwell"
 
 [build.environment]
@@ -7,6 +12,7 @@
   NPM_VERSION = "11"
   AWS_LAMBDA_JS_RUNTIME = "nodejs24.x"
   STARWELL_BASE = "/"
+  PROJECT_ZERO_BASE = "/project-zero-companion/"
 
 [functions]
   directory = "netlify/functions"
