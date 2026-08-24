@@ -33,15 +33,15 @@ test('wires the registered world Jacobian into the detector and carries the fold
   const foldedWorld = {
     ...world,
     transferFunctions: {
-      jacobianVersion: 'test-fold/1',
+      jacobianVersion: 'test-fold/2',
       jacobian: [
         [1, 0, 0, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0], // dynamic R axis creates the fold; Q remains context-only
         [0, 0, 0, 1, 0, 0, 0],
         [0, 0, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 0, 1, 0],
-        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1], // Q identity: never used to manufacture a fold
       ],
     },
   };
@@ -54,9 +54,9 @@ test('wires the registered world Jacobian into the detector and carries the fold
   assert.equal(first.math_wiring.jacobian_source, 'world.transferFunctions.jacobian');
   assert.equal(first.math_spine_packet.projection.fold.active, true);
   assert.equal(first.premaqc_after.math_spine.fold_active, true);
-  assert.equal(first.premaqc_after.math_spine.jacobian_version, 'test-fold/1');
+  assert.equal(first.premaqc_after.math_spine.jacobian_version, 'test-fold/2');
 
-  const releasedWorld = { ...foldedWorld, transferFunctions: { jacobianVersion: 'test-release/1', jacobian: resolveWorldMathWiring(world).jacobian } };
+  const releasedWorld = { ...foldedWorld, transferFunctions: { jacobianVersion: 'test-release/2', jacobian: resolveWorldMathWiring(world).jacobian } };
   const second = await runFeedbackCycle({
     world: releasedWorld, premaqc: first.premaqc_after, mode: 'writing', work: 'The release became the next state.', response: 'Continued.', voiceIds: ['lioreal'],
     observedAt: '2026-08-11T20:02:00.000Z',

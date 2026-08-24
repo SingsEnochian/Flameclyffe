@@ -28,8 +28,10 @@ test('web Arcsweep and Bifröst load the live two-shore gate through the shared 
 
   assert.match(engine, /GATE_BASE_CYCLES = 369/);
   assert.match(engine, /GATE_EXTENSION_CYCLES = Object\.freeze\(\[3, 6, 9\]\)/);
-  assert.match(engine, /GATE_LOCKED_TONE_AXES = Object\.freeze\(\['P', 'R', 'E', 'M', 'A', 'Q'\]\)/);
+  assert.match(engine, /GATE_LOCKED_TONE_AXES = Object\.freeze\(\['P', 'R', 'E', 'M', 'A'\]\)/);
   assert.match(engine, /GATE_COHERENCE_AXIS = 'C'/);
+  assert.match(engine, /context_only_axes: Object\.freeze\(\['Q'\]\)/);
+  assert.match(engine, /qualia_sonified: false/);
   assert.match(engine, /TWO_SHORE_GATE_LINEAGE_MISMATCH/);
   assert.match(engine, /audible_pitch_expanded_by_year: false/);
   assert.match(engine, /physical_claim: false/);
@@ -40,9 +42,11 @@ test('web Arcsweep and Bifröst load the live two-shore gate through the shared 
   assert.match(vite, /recursive: true/);
 });
 
-test('gate UI does not call a degraded calibration LIVE', async () => {
+test('gate UI does not call a degraded calibration LIVE or infer Qualia', async () => {
   const engine = await read('../src/two-shore-premaq-gate.js');
   assert.match(engine, /status: sources\.deep && sources\.hardware \? \(unknowns\.length \? 'PARTIAL' : 'LIVE'\) : 'DEGRADED'/);
   assert.match(engine, /live_ready: Boolean\(deepPacket && groundwireSnapshot\)/);
-  assert.match(engine, /Unsupported or ungranted fields remain UNKNOWN/);
+  assert.match(engine, /unknowns: Object\.freeze\(unknowns\)/);
+  assert.match(engine, /Qualia is firsthand-only/);
+  assert.match(engine, /legacy scalar Q\/charge is retained as unresolved metadata/);
 });

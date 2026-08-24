@@ -21,7 +21,7 @@ function idFactory() {
 
 function premaqPacket() {
   const state = {};
-  const values = { P: 0.72, C: 0.81, R: 0.67, E: 0.31, M: 0.76, A: 0.84, Q: 0.79 };
+  const values = { P: 0.72, C: 0.81, R: 0.67, E: 0.31, M: 0.76, A: 0.84 };
   for (const [axis, value] of Object.entries(values)) {
     state[axis] = {
       value,
@@ -31,17 +31,34 @@ function premaqPacket() {
       contributors: [],
     };
   }
+  state.Q = {
+    value: 1,
+    derivative: 0,
+    uncertainty: 0,
+    confidence: 1,
+    contributors: [{ source_id: 'qualia-test', source_kind: 'firsthand-qualia-report' }],
+    semantics: 'firsthand-report-presence-bit',
+  };
   return {
     schema_version: '2.0.0',
     id: 'premaq-test',
     observed_at: FIXED_TIME.toISOString(),
     registry_version: 'premaq-registry/2.0',
     state,
+    qualia: {
+      schema: 'premaqc.qualia-report/v1',
+      present: true,
+      authority: 'firsthand-only',
+      inferred: false,
+      report_receipt_id: 'qualia-test',
+      observed_at: FIXED_TIME.toISOString(),
+      report: { text: 'A firsthand test report.' },
+    },
     receipt_id: 'premaq-receipt-test',
     sequence: 1,
     prior_state_ref: null,
     model_version: 'test-model/1',
-    provenance_refs: [],
+    provenance_refs: ['firsthand-qualia:qualia-test'],
     generated_at: FIXED_TIME.toISOString(),
     degraded: false,
   };
@@ -55,10 +72,18 @@ function sumProbabilities(state) {
   return Object.values(state.probabilities).reduce((sum, value) => sum + value, 0);
 }
 
+test('Qualia travels as context and never enters the temporal probability basis', () => {
+  const state = initialState();
+  assert.deepEqual(state.basis, ['P', 'C', 'R', 'E', 'M', 'A']);
+  assert.equal(Object.prototype.hasOwnProperty.call(state.probabilities, 'Q'), false);
+  assert.equal(state.qualia.present, true);
+  assert.equal(state.interpretation.qualia_dynamic, false);
+});
+
 test('compression preserves support and release becomes the next state', () => {
   const prior = initialState();
   const released = compressRelease(prior, {
-    focus: 'Q',
+    focus: 'R',
     compressionStrength: 0.8,
     compressionGain: 1.2,
     releaseFraction: 0.35,
@@ -69,6 +94,7 @@ test('compression preserves support and release becomes the next state', () => {
   assert.equal(released.compression_release.source_state_id, prior.state_id);
   assert.equal(released.compression_release.released_state_id, released.state_id);
   assert.equal(released.compression_release.next_operation, 'compression-of-release');
+  assert.equal(released.compression_release.qualia_dynamic, false);
   assert.ok(Math.abs(sumProbabilities(released) - 1) < 1e-10);
   assert.ok(released.spiral.radius >= prior.spiral.radius);
 
@@ -77,6 +103,10 @@ test('compression preserves support and release becomes the next state', () => {
       assert.ok(released.compression_release.compressed_probabilities[axis] > 0);
     }
   }
+});
+
+test('compression refuses Qualia as a dynamical focus', () => {
+  assert.throws(() => compressRelease(initialState(), { focus: 'Q', clock, idFactory }), /Unknown compression focus/);
 });
 
 test('the next compression consumes the previous release', () => {
@@ -105,6 +135,7 @@ test('temporal compression driver is zero while the fold latch is inactive', () 
     enterThreshold: 0.82,
   });
   assert.equal(driver.compression_strength, 0);
+  assert.equal(driver.qualia_dynamic, false);
 });
 
 test('compression and release tones obey the reciprocal invariant', () => {
@@ -114,22 +145,22 @@ test('compression and release tones obey the reciprocal invariant', () => {
   assert.equal(pair.release_hz < pair.root_hz, true);
 });
 
-test('world transition combines temporal evolution, Jacobian fold and tone sequence', () => {
+test('world transition combines temporal evolution, dynamic Jacobian fold and tone sequence', () => {
   const nearlySingular = [
     [1, 0, 0, 0, 0, 0, 0],
     [0, 1, 0, 0, 0, 0, 0],
     [0, 0, 1, 0, 0, 0, 0],
     [0, 0, 0, 1, 0, 0, 0],
     [0, 0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 0, 0, 1e-10],
+    [0, 0, 0, 0, 0, 1e-10, 0],
+    [0, 0, 0, 0, 0, 0, 1],
   ];
   const transition = advanceWorldCompressionRelease({
     state: initialState(),
     jacobian: nearlySingular,
     worldProfile: {
       worldId: 'terra-aeterna',
-      focusAxis: 'Q',
+      focusAxis: 'R',
       enterThreshold: 0.82,
       releaseThreshold: 0.68,
       compressionGain: 1,
@@ -160,4 +191,5 @@ test('world transition combines temporal evolution, Jacobian fold and tone seque
   assert.equal(transition.tone_sequence.sequence[2].role, 'release');
   assert.equal(transition.tone_sequence.sequence[3].role, 'next-compression');
   assert.equal(transition.tone_sequence.render_authority, 'pending-human-calibration');
+  assert.equal(transition.authority.qualia_dynamic, false);
 });

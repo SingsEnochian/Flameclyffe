@@ -1,5 +1,6 @@
 import {
   PREMAQ_AXES,
+  PREMAQ_DYNAMIC_AXES,
   premaqToTemporalState,
   validateTemporalState,
 } from '../src/arcsweep-temporal-quantum/engine.js';
@@ -7,7 +8,7 @@ import { compressRelease } from '../src/arcsweep-temporal-quantum/compression-re
 import { readActiveDualAspectPacket } from '../src/hearthweave-kernel/activation.js';
 
 export const PREMAQ_SONG_CYCLES_PER_AXIS = 35;
-export const PREMAQ_SONG_AXIS_CYCLES = PREMAQ_AXES.length * PREMAQ_SONG_CYCLES_PER_AXIS;
+export const PREMAQ_SONG_AXIS_CYCLES = PREMAQ_DYNAMIC_AXES.length * PREMAQ_SONG_CYCLES_PER_AXIS;
 export const PREMAQ_SONG_NOTE_COUNT = PREMAQ_SONG_AXIS_CYCLES * 2;
 
 const SESSION_KEY = 'bifrost:current-interface-session:v0.4';
@@ -25,7 +26,6 @@ const AXIS_INTERVALS = Object.freeze({
   E: 5,
   M: 7,
   A: 9,
-  Q: 11,
 });
 
 const AXIS_NAMES = Object.freeze({
@@ -35,7 +35,6 @@ const AXIS_NAMES = Object.freeze({
   E: 'Entropy',
   M: 'Memory',
   A: 'Agency',
-  Q: 'Qualia',
 });
 
 const AXIS_WAVES = Object.freeze({
@@ -45,7 +44,6 @@ const AXIS_WAVES = Object.freeze({
   E: 'triangle',
   M: 'sine',
   A: 'triangle',
-  Q: 'sine',
 });
 
 const REFERENCE_VALUES = Object.freeze({
@@ -55,7 +53,7 @@ const REFERENCE_VALUES = Object.freeze({
   E: 0.31,
   M: 0.76,
   A: 0.84,
-  Q: 0.79,
+  Q: 0,
 });
 
 let songContext = null;
@@ -73,6 +71,10 @@ function finiteNumber(value, fallback) {
   return Number.isFinite(number) ? number : fallback;
 }
 
+function dynamicFocus(value) {
+  return PREMAQ_DYNAMIC_AXES.includes(value) ? value : 'R';
+}
+
 function makeReferenceState() {
   const now = new Date().toISOString();
   const packet = {
@@ -87,10 +89,20 @@ function makeReferenceState() {
       confidence: 0.86,
       contributors: [],
     }])),
+    qualia: {
+      schema: 'premaqc.qualia-report/v1',
+      present: false,
+      authority: 'firsthand-only',
+      inferred: false,
+      report_receipt_id: null,
+      observed_at: null,
+      report: null,
+      legacy_scalar: null,
+    },
     receipt_id: 'bifrost-premaq-song-reference-receipt',
     sequence: 0,
     prior_state_ref: null,
-    model_version: 'bifrost-premaq-song/0.4',
+    model_version: 'bifrost-premaq-song/0.5',
     provenance_refs: [],
     generated_at: now,
     degraded: true,
@@ -99,7 +111,8 @@ function makeReferenceState() {
   state.interpretation = {
     formalism: 'temporal-compression-release-state-machine',
     physical_claim: false,
-    note: 'Local reference source for the PREMAQ song. It is not external evidence.',
+    qualia_sonified: false,
+    note: 'Local reference source for the PREMAQ song. P/C/R/E/M/A may be sonified; Qualia remains separate firsthand context.',
   };
   return state;
 }
@@ -128,7 +141,7 @@ function resolveRootHz() {
 
 function axisFrequency(rootHz, axis, probability, phase) {
   const interval = AXIS_INTERVALS[axis];
-  const centred = probability - (1 / PREMAQ_AXES.length);
+  const centred = probability - (1 / PREMAQ_DYNAMIC_AXES.length);
   const stateBend = clamp(centred * 24, -4.5, 4.5);
   const phaseBend = phase === 'compression' ? 0.75 : -0.35;
   return rootHz * (2 ** ((interval + stateBend + phaseBend) / 12));
@@ -155,22 +168,23 @@ export function buildPremaqSongPlan({
   state,
   rootHz = DEFAULT_ROOT_HZ,
   bpm = DEFAULT_BPM,
-  focus = 'Q',
+  focus = 'R',
   compressionStrength = 0.65,
   compressionGain = 1.2,
   releaseFraction = 0.35,
 } = {}) {
   let current = validateTemporalState(state);
   const cycles = [];
-  const voiceCounts = Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, 0]));
+  const voiceCounts = Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [axis, 0]));
   const cycleSeconds = 60 / clamp(finiteNumber(bpm, DEFAULT_BPM), 48, 132);
   const calibratedRoot = finiteNumber(rootHz, DEFAULT_ROOT_HZ);
+  const effectiveFocus = dynamicFocus(focus);
   if (calibratedRoot <= 0) throw new Error('PREMAQ_SONG_ROOT_MUST_BE_POSITIVE');
 
   for (let cycleIndex = 0; cycleIndex < PREMAQ_SONG_CYCLES_PER_AXIS; cycleIndex += 1) {
     const prior = current;
     const released = compressRelease(prior, {
-      focus,
+      focus: effectiveFocus,
       compressionStrength: clamp(finiteNumber(compressionStrength, 0.65), 0, 1),
       compressionGain: clamp(finiteNumber(compressionGain, 1.2), 0, 2),
       releaseFraction: clamp(finiteNumber(releaseFraction, 0.35), 0, 1),
@@ -184,7 +198,7 @@ export function buildPremaqSongPlan({
     const receipt = released.receipts.at(-1);
     requireLineage(prior, released, receipt);
 
-    const voices = PREMAQ_AXES.map((axis, axisIndex) => {
+    const voices = PREMAQ_DYNAMIC_AXES.map((axis, axisIndex) => {
       const compressedProbability = finiteNumber(receipt.compression_probabilities?.[axis], EPSILON);
       const releasedProbability = finiteNumber(receipt.release_probabilities?.[axis], EPSILON);
       const compressionHz = axisFrequency(calibratedRoot, axis, compressedProbability, 'compression');
@@ -195,6 +209,7 @@ export function buildPremaqSongPlan({
         axis_name: AXIS_NAMES[axis],
         voice_index: axisIndex,
         cycle: cycleIndex + 1,
+        dynamic: true,
         compressed_probability: compressedProbability,
         released_probability: releasedProbability,
         compression_hz: compressionHz,
@@ -217,19 +232,24 @@ export function buildPremaqSongPlan({
     current = released;
   }
 
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     if (voiceCounts[axis] !== PREMAQ_SONG_CYCLES_PER_AXIS) {
       throw new Error(`PREMAQ_SONG_AXIS_COUNT_MISMATCH_${axis}`);
     }
   }
 
   return Object.freeze({
-    schema: 'bifrost.premaq-full-song-plan/v0.4',
+    schema: 'bifrost.premaq-full-song-plan/v0.5',
     law: 'compression-release-compression-of-release-infinite-recursion',
     cycles_per_axis: PREMAQ_SONG_CYCLES_PER_AXIS,
     axis_cycle_count: PREMAQ_SONG_AXIS_CYCLES,
     scheduled_note_count: PREMAQ_SONG_NOTE_COUNT,
-    axes: Object.freeze([...PREMAQ_AXES]),
+    axes: Object.freeze([...PREMAQ_DYNAMIC_AXES]),
+    context_only_axes: Object.freeze(['Q']),
+    qualia_sonified: false,
+    qualia: Object.freeze(structuredClone(state.qualia ?? null)),
+    requested_focus: focus,
+    effective_focus: effectiveFocus,
     voice_cycle_counts: Object.freeze(voiceCounts),
     root_hz: calibratedRoot,
     bpm: 60 / cycleSeconds,
@@ -267,7 +287,7 @@ function renderVoiceGrid(plan = null) {
   if (!grid) return;
   const firstCycle = plan?.cycles?.[0] ?? null;
   const fragment = document.createDocumentFragment();
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     const voice = firstCycle?.voices?.find((entry) => entry.axis === axis) ?? null;
     const card = document.createElement('div');
     card.className = 'premaq-song-voice';
@@ -320,7 +340,7 @@ function createVoice(context, destination, axis, index, startAt, endAt) {
   gain.gain.setValueAtTime(0.0001, startAt - 0.02);
   if (typeof context.createStereoPanner === 'function') {
     const panner = context.createStereoPanner();
-    panner.pan.value = -0.9 + (index * 1.8 / (PREMAQ_AXES.length - 1));
+    panner.pan.value = -0.9 + (index * 1.8 / (PREMAQ_DYNAMIC_AXES.length - 1));
     oscillator.connect(gain).connect(panner).connect(destination);
     songNodes.push(panner);
   } else {
@@ -335,7 +355,7 @@ function createVoice(context, destination, axis, index, startAt, endAt) {
 async function buildReceipt(plan) {
   const canonical = JSON.stringify(plan);
   return Object.freeze({
-    schema: 'bifrost.premaq-full-song-receipt/v0.4',
+    schema: 'bifrost.premaq-full-song-receipt/v0.5',
     receipt_id: `premaq-song-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`,
     created_at: new Date().toISOString(),
     plan_sha256: await sha256Hex(canonical),
@@ -345,6 +365,8 @@ async function buildReceipt(plan) {
     axis_cycle_count: plan.axis_cycle_count,
     scheduled_note_count: plan.scheduled_note_count,
     axes: plan.axes,
+    context_only_axes: plan.context_only_axes,
+    qualia_sonified: false,
     bpm: plan.bpm,
     duration_seconds: plan.duration_seconds,
     next_operation: plan.next_operation,
@@ -356,7 +378,7 @@ async function buildReceipt(plan) {
 }
 
 async function playSong() {
-  stopSong('PREPARING · building all seven PREMAQ voices.');
+  stopSong('PREPARING · building six dynamic PREMAQ voices; Qualia remains context-only.');
   const Context = window.AudioContext || window.webkitAudioContext;
   if (!Context) {
     setStatus('BLOCKED · Web Audio is unavailable in this browser.', 'blocked');
@@ -370,7 +392,7 @@ async function playSong() {
     state: source,
     rootHz,
     bpm,
-    focus: document.getElementById('focus-axis')?.value ?? 'Q',
+    focus: dynamicFocus(document.getElementById('focus-axis')?.value),
     compressionStrength: finiteNumber(document.getElementById('compression-strength')?.value, 0.65),
     compressionGain: finiteNumber(document.getElementById('compression-gain')?.value, 1.2),
     releaseFraction: finiteNumber(document.getElementById('release-fraction')?.value, 0.35),
@@ -394,7 +416,7 @@ async function playSong() {
 
     const startAt = songContext.currentTime + 0.08;
     const endAt = startAt + plan.duration_seconds;
-    const voices = Object.fromEntries(PREMAQ_AXES.map((axis, index) => [
+    const voices = Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis, index) => [
       axis,
       createVoice(songContext, master, axis, index, startAt, endAt),
     ]));
@@ -406,7 +428,7 @@ async function playSong() {
         const compressionStart = cycleStart + (voice.voice_index * cycle.duration_seconds * 0.018);
         const compressionDuration = cycle.duration_seconds * 0.39;
         const releaseStart = cycleStart + (cycle.duration_seconds * 0.48)
-          + ((PREMAQ_AXES.length - 1 - voice.voice_index) * cycle.duration_seconds * 0.012);
+          + ((PREMAQ_DYNAMIC_AXES.length - 1 - voice.voice_index) * cycle.duration_seconds * 0.012);
         const releaseDuration = cycle.duration_seconds * 0.45;
         const compressionPeak = 0.035 + clamp(voice.compressed_probability, 0, 1) * 0.075;
         const releasePeak = 0.04 + clamp(voice.released_probability, 0, 1) * 0.08;
@@ -427,7 +449,7 @@ async function playSong() {
       progressTimer = null;
       setProgress(1);
       setStatus(
-        `COMPLETE · 35 cycles per voice · ${plan.axis_cycle_count} axis-cycles · ${plan.scheduled_note_count} notes.`,
+        `COMPLETE · 35 cycles per dynamic voice · ${plan.axis_cycle_count} axis-cycles · ${plan.scheduled_note_count} notes · Q unsonified.`,
         'complete',
       );
       const context = songContext;
@@ -437,7 +459,7 @@ async function playSong() {
     }, Math.ceil((plan.duration_seconds + 0.2) * 1000));
 
     setStatus(
-      `PLAYING · P C R E M A Q · 35 cycles each · ${plan.duration_seconds.toFixed(1)} seconds · gain ceiling ${MASTER_GAIN_CEILING.toFixed(3)}.`,
+      `PLAYING · P C R E M A · 35 cycles each · Q context-only · ${plan.duration_seconds.toFixed(1)} seconds · gain ceiling ${MASTER_GAIN_CEILING.toFixed(3)}.`,
       'playing',
     );
   } catch (error) {
@@ -459,7 +481,7 @@ function exportSongReceipt() {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
-  setStatus(`EXPORTED · ${currentReceipt.axis_cycle_count} axis-cycles and ${currentReceipt.scheduled_note_count} scheduled notes.`, 'complete');
+  setStatus(`EXPORTED · ${currentReceipt.axis_cycle_count} dynamic axis-cycles and ${currentReceipt.scheduled_note_count} scheduled notes; Q remains context-only.`, 'complete');
 }
 
 function initialiseSongInterface() {

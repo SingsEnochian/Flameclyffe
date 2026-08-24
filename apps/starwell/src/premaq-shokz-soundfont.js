@@ -1,5 +1,6 @@
 import {
   PREMAQ_AXES,
+  PREMAQ_DYNAMIC_AXES,
   premaqToTemporalState,
   validateTemporalState,
 } from './arcsweep-temporal-quantum/engine.js';
@@ -10,7 +11,7 @@ import {
 } from './hearthweave-kernel/activation.js';
 
 export const PREMAQ_SHOKZ_CYCLES_PER_AXIS = 35;
-export const PREMAQ_SHOKZ_AXIS_CYCLES = PREMAQ_AXES.length * PREMAQ_SHOKZ_CYCLES_PER_AXIS;
+export const PREMAQ_SHOKZ_AXIS_CYCLES = PREMAQ_DYNAMIC_AXES.length * PREMAQ_SHOKZ_CYCLES_PER_AXIS;
 export const PREMAQ_SHOKZ_TONE_EVENTS = PREMAQ_SHOKZ_AXIS_CYCLES * 2;
 export const PREMAQ_SHOKZ_MIN_HZ = 90;
 export const PREMAQ_SHOKZ_MAX_HZ = 360;
@@ -41,7 +42,6 @@ const AXIS_NAMES = Object.freeze({
   E: 'Entropy',
   M: 'Memory',
   A: 'Agency',
-  Q: 'Qualia',
 });
 
 const AXIS_INTERVALS = Object.freeze({
@@ -51,7 +51,6 @@ const AXIS_INTERVALS = Object.freeze({
   E: 5,
   M: 7,
   A: 9,
-  Q: 11,
 });
 
 const AXIS_WAVES = Object.freeze({
@@ -61,7 +60,6 @@ const AXIS_WAVES = Object.freeze({
   E: 'triangle',
   M: 'sine',
   A: 'triangle',
-  Q: 'sine',
 });
 
 const REFERENCE_VALUES = Object.freeze({
@@ -71,7 +69,7 @@ const REFERENCE_VALUES = Object.freeze({
   E: 0.31,
   M: 0.76,
   A: 0.84,
-  Q: 0.79,
+  Q: 0,
 });
 
 let installed = false;
@@ -85,7 +83,7 @@ let masterGain = null;
 let activeNodes = new Set();
 let fullSongTimer = null;
 let fullSongProgressTimer = null;
-let interactionCursorByAxis = Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, 0]));
+let interactionCursorByAxis = Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [axis, 0]));
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -98,6 +96,10 @@ function finiteNumber(value, fallback) {
 
 function clone(value) {
   return value == null ? value : structuredClone(value);
+}
+
+function dynamicFocus(value) {
+  return PREMAQ_DYNAMIC_AXES.includes(value) ? value : 'R';
 }
 
 function makeReferenceState() {
@@ -114,10 +116,20 @@ function makeReferenceState() {
       confidence: 0.86,
       contributors: [],
     }])),
+    qualia: {
+      schema: 'premaqc.qualia-report/v1',
+      present: false,
+      authority: 'firsthand-only',
+      inferred: false,
+      report_receipt_id: null,
+      observed_at: null,
+      report: null,
+      legacy_scalar: null,
+    },
     receipt_id: 'premaq-shokz-reference-receipt',
     sequence: 0,
     prior_state_ref: null,
-    model_version: 'premaq-shokz-soundfont/0.4',
+    model_version: 'premaq-shokz-soundfont/0.5',
     provenance_refs: [],
     generated_at: now,
     degraded: true,
@@ -126,7 +138,8 @@ function makeReferenceState() {
   state.interpretation = {
     formalism: 'temporal-compression-release-state-machine',
     physical_claim: false,
-    note: 'Explicit local reference source for the browser sound font.',
+    qualia_sonified: false,
+    note: 'Explicit local reference source for the browser sound font. Qualia remains separate firsthand context.',
   };
   return state;
 }
@@ -164,7 +177,7 @@ function foldToShokzBand(frequency) {
 
 function axisFrequency(rootHz, axis, probability, phase, cycleIndex) {
   const interval = AXIS_INTERVALS[axis];
-  const centred = probability - (1 / PREMAQ_AXES.length);
+  const centred = probability - (1 / PREMAQ_DYNAMIC_AXES.length);
   const stateBend = clamp(centred * 24, -4.5, 4.5);
   const phaseBend = phase === 'compression' ? 0.75 : -0.35;
   const cycleBend = Math.sin((cycleIndex + 1) * Math.PI / 7) * 0.55;
@@ -184,22 +197,23 @@ export function buildPremaqShokzSoundfontPlan({
   state,
   rootHz = ROOT_HZ,
   bpm = DEFAULT_BPM,
-  focus = 'Q',
+  focus = 'R',
   compressionStrength = 0.65,
   compressionGain = 1.2,
   releaseFraction = 0.35,
 } = {}) {
   let current = validateTemporalState(state);
   const calibratedRoot = finiteNumber(rootHz, ROOT_HZ);
+  const effectiveFocus = dynamicFocus(focus);
   if (calibratedRoot <= 0) throw new Error('PREMAQ_SHOKZ_ROOT_MUST_BE_POSITIVE');
   const cycleSeconds = 60 / clamp(finiteNumber(bpm, DEFAULT_BPM), 60, 120);
   const cycles = [];
-  const voiceCycleCounts = Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, 0]));
+  const voiceCycleCounts = Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [axis, 0]));
 
   for (let cycleIndex = 0; cycleIndex < PREMAQ_SHOKZ_CYCLES_PER_AXIS; cycleIndex += 1) {
     const prior = current;
     const released = compressRelease(prior, {
-      focus,
+      focus: effectiveFocus,
       compressionStrength: clamp(finiteNumber(compressionStrength, 0.65), 0, 1),
       compressionGain: clamp(finiteNumber(compressionGain, 1.2), 0, 2),
       releaseFraction: clamp(finiteNumber(releaseFraction, 0.35), 0, 1),
@@ -213,7 +227,7 @@ export function buildPremaqShokzSoundfontPlan({
     const receipt = released.receipts.at(-1);
     requireLineage(prior, released, receipt);
 
-    const voices = PREMAQ_AXES.map((axis, axisIndex) => {
+    const voices = PREMAQ_DYNAMIC_AXES.map((axis, axisIndex) => {
       const compressedProbability = finiteNumber(receipt.compression_probabilities?.[axis], 0);
       const releasedProbability = finiteNumber(receipt.release_probabilities?.[axis], 0);
       const compressionSourceHz = axisFrequency(
@@ -241,6 +255,7 @@ export function buildPremaqShokzSoundfontPlan({
         axis_name: AXIS_NAMES[axis],
         axis_index: axisIndex,
         cycle: cycleIndex + 1,
+        dynamic: true,
         compressed_probability: compressedProbability,
         released_probability: releasedProbability,
         compression_source_hz: compressionSourceHz,
@@ -248,7 +263,7 @@ export function buildPremaqShokzSoundfontPlan({
         compression_playback_hz: compressionPlaybackHz,
         release_playback_hz: releasePlaybackHz,
         waveform: AXIS_WAVES[axis],
-        stereo_pan: -0.75 + (axisIndex / (PREMAQ_AXES.length - 1)) * 1.5,
+        stereo_pan: -0.75 + (axisIndex / (PREMAQ_DYNAMIC_AXES.length - 1)) * 1.5,
       });
     });
 
@@ -265,21 +280,26 @@ export function buildPremaqShokzSoundfontPlan({
     current = released;
   }
 
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     if (voiceCycleCounts[axis] !== PREMAQ_SHOKZ_CYCLES_PER_AXIS) {
       throw new Error(`PREMAQ_SHOKZ_AXIS_COUNT_MISMATCH_${axis}`);
     }
   }
 
   return Object.freeze({
-    schema: 'bifrost.premaq-shokz-soundfont-plan/v0.4',
+    schema: 'bifrost.premaq-shokz-soundfont-plan/v0.5',
     formalism: 'temporal-compression-release-state-machine',
     physical_claim: false,
     device_profile: 'shokz-bone-conduction-audio-haptic-proxy',
     cycles_per_axis: PREMAQ_SHOKZ_CYCLES_PER_AXIS,
     axis_cycle_count: PREMAQ_SHOKZ_AXIS_CYCLES,
     scheduled_tone_events: PREMAQ_SHOKZ_TONE_EVENTS,
-    axes: Object.freeze([...PREMAQ_AXES]),
+    axes: Object.freeze([...PREMAQ_DYNAMIC_AXES]),
+    context_only_axes: Object.freeze(['Q']),
+    qualia_sonified: false,
+    qualia: Object.freeze(clone(state.qualia ?? null)),
+    requested_focus: focus,
+    effective_focus: effectiveFocus,
     voice_cycle_counts: Object.freeze(voiceCycleCounts),
     playback_band_hz: Object.freeze([PREMAQ_SHOKZ_MIN_HZ, PREMAQ_SHOKZ_MAX_HZ]),
     root_hz: calibratedRoot,
@@ -304,8 +324,8 @@ function hashToken(token) {
 
 export function axisForInteractionToken(token) {
   const normalised = String(token ?? '').trim().toUpperCase();
-  if (PREMAQ_AXES.includes(normalised)) return normalised;
-  return PREMAQ_AXES[hashToken(normalised || 'UNKNOWN') % PREMAQ_AXES.length];
+  if (PREMAQ_DYNAMIC_AXES.includes(normalised)) return normalised;
+  return PREMAQ_DYNAMIC_AXES[hashToken(normalised || 'UNKNOWN') % PREMAQ_DYNAMIC_AXES.length];
 }
 
 function rebuildPlan() {
@@ -313,9 +333,9 @@ function rebuildPlan() {
   sourceState = clone(resolved.state);
   sourceMode = resolved.mode;
   activePlan = buildPremaqShokzSoundfontPlan({ state: sourceState });
-  interactionCursorByAxis = Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, 0]));
+  interactionCursorByAxis = Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [axis, 0]));
   renderStatus(
-    `READY · ${sourceMode} · 35 chained cycles per PREMAQ voice · 90–360 Hz Shokz proxy.`,
+    `READY · ${sourceMode} · 35 chained cycles per dynamic PREMAQ voice · Q context-only · 90–360 Hz Shokz proxy.`,
     'ready',
   );
   renderSource();
@@ -340,7 +360,7 @@ function renderSource() {
   const source = dock()?.querySelector('#premaq-shokz-source');
   if (source) source.textContent = sourceMode;
   const cycle = dock()?.querySelector('#premaq-shokz-cycle');
-  if (cycle) cycle.textContent = `${PREMAQ_SHOKZ_CYCLES_PER_AXIS} × ${PREMAQ_AXES.length}`;
+  if (cycle) cycle.textContent = `${PREMAQ_SHOKZ_CYCLES_PER_AXIS} × ${PREMAQ_DYNAMIC_AXES.length}`;
 }
 
 function makeDock() {
@@ -390,7 +410,7 @@ function makeDock() {
       <div class="premaq-shokz-grid">
         <div class="premaq-shokz-meta">
           <span>Source<br><strong id="premaq-shokz-source">loading</strong></span>
-          <span>Cycles<br><strong id="premaq-shokz-cycle">35 × 7</strong></span>
+          <span>Cycles<br><strong id="premaq-shokz-cycle">35 × 6</strong></span>
         </div>
         <label>
           <input id="premaq-shokz-confirm" type="checkbox" />
@@ -404,7 +424,7 @@ function makeDock() {
         </div>
         <progress id="premaq-shokz-progress" max="1" value="0" aria-label="PREMAQ Shokz song progress"></progress>
         <p id="premaq-shokz-status" data-kind="resting" role="status">Loading the active PREMAQ source…</p>
-        <small>No autoplay · master gain ceiling 0.018 · 90–360 Hz proxy · no internal iPad haptic claim.</small>
+        <small>No autoplay · master gain ceiling 0.018 · 90–360 Hz proxy · Q is never inferred or sonified · no internal iPad haptic claim.</small>
       </div>
     </details>
   `;
@@ -435,7 +455,7 @@ function disposeNode(node) {
 
 function scheduleInteractionPair(voice) {
   const context = audioContext;
-  if (!context || !masterGain) return;
+  if (!context || !masterGain || !voice) return;
   const oscillator = context.createOscillator();
   const gain = context.createGain();
   oscillator.type = voice.waveform;
@@ -489,7 +509,7 @@ async function playInteraction(token) {
 function scheduleFullSong(plan) {
   const context = audioContext;
   const startAt = context.currentTime + 0.08;
-  const voiceNodes = PREMAQ_AXES.map((axis) => {
+  const voiceNodes = PREMAQ_DYNAMIC_AXES.map((axis) => {
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     const panner = typeof context.createStereoPanner === 'function' ? context.createStereoPanner() : null;
@@ -548,7 +568,7 @@ async function runFullSong() {
     const { startAt, stopAt } = scheduleFullSong(activePlan);
     const progress = dock()?.querySelector('#premaq-shokz-progress');
     renderStatus(
-      `PLAYING · ${PREMAQ_SHOKZ_TONE_EVENTS} tone events across 35 chained cycles · Feather Stop is immediate.`,
+      `PLAYING · ${PREMAQ_SHOKZ_TONE_EVENTS} tone events across 35 chained cycles · Q context-only · Feather Stop is immediate.`,
       'playing',
     );
     fullSongProgressTimer = window.setInterval(() => {
@@ -559,7 +579,7 @@ async function runFullSong() {
       fullSongPlaying = false;
       if (progress) progress.value = 1;
       stopTimers();
-      renderStatus('COMPLETE · 35 chained cycles played for P C R E M A Q. Physical sensation remains NOT TESTED.', 'ready');
+      renderStatus('COMPLETE · 35 chained cycles played for P C R E M A. Q remained unsonified. Physical sensation remains NOT TESTED.', 'ready');
     }, Math.max(0, (stopAt - audioContext.currentTime) * 1000 + 80));
   } catch (error) {
     fullSongPlaying = false;
@@ -643,7 +663,7 @@ function bindDockControls(container) {
       enableButton.textContent = enabled ? 'Disable keyboard + menus' : 'Enable keyboard + menus';
       renderStatus(
         enabled
-          ? 'ACTIVE · physical keyboard, virtual keys, links, buttons, selects, and semantic menu items now use the PREMAQ sound font.'
+          ? 'ACTIVE · physical keyboard, virtual keys, links, buttons, selects, and semantic menu items now use the dynamic PREMAQ sound font.'
           : 'RESTING · keyboard and menu cues are disabled.',
         'ready',
       );

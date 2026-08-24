@@ -57,7 +57,6 @@ test('axis vocabulary: accepts only Presence/Coherence/Resonance/Entanglement/Me
   const observerSrc = fs.readFileSync(path.join(arcsweepSrc, 'observer-bridge.js'), 'utf8');
   const combined = feedbackSrc + '\n' + observerSrc;
 
-  // Forbidden PREMAQC axis name substitutions must be absent from axis label declarations
   const forbiddenPatterns = [
     /['"]C['"]\s*:\s*['"]Compression['"]/,
     /['"]R['"]\s*:\s*['"]Resolution['"]/,
@@ -71,7 +70,6 @@ test('axis vocabulary: accepts only Presence/Coherence/Resonance/Entanglement/Me
     assert.doesNotMatch(combined, pattern, `forbidden axis substitution found: ${pattern}`);
   }
 
-  // The seven canonical axis symbols must all be present as PREMAQC axis keys
   for (const axis of ['P', 'C', 'R', 'E', 'M', 'A', 'Q']) {
     assert.ok(PREMAQC_AXES.includes(axis), `axis ${axis} must be present`);
   }
@@ -88,7 +86,6 @@ test('no-fallback: source contains no hash-derived vector paths', () => {
     }
   }
 
-  // Feedback-loop initial PREMAQC uses fixed defaults, not hash-based values
   const initial = createInitialPremaqc('test-world', { P: 0.8 });
   for (const axis of PREMAQC_AXES) {
     assert.ok(Number.isFinite(initial.state[axis].value), `axis ${axis} must be a finite number`);
@@ -100,15 +97,12 @@ test('failure invariance: cycle failure leaves PREMAQC byte-for-byte unchanged',
   const before = createInitialPremaqc(terra.id, { P: 0.8, C: 0.75, R: 0.9, E: 0.3, M: 0.7, A: 0.8, Q: 0.8 });
   const fingerprint = JSON.stringify(before);
 
-  // Empty work string should cause the cycle to throw before PREMAQC is mutated
   await assert.rejects(
     () => runFeedbackCycle({ world: terra, premaqc: before, mode: 'writing', work: '', voiceIds: ['lioreal'] }),
     /required/i,
   );
-  // PREMAQC object must be unchanged (createInitialPremaqc returns a plain object)
   assert.equal(JSON.stringify(before), fingerprint, 'PREMAQC must be unchanged after cycle failure');
 
-  // Missing voice should also fail cleanly
   await assert.rejects(
     () => runFeedbackCycle({ world: terra, premaqc: before, mode: 'writing', work: 'A passage.', voiceIds: [] }),
     /voice/i,
@@ -125,7 +119,6 @@ test('adapter lineage: PREMAQC after-state contains originating packet fingerpri
     voiceIds: ['lioreal'], observedAt: '2026-08-11T00:01:00.000Z',
   });
 
-  // The next PREMAQC must trace its lineage to the originating Math Spine packet
   const packetId = cycle.math_spine_packet.packet_id;
   assert.ok(packetId, 'packet must have an id');
   assert.equal(cycle.premaqc_after.math_spine.packet_id, packetId, 'next PREMAQC must reference originating packet');
@@ -153,7 +146,6 @@ test('feedback closure: executed sound actions appear in next-state provenance',
     cycle.premaqc_after.provenance_refs.includes(`story-sound:${soundEvent.event_id}`),
     'next-state provenance must record the story-sound action',
   );
-  // Sound event contribution must also appear in the cycle fingerprint
   const silentCycle = await runFeedbackCycle({
     world: terra, premaqc: before,
     mode: 'writing', work: 'A branch snapped in the dark.',
@@ -166,8 +158,6 @@ test('feedback closure: executed sound actions appear in next-state provenance',
 // ---------- 8. Feather integration ----------
 test('feather integration: featherStop halts all active adapters and releases their handles', () => {
   const soundscape = new StorySoundscape();
-
-  // Simulate active state without a real AudioContext
   const stopped = [];
   soundscape.humActive = true;
   soundscape.humSources = [
@@ -198,8 +188,6 @@ test('feather integration: featherStop halts all active adapters and releases th
   for (const track of soundscape.tracks.values()) {
     assert.equal(track.playing, false, 'all tracks must report stopped');
   }
-
-  // Feather on already-stopped soundscape must not throw
   assert.doesNotThrow(() => soundscape.featherStop());
 });
 
@@ -213,28 +201,21 @@ test('world partition: Terra Aeterna and Luna cannot share cycle state or proven
     runFeedbackCycle({ world: luna, premaqc: lunaState, mode: 'writing', work: 'Tide and moonlight.', voiceIds: ['lioreal'], observedAt: '2026-08-11T00:01:00.000Z' }),
   ]);
 
-  // Cycles must carry separate world identities
   assert.equal(terraCycle.world.id, terra.id);
   assert.equal(lunaCycle.world.id, luna.id);
   assert.notEqual(terraCycle.world.id, lunaCycle.world.id);
-
-  // Cycle identities must be independent
   assert.notEqual(terraCycle.cycle_id, lunaCycle.cycle_id);
   assert.notEqual(terraCycle.cycle_fingerprint, lunaCycle.cycle_fingerprint);
 
-  // Provenance refs must not cross world boundaries
   const terraRefs = terraCycle.premaqc_after.provenance_refs.join(' ');
   assert.ok(!terraRefs.includes(luna.id), 'Terra provenance must not reference Luna world id');
   const lunaRefs = lunaCycle.premaqc_after.provenance_refs.join(' ');
   assert.ok(!lunaRefs.includes(terra.id), 'Luna provenance must not reference Terra world id');
-
-  // Next-PREMAQC IDs must not collide
   assert.notEqual(terraCycle.premaqc_after.id, lunaCycle.premaqc_after.id);
 });
 
 // ---------- 10. Voice identity ----------
 test('voice identity: Lioreal and Uial remain uncollapsed; Nocturne Glint is absent from Arcsweep Flames', () => {
-  // Lioreal and Uial must be registered and uncollapsed (distinct identities)
   const lioreal = CONSTELLATION_VOICES.find((v) => v.id === 'lioreal');
   const uial = CONSTELLATION_VOICES.find((v) => v.id === 'uial');
   assert.ok(lioreal, 'Lioreal must be registered');
@@ -242,16 +223,13 @@ test('voice identity: Lioreal and Uial remain uncollapsed; Nocturne Glint is abs
   assert.notEqual(lioreal.route, uial.route, 'Lioreal and Uial must have distinct routes (uncollapsed)');
   assert.notEqual(lioreal.model, uial.model, 'Lioreal and Uial must have distinct model identities (uncollapsed)');
 
-  // Nocturne Glint must be absent from Arcsweep Flames
   const nocturne = CONSTELLATION_VOICES.find((v) => /nocturne/i.test(v.id) || /nocturne/i.test(v.name));
   assert.equal(nocturne, undefined, 'Nocturne Glint must not appear in CONSTELLATION_VOICES');
 
-  // All voices must carry their own route and model (no two voices collapsed to same identity)
   const routes = CONSTELLATION_VOICES.map((v) => v.route);
   const uniqueRoutes = new Set(routes);
   assert.equal(uniqueRoutes.size, routes.length, 'all voice routes must be distinct (no identity collapse)');
 
-  // Story-sound cues must detect branch-snap correctly (integration smoke)
   const cues = findStorySoundCues('A branch snapped in the night.');
   assert.ok(cues.some((c) => c.cue_id === 'branch-snap'), 'branch-snap cue must be detected');
 });
@@ -271,7 +249,6 @@ test('exploration mode: cycle is non-binding and receipt is scoped separately', 
   assert.equal(cycle.authority.steward_review_required, false, 'exploration cycles do not require steward review');
   assert.ok(cycle.premaqc_after.receipt_id.startsWith('premaqc-explore-'), 'exploration receipt must use explore prefix');
 
-  // Binding cycle must differ
   const binding = await runFeedbackCycle({
     world: terra, premaqc: before,
     mode: 'writing', work: 'An exploratory passage.', response: 'Noted.',
@@ -282,28 +259,32 @@ test('exploration mode: cycle is non-binding and receipt is scoped separately', 
   assert.ok(binding.premaqc_after.receipt_id.startsWith('premaqc-feedback-'), 'binding receipt must use feedback prefix');
 });
 
-// ---------- 12. Q uncertainty ----------
-test('Q uncertainty: Q is flagged uncertain on insufficient signal, confident on sufficient signal', async () => {
+// ---------- 12. Qualia authority ----------
+test('ordinary feedback cannot infer Qualia from prose volume, model response, or sound', async () => {
   const before = createInitialPremaqc(terra.id, {}, '2026-08-11T00:00:00.000Z');
+  assert.equal(before.qualia.present, false);
+  assert.equal(before.state.Q.value, 0);
 
-  // Insufficient signal: short work, no response, no sound events
   const sparse = await runFeedbackCycle({
     world: terra, premaqc: before,
     mode: 'writing', work: 'Yes.', response: '',
     voiceIds: ['lioreal'], soundEvents: [], observedAt: '2026-08-11T00:01:00.000Z',
   });
-  assert.equal(sparse.premaqc_after.state.Q.uncertain, true, 'Q must be uncertain on sparse input');
-  assert.ok(sparse.premaqc_after.state.Q.confidence < 0.5, 'Q confidence must be low on sparse input');
-
-  // Sufficient signal: longer work or response provided
   const rich = await runFeedbackCycle({
     world: terra, premaqc: before,
-    mode: 'writing', work: 'The fire held the room. Something shifted in the quality of the silence.',
-    response: 'The room received it.',
-    voiceIds: ['lioreal'], observedAt: '2026-08-11T00:01:00.000Z',
+    mode: 'writing',
+    work: 'The fire held the room. Something shifted in the quality of the silence and the whole scene widened around the characters.',
+    response: 'The room received it, the model answered at length, and the narrative continued.',
+    voiceIds: ['lioreal'],
+    soundEvents: [{ event_id: 'sound-rich-1', cue_id: 'fire', fired_at: '2026-08-11T00:01:00.000Z' }],
+    observedAt: '2026-08-11T00:01:00.000Z',
   });
-  assert.equal(rich.premaqc_after.state.Q.uncertain, false, 'Q must not be uncertain on rich input');
-  assert.ok(rich.premaqc_after.state.Q.confidence >= 0.9, 'Q confidence must be high on rich input');
+
+  for (const cycle of [sparse, rich]) {
+    assert.deepEqual(cycle.premaqc_after.state.Q, before.state.Q, 'software activity must not manufacture or alter Q');
+    assert.deepEqual(cycle.premaqc_after.qualia, before.qualia, 'Qualia report must remain exactly as firsthand supplied');
+    assert.equal(cycle.premaqc_after.authority.qualia_magnitude_inference_allowed, false);
+  }
 });
 
 // ---------- 13. Derived channels ----------
@@ -321,7 +302,6 @@ test('derived channels: H and T are present and in range on every cycle', async 
   assert.ok(cycle.derived.H >= 0 && cycle.derived.H <= 1, 'H must be in [0, 1]');
   assert.ok(cycle.derived.T >= 0 && cycle.derived.T <= 1, 'T must be in [0, 1]');
 
-  // derivedChannels applied directly to initial state must also produce finite values
   const initial = createInitialPremaqc(terra.id, {});
   const d = derivedChannels(initial.state);
   assert.ok(Number.isFinite(d.H) && Number.isFinite(d.T), 'derivedChannels must be finite on any valid PREMAQC state');
@@ -346,22 +326,33 @@ test('mode vocabulary: observation and reflection are accepted; unknown modes ar
   );
 });
 
-// ---------- 15. World Jacobians are non-identity ----------
-test('world Jacobians: Terra Aeterna and Ta\'veren Vaen have world-specific coupling', () => {
+// ---------- 15. World Jacobians are non-identity while Q remains context-only ----------
+test('world Jacobians retain world-specific dynamic coupling without deriving Qualia', () => {
   const terraProfile = resolveHouseProfile('terra-aeterna');
   const tvvProfile = resolveHouseProfile('ta-veren-vaen');
 
   function hasOffDiagonal(jacobian) {
     return jacobian.some((row, i) => row.some((cell, j) => i !== j && cell !== 0));
   }
+  function qIsIsolated(jacobian) {
+    const q = 6;
+    return jacobian[q][q] === 1
+      && jacobian[q].every((cell, index) => index === q ? cell === 1 : cell === 0)
+      && jacobian.every((row, index) => index === q ? true : row[q] === 0);
+  }
 
   assert.ok(hasOffDiagonal(terraProfile.transferFunctions.jacobian),
-    'Terra Aeterna Jacobian must have at least one non-zero off-diagonal entry');
+    'Terra Aeterna Jacobian must retain world-specific non-Q coupling');
   assert.ok(hasOffDiagonal(tvvProfile.transferFunctions.jacobian),
-    "Ta'veren Vaen Jacobian must have at least one non-zero off-diagonal entry");
-
-  assert.equal(terraProfile.transferFunctions.jacobianVersion, 'terra-jacobian/world-coupled-v1',
-    'Terra Aeterna jacobianVersion must reflect world-coupled build');
-  assert.equal(tvvProfile.transferFunctions.jacobianVersion, 'ta-veren-vaen-jacobian/world-coupled-v1',
-    "Ta'veren Vaen jacobianVersion must reflect world-coupled build");
+    "Ta'veren Vaen Jacobian must retain world-specific non-Q coupling");
+  assert.equal(qIsIsolated(terraProfile.transferFunctions.jacobian), true,
+    'Terra Aeterna must not derive or evolve Q through its Jacobian');
+  assert.equal(qIsIsolated(tvvProfile.transferFunctions.jacobian), true,
+    "Ta'veren Vaen must not derive or evolve Q through its Jacobian");
+  assert.deepEqual(terraProfile.transferFunctions.source_axes, ['P', 'C', 'R', 'E', 'M', 'A']);
+  assert.deepEqual(terraProfile.transferFunctions.context_only_axes, ['Q']);
+  assert.deepEqual(tvvProfile.transferFunctions.source_axes, ['P', 'C', 'R', 'E', 'M', 'A']);
+  assert.deepEqual(tvvProfile.transferFunctions.context_only_axes, ['Q']);
+  assert.equal(terraProfile.transferFunctions.jacobianVersion, 'terra-jacobian/world-coupled-v2');
+  assert.equal(tvvProfile.transferFunctions.jacobianVersion, 'ta-veren-vaen-jacobian/world-coupled-v2');
 });

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://flameclyffe.local/schemas/deep-time.schema.json",
   "title": "DEEPTime Accepted Temporal Record",
-  "description": "Append-only temporal coordinate for human-accepted Arcsweep observations. PREMAQC Q remains Qualia; engineering data quality is separate.",
+  "description": "Append-only temporal coordinate for human-accepted Arcsweep observations. PREMAQC Q is the binary presence of a receipted firsthand Qualia report; the report itself remains separate context and engineering data quality is separate.",
   "type": "object",
   "additionalProperties": true,
   "required": ["schema_version", "dataset_kind", "id", "world_id", "sequence_id", "sequence_revision", "lambda", "time", "premaqc", "provenance", "quality", "authority"],
@@ -30,6 +30,7 @@
       "properties": {
         "observation_run_id": { "type": "string" },
         "acceptance_mask_id": { "type": "string" },
+        "qualia_report_receipt_id": { "type": ["string", "null"] },
         "source_receipt_hashes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "accepted_state_hash": { "type": "string", "minLength": 64, "maxLength": 64 }
       }
@@ -38,7 +39,9 @@
       "type": "object",
       "properties": {
         "data_quality": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "data_quality_axes": { "type": "array", "items": { "enum": ["P", "C", "R", "E", "M", "A"] } },
         "uncertainty": { "type": "object" },
+        "qualia_report_present": { "type": "boolean" },
         "missing": { "type": "array" },
         "stale": { "type": "array" }
       },
@@ -46,10 +49,12 @@
     },
     "authority": {
       "type": "object",
-      "required": ["append_only", "qualia_is_premaqc_q", "engineering_data_quality_is_q"],
+      "required": ["append_only", "qualia_presence_is_premaqc_q", "qualia_report_is_firsthand_only", "qualia_magnitude_inference_allowed", "engineering_data_quality_is_q"],
       "properties": {
         "append_only": { "const": true },
-        "qualia_is_premaqc_q": { "const": true },
+        "qualia_presence_is_premaqc_q": { "const": true },
+        "qualia_report_is_firsthand_only": { "const": true },
+        "qualia_magnitude_inference_allowed": { "const": false },
         "engineering_data_quality_is_q": { "const": false }
       }
     }

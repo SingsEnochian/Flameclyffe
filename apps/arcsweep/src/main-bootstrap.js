@@ -133,6 +133,7 @@ async function openCore() {
   try {
     // Allow the recovery surface to paint and remain tappable before core evaluation begins.
     await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+    await import('./qualia-ui-preload.js');
     await import('./main.js');
     finished = true;
     clearTimeout(slowTimer);

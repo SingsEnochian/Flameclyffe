@@ -1,0 +1,2 @@
+/* Canonical PREMAQC entrypoint. Legacy stylesheet remains implementation-only until the CSS selector migration lands. */
+@import url('./premaq-song.css');
