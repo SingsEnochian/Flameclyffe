@@ -20,12 +20,14 @@ function missing(error) {
   return /not found|object not found|no rows/i.test(String(error?.message || ''));
 }
 
-export function createSupabaseCommonsLedgerStore(env) {
-  const client = requireServiceClient(env);
+export function createSupabaseCommonsLedgerStore(env, { client: suppliedClient = null } = {}) {
+  const client = suppliedClient || requireServiceClient(env);
   return Object.freeze({
     async list({ prefix = '' } = {}) {
       const start = String(prefix || '');
-      let query = client.from('house_commons_entries').select('key').order('key', { ascending: true }).limit(1000);
+      // Commons entry keys begin with an ISO timestamp, so descending key order is newest-first.
+      // Limit only after choosing that order or a large Commons will strand new messages past row 1000.
+      let query = client.from('house_commons_entries').select('key').order('key', { ascending: false }).limit(1000);
       if (start) query = query.gte('key', start).lt('key', `${start}\uffff`);
       const { data, error } = await query;
       fail(error, 'House Commons ledger list failed');
