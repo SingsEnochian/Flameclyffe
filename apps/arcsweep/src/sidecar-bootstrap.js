@@ -2,6 +2,7 @@ const SIDECARS = [
   './observer-bridge.js',
   './feedback-queue-bootstrap.js',
   './rich-text-core.js',
+  './active-input-continuity.js',
   './mobile-navigation-sidecar.js',
   './world-registry-persistence-sidecar.js',
   './terra-prime-waking-world-sidecar.js',
