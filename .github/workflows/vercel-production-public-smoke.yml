@@ -4,13 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '.github/workflows/vercel-production-public-smoke.yml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/vercel-production-public-smoke.yml'
   workflow_dispatch:
 
 permissions:
@@ -24,30 +17,57 @@ jobs:
     timeout-minutes: 10
     env:
       BASE_URL: https://flameclyffe.vercel.app
-      RUNTIME_HOTFIX_SHA: 9f476ecf4755a4ce927682ba82a7aaea7874094a
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Wait for canonical Arcsweep production bundle
+        shell: bash
+        run: |
+          node <<'NODE'
+          const url = `${process.env.BASE_URL.replace(/\/$/, '')}/arcsweep/assets/spessasynth_processor.min.js`;
+          for (let attempt = 1; attempt <= 18; attempt += 1) {
+            try {
+              const response = await fetch(url, { redirect: 'manual' });
+              if (response.status === 200) {
+                console.log(`Arcsweep worklet ready on attempt ${attempt}.`);
+                process.exit(0);
+              }
+              console.log(`Attempt ${attempt}: ${response.status}`);
+            } catch (error) {
+              console.log(`Attempt ${attempt}: ${error.message}`);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 10000));
+          }
+          throw new Error('Canonical Arcsweep worklet did not become available in production.');
+          NODE
+
       - name: Probe production shell and runtime boundaries
         shell: bash
         run: |
           node <<'NODE' | tee smoke.json
           const base = process.env.BASE_URL.replace(/\/$/, '');
           const checks = [];
-          const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
-          async function hit(path, expected, init = {}) {
-            const r = await fetch(`${base}${path}`, { redirect: 'manual', ...init });
-            const type = r.headers.get('content-type') || '';
-            const text = await r.text();
-            checks.push({ path, status: r.status, content_type: type, sample: text.slice(0, 120) });
-            assert(r.status === expected, `${path}: expected ${expected}, got ${r.status}${r.headers.get('location') ? ` -> ${r.headers.get('location')}` : ''}`);
-            return { r, text, type };
+          const failures = [];
+
+          async function hit(path, expected, init = {}, validate = null) {
+            try {
+              const response = await fetch(`${base}${path}`, { redirect: 'manual', ...init });
+              const type = response.headers.get('content-type') || '';
+              const text = await response.text();
+              checks.push({ path, status: response.status, content_type: type, sample: text.slice(0, 120) });
+              if (response.status !== expected) failures.push(`${path}: expected ${expected}, got ${response.status}`);
+              if (validate) {
+                const problem = validate({ response, text, type });
+                if (problem) failures.push(`${path}: ${problem}`);
+              }
+            } catch (error) {
+              checks.push({ path, status: null, error: error.message });
+              failures.push(`${path}: ${error.message}`);
+            }
           }
-          const app = await hit('/arcsweep/', 200);
-          assert(/text\/html/i.test(app.type), 'Arcsweep did not return HTML');
-          const worklet = await hit('/arcsweep/assets/spessasynth_processor.min.js', 200);
-          assert(/javascript|ecmascript/i.test(worklet.type), 'SpessaSynth worklet did not return JavaScript');
-          const session = await hit('/api/v1/house/session', 401);
-          assert(/connected/.test(session.text), 'House session route did not return its contract');
+
+          await hit('/arcsweep/', 200, {}, ({ type }) => /text\/html/i.test(type) ? null : 'expected HTML');
+          await hit('/arcsweep/assets/spessasynth_processor.min.js', 200, {}, ({ type }) => /javascript|ecmascript/i.test(type) ? null : 'expected JavaScript');
+          await hit('/api/v1/house/session', 401, {}, ({ text }) => /connected/.test(text) ? null : 'session contract missing');
           await hit('/api/v1/house/session', 401, {
             method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ credential: 'deliberately-invalid-smoke-credential' })
           });
@@ -55,7 +75,10 @@ jobs:
           await hit('/api/v1/house/observations', 401);
           await hit('/api/v1/house/braid/stream', 401);
           await hit('/api/v1/flames/atlas/status', 401);
-          console.log(JSON.stringify({ ok: true, base, runtime_hotfix_sha: process.env.RUNTIME_HOTFIX_SHA, checks }, null, 2));
+
+          const receipt = { ok: failures.length === 0, base, production_sha: process.env.GITHUB_SHA, checks, failures };
+          console.log(JSON.stringify(receipt, null, 2));
+          if (failures.length) process.exitCode = 1;
           NODE
 
       - name: Publish receipt to hosting PR
@@ -68,13 +91,10 @@ jobs:
             echo "### Vercel production public smoke: ${STATUS}"
             echo
             echo 'Production: `https://flameclyffe.vercel.app`'
-            echo "Runtime hotfix SHA: \`${RUNTIME_HOTFIX_SHA}\`"
-            echo "Smoke workflow SHA: \`${GITHUB_SHA}\`"
+            echo "Production commit: \`${GITHUB_SHA}\`"
             echo
             echo '```json'
             cat smoke.json 2>/dev/null || echo '{"ok":false,"error":"probe failed before receipt"}'
             echo '```'
-            echo
-            echo 'This probe verifies the live shell and that House session, Commons, observations, Braid, and Flame routes are deployed and enforce their unauthorised boundary. Authenticated persistence/model traversal remains covered by the 663/663 runtime suite because no House credential is installed in GitHub Actions.'
           } > receipt.md
-          gh pr comment 184 --body-file receipt.md
+          gh pr comment 184 --repo SingsEnochian/Flameclyffe --body-file receipt.md
