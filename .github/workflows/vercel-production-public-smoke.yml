@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 10
     env:
       BASE_URL: https://flameclyffe.vercel.app
+      EXPECTED_PRODUCTION_SHA: 9f476ecf4755a4ce927682ba82a7aaea7874094a
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Probe production shell and runtime boundaries
@@ -47,7 +48,7 @@ jobs:
           await hit('/api/v1/house/observations', 401);
           await hit('/api/v1/house/braid/stream', 401);
           await hit('/api/v1/flames/atlas/status', 401);
-          console.log(JSON.stringify({ ok: true, base, checks }, null, 2));
+          console.log(JSON.stringify({ ok: true, base, expected_production_sha: process.env.EXPECTED_PRODUCTION_SHA, checks }, null, 2));
           NODE
 
       - name: Publish receipt to hosting PR
@@ -60,6 +61,7 @@ jobs:
             echo "### Vercel production public smoke: ${STATUS}"
             echo
             echo 'Production: `https://flameclyffe.vercel.app`'
+            echo "Expected production SHA: \`${EXPECTED_PRODUCTION_SHA}\`"
             echo
             echo '```json'
             cat smoke.json 2>/dev/null || echo '{"ok":false,"error":"probe failed before receipt"}'
