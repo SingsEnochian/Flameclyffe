@@ -47,12 +47,15 @@ const fetchImpl = async (url) => {
   return new Response('not found', { status: 404 });
 };
 
-test('production circulation accepts only the exact main workflow OIDC identity', async () => {
-  const identity = await verifyGitHubActionsOidc(token(), { fetchImpl, now: NOW });
-  assert.equal(identity.repository, HOUSE_SMOKE_REPOSITORY);
-  assert.equal(identity.ref, 'refs/heads/main');
-  assert.equal(identity.workflow_ref, HOUSE_SMOKE_WORKFLOW_REF);
-  assert.equal(identity.event_name, 'workflow_dispatch');
+test('production circulation accepts the exact main workflow for manual and push triggers', async () => {
+  const manual = await verifyGitHubActionsOidc(token(), { fetchImpl, now: NOW });
+  assert.equal(manual.repository, HOUSE_SMOKE_REPOSITORY);
+  assert.equal(manual.ref, 'refs/heads/main');
+  assert.equal(manual.workflow_ref, HOUSE_SMOKE_WORKFLOW_REF);
+  assert.equal(manual.event_name, 'workflow_dispatch');
+
+  const pushed = await verifyGitHubActionsOidc(token({ event_name: 'push' }), { fetchImpl, now: NOW });
+  assert.equal(pushed.event_name, 'push');
 });
 
 test('production circulation rejects another workflow even when repo and branch match', async () => {
@@ -62,7 +65,8 @@ test('production circulation rejects another workflow even when repo and branch 
   );
 });
 
-test('production circulation rejects a non-main ref and an invalid audience', async () => {
+test('production circulation rejects a non-main ref, invalid audience, and unrelated event', async () => {
   await assert.rejects(verifyGitHubActionsOidc(token({ ref: 'refs/heads/feature/test' }), { fetchImpl, now: NOW }), /ref is not authorised/i);
   await assert.rejects(verifyGitHubActionsOidc(token({ aud: 'wrong-audience' }), { fetchImpl, now: NOW }), /audience is invalid/i);
+  await assert.rejects(verifyGitHubActionsOidc(token({ event_name: 'pull_request' }), { fetchImpl, now: NOW }), /event is not authorised/i);
 });
