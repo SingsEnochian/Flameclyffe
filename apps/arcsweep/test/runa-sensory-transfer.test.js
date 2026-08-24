@@ -5,6 +5,8 @@ import {
   RUNA_SENSORY_PLAN_SCHEMA,
   RUNA_SENSORY_RENDER_SCHEMA,
   RUNA_SENSORY_RESPONSE_SCHEMA,
+  SENSORY_CARRIERS,
+  SENSORY_CARRIER_CAPABILITIES,
   compileSensoryTransferPlan,
   createDefaultSensoryTransferProfile,
   createSensoryTransferRenderReceipt,
@@ -24,6 +26,22 @@ function profile() {
   return createDefaultSensoryTransferProfile({ participantRef: 'Rowan', createdAt: STAMP });
 }
 
+test('carrier ontology separates surface bone audio, implant bone audio, and surface haptics', () => {
+  const base = profile();
+  assert.equal(SENSORY_CARRIERS.includes('bone_conduction_audio'), false);
+  assert.equal(SENSORY_CARRIERS.includes('surface_bone_audio'), true);
+  assert.equal(SENSORY_CARRIERS.includes('implant_bone_audio'), true);
+  assert.equal(SENSORY_CARRIERS.includes('surface_haptic'), true);
+
+  const surfaceBone = base.carriers.find((item) => item.carrier === 'surface_bone_audio');
+  const implantBone = base.carriers.find((item) => item.carrier === 'implant_bone_audio');
+  assert.equal(surfaceBone.enabled, false);
+  assert.equal(implantBone.enabled, false);
+  assert.equal(SENSORY_CARRIER_CAPABILITIES.surface_bone_audio.execution, 'adapter-required');
+  assert.equal(SENSORY_CARRIER_CAPABILITIES.implant_bone_audio.execution, 'adapter-required');
+  assert.equal(SENSORY_CARRIER_CAPABILITIES.implant_bone_audio.medical_device_control, false);
+});
+
 test('AIR, BONE, and FIELD preserve one semantic key while changing carriers', async () => {
   const base = profile();
   const air = await compileSensoryTransferPlan({ world: WORLD, profile: base, semanticKey: 'presence', mode: 'air', generatedAt: STAMP });
@@ -42,12 +60,22 @@ test('AIR, BONE, and FIELD preserve one semantic key while changing carriers', a
   assert.equal(field.authority.semantic_invariant_preserved_across_carriers, true);
 });
 
-test('BONE surface haptics do not counterfeit a frequency-controllable bone-conduction path', async () => {
+test('BONE surface haptics do not counterfeit a frequency-controllable bone-audio path', async () => {
   const plan = await compileSensoryTransferPlan({ world: WORLD, profile: profile(), semanticKey: 'crossing', mode: 'bone', generatedAt: STAMP });
   const haptic = plan.transfer.carrier_plans[0];
   assert.equal(haptic.carrier, 'surface_haptic');
   assert.equal(haptic.frequency_hz, null);
   assert.match(haptic.note, /timing, not a guaranteed actuator frequency/i);
+});
+
+test('implant bone audio remains schema-ready but non-executable until an explicit adapter exists', async () => {
+  const plan = await compileSensoryTransferPlan({ world: WORLD, profile: profile(), semanticKey: 'presence', mode: 'field', generatedAt: STAMP });
+  assert.equal(plan.transfer.requested_carriers.includes('implant_bone_audio'), false);
+  assert.equal(plan.transfer.carrier_plans.some((item) => item.carrier === 'implant_bone_audio'), false);
+  assert.equal(plan.authority.implant_bone_audio_execution_authorized, false);
+  assert.equal(plan.authority.surface_bone_audio_execution_authorized, false);
+  assert.equal(plan.authority.medical_device_fitting_mutable, false);
+  assert.equal(plan.authority.medical_device_control_authorized, false);
 });
 
 test('FIELD keeps world harmonic lineage on the AIR carrier', async () => {
@@ -83,6 +111,8 @@ test('render receipts report unsupported haptics without pretending they rendere
   assert.equal(receipt.runtime.haptic_rendered, false);
   assert.deepEqual(receipt.runtime.rendered_carriers, ['air_audio']);
   assert.equal(receipt.authority.runtime_capability_reported_truthfully, true);
+  assert.equal(receipt.authority.medical_device_fitting_changed, false);
+  assert.equal(receipt.authority.medical_device_control_used, false);
 });
 
 test('participant response is first-person evidence and never manufactures Qualia or PREMAQC', async () => {
