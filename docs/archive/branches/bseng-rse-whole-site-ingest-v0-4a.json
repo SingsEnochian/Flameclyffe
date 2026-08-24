@@ -1,0 +1,24 @@
+{
+  "schema": "hearthfire.branch-archive-receipt/v1",
+  "archived_at": "2026-08-20T21:35:00-04:00",
+  "original_ref": "feature/bseng-rse-whole-site-ingest-v0-4a",
+  "archive_ref": "archive/bseng-rse-whole-site-ingest-v0-4a",
+  "commit": "b5bdfd1bea6c9fd4206707e9ef004258c2a0344d",
+  "comparison": {
+    "against": "b5bdfd1bea6c9fd4206707e9ef004258c2a0344d",
+    "status": "identical",
+    "ahead_by": 0,
+    "behind_by": 0,
+    "changed_files": 0
+  },
+  "disposition": "inert-accidental-ref-archived",
+  "replacement": {
+    "branch": "feature/bseng-rse-whole-site-ingest-v0-4",
+    "pull_request": 140
+  },
+  "notes": [
+    "The accidental v0-4a ref contains no unique work and is not a development surface.",
+    "An archive namespace mirror was created at the same immutable commit.",
+    "The currently connected GitHub action surface exposes branch creation/update but not ref deletion, so the original inert ref may remain visible until deleted through a Git client or GitHub UI."
+  ]
+}

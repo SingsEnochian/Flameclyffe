@@ -1,0 +1,24 @@
+.math-spine-status {
+  width: min(100%, 72rem);
+  margin: 0 auto 1rem;
+  padding: .72rem .9rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .75rem;
+  border: 1px solid rgba(114, 200, 189, .34);
+  border-radius: .9rem;
+  background: rgba(4, 18, 20, .86);
+  color: #edf4f2;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .28);
+}
+.math-spine-status-mark { color: #72c8bd; font-size: 1.45rem; }
+.math-spine-status div { min-width: 0; display: grid; gap: .18rem; }
+.math-spine-status strong { color: #e1c77e; letter-spacing: .08em; font-size: .72rem; }
+.math-spine-status small { color: #a9b9b8; overflow-wrap: anywhere; }
+.math-spine-status code { color: #72c8bd; font-size: .68rem; }
+.math-spine-status[data-status='degraded'], .math-spine-status[data-status='invalid'] { border-color: rgba(221, 139, 107, .55); }
+@media (max-width: 680px) {
+  .math-spine-status { grid-template-columns: auto 1fr; }
+  .math-spine-status code { grid-column: 2; }
+}

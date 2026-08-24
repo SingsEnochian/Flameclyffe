@@ -7,87 +7,87 @@
   const CODEX = {
     P: {
       title: 'Presence', rune: 'ᛈ', plain: 'inhabited structure', value: v => `${v.toFixed(2)} · inhabited structure`,
-      science: 'An interpretive DEEP variable that controls how populated and dense the outer architecture appears.',
+      science: 'The canonical Presence axis controls how populated and dense the outer architecture appears.',
       instrument: 'Higher Presence adds or emphasises outer nodes, making the glyph feel more occupied and easier to inspect.',
       myth: 'The field feels more witnessed. More lights gather around the Well.',
-      boundary: 'Presence is theoretical display language. It is not a claim that the instrument detects a person’s hidden inner state.'
+      boundary: 'The packet preserves the accepted Presence value, its provenance, and its renderer mapping as separate fields.'
     },
     C: {
       title: 'Coherence', rune: 'ᚲ', plain: 'structural clarity', value: v => `${v.toFixed(2)} · structural clarity`,
-      science: 'An interpretive stability variable for how strongly the model’s edges and relationships hold together.',
+      science: 'The canonical Coherence axis controls how strongly the model’s edges and relationships hold together.',
       instrument: 'Higher Coherence sharpens route legibility, strengthens lines, and makes the geometry feel more orderly.',
       myth: 'The pattern remembers its shape. The Well answers in cleaner lines.',
-      boundary: 'Coherence is a visual/model translation variable, not proof that an event is objectively meaningful or ordered.'
+      boundary: 'The packet preserves the accepted Coherence value, its provenance, and its visual translation separately.'
     },
     R: {
       title: 'Resonance', rune: 'ᚱ', plain: 'harmonic response', value: v => `${v.toFixed(2)} · harmonic response`,
-      science: 'An interpretive variable for rhythmic emphasis, ring behaviour, and pulse cadence.',
+      science: 'The canonical Resonance axis controls rhythmic emphasis, ring behaviour, and pulse cadence.',
       instrument: 'Higher Resonance makes rings and path traffic feel more musical, lively, and synchronised.',
       myth: 'The instrument hums back. Signal becomes song around the Well.',
-      boundary: 'Resonance is an experimental visual metaphor for rhythmic response, not a measured emotional frequency.'
+      boundary: 'The accepted Resonance value and every audio or visual mapping remain separately receipted.'
     },
     E: {
-      title: 'Entropy', rune: 'ᛇ', plain: 'field looseness', value: v => `${v.toFixed(2)} · field looseness`,
-      science: 'An interpretive variation variable that adds wobble, asymmetry, and looseness to the glyph.',
-      instrument: 'Higher Entropy makes nodes drift, lines feel less rigid, and the geometry become more irregular.',
-      myth: 'The pattern frays at the edges. The Well shows weather, not failure.',
-      boundary: 'Entropy here is model-display language. It does not diagnose chaos in the user or world.'
+      title: 'Entanglement', rune: 'ᛇ', plain: 'relational binding', value: v => `${v.toFixed(2)} · relational binding`,
+      science: 'The canonical Entanglement axis carries continuity and cross-observation binding.',
+      instrument: 'Higher Entanglement strengthens relational routes and connective density through the glyph.',
+      myth: 'The pattern remembers its relations. Threads cross the Well and remain joined.',
+      boundary: 'The packet preserves Entanglement, contributing observations, and route projections as separate fields.'
     },
     M: {
-      title: 'Momentum', rune: 'ᛗ', plain: 'motion pressure', value: v => `${v.toFixed(2)} · motion pressure`,
-      science: 'An interpretive motion variable that affects visible speed and liveliness of animated traffic.',
-      instrument: 'Higher Momentum increases spark speed, pulse travel, and responsiveness of the field.',
-      myth: 'Light packets hurry through the channels. The story is moving quickly.',
-      boundary: 'Momentum is display behaviour, not a literal measurement of destiny, urgency, or inevitability.'
+      title: 'Memory', rune: 'ᛗ', plain: 'accumulated relation', value: v => `${v.toFixed(2)} · accumulated relation`,
+      science: 'The canonical Memory axis carries lineage, provenance, and accumulated relation.',
+      instrument: 'Higher Memory lengthens visible traces and continuity tails through the field.',
+      myth: 'The channels remember where the light has travelled. Earlier song remains in the Well.',
+      boundary: 'The packet preserves Memory, its lineage, and the renderer’s trace-persistence mapping separately.'
     },
     A: {
-      title: 'Alignment', rune: 'ᚨ', plain: 'axis stability', value: v => `${v.toFixed(2)} · axis stability`,
-      science: 'An interpretive centring variable for how tightly the inner body and core geometry hold their axis.',
-      instrument: 'Higher Alignment steadies the central structure and makes the inner geometry feel more disciplined.',
-      myth: 'The compass of the Well steadies. The field remembers where centre is.',
-      boundary: 'Alignment is a visual axis variable, not a moral or spiritual score.'
+      title: 'Agency', rune: 'ᚨ', plain: 'directed capacity', value: v => `${v.toFixed(2)} · directed capacity`,
+      science: 'The canonical Agency axis carries available directed capacity to act, choose, and redirect.',
+      instrument: 'Higher Agency increases response speed, directed motion, and interaction force.',
+      myth: 'The Well can answer, turn, refuse, or choose another channel.',
+      boundary: 'The packet preserves Agency, witnessed choices, and renderer response mapping separately.'
     },
     H: {
       title: 'Horizon', rune: 'ᚺ', plain: 'edge signal', value: v => `${v.toFixed(2)} · edge signal`,
-      science: 'A derived edge variable blended from coherence, entropy, resonance, alignment, Bz, Kp, charge, and pulse state.',
+      science: 'A derived edge variable blended from Coherence, Entanglement, Resonance, Agency, Qualia, Bz, Kp, and pulse state.',
       instrument: 'Higher Horizon brightens edge effects and makes the outer field feel more awake.',
       myth: 'The boundary of the field glows. Something is visible at the rim.',
-      boundary: 'Horizon is a derived display signal, not a prediction or omen.'
+      boundary: 'Horizon is marked derived and carries its complete contributor and transformation receipt.'
     },
     Q: {
-      title: 'Charge', rune: 'ᛩ', plain: 'centre glow', value: v => `${v.toFixed(2)} · centre glow`,
-      science: 'An interpretive variable that wakes the centre point and amplifies local response brightness.',
-      instrument: 'Higher Charge expands the core glow and makes touch responses feel brighter and more immediate.',
-      myth: 'The Well warms. The centre is listening more visibly.',
-      boundary: 'Charge is a visual response variable, not a medical, emotional, or spiritual measurement.'
+      title: 'Qualia', rune: 'ᛩ', plain: 'lived texture', value: v => `${v.toFixed(2)} · lived texture`,
+      science: 'The canonical Qualia axis carries lived interiority and the irreducible experiential texture of the present state.',
+      instrument: 'Higher Qualia warms and inhabits the centre while local touch charge remains a separate rendering channel.',
+      myth: 'The Well warms from within. The centre has texture, colour, and living presence.',
+      boundary: 'The packet preserves Qualia, its contributors, and the centre-texture projection separately.'
     },
     moon: {
       title: 'Moon Illumination', rune: '☾', plain: 'harmonic rings', value: v => `${Math.round(v)}% · harmonic rings`,
       science: 'A direct or fallback reading for the current lunar illumination percentage.',
       instrument: 'More moon illumination increases harmonic ring count or ring visibility around the core.',
       myth: 'The tide-turner adds layers. The Well gains more visible circles of reflection.',
-      boundary: 'The moon layer is a visual scaffold, not a claim that lunar phase causes model truth.'
+      boundary: 'Lunar telemetry, harmonic-ring projection, and causal analysis remain separate named layers.'
     },
     kp: {
       title: 'Kp Index', rune: '✶', plain: 'geomagnetic activity', value: v => `${v.toFixed(1)} · ${v < 3 ? 'quiet magnetic field' : v < 6 ? 'active magnetic field' : 'storming magnetic field'}`,
       science: 'A geomagnetic activity index. Low values are quiet; higher values indicate more disturbed geomagnetic conditions.',
       instrument: 'Higher Kp increases particle activity, mote energy, spark intensity, and pulse liveliness.',
       myth: 'The sky-current grows louder. During storms, light packets move faster through the Well.',
-      boundary: 'Kp is environmental context. It does not diagnose the user or prove a hidden event.'
+      boundary: 'Kp telemetry, particle projection, embodied correlation, and world-state analysis remain separate named layers.'
     },
     bz: {
       title: 'Bz Component', rune: '⇵', plain: 'field thermal mood', value: v => `${v.toFixed(1)} · ${v <= -1 ? 'warm active field' : v >= 1 ? 'cool quiet field' : 'neutral liminal field'}`,
       science: 'A north-south component of the interplanetary magnetic field. In this instrument, positive Bz is treated as quieter/holding, near-zero Bz as balanced or liminal, and negative Bz as more open/active.',
       instrument: 'Bz sets the thermal mood of the palette: positive values cool and quiet the instrument, near-zero values hold neutral silver, and negative values warm and activate the field.',
       myth: 'Positive Bz closes the gate into moon-glass quiet. Near-zero Bz holds the silver threshold. Negative Bz opens the gate; the sky-current heats and the field grows teeth.',
-      boundary: 'Bz is used here as an experimental palette and field-orientation input, not as standalone prediction, proof, or prophecy.'
+      boundary: 'Bz telemetry, palette projection, field interpretation, and prediction remain separate named layers.'
     },
     source: {
       title: 'Data Source', rune: '⟁', plain: 'packet provenance', value: v => `${v} · packet provenance`,
       science: 'A provenance label showing whether the instrument is using bridge, local, stale, or fallback state.',
       instrument: 'Source changes trust context, packet text, and transparency labels.',
       myth: 'This tells which lantern carried the packet to the Well.',
-      boundary: 'Source means origin, not authority. It says where the data came from.'
+      boundary: 'Source records origin. Authority and interpretation carry their own receipts.'
     }
   };
 
@@ -105,7 +105,7 @@
     if (key === 'kp') return Number(deep?.kp ?? readNumber('mKp') ?? 1);
     if (key === 'bz') return Number(deep?.bz ?? readNumber('mBz') ?? 0);
     if (key === 'source') return source;
-    if (key === 'Q') return Number(deep?.charge ?? readNumber('mQ') ?? .2);
+    if (key === 'Q') return Number(deep?.Q ?? deep?.charge ?? readNumber('mQ') ?? .2);
     return Number(deep?.[key] ?? readNumber(`m${key}`) ?? .5);
   }
 
@@ -148,9 +148,9 @@
       <div class="codex-grid">
         <div class="codex-card"><strong>Science</strong><span id="codexScience">Experimental and theoretical readings are kept distinct from direct telemetry.</span></div>
         <div class="codex-card"><strong>Instrument</strong><span id="codexInstrument">The meter shows what visual behaviour changes on the glyph.</span></div>
-        <div class="codex-card"><strong>Terra Aeterna</strong><span id="codexMyth">The mythic layer gives the reading story-language without pretending it proves hidden truth.</span></div>
+        <div class="codex-card"><strong>Terra Aeterna</strong><span id="codexMyth">The mythic layer gives the reading story-language and remains visibly named as mythic translation.</span></div>
       </div>
-      <p class="codex-boundary" id="codexBoundary"><b>Boundary:</b> This is an experimental translation layer: readable, interpretive, and deliberately labelled.</p>
+      <p class="codex-boundary" id="codexBoundary"><b>Boundary:</b> Input remains verbatim. Translation, derivation, interpretation, and canon are appended as separate named layers.</p>
     `;
     teach.insertAdjacentElement('afterend', panel);
   }
@@ -199,7 +199,7 @@
     setText('codexScience', data.science);
     setText('codexInstrument', data.instrument);
     setText('codexMyth', data.myth);
-    document.getElementById('codexBoundary').innerHTML = `<b>Boundary:</b> ${data.boundary} Experimental/theoretical layer; interpretive, not proof.`;
+    document.getElementById('codexBoundary').innerHTML = `<b>Boundary:</b> ${data.boundary} Input remains verbatim; this entry appends a named model layer.`;
   }
 
   function setText(id, value) {

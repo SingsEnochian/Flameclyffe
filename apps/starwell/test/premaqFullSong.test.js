@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { PREMAQ_AXES, premaqToTemporalState } from '../src/arcsweep-temporal-quantum/engine.js';
+import { PREMAQ_AXES, PREMAQ_DYNAMIC_AXES, premaqToTemporalState } from '../src/arcsweep-temporal-quantum/engine.js';
 import {
   PREMAQ_SONG_AXIS_CYCLES,
   PREMAQ_SONG_CYCLES_PER_AXIS,
@@ -38,35 +38,40 @@ function makeState() {
   });
 }
 
-test('full PREMAQ song gives every axis exactly 35 chained cycles', () => {
+test('full PREMAQ song gives every dynamic axis exactly 35 chained cycles and never sonifies Qualia', () => {
   const source = makeState();
   const plan = buildPremaqSongPlan({
     state: source,
     rootHz: 220,
     bpm: 84,
-    focus: 'Q',
+    focus: 'R',
     compressionStrength: 0.65,
     compressionGain: 1.2,
     releaseFraction: 0.35,
   });
 
   assert.equal(PREMAQ_SONG_CYCLES_PER_AXIS, 35);
-  assert.equal(PREMAQ_SONG_AXIS_CYCLES, 245);
-  assert.equal(PREMAQ_SONG_NOTE_COUNT, 490);
+  assert.equal(PREMAQ_SONG_AXIS_CYCLES, 210);
+  assert.equal(PREMAQ_SONG_NOTE_COUNT, 420);
   assert.equal(plan.cycles.length, 35);
-  assert.equal(plan.axis_cycle_count, 245);
-  assert.equal(plan.scheduled_note_count, 490);
+  assert.equal(plan.axis_cycle_count, 210);
+  assert.equal(plan.scheduled_note_count, 420);
   assert.equal(plan.source_state_id, source.state_id);
   assert.equal(plan.next_operation, 'compression-of-release');
+  assert.deepEqual(plan.axes, PREMAQ_DYNAMIC_AXES);
+  assert.deepEqual(plan.context_only_axes, ['Q']);
+  assert.equal(plan.qualia_sonified, false);
 
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     assert.equal(plan.voice_cycle_counts[axis], 35);
   }
+  assert.equal(Object.hasOwn(plan.voice_cycle_counts, 'Q'), false);
 
   for (const [index, cycle] of plan.cycles.entries()) {
     assert.equal(cycle.cycle, index + 1);
-    assert.equal(cycle.voices.length, PREMAQ_AXES.length);
-    assert.deepEqual(cycle.voices.map((voice) => voice.axis), PREMAQ_AXES);
+    assert.equal(cycle.voices.length, PREMAQ_DYNAMIC_AXES.length);
+    assert.deepEqual(cycle.voices.map((voice) => voice.axis), PREMAQ_DYNAMIC_AXES);
+    assert.equal(cycle.voices.some((voice) => voice.axis === 'Q'), false);
     assert.ok(cycle.voices.every((voice) => Number.isFinite(voice.compression_playback_hz)));
     assert.ok(cycle.voices.every((voice) => Number.isFinite(voice.release_playback_hz)));
     if (index === 0) {

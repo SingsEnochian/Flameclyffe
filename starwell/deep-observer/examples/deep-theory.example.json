@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "dataset_kind": "deep_theory",
+  "parallel_datasets": ["DEEPStory", "DEEPTime"],
+  "id": "deep-theory-example-black-hole-star-normal-form",
+  "created_at": "2026-08-14T13:34:00.000Z",
+  "title": "Natural-system cusp control semantics",
+  "summary": "Illustrative DEEPTheory candidate showing that a domain-general cusp model can carry non-intentional astrophysical control semantics without equating the normal-form coordinates with physical density or accretion units.",
+  "domain": "astrophysics",
+  "theory_kind": "topology_model",
+  "status": "candidate",
+  "source_refs": [
+    {
+      "ref": "external-independent-black-hole-star-2026",
+      "dataset": "external",
+      "record_type": "recorded",
+      "checksum": null,
+      "note": "Context source for the black-hole-star / Little Red Dot natural-system QA fixture."
+    }
+  ],
+  "models": [
+    {
+      "id": "canonical-cusp-potential/v1",
+      "name": "Canonical cusp normal form",
+      "equation": "x^3 + a*x + b = 0",
+      "control_semantics": {
+        "a": {
+          "key": "a",
+          "role": "envelope-density-control",
+          "label": "Envelope-density control",
+          "unit": "normal-form",
+          "source": "illustrative-astrophysics-projection",
+          "intentional": false
+        },
+        "b": {
+          "key": "b",
+          "role": "accretion-rate-control",
+          "label": "Accretion-rate control",
+          "unit": "normal-form",
+          "source": "illustrative-astrophysics-projection",
+          "intentional": false
+        }
+      },
+      "calibration_state": "normal-form-only",
+      "calibration_note": "No physical density or accretion-rate calibration is asserted.",
+      "physical_claim": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding-domain-semantics",
+      "kind": "limitation",
+      "text": "The cusp coordinates are model controls whose domain semantics are explicit; their numeric values are not physical measurements until a separate calibration is supplied.",
+      "source_refs": ["external-independent-black-hole-star-2026"],
+      "confidence": 1
+    }
+  ],
+  "source_integrity": {
+    "raw_sources_immutable": true,
+    "analyses_append_only": true,
+    "silent_canonicalisation_forbidden": true
+  },
+  "review": {
+    "human_review_required": true,
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "note": "Example candidate only."
+  },
+  "authority": {
+    "physical_claim": false,
+    "canon_commit": false,
+    "domain_semantics_explicit": true,
+    "cross_domain_numeric_equivalence_assumed": false
+  },
+  "append_only_revisions": []
+}

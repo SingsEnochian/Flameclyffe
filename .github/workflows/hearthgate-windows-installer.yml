@@ -6,6 +6,7 @@ on:
     paths:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
+      - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
       - "config/engine-name-authority.json"
       - "scripts/deny-stale-engine-contracts.mjs"
@@ -21,6 +22,7 @@ on:
     paths:
       - "apps/starwell-server/**"
       - "apps/starwell/**"
+      - "apps/project-zero-companion/**"
       - "starwell/deep-observer/schemas/**"
       - "config/engine-name-authority.json"
       - "scripts/deny-stale-engine-contracts.mjs"
@@ -84,13 +86,15 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: npm run contracts:verify
 
-      - name: Test and build packaged STARWELL framework
+      - name: Test and build packaged STARWELL + Companion surfaces
         working-directory: ${{ github.workspace }}
         env:
           STARWELL_BASE: /starwell/
+          PROJECT_ZERO_BASE: /project-zero-companion/
         run: |
           npm run starwell:test
           npm run starwell:build
+          npm run project-zero:build
 
       - name: Install locked Hearthgate dependencies
         run: npm ci
@@ -103,6 +107,9 @@ jobs:
 
       - name: Stage STARWELL inside Hearthgate
         run: npm run stage:starwell
+
+      - name: Stage Project Zero Companion inside Hearthgate
+        run: npm run stage:project-zero-companion
 
       - name: Prepare deterministic installer assets
         run: npm run prepare:assets
@@ -132,6 +139,7 @@ jobs:
           $asar = "$resourcesRoot/app.asar"
           $unpackedRoot = "$resourcesRoot/app.asar.unpacked"
           $starwellRoot = "$unpackedRoot/public/starwell"
+          $companionRoot = "$unpackedRoot/public/project-zero-companion"
           $required = @(
             $asar,
             "$starwellRoot/index.html",
@@ -139,10 +147,11 @@ jobs:
             "$starwellRoot/arcsweep-continuity/index.html",
             "$starwellRoot/world-tone-approval/index.html",
             "$starwellRoot/modules/bifrost-arcsweep.module.json",
-            "$starwellRoot/schemas/premaq-state-v2.schema.json",
+            "$starwellRoot/schemas/premaqc-state-v2.schema.json",
             "$starwellRoot/schemas/bifrost-temporal-state-v1.schema.json",
             "$starwellRoot/schemas/world-tone-approval.schema.json",
             "$starwellRoot/schemas/ipad-somatic-haptic-receipt.schema.json",
+            "$companionRoot/index.html",
             "$unpackedRoot/server-secure.js",
             "$unpackedRoot/security/local-boundary.js",
             "$unpackedRoot/fontforge/server.js"
@@ -165,6 +174,11 @@ jobs:
             }
           }
 
+          $companionHtml = Get-Content -Raw -Path "$companionRoot/index.html"
+          if (-not $companionHtml.Contains('/project-zero-companion/')) {
+            throw "Packaged Project Zero Companion entry does not use the Hearthgate /project-zero-companion/ asset base."
+          }
+
           $somaticHtml = Get-Content -Raw -Path "$starwellRoot/world-tone-approval/index.html"
           if (-not $somaticHtml.Contains('ROWAN APPROVAL GATE')) {
             throw "Packaged somatic gate does not expose Rowan's persistent approval action."
@@ -183,11 +197,47 @@ jobs:
           if ($manifest.moduleId -ne 'bifrost-arcsweep') {
             throw "Packaged Bifröst manifest has the wrong moduleId."
           }
+          if ($manifest.version -ne '0.5.0') {
+            throw "Packaged Bifröst manifest is not on the canonical PREMAQC contract version."
+          }
           if ($manifest.engine.formalism -ne 'temporal-compression-release-state-machine') {
             throw "Packaged Bifröst manifest does not execute the compression-release formalism."
           }
           if ($manifest.engine.physicalClaim -ne $false) {
             throw "Packaged Bifröst manifest violates the physical-claim boundary."
+          }
+          if ($manifest.schemas.premaqc -ne 'schemas/premaqc-state-v2.schema.json') {
+            throw "Packaged Bifröst manifest does not register the canonical PREMAQC schema."
+          }
+          if ($manifest.engine.premaqcShokzSoundfont -ne 'src/premaqc-shokz-soundfont.js') {
+            throw "Packaged Bifröst manifest does not register the canonical PREMAQC Shokz soundfont."
+          }
+          if ($manifest.engine.twoShorePremaqcGate -ne 'src/two-shore-premaqc-gate.js') {
+            throw "Packaged Bifröst manifest does not register the canonical two-shore PREMAQC gate."
+          }
+          if ($manifest.authorityContract.premaqcCanonicalVocabulary -ne $true) {
+            throw "Packaged Bifröst manifest does not declare PREMAQC canonical."
+          }
+          if ($manifest.authorityContract.legacyPremaqAliasesCompatibilityOnly -ne $true) {
+            throw "Packaged Bifröst manifest does not quarantine legacy aliases."
+          }
+          if (($manifest.authorityContract.dynamicPremaqcAxes -join ',') -ne 'P,C,R,E,M,A') {
+            throw "Packaged Bifröst manifest has the wrong dynamic PREMAQC axes."
+          }
+          if (($manifest.authorityContract.contextOnlyPremaqcAxes -join ',') -ne 'Q') {
+            throw "Packaged Bifröst manifest does not keep Q context-only."
+          }
+          if ($manifest.authorityContract.qualiaFirsthandOnly -ne $true) {
+            throw "Packaged Bifröst manifest does not preserve firsthand Qualia authority."
+          }
+          if ($manifest.authorityContract.qualiaMagnitudeInferenceAllowed -ne $false) {
+            throw "Packaged Bifröst manifest permits Qualia magnitude inference."
+          }
+          if ($manifest.authorityContract.qualiaCompressionFocusAllowed -ne $false) {
+            throw "Packaged Bifröst manifest permits Q as compression focus."
+          }
+          if ($manifest.authorityContract.qualiaSonified -ne $false) {
+            throw "Packaged Bifröst manifest permits Qualia sonification."
           }
           if ($manifest.authorityContract.collapseExists -ne $false) {
             throw "Packaged Bifröst manifest reintroduces collapse."
@@ -198,8 +248,25 @@ jobs:
           if ($manifest.authorityContract.toneApproval -ne 'rowan-human-calibration-owner') {
             throw "Packaged Bifröst manifest removes Rowan tone-approval authority."
           }
+          if ($manifest.installContract.verifyPremaqcSoundfont -ne 'src/premaqc-shokz-soundfont.js') {
+            throw "Packaged Bifröst install contract omits the canonical PREMAQC soundfont."
+          }
+          if ($manifest.installContract.verifyTwoShorePremaqcGate -ne 'src/two-shore-premaqc-gate.js') {
+            throw "Packaged Bifröst install contract omits the canonical PREMAQC gate."
+          }
           if ($manifest.installContract.verifySomaticRoute -ne 'world-tone-approval/index.html') {
             throw "Packaged Bifröst manifest omits the somatic approval route."
+          }
+
+          $premaqcSchema = Get-Content -Raw -Path "$starwellRoot/schemas/premaqc-state-v2.schema.json" | ConvertFrom-Json
+          if ($premaqcSchema.title -ne 'PREMAQC Observation State v2') {
+            throw "Packaged PREMAQC state schema is invalid."
+          }
+          if ($premaqcSchema.'$defs'.qualiaReport.properties.authority.const -ne 'firsthand-only') {
+            throw "Packaged PREMAQC schema does not preserve firsthand-only Qualia authority."
+          }
+          if ($premaqcSchema.'$defs'.qualiaReport.properties.inferred.const -ne $false) {
+            throw "Packaged PREMAQC schema permits inferred Qualia."
           }
 
           $somaticSchema = Get-Content -Raw -Path "$starwellRoot/schemas/ipad-somatic-haptic-receipt.schema.json" | ConvertFrom-Json
@@ -222,10 +289,13 @@ jobs:
           - File: ``$($installer.Name)``
           - Size: $([math]::Round($installer.Length / 1MB, 2)) MB
           - SHA-256: ``$($hash.Hash)``
+          - PREMAQC: canonical; P/C/R/E/M/A dynamic; Q firsthand context-only
           - Formalism: compression → release → compression of the release
           - Somatic gate: packaged and Rowan-owned
+          - Project Zero Companion: packaged at ``/project-zero-companion/`` with native selected-folder watcher IPC
+          - Project Zero authority: external/project-owned; Companion is Flameclyffe integration only
           - Naming authority: Rowan, fail-closed
-          - Security: loopback-only services and restricted origins
+          - Security: loopback-only services, restricted origins, metadata-only explicit folder watcher
           - Signing: unsigned development build
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 

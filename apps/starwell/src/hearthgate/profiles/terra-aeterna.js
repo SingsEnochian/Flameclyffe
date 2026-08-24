@@ -1,13 +1,17 @@
 import { defineHouseProfile } from '../contracts.js';
 
-const IDENTITY_JACOBIAN_7 = Object.freeze([
-  Object.freeze([1, 0, 0, 0, 0, 0, 0]),
-  Object.freeze([0, 1, 0, 0, 0, 0, 0]),
-  Object.freeze([0, 0, 1, 0, 0, 0, 0]),
-  Object.freeze([0, 0, 0, 1, 0, 0, 0]),
-  Object.freeze([0, 0, 0, 0, 1, 0, 0]),
-  Object.freeze([0, 0, 0, 0, 0, 1, 0]),
-  Object.freeze([0, 0, 0, 0, 0, 0, 1]),
+// Dynamic axes: [P, C, R, E, M, A]. Q is firsthand-report context only.
+// Terra Aeterna physics: resonant work heightens presence; deep entanglement
+// tensions coherence; memory grounds agency. Qualia may accompany the crossing
+// as firsthand context, but the world profile never derives or evolves it.
+const TERRA_AETERNA_JACOBIAN = Object.freeze([
+  Object.freeze([1,    0,     0.08, 0,     0,     0,    0]), // P ← R
+  Object.freeze([0,    1,     0,   -0.07,  0,     0,    0]), // C ← −E
+  Object.freeze([0.05, 0,     1,    0,     0,     0,    0]), // R ← P
+  Object.freeze([0,    0,     0,    1,     0,     0,    0]), // E self-only
+  Object.freeze([0,    0.04,  0,    0,     1,     0,    0]), // M ← C
+  Object.freeze([0,    0,     0,    0,     0.07,  1,    0]), // A ← M
+  Object.freeze([0,    0,     0,    0,     0,     0,    1]), // Q context-only identity
 ]);
 
 export const terraAeternaProfile = defineHouseProfile({
@@ -45,7 +49,7 @@ export const terraAeternaProfile = defineHouseProfile({
     initialDelta: 1,
     bridgeCoupling: 0.08,
     compressionRelease: {
-      focusAxis: 'Q',
+      focusAxis: 'R',
       enterThreshold: 0.82,
       releaseThreshold: 0.68,
       compressionGain: 1,
@@ -85,11 +89,12 @@ export const terraAeternaProfile = defineHouseProfile({
     values: ['loyalty', 'love', 'joy', 'compassion'],
   },
   transferFunctions: {
-    version: 'terra-transfer/1.1.0',
-    source_axes: ['P', 'C', 'R', 'E', 'M', 'A', 'Q'],
+    version: 'terra-transfer/1.2.0',
+    source_axes: ['P', 'C', 'R', 'E', 'M', 'A'],
+    context_only_axes: ['Q'],
     outputs: ['glyph', 'tone', 'visual', 'haptic', 'narrative'],
-    jacobianVersion: 'terra-jacobian/reference-identity-v1',
-    jacobian: IDENTITY_JACOBIAN_7,
+    jacobianVersion: 'terra-jacobian/world-coupled-v2',
+    jacobian: TERRA_AETERNA_JACOBIAN,
   },
   packages: [
     'hearthgate.design',

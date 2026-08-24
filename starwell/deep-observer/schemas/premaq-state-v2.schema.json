@@ -43,13 +43,13 @@
       "additionalProperties": false,
       "required": ["P", "C", "R", "E", "M", "A", "Q"],
       "properties": {
-        "P": { "$ref": "#/$defs/component" },
-        "C": { "$ref": "#/$defs/component" },
-        "R": { "$ref": "#/$defs/component" },
-        "E": { "$ref": "#/$defs/component" },
-        "M": { "$ref": "#/$defs/component" },
-        "A": { "$ref": "#/$defs/component" },
-        "Q": { "$ref": "#/$defs/component" }
+        "P": { "$ref": "#/$defs/component", "description": "Presence — barometric and geomagnetic ground field" },
+        "C": { "$ref": "#/$defs/component", "description": "Coherence — solar, ionospheric, and electromagnetic" },
+        "R": { "$ref": "#/$defs/component", "description": "Resonance — Schumann, audio, and seismic" },
+        "E": { "$ref": "#/$defs/component", "description": "Entanglement — coherence, continuity, and cross-observation binding" },
+        "M": { "$ref": "#/$defs/component", "description": "Memory — lineage, provenance, and accumulated relation" },
+        "A": { "$ref": "#/$defs/component", "description": "Agency — available directed capacity to act, choose, and redirect" },
+        "Q": { "$ref": "#/$defs/component", "description": "Qualia — lived interiority, experiential quality, and the irreducible texture of the present state" }
       }
     },
     "receipt_id": { "type": "string", "minLength": 1 },

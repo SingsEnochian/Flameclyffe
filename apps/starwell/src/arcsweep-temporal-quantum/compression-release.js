@@ -1,7 +1,7 @@
 import {
   BIFROST_RECEIPT_SCHEMA,
   BifrostTemporalError,
-  PREMAQ_AXES,
+  PREMAQ_DYNAMIC_AXES,
   evolveTemporalState,
   validateTemporalState,
 } from './engine.js';
@@ -46,41 +46,41 @@ function makeId(prefix, idFactory) {
 }
 
 function normaliseDistribution(weights, field) {
-  const total = PREMAQ_AXES.reduce((sum, axis) => sum + weights[axis], 0);
+  const total = PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + weights[axis], 0);
   if (!Number.isFinite(total) || total <= EPSILON) {
     throw new BifrostTemporalError(`${field} has no positive mass`, 'empty-distribution');
   }
-  return Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, weights[axis] / total]));
+  return Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [axis, weights[axis] / total]));
 }
 
 function probabilityVector(amplitudes) {
-  return Object.fromEntries(PREMAQ_AXES.map((axis) => [
+  return Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [
     axis,
     (amplitudes[axis].re ** 2) + (amplitudes[axis].im ** 2),
   ]));
 }
 
 function shannonEntropy(probabilities) {
-  return PREMAQ_AXES.reduce((sum, axis) => {
+  return PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => {
     const probability = probabilities[axis];
     return probability > EPSILON ? sum - probability * Math.log(probability) : sum;
   }, 0);
 }
 
 function l1Distance(left, right) {
-  return PREMAQ_AXES.reduce((sum, axis) => sum + Math.abs(left[axis] - right[axis]), 0);
+  return PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + Math.abs(left[axis] - right[axis]), 0);
 }
 
 function derivativeRms(derivatives = {}) {
-  const squared = PREMAQ_AXES.reduce((sum, axis) => {
+  const squared = PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => {
     const value = requireFinite(derivatives[axis] ?? 0, `derivative ${axis}`);
     return sum + value ** 2;
   }, 0);
-  return Math.sqrt(squared / PREMAQ_AXES.length);
+  return Math.sqrt(squared / PREMAQ_DYNAMIC_AXES.length);
 }
 
 function compressionPotential(compressed, prior) {
-  return PREMAQ_AXES.reduce((sum, axis) => {
+  return PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => {
     const q = compressed[axis];
     const p = prior[axis];
     if (q <= EPSILON) return sum;
@@ -116,6 +116,14 @@ function normalisedWeights(input = {}) {
   return Object.fromEntries(Object.entries(weights).map(([key, value]) => [key, value / total]));
 }
 
+function dynamicJacobian(jacobian) {
+  if (!Array.isArray(jacobian)) return jacobian;
+  if (jacobian.length === 7 && jacobian.every((row) => Array.isArray(row) && row.length === 7)) {
+    return jacobian.slice(0, 6).map((row) => row.slice(0, 6));
+  }
+  return jacobian;
+}
+
 export function temporalCompressionDriver(stateInput, {
   foldIndex,
   foldActive,
@@ -130,7 +138,7 @@ export function temporalCompressionDriver(stateInput, {
     ? clamp((foldIndex - enterThreshold) / (1 - enterThreshold))
     : Number(foldIndex >= 1);
   const derivative = clamp(derivativeRms(state.derivatives));
-  const entropy = clamp(state.entropy / Math.log(PREMAQ_AXES.length));
+  const entropy = clamp(state.entropy / Math.log(PREMAQ_DYNAMIC_AXES.length));
   const phase = clamp((1 - Math.cos(state.spiral?.angle ?? 0)) / 2);
   const raw = (
     calibrated.fold * foldDepth
@@ -149,11 +157,12 @@ export function temporalCompressionDriver(stateInput, {
     phase_pressure: phase,
     weights: Object.freeze(calibrated),
     compression_strength: strength,
+    qualia_dynamic: false,
   });
 }
 
 export function compressRelease(stateInput, {
-  focus = 'Q',
+  focus = 'R',
   compressionStrength = 0.65,
   compressionGain = 1,
   releaseFraction = 0.35,
@@ -168,7 +177,7 @@ export function compressRelease(stateInput, {
   idFactory,
 } = {}) {
   const prior = validateTemporalState(stateInput);
-  if (!PREMAQ_AXES.includes(focus)) {
+  if (!PREMAQ_DYNAMIC_AXES.includes(focus)) {
     throw new BifrostTemporalError(`Unknown compression focus: ${focus}`, 'invalid-compression-focus');
   }
   requireUnitInterval(compressionStrength, 'compressionStrength');
@@ -193,8 +202,8 @@ export function compressRelease(stateInput, {
   const priorProbabilities = probabilityVector(prior.amplitudes);
   const compressedWeights = {};
   const exponentScale = compressionStrength * compressionGain;
-  for (const axis of PREMAQ_AXES) {
-    const concentration = axis === focus ? PREMAQ_AXES.length - 1 : -1;
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
+    const concentration = axis === focus ? PREMAQ_DYNAMIC_AXES.length - 1 : -1;
     const exponent = exponentScale * concentration;
     if (Math.abs(exponent) > MAX_EXPONENT) {
       throw new BifrostTemporalError('Compression exponent exceeds the finite execution range', 'compression-overflow');
@@ -204,7 +213,7 @@ export function compressRelease(stateInput, {
   const compressedProbabilities = normaliseDistribution(compressedWeights, 'compressed distribution');
 
   const releasedWeights = {};
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     const derivativeFlow = Math.max(0, prior.derivatives?.[axis] ?? 0) * derivativeRelease;
     const rememberedFlow = Math.max(0, memoryFlow?.[axis] ?? 0) * memoryRelease;
     releasedWeights[axis] = (
@@ -217,7 +226,7 @@ export function compressRelease(stateInput, {
   const releasedProbabilities = normaliseDistribution(releasedWeights, 'released distribution');
 
   const amplitudes = {};
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     const old = prior.amplitudes[axis];
     const priorPhase = Math.atan2(old.im, old.re);
     const phaseAdvance = phaseReleaseGain * (compressedProbabilities[axis] - priorProbabilities[axis]);
@@ -260,6 +269,7 @@ export function compressRelease(stateInput, {
     release_fraction: releaseFraction,
     derivative_release: derivativeRelease,
     memory_release: memoryRelease,
+    qualia_evolved: false,
     compression_probabilities: clone(compressedProbabilities),
     release_probabilities: clone(releasedProbabilities),
     compression_distance: compressedDistance,
@@ -275,7 +285,7 @@ export function compressRelease(stateInput, {
     state_id: nextStateId,
     amplitudes,
     probabilities: releasedProbabilities,
-    normalisation: PREMAQ_AXES.reduce((sum, axis) => sum + releasedProbabilities[axis], 0),
+    normalisation: PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + releasedProbabilities[axis], 0),
     entropy,
     spiral: {
       cycle,
@@ -293,6 +303,7 @@ export function compressRelease(stateInput, {
       compressed_probabilities: compressedProbabilities,
       released_probabilities: releasedProbabilities,
       next_operation: 'compression-of-release',
+      qualia_dynamic: false,
     },
     history: [...prior.history, {
       state_id: prior.state_id,
@@ -372,7 +383,7 @@ export function advanceWorldCompressionRelease({
     throw new BifrostTemporalError('A world compression profile is required', 'missing-world-profile');
   }
   const evolved = evolveTemporalState(state, { ...evolution, clock, idFactory });
-  const audit = analyseWorldJacobian(jacobian);
+  const audit = analyseWorldJacobian(dynamicJacobian(jacobian));
   const enter = worldProfile.enterThreshold;
   const release = worldProfile.releaseThreshold;
   const foldActive = updateFoldLatch(audit.fold_index, foldWasActive, { enter, release });
@@ -383,7 +394,7 @@ export function advanceWorldCompressionRelease({
     weights: worldProfile.temporalWeights,
   });
   const released = compressRelease(evolved, {
-    focus: worldProfile.focusAxis,
+    focus: worldProfile.focusAxis === 'Q' ? 'R' : worldProfile.focusAxis,
     compressionStrength: driver.compression_strength,
     compressionGain: worldProfile.compressionGain,
     releaseFraction: worldProfile.releaseFraction,
@@ -418,5 +429,6 @@ export function advanceWorldCompressionRelease({
     tone_sequence: toneSequence,
     state: released,
     receipt: released.receipts.at(-1),
+    authority: Object.freeze({ qualia_dynamic: false, qualia_inference_allowed: false }),
   });
 }

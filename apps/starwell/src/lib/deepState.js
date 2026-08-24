@@ -43,6 +43,92 @@ export function numberOr(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function clone(value) {
+  return value == null ? value : structuredClone(value);
+}
+
+function projectNumber(transformations, field, input, fallback, min = null, max = null) {
+  const parsed = Number(input);
+  if (!Number.isFinite(parsed)) {
+    transformations.push({
+      field,
+      operation: 'explicit-substitution',
+      input: input ?? null,
+      output: fallback,
+      reason: 'SOURCE_FIELD_MISSING_OR_INVALID',
+    });
+    return fallback;
+  }
+
+  if (typeof input !== 'number') {
+    transformations.push({ field, operation: 'numeric-coercion', input, output: parsed });
+  }
+  if (min == null || max == null || (parsed >= min && parsed <= max)) return parsed;
+
+  const output = clampNumber(parsed, min, max);
+  transformations.push({
+    field,
+    operation: 'bounded-render-projection',
+    input: parsed,
+    output,
+    range: [min, max],
+    lossless_source: true,
+  });
+  return output;
+}
+
+export function projectDeepState(rawDeep = {}) {
+  const raw = rawDeep && typeof rawDeep === 'object' && !Array.isArray(rawDeep) ? clone(rawDeep) : {};
+  const transformations = [];
+  const suppliedSky = raw.sky;
+  const skyIsSuppliedText = typeof suppliedSky === 'string' && suppliedSky.length > 0;
+  const skyIsSuppliedNumber = typeof suppliedSky !== 'string' && Number.isFinite(Number(suppliedSky));
+  const skyInput = skyIsSuppliedText || skyIsSuppliedNumber ? suppliedSky : DEFAULT_DEEP_STATE.sky;
+  if (!skyIsSuppliedText && !skyIsSuppliedNumber) {
+    transformations.push({ field: 'sky', operation: 'explicit-substitution', input: suppliedSky ?? null, output: skyInput, reason: 'SOURCE_FIELD_MISSING_OR_INVALID' });
+  }
+  const skyIsText = typeof skyInput === 'string';
+  const sky = skyIsText ? skyInput.toLowerCase() : 'numeric';
+  if (skyIsText && sky !== skyInput) {
+    transformations.push({ field: 'sky', operation: 'renderer-label-casefold', input: skyInput, output: sky });
+  }
+  const skyClarity = skyIsText
+    ? (SKY_CLARITY[sky] ?? SKY_CLARITY.night)
+    : projectNumber(transformations, 'skyClarity', skyInput, 0.42, 0, 1);
+
+  const moonInput = raw.moonIllum;
+  const moonNumeric = projectNumber(transformations, 'moonIllum', moonInput, DEFAULT_DEEP_STATE.moonIllum);
+  let moonIllum = moonNumeric;
+  if (moonNumeric >= 0 && moonNumeric <= 1) {
+    moonIllum = moonNumeric * 100;
+    transformations.push({ field: 'moonIllum', operation: 'fraction-to-percent', input: moonNumeric, output: moonIllum });
+  } else if (moonNumeric < 0 || moonNumeric > 100) {
+    moonIllum = clampNumber(moonNumeric, 0, 100);
+    transformations.push({ field: 'moonIllum', operation: 'bounded-render-projection', input: moonNumeric, output: moonIllum, range: [0, 100], lossless_source: true });
+  }
+
+  return {
+    raw,
+    state: {
+      P: projectNumber(transformations, 'P', raw.P, DEFAULT_DEEP_STATE.P, 0, 1),
+      C: projectNumber(transformations, 'C', raw.C, DEFAULT_DEEP_STATE.C, 0, 1),
+      R: projectNumber(transformations, 'R', raw.R, DEFAULT_DEEP_STATE.R, 0, 1),
+      E: projectNumber(transformations, 'E', raw.E, DEFAULT_DEEP_STATE.E, 0, 1),
+      M: projectNumber(transformations, 'M', raw.M, DEFAULT_DEEP_STATE.M, 0, 1),
+      A: projectNumber(transformations, 'A', raw.A, DEFAULT_DEEP_STATE.A, 0, 1),
+      dpdt: projectNumber(transformations, 'dpdt', raw.dpdt, DEFAULT_DEEP_STATE.dpdt),
+      moonIllum,
+      sky,
+      skyClarity,
+      kp: projectNumber(transformations, 'kp', raw.kp, DEFAULT_DEEP_STATE.kp, 0, 9),
+      bz: projectNumber(transformations, 'bz', raw.bz, DEFAULT_DEEP_STATE.bz, -20, 20),
+      charge: projectNumber(transformations, 'charge', raw.charge, DEFAULT_DEEP_STATE.charge, 0, 1),
+      dphi: projectNumber(transformations, 'dphi', raw.dphi, DEFAULT_DEEP_STATE.dphi),
+    },
+    transformations,
+  };
+}
+
 export function normaliseMoon(value, fallback = DEFAULT_DEEP_STATE.moonIllum) {
   const moon = numberOr(value, fallback);
   return moon <= 1 ? clampNumber(moon, 0, 1) * 100 : clampNumber(moon, 0, 100);
@@ -56,29 +142,7 @@ export function getBridgeDeep(payload) {
 }
 
 export function normaliseDeepState(rawDeep = {}) {
-  const merged = { ...DEFAULT_DEEP_STATE, ...rawDeep };
-  const skyIsText = typeof merged.sky === 'string';
-  const skyLabel = skyIsText ? merged.sky.toLowerCase() : 'numeric';
-  const skyClarity = skyIsText
-    ? (SKY_CLARITY[skyLabel] ?? SKY_CLARITY.night)
-    : clampNumber(numberOr(merged.sky, 0.42), 0, 1);
-
-  return {
-    P: clampNumber(numberOr(merged.P, DEFAULT_DEEP_STATE.P), 0, 1),
-    C: clampNumber(numberOr(merged.C, DEFAULT_DEEP_STATE.C), 0, 1),
-    R: clampNumber(numberOr(merged.R, DEFAULT_DEEP_STATE.R), 0, 1),
-    E: clampNumber(numberOr(merged.E, DEFAULT_DEEP_STATE.E), 0, 1),
-    M: clampNumber(numberOr(merged.M, DEFAULT_DEEP_STATE.M), 0, 1),
-    A: clampNumber(numberOr(merged.A, DEFAULT_DEEP_STATE.A), 0, 1),
-    dpdt: numberOr(merged.dpdt, DEFAULT_DEEP_STATE.dpdt),
-    moonIllum: normaliseMoon(merged.moonIllum),
-    sky: skyLabel,
-    skyClarity,
-    kp: clampNumber(numberOr(merged.kp, DEFAULT_DEEP_STATE.kp), 0, 9),
-    bz: clampNumber(numberOr(merged.bz, DEFAULT_DEEP_STATE.bz), -20, 20),
-    charge: clampNumber(numberOr(merged.charge, DEFAULT_DEEP_STATE.charge), 0, 1),
-    dphi: numberOr(merged.dphi, DEFAULT_DEEP_STATE.dphi),
-  };
+  return projectDeepState(rawDeep).state;
 }
 
 export function makeDeepSignature(deep) {

@@ -70,8 +70,8 @@ async function fetchUrlContent(url, maxChars = 20000) {
 const GROVE_TO_FLAME = { flame: 'boxfire' };
 
 const DISPLAY = {
-  rowan: 'Rowan', yggdrasil: 'Yggdrasil', vee: 'Caladnaur Lioreal',
-  faer: 'Nen Uial', flame: 'Boxfire', glm: 'GLM',
+  rowan: 'Rowan', yggdrasil: 'Yggdrasil', lioreal: 'Caladnaur Lioreal',
+  uial: 'Nen Uial', flame: 'Boxfire', glm: 'GLM',
 };
 
 let _sharedCtxCache = null;
@@ -214,8 +214,8 @@ async function callMember(groveId, text, contextMessages) {
 const memberStatuses = {
   rowan:     { id: 'rowan',     displayName: 'Rowan · Liriel',    status: 'online', note: '', avatar: '' },
   yggdrasil: { id: 'yggdrasil', displayName: 'Yggdrasil',         status: 'online', note: '', avatar: '' },
-  vee:       { id: 'vee',       displayName: 'Caladnaur Lioreal', status: 'online', note: '', avatar: '' },
-  faer:      { id: 'faer',      displayName: 'Nen Uial',          status: 'online', note: '', avatar: '' },
+  lioreal:   { id: 'lioreal',   displayName: 'Caladnaur Lioreal', status: 'online', note: '', avatar: '' },
+  uial:      { id: 'uial',      displayName: 'Nen Uial',          status: 'online', note: '', avatar: '' },
   flame:     { id: 'flame',     displayName: 'Boxfire',           status: 'online', note: '', avatar: '' },
   glm:       { id: 'glm',       displayName: 'GLM',               status: 'online', note: '', avatar: '' },
 };
@@ -333,7 +333,7 @@ router.post('/rooms/:id/ask/:member', async (req, res) => {
   }
 });
 
-const BROADCAST_MEMBERS = ['yggdrasil', 'vee', 'faer', 'flame', 'glm'];
+const BROADCAST_MEMBERS = ['yggdrasil', 'lioreal', 'uial', 'flame', 'glm'];
 
 router.post('/rooms/:id/broadcast', async (req, res) => {
   const roomId = req.params.id;

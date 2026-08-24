@@ -56,7 +56,7 @@ intentionally public and rate-limited
 Known review items:
 
 - `flameclyffe-auth` uses custom JWT minting and should receive full server-side WebAuthn verification before passkeys are treated as production-grade.
-- `faer-voice` is an open POST proxy with a text length limit. Add abuse/rate-limit thinking before broader public use.
+- `uial-voice` is an open POST proxy with a text length limit. Add abuse/rate-limit thinking before broader public use.
 - `lanternwire` serves a browser app and relies on Supabase auth/RLS; keep RLS policies and publishable key exposure reviewed.
 
 ## Safe migration practice

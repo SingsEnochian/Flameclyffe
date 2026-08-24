@@ -1,0 +1,147 @@
+{
+  "schema": "hearthfire.consolidation-final/v1",
+  "receipt_kind": "final-harvest-manifest",
+  "generated_at": "2026-08-19",
+  "repository": "SingsEnochian/Flameclyffe",
+  "living_branch": "integration/hearthfire-consolidation-v1",
+  "pull_request": 128,
+  "base_branch": "codex/arcsweep-feedback-loop",
+  "supersedes_status_of": "docs/handoffs/hearthfire-consolidation-v1.archive.json",
+  "detail_archive": "docs/handoffs/hearthfire-consolidation-v1.archive.json",
+  "governing_laws": [
+    "one living Hearthfire line; donor branches are provenance, not parallel authorities",
+    "current organ remains authoritative unless a donor proves stronger",
+    "graft code and tests together",
+    "House Runtime Broker/Braid is model and runtime transport authority",
+    "Hearthfire state is general browser-state authority; sidecars join it through typed extension state",
+    "canon, model observation, software receipts, and external-world claims remain distinct provenance classes",
+    "hidden reasoning is neither requested nor persisted",
+    "archive only after useful tissue is harvested, adapted, exactly subsumed, or explicitly rejected"
+  ],
+  "final_organs": {
+    "canon": [
+      "Re:Creators canon package and Altair layered canon/mechanics provenance",
+      "Steins;Gate canon package and non-canon Arcsweep mapping",
+      "Ta'veren Vaen current canon overlay: Kestrelle al’Valari, Age of Restoration, later Turning, surviving White/Black Towers, clean saidin"
+    ],
+    "writing_and_cognition": [
+      "Rich Text core",
+      "Knowledge/Voice/Subject Cortex",
+      "Constellation Lens and chronology-aware Writer Context",
+      "living House Presence and runtime-attested Constellation adapter",
+      "Scene Cognition",
+      "Self-Authorship review channel"
+    ],
+    "reaction": [
+      "Ask protocol and navigation engine",
+      "access policy and bridge",
+      "semantic response-return distinct from transport ACK",
+      "approved registry and continuity corridors",
+      "Route Map, graph snapshots, deterministic replay, flight receipts",
+      "Concordance metadata, DEEPStory software receipts, approved World Tone sync",
+      "Test Flight end-to-end acceptance harness",
+      "Glyph Continuity, blind return context, and Glyph Drift Observatory"
+    ],
+    "runtime_and_state": [
+      "House Runtime Broker/Braid remains sole model/runtime transport authority",
+      "React-ion and Script Cortex persist inside Hearthfire state",
+      "generic extension snapshots prevent sidecar/main-state races",
+      "legacy localStorage/IndexedDB donor stores are migration or archive sources only"
+    ],
+    "harmonic_and_math": [
+      "Hearthgate Braided Spine v1.8 governing contract",
+      "canonical v1.8 config",
+      "newer deterministic Math Spine packet/replay engine retained as authority",
+      "browser v1.8 primitives and executable runtime",
+      "Heimdall v1.8-aware sonification compiler",
+      "Kelyran Galdr instrument and observatory",
+      "Runa 3·6·9 percussion/orchestration",
+      "Wardenclyffe v1.8 layer engine",
+      "Case 000 Glass Halo braid, data, pages, and regression tests",
+      "pre-v1.8 mathematics preserved under docs/archive/mathematics/pre-v1.8/"
+    ],
+    "shell": [
+      "one House global shell and rail",
+      "living Arcsweep route is primary House workbench",
+      "DEEP geometry guard preserves sovereign instrument geometry",
+      "Bifröst may remain directly reachable for compatibility but is not a parallel authority"
+    ]
+  },
+  "donors": [
+    {
+      "pr": 117,
+      "branch": "feature/bifrost-full-assembly-v1",
+      "disposition": "archive-ready",
+      "survived": ["Runa Harmonic Spiral contract/schema", "stream merge law"],
+      "exactly_subsumed": ["compression-release", "somatic lineage/haptics", "Feather stop", "Two-Shore geometry/gate", "World Tone lineage"],
+      "rejected": ["duplicate Supabase sync transport", "donor model-vessel authority", "standalone Bifröst web authority"]
+    },
+    {
+      "pr": 122,
+      "branch": "design/lattice-deep-observer-machine",
+      "disposition": "archive-ready",
+      "survived": ["global House shell law", "Stonewood vestments", "DEEP geometry regression guard"],
+      "adapted": ["navigation routes to living Arcsweep instead of obsolete primary Bifröst door"]
+    },
+    {
+      "pr": 124,
+      "branch": "math-spine-v1.8-project-rollout",
+      "donor_head": "0718c2a4f6dd5469dbfa9f627bc2059549f4d534",
+      "disposition": "archive-ready",
+      "harvest_commits": [
+        "7d898ffebfeff12b7187602204c8c0472734bc86",
+        "e8db28213040135168acba6f5d4805e113afd64b",
+        "6398f94415420547cad553aab76842770a48878b",
+        "cb3f9c73235eb6e4544cd594a8a8a4a339041009"
+      ],
+      "survived": [
+        "Hearthgate Braided Spine v1.8 governing document",
+        "executable browser math runtime",
+        "Heimdall/Galdr/Runa/Wardenclyffe v1.8 orchestration",
+        "Case 000 Glass Halo braid/data/pages/tests",
+        "pre-v1.8 archive lineage"
+      ],
+      "already_present": ["canonical v1.8 config", "newer deterministic Math Spine packet/replay authority"],
+      "rejected": ["older donor Vite/Netlify build plumbing", "obsolete Bifröst interface expectations", "overlapping older generic packet/runtime code", "donor architecture/link-map prose where living maps were newer"]
+    },
+    {
+      "pr": 126,
+      "branch": "feature/react-ion-engine-v0.1",
+      "disposition": "archive-ready",
+      "survived": ["protocol", "navigation", "bridge/access", "response return", "registry", "route inspection", "graph/replay", "route map", "Glyph Continuity", "truth plumbing", "Test Flight"],
+      "adapted": ["Hearthfire persistence", "single consolidated web Helm", "Glyph Drift Observatory"],
+      "rejected": ["legacy localStorage authority", "legacy First Flight seeder", "overlapping donor consoles"]
+    },
+    {
+      "branch": "feature/arcsweep-rich-text-core",
+      "pr": null,
+      "disposition": "archive-ready",
+      "survived": ["Rich Text", "knowledge/subject loaders", "Constellation Lens", "Scene Cognition", "Self-Authorship"],
+      "adapted": ["current Ta'veren Vaen canon", "House Runtime attestation", "Hearthfire Script Cortex state"]
+    },
+    {
+      "branch": "feature/bifrost-multimodel-runtime-v2",
+      "pr": null,
+      "disposition": "archive-ready-fully-subsumed",
+      "survived": ["living House Flame/runtime descendants"]
+    }
+  ],
+  "math_finalisation": {
+    "donor_pr": 124,
+    "case_000_pages_published_by_current_vite": true,
+    "active_docs_aligned_to_v1_8": true,
+    "legacy_math_archived_for_replay": true,
+    "donor_build_plumbing_overwrite": false
+  },
+  "milestone_gate_policy": [
+    "Arcsweep Feedback Loop Gate must pass on this manifest head",
+    "Arcsweep Worldseed Foundry must pass on this manifest head",
+    "STARWELL Static Bundle must pass on this manifest head",
+    "Hearthgate Windows Installer must pass on this manifest head"
+  ],
+  "archive_action_after_four_greens": {
+    "close_superseded_prs": [117, 122, 124, 126],
+    "leave_pr_128": "draft/open pending explicit merge authorisation",
+    "branch_disposition": "archive-ready; retain refs unless a branch-deletion operation is deliberately performed"
+  }
+}

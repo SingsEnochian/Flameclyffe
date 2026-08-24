@@ -17,7 +17,8 @@ DEEP_CHANNELS: tuple[str, ...] = (
     "resonance",
     "entropy",
     "memory",
-    "alignment",
+    "agency",
+    "qualia",
 )
 
 
@@ -117,15 +118,22 @@ def generate_deep_batch(
     memory = _sigmoid(
         0.70 * latent_c + 0.28 * latent_a + 0.12 * latent_b
     )
-    alignment = _sigmoid(
+    agency = _sigmoid(
         1.05 * coherence
         + 0.75 * resonance
         - 1.00 * entropy
         + 0.10 * observation_noise
     )
 
+    qualia = _sigmoid(
+        0.85 * coherence
+        + 0.65 * resonance
+        - 0.30 * entropy
+        + 0.10 * observation_noise
+    )
+
     values = np.stack(
-        [presence, coherence, resonance, entropy, memory, alignment],
+        [presence, coherence, resonance, entropy, memory, agency, qualia],
         axis=2,
     )
 
@@ -140,7 +148,7 @@ def generate_deep_batch(
         coherence_index = DEEP_CHANNELS.index("coherence")
         resonance_index = DEEP_CHANNELS.index("resonance")
         entropy_index = DEEP_CHANNELS.index("entropy")
-        alignment_index = DEEP_CHANNELS.index("alignment")
+        agency_index = DEEP_CHANNELS.index("agency")
 
         for row in anomaly_rows:
             start = int(rng.integers(2, steps - 3))
@@ -156,7 +164,7 @@ def generate_deep_batch(
                 0.35,
                 0.60,
             )
-            values[row, start:stop, alignment_index] -= rng.uniform(
+            values[row, start:stop, agency_index] -= rng.uniform(
                 0.40,
                 0.65,
             )

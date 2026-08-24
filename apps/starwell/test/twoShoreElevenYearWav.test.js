@@ -15,7 +15,7 @@ import {
 } from '../src/two-shore-geometric-forms.js';
 
 const earthCalibration = Object.freeze({
-  schema: 'hearthgate.earth-prime-premaq-calibration/v0.1',
+  schema: 'hearthgate.earth-prime-premaq-calibration/v0.2',
   shore_id: 'earth-prime',
   status: 'LIVE',
   physical_claim: false,
@@ -27,7 +27,17 @@ const earthCalibration = Object.freeze({
     E: 0.33,
     M: 0.49,
     A: 0.72,
-    Q: 0.41,
+    Q: 0,
+  }),
+  qualia: Object.freeze({
+    schema: 'premaqc.qualia-report/v1',
+    present: false,
+    authority: 'firsthand-only',
+    inferred: false,
+    report_receipt_id: null,
+    observed_at: null,
+    report: null,
+    legacy_scalar: 0.41,
   }),
   coverage: 1,
   unknowns: Object.freeze([]),
@@ -47,7 +57,7 @@ const earthCalibration = Object.freeze({
     battery_status: 'observed',
   }),
   formula: Object.freeze({}),
-  source_boundary: 'Test fixture standing in for browser-provided DEEP and Groundwire receipts.',
+  source_boundary: 'Test fixture standing in for browser-provided DEEP and Groundwire receipts; Qualia remains firsthand-only.',
 });
 
 function ascii(bytes) {
@@ -75,12 +85,16 @@ test('every year from 2025 through 2035 completes both PREMAQ shores and all geo
   assert.deepEqual(sequence.years.map((year) => year.year), [
     2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035,
   ]);
-  assert.equal(CYCLES_PER_SHORE_PER_YEAR, 394);
-  assert.equal(TOTAL_CYCLES_PER_SHORE, 4334);
-  assert.equal(sequence.total_cycles_per_shore, 4334);
-  assert.equal(sequence.audio_plan.cycles_per_shore, 4334);
-  assert.equal(sequence.audio_plan.event_count, 4411);
+  assert.equal(CYCLES_PER_SHORE_PER_YEAR, 393);
+  assert.equal(TOTAL_CYCLES_PER_SHORE, 4323);
+  assert.equal(sequence.total_cycles_per_shore, 4323);
+  assert.equal(sequence.audio_plan.cycles_per_shore, 4323);
+  assert.equal(sequence.audio_plan.event_count, 4389);
   assert.equal(sequence.audio_plan.cues.length, 11);
+  assert.deepEqual(sequence.audio_plan.dynamic_axes, ['P', 'C', 'R', 'E', 'M', 'A']);
+  assert.deepEqual(sequence.audio_plan.context_only_axes, ['Q']);
+  assert.equal(sequence.audio_plan.qualia_sonified, false);
+  assert.equal(sequence.audio_plan.events.some((event) => event.axis === 'Q'), false);
   assert.equal(sequence.audio_plan.audible_elara_code_layer, true);
   assert.equal(sequence.audio_plan.locked_carrier_preserved, true);
   assert.equal(sequence.geometric_source.commit, BOX_GEOMETRIC_SOURCE.commit);
@@ -89,7 +103,13 @@ test('every year from 2025 through 2035 completes both PREMAQ shores and all geo
     assert.equal(year.complete, true);
     assert.equal(year.premaq_generation.earth_prime.generated_for_year, year.year);
     assert.equal(year.premaq_generation.target_world.generated_for_year, year.year);
-    assert.equal(year.cycle_contract.total_cycles_per_shore, 394);
+    assert.equal(year.premaq_generation.earth_prime.values.Q, 0);
+    assert.equal(year.premaq_generation.earth_prime.qualia.inferred, false);
+    assert.equal(year.cycle_contract.solo_cycles_per_shore, 6);
+    assert.deepEqual(year.cycle_contract.solo_axes, ['P', 'C', 'R', 'E', 'M', 'A']);
+    assert.deepEqual(year.cycle_contract.context_only_axes, ['Q']);
+    assert.equal(year.cycle_contract.total_cycles_per_shore, 393);
+    assert.equal(year.compression_release_spine.qualia_dynamic, false);
     assert.equal(year.compression_release_spine.lineage_verified, true);
     assert.equal(year.geometric_state.earth_prime.status, 'VERIFIED');
     assert.equal(year.geometric_state.target_world.status, 'VERIFIED');
@@ -123,7 +143,7 @@ test('every year from 2025 through 2035 completes both PREMAQ shores and all geo
   });
 });
 
-test('all eleven completed years render to a stereo WAV with eleven labeled cue points', () => {
+test('all eleven completed years render to a stereo WAV with eleven labeled cue points and no Qualia tone', () => {
   let id = 100000;
   const sequence = buildCompleteElevenYearSequence({
     earthCalibration,
@@ -146,18 +166,22 @@ test('all eleven completed years render to a stereo WAV with eleven labeled cue 
   assert.match(text, /2025/);
   assert.match(text, /2035/);
   assert.match(text, /Earth Prime/);
+  assert.match(text, /Qualia remains firsthand context and is not sonified/);
   assert.equal(wav.complete, true);
   assert.equal(wav.channels, 2);
   assert.equal(wav.bits_per_sample, 16);
   assert.equal(wav.sample_rate, 8000);
   assert.equal(wav.cue_count, 11);
+  assert.equal(wav.qualia_sonified, false);
   assert.ok(wav.byte_length > 44);
   assert.ok(wav.sample_count > 0);
 
   const receipt = compactElevenYearReceipt(sequence, wav);
   assert.equal(receipt.complete, true);
   assert.equal(receipt.years.length, 11);
-  assert.equal(receipt.cycles_per_shore, 4334);
+  assert.equal(receipt.cycles_per_shore, 4323);
+  assert.deepEqual(receipt.context_only_axes, ['Q']);
+  assert.equal(receipt.qualia_sonified, false);
   assert.equal(receipt.wav.cue_count, 11);
   assert.ok(receipt.years.every((year) => year.earth_geometry_fingerprint.length === 8));
   assert.ok(receipt.years.every((year) => year.target_geometry_fingerprint.length === 8));

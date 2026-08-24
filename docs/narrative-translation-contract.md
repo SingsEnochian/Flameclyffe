@@ -70,9 +70,9 @@ The `deep_seed` is in `normaliseDeepState()` format — pass it directly to
 | `P` (Presence) | How strongly this lore fragment foregrounds an active witness |
 | `C` (Coherence) | How much the narrative is internally resolved — a vow vs. a riddle |
 | `R` (Resonance) | How much this fragment echoes other fragments in the world |
-| `E` (Entropy) | How unresolved, liminal, or transitional the fragment is |
-| `M` (Moon) | Cyclic or tidal quality — recurring patterns, seasons, phases |
-| `A` (Attention) | How much the fragment draws the observer's gaze |
+| `E` (Entanglement) | How densely this fragment connects to other lore — relational threading, interference patterns |
+| `M` (Memory) | How deeply embedded in the world's accumulated history — living continuity vs. newly spoken |
+| `A` (Agency) | How much active will or directed action the fragment carries — a choice made vs. a thing witnessed |
 | `charge` | How much active energy the fragment carries — still water vs. live current |
 
 These are mappings, not measures. They are *instrument readings*, not claims.

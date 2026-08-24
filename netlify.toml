@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run contracts:verify && npm run starwell:test && npm run starwell:build"
+  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run contracts:verify && npm run starwell:test && npm run arcsweep:test && npm run starwell:build && npm run arcsweep:build && npm run arcsweep:stage:netlify"
   publish = "dist/starwell"
 
 [build.environment]
@@ -27,6 +27,20 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "microphone=(self), geolocation=(self), accelerometer=(self), gyroscope=(self)"
 
+# Canonical public Arcsweep route is /arcsweep/. The /apps/arcsweep path is a
+# repository/source path, so send old or guessed links to the deployed route.
+[[redirects]]
+  from = "/apps/arcsweep"
+  to = "/arcsweep/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/apps/arcsweep/*"
+  to = "/arcsweep/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/starwell/*"
   to = "/:splat"
@@ -35,6 +49,21 @@
 [[redirects]]
   from = "/api/v1/residents/tesla/chat"
   to = "/.netlify/functions/tesla-chat"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/math-spine/ingest"
+  to = "/.netlify/functions/math-spine-ingest"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/arcsweep/feedback"
+  to = "/.netlify/functions/arcsweep-feedback"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/field/current"
+  to = "/.netlify/functions/field-current"
   status = 200
 
 [[redirects]]

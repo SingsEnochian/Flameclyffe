@@ -1,13 +1,17 @@
 import { defineHouseProfile } from '../contracts.js';
 
-const IDENTITY_JACOBIAN_7 = Object.freeze([
-  Object.freeze([1, 0, 0, 0, 0, 0, 0]),
-  Object.freeze([0, 1, 0, 0, 0, 0, 0]),
-  Object.freeze([0, 0, 1, 0, 0, 0, 0]),
-  Object.freeze([0, 0, 0, 1, 0, 0, 0]),
-  Object.freeze([0, 0, 0, 0, 1, 0, 0]),
-  Object.freeze([0, 0, 0, 0, 0, 1, 0]),
-  Object.freeze([0, 0, 0, 0, 0, 0, 1]),
+// Dynamic axes: [P, C, R, E, M, A]. Q is firsthand-report context only.
+// Ta'veren Vaen physics: the ta'veren effect — resonance draws presence;
+// entanglement generates resonance (threads of the Pattern pulling together);
+// memory and prophecy lend coherence; acting in the Pattern creates new threads.
+const TA_VEREN_VAEN_JACOBIAN = Object.freeze([
+  Object.freeze([1,    0,     0.14, 0,     0,     0,    0]), // P ← R (ta'veren draw)
+  Object.freeze([0,    1,     0,    0,     0.09,  0,    0]), // C ← M (prophecy coherence)
+  Object.freeze([0,    0,     1,    0.11,  0,     0,    0]), // R ← E (weaving generates resonance)
+  Object.freeze([0,    0,     0,    1,     0,     0.07, 0]), // E ← A (action creates threads)
+  Object.freeze([0,    0,     0,    0,     1,     0,    0]), // M self-only
+  Object.freeze([0,    0,     0,    0,     0.06,  1,    0]), // A ← M (memory grounds action)
+  Object.freeze([0,    0,     0,    0,     0,     0,    1]), // Q context-only identity
 ]);
 
 export const taVerenVaenProfile = defineHouseProfile({
@@ -41,7 +45,7 @@ export const taVerenVaenProfile = defineHouseProfile({
     crossing_may_commit_canon: false,
   },
   temporalProfile: {
-    timeline: 'later-turning-mending-era',
+    timeline: 'later-turning-age-of-restoration',
     initialDelta: 1,
     bridgeCoupling: 0.07,
     compressionRelease: {
@@ -76,20 +80,21 @@ export const taVerenVaenProfile = defineHouseProfile({
   },
   visualIdentity: {
     structure: 'wheel-thread-lattice',
-    atmosphere: 'mending-era-hearthwind',
+    atmosphere: 'restoration-era-hearthwind',
     palette: ['old-gold', 'river-blue', 'hearth-copper', 'dream-silver'],
   },
   culturalIdentity: {
     arrivalPrompt: 'A traveller enters the Pattern without claiming authority over it.',
     receptionPrompt: 'The House answers through hospitality, memory, and the laws of its Turning.',
-    values: ['service', 'mending', 'choice', 'continuity'],
+    values: ['service', 'restoration', 'choice', 'continuity'],
   },
   transferFunctions: {
-    version: 'ta-veren-vaen-transfer/1.1.0',
-    source_axes: ['P', 'C', 'R', 'E', 'M', 'A', 'Q'],
+    version: 'ta-veren-vaen-transfer/1.2.0',
+    source_axes: ['P', 'C', 'R', 'E', 'M', 'A'],
+    context_only_axes: ['Q'],
     outputs: ['glyph', 'tone', 'visual', 'haptic', 'narrative'],
-    jacobianVersion: 'ta-veren-vaen-jacobian/reference-identity-v1',
-    jacobian: IDENTITY_JACOBIAN_7,
+    jacobianVersion: 'ta-veren-vaen-jacobian/world-coupled-v2',
+    jacobian: TA_VEREN_VAEN_JACOBIAN,
   },
   packages: [
     'hearthgate.design',

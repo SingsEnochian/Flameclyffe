@@ -68,7 +68,7 @@ const receipt = [
   'features:',
   '  - live-deep-groundwire',
   '  - selectable-target-world',
-  '  - premaq-2025-2035',
+  '  - premaqc-2025-2035',
   '  - eleven-year-wav',
   '  - loop-playback',
   '  - shokz-explicit-verification',

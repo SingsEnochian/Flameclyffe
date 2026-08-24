@@ -6,12 +6,14 @@ import { ObservatoryInstrument } from './components/ObservatoryInstrument.jsx';
 import { VarutoraLeaf } from './components/living/VarutoraLeaf.jsx';
 import { WriterRoom } from './components/writer/WriterRoom.jsx';
 import { ObserverAtelier } from './components/atelier/ObserverAtelier.jsx';
+import { MathSpineStatus } from './components/MathSpineStatus.jsx';
 import './starwell.css';
 import './starwell-room.css';
 import './grove-state.css';
 import './starwell-scale-pass.css';
 import './deep-observer-boundary.css';
 import './starwell-living-rooms.css';
+import './math-spine/math-spine-status.css';
 
 const OBSERVATORY_TIME_ZONE = 'America/New_York';
 const MEDALLION_BASE = `${import.meta.env.BASE_URL}art/medallions/`;
@@ -786,6 +788,7 @@ function App() {
       <GroveState phase={phase} time={timeParts.display} />
 
       <section className="observatory-shell">
+        <MathSpineStatus worldId="terra-aeterna" />
         <section className="dome">
           <div className="dome-inner">
             <p className="eyebrow">Hearthweave Observatory · STARWELL Time {timeParts.display}</p>
@@ -808,4 +811,8 @@ function App() {
   );
 }
 
-createRoot(document.getElementById('root')).render(<App />);
+const rootNode = document.getElementById('root');
+if (!rootNode) throw new Error('ARCSWEEP_BOOT: #root mount is missing');
+createRoot(rootNode).render(<App />);
+document.documentElement.dataset.arcsweepBoot = 'ready';
+document.getElementById('arcsweep-boot-status')?.remove();

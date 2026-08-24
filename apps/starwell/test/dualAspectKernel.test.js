@@ -222,6 +222,35 @@ test('bridge parser receipts missing and malformed fields instead of labeling su
   assert.equal(snapshot.substitutions.some((entry) => entry.field === 'state.P' && entry.source_value === 'bogus'), true);
   assert.equal(snapshot.substitutions.some((entry) => entry.field === 'state.A'), true);
   assert.equal(snapshot.substitutions.some((entry) => entry.field === 'state.dphi'), true);
+  assert.equal(snapshot.raw_state.P, 'bogus');
+  assert.equal('A' in snapshot.raw_state, false);
+});
+
+test('Observatory preserves unsanded input and fingerprints it independently from the render projection', () => {
+  const firstPayload = liveDeepPayload();
+  firstPayload.deep.P = 1.25;
+  firstPayload.deep.bz = -44;
+  firstPayload.deep.sky = 'STORM';
+  const secondPayload = structuredClone(firstPayload);
+  secondPayload.deep.P = 7.5;
+
+  const first = parseBridgePulsePayload(firstPayload, {
+    capturedAt: fixedClock(),
+    url: 'https://example.test/unsanded.json',
+    idFactory: () => 'unsanded-first',
+  });
+  const second = parseBridgePulsePayload(secondPayload, {
+    capturedAt: fixedClock(),
+    url: 'https://example.test/unsanded.json',
+    idFactory: () => 'unsanded-second',
+  });
+
+  assert.deepEqual(first.raw_state, firstPayload.deep);
+  assert.equal(first.state.P, 1);
+  assert.equal(first.state.bz, -20);
+  assert.equal(first.transformations.some((entry) => entry.field === 'P' && entry.input === 1.25), true);
+  assert.equal(first.transformations.some((entry) => entry.field === 'bz' && entry.input === -44), true);
+  assert.equal(first.fingerprint === second.fingerprint, false);
 });
 
 test('tampered or incomplete renderer bindings are rejected', () => {

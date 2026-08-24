@@ -68,7 +68,9 @@
             "observed_at": { "type": "string", "format": "date-time" },
             "captured_at": { "type": "string", "format": "date-time" },
             "source": { "type": "object" },
+            "raw_state": { "type": "object", "description": "Verbatim supplied DEEP state before any renderer projection." },
             "state": { "type": "object" },
+            "transformations": { "type": "array", "description": "Append-only receipts for every renderer projection, coercion, or substitution." },
             "substitutions": { "type": "array" },
             "errors": { "type": "array" },
             "fingerprint": { "type": "string" }

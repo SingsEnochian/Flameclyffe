@@ -10,7 +10,7 @@
   const DEFAULTS = { P:.55, C:.50, R:.45, E:.38, M:.30, A:.65, charge:.20, kp:1, bz:0, moonIllum:50, sky:'Night' };
   const MODEL = [
     ['P','Presence',0,1,.01], ['C','Coherence',0,1,.01], ['R','Resonance',0,1,.01],
-    ['E','Entropy',0,1,.01], ['M','Momentum',0,1,.01], ['A','Alignment',0,1,.01], ['charge','Charge',0,1,.01]
+    ['E','Entanglement',0,1,.01], ['M','Memory',0,1,.01], ['A','Agency',0,1,.01], ['charge','Qualia renderer',0,1,.01]
   ];
   const TELEMETRY = [
     ['kp','Kp',0,9,.1], ['bz','Bz',-20,20,.1], ['moonIllum','Moon %',0,100,1]

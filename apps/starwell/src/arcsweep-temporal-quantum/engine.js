@@ -1,4 +1,5 @@
 export const PREMAQ_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A', 'Q']);
+export const PREMAQ_DYNAMIC_AXES = Object.freeze(['P', 'C', 'R', 'E', 'M', 'A']);
 export const BIFROST_TEMPORAL_STATE_SCHEMA = 'arcsweep.bifrost-temporal-state/v0.1';
 export const BIFROST_BRIDGE_PACKET_SCHEMA = 'arcsweep.bifrost-bridge-packet/v0.1';
 export const BIFROST_RECEIPT_SCHEMA = 'arcsweep.bifrost-transition-receipt/v0.1';
@@ -65,30 +66,30 @@ function scale(z, factor) {
 }
 
 function normaliseAmplitudes(amplitudes) {
-  const norm = Math.sqrt(PREMAQ_AXES.reduce(
+  const norm = Math.sqrt(PREMAQ_DYNAMIC_AXES.reduce(
     (sum, axis) => sum + magnitudeSquared(amplitudes[axis]),
     0,
   ));
   if (!Number.isFinite(norm) || norm <= EPSILON) {
-    const equal = 1 / Math.sqrt(PREMAQ_AXES.length);
-    return Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, complex(equal, 0)]));
+    const equal = 1 / Math.sqrt(PREMAQ_DYNAMIC_AXES.length);
+    return Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [axis, complex(equal, 0)]));
   }
-  return Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, scale(amplitudes[axis], 1 / norm)]));
+  return Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [axis, scale(amplitudes[axis], 1 / norm)]));
 }
 
 function probabilityVector(amplitudes) {
-  return Object.fromEntries(PREMAQ_AXES.map((axis) => [axis, magnitudeSquared(amplitudes[axis])]));
+  return Object.fromEntries(PREMAQ_DYNAMIC_AXES.map((axis) => [axis, magnitudeSquared(amplitudes[axis])]));
 }
 
 function shannonEntropy(probabilities) {
-  return PREMAQ_AXES.reduce((sum, axis) => {
+  return PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => {
     const probability = probabilities[axis];
     return probability > EPSILON ? sum - (probability * Math.log(probability)) : sum;
   }, 0);
 }
 
 function l1Distance(left, right) {
-  return PREMAQ_AXES.reduce((sum, axis) => sum + Math.abs(left[axis] - right[axis]), 0);
+  return PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + Math.abs(left[axis] - right[axis]), 0);
 }
 
 function validateComponent(component, axis) {
@@ -104,6 +105,23 @@ function validateComponent(component, axis) {
     }
   }
   return component;
+}
+
+function qualiaMetadata(packet) {
+  if (packet?.qualia && typeof packet.qualia === 'object' && !Array.isArray(packet.qualia)) {
+    return clone(packet.qualia);
+  }
+  const legacyScalar = Number(packet?.state?.Q?.value);
+  return {
+    schema: 'premaqc.qualia-report/v1',
+    present: null,
+    authority: 'legacy-unresolved',
+    inferred: false,
+    report_receipt_id: null,
+    observed_at: null,
+    report: null,
+    legacy_scalar: Number.isFinite(legacyScalar) ? legacyScalar : null,
+  };
 }
 
 export function validatePremaqPacket(packet) {
@@ -143,7 +161,7 @@ export function premaqToTemporalState(packetInput, {
   const confidence = {};
   const uncertainty = {};
 
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     const component = packet.state[axis];
     const boundedValue = clamp(component.value);
     const confidenceWeight = component.confidence == null ? 1 : clamp(component.confidence);
@@ -171,13 +189,14 @@ export function premaqToTemporalState(packetInput, {
       model_version: packet.model_version,
       observed_at: packet.observed_at,
     },
-    basis: [...PREMAQ_AXES],
+    basis: [...PREMAQ_DYNAMIC_AXES],
     amplitudes,
     probabilities,
     derivatives,
     confidence,
     uncertainty,
-    normalisation: PREMAQ_AXES.reduce((sum, axis) => sum + probabilities[axis], 0),
+    qualia: qualiaMetadata(packet),
+    normalisation: PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + probabilities[axis], 0),
     entropy: shannonEntropy(probabilities),
     spiral: {
       cycle: 0,
@@ -190,7 +209,8 @@ export function premaqToTemporalState(packetInput, {
     interpretation: {
       formalism: 'temporal-quantum-state-machine',
       physical_claim: false,
-      note: 'Quantum-mechanical structures are used as a bounded computational formalism; PREMAQ values retain their recorded provenance.',
+      qualia_dynamic: false,
+      note: 'Quantum-mechanical structures are a bounded computational formalism over P/C/R/E/M/A only. Qualia remains separately receipted firsthand evidence and is never evolved by this engine.',
     },
   };
 }
@@ -204,7 +224,7 @@ export function validateTemporalState(stateInput) {
   }
   requireString(stateInput.state_id, 'state_id');
   requireFinite(stateInput.temporal_coordinate, 'temporal_coordinate');
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     const amplitude = stateInput.amplitudes?.[axis];
     requireFinite(amplitude?.re, `${axis}.re`);
     requireFinite(amplitude?.im, `${axis}.im`);
@@ -246,22 +266,21 @@ export function evolveTemporalState(stateInput, {
   }
 
   const amplitudes = clone(prior.amplitudes);
-  for (const [index, axis] of PREMAQ_AXES.entries()) {
+  for (const [index, axis] of PREMAQ_DYNAMIC_AXES.entries()) {
     const baseFrequency = frequencies[axis] ?? (0.5 + (index * 0.125));
     requireFinite(baseFrequency, `frequency ${axis}`);
     const energy = baseFrequency + (derivativeCoupling * (prior.derivatives?.[axis] ?? 0));
     amplitudes[axis] = rotate(amplitudes[axis], -(energy * delta) / hbar);
   }
 
-  for (let index = 0; index < PREMAQ_AXES.length - 1; index += 1) {
+  for (let index = 0; index < PREMAQ_DYNAMIC_AXES.length - 1; index += 1) {
     applyPairRotation(
       amplitudes,
-      PREMAQ_AXES[index],
-      PREMAQ_AXES[index + 1],
+      PREMAQ_DYNAMIC_AXES[index],
+      PREMAQ_DYNAMIC_AXES[index + 1],
       bridgeCoupling * delta,
     );
   }
-  applyPairRotation(amplitudes, 'Q', 'P', bridgeCoupling * delta * 0.5);
 
   const normalised = normaliseAmplitudes(amplitudes);
   const probabilities = probabilityVector(normalised);
@@ -275,8 +294,9 @@ export function evolveTemporalState(stateInput, {
     hbar,
     derivative_coupling: derivativeCoupling,
     bridge_coupling: bridgeCoupling,
+    qualia_evolved: false,
     normalisation_before: prior.normalisation,
-    normalisation_after: PREMAQ_AXES.reduce((sum, axis) => sum + probabilities[axis], 0),
+    normalisation_after: PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + probabilities[axis], 0),
   };
 
   return {
@@ -297,9 +317,9 @@ export function evolveTemporalState(stateInput, {
   };
 }
 
-export function collapseRelease(stateInput, {
-  focus = 'Q',
-  measurementStrength = 0.65,
+export function compressRelease(stateInput, {
+  focus = 'R',
+  compressionGain = 0.65,
   release = 0.35,
   derivativeRelease = 0.08,
   radialGain = 0.5,
@@ -308,44 +328,44 @@ export function collapseRelease(stateInput, {
   idFactory,
 } = {}) {
   const prior = validateTemporalState(stateInput);
-  if (!PREMAQ_AXES.includes(focus)) {
-    throw new BifrostTemporalError(`Unknown collapse focus: ${focus}`, 'invalid-collapse-focus');
+  if (!PREMAQ_DYNAMIC_AXES.includes(focus)) {
+    throw new BifrostTemporalError(`Unknown compression focus: ${focus}`, 'invalid-compression-focus');
   }
-  for (const [field, value] of Object.entries({ measurementStrength, release, derivativeRelease, radialGain, angularGain })) {
+  for (const [field, value] of Object.entries({ compressionGain, release, derivativeRelease, radialGain, angularGain })) {
     requireFinite(value, field);
   }
-  if (measurementStrength < 0 || measurementStrength > 1 || release < 0 || release > 1) {
-    throw new BifrostTemporalError('measurementStrength and release must be from 0 to 1', 'invalid-collapse-release');
+  if (compressionGain < 0 || compressionGain > 1 || release < 0 || release > 1) {
+    throw new BifrostTemporalError('compressionGain and release must be from 0 to 1', 'invalid-compression-release');
   }
 
   const priorProbabilities = probabilityVector(prior.amplitudes);
-  const collapsedWeights = {};
-  for (const axis of PREMAQ_AXES) {
-    const focusWeight = axis === focus ? 1 + (measurementStrength * (PREMAQ_AXES.length - 1)) : 1 - measurementStrength;
-    collapsedWeights[axis] = Math.max(EPSILON, priorProbabilities[axis] * focusWeight);
+  const compressedWeights = {};
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
+    const focusWeight = axis === focus ? 1 + (compressionGain * (PREMAQ_DYNAMIC_AXES.length - 1)) : 1 - compressionGain;
+    compressedWeights[axis] = Math.max(EPSILON, priorProbabilities[axis] * focusWeight);
   }
-  const collapsedTotal = PREMAQ_AXES.reduce((sum, axis) => sum + collapsedWeights[axis], 0);
-  const collapsedProbabilities = Object.fromEntries(
-    PREMAQ_AXES.map((axis) => [axis, collapsedWeights[axis] / collapsedTotal]),
+  const compressedTotal = PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + compressedWeights[axis], 0);
+  const compressedProbabilities = Object.fromEntries(
+    PREMAQ_DYNAMIC_AXES.map((axis) => [axis, compressedWeights[axis] / compressedTotal]),
   );
 
   const releasedWeights = {};
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     const derivativeFlow = Math.max(0, prior.derivatives?.[axis] ?? 0) * derivativeRelease;
     releasedWeights[axis] = Math.max(
       EPSILON,
-      ((1 - release) * collapsedProbabilities[axis])
+      ((1 - release) * compressedProbabilities[axis])
         + (release * priorProbabilities[axis])
         + derivativeFlow,
     );
   }
-  const releasedTotal = PREMAQ_AXES.reduce((sum, axis) => sum + releasedWeights[axis], 0);
+  const releasedTotal = PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + releasedWeights[axis], 0);
   const releasedProbabilities = Object.fromEntries(
-    PREMAQ_AXES.map((axis) => [axis, releasedWeights[axis] / releasedTotal]),
+    PREMAQ_DYNAMIC_AXES.map((axis) => [axis, releasedWeights[axis] / releasedTotal]),
   );
 
   const amplitudes = {};
-  for (const axis of PREMAQ_AXES) {
+  for (const axis of PREMAQ_DYNAMIC_AXES) {
     const old = prior.amplitudes[axis];
     const phase = Math.atan2(old.im, old.re);
     const radius = Math.sqrt(releasedProbabilities[axis]);
@@ -361,15 +381,16 @@ export function collapseRelease(stateInput, {
 
   const receipt = {
     schema: BIFROST_RECEIPT_SCHEMA,
-    receipt_id: makeId('bifrost-collapse-release', idFactory),
-    action: 'collapse-release',
+    receipt_id: makeId('bifrost-compression-release', idFactory),
+    action: 'compression-release',
     created_at: clock().toISOString(),
     from_state_id: prior.state_id,
     focus,
-    measurement_strength: measurementStrength,
+    compression_gain: compressionGain,
     release,
     derivative_release: derivativeRelease,
-    collapse_probabilities: collapsedProbabilities,
+    qualia_evolved: false,
+    compressed_probabilities: compressedProbabilities,
     release_probabilities: releasedProbabilities,
     outward_distance: outwardDistance,
     entropy_change: entropyChange,
@@ -381,7 +402,7 @@ export function collapseRelease(stateInput, {
     state_id: makeId('bifrost-state', idFactory),
     amplitudes,
     probabilities: releasedProbabilities,
-    normalisation: PREMAQ_AXES.reduce((sum, axis) => sum + releasedProbabilities[axis], 0),
+    normalisation: PREMAQ_DYNAMIC_AXES.reduce((sum, axis) => sum + releasedProbabilities[axis], 0),
     entropy,
     spiral: {
       cycle,
@@ -399,8 +420,10 @@ export function collapseRelease(stateInput, {
   };
 }
 
+export { compressRelease as collapseRelease };
+
 function bhattacharyyaFidelity(left, right) {
-  const coefficient = PREMAQ_AXES.reduce(
+  const coefficient = PREMAQ_DYNAMIC_AXES.reduce(
     (sum, axis) => sum + Math.sqrt(Math.max(0, left[axis]) * Math.max(0, right[axis])),
     0,
   );
@@ -454,6 +477,7 @@ export function createBifrostBridgePacket({
       state_id: hearth.state_id,
       temporal_coordinate: hearth.temporal_coordinate,
       probabilities: clone(hearth.probabilities),
+      qualia: clone(hearth.qualia),
       authority: 'evidence-grounded-observational',
     },
     targetside: {
@@ -461,6 +485,7 @@ export function createBifrostBridgePacket({
       state_id: target.state_id,
       temporal_coordinate: target.temporal_coordinate,
       probabilities: clone(target.probabilities),
+      qualia: clone(target.qualia),
       authority: 'canon-grounded-projected',
     },
     bridge_metrics: {
@@ -473,6 +498,7 @@ export function createBifrostBridgePacket({
     laws: [
       'Hearthside evidence is never overwritten by targetside projection.',
       'Targetside projection remains canon-labelled and receipt-traceable.',
+      'Qualia remains firsthand evidence and never enters the dynamical projection basis.',
       'A crossing changes bridge history, not the provenance of either shore.',
       'Collapse must be followed by release before a new outward cycle is counted.',
     ],
@@ -498,7 +524,7 @@ export function projectWorldState(bridgePacketInput, {
       throw new BifrostTemporalError(`Transfer row ${outputKey} must be an object`, 'invalid-transfer-matrix');
     }
     let value = requireFinite(bias[outputKey] ?? 0, `bias ${outputKey}`);
-    for (const axis of PREMAQ_AXES) {
+    for (const axis of PREMAQ_DYNAMIC_AXES) {
       const coefficient = requireFinite(row[axis] ?? 0, `matrix ${outputKey}.${axis}`);
       value += coefficient * input[axis];
     }
@@ -516,7 +542,7 @@ export function projectWorldState(bridgePacketInput, {
     canon_graph_version: bridgePacketInput.canon_graph_version,
     transfer_function_version: bridgePacketInput.transfer_function_version,
     projection,
-    uncertainty: 'inherits PREMAQ component uncertainty and transfer calibration uncertainty',
+    uncertainty: 'inherits PREMAQ dynamic-component uncertainty and transfer calibration uncertainty; Qualia is excluded',
     provenance: {
       premaq_ref: clone(bridgePacketInput.premaq_ref),
       hearthside_state_id: bridgePacketInput.hearthside.state_id,

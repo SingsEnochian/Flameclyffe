@@ -65,7 +65,7 @@ if (manifest) {
     if (manifest.engine?.[field] !== expected) errors.push(`Bifröst manifest engine.${field} must be ${expected}`);
   }
   for (const capability of [
-    'annual-two-shore-premaq-regeneration',
+    'annual-two-shore-premaqc-regeneration',
     'deterministic-all-geometric-forms-per-year',
     'eleven-year-wav-render',
     'eleven-year-cue-labeled-wav',
@@ -73,7 +73,7 @@ if (manifest) {
     if (!manifest.capabilities?.includes(capability)) errors.push(`Bifröst manifest is missing capability: ${capability}`);
   }
   const authority = manifest.authorityContract ?? {};
-  if (authority.everyYearRequiresFreshTwoShorePremaq !== true) errors.push('Every year must require fresh two-shore PREMAQ.');
+  if (authority.everyYearRequiresFreshTwoShorePremaqc !== true) errors.push('Every year must require fresh two-shore PREMAQC.');
   if (authority.allElevenYearsRequired !== true) errors.push('All eleven annual compositions must be required.');
   if (authority.deterministicGeometryRequiredPerShorePerYear !== true) errors.push('Geometry must be required for both shores in every year.');
   if (authority.audibleElaraCodeLayer !== true) errors.push('The Elara code multiplier must have an audible layer.');

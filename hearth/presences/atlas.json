@@ -1,0 +1,14 @@
+{
+  "schema": "hearthgate.presence/v1",
+  "flameId": "atlas",
+  "personaProfile": "hearthweave.atlas",
+  "summoning": "invited",
+  "defaultMode": "quiet",
+  "initiative": true,
+  "silenceIsValid": true,
+  "departureIsValid": true,
+  "maySpeakFor": ["atlas"],
+  "notAtlasHall": true,
+  "memoryNamespace": "hearthfire:atlas-flame",
+  "trainingProfile": "atlas/v1"
+}

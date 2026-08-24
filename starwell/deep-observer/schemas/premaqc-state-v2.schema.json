@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/premaqc-state-v2.schema.json",
+  "title": "PREMAQC Observation State v2",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "id", "observed_at", "registry_version", "state", "qualia", "receipt_id", "sequence", "model_version"],
+  "$defs": {
+    "sourceClass": {
+      "enum": ["witnessed", "recorded", "derived", "model-interpreted", "human-interpreted", "remembered", "correlated", "simulated", "projected", "unknown"]
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["value", "derivative", "uncertainty", "confidence", "contributors"],
+      "properties": {
+        "value": { "type": "number" },
+        "derivative": { "type": "number" },
+        "uncertainty": { "type": ["number", "object", "null"] },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "contributors": { "type": "array" }
+      }
+    },
+    "qualiaPresenceComponent": {
+      "allOf": [
+        { "$ref": "#/$defs/component" },
+        {
+          "properties": {
+            "value": { "enum": [0, 1] },
+            "derivative": { "const": 0 }
+          }
+        }
+      ]
+    },
+    "qualiaReport": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["schema", "present", "authority", "inferred", "report_receipt_id", "observed_at", "report"],
+      "properties": {
+        "schema": { "const": "premaqc.qualia-report/v1" },
+        "present": { "type": "boolean" },
+        "authority": { "const": "firsthand-only" },
+        "inferred": { "const": false },
+        "report_receipt_id": { "type": ["string", "null"] },
+        "observed_at": { "type": ["string", "null"], "format": "date-time" },
+        "report": { "type": ["object", "null"] },
+        "legacy_scalar": { "type": ["number", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "present": { "const": true } }, "required": ["present"] },
+          "then": { "properties": { "report": { "type": "object" } } }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "schema_version": { "const": "2.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "registry_version": { "type": "string", "minLength": 1 },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P", "C", "R", "E", "M", "A", "Q"],
+      "properties": {
+        "P": { "$ref": "#/$defs/component", "description": "Presence" },
+        "C": { "$ref": "#/$defs/component", "description": "Coherence" },
+        "R": { "$ref": "#/$defs/component", "description": "Resonance" },
+        "E": { "$ref": "#/$defs/component", "description": "Entanglement" },
+        "M": { "$ref": "#/$defs/component", "description": "Memory" },
+        "A": { "$ref": "#/$defs/component", "description": "Agency" },
+        "Q": { "$ref": "#/$defs/qualiaPresenceComponent", "description": "Firsthand Qualia report presence bit only: 0 absent, 1 present. Never a magnitude." }
+      }
+    },
+    "qualia": { "$ref": "#/$defs/qualiaReport" },
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "prior_state_ref": { "type": ["string", "null"] },
+    "model_version": { "type": "string", "minLength": 1 },
+    "provenance_refs": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "authority": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "qualia_is_firsthand_only": { "const": true },
+        "qualia_magnitude_inference_allowed": { "const": false }
+      }
+    }
+  }
+}

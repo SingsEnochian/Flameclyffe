@@ -79,7 +79,7 @@ test('Elara horizon is the exact 2025 through 2035 ×1.15 recurrence', () => {
   assert.ok(Math.abs(elaraCodeExpansionMultiplier(2035) - (1.15 ** 10)) < 1e-12);
 });
 
-test('every selectable target world has an explicit PREMAQ origin', () => {
+test('every selectable target world exposes dynamic PREMAQ while quarantining legacy Q', () => {
   const worlds = listSelectableGateWorlds();
   assert.equal(worlds.length, 7);
   for (const world of worlds) {
@@ -91,10 +91,14 @@ test('every selectable target world has an explicit PREMAQ origin', () => {
       assert.ok(Number.isFinite(value));
       assert.ok(value >= 0 && value <= 1);
     }
+    assert.equal(world.premaq.Q, 0);
+    assert.equal(world.qualia.present, false);
+    assert.equal(world.qualia.inferred, false);
+    assert.equal(world.qualia.authority, 'firsthand-only');
   }
 });
 
-test('Earth Prime LIVE calibration consumes DEEP and Groundwire without inventing missing fields', () => {
+test('Earth Prime LIVE calibration consumes DEEP and Groundwire without inferring Qualia', () => {
   const calibration = calibrateEarthPrimePremaq({
     deepPacket: DEEP,
     groundwireSnapshot: liveGroundwire(),
@@ -109,9 +113,14 @@ test('Earth Prime LIVE calibration consumes DEEP and Groundwire without inventin
     assert.ok(Number.isFinite(value));
     assert.ok(value >= 0 && value <= 1);
   }
+  assert.equal(calibration.values.Q, 0);
+  assert.equal(calibration.qualia.present, false);
+  assert.equal(calibration.qualia.inferred, false);
+  assert.equal(calibration.qualia.legacy_scalar, 0.29);
+  assert.match(calibration.source_boundary, /Qualia is firsthand-only/);
 });
 
-test('gate address locks P R E M A Q and uses C as reciprocal inverse-twist coherence', () => {
+test('gate address locks P R E M A, uses C as reciprocal inverse-twist coherence, and never sonifies Q', () => {
   const earth = calibrateEarthPrimePremaq({
     deepPacket: DEEP,
     groundwireSnapshot: liveGroundwire(),
@@ -123,7 +132,11 @@ test('gate address locks P R E M A Q and uses C as reciprocal inverse-twist cohe
   });
 
   assert.deepEqual(tones.locked_axes, GATE_LOCKED_TONE_AXES);
+  assert.deepEqual(tones.locked_axes, ['P', 'R', 'E', 'M', 'A']);
   assert.equal(tones.coherence_axis, 'C');
+  assert.deepEqual(tones.context_only_axes, ['Q']);
+  assert.equal(tones.qualia_sonified, false);
+  assert.equal(tones.tones.Q, undefined);
   assert.equal(tones.elara_multiplier, 1.15);
   for (const axis of GATE_LOCKED_TONE_AXES) {
     const tone = tones.tones[axis];
@@ -134,7 +147,7 @@ test('gate address locks P R E M A Q and uses C as reciprocal inverse-twist cohe
   }
 });
 
-test('one year runs each shore alone, then 369, then saved +3 +6 +9 continuations', () => {
+test('one year runs six dynamic solo axes per shore, then 369, then saved +3 +6 +9 continuations', () => {
   const earth = calibrateEarthPrimePremaq({
     deepPacket: DEEP,
     groundwireSnapshot: liveGroundwire(),
@@ -147,13 +160,15 @@ test('one year runs each shore alone, then 369, then saved +3 +6 +9 continuation
     idFactory: ids(),
   });
 
-  assert.equal(plan.earth_prime.solo.cycles, 7);
-  assert.equal(plan.target_world.solo.cycles, 7);
+  assert.equal(plan.earth_prime.solo.cycles, 6);
+  assert.equal(plan.target_world.solo.cycles, 6);
+  assert.equal(plan.earth_prime.solo.receipts.some((receipt) => receipt.focus === 'Q'), false);
+  assert.equal(plan.target_world.solo.receipts.some((receipt) => receipt.focus === 'Q'), false);
   assert.equal(plan.segments.base.cycles, GATE_BASE_CYCLES);
   assert.equal(plan.segments.plus3.cycles, 3);
   assert.equal(plan.segments.plus6.cycles, 6);
   assert.equal(plan.segments.plus9.cycles, 9);
-  assert.equal(plan.total_cycles_per_shore, 394);
+  assert.equal(plan.total_cycles_per_shore, 393);
   assert.equal(plan.checkpoints.length, 4);
 
   assert.equal(
@@ -179,6 +194,7 @@ test('one year runs each shore alone, then 369, then saved +3 +6 +9 continuation
 
   for (const segment of Object.values(plan.segments)) {
     for (const [index, receipt] of segment.cycle_receipts.entries()) {
+      assert.notEqual(receipt.focus, 'Q');
       if (index > 0) {
         assert.equal(receipt.earth_from_state_id, segment.cycle_receipts[index - 1].earth_to_state_id);
         assert.equal(receipt.target_from_state_id, segment.cycle_receipts[index - 1].target_to_state_id);

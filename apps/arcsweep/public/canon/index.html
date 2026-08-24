@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0f0e" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <title>Arcsweep Canon Library</title>
+  <link rel="stylesheet" href="./canon-library.css" />
+</head>
+<body>
+  <header class="mast">
+    <a href="../" class="back">⌁ Arcsweep</a>
+    <div><p class="eyebrow">Hearthgate · provenance-bound library</p><h1>Canon Library</h1>
+    <p>Browse bundled source-derived canon without folding variants, analysis, or project mappings into one undifferentiated soup.</p></div>
+  </header>
+  <main>
+    <section id="pack-list" class="pack-list" aria-label="Canon packages"></section>
+    <section class="toolbar">
+      <label>Search current canon <input id="canon-search" type="search" placeholder="Altair, attractor field, Amadeus…" /></label>
+      <span id="search-count" aria-live="polite"></span>
+    </section>
+    <section id="pack-view" class="pack-view" aria-live="polite"><p>Loading canon registry…</p></section>
+  </main>
+  <script type="module" src="./canon-library.js"></script>
+</body>
+</html>

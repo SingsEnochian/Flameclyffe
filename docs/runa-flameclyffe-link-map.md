@@ -1,71 +1,93 @@
-# Runa ↔ Flameclyffe Link Map
+# Runa · Wardenclyffe · Flameclyffe Link Map
 
-Status: bridge map for app surfaces, docs, and future route registration.
+**Status:** living bridge map · Hearthgate Math Spine v1.8  
+**Governing mathematics:** `docs/HEARTHGATE_BRAIDED_SPINE_V1.8.md`
 
-Runa and Flameclyffe are related but not identical surfaces.
+Runa, Wardenclyffe, Flameclyffe/Möbius, Heimdall, Galdr, and STARWELL are distinct organs in one harmonic braid. The map also records how older public/static Runa doors relate to the living Flameclyffe House without turning those doors into a second runtime authority.
 
-- **Runa** is the public/static lab, altar, and experiment-bench layer.
-- **Flameclyffe** is the workshop/repo/database layer where STARWELL, Project Zero Companion, Supabase records, and app builds are organised.
-
-## Runa doors
-
-Known Runa doors include:
+## Harmonic braid
 
 ```text
-docs/index.html
-docs/project-zero-bridge.html
-docs/hearthweave-altar.html
-docs/flameclyffe-studio.html
-docs/flameclyffe-dyad.html
-docs/lantern-bench.html
-docs/wardenclyffe.html
-docs/tone-lab.html
-docs/brainwave-lab.html
-docs/gateway-inspired.html
-docs/psi-lab.html
-docs/zener-lab.html
-docs/rv-capture.html
-docs/tesla-observatory.html
+World / PREMAQC / State Address / Stratum / US / Heimdall
+                         ↓
+                    Runa compiler
+                         ↓
+              Wardenclyffe orchestration
+                         ↓
+               Flameclyffe / Möbius
+                         ↓
+             Galdr Observatory receipt
+                         ↓
+                  KGN / DEEPTime
+                         ↓
+                  next braid state
 ```
 
-## Flameclyffe app surfaces
+## Organ law
 
-Known Flameclyffe app surfaces include:
+- **Runa** composes world-native harmonic relation from mapped frequencies, PREMAQC, world profile, Spiral State, memory/continuity, State/Gate Address, provenance, and user choice.
+- **Wardenclyffe** gives that relation temporal anatomy: layers, entrances, 3·6·9 phase, release, memory return, continuity sustain, haptics, and addressed trajectory.
+- **Flameclyffe / Möbius** gives the layered relation acoustic and spatial body.
+- **Heimdall** reads turning geometry, relational participation, observation coupling, shared-observation coherence, and continuation.
+- **Kelyran Galdr** provides voiced performance and semantic trajectory.
+- **Galdr Observatory** measures performed/returning state.
+- **KGN2** preserves pitch, rhythm, phase, mapped tone, State/Gate Address, stratum, lineage, and measurement references for reproducible trajectory replay.
+
+## Active math contract
+
+Where this braid applies, plans and receipts report:
+
+```text
+math_spine = hearthgate.math-spine/v1.8
+```
+
+State/Gate Address:
+
+```text
+(omega, phi, rhythm, tau, chi, relation, consciousness, stratum)
+```
+
+Temporal lattice:
+
+```text
+3 = GROUND / CALL
+6 = WEAVE / RESPONSE
+9 = CROSS / RELEASE
+```
+
+Runa does not mint canonical carrier frequencies from mathematics. Frequencies come from an explicit mapped registry or approved world/tone lineage.
+
+## Living Flameclyffe surfaces
 
 ```text
 apps/starwell
-apps/project-zero-companion
+apps/arcsweep
+apps/project-zero-companion   # compatibility / local bridge surface
 apps/sigil-activator
-sandbox/everos
 ```
 
-## Bridge rules
+STARWELL publishes and observes instruments. Arcsweep is the living workbench and House-facing application. House Runtime Broker/Braid owns model/runtime transport. General browser persistence belongs to Hearthfire state rather than audio or bridge sidecars.
 
-Project Zero Bridge may connect Waking World shards, story passages, files, folders, Observer states, altar work, and sound sources.
+## Runa public/static doors
 
-Bridge-on does not mean silent harvesting. Every bridge flow should preserve a private/local/excluded option.
+Historical and public Runa doors may include lab, altar, Wardenclyffe, tone, brainwave, psi, remote-viewing, and Tesla-observatory surfaces. A public/static page becomes a primary House door only when intentionally registered and reviewed; mere existence does not grant architectural authority.
 
-## Route registration direction
+## World transfer
 
-Public/static Runa pages should be registered in `flameclyffe_frontend_routes` only when they are intentional project doors.
+World profiles may express shared relational invariants through world-native ontology, language, sound, visual form, and movement. Ta’veren Vaen may express Thread / Weave / Pattern / Loom / Pattern Turn / Song of the Weave while retaining the same provenance and replay spine.
 
-STARWELL rooms should prefer their own route metadata and Codex links, then expose public pages only when reviewed.
+## Bridge and receipt rules
 
-## Science and fringe boundary
+- Bridge-on does not mean silent harvesting.
+- Local/private/excluded paths remain explicit where relevant.
+- User choice and source provenance travel with adaptive suggestions.
+- Audio/haptic rendering does not silently promote an observation into canon.
+- Historical receipts retain the engine, mapping, and mathematics version required for replay.
 
-Runa can host fringe-inspired tools and playful instruments. Flameclyffe should record the claim label, evidence status, and implementation state.
+## Legacy
 
-Use:
+Pre-v1.8 mathematics lives under `docs/archive/mathematics/pre-v1.8/`. It remains available for historical replay. Active v1.8 organs use the living braid above.
 
-```text
-established science
-active research
-speculative theory
-fringe inspiration
-implementation task
-evidence-backed finding
-```
+## Working line
 
-## Working mantra
-
-Runa opens the doors. Flameclyffe keeps the receipts. STARWELL writes the field back into language.
+Runa composes. Wardenclyffe gives time. Flameclyffe gives body. Heimdall watches the turn. Galdr voices it. STARWELL keeps the field visible. Hearthfire keeps the lineage joined.

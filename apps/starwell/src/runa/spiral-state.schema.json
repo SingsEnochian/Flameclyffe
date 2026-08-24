@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hearthgate/spiral-state/v1",
+  "title": "Hearthgate Spiral State v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "phase",
+    "direction",
+    "confidence",
+    "suggested_actions",
+    "subsystem_contexts",
+    "supporting_receipts"
+  ],
+  "properties": {
+    "schema": { "const": "hearthgate/spiral-state/v1" },
+    "phase": {
+      "enum": ["observe", "receive", "compress", "integrate", "release", "expand", "reorient", "contribute"]
+    },
+    "direction": { "enum": ["ascending", "holding", "descending", "indeterminate"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "suggested_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["token", "weight"],
+        "properties": {
+          "token": { "type": "string", "minLength": 1 },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+          "reason_code": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "subsystem_contexts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["llm", "audio", "glyph", "ui"],
+      "properties": {
+        "llm": { "type": "object" },
+        "audio": { "type": "object" },
+        "glyph": { "type": "object" },
+        "ui": { "type": "object" },
+        "haptics": { "type": "object" }
+      }
+    },
+    "supporting_receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["story", "time", "theory"],
+      "properties": {
+        "story": { "$ref": "#/$defs/receiptList" },
+        "time": { "$ref": "#/$defs/receiptList" },
+        "theory": { "$ref": "#/$defs/receiptList" },
+        "observer": { "$ref": "#/$defs/receiptList" }
+      }
+    }
+  },
+  "$defs": {
+    "receiptList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  }
+}
