@@ -1,0 +1,75 @@
+name: Vercel Production Public Smoke
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/vercel-production-public-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  production-public-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_URL: https://flameclyffe.vercel.app
+      RUNTIME_HOTFIX_SHA: 9f476ecf4755a4ce927682ba82a7aaea7874094a
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Probe production shell and runtime boundaries
+        shell: bash
+        run: |
+          node <<'NODE' | tee smoke.json
+          const base = process.env.BASE_URL.replace(/\/$/, '');
+          const checks = [];
+          const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
+          async function hit(path, expected, init = {}) {
+            const r = await fetch(`${base}${path}`, { redirect: 'manual', ...init });
+            const type = r.headers.get('content-type') || '';
+            const text = await r.text();
+            checks.push({ path, status: r.status, content_type: type, sample: text.slice(0, 120) });
+            assert(r.status === expected, `${path}: expected ${expected}, got ${r.status}${r.headers.get('location') ? ` -> ${r.headers.get('location')}` : ''}`);
+            return { r, text, type };
+          }
+          const app = await hit('/arcsweep/', 200);
+          assert(/text\/html/i.test(app.type), 'Arcsweep did not return HTML');
+          const worklet = await hit('/arcsweep/assets/spessasynth_processor.min.js', 200);
+          assert(/javascript|ecmascript/i.test(worklet.type), 'SpessaSynth worklet did not return JavaScript');
+          const session = await hit('/api/v1/house/session', 401);
+          assert(/connected/.test(session.text), 'House session route did not return its contract');
+          await hit('/api/v1/house/session', 401, {
+            method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ credential: 'deliberately-invalid-smoke-credential' })
+          });
+          await hit('/api/v1/house/commons', 401);
+          await hit('/api/v1/house/observations', 401);
+          await hit('/api/v1/house/braid/stream', 401);
+          await hit('/api/v1/flames/atlas/status', 401);
+          console.log(JSON.stringify({ ok: true, base, runtime_hotfix_sha: process.env.RUNTIME_HOTFIX_SHA, checks }, null, 2));
+          NODE
+
+      - name: Publish receipt to hosting PR
+        if: always()
+        shell: bash
+        run: |
+          STATUS='PASSED'
+          if [[ '${{ job.status }}' != 'success' ]]; then STATUS='FAILED'; fi
+          {
+            echo "### Vercel production public smoke: ${STATUS}"
+            echo
+            echo 'Production: `https://flameclyffe.vercel.app`'
+            echo "Runtime hotfix SHA: \`${RUNTIME_HOTFIX_SHA}\`"
+            echo "Smoke workflow SHA: \`${GITHUB_SHA}\`"
+            echo
+            echo '```json'
+            cat smoke.json 2>/dev/null || echo '{"ok":false,"error":"probe failed before receipt"}'
+            echo '```'
+            echo
+            echo 'This probe verifies the live shell and that House session, Commons, observations, Braid, and Flame routes are deployed and enforce their unauthorised boundary. Authenticated persistence/model traversal remains covered by the 663/663 runtime suite because no House credential is installed in GitHub Actions.'
+          } > receipt.md
+          gh pr comment 184 --body-file receipt.md
