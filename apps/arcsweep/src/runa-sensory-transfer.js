@@ -8,11 +8,53 @@ export const RUNA_SENSORY_RESPONSE_SCHEMA = 'arcsweep.runa-sensory-transfer-resp
 export const SENSORY_MODES = Object.freeze(['air', 'bone', 'field']);
 export const SENSORY_CARRIERS = Object.freeze([
   'air_audio',
-  'bone_conduction_audio',
+  'surface_bone_audio',
+  'implant_bone_audio',
   'surface_haptic',
   'visual',
   'spatial',
 ]);
+
+export const SENSORY_CARRIER_CAPABILITIES = Object.freeze({
+  air_audio: Object.freeze({
+    carrier_class: 'auditory',
+    execution: 'browser-audio',
+    frequency_control: true,
+    medical_device_control: false,
+  }),
+  surface_bone_audio: Object.freeze({
+    carrier_class: 'bone-auditory',
+    execution: 'adapter-required',
+    frequency_control: true,
+    medical_device_control: false,
+    note: 'External bone-audio devices require an explicit streaming/output adapter.',
+  }),
+  implant_bone_audio: Object.freeze({
+    carrier_class: 'bone-auditory',
+    execution: 'adapter-required',
+    frequency_control: true,
+    medical_device_control: false,
+    note: 'Implant-class bone-audio routing is stream-only. Runa does not alter medical fitting, gain prescription, or implant behaviour.',
+  }),
+  surface_haptic: Object.freeze({
+    carrier_class: 'somatic',
+    execution: 'browser-vibration',
+    frequency_control: false,
+    medical_device_control: false,
+  }),
+  visual: Object.freeze({
+    carrier_class: 'visual',
+    execution: 'adapter-required',
+    frequency_control: false,
+    medical_device_control: false,
+  }),
+  spatial: Object.freeze({
+    carrier_class: 'spatial',
+    execution: 'adapter-required',
+    frequency_control: false,
+    medical_device_control: false,
+  }),
+});
 
 export const SENSORY_SEMANTIC_STATES = Object.freeze({
   presence: Object.freeze({
@@ -122,7 +164,8 @@ export function createDefaultSensoryTransferProfile({ participantRef = 'local-pa
     carriers: [
       { carrier: 'air_audio', enabled: true, regions: [] },
       { carrier: 'surface_haptic', enabled: true, regions: [] },
-      { carrier: 'bone_conduction_audio', enabled: false, regions: [] },
+      { carrier: 'surface_bone_audio', enabled: false, regions: [] },
+      { carrier: 'implant_bone_audio', enabled: false, regions: [] },
       { carrier: 'visual', enabled: false, regions: [] },
       { carrier: 'spatial', enabled: false, regions: [] },
     ],
@@ -165,7 +208,7 @@ export async function compileSensoryTransferPlan({
   if (requestedCarriers.includes('air_audio') && carrierEnabled(sensoryProfile, 'air_audio')) {
     carrierPlans.push(Object.freeze({
       carrier: 'air_audio',
-      semantic_role: mode === 'field' ? 'primary' : 'primary',
+      semantic_role: 'primary',
       frequency_hz: audioHz,
       amplitude_norm: Number(Math.min(0.08, 0.018 + normalizedIntensity * 0.045).toFixed(5)),
       duration_ms: normalizedDuration,
@@ -223,6 +266,10 @@ export async function compileSensoryTransferPlan({
       premaqc_mutable: false,
       canon_commit: false,
       semantic_invariant_preserved_across_carriers: true,
+      surface_bone_audio_execution_authorized: false,
+      implant_bone_audio_execution_authorized: false,
+      medical_device_fitting_mutable: false,
+      medical_device_control_authorized: false,
     },
   };
   const fingerprint = await sha256Hex(core);
@@ -272,6 +319,8 @@ export async function createSensoryTransferRenderReceipt({ plan, runtime, launch
       qualia_inferred: false,
       premaqc_effect_inferred: false,
       canon_commit: false,
+      medical_device_fitting_changed: false,
+      medical_device_control_used: false,
     },
   };
   const fingerprint = await sha256Hex(core);
