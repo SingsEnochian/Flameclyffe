@@ -14,6 +14,7 @@ const SIDECARS = [
   './constellation-runtime-adapter.js',
   './model-presence-bus.js',
   './model-presence-live-ui.js',
+  './model-reply-proof.js',
   './runtime-presence-diagnostics.js',
   './runtime-integration-bootstrap.js',
   './hosted-house-session-ui.js',
