@@ -139,15 +139,17 @@ async function mount(nextMessage = message) {
   }
 }
 
-async function persistList(state, key, value, idField, reason) {
-  const obs = structuredClone(state.observatory || {});
+async function persistList(_state, key, value, idField, reason) {
+  const latest = await loadState();
+  const obs = structuredClone(latest.observatory || {});
   obs[key] ||= [];
   obs[key] = [...obs[key].filter((item) => item?.[idField] !== value?.[idField]), structuredClone(value)].slice(-MAX_ITEMS);
   await persistObservatoryStore(obs, { reason, sensoryTransferId: value?.[idField] });
 }
 
-async function persistProfile(state, profile) {
-  const obs = structuredClone(state.observatory || {});
+async function persistProfile(_state, profile) {
+  const latest = await loadState();
+  const obs = structuredClone(latest.observatory || {});
   obs.runa_sensory_profiles ||= [];
   obs.runa_sensory_profiles = [...obs.runa_sensory_profiles.filter((item) => item.profile_id !== profile.profile_id), structuredClone(profile)].slice(-MAX_ITEMS);
   await persistObservatoryStore(obs, { reason: 'runa-sensory-profile', profileId: profile.profile_id });
