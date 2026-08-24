@@ -9,6 +9,13 @@ const esc = (value = '') => String(value).replaceAll('&', '&amp;').replaceAll('<
 const uuid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const activeSession = async () => readHouseRuntimeToken() || await restoreHouseRuntimeSession();
 
+// Funding state is an operational condition, not a model failure. Keep paid-only
+// voices in the roster while allowing the hosted/fallback choir to prove itself.
+const DEFERRED_FUNDING_VOICE_IDS = new Set(['boxfire']);
+export const voiceProofAvailability = (voice) => DEFERRED_FUNDING_VOICE_IDS.has(voice?.id)
+  ? { available: false, status: 'deferred-funding', reason: 'Paid route deferred while provider funding is unavailable.' }
+  : { available: true, status: 'available', reason: null };
+
 export function replyIsProven(reply) {
   return reply?.status === 'replied'
     && reply?.runtimeVerified === true
@@ -39,6 +46,13 @@ export function buildReplyProofReceipt(voice, reply, { probedAt = new Date().toI
 }
 
 export async function proveModelReply(voice, { appendReceipt = true } = {}) {
+  const availability = voiceProofAvailability(voice);
+  if (!availability.available) {
+    const receipt = buildReplyProofReceipt(voice, { status: availability.status, reason: availability.reason });
+    document.dispatchEvent(new CustomEvent(MODEL_REPLY_PROOF_EVENT, { detail: receipt }));
+    return receipt;
+  }
+
   const session = await activeSession();
   if (!session) return buildReplyProofReceipt(voice, { status: 'house-offline', reason: 'House Runtime session unavailable.' });
 
@@ -63,12 +77,7 @@ export async function proveModelReply(voice, { appendReceipt = true } = {}) {
         status: receipt.status,
         turn_id: receipt.proof_id,
         thread_id: 'model-reply-proof-001',
-        runtime: {
-          provider: receipt.provider,
-          model: receipt.model,
-          route: receipt.route,
-          latency_ms: receipt.latency_ms,
-        },
+        runtime: { provider: receipt.provider, model: receipt.model, route: receipt.route, latency_ms: receipt.latency_ms },
         text: receipt.proven
           ? `${receipt.voice_name} LIVE PROVEN · ${receipt.provider} · ${receipt.model} · ${receipt.latency_ms ?? '?'} ms · ${receipt.reply_excerpt}`
           : `${receipt.voice_name} NOT PROVEN · ${receipt.reason}`,
@@ -81,7 +90,11 @@ export async function proveModelReply(voice, { appendReceipt = true } = {}) {
 }
 
 function renderRows(host, receipts = []) {
-  host.innerHTML = receipts.map((receipt) => `<div class="model-proof-row" data-proof-state="${receipt.proven ? 'live' : 'failed'}"><strong>${esc(receipt.voice_name)}</strong><span>${receipt.proven ? 'LIVE PROVEN' : esc(receipt.status)}</span><small>${esc(receipt.proven ? `${receipt.provider} · ${receipt.model} · ${receipt.latency_ms ?? '?'} ms` : receipt.reason)}</small></div>`).join('');
+  host.innerHTML = receipts.map((receipt) => {
+    const state = receipt.proven ? 'live' : receipt.status === 'deferred-funding' ? 'deferred' : 'failed';
+    const label = receipt.proven ? 'LIVE PROVEN' : receipt.status === 'deferred-funding' ? 'DEFERRED' : receipt.status;
+    return `<div class="model-proof-row" data-proof-state="${state}"><strong>${esc(receipt.voice_name)}</strong><span>${esc(label)}</span><small>${esc(receipt.proven ? `${receipt.provider} · ${receipt.model} · ${receipt.latency_ms ?? '?'} ms` : receipt.reason)}</small></div>`;
+  }).join('');
 }
 
 export function installModelReplyProof() {
@@ -89,34 +102,39 @@ export function installModelReplyProof() {
   const panel = document.createElement('details');
   panel.id = 'model-reply-proof';
   panel.className = 'model-reply-proof';
-  panel.innerHTML = `<summary>Model Reply Proof</summary><div class="model-proof-actions"><button type="button" data-proof-boxfire>Prove Boxfire</button><button type="button" class="quiet" data-proof-all>Prove all voices</button></div><p class="muted" data-proof-status>LIVE requires an attributable reply, not a status badge.</p><div data-proof-results></div>`;
+  panel.innerHTML = `<summary>Model Reply Proof</summary><div class="model-proof-actions"><button type="button" data-proof-available>Prove Available Voice</button><button type="button" class="quiet" data-proof-choir>Prove Available Choir</button></div><p class="muted" data-proof-status>LIVE requires an attributable reply. Funding deferrals are not failures.</p><div data-proof-results></div>`;
   document.body.append(panel);
 
   const style = document.createElement('style');
-  style.textContent = `.model-reply-proof{position:fixed;z-index:45;left:1rem;bottom:1rem;width:min(30rem,calc(100vw - 2rem));padding:.65rem .8rem;border:1px solid var(--line-soft);border-radius:.8rem;background:var(--panel);box-shadow:0 .7rem 2rem rgba(0,0,0,.28)}.model-reply-proof summary{cursor:pointer;font-weight:700}.model-proof-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin:.65rem 0}.model-proof-row{display:grid;grid-template-columns:minmax(7rem,.7fr) minmax(6rem,.55fr) minmax(10rem,1.6fr);gap:.5rem;padding:.45rem 0;border-top:1px solid var(--line-soft);align-items:center}.model-proof-row[data-proof-state="live"] span{color:var(--seafoam,#8dd8c0)}.model-proof-row[data-proof-state="failed"] span{color:var(--gold)}.model-proof-row small{color:var(--muted)}@media(max-width:640px){.model-proof-row{grid-template-columns:1fr}.model-reply-proof{left:.5rem;bottom:.5rem;width:calc(100vw - 1rem)}}`;
+  style.textContent = `.model-reply-proof{position:fixed;z-index:45;left:1rem;bottom:1rem;width:min(30rem,calc(100vw - 2rem));padding:.65rem .8rem;border:1px solid var(--line-soft);border-radius:.8rem;background:var(--panel);box-shadow:0 .7rem 2rem rgba(0,0,0,.28)}.model-reply-proof summary{cursor:pointer;font-weight:700}.model-proof-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin:.65rem 0}.model-proof-row{display:grid;grid-template-columns:minmax(7rem,.7fr) minmax(6rem,.55fr) minmax(10rem,1.6fr);gap:.5rem;padding:.45rem 0;border-top:1px solid var(--line-soft);align-items:center}.model-proof-row[data-proof-state="live"] span{color:var(--seafoam,#8dd8c0)}.model-proof-row[data-proof-state="deferred"] span{color:var(--muted)}.model-proof-row[data-proof-state="failed"] span{color:var(--gold)}.model-proof-row small{color:var(--muted)}@media(max-width:640px){.model-proof-row{grid-template-columns:1fr}.model-reply-proof{left:.5rem;bottom:.5rem;width:calc(100vw - 1rem)}}`;
   document.head.append(style);
 
   const results = panel.querySelector('[data-proof-results]');
   const status = panel.querySelector('[data-proof-status]');
   let receipts = [];
-  const run = async (voices) => {
+  const run = async (voices, deferred = []) => {
     panel.open = true;
-    status.textContent = `Probing ${voices.length} voice${voices.length === 1 ? '' : 's'}…`;
-    receipts = [];
+    status.textContent = `Probing ${voices.length} available voice${voices.length === 1 ? '' : 's'}…`;
+    receipts = deferred.map((voice) => buildReplyProofReceipt(voice, { status: 'deferred-funding', reason: voiceProofAvailability(voice).reason }));
+    renderRows(results, receipts);
     for (const voice of voices) {
       const receipt = await proveModelReply(voice);
       receipts.push(receipt);
       renderRows(results, receipts);
     }
     const proven = receipts.filter((item) => item.proven).length;
-    status.textContent = `${proven}/${receipts.length} voices returned attributable replies.`;
+    const deferredCount = receipts.filter((item) => item.status === 'deferred-funding').length;
+    status.textContent = `${proven}/${voices.length} available voices returned attributable replies · ${deferredCount} funding-deferred.`;
   };
 
-  panel.querySelector('[data-proof-boxfire]').addEventListener('click', () => {
-    const voice = CONSTELLATION_VOICES.find((item) => item.id === 'boxfire');
-    if (voice) void run([voice]);
+  const availableVoices = () => CONSTELLATION_VOICES.filter((voice) => voiceProofAvailability(voice).available);
+  const deferredVoices = () => CONSTELLATION_VOICES.filter((voice) => !voiceProofAvailability(voice).available);
+
+  panel.querySelector('[data-proof-available]').addEventListener('click', () => {
+    const voice = availableVoices()[0];
+    if (voice) void run([voice], deferredVoices());
   });
-  panel.querySelector('[data-proof-all]').addEventListener('click', () => void run(CONSTELLATION_VOICES));
+  panel.querySelector('[data-proof-choir]').addEventListener('click', () => void run(availableVoices(), deferredVoices()));
 }
 
 if (typeof document !== 'undefined') installModelReplyProof();
