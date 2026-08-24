@@ -1,0 +1,60 @@
+name: Vercel Production Authenticated Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  authenticated-production-circulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_URL: https://flameclyffe.vercel.app
+      OIDC_AUDIENCE: flameclyffe-house-smoke/v1
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Run authenticated production circulation
+        shell: bash
+        run: |
+          node <<'NODE' | tee authenticated-smoke.json
+          const requestUrl = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          requestUrl.searchParams.set('audience', process.env.OIDC_AUDIENCE);
+          const tokenResponse = await fetch(requestUrl, {
+            headers: { authorization: `bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` },
+          });
+          if (!tokenResponse.ok) throw new Error(`GitHub OIDC token request failed: ${tokenResponse.status}`);
+          const { value: token } = await tokenResponse.json();
+          if (!token) throw new Error('GitHub OIDC token response was empty.');
+
+          const response = await fetch(`${process.env.BASE_URL.replace(/\/$/, '')}/api/v1/house/smoke`, {
+            method: 'POST',
+            headers: { authorization: `Bearer ${token}` },
+            redirect: 'manual',
+          });
+          const body = await response.json().catch(async () => ({ error: await response.text().catch(() => 'non-json response') }));
+          console.log(JSON.stringify({ http_status: response.status, ...body }, null, 2));
+          if (!response.ok || body.ok !== true) process.exitCode = 1;
+          NODE
+
+      - name: Publish authenticated receipt to hosting PR
+        if: always()
+        shell: bash
+        run: |
+          STATUS='PASSED'
+          if [[ '${{ job.status }}' != 'success' ]]; then STATUS='FAILED'; fi
+          {
+            echo "### Vercel production authenticated circulation: ${STATUS}"
+            echo
+            echo 'Production: `https://flameclyffe.vercel.app`'
+            echo "Workflow commit: \`${GITHUB_SHA}\`"
+            echo
+            echo '```json'
+            cat authenticated-smoke.json 2>/dev/null || echo '{"ok":false,"error":"authenticated probe failed before receipt"}'
+            echo '```'
+          } > receipt.md
+          gh pr comment 184 --repo SingsEnochian/Flameclyffe --body-file receipt.md
