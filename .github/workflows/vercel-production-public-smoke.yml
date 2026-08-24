@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - '.github/workflows/vercel-production-public-smoke.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/vercel-production-public-smoke.yml'
   workflow_dispatch:
 
 permissions:
