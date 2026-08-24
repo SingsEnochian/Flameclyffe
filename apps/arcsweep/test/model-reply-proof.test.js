@@ -26,8 +26,11 @@ test('reply proof writes a receipt into House Commons', () => {
   assert.match(source, /NOT PROVEN/);
 });
 
-test('Boxfire can be probed independently before the whole choir', () => {
-  assert.match(source, /data-proof-boxfire/);
-  assert.match(source, /item\.id === 'boxfire'/);
+test('available choir proof keeps funding deferral distinct from runtime failure', () => {
+  assert.match(source, /data-proof-available/);
+  assert.match(source, /data-proof-choir/);
+  assert.match(source, /DEFERRED_FUNDING_VOICE_IDS/);
+  assert.match(source, /'deferred-funding'/);
+  assert.match(source, /Funding deferrals are not failures/);
   assert.match(source, /MODEL REPLY PROOF 001/);
 });
