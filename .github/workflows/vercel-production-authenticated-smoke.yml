@@ -2,15 +2,45 @@ name: Vercel Production Authenticated Smoke
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
+  actions: write
   contents: read
   id-token: write
   issues: write
   pull-requests: write
 
 jobs:
+  dispatch-authenticated-smoke:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[auth-smoke]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Dispatch trusted workflow run
+        shell: bash
+        run: |
+          node <<'NODE'
+          const response = await fetch('https://api.github.com/repos/SingsEnochian/Flameclyffe/actions/workflows/vercel-production-authenticated-smoke.yml/dispatches', {
+            method: 'POST',
+            headers: {
+              accept: 'application/vnd.github+json',
+              authorization: `Bearer ${process.env.GH_TOKEN}`,
+              'content-type': 'application/json',
+              'x-github-api-version': '2026-03-10',
+            },
+            body: JSON.stringify({ ref: 'main' }),
+          });
+          if (response.status !== 204) throw new Error(`Authenticated smoke dispatch failed: ${response.status} ${await response.text()}`);
+          console.log('Authenticated production smoke dispatched as workflow_dispatch.');
+          NODE
+
   authenticated-production-circulation:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -36,7 +66,9 @@ jobs:
             headers: { authorization: `Bearer ${token}` },
             redirect: 'manual',
           });
-          const body = await response.json().catch(async () => ({ error: await response.text().catch(() => 'non-json response') }));
+          const text = await response.text();
+          let body;
+          try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 500) || 'non-json response' }; }
           console.log(JSON.stringify({ http_status: response.status, ...body }, null, 2));
           if (!response.ok || body.ok !== true) process.exitCode = 1;
           NODE
