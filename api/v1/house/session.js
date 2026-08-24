@@ -1,0 +1,49 @@
+import {
+  authoriseHouseRequest,
+  clearHouseSessionCookies,
+  houseSessionCookie,
+  issueHouseSession,
+  validateStewardCredential,
+  validateSupabaseStewardToken,
+} from '../../../netlify/functions/_shared/house-session.mjs';
+import { vercelEnv as env } from '../../_shared/vercel-env.mjs';
+
+const json = (status, body, headers = {}) => new Response(JSON.stringify(body), {
+  status,
+  headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers },
+});
+
+export default {
+  async fetch(request) {
+    if (request.method === 'GET') {
+      const session = authoriseHouseRequest(request, env);
+      return session ? json(200, { connected: true, role: 'steward', mode: session.mode }) : json(401, { connected: false });
+    }
+    if (request.method === 'DELETE') {
+      const response = json(200, { connected: false });
+      for (const cookie of clearHouseSessionCookies()) response.headers.append('set-cookie', cookie);
+      return response;
+    }
+    if (request.method !== 'POST') return json(405, { error: 'GET, POST, or DELETE required.' });
+
+    let body;
+    try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
+    const supabaseAccessToken = String(body.supabase_access_token || '').trim();
+    const authorised = supabaseAccessToken
+      ? await validateSupabaseStewardToken(supabaseAccessToken, env)
+      : validateStewardCredential(String(body.credential || ''), env);
+    if (!authorised) return json(401, { error: 'Steward identity refused.' });
+
+    try {
+      const session = issueHouseSession(env);
+      return json(201, {
+        connected: true,
+        role: 'steward',
+        mode: supabaseAccessToken ? 'supabase-auth' : 'credential',
+        expires_at: new Date(session.claims.exp * 1000).toISOString(),
+      }, { 'set-cookie': houseSessionCookie(request, session.token, session.ttl) });
+    } catch (error) {
+      return json(503, { error: error.message });
+    }
+  },
+};
