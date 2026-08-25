@@ -8,6 +8,10 @@ import {
   HOUSE_SMOKE_WORKFLOW_REF,
   verifyGitHubActionsOidc,
 } from '../../../api/_shared/github-actions-oidc.mjs';
+import {
+  issueHouseSession,
+  verifyHouseSessionToken,
+} from '../../../netlify/functions/_shared/house-session.mjs';
 
 const NOW = Date.parse('2026-08-24T18:55:00.000Z');
 const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
@@ -53,6 +57,19 @@ test('production circulation accepts only the exact main workflow OIDC identity'
   assert.equal(identity.ref, 'refs/heads/main');
   assert.equal(identity.workflow_ref, HOUSE_SMOKE_WORKFLOW_REF);
   assert.equal(identity.event_name, 'workflow_dispatch');
+});
+
+test('trusted production smoke can mint a sealed House session without a reusable Steward credential', () => {
+  const values = new Map([
+    ['HOUSE_SESSION_SECRET', 'test-only-house-session-secret'],
+  ]);
+  const env = { get: (name) => values.get(name) || null };
+  const session = issueHouseSession(env, NOW);
+  const claims = verifyHouseSessionToken(session.token, env, NOW + 1_000);
+  assert.equal(claims?.role, 'steward');
+  assert.equal(claims?.v, 1);
+  assert.equal(values.has('ARCSWEEP_STEWARD_KEY'), false);
+  assert.equal(values.has('ARCSWEEP_RUNTIME_TOKEN'), false);
 });
 
 test('production circulation rejects another workflow even when repo and branch match', async () => {
