@@ -3,7 +3,11 @@
 const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
 const { FLAMES } = require('./manifests');
-const { getModelCandidate, listModelCandidates } = require('./model-candidates');
+const {
+  getModelCandidate,
+  listModelCandidates,
+  assessCandidateDataPolicy,
+} = require('./model-candidates');
 
 const router = express.Router();
 
@@ -125,10 +129,19 @@ async function callOpenAICompatibleCandidate(candidate, systemPrompt, userMessag
     body.reasoning_effort = reasoningEffort;
   }
 
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${key}`,
+  };
+  if (runtime.backend === 'openrouter') {
+    if (process.env.OPENROUTER_HTTP_REFERER) headers['HTTP-Referer'] = process.env.OPENROUTER_HTTP_REFERER;
+    headers['X-Title'] = process.env.OPENROUTER_APP_TITLE || 'Flameclyffe Bifrost';
+  }
+
   const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
   const res = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    headers,
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(120000),
   });
@@ -348,6 +361,7 @@ router.get('/flames/:flame_id/audition/:candidate_id', resolveFlame, (req, res) 
     audition_route: true,
     primary_route_unchanged: true,
     capabilities: candidate.capabilities,
+    data_policy: candidate.data_policy || null,
     ...runtimeStatus,
   });
 });
@@ -357,14 +371,31 @@ router.post('/flames/:flame_id/audition/:candidate_id', resolveFlame, async (req
   const resolved = resolveCandidateForFlame(manifest, req.params.candidate_id);
   if (resolved.error) return res.status(resolved.status || 404).json({ error: resolved.error });
   const { candidate } = resolved;
-  const { message, session_id, context = [], reasoning_effort } = req.body;
+  const { message, session_id, context = [], reasoning_effort, data_class } = req.body;
   if (!message) return res.status(400).json({ error: 'message required' });
 
-  const hearthCtx = await queryHearthfire(
-    manifest.memory.hearthfire_namespace,
-    manifest.memory.retrieval_scope,
-    message
-  );
+  const policyResult = assessCandidateDataPolicy(candidate, data_class);
+  if (!policyResult.ok) {
+    return res.status(403).json({
+      flame_id: manifest.flame_id,
+      candidate_id: candidate.candidate_id,
+      audition: true,
+      primary_route_unchanged: true,
+      code: policyResult.code,
+      error: policyResult.reason,
+      data_class: policyResult.data_class,
+      allowed_input_classes: policyResult.allowed_input_classes,
+      hearthfire_retrieval: false,
+    });
+  }
+
+  const hearthCtx = policyResult.hearthfire_retrieval
+    ? await queryHearthfire(
+        manifest.memory.hearthfire_namespace,
+        manifest.memory.retrieval_scope,
+        message
+      )
+    : { snippets: [], source: 'disabled-by-candidate-policy' };
 
   const contextBlock = context.length
     ? `Recent conversation:\n${context.map(m => `${m.speaker}: ${m.text}`).join('\n')}\n\n`
@@ -402,6 +433,8 @@ router.post('/flames/:flame_id/audition/:candidate_id', resolveFlame, async (req
       model: candidate.model_id,
       audition: true,
       primary_route_unchanged: true,
+      data_class: policyResult.data_class,
+      hearthfire_retrieval: policyResult.hearthfire_retrieval,
       error,
     });
   }
@@ -414,6 +447,8 @@ router.post('/flames/:flame_id/audition/:candidate_id', resolveFlame, async (req
     model: candidate.model_id,
     audition: true,
     primary_route_unchanged: true,
+    data_class: policyResult.data_class,
+    hearthfire_retrieval: policyResult.hearthfire_retrieval,
     reasoning_effort: result.reasoning_effort,
     message: result.message,
     usage: result.usage,
