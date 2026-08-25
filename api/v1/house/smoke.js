@@ -1,5 +1,6 @@
 import { HOUSE_SMOKE_AUDIENCE, verifyGitHubActionsOidc } from '../../_shared/github-actions-oidc.mjs';
 import { vercelEnv as env } from '../../_shared/vercel-env.mjs';
+import { houseSessionCookie, issueHouseSession } from '../../../netlify/functions/_shared/house-session.mjs';
 
 const json = (status, body) => new Response(JSON.stringify(body), {
   status,
@@ -15,11 +16,6 @@ async function readJson(response, label) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(`${label} failed: ${response.status} ${data.error || JSON.stringify(data)}`);
   return data;
-}
-
-function sessionCookie(response) {
-  const value = response.headers.get('set-cookie') || '';
-  return value.split(';')[0].trim();
 }
 
 async function readBraidReplay(base, cookie) {
@@ -71,11 +67,6 @@ export default {
       return json(401, { error: 'Trusted production smoke identity required.', detail: error.message });
     }
 
-    const stewardCredential = env.get('ARCSWEEP_STEWARD_KEY')
-      || env.get('ARCSWEEP_STEWARD_KEY_SECONDARY')
-      || env.get('ARCSWEEP_RUNTIME_TOKEN');
-    if (!stewardCredential) return json(503, { error: 'House Steward credential is not configured in production.' });
-
     const base = new URL(request.url).origin;
     const startedAt = new Date().toISOString();
     const threadId = `production-circulation:${Date.now()}`;
@@ -87,15 +78,12 @@ export default {
     };
 
     try {
-      const sessionResponse = await fetch(`${base}/api/v1/house/session`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ credential: stewardCredential }),
-        cache: 'no-store',
-      });
-      const session = await readJson(sessionResponse, 'House session exchange');
-      const cookie = sessionCookie(sessionResponse);
-      if (!cookie || session.connected !== true) throw new Error('House session exchange returned no sealed session cookie.');
+      // The GitHub Actions OIDC identity is the authority for this narrow production smoke.
+      // Mint the same sealed House session cookie the normal exchange would issue, without
+      // requiring a reusable Steward credential to be present in the smoke environment.
+      const internalSession = issueHouseSession(env);
+      const cookie = houseSessionCookie(request, internalSession.token, internalSession.ttl).split(';')[0].trim();
+      if (!cookie) throw new Error('Trusted smoke session mint returned no sealed session cookie.');
 
       const houseFetch = (path, init = {}) => {
         const headers = new Headers(init.headers || {});
@@ -187,6 +175,7 @@ export default {
         braid_replay: braid,
         authority: {
           oidc_audience: HOUSE_SMOKE_AUDIENCE,
+          session_bootstrap: 'trusted-github-oidc',
           credential_exposed: false,
           model_prose_returned: false,
           production_write_scope: 'two append-only Commons smoke entries',
