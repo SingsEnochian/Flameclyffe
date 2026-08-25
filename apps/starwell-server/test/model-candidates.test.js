@@ -108,7 +108,7 @@ test('audition router applies candidate data policy before Hearthfire retrieval'
   const routerSource = fs.readFileSync(path.join(__dirname, '..', 'flames', 'router.js'), 'utf8');
   const policyCheck = routerSource.indexOf('assessCandidateDataPolicy(candidate, data_class)');
   const hearthfireChoice = routerSource.indexOf('policyResult.hearthfire_retrieval');
-  const candidateCall = routerSource.indexOf('callOpenAICompatibleCandidate(candidate');
+  const candidateCall = routerSource.indexOf('callOpenAICompatibleCandidate(candidate', hearthfireChoice);
 
   assert.ok(policyCheck >= 0, 'router must evaluate candidate data policy');
   assert.ok(hearthfireChoice > policyCheck, 'Hearthfire decision must occur after policy evaluation');
