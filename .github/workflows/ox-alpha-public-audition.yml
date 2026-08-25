@@ -1,0 +1,46 @@
+name: Ox Alpha Public Audition
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/starwell-server/flames/model-candidates.js"
+      - "netlify/functions/_shared/model-audition-runtime.mjs"
+      - "scripts/ox-alpha-public-audition.mjs"
+      - ".github/workflows/ox-alpha-public-audition.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ox-alpha-public-audition-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  public-audition:
+    name: Guarded public Ox Alpha audition
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      OX_AUDITION_RECEIPT: ox-alpha-audition-receipt.json
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Run bounded public audition
+        run: node scripts/ox-alpha-public-audition.mjs
+
+      - name: Upload audition receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: ox-alpha-public-audition-receipt
+          path: ox-alpha-audition-receipt.json
+          if-no-files-found: error
+          retention-days: 14
