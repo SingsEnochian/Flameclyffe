@@ -2,7 +2,7 @@
 
 **Repository:** `SingsEnochian/Flameclyffe`  
 **Integration branch:** `codex/arcsweep-feedback-loop`  
-**Updated:** 2026-08-22
+**Updated:** 2026-08-25
 
 ## Status vocabulary
 
@@ -35,6 +35,7 @@
 | Wheel of Time ingest | VERIFIED for captured ingest scope | Canon ingest lineage exists; the project recorded a completed captured-page manifest after resumable ingestion. | Verify current manifest/hash location on integration branch for release packaging. |
 | Canon Library bridge | PARTIAL | PR #107 declares generic canon-library manifest, sovereignty law and bridge client. | Desktop loopback service, web mirror, visible pairing/progress/rollback acceptance are the next gates. |
 | Bifröst Agent Foundry | FUNCTIONAL (branch evidence) | PR #116 reports canonical BifrostState, agent registry, conductor, receipts, Boxfire gate and mounted Foundry panel. | Integrate or harvest into the baseline, then verify there. |
+| Bifröst Ox Alpha / OpenRouter audition | PARTIAL / descendant PR #203 | PR #203 registers `stealth/ox-alpha` for Boxfire through the existing OpenAI-compatible audition seam, keeps the primary route unchanged, and adds a fail-closed public/sanitised-only policy with Hearthfire retrieval disabled. | Exact-head CI, then one real keyed public/sanitised audition with receipt; no promotion until quality and privacy evidence are reviewed. |
 | Project Zero Companion | PARTIAL / descendant branch | PR #140 carries typed sockets, theme interoperability, Flame channel, rich text, Observer bridge and artifact rails with explicit ownership boundary. | Resolve draft-branch integration; Nocturne-side handshake remains a separately owned boundary. |
 | BSENG/RSE continuity lattice | PARTIAL / descendant branch | PR #140 reports 421-source corpus seal, recognition/admissibility tooling and continuity/replay work. | Integrate the descendant branch and run independent acceptance against canonical baseline. |
 | iPad somatic renderer | PARTIAL | PR #112 records physical-device, offline PWA, transducer, Shokz and approval gates as remaining work. | Physical hardware run, Rowan approval, and fresh current-head CI. |
