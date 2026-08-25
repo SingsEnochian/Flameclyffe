@@ -23,7 +23,7 @@ const decode = (value) => Buffer.from(value, 'base64url').toString('utf8');
 function signingSecret(env) {
   const explicit = env.get('HOUSE_SESSION_SECRET') || env.get('ARCSWEEP_RUNTIME_TOKEN');
   if (explicit) return explicit;
-  const hostedRoot = env.get('HFTOKEN') || env.get('HF_TOKEN');
+  const hostedRoot = env.get('HFTOKEN') || env.get('HF_TOKEN') || env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!hostedRoot) return null;
   return createHash('sha256').update(`hearthgate-house-session/v1\0${hostedRoot}`).digest('base64url');
 }
