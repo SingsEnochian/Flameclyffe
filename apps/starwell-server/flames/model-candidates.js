@@ -115,6 +115,7 @@ const MODEL_CANDIDATES = {
       base_url_env: 'OPENROUTER_BASE_URL',
       api_key_env: 'OPENROUTER_API_KEY',
       max_tokens: 8192,
+      max_input_chars: 1_000_000,
     },
     data_policy: {
       classification: 'public-or-sanitised-only',
