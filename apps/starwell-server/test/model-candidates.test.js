@@ -39,7 +39,26 @@ test('registering Inkling does not replace Larkshine primary route', () => {
   assert.doesNotMatch(FLAMES.larkshine.platform.model, /Inkling/i);
 });
 
+test('Ox Alpha uses the official GLM-5.3-Flash Hugging Face route as audition-only', () => {
+  const ox = getModelCandidate('ox-alpha');
+
+  assert.ok(ox);
+  assert.equal(ox.source.registry, 'huggingface');
+  assert.equal(ox.source.repo, 'zai-org/GLM-5.3-Flash');
+  assert.equal(ox.source.license, 'mit');
+  assert.match(ox.model_id, /GLM-5\.3-Flash/);
+  assert.equal(ox.runtime.provider, 'openai-compatible');
+  assert.equal(ox.runtime.base_url, 'https://router.huggingface.co/v1');
+  assert.equal(ox.runtime.api_key_env, 'HF_TOKEN');
+  assert.equal(ox.backends.preferred, 'huggingface-inference-providers');
+  assert.equal(ox.deployment.live_route, false);
+  assert.equal(ox.deployment.audition_route, true);
+  assert.equal(ox.deployment.requires_explicit_promotion, true);
+  assert.equal(ox.deployment.primary_route_unchanged, true);
+});
+
 test('candidate registry has stable lookup and listing helpers', () => {
   assert.equal(getModelCandidate('does-not-exist'), null);
   assert.ok(listModelCandidates().includes(MODEL_CANDIDATES['inkling-small']));
+  assert.ok(listModelCandidates().includes(MODEL_CANDIDATES['ox-alpha']));
 });
