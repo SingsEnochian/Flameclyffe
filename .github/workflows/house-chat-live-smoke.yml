@@ -6,6 +6,7 @@ on:
       - 'apps/starwell-server/**'
       - 'apps/starwell/src/components/living-room/**'
       - 'apps/starwell/src/living-room-entry.jsx'
+      - 'api/**'
       - 'netlify/functions/**'
       - '.github/workflows/house-chat-live-smoke.yml'
   workflow_dispatch:
@@ -30,15 +31,26 @@ jobs:
       - name: Run static Flame identity tests
         working-directory: apps/starwell-server
         run: node --test test/model-candidates.test.js test/ox-alpha-house-chat.test.js
-      - name: Wait for Netlify deploy preview and prove two live HF-backed voices
+      - name: Discover Vercel preview and prove two live HF-backed voices
         if: github.event_name == 'pull_request'
         env:
-          PREVIEW_URL: https://deploy-preview-${{ github.event.pull_request.number }}--flameclyffe-starwell.netlify.app/api/house-chat-live-smoke
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          echo "Waiting for $PREVIEW_URL"
+          preview=''
           for attempt in $(seq 1 24); do
-            code=$(curl -sS -o /tmp/house-chat-smoke.json -w '%{http_code}' "$PREVIEW_URL" || true)
+            checks=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs")
+            preview=$(printf '%s' "$checks" | jq -r '[.check_runs[] | select(.app.slug=="vercel") | (.output.summary // "") | scan("https://[A-Za-z0-9._-]+\\.vercel\\.app")] | first // empty')
+            if [ -n "$preview" ]; then break; fi
+            echo "waiting for Vercel preview URL ($attempt)"
+            sleep 5
+          done
+          test -n "$preview"
+          smoke_url="${preview%/}/api/house-chat-live-smoke"
+          echo "Smoking $smoke_url"
+          for attempt in $(seq 1 24); do
+            code=$(curl -sS -L -o /tmp/house-chat-smoke.json -w '%{http_code}' "$smoke_url" || true)
             if [ "$code" = "200" ]; then
               cat /tmp/house-chat-smoke.json
               node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/house-chat-smoke.json','utf8'));if(r.ok!==true||!Array.isArray(r.messages)||r.messages.length!==2)process.exit(1);if(r.messages[0].flame_id!=='oxalpha')process.exit(2);if(r.messages[1].flame_id!=='lioreal')process.exit(3);if(!r.messages.every(m=>m.message&&m.provider&&m.model))process.exit(4);"
