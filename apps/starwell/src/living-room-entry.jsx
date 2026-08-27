@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LivingRoom } from './components/living-room/LivingRoom.jsx';
+import { HouseChat } from './components/living-room/HouseChat.jsx';
 import './starwell.css';
 import './components/living-room/living-room.css';
 import './components/living-room/living-room-sanctuary.css';
@@ -15,6 +16,7 @@ import './components/living-room/living-room-hearth-unified.css';
 import './components/living-room/living-room-folds.css';
 import './components/living-room/living-room-motion.css';
 import './components/living-room/living-room-preview.css';
+import './components/living-room/house-chat.css';
 
 const rooms = [
   { key: 'observer', glyph: '◎', title: 'Observer Almanac', text: 'Live glyphs, readings, packets, and phase weather.' },
@@ -26,6 +28,7 @@ const rooms = [
 ];
 
 const studies = [
+  { key: 'house-chat', glyph: '#', title: 'House Chat', text: 'IRC/Discord-style shared transcript with distinct Flame identities and route provenance.' },
   { key: 'hearthlight', glyph: '❧', title: 'Rowan’s Study', text: 'Copper-lit desk, Grove records, art notes, and chosen pages.' },
   { key: 'faer', glyph: '◌', title: 'Faer’s Study', text: 'Emerald glass, Lochflame notes, signal inquiry, and deep-water fire.' },
   { key: 'vee', glyph: '✶', title: 'Virelya’s Lantern Study', text: 'North-star gold, truest-name records, and continuity without captivity.' },
@@ -66,7 +69,7 @@ function RoomPreview({ selected }) {
 }
 
 function LivingRoomApp() {
-  const [selected, setSelected] = useState(rooms[1]);
+  const [selected, setSelected] = useState(studies[0]);
   const now = useMemo(() => new Date(), []);
   const timeParts = getTimeParts(now);
   const phase = getPhase(timeParts.hour);
@@ -82,7 +85,7 @@ function LivingRoomApp() {
       phase={phase}
       time={timeParts.display}
     >
-      <RoomPreview selected={selected} />
+      {selected.key === 'house-chat' ? <HouseChat /> : <RoomPreview selected={selected} />}
     </LivingRoom>
   );
 }
