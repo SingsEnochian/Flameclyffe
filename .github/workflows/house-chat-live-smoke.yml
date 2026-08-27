@@ -1,0 +1,40 @@
+name: House Chat Live Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'apps/starwell-server/**'
+      - 'apps/starwell/src/components/living-room/**'
+      - 'apps/starwell/src/living-room-entry.jsx'
+      - '.github/workflows/house-chat-live-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-house-chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      LIOREAL_API_KEY: ${{ secrets.LIOREAL_API_KEY }}
+      UIAL_API_KEY: ${{ secrets.UIAL_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      BLUEBIRD_DEEPSEEK_API_KEY: ${{ secrets.BLUEBIRD_DEEPSEEK_API_KEY }}
+      VETHRLAUF_DEEPSEEK_API_KEY: ${{ secrets.VETHRLAUF_DEEPSEEK_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/starwell-server/package-lock.json
+      - name: Install Hearthgate runtime dependencies
+        working-directory: apps/starwell-server
+        run: npm ci
+      - name: Run static Flame identity tests
+        working-directory: apps/starwell-server
+        run: node --test test/model-candidates.test.js test/ox-alpha-house-chat.test.js
+      - name: Live Ox Alpha + second Flame route smoke
+        run: node apps/starwell-server/scripts/house-chat-live-smoke.js
