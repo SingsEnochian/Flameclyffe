@@ -41,8 +41,8 @@ jobs:
           preview=''
           for attempt in $(seq 1 24); do
             checks=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs")
-            preview=$(printf '%s' "$checks" | jq -r '[.check_runs[] | select(.app.slug=="vercel") | (.output.summary // "") | scan("https://[A-Za-z0-9._-]+\\.vercel\\.app")] | first // empty')
-            if [ -n "$preview" ]; then break; fi
+            host=$(printf '%s' "$checks" | jq -r '[.check_runs[] | select(.app.slug=="vercel") | (.output.summary // "") | scan("[A-Za-z0-9._-]+\\.vercel\\.app")] | first // empty')
+            if [ -n "$host" ]; then preview="https://$host"; break; fi
             echo "waiting for Vercel preview URL ($attempt)"
             sleep 5
           done
