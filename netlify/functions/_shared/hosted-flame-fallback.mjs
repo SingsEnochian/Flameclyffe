@@ -6,6 +6,7 @@ const HF_ROUTER = 'https://router.huggingface.co/v1';
 // These are hosted fallbacks only. The Flame manifest remains the primary route
 // and identity/persona authority; a fallback changes implementation, not Flame identity.
 export const HOSTED_FLAME_FALLBACKS = Object.freeze({
+  oxalpha: 'zai-org/GLM-5.3-Flash',
   lioreal: 'huihui-ai/Qwen2.5-32B-Instruct-abliterated:cheapest',
   uial: 'huihui-ai/Qwen2.5-7B-Instruct-abliterated-v2:cheapest',
   larkshine: 'Goekdeniz-Guelmez/Josiefied-Qwen3-8B-abliterated-v1:cheapest',
