@@ -108,12 +108,14 @@ function upstreamBody(plan, manifest, message, context, body) {
   return { model: plan.model, max_tokens: 700, stream: true, messages };
 }
 
-async function openProviderStream(plan, manifest, message, context, body, fetchImpl) {
+async function openProviderStream(plan, manifest, message, context, body, fetchImpl, signal = null) {
+  const timeout = AbortSignal.timeout(plan.kind === 'gateway' ? 120_000 : 90_000);
+  const combinedSignal = signal && typeof AbortSignal.any === 'function' ? AbortSignal.any([signal, timeout]) : signal || timeout;
   return fetchImpl(plan.url, {
     method: 'POST',
     headers: { 'content-type': 'application/json', accept: 'text/event-stream, application/json', ...plan.headers },
     body: JSON.stringify(upstreamBody(plan, manifest, message, context, body)),
-    signal: AbortSignal.timeout(plan.kind === 'gateway' ? 120_000 : 90_000),
+    signal: combinedSignal,
   });
 }
 
@@ -131,11 +133,7 @@ function openAiDelta(block) {
   if (!data || data === '[DONE]') return { done: data === '[DONE]', text: '', usage: null };
   try {
     const parsed = JSON.parse(data);
-    return {
-      done: false,
-      text: String(parsed.choices?.[0]?.delta?.content || ''),
-      usage: parsed.usage || null,
-    };
+    return { done: false, text: String(parsed.choices?.[0]?.delta?.content || ''), usage: parsed.usage || null };
   } catch { return { done: false, text: '', usage: null }; }
 }
 
@@ -198,20 +196,41 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
     const encoder = new TextEncoder();
     const startedAt = Date.now();
     const requestId = text(body?.metadata?.request_id || body?.metadata?.commons_turn_id || body?.session_id || crypto.randomUUID());
+    const upstreamController = new AbortController();
+    const abortUpstream = () => {
+      if (!upstreamController.signal.aborted) upstreamController.abort(request.signal?.reason || new DOMException('Client stream closed.', 'AbortError'));
+    };
+    if (request.signal?.aborted) abortUpstream();
+    else request.signal?.addEventListener?.('abort', abortUpstream, { once: true });
 
     const readable = new ReadableStream({
       async start(controller) {
         let sequence = 0;
         let completeText = '';
         let usage = null;
+        let firstTokenMs = null;
+        let closed = false;
         let plan = planFor(manifest, env);
-        const emit = (event, payload) => controller.enqueue(encoder.encode(eventBlock(event, {
-          schema: FLAME_CHAT_STREAM_SCHEMA,
-          request_id: requestId,
-          flame_id: manifest.flame_id,
-          display_name: manifest.display_name,
-          ...payload,
-        }, ++sequence)));
+        const emit = (event, payload) => {
+          if (closed) return;
+          try {
+            controller.enqueue(encoder.encode(eventBlock(event, {
+              schema: FLAME_CHAT_STREAM_SCHEMA,
+              request_id: requestId,
+              flame_id: manifest.flame_id,
+              display_name: manifest.display_name,
+              ...payload,
+            }, ++sequence)));
+          } catch {
+            closed = true;
+            abortUpstream();
+          }
+        };
+        const close = () => {
+          if (closed) return;
+          closed = true;
+          try { controller.close(); } catch {}
+        };
         const startPlan = () => emit('started', {
           provider: plan.provider,
           model: plan.model,
@@ -222,13 +241,14 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
         try {
           let response;
           try {
-            response = await openProviderStream(plan, manifest, message, context, body, fetchImpl);
+            response = await openProviderStream(plan, manifest, message, context, body, fetchImpl, upstreamController.signal);
             if (!response.ok) throw Object.assign(new Error(`${plan.provider} ${response.status}: ${await response.text().catch(() => '')}`), { status: response.status });
           } catch (primaryError) {
+            if (upstreamController.signal.aborted) throw primaryError;
             const fallbackPlan = plan.mode === 'primary' ? planFor(manifest, env, { forceHostedFallback: true }) : null;
             if (!fallbackPlan || fallbackPlan.mode !== 'hosted-fallback' || fallbackPlan.model === plan.model && fallbackPlan.provider === plan.provider) throw primaryError;
             plan = fallbackPlan;
-            response = await openProviderStream(plan, manifest, message, context, body, fetchImpl);
+            response = await openProviderStream(plan, manifest, message, context, body, fetchImpl, upstreamController.signal);
             if (!response.ok) throw Object.assign(new Error(`${plan.provider} ${response.status}: ${await response.text().catch(() => '')}`), { status: response.status });
           }
           startPlan();
@@ -243,7 +263,10 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
             }));
             completeText = buffered.message;
             usage = buffered.usage;
-            if (completeText) emit('delta', { text: completeText, index: 0, buffered_compatibility: true });
+            if (completeText) {
+              firstTokenMs = Date.now() - startedAt;
+              emit('delta', { text: completeText, index: 0, buffered_compatibility: true, first_token_ms: firstTokenMs });
+            }
             emit('completed', {
               message: completeText,
               provider: buffered.provider || plan.provider,
@@ -251,10 +274,11 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
               cited_sources: buffered.cited_sources || [],
               usage,
               latency_ms: Date.now() - startedAt,
+              first_token_ms: firstTokenMs,
               completed_at: clock(),
               buffered_compatibility: true,
             });
-            controller.close();
+            close();
             return;
           }
           const reader = response.body.getReader();
@@ -262,7 +286,7 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
           let buffer = '';
           let deltaIndex = 0;
           let done = false;
-          while (!done) {
+          while (!done && !upstreamController.signal.aborted) {
             const next = await reader.read();
             buffer += decoder.decode(next.value || new Uint8Array(), { stream: !next.done });
             const parsed = parseSseBlocks(buffer);
@@ -271,13 +295,15 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
               const delta = plan.kind === 'anthropic' ? anthropicDelta(block) : openAiDelta(block);
               if (delta.usage) usage = delta.usage;
               if (delta.text) {
+                if (firstTokenMs == null) firstTokenMs = Date.now() - startedAt;
                 completeText += delta.text;
-                emit('delta', { text: delta.text, index: deltaIndex++, buffered_compatibility: false });
+                emit('delta', { text: delta.text, index: deltaIndex++, buffered_compatibility: false, first_token_ms: firstTokenMs });
               }
               if (delta.done) { done = true; break; }
             }
             if (next.done) break;
           }
+          if (upstreamController.signal.aborted) throw upstreamController.signal.reason || new DOMException('Client stream closed.', 'AbortError');
           emit('completed', {
             message: completeText,
             provider: plan.provider,
@@ -285,21 +311,27 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
             cited_sources: [],
             usage,
             latency_ms: Date.now() - startedAt,
+            first_token_ms: firstTokenMs,
             completed_at: clock(),
             buffered_compatibility: false,
           });
-          controller.close();
+          close();
         } catch (error) {
-          emit('error', {
-            provider: plan.provider,
-            model: plan.model,
-            error: error?.message || 'Flame stream failed.',
-            latency_ms: Date.now() - startedAt,
-          });
-          controller.close();
+          if (!closed && !upstreamController.signal.aborted) {
+            emit('error', {
+              provider: plan.provider,
+              model: plan.model,
+              error: error?.message || 'Flame stream failed.',
+              latency_ms: Date.now() - startedAt,
+              first_token_ms: firstTokenMs,
+            });
+          }
+          close();
         }
       },
-      cancel() {},
+      cancel(reason) {
+        if (!upstreamController.signal.aborted) upstreamController.abort(reason || new DOMException('Client cancelled stream.', 'AbortError'));
+      },
     });
     return new Response(readable, { status: 200, headers: streamHeaders() });
   };
