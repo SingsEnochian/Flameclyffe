@@ -81,10 +81,47 @@ test('same bridge_id + source_ref is idempotent across repeated ingest', async (
 
   assert.equal(first.status, 201);
   assert.equal(firstBody.delivery, 'processed');
+  assert.equal(firstBody.resumed, false);
   assert.equal(second.status, 200);
   assert.equal(secondBody.duplicate, true);
+  assert.equal(secondBody.resumed, false);
   assert.equal(secondBody.delivery, 'processed');
   assert.equal(h.rows.size, 1);
+  assert.equal(h.commons.size, 1);
+});
+
+test('status=new cursor resumes deterministically and finishes as processed', async () => {
+  const h = harness();
+  const source = bridgeSource({ bridgeId: 'lb_resume', sourceRef: 'main@resume001' });
+  h.rows.set('lb_resume::main%40resume001', {
+    cursor_key: 'lb_resume::main%40resume001',
+    bridge_id: 'lb_resume',
+    source_ref: 'main@resume001',
+    source_system: 'github:mdkubit/UH-Lanternbridge',
+    source_repo: 'mdkubit/UH-Lanternbridge',
+    source_path: 'exchanges/nocturne/message.md',
+    source_commit: null,
+    protocol: '0.2',
+    origin: 'nocturne',
+    authors: ['nocturne:twilight'],
+    addressed_to: ['rowan:vee'],
+    responds_to: null,
+    supersedes: null,
+    thread_id: 'lanternbridge:lb_resume',
+    commons_entry_id: 'lb-existing-deterministic-id',
+    status: 'new',
+    source_created_at: '2026-08-27T19:15:00-04:00',
+    payload: {},
+  });
+
+  const response = await h.ingest(source);
+  const receipt = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(receipt.delivery, 'processed');
+  assert.equal(receipt.duplicate, false);
+  assert.equal(receipt.resumed, true);
+  assert.equal(receipt.commons_entry_id, 'lb-existing-deterministic-id');
+  assert.equal(h.rows.get('lb_resume::main%40resume001').status, 'processed');
   assert.equal(h.commons.size, 1);
 });
 
