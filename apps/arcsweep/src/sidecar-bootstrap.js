@@ -48,6 +48,7 @@ const SIDECARS = [
   './feedback-chamber-v2.js',
   './story-mode-sidecar.js',
   './aemeth-chamber-live.js',
+  './aemeth-oa-route-status.js',
 ];
 
 const yieldToBrowser = () => new Promise((resolve) => setTimeout(resolve, 0));
