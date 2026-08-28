@@ -133,6 +133,14 @@ async function openCore() {
   try {
     // Allow the recovery surface to paint and remain tappable before core evaluation begins.
     await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+    if (!safeBoot) {
+      status('Checking the durable House copy before local state opens…');
+      const { installDurableWorkspaceState } = await import('./durable-workspace-state.js');
+      const durable = await installDurableWorkspaceState({ safeBoot: false });
+      if (durable.state === 'restored-cloud') status('Recovered the saved House workspace. Opening Arcsweep…');
+      else if (durable.state === 'mirrored-local' || durable.state === 'in-sync') status('Saved workspace verified. Opening Arcsweep…');
+      else if (durable.state === 'deferred' || durable.state === 'degraded') status('Cloud recovery is temporarily unavailable. Opening the local copy without replacing it…');
+    }
     await import('./qualia-ui-preload.js');
     await import('./main.js');
     finished = true;
