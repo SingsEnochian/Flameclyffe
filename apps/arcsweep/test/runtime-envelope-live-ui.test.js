@@ -45,12 +45,14 @@ test('Commons runtime feedback view keeps receipts visible and escapes visible p
   assert.match(html, /&lt;runtime braid intact&gt;/);
 });
 
-test('Arcsweep mounts runtime envelope live read after House Commons', async () => {
+test('Arcsweep mounts runtime envelope live read after House Chat', async () => {
   const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
-  const commons = manifest.indexOf('./house-commons-chat-v3.js');
+  const commons = manifest.indexOf('./house-commons-chat-v4.js');
+  const social = manifest.indexOf('./house-chat-room-social.js');
   const liveRead = manifest.indexOf('./runtime-envelope-live-ui.js');
-  assert.ok(commons >= 0, 'House Commons v3 must be mounted');
-  assert.ok(liveRead > commons, 'Runtime envelope live read must mount after House Commons v3');
+  assert.ok(commons >= 0, 'House Chat v4 must be mounted');
+  assert.ok(social > commons, 'House Chat social room must mount after House Chat v4');
+  assert.ok(liveRead > social, 'Runtime envelope live read must mount after the House Chat social room');
 });
 
 test('production-style runtime smoke crosses Terra Prime, presence, Commons, persistence, and replay', async () => {
