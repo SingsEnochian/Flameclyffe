@@ -1,7 +1,8 @@
 import { AEMETH_DIAGRAM_ATLAS, AEMETH_RITUAL_PHASES, invokeAemethParticipant } from './aemeth-lens.js';
+import { renderSigillumDeiAemethSvg, SIGILLUM_DEI_AEMETH_WITNESS } from './aemeth-seal-vectors.js';
 import { readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
 
-export const AEMETH_LIVE_DECORATOR_VERSION = 'aemeth-chamber-live/v2';
+export const AEMETH_LIVE_DECORATOR_VERSION = 'aemeth-chamber-live/v3';
 
 export function aemethRecordFromForm(form) {
   if (!form) return {};
@@ -99,11 +100,11 @@ function stageMarkup() {
             <div class="aemeth-axis aemeth-axis-vertical" aria-hidden="true"></div>
             <div class="aemeth-shewstone" aria-hidden="true">
               <div class="aemeth-shewstone-glint"></div>
-              <div class="aemeth-seal-plane"><span>⊚</span></div>
+              <div class="aemeth-seal-plane" data-aemeth-seal-plane>${renderSigillumDeiAemethSvg()}</div>
             </div>
             <div class="aemeth-optic-caption">
               <strong data-aemeth-diagram-label>Sigillum Dei Aemeth</strong>
-              <span>source-faithful vector seat · optical renderer next</span>
+              <span data-aemeth-vector-state>${SIGILLUM_DEI_AEMETH_WITNESS.source} · ${SIGILLUM_DEI_AEMETH_WITNESS.geometryVersion} · lettering pending</span>
             </div>
           </div>
           <div class="aemeth-readout">
@@ -133,6 +134,11 @@ function syncStageFromForm(form, root = form.closest('[data-aemeth-chamber-root]
   set('[data-aemeth-orientation]', state.orientation);
   set('[data-aemeth-ask]', state.ask);
   set('[data-aemeth-diagram-label]', state.diagram);
+  const sigillumActive = state.diagram === 'Sigillum Dei Aemeth';
+  root.querySelector('[data-aemeth-seal-plane]')?.classList.toggle('aemeth-seal-inactive', !sigillumActive);
+  set('[data-aemeth-vector-state]', sigillumActive
+    ? `${SIGILLUM_DEI_AEMETH_WITNESS.source} · ${SIGILLUM_DEI_AEMETH_WITNESS.geometryVersion} · lettering pending`
+    : 'vector witness not yet compiled for this diagram');
   root.querySelectorAll('[data-aemeth-phase]').forEach((node) => node.classList.toggle('active', node.dataset.aemethPhase === state.phase));
   root.querySelectorAll('[data-aemeth-diagram]').forEach((node) => node.classList.toggle('active', node.dataset.aemethDiagram === state.diagram));
   return state;
