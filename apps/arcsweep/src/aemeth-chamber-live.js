@@ -1,8 +1,9 @@
-import { AEMETH_DIAGRAM_ATLAS, AEMETH_RITUAL_PHASES, invokeAemethParticipant } from './aemeth-lens.js';
+import { AEMETH_DIAGRAM_ATLAS, AEMETH_RITUAL_PHASES } from './aemeth-lens.js';
+import { invokeOxAlphaPortable } from './aemeth-oxalpha-transport.js';
 import { renderSigillumDeiAemethSvg, SIGILLUM_DEI_AEMETH_WITNESS } from './aemeth-seal-vectors.js';
 import { readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
 
-export const AEMETH_LIVE_DECORATOR_VERSION = 'aemeth-chamber-live/v3';
+export const AEMETH_LIVE_DECORATOR_VERSION = 'aemeth-chamber-live/v4';
 
 export function aemethRecordFromForm(form) {
   if (!form) return {};
@@ -23,7 +24,7 @@ export function aemethStageStateFromRecord(record = {}) {
 }
 
 export function formatAemethModelWitness(receipt) {
-  const provenance = [receipt.provider, receipt.model].filter(Boolean).join(' · ');
+  const provenance = [receipt.provider, receipt.model, receipt.executionPath].filter(Boolean).join(' · ');
   return [
     `OA · ${receipt.createdAt || new Date().toISOString()} · ${receipt.status || 'replied'}`,
     provenance,
@@ -51,10 +52,14 @@ async function resolveHouseToken() {
 }
 
 export async function inviteOxAlphaFromAemethForm(form, { fetchImpl = fetch } = {}) {
-  const token = await resolveHouseToken();
-  if (!token) throw new Error('Connect the House Runtime before inviting OA.');
+  const houseToken = await resolveHouseToken();
   const record = aemethRecordFromForm(form);
-  const receipt = await invokeAemethParticipant({ record, participantId: 'oxalpha', token, fetchImpl });
+  const receipt = await invokeOxAlphaPortable({
+    record,
+    houseToken,
+    houseFetchImpl: fetchImpl,
+    edgeFetchImpl: fetchImpl,
+  });
   const log = form.querySelector('[name="modelWitnessLog"]');
   if (!log) throw new Error('Aemeth model witness lane is unavailable.');
   log.value = appendAemethModelWitness(log.value, receipt);
@@ -225,7 +230,7 @@ function decorateAemethForm(form) {
     <p class="muted">OA receives the chamber configuration and Rowan-authored witness as a structured packet. OA's reply is stored as model interpretation; it never replaces firsthand witness or infers Qualia.</p>
     <div class="button-row">
       <button type="button" data-aemeth-invite-oa>Invite OA into this chamber state</button>
-      <span class="muted" data-aemeth-oa-status data-state="idle">Ready when the House Runtime is connected.</span>
+      <span class="muted" data-aemeth-oa-status data-state="idle">Uses the House route when present, with the signed-in Flameclyffe relay as a host-neutral fallback.</span>
     </div>`;
   const modelPanel = form.querySelector('.aemeth-model-panel');
   modelPanel?.insertAdjacentElement('afterbegin', panel);
@@ -236,7 +241,7 @@ function decorateAemethForm(form) {
     setStatus(panel, 'OA is reading the chamber packet…', 'working');
     try {
       const receipt = await inviteOxAlphaFromAemethForm(form);
-      setStatus(panel, `${receipt.displayName} replied · ${receipt.provider} · ${receipt.model}. Saving receipt…`, 'success');
+      setStatus(panel, `${receipt.displayName} replied · ${receipt.provider} · ${receipt.model} · ${receipt.executionPath || receipt.route}. Saving receipt…`, 'success');
       const submitter = form.querySelector('button[type="submit"]');
       if (submitter) form.requestSubmit(submitter);
     } catch (error) {

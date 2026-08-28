@@ -5,8 +5,8 @@ import { readFile } from 'node:fs/promises';
 const renderer = await readFile(new URL('../src/aemeth-chamber-live.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('../src/aemeth-chamber.css', import.meta.url), 'utf8');
 
-test('Aemeth Chamber v3 is a renderer over the existing record form rather than a second state owner', () => {
-  assert.match(renderer, /aemeth-chamber-live\/v3/);
+test('Aemeth Chamber v4 is a renderer over the existing record form rather than a second state owner', () => {
+  assert.match(renderer, /aemeth-chamber-live\/v4/);
   assert.match(renderer, /#record-form\[data-room-id="aemeth-lens"\]/);
   assert.match(renderer, /new FormData\(form\)/);
   assert.match(renderer, /dispatchEvent\(new Event\('change'/);
