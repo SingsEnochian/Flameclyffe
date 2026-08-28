@@ -100,6 +100,7 @@ export async function streamConstellationRuntimeVoice({
   }
   if (!completed) throw new Error('Flame stream closed before completion.');
   if (String(completed.flame_id || '').toLowerCase() !== String(route.route || '').toLowerCase()) throw new Error('Flame stream identity mismatch.');
+  const worldId = worldContext?.identity_anchor?.world_id || requestMetadata.world_id || null;
   return {
     status: 'replied',
     voiceId: route.voiceId,
@@ -107,11 +108,13 @@ export async function streamConstellationRuntimeVoice({
     message: String(completed.message || visible).trim(),
     provider: completed.provider || started?.provider || null,
     model: completed.model || started?.model || null,
-    profileId: `house:${route.route}:${completed.provider || started?.provider}:${completed.model || started?.model}`,
+    profileId: `house:${route.route}:${completed.provider || started?.provider || 'unknown'}:${completed.model || started?.model || 'unknown'}`,
     citedSources: completed.cited_sources || [],
     usage: completed.usage || null,
     latencyMs: completed.latency_ms ?? null,
-    runtimeWorldContextId: completed.runtime_world_context_id || started?.runtime_world_context_id || null,
+    firstTokenMs: completed.first_token_ms ?? null,
+    worldId,
+    runtimeWorldContextId: completed.runtime_world_context_id || started?.runtime_world_context_id || worldContext?.context_id || null,
     bufferedCompatibility: completed.buffered_compatibility === true,
   };
 }
