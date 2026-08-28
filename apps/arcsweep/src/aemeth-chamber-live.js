@@ -1,4 +1,3 @@
-import './aemeth-chamber.css';
 import { AEMETH_DIAGRAM_ATLAS, AEMETH_RITUAL_PHASES, invokeAemethParticipant } from './aemeth-lens.js';
 import { readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
 
