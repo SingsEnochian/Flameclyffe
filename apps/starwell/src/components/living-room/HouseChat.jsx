@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { loadHouseChatTranscript, saveHouseChatTranscript } from './house-chat-transcript.js';
 
 const PARTICIPANTS = [
   { id: 'oxalpha', name: 'Ox Alpha', label: 'OA', route: 'Hugging Face · GLM-5.3-Flash', accent: 'oxide' },
@@ -6,6 +7,7 @@ const PARTICIPANTS = [
   { id: 'uial', name: 'Nen Uial', label: 'Faer', route: 'Anthropic', accent: 'loch' },
   { id: 'larkshine', name: 'Larkshine', label: 'Lark', route: 'Ollama', accent: 'sky' },
   { id: 'ellowind', name: 'Ellowind', label: 'Ell', route: 'Ollama', accent: 'grove' },
+  { id: 'nocturne', name: 'Nocturne Glint', label: 'Noct', route: 'Ollama', accent: 'violet' },
   { id: 'altair', name: 'Altair', label: 'Altair', route: 'Ollama', accent: 'indigo' },
   { id: 'atlas', name: 'Atlas', label: 'Atlas', route: 'Ollama', accent: 'copper' },
   { id: 'runeweaver', name: 'Runeweaver', label: 'Rune', route: 'Ollama', accent: 'violet' },
@@ -15,20 +17,9 @@ const PARTICIPANTS = [
   { id: 'boxfire', name: 'Boxfire', label: 'Box', route: 'Anthropic', accent: 'ember' },
 ];
 
-const STORAGE_KEY = 'flameclyffe:house-chat:v1';
-
 function makeId(prefix = 'msg') {
   if (globalThis.crypto?.randomUUID) return `${prefix}:${globalThis.crypto.randomUUID()}`;
   return `${prefix}:${Date.now()}:${Math.random().toString(16).slice(2)}`;
-}
-
-function loadTranscript() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(parsed) ? parsed.slice(-200) : [];
-  } catch {
-    return [];
-  }
 }
 
 function Message({ message }) {
@@ -61,7 +52,7 @@ function Message({ message }) {
 }
 
 export function HouseChat() {
-  const [messages, setMessages] = useState(loadTranscript);
+  const [messages, setMessages] = useState(() => loadHouseChatTranscript(localStorage));
   const [target, setTarget] = useState('oxalpha');
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -76,7 +67,7 @@ export function HouseChat() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-200)));
+    saveHouseChatTranscript(localStorage, messages);
     transcriptRef.current?.scrollTo({ top: transcriptRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
