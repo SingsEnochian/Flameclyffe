@@ -28,10 +28,13 @@ jobs:
     timeout-minutes: 12
     env:
       GH_TOKEN: ${{ github.token }}
+      TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
     steps:
       - name: Checkout exact head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Node 24
         uses: actions/setup-node@v4
@@ -46,7 +49,7 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          HEAD_SHA="${GITHUB_SHA}"
+          HEAD_SHA="${TARGET_SHA}"
           API="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs"
           SAW_VERCEL=0
           PREVIEW_URL=''
@@ -157,6 +160,7 @@ jobs:
           done
 
           echo '### Source Library Live Smoke' >> "$GITHUB_STEP_SUMMARY"
+          echo "- exact_head: \`${TARGET_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- preview: \`${PREVIEW_URL}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- endpoint_status: \`${FINAL_STATUS}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- content_type: \`${FINAL_CONTENT_TYPE:-unknown}\`" >> "$GITHUB_STEP_SUMMARY"
@@ -180,6 +184,16 @@ jobs:
             echo >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             echo '::error title=INVALID_JSON::Preview returned a non-JSON body; likely routing/protection/stale deployment.'
+            exit 1
+          fi
+
+          if [[ "${FINAL_STATUS}" != '200' ]]; then
+            CODE=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.code || 'LIVE_SMOKE_FAILED'))" 2>/dev/null || echo LIVE_SMOKE_FAILED)
+            ERROR=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.error || 'Hosted smoke failed').slice(0,700))" 2>/dev/null || echo 'Hosted smoke failed')
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            node -e "const d=require('./smoke-body.json'); console.log(JSON.stringify(d,null,2).slice(0,3000))" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=${CODE}::${ERROR}"
             exit 1
           fi
 
@@ -222,10 +236,3 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`);
           console.log('Source Library live smoke PASSED: list → FTS → compare → Ox Alpha Author Lens → provenance receipt.');
           NODE
-
-          if [[ "${FINAL_STATUS}" != '200' ]]; then
-            CODE=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.code || 'LIVE_SMOKE_FAILED'))" 2>/dev/null || echo LIVE_SMOKE_FAILED)
-            ERROR=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.error || 'Hosted smoke failed').slice(0,700))" 2>/dev/null || echo 'Hosted smoke failed')
-            echo "::error title=${CODE}::${ERROR}"
-            exit 1
-          fi
