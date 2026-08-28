@@ -14,15 +14,27 @@ async function refreshRooms() {
 
 function activeSelect() { return document.querySelector('.commons-log [data-house-room-select], .commons-log [data-commons-thread]'); }
 function activeRoom() { const id = activeSelect()?.value || ''; return cache.find((room) => room.id === id) || null; }
+function slugFromTitle(title) { return String(title || '').trim().toLowerCase().replace(/[^a-z0-9:_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120) || 'room'; }
+function reflectRoom(room) {
+  if (!room) return;
+  const selector = activeSelect();
+  const option = selector ? [...selector.options].find((item) => item.value === room.id) : null;
+  if (option) option.textContent = `${room.kind === 'direct' ? '@' : '#'}${room.slug || room.title}`;
+  if (selector?.value === room.id) {
+    const heading = document.querySelector('.commons-chat-log-head h2'); if (heading) heading.textContent = `${room.kind === 'direct' ? '@' : '#'}${room.slug || room.title}`;
+    const topic = document.querySelector('.commons-chat-log-head h2 + span'); if (topic) topic.textContent = room.topic || '';
+  }
+}
 
 async function renameRoom(room) {
   if (!room) return;
   const title = window.prompt('Room title', room.title || room.slug || 'Room');
   if (!title?.trim()) return;
-  const saved = await upsertHouseRoom({ ...room, title: title.trim().slice(0, 160) });
+  const cleanTitle = title.trim().slice(0, 160);
+  const saved = await upsertHouseRoom({ ...room, title: cleanTitle, slug: slugFromTitle(cleanTitle) });
   const index = cache.findIndex((item) => item.id === saved.id); index >= 0 ? cache.splice(index, 1, saved) : cache.push(saved);
+  reflectRoom(saved);
   document.dispatchEvent(new CustomEvent('arcsweep:house-room-metadata-changed', { detail: { room: saved } }));
-  const selector = activeSelect(); if (selector) selector.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 async function archiveRoom(room) {
@@ -32,6 +44,8 @@ async function archiveRoom(room) {
   document.dispatchEvent(new CustomEvent('arcsweep:house-room-metadata-changed', { detail: { room: saved } }));
   const selector = activeSelect();
   if (selector) {
+    const archivedOption = [...selector.options].find((option) => option.value === room.id);
+    archivedOption?.remove();
     selector.value = [...selector.options].some((option) => option.value === HOUSE_CHAT_HOME_ROOM_ID) ? HOUSE_CHAT_HOME_ROOM_ID : selector.options[0]?.value || '';
     selector.dispatchEvent(new Event('change', { bubbles: true }));
   }
@@ -68,7 +82,7 @@ export function installHouseChatRoomManagementV5() {
   if (installed || typeof document === 'undefined') return;
   installed = true;
   document.addEventListener('click', captureLegacyManagement, true);
-  document.addEventListener('arcsweep:house-room-metadata-changed', () => { void refreshRooms().then(decorate); });
+  document.addEventListener('arcsweep:house-room-metadata-changed', () => { void refreshRooms().then(() => { reflectRoom(activeRoom()); decorate(); }); });
   observer = new MutationObserver(decorate); observer.observe(document.body, { childList: true, subtree: true });
   void refreshRooms().then(decorate);
   globalThis.addEventListener?.('beforeunload', () => observer?.disconnect(), { once: true });
