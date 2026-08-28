@@ -1,0 +1,231 @@
+name: Source Library Live Smoke
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/source-library-live-smoke.yml'
+      - 'api/source-library-live-smoke.js'
+      - 'api/v1/library/**'
+      - 'netlify/functions/source-library.mts'
+      - 'netlify/functions/_shared/source-library-runtime.mjs'
+      - 'apps/starwell/src/components/living-room/SourceLibrary.jsx'
+      - 'apps/starwell/src/living-room-entry.jsx'
+      - 'supabase/migrations/202608270001_source_sync_spine_v1.sql'
+      - 'supabase/migrations/202608270002_source_library_query_v1.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: source-library-live-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview-live-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Syntax-check live smoke endpoint
+        run: node --check api/source-library-live-smoke.js
+
+      - name: Discover exact-head Vercel preview
+        id: preview
+        shell: bash
+        run: |
+          set -uo pipefail
+          HEAD_SHA="${GITHUB_SHA}"
+          API="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs"
+          SAW_VERCEL=0
+          PREVIEW_URL=''
+
+          for attempt in $(seq 1 36); do
+            HTTP_STATUS=$(curl -sS --retry 2 --retry-delay 1 \
+              -o check-runs.json \
+              -w '%{http_code}' \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "${API}") || HTTP_STATUS='000'
+
+            if [[ "${HTTP_STATUS}" == '200' ]]; then
+              VERCEL_COUNT=$(node - <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('check-runs.json', 'utf8'));
+          console.log((data.check_runs || []).filter((run) => run.app?.slug === 'vercel').length);
+          NODE
+              )
+              if [[ "${VERCEL_COUNT}" -gt 0 ]]; then SAW_VERCEL=1; fi
+
+              PREVIEW_HOST=$(node - <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('check-runs.json', 'utf8'));
+          const checks = (data.check_runs || []).filter((run) => run.app?.slug === 'vercel');
+          const hosts = [];
+          for (const run of checks) {
+            const values = [run.details_url, run.output?.title, run.output?.summary, run.output?.text];
+            for (const value of values) {
+              const matches = String(value || '').match(/[a-z0-9][a-z0-9.-]*\.vercel\.app/gi) || [];
+              for (const host of matches) if (!hosts.includes(host)) hosts.push(host);
+            }
+          }
+          console.log(hosts[0] || '');
+          NODE
+              )
+
+              if [[ -n "${PREVIEW_HOST}" ]]; then
+                PREVIEW_URL="https://${PREVIEW_HOST}"
+                break
+              fi
+            else
+              echo "GitHub check-runs lookup attempt ${attempt} returned HTTP ${HTTP_STATUS}." >&2
+            fi
+            sleep 10
+          done
+
+          if [[ -z "${PREVIEW_URL}" ]]; then
+            echo '### Source Library preview discovery' >> "$GITHUB_STEP_SUMMARY"
+            echo "- head: \`${HEAD_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "- saw_vercel_check: \`${SAW_VERCEL}\`" >> "$GITHUB_STEP_SUMMARY"
+            if [[ -f check-runs.json ]]; then
+              node - <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('check-runs.json', 'utf8'));
+          for (const run of (data.check_runs || []).filter((item) => item.app?.slug === 'vercel')) {
+            console.log(`- Vercel check: ${run.name} status=${run.status} conclusion=${run.conclusion || 'null'} details=${run.details_url || 'null'}`);
+          }
+          NODE
+            fi
+            if [[ "${SAW_VERCEL}" -eq 0 ]]; then
+              echo '::error title=NO_VERCEL_CHECK::No exact-head Vercel check appeared before timeout.'
+            else
+              echo '::error title=NO_PREVIEW_URL::Vercel checks appeared, but no .vercel.app preview hostname was discoverable.'
+            fi
+            exit 1
+          fi
+
+          echo "url=${PREVIEW_URL}" >> "$GITHUB_OUTPUT"
+          echo "Discovered exact-head preview: ${PREVIEW_URL}"
+
+      - name: Prove list search compare and Ox Alpha Author Lens
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: |
+          set -uo pipefail
+          ENDPOINT="${PREVIEW_URL}/api/source-library-live-smoke"
+          FINAL_STATUS='000'
+          FINAL_CONTENT_TYPE=''
+
+          for attempt in $(seq 1 30); do
+            rm -f smoke-headers.txt smoke-body.json
+            CURL_ARGS=(
+              -sS -L --max-time 180
+              -D smoke-headers.txt
+              -o smoke-body.json
+              -w '%{http_code}'
+              -H 'accept: application/json'
+            )
+            if [[ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]]; then
+              CURL_ARGS+=(
+                -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}"
+                -H 'x-vercel-set-bypass-cookie: true'
+              )
+            fi
+
+            FINAL_STATUS=$(curl "${CURL_ARGS[@]}" "${ENDPOINT}") || FINAL_STATUS='000'
+            FINAL_CONTENT_TYPE=$(awk 'BEGIN{IGNORECASE=1} /^content-type:/{gsub(/\r/,""); value=$0} END{sub(/^[^:]*:[ ]*/,"",value); print value}' smoke-headers.txt 2>/dev/null || true)
+
+            # 404/000 can mean the exact-head preview is still propagating. A JSON
+            # response from our endpoint, including a typed 502/503, means the route is live.
+            if [[ "${FINAL_STATUS}" != '000' && "${FINAL_STATUS}" != '404' ]]; then
+              break
+            fi
+            sleep 10
+          done
+
+          echo '### Source Library Live Smoke' >> "$GITHUB_STEP_SUMMARY"
+          echo "- preview: \`${PREVIEW_URL}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- endpoint_status: \`${FINAL_STATUS}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- content_type: \`${FINAL_CONTENT_TYPE:-unknown}\`" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "${FINAL_STATUS}" == '000' ]]; then
+            echo '::error title=PREVIEW_UNREACHABLE::Vercel preview endpoint was unreachable after the propagation window.'
+            exit 1
+          fi
+          if [[ "${FINAL_STATUS}" == '404' ]]; then
+            echo '::error title=PREVIEW_404::Exact-head Vercel preview never exposed /api/source-library-live-smoke.'
+            exit 1
+          fi
+          if [[ "${FINAL_STATUS}" == '401' || "${FINAL_STATUS}" == '403' ]]; then
+            echo '::error title=PREVIEW_PROTECTED::Preview rejected the automation request before the smoke endpoint could run.'
+            exit 1
+          fi
+          if [[ "${FINAL_CONTENT_TYPE}" != application/json* ]]; then
+            echo 'Response was not JSON:' >> "$GITHUB_STEP_SUMMARY"
+            echo '```text' >> "$GITHUB_STEP_SUMMARY"
+            head -c 1200 smoke-body.json >> "$GITHUB_STEP_SUMMARY" || true
+            echo >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo '::error title=INVALID_JSON::Preview returned a non-JSON body; likely routing/protection/stale deployment.'
+            exit 1
+          fi
+
+          node - <<'NODE'
+          const fs = require('fs');
+          let data;
+          try {
+            data = JSON.parse(fs.readFileSync('smoke-body.json', 'utf8'));
+          } catch (error) {
+            console.error(`::error title=INVALID_JSON::${error.message}`);
+            process.exit(1);
+          }
+          const required = [
+            data?.ok === true,
+            data?.schema === 'source-library-live-smoke/v1',
+            data?.proof?.list?.indexed_document_count >= 2,
+            data?.proof?.search?.result_count >= 1,
+            data?.proof?.compare?.item_ids?.length === 2,
+            data?.proof?.compare?.evidence_counts?.every((count) => count >= 1),
+            data?.proof?.author_lens?.mode === 'author_reconstruction',
+            data?.proof?.author_lens?.simulated_author === true,
+            data?.proof?.author_lens?.flame_id === 'oxalpha',
+            data?.proof?.author_lens?.provider === 'huggingface-inference-providers',
+            data?.proof?.author_lens?.model === 'zai-org/GLM-5.3-Flash',
+            data?.proof?.author_lens?.response_char_count > 0,
+            data?.proof?.author_lens?.evidence_segment_ids?.length >= 1,
+            data?.proof?.author_lens?.evidence_text_hashes?.length >= 1,
+          ];
+          if (!required.every(Boolean)) {
+            console.error(`::error title=LIVE_SMOKE_CONTRACT_FAILED::${JSON.stringify(data).slice(0, 1800)}`);
+            process.exit(1);
+          }
+          const summary = {
+            schema: data.schema,
+            list: data.proof.list,
+            search: data.proof.search,
+            compare: data.proof.compare,
+            author_lens: data.proof.author_lens,
+          };
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`);
+          console.log('Source Library live smoke PASSED: list → FTS → compare → Ox Alpha Author Lens → provenance receipt.');
+          NODE
+
+          if [[ "${FINAL_STATUS}" != '200' ]]; then
+            CODE=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.code || 'LIVE_SMOKE_FAILED'))" 2>/dev/null || echo LIVE_SMOKE_FAILED)
+            ERROR=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.error || 'Hosted smoke failed').slice(0,700))" 2>/dev/null || echo 'Hosted smoke failed')
+            echo "::error title=${CODE}::${ERROR}"
+            exit 1
+          fi
