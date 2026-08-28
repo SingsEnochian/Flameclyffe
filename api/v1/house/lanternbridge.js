@@ -35,13 +35,27 @@ const lazyCommonsStore = Object.freeze({
 
 const handle = createLanternbridgeMessageHandler({ env, indexStore: lazyIndexStore, commonsStore: lazyCommonsStore });
 
+export function classifyLanternbridgeRuntimeFailure(error) {
+  const message = String(error?.message || error || '');
+  if (/Supabase Lanternbridge storage is not configured/i.test(message)) return 'supabase_index_config_missing';
+  if (/Lanternbridge cursor read failed|Lanternbridge bridge-id read failed|Lanternbridge index list failed/i.test(message)) return 'supabase_index_read_failed';
+  if (/Lanternbridge index insert failed|Lanternbridge processed-state update failed|Lanternbridge .* update failed/i.test(message)) return 'supabase_index_write_failed';
+  if (/Supabase House Runtime storage is not configured/i.test(message)) return 'commons_storage_config_missing';
+  if (/House Commons ledger write failed/i.test(message)) return 'commons_storage_write_failed';
+  return 'internal_error';
+}
+
 export default {
   async fetch(request) {
     try {
       return await handle(request);
     } catch (error) {
-      console.error('Lanternbridge message-index failure', error);
-      return new Response(JSON.stringify({ error: 'Lanternbridge message index unavailable.' }), {
+      const code = classifyLanternbridgeRuntimeFailure(error);
+      console.error('Lanternbridge message-index failure', { code, error });
+      return new Response(JSON.stringify({
+        error: 'Lanternbridge message index unavailable.',
+        code,
+      }), {
         status: 503,
         headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
       });
