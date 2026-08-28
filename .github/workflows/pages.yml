@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - codex/arcsweep-feedback-loop
   workflow_dispatch:
 
 permissions:
@@ -13,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: pages-production
   cancel-in-progress: true
 
 jobs:
@@ -76,6 +75,25 @@ jobs:
         run: |
           npm run arcsweep:build
           test -f dist/arcsweep/index.html
+          test -d dist/arcsweep/assets
+
+      - name: Verify Arcsweep production module boundary
+        run: |
+          set -euo pipefail
+          if grep -Fq './src/main-bootstrap.js' dist/arcsweep/index.html; then
+            echo 'ArcSweep production index still references source main-bootstrap.js' >&2
+            exit 1
+          fi
+          if grep -Fq './src/startup-fetch-guard.js' dist/arcsweep/index.html; then
+            echo 'ArcSweep production index still references source startup-fetch-guard.js' >&2
+            exit 1
+          fi
+          if grep -R -Fq "import './styles.css'" dist/arcsweep; then
+            echo 'ArcSweep production output still contains raw CSS-as-module source import' >&2
+            exit 1
+          fi
+          grep -Eq '<script[^>]+type="module"[^>]+src="\./assets/[^\"]+\.js"' dist/arcsweep/index.html
+          grep -Eq '<link[^>]+rel="stylesheet"[^>]+href="\./assets/[^\"]+\.css"' dist/arcsweep/index.html
 
       - name: Build Pocket Concordance Lens
         run: npm run pocket:build
@@ -98,6 +116,15 @@ jobs:
           mkdir -p _site/apps/arcsweep
           cp -a dist/arcsweep/. _site/apps/arcsweep/
           test -f _site/apps/arcsweep/index.html
+          if grep -Fq './src/main-bootstrap.js' _site/apps/arcsweep/index.html; then
+            echo 'Pages artifact contains ArcSweep source module entrypoint' >&2
+            exit 1
+          fi
+          if grep -R -Fq "import './styles.css'" _site/apps/arcsweep; then
+            echo 'Pages artifact contains raw ArcSweep CSS module import' >&2
+            exit 1
+          fi
+          grep -Eq '<script[^>]+type="module"[^>]+src="\./assets/[^\"]+\.js"' _site/apps/arcsweep/index.html
 
           mkdir -p _site/starwell-react-lab
           cp -a /tmp/starwell-react-lab/. _site/starwell-react-lab/
