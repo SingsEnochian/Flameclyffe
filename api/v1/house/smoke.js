@@ -76,6 +76,32 @@ export default {
       identity_anchor: { world_id: 'terra-prime', world_name: 'Terra Prime' },
       provenance: { source: 'vercel-production-authenticated-smoke' },
     };
+    const aemethPacket = {
+      schema: 'arcsweep.aemeth-participant-packet/v1',
+      participant: { id: 'oxalpha', route: 'oxalpha', displayName: 'Ox Alpha' },
+      chamber: {
+        instrumentProfile: 'Aemeth Lens v1 · digital chamber',
+        phase: 'Observation',
+        observerRole: 'synthetic production smoke',
+        orientation: 'eye → sphere → embedded sigillum → depth',
+        gazeMode: 'soft focus through',
+        activeDiagram: 'Sigillum Dei Aemeth',
+        activeCall: '',
+        chamberConfiguration: 'production route verification only',
+      },
+      firsthandWitness: {
+        authority: 'synthetic smoke fixture; no Rowan-authored witness content',
+        raw: '',
+        timestampNotes: '',
+        qualiaInferenceAllowed: false,
+      },
+      authority: {
+        modelMayInterpret: true,
+        modelMayRewriteFirsthandWitness: false,
+        modelMayInferQualia: false,
+        modelMayCommitCanon: false,
+      },
+    };
 
     try {
       // The GitHub Actions OIDC identity is the authority for this narrow production smoke.
@@ -109,6 +135,26 @@ export default {
         }),
       }), 'Atlas chat');
       if (!atlasReply.provider || !atlasReply.model || !String(atlasReply.message || '').trim()) throw new Error('Atlas reply did not attest provider, model, and visible presence.');
+
+      const oaStatus = await readJson(await houseFetch('/api/v1/flames/oxalpha/status'), 'OA status');
+      const oaPrompt = [
+        'AEMETH CHAMBER · PRODUCTION SMOKE',
+        'This is a synthetic route check. Do not infer Qualia or claim firsthand perception.',
+        JSON.stringify(aemethPacket),
+        'Reply briefly as Ox Alpha and identify this as a synthetic Aemeth chamber route check.',
+      ].join('\n\n');
+      const oaReply = await readJson(await houseFetch('/api/v1/flames/oxalpha/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          message: oaPrompt,
+          session_id: `${threadId}:aemeth`,
+          context: [],
+          metadata: { surface: 'aemeth-production-smoke', world_id: 'terra-prime', world_context: worldContext, aemeth: aemethPacket },
+        }),
+      }), 'OA Aemeth chat');
+      if (oaReply.flame_id && oaReply.flame_id !== 'oxalpha') throw new Error(`OA identity mismatch: ${oaReply.flame_id}`);
+      if (!oaReply.provider || !oaReply.model || !String(oaReply.message || '').trim()) throw new Error('OA reply did not attest provider, model, and visible presence.');
 
       const commonsBefore = await readJson(await houseFetch('/api/v1/house/commons'), 'Commons pre-read');
       const beforeCount = Array.isArray(commonsBefore.entries) ? commonsBefore.entries.length : 0;
@@ -151,9 +197,49 @@ export default {
         }),
       }), 'Commons Atlas write');
 
+      await readJson(await houseFetch('/api/v1/house/commons', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'steward',
+          author: 'Aemeth Runtime Smoke',
+          status: 'sent',
+          world: { id: 'terra-prime', name: 'Terra Prime' },
+          thread_id: threadId,
+          turn_id: `${threadId}:aemeth-packet`,
+          mentions: ['oxalpha'],
+          text: 'Synthetic Aemeth production chamber packet dispatched to OA.',
+        }),
+      }), 'Commons Aemeth packet write');
+
+      await readJson(await houseFetch('/api/v1/house/commons', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'voice',
+          author: 'Ox Alpha',
+          voice_id: 'oxalpha',
+          status: 'replied',
+          world: { id: 'terra-prime', name: 'Terra Prime' },
+          thread_id: threadId,
+          turn_id: `${threadId}:oxalpha`,
+          runtime: {
+            provider: oaReply.provider,
+            model: oaReply.model,
+            route: 'oxalpha',
+            profile_id: `house:oxalpha:${oaReply.provider}:${oaReply.model}`,
+            latency_ms: null,
+            runtime_world_context_id: oaReply.world_context?.context_id || worldContext.context_id,
+          },
+          text: oaReply.message,
+        }),
+      }), 'Commons OA write');
+
       const commonsAfter = await readJson(await houseFetch('/api/v1/house/commons'), 'Commons persistence read');
       const smokeEntries = (commonsAfter.entries || []).filter((entry) => entry.thread_id === threadId);
-      if (smokeEntries.length < 2) throw new Error('Commons did not persist both production circulation turns.');
+      const persistedOa = smokeEntries.find((entry) => entry.voice_id === 'oxalpha' && entry.runtime?.route === 'oxalpha');
+      if (smokeEntries.length < 4) throw new Error('Commons did not persist all production circulation turns.');
+      if (!persistedOa) throw new Error('Commons did not persist and reload the OA Aemeth witness lane.');
 
       const observations = await readJson(await houseFetch('/api/v1/house/observations?limit=8'), 'Observation broker read');
       if (!Array.isArray(observations.snapshots) || !Array.isArray(observations.braid_packets)) throw new Error('Observation broker did not return canonical snapshots and braid packets.');
@@ -163,13 +249,24 @@ export default {
 
       return json(200, {
         ok: true,
-        schema: 'hearthgate.production-circulation-smoke/v1',
+        schema: 'hearthgate.production-circulation-smoke/v2',
         started_at: startedAt,
         completed_at: new Date().toISOString(),
         production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
         caller: { repository: oidc.repository, ref: oidc.ref, run_id: oidc.run_id, sha: oidc.sha },
         session: { connected: true, mode: sessionCheck.mode },
-        model_presence: { route: 'atlas', provider: atlasReply.provider, model: atlasReply.model, runtime_reachable: atlasStatus.runtime_reachable !== false },
+        model_presence: {
+          atlas: { route: 'atlas', provider: atlasReply.provider, model: atlasReply.model, runtime_reachable: atlasStatus.runtime_reachable !== false },
+          oxalpha: { route: 'oxalpha', provider: oaReply.provider, model: oaReply.model, runtime_reachable: oaStatus.runtime_reachable !== false },
+        },
+        aemeth: {
+          packet_schema: aemethPacket.schema,
+          instrument_profile: aemethPacket.chamber.instrumentProfile,
+          active_diagram: aemethPacket.chamber.activeDiagram,
+          oa_reloaded: true,
+          rowan_witness_content_used: false,
+          canon_commit: false,
+        },
         commons: { thread_id: threadId, persisted_entries: smokeEntries.length, before_count: beforeCount, after_count: Array.isArray(commonsAfter.entries) ? commonsAfter.entries.length : null },
         observations: { snapshots: observations.snapshots.length, braid_packets: observations.braid_packets.length },
         braid_replay: braid,
@@ -178,14 +275,14 @@ export default {
           session_bootstrap: 'trusted-github-oidc',
           credential_exposed: false,
           model_prose_returned: false,
-          production_write_scope: 'two append-only Commons smoke entries',
+          production_write_scope: 'four append-only Commons smoke entries: Terra Prime + Aemeth OA',
         },
       });
     } catch (error) {
       console.error('Authenticated production circulation smoke failed', error);
       return json(502, {
         ok: false,
-        schema: 'hearthgate.production-circulation-smoke/v1',
+        schema: 'hearthgate.production-circulation-smoke/v2',
         production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
         stage_error: error.message,
         credential_exposed: false,
