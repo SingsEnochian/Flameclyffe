@@ -1,0 +1,32 @@
+{
+  "schema": "arcsweep.third-party-asset-pack/v1",
+  "id": "wot-chapter-icons",
+  "title": "The Wheel of Time Chapter Icons",
+  "status": "external-quarantined",
+  "use": ["taaveren-vaen", "canon-studio", "echo-index", "chapter-navigation"],
+  "upstream": {
+    "repository": "jcsalomon/wot-chapter-icons",
+    "commit": "7fd9e09a192afdaa80c0a0fcc8f8ae7a5cf49ab5",
+    "site": "https://jcsalomon.github.io/wot-chapter-icons/",
+    "rawBase": "https://raw.githubusercontent.com/jcsalomon/wot-chapter-icons/7fd9e09a192afdaa80c0a0fcc8f8ae7a5cf49ab5/",
+    "filenameRule": "*-icon.svg"
+  },
+  "rights": {
+    "projectCopyright": "© 2010 Joel Salomon",
+    "projectLicense": "CC BY-SA 3.0 Unported",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "imageCopyright": "Images copyright © Tor Books and used with permission, per upstream README.",
+    "permissionReference": "http://linuxmafia.com/waygate/chapter-icons-permission",
+    "attributionRequired": true,
+    "shareAlikeAppliesToAssetAdaptations": true,
+    "flameclyffeAssetLicenseInherited": false,
+    "publicCanonPromotion": false
+  },
+  "policy": {
+    "vendorCopies": false,
+    "resolveByPinnedUpstreamFilename": true,
+    "doNotClaimOriginalArtwork": true,
+    "preserveAttributionWithRenderedAsset": true,
+    "doNotInferBroaderTorPermission": true
+  }
+}
