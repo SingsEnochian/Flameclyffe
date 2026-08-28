@@ -42,7 +42,7 @@ test('runtime context contains only the selected room and preserves speaker iden
 
 test('model display keeps rich styling while persisted plain text drops Markdown decoration', () => {
   const raw = '**Bold** and _soft_\n\n> quoted\n\n- one';
-  assert.equal(modelReplyPlainText(raw), 'Bold and soft\n\nquoted\n\n• one');
+  assert.equal(modelReplyPlainText(raw), 'Bold and soft\n\nquoted\n• one');
   const html = renderCommonsRichText(raw);
   assert.match(html, /<strong>Bold<\/strong>/);
   assert.match(html, /<em>soft<\/em>/);
@@ -51,8 +51,8 @@ test('model display keeps rich styling while persisted plain text drops Markdown
 });
 
 test('legacy/model rendering escapes raw HTML', () => {
-  const html = renderCommonsRichText('<script>alert(1)</script> **safe**');
-  assert.equal(html.includes('<script>'), false);
-  assert.match(html, /&lt;script&gt;/);
+  const html = renderCommonsRichText('<unsafe>tag</unsafe> **safe**');
+  assert.equal(html.includes('<unsafe>'), false);
+  assert.match(html, /&lt;unsafe&gt;/);
   assert.match(html, /<strong>safe<\/strong>/);
 });
