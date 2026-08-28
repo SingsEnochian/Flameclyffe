@@ -8,13 +8,12 @@ async function source(path) {
   return readFile(new URL(path, root), 'utf8');
 }
 
-test('Pages House transport is installed before ArcSweep core boot', async () => {
+test('Pages House transport is nested under the startup guard before ArcSweep core boot', async () => {
   const html = await source('index.html');
-  const bridge = html.indexOf('./src/pages-house-transport-bridge.js');
-  const bootstrap = html.indexOf('./src/main-bootstrap.js');
-  assert.ok(bridge >= 0, 'portable transport script must be present');
-  assert.ok(bootstrap >= 0, 'main bootstrap must be present');
-  assert.ok(bridge < bootstrap, 'portable transport must install before core imports House Runtime');
+  const scripts = [...html.matchAll(/<script type="module" src="([^"]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(scripts, ['./src/startup-fetch-guard.js', './src/main-bootstrap.js']);
+  const guard = await source('src/startup-fetch-guard.js');
+  assert.match(guard, /^import '\.\/pages-house-transport-bridge\.js';/);
 });
 
 test('Pages transport bridges session and Commons to Supabase and exposes Ox Alpha route truth', async () => {
