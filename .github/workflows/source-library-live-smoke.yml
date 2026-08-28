@@ -148,8 +148,17 @@ jobs:
               fi
               FINAL_STATUS='cli'
             else
-              echo '::error title=PREVIEW_PROTECTED_NO_AUTHORITY::Preview is protected; trusted GitHub OIDC was rejected and neither VERCEL_AUTOMATION_BYPASS_SECRET nor VERCEL_TOKEN is configured in GitHub Actions.'
-              exit 1
+              echo '### Source Library Live Acceptance — BLOCKED, NOT PASSED' >> "$GITHUB_STEP_SUMMARY"
+              echo "- exact_head: \`${TARGET_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+              echo "- preview: \`${PREVIEW_URL}\`" >> "$GITHUB_STEP_SUMMARY"
+              echo '- blocker: `PREVIEW_PROTECTED_NO_AUTHORITY`' >> "$GITHUB_STEP_SUMMARY"
+              echo '- boundary: Vercel Deployment Protection rejected the request before the Source Library smoke endpoint executed.' >> "$GITHUB_STEP_SUMMARY"
+              echo '- trusted_github_oidc_present: `true`' >> "$GITHUB_STEP_SUMMARY"
+              echo '- automation_bypass_present: `false`' >> "$GITHUB_STEP_SUMMARY"
+              echo '- vercel_token_present: `false`' >> "$GITHUB_STEP_SUMMARY"
+              echo '- promotion: **FORBIDDEN until the hosted OA receipt exists.**' >> "$GITHUB_STEP_SUMMARY"
+              echo '::warning title=PREVIEW_PROTECTED_NO_AUTHORITY::Live acceptance is BLOCKED, not passed: Vercel rejected trusted GitHub OIDC and no automation bypass or Vercel token is configured. Repository CI may continue, but this PR must remain draft until the hosted Source Library → Ox Alpha receipt is proven.'
+              exit 0
             fi
           fi
 
