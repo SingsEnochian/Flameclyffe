@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LivingRoom } from './components/living-room/LivingRoom.jsx';
+import { SourceLibrary } from './components/living-room/SourceLibrary.jsx';
 import './starwell.css';
 import './components/living-room/living-room.css';
 import './components/living-room/living-room-sanctuary.css';
@@ -15,11 +16,12 @@ import './components/living-room/living-room-hearth-unified.css';
 import './components/living-room/living-room-folds.css';
 import './components/living-room/living-room-motion.css';
 import './components/living-room/living-room-preview.css';
+import './components/living-room/source-library.css';
 
 const rooms = [
   { key: 'observer', glyph: '◎', title: 'Observer Almanac', text: 'Live glyphs, readings, packets, and phase weather.' },
   { key: 'writing', glyph: '✎', title: 'Writing Room', text: 'Manuscript chamber, scene loom, local drafts, and living pages.' },
-  { key: 'library', glyph: '▤', title: 'Grand Library', text: 'Codex shelves, lore records, marginalia, and root-texts.' },
+  { key: 'library', glyph: '▤', title: 'Grand Library', text: 'Private source archive search, comparison, provenance, and Ox Alpha Author Lens.' },
   { key: 'atlas', glyph: '⌖', title: 'Atlas Hall', text: 'Worlds, cities, regions, routes, and grown Stonewood maps.' },
   { key: 'atelier', glyph: '◇', title: 'Observer Atelier', text: 'Visual canon, prompt loom, pose language, and image lineage.' },
   { key: 'studio', glyph: '✣', title: 'Art Studio', text: 'Moodboards, textures, sketches, palettes, and wet paint.' },
@@ -52,6 +54,7 @@ function getPhase(hour) {
 }
 
 function RoomPreview({ selected }) {
+  if (selected.key === 'library') return <SourceLibrary />;
   return (
     <section className="living-preview-panel" aria-label={`${selected.title} preview`}>
       <span aria-hidden="true">{selected.glyph}</span>
