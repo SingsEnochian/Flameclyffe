@@ -18,6 +18,7 @@ const SIDECARS = [
   './runtime-presence-diagnostics.js',
   './runtime-integration-bootstrap.js',
   './hosted-house-session-ui.js',
+  './observer-archive-reader.js',
   './house-commons-chat-v5.js',
   './house-lanternbridge-chat.js',
   './house-commons-command-room.js',
