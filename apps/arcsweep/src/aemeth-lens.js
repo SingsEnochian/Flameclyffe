@@ -96,9 +96,11 @@ export function createAemethReplayEnvelope(record = {}) {
     witnessRaw: record.witnessRaw || '',
     witnessTimestampNotes: record.witnessTimestampNotes || '',
     transformationNotes: record.transformationNotes || '',
+    modelParticipant: record.modelParticipant || '',
+    modelWitnessLog: record.modelWitnessLog || '',
+    modelWitnesses: Array.isArray(record.modelWitnesses) ? structuredClone(record.modelWitnesses) : [],
     interpretation: record.interpretation || '',
     sourceRefs: record.sourceRefs || '',
-    modelWitnesses: Array.isArray(record.modelWitnesses) ? structuredClone(record.modelWitnesses) : [],
     replayFingerprint: record.replayFingerprint || '',
   });
 }
