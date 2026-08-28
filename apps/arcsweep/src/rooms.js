@@ -1,4 +1,4 @@
-import { AEMETH_RITUAL_PHASES, aemethDiagramOptions, aemethInstrumentOptions } from './aemeth-lens.js';
+import { AEMETH_RITUAL_PHASES, aemethDiagramOptions, aemethInstrumentOptions, aemethParticipantOptions } from './aemeth-lens.js';
 
 export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
   records: {
@@ -75,7 +75,7 @@ export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
     attachments: true,
   },
   'aemeth-lens': {
-    label: 'Aemeth Chamber', glyph: '⊚', category: 'observation', description: 'A replayable observer chamber for shewstone work, ritual geometry, Calls, and transformation. Raw witness stays distinct from later interpretation; source diagrams remain versioned evidence rather than flattened canon.',
+    label: 'Aemeth Chamber', glyph: '⊚', category: 'observation', description: 'A replayable observer chamber for shewstone work, ritual geometry, Calls, transformation, and invited model witnesses. Raw witness stays distinct from later interpretation; source diagrams remain versioned evidence rather than flattened canon.',
     fields: [
       ['title', 'Session title', 'text', true],
       ['status', 'Session status', 'select', false, ['Planned', 'Prepared', 'Active', 'Suspended', 'Closed', 'Interpreted', 'Archived']],
@@ -92,7 +92,9 @@ export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
       ['witnessRaw', 'Clean witness · raw observation', 'textarea'],
       ['witnessTimestampNotes', 'Witness timestamps / sequence', 'textarea'],
       ['transformationNotes', 'Transformation edges · what changed with orientation, diagram, Call, sound, or state', 'textarea'],
-      ['interpretation', 'Interpretation · kept separate from witness', 'textarea'],
+      ['modelParticipant', 'Invited model witness', 'select', false, aemethParticipantOptions()],
+      ['modelWitnessLog', 'Model witness lane · separate from firsthand witness', 'textarea'],
+      ['interpretation', 'Interpretation · kept separate from witness and model witness', 'textarea'],
       ['sourceRefs', 'Source witnesses / corpus references', 'textarea'],
       ['runaReceipt', 'Runa / sound receipt', 'textarea'],
       ['replayFingerprint', 'Replay fingerprint', 'text'],
