@@ -1,7 +1,7 @@
 import { readHouseRuntimeToken } from './house-runtime.js';
 import { readOxAlphaPortableStatus } from './aemeth-oxalpha-transport.js';
 
-export const AEMETH_OA_ROUTE_STATUS_VERSION = 'aemeth-oa-route-status/v1';
+export const AEMETH_OA_ROUTE_STATUS_VERSION = 'aemeth-oa-route-status/v2';
 
 export function formatOxAlphaRouteStatus(status = {}) {
   const houseState = status.house?.state || 'unknown';
@@ -17,13 +17,14 @@ export function formatOxAlphaRouteStatus(status = {}) {
   const inference = inferenceState === 'ready' ? 'ready'
     : inferenceState === 'credential-missing' ? 'credential missing'
       : inferenceState;
+  const provider = String(status.provider || 'configured provider');
 
-  const summary = status.overall === 'hf-ready'
-    ? 'Supabase relay and Hugging Face inference are armed.'
+  const summary = status.overall === 'inference-ready'
+    ? `Supabase relay and OA inference via ${provider} are armed.`
     : status.overall === 'house-session-present'
-      ? 'House session is present; House model health remains invocation-proven. The host-neutral Hugging Face relay is not armed.'
+      ? 'House session is present; House model health remains invocation-proven. The host-neutral OA relay is not armed.'
       : status.overall === 'relay-unarmed'
-        ? 'Supabase relay is reachable; Hugging Face inference credential is missing.'
+        ? 'Supabase relay is reachable; OA inference credential is missing.'
         : 'No House session is present and the host-neutral relay is not currently usable.';
 
   return Object.freeze({
@@ -72,7 +73,7 @@ function routeInstrumentMarkup() {
       <div class="aemeth-readout aemeth-route-grid" aria-label="Ox Alpha route readiness">
         <div><small>House route</small><strong data-aemeth-route-house data-state="checking">checking…</strong></div>
         <div><small>Supabase relay</small><strong data-aemeth-route-relay data-state="checking">checking…</strong></div>
-        <div><small>HF inference</small><strong data-aemeth-route-inference data-state="checking">checking…</strong></div>
+        <div><small>OA inference</small><strong data-aemeth-route-inference data-state="checking">checking…</strong></div>
       </div>
       <p class="muted" data-aemeth-route-summary>Checking host-neutral route truth…</p>
     </section>`;

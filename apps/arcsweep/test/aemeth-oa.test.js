@@ -8,13 +8,17 @@ import {
   invokeAemethParticipant,
 } from '../src/aemeth-lens.js';
 
-test('Ox Alpha is a distinct Aemeth model witness with Hugging Face lineage', () => {
+test('Ox Alpha is a distinct Aemeth model witness with route-resolved provider provenance', () => {
   const oa = AEMETH_MODEL_PARTICIPANTS.find((item) => item.id === 'oxalpha');
   assert.equal(oa?.displayName, 'Ox Alpha');
   assert.equal(oa?.captionLabel, 'OA');
   assert.equal(oa?.route, 'oxalpha');
-  assert.equal(oa?.provider, 'huggingface-inference-providers');
-  assert.equal(oa?.model, 'zai-org/GLM-5.3-Flash');
+  assert.equal(oa?.provider, 'route-resolved-at-invocation');
+  assert.equal(oa?.model, 'GLM-5.3-Flash');
+  assert.equal(oa?.providerRoutes?.house?.provider, 'huggingface-inference-providers');
+  assert.equal(oa?.providerRoutes?.house?.model, 'zai-org/GLM-5.3-Flash');
+  assert.equal(oa?.providerRoutes?.portable?.provider, 'openrouter');
+  assert.equal(oa?.providerRoutes?.portable?.model, 'z-ai/glm-5.3-flash');
   assert.match(oa?.authority || '', /never inferred Qualia/i);
 });
 
@@ -53,7 +57,7 @@ test('Aemeth replay envelope carries model witnesses without replacing Rowan wit
   assert.equal(envelope.modelWitnesses[0].participantId, 'oxalpha');
 });
 
-test('Aemeth OA invocation uses the existing Flame route and preserves provider/model provenance', async () => {
+test('Aemeth OA House invocation preserves actual provider/model provenance', async () => {
   let request = null;
   const result = await invokeAemethParticipant({
     token: 'house-token',
