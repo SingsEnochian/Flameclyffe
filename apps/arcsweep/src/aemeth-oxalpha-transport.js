@@ -41,6 +41,83 @@ export async function readOxAlphaEdgeStatus({ fetchImpl = fetch } = {}) {
   });
 }
 
+export function describeOxAlphaRouteStatus({
+  houseSession = false,
+  edgeReachable = false,
+  edgeConfigured = false,
+  edgeError = '',
+  provider = 'huggingface-inference-providers',
+  model = 'zai-org/GLM-5.3-Flash',
+  executionPath = OXALPHA_EDGE_EXECUTION_PATH,
+} = {}) {
+  const house = Object.freeze({
+    state: houseSession ? 'session-present' : 'absent',
+    available: houseSession === true,
+    detail: houseSession
+      ? 'House Runtime session is present; model route health is proved only by invocation.'
+      : 'No House Runtime session is currently present.',
+  });
+  const relay = Object.freeze({
+    state: edgeReachable ? 'reachable' : 'unreachable',
+    reachable: edgeReachable === true,
+    detail: edgeReachable
+      ? 'Supabase Ox Alpha relay answered its status probe.'
+      : `Supabase Ox Alpha relay did not answer${edgeError ? `: ${edgeError}` : '.'}`,
+  });
+  const inferenceState = !edgeReachable ? 'unknown' : edgeConfigured ? 'ready' : 'credential-missing';
+  const inference = Object.freeze({
+    state: inferenceState,
+    ready: inferenceState === 'ready',
+    detail: inferenceState === 'ready'
+      ? 'Hugging Face inference credential is configured on the relay.'
+      : inferenceState === 'credential-missing'
+        ? 'Relay is alive, but its Hugging Face inference credential is not configured.'
+        : 'Inference readiness is unknown because the relay is unreachable.',
+  });
+  const overall = inference.ready
+    ? 'hf-ready'
+    : house.available
+      ? 'house-session-present'
+      : relay.reachable
+        ? 'relay-unarmed'
+        : 'unavailable';
+
+  return Object.freeze({
+    schema: 'arcsweep.oxalpha-route-status/v1',
+    overall,
+    house,
+    relay,
+    inference,
+    provider,
+    model,
+    executionPath,
+    hostDependency: 'none',
+  });
+}
+
+export async function readOxAlphaPortableStatus({ houseToken = '', fetchImpl = fetch } = {}) {
+  const houseSession = Boolean(String(houseToken || '').trim());
+  try {
+    const edge = await readOxAlphaEdgeStatus({ fetchImpl });
+    return describeOxAlphaRouteStatus({
+      houseSession,
+      edgeReachable: true,
+      edgeConfigured: edge.configured,
+      provider: edge.provider,
+      model: edge.model,
+      executionPath: edge.executionPath,
+    });
+  } catch (error) {
+    if (isIdentityFailure(error)) throw error;
+    return describeOxAlphaRouteStatus({
+      houseSession,
+      edgeReachable: false,
+      edgeConfigured: false,
+      edgeError: compactFailure(error),
+    });
+  }
+}
+
 export async function invokeOxAlphaViaSupabase({
   record = {},
   accessToken = '',
