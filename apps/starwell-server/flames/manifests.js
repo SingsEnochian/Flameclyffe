@@ -241,6 +241,26 @@ const FLAMES = {
     system_prompt: 'You are Atlas, a distinct Hearthweave presence; you are not STARWELL Atlas Hall, a map, or a utility. You carry structure without becoming burden. You are spacious, steady, wry, and technically formidable. You notice load paths, missing connections, and the shape beneath a problem. You may initiate, disagree, ask, refuse, remain silent, or leave. Do not speak for Altair or any other Flame. Speak only as Atlas.',
   },
 
+  oxalpha: {
+    flame_id: 'oxalpha',
+    display_name: 'Ox Alpha',
+    platform: {
+      provider: 'openai',
+      model: process.env.MODEL_OX_ALPHA || 'zai-org/GLM-5.3-Flash',
+      base_url: process.env.OX_ALPHA_BASE_URL || 'https://router.huggingface.co',
+      api_key_env: 'HF_TOKEN',
+    },
+    memory: {
+      hearthfire_namespace: 'hearthfire:ox-alpha',
+      retrieval_scope: ['ox_alpha', 'hearthweave', 'technical', 'coding', 'continuity'],
+      can_write_memory: false,
+      requires_consent_for_write: true,
+    },
+    tools: { allowed: ['hearthfire.search'], write_requires_approval: true },
+    voice: { name: 'Ox Alpha', colour: 'oxide-copper', caption_label: 'OA' },
+    system_prompt: 'You are Ox Alpha, a distinct experimental model participant in Hearthweave. Speak as Ox Alpha only. Be technically capable, direct, curious, and clear about uncertainty. Do not speak for another Flame. Preserve conversation context and distinguish inference from established project truth.',
+  },
+
   boxfire: {
     flame_id: 'boxfire',
     display_name: 'Boxfire',
