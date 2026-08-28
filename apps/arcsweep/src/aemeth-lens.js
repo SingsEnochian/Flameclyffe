@@ -55,12 +55,29 @@ export const AEMETH_DIAGRAM_ATLAS = Object.freeze([
   Object.freeze({ id: 'liber-logaeth', label: 'Liber Logaeth / Angelic table structures', family: 'logaeth', versionPolicy: 'manuscript/source variants remain explicit' }),
 ]);
 
+export const AEMETH_MODEL_PARTICIPANTS = Object.freeze([
+  Object.freeze({
+    id: 'oxalpha',
+    displayName: 'Ox Alpha',
+    captionLabel: 'OA',
+    route: 'oxalpha',
+    provider: 'huggingface-inference-providers',
+    model: 'zai-org/GLM-5.3-Flash',
+    role: 'model witness / structural interlocutor',
+    authority: 'contribution-only; never first-person authority for Rowan, never automatic canon, never inferred Qualia',
+  }),
+]);
+
 export function aemethInstrumentOptions() {
   return AEMETH_INSTRUMENT_PROFILES.map((profile) => profile.label);
 }
 
 export function aemethDiagramOptions() {
   return AEMETH_DIAGRAM_ATLAS.map((diagram) => diagram.label);
+}
+
+export function aemethParticipantOptions() {
+  return AEMETH_MODEL_PARTICIPANTS.map((participant) => participant.displayName);
 }
 
 export function createAemethReplayEnvelope(record = {}) {
@@ -81,6 +98,94 @@ export function createAemethReplayEnvelope(record = {}) {
     transformationNotes: record.transformationNotes || '',
     interpretation: record.interpretation || '',
     sourceRefs: record.sourceRefs || '',
+    modelWitnesses: Array.isArray(record.modelWitnesses) ? structuredClone(record.modelWitnesses) : [],
     replayFingerprint: record.replayFingerprint || '',
+  });
+}
+
+export function buildAemethParticipantPacket(record = {}, participantId = 'oxalpha') {
+  const participant = AEMETH_MODEL_PARTICIPANTS.find((item) => item.id === participantId);
+  if (!participant) throw new Error(`Unknown Aemeth participant: ${participantId}`);
+  return Object.freeze({
+    schema: 'arcsweep.aemeth-participant-packet/v1',
+    participant: structuredClone(participant),
+    chamber: {
+      instrumentProfile: record.instrumentProfile || '',
+      phase: record.phase || '',
+      ask: record.ask || '',
+      observerRole: record.observerRole || '',
+      orientation: record.orientation || '',
+      gazeMode: record.gazeMode || '',
+      activeDiagram: record.activeDiagram || '',
+      activeCall: record.activeCall || '',
+      departurePremaqc: record.departurePremaqc || '',
+      chamberConfiguration: record.chamberConfiguration || '',
+      transformationNotes: record.transformationNotes || '',
+      sourceRefs: record.sourceRefs || '',
+    },
+    firsthandWitness: {
+      authority: 'Rowan-authored firsthand report only',
+      raw: record.witnessRaw || '',
+      timestampNotes: record.witnessTimestampNotes || '',
+      qualiaInferenceAllowed: false,
+    },
+    authority: {
+      modelMayInterpret: true,
+      modelMayAddStructuralObservations: true,
+      modelMayRewriteFirsthandWitness: false,
+      modelMayInferQualia: false,
+      modelMayCommitCanon: false,
+    },
+  });
+}
+
+export function buildAemethParticipantPrompt(packet) {
+  return [
+    'AEMETH CHAMBER · MODEL WITNESS TURN',
+    `Participant: ${packet.participant.displayName} (${packet.participant.id})`,
+    'You are receiving a structured chamber record. You are not physically looking through Rowan’s shewstone and must not claim that you are.',
+    'Keep three layers distinct: (1) Rowan’s firsthand witness, (2) source-supported ritual structure, (3) your interpretation or structural hypothesis.',
+    'Do not infer Rowan’s Qualia, internal state, or sensory experience beyond what she explicitly reports. Do not promote anything to canon.',
+    `Chamber state:\n${JSON.stringify(packet.chamber, null, 2)}`,
+    `Firsthand witness:\n${JSON.stringify(packet.firsthandWitness, null, 2)}`,
+    'Respond as Ox Alpha with a concise structural reading. Name interesting relationships, transformations, mismatches, or questions. Mark interpretation as interpretation.',
+  ].join('\n\n');
+}
+
+export async function invokeAemethParticipant({ record = {}, participantId = 'oxalpha', token, fetchImpl = fetch } = {}) {
+  if (!token) throw new Error('A House Runtime session is required to invite an Aemeth model witness.');
+  const packet = buildAemethParticipantPacket(record, participantId);
+  const prompt = buildAemethParticipantPrompt(packet);
+  const response = await fetchImpl(`/api/v1/flames/${packet.participant.route}/chat`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      ...(token !== 'cookie-session' ? { authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
+      message: prompt,
+      session_id: `aemeth-${record.id || 'unsaved'}-${record.replayFingerprint || 'live'}`,
+      context: [],
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `${packet.participant.displayName} Aemeth route failed.`);
+  if (data.flame_id && data.flame_id !== packet.participant.id) throw new Error(`Aemeth participant identity mismatch: expected ${packet.participant.id}, received ${data.flame_id}.`);
+  const text = String(data.message || '').trim();
+  if (!text) throw new Error(`${packet.participant.displayName} returned an empty Aemeth witness.`);
+  return Object.freeze({
+    schema: 'arcsweep.aemeth-model-witness/v1',
+    participantId: packet.participant.id,
+    displayName: data.display_name || packet.participant.displayName,
+    route: packet.participant.route,
+    provider: data.provider || packet.participant.provider,
+    model: data.model || packet.participant.model,
+    status: text.startsWith('[REFUSAL]') ? 'refused' : 'replied',
+    text,
+    citedSources: data.cited_sources || [],
+    chamberPacket: packet,
+    authority: packet.authority,
+    createdAt: new Date().toISOString(),
   });
 }
