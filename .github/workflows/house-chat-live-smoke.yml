@@ -105,8 +105,8 @@ jobs:
             echo '### House Chat Live Acceptance — BLOCKED, NOT PASSED' >> "$GITHUB_STEP_SUMMARY"
             echo '- blocker: `PREVIEW_PROTECTED_NO_AUTHORITY`' >> "$GITHUB_STEP_SUMMARY"
             echo '- promotion: **FORBIDDEN until hosted OA + second-Flame receipts exist.**' >> "$GITHUB_STEP_SUMMARY"
-            echo '::warning title=PREVIEW_PROTECTED_NO_AUTHORITY::Vercel rejected the trusted-source request before Flame routing executed.'
-            exit 0
+            echo '::error title=PREVIEW_PROTECTED_NO_AUTHORITY::Vercel rejected the automation request before Flame routing executed. Configure Trusted Sources or VERCEL_AUTOMATION_BYPASS_SECRET.'
+            exit 1
           fi
           if [[ "$OA_CODE" != '200' ]]; then cat oa.json || true; echo "::error title=OA_ROUTE_FAILED::Ox Alpha route returned HTTP $OA_CODE"; exit 1; fi
 
