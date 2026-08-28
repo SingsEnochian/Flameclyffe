@@ -31,6 +31,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_SCOPE: singsenochian-2527s-projects
     steps:
       - name: Checkout exact head
         uses: actions/checkout@v4
@@ -59,68 +61,38 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          HEAD_SHA="${TARGET_SHA}"
-          API="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs"
+          API="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${TARGET_SHA}/check-runs"
           SAW_VERCEL=0
           PREVIEW_URL=''
-
           for attempt in $(seq 1 36); do
-            HTTP_STATUS=$(curl -sS --retry 2 --retry-delay 1 \
-              -o check-runs.json \
-              -w '%{http_code}' \
+            HTTP_STATUS=$(curl -sS --retry 2 --retry-delay 1 -o check-runs.json -w '%{http_code}' \
               -H "Authorization: Bearer ${GH_TOKEN}" \
               -H 'Accept: application/vnd.github+json' \
-              -H 'X-GitHub-Api-Version: 2022-11-28' \
-              "${API}") || HTTP_STATUS='000'
-
+              -H 'X-GitHub-Api-Version: 2022-11-28' "${API}") || HTTP_STATUS='000'
             if [[ "${HTTP_STATUS}" == '200' ]]; then
-              VERCEL_COUNT=$(node - <<'NODE'
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync('check-runs.json', 'utf8'));
-          console.log((data.check_runs || []).filter((run) => run.app?.slug === 'vercel').length);
-          NODE
-              )
-              if [[ "${VERCEL_COUNT}" -gt 0 ]]; then SAW_VERCEL=1; fi
-
-              PREVIEW_HOST=$(node - <<'NODE'
+              read -r VERCEL_COUNT PREVIEW_HOST < <(node - <<'NODE'
           const fs = require('fs');
           const data = JSON.parse(fs.readFileSync('check-runs.json', 'utf8'));
           const checks = (data.check_runs || []).filter((run) => run.app?.slug === 'vercel');
           const hosts = [];
           for (const run of checks) {
-            const values = [run.details_url, run.output?.title, run.output?.summary, run.output?.text];
-            for (const value of values) {
-              const matches = String(value || '').match(/[a-z0-9][a-z0-9.-]*\.vercel\.app/gi) || [];
-              for (const host of matches) if (!hosts.includes(host)) hosts.push(host);
+            for (const value of [run.details_url, run.output?.title, run.output?.summary, run.output?.text]) {
+              for (const host of String(value || '').match(/[a-z0-9][a-z0-9.-]*\.vercel\.app/gi) || []) {
+                if (!hosts.includes(host)) hosts.push(host);
+              }
             }
           }
-          console.log(hosts[0] || '');
+          process.stdout.write(`${checks.length} ${hosts[0] || ''}`);
           NODE
               )
-
-              if [[ -n "${PREVIEW_HOST}" ]]; then
-                PREVIEW_URL="https://${PREVIEW_HOST}"
-                break
-              fi
-            else
-              echo "GitHub check-runs lookup attempt ${attempt} returned HTTP ${HTTP_STATUS}." >&2
+              if [[ "${VERCEL_COUNT:-0}" -gt 0 ]]; then SAW_VERCEL=1; fi
+              if [[ -n "${PREVIEW_HOST:-}" ]]; then PREVIEW_URL="https://${PREVIEW_HOST}"; break; fi
             fi
             sleep 10
           done
-
           if [[ -z "${PREVIEW_URL}" ]]; then
-            echo '### Source Library preview discovery' >> "$GITHUB_STEP_SUMMARY"
-            echo "- head: \`${HEAD_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "- exact_head: \`${TARGET_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
             echo "- saw_vercel_check: \`${SAW_VERCEL}\`" >> "$GITHUB_STEP_SUMMARY"
-            if [[ -f check-runs.json ]]; then
-              node - <<'NODE' >> "$GITHUB_STEP_SUMMARY"
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync('check-runs.json', 'utf8'));
-          for (const run of (data.check_runs || []).filter((item) => item.app?.slug === 'vercel')) {
-            console.log(`- Vercel check: ${run.name} status=${run.status} conclusion=${run.conclusion || 'null'} details=${run.details_url || 'null'}`);
-          }
-          NODE
-            fi
             if [[ "${SAW_VERCEL}" -eq 0 ]]; then
               echo '::error title=NO_VERCEL_CHECK::No exact-head Vercel check appeared before timeout.'
             else
@@ -128,7 +100,6 @@ jobs:
             fi
             exit 1
           fi
-
           echo "url=${PREVIEW_URL}" >> "$GITHUB_OUTPUT"
           echo "Discovered exact-head preview: ${PREVIEW_URL}"
 
@@ -139,76 +110,69 @@ jobs:
           VERCEL_TRUSTED_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -uo pipefail
-          ENDPOINT="${PREVIEW_URL}/api/source-library-live-smoke"
-          FINAL_STATUS='000'
-          FINAL_CONTENT_TYPE=''
+          ENDPOINT_PATH='/api/source-library-live-smoke'
+          ENDPOINT="${PREVIEW_URL}${ENDPOINT_PATH}"
+          rm -f smoke-body.json smoke-headers.txt vercel-curl.err
 
-          for attempt in $(seq 1 30); do
-            rm -f smoke-headers.txt smoke-body.json
-            CURL_ARGS=(
-              -sS -L --max-time 180
-              -D smoke-headers.txt
-              -o smoke-body.json
-              -w '%{http_code}'
-              -H 'accept: application/json'
-            )
-            if [[ -n "${VERCEL_TRUSTED_OIDC_TOKEN:-}" ]]; then
-              CURL_ARGS+=( -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_TRUSTED_OIDC_TOKEN}" )
-            fi
-            if [[ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]]; then
-              CURL_ARGS+=(
-                -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}"
-                -H 'x-vercel-set-bypass-cookie: true'
-              )
-            fi
+          CURL_ARGS=(-sS -L --max-time 180 -D smoke-headers.txt -o smoke-body.json -w '%{http_code}' -H 'accept: application/json')
+          if [[ -n "${VERCEL_TRUSTED_OIDC_TOKEN:-}" ]]; then
+            CURL_ARGS+=( -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_TRUSTED_OIDC_TOKEN}" )
+          fi
+          if [[ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]]; then
+            CURL_ARGS+=( -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}" -H 'x-vercel-set-bypass-cookie: true' )
+          fi
 
-            FINAL_STATUS=$(curl "${CURL_ARGS[@]}" "${ENDPOINT}") || FINAL_STATUS='000'
-            FINAL_CONTENT_TYPE=$(awk 'BEGIN{IGNORECASE=1} /^content-type:/{gsub(/\r/,""); value=$0} END{sub(/^[^:]*:[ ]*/,"",value); print value}' smoke-headers.txt 2>/dev/null || true)
+          FINAL_STATUS=$(curl "${CURL_ARGS[@]}" "${ENDPOINT}") || FINAL_STATUS='000'
+          ACCESS_METHOD='direct'
 
-            # 404/000 can mean the exact-head preview is still propagating. A JSON
-            # response from our endpoint, including a typed 502/503, means the route is live.
-            if [[ "${FINAL_STATUS}" != '000' && "${FINAL_STATUS}" != '404' ]]; then
-              break
+          # Vercel Authentication can reject ordinary HTTP even when the repo has a
+          # valid Vercel account token. `vercel curl` performs an authenticated request
+          # against the exact deployment without putting provider secrets in Actions.
+          if [[ "${FINAL_STATUS}" == '401' || "${FINAL_STATUS}" == '403' ]]; then
+            if [[ -n "${VERCEL_TOKEN:-}" ]]; then
+              ACCESS_METHOD='vercel-cli'
+              rm -f smoke-body.json
+              npx --yes vercel@latest curl "${ENDPOINT_PATH}" \
+                --deployment "${PREVIEW_URL}" \
+                --token "${VERCEL_TOKEN}" \
+                --scope "${VERCEL_SCOPE}" \
+                > smoke-body.json 2> vercel-curl.err
+              CLI_EXIT=$?
+              if [[ ${CLI_EXIT} -ne 0 ]]; then
+                echo '### Vercel CLI access failure' >> "$GITHUB_STEP_SUMMARY"
+                echo '```text' >> "$GITHUB_STEP_SUMMARY"
+                tail -n 30 vercel-curl.err >> "$GITHUB_STEP_SUMMARY" || true
+                echo '```' >> "$GITHUB_STEP_SUMMARY"
+                echo '::error title=VERCEL_CLI_ACCESS_FAILED::Vercel CLI could not reach the protected exact-head preview.'
+                exit 1
+              fi
+              FINAL_STATUS='cli'
+            else
+              echo '::error title=PREVIEW_PROTECTED_NO_AUTHORITY::Preview is protected; trusted GitHub OIDC was rejected and neither VERCEL_AUTOMATION_BYPASS_SECRET nor VERCEL_TOKEN is configured in GitHub Actions.'
+              exit 1
             fi
-            sleep 10
-          done
+          fi
 
           echo '### Source Library Live Smoke' >> "$GITHUB_STEP_SUMMARY"
           echo "- exact_head: \`${TARGET_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- preview: \`${PREVIEW_URL}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- endpoint_status: \`${FINAL_STATUS}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- content_type: \`${FINAL_CONTENT_TYPE:-unknown}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- access_method: \`${ACCESS_METHOD}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- direct_http_status: \`${FINAL_STATUS}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- trusted_oidc_present: \`$([[ -n "${VERCEL_TRUSTED_OIDC_TOKEN:-}" ]] && echo true || echo false)\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- vercel_token_present: \`$([[ -n "${VERCEL_TOKEN:-}" ]] && echo true || echo false)\`" >> "$GITHUB_STEP_SUMMARY"
 
-          if [[ "${FINAL_STATUS}" == '000' ]]; then
-            echo '::error title=PREVIEW_UNREACHABLE::Vercel preview endpoint was unreachable after the propagation window.'
+          if [[ "${FINAL_STATUS}" == '000' || "${FINAL_STATUS}" == '404' ]]; then
+            echo '::error title=PREVIEW_ROUTE_UNAVAILABLE::Exact-head preview did not expose the Source Library smoke route.'
             exit 1
           fi
-          if [[ "${FINAL_STATUS}" == '404' ]]; then
-            echo '::error title=PREVIEW_404::Exact-head Vercel preview never exposed /api/source-library-live-smoke.'
-            exit 1
-          fi
-          if [[ "${FINAL_STATUS}" == '401' || "${FINAL_STATUS}" == '403' ]]; then
-            echo '::error title=PREVIEW_PROTECTED::Preview rejected both trusted OIDC and any configured automation bypass before the smoke endpoint could run.'
-            exit 1
-          fi
-          if [[ "${FINAL_CONTENT_TYPE}" != application/json* ]]; then
-            echo 'Response was not JSON:' >> "$GITHUB_STEP_SUMMARY"
-            echo '```text' >> "$GITHUB_STEP_SUMMARY"
-            head -c 1200 smoke-body.json >> "$GITHUB_STEP_SUMMARY" || true
-            echo >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            echo '::error title=INVALID_JSON::Preview returned a non-JSON body; likely routing/protection/stale deployment.'
-            exit 1
-          fi
-
-          if [[ "${FINAL_STATUS}" != '200' ]]; then
-            CODE=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.code || 'LIVE_SMOKE_FAILED'))" 2>/dev/null || echo LIVE_SMOKE_FAILED)
-            ERROR=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.error || 'Hosted smoke failed').slice(0,700))" 2>/dev/null || echo 'Hosted smoke failed')
-            echo '```json' >> "$GITHUB_STEP_SUMMARY"
-            node -e "const d=require('./smoke-body.json'); console.log(JSON.stringify(d,null,2).slice(0,3000))" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            echo "::error title=${CODE}::${ERROR}"
+          if [[ "${ACCESS_METHOD}" == 'direct' && "${FINAL_STATUS}" != '200' ]]; then
+            if node -e "const d=require('./smoke-body.json'); process.exit(d && d.code ? 0 : 1)" 2>/dev/null; then
+              CODE=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.code))")
+              ERROR=$(node -e "const d=require('./smoke-body.json'); process.stdout.write(String(d.error || 'Hosted smoke failed').slice(0,700))")
+              echo "::error title=${CODE}::${ERROR}"
+            else
+              echo '::error title=PREVIEW_HTTP_FAILURE::Preview returned a non-success response before a valid smoke receipt was produced.'
+            fi
             exit 1
           fi
 
@@ -216,13 +180,17 @@ jobs:
           const fs = require('fs');
           let data;
           try {
-            data = JSON.parse(fs.readFileSync('smoke-body.json', 'utf8'));
+            const raw = fs.readFileSync('smoke-body.json', 'utf8').trim();
+            data = JSON.parse(raw);
           } catch (error) {
-            console.error(`::error title=INVALID_JSON::${error.message}`);
+            console.error(`::error title=INVALID_JSON::Authenticated preview probe did not return the smoke JSON envelope: ${error.message}`);
+            process.exit(1);
+          }
+          if (data?.ok !== true) {
+            console.error(`::error title=${data?.code || 'LIVE_SMOKE_FAILED'}::${String(data?.error || 'Hosted smoke failed').slice(0, 900)}`);
             process.exit(1);
           }
           const required = [
-            data?.ok === true,
             data?.schema === 'source-library-live-smoke/v1',
             data?.proof?.list?.indexed_document_count >= 2,
             data?.proof?.search?.result_count >= 1,
@@ -241,13 +209,7 @@ jobs:
             console.error(`::error title=LIVE_SMOKE_CONTRACT_FAILED::${JSON.stringify(data).slice(0, 1800)}`);
             process.exit(1);
           }
-          const summary = {
-            schema: data.schema,
-            list: data.proof.list,
-            search: data.proof.search,
-            compare: data.proof.compare,
-            author_lens: data.proof.author_lens,
-          };
+          const summary = { schema: data.schema, list: data.proof.list, search: data.proof.search, compare: data.proof.compare, author_lens: data.proof.author_lens };
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`);
           console.log('Source Library live smoke PASSED: list → FTS → compare → Ox Alpha Author Lens → provenance receipt.');
           NODE
