@@ -1,3 +1,5 @@
+import { canonicaliseHouseCommonsEntry } from './house-formatted-text-bridge.js';
+
 export const HOUSE_RUNTIME_SESSION_KEY = 'hearthgate:house-runtime-session/v1';
 export const HOUSE_COOKIE_SESSION = 'cookie-session';
 
@@ -105,7 +107,10 @@ async function commonsRequest(token, options = {}, fetchImpl = fetch) {
 }
 
 export function readHouseCommons(token, fetchImpl = fetch) { return commonsRequest(token, { cache: 'no-store' }, fetchImpl); }
-export function appendHouseCommons(token, entry, fetchImpl = fetch) { return commonsRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(entry) }, fetchImpl); }
+export function appendHouseCommons(token, entry, fetchImpl = fetch) {
+  const canonical = canonicaliseHouseCommonsEntry(entry);
+  return commonsRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(canonical) }, fetchImpl);
+}
 
 async function kelyranReportRequest(token, options = {}, fetchImpl = fetch) {
   if (!token) throw new Error('Connect the House Runtime first.');
