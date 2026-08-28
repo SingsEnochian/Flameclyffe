@@ -59,13 +59,15 @@ test('Aemeth Chamber is a visible observation room with a clean witness boundary
   for (const field of [
     'instrumentProfile', 'phase', 'ask', 'observerRole', 'orientation', 'gazeMode',
     'activeDiagram', 'activeCall', 'departurePremaqc', 'chamberConfiguration', 'witnessRaw',
-    'witnessTimestampNotes', 'transformationNotes', 'interpretation', 'sourceRefs', 'runaReceipt',
-    'replayFingerprint', 'canonBoundary',
+    'witnessTimestampNotes', 'transformationNotes', 'modelParticipant', 'modelWitnessLog',
+    'interpretation', 'sourceRefs', 'runaReceipt', 'replayFingerprint', 'canonBoundary',
   ]) {
     assert.ok(definition.fields.some(([name]) => name === field), `missing Aemeth field ${field}`);
   }
   assert.ok(definition.fields.find(([name]) => name === 'instrumentProfile')[4].some((label) => /Shewstone 001/.test(label)));
   assert.ok(definition.fields.find(([name]) => name === 'activeDiagram')[4].includes('Sigillum Dei Aemeth'));
+  assert.deepEqual(definition.fields.find(([name]) => name === 'modelParticipant')[4], ['Ox Alpha']);
+  assert.deepEqual(definition.fields.find(([name]) => name === 'canonBoundary')[4], ['Private observation · non-canon', 'Candidate for Steward review']);
 });
 
 test('Aemeth instrument contract preserves physical, digital, and hybrid profiles', () => {
@@ -85,16 +87,21 @@ test('Aemeth diagram atlas keeps source variants explicit', () => {
   assert.match(AEMETH_DIAGRAM_ATLAS.find((item) => item.id === 'great-table').versionPolicy, /separate states/i);
 });
 
-test('Aemeth replay envelope carries witness and interpretation as separate fields', () => {
+test('Aemeth replay envelope keeps firsthand witness, OA witness, and interpretation separate', () => {
   const packet = createAemethReplayEnvelope({
     instrumentProfile: 'Aemeth Shewstone 001 · physical sphere',
     witnessRaw: 'Observed form',
-    interpretation: 'Later reading',
+    modelParticipant: 'Ox Alpha',
+    modelWitnessLog: 'OA structural reading',
+    interpretation: 'Later Rowan reading',
     replayFingerprint: 'sha256:test',
   });
   assert.equal(packet.schema, 'arcsweep.aemeth-replay/v1');
   assert.equal(packet.witnessRaw, 'Observed form');
-  assert.equal(packet.interpretation, 'Later reading');
+  assert.equal(packet.modelParticipant, 'Ox Alpha');
+  assert.equal(packet.modelWitnessLog, 'OA structural reading');
+  assert.equal(packet.interpretation, 'Later Rowan reading');
+  assert.notEqual(packet.witnessRaw, packet.modelWitnessLog);
   assert.notEqual(packet.witnessRaw, packet.interpretation);
   assert.equal(packet.replayFingerprint, 'sha256:test');
 });
