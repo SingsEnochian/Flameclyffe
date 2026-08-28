@@ -19,7 +19,7 @@ test('pretty room scenes preserve distinct built-in room identities', () => {
 test('pretty layer remains a visual decorator rather than chat state owner', () => {
   assert.match(source, /MutationObserver/);
   assert.match(source, /requestAnimationFrame/);
-  assert.match(source, /data\.commonsEnhanced !== 'v5'/);
+  assert.match(source, /dataset\.commonsEnhanced !== 'v5'/);
   assert.doesNotMatch(source, /appendHouseCommons|streamConstellationRuntimeVoice|upsertHouseRoom/);
   assert.match(source, /prefers-reduced-motion/);
   assert.match(source, /house-scene-a/);
