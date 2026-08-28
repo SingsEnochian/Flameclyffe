@@ -5,6 +5,11 @@ const short = (value, length = 160) => value == null ? null : String(value).slic
 const cleanLinks = (links) => Array.isArray(links) ? links.slice(0, 24).map((link) => ({ kind: short(link?.kind, 80), id: short(link?.id, 240), label: short(link?.label, 240) })).filter((link) => link.kind && link.id) : [];
 const cleanMentions = (mentions) => Array.isArray(mentions) ? [...new Set(mentions.map((item) => short(item, 120)).filter(Boolean))].slice(0, 32) : [];
 const cleanAttachments = (attachments) => Array.isArray(attachments) ? attachments.slice(0, 16).map((item) => ({ id: short(item?.id, 240), name: short(item?.name, 240), type: short(item?.type, 160), size: Number.isFinite(Number(item?.size)) ? Number(item.size) : null })).filter((item) => item.id && item.name) : [];
+const cleanRichTextHtml = (value) => {
+  if (value == null) return null;
+  const html = String(value).trim();
+  return html ? html.slice(0, 96000) : null;
+};
 
 export function createHouseCommonsHandler({ env, store, clock = () => new Date(), idFactory = () => crypto.randomUUID() }) {
   return async function handle(request) {
@@ -33,6 +38,7 @@ export function createHouseCommonsHandler({ env, store, clock = () => new Date()
         profile_id: short(body.runtime.profile_id, 320), latency_ms: Number.isFinite(Number(body.runtime.latency_ms)) ? Number(body.runtime.latency_ms) : null,
         runtime_world_context_id: short(body.runtime.runtime_world_context_id, 320),
       } : null,
+      rich_text_html: cleanRichTextHtml(body.rich_text_html),
       text,
     };
     await store.setJSON(`entries/${createdAt}-${entry.id}`, entry);
