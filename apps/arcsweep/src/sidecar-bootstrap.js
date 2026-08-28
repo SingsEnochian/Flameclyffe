@@ -28,6 +28,7 @@ const SIDECARS = [
   './house-chat-room-management-v5.js',
   './house-chat-room-social.js',
   './house-chat-tools-v5.js',
+  './house-chat-vestments-v1.js',
   './runtime-envelope-live-ui.js',
   './canon-intelligence-live-ui.js',
   './constellation-presence.js',
