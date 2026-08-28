@@ -5,8 +5,8 @@ import { readFile } from 'node:fs/promises';
 const renderer = await readFile(new URL('../src/aemeth-chamber-live.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('../src/aemeth-chamber.css', import.meta.url), 'utf8');
 
-test('Aemeth Chamber v2 is a renderer over the existing record form rather than a second state owner', () => {
-  assert.match(renderer, /aemeth-chamber-live\/v2/);
+test('Aemeth Chamber v3 is a renderer over the existing record form rather than a second state owner', () => {
+  assert.match(renderer, /aemeth-chamber-live\/v3/);
   assert.match(renderer, /#record-form\[data-room-id="aemeth-lens"\]/);
   assert.match(renderer, /new FormData\(form\)/);
   assert.match(renderer, /dispatchEvent\(new Event\('change'/);
@@ -31,9 +31,19 @@ test('clean witness, OA witness, and interpretation remain visibly separate cham
   assert.match(renderer, /interpretation/);
 });
 
-test('digital shewstone labels the exact-vector optical layer as the next renderer stage instead of pretending the placeholder is source geometry', () => {
-  assert.match(renderer, /source-faithful vector seat · optical renderer next/);
-  assert.match(renderer, /aemeth-seal-plane/);
+test('digital shewstone seats a manuscript-backed Sigillum vector and leaves lettering visibly pending', () => {
+  assert.match(renderer, /renderSigillumDeiAemethSvg/);
+  assert.match(renderer, /SIGILLUM_DEI_AEMETH_WITNESS/);
+  assert.match(renderer, /lettering pending/);
+  assert.match(renderer, /data-aemeth-seal-plane/);
+  assert.doesNotMatch(renderer, /<span>⊚<\/span>/);
+});
+
+test('Aemeth Chamber styles semantic vector layers without a raster dependency', () => {
+  for (const selector of ['.aemeth-sigillum-svg', '.aemeth-sigil-layer', '.aemeth-seal-inactive']) {
+    assert.match(css, new RegExp(selector.replaceAll('.', '\\.')));
+  }
+  assert.doesNotMatch(renderer, /<img[^>]+sigil|<image[^>]+href/i);
 });
 
 test('Aemeth Chamber has responsive instrument, atlas, witness, and soft-focus layout', () => {
