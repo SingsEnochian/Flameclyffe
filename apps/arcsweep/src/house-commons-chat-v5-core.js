@@ -7,18 +7,29 @@ export const HOUSE_CHAT_DRAFT_HTML_KEY = 'arcsweep.house-chat-draft-html/v2';
 export const HOUSE_CHAT_REPLY_KEY = 'arcsweep.house-chat-reply/v2';
 export const HOUSE_CHAT_ACTIVE_ROOM_KEY = 'arcsweep.house-chat-active-room/v2';
 
+export const HOUSE_CHAT_VOICES = Object.freeze([
+  ...CONSTELLATION_VOICES,
+  ...(CONSTELLATION_VOICES.some((voice) => voice.id === 'oxalpha') ? [] : [{
+    id: 'oxalpha',
+    name: 'Ox Alpha',
+    route: 'oxalpha',
+    model: 'GLM-5.3-Flash',
+    roles: ['story', 'writing', 'roleplay', 'observation', 'structure'],
+  }]),
+]);
+
 export const uuid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 export const commonsThreadId = (entry) => entry?.thread_id || entry?.turn_id || entry?.id || null;
-export const voiceName = (id, voices = CONSTELLATION_VOICES) => voices.find((voice) => voice.id === id)?.name || id;
-export const defaultVoiceIds = (voices = CONSTELLATION_VOICES) => voices.map((voice) => voice.id);
+export const voiceName = (id, voices = HOUSE_CHAT_VOICES) => voices.find((voice) => voice.id === id)?.name || id;
+export const defaultVoiceIds = (voices = HOUSE_CHAT_VOICES) => voices.map((voice) => voice.id);
 
-export function normaliseVoiceSelection(value, voices = CONSTELLATION_VOICES) {
+export function normaliseVoiceSelection(value, voices = HOUSE_CHAT_VOICES) {
   const allowed = new Set(voices.map((voice) => voice.id));
   const selected = [...new Set((Array.isArray(value) ? value : []).map((item) => String(item || '').trim().toLowerCase()).filter((id) => allowed.has(id)))];
   return selected.length ? selected : defaultVoiceIds(voices);
 }
 
-export function parseHouseMentions(message = '', voices = CONSTELLATION_VOICES) {
+export function parseHouseMentions(message = '', voices = HOUSE_CHAT_VOICES) {
   const tokens = [...String(message).matchAll(/(^|\s)@([\w/-]+)/g)].map((match) => match[2].toLowerCase());
   if (tokens.some((token) => token === 'all' || token === 'constellation')) return defaultVoiceIds(voices);
   return voices.filter((voice) => {
@@ -50,7 +61,7 @@ export function latestRoomEntry(entries = [], roomId = '') {
   return entries.filter((entry) => commonsThreadId(entry) === roomId).sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || ''))).at(-1) || null;
 }
 
-export function createOptimisticStewardEntry({ roomId, turnId, text, richTextHtml = null, replyTo = null, mentions = [], attachments = [], world = null, idempotencyKey = null } = {}) {
+export function createOptimisticStewardEntry({ roomId, turnId, text, formattedText = null, richTextHtml = null, replyTo = null, mentions = [], attachments = [], world = null, idempotencyKey = null } = {}) {
   const now = new Date().toISOString();
   return {
     schema: 'hearthgate.house-commons-entry/v4',
@@ -65,6 +76,7 @@ export function createOptimisticStewardEntry({ roomId, turnId, text, richTextHtm
     reply_to: replyTo,
     mentions,
     attachments,
+    formatted_text: formattedText,
     rich_text_html: richTextHtml,
     idempotency_key: idempotencyKey,
     text,
@@ -88,7 +100,7 @@ export function directRoomId(voiceId) {
   return `house-room:dm:${String(voiceId || '').trim().toLowerCase()}`;
 }
 
-export function directRoomSeed(voiceId, voices = CONSTELLATION_VOICES) {
+export function directRoomSeed(voiceId, voices = HOUSE_CHAT_VOICES) {
   const voice = voices.find((item) => item.id === voiceId);
   if (!voice) return null;
   return {

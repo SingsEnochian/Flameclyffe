@@ -1,4 +1,7 @@
+import { FORMATTED_TEXT_ENTITY_TYPES } from './formatted-text.js';
+
 export const HOUSE_CHAT_ALLOWED_TAGS = new Set(['A', 'B', 'BLOCKQUOTE', 'BR', 'CODE', 'DIV', 'EM', 'H1', 'H2', 'H3', 'I', 'LI', 'MARK', 'OL', 'P', 'PRE', 'S', 'SPAN', 'STRONG', 'TABLE', 'TBODY', 'TD', 'TH', 'THEAD', 'TR', 'U', 'UL']);
+const SEMANTIC_ENTITY_TYPES = new Set(FORMATTED_TEXT_ENTITY_TYPES.filter((type) => !['paragraph', 'heading', 'quote', 'code_block', 'list_item', 'bold', 'italic', 'underline', 'strikethrough', 'code', 'link', 'mention'].includes(type)));
 
 export const escapeHtml = (value = '') => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 
@@ -28,11 +31,17 @@ export function sanitizeHouseRichHtml(html = '', doc = globalThis.document) {
       const name = attribute.name.toLowerCase();
       if (element.tagName === 'A' && name === 'href') continue;
       if (element.tagName === 'MARK' && name === 'class' && attribute.value === 'commons-mention') continue;
+      if (element.tagName === 'PRE' && name === 'data-language' && /^[\w+-]{1,40}$/.test(attribute.value)) continue;
+      if ((element.tagName === 'SPAN' || element.tagName === 'MARK') && name === 'data-ft-entity' && FORMATTED_TEXT_ENTITY_TYPES.includes(attribute.value)) continue;
+      if ((element.tagName === 'SPAN' || element.tagName === 'MARK') && name === 'data-ft-value') { element.setAttribute(attribute.name, String(attribute.value).slice(0, 2000)); continue; }
       element.removeAttribute(attribute.name);
     }
     if (element.tagName === 'A') {
       const href = safeHouseHref(element.getAttribute('href'));
       href ? element.setAttribute('href', href) : element.removeAttribute('href');
+    }
+    if ((element.tagName === 'SPAN' || element.tagName === 'MARK') && element.hasAttribute('data-ft-entity') && !FORMATTED_TEXT_ENTITY_TYPES.includes(element.getAttribute('data-ft-entity'))) {
+      element.removeAttribute('data-ft-entity'); element.removeAttribute('data-ft-value');
     }
   }
   return template.innerHTML;
@@ -147,6 +156,26 @@ export function wrapHouseSelection(editor, tagName, doc = globalThis.document) {
   } else {
     const fragment = current.range.extractContents();
     wrapper.append(fragment);
+    current.range.insertNode(wrapper);
+    const next = doc.createRange(); next.selectNodeContents(wrapper);
+    current.selection.removeAllRanges(); current.selection.addRange(next);
+  }
+  return true;
+}
+
+export function wrapHouseSemanticSelection(editor, type, doc = globalThis.document) {
+  if (!SEMANTIC_ENTITY_TYPES.has(type)) return false;
+  editor.focus();
+  const current = selectionInside(editor, doc);
+  if (!current) return false;
+  const wrapper = doc.createElement('span');
+  wrapper.setAttribute('data-ft-entity', type);
+  if (current.range.collapsed) {
+    wrapper.append(doc.createTextNode('\u200b'));
+    current.range.insertNode(wrapper);
+    placeCaretInside(wrapper, doc);
+  } else {
+    wrapper.append(current.range.extractContents());
     current.range.insertNode(wrapper);
     const next = doc.createRange(); next.selectNodeContents(wrapper);
     current.selection.removeAllRanges(); current.selection.addRange(next);

@@ -19,6 +19,8 @@ const SIDECARS = [
   './runtime-integration-bootstrap.js',
   './hosted-house-session-ui.js',
   './house-commons-chat-v5.js',
+  './house-roleplay-mode.js',
+  './formatted-text-vestments.js',
   './house-lanternbridge-chat.js',
   './house-commons-command-room.js',
   './house-commons-thread-restoration.js',

@@ -11,7 +11,8 @@
     { "id": "nocturne", "displayName": "Nocturne", "runtimeAliases": ["nocturne"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
     { "id": "runeweaver", "displayName": "Runeweaver", "runtimeAliases": ["runeweaver"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
     { "id": "altair", "displayName": "Altair", "runtimeAliases": ["altair"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
-    { "id": "atlas", "displayName": "Atlas", "runtimeAliases": ["atlas"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" }
+    { "id": "atlas", "displayName": "Atlas", "runtimeAliases": ["atlas"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
+    { "id": "oxalpha", "displayName": "Ox Alpha", "runtimeAliases": ["oxalpha"], "status": "established", "bankStatus": "shared-banks-plus-route-resolved-runtime" }
   ],
   "developingVoices": [
     { "id": "sonata", "displayName": "Sonata", "runtimeAliases": [], "runtimeState": "unbound", "status": "developing", "bankStatus": "founding-only" }

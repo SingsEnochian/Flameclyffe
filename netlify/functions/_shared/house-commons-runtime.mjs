@@ -10,6 +10,45 @@ const cleanRichTextHtml = (value) => {
   const html = String(value).trim();
   return html ? html.slice(0, 96000) : null;
 };
+const FORMATTED_TEXT_ENTITY_TYPES = new Set([
+  'bold', 'italic', 'underline', 'strikethrough', 'code', 'link', 'mention',
+  'paragraph', 'heading', 'quote', 'code_block', 'list_item',
+  'action', 'dialogue', 'narration', 'ooc', 'system', 'sourceCitation',
+  'evidenceClaim', 'hypothesis', 'observation', 'interpretation', 'worldTerm', 'flameMention', 'ritualCall',
+]);
+const cleanEntityData = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const entries = Object.entries(value).slice(0, 16).map(([key, item]) => {
+    if (item == null) return [String(key).slice(0, 80), null];
+    if (typeof item === 'number' || typeof item === 'boolean') return [String(key).slice(0, 80), item];
+    return [String(key).slice(0, 80), String(item).slice(0, 2000)];
+  });
+  return entries.length ? Object.fromEntries(entries) : undefined;
+};
+const cleanFormattedText = (value, text) => {
+  if (value == null) return null;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { error: 'formatted_text must be an object.' };
+  const formattedText = String(value.text ?? '');
+  if (formattedText !== text) return { error: 'formatted_text.text must exactly match entry text.' };
+  const rawEntities = Array.isArray(value.entities) ? value.entities : [];
+  if (rawEntities.length > 512) return { error: 'formatted_text exceeds 512 entities.' };
+  const entities = [];
+  const seen = new Set();
+  for (const raw of rawEntities) {
+    const type = String(raw?.type || '');
+    const offset = Number(raw?.offset);
+    const length = Number(raw?.length);
+    if (!FORMATTED_TEXT_ENTITY_TYPES.has(type)) return { error: `Unsupported formatted_text entity: ${type || 'empty'}.` };
+    if (!Number.isInteger(offset) || !Number.isInteger(length) || offset < 0 || length <= 0 || offset + length > text.length) return { error: 'formatted_text entity range is invalid.' };
+    const data = cleanEntityData(raw?.data);
+    const entity = { type, offset, length, ...(data ? { data } : {}) };
+    const key = JSON.stringify(entity);
+    if (seen.has(key)) continue;
+    seen.add(key); entities.push(entity);
+  }
+  entities.sort((a, b) => a.offset - b.offset || b.length - a.length || a.type.localeCompare(b.type));
+  return { value: { schema: 'arcsweep.formatted-text/v1', text, entities } };
+};
 const cleanIdempotencyKey = (value) => {
   const key = String(value || '').trim().slice(0, 240);
   return key && /^[a-zA-Z0-9:._-]+$/.test(key) ? key : null;
@@ -30,6 +69,8 @@ export function createHouseCommonsHandler({ env, store, clock = () => new Date()
     const text = String(body.text || '').trim();
     if (!text) return json(400, { error: 'Commons entry text required.' });
     if (text.length > 24000) return json(413, { error: 'Commons entry exceeds 24,000 characters.' });
+    const formatted = cleanFormattedText(body.formatted_text, text);
+    if (formatted?.error) return json(400, { error: formatted.error });
     const idempotencyKey = cleanIdempotencyKey(body.idempotency_key);
     if (idempotencyKey) {
       const existing = await store.get(`idempotency/${idempotencyKey}`, { type: 'json' }).catch(() => null);
@@ -49,6 +90,7 @@ export function createHouseCommonsHandler({ env, store, clock = () => new Date()
         profile_id: short(body.runtime.profile_id, 320), latency_ms: finiteNumber(body.runtime.latency_ms), first_token_ms: finiteNumber(body.runtime.first_token_ms),
         runtime_world_context_id: short(body.runtime.runtime_world_context_id, 320),
       } : null,
+      formatted_text: formatted?.value || null,
       rich_text_html: cleanRichTextHtml(body.rich_text_html),
       text,
     };
