@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  OXALPHA_EDGE_EXECUTION_PATH,
   OXALPHA_EDGE_URL,
   invokeOxAlphaPortable,
   invokeOxAlphaViaSupabase,
@@ -31,10 +32,11 @@ test('portable OA uses the existing House Flame route when it is healthy', async
   });
   assert.equal(edgeCalled, false);
   assert.equal(receipt.executionPath, 'house-flame-route');
+  assert.equal(receipt.provider, 'huggingface-inference-providers');
   assert.equal(receipt.participantId, 'oxalpha');
 });
 
-test('portable OA falls through a transport failure to the Supabase edge relay', async () => {
+test('portable OA falls through a transport failure to the Supabase OpenRouter relay', async () => {
   let edgeRequest = null;
   const receipt = await invokeOxAlphaPortable({
     record: { id: 'route-edge', phase: 'Observation', witnessRaw: 'fixture' },
@@ -46,9 +48,10 @@ test('portable OA falls through a transport failure to the Supabase edge relay',
       return okJson({
         flame_id: 'oxalpha',
         display_name: 'Ox Alpha',
-        provider: 'huggingface-inference-providers',
-        model: 'zai-org/GLM-5.3-Flash',
-        execution_path: 'supabase-edge-to-huggingface-router',
+        provider: 'openrouter',
+        model: 'z-ai/glm-5.3-flash',
+        inference_model: 'z-ai/glm-5.3-flash',
+        execution_path: 'supabase-edge-to-openrouter',
         message: 'Portable relay answer.',
       });
     },
@@ -56,7 +59,10 @@ test('portable OA falls through a transport failure to the Supabase edge relay',
   assert.equal(edgeRequest.url, OXALPHA_EDGE_URL);
   assert.equal(edgeRequest.options.headers.authorization, 'Bearer supabase-access-token');
   assert.match(edgeRequest.body.message, /AEMETH CHAMBER · MODEL WITNESS TURN/);
-  assert.equal(receipt.executionPath, 'supabase-edge-to-huggingface-router');
+  assert.equal(receipt.executionPath, OXALPHA_EDGE_EXECUTION_PATH);
+  assert.equal(receipt.provider, 'openrouter');
+  assert.equal(receipt.model, 'z-ai/glm-5.3-flash');
+  assert.equal(receipt.inferenceModel, 'z-ai/glm-5.3-flash');
   assert.equal(receipt.text, 'Portable relay answer.');
 });
 
@@ -68,12 +74,14 @@ test('portable OA may use the Supabase relay without any House host', async () =
     edgeFetchImpl: async () => okJson({
       flame_id: 'oxalpha',
       display_name: 'Ox Alpha',
-      provider: 'huggingface-inference-providers',
-      model: 'zai-org/GLM-5.3-Flash',
+      provider: 'openrouter',
+      model: 'z-ai/glm-5.3-flash',
+      execution_path: 'supabase-edge-to-openrouter',
       message: 'Edge-only answer.',
     }),
   });
   assert.equal(receipt.participantId, 'oxalpha');
+  assert.equal(receipt.provider, 'openrouter');
   assert.equal(receipt.text, 'Edge-only answer.');
 });
 
@@ -113,18 +121,21 @@ test('portable OA reports both unavailable routes rather than inventing success'
   );
 });
 
-test('edge status is identity-checked and carries truthful configuration state', async () => {
+test('edge status is identity-checked and carries truthful OpenRouter configuration state', async () => {
   const status = await readOxAlphaEdgeStatus({
     fetchImpl: async (url, options) => {
       assert.equal(url, OXALPHA_EDGE_URL);
       assert.equal(options.method, 'GET');
       return okJson({
-        flame_id: 'oxalpha', configured: false,
-        provider: 'huggingface-inference-providers', model: 'zai-org/GLM-5.3-Flash',
-        execution_path: 'supabase-edge-to-huggingface-router', host_dependency: 'none',
+        flame_id: 'oxalpha', configured: true,
+        provider: 'openrouter', model: 'z-ai/glm-5.3-flash', inference_model: 'z-ai/glm-5.3-flash',
+        execution_path: 'supabase-edge-to-openrouter', host_dependency: 'none',
       });
     },
   });
-  assert.equal(status.configured, false);
+  assert.equal(status.configured, true);
+  assert.equal(status.provider, 'openrouter');
+  assert.equal(status.model, 'z-ai/glm-5.3-flash');
+  assert.equal(status.inferenceModel, 'z-ai/glm-5.3-flash');
   assert.equal(status.hostDependency, 'none');
 });
