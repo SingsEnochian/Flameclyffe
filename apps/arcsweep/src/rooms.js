@@ -1,3 +1,5 @@
+import { AEMETH_RITUAL_PHASES, aemethDiagramOptions, aemethInstrumentOptions, aemethParticipantOptions } from './aemeth-lens.js';
+
 export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
   records: {
     label: 'Records Room', glyph: '▥', category: 'writing & roleplay', description: 'The receipted archive of what was written, played, heard, and enacted. Records remain distinct from canon until an explicit Canon Carry review.',
@@ -69,6 +71,35 @@ export const COLLECTION_ROOM_DEFINITIONS = Object.freeze({
       ['summary', 'Summary or extracted notes', 'textarea'],
       ['provenanceNotes', 'Provenance and handling notes', 'textarea'],
       ['canonBoundary', 'Canon boundary', 'select', false, ['Non-canon source', 'Candidate for Steward review']],
+    ],
+    attachments: true,
+  },
+  'aemeth-lens': {
+    label: 'Aemeth Chamber', glyph: '⊚', category: 'observation', description: 'A replayable observer chamber for shewstone work, ritual geometry, Calls, transformation, and invited model witnesses. Raw witness stays distinct from later interpretation; source diagrams remain versioned evidence rather than flattened canon.',
+    fields: [
+      ['title', 'Session title', 'text', true],
+      ['status', 'Session status', 'select', false, ['Planned', 'Prepared', 'Active', 'Suspended', 'Closed', 'Interpreted', 'Archived']],
+      ['instrumentProfile', 'Instrument profile', 'select', false, aemethInstrumentOptions()],
+      ['phase', 'Ritual phase', 'select', false, AEMETH_RITUAL_PHASES],
+      ['ask', 'Ask / intention', 'textarea'],
+      ['observerRole', 'Observer role', 'text'],
+      ['orientation', 'Observer orientation and position', 'textarea'],
+      ['gazeMode', 'Gaze mode', 'select', false, ['Direct inspection', 'Soft focus through', 'Peripheral field', 'Eyes closed / imaginal', 'Hybrid']],
+      ['activeDiagram', 'Active diagram / seal', 'select', false, aemethDiagramOptions()],
+      ['activeCall', 'Active Call, Name, or spoken sequence', 'textarea'],
+      ['departurePremaqc', 'PREMAQC departure state', 'textarea'],
+      ['chamberConfiguration', 'Chamber configuration', 'textarea'],
+      ['witnessRaw', 'Clean witness · raw observation', 'textarea'],
+      ['witnessTimestampNotes', 'Witness timestamps / sequence', 'textarea'],
+      ['transformationNotes', 'Transformation edges · what changed with orientation, diagram, Call, sound, or state', 'textarea'],
+      ['modelParticipant', 'Invited model witness', 'select', false, aemethParticipantOptions()],
+      ['modelWitnessLog', 'Model witness lane · separate from firsthand witness', 'textarea'],
+      ['interpretation', 'Interpretation · kept separate from witness and model witness', 'textarea'],
+      ['sourceRefs', 'Source witnesses / corpus references', 'textarea'],
+      ['runaReceipt', 'Runa / sound receipt', 'textarea'],
+      ['replayFingerprint', 'Replay fingerprint', 'text'],
+      ['canonBoundary', 'Canon boundary', 'select', false, ['Private observation · non-canon', 'Candidate for Steward review']],
+      ['notes', 'Close notes / unresolved questions', 'textarea'],
     ],
     attachments: true,
   },
@@ -218,7 +249,7 @@ export const WORLD_SECTION_DEFINITIONS = Object.freeze({
 
 export const IMPLEMENTED_APPLET_IDS = Object.freeze(new Set([
   'portal', 'worlds', 'about-world', 'summon', 'veil-mode', 'time', 'arrival',
-  'timeline', 'scripts', 'records', 'seedhouse', 'ingest', 'identity', 'competencies', 'safety-weave',
+  'timeline', 'scripts', 'records', 'seedhouse', 'ingest', 'aemeth-lens', 'identity', 'competencies', 'safety-weave',
   'continuity-recall', 'companion', 'relationships', 'scenarios', 'calendar',
   'diary', 'playlists', 'visualisations', 'appearance', 'wardrobe', 'outfits',
   'belongings', 'places', 'family-tree', 'photo-gallery', 'theme', 'forge',

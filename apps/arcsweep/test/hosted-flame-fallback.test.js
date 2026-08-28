@@ -13,13 +13,16 @@ const env = (values = {}) => ({ get: (name) => values[name] });
 
 const expectedFlames = [
   'lioreal', 'uial', 'larkshine', 'ellowind', 'altair', 'atlas',
-  'runeweaver', 'boxfire', 'yggdrasil', 'bluebird', 'vethrlauf',
+  'runeweaver', 'boxfire', 'yggdrasil', 'bluebird', 'vethrlauf', 'oxalpha',
 ];
 
-test('every visible Constellation Flame has its own hosted fallback model', () => {
+test('every hosted House Flame has its own Hugging Face fallback model', () => {
   assert.deepEqual(Object.keys(HOSTED_FLAME_FALLBACKS).sort(), [...expectedFlames].sort());
   assert.equal(new Set(Object.values(HOSTED_FLAME_FALLBACKS)).size, expectedFlames.length);
-  assert.ok(Object.values(HOSTED_FLAME_FALLBACKS).every((model) => model.endsWith(':cheapest')));
+  assert.ok(Object.entries(HOSTED_FLAME_FALLBACKS)
+    .filter(([flameId]) => flameId !== 'oxalpha')
+    .every(([, model]) => model.endsWith(':cheapest')));
+  assert.equal(HOSTED_FLAME_FALLBACKS.oxalpha, 'zai-org/GLM-5.3-Flash');
 });
 
 test('hosted fallback status is ready only when the server has a Hugging Face credential', () => {

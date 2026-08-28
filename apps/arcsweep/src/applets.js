@@ -12,6 +12,7 @@ export const APPLET_CATALOGUE = [
   { id: 'seedhouse', label: 'Seedhouse', glyph: '✤', category: 'worldseed', defaultVisible: true },
   { id: 'kelyran-school', label: 'Kelyran School', glyph: 'ᚲ', category: 'language', defaultVisible: true },
   { id: 'ingest', label: 'Non-Canon Ingest', glyph: '⇣', category: 'evidence', defaultVisible: true },
+  { id: 'aemeth-lens', label: 'Aemeth Lens', glyph: '⊚', category: 'observation', defaultVisible: true },
   { id: 'identity', label: 'About Me', glyph: '◇', category: 'world', defaultVisible: true },
   { id: 'competencies', label: 'World Competencies', glyph: '✣', category: 'world', defaultVisible: true },
   { id: 'safety-weave', label: 'Safety Weave', glyph: '⌘', category: 'continuity', defaultVisible: true },

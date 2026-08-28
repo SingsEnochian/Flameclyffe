@@ -47,6 +47,7 @@ const SIDECARS = [
   './canon-web-link-sidecar.js',
   './feedback-chamber-v2.js',
   './story-mode-sidecar.js',
+  './aemeth-chamber-live.js',
 ];
 
 const yieldToBrowser = () => new Promise((resolve) => setTimeout(resolve, 0));
