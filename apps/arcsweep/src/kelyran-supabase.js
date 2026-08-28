@@ -1,5 +1,6 @@
-const url = import.meta.env.VITE_SUPABASE_URL || 'https://rufrmjyusalnifpegllj.supabase.co';
-const publishableKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_z69-aAbQvzFFDRk4SHDYrQ_FuqirkLD';
+const viteEnv = import.meta.env || {};
+const url = viteEnv.VITE_SUPABASE_URL || 'https://rufrmjyusalnifpegllj.supabase.co';
+const publishableKey = viteEnv.VITE_SUPABASE_ANON_KEY || 'sb_publishable_z69-aAbQvzFFDRk4SHDYrQ_FuqirkLD';
 
 let clientPromise;
 
