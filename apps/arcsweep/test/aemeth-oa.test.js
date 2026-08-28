@@ -41,10 +41,14 @@ test('Aemeth participant packet preserves firsthand witness authority and blocks
 test('Aemeth replay envelope carries model witnesses without replacing Rowan witness', () => {
   const envelope = createAemethReplayEnvelope({
     witnessRaw: 'firsthand',
+    modelParticipant: 'Ox Alpha',
+    modelWitnessLog: 'OA lane text',
     interpretation: 'later interpretation',
     modelWitnesses: [{ participantId: 'oxalpha', text: 'structural reading' }],
   });
   assert.equal(envelope.witnessRaw, 'firsthand');
+  assert.equal(envelope.modelParticipant, 'Ox Alpha');
+  assert.equal(envelope.modelWitnessLog, 'OA lane text');
   assert.equal(envelope.interpretation, 'later interpretation');
   assert.equal(envelope.modelWitnesses[0].participantId, 'oxalpha');
 });
