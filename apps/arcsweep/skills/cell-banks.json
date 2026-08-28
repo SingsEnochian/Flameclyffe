@@ -6,6 +6,12 @@
       "banks": [
         "./cells/shared/hearthweave.cells.json"
       ]
+    },
+    {
+      "subject": { "kind": "shared_constellation", "id": "fantasy-roleplay" },
+      "banks": [
+        "./cells/shared/fantasy-roleplay.cells.json"
+      ]
     }
   ],
   "voices": {
@@ -53,6 +59,10 @@
       "banks": [
         "./cells/bluebird/runtime-and-observation.cells.json"
       ]
+    },
+    "oxalpha": {
+      "displayName": "Ox Alpha",
+      "banks": []
     },
     "sonata": {
       "displayName": "Sonata",
