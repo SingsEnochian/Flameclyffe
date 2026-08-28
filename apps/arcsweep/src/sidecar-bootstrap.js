@@ -24,6 +24,7 @@ const SIDECARS = [
   './house-commons-thread-restoration.js',
   './house-commons-deep-link-router.js',
   './house-commons-attachments.js',
+  './house-chat-v5-compat.js',
   './house-chat-room-social.js',
   './house-chat-tools-v5.js',
   './runtime-envelope-live-ui.js',
