@@ -4,10 +4,10 @@ on:
   pull_request:
     paths:
       - '.github/workflows/source-library-live-smoke.yml'
-      - 'api/source-library-live-smoke.js'
       - 'api/v1/library/**'
       - 'netlify/functions/source-library.mts'
       - 'netlify/functions/_shared/source-library-runtime.mjs'
+      - 'netlify/functions/_shared/source-library-live-smoke.mjs'
       - 'apps/starwell/src/components/living-room/SourceLibrary.jsx'
       - 'apps/starwell/src/living-room-entry.jsx'
       - 'supabase/migrations/202608270001_source_sync_spine_v1.sql'
@@ -53,8 +53,10 @@ jobs:
             core.setSecret(token);
             core.setOutput('token', token);
 
-      - name: Syntax-check live smoke endpoint
-        run: node --check api/source-library-live-smoke.js
+      - name: Syntax-check consolidated live smoke route
+        run: |
+          node --check 'api/v1/library/[action].js'
+          node --check netlify/functions/_shared/source-library-live-smoke.mjs
 
       - name: Discover exact-head Vercel preview
         id: preview
@@ -110,7 +112,7 @@ jobs:
           VERCEL_TRUSTED_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -uo pipefail
-          ENDPOINT_PATH='/api/source-library-live-smoke'
+          ENDPOINT_PATH='/api/v1/library/live-smoke'
           ENDPOINT="${PREVIEW_URL}${ENDPOINT_PATH}"
           rm -f smoke-body.json smoke-headers.txt vercel-curl.err
 
@@ -125,9 +127,6 @@ jobs:
           FINAL_STATUS=$(curl "${CURL_ARGS[@]}" "${ENDPOINT}") || FINAL_STATUS='000'
           ACCESS_METHOD='direct'
 
-          # Vercel Authentication can reject ordinary HTTP even when the repo has a
-          # valid Vercel account token. `vercel curl` performs an authenticated request
-          # against the exact deployment without putting provider secrets in Actions.
           if [[ "${FINAL_STATUS}" == '401' || "${FINAL_STATUS}" == '403' ]]; then
             if [[ -n "${VERCEL_TOKEN:-}" ]]; then
               ACCESS_METHOD='vercel-cli'
@@ -139,10 +138,7 @@ jobs:
                 > smoke-body.json 2> vercel-curl.err
               CLI_EXIT=$?
               if [[ ${CLI_EXIT} -ne 0 ]]; then
-                echo '### Vercel CLI access failure' >> "$GITHUB_STEP_SUMMARY"
-                echo '```text' >> "$GITHUB_STEP_SUMMARY"
                 tail -n 30 vercel-curl.err >> "$GITHUB_STEP_SUMMARY" || true
-                echo '```' >> "$GITHUB_STEP_SUMMARY"
                 echo '::error title=VERCEL_CLI_ACCESS_FAILED::Vercel CLI could not reach the protected exact-head preview.'
                 exit 1
               fi
@@ -152,26 +148,14 @@ jobs:
               echo "- exact_head: \`${TARGET_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
               echo "- preview: \`${PREVIEW_URL}\`" >> "$GITHUB_STEP_SUMMARY"
               echo '- blocker: `PREVIEW_PROTECTED_NO_AUTHORITY`' >> "$GITHUB_STEP_SUMMARY"
-              echo '- boundary: Vercel Deployment Protection rejected the request before the Source Library smoke endpoint executed.' >> "$GITHUB_STEP_SUMMARY"
-              echo '- trusted_github_oidc_present: `true`' >> "$GITHUB_STEP_SUMMARY"
-              echo '- automation_bypass_present: `false`' >> "$GITHUB_STEP_SUMMARY"
-              echo '- vercel_token_present: `false`' >> "$GITHUB_STEP_SUMMARY"
               echo '- promotion: **FORBIDDEN until the hosted OA receipt exists.**' >> "$GITHUB_STEP_SUMMARY"
-              echo '::warning title=PREVIEW_PROTECTED_NO_AUTHORITY::Live acceptance is BLOCKED, not passed: Vercel rejected trusted GitHub OIDC and no automation bypass or Vercel token is configured. Repository CI may continue, but this PR must remain draft until the hosted Source Library → Ox Alpha receipt is proven.'
+              echo '::warning title=PREVIEW_PROTECTED_NO_AUTHORITY::Vercel rejected trusted GitHub OIDC and no automation bypass or Vercel token is configured. This gate is BLOCKED, not passed.'
               exit 0
             fi
           fi
 
-          echo '### Source Library Live Smoke' >> "$GITHUB_STEP_SUMMARY"
-          echo "- exact_head: \`${TARGET_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- preview: \`${PREVIEW_URL}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- access_method: \`${ACCESS_METHOD}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- direct_http_status: \`${FINAL_STATUS}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- trusted_oidc_present: \`$([[ -n "${VERCEL_TRUSTED_OIDC_TOKEN:-}" ]] && echo true || echo false)\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- vercel_token_present: \`$([[ -n "${VERCEL_TOKEN:-}" ]] && echo true || echo false)\`" >> "$GITHUB_STEP_SUMMARY"
-
           if [[ "${FINAL_STATUS}" == '000' || "${FINAL_STATUS}" == '404' ]]; then
-            echo '::error title=PREVIEW_ROUTE_UNAVAILABLE::Exact-head preview did not expose the Source Library smoke route.'
+            echo '::error title=PREVIEW_ROUTE_UNAVAILABLE::Exact-head preview did not expose the consolidated Source Library smoke route.'
             exit 1
           fi
           if [[ "${ACCESS_METHOD}" == 'direct' && "${FINAL_STATUS}" != '200' ]]; then
@@ -189,8 +173,7 @@ jobs:
           const fs = require('fs');
           let data;
           try {
-            const raw = fs.readFileSync('smoke-body.json', 'utf8').trim();
-            data = JSON.parse(raw);
+            data = JSON.parse(fs.readFileSync('smoke-body.json', 'utf8').trim());
           } catch (error) {
             console.error(`::error title=INVALID_JSON::Authenticated preview probe did not return the smoke JSON envelope: ${error.message}`);
             process.exit(1);
@@ -218,7 +201,6 @@ jobs:
             console.error(`::error title=LIVE_SMOKE_CONTRACT_FAILED::${JSON.stringify(data).slice(0, 1800)}`);
             process.exit(1);
           }
-          const summary = { schema: data.schema, list: data.proof.list, search: data.proof.search, compare: data.proof.compare, author_lens: data.proof.author_lens };
-          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`json\n${JSON.stringify(data.proof, null, 2)}\n\`\`\`\n`);
           console.log('Source Library live smoke PASSED: list → FTS → compare → Ox Alpha Author Lens → provenance receipt.');
           NODE
