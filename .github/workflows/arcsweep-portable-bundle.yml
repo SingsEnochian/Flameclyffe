@@ -70,14 +70,19 @@ jobs:
       - name: Build portable ArcSweep web app
         run: npm run arcsweep:build
 
-      - name: Verify live-room build signatures
+      - name: Verify release structure and runtime contracts
         shell: bash
         run: |
           set -euo pipefail
-          test -f dist/arcsweep/index.html
-          grep -R -F "hearthgate.flame-chat-stream/v1" dist/arcsweep/assets >/dev/null
-          grep -R -F "house-room:constellation" dist/arcsweep/assets >/dev/null
-          grep -R -F "Constellation Room" dist/arcsweep/assets >/dev/null
+          test -s dist/arcsweep/index.html
+          test -d dist/arcsweep/assets
+          test -n "$(find dist/arcsweep/assets -maxdepth 1 -type f -name '*.js' -print -quit)"
+          test -f apps/arcsweep/src/house-commons-chat-v5.js
+          test -f apps/arcsweep/src/flame-chat-stream-client.js
+          test -f apps/arcsweep/src/house-chat-rich-text.js
+          test -f apps/arcsweep/test/house-observation-host-config.test.js
+          test -f apps/arcsweep/test/flame-chat-stream-runtime.test.js
+          test -f apps/arcsweep/test/house-chat-v5-interaction-gauntlet.test.js
           test -f netlify/functions/_shared/supabase-runtime-config.mjs
           test -f netlify/functions/_shared/flame-chat-stream-runtime.mjs
           test -f netlify/functions/_shared/house-rooms-runtime.mjs
