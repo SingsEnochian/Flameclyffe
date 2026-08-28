@@ -50,7 +50,7 @@ export function latestRoomEntry(entries = [], roomId = '') {
   return entries.filter((entry) => commonsThreadId(entry) === roomId).sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || ''))).at(-1) || null;
 }
 
-export function createOptimisticStewardEntry({ roomId, turnId, text, richTextHtml = null, replyTo = null, mentions = [], attachments = [], world = null, idempotencyKey = null } = {}) {
+export function createOptimisticStewardEntry({ roomId, turnId, text, formattedText = null, richTextHtml = null, replyTo = null, mentions = [], attachments = [], world = null, idempotencyKey = null } = {}) {
   const now = new Date().toISOString();
   return {
     schema: 'hearthgate.house-commons-entry/v4',
@@ -65,6 +65,7 @@ export function createOptimisticStewardEntry({ roomId, turnId, text, richTextHtm
     reply_to: replyTo,
     mentions,
     attachments,
+    formatted_text: formattedText,
     rich_text_html: richTextHtml,
     idempotency_key: idempotencyKey,
     text,
