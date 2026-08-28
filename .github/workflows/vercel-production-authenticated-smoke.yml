@@ -61,16 +61,27 @@ jobs:
           const { value: token } = await tokenResponse.json();
           if (!token) throw new Error('GitHub OIDC token response was empty.');
 
-          const response = await fetch(`${process.env.BASE_URL.replace(/\/$/, '')}/api/v1/house/smoke`, {
-            method: 'POST',
-            headers: { authorization: `Bearer ${token}` },
-            redirect: 'manual',
-          });
-          const text = await response.text();
-          let body;
-          try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 500) || 'non-json response' }; }
-          console.log(JSON.stringify({ http_status: response.status, ...body }, null, 2));
-          if (!response.ok || body.ok !== true) process.exitCode = 1;
+          const base = process.env.BASE_URL.replace(/\/$/, '');
+          const probes = [
+            ['house', '/api/v1/house/smoke'],
+            ['aemeth_oa', '/api/v1/house/aemeth-smoke'],
+          ];
+          const results = {};
+          let failed = false;
+          for (const [name, path] of probes) {
+            const response = await fetch(`${base}${path}`, {
+              method: 'POST',
+              headers: { authorization: `Bearer ${token}` },
+              redirect: 'manual',
+            });
+            const text = await response.text();
+            let body;
+            try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 500) || 'non-json response' }; }
+            results[name] = { http_status: response.status, ...body };
+            if (!response.ok || body.ok !== true) failed = true;
+          }
+          console.log(JSON.stringify({ ok: !failed, production: base, probes: results }, null, 2));
+          if (failed) process.exitCode = 1;
           NODE
 
       - name: Publish authenticated receipt to hosting PR
