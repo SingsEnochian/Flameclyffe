@@ -1,0 +1,116 @@
+name: ArcSweep Portable Release Bundle
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/arcsweep/**"
+      - "api/v1/house/**"
+      - "api/v1/flames/**"
+      - "api/_shared/**"
+      - "netlify/functions/**"
+      - "config/engine-name-authority.json"
+      - "scripts/deny-stale-engine-contracts.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
+      - ".github/workflows/arcsweep-portable-bundle.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/arcsweep/**"
+      - "api/v1/house/**"
+      - "api/v1/flames/**"
+      - "api/_shared/**"
+      - "netlify/functions/**"
+      - "config/engine-name-authority.json"
+      - "scripts/deny-stale-engine-contracts.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
+      - ".github/workflows/arcsweep-portable-bundle.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arcsweep-portable-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-portable:
+    name: Build verified ArcSweep release bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.x"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Pin npm 11.16.0
+        run: npm install --global npm@11.16.0
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify engine contracts
+        run: npm run contracts:verify
+
+      - name: Run complete ArcSweep test suite
+        run: npm run arcsweep:test
+
+      - name: Build portable ArcSweep web app
+        run: npm run arcsweep:build
+
+      - name: Verify live-room build signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist/arcsweep/index.html
+          grep -R -F "hearthgate.flame-chat-stream/v1" dist/arcsweep/assets >/dev/null
+          grep -R -F "house-room:constellation" dist/arcsweep/assets >/dev/null
+          grep -R -F "Constellation Room" dist/arcsweep/assets >/dev/null
+          test -f netlify/functions/_shared/supabase-runtime-config.mjs
+          test -f netlify/functions/_shared/flame-chat-stream-runtime.mjs
+          test -f netlify/functions/_shared/house-rooms-runtime.mjs
+          test -f api/v1/house/observations.js
+          test -f api/v1/house/rooms.js
+
+      - name: Assemble host-agnostic release package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist/arcsweep-release
+          mkdir -p dist/arcsweep-release/web dist/arcsweep-release/runtime
+          cp -a dist/arcsweep/. dist/arcsweep-release/web/
+          cp -a api dist/arcsweep-release/runtime/api
+          mkdir -p dist/arcsweep-release/runtime/netlify
+          cp -a netlify/functions dist/arcsweep-release/runtime/netlify/functions
+          cp package.json package-lock.json dist/arcsweep-release/runtime/
+          printf '%s\n' \
+            "Flameclyffe ArcSweep portable release bundle" \
+            "Commit: $GITHUB_SHA" \
+            "Built: $(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            "Node: $(node --version)" \
+            "npm: $(npm --version)" \
+            "GitHub-only proof: contracts + complete ArcSweep tests + Vite production build" \
+            "House Chat: v5 native rich room + true SSE Flame streaming" \
+            "Observation broker: canonical Supabase URL + deployed service-key aliases" \
+            "Runtime source: Vercel and Netlify adapters bundled, hosting provider not trusted as a build gate" \
+            > dist/arcsweep-release/RELEASE-RECEIPT.txt
+
+      - name: Upload verified ArcSweep release bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: flameclyffe-arcsweep-release-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 21
+          path: dist/arcsweep-release
