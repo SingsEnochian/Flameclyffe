@@ -57,20 +57,20 @@ function decorateAemethForm(form) {
   if (!log) return;
 
   const panel = document.createElement('section');
-  panel.className = 'aemeth-oa-panel';
+  panel.className = 'panel aemeth-oa-panel';
   panel.dataset.aemethOaPanel = 'true';
   panel.innerHTML = `
-    <div class="aemeth-oa-heading">
+    <div class="section-heading compact-heading">
       <div>
         <p class="eyebrow">Model witness · separate lane</p>
         <h3>Ox Alpha · OA</h3>
       </div>
-      <span class="aemeth-oa-route">Hugging Face · GLM-5.3-Flash</span>
+      <span class="muted">Hugging Face · GLM-5.3-Flash</span>
     </div>
     <p class="muted">OA receives the chamber configuration and Rowan-authored witness as a structured packet. OA's reply is stored here as model interpretation; it never replaces firsthand witness or infers Qualia.</p>
     <div class="button-row">
       <button type="button" data-aemeth-invite-oa>Invite OA into this chamber state</button>
-      <span class="aemeth-oa-status" data-aemeth-oa-status data-state="idle">Ready when the House Runtime is connected.</span>
+      <span class="muted" data-aemeth-oa-status data-state="idle">Ready when the House Runtime is connected.</span>
     </div>`;
   log.closest('label')?.insertAdjacentElement('beforebegin', panel);
 
