@@ -61,10 +61,14 @@ async function ingestSource(token, item, rawSource, fetchImpl) {
   return data;
 }
 
-export async function syncLanternbridgeMailbox({ fetchImpl = fetch, storage = globalThis.localStorage } = {}) {
+export async function syncLanternbridgeMailbox({
+  fetchImpl = fetch,
+  storage = globalThis.localStorage,
+  sessionProvider = activeSession,
+} = {}) {
   if (syncInFlight) return syncInFlight;
   syncInFlight = (async () => {
-    const token = await activeSession();
+    const token = await sessionProvider();
     if (!token) return { state: 'house-offline', checked: 0, ingested: 0, duplicates: 0 };
 
     const seen = readSeen(storage);
