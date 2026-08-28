@@ -79,6 +79,7 @@ export function createLanternbridgeMessageHandler({ env, indexStore, commonsStor
         schema: 'hearthgate.lanternbridge-ingest-receipt/v1',
         delivery: existingState,
         duplicate: true,
+        resumed: false,
         cursor_key: existing.cursor_key,
         bridge_id: existing.bridge_id,
         commons_entry_id: existing.commons_entry_id,
@@ -86,6 +87,7 @@ export function createLanternbridgeMessageHandler({ env, indexStore, commonsStor
       });
     }
 
+    const resumed = Boolean(existing && existingState === 'new');
     const commonsEntryId = existing?.commons_entry_id || deterministicCommonsId(indexEntry.cursor_key);
     const durable = existing || await indexStore.insertNew({ ...indexEntry, commons_entry_id: commonsEntryId });
     const currentParent = respondsTo ? await indexStore.getByBridgeId(respondsTo) : parent;
@@ -106,10 +108,11 @@ export function createLanternbridgeMessageHandler({ env, indexStore, commonsStor
       await indexStore.markBridgeStatus(indexEntry.responds_to, 'reply_emitted');
     }
 
-    return json(existing ? 200 : 201, {
+    return json(resumed ? 200 : 201, {
       schema: 'hearthgate.lanternbridge-ingest-receipt/v1',
-      delivery: existing ? 'new' : 'processed',
+      delivery: 'processed',
       duplicate: false,
+      resumed,
       cursor_key: processed.cursor_key,
       bridge_id: processed.bridge_id,
       commons_entry_id: processed.commons_entry_id,
