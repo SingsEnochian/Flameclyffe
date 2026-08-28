@@ -67,14 +67,16 @@ test('runtime integration heartbeat carries presence and feedback through persis
   assert.equal(runtimeReplayEquivalent(reloaded, restored), true);
 });
 
-test('Arcsweep startup mounts the runtime integration bootstrap after the model presence bus', async () => {
+test('Arcsweep startup mounts runtime integration before House Chat surfaces', async () => {
   const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
   const bus = manifest.indexOf('./model-presence-bus.js');
   const diagnostics = manifest.indexOf('./runtime-presence-diagnostics.js');
   const bootstrap = manifest.indexOf('./runtime-integration-bootstrap.js');
-  const commons = manifest.indexOf('./house-commons-chat-v3.js');
+  const commons = manifest.indexOf('./house-commons-chat-v4.js');
+  const social = manifest.indexOf('./house-chat-room-social.js');
   assert.ok(bus >= 0, 'Model Presence Bus must be mounted');
   assert.ok(diagnostics > bus, 'Runtime presence diagnostics must mount after Model Presence Bus');
   assert.ok(bootstrap > diagnostics, 'Runtime integration bootstrap must mount after diagnostics');
-  assert.ok(commons > bootstrap, 'House Commons v3 must mount after the runtime integration bootstrap');
+  assert.ok(commons > bootstrap, 'House Chat v4 must mount after the runtime integration bootstrap');
+  assert.ok(social > commons, 'House Chat social room must mount after House Chat v4');
 });
