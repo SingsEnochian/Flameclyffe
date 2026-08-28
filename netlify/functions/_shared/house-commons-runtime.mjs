@@ -10,6 +10,11 @@ const cleanRichTextHtml = (value) => {
   const html = String(value).trim();
   return html ? html.slice(0, 96000) : null;
 };
+const cleanIdempotencyKey = (value) => {
+  const key = String(value || '').trim().slice(0, 240);
+  return key && /^[a-zA-Z0-9:._-]+$/.test(key) ? key : null;
+};
+const finiteNumber = (value) => Number.isFinite(Number(value)) ? Number(value) : null;
 
 export function createHouseCommonsHandler({ env, store, clock = () => new Date(), idFactory = () => crypto.randomUUID() }) {
   return async function handle(request) {
@@ -25,9 +30,15 @@ export function createHouseCommonsHandler({ env, store, clock = () => new Date()
     const text = String(body.text || '').trim();
     if (!text) return json(400, { error: 'Commons entry text required.' });
     if (text.length > 24000) return json(413, { error: 'Commons entry exceeds 24,000 characters.' });
+    const idempotencyKey = cleanIdempotencyKey(body.idempotency_key);
+    if (idempotencyKey) {
+      const existing = await store.get(`idempotency/${idempotencyKey}`, { type: 'json' }).catch(() => null);
+      if (existing) return json(200, existing);
+    }
     const createdAt = clock().toISOString();
     const entry = {
       schema: 'hearthgate.house-commons-entry/v4', id: idFactory(), created_at: createdAt,
+      idempotency_key: idempotencyKey,
       kind: ['steward', 'voice', 'system'].includes(body.kind) ? body.kind : 'system',
       author: short(body.author || 'House', 120), voice_id: short(body.voice_id, 120),
       status: short(body.status || 'received', 80), world: body.world && typeof body.world === 'object' ? { id: short(body.world.id || '', 240), name: short(body.world.name || '', 240) } : null,
@@ -35,13 +46,14 @@ export function createHouseCommonsHandler({ env, store, clock = () => new Date()
       mentions: cleanMentions(body.mentions), links: cleanLinks(body.links), attachments: cleanAttachments(body.attachments), summary_of: short(body.summary_of, 240),
       runtime: body.runtime && typeof body.runtime === 'object' ? {
         provider: short(body.runtime.provider, 120), model: short(body.runtime.model, 240), route: short(body.runtime.route, 240),
-        profile_id: short(body.runtime.profile_id, 320), latency_ms: Number.isFinite(Number(body.runtime.latency_ms)) ? Number(body.runtime.latency_ms) : null,
+        profile_id: short(body.runtime.profile_id, 320), latency_ms: finiteNumber(body.runtime.latency_ms), first_token_ms: finiteNumber(body.runtime.first_token_ms),
         runtime_world_context_id: short(body.runtime.runtime_world_context_id, 320),
       } : null,
       rich_text_html: cleanRichTextHtml(body.rich_text_html),
       text,
     };
     await store.setJSON(`entries/${createdAt}-${entry.id}`, entry);
+    if (idempotencyKey) await store.setJSON(`idempotency/${idempotencyKey}`, entry);
     return json(201, entry);
   };
 }

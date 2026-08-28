@@ -1,4 +1,5 @@
 import { createFlameHandler } from './_shared/flame-runtime.mjs';
+import { createFlameChatStreamHandler } from './_shared/flame-chat-stream-runtime.mjs';
 import { hostedFlameFallbackStatus, invokeHostedFlameFallback } from './_shared/hosted-flame-fallback.mjs';
 import {
   bindMessageToRuntimeWorld,
@@ -40,6 +41,9 @@ export default async (request, context) => {
 
   const flameId = String(context.params?.flame_id || '');
   const action = String(context.params?.action || '');
+  const wantsStream = request.method === 'POST' && action === 'chat' && (request.headers.get('accept') || '').includes('text/event-stream');
+  if (wantsStream) return createFlameChatStreamHandler({ env })(boundRequest, context.params);
+
   const fallbackRequest = request.method === 'POST' && action === 'chat' ? boundRequest.clone() : null;
   let response = await createFlameHandler({ env })(boundRequest, context.params);
 

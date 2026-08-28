@@ -1,10 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { createHouseBraidStreamHandler } from '../../../../netlify/functions/_shared/house-braid-stream-runtime.mjs';
+import { resolveSupabaseRuntimeConfig } from '../../../../netlify/functions/_shared/supabase-runtime-config.mjs';
 import { vercelEnv as env } from '../../../_shared/vercel-env.mjs';
+
+const resolved = resolveSupabaseRuntimeConfig(env);
+const runtimeEnv = resolved.env;
 
 function createSubscriber() {
   return async ({ worldId, onEvent }) => {
-    const client = createClient(env.get('SUPABASE_URL'), env.get('SUPABASE_SERVICE_ROLE_KEY'), {
+    const client = createClient(runtimeEnv.get('SUPABASE_URL'), runtimeEnv.get('SUPABASE_SERVICE_ROLE_KEY'), {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
       realtime: { params: { eventsPerSecond: 20 } },
     });
@@ -29,7 +33,7 @@ function createSubscriber() {
   };
 }
 
-const handle = createHouseBraidStreamHandler({ env, subscribe: createSubscriber() });
+const handle = createHouseBraidStreamHandler({ env: runtimeEnv, subscribe: createSubscriber() });
 
 export const config = { maxDuration: 60 };
 export default { fetch: handle };

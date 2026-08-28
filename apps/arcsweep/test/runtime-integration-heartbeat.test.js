@@ -72,11 +72,11 @@ test('Arcsweep startup mounts runtime integration before House Chat surfaces', a
   const bus = manifest.indexOf('./model-presence-bus.js');
   const diagnostics = manifest.indexOf('./runtime-presence-diagnostics.js');
   const bootstrap = manifest.indexOf('./runtime-integration-bootstrap.js');
-  const commons = manifest.indexOf('./house-commons-chat-v4.js');
+  const commons = manifest.indexOf('./house-commons-chat-v5.js');
   const social = manifest.indexOf('./house-chat-room-social.js');
   assert.ok(bus >= 0, 'Model Presence Bus must be mounted');
   assert.ok(diagnostics > bus, 'Runtime presence diagnostics must mount after Model Presence Bus');
   assert.ok(bootstrap > diagnostics, 'Runtime integration bootstrap must mount after diagnostics');
-  assert.ok(commons > bootstrap, 'House Chat v4 must mount after the runtime integration bootstrap');
-  assert.ok(social > commons, 'House Chat social room must mount after House Chat v4');
+  assert.ok(commons > bootstrap, 'House Chat v5 must mount after the runtime integration bootstrap');
+  assert.ok(social > commons, 'House Chat social room must mount after House Chat v5');
 });

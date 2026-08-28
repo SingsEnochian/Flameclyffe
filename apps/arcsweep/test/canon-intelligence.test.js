@@ -63,15 +63,8 @@ test('comparison engine separates agree, extend, conflict and unknown', () => {
 
 test('proposal keeps evidence, model authority, and canon authority separate', () => {
   const proposal = createCanonIntelligenceProposal({
-    worldId: 'taaveren-vaen',
-    entity: entities[0],
-    field: fields[0],
-    proposedValue: 'Wise Woman',
-    existingValue: null,
-    evidence: [evidence],
-    proposer: { id: 'atlas', kind: 'model' },
-    confidence: 0.9,
-    createdAt: '2026-08-21T19:00:00.000Z',
+    worldId: 'taaveren-vaen', entity: entities[0], field: fields[0], proposedValue: 'Wise Woman', existingValue: null,
+    evidence: [evidence], proposer: { id: 'atlas', kind: 'model' }, confidence: 0.9, createdAt: '2026-08-21T19:00:00.000Z',
   });
   assert.equal(proposal.status, 'pending');
   assert.equal(proposal.authority.may_promote_to_canon, false);
@@ -80,9 +73,7 @@ test('proposal keeps evidence, model authority, and canon authority separate', (
 });
 
 test('contradiction bundle exposes competing values without resolving them', () => {
-  const proposal = createCanonIntelligenceProposal({
-    worldId: 'taaveren-vaen', entity: entities[0], field: fields[0], proposedValue: 'Wise Woman', existingValue: 'Aes Sedai', evidence: [evidence], proposer: 'atlas', createdAt: '2026-08-21T19:01:00.000Z',
-  });
+  const proposal = createCanonIntelligenceProposal({ worldId: 'taaveren-vaen', entity: entities[0], field: fields[0], proposedValue: 'Wise Woman', existingValue: 'Aes Sedai', evidence: [evidence], proposer: 'atlas', createdAt: '2026-08-21T19:01:00.000Z' });
   const bundle = buildContradictionBundle(proposal);
   assert.equal(bundle.relation, 'conflict');
   assert.equal(bundle.requires_review, true);
@@ -115,10 +106,7 @@ test('accepted proposal can mutate canon only through supplied mutator and yield
   const proposal = createCanonIntelligenceProposal({ worldId: 'taaveren-vaen', entity: entities[0], field: fields[0], proposedValue: 'Wise Woman', evidence: [evidence], proposer: 'atlas', createdAt: '2026-08-21T19:04:00.000Z' });
   const reviewed = reviewCanonProposal(proposal, { action: 'accept', steward: 'Rowan', reviewedAt: '2026-08-21T19:05:00.000Z' });
   let mutation = null;
-  const receipt = await applyCanonPromotion(reviewed, {
-    steward: 'Rowan',
-    mutateCanon: async (input) => { mutation = input; return { receipt_id: 'canon-mutation:1' }; },
-  });
+  const receipt = await applyCanonPromotion(reviewed, { steward: 'Rowan', mutateCanon: async (input) => { mutation = input; return { receipt_id: 'canon-mutation:1' }; } });
   assert.equal(mutation.target.field_key, 'occupation');
   assert.equal(receipt.schema, 'arcsweep.canon-intelligence-promotion/v1');
   assert.equal(receipt.mutation_receipt_id, 'canon-mutation:1');
@@ -127,18 +115,18 @@ test('accepted proposal can mutate canon only through supplied mutator and yield
 });
 
 test('live inbox shows source evidence and keeps raw HTML escaped', () => {
-  const proposal = createCanonIntelligenceProposal({ worldId: 'taaveren-vaen', entity: entities[0], field: fields[0], proposedValue: '<script>nope</script>', existingValue: 'Wise Woman', evidence: [evidence], proposer: 'atlas' });
+  const proposal = createCanonIntelligenceProposal({ worldId: 'taaveren-vaen', entity: entities[0], field: fields[0], proposedValue: '<unsafe>nope</unsafe>', existingValue: 'Wise Woman', evidence: [evidence], proposer: 'atlas' });
   const html = renderCanonIntelligenceProposal(proposal);
   assert.match(html, /Existing canon/);
   assert.match(html, /Evidence \(1\)/);
-  assert.doesNotMatch(html, /<script>nope<\/script>/);
-  assert.match(html, /&lt;script&gt;nope&lt;\/script&gt;/);
+  assert.doesNotMatch(html, /<unsafe>nope<\/unsafe>/);
+  assert.match(html, /&lt;unsafe&gt;nope&lt;\/unsafe&gt;/);
 });
 
 test('Arcsweep mounts Canon Intelligence after runtime and House Chat surfaces', async () => {
   const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
   const runtime = manifest.indexOf('./runtime-integration-bootstrap.js');
-  const commons = manifest.indexOf('./house-commons-chat-v4.js');
+  const commons = manifest.indexOf('./house-commons-chat-v5.js');
   const social = manifest.indexOf('./house-chat-room-social.js');
   const intelligence = manifest.indexOf('./canon-intelligence-live-ui.js');
   assert.ok(runtime >= 0 && commons > runtime && social > commons && intelligence > social);

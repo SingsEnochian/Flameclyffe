@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { createHouseBraidStreamHandler } from './_shared/house-braid-stream-runtime.mjs';
+import { resolveSupabaseRuntimeConfig } from './_shared/supabase-runtime-config.mjs';
 
 function createSubscriber(env) {
   return async ({ worldId, onEvent }) => {
@@ -27,8 +28,9 @@ function createSubscriber(env) {
 }
 
 export default (request) => {
-  const env = { get: (name) => Netlify.env.get(name) };
-  return createHouseBraidStreamHandler({ env, subscribe: createSubscriber(env) })(request);
+  const rawEnv = { get: (name) => Netlify.env.get(name) };
+  const resolved = resolveSupabaseRuntimeConfig(rawEnv);
+  return createHouseBraidStreamHandler({ env: resolved.env, subscribe: createSubscriber(resolved.env) })(request);
 };
 
 export const config = { path: '/api/v1/house/braid/stream' };

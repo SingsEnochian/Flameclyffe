@@ -1,4 +1,5 @@
 import { createFlameHandler } from '../../../../netlify/functions/_shared/flame-runtime.mjs';
+import { createFlameChatStreamHandler } from '../../../../netlify/functions/_shared/flame-chat-stream-runtime.mjs';
 import { hostedFlameFallbackStatus, invokeHostedFlameFallback } from '../../../../netlify/functions/_shared/hosted-flame-fallback.mjs';
 import {
   bindMessageToRuntimeWorld,
@@ -43,6 +44,9 @@ export default {
 
     const flameId = String(params.flame_id || '');
     const action = String(params.action || '');
+    const wantsStream = request.method === 'POST' && action === 'chat' && (request.headers.get('accept') || '').includes('text/event-stream');
+    if (wantsStream) return createFlameChatStreamHandler({ env })(boundRequest, params);
+
     const fallbackRequest = request.method === 'POST' && action === 'chat' ? boundRequest.clone() : null;
     let response = await createFlameHandler({ env })(boundRequest, params);
 
