@@ -2,6 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { APPLET_CATALOGUE } from '../src/applets.js';
 import {
+  AEMETH_DIAGRAM_ATLAS,
+  AEMETH_INSTRUMENT_PROFILES,
+  AEMETH_RITUAL_PHASES,
+  createAemethReplayEnvelope,
+} from '../src/aemeth-lens.js';
+import {
   COLLECTION_ROOM_DEFINITIONS,
   IMPLEMENTED_APPLET_IDS,
   WORLD_SECTION_DEFINITIONS,
@@ -40,6 +46,57 @@ test('Seedhouse is a visible worldseed room with inheritance, lineage, and Conti
   assert.ok(seedType[4].includes('World Constitution'));
   assert.ok(seedType[4].includes('Continuity Genome'));
   assert.ok(seedType[4].includes('Ark Export'));
+});
+
+test('Aemeth Chamber is a visible observation room with a clean witness boundary', () => {
+  const applet = APPLET_CATALOGUE.find((item) => item.id === 'aemeth-lens');
+  const definition = COLLECTION_ROOM_DEFINITIONS['aemeth-lens'];
+  assert.equal(applet?.defaultVisible, true);
+  assert.equal(applet?.category, 'observation');
+  assert.equal(IMPLEMENTED_APPLET_IDS.has('aemeth-lens'), true);
+  assert.equal(definition.attachments, true);
+  assert.match(definition.description, /Raw witness stays distinct from later interpretation/i);
+  for (const field of [
+    'instrumentProfile', 'phase', 'ask', 'observerRole', 'orientation', 'gazeMode',
+    'activeDiagram', 'activeCall', 'departurePremaqc', 'chamberConfiguration', 'witnessRaw',
+    'witnessTimestampNotes', 'transformationNotes', 'interpretation', 'sourceRefs', 'runaReceipt',
+    'replayFingerprint', 'canonBoundary',
+  ]) {
+    assert.ok(definition.fields.some(([name]) => name === field), `missing Aemeth field ${field}`);
+  }
+  assert.ok(definition.fields.find(([name]) => name === 'instrumentProfile')[4].some((label) => /Shewstone 001/.test(label)));
+  assert.ok(definition.fields.find(([name]) => name === 'activeDiagram')[4].includes('Sigillum Dei Aemeth'));
+});
+
+test('Aemeth instrument contract preserves physical, digital, and hybrid profiles', () => {
+  assert.deepEqual(AEMETH_INSTRUMENT_PROFILES.map((item) => item.medium), ['physical', 'digital', 'hybrid']);
+  const physical = AEMETH_INSTRUMENT_PROFILES[0];
+  assert.match(physical.geometry, /subsurface Sigillum Dei Aemeth/i);
+  assert.match(physical.observerAxis, /sphere/i);
+  assert.equal(AEMETH_RITUAL_PHASES[0], 'Preparation');
+  assert.equal(AEMETH_RITUAL_PHASES.at(-1), 'Replay review');
+});
+
+test('Aemeth diagram atlas keeps source variants explicit', () => {
+  const ids = new Set(AEMETH_DIAGRAM_ATLAS.map((item) => item.id));
+  for (const id of ['sigillum-dei-aemeth', 'holy-table', 'heptarchic-lamen', 'pele-ring', 'ensigns-of-creation', 'great-table', 'tablet-of-union', 'ninety-one-parts', 'liber-logaeth']) {
+    assert.equal(ids.has(id), true, `missing Aemeth diagram ${id}`);
+  }
+  assert.match(AEMETH_DIAGRAM_ATLAS.find((item) => item.id === 'great-table').versionPolicy, /separate states/i);
+});
+
+test('Aemeth replay envelope carries witness and interpretation as separate fields', () => {
+  const packet = createAemethReplayEnvelope({
+    instrumentProfile: 'Aemeth Shewstone 001 · physical sphere',
+    witnessRaw: 'Observed form',
+    interpretation: 'Later reading',
+    replayFingerprint: 'sha256:test',
+  });
+  assert.equal(packet.schema, 'arcsweep.aemeth-replay/v1');
+  assert.equal(packet.witnessRaw, 'Observed form');
+  assert.equal(packet.interpretation, 'Later reading');
+  assert.notEqual(packet.witnessRaw, packet.interpretation);
+  assert.equal(packet.replayFingerprint, 'sha256:test');
 });
 
 test('room collections include every collection-backed room', () => {
