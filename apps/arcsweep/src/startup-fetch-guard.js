@@ -1,3 +1,5 @@
+import './pages-house-transport-bridge.js';
+
 export const HOUSE_SESSION_STARTUP_TIMEOUT_MS = 2500;
 
 export function installStartupFetchGuard(target = globalThis, timeoutMs = HOUSE_SESSION_STARTUP_TIMEOUT_MS) {
