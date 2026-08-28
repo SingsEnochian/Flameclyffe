@@ -1,5 +1,9 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { authoriseHouseRequest } from './house-session.mjs';
+import {
+  authoriseGitHubActionsOidcRequest,
+  GITHUB_ACTIONS_OIDC_DEFAULTS,
+} from './github-actions-oidc.mjs';
 import { parseLanternbridgeRecord } from '../../../apps/arcsweep/src/lanternbridge-receiver.js';
 import {
   buildLanternbridgeIndexEntry,
@@ -25,11 +29,47 @@ function deterministicCommonsId(cursorKey) {
   return `lb-${createHash('sha256').update(String(cursorKey)).digest('hex').slice(0, 32)}`;
 }
 
-export function createLanternbridgeMessageHandler({ env, indexStore, commonsStore }) {
+function oidcOptions(env, fetchImpl) {
+  return {
+    fetchImpl,
+    audience: String(env.get('LANTERNBRIDGE_OIDC_AUDIENCE') || GITHUB_ACTIONS_OIDC_DEFAULTS.audience),
+    repository: String(env.get('LANTERNBRIDGE_OIDC_REPOSITORY') || GITHUB_ACTIONS_OIDC_DEFAULTS.repository),
+    ref: String(env.get('LANTERNBRIDGE_OIDC_REF') || GITHUB_ACTIONS_OIDC_DEFAULTS.ref),
+    workflow: String(env.get('LANTERNBRIDGE_OIDC_WORKFLOW') || GITHUB_ACTIONS_OIDC_DEFAULTS.workflow),
+  };
+}
+
+function oidcSourceProblem(body, claims) {
+  if (!claims) return null;
+  if (body.source_repo && String(body.source_repo) !== String(claims.repository)) return 'source_repo does not match the attested GitHub repository.';
+  if (body.source_commit && claims.sha && String(body.source_commit) !== String(claims.sha)) return 'source_commit does not match the attested GitHub commit.';
+  const path = String(body.source_path || '');
+  if (!/^exchanges\/(nocturne|rowan|shared)\/.+\.md$/i.test(path)) return 'source_path is outside the Lanternbridge exchange lanes.';
+  return null;
+}
+
+export function createLanternbridgeMessageHandler({
+  env,
+  indexStore,
+  commonsStore,
+  oidcAuthoriser = authoriseGitHubActionsOidcRequest,
+  oidcFetchImpl = fetch,
+}) {
   return async function handle(request) {
     const houseAuthorised = authoriseHouseRequest(request, env);
     const ingestAuthorised = ingestKeyAuthorised(request, env);
-    if (!houseAuthorised && !ingestAuthorised) return json(401, { error: 'Valid House Runtime session or Lanternbridge ingest key required.' });
+    let oidcAuthority = { authorised: false, reason: 'not_attempted', claims: null };
+
+    if (request.method === 'POST' && !houseAuthorised && !ingestAuthorised) {
+      oidcAuthority = await oidcAuthoriser(request, oidcOptions(env, oidcFetchImpl));
+    }
+
+    if (!houseAuthorised && !ingestAuthorised && !oidcAuthority.authorised) {
+      return json(401, {
+        error: 'Valid House Runtime session, Lanternbridge ingest key, or attested GitHub Actions OIDC token required.',
+        oidc_reason: oidcAuthority.reason,
+      });
+    }
 
     if (request.method === 'GET') {
       if (!houseAuthorised) return json(403, { error: 'House Runtime session required for Lanternbridge index reads.' });
@@ -42,6 +82,9 @@ export function createLanternbridgeMessageHandler({ env, indexStore, commonsStor
     let body;
     try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
     if (body.action && body.action !== 'ingest') return json(400, { error: 'Only action=ingest is supported.' });
+
+    const sourceProblem = oidcSourceProblem(body, oidcAuthority.claims);
+    if (sourceProblem) return json(422, { error: sourceProblem });
 
     const rawSource = String(body.raw_source || '');
     if (!rawSource.trim()) return json(400, { error: 'raw_source is required.' });
@@ -56,6 +99,8 @@ export function createLanternbridgeMessageHandler({ env, indexStore, commonsStor
       });
     }
 
+    const sourceRepo = oidcAuthority.claims?.repository || body.source_repo;
+    const sourceCommit = oidcAuthority.claims?.sha || body.source_commit;
     const respondsTo = record.metadata?.relations?.responds_to || null;
     const parent = respondsTo ? await indexStore.getByBridgeId(respondsTo) : null;
     let indexEntry;
@@ -63,14 +108,20 @@ export function createLanternbridgeMessageHandler({ env, indexStore, commonsStor
       indexEntry = buildLanternbridgeIndexEntry(record, {
         sourceRef: body.source_ref,
         sourceSystem: body.source_system,
-        sourceRepo: body.source_repo,
+        sourceRepo,
         sourcePath: body.source_path,
-        sourceCommit: body.source_commit,
+        sourceCommit,
         parent,
       });
     } catch (error) {
       return json(422, { error: error?.message || String(error) });
     }
+
+    const authority = houseAuthorised
+      ? 'house_session'
+      : ingestAuthorised
+        ? 'ingest_key'
+        : 'github_actions_oidc';
 
     const existing = await indexStore.getByCursor(indexEntry.cursor_key);
     const existingState = classifyLanternbridgeDelivery(existing);
@@ -80,6 +131,7 @@ export function createLanternbridgeMessageHandler({ env, indexStore, commonsStor
         delivery: existingState,
         duplicate: true,
         resumed: false,
+        authority,
         cursor_key: existing.cursor_key,
         bridge_id: existing.bridge_id,
         commons_entry_id: existing.commons_entry_id,
@@ -113,6 +165,7 @@ export function createLanternbridgeMessageHandler({ env, indexStore, commonsStor
       delivery: 'processed',
       duplicate: false,
       resumed,
+      authority,
       cursor_key: processed.cursor_key,
       bridge_id: processed.bridge_id,
       commons_entry_id: processed.commons_entry_id,
