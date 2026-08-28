@@ -69,8 +69,11 @@ jobs:
           const text = await response.text();
           let body;
           try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 500) || 'non-json response' }; }
+          const oaPresent = body?.model_presence?.oxalpha?.route === 'oxalpha';
+          const oaReloaded = body?.aemeth?.oa_reloaded === true;
+          const aemethPacket = body?.aemeth?.packet_schema === 'arcsweep.aemeth-participant-packet/v1';
           console.log(JSON.stringify({ http_status: response.status, ...body }, null, 2));
-          if (!response.ok || body.ok !== true) process.exitCode = 1;
+          if (!response.ok || body.ok !== true || !oaPresent || !oaReloaded || !aemethPacket) process.exitCode = 1;
           NODE
 
       - name: Publish authenticated receipt to hosting PR
