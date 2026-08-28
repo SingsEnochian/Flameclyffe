@@ -1,5 +1,6 @@
 import { constellationRuntimeRouteForVoice } from './constellation-runtime-adapter.js';
 import { HOUSE_COOKIE_SESSION, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import { IDENTITY_RELATIONS, createContributionEnvelope } from './mythframe-federation.js';
 
 export const FLAME_CHAT_STREAM_SCHEMA = 'hearthgate.flame-chat-stream/v1';
 
@@ -25,6 +26,11 @@ function parseBlock(block) {
   return message;
 }
 
+function identityRelation(value) {
+  const requested = String(value || '').trim();
+  return IDENTITY_RELATIONS.includes(requested) ? requested : 'unknown';
+}
+
 export async function streamConstellationRuntimeVoice({
   voiceId,
   message,
@@ -43,6 +49,7 @@ export async function streamConstellationRuntimeVoice({
   if (!route.available) throw new Error(`Flame route unavailable: ${route.status}`);
   const token = await activeSession(fetchImpl);
   if (!token) throw new Error('House Runtime offline.');
+  const resolvedSessionId = sessionId || `arcsweep-${route.voiceId}-${Date.now()}`;
   const requestMetadata = { ...metadata, voice_id: route.voiceId };
   if (worldContext?.identity_anchor?.world_id) {
     requestMetadata.world_id = worldContext.identity_anchor.world_id;
@@ -56,7 +63,7 @@ export async function streamConstellationRuntimeVoice({
     signal,
     body: JSON.stringify({
       message: String(message || '').trim(),
-      session_id: sessionId || `arcsweep-${route.voiceId}-${Date.now()}`,
+      session_id: resolvedSessionId,
       context: Array.isArray(context) ? context : [],
       metadata: requestMetadata,
     }),
@@ -101,14 +108,33 @@ export async function streamConstellationRuntimeVoice({
   if (!completed) throw new Error('Flame stream closed before completion.');
   if (String(completed.flame_id || '').toLowerCase() !== String(route.route || '').toLowerCase()) throw new Error('Flame stream identity mismatch.');
   const worldId = worldContext?.identity_anchor?.world_id || requestMetadata.world_id || null;
+  const provider = completed.provider || started?.provider || 'unknown';
+  const model = completed.model || started?.model || 'unknown';
+  const contributionEnvelope = await createContributionEnvelope({
+    contributionId: requestMetadata.contribution_id || `${completed.request_id || resolvedSessionId}:contribution`,
+    voiceId: route.voiceId,
+    identityContinuityId: requestMetadata.identity_continuity_id || `hearthfire:${route.voiceId}`,
+    identityRelation: identityRelation(requestMetadata.identity_relation),
+    runtimeProvider: provider,
+    runtimeModelExact: model,
+    runtimeRoute: `/api/v1/flames/${route.route}/chat`,
+    sessionId: resolvedSessionId,
+    mythframeScope: Array.isArray(requestMetadata.mythframe_scope) ? requestMetadata.mythframe_scope : worldId ? [`world:${worldId}`] : [],
+    sourceContextReceipts: Array.isArray(requestMetadata.source_context_receipts) ? requestMetadata.source_context_receipts : [],
+    foreignTranslationCapsulesUsed: Array.isArray(requestMetadata.foreign_translation_capsules_used) ? requestMetadata.foreign_translation_capsules_used : [],
+    localContinuityRevision: requestMetadata.local_continuity_revision || null,
+    contributionKind: requestMetadata.contribution_kind || 'house-chat-utterance',
+    adoptionRequested: requestMetadata.adoption_requested === true,
+    adoptionResult: requestMetadata.adoption_result || 'not-requested',
+  });
   return {
     status: 'replied',
     voiceId: route.voiceId,
     route: route.route,
     message: String(completed.message || visible).trim(),
-    provider: completed.provider || started?.provider || null,
-    model: completed.model || started?.model || null,
-    profileId: `house:${route.route}:${completed.provider || started?.provider || 'unknown'}:${completed.model || started?.model || 'unknown'}`,
+    provider,
+    model,
+    profileId: `house:${route.route}:${provider}:${model}`,
     citedSources: completed.cited_sources || [],
     usage: completed.usage || null,
     latencyMs: completed.latency_ms ?? null,
@@ -116,5 +142,6 @@ export async function streamConstellationRuntimeVoice({
     worldId,
     runtimeWorldContextId: completed.runtime_world_context_id || started?.runtime_world_context_id || worldContext?.context_id || null,
     bufferedCompatibility: completed.buffered_compatibility === true,
+    contributionEnvelope,
   };
 }
