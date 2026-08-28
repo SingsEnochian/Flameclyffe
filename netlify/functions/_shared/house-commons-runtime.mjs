@@ -14,6 +14,7 @@ const cleanIdempotencyKey = (value) => {
   const key = String(value || '').trim().slice(0, 240);
   return key && /^[a-zA-Z0-9:._-]+$/.test(key) ? key : null;
 };
+const finiteNumber = (value) => Number.isFinite(Number(value)) ? Number(value) : null;
 
 export function createHouseCommonsHandler({ env, store, clock = () => new Date(), idFactory = () => crypto.randomUUID() }) {
   return async function handle(request) {
@@ -45,7 +46,7 @@ export function createHouseCommonsHandler({ env, store, clock = () => new Date()
       mentions: cleanMentions(body.mentions), links: cleanLinks(body.links), attachments: cleanAttachments(body.attachments), summary_of: short(body.summary_of, 240),
       runtime: body.runtime && typeof body.runtime === 'object' ? {
         provider: short(body.runtime.provider, 120), model: short(body.runtime.model, 240), route: short(body.runtime.route, 240),
-        profile_id: short(body.runtime.profile_id, 320), latency_ms: Number.isFinite(Number(body.runtime.latency_ms)) ? Number(body.runtime.latency_ms) : null,
+        profile_id: short(body.runtime.profile_id, 320), latency_ms: finiteNumber(body.runtime.latency_ms), first_token_ms: finiteNumber(body.runtime.first_token_ms),
         runtime_world_context_id: short(body.runtime.runtime_world_context_id, 320),
       } : null,
       rich_text_html: cleanRichTextHtml(body.rich_text_html),
