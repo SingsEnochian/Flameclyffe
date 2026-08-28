@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run arcsweep:build && npm run starwell:build && npm run arcsweep:stage:vercel",
+  "buildCommand": "npm run arcsweep:build && npm run starwell:build && npm run arcsweep:stage:vercel && node scripts/source-library-vercel-build-smoke.mjs",
   "outputDirectory": "dist/starwell",
   "git": {
     "deploymentEnabled": {
