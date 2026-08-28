@@ -82,7 +82,7 @@ jobs:
               }
             }
           }
-          process.stdout.write(`${checks.length} ${hosts[0] || ''}`);
+          console.log(`${checks.length} ${hosts[0] || ''}`);
           NODE
               )
               if [[ "${VERCEL_COUNT:-0}" -gt 0 ]]; then SAW_VERCEL=1; fi
