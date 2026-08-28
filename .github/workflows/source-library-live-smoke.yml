@@ -17,6 +17,7 @@ on:
 permissions:
   contents: read
   checks: read
+  id-token: write
 
 concurrency:
   group: source-library-live-smoke-${{ github.event.pull_request.number || github.ref }}
@@ -40,6 +41,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
+
+      - name: Mint trusted GitHub OIDC token for Vercel protection
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken();
+            core.setSecret(token);
+            core.setOutput('token', token);
 
       - name: Syntax-check live smoke endpoint
         run: node --check api/source-library-live-smoke.js
@@ -126,6 +136,7 @@ jobs:
         shell: bash
         env:
           PREVIEW_URL: ${{ steps.preview.outputs.url }}
+          VERCEL_TRUSTED_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -uo pipefail
           ENDPOINT="${PREVIEW_URL}/api/source-library-live-smoke"
@@ -141,6 +152,9 @@ jobs:
               -w '%{http_code}'
               -H 'accept: application/json'
             )
+            if [[ -n "${VERCEL_TRUSTED_OIDC_TOKEN:-}" ]]; then
+              CURL_ARGS+=( -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_TRUSTED_OIDC_TOKEN}" )
+            fi
             if [[ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]]; then
               CURL_ARGS+=(
                 -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}"
@@ -164,6 +178,7 @@ jobs:
           echo "- preview: \`${PREVIEW_URL}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- endpoint_status: \`${FINAL_STATUS}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- content_type: \`${FINAL_CONTENT_TYPE:-unknown}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- trusted_oidc_present: \`$([[ -n "${VERCEL_TRUSTED_OIDC_TOKEN:-}" ]] && echo true || echo false)\`" >> "$GITHUB_STEP_SUMMARY"
 
           if [[ "${FINAL_STATUS}" == '000' ]]; then
             echo '::error title=PREVIEW_UNREACHABLE::Vercel preview endpoint was unreachable after the propagation window.'
@@ -174,7 +189,7 @@ jobs:
             exit 1
           fi
           if [[ "${FINAL_STATUS}" == '401' || "${FINAL_STATUS}" == '403' ]]; then
-            echo '::error title=PREVIEW_PROTECTED::Preview rejected the automation request before the smoke endpoint could run.'
+            echo '::error title=PREVIEW_PROTECTED::Preview rejected both trusted OIDC and any configured automation bypass before the smoke endpoint could run.'
             exit 1
           fi
           if [[ "${FINAL_CONTENT_TYPE}" != application/json* ]]; then
