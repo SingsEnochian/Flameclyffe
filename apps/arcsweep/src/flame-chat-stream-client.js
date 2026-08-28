@@ -1,5 +1,11 @@
 import { constellationRuntimeRouteForVoice } from './constellation-runtime-adapter.js';
 import { HOUSE_COOKIE_SESSION, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import {
+  compileFantasyRoleplayEnvelope,
+  fantasyRoleplayMetadata,
+  readHouseInteractionMode,
+} from './fantasy-roleplay-runtime.js';
+import { invokeOxAlphaPortableChat } from './oxalpha-portable-chat.js';
 
 export const FLAME_CHAT_STREAM_SCHEMA = 'hearthgate.flame-chat-stream/v1';
 
@@ -25,6 +31,51 @@ function parseBlock(block) {
   return message;
 }
 
+async function portableOxAlphaStream({
+  compiled,
+  sessionId,
+  context,
+  metadata,
+  worldContext,
+  fetchImpl,
+  onStarted,
+  onDelta,
+  onCompleted,
+} = {}) {
+  const reply = await invokeOxAlphaPortableChat({
+    message: compiled.message,
+    sessionId,
+    context,
+    metadata,
+    fetchImpl,
+  });
+  const started = {
+    schema: FLAME_CHAT_STREAM_SCHEMA,
+    flame_id: 'oxalpha',
+    provider: reply.provider,
+    model: reply.model,
+    runtime_world_context_id: worldContext?.context_id || null,
+    portable: true,
+  };
+  const completed = {
+    ...started,
+    message: reply.message,
+    usage: reply.usage,
+    latency_ms: reply.latencyMs,
+    first_token_ms: null,
+    buffered_compatibility: true,
+    execution_path: reply.executionPath,
+  };
+  onStarted(started);
+  onDelta({ ...started, text: reply.message, message: reply.message });
+  onCompleted(completed);
+  return {
+    ...reply,
+    worldId: worldContext?.identity_anchor?.world_id || metadata.world_id || null,
+    runtimeWorldContextId: worldContext?.context_id || null,
+  };
+}
+
 export async function streamConstellationRuntimeVoice({
   voiceId,
   message,
@@ -41,28 +92,55 @@ export async function streamConstellationRuntimeVoice({
 } = {}) {
   const route = await constellationRuntimeRouteForVoice(voiceId, fetchImpl);
   if (!route.available) throw new Error(`Flame route unavailable: ${route.status}`);
-  const token = await activeSession(fetchImpl);
-  if (!token) throw new Error('House Runtime offline.');
-  const requestMetadata = { ...metadata, voice_id: route.voiceId };
+  const interactionMode = metadata.interaction_mode || readHouseInteractionMode();
+  const compiled = await compileFantasyRoleplayEnvelope({
+    voiceId: route.voiceId,
+    message,
+    mode: interactionMode,
+    worldContext,
+    fetchImpl,
+  });
+  const requestMetadata = fantasyRoleplayMetadata(compiled, { ...metadata, voice_id: route.voiceId });
   if (worldContext?.identity_anchor?.world_id) {
     requestMetadata.world_id = worldContext.identity_anchor.world_id;
     requestMetadata.world_context = worldContext;
   }
-  const response = await fetchImpl(`/api/v1/flames/${route.route}/chat`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'text/event-stream', ...authHeaders(token) },
-    credentials: 'same-origin',
-    cache: 'no-store',
-    signal,
-    body: JSON.stringify({
-      message: String(message || '').trim(),
-      session_id: sessionId || `arcsweep-${route.voiceId}-${Date.now()}`,
-      context: Array.isArray(context) ? context : [],
-      metadata: requestMetadata,
-    }),
-  });
+
+  const token = await activeSession(fetchImpl);
+  if (!token) {
+    if (route.voiceId === 'oxalpha') {
+      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+    }
+    throw new Error('House Runtime offline.');
+  }
+
+  let response;
+  try {
+    response = await fetchImpl(`/api/v1/flames/${route.route}/chat`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'text/event-stream', ...authHeaders(token) },
+      credentials: 'same-origin',
+      cache: 'no-store',
+      signal,
+      body: JSON.stringify({
+        message: compiled.message,
+        session_id: sessionId || `arcsweep-${route.voiceId}-${Date.now()}`,
+        context: Array.isArray(context) ? context : [],
+        metadata: requestMetadata,
+      }),
+    });
+  } catch (error) {
+    if (route.voiceId === 'oxalpha' && error?.name !== 'AbortError' && !signal?.aborted) {
+      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+    }
+    throw error;
+  }
+
   if (!response.ok || !response.body) {
     const data = await response.json().catch(() => ({}));
+    if (route.voiceId === 'oxalpha' && response.status !== 401) {
+      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+    }
     throw new Error(data.error || `Flame stream ${response.status}`);
   }
   const reader = response.body.getReader();
@@ -116,5 +194,7 @@ export async function streamConstellationRuntimeVoice({
     worldId,
     runtimeWorldContextId: completed.runtime_world_context_id || started?.runtime_world_context_id || worldContext?.context_id || null,
     bufferedCompatibility: completed.buffered_compatibility === true,
+    interactionMode: compiled.mode,
+    interactionSkillActive: compiled.active,
   };
 }
