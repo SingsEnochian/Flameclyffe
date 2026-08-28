@@ -6,7 +6,9 @@ import {
 import { getKelyranSupabase } from './kelyran-supabase.js';
 
 export const OXALPHA_EDGE_URL = 'https://rufrmjyusalnifpegllj.supabase.co/functions/v1/oxalpha';
-export const OXALPHA_EDGE_EXECUTION_PATH = 'supabase-edge-to-huggingface-router';
+export const OXALPHA_EDGE_EXECUTION_PATH = 'supabase-edge-to-openrouter';
+export const OXALPHA_DEFAULT_PROVIDER = 'openrouter';
+export const OXALPHA_DEFAULT_MODEL = 'z-ai/glm-5.3-flash';
 
 async function signedInSupabaseAccessToken() {
   try {
@@ -34,8 +36,9 @@ export async function readOxAlphaEdgeStatus({ fetchImpl = fetch } = {}) {
   if (data.flame_id !== 'oxalpha') throw new Error(`Ox Alpha edge identity mismatch: received ${data.flame_id || 'unknown'}.`);
   return Object.freeze({
     configured: data.configured === true,
-    provider: data.provider || 'huggingface-inference-providers',
-    model: data.model || 'zai-org/GLM-5.3-Flash',
+    provider: data.provider || OXALPHA_DEFAULT_PROVIDER,
+    model: data.model || OXALPHA_DEFAULT_MODEL,
+    inferenceModel: data.inference_model || data.model || OXALPHA_DEFAULT_MODEL,
     executionPath: data.execution_path || OXALPHA_EDGE_EXECUTION_PATH,
     hostDependency: data.host_dependency || 'none',
   });
@@ -46,8 +49,8 @@ export function describeOxAlphaRouteStatus({
   edgeReachable = false,
   edgeConfigured = false,
   edgeError = '',
-  provider = 'huggingface-inference-providers',
-  model = 'zai-org/GLM-5.3-Flash',
+  provider = OXALPHA_DEFAULT_PROVIDER,
+  model = OXALPHA_DEFAULT_MODEL,
   executionPath = OXALPHA_EDGE_EXECUTION_PATH,
 } = {}) {
   const house = Object.freeze({
@@ -65,17 +68,18 @@ export function describeOxAlphaRouteStatus({
       : `Supabase Ox Alpha relay did not answer${edgeError ? `: ${edgeError}` : '.'}`,
   });
   const inferenceState = !edgeReachable ? 'unknown' : edgeConfigured ? 'ready' : 'credential-missing';
+  const providerLabel = String(provider || 'configured provider');
   const inference = Object.freeze({
     state: inferenceState,
     ready: inferenceState === 'ready',
     detail: inferenceState === 'ready'
-      ? 'Hugging Face inference credential is configured on the relay.'
+      ? `${providerLabel} inference credential is configured on the relay.`
       : inferenceState === 'credential-missing'
-        ? 'Relay is alive, but its Hugging Face inference credential is not configured.'
+        ? 'Relay is alive, but its OA inference credential is not configured.'
         : 'Inference readiness is unknown because the relay is unreachable.',
   });
   const overall = inference.ready
-    ? 'hf-ready'
+    ? 'inference-ready'
     : house.available
       ? 'house-session-present'
       : relay.reachable
@@ -83,7 +87,7 @@ export function describeOxAlphaRouteStatus({
         : 'unavailable';
 
   return Object.freeze({
-    schema: 'arcsweep.oxalpha-route-status/v1',
+    schema: 'arcsweep.oxalpha-route-status/v2',
     overall,
     house,
     relay,
