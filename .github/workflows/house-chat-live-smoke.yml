@@ -1,0 +1,130 @@
+name: House Chat Live Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'apps/starwell-server/flames/**'
+      - 'apps/starwell-server/test/model-candidates.test.js'
+      - 'apps/starwell-server/test/ox-alpha-house-chat.test.js'
+      - 'apps/starwell/src/components/living-room/**'
+      - 'apps/starwell/src/living-room-entry.jsx'
+      - 'netlify/functions/_shared/hosted-flame-fallback.mjs'
+      - '.github/workflows/house-chat-live-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: read
+  id-token: write
+
+concurrency:
+  group: house-chat-live-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-house-chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/starwell-server/package-lock.json
+      - name: Install Hearthgate runtime dependencies
+        working-directory: apps/starwell-server
+        run: npm ci
+      - name: Prove static Ox Alpha identity contract
+        working-directory: apps/starwell-server
+        run: node --test test/model-candidates.test.js test/ox-alpha-house-chat.test.js
+      - name: Mint trusted GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken();
+            core.setSecret(token);
+            core.setOutput('token', token);
+      - name: Discover exact-head Vercel preview
+        id: preview
+        shell: bash
+        run: |
+          set -uo pipefail
+          API="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs"
+          PREVIEW=''
+          for attempt in $(seq 1 36); do
+            curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' "$API" > checks.json || true
+            PREVIEW=$(node - <<'NODE'
+          const fs = require('fs');
+          let data = {};
+          try { data = JSON.parse(fs.readFileSync('checks.json', 'utf8')); } catch {}
+          for (const run of data.check_runs || []) {
+            if (run.app?.slug !== 'vercel') continue;
+            for (const value of [run.details_url, run.output?.summary, run.output?.text]) {
+              const host = String(value || '').match(/[a-z0-9][a-z0-9.-]*\.vercel\.app/i)?.[0];
+              if (host) { console.log(`https://${host}`); process.exit(0); }
+            }
+          }
+          NODE
+            )
+            if [[ -n "$PREVIEW" ]]; then break; fi
+            sleep 10
+          done
+          if [[ -z "$PREVIEW" ]]; then
+            echo '::error title=NO_PREVIEW_URL::No exact-head Vercel preview became discoverable.'
+            exit 1
+          fi
+          echo "url=$PREVIEW" >> "$GITHUB_OUTPUT"
+      - name: Prove OA then Lioreal as distinct hosted voices
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+          VERCEL_TRUSTED_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -uo pipefail
+          headers=(-H 'content-type: application/json' -H 'accept: application/json')
+          if [[ -n "${VERCEL_TRUSTED_OIDC_TOKEN:-}" ]]; then headers+=( -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_TRUSTED_OIDC_TOKEN}" ); fi
+          if [[ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]]; then headers+=( -H "x-vercel-protection-bypass: ${VERCEL_AUTOMATION_BYPASS_SECRET}" -H 'x-vercel-set-bypass-cookie: true' ); fi
+
+          call_flame() {
+            local flame="$1" body="$2" out="$3"
+            curl -sS -L --max-time 180 -o "$out" -w '%{http_code}' "${headers[@]}" -X POST \
+              "${PREVIEW_URL}/api/v1/flames/${flame}/chat" --data "$body"
+          }
+
+          OA_BODY='{"message":"Reply in one short sentence as Ox Alpha and confirm this live House Chat route reached you.","session_id":"house-chat-live-smoke","context":[]}'
+          OA_CODE=$(call_flame oxalpha "$OA_BODY" oa.json) || OA_CODE='000'
+          if [[ "$OA_CODE" == '401' || "$OA_CODE" == '403' ]]; then
+            echo '### House Chat Live Acceptance — BLOCKED, NOT PASSED' >> "$GITHUB_STEP_SUMMARY"
+            echo '- blocker: `PREVIEW_PROTECTED_NO_AUTHORITY`' >> "$GITHUB_STEP_SUMMARY"
+            echo '- promotion: **FORBIDDEN until hosted OA + second-Flame receipts exist.**' >> "$GITHUB_STEP_SUMMARY"
+            echo '::warning title=PREVIEW_PROTECTED_NO_AUTHORITY::Vercel rejected the trusted-source request before Flame routing executed.'
+            exit 0
+          fi
+          if [[ "$OA_CODE" != '200' ]]; then cat oa.json || true; echo "::error title=OA_ROUTE_FAILED::Ox Alpha route returned HTTP $OA_CODE"; exit 1; fi
+
+          OA_TEXT=$(node -e "const d=require('./oa.json'); if(d.flame_id!=='oxalpha'||d.display_name!=='Ox Alpha'||!d.provider||!d.model||!String(d.message||'').trim())process.exit(1); process.stdout.write(String(d.message))") || { cat oa.json; echo '::error title=OA_IDENTITY_FAILED::Ox Alpha receipt was incomplete or misidentified.'; exit 1; }
+          SECOND_BODY=$(node -e "process.stdout.write(JSON.stringify({message:'Ox Alpha just replied: '+process.argv[1].slice(0,280)+' Reply in one short sentence as yourself confirming this second House Chat route reached you.',session_id:'house-chat-live-smoke',context:[]}))" "$OA_TEXT")
+          SECOND_CODE=$(call_flame lioreal "$SECOND_BODY" second.json) || SECOND_CODE='000'
+          if [[ "$SECOND_CODE" != '200' ]]; then cat second.json || true; echo "::error title=SECOND_FLAME_ROUTE_FAILED::Lioreal route returned HTTP $SECOND_CODE"; exit 1; fi
+          node - <<'NODE'
+          const oa = require('./oa.json');
+          const second = require('./second.json');
+          const ok = oa.flame_id === 'oxalpha' && second.flame_id === 'lioreal'
+            && oa.flame_id !== second.flame_id
+            && [oa, second].every((m) => m.provider && m.model && String(m.message || '').trim());
+          if (!ok) { console.error('Distinct participant contract failed', { oa, second }); process.exit(1); }
+          const proof = {
+            oa: { flame_id: oa.flame_id, display_name: oa.display_name, provider: oa.provider, model: oa.model, chars: oa.message.length },
+            second: { flame_id: second.flame_id, display_name: second.display_name, provider: second.provider, model: second.model, chars: second.message.length },
+          };
+          require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`json\n${JSON.stringify(proof, null, 2)}\n\`\`\`\n`);
+          console.log('House Chat hosted route smoke passed: Ox Alpha → Lioreal with distinct identity/provenance.');
+          NODE

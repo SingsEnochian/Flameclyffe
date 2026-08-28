@@ -72,6 +72,70 @@ const MODEL_CANDIDATES = {
       ],
     },
   },
+
+  'ox-alpha': {
+    candidate_id: 'ox-alpha',
+    display_name: 'Ox Alpha · GLM-5.3-Flash',
+    model_id: process.env.MODEL_OX_ALPHA || 'zai-org/GLM-5.3-Flash',
+    source: {
+      registry: 'huggingface',
+      repo: 'zai-org/GLM-5.3-Flash',
+      license: 'mit',
+      lineage_label: 'ox-alpha',
+    },
+    status: 'audition',
+    candidate_for: [],
+    architecture: {
+      family: 'glm-5.3',
+      type: 'model-card-defined',
+    },
+    capabilities: {
+      text: true,
+      image: true,
+      audio: false,
+      tools: 'provider-dependent',
+      reasoning_effort: false,
+      structured_output: 'provider-dependent',
+      context_window_tokens: null,
+      fine_tunable: true,
+    },
+    backends: {
+      preferred: 'huggingface-inference-providers',
+      compatible: ['huggingface-inference-providers', 'vllm', 'sglang', 'transformers'],
+    },
+    runtime: {
+      provider: 'openai-compatible',
+      backend: process.env.OX_ALPHA_BACKEND || 'huggingface-inference-providers',
+      base_url: 'https://router.huggingface.co/v1',
+      base_url_env: 'OX_ALPHA_BASE_URL',
+      api_key_env: process.env.OX_ALPHA_API_KEY_ENV || 'HF_TOKEN',
+      max_tokens: 1200,
+    },
+    deployment: {
+      live_route: false,
+      audition_route: true,
+      requires_explicit_promotion: true,
+      primary_route_unchanged: true,
+    },
+    audition: {
+      baseline_flame: null,
+      baseline_model_env: null,
+      preserves_flame_prompt: true,
+      measures: [
+        'coding',
+        'agentic_planning',
+        'tool_judgement',
+        'long_context_recall',
+        'multimodal_understanding',
+        'continuity',
+        'initiative',
+        'disagreement',
+        'humour',
+        'flattening',
+        'needless_refusal',
+      ],
+    },
+  },
 };
 
 function getModelCandidate(candidateId) {

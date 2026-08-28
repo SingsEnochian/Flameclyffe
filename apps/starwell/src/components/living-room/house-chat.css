@@ -1,0 +1,257 @@
+.house-chat {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  min-height: 62vh;
+  border: 1px solid rgba(213, 162, 83, 0.28);
+  background: rgba(11, 13, 18, 0.88);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.house-chat-roster {
+  border-right: 1px solid rgba(213, 162, 83, 0.2);
+  background: rgba(17, 19, 25, 0.94);
+  padding: 16px 12px;
+}
+
+.house-chat-roster header p,
+.house-chat-channel-header p {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  opacity: 0.68;
+}
+
+.house-chat-roster header h2 {
+  margin: 4px 0 14px;
+  font-size: 1rem;
+}
+
+.house-chat-roster-list {
+  display: grid;
+  gap: 4px;
+}
+
+.house-chat-person {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.house-chat-person:hover,
+.house-chat-person.active {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(213, 162, 83, 0.22);
+}
+
+.house-chat-person strong,
+.house-chat-person em {
+  display: block;
+}
+
+.house-chat-person strong {
+  font-size: 0.88rem;
+}
+
+.house-chat-person em {
+  margin-top: 2px;
+  font-size: 0.7rem;
+  opacity: 0.58;
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presence {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.presence-ready { background: #75c889; }
+.presence-calling { background: #d7b868; box-shadow: 0 0 0 4px rgba(215,184,104,.09); }
+.presence-error,
+.presence-offline { background: #b96868; }
+
+.house-chat-channel {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto minmax(320px, 1fr) auto;
+}
+
+.house-chat-channel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(213, 162, 83, 0.18);
+  background: rgba(14, 16, 22, 0.92);
+}
+
+.house-chat-channel-header strong,
+.house-chat-channel-header > span {
+  font-size: 0.8rem;
+}
+
+.house-chat-channel-header > span { opacity: 0.55; }
+
+.house-chat-transcript {
+  overflow-y: auto;
+  padding: 8px 0 18px;
+  scroll-behavior: smooth;
+}
+
+.house-chat-message {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  padding: 11px 18px;
+}
+
+.house-chat-message:hover { background: rgba(255, 255, 255, 0.025); }
+.house-chat-message.error { background: rgba(139, 57, 57, 0.08); }
+
+.house-chat-avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(213, 162, 83, 0.3);
+  background: rgba(213, 162, 83, 0.09);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.house-chat-message-body header {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.house-chat-message-body header strong { font-size: 0.88rem; }
+.house-chat-message-body header time { font-size: 0.68rem; opacity: 0.48; }
+.house-chat-message-body > p {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  line-height: 1.52;
+}
+
+.house-chat-state {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  border: 1px solid rgba(255,255,255,.12);
+  opacity: .75;
+}
+
+.house-chat-provenance {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  opacity: 0.72;
+}
+
+.house-chat-provenance summary { cursor: pointer; }
+.house-chat-provenance dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 8px;
+  margin: 6px 0 0;
+}
+.house-chat-provenance dt { opacity: 0.6; }
+.house-chat-provenance dd { margin: 0; overflow-wrap: anywhere; }
+
+.house-chat-empty {
+  padding: 48px 24px;
+  text-align: center;
+  opacity: 0.62;
+}
+
+.house-chat-composer {
+  padding: 12px 16px 16px;
+  border-top: 1px solid rgba(213, 162, 83, 0.18);
+  background: rgba(14, 16, 22, 0.96);
+}
+
+.house-chat-composer label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.74rem;
+  opacity: 0.66;
+}
+
+.house-chat-composer textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 64px;
+  box-sizing: border-box;
+  border: 1px solid rgba(213, 162, 83, 0.25);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.04);
+  color: inherit;
+  font: inherit;
+}
+
+.house-chat-composer > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.house-chat-composer > div span { font-size: 0.68rem; opacity: 0.48; }
+.house-chat-composer button {
+  border: 1px solid rgba(213, 162, 83, 0.34);
+  border-radius: 8px;
+  padding: 7px 13px;
+  background: rgba(213, 162, 83, 0.13);
+  color: inherit;
+  cursor: pointer;
+}
+.house-chat-composer button:disabled { opacity: .42; cursor: default; }
+
+.accent-oxide .house-chat-avatar,
+.house-chat-person.accent-oxide.active { border-color: rgba(199, 117, 76, .62); }
+.accent-gold .house-chat-avatar { border-color: rgba(228, 190, 104, .58); }
+.accent-loch .house-chat-avatar { border-color: rgba(74, 146, 124, .58); }
+.accent-sky .house-chat-avatar { border-color: rgba(108, 169, 214, .58); }
+.accent-grove .house-chat-avatar { border-color: rgba(74, 132, 84, .58); }
+.accent-indigo .house-chat-avatar { border-color: rgba(109, 98, 192, .58); }
+.accent-copper .house-chat-avatar { border-color: rgba(190, 120, 72, .58); }
+.accent-violet .house-chat-avatar { border-color: rgba(159, 105, 190, .58); }
+.accent-root .house-chat-avatar { border-color: rgba(136, 156, 83, .58); }
+.accent-slate .house-chat-avatar { border-color: rgba(131, 143, 157, .58); }
+.accent-blue .house-chat-avatar { border-color: rgba(94, 159, 216, .58); }
+.accent-ember .house-chat-avatar { border-color: rgba(213, 111, 60, .58); }
+
+@media (max-width: 820px) {
+  .house-chat { grid-template-columns: 1fr; }
+  .house-chat-roster {
+    border-right: 0;
+    border-bottom: 1px solid rgba(213, 162, 83, 0.2);
+  }
+  .house-chat-roster-list {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .house-chat-person {
+    min-width: 160px;
+  }
+}
