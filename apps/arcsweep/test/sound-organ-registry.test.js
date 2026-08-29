@@ -15,7 +15,16 @@ test('every sound organ preserves a real source owner', async () => {
     assert.ok(organ.sourcePath, `${organ.id} has no sourcePath`);
     assert.ok(organ.implementation, `${organ.id} has no implementation label`);
     await access(new URL(`../../../${organ.sourcePath}`, import.meta.url));
+    if (organ.surfaceSourcePath) await access(new URL(`../../../${organ.surfaceSourcePath}`, import.meta.url));
   }
+});
+
+test('Runa protects its canonical 3·6·9 engine while using the existing Heartfield surface', () => {
+  const runa = SOUND_ORGANS.find((organ) => organ.id === 'runa');
+  assert.equal(runa.sourcePath, 'assets/runa-369-percussion-oscillator.js');
+  assert.equal(runa.surfaceSourcePath, 'apps/arcsweep/src/synaptic-heartfield.js');
+  assert.equal(runa.focusSelector, '.synaptic-heartfield');
+  assert.match(runa.implementation, /3·6·9/);
 });
 
 test('native sound organs deliberately focus the existing Theme soundscape', () => {
