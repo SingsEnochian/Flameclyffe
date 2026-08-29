@@ -1,6 +1,7 @@
 const GLOBAL_SIDECARS = Object.freeze([
   './observer-bridge.js',
   './rich-text-core.js',
+  './soundfont-runtime-repair.js',
   './active-input-continuity.js',
   './mobile-navigation-sidecar.js',
   './creative-organ-navigation.js',
@@ -17,9 +18,10 @@ const SIDECAR_PACKS = Object.freeze({
     './feedback-chamber-v2.js',
   ]),
   house: Object.freeze([
-    './constellation-runtime-adapter.js',
     './model-presence-bus.js',
+    './runtime-presence-diagnostics.js',
     './runtime-integration-bootstrap.js',
+    './constellation-runtime-adapter.js',
     './hosted-house-session-ui.js',
     './house-chat-authoritative-surface.js',
     './house-commons-chat-v5.js',
@@ -32,15 +34,15 @@ const SIDECAR_PACKS = Object.freeze({
     './house-chat-room-social.js',
     './house-chat-tools-v5.js',
     './house-chat-vestments-v1.js',
+    './house-chat-pretty-v2.js',
     './house-chat-pretty-v3.js',
+    './runtime-envelope-live-ui.js',
     './model-presence-live-ui.js',
     './model-reply-proof.js',
-    './runtime-presence-diagnostics.js',
     './house-lanternbridge-chat.js',
     './house-commons-command-room.js',
     './house-commons-thread-restoration.js',
     './house-commons-deep-link-router.js',
-    './runtime-envelope-live-ui.js',
     './constellation-presence.js',
     './runtime-world-presence.js',
   ]),
@@ -67,9 +69,6 @@ const SIDECAR_PACKS = Object.freeze({
     './instrument-sidecars.js',
     './react-ion-helm-sidecar.js',
     './glyph-drift-observatory-sidecar.js',
-  ]),
-  sound: Object.freeze([
-    './soundfont-runtime-repair.js',
   ]),
   canon: Object.freeze([
     './canon-web-link-sidecar.js',
@@ -125,6 +124,7 @@ const SIDECAR_LOADERS = import.meta.glob([
   './house-chat-room-social.js',
   './house-chat-tools-v5.js',
   './house-chat-vestments-v1.js',
+  './house-chat-pretty-v2.js',
   './house-chat-pretty-v3.js',
   './runtime-envelope-live-ui.js',
   './canon-intelligence-live-ui.js',
@@ -247,7 +247,6 @@ function packNamesForTrigger(node) {
   ].filter(Boolean);
   const names = new Set();
   for (const value of values) for (const name of ROOM_PACKS[value] || []) names.add(name);
-  if (node.closest?.('[data-sound-organ]')) names.add('sound');
   return [...names];
 }
 
@@ -277,7 +276,7 @@ function schedulePackScan() {
 function installPackScheduler() {
   if (schedulerObserver || typeof document === 'undefined') return;
   document.addEventListener('click', (event) => {
-    const trigger = event.target?.closest?.('[data-room],[data-room-id],[data-collection-room],[data-record-room],[data-sound-organ]');
+    const trigger = event.target?.closest?.('[data-room],[data-room-id],[data-collection-room],[data-record-room]');
     const packs = packNamesForTrigger(trigger);
     if (packs.length) setTimeout(() => packs.forEach((name) => void mountSidecarPack(name)), 0);
   }, true);
