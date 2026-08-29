@@ -62,6 +62,20 @@ test('translation capsule exports a projection, not the source object', async ()
   assert.equal(value.authority.continuity_admission, false);
 });
 
+test('reference-only export carries identity reference without source meaning or portable facets', async () => {
+  const value = await capsule({
+    exportPolicy: 'reference_only',
+    requestedSemanticDepth: 'public_summary',
+    exportConsent: { granted: true, scope: 'reference-only' },
+  });
+  assert.equal(value.source_projection.source_object_ref.id, 'elara:bridge:739');
+  assert.equal(value.source_projection.source_meaning, null);
+  assert.deepEqual(value.source_projection.source_relationships, []);
+  assert.deepEqual(value.source_projection.portable_facets, []);
+  assert.deepEqual(value.source_projection.home_bound_facets, ['withheld-by-source']);
+  assert.equal(value.source_projection.content_withheld, true);
+});
+
 test('export consent and target admission are separate privileges', async () => {
   const value = await capsule({ targetAdmissionState: 'unreviewed' });
   assert.equal(value.export_consent.granted, true);
