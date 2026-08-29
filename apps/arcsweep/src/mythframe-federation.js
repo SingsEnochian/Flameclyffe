@@ -100,7 +100,7 @@ function exportAllows(policy, requestedDepth, explicitFullConsent) {
   return false;
 }
 
-function sourceProjection(sourceObject, requestedDepth) {
+function sourceProjection(sourceObject, requestedDepth, exportPolicy) {
   const projection = {
     source_object_ref: {
       id: required(sourceObject?.id, 'sourceObject.id', 500),
@@ -112,7 +112,16 @@ function sourceProjection(sourceObject, requestedDepth) {
     source_relationships: list(sourceObject?.relationships, 100),
     portable_facets: list(sourceObject?.portableFacets, 100),
     home_bound_facets: list(sourceObject?.homeBoundFacets, 100),
+    content_withheld: false,
   };
+  if (exportPolicy === 'reference_only') {
+    projection.source_meaning = null;
+    projection.source_relationships = [];
+    projection.portable_facets = [];
+    projection.home_bound_facets = projection.home_bound_facets.length ? ['withheld-by-source'] : [];
+    projection.content_withheld = true;
+    return projection;
+  }
   if (requestedDepth === 'public_summary') {
     projection.source_relationships = [];
     projection.portable_facets = projection.portable_facets.slice(0, 12);
@@ -160,7 +169,7 @@ export async function createMythframeTranslationCapsule({
     created_by: required(createdBy, 'createdBy', 160),
     source_framework: required(sourceFramework, 'sourceFramework', 500),
     source_branch: clean(sourceBranch, 500) || 'main',
-    source_projection: sourceProjection(sourceObject, requestedSemanticDepth),
+    source_projection: sourceProjection(sourceObject, requestedSemanticDepth, exportPolicy),
     source_authority: required(sourceAuthority, 'sourceAuthority', 1000),
     source_admission_state: required(sourceAdmissionState, 'sourceAdmissionState', 200),
     export_policy: exportPolicy,
