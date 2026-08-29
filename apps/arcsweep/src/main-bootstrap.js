@@ -140,6 +140,13 @@ async function openCore() {
       if (durable.state === 'restored-cloud') status('Recovered the saved House workspace. Opening Arcsweep…');
       else if (durable.state === 'mirrored-local' || durable.state === 'in-sync') status('Saved workspace verified. Opening Arcsweep…');
       else if (durable.state === 'deferred' || durable.state === 'degraded') status('Cloud recovery is temporarily unavailable. Opening the local copy without replacing it…');
+
+      status('Reconciling Terra Prime before the world registry opens…');
+      const { synchroniseTerraPrimeWakingWorld } = await import('./terra-prime-core.js');
+      const terraPrime = await synchroniseTerraPrimeWakingWorld();
+      if (terraPrime.created) status('Terra Prime restored. Opening Arcsweep…');
+      else if (terraPrime.changed) status('Terra Prime reconciled. Opening Arcsweep…');
+      else status('Terra Prime verified. Opening Arcsweep…');
     }
     await import('./qualia-ui-preload.js');
     await import('./main.js');
