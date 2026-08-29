@@ -6,6 +6,7 @@ import {
   compareWitnessRealizations,
   evaluateBranchGarden,
 } from './semantic-transition-contract.js';
+import { runNarrativeCircuit } from './narrative-circuit.js';
 
 export const SEMANTIC_LAB_V2_VERSION = 'arcsweep.semantic-lab/v2';
 
@@ -26,6 +27,7 @@ function ensureStyle() {
     .semantic-v2-toy textarea{width:100%;box-sizing:border-box;min-height:6.2rem;resize:vertical;border:1px solid #ffffff20;border-radius:.55rem;background:#0003;color:inherit;padding:.55rem;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
     .semantic-v2-out{white-space:pre-wrap;overflow-wrap:anywhere;min-height:3rem;border-radius:.55rem;background:#0004;padding:.55rem;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
     .semantic-v2-rule{grid-column:1/-1;border:1px dashed #ffffff22;border-radius:.7rem;padding:.7rem;font-size:.78rem;opacity:.84}
+    .semantic-v2-circuit{grid-column:1/-1}
     @media(max-width:760px){.semantic-v2-grid{grid-template-columns:1fr}}
   `;
   document.head.append(style);
@@ -69,7 +71,7 @@ function buildDialog() {
   const runDensity = () => show(density.querySelector('.semantic-v2-out'), causalDensity(parse(density.querySelector('textarea').value, {})));
   density.querySelector('textarea').addEventListener('input', runDensity); runDensity();
 
-  const swap = toy('✍ Witness Swap Bench', 'Hold ΔX fixed and compare different lived realizations without changing the target transition.', { targetTransition:{ access:'opened', responsibility:'individual→shared' }, realizations:[{witness:'close-third',prose:'The latch gave. Responsibility did not.',preserves_target:true},{witness:'epistolary',prose:'We opened it together, which changed who could refuse what came next.',preserves_target:true}] });
+  const swap = toy('✍ Witness Swap Bench', 'Hold ΔX fixed and compare different lived realizations without changing the target transition.', { targetTransition:{ access:'opened', responsibility:'individual→shared' }, realizations:[{id:'close-third',witness:'close-third',prose:'The latch gave. Responsibility did not.',preserves_target:true},{id:'epistolary',witness:'epistolary',prose:'We opened it together, which changed who could refuse what came next.',preserves_target:true}] });
   swap.dataset.toy = 'witness-swap'; grid.append(swap);
   const runSwap = () => { const data = parse(swap.querySelector('textarea').value, {}); show(swap.querySelector('.semantic-v2-out'), compareWitnessRealizations(data.targetTransition || {}, data.realizations || [])); };
   swap.querySelector('textarea').addEventListener('input', runSwap); runSwap();
@@ -79,7 +81,26 @@ function buildDialog() {
   const runGarden = () => show(garden.querySelector('.semantic-v2-out'), evaluateBranchGarden(parse(garden.querySelector('textarea').value, [])));
   garden.querySelector('textarea').addEventListener('input', runGarden); runGarden();
 
-  const rule = document.createElement('div'); rule.className = 'semantic-v2-rule'; rule.textContent = 'Generate inside reachable agency constraints → filter continuity/debt/topology → select ΔX → project participant views → witness realizes lived particulars → validate arrival. Novelty is a proposal operator, not a reward.'; grid.append(rule);
+  const circuit = toy('⚡ Narrative Circuit', 'Branch Garden → Transition Forge → Witness Swap → evidenced arrival validation through Semantic Inflation, Debt Loom, Perspective Lantern and Causal Density.', {
+    beforeState:{ access:'closed', responsibility:'individual', bridge:'stable' },
+    afterState:{ access:'open', responsibility:'shared', bridge:'lost' },
+    beforeDebt:[{id:'sealed-crossing',kind:'access-barrier',state:'closed'}],
+    afterDebt:[{id:'shared-duty',kind:'responsibility',state:'open'}],
+    branches:[{id:'bridge-choice',agency_legal:true,continuity_legal:true,semantic_inflation:false,novelty:'bounded',vector:{D:.8,C:.9,A:.7,R:.8,P:.8,K:.9,T:.7,L:.6,Q:.5,G:.8,S:.2,F:.1,I:.1}}],
+    selectedBranchId:'bridge-choice',
+    witnessRealizations:[{id:'close-third',witness:'close-third',prose:'The bridge went under behind them. The key was no longer whether to cross, but who now carried the road.',preserves_target:true}],
+    selectedWitnessId:'close-third',
+    participantKnown:{ access:'open', responsibility:'shared' },
+    sources:[],
+    initiatingEvents:[{id:'bridge-loss'}],
+    consequentialChanges:[{id:'route-closed',evidenced:true,persistent:true,causal_link:true},{id:'responsibility-shared',evidenced:true,persistent:true,causal_link:true}]
+  });
+  circuit.classList.add('semantic-v2-circuit');
+  circuit.dataset.toy = 'narrative-circuit'; grid.append(circuit);
+  const runCircuit = () => show(circuit.querySelector('.semantic-v2-out'), runNarrativeCircuit(parse(circuit.querySelector('textarea').value, {})));
+  circuit.querySelector('textarea').addEventListener('input', runCircuit); runCircuit();
+
+  const rule = document.createElement('div'); rule.className = 'semantic-v2-rule'; rule.textContent = 'Generate inside reachable agency constraints → filter continuity/debt/topology → select ΔX → project participant views → witness realizes lived particulars → validate arrival. Novelty is a proposal operator, not a reward. The circuit may inspect and select; it may not silently mutate canon, memory, tools, or participant authority.'; grid.append(rule);
   document.body.append(dialog);
   dialog.querySelector('[data-close]').addEventListener('click', () => dialog.close());
   return dialog;
