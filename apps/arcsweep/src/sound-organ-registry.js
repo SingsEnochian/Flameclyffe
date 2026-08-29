@@ -25,9 +25,10 @@ export const SOUND_ORGANS = Object.freeze([
     focusSelector: '.synaptic-heartfield',
     pagesHref: '/Flameclyffe/apps/arcsweep/?soundOrgan=runa',
     deployedPath: 'apps/arcsweep/index.html',
-    sourcePath: 'apps/arcsweep/src/synaptic-heartfield.js',
-    implementation: 'ArcSweep Synaptic Heartfield · StorySoundscape',
-    description: 'Runa auditory coherence instrument, preserving the existing Synaptic Heartfield implementation.',
+    sourcePath: 'assets/runa-369-percussion-oscillator.js',
+    surfaceSourcePath: 'apps/arcsweep/src/synaptic-heartfield.js',
+    implementation: 'Runa 3·6·9 Percussion v0.3 · Synaptic Heartfield surface',
+    description: 'The canonical Runa 3·6·9 temporal percussion engine, exposed through the existing ArcSweep Synaptic Heartfield surface rather than cloned.',
   }),
   Object.freeze({
     id: 'tone-lab',
