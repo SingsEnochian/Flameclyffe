@@ -6,6 +6,8 @@ const GLOBAL_SIDECARS = Object.freeze([
   './mobile-navigation-sidecar.js',
   './creative-organ-navigation.js',
   './sound-organ-navigation.js',
+  './semantic-lab-sidecar.js',
+  './sidecar-health-panel.js',
 ]);
 
 const SIDECAR_PACKS = Object.freeze({
@@ -26,6 +28,7 @@ const SIDECAR_PACKS = Object.freeze({
     './house-chat-authoritative-surface.js',
     './house-commons-chat-v5.js',
     './house-chat-runtime-roster-ui.js',
+    './house-browser-smoke.js',
     './house-roleplay-mode.js',
     './formatted-text-vestments.js',
     './house-commons-attachments.js',
@@ -96,6 +99,8 @@ const SIDECAR_LOADERS = import.meta.glob([
   './mobile-navigation-sidecar.js',
   './creative-organ-navigation.js',
   './sound-organ-navigation.js',
+  './semantic-lab-sidecar.js',
+  './sidecar-health-panel.js',
   './world-registry-persistence-sidecar.js',
   './instrument-sidecars.js',
   './react-ion-helm-sidecar.js',
@@ -112,6 +117,7 @@ const SIDECAR_LOADERS = import.meta.glob([
   './house-chat-authoritative-surface.js',
   './house-commons-chat-v5.js',
   './house-chat-runtime-roster-ui.js',
+  './house-browser-smoke.js',
   './house-roleplay-mode.js',
   './formatted-text-vestments.js',
   './house-lanternbridge-chat.js',
