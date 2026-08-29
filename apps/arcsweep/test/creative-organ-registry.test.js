@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { CREATIVE_ORGANS } from '../src/creative-organ-registry.js';
 
 const REQUIRED = ['glyph-lab', 'brush-foundry', 'living-glyph', 'font-foundry', 'continuity-gate'];
@@ -8,6 +9,12 @@ const REQUIRED = ['glyph-lab', 'brush-foundry', 'living-glyph', 'font-foundry', 
 test('creative organ registry carries every recovered first-class instrument', () => {
   assert.deepEqual(CREATIVE_ORGANS.map((organ) => organ.id), REQUIRED);
   assert.equal(new Set(CREATIVE_ORGANS.map((organ) => organ.id)).size, REQUIRED.length);
+});
+
+test('every registered creative organ retains its authoritative source owner', async () => {
+  await Promise.all(CREATIVE_ORGANS.map(async (organ) => {
+    await assert.doesNotReject(access(resolve(organ.sourcePath)), `${organ.id} lost source owner ${organ.sourcePath}`);
+  }));
 });
 
 test('Glyph Lab and Brush Foundry deliberately share the Glyph Studio implementation', () => {
