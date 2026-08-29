@@ -56,7 +56,6 @@ const WILD_CONTROL_FIELDS = new Set([
 
 const clean = (value, max = 8000) => String(value ?? '').trim().slice(0, max);
 const list = (value, max = 200) => [...new Set((Array.isArray(value) ? value : []).map((item) => clean(item, 2000)).filter(Boolean))].slice(0, max);
-const clone = (value) => value == null ? value : structuredClone(value);
 
 function deepFreeze(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
@@ -273,10 +272,20 @@ export function compileWildGenerationContext(raw) {
   const control = unsupported.filter((key) => WILD_CONTROL_FIELDS.has(key));
   if (control.length) throw new Error(`WILD context forbids evaluator/control fields: ${control.join(', ')}.`);
   if (unsupported.length) throw new Error(`Unsupported WILD context field: ${unsupported.join(', ')}.`);
-  if (raw.world_state == null || String(raw.world_state).trim() === '') throw new Error('wild_context.world_state is required.');
-  const context = {};
-  for (const key of WILD_CONTEXT_FIELDS) {
-    if (raw[key] !== undefined) context[key] = clone(raw[key]);
-  }
+
+  const context = {
+    world_state: required(raw.world_state, 'wild_context.world_state', 24000),
+    history: list(raw.history, 240),
+    participants: list(raw.participants, 100),
+    participant_knowledge: list(raw.participant_knowledge, 240),
+    capabilities: list(raw.capabilities, 160),
+    relationships: list(raw.relationships, 160),
+    agency_boundaries: list(raw.agency_boundaries, 160),
+    constraints: list(raw.constraints, 240),
+    reachable_possibilities: list(raw.reachable_possibilities, 240),
+    memory_active_context: list(raw.memory_active_context, 240),
+    orientation: clean(raw.orientation, 4000) || 'Continue from the lived scene state.',
+    provenance: list(raw.provenance, 300),
+  };
   return deepFreeze(context);
 }
