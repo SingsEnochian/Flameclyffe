@@ -20,7 +20,7 @@ test('Narrative Circuit carries one admissible branch through witness and eviden
   assert.equal(result.ready_for_narrative_use, true);
   assert.equal(result.stages.transition_forge.branch_id, 'crossing');
   assert.equal(result.stages.witness_swap.selected_witness_id, 'w1');
-  assert.deepEqual(result.stages.arrival_validation.semantic_inflation.changed_paths.sort(), ['access','responsibility']);
+  assert.deepEqual([...result.stages.arrival_validation.semantic_inflation.changed_paths].sort(), ['access','responsibility']);
   assert.equal(result.mutation_authority, false);
 });
 
