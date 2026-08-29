@@ -32,7 +32,7 @@ test('semantic capability projection keeps observability separate from influence
   });
   const projection = projectSemanticCapabilities(source, ['scene_fact', 'tool_authority', 'narrative_particulars']);
   assert.deepEqual(projection.permitted, ['scene_fact']);
-  assert.deepEqual(projection.denied.sort(), ['narrative_particulars', 'tool_authority']);
+  assert.deepEqual([...projection.denied].sort(), ['narrative_particulars', 'tool_authority']);
   assert.match(projection.rule, /presence != influence/);
 });
 
