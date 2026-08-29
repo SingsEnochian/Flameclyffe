@@ -14,6 +14,16 @@ function findWorld(state, entry) {
     || null;
 }
 
+function findScript(state, document) {
+  const id = stableId('house-script', document.sourceKey);
+  return state.scripts.find((script) => script.houseSourceKey === document.sourceKey || script.id === id) || null;
+}
+
+function findIngestRecord(state, document) {
+  const id = stableId('house-ingest', document.sourceKey);
+  return state.records?.ingest?.find((record) => record.houseSourceKey === document.sourceKey || record.id === id) || null;
+}
+
 function sourceProfile(entry) {
   return {
     name: entry.name || '',
@@ -83,9 +93,30 @@ function upsertWorld(state, entry, now) {
   return { world, created: false };
 }
 
+function adoptWorldProvenance(world, entry) {
+  let changed = false;
+  if (world.houseSourceKey !== entry.sourceKey) {
+    world.houseSourceKey = entry.sourceKey;
+    changed = true;
+  }
+  if (!world.houseBundleManaged) {
+    world.houseBundleManaged = true;
+    changed = true;
+  }
+  if (!world.houseProfile) {
+    world.houseProfile = sourceProfile(entry);
+    changed = true;
+  }
+  if (!Array.isArray(world.houseSourceUrls) || !world.houseSourceUrls.length) {
+    world.houseSourceUrls = [...(entry.sourceUrls || [])];
+    changed = true;
+  }
+  return changed;
+}
+
 function upsertScript(state, world, document, bundle, now) {
   const id = stableId('house-script', document.sourceKey);
-  const existing = state.scripts.find((script) => script.houseSourceKey === document.sourceKey || script.id === id);
+  const existing = findScript(state, document);
   const record = {
     id,
     name: document.title,
@@ -112,7 +143,7 @@ function upsertIngestRecord(state, world, document, bundle, now) {
   if (!state.records || typeof state.records !== 'object') state.records = {};
   if (!Array.isArray(state.records.ingest)) state.records.ingest = [];
   const id = stableId('house-ingest', document.sourceKey);
-  const existing = state.records.ingest.find((record) => record.houseSourceKey === document.sourceKey || record.id === id);
+  const existing = findIngestRecord(state, document);
   const record = {
     id,
     worldId: world.id,
@@ -157,12 +188,171 @@ function removePristineFirstRunWorld(state) {
   }
 }
 
-export function applyHouseDrBundle(inputState, bundle, now = new Date().toISOString()) {
-  const state = deepClone(inputState);
+function ensureStateShape(state) {
   if (!Array.isArray(state.worlds)) state.worlds = [];
   if (!Array.isArray(state.scripts)) state.scripts = [];
   if (!state.records || typeof state.records !== 'object') state.records = {};
+  if (!Array.isArray(state.records.ingest)) state.records.ingest = [];
   if (!Array.isArray(state.houseBundles)) state.houseBundles = [];
+}
+
+export function inspectHouseDrBundleIntegrity(inputState, bundle) {
+  const state = inputState && typeof inputState === 'object' ? inputState : {};
+  const worlds = Array.isArray(state.worlds) ? state.worlds : [];
+  const scripts = Array.isArray(state.scripts) ? state.scripts : [];
+  const ingests = Array.isArray(state.records?.ingest) ? state.records.ingest : [];
+  const receipts = Array.isArray(state.houseBundles) ? state.houseBundles : [];
+  const currentReceipt = receipts.find((item) => item?.id === bundle.id && item?.version === bundle.version) || null;
+
+  const worldBySource = new Map();
+  const missingWorlds = [];
+  const unprovenancedWorlds = [];
+  for (const entry of bundle.worlds) {
+    const world = worlds.find((item) => item?.houseSourceKey === entry.sourceKey)
+      || worlds.find((item) => item?.name === entry.name)
+      || null;
+    if (!world) missingWorlds.push(entry.sourceKey);
+    else {
+      worldBySource.set(entry.sourceKey, world);
+      if (world.houseSourceKey !== entry.sourceKey || !world.houseBundleManaged) unprovenancedWorlds.push(entry.sourceKey);
+    }
+  }
+
+  const missingScripts = [];
+  const mislinkedScripts = [];
+  const missingIngests = [];
+  const mislinkedIngests = [];
+  for (const document of bundle.documents) {
+    const world = worldBySource.get(document.worldSourceKey) || null;
+    if (document.kind === 'source-ingest') {
+      const id = stableId('house-ingest', document.sourceKey);
+      const record = ingests.find((item) => item?.houseSourceKey === document.sourceKey || item?.id === id) || null;
+      if (!record) missingIngests.push(document.sourceKey);
+      else if (world && record.worldId !== world.id) mislinkedIngests.push(document.sourceKey);
+    } else {
+      const id = stableId('house-script', document.sourceKey);
+      const script = scripts.find((item) => item?.houseSourceKey === document.sourceKey || item?.id === id) || null;
+      if (!script) missingScripts.push(document.sourceKey);
+      else if (world && (script.worldId !== world.id || script.world !== world.name)) mislinkedScripts.push(document.sourceKey);
+    }
+  }
+
+  const complete = Boolean(currentReceipt)
+    && missingWorlds.length === 0
+    && unprovenancedWorlds.length === 0
+    && missingScripts.length === 0
+    && mislinkedScripts.length === 0
+    && missingIngests.length === 0
+    && mislinkedIngests.length === 0;
+
+  return {
+    complete,
+    currentReceipt,
+    missingWorlds,
+    unprovenancedWorlds,
+    missingScripts,
+    mislinkedScripts,
+    missingIngests,
+    mislinkedIngests,
+  };
+}
+
+export function repairHouseDrBundle(inputState, bundle, now = new Date().toISOString()) {
+  const state = deepClone(inputState);
+  ensureStateShape(state);
+  removePristineFirstRunWorld(state);
+
+  let worldsCreated = 0;
+  let worldsAdopted = 0;
+  let scriptsCreated = 0;
+  let scriptsRelinked = 0;
+  let ingestCreated = 0;
+  let ingestRelinked = 0;
+  const worldMap = new Map();
+
+  for (const entry of bundle.worlds) {
+    let world = findWorld(state, entry);
+    if (!world) {
+      world = seedWorld(entry, now);
+      state.worlds.push(world);
+      worldsCreated += 1;
+    } else if (adoptWorldProvenance(world, entry)) {
+      worldsAdopted += 1;
+    }
+    worldMap.set(entry.sourceKey, world);
+  }
+
+  for (const document of bundle.documents) {
+    const world = worldMap.get(document.worldSourceKey);
+    if (!world) throw new Error(`House DR document ${document.sourceKey} references missing world ${document.worldSourceKey}.`);
+
+    if (document.kind === 'source-ingest') {
+      const record = findIngestRecord(state, document);
+      if (!record) {
+        upsertIngestRecord(state, world, document, bundle, now);
+        ingestCreated += 1;
+      } else if (record.worldId !== world.id) {
+        record.worldId = world.id;
+        record.updatedAt = now;
+        ingestRelinked += 1;
+      }
+      continue;
+    }
+
+    const script = findScript(state, document);
+    if (!script) {
+      upsertScript(state, world, document, bundle, now);
+      scriptsCreated += 1;
+    } else if (script.worldId !== world.id || script.world !== world.name) {
+      script.worldId = world.id;
+      script.world = world.name;
+      script.updatedAt = now;
+      scriptsRelinked += 1;
+    }
+  }
+
+  const changed = worldsCreated + worldsAdopted + scriptsCreated + scriptsRelinked + ingestCreated + ingestRelinked > 0;
+  if (changed) {
+    state.provenance = {
+      ...(state.provenance || {}),
+      updatedAt: now,
+      houseDrLibraryRepair: {
+        bundleId: bundle.id,
+        bundleVersion: bundle.version,
+        repairedAt: now,
+        additiveOnly: true,
+        worldsCreated,
+        worldsAdopted,
+        scriptsCreated,
+        scriptsRelinked,
+        ingestCreated,
+        ingestRelinked,
+      },
+    };
+  }
+
+  if (!state.activeWorldId || !state.worlds.some((world) => world.id === state.activeWorldId)) {
+    state.activeWorldId = worldMap.get(bundle.defaultWorldSourceKey)?.id || state.worlds[0]?.id || null;
+  }
+
+  return {
+    state,
+    changed,
+    receipt: state.houseBundles.find((item) => item?.id === bundle.id && item?.version === bundle.version) || null,
+    summary: {
+      worldsCreated,
+      worldsAdopted,
+      scriptsCreated,
+      scriptsRelinked,
+      ingestCreated,
+      ingestRelinked,
+    },
+  };
+}
+
+export function applyHouseDrBundle(inputState, bundle, now = new Date().toISOString()) {
+  const state = deepClone(inputState);
+  ensureStateShape(state);
 
   removePristineFirstRunWorld(state);
 
