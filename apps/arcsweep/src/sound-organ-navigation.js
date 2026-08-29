@@ -3,6 +3,22 @@ import { SOUND_ORGANS, SOUND_ORGAN_REGISTRY_VERSION, soundOrgan } from './sound-
 let initialDeepLinkHandled = false;
 let focusTimer = null;
 
+function ensureStyles() {
+  if (document.querySelector('[data-sound-organ-style]')) return;
+  const style = document.createElement('style');
+  style.dataset.soundOrganStyle = SOUND_ORGAN_REGISTRY_VERSION;
+  style.textContent = `
+    .sound-organ-nav{display:grid;gap:.3rem;margin:.35rem 0 .75rem;padding:.55rem .35rem .2rem;border-top:1px solid color-mix(in srgb,var(--accent,#c89b62) 28%,transparent)}
+    .sound-organ-nav>small{padding:0 .5rem .2rem;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;opacity:.68}
+    .sound-organ-link{display:grid;grid-template-columns:1.6rem 1fr;align-items:center;gap:.45rem;width:100%;padding:.55rem .65rem;border:0;border-radius:.65rem;background:transparent;color:inherit;text-decoration:none;text-align:left;font:inherit;font-size:.86rem;cursor:pointer}
+    .sound-organ-link:hover,.sound-organ-link:focus-visible{background:color-mix(in srgb,var(--accent,#c89b62) 12%,transparent);outline:none}
+    [data-sound-organ-focused]{scroll-margin-top:1rem;outline:1px solid color-mix(in srgb,var(--accent,#c89b62) 62%,transparent);outline-offset:.35rem}
+    .soundfont-runtime-diagnostic[data-state="ready"]{color:var(--secondary,#92b8a1)}
+    .soundfont-runtime-diagnostic[data-state="error"]{color:#d98282}
+  `;
+  document.head.append(style);
+}
+
 function focusOrgan(id) {
   const organ = soundOrgan(id);
   if (!organ?.focusSelector) return;
@@ -13,13 +29,13 @@ function focusOrgan(id) {
     document.querySelectorAll('[data-sound-organ-focused]').forEach((node) => node.removeAttribute('data-sound-organ-focused'));
     target.dataset.soundOrganFocused = id;
     target.scrollIntoView({ block: 'start', behavior: 'smooth' });
-  }, 40);
+  }, 60);
 }
 
 function nativeButton(organ) {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'nav-room sound-organ-link';
+  button.className = 'sound-organ-link';
   button.dataset.room = organ.roomId;
   button.dataset.soundOrgan = organ.id;
   button.dataset.soundFocus = organ.focusSelector;
@@ -30,7 +46,7 @@ function nativeButton(organ) {
 
 function externalLink(organ) {
   const link = document.createElement('a');
-  link.className = 'nav-room sound-organ-link';
+  link.className = 'sound-organ-link';
   link.dataset.soundOrgan = organ.id;
   link.href = organ.pagesHref;
   link.title = organ.description;
@@ -39,6 +55,7 @@ function externalLink(organ) {
 }
 
 export function mountSoundOrganNavigation() {
+  ensureStyles();
   const nav = document.querySelector('.sidebar nav[aria-label="Primary Arcsweep rooms"]');
   if (!nav) return null;
   let group = nav.querySelector(`[data-sound-organ-nav="${SOUND_ORGAN_REGISTRY_VERSION}"]`);
@@ -67,7 +84,7 @@ function handleInitialDeepLink() {
     initialDeepLinkHandled = true;
     return;
   }
-  const button = document.querySelector(`[data-sound-organ="${CSS.escape(id)}"][data-room]`);
+  const button = document.querySelector(`[data-sound-organ="${id}"][data-room]`);
   if (!button) return;
   initialDeepLinkHandled = true;
   button.click();
