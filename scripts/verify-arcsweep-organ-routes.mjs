@@ -15,8 +15,10 @@ for (const organ of organs) {
   for (const key of ['id', 'label', 'pagesHref', 'deployedPath', 'sourcePath', 'implementation']) {
     if (!organ[key]) errors.push(`${organ.id || '<unknown>'}: missing ${key}`);
   }
-  try { await access(resolve(organ.sourcePath)); }
-  catch { errors.push(`${organ.id}: source missing: ${organ.sourcePath}`); }
+  for (const path of [organ.sourcePath, organ.surfaceSourcePath].filter(Boolean)) {
+    try { await access(resolve(path)); }
+    catch { errors.push(`${organ.id}: source missing: ${path}`); }
+  }
   if (siteRoot) {
     try { await access(resolve(siteRoot, organ.deployedPath)); }
     catch { errors.push(`${organ.id}: deployed route missing: ${organ.deployedPath}`); }

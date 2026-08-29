@@ -52,9 +52,12 @@ test('core renders before deferred sidecars and Safe Boot remains core-only', as
   assert.match(source, /data-arcsweep-recovery="error"/);
 });
 
-test('sidecar bootstrap contains failures and yields to WebKit between organs', async () => {
+test('sidecar bootstrap contains failures, build-visible loaders, and WebKit yields between organs', async () => {
   const source = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
-  assert.match(source, /await import\(specifier\)/);
+  assert.match(source, /import\.meta\.glob\(/);
+  assert.match(source, /SIDECAR_LOADERS\[specifier\]/);
+  assert.match(source, /await load\(\)/);
+  assert.doesNotMatch(source, /await import\(specifier\)/);
   assert.match(source, /setTimeout\(resolve, 0\)/);
   assert.match(source, /sidecar failed/);
   assert.match(source, /arcsweep:sidecars-ready/);
