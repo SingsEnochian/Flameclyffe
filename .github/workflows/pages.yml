@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: pages-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -23,6 +23,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Verify canonical Pages ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          offenders="$(grep -R -l 'actions/deploy-pages@' .github/workflows --include='*.yml' --include='*.yaml' | grep -v '^.github/workflows/pages.yml$' || true)"
+          if [ -n "$offenders" ]; then
+            echo 'Competing GitHub Pages publisher detected:' >&2
+            echo "$offenders" >&2
+            exit 1
+          fi
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -160,6 +171,7 @@ jobs:
           Flameclyffe GitHub Pages
           Source commit: $GITHUB_SHA
           Source branch: $GITHUB_REF_NAME
+          Publisher: .github/workflows/pages.yml
           Arcsweep: /Flameclyffe/apps/arcsweep/
           Bifröst Live: /Flameclyffe/bifrost-live/
           STARWELL Lab: /Flameclyffe/starwell-react-lab/
