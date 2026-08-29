@@ -44,6 +44,6 @@ test('SoundFont runtime repair emits the AudioWorklet as a Vite URL asset', asyn
 test('sound organ navigation is registry-driven and never clones StorySoundscape', async () => {
   const source = await readFile(new URL('../src/sound-organ-navigation.js', import.meta.url), 'utf8');
   assert.match(source, /SOUND_ORGANS/);
-  assert.match(source, /dataSoundOrgan/);
+  assert.match(source, /dataset\.soundOrgan/);
   assert.doesNotMatch(source, /new StorySoundscape/);
 });
