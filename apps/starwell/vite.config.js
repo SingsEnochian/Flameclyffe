@@ -102,6 +102,8 @@ export default defineConfig({
         scfeLab: resolve(REPO_ROOT, 'apps/starwell/scfe-lab.html'),
         temporalTwistRenderer: resolve(REPO_ROOT, 'apps/starwell/temporal-twist-renderer.html'),
         glyphStudio: resolve(REPO_ROOT, 'apps/starwell/glyph-studio/index.html'),
+        livingGlyph: resolve(REPO_ROOT, 'apps/starwell/living-glyph/index.html'),
+        fontFoundry: resolve(REPO_ROOT, 'apps/starwell/font-foundry/index.html'),
         signalWell: resolve(REPO_ROOT, 'apps/starwell/signal-well/index.html'),
       },
     },

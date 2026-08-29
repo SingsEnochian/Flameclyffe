@@ -38,12 +38,17 @@ jobs:
           npm run contracts:verify
           npm run starwell:test
           npm run arcsweep:test
+          node scripts/verify-arcsweep-organ-routes.mjs
 
       - name: Build existing STARWELL React Observatory Lab
         env:
           STARWELL_BASE: /Flameclyffe/starwell-react-lab/
         run: |
           npm run starwell:build
+          test -f dist/starwell/glyph-studio/index.html
+          test -f dist/starwell/living-glyph/index.html
+          test -f dist/starwell/font-foundry/index.html
+          test -f dist/starwell/arcsweep-continuity/index.html
           rm -rf /tmp/starwell-react-lab
           mkdir -p /tmp/starwell-react-lab
           cp -a dist/starwell/. /tmp/starwell-react-lab/
@@ -134,6 +139,8 @@ jobs:
             cp _site/starwell-react-lab/unit-resonance-lab.html "_site/starwell-react-lab/${route}/index.html"
           done
 
+          node scripts/verify-arcsweep-organ-routes.mjs --site _site
+
           mkdir -p _site/bifrost-live
           cp -a /tmp/bifrost-live/. _site/bifrost-live/
           test -f _site/bifrost-live/index.html
@@ -156,6 +163,10 @@ jobs:
           Arcsweep: /Flameclyffe/apps/arcsweep/
           Bifröst Live: /Flameclyffe/bifrost-live/
           STARWELL Lab: /Flameclyffe/starwell-react-lab/
+          Glyph Lab: /Flameclyffe/starwell-react-lab/glyph-studio/
+          Living Glyph: /Flameclyffe/starwell-react-lab/living-glyph/
+          Font Foundry: /Flameclyffe/starwell-react-lab/font-foundry/
+          Continuity Gate: /Flameclyffe/starwell-react-lab/arcsweep-continuity/
           EOF
 
           touch _site/.nojekyll

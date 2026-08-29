@@ -4,6 +4,7 @@ const SIDECARS = [
   './rich-text-core.js',
   './active-input-continuity.js',
   './mobile-navigation-sidecar.js',
+  './creative-organ-navigation.js',
   './world-registry-persistence-sidecar.js',
   './terra-prime-waking-world-sidecar.js',
   './instrument-sidecars.js',
