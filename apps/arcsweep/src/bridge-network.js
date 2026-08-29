@@ -58,6 +58,12 @@ const clean = (value, max = 8000) => String(value ?? '').trim().slice(0, max);
 const list = (value, max = 200) => [...new Set((Array.isArray(value) ? value : []).map((item) => clean(item, 2000)).filter(Boolean))].slice(0, max);
 const clone = (value) => value == null ? value : structuredClone(value);
 
+function deepFreeze(value) {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  for (const child of Object.values(value)) deepFreeze(child);
+  return Object.freeze(value);
+}
+
 function required(value, name, max = 8000) {
   const result = clean(value, max);
   if (!result) throw new Error(`${name} is required.`);
@@ -113,7 +119,7 @@ export async function createGlobalStructureDescriptor({
     },
   };
   descriptor.descriptor_fingerprint = await sha256(JSON.stringify(descriptor));
-  return Object.freeze(descriptor);
+  return deepFreeze(descriptor);
 }
 
 export async function createEpistemicProjection({
@@ -153,7 +159,7 @@ export async function createEpistemicProjection({
     },
   };
   projection.projection_fingerprint = await sha256(JSON.stringify(projection));
-  return Object.freeze(projection);
+  return deepFreeze(projection);
 }
 
 export async function createEffectReceipt({
@@ -182,7 +188,7 @@ export async function createEffectReceipt({
     },
   };
   receipt.receipt_fingerprint = await sha256(JSON.stringify(receipt));
-  return Object.freeze(receipt);
+  return deepFreeze(receipt);
 }
 
 export async function createInterpretationRevision({
@@ -220,7 +226,7 @@ export async function createInterpretationRevision({
     },
   };
   revision.revision_fingerprint = await sha256(JSON.stringify(revision));
-  return Object.freeze(revision);
+  return deepFreeze(revision);
 }
 
 export async function createDisclosureReceipt({
@@ -257,7 +263,7 @@ export async function createDisclosureReceipt({
     },
   };
   receipt.receipt_fingerprint = await sha256(JSON.stringify(receipt));
-  return Object.freeze(receipt);
+  return deepFreeze(receipt);
 }
 
 export function compileWildGenerationContext(raw) {
@@ -272,5 +278,5 @@ export function compileWildGenerationContext(raw) {
   for (const key of WILD_CONTEXT_FIELDS) {
     if (raw[key] !== undefined) context[key] = clone(raw[key]);
   }
-  return Object.freeze(context);
+  return deepFreeze(context);
 }
