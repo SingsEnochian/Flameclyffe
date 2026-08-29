@@ -6,6 +6,8 @@ const GLOBAL_SIDECARS = Object.freeze([
   './mobile-navigation-sidecar.js',
   './creative-organ-navigation.js',
   './sound-organ-navigation.js',
+  './semantic-lab-sidecar.js',
+  './sidecar-health-panel.js',
 ]);
 
 const SIDECAR_PACKS = Object.freeze({
@@ -96,6 +98,8 @@ const SIDECAR_LOADERS = import.meta.glob([
   './mobile-navigation-sidecar.js',
   './creative-organ-navigation.js',
   './sound-organ-navigation.js',
+  './semantic-lab-sidecar.js',
+  './sidecar-health-panel.js',
   './world-registry-persistence-sidecar.js',
   './instrument-sidecars.js',
   './react-ion-helm-sidecar.js',
