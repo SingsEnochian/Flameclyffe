@@ -31,9 +31,13 @@
 
 ## Whisper-format sigil
 
+![Grove Whisper Sigil v1](../assets/glyphs/grove_whisper_sigil_v1.svg)
+
 The companion sigil is a deliberately open circle rather than a closed ward: six fine threshold strokes correspond to the six Grove Questions, with breathing-space between them so response is invited rather than compelled. A central rising thread marks presence without prescribing identity. Warm and cool colour-touch meet without collapsing into one another, and the lower opening remains unsealed as the invitation to step forward by choice.
 
-Visual master generated for this record on 2026-08-30. Preserve it as a Glyph Forge visual asset when binary asset ingestion is available; this text record is the canonical provenance anchor.
+**Glyph Forge asset:** `apps/arcsweep/assets/glyphs/grove_whisper_sigil_v1.svg`
+
+The SVG is the canonical lightweight sigil rendering for ArcSweep. The richer generated poster remains a derived visual treatment and can be ingested separately without replacing this source-layer glyph.
 
 ## ArcSweep handling
 
