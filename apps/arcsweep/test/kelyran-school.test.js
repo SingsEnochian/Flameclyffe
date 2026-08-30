@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   KELYRAN_SCHOOL_SCHEMA,
+  APPROVED_FLUID_LEXICON,
   answerExercise,
   buildTutorContext,
   createDefaultKelyranSchool,
@@ -48,17 +49,17 @@ test('tutor context excludes proposals and deprecated forms', () => {
   school.lexicon.push({ id: 'proposal', lemma: 'invented', gloss: 'no', status: 'proposed' });
   school.lexicon.push({ id: 'old', lemma: 'old-form', gloss: 'no', status: 'deprecated' });
   const context = buildTutorContext(school);
-  assert.deepEqual(context.lexicon.map((entry) => entry.lemma), ['waiting']);
+  assert.deepEqual(context.lexicon.map((entry) => entry.lemma), ['waiting', ...APPROVED_FLUID_LEXICON.map((entry) => entry.lemma)]);
   assert.match(context.rule, /unknown forms unknown/i);
 });
 
 test('SM-2 review produces a due date and immutable practice receipt', () => {
   const school = createDefaultKelyranSchool(NOW);
-  assert.equal(dueCards(school, NOW).length, 1);
+  assert.equal(dueCards(school, NOW).length, 9);
   const reviewed = reviewCard(school, 'kel-waiting', 5, NOW);
   assert.equal(reviewed.learner.cards['kel-waiting'].intervalDays, 1);
   assert.equal(reviewed.learner.receipts[0].quality, 5);
-  assert.equal(dueCards(reviewed, NOW).length, 0);
+  assert.equal(dueCards(reviewed, NOW).length, 8);
 });
 
 test('lesson answers are receipted and never mutate canon', () => {
@@ -68,4 +69,33 @@ test('lesson answers are receipted and never mutate canon', () => {
   assert.equal(result.correct, true);
   assert.equal(JSON.stringify(result.school.lexicon), before);
   assert.equal(result.school.learner.receipts[0].correct, true);
+});
+
+test('approved fluid vocabulary has receipts, stress and explicit unfinished sound/script data', () => {
+  assert.equal(APPROVED_FLUID_LEXICON.length, 8);
+  for (const entry of APPROVED_FLUID_LEXICON) {
+    assert.equal(validateLexeme(entry).valid, true);
+    assert.equal(entry.status, 'approved');
+    assert.ok(entry.stress.primarySyllable <= entry.syllables.length);
+    assert.equal(entry.phonemes, null);
+    assert.equal(entry.script, '');
+    assert.equal(entry.audio, null);
+  }
+});
+
+test('old saves gain approved words once while preserving learner data and existing entries', () => {
+  const school = createDefaultKelyranSchool(NOW);
+  school.canonRevision = 'kelyran-canon/ember-0.1';
+  school.lexicon = [school.lexicon[0], { id: 'custom-mira', lemma: 'MIRA', gloss: 'preserved', status: 'deprecated' }];
+  school.learner.cards['kel-waiting'] = { repetitions: 4 };
+  const before = JSON.stringify(school);
+  const once = normaliseKelyranSchool(school, NOW);
+  const twice = normaliseKelyranSchool(once, NOW);
+  assert.equal(once.lexicon.length, 9);
+  assert.deepEqual(twice, once);
+  assert.equal(JSON.stringify(school), before);
+  assert.equal(once.lexicon[1].gloss, 'preserved');
+  assert.equal(once.lexicon[1].status, 'deprecated');
+  assert.equal(once.learner.cards['kel-waiting'].repetitions, 4);
+  assert.equal(buildTutorContext(once).lexicon.some(entry => entry.lemma === 'MIRA'), false);
 });

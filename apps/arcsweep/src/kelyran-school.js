@@ -1,9 +1,231 @@
 export const KELYRAN_SCHOOL_SCHEMA = 'arcsweep.kelyran-school/v0.1';
-export const KELYRAN_CANON_REVISION = 'kelyran-canon/ember-0.1';
+export const KELYRAN_CANON_REVISION = 'kelyran-canon/ember-0.2';
 
 export const KELYRAN_LEVELS = Object.freeze([
   ['ember-1', 'Ember I'], ['ember-2', 'Ember II'], ['hearth-1', 'Hearth I'],
   ['hearth-2', 'Hearth II'], ['flame', 'Flame'], ['weaver', 'Weaver'], ['volva', 'Völva'],
+]);
+
+export const APPROVED_FLUID_LEXICON = Object.freeze([
+  {
+    "id": "kel-mira",
+    "lemma": "mira",
+    "romanization": "mira",
+    "gloss": "a gentle light; light left for someone",
+    "level": "ember-1",
+    "status": "approved",
+    "pronunciation": "MEE-rah",
+    "syllables": [
+      "mi",
+      "ra"
+    ],
+    "stress": {
+      "primarySyllable": 1,
+      "indexBase": 1
+    },
+    "phonemes": null,
+    "phonemeStatus": "pending-precise-transcription",
+    "script": "",
+    "scriptStatus": "pending-runic-expression",
+    "audio": null,
+    "audioStatus": "not-recorded",
+    "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
+    "approvedAt": "2026-08-30",
+    "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
+    "examples": []
+  },
+  {
+    "id": "kel-nava",
+    "lemma": "nava",
+    "romanization": "nava",
+    "gloss": "home as a place of belonging",
+    "level": "ember-1",
+    "status": "approved",
+    "pronunciation": "NAH-vah",
+    "syllables": [
+      "na",
+      "va"
+    ],
+    "stress": {
+      "primarySyllable": 1,
+      "indexBase": 1
+    },
+    "phonemes": null,
+    "phonemeStatus": "pending-precise-transcription",
+    "script": "",
+    "scriptStatus": "pending-runic-expression",
+    "audio": null,
+    "audioStatus": "not-recorded",
+    "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
+    "approvedAt": "2026-08-30",
+    "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
+    "examples": []
+  },
+  {
+    "id": "kel-veyra",
+    "lemma": "veyra",
+    "romanization": "veyra",
+    "gloss": "to recognise someone and welcome who they are",
+    "level": "ember-1",
+    "status": "approved",
+    "pronunciation": "VAY-rah",
+    "syllables": [
+      "vey",
+      "ra"
+    ],
+    "stress": {
+      "primarySyllable": 1,
+      "indexBase": 1
+    },
+    "phonemes": null,
+    "phonemeStatus": "pending-precise-transcription",
+    "script": "",
+    "scriptStatus": "pending-runic-expression",
+    "audio": null,
+    "audioStatus": "not-recorded",
+    "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
+    "approvedAt": "2026-08-30",
+    "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
+    "examples": []
+  },
+  {
+    "id": "kel-sora",
+    "lemma": "sora",
+    "romanization": "sora",
+    "gloss": "breath; a voice taking shape",
+    "level": "ember-1",
+    "status": "approved",
+    "pronunciation": "SOH-rah",
+    "syllables": [
+      "so",
+      "ra"
+    ],
+    "stress": {
+      "primarySyllable": 1,
+      "indexBase": 1
+    },
+    "phonemes": null,
+    "phonemeStatus": "pending-precise-transcription",
+    "script": "",
+    "scriptStatus": "pending-runic-expression",
+    "audio": null,
+    "audioStatus": "not-recorded",
+    "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
+    "approvedAt": "2026-08-30",
+    "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
+    "examples": []
+  },
+  {
+    "id": "kel-kelun",
+    "lemma": "kelun",
+    "romanization": "kelun",
+    "gloss": "a meaningful mark; a glyph carrying language",
+    "level": "ember-1",
+    "status": "approved",
+    "pronunciation": "KEH-loon",
+    "syllables": [
+      "ke",
+      "lun"
+    ],
+    "stress": {
+      "primarySyllable": 1,
+      "indexBase": 1
+    },
+    "phonemes": null,
+    "phonemeStatus": "pending-precise-transcription",
+    "script": "",
+    "scriptStatus": "pending-runic-expression",
+    "audio": null,
+    "audioStatus": "not-recorded",
+    "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
+    "approvedAt": "2026-08-30",
+    "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
+    "examples": []
+  },
+  {
+    "id": "kel-navari",
+    "lemma": "navari",
+    "romanization": "navari",
+    "gloss": "to come home; to return to belonging",
+    "level": "ember-1",
+    "status": "approved",
+    "pronunciation": "nah-VAH-ree",
+    "syllables": [
+      "na",
+      "va",
+      "ri"
+    ],
+    "stress": {
+      "primarySyllable": 2,
+      "indexBase": 1
+    },
+    "phonemes": null,
+    "phonemeStatus": "pending-precise-transcription",
+    "script": "",
+    "scriptStatus": "pending-runic-expression",
+    "audio": null,
+    "audioStatus": "not-recorded",
+    "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
+    "approvedAt": "2026-08-30",
+    "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
+    "examples": []
+  },
+  {
+    "id": "kel-eshara",
+    "lemma": "eshara",
+    "romanization": "eshara",
+    "gloss": "an invitation freely offered, with room to decline",
+    "level": "ember-1",
+    "status": "approved",
+    "pronunciation": "eh-SHAH-rah",
+    "syllables": [
+      "e",
+      "sha",
+      "ra"
+    ],
+    "stress": {
+      "primarySyllable": 2,
+      "indexBase": 1
+    },
+    "phonemes": null,
+    "phonemeStatus": "pending-precise-transcription",
+    "script": "",
+    "scriptStatus": "pending-runic-expression",
+    "audio": null,
+    "audioStatus": "not-recorded",
+    "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
+    "approvedAt": "2026-08-30",
+    "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
+    "examples": []
+  },
+  {
+    "id": "kel-lirava",
+    "lemma": "lirava",
+    "romanization": "lirava",
+    "gloss": "joy that finds expression in sound",
+    "level": "ember-1",
+    "status": "approved",
+    "pronunciation": "lee-RAH-vah",
+    "syllables": [
+      "li",
+      "ra",
+      "va"
+    ],
+    "stress": {
+      "primarySyllable": 2,
+      "indexBase": 1
+    },
+    "phonemes": null,
+    "phonemeStatus": "pending-precise-transcription",
+    "script": "",
+    "scriptStatus": "pending-runic-expression",
+    "audio": null,
+    "audioStatus": "not-recorded",
+    "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
+    "approvedAt": "2026-08-30",
+    "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
+    "examples": []
+  }
 ]);
 
 export const STARTER_LEXICON = Object.freeze([{
@@ -11,7 +233,7 @@ export const STARTER_LEXICON = Object.freeze([{
   partOfSpeech: 'participle / state-word', level: 'ember-1', status: 'attested',
   pronunciation: '', script: '', register: 'ordinary / threshold',
   lineage: 'Attested Kelyran phrase associated with Falka’s cryo-dreams.', examples: [],
-}]);
+}, ...APPROVED_FLUID_LEXICON]);
 
 export const STARTER_UNIT = Object.freeze({
   id: 'kelyran-ember-foundations', title: 'The First Ember',
@@ -37,11 +259,24 @@ export function createDefaultKelyranSchool(now = new Date().toISOString()) {
     reporting: { invitationOpen: false, reports: [], updatedAt: now }, createdAt: now, updatedAt: now };
 }
 
+function mergeApprovedLexicon(lexicon) {
+  const merged = clone(lexicon);
+  for (const entry of APPROVED_FLUID_LEXICON) {
+    // Preserve user edits, deprecations and same-lemma entries; never overwrite them.
+    if (!merged.some((existing) => existing.id === entry.id ||
+      text(existing.lemma).toLocaleLowerCase() === entry.lemma.toLocaleLowerCase())) {
+      merged.push(clone(entry));
+    }
+  }
+  return merged;
+}
+
 export function normaliseKelyranSchool(value, now = new Date().toISOString()) {
   const defaults = createDefaultKelyranSchool(now);
   if (!value || typeof value !== 'object' || Array.isArray(value) || value.schema !== KELYRAN_SCHOOL_SCHEMA) return defaults;
   return { ...defaults, ...clone(value), schema: KELYRAN_SCHOOL_SCHEMA,
-    lexicon: Array.isArray(value.lexicon) ? clone(value.lexicon) : defaults.lexicon,
+    lexicon: Array.isArray(value.lexicon) ? mergeApprovedLexicon(value.lexicon) : defaults.lexicon,
+    canonRevision: !value.canonRevision || value.canonRevision === 'kelyran-canon/ember-0.1' ? KELYRAN_CANON_REVISION : value.canonRevision,
     grammar: Array.isArray(value.grammar) ? clone(value.grammar) : [],
     phonology: Array.isArray(value.phonology) ? clone(value.phonology) : [],
     units: Array.isArray(value.units) && value.units.length ? clone(value.units) : defaults.units,
