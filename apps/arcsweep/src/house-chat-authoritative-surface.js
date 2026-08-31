@@ -1,4 +1,5 @@
 import { HOUSE_CHAT_VOICES } from './house-commons-chat-v5-core.js';
+import './house-live-recovery.js';
 
 export const HOUSE_CHAT_SURFACE_MARKER = 'house-chat-authoritative-surface/v1';
 
