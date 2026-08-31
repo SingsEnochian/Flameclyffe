@@ -6,8 +6,10 @@ import {
   readHouseInteractionMode,
 } from './fantasy-roleplay-runtime.js';
 import { invokeOxAlphaPortableChat } from './oxalpha-portable-chat.js';
+import { buildModelReplyRuntimeEvent, persistAndVerifyModelReplyRuntimeEvent } from './house-runtime-receipt-client.js';
 
 export const FLAME_CHAT_STREAM_SCHEMA = 'hearthgate.flame-chat-stream/v1';
+export const HOUSE_CHAT_AUTO_BRAID_SCHEMA = 'arcsweep.house-chat-auto-braid/v1';
 
 function authHeaders(token) {
   return token && token !== HOUSE_COOKIE_SESSION ? { authorization: `Bearer ${token}` } : {};
@@ -31,6 +33,75 @@ function parseBlock(block) {
   return message;
 }
 
+async function maybeAutoReceiptHouseReply(reply, metadata, worldContext) {
+  const base = { ...reply, runtimeVerified: reply?.status === 'replied' && Boolean(reply?.provider) && Boolean(reply?.model) && Boolean(reply?.route) };
+  if (metadata?.surface !== 'house-commons') return base;
+  const threadId = String(metadata.commons_thread_id || '').trim();
+  const turnId = String(metadata.commons_turn_id || '').trim();
+  if (!threadId || !turnId || !worldContext || !base.runtimeVerified || !String(base.message || '').trim()) {
+    return {
+      ...base,
+      runtimeBraid: {
+        schema: HOUSE_CHAT_AUTO_BRAID_SCHEMA,
+        persisted: false,
+        readbackVerified: false,
+        reason: 'House reply was visible but lacked the complete attribution, World, thread, or turn evidence required for Runtime Braid admission.',
+      },
+    };
+  }
+  const proof = {
+    schema: HOUSE_CHAT_AUTO_BRAID_SCHEMA,
+    proof_id: `house-chat:${turnId}:${base.voiceId}`,
+    probed_at: new Date().toISOString(),
+    voice_id: base.voiceId,
+    voice_name: base.voiceId,
+    route: base.route,
+    status: 'live-proven',
+    proven: true,
+    provider: base.provider,
+    model: base.model,
+    latency_ms: base.latencyMs ?? null,
+    runtime_verified: true,
+    reply_excerpt: String(base.message).trim().slice(0, 280),
+    reason: null,
+  };
+  try {
+    const event = await buildModelReplyRuntimeEvent({
+      proof,
+      worldContext,
+      threadId,
+      turnId,
+      sourceReceiptIds: [proof.proof_id, worldContext.context_id].filter(Boolean),
+      occurredAt: proof.probed_at,
+    });
+    const persistence = await persistAndVerifyModelReplyRuntimeEvent(event);
+    return {
+      ...base,
+      runtimeBraid: {
+        schema: HOUSE_CHAT_AUTO_BRAID_SCHEMA,
+        persisted: true,
+        readbackVerified: persistence.verified === true,
+        eventId: event.event_id,
+        eventSequence: persistence.readback?.event_sequence ?? null,
+        packetFingerprint: event.packet_fingerprint,
+        worldId: event.world_id,
+        threadId: event.thread_id,
+        turnId: event.turn_id,
+      },
+    };
+  } catch (error) {
+    return {
+      ...base,
+      runtimeBraid: {
+        schema: HOUSE_CHAT_AUTO_BRAID_SCHEMA,
+        persisted: false,
+        readbackVerified: false,
+        reason: error?.message || String(error),
+      },
+    };
+  }
+}
+
 async function portableOxAlphaStream({
   compiled,
   sessionId,
@@ -42,7 +113,7 @@ async function portableOxAlphaStream({
   onDelta,
   onCompleted,
 } = {}) {
-  const reply = await invokeOxAlphaPortableChat({
+  const rawReply = await invokeOxAlphaPortableChat({
     message: compiled.message,
     sessionId,
     context,
@@ -52,28 +123,32 @@ async function portableOxAlphaStream({
   const started = {
     schema: FLAME_CHAT_STREAM_SCHEMA,
     flame_id: 'oxalpha',
-    provider: reply.provider,
-    model: reply.model,
+    provider: rawReply.provider,
+    model: rawReply.model,
     runtime_world_context_id: worldContext?.context_id || null,
     portable: true,
   };
   const completed = {
     ...started,
-    message: reply.message,
-    usage: reply.usage,
-    latency_ms: reply.latencyMs,
+    message: rawReply.message,
+    usage: rawReply.usage,
+    latency_ms: rawReply.latencyMs,
     first_token_ms: null,
     buffered_compatibility: true,
-    execution_path: reply.executionPath,
+    execution_path: rawReply.executionPath,
   };
   onStarted(started);
-  onDelta({ ...started, text: reply.message, message: reply.message });
+  onDelta({ ...started, text: rawReply.message, message: rawReply.message });
   onCompleted(completed);
-  return {
-    ...reply,
+  const reply = {
+    ...rawReply,
+    status: rawReply.status || 'replied',
+    voiceId: 'oxalpha',
+    route: rawReply.route || 'oxalpha',
     worldId: worldContext?.identity_anchor?.world_id || metadata.world_id || null,
     runtimeWorldContextId: worldContext?.context_id || null,
   };
+  return maybeAutoReceiptHouseReply(reply, metadata, worldContext);
 }
 
 export async function streamConstellationRuntimeVoice({
@@ -179,7 +254,7 @@ export async function streamConstellationRuntimeVoice({
   if (!completed) throw new Error('Flame stream closed before completion.');
   if (String(completed.flame_id || '').toLowerCase() !== String(route.route || '').toLowerCase()) throw new Error('Flame stream identity mismatch.');
   const worldId = worldContext?.identity_anchor?.world_id || requestMetadata.world_id || null;
-  return {
+  const reply = {
     status: 'replied',
     voiceId: route.voiceId,
     route: route.route,
@@ -197,4 +272,5 @@ export async function streamConstellationRuntimeVoice({
     interactionMode: compiled.mode,
     interactionSkillActive: compiled.active,
   };
+  return maybeAutoReceiptHouseReply(reply, requestMetadata, worldContext);
 }
