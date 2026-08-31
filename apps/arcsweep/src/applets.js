@@ -1,3 +1,5 @@
+import './echo-index-sidecar.js';
+
 export const APPLET_CATALOGUE = [
   { id: 'portal', label: 'Portal', glyph: '◉', category: 'core', defaultVisible: true },
   { id: 'worlds', label: 'World Registry', glyph: '✧', category: 'core', defaultVisible: true },
