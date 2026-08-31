@@ -103,7 +103,7 @@ export async function proveModelReply(voice, { appendReceipt = true } = {}) {
   try {
     reply = await invokeConstellationRuntimeVoice({
       voiceId: voice.id,
-      message: 'MODEL REPLY PROOF 002. Reply with one short sentence confirming you received this probe.',
+      message: 'MODEL REPLY PROOF 001. Reply with one short sentence confirming you received this probe.',
       sessionId: `model-reply-proof-${voice.id}-${Date.now()}`,
       metadata: { surface: 'model-reply-proof', proof_schema: MODEL_REPLY_PROOF_SCHEMA, runtime_braid_required: true },
     });
@@ -120,7 +120,7 @@ export async function proveModelReply(voice, { appendReceipt = true } = {}) {
         author: 'Model Reply Proof',
         status: receipt.proven && receipt.runtime_braid?.persisted ? 'live-braid-verified' : receipt.status,
         turn_id: receipt.proof_id,
-        thread_id: PROOF_THREAD_ID,
+        thread_id: 'model-reply-proof-001',
         world: receipt.runtime_braid?.world_id || null,
         runtime: {
           provider: receipt.provider,
