@@ -2,11 +2,26 @@ import { loadState } from './storage.js';
 import { resolveEchoIndex } from './echo-index.js';
 
 export const ECHO_INDEX_SIDECAR = 'arcsweep.echo-index-surface/v1';
+let navObserver = null;
 
 function externalEntries() {
   const provider = globalThis.__arcsweepEchoIndexSources;
   if (typeof provider !== 'function') return Promise.resolve([]);
   return Promise.resolve(provider()).then((value) => Array.isArray(value) ? value : []).catch(() => []);
+}
+
+function ensureLauncher() {
+  if (document.querySelector('#app [data-room="echo-index"]')) return;
+  const worlds = document.querySelector('#app [data-room="worlds"]');
+  if (!worlds?.parentElement) return;
+  const launcher = document.createElement(worlds.tagName.toLowerCase());
+  if (launcher.tagName === 'BUTTON') launcher.type = 'button';
+  launcher.className = worlds.className;
+  launcher.dataset.room = 'echo-index';
+  launcher.dataset.echoIndexLauncher = 'true';
+  launcher.setAttribute('aria-label', 'Open Echo Index resolver');
+  launcher.innerHTML = '<span aria-hidden="true">⌕</span><span>Echo Index</span>';
+  worlds.insertAdjacentElement('afterend', launcher);
 }
 
 function ensureDialog() {
@@ -88,5 +103,9 @@ if (typeof document !== 'undefined') {
     event.stopImmediatePropagation();
     void openEchoIndex();
   },true);
+  ensureLauncher();
+  navObserver = new MutationObserver(ensureLauncher);
+  navObserver.observe(document.body,{ childList:true, subtree:true });
+  globalThis.addEventListener?.('beforeunload',() => navObserver?.disconnect(),{ once:true });
   globalThis.dispatchEvent?.(new CustomEvent('arcsweep:echo-index-ready',{ detail:{ schema:ECHO_INDEX_SIDECAR } }));
 }
