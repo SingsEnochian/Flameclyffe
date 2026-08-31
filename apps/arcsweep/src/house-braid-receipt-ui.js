@@ -28,7 +28,7 @@ async function readRecentRuntimeReceipts() {
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body?.detail || body?.error || `Runtime receipt read failed (${response.status}).`);
-  return Array.isArray(body.events) ? body.events : [];
+  return (Array.isArray(body.events) ? body.events : []).filter((event) => event?.event_type === 'model-reply-receipted');
 }
 
 function receiptKey({ thread_id, turn_id, voice_id } = {}) {
