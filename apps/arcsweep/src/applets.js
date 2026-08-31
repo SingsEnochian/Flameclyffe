@@ -3,7 +3,6 @@ import './echo-index-sidecar.js';
 export const APPLET_CATALOGUE = [
   { id: 'portal', label: 'Portal', glyph: '◉', category: 'core', defaultVisible: true },
   { id: 'worlds', label: 'World Registry', glyph: '✧', category: 'core', defaultVisible: true },
-  { id: 'echo-index', label: 'Echo Index', glyph: '⌕', category: 'core', defaultVisible: true },
   { id: 'about-world', label: 'About this World', glyph: 'ⓘ', category: 'core', defaultVisible: true },
   { id: 'summon', label: 'Summon', glyph: '⌁', category: 'interface', defaultVisible: true },
   { id: 'veil-mode', label: 'Veil Mode', glyph: '◌', category: 'interface', defaultVisible: true },
