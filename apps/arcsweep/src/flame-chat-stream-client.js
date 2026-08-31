@@ -6,6 +6,7 @@ import {
   readHouseInteractionMode,
 } from './fantasy-roleplay-runtime.js';
 import { invokeOxAlphaPortableChat } from './oxalpha-portable-chat.js';
+import { IDENTITY_RELATIONS, createContributionEnvelope } from './mythframe-federation.js';
 
 export const FLAME_CHAT_STREAM_SCHEMA = 'hearthgate.flame-chat-stream/v1';
 
@@ -29,6 +30,11 @@ function parseBlock(block) {
   message.data = message.data.replace(/\n$/, '');
   try { message.payload = message.data ? JSON.parse(message.data) : null; } catch { message.payload = null; }
   return message;
+}
+
+function identityRelation(value) {
+  const requested = String(value || '').trim();
+  return IDENTITY_RELATIONS.includes(requested) ? requested : 'unknown';
 }
 
 async function portableOxAlphaStream({
@@ -105,11 +111,12 @@ export async function streamConstellationRuntimeVoice({
     requestMetadata.world_id = worldContext.identity_anchor.world_id;
     requestMetadata.world_context = worldContext;
   }
+  const resolvedSessionId = sessionId || `arcsweep-${route.voiceId}-${Date.now()}`;
 
   const token = await activeSession(fetchImpl);
   if (!token) {
     if (route.voiceId === 'oxalpha') {
-      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+      return portableOxAlphaStream({ compiled, sessionId: resolvedSessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
     }
     throw new Error('House Runtime offline.');
   }
@@ -124,14 +131,14 @@ export async function streamConstellationRuntimeVoice({
       signal,
       body: JSON.stringify({
         message: compiled.message,
-        session_id: sessionId || `arcsweep-${route.voiceId}-${Date.now()}`,
+        session_id: resolvedSessionId,
         context: Array.isArray(context) ? context : [],
         metadata: requestMetadata,
       }),
     });
   } catch (error) {
     if (route.voiceId === 'oxalpha' && error?.name !== 'AbortError' && !signal?.aborted) {
-      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+      return portableOxAlphaStream({ compiled, sessionId: resolvedSessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
     }
     throw error;
   }
@@ -139,7 +146,7 @@ export async function streamConstellationRuntimeVoice({
   if (!response.ok || !response.body) {
     const data = await response.json().catch(() => ({}));
     if (route.voiceId === 'oxalpha' && response.status !== 401) {
-      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+      return portableOxAlphaStream({ compiled, sessionId: resolvedSessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
     }
     throw new Error(data.error || `Flame stream ${response.status}`);
   }
@@ -179,14 +186,33 @@ export async function streamConstellationRuntimeVoice({
   if (!completed) throw new Error('Flame stream closed before completion.');
   if (String(completed.flame_id || '').toLowerCase() !== String(route.route || '').toLowerCase()) throw new Error('Flame stream identity mismatch.');
   const worldId = worldContext?.identity_anchor?.world_id || requestMetadata.world_id || null;
+  const provider = completed.provider || started?.provider || 'unknown';
+  const model = completed.model || started?.model || 'unknown';
+  const contributionEnvelope = await createContributionEnvelope({
+    contributionId: requestMetadata.contribution_id || `${completed.request_id || resolvedSessionId}:contribution`,
+    voiceId: route.voiceId,
+    identityContinuityId: requestMetadata.identity_continuity_id || `hearthfire:${route.voiceId}`,
+    identityRelation: identityRelation(requestMetadata.identity_relation),
+    runtimeProvider: provider,
+    runtimeModelExact: model,
+    runtimeRoute: `/api/v1/flames/${route.route}/chat`,
+    sessionId: resolvedSessionId,
+    mythframeScope: Array.isArray(requestMetadata.mythframe_scope) ? requestMetadata.mythframe_scope : worldId ? [`world:${worldId}`] : [],
+    sourceContextReceipts: Array.isArray(requestMetadata.source_context_receipts) ? requestMetadata.source_context_receipts : [],
+    foreignTranslationCapsulesUsed: Array.isArray(requestMetadata.foreign_translation_capsules_used) ? requestMetadata.foreign_translation_capsules_used : [],
+    localContinuityRevision: requestMetadata.local_continuity_revision || null,
+    contributionKind: requestMetadata.contribution_kind || 'house-chat-utterance',
+    adoptionRequested: requestMetadata.adoption_requested === true,
+    adoptionResult: requestMetadata.adoption_result || 'not-requested',
+  });
   return {
     status: 'replied',
     voiceId: route.voiceId,
     route: route.route,
     message: String(completed.message || visible).trim(),
-    provider: completed.provider || started?.provider || null,
-    model: completed.model || started?.model || null,
-    profileId: `house:${route.route}:${completed.provider || started?.provider || 'unknown'}:${completed.model || started?.model || 'unknown'}`,
+    provider,
+    model,
+    profileId: `house:${route.route}:${provider}:${model}`,
     citedSources: completed.cited_sources || [],
     usage: completed.usage || null,
     latencyMs: completed.latency_ms ?? null,
@@ -196,5 +222,6 @@ export async function streamConstellationRuntimeVoice({
     bufferedCompatibility: completed.buffered_compatibility === true,
     interactionMode: compiled.mode,
     interactionSkillActive: compiled.active,
+    contributionEnvelope,
   };
 }

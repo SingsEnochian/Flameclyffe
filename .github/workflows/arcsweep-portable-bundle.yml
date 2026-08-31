@@ -83,10 +83,12 @@ jobs:
           test -f apps/arcsweep/test/house-observation-host-config.test.js
           test -f apps/arcsweep/test/flame-chat-stream-runtime.test.js
           test -f apps/arcsweep/test/house-chat-v5-interaction-gauntlet.test.js
+          test -f apps/arcsweep/test/vercel-function-budget.test.js
           test -f netlify/functions/_shared/supabase-runtime-config.mjs
           test -f netlify/functions/_shared/flame-chat-stream-runtime.mjs
           test -f netlify/functions/_shared/house-rooms-runtime.mjs
-          test -f api/v1/house/observations.js
+          test -f 'api/v1/house/[action].js'
+          grep -q "observations" 'api/v1/house/[action].js'
           test -f api/v1/house/rooms.js
 
       - name: Assemble host-agnostic release package
