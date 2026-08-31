@@ -2,24 +2,36 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-import { runtimeHouseVoices } from '../src/house-commons-chat-v5-core.js';
+import { HOUSE_CHAT_VOICES, runtimeHouseVoices } from '../src/house-commons-chat-v5-core.js';
 
-test('runtime roster prefers live non-offline voices and preserves runtime metadata', () => {
+test('runtime roster keeps configured voices visible while preserving live runtime metadata', () => {
+  const fallback = [
+    { id: 'lioreal', name: 'Lioreal', route: 'lioreal' },
+    { id: 'oxalpha', name: 'Ox Alpha', route: 'oxalpha', model: 'GLM-5.3-Flash' },
+    { id: 'uial', name: 'Uial', route: 'uial' },
+  ];
   const voices = runtimeHouseVoices([
     { voice_id: 'lioreal', display_name: 'Lioreal', state: 'ready', provider: 'openai', model: 'gpt-test', route: 'lioreal' },
-    { voice_id: 'oa', display_name: 'OA', state: 'ready', provider: 'openai', model: 'oa-test', route: 'oa' },
     { voice_id: 'uial', display_name: 'Uial', state: 'offline', provider: 'test', model: 'test', route: 'uial' },
-  ], [{ id: 'lioreal', name: 'Lioreal', route: 'lioreal' }, { id: 'uial', name: 'Uial', route: 'uial' }]);
+  ], fallback);
 
-  assert.deepEqual(voices.map((voice) => voice.id), ['lioreal', 'oa']);
-  assert.equal(voices.find((voice) => voice.id === 'oa')?.provider, 'openai');
-  assert.equal(voices.find((voice) => voice.id === 'oa')?.state, 'ready');
+  assert.deepEqual(voices.map((voice) => voice.id), ['lioreal', 'oxalpha', 'uial']);
+  assert.equal(voices.find((voice) => voice.id === 'lioreal')?.provider, 'openai');
+  assert.equal(voices.find((voice) => voice.id === 'lioreal')?.state, 'ready');
+  assert.equal(voices.find((voice) => voice.id === 'oxalpha')?.name, 'Ox Alpha');
+  assert.equal(voices.find((voice) => voice.id === 'oxalpha')?.state, 'offline');
 });
 
-test('runtime roster falls back only when no live runtime voices exist', () => {
-  const fallback = [{ id: 'lioreal', name: 'Lioreal' }];
-  assert.deepEqual(runtimeHouseVoices([], fallback), fallback);
-  assert.deepEqual(runtimeHouseVoices([{ voice_id: 'lioreal', state: 'offline' }], fallback), fallback);
+test('runtime-only identities remain visible without replacing the configured roster', () => {
+  const fallback = [{ id: 'lioreal', name: 'Lioreal' }, { id: 'oxalpha', name: 'Ox Alpha' }];
+  const voices = runtimeHouseVoices([{ voice_id: 'temporary-lab', display_name: 'Temporary Lab', state: 'ready' }], fallback);
+  assert.deepEqual(voices.map((voice) => voice.id), ['lioreal', 'oxalpha', 'temporary-lab']);
+  assert.equal(voices.find((voice) => voice.id === 'temporary-lab')?.runtime_only, true);
+});
+
+test('Ox Alpha is one canonical House identity and OA is not invented as a second voice', () => {
+  assert.equal(HOUSE_CHAT_VOICES.some((voice) => voice.id === 'oxalpha' && voice.name === 'Ox Alpha'), true);
+  assert.equal(HOUSE_CHAT_VOICES.some((voice) => voice.id === 'oa'), false);
 });
 
 test('visible House Chat mounts runtime roster UI after v5', async () => {
