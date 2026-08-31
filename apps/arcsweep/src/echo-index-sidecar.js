@@ -80,12 +80,13 @@ async function openEchoIndex() {
   queueMicrotask(() => input.focus());
 }
 
-document.addEventListener('click',(event) => {
-  const trigger = event.target?.closest?.('#app [data-room="echo-index"]');
-  if (!trigger) return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  void openEchoIndex();
-},true);
-
-globalThis.dispatchEvent?.(new CustomEvent('arcsweep:echo-index-ready',{ detail:{ schema:ECHO_INDEX_SIDECAR } }));
+if (typeof document !== 'undefined') {
+  document.addEventListener('click',(event) => {
+    const trigger = event.target?.closest?.('#app [data-room="echo-index"]');
+    if (!trigger) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    void openEchoIndex();
+  },true);
+  globalThis.dispatchEvent?.(new CustomEvent('arcsweep:echo-index-ready',{ detail:{ schema:ECHO_INDEX_SIDECAR } }));
+}
