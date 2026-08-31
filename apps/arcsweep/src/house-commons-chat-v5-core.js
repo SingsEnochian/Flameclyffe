@@ -15,12 +15,39 @@ export const HOUSE_CHAT_VOICES = Object.freeze([
 ]);
 
 export function runtimeHouseVoices(presence = [], fallback = HOUSE_CHAT_VOICES) {
-  const known = new Map(fallback.map((voice) => [voice.id, voice]));
-  const live = (Array.isArray(presence) ? presence : []).filter((item) => item?.voice_id && item.state !== 'offline').map((item) => ({
-    ...(known.get(item.voice_id) || {}), id: item.voice_id, name: item.display_name || known.get(item.voice_id)?.name || item.voice_id,
-    route: item.route || known.get(item.voice_id)?.route || item.voice_id, provider: item.provider || null, model: item.model || null, state: item.state,
-  }));
-  return live.length ? live : fallback;
+  const configured = Array.isArray(fallback) ? fallback : [];
+  const known = new Map(configured.map((voice) => [voice.id, voice]));
+  const presenceRows = (Array.isArray(presence) ? presence : []).filter((item) => item?.voice_id);
+  const runtimeById = new Map(presenceRows.map((item) => [item.voice_id, item]));
+
+  const roster = configured.map((voice) => {
+    const item = runtimeById.get(voice.id);
+    if (!item) return { ...voice, state: voice.state || 'offline', provider: voice.provider || null };
+    return {
+      ...voice,
+      id: voice.id,
+      name: voice.name || item.display_name || voice.id,
+      route: item.route || voice.route || voice.id,
+      provider: item.provider || voice.provider || null,
+      model: item.model || voice.model || null,
+      state: item.state || 'offline',
+    };
+  });
+
+  for (const item of presenceRows) {
+    if (known.has(item.voice_id)) continue;
+    roster.push({
+      id: item.voice_id,
+      name: item.display_name || item.voice_id,
+      route: item.route || item.voice_id,
+      provider: item.provider || null,
+      model: item.model || null,
+      state: item.state || 'offline',
+      runtime_only: true,
+    });
+  }
+
+  return roster;
 }
 
 export const uuid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
