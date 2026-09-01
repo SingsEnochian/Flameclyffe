@@ -41,7 +41,7 @@ function receiptForEntry(entry, byKey) {
 }
 
 function receiptMarkup(receipt) {
-  if (!receipt) return '<span class="house-braid-chip house-braid-chip-unbraided" data-braid-state="unbraided" title="No matching durable Runtime Braid receipt was found for this model reply.">◇ unbraided</span>';
+  if (!receipt) return '<span class="house-braid-chip house-braid-chip-not-observed" data-braid-state="not-observed" title="No matching receipt was observed in the bounded recent Runtime Braid read. This does not prove that no durable receipt exists.">◇ receipt not observed</span>';
   const title = [
     'Runtime Braid verified',
     receipt.provider && `provider: ${receipt.provider}`,
@@ -82,7 +82,7 @@ function decorate(entries, receipts) {
     const actions = header.querySelector('div:last-child') || header;
     const existing = article.querySelector('[data-braid-state]');
     const receipt = receiptForEntry(entry, byKey);
-    const state = receipt ? `verified:${receipt.event_id}` : 'unbraided';
+    const state = receipt ? `verified:${receipt.event_id}` : 'not-observed';
     if (existing?.dataset?.braidFingerprint === state) return;
     existing?.remove();
     const holder = document.createElement('span');
@@ -112,7 +112,7 @@ export function installHouseBraidReceiptUI() {
   if (installed || typeof document === 'undefined') return;
   installed = true;
   const style = document.createElement('style');
-  style.textContent = `.house-braid-chip{border:1px solid var(--line-soft);border-radius:999px;padding:.16rem .42rem;font-size:.72rem;line-height:1.2;background:transparent;color:var(--muted);cursor:help}.house-braid-chip-verified{color:var(--seafoam,#8dd8c0);cursor:pointer}.house-braid-chip-unbraided{opacity:.7}.house-braid-receipt-inspector{width:min(42rem,calc(100vw - 2rem));border:1px solid var(--line-soft);border-radius:1rem;background:var(--panel);color:inherit}.house-braid-receipt-inspector form>header{display:flex;justify-content:space-between;gap:1rem;align-items:start}.house-braid-receipt-inspector pre{max-height:60vh;overflow:auto;white-space:pre-wrap;word-break:break-word;background:var(--panel-deep,var(--panel));padding:.8rem;border-radius:.7rem}`;
+  style.textContent = `.house-braid-chip{border:1px solid var(--line-soft);border-radius:999px;padding:.16rem .42rem;font-size:.72rem;line-height:1.2;background:transparent;color:var(--muted);cursor:help}.house-braid-chip-verified{color:var(--seafoam,#8dd8c0);cursor:pointer}.house-braid-chip-not-observed{opacity:.7}.house-braid-receipt-inspector{width:min(42rem,calc(100vw - 2rem));border:1px solid var(--line-soft);border-radius:1rem;background:var(--panel);color:inherit}.house-braid-receipt-inspector form>header{display:flex;justify-content:space-between;gap:1rem;align-items:start}.house-braid-receipt-inspector pre{max-height:60vh;overflow:auto;white-space:pre-wrap;word-break:break-word;background:var(--panel-deep,var(--panel));padding:.8rem;border-radius:.7rem}`;
   document.head.append(style);
   observer = new MutationObserver(() => queueMicrotask(() => void refreshHouseBraidReceipts()));
   observer.observe(document.body, { childList: true, subtree: true });

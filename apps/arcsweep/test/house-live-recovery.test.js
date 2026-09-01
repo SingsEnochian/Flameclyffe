@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { houseLiveRecoveryNeedsMount } from '../src/house-live-recovery.js';
 
 const recovery = fs.readFileSync(new URL('../src/house-live-recovery.js', import.meta.url), 'utf8');
 const surface = fs.readFileSync(new URL('../src/house-chat-authoritative-surface.js', import.meta.url), 'utf8');
@@ -23,4 +24,11 @@ test('static Pages does not pretend to seal a server cookie and can recover in-p
 
 test('native House surface mounts the live recovery dependency', () => {
   assert.match(surface, /import '\.\/house-live-recovery\.js'/);
+});
+
+test('live recovery observer ignores mutations made by an existing recovery rail', () => {
+  const root = (present) => ({ querySelector: (selector) => present.has(selector) ? { selector } : null });
+  assert.equal(houseLiveRecoveryNeedsMount(root(new Set())), false);
+  assert.equal(houseLiveRecoveryNeedsMount(root(new Set(['#commons-form']))), true);
+  assert.equal(houseLiveRecoveryNeedsMount(root(new Set(['#commons-form', '[data-house-live-recovery]']))), false);
 });

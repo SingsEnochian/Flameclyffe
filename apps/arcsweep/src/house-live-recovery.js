@@ -49,6 +49,11 @@ function ensureRail() {
   return rail;
 }
 
+export function houseLiveRecoveryNeedsMount(root = globalThis.document) {
+  if (!root?.querySelector) return false;
+  return Boolean(root.querySelector('#commons-form') && !root.querySelector('[data-house-live-recovery]'));
+}
+
 function setRail(rail, { state, title, detail, showSignin = false } = {}) {
   if (!rail) return;
   rail.dataset.houseLiveState = state || 'unknown';
@@ -106,7 +111,11 @@ export async function installHouseLiveRecovery() {
   const style = document.createElement('style');
   style.textContent = `.house-live-recovery{margin:.65rem 0;padding:.7rem .8rem;border:1px solid var(--line-soft);border-radius:.85rem;background:var(--panel)}.house-live-recovery-head{display:flex;justify-content:space-between;gap:.8rem;align-items:center}.house-live-recovery[data-house-live-state="live"]{border-color:color-mix(in srgb,var(--seafoam,#8dd8c0) 55%,var(--line-soft))}.house-live-recovery[data-house-live-state="auth-required"],.house-live-recovery[data-house-live-state="error"]{border-color:color-mix(in srgb,var(--gold,#d9b46f) 55%,var(--line-soft))}.house-live-recovery [data-house-live-signin]{display:flex;gap:.5rem;align-items:end;flex-wrap:wrap}.house-live-recovery [data-house-live-signin][hidden]{display:none}.house-live-recovery input{min-width:min(18rem,75vw)}`;
   document.head.append(style);
-  observer = new MutationObserver(() => { if (document.querySelector('#commons-form')) { ensureRail(); queueMicrotask(() => void refreshHouseLiveRecovery()); } });
+  observer = new MutationObserver(() => {
+    if (!houseLiveRecoveryNeedsMount()) return;
+    ensureRail();
+    queueMicrotask(() => void refreshHouseLiveRecovery());
+  });
   observer.observe(document.body, { childList: true, subtree: true });
   const { client } = await supabaseSession().catch(() => ({ client: null }));
   if (client) {
