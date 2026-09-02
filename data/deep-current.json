@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-09-02T16:48:18.196Z",
+  "generated_at": "2026-09-02T22:17:57.840Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,52 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-02T12:45",
+    "time": "2026-09-02T18:15",
     "sky": "Day",
     "current": {
-      "time": "2026-09-02T12:45",
+      "time": "2026-09-02T18:15",
       "interval": 900,
-      "temperature_2m": 82.8,
+      "temperature_2m": 80.5,
       "relative_humidity_2m": 91,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
-      "cloud_cover": 100,
-      "pressure_msl": 1017.8,
-      "wind_speed_10m": 9.9,
-      "wind_direction_10m": 51
+      "cloud_cover": 92,
+      "pressure_msl": 1015,
+      "wind_speed_10m": 8.8,
+      "wind_direction_10m": 36
     }
   },
   "space_weather": {
     "kp": {
       "value": 1.67,
-      "time_tag": "2026-09-02T12:00:00",
+      "time_tag": "2026-09-02T18:00:00",
       "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-09-02T16:40:00Z",
-      "bz": 0,
-      "bt": 5,
+      "time_tag": "2026-09-02T22:10:00Z",
+      "bz": 2,
+      "bt": 4,
       "density": null,
-      "speed": 360
+      "speed": 378
     }
   },
   "moon": {
-    "age_days": 20.38,
-    "illumination": 68.4,
+    "age_days": 20.61,
+    "illumination": 66.1,
     "name": "Last Quarter"
   },
   "field": {
-    "P": 0.5733333333333328,
-    "C": 0.2538095238095239,
-    "R": 0.7849999999999999,
+    "P": 0.5422222222222223,
+    "C": 0.29190476190476194,
+    "R": 0.8216666666666668,
     "E": 0.7092857142857143,
-    "M": 0.684,
-    "A": 0.6,
-    "T": 0.5832555873015872,
-    "H": 0.5233873015873016,
-    "dpdt": 0.7849999999999999
+    "M": 0.6609999999999999,
+    "A": 0.6307692307692307,
+    "T": 0.597775894993895,
+    "H": 0.5688188034188034,
+    "dpdt": 0.8216666666666668
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
