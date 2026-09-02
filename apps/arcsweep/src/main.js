@@ -30,6 +30,7 @@ import { CONSTELLATION_VOICES, createInitialPremaqc, invokeConstellationVoices, 
 import { createEmptyFeedbackQueue, normalizeFeedbackQueue, enqueueFeedbackCycle, acceptFeedbackCycle, archiveFeedbackCycle, discardFeedbackCycle, pendingCycles, feedbackQueueSummary } from './feedback-cycle-queue.js';
 import { StorySoundscape } from './story-soundscape.js';
 import { FIELD_AXES, classifyFieldInstrument, createFieldObservationPremaqc, formatFieldAge, isHostedBrowser } from './field-instrument.js';
+import { readCurrentField } from './field-source.js';
 import {
   admitHouseObservationToDeepTime,
   appendHouseCommons,
@@ -779,9 +780,7 @@ async function fetchDeepData() {
   notice = 'Reading field…';
   render();
   try {
-    const res = await fetch('/api/v1/field/current', { cache: 'no-store' });
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    deepData = await res.json();
+    deepData = await readCurrentField();
     deepDataError = null;
     const age = deepData?.generated_at ? Date.now() - Date.parse(deepData.generated_at) : null;
     notice = age !== null && age > 6 * 60 * 60 * 1000 ? `Field source received · stale (${formatFieldAge(age)}).` : 'Field source received.';

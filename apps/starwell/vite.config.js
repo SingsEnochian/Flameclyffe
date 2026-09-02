@@ -59,6 +59,8 @@ function publishLegacyObservatoryPages() {
       await cp(resolve(REPO_ROOT, 'assets'), resolve(OUT_DIR, 'assets'), { recursive: true, force: true });
       await cp(resolve(REPO_ROOT, 'resonance'), resolve(OUT_DIR, 'resonance'), { recursive: true, force: true });
       await cp(resolve(REPO_ROOT, 'starwell/deep-observer/schemas'), resolve(OUT_DIR, 'schemas'), { recursive: true, force: true });
+      await mkdir(resolve(OUT_DIR, 'data'), { recursive: true });
+      await cp(resolve(REPO_ROOT, 'data/deep-current.json'), resolve(OUT_DIR, 'data/deep-current.json'), { force: true });
 
       await mkdir(resolve(OUT_DIR, 'arcsweep'), { recursive: true });
       await cp(resolve(OUT_DIR, 'index.html'), resolve(OUT_DIR, 'arcsweep', 'index.html'), { force: true });

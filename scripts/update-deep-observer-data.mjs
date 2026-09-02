@@ -1,16 +1,18 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 
 const DEFAULT_LAT = Number(process.env.DEEP_OBSERVER_LAT || '30.04');
 const DEFAULT_LON = Number(process.env.DEEP_OBSERVER_LON || '-81.40');
 const DEFAULT_LABEL = process.env.DEEP_OBSERVER_LABEL || 'NE Florida approximate';
 const OUT_PATH = 'data/deep-current.json';
 const FETCH_TIMEOUT_MS = Number(process.env.DEEP_OBSERVER_FETCH_TIMEOUT_MS || '15000');
+const MAX_FALLBACK_AGE_MS = 6 * 60 * 60 * 1000;
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const latest = (rows) => Array.isArray(rows) && rows.length ? rows[rows.length - 1] : null;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function jsonWithRetry(url, maxRetries = 3) {
+export async function jsonWithRetry(url, maxRetries = 3) {
   for (let i = 0; i < maxRetries; i++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -20,9 +22,14 @@ async function jsonWithRetry(url, maxRetries = 3) {
         headers: { accept: 'application/json' },
         signal: controller.signal,
       });
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+      if (!res.ok) {
+        const error = new Error(`${res.status} ${res.statusText} for ${url}`);
+        error.status = res.status;
+        throw error;
+      }
       return res.json();
     } catch (err) {
+      if (err.status >= 400 && err.status < 500 && err.status !== 429) throw err;
       if (i === maxRetries - 1) throw err;
       const delay = Math.pow(2, i) * 1000;
       console.log(`Retry ${i + 1}/${maxRetries} after ${delay}ms for ${url}...`);
@@ -41,7 +48,7 @@ async function readPreviousState() {
   }
 }
 
-function moonInfo(date = new Date()) {
+export function moonInfo(date = new Date()) {
   const synodic = 29.530588853;
   const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
   const days = (date.getTime() - knownNewMoon) / 86400000;
@@ -66,15 +73,16 @@ function weatherCodeToSky(code, isDay) {
   return 'Day';
 }
 
-function buildState({ weather, kpRows, magRows, plasmaRows }) {
+export function buildState({ weather, kpRows, magRows, plasmaRows }, now = new Date()) {
   const current = weather?.current || {};
   const latestKp = latest(kpRows) || {};
   const mag = latest(magRows) || [];
   const plasma = latest(plasmaRows) || [];
-  const bz = Number(mag[3] ?? 0);
-  const bt = Number(mag[6] ?? mag[2] ?? 0);
-  const density = Number(plasma[1] ?? 0);
-  const speed = Number(plasma[2] ?? 0);
+  const bz = Number(mag.bz_gsm ?? mag[3] ?? 0);
+  const bt = Number(mag.bt ?? mag[6] ?? mag[2] ?? 0);
+  const densityInput = plasma.proton_density ?? plasma[1];
+  const density = densityInput == null ? null : Number(densityInput);
+  const speed = Number(plasma.proton_speed ?? plasma[2] ?? 0);
   const kp = Number(latestKp.Kp ?? 0);
   const cloud = Number(current.cloud_cover ?? 0);
   const precip = Number(current.precipitation ?? 0);
@@ -82,7 +90,7 @@ function buildState({ weather, kpRows, magRows, plasmaRows }) {
   const wind = Number(current.wind_speed_10m ?? 0);
   const weatherCode = Number(current.weather_code ?? 0);
   const sky = weatherCodeToSky(weatherCode, Number(current.is_day ?? 0));
-  const moon = moonInfo();
+  const moon = moonInfo(now);
 
   const P = clamp(0.48 + (Number(current.pressure_msl ?? 1013) - 1013) / 90 + (Number(current.is_day ?? 0) ? 0.04 : -0.02));
   const C = clamp(0.66 - cloud / 210 - precip / 10 + (kp < 3 ? 0.07 : -0.04));
@@ -95,7 +103,7 @@ function buildState({ weather, kpRows, magRows, plasmaRows }) {
 
   return {
     version: 'deep-observer-backend-v1',
-    generated_at: new Date().toISOString(),
+    generated_at: now.toISOString(),
     source: {
       weather: 'Open-Meteo Forecast API',
       space_weather: 'NOAA SWPC JSON products',
@@ -109,7 +117,7 @@ function buildState({ weather, kpRows, magRows, plasmaRows }) {
     },
     space_weather: {
       kp: { value: kp, time_tag: latestKp.time_tag || null, a_running: latestKp.a_running ?? null },
-      solar_wind: { time_tag: mag[0] || plasma[0] || null, bz, bt, density, speed }
+      solar_wind: { time_tag: mag.time_tag || plasma.time_tag || mag[0] || plasma[0] || null, bz, bt, density, speed }
     },
     moon,
     field: { P, C, R, E, M, A, T, H, dpdt: R },
@@ -117,7 +125,7 @@ function buildState({ weather, kpRows, magRows, plasmaRows }) {
   };
 }
 
-async function fetchCurrentInputs() {
+export async function fetchCurrentInputs() {
   const weatherUrl = new URL('https://api.open-meteo.com/v1/forecast');
   weatherUrl.searchParams.set('latitude', String(DEFAULT_LAT));
   weatherUrl.searchParams.set('longitude', String(DEFAULT_LON));
@@ -130,14 +138,19 @@ async function fetchCurrentInputs() {
   const [weather, kpRows, magRows, plasmaRows] = await Promise.all([
     jsonWithRetry(weatherUrl.toString()),
     jsonWithRetry('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
-    jsonWithRetry('https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json'),
-    jsonWithRetry('https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json')
+    jsonWithRetry('https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json'),
+    jsonWithRetry('https://services.swpc.noaa.gov/products/summary/solar-wind-speed.json')
   ]);
 
   return { weather, kpRows, magRows, plasmaRows };
 }
 
-async function main() {
+export function cacheIsFresh(state, now = Date.now()) {
+  const generatedAt = Date.parse(state?.generated_at || '');
+  return Number.isFinite(generatedAt) && Number(now) - generatedAt <= MAX_FALLBACK_AGE_MS;
+}
+
+export async function main() {
   try {
     const inputs = await fetchCurrentInputs();
     await mkdir('data', { recursive: true });
@@ -145,7 +158,9 @@ async function main() {
     console.log(`Wrote ${OUT_PATH}`);
   } catch (err) {
     const previous = await readPreviousState();
-    if (!previous) throw err;
+    if (!previous || !cacheIsFresh(previous)) {
+      throw new Error(`DEEP Observer refresh failed and the fallback cache is older than six hours: ${err.message}`, { cause: err });
+    }
 
     console.warn('DEEP Observer source fetch failed. Keeping previous cache instead of failing workflow.');
     console.warn(err);
@@ -153,7 +168,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

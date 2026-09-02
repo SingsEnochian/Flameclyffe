@@ -1,7 +1,7 @@
 'use strict';
 
 const TZ = 'America/New_York';
-const BRIDGE = 'https://singsenochian.github.io/-bridge-pulse/pulse.json';
+const BRIDGE = new URL('../../data/deep-current.json', window.location.href).href;
 const TAU = Math.PI * 2;
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const rgba = (rgb, a) => `rgba(${rgb},${a})`;
@@ -149,7 +149,7 @@ function applyDeep(raw, source, channel = source){
   D.rawInputs[channel] = copyExact(raw);
   D.transformationReceipts[channel] = [];
   ['P','C','R','E','M','A','Q','charge'].forEach(k => {
-    if(raw[k] === undefined) return;
+    if(raw[k] == null) return;
     const numeric = n(raw[k], D[k]);
     const projected = clamp(numeric);
     receipt(channel, k, raw[k], projected, numeric === projected ? 'numeric-coercion' : 'bounded-render-projection');
@@ -166,13 +166,27 @@ function applyDeep(raw, source, channel = source){
   if(raw.sky !== undefined) D.sky = String(raw.sky);
   D.source = source;
 }
+function deepStateFromPayload(data){
+  const embedded = data?.deep || data?.DEEP || data?.state || data?.observer;
+  if(embedded && typeof embedded === 'object') return embedded;
+  if(!data?.field || typeof data.field !== 'object') return null;
+  return {
+    ...data.field,
+    moonIllum: data.moon?.illumination,
+    kp: data.space_weather?.kp?.value,
+    bz: data.space_weather?.solar_wind?.bz,
+    sky: data.weather?.sky,
+  };
+}
 async function fetchBridge(){
   try{
     const r = await fetch(BRIDGE, { cache: 'no-store' });
     if(!r.ok) throw new Error(String(r.status));
     const data = await r.json();
-    applyDeep(data.deep || data.DEEP || data.state || data.observer, 'bridge', 'bridge');
-  }catch(e){ if(D.source === 'bridge') D.source = 'stale'; }
+    const state = deepStateFromPayload(data);
+    if(!state) throw new Error('field payload missing');
+    applyDeep(state, data.field ? 'field-cache' : 'bridge', 'bridge');
+  }catch(e){ if(['bridge', 'field-cache'].includes(D.source)) D.source = 'stale'; }
 }
 function pollLocal(){
   const keys = ['ta_deep_state','ta_deep_entries','deepEntries','terra_aeterna_deep','observer_deep'];

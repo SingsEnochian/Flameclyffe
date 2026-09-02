@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: .nvmrc
       - name: Refresh data cache
         run: node scripts/update-deep-observer-data.mjs
       - name: Commit data cache
