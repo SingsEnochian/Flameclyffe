@@ -1,3 +1,5 @@
+import './selected-applet-navigation.js';
+
 const app = document.querySelector('#app');
 const media = window.matchMedia('(max-width: 820px)');
 const PINNED_ROOMS = [
