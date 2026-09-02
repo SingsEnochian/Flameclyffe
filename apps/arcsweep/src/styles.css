@@ -94,6 +94,11 @@ legend { color: var(--gold); padding-inline: .45rem; font-weight: 800; }
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   padding: 1.3rem 1rem;
