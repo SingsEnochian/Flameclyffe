@@ -34,12 +34,15 @@ test('stale cache retention turns red after six hours', () => {
 
 test('standalone DEEP and Vercel publish the shared static field source', async () => {
   const observer = await readFile(new URL('../../../starwell/deep-observer/deep-observer.js', import.meta.url), 'utf8');
+  const starwellBridge = await readFile(new URL('../../starwell/src/lib/deepBridge.js', import.meta.url), 'utf8');
   const vite = await readFile(new URL('../../starwell/vite.config.js', import.meta.url), 'utf8');
   const updater = await readFile(new URL('../../../scripts/update-deep-observer-data.mjs', import.meta.url), 'utf8');
 
   assert.match(observer, /new URL\('\.\.\/\.\.\/data\/deep-current\.json'/);
   assert.match(observer, /data\?\.field/);
   assert.doesNotMatch(observer, /-bridge-pulse/);
+  assert.match(starwellBridge, /data\/deep-current\.json/);
+  assert.doesNotMatch(starwellBridge, /-bridge-pulse/);
   assert.match(vite, /data\/deep-current\.json/);
   assert.match(updater, /products\/summary\/solar-wind-mag-field\.json/);
   assert.match(updater, /products\/summary\/solar-wind-speed\.json/);
