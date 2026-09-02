@@ -25,7 +25,11 @@ test('House session startup fetch receives a timeout signal without affecting ot
 test('only startup guard and visible bootstrap sit on the critical HTML boot path', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const moduleScripts = [...html.matchAll(/<script type="module" src="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(moduleScripts, ['./src/startup-fetch-guard.js', './src/main-bootstrap.js']);
+  assert.deepEqual(moduleScripts, [
+    './src/canonical-runtime-host.js',
+    './src/startup-fetch-guard.js',
+    './src/main-bootstrap.js',
+  ]);
 });
 
 test('iPhone bootstrap exposes native launch links before loading core', async () => {

@@ -11,7 +11,11 @@ async function source(path) {
 test('Pages House transport is nested under the startup guard before ArcSweep core boot', async () => {
   const html = await source('index.html');
   const scripts = [...html.matchAll(/<script type="module" src="([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(scripts, ['./src/startup-fetch-guard.js', './src/main-bootstrap.js']);
+  assert.deepEqual(scripts, [
+    './src/canonical-runtime-host.js',
+    './src/startup-fetch-guard.js',
+    './src/main-bootstrap.js',
+  ]);
   const guard = await source('src/startup-fetch-guard.js');
   assert.match(guard, /^import '\.\/pages-house-transport-bridge\.js';/);
 });
