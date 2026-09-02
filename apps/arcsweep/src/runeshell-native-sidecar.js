@@ -12,12 +12,13 @@ const RUNES = Object.freeze(['ᚠ','ᚢ','ᚦ','ᚨ','ᚱ','ᚾ','ᛁ','ᛃ','�
 const SIGILS = Object.freeze(['⚚','☸','🜃','☀','⛥','𓂀']);
 const STYLE_ID = 'arcsweep-runeshell-native-styles';
 const OVERLAY_ID = 'arcsweep-runeshell-native-overlay';
+const ENTRY_SELECTOR = '.commons-chat-entry,.commons-entry,[data-house-entry],[data-entry-id],[data-stream-key]';
 let installed = false;
 let prefs = readPrefs();
 let logObserver = null;
 let rootObserver = null;
 let composerBound = null;
-let seenLogNodes = new WeakSet();
+const seenEntryKeys = new Set();
 
 function readPrefs() {
   try { return normaliseRuneShellPrefs(JSON.parse(localStorage.getItem(RUNESHELL_PREFS_KEY) || 'null') || RUNESHELL_DEFAULTS); }
@@ -31,12 +32,18 @@ function savePrefs(next) {
   return prefs;
 }
 
-function reducedMotion() {
-  return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
-}
-
+function reducedMotion() { return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false; }
 function canAnimate() { return shouldAnimateRuneShell(prefs, reducedMotion()); }
 function pick(values) { return values[Math.floor(Math.random() * values.length)]; }
+function entryKey(node) {
+  if (!(node instanceof Element)) return '';
+  const stable = node.dataset.entryId || node.dataset.streamKey || node.dataset.houseEntry || '';
+  if (stable) return stable;
+  const author = node.querySelector('header strong')?.textContent || '';
+  const stamp = node.querySelector('header span')?.textContent || '';
+  const text = node.querySelector('.commons-chat-body,p')?.textContent || '';
+  return `${author}|${stamp}|${text.slice(0,180)}`;
+}
 
 function overlay() {
   let node = document.getElementById(OVERLAY_ID);
@@ -72,13 +79,13 @@ function ensureStyles() {
   document.head.appendChild(style);
 }
 
-function particle(className, text, point = null) {
+function particle(className, text = '', point = null) {
   if (!canAnimate()) return null;
   const el = document.createElement('span');
   el.className = `runeshell-native-particle ${className}`;
-  el.textContent = text || '';
-  const x = point?.x ?? (innerWidth * (.18 + Math.random() * .64));
-  const y = point?.y ?? (innerHeight * (.18 + Math.random() * .62));
+  el.textContent = text;
+  const x = point?.x ?? innerWidth * (.18 + Math.random() * .64);
+  const y = point?.y ?? innerHeight * (.18 + Math.random() * .62);
   el.style.left = `${Math.max(8, Math.min(innerWidth - 8, x))}px`;
   el.style.top = `${Math.max(8, Math.min(innerHeight - 8, y))}px`;
   overlay().appendChild(el);
@@ -91,9 +98,7 @@ function burst(kind = 'ambient', point = null) {
   if (!canAnimate()) return;
   const budget = runeShellParticleBudget(prefs.intensity);
   particle(`runeshell-native-sigil runeshell-native-${kind}`, pick(SIGILS), point || { x: innerWidth * .5, y: innerHeight * .45 });
-  for (let i = 0; i < budget; i += 1) {
-    setTimeout(() => particle(`runeshell-native-rune runeshell-native-${kind}`, pick(RUNES), point), i * 90);
-  }
+  for (let i = 0; i < budget; i += 1) setTimeout(() => particle(`runeshell-native-rune runeshell-native-${kind}`, pick(RUNES), point), i * 90);
   if (prefs.intensity !== 'quiet') particle('runeshell-native-mist', '', point);
 }
 
@@ -108,37 +113,48 @@ function bindComposer() {
   composerBound = editor;
   editor.addEventListener('input', () => {
     if (!prefs.typing || !canAnimate()) return;
-    if (Math.random() > (prefs.intensity === 'bright' ? .68 : prefs.intensity === 'quiet' ? .18 : .38)) return;
+    const chance = prefs.intensity === 'bright' ? .68 : prefs.intensity === 'quiet' ? .18 : .38;
+    if (Math.random() > chance) return;
     particle('runeshell-native-rune runeshell-native-wake', pick(RUNES), composerPoint(editor));
   });
 }
 
-function markExistingLogNodes(log) {
-  log.querySelectorAll('.commons-entry,[data-house-entry],[data-entry-id]').forEach((node) => seenLogNodes.add(node));
+function rememberCurrentEntries(log) {
+  log.querySelectorAll(ENTRY_SELECTOR).forEach((node) => {
+    const key = entryKey(node); if (key) seenEntryKeys.add(key);
+  });
+}
+
+function entryPoint(entry) {
+  const rect = entry.getBoundingClientRect();
+  return {
+    x: Math.min(innerWidth - 24, Math.max(24, rect.left + rect.width * .72)),
+    y: Math.min(innerHeight - 24, Math.max(24, rect.top + 28)),
+  };
 }
 
 function bindLog() {
   const log = document.querySelector('[data-house-chat-log],.commons-log');
   if (!log || logObserver?.target === log) return;
   logObserver?.observer?.disconnect();
-  markExistingLogNodes(log);
+  rememberCurrentEntries(log);
   const observer = new MutationObserver((mutations) => {
     if (!prefs.incoming || !canAnimate()) return;
-    let fired = false;
+    const newEntries = [];
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (!(node instanceof Element)) continue;
-        const candidates = node.matches?.('.commons-entry,[data-house-entry],[data-entry-id]') ? [node] : [...node.querySelectorAll?.('.commons-entry,[data-house-entry],[data-entry-id]') || []];
+        const candidates = node.matches?.(ENTRY_SELECTOR) ? [node] : [...(node.querySelectorAll?.(ENTRY_SELECTOR) || [])];
         for (const entry of candidates) {
-          if (seenLogNodes.has(entry)) continue;
-          seenLogNodes.add(entry);
-          const rect = entry.getBoundingClientRect();
-          burst('voice', { x: Math.min(innerWidth - 24, Math.max(24, rect.left + rect.width * .72)), y: Math.min(innerHeight - 24, Math.max(24, rect.top + 28)) });
-          fired = true;
+          const key = entryKey(entry);
+          if (!key || seenEntryKeys.has(key)) continue;
+          seenEntryKeys.add(key);
+          newEntries.push(entry);
         }
       }
     }
-    if (!fired && mutations.some((item) => item.type === 'childList')) burst('ambient');
+    const newest = newEntries.at(-1);
+    if (newest) burst(newest.dataset.kind === 'voice' ? 'voice' : 'ambient', entryPoint(newest));
   });
   observer.observe(log, { childList: true, subtree: true });
   logObserver = { observer, target: log };
@@ -172,19 +188,19 @@ function settingsSheet() {
 function settingsButton() {
   let button = document.querySelector('[data-runeshell-native-settings]');
   if (button) return button;
+  const actions = document.querySelector('.house-chat-native-actions');
+  if (!actions) return null;
   button = document.createElement('button');
   button.type = 'button';
   button.className = 'quiet runeshell-native-settings-button';
   button.dataset.runeshellNativeSettings = 'true';
   button.setAttribute('aria-label', 'RuneShell settings');
-  button.textContent = 'ᚱ RuneShell';
   button.addEventListener('click', () => {
     const sheet = settingsSheet();
     sheet.hidden = !sheet.hidden;
     reflectState();
   });
-  const actions = document.querySelector('.house-chat-native-actions');
-  if (actions) actions.prepend(button);
+  actions.prepend(button);
   return button;
 }
 
