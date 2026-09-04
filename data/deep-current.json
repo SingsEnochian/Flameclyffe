@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-09-04T19:46:49.925Z",
+  "generated_at": "2026-09-04T22:03:19.037Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,52 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-04T15:45",
+    "time": "2026-09-04T18:00",
     "sky": "Day",
     "current": {
-      "time": "2026-09-04T15:45",
+      "time": "2026-09-04T18:00",
       "interval": 900,
-      "temperature_2m": 82.7,
-      "relative_humidity_2m": 84,
+      "temperature_2m": 81.6,
+      "relative_humidity_2m": 92,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
       "cloud_cover": 100,
-      "pressure_msl": 1014.2,
-      "wind_speed_10m": 8.6,
-      "wind_direction_10m": 115
+      "pressure_msl": 1013.2,
+      "wind_speed_10m": 8.8,
+      "wind_direction_10m": 120
     }
   },
   "space_weather": {
     "kp": {
-      "value": 0.33,
-      "time_tag": "2026-09-04T15:00:00",
-      "a_running": 2
+      "value": 0.67,
+      "time_tag": "2026-09-04T18:00:00",
+      "a_running": 3
     },
     "solar_wind": {
-      "time_tag": "2026-09-04T19:38:00Z",
+      "time_tag": "2026-09-04T21:57:00Z",
       "bz": 0,
       "bt": 6,
       "density": null,
-      "speed": 335
+      "speed": 340
     }
   },
   "moon": {
-    "age_days": 22.5,
-    "illumination": 46.3,
+    "age_days": 22.6,
+    "illumination": 45.2,
     "name": "Last Quarter"
   },
   "field": {
-    "P": 0.5333333333333339,
+    "P": 0.5222222222222227,
     "C": 0.2538095238095239,
-    "R": 0.7425,
-    "E": 0.5866483516483516,
-    "M": 0.46299999999999997,
+    "R": 0.75,
+    "E": 0.6417032967032967,
+    "M": 0.452,
     "A": 0.6,
-    "T": 0.5565312216117216,
-    "H": 0.41676538461538465,
-    "dpdt": 0.7425
+    "T": 0.5526737789987791,
+    "H": 0.4480152625152626,
+    "dpdt": 0.75
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
