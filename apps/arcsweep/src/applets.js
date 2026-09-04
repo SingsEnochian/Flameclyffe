@@ -92,13 +92,26 @@ export function appletLaunchTarget(id) {
   return APPLET_CATALOGUE.find((item) => item.id === id)?.pagesHref || '';
 }
 
+export function contextualAppletLaunchTarget(id, context = globalThis.__arcsweepInstrumentContext || {}) {
+  const href = appletLaunchTarget(id);
+  if (!href) return '';
+  const base = globalThis.location?.origin || 'https://singsenochian.github.io';
+  const url = new URL(href, base);
+  if (context.worldId) url.searchParams.set('worldId', context.worldId);
+  if (context.worldName) url.searchParams.set('worldName', context.worldName);
+  if (context.worldseedFingerprint) url.searchParams.set('worldseed', context.worldseedFingerprint);
+  url.searchParams.set('from', 'arcsweep');
+  url.searchParams.set('appletId', id);
+  return href.startsWith('/') && url.origin === base ? `${url.pathname}${url.search}${url.hash}` : url.toString();
+}
+
 export function installAppletLaunchRouter(root = document) {
   if (!root?.addEventListener || globalThis.__arcsweepAppletLaunchRouterInstalled) return false;
-  globalThis.__arcsweepAppletLaunchRouterInstalled = 'arcsweep.applet-launch-router/v1';
+  globalThis.__arcsweepAppletLaunchRouterInstalled = 'arcsweep.applet-launch-router/v2';
   root.addEventListener('click', (event) => {
     const trigger = event.target?.closest?.('[data-room]');
     if (!trigger) return;
-    const href = appletLaunchTarget(trigger.dataset.room);
+    const href = contextualAppletLaunchTarget(trigger.dataset.room);
     if (!href) return;
     event.preventDefault();
     event.stopImmediatePropagation();

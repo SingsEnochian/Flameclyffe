@@ -1,7 +1,8 @@
 import { readHouseCommons, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
 import { getKelyranSupabase } from './kelyran-supabase.js';
+import { braidGlyph } from './instrument-console.js';
 
-export const HOUSE_BRAID_RECEIPT_UI_VERSION = 'arcsweep.house-braid-receipt-ui/v1';
+export const HOUSE_BRAID_RECEIPT_UI_VERSION = 'arcsweep.house-braid-receipt-ui/v2';
 export const HOUSE_RUNTIME_RECEIPT_EDGE = 'https://rufrmjyusalnifpegllj.supabase.co/functions/v1/arcsweep-runtime-receipt';
 
 let installed = false;
@@ -41,7 +42,8 @@ function receiptForEntry(entry, byKey) {
 }
 
 function receiptMarkup(receipt) {
-  if (!receipt) return '<span class="house-braid-chip house-braid-chip-not-observed" data-braid-state="not-observed" title="No matching receipt was observed in the bounded recent Runtime Braid read. This does not prove that no durable receipt exists.">◇ receipt not observed</span>';
+  const glyph = braidGlyph(receipt);
+  if (!receipt) return `<span class="house-braid-chip house-braid-chip-not-observed" data-braid-state="${esc(glyph.state)}" title="No matching receipt was observed in the bounded recent Runtime Braid read. This does not prove that no durable receipt exists.">${esc(glyph.glyph)} ${esc(glyph.label)}</span>`;
   const title = [
     'Runtime Braid verified',
     receipt.provider && `provider: ${receipt.provider}`,
@@ -53,8 +55,7 @@ function receiptMarkup(receipt) {
     receipt.event_sequence != null && `event: #${receipt.event_sequence}`,
     receipt.packet_fingerprint && `fingerprint: ${receipt.packet_fingerprint}`,
   ].filter(Boolean).join('\n');
-  const event = receipt.event_sequence != null ? ` #${receipt.event_sequence}` : '';
-  return `<button type="button" class="house-braid-chip house-braid-chip-verified" data-braid-state="verified" data-braid-event="${esc(receipt.event_id || '')}" title="${esc(title)}">◈ braided${esc(event)}</button>`;
+  return `<button type="button" class="house-braid-chip house-braid-chip-verified" data-braid-state="${esc(glyph.state)}" data-braid-event="${esc(glyph.receiptId || '')}" title="${esc(title)}">${esc(glyph.glyph)} ${esc(glyph.label)}</button>`;
 }
 
 function renderInspector(receipt) {
@@ -82,7 +83,8 @@ function decorate(entries, receipts) {
     const actions = header.querySelector('div:last-child') || header;
     const existing = article.querySelector('[data-braid-state]');
     const receipt = receiptForEntry(entry, byKey);
-    const state = receipt ? `verified:${receipt.event_id}` : 'not-observed';
+    const glyph = braidGlyph(receipt);
+    const state = receipt ? `${glyph.state}:${receipt.event_id}` : glyph.state;
     if (existing?.dataset?.braidFingerprint === state) return;
     existing?.remove();
     const holder = document.createElement('span');
