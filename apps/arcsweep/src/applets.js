@@ -1,6 +1,8 @@
 import './echo-index-sidecar.js';
+import { CREATIVE_ORGANS } from './creative-organ-registry.js';
+import { SOUND_ORGANS } from './sound-organ-registry.js';
 
-export const APPLET_CATALOGUE = [
+const CORE_APPLETS = [
   { id: 'portal', label: 'Portal', glyph: '◉', category: 'core', defaultVisible: true },
   { id: 'worlds', label: 'World Registry', glyph: '✧', category: 'core', defaultVisible: true },
   { id: 'about-world', label: 'About this World', glyph: 'ⓘ', category: 'core', defaultVisible: true },
@@ -38,6 +40,25 @@ export const APPLET_CATALOGUE = [
   { id: 'waking-thread', label: 'Waking Thread', glyph: '⌁', category: 'continuity', defaultVisible: true },
 ];
 
+const organApplet = (organ, category) => ({
+  id: organ.id,
+  label: organ.label,
+  glyph: organ.glyph,
+  category,
+  defaultVisible: true,
+  pagesHref: organ.pagesHref,
+  organFamily: organ.family,
+  organKind: organ.kind || 'external',
+  description: organ.description,
+  implementation: organ.implementation,
+});
+
+export const APPLET_CATALOGUE = Object.freeze([
+  ...CORE_APPLETS,
+  ...CREATIVE_ORGANS.map((organ) => organApplet(organ, organ.family === 'continuity' ? 'continuity' : 'creative-instrument')),
+  ...SOUND_ORGANS.map((organ) => organApplet(organ, 'sound-instrument')),
+]);
+
 export function createDefaultAppletLayout() {
   return APPLET_CATALOGUE.map((applet, index) => ({
     id: applet.id,
@@ -66,3 +87,24 @@ export function visibleApplets(layout) {
     .map(resolveApplet)
     .filter(Boolean);
 }
+
+export function appletLaunchTarget(id) {
+  return APPLET_CATALOGUE.find((item) => item.id === id)?.pagesHref || '';
+}
+
+export function installAppletLaunchRouter(root = document) {
+  if (!root?.addEventListener || globalThis.__arcsweepAppletLaunchRouterInstalled) return false;
+  globalThis.__arcsweepAppletLaunchRouterInstalled = 'arcsweep.applet-launch-router/v1';
+  root.addEventListener('click', (event) => {
+    const trigger = event.target?.closest?.('[data-room]');
+    if (!trigger) return;
+    const href = appletLaunchTarget(trigger.dataset.room);
+    if (!href) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    globalThis.location?.assign?.(href);
+  }, true);
+  return true;
+}
+
+if (typeof document !== 'undefined') installAppletLaunchRouter(document);
