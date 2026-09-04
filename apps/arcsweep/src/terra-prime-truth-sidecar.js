@@ -1,3 +1,4 @@
+import './deep-history-atlas-sidecar.js';
 import { loadState } from './storage.js';
 import { TERRA_PRIME_HISTORY_INGEST } from './terra-prime-history-ingest.js';
 import { PROVENANCE_CLASSES, logarithmicTimePosition, provenanceClass, worldCompletionReport } from './truth-provenance.js';
