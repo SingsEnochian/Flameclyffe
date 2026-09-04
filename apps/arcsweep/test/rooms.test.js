@@ -15,9 +15,21 @@ import {
   normaliseRoomCollections,
 } from '../src/rooms.js';
 
-test('every registered applet resolves to an implemented room', () => {
-  const missing = APPLET_CATALOGUE.map((item) => item.id).filter((id) => !IMPLEMENTED_APPLET_IDS.has(id));
+test('every room-routed applet resolves to an implemented room', () => {
+  const missing = APPLET_CATALOGUE
+    .filter((item) => !item.pagesHref)
+    .map((item) => item.id)
+    .filter((id) => !IMPLEMENTED_APPLET_IDS.has(id));
   assert.deepEqual(missing, []);
+});
+
+test('launch-target applets are explicit deployed surfaces rather than fake rooms', () => {
+  const launchables = APPLET_CATALOGUE.filter((item) => item.pagesHref);
+  assert.ok(launchables.length > 0);
+  for (const item of launchables) {
+    assert.equal(IMPLEMENTED_APPLET_IDS.has(item.id), false, `${item.id} should launch its canonical organ rather than masquerade as a room`);
+    assert.match(item.pagesHref, /^\/Flameclyffe\//);
+  }
 });
 
 test('Kelyran School is a visible implemented language room', () => {
