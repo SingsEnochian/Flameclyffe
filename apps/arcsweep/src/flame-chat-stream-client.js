@@ -7,6 +7,7 @@ import {
 } from './fantasy-roleplay-runtime.js';
 import { invokeOxAlphaPortableChat } from './oxalpha-portable-chat.js';
 import { buildModelReplyRuntimeEvent, persistAndVerifyModelReplyRuntimeEvent } from './house-runtime-receipt-client.js';
+import { applyGlassHaloAtModelBoundary } from './model-boundary-glass-halo.js';
 
 export const FLAME_CHAT_STREAM_SCHEMA = 'hearthgate.flame-chat-stream/v1';
 export const HOUSE_CHAT_AUTO_BRAID_SCHEMA = 'arcsweep.house-chat-auto-braid/v1';
@@ -31,6 +32,27 @@ function parseBlock(block) {
   message.data = message.data.replace(/\n$/, '');
   try { message.payload = message.data ? JSON.parse(message.data) : null; } catch { message.payload = null; }
   return message;
+}
+
+function glassHaloMetadata(boundary) {
+  return {
+    schema: boundary.schema,
+    quarantined_count: boundary.quarantinedCount,
+    clean_count: boundary.cleanCount,
+    enforcement: 'provider-context-redaction',
+    raw_quarantined_text_sent_to_provider: false,
+  };
+}
+
+function announceGlassHalo(boundary) {
+  globalThis.dispatchEvent?.(new CustomEvent('arcsweep:model-boundary-glass-halo', {
+    detail: {
+      schema: boundary.schema,
+      quarantinedCount: boundary.quarantinedCount,
+      cleanCount: boundary.cleanCount,
+      receipts: boundary.receipts,
+    },
+  }));
 }
 
 async function maybeAutoReceiptHouseReply(reply, metadata, worldContext) {
@@ -175,7 +197,13 @@ export async function streamConstellationRuntimeVoice({
     worldContext,
     fetchImpl,
   });
-  const requestMetadata = fantasyRoleplayMetadata(compiled, { ...metadata, voice_id: route.voiceId });
+  const boundary = applyGlassHaloAtModelBoundary(context);
+  announceGlassHalo(boundary);
+  const requestMetadata = fantasyRoleplayMetadata(compiled, {
+    ...metadata,
+    voice_id: route.voiceId,
+    glass_halo: glassHaloMetadata(boundary),
+  });
   if (worldContext?.identity_anchor?.world_id) {
     requestMetadata.world_id = worldContext.identity_anchor.world_id;
     requestMetadata.world_context = worldContext;
@@ -184,7 +212,7 @@ export async function streamConstellationRuntimeVoice({
   const token = await activeSession(fetchImpl);
   if (!token) {
     if (route.voiceId === 'oxalpha') {
-      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+      return portableOxAlphaStream({ compiled, sessionId, context: boundary.context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
     }
     throw new Error('House Runtime offline.');
   }
@@ -200,13 +228,13 @@ export async function streamConstellationRuntimeVoice({
       body: JSON.stringify({
         message: compiled.message,
         session_id: sessionId || `arcsweep-${route.voiceId}-${Date.now()}`,
-        context: Array.isArray(context) ? context : [],
+        context: boundary.context,
         metadata: requestMetadata,
       }),
     });
   } catch (error) {
     if (route.voiceId === 'oxalpha' && error?.name !== 'AbortError' && !signal?.aborted) {
-      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+      return portableOxAlphaStream({ compiled, sessionId, context: boundary.context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
     }
     throw error;
   }
@@ -214,7 +242,7 @@ export async function streamConstellationRuntimeVoice({
   if (!response.ok || !response.body) {
     const data = await response.json().catch(() => ({}));
     if (route.voiceId === 'oxalpha' && response.status !== 401) {
-      return portableOxAlphaStream({ compiled, sessionId, context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
+      return portableOxAlphaStream({ compiled, sessionId, context: boundary.context, metadata: requestMetadata, worldContext, fetchImpl, onStarted, onDelta, onCompleted });
     }
     throw new Error(data.error || `Flame stream ${response.status}`);
   }
@@ -271,6 +299,7 @@ export async function streamConstellationRuntimeVoice({
     bufferedCompatibility: completed.buffered_compatibility === true,
     interactionMode: compiled.mode,
     interactionSkillActive: compiled.active,
+    glassHalo: glassHaloMetadata(boundary),
   };
   return maybeAutoReceiptHouseReply(reply, requestMetadata, worldContext);
 }
