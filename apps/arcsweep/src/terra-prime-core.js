@@ -6,6 +6,7 @@ import {
 } from './house-dr-library.js';
 import { loadState, saveState } from './storage.js';
 import { ensureTerraPrimeWakingWorld } from './waking-world.js';
+import { enrichAllWorldKnowledge, TERRA_PRIME_HISTORY_SCHEMA } from './terra-prime-history-ingest.js';
 import {
   WORLD_REGISTRY_JOURNAL_KEY,
   createWorldRegistryJournal,
@@ -30,7 +31,7 @@ function writeJournalWorld(world, writtenAt) {
   try {
     globalThis.localStorage?.setItem(WORLD_REGISTRY_JOURNAL_KEY, JSON.stringify(journal));
   } catch {
-    throw new Error('Terra Prime could not be written to the durable World Registry recovery journal');
+    throw new Error('World knowledge could not be written to the durable World Registry recovery journal');
   }
   return journal;
 }
@@ -64,7 +65,8 @@ export async function synchroniseTerraPrimeWakingWorld(now = new Date().toISOStr
   const library = reconcileHouseDrLibraryBeforeHydration(loaded, now);
   const reconciled = reconcileWorldRegistry(library.state, readJournal());
   const result = ensureTerraPrimeWakingWorld(reconciled.state, now);
-  const changed = Boolean(library.changed || reconciled.changed || result.changed);
+  const knowledge = enrichAllWorldKnowledge(result.state, now);
+  const changed = Boolean(library.changed || reconciled.changed || result.changed || knowledge.changed);
 
   if (!changed) {
     return {
@@ -74,18 +76,31 @@ export async function synchroniseTerraPrimeWakingWorld(now = new Date().toISOStr
       houseLibraryRecovered: false,
       houseLibraryMode: library.mode,
       houseLibrarySummary: library.summary,
+      knowledgeHydrated: false,
+      worldsKnowledgeHydrated: [],
+      terraPrimeHistorySchema: TERRA_PRIME_HISTORY_SCHEMA,
     };
   }
 
-  writeJournalWorld(result.world, now);
+  const changedSet = new Set([result.world.id, ...knowledge.worldsChanged]);
+  for (const worldId of changedSet) {
+    const world = result.state.worlds.find((candidate) => candidate.id === worldId);
+    if (world) writeJournalWorld(world, now);
+  }
+
   await saveState(result.state, {
-    reason: library.changed ? 'house-library-and-terra-prime-integrity-sync' : 'terra-prime-waking-world-sync',
+    reason: knowledge.changed
+      ? 'terra-prime-deep-history-and-world-applet-hydration'
+      : library.changed ? 'house-library-and-terra-prime-integrity-sync' : 'terra-prime-waking-world-sync',
     worldId: result.world.id,
     worldBirthReceiptId: result.receipt?.id || null,
     registryRecovered: reconciled.changed,
     houseLibraryRecovered: library.changed,
     houseLibraryMode: library.mode,
     houseLibrarySummary: library.summary,
+    knowledgeHydrated: knowledge.changed,
+    worldsKnowledgeHydrated: knowledge.worldsChanged,
+    terraPrimeHistorySchema: TERRA_PRIME_HISTORY_SCHEMA,
   });
 
   globalThis.document?.dispatchEvent?.(new CustomEvent(TERRA_PRIME_SYNC_EVENT, {
@@ -98,6 +113,9 @@ export async function synchroniseTerraPrimeWakingWorld(now = new Date().toISOStr
       houseLibraryMode: library.mode,
       houseLibrarySummary: library.summary,
       stableAnchorRevisedAt: result.world.wakingWorld?.stable_anchor?.source_revised_at || null,
+      knowledgeHydrated: knowledge.changed,
+      worldsKnowledgeHydrated: knowledge.worldsChanged,
+      terraPrimeHistorySchema: TERRA_PRIME_HISTORY_SCHEMA,
     },
   }));
 
@@ -108,5 +126,8 @@ export async function synchroniseTerraPrimeWakingWorld(now = new Date().toISOStr
     houseLibraryRecovered: library.changed,
     houseLibraryMode: library.mode,
     houseLibrarySummary: library.summary,
+    knowledgeHydrated: knowledge.changed,
+    worldsKnowledgeHydrated: knowledge.worldsChanged,
+    terraPrimeHistorySchema: TERRA_PRIME_HISTORY_SCHEMA,
   };
 }
