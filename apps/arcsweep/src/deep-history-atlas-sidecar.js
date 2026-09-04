@@ -1,3 +1,4 @@
+import './cosmology-lineage-sidecar.js';
 import {
   GEOLOGICAL_ATLAS,
   HUMAN_HISTORY_LATTICE,
