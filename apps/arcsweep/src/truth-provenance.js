@@ -18,7 +18,6 @@ export const PROVENANCE_CLASSES = Object.freeze({
 });
 
 const UNKNOWN_RX = /^(?:not yet specified|unknown|unset|not applicable unless explicitly configured|no default companion|no default role)/i;
-const INTENTIONAL_BLANK = Symbol('intentional-blank');
 
 export function provenanceClass(id) {
   return PROVENANCE_CLASSES[id] || PROVENANCE_CLASSES.unknown;
@@ -79,6 +78,13 @@ function plainLeafMap(value) {
   return new Map(leafEntries(value).map(([path, item]) => [path, item]));
 }
 
+function ignorableHydrationPath(path) {
+  return path === 'updatedAt'
+    || path === 'knowledgeAtlas.revisedAt'
+    || path.includes('hydrationReceipt')
+    || path.includes('completionReport');
+}
+
 export function buildHydrationReceipt(beforeWorld, afterWorld, hydratedAt = new Date().toISOString()) {
   const before = plainLeafMap(beforeWorld || {});
   const after = plainLeafMap(afterWorld || {});
@@ -88,7 +94,7 @@ export function buildHydrationReceipt(beforeWorld, afterWorld, hydratedAt = new 
   const preserved = [];
   const unknown = [];
   for (const path of paths) {
-    if (path === 'updatedAt' || path.includes('hydrationReceipt')) continue;
+    if (ignorableHydrationPath(path)) continue;
     const left = before.get(path);
     const right = after.get(path);
     const leftEmpty = fieldCompletion(left) === 'unknown';
