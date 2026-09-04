@@ -6,11 +6,10 @@ const ui = fs.readFileSync(new URL('../src/house-braid-receipt-ui.js', import.me
 const bootstrap = fs.readFileSync(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
 
 test('House messages expose verified and bounded not-observed Runtime Braid states', () => {
-  assert.match(ui, /arcsweep\.house-braid-receipt-ui\/v1/);
-  assert.match(ui, /◇ receipt not observed/);
+  assert.match(ui, /arcsweep\.house-braid-receipt-ui\/v2/);
+  assert.match(ui, /braidGlyph/);
   assert.match(ui, /bounded recent Runtime Braid read/);
   assert.match(ui, /does not prove that no durable receipt exists/);
-  assert.match(ui, /◈ braided/);
   assert.match(ui, /Runtime Braid verified/);
   assert.match(ui, /packet_fingerprint/);
   assert.match(ui, /event_sequence/);
