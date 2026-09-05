@@ -54,3 +54,10 @@ test('ArcSweep mounts the preset with explicit entry, mode, somatic, and Feather
   assert.match(engine, /bluebirdSoundfontLayer/);
   assert.match(engine, /bluebirdCoupledHearts/);
 });
+
+test('web and desktop CSP permit the bundled SoundFont WebAssembly synthesizer', () => {
+  for (const relative of ['../index.html', '../desktop/app/index.html']) {
+    const html = readFileSync(new URL(relative, import.meta.url), 'utf8');
+    assert.match(html, /script-src 'self' 'wasm-unsafe-eval'/);
+  }
+});
