@@ -1,8 +1,11 @@
 import { loadState } from './storage.js';
 import { resolveEchoIndex } from './echo-index.js';
+import { installEchoLiveAdapters } from './echo-live-adapters.js';
 
-export const ECHO_INDEX_SIDECAR = 'arcsweep.echo-index-surface/v1';
+export const ECHO_INDEX_SIDECAR = 'arcsweep.echo-index-surface/v2';
 let navObserver = null;
+
+installEchoLiveAdapters();
 
 function externalEntries() {
   const provider = globalThis.__arcsweepEchoIndexSources;
@@ -32,13 +35,13 @@ function ensureDialog() {
   dialog.className = 'panel';
   dialog.innerHTML = `
     <form method="dialog" style="display:flex;justify-content:space-between;gap:1rem;align-items:center">
-      <div><strong>Echo Index</strong><div class="muted">Resolver across existing ArcSweep stores. No duplicate canon or source database.</div></div>
+      <div><strong>Echo Index</strong><div class="muted">Resolver across live ArcSweep stores. Source, authority and store remain visible; no duplicate canon database.</div></div>
       <button value="cancel" aria-label="Close Echo Index">Close</button>
     </form>
     <label style="display:grid;gap:.35rem;margin-top:1rem">Resolve
       <input data-echo-index-query type="search" placeholder="world, character, place, record, source, receipt…" autocomplete="off">
     </label>
-    <p class="muted" data-echo-index-status>Loading persisted stores…</p>
+    <p class="muted" data-echo-index-status>Loading persisted and live stores…</p>
     <div data-echo-index-results style="display:grid;gap:.65rem;max-height:55vh;overflow:auto"></div>`;
   document.body.appendChild(dialog);
   return dialog;
@@ -84,9 +87,10 @@ async function openEchoIndex() {
   const status = dialog.querySelector('[data-echo-index-status]');
   const results = dialog.querySelector('[data-echo-index-results]');
   const [state,external] = await Promise.all([loadState(),externalEntries()]);
+  const stores = [...new Set(external.map((item) => item.store).filter(Boolean))];
   const refresh = () => {
     const rows = resolveEchoIndex(state,input.value,{ externalEntries:external });
-    status.textContent = `${rows.length} resolved echo${rows.length === 1 ? '' : 'es'} · source store and authority remain visible`;
+    status.textContent = `${rows.length} resolved echo${rows.length === 1 ? '' : 'es'} · ${stores.length} live adapter store${stores.length === 1 ? '' : 's'} · authority remains visible`;
     renderResults(results,rows);
   };
   input.oninput = refresh;
