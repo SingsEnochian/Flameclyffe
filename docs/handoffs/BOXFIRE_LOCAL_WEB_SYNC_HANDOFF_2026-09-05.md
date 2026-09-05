@@ -270,10 +270,11 @@ Start with these current-main source contracts and their native/local consumers:
 - `apps/arcsweep/src/instrument-console.js`
 - `apps/arcsweep/src/creative-organ-registry.js`
 - `apps/arcsweep/src/sound-organ-registry.js`
-- `apps/arcsweep/src/terra-prime-ingest.js` and current Terra Prime sync/completion modules
+- `apps/arcsweep/src/terra-prime-history-ingest.js`
+- `apps/arcsweep/src/terra-prime-current-ingest.js`
 - `apps/arcsweep/src/truth-provenance.js`
 - `apps/arcsweep/src/deep-history-atlas.js`
-- `apps/arcsweep/src/cosmology-lineage.js`
+- `apps/arcsweep/src/world-cosmology-lineage.js`
 - `apps/arcsweep/src/echo-index.js`
 - `apps/arcsweep/src/echo-live-adapters.js`
 - `apps/arcsweep/src/semantic-source-contract.js`
