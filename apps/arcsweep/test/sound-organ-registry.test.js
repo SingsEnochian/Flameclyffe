@@ -27,7 +27,7 @@ test('Runa protects its canonical 3·6·9 engine while using the existing Heartf
   assert.match(runa.implementation, /3·6·9/);
 });
 
-test('native sound organs deliberately focus the existing Theme soundscape', () => {
+test('native sound organs deliberately focus the existing Feedback soundscape', () => {
   const native = SOUND_ORGANS.filter((organ) => organ.kind === 'native-focus');
   assert.ok(native.length >= 4);
   native.forEach((organ) => {

@@ -49,14 +49,14 @@ test('accepted reference UI keeps the deliberate twelve-column chamber geometry'
   assert.match(css, /feedback-chamber-v2__voices \{ grid-column: 1 \/ 7/);
   assert.match(css, /feedback-chamber-v2__canon \{ grid-column: 7 \/ 13/);
   assert.match(css, /feedback-chamber-v2__turn \{ grid-column: 7 \/ 13/);
-  assert.match(css, /feedback-chamber-v2__sound \{ grid-column: 1 \/ 10/);
-  assert.match(css, /feedback-chamber-v2__action-rail \{ grid-column: 10 \/ 13/);
+  assert.match(css, /feedback-chamber-v2__sound \{ grid-column: 1 \/ 13/);
+  assert.match(css, /feedback-chamber-v2__action-rail \{ grid-column: 1 \/ 13/);
 });
 
-test('accepted reference UI makes Sound and Runa sibling instruments with a stable cycle rail', () => {
+test('accepted reference UI makes Sound and Runa sibling instruments with a full-width cycle rail', () => {
   assert.match(css, /story-soundscape[\s\S]*grid-template-columns:\s*minmax\(0, 1\.02fr\) minmax\(0, 1\.18fr\)/);
   assert.match(css, /synaptic-heartfield[\s\S]*grid-column:\s*2/);
-  assert.match(css, /feedback-chamber-v2__action-rail[\s\S]*position:\s*sticky/);
+  assert.match(css, /feedback-chamber-v2__action-rail[\s\S]*grid-template-columns:\s*repeat\(4/);
   assert.match(css, /button\[type='submit'\][\s\S]*linear-gradient\(180deg, #f0d28c, #c99a40\)/);
 });
 
