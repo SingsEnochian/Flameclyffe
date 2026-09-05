@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 const renderer = await readFile(new URL('../src/aemeth-chamber-live.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('../src/aemeth-chamber.css', import.meta.url), 'utf8');
+const globalCss = await readFile(new URL('../src/styles.css', import.meta.url), 'utf8');
 
 test('Aemeth Chamber v4 is a renderer over the existing record form rather than a second state owner', () => {
   assert.match(renderer, /aemeth-chamber-live\/v4/);
@@ -51,4 +52,18 @@ test('Aemeth Chamber has responsive instrument, atlas, witness, and soft-focus l
     assert.match(css, new RegExp(selector.replaceAll('.', '\\.')));
   }
   assert.match(css, /@media\(max-width:640px\)/);
+});
+
+test('desktop chamber gives the optical instrument priority over rails and atlas', () => {
+  assert.match(css, /@media\(min-width:1051px\)/);
+  assert.match(css, /grid-template-columns:minmax\(13rem,18rem\) minmax\(0,1fr\)/);
+  assert.match(css, /grid-template-columns:minmax\(0,1\.8fr\) minmax\(12rem,\.72fr\)/);
+  assert.match(css, /\.aemeth-optic-field\{min-height:32rem\}/);
+  assert.match(css, /\.aemeth-shewstone\{width:min\(27rem,82%\)\}/);
+});
+
+test('page atmosphere is continuous instead of fixed-viewport tiled', () => {
+  assert.match(globalCss, /background-repeat: no-repeat/);
+  assert.match(globalCss, /background-position: right top, left bottom, 0 0/);
+  assert.doesNotMatch(globalCss, /background-attachment: fixed/);
 });

@@ -30,8 +30,9 @@ body {
     radial-gradient(circle at 82% 8%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 31rem),
     radial-gradient(circle at 18% 88%, color-mix(in srgb, var(--green) 13%, transparent), transparent 30rem),
     var(--bg);
-  background-size: cover;
-  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: max(64rem, 100vw) max(52rem, 100vh), max(64rem, 100vw) max(52rem, 100vh), auto;
+  background-position: right top, left bottom, 0 0;
   color: var(--text);
 }
 body[data-surface="mirror"] { background-image: linear-gradient(135deg, rgba(210,225,235,.08), transparent 45%), radial-gradient(circle at 50% 0, rgba(255,255,255,.08), transparent 40rem); }
