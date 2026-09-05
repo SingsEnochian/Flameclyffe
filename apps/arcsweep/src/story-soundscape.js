@@ -286,6 +286,37 @@ export class StorySoundscape {
     return sounding;
   }
 
+  bluebirdCoupledHearts(destination, gainValue = .14) {
+    const profile = BLUEBIRD_WEIGHTED_HOME.coupledHearts;
+    const sampleRate = this.context.sampleRate;
+    const frameCount = Math.ceil(profile.cycleSeconds * sampleRate);
+    const buffer = this.context.createBuffer(2, frameCount, sampleRate);
+    const strike = (channel, startSeconds, frequency, amplitude, decaySeconds) => {
+      const data = buffer.getChannelData(channel);
+      const start = Math.floor(startSeconds * sampleRate) % frameCount;
+      const length = Math.min(Math.ceil(decaySeconds * sampleRate), frameCount - start);
+      for (let i = 0; i < length; i += 1) {
+        const t = i / sampleRate;
+        const envelope = Math.exp(-t / (decaySeconds / 5));
+        data[start + i] += Math.sin(2 * Math.PI * frequency * t) * envelope * amplitude;
+      }
+    };
+    profile.voices.forEach((voice, index) => {
+      const channel = index;
+      const callAt = index * profile.cycleSeconds * profile.answerOffsetCycles;
+      strike(channel, callAt, voice.lubHz, 1, .16);
+      strike(channel, callAt + profile.lubDubGapSeconds, voice.dubHz, .72, .2);
+    });
+    const source = this.context.createBufferSource();
+    const gain = this.context.createGain();
+    source.buffer = buffer;
+    source.loop = true;
+    gain.gain.value = gainValue;
+    source.connect(gain).connect(destination);
+    source.start();
+    this.heartfieldNodes.push({ source, gain, extras: [] });
+  }
+
   startBluebirdWeightedHome() {
     if (!this.context || this.bluebirdActive) return null;
     const validation = validateBluebirdWeightedHome();
@@ -307,6 +338,7 @@ export class StorySoundscape {
       carrierHz: BLUEBIRD_WEIGHTED_HOME.somaticProxy.carrierHz,
       modulationHz: BLUEBIRD_WEIGHTED_HOME.somaticProxy.pulseHz,
     }, this.bluebirdOutput, .08);
+    this.bluebirdCoupledHearts(this.bluebirdOutput);
     this.bluebirdNodes = this.heartfieldNodes.splice(nodeStart);
     const soundfontVoiceIds = this.bluebirdSoundfontLayer();
     const receipt = createBluebirdWeightedHomeReceipt({ mode: this.bluebirdMode, soundfontVoiceIds, somaticProxy: this.bluebirdSomaticProxy });

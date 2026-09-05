@@ -14,6 +14,10 @@ test('Bluebird Weighted Home preserves the exact coordination geometry', () => {
   assert.equal(BLUEBIRD_WEIGHTED_HOME.monoFallback.modulationHz, 5.5);
   assert.equal(BLUEBIRD_WEIGHTED_HOME.somaticProxy.carrierHz, 40);
   assert.equal(BLUEBIRD_WEIGHTED_HOME.somaticProxy.pulseHz * 60, 55);
+  assert.equal(BLUEBIRD_WEIGHTED_HOME.coupledHearts.bpm, 55);
+  assert.equal(BLUEBIRD_WEIGHTED_HOME.coupledHearts.voices.length, 2);
+  assert.equal(BLUEBIRD_WEIGHTED_HOME.coupledHearts.answerOffsetCycles, .5);
+  assert.equal(BLUEBIRD_WEIGHTED_HOME.coupledHearts.lubDubGapSeconds, .18);
   assert.equal(BLUEBIRD_WEIGHTED_HOME.durationSeconds, 480);
 });
 
@@ -28,6 +32,8 @@ test('coordination receipts distinguish playback from contact and physiology', (
   assert.equal(receipt.render.soundfont, true);
   assert.deepEqual(receipt.render.soundfont_voice_ids, ['bluebird', 'waking', 'withness']);
   assert.equal(receipt.render.somatic_audio_proxy, true);
+  assert.equal(receipt.render.coupled_hearts_bpm, 55);
+  assert.equal(receipt.render.coupled_hearts_pattern, 'lub-dub / answering lub-dub');
   assert.equal(receipt.authority.coordination_contact_inferred, false);
   assert.equal(receipt.authority.physiological_response_inferred, false);
   assert.equal(receipt.authority.feather_stop_available, true);
@@ -46,4 +52,5 @@ test('ArcSweep mounts the preset with explicit entry, mode, somatic, and Feather
   assert.match(engine, /startBluebirdWeightedHome/);
   assert.match(engine, /stopBluebirdWeightedHome/);
   assert.match(engine, /bluebirdSoundfontLayer/);
+  assert.match(engine, /bluebirdCoupledHearts/);
 });
