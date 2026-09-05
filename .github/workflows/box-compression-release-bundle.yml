@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   package:
+    name: Build ArcSweep and assemble Boxfire review bundle
     runs-on: ubuntu-24.04
     env:
       SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -23,6 +24,27 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: npm
+
+      - name: Pin npm 11.16.0
+        run: npm install --global npm@11.16.0
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify engine contracts
+        run: npm run contracts:verify
+
+      - name: Run complete ArcSweep test suite
+        run: npm run arcsweep:test
+
+      - name: Build production ArcSweep
+        run: npm run arcsweep:build
 
       - name: Assemble Boxfire review tree
         shell: bash
@@ -66,6 +88,23 @@ jobs:
             cp "$file" "$bundle/$file"
           done
 
+          mkdir -p "$bundle/dist"
+          cp -R dist/arcsweep "$bundle/dist/arcsweep"
+
+          cat > "$bundle/ARCSWEEP_BUILD_RECEIPT.txt" <<RECEIPT
+          repository=SingsEnochian/Flameclyffe
+          branch=${SOURCE_BRANCH}
+          commit=${SOURCE_SHA}
+          node=24.x
+          npm=11.16.0
+          contracts=verified
+          arcsweep_tests=passed
+          arcsweep_production_build=passed
+          compiled_output=dist/arcsweep
+          builder=boxfire-workflow
+          independent_qa=boxfire
+          RECEIPT
+
           cat > "$bundle/BOXFIRE_BUNDLE_IDENTITY.txt" <<IDENTITY
           repository=SingsEnochian/Flameclyffe
           branch=${SOURCE_BRANCH}
@@ -73,6 +112,7 @@ jobs:
           law=compression-release-compression-of-release-infinite-recursion
           collapse_exists=false
           calibration_authority=rowan
+          build_authority=boxfire-workflow
           independent_qa=boxfire
           IDENTITY
 
