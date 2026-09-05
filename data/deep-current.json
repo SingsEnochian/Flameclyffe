@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-09-05T21:27:39.030Z",
+  "generated_at": "2026-09-05T23:09:05.129Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-05T17:15",
+    "time": "2026-09-05T19:00",
     "sky": "Day",
     "current": {
-      "time": "2026-09-05T17:15",
+      "time": "2026-09-05T19:00",
       "interval": 900,
-      "temperature_2m": 86.8,
-      "relative_humidity_2m": 72,
+      "temperature_2m": 80.7,
+      "relative_humidity_2m": 82,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
       "cloud_cover": 100,
-      "pressure_msl": 1012.3,
-      "wind_speed_10m": 3.9,
-      "wind_direction_10m": 190
+      "pressure_msl": 1012,
+      "wind_speed_10m": 4.5,
+      "wind_direction_10m": 207
     }
   },
   "space_weather": {
@@ -37,28 +37,28 @@
       "a_running": 2
     },
     "solar_wind": {
-      "time_tag": "2026-09-05T21:19:00Z",
-      "bz": 3,
-      "bt": 7,
+      "time_tag": "2026-09-05T23:02:00Z",
+      "bz": 5,
+      "bt": 6,
       "density": null,
-      "speed": 341
+      "speed": 349
     }
   },
   "moon": {
-    "age_days": 23.57,
-    "illumination": 35.1,
+    "age_days": 23.64,
+    "illumination": 34.4,
     "name": "Last Quarter"
   },
   "field": {
-    "P": 0.5122222222222217,
+    "P": 0.5088888888888888,
     "C": 0.2538095238095239,
-    "R": 0.7291666666666667,
-    "E": 0.5404945054945055,
-    "M": 0.35100000000000003,
+    "R": 0.7858333333333333,
+    "E": 0.5789560439560439,
+    "M": 0.344,
     "A": 0.6,
-    "T": 0.5523393498168497,
-    "H": 0.4426346153846154,
-    "dpdt": 0.7291666666666667
+    "T": 0.5591399652014652,
+    "H": 0.4855269230769231,
+    "dpdt": 0.7858333333333333
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
