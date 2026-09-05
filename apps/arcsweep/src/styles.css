@@ -301,6 +301,7 @@ code.deep-formula { display: block; font-size: 0.72rem; color: var(--muted); fon
 .soundfont-rack h4, .soundfont-rack p { margin: 0 0 .35rem; }
 .soundfont-rack a { color: var(--gold); }
 .synaptic-heartfield { border-color: color-mix(in srgb, var(--gold) 48%, var(--line-soft)); background: radial-gradient(circle at 90% 0%, rgba(200,150,80,.12), transparent 38%), rgba(0,0,0,.2); }
+.bluebird-weighted-home { border-color: color-mix(in srgb, #6599d5 52%, var(--line-soft)); background: radial-gradient(circle at 88% 8%, rgba(91,137,194,.16), transparent 42%), radial-gradient(circle at 12% 92%, rgba(200,150,80,.1), transparent 36%), rgba(0,0,0,.22); }
 .heartfield-controls { display: flex; flex-wrap: wrap; align-items: end; gap: .7rem; }
 .heartfield-controls label { flex: 1 1 13rem; }
 .heartfield-layer-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(15rem,1fr)); gap: .5rem; }

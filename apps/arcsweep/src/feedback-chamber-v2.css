@@ -199,12 +199,12 @@
   box-shadow: none;
   align-items: stretch;
 }
-.feedback-chamber-v2 .story-soundscape > :not(.synaptic-heartfield) {
+.feedback-chamber-v2 .story-soundscape > :not(.synaptic-heartfield):not(.bluebird-weighted-home) {
   grid-column: 1;
 }
 .feedback-chamber-v2 .story-soundscape > .soundscape-head { grid-row: 1; }
 .feedback-chamber-v2 .story-soundscape > .sound-mixer-grid { grid-row: 2; }
-.feedback-chamber-v2 .story-soundscape > .soundfont-rack:not(.synaptic-heartfield) { grid-row: 3; }
+.feedback-chamber-v2 .story-soundscape > .soundfont-rack:not(.synaptic-heartfield):not(.bluebird-weighted-home) { grid-row: 3; }
 .feedback-chamber-v2 .story-soundscape > .sound-output-row { grid-row: 4; }
 .feedback-chamber-v2 .story-soundscape > .soundscape-lower { grid-row: 5; }
 .feedback-chamber-v2 .story-soundscape > .synaptic-heartfield {
@@ -217,7 +217,11 @@
   padding: 14px;
   background: linear-gradient(180deg, rgba(6,23,26,.96), rgba(2,13,16,.98));
 }
-.feedback-chamber-v2 .story-soundscape > :not(.synaptic-heartfield) {
+.feedback-chamber-v2 .story-soundscape > .bluebird-weighted-home {
+  grid-column: 1 / -1;
+  grid-row: 6;
+}
+.feedback-chamber-v2 .story-soundscape > :not(.synaptic-heartfield):not(.bluebird-weighted-home) {
   border-left: 1px solid var(--fc-border-soft);
   border-right: 1px solid var(--fc-border-soft);
   padding-inline: 14px;

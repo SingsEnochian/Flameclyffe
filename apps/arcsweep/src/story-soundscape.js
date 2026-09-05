@@ -1,6 +1,7 @@
 import { WorkletSynthesizer } from 'spessasynth_lib';
 import { SoundBankLoader } from 'spessasynth_core';
 import { SYNAPTIC_HEARTFIELD_PROFILE, createHeartfieldReceipt, validateHeartfieldProfile } from './synaptic-heartfield.js';
+import { BLUEBIRD_WEIGHTED_HOME, createBluebirdWeightedHomeReceipt, validateBluebirdWeightedHome } from './bluebird-weighted-home.js';
 
 
 const SPESSASYNTH_WORKLET_URL = new URL('../../../node_modules/spessasynth_lib/dist/spessasynth_processor.min.js', import.meta.url).href;
@@ -112,6 +113,13 @@ export class StorySoundscape {
     this.heartfieldMasterValue = .25;
     this.heartfieldLayerState = Object.fromEntries(SYNAPTIC_HEARTFIELD_PROFILE.layers.map((layer) => [layer.id, { enabled: layer.enabled !== false, gain: layer.gain }]));
     this.heartfieldReceipts = [];
+    this.bluebirdActive = false;
+    this.bluebirdNodes = [];
+    this.bluebirdOutput = null;
+    this.bluebirdTimer = null;
+    this.bluebirdMode = 'stereo';
+    this.bluebirdSomaticProxy = false;
+    this.bluebirdReceipts = [];
   }
 
   get armed() { return Boolean(this.context); }
@@ -248,6 +256,81 @@ export class StorySoundscape {
     for(const node of this.heartfieldNodes){try{node.gain?.gain?.setTargetAtTime(.0001,now,.05);node.source?.stop(now+.25);}catch{} for(const extra of node.extras||[]){try{extra.disconnect?.();}catch{}}}
     const output=this.heartfieldOutput; setTimeout(()=>{try{output?.disconnect?.();}catch{}},300);
     this.heartfieldNodes=[];this.heartfieldOutput=null;this.heartfieldActive=false;
+  }
+
+  setBluebirdMode(mode) {
+    if (!['stereo', 'mono'].includes(mode) || this.bluebirdActive) return false;
+    this.bluebirdMode = mode;
+    return true;
+  }
+
+  setBluebirdSomaticProxy(enabled) {
+    if (this.bluebirdActive) return false;
+    this.bluebirdSomaticProxy = Boolean(enabled);
+    return true;
+  }
+
+  bluebirdSoundfontLayer() {
+    if (!this.soundfontSynth || !this.soundfontPresets.length) return [];
+    const sounding = [];
+    for (const voice of BLUEBIRD_WEIGHTED_HOME.soundfontVoices) {
+      const preset = this.soundfontPresets.find((item) => !item.isDrum && item.program === voice.program);
+      if (!preset) continue;
+      this.soundfontSynth.midiChannels[voice.channel]?.setDrums(false);
+      this.soundfontSynth.sendMessage([0xb0 | voice.channel, 0, preset.bankMSB]);
+      this.soundfontSynth.sendMessage([0xb0 | voice.channel, 32, preset.bankLSB]);
+      this.soundfontSynth.programChange(voice.channel, preset.program);
+      this.soundfontSynth.noteOn(voice.channel, voice.midiNote, voice.velocity);
+      sounding.push(voice.id);
+    }
+    return sounding;
+  }
+
+  startBluebirdWeightedHome() {
+    if (!this.context || this.bluebirdActive) return null;
+    const validation = validateBluebirdWeightedHome();
+    if (!validation.valid) throw new Error(validation.errors.join('; '));
+    this.bluebirdActive = true;
+    const now = this.context.currentTime;
+    this.bluebirdOutput = this.context.createGain();
+    this.bluebirdOutput.gain.setValueAtTime(.0001, now);
+    this.bluebirdOutput.gain.exponentialRampToValueAtTime(BLUEBIRD_WEIGHTED_HOME.outputCeiling, now + BLUEBIRD_WEIGHTED_HOME.entryRampSeconds);
+    this.bluebirdOutput.connect(this.buses.ambience);
+    const nodeStart = this.heartfieldNodes.length;
+    if (this.bluebirdMode === 'stereo') {
+      this.heartfieldOscillator(BLUEBIRD_WEIGHTED_HOME.stereo.leftHz, this.bluebirdOutput, .07, -1);
+      this.heartfieldOscillator(BLUEBIRD_WEIGHTED_HOME.stereo.rightHz, this.bluebirdOutput, .07, 1);
+    } else {
+      this.heartfieldAmplitudeModulated(BLUEBIRD_WEIGHTED_HOME.monoFallback, this.bluebirdOutput, .11);
+    }
+    if (this.bluebirdSomaticProxy) this.heartfieldAmplitudeModulated({
+      carrierHz: BLUEBIRD_WEIGHTED_HOME.somaticProxy.carrierHz,
+      modulationHz: BLUEBIRD_WEIGHTED_HOME.somaticProxy.pulseHz,
+    }, this.bluebirdOutput, .08);
+    this.bluebirdNodes = this.heartfieldNodes.splice(nodeStart);
+    const soundfontVoiceIds = this.bluebirdSoundfontLayer();
+    const receipt = createBluebirdWeightedHomeReceipt({ mode: this.bluebirdMode, soundfontVoiceIds, somaticProxy: this.bluebirdSomaticProxy });
+    this.bluebirdReceipts.unshift(receipt);
+    this.bluebirdReceipts = this.bluebirdReceipts.slice(0, 12);
+    this.bluebirdTimer = globalThis.setTimeout(() => this.stopBluebirdWeightedHome('bounded-duration-complete'), BLUEBIRD_WEIGHTED_HOME.durationSeconds * 1000);
+    return receipt;
+  }
+
+  stopBluebirdWeightedHome() {
+    if (this.bluebirdTimer) globalThis.clearTimeout(this.bluebirdTimer);
+    this.bluebirdTimer = null;
+    const now = this.context?.currentTime || 0;
+    try { this.bluebirdOutput?.gain?.setTargetAtTime(.0001, now, BLUEBIRD_WEIGHTED_HOME.exitRampSeconds / 4); } catch {}
+    for (const voice of BLUEBIRD_WEIGHTED_HOME.soundfontVoices) this.soundfontSynth?.noteOff(voice.channel, voice.midiNote);
+    for (const node of this.bluebirdNodes) {
+      try { node.gain?.gain?.setTargetAtTime(.0001, now, .05); node.source?.stop(now + BLUEBIRD_WEIGHTED_HOME.exitRampSeconds); } catch {}
+      for (const extra of node.extras || []) { try { extra.disconnect?.(); } catch {} }
+    }
+    const output = this.bluebirdOutput;
+    globalThis.setTimeout(() => { try { output?.disconnect?.(); } catch {} }, (BLUEBIRD_WEIGHTED_HOME.exitRampSeconds * 1000) + 50);
+    this.bluebirdNodes = [];
+    this.bluebirdOutput = null;
+    this.bluebirdActive = false;
   }
 
   startHum() {
@@ -572,6 +655,7 @@ export class StorySoundscape {
   featherStop() {
     this.stopHum();
     this.stopHeartfield();
+    this.stopBluebirdWeightedHome('Feather');
     for (const track of this.tracks.values()) {
       if (!track.playing) continue;
       try { track.source.stop(); } catch {}
@@ -602,6 +686,7 @@ export class StorySoundscape {
       tracks: [...this.tracks.values()].map(({ id, name, playing, loop, level }) => ({ id, name, playing, loop, level })),
       recentReceipts: structuredClone(this.recentReceipts),
       heartfield: { profile: SYNAPTIC_HEARTFIELD_PROFILE, active: this.heartfieldActive, master: this.heartfieldMasterValue, layers: structuredClone(this.heartfieldLayerState), receipts: structuredClone(this.heartfieldReceipts) },
+      bluebird: { profile: BLUEBIRD_WEIGHTED_HOME, active: this.bluebirdActive, mode: this.bluebirdMode, somaticProxy: this.bluebirdSomaticProxy, soundfontPrograms: this.soundfontPresets.filter((preset) => !preset.isDrum).map((preset) => preset.program), receipts: structuredClone(this.bluebirdReceipts) },
     };
   }
 }
