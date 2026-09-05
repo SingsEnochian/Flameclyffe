@@ -1,6 +1,7 @@
 import './echo-index-sidecar.js';
 import { CREATIVE_ORGANS } from './creative-organ-registry.js';
 import { SOUND_ORGANS } from './sound-organ-registry.js';
+import { contextualOrganLaunchHref, organLaunchHref } from './organ-launch-route.js';
 
 const CORE_APPLETS = [
   { id: 'portal', label: 'Portal', glyph: '◉', category: 'core', defaultVisible: true },
@@ -47,6 +48,7 @@ const organApplet = (organ, category) => ({
   category,
   defaultVisible: true,
   pagesHref: organ.pagesHref,
+  webHref: organ.webHref,
   organFamily: organ.family,
   organKind: organ.kind || 'external',
   description: organ.description,
@@ -88,21 +90,13 @@ export function visibleApplets(layout) {
     .filter(Boolean);
 }
 
-export function appletLaunchTarget(id) {
-  return APPLET_CATALOGUE.find((item) => item.id === id)?.pagesHref || '';
+export function appletLaunchTarget(id, locationLike = globalThis.location) {
+  return organLaunchHref(APPLET_CATALOGUE.find((item) => item.id === id), locationLike);
 }
 
-export function contextualAppletLaunchTarget(id, context = globalThis.__arcsweepInstrumentContext || {}) {
-  const href = appletLaunchTarget(id);
-  if (!href) return '';
-  const base = globalThis.location?.origin || 'https://singsenochian.github.io';
-  const url = new URL(href, base);
-  if (context.worldId) url.searchParams.set('worldId', context.worldId);
-  if (context.worldName) url.searchParams.set('worldName', context.worldName);
-  if (context.worldseedFingerprint) url.searchParams.set('worldseed', context.worldseedFingerprint);
-  url.searchParams.set('from', 'arcsweep');
-  url.searchParams.set('appletId', id);
-  return href.startsWith('/') && url.origin === base ? `${url.pathname}${url.search}${url.hash}` : url.toString();
+export function contextualAppletLaunchTarget(id, context = globalThis.__arcsweepInstrumentContext || {}, locationLike = globalThis.location) {
+  const organ = APPLET_CATALOGUE.find((item) => item.id === id);
+  return contextualOrganLaunchHref(organ, { ...context, from: 'arcsweep', appletId: id }, locationLike);
 }
 
 export function installAppletLaunchRouter(root = document) {

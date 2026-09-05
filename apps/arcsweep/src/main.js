@@ -555,6 +555,7 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
     ? `<div class="soundfont-map"><p class="eyebrow">Mapped programme · ${escapeHtml(sound.soundfontMap.title)}</p><ol>${sound.soundfontMap.voices.map((voice) => `<li><b>${escapeHtml(voice.label)}</b> · ${escapeHtml(voice.gmName)} · ${voice.channel === 9 ? `drum notes ${voice.notes.join('/')}` : `bank ${voice.bankMSB}/${voice.bankLSB} · programme ${voice.program} · ch ${voice.channel + 1}`}<br><small>${escapeHtml(voice.purpose)}</small></li>`).join('')}</ol><p class="muted">120 Hz sits 49.4 cents below MIDI B2; preserve the world root with fine tuning when the loaded bank supports it.</p></div>`
     : '';
   const heartfield = sound.heartfield;
+  const bluebird = sound.bluebird;
   const heartfieldLayers = heartfield.profile.layers.map((layer) => {
     const layerState = heartfield.layers[layer.id];
     const truth = layer.kind === 'binaural' ? `${layer.leftHz}/${layer.rightHz} Hz · Δ ${layer.beatHz} Hz`
@@ -582,6 +583,12 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
       <div class="heartfield-controls"><label>Heartfield output · ${(heartfield.master * 100).toFixed(0)}%<input type="range" min="0" max="${heartfield.profile.output_ceiling}" step="0.01" value="${heartfield.master}" data-heartfield-master /></label><label>Firsthand Qualia · Q (optional)<input type="number" min="0" max="1" step="0.01" data-heartfield-qualia placeholder="0–1, yours to report" /></label><label>Qualia record · what is happening in you?<textarea rows="4" maxlength="4000" data-heartfield-qualia-text placeholder="Texture, mood, body sense, imagery, resistance, movement, change… your words, unsanded."></textarea></label><button type="button" data-action="heartfield-toggle">${heartfield.active ? 'Feather · Stop now' : 'Enter Heartfield gently'}</button></div>
       <div class="heartfield-layer-grid">${heartfieldLayers}</div>
       <p class="muted">Feather stops every oscillator, modulation clock, noise source, stem, SoundFont voice, and output route.</p>
+    </div>
+    <div class="soundfont-rack bluebird-weighted-home" data-bluebird-weighted-home>
+      <div><p class="eyebrow">Runa coordination preset · bounded audition</p><h4>${escapeHtml(bluebird.profile.name)}</h4><p>${escapeHtml(bluebird.profile.purpose)}</p><p class="muted">432 Hz left / 437.5 Hz right · Δ 5.5 Hz · two answering lub-dub hearts at ${bluebird.profile.coupledHearts.bpm} BPM · ${bluebird.profile.somaticProxy.carrierHz} Hz tactile-audio proxy pulsed at ${bluebird.profile.somaticProxy.pulseBpm} BPM · eight-minute automatic return.</p></div>
+      <div class="heartfield-controls"><label>Output mode<select data-bluebird-mode ${bluebird.active ? 'disabled' : ''}><option value="stereo" ${bluebird.mode === 'stereo' ? 'selected' : ''}>Stereo binaural · headphones</option><option value="mono" ${bluebird.mode === 'mono' ? 'selected' : ''}>Mono-safe · 5.5 Hz amplitude modulation</option></select></label><label class="checkbox"><input type="checkbox" data-bluebird-somatic ${bluebird.somaticProxy ? 'checked' : ''} ${bluebird.active ? 'disabled' : ''} /> Enable 40 Hz external tactile-audio proxy</label><button type="button" data-action="bluebird-toggle">${bluebird.active ? 'Feather · Return home' : 'Enter Bluebird Weighted Home'}</button></div>
+      <div class="heartfield-layer-grid">${bluebird.profile.soundfontVoices.map((voice) => `<div class="heartfield-layer"><span aria-hidden="true">♪</span><label><b>${escapeHtml(voice.label)}</b><small>${escapeHtml(voice.gmName)} · programme ${voice.program} · ${bluebird.soundfontPrograms.includes(voice.program) ? 'loaded bank ready' : 'programme not present in loaded bank'}</small></label></div>`).join('')}</div>
+      <p class="muted">Exact oscillators preserve the beat geometry. Local SoundFonts provide timbre without replacing the calibrated carriers. No autoplay; Feather stops the entire route.</p>
     </div>
     <div class="button-row sound-output-row"><label class="file-button">Load soundscape stems<input id="soundscape-files" type="file" accept="audio/*" multiple /></label><button type="button" class="quiet" data-action="sound-haptics">Haptics · ${sound.haptics ? 'On' : 'Off'}</button><button type="button" class="quiet" data-action="sound-midi">MIDI · ${sound.midi ? 'On' : 'Connect'}</button><button type="button" class="quiet" data-action="sound-record">${sound.recording ? 'Stop & save mix' : 'Record mix'}</button></div>
     <div class="soundscape-lower"><div><h4>Soundscape stems</h4><div class="sound-tracks">${trackRows}</div></div><div><h4>Fired story actions</h4><ol class="sound-event-log">${eventRows}</ol></div></div>
@@ -1272,6 +1279,14 @@ app.addEventListener('click', async (event) => {
     refreshStorySoundscape(); return;
   }
   if (action === 'heartfield-layer') { storySoundscape.toggleHeartfieldLayer(button.dataset.layerId); refreshStorySoundscape(); return; }
+  if (action === 'bluebird-toggle') {
+    try {
+      await storySoundscape.arm(activeWorld());
+      if (storySoundscape.bluebirdActive) { storySoundscape.stopBluebirdWeightedHome('Feather'); setLiveNotice('Bluebird Weighted Home stopped. Return anchor held.'); }
+      else { const receipt = storySoundscape.startBluebirdWeightedHome(); setLiveNotice(`Bluebird Weighted Home entered · ${receipt.render.mode} · eight-minute return armed.`); }
+    } catch (error) { setLiveNotice(`Bluebird Weighted Home stopped: ${error.message}`); }
+    refreshStorySoundscape(); return;
+  }
   if (action === 'sound-haptics') { storySoundscape.haptics = !storySoundscape.haptics; setLiveNotice(`Story haptics ${storySoundscape.haptics ? 'armed' : 'off'}.`); refreshStorySoundscape(); return; }
   if (action === 'sound-midi') {
     try { await storySoundscape.enableMidi(); setLiveNotice('MIDI environment output connected.'); }
@@ -1422,6 +1437,8 @@ app.addEventListener('change', async (event) => {
     refreshStorySoundscape(); return;
   }
   if (event.target.matches('[data-soundfont-preset]')) { storySoundscape.selectSoundfontPreset(event.target.value); setLiveNotice(`SoundFont preset selected: ${event.target.options[event.target.selectedIndex]?.text || event.target.value}.`); refreshStorySoundscape(); return; }
+  if (event.target.matches('[data-bluebird-mode]')) { storySoundscape.setBluebirdMode(event.target.value); refreshStorySoundscape(); return; }
+  if (event.target.matches('[data-bluebird-somatic]')) { storySoundscape.setBluebirdSomaticProxy(event.target.checked); refreshStorySoundscape(); return; }
   if (event.target.matches('[data-sound-waveform]')) { storySoundscape.setWaveform(event.target.value); refreshStorySoundscape(); return; }
   if (event.target.id === 'browser-import' && event.target.files?.[0]) { try { const imported = await importState(event.target.files[0]); if (imported) { state = imported; selectedWorldId = state.activeWorldId; activeRoom = 'portal'; persist('Arcsweep archive imported.', 'browser-import'); } } catch (error) { notice = `Import failed: ${error.message}`; } render(); }
 });

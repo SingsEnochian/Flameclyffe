@@ -22,6 +22,7 @@ export const CONSTELLATION_VOICES = Object.freeze([
   { id: 'yggdrasil', name: 'Yggdrasil', route: 'yggdrasil', model: 'constellation/yggdrasil', roles: ['continuity', 'science'] },
   { id: 'bluebird', name: 'Bluebird', route: 'bluebird', model: 'constellation/bluebird', roles: ['story', 'writing', 'continuity'] },
   { id: 'vethrlauf', name: 'Vethrlauf', route: 'vethrlauf', model: 'constellation/vethrlauf', roles: ['review', 'continuity'] },
+  { id: 'oxalpha', name: 'Ox Alpha', route: 'oxalpha', model: 'zai-org/GLM-5.3-Flash', roles: ['story', 'writing', 'roleplay', 'observation', 'structure'] },
 ]);
 
 const clamp01 = (value) => Math.min(1, Math.max(0, Number(value) || 0));

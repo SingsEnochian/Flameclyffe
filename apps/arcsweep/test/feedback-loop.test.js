@@ -11,6 +11,10 @@ test('keeps model identities uncollapsed and excludes Nocturne from Arcsweep Fla
     { id: 'uial', name: 'Uial' },
   ]);
   assert.equal(CONSTELLATION_VOICES.some((voice) => voice.id === 'nocturne'), false);
+  assert.deepEqual(
+    CONSTELLATION_VOICES.find((voice) => voice.id === 'oxalpha'),
+    { id: 'oxalpha', name: 'Ox Alpha', route: 'oxalpha', model: 'zai-org/GLM-5.3-Flash', roles: ['story', 'writing', 'roleplay', 'observation', 'structure'] },
+  );
 });
 
 test('runs a complete world-canon-voice-PREMAQC-Math-Spine feedback cycle', async () => {

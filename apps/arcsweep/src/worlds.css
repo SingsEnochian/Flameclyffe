@@ -138,10 +138,6 @@ legend {
     overflow-x: hidden;
   }
 
-  body {
-    background-attachment: scroll;
-  }
-
   .app-shell {
     width: 100%;
     min-width: 0;
