@@ -1,4 +1,5 @@
 import { SOUND_ORGANS, SOUND_ORGAN_REGISTRY_VERSION, soundOrgan } from './sound-organ-registry.js';
+import { organLaunchHref } from './organ-launch-route.js';
 
 let initialDeepLinkHandled = false;
 let focusTimer = null;
@@ -53,7 +54,7 @@ function externalLink(organ) {
   const link = document.createElement('a');
   link.className = 'sound-organ-link';
   link.dataset.soundOrgan = organ.id;
-  link.href = organ.pagesHref;
+  link.href = organLaunchHref(organ);
   link.title = organ.description;
   link.innerHTML = `<span aria-hidden="true">${organ.glyph}</span><span>${organ.label}</span>`;
   return link;
