@@ -31,7 +31,7 @@ test('native sound organs deliberately focus the existing Theme soundscape', () 
   const native = SOUND_ORGANS.filter((organ) => organ.kind === 'native-focus');
   assert.ok(native.length >= 4);
   native.forEach((organ) => {
-    assert.equal(organ.roomId, 'theme');
+    assert.equal(organ.roomId, 'feedback');
     assert.ok(organ.focusSelector);
     assert.equal(organ.deployedPath, 'apps/arcsweep/index.html');
   });
