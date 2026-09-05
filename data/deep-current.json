@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-09-04T22:03:19.037Z",
+  "generated_at": "2026-09-05T00:14:58.198Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,52 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-04T18:00",
-    "sky": "Day",
+    "time": "2026-09-04T20:00",
+    "sky": "Night",
     "current": {
-      "time": "2026-09-04T18:00",
+      "time": "2026-09-04T20:00",
       "interval": 900,
-      "temperature_2m": 81.6,
-      "relative_humidity_2m": 92,
-      "is_day": 1,
+      "temperature_2m": 79.5,
+      "relative_humidity_2m": 91,
+      "is_day": 0,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
-      "cloud_cover": 100,
-      "pressure_msl": 1013.2,
-      "wind_speed_10m": 8.8,
-      "wind_direction_10m": 120
+      "cloud_cover": 95,
+      "pressure_msl": 1014.1,
+      "wind_speed_10m": 4.7,
+      "wind_direction_10m": 163
     }
   },
   "space_weather": {
     "kp": {
-      "value": 0.67,
-      "time_tag": "2026-09-04T18:00:00",
-      "a_running": 3
+      "value": 0.33,
+      "time_tag": "2026-09-04T21:00:00",
+      "a_running": 2
     },
     "solar_wind": {
-      "time_tag": "2026-09-04T21:57:00Z",
-      "bz": 0,
-      "bt": 6,
+      "time_tag": "2026-09-05T00:07:00Z",
+      "bz": -4,
+      "bt": 4,
       "density": null,
-      "speed": 340
+      "speed": 354
     }
   },
   "moon": {
-    "age_days": 22.6,
-    "illumination": 45.2,
+    "age_days": 22.69,
+    "illumination": 44.3,
     "name": "Last Quarter"
   },
   "field": {
-    "P": 0.5222222222222227,
-    "C": 0.2538095238095239,
-    "R": 0.75,
-    "E": 0.6417032967032967,
-    "M": 0.452,
-    "A": 0.6,
-    "T": 0.5526737789987791,
-    "H": 0.4480152625152626,
-    "dpdt": 0.75
+    "P": 0.47222222222222243,
+    "C": 0.27761904761904765,
+    "R": 0.7733333333333333,
+    "E": 0.7135714285714285,
+    "M": 0.44299999999999995,
+    "A": 0.3992307692307692,
+    "T": 0.5234256446886447,
+    "H": 0.47554468864468863,
+    "dpdt": 0.7733333333333333
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
