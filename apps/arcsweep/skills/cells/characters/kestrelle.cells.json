@@ -1,10 +1,10 @@
 {
   "contract": "arcsweep.knowledge-cell-bank/v1",
-  "bankId": "character:kestrelle/current-canon-2026-08-19",
+  "bankId": "character:kestrelle/current-canon-2026-09-05",
   "subject": { "kind": "character", "id": "kestrelle", "worldId": "taaveren-vaen" },
-  "label": "Kestrelle al’Valari",
+  "label": "Kestrelle al’Var",
   "sources": [
-    "hearthfire:taaveren-vaen-canon-overlay/2026-08-19",
+    "hearthfire:taaveren-vaen-canon-overlay/2026-09-05",
     "notion:3a970290-d9c4-81f7-92bd-f392f5439387",
     "notion:3a970290-d9c4-8108-b47e-d21fa9573df7",
     "notion:3a970290-d9c4-81fc-b5d5-dd90e34af90f"
@@ -15,7 +15,7 @@
       "cellType": "identity",
       "subject": { "kind": "character", "id": "kestrelle", "worldId": "taaveren-vaen" },
       "predicate": "has_name",
-      "value": "Kestrelle al’Valari",
+      "value": "Kestrelle al’Var",
       "status": "stable",
       "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
       "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/src/taaveren-vaen-canon-overlay.js" },
@@ -23,17 +23,17 @@
       "mutability": "stable_core",
       "privacy": "house",
       "relations": [
-        { "kind": "supersedes", "targetId": "kestrelle.identity.alvar-historical" },
+        { "kind": "supersedes", "targetId": "kestrelle.identity.alvalari-historical" },
         { "kind": "supersedes", "targetId": "kestrelle.identity.ayrel-historical" }
       ],
       "tags": ["canon", "identity", "name"]
     },
     {
-      "id": "kestrelle.identity.alvar-historical",
+      "id": "kestrelle.identity.alvalari-historical",
       "cellType": "identity",
       "subject": { "kind": "character", "id": "kestrelle", "worldId": "taaveren-vaen" },
       "predicate": "was_named_in_historical_draft",
-      "value": "Kestrelle al’Var",
+      "value": "Kestrelle al’Valari",
       "status": "superseded",
       "authority": { "kind": "project_canon", "speakerOrAuthor": "historical Ta’veren Vaen bundle", "confidence": 1 },
       "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/src/house-dr-bundle-worlds-a.js" },
