@@ -16,6 +16,15 @@ test('StorySoundscape remains the sole SoundFont bank and haptic engine', async 
   assert.match(engine, /soundBankManager\.addSoundBank/);
   assert.match(engine, /soundfontPresets = synth\.presetList/);
   assert.match(engine, /navigator\?\.vibrate/);
+  assert.doesNotMatch(engine, /fromArrayBuffer\(buffer\.slice/);
+});
+
+test('SoundFont status names the batch, selected preset, and audible audition', async () => {
+  const { soundfontBankStatusText } = await import('../src/soundfont-status.js');
+  assert.match(soundfontBankStatusText({ state: 'loading-bank', fileCount: 12, totalBytes: 469000000 }), /preparing 12 files/);
+  assert.match(soundfontBankStatusText({ state: 'bank-file-loading', fileIndex: 2, fileCount: 12, fileName: 'BIG_SHOT.sf2', fileSize: 68838376 }), /BIG_SHOT\.sf2/);
+  assert.match(soundfontBankStatusText({ state: 'bank-ready', bankCount: 12, presetCount: 233, selectedPreset: { name: 'Choir Aahs' } }), /233 presets · selected: Choir Aahs/);
+  assert.match(soundfontBankStatusText({ state: 'audition-started', frequency: 432, selectedPreset: { name: 'Choir Aahs' } }), /playing Choir Aahs at 432\.00 Hz/);
 });
 
 test('repair sidecar boots before navigation and long-running UI sidecars', async () => {
