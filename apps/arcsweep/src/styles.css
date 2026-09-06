@@ -476,6 +476,17 @@ html[data-high-contrast="true"] .houseglass { border-width: 2px; background: var
 .soundfont-controls { display: grid; grid-template-columns: auto minmax(12rem, 1fr) auto; align-items: end; gap: .65rem; }
 .soundfont-controls label:not(.file-button) { display: grid; gap: .3rem; font-size: .76rem; }
 .soundfont-bank-list { display: flex; flex-wrap: wrap; gap: .4rem .8rem; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: .72rem; }
+.soundfont-load-status { display: grid; gap: .45rem; padding: .7rem .8rem; border: 1px solid color-mix(in srgb, var(--gold) 38%, var(--line-soft)); border-radius: .7rem; background: rgba(0,0,0,.2); }
+.soundfont-load-status p { margin: 0; }
+.soundfont-runtime-diagnostic { display: flex; align-items: center; gap: .45rem; color: var(--muted); font-size: .76rem; }
+.soundfont-runtime-diagnostic::before, .soundfont-load-progress li::before { content: ''; flex: 0 0 auto; width: .55rem; height: .55rem; border-radius: 50%; background: #788083; box-shadow: 0 0 0 2px rgba(120,128,131,.12); }
+.soundfont-runtime-diagnostic[data-state='loading']::before, .soundfont-load-progress li[data-state='loading']::before { background: var(--gold); box-shadow: 0 0 10px color-mix(in srgb, var(--gold) 62%, transparent); }
+.soundfont-runtime-diagnostic[data-state='ready']::before, .soundfont-load-progress li[data-state='ready']::before { background: var(--green); box-shadow: 0 0 10px color-mix(in srgb, var(--green) 62%, transparent); }
+.soundfont-runtime-diagnostic[data-state='error']::before, .soundfont-load-progress li[data-state='error']::before { background: var(--danger); box-shadow: 0 0 10px color-mix(in srgb, var(--danger) 55%, transparent); }
+.soundfont-load-progress { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: .35rem .7rem; margin: .2rem 0 0; padding: 0; list-style: none; color: var(--muted); font-size: .7rem; }
+.soundfont-load-progress:empty { display: none; }
+.soundfont-load-progress li { display: flex; align-items: flex-start; gap: .45rem; min-width: 0; overflow-wrap: anywhere; }
+.soundfont-load-progress li::before { margin-top: .2rem; }
 .soundfont-map { border-top: 1px solid var(--line-soft); margin-top: .75rem; padding-top: .75rem; }
 .soundfont-map ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .55rem; margin: .5rem 0; padding: 0; list-style: none; }
 .soundfont-map li { border: 1px solid var(--line-soft); border-radius: .65rem; background: rgba(0,0,0,.18); padding: .65rem; }

@@ -30,11 +30,17 @@ test('Sound Room exposes one in-room instrument rail over existing organs', asyn
 
 test('Sound Bank UX reports loading, ready, error and remembers preset per world', async () => {
   const source = await readFile(new URL('../src/soundfont-runtime-repair.js', import.meta.url), 'utf8');
+  const status = await readFile(new URL('../src/soundfont-status.js', import.meta.url), 'utf8');
   assert.match(source, /loading-bank/);
+  assert.match(source, /bank-file-loading/);
+  assert.match(source, /bank-file-ready/);
+  assert.match(source, /bank-file-error/);
   assert.match(source, /bank-ready/);
   assert.match(source, /preset-selected/);
+  assert.match(source, /audition-started/);
   assert.match(source, /arcsweep\.soundfont\.preference\/v1/);
-  assert.match(source, /no bank loaded/);
+  assert.match(status, /no bank loaded/);
+  assert.match(source, /bankAttempts/);
 });
 
 test('new toys are real Vite build dependencies and House smoke stays lazy with House', async () => {
