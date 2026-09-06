@@ -18,10 +18,10 @@ const CANON_OVERLAY = applyTaaverenVaenCanonOverlay({
 
 export const HOUSE_DR_BUNDLE = Object.freeze({
   id: 'hearthweave-notion-dr-library',
-  version: '2026.08.19.1',
+  version: '2026.09.05.1',
   title: 'Hearthweave Desired Reality Library',
   source: 'Notion Shifting Wiki and Desired Reality Scripts with receipted current-canon overlays',
-  decisionDate: '2026-08-19',
+  decisionDate: '2026-09-05',
   defaultWorldSourceKey: 'hearthweave-foundation',
   worlds: CANON_OVERLAY.worlds,
   documents: CANON_OVERLAY.documents,
