@@ -26,9 +26,9 @@ import { renderCanonIntelligenceProposal } from '../src/canon-intelligence-live-
 const evidence = normaliseCanonEvidence({
   source_id: 'wot-fandom:kestrelle',
   source_kind: 'canon-source',
-  source_title: 'Kestrelle al’Valari',
+  source_title: 'Kestrelle al’Var',
   world_id: 'taaveren-vaen',
-  entity_hint: 'Kestrelle al’Valari',
+  entity_hint: 'Kestrelle al’Var',
   field_hint: 'occupation',
   value: 'Wise Woman',
   excerpt: 'Kestrelle is a recognised Wise Woman.',
@@ -37,7 +37,7 @@ const evidence = normaliseCanonEvidence({
   provenance: ['ingest:757'],
 });
 
-const entities = [{ id: 'kestrelle-al-valari', type: 'character', name: 'Kestrelle al’Valari', aliases: ['Kestrelle'] }];
+const entities = [{ id: 'kestrelle-al-var', type: 'character', name: 'Kestrelle al’Var', aliases: ['Kestrelle'] }];
 const fields = [{ key: 'occupation', label: 'Occupation', aliases: ['role'], entity_types: ['character'] }];
 
 test('ingest normalisation keeps evidence outside canon', () => {
