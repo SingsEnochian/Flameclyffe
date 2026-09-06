@@ -454,7 +454,10 @@ export class StorySoundscape {
       const buffer = await file.arrayBuffer();
       let parsed;
       try {
-        parsed = SoundBankLoader.fromArrayBuffer(buffer.slice(0));
+        // The worklet takes ownership of this buffer after parsing. Avoid cloning
+        // it first: large orchestral banks can exceed 150 MB, and a second full
+        // copy needlessly doubles the browser's peak memory pressure.
+        parsed = SoundBankLoader.fromArrayBuffer(buffer);
       } catch (error) {
         throw new Error(`${file.name} could not be parsed as a SoundFont bank: ${error.message}`);
       }
