@@ -43,8 +43,8 @@ export async function buildSceneCortexAcceptanceReport(fieldContext, options = {
   const style = page.writingStyleId ? subjectBy(packet, 'writing_style', page.writingStyleId) : null;
   const activeCells = (packet.subjects || []).flatMap((subject) => subject.cells || []);
   const isTaaveren = ['taaveren-vaen', 'taveren-vaen'].includes(String(page.worldId || '').toLowerCase());
-  const activeCurrentName = !isTaaveren || !character || cellContains(character.cells, 'Kestrelle al’Valari');
-  const oldNameLeak = isTaaveren && (cellContains(activeCells, 'Kestrelle al’Var') && !cellContains(activeCells, 'Kestrelle al’Valari'));
+  const activeCurrentName = !isTaaveren || !character || cellContains(character.cells, 'Kestrelle al’Var');
+  const oldNameLeak = isTaaveren && (cellContains(activeCells, 'Kestrelle al’Valari') && !cellContains(activeCells, 'Kestrelle al’Var'));
   const oldEraLeak = isTaaveren && (cellContains(activeCells, 'Mending') || cellContains(activeCells, 'Fourth Age'));
   const restorationActive = !isTaaveren || cellContains(activeCells, 'Age of Restoration');
 
@@ -58,8 +58,8 @@ export async function buildSceneCortexAcceptanceReport(fieldContext, options = {
     check('subject-separation', 'Narrator and character knowledge remain separate', packet.rules?.narrativeVoiceMayShapeProseButMayNotGrantCharacterKnowledge === true && packet.rules?.subjectKindsRemainDistinct === true, 'subject boundaries preserved'),
     check('no-silent-mutation', 'Field remains user-controlled', packet.rules?.noSilentFieldMutation === true, 'dry-run builds context without editing prose'),
     check('no-impersonation', 'Unavailable voices keep their own identity boundary', packet.rules?.unavailableVoiceMayNotBeImpersonated === true, 'no fallback impersonation'),
-    check('active-name', 'Current protagonist terminology present', activeCurrentName, isTaaveren ? 'Kestrelle al’Valari expected in active character context' : 'not a Ta’veren Vaen scene'),
-    check('superseded-name', 'Superseded protagonist name excluded from active subject context', !oldNameLeak, oldNameLeak ? 'al’Var leaked as active canon' : 'historical name remains outside ordinary activation'),
+    check('active-name', 'Current protagonist terminology present', activeCurrentName, isTaaveren ? 'Kestrelle al’Var expected in active character context' : 'not a Ta’veren Vaen scene'),
+    check('superseded-name', 'Superseded protagonist name excluded from active subject context', !oldNameLeak, oldNameLeak ? 'al’Valari leaked as active canon' : 'historical name remains outside ordinary activation'),
     check('restoration-era', 'Age of Restoration context active', restorationActive, isTaaveren ? 'Restoration must resolve in active cortex' : 'not a Ta’veren Vaen scene'),
     check('superseded-era', 'Superseded era terms excluded from active subject context', !oldEraLeak, oldEraLeak ? 'Fourth Age or Mending leaked into active cortex' : 'superseded era terms remain historical only'),
   ];
