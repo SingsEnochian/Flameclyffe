@@ -35,16 +35,16 @@ test('the bundle preserves Notion status and canon boundaries', () => {
   assert.match(sourceIngest.canonBoundary, /Protagonist.*remain open authored fields/i);
 });
 
-test('Kestrelle al’Valari is canonical and older names remain provenance only', () => {
+test('Kestrelle al’Var is canonical and older names remain provenance only', () => {
   const { state } = installCurrentHouseDrLibrary(createDefaultState(), NOW);
   const world = state.worlds.find((item) => item.houseSourceKey === 'taveren-vaen');
   const script = state.scripts.find((item) => item.houseSourceKey === 'taveren-vaen-kestrelle-script');
-  assert.equal(world.identity.name, 'Kestrelle al’Valari');
-  assert.equal(world.houseProfile.protagonist, 'Kestrelle al’Valari');
-  assert.equal(script.name, 'Ta’veren Vaen 01 — Kestrelle al’Valari');
-  assert.match(script.content, /I am Kestrelle al’Valari\./);
-  assert.match(script.content, /Kestrelle al’Var.*provenance only/i);
-  assert.doesNotMatch(script.content, /Kestrelle al’Valari, are provenance only/);
+  assert.equal(world.identity.name, 'Kestrelle al’Var');
+  assert.equal(world.houseProfile.protagonist, 'Kestrelle al’Var');
+  assert.equal(script.name, 'Ta’veren Vaen 01 — Kestrelle al’Var');
+  assert.match(script.content, /I am Kestrelle al’Var\./);
+  assert.match(script.content, /Kestrelle al’Valari.*provenance only/i);
+  assert.doesNotMatch(script.content, /Kestrelle al’Var, are provenance only/);
 });
 
 test('Ta’veren Vaen uses the Age of Restoration later-Turning canon while technology remains open', () => {
