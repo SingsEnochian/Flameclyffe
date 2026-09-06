@@ -2,7 +2,7 @@
   "contract": "arcsweep.subject-bank-manifest/v1",
   "subjects": {
     "character:kestrelle": {
-      "label": "Kestrelle al’Valari",
+      "label": "Kestrelle al’Var",
       "worldIds": ["taaveren-vaen", "taveren-vaen"],
       "banks": ["./cells/characters/kestrelle.cells.json"],
       "status": "active-canon-cortex"
