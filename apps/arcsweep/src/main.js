@@ -573,8 +573,8 @@ function renderStorySoundscape(sound = storySoundscape.snapshot()) {
       <label>Overtones<input type="range" min="1" max="6" step="1" value="${sound.world.overtones}" data-sound-overtones /></label>
     </div>
     <div class="soundfont-rack">
-      <div><p class="eyebrow">Polyphone → local bank → world voice</p><h4>SoundFont rack</h4><p class="muted">Browse <a href="https://www.polyphone.io/en/soundfonts" target="_blank" rel="noopener noreferrer">Polyphone soundfonts</a>, keep the bank’s license with it, then load the local SF2, SF3, SFOGG, or DLS file here. Banks stay on this device.</p></div>
-      <div class="soundfont-controls"><label class="file-button">Load SoundFont bank<input id="soundfont-files" type="file" accept=".sf2,.sf3,.sfogg,.dls" multiple /></label><label>Preset<select data-soundfont-preset ${sound.soundfontPresets.length ? '' : 'disabled'}>${soundfontOptions}</select></label><button type="button" class="quiet" data-action="soundfont-tone" ${sound.selectedSoundfontPreset ? '' : 'disabled'}>Play preset at world tone</button></div>
+      <div><p class="eyebrow">Polyphone → local bank → world voice</p><h4>SoundFont rack</h4><p class="muted">Load one bank or a whole local collection. ArcSweep reports each parse, counts the presets, names the selected voice, and confirms the audible test. Banks stay on this device and are never uploaded; keep each bank’s licence and source notes with it.</p></div>
+      <div class="soundfont-controls"><label class="file-button">Load one or many banks<input id="soundfont-files" type="file" accept=".sf2,.sf3,.sfogg,.dls" multiple /></label><label>Selected preset<select data-soundfont-preset ${sound.soundfontPresets.length ? '' : 'disabled'}>${soundfontOptions}</select></label><button type="button" class="quiet" data-action="soundfont-tone" ${sound.selectedSoundfontPreset ? '' : 'disabled'}>Play ${sound.selectedSoundfontPreset ? escapeHtml(sound.selectedSoundfontPreset.name || 'selected preset') : 'loaded preset'} at world tone</button></div>
       <ul class="soundfont-bank-list">${soundfontBanks}</ul>
       ${mappedVoices}
     </div>
