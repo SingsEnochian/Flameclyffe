@@ -10,6 +10,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/v1/telegram/house",
+      "destination": "/api/v1/house/commons?transport=telegram"
+    },
+    {
       "source": "/templehouse/tesla-observatory",
       "destination": "/templehouse/tesla-observatory-live.html"
     },
