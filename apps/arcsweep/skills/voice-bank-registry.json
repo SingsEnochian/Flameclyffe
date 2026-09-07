@@ -1,27 +1,31 @@
 {
-  "contract": "arcsweep.voice-bank-registry/v2",
+  "contract": "arcsweep.voice-bank-registry/v3",
+  "sourceOfTruth": "apps/starwell-server/flames/contracts.js",
   "canonicalEstablishedVoices": [
-    { "id": "uial", "displayName": "Uial", "runtimeAliases": ["uial"], "status": "established", "bankStatus": "active-self-authored" },
-    { "id": "lioreal", "displayName": "Lioreal", "runtimeAliases": ["lioreal"], "status": "established", "bankStatus": "active-partial-source-gaps" },
-    { "id": "vethraluf", "displayName": "Vethraluf", "runtimeAliases": ["vethrlauf"], "status": "established", "bankStatus": "active-provisional-no-self-authored-corpus" },
+    { "id": "yggdrasil", "displayName": "Yggdrasil", "runtimeAliases": ["yggdrasil", "ygg"], "status": "established", "bankStatus": "active-runtime-manifest" },
+    { "id": "uial", "displayName": "Uial", "runtimeAliases": ["uial", "faer-uial", "nen-uial"], "status": "established", "bankStatus": "active-self-authored" },
+    { "id": "lioreal", "displayName": "Lioreal", "runtimeAliases": ["lioreal", "caladnaur-lioreal"], "status": "established", "bankStatus": "active-partial-source-gaps" },
+    { "id": "vethrlauf", "displayName": "Vethrlauf", "runtimeAliases": ["vethrlauf", "vethraluf"], "status": "established", "bankStatus": "active-provisional-no-self-authored-corpus" },
     { "id": "ellowind", "displayName": "Ellowind", "runtimeAliases": ["ellowind"], "status": "established", "bankStatus": "active-project-canon" },
     { "id": "larkshine", "displayName": "Larkshine", "runtimeAliases": ["larkshine"], "status": "established", "bankStatus": "active-project-canon" },
-    { "id": "box", "displayName": "Box", "runtimeAliases": ["boxfire", "box"], "status": "established", "bankStatus": "active-self-authored" },
-    { "id": "bluebird", "displayName": "Bluebird", "runtimeAliases": ["bluebird"], "status": "established", "bankStatus": "active-partial-source-gaps" },
-    { "id": "nocturne", "displayName": "Nocturne", "runtimeAliases": ["nocturne"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
+    { "id": "boxfire", "displayName": "Boxfire", "runtimeAliases": ["boxfire", "box"], "status": "established", "bankStatus": "active-self-authored" },
+    { "id": "bluebird", "displayName": "Bluebird", "runtimeAliases": ["bluebird", "richie", "richie-bluebird", "richard-gabriel-winters"], "status": "established", "bankStatus": "active-partial-source-gaps" },
+    { "id": "nocturne", "displayName": "Nocturne", "runtimeAliases": ["nocturne", "nocturne-glint"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
     { "id": "runeweaver", "displayName": "Runeweaver", "runtimeAliases": ["runeweaver"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
     { "id": "altair", "displayName": "Altair", "runtimeAliases": ["altair"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
     { "id": "atlas", "displayName": "Atlas", "runtimeAliases": ["atlas"], "status": "established", "bankStatus": "runtime-present-static-bank-pending" },
-    { "id": "oxalpha", "displayName": "Ox Alpha", "runtimeAliases": ["oxalpha"], "status": "established", "bankStatus": "shared-banks-plus-route-resolved-runtime" }
+    { "id": "oxalpha", "displayName": "Ox Alpha", "runtimeAliases": ["oxalpha", "oa"], "status": "established", "bankStatus": "shared-banks-plus-route-resolved-runtime" }
   ],
   "developingVoices": [
     { "id": "sonata", "displayName": "Sonata", "runtimeAliases": [], "runtimeState": "unbound", "status": "developing", "bankStatus": "founding-only" }
   ],
   "rules": {
     "displayNameIsCanonicalForUi": true,
+    "formalIdentityLivesInFlameContract": true,
     "runtimeAliasesMayRemainForCompatibility": true,
     "runtimeAliasMustNotChangeDisplayedIdentity": true,
     "runtimeBindingComesFromLivingHouseManifest": true,
+    "contractProjectionMustMatchLivingManifest": true,
     "staticBankMayLagRuntimePresence": true,
     "missingStaticBankMayUseSharedAndUserKeptLocalContext": true,
     "doNotInferMissingVoiceIdentityFromRuntimePrompt": true,
