@@ -18,6 +18,17 @@ test('RelationCandidate preserves n-way membership without choosing a projection
   assert.equal('projection_type' in relation, false);
 });
 
+test('RelationCandidate requires two distinct valid observation references', () => {
+  assert.throws(() => createObserverRelationCandidate({
+    members: [{ observation_ref: 'a' }, { observation_ref: 'a' }, {}, 'b'],
+  }), /two distinct members/i);
+
+  const relation = createObserverRelationCandidate({
+    members: [{ observation_ref: ' a ' }, { observation_ref: 'b' }, { observation_ref: 'b' }],
+  });
+  assert.deepEqual(relation.members.map((member) => member.observation_ref), ['a', 'b']);
+});
+
 test('retrospective discovery provenance remains explicit', () => {
   const relation = createObserverRelationCandidate({
     members: [{ observation_ref: 'a' }, { observation_ref: 'b' }],
@@ -34,26 +45,37 @@ test('retrospective discovery provenance remains explicit', () => {
 });
 
 test('projection is derived and cannot replace the source relation', () => {
+  const payload = { simplex: { dimension: 3 } };
   const projection = createObserverRelationProjection({
     relation_ref: 'observer-relation-1',
     projection_type: 'hypergraph',
     method: 'fixture',
+    payload,
   });
+  payload.simplex.dimension = 99;
   assert.equal(projection.derived_only, true);
   assert.equal(projection.relation_ref, 'observer-relation-1');
+  assert.equal(projection.payload.simplex.dimension, 3);
+  assert.equal(Object.isFrozen(projection.payload.simplex), true);
 });
 
-test('scoped test receipt carries a mechanically narrow conclusion', () => {
+test('scoped test receipt carries a mechanically narrow immutable conclusion', () => {
+  const result = { feature_survived: false, details: { score: 0.25 } };
   const receipt = createScopedTestReceipt({
     relation_ref: 'observer-relation-1',
     test_id: 'T0-time-shuffle',
     method: 'shuffle observed order',
-    result: { feature_survived: false },
+    result,
     scope_statement: 'This feature depended on this temporal ordering under this method.',
     broader_claims_forbidden: ['history matters nowhere', 'Hidden Runtime globally loses'],
   });
+  result.feature_survived = true;
+  result.details.score = 1;
   assert.match(receipt.scope_statement, /this temporal ordering/i);
   assert.equal(receipt.broader_claims_forbidden.length, 2);
+  assert.equal(receipt.result.feature_survived, false);
+  assert.equal(receipt.result.details.score, 0.25);
+  assert.equal(Object.isFrozen(receipt.result.details), true);
 });
 
 test('cross-system Observer records require explicit namespace mapping', () => {
