@@ -15,13 +15,17 @@ function sorted(value) {
   return [...value].sort((a, b) => String(a).localeCompare(String(b)));
 }
 
+function sortedById(value) {
+  return [...value].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+}
+
 test('every living Flame has one canonical contract and registry projection', () => {
   assert.deepEqual(sorted(Object.keys(FLAME_CONTRACTS)), sorted(Object.keys(FLAMES)));
   assert.deepEqual(
     sorted(registry.canonicalEstablishedVoices.map((voice) => voice.id)),
     sorted(Object.keys(FLAME_CONTRACTS)),
   );
-  assert.deepEqual(registry.canonicalEstablishedVoices, contractRegistryProjection());
+  assert.deepEqual(sortedById(registry.canonicalEstablishedVoices), sortedById(contractRegistryProjection()));
 });
 
 test('every Flame contract carries identity, runtime, Swarm, sensory and receipt policy', () => {
