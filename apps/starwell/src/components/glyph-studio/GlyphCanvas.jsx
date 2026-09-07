@@ -1,57 +1,131 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { VIEWBOX, brushRuntime, clamp, makeId } from './glyphStudioModel.js';
+import { createLiveBrushFrame, liveBrushSensoryEngine } from './liveBrushRuntime.js';
 
-function pointWidth(stroke, point, index) {
-  const pressure = clamp(point.pressure ?? 0.5, stroke.brush.minPressure, 1);
-  const pressureMultiplier = (1 - stroke.brush.pressureSize) + stroke.brush.pressureSize * pressure;
-  const progress = stroke.points.length > 1 ? index / (stroke.points.length - 1) : 0.5;
-  const startTaper = stroke.brush.taperStart > 0
-    ? clamp(progress / stroke.brush.taperStart, 0.08, 1)
-    : 1;
-  const endTaper = stroke.brush.taperEnd > 0
-    ? clamp((1 - progress) / stroke.brush.taperEnd, 0.08, 1)
-    : 1;
-  return Math.max(1, stroke.brush.size * pressureMultiplier * Math.min(startTaper, endTaper));
+function pointSpeedNorm(stroke, point, index) {
+  const previous = index > 0 ? stroke.points[index - 1] : null;
+  if (!previous) return 0;
+  const dt = Math.max(1, Number(point.t || 0) - Number(previous.t || 0));
+  const distance = Math.hypot(Number(point.x) - Number(previous.x), Number(point.y) - Number(previous.y));
+  return clamp((distance / (dt / 1000)) / 1800, 0, 1);
 }
 
-function pointOpacity(stroke, point) {
+function pointTilt(point) {
+  return clamp(Math.hypot(Number(point.tiltX || 0), Number(point.tiltY || 0)) / 90, 0, 1);
+}
+
+function deterministicNoise(index, salt = 0) {
+  const value = Math.sin((index + 1) * 12.9898 + salt * 78.233) * 43758.5453;
+  return (value - Math.floor(value)) * 2 - 1;
+}
+
+function pointWidth(stroke, point, index) {
+  const brush = stroke.brush || {};
+  const pressure = clamp(point.pressure ?? 0.5, brush.minPressure ?? 0.08, 1);
+  const pressureSize = brush.pressureSize ?? 0;
+  const pressureMultiplier = (1 - pressureSize) + pressureSize * pressure;
+  const progress = stroke.points.length > 1 ? index / (stroke.points.length - 1) : 0.5;
+  const startTaper = (brush.taperStart ?? 0) > 0
+    ? clamp(progress / brush.taperStart, 0.08, 1)
+    : 1;
+  const endTaper = (brush.taperEnd ?? 0) > 0
+    ? clamp((1 - progress) / brush.taperEnd, 0.08, 1)
+    : 1;
+  const speedNorm = pointSpeedNorm(stroke, point, index);
+  const speedMultiplier = 1 + (brush.speedSize ?? 0) * (speedNorm - 0.5);
+  const tiltMultiplier = 1 + (brush.tiltSize ?? 0) * pointTilt(point);
+  const jitterMultiplier = 1 + (brush.jitterSize ?? 0) * deterministicNoise(index, 3) * 0.35;
+  const size = Number(brush.size ?? 1) * pressureMultiplier * speedMultiplier * tiltMultiplier * jitterMultiplier;
+  return clamp(Math.max(1, size * Math.min(startTaper, endTaper)), brush.minSize ?? 1, brush.maxSize ?? 10000);
+}
+
+function pointOpacity(stroke, point, index) {
+  const brush = stroke.brush || {};
   const pressure = clamp(point.pressure ?? 0.5, 0, 1);
-  const pressureMultiplier = (1 - stroke.brush.pressureOpacity)
-    + stroke.brush.pressureOpacity * pressure;
-  return clamp(stroke.brush.opacity * pressureMultiplier, 0, 1);
+  const pressureOpacity = brush.pressureOpacity ?? 0;
+  const pressureMultiplier = (1 - pressureOpacity) + pressureOpacity * pressure;
+  const speedNorm = pointSpeedNorm(stroke, point, index);
+  const speedMultiplier = 1 + (brush.speedOpacity ?? 0) * (speedNorm - 0.5);
+  const tiltMultiplier = 1 - (brush.tiltOpacity ?? 0) * pointTilt(point) * 0.7;
+  const jitterMultiplier = 1 + (brush.jitterOpacity ?? 0) * deterministicNoise(index, 7) * 0.3;
+  const flow = clamp(brush.flow ?? 1, 0, 1);
+  const opacity = Number(brush.opacity ?? 1) * pressureMultiplier * speedMultiplier * tiltMultiplier * jitterMultiplier * flow;
+  return clamp(opacity, brush.minOpacity ?? 0, brush.maxOpacity ?? 1);
+}
+
+function offsetPoint(point, brush, index) {
+  const lateral = (brush.lateralJitter ?? 0) + (brush.scatter ?? 0) * 0.75;
+  if (!lateral) return point;
+  const amount = Math.max(1, Number(brush.size ?? 1)) * lateral * 0.45;
+  return {
+    ...point,
+    x: Number(point.x) + deterministicNoise(index, 11) * amount,
+    y: Number(point.y) + deterministicNoise(index, 17) * amount,
+  };
+}
+
+function grainDash(brush, width) {
+  const depth = clamp(brush.grainDepth ?? 0, 0, 1);
+  const spacing = clamp(brush.spacing ?? 0, 0, 1);
+  if (depth < 0.03 && spacing < 0.08) return undefined;
+  const mark = Math.max(1, width * (1.65 - depth * 0.9));
+  const gap = Math.max(0.5, width * (0.12 + depth * 0.9 + spacing * 1.7));
+  return `${mark} ${gap}`;
 }
 
 export function StrokeMarks({ stroke }) {
   if (!stroke?.points?.length) return null;
   if (stroke.points.length === 1) {
-    const point = stroke.points[0];
+    const point = offsetPoint(stroke.points[0], stroke.brush || {}, 0);
     return (
       <circle
         cx={point.x}
         cy={point.y}
         r={pointWidth(stroke, point, 0) / 2}
         fill={stroke.brush.colour}
-        opacity={pointOpacity(stroke, point)}
+        opacity={pointOpacity(stroke, point, 0)}
       />
     );
   }
 
   return stroke.points.slice(1).map((point, index) => {
-    const previous = stroke.points[index];
-    const width = (pointWidth(stroke, previous, index) + pointWidth(stroke, point, index + 1)) / 2;
+    const previousRaw = stroke.points[index];
+    const previous = offsetPoint(previousRaw, stroke.brush || {}, index);
+    const current = offsetPoint(point, stroke.brush || {}, index + 1);
+    const width = (pointWidth(stroke, previousRaw, index) + pointWidth(stroke, point, index + 1)) / 2;
+    const opacity = (pointOpacity(stroke, previousRaw, index) + pointOpacity(stroke, point, index + 1)) / 2;
+    const dash = grainDash(stroke.brush || {}, width);
+    const wetEdge = clamp(stroke.brush?.wetEdges ?? 0, 0, 1);
+    const metallic = clamp(stroke.brush?.metallic ?? 0, 0, 1);
+
     return (
-      <line
-        key={`${stroke.id}-${index}`}
-        x1={previous.x}
-        y1={previous.y}
-        x2={point.x}
-        y2={point.y}
-        stroke={stroke.brush.colour}
-        strokeWidth={width}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity={(pointOpacity(stroke, previous) + pointOpacity(stroke, point)) / 2}
-      />
+      <g key={`${stroke.id}-${index}`}>
+        {(wetEdge > 0.04 || metallic > 0.04) && (
+          <line
+            x1={previous.x}
+            y1={previous.y}
+            x2={current.x}
+            y2={current.y}
+            stroke={stroke.brush.colour}
+            strokeWidth={width * (1.05 + wetEdge * 0.32 + metallic * 0.12)}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={opacity * (0.18 + wetEdge * 0.2 + metallic * 0.12)}
+          />
+        )}
+        <line
+          x1={previous.x}
+          y1={previous.y}
+          x2={current.x}
+          y2={current.y}
+          stroke={stroke.brush.colour}
+          strokeWidth={width}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray={dash}
+          opacity={opacity}
+        />
+      </g>
     );
   });
 }
@@ -120,6 +194,8 @@ function layerBlend(mode) {
 export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, onCommitStroke }) {
   const svgRef = useRef(null);
   const drawingRef = useRef(null);
+  const drawingBrushRef = useRef(null);
+  const lastFrameRef = useRef(null);
   const [draftStroke, setDraftStroke] = useState(null);
   const [stylus, setStylus] = useState({ type: 'none', pressure: 0, tiltX: 0, tiltY: 0, twist: 0 });
   const visibleLayers = useMemo(() => glyph.layers.filter((layer) => layer.visible), [glyph.layers]);
@@ -141,17 +217,22 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
 
   function appendEvent(event) {
     const stroke = drawingRef.current;
-    if (!stroke) return;
+    const brushDefinition = drawingBrushRef.current;
+    if (!stroke || !brushDefinition) return;
     const raw = eventPoint(event);
     if (!raw) return;
     const previous = stroke.points[stroke.points.length - 1];
-    const alpha = 1 - clamp(stroke.brush.streamline + stroke.brush.stabilization * 0.35, 0, 0.95);
+    const alpha = 1 - clamp((stroke.brush.streamline ?? 0) + (stroke.brush.stabilization ?? 0) * 0.35, 0, 0.95);
     const point = previous ? {
       ...raw,
       x: previous.x + (raw.x - previous.x) * alpha,
       y: previous.y + (raw.y - previous.y) * alpha,
     } : raw;
     stroke.points.push(point);
+    const frame = createLiveBrushFrame(brushDefinition, point, previous, 'glyph-canvas');
+    if (previous) liveBrushSensoryEngine.update(frame);
+    else liveBrushSensoryEngine.start(frame);
+    lastFrameRef.current = frame;
     setStylus({ type: event.pointerType, pressure: point.pressure, tiltX: point.tiltX, tiltY: point.tiltY, twist: point.twist });
   }
 
@@ -159,16 +240,19 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     if (!activeLayer || !activeBrush || activeLayer.locked || !['vector', 'raster'].includes(activeLayer.kind) || event.button > 0) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
+    const brushDefinition = structuredClone(activeBrush);
     const stroke = {
       id: makeId('stroke'),
       layerId: activeLayer.id,
       pointerType: event.pointerType,
       brushId: activeBrush.id,
-      brush: brushRuntime(activeBrush),
+      brushRevision: activeBrush.modifiedAt || null,
+      brush: brushRuntime(brushDefinition),
       points: [],
       createdAt: new Date().toISOString(),
     };
     drawingRef.current = stroke;
+    drawingBrushRef.current = brushDefinition;
     appendEvent(event);
     setDraftStroke({ ...stroke, points: [...stroke.points] });
   }
@@ -187,7 +271,10 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     if (!stroke) return;
     event.preventDefault();
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    liveBrushSensoryEngine.stop(lastFrameRef.current);
     drawingRef.current = null;
+    drawingBrushRef.current = null;
+    lastFrameRef.current = null;
     setDraftStroke(null);
     if (stroke.points.length) onCommitStroke(stroke);
   }
