@@ -1,8 +1,8 @@
-import manifestsModule from '../../../apps/starwell-server/flames/manifests.js';
+import contractsModule from '../../../apps/starwell-server/flames/contracts.js';
 import { authoriseHouseRequest } from './house-session.mjs';
 import { HOSTED_FLAME_FALLBACKS } from './hosted-flame-fallback.mjs';
 
-const { FLAMES } = manifestsModule;
+const { FLAME_CONTRACTS } = contractsModule;
 const HF_ROUTER = 'https://router.huggingface.co/v1';
 export const FLAME_CHAT_STREAM_SCHEMA = 'hearthgate.flame-chat-stream/v1';
 
@@ -24,12 +24,14 @@ export function normaliseFlameConversationContext(value, limit = 24) {
   })).filter((item) => item.text);
 }
 
-export function providerMessages(manifest, message, context = []) {
+export function providerMessages(contract, message, context = []) {
   const conversation = normaliseFlameConversationContext(context);
+  const identityNames = [contract.id, contract.identity.displayName, contract.identity.formalName, ...contract.identity.aliases]
+    .map((value) => text(value).toLowerCase());
   return [
-    { role: 'system', content: manifest.system_prompt },
+    { role: 'system', content: contract.identity.systemPrompt },
     ...conversation.map((item) => ({
-      role: [manifest.flame_id, manifest.display_name].some((value) => text(value).toLowerCase() === item.speaker.toLowerCase()) ? 'assistant' : 'user',
+      role: identityNames.includes(item.speaker.toLowerCase()) ? 'assistant' : 'user',
       content: `[${item.speaker}]\n${item.text}`,
     })),
     { role: 'user', content: message },
@@ -40,16 +42,18 @@ function hostedCredential(env) {
   return text(env.get('HF_TOKEN') || env.get('HFTOKEN'));
 }
 
-function primaryConfigured(manifest, env) {
+function primaryConfigured(contract, env) {
+  const manifest = contract.manifest;
   if (manifest.platform.provider === 'ollama') return Boolean(env.get('HEARTHGATE_GATEWAY_URL') && env.get('HEARTHGATE_GATEWAY_TOKEN'));
   return Boolean(env.get(manifest.platform.api_key_env));
 }
 
-function planFor(manifest, env, { forceHostedFallback = false } = {}) {
-  const fallbackModel = HOSTED_FLAME_FALLBACKS[manifest.flame_id] || null;
-  if ((forceHostedFallback || !primaryConfigured(manifest, env)) && fallbackModel && hostedCredential(env)) {
+function planFor(contract, env, { forceHostedFallback = false } = {}) {
+  const manifest = contract.manifest;
+  const fallbackModel = contract.runtime.hostedFallback.model || HOSTED_FLAME_FALLBACKS[contract.id] || null;
+  if ((forceHostedFallback || !primaryConfigured(contract, env)) && fallbackModel && hostedCredential(env)) {
     return {
-      provider: 'huggingface-inference-providers',
+      provider: contract.runtime.hostedFallback.provider || 'huggingface-inference-providers',
       model: fallbackModel,
       mode: 'hosted-fallback',
       url: `${HF_ROUTER}/chat/completions`,
@@ -63,7 +67,7 @@ function planFor(manifest, env, { forceHostedFallback = false } = {}) {
       provider: 'hearthgate-gateway',
       model: manifest.platform.model,
       mode: 'primary',
-      url: `${base}/api/v1/flames/${manifest.flame_id}/chat`,
+      url: `${base}/api/v1/flames/${contract.id}/chat`,
       headers: { authorization: `Bearer ${env.get('HEARTHGATE_GATEWAY_TOKEN')}` },
       kind: 'gateway',
     };
@@ -93,28 +97,28 @@ function planFor(manifest, env, { forceHostedFallback = false } = {}) {
   };
 }
 
-function upstreamBody(plan, manifest, message, context, body) {
-  const messages = providerMessages(manifest, message, context);
+function upstreamBody(plan, contract, message, context, body) {
+  const messages = providerMessages(contract, message, context);
   if (plan.kind === 'gateway') return { ...body, message, context: normaliseFlameConversationContext(context), stream: true };
   if (plan.kind === 'anthropic') {
     return {
       model: plan.model,
       max_tokens: 700,
       stream: true,
-      system: manifest.system_prompt,
+      system: contract.identity.systemPrompt,
       messages: messages.filter((item) => item.role !== 'system'),
     };
   }
   return { model: plan.model, max_tokens: 700, stream: true, messages };
 }
 
-async function openProviderStream(plan, manifest, message, context, body, fetchImpl, signal = null) {
+async function openProviderStream(plan, contract, message, context, body, fetchImpl, signal = null) {
   const timeout = AbortSignal.timeout(plan.kind === 'gateway' ? 120_000 : 90_000);
   const combinedSignal = signal && typeof AbortSignal.any === 'function' ? AbortSignal.any([signal, timeout]) : signal || timeout;
   return fetchImpl(plan.url, {
     method: 'POST',
     headers: { 'content-type': 'application/json', accept: 'text/event-stream, application/json', ...plan.headers },
-    body: JSON.stringify(upstreamBody(plan, manifest, message, context, body)),
+    body: JSON.stringify(upstreamBody(plan, contract, message, context, body)),
     signal: combinedSignal,
   });
 }
@@ -185,8 +189,8 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
   return async function handle(request, params = {}) {
     if (!authoriseHouseRequest(request, env)) return json(401, { error: 'Valid House Runtime session required.' });
     if (request.method !== 'POST' || params.action !== 'chat') return json(405, { error: 'POST chat required.' });
-    const manifest = FLAMES[params.flame_id];
-    if (!manifest) return json(404, { error: `Unknown Constellation voice: ${params.flame_id}` });
+    const contract = FLAME_CONTRACTS[params.flame_id];
+    if (!contract) return json(404, { error: `Unknown Constellation voice: ${params.flame_id}` });
     let body;
     try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
     const message = text(body?.message);
@@ -210,15 +214,18 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
         let usage = null;
         let firstTokenMs = null;
         let closed = false;
-        let plan = planFor(manifest, env);
+        let plan = planFor(contract, env);
         const emit = (event, payload) => {
           if (closed) return;
           try {
             controller.enqueue(encoder.encode(eventBlock(event, {
               schema: FLAME_CHAT_STREAM_SCHEMA,
               request_id: requestId,
-              flame_id: manifest.flame_id,
-              display_name: manifest.display_name,
+              flame_id: contract.id,
+              display_name: contract.identity.displayName,
+              formal_name: contract.identity.formalName,
+              flame_contract_schema: contract.schema,
+              sensory_profile_id: contract.sensory.profileId,
               ...payload,
             }, ++sequence)));
           } catch {
@@ -241,14 +248,14 @@ export function createFlameChatStreamHandler({ env, fetchImpl = fetch, clock = n
         try {
           let response;
           try {
-            response = await openProviderStream(plan, manifest, message, context, body, fetchImpl, upstreamController.signal);
+            response = await openProviderStream(plan, contract, message, context, body, fetchImpl, upstreamController.signal);
             if (!response.ok) throw Object.assign(new Error(`${plan.provider} ${response.status}: ${await response.text().catch(() => '')}`), { status: response.status });
           } catch (primaryError) {
             if (upstreamController.signal.aborted) throw primaryError;
-            const fallbackPlan = plan.mode === 'primary' ? planFor(manifest, env, { forceHostedFallback: true }) : null;
+            const fallbackPlan = plan.mode === 'primary' ? planFor(contract, env, { forceHostedFallback: true }) : null;
             if (!fallbackPlan || fallbackPlan.mode !== 'hosted-fallback' || fallbackPlan.model === plan.model && fallbackPlan.provider === plan.provider) throw primaryError;
             plan = fallbackPlan;
-            response = await openProviderStream(plan, manifest, message, context, body, fetchImpl, upstreamController.signal);
+            response = await openProviderStream(plan, contract, message, context, body, fetchImpl, upstreamController.signal);
             if (!response.ok) throw Object.assign(new Error(`${plan.provider} ${response.status}: ${await response.text().catch(() => '')}`), { status: response.status });
           }
           startPlan();
