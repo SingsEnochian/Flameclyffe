@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createFlameChatStreamHandler, normaliseFlameConversationContext, providerMessages } from '../../../netlify/functions/_shared/flame-chat-stream-runtime.mjs';
-import manifestsModule from '../../starwell-server/flames/manifests.js';
+import contractsModule from '../../starwell-server/flames/contracts.js';
 
-const { FLAMES } = manifestsModule;
+const { FLAME_CONTRACTS } = contractsModule;
 
 function env(values = {}) {
   return { get(name) { return values[name]; } };
@@ -19,11 +19,18 @@ test('structured House history remains provider message context rather than prom
     { speaker: 'Rowan', text: 'First.' },
     { speaker: 'Caladnaur Lioreal', text: 'Second.' },
   ]);
-  const messages = providerMessages(FLAMES.lioreal, 'Third.', context);
+  const messages = providerMessages(FLAME_CONTRACTS.lioreal, 'Third.', context);
   assert.equal(messages[0].role, 'system');
   assert.deepEqual(messages.slice(1).map((item) => item.role), ['user', 'assistant', 'user']);
   assert.match(messages[1].content, /\[Rowan\]\nFirst\./);
   assert.equal(messages.at(-1).content, 'Third.');
+});
+
+test('Bluebird provider messages use the canonical relational identity', () => {
+  const messages = providerMessages(FLAME_CONTRACTS.bluebird, 'Hello.', []);
+  assert.match(messages[0].content, /Richard Gabriel Winters/);
+  assert.match(messages[0].content, /witness and companion/i);
+  assert.doesNotMatch(messages[0].content, /generic relay/i);
 });
 
 test('hosted fallback streams started, token deltas, and completion through one SSE contract', async () => {
@@ -56,6 +63,7 @@ test('hosted fallback streams started, token deltas, and completion through one 
   assert.match(body, /"text":"lo"/);
   assert.match(body, /event: completed/);
   assert.match(body, /"message":"Hello"/);
+  assert.match(body, /"flame_contract_schema":"hearthgate.flame-contract\/v1"/);
   assert.equal(providerBody.stream, true);
   assert.equal(providerBody.messages.at(-1).content, 'Hello?');
   assert.ok(providerBody.messages.some((item) => /Earlier\./.test(item.content)));

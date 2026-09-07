@@ -1,8 +1,8 @@
-import manifestsModule from '../../../apps/starwell-server/flames/manifests.js';
+import contractsModule from '../../../apps/starwell-server/flames/contracts.js';
 import candidatesModule from '../../../apps/starwell-server/flames/model-candidates.js';
 import { authoriseHouseRequest } from './house-session.mjs';
 
-const { FLAMES } = manifestsModule;
+const { FLAME_CONTRACTS } = contractsModule;
 const { getModelCandidate } = candidatesModule;
 
 const json = (status, body) => new Response(JSON.stringify(body), {
@@ -17,47 +17,51 @@ async function providerJson(fetchImpl, url, options, label) {
   return data;
 }
 
-async function callCloud(manifest, message, env, fetchImpl) {
+async function callCloud(contract, message, env, fetchImpl) {
+  const manifest = contract.manifest;
   const key = env.get(manifest.platform.api_key_env);
   if (!key) throw new Error(`Missing server configuration: ${manifest.platform.api_key_env}`);
   const messages = [{ role: 'user', content: message }];
   if (manifest.platform.provider === 'anthropic') {
     const data = await providerJson(fetchImpl, 'https://api.anthropic.com/v1/messages', {
       method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: manifest.platform.model, max_tokens: 600, system: manifest.system_prompt, messages }),
+      body: JSON.stringify({ model: manifest.platform.model, max_tokens: 600, system: contract.identity.systemPrompt, messages }),
     }, 'Anthropic');
     return data.content?.find((item) => item.type === 'text')?.text || '';
   }
   const base = manifest.platform.base_url || (manifest.platform.provider === 'deepseek' ? 'https://api.deepseek.com' : 'https://api.openai.com');
   const data = await providerJson(fetchImpl, `${base}${manifest.platform.provider === 'openai' ? '/v1' : ''}/chat/completions`, {
     method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: manifest.platform.model, max_tokens: 600, messages: [{ role: 'system', content: manifest.system_prompt }, ...messages] }),
+    body: JSON.stringify({ model: manifest.platform.model, max_tokens: 600, messages: [{ role: 'system', content: contract.identity.systemPrompt }, ...messages] }),
   }, manifest.platform.provider);
   return data.choices?.[0]?.message?.content || '';
 }
 
-async function callLocalGateway(manifest, body, env, fetchImpl) {
+async function callLocalGateway(contract, body, env, fetchImpl) {
+  const manifest = contract.manifest;
   const base = env.get('HEARTHGATE_GATEWAY_URL');
   const token = env.get('HEARTHGATE_GATEWAY_TOKEN');
   if (!base || !token) throw new Error('Missing server configuration: HEARTHGATE_GATEWAY_URL or HEARTHGATE_GATEWAY_TOKEN');
-  const data = await providerJson(fetchImpl, `${base.replace(/\/$/, '')}/api/v1/flames/${manifest.flame_id}/chat`, {
+  const data = await providerJson(fetchImpl, `${base.replace(/\/$/, '')}/api/v1/flames/${contract.id}/chat`, {
     method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` }, body: JSON.stringify(body),
   }, 'Hearthgate gateway');
   return { message: data.message || '', provider: data.provider || 'ollama', model: data.model || manifest.platform.model, cited_sources: data.cited_sources || [] };
 }
 
-async function callModelAudition(manifest, candidate, body, env, fetchImpl) {
+async function callModelAudition(contract, candidate, body, env, fetchImpl) {
   const base = env.get('HEARTHGATE_GATEWAY_URL');
   const token = env.get('HEARTHGATE_GATEWAY_TOKEN');
   if (!base || !token) throw new Error('Missing server configuration: HEARTHGATE_GATEWAY_URL or HEARTHGATE_GATEWAY_TOKEN');
-  const data = await providerJson(fetchImpl, `${base.replace(/\/$/, '')}/api/v1/flames/${manifest.flame_id}/audition/${candidate.candidate_id}`, {
+  const data = await providerJson(fetchImpl, `${base.replace(/\/$/, '')}/api/v1/flames/${contract.id}/audition/${candidate.candidate_id}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
     body: JSON.stringify(body),
   }, 'Hearthgate model audition');
   return {
-    flame_id: manifest.flame_id,
-    display_name: manifest.display_name,
+    flame_id: contract.id,
+    display_name: contract.identity.displayName,
+    formal_name: contract.identity.formalName,
+    flame_contract_schema: contract.schema,
     candidate_id: candidate.candidate_id,
     provider: data.provider || candidate.runtime?.backend || candidate.runtime?.provider || 'candidate',
     model: data.model || candidate.model_id,
@@ -71,27 +75,37 @@ async function callModelAudition(manifest, candidate, body, env, fetchImpl) {
 }
 
 export function flameStatus(flameId, env) {
-  const manifest = FLAMES[flameId];
-  if (!manifest) return null;
+  const contract = FLAME_CONTRACTS[flameId];
+  if (!contract) return null;
+  const manifest = contract.manifest;
   const local = manifest.platform.provider === 'ollama';
   const required = local ? ['HEARTHGATE_GATEWAY_URL', 'HEARTHGATE_GATEWAY_TOKEN'] : [manifest.platform.api_key_env];
   const missing = required.filter((name) => !env.get(name));
   return {
-    flame_id: manifest.flame_id, display_name: manifest.display_name,
+    flame_id: contract.id,
+    display_name: contract.identity.displayName,
+    formal_name: contract.identity.formalName,
+    flame_contract_schema: contract.schema,
+    sensory_profile_id: contract.sensory.profileId,
     provider: local ? 'hearthgate-gateway' : manifest.platform.provider,
-    model: manifest.platform.model, configured: missing.length === 0, missing,
-    memory_namespace: manifest.memory.hearthfire_namespace,
+    model: manifest.platform.model,
+    configured: missing.length === 0,
+    missing,
+    memory_namespace: contract.knowledge.hearthfireNamespace,
+    hosted_fallback: contract.runtime.hostedFallback,
   };
 }
 
 export function modelAuditionStatus(flameId, candidateId, env) {
-  const manifest = FLAMES[flameId];
+  const contract = FLAME_CONTRACTS[flameId];
   const candidate = getModelCandidate(candidateId);
-  if (!manifest || !candidate || !candidate.candidate_for?.includes(flameId)) return null;
+  if (!contract || !candidate || !candidate.candidate_for?.includes(flameId)) return null;
   const missing = ['HEARTHGATE_GATEWAY_URL', 'HEARTHGATE_GATEWAY_TOKEN'].filter((name) => !env.get(name));
   return {
     flame_id: flameId,
-    display_name: manifest.display_name,
+    display_name: contract.identity.displayName,
+    formal_name: contract.identity.formalName,
+    flame_contract_schema: contract.schema,
     candidate_id: candidate.candidate_id,
     model: candidate.model_id,
     status: candidate.status,
@@ -108,11 +122,12 @@ export function modelAuditionStatus(flameId, candidateId, env) {
 async function resolvedFlameStatus(flameId, env, fetchImpl) {
   const status = flameStatus(flameId, env);
   if (!status || status.provider !== 'hearthgate-gateway' || !status.configured) return status;
-  const manifest = FLAMES[flameId];
+  const contract = FLAME_CONTRACTS[flameId];
+  const manifest = contract.manifest;
   const base = env.get('HEARTHGATE_GATEWAY_URL');
   const token = env.get('HEARTHGATE_GATEWAY_TOKEN');
   try {
-    const data = await providerJson(fetchImpl, `${base.replace(/\/$/, '')}/api/v1/flames/${manifest.flame_id}/status`, {
+    const data = await providerJson(fetchImpl, `${base.replace(/\/$/, '')}/api/v1/flames/${contract.id}/status`, {
       headers: { authorization: `Bearer ${token}` },
     }, 'Hearthgate gateway');
     return {
@@ -162,27 +177,48 @@ async function resolvedModelAuditionStatus(flameId, candidateId, env, fetchImpl)
 }
 
 export async function invokeFlame(flameId, body, env, fetchImpl = fetch) {
-  const manifest = FLAMES[flameId];
-  if (!manifest) throw new Error(`Unknown Constellation voice: ${flameId}`);
+  const contract = FLAME_CONTRACTS[flameId];
+  if (!contract) throw new Error(`Unknown Constellation voice: ${flameId}`);
+  const manifest = contract.manifest;
   const message = String(body?.message || '').trim();
   if (!message) throw new Error('message required.');
   if (message.length > 24000) throw new Error('message exceeds 24,000 characters.');
-  if (manifest.platform.provider === 'ollama') return { flame_id: flameId, display_name: manifest.display_name, ...await callLocalGateway(manifest, body, env, fetchImpl) };
-  const reply = await callCloud(manifest, message, env, fetchImpl);
-  return { flame_id: flameId, display_name: manifest.display_name, provider: manifest.platform.provider, model: manifest.platform.model, message: reply, cited_sources: [], memory_write_recommendation: false };
+  if (manifest.platform.provider === 'ollama') {
+    return {
+      flame_id: contract.id,
+      display_name: contract.identity.displayName,
+      formal_name: contract.identity.formalName,
+      flame_contract_schema: contract.schema,
+      sensory_profile_id: contract.sensory.profileId,
+      ...await callLocalGateway(contract, body, env, fetchImpl),
+    };
+  }
+  const reply = await callCloud(contract, message, env, fetchImpl);
+  return {
+    flame_id: contract.id,
+    display_name: contract.identity.displayName,
+    formal_name: contract.identity.formalName,
+    flame_contract_schema: contract.schema,
+    sensory_profile_id: contract.sensory.profileId,
+    provider: manifest.platform.provider,
+    model: manifest.platform.model,
+    message: reply,
+    cited_sources: [],
+    memory_write_recommendation: false,
+  };
 }
 
 export async function invokeModelAudition(flameId, candidateId, body, env, fetchImpl = fetch) {
-  const manifest = FLAMES[flameId];
+  const contract = FLAME_CONTRACTS[flameId];
   const candidate = getModelCandidate(candidateId);
-  if (!manifest) throw new Error(`Unknown Constellation voice: ${flameId}`);
+  if (!contract) throw new Error(`Unknown Constellation voice: ${flameId}`);
   if (!candidate) throw new Error(`Unknown model candidate: ${candidateId}`);
   if (!candidate.candidate_for?.includes(flameId)) throw new Error(`${candidateId} is not registered for ${flameId}`);
   if (!candidate.deployment?.audition_route) throw new Error(`Model candidate ${candidateId} audition route is not armed.`);
   const message = String(body?.message || '').trim();
   if (!message) throw new Error('message required.');
   if (message.length > 24000) throw new Error('message exceeds 24,000 characters.');
-  return callModelAudition(manifest, candidate, body, env, fetchImpl);
+  return callModelAudition(contract, candidate, body, env, fetchImpl);
 }
 
 export function createFlameHandler({ env, fetchImpl = fetch } = {}) {
@@ -190,8 +226,8 @@ export function createFlameHandler({ env, fetchImpl = fetch } = {}) {
     if (!authoriseHouseRequest(request, env)) return json(401, { error: 'Valid House Runtime session required.' });
     const flameId = params.flame_id;
     const action = params.action;
-    const manifest = FLAMES[flameId];
-    if (!manifest) return json(404, { error: `Unknown Constellation voice: ${flameId}` });
+    const contract = FLAME_CONTRACTS[flameId];
+    if (!contract) return json(404, { error: `Unknown Constellation voice: ${flameId}` });
     if (request.method === 'GET' && action === 'status') return json(200, await resolvedFlameStatus(flameId, env, fetchImpl));
     if (request.method !== 'POST' || action !== 'chat') return json(405, { error: 'POST chat or GET status required.' });
     let body;
