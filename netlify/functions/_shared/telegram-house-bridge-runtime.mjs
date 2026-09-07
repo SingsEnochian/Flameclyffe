@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { authoriseHouseRequest } from './house-session.mjs';
 import { createHouseCommonsHandler } from './house-commons-runtime.mjs';
 import { invokeFlame } from './flame-runtime.mjs';
+import { hostedFlameFallbackStatus, invokeHostedFlameFallback } from './hosted-flame-fallback.mjs';
 import {
   FLAMES,
   resolveTelegramRoute,
@@ -23,6 +24,21 @@ function secretEqual(actual, expected) {
   const left = Buffer.from(String(actual));
   const right = Buffer.from(String(expected));
   return left.length === right.length && timingSafeEqual(left, right);
+}
+
+export async function invokeTelegramVoice(voiceId, body, env, fetchImpl = fetch) {
+  try {
+    return await invokeFlame(voiceId, body, env, fetchImpl);
+  } catch (primaryError) {
+    const fallback = hostedFlameFallbackStatus(voiceId, env);
+    if (!fallback?.configured) throw primaryError;
+    try {
+      return await invokeHostedFlameFallback(voiceId, body, env, fetchImpl);
+    } catch (fallbackError) {
+      fallbackError.cause = primaryError;
+      throw fallbackError;
+    }
+  }
 }
 
 function telegramApiUrl(env, method) {
@@ -229,7 +245,7 @@ async function telegramAdmin(request, env, fetchImpl) {
   return json(200, { schema: TELEGRAM_HOUSE_BRIDGE_SCHEMA, action, url, result });
 }
 
-export function createTelegramHouseBridgeHandler({ env, store, fetchImpl = fetch, invokeVoice = invokeFlame, clock = nowIso } = {}) {
+export function createTelegramHouseBridgeHandler({ env, store, fetchImpl = fetch, invokeVoice = invokeTelegramVoice, clock = nowIso } = {}) {
   const commonsHandler = createHouseCommonsHandler({ env, store });
   return async function handle(request) {
     if (request.method === 'GET' || request.method === 'PUT') return telegramAdmin(request, env, fetchImpl);
