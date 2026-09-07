@@ -127,12 +127,12 @@ function selectedVoiceIds(form) {
   return voiceCheckboxes(form).filter((input) => input.checked).map((input) => input.value);
 }
 
-function applySelection(form, ids) {
+function applyTurnSelection(form, ids) {
+  const checks = voiceCheckboxes(form);
+  const previous = checks.map((input) => [input, input.checked]);
   const chosen = new Set(ids);
-  voiceCheckboxes(form).forEach((input) => {
-    input.checked = chosen.has(input.value);
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  });
+  checks.forEach((input) => { input.checked = chosen.has(input.value); });
+  return () => previous.forEach(([input, checked]) => { if (input.isConnected) input.checked = checked; });
 }
 
 function synthesisVoice() {
@@ -203,7 +203,8 @@ function routeBeforeSubmit(event) {
     selectedVoiceIds: selectedVoiceIds(form),
     synthesisVoiceId: synthesisVoice(),
   });
-  applySelection(form, route.voiceIds);
+  const restore = applyTurnSelection(form, route.voiceIds);
+  queueMicrotask(restore);
   const panel = document.querySelector('[data-devconsole-swarm-chat]');
   if (panel?.querySelector('[data-dev-swarm-status]')) panel.querySelector('[data-dev-swarm-status]').textContent = route.reason === 'call-needs-mention' ? 'Call blocked · add @name.' : statusSentence(form);
 }
