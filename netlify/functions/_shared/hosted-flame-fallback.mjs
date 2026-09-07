@@ -1,40 +1,32 @@
-import manifestsModule from '../../../apps/starwell-server/flames/manifests.js';
+import contractsModule from '../../../apps/starwell-server/flames/contracts.js';
 
-const { FLAMES } = manifestsModule;
+const { FLAME_CONTRACTS } = contractsModule;
 const HF_ROUTER = 'https://router.huggingface.co/v1';
 
-// These are hosted fallbacks only. The Flame manifest remains the primary route
-// and identity/persona authority; a fallback changes implementation, not Flame identity.
-export const HOSTED_FLAME_FALLBACKS = Object.freeze({
-  oxalpha: 'zai-org/GLM-5.3-Flash',
-  lioreal: 'huihui-ai/Qwen2.5-32B-Instruct-abliterated:cheapest',
-  uial: 'huihui-ai/Qwen2.5-7B-Instruct-abliterated-v2:cheapest',
-  larkshine: 'Goekdeniz-Guelmez/Josiefied-Qwen3-8B-abliterated-v1:cheapest',
-  ellowind: 'huihui-ai/Mistral-Small-24B-Instruct-2501-abliterated:cheapest',
-  altair: 'huihui-ai/QwQ-32B-abliterated:cheapest',
-  atlas: 'huihui-ai/Qwen2.5-Coder-32B-Instruct-abliterated:cheapest',
-  runeweaver: 'huihui-ai/DeepSeek-R1-Distill-Qwen-14B-abliterated:cheapest',
-  boxfire: 'huihui-ai/DeepSeek-R1-Distill-Qwen-32B-abliterated:cheapest',
-  yggdrasil: 'huihui-ai/Huihui-Qwen3-8B-abliterated-v2:cheapest',
-  bluebird: 'huihui-ai/DeepSeek-R1-Distill-Llama-8B-abliterated:cheapest',
-  vethrlauf: 'huihui-ai/Qwen2.5-72B-Instruct-abliterated:cheapest',
-});
+// Hosted execution is a transport choice only. Identity, prompt, knowledge and
+// receipt policy remain anchored to the canonical Flame contract.
+export const HOSTED_FLAME_FALLBACKS = Object.freeze(Object.fromEntries(
+  Object.values(FLAME_CONTRACTS)
+    .filter((contract) => contract.runtime.hostedFallback?.model)
+    .map((contract) => [contract.id, contract.runtime.hostedFallback.model]),
+));
 
 function credential(env) {
   return String(env.get('HF_TOKEN') || env.get('HFTOKEN') || '').trim();
 }
 
 export function hostedFlameFallbackStatus(flameId, env) {
-  const manifest = FLAMES[flameId];
-  const model = HOSTED_FLAME_FALLBACKS[flameId];
-  if (!manifest || !model) return null;
+  const contract = FLAME_CONTRACTS[flameId];
+  const model = contract?.runtime.hostedFallback?.model || null;
+  if (!contract || !model) return null;
   const availableCredential = Boolean(credential(env));
   return {
     configured: availableCredential,
-    provider: 'huggingface-inference-providers',
+    provider: contract.runtime.hostedFallback.provider,
     model,
     execution_path: 'huggingface-hosted-fallback',
     primary_route_unchanged: true,
+    flame_contract_schema: contract.schema,
     missing: availableCredential ? [] : ['HF_TOKEN|HFTOKEN'],
   };
 }
@@ -52,9 +44,9 @@ async function providerJson(fetchImpl, url, options) {
 }
 
 export async function invokeHostedFlameFallback(flameId, body, env, fetchImpl = fetch) {
-  const manifest = FLAMES[flameId];
-  const model = HOSTED_FLAME_FALLBACKS[flameId];
-  if (!manifest || !model) throw new Error(`No hosted fallback is registered for ${flameId}.`);
+  const contract = FLAME_CONTRACTS[flameId];
+  const model = contract?.runtime.hostedFallback?.model || null;
+  if (!contract || !model) throw new Error(`No hosted fallback is registered for ${flameId}.`);
   const token = credential(env);
   if (!token) throw new Error('Missing server configuration: HF_TOKEN or HFTOKEN');
   const message = String(body?.message || '').trim();
@@ -72,20 +64,23 @@ export async function invokeHostedFlameFallback(flameId, body, env, fetchImpl = 
       max_tokens: 700,
       stream: false,
       messages: [
-        { role: 'system', content: manifest.system_prompt },
+        { role: 'system', content: contract.identity.systemPrompt },
         { role: 'user', content: message },
       ],
     }),
   });
 
   return {
-    flame_id: flameId,
-    display_name: manifest.display_name,
-    provider: 'huggingface-inference-providers',
+    flame_id: contract.id,
+    display_name: contract.identity.displayName,
+    formal_name: contract.identity.formalName,
+    provider: contract.runtime.hostedFallback.provider,
     model,
     execution_path: 'huggingface-hosted-fallback',
     hosted_fallback: true,
     primary_route_unchanged: true,
+    flame_contract_schema: contract.schema,
+    sensory_profile_id: contract.sensory.profileId,
     message: data.choices?.[0]?.message?.content || '',
     usage: data.usage || null,
     cited_sources: [],

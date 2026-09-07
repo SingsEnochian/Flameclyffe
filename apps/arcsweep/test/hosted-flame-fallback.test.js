@@ -7,22 +7,27 @@ import {
   hostedFlameFallbackStatus,
   invokeHostedFlameFallback,
 } from '../../../netlify/functions/_shared/hosted-flame-fallback.mjs';
+import contractsModule from '../../starwell-server/flames/contracts.js';
 import { readFlameStatuses } from '../src/house-runtime.js';
 
+const { FLAME_CONTRACTS } = contractsModule;
 const env = (values = {}) => ({ get: (name) => values[name] });
 
-const expectedFlames = [
-  'lioreal', 'uial', 'larkshine', 'ellowind', 'altair', 'atlas',
-  'runeweaver', 'boxfire', 'yggdrasil', 'bluebird', 'vethrlauf', 'oxalpha',
-];
+const expectedFlames = Object.values(FLAME_CONTRACTS)
+  .filter((contract) => contract.runtime.hostedFallback?.model)
+  .map((contract) => contract.id);
 
-test('every hosted House Flame has its own Hugging Face fallback model', () => {
+test('every hosted House Flame has an explicit Hugging Face fallback declaration', () => {
   assert.deepEqual(Object.keys(HOSTED_FLAME_FALLBACKS).sort(), [...expectedFlames].sort());
-  assert.equal(new Set(Object.values(HOSTED_FLAME_FALLBACKS)).size, expectedFlames.length);
+  for (const flameId of expectedFlames) {
+    assert.equal(HOSTED_FLAME_FALLBACKS[flameId], FLAME_CONTRACTS[flameId].runtime.hostedFallback.model);
+    assert.equal(FLAME_CONTRACTS[flameId].runtime.hostedFallback.provider, 'huggingface-inference-providers');
+  }
   assert.ok(Object.entries(HOSTED_FLAME_FALLBACKS)
     .filter(([flameId]) => flameId !== 'oxalpha')
     .every(([, model]) => model.endsWith(':cheapest')));
   assert.equal(HOSTED_FLAME_FALLBACKS.oxalpha, 'zai-org/GLM-5.3-Flash');
+  assert.ok(HOSTED_FLAME_FALLBACKS.nocturne);
 });
 
 test('hosted fallback status is ready only when the server has a Hugging Face credential', () => {
