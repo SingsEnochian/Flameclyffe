@@ -1,4 +1,5 @@
 import { CONSTELLATION_VOICES } from './feedback-loop.js';
+import { readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
 
 export const DEVCONSOLE_SWARM_MODE_KEY = 'arcsweep.devconsole-swarm-mode/v1';
 export const DEVCONSOLE_SYNTH_VOICE_KEY = 'arcsweep.devconsole-synth-voice/v1';
@@ -159,6 +160,75 @@ function synthOptions() {
   return CONSTELLATION_VOICES.map((voice) => `<option value="${voice.id}" ${voice.id === current ? 'selected' : ''}>${voice.name}</option>`).join('');
 }
 
+async function houseRuntimeToken() {
+  return readHouseRuntimeToken() || await restoreHouseRuntimeSession();
+}
+
+async function telegramBridgeRequest(method = 'GET', body = null) {
+  const token = await houseRuntimeToken();
+  if (!token) throw new Error('House Runtime offline. Connect once in Settings.');
+  const response = await fetch('/api/v1/telegram/house', {
+    method,
+    headers: {
+      authorization: `Bearer ${token}`,
+      ...(body ? { 'content-type': 'application/json' } : {}),
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `Telegram bridge returned ${response.status}.`);
+  return data;
+}
+
+export function telegramBridgeStatusSentence(status) {
+  if (!status) return 'Telegram · checking transport…';
+  const pieces = [
+    status.bot_token ? 'token ✓' : 'token missing',
+    status.webhook_secret ? 'secret ✓' : 'secret missing',
+    status.allowlist ? 'allowlist ✓' : 'allowlist missing',
+  ];
+  const webhookUrl = String(status.webhook?.url || '');
+  const armed = Boolean(webhookUrl);
+  return `Telegram · ${pieces.join(' · ')} · ${armed ? 'webhook armed' : 'webhook not armed'}`;
+}
+
+async function refreshTelegramPanel(panel) {
+  const statusNode = panel?.querySelector('[data-telegram-bridge-status]');
+  const arm = panel?.querySelector('[data-telegram-arm]');
+  const disarm = panel?.querySelector('[data-telegram-disarm]');
+  if (!statusNode) return null;
+  statusNode.textContent = 'Telegram · checking transport…';
+  try {
+    const status = await telegramBridgeRequest('GET');
+    panel.dataset.telegramConfigured = String(Boolean(status.configured));
+    statusNode.textContent = telegramBridgeStatusSentence(status);
+    if (arm) arm.disabled = !status.configured;
+    if (disarm) disarm.disabled = !status.bot_token || !status.webhook?.url;
+    return status;
+  } catch (error) {
+    panel.dataset.telegramConfigured = 'false';
+    statusNode.textContent = `Telegram · ${error?.message || 'status unavailable'}`;
+    if (arm) arm.disabled = true;
+    if (disarm) disarm.disabled = true;
+    return null;
+  }
+}
+
+async function setTelegramWebhook(panel, armed) {
+  const statusNode = panel?.querySelector('[data-telegram-bridge-status]');
+  if (statusNode) statusNode.textContent = armed ? 'Telegram · arming webhook…' : 'Telegram · disarming webhook…';
+  try {
+    const body = armed
+      ? { action: 'set-webhook', url: new URL('/api/v1/telegram/house', location.origin).toString() }
+      : { action: 'delete-webhook' };
+    await telegramBridgeRequest('PUT', body);
+    return await refreshTelegramPanel(panel);
+  } catch (error) {
+    if (statusNode) statusNode.textContent = `Telegram · ${error?.message || 'webhook action failed'}`;
+    return null;
+  }
+}
+
 function ensurePanel(form) {
   if (!form || document.querySelector('[data-devconsole-swarm-chat]')) return;
   const chrome = document.querySelector('[data-house-room-chrome]') || form.closest('.commons-layout') || form.parentElement;
@@ -166,7 +236,7 @@ function ensurePanel(form) {
   const panel = document.createElement('section');
   panel.className = 'devconsole-swarm-chat';
   panel.dataset.devconsoleSwarmChat = 'true';
-  panel.innerHTML = `<div class="devconsole-swarm-head"><div><p class="eyebrow">DEVCONSOLE · Constellation routing</p><h3>Swarm Chat</h3></div><span class="devconsole-swarm-live" data-dev-swarm-status></span></div><div class="devconsole-swarm-controls" role="toolbar" aria-label="Swarm chat mode">${modeButtons()}<label class="devconsole-synth-select">Synthesiser <select data-dev-synth-voice>${synthOptions()}</select></label></div><p class="muted devconsole-swarm-note">Room keeps normal routing. Swarm chooses up to three relevant voices. Call requires @mentions. Chorus opens the full registered Constellation. Synthesis routes one voice without erasing the raw room transcript.</p>`;
+  panel.innerHTML = `<div class="devconsole-swarm-head"><div><p class="eyebrow">DEVCONSOLE · Constellation routing</p><h3>Swarm Chat</h3></div><span class="devconsole-swarm-live" data-dev-swarm-status></span></div><div class="devconsole-swarm-controls" role="toolbar" aria-label="Swarm chat mode">${modeButtons()}<label class="devconsole-synth-select">Synthesiser <select data-dev-synth-voice>${synthOptions()}</select></label></div><p class="muted devconsole-swarm-note">Room keeps normal routing. Swarm chooses up to three relevant voices. Call requires @mentions. Chorus opens the full registered Constellation. Synthesis routes one voice without erasing the raw room transcript.</p><div class="devconsole-telegram"><div><strong>Telegram doorway</strong><span data-telegram-bridge-status>Telegram · checking transport…</span></div><div class="devconsole-telegram-actions"><button type="button" class="quiet mini" data-telegram-refresh>Refresh</button><button type="button" class="quiet mini" data-telegram-arm disabled>Arm webhook</button><button type="button" class="quiet mini" data-telegram-disarm disabled>Disarm</button></div></div>`;
   chrome.insertAdjacentElement('afterend', panel);
 
   const refresh = () => {
@@ -185,9 +255,13 @@ function ensurePanel(form) {
     writeLocal(DEVCONSOLE_SYNTH_VOICE_KEY, event.target.value);
     refresh();
   });
+  panel.querySelector('[data-telegram-refresh]')?.addEventListener('click', () => void refreshTelegramPanel(panel));
+  panel.querySelector('[data-telegram-arm]')?.addEventListener('click', () => void setTelegramWebhook(panel, true));
+  panel.querySelector('[data-telegram-disarm]')?.addEventListener('click', () => void setTelegramWebhook(panel, false));
   form.addEventListener('input', refresh);
   form.addEventListener('change', refresh);
   refresh();
+  void refreshTelegramPanel(panel);
 }
 
 function routeBeforeSubmit(event) {
@@ -213,7 +287,7 @@ function styles() {
   if (document.getElementById('devconsole-swarm-chat-styles')) return;
   const style = document.createElement('style');
   style.id = 'devconsole-swarm-chat-styles';
-  style.textContent = `.devconsole-swarm-chat{display:grid;gap:.55rem;margin:.65rem 0;padding:.75rem .85rem;border:1px solid color-mix(in srgb,var(--sea) 34%,var(--line-soft));border-radius:.85rem;background:color-mix(in srgb,var(--panel-solid) 91%,var(--sea) 4%)}.devconsole-swarm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem}.devconsole-swarm-head h3{margin:.05rem 0}.devconsole-swarm-head .eyebrow{margin:0}.devconsole-swarm-live{font-size:.74rem;color:var(--green);text-align:right}.devconsole-swarm-controls{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}.dev-swarm-mode[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent)}.devconsole-synth-select{display:flex;align-items:center;gap:.35rem;margin-left:auto;font-size:.72rem;color:var(--muted)}.devconsole-synth-select select{min-width:8.5rem}.devconsole-swarm-note{margin:0;font-size:.72rem;line-height:1.45}@media(max-width:700px){.devconsole-swarm-head{display:grid}.devconsole-swarm-live{text-align:left}.devconsole-synth-select{margin-left:0;width:100%}.devconsole-synth-select select{flex:1}}`;
+  style.textContent = `.devconsole-swarm-chat{display:grid;gap:.55rem;margin:.65rem 0;padding:.75rem .85rem;border:1px solid color-mix(in srgb,var(--sea) 34%,var(--line-soft));border-radius:.85rem;background:color-mix(in srgb,var(--panel-solid) 91%,var(--sea) 4%)}.devconsole-swarm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem}.devconsole-swarm-head h3{margin:.05rem 0}.devconsole-swarm-head .eyebrow{margin:0}.devconsole-swarm-live{font-size:.74rem;color:var(--green);text-align:right}.devconsole-swarm-controls{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}.dev-swarm-mode[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent)}.devconsole-synth-select{display:flex;align-items:center;gap:.35rem;margin-left:auto;font-size:.72rem;color:var(--muted)}.devconsole-synth-select select{min-width:8.5rem}.devconsole-swarm-note{margin:0;font-size:.72rem;line-height:1.45}.devconsole-telegram{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.55rem .65rem;border-top:1px solid color-mix(in srgb,var(--sea) 22%,var(--line-soft));margin-top:.15rem}.devconsole-telegram>div:first-child{display:grid;gap:.12rem}.devconsole-telegram strong{font-size:.76rem}.devconsole-telegram span{font-size:.7rem;color:var(--muted)}.devconsole-telegram-actions{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:flex-end}@media(max-width:700px){.devconsole-swarm-head{display:grid}.devconsole-swarm-live{text-align:left}.devconsole-synth-select{margin-left:0;width:100%}.devconsole-synth-select select{flex:1}.devconsole-telegram{display:grid}.devconsole-telegram-actions{justify-content:flex-start}}`;
   document.head.append(style);
 }
 
