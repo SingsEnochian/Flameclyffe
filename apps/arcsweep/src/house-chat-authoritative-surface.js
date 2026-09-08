@@ -2,7 +2,7 @@ import './runeshell-native-sidecar.js';
 import { HOUSE_CHAT_VOICES } from './house-commons-chat-v5-core.js';
 import './house-live-recovery.js';
 
-export const HOUSE_CHAT_SURFACE_MARKER = 'house-chat-authoritative-surface/v1';
+export const HOUSE_CHAT_SURFACE_MARKER = 'house-chat-authoritative-surface/v2';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -16,18 +16,18 @@ function voiceTransport(voice) {
 }
 
 function authoritativeMarkup() {
-  return `<section class="house-chat-native" data-house-chat-authoritative="${HOUSE_CHAT_SURFACE_MARKER}">
-    <header class="house-chat-native-head">
-      <div><p class="eyebrow">House Chat · native conversation</p><h1>House Commons</h1><p>Talk with the live Constellation. Rooms, replies, rich text, route state, and receipts stay in one conversation surface.</p><p class="house-chat-native-status" data-commons-connection>Restoring House Runtime session…</p></div>
-      <div class="house-chat-native-actions"><button type="button" class="quiet" data-house-chat-refresh>Refresh chat</button></div>
+  return `<section class="house-chat-native devconsole-chat-native" data-house-chat-authoritative="${HOUSE_CHAT_SURFACE_MARKER}" data-devconsole-chat-root="true">
+    <header class="house-chat-native-head devconsole-chat-head" data-house-room-chrome="true">
+      <div><p class="eyebrow">DEVCONSOLE · live Constellation room</p><h1>Swarm Chat</h1><p>One living room for Rowan and the registered Constellation. Call a voice, open the chorus, let a bounded swarm answer, or route a synthesis without flattening the raw replies.</p><p class="house-chat-native-status" data-commons-connection>Restoring House Runtime session…</p></div>
+      <div class="house-chat-native-actions"><button type="button" class="quiet" data-house-chat-refresh>Refresh room</button></div>
     </header>
     <div class="house-chat-native-layout">
-      <article class="panel commons-log" data-house-chat-log><p class="muted">Opening House Chat…</p></article>
+      <article class="panel commons-log" data-house-chat-log><p class="muted">Opening DevConsole Swarm Chat…</p></article>
       <aside class="panel house-chat-native-compose">
-        <form id="commons-form" class="stack" data-house-chat-native-form="true">
+        <form id="commons-form" class="stack" data-house-chat-native-form="true" data-devconsole-chat-form="true">
           <div class="house-chat-transport" aria-hidden="true">${HOUSE_CHAT_VOICES.map(voiceTransport).join('')}</div>
-          <textarea name="message" rows="6" required aria-label="House Chat message" placeholder="Message the room…"></textarea>
-          <button type="submit">Send to House Chat ∞</button>
+          <textarea name="message" rows="6" required aria-label="DevConsole Swarm Chat message" placeholder="Speak to the room…"></textarea>
+          <button type="submit">Send to Swarm Chat ∞</button>
         </form>
       </aside>
     </div>
@@ -42,7 +42,8 @@ function commonsPage() {
 
 export function mountAuthoritativeHouseChatSurface() {
   if (typeof document === 'undefined') return null;
-  if (document.querySelector(`[data-house-chat-authoritative="${HOUSE_CHAT_SURFACE_MARKER}"]`)) return document.querySelector(`[data-house-chat-authoritative="${HOUSE_CHAT_SURFACE_MARKER}"]`);
+  const mounted = document.querySelector(`[data-house-chat-authoritative="${HOUSE_CHAT_SURFACE_MARKER}"]`);
+  if (mounted) return mounted;
   const oldForm = document.querySelector('#commons-form');
   if (!oldForm) return null;
   const page = commonsPage();
