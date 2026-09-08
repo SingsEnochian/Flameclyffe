@@ -38,6 +38,7 @@ import {
 } from './house-commons-chat-v5-core.js';
 
 const REFRESH_MS = 4000;
+const STREAM_FOLLOW_MARGIN_PX = 96;
 const PINS_KEY = 'arcsweep.house-commons-pins/v1';
 const TOOLBAR = Object.freeze([
   ['B', 'Bold', 'strong'], ['I', 'Italic', 'em'], ['U', 'Underline', 'u'],
@@ -59,6 +60,8 @@ let pendingAttachments = [];
 let attachmentUploads = new Map();
 let streamingTurns = new Map();
 let streamControllers = new Map();
+let pendingStreamPaints = new Set();
+let streamPaintHandle = null;
 let sending = false;
 let searchQuery = '';
 let pinnedOnly = false;
@@ -307,7 +310,7 @@ function renderEntry(entry) {
   return `<article class="commons-chat-entry${entry.optimistic ? ' commons-optimistic' : ''}" data-entry-id="${escapeHtml(entry.id || '')}" data-thread-id="${escapeHtml(commonsThreadId(entry) || '')}" data-kind="${escapeHtml(entry.kind || 'system')}">${parent ? `<button type="button" class="commons-reply-context" data-jump-parent="${escapeHtml(parent.id)}">↳ ${escapeHtml(parent.author || 'House')}: ${escapeHtml(String(parent.text || '').slice(0, 120))}</button>` : ''}<header><strong>${escapeHtml(entry.author || 'House')}</strong><span>${escapeHtml([stamp, entry.status, runtime].filter(Boolean).join(' · '))}</span><div>${failed ? `<button type="button" class="quiet mini" data-retry-optimistic="${escapeHtml(entry.turn_id || '')}">Retry</button>` : ''}<button type="button" class="quiet mini" data-reply-entry="${escapeHtml(entry.id || '')}">Reply</button><button type="button" class="quiet mini" data-pin-entry="${escapeHtml(entry.id || '')}">${pinned ? 'Unpin' : 'Pin'}</button><button type="button" class="quiet mini" data-copy-entry="${escapeHtml(entry.id || '')}">Copy</button></div></header><div class="commons-chat-body">${entryBody(entry)}</div>${attachmentMarkup(entry)}</article>`;
 }
 function streamingMarkup(stream) {
-  return `<article class="commons-chat-entry commons-streaming" data-kind="voice" data-stream-key="${escapeHtml(stream.key)}"><header><strong>${escapeHtml(voiceName(stream.voiceId))}</strong><span>${escapeHtml([stream.state, stream.provider, stream.model].filter(Boolean).join(' · '))}</span><div><button type="button" class="quiet mini" data-cancel-stream="${escapeHtml(stream.key)}">Cancel</button></div></header><div class="commons-chat-body" data-stream-body>${escapeHtml(stream.text || '')}<span class="commons-stream-cursor" aria-hidden="true">▍</span></div></article>`;
+  return `<article class="commons-chat-entry commons-streaming" data-kind="voice" data-stream-key="${escapeHtml(stream.key)}"><header><strong>${escapeHtml(voiceName(stream.voiceId))}</strong><span>${escapeHtml([stream.state, stream.provider, stream.model].filter(Boolean).join(' · '))}</span><div><button type="button" class="quiet mini" data-cancel-stream="${escapeHtml(stream.key)}">Cancel</button></div></header><div class="commons-chat-body" data-stream-body><span data-stream-text>${escapeHtml(stream.text || '')}</span><span class="commons-stream-cursor" aria-hidden="true">▍</span></div></article>`;
 }
 function roomOptions() {
   return rooms.filter((room) => !room.archived).map((room) => `<option value="${escapeHtml(room.id)}" ${room.id === activeRoomId ? 'selected' : ''}>${escapeHtml(roomLabel(room, room.id === activeRoomId ? 0 : roomUnreadCount(entries, room, roomRead(room.id))))}</option>`).join('');
@@ -352,15 +355,42 @@ function renderLog({ scroll = false } = {}) {
   scheduleReadMark();
 }
 
-function updateStreamingBubble(key) {
+function shouldFollowStream(log) {
+  if (!log) return false;
+  return log.scrollHeight - log.scrollTop - log.clientHeight <= STREAM_FOLLOW_MARGIN_PX;
+}
+function paintStreamingBubble(key) {
   const stream = streamingTurns.get(key); if (!stream || stream.roomId !== activeRoomId) return;
   const zone = document.querySelector('[data-streaming-zone]'); if (!zone) return;
   let article = zone.querySelector(`[data-stream-key="${CSS.escape(key)}"]`);
-  if (!article) { zone.insertAdjacentHTML('beforeend', streamingMarkup(stream)); article = zone.querySelector(`[data-stream-key="${CSS.escape(key)}"]`); article?.querySelector('[data-cancel-stream]')?.addEventListener('click', () => streamControllers.get(key)?.abort()); }
+  if (!article) {
+    zone.insertAdjacentHTML('beforeend', streamingMarkup(stream));
+    article = zone.querySelector(`[data-stream-key="${CSS.escape(key)}"]`);
+    article?.querySelector('[data-cancel-stream]')?.addEventListener('click', () => streamControllers.get(key)?.abort());
+  }
   if (!article) return;
-  const body = article.querySelector('[data-stream-body]'); if (body) body.innerHTML = `${escapeHtml(stream.text || '')}<span class="commons-stream-cursor" aria-hidden="true">▍</span>`;
-  const meta = article.querySelector('header>span'); if (meta) meta.textContent = [stream.state, stream.provider, stream.model].filter(Boolean).join(' · ');
-  article.closest('.commons-log')?.scrollTo?.({ top: article.closest('.commons-log').scrollHeight });
+  const text = article.querySelector('[data-stream-text]');
+  if (text && text.textContent !== (stream.text || '')) text.textContent = stream.text || '';
+  const meta = article.querySelector('header>span');
+  const metaText = [stream.state, stream.provider, stream.model].filter(Boolean).join(' · ');
+  if (meta && meta.textContent !== metaText) meta.textContent = metaText;
+}
+function flushStreamingBubbles() {
+  streamPaintHandle = null;
+  const keys = [...pendingStreamPaints];
+  pendingStreamPaints.clear();
+  const log = document.querySelector('.commons-log');
+  const follow = shouldFollowStream(log);
+  keys.forEach(paintStreamingBubble);
+  if (follow && log) log.scrollTop = log.scrollHeight;
+}
+function updateStreamingBubble(key) {
+  pendingStreamPaints.add(key);
+  if (streamPaintHandle != null) return;
+  const schedule = typeof globalThis.requestAnimationFrame === 'function'
+    ? globalThis.requestAnimationFrame.bind(globalThis)
+    : (callback) => globalThis.setTimeout(callback, 16);
+  streamPaintHandle = schedule(flushStreamingBubbles);
 }
 
 function scheduleReadMark() {
@@ -438,7 +468,7 @@ async function runVoiceStream({ voiceId, message, turnId, roomId, stewardEntry, 
     }).catch(() => null);
     publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: cancelled ? 'ready' : 'degraded', worldId: world.id, task: null, reason: cancelled ? null : error?.message });
   } finally {
-    streamControllers.delete(key); streamingTurns.delete(key); await refreshLog({ force: true, scroll: true });
+    streamControllers.delete(key); streamingTurns.delete(key); pendingStreamPaints.delete(key); await refreshLog({ force: true, scroll: true });
   }
 }
 
@@ -531,7 +561,7 @@ export function installHouseCommonsChatV5() {
   enhance(document.querySelector('#commons-form'));
   refreshTimer = setInterval(() => { if (document.querySelector('#commons-form')) void refreshLog(); }, REFRESH_MS);
   globalThis.addEventListener?.('online', () => void refreshLog({ force: true }));
-  globalThis.addEventListener?.('beforeunload', () => { if (refreshTimer) clearInterval(refreshTimer); if (readMarkTimer) clearTimeout(readMarkTimer); for (const controller of streamControllers.values()) controller.abort(); observer?.disconnect(); }, { once: true });
+  globalThis.addEventListener?.('beforeunload', () => { if (refreshTimer) clearInterval(refreshTimer); if (readMarkTimer) clearTimeout(readMarkTimer); pendingStreamPaints.clear(); for (const controller of streamControllers.values()) controller.abort(); observer?.disconnect(); }, { once: true });
 }
 
 if (typeof document !== 'undefined') installHouseCommonsChatV5();
