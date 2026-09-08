@@ -62,11 +62,14 @@ test('v5 editor uses Selection/Range rather than execCommand', async () => {
   assert.match(rich, /createRange\(\)/);
 });
 
-test('v5 mounts before compatibility and social decorators', async () => {
+test('v5 mounts before compatibility and core chat tools while social animation stays off the hot path', async () => {
   const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
-  const chat = manifest.indexOf('./house-commons-chat-v5.js');
-  const compat = manifest.indexOf('./house-chat-v5-compat.js');
-  const social = manifest.indexOf('./house-chat-room-social.js');
-  const tools = manifest.indexOf('./house-chat-tools-v5.js');
-  assert.ok(chat >= 0 && compat > chat && social > compat && tools > social);
+  const start = manifest.indexOf('house: Object.freeze([');
+  const end = manifest.indexOf('writing: Object.freeze([', start);
+  const house = manifest.slice(start, end);
+  const chat = house.indexOf("'./house-commons-chat-v5.js'");
+  const compat = house.indexOf("'./house-chat-v5-compat.js'");
+  const tools = house.indexOf("'./house-chat-tools-v5.js'");
+  assert.ok(chat >= 0 && compat > chat && tools > compat);
+  assert.doesNotMatch(house, /house-chat-room-social\.js/);
 });
