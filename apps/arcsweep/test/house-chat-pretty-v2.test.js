@@ -25,9 +25,10 @@ test('pretty layer remains a visual decorator rather than chat state owner', () 
   assert.match(source, /house-scene-a/);
 });
 
-test('pretty layer mounts after vestments and before runtime diagnostic sidecars', () => {
-  const vestments = bootstrap.indexOf("'./house-chat-vestments-v1.js'");
-  const pretty = bootstrap.indexOf("'./house-chat-pretty-v2.js'");
-  const runtime = bootstrap.indexOf("'./runtime-envelope-live-ui.js'");
-  assert.ok(vestments >= 0 && pretty > vestments && runtime > pretty);
+test('pretty v2 remains build-visible but is excluded from the default House pack', () => {
+  const start = bootstrap.indexOf('house: Object.freeze([');
+  const end = bootstrap.indexOf('writing: Object.freeze([', start);
+  const house = bootstrap.slice(start, end);
+  assert.doesNotMatch(house, /house-chat-pretty-v2\.js/);
+  assert.equal(bootstrap.split("'./house-chat-pretty-v2.js'").length - 1, 1);
 });
