@@ -1,5 +1,5 @@
 import { createFlameHandler } from '../../../../netlify/functions/_shared/flame-runtime.mjs';
-import { createFlameChatStreamHandler } from '../../../../netlify/functions/_shared/flame-chat-stream-runtime.mjs';
+import { createReceiptedFlameChatStreamHandler, receiptBufferedFlameResponse } from '../../../../netlify/functions/_shared/receipted-flame-runtime.mjs';
 import { hostedFlameFallbackStatus, invokeHostedFlameFallback } from '../../../../netlify/functions/_shared/hosted-flame-fallback.mjs';
 import {
   bindMessageToRuntimeWorld,
@@ -45,9 +45,10 @@ export default {
     const flameId = String(params.flame_id || '');
     const action = String(params.action || '');
     const wantsStream = request.method === 'POST' && action === 'chat' && (request.headers.get('accept') || '').includes('text/event-stream');
-    if (wantsStream) return createFlameChatStreamHandler({ env })(boundRequest, params);
+    if (wantsStream) return createReceiptedFlameChatStreamHandler({ env })(boundRequest, params);
 
     const fallbackRequest = request.method === 'POST' && action === 'chat' ? boundRequest.clone() : null;
+    const receiptRequest = request.method === 'POST' && action === 'chat' ? boundRequest.clone() : null;
     let response = await createFlameHandler({ env })(boundRequest, params);
 
     if (request.method === 'GET' && action === 'status' && response.ok) {
@@ -73,6 +74,11 @@ export default {
           error: error.message,
         });
       }
+    }
+
+    if (request.method === 'POST' && action === 'chat' && receiptRequest && response.ok) {
+      const receiptBody = await receiptRequest.json().catch(() => null);
+      response = await receiptBufferedFlameResponse({ response, body: receiptBody, flameId, env, fetchImpl: fetch });
     }
 
     return runtimeWorld ? responseWithRuntimeWorld(response, runtimeWorld) : response;
