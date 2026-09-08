@@ -40,7 +40,6 @@ function matMul(a, b) {
   return a.map((row) => bt.map((column) => dot(row, column)));
 }
 
-/** Symmetric Jacobi eigensolver for the small matrices used by Foldwatch. */
 export function symmetricEigenDecomposition(matrix, { tolerance = 1e-10, maxSweeps = 80 } = {}) {
   invariant(Array.isArray(matrix) && matrix.length > 0, 'matrix is required');
   const n = matrix.length;
@@ -166,9 +165,9 @@ function curvatureFromDirections(history = []) {
 
 export function relationalParticipation(softDirection = [], relationalIndices = []) {
   const direction = normalise(softDirection);
-  if (!direction.length) return 0;
+  if (!direction.length) return null;
   const indices = new Set((relationalIndices || []).map((index) => Number(index)).filter((index) => Number.isInteger(index) && index >= 0 && index < direction.length));
-  if (!indices.size) return 0;
+  if (!indices.size) return null;
   let relation = 0;
   direction.forEach((value, index) => { if (indices.has(index)) relation += value ** 2; });
   return clamp01(relation);
@@ -225,6 +224,7 @@ export function createFoldTelemetry({
     soft_persistence: persistence,
     curvature,
     relational_participation: pU,
+    relational_participation_status: pU == null ? 'unavailable' : 'measured',
     branch_id: branchId,
     branch_changed: branchChanged,
     state: classification.state,
@@ -232,7 +232,6 @@ export function createFoldTelemetry({
   });
 }
 
-/** Known saddle-node proving chamber: x' = mu - x^2. */
 export function saddleNodeSample({ x, mu = 0, t = 0, history = [], previousState = 'CLEAR' } = {}) {
   const state = finite(x, 'x');
   const control = finite(mu, 'mu');
@@ -257,7 +256,8 @@ export function buildSwarmFoldPrompt(telemetry, { question = 'Interpret this fol
     softening: Number(telemetry.softening_score.toFixed(4)),
     persistence: Number(telemetry.soft_persistence.toFixed(4)),
     curvature: Number(telemetry.curvature.toFixed(4)),
-    p_U: Number(telemetry.relational_participation.toFixed(4)),
+    p_U: telemetry.relational_participation == null ? null : Number(telemetry.relational_participation.toFixed(4)),
+    p_U_status: telemetry.relational_participation_status,
     soft_direction: telemetry.soft_direction.map((value) => Number(value.toFixed(4))),
     branch_id: telemetry.branch_id,
   };
