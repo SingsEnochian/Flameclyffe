@@ -1,4 +1,3 @@
-import './runeshell-native-sidecar.js';
 import { HOUSE_CHAT_VOICES } from './house-commons-chat-v5-core.js';
 import './house-live-recovery.js';
 
