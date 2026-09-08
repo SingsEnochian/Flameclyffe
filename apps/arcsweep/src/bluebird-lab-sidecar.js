@@ -13,7 +13,7 @@ import { publishModelPresence } from './model-presence-bus.js';
 const STORAGE_KEY = 'arcsweep.bluebird-lab/v0.1';
 const MAX_HISTORY = 40;
 const MAX_RECEIPTS = 100;
-const GITHUB_PAGES_CHARACTER_URL = 'https://flameclyffe-starwell.netlify.app/.netlify/functions/tesla-chat';
+const GITHUB_PAGES_CHARACTER_URL = 'https://flameclyffe.vercel.app/api/v1/residents/tesla/chat';
 
 let opened = false;
 let busy = false;
@@ -64,7 +64,7 @@ function saveLab() {
 function characterEndpoint() {
   return /(?:^|\.)github\.io$/i.test(globalThis.location?.hostname || '')
     ? GITHUB_PAGES_CHARACTER_URL
-    : '/.netlify/functions/tesla-chat';
+    : '/api/v1/residents/tesla/chat';
 }
 
 function modelMessages() {
