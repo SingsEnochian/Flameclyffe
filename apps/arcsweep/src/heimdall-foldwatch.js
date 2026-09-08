@@ -236,12 +236,14 @@ export function saddleNodeSample({ x, mu = 0, t = 0, history = [], previousState
   const state = finite(x, 'x');
   const control = finite(mu, 'mu');
   const jacobian = Object.freeze([Object.freeze([-2 * state])]);
-  const branchId = state < 0 ? 'negative' : state > 0 ? 'positive' : 'fold';
+  // The singular point itself is not a continuation branch. Crossing is only earned
+  // once a later observation supplies an actual branch on the other side.
+  const branchId = state < 0 ? 'negative' : state > 0 ? 'positive' : null;
   const previousBranchId = history[history.length - 1]?.branch_id ?? null;
   const telemetry = createFoldTelemetry({ t, jacobian, history, previousState, branchId, previousBranchId, rankScale: 0.2 });
   return Object.freeze({
     ...telemetry,
-    proving_chamber: Object.freeze({ equation: "x' = mu - x^2", x: state, mu: control, equilibrium_residual: control - state ** 2 }),
+    proving_chamber: Object.freeze({ equation: "x' = mu - x^2", x: state, mu: control, equilibrium_residual: control - state ** 2, analytic_fold: state === 0 && control === 0 }),
   });
 }
 
