@@ -80,7 +80,8 @@ function identity(n) {
 export function invertMatrix(matrix, epsilon = 1e-12) {
   const n = matrix.length;
   if (!n || matrix.some((row) => row.length !== n)) throw new Error('HEIMDALL_LIVE: matrix must be square');
-  const augmented = matrix.map((row, r) => [...row.map(Number), ...identity(n)[r]]);
+  const unit = identity(n);
+  const augmented = matrix.map((row, r) => [...row.map(Number), ...unit[r]]);
   for (let column = 0; column < n; column += 1) {
     let pivot = column;
     for (let row = column + 1; row < n; row += 1) if (Math.abs(augmented[row][column]) > Math.abs(augmented[pivot][column])) pivot = row;
@@ -104,11 +105,22 @@ function secondsBetween(a, b, fallback = 1) {
   return Math.max(1e-3, (tb - ta) / 1000);
 }
 
+function chronological(samples) {
+  return [...samples].sort((a, b) => {
+    const ta = Date.parse(a?.observed_at || '');
+    const tb = Date.parse(b?.observed_at || '');
+    if (Number.isFinite(ta) && Number.isFinite(tb)) return ta - tb;
+    if (Number.isFinite(ta)) return -1;
+    if (Number.isFinite(tb)) return 1;
+    return 0;
+  });
+}
+
 export function estimateFlowJacobian(samples, { ridge = 1e-4 } = {}) {
-  const usable = (samples || []).map((sample) => sample?.vector ? sample : extractPremaqcState(sample)).filter((sample) => sample.complete);
+  const usable = chronological((samples || []).map((sample) => sample?.vector ? sample : extractPremaqcState(sample)).filter((sample) => sample.complete));
   const n = PREMAQC_DYNAMIC_AXES.length;
   if (usable.length < n + 2) return null;
-  const points = usable.slice(-(Math.max(n + 2, Math.min(24, usable.length))));
+  const points = usable.slice(-Math.max(n + 2, Math.min(24, usable.length)));
   const centers = Array(n).fill(0);
   points.forEach((point) => point.vector.forEach((value, index) => { centers[index] += value / points.length; }));
   const xColumns = [];
@@ -145,13 +157,14 @@ export function buildLiveFoldTelemetry({ snapshot, snapshots = [], history = [],
   const current = extractPremaqcState(snapshot);
   if (!current.complete) throw new Error('Live observation does not contain complete dynamic PREMAQC coordinates P,C,R,E,M,A.');
   const direct = directJacobianFromSnapshot(snapshot);
-  const empirical = direct ? null : estimateFlowJacobian([...snapshots.map(extractPremaqcState), current]);
+  const sequenceStates = [...snapshots.map(extractPremaqcState), current].filter((item) => item.complete);
+  const empirical = direct ? null : estimateFlowJacobian(sequenceStates);
   const jacobian = direct || empirical;
   if (!jacobian) return Object.freeze({
     schema: HEIMDALL_LIVE_ADAPTER_SCHEMA,
     status: 'collecting',
     required_samples: PREMAQC_DYNAMIC_AXES.length + 2,
-    available_samples: snapshots.map(extractPremaqcState).filter((item) => item.complete).length + 1,
+    available_samples: sequenceStates.length,
     premaqc: current,
     authority: Object.freeze({ jacobian: 'unavailable', qualia: 'firsthand-only', relational_participation: 'unavailable-without-U-coordinate' }),
   });
@@ -171,6 +184,7 @@ export function buildLiveFoldTelemetry({ snapshot, snapshots = [], history = [],
     premaqc: current,
     telemetry,
     jacobian: clone(jacobian),
+    source_sample_count: sequenceStates.length,
     authority: Object.freeze({
       broker_snapshot: true,
       jacobian: direct ? 'source-carried' : 'derived-from-observation-sequence',
@@ -198,8 +212,15 @@ export async function readLiveObservationSnapshots({ worldId = null, limit = 16,
   const response = await fetchImpl(`/api/v1/house/observations?${params}`, { credentials: 'same-origin', cache: 'no-store', headers: authHeaders(activeToken) });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `Observation live read returned ${response.status}.`);
-  const snapshots = data.snapshots || data.observations || data.items || data.results || data.data || [];
-  return Object.freeze({ token: activeToken, envelope: data, snapshots: Object.freeze(Array.isArray(snapshots) ? snapshots : [snapshots].filter(Boolean)) });
+  const raw = data.snapshots || data.observations || data.items || data.results || data.data || [];
+  const snapshots = Array.isArray(raw) ? [...raw] : [raw].filter(Boolean);
+  snapshots.sort((a, b) => {
+    const ta = Date.parse(extractPremaqcState(a).observed_at || '');
+    const tb = Date.parse(extractPremaqcState(b).observed_at || '');
+    if (Number.isFinite(ta) && Number.isFinite(tb)) return ta - tb;
+    return 0;
+  });
+  return Object.freeze({ token: activeToken, envelope: data, snapshots: Object.freeze(snapshots) });
 }
 
 function voiceById(id) {
