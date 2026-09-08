@@ -62,6 +62,27 @@ test('v5 editor uses Selection/Range rather than execCommand', async () => {
   assert.match(rich, /createRange\(\)/);
 });
 
+test('v5 stream renderer batches deltas without reparsing or forced scrolling per token', async () => {
+  const chat = await readFile(new URL('../src/house-commons-chat-v5.js', import.meta.url), 'utf8');
+  assert.match(chat, /pendingStreamPaints/);
+  assert.match(chat, /requestAnimationFrame/);
+  assert.match(chat, /data-stream-text/);
+  assert.match(chat, /STREAM_FOLLOW_MARGIN_PX/);
+
+  const paintStart = chat.indexOf('function paintStreamingBubble');
+  const flushStart = chat.indexOf('function flushStreamingBubbles', paintStart);
+  const updateStart = chat.indexOf('function updateStreamingBubble', flushStart);
+  assert.ok(paintStart >= 0 && flushStart > paintStart && updateStart > flushStart);
+
+  const paint = chat.slice(paintStart, flushStart);
+  assert.match(paint, /text\.textContent/);
+  assert.doesNotMatch(paint, /innerHTML|scrollTo|scrollHeight/);
+
+  const flush = chat.slice(flushStart, updateStart);
+  assert.match(flush, /shouldFollowStream/);
+  assert.match(flush, /log\.scrollTop = log\.scrollHeight/);
+});
+
 test('v5 mounts before compatibility and core chat tools while social animation stays off the hot path', async () => {
   const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
   const start = manifest.indexOf('house: Object.freeze([');
