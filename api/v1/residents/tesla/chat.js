@@ -23,9 +23,9 @@ const MODEL_ROUTES = {
   },
   'bluebird-api': {
     provider: 'openai-compatible',
-    apiKey: () => process.env.BLUEBIRD_API_KEY,
-    url: () => process.env.BLUEBIRD_API_URL,
-    model: () => process.env.BLUEBIRD_MODEL || 'bluebird-api'
+    apiKey: () => process.env.BLUEBIRD_API_KEY || process.env.BLUEBIRD_DEEPSEEK_API_KEY,
+    url: () => process.env.BLUEBIRD_API_URL || 'https://api.deepseek.com/chat/completions',
+    model: () => process.env.BLUEBIRD_MODEL || 'deepseek-chat'
   },
   'vethrlauf-api': {
     provider: 'openai-compatible',
@@ -131,7 +131,7 @@ async function callOpenAICompatible(route, payload, label, res) {
   const apiKey = route.apiKey && route.apiKey();
   const url = route.url && route.url();
   if (!apiKey || !url) {
-    return send(res, 503, { error: `${label} is not configured on this deploy. Add its API key and URL in Vercel environment variables.` });
+    return send(res, 503, { error: `${label} is not configured on this deploy. Add its API key in Vercel environment variables.` });
   }
 
   const response = await fetch(url, {
