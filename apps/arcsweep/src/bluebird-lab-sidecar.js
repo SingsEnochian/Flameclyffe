@@ -17,7 +17,7 @@ const GITHUB_PAGES_CHARACTER_URL = 'https://flameclyffe.vercel.app/api/v1/reside
 
 let opened = false;
 let busy = false;
-let runtimeLine = 'Qwen Character route not yet called.';
+let runtimeLine = 'Bluebird Direct route not yet called.';
 let outputLine = 'Outputs are disarmed.';
 let lastError = '';
 let audioContext = null;
@@ -38,6 +38,7 @@ function loadLab() {
     state: createBluebirdState(raw?.state || {}),
     history: Array.isArray(raw?.history) ? raw.history.slice(-MAX_HISTORY) : [],
     receipts: Array.isArray(raw?.receipts) ? raw.receipts.slice(-MAX_RECEIPTS) : [],
+    // Keep the legacy storage value so existing local state survives the provider-label correction.
     backend: raw?.backend === 'house-bluebird' ? 'house-bluebird' : 'qwen-character',
     settings: {
       audio: raw?.settings?.audio !== false,
@@ -91,11 +92,11 @@ async function callQwenCharacter() {
   });
   const latencyMs = Math.max(0, Math.round((performance?.now?.() ?? Date.now()) - started));
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || `Qwen Character route failed (${response.status}).`);
+  if (!response.ok) throw new Error(data.error || `Bluebird Direct route failed (${response.status}).`);
   return {
     text: String(data.reply || '').trim(),
     provider: data.provider || 'bluebird-api',
-    model: data.model || 'bluebird-api',
+    model: data.model || 'deepseek-chat',
     backend: 'qwen-character',
     latencyMs,
   };
@@ -236,7 +237,7 @@ function panelMarkup() {
   return `<div class="bluebird-lab-backdrop" data-bluebird-close></div>
   <aside class="bluebird-lab-panel" role="dialog" aria-modal="false" aria-label="Bluebird Embodiment Lab">
     <header class="bluebird-lab-head"><div><p>ArcSweep · Embodiment</p><h2>Bluebird Lab <span>v0.1</span></h2></div><button type="button" class="quiet mini" data-bluebird-close aria-label="Close Bluebird Lab">×</button></header>
-    <section class="bluebird-runtime-strip"><label>Runtime<select data-bluebird-backend><option value="qwen-character" ${lab.backend === 'qwen-character' ? 'selected' : ''}>Qwen Character · bluebird-api</option><option value="house-bluebird" ${lab.backend === 'house-bluebird' ? 'selected' : ''}>House Bluebird route</option></select></label><small>${esc(runtimeLine)}</small>${lastError ? `<p class="bluebird-error">${esc(lastError)}</p>` : ''}</section>
+    <section class="bluebird-runtime-strip"><label>Runtime<select data-bluebird-backend><option value="qwen-character" ${lab.backend === 'qwen-character' ? 'selected' : ''}>Bluebird Direct · DeepSeek</option><option value="house-bluebird" ${lab.backend === 'house-bluebird' ? 'selected' : ''}>House Bluebird route</option></select></label><small>${esc(runtimeLine)}</small>${lastError ? `<p class="bluebird-error">${esc(lastError)}</p>` : ''}</section>
     <section class="bluebird-state"><div class="bluebird-section-title"><h3>Live state</h3><span>${esc(lab.state.consent)}</span></div><div class="bluebird-meters">${stateMeter('Energy', 'energy')}${stateMeter('Affection', 'affection')}${stateMeter('Curiosity', 'curiosity')}${stateMeter('Play', 'playfulness')}${stateMeter('Intimacy', 'intimacy')}${stateMeter('Hesitation', 'hesitation')}</div></section>
     <section class="bluebird-chat"><div class="bluebird-section-title"><h3>Conversation</h3><span>${lab.history.length} context turns</span></div><div class="bluebird-chat-log" data-bluebird-chat-log>${chatMarkup()}</div><form data-bluebird-form><textarea name="message" rows="3" placeholder="Talk to Richie…" ${busy ? 'disabled' : ''}></textarea><button type="submit" ${busy ? 'disabled' : ''}>${busy ? 'Bluebird is answering…' : 'Send'}</button></form></section>
     <section class="bluebird-gesture"><div class="bluebird-section-title"><h3>Offered gesture</h3><span>semantic, then rendered</span></div>${intentMarkup()}<div class="bluebird-feedback"><button type="button" data-bluebird-feedback="again">Again</button><button type="button" data-bluebird-feedback="more">More</button><button type="button" data-bluebird-feedback="less">Less</button><button type="button" data-bluebird-feedback="different">Different</button><button type="button" class="quiet" data-bluebird-feedback="pause">Pause</button></div></section>
@@ -284,7 +285,7 @@ function renderPanel({ focusComposer = false } = {}) {
   root.querySelectorAll('[data-bluebird-close]').forEach((button) => button.addEventListener('click', closeLab));
   root.querySelector('[data-bluebird-backend]')?.addEventListener('change', (event) => {
     lab.backend = event.target.value === 'house-bluebird' ? 'house-bluebird' : 'qwen-character';
-    runtimeLine = lab.backend === 'qwen-character' ? 'Qwen Character selected. Uses BLUEBIRD_API_URL / BLUEBIRD_API_KEY / BLUEBIRD_MODEL.' : 'House Bluebird selected. Uses the active House Runtime route.';
+    runtimeLine = lab.backend === 'qwen-character' ? 'Bluebird Direct selected. Uses the canonical Bluebird DeepSeek route.' : 'House Bluebird selected. Uses the active House Runtime route.';
     lastError = '';
     saveLab(); renderPanel();
   });
@@ -338,7 +339,7 @@ async function handleSend(event) {
   }
 
   addHistory('user', message);
-  busy = true; lastError = ''; runtimeLine = lab.backend === 'qwen-character' ? 'Calling Qwen Character…' : 'Calling House Bluebird…';
+  busy = true; lastError = ''; runtimeLine = lab.backend === 'qwen-character' ? 'Calling Bluebird Direct…' : 'Calling House Bluebird…';
   publishModelPresence({ voiceId: 'bluebird', displayName: 'Bluebird', state: 'thinking', task: 'bluebird-embodiment-lab' });
   saveLab(); renderPanel();
   try {
