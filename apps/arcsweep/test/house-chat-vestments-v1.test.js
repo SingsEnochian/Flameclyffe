@@ -47,12 +47,11 @@ test('sigil portraits have stable identity-specific tone pairs with a safe fallb
   assert.deepEqual(portraitToneForId('unknown'), ['gold', 'seaglass']);
 });
 
-test('vestments mount after House Chat social/tools and before downstream live reads', async () => {
+test('vestments remain build-visible but are excluded from the default House pack', async () => {
   const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
-  const chat = manifest.indexOf('./house-commons-chat-v5.js');
-  const social = manifest.indexOf('./house-chat-room-social.js');
-  const tools = manifest.indexOf('./house-chat-tools-v5.js');
-  const vestments = manifest.indexOf('./house-chat-vestments-v1.js');
-  const runtime = manifest.indexOf('./runtime-envelope-live-ui.js');
-  assert.ok(chat >= 0 && social > chat && tools > social && vestments > tools && runtime > vestments);
+  const start = manifest.indexOf('house: Object.freeze([');
+  const end = manifest.indexOf('writing: Object.freeze([', start);
+  const house = manifest.slice(start, end);
+  assert.doesNotMatch(house, /house-chat-vestments-v1\.js/);
+  assert.equal(manifest.split("'./house-chat-vestments-v1.js'").length - 1, 1);
 });
