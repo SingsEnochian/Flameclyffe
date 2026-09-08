@@ -26,9 +26,10 @@ test('pretty v3 stays a visual decorator with v5 guard and reduced-motion treatm
   assert.doesNotMatch(source, /appendHouseCommons|streamConstellationRuntimeVoice|upsertHouseRoom|markHouseRoomRead|uploadHouseAttachment/);
 });
 
-test('pretty v3 mounts after pretty v2 and before runtime diagnostic surfaces', () => {
-  const v2 = bootstrap.indexOf("'./house-chat-pretty-v2.js'");
-  const v3 = bootstrap.indexOf("'./house-chat-pretty-v3.js'");
-  const runtime = bootstrap.indexOf("'./runtime-envelope-live-ui.js'");
-  assert.ok(v2 >= 0 && v3 > v2 && runtime > v3);
+test('pretty v3 remains build-visible but is excluded from the default House pack', () => {
+  const start = bootstrap.indexOf('house: Object.freeze([');
+  const end = bootstrap.indexOf('writing: Object.freeze([', start);
+  const house = bootstrap.slice(start, end);
+  assert.doesNotMatch(house, /house-chat-pretty-v3\.js/);
+  assert.equal(bootstrap.split("'./house-chat-pretty-v3.js'").length - 1, 1);
 });
