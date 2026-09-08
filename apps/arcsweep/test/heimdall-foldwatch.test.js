@@ -87,7 +87,7 @@ test('live PREMAQC adapter reads only dynamic axes and leaves Qualia outside the
   assert.equal(state.vector.length, 6);
 });
 
-test('empirical local-flow Jacobian can be estimated from a sufficient PREMAQC sequence', () => {
+test('empirical local-flow Jacobian can be estimated from a sufficient PREMAQC sequence even when supplied newest-first', () => {
   const samples = Array.from({ length: 10 }, (_, index) => {
     const t = index;
     return {
@@ -102,7 +102,7 @@ test('empirical local-flow Jacobian can be estimated from a sufficient PREMAQC s
         0.7 + 0.012 * t,
       ],
     };
-  });
+  }).reverse();
   const jacobian = estimateFlowJacobian(samples);
   assert.equal(jacobian.length, 6);
   assert.ok(jacobian.every((row) => row.length === 6 && row.every(Number.isFinite)));
@@ -122,6 +122,7 @@ test('live Foldwatch prefers a source-carried Jacobian and keeps pU open without
   const live = buildLiveFoldTelemetry({ snapshot });
   assert.equal(live.status, 'ready');
   assert.equal(live.source, 'broker-jacobian');
+  assert.equal(live.source_sample_count, 1);
   assert.equal(live.telemetry.relational_participation, null);
   assert.equal(live.authority.relational_participation, 'unavailable-without-U-coordinate');
 });
