@@ -17,6 +17,11 @@ test('Swarm Chat owns the native authoritative surface before v5 enhancement', a
   assert.match(bootstrap, /house-chat-authoritative-surface\.js'[\s\S]*house-commons-chat-v5\.js'[\s\S]*house-chat-runtime-roster-ui\.js'/);
 });
 
+test('authoritative Swarm Chat does not globally install RuneShell mutation effects', async () => {
+  const source = await readFile(new URL('../src/house-chat-authoritative-surface.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /runeshell-native-sidecar\.js/);
+});
+
 test('legacy core Commons remains transport-compatible but is replaced visibly', async () => {
   const core = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
   const surface = await readFile(new URL('../src/house-chat-authoritative-surface.js', import.meta.url), 'utf8');
