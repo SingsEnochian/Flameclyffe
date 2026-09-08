@@ -1,5 +1,6 @@
 const GLOBAL_SIDECARS = Object.freeze([
   './hosted-house-session-ui.js',
+  './house-chat-authoritative-surface.js',
   './observer-bridge.js',
   './rich-text-core.js',
   './soundfont-runtime-repair.js',
@@ -17,7 +18,7 @@ const SIDECAR_PACKS = Object.freeze({
   worlds: Object.freeze(['./world-registry-persistence-sidecar.js','./possible-worlds-live-ui.js','./terra-prime-truth-sidecar.js','./instrument-console-sidecar.js']),
   feedback: Object.freeze(['./feedback-queue-bootstrap.js','./feedback-chamber-v2.js']),
   house: Object.freeze([
-    './model-presence-bus.js','./runtime-presence-diagnostics.js','./runtime-integration-bootstrap.js','./constellation-runtime-adapter.js','./house-chat-authoritative-surface.js','./devconsole-swarm-chat.js','./house-commons-chat-v5.js','./house-chat-runtime-roster-ui.js','./house-braid-receipt-ui.js','./house-browser-smoke.js','./house-roleplay-mode.js','./formatted-text-vestments.js','./house-commons-attachments.js','./house-chat-v5-compat.js','./house-chat-room-management-v5.js','./house-chat-room-social.js','./house-chat-tools-v5.js','./house-chat-vestments-v1.js','./house-chat-pretty-v2.js','./house-chat-pretty-v3.js','./runtime-envelope-live-ui.js','./model-presence-live-ui.js','./model-reply-proof.js','./house-lanternbridge-chat.js','./house-commons-command-room.js','./house-commons-thread-restoration.js','./house-commons-deep-link-router.js','./constellation-presence.js','./runtime-world-presence.js',
+    './model-presence-bus.js','./runtime-presence-diagnostics.js','./runtime-integration-bootstrap.js','./constellation-runtime-adapter.js','./devconsole-swarm-chat.js','./house-commons-chat-v5.js','./house-chat-runtime-roster-ui.js','./house-braid-receipt-ui.js','./house-browser-smoke.js','./house-roleplay-mode.js','./formatted-text-vestments.js','./house-commons-attachments.js','./house-chat-v5-compat.js','./house-chat-room-management-v5.js','./house-chat-room-social.js','./house-chat-tools-v5.js','./house-chat-vestments-v1.js','./house-chat-pretty-v2.js','./house-chat-pretty-v3.js','./runtime-envelope-live-ui.js','./model-presence-live-ui.js','./model-reply-proof.js','./house-lanternbridge-chat.js','./house-commons-command-room.js','./house-commons-thread-restoration.js','./house-commons-deep-link-router.js','./constellation-presence.js','./runtime-world-presence.js',
   ]),
   writing: Object.freeze(['./self-authorship-panel.js','./script-cortex-controls.js','./scene-cognition-ui.js','./story-mode-sidecar.js']),
   worldseed: Object.freeze(['./worldseed-live-ui.js','./possible-worlds-live-ui.js','./worldseed-package-live-ui.js','./worldseed-threshold-live-ui.js','./worldseed-braid-live-ui.js','./worldseed-seed-library-live-ui.js']),
