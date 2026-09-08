@@ -29,12 +29,35 @@ function eventBlock({ event = 'message', id = null, payload = null, data = '' } 
   return `${lines.join('\n')}\n\n`;
 }
 
+function receiptReadyBody(body = {}) {
+  const metadata = body?.metadata && typeof body.metadata === 'object' ? { ...body.metadata } : {};
+  const explicitWorld = metadata.world_id || metadata.world_context?.active_world_id || metadata.world_context?.identity_anchor?.world_id || body?.world_id;
+  const explicitTurn = metadata.commons_turn_id || metadata.turn_id || metadata.request_id || body?.turn_id;
+  if (explicitWorld && explicitTurn) return body;
+
+  const envelopeWorld = String(body?.message || '').match(/^World:\s+.*\(([^()\n]+)\)\s*$/m)?.[1]?.trim() || '';
+  const sessionId = String(body?.session_id || '').trim();
+  if (!envelopeWorld || !sessionId) return body;
+  return {
+    ...body,
+    metadata: {
+      ...metadata,
+      world_id: metadata.world_id || envelopeWorld,
+      thread_id: metadata.thread_id || sessionId,
+      turn_id: metadata.turn_id || sessionId,
+      surface: metadata.surface || 'arcsweep-relational-turn',
+      compatibility_identity_source: 'machine-generated-relational-envelope',
+    },
+  };
+}
+
 export function createReceiptedFlameChatStreamHandler({ env, fetchImpl = fetch, clock } = {}) {
   const baseHandler = createFlameChatStreamHandler({ env, fetchImpl, clock });
   return async function handle(request, params = {}) {
     const bodyPromise = request.clone().json().catch(() => null);
     const response = await baseHandler(request, params);
-    const body = await bodyPromise;
+    const originalBody = await bodyPromise;
+    const body = originalBody ? receiptReadyBody(originalBody) : null;
     const contract = FLAME_CONTRACTS[params.flame_id];
     const contentType = response.headers.get('content-type') || '';
     if (!body || !contract || !response.ok || !response.body || !contentType.includes('text/event-stream')) return response;
@@ -99,7 +122,7 @@ export async function receiptBufferedFlameResponse({ response, body, flameId, en
   if (payload.runtime_braid?.persisted === true) return response;
   const runtimeBraid = await receiptModelReplyAtServerBoundary({
     contract,
-    body,
+    body: receiptReadyBody(body),
     result: payload,
     env,
     fetchImpl,
