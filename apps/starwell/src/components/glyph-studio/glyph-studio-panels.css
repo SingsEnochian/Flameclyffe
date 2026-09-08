@@ -76,9 +76,35 @@
 }
 .attribute-rail button { min-height: 2rem; text-align: left; font-size: 0.7rem; padding: 0.35rem 0.45rem; }
 .attribute-inspector { display: grid; align-content: start; gap: 0.65rem; padding: 0.65rem; min-width: 0; }
+.brush-audition {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 0.72rem;
+  background: rgba(255,255,255,0.018);
+}
+.brush-audition-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+.brush-audition-heading > div:first-child { display: grid; gap: 0.08rem; }
+.brush-audition-heading span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+.brush-audition-heading strong { color: var(--cream); font-size: 0.86rem; }
+.brush-sensory-toggles { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.brush-sensory-toggles button { min-height: 2rem; padding: 0.3rem 0.48rem; font-size: 0.68rem; }
 .brush-live-pad {
   position: relative;
-  min-height: 5.4rem;
+  min-height: 7.5rem;
+  aspect-ratio: 5 / 2;
   border-radius: 0.65rem;
   overflow: hidden;
   background:
@@ -86,17 +112,9 @@
     repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(230,198,122,0.04) 16px);
   border: 1px solid var(--line);
 }
-.brush-live-pad span {
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 50%;
-  height: var(--preview-width);
-  border-radius: 999px;
-  background: var(--preview-colour);
-  transform: translateY(-50%) rotate(-3deg);
-  box-shadow: 0 0 1.2rem color-mix(in srgb, var(--preview-colour), transparent 45%);
-}
+.brush-live-pad svg { display: block; width: 100%; height: 100%; }
+.brush-audition-paper { fill: rgba(245,240,223,0.025); }
+.brush-audition-note { margin: 0; color: var(--muted); font-size: 0.68rem; line-height: 1.35; }
 
 .range-field { gap: 0.3rem; }
 .range-field > span { display: flex; justify-content: space-between; gap: 0.6rem; }
@@ -186,6 +204,8 @@
   .brush-record { grid-template-columns: 3.4rem 1fr; }
   .attribute-rail, .brush-sets { padding: 0.3rem; }
   .attribute-rail button, .brush-sets button { font-size: 0.66rem; }
+  .brush-audition-heading { align-items: flex-start; }
+  .brush-live-pad { min-height: 6rem; }
   .layer-main-row { grid-template-columns: 1.8rem 2rem 1fr 1.8rem 2rem; }
   .colour-row { grid-template-columns: 1fr auto; }
   .colour-row input:last-child { grid-column: 1 / -1; }

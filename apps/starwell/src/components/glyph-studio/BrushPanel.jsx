@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
+import BrushAuditionPad from './BrushAuditionPad.jsx';
 import {
   BRUSH_ATTRIBUTE_GROUPS,
   BRUSH_LIBRARY_SCHEMA,
@@ -9,6 +10,11 @@ import {
   recordRecentBrush,
   safeFileName,
 } from './glyphStudioModel.js';
+import {
+  auditionBrushDefinition,
+  createBrushSettingChangeReceipt,
+  dispatchBrushSettingChange,
+} from './liveBrushRuntime.js';
 
 const GROUP_KEYS = {
   'Stroke Path': 'strokePath',
@@ -107,28 +113,49 @@ export default function BrushPanel({ library, onChangeLibrary }) {
     return needle ? brushes.filter((brush) => brush.name.toLowerCase().includes(needle)) : brushes;
   }, [library, query, setId]);
 
-  function patchBrush(patch) {
+  function patchBrush(patch, settingChange = null) {
+    const nextBrush = { ...activeBrush, ...patch, modifiedAt: new Date().toISOString() };
     onChangeLibrary({
       ...library,
-      brushes: library.brushes.map((brush) => brush.id === activeBrush.id
-        ? { ...brush, ...patch, modifiedAt: new Date().toISOString() }
-        : brush),
+      brushes: library.brushes.map((brush) => brush.id === activeBrush.id ? nextBrush : brush),
     });
+
+    if (settingChange) {
+      const receipt = createBrushSettingChangeReceipt({ brush: nextBrush, ...settingChange });
+      dispatchBrushSettingChange(receipt);
+      auditionBrushDefinition(nextBrush, 'brush-studio-setting');
+      setStatus(`${labelFor(settingChange.setting)} is live: visual, sound/haptic audition, and Observer context now share ${nextBrush.name}.`);
+    }
+
+    return nextBrush;
   }
 
   function patchAttribute(attributeKey, setting, value) {
+    const previousValue = activeBrush.attributes[attributeKey]?.[setting];
     patchBrush({
       attributes: {
         ...activeBrush.attributes,
         [attributeKey]: { ...activeBrush.attributes[attributeKey], [setting]: value },
       },
+    }, {
+      group: attributeKey,
+      setting,
+      previousValue,
+      nextValue: value,
     });
+  }
+
+  function selectBrush(brush) {
+    onChangeLibrary(recordRecentBrush(library, brush.id));
+    auditionBrushDefinition(brush, 'brush-library-select');
+    setStatus(`${brush.name} is active. Its sealed audition stroke and sensory channels now use the same runtime definition.`);
   }
 
   function addBrush() {
     const targetSet = library.sets.find((set) => set.id === setId && !set.virtual)?.id || 'set-foundation';
     const brush = makeBrush({ id: makeId('brush'), name: `New Brush ${library.brushes.length + 1}`, setId: targetSet, pinned: false });
     onChangeLibrary(recordRecentBrush({ ...library, brushes: [...library.brushes, brush] }, brush.id));
+    auditionBrushDefinition(brush, 'brush-created');
   }
 
   function duplicateBrush() {
@@ -138,6 +165,7 @@ export default function BrushPanel({ library, onChangeLibrary }) {
     copy.pinned = false;
     copy.modifiedAt = new Date().toISOString();
     onChangeLibrary(recordRecentBrush({ ...library, brushes: [...library.brushes, copy] }, copy.id));
+    auditionBrushDefinition(copy, 'brush-duplicated');
   }
 
   function deleteBrush() {
@@ -149,6 +177,7 @@ export default function BrushPanel({ library, onChangeLibrary }) {
       activeBrushId: brushes[0].id,
       recentBrushIds: library.recentBrushIds.filter((id) => id !== activeBrush.id),
     });
+    auditionBrushDefinition(brushes[0], 'brush-delete-fallback');
   }
 
   function exportBrush() {
@@ -198,6 +227,8 @@ export default function BrushPanel({ library, onChangeLibrary }) {
       }
     }
     onChangeLibrary(next);
+    const importedActive = next.brushes.find((brush) => brush.id === next.activeBrushId);
+    if (importedActive) auditionBrushDefinition(importedActive, 'brush-import');
     setStatus(messages.join(' · '));
   }
 
@@ -226,7 +257,7 @@ export default function BrushPanel({ library, onChangeLibrary }) {
             <button
               key={brush.id}
               className={`brush-record ${brush.id === activeBrush.id ? 'active' : ''}`}
-              onClick={() => onChangeLibrary(recordRecentBrush(library, brush.id))}
+              onClick={() => selectBrush(brush)}
             >
               <span className="brush-preview" style={{ '--brush-colour': brush.attributes.preview.color, '--brush-size': `${8 + brush.attributes.preview.size * 28}px` }} />
               <span>{brush.name}<small>{brush.pinned ? 'Pinned · ' : ''}{brush.attributes.shape.sourceName} / {brush.attributes.grain.sourceName}</small></span>
@@ -252,9 +283,7 @@ export default function BrushPanel({ library, onChangeLibrary }) {
         </nav>
         <div className="attribute-inspector">
           <div className="panel-heading compact"><div><span>Brush Studio</span><h3>{groupName}</h3></div></div>
-          <div className="brush-live-pad" aria-label="Brush preview pad">
-            <span style={{ '--preview-colour': activeBrush.attributes.preview.color, '--preview-width': `${Math.max(3, activeBrush.attributes.properties.size / 5)}px` }} />
-          </div>
+          <BrushAuditionPad brush={activeBrush} />
           {Object.entries(settings).map(([name, value]) => <SettingField key={name} name={name} value={value} onChange={(nextValue) => patchAttribute(attributeKey, name, nextValue)} />)}
         </div>
       </div>
