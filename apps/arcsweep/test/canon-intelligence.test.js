@@ -123,11 +123,10 @@ test('live inbox shows source evidence and keeps raw HTML escaped', () => {
   assert.match(html, /&lt;unsafe&gt;nope&lt;\/unsafe&gt;/);
 });
 
-test('Arcsweep mounts Canon Intelligence after runtime and House Chat surfaces', async () => {
+test('Arcsweep keeps Canon Intelligence build-visible after the lean House Chat core', async () => {
   const manifest = await readFile(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
   const runtime = manifest.indexOf('./runtime-integration-bootstrap.js');
   const commons = manifest.indexOf('./house-commons-chat-v5.js');
-  const social = manifest.indexOf('./house-chat-room-social.js');
   const intelligence = manifest.indexOf('./canon-intelligence-live-ui.js');
-  assert.ok(runtime >= 0 && commons > runtime && social > commons && intelligence > social);
+  assert.ok(runtime >= 0 && commons > runtime && intelligence > commons);
 });
