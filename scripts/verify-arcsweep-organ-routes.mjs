@@ -33,7 +33,7 @@ if (siteRoot) {
     const source = (await Promise.all(jsFiles.map((name) => readFile(resolve(assetsRoot, name), 'utf8').catch(() => '')))).join('\n');
     const markers = [
       ['arcsweep.sound-organs/v1', 'sound organ registry'],
-      ['arcsweep.soundfont-worklet/v2', 'SoundFont runtime repair v2'],
+      ['arcsweep.soundfont-worklet/v3', 'SoundFont runtime repair v3'],
       ['arcsweep.semantic-lab/v1', 'Semantic Lab'],
       ['arcsweep.sidecar-health/v1', 'production sidecar health panel'],
       ['arcsweep.house-browser-smoke/v1', 'House browser smoke instrument'],
