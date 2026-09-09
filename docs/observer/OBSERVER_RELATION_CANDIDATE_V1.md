@@ -41,14 +41,16 @@ Retrospective work is valid exploratory work, but its search freedom must remain
 A relation candidate may therefore record:
 
 - `noticed_at`
-- `noticed_mode`: `in_moment | memory_recall | archive_recovery | systematic_search | cue_guided_search`
+- `noticed_mode`: `in_moment | memory_recall | archive_recovery | systematic_search | cue_guided_search | unrecorded`
 - `search_scope`
 - `candidate_pool_estimate`
-- `hypothesis_preexisting`
+- `hypothesis_preexisting`: `true | false | null`
 - `prompting_cue`
 - `alternative_matches_considered[]`
 - `transformation_history[]`
 - provenance
+
+`unrecorded` and `null` are deliberate provenance states. Missing information must remain missing rather than being rewritten as `archive_recovery` or `false`.
 
 This is especially important for synchronicity and recurrence archaeology, where later noticing must not be rewritten as prospective prediction.
 
@@ -94,6 +96,14 @@ Domain labels such as `neuroscience`, `cosmology`, or `information theory` may r
 
 Accordingly, `RelationCandidate` is not named `CrossDomainRelation` and does not require domain identity to define the relation.
 
+## Symbolic features and Mythience
+
+`RelationCandidate.symbolic_features[]` may preserve descriptive features noticed in the candidate relation, but the field is not an empirical evidence class. Its contents do not raise evidentiary weight by themselves.
+
+Mythic, symbolic, ritual, or narrative interpretation belongs in a parallel interpretation receipt when it becomes an interpretation rather than a description.
+
+The candidate contract therefore states that it is not itself a symbolic-evidence claim.
+
 ## Cross-system Observer namespace rule
 
 `SingsEnochian/Flameclyffe` Observer and `mdkubit/UH-Observer` are distinct systems.
@@ -108,8 +118,12 @@ destination_system
 semantic_mapping
 preserved_meaning[]
 changed_meaning[]
+omitted_meaning[]
 runtime_authority
+provenance[]
 ```
+
+An omission is part of the semantic transfer contract, not an absence to hide. If a source concept is deliberately not transferred, record it in `omitted_meaning[]`.
 
 Default runtime authority for imported analytical material is `none` unless another contract explicitly grants more.
 
