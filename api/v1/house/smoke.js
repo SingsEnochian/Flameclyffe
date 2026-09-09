@@ -1,6 +1,7 @@
 import { HOUSE_SMOKE_AUDIENCE, verifyGitHubActionsOidc } from '../../_shared/github-actions-oidc.mjs';
 import { vercelEnv as env } from '../../_shared/vercel-env.mjs';
 import { houseSessionCookie, issueHouseSession } from '../../../netlify/functions/_shared/house-session.mjs';
+import { buildProductionSmokeWorldContext } from '../../../netlify/functions/_shared/production-smoke-world-context.mjs';
 
 const json = (status, body) => new Response(JSON.stringify(body), {
   status,
@@ -70,12 +71,7 @@ export default {
     const base = new URL(request.url).origin;
     const startedAt = new Date().toISOString();
     const threadId = `production-circulation:${Date.now()}`;
-    const worldContext = {
-      schema: 'arcsweep.runtime-world-context/v1',
-      context_id: `production-circulation-context:${Date.now()}`,
-      identity_anchor: { world_id: 'terra-prime', world_name: 'Terra Prime' },
-      provenance: { source: 'vercel-production-authenticated-smoke' },
-    };
+    const worldContext = await buildProductionSmokeWorldContext(startedAt);
     const aemethPacket = {
       schema: 'arcsweep.aemeth-participant-packet/v1',
       participant: { id: 'oxalpha', route: 'oxalpha', displayName: 'Ox Alpha' },
