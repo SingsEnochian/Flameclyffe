@@ -7,6 +7,7 @@ const NOTICE_MODES = new Set([
   'archive_recovery',
   'systematic_search',
   'cue_guided_search',
+  'unrecorded',
 ]);
 
 const STATUSES = new Set(['open', 'weakened', 'broken', 'surviving', 'unresolved']);
@@ -24,6 +25,15 @@ function nullableFinite(value) {
   if (value === '' || value === null || value === undefined) return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function nullableBoolean(value) {
+  return typeof value === 'boolean' ? value : null;
+}
+
+function makeId(prefix) {
+  const uuid = globalThis.crypto?.randomUUID?.();
+  return `${prefix}-${uuid || Math.random().toString(36).slice(2)}`;
 }
 
 function snapshot(value, seen = new WeakMap()) {
@@ -58,18 +68,18 @@ export function createObserverRelationCandidate(input = {}) {
     throw new TypeError('Observer RelationCandidate requires at least two distinct members with non-empty observation_ref values.');
   }
 
-  const noticedMode = NOTICE_MODES.has(input.noticed_mode) ? input.noticed_mode : 'archive_recovery';
+  const noticedMode = NOTICE_MODES.has(input.noticed_mode) ? input.noticed_mode : 'unrecorded';
   const status = STATUSES.has(input.status) ? input.status : 'open';
 
   return Object.freeze({
     schema: OBSERVER_RELATION_CANDIDATE_SCHEMA,
-    relation_id: input.relation_id || `observer-relation-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`,
+    relation_id: input.relation_id || makeId('observer-relation'),
     members: Object.freeze(members),
     noticed_at: input.noticed_at || new Date().toISOString(),
     noticed_mode: noticedMode,
     search_scope: text(input.search_scope),
     candidate_pool_estimate: nullableFinite(input.candidate_pool_estimate),
-    hypothesis_preexisting: Boolean(input.hypothesis_preexisting),
+    hypothesis_preexisting: nullableBoolean(input.hypothesis_preexisting),
     prompting_cue: text(input.prompting_cue),
     alternative_matches_considered: snapshot(list(input.alternative_matches_considered)),
     relation_features: snapshot(list(input.relation_features)),
@@ -79,7 +89,7 @@ export function createObserverRelationCandidate(input = {}) {
     provenance: snapshot(list(input.provenance)),
     transformation_history: snapshot(list(input.transformation_history)),
     status,
-    interpretation_rule: 'This record preserves a candidate relation. It is not itself a causal, ontological, or canon claim.',
+    interpretation_rule: 'This record preserves a candidate relation. It is not itself a causal, ontological, symbolic-evidence, or canon claim.',
   });
 }
 
@@ -88,7 +98,7 @@ export function createObserverRelationProjection({ relation_ref, projection_type
   if (!projection_type) throw new TypeError('Observer relation projection requires projection_type.');
   return Object.freeze({
     schema: OBSERVER_RELATION_PROJECTION_SCHEMA,
-    projection_id: `observer-projection-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`,
+    projection_id: makeId('observer-projection'),
     relation_ref: String(relation_ref),
     projection_type: String(projection_type),
     method: String(method || ''),
@@ -123,7 +133,16 @@ export function createScopedTestReceipt({
   });
 }
 
-export function createObserverBridgeNamespace({ source_system, destination_system, semantic_mapping, preserved_meaning = [], changed_meaning = [], runtime_authority = 'none' } = {}) {
+export function createObserverBridgeNamespace({
+  source_system,
+  destination_system,
+  semantic_mapping,
+  preserved_meaning = [],
+  changed_meaning = [],
+  omitted_meaning = [],
+  runtime_authority = 'none',
+  provenance = [],
+} = {}) {
   if (!source_system || !destination_system || !semantic_mapping) {
     throw new TypeError('Observer bridge namespace requires source_system, destination_system, and semantic_mapping.');
   }
@@ -134,7 +153,9 @@ export function createObserverBridgeNamespace({ source_system, destination_syste
     semantic_mapping: String(semantic_mapping),
     preserved_meaning: snapshot(list(preserved_meaning)),
     changed_meaning: snapshot(list(changed_meaning)),
+    omitted_meaning: snapshot(list(omitted_meaning)),
     runtime_authority: String(runtime_authority || 'none'),
+    provenance: snapshot(list(provenance)),
     merge_rule: 'Shared vocabulary is not identity. Cross-system records remain namespaced unless an explicit mapping receipt says otherwise.',
   });
 }
