@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-09-09T21:05:47.890Z",
+  "generated_at": "2026-09-09T23:24:51.395Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,52 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-09T17:00",
+    "time": "2026-09-09T19:15",
     "sky": "Day",
     "current": {
-      "time": "2026-09-09T17:00",
+      "time": "2026-09-09T19:15",
       "interval": 900,
-      "temperature_2m": 80.6,
+      "temperature_2m": 79.2,
       "relative_humidity_2m": 89,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 3,
-      "cloud_cover": 100,
-      "pressure_msl": 1019.2,
-      "wind_speed_10m": 11,
+      "weather_code": 0,
+      "cloud_cover": 0,
+      "pressure_msl": 1018.7,
+      "wind_speed_10m": 5.2,
       "wind_direction_10m": 70
     }
   },
   "space_weather": {
     "kp": {
       "value": 3,
-      "time_tag": "2026-09-09T15:00:00",
+      "time_tag": "2026-09-09T18:00:00",
       "a_running": 15
     },
     "solar_wind": {
-      "time_tag": "2026-09-09T20:56:00Z",
+      "time_tag": "2026-09-09T23:16:00Z",
       "bz": -1,
-      "bt": 4,
+      "bt": 6,
       "density": null,
-      "speed": 450
+      "speed": 441
     }
   },
   "moon": {
-    "age_days": 27.56,
-    "illumination": 4.4,
+    "age_days": 27.65,
+    "illumination": 3.9,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.5888888888888895,
-    "C": 0.14380952380952386,
-    "R": 0.8983333333333333,
+    "P": 0.5833333333333338,
+    "C": 0.62,
+    "R": 0.7941666666666667,
     "E": 0.8215934065934066,
-    "M": 0.044000000000000004,
-    "A": 0.6,
-    "T": 0.5296728864468865,
-    "H": 0.6251377289377289,
-    "dpdt": 0.8983333333333333
+    "M": 0.039,
+    "A": 0.9846153846153847,
+    "T": 0.6584892326007327,
+    "H": 0.7792815018315018,
+    "dpdt": 0.7941666666666667
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
