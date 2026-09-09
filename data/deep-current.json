@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-09-09T01:00:09.708Z",
+  "generated_at": "2026-09-09T05:52:56.096Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,52 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-08T21:00",
+    "time": "2026-09-09T01:45",
     "sky": "Night",
     "current": {
-      "time": "2026-09-08T21:00",
+      "time": "2026-09-09T01:45",
       "interval": 900,
-      "temperature_2m": 78.1,
-      "relative_humidity_2m": 87,
+      "temperature_2m": 77.9,
+      "relative_humidity_2m": 90,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
-      "cloud_cover": 11,
-      "pressure_msl": 1019,
-      "wind_speed_10m": 6.6,
-      "wind_direction_10m": 57
+      "cloud_cover": 1,
+      "pressure_msl": 1019.3,
+      "wind_speed_10m": 4.3,
+      "wind_direction_10m": 93
     }
   },
   "space_weather": {
     "kp": {
-      "value": 3,
-      "time_tag": "2026-09-08T21:00:00",
-      "a_running": 15
+      "value": 2.67,
+      "time_tag": "2026-09-09T00:00:00",
+      "a_running": 12
     },
     "solar_wind": {
-      "time_tag": "2026-09-09T00:53:00Z",
+      "time_tag": "2026-09-09T05:45:00Z",
       "bz": 1,
-      "bt": 5,
+      "bt": 7,
       "density": null,
-      "speed": 413
+      "speed": 398
     }
   },
   "moon": {
-    "age_days": 26.72,
-    "illumination": 8.7,
+    "age_days": 26.92,
+    "illumination": 7.5,
     "name": "Waning Crescent"
   },
   "field": {
-    "P": 0.5266666666666666,
-    "C": 0.5676190476190476,
-    "R": 0.7941666666666667,
-    "E": 0.7889010989010988,
-    "M": 0.087,
-    "A": 0.7223076923076923,
-    "T": 0.6122680531135531,
-    "H": 0.7229247252747253,
-    "dpdt": 0.7941666666666667
+    "P": 0.5299999999999995,
+    "C": 0.7252380952380952,
+    "R": 0.7433333333333334,
+    "E": 0.7768681318681319,
+    "M": 0.075,
+    "A": 0.7607692307692308,
+    "T": 0.63882336996337,
+    "H": 0.7378241758241758,
+    "dpdt": 0.7433333333333334
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
