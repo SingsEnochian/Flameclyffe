@@ -35,8 +35,16 @@ jobs:
             },
             body: JSON.stringify({ ref: 'main' }),
           });
-          if (response.status !== 204) throw new Error(`Authenticated smoke dispatch failed: ${response.status} ${await response.text()}`);
-          console.log('Authenticated production smoke dispatched as workflow_dispatch.');
+          const text = await response.text();
+          if (![200, 204].includes(response.status)) {
+            throw new Error(`Authenticated smoke dispatch failed: ${response.status} ${text}`);
+          }
+          if (response.status === 200 && text) {
+            const dispatched = JSON.parse(text);
+            console.log(`Authenticated production smoke dispatched as workflow_dispatch run ${dispatched.workflow_run_id || 'unknown'}.`);
+          } else {
+            console.log('Authenticated production smoke dispatched as workflow_dispatch.');
+          }
           NODE
 
   authenticated-production-circulation:
