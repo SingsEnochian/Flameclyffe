@@ -44,6 +44,14 @@ test('retrospective discovery provenance remains explicit', () => {
   assert.deepEqual(relation.alternative_matches_considered, ['c', 'd']);
 });
 
+test('unknown discovery provenance remains unknown rather than being invented', () => {
+  const relation = createObserverRelationCandidate({
+    members: [{ observation_ref: 'a' }, { observation_ref: 'b' }],
+  });
+  assert.equal(relation.noticed_mode, 'unrecorded');
+  assert.equal(relation.hypothesis_preexisting, null);
+});
+
 test('projection is derived and cannot replace the source relation', () => {
   const payload = { simplex: { dimension: 3 } };
   const projection = createObserverRelationProjection({
@@ -85,7 +93,11 @@ test('cross-system Observer records require explicit namespace mapping', () => {
     semantic_mapping: 'DEEPTheory pattern candidate -> external analytical source',
     preserved_meaning: ['provenance', 'candidate status'],
     changed_meaning: ['runtime authority'],
+    omitted_meaning: ['source-only UI state'],
+    provenance: ['lanternbridge-receipt-1'],
   });
   assert.equal(mapping.runtime_authority, 'none');
+  assert.deepEqual(mapping.omitted_meaning, ['source-only UI state']);
+  assert.deepEqual(mapping.provenance, ['lanternbridge-receipt-1']);
   assert.match(mapping.merge_rule, /Shared vocabulary is not identity/);
 });
