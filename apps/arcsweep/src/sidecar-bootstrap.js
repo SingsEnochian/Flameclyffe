@@ -135,4 +135,10 @@ export async function mountArcsweepSidecars() {
   return failures;
 }
 
+globalThis.__arcsweepSidecarControl = Object.freeze({
+  mountPack: mountSidecarPack,
+  packNames: () => Object.keys(SIDECAR_PACKS),
+  diagnostics: () => diagnostics(),
+});
+
 export { GLOBAL_SIDECARS, SIDECARS, SIDECAR_LOADERS, SIDECAR_PACKS };
