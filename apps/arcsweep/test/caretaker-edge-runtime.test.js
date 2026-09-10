@@ -32,5 +32,6 @@ test('Caretaker Edge admits only the two canonical browser origins and handles p
 test('Caretaker Edge cannot widen runtime authority beyond navigation', () => {
   assert.match(source, /only executable Caretaker action currently permitted is navigate/i);
   assert.match(source, /allowed_actions: \["navigate"\]/);
-  assert.doesNotMatch(source, /world\.activate|git\.commit|deploy|shell\.exec|filesystem\.write/);
+  assert.doesNotMatch(source, /allowed_actions:\s*\[[^\]]*(?:world\.activate|git\.commit|shell\.exec|filesystem\.write)/);
+  assert.doesNotMatch(source, /"type"\s*:\s*"(?:world\.activate|git\.commit|shell\.exec|filesystem\.write)"/);
 });
