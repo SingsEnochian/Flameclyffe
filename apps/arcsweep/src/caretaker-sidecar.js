@@ -1,8 +1,11 @@
 import { invokeCaretaker } from './caretaker.js';
-import { readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import {
+  caretakerTransportLabel,
+  resolveCaretakerTransport,
+} from './caretaker-transport.js';
 import { readActiveRuntimeWorldContext } from './runtime-world-context.js';
 
-export const ARCSWEEP_CARETAKER_SIDECAR_VERSION = 'arcsweep.caretaker-sidecar/v0.2';
+export const ARCSWEEP_CARETAKER_SIDECAR_VERSION = 'arcsweep.caretaker-sidecar/v0.3';
 export const ARCSWEEP_CARETAKER_LOCAL_RECEIPTS = 'arcsweep.caretaker.receipts.v0.1';
 export const ARCSWEEP_CARETAKER_CHAT_HISTORY = 'arcsweep.caretaker.chat.v0.2';
 
@@ -149,8 +152,8 @@ function installStyle() {
     .arcsweep-caretaker-composer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:end}
     .arcsweep-caretaker textarea{width:100%;box-sizing:border-box;resize:none;min-height:3rem;max-height:8rem;background:var(--panel-deep,#111);color:inherit;border:1px solid var(--line-soft,#665);border-radius:.75rem;padding:.72rem;font:inherit}
     .arcsweep-caretaker-actions{display:flex;gap:.45rem;align-items:center;justify-content:space-between}
-    .arcsweep-caretaker-output{display:none}
     .arcsweep-caretaker-status{font-size:.78rem;opacity:.72}
+    .arcsweep-caretaker-runtime{font-size:.76rem;opacity:.8;margin-top:.2rem}
     @media (max-width:540px){.arcsweep-caretaker{width:calc(100vw - .7rem);height:calc(100vh - .7rem);max-height:calc(100vh - .7rem)}.arcsweep-caretaker-message{max-width:92%}.arcsweep-caretaker-composer{grid-template-columns:1fr}.arcsweep-caretaker-composer button{justify-self:end}}
   `;
   document.head.append(style);
@@ -160,7 +163,12 @@ function markup() {
   return `
     <section class="arcsweep-caretaker-shell" aria-label="ArcSweep Caretaker conversation">
       <header>
-        <div><span class="eyebrow">House intelligence · v0.2</span><h2>ArcSweep Caretaker</h2><p class="arcsweep-caretaker-status">Mighty Sword 9B · conversation + bounded navigation</p></div>
+        <div>
+          <span class="eyebrow">House intelligence · v0.3</span>
+          <h2>ArcSweep Caretaker</h2>
+          <p class="arcsweep-caretaker-status">Conversation + bounded navigation</p>
+          <p class="arcsweep-caretaker-runtime" data-caretaker-runtime>Connecting automatically…</p>
+        </div>
         <button type="button" class="quiet" data-caretaker-close>Close</button>
       </header>
       <div class="arcsweep-caretaker-thread" data-caretaker-thread role="log" aria-live="polite" aria-label="Caretaker conversation"></div>
@@ -196,13 +204,33 @@ function appendMessage(thread, role, content) {
 function renderConversation(thread, history) {
   thread.replaceChildren();
   if (!history.length) {
-    appendMessage(thread, 'assistant', 'Hi. I can talk with you about ArcSweep, help you orient, and walk you to rooms when you ask.');
+    appendMessage(thread, 'assistant', 'Hi. I live here now. Talk to me normally, ask what ArcSweep is doing, or tell me where you want to go.');
     return;
   }
   for (const turn of history) appendMessage(thread, turn.role, turn.content);
 }
 
-async function runCaretaker(form, thread, proof) {
+function shortModel(value) {
+  const text = String(value || '').trim();
+  if (!text) return 'model connected';
+  const tail = text.split('/').at(-1) || text;
+  return tail.replace(/:cheapest$/, '').replace(/^hf\.co\//, '');
+}
+
+async function primeCaretakerConnection(runtimeStatus) {
+  if (!runtimeStatus) return null;
+  runtimeStatus.textContent = 'Connecting automatically…';
+  try {
+    const transport = await resolveCaretakerTransport();
+    runtimeStatus.textContent = caretakerTransportLabel(transport);
+    return transport;
+  } catch (error) {
+    runtimeStatus.textContent = error?.message || 'Caretaker connection unavailable.';
+    return null;
+  }
+}
+
+async function runCaretaker(form, thread, proof, runtimeStatus) {
   const textarea = form.elements.request;
   const request = String(new FormData(form).get('request') || '').trim();
   if (!request) return;
@@ -213,8 +241,12 @@ async function runCaretaker(form, thread, proof) {
   const waiting = appendMessage(thread, 'system', 'Caretaker is thinking…');
   proof.textContent = `Current room: ${activeRoomId()} · conversation is free; navigation remains bounded.`;
 
-  const token = readHouseRuntimeToken() || await restoreHouseRuntimeSession();
-  if (!token) throw new Error('House Runtime session is required before the Caretaker can answer.');
+  const transport = await resolveCaretakerTransport();
+  runtimeStatus.textContent = caretakerTransportLabel(transport);
+  if (!transport.token) {
+    throw new Error('Sign in to ArcSweep once with the Steward identity. Caretaker will connect automatically after that.');
+  }
+
   const world = await currentCaretakerWorld();
   const receipt = await invokeCaretaker({
     message: request,
@@ -223,7 +255,8 @@ async function runCaretaker(form, thread, proof) {
     world,
     availableRooms: availableRooms(),
     navigate: navigateCaretakerRoom,
-    token,
+    token: transport.token,
+    endpoint: transport.endpoint,
   });
   const stored = persistCaretakerReceiptLocal(receipt);
   waiting?.remove();
@@ -238,7 +271,9 @@ async function runCaretaker(form, thread, proof) {
   const actionSummary = stored.action_results.length
     ? stored.action_results.map((item) => `${item.status}: ${item.action.type} → ${item.action.target}`).join(' · ')
     : 'conversation only';
-  proof.textContent = `${stored.status} · ${actionSummary} · ${stored.persistence}`;
+  const executionPath = stored.execution_path || stored.provider || 'runtime';
+  proof.textContent = `${stored.status} · ${actionSummary} · ${executionPath} · ${stored.persistence}`;
+  runtimeStatus.textContent = `Caretaker online · ${shortModel(stored.model)} · ${transport.cross_origin ? 'GitHub bridge' : 'ArcSweep runtime'}`;
   globalThis.dispatchEvent?.(new CustomEvent('arcsweep:caretaker-receipt', { detail: stored }));
 }
 
@@ -263,6 +298,7 @@ export function installCaretakerSidecar() {
   const form = dialog.querySelector('[data-caretaker-form]');
   const thread = dialog.querySelector('[data-caretaker-thread]');
   const proof = dialog.querySelector('[data-caretaker-proof]');
+  const runtimeStatus = dialog.querySelector('[data-caretaker-runtime]');
   const textarea = form?.elements?.request;
 
   renderConversation(thread, readCaretakerChatLocal());
@@ -270,6 +306,7 @@ export function installCaretakerSidecar() {
   launch.addEventListener('click', () => {
     renderConversation(thread, readCaretakerChatLocal());
     dialog.showModal?.();
+    void primeCaretakerConnection(runtimeStatus);
     requestAnimationFrame(() => textarea?.focus?.());
   });
   dialog.querySelector('[data-caretaker-close]')?.addEventListener('click', () => dialog.close?.());
@@ -289,7 +326,7 @@ export function installCaretakerSidecar() {
     event.preventDefault();
     const submit = form.querySelector('[type="submit"]');
     if (submit) submit.disabled = true;
-    runCaretaker(form, thread, proof).catch((error) => {
+    runCaretaker(form, thread, proof, runtimeStatus).catch((error) => {
       thread.querySelector('.arcsweep-caretaker-message[data-role="system"]:last-child')?.remove();
       appendMessage(thread, 'system', error?.message || String(error));
       proof.textContent = 'No action receipt was produced.';
