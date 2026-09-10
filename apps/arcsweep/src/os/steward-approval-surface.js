@@ -17,7 +17,10 @@ function escapeHtml(value) {
 }
 
 export function installStewardApprovalSurface({ approvals, resolveTrusted, bus = null } = {}) {
-  if (!approvals?.list || typeof resolveTrusted !== 'function' || typeof document === 'undefined') return null;
+  if (!approvals?.list || typeof resolveTrusted !== 'function' || typeof document === 'undefined' || !document.body) return null;
+
+  const existing = document.getElementById('arcsweep-steward-approval-surface');
+  if (existing) return null;
 
   const host = document.createElement('div');
   host.id = 'arcsweep-steward-approval-surface';
