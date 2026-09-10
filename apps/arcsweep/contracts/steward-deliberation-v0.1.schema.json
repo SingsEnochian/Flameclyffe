@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.steward-deliberation/v1",
+  "title": "ArcSweep Steward Deliberation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "decision_id", "subject", "requested_authority", "contributions", "dissent_preserved", "created_at"],
+  "properties": {
+    "schema": { "const": "arcsweep.steward-deliberation/v1" },
+    "decision_id": { "type": "string", "minLength": 1 },
+    "subject": { "type": "string", "minLength": 1 },
+    "requested_authority": { "enum": ["read", "operate", "mutate", "admin"] },
+    "contributions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["participant_id", "participant_class", "weight", "stance", "confidence"],
+        "properties": {
+          "participant_id": { "type": "string", "minLength": 1 },
+          "participant_class": { "enum": ["steward", "swarm", "constellation", "witness", "security-service", "external"] },
+          "weight": { "type": "number", "minimum": 0, "maximum": 10 },
+          "stance": { "enum": ["support", "oppose", "concern", "abstain", "needs-evidence"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "assessment_summary": { "type": ["string", "null"] },
+          "evidence_refs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "risk_tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+        }
+      }
+    },
+    "weighted_signal": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "support": { "type": "number", "minimum": 0 },
+        "oppose": { "type": "number", "minimum": 0 },
+        "concern": { "type": "number", "minimum": 0 },
+        "needs_evidence": { "type": "number", "minimum": 0 }
+      }
+    },
+    "dissent_preserved": { "const": true },
+    "security_evidence_refs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "steward_decision": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "decision": { "enum": ["approve", "approve-bounded", "defer", "reject", "request-more-evidence"] },
+        "reason_summary": { "type": ["string", "null"] },
+        "acknowledged_dissent": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "created_at": { "type": "string" }
+  }
+}
