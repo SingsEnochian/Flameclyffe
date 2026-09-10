@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.1';
+export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.2';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'kernel-foundation',
+  stage: 'kernel-capability-foundation',
   authority: Object.freeze({
     modelRuntime: 'house-runtime',
     browserState: 'hearthfire',
@@ -23,5 +23,8 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     repairReceipt: 'arcsweep.repair-receipt/v1',
     checkpoint: 'arcsweep.checkpoint/v1',
     diagnostics: 'arcsweep.os-diagnostics/v1',
+    service: 'arcsweep.os-service/v1',
+    capability: 'arcsweep.os-capability/v1',
+    capabilityReceipt: 'arcsweep.os-capability-receipt/v1',
   }),
 });
