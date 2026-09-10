@@ -8,6 +8,7 @@ import {
 } from './kernel.js';
 import { createCaretaker } from './caretaker.js';
 import { createCapabilityRegistry } from './capabilities.js';
+import { createCapabilityFirewall } from './capability-firewall.js';
 import { createContextPersistence } from './context-persistence.js';
 import { registerSidecarService } from './sidecar-service.js';
 import { registerObserverService } from './observer-service.js';
@@ -46,7 +47,6 @@ function installArcSweepOS() {
   const bus = createEventBus();
   const checkpointStore = createCheckpointStore();
   const healthRegistry = createHealthRegistry({ bus });
-  const capabilityRegistry = createCapabilityRegistry({ bus });
   const contextPersistence = createContextPersistence({ storage: resolveSessionStorage() });
   const restored = contextPersistence.load();
   let session = restored?.session || createSessionState({ active_room: 'portal' });
@@ -54,6 +54,11 @@ function installArcSweepOS() {
   let lastNavigationReceipt = null;
 
   const caretaker = createCaretaker({ bus, checkpointStore, healthRegistry });
+  const capabilityFirewall = createCapabilityFirewall({
+    bus,
+    featherPaused: () => caretaker.featherPaused(),
+  });
+  const capabilityRegistry = createCapabilityRegistry({ bus, policy: capabilityFirewall });
 
   caretaker.registerRequiredSubscription({
     eventName: 'arcsweep:navigation-changed',
@@ -134,6 +139,7 @@ function installArcSweepOS() {
       service_registry: capabilityRegistry.services(),
       capabilities: capabilityRegistry.capabilities(),
       capability_receipts: capabilityReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
+      security_tripwires: capabilityFirewall.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
       repair_receipts: repairReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
       repair_budget: caretaker.repairBudget(),
       captured_at: new Date().toISOString(),
@@ -157,6 +163,7 @@ function installArcSweepOS() {
     manifest: ARCSWEEP_OS_MANIFEST,
     bus,
     caretaker,
+    firewall: capabilityFirewall,
     capabilities: capabilityRegistry,
     checkpoints: checkpointStore,
     health: healthRegistry,
