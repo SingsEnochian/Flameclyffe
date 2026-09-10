@@ -14,6 +14,10 @@
       "destination": "/api/v1/house/commons?transport=telegram"
     },
     {
+      "source": "/api/v1/house/caretaker",
+      "destination": "/api/v1/house/rooms?house_action=caretaker"
+    },
+    {
       "source": "/templehouse/tesla-observatory",
       "destination": "/templehouse/tesla-observatory-live.html"
     },

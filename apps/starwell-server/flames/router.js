@@ -4,8 +4,10 @@ const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
 const { FLAMES } = require('./manifests');
 const { getModelCandidate, listModelCandidates } = require('./model-candidates');
+const caretakerRouter = require('../caretaker/router');
 
 const router = express.Router();
+router.use(caretakerRouter);
 
 // ── Provider adapters ────────────────────────────────────────────────────────
 
