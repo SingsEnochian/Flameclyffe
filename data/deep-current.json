@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1",
-  "generated_at": "2026-09-10T01:16:50.911Z",
+  "generated_at": "2026-09-10T06:18:02.550Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,52 +13,52 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-09T21:15",
+    "time": "2026-09-10T02:15",
     "sky": "Night",
     "current": {
-      "time": "2026-09-09T21:15",
+      "time": "2026-09-10T02:15",
       "interval": 900,
-      "temperature_2m": 79.3,
-      "relative_humidity_2m": 89,
+      "temperature_2m": 77.6,
+      "relative_humidity_2m": 91,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 3,
-      "cloud_cover": 80,
-      "pressure_msl": 1018.3,
-      "wind_speed_10m": 5.6,
-      "wind_direction_10m": 61
+      "weather_code": 0,
+      "cloud_cover": 1,
+      "pressure_msl": 1017.8,
+      "wind_speed_10m": 2.9,
+      "wind_direction_10m": 99
     }
   },
   "space_weather": {
     "kp": {
       "value": 2.67,
-      "time_tag": "2026-09-10T00:00:00",
+      "time_tag": "2026-09-10T03:00:00",
       "a_running": 12
     },
     "solar_wind": {
-      "time_tag": "2026-09-10T01:09:00Z",
-      "bz": -2,
-      "bt": 6,
+      "time_tag": "2026-09-10T06:10:00Z",
+      "bz": 0,
+      "bt": 5,
       "density": null,
       "speed": 446
     }
   },
   "moon": {
-    "age_days": 27.73,
-    "illumination": 3.6,
+    "age_days": 27.94,
+    "illumination": 2.8,
     "name": "New Moon"
   },
   "field": {
-    "P": 0.5188888888888884,
-    "C": 0.3490476190476191,
-    "R": 0.825,
-    "E": 0.8230219780219781,
-    "M": 0.036000000000000004,
-    "A": 0.45692307692307693,
-    "T": 0.5289593699633699,
-    "H": 0.6376688644688645,
-    "dpdt": 0.825
+    "P": 0.5133333333333328,
+    "C": 0.7252380952380952,
+    "R": 0.74,
+    "E": 0.7807142857142857,
+    "M": 0.027999999999999997,
+    "A": 0.7607692307692308,
+    "T": 0.6305988315018314,
+    "H": 0.7254934065934066,
+    "dpdt": 0.74
   },
   "observer_note": "Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer."
 }
