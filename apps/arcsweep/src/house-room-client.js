@@ -1,4 +1,9 @@
-import { HOUSE_COOKIE_SESSION, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import {
+  HOUSE_COOKIE_SESSION,
+  readHouseRuntimeToken,
+  restoreHouseRuntimeSession,
+  withFiniteHouseRequest,
+} from './house-runtime.js';
 
 async function activeSession(fetchImpl = fetch) {
   return readHouseRuntimeToken() || await restoreHouseRuntimeSession(fetchImpl);
@@ -9,12 +14,12 @@ function authHeaders(token) {
 async function requestRooms(options = {}, fetchImpl = fetch) {
   const token = await activeSession(fetchImpl);
   if (!token) throw new Error('House Runtime offline.');
-  const response = await fetchImpl('/api/v1/house/rooms', {
+  const response = await fetchImpl('/api/v1/house/rooms', withFiniteHouseRequest({
     ...options,
     credentials: 'same-origin',
     cache: 'no-store',
     headers: { ...(options.headers || {}), ...authHeaders(token) },
-  });
+  }));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `House rooms ${response.status}`);
   return data;
