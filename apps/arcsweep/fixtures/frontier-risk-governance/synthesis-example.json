@@ -1,0 +1,25 @@
+{
+  "schema": "arcsweep.swarm-epistemic-synthesis/v0.1",
+  "synthesis_id": "example-synthesis",
+  "timestamp": "2026-09-10T00:00:00Z",
+  "source_ids": ["example-primary", "response-a", "response-b"],
+  "specialists": [
+    { "role": "Archivist", "status": "support", "report_ref": "example:archivist" },
+    { "role": "Extractor", "status": "support", "report_ref": "example:extractor" },
+    { "role": "Verifier", "status": "mixed", "report_ref": "example:verifier" },
+    { "role": "Sceptic", "status": "contest", "report_ref": "example:sceptic" },
+    { "role": "Systems", "status": "mixed", "report_ref": "example:systems" },
+    { "role": "Observer", "status": "open", "report_ref": "example:observer" },
+    { "role": "Red Team", "status": "contest", "report_ref": "example:red-team" },
+    { "role": "Synthesiser", "status": "mixed", "report_ref": "example:synthesis" }
+  ],
+  "support_count": 2,
+  "contest_count": 2,
+  "unresolved_assumptions": ["capability trajectory", "coordination response"],
+  "independent_source_count": 3,
+  "confidence": "uncertain",
+  "promotion_status": "needs_review",
+  "canonical_world": false,
+  "canonical_theory": false,
+  "notes": ["Example only; replace with a live receipted proving run."]
+}
