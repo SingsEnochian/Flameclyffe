@@ -24,18 +24,26 @@ export const TEMPORAL_EPISTEMIC_STATUS = Object.freeze([
   'speculative',
 ]);
 
+export const TEMPORAL_RELATION_TYPES = Object.freeze([
+  'related',
+  'independent-convergence',
+  'corroborates',
+  'contradicts',
+  'follows',
+  'precedes',
+  'same-thread',
+  'contextual',
+]);
+
+const LENS_FIELDS = Object.freeze(['direct_observation', 'change_noted', 'why_noteworthy', 'method_note']);
+
 function clone(value) {
   if (value === undefined) return undefined;
   return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 }
 
-function nowIso(now) {
-  return now().toISOString();
-}
-
-function text(value, max = 4000) {
-  return String(value == null ? '' : value).trim().slice(0, max);
-}
+function nowIso(now) { return now().toISOString(); }
+function text(value, max = 4000) { return String(value == null ? '' : value).trim().slice(0, max); }
 
 function uniqueStrings(values, maxItems = 16, maxLength = 240) {
   return [...new Set((Array.isArray(values) ? values : [])
@@ -56,38 +64,6 @@ function recordId() {
 
 function timezone() {
   try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch { return 'UTC'; }
-}
-
-function stablePayload(record) {
-  return JSON.stringify({
-    schema: record.schema,
-    record_id: record.record_id,
-    record_type: record.record_type,
-    title: record.title,
-    description: record.description,
-    observed_at: record.observed_at,
-    occurred_at: record.occurred_at,
-    recorded_at: record.recorded_at,
-    source_refs: record.source_refs,
-    witness_refs: record.witness_refs,
-    related_record_ids: record.related_record_ids,
-    tags: record.tags,
-    epistemic_status: record.epistemic_status,
-    confidence: record.confidence,
-    visibility: record.visibility,
-    context: record.context,
-  });
-}
-
-async function sha256(value) {
-  try {
-    if (!globalThis.crypto?.subtle || typeof TextEncoder === 'undefined') return null;
-    const bytes = new TextEncoder().encode(value);
-    const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
-    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  } catch {
-    return null;
-  }
 }
 
 function normaliseConfidence(value) {
@@ -116,6 +92,75 @@ function compactContext(input = {}) {
   };
 }
 
+function normaliseMethodology(input = {}) {
+  const source = input && typeof input === 'object' ? input : {};
+  return Object.freeze({
+    direct_observation: text(source.direct_observation, 4000) || null,
+    change_noted: text(source.change_noted, 4000) || null,
+    why_noteworthy: text(source.why_noteworthy, 4000) || null,
+    method_note: text(source.method_note, 2000) || null,
+  });
+}
+
+function methodologyFieldCount(methodology = {}) {
+  return LENS_FIELDS.reduce((count, field) => count + (text(methodology?.[field], 1) ? 1 : 0), 0);
+}
+
+function normaliseRelations(input = {}) {
+  const output = [];
+  const seen = new Set();
+  const add = (recordIdValue, relationType = 'related') => {
+    const target = text(recordIdValue, 160);
+    if (!target) return;
+    const type = TEMPORAL_RELATION_TYPES.includes(relationType) ? relationType : 'related';
+    const key = `${target}\u0000${type}`;
+    if (seen.has(key) || output.length >= 24) return;
+    seen.add(key);
+    output.push({ record_id: target, relation_type: type });
+  };
+
+  for (const item of Array.isArray(input.relations) ? input.relations : []) {
+    if (typeof item === 'string') add(item, 'related');
+    else add(item?.record_id, item?.relation_type);
+  }
+  for (const target of Array.isArray(input.related_record_ids) ? input.related_record_ids : []) add(target, 'related');
+  return Object.freeze(output.map((item) => Object.freeze(item)));
+}
+
+function stablePayload(record) {
+  return JSON.stringify({
+    schema: record.schema,
+    record_id: record.record_id,
+    record_type: record.record_type,
+    title: record.title,
+    description: record.description,
+    observed_at: record.observed_at,
+    occurred_at: record.occurred_at,
+    recorded_at: record.recorded_at,
+    source_refs: record.source_refs,
+    witness_refs: record.witness_refs,
+    observer_refs: record.observer_refs,
+    relations: record.relations,
+    tags: record.tags,
+    methodology: record.methodology,
+    epistemic_status: record.epistemic_status,
+    confidence: record.confidence,
+    visibility: record.visibility,
+    context: record.context,
+  });
+}
+
+async function sha256(value) {
+  try {
+    if (!globalThis.crypto?.subtle || typeof TextEncoder === 'undefined') return null;
+    const bytes = new TextEncoder().encode(value);
+    const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return null;
+  }
+}
+
 function header(record = {}) {
   return Object.freeze({
     schema: 'arcsweep.temporal-record-header/v1',
@@ -128,9 +173,47 @@ function header(record = {}) {
     epistemic_status: record.epistemic_status || null,
     source_count: Array.isArray(record.source_refs) ? record.source_refs.length : 0,
     witness_count: Array.isArray(record.witness_refs) ? record.witness_refs.length : 0,
-    relation_count: Array.isArray(record.related_record_ids) ? record.related_record_ids.length : 0,
+    observer_count: Array.isArray(record.observer_refs) ? record.observer_refs.length : 0,
+    relation_count: Array.isArray(record.relations) ? record.relations.length : Array.isArray(record.related_record_ids) ? record.related_record_ids.length : 0,
+    convergence_relation_count: Array.isArray(record.relations) ? record.relations.filter((item) => item?.relation_type === 'independent-convergence').length : 0,
+    methodology_field_count: methodologyFieldCount(record.methodology),
     tag_count: Array.isArray(record.tags) ? record.tags.length : 0,
   });
+}
+
+function convergenceCandidates(records) {
+  const byTag = new Map();
+  for (const record of records) {
+    for (const tag of record.tags || []) {
+      const bucket = byTag.get(tag) || [];
+      bucket.push(record);
+      byTag.set(tag, bucket);
+    }
+  }
+
+  const candidates = [];
+  for (const [thread, bucket] of byTag.entries()) {
+    if (bucket.length < 2) continue;
+    const observerSet = new Set(bucket.flatMap((record) => record.observer_refs || []).filter(Boolean));
+    if (observerSet.size < 2) continue;
+    const explicitLinks = bucket.reduce((count, record) => count + (record.relations || []).filter((item) => item?.relation_type === 'independent-convergence').length, 0);
+    const latestAt = bucket
+      .map((record) => isoOrNull(record.occurred_at || record.recorded_at))
+      .filter(Boolean)
+      .sort()
+      .at(-1) || null;
+    candidates.push(Object.freeze({
+      thread,
+      record_count: bucket.length,
+      observer_count: observerSet.size,
+      explicit_relation_count: explicitLinks,
+      latest_at: latestAt,
+    }));
+  }
+
+  return candidates
+    .sort((a, b) => b.observer_count - a.observer_count || b.record_count - a.record_count || String(a.thread).localeCompare(String(b.thread)))
+    .slice(0, 8);
 }
 
 export function createTemporalWitnessStore({
@@ -155,11 +238,7 @@ export function createTemporalWitnessStore({
 
   function writeLedger(records) {
     if (!storage?.setItem) throw new Error('Temporal Witness local storage is unavailable.');
-    const ledger = {
-      schema: LEDGER_SCHEMA,
-      updated_at: nowIso(now),
-      records: records.slice(-maxRecords),
-    };
+    const ledger = { schema: LEDGER_SCHEMA, updated_at: nowIso(now), records: records.slice(-maxRecords) };
     storage.setItem(storageKey, JSON.stringify(ledger));
     return ledger.records.length;
   }
@@ -176,6 +255,7 @@ export function createTemporalWitnessStore({
     const epistemicStatus = TEMPORAL_EPISTEMIC_STATUS.includes(input.epistemic_status)
       ? input.epistemic_status
       : defaultEpistemicStatus(recordType);
+    const relations = normaliseRelations(input);
 
     const record = {
       schema: RECORD_SCHEMA,
@@ -191,8 +271,11 @@ export function createTemporalWitnessStore({
       confidence: normaliseConfidence(input.confidence),
       source_refs: uniqueStrings(input.source_refs, 16, 500),
       witness_refs: uniqueStrings(input.witness_refs, 16, 240),
-      related_record_ids: uniqueStrings(input.related_record_ids, 24, 160),
+      observer_refs: uniqueStrings(input.observer_refs, 16, 240),
+      relations,
+      related_record_ids: [...new Set(relations.map((item) => item.record_id))],
       tags: uniqueStrings(input.tags, 20, 80),
+      methodology: normaliseMethodology(input.methodology),
       visibility: input.visibility === 'local-shared' ? 'local-shared' : 'local-private',
       context: compactContext(contextProvider?.() || {}),
       content_sha256: null,
@@ -231,7 +314,10 @@ export function createTemporalWitnessStore({
     let last7d = 0;
     let sourced = 0;
     let witnessed = 0;
+    let observedBy = 0;
     let linked = 0;
+    let methoded = 0;
+    let explicitConvergenceLinks = 0;
 
     for (const record of records) {
       if (record.record_type in byType) byType[record.record_type] += 1;
@@ -240,7 +326,11 @@ export function createTemporalWitnessStore({
       if (Number.isFinite(time) && time >= cutoff7d) last7d += 1;
       if (record.source_refs?.length) sourced += 1;
       if (record.witness_refs?.length) witnessed += 1;
-      if (record.related_record_ids?.length) linked += 1;
+      if (record.observer_refs?.length) observedBy += 1;
+      const relationCount = Array.isArray(record.relations) ? record.relations.length : Array.isArray(record.related_record_ids) ? record.related_record_ids.length : 0;
+      if (relationCount) linked += 1;
+      explicitConvergenceLinks += (record.relations || []).filter((item) => item?.relation_type === 'independent-convergence').length;
+      if (methodologyFieldCount(record.methodology)) methoded += 1;
       for (const tag of record.tags || []) tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
     }
 
@@ -248,6 +338,7 @@ export function createTemporalWitnessStore({
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .slice(0, 8)
       .map(([tag, count]) => ({ tag, count }));
+    const convergences = convergenceCandidates(records);
     const pulse = last24h === 0 ? 'quiet' : last24h <= 2 ? 'stirring' : last24h <= 6 ? 'braided' : 'dense';
 
     return Object.freeze({
@@ -257,10 +348,17 @@ export function createTemporalWitnessStore({
       last_7d: last7d,
       source_linked_records: sourced,
       witnessed_records: witnessed,
+      observer_linked_records: observedBy,
       related_records: linked,
+      methodology_records: methoded,
       source_density: records.length ? sourced / records.length : 0,
       witness_density: records.length ? witnessed / records.length : 0,
+      observer_density: records.length ? observedBy / records.length : 0,
       relation_density: records.length ? linked / records.length : 0,
+      methodology_density: records.length ? methoded / records.length : 0,
+      explicit_convergence_links: explicitConvergenceLinks,
+      convergence_detected: Boolean(convergences.length || explicitConvergenceLinks),
+      convergences,
       by_type: byType,
       threads,
       temporal_weather: pulse,
@@ -278,6 +376,8 @@ export function createTemporalWitnessStore({
       record_count: ledger.records.length,
       max_records: maxRecords,
       full_text_on_os_event_bus: false,
+      witness_lens: true,
+      convergence_signal: true,
     });
   }
 
@@ -313,6 +413,8 @@ export function registerTemporalWitnessService(registry, {
     authority_boundary: {
       persistence: 'browser-local-only',
       human_authored_recording: true,
+      methodology_guidance: true,
+      deterministic_convergence_signal: true,
       autonomous_interpretation: false,
       canon_promotion: false,
       external_upload: false,
@@ -333,7 +435,7 @@ export function registerTemporalWitnessService(registry, {
   registry.registerCapability({
     capability_id: 'witness.summary',
     service_id: 'temporal-witness',
-    description: 'Read aggregate Temporal Weather, anchor density, record-type counts, and active threads.',
+    description: 'Read aggregate Temporal Weather, anchor density, active threads, and deterministic convergence signals.',
     authority: 'read',
     execute: () => store.summary(),
   });
@@ -341,7 +443,7 @@ export function registerTemporalWitnessService(registry, {
   registry.registerCapability({
     capability_id: 'witness.recent',
     service_id: 'temporal-witness',
-    description: 'Read bounded Temporal Witness record headers without private descriptions.',
+    description: 'Read bounded Temporal Witness record headers without private descriptions or Witness Lens prose.',
     authority: 'read',
     input_schema: { optional: ['limit'] },
     validate: (input) => input?.limit == null || (Number.isFinite(Number(input.limit)) && Number(input.limit) > 0),
@@ -351,8 +453,9 @@ export function registerTemporalWitnessService(registry, {
   registry.registerCapability({
     capability_id: 'witness.list-local',
     service_id: 'temporal-witness',
-    description: 'Read full locally stored Temporal Witness records for the human Chronicle surface.',
-    authority: 'read',
+    description: 'Read full locally stored Temporal Witness records for the explicit human Chronicle surface.',
+    authority: 'operate',
+    requires_confirmation: true,
     input_schema: { optional: ['record_type', 'limit', 'since'] },
     validate: (input) => (!input?.record_type || TEMPORAL_RECORD_TYPES.includes(input.record_type)),
     execute: (input = {}) => ({ schema: 'arcsweep.temporal-witness-record-list/v1', records: store.list(input) }),
@@ -364,7 +467,10 @@ export function registerTemporalWitnessService(registry, {
     description: 'Create one explicit human-authored local Temporal Witness anchor.',
     authority: 'operate',
     requires_confirmation: true,
-    input_schema: { required: ['record_type'], optional: ['title', 'description', 'observed_at', 'occurred_at', 'epistemic_status', 'confidence', 'source_refs', 'witness_refs', 'related_record_ids', 'tags', 'visibility'] },
+    input_schema: {
+      required: ['record_type'],
+      optional: ['title', 'description', 'observed_at', 'occurred_at', 'epistemic_status', 'confidence', 'source_refs', 'witness_refs', 'observer_refs', 'related_record_ids', 'relations', 'tags', 'methodology', 'visibility'],
+    },
     validate: (input) => TEMPORAL_RECORD_TYPES.includes(input?.record_type) && Boolean(text(input?.title, 180) || text(input?.description, 12000)),
     execute: async (input) => {
       const record = await store.add(input);
@@ -375,6 +481,11 @@ export function registerTemporalWitnessService(registry, {
         observed_at: record.observed_at,
         occurred_at: record.occurred_at,
         recorded_at: record.recorded_at,
+        source_count: record.source_refs.length,
+        observer_count: record.observer_refs.length,
+        relation_count: record.relations.length,
+        methodology_field_count: methodologyFieldCount(record.methodology),
+        convergence_marked: record.relations.some((item) => item.relation_type === 'independent-convergence'),
       }, { source: 'temporal-witness' });
       return record;
     },
