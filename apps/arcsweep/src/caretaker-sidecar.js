@@ -1,5 +1,6 @@
 import { invokeCaretaker } from './caretaker.js';
 import { readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import { readActiveRuntimeWorldContext } from './runtime-world-context.js';
 
 export const ARCSWEEP_CARETAKER_SIDECAR_VERSION = 'arcsweep.caretaker-sidecar/v0.1';
 export const ARCSWEEP_CARETAKER_LOCAL_RECEIPTS = 'arcsweep.caretaker.receipts.v0.1';
@@ -34,10 +35,19 @@ function activeRoomId() {
     || 'portal';
 }
 
-function currentWorld() {
-  const node = document.querySelector('[data-world-id][data-world-name]') || document.querySelector('[data-world-id]');
-  const id = String(node?.dataset?.worldId || '').trim();
-  return id ? { id, name: String(node?.dataset?.worldName || id).trim() } : null;
+export async function currentCaretakerWorld(readWorld = readActiveRuntimeWorldContext) {
+  try {
+    const context = await readWorld();
+    const world = context?.world;
+    const id = String(world?.id || context?.active_world_id || context?.identity_anchor?.world_id || '').trim();
+    if (!id) return null;
+    return {
+      id,
+      name: String(world?.name || id).trim(),
+    };
+  } catch {
+    return null;
+  }
 }
 
 async function afterRender() {
@@ -58,8 +68,16 @@ export async function navigateCaretakerRoom(target) {
   };
 }
 
+function nonDurableReceipt(receipt, error = null) {
+  return Object.freeze({
+    ...structuredClone(receipt),
+    persistence: receipt.persistence === 'runtime-braid-verified' ? receipt.persistence : 'not-yet-durable',
+    ...(error ? { storage_error: error?.message || String(error) } : {}),
+  });
+}
+
 export function persistCaretakerReceiptLocal(receipt, storage = globalThis.localStorage) {
-  if (!storage) return { ...receipt, persistence: receipt.persistence || 'not-yet-durable' };
+  if (!storage) return nonDurableReceipt(receipt);
   let previous = [];
   try {
     previous = JSON.parse(storage.getItem(ARCSWEEP_CARETAKER_LOCAL_RECEIPTS) || '[]');
@@ -70,8 +88,12 @@ export function persistCaretakerReceiptLocal(receipt, storage = globalThis.local
     persistence: receipt.persistence === 'runtime-braid-verified' ? receipt.persistence : 'local-replayable',
     stored_at: new Date().toISOString(),
   };
-  storage.setItem(ARCSWEEP_CARETAKER_LOCAL_RECEIPTS, JSON.stringify([stored, ...previous].slice(0, 60)));
-  return Object.freeze(stored);
+  try {
+    storage.setItem(ARCSWEEP_CARETAKER_LOCAL_RECEIPTS, JSON.stringify([stored, ...previous].slice(0, 60)));
+    return Object.freeze(stored);
+  } catch (error) {
+    return nonDurableReceipt(receipt, error);
+  }
 }
 
 export function readCaretakerReceiptsLocal(storage = globalThis.localStorage) {
@@ -122,10 +144,11 @@ async function runCaretaker(form, output, proof) {
   proof.textContent = `Current room: ${activeRoomId()} · navigation is the only armed action.`;
   const token = readHouseRuntimeToken() || await restoreHouseRuntimeSession();
   if (!token) throw new Error('House Runtime session is required before the Caretaker can act.');
+  const world = await currentCaretakerWorld();
   const receipt = await invokeCaretaker({
     message: request,
     roomId: activeRoomId(),
-    world: currentWorld(),
+    world,
     availableRooms: availableRooms(),
     navigate: navigateCaretakerRoom,
     token,
