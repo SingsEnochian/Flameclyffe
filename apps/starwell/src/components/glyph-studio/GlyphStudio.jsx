@@ -188,7 +188,9 @@ export default function GlyphStudio() {
   }
 
   function commitStroke(stroke) {
-    changeGlyph({ ...activeGlyph, strokes: [...activeGlyph.strokes, stroke] }, `Stroke recorded from ${stroke.pointerType || 'pointer'} input.`);
+    const target = project.glyphs.find((glyph) => glyph.id === stroke.glyphId);
+    if (!target || !target.layers.some((layer) => layer.id === stroke.layerId)) return;
+    changeGlyph({ ...target, strokes: [...target.strokes, stroke] }, `Stroke recorded from ${stroke.pointerType || 'pointer'} input.`);
   }
 
   function applyColour(colour) {
