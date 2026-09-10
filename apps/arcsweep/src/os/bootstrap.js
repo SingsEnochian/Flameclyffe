@@ -9,6 +9,7 @@ import {
 import { createCaretaker } from './caretaker.js';
 import { createCapabilityRegistry } from './capabilities.js';
 import { createCapabilityFirewall } from './capability-firewall.js';
+import { createAuthorityBroker } from './authority-broker.js';
 import { createContextPersistence } from './context-persistence.js';
 import { registerSidecarService } from './sidecar-service.js';
 import { registerObserverService } from './observer-service.js';
@@ -18,6 +19,7 @@ import { ARCSWEEP_OS_MANIFEST } from './version.js';
 const GLOBAL_KEY = '__arcsweepOS';
 const MAX_CAPSULES = 64;
 const MAX_DIAGNOSTIC_EVENTS = 32;
+const UNPRIVILEGED_AUTHORITY = new Set(['read', 'operate']);
 
 function clone(value) {
   if (value === undefined) return undefined;
@@ -58,7 +60,23 @@ function installArcSweepOS() {
     bus,
     featherPaused: () => caretaker.featherPaused(),
   });
-  const capabilityRegistry = createCapabilityRegistry({ bus, policy: capabilityFirewall });
+  const authorityBroker = createAuthorityBroker();
+  const capabilityRegistry = createCapabilityRegistry({
+    bus,
+    policy: capabilityFirewall,
+    authorityResolver: ({ capability, context }) => {
+      const claimed = context.authority || 'read';
+      if (UNPRIVILEGED_AUTHORITY.has(claimed)) return { authority: claimed };
+      const actorId = context.actor_id || context.source || 'unknown';
+      const lease = authorityBroker.resolve({
+        token: context.authority_lease,
+        actor_id: actorId,
+        capability_id: capability.capability_id,
+      });
+      if (!lease.valid) return { authority: 'operate', reason: `authority-lease-${lease.reason}` };
+      return { authority: lease.authority };
+    },
+  });
 
   caretaker.registerRequiredSubscription({
     eventName: 'arcsweep:navigation-changed',
@@ -140,6 +158,7 @@ function installArcSweepOS() {
       capabilities: capabilityRegistry.capabilities(),
       capability_receipts: capabilityReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
       security_tripwires: capabilityFirewall.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
+      authority_leases: authorityBroker.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
       repair_receipts: repairReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
       repair_budget: caretaker.repairBudget(),
       captured_at: new Date().toISOString(),
