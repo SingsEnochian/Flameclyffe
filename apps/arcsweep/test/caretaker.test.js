@@ -11,6 +11,7 @@ import {
   caretakerExecutionStatus,
   executeCaretakerPlan,
   invokeCaretaker,
+  normaliseCaretakerHistory,
   normaliseCaretakerPlan,
   parseCaretakerPlan,
 } from '../src/caretaker.js';
@@ -35,8 +36,25 @@ test('caretaker context binds current room, world, and a deduplicated room regis
   const prompt = buildCaretakerPrompt({ message: 'Take me to Glyph Forge.', context });
   assert.match(prompt, /house intelligence/i);
   assert.match(prompt, /only ArcSweep may execute/i);
+  assert.match(prompt, /ongoing conversation/i);
   assert.match(prompt, /glyph-forge: Glyph Forge/);
   assert.match(prompt, new RegExp(ARCSWEEP_CARETAKER_PLAN_SCHEMA.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+});
+
+test('caretaker prompt carries only bounded recent conversational continuity', () => {
+  const history = Array.from({ length: 14 }, (_, index) => ({
+    role: index % 2 ? 'assistant' : 'user',
+    content: `history-${index}`,
+  }));
+  const bounded = normaliseCaretakerHistory(history);
+  assert.equal(bounded.length, 10);
+  assert.equal(bounded[0].content, 'history-4');
+  const context = buildCaretakerContext({ roomId: 'portal', availableRooms: rooms });
+  const prompt = buildCaretakerPrompt({ message: 'What were we doing?', context, history });
+  assert.doesNotMatch(prompt, /history-0/);
+  assert.match(prompt, /history-4/);
+  assert.match(prompt, /history-13/);
+  assert.match(prompt, /ROWAN NOW:\nWhat were we doing\?/);
 });
 
 test('caretaker accepts only registered navigation actions', () => {
@@ -83,6 +101,10 @@ test('invokeCaretaker completes model to plan to runtime result without inventin
   const navigated = [];
   const receipt = await invokeCaretaker({
     message: 'Take me to Glyph Forge.',
+    history: [
+      { role: 'user', content: 'Where is the language work?' },
+      { role: 'assistant', content: 'Glyph Forge is where the language tools live.' },
+    ],
     roomId: 'portal',
     world: { id: 'terra-aeterna', name: 'Terra Aeterna' },
     availableRooms: rooms,
@@ -100,6 +122,8 @@ test('invokeCaretaker completes model to plan to runtime result without inventin
       assert.equal(options.headers.authorization, 'Bearer house-key');
       const request = JSON.parse(options.body);
       assert.equal(request.context.room_id, 'portal');
+      assert.match(request.message, /Where is the language work\?/);
+      assert.match(request.message, /Glyph Forge is where the language tools live\./);
       return {
         ok: true,
         status: 200,
