@@ -7,6 +7,7 @@ import {
   createSessionState,
 } from './kernel.js';
 import { createCaretaker } from './caretaker.js';
+import { createCapabilityRegistry } from './capabilities.js';
 import { ARCSWEEP_OS_MANIFEST } from './version.js';
 
 const GLOBAL_KEY = '__arcsweepOS';
@@ -33,6 +34,7 @@ function installArcSweepOS() {
   const bus = createEventBus();
   const checkpointStore = createCheckpointStore();
   const healthRegistry = createHealthRegistry({ bus });
+  const capabilityRegistry = createCapabilityRegistry({ bus });
   let session = createSessionState({ active_room: 'portal' });
   const capsules = [];
   let lastNavigationReceipt = null;
@@ -51,25 +53,6 @@ function installArcSweepOS() {
       lastNavigationReceipt = receipt;
     },
   });
-
-  function snapshot() {
-    const events = bus.history();
-    const repairReceipts = events
-      .filter((item) => item.name === 'arcsweep:repair-completed')
-      .map((item) => item.payload);
-    return Object.freeze({
-      schema: 'arcsweep.os-diagnostics/v1',
-      manifest: clone(ARCSWEEP_OS_MANIFEST),
-      session: clone(session),
-      active_context: capsules.length ? clone(capsules[capsules.length - 1]) : null,
-      context_depth: capsules.length,
-      recent_events: events.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
-      services: healthRegistry.snapshot(),
-      repair_receipts: repairReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
-      repair_budget: caretaker.repairBudget(),
-      captured_at: new Date().toISOString(),
-    });
-  }
 
   function navigate(currentRoom, patch = {}) {
     const room = String(currentRoom || '').trim();
@@ -103,6 +86,54 @@ function installArcSweepOS() {
     return capsule;
   }
 
+  capabilityRegistry.registerService({
+    service_id: 'arcsweep-os-kernel',
+    label: 'ArcSweep OS Kernel',
+    authority_boundary: {
+      browser_state: 'hearthfire',
+      orchestration: 'arcsweep-os-kernel',
+      source_mutation: 'forbidden',
+    },
+    consumes: ['arcsweep:feather'],
+    emits: ['arcsweep:navigation-changed', 'arcsweep:context-capsule-created'],
+  });
+
+  capabilityRegistry.registerCapability({
+    capability_id: 'os.navigate',
+    service_id: 'arcsweep-os-kernel',
+    description: 'Move the active ArcSweep room while preserving the current context capsule.',
+    authority: 'operate',
+    requires_confirmation: false,
+    input_schema: { required: ['room'] },
+    validate: (input) => Boolean(String(input?.room || '').trim()),
+    execute: (input) => navigate(input.room, input.patch || {}),
+  });
+
+  function snapshot() {
+    const events = bus.history();
+    const repairReceipts = events
+      .filter((item) => item.name === 'arcsweep:repair-completed')
+      .map((item) => item.payload);
+    const capabilityReceipts = events
+      .filter((item) => item.name === 'arcsweep:capability-invoked')
+      .map((item) => item.payload);
+    return Object.freeze({
+      schema: 'arcsweep.os-diagnostics/v1',
+      manifest: clone(ARCSWEEP_OS_MANIFEST),
+      session: clone(session),
+      active_context: capsules.length ? clone(capsules[capsules.length - 1]) : null,
+      context_depth: capsules.length,
+      recent_events: events.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
+      services: healthRegistry.snapshot(),
+      service_registry: capabilityRegistry.services(),
+      capabilities: capabilityRegistry.capabilities(),
+      capability_receipts: capabilityReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
+      repair_receipts: repairReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
+      repair_budget: caretaker.repairBudget(),
+      captured_at: new Date().toISOString(),
+    });
+  }
+
   async function inspect() {
     const subscriptionFindings = await caretaker.inspectRequiredSubscriptions();
     const serviceFindings = await caretaker.inspectRequiredServices();
@@ -121,6 +152,7 @@ function installArcSweepOS() {
     manifest: ARCSWEEP_OS_MANIFEST,
     bus,
     caretaker,
+    capabilities: capabilityRegistry,
     checkpoints: checkpointStore,
     health: healthRegistry,
     session: () => clone(session),
