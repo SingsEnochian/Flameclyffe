@@ -273,7 +273,7 @@ async function runCaretaker(form, thread, proof, runtimeStatus) {
     : 'conversation only';
   const executionPath = stored.execution_path || stored.provider || 'runtime';
   proof.textContent = `${stored.status} · ${actionSummary} · ${executionPath} · ${stored.persistence}`;
-  runtimeStatus.textContent = `Caretaker online · ${shortModel(stored.model)} · ${transport.cross_origin ? 'GitHub bridge' : 'ArcSweep runtime'}`;
+  runtimeStatus.textContent = `Caretaker online · ${shortModel(stored.model)} · ${caretakerTransportLabel(transport)}`;
   globalThis.dispatchEvent?.(new CustomEvent('arcsweep:caretaker-receipt', { detail: stored }));
 }
 
