@@ -15,6 +15,7 @@ import {
   normaliseCaretakerPlan,
   parseCaretakerPlan,
 } from '../src/caretaker.js';
+import { requestTargetsCaretaker } from '../../../api/v1/house/rooms.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../../..');
@@ -149,7 +150,7 @@ test('invokeCaretaker completes model to plan to runtime result without inventin
   assert.equal(receipt.model, 'hf.co/DavidAU/Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M');
 });
 
-test('Vercel caretaker reuses the existing House rooms function instead of adding a function slot', () => {
+test('Vercel caretaker reuses the existing House rooms function and recognises the rewritten source URL', () => {
   const runtime = fs.readFileSync(path.join(root, 'api/_shared/house-caretaker-runtime.mjs'), 'utf8');
   const contract = fs.readFileSync(path.join(root, 'apps/starwell-server/caretaker/contract.js'), 'utf8');
   const roomsRoute = fs.readFileSync(path.join(root, 'api/v1/house/rooms.js'), 'utf8');
@@ -165,9 +166,13 @@ test('Vercel caretaker reuses the existing House rooms function instead of addin
   assert.doesNotMatch(runtime, /flame_id/);
   assert.match(contract, /Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M/);
   assert.match(contract, /ALLOWED_ACTIONS = Object\.freeze\(\['navigate'\]\)/);
-  assert.match(roomsRoute, /createHouseCaretakerHandler/);
+  assert.match(roomsRoute, /requestTargetsCaretaker/);
   assert.match(roomsRoute, /searchParams\.get\('house_action'\)/);
-  assert.match(roomsRoute, /houseAction === 'caretaker'/);
+  assert.match(roomsRoute, /pathname === '\/api\/v1\/house\/caretaker'/);
+  assert.equal(requestTargetsCaretaker(new Request('https://example.test/api/v1/house/caretaker')), true);
+  assert.equal(requestTargetsCaretaker(new Request('https://example.test/api/v1/house/caretaker/')), true);
+  assert.equal(requestTargetsCaretaker(new Request('https://example.test/api/v1/house/rooms?house_action=caretaker')), true);
+  assert.equal(requestTargetsCaretaker(new Request('https://example.test/api/v1/house/rooms')), false);
   assert.deepEqual(rewrite, {
     source: '/api/v1/house/caretaker',
     destination: '/api/v1/house/rooms?house_action=caretaker',
