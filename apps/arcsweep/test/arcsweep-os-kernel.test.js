@@ -14,6 +14,7 @@ import {
   createRepairBudget,
   runRepairTransaction,
 } from '../src/os/caretaker.js';
+import { createCapabilityRegistry } from '../src/os/capabilities.js';
 
 test('typed event bus rejects unknown events and preserves event receipts', () => {
   const bus = createEventBus();
@@ -25,6 +26,56 @@ test('typed event bus rejects unknown events and preserves event receipts', () =
   assert.equal(seen.length, 1);
   assert.equal(seen[0].payload.current_room, 'forge');
   assert.throws(() => bus.publish('arcsweep:made-up-event', {}), /Unknown ArcSweep OS event/);
+});
+
+test('capability registry requires declared services and emits receipted calls', async () => {
+  const bus = createEventBus();
+  const registry = createCapabilityRegistry({ bus });
+  registry.registerService({
+    service_id: 'test-organ',
+    authority_boundary: { source_mutation: 'forbidden' },
+    consumes: ['arcsweep:navigation-changed'],
+    emits: ['test:done'],
+  });
+  registry.registerCapability({
+    capability_id: 'test.organ.read',
+    service_id: 'test-organ',
+    authority: 'read',
+    validate: (input) => Boolean(input?.key),
+    execute: (input) => ({ key: input.key, value: 'present' }),
+  });
+
+  assert.throws(() => registry.registerCapability({ capability_id: 'ghost.action', service_id: 'ghost', execute: () => null }), /registered service/);
+  const applied = await registry.invoke('test.organ.read', { key: 'alpha' }, { authority: 'read', source: 'test' });
+  assert.equal(applied.status, 'applied');
+  assert.equal(applied.output.value, 'present');
+  const receipts = bus.history().filter((event) => event.name === 'arcsweep:capability-invoked');
+  assert.equal(receipts.length, 1);
+  assert.equal(receipts[0].payload.call_id, applied.call_id);
+});
+
+test('capability registry blocks calls below declared authority or without confirmation', async () => {
+  const bus = createEventBus();
+  const registry = createCapabilityRegistry({ bus });
+  registry.registerService({ service_id: 'test-control' });
+  let calls = 0;
+  registry.registerCapability({
+    capability_id: 'test.control.change',
+    service_id: 'test-control',
+    authority: 'mutate',
+    requires_confirmation: true,
+    execute: () => { calls += 1; return { changed: true }; },
+  });
+
+  const weak = await registry.invoke('test.control.change', {}, { authority: 'operate', confirmed: true });
+  assert.equal(weak.status, 'rejected');
+  assert.equal(weak.reason, 'insufficient-authority');
+  const unconfirmed = await registry.invoke('test.control.change', {}, { authority: 'mutate' });
+  assert.equal(unconfirmed.status, 'rejected');
+  assert.equal(unconfirmed.reason, 'confirmation-required');
+  const applied = await registry.invoke('test.control.change', {}, { authority: 'mutate', confirmed: true });
+  assert.equal(applied.status, 'applied');
+  assert.equal(calls, 1);
 });
 
 test('context capsule preserves world, project, and goal through room navigation', () => {
@@ -39,7 +90,7 @@ test('context capsule preserves world, project, and goal through room navigation
   assert.equal(finalSession.active_room, 'ingest');
 });
 
-test('OS bootstrap exposes diagnostics and navigation receipts on the current sidecar spine', async () => {
+test('OS bootstrap exposes diagnostics, capability registry, and navigation receipts on the current sidecar spine', async () => {
   const previous = globalThis.__arcsweepOS;
   delete globalThis.__arcsweepOS;
   const module = await import(`../src/os/bootstrap.js?diagnostics-test=${Date.now()}`);
@@ -48,20 +99,24 @@ test('OS bootstrap exposes diagnostics and navigation receipts on the current si
   assert.equal(initial.schema, 'arcsweep.os-diagnostics/v1');
   assert.equal(initial.session.active_room, 'portal');
   assert.ok(initial.services.some((service) => service.service_id === 'arcsweep-os-kernel' && service.status === 'healthy'));
+  assert.ok(initial.service_registry.some((service) => service.service_id === 'arcsweep-os-kernel'));
+  assert.ok(initial.capabilities.some((capability) => capability.capability_id === 'os.navigate' && capability.authority === 'operate'));
   assert.deepEqual(initial.repair_receipts, []);
 
-  const capsule = os.navigate('forge', { world_id: 'terra-aeterna', project_id: 'runa-kelyran', current_goal: 'design meda' });
-  assert.equal(capsule.previous_room, 'portal');
-  assert.equal(capsule.current_room, 'forge');
+  const navReceipt = await os.capabilities.invoke('os.navigate', {
+    room: 'forge',
+    patch: { world_id: 'terra-aeterna', project_id: 'runa-kelyran', current_goal: 'design meda' },
+  }, { authority: 'operate', source: 'kernel-test' });
+  assert.equal(navReceipt.status, 'applied');
   const after = os.snapshot();
   assert.equal(after.session.active_room, 'forge');
   assert.equal(after.session.active_world_id, 'terra-aeterna');
   assert.equal(after.session.active_project_id, 'runa-kelyran');
   assert.equal(after.session.current_goal, 'design meda');
-  assert.equal(after.active_context.capsule_id, capsule.capsule_id);
   assert.equal(after.context_depth, 1);
   assert.ok(after.recent_events.some((event) => event.name === 'arcsweep:context-capsule-created'));
   assert.ok(after.recent_events.some((event) => event.name === 'arcsweep:navigation-changed'));
+  assert.ok(after.capability_receipts.some((receipt) => receipt.capability_id === 'os.navigate' && receipt.status === 'applied'));
   assert.equal(os.lastNavigationReceipt().payload.current_room, 'forge');
 
   delete globalThis.__arcsweepOS;
