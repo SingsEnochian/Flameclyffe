@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.frontier-risk-governance/v0.1",
+  "title": "ArcSweep Frontier Risk and Governance Ingest v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "source", "claims", "lifecycle", "promotion"],
+  "properties": {
+    "schema": { "const": "arcsweep.frontier-risk-governance/v0.1" },
+    "source": {
+      "type": "object",
+      "required": ["source_id", "title", "source_type", "published_at", "provenance"],
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "source_type": { "type": "string", "minLength": 1 },
+        "speaker_role": { "type": ["string", "null"] },
+        "org_history": { "type": "array", "items": { "type": "string" } },
+        "published_at": { "type": "string", "format": "date-time" },
+        "provenance": {
+          "type": "object",
+          "required": ["uri", "content_hash"],
+          "properties": {
+            "uri": { "type": "string", "minLength": 1 },
+            "content_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["claim_id", "text", "claim_class", "epistemic_distance", "confidence", "evidence_basis"],
+        "properties": {
+          "claim_id": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 },
+          "claim_class": {
+            "enum": [
+              "measurement",
+              "firsthand_observation",
+              "insider_testimony",
+              "secondhand_report",
+              "inference",
+              "forecast",
+              "speculation",
+              "rhetorical_framing",
+              "policy_prescription"
+            ]
+          },
+          "epistemic_distance": { "type": "integer", "minimum": 0, "maximum": 6 },
+          "confidence": { "enum": ["low", "medium", "medium_high", "high", "uncertain", "normative"] },
+          "evidence_basis": { "type": "string", "minLength": 1 },
+          "corroborates": { "type": "array", "items": { "type": "string" } },
+          "contradicts": { "type": "array", "items": { "type": "string" } },
+          "normative_axis": { "type": ["string", "null"] }
+        },
+        "additionalProperties": true
+      }
+    },
+    "actors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["actor_id", "name", "incentives"],
+        "properties": {
+          "actor_id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "incentives": {
+            "type": "object",
+            "properties": {
+              "capability": { "$ref": "#/$defs/level" },
+              "safety": { "$ref": "#/$defs/level" },
+              "commercial": { "$ref": "#/$defs/level" },
+              "reputational_constraint": { "$ref": "#/$defs/level" },
+              "competitive_pressure": { "$ref": "#/$defs/level" },
+              "regulatory_pressure": { "$ref": "#/$defs/level" },
+              "information_privilege": { "$ref": "#/$defs/level" },
+              "conflict_of_interest_risk": { "$ref": "#/$defs/level" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "lifecycle": {
+      "enum": ["RAW", "PARSED", "CLAIMS", "CORROBORATED", "CONTESTED", "SYNTHESISED", "POLICY_RELEVANT"]
+    },
+    "promotion": {
+      "type": "object",
+      "required": ["working_memory", "canonical_world", "canonical_theory"],
+      "properties": {
+        "working_memory": { "type": "boolean" },
+        "canonical_world": { "const": false },
+        "canonical_theory": { "const": false }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "level": { "enum": ["low", "medium", "high", "very_high", "unknown"] }
+  }
+}
