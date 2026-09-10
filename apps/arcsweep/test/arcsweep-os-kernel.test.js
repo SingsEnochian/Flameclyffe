@@ -90,7 +90,7 @@ test('context capsule preserves world, project, and goal through room navigation
   assert.equal(finalSession.active_room, 'ingest');
 });
 
-test('OS bootstrap exposes diagnostics, capability registry, and navigation receipts on the current sidecar spine', async () => {
+test('OS bootstrap exposes redacted diagnostics, capability registry, and navigation receipts on the current sidecar spine', async () => {
   const previous = globalThis.__arcsweepOS;
   delete globalThis.__arcsweepOS;
   const module = await import(`../src/os/bootstrap.js?diagnostics-test=${Date.now()}`);
@@ -101,6 +101,8 @@ test('OS bootstrap exposes diagnostics, capability registry, and navigation rece
   assert.ok(initial.services.some((service) => service.service_id === 'arcsweep-os-kernel' && service.status === 'healthy'));
   assert.ok(initial.service_registry.some((service) => service.service_id === 'arcsweep-os-kernel'));
   assert.ok(initial.capabilities.some((capability) => capability.capability_id === 'os.navigate' && capability.authority === 'operate'));
+  assert.ok(initial.capabilities.some((capability) => capability.capability_id === 'runa.status' && capability.authority === 'read'));
+  assert.ok(initial.capabilities.some((capability) => capability.capability_id === 'device.status' && capability.authority === 'read'));
   assert.deepEqual(initial.repair_receipts, []);
 
   const navReceipt = await os.capabilities.invoke('os.navigate', {
@@ -112,7 +114,8 @@ test('OS bootstrap exposes diagnostics, capability registry, and navigation rece
   assert.equal(after.session.active_room, 'forge');
   assert.equal(after.session.active_world_id, 'terra-aeterna');
   assert.equal(after.session.active_project_id, 'runa-kelyran');
-  assert.equal(after.session.current_goal, 'design meda');
+  assert.equal(after.session.current_goal, undefined);
+  assert.equal(after.session.has_current_goal, true);
   assert.equal(after.context_depth, 1);
   assert.ok(after.recent_events.some((event) => event.name === 'arcsweep:context-capsule-created'));
   assert.ok(after.recent_events.some((event) => event.name === 'arcsweep:navigation-changed'));
