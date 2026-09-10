@@ -19,7 +19,7 @@ function normaliseAuthority(value = 'read') {
   return value;
 }
 
-export function createCapabilityRegistry({ bus = null, now = () => new Date(), policy = null } = {}) {
+export function createCapabilityRegistry({ bus = null, now = () => new Date(), policy = null, authorityResolver = null } = {}) {
   const services = new Map();
   const capabilities = new Map();
 
@@ -112,14 +112,7 @@ export function createCapabilityRegistry({ bus = null, now = () => new Date(), p
           context: clone(context),
         });
       } catch {
-        return rejectedReceipt({
-          callId,
-          capabilityId,
-          entry,
-          startedAt,
-          context,
-          reason: 'policy-evaluation-failed',
-        });
+        return rejectedReceipt({ callId, capabilityId, entry, startedAt, context, reason: 'policy-evaluation-failed' });
       }
       if (decision?.decision === 'deny') {
         return rejectedReceipt({
@@ -153,20 +146,41 @@ export function createCapabilityRegistry({ bus = null, now = () => new Date(), p
       }
     }
 
-    const requestedAuthority = context.authority || 'read';
+    const claimedAuthority = context.authority || 'read';
+    let resolvedAuthority = claimedAuthority;
+    let authorityReason = null;
+    if (authorityResolver) {
+      try {
+        const resolved = await authorityResolver({
+          call_id: callId,
+          capability: clone(entry.descriptor),
+          input: clone(input),
+          context: clone(context),
+        });
+        if (typeof resolved === 'string') resolvedAuthority = resolved;
+        else if (resolved && typeof resolved === 'object') {
+          resolvedAuthority = resolved.authority || 'read';
+          authorityReason = resolved.reason || null;
+        } else resolvedAuthority = 'read';
+      } catch {
+        return rejectedReceipt({ callId, capabilityId, entry, startedAt, context, reason: 'authority-resolution-failed' });
+      }
+    }
+
     const descriptorAuthority = entry.descriptor.authority;
-    const requestedRank = CAPABILITY_AUTHORITY.indexOf(requestedAuthority);
+    const resolvedRank = CAPABILITY_AUTHORITY.indexOf(resolvedAuthority);
     const allowedRank = CAPABILITY_AUTHORITY.indexOf(descriptorAuthority);
-    if (requestedRank < 0 || requestedRank < allowedRank) {
+    if (resolvedRank < 0 || resolvedRank < allowedRank) {
       return rejectedReceipt({
         callId,
         capabilityId,
         entry,
         startedAt,
         context,
-        reason: 'insufficient-authority',
+        reason: authorityReason || 'insufficient-authority',
         extras: {
-          requested_authority: requestedAuthority,
+          claimed_authority: claimedAuthority,
+          resolved_authority: resolvedAuthority,
           required_authority: descriptorAuthority,
         },
       });
@@ -187,6 +201,7 @@ export function createCapabilityRegistry({ bus = null, now = () => new Date(), p
         service_id: entry.descriptor.service_id,
         status: 'applied',
         output: clone(output),
+        resolved_authority: resolvedAuthority,
         started_at: startedAt,
         completed_at: now().toISOString(),
       });
@@ -200,6 +215,7 @@ export function createCapabilityRegistry({ bus = null, now = () => new Date(), p
         service_id: entry.descriptor.service_id,
         status: 'failed',
         error: error?.message || String(error),
+        resolved_authority: resolvedAuthority,
         started_at: startedAt,
         completed_at: now().toISOString(),
       });
