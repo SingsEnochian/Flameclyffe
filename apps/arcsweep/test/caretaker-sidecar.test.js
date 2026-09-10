@@ -23,8 +23,7 @@ test('Caretaker is mounted through the guarded sidecar bootstrap and stays out o
   assert.match(sidecarBootstrap, /import\.meta\.glob\([\s\S]*caretaker-sidecar\.js/);
   assert.match(mainBootstrap, /if \(!safeBoot\)[\s\S]*import\('\.\/sidecar-bootstrap\.js'\)/);
   assert.match(sidecar, /ArcSweep Caretaker/);
-  assert.match(sidecar, /Mighty Sword 9B/);
-  assert.match(sidecar, /conversation \+ bounded navigation/);
+  assert.match(sidecar, /conversation \+ bounded navigation/i);
 });
 
 test('Caretaker surface is a threaded chat rather than a one-shot output box', () => {
@@ -37,6 +36,17 @@ test('Caretaker surface is a threaded chat rather than a one-shot output box', (
   assert.match(sidecar, /!event\.shiftKey/);
   assert.match(sidecar, /requestSubmit/);
   assert.match(sidecar, /Clear conversation/);
+});
+
+test('Caretaker LLM transport is automatic and deployment-aware', () => {
+  assert.match(sidecar, /resolveCaretakerTransport/);
+  assert.match(sidecar, /caretakerTransportLabel/);
+  assert.match(sidecar, /endpoint: transport\.endpoint/);
+  assert.match(sidecar, /Connecting automatically/);
+  assert.match(sidecar, /GitHub bridge/);
+  assert.doesNotMatch(sidecar, /House Runtime session is required before the Caretaker can answer/);
+  assert.doesNotMatch(sidecar, /readHouseRuntimeToken/);
+  assert.doesNotMatch(sidecar, /restoreHouseRuntimeSession/);
 });
 
 test('Caretaker keeps bounded local conversational continuity', () => {
