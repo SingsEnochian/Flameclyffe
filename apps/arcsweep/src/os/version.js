@@ -1,4 +1,4 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.5';
+export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.6';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
@@ -29,6 +29,8 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     failClosedPolicyEvaluation: true,
     featherBlocksNonReadCapabilities: true,
     criticalRiskMutationPolicy: 'deny-until-steward-review',
+    privilegedAuthority: 'scoped-short-lived-steward-lease',
+    authorityLeaseTokensExposedInDiagnostics: false,
     autonomousOffensiveAction: false,
   }),
   contracts: Object.freeze({
@@ -42,6 +44,7 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     service: 'arcsweep.os-service/v1',
     capability: 'arcsweep.os-capability/v1',
     capabilityReceipt: 'arcsweep.os-capability-receipt/v1',
+    authorityLease: 'arcsweep.authority-lease/v1',
     securityTripwire: 'arcsweep.security-tripwire/v1',
     stewardDeliberation: 'arcsweep.steward-deliberation/v1',
     cybersecurityIntelligence: 'arcsweep.cybersecurity-intelligence/v1',
