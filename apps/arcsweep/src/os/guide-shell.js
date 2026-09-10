@@ -27,8 +27,14 @@ export function createGuideShell({ invoke, actorId = 'guide:arcsweep' } = {}) {
       });
     }
 
+    const safeContext = clone(context) || {};
+    delete safeContext.authority_lease;
+    delete safeContext.confirmed;
+    delete safeContext.steward_reviewed;
+    delete safeContext.approval_receipt;
+
     return invoke(capabilityId, clone(input), {
-      ...clone(context),
+      ...safeContext,
       actor_id: actorId,
       source: 'guide-shell',
       authority: descriptor.authority,
