@@ -438,7 +438,7 @@ router.get('/flames/:flame_id/status', resolveFlame, async (req, res) => {
     try {
       const response = await fetch(`${endpoint}/api/tags`, { signal: AbortSignal.timeout(4000) });
       if (!response.ok) throw new Error(`Ollama ${response.status}`);
-      const data = await res.json();
+      const data = await response.json();
       const installed = (data.models || []).flatMap((item) => [item.name, item.model]).filter(Boolean);
       runtimeReachable = true;
       modelAvailable = installed.includes(manifest.platform.model);
