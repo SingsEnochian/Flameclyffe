@@ -28,6 +28,13 @@ test('Code Lattice preserves project instruction authority and keeps generated s
   assert.match(gitignore, /^\.agents\/skills\/gitnexus-\*\/$/m);
 });
 
+test('Code Lattice launches npm command shims through the Windows command processor', () => {
+  assert.match(wrapper, /process\.env\.ComSpec \|\| 'cmd\.exe'/);
+  assert.match(wrapper, /\['\/d', '\/s', '\/c'/);
+  assert.match(wrapper, /`gitnexus \$\{args\.join\(' '\)\}`/);
+  assert.doesNotMatch(wrapper, /executable\s*=\s*process\.platform === 'win32' \? 'gitnexus\.cmd'/);
+});
+
 test('Code Lattice v0.1 is read-only by design and does not claim a completed graph proof', () => {
   assert.match(design, /\*\*Status:\*\* SPECIFIED/);
   assert.match(design, /No mutating GitNexus tool is granted to the Caretaker in v0\.1/);
