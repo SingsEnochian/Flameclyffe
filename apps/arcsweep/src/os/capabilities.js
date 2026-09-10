@@ -19,7 +19,7 @@ function normaliseAuthority(value = 'read') {
   return value;
 }
 
-export function createCapabilityRegistry({ bus = null, now = () => new Date() } = {}) {
+export function createCapabilityRegistry({ bus = null, now = () => new Date(), policy = null } = {}) {
   const services = new Map();
   const capabilities = new Map();
 
@@ -80,58 +80,102 @@ export function createCapabilityRegistry({ bus = null, now = () => new Date() } 
     return clone(record.descriptor);
   }
 
+  function rejectedReceipt({ callId, capabilityId, entry, startedAt, context, reason, extras = {} }) {
+    const receipt = freeze({
+      schema: 'arcsweep.os-capability-receipt/v1',
+      call_id: callId,
+      capability_id: capabilityId,
+      service_id: entry.descriptor.service_id,
+      status: 'rejected',
+      reason,
+      ...clone(extras),
+      started_at: startedAt,
+      completed_at: now().toISOString(),
+    });
+    bus?.publish?.('arcsweep:capability-invoked', receipt, { source: context.source || 'os' });
+    return receipt;
+  }
+
   async function invoke(capabilityId, input = {}, context = {}) {
     const entry = capabilities.get(capabilityId);
     if (!entry) throw new Error(`Unknown ArcSweep capability: ${capabilityId}`);
     const callId = createId();
     const startedAt = now().toISOString();
+
+    if (policy?.evaluate) {
+      let decision;
+      try {
+        decision = await policy.evaluate({
+          call_id: callId,
+          capability: clone(entry.descriptor),
+          input: clone(input),
+          context: clone(context),
+        });
+      } catch {
+        return rejectedReceipt({
+          callId,
+          capabilityId,
+          entry,
+          startedAt,
+          context,
+          reason: 'policy-evaluation-failed',
+        });
+      }
+      if (decision?.decision === 'deny') {
+        return rejectedReceipt({
+          callId,
+          capabilityId,
+          entry,
+          startedAt,
+          context,
+          reason: decision.reason || 'policy-denied',
+          extras: {
+            policy_decision: 'deny',
+            risk_families: clone(decision.risk_families || []),
+            tripwire_id: decision.tripwire_id || null,
+          },
+        });
+      }
+      if (decision?.decision === 'require-confirmation' && context.confirmed !== true) {
+        return rejectedReceipt({
+          callId,
+          capabilityId,
+          entry,
+          startedAt,
+          context,
+          reason: decision.reason || 'security-confirmation-required',
+          extras: {
+            policy_decision: 'require-confirmation',
+            risk_families: clone(decision.risk_families || []),
+            tripwire_id: decision.tripwire_id || null,
+          },
+        });
+      }
+    }
+
     const requestedAuthority = context.authority || 'read';
     const descriptorAuthority = entry.descriptor.authority;
     const requestedRank = CAPABILITY_AUTHORITY.indexOf(requestedAuthority);
     const allowedRank = CAPABILITY_AUTHORITY.indexOf(descriptorAuthority);
     if (requestedRank < 0 || requestedRank < allowedRank) {
-      const receipt = freeze({
-        schema: 'arcsweep.os-capability-receipt/v1',
-        call_id: callId,
-        capability_id: capabilityId,
-        service_id: entry.descriptor.service_id,
-        status: 'rejected',
+      return rejectedReceipt({
+        callId,
+        capabilityId,
+        entry,
+        startedAt,
+        context,
         reason: 'insufficient-authority',
-        requested_authority: requestedAuthority,
-        required_authority: descriptorAuthority,
-        started_at: startedAt,
-        completed_at: now().toISOString(),
+        extras: {
+          requested_authority: requestedAuthority,
+          required_authority: descriptorAuthority,
+        },
       });
-      bus?.publish?.('arcsweep:capability-invoked', receipt, { source: context.source || 'os' });
-      return receipt;
     }
     if (entry.descriptor.requires_confirmation && context.confirmed !== true) {
-      const receipt = freeze({
-        schema: 'arcsweep.os-capability-receipt/v1',
-        call_id: callId,
-        capability_id: capabilityId,
-        service_id: entry.descriptor.service_id,
-        status: 'rejected',
-        reason: 'confirmation-required',
-        started_at: startedAt,
-        completed_at: now().toISOString(),
-      });
-      bus?.publish?.('arcsweep:capability-invoked', receipt, { source: context.source || 'os' });
-      return receipt;
+      return rejectedReceipt({ callId, capabilityId, entry, startedAt, context, reason: 'confirmation-required' });
     }
     if (entry.validate && entry.validate(input, context) !== true) {
-      const receipt = freeze({
-        schema: 'arcsweep.os-capability-receipt/v1',
-        call_id: callId,
-        capability_id: capabilityId,
-        service_id: entry.descriptor.service_id,
-        status: 'rejected',
-        reason: 'input-validation-failed',
-        started_at: startedAt,
-        completed_at: now().toISOString(),
-      });
-      bus?.publish?.('arcsweep:capability-invoked', receipt, { source: context.source || 'os' });
-      return receipt;
+      return rejectedReceipt({ callId, capabilityId, entry, startedAt, context, reason: 'input-validation-failed' });
     }
 
     try {
