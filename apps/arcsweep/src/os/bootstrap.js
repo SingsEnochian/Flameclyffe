@@ -9,6 +9,7 @@ import {
 import { createCaretaker } from './caretaker.js';
 import { createCapabilityRegistry } from './capabilities.js';
 import { createContextPersistence } from './context-persistence.js';
+import { registerSidecarService } from './sidecar-service.js';
 import { ARCSWEEP_OS_MANIFEST } from './version.js';
 
 const GLOBAL_KEY = '__arcsweepOS';
@@ -125,6 +126,8 @@ function installArcSweepOS() {
     validate: (input) => Boolean(String(input?.room || '').trim()),
     execute: (input) => navigate(input.room, input.patch || {}),
   });
+
+  registerSidecarService(capabilityRegistry);
 
   function snapshot() {
     const events = bus.history();
