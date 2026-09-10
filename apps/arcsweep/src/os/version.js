@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.4';
+export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.5';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'kernel-capability-context-security-foundation',
+  stage: 'kernel-capability-context-cyberimmune-foundation',
   authority: Object.freeze({
     modelRuntime: 'house-runtime',
     browserState: 'hearthfire',
@@ -24,6 +24,13 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     securityEvidenceGrantsAuthority: false,
     stewardReviewForGovernanceChange: true,
   }),
+  security: Object.freeze({
+    capabilityFirewall: true,
+    failClosedPolicyEvaluation: true,
+    featherBlocksNonReadCapabilities: true,
+    criticalRiskMutationPolicy: 'deny-until-steward-review',
+    autonomousOffensiveAction: false,
+  }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
     contextState: 'arcsweep.os-context-state/v1',
@@ -35,6 +42,7 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     service: 'arcsweep.os-service/v1',
     capability: 'arcsweep.os-capability/v1',
     capabilityReceipt: 'arcsweep.os-capability-receipt/v1',
+    securityTripwire: 'arcsweep.security-tripwire/v1',
     stewardDeliberation: 'arcsweep.steward-deliberation/v1',
     cybersecurityIntelligence: 'arcsweep.cybersecurity-intelligence/v1',
     cybersecuritySeed: 'arcsweep.cybersecurity-seed/v1',
