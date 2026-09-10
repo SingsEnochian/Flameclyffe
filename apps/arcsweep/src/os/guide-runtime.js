@@ -1,5 +1,3 @@
-import { invokeConstellationRuntimeVoice } from '../constellation-runtime-adapter.js';
-
 function clone(value) {
   if (value === undefined) return undefined;
   return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -7,6 +5,11 @@ function clone(value) {
 
 function cleanText(value, max = 1600) {
   return String(value || '').trim().slice(0, max);
+}
+
+async function defaultInvokeModel(args) {
+  const { invokeConstellationRuntimeVoice } = await import('../constellation-runtime-adapter.js');
+  return invokeConstellationRuntimeVoice(args);
 }
 
 function parsePlan(text) {
@@ -45,7 +48,7 @@ function buildGuidePrompt({ utterance, context, capabilities }) {
 export function createGuideRuntime({
   shell,
   contextProvider,
-  invokeModel = invokeConstellationRuntimeVoice,
+  invokeModel = defaultInvokeModel,
   voiceId = null,
   now = () => new Date(),
 } = {}) {
