@@ -24,6 +24,10 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   assert.equal(forbidden.reason, 'guide-capability-not-allowed');
   assert.equal(seen.length, 3);
   assert.deepEqual(guide.allowedCapabilities().map((item) => item.capability_id).sort(), [
+    'glyphforge.active-brush',
+    'glyphforge.project-summary',
+    'glyphforge.select-brush',
+    'glyphforge.status',
     'observer.deep-current',
     'observer.status',
     'os.boot',
