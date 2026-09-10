@@ -1,0 +1,57 @@
+{
+  "schema": "arcsweep.frontier-risk-governance/v0.1",
+  "source": {
+    "source_id": "example-primary",
+    "title": "Operator-supplied primary warning",
+    "source_type": "firsthand_public_statement",
+    "speaker_role": "frontier_ai_researcher",
+    "org_history": [],
+    "published_at": "2026-09-10T00:00:00Z",
+    "provenance": {
+      "uri": "urn:example:replace-with-live-source",
+      "content_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "claims": [
+    {
+      "claim_id": "c1",
+      "text": "Example firsthand observation.",
+      "claim_class": "firsthand_observation",
+      "epistemic_distance": 1,
+      "confidence": "high",
+      "evidence_basis": "speaker firsthand report",
+      "corroborates": [],
+      "contradicts": [],
+      "normative_axis": null
+    },
+    {
+      "claim_id": "c2",
+      "text": "Example forecast derived from the source.",
+      "claim_class": "forecast",
+      "epistemic_distance": 4,
+      "confidence": "uncertain",
+      "evidence_basis": "expert prediction",
+      "corroborates": [],
+      "contradicts": [],
+      "normative_axis": null
+    },
+    {
+      "claim_id": "c3",
+      "text": "Example policy recommendation.",
+      "claim_class": "policy_prescription",
+      "epistemic_distance": 6,
+      "confidence": "normative",
+      "evidence_basis": "normative argument",
+      "corroborates": [],
+      "contradicts": [],
+      "normative_axis": "governance"
+    }
+  ],
+  "actors": [],
+  "lifecycle": "CLAIMS",
+  "promotion": {
+    "working_memory": false,
+    "canonical_world": false,
+    "canonical_theory": false
+  }
+}
