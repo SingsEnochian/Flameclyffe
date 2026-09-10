@@ -1,5 +1,4 @@
 // Arcsweep compatibility adapter. Houseglass is a House-wide contract so every
 // organ can share one settings, scope, routing, authority, and receipt vocabulary.
-// The Caretaker is the House intelligence surface, not another Flame.
-import './caretaker-sidecar.js';
+// Sidecar installation belongs to sidecar-bootstrap so Safe Boot remains isolated.
 export * from '../../../hearth/houseglass.js';
