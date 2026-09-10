@@ -3,6 +3,9 @@ export const ARCSWEEP_CARETAKER_RECEIPT_SCHEMA = 'arcsweep.caretaker-receipt/v0.
 export const ARCSWEEP_CARETAKER_ENDPOINT = '/api/v1/house/caretaker';
 export const ARCSWEEP_CARETAKER_ACTIONS = Object.freeze(['navigate']);
 
+const MAX_HISTORY_TURNS = 10;
+const MAX_HISTORY_TEXT = 1600;
+
 function text(value) {
   return String(value ?? '').trim();
 }
@@ -15,6 +18,17 @@ function uniqueRooms(rooms = []) {
   }).filter((room) => room.id && !seen.has(room.id) && seen.add(room.id));
 }
 
+export function normaliseCaretakerHistory(history = []) {
+  return Object.freeze((Array.isArray(history) ? history : [])
+    .map((turn) => {
+      const role = turn?.role === 'assistant' || turn?.role === 'caretaker' ? 'assistant' : turn?.role === 'user' ? 'user' : null;
+      const content = text(turn?.content || turn?.message).slice(0, MAX_HISTORY_TEXT);
+      return role && content ? Object.freeze({ role, content }) : null;
+    })
+    .filter(Boolean)
+    .slice(-MAX_HISTORY_TURNS));
+}
+
 export function buildCaretakerContext({ roomId = 'portal', world = null, availableRooms = [] } = {}) {
   return Object.freeze({
     room_id: text(roomId) || 'portal',
@@ -23,23 +37,29 @@ export function buildCaretakerContext({ roomId = 'portal', world = null, availab
   });
 }
 
-export function buildCaretakerPrompt({ message, context }) {
+export function buildCaretakerPrompt({ message, context, history = [] }) {
   const request = text(message);
   if (!request) throw new Error('Caretaker request is required.');
   const roomList = context.available_rooms.map((room) => `${room.id}: ${room.label}`).join('\n') || '(none supplied)';
+  const recentConversation = normaliseCaretakerHistory(history);
+  const conversationBlock = recentConversation.length
+    ? recentConversation.map((turn) => `${turn.role === 'user' ? 'Rowan' : 'Caretaker'}: ${turn.content}`).join('\n')
+    : '(new conversation)';
   return [
-    'ARCSWEEP CARETAKER v0.1',
+    'ARCSWEEP CARETAKER v0.2',
     'You are the house intelligence of ArcSweep. You are not a Flame and you do not speak for any Flame.',
-    'Your task is to interpret Rowan\'s request and return a bounded action plan.',
+    'Talk naturally with Rowan. This is an ongoing conversation, not a one-shot command form. Use RECENT CONVERSATION for continuity, but never invent earlier turns that are not present.',
+    'You may answer questions, orient Rowan inside ArcSweep, explain what is visible, and help decide where to go next. Conversation itself does not grant runtime authority.',
     'Runtime law: language may propose an action; only ArcSweep may execute it. Never claim an action occurred.',
-    'This version permits exactly one action type: navigate.',
-    'Only choose a target room from AVAILABLE ROOMS. If no navigation is requested, return no actions.',
+    'This version permits exactly one runtime action type: navigate.',
+    'Only choose a target room from AVAILABLE ROOMS. If no navigation is requested, return no actions and simply reply conversationally.',
     'Return JSON only with this exact shape:',
-    `{"schema":"${ARCSWEEP_CARETAKER_PLAN_SCHEMA}","reply":"brief natural response","actions":[{"type":"navigate","target":"room-id"}]}`,
+    `{"schema":"${ARCSWEEP_CARETAKER_PLAN_SCHEMA}","reply":"natural conversational response","actions":[{"type":"navigate","target":"room-id"}]}`,
     `Current room: ${context.room_id}`,
     `Current world: ${context.world ? `${context.world.name} (${context.world.id})` : 'unassigned'}`,
     `AVAILABLE ROOMS:\n${roomList}`,
-    `REQUEST:\n${request}`,
+    `RECENT CONVERSATION:\n${conversationBlock}`,
+    `ROWAN NOW:\n${request}`,
   ].join('\n\n');
 }
 
@@ -117,6 +137,7 @@ export function caretakerExecutionStatus(results = []) {
 
 export async function invokeCaretaker({
   message,
+  history = [],
   roomId = 'portal',
   world = null,
   availableRooms = [],
@@ -127,7 +148,7 @@ export async function invokeCaretaker({
   now = () => new Date().toISOString(),
 } = {}) {
   const context = buildCaretakerContext({ roomId, world, availableRooms });
-  const prompt = buildCaretakerPrompt({ message, context });
+  const prompt = buildCaretakerPrompt({ message, context, history });
   const requestedAt = now();
   const response = await fetchImpl(endpoint, {
     method: 'POST',
