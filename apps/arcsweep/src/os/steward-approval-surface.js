@@ -102,10 +102,10 @@ export function installStewardApprovalSurface({ approvals, resolveTrusted, bus =
     }
   });
 
-  const subscriptions = [];
+  const unsubscribers = [];
   if (bus?.subscribe) {
-    subscriptions.push(['arcsweep:steward-approval-requested', bus.subscribe('arcsweep:steward-approval-requested', render, { id: 'steward-approval-ui-requested' })]);
-    subscriptions.push(['arcsweep:steward-approval-resolved', bus.subscribe('arcsweep:steward-approval-resolved', render, { id: 'steward-approval-ui-resolved' })]);
+    unsubscribers.push(bus.subscribe('arcsweep:steward-approval-requested', render, { id: 'steward-approval-ui-requested' }));
+    unsubscribers.push(bus.subscribe('arcsweep:steward-approval-resolved', render, { id: 'steward-approval-ui-resolved' }));
   }
 
   render();
@@ -113,7 +113,7 @@ export function installStewardApprovalSurface({ approvals, resolveTrusted, bus =
     host,
     render,
     destroy() {
-      for (const [eventName, subscriptionId] of subscriptions) bus?.unsubscribe?.(eventName, subscriptionId);
+      for (const unsubscribe of unsubscribers) unsubscribe?.();
       host.remove();
     },
   });
