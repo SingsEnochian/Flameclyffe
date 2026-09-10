@@ -43,7 +43,9 @@ test('Caretaker LLM transport is automatic and deployment-aware', () => {
   assert.match(sidecar, /caretakerTransportLabel/);
   assert.match(sidecar, /endpoint: transport\.endpoint/);
   assert.match(sidecar, /Connecting automatically/);
-  assert.match(sidecar, /GitHub bridge/);
+  assert.match(sidecar, /Caretaker online/);
+  assert.match(sidecar, /caretakerTransportLabel\(transport\)/);
+  assert.doesNotMatch(sidecar, /GitHub bridge/);
   assert.doesNotMatch(sidecar, /House Runtime session is required before the Caretaker can answer/);
   assert.doesNotMatch(sidecar, /readHouseRuntimeToken/);
   assert.doesNotMatch(sidecar, /restoreHouseRuntimeSession/);
