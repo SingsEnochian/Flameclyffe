@@ -22,6 +22,9 @@ const GUIDE_CAPABILITIES = Object.freeze({
   'runa.inspect-preview-plan': Object.freeze({ authority: 'read' }),
   'device.status': Object.freeze({ authority: 'read' }),
   'device.input-proof': Object.freeze({ authority: 'read' }),
+  'witness.status': Object.freeze({ authority: 'read' }),
+  'witness.summary': Object.freeze({ authority: 'read' }),
+  'witness.recent': Object.freeze({ authority: 'read' }),
 });
 
 export function createGuideShell({ invoke, actorId = 'guide:arcsweep' } = {}) {
