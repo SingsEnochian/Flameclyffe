@@ -127,6 +127,7 @@ test('invokeCaretaker completes model to plan to runtime result without inventin
 
 test('Vercel caretaker reuses the existing House rooms function instead of adding a function slot', () => {
   const runtime = fs.readFileSync(path.join(root, 'api/_shared/house-caretaker-runtime.mjs'), 'utf8');
+  const contract = fs.readFileSync(path.join(root, 'apps/starwell-server/caretaker/contract.js'), 'utf8');
   const roomsRoute = fs.readFileSync(path.join(root, 'api/v1/house/rooms.js'), 'utf8');
   const vercel = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
   const rewrite = vercel.rewrites.find((item) => item.source === '/api/v1/house/caretaker');
@@ -135,9 +136,11 @@ test('Vercel caretaker reuses the existing House rooms function instead of addin
   assert.match(runtime, /role: 'house-intelligence'/);
   assert.match(runtime, /MODEL_ARCSWEEP_CARETAKER/);
   assert.match(runtime, /OLLAMA_URL_CARETAKER/);
-  assert.match(runtime, /Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M/);
-  assert.match(runtime, /allowed_actions: \['navigate'\]/);
+  assert.match(runtime, /HEARTHGATE_GATEWAY_URL/);
+  assert.match(runtime, /HEARTHGATE_GATEWAY_TOKEN/);
   assert.doesNotMatch(runtime, /flame_id/);
+  assert.match(contract, /Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M/);
+  assert.match(contract, /ALLOWED_ACTIONS = Object\.freeze\(\['navigate'\]\)/);
   assert.match(roomsRoute, /createHouseCaretakerHandler/);
   assert.match(roomsRoute, /searchParams\.get\('house_action'\)/);
   assert.match(roomsRoute, /houseAction === 'caretaker'/);
