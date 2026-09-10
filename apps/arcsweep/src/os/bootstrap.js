@@ -114,7 +114,7 @@ function installArcSweepOS() {
     }));
   }
 
-  function navigate(currentRoom, patch = {}) {
+  function navigateInternal(currentRoom, patch = {}) {
     const room = String(currentRoom || '').trim();
     if (!room || room === session.active_room) return null;
     const previousRoom = session.active_room;
@@ -175,8 +175,17 @@ function installArcSweepOS() {
     requires_confirmation: false,
     input_schema: { required: ['room'] },
     validate: (input) => Boolean(String(input?.room || '').trim()),
-    execute: (input) => navigate(input.room, input.patch || {}),
+    execute: (input) => navigateInternal(input.room, input.patch || {}),
   });
+
+  function requestNavigation(room, patch = {}, { actor_id = 'human-ui', source = 'os-ui' } = {}) {
+    return capabilityRegistry.invoke('os.navigate', { room, patch }, {
+      actor_id,
+      source,
+      authority: 'operate',
+      expected_authority: 'operate',
+    });
+  }
 
   registerSidecarService(capabilityRegistry);
   registerObserverService(capabilityRegistry);
@@ -305,7 +314,7 @@ function installArcSweepOS() {
     capsules: () => capsules.map(clone),
     lastNavigationReceipt: () => lastNavigationReceipt ? clone(lastNavigationReceipt) : null,
     snapshot,
-    navigate,
+    navigate: (room, patch = {}) => requestNavigation(room, patch, { actor_id: 'human-ui', source: 'os-api' }),
     inspect,
     setFeatherPaused,
     clearPersistedContext,
@@ -343,7 +352,7 @@ function installArcSweepOS() {
     else document.addEventListener('DOMContentLoaded', installStewardSurface, { once: true });
     document.addEventListener('click', (event) => {
       const room = inferRoomFromTrigger(event.target);
-      if (room) queueMicrotask(() => navigate(room));
+      if (room) queueMicrotask(() => { void requestNavigation(room, {}, { actor_id: 'human-ui', source: 'ui-navigation' }); });
     }, true);
     globalThis.addEventListener?.('arcsweep:caretaker-inspect', () => { void inspect(); });
     globalThis.addEventListener?.('arcsweep:os-inspect', () => dispatchDomEvent('arcsweep:os-diagnostics', snapshot()));
