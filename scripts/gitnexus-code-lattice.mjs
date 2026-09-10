@@ -25,17 +25,33 @@ if (!fs.existsSync(path.join(root, 'package.json')) || !fs.existsSync(path.join(
   fail('Run this command from the Flameclyffe repository root.');
 }
 
-const executable = process.platform === 'win32' ? 'gitnexus.cmd' : 'gitnexus';
-
 console.log(`[Code Lattice] gitnexus ${args.join(' ')}`);
-const result = spawnSync(executable, args, {
+
+// Windows global npm binaries are .cmd shims. Node cannot reliably execute those
+// as native binaries with shell:false, so route the fixed command through ComSpec.
+// The action and all arguments come exclusively from COMMANDS above.
+const isWindows = process.platform === 'win32';
+const executable = isWindows ? (process.env.ComSpec || 'cmd.exe') : 'gitnexus';
+const spawnArgs = isWindows
+  ? ['/d', '/s', '/c', `gitnexus ${args.join(' ')}`]
+  : args;
+
+const result = spawnSync(executable, spawnArgs, {
   cwd: root,
   stdio: 'inherit',
   shell: false,
+  windowsHide: true,
 });
 
 if (result.error?.code === 'ENOENT') {
-  fail('GitNexus is not installed on this machine. Install it once with: npm install -g gitnexus@latest');
+  fail(isWindows
+    ? 'Windows command processor is unavailable, so GitNexus could not be launched.'
+    : 'GitNexus is not installed on this machine. Install it once with: npm install -g gitnexus@latest');
 }
 if (result.error) fail(`GitNexus failed to start: ${result.error.message}`);
-if (result.status !== 0) process.exit(result.status ?? 1);
+if (result.status !== 0) {
+  if (isWindows && (result.status === 1 || result.status === 9009)) {
+    fail('GitNexus did not run successfully. Confirm it is installed and visible with: where.exe gitnexus', result.status);
+  }
+  process.exit(result.status ?? 1);
+}
