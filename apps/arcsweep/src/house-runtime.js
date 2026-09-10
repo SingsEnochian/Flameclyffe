@@ -2,6 +2,8 @@ import { canonicaliseHouseCommonsEntry } from './house-formatted-text-bridge.js'
 
 export const HOUSE_RUNTIME_SESSION_KEY = 'hearthgate:house-runtime-session/v1';
 export const HOUSE_COOKIE_SESSION = 'cookie-session';
+export const HOUSE_FINITE_REQUEST_TIMEOUT_MS = 8_000;
+export const HOUSE_SESSION_REQUEST_TIMEOUT_MS = 5_000;
 
 export function readHouseRuntimeToken(storage = globalThis.sessionStorage) {
   try { return storage?.getItem(HOUSE_RUNTIME_SESSION_KEY) || ''; } catch { return ''; }
@@ -20,8 +22,13 @@ export function clearHouseRuntimeToken(storage = globalThis.sessionStorage) {
 
 const bearerHeaders = (token) => token && token !== HOUSE_COOKIE_SESSION ? { authorization: `Bearer ${token}` } : {};
 
+export function withFiniteHouseRequest(options = {}, timeoutMs = HOUSE_FINITE_REQUEST_TIMEOUT_MS) {
+  if (options.signal || typeof AbortSignal === 'undefined' || typeof AbortSignal.timeout !== 'function') return options;
+  return { ...options, signal: AbortSignal.timeout(timeoutMs) };
+}
+
 async function sessionRequest(options = {}, fetchImpl = fetch) {
-  const response = await fetchImpl('/api/v1/house/session', { ...options, credentials: 'same-origin', cache: 'no-store' });
+  const response = await fetchImpl('/api/v1/house/session', withFiniteHouseRequest({ ...options, credentials: 'same-origin', cache: 'no-store' }, HOUSE_SESSION_REQUEST_TIMEOUT_MS));
   const data = await response.json().catch(() => ({}));
   return { response, data };
 }
@@ -70,7 +77,7 @@ export async function readFlameStatuses(voices, token, fetchImpl = fetch) {
   if (!token) return voices.map((voice) => ({ id: voice.id, name: voice.name, state: 'house-offline', configured: false, missing: ['HOUSE_RUNTIME_SESSION'] }));
   return Promise.all(voices.map(async (voice) => {
     try {
-      const response = await fetchImpl(`/api/v1/flames/${voice.route}/status`, { headers: bearerHeaders(token), credentials: 'same-origin', cache: 'no-store' });
+      const response = await fetchImpl(`/api/v1/flames/${voice.route}/status`, withFiniteHouseRequest({ headers: bearerHeaders(token), credentials: 'same-origin', cache: 'no-store' }));
       const data = await response.json().catch(() => ({}));
       if (response.status === 401) return { id: voice.id, name: voice.name, state: 'unauthorised', configured: false, missing: [] };
       if (!response.ok) return { id: voice.id, name: voice.name, state: 'route-error', configured: false, missing: [], error: data.error || `${response.status}` };
@@ -100,7 +107,7 @@ export async function readFlameStatuses(voices, token, fetchImpl = fetch) {
 
 async function commonsRequest(token, options = {}, fetchImpl = fetch) {
   if (!token) throw new Error('Connect the House Runtime first.');
-  const response = await fetchImpl('/api/v1/house/commons', { ...options, credentials: 'same-origin', headers: { ...(options.headers || {}), ...bearerHeaders(token) } });
+  const response = await fetchImpl('/api/v1/house/commons', withFiniteHouseRequest({ ...options, credentials: 'same-origin', headers: { ...(options.headers || {}), ...bearerHeaders(token) } }));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `House Commons ${response.status}`);
   return data;
@@ -114,7 +121,7 @@ export function appendHouseCommons(token, entry, fetchImpl = fetch) {
 
 async function kelyranReportRequest(token, options = {}, fetchImpl = fetch) {
   if (!token) throw new Error('Connect the House Runtime first.');
-  const response = await fetchImpl('/api/v1/house/kelyran-reports', { ...options, credentials: 'same-origin', cache: 'no-store', headers: { ...(options.headers || {}), ...bearerHeaders(token) } });
+  const response = await fetchImpl('/api/v1/house/kelyran-reports', withFiniteHouseRequest({ ...options, credentials: 'same-origin', cache: 'no-store', headers: { ...(options.headers || {}), ...bearerHeaders(token) } }));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `Kelyran model reporting ${response.status}`);
   return data;
@@ -128,7 +135,7 @@ export async function readHouseObservations(token, worldId = null, fetchImpl = f
   const params = new URLSearchParams();
   if (worldId) params.set('world_id', worldId);
   const suffix = params.size ? `?${params}` : '';
-  const response = await fetchImpl(`/api/v1/house/observations${suffix}`, { headers: bearerHeaders(token), credentials: 'same-origin', cache: 'no-store' });
+  const response = await fetchImpl(`/api/v1/house/observations${suffix}`, withFiniteHouseRequest({ headers: bearerHeaders(token), credentials: 'same-origin', cache: 'no-store' }));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `House observation live read ${response.status}`);
   return data;
@@ -143,7 +150,7 @@ export async function commandHouseObservation(token, { action, cycleId, decision
   if (!token) throw new Error('Connect the House Runtime first.');
   const body = { schema: 'hearthgate.runtime-braid-command/v1', command_id: suppliedCommandId || commandId(action || 'braid-command'), action, cycle_id: cycleId, reviewed_by: reviewedBy, requested_at: requestedAt };
   if (decision) body.decision = decision;
-  const response = await fetchImpl('/api/v1/house/observations', { method: 'POST', headers: { 'content-type': 'application/json', ...bearerHeaders(token) }, credentials: 'same-origin', cache: 'no-store', body: JSON.stringify(body) });
+  const response = await fetchImpl('/api/v1/house/observations', withFiniteHouseRequest({ method: 'POST', headers: { 'content-type': 'application/json', ...bearerHeaders(token) }, credentials: 'same-origin', cache: 'no-store', body: JSON.stringify(body) }));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `House Runtime command ${response.status}`);
   return data;
