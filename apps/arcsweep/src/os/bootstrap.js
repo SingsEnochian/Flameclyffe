@@ -10,7 +10,10 @@ import { createCaretaker } from './caretaker.js';
 import { createCapabilityRegistry } from './capabilities.js';
 import { createCapabilityFirewall } from './capability-firewall.js';
 import { createAuthorityBroker } from './authority-broker.js';
-import { createContextPersistence } from './context-persistence.js';
+import { createContextPersistence, normaliseContextState } from './context-persistence.js';
+import { createRoomNavigation } from './room-navigation.js';
+import { createWorkspaceContext } from './workspace-context.js';
+import { registerContextCacheService } from './context-cache-service.js';
 import { createGuideShell } from './guide-shell.js';
 import { registerSidecarService } from './sidecar-service.js';
 import { registerObserverService } from './observer-service.js';
@@ -44,17 +47,26 @@ function resolveSessionStorage() {
   }
 }
 
-function installArcSweepOS() {
+function installArcSweepOS({ navigation = createRoomNavigation(), workspace = typeof document !== 'undefined' ? createWorkspaceContext() : null, storage = resolveSessionStorage() } = {}) {
   if (globalThis[GLOBAL_KEY]) return globalThis[GLOBAL_KEY];
 
   const bus = createEventBus();
   const checkpointStore = createCheckpointStore();
   const healthRegistry = createHealthRegistry({ bus });
-  const contextPersistence = createContextPersistence({ storage: resolveSessionStorage() });
-  const restored = contextPersistence.load();
+  const contextPersistence = createContextPersistence({ storage });
+  let restored = contextPersistence.load();
   let session = restored?.session || createSessionState({ active_room: 'portal' });
   const capsules = restored?.capsules ? restored.capsules.slice(-MAX_CAPSULES) : [];
   let lastNavigationReceipt = null;
+  let receipts = restored?.receipts || [];
+  let persistenceStatus = { status: 'not-yet-stored', cloud_verified: false };
+  let persistQueue = Promise.resolve();
+  let navigationQueue = Promise.resolve();
+  let guideNavigating = false;
+  let restoration = null;
+  let ready;
+  let workspaceRestoreBlocked = false;
+  const currentState = () => ({ schema: 'arcsweep.os-context-state/v1', session: clone(session), capsules: capsules.map(clone), receipts: receipts.map(clone), saved_at: new Date().toISOString() });
 
   const caretaker = createCaretaker({ bus, checkpointStore, healthRegistry });
   const capabilityFirewall = createCapabilityFirewall({
@@ -86,8 +98,29 @@ function installArcSweepOS() {
     handler: (receipt) => { lastNavigationReceipt = receipt; },
   });
 
-  function persistContext() {
-    return contextPersistence.save({ session, capsules });
+  function persistContext({ mirror = true } = {}) {
+    const state = currentState();
+    const cached = mirror ? contextPersistence.save(state) : null;
+    if (!workspace) {
+      persistenceStatus = { cached, status: 'session-only', cloud_verified: false };
+      return Promise.resolve(clone(persistenceStatus));
+    }
+    if (workspaceRestoreBlocked) return Promise.resolve(clone(persistenceStatus));
+    persistQueue = persistQueue.then(async () => {
+      try {
+        const result = await workspace.write(state);
+        persistenceStatus = { ...result, status: 'workspace-readback-verified' };
+      } catch (error) {
+        persistenceStatus = { status: 'failed', error: error?.message || String(error), cloud_verified: false };
+      }
+      return clone(persistenceStatus);
+    });
+    return persistQueue;
+  }
+
+  function rememberReceipt(event) {
+    receipts = [...receipts, clone(event.payload)].slice(-MAX_DIAGNOSTIC_EVENTS);
+    void persistContext({ mirror: false });
   }
 
   function contextSummary() {
@@ -107,9 +140,10 @@ function installArcSweepOS() {
     }));
   }
 
-  function navigate(currentRoom, patch = {}) {
+  function recordNavigation(currentRoom, patch = {}) {
     const room = String(currentRoom || '').trim();
-    if (!room || room === session.active_room) return null;
+    if (!room) return null;
+    if (room === session.active_room && !Object.keys(patch).length) return null;
     const previousRoom = session.active_room;
     const capsule = createContextCapsule({
       session,
@@ -131,9 +165,31 @@ function installArcSweepOS() {
       context_capsule_id: capsule.capsule_id,
       context_event_id: capsuleReceipt.event_id,
     }, { source: 'os-bootstrap' });
-    const persisted = persistContext();
-    dispatchDomEvent('arcsweep:os-navigation', { capsule, navigation_receipt: navigationReceipt, persisted, diagnostics: snapshot() });
+    void persistContext();
+    dispatchDomEvent('arcsweep:os-navigation', { capsule, navigation_receipt: navigationReceipt, diagnostics: snapshot() });
     return capsule;
+  }
+
+  function navigate(room, patch = {}) {
+    const operation = navigationQueue.catch(() => {}).then(async () => {
+      await ready;
+      if (caretaker.featherPaused()) throw new Error('feather-paused');
+      if (!navigation.hasRoom(room)) throw new Error(`Unknown or unavailable room: ${room}`);
+      const active = workspace ? await workspace.activeContext() : {};
+      // Active workspace world wins over an old or model-supplied world ID.
+      const mergedPatch = { ...patch, ...active };
+      if (caretaker.featherPaused()) throw new Error('feather-paused');
+      guideNavigating = true;
+      try {
+        const observed = await navigation.navigate(room);
+        if (observed?.ok !== true || observed.observed_room !== room) throw new Error(`Room navigation was not observed: ${room}`);
+        const capsule = recordNavigation(room, mergedPatch);
+        await persistQueue;
+        return { ...observed, context_capsule_id: capsule?.capsule_id || capsules.at(-1)?.capsule_id || null, persistence: clone(persistenceStatus) };
+      } finally { guideNavigating = false; }
+    });
+    navigationQueue = operation;
+    return operation;
   }
 
   capabilityRegistry.registerService({
@@ -159,7 +215,7 @@ function installArcSweepOS() {
     authority: 'operate',
     requires_confirmation: false,
     input_schema: { required: ['room'] },
-    validate: (input) => Boolean(String(input?.room || '').trim()),
+    validate: (input) => typeof input?.room === 'string' && navigation.hasRoom(input.room),
     execute: (input) => navigate(input.room, input.patch || {}),
   });
 
@@ -168,19 +224,29 @@ function installArcSweepOS() {
   registerCybersecurityIntelligenceService(capabilityRegistry);
 
   const guideShell = createGuideShell({
-    invoke: (capabilityId, input, context) => capabilityRegistry.invoke(capabilityId, input, context),
+    invoke: async (capabilityId, input, context) => {
+      await ready;
+      const receipt = await capabilityRegistry.invoke(capabilityId, input, context);
+      await persistQueue;
+      return receipt;
+    },
   });
+
+  bus.subscribe('arcsweep:capability-invoked', rememberReceipt, { id: 'os-capability-replay' });
+  bus.subscribe('arcsweep:repair-completed', rememberReceipt, { id: 'os-repair-replay' });
 
   function snapshot() {
     const events = bus.history();
-    const repairReceipts = events.filter((item) => item.name === 'arcsweep:repair-completed').map((item) => item.payload);
-    const capabilityReceipts = events.filter((item) => item.name === 'arcsweep:capability-invoked').map((item) => item.payload);
+    const repairReceipts = receipts.filter((item) => item.schema === 'arcsweep.repair-receipt/v1');
+    const capabilityReceipts = receipts.filter((item) => item.schema === 'arcsweep.os-capability-receipt/v1');
     return Object.freeze({
       schema: 'arcsweep.os-diagnostics/v1',
       manifest: clone(ARCSWEEP_OS_MANIFEST),
       session: clone(session),
       active_context: capsules.length ? clone(capsules[capsules.length - 1]) : null,
       context_depth: capsules.length,
+      workspace_persistence: clone(persistenceStatus),
+      restoration: clone(restoration),
       context_persistence: { available: contextPersistence.available(), restored: Boolean(restored), storage_key: contextPersistence.key },
       recent_events: events.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
       services: healthRegistry.snapshot(),
@@ -196,7 +262,8 @@ function installArcSweepOS() {
     });
   }
 
-  async function inspect() {
+  async function inspectOnce() {
+    await ready;
     const subscriptionFindings = await caretaker.inspectRequiredSubscriptions();
     const serviceFindings = await caretaker.inspectRequiredServices();
     const findings = [...subscriptionFindings, ...serviceFindings];
@@ -206,10 +273,60 @@ function installArcSweepOS() {
     return findings;
   }
 
-  function setFeatherPaused(paused = true) { return caretaker.setFeatherPaused(paused); }
+  let inspection = null;
+  function inspect() {
+    if (!inspection) inspection = inspectOnce().finally(() => { inspection = null; });
+    return inspection;
+  }
+  function setFeatherPaused(paused = true) {
+    session = { ...session, feather_paused: Boolean(paused) };
+    const result = caretaker.setFeatherPaused(paused);
+    void persistContext();
+    return result;
+  }
+  // Clears only the derived session cache; workspace continuity remains recoverable.
   function clearPersistedContext() { return contextPersistence.clear(); }
 
+  ready = (async () => {
+    if (workspace) {
+      try {
+        const raw = await workspace.read();
+        const saved = normaliseContextState(raw);
+        if (raw !== null && raw !== undefined && !saved) throw new Error('Stored OS context is invalid; preserving it for recovery.');
+        if (saved && (!restored || Date.parse(saved.saved_at) >= Date.parse(restored.saved_at || 0))) restored = saved;
+      } catch (error) {
+        workspaceRestoreBlocked = true;
+        persistenceStatus = { status: 'restore-failed', error: error.message, cloud_verified: false };
+      }
+    }
+    if (restored) {
+      session = clone(restored.session);
+      capsules.splice(0, capsules.length, ...restored.capsules);
+      receipts = clone(restored.receipts || []);
+      caretaker.setFeatherPaused(session.feather_paused === true);
+      guideNavigating = true;
+      try {
+        const target = session.active_room;
+        restoration = caretaker.featherPaused()
+          ? { ok: false, status: 'feather-paused', target }
+          : await navigation.navigate(target);
+        if (!restoration?.ok) session = { ...session, active_room: navigation.activeRoom() || 'portal' };
+      } catch (error) {
+        restoration = { ok: false, status: 'failed', error: error.message };
+        session = { ...session, active_room: navigation.activeRoom() || 'portal' };
+      } finally { guideNavigating = false; }
+    } else {
+      session = { ...session, active_room: navigation.activeRoom() || 'portal' };
+    }
+    // Cache only at boot; do not overwrite the workspace on a failed restore.
+    contextPersistence.save(currentState());
+    return restoration;
+  })();
+  registerContextCacheService({ caretaker, persistence: contextPersistence, state: currentState, ready });
+
   const api = Object.freeze({
+    ready,
+    flush: () => persistQueue,
     manifest: ARCSWEEP_OS_MANIFEST,
     bus,
     caretaker,
@@ -243,12 +360,20 @@ function installArcSweepOS() {
   if (typeof document !== 'undefined') {
     document.addEventListener('click', (event) => {
       const room = inferRoomFromTrigger(event.target);
-      if (room) queueMicrotask(() => navigate(room));
+      if (room && !guideNavigating) {
+        void (async () => {
+          await ready;
+          await navigation.settle();
+          if (guideNavigating || navigation.activeRoom() !== room) return;
+          const patch = workspace ? await workspace.activeContext() : {};
+          recordNavigation(room, patch);
+        })().catch((error) => bus.publish('arcsweep:caretaker-alert', { message: error.message }));
+      }
     }, true);
     globalThis.addEventListener?.('arcsweep:caretaker-inspect', () => { void inspect(); });
     globalThis.addEventListener?.('arcsweep:os-inspect', () => dispatchDomEvent('arcsweep:os-diagnostics', snapshot()));
     globalThis.addEventListener?.('arcsweep:feather', () => setFeatherPaused(true));
-    const inspectionTimer = setInterval(() => { void inspect(); }, 12000);
+    const inspectionTimer = setInterval(() => { void inspect().catch((error) => bus.publish('arcsweep:caretaker-alert', { message: error.message })); }, 12000);
     globalThis.addEventListener?.('beforeunload', () => clearInterval(inspectionTimer), { once: true });
   }
 

@@ -47,13 +47,21 @@ export function createRepairBudget({ maxAttemptsPerFingerprint = 1, maxRepairsPe
 
 export async function runRepairTransaction({
   fault, repairLevel = 'R1', action, checkpointStore, captureState, apply, validate, rollback,
-  bus = null, budget = null, now,
+  verifyRollback, bus = null, budget = null, now,
 } = {}) {
   if (!fault?.fault_id) throw new Error('Repair transaction requires a fault.');
   if (typeof captureState !== 'function') throw new Error('Repair transaction requires captureState.');
   if (typeof apply !== 'function') throw new Error('Repair transaction requires apply.');
   if (typeof validate !== 'function') throw new Error('Repair transaction requires validate.');
   if (!checkpointStore?.capture || !checkpointStore?.restore) throw new Error('Repair transaction requires checkpointStore.');
+  if (typeof rollback !== 'function' || typeof verifyRollback !== 'function') {
+    const receipt = createRepairReceipt({ fault_class: fault.fault_class, service_id: fault.service_id,
+      repair_level: repairLevel, action, result: 'contained', reversible: false,
+      validation: [{ ok: false, check: 'rollback-contract', detail: 'Repair requires rollback and independent restoration verification.' }],
+    }, { now });
+    bus?.publish?.('arcsweep:repair-completed', receipt);
+    return receipt;
+  }
 
   if (budget && !budget.mayAttempt(fault)) {
     const contained = createRepairReceipt({
@@ -66,10 +74,20 @@ export async function runRepairTransaction({
   }
 
   budget?.noteAttempt(fault);
-  const checkpoint = checkpointStore.capture(await captureState(), {
-    label: `${fault.service_id}:${action || 'repair'}`,
-    metadata: { fault_id: fault.fault_id, fingerprint: fault.fingerprint },
-  });
+  let checkpoint;
+  try {
+    checkpoint = checkpointStore.capture(await captureState(), {
+      label: `${fault.service_id}:${action || 'repair'}`,
+      metadata: { fault_id: fault.fault_id, fingerprint: fault.fingerprint },
+    });
+  } catch (error) {
+    const receipt = createRepairReceipt({ fault_class: fault.fault_class, service_id: fault.service_id,
+      repair_level: repairLevel, action, result: 'contained', reversible: false,
+      validation: [{ ok: false, check: 'checkpoint-capture', detail: error?.message || String(error) }],
+    }, { now });
+    bus?.publish?.('arcsweep:repair-completed', receipt);
+    return receipt;
+  }
   let applicationResult = null;
   let validation = null;
   try {
@@ -81,11 +99,19 @@ export async function runRepairTransaction({
   const checks = Array.isArray(validation) ? validation : [validation || { ok: false, check: 'validation', detail: 'No validation result.' }];
   const valid = checks.length > 0 && checks.every((item) => item?.ok === true);
   if (!valid) {
-    const priorState = checkpointStore.restore(checkpoint.checkpoint_id);
-    if (typeof rollback === 'function') await rollback({ fault, checkpoint: clone(checkpoint), priorState, applicationResult });
+    let restored = false;
+    try {
+      const priorState = checkpointStore.restore(checkpoint.checkpoint_id);
+      const context = { fault, checkpoint: clone(checkpoint), priorState, applicationResult };
+      await rollback(context);
+      restored = (await verifyRollback(context)) === true;
+      checks.push({ ok: restored, check: 'rollback-verified', detail: restored ? 'Prior state restored.' : 'Prior state restoration could not be verified.' });
+    } catch (error) {
+      checks.push({ ok: false, check: 'rollback-verified', detail: error?.message || String(error) });
+    }
     const receipt = createRepairReceipt({
       fault_class: fault.fault_class, service_id: fault.service_id, before_checkpoint: checkpoint.checkpoint_id,
-      repair_level: repairLevel, action, validation: checks, result: 'rolled-back', reversible: true,
+      repair_level: repairLevel, action, validation: checks, result: restored ? 'rolled-back' : 'escalated', reversible: restored,
     }, { now });
     bus?.publish?.('arcsweep:repair-completed', receipt);
     return receipt;
@@ -120,12 +146,12 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
   }
 
   function registerRequiredService({
-    serviceId, probe, repair = null, rollback = null, repairLevel = 'R1', faultClass = 'TRANSIENT',
+    serviceId, probe, repair = null, rollback = null, captureState = null, verifyRollback = null, repairLevel = 'R1', faultClass = 'TRANSIENT',
   } = {}) {
     if (!serviceId || typeof probe !== 'function') throw new Error('Required service needs serviceId and probe.');
     if (repair !== null && typeof repair !== 'function') throw new Error('Service repair must be a function when supplied.');
     if (rollback !== null && typeof rollback !== 'function') throw new Error('Service rollback must be a function when supplied.');
-    requiredServices.set(serviceId, { serviceId, probe, repair, rollback, repairLevel, faultClass });
+    requiredServices.set(serviceId, { serviceId, probe, repair, rollback, captureState, verifyRollback, repairLevel, faultClass });
     return serviceId;
   }
 
@@ -140,6 +166,7 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
       },
       validate: () => ({ ok: bus.hasSubscription(descriptor.eventName, descriptor.subscriptionId), check: 'required-subscription-present', detail: key }),
       rollback: ({ priorState }) => { if (priorState?.present === false) bus.unsubscribe(descriptor.eventName, descriptor.subscriptionId); },
+      verifyRollback: ({ priorState }) => bus.hasSubscription(descriptor.eventName, descriptor.subscriptionId) === priorState.present,
     });
   }
 
@@ -179,10 +206,10 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
       bus,
       budget: repairBudget,
       now,
-      captureState: async () => ({
+      captureState: descriptor.captureState || (async () => ({
         health: healthRegistry?.get?.(descriptor.serviceId) || null,
         probe: await probeService(descriptor),
-      }),
+      })),
       apply: async (context) => descriptor.repair?.(context),
       validate: async () => {
         const probe = await probeService(descriptor);
@@ -197,7 +224,8 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
         }
         return { ok: probe.ok, check: 'required-service-healthy', detail: clone(probe.detail) };
       },
-      rollback: async (context) => descriptor.rollback?.(context),
+      rollback: descriptor.rollback,
+      verifyRollback: descriptor.verifyRollback,
     });
   }
 

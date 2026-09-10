@@ -5,7 +5,12 @@ test('bootstrapped Guide reads context, navigates through OS, and obeys Feather'
   const previous = globalThis.__arcsweepOS;
   delete globalThis.__arcsweepOS;
   const module = await import(`../src/os/bootstrap.js?guide-bootstrap-test=${Date.now()}`);
-  const os = module.arcsweepOS;
+  delete globalThis.__arcsweepOS;
+  let visibleRoom = 'portal';
+  const os = module.installArcSweepOS({ workspace: null, storage: null, navigation: {
+    activeRoom: () => visibleRoom, hasRoom: (room) => ['portal', 'forge', 'records'].includes(room),
+    navigate: async (room) => { visibleRoom = room; return { ok: true, observed_room: visibleRoom }; },
+  } });
 
   const context = await os.guide.request('os.context');
   assert.equal(context.status, 'applied');

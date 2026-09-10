@@ -94,7 +94,12 @@ test('OS bootstrap exposes diagnostics, capability registry, and navigation rece
   const previous = globalThis.__arcsweepOS;
   delete globalThis.__arcsweepOS;
   const module = await import(`../src/os/bootstrap.js?diagnostics-test=${Date.now()}`);
-  const os = module.arcsweepOS;
+  delete globalThis.__arcsweepOS;
+  let visibleRoom = 'portal';
+  const os = module.installArcSweepOS({ workspace: null, storage: null, navigation: {
+    activeRoom: () => visibleRoom, hasRoom: (room) => ['portal', 'forge', 'records'].includes(room),
+    navigate: async (room) => { visibleRoom = room; return { ok: true, observed_room: visibleRoom }; },
+  } });
   const initial = os.snapshot();
   assert.equal(initial.schema, 'arcsweep.os-diagnostics/v1');
   assert.equal(initial.session.active_room, 'portal');
@@ -153,6 +158,9 @@ test('Caretaker detects, repairs, validates, and receipts an unhealthy required 
   caretaker.registerRequiredService({
     serviceId: 'test-sidecar-service',
     probe: () => ({ ok: mounted, mounted }),
+    captureState: () => mounted,
+    rollback: ({ priorState }) => { mounted = priorState; },
+    verifyRollback: ({ priorState }) => mounted === priorState,
     repair: () => { repairCalls += 1; mounted = true; return { remounted: true }; },
   });
 
@@ -204,6 +212,7 @@ test('bad R1 repair rolls back to the captured state', async () => {
     apply: () => { state.mounted = true; state.generation = 5; return { attempted: true }; },
     validate: () => ({ ok: false, check: 'event-path-restored', detail: 'Injected validation failure' }),
     rollback: ({ priorState }) => { Object.assign(state, priorState); },
+    verifyRollback: ({ priorState }) => JSON.stringify(state) === JSON.stringify(priorState),
   });
   assert.equal(receipt.result, 'rolled-back');
   assert.deepEqual(state, { mounted: false, generation: 4 });
@@ -226,6 +235,7 @@ test('repair budget blocks repeat mutation for the same fault fingerprint', asyn
     apply: () => { mutations += 1; },
     validate: () => ({ ok: true, check: 'safe-operation-restored' }),
     rollback: ({ priorState }) => { mutations = priorState.mutations; },
+    verifyRollback: ({ priorState }) => mutations === priorState.mutations,
   });
   const first = await request();
   const second = await request();

@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.6';
+export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.7';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'kernel-capability-context-cyberimmune-foundation',
+  stage: 'guide-navigation-workspace-recovery-integration',
   authority: Object.freeze({
     modelRuntime: 'house-runtime',
     browserState: 'hearthfire',

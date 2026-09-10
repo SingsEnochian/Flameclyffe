@@ -36,11 +36,9 @@ test('Caretaker reads the actual active runtime World instead of guessing from D
   assert.doesNotMatch(sidecar, /querySelector\('\[data-world-id\]/);
 });
 
-test('Caretaker executes navigation through actual room buttons and verifies the observed room', () => {
-  assert.match(sidecar, /button\[data-room\]/);
-  assert.match(sidecar, /button\.click\(\)/);
-  assert.match(sidecar, /observedRoom === target/);
-  assert.match(sidecar, /status: observedRoom === target \? 'navigated' : 'not-observed'/);
+test('Caretaker delegates navigation to the bounded OS Guide', () => {
+  assert.match(sidecar, /arcsweepOS.guide.request\('os.navigate'/);
+  assert.doesNotMatch(sidecar, /button\.click\(\)/);
 });
 
 test('Caretaker keeps a bounded local replay trail until Runtime Braid persistence is added', () => {
