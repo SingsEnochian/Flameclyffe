@@ -9,6 +9,7 @@ const GUIDE_CAPABILITIES = Object.freeze({
   'os.navigate': Object.freeze({ authority: 'operate' }),
   'observer.status': Object.freeze({ authority: 'read' }),
   'observer.deep-current': Object.freeze({ authority: 'read' }),
+  'observer.timeline': Object.freeze({ authority: 'read' }),
   'security.sources': Object.freeze({ authority: 'read' }),
   'security.risk-families': Object.freeze({ authority: 'read' }),
   'security.classify-known-risk-tags': Object.freeze({ authority: 'read' }),
@@ -17,6 +18,10 @@ const GUIDE_CAPABILITIES = Object.freeze({
   'glyphforge.project-summary': Object.freeze({ authority: 'read' }),
   'glyphforge.active-brush': Object.freeze({ authority: 'read' }),
   'glyphforge.select-brush': Object.freeze({ authority: 'operate' }),
+  'runa.status': Object.freeze({ authority: 'read' }),
+  'runa.inspect-preview-plan': Object.freeze({ authority: 'read' }),
+  'device.status': Object.freeze({ authority: 'read' }),
+  'device.input-proof': Object.freeze({ authority: 'read' }),
 });
 
 export function createGuideShell({ invoke, actorId = 'guide:arcsweep' } = {}) {
