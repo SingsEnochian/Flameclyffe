@@ -8,9 +8,17 @@
 
 Preferred local model: `hf.co/DavidAU/Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M`.
 
-Override with `MODEL_ARCSWEEP_CARETAKER`. The House endpoint reads `OLLAMA_URL_CARETAKER`, then `OLLAMA_ENDPOINT`, then falls back to `http://127.0.0.1:11434`.
+Override with `MODEL_ARCSWEEP_CARETAKER`. The House runtime reads `OLLAMA_URL_CARETAKER`, then `OLLAMA_ENDPOINT`, then falls back to `http://127.0.0.1:11434`.
 
 The Caretaker is explicitly a House role. It must not impersonate, merge with, or speak for Constellation members.
+
+## Hosted route topology
+
+The public contract remains `/api/v1/house/caretaker`, but it does **not** consume its own Vercel function slot.
+
+`vercel.json` rewrites that path to `/api/v1/house/rooms?house_action=caretaker`. The existing `api/v1/house/rooms.js` function dispatches `house_action=caretaker` to `api/_shared/house-caretaker-runtime.mjs`; all other requests continue through the existing House rooms handler.
+
+A first preview attempt at commit `292c9f0` failed after the standalone `api/v1/house/caretaker.js` function was introduced. The available deployment evidence did not expose the exact Vercel build error, so the failure cause is not claimed. The standalone function was nevertheless removed and the route consolidated because the project is intentionally avoiding additional Vercel function slots.
 
 ## v0.1 action surface
 
