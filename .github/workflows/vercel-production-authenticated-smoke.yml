@@ -101,3 +101,42 @@ jobs:
             echo '```'
           } > receipt.md
           gh pr comment 184 --repo SingsEnochian/Flameclyffe --body-file receipt.md
+
+  caretaker-production-browser-smoke:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_URL: https://flameclyffe.vercel.app
+      OIDC_AUDIENCE: flameclyffe-house-smoke/v1
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout exact production-smoke code
+        uses: actions/checkout@v6
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
+      - name: Prove Caretaker status, Mighty Sword, navigation, and local replay
+        shell: bash
+        run: node scripts/arcsweep-caretaker-production-browser-smoke.mjs | tee caretaker-browser-smoke.json
+
+      - name: Publish Caretaker browser receipt to hosting PR
+        if: always()
+        shell: bash
+        run: |
+          STATUS='PASSED'
+          if [[ '${{ job.status }}' != 'success' ]]; then STATUS='FAILED'; fi
+          {
+            echo "### Caretaker production browser smoke: ${STATUS}"
+            echo
+            echo 'Production: `https://flameclyffe.vercel.app/arcsweep/`'
+            echo "Workflow commit: \`${GITHUB_SHA}\`"
+            echo
+            echo '```json'
+            cat caretaker-browser-smoke.json 2>/dev/null || echo '{"ok":false,"error":"Caretaker browser probe failed before receipt"}'
+            echo '```'
+          } > caretaker-receipt.md
+          gh pr comment 184 --repo SingsEnochian/Flameclyffe --body-file caretaker-receipt.md
