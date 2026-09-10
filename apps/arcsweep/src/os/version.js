@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.6';
+export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.7';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'kernel-capability-context-cyberimmune-foundation',
+  stage: 'kernel-capability-context-cyberimmune-runtime-shell',
   authority: Object.freeze({
     modelRuntime: 'house-runtime',
     browserState: 'hearthfire',
@@ -23,6 +23,7 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     weightedSignalGrantsAuthority: false,
     securityEvidenceGrantsAuthority: false,
     stewardReviewForGovernanceChange: true,
+    privilegedApprovalRequiresTrustedHumanAction: true,
   }),
   security: Object.freeze({
     capabilityFirewall: true,
@@ -31,7 +32,13 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     criticalRiskMutationPolicy: 'deny-until-steward-review',
     privilegedAuthority: 'scoped-short-lived-steward-lease',
     authorityLeaseTokensExposedInDiagnostics: false,
+    modelSelfApproval: false,
     autonomousOffensiveAction: false,
+  }),
+  runtime: Object.freeze({
+    bootLifecycle: ['BOOTING', 'READY', 'DEGRADED', 'PAUSED', 'ERROR'],
+    guideDirectOrganAccess: false,
+    guideMaximumCapabilityRequestsPerTurn: 1,
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
@@ -41,12 +48,15 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     repairReceipt: 'arcsweep.repair-receipt/v1',
     checkpoint: 'arcsweep.checkpoint/v1',
     diagnostics: 'arcsweep.os-diagnostics/v1',
+    bootState: 'arcsweep.os-boot-state/v1',
     service: 'arcsweep.os-service/v1',
     capability: 'arcsweep.os-capability/v1',
     capabilityReceipt: 'arcsweep.os-capability-receipt/v1',
     authorityLease: 'arcsweep.authority-lease/v1',
     securityTripwire: 'arcsweep.security-tripwire/v1',
+    stewardApproval: 'arcsweep.steward-approval/v1',
     stewardDeliberation: 'arcsweep.steward-deliberation/v1',
+    guideTurn: 'arcsweep.guide-turn/v1',
     cybersecurityIntelligence: 'arcsweep.cybersecurity-intelligence/v1',
     cybersecuritySeed: 'arcsweep.cybersecurity-seed/v1',
   }),
