@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.caretaker-action-receipted/v0.1",
+  "title": "ArcSweep Caretaker Action Receipt v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "event_id",
+    "timestamp",
+    "session_id",
+    "caretaker_contract_version",
+    "requested_action",
+    "validated_action",
+    "target",
+    "pre_state",
+    "post_state",
+    "applied",
+    "verification",
+    "context_fingerprint",
+    "source_turn_id"
+  ],
+  "properties": {
+    "schema": { "const": "arcsweep.caretaker-action-receipted/v0.1" },
+    "event_id": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "session_id": { "type": "string", "minLength": 1 },
+    "world_id": { "type": ["string", "null"] },
+    "caretaker_contract_version": { "const": "arcsweep.caretaker-plan/v0.1" },
+    "provider": { "type": ["string", "null"] },
+    "model": { "type": ["string", "null"] },
+    "requested_action": { "enum": ["navigate", "open_surface"] },
+    "validated_action": { "enum": ["navigate", "open_surface"] },
+    "target": { "type": "string", "minLength": 1 },
+    "pre_state": { "type": "object" },
+    "post_state": { "type": "object" },
+    "applied": { "type": "boolean" },
+    "verification": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["verified", "failed", "unavailable"] },
+        "observed": {}
+      },
+      "additionalProperties": true
+    },
+    "context_fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "source_turn_id": { "type": "string", "minLength": 1 },
+    "failure_reason": { "type": ["string", "null"] }
+  }
+}
