@@ -11,6 +11,7 @@ import { createCapabilityRegistry } from './capabilities.js';
 import { createCapabilityFirewall } from './capability-firewall.js';
 import { createAuthorityBroker } from './authority-broker.js';
 import { createContextPersistence } from './context-persistence.js';
+import { createGuideShell } from './guide-shell.js';
 import { registerSidecarService } from './sidecar-service.js';
 import { registerObserverService } from './observer-service.js';
 import { registerCybersecurityIntelligenceService } from './cybersecurity-service.js';
@@ -89,6 +90,23 @@ function installArcSweepOS() {
     return contextPersistence.save({ session, capsules });
   }
 
+  function contextSummary() {
+    const active = capsules.length ? capsules[capsules.length - 1] : null;
+    return Object.freeze(clone({
+      schema: 'arcsweep.os-context-summary/v1',
+      session_id: session.session_id,
+      active_world_id: session.active_world_id,
+      active_project_id: session.active_project_id,
+      active_scene_id: session.active_scene_id,
+      active_document_id: session.active_document_id,
+      active_room: session.active_room,
+      current_goal: session.current_goal,
+      presence_mode: session.presence_mode,
+      active_context_id: active?.capsule_id || null,
+      context_depth: capsules.length,
+    }));
+  }
+
   function navigate(currentRoom, patch = {}) {
     const room = String(currentRoom || '').trim();
     if (!room || room === session.active_room) return null;
@@ -127,6 +145,14 @@ function installArcSweepOS() {
   });
 
   capabilityRegistry.registerCapability({
+    capability_id: 'os.context',
+    service_id: 'arcsweep-os-kernel',
+    description: 'Read a bounded summary of the active ArcSweep session and context lineage.',
+    authority: 'read',
+    execute: () => contextSummary(),
+  });
+
+  capabilityRegistry.registerCapability({
     capability_id: 'os.navigate',
     service_id: 'arcsweep-os-kernel',
     description: 'Move the active ArcSweep room while preserving the current context capsule.',
@@ -140,6 +166,10 @@ function installArcSweepOS() {
   registerSidecarService(capabilityRegistry);
   registerObserverService(capabilityRegistry);
   registerCybersecurityIntelligenceService(capabilityRegistry);
+
+  const guideShell = createGuideShell({
+    invoke: (capabilityId, input, context) => capabilityRegistry.invoke(capabilityId, input, context),
+  });
 
   function snapshot() {
     const events = bus.history();
@@ -156,6 +186,7 @@ function installArcSweepOS() {
       services: healthRegistry.snapshot(),
       service_registry: capabilityRegistry.services(),
       capabilities: capabilityRegistry.capabilities(),
+      guide: { actor_id: guideShell.actor_id, allowed_capabilities: guideShell.allowedCapabilities() },
       capability_receipts: capabilityReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
       security_tripwires: capabilityFirewall.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
       authority_leases: authorityBroker.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
@@ -184,6 +215,7 @@ function installArcSweepOS() {
     caretaker,
     firewall: capabilityFirewall,
     capabilities: capabilityRegistry,
+    guide: guideShell,
     checkpoints: checkpointStore,
     health: healthRegistry,
     persistence: contextPersistence,
