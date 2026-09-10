@@ -104,7 +104,9 @@ function installArcSweepOS() {
   }
 
   async function inspect() {
-    const findings = await caretaker.inspectRequiredSubscriptions();
+    const subscriptionFindings = await caretaker.inspectRequiredSubscriptions();
+    const serviceFindings = await caretaker.inspectRequiredServices();
+    const findings = [...subscriptionFindings, ...serviceFindings];
     const diagnostics = snapshot();
     if (findings.length) dispatchDomEvent('arcsweep:caretaker-findings', { findings, diagnostics });
     dispatchDomEvent('arcsweep:os-diagnostics', diagnostics);
