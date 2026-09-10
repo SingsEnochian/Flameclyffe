@@ -11,6 +11,7 @@ import { createCapabilityRegistry } from './capabilities.js';
 import { createContextPersistence } from './context-persistence.js';
 import { registerSidecarService } from './sidecar-service.js';
 import { registerObserverService } from './observer-service.js';
+import { registerCybersecurityIntelligenceService } from './cybersecurity-service.js';
 import { ARCSWEEP_OS_MANIFEST } from './version.js';
 
 const GLOBAL_KEY = '__arcsweepOS';
@@ -115,6 +116,7 @@ function installArcSweepOS() {
 
   registerSidecarService(capabilityRegistry);
   registerObserverService(capabilityRegistry);
+  registerCybersecurityIntelligenceService(capabilityRegistry);
 
   function snapshot() {
     const events = bus.history();
