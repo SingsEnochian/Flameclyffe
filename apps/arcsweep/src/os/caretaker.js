@@ -103,6 +103,7 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
   if (!bus?.publish || !bus?.subscribe) throw new Error('Caretaker requires the ArcSweep OS event bus.');
   if (!checkpointStore?.capture) throw new Error('Caretaker requires checkpoint storage.');
   const requiredSubscriptions = new Map();
+  const requiredServices = new Map();
   let featherPaused = false;
 
   function emitFault(input) {
@@ -116,6 +117,16 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
     requiredSubscriptions.set(`${eventName}#${subscriptionId}`, { eventName, subscriptionId, handler, serviceId, repair });
     if (!bus.hasSubscription(eventName, subscriptionId)) bus.subscribe(eventName, handler, { id: subscriptionId });
     return `${eventName}#${subscriptionId}`;
+  }
+
+  function registerRequiredService({
+    serviceId, probe, repair = null, rollback = null, repairLevel = 'R1', faultClass = 'TRANSIENT',
+  } = {}) {
+    if (!serviceId || typeof probe !== 'function') throw new Error('Required service needs serviceId and probe.');
+    if (repair !== null && typeof repair !== 'function') throw new Error('Service repair must be a function when supplied.');
+    if (rollback !== null && typeof rollback !== 'function') throw new Error('Service rollback must be a function when supplied.');
+    requiredServices.set(serviceId, { serviceId, probe, repair, rollback, repairLevel, faultClass });
+    return serviceId;
   }
 
   async function repairSubscription(fault, descriptor) {
@@ -148,6 +159,75 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
     return findings;
   }
 
+  async function probeService(descriptor) {
+    try {
+      const result = await descriptor.probe();
+      if (result === true) return { ok: true, detail: null };
+      if (result && typeof result === 'object') return { ok: result.ok === true, detail: clone(result) };
+      return { ok: false, detail: result ?? null };
+    } catch (error) {
+      return { ok: false, detail: { error: error?.message || String(error) } };
+    }
+  }
+
+  async function repairService(fault, descriptor) {
+    return runRepairTransaction({
+      fault,
+      repairLevel: descriptor.repairLevel,
+      action: 'recover-required-service',
+      checkpointStore,
+      bus,
+      budget: repairBudget,
+      now,
+      captureState: async () => ({
+        health: healthRegistry?.get?.(descriptor.serviceId) || null,
+        probe: await probeService(descriptor),
+      }),
+      apply: async (context) => descriptor.repair?.(context),
+      validate: async () => {
+        const probe = await probeService(descriptor);
+        if (probe.ok) {
+          healthRegistry?.set?.({
+            service_id: descriptor.serviceId,
+            status: 'healthy',
+            last_success_at: nowIso(now),
+            recoverable: true,
+            repair_class: descriptor.repairLevel,
+          });
+        }
+        return { ok: probe.ok, check: 'required-service-healthy', detail: clone(probe.detail) };
+      },
+      rollback: async (context) => descriptor.rollback?.(context),
+    });
+  }
+
+  async function inspectRequiredServices() {
+    const findings = [];
+    for (const descriptor of requiredServices.values()) {
+      const probe = await probeService(descriptor);
+      if (probe.ok) continue;
+      healthRegistry?.set?.({
+        service_id: descriptor.serviceId,
+        status: 'failed',
+        last_error: probe.detail?.error || 'Required service probe failed.',
+        recoverable: Boolean(descriptor.repair),
+        repair_class: descriptor.repair ? descriptor.repairLevel : 'R0',
+      });
+      const fault = emitFault({
+        fault_class: descriptor.faultClass,
+        service_id: descriptor.serviceId,
+        code: 'required-service-unhealthy',
+        message: `Required service is unhealthy: ${descriptor.serviceId}`,
+        recoverable: Boolean(descriptor.repair),
+        repair_level: descriptor.repair ? descriptor.repairLevel : 'R0',
+        metadata: { probe: clone(probe.detail) },
+      });
+      findings.push(fault);
+      if (descriptor.repair && !featherPaused) await repairService(fault, descriptor);
+    }
+    return findings;
+  }
+
   function setFeatherPaused(paused = true) {
     featherPaused = Boolean(paused);
     if (featherPaused) bus.publish('arcsweep:feather-paused', { paused: true, source: 'caretaker' });
@@ -162,8 +242,16 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
   }
 
   return Object.freeze({
-    emitFault, registerRequiredSubscription, inspectRequiredSubscriptions, repairSubscription,
-    setFeatherPaused, featherPaused: () => featherPaused, publishHealth,
+    emitFault,
+    registerRequiredSubscription,
+    registerRequiredService,
+    inspectRequiredSubscriptions,
+    inspectRequiredServices,
+    repairSubscription,
+    repairService,
+    setFeatherPaused,
+    featherPaused: () => featherPaused,
+    publishHealth,
     repairBudget: () => repairBudget.snapshot(),
   });
 }
