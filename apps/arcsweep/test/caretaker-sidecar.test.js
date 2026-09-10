@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 import {
   currentCaretakerWorld,
   persistCaretakerReceiptLocal,
+  persistCaretakerChatLocal,
+  readCaretakerChatLocal,
 } from '../src/caretaker-sidecar.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -22,7 +24,36 @@ test('Caretaker is mounted through the guarded sidecar bootstrap and stays out o
   assert.match(mainBootstrap, /if \(!safeBoot\)[\s\S]*import\('\.\/sidecar-bootstrap\.js'\)/);
   assert.match(sidecar, /ArcSweep Caretaker/);
   assert.match(sidecar, /Mighty Sword 9B/);
-  assert.match(sidecar, /bounded navigation only/);
+  assert.match(sidecar, /conversation \+ bounded navigation/);
+});
+
+test('Caretaker surface is a threaded chat rather than a one-shot output box', () => {
+  assert.match(sidecar, /data-caretaker-thread/);
+  assert.match(sidecar, /role="log"/);
+  assert.match(sidecar, /appendMessage\(thread, 'user'/);
+  assert.match(sidecar, /appendMessage\(thread, 'assistant'/);
+  assert.match(sidecar, /Caretaker is thinking/);
+  assert.match(sidecar, /event\.key === 'Enter'/);
+  assert.match(sidecar, /!event\.shiftKey/);
+  assert.match(sidecar, /requestSubmit/);
+  assert.match(sidecar, /Clear conversation/);
+});
+
+test('Caretaker keeps bounded local conversational continuity', () => {
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.get(key) || null,
+    setItem: (key, value) => values.set(key, value),
+  };
+  const turns = Array.from({ length: 30 }, (_, index) => ({
+    role: index % 2 ? 'assistant' : 'user',
+    content: `turn-${index}`,
+    at: `2026-09-10T20:${String(index).padStart(2, '0')}:00.000Z`,
+  }));
+  const stored = persistCaretakerChatLocal(turns, storage);
+  assert.equal(stored.length, 24);
+  assert.equal(stored[0].content, 'turn-6');
+  assert.equal(readCaretakerChatLocal(storage).at(-1).content, 'turn-29');
 });
 
 test('Caretaker reads the actual active runtime World instead of guessing from DOM order', async () => {
