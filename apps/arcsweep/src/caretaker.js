@@ -46,7 +46,7 @@ export function buildCaretakerPrompt({ message, context, history = [] }) {
     ? recentConversation.map((turn) => `${turn.role === 'user' ? 'Rowan' : 'Caretaker'}: ${turn.content}`).join('\n')
     : '(new conversation)';
   return [
-    'ARCSWEEP CARETAKER v0.2',
+    'ARCSWEEP CARETAKER v0.3',
     'You are the house intelligence of ArcSweep. You are not a Flame and you do not speak for any Flame.',
     'Talk naturally with Rowan. This is an ongoing conversation, not a one-shot command form. Use RECENT CONVERSATION for continuity, but never invent earlier turns that are not present.',
     'You may answer questions, orient Rowan inside ArcSweep, explain what is visible, and help decide where to go next. Conversation itself does not grant runtime authority.',
@@ -78,7 +78,7 @@ export function normaliseCaretakerPlan(value, { availableRooms = [] } = {}) {
   if (value.schema !== ARCSWEEP_CARETAKER_PLAN_SCHEMA) throw new Error(`Caretaker plan schema must be ${ARCSWEEP_CARETAKER_PLAN_SCHEMA}.`);
   const allowedRooms = new Set(uniqueRooms(availableRooms).map((room) => room.id));
   const inputActions = Array.isArray(value.actions) ? value.actions : [];
-  if (inputActions.length > 4) throw new Error('Caretaker v0.1 permits at most four navigation actions per plan.');
+  if (inputActions.length > 4) throw new Error('Caretaker permits at most four navigation actions per plan.');
   const actions = inputActions.map((action, index) => {
     if (!action || typeof action !== 'object' || Array.isArray(action)) throw new Error(`Caretaker action ${index + 1} must be an object.`);
     const type = text(action.type);
@@ -153,6 +153,7 @@ export async function invokeCaretaker({
   const response = await fetchImpl(endpoint, {
     method: 'POST',
     credentials: 'same-origin',
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       ...(token && token !== 'cookie-session' ? { authorization: `Bearer ${token}` } : {}),
@@ -174,6 +175,9 @@ export async function invokeCaretaker({
     world: context.world,
     provider: body.provider || null,
     model: body.model || null,
+    execution_path: body.execution_path || null,
+    fallback_from: body.fallback_from || null,
+    auth_mode: body.auth_mode || null,
     route: endpoint,
     plan,
     action_results: results,
