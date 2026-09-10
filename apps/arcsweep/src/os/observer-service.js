@@ -7,6 +7,16 @@ function bridge() {
   return globalThis.__arcsweepObserverBridge || null;
 }
 
+function readStoredSnapshot(storageKey) {
+  if (!storageKey) return null;
+  try {
+    const raw = globalThis.localStorage?.getItem?.(storageKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function registerObserverService(registry) {
   if (!registry?.registerService || !registry?.registerCapability) throw new Error('Observer service requires the ArcSweep capability registry.');
 
@@ -46,8 +56,10 @@ export function registerObserverService(registry) {
     authority: 'read',
     execute: () => {
       const current = bridge();
-      if (!current?.getSnapshot) throw new Error('Observer snapshot bridge is unavailable.');
-      return clone(current.getSnapshot());
+      if (current?.getSnapshot) return clone(current.getSnapshot());
+      const snapshot = readStoredSnapshot(current?.storageKey);
+      if (!snapshot) throw new Error('Observer snapshot bridge is unavailable.');
+      return clone(snapshot);
     },
   });
 
@@ -56,10 +68,13 @@ export function registerObserverService(registry) {
     service_id: 'observer-deep',
     description: 'Read the current derived DEEP projection with transformation receipts.',
     authority: 'read',
-    execute: () => {
+    execute: async () => {
       const current = bridge();
-      if (!current?.getDeepPayload) throw new Error('Observer DEEP projection bridge is unavailable.');
-      return clone(current.getDeepPayload());
+      if (current?.getDeepPayload) return clone(current.getDeepPayload());
+      if (typeof globalThis.fetch !== 'function') throw new Error('Observer DEEP projection bridge is unavailable.');
+      const response = await globalThis.fetch('/data/deep-current.json', { cache: 'no-store' });
+      if (!response?.ok) throw new Error(`Observer DEEP projection failed: ${response?.status || 'unknown'}`);
+      return clone(await response.json());
     },
   });
 
