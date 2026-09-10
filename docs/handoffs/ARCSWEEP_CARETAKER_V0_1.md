@@ -30,17 +30,21 @@ Only `navigate` is armed.
 
 Model output is a proposal using `arcsweep.caretaker-plan/v0.1`. The browser validates the schema, rejects unknown action types, rejects room ids outside the supplied DOM room registry, invokes the actual room button, waits for render, and verifies the observed active room before marking the action applied.
 
+The Caretaker reads World identity from the existing `runtime-world-context.js` state path rather than guessing from DOM order or decorative labels. If that authoritative read fails, World context remains unavailable rather than being fabricated.
+
 No world activation, brush mutation, file write, canon write, settings change, deployment, shell command, or arbitrary tool execution is permitted in v0.1.
 
 ## Receipt state
 
-The client produces `arcsweep.caretaker-receipt/v0.1` and stores the latest 60 receipts in local storage as `local-replayable`. This is durable enough to survive a browser reload on that client, but it is **not yet a Runtime Braid receipt** and must not be described as House-wide or server-verified durability.
+The client produces `arcsweep.caretaker-receipt/v0.1` and attempts to store the latest 60 receipts in local storage as `local-replayable`. This is durable enough to survive a browser reload on that client, but it is **not yet a Runtime Braid receipt** and must not be described as House-wide or server-verified durability.
+
+If local storage is blocked, full, or unavailable after an action has already executed, the completed receipt remains visible with `persistence: not-yet-durable` and a storage error. Persistence failure must never erase execution proof.
 
 The model response itself returns `runtime_braid: null` until a specific Caretaker event contract is added to the existing append-only Runtime Braid.
 
 ## Mounted surface
 
-`apps/arcsweep/src/houseglass.js` imports `caretaker-sidecar.js`, so the Caretaker is attached through the Houseglass runtime surface rather than registered as a Constellation voice.
+`caretaker-sidecar.js` is a registered global sidecar in `sidecar-bootstrap.js`. It is deliberately **not** imported by the core `houseglass.js` adapter. `main-bootstrap.js` skips sidecar bootstrap during Safe Boot, so the Caretaker cannot compromise the recovery path simply by failing to initialise.
 
 The first UI is intentionally small: a floating `⌁ Caretaker` launcher with one request field, model reply, and visible execution proof line.
 
@@ -51,12 +55,13 @@ This branch is not VERIFIED until CI passes and a runtime smoke demonstrates thi
 1. House Runtime session exists.
 2. Hosted ArcSweep can reach the configured Hearthgate gateway, or an explicitly local ArcSweep instance can reach Ollama directly.
 3. The selected Mighty Sword model is reported available by the local Hearthgate/Ollama status path.
-4. User requests navigation to an existing room.
-5. Model returns the correct Action IR schema.
-6. ArcSweep validates the target against the live room registry.
-7. ArcSweep performs the room transition.
-8. The observed active room matches the requested target.
-9. A local replay receipt records the applied transition.
+4. The active World read matches the actual ArcSweep runtime state.
+5. User requests navigation to an existing room.
+6. Model returns the correct Action IR schema.
+7. ArcSweep validates the target against the live room registry.
+8. ArcSweep performs the room transition.
+9. The observed active room matches the requested target.
+10. A replay receipt records the applied transition, or remains visibly non-durable if local persistence fails.
 
 The gateway path has automated contract coverage, but it is not described as live until the real configured Hearthgate/Ollama route answers the smoke test.
 
