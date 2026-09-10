@@ -1,0 +1,36 @@
+{
+  "schema": "arcsweep.frontier-risk-proving-chamber/v0.1",
+  "dataset_class": "FRONTIER_RISK_AND_GOVERNANCE",
+  "purpose": "Exercise provenance, claim decomposition, disagreement preservation, and confidence revision without promoting contested material to canon.",
+  "sources": [
+    {
+      "source_id": "primary-warning",
+      "required_role": "firsthand_or_insider_warning",
+      "status": "operator_supplied",
+      "requirements": ["stable_uri", "published_at", "content_hash", "speaker_role"]
+    },
+    {
+      "source_id": "independent-response-a",
+      "required_role": "independent_response_or_analysis",
+      "status": "operator_supplied",
+      "requirements": ["stable_uri", "published_at", "content_hash"]
+    },
+    {
+      "source_id": "independent-response-b",
+      "required_role": "independent_response_or_analysis",
+      "status": "operator_supplied",
+      "requirements": ["stable_uri", "published_at", "content_hash"]
+    }
+  ],
+  "must_demonstrate": [
+    "provenance_preserved",
+    "claim_class_preserved",
+    "epistemic_distance_preserved",
+    "factual_normative_separation",
+    "specialist_disagreement_preserved",
+    "independent_source_counted",
+    "confidence_revision_replayable",
+    "no_automatic_canon_promotion"
+  ],
+  "pass_rule": "All invariants hold and a synthesis receipt explicitly records uncertainty and unresolved assumptions."
+}
