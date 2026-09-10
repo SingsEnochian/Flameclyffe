@@ -23,6 +23,19 @@ export function createCapabilityRegistry({ bus = null, now = () => new Date() } 
   const services = new Map();
   const capabilities = new Map();
 
+  if (bus?.define && bus?.eventNames) {
+    const known = new Set(bus.eventNames());
+    if (!known.has('arcsweep:service-registered')) {
+      bus.define('arcsweep:service-registered', (payload) => payload?.schema === 'arcsweep.os-service/v1' && Boolean(payload?.service_id));
+    }
+    if (!known.has('arcsweep:capability-registered')) {
+      bus.define('arcsweep:capability-registered', (payload) => payload?.schema === 'arcsweep.os-capability/v1' && Boolean(payload?.capability_id));
+    }
+    if (!known.has('arcsweep:capability-invoked')) {
+      bus.define('arcsweep:capability-invoked', (payload) => payload?.schema === 'arcsweep.os-capability-receipt/v1' && Boolean(payload?.call_id));
+    }
+  }
+
   function registerService(input = {}) {
     const serviceId = String(input.service_id || '').trim();
     if (!serviceId) throw new Error('Capability service requires service_id.');
