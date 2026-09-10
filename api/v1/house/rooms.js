@@ -18,10 +18,20 @@ const lazyStore = Object.freeze({
 const handleRooms = createHouseRoomsHandler({ env, store: lazyStore });
 const handleCaretaker = createHouseCaretakerHandler({ env });
 
+export function requestTargetsCaretaker(request) {
+  const url = new URL(request.url);
+  if (url.searchParams.get('house_action') === 'caretaker') return true;
+
+  // Vercel rewrites /api/v1/house/caretaker onto this function while preserving
+  // the browser-facing source URL. Do not rely only on a destination query
+  // parameter being visible inside the serverless Request object.
+  const pathname = url.pathname.replace(/\/+$/, '');
+  return pathname === '/api/v1/house/caretaker';
+}
+
 export default {
   async fetch(request) {
-    const houseAction = new URL(request.url).searchParams.get('house_action');
-    if (houseAction === 'caretaker') return handleCaretaker(request);
+    if (requestTargetsCaretaker(request)) return handleCaretaker(request);
     try { return await handleRooms(request); }
     catch (error) {
       console.error('House room storage failure', error);
