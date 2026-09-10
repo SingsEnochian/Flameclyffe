@@ -1,4 +1,4 @@
-import { mountSidecarPack, SIDECAR_PACKS } from '../sidecar-bootstrap.js';
+const DECLARED_PACKS = Object.freeze(['worlds','feedback','house','writing','worldseed','deep','forge','canon','aemeth']);
 
 function clone(value) {
   if (value === undefined) return undefined;
@@ -12,6 +12,10 @@ function schedulerDiagnostics() {
     failures: [],
     packs: [],
   });
+}
+
+function sidecarControl() {
+  return globalThis.__arcsweepSidecarControl || null;
 }
 
 export function registerSidecarService(registry) {
@@ -44,12 +48,14 @@ export function registerSidecarService(registry) {
     description: 'Mount one already-declared ArcSweep sidecar pack.',
     authority: 'operate',
     input_schema: { required: ['pack'] },
-    validate: (input) => Boolean(input?.pack && SIDECAR_PACKS[input.pack]),
+    validate: (input) => Boolean(input?.pack && DECLARED_PACKS.includes(input.pack)),
     execute: async (input) => {
-      const results = await mountSidecarPack(input.pack);
+      const control = sidecarControl();
+      if (!control?.mountPack) throw new Error('ArcSweep sidecar scheduler control is unavailable.');
+      const results = await control.mountPack(input.pack);
       return {
         pack: input.pack,
-        failures: results.filter((item) => item?.message),
+        failures: (results || []).filter((item) => item?.message),
         diagnostics: schedulerDiagnostics(),
       };
     },
@@ -60,3 +66,5 @@ export function registerSidecarService(registry) {
     capabilities: ['sidecars.status', 'sidecars.mount-pack'],
   });
 }
+
+export { DECLARED_PACKS as ARCSWEEP_DECLARED_SIDECAR_PACKS };
