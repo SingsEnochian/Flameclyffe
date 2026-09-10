@@ -117,6 +117,5 @@ test('local Hearthgate mounts a separate House Caretaker lane without altering F
   assert.match(caretakerRouter, /SYSTEM_PROMPT/);
   assert.match(flameRouter, /require\('\.\.\/caretaker\/router'\)/);
   assert.match(flameRouter, /router\.use\(caretakerRouter\)/);
-  assert.match(flameRouter, /const data = await response\.json\(\)/);
-  assert.doesNotMatch(flameRouter, /const data = await res\.json\(\)/);
+  assert.match(flameRouter, /const response = await fetch\(`\$\{endpoint\}\/api\/tags`[\s\S]{0,240}const data = await response\.json\(\)/);
 });
