@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-alpha.7';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.1';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'kernel-capability-context-cyberimmune-runtime-shell',
+  stage: 'runnable-release-candidate',
   authority: Object.freeze({
     modelRuntime: 'house-runtime',
     browserState: 'hearthfire',
@@ -29,9 +29,11 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     capabilityFirewall: true,
     failClosedPolicyEvaluation: true,
     featherBlocksNonReadCapabilities: true,
+    forgedStewardClaimsDenied: true,
     criticalRiskMutationPolicy: 'deny-until-steward-review',
     privilegedAuthority: 'scoped-short-lived-steward-lease',
     authorityLeaseTokensExposedInDiagnostics: false,
+    diagnosticsPayloadsRedacted: true,
     modelSelfApproval: false,
     autonomousOffensiveAction: false,
   }),
@@ -39,11 +41,15 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     bootLifecycle: ['BOOTING', 'READY', 'DEGRADED', 'PAUSED', 'ERROR'],
     guideDirectOrganAccess: false,
     guideMaximumCapabilityRequestsPerTurn: 1,
+    durableWorkspaceContext: true,
+    passiveDeviceProving: true,
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
     contextState: 'arcsweep.os-context-state/v1',
+    workspaceContext: 'arcsweep.workspace-context/v1',
     eventReceipt: 'arcsweep.os-event-receipt/v1',
+    observerTimeline: 'arcsweep.observer-os-timeline/v1',
     health: 'arcsweep.service-health/v1',
     repairReceipt: 'arcsweep.repair-receipt/v1',
     checkpoint: 'arcsweep.checkpoint/v1',
@@ -57,6 +63,10 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     stewardApproval: 'arcsweep.steward-approval/v1',
     stewardDeliberation: 'arcsweep.steward-deliberation/v1',
     guideTurn: 'arcsweep.guide-turn/v1',
+    glyphForgeStatus: 'arcsweep.glyphforge-status/v1',
+    runaStatus: 'arcsweep.runa-status/v1',
+    deviceStatus: 'arcsweep.device-status/v1',
+    deviceInputProof: 'arcsweep.device-input-proof/v1',
     cybersecurityIntelligence: 'arcsweep.cybersecurity-intelligence/v1',
     cybersecuritySeed: 'arcsweep.cybersecurity-seed/v1',
   }),
