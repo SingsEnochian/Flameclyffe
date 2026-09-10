@@ -150,7 +150,10 @@ export function createStewardApprovalQueue({
       record.execution = { call_id: null, status: 'failed', reason: error?.message || String(error) };
       record.status = 'approved-not-applied';
     } finally {
-      if (issued?.token) broker.revoke(issued.token);
+      if (issued?.token) {
+        const currentLease = broker.snapshot?.().find((lease) => lease.lease_id === issued.lease?.lease_id) || null;
+        if (!currentLease || currentLease.status === 'active') broker.revoke(issued.token);
+      }
     }
 
     const visible = publicRecord(record);
