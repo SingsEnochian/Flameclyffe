@@ -31,6 +31,14 @@ export function clearStateExtensionSnapshot(key) {
   return stateExtensionSnapshots.delete(key);
 }
 
+// Read actual persisted bytes, without loadState's in-memory extension overlay.
+export async function readPersistedStateExtension(key) {
+  const state = desktop?.loadState
+    ? (await desktop.loadState())?.state
+    : JSON.parse(globalThis.localStorage?.getItem(STORAGE_KEY) || 'null');
+  return state?.[key] === undefined ? null : structuredClone(state[key]);
+}
+
 export function applyStateExtensionSnapshots(state) {
   if (!state || typeof state !== 'object' || Array.isArray(state)) throw new TypeError('Arcsweep state object is required.');
   for (const [key, value] of stateExtensionSnapshots.entries()) state[key] = structuredClone(value);

@@ -11,7 +11,10 @@ import { createCapabilityRegistry } from './capabilities.js';
 import { createCapabilityFirewall } from './capability-firewall.js';
 import { createAuthorityBroker } from './authority-broker.js';
 import { createBootLifecycle } from './boot-lifecycle.js';
-import { createContextPersistence } from './context-persistence.js';
+import { createRoomNavigation } from './room-navigation.js';
+import { registerContextCacheService } from './context-cache-service.js';
+import { createWorkspaceContext } from './workspace-context.js';
+import { createContextPersistence, normaliseContextState } from './context-persistence.js';
 import { createWorkspaceContextStore } from './workspace-context.js';
 import { createSafeDiagnostics } from './diagnostics.js';
 import { createGuideShell } from './guide-shell.js';
@@ -54,28 +57,30 @@ function resolveLocalStorage() {
   try { return globalThis.localStorage || null; } catch { return null; }
 }
 
-function installArcSweepOS() {
+function installArcSweepOS({ navigation = createRoomNavigation(), workspace = typeof document !== 'undefined' ? createWorkspaceContext() : null, storage = resolveSessionStorage() } = {}) {
   if (globalThis[GLOBAL_KEY]) return globalThis[GLOBAL_KEY];
 
   const bus = createEventBus();
   const bootLifecycle = createBootLifecycle({ bus });
   const checkpointStore = createCheckpointStore();
   const healthRegistry = createHealthRegistry({ bus });
-  const contextPersistence = createContextPersistence({ storage: resolveSessionStorage() });
+  const contextPersistence = createContextPersistence({ storage });
   const workspaceContext = createWorkspaceContextStore({ storage: resolveLocalStorage() });
-  const restored = contextPersistence.load();
-  const durable = workspaceContext.load();
-  let session = restored?.session || createSessionState({
-    active_world_id: durable?.active_world_id || null,
-    active_project_id: durable?.active_project_id || null,
-    active_scene_id: durable?.active_scene_id || null,
-    active_document_id: durable?.active_document_id || null,
-    active_room: durable?.active_room || 'portal',
-    current_goal: durable?.current_goal || null,
-    presence_mode: durable?.presence_mode || 'companion',
-  });
+  let restored = contextPersistence.load();
+  let session = restored?.session || createSessionState({ active_room: 'portal' });
   const capsules = restored?.capsules ? restored.capsules.slice(-MAX_CAPSULES) : [];
   let lastNavigationReceipt = null;
+  let receipts = restored?.receipts || [];
+  let persistenceStatus = { status: 'not-yet-stored', cloud_verified: false };
+  let persistQueue = Promise.resolve();
+  let navigationQueue = Promise.resolve();
+  let guideNavigating = false;
+  let restoration = null;
+  let ready;
+  let workspaceRestoreBlocked = false;
+  const currentState = () => ({ schema: 'arcsweep.os-context-state/v1', session: clone(session), capsules: capsules.map(clone), receipts: receipts.map(clone), saved_at: new Date().toISOString() });
+
+  const durable = workspaceContext.load();
   let stewardSurface = null;
   let osShellSurface = null;
 
@@ -102,11 +107,30 @@ function installArcSweepOS() {
     handler: (receipt) => { lastNavigationReceipt = receipt; },
   });
 
-  function persistContext() {
-    return {
-      session: contextPersistence.save({ session, capsules }),
-      workspace: workspaceContext.save(session),
-    };
+  function persistContext({ mirror = true } = {}) {
+    const state = currentState();
+    const cached = mirror ? contextPersistence.save(state) : null;
+    if (mirror) workspaceContext.save(session);
+    if (!workspace) {
+      persistenceStatus = { cached, status: 'session-only', cloud_verified: false };
+      return Promise.resolve(clone(persistenceStatus));
+    }
+    if (workspaceRestoreBlocked) return Promise.resolve(clone(persistenceStatus));
+    persistQueue = persistQueue.then(async () => {
+      try {
+        const result = await workspace.write(state);
+        persistenceStatus = { ...result, status: 'workspace-readback-verified' };
+      } catch (error) {
+        persistenceStatus = { status: 'failed', error: error?.message || String(error), cloud_verified: false };
+      }
+      return clone(persistenceStatus);
+    });
+    return persistQueue;
+  }
+
+  function rememberReceipt(event) {
+    receipts = [...receipts, clone(event.payload)].slice(-MAX_DIAGNOSTIC_EVENTS);
+    void persistContext({ mirror: false });
   }
 
   function workspaceMatchesSession() {
@@ -123,7 +147,8 @@ function installArcSweepOS() {
     probe: workspaceMatchesSession,
     captureState: () => workspaceContext.load(),
     repair: () => workspaceContext.save(session),
-    rollback: ({ priorState }) => priorState ? workspaceContext.save(priorState) : workspaceContext.clear(),
+    rollback: ({ priorState }) => workspaceContext.restore(priorState),
+    verifyRollback: ({ priorState }) => JSON.stringify(workspaceContext.load()) === JSON.stringify(priorState),
   });
 
   function contextSummary() {
@@ -144,9 +169,10 @@ function installArcSweepOS() {
     }));
   }
 
-  function navigateInternal(currentRoom, patch = {}) {
+  function recordNavigation(currentRoom, patch = {}) {
     const room = String(currentRoom || '').trim();
-    if (!room || room === session.active_room) return null;
+    if (!room) return null;
+    if (room === session.active_room && !Object.keys(patch).length) return null;
     const previousRoom = session.active_room;
     const capsule = createContextCapsule({
       session,
@@ -168,9 +194,31 @@ function installArcSweepOS() {
       context_capsule_id: capsule.capsule_id,
       context_event_id: capsuleReceipt.event_id,
     }, { source: 'os-bootstrap' });
-    const persisted = persistContext();
-    dispatchDomEvent('arcsweep:os-navigation', { capsule, navigation_receipt: navigationReceipt, persisted, diagnostics: snapshot() });
+    void persistContext();
+    dispatchDomEvent('arcsweep:os-navigation', { capsule, navigation_receipt: navigationReceipt, diagnostics: snapshot() });
     return capsule;
+  }
+
+  function navigate(room, patch = {}) {
+    const operation = navigationQueue.catch(() => {}).then(async () => {
+      await ready;
+      if (caretaker.featherPaused()) throw new Error('feather-paused');
+      if (!navigation.hasRoom(room)) throw new Error(`Unknown or unavailable room: ${room}`);
+      const active = workspace ? await workspace.activeContext() : {};
+      // Active workspace world wins over an old or model-supplied world ID.
+      const mergedPatch = { ...patch, ...active };
+      if (caretaker.featherPaused()) throw new Error('feather-paused');
+      guideNavigating = true;
+      try {
+        const observed = await navigation.navigate(room);
+        if (observed?.ok !== true || observed.observed_room !== room) throw new Error(`Room navigation was not observed: ${room}`);
+        const capsule = recordNavigation(room, mergedPatch);
+        await persistQueue;
+        return { ...observed, context_capsule_id: capsule?.capsule_id || capsules.at(-1)?.capsule_id || null, persistence: clone(persistenceStatus) };
+      } finally { guideNavigating = false; }
+    });
+    navigationQueue = operation;
+    return operation;
   }
 
   capabilityRegistry.registerService({
@@ -185,7 +233,7 @@ function installArcSweepOS() {
   capabilityRegistry.registerCapability({ capability_id: 'os.context', service_id: 'arcsweep-os-kernel', description: 'Read a bounded summary of the active ArcSweep session and context lineage.', authority: 'read', execute: () => contextSummary() });
   capabilityRegistry.registerCapability({
     capability_id: 'os.navigate', service_id: 'arcsweep-os-kernel', description: 'Move the active ArcSweep room while preserving the current context capsule.', authority: 'operate', requires_confirmation: false,
-    input_schema: { required: ['room'] }, validate: (input) => Boolean(String(input?.room || '').trim()), execute: (input) => navigateInternal(input.room, input.patch || {}),
+    input_schema: { required: ['room'] }, validate: (input) => typeof input?.room === 'string' && navigation.hasRoom(input.room), execute: (input) => navigate(input.room, input.patch || {}),
   });
 
   function requestNavigation(room, patch = {}, { actor_id = 'human-ui', source = 'os-ui' } = {}) {
@@ -216,7 +264,19 @@ function installArcSweepOS() {
     getCapability: (capabilityId) => capabilityRegistry.getCapability(capabilityId),
     bus,
   });
-  const guideShell = createGuideShell({ invoke: (capabilityId, input, context) => capabilityRegistry.invoke(capabilityId, input, context) });
+  const guideShell = createGuideShell({
+    invoke: async (capabilityId, input, context) => {
+      await ready;
+      const receipt = await capabilityRegistry.invoke(capabilityId, input, context);
+      await persistQueue;
+      return receipt;
+    },
+  });
+
+  bus.subscribe('arcsweep:capability-invoked', rememberReceipt, { id: 'os-capability-replay' });
+  bus.subscribe('arcsweep:repair-completed', rememberReceipt, { id: 'os-repair-replay' });
+
+
   const guideRuntime = createGuideRuntime({ shell: guideShell, contextProvider: () => contextSummary() });
 
   function installStewardSurface() {
@@ -227,9 +287,11 @@ function installArcSweepOS() {
 
   function snapshot() {
     const events = bus.history();
-    const repairReceipts = events.filter((item) => item.name === 'arcsweep:repair-completed').map((item) => item.payload);
-    const capabilityReceipts = events.filter((item) => item.name === 'arcsweep:capability-invoked').map((item) => item.payload);
-    return createSafeDiagnostics({
+    const repairReceipts = receipts.filter((item) => item.schema === 'arcsweep.repair-receipt/v1');
+    const capabilityReceipts = receipts.filter((item) => item.schema === 'arcsweep.os-capability-receipt/v1');
+    return Object.freeze({ workspace_persistence: { status: persistenceStatus.status, cloud_verified: false },
+      restoration: restoration ? { ok: restoration.ok === true, status: restoration.status || null } : null,
+      ...createSafeDiagnostics({
       manifest: ARCSWEEP_OS_MANIFEST,
       boot: bootLifecycle.snapshot(),
       session,
@@ -254,10 +316,11 @@ function installArcSweepOS() {
       repairBudget: caretaker.repairBudget(),
       featherPaused: caretaker.featherPaused(),
       maxEvents: MAX_DIAGNOSTIC_EVENTS,
-    });
+    }) });
   }
 
-  async function inspect() {
+  async function inspectOnce() {
+    await ready;
     const subscriptionFindings = await caretaker.inspectRequiredSubscriptions();
     const serviceFindings = await caretaker.inspectRequiredServices();
     const derivedFindings = await caretaker.inspectRequiredDerivedState();
@@ -270,18 +333,70 @@ function installArcSweepOS() {
     return findings;
   }
 
+  let inspection = null;
+  function inspect() {
+    if (!inspection) inspection = inspectOnce().finally(() => { inspection = null; });
+    return inspection;
+  }
   function setFeatherPaused(paused = true) {
+    session = { ...session, feather_paused: Boolean(paused) };
     const next = caretaker.setFeatherPaused(paused);
+    void persistContext();
     if (next && bootLifecycle.state() !== 'PAUSED') bootLifecycle.transition('PAUSED', { reason: 'feather' });
     if (!next && bootLifecycle.state() === 'PAUSED') bootLifecycle.transition('READY', { reason: 'feather-cleared' });
     return next;
   }
 
   function clearPersistedContext() {
-    return { session: contextPersistence.clear(), workspace: workspaceContext.clear() };
+    return { session: contextPersistence.clear(), workspace: workspaceContext.clear(), durable_context_retained: true };
   }
 
+  ready = (async () => {
+    if (workspace) {
+      try {
+        const raw = await workspace.read();
+        const saved = normaliseContextState(raw);
+        if (raw !== null && raw !== undefined && !saved) throw new Error('Stored OS context is invalid; preserving it for recovery.');
+        if (saved && (!restored || Date.parse(saved.saved_at) >= Date.parse(restored.saved_at || 0))) restored = saved;
+      } catch (error) {
+        workspaceRestoreBlocked = true;
+        persistenceStatus = { status: 'restore-failed', error: error.message, cloud_verified: false };
+      }
+    }
+    if (!restored && durable) {
+      session = createSessionState(durable);
+      restored = { session, capsules: [], receipts: [] };
+    }
+    if (restored) {
+      session = clone(restored.session);
+      capsules.splice(0, capsules.length, ...restored.capsules);
+      receipts = clone(restored.receipts || []);
+      caretaker.setFeatherPaused(session.feather_paused === true);
+      if (session.feather_paused === true && bootLifecycle.state() !== 'PAUSED') bootLifecycle.transition('PAUSED', { reason: 'restored-feather' });
+      guideNavigating = true;
+      try {
+        const target = session.active_room;
+        restoration = caretaker.featherPaused()
+          ? { ok: false, status: 'feather-paused', target }
+          : await navigation.navigate(target);
+        if (!restoration?.ok) session = { ...session, active_room: navigation.activeRoom() || 'portal' };
+      } catch (error) {
+        restoration = { ok: false, status: 'failed', error: error.message };
+        session = { ...session, active_room: navigation.activeRoom() || 'portal' };
+      } finally { guideNavigating = false; }
+    } else {
+      session = { ...session, active_room: navigation.activeRoom() || 'portal' };
+    }
+    // Cache only at boot; do not overwrite the workspace on a failed restore.
+    contextPersistence.save(currentState());
+    workspaceContext.save(session);
+    return restoration;
+  })();
+  registerContextCacheService({ caretaker, persistence: contextPersistence, state: currentState, ready });
+
   const api = Object.freeze({
+    ready,
+    flush: () => persistQueue,
     manifest: ARCSWEEP_OS_MANIFEST,
     bus,
     boot: bootLifecycle,
@@ -306,7 +421,6 @@ function installArcSweepOS() {
   });
 
   globalThis[GLOBAL_KEY] = api;
-  persistContext();
 
   healthRegistry.set({ service_id: 'arcsweep-os-kernel', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['hearthfire', 'house-runtime'], recoverable: true });
   healthRegistry.set({ service_id: 'steward-gate', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: false });
@@ -323,9 +437,17 @@ function installArcSweepOS() {
     else document.addEventListener('DOMContentLoaded', installSurfaces, { once: true });
     document.addEventListener('click', (event) => {
       const room = inferRoomFromTrigger(event.target);
-      if (room) queueMicrotask(() => { void requestNavigation(room, {}, { actor_id: 'human-ui', source: 'ui-navigation' }); });
+      if (room && !guideNavigating) {
+        void (async () => {
+          await ready;
+          await navigation.settle();
+          if (guideNavigating || navigation.activeRoom() !== room) return;
+          const patch = workspace ? await workspace.activeContext() : {};
+          recordNavigation(room, patch);
+        })().catch((error) => bus.publish('arcsweep:caretaker-alert', { message: error.message }));
+      }
     }, true);
-    globalThis.addEventListener?.('arcsweep:caretaker-inspect', () => { void inspect(); });
+    globalThis.addEventListener?.('arcsweep:caretaker-inspect', () => { void inspect().catch(() => {}); });
     globalThis.addEventListener?.('arcsweep:os-inspect', () => dispatchDomEvent('arcsweep:os-diagnostics', snapshot()));
     globalThis.addEventListener?.('arcsweep:feather', () => setFeatherPaused(true));
     globalThis.addEventListener?.('arcsweep:guide-query', (event) => {
@@ -335,7 +457,7 @@ function installArcSweepOS() {
         .then((turn) => dispatchDomEvent('arcsweep:guide-response', { request_id: requestId, turn }))
         .catch((error) => dispatchDomEvent('arcsweep:guide-response', { request_id: requestId, turn: { schema: 'arcsweep.guide-turn/v1', status: 'failed', say: error?.message || String(error) } }));
     });
-    const inspectionTimer = setInterval(() => { void inspect(); }, 12000);
+    const inspectionTimer = setInterval(() => { void inspect().catch(() => {}); }, 12000);
     globalThis.addEventListener?.('beforeunload', () => clearInterval(inspectionTimer), { once: true });
   }
 

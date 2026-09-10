@@ -1,4 +1,4 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.3';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.4';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
