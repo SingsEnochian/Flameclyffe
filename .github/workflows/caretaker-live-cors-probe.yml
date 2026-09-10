@@ -12,7 +12,7 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe GitHub Pages preflight
+      - name: Probe direct shared Caretaker preflight
         shell: bash
         run: |
           set -euo pipefail
@@ -21,13 +21,13 @@ jobs:
             -H 'Origin: https://singsenochian.github.io' \
             -H 'Access-Control-Request-Method: POST' \
             -H 'Access-Control-Request-Headers: authorization,content-type' \
-            https://flameclyffe.vercel.app/api/v1/house/caretaker)"
+            'https://flameclyffe.vercel.app/api/v1/house/rooms?house_action=caretaker')"
           cat "$headers"
           test "$code" = '204'
           grep -qi '^access-control-allow-origin: https://singsenochian.github.io' "$headers"
           grep -qi '^access-control-allow-headers:.*authorization' "$headers"
 
-      - name: Probe unauthenticated CORS error visibility
+      - name: Probe unauthenticated direct shared Caretaker response
         shell: bash
         run: |
           set -euo pipefail
@@ -35,7 +35,7 @@ jobs:
           body="$(mktemp)"
           code="$(curl -sS -o "$body" -D "$headers" -w '%{http_code}' \
             -H 'Origin: https://singsenochian.github.io' \
-            https://flameclyffe.vercel.app/api/v1/house/caretaker)"
+            'https://flameclyffe.vercel.app/api/v1/house/rooms?house_action=caretaker')"
           cat "$headers"
           cat "$body"
           test "$code" = '401'
