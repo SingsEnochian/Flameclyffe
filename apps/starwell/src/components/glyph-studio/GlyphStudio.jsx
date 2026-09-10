@@ -5,10 +5,12 @@ import GlyphCanvas from './GlyphCanvas.jsx';
 import LayerPanel from './LayerPanel.jsx';
 import TextPanel, { makeTextLayer } from './TextPanel.jsx';
 import {
+  brushRuntime,
   downloadText,
   makeBrushLibrary,
   makeGlyph,
   makeId,
+  recordRecentBrush,
   safeFileName,
 } from './glyphStudioModel.js';
 import {
@@ -35,6 +37,23 @@ const PANELS = [
 
 function clone(value) {
   return structuredClone(value);
+}
+
+function dispatchStudioEvent(name, detail) {
+  if (typeof globalThis.dispatchEvent !== 'function' || typeof CustomEvent === 'undefined') return;
+  globalThis.dispatchEvent(new CustomEvent(name, { detail }));
+}
+
+function coerceExistingSetting(currentValue, nextValue) {
+  if (typeof currentValue === 'number') {
+    const numeric = Number(nextValue);
+    if (!Number.isFinite(numeric)) throw new Error('Numeric brush setting requires a finite number.');
+    return numeric;
+  }
+  if (typeof currentValue === 'boolean') return Boolean(nextValue);
+  if (typeof currentValue === 'string') return String(nextValue);
+  if (currentValue === null && (nextValue === null || ['string', 'number', 'boolean'].includes(typeof nextValue))) return nextValue;
+  throw new Error('This brush setting type is not remotely mutable.');
 }
 
 function GlyphInventory({ project, onSelect, onAdd, onDuplicate, onDelete }) {
@@ -96,6 +115,7 @@ export default function GlyphStudio() {
   const [status, setStatus] = useState('Glyph Studio foundation awake. Project is stored locally in this browser.');
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
+  const liveStateRef = useRef(null);
 
   const activeGlyph = useMemo(
     () => project.glyphs.find((glyph) => glyph.id === project.activeGlyphId) || project.glyphs[0],
@@ -103,6 +123,7 @@ export default function GlyphStudio() {
   );
   const activeLayer = activeGlyph.layers.find((layer) => layer.id === activeGlyph.activeLayerId) || activeGlyph.layers[0];
   const activeBrush = library.brushes.find((brush) => brush.id === library.activeBrushId) || library.brushes[0];
+  liveStateRef.current = { project, library, colourState, activeGlyph, activeLayer, activeBrush };
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -112,6 +133,91 @@ export default function GlyphStudio() {
     }, 180);
     return () => window.clearTimeout(timer);
   }, [project, library, colourState]);
+
+  useEffect(() => {
+    const previous = globalThis.__starwellGlyphStudioBridge;
+    const bridge = Object.freeze({
+      schema: 'starwell.glyph-studio-bridge/v1',
+      surface: 'glyph-studio',
+      snapshot() {
+        const live = liveStateRef.current;
+        const glyph = live?.activeGlyph;
+        const layer = live?.activeLayer;
+        const brush = live?.activeBrush;
+        return clone({
+          schema: 'starwell.glyph-studio-snapshot/v1',
+          project: {
+            id: live?.project?.id || null,
+            name: live?.project?.name || null,
+            glyph_count: live?.project?.glyphs?.length || 0,
+          },
+          active_glyph: glyph ? {
+            id: glyph.id,
+            name: glyph.name,
+            character: glyph.character,
+            codepoint: glyph.codepoint,
+            stroke_count: glyph.strokes?.length || 0,
+          } : null,
+          active_layer: layer ? { id: layer.id, name: layer.name, kind: layer.kind, locked: Boolean(layer.locked) } : null,
+          active_brush: brush ? { id: brush.id, name: brush.name, modified_at: brush.modifiedAt || null } : null,
+          brush_runtime: brush ? brushRuntime(brush) : null,
+          available_brushes: (live?.library?.brushes || []).map((item) => ({ id: item.id, name: item.name, pinned: Boolean(item.pinned) })),
+          colour_profile: live?.colourState?.profile || null,
+        });
+      },
+      selectBrush(brushId) {
+        const id = String(brushId || '').trim();
+        const live = liveStateRef.current;
+        if (!live?.library?.brushes?.some((brush) => brush.id === id)) throw new Error(`Unknown Glyph Studio brush: ${id || 'missing'}`);
+        setLibrary((current) => recordRecentBrush(current, id));
+        setStatus(`Brush selected through ArcSweep OS: ${live.library.brushes.find((brush) => brush.id === id)?.name || id}.`);
+        dispatchStudioEvent('starwell:glyph-brush-selected', { schema: 'starwell.glyph-brush-selected/v1', brush_id: id, selected_at: new Date().toISOString() });
+        return { schema: 'starwell.glyph-brush-selection/v1', selected_brush_id: id };
+      },
+      patchBrushSetting({ brush_id, group, setting, value } = {}) {
+        const brushId = String(brush_id || '').trim();
+        const groupName = String(group || '').trim();
+        const settingName = String(setting || '').trim();
+        const live = liveStateRef.current;
+        const brush = live?.library?.brushes?.find((item) => item.id === brushId);
+        if (!brush) throw new Error(`Unknown Glyph Studio brush: ${brushId || 'missing'}`);
+        const groupValue = brush.attributes?.[groupName];
+        if (!groupValue || typeof groupValue !== 'object') throw new Error(`Unknown brush attribute group: ${groupName || 'missing'}`);
+        if (!Object.prototype.hasOwnProperty.call(groupValue, settingName)) throw new Error(`Unknown brush setting: ${groupName}.${settingName}`);
+        const nextValue = coerceExistingSetting(groupValue[settingName], value);
+        setLibrary((current) => ({
+          ...current,
+          brushes: current.brushes.map((item) => item.id === brushId
+            ? {
+                ...item,
+                attributes: {
+                  ...item.attributes,
+                  [groupName]: { ...item.attributes[groupName], [settingName]: nextValue },
+                },
+                modifiedAt: new Date().toISOString(),
+              }
+            : item),
+        }));
+        setStatus(`Brush setting changed through the Steward gate: ${groupName}.${settingName}.`);
+        dispatchStudioEvent('starwell:glyph-brush-setting-changed', {
+          schema: 'starwell.glyph-brush-setting-changed/v1',
+          brush_id: brushId,
+          group: groupName,
+          setting: settingName,
+          changed_at: new Date().toISOString(),
+        });
+        return { schema: 'starwell.glyph-brush-setting-change/v1', brush_id: brushId, group: groupName, setting: settingName, applied: true };
+      },
+    });
+    globalThis.__starwellGlyphStudioBridge = bridge;
+    dispatchStudioEvent('starwell:glyph-studio-bridge-ready', { schema: bridge.schema, surface: bridge.surface });
+    return () => {
+      if (globalThis.__starwellGlyphStudioBridge === bridge) {
+        if (previous === undefined) delete globalThis.__starwellGlyphStudioBridge;
+        else globalThis.__starwellGlyphStudioBridge = previous;
+      }
+    };
+  }, []);
 
   function commitProject(nextProject, message = 'Project updated.') {
     setUndoStack((stack) => [...stack.slice(-39), clone(project)]);
@@ -189,6 +295,16 @@ export default function GlyphStudio() {
 
   function commitStroke(stroke) {
     changeGlyph({ ...activeGlyph, strokes: [...activeGlyph.strokes, stroke] }, `Stroke recorded from ${stroke.pointerType || 'pointer'} input.`);
+    dispatchStudioEvent('starwell:glyph-stroke-committed', {
+      schema: 'starwell.glyph-stroke-receipt/v1',
+      stroke_id: stroke.id,
+      glyph_id: activeGlyph.id,
+      layer_id: stroke.layerId,
+      brush_id: stroke.brushId,
+      pointer_type: stroke.pointerType || 'pointer',
+      point_count: stroke.points?.length || 0,
+      committed_at: new Date().toISOString(),
+    });
   }
 
   function applyColour(colour) {
@@ -308,7 +424,7 @@ export default function GlyphStudio() {
             </div>
           </div>
           <GlyphCanvas glyph={activeGlyph} activeLayer={activeLayer} activeBrush={activeBrush} guides={guides} onCommitStroke={commitStroke} />
-          <div className="studio-status" aria-live="polite"><strong>Status</strong><span>{status}</span><small>Local-first preview · iPad Pointer Events enabled · FontForge compilation not yet connected</small></div>
+          <div className="studio-status" aria-live="polite"><strong>Status</strong><span>{status}</span><small>Local-first preview · iPad Pointer Events enabled · ArcSweep OS organ bridge live · FontForge compilation not yet connected</small></div>
         </section>
 
         <aside className="inspector-column">

@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
+import BrushLivePreview from './BrushLivePreview.jsx';
 import {
   BRUSH_ATTRIBUTE_GROUPS,
   BRUSH_LIBRARY_SCHEMA,
@@ -252,9 +253,10 @@ export default function BrushPanel({ library, onChangeLibrary }) {
         </nav>
         <div className="attribute-inspector">
           <div className="panel-heading compact"><div><span>Brush Studio</span><h3>{groupName}</h3></div></div>
-          <div className="brush-live-pad" aria-label="Brush preview pad">
-            <span style={{ '--preview-colour': activeBrush.attributes.preview.color, '--preview-width': `${Math.max(3, activeBrush.attributes.properties.size / 5)}px` }} />
+          <div className="brush-live-pad" aria-label="Live brush preview pad">
+            <BrushLivePreview brush={activeBrush} />
           </div>
+          <p className="empty-setting">Live pad uses the same brush runtime and stroke renderer as the drawing canvas. Size, opacity, pressure, taper, colour and stabilization changes are visible immediately.</p>
           {Object.entries(settings).map(([name, value]) => <SettingField key={name} name={name} value={value} onChange={(nextValue) => patchAttribute(attributeKey, name, nextValue)} />)}
         </div>
       </div>

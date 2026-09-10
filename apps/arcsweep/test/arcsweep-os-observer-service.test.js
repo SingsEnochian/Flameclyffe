@@ -4,7 +4,7 @@ import { createEventBus } from '../src/os/kernel.js';
 import { createCapabilityRegistry } from '../src/os/capabilities.js';
 import { registerObserverService } from '../src/os/observer-service.js';
 
-test('Observer joins the OS as a read-only service with receipted status, source, and DEEP reads', async () => {
+test('Observer joins the OS as a read-only service with receipted status, source, DEEP reads, and safe timeline', async () => {
   const previousBridge = globalThis.__arcsweepObserverBridge;
   const previousFetch = globalThis.fetch;
   const previousStorage = globalThis.localStorage;
@@ -32,7 +32,7 @@ test('Observer joins the OS as a read-only service with receipted status, source
 
   const bus = createEventBus();
   const registry = createCapabilityRegistry({ bus });
-  registerObserverService(registry);
+  registerObserverService(registry, { bus });
 
   const status = await registry.invoke('observer.status', {}, { authority: 'read' });
   assert.equal(status.status, 'applied');
@@ -47,8 +47,18 @@ test('Observer joins the OS as a read-only service with receipted status, source
   assert.equal(deep.output.schema, 'hearthgate.deep-current/v1');
   assert.deepEqual(deep.output.raw_field, snapshot.field);
 
+  bus.publish('arcsweep:caretaker-alert', { message: 'secret payload should stay out of timeline' }, { source: 'test-suite' });
+  const timeline = await registry.invoke('observer.timeline', {}, { authority: 'read' });
+  assert.equal(timeline.status, 'applied');
+  assert.equal(timeline.output.schema, 'arcsweep.observer-os-timeline/v1');
+  const latest = timeline.output.events.at(-1);
+  assert.equal(latest.name, 'arcsweep:caretaker-alert');
+  assert.equal(latest.source, 'test-suite');
+  assert.equal(latest.payload, undefined);
+  assert.equal(JSON.stringify(timeline.output).includes('secret payload'), false);
+
   const descriptors = registry.capabilities().filter((item) => item.service_id === 'observer-deep');
-  assert.ok(descriptors.length >= 3);
+  assert.ok(descriptors.length >= 4);
   assert.ok(descriptors.every((item) => item.authority === 'read'));
 
   if (previousBridge === undefined) delete globalThis.__arcsweepObserverBridge;

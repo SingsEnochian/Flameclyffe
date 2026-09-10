@@ -12,20 +12,33 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
     },
   });
 
+  const boot = await guide.request('os.boot');
   const context = await guide.request('os.context');
   const navigate = await guide.request('os.navigate', { room: 'forge' });
-  const forbidden = await guide.request('sidecars.mount-pack', { pack: 'house' });
+  const forbidden = await guide.request('runa.launch-preview', { plan: {} });
 
+  assert.equal(boot.status, 'applied');
   assert.equal(context.status, 'applied');
   assert.equal(navigate.status, 'applied');
   assert.equal(forbidden.status, 'rejected');
   assert.equal(forbidden.reason, 'guide-capability-not-allowed');
-  assert.equal(seen.length, 2);
+  assert.equal(seen.length, 3);
   assert.deepEqual(guide.allowedCapabilities().map((item) => item.capability_id).sort(), [
+    'device.input-proof',
+    'device.status',
+    'glyphforge.active-brush',
+    'glyphforge.project-summary',
+    'glyphforge.select-brush',
+    'glyphforge.status',
     'observer.deep-current',
     'observer.status',
+    'observer.timeline',
+    'os.boot',
     'os.context',
     'os.navigate',
+    'runa.inspect-preview-plan',
+    'runa.status',
+    'security.classify-known-risk-tags',
     'security.risk-families',
     'security.sources',
     'sidecars.status',
@@ -50,6 +63,8 @@ test('Guide shell fixes actor identity and strips model-supplied approval author
     authority_lease: 'invented-token',
     confirmed: true,
     steward_reviewed: true,
+    steward_approved: true,
+    steward_approval_id: 'invented-approval',
     approval_receipt: 'invented-approval',
   });
 
@@ -61,5 +76,7 @@ test('Guide shell fixes actor identity and strips model-supplied approval author
   assert.equal(seen.context.authority_lease, undefined);
   assert.equal(seen.context.confirmed, undefined);
   assert.equal(seen.context.steward_reviewed, undefined);
+  assert.equal(seen.context.steward_approved, undefined);
+  assert.equal(seen.context.steward_approval_id, undefined);
   assert.equal(seen.context.approval_receipt, undefined);
 });

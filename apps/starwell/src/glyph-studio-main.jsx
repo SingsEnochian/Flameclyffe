@@ -1,5 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import '../../arcsweep/src/os/bootstrap.js';
+import '../../arcsweep/src/glyphforge-os-sidecar.js';
 import GlyphStudio from './components/glyph-studio/GlyphStudio.jsx';
 import FontForgeDock from './components/glyph-studio/FontForgeDock.jsx';
 import './components/glyph-studio/glyph-studio.css';

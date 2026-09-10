@@ -17,7 +17,17 @@ function readStoredSnapshot(storageKey) {
   }
 }
 
-export function registerObserverService(registry) {
+function timelineReceipt(receipt = {}) {
+  return {
+    event_id: receipt.event_id || null,
+    sequence: Number.isFinite(receipt.sequence) ? receipt.sequence : null,
+    name: receipt.name || null,
+    source: typeof receipt.meta?.source === 'string' ? receipt.meta.source.slice(0, 120) : null,
+    emitted_at: receipt.emitted_at || null,
+  };
+}
+
+export function registerObserverService(registry, { bus = null, timelineLimit = 64 } = {}) {
   if (!registry?.registerService || !registry?.registerCapability) throw new Error('Observer service requires the ArcSweep capability registry.');
 
   registry.registerService({
@@ -26,6 +36,7 @@ export function registerObserverService(registry) {
     authority_boundary: {
       observer_source: 'read-only',
       deep_projection: 'derived-read-only',
+      os_timeline: 'receipt-summary-only',
       canon_promotion: false,
       source_mutation: false,
     },
@@ -78,8 +89,23 @@ export function registerObserverService(registry) {
     },
   });
 
+  registry.registerCapability({
+    capability_id: 'observer.timeline',
+    service_id: 'observer-deep',
+    description: 'Read a bounded live timeline of ArcSweep OS event receipt headers without event payloads.',
+    authority: 'read',
+    execute: () => {
+      const receipts = bus?.history?.() || [];
+      return {
+        schema: 'arcsweep.observer-os-timeline/v1',
+        count: Math.min(receipts.length, timelineLimit),
+        events: receipts.slice(-timelineLimit).map(timelineReceipt),
+      };
+    },
+  });
+
   return Object.freeze({
     service_id: 'observer-deep',
-    capabilities: ['observer.status', 'observer.snapshot', 'observer.deep-current'],
+    capabilities: ['observer.status', 'observer.snapshot', 'observer.deep-current', 'observer.timeline'],
   });
 }

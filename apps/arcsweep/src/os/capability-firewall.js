@@ -5,6 +5,7 @@ function clone(value) {
 
 const AUTHORITY = Object.freeze(['read', 'operate', 'mutate', 'admin']);
 const DEFAULT_TRIPWIRE_LIMIT = 64;
+const TRUSTED_STEWARD_SOURCE = 'steward-approval-surface';
 
 export const CRITICAL_RISK_FAMILIES = Object.freeze([
   'credential-access',
@@ -58,6 +59,7 @@ export function createCapabilityFirewall({ bus = null, featherPaused = () => fal
       decision: input.decision,
       reason: input.reason,
       risk_families: clone(input.risk_families || []),
+      steward_approval_id: input.steward_approval_id || null,
       observed_at: now().toISOString(),
     }));
     tripwires.push(item);
@@ -74,15 +76,7 @@ export function createCapabilityFirewall({ bus = null, featherPaused = () => fal
     const risks = riskFamilies(context);
 
     if (featherPaused() && requiredAuthority !== 'read') {
-      const tripwire = record({
-        actor_id: actorId,
-        capability_id: capability.capability_id,
-        service_id: capability.service_id,
-        required_authority: requiredAuthority,
-        decision: 'deny',
-        reason: 'feather-paused',
-        risk_families: risks,
-      });
+      const tripwire = record({ actor_id: actorId, capability_id: capability.capability_id, service_id: capability.service_id, required_authority: requiredAuthority, decision: 'deny', reason: 'feather-paused', risk_families: risks });
       return { decision: 'deny', reason: 'feather-paused', risk_families: risks, tripwire_id: tripwire.tripwire_id };
     }
 
@@ -90,44 +84,43 @@ export function createCapabilityFirewall({ bus = null, featherPaused = () => fal
       const expectedRank = authorityRank(context.expected_authority);
       if (expectedRank >= 0 && requiredRank > expectedRank) {
         const taggedRisks = [...new Set([...risks, 'capability-drift'])];
-        const tripwire = record({
-          actor_id: actorId,
-          capability_id: capability.capability_id,
-          service_id: capability.service_id,
-          required_authority: requiredAuthority,
-          decision: 'deny',
-          reason: 'capability-drift',
-          risk_families: taggedRisks,
-        });
+        const tripwire = record({ actor_id: actorId, capability_id: capability.capability_id, service_id: capability.service_id, required_authority: requiredAuthority, decision: 'deny', reason: 'capability-drift', risk_families: taggedRisks });
         return { decision: 'deny', reason: 'capability-drift', risk_families: taggedRisks, tripwire_id: tripwire.tripwire_id };
       }
     }
 
-    const critical = risks.filter((risk) => CRITICAL_RISK_FAMILIES.includes(risk));
-    if (critical.length && requiredRank >= authorityRank('mutate')) {
+    if (context.steward_approved === true && requiredRank >= authorityRank('mutate') && context.source !== TRUSTED_STEWARD_SOURCE) {
+      const taggedRisks = [...new Set([...risks, 'capability-drift'])];
       const tripwire = record({
         actor_id: actorId,
         capability_id: capability.capability_id,
         service_id: capability.service_id,
         required_authority: requiredAuthority,
         decision: 'deny',
-        reason: 'deny-until-steward-review',
-        risk_families: risks,
+        reason: 'untrusted-steward-claim',
+        risk_families: taggedRisks,
+        steward_approval_id: context.steward_approval_id || null,
       });
-      return { decision: 'deny', reason: 'deny-until-steward-review', risk_families: risks, tripwire_id: tripwire.tripwire_id };
+      return { decision: 'deny', reason: 'untrusted-steward-claim', risk_families: taggedRisks, tripwire_id: tripwire.tripwire_id };
+    }
+
+    const critical = risks.filter((risk) => CRITICAL_RISK_FAMILIES.includes(risk));
+    if (critical.length && requiredRank >= authorityRank('mutate')) {
+      const stewardReviewed = context.steward_approved === true
+        && context.source === TRUSTED_STEWARD_SOURCE
+        && Boolean(String(context.steward_approval_id || '').trim())
+        && context.confirmed === true;
+      if (!stewardReviewed) {
+        const tripwire = record({ actor_id: actorId, capability_id: capability.capability_id, service_id: capability.service_id, required_authority: requiredAuthority, decision: 'deny', reason: 'deny-until-steward-review', risk_families: risks });
+        return { decision: 'deny', reason: 'deny-until-steward-review', risk_families: risks, tripwire_id: tripwire.tripwire_id };
+      }
+      const tripwire = record({ actor_id: actorId, capability_id: capability.capability_id, service_id: capability.service_id, required_authority: requiredAuthority, decision: 'allow-reviewed', reason: 'steward-reviewed-critical-risk', risk_families: risks, steward_approval_id: context.steward_approval_id });
+      return { decision: 'allow', reason: 'steward-reviewed-critical-risk', risk_families: risks, tripwire_id: tripwire.tripwire_id };
     }
 
     const confirmationRisks = risks.filter((risk) => CONFIRMATION_RISK_FAMILIES.includes(risk));
     if (confirmationRisks.length && requiredRank >= authorityRank('operate') && context.confirmed !== true) {
-      const tripwire = record({
-        actor_id: actorId,
-        capability_id: capability.capability_id,
-        service_id: capability.service_id,
-        required_authority: requiredAuthority,
-        decision: 'require-confirmation',
-        reason: 'security-confirmation-required',
-        risk_families: risks,
-      });
+      const tripwire = record({ actor_id: actorId, capability_id: capability.capability_id, service_id: capability.service_id, required_authority: requiredAuthority, decision: 'require-confirmation', reason: 'security-confirmation-required', risk_families: risks });
       return { decision: 'require-confirmation', reason: 'security-confirmation-required', risk_families: risks, tripwire_id: tripwire.tripwire_id };
     }
 
