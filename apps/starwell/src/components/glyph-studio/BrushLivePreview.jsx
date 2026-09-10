@@ -40,7 +40,7 @@ export default function BrushLivePreview({ brush }) {
       viewBox="0 0 320 100"
       role="img"
       aria-label={`Live stroke preview for ${brush.name}`}
-      style={{ width: '100%', height: '100%', display: 'block', overflow: 'visible' }}
+      style={{ width: '100%', height: '5.4rem', display: 'block', overflow: 'visible' }}
       data-brush-preview-id={brush.id}
     >
       <StrokeMarks stroke={stroke} />
