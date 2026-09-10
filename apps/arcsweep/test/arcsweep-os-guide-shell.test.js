@@ -32,7 +32,7 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   ]);
 });
 
-test('Guide shell fixes actor identity and authority instead of trusting model-supplied context', async () => {
+test('Guide shell fixes actor identity and strips model-supplied approval authority', async () => {
   let seen = null;
   const guide = createGuideShell({
     actorId: 'guide:test',
@@ -48,6 +48,9 @@ test('Guide shell fixes actor identity and authority instead of trusting model-s
     authority: 'admin',
     expected_authority: 'admin',
     authority_lease: 'invented-token',
+    confirmed: true,
+    steward_reviewed: true,
+    approval_receipt: 'invented-approval',
   });
 
   assert.equal(seen.capabilityId, 'os.navigate');
@@ -55,5 +58,8 @@ test('Guide shell fixes actor identity and authority instead of trusting model-s
   assert.equal(seen.context.source, 'guide-shell');
   assert.equal(seen.context.authority, 'operate');
   assert.equal(seen.context.expected_authority, 'operate');
-  assert.equal(seen.context.authority_lease, 'invented-token');
+  assert.equal(seen.context.authority_lease, undefined);
+  assert.equal(seen.context.confirmed, undefined);
+  assert.equal(seen.context.steward_reviewed, undefined);
+  assert.equal(seen.context.approval_receipt, undefined);
 });
