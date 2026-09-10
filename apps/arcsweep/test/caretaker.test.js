@@ -125,13 +125,24 @@ test('invokeCaretaker completes model to plan to runtime result without inventin
   assert.equal(receipt.model, 'hf.co/DavidAU/Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M');
 });
 
-test('Vercel caretaker route is a House route, requires House auth, and defaults to Mighty Sword Q4_K_M', () => {
-  const source = fs.readFileSync(path.join(root, 'api/v1/house/caretaker.js'), 'utf8');
-  assert.match(source, /authoriseHouseRequest/);
-  assert.match(source, /role: 'house-intelligence'/);
-  assert.match(source, /MODEL_ARCSWEEP_CARETAKER/);
-  assert.match(source, /OLLAMA_URL_CARETAKER/);
-  assert.match(source, /Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M/);
-  assert.match(source, /allowed_actions: \['navigate'\]/);
-  assert.doesNotMatch(source, /flame_id/);
+test('Vercel caretaker reuses the existing House rooms function instead of adding a function slot', () => {
+  const runtime = fs.readFileSync(path.join(root, 'api/_shared/house-caretaker-runtime.mjs'), 'utf8');
+  const roomsRoute = fs.readFileSync(path.join(root, 'api/v1/house/rooms.js'), 'utf8');
+  const vercel = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
+  const rewrite = vercel.rewrites.find((item) => item.source === '/api/v1/house/caretaker');
+
+  assert.match(runtime, /authoriseHouseRequest/);
+  assert.match(runtime, /role: 'house-intelligence'/);
+  assert.match(runtime, /MODEL_ARCSWEEP_CARETAKER/);
+  assert.match(runtime, /OLLAMA_URL_CARETAKER/);
+  assert.match(runtime, /Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M/);
+  assert.match(runtime, /allowed_actions: \['navigate'\]/);
+  assert.doesNotMatch(runtime, /flame_id/);
+  assert.match(roomsRoute, /createHouseCaretakerHandler/);
+  assert.match(roomsRoute, /house_action.*caretaker/);
+  assert.deepEqual(rewrite, {
+    source: '/api/v1/house/caretaker',
+    destination: '/api/v1/house/rooms?house_action=caretaker',
+  });
+  assert.equal(fs.existsSync(path.join(root, 'api/v1/house/caretaker.js')), false);
 });
