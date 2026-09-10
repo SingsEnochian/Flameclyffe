@@ -2,7 +2,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 
-import { clearHouseRuntimeToken, readFlameStatuses, readHouseRuntimeToken, writeHouseRuntimeToken } from '../src/house-runtime.js';
+import {
+  clearHouseRuntimeToken,
+  readFlameStatuses,
+  readHouseRuntimeToken,
+  withFiniteHouseRequest,
+  writeHouseRuntimeToken,
+} from '../src/house-runtime.js';
 
 function memoryStorage() {
   const values = new Map();
@@ -16,6 +22,17 @@ test('House Runtime credential is session-scoped and explicitly removable', () =
   assert.equal(readHouseRuntimeToken(storage), 'house-key');
   clearHouseRuntimeToken(storage);
   assert.equal(readHouseRuntimeToken(storage), '');
+});
+
+test('finite House requests receive a deadline without overriding an explicit caller signal', async () => {
+  const bounded = withFiniteHouseRequest({}, 5);
+  assert.ok(bounded.signal instanceof AbortSignal);
+  if (!bounded.signal.aborted) await new Promise((resolve) => bounded.signal.addEventListener('abort', resolve, { once: true }));
+  assert.equal(bounded.signal.aborted, true);
+
+  const controller = new AbortController();
+  const explicit = withFiniteHouseRequest({ signal: controller.signal }, 5);
+  assert.equal(explicit.signal, controller.signal);
 });
 
 test('House Runtime board distinguishes live, unavailable, and unauthorised Flames', async () => {
