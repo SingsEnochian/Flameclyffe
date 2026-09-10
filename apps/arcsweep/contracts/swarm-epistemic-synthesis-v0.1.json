@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.swarm-epistemic-synthesis/v0.1",
+  "title": "ArcSweep Swarm Epistemic Synthesis Receipt v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "synthesis_id",
+    "timestamp",
+    "source_ids",
+    "specialists",
+    "support_count",
+    "contest_count",
+    "unresolved_assumptions",
+    "independent_source_count",
+    "confidence",
+    "promotion_status"
+  ],
+  "properties": {
+    "schema": { "const": "arcsweep.swarm-epistemic-synthesis/v0.1" },
+    "synthesis_id": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "source_ids": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "specialists": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["role", "status", "report_ref"],
+        "properties": {
+          "role": { "enum": ["Archivist", "Extractor", "Verifier", "Sceptic", "Historian", "Systems", "Observer", "Red Team", "Synthesiser", "Caretaker"] },
+          "status": { "enum": ["support", "contest", "mixed", "open", "quiet", "failed"] },
+          "report_ref": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "support_count": { "type": "integer", "minimum": 0 },
+    "contest_count": { "type": "integer", "minimum": 0 },
+    "unresolved_assumptions": { "type": "array", "items": { "type": "string" } },
+    "independent_source_count": { "type": "integer", "minimum": 1 },
+    "confidence": { "enum": ["low", "medium", "medium_high", "high", "uncertain"] },
+    "promotion_status": { "enum": ["raw", "working_memory", "policy_relevant", "rejected", "needs_review"] },
+    "canonical_world": { "const": false },
+    "canonical_theory": { "const": false },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}
