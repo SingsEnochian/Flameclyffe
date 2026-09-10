@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSafeDiagnostics } from '../src/os/diagnostics.js';
 
-test('OS diagnostics expose bounded summaries without raw context, errors, outputs, or Steward prose', () => {
+test('OS diagnostics expose bounded summaries without raw context, errors, outputs, actor IDs, or repair fingerprints', () => {
   const secret = 'SENTINEL-DO-NOT-LEAK';
   const diagnostics = createSafeDiagnostics({
     manifest: { version: 'test' },
-    boot: { state: 'READY' },
+    boot: { state: 'READY', details: { secret } },
     session: {
       schema: 'arcsweep.os-session/v1',
       session_id: 'session:test',
@@ -33,9 +33,12 @@ test('OS diagnostics expose bounded summaries without raw context, errors, outpu
     services: [{ service_id: 'test', label: 'Test', authority_boundary: { secret }, consumes: [], emits: [] }],
     capabilities: [{ capability_id: 'test.read', service_id: 'test', authority: 'read', input_schema: { secret } }],
     capabilityReceipts: [{ call_id: 'call:1', capability_id: 'test.read', service_id: 'test', status: 'applied', output: { secret } }],
+    securityTripwires: [{ tripwire_id: 'tripwire:1', actor_id: secret, capability_id: 'test.mutate', decision: 'deny', reason: 'test', required_authority: 'mutate' }],
+    authorityLeases: [{ lease_id: 'lease:1', actor_id: secret, authority: 'mutate', capability_ids: ['test.mutate'], status: 'used' }],
     stewardPending: 1,
-    stewardRecent: [{ request_id: 'steward:1', actor_id: 'human', capability_id: 'test.mutate', authority: 'mutate', status: 'pending', summary: secret, evidence_refs: [secret] }],
+    stewardRecent: [{ request_id: 'steward:1', actor_id: secret, capability_id: 'test.mutate', authority: 'mutate', status: 'pending', summary: secret, evidence_refs: [secret] }],
     repairReceipts: [{ repair_id: 'repair:1', fault_class: 'UI/WIRING', service_id: 'test', repair_level: 'R1', action: 'repair', result: 'committed', validation: [{ detail: secret }] }],
+    repairBudget: { attempts: { [`UI/WIRING:test:${secret}`]: 1 }, service_repairs: { test: 1 } },
     featherPaused: true,
   });
 
@@ -43,12 +46,18 @@ test('OS diagnostics expose bounded summaries without raw context, errors, outpu
   assert.equal(text.includes(secret), false);
   assert.equal(diagnostics.session.has_current_goal, true);
   assert.equal(diagnostics.session.current_goal, undefined);
+  assert.equal(diagnostics.boot.details, undefined);
   assert.equal(diagnostics.active_context.receipt_count, 1);
   assert.equal(diagnostics.active_context.open_work, undefined);
   assert.equal(diagnostics.recent_events[0].payload, undefined);
   assert.equal(diagnostics.services[0].last_error, undefined);
   assert.equal(diagnostics.capability_receipts[0].output, undefined);
+  assert.equal(diagnostics.security_tripwires[0].actor_id, undefined);
+  assert.equal(diagnostics.authority_leases[0].actor_id, undefined);
+  assert.equal(diagnostics.steward_gate.recent[0].actor_id, undefined);
   assert.equal(diagnostics.steward_gate.recent[0].summary, undefined);
   assert.equal(diagnostics.repair_receipts[0].validation, undefined);
+  assert.equal(diagnostics.repair_budget.attempted_fault_count, 1);
+  assert.equal(diagnostics.repair_budget.automatic_attempt_count, 1);
   assert.equal(diagnostics.feather_paused, true);
 });
