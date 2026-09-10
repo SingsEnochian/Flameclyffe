@@ -104,6 +104,7 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
   if (!checkpointStore?.capture) throw new Error('Caretaker requires checkpoint storage.');
   const requiredSubscriptions = new Map();
   const requiredServices = new Map();
+  const requiredDerivedStates = new Map();
   let featherPaused = false;
 
   function emitFault(input) {
@@ -119,14 +120,20 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
     return `${eventName}#${subscriptionId}`;
   }
 
-  function registerRequiredService({
-    serviceId, probe, repair = null, rollback = null, repairLevel = 'R1', faultClass = 'TRANSIENT',
-  } = {}) {
+  function registerRequiredService({ serviceId, probe, repair = null, rollback = null, repairLevel = 'R1', faultClass = 'TRANSIENT' } = {}) {
     if (!serviceId || typeof probe !== 'function') throw new Error('Required service needs serviceId and probe.');
     if (repair !== null && typeof repair !== 'function') throw new Error('Service repair must be a function when supplied.');
     if (rollback !== null && typeof rollback !== 'function') throw new Error('Service rollback must be a function when supplied.');
     requiredServices.set(serviceId, { serviceId, probe, repair, rollback, repairLevel, faultClass });
     return serviceId;
+  }
+
+  function registerRequiredDerivedState({ stateId, serviceId = 'arcsweep-os', probe, captureState, repair = null, rollback = null, repairLevel = 'R1' } = {}) {
+    if (!stateId || typeof probe !== 'function' || typeof captureState !== 'function') throw new Error('Required derived state needs stateId, probe, and captureState.');
+    if (repair !== null && typeof repair !== 'function') throw new Error('Derived-state repair must be a function when supplied.');
+    if (rollback !== null && typeof rollback !== 'function') throw new Error('Derived-state rollback must be a function when supplied.');
+    requiredDerivedStates.set(stateId, { stateId, serviceId, probe, captureState, repair, rollback, repairLevel });
+    return stateId;
   }
 
   async function repairSubscription(fault, descriptor) {
@@ -150,8 +157,7 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
       const fault = emitFault({
         fault_class: 'UI/WIRING', service_id: descriptor.serviceId, code: 'missing-event-subscription',
         message: `Required subscription is missing: ${descriptor.eventName}#${descriptor.subscriptionId}`,
-        repair_level: descriptor.repair ? 'R1' : 'R0',
-        metadata: { event_name: descriptor.eventName, subscription_id: descriptor.subscriptionId },
+        repair_level: descriptor.repair ? 'R1' : 'R0', metadata: { event_name: descriptor.eventName, subscription_id: descriptor.subscriptionId },
       });
       findings.push(fault);
       if (descriptor.repair && !featherPaused) await repairSubscription(fault, descriptor);
@@ -159,7 +165,7 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
     return findings;
   }
 
-  async function probeService(descriptor) {
+  async function probeDescriptor(descriptor) {
     try {
       const result = await descriptor.probe();
       if (result === true) return { ok: true, detail: null };
@@ -172,29 +178,12 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
 
   async function repairService(fault, descriptor) {
     return runRepairTransaction({
-      fault,
-      repairLevel: descriptor.repairLevel,
-      action: 'recover-required-service',
-      checkpointStore,
-      bus,
-      budget: repairBudget,
-      now,
-      captureState: async () => ({
-        health: healthRegistry?.get?.(descriptor.serviceId) || null,
-        probe: await probeService(descriptor),
-      }),
+      fault, repairLevel: descriptor.repairLevel, action: 'recover-required-service', checkpointStore, bus, budget: repairBudget, now,
+      captureState: async () => ({ health: healthRegistry?.get?.(descriptor.serviceId) || null, probe: await probeDescriptor(descriptor) }),
       apply: async (context) => descriptor.repair?.(context),
       validate: async () => {
-        const probe = await probeService(descriptor);
-        if (probe.ok) {
-          healthRegistry?.set?.({
-            service_id: descriptor.serviceId,
-            status: 'healthy',
-            last_success_at: nowIso(now),
-            recoverable: true,
-            repair_class: descriptor.repairLevel,
-          });
-        }
+        const probe = await probeDescriptor(descriptor);
+        if (probe.ok) healthRegistry?.set?.({ service_id: descriptor.serviceId, status: 'healthy', last_success_at: nowIso(now), recoverable: true, repair_class: descriptor.repairLevel });
         return { ok: probe.ok, check: 'required-service-healthy', detail: clone(probe.detail) };
       },
       rollback: async (context) => descriptor.rollback?.(context),
@@ -204,26 +193,45 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
   async function inspectRequiredServices() {
     const findings = [];
     for (const descriptor of requiredServices.values()) {
-      const probe = await probeService(descriptor);
+      const probe = await probeDescriptor(descriptor);
       if (probe.ok) continue;
-      healthRegistry?.set?.({
-        service_id: descriptor.serviceId,
-        status: 'failed',
-        last_error: probe.detail?.error || 'Required service probe failed.',
-        recoverable: Boolean(descriptor.repair),
-        repair_class: descriptor.repair ? descriptor.repairLevel : 'R0',
-      });
-      const fault = emitFault({
-        fault_class: descriptor.faultClass,
-        service_id: descriptor.serviceId,
-        code: 'required-service-unhealthy',
-        message: `Required service is unhealthy: ${descriptor.serviceId}`,
-        recoverable: Boolean(descriptor.repair),
-        repair_level: descriptor.repair ? descriptor.repairLevel : 'R0',
-        metadata: { probe: clone(probe.detail) },
-      });
+      healthRegistry?.set?.({ service_id: descriptor.serviceId, status: 'failed', last_error: probe.detail?.error || 'Required service probe failed.', recoverable: Boolean(descriptor.repair), repair_class: descriptor.repair ? descriptor.repairLevel : 'R0' });
+      const fault = emitFault({ fault_class: descriptor.faultClass, service_id: descriptor.serviceId, code: 'required-service-unhealthy', message: `Required service is unhealthy: ${descriptor.serviceId}`, recoverable: Boolean(descriptor.repair), repair_level: descriptor.repair ? descriptor.repairLevel : 'R0', metadata: { probe: clone(probe.detail) } });
       findings.push(fault);
       if (descriptor.repair && !featherPaused) await repairService(fault, descriptor);
+    }
+    return findings;
+  }
+
+  async function repairDerivedState(fault, descriptor) {
+    return runRepairTransaction({
+      fault, repairLevel: descriptor.repairLevel, action: 'rebuild-derived-state', checkpointStore, bus, budget: repairBudget, now,
+      captureState: descriptor.captureState,
+      apply: async (context) => descriptor.repair?.(context),
+      validate: async () => {
+        const probe = await probeDescriptor(descriptor);
+        return { ok: probe.ok, check: 'required-derived-state-consistent', detail: descriptor.stateId };
+      },
+      rollback: async (context) => descriptor.rollback?.(context),
+    });
+  }
+
+  async function inspectRequiredDerivedState() {
+    const findings = [];
+    for (const descriptor of requiredDerivedStates.values()) {
+      const probe = await probeDescriptor(descriptor);
+      if (probe.ok) continue;
+      const fault = emitFault({
+        fault_class: 'DERIVED-STATE',
+        service_id: descriptor.serviceId,
+        code: `derived-state:${descriptor.stateId}`,
+        message: `Required derived state is inconsistent: ${descriptor.stateId}`,
+        recoverable: Boolean(descriptor.repair),
+        repair_level: descriptor.repair ? descriptor.repairLevel : 'R0',
+        metadata: { state_id: descriptor.stateId },
+      });
+      findings.push(fault);
+      if (descriptor.repair && !featherPaused) await repairDerivedState(fault, descriptor);
     }
     return findings;
   }
@@ -245,10 +253,13 @@ export function createCaretaker({ bus, checkpointStore, healthRegistry, repairBu
     emitFault,
     registerRequiredSubscription,
     registerRequiredService,
+    registerRequiredDerivedState,
     inspectRequiredSubscriptions,
     inspectRequiredServices,
+    inspectRequiredDerivedState,
     repairSubscription,
     repairService,
+    repairDerivedState,
     setFeatherPaused,
     featherPaused: () => featherPaused,
     publishHealth,
