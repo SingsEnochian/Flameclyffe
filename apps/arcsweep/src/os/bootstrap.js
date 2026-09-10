@@ -10,8 +10,12 @@ import { createCaretaker } from './caretaker.js';
 import { createCapabilityRegistry } from './capabilities.js';
 import { createCapabilityFirewall } from './capability-firewall.js';
 import { createAuthorityBroker } from './authority-broker.js';
+import { createBootLifecycle } from './boot-lifecycle.js';
 import { createContextPersistence } from './context-persistence.js';
 import { createGuideShell } from './guide-shell.js';
+import { createGuideRuntime } from './guide-runtime.js';
+import { createStewardApprovalQueue } from './steward-approval.js';
+import { installStewardApprovalSurface } from './steward-approval-surface.js';
 import { registerSidecarService } from './sidecar-service.js';
 import { registerObserverService } from './observer-service.js';
 import { registerCybersecurityIntelligenceService } from './cybersecurity-service.js';
@@ -48,6 +52,7 @@ function installArcSweepOS() {
   if (globalThis[GLOBAL_KEY]) return globalThis[GLOBAL_KEY];
 
   const bus = createEventBus();
+  const bootLifecycle = createBootLifecycle({ bus });
   const checkpointStore = createCheckpointStore();
   const healthRegistry = createHealthRegistry({ bus });
   const contextPersistence = createContextPersistence({ storage: resolveSessionStorage() });
@@ -55,6 +60,7 @@ function installArcSweepOS() {
   let session = restored?.session || createSessionState({ active_room: 'portal' });
   const capsules = restored?.capsules ? restored.capsules.slice(-MAX_CAPSULES) : [];
   let lastNavigationReceipt = null;
+  let stewardSurface = null;
 
   const caretaker = createCaretaker({ bus, checkpointStore, healthRegistry });
   const capabilityFirewall = createCapabilityFirewall({
@@ -102,6 +108,7 @@ function installArcSweepOS() {
       active_room: session.active_room,
       current_goal: session.current_goal,
       presence_mode: session.presence_mode,
+      feather_paused: caretaker.featherPaused(),
       active_context_id: active?.capsule_id || null,
       context_depth: capsules.length,
     }));
@@ -141,7 +148,15 @@ function installArcSweepOS() {
     label: 'ArcSweep OS Kernel',
     authority_boundary: { browser_state: 'hearthfire', orchestration: 'arcsweep-os-kernel', source_mutation: 'forbidden' },
     consumes: ['arcsweep:feather'],
-    emits: ['arcsweep:navigation-changed', 'arcsweep:context-capsule-created'],
+    emits: ['arcsweep:navigation-changed', 'arcsweep:context-capsule-created', 'arcsweep:os-boot-state'],
+  });
+
+  capabilityRegistry.registerCapability({
+    capability_id: 'os.boot',
+    service_id: 'arcsweep-os-kernel',
+    description: 'Read the current ArcSweep OS boot lifecycle state.',
+    authority: 'read',
+    execute: () => bootLifecycle.snapshot(),
   });
 
   capabilityRegistry.registerCapability({
@@ -167,9 +182,54 @@ function installArcSweepOS() {
   registerObserverService(capabilityRegistry);
   registerCybersecurityIntelligenceService(capabilityRegistry);
 
+  capabilityRegistry.registerService({
+    service_id: 'arcsweep-guide',
+    label: 'ArcSweep Guide',
+    authority_boundary: {
+      direct_organ_access: false,
+      privileged_authority: false,
+      capability_requests_only: true,
+    },
+    consumes: ['arcsweep:guide-query'],
+    emits: ['arcsweep:guide-response'],
+  });
+
+  capabilityRegistry.registerService({
+    service_id: 'steward-gate',
+    label: 'ArcSweep Steward Gate',
+    authority_boundary: {
+      human_trusted_action_required: true,
+      privileged_lease_tokens_exposed: false,
+      model_self_approval: false,
+    },
+    consumes: ['arcsweep:steward-approval-requested'],
+    emits: ['arcsweep:steward-approval-resolved'],
+  });
+
+  const stewardApprovals = createStewardApprovalQueue({
+    broker: authorityBroker,
+    invoke: (capabilityId, input, context) => capabilityRegistry.invoke(capabilityId, input, context),
+    getCapability: (capabilityId) => capabilityRegistry.getCapability(capabilityId),
+    bus,
+  });
+
   const guideShell = createGuideShell({
     invoke: (capabilityId, input, context) => capabilityRegistry.invoke(capabilityId, input, context),
   });
+  const guideRuntime = createGuideRuntime({
+    shell: guideShell,
+    contextProvider: () => contextSummary(),
+  });
+
+  function installStewardSurface() {
+    if (stewardSurface || typeof document === 'undefined' || !document.body) return stewardSurface;
+    stewardSurface = installStewardApprovalSurface({
+      approvals: stewardApprovals.publicApi,
+      resolveTrusted: stewardApprovals.resolveTrusted,
+      bus,
+    });
+    return stewardSurface;
+  }
 
   function snapshot() {
     const events = bus.history();
@@ -178,6 +238,7 @@ function installArcSweepOS() {
     return Object.freeze({
       schema: 'arcsweep.os-diagnostics/v1',
       manifest: clone(ARCSWEEP_OS_MANIFEST),
+      boot: bootLifecycle.snapshot(),
       session: clone(session),
       active_context: capsules.length ? clone(capsules[capsules.length - 1]) : null,
       context_depth: capsules.length,
@@ -186,7 +247,15 @@ function installArcSweepOS() {
       services: healthRegistry.snapshot(),
       service_registry: capabilityRegistry.services(),
       capabilities: capabilityRegistry.capabilities(),
-      guide: { actor_id: guideShell.actor_id, allowed_capabilities: guideShell.allowedCapabilities() },
+      guide: {
+        actor_id: guideShell.actor_id,
+        voice_id: guideRuntime.voiceId(),
+        allowed_capabilities: guideShell.allowedCapabilities(),
+      },
+      steward_gate: {
+        pending: stewardApprovals.publicApi.pendingCount(),
+        recent: stewardApprovals.publicApi.list().slice(-16),
+      },
       capability_receipts: capabilityReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
       security_tripwires: capabilityFirewall.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
       authority_leases: authorityBroker.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
@@ -200,22 +269,35 @@ function installArcSweepOS() {
     const subscriptionFindings = await caretaker.inspectRequiredSubscriptions();
     const serviceFindings = await caretaker.inspectRequiredServices();
     const findings = [...subscriptionFindings, ...serviceFindings];
+    if (findings.length && bootLifecycle.state() === 'READY') {
+      bootLifecycle.transition('DEGRADED', { reason: 'caretaker-findings', details: { count: findings.length } });
+    } else if (!findings.length && bootLifecycle.state() === 'DEGRADED') {
+      bootLifecycle.transition('READY', { reason: 'caretaker-clear' });
+    }
     const diagnostics = snapshot();
     if (findings.length) dispatchDomEvent('arcsweep:caretaker-findings', { findings, diagnostics });
     dispatchDomEvent('arcsweep:os-diagnostics', diagnostics);
     return findings;
   }
 
-  function setFeatherPaused(paused = true) { return caretaker.setFeatherPaused(paused); }
+  function setFeatherPaused(paused = true) {
+    const next = caretaker.setFeatherPaused(paused);
+    if (next && bootLifecycle.state() !== 'PAUSED') bootLifecycle.transition('PAUSED', { reason: 'feather' });
+    if (!next && bootLifecycle.state() === 'PAUSED') bootLifecycle.transition('READY', { reason: 'feather-cleared' });
+    return next;
+  }
   function clearPersistedContext() { return contextPersistence.clear(); }
 
   const api = Object.freeze({
     manifest: ARCSWEEP_OS_MANIFEST,
     bus,
+    boot: bootLifecycle,
     caretaker,
     firewall: capabilityFirewall,
     capabilities: capabilityRegistry,
     guide: guideShell,
+    guideRuntime,
+    steward: stewardApprovals.publicApi,
     checkpoints: checkpointStore,
     health: healthRegistry,
     persistence: contextPersistence,
@@ -239,8 +321,26 @@ function installArcSweepOS() {
     dependencies: ['hearthfire', 'house-runtime'],
     recoverable: true,
   });
+  healthRegistry.set({
+    service_id: 'steward-gate',
+    status: 'healthy',
+    version: ARCSWEEP_OS_MANIFEST.version,
+    last_success_at: new Date().toISOString(),
+    dependencies: ['arcsweep-os-kernel'],
+    recoverable: false,
+  });
+  healthRegistry.set({
+    service_id: 'arcsweep-guide',
+    status: 'healthy',
+    version: ARCSWEEP_OS_MANIFEST.version,
+    last_success_at: new Date().toISOString(),
+    dependencies: ['arcsweep-os-kernel', 'house-runtime'],
+    recoverable: true,
+  });
 
   if (typeof document !== 'undefined') {
+    if (document.body) installStewardSurface();
+    else document.addEventListener('DOMContentLoaded', installStewardSurface, { once: true });
     document.addEventListener('click', (event) => {
       const room = inferRoomFromTrigger(event.target);
       if (room) queueMicrotask(() => navigate(room));
@@ -248,15 +348,31 @@ function installArcSweepOS() {
     globalThis.addEventListener?.('arcsweep:caretaker-inspect', () => { void inspect(); });
     globalThis.addEventListener?.('arcsweep:os-inspect', () => dispatchDomEvent('arcsweep:os-diagnostics', snapshot()));
     globalThis.addEventListener?.('arcsweep:feather', () => setFeatherPaused(true));
+    globalThis.addEventListener?.('arcsweep:guide-query', (event) => {
+      const detail = event?.detail || {};
+      const requestId = detail.request_id || `guide-request:${Date.now()}`;
+      void guideRuntime.turn(detail.utterance || detail.message, { voice_id: detail.voice_id || null })
+        .then((turn) => dispatchDomEvent('arcsweep:guide-response', { request_id: requestId, turn }))
+        .catch((error) => dispatchDomEvent('arcsweep:guide-response', {
+          request_id: requestId,
+          turn: { schema: 'arcsweep.guide-turn/v1', status: 'failed', say: error?.message || String(error) },
+        }));
+    });
     const inspectionTimer = setInterval(() => { void inspect(); }, 12000);
     globalThis.addEventListener?.('beforeunload', () => clearInterval(inspectionTimer), { once: true });
   }
+
+  bootLifecycle.transition('READY', {
+    reason: 'kernel-services-registered',
+    details: { restored_context: Boolean(restored) },
+  });
 
   dispatchDomEvent('arcsweep:os-ready', {
     schema: ARCSWEEP_OS_MANIFEST.schema,
     version: ARCSWEEP_OS_MANIFEST.version,
     stage: ARCSWEEP_OS_MANIFEST.stage,
     restored_context: Boolean(restored),
+    boot: bootLifecycle.snapshot(),
     diagnostics: snapshot(),
   });
 
