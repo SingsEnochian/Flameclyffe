@@ -139,7 +139,8 @@ test('Vercel caretaker reuses the existing House rooms function instead of addin
   assert.match(runtime, /allowed_actions: \['navigate'\]/);
   assert.doesNotMatch(runtime, /flame_id/);
   assert.match(roomsRoute, /createHouseCaretakerHandler/);
-  assert.match(roomsRoute, /house_action.*caretaker/);
+  assert.match(roomsRoute, /searchParams\.get\('house_action'\)/);
+  assert.match(roomsRoute, /houseAction === 'caretaker'/);
   assert.deepEqual(rewrite, {
     source: '/api/v1/house/caretaker',
     destination: '/api/v1/house/rooms?house_action=caretaker',
