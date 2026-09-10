@@ -42,12 +42,12 @@ function install() {
     return surface;
   };
 
-  os.bus?.subscribe?.('arcsweep:temporal-witness-recorded', 'temporal-witness-dom-bridge', (receipt) => {
+  os.bus?.subscribe?.('arcsweep:temporal-witness-recorded', (receipt) => {
     dispatch('arcsweep:temporal-witness-updated', {
       record: receipt?.payload || null,
       event_id: receipt?.event_id || null,
     });
-  });
+  }, { id: 'temporal-witness-dom-bridge' });
 
   os.health?.set?.({
     service_id: 'temporal-witness',
