@@ -4,8 +4,10 @@ const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
 const { FLAMES } = require('./manifests');
 const { getModelCandidate, listModelCandidates } = require('./model-candidates');
+const caretakerRouter = require('../caretaker/router');
 
 const router = express.Router();
+router.use(caretakerRouter);
 
 // ── Provider adapters ────────────────────────────────────────────────────────
 
@@ -436,7 +438,7 @@ router.get('/flames/:flame_id/status', resolveFlame, async (req, res) => {
     try {
       const response = await fetch(`${endpoint}/api/tags`, { signal: AbortSignal.timeout(4000) });
       if (!response.ok) throw new Error(`Ollama ${response.status}`);
-      const data = await response.json();
+      const data = await res.json();
       const installed = (data.models || []).flatMap((item) => [item.name, item.model]).filter(Boolean);
       runtimeReachable = true;
       modelAvailable = installed.includes(manifest.platform.model);
