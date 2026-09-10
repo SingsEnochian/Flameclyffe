@@ -1,4 +1,4 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.2';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.3';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
@@ -45,6 +45,9 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     passiveDeviceProving: true,
     temporalWitness: true,
     temporalWitnessStorage: 'browser-local-only',
+    temporalWitnessLens: true,
+    temporalConvergenceSignal: true,
+    guideTemporalAccess: 'summary-and-headers-only',
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
@@ -54,7 +57,9 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     observerTimeline: 'arcsweep.observer-os-timeline/v1',
     temporalWitnessLedger: 'arcsweep.temporal-witness-ledger/v1',
     temporalRecord: 'arcsweep.temporal-record/v1',
+    temporalRecordHeader: 'arcsweep.temporal-record-header/v1',
     temporalWitnessSummary: 'arcsweep.temporal-witness-summary/v1',
+    temporalWitnessEvent: 'arcsweep.temporal-witness-event/v1',
     health: 'arcsweep.service-health/v1',
     repairReceipt: 'arcsweep.repair-receipt/v1',
     checkpoint: 'arcsweep.checkpoint/v1',
