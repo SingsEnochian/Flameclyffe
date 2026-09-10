@@ -301,6 +301,13 @@ button.wide-action { width: 100%; }
   .glyph-stage { width: min(100%, 72dvh); }
 }
 
+/* Keep the drawing visible while browsing a long brush inspector. */
+@media (min-width: 901px) {
+  .canvas-column { align-self: start; position: sticky; top: 9rem; }
+  .glyph-stage-wrap { min-height: 0; }
+  .glyph-stage { width: min(100%, calc(100dvh - 18rem)); }
+}
+
 @media (max-width: 560px) {
   .studio-topbar, .canvas-column, .glyph-inventory, .inspector-scroll { padding: 0.65rem; }
   .canvas-toolbar { align-items: flex-start; flex-direction: column; }

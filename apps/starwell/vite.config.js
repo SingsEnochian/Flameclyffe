@@ -83,6 +83,7 @@ function publishLegacyObservatoryPages() {
 }
 
 export default defineConfig({
+  server: { host: '0.0.0.0', allowedHosts: ['terminal.local'] },
   plugins: [react(), injectArcsweepShell(), publishLegacyObservatoryPages()],
   root: 'apps/starwell',
   base: STARWELL_BASE,

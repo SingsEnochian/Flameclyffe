@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { VIEWBOX, brushRuntime, clamp, makeId } from './glyphStudioModel.js';
+import { createStrokeInput } from './brushStroke.js';
 
 function pointWidth(stroke, point, index) {
   const pressure = clamp(point.pressure ?? 0.5, stroke.brush.minPressure, 1);
@@ -119,7 +120,8 @@ function layerBlend(mode) {
 
 export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, onCommitStroke }) {
   const svgRef = useRef(null);
-  const drawingRef = useRef(null);
+  const inputRef = useRef(null);
+  if (!inputRef.current) inputRef.current = createStrokeInput(eventPoint);
   const [draftStroke, setDraftStroke] = useState(null);
   const [stylus, setStylus] = useState({ type: 'none', pressure: 0, tiltX: 0, tiltY: 0, twist: 0 });
   const visibleLayers = useMemo(() => glyph.layers.filter((layer) => layer.visible), [glyph.layers]);
@@ -131,7 +133,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     return {
       x: clamp(local.x, 0, VIEWBOX),
       y: clamp(local.y, 0, VIEWBOX),
-      pressure: event.pointerType === 'mouse' ? 0.5 : clamp(event.pressure || 0.01, 0.01, 1),
+      pressure: event.pointerType === 'pen' ? clamp(event.pressure || 0.01, 0.01, 1) : 0.5,
       tiltX: Number(event.tiltX || 0),
       tiltY: Number(event.tiltY || 0),
       twist: Number(event.twist || 0),
@@ -139,28 +141,19 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     };
   }
 
-  function appendEvent(event) {
-    const stroke = drawingRef.current;
-    if (!stroke) return;
-    const raw = eventPoint(event);
-    if (!raw) return;
-    const previous = stroke.points[stroke.points.length - 1];
-    const alpha = 1 - clamp(stroke.brush.streamline + stroke.brush.stabilization * 0.35, 0, 0.95);
-    const point = previous ? {
-      ...raw,
-      x: previous.x + (raw.x - previous.x) * alpha,
-      y: previous.y + (raw.y - previous.y) * alpha,
-    } : raw;
-    stroke.points.push(point);
-    setStylus({ type: event.pointerType, pressure: point.pressure, tiltX: point.tiltX, tiltY: point.tiltY, twist: point.twist });
+  function showDraft() {
+    const stroke = inputRef.current.current;
+    const point = stroke.points.at(-1);
+    setStylus({ type: stroke.pointerType, pressure: point.pressure, tiltX: point.tiltX, tiltY: point.tiltY, twist: point.twist });
+    setDraftStroke({ ...stroke, points: [...stroke.points] });
   }
 
   function startStroke(event) {
-    if (!activeLayer || !activeBrush || activeLayer.locked || !['vector', 'raster'].includes(activeLayer.kind) || event.button > 0) return;
+    if (inputRef.current.current || event.isPrimary === false || !activeLayer || !activeBrush || !activeLayer.visible || activeLayer.locked || !['vector', 'raster'].includes(activeLayer.kind) || event.button > 0) return;
     event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
     const stroke = {
       id: makeId('stroke'),
+      glyphId: glyph.id,
       layerId: activeLayer.id,
       pointerType: event.pointerType,
       brushId: activeBrush.id,
@@ -168,26 +161,23 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
       points: [],
       createdAt: new Date().toISOString(),
     };
-    drawingRef.current = stroke;
-    appendEvent(event);
-    setDraftStroke({ ...stroke, points: [...stroke.points] });
+    if (!inputRef.current.start(event, stroke)) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    showDraft();
   }
 
   function moveStroke(event) {
-    if (!drawingRef.current) return;
+    if (!inputRef.current.owns(event)) return;
     event.preventDefault();
-    const events = event.getCoalescedEvents?.() || [event];
-    events.forEach(appendEvent);
-    const stroke = drawingRef.current;
-    setDraftStroke({ ...stroke, points: [...stroke.points] });
+    inputRef.current.move(event);
+    showDraft();
   }
 
   function finishStroke(event) {
-    const stroke = drawingRef.current;
+    const stroke = inputRef.current.finish(event);
     if (!stroke) return;
     event.preventDefault();
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-    drawingRef.current = null;
     setDraftStroke(null);
     if (stroke.points.length) onCommitStroke(stroke);
   }
@@ -202,6 +192,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
         onPointerMove={moveStroke}
         onPointerUp={finishStroke}
         onPointerCancel={finishStroke}
+        onLostPointerCapture={finishStroke}
         aria-label={`Drawing canvas for ${glyph.name}`}
       >
         <rect width={VIEWBOX} height={VIEWBOX} className="stage-paper" />
@@ -212,7 +203,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
             {glyph.strokes.filter((stroke) => stroke.layerId === layer.id).map((stroke) => <StrokeMarks key={stroke.id} stroke={stroke} />)}
           </g>
         ))}
-        {draftStroke && <StrokeMarks stroke={draftStroke} />}
+        {draftStroke?.glyphId === glyph.id && <StrokeMarks stroke={draftStroke} />}
       </svg>
       <div className="stage-readout" aria-live="polite">
         <span>{stylus.type}</span>

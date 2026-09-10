@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
+import BrushPreview from './BrushPreview.jsx';
 import {
   BRUSH_ATTRIBUTE_GROUPS,
   BRUSH_LIBRARY_SCHEMA,
@@ -28,14 +29,21 @@ const GROUP_KEYS = {
 };
 
 const COMPATIBLE_EXTENSIONS = new Set(['.brush', '.brushset', '.brushlibrary', '.abr']);
+const LIVE_SETTINGS = {
+  properties: ['size', 'opacity'],
+  stabilization: ['streamlineAmount', 'stabilizationAmount'],
+  taper: ['pressureStart', 'pressureEnd'],
+  applePencil: ['pressureSize', 'pressureOpacity'],
+  preview: ['color'],
+};
 
 function extensionOf(name = '') {
   return name.toLowerCase().match(/\.[^.]+$/)?.[0] || '';
 }
 
-function rangeFor(key, value) {
+function rangeFor(key, value, group) {
   if (key.toLowerCase().includes('angle')) return { min: 0, max: 180, step: 1 };
-  if (key.toLowerCase().includes('size') && value > 1) return { min: 1, max: 300, step: 1 };
+  if (group === 'properties' && key.toLowerCase().includes('size')) return { min: 1, max: 300, step: 1 };
   if (key === 'count') return { min: 1, max: 16, step: 1 };
   if (key.toLowerCase().includes('rotation')) return { min: -1, max: 1, step: 0.01 };
   return { min: 0, max: 1, step: 0.01 };
@@ -45,13 +53,14 @@ function labelFor(key) {
   return key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (letter) => letter.toUpperCase());
 }
 
-function NumericSetting({ name, value, onChange }) {
-  const range = rangeFor(name, value);
+function NumericSetting({ name, value, onChange, group }) {
+  const range = rangeFor(name, value, group);
   return (
     <label className="range-field">
       <span>{labelFor(name)}<output>{Number(value).toFixed(range.step < 1 ? 2 : 0)}</output></span>
       <input
         type="range"
+        aria-label={labelFor(name)}
         min={range.min}
         max={range.max}
         step={range.step}
@@ -62,8 +71,8 @@ function NumericSetting({ name, value, onChange }) {
   );
 }
 
-function SettingField({ name, value, onChange }) {
-  if (typeof value === 'number') return <NumericSetting name={name} value={value} onChange={onChange} />;
+function SettingField({ name, value, onChange, group }) {
+  if (typeof value === 'number') return <NumericSetting name={name} value={value} onChange={onChange} group={group} />;
   if (typeof value === 'boolean') {
     return (
       <label className="toggle-field">
@@ -94,7 +103,7 @@ export default function BrushPanel({ library, onChangeLibrary }) {
   const importRef = useRef(null);
   const [setId, setSetId] = useState('set-foundation');
   const [query, setQuery] = useState('');
-  const [groupName, setGroupName] = useState('Stroke Path');
+  const [groupName, setGroupName] = useState('Properties');
   const [status, setStatus] = useState('STARWELL brush definitions are editable and local-first.');
 
   const activeBrush = library.brushes.find((brush) => brush.id === library.activeBrushId) || library.brushes[0];
@@ -228,7 +237,7 @@ export default function BrushPanel({ library, onChangeLibrary }) {
               className={`brush-record ${brush.id === activeBrush.id ? 'active' : ''}`}
               onClick={() => onChangeLibrary(recordRecentBrush(library, brush.id))}
             >
-              <span className="brush-preview" style={{ '--brush-colour': brush.attributes.preview.color, '--brush-size': `${8 + brush.attributes.preview.size * 28}px` }} />
+              <BrushPreview brush={brush} compact />
               <span>{brush.name}<small>{brush.pinned ? 'Pinned · ' : ''}{brush.attributes.shape.sourceName} / {brush.attributes.grain.sourceName}</small></span>
             </button>
           ))}
@@ -252,10 +261,12 @@ export default function BrushPanel({ library, onChangeLibrary }) {
         </nav>
         <div className="attribute-inspector">
           <div className="panel-heading compact"><div><span>Brush Studio</span><h3>{groupName}</h3></div></div>
-          <div className="brush-live-pad" aria-label="Brush preview pad">
-            <span style={{ '--preview-colour': activeBrush.attributes.preview.color, '--preview-width': `${Math.max(3, activeBrush.attributes.properties.size / 5)}px` }} />
-          </div>
-          {Object.entries(settings).map(([name, value]) => <SettingField key={name} name={name} value={value} onChange={(nextValue) => patchAttribute(attributeKey, name, nextValue)} />)}
+          <BrushPreview brush={activeBrush} />
+          <p className="panel-footnote">Live sample: size, opacity, colour, pressure, taper and smoothing. Changes apply to your next stroke; existing ink keeps its brush.</p>
+          {Object.entries(settings).map(([name, value]) => <SettingField key={name} name={name} group={attributeKey} value={value} onChange={(nextValue) => patchAttribute(attributeKey, name, nextValue)} />)}
+          <p className="panel-footnote">{LIVE_SETTINGS[attributeKey]
+            ? `Live controls here: ${LIVE_SETTINGS[attributeKey].map(labelFor).join(', ')}. Other settings are saved only.`
+            : 'These settings are saved in the definition but do not affect the stroke yet.'}</p>
         </div>
       </div>
       <p className="panel-footnote" aria-live="polite">{status}</p>
