@@ -8,6 +8,17 @@ function sourceFromMeta(meta) {
   return typeof source === 'string' && source.trim() ? source.trim().slice(0, 120) : null;
 }
 
+function summarizeBoot(boot = {}) {
+  return {
+    schema: boot.schema || 'arcsweep.os-boot-state/v1',
+    sequence: Number.isFinite(boot.sequence) ? boot.sequence : null,
+    state: boot.state || null,
+    previous_state: boot.previous_state || null,
+    reason: typeof boot.reason === 'string' ? boot.reason.slice(0, 120) : null,
+    changed_at: boot.changed_at || null,
+  };
+}
+
 function summarizeSession(session = {}, featherPaused = false) {
   return {
     schema: session.schema || 'arcsweep.os-session/v1',
@@ -174,7 +185,7 @@ export function createSafeDiagnostics({
   return Object.freeze(clone({
     schema: 'arcsweep.os-diagnostics/v1',
     manifest,
-    boot,
+    boot: summarizeBoot(boot),
     session: summarizeSession(session, featherPaused),
     active_context: summarizeContext(activeContext),
     context_depth: Number(contextDepth) || 0,
