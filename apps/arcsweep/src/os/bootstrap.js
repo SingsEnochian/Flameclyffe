@@ -12,13 +12,19 @@ import { createCapabilityFirewall } from './capability-firewall.js';
 import { createAuthorityBroker } from './authority-broker.js';
 import { createBootLifecycle } from './boot-lifecycle.js';
 import { createContextPersistence } from './context-persistence.js';
+import { createWorkspaceContextStore } from './workspace-context.js';
+import { createSafeDiagnostics } from './diagnostics.js';
 import { createGuideShell } from './guide-shell.js';
 import { createGuideRuntime } from './guide-runtime.js';
 import { createStewardApprovalQueue } from './steward-approval.js';
 import { installStewardApprovalSurface } from './steward-approval-surface.js';
+import { installArcSweepOSShell } from './shell-surface.js';
 import { registerSidecarService } from './sidecar-service.js';
 import { registerObserverService } from './observer-service.js';
 import { registerCybersecurityIntelligenceService } from './cybersecurity-service.js';
+import { registerGlyphForgeService } from './glyphforge-service.js';
+import { registerRunaService } from './runa-service.js';
+import { registerDeviceProvingService } from './device-proving.js';
 import { ARCSWEEP_OS_MANIFEST } from './version.js';
 
 const GLOBAL_KEY = '__arcsweepOS';
@@ -41,11 +47,11 @@ function inferRoomFromTrigger(target) {
 }
 
 function resolveSessionStorage() {
-  try {
-    return globalThis.sessionStorage || null;
-  } catch {
-    return null;
-  }
+  try { return globalThis.sessionStorage || null; } catch { return null; }
+}
+
+function resolveLocalStorage() {
+  try { return globalThis.localStorage || null; } catch { return null; }
 }
 
 function installArcSweepOS() {
@@ -56,17 +62,25 @@ function installArcSweepOS() {
   const checkpointStore = createCheckpointStore();
   const healthRegistry = createHealthRegistry({ bus });
   const contextPersistence = createContextPersistence({ storage: resolveSessionStorage() });
+  const workspaceContext = createWorkspaceContextStore({ storage: resolveLocalStorage() });
   const restored = contextPersistence.load();
-  let session = restored?.session || createSessionState({ active_room: 'portal' });
+  const durable = workspaceContext.load();
+  let session = restored?.session || createSessionState({
+    active_world_id: durable?.active_world_id || null,
+    active_project_id: durable?.active_project_id || null,
+    active_scene_id: durable?.active_scene_id || null,
+    active_document_id: durable?.active_document_id || null,
+    active_room: durable?.active_room || 'portal',
+    current_goal: durable?.current_goal || null,
+    presence_mode: durable?.presence_mode || 'companion',
+  });
   const capsules = restored?.capsules ? restored.capsules.slice(-MAX_CAPSULES) : [];
   let lastNavigationReceipt = null;
   let stewardSurface = null;
+  let osShellSurface = null;
 
   const caretaker = createCaretaker({ bus, checkpointStore, healthRegistry });
-  const capabilityFirewall = createCapabilityFirewall({
-    bus,
-    featherPaused: () => caretaker.featherPaused(),
-  });
+  const capabilityFirewall = createCapabilityFirewall({ bus, featherPaused: () => caretaker.featherPaused() });
   const authorityBroker = createAuthorityBroker();
   const capabilityRegistry = createCapabilityRegistry({
     bus,
@@ -75,11 +89,7 @@ function installArcSweepOS() {
       const claimed = context.authority || 'read';
       if (UNPRIVILEGED_AUTHORITY.has(claimed)) return { authority: claimed };
       const actorId = context.actor_id || context.source || 'unknown';
-      const lease = authorityBroker.resolve({
-        token: context.authority_lease,
-        actor_id: actorId,
-        capability_id: capability.capability_id,
-      });
+      const lease = authorityBroker.resolve({ token: context.authority_lease, actor_id: actorId, capability_id: capability.capability_id });
       if (!lease.valid) return { authority: 'operate', reason: `authority-lease-${lease.reason}` };
       return { authority: lease.authority };
     },
@@ -93,8 +103,28 @@ function installArcSweepOS() {
   });
 
   function persistContext() {
-    return contextPersistence.save({ session, capsules });
+    return {
+      session: contextPersistence.save({ session, capsules }),
+      workspace: workspaceContext.save(session),
+    };
   }
+
+  function workspaceMatchesSession() {
+    if (!workspaceContext.available()) return { ok: true, unavailable: true };
+    const current = workspaceContext.load();
+    if (!current) return { ok: false, reason: 'workspace-missing' };
+    const keys = ['active_world_id','active_project_id','active_scene_id','active_document_id','active_room','current_goal','presence_mode'];
+    return { ok: keys.every((key) => (current[key] ?? null) === (session[key] ?? null)) };
+  }
+
+  caretaker.registerRequiredDerivedState({
+    stateId: 'workspace-context-mirror',
+    serviceId: 'arcsweep-os-kernel',
+    probe: workspaceMatchesSession,
+    captureState: () => workspaceContext.load(),
+    repair: () => workspaceContext.save(session),
+    rollback: ({ priorState }) => priorState ? workspaceContext.save(priorState) : workspaceContext.clear(),
+  });
 
   function contextSummary() {
     const active = capsules.length ? capsules[capsules.length - 1] : null;
@@ -151,68 +181,33 @@ function installArcSweepOS() {
     emits: ['arcsweep:navigation-changed', 'arcsweep:context-capsule-created', 'arcsweep:os-boot-state'],
   });
 
+  capabilityRegistry.registerCapability({ capability_id: 'os.boot', service_id: 'arcsweep-os-kernel', description: 'Read the current ArcSweep OS boot lifecycle state.', authority: 'read', execute: () => bootLifecycle.snapshot() });
+  capabilityRegistry.registerCapability({ capability_id: 'os.context', service_id: 'arcsweep-os-kernel', description: 'Read a bounded summary of the active ArcSweep session and context lineage.', authority: 'read', execute: () => contextSummary() });
   capabilityRegistry.registerCapability({
-    capability_id: 'os.boot',
-    service_id: 'arcsweep-os-kernel',
-    description: 'Read the current ArcSweep OS boot lifecycle state.',
-    authority: 'read',
-    execute: () => bootLifecycle.snapshot(),
-  });
-
-  capabilityRegistry.registerCapability({
-    capability_id: 'os.context',
-    service_id: 'arcsweep-os-kernel',
-    description: 'Read a bounded summary of the active ArcSweep session and context lineage.',
-    authority: 'read',
-    execute: () => contextSummary(),
-  });
-
-  capabilityRegistry.registerCapability({
-    capability_id: 'os.navigate',
-    service_id: 'arcsweep-os-kernel',
-    description: 'Move the active ArcSweep room while preserving the current context capsule.',
-    authority: 'operate',
-    requires_confirmation: false,
-    input_schema: { required: ['room'] },
-    validate: (input) => Boolean(String(input?.room || '').trim()),
-    execute: (input) => navigateInternal(input.room, input.patch || {}),
+    capability_id: 'os.navigate', service_id: 'arcsweep-os-kernel', description: 'Move the active ArcSweep room while preserving the current context capsule.', authority: 'operate', requires_confirmation: false,
+    input_schema: { required: ['room'] }, validate: (input) => Boolean(String(input?.room || '').trim()), execute: (input) => navigateInternal(input.room, input.patch || {}),
   });
 
   function requestNavigation(room, patch = {}, { actor_id = 'human-ui', source = 'os-ui' } = {}) {
-    return capabilityRegistry.invoke('os.navigate', { room, patch }, {
-      actor_id,
-      source,
-      authority: 'operate',
-      expected_authority: 'operate',
-    });
+    return capabilityRegistry.invoke('os.navigate', { room, patch }, { actor_id, source, authority: 'operate', expected_authority: 'operate' });
   }
 
   registerSidecarService(capabilityRegistry);
-  registerObserverService(capabilityRegistry);
+  registerObserverService(capabilityRegistry, { bus });
   registerCybersecurityIntelligenceService(capabilityRegistry);
+  registerGlyphForgeService(capabilityRegistry);
+  registerRunaService(capabilityRegistry, { bus });
+  registerDeviceProvingService(capabilityRegistry);
 
   capabilityRegistry.registerService({
-    service_id: 'arcsweep-guide',
-    label: 'ArcSweep Guide',
-    authority_boundary: {
-      direct_organ_access: false,
-      privileged_authority: false,
-      capability_requests_only: true,
-    },
-    consumes: ['arcsweep:guide-query'],
-    emits: ['arcsweep:guide-response'],
+    service_id: 'arcsweep-guide', label: 'ArcSweep Guide',
+    authority_boundary: { direct_organ_access: false, privileged_authority: false, capability_requests_only: true },
+    consumes: ['arcsweep:guide-query'], emits: ['arcsweep:guide-response'],
   });
-
   capabilityRegistry.registerService({
-    service_id: 'steward-gate',
-    label: 'ArcSweep Steward Gate',
-    authority_boundary: {
-      human_trusted_action_required: true,
-      privileged_lease_tokens_exposed: false,
-      model_self_approval: false,
-    },
-    consumes: ['arcsweep:steward-approval-requested'],
-    emits: ['arcsweep:steward-approval-resolved'],
+    service_id: 'steward-gate', label: 'ArcSweep Steward Gate',
+    authority_boundary: { human_trusted_action_required: true, privileged_lease_tokens_exposed: false, model_self_approval: false },
+    consumes: ['arcsweep:steward-approval-requested'], emits: ['arcsweep:steward-approval-resolved'],
   });
 
   const stewardApprovals = createStewardApprovalQueue({
@@ -221,22 +216,12 @@ function installArcSweepOS() {
     getCapability: (capabilityId) => capabilityRegistry.getCapability(capabilityId),
     bus,
   });
-
-  const guideShell = createGuideShell({
-    invoke: (capabilityId, input, context) => capabilityRegistry.invoke(capabilityId, input, context),
-  });
-  const guideRuntime = createGuideRuntime({
-    shell: guideShell,
-    contextProvider: () => contextSummary(),
-  });
+  const guideShell = createGuideShell({ invoke: (capabilityId, input, context) => capabilityRegistry.invoke(capabilityId, input, context) });
+  const guideRuntime = createGuideRuntime({ shell: guideShell, contextProvider: () => contextSummary() });
 
   function installStewardSurface() {
     if (stewardSurface || typeof document === 'undefined' || !document.body) return stewardSurface;
-    stewardSurface = installStewardApprovalSurface({
-      approvals: stewardApprovals.publicApi,
-      resolveTrusted: stewardApprovals.resolveTrusted,
-      bus,
-    });
+    stewardSurface = installStewardApprovalSurface({ approvals: stewardApprovals.publicApi, resolveTrusted: stewardApprovals.resolveTrusted, bus });
     return stewardSurface;
   }
 
@@ -244,45 +229,41 @@ function installArcSweepOS() {
     const events = bus.history();
     const repairReceipts = events.filter((item) => item.name === 'arcsweep:repair-completed').map((item) => item.payload);
     const capabilityReceipts = events.filter((item) => item.name === 'arcsweep:capability-invoked').map((item) => item.payload);
-    return Object.freeze({
-      schema: 'arcsweep.os-diagnostics/v1',
-      manifest: clone(ARCSWEEP_OS_MANIFEST),
+    return createSafeDiagnostics({
+      manifest: ARCSWEEP_OS_MANIFEST,
       boot: bootLifecycle.snapshot(),
-      session: clone(session),
-      active_context: capsules.length ? clone(capsules[capsules.length - 1]) : null,
-      context_depth: capsules.length,
-      context_persistence: { available: contextPersistence.available(), restored: Boolean(restored), storage_key: contextPersistence.key },
-      recent_events: events.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
-      services: healthRegistry.snapshot(),
-      service_registry: capabilityRegistry.services(),
+      session,
+      activeContext: capsules.length ? capsules[capsules.length - 1] : null,
+      contextDepth: capsules.length,
+      contextPersistence: {
+        available: contextPersistence.available(),
+        restored: Boolean(restored || durable),
+        storage_key: contextPersistence.key,
+      },
+      events,
+      health: healthRegistry.snapshot(),
+      services: capabilityRegistry.services(),
       capabilities: capabilityRegistry.capabilities(),
-      guide: {
-        actor_id: guideShell.actor_id,
-        voice_id: guideRuntime.voiceId(),
-        allowed_capabilities: guideShell.allowedCapabilities(),
-      },
-      steward_gate: {
-        pending: stewardApprovals.publicApi.pendingCount(),
-        recent: stewardApprovals.publicApi.list().slice(-16),
-      },
-      capability_receipts: capabilityReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
-      security_tripwires: capabilityFirewall.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
-      authority_leases: authorityBroker.snapshot().slice(-MAX_DIAGNOSTIC_EVENTS),
-      repair_receipts: repairReceipts.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
-      repair_budget: caretaker.repairBudget(),
-      captured_at: new Date().toISOString(),
+      guide: { actor_id: guideShell.actor_id, voice_id: guideRuntime.voiceId(), allowed_capabilities: guideShell.allowedCapabilities() },
+      stewardPending: stewardApprovals.publicApi.pendingCount(),
+      stewardRecent: stewardApprovals.publicApi.list(),
+      capabilityReceipts,
+      securityTripwires: capabilityFirewall.snapshot(),
+      authorityLeases: authorityBroker.snapshot(),
+      repairReceipts,
+      repairBudget: caretaker.repairBudget(),
+      featherPaused: caretaker.featherPaused(),
+      maxEvents: MAX_DIAGNOSTIC_EVENTS,
     });
   }
 
   async function inspect() {
     const subscriptionFindings = await caretaker.inspectRequiredSubscriptions();
     const serviceFindings = await caretaker.inspectRequiredServices();
-    const findings = [...subscriptionFindings, ...serviceFindings];
-    if (findings.length && bootLifecycle.state() === 'READY') {
-      bootLifecycle.transition('DEGRADED', { reason: 'caretaker-findings', details: { count: findings.length } });
-    } else if (!findings.length && bootLifecycle.state() === 'DEGRADED') {
-      bootLifecycle.transition('READY', { reason: 'caretaker-clear' });
-    }
+    const derivedFindings = await caretaker.inspectRequiredDerivedState();
+    const findings = [...subscriptionFindings, ...serviceFindings, ...derivedFindings];
+    if (findings.length && bootLifecycle.state() === 'READY') bootLifecycle.transition('DEGRADED', { reason: 'caretaker-findings', details: { count: findings.length } });
+    else if (!findings.length && bootLifecycle.state() === 'DEGRADED') bootLifecycle.transition('READY', { reason: 'caretaker-clear' });
     const diagnostics = snapshot();
     if (findings.length) dispatchDomEvent('arcsweep:caretaker-findings', { findings, diagnostics });
     dispatchDomEvent('arcsweep:os-diagnostics', diagnostics);
@@ -295,7 +276,10 @@ function installArcSweepOS() {
     if (!next && bootLifecycle.state() === 'PAUSED') bootLifecycle.transition('READY', { reason: 'feather-cleared' });
     return next;
   }
-  function clearPersistedContext() { return contextPersistence.clear(); }
+
+  function clearPersistedContext() {
+    return { session: contextPersistence.clear(), workspace: workspaceContext.clear() };
+  }
 
   const api = Object.freeze({
     manifest: ARCSWEEP_OS_MANIFEST,
@@ -310,6 +294,7 @@ function installArcSweepOS() {
     checkpoints: checkpointStore,
     health: healthRegistry,
     persistence: contextPersistence,
+    workspace: workspaceContext,
     session: () => clone(session),
     capsules: () => capsules.map(clone),
     lastNavigationReceipt: () => lastNavigationReceipt ? clone(lastNavigationReceipt) : null,
@@ -321,35 +306,21 @@ function installArcSweepOS() {
   });
 
   globalThis[GLOBAL_KEY] = api;
+  persistContext();
 
-  healthRegistry.set({
-    service_id: 'arcsweep-os-kernel',
-    status: 'healthy',
-    version: ARCSWEEP_OS_MANIFEST.version,
-    last_success_at: new Date().toISOString(),
-    dependencies: ['hearthfire', 'house-runtime'],
-    recoverable: true,
-  });
-  healthRegistry.set({
-    service_id: 'steward-gate',
-    status: 'healthy',
-    version: ARCSWEEP_OS_MANIFEST.version,
-    last_success_at: new Date().toISOString(),
-    dependencies: ['arcsweep-os-kernel'],
-    recoverable: false,
-  });
-  healthRegistry.set({
-    service_id: 'arcsweep-guide',
-    status: 'healthy',
-    version: ARCSWEEP_OS_MANIFEST.version,
-    last_success_at: new Date().toISOString(),
-    dependencies: ['arcsweep-os-kernel', 'house-runtime'],
-    recoverable: true,
-  });
+  healthRegistry.set({ service_id: 'arcsweep-os-kernel', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['hearthfire', 'house-runtime'], recoverable: true });
+  healthRegistry.set({ service_id: 'steward-gate', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: false });
+  healthRegistry.set({ service_id: 'arcsweep-guide', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel', 'house-runtime'], recoverable: true });
+  healthRegistry.set({ service_id: 'runa-sensory', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: true });
+  healthRegistry.set({ service_id: 'device-proving', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: true });
 
   if (typeof document !== 'undefined') {
-    if (document.body) installStewardSurface();
-    else document.addEventListener('DOMContentLoaded', installStewardSurface, { once: true });
+    const installSurfaces = () => {
+      installStewardSurface();
+      if (!osShellSurface) osShellSurface = installArcSweepOSShell({ os: api });
+    };
+    if (document.body) installSurfaces();
+    else document.addEventListener('DOMContentLoaded', installSurfaces, { once: true });
     document.addEventListener('click', (event) => {
       const room = inferRoomFromTrigger(event.target);
       if (room) queueMicrotask(() => { void requestNavigation(room, {}, { actor_id: 'human-ui', source: 'ui-navigation' }); });
@@ -362,25 +333,18 @@ function installArcSweepOS() {
       const requestId = detail.request_id || `guide-request:${Date.now()}`;
       void guideRuntime.turn(detail.utterance || detail.message, { voice_id: detail.voice_id || null })
         .then((turn) => dispatchDomEvent('arcsweep:guide-response', { request_id: requestId, turn }))
-        .catch((error) => dispatchDomEvent('arcsweep:guide-response', {
-          request_id: requestId,
-          turn: { schema: 'arcsweep.guide-turn/v1', status: 'failed', say: error?.message || String(error) },
-        }));
+        .catch((error) => dispatchDomEvent('arcsweep:guide-response', { request_id: requestId, turn: { schema: 'arcsweep.guide-turn/v1', status: 'failed', say: error?.message || String(error) } }));
     });
     const inspectionTimer = setInterval(() => { void inspect(); }, 12000);
     globalThis.addEventListener?.('beforeunload', () => clearInterval(inspectionTimer), { once: true });
   }
 
-  bootLifecycle.transition('READY', {
-    reason: 'kernel-services-registered',
-    details: { restored_context: Boolean(restored) },
-  });
-
+  bootLifecycle.transition('READY', { reason: 'kernel-services-registered', details: { restored_context: Boolean(restored || durable) } });
   dispatchDomEvent('arcsweep:os-ready', {
     schema: ARCSWEEP_OS_MANIFEST.schema,
     version: ARCSWEEP_OS_MANIFEST.version,
     stage: ARCSWEEP_OS_MANIFEST.stage,
-    restored_context: Boolean(restored),
+    restored_context: Boolean(restored || durable),
     boot: bootLifecycle.snapshot(),
     diagnostics: snapshot(),
   });
