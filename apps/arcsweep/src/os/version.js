@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.1';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.2';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'runnable-release-candidate',
+  stage: 'runnable-release-candidate-temporal-witness',
   authority: Object.freeze({
     modelRuntime: 'house-runtime',
     browserState: 'hearthfire',
@@ -43,6 +43,8 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     guideMaximumCapabilityRequestsPerTurn: 1,
     durableWorkspaceContext: true,
     passiveDeviceProving: true,
+    temporalWitness: true,
+    temporalWitnessStorage: 'browser-local-only',
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
@@ -50,6 +52,9 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     workspaceContext: 'arcsweep.workspace-context/v1',
     eventReceipt: 'arcsweep.os-event-receipt/v1',
     observerTimeline: 'arcsweep.observer-os-timeline/v1',
+    temporalWitnessLedger: 'arcsweep.temporal-witness-ledger/v1',
+    temporalRecord: 'arcsweep.temporal-record/v1',
+    temporalWitnessSummary: 'arcsweep.temporal-witness-summary/v1',
     health: 'arcsweep.service-health/v1',
     repairReceipt: 'arcsweep.repair-receipt/v1',
     checkpoint: 'arcsweep.checkpoint/v1',
