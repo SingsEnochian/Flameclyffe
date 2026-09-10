@@ -149,28 +149,25 @@ test('invokeCaretaker completes model to plan to runtime result without inventin
   assert.equal(receipt.model, 'hf.co/DavidAU/Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M');
 });
 
-test('Vercel caretaker reuses the existing House rooms function instead of adding a function slot', () => {
+test('hosted Caretaker does not rely on the broken Vercel rooms rewrite', () => {
   const runtime = fs.readFileSync(path.join(root, 'api/_shared/house-caretaker-runtime.mjs'), 'utf8');
   const contract = fs.readFileSync(path.join(root, 'apps/starwell-server/caretaker/contract.js'), 'utf8');
-  const roomsRoute = fs.readFileSync(path.join(root, 'api/v1/house/rooms.js'), 'utf8');
   const vercel = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
+  const edge = fs.readFileSync(path.join(root, 'supabase/functions/arcsweep-caretaker/index.ts'), 'utf8');
   const rewrite = vercel.rewrites.find((item) => item.source === '/api/v1/house/caretaker');
 
-  assert.match(runtime, /authoriseHouseRequest/);
-  assert.match(runtime, /role: 'house-intelligence'/);
+  assert.equal(rewrite, undefined);
+  assert.equal(fs.existsSync(path.join(root, 'api/v1/house/caretaker.js')), false);
+  assert.match(edge, /supabase-edge-to-openrouter/);
+  assert.match(edge, /OPENROUTER_API_KEY/);
+  assert.match(edge, /allowed_actions|navigate/i);
+
+  // Keep the existing local/shared House handler and Mighty Sword contract for
+  // installed/local ArcSweep, where Hearthgate/Ollama remains the preferred lane.
   assert.match(runtime, /MODEL_ARCSWEEP_CARETAKER/);
   assert.match(runtime, /OLLAMA_URL_CARETAKER/);
   assert.match(runtime, /HEARTHGATE_GATEWAY_URL/);
-  assert.match(runtime, /HEARTHGATE_GATEWAY_TOKEN/);
   assert.doesNotMatch(runtime, /flame_id/);
   assert.match(contract, /Gemma-The-Writer-Mighty-Sword-9B-GGUF:Q4_K_M/);
   assert.match(contract, /ALLOWED_ACTIONS = Object\.freeze\(\['navigate'\]\)/);
-  assert.match(roomsRoute, /createHouseCaretakerHandler/);
-  assert.match(roomsRoute, /searchParams\.get\('house_action'\)/);
-  assert.match(roomsRoute, /houseAction === 'caretaker'/);
-  assert.deepEqual(rewrite, {
-    source: '/api/v1/house/caretaker',
-    destination: '/api/v1/house/rooms?house_action=caretaker',
-  });
-  assert.equal(fs.existsSync(path.join(root, 'api/v1/house/caretaker.js')), false);
 });
