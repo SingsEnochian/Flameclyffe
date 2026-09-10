@@ -112,7 +112,6 @@ function summarizeTripwire(item = {}) {
     decision: item.decision || null,
     reason: item.reason || null,
     capability_id: item.capability_id || null,
-    actor_id: item.actor_id || null,
     authority: item.authority || item.required_authority || null,
     observed_at: item.observed_at || item.created_at || null,
   };
@@ -121,7 +120,6 @@ function summarizeTripwire(item = {}) {
 function summarizeLease(item = {}) {
   return {
     lease_id: item.lease_id || null,
-    actor_id: item.actor_id || null,
     authority: item.authority || null,
     capability_ids: Array.isArray(item.capability_ids) ? [...item.capability_ids] : [],
     single_use: Boolean(item.single_use),
@@ -149,13 +147,23 @@ function summarizeRepair(item = {}) {
 function summarizeStewardRecord(item = {}) {
   return {
     request_id: item.request_id || null,
-    actor_id: item.actor_id || null,
     capability_id: item.capability_id || null,
     authority: item.authority || null,
     status: item.status || null,
     requested_at: item.requested_at || null,
     resolved_at: item.resolved_at || null,
     execution_status: item.execution?.status || null,
+  };
+}
+
+function summarizeRepairBudget(budget = {}) {
+  const attempts = budget?.attempts && typeof budget.attempts === 'object' ? budget.attempts : {};
+  const services = budget?.service_repairs && typeof budget.service_repairs === 'object' ? budget.service_repairs : {};
+  return {
+    attempted_fault_count: Object.keys(attempts).length,
+    automatic_attempt_count: Object.values(attempts).reduce((sum, value) => sum + (Number(value) || 0), 0),
+    repaired_service_count: Object.keys(services).length,
+    committed_repair_count: Object.values(services).reduce((sum, value) => sum + (Number(value) || 0), 0),
   };
 }
 
@@ -211,7 +219,7 @@ export function createSafeDiagnostics({
     security_tripwires: securityTripwires.slice(-maxEvents).map(summarizeTripwire),
     authority_leases: authorityLeases.slice(-maxEvents).map(summarizeLease),
     repair_receipts: repairReceipts.slice(-maxEvents).map(summarizeRepair),
-    repair_budget: clone(repairBudget),
+    repair_budget: summarizeRepairBudget(repairBudget),
     feather_paused: Boolean(featherPaused),
     captured_at: capturedAt,
   }));
