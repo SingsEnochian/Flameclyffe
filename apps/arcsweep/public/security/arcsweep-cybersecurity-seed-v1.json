@@ -1,0 +1,83 @@
+{
+  "schema": "arcsweep.cybersecurity-seed/v1",
+  "generated_at": "2026-09-10",
+  "purpose": "Read-only security intelligence seed for ArcSweep OS threat awareness, tripwires, capability review, and red-team analysis.",
+  "ingest_policy": {
+    "mode": "read-only",
+    "preserve_source_ids": true,
+    "require_provenance": true,
+    "allow_direct_policy_mutation": false,
+    "allow_direct_capability_escalation": false,
+    "quarantine_untrusted_free_text": true,
+    "steward_review_required_for_governance_changes": true
+  },
+  "sources": [
+    {
+      "source_id": "mitre-attack",
+      "source_class": "adversary-technique-knowledge-base",
+      "canonical_url": "https://attack.mitre.org/",
+      "use": ["enterprise tactics", "privilege escalation", "credential access", "persistence", "exfiltration"]
+    },
+    {
+      "source_id": "mitre-atlas",
+      "source_class": "ai-adversary-technique-knowledge-base",
+      "canonical_url": "https://atlas.mitre.org/",
+      "use": ["AI system attacks", "agentic abuse", "model manipulation", "AI red-team evidence"]
+    },
+    {
+      "source_id": "cisa-kev",
+      "source_class": "known-exploited-vulnerability-catalog",
+      "canonical_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "use": ["known exploited vulnerabilities", "patch prioritisation"]
+    },
+    {
+      "source_id": "nvd-cve",
+      "source_class": "vulnerability-registry",
+      "canonical_url": "https://nvd.nist.gov/",
+      "use": ["CVE enrichment", "severity", "affected products"]
+    },
+    {
+      "source_id": "mitre-cwe",
+      "source_class": "software-weakness-taxonomy",
+      "canonical_url": "https://cwe.mitre.org/",
+      "use": ["weakness classes", "secure coding", "root-cause mapping"]
+    },
+    {
+      "source_id": "mitre-capec",
+      "source_class": "attack-pattern-taxonomy",
+      "canonical_url": "https://capec.mitre.org/",
+      "use": ["attack patterns", "abuse cases", "threat modelling"]
+    },
+    {
+      "source_id": "owasp-genai-llm-top10-2026",
+      "source_class": "ai-application-security-guidance",
+      "canonical_url": "https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/",
+      "use": ["prompt injection", "sensitive data", "supply chain", "excessive agency", "resource abuse"]
+    },
+    {
+      "source_id": "owasp-agentic-top10-2026",
+      "source_class": "agentic-security-guidance",
+      "canonical_url": "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+      "use": ["agent control", "memory and context risk", "tool misuse", "autonomous workflow risk"]
+    }
+  ],
+  "risk_families": [
+    "prompt-injection",
+    "tool-output-injection",
+    "context-memory-poisoning",
+    "data-model-poisoning",
+    "supply-chain-compromise",
+    "credential-access",
+    "sensitive-information-disclosure",
+    "privilege-escalation",
+    "excessive-agency",
+    "persistence",
+    "defence-evasion",
+    "exfiltration",
+    "unbounded-consumption",
+    "capability-drift",
+    "identity-route-confusion",
+    "provenance-break",
+    "repair-loop-abuse"
+  ]
+}
