@@ -21,8 +21,9 @@ test('boot lifecycle exposes explicit legal transitions and receipts them', () =
 
 test('boot lifecycle rejects impossible transitions rather than inventing state', () => {
   const boot = createBootLifecycle();
+  boot.transition('READY', { reason: 'services-registered' });
   assert.throws(() => boot.transition('BOOTING'), /Invalid ArcSweep boot transition/);
-  boot.transition('ERROR', { reason: 'fatal-startup' });
+  boot.transition('ERROR', { reason: 'fatal-runtime' });
   assert.throws(() => boot.transition('READY'), /Invalid ArcSweep boot transition/);
   boot.transition('BOOTING', { reason: 'explicit-retry' });
   assert.equal(boot.state(), 'BOOTING');
