@@ -87,6 +87,53 @@ test('Caretaker detects and repairs a missing required event subscription', asyn
   assert.equal(repairs[0].payload.result, 'committed');
 });
 
+test('Caretaker detects, repairs, validates, and receipts an unhealthy required service', async () => {
+  const bus = createEventBus();
+  const checkpoints = createCheckpointStore();
+  const health = createHealthRegistry({ bus });
+  const caretaker = createCaretaker({ bus, checkpointStore: checkpoints, healthRegistry: health, repairBudget: createRepairBudget() });
+  let mounted = false;
+  let repairCalls = 0;
+
+  caretaker.registerRequiredService({
+    serviceId: 'test-sidecar-service',
+    probe: () => ({ ok: mounted, mounted }),
+    repair: () => { repairCalls += 1; mounted = true; return { remounted: true }; },
+  });
+
+  const findings = await caretaker.inspectRequiredServices();
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].code, 'required-service-unhealthy');
+  assert.equal(repairCalls, 1);
+  assert.equal(mounted, true);
+  assert.equal(health.get('test-sidecar-service').status, 'healthy');
+
+  const repairs = bus.history().filter((item) => item.name === 'arcsweep:repair-completed');
+  assert.equal(repairs.length, 1);
+  assert.equal(repairs[0].payload.action, 'recover-required-service');
+  assert.equal(repairs[0].payload.result, 'committed');
+  assert.ok(repairs[0].payload.before_checkpoint);
+});
+
+test('Feather pauses automatic required service repair without hiding the fault', async () => {
+  const bus = createEventBus();
+  const checkpoints = createCheckpointStore();
+  const health = createHealthRegistry({ bus });
+  const caretaker = createCaretaker({ bus, checkpointStore: checkpoints, healthRegistry: health, repairBudget: createRepairBudget() });
+  let repairCalls = 0;
+
+  caretaker.registerRequiredService({
+    serviceId: 'paused-service',
+    probe: () => false,
+    repair: () => { repairCalls += 1; },
+  });
+  caretaker.setFeatherPaused(true);
+  const findings = await caretaker.inspectRequiredServices();
+  assert.equal(findings.length, 1);
+  assert.equal(repairCalls, 0);
+  assert.equal(health.get('paused-service').status, 'failed');
+});
+
 test('bad R1 repair rolls back to the captured state', async () => {
   const bus = createEventBus();
   const checkpoints = createCheckpointStore();
