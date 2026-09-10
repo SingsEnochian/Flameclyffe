@@ -3,9 +3,9 @@ import { vercelEnv as env } from '../../_shared/vercel-env.mjs';
 import { houseSessionCookie, issueHouseSession } from '../../../netlify/functions/_shared/house-session.mjs';
 import { buildProductionSmokeWorldContext } from '../../../netlify/functions/_shared/production-smoke-world-context.mjs';
 
-const json = (status, body) => new Response(JSON.stringify(body), {
+const json = (status, body, headers = {}) => new Response(JSON.stringify(body), {
   status,
-  headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
+  headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers },
 });
 
 function bearer(request) {
@@ -68,7 +68,9 @@ export default {
       return json(401, { error: 'Trusted production smoke identity required.', detail: error.message });
     }
 
-    const base = new URL(request.url).origin;
+    const requestUrl = new URL(request.url);
+    const smokeTarget = requestUrl.searchParams.get('target') || '';
+    const base = requestUrl.origin;
     const startedAt = new Date().toISOString();
     const threadId = `production-circulation:${Date.now()}`;
     const worldContext = await buildProductionSmokeWorldContext(startedAt);
@@ -104,7 +106,8 @@ export default {
       // Mint the same sealed House session cookie the normal exchange would issue, without
       // requiring a reusable Steward credential to be present in the smoke environment.
       const internalSession = issueHouseSession(env);
-      const cookie = houseSessionCookie(request, internalSession.token, internalSession.ttl).split(';')[0].trim();
+      const sessionCookieHeader = houseSessionCookie(request, internalSession.token, internalSession.ttl);
+      const cookie = sessionCookieHeader.split(';')[0].trim();
       if (!cookie) throw new Error('Trusted smoke session mint returned no sealed session cookie.');
 
       const houseFetch = (path, init = {}) => {
@@ -115,6 +118,45 @@ export default {
 
       const sessionCheck = await readJson(await houseFetch('/api/v1/house/session'), 'House session validation');
       if (sessionCheck.connected !== true || sessionCheck.mode !== 'session') throw new Error('House session cookie did not validate as a sealed session.');
+
+      if (smokeTarget === 'caretaker') {
+        const caretakerStatus = await readJson(await houseFetch('/api/v1/house/caretaker'), 'Caretaker status');
+        const ready = caretakerStatus.role === 'house-intelligence'
+          && caretakerStatus.runtime_reachable === true
+          && caretakerStatus.model_available === true;
+        return json(200, {
+          ok: ready,
+          schema: 'hearthgate.caretaker-production-status/v1',
+          started_at: startedAt,
+          completed_at: new Date().toISOString(),
+          production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
+          caller: { repository: oidc.repository, ref: oidc.ref, run_id: oidc.run_id, sha: oidc.sha },
+          session: { connected: true, mode: sessionCheck.mode },
+          caretaker: {
+            role: caretakerStatus.role || null,
+            provider: caretakerStatus.provider || null,
+            model: caretakerStatus.model || null,
+            default_model: caretakerStatus.default_model || null,
+            source_model: caretakerStatus.source_model || null,
+            action_schema: caretakerStatus.action_schema || null,
+            allowed_actions: caretakerStatus.allowed_actions || [],
+            configured: caretakerStatus.configured === true,
+            gateway_configured: caretakerStatus.gateway_configured === true,
+            runtime_reachable: caretakerStatus.runtime_reachable === true,
+            model_available: caretakerStatus.model_available === true,
+            installed_count: caretakerStatus.installed_count ?? null,
+            missing: caretakerStatus.missing || [],
+            runtime_error: caretakerStatus.runtime_error || null,
+          },
+          authority: {
+            oidc_audience: HOUSE_SMOKE_AUDIENCE,
+            session_bootstrap: 'trusted-github-oidc',
+            credential_exposed: false,
+            session_cookie_returned_only_as_http_header: true,
+            production_write_scope: 'none',
+          },
+        }, { 'set-cookie': sessionCookieHeader });
+      }
 
       const atlasStatus = await readJson(await houseFetch('/api/v1/flames/atlas/status'), 'Atlas status');
       if (atlasStatus.runtime_reachable === false) throw new Error('Atlas runtime is unreachable.');
@@ -278,7 +320,7 @@ export default {
       console.error('Authenticated production circulation smoke failed', error);
       return json(502, {
         ok: false,
-        schema: 'hearthgate.production-circulation-smoke/v2',
+        schema: smokeTarget === 'caretaker' ? 'hearthgate.caretaker-production-status/v1' : 'hearthgate.production-circulation-smoke/v2',
         production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
         stage_error: error.message,
         credential_exposed: false,
