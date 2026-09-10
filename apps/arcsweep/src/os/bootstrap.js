@@ -8,6 +8,7 @@ import {
 } from './kernel.js';
 import { createCaretaker } from './caretaker.js';
 import { createCapabilityRegistry } from './capabilities.js';
+import { createContextPersistence } from './context-persistence.js';
 import { ARCSWEEP_OS_MANIFEST } from './version.js';
 
 const GLOBAL_KEY = '__arcsweepOS';
@@ -28,6 +29,14 @@ function inferRoomFromTrigger(target) {
   return target?.closest?.('[data-room]')?.dataset?.room || null;
 }
 
+function resolveSessionStorage() {
+  try {
+    return globalThis.sessionStorage || null;
+  } catch {
+    return null;
+  }
+}
+
 function installArcSweepOS() {
   if (globalThis[GLOBAL_KEY]) return globalThis[GLOBAL_KEY];
 
@@ -35,8 +44,10 @@ function installArcSweepOS() {
   const checkpointStore = createCheckpointStore();
   const healthRegistry = createHealthRegistry({ bus });
   const capabilityRegistry = createCapabilityRegistry({ bus });
-  let session = createSessionState({ active_room: 'portal' });
-  const capsules = [];
+  const contextPersistence = createContextPersistence({ storage: resolveSessionStorage() });
+  const restored = contextPersistence.load();
+  let session = restored?.session || createSessionState({ active_room: 'portal' });
+  const capsules = restored?.capsules ? restored.capsules.slice(-MAX_CAPSULES) : [];
   let lastNavigationReceipt = null;
 
   const caretaker = createCaretaker({
@@ -53,6 +64,10 @@ function installArcSweepOS() {
       lastNavigationReceipt = receipt;
     },
   });
+
+  function persistContext() {
+    return contextPersistence.save({ session, capsules });
+  }
 
   function navigate(currentRoom, patch = {}) {
     const room = String(currentRoom || '').trim();
@@ -78,9 +93,11 @@ function installArcSweepOS() {
       context_capsule_id: capsule.capsule_id,
       context_event_id: capsuleReceipt.event_id,
     }, { source: 'os-bootstrap' });
+    const persisted = persistContext();
     dispatchDomEvent('arcsweep:os-navigation', {
       capsule,
       navigation_receipt: navigationReceipt,
+      persisted,
       diagnostics: snapshot(),
     });
     return capsule;
@@ -123,6 +140,11 @@ function installArcSweepOS() {
       session: clone(session),
       active_context: capsules.length ? clone(capsules[capsules.length - 1]) : null,
       context_depth: capsules.length,
+      context_persistence: {
+        available: contextPersistence.available(),
+        restored: Boolean(restored),
+        storage_key: contextPersistence.key,
+      },
       recent_events: events.slice(-MAX_DIAGNOSTIC_EVENTS).map(clone),
       services: healthRegistry.snapshot(),
       service_registry: capabilityRegistry.services(),
@@ -148,6 +170,10 @@ function installArcSweepOS() {
     return caretaker.setFeatherPaused(paused);
   }
 
+  function clearPersistedContext() {
+    return contextPersistence.clear();
+  }
+
   const api = Object.freeze({
     manifest: ARCSWEEP_OS_MANIFEST,
     bus,
@@ -155,6 +181,7 @@ function installArcSweepOS() {
     capabilities: capabilityRegistry,
     checkpoints: checkpointStore,
     health: healthRegistry,
+    persistence: contextPersistence,
     session: () => clone(session),
     capsules: () => capsules.map(clone),
     lastNavigationReceipt: () => lastNavigationReceipt ? clone(lastNavigationReceipt) : null,
@@ -162,6 +189,7 @@ function installArcSweepOS() {
     navigate,
     inspect,
     setFeatherPaused,
+    clearPersistedContext,
   });
 
   globalThis[GLOBAL_KEY] = api;
@@ -193,6 +221,7 @@ function installArcSweepOS() {
     schema: ARCSWEEP_OS_MANIFEST.schema,
     version: ARCSWEEP_OS_MANIFEST.version,
     stage: ARCSWEEP_OS_MANIFEST.stage,
+    restored_context: Boolean(restored),
     diagnostics: snapshot(),
   });
 
