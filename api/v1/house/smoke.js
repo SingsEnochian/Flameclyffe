@@ -169,10 +169,27 @@ export default {
           message: prompt,
           session_id: threadId,
           context: [],
-          metadata: { surface: 'authenticated-production-smoke', world_id: 'terra-prime', world_context: worldContext },
+          metadata: {
+            surface: 'authenticated-production-smoke',
+            world_id: 'terra-prime',
+            world_context: worldContext,
+            commons_thread_id: threadId,
+            commons_turn_id: `${threadId}:atlas`,
+            request_id: `${threadId}:atlas`,
+          },
         }),
       }), 'Atlas chat');
       if (!atlasReply.provider || !atlasReply.model || !String(atlasReply.message || '').trim()) throw new Error('Atlas reply did not attest provider, model, and visible presence.');
+      const atlasRuntimeReceipt = atlasReply.runtime_braid || null;
+      if (atlasRuntimeReceipt?.persisted !== true || atlasRuntimeReceipt?.readback_verified !== true) {
+        throw new Error(`Atlas reply did not produce a verified durable runtime receipt: ${atlasRuntimeReceipt?.reason || 'missing runtime_braid proof'}`);
+      }
+      if (atlasRuntimeReceipt.thread_id !== threadId || atlasRuntimeReceipt.turn_id !== `${threadId}:atlas` || atlasRuntimeReceipt.voice_id !== 'atlas') {
+        throw new Error('Atlas runtime receipt identity did not match the production smoke turn.');
+      }
+      if (atlasRuntimeReceipt.provider !== atlasReply.provider || atlasRuntimeReceipt.model !== atlasReply.model) {
+        throw new Error('Atlas runtime receipt provider/model did not match the server-observed reply.');
+      }
 
       const oaStatus = await readJson(await houseFetch('/api/v1/flames/oxalpha/status'), 'OA status');
       const oaPrompt = [
@@ -188,11 +205,29 @@ export default {
           message: oaPrompt,
           session_id: `${threadId}:aemeth`,
           context: [],
-          metadata: { surface: 'aemeth-production-smoke', world_id: 'terra-prime', world_context: worldContext, aemeth: aemethPacket },
+          metadata: {
+            surface: 'aemeth-production-smoke',
+            world_id: 'terra-prime',
+            world_context: worldContext,
+            commons_thread_id: threadId,
+            commons_turn_id: `${threadId}:oxalpha`,
+            request_id: `${threadId}:oxalpha`,
+            aemeth: aemethPacket,
+          },
         }),
       }), 'OA Aemeth chat');
       if (oaReply.flame_id && oaReply.flame_id !== 'oxalpha') throw new Error(`OA identity mismatch: ${oaReply.flame_id}`);
       if (!oaReply.provider || !oaReply.model || !String(oaReply.message || '').trim()) throw new Error('OA reply did not attest provider, model, and visible presence.');
+      const oaRuntimeReceipt = oaReply.runtime_braid || null;
+      if (oaRuntimeReceipt?.persisted !== true || oaRuntimeReceipt?.readback_verified !== true) {
+        throw new Error(`OA reply did not produce a verified durable runtime receipt: ${oaRuntimeReceipt?.reason || 'missing runtime_braid proof'}`);
+      }
+      if (oaRuntimeReceipt.thread_id !== threadId || oaRuntimeReceipt.turn_id !== `${threadId}:oxalpha` || oaRuntimeReceipt.voice_id !== 'oxalpha') {
+        throw new Error('OA runtime receipt identity did not match the production smoke turn.');
+      }
+      if (oaRuntimeReceipt.provider !== oaReply.provider || oaRuntimeReceipt.model !== oaReply.model) {
+        throw new Error('OA runtime receipt provider/model did not match the server-observed reply.');
+      }
 
       const commonsBefore = await readJson(await houseFetch('/api/v1/house/commons'), 'Commons pre-read');
       const beforeCount = Array.isArray(commonsBefore.entries) ? commonsBefore.entries.length : 0;
@@ -297,6 +332,30 @@ export default {
           atlas: { route: 'atlas', provider: atlasReply.provider, model: atlasReply.model, runtime_reachable: atlasStatus.runtime_reachable !== false },
           oxalpha: { route: 'oxalpha', provider: oaReply.provider, model: oaReply.model, runtime_reachable: oaStatus.runtime_reachable !== false },
         },
+        runtime_receipts: {
+          atlas: {
+            persisted: atlasRuntimeReceipt.persisted,
+            readback_verified: atlasRuntimeReceipt.readback_verified,
+            event_id: atlasRuntimeReceipt.event_id,
+            event_sequence: atlasRuntimeReceipt.event_sequence,
+            packet_fingerprint: atlasRuntimeReceipt.packet_fingerprint,
+            voice_id: atlasRuntimeReceipt.voice_id,
+            provider: atlasRuntimeReceipt.provider,
+            model: atlasRuntimeReceipt.model,
+            route: atlasRuntimeReceipt.route,
+          },
+          oxalpha: {
+            persisted: oaRuntimeReceipt.persisted,
+            readback_verified: oaRuntimeReceipt.readback_verified,
+            event_id: oaRuntimeReceipt.event_id,
+            event_sequence: oaRuntimeReceipt.event_sequence,
+            packet_fingerprint: oaRuntimeReceipt.packet_fingerprint,
+            voice_id: oaRuntimeReceipt.voice_id,
+            provider: oaRuntimeReceipt.provider,
+            model: oaRuntimeReceipt.model,
+            route: oaRuntimeReceipt.route,
+          },
+        },
         aemeth: {
           packet_schema: aemethPacket.schema,
           instrument_profile: aemethPacket.chamber.instrumentProfile,
@@ -313,7 +372,7 @@ export default {
           session_bootstrap: 'trusted-github-oidc',
           credential_exposed: false,
           model_prose_returned: false,
-          production_write_scope: 'four append-only Commons smoke entries: Terra Prime + Aemeth OA',
+          production_write_scope: 'two verified model-reply runtime receipts plus four append-only Commons smoke entries: Terra Prime + Aemeth OA',
         },
       });
     } catch (error) {
