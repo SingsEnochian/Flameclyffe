@@ -30,7 +30,7 @@ function liveFetch(mismatched = false) {
       assert.equal(body.metadata.world_context.schema, 'arcsweep.runtime-world-context/v1');
       assert.match(body.message, /^ARCSWEEP ACTIVE WORLD RUNTIME CONTEXT/);
       assert.match(body.message, /World: Terra Prime/);
-      return response({ flame_id: mismatched ? 'uial' : 'lioreal', provider: 'openai', model: 'gpt-4o', message: '[CONTINUITY] Current surname: al’Valari.', cited_sources: ['canon-overlay'], world_context: body.metadata.world_context });
+      return response({ flame_id: mismatched ? 'uial' : 'lioreal', provider: 'openai', model: 'gpt-4o', message: '[CONTINUITY] Current surname: al’Var.', cited_sources: ['canon-overlay'], world_context: body.metadata.world_context });
     }
     throw new Error(`Unexpected fetch: ${url}`);
   };
@@ -62,7 +62,7 @@ test('a response from a different Flame is rejected as a runtime mismatch', asyn
 
 test('attested visible reply can be kept only as provisional model observation', () => {
   const cell = createLearningCellFromMargin({
-    voiceId: 'lioreal', voiceLabel: 'Lioreal', text: 'Current surname: al’Valari.', runtimeVerified: true,
+    voiceId: 'lioreal', voiceLabel: 'Lioreal', text: 'Current surname: al’Var.', runtimeVerified: true,
     profileId: 'house:lioreal:openai:gpt-4o', provider: 'openai', model: 'gpt-4o', sourceModel: 'gpt-4o',
     requestId: 'req-1', mode: 'writing', fieldContext: { field: { key: 'script:content' }, page: { worldId: 'taaveren-vaen' } },
   });

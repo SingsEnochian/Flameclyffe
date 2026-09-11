@@ -10,7 +10,7 @@ async function json(relative) {
 
 test('Subject Cortex registers character, narrator, and writing-style subjects', async () => {
   const manifest = await json('../skills/subject-banks.json');
-  assert.equal(manifest.subjects['character:kestrelle'].label, 'Kestrelle al’Valari');
+  assert.equal(manifest.subjects['character:kestrelle'].label, 'Kestrelle al’Var');
   assert.equal(manifest.subjects['narrative_voice:taaveren-vaen-narrator'].status, 'provisional-derived-cortex');
   assert.equal(manifest.subjects['writing_style:taaveren-vaen-longform'].status, 'provisional-derived-cortex');
   assert.equal(manifest.rules.currentCanonOverlaySupersedesHistoricalBundleClaims, true);
@@ -27,11 +27,11 @@ test('Kestrelle cortex resolves current canon and quarantines superseded names a
     includeHistorical: true,
   });
   const values = current.map((cell) => cell.value);
-  assert.ok(values.includes('Kestrelle al’Valari'));
+  assert.ok(values.includes('Kestrelle al’Var'));
   assert.ok(values.some((value) => typeof value === 'string' && value.includes('Age of Restoration')));
   assert.ok(values.some((value) => typeof value === 'string' && value.includes('White Tower')));
   assert.ok(values.includes('saidin remains clean'));
-  assert.equal(values.includes('Kestrelle al’Var'), false);
+  assert.equal(values.includes('Kestrelle al’Valari'), false);
   assert.equal(values.includes('Fourth Age'), false);
   assert.equal(values.includes('Mending'), false);
 });
