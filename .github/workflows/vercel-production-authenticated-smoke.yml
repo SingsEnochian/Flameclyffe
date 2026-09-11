@@ -47,6 +47,97 @@ jobs:
           }
           NODE
 
+  durable-runtime-receipt-proof:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_URL: https://flameclyffe.vercel.app
+      OIDC_AUDIENCE: flameclyffe-house-smoke/v1
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Wait for exact production SHA then prove one durable model receipt
+        shell: bash
+        run: |
+          node <<'NODE' | tee runtime-receipt-proof.json
+          const base = process.env.BASE_URL.replace(/\/$/, '');
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          async function oidcToken() {
+            const requestUrl = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+            requestUrl.searchParams.set('audience', process.env.OIDC_AUDIENCE);
+            const response = await fetch(requestUrl, {
+              headers: { authorization: `bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` },
+            });
+            if (!response.ok) throw new Error(`GitHub OIDC token request failed: ${response.status}`);
+            const body = await response.json();
+            if (!body.value) throw new Error('GitHub OIDC token response was empty.');
+            return body.value;
+          }
+
+          const token = await oidcToken();
+          let deployed = null;
+          for (let attempt = 1; attempt <= 30; attempt += 1) {
+            try {
+              const response = await fetch(`${base}/api/v1/house/smoke?target=caretaker`, {
+                method: 'POST',
+                headers: { authorization: `Bearer ${token}` },
+                redirect: 'manual',
+              });
+              const body = await response.json().catch(() => ({}));
+              deployed = body.production_sha || null;
+              console.error(JSON.stringify({ attempt, expected_sha: process.env.GITHUB_SHA, production_sha: deployed, http_status: response.status }));
+              if (deployed === process.env.GITHUB_SHA) break;
+            } catch (error) {
+              console.error(JSON.stringify({ attempt, expected_sha: process.env.GITHUB_SHA, transport_error: error.message }));
+            }
+            await sleep(10_000);
+          }
+          if (deployed !== process.env.GITHUB_SHA) {
+            throw new Error(`Exact production SHA never became active. Expected ${process.env.GITHUB_SHA}, last observed ${deployed || 'unknown'}.`);
+          }
+
+          const response = await fetch(`${base}/api/v1/house/smoke?target=runtime-receipt`, {
+            method: 'POST',
+            headers: { authorization: `Bearer ${token}` },
+            redirect: 'manual',
+          });
+          const text = await response.text();
+          let body;
+          try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 500) || 'non-json response' }; }
+          const receipt = body?.runtime_receipt;
+          const passed = response.ok
+            && body?.ok === true
+            && body?.production_sha === process.env.GITHUB_SHA
+            && receipt?.persisted === true
+            && receipt?.readback_verified === true
+            && receipt?.voice_id === 'boxfire'
+            && Boolean(receipt?.provider)
+            && Boolean(receipt?.model)
+            && Boolean(receipt?.event_id)
+            && Boolean(receipt?.packet_fingerprint);
+          console.log(JSON.stringify({ http_status: response.status, ...body }, null, 2));
+          if (!passed) process.exitCode = 1;
+          NODE
+
+      - name: Publish durable receipt proof to hosting PR
+        if: always()
+        shell: bash
+        run: |
+          STATUS='PASSED'
+          if [[ '${{ job.status }}' != 'success' ]]; then STATUS='FAILED'; fi
+          {
+            echo "### ArcSweep durable runtime receipt proof: ${STATUS}"
+            echo
+            echo 'Production: `https://flameclyffe.vercel.app`'
+            echo "Workflow commit: \`${GITHUB_SHA}\`"
+            echo
+            echo '```json'
+            cat runtime-receipt-proof.json 2>/dev/null || echo '{"ok":false,"error":"runtime receipt proof failed before receipt"}'
+            echo '```'
+          } > runtime-receipt-proof.md
+          gh pr comment 184 --repo SingsEnochian/Flameclyffe --body-file runtime-receipt-proof.md
+
   authenticated-production-circulation:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
