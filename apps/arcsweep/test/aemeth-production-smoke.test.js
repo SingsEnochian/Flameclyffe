@@ -22,6 +22,17 @@ test('production smoke proves OA persistence, fresh readback, and braid replay',
   assert.match(endpoint, /model_prose_returned:\s*false/);
 });
 
+test('production smoke requires durable server-boundary runtime receipts for both real model turns', () => {
+  assert.match(endpoint, /commons_thread_id:\s*threadId/);
+  assert.match(endpoint, /commons_turn_id:\s*`\$\{threadId\}:atlas`/);
+  assert.match(endpoint, /commons_turn_id:\s*`\$\{threadId\}:oxalpha`/);
+  assert.match(endpoint, /atlasRuntimeReceipt\?\.persisted !== true/);
+  assert.match(endpoint, /atlasRuntimeReceipt\?\.readback_verified !== true/);
+  assert.match(endpoint, /oaRuntimeReceipt\?\.persisted !== true/);
+  assert.match(endpoint, /oaRuntimeReceipt\?\.readback_verified !== true/);
+  assert.match(endpoint, /runtime_receipts:/);
+});
+
 test('trusted production workflow fails unless the integrated OA Aemeth proof is present', () => {
   assert.match(workflow, /\/api\/v1\/house\/smoke/);
   assert.match(workflow, /model_presence\?\.oxalpha/);
