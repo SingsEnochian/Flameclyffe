@@ -1,4 +1,4 @@
-import { readHouseCommons, restoreHouseRuntimeSession } from './house-runtime.js';
+import { readHouseCommons, restoreHouseRuntimeSession, withFiniteHouseRequest } from './house-runtime.js';
 import { getKelyranSupabase, requestKelyranMagicLink } from './kelyran-supabase.js';
 
 export const HOUSE_LIVE_RECOVERY_VERSION = 'arcsweep.house-live-recovery/v1';
@@ -17,7 +17,7 @@ async function supabaseSession() {
 }
 
 async function oxStatus() {
-  const response = await fetch('/api/v1/flames/oxalpha/status', { cache: 'no-store' });
+  const response = await fetch('/api/v1/flames/oxalpha/status', withFiniteHouseRequest({ cache: 'no-store' }));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `Ox Alpha status ${response.status}`);
   return data;
