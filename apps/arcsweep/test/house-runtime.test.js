@@ -3,8 +3,11 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 
 import {
+  appendHouseCommons,
   clearHouseRuntimeToken,
+  invalidateHouseCommonsSnapshot,
   readFlameStatuses,
+  readHouseCommons,
   readHouseRuntimeToken,
   withFiniteHouseRequest,
   writeHouseRuntimeToken,
@@ -33,6 +36,55 @@ test('finite House requests receive a deadline without overriding an explicit ca
   const controller = new AbortController();
   const explicit = withFiniteHouseRequest({ signal: controller.signal }, 5);
   assert.equal(explicit.signal, controller.signal);
+});
+
+test('Commons GET callers share one in-flight browser read and a short settling snapshot', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    await new Promise((resolve) => setTimeout(resolve, 12));
+    return new Response(JSON.stringify({ entries: [{ id: `entry-${calls}` }] }), { status: 200 });
+  };
+  invalidateHouseCommonsSnapshot();
+  try {
+    const [left, right] = await Promise.all([readHouseCommons('house-key'), readHouseCommons('house-key')]);
+    assert.equal(calls, 1);
+    assert.deepEqual(left, right);
+    const settled = await readHouseCommons('house-key');
+    assert.equal(calls, 1);
+    assert.deepEqual(settled, left);
+  } finally {
+    globalThis.fetch = originalFetch;
+    invalidateHouseCommonsSnapshot();
+  }
+});
+
+test('Commons writes invalidate the shared read snapshot', async () => {
+  const originalFetch = globalThis.fetch;
+  let reads = 0;
+  let writes = 0;
+  globalThis.fetch = async (_url, options = {}) => {
+    if (options.method === 'POST') {
+      writes += 1;
+      return new Response(JSON.stringify({ id: `saved-${writes}` }), { status: 200 });
+    }
+    reads += 1;
+    return new Response(JSON.stringify({ entries: [{ id: `read-${reads}` }] }), { status: 200 });
+  };
+  invalidateHouseCommonsSnapshot();
+  try {
+    await readHouseCommons('house-key');
+    await readHouseCommons('house-key');
+    assert.equal(reads, 1);
+    await appendHouseCommons('house-key', { kind: 'steward', author: 'Rowan', status: 'sent', text: 'test' });
+    assert.equal(writes, 1);
+    await readHouseCommons('house-key');
+    assert.equal(reads, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+    invalidateHouseCommonsSnapshot();
+  }
 });
 
 test('House Runtime board distinguishes live, unavailable, and unauthorised Flames', async () => {
