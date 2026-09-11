@@ -16,6 +16,7 @@ test('Caretaker detects and repairs inconsistent derived state with checkpoint a
     captureState: () => ({ ...derived }),
     repair: () => { derived.room = 'forge'; },
     rollback: ({ priorState }) => { derived.room = priorState.room; },
+    verifyRollback: ({ priorState }) => derived.room === priorState.room,
   });
 
   const findings = await caretaker.inspectRequiredDerivedState();

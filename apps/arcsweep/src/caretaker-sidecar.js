@@ -46,22 +46,9 @@ export async function currentCaretakerWorld(readWorld = readActiveRuntimeWorldCo
   }
 }
 
-async function afterRender() {
-  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-}
-
 export async function navigateCaretakerRoom(target) {
-  const button = roomButtons().find((candidate) => candidate.dataset.room === target);
-  if (!button) return { ok: false, status: 'missing', target, observed_room: activeRoomId() };
-  button.click();
-  await afterRender();
-  const observedRoom = activeRoomId();
-  return {
-    ok: observedRoom === target,
-    status: observedRoom === target ? 'navigated' : 'not-observed',
-    target,
-    observed_room: observedRoom,
-  };
+  const { arcsweepOS } = await import('./os/bootstrap.js');
+  return arcsweepOS.guide.request('os.navigate', { room: target });
 }
 
 function nonDurableReceipt(receipt, error = null) {
