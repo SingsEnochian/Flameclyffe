@@ -19,6 +19,39 @@ async function readJson(response, label) {
   return data;
 }
 
+function assertDurableRuntimeReceipt({ reply, receipt, threadId, turnId, voiceId, label }) {
+  if (!reply?.provider || !reply?.model || !String(reply?.message || '').trim()) {
+    throw new Error(`${label} reply did not attest provider, model, and visible presence.`);
+  }
+  if (receipt?.persisted !== true || receipt?.readback_verified !== true) {
+    throw new Error(`${label} reply did not produce a verified durable runtime receipt: ${receipt?.reason || 'missing runtime_braid proof'}`);
+  }
+  if (receipt.thread_id !== threadId || receipt.turn_id !== turnId || receipt.voice_id !== voiceId) {
+    throw new Error(`${label} runtime receipt identity did not match the production smoke turn.`);
+  }
+  if (receipt.provider !== reply.provider || receipt.model !== reply.model) {
+    throw new Error(`${label} runtime receipt provider/model did not match the server-observed reply.`);
+  }
+  return receipt;
+}
+
+function runtimeReceiptProjection(receipt) {
+  return {
+    persisted: receipt.persisted,
+    readback_verified: receipt.readback_verified,
+    event_id: receipt.event_id,
+    event_sequence: receipt.event_sequence,
+    packet_fingerprint: receipt.packet_fingerprint,
+    world_id: receipt.world_id,
+    thread_id: receipt.thread_id,
+    turn_id: receipt.turn_id,
+    voice_id: receipt.voice_id,
+    provider: receipt.provider,
+    model: receipt.model,
+    route: receipt.route,
+  };
+}
+
 async function readBraidReplay(base, cookie) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
@@ -102,9 +135,6 @@ export default {
     };
 
     try {
-      // The GitHub Actions OIDC identity is the authority for this narrow production smoke.
-      // Mint the same sealed House session cookie the normal exchange would issue, without
-      // requiring a reusable Steward credential to be present in the smoke environment.
       const internalSession = issueHouseSession(env);
       const sessionCookieHeader = houseSessionCookie(request, internalSession.token, internalSession.ttl);
       const cookie = sessionCookieHeader.split(';')[0].trim();
@@ -158,6 +188,63 @@ export default {
         }, { 'set-cookie': sessionCookieHeader });
       }
 
+      if (smokeTarget === 'runtime-receipt') {
+        const voiceId = 'boxfire';
+        const turnId = `${threadId}:${voiceId}`;
+        const boxfireStatus = await readJson(await houseFetch('/api/v1/flames/boxfire/status'), 'Boxfire status');
+        const prompt = 'ARCSWEEP DURABLE RUNTIME RECEIPT PROOF. Reply briefly with: RUNTIME RECEIPT PRESENT';
+        const boxfireReply = await readJson(await houseFetch('/api/v1/flames/boxfire/chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            message: prompt,
+            session_id: threadId,
+            context: [],
+            metadata: {
+              surface: 'runtime-receipt-production-proof',
+              world_id: 'terra-prime',
+              world_context: worldContext,
+              commons_thread_id: threadId,
+              commons_turn_id: turnId,
+              request_id: turnId,
+            },
+          }),
+        }), 'Boxfire runtime receipt proof');
+        const runtimeReceipt = assertDurableRuntimeReceipt({
+          reply: boxfireReply,
+          receipt: boxfireReply.runtime_braid,
+          threadId,
+          turnId,
+          voiceId,
+          label: 'Boxfire',
+        });
+        return json(200, {
+          ok: true,
+          schema: 'hearthgate.runtime-receipt-production-proof/v1',
+          started_at: startedAt,
+          completed_at: new Date().toISOString(),
+          production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
+          caller: { repository: oidc.repository, ref: oidc.ref, run_id: oidc.run_id, sha: oidc.sha },
+          session: { connected: true, mode: sessionCheck.mode },
+          model_presence: {
+            boxfire: {
+              route: 'boxfire',
+              provider: boxfireReply.provider,
+              model: boxfireReply.model,
+              configured: boxfireStatus.configured === true,
+            },
+          },
+          runtime_receipt: runtimeReceiptProjection(runtimeReceipt),
+          authority: {
+            oidc_audience: HOUSE_SMOKE_AUDIENCE,
+            session_bootstrap: 'trusted-github-oidc',
+            credential_exposed: false,
+            model_prose_returned: false,
+            production_write_scope: 'one verified model-reply runtime receipt; no Commons smoke writes',
+          },
+        }, { 'set-cookie': sessionCookieHeader });
+      }
+
       const atlasStatus = await readJson(await houseFetch('/api/v1/flames/atlas/status'), 'Atlas status');
       if (atlasStatus.runtime_reachable === false) throw new Error('Atlas runtime is unreachable.');
 
@@ -179,17 +266,14 @@ export default {
           },
         }),
       }), 'Atlas chat');
-      if (!atlasReply.provider || !atlasReply.model || !String(atlasReply.message || '').trim()) throw new Error('Atlas reply did not attest provider, model, and visible presence.');
-      const atlasRuntimeReceipt = atlasReply.runtime_braid || null;
-      if (atlasRuntimeReceipt?.persisted !== true || atlasRuntimeReceipt?.readback_verified !== true) {
-        throw new Error(`Atlas reply did not produce a verified durable runtime receipt: ${atlasRuntimeReceipt?.reason || 'missing runtime_braid proof'}`);
-      }
-      if (atlasRuntimeReceipt.thread_id !== threadId || atlasRuntimeReceipt.turn_id !== `${threadId}:atlas` || atlasRuntimeReceipt.voice_id !== 'atlas') {
-        throw new Error('Atlas runtime receipt identity did not match the production smoke turn.');
-      }
-      if (atlasRuntimeReceipt.provider !== atlasReply.provider || atlasRuntimeReceipt.model !== atlasReply.model) {
-        throw new Error('Atlas runtime receipt provider/model did not match the server-observed reply.');
-      }
+      const atlasRuntimeReceipt = assertDurableRuntimeReceipt({
+        reply: atlasReply,
+        receipt: atlasReply.runtime_braid,
+        threadId,
+        turnId: `${threadId}:atlas`,
+        voiceId: 'atlas',
+        label: 'Atlas',
+      });
 
       const oaStatus = await readJson(await houseFetch('/api/v1/flames/oxalpha/status'), 'OA status');
       const oaPrompt = [
@@ -217,17 +301,14 @@ export default {
         }),
       }), 'OA Aemeth chat');
       if (oaReply.flame_id && oaReply.flame_id !== 'oxalpha') throw new Error(`OA identity mismatch: ${oaReply.flame_id}`);
-      if (!oaReply.provider || !oaReply.model || !String(oaReply.message || '').trim()) throw new Error('OA reply did not attest provider, model, and visible presence.');
-      const oaRuntimeReceipt = oaReply.runtime_braid || null;
-      if (oaRuntimeReceipt?.persisted !== true || oaRuntimeReceipt?.readback_verified !== true) {
-        throw new Error(`OA reply did not produce a verified durable runtime receipt: ${oaRuntimeReceipt?.reason || 'missing runtime_braid proof'}`);
-      }
-      if (oaRuntimeReceipt.thread_id !== threadId || oaRuntimeReceipt.turn_id !== `${threadId}:oxalpha` || oaRuntimeReceipt.voice_id !== 'oxalpha') {
-        throw new Error('OA runtime receipt identity did not match the production smoke turn.');
-      }
-      if (oaRuntimeReceipt.provider !== oaReply.provider || oaRuntimeReceipt.model !== oaReply.model) {
-        throw new Error('OA runtime receipt provider/model did not match the server-observed reply.');
-      }
+      const oaRuntimeReceipt = assertDurableRuntimeReceipt({
+        reply: oaReply,
+        receipt: oaReply.runtime_braid,
+        threadId,
+        turnId: `${threadId}:oxalpha`,
+        voiceId: 'oxalpha',
+        label: 'OA',
+      });
 
       const commonsBefore = await readJson(await houseFetch('/api/v1/house/commons'), 'Commons pre-read');
       const beforeCount = Array.isArray(commonsBefore.entries) ? commonsBefore.entries.length : 0;
@@ -333,28 +414,8 @@ export default {
           oxalpha: { route: 'oxalpha', provider: oaReply.provider, model: oaReply.model, runtime_reachable: oaStatus.runtime_reachable !== false },
         },
         runtime_receipts: {
-          atlas: {
-            persisted: atlasRuntimeReceipt.persisted,
-            readback_verified: atlasRuntimeReceipt.readback_verified,
-            event_id: atlasRuntimeReceipt.event_id,
-            event_sequence: atlasRuntimeReceipt.event_sequence,
-            packet_fingerprint: atlasRuntimeReceipt.packet_fingerprint,
-            voice_id: atlasRuntimeReceipt.voice_id,
-            provider: atlasRuntimeReceipt.provider,
-            model: atlasRuntimeReceipt.model,
-            route: atlasRuntimeReceipt.route,
-          },
-          oxalpha: {
-            persisted: oaRuntimeReceipt.persisted,
-            readback_verified: oaRuntimeReceipt.readback_verified,
-            event_id: oaRuntimeReceipt.event_id,
-            event_sequence: oaRuntimeReceipt.event_sequence,
-            packet_fingerprint: oaRuntimeReceipt.packet_fingerprint,
-            voice_id: oaRuntimeReceipt.voice_id,
-            provider: oaRuntimeReceipt.provider,
-            model: oaRuntimeReceipt.model,
-            route: oaRuntimeReceipt.route,
-          },
+          atlas: runtimeReceiptProjection(atlasRuntimeReceipt),
+          oxalpha: runtimeReceiptProjection(oaRuntimeReceipt),
         },
         aemeth: {
           packet_schema: aemethPacket.schema,
@@ -379,7 +440,11 @@ export default {
       console.error('Authenticated production circulation smoke failed', error);
       return json(502, {
         ok: false,
-        schema: smokeTarget === 'caretaker' ? 'hearthgate.caretaker-production-status/v1' : 'hearthgate.production-circulation-smoke/v2',
+        schema: smokeTarget === 'caretaker'
+          ? 'hearthgate.caretaker-production-status/v1'
+          : smokeTarget === 'runtime-receipt'
+            ? 'hearthgate.runtime-receipt-production-proof/v1'
+            : 'hearthgate.production-circulation-smoke/v2',
         production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
         stage_error: error.message,
         credential_exposed: false,
