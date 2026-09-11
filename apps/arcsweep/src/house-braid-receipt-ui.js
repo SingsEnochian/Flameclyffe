@@ -1,14 +1,20 @@
-import { readHouseCommons, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import {
+  HOUSE_COMMONS_SNAPSHOT_EVENT,
+  readCachedHouseCommons,
+  readHouseRuntimeToken,
+  restoreHouseRuntimeSession,
+} from './house-runtime.js';
 import { getKelyranSupabase } from './kelyran-supabase.js';
 import { braidGlyph } from './instrument-console.js';
 
-export const HOUSE_BRAID_RECEIPT_UI_VERSION = 'arcsweep.house-braid-receipt-ui/v2';
+export const HOUSE_BRAID_RECEIPT_UI_VERSION = 'arcsweep.house-braid-receipt-ui/v3';
 export const HOUSE_RUNTIME_RECEIPT_EDGE = 'https://rufrmjyusalnifpegllj.supabase.co/functions/v1/arcsweep-runtime-receipt';
 
 let installed = false;
 let timer = null;
 let refreshInFlight = null;
 let observer = null;
+let latestEntries = [];
 
 const esc = (value = '') => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 
@@ -97,15 +103,21 @@ function decorate(entries, receipts) {
   });
 }
 
+function adoptCommonsSnapshot(data) {
+  latestEntries = Array.isArray(data?.entries) ? data.entries : Array.isArray(data) ? data : latestEntries;
+}
+
 export async function refreshHouseBraidReceipts() {
   if (refreshInFlight) return refreshInFlight;
   refreshInFlight = (async () => {
     const session = readHouseRuntimeToken() || await restoreHouseRuntimeSession();
     if (!session || !document.querySelector('#commons-form')) return { status: 'house-offline' };
-    const [commons, receipts] = await Promise.all([readHouseCommons(session), readRecentRuntimeReceipts()]);
-    const entries = Array.isArray(commons?.entries) ? commons.entries : Array.isArray(commons) ? commons : [];
-    decorate(entries, receipts);
-    return { status: 'ready', entries: entries.length, receipts: receipts.length };
+    const cached = readCachedHouseCommons(session);
+    if (cached) adoptCommonsSnapshot(cached);
+    if (!latestEntries.length) return { status: 'waiting-for-house-chat-snapshot' };
+    const receipts = await readRecentRuntimeReceipts();
+    decorate(latestEntries, receipts);
+    return { status: 'ready', entries: latestEntries.length, receipts: receipts.length };
   })().catch((error) => ({ status: 'degraded', error: error?.message || String(error) })).finally(() => { refreshInFlight = null; });
   return refreshInFlight;
 }
@@ -118,7 +130,11 @@ export function installHouseBraidReceiptUI() {
   document.head.append(style);
   observer = new MutationObserver(() => queueMicrotask(() => void refreshHouseBraidReceipts()));
   observer.observe(document.body, { childList: true, subtree: true });
-  timer = setInterval(() => void refreshHouseBraidReceipts(), 5000);
+  globalThis.addEventListener?.(HOUSE_COMMONS_SNAPSHOT_EVENT, (event) => {
+    adoptCommonsSnapshot(event.detail?.data);
+    queueMicrotask(() => void refreshHouseBraidReceipts());
+  });
+  timer = setInterval(() => { if (latestEntries.length) void refreshHouseBraidReceipts(); }, 12000);
   globalThis.addEventListener?.('beforeunload', () => { observer?.disconnect(); if (timer) clearInterval(timer); }, { once: true });
   void refreshHouseBraidReceipts();
   globalThis.dispatchEvent?.(new CustomEvent('arcsweep:house-braid-receipt-ui-ready', { detail: { version: HOUSE_BRAID_RECEIPT_UI_VERSION } }));
