@@ -1,4 +1,10 @@
-import { appendHouseCommons, readHouseCommons, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import {
+  HOUSE_COMMONS_SNAPSHOT_EVENT,
+  appendHouseCommons,
+  readCachedHouseCommons,
+  readHouseRuntimeToken,
+  restoreHouseRuntimeSession,
+} from './house-runtime.js';
 import { streamConstellationRuntimeVoice } from './flame-chat-stream-client.js';
 import { publishModelPresence } from './model-presence-bus.js';
 import { renderHouseModelRichText, houseModelPlainText } from './house-chat-rich-text.js';
@@ -6,20 +12,23 @@ import { renderHouseModelRichText, houseModelPlainText } from './house-chat-rich
 let installed = false;
 let observer = null;
 let entries = [];
-let refreshInFlight = null;
 
 const esc = (value = '') => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 const uuid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const threadId = (entry) => entry?.thread_id || entry?.turn_id || entry?.id || null;
 async function session() { return readHouseRuntimeToken() || await restoreHouseRuntimeSession(); }
 
+function adoptSnapshot(data) {
+  entries = Array.isArray(data?.entries) ? data.entries : Array.isArray(data) ? data : entries;
+  return entries;
+}
+
 async function refreshEntries() {
-  if (refreshInFlight) return refreshInFlight;
-  refreshInFlight = (async () => {
-    const token = await session(); if (!token) return;
-    const data = await readHouseCommons(token); entries = Array.isArray(data?.entries) ? data.entries : [];
-  })().catch(() => {}).finally(() => { refreshInFlight = null; });
-  return refreshInFlight;
+  const token = await session();
+  if (!token) return entries;
+  const snapshot = readCachedHouseCommons(token);
+  if (snapshot) adoptSnapshot(snapshot);
+  return entries;
 }
 
 function openCrossLink(kind, id) {
@@ -46,7 +55,9 @@ function linkPanel(article, entry) {
       turn_id: `commons-link:${uuid()}`, reply_to: entry.id, links: [{ kind, id, label }],
       text: `Linked this room to ${label || `${kind}:${id}`}.`,
     });
-    panel.remove(); document.dispatchEvent(new CustomEvent('arcsweep:commons-tools-updated')); await refreshEntries(); decorate();
+    panel.remove();
+    document.dispatchEvent(new CustomEvent('arcsweep:commons-tools-updated'));
+    globalThis.dispatchEvent?.(new CustomEvent('arcsweep:house-chat-refresh-requested', { detail: { source: 'house-chat-tools-v5' } }));
   };
 }
 
@@ -76,6 +87,7 @@ async function summariseRoom(roomId, button) {
     });
     publishModelPresence({ voiceId: 'atlas', displayName: 'Atlas', state: 'ready', provider: reply.provider, model: reply.model, latencyMs: reply.latencyMs, task: null });
     document.dispatchEvent(new CustomEvent('arcsweep:commons-tools-updated'));
+    globalThis.dispatchEvent?.(new CustomEvent('arcsweep:house-chat-refresh-requested', { detail: { source: 'house-chat-tools-v5' } }));
   } catch (error) {
     publishModelPresence({ voiceId: 'atlas', displayName: 'Atlas', state: 'degraded', task: null, reason: error.message });
   } finally { button.disabled = false; button.textContent = 'Summarise'; }
@@ -110,8 +122,9 @@ export function installHouseChatToolsV5() {
   installed = true;
   const style = document.createElement('style'); style.textContent = '.commons-link-panel{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem;margin:.55rem 0;padding:.55rem .65rem;border-left:3px solid var(--gold);background:color-mix(in srgb,var(--gold) 7%,transparent)}.commons-link-panel input,.commons-link-panel select{min-width:10rem;flex:1}'; document.head.append(style);
   observer = new MutationObserver(() => decorate()); observer.observe(document.body, { childList: true, subtree: true });
+  globalThis.addEventListener?.(HOUSE_COMMONS_SNAPSHOT_EVENT, (event) => { adoptSnapshot(event.detail?.data); decorate(); });
   document.addEventListener('arcsweep:commons-tools-updated', () => void refreshAndDecorate());
-  void refreshAndDecorate(); setInterval(() => { if (document.querySelector('#commons-form')) void refreshAndDecorate(); }, 8000);
+  void refreshAndDecorate();
   globalThis.addEventListener?.('beforeunload', () => observer?.disconnect(), { once: true });
 }
 
