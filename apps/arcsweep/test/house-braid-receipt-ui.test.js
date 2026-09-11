@@ -6,7 +6,7 @@ const ui = fs.readFileSync(new URL('../src/house-braid-receipt-ui.js', import.me
 const bootstrap = fs.readFileSync(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
 
 test('House messages expose verified and bounded not-observed Runtime Braid states', () => {
-  assert.match(ui, /arcsweep\.house-braid-receipt-ui\/v2/);
+  assert.match(ui, /arcsweep\.house-braid-receipt-ui\/v3/);
   assert.match(ui, /braidGlyph/);
   assert.match(ui, /bounded recent Runtime Braid read/);
   assert.match(ui, /does not prove that no durable receipt exists/);
@@ -15,8 +15,10 @@ test('House messages expose verified and bounded not-observed Runtime Braid stat
   assert.match(ui, /event_sequence/);
 });
 
-test('House braid receipt UI joins Commons identity to durable runtime events', () => {
-  assert.match(ui, /readHouseCommons/);
+test('House braid receipt UI joins shared Commons identity snapshots to durable runtime events', () => {
+  assert.doesNotMatch(ui, /\breadHouseCommons\b/);
+  assert.match(ui, /readCachedHouseCommons/);
+  assert.match(ui, /HOUSE_COMMONS_SNAPSHOT_EVENT/);
   assert.match(ui, /thread_id/);
   assert.match(ui, /turn_id/);
   assert.match(ui, /voice_id/);

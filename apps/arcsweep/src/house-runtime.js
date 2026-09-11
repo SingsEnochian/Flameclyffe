@@ -4,6 +4,13 @@ export const HOUSE_RUNTIME_SESSION_KEY = 'hearthgate:house-runtime-session/v1';
 export const HOUSE_COOKIE_SESSION = 'cookie-session';
 export const HOUSE_FINITE_REQUEST_TIMEOUT_MS = 8_000;
 export const HOUSE_SESSION_REQUEST_TIMEOUT_MS = 5_000;
+export const HOUSE_COMMONS_READ_CACHE_MS = 250;
+export const HOUSE_COMMONS_SNAPSHOT_EVENT = 'arcsweep:house-commons-snapshot';
+
+let commonsReadInFlight = null;
+let commonsReadToken = '';
+let commonsReadSnapshot = null;
+let commonsReadAt = 0;
 
 export function readHouseRuntimeToken(storage = globalThis.sessionStorage) {
   try { return storage?.getItem(HOUSE_RUNTIME_SESSION_KEY) || ''; } catch { return ''; }
@@ -25,6 +32,24 @@ const bearerHeaders = (token) => token && token !== HOUSE_COOKIE_SESSION ? { aut
 export function withFiniteHouseRequest(options = {}, timeoutMs = HOUSE_FINITE_REQUEST_TIMEOUT_MS) {
   if (options.signal || typeof AbortSignal === 'undefined' || typeof AbortSignal.timeout !== 'function') return options;
   return { ...options, signal: AbortSignal.timeout(timeoutMs) };
+}
+
+function emitCommonsSnapshot(data, source = 'read') {
+  if (typeof globalThis.dispatchEvent !== 'function' || typeof globalThis.CustomEvent !== 'function') return;
+  globalThis.dispatchEvent(new CustomEvent(HOUSE_COMMONS_SNAPSHOT_EVENT, {
+    detail: Object.freeze({ source, data, read_at: new Date().toISOString() }),
+  }));
+}
+
+export function readCachedHouseCommons(token = null) {
+  if (!commonsReadSnapshot) return null;
+  if (token && commonsReadToken && token !== commonsReadToken) return null;
+  return commonsReadSnapshot;
+}
+
+export function invalidateHouseCommonsSnapshot() {
+  commonsReadSnapshot = null;
+  commonsReadAt = 0;
 }
 
 async function sessionRequest(options = {}, fetchImpl = fetch) {
@@ -65,11 +90,13 @@ export async function connectHouseRuntime(credential, { hosted = true, storage =
   const { response, data } = await sessionRequest({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ credential: value }) }, fetchImpl);
   if (!response.ok) throw new Error(data.error || `House Runtime ${response.status}`);
   clearHouseRuntimeToken(storage);
+  invalidateHouseCommonsSnapshot();
   return HOUSE_COOKIE_SESSION;
 }
 
 export async function disconnectHouseRuntime({ hosted = true, storage = globalThis.sessionStorage, fetchImpl = fetch } = {}) {
   clearHouseRuntimeToken(storage);
+  invalidateHouseCommonsSnapshot();
   if (hosted) await sessionRequest({ method: 'DELETE' }, fetchImpl).catch(() => null);
 }
 
@@ -113,10 +140,35 @@ async function commonsRequest(token, options = {}, fetchImpl = fetch) {
   return data;
 }
 
-export function readHouseCommons(token, fetchImpl = fetch) { return commonsRequest(token, { cache: 'no-store' }, fetchImpl); }
+export function readHouseCommons(token, fetchImpl = fetch) {
+  const shareable = fetchImpl === globalThis.fetch;
+  if (!shareable) return commonsRequest(token, { cache: 'no-store' }, fetchImpl);
+  const now = Date.now();
+  if (commonsReadSnapshot && commonsReadToken === token && now - commonsReadAt <= HOUSE_COMMONS_READ_CACHE_MS) return Promise.resolve(commonsReadSnapshot);
+  if (commonsReadInFlight && commonsReadToken === token) return commonsReadInFlight;
+
+  commonsReadToken = token;
+  const request = commonsRequest(token, { cache: 'no-store' }, fetchImpl)
+    .then((data) => {
+      commonsReadSnapshot = data;
+      commonsReadAt = Date.now();
+      emitCommonsSnapshot(data, 'read');
+      return data;
+    })
+    .finally(() => {
+      if (commonsReadInFlight === request) commonsReadInFlight = null;
+    });
+  commonsReadInFlight = request;
+  return request;
+}
+
 export function appendHouseCommons(token, entry, fetchImpl = fetch) {
   const canonical = canonicaliseHouseCommonsEntry(entry);
-  return commonsRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(canonical) }, fetchImpl);
+  return commonsRequest(token, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(canonical) }, fetchImpl)
+    .then((data) => {
+      invalidateHouseCommonsSnapshot();
+      return data;
+    });
 }
 
 async function kelyranReportRequest(token, options = {}, fetchImpl = fetch) {

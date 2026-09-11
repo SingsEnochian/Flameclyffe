@@ -1,4 +1,9 @@
-import { readHouseCommons, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
+import {
+  HOUSE_COMMONS_SNAPSHOT_EVENT,
+  readCachedHouseCommons,
+  readHouseRuntimeToken,
+  restoreHouseRuntimeSession,
+} from './house-runtime.js';
 import { currentModelPresence, MODEL_PRESENCE_EVENT } from './model-presence-bus.js';
 
 export const COMMONS_THREAD_TITLES_KEY = 'arcsweep.house-commons-thread-titles/v1';
@@ -14,6 +19,7 @@ const threadId = (entry) => entry?.thread_id || entry?.turn_id || entry?.id || n
 let refreshInFlight = null;
 let lastRemoteFingerprint = null;
 let lastRenderedHost = null;
+let latestEntries = [];
 
 export function commonsEntriesFingerprint(entries = []) {
   return JSON.stringify(entries.map((entry) => ({
@@ -118,16 +124,26 @@ function render(host, entries) {
   host.querySelector('[data-new-thread]')?.addEventListener('click', beginNewThread);
 }
 
-async function performRefresh({ force = false } = {}) {
+function ensureHost() {
   const form = document.querySelector('#commons-form');
-  if (!form) return;
+  if (!form) return null;
   let host = document.querySelector('[data-commons-command-room]');
   if (!host) {
     host = document.createElement('div');
     host.dataset.commonsCommandRoom = 'true';
     (form.closest('.commons-layout') || form.parentElement)?.prepend(host);
-    force = true;
   }
+  return host;
+}
+
+function adoptSnapshot(data) {
+  latestEntries = Array.isArray(data?.entries) ? data.entries : Array.isArray(data) ? data : latestEntries;
+}
+
+async function performRefresh({ force = false, snapshot = null } = {}) {
+  const host = ensureHost();
+  if (!host) return;
+  if (snapshot) adoptSnapshot(snapshot);
   const token = await session();
   if (!token) {
     if (force || host !== lastRenderedHost || host.dataset.commonsState !== 'offline') {
@@ -137,25 +153,25 @@ async function performRefresh({ force = false } = {}) {
     }
     return;
   }
-  try {
-    const data = await readHouseCommons(token);
-    const entries = Array.isArray(data?.entries) ? data.entries : [];
-    const fingerprint = commonsEntriesFingerprint(entries);
-    const hostChanged = host !== lastRenderedHost;
-    if (!force && !hostChanged && fingerprint === lastRemoteFingerprint) return;
-    render(host, entries);
-    host.dataset.commonsState = 'live';
-    lastRemoteFingerprint = fingerprint;
-    lastRenderedHost = host;
-  } catch (error) {
-    const message = String(error?.message || error);
-    if (force || host !== lastRenderedHost || host.dataset.commonsError !== message) {
-      host.innerHTML = `<aside class="commons-command-room"><p>${esc(message)}</p></aside>`;
-      host.dataset.commonsError = message;
-      host.dataset.commonsState = 'error';
+  if (!snapshot) {
+    const cached = readCachedHouseCommons(token);
+    if (cached) adoptSnapshot(cached);
+  }
+  if (!latestEntries.length) {
+    if (force || host.dataset.commonsState !== 'waiting') {
+      host.innerHTML = '<aside class="commons-command-room"><strong>Command Room</strong><p class="muted">Waiting for House Chat snapshot…</p></aside>';
+      host.dataset.commonsState = 'waiting';
       lastRenderedHost = host;
     }
+    return;
   }
+  const fingerprint = commonsEntriesFingerprint(latestEntries);
+  const hostChanged = host !== lastRenderedHost;
+  if (!force && !hostChanged && fingerprint === lastRemoteFingerprint) return;
+  render(host, latestEntries);
+  host.dataset.commonsState = 'live';
+  lastRemoteFingerprint = fingerprint;
+  lastRenderedHost = host;
 }
 
 export function refreshHouseCommonsCommandRoom(options = {}) {
@@ -176,8 +192,11 @@ export function installHouseCommonsCommandRoom() {
   new MutationObserver((mutations) => { if (mutationIntroducedCommons(mutations)) void refreshHouseCommonsCommandRoom({ force: true }); }).observe(document.body, { childList: true, subtree: true });
   document.addEventListener(MODEL_PRESENCE_EVENT, () => { const node = document.querySelector('[data-live-answering]'); if (node) node.textContent = statusText(); });
   document.addEventListener('arcsweep:commons-attachment-saved', () => void refreshHouseCommonsCommandRoom({ force: true }));
+  globalThis.addEventListener?.(HOUSE_COMMONS_SNAPSHOT_EVENT, (event) => {
+    adoptSnapshot(event.detail?.data);
+    void refreshHouseCommonsCommandRoom({ force: true, snapshot: event.detail?.data });
+  });
   void refreshHouseCommonsCommandRoom({ force: true });
-  setInterval(() => { if (document.querySelector('#commons-form')) void refreshHouseCommonsCommandRoom(); }, 10000);
 }
 
 if (typeof document !== 'undefined') installHouseCommonsCommandRoom();

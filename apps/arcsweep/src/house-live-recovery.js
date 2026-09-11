@@ -1,7 +1,7 @@
-import { readHouseCommons, restoreHouseRuntimeSession, withFiniteHouseRequest } from './house-runtime.js';
+import { readCachedHouseCommons, restoreHouseRuntimeSession, withFiniteHouseRequest } from './house-runtime.js';
 import { getKelyranSupabase, requestKelyranMagicLink } from './kelyran-supabase.js';
 
-export const HOUSE_LIVE_RECOVERY_VERSION = 'arcsweep.house-live-recovery/v1';
+export const HOUSE_LIVE_RECOVERY_VERSION = 'arcsweep.house-live-recovery/v2';
 
 let installed = false;
 let authSubscription = null;
@@ -31,7 +31,7 @@ function ensureRail() {
   rail = document.createElement('section');
   rail.className = 'house-live-recovery';
   rail.dataset.houseLiveRecovery = HOUSE_LIVE_RECOVERY_VERSION;
-  rail.innerHTML = `<div class="house-live-recovery-head"><div><span class="eyebrow">House transport</span><strong data-house-live-title>Checking live path…</strong></div><button type="button" class="quiet mini" data-house-live-retry>Retry</button></div><p class="muted" data-house-live-detail>Checking Supabase identity, Commons transport, and Ox Alpha.</p><form data-house-live-signin hidden><label>Email <input type="email" autocomplete="email" data-house-live-email placeholder="Steward email" /></label><button type="submit">Send sign-in link</button></form>`;
+  rail.innerHTML = `<div class="house-live-recovery-head"><div><span class="eyebrow">House transport</span><strong data-house-live-title>Checking live path…</strong></div><button type="button" class="quiet mini" data-house-live-retry>Retry</button></div><p class="muted" data-house-live-detail>Checking Supabase identity and Ox Alpha. Commons data remains owned by House Chat.</p><form data-house-live-signin hidden><label>Email <input type="email" autocomplete="email" data-house-live-email placeholder="Steward email" /></label><button type="submit">Send sign-in link</button></form>`;
   form.parentElement?.insertBefore(rail, form);
   rail.querySelector('[data-house-live-retry]')?.addEventListener('click', () => void refreshHouseLiveRecovery());
   rail.querySelector('[data-house-live-signin]')?.addEventListener('submit', async (event) => {
@@ -68,7 +68,7 @@ function setRail(rail, { state, title, detail, showSignin = false } = {}) {
 export async function refreshHouseLiveRecovery() {
   const rail = ensureRail();
   if (!rail) return { state: 'not-mounted' };
-  setRail(rail, { state: 'checking', title: 'Checking House live path…', detail: 'Checking Steward session, Commons, and Ox Alpha.' });
+  setRail(rail, { state: 'checking', title: 'Checking House live path…', detail: 'Checking Steward session and Ox Alpha without opening a second Commons read.' });
   try {
     const { session } = await supabaseSession();
     if (!session?.access_token) {
@@ -89,13 +89,15 @@ export async function refreshHouseLiveRecovery() {
       return { state: 'session-failed' };
     }
 
-    const [commons, ox] = await Promise.all([readHouseCommons(houseSession), oxStatus()]);
-    const entries = Array.isArray(commons?.entries) ? commons.entries.length : Array.isArray(commons) ? commons.length : 0;
+    const ox = await oxStatus();
+    const commons = readCachedHouseCommons(houseSession);
+    const entries = Array.isArray(commons?.entries) ? commons.entries.length : null;
     const oxReady = ox?.configured === true && ox?.runtime_reachable !== false;
+    const commonsNote = entries == null ? 'Commons snapshot awaits House Chat' : `${entries} Commons entries in the shared snapshot`;
     setRail(rail, {
       state: oxReady ? 'live' : 'commons-live-ox-unavailable',
       title: oxReady ? 'House LIVE · Ox Alpha reachable' : 'House transport LIVE · Ox Alpha not ready',
-      detail: `${entries} Commons entries readable · Ox Alpha ${ox?.provider || 'provider ?'} / ${ox?.model || 'model ?'} · ${hostedPages() ? 'GitHub Pages → Supabase Edge' : 'hosted transport'}`,
+      detail: `${commonsNote} · Ox Alpha ${ox?.provider || 'provider ?'} / ${ox?.model || 'model ?'} · ${hostedPages() ? 'GitHub Pages → Supabase Edge' : 'hosted transport'}`,
     });
     globalThis.dispatchEvent?.(new CustomEvent('arcsweep:house-live-state', { detail: { state: oxReady ? 'live' : 'partial', ox, entries } }));
     return { state: oxReady ? 'live' : 'partial', ox, entries };

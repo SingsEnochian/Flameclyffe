@@ -6,12 +6,15 @@ import { houseLiveRecoveryNeedsMount } from '../src/house-live-recovery.js';
 const recovery = fs.readFileSync(new URL('../src/house-live-recovery.js', import.meta.url), 'utf8');
 const surface = fs.readFileSync(new URL('../src/house-chat-authoritative-surface.js', import.meta.url), 'utf8');
 
-test('House live recovery diagnoses auth, Commons transport, and Ox Alpha from the Commons surface', () => {
-  assert.match(recovery, /arcsweep\.house-live-recovery\/v1/);
+test('House live recovery diagnoses auth and Ox Alpha without opening a second Commons read lane', () => {
+  assert.match(recovery, /arcsweep\.house-live-recovery\/v2/);
   assert.match(recovery, /requestKelyranMagicLink/);
   assert.match(recovery, /restoreHouseRuntimeSession/);
-  assert.match(recovery, /readHouseCommons/);
+  assert.doesNotMatch(recovery, /\breadHouseCommons\b/);
+  assert.match(recovery, /readCachedHouseCommons/);
+  assert.match(recovery, /withFiniteHouseRequest/);
   assert.match(recovery, /\/api\/v1\/flames\/oxalpha\/status/);
+  assert.match(recovery, /Commons snapshot awaits House Chat/);
   assert.match(recovery, /House LIVE · Ox Alpha reachable/);
   assert.match(recovery, /GitHub Pages → Supabase Edge/);
 });
