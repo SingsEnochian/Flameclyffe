@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createSomaticProfileStore } from '../src/somatic-profile.js';
 import { createSomaticEventBridge } from '../src/somatic-event-bridge.js';
+import { normalizeGlyphBrushSample } from '../src/afferent-bus.js';
 
 function memoryStorage() {
   const values = new Map();
@@ -47,8 +48,13 @@ function sample(overrides = {}) {
     tilt_x: 0,
     tilt_y: 0,
     twist: 0,
+    timestamp: 1000,
     ...overrides,
   };
+}
+
+function afferent(overrides = {}) {
+  return normalizeGlyphBrushSample(sample(overrides), () => 1000);
 }
 
 test('Glyph Forge brush somatics are opt-in and pressure threshold gated', async () => {
@@ -65,26 +71,27 @@ test('Glyph Forge brush somatics are opt-in and pressure threshold gated', async
     somatic: { emit: async (cue, options) => { emitted.push({ cue, options }); return { status: 'applied' }; } },
   });
 
-  target.dispatch('arcsweep:glyph-brush-sample', sample());
+  target.dispatch('arcsweep:afferent-signal', afferent());
   await flush();
   assert.equal(emitted.length, 0);
 
   profile.save({ bindings: { brush_contact: true }, brush: { min_pressure: 0.2 } });
-  target.dispatch('arcsweep:glyph-brush-sample', sample({ pressure: 0.1 }));
+  target.dispatch('arcsweep:afferent-signal', afferent({ pressure: 0.1 }));
   await flush();
   assert.equal(emitted.length, 0);
 
   clock += 300;
-  target.dispatch('arcsweep:glyph-brush-sample', sample({ pressure: 0.6 }));
+  target.dispatch('arcsweep:afferent-signal', afferent({ pressure: 0.6, timestamp: 1300 }));
   await flush();
   assert.equal(emitted.length, 1);
   assert.equal(emitted[0].cue, 'brush_contact');
   assert.equal(emitted[0].options.context.phase, 'start');
+  assert.equal(emitted[0].options.context.modality, 'pencil');
   assert.ok(emitted[0].options.gain_ceiling > 0);
   bridge.destroy();
 });
 
-test('brush expression maps pressure, velocity, and tilt inside bounded semantic modulation', async () => {
+test('brush expression maps normalized pressure, velocity, and tilt inside bounded semantic modulation', async () => {
   const storage = memoryStorage();
   const profile = createSomaticProfileStore({ storage });
   profile.save({
@@ -103,13 +110,13 @@ test('brush expression maps pressure, velocity, and tilt inside bounded semantic
     somatic: { emit: async (cue, options) => { emitted.push({ cue, options }); return { status: 'applied' }; } },
   });
 
-  target.dispatch('arcsweep:glyph-brush-sample', sample({ phase: 'start', pressure: 0.25, velocity_px_s: 100, tilt_x: 0, tilt_y: 0 }));
+  target.dispatch('arcsweep:afferent-signal', afferent({ phase: 'start', pressure: 0.25, velocity_px_s: 100, tilt_x: 0, tilt_y: 0 }));
   await flush();
   assert.equal(emitted.length, 1);
   const low = emitted[0].options;
 
   clock += 160;
-  target.dispatch('arcsweep:glyph-brush-sample', sample({ phase: 'move', pressure: 0.9, velocity_px_s: 900, tilt_x: 64, tilt_y: 40 }));
+  target.dispatch('arcsweep:afferent-signal', afferent({ phase: 'move', timestamp: 1160, pressure: 0.9, velocity_px_s: 900, tilt_x: 64, tilt_y: 40 }));
   await flush();
   assert.equal(emitted.length, 2);
   const high = emitted[1].options;
