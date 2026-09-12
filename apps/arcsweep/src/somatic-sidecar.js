@@ -2,6 +2,7 @@ import { arcsweepOS } from './os/bootstrap.js';
 import { registerSomaticService } from './os/somatic-service.js';
 import { createSomaticProfileStore, detectSomaticChannels } from './somatic-profile.js';
 import { installSomaticCalibrationSurface } from './somatic-calibration-surface.js';
+import { createSomaticEventBridge } from './somatic-event-bridge.js';
 
 const GLOBAL_KEY = '__arcsweepSomatic';
 
@@ -18,6 +19,7 @@ function install() {
     recoverable: true,
   });
   let calibration = null;
+  let bridge = null;
   const api = {
     service_id: service.service_id,
     capabilities: [...service.capabilities],
@@ -43,15 +45,21 @@ function install() {
       if (!calibration && typeof document !== 'undefined' && document.body) calibration = installSomaticCalibrationSurface({ somatic: api });
       return calibration?.open?.() || profileStore.load();
     },
+    enableNavigationCue: (enabled = true) => {
+      const current = profileStore.load();
+      return profileStore.save({ bindings: { ...current.bindings, navigation: Boolean(enabled) } });
+    },
   };
   const frozen = Object.freeze(api);
   globalThis[GLOBAL_KEY] = frozen;
+  bridge = createSomaticEventBridge({ bus: arcsweepOS.bus, somatic: frozen, profile: profileStore });
 
   if (typeof document !== 'undefined') {
     const mount = () => { if (!calibration && document.body) calibration = installSomaticCalibrationSurface({ somatic: frozen }); };
     if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount, { once: true });
   }
 
+  globalThis.addEventListener?.('beforeunload', () => bridge?.destroy?.(), { once: true });
   globalThis.dispatchEvent?.(new CustomEvent('arcsweep:somatic-ready', {
     detail: { service_id: service.service_id, capabilities: service.capabilities, channels: detectSomaticChannels(globalThis) },
   }));
