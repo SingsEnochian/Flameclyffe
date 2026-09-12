@@ -31,6 +31,7 @@ export function registerSomaticService(registry, {
       system_audio_route_only: true,
       medical_device_control: false,
       implant_control: false,
+      expressive_modulation_bounded: true,
     },
     consumes: ['arcsweep:feather-paused'],
     emits: ['arcsweep:somatic-cue-emitted'],
@@ -49,6 +50,7 @@ export function registerSomaticService(registry, {
       bone_conduction_ready: typeof audioContextProvider() === 'function',
       audio_route: 'system-selected-output',
       explicit_user_launch_required: true,
+      expressive_modulation_bounded: true,
     }),
   });
 
@@ -82,6 +84,8 @@ export function registerSomaticService(registry, {
       const receipt = await emitCue(input.cue_id, {
         channels: input.channels || { audio: true, haptic: true },
         gainCeiling: input.gain_ceiling,
+        modulation: input.modulation || {},
+        context: input.context || null,
         source: context.actor_id || context.source || 'human-ui',
       });
       bus?.publish?.('arcsweep:somatic-cue-emitted', receipt, { source: 'somatic-interface' });
