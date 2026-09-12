@@ -76,11 +76,10 @@ export function stopSomaticCue(reason = 'Feather') {
   if (!current) return false;
   current.stopped_early = true;
   current.stop_reason = String(reason || 'stopped');
-  try { current.oscillator?.stop?.(); } catch {}
-  try { current.context?.close?.(); } catch {}
+  try { current.sources?.forEach(({ oscillator }) => oscillator?.stop?.()); } catch {}
   try { current.vibrate?.(0); } catch {}
   clearTimeout(current.timer);
-  activeCue = null;
+  current.finish?.();
   return true;
 }
 
@@ -137,17 +136,20 @@ export async function emitSomaticCue(cueId, {
   const durationMs = Math.max(audioRequested ? audioDuration : 0, hapticRequested ? hapticDuration : 0, 1);
 
   return await new Promise((resolve) => {
+    let settled = false;
     const state = {
       context,
-      oscillator: tonePlan?.sources?.[0]?.oscillator || null,
+      sources: tonePlan?.sources || [],
       vibrate,
       stopped_early: false,
       stop_reason: null,
       timer: null,
+      finish: null,
     };
     const finish = () => {
-      if (activeCue !== state) return;
-      activeCue = null;
+      if (settled) return;
+      settled = true;
+      if (activeCue === state) activeCue = null;
       try { context?.close?.(); } catch {}
       resolve(Object.freeze({
         schema: SOMATIC_RECEIPT_SCHEMA,
@@ -165,6 +167,7 @@ export async function emitSomaticCue(cueId, {
         stop_reason: state.stop_reason,
       }));
     };
+    state.finish = finish;
     state.timer = setTimeout(finish, durationMs + 45);
     activeCue = state;
   });
