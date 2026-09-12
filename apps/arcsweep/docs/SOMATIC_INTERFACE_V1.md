@@ -26,7 +26,26 @@ ArcSweep capability/event layer
  bone-conduction-capable output when selected by the OS
 ```
 
-The input side now begins in Glyph Forge. Pencil/pointer samples remain owned by GlyphCanvas and the ordinary stroke renderer. A parallel transient telemetry membrane emits bounded `arcsweep.glyph-brush-sample/v1` events for the somatic bridge. It does not replace, rewrite, or canonise drawing state.
+On the input side, device-specific telemetry now passes through the **Afferent Bus** before any somatic consumer sees it. GlyphCanvas still owns the real stroke and renderer. Its parallel transient `arcsweep.glyph-brush-sample/v1` stream is normalised into `arcsweep.afferent-signal/v1`, then published to both the ArcSweep OS bus and the DOM event spine.
+
+```text
+Pencil / touch / future sensor adapter
+          |
+          v
+ device-specific transient event
+          |
+          v
+      Afferent Bus
+          |
+          v
+ arcsweep.afferent-signal/v1
+      /                 \
+ ArcSweep OS bus       DOM spine
+      |                  |
+ Observer/DEEP      Somatic bridge
+```
+
+The normalised signal contract carries source, modality, semantic intent, phase, confidence, a bounded numeric vector, and small contextual identifiers. This keeps downstream organs independent from raw browser/device schemas.
 
 ## Semantic vocabulary
 
@@ -48,6 +67,8 @@ GlyphCanvas already receives pressure, tilt, twist, timestamps, and coalesced Pe
 Pencil / pointer
   -> GlyphCanvas normal stroke pipeline
   -> transient glyph-brush-sample event
+  -> Afferent Bus normalization
+  -> arcsweep.afferent-signal/v1
   -> Somatic Event Bridge
   -> profile + binding + pressure + cooldown gates
   -> brush_contact cue
@@ -55,7 +76,7 @@ Pencil / pointer
   -> somatic receipt
 ```
 
-The telemetry contract includes stroke/brush identity, pointer type, phase (`start`, `move`, `end`), pressure, velocity, tilt, and twist. Raw x/y coordinates are available to the local transient event but are not forwarded into the somatic receipt allowlist.
+For Glyph Forge, the Afferent Bus currently maps pointer type to `pencil` or `touch`, and stroke phase to semantic intent: `start -> contact`, `move -> expression`, `end -> release`. Pressure, velocity, tilt, and twist are clamped before publication. Stroke and brush identity remain contextual evidence rather than control authority.
 
 Current expressive mapping:
 
@@ -91,6 +112,8 @@ Somatic output is an `operate` capability and requires explicit confirmation at 
 
 The browser may route sound to a bone-conduction device only because the operating system/user selected that audio route. ArcSweep v1 does not enumerate, pair, configure, stimulate, or command implanted hardware.
 
+The Afferent Bus is observational and translational. It does not grant authority to a sensor because a signal exists. Future microphone, motion, gesture, or wearable adapters must be explicitly enabled at their own acquisition boundary before they can publish normalised afferent signals.
+
 ## Capabilities
 
 - `somatic.status`
@@ -99,7 +122,7 @@ The browser may route sound to a bone-conduction device only because the operati
 - `somatic.emit-cue`
 - `somatic.stop`
 
-The global sidecar exposes `globalThis.__arcsweepSomatic` with status/catalog/output/profile helpers plus opt-in navigation, brush-contact, and brush-expression controls.
+The global sidecars expose `globalThis.__arcsweepSomatic` for somatic output/profile control and `globalThis.__arcsweepAfferent` for normalised input status, publication, subscription, and adapter helpers.
 
 ## Working vertical slices
 
@@ -129,6 +152,8 @@ navigation event
 ```text
 Pencil down
   -> glyph-brush-sample(start)
+  -> Afferent Bus
+  -> afferent(contact, pencil)
   -> opt-in + min-pressure + contact cooldown gate
   -> brush_contact
   -> pressure/velocity/tilt modulation
@@ -136,6 +161,8 @@ Pencil down
 
 Pencil move
   -> glyph-brush-sample(move)
+  -> Afferent Bus
+  -> afferent(expression, pencil)
   -> optional brush-expression binding
   -> expression cooldown + cue-in-flight gate
   -> same brush_contact semantic cue with bounded modulation
@@ -144,9 +171,9 @@ Pencil move
 
 ## Next increments
 
-1. Build the Afferent Bus that normalises Pencil/touch, gesture, motion, microphone, and explicitly authorised wearable inputs into one event contract.
-2. Add an initial three-command gesture vocabulary: accept, back, Feather.
-3. Link somatic receipts and explicit calibration feedback into Observer/DEEP evidence paths.
+1. Add the initial three-command gesture vocabulary: `accept`, `back`, `Feather`, expressed as semantic afferent intents rather than device gestures.
+2. Add opt-in adapter shells for motion and microphone input behind explicit acquisition controls.
+3. Link afferent and somatic receipts plus explicit calibration feedback into Observer/DEEP evidence paths.
 4. Add adaptive recommendations that can suggest, but never silently apply, changes to confusing or indistinct cues.
 5. Complete the replayable Glyph Forge loop: navigation -> brush contact/expression -> glyph completion -> accepted cue -> evidence receipt -> replay.
-6. Add external haptic adapters only behind explicit, user-authorised device APIs.
+6. Add external haptic and wearable adapters only behind explicit, user-authorised device APIs.
