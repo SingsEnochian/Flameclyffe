@@ -19,7 +19,7 @@ function ensureStyle() {
   if (document.querySelector('style[data-somatic-calibration-style]')) return;
   const style = document.createElement('style');
   style.dataset.somaticCalibrationStyle = 'true';
-  style.textContent = `[data-somatic-calibration]{position:fixed;inset:0;z-index:2147482000;background:rgba(8,10,14,.72);padding:clamp(12px,3vw,36px);overflow:auto} [data-somatic-calibration][hidden]{display:none}.somatic-calibration-card{max-width:820px;margin:4vh auto;padding:22px;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:#11151d;color:#f3eadb;box-shadow:0 18px 70px rgba(0,0,0,.45)}.somatic-calibration-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.somatic-calibration-card header p{margin:0;opacity:.7}.somatic-calibration-card h2,.somatic-calibration-card h3{margin:.2em 0 .55em}.somatic-calibration-card button,.somatic-calibration-card select,.somatic-calibration-card input{font:inherit}.somatic-calibration-controls{display:flex;flex-wrap:wrap;gap:14px;padding:12px 0 18px}.somatic-calibration-controls label{display:flex;align-items:center;gap:7px}.somatic-calibration-card article{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid rgba(255,255,255,.1)}.somatic-calibration-card article p{margin:.2em 0;opacity:.75}.somatic-device-status ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;padding:0;list-style:none}.somatic-device-status li{display:flex;justify-content:space-between;gap:10px}.somatic-calibration-note{font-size:.9em;opacity:.68}`;
+  style.textContent = `[data-somatic-calibration]{position:fixed;inset:0;z-index:2147482000;background:rgba(8,10,14,.72);padding:clamp(12px,3vw,36px);overflow:auto} [data-somatic-calibration][hidden]{display:none}.somatic-calibration-card{max-width:900px;margin:4vh auto;padding:22px;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:#11151d;color:#f3eadb;box-shadow:0 18px 70px rgba(0,0,0,.45)}.somatic-calibration-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.somatic-calibration-card header p{margin:0;opacity:.7}.somatic-calibration-card h2,.somatic-calibration-card h3{margin:.2em 0 .55em}.somatic-calibration-card button,.somatic-calibration-card select,.somatic-calibration-card input{font:inherit}.somatic-calibration-controls{display:flex;flex-wrap:wrap;gap:14px;padding:12px 0 18px}.somatic-calibration-controls label{display:flex;align-items:center;gap:7px}.somatic-calibration-card article{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid rgba(255,255,255,.1)}.somatic-calibration-card article p{margin:.2em 0;opacity:.75}.somatic-device-status ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;padding:0;list-style:none}.somatic-device-status li{display:flex;justify-content:space-between;gap:10px}.somatic-calibration-note{font-size:.9em;opacity:.68}`;
   document.head.appendChild(style);
 }
 
@@ -42,11 +42,17 @@ export function installSomaticCalibrationSurface({ somatic, root = document.body
         <label><input data-somatic-haptic type="checkbox"> Haptic</label>
         <label><input data-somatic-quiet type="checkbox"> Quiet mode</label>
         <label><input data-somatic-navigation type="checkbox"> Navigation cue</label>
-        <label>Cooldown <input data-somatic-cooldown type="number" min="150" max="5000" step="50"> ms</label>
+        <label><input data-somatic-brush-contact type="checkbox"> Brush contact</label>
+        <label><input data-somatic-brush-expression type="checkbox"> Brush expression</label>
+        <label>Navigation cooldown <input data-somatic-cooldown type="number" min="150" max="5000" step="50"> ms</label>
+        <label>Contact cooldown <input data-somatic-contact-cooldown type="number" min="100" max="1500" step="20"> ms</label>
+        <label>Expression cooldown <input data-somatic-expression-cooldown type="number" min="80" max="1000" step="20"> ms</label>
+        <label>Min pressure <input data-somatic-min-pressure type="number" min="0.01" max="0.95" step="0.01"></label>
+        <label>Velocity reference <input data-somatic-velocity-ref type="number" min="100" max="5000" step="50"> px/s</label>
       </div>
       <div data-somatic-cues></div>
       <div class="somatic-device-status"><h3>Channels</h3><ul data-somatic-channels></ul></div>
-      <p class="somatic-calibration-note">Bone-conduction support uses your system-selected audio route. ArcSweep does not control implants or medical devices. Navigation cues remain opt-in.</p>
+      <p class="somatic-calibration-note">Bone-conduction support uses your system-selected audio route. ArcSweep does not control implants or medical devices. Navigation and Glyph Forge brush cues remain opt-in. Pressure changes cue strength, velocity subtly shifts pitch, and tilt changes duration only inside bounded ranges.</p>
     </div>`;
   root.appendChild(host);
 
@@ -55,7 +61,13 @@ export function installSomaticCalibrationSurface({ somatic, root = document.body
   const haptic = host.querySelector('[data-somatic-haptic]');
   const quiet = host.querySelector('[data-somatic-quiet]');
   const navigation = host.querySelector('[data-somatic-navigation]');
+  const brushContact = host.querySelector('[data-somatic-brush-contact]');
+  const brushExpression = host.querySelector('[data-somatic-brush-expression]');
   const cooldown = host.querySelector('[data-somatic-cooldown]');
+  const contactCooldown = host.querySelector('[data-somatic-contact-cooldown]');
+  const expressionCooldown = host.querySelector('[data-somatic-expression-cooldown]');
+  const minPressure = host.querySelector('[data-somatic-min-pressure]');
+  const velocityRef = host.querySelector('[data-somatic-velocity-ref]');
   const statusEl = host.querySelector('[data-somatic-status]');
   const cuesEl = host.querySelector('[data-somatic-cues]');
   const channelsEl = host.querySelector('[data-somatic-channels]');
@@ -67,18 +79,33 @@ export function installSomaticCalibrationSurface({ somatic, root = document.body
     haptic.checked = state.channels.haptic;
     quiet.checked = state.quiet_mode;
     navigation.checked = state.bindings.navigation;
+    brushContact.checked = state.bindings.brush_contact;
+    brushExpression.checked = state.bindings.brush_expression;
     cooldown.value = String(state.cooldown_ms);
+    contactCooldown.value = String(state.brush.contact_cooldown_ms);
+    expressionCooldown.value = String(state.brush.expression_cooldown_ms);
+    minPressure.value = String(state.brush.min_pressure);
+    velocityRef.value = String(state.brush.velocity_reference_px_s);
     return state;
   }
 
   function saveControls() {
-    const current = profile.load();
     return profile.save({
       gain_ceiling: Number(gain.value),
       channels: { audio: audio.checked, haptic: haptic.checked },
       quiet_mode: quiet.checked,
-      bindings: { ...current.bindings, navigation: navigation.checked },
+      bindings: {
+        navigation: navigation.checked,
+        brush_contact: brushContact.checked,
+        brush_expression: brushExpression.checked,
+      },
       cooldown_ms: Number(cooldown.value),
+      brush: {
+        contact_cooldown_ms: Number(contactCooldown.value),
+        expression_cooldown_ms: Number(expressionCooldown.value),
+        min_pressure: Number(minPressure.value),
+        velocity_reference_px_s: Number(velocityRef.value),
+      },
     });
   }
 
@@ -86,7 +113,7 @@ export function installSomaticCalibrationSurface({ somatic, root = document.body
     const state = syncControls();
     const [status, catalog] = await Promise.all([somatic.status(), somatic.cues()]);
     const channelStatus = detectSomaticChannels(globalThis);
-    statusEl.innerHTML = `<p><strong>${status.output?.cue_active ? 'Cue active' : 'Ready'}</strong> · profile ${profile.available() ? 'persistent' : 'session only'} · navigation ${state.bindings.navigation ? 'on' : 'off'}</p>`;
+    statusEl.innerHTML = `<p><strong>${status.output?.cue_active ? 'Cue active' : 'Ready'}</strong> · profile ${profile.available() ? 'persistent' : 'session only'} · navigation ${state.bindings.navigation ? 'on' : 'off'} · brush ${state.bindings.brush_contact ? 'contact' : 'off'}${state.bindings.brush_expression ? ' + expression' : ''}</p>`;
     channelsEl.innerHTML = channelRows(channelStatus);
     const cues = catalog.output?.cues || [];
     cuesEl.innerHTML = `<h3>Semantic cues</h3>${cues.map((cue) => {
@@ -107,7 +134,7 @@ export function installSomaticCalibrationSurface({ somatic, root = document.body
   });
 
   host.addEventListener('change', (event) => {
-    if (event.target.matches('[data-somatic-gain],[data-somatic-audio],[data-somatic-haptic],[data-somatic-quiet],[data-somatic-navigation],[data-somatic-cooldown]')) saveControls();
+    if (event.target.matches('[data-somatic-gain],[data-somatic-audio],[data-somatic-haptic],[data-somatic-quiet],[data-somatic-navigation],[data-somatic-brush-contact],[data-somatic-brush-expression],[data-somatic-cooldown],[data-somatic-contact-cooldown],[data-somatic-expression-cooldown],[data-somatic-min-pressure],[data-somatic-velocity-ref]')) saveControls();
     const rating = event.target.closest('[data-rate-cue]');
     if (rating?.value) {
       profile.rateCue(rating.dataset.rateCue, rating.value);
