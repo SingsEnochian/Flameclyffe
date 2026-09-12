@@ -1,0 +1,112 @@
+import { createSomaticProfileStore, detectSomaticChannels } from './somatic-profile.js';
+
+const GLOBAL_KEY = '__arcsweepSomaticCalibration';
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
+}
+
+function channelRows(status) {
+  const rows = [
+    ['Web Audio', status.web_audio], ['Vibration', status.vibration], ['Pointer', status.pointer_events],
+    ['Touch', status.touch], ['Motion', status.device_motion], ['Orientation', status.device_orientation],
+    ['Microphone API', status.microphone_api], ['Gamepad API', status.gamepad_api],
+  ];
+  return rows.map(([label, available]) => `<li><span>${esc(label)}</span><strong>${available ? 'available' : 'unavailable'}</strong></li>`).join('');
+}
+
+export function installSomaticCalibrationSurface({ somatic, root = document.body, storage = null } = {}) {
+  if (!somatic || !root || typeof document === 'undefined') return null;
+  if (globalThis[GLOBAL_KEY]) return globalThis[GLOBAL_KEY];
+
+  const profile = createSomaticProfileStore({ storage });
+  const host = document.createElement('section');
+  host.dataset.somaticCalibration = 'true';
+  host.hidden = true;
+  host.innerHTML = `
+    <div class="somatic-calibration-card" role="dialog" aria-modal="false" aria-labelledby="somatic-calibration-title">
+      <header><div><p>Somatic Interface</p><h2 id="somatic-calibration-title">Calibration Chamber</h2></div><button type="button" data-somatic-close aria-label="Close">×</button></header>
+      <div data-somatic-status></div>
+      <div class="somatic-calibration-controls">
+        <label>Gain <input data-somatic-gain type="range" min="0.001" max="0.08" step="0.001"></label>
+        <label><input data-somatic-audio type="checkbox"> Audio</label>
+        <label><input data-somatic-haptic type="checkbox"> Haptic</label>
+        <label><input data-somatic-quiet type="checkbox"> Quiet mode</label>
+      </div>
+      <div data-somatic-cues></div>
+      <div class="somatic-device-status"><h3>Channels</h3><ul data-somatic-channels></ul></div>
+      <p class="somatic-calibration-note">Bone-conduction support uses your system-selected audio route. ArcSweep does not control implants or medical devices.</p>
+    </div>`;
+  root.appendChild(host);
+
+  const gain = host.querySelector('[data-somatic-gain]');
+  const audio = host.querySelector('[data-somatic-audio]');
+  const haptic = host.querySelector('[data-somatic-haptic]');
+  const quiet = host.querySelector('[data-somatic-quiet]');
+  const statusEl = host.querySelector('[data-somatic-status]');
+  const cuesEl = host.querySelector('[data-somatic-cues]');
+  const channelsEl = host.querySelector('[data-somatic-channels]');
+
+  function syncControls() {
+    const state = profile.load();
+    gain.value = String(state.gain_ceiling);
+    audio.checked = state.channels.audio;
+    haptic.checked = state.channels.haptic;
+    quiet.checked = state.quiet_mode;
+    return state;
+  }
+
+  function saveControls() {
+    return profile.save({
+      gain_ceiling: Number(gain.value),
+      channels: { audio: audio.checked, haptic: haptic.checked },
+      quiet_mode: quiet.checked,
+    });
+  }
+
+  async function render() {
+    const state = syncControls();
+    const [status, catalog] = await Promise.all([somatic.status(), somatic.cues()]);
+    const channelStatus = detectSomaticChannels(globalThis);
+    statusEl.innerHTML = `<p><strong>${status.output?.cue_active ? 'Cue active' : 'Ready'}</strong> · profile ${profile.available() ? 'persistent' : 'session only'}</p>`;
+    channelsEl.innerHTML = channelRows(channelStatus);
+    const cues = catalog.output?.cues || [];
+    cuesEl.innerHTML = `<h3>Semantic cues</h3>${cues.map((cue) => {
+      const feedback = state.cue_feedback?.[cue.id];
+      return `<article data-cue-id="${esc(cue.id)}"><div><strong>${esc(cue.id)}</strong><p>${esc(cue.meaning)}</p></div><button type="button" data-test-cue="${esc(cue.id)}">Test</button><select data-rate-cue="${esc(cue.id)}"><option value="">Rate…</option><option value="clear">clear</option><option value="muddy">muddy</option><option value="too-sharp">too sharp</option><option value="pleasant">pleasant</option><option value="indistinct">indistinct</option></select>${feedback ? `<small>Last: ${esc(feedback.rating)}</small>` : ''}</article>`;
+    }).join('')}`;
+  }
+
+  host.addEventListener('click', async (event) => {
+    if (event.target.closest('[data-somatic-close]')) { host.hidden = true; return; }
+    const test = event.target.closest('[data-test-cue]');
+    if (!test) return;
+    const state = saveControls();
+    if (state.quiet_mode) { statusEl.textContent = 'Quiet mode is active. Cue not emitted.'; return; }
+    statusEl.textContent = `Emitting ${test.dataset.testCue}…`;
+    const result = await somatic.emit(test.dataset.testCue, { channels: state.channels, gain_ceiling: state.gain_ceiling });
+    statusEl.textContent = result.status === 'applied' ? `Completed ${test.dataset.testCue}.` : `Cue ${result.status}: ${result.reason || 'not emitted'}`;
+  });
+
+  host.addEventListener('change', (event) => {
+    if (event.target.matches('[data-somatic-gain],[data-somatic-audio],[data-somatic-haptic],[data-somatic-quiet]')) saveControls();
+    const rating = event.target.closest('[data-rate-cue]');
+    if (rating?.value) {
+      profile.rateCue(rating.dataset.rateCue, rating.value);
+      void render();
+    }
+  });
+
+  const api = Object.freeze({
+    open: async () => { host.hidden = false; await render(); return profile.load(); },
+    close: () => { host.hidden = true; },
+    profile: () => profile.load(),
+    saveProfile: (patch) => profile.save(patch),
+    rateCue: (cueId, rating, note = '') => profile.rateCue(cueId, rating, note),
+    channels: () => detectSomaticChannels(globalThis),
+    element: host,
+  });
+  globalThis[GLOBAL_KEY] = api;
+  globalThis.addEventListener?.('arcsweep:somatic-calibration-open', () => void api.open());
+  return api;
+}
