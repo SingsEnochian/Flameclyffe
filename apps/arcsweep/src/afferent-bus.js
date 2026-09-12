@@ -12,6 +12,11 @@ function freezeSignal(signal) {
   });
 }
 
+function makeEvent(type, detail) {
+  if (typeof CustomEvent === 'function') return new CustomEvent(type, { detail });
+  return { type, detail };
+}
+
 export function normalizeGlyphBrushSample(sample, now = () => Date.now()) {
   if (!sample || sample.schema !== 'arcsweep.glyph-brush-sample/v1') return null;
   const phase = ['start', 'move', 'end'].includes(sample.phase) ? sample.phase : 'move';
@@ -54,7 +59,7 @@ export function createAfferentBus({ eventTarget = globalThis, bus = null, now = 
       try { listener(lastSignal); } catch {}
     }
     bus?.publish?.('arcsweep:afferent-signal', lastSignal);
-    eventTarget?.dispatchEvent?.(new CustomEvent('arcsweep:afferent-signal', { detail: lastSignal }));
+    eventTarget?.dispatchEvent?.(makeEvent('arcsweep:afferent-signal', lastSignal));
     return lastSignal;
   }
 
