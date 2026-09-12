@@ -1,4 +1,5 @@
 import { arcsweepOS } from './os/bootstrap.js';
+import './afferent-sidecar.js';
 import { registerSomaticService } from './os/somatic-service.js';
 import { createSomaticProfileStore, detectSomaticChannels } from './somatic-profile.js';
 import { installSomaticCalibrationSurface } from './somatic-calibration-surface.js';
@@ -15,7 +16,7 @@ function install() {
     status: 'healthy',
     version: arcsweepOS.manifest?.version || 'unknown',
     last_success_at: new Date().toISOString(),
-    dependencies: ['arcsweep-os-kernel'],
+    dependencies: ['arcsweep-os-kernel', 'afferent-bus'],
     recoverable: true,
   });
   let calibration = null;
