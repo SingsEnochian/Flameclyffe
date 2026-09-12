@@ -21,6 +21,11 @@ function pointOpacity(stroke, point) {
   return clamp(stroke.brush.opacity * pressureMultiplier, 0, 1);
 }
 
+function dispatchBrushTelemetry(detail) {
+  if (typeof globalThis.dispatchEvent !== 'function' || typeof CustomEvent === 'undefined') return;
+  globalThis.dispatchEvent(new CustomEvent('arcsweep:glyph-brush-sample', { detail }));
+}
+
 export function StrokeMarks({ stroke }) {
   if (!stroke?.points?.length) return null;
   if (stroke.points.length === 1) {
@@ -120,6 +125,7 @@ function layerBlend(mode) {
 export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, onCommitStroke }) {
   const svgRef = useRef(null);
   const drawingRef = useRef(null);
+  const somaticSampleRef = useRef(null);
   const [draftStroke, setDraftStroke] = useState(null);
   const [stylus, setStylus] = useState({ type: 'none', pressure: 0, tiltX: 0, tiltY: 0, twist: 0 });
   const visibleLayers = useMemo(() => glyph.layers.filter((layer) => layer.visible), [glyph.layers]);
@@ -139,7 +145,32 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     };
   }
 
-  function appendEvent(event) {
+  function emitSomaticSample(phase, event, point, stroke) {
+    if (!point || !stroke) return;
+    const previous = somaticSampleRef.current;
+    const dt = previous ? Math.max(1, point.t - previous.t) : 0;
+    const distance = previous ? Math.hypot(point.x - previous.x, point.y - previous.y) : 0;
+    const velocity = dt > 0 ? (distance / dt) * 1000 : 0;
+    const detail = Object.freeze({
+      schema: 'arcsweep.glyph-brush-sample/v1',
+      phase,
+      stroke_id: stroke.id,
+      brush_id: stroke.brushId,
+      pointer_type: event?.pointerType || stroke.pointerType || 'unknown',
+      pressure: clamp(Number(point.pressure) || 0, 0, 1),
+      tilt_x: clamp(Number(point.tiltX) || 0, -90, 90),
+      tilt_y: clamp(Number(point.tiltY) || 0, -90, 90),
+      twist: clamp(Number(point.twist) || 0, 0, 359),
+      velocity_px_s: Math.max(0, Math.min(5000, velocity)),
+      x: point.x,
+      y: point.y,
+      timestamp_ms: point.t,
+    });
+    somaticSampleRef.current = point;
+    dispatchBrushTelemetry(detail);
+  }
+
+  function appendEvent(event, phase = 'move') {
     const stroke = drawingRef.current;
     if (!stroke) return;
     const raw = eventPoint(event);
@@ -153,6 +184,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     } : raw;
     stroke.points.push(point);
     setStylus({ type: event.pointerType, pressure: point.pressure, tiltX: point.tiltX, tiltY: point.tiltY, twist: point.twist });
+    emitSomaticSample(phase, event, point, stroke);
   }
 
   function startStroke(event) {
@@ -169,7 +201,8 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
       createdAt: new Date().toISOString(),
     };
     drawingRef.current = stroke;
-    appendEvent(event);
+    somaticSampleRef.current = null;
+    appendEvent(event, 'start');
     setDraftStroke({ ...stroke, points: [...stroke.points] });
   }
 
@@ -177,7 +210,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     if (!drawingRef.current) return;
     event.preventDefault();
     const events = event.getCoalescedEvents?.() || [event];
-    events.forEach(appendEvent);
+    events.forEach((sample) => appendEvent(sample, 'move'));
     const stroke = drawingRef.current;
     setDraftStroke({ ...stroke, points: [...stroke.points] });
   }
@@ -187,7 +220,10 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     if (!stroke) return;
     event.preventDefault();
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    const lastPoint = stroke.points[stroke.points.length - 1];
+    emitSomaticSample('end', event, lastPoint, stroke);
     drawingRef.current = null;
+    somaticSampleRef.current = null;
     setDraftStroke(null);
     if (stroke.points.length) onCommitStroke(stroke);
   }
