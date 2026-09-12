@@ -1,0 +1,99 @@
+export const SOMATIC_PROFILE_SCHEMA = 'arcsweep.somatic-profile/v1';
+export const SOMATIC_PROFILE_KEY = 'arcsweep:somatic-profile:v1';
+
+const DEFAULT_PROFILE = Object.freeze({
+  schema: SOMATIC_PROFILE_SCHEMA,
+  version: 1,
+  enabled: true,
+  gain_ceiling: 0.025,
+  channels: Object.freeze({ audio: true, haptic: true }),
+  quiet_mode: false,
+  cue_feedback: Object.freeze({}),
+  updated_at: null,
+});
+
+function clone(value) {
+  return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
+}
+
+function storageOrNull(storage) {
+  if (storage) return storage;
+  try { return globalThis.localStorage || null; } catch { return null; }
+}
+
+export function detectSomaticChannels(scope = globalThis) {
+  const navigator = scope.navigator || {};
+  return Object.freeze({
+    schema: 'arcsweep.somatic-channel-status/v1',
+    web_audio: typeof (scope.AudioContext || scope.webkitAudioContext) === 'function',
+    vibration: typeof navigator.vibrate === 'function',
+    pointer_events: typeof scope.PointerEvent === 'function',
+    touch: Number(navigator.maxTouchPoints || 0) > 0,
+    device_motion: typeof scope.DeviceMotionEvent === 'function',
+    device_orientation: typeof scope.DeviceOrientationEvent === 'function',
+    microphone_api: Boolean(navigator.mediaDevices?.getUserMedia),
+    gamepad_api: typeof navigator.getGamepads === 'function',
+    selected_audio_route: 'system-selected-output',
+    bone_conduction_compatible: typeof (scope.AudioContext || scope.webkitAudioContext) === 'function',
+    note: 'Bone-conduction compatibility means ordinary audio can use a user-selected system audio route; ArcSweep does not control implants or medical devices.',
+  });
+}
+
+export function createSomaticProfileStore({ storage = null, key = SOMATIC_PROFILE_KEY, now = () => new Date().toISOString() } = {}) {
+  const target = storageOrNull(storage);
+
+  function normalise(input = {}) {
+    const base = clone(DEFAULT_PROFILE);
+    const gain = Number(input.gain_ceiling);
+    return Object.freeze({
+      ...base,
+      ...clone(input),
+      schema: SOMATIC_PROFILE_SCHEMA,
+      version: 1,
+      enabled: input.enabled !== false,
+      gain_ceiling: Number.isFinite(gain) ? Math.max(0.001, Math.min(0.08, gain)) : base.gain_ceiling,
+      channels: Object.freeze({
+        audio: input.channels?.audio !== false,
+        haptic: input.channels?.haptic !== false,
+      }),
+      quiet_mode: input.quiet_mode === true,
+      cue_feedback: Object.freeze({ ...(input.cue_feedback || {}) }),
+      updated_at: input.updated_at || null,
+    });
+  }
+
+  function load() {
+    if (!target) return normalise();
+    try {
+      const raw = target.getItem(key);
+      if (!raw) return normalise();
+      return normalise(JSON.parse(raw));
+    } catch { return normalise(); }
+  }
+
+  function save(patch = {}) {
+    const current = load();
+    const next = normalise({ ...current, ...clone(patch), updated_at: now() });
+    try { target?.setItem?.(key, JSON.stringify(next)); } catch {}
+    return next;
+  }
+
+  function rateCue(cueId, rating, note = '') {
+    const allowed = new Set(['clear', 'muddy', 'too-sharp', 'pleasant', 'indistinct']);
+    if (!allowed.has(rating)) throw new Error(`Unsupported somatic cue rating: ${rating}`);
+    const current = load();
+    return save({
+      cue_feedback: {
+        ...current.cue_feedback,
+        [String(cueId)]: { rating, note: String(note || '').slice(0, 240), rated_at: now() },
+      },
+    });
+  }
+
+  function clear() {
+    try { target?.removeItem?.(key); } catch {}
+    return load();
+  }
+
+  return Object.freeze({ key, load, save, rateCue, clear, available: () => Boolean(target) });
+}
