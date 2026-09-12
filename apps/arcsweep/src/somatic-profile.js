@@ -7,6 +7,8 @@ const DEFAULT_PROFILE = Object.freeze({
   enabled: true,
   gain_ceiling: 0.025,
   channels: Object.freeze({ audio: true, haptic: true }),
+  bindings: Object.freeze({ navigation: false, brush_contact: false }),
+  cooldown_ms: 450,
   quiet_mode: false,
   cue_feedback: Object.freeze({}),
   updated_at: null,
@@ -45,6 +47,7 @@ export function createSomaticProfileStore({ storage = null, key = SOMATIC_PROFIL
   function normalise(input = {}) {
     const base = clone(DEFAULT_PROFILE);
     const gain = Number(input.gain_ceiling);
+    const cooldown = Number(input.cooldown_ms);
     return Object.freeze({
       ...base,
       ...clone(input),
@@ -56,6 +59,11 @@ export function createSomaticProfileStore({ storage = null, key = SOMATIC_PROFIL
         audio: input.channels?.audio !== false,
         haptic: input.channels?.haptic !== false,
       }),
+      bindings: Object.freeze({
+        navigation: input.bindings?.navigation === true,
+        brush_contact: input.bindings?.brush_contact === true,
+      }),
+      cooldown_ms: Number.isFinite(cooldown) ? Math.max(150, Math.min(5000, Math.round(cooldown))) : base.cooldown_ms,
       quiet_mode: input.quiet_mode === true,
       cue_feedback: Object.freeze({ ...(input.cue_feedback || {}) }),
       updated_at: input.updated_at || null,
