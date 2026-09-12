@@ -45,10 +45,10 @@ function install() {
       if (!calibration && typeof document !== 'undefined' && document.body) calibration = installSomaticCalibrationSurface({ somatic: api });
       return calibration?.open?.() || profileStore.load();
     },
-    enableNavigationCue: (enabled = true) => {
-      const current = profileStore.load();
-      return profileStore.save({ bindings: { ...current.bindings, navigation: Boolean(enabled) } });
-    },
+    enableNavigationCue: (enabled = true) => profileStore.save({ bindings: { navigation: Boolean(enabled) } }),
+    enableBrushContact: (enabled = true) => profileStore.save({ bindings: { brush_contact: Boolean(enabled) } }),
+    enableBrushExpression: (enabled = true) => profileStore.save({ bindings: { brush_expression: Boolean(enabled) } }),
+    bridgeStatus: () => bridge?.status?.() || null,
   };
   const frozen = Object.freeze(api);
   globalThis[GLOBAL_KEY] = frozen;
