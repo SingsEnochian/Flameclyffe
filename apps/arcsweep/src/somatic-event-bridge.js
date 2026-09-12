@@ -2,11 +2,12 @@ function clamp(value, low, high) {
   return Math.max(low, Math.min(high, Number(value) || 0));
 }
 
-function brushExpression(sample, state) {
-  const pressure = clamp(sample.pressure, 0, 1);
+function brushExpression(signal, state) {
+  const vector = signal?.vector || {};
+  const pressure = clamp(vector.pressure, 0, 1);
   const referenceVelocity = Math.max(100, Number(state.brush?.velocity_reference_px_s) || 900);
-  const velocity = clamp((Number(sample.velocity_px_s) || 0) / referenceVelocity, 0, 1);
-  const tiltMagnitude = clamp(Math.hypot(Number(sample.tilt_x) || 0, Number(sample.tilt_y) || 0) / 90, 0, 1);
+  const velocity = clamp((Number(vector.velocity_px_s) || 0) / referenceVelocity, 0, 1);
+  const tiltMagnitude = clamp(Math.hypot(Number(vector.tilt_x) || 0, Number(vector.tilt_y) || 0) / 90, 0, 1);
   return Object.freeze({
     gain_ceiling: clamp(state.gain_ceiling * (0.55 + pressure * 0.75), 0.001, 0.08),
     modulation: Object.freeze({
@@ -61,28 +62,34 @@ export function createSomaticEventBridge({
     }).catch(() => {});
   }, { id: 'somatic-navigation-bridge' });
 
-  const brushHandler = (event) => {
-    const sample = event?.detail;
-    if (!sample || sample.schema !== 'arcsweep.glyph-brush-sample/v1') return;
+  const afferentHandler = (event) => {
+    const signal = event?.detail;
+    if (!signal || signal.schema !== 'arcsweep.afferent-signal/v1' || signal.source !== 'glyph-forge') return;
+    if (!['pencil', 'touch'].includes(signal.modality)) return;
     const state = profile.load();
     if (!state.enabled || state.quiet_mode) return;
-    const pressure = clamp(sample.pressure, 0, 1);
+    const vector = signal.vector || {};
+    const pressure = clamp(vector.pressure, 0, 1);
     if (pressure < Number(state.brush?.min_pressure || 0.05)) return;
     const context = {
-      trigger: 'arcsweep:glyph-brush-sample',
-      phase: sample.phase,
-      stroke_id: sample.stroke_id,
-      brush_id: sample.brush_id,
-      pointer_type: sample.pointer_type,
+      trigger: 'arcsweep:afferent-signal',
+      afferent_id: signal.id,
+      afferent_sequence: signal.sequence,
+      modality: signal.modality,
+      intent: signal.intent,
+      phase: signal.phase,
+      stroke_id: signal.context?.stroke_id,
+      brush_id: signal.context?.brush_id,
+      pointer_type: signal.context?.pointer_type,
       pressure,
-      velocity_px_s: clamp(sample.velocity_px_s, 0, 5000),
-      tilt_x: clamp(sample.tilt_x, -90, 90),
-      tilt_y: clamp(sample.tilt_y, -90, 90),
-      twist: clamp(sample.twist, 0, 359),
+      velocity_px_s: clamp(vector.velocity_px_s, 0, 5000),
+      tilt_x: clamp(vector.tilt_x, -90, 90),
+      tilt_y: clamp(vector.tilt_y, -90, 90),
+      twist: clamp(vector.twist, 0, 359),
     };
 
-    if (sample.phase === 'start') {
-      const expression = brushExpression(sample, state);
+    if (signal.intent === 'contact') {
+      const expression = brushExpression(signal, state);
       void maybeEmit('brush_contact', 'brush_contact', {
         cooldownMs: state.brush?.contact_cooldown_ms,
         options: { ...expression, context },
@@ -90,8 +97,8 @@ export function createSomaticEventBridge({
       return;
     }
 
-    if (sample.phase === 'move' && state.bindings?.brush_expression === true) {
-      const expression = brushExpression(sample, state);
+    if (signal.intent === 'expression' && state.bindings?.brush_expression === true) {
+      const expression = brushExpression(signal, state);
       void maybeEmit('brush_contact', 'brush_expression', {
         cooldownMs: state.brush?.expression_cooldown_ms,
         options: { ...expression, context },
@@ -99,11 +106,11 @@ export function createSomaticEventBridge({
     }
   };
 
-  eventTarget?.addEventListener?.('arcsweep:glyph-brush-sample', brushHandler);
+  eventTarget?.addEventListener?.('arcsweep:afferent-signal', afferentHandler);
 
   return Object.freeze({
     maybeEmit,
-    brushExpression: (sample) => brushExpression(sample, profile.load()),
+    brushExpression: (signal) => brushExpression(signal, profile.load()),
     status: () => Object.freeze({
       destroyed,
       cue_in_flight: cueInFlight,
@@ -114,7 +121,7 @@ export function createSomaticEventBridge({
     destroy() {
       destroyed = true;
       unsubscribeNavigation?.();
-      eventTarget?.removeEventListener?.('arcsweep:glyph-brush-sample', brushHandler);
+      eventTarget?.removeEventListener?.('arcsweep:afferent-signal', afferentHandler);
     },
   });
 }
