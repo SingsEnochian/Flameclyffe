@@ -58,6 +58,31 @@ function clone(value) {
   return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 }
 
+function clampNumber(value, low, high, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.max(low, Math.min(high, number)) : fallback;
+}
+
+function normaliseModulation(input = {}) {
+  return Object.freeze({
+    frequency_scale: clampNumber(input.frequency_scale, 0.85, 1.15, 1),
+    duration_scale: clampNumber(input.duration_scale, 0.65, 1.35, 1),
+    haptic_scale: clampNumber(input.haptic_scale, 0.5, 1.5, 1),
+  });
+}
+
+function boundedContext(input = null) {
+  if (!input || typeof input !== 'object') return null;
+  const allowed = ['trigger', 'phase', 'stroke_id', 'brush_id', 'pointer_type', 'pressure', 'velocity_px_s', 'tilt_x', 'tilt_y', 'twist', 'previous_room', 'current_room'];
+  const output = {};
+  for (const key of allowed) {
+    const value = input[key];
+    if (typeof value === 'string') output[key] = value.slice(0, 120);
+    else if (typeof value === 'number' && Number.isFinite(value)) output[key] = value;
+  }
+  return Object.freeze(output);
+}
+
 export function listSomaticCues() {
   return Object.freeze(Object.values(CUES).map((cue) => Object.freeze(clone(cue))));
 }
@@ -83,16 +108,16 @@ export function stopSomaticCue(reason = 'Feather') {
   return true;
 }
 
-function scheduleToneSequence(context, cue, gainCeiling) {
+function scheduleToneSequence(context, cue, gainCeiling, modulation) {
   const sources = [];
   const start = context.currentTime;
   let cursor = start;
   for (const hz of cue.tones_hz) {
     const oscillator = context.createOscillator();
     const gain = context.createGain();
-    const duration = Math.max(0.03, cue.tone_ms / 1000);
+    const duration = Math.max(0.03, (cue.tone_ms * modulation.duration_scale) / 1000);
     oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(Number(hz), cursor);
+    oscillator.frequency.setValueAtTime(Number(hz) * modulation.frequency_scale, cursor);
     gain.gain.setValueAtTime(0.0001, cursor);
     gain.gain.exponentialRampToValueAtTime(gainCeiling, cursor + Math.min(0.02, duration / 3));
     gain.gain.exponentialRampToValueAtTime(0.0001, cursor + duration);
@@ -100,7 +125,7 @@ function scheduleToneSequence(context, cue, gainCeiling) {
     oscillator.start(cursor);
     oscillator.stop(cursor + duration + 0.01);
     sources.push({ oscillator, gain });
-    cursor += duration + Math.max(0, cue.gap_ms / 1000);
+    cursor += duration + Math.max(0, (cue.gap_ms * modulation.duration_scale) / 1000);
   }
   return { sources, endClock: cursor };
 }
@@ -111,28 +136,34 @@ export async function emitSomaticCue(cueId, {
   gainCeiling = 0.025,
   channels = { audio: true, haptic: true },
   source = 'human-ui',
+  modulation = {},
+  context: cueContext = null,
 } = {}) {
   const cue = getSomaticCue(cueId);
   invariant(cue, `unknown cue: ${cueId}`);
   invariant(!activeCue, 'another somatic cue is active');
 
+  const expressive = normaliseModulation(modulation);
+  const receiptContext = boundedContext(cueContext);
   const startedAt = nowIso();
   const audioRequested = channels?.audio !== false;
   const hapticRequested = channels?.haptic !== false;
   const audioAvailable = typeof AudioContextClass === 'function';
   const hapticAvailable = typeof vibrate === 'function';
+  const boundedGain = Math.max(0.001, Math.min(0.08, Number(gainCeiling) || 0.025));
+  const vibrationPattern = cue.vibration_ms.map((value) => Math.max(1, Math.round(value * expressive.haptic_scale)));
   let context = null;
   let tonePlan = null;
 
   if (audioRequested && audioAvailable) {
     context = new AudioContextClass();
     if (context.state === 'suspended') await context.resume();
-    tonePlan = scheduleToneSequence(context, cue, Math.max(0.001, Math.min(0.08, Number(gainCeiling) || 0.025)));
+    tonePlan = scheduleToneSequence(context, cue, boundedGain, expressive);
   }
-  if (hapticRequested && hapticAvailable) vibrate([...cue.vibration_ms]);
+  if (hapticRequested && hapticAvailable) vibrate(vibrationPattern);
 
-  const audioDuration = cue.tones_hz.length * cue.tone_ms + Math.max(0, cue.tones_hz.length - 1) * cue.gap_ms;
-  const hapticDuration = cue.vibration_ms.reduce((sum, value) => sum + value, 0);
+  const audioDuration = (cue.tones_hz.length * cue.tone_ms + Math.max(0, cue.tones_hz.length - 1) * cue.gap_ms) * expressive.duration_scale;
+  const hapticDuration = vibrationPattern.reduce((sum, value) => sum + value, 0);
   const durationMs = Math.max(audioRequested ? audioDuration : 0, hapticRequested ? hapticDuration : 0, 1);
 
   return await new Promise((resolve) => {
@@ -158,7 +189,10 @@ export async function emitSomaticCue(cueId, {
         source,
         started_at: startedAt,
         completed_at: nowIso(),
-        duration_ms: durationMs,
+        duration_ms: Math.round(durationMs),
+        gain_ceiling: boundedGain,
+        modulation: expressive,
+        context: receiptContext,
         audio: Boolean(audioRequested && audioAvailable),
         haptic: Boolean(hapticRequested && hapticAvailable),
         audio_route: audioRequested && audioAvailable ? 'system-selected-output' : null,
@@ -168,7 +202,7 @@ export async function emitSomaticCue(cueId, {
       }));
     };
     state.finish = finish;
-    state.timer = setTimeout(finish, durationMs + 45);
+    state.timer = setTimeout(finish, Math.ceil(durationMs) + 45);
     activeCue = state;
   });
 }
