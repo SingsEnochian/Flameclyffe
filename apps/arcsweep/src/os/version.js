@@ -1,12 +1,12 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.4';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.5';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'runnable-release-candidate-temporal-witness',
+  stage: 'runnable-release-candidate-cognitive-learning',
   authority: Object.freeze({
-    modelRuntime: 'house-runtime',
+    modelRuntime: 'house-runtime+cognitive-edge',
     browserState: 'hearthfire',
     orchestration: 'arcsweep-os-kernel',
     stewardship: 'human-steward',
@@ -24,6 +24,8 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     securityEvidenceGrantsAuthority: false,
     stewardReviewForGovernanceChange: true,
     privilegedApprovalRequiresTrustedHumanAction: true,
+    learningPromotionRequiresHumanStewardAction: true,
+    modelMaySelfPromoteLearning: false,
   }),
   security: Object.freeze({
     capabilityFirewall: true,
@@ -41,6 +43,10 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     bootLifecycle: ['BOOTING', 'READY', 'DEGRADED', 'PAUSED', 'ERROR'],
     guideDirectOrganAccess: false,
     guideMaximumCapabilityRequestsPerTurn: 1,
+    guidePreferredRuntime: 'supabase-edge-to-openrouter',
+    guideFallbackRuntime: 'constellation-runtime',
+    cognitiveLearning: true,
+    cognitiveLearningMode: 'observe-then-steward-promote',
     durableWorkspaceContext: true,
     passiveDeviceProving: true,
     temporalWitness: true,
@@ -73,6 +79,10 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     stewardApproval: 'arcsweep.steward-approval/v1',
     stewardDeliberation: 'arcsweep.steward-deliberation/v1',
     guideTurn: 'arcsweep.guide-turn/v1',
+    cognitiveRuntime: 'arcsweep.cognitive-runtime/v1',
+    cognitiveModelResponse: 'arcsweep.cognitive-model-response/v1',
+    learningObservation: 'arcsweep.learning-observation/v1',
+    learningFeedback: 'arcsweep.learning-feedback/v1',
     glyphForgeStatus: 'arcsweep.glyphforge-status/v1',
     runaStatus: 'arcsweep.runa-status/v1',
     deviceStatus: 'arcsweep.device-status/v1',
