@@ -41,8 +41,14 @@ export function readLocalLearningLedger(storage = storageOrNull()) {
 
 function writeLocalLearningLedger(rows, storage = storageOrNull()) {
   const bounded = (Array.isArray(rows) ? rows : []).slice(-MAX_LOCAL_ROWS);
-  try { storage?.setItem?.(ARCSWEEP_COGNITIVE_LOCAL_LEDGER, JSON.stringify(bounded)); } catch { /* local fallback is best effort */ }
-  return bounded;
+  if (!storage?.setItem || !storage?.getItem) return false;
+  try {
+    const serialised = JSON.stringify(bounded);
+    storage.setItem(ARCSWEEP_COGNITIVE_LOCAL_LEDGER, serialised);
+    return storage.getItem(ARCSWEEP_COGNITIVE_LOCAL_LEDGER) === serialised;
+  } catch {
+    return false;
+  }
 }
 
 function contextScore(row, metadata = {}) {
@@ -103,9 +109,16 @@ export async function invokeCognitiveGuide({
   const prompt = text(message, 24000);
   if (!prompt) throw new Error('Cognitive runtime requires a prompt.');
 
+  const localMemory = readLocalPromotedLearning(metadata, storage);
+  const promptWithLocalLearning = `${prompt}${localMemoryBlock(localMemory)}`;
+
   if (isHostedCaretakerSurface(location)) {
     try {
-      const data = await postCognitive({ mode: 'guide', message: prompt, metadata }, { fetchImpl, accessTokenProvider });
+      const data = await postCognitive({
+        mode: 'guide',
+        message: promptWithLocalLearning,
+        metadata: { ...metadata, local_memory_count: localMemory.length },
+      }, { fetchImpl, accessTokenProvider });
       return Object.freeze({
         status: 'replied',
         voiceId: voiceId || 'oxalpha',
@@ -119,7 +132,8 @@ export async function invokeCognitiveGuide({
         citedSources: [],
         latencyMs: Number(data.latency_ms || 0),
         executionPath: data.execution_path || 'supabase-edge-to-openrouter',
-        memoryCount: Number(data.memory_count || 0),
+        memoryCount: Number(data.memory_count || 0) + localMemory.length,
+        localMemoryCount: localMemory.length,
         cognitiveRuntime: true,
       });
     } catch {
@@ -127,15 +141,20 @@ export async function invokeCognitiveGuide({
     }
   }
 
-  const localMemory = readLocalPromotedLearning(metadata, storage);
   const fallback = await fallbackInvoke({
     voiceId,
-    message: `${prompt}${localMemoryBlock(localMemory)}`,
+    message: promptWithLocalLearning,
     sessionId,
     metadata: { ...metadata, cognitive_fallback: true, local_memory_count: localMemory.length },
     fetchImpl,
   });
-  return Object.freeze({ ...clone(fallback), cognitiveRuntime: false, memoryCount: localMemory.length, executionPath: fallback?.executionPath || 'constellation-fallback' });
+  return Object.freeze({
+    ...clone(fallback),
+    cognitiveRuntime: false,
+    memoryCount: localMemory.length,
+    localMemoryCount: localMemory.length,
+    executionPath: fallback?.executionPath || 'constellation-fallback',
+  });
 }
 
 export async function recordCognitiveObservation({
@@ -187,7 +206,15 @@ export async function recordCognitiveObservation({
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });
-  writeLocalLearningLedger([...readLocalLearningLedger(storage), row], storage);
+  const persisted = writeLocalLearningLedger([...readLocalLearningLedger(storage), row], storage);
+  if (!persisted) {
+    return Object.freeze({
+      id: null,
+      persistence: 'not-durable',
+      status: 'not-persisted',
+      error: 'local-learning-persistence-failed',
+    });
+  }
   return Object.freeze({ id: row.id, persistence: 'local', status: 'observed' });
 }
 
@@ -214,7 +241,8 @@ export async function submitCognitiveFeedback({
   const index = rows.findIndex((row) => row?.id === recordId);
   if (index < 0) throw new Error('Learning receipt not found.');
   if (action === 'forget') {
-    writeLocalLearningLedger(rows.filter((row) => row?.id !== recordId), storage);
+    const persisted = writeLocalLearningLedger(rows.filter((row) => row?.id !== recordId), storage);
+    if (!persisted) throw new Error('Local learning update could not be persisted.');
     return Object.freeze({ schema: 'arcsweep.learning-feedback/v1', id: recordId, status: 'forgotten', persistence: 'local' });
   }
   const updated = {
@@ -226,6 +254,7 @@ export async function submitCognitiveFeedback({
     updated_at: new Date().toISOString(),
   };
   rows[index] = updated;
-  writeLocalLearningLedger(rows, storage);
+  const persisted = writeLocalLearningLedger(rows, storage);
+  if (!persisted) throw new Error('Local learning update could not be persisted.');
   return Object.freeze({ schema: 'arcsweep.learning-feedback/v1', record: clone(updated), persistence: 'local' });
 }
