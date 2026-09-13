@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.5';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.6';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'runnable-release-candidate-cognitive-learning',
+  stage: 'runnable-release-candidate-conversational-cognition',
   authority: Object.freeze({
     modelRuntime: 'house-runtime+cognitive-edge',
     browserState: 'hearthfire',
@@ -45,6 +45,8 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     guideMaximumCapabilityRequestsPerTurn: 1,
     guidePreferredRuntime: 'supabase-edge-to-openrouter',
     guideFallbackRuntime: 'constellation-runtime',
+    guideRecentConversation: true,
+    guideRecentConversationLimit: 10,
     cognitiveLearning: true,
     cognitiveLearningMode: 'observe-then-steward-promote',
     durableWorkspaceContext: true,
