@@ -69,6 +69,23 @@ test('Steward correction becomes an explicit promoted lesson and forget removes 
   assert.equal(readLocalLearningLedger(storage).length, 0);
 });
 
+test('local observation reports non-durable state when storage refuses the write', async () => {
+  const storage = {
+    getItem: () => null,
+    setItem: () => {},
+  };
+  const observed = await recordCognitiveObservation({
+    userText: 'Remember this only if it really saves.',
+    assistantText: 'Acknowledged.',
+    storage,
+    location: localLocation,
+  });
+  assert.equal(observed.id, null);
+  assert.equal(observed.persistence, 'not-durable');
+  assert.equal(observed.status, 'not-persisted');
+  assert.equal(observed.error, 'local-learning-persistence-failed');
+});
+
 test('hosted Guide prefers authenticated cognitive Edge runtime', async () => {
   let fallbackCalled = false;
   let requestBody = null;
@@ -106,6 +123,54 @@ test('hosted Guide prefers authenticated cognitive Edge runtime', async () => {
   assert.equal(result.cognitiveRuntime, true);
   assert.equal(result.memoryCount, 3);
   assert.equal(result.runtimeVerified, true);
+});
+
+test('hosted Guide keeps locally promoted outage learning after Edge recovery', async () => {
+  const storage = memoryStorage();
+  const observed = await recordCognitiveObservation({
+    userText: 'What should I do next?',
+    assistantText: 'Invent another subsystem.',
+    storage,
+    location: localLocation,
+  });
+  await submitCognitiveFeedback({
+    id: observed.id,
+    verdict: 'correct',
+    lesson: 'Finish the current incomplete dependency before proposing another subsystem.',
+    storage,
+    location: localLocation,
+  });
+
+  let requestBody = null;
+  const result = await invokeCognitiveGuide({
+    voiceId: 'oxalpha',
+    message: 'Guide contract prompt',
+    sessionId: 'session:test',
+    metadata: { room_id: 'portal' },
+    storage,
+    location: hostedLocation,
+    accessTokenProvider: async () => 'steward-token',
+    fetchImpl: async (_url, options) => {
+      requestBody = JSON.parse(options.body);
+      return new Response(JSON.stringify({
+        schema: 'arcsweep.cognitive-model-response/v1',
+        provider: 'openrouter',
+        model: 'z-ai/glm-5.3-flash',
+        upstream_model: 'z-ai/glm-5.3-flash',
+        message: '{"say":"Finish the current dependency first.","request":null}',
+        latency_ms: 18,
+        memory_count: 2,
+        runtime_verified: true,
+        execution_path: 'supabase-edge-to-openrouter',
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    },
+  });
+
+  assert.match(requestBody.message, /Finish the current incomplete dependency/);
+  assert.equal(requestBody.metadata.local_memory_count, 1);
+  assert.equal(result.cognitiveRuntime, true);
+  assert.equal(result.localMemoryCount, 1);
+  assert.equal(result.memoryCount, 3);
 });
 
 test('cognitive Edge failure preserves the existing Constellation fallback', async () => {
