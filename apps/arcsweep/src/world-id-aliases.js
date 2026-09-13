@@ -4,6 +4,7 @@ const WORLD_ID_GROUPS = Object.freeze([
   Object.freeze(['terra-aeterna']),
   Object.freeze(['luna']),
   Object.freeze(['feather-and-flame']),
+  Object.freeze(['star-trek-sundancer', 'sundancer']),
 ]);
 
 const ALIAS_INDEX = new Map();
