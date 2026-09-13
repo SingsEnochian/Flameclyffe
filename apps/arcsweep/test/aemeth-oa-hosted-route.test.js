@@ -21,7 +21,10 @@ test('Ox Alpha has a Hugging Face hosted fallback with truthful credential statu
   assert.equal(HOSTED_FLAME_FALLBACKS.oxalpha, 'zai-org/GLM-5.3-Flash');
   const unavailable = hostedFlameFallbackStatus('oxalpha', env());
   assert.equal(unavailable.configured, false);
-  assert.deepEqual(unavailable.missing, ['HF_TOKEN|HFTOKEN']);
+  assert.deepEqual(unavailable.missing, [
+    'HF_TOKEN|HFTOKEN',
+    'SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SERVICE_KEY|SUPABASE_SECRET_KEY',
+  ]);
   const available = hostedFlameFallbackStatus('oxalpha', env({ HF_TOKEN: 'configured-secret' }));
   assert.equal(available.configured, true);
   assert.equal(available.provider, 'huggingface-inference-providers');

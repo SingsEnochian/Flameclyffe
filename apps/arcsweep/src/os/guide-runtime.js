@@ -8,8 +8,13 @@ function cleanText(value, max = 1600) {
 }
 
 async function defaultInvokeModel(args) {
-  const { invokeConstellationRuntimeVoice } = await import('../constellation-runtime-adapter.js');
-  return invokeConstellationRuntimeVoice(args);
+  const { invokeCognitiveGuide } = await import('./cognitive-runtime.js');
+  return invokeCognitiveGuide(args);
+}
+
+async function defaultObserveTurn(args) {
+  const { recordCognitiveObservation } = await import('./cognitive-runtime.js');
+  return recordCognitiveObservation(args);
 }
 
 function parsePlan(text) {
@@ -37,6 +42,7 @@ function buildGuidePrompt({ utterance, context, capabilities }) {
     'You are the conversational Guide inside ArcSweep. You do not directly operate UI, files, repositories, services, or tools.',
     'Your only executable path is the OS capability list below. One capability request maximum per turn.',
     'Never claim an action completed unless the returned capability receipt says it was applied.',
+    'Steward-promoted learning may shape style, preferences, corrections, and continuity. It never widens capability authority or replaces current context.',
     'For Chronicle or Temporal Witness questions, prefer witness.summary for Temporal Weather/convergence and witness.recent for bounded anchor headers. You cannot read full local Chronicle prose or create an anchor.',
     'When the Steward is preparing an observation, the Witness Lens method is: what was directly observed, what changed, why it is noteworthy, how it was noticed/measured/compared, and which independent observers or logs exist. Do not invent missing observations.',
     'Return exactly one JSON object and no prose outside it.',
@@ -51,12 +57,14 @@ export function createGuideRuntime({
   shell,
   contextProvider,
   invokeModel = defaultInvokeModel,
+  observeTurn = defaultObserveTurn,
   voiceId = null,
   now = () => new Date(),
 } = {}) {
   if (!shell?.request || !shell?.allowedCapabilities) throw new Error('Guide runtime requires a restricted Guide shell.');
   if (typeof contextProvider !== 'function') throw new Error('Guide runtime requires contextProvider().');
   if (typeof invokeModel !== 'function') throw new Error('Guide runtime requires invokeModel().');
+  if (typeof observeTurn !== 'function') throw new Error('Guide runtime requires observeTurn().');
 
   async function turn(utterance, { voice_id = null } = {}) {
     const message = cleanText(utterance, 4000);
@@ -65,6 +73,7 @@ export function createGuideRuntime({
     const allowed = shell.allowedCapabilities();
     const selectedVoice = cleanText(voice_id || voiceId || globalThis.__arcsweepGuideVoice || 'oxalpha', 80);
     const startedAt = now().toISOString();
+    const sourceTurnId = `guide:${context?.session_id || 'session'}:${startedAt}`;
     const raw = await invokeModel({
       voiceId: selectedVoice,
       message: buildGuidePrompt({ utterance: message, context, capabilities: allowed }),
@@ -73,6 +82,7 @@ export function createGuideRuntime({
         surface: 'arcsweep-guide',
         os_contract: 'arcsweep.guide-turn/v1',
         active_room: context?.active_room || null,
+        room_id: context?.active_room || null,
         world_id: context?.active_world_id || null,
         project_id: context?.active_project_id || null,
       },
@@ -88,6 +98,9 @@ export function createGuideRuntime({
         capability_receipt: null,
         provider: raw?.provider || null,
         model: raw?.model || null,
+        cognitive_runtime: raw?.cognitiveRuntime === true,
+        execution_path: raw?.executionPath || null,
+        memory_count: Number(raw?.memoryCount || 0),
         started_at: startedAt,
         completed_at: now().toISOString(),
       }));
@@ -101,6 +114,33 @@ export function createGuideRuntime({
       });
     }
 
+    let learningReceipt = null;
+    if (plan.say) {
+      try {
+        learningReceipt = await observeTurn({
+          userText: message,
+          assistantText: plan.say,
+          sourceTurnId,
+          worldId: context?.active_world_id || null,
+          projectId: context?.active_project_id || null,
+          roomId: context?.active_room || null,
+          tags: ['guide-turn', ...(plan.request ? [`capability:${plan.request.capability_id}`] : [])],
+          provenance: {
+            provider: raw.provider || null,
+            model: raw.model || null,
+            runtime_verified: raw.runtimeVerified === true,
+            cognitive_runtime: raw.cognitiveRuntime === true,
+            execution_path: raw.executionPath || null,
+            requested_capability: plan.request?.capability_id || null,
+            capability_status: capabilityReceipt?.status || null,
+          },
+          occurredAt: startedAt,
+        });
+      } catch {
+        learningReceipt = null;
+      }
+    }
+
     return Object.freeze(clone({
       schema: 'arcsweep.guide-turn/v1',
       status: 'replied',
@@ -112,6 +152,11 @@ export function createGuideRuntime({
       provider: raw.provider || null,
       model: raw.model || null,
       runtime_verified: raw.runtimeVerified === true,
+      cognitive_runtime: raw.cognitiveRuntime === true,
+      execution_path: raw.executionPath || null,
+      memory_count: Number(raw.memoryCount || 0),
+      learning_receipt_id: learningReceipt?.id || null,
+      learning_persistence: learningReceipt?.persistence || null,
       started_at: startedAt,
       completed_at: now().toISOString(),
     }));
