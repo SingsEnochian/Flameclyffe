@@ -4,12 +4,16 @@
   "name": "Star Trek: Sundancer",
   "status": "working-canon",
   "kind": "alternate-universe",
-  "summary": "A Kelvin-timeline Star Trek series centred on Amarande Emrys Xiiv, Elion Tassar Lioren, and the U.S.S. Sundancer, with a hard post-2233 timeline firewall and story-present target of 2399.",
+  "summary": "A Kelvin-timeline Star Trek series centred on Amarande Emrys Xiiv, Elion Tassar Lioren, and the living bio-organic science vessel U.S.S. Sundancer, with a hard post-2233 timeline firewall and story-present target of 2399.",
   "canon": {
     "authority": "Rowan-first",
     "sourcePolicy": "Official Kelvin canon anchors the branch through 2263; post-2233 Prime history is reference-only unless explicitly imported; Sundancer proposals remain named until approved.",
     "ingestPrimer": "../presets/star-trek-sundancer-canon-ingest.v0.1.json",
-    "sourceDocs": ["../../../docs/ingest/STAR-TREK-SUNDANCER-WORLD-INGEST-v0.1.md"],
+    "sourceDocs": [
+      "../../../docs/ingest/STAR-TREK-SUNDANCER-WORLD-INGEST-v0.1.md",
+      "../../../docs/ingest/STAR-TREK-SUNDANCER-LIVING-SHIP-SEASON-SPINE-v0.2.md",
+      "../../../docs/ingest/STAR-TREK-SUNDANCER-SEASON-ONE-MYSTERY-v0.1.md"
+    ],
     "timelineFirewall": {
       "divergenceYear": 2233,
       "kelvinHardCanonThrough": 2263,
@@ -38,6 +42,9 @@
       "relationship",
       "trill-symbiosis",
       "vulcan-culture",
+      "living-starship",
+      "bioengineering",
+      "ship-personhood",
       "anomalies",
       "timeline-and-history"
     ]
@@ -57,10 +64,11 @@
   "nextCanonTasks": [
     "approve or replace T’Ralen as Amarande's Vulcan foster/ceremonial name",
     "define Emrys name layer",
-    "lock Elion Tassar Lioren's species and culture",
+    "lock Elion Tassar Lioren's species, culture, rank and department",
     "approve or revise the Xiiv host chronology",
     "name the Vulcan successor world",
-    "define U.S.S. Sundancer class, registry, mission profile, captain and launch year",
-    "approve or revise the season-one mystery arc"
+    "lock U.S.S. Sundancer registry, launch year, dimensions, crew complement and command crew",
+    "lock the Sundancer-class communication vocabulary and crew/ship interface rules",
+    "revise and lock the ten-episode Season One spine for The Eighth Memory"
   ]
 }
