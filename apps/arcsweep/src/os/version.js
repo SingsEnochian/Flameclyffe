@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.6';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.7';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'runnable-release-candidate-conversational-cognition',
+  stage: 'runnable-release-candidate-ontological-kernel',
   authority: Object.freeze({
     modelRuntime: 'house-runtime+cognitive-edge',
     browserState: 'hearthfire',
@@ -26,6 +26,9 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     privilegedApprovalRequiresTrustedHumanAction: true,
     learningPromotionRequiresHumanStewardAction: true,
     modelMaySelfPromoteLearning: false,
+    durableAbstractionRequiresLossReceipt: true,
+    similarityImpliesIdentity: false,
+    ontologyReviewRequiresHumanStewardAction: true,
   }),
   security: Object.freeze({
     capabilityFirewall: true,
@@ -56,6 +59,10 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     temporalWitnessLens: true,
     temporalConvergenceSignal: true,
     guideTemporalAccess: 'summary-and-headers-only',
+    ontologicalKernel: true,
+    ontologyObserverSync: true,
+    ontologyTransformationReceipts: true,
+    ontologyReview: 'steward-scored-five-axis-loss-review',
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
@@ -85,6 +92,10 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     cognitiveModelResponse: 'arcsweep.cognitive-model-response/v1',
     learningObservation: 'arcsweep.learning-observation/v1',
     learningFeedback: 'arcsweep.learning-feedback/v1',
+    ontologyRuntime: 'arcsweep.ontology-runtime/v1',
+    ontologyClaim: 'arcsweep.ontology-claim/v1',
+    ontologyTransformation: 'arcsweep.ontology-transformation/v1',
+    ontologyReview: 'arcsweep.ontology-review/v1',
     glyphForgeStatus: 'arcsweep.glyphforge-status/v1',
     runaStatus: 'arcsweep.runa-status/v1',
     deviceStatus: 'arcsweep.device-status/v1',
