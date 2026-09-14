@@ -53,6 +53,12 @@ test('builds a deterministic Kelyran embodied-glyph course', () => {
     'hands-available → tracing-ready',
     'tracing-ready → embodied-glyph',
   ]);
+  assert.deepEqual(first.steps.map((step) => step.capabilities), [
+    ['runa.haptic.start'],
+    ['somatic.cue'],
+    ['glyphforge.gesture.cue'],
+    ['glyphforge.trace.arm', 'runa.audio.play', 'runa.haptic.pattern'],
+  ]);
   assert.deepEqual(first.steps[3].cue, {
     gesture_id: 'glyph.meda',
     phoneme: 'me-da',
