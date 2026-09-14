@@ -1,6 +1,12 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { VIEWBOX, brushRuntime, clamp, makeId } from './glyphStudioModel.js';
 
+const SOMATIC_PHASE_DETAIL = Object.freeze({
+  start: Object.freeze({ phase: 'start' }),
+  move: Object.freeze({ phase: 'move' }),
+  end: Object.freeze({ phase: 'end' }),
+});
+
 function pointWidth(stroke, point, index) {
   const pressure = clamp(point.pressure ?? 0.5, stroke.brush.minPressure, 1);
   const pressureMultiplier = (1 - stroke.brush.pressureSize) + stroke.brush.pressureSize * pressure;
@@ -153,7 +159,7 @@ export default function GlyphCanvas({ glyph, activeLayer, activeBrush, guides, o
     const velocity = dt > 0 ? (distance / dt) * 1000 : 0;
     const detail = Object.freeze({
       schema: 'arcsweep.glyph-brush-sample/v1',
-      phase,
+      ...(SOMATIC_PHASE_DETAIL[phase] || SOMATIC_PHASE_DETAIL.move),
       stroke_id: stroke.id,
       brush_id: stroke.brushId,
       pointer_type: event?.pointerType || stroke.pointerType || 'unknown',
