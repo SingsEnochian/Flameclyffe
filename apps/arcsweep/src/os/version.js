@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.7';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.8';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'runnable-release-candidate-ontological-kernel',
+  stage: 'runnable-release-candidate-time-room',
   authority: Object.freeze({
     modelRuntime: 'house-runtime+cognitive-edge',
     browserState: 'hearthfire',
@@ -59,6 +59,11 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     temporalWitnessLens: true,
     temporalConvergenceSignal: true,
     guideTemporalAccess: 'summary-and-headers-only',
+    timeRoom: true,
+    timeRoomSurface: true,
+    universeTimeRegistry: true,
+    universeStateTime: true,
+    guideTimeRoomAccess: 'bounded-read-only',
     ontologicalKernel: true,
     ontologyObserverSync: true,
     ontologyTransformationReceipts: true,
@@ -75,6 +80,12 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     temporalRecordHeader: 'arcsweep.temporal-record-header/v1',
     temporalWitnessSummary: 'arcsweep.temporal-witness-summary/v1',
     temporalWitnessEvent: 'arcsweep.temporal-witness-event/v1',
+    timeRoomStatus: 'arcsweep.time-room-status/v1',
+    timeRoomSnapshot: 'arcsweep.time-room-snapshot/v1',
+    timeRoomClock: 'arcsweep.time-room-clock/v1',
+    timeRoomEvent: 'arcsweep.time-room-event/v1',
+    universeTimeProfile: 'arcsweep.universe-time-profile/v1',
+    universeTimeRegistry: 'arcsweep.time-room-universe-registry/v1',
     health: 'arcsweep.service-health/v1',
     repairReceipt: 'arcsweep.repair-receipt/v1',
     checkpoint: 'arcsweep.checkpoint/v1',
