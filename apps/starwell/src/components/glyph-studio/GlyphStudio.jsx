@@ -39,9 +39,20 @@ function clone(value) {
   return structuredClone(value);
 }
 
+function postStudioEventMessage(name, detail) {
+  const targetOrigin = globalThis.location?.origin || '*';
+  const message = { schema: 'starwell.glyph-studio-event-message/v1', type: name, detail: clone(detail) };
+  try { globalThis.opener?.postMessage?.(message, targetOrigin); } catch {}
+  try {
+    if (globalThis.parent && globalThis.parent !== globalThis) globalThis.parent.postMessage(message, targetOrigin);
+  } catch {}
+}
+
 function dispatchStudioEvent(name, detail) {
-  if (typeof globalThis.dispatchEvent !== 'function' || typeof CustomEvent === 'undefined') return;
-  globalThis.dispatchEvent(new CustomEvent(name, { detail }));
+  if (typeof globalThis.dispatchEvent === 'function' && typeof CustomEvent !== 'undefined') {
+    globalThis.dispatchEvent(new CustomEvent(name, { detail }));
+  }
+  postStudioEventMessage(name, detail);
 }
 
 function coerceExistingSetting(currentValue, nextValue) {
