@@ -92,7 +92,6 @@ export function registerGlyphForgeService(registry, {
         mounted: Boolean(live),
         bridge_schema: live?.schema || null,
         surface: live?.surface || null,
-        armed_somatic_traces: armedTraces.size,
       };
     },
   });
