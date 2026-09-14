@@ -25,6 +25,9 @@ const GUIDE_CAPABILITIES = Object.freeze({
   'witness.status': Object.freeze({ authority: 'read' }),
   'witness.summary': Object.freeze({ authority: 'read' }),
   'witness.recent': Object.freeze({ authority: 'read' }),
+  'time-room.status': Object.freeze({ authority: 'read' }),
+  'time-room.universes': Object.freeze({ authority: 'read' }),
+  'time-room.snapshot': Object.freeze({ authority: 'read' }),
 });
 
 export function createGuideShell({ invoke, actorId = 'guide:arcsweep' } = {}) {
