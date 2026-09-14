@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.somatic-target/v1",
+  "title": "ArcSweep Somatic Target",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "target_id", "desired", "arrival_conditions"],
+  "properties": {
+    "schema": { "const": "arcsweep.somatic-target/v1" },
+    "target_id": { "type": "string", "minLength": 1 },
+    "label": { "type": ["string", "null"] },
+    "desired": { "type": "object", "additionalProperties": true },
+    "constraints": { "type": "object", "additionalProperties": true },
+    "arrival_conditions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  }
+}
