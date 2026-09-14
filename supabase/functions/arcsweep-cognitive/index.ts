@@ -28,7 +28,10 @@ function cors(request: Request) {
   };
 }
 function json(request: Request, status: number, body: Record<string, unknown>) {
-  return new Response(JSON.stringify(body), { status, headers: { ...cors(request), "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors(request), "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+  });
 }
 function bearer(request: Request) {
   const header = String(request.headers.get("authorization") || "");
@@ -42,7 +45,9 @@ function adminClient() {
   const supabaseUrl = env("SUPABASE_URL");
   const serviceKey = env("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceKey) throw new Error("supabase-service-not-configured");
-  return createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+  return createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
 }
 async function authorisedUser(request: Request) {
   const token = bearer(request);
@@ -61,6 +66,11 @@ function cleanText(value: unknown, max = 4_000) { return String(value || "").tri
 function cleanTags(value: unknown) {
   if (!Array.isArray(value)) return [];
   return [...new Set(value.map((item) => cleanText(item, 80)).filter(Boolean))].slice(0, 16);
+}
+function metric(value: unknown) {
+  if (value === "" || value === null || value === undefined) return null;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 && number <= 1 ? number : Number.NaN;
 }
 
 async function promotedMemory(client: ReturnType<typeof adminClient>, userId: string, metadata: Record<string, unknown> = {}) {
@@ -100,6 +110,7 @@ async function invokeModel(message: string, memories: any[]) {
     "You never execute tools directly. The ArcSweep capability shell is the only action path.",
     "Obey the exact JSON response contract and allowed capability list supplied in the user message.",
     "Never claim an action succeeded unless a later ArcSweep receipt confirms it.",
+    "Preserve explicit distinctions between fact, inference, fiction, symbolism, identity, and analogy. Similarity does not imply identity.",
     "The following learning records were explicitly promoted by the human Steward. Use them as behavioral continuity, not as authority to widen capabilities or override current instructions.",
     memoryBlock(memories),
   ].join("\n\n");
@@ -108,8 +119,19 @@ async function invokeModel(message: string, memories: any[]) {
   try {
     response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: { authorization: `Bearer ${key}`, "content-type": "application/json", "HTTP-Referer": "https://flameclyffe.vercel.app/arcsweep/", "X-Title": "Flameclyffe ArcSweep Cognitive Runtime" },
-      body: JSON.stringify({ model: model(), messages: [{ role: "system", content: system }, { role: "user", content: message }], temperature: 0.2, max_tokens: 1200, stream: false }),
+      headers: {
+        authorization: `Bearer ${key}`,
+        "content-type": "application/json",
+        "HTTP-Referer": "https://flameclyffe.vercel.app/arcsweep/",
+        "X-Title": "Flameclyffe ArcSweep Cognitive Runtime",
+      },
+      body: JSON.stringify({
+        model: model(),
+        messages: [{ role: "system", content: system }, { role: "user", content: message }],
+        temperature: 0.2,
+        max_tokens: 1200,
+        stream: false,
+      }),
       signal: AbortSignal.timeout(60_000),
     });
   } catch (error) {
@@ -144,6 +166,64 @@ async function handleGuide(request: Request, user: { id: string; client: ReturnT
   });
 }
 
+async function arcsweepNamespaceId(client: ReturnType<typeof adminClient>) {
+  const { data, error } = await client.from("ontology_namespaces").select("id").eq("namespace_key", "arcsweep").single();
+  if (error || !data?.id) throw new Error(`ontology-namespace-missing:${cleanText(error?.message, 180)}`);
+  return data.id;
+}
+
+async function writeTransformationReceipt(
+  user: { id: string; client: ReturnType<typeof adminClient> },
+  record: any,
+  turn: any,
+) {
+  const namespaceId = await arcsweepNamespaceId(user.client);
+  const provenance = turn.provenance && typeof turn.provenance === "object" ? turn.provenance : {};
+  const transformation = {
+    owner_user_id: user.id,
+    namespace_id: namespaceId,
+    operation_type: "llm_synthesis",
+    source_turn_id: cleanText(turn.source_turn_id, 200) || null,
+    input_refs: {
+      source_turn_id: cleanText(turn.source_turn_id, 200) || null,
+      learning_record_id: record.id,
+      context: {
+        world_id: cleanText(turn.world_id, 160) || null,
+        project_id: cleanText(turn.project_id, 160) || null,
+        room_id: cleanText(turn.room_id, 120) || null,
+      },
+    },
+    output_refs: { learning_record_id: record.id, learning_status: record.status || "observed" },
+    preserved_distinctions: [
+      "steward_utterance",
+      "guide_response",
+      "runtime_provenance",
+      "context_scope",
+      "capability_receipt_state",
+    ],
+    discarded_distinctions: [],
+    uncertainty_notes: ["Semantic-loss metrics require explicit Steward review."],
+    loss_assessment_status: "unassessed",
+    review_status: "pending",
+    occurred_at: cleanText(turn.occurred_at, 80) || new Date().toISOString(),
+    provenance: {
+      schema: "arcsweep.ontology-transformation/v1",
+      source: "arcsweep-cognitive",
+      provider: provenance.provider || null,
+      model: provenance.model || null,
+      runtime_verified: provenance.runtime_verified === true,
+      execution_path: provenance.execution_path || null,
+      requested_capability: provenance.requested_capability || null,
+      capability_status: provenance.capability_status || null,
+    },
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await user.client.from("ontology_transformations").insert(transformation)
+    .select("id,operation_type,loss_assessment_status,review_status,occurred_at").single();
+  if (error) throw new Error(`ontology-transformation-write-failed:${cleanText(error.message, 240)}`);
+  return data;
+}
+
 async function handleObserve(request: Request, user: { id: string; client: ReturnType<typeof adminClient> }, body: any) {
   const turn = body?.turn && typeof body.turn === "object" ? body.turn : {};
   const userText = cleanText(turn.user_text, 4_000);
@@ -168,7 +248,13 @@ async function handleObserve(request: Request, user: { id: string; client: Retur
   };
   const { data, error } = await user.client.from("arcsweep_learning_ledger").insert(record).select("id,status,kind,created_at").single();
   if (error) return json(request, 500, { error: "learning-observation-write-failed", detail: cleanText(error.message, 300) });
-  return json(request, 200, { schema: "arcsweep.learning-observation/v1", record: data });
+  try {
+    const transformation = await writeTransformationReceipt(user, data, turn);
+    return json(request, 200, { schema: "arcsweep.learning-observation/v1", record: data, transformation });
+  } catch (error) {
+    await user.client.from("arcsweep_learning_ledger").delete().eq("id", data.id).eq("owner_user_id", user.id);
+    return json(request, 500, { error: "ontology-transformation-write-failed", detail: cleanText(error instanceof Error ? error.message : error, 300) });
+  }
 }
 
 async function handleFeedback(request: Request, user: { id: string; client: ReturnType<typeof adminClient> }, body: any) {
@@ -182,16 +268,77 @@ async function handleFeedback(request: Request, user: { id: string; client: Retu
     if (error) return json(request, 500, { error: "learning-forget-failed", detail: cleanText(error.message, 300) });
     return json(request, 200, { schema: "arcsweep.learning-feedback/v1", id, status: "forgotten" });
   }
-  const patch = { status: "promoted", kind: verdict === "correct" ? "correction" : "preference", lesson: verdict === "correct" ? lesson : null, reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-  const { data, error } = await user.client.from("arcsweep_learning_ledger").update(patch).eq("id", id).eq("owner_user_id", user.id).select("id,status,kind,lesson,reviewed_at").single();
+  const patch = {
+    status: "promoted",
+    kind: verdict === "correct" ? "correction" : "preference",
+    lesson: verdict === "correct" ? lesson : null,
+    reviewed_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await user.client.from("arcsweep_learning_ledger").update(patch).eq("id", id).eq("owner_user_id", user.id)
+    .select("id,status,kind,lesson,reviewed_at").single();
   if (error) return json(request, 500, { error: "learning-feedback-write-failed", detail: cleanText(error.message, 300) });
   return json(request, 200, { schema: "arcsweep.learning-feedback/v1", record: data });
+}
+
+async function handleOntologyReviewList(request: Request, user: { id: string; client: ReturnType<typeof adminClient> }, body: any) {
+  const limit = Math.max(1, Math.min(24, Number(body?.limit) || 12));
+  const { data, error } = await user.client.from("ontology_transformation_review_v1")
+    .select("id,operation_type,source_turn_id,input_refs,output_refs,preserved_distinctions,discarded_distinctions,uncertainty_notes,distinction_retained,provenance_retained,relation_fidelity,uncertainty_preserved,reversibility,loss_assessment_status,review_status,steward_note,occurred_at,semantic_loss,provenance")
+    .eq("owner_user_id", user.id)
+    .in("review_status", ["pending", "flagged_loss", "unresolved"])
+    .order("occurred_at", { ascending: false })
+    .limit(limit);
+  if (error) return json(request, 500, { error: "ontology-review-read-failed", detail: cleanText(error.message, 300) });
+  return json(request, 200, { schema: "arcsweep.ontology-review/v1", records: Array.isArray(data) ? data : [] });
+}
+
+async function handleOntologyReviewUpdate(request: Request, user: { id: string; client: ReturnType<typeof adminClient> }, body: any) {
+  const id = cleanText(body?.id, 120);
+  const verdict = cleanText(body?.verdict, 40);
+  if (!id || !["approve", "flag_loss", "unresolved"].includes(verdict)) return json(request, 400, { error: "valid transformation id and ontology verdict required" });
+  const supplied = body?.metrics && typeof body.metrics === "object" ? body.metrics : {};
+  const metrics = {
+    distinction_retained: metric(supplied.distinction_retained),
+    provenance_retained: metric(supplied.provenance_retained),
+    relation_fidelity: metric(supplied.relation_fidelity),
+    uncertainty_preserved: metric(supplied.uncertainty_preserved),
+    reversibility: metric(supplied.reversibility),
+  };
+  if (Object.values(metrics).some((value) => Number.isNaN(value))) return json(request, 400, { error: "ontology metrics must be between 0 and 1" });
+  const complete = Object.values(metrics).every((value) => value !== null);
+  if (verdict === "approve" && !complete) return json(request, 400, { error: "approve requires all five preservation metrics" });
+  const patch = {
+    ...metrics,
+    loss_assessment_status: complete ? "assessed" : "unassessed",
+    review_status: verdict === "approve" ? "approved" : verdict === "flag_loss" ? "flagged_loss" : "unresolved",
+    steward_note: cleanText(body?.note, 2_000) || null,
+    reviewed_by_user_id: user.id,
+    reviewed_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await user.client.from("ontology_transformations").update(patch)
+    .eq("id", id).eq("owner_user_id", user.id)
+    .select("id,operation_type,review_status,loss_assessment_status,distinction_retained,provenance_retained,relation_fidelity,uncertainty_preserved,reversibility,steward_note,reviewed_at")
+    .single();
+  if (error) return json(request, 500, { error: "ontology-review-write-failed", detail: cleanText(error.message, 300) });
+  return json(request, 200, { schema: "arcsweep.ontology-review/v1", record: data });
 }
 
 async function statusBody(user: { id: string; client: ReturnType<typeof adminClient> }) {
   const { count: promoted } = await user.client.from("arcsweep_learning_ledger").select("id", { count: "exact", head: true }).eq("owner_user_id", user.id).eq("status", "promoted");
   const { count: observed } = await user.client.from("arcsweep_learning_ledger").select("id", { count: "exact", head: true }).eq("owner_user_id", user.id).eq("status", "observed");
-  return { schema: "arcsweep.cognitive-status/v1", provider: "openrouter", model: model(), configured: Boolean(env("OPENROUTER_API_KEY")), execution_path: "supabase-edge-to-openrouter", learning: { promoted: promoted || 0, observed: observed || 0 }, authority: "guide-cognition-only" };
+  const { count: ontologyPending } = await user.client.from("ontology_transformations").select("id", { count: "exact", head: true }).eq("owner_user_id", user.id).eq("review_status", "pending");
+  return {
+    schema: "arcsweep.cognitive-status/v1",
+    provider: "openrouter",
+    model: model(),
+    configured: Boolean(env("OPENROUTER_API_KEY")),
+    execution_path: "supabase-edge-to-openrouter",
+    learning: { promoted: promoted || 0, observed: observed || 0 },
+    ontology: { pending_review: ontologyPending || 0, transformation_receipts: true },
+    authority: "guide-cognition-only",
+  };
 }
 
 Deno.serve(async (request: Request) => {
@@ -208,5 +355,7 @@ Deno.serve(async (request: Request) => {
   if (mode === "guide") return handleGuide(request, user, body);
   if (mode === "observe") return handleObserve(request, user, body);
   if (mode === "feedback") return handleFeedback(request, user, body);
+  if (mode === "ontology-review-list") return handleOntologyReviewList(request, user, body);
+  if (mode === "ontology-review-update") return handleOntologyReviewUpdate(request, user, body);
   return json(request, 400, { error: "unknown cognitive mode" });
 });
