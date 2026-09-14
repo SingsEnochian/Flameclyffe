@@ -31,8 +31,91 @@ function projectSummary(snapshot) {
   };
 }
 
-export function registerGlyphForgeService(registry) {
+function defaultCuePresenter(cue = {}) {
+  const surface = globalThis.__arcsweepSomaticCartographyCueSurface;
+  if (!surface?.ready || typeof surface.present !== 'function') {
+    return { applied: false, supported: false, awaiting_presentation: true, reason: 'somatic-cue-surface-unavailable', cue: clone(cue) };
+  }
+  return surface.present(cue);
+}
+
+function dispatchEventLike(target, name, detail) {
+  if (!target?.dispatchEvent) return false;
+  if (typeof CustomEvent === 'function') return target.dispatchEvent(new CustomEvent(name, { detail }));
+  return target.dispatchEvent({ type: name, detail });
+}
+
+function sameOrigin(event) {
+  const expected = globalThis.location?.origin;
+  if (!expected || !event?.origin) return true;
+  return event.origin === expected;
+}
+
+function messageDetail(data) {
+  if (!data || typeof data !== 'object') return null;
+  const type = data.type || data.name;
+  if (type !== 'starwell:glyph-stroke-committed') return null;
+  if (data.schema && data.schema !== 'starwell.glyph-studio-event-message/v1') return null;
+  const detail = data.detail || data.payload || null;
+  return detail?.schema === 'starwell.glyph-stroke-receipt/v1' ? detail : null;
+}
+
+export function registerGlyphForgeService(registry, { eventTarget = globalThis, presentCue = defaultCuePresenter } = {}) {
   if (!registry?.registerService || !registry?.registerCapability) throw new Error('Glyph Forge service requires the ArcSweep capability registry.');
+
+  const armedTraces = new Map();
+
+  function traceStatus() {
+    return {
+      schema: 'arcsweep.glyphforge-trace-status/v1',
+      pending_count: armedTraces.size,
+      pending: [...armedTraces.values()].map(clone),
+      cross_document_bridge: true,
+      concurrency: 'single-active-trace',
+    };
+  }
+
+  function findMatchingTrace(stroke = {}) {
+    const explicit = stroke.trace_id || stroke.pending_id;
+    if (explicit && armedTraces.has(explicit)) return explicit;
+    const matches = [...armedTraces.values()].filter((trace) => {
+      if (trace.glyph_id && stroke.glyph_id && trace.glyph_id !== stroke.glyph_id) return false;
+      if (trace.brush_id && stroke.brush_id && trace.brush_id !== stroke.brush_id) return false;
+      if (trace.gesture_id && stroke.gesture_id && trace.gesture_id !== stroke.gesture_id) return false;
+      return trace.glyph_id || trace.brush_id || trace.gesture_id;
+    });
+    return matches.length === 1 ? matches[0].trace_id : null;
+  }
+
+  function observeStroke(stroke = {}) {
+    const traceId = findMatchingTrace(stroke);
+    if (!traceId) {
+      return { schema: 'arcsweep.glyphforge-trace-observation/v1', applied: false, observed: false, reason: 'no-unique-armed-trace', pending_count: armedTraces.size };
+    }
+    const trace = armedTraces.get(traceId);
+    armedTraces.delete(traceId);
+    const observation = {
+      schema: 'arcsweep.glyphforge-trace-observation/v1',
+      applied: true,
+      observed: true,
+      trace_id: traceId,
+      course_id: trace.course_id || null,
+      step: trace.step || null,
+      stroke: clone(stroke),
+      observed_at: new Date().toISOString(),
+    };
+    dispatchEventLike(eventTarget, 'arcsweep:glyph-stroke-observed', observation);
+    return observation;
+  }
+
+  const onLocalStroke = (event) => observeStroke(event?.detail || {});
+  const onMessage = (event) => {
+    if (!sameOrigin(event)) return;
+    const detail = messageDetail(event?.data);
+    if (detail) observeStroke(detail);
+  };
+  eventTarget?.addEventListener?.('starwell:glyph-stroke-committed', onLocalStroke);
+  globalThis.addEventListener?.('message', onMessage);
 
   registry.registerService({
     service_id: 'glyphforge',
@@ -44,9 +127,12 @@ export function registerGlyphForgeService(registry) {
       synthetic_drawing: false,
       arbitrary_file_access: false,
       source_mutation: false,
+      cross_document_stroke_bridge: 'same-origin-postmessage',
+      trace_correlation: 'explicit-trace-or-unique-glyph-match',
+      concurrent_trace_arms: 'rejected',
     },
     consumes: ['starwell:glyph-studio-bridge-ready', 'starwell:glyph-stroke-committed'],
-    emits: [],
+    emits: ['arcsweep:glyph-stroke-observed'],
   });
 
   registry.registerCapability({
@@ -61,6 +147,7 @@ export function registerGlyphForgeService(registry) {
         mounted: Boolean(live),
         bridge_schema: live?.schema || null,
         surface: live?.surface || null,
+        trace_bridge: traceStatus(),
       };
     },
   });
@@ -120,6 +207,62 @@ export function registerGlyphForgeService(registry) {
     }),
   });
 
+  registry.registerCapability({
+    capability_id: 'glyphforge.gesture.cue',
+    service_id: 'glyphforge',
+    description: 'Present one glyph gesture cue through the mounted somatic cue surface before claiming it was shown.',
+    authority: 'operate',
+    execute: (input) => {
+      const result = presentCue({ cue_type: 'glyph-gesture', ...clone(input || {}) });
+      if (result === false) return { applied: false, supported: false, awaiting_presentation: true };
+      return result?.applied === false ? clone(result) : { applied: true, supported: true, cue_presented: true, cue: clone(input || {}) };
+    },
+  });
+
+  registry.registerCapability({
+    capability_id: 'glyphforge.trace.arm',
+    service_id: 'glyphforge',
+    description: 'Arm exactly one expected human glyph trace; completion requires a correlated real stroke observation.',
+    authority: 'operate',
+    input_schema: { required: ['course_id', 'step'] },
+    validate: (input) => Boolean(input?.course_id && input?.step),
+    execute: (input) => {
+      const traceId = String(input.trace_id || `trace:${input.course_id}:${input.step}`).trim();
+      if (armedTraces.size && !armedTraces.has(traceId)) throw new Error('Glyph Forge already has an armed trace; concurrent trace arms are rejected until explicit correlation is available.');
+      const trace = {
+        schema: 'arcsweep.glyphforge-armed-trace/v1',
+        trace_id: traceId,
+        course_id: input.course_id,
+        step: input.step,
+        glyph_id: input.glyph_id || null,
+        gesture_id: input.gesture_id || null,
+        brush_id: input.brush_id || null,
+        arrival_condition: input.arrival_condition || null,
+        armed_at: new Date().toISOString(),
+      };
+      armedTraces.set(traceId, trace);
+      return { applied: true, supported: true, awaiting_observation: true, trace_id: traceId, armed: clone(trace) };
+    },
+  });
+
+  registry.registerCapability({
+    capability_id: 'glyphforge.trace.pending',
+    service_id: 'glyphforge',
+    description: 'Read pending armed glyph traces without stroke payloads.',
+    authority: 'read',
+    execute: traceStatus,
+  });
+
+  registry.registerCapability({
+    capability_id: 'glyphforge.trace.observe',
+    service_id: 'glyphforge',
+    description: 'Record a real stroke observation and correlate it to the matching armed trace.',
+    authority: 'operate',
+    input_schema: { required: ['stroke'] },
+    validate: (input) => Boolean(input?.stroke),
+    execute: (input) => observeStroke(input.stroke),
+  });
+
   return Object.freeze({
     service_id: 'glyphforge',
     capabilities: [
@@ -128,6 +271,14 @@ export function registerGlyphForgeService(registry) {
       'glyphforge.active-brush',
       'glyphforge.select-brush',
       'glyphforge.patch-brush-setting',
+      'glyphforge.gesture.cue',
+      'glyphforge.trace.arm',
+      'glyphforge.trace.pending',
+      'glyphforge.trace.observe',
     ],
+    destroy: () => {
+      eventTarget?.removeEventListener?.('starwell:glyph-stroke-committed', onLocalStroke);
+      globalThis.removeEventListener?.('message', onMessage);
+    },
   });
 }
