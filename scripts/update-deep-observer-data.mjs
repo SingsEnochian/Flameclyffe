@@ -98,11 +98,9 @@ export function buildState({ weather, kpRows, magRows, plasmaRows }, now = new D
   const E = clamp(0.24 + precip / 8 + humidity / 260 + kp / 14 + (bz < 0 ? Math.abs(bz) / 40 : 0));
   const M = clamp(moon.illumination / 100);
   const A = clamp(0.42 + (Number(current.is_day ?? 0) ? 0.18 : -0.04) + (100 - cloud) / 260);
-  const H = clamp(C * 0.25 + E * 0.20 + R * 0.18 + A * 0.14 + kp / 18 + Math.abs(bz) / 80);
-  const T = clamp(P * 0.12 + C * 0.16 + R * 0.12 + (1 - E) * 0.12 + M * 0.08 + A * 0.12 + H * 0.13 + 0.15);
 
   return {
-    version: 'deep-observer-backend-v1',
+    version: 'deep-observer-backend-v1.8',
     generated_at: now.toISOString(),
     source: {
       weather: 'Open-Meteo Forecast API',
@@ -120,8 +118,16 @@ export function buildState({ weather, kpRows, magRows, plasmaRows }, now = new D
       solar_wind: { time_tag: mag.time_tag || plasma.time_tag || mag[0] || plasma[0] || null, bz, bt, density, speed }
     },
     moon,
-    field: { P, C, R, E, M, A, T, H, dpdt: R },
-    observer_note: 'Observed and rendered. Not proof. Backend cache for STARWELL / DEEP Observer.'
+    field: {
+      P, C, R, E, M, A,
+      Q: null,
+      dpdt: R,
+      dynamic_axes: ['P', 'C', 'R', 'E', 'M', 'A'],
+      context_only_axes: ['Q'],
+      qualia_source: 'firsthand-only',
+      qualia_inference_allowed: false
+    },
+    observer_note: 'Observed and rendered. Not proof. PREMAQC Q remains unknown unless supplied by a firsthand experiential report.'
   };
 }
 
