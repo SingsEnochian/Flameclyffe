@@ -1,5 +1,6 @@
 import { RUNA_PREVIEW_PLAN_SCHEMA, createRunaPreviewRenderReceipt } from '../runa-preview-render.js';
 import { launchRunaPreviewPlan, previewIsActive, stopRunaPreview } from '../runa-preview-player.js';
+import { registerSomaticService } from './somatic-service.js';
 
 function clone(value) {
   if (value === undefined) return undefined;
@@ -47,10 +48,11 @@ function defaultVibrate(pattern) {
   return vibrate.call(globalThis.navigator, pattern) !== false;
 }
 
-function hapticPattern({ bpm = 55, pattern = 'pulse.single.soft' } = {}) {
+function hapticPattern({ bpm = 55, pattern = 'pulse.single.soft', haptic_pattern = null } = {}) {
   const beat = Math.max(250, Math.round(60000 / Math.max(1, Number(bpm) || 55)));
-  if (pattern === 'pulse.double') return [70, 90, 70, Math.max(80, beat - 230)];
-  if (pattern === 'pulse.arc.55') return [55, 80, 90, 110, 125, Math.max(80, beat - 460)];
+  const name = haptic_pattern || pattern;
+  if (name === 'pulse.double') return [70, 90, 70, Math.max(80, beat - 230)];
+  if (name === 'pulse.arc.55') return [55, 80, 90, 110, 125, Math.max(80, beat - 460)];
   return [70, Math.max(80, beat - 70)];
 }
 
@@ -149,9 +151,9 @@ export function registerRunaService(registry, {
     input_schema: { required: ['bpm'] },
     validate: (input) => Number.isFinite(Number(input?.bpm)) && Number(input.bpm) > 0,
     execute: (input) => {
-      const pattern = hapticPattern(input);
-      const applied = Boolean(vibrate(pattern));
-      return { applied, supported: applied, bpm: Number(input.bpm), pattern_name: input.pattern || 'pulse.single.soft', vibration_pattern: pattern };
+      const vibration = hapticPattern(input);
+      const applied = Boolean(vibrate(vibration));
+      return { applied, supported: applied, bpm: Number(input.bpm), pattern_name: input.pattern || 'pulse.single.soft', vibration_pattern: vibration };
     },
   });
 
@@ -161,9 +163,9 @@ export function registerRunaService(registry, {
     description: 'Emit one named bounded haptic glyph pattern without changing persistent world state.',
     authority: 'operate',
     execute: (input) => {
-      const pattern = hapticPattern(input);
-      const applied = Boolean(vibrate(pattern));
-      return { applied, supported: applied, bpm: Number(input?.bpm || 55), pattern_name: input?.haptic_pattern || input?.pattern || 'pulse.single.soft', vibration_pattern: pattern };
+      const vibration = hapticPattern(input);
+      const applied = Boolean(vibrate(vibration));
+      return { applied, supported: applied, bpm: Number(input?.bpm || 55), pattern_name: input?.haptic_pattern || input?.pattern || 'pulse.single.soft', vibration_pattern: vibration };
     },
   });
 
@@ -189,6 +191,8 @@ export function registerRunaService(registry, {
     execute: () => ({ stopped: Boolean(stopPreview('OS stop')), reason: 'OS stop' }),
   });
 
+  const somatic = registerSomaticService(registry, { bus, now });
+
   let unsubscribe = null;
   if (bus?.subscribe) {
     unsubscribe = bus.subscribe('arcsweep:feather-paused', () => {
@@ -203,6 +207,10 @@ export function registerRunaService(registry, {
       'runa.status', 'runa.inspect-preview-plan', 'runa.launch-preview', 'runa.stop-preview',
       'runa.haptic.start', 'runa.haptic.pattern', 'runa.audio.play',
     ],
-    destroy: () => unsubscribe?.(),
+    somatic,
+    destroy: () => {
+      unsubscribe?.();
+      somatic.destroy?.();
+    },
   });
 }
