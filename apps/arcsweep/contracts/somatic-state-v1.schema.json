@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.somatic-state/v1",
+  "title": "ArcSweep Somatic State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "state_id", "observed_at", "world_id", "channels", "provenance"],
+  "properties": {
+    "schema": { "const": "arcsweep.somatic-state/v1" },
+    "state_id": { "type": "string", "minLength": 1 },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "world_id": { "type": ["string", "null"] },
+    "continuity_packet_id": { "type": ["string", "null"] },
+    "channels": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "posture": { "type": ["object", "null"] },
+        "movement": { "type": ["object", "null"] },
+        "breath": { "type": ["object", "null"] },
+        "voice": { "type": ["object", "null"] },
+        "haptic": { "type": ["object", "null"] },
+        "sensory": { "type": ["object", "null"] },
+        "subjective": { "type": ["object", "null"] }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": { "enum": ["user", "device", "system", "world", "unknown"] }
+    }
+  }
+}
