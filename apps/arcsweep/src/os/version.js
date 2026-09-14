@@ -1,10 +1,10 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.8';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.7';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'runnable-release-candidate-time-room',
+  stage: 'runnable-release-candidate-ontological-kernel',
   authority: Object.freeze({
     modelRuntime: 'house-runtime+cognitive-edge',
     browserState: 'hearthfire',
