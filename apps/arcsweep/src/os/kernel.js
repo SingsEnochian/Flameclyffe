@@ -22,6 +22,7 @@ export const OS_EVENT_DEFINITIONS = Object.freeze({
   'arcsweep:repair-completed': (payload) => payload?.schema === ARCSWEEP_OS_MANIFEST.contracts.repairReceipt,
   'arcsweep:caretaker-alert': (payload) => Boolean(payload?.message),
   'arcsweep:feather-paused': (payload) => payload?.paused === true,
+  'arcsweep:somatic-cue-emitted': (payload) => payload?.schema === 'arcsweep.somatic-receipt/v1' && Boolean(payload?.cue_id),
 });
 
 export function createEventBus({ definitions = OS_EVENT_DEFINITIONS, historyLimit = DEFAULT_HISTORY_LIMIT, now } = {}) {
