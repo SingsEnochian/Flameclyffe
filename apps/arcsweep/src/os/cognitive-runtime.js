@@ -157,6 +157,37 @@ export async function invokeCognitiveGuide({
   });
 }
 
+function localTransformationReceipt(turn = {}) {
+  return Object.freeze({
+    schema: 'arcsweep.ontology-transformation/v1',
+    id: randomId('local-transformation'),
+    operation_type: 'llm_synthesis',
+    source_turn_id: turn.source_turn_id || null,
+    input_refs: {
+      source_turn_id: turn.source_turn_id || null,
+      context: {
+        world_id: turn.world_id || null,
+        project_id: turn.project_id || null,
+        room_id: turn.room_id || null,
+      },
+    },
+    output_refs: { local_learning_record: true },
+    preserved_distinctions: [
+      'steward_utterance',
+      'guide_response',
+      'runtime_provenance',
+      'context_scope',
+      'capability_receipt_state',
+    ],
+    discarded_distinctions: [],
+    uncertainty_notes: ['Semantic-loss metrics require explicit Steward review on the hosted ontology surface.'],
+    loss_assessment_status: 'unassessed',
+    review_status: 'pending',
+    occurred_at: turn.occurred_at || new Date().toISOString(),
+    provenance: clone(turn.provenance || {}),
+  });
+}
+
 export async function recordCognitiveObservation({
   userText,
   assistantText,
@@ -190,12 +221,19 @@ export async function recordCognitiveObservation({
   if (isHostedCaretakerSurface(location)) {
     try {
       const data = await postCognitive({ mode: 'observe', turn }, { fetchImpl, accessTokenProvider });
-      return Object.freeze({ id: data?.record?.id || null, persistence: 'supabase', status: data?.record?.status || 'observed' });
+      return Object.freeze({
+        id: data?.record?.id || null,
+        persistence: 'supabase',
+        status: data?.record?.status || 'observed',
+        transformation_id: data?.transformation?.id || null,
+        transformation_review_status: data?.transformation?.review_status || null,
+      });
     } catch {
-      // Keep the episode locally if the cloud learning lane is unavailable.
+      // Keep the episode and its transformation receipt locally if the cloud learning lane is unavailable.
     }
   }
 
+  const transformationReceipt = localTransformationReceipt(turn);
   const row = Object.freeze({
     id: randomId('local-learning'),
     kind: 'episode',
@@ -203,6 +241,7 @@ export async function recordCognitiveObservation({
     ...turn,
     confidence: 1,
     lesson: null,
+    transformation_receipt: transformationReceipt,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });
@@ -212,10 +251,17 @@ export async function recordCognitiveObservation({
       id: null,
       persistence: 'not-durable',
       status: 'not-persisted',
+      transformation_id: null,
       error: 'local-learning-persistence-failed',
     });
   }
-  return Object.freeze({ id: row.id, persistence: 'local', status: 'observed' });
+  return Object.freeze({
+    id: row.id,
+    persistence: 'local',
+    status: 'observed',
+    transformation_id: transformationReceipt.id,
+    transformation_review_status: transformationReceipt.review_status,
+  });
 }
 
 export async function submitCognitiveFeedback({
