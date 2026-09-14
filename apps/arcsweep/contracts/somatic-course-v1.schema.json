@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.somatic-course/v1",
+  "title": "ArcSweep Somatic Course",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "course_id", "origin_state_id", "target_id", "steps", "created_at"],
+  "properties": {
+    "schema": { "const": "arcsweep.somatic-course/v1" },
+    "course_id": { "type": "string", "minLength": 1 },
+    "origin_state_id": { "type": "string", "minLength": 1 },
+    "target_id": { "type": "string", "minLength": 1 },
+    "world_id": { "type": ["string", "null"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["step", "transition", "capabilities"],
+        "properties": {
+          "step": { "type": "integer", "minimum": 1 },
+          "transition": { "type": "string", "minLength": 1 },
+          "capabilities": { "type": "array", "items": { "type": "string" } },
+          "cue": { "type": ["object", "null"], "additionalProperties": true },
+          "arrival_condition": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}
