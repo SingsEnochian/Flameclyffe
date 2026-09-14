@@ -1,3 +1,4 @@
+import { loadCanonicalSpine } from './canonical-spine.js';
 import { loadState, persistObservatoryStore } from './storage.js';
 import { connectedProvenanceComponent, createProvenanceBundle } from './receipt-provenance-graph.js';
 import { buildExtendedArcsweepProvenanceGraph } from './receipt-provenance-extension.js';
@@ -34,6 +35,7 @@ function requestOptions(transformations, worldId) {
 
 async function model() {
   const state = await loadState();
+  const canonicalSpineGraph = await loadCanonicalSpine().catch(() => null);
   const world = state.worlds.find((item) => item.id === state.activeWorldId) || state.worlds[0] || null;
   if (!world) return null;
   const transformations = transformationsForState(state);
@@ -43,6 +45,8 @@ async function model() {
     feedbackCycles: state.feedbackCycles || [],
     feedbackQueue: state.feedbackQueue || null,
     observatory: state.observatory || null,
+    canonicalSpineControl: state.canonicalSpineControl || null,
+    canonicalSpineGraph,
   });
   const requests = requestOptions(transformations, world.id);
   if (activeFocusId === null && requests[0]?.request_id) activeFocusId = requests[0].request_id;
@@ -125,7 +129,7 @@ function render(m, message = '') {
   const key = modelSignature(m);
   const latestExport = exportReceipts.at(-1) || null;
   return `<section class="panel receipt-provenance" data-receipt-provenance data-prov-key="${esc(key)}">
-    <div class="section-heading compact-heading"><div><p class="eyebrow">Receipts remember the path</p><h2>Provenance Graph</h2><p class="muted">Trace an Ask through BAI, cusp, Feedback, DEEPTime, Theory, Advisor, Runa, renderer review, and the chain's own export/audit receipts. Explicit identifiers only. Missing joins stay missing.</p></div><span class="bai-topology-badge">${focused.nodes.length} nodes</span></div>
+    <div class="section-heading compact-heading"><div><p class="eyebrow">Receipts remember the path</p><h2>Provenance Graph</h2><p class="muted">Trace an Ask through BAI, cusp, Feedback, DEEPTime, Theory, Advisor, Runa, renderer review, Canonical Spine governance, and the chain's own export/audit receipts. Explicit identifiers only. Missing joins stay missing.</p></div><span class="bai-topology-badge">${focused.nodes.length} nodes</span></div>
     ${message ? `<p class="callout">${esc(message)}</p>` : ''}
     <div class="grid two compact-grid prov-controls"><label>Focus<select data-prov-focus>${options}</select></label><div class="prov-actions"><button type="button" data-prov-action="export">Export & receipt connected bundle</button><small>${focused.edges.length} links${orphanCount > 0 ? ` · ${orphanCount} unrelated receipt${orphanCount === 1 ? '' : 's'} hidden` : ''}</small>${structuralMarkup(focused)}</div></div>
     ${graphSvg(focused)}
