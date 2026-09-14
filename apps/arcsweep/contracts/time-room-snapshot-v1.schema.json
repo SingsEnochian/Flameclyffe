@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.time-room-snapshot/v1",
+  "title": "ArcSweep Time Room Snapshot",
+  "type": "object",
+  "required": ["schema", "generated_at", "room_id", "universe_id", "title", "time_law", "question", "readiness", "temporal_weather", "clocks"],
+  "properties": {
+    "schema": { "const": "arcsweep.time-room-snapshot/v1" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "room_id": { "const": "time-room" },
+    "universe_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "chamber": { "type": "string" },
+    "time_law": { "type": "string", "minLength": 1 },
+    "question": { "type": "string", "minLength": 1 },
+    "context": { "type": "object" },
+    "readiness": {
+      "type": "object",
+      "required": ["schema", "state", "pressure", "reason"],
+      "properties": {
+        "schema": { "const": "arcsweep.time-room-readiness/v1" },
+        "state": { "type": "string", "minLength": 1 },
+        "pressure": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "temporal_weather": { "type": "string" },
+    "clocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/clock" }
+    },
+    "entry_questions": { "type": "array", "items": { "type": "string" } },
+    "can_happen": { "type": "array", "items": { "type": "string" } },
+    "arrival_signals": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "clock": {
+      "type": "object",
+      "required": ["schema", "clock_id", "layer", "label", "reading"],
+      "properties": {
+        "schema": { "const": "arcsweep.time-room-clock/v1" },
+        "clock_id": { "type": "string", "minLength": 1 },
+        "layer": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "reading": { "type": "string" },
+        "phase": { "type": "string" },
+        "pressure": { "type": "string" },
+        "question": { "type": "string" },
+        "temporal_weather": { "type": "string" },
+        "utc_iso": { "type": "string", "format": "date-time" },
+        "timezone": { "type": "string" },
+        "active_room": { "type": ["string", "null"] },
+        "body_state": { "type": "object" },
+        "story_state": { "type": "object" },
+        "total_records": { "type": ["integer", "null"] },
+        "last_24h": { "type": ["integer", "null"] },
+        "convergence_detected": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

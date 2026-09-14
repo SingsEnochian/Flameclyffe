@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.time-room-event/v1",
+  "title": "ArcSweep Time Room Observed Event",
+  "type": "object",
+  "required": ["schema", "universe_id", "generated_at", "readiness", "temporal_weather", "clock_count"],
+  "properties": {
+    "schema": { "const": "arcsweep.time-room-event/v1" },
+    "universe_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "readiness": { "type": "string", "minLength": 1 },
+    "temporal_weather": { "type": "string" },
+    "clock_count": { "type": "integer", "minimum": 1 }
+  },
+  "additionalProperties": false
+}
