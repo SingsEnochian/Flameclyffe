@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.somatic-profile/v1",
+  "title": "ArcSweep Somatic Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "world_id", "posture_modes", "gestures", "haptic_lexicon", "rhythm"],
+  "properties": {
+    "schema": { "const": "arcsweep.somatic-profile/v1" },
+    "world_id": { "type": "string", "minLength": 1 },
+    "posture_modes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "gestures": { "type": "object", "additionalProperties": { "type": "object" } },
+    "haptic_lexicon": { "type": "object", "additionalProperties": { "type": ["string", "object"] } },
+    "rhythm": { "type": "object", "additionalProperties": true },
+    "constraints": { "type": "object", "additionalProperties": true }
+  }
+}
