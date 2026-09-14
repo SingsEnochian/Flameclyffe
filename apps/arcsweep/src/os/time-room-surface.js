@@ -16,6 +16,10 @@ function clockLabel(clock = {}) {
   return `${clock.label || clock.clock_id || 'Clock'}${layer}`;
 }
 
+function activeWorldId(os) {
+  return os?.session?.()?.active_world_id || null;
+}
+
 async function readTimeRoom(os, capabilityId, input = {}) {
   return os.capabilities.invoke(capabilityId, input, {
     actor_id: 'human-ui',
@@ -79,15 +83,31 @@ export function installTimeRoomSurface({ os } = {}) {
     if (receipt.status !== 'applied') return [];
     const universes = receipt.output?.universes || [];
     universeSelect.replaceChildren();
+
+    const activeWorld = activeWorldId(os);
+    const hasActiveRegisteredWorld = Boolean(activeWorld && universes.some((universe) => universe.universe_id === activeWorld));
+    if (activeWorld && !hasActiveRegisteredWorld) {
+      const option = document.createElement('option');
+      option.value = activeWorld;
+      option.textContent = `Active world: ${activeWorld}`;
+      option.dataset.activeUnregisteredWorld = 'true';
+      universeSelect.appendChild(option);
+    }
+
     for (const universe of universes) {
       const option = document.createElement('option');
       option.value = universe.universe_id;
       option.textContent = universe.title;
       universeSelect.appendChild(option);
     }
-    const activeWorld = os.session?.()?.active_world_id;
-    if (activeWorld && [...universeSelect.options].some((option) => option.value === activeWorld)) universeSelect.value = activeWorld;
+    if (activeWorld) universeSelect.value = activeWorld;
     return universes;
+  }
+
+  function selectedUniverseId() {
+    const activeWorld = activeWorldId(os);
+    if (activeWorld && universeSelect.value === activeWorld) return activeWorld;
+    return universeSelect.value || null;
   }
 
   function fillList(target, values = []) {
@@ -103,7 +123,7 @@ export function installTimeRoomSurface({ os } = {}) {
   }
 
   async function render() {
-    const universeId = universeSelect.value || null;
+    const universeId = selectedUniverseId();
     const receipt = await readTimeRoom(os, 'time-room.snapshot', { universe_id: universeId });
     if (receipt.status !== 'applied') {
       panel.querySelector('[data-tr-message]').textContent = `Time Room read failed: ${receipt.reason || receipt.error || 'unknown'}`;
@@ -135,7 +155,7 @@ export function installTimeRoomSurface({ os } = {}) {
 
   async function open() {
     panel.hidden = false;
-    if (!universeSelect.options.length) await loadUniverses();
+    await loadUniverses();
     await render();
   }
 
@@ -143,7 +163,7 @@ export function installTimeRoomSurface({ os } = {}) {
   panel.querySelector('[data-tr-close]').addEventListener('click', () => { panel.hidden = true; });
   panel.querySelector('[data-tr-refresh]').addEventListener('click', () => { void render(); });
   universeSelect.addEventListener('change', () => { void render(); });
-  globalThis.addEventListener?.('arcsweep:os-navigation', () => { if (!panel.hidden) void render(); });
+  globalThis.addEventListener?.('arcsweep:os-navigation', () => { if (!panel.hidden) void open(); });
   globalThis.addEventListener?.('arcsweep:temporal-witness-updated', () => { if (!panel.hidden) void render(); });
 
   return Object.freeze({ element: panel, open, render, loadUniverses });
