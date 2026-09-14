@@ -6,9 +6,22 @@ import {
   stopSomaticCue,
 } from '../somatic-runtime.js';
 
+const SOMATIC_CUE_EMITTED_EVENT = 'arcsweep:somatic-cue-emitted';
+
 function clone(value) {
   if (value === undefined) return undefined;
   return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
+}
+
+function ensureSomaticEvent(bus) {
+  if (!bus?.define) return;
+  const knownEvents = typeof bus.eventNames === 'function' ? bus.eventNames() : [];
+  if (knownEvents.includes(SOMATIC_CUE_EMITTED_EVENT)) return;
+  bus.define(SOMATIC_CUE_EMITTED_EVENT, (payload) => (
+    payload?.schema === 'arcsweep.somatic-receipt/v1'
+    && Boolean(payload?.cue_id)
+    && typeof payload.completed_at === 'string'
+  ));
 }
 
 export function registerSomaticService(registry, {
@@ -20,6 +33,7 @@ export function registerSomaticService(registry, {
   vibrationProvider = () => globalThis.navigator?.vibrate || null,
 } = {}) {
   if (!registry?.registerService || !registry?.registerCapability) throw new Error('Somatic service requires the ArcSweep capability registry.');
+  ensureSomaticEvent(bus);
 
   registry.registerService({
     service_id: 'somatic-interface',
@@ -34,7 +48,7 @@ export function registerSomaticService(registry, {
       expressive_modulation_bounded: true,
     },
     consumes: ['arcsweep:feather-paused'],
-    emits: ['arcsweep:somatic-cue-emitted'],
+    emits: [SOMATIC_CUE_EMITTED_EVENT],
   });
 
   registry.registerCapability({
@@ -88,7 +102,7 @@ export function registerSomaticService(registry, {
         context: input.context || null,
         source: context.actor_id || context.source || 'human-ui',
       });
-      bus?.publish?.('arcsweep:somatic-cue-emitted', receipt, { source: 'somatic-interface' });
+      bus?.publish?.(SOMATIC_CUE_EMITTED_EVENT, receipt, { source: 'somatic-interface' });
       return receipt;
     },
   });
