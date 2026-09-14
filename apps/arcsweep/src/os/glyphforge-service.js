@@ -41,6 +41,11 @@ function defaultDispatchGestureCue(detail) {
   return globalThis.dispatchEvent(new globalThis.CustomEvent('arcsweep:glyph-gesture-cue', { detail }));
 }
 
+function dispatchObservedStroke(eventTarget, payload) {
+  if (typeof eventTarget?.dispatchEvent !== 'function' || typeof globalThis.CustomEvent !== 'function') return false;
+  return eventTarget.dispatchEvent(new globalThis.CustomEvent('arcsweep:glyph-stroke-observed', { detail: payload }));
+}
+
 export function registerGlyphForgeService(registry, {
   bus = null,
   eventTarget = globalThis,
@@ -194,17 +199,18 @@ export function registerGlyphForgeService(registry, {
     if (first.done) return;
     const [traceId, armed] = first.value;
     armedTraces.delete(traceId);
-    const stroke = clone(event?.detail || {});
-    bus?.publish?.('arcsweep:glyph-stroke-observed', {
+    const payload = {
       schema: 'arcsweep.glyph-stroke-observation/v1',
       trace_id: traceId,
       gesture_id: armed.gesture_id,
       semantic_id: armed.semantic_id,
       course_id: armed.course_id,
       step: armed.step,
-      stroke,
+      stroke: clone(event?.detail || {}),
       observed_at: now().toISOString(),
-    }, { source: 'starwell:glyph-stroke-committed' });
+    };
+    if (bus?.publish) bus.publish('arcsweep:glyph-stroke-observed', payload, { source: 'starwell:glyph-stroke-committed' });
+    else dispatchObservedStroke(eventTarget, payload);
   };
 
   eventTarget?.addEventListener?.('starwell:glyph-stroke-committed', onStroke);
