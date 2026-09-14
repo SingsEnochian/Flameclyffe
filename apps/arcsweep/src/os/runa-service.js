@@ -1,6 +1,5 @@
 import { RUNA_PREVIEW_PLAN_SCHEMA, createRunaPreviewRenderReceipt } from '../runa-preview-render.js';
 import { launchRunaPreviewPlan, previewIsActive, stopRunaPreview } from '../runa-preview-player.js';
-import { registerSomaticService } from './somatic-service.js';
 
 function clone(value) {
   if (value === undefined) return undefined;
@@ -155,7 +154,13 @@ export function registerRunaService(registry, {
     execute: (input) => {
       const vibration = hapticPattern(input);
       const applied = Boolean(vibrate(vibration));
-      return { applied, supported: applied, bpm: Number(input.bpm), pattern_name: input.pattern || 'pulse.single.soft', vibration_pattern: vibration };
+      return {
+        applied,
+        supported: applied,
+        bpm: Number(input.bpm),
+        pattern_name: input.haptic_pattern || input.pattern || 'pulse.single.soft',
+        vibration_pattern: vibration,
+      };
     },
   });
 
@@ -167,7 +172,13 @@ export function registerRunaService(registry, {
     execute: (input) => {
       const vibration = hapticPattern(input);
       const applied = Boolean(vibrate(vibration));
-      return { applied, supported: applied, bpm: Number(input?.bpm || 55), pattern_name: input?.haptic_pattern || input?.pattern || 'pulse.single.soft', vibration_pattern: vibration };
+      return {
+        applied,
+        supported: applied,
+        bpm: Number(input?.bpm || 55),
+        pattern_name: input?.haptic_pattern || input?.pattern || 'pulse.single.soft',
+        vibration_pattern: vibration,
+      };
     },
   });
 
@@ -193,8 +204,6 @@ export function registerRunaService(registry, {
     execute: () => ({ stopped: Boolean(stopPreview('OS stop')), reason: 'OS stop' }),
   });
 
-  const somatic = registerSomaticService(registry, { bus, now });
-
   let unsubscribe = null;
   if (bus?.subscribe) {
     unsubscribe = bus.subscribe('arcsweep:feather-paused', () => {
@@ -209,10 +218,6 @@ export function registerRunaService(registry, {
       'runa.status', 'runa.inspect-preview-plan', 'runa.launch-preview', 'runa.stop-preview',
       'runa.haptic.start', 'runa.haptic.pattern', 'runa.audio.play',
     ],
-    somatic,
-    destroy: () => {
-      unsubscribe?.();
-      somatic.destroy?.();
-    },
+    destroy: () => unsubscribe?.(),
   });
 }

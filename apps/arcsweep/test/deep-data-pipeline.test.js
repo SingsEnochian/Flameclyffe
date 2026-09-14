@@ -17,14 +17,22 @@ test('DEEP cache builder accepts the current NOAA summary payloads', () => {
     plasmaRows: [{ proton_speed: 380, time_tag: '2026-09-02T03:00:00Z' }],
   }, NOW);
 
+  assert.equal(state.version, 'deep-observer-backend-v1.8');
   assert.equal(state.generated_at, NOW.toISOString());
   assert.equal(state.space_weather.solar_wind.bz, -2);
   assert.equal(state.space_weather.solar_wind.bt, 4);
   assert.equal(state.space_weather.solar_wind.speed, 380);
   assert.equal(state.space_weather.solar_wind.density, null);
-  for (const axis of ['P', 'C', 'R', 'E', 'M', 'A', 'T', 'H', 'dpdt']) {
+  for (const axis of ['P', 'C', 'R', 'E', 'M', 'A', 'dpdt']) {
     assert.equal(Number.isFinite(state.field[axis]), true, `${axis} should be finite`);
   }
+  assert.deepEqual(state.field.dynamic_axes, ['P', 'C', 'R', 'E', 'M', 'A']);
+  assert.deepEqual(state.field.context_only_axes, ['Q']);
+  assert.equal(state.field.Q, null);
+  assert.equal(state.field.qualia_source, 'firsthand-only');
+  assert.equal(state.field.qualia_inference_allowed, false);
+  assert.equal(Object.hasOwn(state.field, 'T'), false);
+  assert.equal(Object.hasOwn(state.field, 'H'), false);
 });
 
 test('stale cache retention turns red after six hours', () => {

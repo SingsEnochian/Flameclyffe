@@ -8,6 +8,13 @@ const siteRoot = siteArg >= 0 ? process.argv[siteArg + 1] : null;
 const errors = [];
 const ids = new Set();
 const organs = [...CREATIVE_ORGANS, ...SOUND_ORGANS];
+const coreSurfaces = [
+  {
+    id: 'canonical-spine',
+    sourcePath: 'apps/arcsweep/spine/index.html',
+    deployedPath: 'apps/arcsweep/spine/index.html',
+  },
+];
 
 for (const organ of organs) {
   if (ids.has(organ.id)) errors.push(`duplicate organ id: ${organ.id}`);
@@ -22,6 +29,15 @@ for (const organ of organs) {
   if (siteRoot) {
     try { await access(resolve(siteRoot, organ.deployedPath)); }
     catch { errors.push(`${organ.id}: deployed route missing: ${organ.deployedPath}`); }
+  }
+}
+
+for (const surface of coreSurfaces) {
+  try { await access(resolve(surface.sourcePath)); }
+  catch { errors.push(`${surface.id}: source missing: ${surface.sourcePath}`); }
+  if (siteRoot) {
+    try { await access(resolve(siteRoot, surface.deployedPath)); }
+    catch { errors.push(`${surface.id}: deployed route missing: ${surface.deployedPath}`); }
   }
 }
 
@@ -43,6 +59,9 @@ if (siteRoot) {
   } catch (error) {
     errors.push(`ArcSweep deployed asset inspection failed: ${error.message}`);
   }
+
+  try { await access(resolve(siteRoot, 'apps/arcsweep/canonical-spine.seed.json')); }
+  catch { errors.push('canonical-spine: generated graph asset missing: apps/arcsweep/canonical-spine.seed.json'); }
 }
 
 if (errors.length) {
@@ -50,4 +69,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`ArcSweep organ integrity OK: ${CREATIVE_ORGANS.length} creative + ${SOUND_ORGANS.length} sound organs${siteRoot ? ' present in deployed site with Semantic Lab, runtime health, House smoke, and bundled SoundFont worklet' : ' have source owners'}.`);
+console.log(`ArcSweep organ integrity OK: ${CREATIVE_ORGANS.length} creative + ${SOUND_ORGANS.length} sound organs + ${coreSurfaces.length} core surface${coreSurfaces.length === 1 ? '' : 's'}${siteRoot ? ' present in deployed site with Canonical Spine, Semantic Lab, runtime health, House smoke, and bundled SoundFont worklet' : ' have source owners'}.`);

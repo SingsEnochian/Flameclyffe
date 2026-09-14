@@ -4,6 +4,7 @@ import { createCapabilityRegistry } from '../src/os/capabilities.js';
 import { createEventBus } from '../src/os/kernel.js';
 import { registerGlyphForgeService } from '../src/os/glyphforge-service.js';
 import { registerRunaService } from '../src/os/runa-service.js';
+import { registerSomaticCartographyService } from '../src/os/somatic-cartography-service.js';
 import { createSomaticState, createSomaticTarget } from '../src/os/somatic-cartography.js';
 
 function fakeEventTarget() {
@@ -36,10 +37,16 @@ test('Helm executes through Runa and Glyph Forge then waits for real stroke evid
     dispatchGestureCue: () => true,
     now: fixedNow,
   });
-  const runa = registerRunaService(registry, {
+  registerRunaService(registry, {
     bus,
     vibrate: (pattern) => { vibrations.push(pattern); return true; },
     speak: (text) => { spoken.push(text); return true; },
+    now: fixedNow,
+  });
+  const somatic = registerSomaticCartographyService(registry, {
+    bus,
+    eventTarget: events,
+    dispatchCue: () => true,
     now: fixedNow,
   });
 
@@ -71,7 +78,7 @@ test('Helm executes through Runa and Glyph Forge then waits for real stroke evid
   assert.ok(vibrations.length >= 2);
   assert.deepEqual(spoken, ['me-da']);
   assert.equal(glyph.armedTraces().length, 1);
-  assert.equal(runa.somatic.pending().length, 1);
+  assert.equal(somatic.pending().length, 1);
 
   events.emit('starwell:glyph-stroke-committed', {
     glyph_id: 'glyph.meda',
@@ -80,13 +87,13 @@ test('Helm executes through Runa and Glyph Forge then waits for real stroke evid
   });
 
   assert.equal(glyph.armedTraces().length, 0);
-  assert.equal(runa.somatic.pending().length, 0);
-  const receipts = runa.somatic.store.receipts();
+  assert.equal(somatic.pending().length, 0);
+  const receipts = somatic.store.receipts();
   assert.equal(receipts.at(-1).status, 'observed');
   assert.equal(receipts.at(-1).transition, 'tracing-ready → embodied-glyph');
 
   glyph.destroy();
-  runa.destroy();
+  somatic.destroy();
 });
 
 test('Runa somatic output reports unsupported hardware without inventing success', async () => {

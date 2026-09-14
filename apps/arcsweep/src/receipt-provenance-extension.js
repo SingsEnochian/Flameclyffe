@@ -10,6 +10,9 @@ const EXTENDED_STAGE = Object.freeze({
   runa_preview_observation_link: 13,
   provenance_export: 14,
   integrity_report: 14,
+  canonical_spine_change_request: 15,
+  canonical_spine_change_review: 16,
+  canonical_spine_receipt: 17,
 });
 
 function clone(value) { return value == null ? value : structuredClone(value); }
@@ -68,6 +71,12 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
   const base = buildArcsweepProvenanceGraph(input);
   const worldId = input.worldId ?? base.world_id ?? null;
   const obs = input.observatory && typeof input.observatory === 'object' ? input.observatory : {};
+  const spineControl = input.canonicalSpineControl && typeof input.canonicalSpineControl === 'object'
+    ? input.canonicalSpineControl
+    : {};
+  const spineGraph = input.canonicalSpineGraph && typeof input.canonicalSpineGraph === 'object'
+    ? input.canonicalSpineGraph
+    : {};
   const nodes = new Map(base.nodes.map((item) => [item.id, item]));
   const collisions = [...(base.collisions || [])];
   const rawEdges = [
@@ -179,6 +188,35 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
     if (relation) rawEdges.push(relation);
   }
 
+  // Canonical Spine governance joins the existing Observer provenance graph rather than
+  // creating a second receipt universe. These records are house-level, so world_id is null.
+  for (const request of spineControl.requests || []) {
+    addNode(nodes, node(request.request_id, 'canonical_spine_change_request', `Spine Change · ${request.operation || 'proposal'} · ${request.target || 'target'}`, request, {
+      world_id: null,
+      timestamp: request.created_at || null,
+    }), collisions);
+  }
+
+  for (const review of spineControl.reviews || []) {
+    addNode(nodes, node(review.review_id, 'canonical_spine_change_review', `Spine Review · ${review.decision || 'reviewed'}`, review, {
+      world_id: null,
+      timestamp: review.reviewed_at || null,
+    }), collisions);
+    const relation = edge(review.request_id, review.review_id, 'reviewed-canonical-change-as');
+    if (relation) rawEdges.push(relation);
+  }
+
+  for (const receipt of spineGraph.receipts || []) {
+    addNode(nodes, node(receipt.id, 'canonical_spine_receipt', `Spine Receipt · ${receipt.operation || 'change'}`, receipt, {
+      world_id: null,
+      timestamp: receipt.timestamp || null,
+    }), collisions);
+    const requestRelation = edge(receipt.provenance?.requestId, receipt.id, 'applied-as-canonical-change');
+    const reviewRelation = edge(receipt.provenance?.reviewId, receipt.id, 'authorised-canonical-change');
+    if (requestRelation) rawEdges.push(requestRelation);
+    if (reviewRelation) rawEdges.push(reviewRelation);
+  }
+
   const edgeMap = new Map();
   for (const item of rawEdges) {
     if (!item) continue;
@@ -225,6 +263,8 @@ export function buildExtendedArcsweepProvenanceGraph(input = {}) {
       feedback_loop_may_be_cyclic: true,
       observation_links_are_context_not_causation_claims: true,
       audit_and_export_receipts_included_without_source_mutation: true,
+      canonical_spine_governance_included: true,
+      canonical_spine_proposals_do_not_mutate_root: true,
     }),
   });
 }

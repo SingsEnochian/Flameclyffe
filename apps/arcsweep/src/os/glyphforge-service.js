@@ -46,6 +46,14 @@ function dispatchObservedStroke(eventTarget, payload) {
   return eventTarget.dispatchEvent(new globalThis.CustomEvent('arcsweep:glyph-stroke-observed', { detail: payload }));
 }
 
+function ensureGlyphObservationEvent(bus) {
+  if (!bus?.define || !bus?.eventNames) return;
+  const known = new Set(bus.eventNames());
+  if (!known.has('arcsweep:glyph-stroke-observed')) {
+    bus.define('arcsweep:glyph-stroke-observed', (payload) => Boolean(payload?.trace_id && payload?.stroke));
+  }
+}
+
 export function registerGlyphForgeService(registry, {
   bus = null,
   eventTarget = globalThis,
@@ -55,13 +63,7 @@ export function registerGlyphForgeService(registry, {
   if (!registry?.registerService || !registry?.registerCapability) throw new Error('Glyph Forge service requires the ArcSweep capability registry.');
 
   const armedTraces = new Map();
-
-  if (bus?.define && bus?.eventNames) {
-    const known = new Set(bus.eventNames());
-    if (!known.has('arcsweep:glyph-stroke-observed')) {
-      bus.define('arcsweep:glyph-stroke-observed', (payload) => Boolean(payload?.trace_id && payload?.stroke));
-    }
-  }
+  ensureGlyphObservationEvent(bus);
 
   registry.registerService({
     service_id: 'glyphforge',

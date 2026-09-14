@@ -68,6 +68,23 @@ test('builds a deterministic Kelyran embodied-glyph course', () => {
   });
 });
 
+test('preserves custom target arrival conditions as observation steps', () => {
+  const state = createSomaticState({
+    world_id: 'kelyran',
+    channels: { posture: { mode: 'resting-seated' } },
+    provenance: { posture: 'user' },
+  }, { now: fixedNow });
+  const target = createSomaticTarget({
+    target_id: 'kelyran:writing:comfort',
+    desired: { posture: 'writing' },
+    arrival_conditions: ['comfort-confirmed'],
+  });
+
+  const course = calculateSomaticCourse({ state, target, profile: KELYRAN_SOMATIC_PROFILE }, { now: fixedNow });
+  assert.deepEqual(course.steps.map((step) => step.arrival_condition), ['cadence-established', 'posture-ready', 'comfort-confirmed']);
+  assert.deepEqual(course.steps.at(-1).capabilities, ['somatic.observe-hold']);
+});
+
 test('rejects a somatic profile for the wrong active world', () => {
   const state = createSomaticState({ world_id: 'terra-aeterna' }, { now: fixedNow });
   const target = createSomaticTarget({ target_id: 'test', desired: {}, arrival_conditions: [] });
@@ -102,4 +119,28 @@ test('receipts and stores observed somatic transitions', () => {
   assert.equal(receipt.schema, SOMATIC_RECEIPT_SCHEMA);
   assert.equal(store.snapshot().receipts.length, 1);
   assert.equal(store.snapshot().receipts[0].observed_state_id, 'somatic-state:next');
+});
+
+test('receipt identity includes capability evidence', () => {
+  const state = createSomaticState({ world_id: 'kelyran' }, { now: fixedNow });
+  const target = createSomaticTarget({ target_id: 'kelyran:hold', desired: {}, arrival_conditions: ['target-held'] });
+  const course = calculateSomaticCourse({ state, target, profile: KELYRAN_SOMATIC_PROFILE }, { now: fixedNow });
+  const first = createSomaticReceipt({ course, step: 1, status: 'applied', capability_receipt_ids: ['cap:1'] }, { now: fixedNow });
+  const second = createSomaticReceipt({ course, step: 1, status: 'applied', capability_receipt_ids: ['cap:2'] }, { now: fixedNow });
+  assert.notEqual(first.receipt_id, second.receipt_id);
+});
+
+test('somatic store isolates stored state from caller and reader mutations', () => {
+  const state = createSomaticState({
+    world_id: 'kelyran',
+    channels: { posture: { mode: 'resting-seated' } },
+    provenance: { posture: 'user' },
+  }, { now: fixedNow });
+  const store = createSomaticStore();
+  store.write(state);
+
+  const readState = store.read();
+  readState.channels.posture.mode = 'standing';
+
+  assert.equal(store.read().channels.posture.mode, 'resting-seated');
 });

@@ -71,6 +71,7 @@ function buildGuidePrompt({ utterance, context, capabilities, history = [] }) {
     'Your only executable path is the OS capability list below. One capability request maximum per turn.',
     'Never claim an action completed unless the returned capability receipt says it was applied.',
     'Steward-promoted learning may shape style, preferences, corrections, and continuity. It never widens capability authority or replaces current context.',
+    'Preserve explicit distinctions between fact, inference, fiction, symbolism, identity, analogy, and uncertainty. Similarity does not imply identity. Durable abstractions must expose their losses for Steward review.',
     'For Chronicle or Temporal Witness questions, prefer witness.summary for Temporal Weather/convergence and witness.recent for bounded anchor headers. You cannot read full local Chronicle prose or create an anchor.',
     'When the Steward is preparing an observation, the Witness Lens method is: what was directly observed, what changed, why it is noteworthy, how it was noticed/measured/compared, and which independent observers or logs exist. Do not invent missing observations.',
     'Return exactly one JSON object and no prose outside it.',
@@ -202,6 +203,8 @@ export function createGuideRuntime({
       conversation_messages: conversationHistory.length,
       learning_receipt_id: learningReceipt?.id || null,
       learning_persistence: learningReceipt?.persistence || null,
+      ontology_transformation_id: learningReceipt?.transformation_id || null,
+      ontology_review_status: learningReceipt?.transformation_review_status || null,
       started_at: startedAt,
       completed_at: now().toISOString(),
     }));

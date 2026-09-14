@@ -1,7 +1,36 @@
 {
   "schema": "flameclyffe.living-liturgy.v1",
-  "updatedAt": "2026-05-28",
+  "updatedAt": "2026-09-13",
   "audioBasePath": "assets/audio",
+  "harmonicBeds": [
+    {
+      "id": "a-family-550-bed",
+      "title": "550 Hz Harmonic Bed",
+      "frequencyHz": 550,
+      "waveform": "sine",
+      "defaultGain": 0.018,
+      "fadeSeconds": 1.5,
+      "role": "Low-level persistent harmonic scaffold beneath World Hums, liturgy tracks, and resonance sessions.",
+      "mixing": "Independent bus; may be enabled, faded, or level-adjusted without retuning the foreground material.",
+      "harmonicRelation": "5 × 110 Hz; A-family harmonic scaffold."
+    },
+    {
+      "id": "beethoven-fork-455-4",
+      "title": "Beethoven Fork",
+      "frequencyHz": 455.4,
+      "waveform": "sine",
+      "defaultGain": 0.012,
+      "fadeSeconds": 1.5,
+      "role": "Historical-reference resonance layer modelled on the surviving tuning fork associated with Beethoven and Bridgetower.",
+      "mixing": "Independent bus; designed to be auditioned alone or against the 550 Hz bed with separate level control.",
+      "historicalReference": "Tuning fork attributed to Beethoven and later associated with George Bridgetower; reported resonance approximately 455.4 Hz.",
+      "relationshipTo550": {
+        "ratio": 1.2077294686,
+        "differenceHz": 94.6,
+        "note": "Deliberately non-simple relationship to the 550 Hz bed; useful for audible tension, beating among derived partials, and comparative resonance experiments."
+      }
+    }
+  ],
   "tracks": [
     {
       "id": "transformata",

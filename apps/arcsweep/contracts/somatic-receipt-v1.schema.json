@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.somatic-receipt/v1",
+  "title": "ArcSweep Somatic Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "receipt_id", "course_id", "step", "transition", "status", "recorded_at"],
+  "properties": {
+    "schema": { "const": "arcsweep.somatic-receipt/v1" },
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "course_id": { "type": "string", "minLength": 1 },
+    "step": { "type": "integer", "minimum": 1 },
+    "transition": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["applied", "observed", "skipped", "failed"] },
+    "observed_state_id": { "type": ["string", "null"] },
+    "capability_receipt_ids": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

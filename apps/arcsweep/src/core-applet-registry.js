@@ -1,9 +1,4 @@
-import './echo-index-sidecar.js';
-import { CREATIVE_ORGANS } from './creative-organ-registry.js';
-import { SOUND_ORGANS } from './sound-organ-registry.js';
-import { contextualOrganLaunchHref, organLaunchHref } from './organ-launch-route.js';
-
-const CORE_APPLETS = [
+export const CORE_APPLETS = Object.freeze([
   { id: 'portal', label: 'Portal', glyph: '◉', category: 'core', defaultVisible: true },
   { id: 'worlds', label: 'World Registry', glyph: '✧', category: 'core', defaultVisible: true },
   { id: 'canonical-spine', label: 'Canonical Spine', glyph: '⌘', category: 'core', defaultVisible: true, pagesHref: '/Flameclyffe/apps/arcsweep/spine/', webHref: '/arcsweep/spine/' },
@@ -40,79 +35,10 @@ const CORE_APPLETS = [
   { id: 'theme', label: 'Theme', glyph: '✦', category: 'customisation', defaultVisible: true },
   { id: 'forge', label: 'Forge', glyph: '✦', category: 'practice', defaultVisible: true },
   { id: 'waking-thread', label: 'Waking Thread', glyph: '⌁', category: 'continuity', defaultVisible: true },
-];
-
-const organApplet = (organ, category) => ({
-  id: organ.id,
-  label: organ.label,
-  glyph: organ.glyph,
-  category,
-  defaultVisible: true,
-  pagesHref: organ.pagesHref,
-  webHref: organ.webHref,
-  organFamily: organ.family,
-  organKind: organ.kind || 'external',
-  description: organ.description,
-  implementation: organ.implementation,
-});
-
-export const APPLET_CATALOGUE = Object.freeze([
-  ...CORE_APPLETS,
-  ...CREATIVE_ORGANS.map((organ) => organApplet(organ, organ.family === 'continuity' ? 'continuity' : 'creative-instrument')),
-  ...SOUND_ORGANS.map((organ) => organApplet(organ, 'sound-instrument')),
 ]);
 
-export function createDefaultAppletLayout() {
-  return APPLET_CATALOGUE.map((applet, index) => ({
-    id: applet.id,
-    visible: applet.defaultVisible,
-    order: index,
-    customLabel: '',
-    customGlyph: '',
-  }));
-}
+export const CORE_APPLET_IDS = Object.freeze(CORE_APPLETS.map((applet) => applet.id));
 
-export function resolveApplet(layoutItem) {
-  const definition = APPLET_CATALOGUE.find((item) => item.id === layoutItem.id);
-  if (!definition) return null;
-  return {
-    ...definition,
-    ...layoutItem,
-    label: layoutItem.customLabel || definition.label,
-    glyph: layoutItem.customGlyph || definition.glyph,
-  };
+export function coreAppletById(id) {
+  return CORE_APPLETS.find((applet) => applet.id === id) || null;
 }
-
-export function visibleApplets(layout) {
-  return layout
-    .filter((item) => item.visible)
-    .sort((a, b) => a.order - b.order)
-    .map(resolveApplet)
-    .filter(Boolean);
-}
-
-export function appletLaunchTarget(id, locationLike = globalThis.location) {
-  return organLaunchHref(APPLET_CATALOGUE.find((item) => item.id === id), locationLike);
-}
-
-export function contextualAppletLaunchTarget(id, context = globalThis.__arcsweepInstrumentContext || {}, locationLike = globalThis.location) {
-  const organ = APPLET_CATALOGUE.find((item) => item.id === id);
-  return contextualOrganLaunchHref(organ, { ...context, from: 'arcsweep', appletId: id }, locationLike);
-}
-
-export function installAppletLaunchRouter(root = document) {
-  if (!root?.addEventListener || globalThis.__arcsweepAppletLaunchRouterInstalled) return false;
-  globalThis.__arcsweepAppletLaunchRouterInstalled = 'arcsweep.applet-launch-router/v2';
-  root.addEventListener('click', (event) => {
-    const trigger = event.target?.closest?.('[data-room]');
-    if (!trigger) return;
-    const href = contextualAppletLaunchTarget(trigger.dataset.room);
-    if (!href) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    globalThis.location?.assign?.(href);
-  }, true);
-  return true;
-}
-
-if (typeof document !== 'undefined') installAppletLaunchRouter(document);

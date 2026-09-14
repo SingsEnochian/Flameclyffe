@@ -5,12 +5,28 @@ export const SOMATIC_COURSE_SCHEMA = 'arcsweep.somatic-course/v1';
 export const SOMATIC_RECEIPT_SCHEMA = 'arcsweep.somatic-receipt/v1';
 
 function clone(value) {
-  return value == null ? value : structuredClone(value);
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
+}
+
+function deepFreeze(value) {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  for (const nested of Object.values(value)) deepFreeze(nested);
+  return Object.freeze(value);
+}
+
+function frozenClone(value) {
+  return deepFreeze(clone(value));
 }
 
 function clean(value, fallback = null) {
   const text = String(value ?? '').trim();
   return text || fallback;
+}
+
+function cleanList(values = []) {
+  return [...new Set((values || []).map((item) => clean(item)).filter(Boolean))];
 }
 
 function nowIso(now) {
@@ -36,16 +52,16 @@ export function createSomaticState({
   provenance = {},
 } = {}, { now = () => new Date() } = {}) {
   const timestamp = observed_at || nowIso(now);
-  const safeChannels = clone(channels) || {};
-  const safeProvenance = clone(provenance) || {};
-  return Object.freeze({
+  const safeChannels = frozenClone(channels || {});
+  const safeProvenance = frozenClone(provenance || {});
+  return deepFreeze({
     schema: SOMATIC_STATE_SCHEMA,
     state_id: state_id || stableId('somatic-state', [world_id, continuity_packet_id, timestamp, JSON.stringify(safeChannels)]),
     observed_at: timestamp,
     world_id: clean(world_id),
     continuity_packet_id: clean(continuity_packet_id),
-    channels: Object.freeze(safeChannels),
-    provenance: Object.freeze(safeProvenance),
+    channels: safeChannels,
+    provenance: safeProvenance,
   });
 }
 
@@ -57,13 +73,13 @@ export function createSomaticTarget({
   arrival_conditions = [],
 } = {}) {
   if (!clean(target_id)) throw new Error('Somatic target requires target_id.');
-  return Object.freeze({
+  return deepFreeze({
     schema: SOMATIC_TARGET_SCHEMA,
     target_id: clean(target_id),
     label: clean(label),
-    desired: Object.freeze(clone(desired) || {}),
-    constraints: Object.freeze(clone(constraints) || {}),
-    arrival_conditions: Object.freeze([...new Set((arrival_conditions || []).map((item) => clean(item)).filter(Boolean))]),
+    desired: frozenClone(desired || {}),
+    constraints: frozenClone(constraints || {}),
+    arrival_conditions: cleanList(arrival_conditions),
   });
 }
 
@@ -76,14 +92,14 @@ export function createSomaticProfile({
   constraints = {},
 } = {}) {
   if (!clean(world_id)) throw new Error('Somatic profile requires world_id.');
-  return Object.freeze({
+  return deepFreeze({
     schema: SOMATIC_PROFILE_SCHEMA,
     world_id: clean(world_id),
-    posture_modes: Object.freeze([...new Set((posture_modes || []).map((item) => clean(item)).filter(Boolean))]),
-    gestures: Object.freeze(clone(gestures) || {}),
-    haptic_lexicon: Object.freeze(clone(haptic_lexicon) || {}),
-    rhythm: Object.freeze(clone(rhythm) || {}),
-    constraints: Object.freeze(clone(constraints) || {}),
+    posture_modes: cleanList(posture_modes),
+    gestures: frozenClone(gestures || {}),
+    haptic_lexicon: frozenClone(haptic_lexicon || {}),
+    rhythm: frozenClone(rhythm || {}),
+    constraints: frozenClone(constraints || {}),
   });
 }
 
@@ -118,6 +134,10 @@ function desiredGesture(target) {
   return clean(target?.desired?.gesture_id || target?.desired?.gesture);
 }
 
+function arrivalConditions(target) {
+  return cleanList(target?.arrival_conditions || []);
+}
+
 export function calculateSomaticCourse({ state, target, profile }, { now = () => new Date() } = {}) {
   if (state?.schema !== SOMATIC_STATE_SCHEMA) throw new Error('Somatic course requires a valid state.');
   if (target?.schema !== SOMATIC_TARGET_SCHEMA) throw new Error('Somatic course requires a valid target.');
@@ -130,12 +150,12 @@ export function calculateSomaticCourse({ state, target, profile }, { now = () =>
 
   const steps = [];
   const push = (transition, capabilities, cue = null, arrival_condition = null) => {
-    steps.push(Object.freeze({
+    steps.push(deepFreeze({
       step: steps.length + 1,
       transition,
-      capabilities: Object.freeze([...capabilities]),
-      cue: cue ? Object.freeze(clone(cue)) : null,
-      arrival_condition,
+      capabilities: cleanList(capabilities),
+      cue: cue ? frozenClone(cue) : null,
+      arrival_condition: clean(arrival_condition),
     }));
   };
 
@@ -164,22 +184,30 @@ export function calculateSomaticCourse({ state, target, profile }, { now = () =>
       semantic_id: gesture.semantic_id,
       haptic_pattern: profile.haptic_lexicon?.[gestureId] || null,
       bpm: desiredRhythm,
-    }, target.arrival_conditions.includes('embodied-glyph') ? 'embodied-glyph' : null);
+    }, arrivalConditions(target).includes('embodied-glyph') ? 'embodied-glyph' : null);
+  }
+
+  const represented = new Set(steps.map((step) => step.arrival_condition).filter(Boolean));
+  for (const condition of arrivalConditions(target)) {
+    if (!represented.has(condition)) {
+      push(`target-check → ${condition}`, ['somatic.observe-hold'], { target_id: target.target_id, condition }, condition);
+      represented.add(condition);
+    }
   }
 
   if (!steps.length) {
-    push('current-state → target-held', ['somatic.observe-hold'], { target_id: target.target_id }, target.arrival_conditions[0] || 'target-held');
+    push('current-state → target-held', ['somatic.observe-hold'], { target_id: target.target_id }, 'target-held');
   }
 
   const createdAt = nowIso(now);
-  return Object.freeze({
+  return deepFreeze({
     schema: SOMATIC_COURSE_SCHEMA,
     course_id: stableId('somatic-course', [state.state_id, target.target_id, profile.world_id, JSON.stringify(steps)]),
     origin_state_id: state.state_id,
     target_id: target.target_id,
     world_id: state.world_id || profile.world_id,
     created_at: createdAt,
-    steps: Object.freeze(steps),
+    steps,
   });
 }
 
@@ -189,35 +217,37 @@ export function createSomaticReceipt({ course, step, status, observed_state_id =
   if (!courseStep) throw new Error('Somatic receipt step is not present in course.');
   if (!['applied', 'observed', 'skipped', 'failed'].includes(status)) throw new Error('Somatic receipt status is unsupported.');
   const recordedAt = nowIso(now);
-  return Object.freeze({
+  const capabilityIds = cleanList(capability_receipt_ids);
+  return deepFreeze({
     schema: SOMATIC_RECEIPT_SCHEMA,
-    receipt_id: stableId('somatic-receipt', [course.course_id, step, status, observed_state_id, recordedAt]),
+    receipt_id: stableId('somatic-receipt', [course.course_id, step, status, observed_state_id, recordedAt, JSON.stringify(capabilityIds)]),
     course_id: course.course_id,
     step,
     transition: courseStep.transition,
     status,
     observed_state_id: clean(observed_state_id),
-    capability_receipt_ids: Object.freeze([...new Set((capability_receipt_ids || []).map((item) => clean(item)).filter(Boolean))]),
+    capability_receipt_ids: capabilityIds,
     recorded_at: recordedAt,
   });
 }
 
 export function createSomaticStore({ initialState = null } = {}) {
-  let active = initialState;
+  let active = initialState ? frozenClone(initialState) : null;
   const receipts = [];
   return Object.freeze({
-    read: () => active,
+    read: () => clone(active),
     write: (state) => {
       if (state?.schema !== SOMATIC_STATE_SCHEMA) throw new Error('Somatic store accepts somatic-state/v1 only.');
-      active = state;
-      return active;
+      active = frozenClone(state);
+      return clone(active);
     },
     appendReceipt: (receipt) => {
       if (receipt?.schema !== SOMATIC_RECEIPT_SCHEMA) throw new Error('Somatic store accepts somatic-receipt/v1 only.');
-      receipts.push(receipt);
-      return receipt;
+      const safeReceipt = frozenClone(receipt);
+      receipts.push(safeReceipt);
+      return clone(safeReceipt);
     },
     receipts: () => receipts.map(clone),
-    snapshot: () => Object.freeze({ state: clone(active), receipts: receipts.map(clone) }),
+    snapshot: () => frozenClone({ state: active, receipts }),
   });
 }
