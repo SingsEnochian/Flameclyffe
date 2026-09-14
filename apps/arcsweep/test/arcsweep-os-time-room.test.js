@@ -39,7 +39,7 @@ test('Time Room snapshot gives Ta’veren Vaen state-time with Pattern clocks', 
   assert.ok(layers.includes('stones-time'));
 });
 
-test('Time Room registers bounded read capabilities and keeps private body prose off the event bus', async () => {
+test('Time Room registers bounded read capabilities and keeps private body prose off capability receipts and observed events', async () => {
   const bus = createEventBus();
   const registry = createCapabilityRegistry({ bus });
   registerTimeRoomService(registry, {
@@ -59,21 +59,27 @@ test('Time Room registers bounded read capabilities and keeps private body prose
   assert.ok(registryReceipt.output.universes.some((item) => item.universe_id === 'bluebird-grove'));
 
   const receipt = await registry.invoke('time-room.snapshot', {
-    body_state: { note: 'PRIVATE-BODY-SENTINEL', available: true },
+    body_state: { note: 'PRIVATE-BODY-SENTINEL', pain: 'PRIVATE-PAIN-SENTINEL', sleep: 'PRIVATE-SLEEP-SENTINEL', available: true },
+    story_state: { blocked_by: 'PRIVATE-STORY-SENTINEL' },
   }, { authority: 'read', source: 'test' });
   assert.equal(receipt.status, 'applied');
   assert.equal(receipt.output.universe_id, 'bluebird-grove');
-  assert.equal(receipt.output.readiness.state, 'converging');
+  assert.equal(receipt.output.private_time_inputs, 'redacted-from-capability-receipts');
+  assert.equal(JSON.stringify(receipt.output).includes('PRIVATE-BODY-SENTINEL'), false);
+  assert.equal(JSON.stringify(receipt.output).includes('PRIVATE-PAIN-SENTINEL'), false);
+  assert.equal(JSON.stringify(receipt.output).includes('PRIVATE-SLEEP-SENTINEL'), false);
+  assert.equal(JSON.stringify(receipt.output).includes('PRIVATE-STORY-SENTINEL'), false);
 
   const observed = bus.history().find((item) => item.name === 'arcsweep:time-room-observed');
   assert.ok(observed);
   assert.equal(observed.payload.schema, 'arcsweep.time-room-event/v1');
   assert.equal(observed.payload.universe_id, 'bluebird-grove');
   assert.equal(observed.payload.temporal_weather, 'dense');
-  assert.equal(JSON.stringify(observed.payload).includes('PRIVATE-BODY-SENTINEL'), false);
+  assert.equal(JSON.stringify(bus.history()).includes('PRIVATE-BODY-SENTINEL'), false);
+  assert.equal(JSON.stringify(bus.history()).includes('PRIVATE-STORY-SENTINEL'), false);
 });
 
-test('Guide can read the Time Room but cannot invent a privileged entry action', async () => {
+test('Guide can read the Time Room but cannot invent body/story state or a privileged entry action', async () => {
   const requested = [];
   const guide = createGuideShell({
     invoke: async (capabilityId, input, context) => {
@@ -87,8 +93,13 @@ test('Guide can read the Time Room but cannot invent a privileged entry action',
   assert.ok(allowed.includes('time-room.universes'));
   assert.ok(allowed.includes('time-room.snapshot'));
 
-  const snapshot = await guide.request('time-room.snapshot', { universe_id: 'taveren-vaen' }, { authority: 'admin', confirmed: true });
+  const snapshot = await guide.request('time-room.snapshot', {
+    universe_id: 'taveren-vaen',
+    body_state: { available: false, note: 'model cannot supply this' },
+    story_state: { ripe_signal: 'model cannot supply this either' },
+  }, { authority: 'admin', confirmed: true });
   assert.equal(snapshot.status, 'applied');
+  assert.deepEqual(requested[0].input, { universe_id: 'taveren-vaen' });
   assert.equal(requested[0].context.authority, 'read');
   assert.equal(requested[0].context.confirmed, undefined);
 
@@ -111,11 +122,13 @@ test('Time Room is mounted after Temporal Witness and present in the Vite sideca
   assert.match(sidecar, /witness\.summary/);
 });
 
-test('Time Room surface and manifest declare the Universe Clock law', () => {
+test('Time Room surface and manifest declare the Universe Clock law and preserve custom active worlds', () => {
   const surface = readFileSync(new URL('../src/os/time-room-surface.js', import.meta.url), 'utf8');
   assert.match(surface, /Universe Clock/);
   assert.match(surface, /What hour is it in this universe, and what can happen now\?/);
   assert.match(surface, /Time Room/);
+  assert.match(surface, /activeUnregisteredWorld/);
+  assert.match(surface, /Active world:/);
 
   const manifest = readFileSync(new URL('../src/os/version.js', import.meta.url), 'utf8');
   assert.match(manifest, /timeRoom: true/);
