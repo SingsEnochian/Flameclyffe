@@ -56,8 +56,11 @@ test('change preview never mutates the source graph', () => {
   const before = structuredClone(graph);
   const request = {
     schema: 'arcsweep.canonical-spine-change-request/v1',
+    actor: 'agent:caretaker',
     operation: 'add_node',
     payload: validNode(),
+    reason: 'Preview a valid change without mutating the source graph.',
+    base_fingerprint: graph._mirror.sourceFingerprint,
     created_at: '2026-09-14T04:00:00-04:00',
   };
   const preview = previewCanonicalSpineChange(graph, request);
