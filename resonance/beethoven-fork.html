@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beethoven Fork Lab · Resonance Chapel</title>
+<style>
+body{margin:0;min-height:100vh;background:#050812;color:#eef9ff;font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(900px,92vw);margin:0 auto;padding:2rem 0 4rem}.card{border:1px solid #9be7ff55;background:#0b1724e8;border-radius:24px;padding:1.2rem;margin:1rem 0}.row{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center}.controls{display:grid;grid-template-columns:auto 1fr auto;gap:.8rem;align-items:center;margin-top:.8rem}.btn{border:1px solid #ffd58e77;background:#201c12;color:#fff6d8;border-radius:999px;padding:.65rem 1rem;font-weight:800;cursor:pointer}.btn[data-on="true"]{background:#294534;border-color:#71e0aa;color:#eafff3}.muted{color:#a8c5d7}.readout{font-variant-numeric:tabular-nums;font-weight:800}.meter{height:10px;border:1px solid #9be7ff44;border-radius:999px;overflow:hidden;background:#020810;margin-top:1rem}.meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,#71e0aa,#ffd58e);transition:width .2s linear}input[type="range"]{width:100%;accent-color:#ffd58e}a{color:#9fe5ff}@media(max-width:720px){.controls,.row{grid-template-columns:1fr}.readout{text-align:left}}
+</style>
+</head>
+<body>
+<main>
+<p><a href="./">← Resonance Chapel</a></p>
+<section class="card"><h1>Beethoven Fork Lab</h1><p class="muted">Two independent oscillators: the existing 550 Hz bed and a 455.4 Hz historical-reference layer associated with Beethoven’s surviving tuning fork. Each has its own gain bus and 1.5 second fade.</p><div class="row"><div><b>Frequency relationship</b><div class="muted">550 / 455.4 ≈ 1.20773 · separation 94.6 Hz</div></div><div class="readout">455.4 ↔ 550 Hz</div></div></section>
+<section class="card"><h2>550 Hz bed</h2><div class="controls"><button id="aToggle" class="btn" data-on="false">Start 550</button><input id="aLevel" type="range" min="0" max="0.06" step="0.001" value="0.018"><span id="aRead" class="readout">0.018</span></div></section>
+<section class="card"><h2>Beethoven Fork · 455.4 Hz</h2><div class="controls"><button id="bToggle" class="btn" data-on="false">Start 455.4</button><input id="bLevel" type="range" min="0" max="0.06" step="0.001" value="0.012"><span id="bRead" class="readout">0.012</span></div></section>
+<section class="card"><h2>Combined field</h2><p id="status" class="muted">Both layers idle.</p><div class="meter"><span id="meterFill"></span></div></section>
+</main>
+<script>
+(() => {
+  const FADE = 1.5;
+  let ctx;
+  function makeLayer(freq, levelEl, toggleEl, readEl) {
+    let osc, gain, running=false;
+    async function ensure(){
+      if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)();
+      if(ctx.state==='suspended') await ctx.resume();
+      if(!osc){osc=ctx.createOscillator();gain=ctx.createGain();osc.type='sine';osc.frequency.value=freq;gain.gain.value=0;osc.connect(gain).connect(ctx.destination);osc.start();}
+    }
+    function level(){return Number(levelEl.value)}
+    function ramp(v){const now=ctx.currentTime;gain.gain.cancelScheduledValues(now);gain.gain.setValueAtTime(gain.gain.value,now);gain.gain.linearRampToValueAtTime(v,now+FADE)}
+    toggleEl.addEventListener('click',async()=>{await ensure();running=!running;ramp(running?level():0);toggleEl.dataset.on=String(running);toggleEl.textContent=running?`Stop ${freq}`:`Start ${freq}`;updateStatus();});
+    levelEl.addEventListener('input',async()=>{readEl.textContent=level().toFixed(3);if(running){await ensure();ramp(level())}updateStatus();});
+    return {get running(){return running},get level(){return level()}};
+  }
+  const a=makeLayer(550,document.getElementById('aLevel'),document.getElementById('aToggle'),document.getElementById('aRead'));
+  const b=makeLayer(455.4,document.getElementById('bLevel'),document.getElementById('bToggle'),document.getElementById('bRead'));
+  const status=document.getElementById('status');
+  const meter=document.getElementById('meterFill');
+  window.updateStatus=()=>{const states=[];if(a.running)states.push(`550 Hz @ ${a.level.toFixed(3)}`);if(b.running)states.push(`455.4 Hz @ ${b.level.toFixed(3)}`);status.textContent=states.length?states.join(' + '):'Both layers idle.';meter.style.width=`${Math.min(100,(a.level+b.level)/0.12*100)}%`;};
+})();
+</script>
+</body>
+</html>
