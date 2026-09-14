@@ -20,13 +20,22 @@ function activeWorldId(os) {
   return os?.session?.()?.active_world_id || null;
 }
 
-async function readTimeRoom(os, capabilityId, input = {}) {
+async function invokeTimeRoom(os, capabilityId, input = {}, { authority = 'read', confirmed = false } = {}) {
   return os.capabilities.invoke(capabilityId, input, {
     actor_id: 'human-ui',
     source: 'time-room-surface',
-    authority: 'read',
-    expected_authority: 'read',
+    authority,
+    expected_authority: authority,
+    confirmed,
   });
+}
+
+async function readTimeRoom(os, capabilityId, input = {}) {
+  return invokeTimeRoom(os, capabilityId, input, { authority: 'read' });
+}
+
+async function enterTimeRoomDoorway(os, input = {}) {
+  return invokeTimeRoom(os, 'time-room.enter-doorway', input, { authority: 'operate', confirmed: true });
 }
 
 export function installTimeRoomSurface({ os } = {}) {
@@ -41,9 +50,9 @@ export function installTimeRoomSurface({ os } = {}) {
 
   const style = document.createElement('style');
   style.textContent = `
-    [data-time-room-surface]{border-top:1px solid rgba(255,255,255,.08);padding:11px 13px;max-height:62vh;overflow:auto}
-    [data-time-room-surface][hidden]{display:none}.tr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.tr-kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6}.tr-title{font-size:14px;font-weight:700;margin-top:2px}.tr-law{font-size:12px;opacity:.72;margin-top:3px;line-height:1.35}.tr-close,.tr-button{border:1px solid rgba(220,180,95,.4);border-radius:8px;background:rgba(220,180,95,.08);color:inherit;padding:6px 9px;font:inherit}.tr-controls{display:grid;grid-template-columns:1fr auto;gap:7px;margin:10px 0}.tr-select{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.16);border-radius:8px;background:rgba(255,255,255,.055);color:inherit;padding:7px 8px;font:inherit}.tr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:9px 0}.tr-stat{padding:7px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.035)}.tr-stat b{display:block;font-size:13px}.tr-stat span{font-size:10px;opacity:.65}.tr-ready{border:1px solid rgba(220,180,95,.28);border-radius:12px;padding:8px 9px;margin:8px 0;background:rgba(220,180,95,.06)}.tr-ready strong{display:block}.tr-ready div{font-size:11px;opacity:.78;margin-top:2px;line-height:1.35}.tr-clocks{display:grid;gap:6px;margin-top:9px}.tr-clock{border-left:2px solid rgba(220,180,95,.48);padding:6px 8px;background:rgba(255,255,255,.025);border-radius:0 8px 8px 0}.tr-clock-head{font-size:11px;font-weight:700}.tr-clock-reading{font-size:12px;margin-top:2px}.tr-clock-question{font-size:10px;opacity:.6;margin-top:2px}.tr-chips{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0}.tr-chip{border-radius:999px;border:1px solid rgba(220,180,95,.3);padding:3px 7px;font-size:11px;background:rgba(220,180,95,.06)}.tr-empty,.tr-message{font-size:11px;opacity:.62}.tr-question{font-size:12px;font-weight:650;margin-top:7px}.tr-lists{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.tr-list{border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px;background:rgba(255,255,255,.02)}.tr-list b{display:block;font-size:11px;margin-bottom:4px}.tr-list div{font-size:10px;opacity:.72;margin-top:2px}
-    @media(max-width:520px){.tr-grid,.tr-lists,.tr-controls{grid-template-columns:1fr}}
+    [data-time-room-surface]{border-top:1px solid rgba(255,255,255,.08);padding:11px 13px;max-height:68vh;overflow:auto}
+    [data-time-room-surface][hidden]{display:none}.tr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.tr-kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6}.tr-title{font-size:14px;font-weight:700;margin-top:2px}.tr-law{font-size:12px;opacity:.72;margin-top:3px;line-height:1.35}.tr-close,.tr-button{border:1px solid rgba(220,180,95,.4);border-radius:8px;background:rgba(220,180,95,.08);color:inherit;padding:6px 9px;font:inherit}.tr-controls{display:grid;grid-template-columns:1fr auto;gap:7px;margin:10px 0}.tr-select{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.16);border-radius:8px;background:rgba(255,255,255,.055);color:inherit;padding:7px 8px;font:inherit}.tr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:9px 0}.tr-stat{padding:7px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.035)}.tr-stat b{display:block;font-size:13px}.tr-stat span{font-size:10px;opacity:.65}.tr-ready{border:1px solid rgba(220,180,95,.28);border-radius:12px;padding:8px 9px;margin:8px 0;background:rgba(220,180,95,.06)}.tr-ready strong{display:block}.tr-ready div{font-size:11px;opacity:.78;margin-top:2px;line-height:1.35}.tr-clocks{display:grid;gap:6px;margin-top:9px}.tr-clock{border-left:2px solid rgba(220,180,95,.48);padding:6px 8px;background:rgba(255,255,255,.025);border-radius:0 8px 8px 0}.tr-clock-head{font-size:11px;font-weight:700}.tr-clock-reading{font-size:12px;margin-top:2px}.tr-clock-question{font-size:10px;opacity:.6;margin-top:2px}.tr-chips{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0}.tr-chip{border-radius:999px;border:1px solid rgba(220,180,95,.3);padding:3px 7px;font-size:11px;background:rgba(220,180,95,.06)}.tr-empty,.tr-message{font-size:11px;opacity:.62}.tr-question{font-size:12px;font-weight:650;margin-top:7px}.tr-lists{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.tr-list{border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px;background:rgba(255,255,255,.02)}.tr-list b{display:block;font-size:11px;margin-bottom:4px}.tr-list div{font-size:10px;opacity:.72;margin-top:2px}.tr-doorways{display:grid;gap:7px;margin:10px 0}.tr-doorway{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid rgba(220,180,95,.22);border-radius:12px;padding:8px 9px;background:rgba(220,180,95,.04)}.tr-doorway[data-recommended="true"]{border-color:rgba(220,180,95,.52);background:rgba(220,180,95,.085)}.tr-doorway-title{font-size:12px;font-weight:700}.tr-doorway-purpose{font-size:10px;opacity:.72;line-height:1.35;margin-top:2px}.tr-doorway-hold{font-size:10px;opacity:.58;margin-top:3px}.tr-doorway button{border:1px solid rgba(220,180,95,.42);border-radius:8px;background:rgba(220,180,95,.1);color:inherit;padding:6px 8px;font:inherit;font-size:11px}.tr-doorway button:disabled{opacity:.42}.tr-doorways-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px}.tr-doorways-head b{font-size:12px}.tr-doorways-head span{font-size:10px;opacity:.58}
+    @media(max-width:520px){.tr-grid,.tr-lists,.tr-controls,.tr-doorway{grid-template-columns:1fr}}
   `;
   shell.appendChild(style);
 
@@ -54,7 +63,7 @@ export function installTimeRoomSurface({ os } = {}) {
   actions.appendChild(openButton);
 
   const panel = document.createElement('section');
-  panel.dataset.timeRoomSurface = 'v0.1';
+  panel.dataset.timeRoomSurface = 'v0.2';
   panel.hidden = true;
   panel.setAttribute('aria-label', 'ArcSweep Time Room');
   panel.innerHTML = `
@@ -72,11 +81,14 @@ export function installTimeRoomSurface({ os } = {}) {
     <div class="tr-ready"><strong data-tr-ready-label>State-time</strong><div data-tr-ready-reason></div></div>
     <div class="tr-chips" data-tr-signals></div>
     <div class="tr-lists"><div class="tr-list"><b>Can happen now</b><div data-tr-can-happen></div></div><div class="tr-list"><b>Entry questions</b><div data-tr-questions></div></div></div>
+    <div class="tr-doorways-head"><b>Doorways</b><span>Visible by the clocks. Opened only by your hand.</span></div>
+    <div class="tr-doorways" data-tr-doorways></div>
     <div class="tr-clocks" data-tr-clocks-list></div>
     <div class="tr-message" data-tr-message aria-live="polite"></div>`;
   guide.parentNode.insertBefore(panel, guide);
 
   const universeSelect = panel.querySelector('[data-tr-universe]');
+  const message = panel.querySelector('[data-tr-message]');
 
   async function loadUniverses() {
     const receipt = await readTimeRoom(os, 'time-room.universes');
@@ -122,14 +134,60 @@ export function installTimeRoomSurface({ os } = {}) {
     if (!target.childNodes.length) target.appendChild(make('span', 'tr-empty', 'No arrival signals named yet.'));
   }
 
-  async function render() {
-    const universeId = selectedUniverseId();
-    const receipt = await readTimeRoom(os, 'time-room.snapshot', { universe_id: universeId });
-    if (receipt.status !== 'applied') {
-      panel.querySelector('[data-tr-message]').textContent = `Time Room read failed: ${receipt.reason || receipt.error || 'unknown'}`;
+  async function openDoorway(doorway, universeId, button) {
+    if (!doorway?.enterable) return;
+    const question = `Open ${doorway.label} to ${doorway.destination_room}?`;
+    const confirmed = typeof globalThis.confirm === 'function' ? globalThis.confirm(question) : true;
+    if (!confirmed) return;
+
+    button.disabled = true;
+    message.textContent = `Opening ${doorway.label}…`;
+    panel.hidden = true;
+    const receipt = await enterTimeRoomDoorway(os, {
+      doorway_id: doorway.doorway_id,
+      universe_id: universeId,
+    });
+    if (receipt.status !== 'applied' || receipt.output?.status !== 'entered') {
+      panel.hidden = false;
+      button.disabled = false;
+      message.textContent = `Door stayed closed: ${receipt.reason || receipt.error || receipt.output?.status || 'navigation not observed'}`;
       return;
     }
-    const snapshot = receipt.output || {};
+    message.textContent = `Entered ${doorway.label}. Context ${receipt.output.context_capsule_id || 'recorded'}.`;
+  }
+
+  function fillDoorways(target, doorwaySet, universeId) {
+    target.replaceChildren();
+    const doorways = doorwaySet?.doorways || [];
+    for (const doorway of doorways) {
+      const card = make('article', 'tr-doorway');
+      card.dataset.recommended = doorway.recommended ? 'true' : 'false';
+      const copy = make('div');
+      copy.appendChild(make('div', 'tr-doorway-title', `${doorway.label}${doorway.recommended ? ' · recommended' : ''}`));
+      copy.appendChild(make('div', 'tr-doorway-purpose', doorway.reason || doorway.purpose));
+      if (!doorway.enterable && doorway.held_reason) copy.appendChild(make('div', 'tr-doorway-hold', doorway.held_reason));
+      const button = make('button', null, doorway.enterable ? 'Open door' : 'Held');
+      button.type = 'button';
+      button.disabled = !doorway.enterable;
+      button.dataset.trDoorway = doorway.doorway_id;
+      button.addEventListener('click', () => { void openDoorway(doorway, universeId, button); });
+      card.append(copy, button);
+      target.appendChild(card);
+    }
+    if (!target.childNodes.length) target.appendChild(make('div', 'tr-empty', 'No doorway is named for this reading yet.'));
+  }
+
+  async function render() {
+    const universeId = selectedUniverseId();
+    const [snapshotReceipt, doorwayReceipt] = await Promise.all([
+      readTimeRoom(os, 'time-room.snapshot', { universe_id: universeId }),
+      readTimeRoom(os, 'time-room.doorways', { universe_id: universeId }),
+    ]);
+    if (snapshotReceipt.status !== 'applied') {
+      message.textContent = `Time Room read failed: ${snapshotReceipt.reason || snapshotReceipt.error || 'unknown'}`;
+      return;
+    }
+    const snapshot = snapshotReceipt.output || {};
     panel.querySelector('[data-tr-title]').textContent = `${snapshot.title || 'Time Room'} · ${snapshot.chamber || 'Loom Clock'}`;
     panel.querySelector('[data-tr-law]').textContent = snapshot.time_law || '';
     panel.querySelector('[data-tr-weather]').textContent = titleCase(snapshot.temporal_weather || 'unmeasured');
@@ -141,6 +199,12 @@ export function installTimeRoomSurface({ os } = {}) {
     fillList(panel.querySelector('[data-tr-can-happen]'), snapshot.can_happen || []);
     fillList(panel.querySelector('[data-tr-questions]'), snapshot.entry_questions || []);
 
+    if (doorwayReceipt.status === 'applied') {
+      fillDoorways(panel.querySelector('[data-tr-doorways]'), doorwayReceipt.output, snapshot.universe_id || universeId);
+    } else {
+      panel.querySelector('[data-tr-doorways]').replaceChildren(make('div', 'tr-empty', `Doorway read failed: ${doorwayReceipt.reason || doorwayReceipt.error || 'unknown'}`));
+    }
+
     const clocks = panel.querySelector('[data-tr-clocks-list]');
     clocks.replaceChildren();
     for (const item of snapshot.clocks || []) {
@@ -150,7 +214,7 @@ export function installTimeRoomSurface({ os } = {}) {
       if (item.question) card.appendChild(make('div', 'tr-clock-question', item.question));
       clocks.appendChild(card);
     }
-    panel.querySelector('[data-tr-message]').textContent = snapshot.generated_at ? `Read ${new Date(snapshot.generated_at).toLocaleTimeString()}` : '';
+    message.textContent = snapshot.generated_at ? `Read ${new Date(snapshot.generated_at).toLocaleTimeString()}` : '';
   }
 
   async function open() {

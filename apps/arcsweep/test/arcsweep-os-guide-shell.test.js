@@ -50,6 +50,7 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
     'security.risk-families',
     'security.sources',
     'sidecars.status',
+    'time-room.doorways',
     'time-room.snapshot',
     'time-room.status',
     'time-room.universes',

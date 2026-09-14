@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.time-room-doorway-set/v1",
+  "title": "ArcSweep Time Room Doorway Set",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "universe_id",
+    "generated_at",
+    "readiness",
+    "selection_policy",
+    "autonomous_entry",
+    "doorways"
+  ],
+  "properties": {
+    "schema": { "const": "arcsweep.time-room-doorway-set/v1" },
+    "universe_id": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "generated_at": { "type": ["string", "null"] },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "pressure", "held"],
+      "properties": {
+        "state": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "pressure": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "held": { "type": "boolean" }
+      }
+    },
+    "selection_policy": { "const": "human-confirmed-only" },
+    "autonomous_entry": { "const": false },
+    "doorways": {
+      "type": "array",
+      "items": { "$ref": "arcsweep.time-room-doorway/v1" },
+      "maxItems": 12
+    }
+  }
+}
