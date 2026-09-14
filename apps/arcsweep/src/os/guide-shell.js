@@ -3,6 +3,10 @@ function clone(value) {
   return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
 }
 
+function guideUniverseOnly(input = {}) {
+  return input?.universe_id == null ? {} : { universe_id: input.universe_id };
+}
+
 const GUIDE_CAPABILITIES = Object.freeze({
   'os.boot': Object.freeze({ authority: 'read' }),
   'os.context': Object.freeze({ authority: 'read' }),
@@ -27,7 +31,7 @@ const GUIDE_CAPABILITIES = Object.freeze({
   'witness.recent': Object.freeze({ authority: 'read' }),
   'time-room.status': Object.freeze({ authority: 'read' }),
   'time-room.universes': Object.freeze({ authority: 'read' }),
-  'time-room.snapshot': Object.freeze({ authority: 'read' }),
+  'time-room.snapshot': Object.freeze({ authority: 'read', sanitizeInput: guideUniverseOnly }),
 });
 
 export function createGuideShell({ invoke, actorId = 'guide:arcsweep' } = {}) {
@@ -52,7 +56,9 @@ export function createGuideShell({ invoke, actorId = 'guide:arcsweep' } = {}) {
     delete safeContext.steward_approval_id;
     delete safeContext.approval_receipt;
 
-    return invoke(capabilityId, clone(input), {
+    const safeInput = descriptor.sanitizeInput ? descriptor.sanitizeInput(clone(input) || {}) : clone(input);
+
+    return invoke(capabilityId, safeInput, {
       ...safeContext,
       actor_id: actorId,
       source: 'guide-shell',
