@@ -61,5 +61,7 @@ export const CONTINUITY_RESILIENCE_POLICY = Object.freeze({
 });
 
 export function continuityResiliencePolicy() {
-  return structuredClone?.(CONTINUITY_RESILIENCE_POLICY) || JSON.parse(JSON.stringify(CONTINUITY_RESILIENCE_POLICY));
+  return globalThis.structuredClone
+    ? globalThis.structuredClone(CONTINUITY_RESILIENCE_POLICY)
+    : JSON.parse(JSON.stringify(CONTINUITY_RESILIENCE_POLICY));
 }
