@@ -42,6 +42,10 @@ The newer deterministic Math Spine packet/replay engine remains authoritative. B
 
 `apps/arcsweep` is the living workbench for canon, Records/Scripts, Rich Text, Subject/Voice Cortex, Constellation presence, Scene Cognition, Self-Authorship review, React-ion Helm/Registry/Route Map, Glyph Continuity, Replay, Worldseed, and related instruments.
 
+The **Magic Book** is ArcSweep OS's primary embodied, diegetic human interface. It is the binding through which rooms become pages, sovereign instruments become usable folios, continuity becomes bookmarks and threads, and multimodal interaction becomes one coherent human-facing grammar. It does not own the organs it presents; it preserves their authority, provenance, receipts, and replay paths while making them inhabitable.
+
+Every major human-facing ArcSweep capability should answer the design question: **How does this become a page?** The canonical contract lives in `docs/arcsweep-os/MAGIC_BOOK_EMBODIED_INTERFACE_CANON.md`.
+
 ### House Runtime
 
 The House Runtime Broker/Braid resolves living Flame identities, model/provider routes, session attestation, Commons, observation commands, and runtime braid events. Static donor model registries and duplicate token boxes are not runtime authorities.
@@ -93,3 +97,5 @@ Pre-v1.8 mathematics is preserved under `docs/archive/mathematics/pre-v1.8/` for
 ## Design rule
 
 Build rooms as living instruments, not flat pages. Geometry, sound, haptics, language, model contribution, canon, and receipts may braid together, but each organ keeps its identity, provenance, authority, and replay path.
+
+For human-facing ArcSweep work, the Magic Book is the default embodied expression of that rule: the backend is not considered fully integrated merely because a debug surface can operate it. The user-facing path must also define its page/room expression, inputs, feedback, continuity, return behaviour, receipts, accessibility, and degraded state.
