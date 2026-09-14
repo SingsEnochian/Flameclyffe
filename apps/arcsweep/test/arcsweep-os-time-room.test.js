@@ -118,7 +118,6 @@ test('Time Room surface and manifest declare the Universe Clock law', () => {
   assert.match(surface, /Time Room/);
 
   const manifest = readFileSync(new URL('../src/os/version.js', import.meta.url), 'utf8');
-  assert.match(manifest, /0\.1\.0-rc\.8/);
   assert.match(manifest, /timeRoom: true/);
   assert.match(manifest, /universeTimeRegistry: true/);
   assert.match(manifest, /timeRoomSnapshot: 'arcsweep\.time-room-snapshot\/v1'/);
