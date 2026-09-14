@@ -4,7 +4,7 @@ export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
   schema: ARCSWEEP_OS_SCHEMA,
   version: ARCSWEEP_OS_VERSION,
-  stage: 'runnable-release-candidate-ontological-kernel',
+  stage: 'runnable-release-candidate-ontological-somatic-kernel',
   authority: Object.freeze({
     modelRuntime: 'house-runtime+cognitive-edge',
     browserState: 'hearthfire',
@@ -63,6 +63,10 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     ontologyObserverSync: true,
     ontologyTransformationReceipts: true,
     ontologyReview: 'steward-scored-five-axis-loss-review',
+    somaticCartography: true,
+    somaticNavigationMode: 'deterministic-course-with-receipts',
+    somaticRuntimeWired: true,
+    embodiedGlyphArrivalEvidence: 'real-stroke-observation',
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
@@ -100,6 +104,11 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     runaStatus: 'arcsweep.runa-status/v1',
     deviceStatus: 'arcsweep.device-status/v1',
     deviceInputProof: 'arcsweep.device-input-proof/v1',
+    somaticState: 'arcsweep.somatic-state/v1',
+    somaticTarget: 'arcsweep.somatic-target/v1',
+    somaticProfile: 'arcsweep.somatic-profile/v1',
+    somaticCourse: 'arcsweep.somatic-course/v1',
+    somaticReceipt: 'arcsweep.somatic-receipt/v1',
     cybersecurityIntelligence: 'arcsweep.cybersecurity-intelligence/v1',
     cybersecuritySeed: 'arcsweep.cybersecurity-seed/v1',
   }),

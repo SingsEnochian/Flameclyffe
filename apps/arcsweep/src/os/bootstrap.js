@@ -27,6 +27,7 @@ import { registerObserverService } from './observer-service.js';
 import { registerCybersecurityIntelligenceService } from './cybersecurity-service.js';
 import { registerGlyphForgeService } from './glyphforge-service.js';
 import { registerRunaService } from './runa-service.js';
+import { registerSomaticCartographyService } from './somatic-cartography-service.js';
 import { registerDeviceProvingService } from './device-proving.js';
 import { ARCSWEEP_OS_MANIFEST } from './version.js';
 
@@ -243,8 +244,9 @@ function installArcSweepOS({ navigation = createRoomNavigation(), workspace = ty
   registerSidecarService(capabilityRegistry);
   registerObserverService(capabilityRegistry, { bus });
   registerCybersecurityIntelligenceService(capabilityRegistry);
-  registerGlyphForgeService(capabilityRegistry);
-  registerRunaService(capabilityRegistry, { bus });
+  const glyphForgeService = registerGlyphForgeService(capabilityRegistry, { bus });
+  const runaService = registerRunaService(capabilityRegistry, { bus });
+  const somaticCartography = registerSomaticCartographyService(capabilityRegistry, { bus });
   registerDeviceProvingService(capabilityRegistry);
 
   capabilityRegistry.registerService({
@@ -410,6 +412,9 @@ function installArcSweepOS({ navigation = createRoomNavigation(), workspace = ty
     health: healthRegistry,
     persistence: contextPersistence,
     workspace: workspaceContext,
+    glyphforge: glyphForgeService,
+    runa: runaService,
+    somaticCartography,
     session: () => clone(session),
     capsules: () => capsules.map(clone),
     lastNavigationReceipt: () => lastNavigationReceipt ? clone(lastNavigationReceipt) : null,
@@ -426,6 +431,7 @@ function installArcSweepOS({ navigation = createRoomNavigation(), workspace = ty
   healthRegistry.set({ service_id: 'steward-gate', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: false });
   healthRegistry.set({ service_id: 'arcsweep-guide', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel', 'house-runtime'], recoverable: true });
   healthRegistry.set({ service_id: 'runa-sensory', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: true });
+  healthRegistry.set({ service_id: 'somatic-cartography', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel', 'runa-sensory', 'glyphforge'], recoverable: true });
   healthRegistry.set({ service_id: 'device-proving', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: true });
 
   if (typeof document !== 'undefined') {
