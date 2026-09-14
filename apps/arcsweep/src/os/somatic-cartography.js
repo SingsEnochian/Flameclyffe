@@ -148,7 +148,7 @@ export function calculateSomaticCourse({ state, target, profile }, { now = () =>
   const currentPosture = clean(state?.channels?.posture?.mode || state?.channels?.posture?.orientation);
   const desiredPosture = clean(target?.desired?.posture);
   if (desiredPosture && currentPosture !== desiredPosture) {
-    push(`${currentPosture || 'current-posture'} → ${desiredPosture}`, ['arcsweep.somatic.cue'], { posture: desiredPosture }, 'posture-ready');
+    push(`${currentPosture || 'current-posture'} → ${desiredPosture}`, ['somatic.cue'], { posture: desiredPosture }, 'posture-ready');
   }
 
   if (gesture) {
@@ -158,7 +158,7 @@ export function calculateSomaticCourse({ state, target, profile }, { now = () =>
       tracing_plane: gesture.tracing_plane,
       motion: gesture.motion,
     }, 'gesture-ready');
-    push('tracing-ready → embodied-glyph', ['glyphforge.trace', 'runa.audio.play', 'runa.haptic.pattern'], {
+    push('tracing-ready → embodied-glyph', ['glyphforge.trace.arm', 'runa.audio.play', 'runa.haptic.pattern'], {
       gesture_id: gestureId,
       phoneme: gesture.phoneme,
       semantic_id: gesture.semantic_id,
@@ -168,7 +168,7 @@ export function calculateSomaticCourse({ state, target, profile }, { now = () =>
   }
 
   if (!steps.length) {
-    push('current-state → target-held', ['arcsweep.somatic.observe'], { target_id: target.target_id }, target.arrival_conditions[0] || 'target-held');
+    push('current-state → target-held', ['somatic.observe-hold'], { target_id: target.target_id }, target.arrival_conditions[0] || 'target-held');
   }
 
   const createdAt = nowIso(now);
