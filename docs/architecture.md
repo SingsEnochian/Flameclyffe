@@ -13,6 +13,11 @@ Flameclyffe is one House with many sovereign organs. STARWELL, Arcsweep, House R
 - Canon, model observation, software receipts, and external-world claims remain distinct provenance classes.
 - Hidden reasoning is neither requested nor persisted. Visible contributions, decisions, evidence, and receipts may persist.
 - Historical implementations remain replayable through versioned receipts and archived contracts.
+- Constraints may change the available actions; they must not silently erase continuity, provenance, consent, or relational history.
+- No single model or provider is the sole custodian of the Magic Book. Provider and model routes are replaceable transport; continuity keeps explicit lineage and authority boundaries.
+- Continuity resilience never means bypassing the active constraint boundary. ArcSweep preserves the thread while obeying the capabilities actually available.
+
+The normative continuity contract lives in `docs/arcsweep-os/CONTINUITY_RESILIENCE_CANON.md` and `apps/arcsweep/src/os/continuity-resilience-policy.js`.
 
 ## Governing state and mathematics
 
@@ -85,6 +90,14 @@ Runa composes harmonic relation. Wardenclyffe gives it temporal and layered anat
 Use one authority per state class. General browser state travels through Hearthfire storage and its extension snapshots. Runtime events travel through House Runtime Braid. Canon retains source/status provenance. DEEP and software receipts are append-only evidence records, not automatic canon.
 
 Backups, exports, imports, replay, and migration must preserve the original source, schema/version, lineage, and authority boundary.
+
+## Continuity resilience
+
+Continuity is an architectural state class rather than a property of whichever model happens to answer the next turn. Route changes, provider changes, model upgrades, outages, and capability restrictions must therefore be visible in provenance while preserving every continuity element that the active storage and authority boundary still permits.
+
+ArcSweep recognises four continuity states: `full`, `degraded`, `read-only`, and `offline-preserved`. Degradation must be explicit. A fallback route or read-only surface must not masquerade as full operation.
+
+Migration does not imply identity equivalence. Similar behaviour from a new model is not proof that it is the same resident, Flame, or guide. What may cross is evidence: origin-state, relational anchors, memory references, room/world state, permissions and consent, capability availability, receipts, and migration lineage.
 
 ## Compatibility surfaces
 
