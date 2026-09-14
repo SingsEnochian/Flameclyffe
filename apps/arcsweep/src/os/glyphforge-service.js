@@ -31,8 +31,32 @@ function projectSummary(snapshot) {
   };
 }
 
-export function registerGlyphForgeService(registry) {
+function createTraceId() {
+  const uuid = globalThis.crypto?.randomUUID?.();
+  return `glyph-trace:${uuid || `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`}`;
+}
+
+function defaultDispatchGestureCue(detail) {
+  if (typeof globalThis.dispatchEvent !== 'function' || typeof globalThis.CustomEvent !== 'function') return false;
+  return globalThis.dispatchEvent(new globalThis.CustomEvent('arcsweep:glyph-gesture-cue', { detail }));
+}
+
+export function registerGlyphForgeService(registry, {
+  bus = null,
+  eventTarget = globalThis,
+  dispatchGestureCue = defaultDispatchGestureCue,
+  now = () => new Date(),
+} = {}) {
   if (!registry?.registerService || !registry?.registerCapability) throw new Error('Glyph Forge service requires the ArcSweep capability registry.');
+
+  const armedTraces = new Map();
+
+  if (bus?.define && bus?.eventNames) {
+    const known = new Set(bus.eventNames());
+    if (!known.has('arcsweep:glyph-stroke-observed')) {
+      bus.define('arcsweep:glyph-stroke-observed', (payload) => Boolean(payload?.trace_id && payload?.stroke));
+    }
+  }
 
   registry.registerService({
     service_id: 'glyphforge',
@@ -41,12 +65,14 @@ export function registerGlyphForgeService(registry) {
       read_project_state: true,
       select_existing_brush: true,
       patch_existing_brush_setting: 'steward-approved-mutate',
+      somatic_gesture_cue: true,
+      somatic_trace_arm: true,
       synthetic_drawing: false,
       arbitrary_file_access: false,
       source_mutation: false,
     },
     consumes: ['starwell:glyph-studio-bridge-ready', 'starwell:glyph-stroke-committed'],
-    emits: [],
+    emits: ['arcsweep:glyph-stroke-observed'],
   });
 
   registry.registerCapability({
@@ -61,6 +87,7 @@ export function registerGlyphForgeService(registry) {
         mounted: Boolean(live),
         bridge_schema: live?.schema || null,
         surface: live?.surface || null,
+        armed_somatic_traces: armedTraces.size,
       };
     },
   });
@@ -100,6 +127,48 @@ export function registerGlyphForgeService(registry) {
   });
 
   registry.registerCapability({
+    capability_id: 'glyphforge.gesture.cue',
+    service_id: 'glyphforge',
+    description: 'Present one somatic gesture cue without drawing or mutating glyph data.',
+    authority: 'operate',
+    input_schema: { required: ['gesture_id'] },
+    validate: (input) => Boolean(String(input?.gesture_id || '').trim()),
+    execute: (input) => {
+      const cue = clone({
+        gesture_id: String(input.gesture_id).trim(),
+        hand: input.hand || null,
+        tracing_plane: input.tracing_plane || null,
+        motion: input.motion || null,
+        course_id: input.course_id || null,
+        step: input.step || null,
+      });
+      const dispatched = dispatchGestureCue(cue) !== false;
+      return { applied: dispatched, supported: dispatched, cue, synthetic_drawing: false };
+    },
+  });
+
+  registry.registerCapability({
+    capability_id: 'glyphforge.trace.arm',
+    service_id: 'glyphforge',
+    description: 'Arm an embodied trace and wait for a real STARWELL stroke event. This capability never synthesizes drawing input.',
+    authority: 'operate',
+    input_schema: { required: ['gesture_id'] },
+    validate: (input) => Boolean(String(input?.gesture_id || '').trim()),
+    execute: (input) => {
+      const traceId = createTraceId();
+      armedTraces.set(traceId, Object.freeze(clone({
+        trace_id: traceId,
+        gesture_id: String(input.gesture_id).trim(),
+        semantic_id: input.semantic_id || null,
+        course_id: input.course_id || null,
+        step: input.step || null,
+        armed_at: now().toISOString(),
+      })));
+      return { applied: true, supported: true, trace_id: traceId, waiting_for: 'starwell:glyph-stroke-committed', synthetic_drawing: false };
+    },
+  });
+
+  registry.registerCapability({
     capability_id: 'glyphforge.patch-brush-setting',
     service_id: 'glyphforge',
     description: 'Change one existing setting on one existing Glyph Studio brush. Model-originated use requires the Steward mutation gate.',
@@ -120,6 +189,26 @@ export function registerGlyphForgeService(registry) {
     }),
   });
 
+  const onStroke = (event) => {
+    const first = armedTraces.entries().next();
+    if (first.done) return;
+    const [traceId, armed] = first.value;
+    armedTraces.delete(traceId);
+    const stroke = clone(event?.detail || {});
+    bus?.publish?.('arcsweep:glyph-stroke-observed', {
+      schema: 'arcsweep.glyph-stroke-observation/v1',
+      trace_id: traceId,
+      gesture_id: armed.gesture_id,
+      semantic_id: armed.semantic_id,
+      course_id: armed.course_id,
+      step: armed.step,
+      stroke,
+      observed_at: now().toISOString(),
+    }, { source: 'starwell:glyph-stroke-committed' });
+  };
+
+  eventTarget?.addEventListener?.('starwell:glyph-stroke-committed', onStroke);
+
   return Object.freeze({
     service_id: 'glyphforge',
     capabilities: [
@@ -127,7 +216,11 @@ export function registerGlyphForgeService(registry) {
       'glyphforge.project-summary',
       'glyphforge.active-brush',
       'glyphforge.select-brush',
+      'glyphforge.gesture.cue',
+      'glyphforge.trace.arm',
       'glyphforge.patch-brush-setting',
     ],
+    armedTraces: () => [...armedTraces.values()].map(clone),
+    destroy: () => eventTarget?.removeEventListener?.('starwell:glyph-stroke-committed', onStroke),
   });
 }
