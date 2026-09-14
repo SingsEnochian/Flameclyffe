@@ -58,6 +58,8 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     guideTemporalAccess: 'summary-and-headers-only',
     somaticCartography: true,
     somaticNavigationMode: 'deterministic-course-with-receipts',
+    somaticRuntimeWired: true,
+    embodiedGlyphArrivalEvidence: 'real-stroke-observation',
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
