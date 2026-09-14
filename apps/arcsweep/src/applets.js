@@ -6,6 +6,7 @@ import { contextualOrganLaunchHref, organLaunchHref } from './organ-launch-route
 const CORE_APPLETS = [
   { id: 'portal', label: 'Portal', glyph: '◉', category: 'core', defaultVisible: true },
   { id: 'worlds', label: 'World Registry', glyph: '✧', category: 'core', defaultVisible: true },
+  { id: 'canonical-spine', label: 'Canonical Spine', glyph: '⌘', category: 'core', defaultVisible: true, pagesHref: '/Flameclyffe/apps/arcsweep/spine/', webHref: '/apps/arcsweep/spine/' },
   { id: 'about-world', label: 'About this World', glyph: 'ⓘ', category: 'core', defaultVisible: true },
   { id: 'summon', label: 'Summon', glyph: '⌁', category: 'interface', defaultVisible: true },
   { id: 'veil-mode', label: 'Veil Mode', glyph: '◌', category: 'interface', defaultVisible: true },
