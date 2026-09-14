@@ -135,9 +135,11 @@ test('Somatic Cartography is build-visible, has a distinct receipt schema, and r
   assert.ok(cartographyIndex > somaticIndex);
   assert.match(sidecar, /import\.meta\.glob\([\s\S]*\.\/somatic-cartography-sidecar\.js/);
 
+  const kernel = readFileSync(new URL('../src/os/somatic-cartography.js', import.meta.url), 'utf8');
+  assert.match(kernel, /arcsweep\.somatic-cartography-receipt\/v1/);
+  assert.doesNotMatch(kernel, /arcsweep\.somatic-receipt\/v1/);
+
   const service = readFileSync(new URL('../src/os/somatic-cartography-service.js', import.meta.url), 'utf8');
-  assert.match(service, /arcsweep\.somatic-cartography-receipt\/v1/);
-  assert.doesNotMatch(service, /arcsweep\.somatic-receipt\/v1/);
   assert.match(service, /observation_only_conditions_remain_pending: true/);
   assert.match(service, /cue_presentation_surface_required: true/);
 
