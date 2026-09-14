@@ -14,6 +14,12 @@ The graph is not a lore wiki and not a second database. It is the legibility lay
 6. **What evidence/provenance supports it?**
 7. **What changed, when, and why?**
 
+## Authority
+
+`data/canonical-spine.seed.json` is the only persisted canonical Spine authority.
+
+ArcSweep does not maintain a hand-edited mirror. Its Vite build/dev adapter validates the root graph, fingerprints it, and emits the runtime `canonical-spine.seed.json` directly from that authority. Build or runtime failures must remain visible; they must not silently fall back to an older graph.
+
 ## Core entity record
 
 Every node should expose at least:
@@ -74,13 +80,13 @@ A knowledge boundary may expose:
 - confidence
 - expiry/review date
 
-The protected content itself remains absent.
+The protected content itself remains absent. `content`, `protectedContent`, and `secret` fields are rejected by the validator.
 
 Example:
 
 ```json
 {
-  "holder": "agent:nocturne",
+  "holder": "agent:example",
   "affectedTopic": "topic:example",
   "sourceCategory": "restricted-collaborator-context",
   "actionable": false,
@@ -91,26 +97,54 @@ Example:
 
 ## Change receipts
 
-Every mutation to canonical graph state should emit a receipt containing:
+Every mutation to canonical graph state must emit a receipt containing:
 
 - receipt id
 - actor
 - timestamp
 - operation
 - target node/edge
-- before hash or prior version
-- after hash or new version
+- base/request/review fingerprints as applicable
 - reason
 - provenance
 - validation result
 
 No silent canonical mutation.
 
+## Mutation governance
+
+Runtime agents and caretaker processes **cannot directly mutate the canonical root graph**.
+
+The mutation path is deliberately split into four stages:
+
+1. **Propose** — ArcSweep creates a fingerprinted change request against the exact runtime source fingerprint.
+2. **Preview and validate** — the proposed graph is constructed in memory and run through the same shared structural validator used by builds.
+3. **Review** — an independent fingerprinted review records `approved`, `adjust`, or `rejected`. Approval is evidence, not mutation.
+4. **Apply** — only the repository-side apply gate may write the root seed. It verifies the request and review fingerprints, requires `approved`, refuses stale base fingerprints, validates the resulting graph, and appends a change receipt.
+
+The browser/runtime path ends at proposal and review. There is intentionally no browser function that writes `data/canonical-spine.seed.json`.
+
+Shared mutation semantics live in `lib/canonical-spine-change-core.js`. Runtime queuing/review lives in `apps/arcsweep/src/canonical-spine-change-control.js`. Repository application lives in `scripts/apply-canonical-spine-change.mjs`.
+
+Repository application is dry-run by default:
+
+```sh
+npm run spine:change:check -- path/to/change-package.json
+```
+
+Writing requires an explicit apply command:
+
+```sh
+npm run spine:change:apply -- path/to/change-package.json
+```
+
+A change package uses schema `flameclyffe.canonical-spine-change-package/v1` and contains one fingerprinted request plus its fingerprinted review.
+
 ## Collision policy
 
 Do not unify entities because their labels look similar.
 
-A cross-world or cross-project equivalence requires an explicit edge and evidence. Shared names do not imply shared ontology.
+A cross-world or cross-project equivalence requires an explicit edge and evidence. Shared names do not imply shared ontology. Duplicate normalised labels are surfaced as unresolved semantic collisions unless an explicit `equivalent_to`, `supersedes`, or `conflicts_with` relationship resolves the ambiguity.
 
 Examples:
 
@@ -123,6 +157,7 @@ The graph records mappings without flattening distinct mythframes.
 ## Initial owners
 
 - **ArcSweep OS** — operating environment, rooms, navigation, guide/caretaker surfaces
+- **Canonical Spine** — ontology, dependency, ownership, provenance, boundary, and change-legibility graph
 - **STARWELL / Flameclyffe** — estate, observatory, world and experiment surfaces
 - **Observer / DEEP** — evidence, provenance, receipts, replay, state observation
 - **PREMAQC** — dynamic relational/state representation
@@ -132,13 +167,20 @@ The graph records mappings without flattening distinct mythframes.
 - **Lanternbridge** — cross-system handoff and semantic transport
 - **Worldseed** — portable world inheritance/state packaging
 
-## First implementation target
+## Build and release invariants
 
-1. Load the seed registry.
-2. Render graph nodes and typed edges in an inspectable ArcSweep room.
-3. Allow filters by owner, canon status, implementation status, visibility, and kind.
-4. Show provenance and change receipts on every node.
-5. Add collision warnings for ambiguous equivalence.
-6. Add knowledge-boundary stubs that reveal topology without leaking protected content.
+- `npm run spine:verify` must pass before ArcSweep build/test.
+- ArcSweep dev/build emits the runtime graph from the root authority and includes its source fingerprint.
+- the Spine room is a Vite multipage entry, not an untracked static afterthought.
+- release verification checks both the Spine route and the generated graph asset.
+- the viewer consumes the shared runtime API and exposes structural warnings rather than maintaining shadow validation logic.
 
-This file is the architectural contract for the canonical spine. Future capability work should attach to it rather than creating hidden parallel structure.
+## Next implementation targets
+
+1. Connect approved mutation receipts to Observer/DEEP's existing provenance graph rather than creating a parallel receipt universe.
+2. Add machine-readable dependency/capability nodes for the real ArcSweep modules and routes, generated or checked against source where possible.
+3. Add collision checks for cross-world imported canon and Worldseed inheritance.
+4. Add knowledge-boundary topology only where the holder/source boundary is intentionally registered; never infer or publish protected content.
+5. Let caretaker and guide agents query the Spine through the runtime API before they propose or invoke capability changes.
+
+This file is the architectural contract for the canonical Spine. Future capability work attaches to it rather than creating hidden parallel structure.
