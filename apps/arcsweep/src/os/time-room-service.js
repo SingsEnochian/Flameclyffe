@@ -373,6 +373,45 @@ function systemClocks({ now, context, bodyState, storyState, witness }) {
   ];
 }
 
+function redactedSummary(state = {}, keys = []) {
+  return Object.freeze({
+    available: state.available === false ? false : state.available === true ? true : undefined,
+    provided: Object.fromEntries(keys.map((key) => [key, Boolean(state[key])])),
+    private_detail_redacted: true,
+  });
+}
+
+function redactClockForCapability(item = {}) {
+  const next = clone(item);
+  if (next.body_state) {
+    next.body_state_summary = redactedSummary(next.body_state, ['energy', 'attention', 'pain', 'sleep', 'gesture', 'note']);
+    delete next.body_state;
+  }
+  if (next.story_state) {
+    next.story_state_summary = redactedSummary(next.story_state, ['active_thread', 'scene_state', 'blocked_by', 'ripe_signal', 'note']);
+    delete next.story_state;
+  }
+  return next;
+}
+
+function redactReadinessForCapability(readinessRecord = {}) {
+  const next = clone(readinessRecord);
+  if (next.reason && /Story-time (is blocked by|reports a ripe signal:)/.test(next.reason)) {
+    next.reason = 'Human-supplied story-time affected this reading; private detail stays local to the trusted entry surface.';
+    next.private_detail_redacted = true;
+  }
+  return next;
+}
+
+function redactSnapshotForCapability(snapshot = {}) {
+  return freeze({
+    ...clone(snapshot),
+    readiness: redactReadinessForCapability(snapshot.readiness),
+    clocks: (snapshot.clocks || []).map(redactClockForCapability),
+    private_time_inputs: 'redacted-from-capability-receipts',
+  });
+}
+
 export async function createTimeRoomSnapshot({
   universe_id = null,
   body_state = null,
@@ -456,6 +495,7 @@ export function registerTimeRoomService(registry, {
       autonomous_entry: false,
       body_state_interpretation: 'human-supplied-summary-only',
       witness_full_text_access: false,
+      capability_receipt_private_time_inputs: 'redacted',
     },
     consumes: ['os.context', 'witness.summary'],
     emits: ['arcsweep:time-room-observed'],
@@ -488,21 +528,22 @@ export function registerTimeRoomService(registry, {
   registry.registerCapability({
     capability_id: 'time-room.snapshot',
     service_id: 'time-room',
-    description: 'Read the active universe state-time snapshot: body, story, system, witness, and world clocks.',
+    description: 'Read the active universe state-time snapshot with private body and story details redacted from capability receipts.',
     authority: 'read',
     input_schema: { optional: ['universe_id', 'body_state', 'story_state'] },
     validate: (input = {}) => input?.universe_id == null || Boolean(normaliseId(input.universe_id)),
     execute: async (input = {}) => {
       const snapshot = await createTimeRoomSnapshot(input, { now, contextProvider, witnessProvider });
+      const redacted = redactSnapshotForCapability(snapshot);
       bus?.publish?.('arcsweep:time-room-observed', {
         schema: TIME_ROOM_EVENT_SCHEMA,
-        universe_id: snapshot.universe_id,
-        generated_at: snapshot.generated_at,
-        readiness: snapshot.readiness.state,
-        temporal_weather: snapshot.temporal_weather,
-        clock_count: snapshot.clocks.length,
+        universe_id: redacted.universe_id,
+        generated_at: redacted.generated_at,
+        readiness: redacted.readiness.state,
+        temporal_weather: redacted.temporal_weather,
+        clock_count: redacted.clocks.length,
       }, { source: 'time-room' });
-      return snapshot;
+      return redacted;
     },
   });
 
