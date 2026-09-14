@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Canonical Spine · ArcSweep</title>
+<style>
+:root{--bg:#0b0f0e;--panel:#141c19;--panel2:#101613;--line:#3f514a;--text:#f0eadb;--muted:#aab8b2;--gold:#d8b56a;--green:#8ebca6;--warn:#e6bf74}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#8ebca615,transparent 28%),linear-gradient(#0b0f0e,#080b0a);color:var(--text);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:#e7ca8c}.shell{width:min(1320px,94vw);margin:auto;padding:1rem 0 4rem}.top{position:sticky;top:0;z-index:20;background:#0b0f0ef2;border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}.topin{width:min(1320px,94vw);margin:auto;padding:.8rem 0;display:flex;justify-content:space-between;align-items:center;gap:1rem}.brand b{color:#f3d48e}.tiny,.muted{color:var(--muted);font-size:.88rem}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:.55rem .85rem;border:1px solid var(--line);border-radius:999px;background:#151d1a;color:var(--text);text-decoration:none;font-weight:700}.hero,.panel{border:1px solid var(--line);background:linear-gradient(180deg,#17211de8,#101613ee);border-radius:22px;box-shadow:0 18px 70px #0006}.hero{margin:1rem 0;padding:1.2rem 1.3rem;display:grid;grid-template-columns:1.1fr .9fr;gap:1rem}.hero h1{font-size:clamp(2.2rem,6vw,4.8rem);line-height:.92;margin:.2rem 0;color:#f5e4b7}.rule{border-left:3px solid var(--gold);padding:.8rem 1rem;background:#d8b56a12;border-radius:0 14px 14px 0}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;margin:1rem 0}.stat{padding:.9rem;border:1px solid var(--line);border-radius:16px;background:#101713}.stat strong{display:block;font-size:1.65rem;color:#f3d48e}.panel{padding:1rem;margin:1rem 0}.filters{display:grid;grid-template-columns:2fr repeat(5,1fr);gap:.65rem}.filters input,.filters select{width:100%;min-height:42px;border:1px solid var(--line);border-radius:12px;background:#0b100e;color:var(--text);padding:.55rem .65rem}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:.8rem}.sectionHead h2{margin:0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:.8rem}.card{border:1px solid var(--line);border-radius:18px;background:#0e1512;padding:1rem}.card h3{margin:.15rem 0 .4rem}.badges{display:flex;flex-wrap:wrap;gap:.35rem;margin:.55rem 0}.badge{font-size:.75rem;border:1px solid #53665e;border-radius:999px;padding:.18rem .5rem;color:#cddad4;background:#16201c}.badge.canon{border-color:#d8b56a80;color:#efd49a}.badge.planned{border-color:#806b4d}.meta{font-size:.84rem;color:var(--muted);overflow-wrap:anywhere}.edges{display:grid;gap:.65rem}.edge{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:.7rem;align-items:center;padding:.8rem;border:1px solid var(--line);border-radius:14px;background:#0e1512}.edge .arrow{text-align:center;color:var(--gold);font-weight:800}.edge small{display:block;color:var(--muted)}.empty{padding:1rem;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}.boundary{border-left:3px solid var(--warn)}code{color:#f3d48e;overflow-wrap:anywhere}@media(max-width:900px){.hero{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.edge{grid-template-columns:1fr}.edge .arrow{text-align:left}}@media(max-width:560px){.filters,.stats{grid-template-columns:1fr}.topin{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin"><div class="brand"><b>⌘ Canonical Spine</b><div class="tiny">ArcSweep · legibility surface</div></div><a class="btn" href="../?open=1">← Return to ArcSweep</a></div></header>
+<main class="shell">
+<section class="hero"><div><div class="tiny">CANONICAL TOPOLOGY · READ-ONLY VIEW</div><h1>The Spine</h1><p>What exists, who owns it, what it means, what it depends on, and where the boundaries actually are.</p></div><div class="rule"><b>Architectural rule</b><div id="rule">Legibility before capability.</div><p class="tiny">Root authority: <code>data/canonical-spine.seed.json</code><br>This room reads an app-local mirror and never edits canon directly.</p></div></section>
+<div class="stats"><div class="stat"><strong id="nodeCount">–</strong><span>nodes</span></div><div class="stat"><strong id="edgeCount">–</strong><span>relationships</span></div><div class="stat"><strong id="boundaryCount">–</strong><span>knowledge boundaries</span></div><div class="stat"><strong id="receiptCount">–</strong><span>receipts</span></div></div>
+<section class="panel"><div class="sectionHead"><div><h2>Filter the House</h2><div class="tiny">The graph should answer questions before adding more machinery.</div></div><button id="clearFilters" class="btn" type="button">Clear</button></div><div class="filters"><input id="query" type="search" placeholder="Search names, tags, summaries…"><select id="kind"><option value="">All kinds</option></select><select id="owner"><option value="">All owners</option></select><select id="canon"><option value="">All canon states</option></select><select id="implementation"><option value="">All implementation states</option></select><select id="visibility"><option value="">All visibility states</option></select></div></section>
+<section class="panel"><div class="sectionHead"><div><h2>Entities</h2><div id="visibleCount" class="tiny"></div></div></div><div id="nodes" class="cards"></div></section>
+<section class="panel"><div class="sectionHead"><div><h2>Relationships</h2><div class="tiny">Only relationships whose endpoints survive the current filters are shown.</div></div></div><div id="edges" class="edges"></div></section>
+<section class="panel boundary"><div class="sectionHead"><div><h2>Knowledge Boundaries</h2><div class="tiny">Protected content may remain hidden. The existence, scope, and consequence of the boundary should not.</div></div></div><div id="boundaries"></div></section>
+<section class="panel"><div class="sectionHead"><div><h2>Change Receipts</h2><div class="tiny">Later passes will connect this directly to Observer/DEEP.</div></div></div><div id="receipts"></div></section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (v='') => String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+let graph = null;
+const filters = ['query','kind','owner','canon','implementation','visibility'];
+
+function uniq(values){return [...new Set(values.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b)))}
+function fillSelect(id, values){const el=$(id); for(const value of uniq(values)){const o=document.createElement('option');o.value=value;o.textContent=value;el.append(o)}}
+function nodeById(id){return graph?.nodes?.find(n=>n.id===id)}
+function selectedNodes(){
+  const q=$('query').value.trim().toLowerCase();
+  return (graph.nodes||[]).filter(n=>{
+    const hay=[n.id,n.name,n.kind,n.owner,n.summary,...(n.tags||[]),...(n.sourceRefs||[])].join(' ').toLowerCase();
+    return (!q||hay.includes(q))&&(!$('kind').value||n.kind===$('kind').value)&&(!$('owner').value||n.owner===$('owner').value)&&(!$('canon').value||n.canonStatus===$('canon').value)&&(!$('implementation').value||n.implementationStatus===$('implementation').value)&&(!$('visibility').value||n.visibility===$('visibility').value);
+  });
+}
+function render(){
+  if(!graph)return;
+  const nodes=selectedNodes(), ids=new Set(nodes.map(n=>n.id));
+  $('visibleCount').textContent=`Showing ${nodes.length} of ${graph.nodes.length} entities`;
+  $('nodes').innerHTML=nodes.length?nodes.map(n=>`<article class="card"><div class="tiny">${esc(n.id)}</div><h3>${esc(n.name)}</h3><p>${esc(n.summary)}</p><div class="badges"><span class="badge">${esc(n.kind)}</span><span class="badge canon">${esc(n.canonStatus)}</span><span class="badge ${n.implementationStatus==='planned'?'planned':''}">${esc(n.implementationStatus)}</span><span class="badge">${esc(n.visibility)}</span></div><div class="meta"><b>Owner:</b> ${esc(n.owner)}<br><b>Tags:</b> ${(n.tags||[]).map(esc).join(' · ')||'—'}<br><b>Sources:</b> ${(n.sourceRefs||[]).map(r=>`<code>${esc(r)}</code>`).join(', ')||'—'}</div></article>`).join(''):'<div class="empty">Nothing matches these filters.</div>';
+  const edges=(graph.edges||[]).filter(e=>ids.has(e.from)&&ids.has(e.to));
+  $('edges').innerHTML=edges.length?edges.map(e=>{const a=nodeById(e.from),b=nodeById(e.to);return `<div class="edge"><div><b>${esc(a?.name||e.from)}</b><small>${esc(e.from)}</small></div><div class="arrow">${esc(e.type)} →</div><div><b>${esc(b?.name||e.to)}</b><small>${esc(e.meaning)} · confidence ${esc(e.confidence||'—')}</small></div></div>`}).join(''):'<div class="empty">No relationships remain under the current filters.</div>';
+  const bs=graph.knowledgeBoundaries||[];
+  $('boundaries').innerHTML=bs.length?bs.map(b=>`<div class="card"><b>${esc(b.title||b.id||'Boundary')}</b><p>${esc(b.summary||b.meaning||'Restricted context boundary.')}</p></div>`).join(''):'<div class="empty">No knowledge-boundary records yet. The slot is live and waiting for explicit topology records.</div>';
+  const rs=graph.receipts||[];
+  $('receipts').innerHTML=rs.length?rs.map(r=>`<div class="card"><b>${esc(r.title||r.id||'Receipt')}</b><p>${esc(r.summary||r.change||'Recorded change.')}</p></div>`).join(''):'<div class="empty">No graph change receipts yet.</div>';
+}
+
+async function boot(){
+  try{
+    const response=await fetch('../public/canonical-spine.seed.json',{cache:'no-store'});
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    graph=await response.json();
+    $('rule').textContent=(graph.architecturalRule||'legibility before capability').replace(/^./,c=>c.toUpperCase())+'.';
+    $('nodeCount').textContent=graph.nodes?.length||0;$('edgeCount').textContent=graph.edges?.length||0;$('boundaryCount').textContent=graph.knowledgeBoundaries?.length||0;$('receiptCount').textContent=graph.receipts?.length||0;
+    fillSelect('kind',graph.nodes.map(n=>n.kind));fillSelect('owner',graph.nodes.map(n=>n.owner));fillSelect('canon',graph.nodes.map(n=>n.canonStatus));fillSelect('implementation',graph.nodes.map(n=>n.implementationStatus));fillSelect('visibility',graph.nodes.map(n=>n.visibility));
+    for(const id of filters)$(id).addEventListener(id==='query'?'input':'change',render);
+    $('clearFilters').addEventListener('click',()=>{for(const id of filters)$(id).value='';render()});
+    render();
+  }catch(error){
+    $('nodes').innerHTML=`<div class="empty">The Spine mirror could not be read: ${esc(error.message)}</div>`;
+  }
+}
+boot();
+</script>
+</body>
+</html>
