@@ -10,6 +10,8 @@
   "scripts": {
     "contracts:verify": "node scripts/deny-stale-engine-contracts.mjs && npm run spine:verify",
     "spine:verify": "node scripts/canonical-spine.mjs verify",
+    "spine:change:check": "node scripts/apply-canonical-spine-change.mjs",
+    "spine:change:apply": "node scripts/apply-canonical-spine-change.mjs --write",
     "sigil:dev": "vite --config apps/sigil-activator/vite.config.js",
     "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
     "sigil:preview": "vite preview --config apps/sigil-activator/vite.config.js",
