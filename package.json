@@ -9,6 +9,10 @@
   "packageManager": "npm@11.16.0",
   "scripts": {
     "contracts:verify": "node scripts/deny-stale-engine-contracts.mjs",
+    "code-lattice:analyze": "node scripts/gitnexus-code-lattice.mjs analyze",
+    "code-lattice:analyze:pdg": "node scripts/gitnexus-code-lattice.mjs analyze-pdg",
+    "code-lattice:status": "node scripts/gitnexus-code-lattice.mjs status",
+    "code-lattice:setup:codex": "node scripts/gitnexus-code-lattice.mjs setup-codex",
     "sigil:dev": "vite --config apps/sigil-activator/vite.config.js",
     "sigil:build": "vite build --config apps/sigil-activator/vite.config.js",
     "sigil:preview": "vite preview --config apps/sigil-activator/vite.config.js",

@@ -47,6 +47,11 @@ hearth/corpora/
 # Generated STARWELL bundle staged for Hearthgate packaging
 apps/starwell-server/public/starwell/
 
+# GitNexus Code Lattice local index and generated agent skills
+.gitnexus/
+.claude/skills/gitnexus-*/
+.agents/skills/gitnexus-*/
+
 # OS/editor noise
 .DS_Store
 .vscode/
