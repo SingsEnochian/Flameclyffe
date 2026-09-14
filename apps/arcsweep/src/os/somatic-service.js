@@ -26,10 +26,17 @@ function profileForWorld(worldId, profiles) {
   return profiles.get(worldId) || null;
 }
 
+function defaultCue(detail) {
+  if (typeof globalThis.dispatchEvent !== 'function' || typeof globalThis.CustomEvent !== 'function') return false;
+  return globalThis.dispatchEvent(new globalThis.CustomEvent('arcsweep:somatic-cue', { detail }));
+}
+
 export function registerSomaticService(registry, {
   bus = null,
   store = createSomaticStore(),
   profiles = [KELYRAN_SOMATIC_PROFILE],
+  eventTarget = globalThis,
+  dispatchCue = defaultCue,
   now = () => new Date(),
 } = {}) {
   if (!registry?.registerService || !registry?.registerCapability || !registry?.invoke) {
@@ -94,6 +101,26 @@ export function registerSomaticService(registry, {
   });
 
   registry.registerCapability({
+    capability_id: 'somatic.cue',
+    service_id: 'somatic-cartography',
+    description: 'Present a posture or movement cue without claiming that the body completed it.',
+    authority: 'operate',
+    execute: (input) => {
+      const cue = clone({ posture: input?.posture || null, transition: input?.transition || null, course_id: input?.course_id || null, step: input?.step || null });
+      const applied = dispatchCue(cue) !== false;
+      return { applied, supported: applied, cue, body_state_claimed: false };
+    },
+  });
+
+  registry.registerCapability({
+    capability_id: 'somatic.observe-hold',
+    service_id: 'somatic-cartography',
+    description: 'Mark a target as held for observation without synthesizing a new body state.',
+    authority: 'operate',
+    execute: (input) => ({ applied: true, target_id: input?.target_id || null, body_state_claimed: false, awaiting_observation: true }),
+  });
+
+  registry.registerCapability({
     capability_id: 'somatic.plan',
     service_id: 'somatic-cartography',
     description: 'Calculate a deterministic somatic course from an observed body state to a declared target.',
@@ -121,6 +148,7 @@ export function registerSomaticService(registry, {
     execute: async (input, context) => {
       const course = input.course;
       const stepReceipts = [];
+      let coursePending = false;
 
       for (const step of course.steps || []) {
         const capabilityReceipts = [];
@@ -157,12 +185,15 @@ export function registerSomaticService(registry, {
         if (waitingForBody) {
           const traceReceipt = capabilityReceipts.find((receipt) => receipt?.capability_id === 'glyphforge.trace.arm');
           const traceId = traceReceipt?.output?.trace_id;
-          if (traceId) pending.set(traceId, {
-            trace_id: traceId,
-            course: clone(course),
-            step: step.step,
-            capability_receipt_ids: capabilityReceipts.map(receiptId).filter(Boolean),
-          });
+          if (traceId) {
+            coursePending = true;
+            pending.set(traceId, {
+              trace_id: traceId,
+              course: clone(course),
+              step: step.step,
+              capability_receipt_ids: capabilityReceipts.map(receiptId).filter(Boolean),
+            });
+          }
         }
         if (failed) break;
       }
@@ -170,36 +201,44 @@ export function registerSomaticService(registry, {
       return {
         schema: 'arcsweep.somatic-execution/v1',
         course_id: course.course_id,
-        status: pending.size ? 'awaiting-body-observation' : stepReceipts.some((item) => item.status === 'failed') ? 'failed' : 'applied',
+        status: coursePending ? 'awaiting-body-observation' : stepReceipts.some((item) => item.status === 'failed') ? 'failed' : 'applied',
         receipts: stepReceipts,
       };
     },
   });
 
-  let unsubscribe = null;
-  if (bus?.subscribe) {
-    unsubscribe = bus.subscribe('arcsweep:glyph-stroke-observed', (event) => {
-      const observation = event?.payload || {};
-      const waiting = pending.get(observation.trace_id);
-      if (!waiting) return;
-      const receipt = createSomaticReceipt({
-        course: waiting.course,
-        step: waiting.step,
-        status: 'observed',
-        observed_state_id: observation.somatic_state_id || null,
-        capability_receipt_ids: waiting.capability_receipt_ids,
-      }, { now });
-      store.appendReceipt(receipt);
-      pending.delete(observation.trace_id);
-      bus.publish('arcsweep:somatic-step-receipted', receipt, { source: 'glyph-stroke-observer' });
-    }, { id: 'somatic-glyph-stroke-observer' });
+  function receiveStrokeObservation(observation = {}) {
+    const waiting = pending.get(observation.trace_id);
+    if (!waiting) return null;
+    const receipt = createSomaticReceipt({
+      course: waiting.course,
+      step: waiting.step,
+      status: 'observed',
+      observed_state_id: observation.somatic_state_id || null,
+      capability_receipt_ids: waiting.capability_receipt_ids,
+    }, { now });
+    store.appendReceipt(receipt);
+    pending.delete(observation.trace_id);
+    bus?.publish?.('arcsweep:somatic-step-receipted', receipt, { source: 'glyph-stroke-observer' });
+    return receipt;
   }
+
+  let unsubscribeBus = null;
+  if (bus?.subscribe) {
+    unsubscribeBus = bus.subscribe('arcsweep:glyph-stroke-observed', (event) => receiveStrokeObservation(event?.payload || {}), { id: 'somatic-glyph-stroke-observer' });
+  }
+  const onDomObservation = (event) => receiveStrokeObservation(event?.detail || {});
+  eventTarget?.addEventListener?.('arcsweep:glyph-stroke-observed', onDomObservation);
 
   return Object.freeze({
     service_id: 'somatic-cartography',
-    capabilities: ['somatic.status', 'somatic.observe', 'somatic.plan', 'somatic.execute-course'],
+    capabilities: ['somatic.status', 'somatic.observe', 'somatic.cue', 'somatic.observe-hold', 'somatic.plan', 'somatic.execute-course'],
     store,
     pending: () => [...pending.values()].map(clone),
-    destroy: () => unsubscribe?.(),
+    receiveStrokeObservation,
+    destroy: () => {
+      unsubscribeBus?.();
+      eventTarget?.removeEventListener?.('arcsweep:glyph-stroke-observed', onDomObservation);
+    },
   });
 }
