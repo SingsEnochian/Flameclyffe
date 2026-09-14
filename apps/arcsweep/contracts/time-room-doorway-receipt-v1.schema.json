@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.time-room-doorway-receipt/v1",
+  "title": "ArcSweep Time Room Doorway Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "doorway_id",
+    "universe_id",
+    "origin_room",
+    "destination_room",
+    "label",
+    "status",
+    "human_confirmed",
+    "autonomous_entry",
+    "navigation_call_id",
+    "context_capsule_id",
+    "entered_at"
+  ],
+  "properties": {
+    "schema": { "const": "arcsweep.time-room-doorway-receipt/v1" },
+    "doorway_id": { "type": "string", "minLength": 1, "maxLength": 260 },
+    "universe_id": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "origin_room": { "type": ["string", "null"], "maxLength": 80 },
+    "destination_room": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "label": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "status": { "enum": ["entered", "not-entered"] },
+    "human_confirmed": { "const": true },
+    "autonomous_entry": { "const": false },
+    "navigation_call_id": { "type": ["string", "null"], "maxLength": 260 },
+    "context_capsule_id": { "type": ["string", "null"], "maxLength": 260 },
+    "entered_at": { "type": ["string", "null"] }
+  }
+}
