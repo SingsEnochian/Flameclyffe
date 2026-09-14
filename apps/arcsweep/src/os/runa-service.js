@@ -41,6 +41,19 @@ function validPlan(plan) {
   );
 }
 
+function semanticCue(kind, input = {}) {
+  return {
+    schema: 'arcsweep.runa-somatic-cue/v1',
+    kind,
+    applied: true,
+    supported: true,
+    hardware_output: false,
+    browser_autoplay_required: false,
+    cue: clone(input || {}),
+    presented_at: new Date().toISOString(),
+  };
+}
+
 export function registerRunaService(registry, {
   bus = null,
   launchPreview = launchRunaPreviewPlan,
@@ -63,6 +76,8 @@ export function registerRunaService(registry, {
       haptic_preview: false,
       midi_preview: false,
       soundfont_preview: false,
+      somatic_semantic_cues: true,
+      hardware_haptic_output: false,
     },
     consumes: ['arcsweep:feather-paused'],
     emits: [],
@@ -82,6 +97,8 @@ export function registerRunaService(registry, {
       haptic_preview_authorized: false,
       midi_preview_authorized: false,
       soundfont_preview_authorized: false,
+      somatic_semantic_cues: true,
+      hardware_haptic_output: false,
     }),
   });
 
@@ -124,6 +141,30 @@ export function registerRunaService(registry, {
     execute: () => ({ stopped: Boolean(stopPreview('OS stop')), reason: 'OS stop' }),
   });
 
+  registry.registerCapability({
+    capability_id: 'runa.haptic.start',
+    service_id: 'runa-sensory',
+    description: 'Present a semantic haptic-start cue for Somatic Cartography without activating hardware output.',
+    authority: 'operate',
+    execute: (input) => semanticCue('haptic-start', input),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.audio.play',
+    service_id: 'runa-sensory',
+    description: 'Present a semantic audio cue for Somatic Cartography without browser autoplay or persistent soundscape mutation.',
+    authority: 'operate',
+    execute: (input) => semanticCue('audio-cue', input),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.haptic.pattern',
+    service_id: 'runa-sensory',
+    description: 'Present a named haptic-pattern cue for Somatic Cartography without claiming device vibration occurred.',
+    authority: 'operate',
+    execute: (input) => semanticCue('haptic-pattern', input),
+  });
+
   let unsubscribe = null;
   if (bus?.subscribe) {
     unsubscribe = bus.subscribe('arcsweep:feather-paused', () => { stopPreview('Feather'); }, { id: 'runa-feather-stop' });
@@ -131,7 +172,7 @@ export function registerRunaService(registry, {
 
   return Object.freeze({
     service_id: 'runa-sensory',
-    capabilities: ['runa.status', 'runa.inspect-preview-plan', 'runa.launch-preview', 'runa.stop-preview'],
+    capabilities: ['runa.status', 'runa.inspect-preview-plan', 'runa.launch-preview', 'runa.stop-preview', 'runa.haptic.start', 'runa.audio.play', 'runa.haptic.pattern'],
     destroy: () => unsubscribe?.(),
   });
 }
