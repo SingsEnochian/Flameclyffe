@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
+const ARCSWEEP_ROOT = fileURLToPath(new URL('./', import.meta.url));
 const SPESSASYNTH_WORKLET_PATH = fileURLToPath(new URL('../../node_modules/spessasynth_lib/dist/spessasynth_processor.min.js', import.meta.url));
 const STORY_SOUNDSCAPE_PATH = '/apps/arcsweep/src/story-soundscape.js';
 const SOURCE_WORKLET_DECLARATION = "const SPESSASYNTH_WORKLET_URL = new URL('../../../node_modules/spessasynth_lib/dist/spessasynth_processor.min.js', import.meta.url).href;";
@@ -50,6 +52,12 @@ export default defineConfig({
   build: {
     outDir: '../../dist/arcsweep',
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: resolve(ARCSWEEP_ROOT, 'index.html'),
+        spine: resolve(ARCSWEEP_ROOT, 'spine/index.html'),
+      },
+    },
   },
   server: {
     host: '127.0.0.1',
