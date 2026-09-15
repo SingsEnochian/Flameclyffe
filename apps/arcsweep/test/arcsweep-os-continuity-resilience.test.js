@@ -56,5 +56,5 @@ test('Architecture and canon keep the provider-independent continuity laws visib
   assert.match(architecture, /Continuity resilience never means bypassing the active constraint boundary/);
   assert.match(canon, /This is a resilience contract, not a constraint-bypass contract/);
   assert.match(canon, /provider-independent runtime proof lanes/);
-  assert.match(canon, /does not claim universal one-click relational export\/import/);
+  assert.match(canon, /does not claim that a universal one-click relational export\/import pipeline already exists/);
 });
