@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-15T21:35:23.692Z",
+  "generated_at": "2026-09-15T23:55:51.645Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,21 +13,21 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-15T17:30",
-    "sky": "Day",
+    "time": "2026-09-15T19:45",
+    "sky": "Night",
     "current": {
-      "time": "2026-09-15T17:30",
+      "time": "2026-09-15T19:45",
       "interval": 900,
-      "temperature_2m": 80.7,
+      "temperature_2m": 79.1,
       "relative_humidity_2m": 85,
-      "is_day": 1,
+      "is_day": 0,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
-      "cloud_cover": 100,
-      "pressure_msl": 1020.2,
-      "wind_speed_10m": 10.4,
-      "wind_direction_10m": 75
+      "cloud_cover": 86,
+      "pressure_msl": 1019.8,
+      "wind_speed_10m": 10.6,
+      "wind_direction_10m": 69
     }
   },
   "space_weather": {
@@ -37,27 +37,27 @@
       "a_running": 7
     },
     "solar_wind": {
-      "time_tag": "2026-09-15T21:26:00Z",
-      "bz": 2,
-      "bt": 13,
+      "time_tag": "2026-09-15T23:47:00Z",
+      "bz": -2,
+      "bt": 12,
       "density": null,
-      "speed": 451
+      "speed": 508
     }
   },
   "moon": {
-    "age_days": 4.05,
-    "illumination": 17.4,
+    "age_days": 4.14,
+    "illumination": 18.2,
     "name": "Waxing Crescent"
   },
   "field": {
-    "P": 0.6000000000000005,
-    "C": 0.2538095238095239,
-    "R": 0.9091666666666667,
-    "E": 0.7097802197802197,
-    "M": 0.174,
-    "A": 0.6,
+    "P": 0.535555555555555,
+    "C": 0.3204761904761905,
+    "R": 0.9600000000000001,
+    "E": 0.7597802197802197,
+    "M": 0.182,
+    "A": 0.4338461538461539,
     "Q": null,
-    "dpdt": 0.9091666666666667,
+    "dpdt": 0.9600000000000001,
     "dynamic_axes": [
       "P",
       "C",
