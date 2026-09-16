@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-16T13:59:31.705Z",
+  "generated_at": "2026-09-16T18:06:38.187Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,49 +13,49 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-16T09:45",
+    "time": "2026-09-16T14:00",
     "sky": "Day",
     "current": {
-      "time": "2026-09-16T09:45",
+      "time": "2026-09-16T14:00",
       "interval": 900,
-      "temperature_2m": 81.5,
-      "relative_humidity_2m": 72,
+      "temperature_2m": 83.6,
+      "relative_humidity_2m": 65,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
-      "cloud_cover": 17,
-      "pressure_msl": 1023.5,
-      "wind_speed_10m": 10.4,
-      "wind_direction_10m": 53
+      "cloud_cover": 8,
+      "pressure_msl": 1022.7,
+      "wind_speed_10m": 13.3,
+      "wind_direction_10m": 45
     }
   },
   "space_weather": {
     "kp": {
-      "value": 1.67,
-      "time_tag": "2026-09-16T09:00:00",
-      "a_running": 6
+      "value": 1,
+      "time_tag": "2026-09-16T15:00:00",
+      "a_running": 4
     },
     "solar_wind": {
-      "time_tag": "2026-09-16T13:50:00Z",
+      "time_tag": "2026-09-16T18:00:00Z",
       "bz": 3,
       "bt": 6,
       "density": null,
-      "speed": 557
+      "speed": 527
     }
   },
   "moon": {
-    "age_days": 4.73,
-    "illumination": 23.2,
+    "age_days": 4.9,
+    "illumination": 24.8,
     "name": "Waxing Crescent"
   },
   "field": {
-    "P": 0.6366666666666667,
-    "C": 0.6490476190476191,
+    "P": 0.6277777777777783,
+    "C": 0.691904761904762,
     "R": 1,
-    "E": 0.6362087912087913,
-    "M": 0.23199999999999998,
-    "A": 0.9192307692307692,
+    "E": 0.5614285714285714,
+    "M": 0.248,
+    "A": 0.9538461538461538,
     "Q": null,
     "dpdt": 1,
     "dynamic_axes": [
