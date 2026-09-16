@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-16T08:45:19.515Z",
+  "generated_at": "2026-09-16T13:59:31.705Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-16T04:45",
-    "sky": "Night",
+    "time": "2026-09-16T09:45",
+    "sky": "Day",
     "current": {
-      "time": "2026-09-16T04:45",
+      "time": "2026-09-16T09:45",
       "interval": 900,
-      "temperature_2m": 76.7,
-      "relative_humidity_2m": 78,
-      "is_day": 0,
+      "temperature_2m": 81.5,
+      "relative_humidity_2m": 72,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 3,
-      "cloud_cover": 93,
-      "pressure_msl": 1021.1,
-      "wind_speed_10m": 8.7,
-      "wind_direction_10m": 67
+      "weather_code": 0,
+      "cloud_cover": 17,
+      "pressure_msl": 1023.5,
+      "wind_speed_10m": 10.4,
+      "wind_direction_10m": 53
     }
   },
   "space_weather": {
     "kp": {
-      "value": 3,
-      "time_tag": "2026-09-16T03:00:00",
-      "a_running": 15
+      "value": 1.67,
+      "time_tag": "2026-09-16T09:00:00",
+      "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-09-16T08:37:00Z",
-      "bz": 4,
-      "bt": 5,
+      "time_tag": "2026-09-16T13:50:00Z",
+      "bz": 3,
+      "bt": 6,
       "density": null,
-      "speed": 544
+      "speed": 557
     }
   },
   "moon": {
-    "age_days": 4.51,
-    "illumination": 21.3,
+    "age_days": 4.73,
+    "illumination": 23.2,
     "name": "Waxing Crescent"
   },
   "field": {
-    "P": 0.5500000000000003,
-    "C": 0.17714285714285719,
-    "R": 0.9983333333333332,
-    "E": 0.7542857142857143,
-    "M": 0.213,
-    "A": 0.40692307692307694,
+    "P": 0.6366666666666667,
+    "C": 0.6490476190476191,
+    "R": 1,
+    "E": 0.6362087912087913,
+    "M": 0.23199999999999998,
+    "A": 0.9192307692307692,
     "Q": null,
-    "dpdt": 0.9983333333333332,
+    "dpdt": 1,
     "dynamic_axes": [
       "P",
       "C",
