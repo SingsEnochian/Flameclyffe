@@ -11,6 +11,11 @@ const {
   writeAttachmentPayload,
   writeStateAtomic,
 } = require('./store.cjs');
+const {
+  appendObserverWitness,
+  observerWitnessStatus,
+  readObserverWitness,
+} = require('./observer-witness.cjs');
 
 /**
  * Register all Arcsweep IPC handlers on the provided ipcMain instance.
@@ -83,6 +88,7 @@ module.exports = function registerArcsweepIpc({
     stateFile: storePaths.stateFile,
     attachmentDirectory: storePaths.attachmentDir,
     diagnosticsFile: getDiagnosticsPath(),
+    observerWitness: await observerWitnessStatus(storePaths),
     backups: await listBackups(storePaths),
   }));
 
@@ -111,6 +117,10 @@ module.exports = function registerArcsweepIpc({
 
   ipcMain.handle('arcsweep:attachment:read-payload', async (_event, attachment) => readAttachmentPayload(storePaths, attachment));
   ipcMain.handle('arcsweep:attachment:write-payload', async (_event, payload) => writeAttachmentPayload(storePaths, payload));
+
+  ipcMain.handle('arcsweep:observer-witness:publish', async (_event, packet) => appendObserverWitness(storePaths, packet));
+  ipcMain.handle('arcsweep:observer-witness:read', async (_event, options = {}) => readObserverWitness(storePaths, options));
+  ipcMain.handle('arcsweep:observer-witness:status', async () => observerWitnessStatus(storePaths));
 
   ipcMain.handle('arcsweep:storage:show', async () => {
     const error = await shell.openPath(storePaths.root);
