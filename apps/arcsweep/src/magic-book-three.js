@@ -173,7 +173,10 @@ export function mountMagicBook({ host = document.body } = {}) {
     .magic-book-copy small{letter-spacing:.18em}.magic-book-copy strong{font:600 clamp(1.15rem,3vw,1.7rem)/1.2 Georgia,serif}.magic-book-copy span{opacity:.72;font-size:.82rem}
     .magic-book-observatory{position:absolute;top:max(1rem,env(safe-area-inset-top));right:1rem;width:min(24rem,calc(100vw - 2rem));padding:1rem;border:1px solid #8d7647;border-radius:.8rem;background:rgba(8,14,12,.9);color:#e8dfc8;font:500 .78rem/1.35 system-ui,sans-serif;box-shadow:0 12px 48px #0008}
     .magic-book-observatory small{letter-spacing:.14em;opacity:.68}.magic-book-observatory strong{display:block;margin:.3rem 0 .7rem;font-family:ui-monospace,monospace}.magic-book-observatory dl{margin:0;display:grid;gap:.35rem}.magic-book-observatory dl div{display:grid;grid-template-columns:7rem 1fr;gap:.5rem}.magic-book-observatory dt{opacity:.62}.magic-book-observatory dd{margin:0;overflow-wrap:anywhere;font-family:ui-monospace,monospace}
-    #arcsweep-magic-book-three[data-open="true"]{pointer-events:none;opacity:.16}
+    #arcsweep-magic-book-three[data-open="true"]{background:transparent;pointer-events:none}
+    #arcsweep-magic-book-three[data-open="true"] canvas{opacity:.16;pointer-events:none}
+    #arcsweep-magic-book-three[data-open="true"] .magic-book-copy{opacity:.16}
+    #arcsweep-magic-book-three[data-open="true"] .magic-book-observatory{pointer-events:auto}
     @media(prefers-reduced-motion:reduce){#arcsweep-magic-book-three{transition:none}}
   `;
   document.head.append(style);
@@ -291,7 +294,10 @@ export function mountMagicBook({ host = document.body } = {}) {
 
   let state = readState();
   let phase = state.open ? 'open' : 'closed';
-  let target = state.open ? Math.PI * .985 : 0;
+  const restoredAngle = Number(state.coverAngle);
+  let target = Number.isFinite(restoredAngle)
+    ? THREE.MathUtils.clamp(restoredAngle, 0, Math.PI)
+    : (state.open ? Math.PI * .985 : 0);
   let coverAngle = target;
   let dragging = false;
   let startX = 0;
@@ -315,9 +321,14 @@ export function mountMagicBook({ host = document.body } = {}) {
     persist(action);
   };
 
+  let renderedWidth = 0;
+  let renderedHeight = 0;
   function resize() {
-    const { clientWidth:w, clientHeight:h } = canvas;
-    const width = Math.max(1, w), height = Math.max(1, h);
+    const width = Math.max(1, canvas.clientWidth);
+    const height = Math.max(1, canvas.clientHeight);
+    if (width === renderedWidth && height === renderedHeight) return;
+    renderedWidth = width;
+    renderedHeight = height;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -426,7 +437,10 @@ export function mountMagicBook({ host = document.body } = {}) {
   canvas.addEventListener('pointercancel', release);
 
   const clock = new THREE.Clock();
+  let frameId = 0;
+  let destroyed = false;
   function frame() {
+    if (destroyed) return;
     resize();
     if (!dragging) {
       const step = reducedMotion ? 1 : 1 - Math.exp(-clock.getDelta() * 8);
@@ -447,7 +461,7 @@ export function mountMagicBook({ host = document.body } = {}) {
       pageRepresentationState = nextRepresentation;
     }
     renderer.render(scene, camera);
-    requestAnimationFrame(frame);
+    frameId = requestAnimationFrame(frame);
   }
 
   shell.dataset.open = String(phase === 'open');
@@ -455,9 +469,20 @@ export function mountMagicBook({ host = document.body } = {}) {
   pageReceipt('object-observed', 0, { continuity_preserved: true });
   frame();
 
-  return { shell, scene, book, renderer, getState: () => ({ phase, coverAngle }) };
-}
+  const destroy = () => {
+    if (destroyed) return;
+    destroyed = true;
+    cancelAnimationFrame(frameId);
+    scene.traverse((node) => {
+      node.geometry?.dispose?.();
+      if (Array.isArray(node.material)) node.material.forEach((material) => material?.dispose?.());
+      else node.material?.dispose?.();
+    });
+    renderer.dispose();
+    style.remove();
+    shell.remove();
+    emitReceipt('destroyed', { phase, cover_angle: Number(coverAngle.toFixed(4)) });
+  };
 
-if (typeof window !== 'undefined') {
-  window.addEventListener('arcsweep:core-ready', () => mountMagicBook(), { once: true });
+  return { shell, scene, book, renderer, destroy, getState: () => ({ phase, coverAngle }) };
 }
