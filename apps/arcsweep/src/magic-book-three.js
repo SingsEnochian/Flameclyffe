@@ -4,6 +4,7 @@ export const MAGIC_BOOK_VERSION = 'arcsweep.magic-book-three/v1';
 const RECEIPT_EVENT = 'arcsweep:magic-book-receipt';
 const STORAGE_KEY = 'hearthgate.arcsweep.magic-book.v1';
 const PAGE_OBJECT_ID = 'arcsweep:magic-book:page:starsong-001';
+const CROSSING_SCHEMA = 'arcsweep.magic-book-crossing/1';
 const PAGE_SIGNATURE = Object.freeze({
   kind: 'magic-book-page',
   book_id: 'arcsweep:magic-book',
@@ -50,6 +51,35 @@ function pageRepresentation(progress) {
   if (progress <= .02) return 'resting-page';
   if (progress >= .98) return 'turned-page';
   return 'deforming-page';
+}
+
+function snapshotPage(progress) {
+  return Object.freeze({
+    object_id: PAGE_OBJECT_ID,
+    continuity_signature: PAGE_SIGNATURE,
+    representation: pageRepresentation(progress),
+    transform_progress: Number(THREE.MathUtils.clamp(progress, 0, 1).toFixed(4)),
+    observed_at: now(),
+  });
+}
+
+function compareCrossing(origin, encounter) {
+  const sameIdentity = origin.object_id === encounter.object_id;
+  const sameSignature = JSON.stringify(origin.continuity_signature) === JSON.stringify(encounter.continuity_signature);
+  return Object.freeze({
+    schema: CROSSING_SCHEMA,
+    crossing_id: id(),
+    observed_at: now(),
+    origin,
+    encounter,
+    observer: 'arcsweep:observer:magic-book',
+    continuity_preserved: sameIdentity && sameSignature,
+    representation_changed: origin.representation !== encounter.representation,
+    delta: {
+      representation: [origin.representation, encounter.representation],
+      transform_progress: encounter.transform_progress - origin.transform_progress,
+    },
+  });
 }
 
 function pageReceipt(action, progress, detail = {}) {
@@ -151,6 +181,7 @@ export function mountMagicBook({ host = document.body } = {}) {
   let startX = 0;
   let startAngle = 0;
   let pageRepresentationState = pageRepresentation(0);
+  let crossingOrigin = null;
   const reducedMotion = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 
   const persist = (action) => {
@@ -182,6 +213,11 @@ export function mountMagicBook({ host = document.body } = {}) {
     startX = pointerX(event);
     startAngle = coverAngle;
     emitReceipt('interaction-started', { phase, pointer_type: event.pointerType });
+    crossingOrigin = snapshotPage(Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
+    pageReceipt('crossing-origin-sealed', crossingOrigin.transform_progress, {
+      crossing_role: 'origin',
+      snapshot: crossingOrigin,
+    });
   });
   canvas.addEventListener('pointermove', (event) => {
     if (!dragging) return;
@@ -194,6 +230,20 @@ export function mountMagicBook({ host = document.body } = {}) {
     dragging = false;
     target = coverAngle > Math.PI * .32 ? Math.PI * .985 : 0;
     emitReceipt('interaction-released', { target: target > 1 ? 'open' : 'closed' });
+    if (crossingOrigin) {
+      const encounter = snapshotPage(Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
+      pageReceipt('crossing-encounter-sealed', encounter.transform_progress, {
+        crossing_role: 'encounter',
+        snapshot: encounter,
+      });
+      const comparison = compareCrossing(crossingOrigin, encounter);
+      emitReceipt('crossing-observed', {
+        crossing: comparison,
+        continuity_preserved: comparison.continuity_preserved,
+        representation_changed: comparison.representation_changed,
+      }, PAGE_OBJECT_ID);
+      crossingOrigin = null;
+    }
   };
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
