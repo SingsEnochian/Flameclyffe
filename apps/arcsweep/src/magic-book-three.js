@@ -405,8 +405,11 @@ export function mountMagicBook({ host = document.body } = {}) {
   });
   const release = async (event) => {
     if (!dragging) return;
+    const activeOrigin = crossingOrigin;
+    const activeTacPromise = tacCrossingPromise;
     dragging = false;
     target = coverAngle > Math.PI * .32 ? Math.PI * .985 : 0;
+    try {
     emitReceipt('interaction-released', {
       target: target > 1 ? 'open' : 'closed',
       input_evidence: {
@@ -416,15 +419,15 @@ export function mountMagicBook({ host = document.body } = {}) {
         tilt_y: event?.tiltY ?? null,
       },
     });
-    if (crossingOrigin) {
+    if (activeOrigin) {
       const encounter = snapshotPage(Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
       pageReceipt('crossing-encounter-sealed', encounter.transform_progress, {
         crossing_role: 'encounter',
         snapshot: encounter,
       });
-      let comparison = compareCrossing(crossingOrigin, encounter);
-      if (tacCrossingPromise) {
-        const tacCrossing = await tacCrossingPromise;
+      let comparison = compareCrossing(activeOrigin, encounter);
+      if (activeTacPromise) {
+        const tacCrossing = await activeTacPromise;
         const encounterReceipt = await sealEncounterReceipt({
           crossing_id: tacCrossing.artifact.crossing_id,
           context_id: 'magic-book:post-transform',
@@ -456,7 +459,7 @@ export function mountMagicBook({ host = document.body } = {}) {
         witness_id: id(),
         recorded_at: now(),
         object_id: PAGE_OBJECT_ID,
-        origin_snapshot: crossingOrigin,
+        origin_snapshot: activeOrigin,
         encounter_snapshot: encounter,
         comparison,
       });
@@ -473,12 +476,24 @@ export function mountMagicBook({ host = document.body } = {}) {
         continuity_preserved: comparison.continuity_preserved,
         representation_changed: comparison.representation_changed,
       }, PAGE_OBJECT_ID);
-      crossingOrigin = null;
-      tacCrossingPromise = null;
+      if (crossingOrigin === activeOrigin) crossingOrigin = null;
+      if (tacCrossingPromise === activeTacPromise) tacCrossingPromise = null;
     }
+    }
+  } catch (error) {
+    emitReceipt('crossing-error', {
+      stage: 'release',
+      error_name: error?.name || 'Error',
+      message: String(error?.message || error || 'Unknown crossing error').slice(0, 240),
+    }, PAGE_OBJECT_ID);
+    status.textContent = 'Crossing receipt failed · interaction preserved.';
+    if (crossingOrigin === activeOrigin) crossingOrigin = null;
+    if (tacCrossingPromise === activeTacPromise) tacCrossingPromise = null;
+  }
   };
-  canvas.addEventListener('pointerup', release);
-  canvas.addEventListener('pointercancel', release);
+  const safelyRelease = (event) => { void release(event); };
+  canvas.addEventListener('pointerup', safelyRelease);
+  canvas.addEventListener('pointercancel', safelyRelease);
   bookToggle?.addEventListener('click', () => {
     const opening = target < 1;
     target = opening ? Math.PI * .985 : 0;
