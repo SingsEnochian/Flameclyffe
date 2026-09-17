@@ -120,7 +120,19 @@ export function mountMagicBook({ host = document.body } = {}) {
       <small>STARSONG · ARCSWEEP</small>
       <strong>The Book is the bridge.</strong>
       <span data-book-status>Touch the cover to open.</span>
-    </div>`;
+    </div>
+    <aside class="magic-book-observatory" aria-label="Magic Book Observatory" hidden>
+      <small>OBSERVER · TAC CROSSING</small>
+      <strong data-observer-object>Waiting for a crossing…</strong>
+      <dl>
+        <div><dt>Continuity</dt><dd data-observer-continuity>unknown</dd></div>
+        <div><dt>Representation</dt><dd data-observer-representation>unknown</dd></div>
+        <div><dt>Evidence</dt><dd data-observer-evidence>unknown</dd></div>
+        <div><dt>Origin</dt><dd data-observer-origin>—</dd></div>
+        <div><dt>Encounter</dt><dd data-observer-encounter>—</dd></div>
+        <div><dt>Observer</dt><dd data-observer-join>—</dd></div>
+      </dl>
+    </aside>`;
   host.prepend(shell);
 
   const style = document.createElement('style');
@@ -129,6 +141,8 @@ export function mountMagicBook({ host = document.body } = {}) {
     #arcsweep-magic-book-three canvas{width:100%;height:100%;touch-action:none}
     .magic-book-copy{position:absolute;bottom:max(1.25rem,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:grid;gap:.2rem;text-align:center;color:#eadfbf;pointer-events:none;text-shadow:0 2px 16px #000}
     .magic-book-copy small{letter-spacing:.18em}.magic-book-copy strong{font:600 clamp(1.15rem,3vw,1.7rem)/1.2 Georgia,serif}.magic-book-copy span{opacity:.72;font-size:.82rem}
+    .magic-book-observatory{position:absolute;top:max(1rem,env(safe-area-inset-top));right:1rem;width:min(24rem,calc(100vw - 2rem));padding:1rem;border:1px solid #8d7647;border-radius:.8rem;background:rgba(8,14,12,.9);color:#e8dfc8;font:500 .78rem/1.35 system-ui,sans-serif;box-shadow:0 12px 48px #0008}
+    .magic-book-observatory small{letter-spacing:.14em;opacity:.68}.magic-book-observatory strong{display:block;margin:.3rem 0 .7rem;font-family:ui-monospace,monospace}.magic-book-observatory dl{margin:0;display:grid;gap:.35rem}.magic-book-observatory dl div{display:grid;grid-template-columns:7rem 1fr;gap:.5rem}.magic-book-observatory dt{opacity:.62}.magic-book-observatory dd{margin:0;overflow-wrap:anywhere;font-family:ui-monospace,monospace}
     #arcsweep-magic-book-three[data-open="true"]{pointer-events:none;opacity:.16}
     @media(prefers-reduced-motion:reduce){#arcsweep-magic-book-three{transition:none}}
   `;
@@ -136,6 +150,23 @@ export function mountMagicBook({ host = document.body } = {}) {
 
   const canvas = shell.querySelector('canvas');
   const status = shell.querySelector('[data-book-status]');
+  const observatory = shell.querySelector('.magic-book-observatory');
+  const observerField = (name) => shell.querySelector(`[data-observer-${name}]`);
+  const shortHash = (value) => value ? `${value.slice(0, 10)}…${value.slice(-6)}` : '—';
+  const showCrossing = (comparison) => {
+    const tac = comparison?.tac;
+    if (!observatory || !tac) return;
+    observatory.hidden = false;
+    observerField('object').textContent = PAGE_OBJECT_ID;
+    observerField('continuity').textContent = comparison.continuity_preserved ? 'PRESERVED' : 'BREAK';
+    observerField('representation').textContent = comparison.representation_changed
+      ? comparison.delta.representation.join(' → ')
+      : 'unchanged';
+    observerField('evidence').textContent = tac.evidence_state || 'unknown';
+    observerField('origin').textContent = shortHash(tac.origin_receipt_hash);
+    observerField('encounter').textContent = shortHash(tac.encounter_receipt_hash);
+    observerField('join').textContent = shortHash(tac.observer_receipt_hash);
+  };
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
@@ -280,6 +311,7 @@ export function mountMagicBook({ host = document.body } = {}) {
           evidence_state: observerReceipt.body.evidence_state,
         };
       }
+      showCrossing(comparison);
       emitReceipt('crossing-observed', {
         crossing: comparison,
         continuity_preserved: comparison.continuity_preserved,
