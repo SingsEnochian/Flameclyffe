@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-17T15:08:44.539Z",
+  "generated_at": "2026-09-17T19:09:06.940Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-17T11:00",
+    "time": "2026-09-17T15:00",
     "sky": "Day",
     "current": {
-      "time": "2026-09-17T11:00",
+      "time": "2026-09-17T15:00",
       "interval": 900,
-      "temperature_2m": 81.8,
-      "relative_humidity_2m": 62,
+      "temperature_2m": 82.6,
+      "relative_humidity_2m": 66,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 0,
-      "cloud_cover": 3,
-      "pressure_msl": 1021.2,
-      "wind_speed_10m": 11.4,
-      "wind_direction_10m": 45
+      "weather_code": 1,
+      "cloud_cover": 39,
+      "pressure_msl": 1020.4,
+      "wind_speed_10m": 12.2,
+      "wind_direction_10m": 47
     }
   },
   "space_weather": {
     "kp": {
-      "value": 3,
-      "time_tag": "2026-09-17T12:00:00",
-      "a_running": 15
+      "value": 2,
+      "time_tag": "2026-09-17T15:00:00",
+      "a_running": 7
     },
     "solar_wind": {
-      "time_tag": "2026-09-17T15:03:00Z",
+      "time_tag": "2026-09-17T19:02:00Z",
       "bz": 1,
       "bt": 5,
       "density": null,
-      "speed": 448
+      "speed": 456
     }
   },
   "moon": {
-    "age_days": 5.78,
-    "illumination": 33.2,
+    "age_days": 5.94,
+    "illumination": 34.9,
     "name": "First Quarter"
   },
   "field": {
-    "P": 0.6111111111111116,
-    "C": 0.6057142857142858,
-    "R": 0.9033333333333333,
-    "E": 0.6927472527472528,
-    "M": 0.332,
-    "A": 0.9730769230769231,
+    "P": 0.602222222222222,
+    "C": 0.5442857142857143,
+    "R": 0.9233333333333333,
+    "E": 0.6367032967032966,
+    "M": 0.349,
+    "A": 0.8346153846153845,
     "Q": null,
-    "dpdt": 0.9033333333333333,
+    "dpdt": 0.9233333333333333,
     "dynamic_axes": [
       "P",
       "C",
