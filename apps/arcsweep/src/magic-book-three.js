@@ -4,6 +4,7 @@ import { createArtifact, sealOriginReceipt, sealEncounterReceipt, createCrossing
 export const MAGIC_BOOK_VERSION = 'arcsweep.magic-book-three/v1';
 const RECEIPT_EVENT = 'arcsweep:magic-book-receipt';
 const STORAGE_KEY = 'hearthgate.arcsweep.magic-book.v1';
+const WITNESS_KEY = 'hearthgate.arcsweep.magic-book.witness.v1';
 const PAGE_OBJECT_ID = 'arcsweep:magic-book:page:starsong-001';
 const CROSSING_SCHEMA = 'arcsweep.magic-book-crossing/1';
 const PAGE_SIGNATURE = Object.freeze({
@@ -38,6 +39,21 @@ function readState() {
 
 function writeState(next) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+}
+
+function readWitnesses() {
+  try {
+    const value = JSON.parse(localStorage.getItem(WITNESS_KEY));
+    return Array.isArray(value) ? value : [];
+  } catch { return []; }
+}
+
+function appendWitness(record) {
+  const records = readWitnesses();
+  records.push(record);
+  const bounded = records.slice(-100);
+  try { localStorage.setItem(WITNESS_KEY, JSON.stringify(bounded)); } catch {}
+  return bounded;
 }
 
 function makePage(material, x) {
@@ -132,6 +148,11 @@ export function mountMagicBook({ host = document.body } = {}) {
         <div><dt>Encounter</dt><dd data-observer-encounter>—</dd></div>
         <div><dt>Observer</dt><dd data-observer-join>—</dd></div>
       </dl>
+      <div class="magic-book-witness-nav">
+        <button type="button" data-witness-prev aria-label="Previous crossing">←</button>
+        <span data-witness-index>live</span>
+        <button type="button" data-witness-next aria-label="Next crossing">→</button>
+      </div>
     </aside>`;
   host.prepend(shell);
 
@@ -153,7 +174,10 @@ export function mountMagicBook({ host = document.body } = {}) {
   const observatory = shell.querySelector('.magic-book-observatory');
   const observerField = (name) => shell.querySelector(`[data-observer-${name}]`);
   const shortHash = (value) => value ? `${value.slice(0, 10)}…${value.slice(-6)}` : '—';
-  const showCrossing = (comparison) => {
+  let witnesses = readWitnesses();
+  let witnessIndex = witnesses.length ? witnesses.length - 1 : -1;
+  const witnessIndexNode = shell.querySelector('[data-witness-index]');
+  const showCrossing = (comparison, label = 'live') => {
     const tac = comparison?.tac;
     if (!observatory || !tac) return;
     observatory.hidden = false;
@@ -166,7 +190,21 @@ export function mountMagicBook({ host = document.body } = {}) {
     observerField('origin').textContent = shortHash(tac.origin_receipt_hash);
     observerField('encounter').textContent = shortHash(tac.encounter_receipt_hash);
     observerField('join').textContent = shortHash(tac.observer_receipt_hash);
+    if (witnessIndexNode) witnessIndexNode.textContent = label;
   };
+  const replayWitness = (index) => {
+    if (!witnesses.length) return;
+    witnessIndex = THREE.MathUtils.clamp(index, 0, witnesses.length - 1);
+    const witness = witnesses[witnessIndex];
+    showCrossing(witness.comparison, `${witnessIndex + 1}/${witnesses.length}`);
+    emitReceipt('witness-replayed', {
+      witness_id: witness.witness_id,
+      recorded_at: witness.recorded_at,
+      replay_index: witnessIndex,
+    }, PAGE_OBJECT_ID);
+  };
+  shell.querySelector('[data-witness-prev]')?.addEventListener('click', () => replayWitness(witnessIndex - 1));
+  shell.querySelector('[data-witness-next]')?.addEventListener('click', () => replayWitness(witnessIndex + 1));
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
@@ -311,7 +349,23 @@ export function mountMagicBook({ host = document.body } = {}) {
           evidence_state: observerReceipt.body.evidence_state,
         };
       }
-      showCrossing(comparison);
+      const witness = Object.freeze({
+        schema: 'arcsweep.temporal-witness.magic-book/1',
+        witness_id: id(),
+        recorded_at: now(),
+        object_id: PAGE_OBJECT_ID,
+        origin_snapshot: crossingOrigin,
+        encounter_snapshot: encounter,
+        comparison,
+      });
+      witnesses = appendWitness(witness);
+      witnessIndex = witnesses.length - 1;
+      showCrossing(comparison, `${witnesses.length}/${witnesses.length}`);
+      emitReceipt('witness-recorded', {
+        witness_id: witness.witness_id,
+        recorded_at: witness.recorded_at,
+        witness_count: witnesses.length,
+      }, PAGE_OBJECT_ID);
       emitReceipt('crossing-observed', {
         crossing: comparison,
         continuity_preserved: comparison.continuity_preserved,
