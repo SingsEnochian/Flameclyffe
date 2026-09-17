@@ -1,3 +1,5 @@
+import { PREMAQC_TERM, canonicalPremaqcSchema } from '../../../starwell/src/premaqc-contract.js';
+
 function clone(value) {
   if (value === undefined) return undefined;
   return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -32,6 +34,15 @@ function uniqueStrings(values = []) {
 
 function snapshotRaw(snapshot) {
   return asObject(snapshot?.raw);
+}
+
+function schemaIdentity(...values) {
+  const raw = firstValue(...values);
+  return Object.freeze({
+    canonical: raw ? canonicalPremaqcSchema(raw) : null,
+    raw,
+    legacy: Boolean(raw && canonicalPremaqcSchema(raw) !== raw),
+  });
 }
 
 function normaliseNarrativeNode(item, index, type) {
@@ -78,7 +89,7 @@ export function buildObserverSemanticStatus({
 } = {}) {
   const raw = snapshotRaw(snapshot);
   const hasSnapshot = Boolean(snapshot && typeof snapshot === 'object');
-  const sourceSchema = firstValue(snapshot?.schema, raw.schema, schema, null);
+  const sourceSchema = schemaIdentity(snapshot?.schema, raw.schema, schema, null);
   const generatedAt = firstValue(snapshot?.generated_at, snapshot?.generatedAt, raw.generated_at, raw.generatedAt, null);
   const heartbeat = asObject(firstValue(snapshot?.heartbeat, raw.heartbeat, {}));
   const latestNarrative = asObject(firstValue(snapshot?.narrative, snapshot?.narrative_state, raw.narrative, raw.narrative_state, {}));
@@ -88,14 +99,14 @@ export function buildObserverSemanticStatus({
   const npsConnection = firstValue(snapshot?.nps_connection_state, raw.nps_connection_state, latestNarrative.nps_connection_state, null);
 
   let dataState = 'missing';
-  if (hasSnapshot) dataState = sourceSchema ? 'healthy' : 'degraded';
+  if (hasSnapshot) dataState = sourceSchema.canonical ? 'healthy' : 'degraded';
   const integrationState = !bridgePresent ? 'unavailable' : hasSnapshot ? 'healthy' : 'degraded';
 
   return Object.freeze({
     schema: 'arcsweep.observer-semantic-status/v1',
     available: Boolean(bridgePresent),
     connected: hasSnapshot,
-    source_schema: sourceSchema,
+    source_schema: sourceSchema.canonical,
     storage_key: storageKey || null,
     availability: Object.freeze({
       state: bridgePresent ? 'available' : 'unavailable',
@@ -112,7 +123,7 @@ export function buildObserverSemanticStatus({
     data_health: Object.freeze({
       state: dataState,
       snapshot_present: hasSnapshot,
-      source_schema_present: Boolean(sourceSchema),
+      source_schema_present: Boolean(sourceSchema.canonical),
       generated_at: generatedAt,
     }),
     activity: Object.freeze({
@@ -130,7 +141,10 @@ export function buildObserverSemanticStatus({
     provenance: Object.freeze({
       source: 'observer-bridge',
       transport,
-      source_schema: sourceSchema,
+      source_schema: sourceSchema.canonical,
+      raw_source_schema: sourceSchema.raw,
+      vocabulary: PREMAQC_TERM,
+      legacy_schema_accepted: sourceSchema.legacy,
       runtime_inference: false,
       unknowns_preserved: true,
     }),
@@ -148,6 +162,7 @@ export function buildObserverNarrativeState(snapshot = null) {
   const mechanismEdges = asArray(firstValue(narrative.mechanism_edges, narrative.mechanisms, [])).map(normaliseEdge);
   const phase = firstValue(snapshot?.narrative_phase, raw.narrative_phase, narrative.phase, null);
   const present = Boolean(phase || claims.length || evidence.length || objections.length || risks.length || researchGaps.length || mechanismEdges.length);
+  const sourceSchema = schemaIdentity(snapshot?.schema, raw.schema, null);
 
   return Object.freeze({
     schema: 'arcsweep.observer-narrative-state/v1',
@@ -166,7 +181,10 @@ export function buildObserverNarrativeState(snapshot = null) {
     mechanism_edges: mechanismEdges,
     provenance: Object.freeze({
       source: 'observer-snapshot',
-      source_schema: firstValue(snapshot?.schema, raw.schema, null),
+      source_schema: sourceSchema.canonical,
+      raw_source_schema: sourceSchema.raw,
+      vocabulary: PREMAQC_TERM,
+      legacy_schema_accepted: sourceSchema.legacy,
       interpretation_class: 'narrative-derived',
       canon_promotion: false,
       evidence_promotion: 'explicit-only',
@@ -203,7 +221,7 @@ function transformationStatus(operation) {
 export function buildObserverEpistemicLedger({ snapshot = null, deepPayload = null, narrativeState = null } = {}) {
   const narrative = narrativeState || buildObserverNarrativeState(snapshot);
   const entries = [];
-  const sourceSchema = firstValue(snapshot?.schema, deepPayload?.provenance?.schema, null);
+  const sourceSchema = schemaIdentity(snapshot?.schema, deepPayload?.provenance?.schema, null);
 
   if (snapshot && typeof snapshot === 'object') {
     entries.push(entry({
@@ -211,10 +229,13 @@ export function buildObserverEpistemicLedger({ snapshot = null, deepPayload = nu
       kind: 'observation',
       epistemicStatus: 'observed',
       sourceRef: 'observer.snapshot',
-      sourceSchema,
+      sourceSchema: sourceSchema.canonical,
       details: {
         generated_at: firstValue(snapshot.generated_at, snapshot.generatedAt, null),
         field_present: Boolean(snapshot.field || snapshot.raw?.field || snapshot.raw?.deep || snapshot.raw?.DEEP),
+        raw_source_schema: sourceSchema.raw,
+        legacy_schema_accepted: sourceSchema.legacy,
+        vocabulary: PREMAQC_TERM,
       },
     }));
   }
@@ -275,6 +296,7 @@ export function buildObserverEpistemicLedger({ snapshot = null, deepPayload = nu
 
   return Object.freeze({
     schema: 'arcsweep.epistemic-ledger/v1',
+    vocabulary: PREMAQC_TERM,
     entries,
     mechanism_edges: (narrative.mechanism_edges || []).map((edge) => clone(edge)),
     counts: Object.freeze({
