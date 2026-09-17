@@ -153,6 +153,10 @@ export function mountMagicBook({ host = document.body } = {}) {
         <span data-witness-index>live</span>
         <button type="button" data-witness-next aria-label="Next crossing">→</button>
       </div>
+      <div class="magic-book-witness-nav" aria-label="Replay edge">
+        <button type="button" data-witness-origin>Origin</button>
+        <button type="button" data-witness-encounter>Encounter</button>
+      </div>
     </aside>`;
   host.prepend(shell);
 
@@ -192,19 +196,34 @@ export function mountMagicBook({ host = document.body } = {}) {
     observerField('join').textContent = shortHash(tac.observer_receipt_hash);
     if (witnessIndexNode) witnessIndexNode.textContent = label;
   };
-  const replayWitness = (index) => {
+  const reconstructWitness = (witness, edge = 'encounter') => {
+    const snapshot = edge === 'origin' ? witness.origin_snapshot : witness.encounter_snapshot;
+    if (!snapshot) return null;
+    const progress = THREE.MathUtils.clamp(snapshot.transform_progress ?? 0, 0, 1);
+    curlPage(rightPage, progress);
+    pageRepresentationState = pageRepresentation(progress);
+    status.textContent = `Time Room replay · ${edge} · ${pageRepresentationState}`;
+    return snapshot;
+  };
+  const replayWitness = (index, edge = 'encounter') => {
     if (!witnesses.length) return;
     witnessIndex = THREE.MathUtils.clamp(index, 0, witnesses.length - 1);
     const witness = witnesses[witnessIndex];
+    const snapshot = reconstructWitness(witness, edge);
     showCrossing(witness.comparison, `${witnessIndex + 1}/${witnesses.length}`);
     emitReceipt('witness-replayed', {
       witness_id: witness.witness_id,
       recorded_at: witness.recorded_at,
       replay_index: witnessIndex,
+      replay_edge: edge,
+      reconstructed_representation: snapshot?.representation ?? null,
+      reconstructed_progress: snapshot?.transform_progress ?? null,
     }, PAGE_OBJECT_ID);
   };
   shell.querySelector('[data-witness-prev]')?.addEventListener('click', () => replayWitness(witnessIndex - 1));
   shell.querySelector('[data-witness-next]')?.addEventListener('click', () => replayWitness(witnessIndex + 1));
+  shell.querySelector('[data-witness-origin]')?.addEventListener('click', () => replayWitness(witnessIndex, 'origin'));
+  shell.querySelector('[data-witness-encounter]')?.addEventListener('click', () => replayWitness(witnessIndex, 'encounter'));
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
@@ -281,6 +300,7 @@ export function mountMagicBook({ host = document.body } = {}) {
   canvas.addEventListener('pointerdown', async (event) => {
     canvas.setPointerCapture(event.pointerId);
     dragging = true;
+    if (status.textContent.startsWith('Time Room replay')) status.textContent = phase === 'open' ? 'Book open · ArcSweep continues beneath the page.' : 'Touch the cover to open.';
     startX = pointerX(event);
     startAngle = coverAngle;
     emitReceipt('interaction-started', { phase, pointer_type: event.pointerType });
@@ -389,7 +409,7 @@ export function mountMagicBook({ host = document.body } = {}) {
     } else clock.getDelta();
     frontPivot.rotation.y = -coverAngle;
     const pageProgress = Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI);
-    curlPage(rightPage, pageProgress);
+    if (!status.textContent.startsWith('Time Room replay')) curlPage(rightPage, pageProgress);
     const nextRepresentation = pageRepresentation(pageProgress);
     if (nextRepresentation !== pageRepresentationState) {
       pageReceipt('representation-changed', pageProgress, {
