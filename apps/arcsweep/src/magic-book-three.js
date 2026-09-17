@@ -315,7 +315,8 @@ export function mountMagicBook({ host = document.body } = {}) {
 
   let state = readState();
   let phase = state.open ? 'open' : 'closed';
-  const restoredAngle = Number(state.coverAngle);
+  const hasRestoredAngle = state.coverAngle !== null && state.coverAngle !== undefined && state.coverAngle !== '';
+  const restoredAngle = hasRestoredAngle ? Number(state.coverAngle) : NaN;
   let target = Number.isFinite(restoredAngle)
     ? THREE.MathUtils.clamp(restoredAngle, 0, Math.PI)
     : (state.open ? Math.PI * .985 : 0);
