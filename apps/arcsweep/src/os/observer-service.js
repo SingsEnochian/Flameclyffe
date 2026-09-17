@@ -3,6 +3,7 @@ import {
   buildObserverNarrativeState,
   buildObserverSemanticStatus,
 } from './observer-epistemic.js';
+import { OBSERVER_PREMAQC_MESSAGE_TYPE } from '../../../starwell/src/premaqc-contract.js';
 
 function clone(value) {
   if (value === undefined) return undefined;
@@ -62,7 +63,7 @@ export function registerObserverService(registry, { bus = null, timelineLimit = 
       canon_promotion: false,
       source_mutation: false,
     },
-    consumes: ['hearthgate.observer.premaq'],
+    consumes: [OBSERVER_PREMAQC_MESSAGE_TYPE],
     emits: ['hearthgate.deep-current/v1'],
   });
 
