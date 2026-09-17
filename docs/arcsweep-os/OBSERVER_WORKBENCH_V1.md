@@ -25,6 +25,22 @@ A green UI control, HTTP 200, successful tool dispatch, or rendered visual is no
 
 Unknown remains unknown. Unset is not automatically missing. Missing is not automatically error. Narrative is not automatically evidence. A claim is not automatically fact. A visualised mechanism is not automatically an observed mechanism.
 
+## PREMAQC naming law
+
+`PREMAQC` is the current canonical term. Current UI labels, schemas, receipts, storage keys, message types, package checks, and build documentation use PREMAQC.
+
+The former spelling `PREMAQ` is compatibility-only. It may appear only when an old packet, storage key, schema, or transport message is explicitly identified as a legacy alias and mapped into the canonical PREMAQC contract. New state is never written under the legacy name.
+
+Canonical Observer identities are:
+
+```text
+schema:       hearthgate.observer.premaqc/v1
+storage key:  hearthgate.observer.premaqc.v1
+message type: hearthgate.observer.premaqc
+```
+
+Legacy Observer identifiers remain readable during migration, but derived current-state surfaces report the canonical PREMAQC identity and preserve the original legacy identifier only as provenance.
+
 ## Surface layout
 
 ### Semantic truth rail
@@ -177,7 +193,8 @@ The Workbench reads existing ArcSweep/Observer sources rather than creating repl
 - feedback cycles;
 - `premaqcByWorld`;
 - `observatory.deep_time_records`;
-- Observer shared snapshot `hearthgate.observer.premaq.v1`;
+- canonical Observer shared snapshot `hearthgate.observer.premaqc/v1`;
+- compatibility-only legacy Observer snapshot identifiers when encountered;
 - derived DEEP projection;
 - Observer OS semantic/narrative/epistemic builders.
 
@@ -211,13 +228,14 @@ The Workbench v1 is ready for merge when all of the following are demonstrated:
 2. Existing World identity is preserved in the launch context.
 3. Semantic status never claims runtime liveness from snapshot availability alone.
 4. PREMAQC renders without mutating source state.
-5. Claims and evidence remain separate in the narrative/epistemic surfaces.
-6. Rich working notes persist per World and remain explicitly non-canon.
-7. Publishing a witness produces the same receipt id in browser history and, when desktop-hosted, the local witness files.
-8. Boxfire's local watcher can observe a newly published receipt without receiving write authority.
-9. Desktop and web render the same semantic status from the same source fixture, except for explicitly host-specific witness transport fields.
-10. Existing `deep-observer` workflows still operate.
-11. ArcSweep tests and build pass from the same source SHA.
+5. Current Observer schema/storage/message identities use PREMAQC; PREMAQ is compatibility-only.
+6. Claims and evidence remain separate in the narrative/epistemic surfaces.
+7. Rich working notes persist per World and remain explicitly non-canon.
+8. Publishing a witness produces the same receipt id in browser history and, when desktop-hosted, the local witness files.
+9. Boxfire's local watcher can observe a newly published receipt without receiving write authority.
+10. Desktop and web render the same semantic status from the same source fixture, except for explicitly host-specific witness transport fields.
+11. Existing `deep-observer` workflows still operate.
+12. ArcSweep tests and build pass from the same source SHA.
 
 ## Next layer
 
