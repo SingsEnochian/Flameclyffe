@@ -419,7 +419,7 @@ export function mountMagicBook({ host = document.body } = {}) {
         crossing_role: 'encounter',
         snapshot: encounter,
       });
-      const comparison = compareCrossing(crossingOrigin, encounter);
+      let comparison = compareCrossing(crossingOrigin, encounter);
       if (tacCrossing) {
         const encounterReceipt = await sealEncounterReceipt({
           crossing_id: tacCrossing.artifact.crossing_id,
@@ -436,13 +436,16 @@ export function mountMagicBook({ host = document.body } = {}) {
           encounter: encounterReceipt,
           behavioural_delta: comparison.delta,
         });
-        comparison.tac = {
-          artifact_hash: tacCrossing.artifact.artifact_hash,
-          origin_receipt_hash: tacCrossing.origin.receipt_hash,
-          encounter_receipt_hash: encounterReceipt.receipt_hash,
-          observer_receipt_hash: observerReceipt.receipt_hash,
-          evidence_state: observerReceipt.body.evidence_state,
-        };
+        comparison = Object.freeze({
+          ...comparison,
+          tac: Object.freeze({
+            artifact_hash: tacCrossing.artifact.artifact_hash,
+            origin_receipt_hash: tacCrossing.origin.receipt_hash,
+            encounter_receipt_hash: encounterReceipt.receipt_hash,
+            observer_receipt_hash: observerReceipt.receipt_hash,
+            evidence_state: observerReceipt.body.evidence_state,
+          }),
+        });
       }
       const witness = Object.freeze({
         schema: 'arcsweep.temporal-witness.magic-book/1',
