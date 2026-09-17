@@ -71,9 +71,9 @@ export const DEFAULT_SCIENTIFIC_SKILLS = Object.freeze([
     topics: ['narrative', 'claims', 'evidence', 'objections', 'risks', 'research-gaps'],
     capabilities: ['observer.narrative-state'],
     source_refs: [
-      'https://github.com/cyber-dash-tech/revela',
+      'https://github.com/Carasibana/NarrativeNode',
     ],
-    notes: 'Keep narrative state traceable to claims and evidence while preserving objections, risks, gaps, and provenance boundaries.',
+    notes: 'Keep narrative state traceable to claims and evidence while preserving objections, risks, gaps, and provenance boundaries. External donor is design-reference only; ArcSweep implementation remains independently authored.',
   }),
 ]);
 
