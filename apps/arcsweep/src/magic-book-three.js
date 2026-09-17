@@ -257,8 +257,26 @@ export function mountMagicBook({ host = document.body } = {}) {
   };
   scrubber?.addEventListener('input', (event) => scrubWitness(event.target.value));
   scrubber?.addEventListener('change', (event) => scrubWitness(event.target.value, true));
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  } catch (error) {
+    style.remove();
+    shell.remove();
+    window.dispatchEvent(new CustomEvent(RECEIPT_EVENT, { detail: Object.freeze({
+      schema: 'arcsweep.magic-book-receipt/1',
+      receipt_id: id(),
+      occurred_at: now(),
+      object_id: 'arcsweep:magic-book',
+      renderer: 'three',
+      version: MAGIC_BOOK_VERSION,
+      action: 'mount-failed',
+      reason: 'webgl-initialization',
+      error_name: error?.name || 'Error',
+    }) }));
+    return null;
+  }
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, .1, 100);
   camera.position.set(0, .05, 5.2);
