@@ -479,7 +479,6 @@ export function mountMagicBook({ host = document.body } = {}) {
       if (crossingOrigin === activeOrigin) crossingOrigin = null;
       if (tacCrossingPromise === activeTacPromise) tacCrossingPromise = null;
     }
-    }
   } catch (error) {
     emitReceipt('crossing-error', {
       stage: 'release',
