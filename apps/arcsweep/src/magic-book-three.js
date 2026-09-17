@@ -3,16 +3,24 @@ import * as THREE from 'three';
 export const MAGIC_BOOK_VERSION = 'arcsweep.magic-book-three/v1';
 const RECEIPT_EVENT = 'arcsweep:magic-book-receipt';
 const STORAGE_KEY = 'hearthgate.arcsweep.magic-book.v1';
+const PAGE_OBJECT_ID = 'arcsweep:magic-book:page:starsong-001';
+const PAGE_SIGNATURE = Object.freeze({
+  kind: 'magic-book-page',
+  book_id: 'arcsweep:magic-book',
+  page_id: PAGE_OBJECT_ID,
+  world: 'starsong',
+  continuity: 'identity-before-form',
+});
 
 const now = () => new Date().toISOString();
 const id = () => crypto.randomUUID?.() || `book-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-function emitReceipt(action, detail = {}) {
+function emitReceipt(action, detail = {}, objectId = 'arcsweep:magic-book') {
   const receipt = Object.freeze({
     schema: 'arcsweep.magic-book-receipt/1',
     receipt_id: id(),
     occurred_at: now(),
-    object_id: 'arcsweep:magic-book',
+    object_id: objectId,
     renderer: 'three',
     version: MAGIC_BOOK_VERSION,
     action,
@@ -36,6 +44,21 @@ function makePage(material, x) {
   const page = new THREE.Mesh(geometry, material);
   page.position.set(x, 0, 0.035);
   return page;
+}
+
+function pageRepresentation(progress) {
+  if (progress <= .02) return 'resting-page';
+  if (progress >= .98) return 'turned-page';
+  return 'deforming-page';
+}
+
+function pageReceipt(action, progress, detail = {}) {
+  return emitReceipt(action, {
+    continuity_signature: PAGE_SIGNATURE,
+    representation: pageRepresentation(progress),
+    transform_progress: Number(THREE.MathUtils.clamp(progress, 0, 1).toFixed(4)),
+    ...detail,
+  }, PAGE_OBJECT_ID);
 }
 
 function curlPage(page, progress) {
@@ -127,6 +150,7 @@ export function mountMagicBook({ host = document.body } = {}) {
   let dragging = false;
   let startX = 0;
   let startAngle = 0;
+  let pageRepresentationState = pageRepresentation(0);
   const reducedMotion = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 
   const persist = (action) => {
@@ -184,13 +208,24 @@ export function mountMagicBook({ host = document.body } = {}) {
       if (target === 0 && coverAngle < .04) setPhase('closed', 'closed');
     } else clock.getDelta();
     frontPivot.rotation.y = -coverAngle;
-    curlPage(rightPage, Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
+    const pageProgress = Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI);
+    curlPage(rightPage, pageProgress);
+    const nextRepresentation = pageRepresentation(pageProgress);
+    if (nextRepresentation !== pageRepresentationState) {
+      pageReceipt('representation-changed', pageProgress, {
+        from: pageRepresentationState,
+        to: nextRepresentation,
+        continuity_preserved: true,
+      });
+      pageRepresentationState = nextRepresentation;
+    }
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
 
   shell.dataset.open = String(phase === 'open');
   emitReceipt('mounted', { restored_phase: phase, restored: Boolean(state.updated_at) });
+  pageReceipt('object-observed', 0, { continuity_preserved: true });
   frame();
 
   return { shell, scene, book, renderer, getState: () => ({ phase, coverAngle }) };
