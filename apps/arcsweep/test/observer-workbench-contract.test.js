@@ -6,6 +6,13 @@ import { fileURLToPath } from 'node:url';
 import { APPLET_CATALOGUE, appletLaunchTarget } from '../src/applets.js';
 import { createScientificSkillRouter } from '../src/os/scientific-skill-service.js';
 import { buildObserverEpistemicLedger, buildObserverSemanticStatus } from '../src/os/observer-epistemic.js';
+import {
+  OBSERVER_PREMAQC_MESSAGE_TYPE,
+  OBSERVER_PREMAQC_SCHEMA,
+  OBSERVER_PREMAQC_STORAGE_KEY,
+  PREMAQC_NAMING_LAW,
+  canonicalPremaqcSchema,
+} from '../../starwell/src/premaqc-contract.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const arcsweepRoot = path.resolve(here, '..');
@@ -37,9 +44,25 @@ test('Observer Workbench is a first-class launch-target applet and packaged rout
   assert.match(vite, /observer:\s*resolve\(ARCSWEEP_ROOT, 'observer\/index\.html'\)/);
 });
 
+test('Observer Workbench uses PREMAQC canonically and keeps PREMAQ compatibility-only', () => {
+  assert.equal(PREMAQC_NAMING_LAW.canonical, 'PREMAQC');
+  assert.equal(PREMAQC_NAMING_LAW.legacy_status, 'compatibility-only');
+  assert.equal(OBSERVER_PREMAQC_SCHEMA, 'hearthgate.observer.premaqc/v1');
+  assert.equal(OBSERVER_PREMAQC_STORAGE_KEY, 'hearthgate.observer.premaqc.v1');
+  assert.equal(OBSERVER_PREMAQC_MESSAGE_TYPE, 'hearthgate.observer.premaqc');
+  assert.equal(canonicalPremaqcSchema('hearthgate.observer.premaq/v1'), OBSERVER_PREMAQC_SCHEMA);
+
+  const bridge = read('src/observer-bridge.js');
+  const workbench = read('src/observer-workbench.js');
+  assert.match(bridge, /OBSERVER_PREMAQC_SCHEMA/);
+  assert.match(bridge, /OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS/);
+  assert.match(workbench, /OBSERVER_PREMAQC_STORAGE_KEY/);
+  assert.match(workbench, /OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS/);
+});
+
 test('Observer Workbench preserves the semantic boundaries of the merged instrument', () => {
   const semantic = buildObserverSemanticStatus({
-    snapshot: { schema: 'hearthgate.observer.premaq/v1', field: { P: 0.5 } },
+    snapshot: { schema: OBSERVER_PREMAQC_SCHEMA, field: { P: 0.5 } },
     bridgePresent: true,
   });
   assert.equal(semantic.availability.state, 'available');
@@ -50,7 +73,7 @@ test('Observer Workbench preserves the semantic boundaries of the merged instrum
 
   const ledger = buildObserverEpistemicLedger({
     snapshot: {
-      schema: 'hearthgate.observer.premaq/v1',
+      schema: OBSERVER_PREMAQC_SCHEMA,
       narrative_state: {
         claims: [{ id: 'c1', text: 'A claim', evidence_refs: ['e1'] }],
         evidence: [{ id: 'e1', text: 'An observation', epistemic_status: 'observed' }],
