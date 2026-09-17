@@ -16,5 +16,8 @@ contextBridge.exposeInMainWorld('arcsweepDesktop', Object.freeze({
   readAttachmentPayload: (attachment) => ipcRenderer.invoke('arcsweep:attachment:read-payload', attachment),
   writeAttachmentPayload: (payload) => ipcRenderer.invoke('arcsweep:attachment:write-payload', payload),
   showDataFolder: () => ipcRenderer.invoke('arcsweep:storage:show'),
+  publishObserverWitness: (packet) => ipcRenderer.invoke('arcsweep:observer-witness:publish', packet),
+  readObserverWitness: (options = {}) => ipcRenderer.invoke('arcsweep:observer-witness:read', options),
+  getObserverWitnessStatus: () => ipcRenderer.invoke('arcsweep:observer-witness:status'),
   runtime: Object.freeze({ desktop: true, platform: process.platform }),
 }));

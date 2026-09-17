@@ -26,6 +26,7 @@
     "arcsweep:preview": "vite preview --config apps/arcsweep/vite.config.js",
     "prearcsweep:test": "npm run spine:verify",
     "arcsweep:test": "node --test apps/arcsweep/test/*.test.js apps/arcsweep/test/*.test.cjs",
+    "arcsweep:observer:witness": "node apps/arcsweep/scripts/observer-witness-tail.mjs --watch",
     "arcsweep:smoke:terra-prime": "node scripts/arcsweep-terra-prime-live-smoke.mjs",
     "lanternbridge:interop": "node scripts/lanternbridge-v02-interop.mjs",
     "arcsweep:stage:desktop": "node apps/arcsweep/desktop/stage.cjs",

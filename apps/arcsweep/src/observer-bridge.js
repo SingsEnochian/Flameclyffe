@@ -1,5 +1,19 @@
-const STORAGE_KEY = 'hearthgate.observer.premaq.v1';
-const MESSAGE_TYPE = 'hearthgate.observer.premaq';
+import {
+  buildObserverNarrativeState,
+  buildObserverSemanticStatus,
+} from './os/observer-epistemic.js';
+import {
+  OBSERVER_PREMAQC_LEGACY_MESSAGE_TYPES,
+  OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS,
+  OBSERVER_PREMAQC_MESSAGE_TYPE,
+  OBSERVER_PREMAQC_SCHEMA,
+  OBSERVER_PREMAQC_STORAGE_KEY,
+  PREMAQC_TERM,
+  canonicalPremaqcSchema,
+} from '../../starwell/src/premaqc-contract.js';
+
+const STORAGE_KEY = OBSERVER_PREMAQC_STORAGE_KEY;
+const MESSAGE_TYPE = OBSERVER_PREMAQC_MESSAGE_TYPE;
 const REMOTE_FIELD_PATH = 'https://singsenochian.github.io/Flameclyffe/data/deep-current.json';
 
 const nativeFetch = window.fetch.bind(window);
@@ -33,23 +47,38 @@ function projectAxis(receipts, field, axis, fallback) {
   return output;
 }
 
-function readSnapshot() {
+function readStorageKey(key) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
 }
 
+function readSnapshot() {
+  const canonical = readStorageKey(STORAGE_KEY);
+  if (canonical) return canonical;
+  for (const legacyKey of OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS) {
+    const legacy = readStorageKey(legacyKey);
+    if (legacy) return legacy;
+  }
+  return null;
+}
+
+function currentSnapshot() {
+  return latestSnapshot || readSnapshot();
+}
+
 function writeSnapshot(snapshot) {
-  if (!snapshot || typeof snapshot !== 'object') return;
+  if (!snapshot || typeof snapshot !== 'object') return false;
   latestSnapshot = snapshot;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
   } catch {
     // The bridge still works for the current page through memory and postMessage.
   }
+  return true;
 }
 
 function observerProjection(snapshot) {
@@ -102,10 +131,13 @@ function toDeepPayload(snapshot) {
   const bt = finite(direct.bt ?? raw.bt ?? raw.space_weather?.solar_wind?.bt, null);
   const speed = finite(direct.solarWind ?? direct.speed ?? raw.space_weather?.solar_wind?.speed, null);
   const weather = raw.weather || {};
+  const sourceSchema = snapshot?.schema || null;
+  const canonicalSchema = canonicalPremaqcSchema(sourceSchema || OBSERVER_PREMAQC_SCHEMA);
 
   return {
     schema: 'hearthgate.deep-current/v1',
-    generated_at: snapshot?.generated_at || snapshot?.generatedAt || new Date().toISOString(),
+    generated_at: snapshot?.generated_at || snapshot?.generatedAt || raw.generated_at || raw.generatedAt || null,
+    projected_at: new Date().toISOString(),
     location: {
       label: snapshot?.location?.label || raw.location?.label || 'Observer shared field',
     },
@@ -134,9 +166,14 @@ function toDeepPayload(snapshot) {
       age_days: finite(direct.moonAge ?? raw.moon?.age_days, null),
     },
     provenance: {
-      source: 'DEEP Observer shared PREMAQ spine',
+      source: 'DEEP Observer shared PREMAQC spine',
       transport: snapshot?.transport || 'same-origin observer bridge',
-      schema: snapshot?.schema || 'hearthgate.observer.premaq/v1',
+      schema: canonicalSchema,
+      source_schema: sourceSchema,
+      vocabulary: PREMAQC_TERM,
+      legacy_schema_accepted: Boolean(sourceSchema && canonicalSchema !== sourceSchema),
+      source_generated_at_preserved: true,
+      unknowns_preserved: true,
     },
   };
 }
@@ -154,7 +191,7 @@ function isDeepFieldRequest(input) {
 
 window.fetch = async (input, init) => {
   if (isDeepFieldRequest(input)) {
-    const snapshot = latestSnapshot || readSnapshot();
+    const snapshot = currentSnapshot();
     if (snapshot) {
       return new Response(JSON.stringify(toDeepPayload(snapshot)), {
         status: 200,
@@ -179,25 +216,54 @@ function requestFieldRefresh() {
 window.addEventListener('message', (event) => {
   if (event.source !== window.parent) return;
   const message = event.data;
-  if (!message || message.type !== MESSAGE_TYPE) return;
-  writeSnapshot(message.payload);
-  requestFieldRefresh();
+  if (!message || (message.type !== MESSAGE_TYPE && !OBSERVER_PREMAQC_LEGACY_MESSAGE_TYPES.includes(message.type))) return;
+  if (writeSnapshot(message.payload)) requestFieldRefresh();
 });
 
 window.addEventListener('storage', (event) => {
-  if (event.key !== STORAGE_KEY || !event.newValue) return;
+  const acceptedKeys = [STORAGE_KEY, ...OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS];
+  if (!acceptedKeys.includes(event.key)) return;
+  if (!event.newValue) {
+    latestSnapshot = readSnapshot();
+    requestFieldRefresh();
+    return;
+  }
   try {
     latestSnapshot = JSON.parse(event.newValue);
     requestFieldRefresh();
   } catch {
-    // Ignore malformed external storage writes.
+    // Ignore malformed external storage writes and retain the last valid snapshot.
   }
 });
 
 window.__arcsweepObserverBridge = Object.freeze({
-  schema: 'hearthgate.observer.premaq/v1',
+  schema: OBSERVER_PREMAQC_SCHEMA,
   storageKey: STORAGE_KEY,
-  connected: Boolean(latestSnapshot),
+  messageType: MESSAGE_TYPE,
+  legacyStorageKeys: [...OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS],
+  legacyMessageTypes: [...OBSERVER_PREMAQC_LEGACY_MESSAGE_TYPES],
+  get connected() {
+    return Boolean(currentSnapshot());
+  },
+  getSnapshot() {
+    return copyExact(currentSnapshot());
+  },
+  getStatus() {
+    return buildObserverSemanticStatus({
+      snapshot: currentSnapshot(),
+      bridgePresent: true,
+      schema: OBSERVER_PREMAQC_SCHEMA,
+      storageKey: STORAGE_KEY,
+    });
+  },
+  getDeepPayload() {
+    const snapshot = currentSnapshot();
+    if (!snapshot) throw new Error('Observer snapshot bridge is unavailable.');
+    return toDeepPayload(snapshot);
+  },
+  getNarrativeState() {
+    return buildObserverNarrativeState(currentSnapshot());
+  },
 });
 
 if (window.parent !== window) {
