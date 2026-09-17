@@ -54,6 +54,14 @@ test('Magic Book uses Three.js and emits durable receipt-shaped events', () => {
   assert.match(source, /THREE\.MathUtils\.lerp\(from, to, t\)/);
   assert.match(source, /witness-scrubbed/);
   assert.match(source, /temporal_position/);
+  assert.match(source, /restoredAngle/);
+  assert.match(source, /renderedWidth/);
+  assert.match(source, /renderedHeight/);
+  assert.match(source, /const destroy =/);
+  assert.match(source, /cancelAnimationFrame/);
+  assert.match(source, /renderer\.dispose/);
+  assert.match(source, /geometry\?\.dispose/);
+  assert.doesNotMatch(source, /window\.addEventListener\('arcsweep:core-ready'/);
 });
 
 test('Magic Book mounts only after normal core readiness', () => {
