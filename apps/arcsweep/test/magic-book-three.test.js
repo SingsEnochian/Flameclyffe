@@ -8,7 +8,7 @@ const bootstrap = fs.readFileSync(new URL('../src/main-bootstrap.js', import.met
 test('Magic Book uses Three.js and emits durable receipt-shaped events', () => {
   assert.match(source, /from 'three'/);
   assert.match(source, /arcsweep\.magic-book-receipt\/1/);
-  assert.match(source, /object_id: 'arcsweep:magic-book'/);
+  assert.match(source, /objectId = 'arcsweep:magic-book'/);
   assert.match(source, /localStorage\.setItem\(STORAGE_KEY/);
   assert.match(source, /pointerdown/);
   assert.match(source, /pointermove/);
