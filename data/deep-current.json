@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-17T10:13:39.354Z",
+  "generated_at": "2026-09-17T15:08:44.539Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-17T06:00",
-    "sky": "Night",
+    "time": "2026-09-17T11:00",
+    "sky": "Day",
     "current": {
-      "time": "2026-09-17T06:00",
+      "time": "2026-09-17T11:00",
       "interval": 900,
-      "temperature_2m": 73.5,
-      "relative_humidity_2m": 76,
-      "is_day": 0,
+      "temperature_2m": 81.8,
+      "relative_humidity_2m": 62,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
-      "cloud_cover": 2,
-      "pressure_msl": 1021.6,
-      "wind_speed_10m": 6.3,
-      "wind_direction_10m": 58
+      "cloud_cover": 3,
+      "pressure_msl": 1021.2,
+      "wind_speed_10m": 11.4,
+      "wind_direction_10m": 45
     }
   },
   "space_weather": {
     "kp": {
-      "value": 1.67,
-      "time_tag": "2026-09-17T06:00:00",
-      "a_running": 6
+      "value": 3,
+      "time_tag": "2026-09-17T12:00:00",
+      "a_running": 15
     },
     "solar_wind": {
-      "time_tag": "2026-09-17T10:05:00Z",
-      "bz": 0,
-      "bt": 4,
+      "time_tag": "2026-09-17T15:03:00Z",
+      "bz": 1,
+      "bt": 5,
       "density": null,
-      "speed": 469
+      "speed": 448
     }
   },
   "moon": {
-    "age_days": 5.57,
-    "illumination": 31.2,
+    "age_days": 5.78,
+    "illumination": 33.2,
     "name": "First Quarter"
   },
   "field": {
-    "P": 0.5555555555555558,
-    "C": 0.7204761904761905,
-    "R": 0.8158333333333333,
-    "E": 0.6515934065934067,
-    "M": 0.312,
-    "A": 0.7569230769230769,
+    "P": 0.6111111111111116,
+    "C": 0.6057142857142858,
+    "R": 0.9033333333333333,
+    "E": 0.6927472527472528,
+    "M": 0.332,
+    "A": 0.9730769230769231,
     "Q": null,
-    "dpdt": 0.8158333333333333,
+    "dpdt": 0.9033333333333333,
     "dynamic_axes": [
       "P",
       "C",
