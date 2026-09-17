@@ -216,6 +216,18 @@ export function mountMagicBook({ host = document.body } = {}) {
     status.textContent = `Time Room replay · ${edge} · ${pageRepresentationState}`;
     return snapshot;
   };
+  if (witnesses.length) {
+    const latestWitness = witnesses[witnessIndex];
+    queueMicrotask(() => {
+      showCrossing(latestWitness.comparison, `${witnessIndex + 1}/${witnesses.length}`);
+      emitReceipt('witness-restored', {
+        witness_id: latestWitness.witness_id,
+        recorded_at: latestWitness.recorded_at,
+        replay_index: witnessIndex,
+        witness_count: witnesses.length,
+      }, PAGE_OBJECT_ID);
+    });
+  }
   const replayWitness = (index, edge = 'encounter') => {
     if (!witnesses.length) return;
     witnessIndex = THREE.MathUtils.clamp(index, 0, witnesses.length - 1);
