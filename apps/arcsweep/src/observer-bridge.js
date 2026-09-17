@@ -1,3 +1,8 @@
+import {
+  buildObserverNarrativeState,
+  buildObserverSemanticStatus,
+} from './os/observer-epistemic.js';
+
 const STORAGE_KEY = 'hearthgate.observer.premaq.v1';
 const MESSAGE_TYPE = 'hearthgate.observer.premaq';
 const REMOTE_FIELD_PATH = 'https://singsenochian.github.io/Flameclyffe/data/deep-current.json';
@@ -42,14 +47,19 @@ function readSnapshot() {
   }
 }
 
+function currentSnapshot() {
+  return latestSnapshot || readSnapshot();
+}
+
 function writeSnapshot(snapshot) {
-  if (!snapshot || typeof snapshot !== 'object') return;
+  if (!snapshot || typeof snapshot !== 'object') return false;
   latestSnapshot = snapshot;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
   } catch {
     // The bridge still works for the current page through memory and postMessage.
   }
+  return true;
 }
 
 function observerProjection(snapshot) {
@@ -105,7 +115,8 @@ function toDeepPayload(snapshot) {
 
   return {
     schema: 'hearthgate.deep-current/v1',
-    generated_at: snapshot?.generated_at || snapshot?.generatedAt || new Date().toISOString(),
+    generated_at: snapshot?.generated_at || snapshot?.generatedAt || raw.generated_at || raw.generatedAt || null,
+    projected_at: new Date().toISOString(),
     location: {
       label: snapshot?.location?.label || raw.location?.label || 'Observer shared field',
     },
@@ -134,9 +145,11 @@ function toDeepPayload(snapshot) {
       age_days: finite(direct.moonAge ?? raw.moon?.age_days, null),
     },
     provenance: {
-      source: 'DEEP Observer shared PREMAQ spine',
+      source: 'DEEP Observer shared PREMAQC spine',
       transport: snapshot?.transport || 'same-origin observer bridge',
       schema: snapshot?.schema || 'hearthgate.observer.premaq/v1',
+      source_generated_at_preserved: true,
+      unknowns_preserved: true,
     },
   };
 }
@@ -154,7 +167,7 @@ function isDeepFieldRequest(input) {
 
 window.fetch = async (input, init) => {
   if (isDeepFieldRequest(input)) {
-    const snapshot = latestSnapshot || readSnapshot();
+    const snapshot = currentSnapshot();
     if (snapshot) {
       return new Response(JSON.stringify(toDeepPayload(snapshot)), {
         status: 200,
@@ -180,24 +193,49 @@ window.addEventListener('message', (event) => {
   if (event.source !== window.parent) return;
   const message = event.data;
   if (!message || message.type !== MESSAGE_TYPE) return;
-  writeSnapshot(message.payload);
-  requestFieldRefresh();
+  if (writeSnapshot(message.payload)) requestFieldRefresh();
 });
 
 window.addEventListener('storage', (event) => {
-  if (event.key !== STORAGE_KEY || !event.newValue) return;
+  if (event.key !== STORAGE_KEY) return;
+  if (!event.newValue) {
+    latestSnapshot = null;
+    requestFieldRefresh();
+    return;
+  }
   try {
     latestSnapshot = JSON.parse(event.newValue);
     requestFieldRefresh();
   } catch {
-    // Ignore malformed external storage writes.
+    // Ignore malformed external storage writes and retain the last valid snapshot.
   }
 });
 
 window.__arcsweepObserverBridge = Object.freeze({
   schema: 'hearthgate.observer.premaq/v1',
   storageKey: STORAGE_KEY,
-  connected: Boolean(latestSnapshot),
+  get connected() {
+    return Boolean(currentSnapshot());
+  },
+  getSnapshot() {
+    return copyExact(currentSnapshot());
+  },
+  getStatus() {
+    return buildObserverSemanticStatus({
+      snapshot: currentSnapshot(),
+      bridgePresent: true,
+      schema: 'hearthgate.observer.premaq/v1',
+      storageKey: STORAGE_KEY,
+    });
+  },
+  getDeepPayload() {
+    const snapshot = currentSnapshot();
+    if (!snapshot) throw new Error('Observer snapshot bridge is unavailable.');
+    return toDeepPayload(snapshot);
+  },
+  getNarrativeState() {
+    return buildObserverNarrativeState(currentSnapshot());
+  },
 });
 
 if (window.parent !== window) {
