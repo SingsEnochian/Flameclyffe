@@ -31,10 +31,27 @@ function writeState(next) {
 }
 
 function makePage(material, x) {
-  const geometry = new THREE.PlaneGeometry(1.38, 1.84, 24, 2);
+  const geometry = new THREE.PlaneGeometry(1.38, 1.84, 24, 6);
+  geometry.userData.rest = Float32Array.from(geometry.attributes.position.array);
   const page = new THREE.Mesh(geometry, material);
   page.position.set(x, 0, 0.035);
   return page;
+}
+
+function curlPage(page, progress) {
+  const position = page.geometry.attributes.position;
+  const rest = page.geometry.userData.rest;
+  const p = THREE.MathUtils.clamp(progress, 0, 1);
+  for (let i = 0; i < position.count; i += 1) {
+    const offset = i * 3;
+    const x = rest[offset];
+    const y = rest[offset + 1];
+    const u = (x + .69) / 1.38;
+    const fold = Math.sin(u * Math.PI) * p;
+    position.setXYZ(i, x - .13 * fold * u, y, rest[offset + 2] + .34 * fold);
+  }
+  position.needsUpdate = true;
+  page.geometry.computeVertexNormals();
 }
 
 export function mountMagicBook({ host = document.body } = {}) {
@@ -167,6 +184,7 @@ export function mountMagicBook({ host = document.body } = {}) {
       if (target === 0 && coverAngle < .04) setPhase('closed', 'closed');
     } else clock.getDelta();
     frontPivot.rotation.y = -coverAngle;
+    curlPage(rightPage, Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
