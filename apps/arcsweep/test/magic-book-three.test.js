@@ -76,6 +76,10 @@ test('Magic Book uses Three.js and emits durable receipt-shaped events', () => {
   assert.match(source, /let comparison = compareCrossing/);
   assert.match(source, /comparison = Object\.freeze/);
   assert.doesNotMatch(source, /comparison\.tac\s*=/);
+  assert.match(source, /let tacCrossingPromise = null/);
+  assert.match(source, /tacCrossingPromise = \(async \(\) =>/);
+  assert.match(source, /const tacCrossing = await tacCrossingPromise/);
+  assert.doesNotMatch(source, /let tacCrossing = null/);
 });
 
 test('Magic Book mounts only after normal core readiness', () => {
