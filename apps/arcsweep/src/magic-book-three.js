@@ -137,6 +137,7 @@ export function mountMagicBook({ host = document.body } = {}) {
       <strong>The Book is the bridge.</strong>
       <span data-book-status>Touch the cover to open.</span>
     </div>
+    <button class="magic-book-tab" type="button" data-book-toggle aria-label="Open or close Magic Book">BOOK</button>
     <aside class="magic-book-observatory" aria-label="Magic Book Observatory" hidden>
       <small>OBSERVER · TAC CROSSING</small>
       <strong data-observer-object>Waiting for a crossing…</strong>
@@ -171,12 +172,13 @@ export function mountMagicBook({ host = document.body } = {}) {
     #arcsweep-magic-book-three canvas{width:100%;height:100%;touch-action:none}
     .magic-book-copy{position:absolute;bottom:max(1.25rem,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:grid;gap:.2rem;text-align:center;color:#eadfbf;pointer-events:none;text-shadow:0 2px 16px #000}
     .magic-book-copy small{letter-spacing:.18em}.magic-book-copy strong{font:600 clamp(1.15rem,3vw,1.7rem)/1.2 Georgia,serif}.magic-book-copy span{opacity:.72;font-size:.82rem}
+.magic-book-tab{position:absolute;top:max(1rem,env(safe-area-inset-top));left:1rem;z-index:3;min-width:4.5rem;min-height:2.75rem;border:1px solid #8d7647;border-radius:.6rem;background:#111816;color:#eadfbf;letter-spacing:.12em;pointer-events:auto}
     .magic-book-observatory{position:absolute;top:max(1rem,env(safe-area-inset-top));right:1rem;width:min(24rem,calc(100vw - 2rem));padding:1rem;border:1px solid #8d7647;border-radius:.8rem;background:rgba(8,14,12,.9);color:#e8dfc8;font:500 .78rem/1.35 system-ui,sans-serif;box-shadow:0 12px 48px #0008}
     .magic-book-observatory small{letter-spacing:.14em;opacity:.68}.magic-book-observatory strong{display:block;margin:.3rem 0 .7rem;font-family:ui-monospace,monospace}.magic-book-observatory dl{margin:0;display:grid;gap:.35rem}.magic-book-observatory dl div{display:grid;grid-template-columns:7rem 1fr;gap:.5rem}.magic-book-observatory dt{opacity:.62}.magic-book-observatory dd{margin:0;overflow-wrap:anywhere;font-family:ui-monospace,monospace}
     #arcsweep-magic-book-three[data-open="true"]{background:transparent;pointer-events:none}
     #arcsweep-magic-book-three[data-open="true"] canvas{opacity:.16;pointer-events:none}
     #arcsweep-magic-book-three[data-open="true"] .magic-book-copy{opacity:.16}
-    #arcsweep-magic-book-three[data-open="true"] .magic-book-observatory{pointer-events:auto}
+    #arcsweep-magic-book-three[data-open="true"] .magic-book-observatory,#arcsweep-magic-book-three[data-open="true"] .magic-book-tab{pointer-events:auto}
     @media(prefers-reduced-motion:reduce){#arcsweep-magic-book-three{transition:none}}
   `;
   document.head.append(style);
@@ -184,6 +186,7 @@ export function mountMagicBook({ host = document.body } = {}) {
   const canvas = shell.querySelector('canvas');
   const status = shell.querySelector('[data-book-status]');
   const observatory = shell.querySelector('.magic-book-observatory');
+  const bookToggle = shell.querySelector('[data-book-toggle]');
   const observerField = (name) => shell.querySelector(`[data-observer-${name}]`);
   const shortHash = (value) => value ? `${value.slice(0, 10)}…${value.slice(-6)}` : '—';
   let witnesses = readWitnesses();
@@ -341,7 +344,15 @@ export function mountMagicBook({ host = document.body } = {}) {
     if (status.textContent.startsWith('Time Room')) status.textContent = phase === 'open' ? 'Book open · ArcSweep continues beneath the page.' : 'Touch the cover to open.';
     startX = pointerX(event);
     startAngle = coverAngle;
-    emitReceipt('interaction-started', { phase, pointer_type: event.pointerType });
+    emitReceipt('interaction-started', {
+      phase,
+      pointer_type: event.pointerType,
+      pointer_id: event.pointerId,
+      pressure: Number((event.pressure ?? 0).toFixed(3)),
+      tilt_x: event.tiltX ?? null,
+      tilt_y: event.tiltY ?? null,
+      is_primary: event.isPrimary ?? null,
+    });
     crossingOrigin = snapshotPage(Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
     const crossingId = id();
     const artifact = await createArtifact({
@@ -371,11 +382,19 @@ export function mountMagicBook({ host = document.body } = {}) {
     coverAngle = THREE.MathUtils.clamp(startAngle + delta, 0, Math.PI);
     target = coverAngle;
   });
-  const release = async () => {
+  const release = async (event) => {
     if (!dragging) return;
     dragging = false;
     target = coverAngle > Math.PI * .32 ? Math.PI * .985 : 0;
-    emitReceipt('interaction-released', { target: target > 1 ? 'open' : 'closed' });
+    emitReceipt('interaction-released', {
+      target: target > 1 ? 'open' : 'closed',
+      input_evidence: {
+        pointer_type: event?.pointerType ?? null,
+        pressure: Number((event?.pressure ?? 0).toFixed(3)),
+        tilt_x: event?.tiltX ?? null,
+        tilt_y: event?.tiltY ?? null,
+      },
+    });
     if (crossingOrigin) {
       const encounter = snapshotPage(Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
       pageReceipt('crossing-encounter-sealed', encounter.transform_progress, {
@@ -435,6 +454,12 @@ export function mountMagicBook({ host = document.body } = {}) {
   };
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
+  bookToggle?.addEventListener('click', () => {
+    const opening = target < 1;
+    target = opening ? Math.PI * .985 : 0;
+    status.textContent = opening ? 'Opening Book…' : 'Closing Book…';
+    emitReceipt('book-toggle-requested', { target: opening ? 'open' : 'closed', input: 'accessible-button' });
+  });
 
   const clock = new THREE.Clock();
   let frameId = 0;
