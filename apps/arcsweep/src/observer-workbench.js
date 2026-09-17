@@ -1,6 +1,10 @@
 import './observer-bridge.js';
 import { ARCSWEEP_LOCAL_STATE_KEY } from './durable-workspace-state.js';
 import {
+  OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS,
+  OBSERVER_PREMAQC_STORAGE_KEY,
+} from '../../starwell/src/premaqc-contract.js';
+import {
   buildObserverEpistemicLedger,
   buildObserverNarrativeState,
   buildObserverSemanticStatus,
@@ -15,7 +19,7 @@ import {
 } from './observer-witness.js';
 
 const NOTES_KEY = 'hearthgate.arcsweep.observer-workbench.notes.v1';
-const OBSERVER_SNAPSHOT_KEY = 'hearthgate.observer.premaq.v1';
+const OBSERVER_SNAPSHOT_KEY = OBSERVER_PREMAQC_STORAGE_KEY;
 const app = document.querySelector('#observer-workbench');
 const desktop = globalThis.arcsweepDesktop ?? globalThis.arcsweep ?? null;
 const skillRouter = createScientificSkillRouter();
@@ -52,11 +56,21 @@ function parseJson(raw, fallback = null) {
   try { return JSON.parse(raw); } catch { return fallback; }
 }
 
+function readSnapshotKey(key) {
+  try { return parseJson(localStorage.getItem(key), null); }
+  catch { return null; }
+}
+
 function readObserverSnapshot() {
   const bridge = globalThis.__arcsweepObserverBridge;
   if (bridge?.getSnapshot) return bridge.getSnapshot();
-  try { return parseJson(localStorage.getItem(OBSERVER_SNAPSHOT_KEY), null); }
-  catch { return null; }
+  const canonical = readSnapshotKey(OBSERVER_SNAPSHOT_KEY);
+  if (canonical) return canonical;
+  for (const legacyKey of OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS) {
+    const legacy = readSnapshotKey(legacyKey);
+    if (legacy) return legacy;
+  }
+  return null;
 }
 
 async function loadWorkspace() {
