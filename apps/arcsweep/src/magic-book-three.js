@@ -325,7 +325,7 @@ export function mountMagicBook({ host = document.body } = {}) {
   let startAngle = 0;
   let pageRepresentationState = pageRepresentation(0);
   let crossingOrigin = null;
-  let tacCrossing = null;
+  let tacCrossingPromise = null;
   const reducedMotion = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 
   const persist = (action) => {
@@ -373,26 +373,29 @@ export function mountMagicBook({ host = document.body } = {}) {
     });
     crossingOrigin = snapshotPage(Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
     const crossingId = id();
-    const artifact = await createArtifact({
-      crossing_id: crossingId,
-      payload: crossingOrigin,
-      provenance: { object_id: PAGE_OBJECT_ID, surface: 'magic-book-three' },
-    });
-    const origin = await sealOriginReceipt({
-      crossing_id: crossingId,
-      context_id: 'magic-book:pre-transform',
-      artifact_hash: artifact.artifact_hash,
-      anticipated_recipient: 'magic-book:post-transform',
-      anticipated_effect: 'representation may change while continuity survives',
-      reason_for_persisting: 'prove page identity across representation change',
-      knowledge_available: crossingOrigin,
-    });
-    tacCrossing = { artifact, origin };
-    pageReceipt('crossing-origin-sealed', crossingOrigin.transform_progress, {
-      crossing_role: 'origin',
-      snapshot: crossingOrigin,
-      tac_receipt_hash: origin.receipt_hash,
-    });
+    const originSnapshot = crossingOrigin;
+    tacCrossingPromise = (async () => {
+      const artifact = await createArtifact({
+        crossing_id: crossingId,
+        payload: originSnapshot,
+        provenance: { object_id: PAGE_OBJECT_ID, surface: 'magic-book-three' },
+      });
+      const origin = await sealOriginReceipt({
+        crossing_id: crossingId,
+        context_id: 'magic-book:pre-transform',
+        artifact_hash: artifact.artifact_hash,
+        anticipated_recipient: 'magic-book:post-transform',
+        anticipated_effect: 'representation may change while continuity survives',
+        reason_for_persisting: 'prove page identity across representation change',
+        knowledge_available: originSnapshot,
+      });
+      pageReceipt('crossing-origin-sealed', originSnapshot.transform_progress, {
+        crossing_role: 'origin',
+        snapshot: originSnapshot,
+        tac_receipt_hash: origin.receipt_hash,
+      });
+      return { artifact, origin };
+    })();
   });
   canvas.addEventListener('pointermove', (event) => {
     if (!dragging) return;
@@ -420,7 +423,8 @@ export function mountMagicBook({ host = document.body } = {}) {
         snapshot: encounter,
       });
       let comparison = compareCrossing(crossingOrigin, encounter);
-      if (tacCrossing) {
+      if (tacCrossingPromise) {
+        const tacCrossing = await tacCrossingPromise;
         const encounterReceipt = await sealEncounterReceipt({
           crossing_id: tacCrossing.artifact.crossing_id,
           context_id: 'magic-book:post-transform',
@@ -470,7 +474,7 @@ export function mountMagicBook({ host = document.body } = {}) {
         representation_changed: comparison.representation_changed,
       }, PAGE_OBJECT_ID);
       crossingOrigin = null;
-      tacCrossing = null;
+      tacCrossingPromise = null;
     }
   };
   canvas.addEventListener('pointerup', release);
