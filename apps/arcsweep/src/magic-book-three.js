@@ -157,6 +157,11 @@ export function mountMagicBook({ host = document.body } = {}) {
         <button type="button" data-witness-origin>Origin</button>
         <button type="button" data-witness-encounter>Encounter</button>
       </div>
+      <label class="magic-book-time-scrubber">
+        <span>TIME ROOM</span>
+        <input type="range" min="0" max="1000" value="1000" step="1" data-witness-scrubber aria-label="Scrub witnessed crossing through time">
+        <output data-witness-scrub-output>100%</output>
+      </label>
     </aside>`;
   host.prepend(shell);
 
@@ -224,6 +229,28 @@ export function mountMagicBook({ host = document.body } = {}) {
   shell.querySelector('[data-witness-next]')?.addEventListener('click', () => replayWitness(witnessIndex + 1));
   shell.querySelector('[data-witness-origin]')?.addEventListener('click', () => replayWitness(witnessIndex, 'origin'));
   shell.querySelector('[data-witness-encounter]')?.addEventListener('click', () => replayWitness(witnessIndex, 'encounter'));
+  const scrubber = shell.querySelector('[data-witness-scrubber]');
+  const scrubOutput = shell.querySelector('[data-witness-scrub-output]');
+  const scrubWitness = (value, receipt = false) => {
+    if (!witnesses.length) return;
+    const witness = witnesses[witnessIndex < 0 ? witnesses.length - 1 : witnessIndex];
+    const t = THREE.MathUtils.clamp(Number(value) / 1000, 0, 1);
+    const from = witness.origin_snapshot?.transform_progress ?? 0;
+    const to = witness.encounter_snapshot?.transform_progress ?? from;
+    const progress = THREE.MathUtils.lerp(from, to, t);
+    curlPage(rightPage, progress);
+    pageRepresentationState = pageRepresentation(progress);
+    status.textContent = `Time Room scrub · ${Math.round(t * 100)}% · ${pageRepresentationState}`;
+    if (scrubOutput) scrubOutput.value = `${Math.round(t * 100)}%`;
+    if (receipt) emitReceipt('witness-scrubbed', {
+      witness_id: witness.witness_id,
+      temporal_position: Number(t.toFixed(3)),
+      reconstructed_progress: Number(progress.toFixed(4)),
+      reconstructed_representation: pageRepresentationState,
+    }, PAGE_OBJECT_ID);
+  };
+  scrubber?.addEventListener('input', (event) => scrubWitness(event.target.value));
+  scrubber?.addEventListener('change', (event) => scrubWitness(event.target.value, true));
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
@@ -300,7 +327,7 @@ export function mountMagicBook({ host = document.body } = {}) {
   canvas.addEventListener('pointerdown', async (event) => {
     canvas.setPointerCapture(event.pointerId);
     dragging = true;
-    if (status.textContent.startsWith('Time Room replay')) status.textContent = phase === 'open' ? 'Book open · ArcSweep continues beneath the page.' : 'Touch the cover to open.';
+    if (status.textContent.startsWith('Time Room')) status.textContent = phase === 'open' ? 'Book open · ArcSweep continues beneath the page.' : 'Touch the cover to open.';
     startX = pointerX(event);
     startAngle = coverAngle;
     emitReceipt('interaction-started', { phase, pointer_type: event.pointerType });
@@ -409,7 +436,7 @@ export function mountMagicBook({ host = document.body } = {}) {
     } else clock.getDelta();
     frontPivot.rotation.y = -coverAngle;
     const pageProgress = Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI);
-    if (!status.textContent.startsWith('Time Room replay')) curlPage(rightPage, pageProgress);
+    if (!status.textContent.startsWith('Time Room')) curlPage(rightPage, pageProgress);
     const nextRepresentation = pageRepresentation(pageProgress);
     if (nextRepresentation !== pageRepresentationState) {
       pageReceipt('representation-changed', pageProgress, {
