@@ -106,6 +106,7 @@ export default defineConfig({
       input: {
         main: resolve(ARCSWEEP_ROOT, 'index.html'),
         spine: resolve(ARCSWEEP_ROOT, 'spine/index.html'),
+        observer: resolve(ARCSWEEP_ROOT, 'observer/index.html'),
       },
     },
   },
