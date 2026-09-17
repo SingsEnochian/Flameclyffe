@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import { createEventBus } from '../src/os/kernel.js';
 import { createCapabilityRegistry } from '../src/os/capabilities.js';
 import { registerObserverService } from '../src/os/observer-service.js';
+import { OBSERVER_PREMAQC_SCHEMA } from '../../starwell/src/premaqc-contract.js';
 
-test('Observer joins the OS as a read-only service with semantic status, source, DEEP, narrative, ledger, and safe timeline reads', async () => {
+test('Observer joins the OS as a read-only PREMAQC service with semantic status, source, DEEP, narrative, ledger, and safe timeline reads', async () => {
   const previousBridge = globalThis.__arcsweepObserverBridge;
   const previousFetch = globalThis.fetch;
   const previousStorage = globalThis.localStorage;
   const snapshot = {
-    schema: 'hearthgate.observer.premaq/v1',
+    schema: OBSERVER_PREMAQC_SCHEMA,
     generated_at: '2026-09-17T17:00:00.000Z',
     field: { P: 0.7, C: 0.6, R: 0.5, E: 0.4, M: 0.3, A: 0.8, Q: 0.2 },
     narrative_state: {
@@ -21,7 +22,7 @@ test('Observer joins the OS as a read-only service with semantic status, source,
   };
 
   globalThis.__arcsweepObserverBridge = {
-    schema: 'hearthgate.observer.premaq/v1',
+    schema: OBSERVER_PREMAQC_SCHEMA,
     storageKey: 'observer-test',
     connected: true,
   };
@@ -52,10 +53,12 @@ test('Observer joins the OS as a read-only service with semantic status, source,
   assert.equal(status.output.integration_health.state, 'healthy');
   assert.equal(status.output.runtime_state.state, 'unknown');
   assert.equal(status.output.data_health.state, 'healthy');
+  assert.equal(status.output.source_schema, OBSERVER_PREMAQC_SCHEMA);
   assert.equal(status.output.provenance.unknowns_preserved, true);
 
   const source = await registry.invoke('observer.snapshot', {}, { authority: 'read' });
   assert.equal(source.status, 'applied');
+  assert.equal(source.output.schema, OBSERVER_PREMAQC_SCHEMA);
   assert.equal(source.output.field.A, 0.8);
 
   const deep = await registry.invoke('observer.deep-current', {}, { authority: 'read' });
