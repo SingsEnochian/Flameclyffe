@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createArtifact, sealOriginReceipt, sealEncounterReceipt, createCrossingReceipt } from './temporal-action-channel.js';
 
 export const MAGIC_BOOK_VERSION = 'arcsweep.magic-book-three/v1';
 const RECEIPT_EVENT = 'arcsweep:magic-book-receipt';
@@ -182,6 +183,7 @@ export function mountMagicBook({ host = document.body } = {}) {
   let startAngle = 0;
   let pageRepresentationState = pageRepresentation(0);
   let crossingOrigin = null;
+  let tacCrossing = null;
   const reducedMotion = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 
   const persist = (action) => {
@@ -207,16 +209,33 @@ export function mountMagicBook({ host = document.body } = {}) {
   }
 
   const pointerX = (event) => event.clientX / Math.max(1, innerWidth);
-  canvas.addEventListener('pointerdown', (event) => {
+  canvas.addEventListener('pointerdown', async (event) => {
     canvas.setPointerCapture(event.pointerId);
     dragging = true;
     startX = pointerX(event);
     startAngle = coverAngle;
     emitReceipt('interaction-started', { phase, pointer_type: event.pointerType });
     crossingOrigin = snapshotPage(Math.sin(Math.min(1, coverAngle / Math.PI) * Math.PI));
+    const crossingId = id();
+    const artifact = await createArtifact({
+      crossing_id: crossingId,
+      payload: crossingOrigin,
+      provenance: { object_id: PAGE_OBJECT_ID, surface: 'magic-book-three' },
+    });
+    const origin = await sealOriginReceipt({
+      crossing_id: crossingId,
+      context_id: 'magic-book:pre-transform',
+      artifact_hash: artifact.artifact_hash,
+      anticipated_recipient: 'magic-book:post-transform',
+      anticipated_effect: 'representation may change while continuity survives',
+      reason_for_persisting: 'prove page identity across representation change',
+      knowledge_available: crossingOrigin,
+    });
+    tacCrossing = { artifact, origin };
     pageReceipt('crossing-origin-sealed', crossingOrigin.transform_progress, {
       crossing_role: 'origin',
       snapshot: crossingOrigin,
+      tac_receipt_hash: origin.receipt_hash,
     });
   });
   canvas.addEventListener('pointermove', (event) => {
@@ -225,7 +244,7 @@ export function mountMagicBook({ host = document.body } = {}) {
     coverAngle = THREE.MathUtils.clamp(startAngle + delta, 0, Math.PI);
     target = coverAngle;
   });
-  const release = () => {
+  const release = async () => {
     if (!dragging) return;
     dragging = false;
     target = coverAngle > Math.PI * .32 ? Math.PI * .985 : 0;
@@ -237,12 +256,37 @@ export function mountMagicBook({ host = document.body } = {}) {
         snapshot: encounter,
       });
       const comparison = compareCrossing(crossingOrigin, encounter);
+      if (tacCrossing) {
+        const encounterReceipt = await sealEncounterReceipt({
+          crossing_id: tacCrossing.artifact.crossing_id,
+          context_id: 'magic-book:post-transform',
+          artifact_hash_seen: tacCrossing.artifact.artifact_hash,
+          perceived_origin: PAGE_OBJECT_ID,
+          interpretation: encounter,
+          action_taken: 'render transformed page representation',
+          knowledge_available: encounter,
+          resulting_state_hash: null,
+        });
+        const observerReceipt = await createCrossingReceipt({
+          origin: tacCrossing.origin,
+          encounter: encounterReceipt,
+          behavioural_delta: comparison.delta,
+        });
+        comparison.tac = {
+          artifact_hash: tacCrossing.artifact.artifact_hash,
+          origin_receipt_hash: tacCrossing.origin.receipt_hash,
+          encounter_receipt_hash: encounterReceipt.receipt_hash,
+          observer_receipt_hash: observerReceipt.receipt_hash,
+          evidence_state: observerReceipt.body.evidence_state,
+        };
+      }
       emitReceipt('crossing-observed', {
         crossing: comparison,
         continuity_preserved: comparison.continuity_preserved,
         representation_changed: comparison.representation_changed,
       }, PAGE_OBJECT_ID);
       crossingOrigin = null;
+      tacCrossing = null;
     }
   };
   canvas.addEventListener('pointerup', release);
