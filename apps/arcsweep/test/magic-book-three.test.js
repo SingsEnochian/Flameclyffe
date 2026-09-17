@@ -88,6 +88,9 @@ test('Magic Book uses Three.js and emits durable receipt-shaped events', () => {
   assert.match(source, /state\.coverAngle !== null/);
   assert.match(source, /state\.coverAngle !== undefined/);
   assert.match(source, /hasRestoredAngle \? Number\(state\.coverAngle\) : NaN/);
+  assert.match(source, /const latestWitness = witnesses\[witnessIndex\]/);
+  assert.match(source, /witness-restored/);
+  assert.match(source, /witness_count: witnesses\.length/);
 });
 
 test('Magic Book mounts only after normal core readiness', () => {
