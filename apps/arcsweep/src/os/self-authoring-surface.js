@@ -25,14 +25,22 @@ export function installSelfAuthoringSurface({ os, agent, document = globalThis.d
   for (const button of [run, stop, exportButton]) button.style.cssText = 'margin:8px 5px 8px 0;padding:7px;border:1px solid #607779;border-radius:6px;background:#213033;color:#eee;';
   panel.append(run, stop, exportButton);
   const status = make('p'); status.setAttribute('role', 'status'); panel.append(status);
+  const clearError = make('button', 'Clear stored state');
+  clearError.type = 'button'; clearError.style.cssText = 'display:none;margin:0 0 8px;padding:7px;border:1px solid #607779;border-radius:6px;background:#213033;color:#eee;';
+  clearError.addEventListener('click', async () => {
+    try { await os.capabilities.invoke('sandbox.self-authoring.reset', {}, context); render(); }
+    catch (err) { status.textContent = err.message; }
+  });
+  panel.append(clearError);
   const output = make('div'); panel.append(output);
   let last = '';
   const context = { actor_id: 'human-ui', source: 'self-authoring-surface', authority: 'operate', expected_authority: 'operate' };
   function render() {
     const state = agent.snapshot();
-    run.disabled = state.busy; stop.disabled = !state.busy;
+    run.disabled = state.busy || !!state.loadError; stop.disabled = !state.busy;
+    clearError.style.display = state.loadError ? 'inline-block' : 'none';
     const attempt = state.lastAttempt || state.runs.at(-1);
-    status.textContent = state.loadError || (state.busy ? `Running: ${attempt?.stage || 'starting'}` : `${attempt?.status || 'Ready'} · memory revision ${state.revision} · ${state.persistence}${attempt?.error ? ` · ${attempt.error}` : ''}`);
+    status.textContent = state.loadError ? `Stored state could not be read: ${state.loadError}` : (state.busy ? `Running: ${attempt?.stage || 'starting'}` : `${attempt?.status || 'Ready'} · memory revision ${state.revision} · ${state.persistence}${attempt?.error ? ` · ${attempt.error}` : ''}`);
     const encoded = JSON.stringify({ attempt, playbook: state.playbook });
     if (encoded === last) return;
     last = encoded; output.replaceChildren();
@@ -57,7 +65,7 @@ export function installSelfAuthoringSurface({ os, agent, document = globalThis.d
     try {
       const result = await os.capabilities.invoke('sandbox.self-authoring.run', { task: task.value, probe: probe.value, feedback: feedback.value, voiceId: voice.value.trim() }, context);
       render();
-      if (result.status !== 'applied') status.textContent = result.error || result.reason || `Experiment ${result.status}`;
+      if (result.status !== 'applied') status.textContent = result.error || result.reason || (result.status === 'rejected' ? 'Capability rejected: \'operate\' authority required.' : `Experiment ${result.status}`);
     } catch (error) { status.textContent = error.message; run.disabled = false; }
   });
   stop.addEventListener('click', () => { void os.capabilities.invoke('sandbox.self-authoring.stop', {}, { authority: 'read' }); });

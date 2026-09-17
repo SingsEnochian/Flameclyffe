@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createSelfAuthoringSandbox, applyMemoryEdits, SANDBOX_KEY, registerSelfAuthoringSandbox } from '../src/os/self-authoring-sandbox.js';
 import { createCapabilityRegistry } from '../src/os/capabilities.js';
 const answers = () => ['baseline answer', 'private full experience marker', JSON.stringify({ edits: [{ op: 'add', text: 'Separate observation from inference in field notes.', reason: 'The previous note mixed the two.' }] }), 'I learned to distinguish observation and inference.', 'revised answer'];
-const store = () => { const m = new Map(); return { getItem: (k) => m.get(k) || null, setItem: (k, v) => m.set(k, v) }; };
+const store = () => { const m = new Map(); return { getItem: (k) => m.get(k) || null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 function model(outputs = answers(), calls = []) { return async (request) => { calls.push(request); return { status: 'replied', runtimeVerified: true, message: outputs.shift(), model: 'test-double', provider: 'test-only' }; }; }
 const input = { task: 'First field note', probe: 'Second field note', feedback: 'Consider uncertain evidence.' };
 test('agent-authored guidance crosses a fresh context boundary with complete provenance and reload', async () => {
@@ -69,4 +69,35 @@ test('service runs through the existing OS capability registry', async () => {
   const result = await registry.invoke('sandbox.self-authoring.run', input, { authority: 'operate' });
   assert.equal(result.status, 'applied');
   assert.equal(result.output.status, 'completed');
+});
+test('reset clears playbook, loadError, and persisted storage', async () => {
+  const storage = store();
+  const agent = createSelfAuthoringSandbox({ invoke: model(), storage });
+  await agent.run(input);
+  assert.equal(agent.snapshot().revision, 1);
+  assert.ok(storage.getItem(SANDBOX_KEY) !== null);
+  agent.reset();
+  assert.equal(agent.snapshot().revision, 0);
+  assert.deepEqual(agent.snapshot().playbook, []);
+  assert.equal(agent.snapshot().loadError, null);
+  assert.equal(storage.getItem(SANDBOX_KEY), null);
+  assert.equal(agent.snapshot().persistence, 'available');
+});
+test('reset via capability registry requires operate authority and blocks during a run', async () => {
+  const registry = createCapabilityRegistry();
+  registerSelfAuthoringSandbox(registry, { invoke: model() });
+  const denied = await registry.invoke('sandbox.self-authoring.reset', {}, { authority: 'read' });
+  assert.equal(denied.status, 'rejected');
+  let started;
+  const waiting = new Promise(resolve => { started = resolve; });
+  const agent = createSelfAuthoringSandbox({ invoke: () => { started(); return new Promise(() => {}); } });
+  const pending = agent.run(input); await waiting;
+  assert.throws(() => agent.reset(), /running/);
+  agent.stop(); await assert.rejects(pending);
+});
+test('voiceId is validated before the first model call', async () => {
+  const agent = createSelfAuthoringSandbox({ invoke: model() });
+  await assert.rejects(agent.run({ ...input, voiceId: '' }), /voice ID/);
+  await assert.rejects(agent.run({ ...input, voiceId: 'x'.repeat(81) }), /voice ID/);
+  assert.equal(agent.snapshot().revision, 0);
 });

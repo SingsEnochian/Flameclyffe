@@ -26,6 +26,8 @@ Runs are manual, one at a time, at most five model calls. Each call has a 60-sec
 
 Unknown memory references, malformed JSON, oversized prompts/outputs, unverified model responses, and failed persistence fail visibly. Successful memory writes are read back. Corrupt existing snapshots are reported and preserved rather than overwritten. There is no automatic retry or automatic promotion into other agents' memory.
 
+If the stored snapshot is corrupt or unreadable, the panel shows an error and disables **Run experiment**. Press **Clear stored state** (or invoke `sandbox.self-authoring.reset` with `operate` authority) to wipe the local snapshot and return to an empty playbook. This does not affect other browser storage. The voice ID field accepts 1–80 characters; blank or overlong values are rejected before any model call.
+
 ## Verification
 
 Run:

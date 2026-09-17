@@ -56,10 +56,20 @@ export function createSelfAuthoringSandbox({ invoke, storage = null, paused = ()
   const snapshot = () => copy({ ...state, busy, persistence, loadError, lastAttempt });
   const notify = () => { try { onProgress(snapshot()); } catch {} };
   function stop() { controller?.abort(); }
+  function reset() {
+    if (busy) throw new Error('Cannot reset while an experiment is running.');
+    state = empty();
+    loadError = null;
+    persistence = storage ? 'available' : 'memory-only';
+    lastAttempt = null;
+    try { storage?.removeItem(SANDBOX_KEY); } catch {}
+    notify();
+  }
   async function run({ task, probe, feedback = '', voiceId = 'oxalpha' } = {}) {
     if (busy) throw new Error('An experiment is already running.');
     if (loadError) throw new Error(`Stored experiment could not be read: ${loadError}`);
     bounded(task, 4000, 'learning task'); bounded(probe, 4000, 'probe');
+    bounded(voiceId, 80, 'voice ID');
     if (typeof feedback !== 'string' || feedback.length > 4000) throw new Error('Feedback exceeds 4000 characters.');
     if (paused()) throw new Error('feather-paused');
     busy = true; controller = new AbortController();
@@ -71,7 +81,10 @@ export function createSelfAuthoringSandbox({ invoke, storage = null, paused = ()
     const frame = (memory, summary) => `You are an ArcSweep sandbox research agent. Apply and revise your own working guidance as you learn. You author the guidance; the operator supplies tasks and observations.\nYour persistent playbook:\n${JSON.stringify(memory)}\nYour previous compacted handoff:\n${summary || '(none)'}\n`;
     async function call(stage, prompt) {
       if (signal.aborted || paused()) throw new Error('Experiment stopped.');
-      bounded(prompt, 24000, 'model prompt');
+      // Internal prompts are assembled from individually-validated inputs (user fields
+      // capped at 4000 chars, model output at 12000, playbook at 16000, summary at 4000).
+      // Worst-case assembled size is ~42000 chars; 48000 gives headroom without hiding bugs.
+      bounded(prompt, 48000, 'model prompt');
       attempt.stage = stage; notify();
       let timer; let rejectAbort;
       const aborted = new Promise((_, reject) => { rejectAbort = () => reject(new Error('Experiment stopped.')); signal.addEventListener('abort', rejectAbort, { once: true }); });
@@ -116,7 +129,7 @@ export function createSelfAuthoringSandbox({ invoke, storage = null, paused = ()
       throw error;
     } finally { busy = false; controller = null; notify(); }
   }
-  return Object.freeze({ snapshot, run, stop });
+  return Object.freeze({ snapshot, run, stop, reset });
 }
 
 export function registerSelfAuthoringSandbox(registry, options) {
@@ -125,5 +138,6 @@ export function registerSelfAuthoringSandbox(registry, options) {
   registry.registerCapability({ capability_id: 'sandbox.self-authoring.status', service_id: 'self-authoring-sandbox', authority: 'read', execute: () => agent.snapshot() });
   registry.registerCapability({ capability_id: 'sandbox.self-authoring.run', service_id: 'self-authoring-sandbox', authority: 'operate', execute: (input) => agent.run(input) });
   registry.registerCapability({ capability_id: 'sandbox.self-authoring.stop', service_id: 'self-authoring-sandbox', authority: 'read', execute: () => { agent.stop(); return { stopped: true }; } });
+  registry.registerCapability({ capability_id: 'sandbox.self-authoring.reset', service_id: 'self-authoring-sandbox', authority: 'operate', execute: () => { agent.reset(); return { reset: true }; } });
   return agent;
 }
