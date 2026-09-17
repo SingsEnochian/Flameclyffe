@@ -30,6 +30,12 @@ test('Magic Book uses Three.js and emits durable receipt-shaped events', () => {
   assert.match(source, /sealEncounterReceipt/);
   assert.match(source, /createCrossingReceipt/);
   assert.match(source, /evidence_state/);
+  assert.match(source, /Magic Book Observatory/);
+  assert.match(source, /data-observer-continuity/);
+  assert.match(source, /data-observer-origin/);
+  assert.match(source, /data-observer-encounter/);
+  assert.match(source, /data-observer-join/);
+  assert.match(source, /showCrossing\(comparison\)/);
 });
 
 test('Magic Book mounts only after normal core readiness', () => {
