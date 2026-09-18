@@ -1,4 +1,4 @@
-export const ARCSWEEP_OS_VERSION = '0.1.0-rc.7';
+export const ARCSWEEP_OS_VERSION = '0.1.0-rc.8';
 export const ARCSWEEP_OS_SCHEMA = 'arcsweep.os-manifest/v1';
 
 export const ARCSWEEP_OS_MANIFEST = Object.freeze({
@@ -80,6 +80,14 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     somaticCartographyReceipts: true,
     somaticObservationOnlyConditions: 'pending-until-evidence',
     glyphStrokeBridge: 'same-origin-postmessage-and-correlated-trace',
+    magicBook: true,
+    magicBookVersion: '0.1',
+    magicBookPrimaryEmbodiedInterface: true,
+    magicBookThreeEmbodiment: true,
+    magicBookAccessibleDomAuthority: true,
+    magicBookSharedGlyphStudioState: true,
+    magicBookReceipts: true,
+    magicBookPages: ['threshold', 'glyph-forge', 'receipts'],
     ontologicalKernel: true,
     ontologyObserverSync: true,
     ontologyTransformationReceipts: true,
@@ -133,6 +141,9 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     ontologyTransformation: 'arcsweep.ontology-transformation/v1',
     ontologyReview: 'arcsweep.ontology-review/v1',
     glyphForgeStatus: 'arcsweep.glyphforge-status/v1',
+    magicBookBinding: 'arcsweep.magic-book-binding/v0.1',
+    magicBookReceipt: 'arcsweep.magic-book-receipt/v0.1',
+    magicBookSurface: 'arcsweep.magic-book-surface/v0.1',
     runaStatus: 'arcsweep.runa-status/v1',
     deviceStatus: 'arcsweep.device-status/v1',
     deviceInputProof: 'arcsweep.device-input-proof/v1',
