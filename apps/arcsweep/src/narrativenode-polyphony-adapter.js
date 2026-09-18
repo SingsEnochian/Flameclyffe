@@ -85,7 +85,6 @@ export function buildNarrativeNodeBootstrapPlan({
   }
   steps.push(step('end_mcp_session', {
     summary: 'ArcSweep polyphonic narrative profile installed: diegetic provenance, productive apocrypha, name lineage, mnemonic ecology, palimpsest, erasure, and resonance-autonomy surfaces.',
-    category: 'setup',
   }, { phase: 'close' }));
   return Object.freeze({
     schema: NARRATIVENODE_MCP_PLAN_SCHEMA,
@@ -195,7 +194,6 @@ export function buildNarrativeNodeClaimPlan({
 
   steps.push(step('end_mcp_session', {
     summary: `Synced ${mapped.length} ArcSweep knowledge record(s) into NarrativeNode without canon promotion.`,
-    category: 'authoring',
   }, { phase: 'close' }));
 
   return Object.freeze({
