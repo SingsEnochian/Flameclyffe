@@ -92,6 +92,38 @@ Candidate Universal Codex sequence derived from the mechanism layer:
 
 The important law is that the animation follows the real state. Failed actions do not receive triumphant flourishes; successful actions leave an inspectable receipt.
 
+## Circles reference ingest
+
+A second Rowan-supplied Google Doc, **Circles**, contributes a different animation grammar: presence, memory, dream, projection, and absence.
+
+Source:
+
+`https://docs.google.com/document/d/1HGXZGyK-brTrvFwsMKiK93FzP6RpjrmmYt1nCHjmxeA`
+
+Reference ingest:
+
+`apps/arcsweep/skills/sources/drive/circles-reference.v0.1.json`
+
+Story setting remains reference-only. The useful mechanism layer is:
+
+- a presence may arrive as signal/voice before resolving into visible form;
+- holographic or apparition-like presence can coalesce, stabilise, flicker, and fade rather than be binary;
+- one participant can intentionally share a remembered or dreamed scene with another;
+- dreams, memories, forecasts, remote presences, and current observation must remain visually and epistemically distinct even when equally vivid;
+- an absent person can remain causally and relationally represented through objects, memories, messages, and projections without being treated as physically co-present;
+- material artefacts can act as provenance anchors that summon related receipts, timelines, relationships, or scenes;
+- mission transitions benefit from an explicit threshold sequence: context -> team/tools -> readiness -> launch -> active state.
+
+Candidate Universal Codex presence machine:
+
+`absent -> signal -> voice -> flicker -> coalescing -> stable projection -> fading -> absent`
+
+Candidate scene classes:
+
+`present | memory | dream | forecast | remote-presence | archived-witness`
+
+The governing rule is simple: **visual vividness never silently changes epistemic class.**
+
 A useful adjacent Drive source already located is *The Cyber Spellbook: Magick in the Virtual World*; it may receive its own reference ingest for digital-grimoire mechanics, but it remains a separate source.
 
 ## Next visual experiments
@@ -100,9 +132,10 @@ A useful adjacent Drive source already located is *The Cyber Spellbook: Magick i
 2. Replace ordinary sliders with optional radial spell-control projections while retaining the underlying accessible controls.
 3. Add page-specific projection profiles: Threshold, Glyph Forge, Receipts.
 4. Add Kala-derived transformation-state choreography for opening a room, invoking a tool, merging views, quarantining a source, or entering Story Mode.
-5. Turn successful action receipts into brief luminous numbered glyphs that can be opened back into the exact machine receipt.
-6. Add gesture input only after desktop/touch controls remain fully usable.
-7. Feed future Signal events into the same projection grammar as discrete, provenance-bearing objects.
+5. Add Circles-derived presence states so remote/archived/dream/memory projections visibly arrive and depart without flattening source class.
+6. Turn successful action receipts into brief luminous numbered glyphs that can be opened back into the exact machine receipt.
+7. Add gesture input only after desktop/touch controls remain fully usable.
+8. Feed future Signal events into the same projection grammar as discrete, provenance-bearing objects.
 
 ## Seal
 
