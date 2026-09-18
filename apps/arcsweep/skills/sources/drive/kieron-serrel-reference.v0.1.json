@@ -1,0 +1,91 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source": {
+    "title": "Kieron Serrel",
+    "document_id": "1Rl677TuQiHz9S777daVQiQwa2xQSKwbqqDihYOOu7Tk",
+    "url": "https://docs.google.com/document/d/1Rl677TuQiHz9S777daVQiQwa2xQSKwbqqDihYOOu7Tk/edit",
+    "class": "early-character-system-design-reference",
+    "created_time": "2013-05-04T17:23:12.902Z",
+    "modified_time": "2014-04-20T03:58:09.662Z",
+    "provenance": "Rowan-supplied Google Doc",
+    "canon_policy": "reference-only"
+  },
+  "boundaries": {
+    "story_lore_auto_promotes": false,
+    "characters_auto_promote": false,
+    "setting_auto_promotes": false,
+    "mechanisms_may_be_abstracted": true,
+    "full_text_mirror": false
+  },
+  "design_ancestry_signals": [
+    {
+      "id": "human-system-merge",
+      "summary": "A person enters a persistent merged state with a living/organic ship while retaining distinguishable identity and relationship roles.",
+      "codex_use": "Model deep tool/system integration as linked state with preserved identity boundaries rather than replacement or possession."
+    },
+    {
+      "id": "paired-operation",
+      "summary": "Pilot, ship, and wingmate form an operational unit with distinct roles and ongoing coordination.",
+      "codex_use": "Represent collaborative agents/tools as a braid of participants with shared task state and separate provenance/authority lanes."
+    },
+    {
+      "id": "multi-threading",
+      "summary": "Training explicitly develops the ability to handle several streams of information at once.",
+      "codex_use": "Universal Codex may show simultaneous task streams as spatially separate but coordinated lanes rather than flattening them into one activity feed."
+    },
+    {
+      "id": "ambient-signal-filtering",
+      "summary": "High-volume incoming telepathic signal requires filtering and assistance to keep ambient noise tolerable.",
+      "codex_use": "Use gain, attenuation, focus, and companion filtering as visible controls over signal density while preserving underlying source availability."
+    },
+    {
+      "id": "signal-boost-relay",
+      "summary": "One participant can amplify or extend another participant's signal without becoming its author.",
+      "codex_use": "Treat relays/boosts as transport metadata: source remains source, relay remains relay, and reach/intensity remain separate from authorship."
+    },
+    {
+      "id": "capability-after-transition",
+      "summary": "A major transition changes available capabilities and perception while lineage to the prior state remains explicit.",
+      "codex_use": "Transformation animations should expose what changed, what persisted, and which capabilities became newly available."
+    },
+    {
+      "id": "capability-cost",
+      "summary": "High-energy actions have explicit resource cost even when technically possible.",
+      "codex_use": "Separate possible, permitted, powered, affordable, and completed states in tool projections and receipts."
+    },
+    {
+      "id": "probability-instinct",
+      "summary": "A non-conscious pattern-sense influences action selection but is not perfectly controllable or infallible.",
+      "codex_use": "Prediction or recommendation surfaces should display confidence and uncertainty rather than visually presenting instinctive guidance as certainty."
+    },
+    {
+      "id": "rapid-language-assimilation",
+      "summary": "A participant quickly builds a usable model of unfamiliar languages through exposure.",
+      "codex_use": "Runa/Kelyran teaching can expose progressive recognition, approximation, confidence, and correction rather than a binary understood/not-understood state."
+    },
+    {
+      "id": "organic-machine-affinity",
+      "summary": "The character is drawn to mechanics, programming, alien devices, and organic ships as systems to understand and manipulate.",
+      "codex_use": "Projected tools may present inspectable living-system structure and invite puzzle-like exploration without hiding machine state."
+    }
+  ],
+  "candidate_ui": {
+    "merge_machine": "pre-link identity -> pairing -> merge/transition -> capability discovery -> multi-stream calibration -> active braid -> cost/receipt -> continued adaptation",
+    "visuals": [
+      "three-strand braid for person/ship/wingmate with independently addressable strands",
+      "parallel thought-stream ribbons with local gain controls",
+      "relay halo that visibly shows source, relay, and recipients",
+      "transition ring that preserves a lineage filament to pre-merge state",
+      "capability glyphs appearing only after the state transition that grants them",
+      "resource-cost flare or depletion trace for high-energy actions"
+    ]
+  },
+  "laws": [
+    "Deep integration does not require identity collapse.",
+    "Relay is not authorship.",
+    "Parallel streams remain separately inspectable.",
+    "Transition can add capability without rewriting prior lineage.",
+    "Possible is not the same as costless.",
+    "Prediction confidence is not certainty."
+  ]
+}
