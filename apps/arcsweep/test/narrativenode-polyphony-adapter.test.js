@@ -25,37 +25,37 @@ test('NarrativeNode bootstrap is protocol-only and begins with explicit user per
 
 test('claims become NarrativeNode Knowledge rather than canon mutations', () => {
   const mapped = mapClaimToNarrativeNodeKnowledge({
-    id: 'origin-tree',
-    name: 'Caelwyn was born beneath the Wyrm Tree',
-    summary: 'One in-world origin tradition.',
+    id: 'fixture-origin-a',
+    name: 'Fixture origin tradition A',
+    summary: 'One deliberately conflicting in-world origin tradition.',
     truth_layer: 'folklore',
     productive_apocrypha: true,
     diegetic_provenance: { hops: 2 },
-    source_ids: ['hollow-vale:origin'],
-    awareness: [{ observer: 'Caelwyn', level: 1 }],
+    source_ids: ['fixture:origin-a'],
+    awareness: [{ observer: 'Fixture Character', level: 1 }],
   });
   assert.equal(mapped.create.tool, 'create_knowledge');
   assert.ok(mapped.tags.includes('folklore'));
   assert.ok(mapped.tags.includes('productive-apocrypha'));
   assert.ok(mapped.tags.includes('diegetic-source'));
-  assert.equal(mapped.awareness[0].observer, 'Caelwyn');
+  assert.equal(mapped.awareness[0].observer, 'Fixture Character');
 });
 
 test('claim plan keeps permission, knowledge, tags, awareness and close steps sequential', () => {
   const plan = buildNarrativeNodeClaimPlan({
-    worldId: 'hollow-vale',
+    worldId: 'fixture-world',
     claims: [{
-      id: 'origin-tree',
-      name: 'Wyrm Tree origin',
+      id: 'fixture-origin-a',
+      name: 'Fixture origin tradition A',
       productive_apocrypha: true,
-      awareness: [{ observer: 'Father Thorn', level: 2 }],
+      awareness: [{ observer: 'Fixture Witness', level: 2 }],
     }],
   });
   assert.equal(plan.steps[0].tool, 'request_mcp_session');
   assert.equal(plan.steps[1].tool, 'create_knowledge');
-  assert.equal(plan.steps[1].capture_as, 'knowledge:claim:origin-tree');
+  assert.equal(plan.steps[1].capture_as, 'knowledge:claim:fixture-origin-a');
   assert.equal(plan.steps[2].tool, 'add_tags');
-  assert.match(plan.steps[2].args.host, /^\$\{knowledge:claim:origin-tree\}\.id$/);
+  assert.match(plan.steps[2].args.host, /^\$\{knowledge:claim:fixture-origin-a\}\.id$/);
   assert.equal(plan.steps[3].tool, 'set_knowledge_awareness');
   assert.equal(plan.steps.at(-1).tool, 'end_mcp_session');
 });
