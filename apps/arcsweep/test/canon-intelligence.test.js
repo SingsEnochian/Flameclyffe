@@ -86,17 +86,17 @@ test('contradiction bundle exposes competing values without resolving them', () 
 
 test('Steward can intentionally preserve a contradiction as productive apocrypha without promoting either value', () => {
   const proposal = createCanonIntelligenceProposal({
-    worldId: 'hollow-vale',
-    entity: { id: 'caelwyn', type: 'character', name: 'Caelwyn' },
+    worldId: 'fixture-world',
+    entity: { id: 'fixture-character', type: 'character', name: 'Fixture Character' },
     field: { key: 'origin', label: 'Origin' },
-    proposedValue: 'Bell-Touched Wanderer',
-    existingValue: 'Wyrm Tree / Elysian Convergence',
+    proposedValue: 'Origin Variant B',
+    existingValue: 'Origin Variant A',
     evidence: [normaliseCanonEvidence({
-      source_id: 'hollow-vale:origin-tradition',
-      world_id: 'hollow-vale',
-      entity_hint: 'Caelwyn',
+      source_id: 'fixture:origin-tradition-b',
+      world_id: 'fixture-world',
+      entity_hint: 'Fixture Character',
       field_hint: 'origin',
-      value: 'Bell-Touched Wanderer',
+      value: 'Origin Variant B',
       authority: 'in-world-tradition',
     })],
     proposer: 'canon-intelligence',

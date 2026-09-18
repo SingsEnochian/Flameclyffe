@@ -7,7 +7,7 @@
 
 ## Purpose
 
-This slice turns the Hollow Vale comparison into a general narrative law:
+This slice turns the Hollow Vale comparison into a general narrative law. **Hollow Vale and its characters, including Caelwyn, are external reference material only; they are not ArcSweep/Terra Aeterna canon, entities, or import targets.**
 
 > ArcSweep preserves the conditions under which continuity, difference, and relationship can coexist.
 
@@ -192,7 +192,7 @@ When NarrativeNode is running locally, an MCP-capable local agent/client can exe
 
 ## What Hollow Vale actually donated
 
-Not its canon.
+Not its canon, characters, places, names, or plot material. Those remain external reference-only material.
 
 It sharpened seven mechanisms that ArcSweep had either left implicit or under-modelled:
 
@@ -204,7 +204,7 @@ It sharpened seven mechanisms that ArcSweep had either left implicit or under-mo
 6. palimpsest geography;
 7. productive apocrypha.
 
-These are now general ArcSweep narrative capabilities rather than Hollow Vale-specific lore.
+These are now general ArcSweep narrative capabilities rather than Hollow Vale-specific lore. Implementation fixtures must remain neutral or use our own canon; donor-specific entities such as Caelwyn must not be used as ArcSweep/NarrativeNode world objects.
 
 ## Seal
 
