@@ -1,0 +1,104 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "id": "drive:voidcaller:175UIXhAki5qRYBgirSizq4flIWAt-nnNHRkLGIn87iQ",
+  "title": "Voidcaller",
+  "source": {
+    "kind": "google-doc",
+    "url": "https://docs.google.com/document/d/175UIXhAki5qRYBgirSizq4flIWAt-nnNHRkLGIn87iQ",
+    "document_id": "175UIXhAki5qRYBgirSizq4flIWAt-nnNHRkLGIn87iQ",
+    "created_at": "2012-11-03T18:05:43.005Z",
+    "modified_at": "2022-04-28T21:04:19.689Z",
+    "lineage": ["Rowan-authored fantasy fiction"],
+    "content_policy": "reference-only"
+  },
+  "canon_policy": {
+    "auto_promote": false,
+    "story_lore_transfer": false,
+    "mechanism_transfer": true,
+    "ancestry_status": "candidate-authorial-precursor",
+    "notes": "Ella, Rinna, Arion, Roland, the Abbot, the village, the Templar order, healing lore, religious institutions, creatures, cosmology, and plot remain source-bound. The 2012 creation date is useful provenance for authorial-ancestry comparisons, but similarity alone does not establish direct descent into later ArcSweep systems."
+  },
+  "mechanisms": [
+    {
+      "name": "readiness-is-resource-bounded",
+      "description": "Travel readiness depends on rest, food, warmth, wound state, equipment condition, and the condition of a trusted mount rather than determination alone.",
+      "codex_translation": "Derive readiness from inspectable dependencies and maintenance receipts rather than one binary ready flag."
+    },
+    {
+      "name": "fear-prior-versus-observation",
+      "description": "Community fear and institutional claims can cause ambiguous people or events to be interpreted as threatening before direct evidence is examined.",
+      "codex_translation": "Keep rumour, doctrine, expectation, and fear-weighted interpretation separate from direct observation and verified state."
+    },
+    {
+      "name": "consent-before-care",
+      "description": "The healer explicitly asks whether treatment is wanted before acting, even when she believes intervention is beneficial.",
+      "codex_translation": "Support, repair, adaptation, or caretaker actions that change user state require an explicit grant when they exceed passive observation or already-authorised maintenance."
+    },
+    {
+      "name": "pattern-diagnosis-with-confirmation",
+      "description": "A skilled observer infers likely cause from visible wound characteristics, then checks that inference with the patient rather than silently treating it as fact.",
+      "codex_translation": "Diagnostic overlays expose observed features, candidate interpretation, and confirmation separately."
+    },
+    {
+      "name": "care-until-exit-criteria",
+      "description": "Care continues until the patient no longer needs the healer rather than ending after one intervention.",
+      "codex_translation": "Long-running support workflows remain open across treatment, follow-up, maintenance, and recovery until explicit exit criteria are met and receipted."
+    },
+    {
+      "name": "recovery-can-constrain-capability",
+      "description": "Effective treatment may temporarily hinder movement while improving long-term recovery.",
+      "codex_translation": "A healthy recovery state may intentionally narrow available actions; temporary constraint is not generic failure or loss of competence."
+    },
+    {
+      "name": "authority-label-versus-demonstrated-function",
+      "description": "An institution labels a healer's effective practice illegitimate despite repeated observed benefit.",
+      "codex_translation": "Keep authority claims, reputation labels, and demonstrated function in separate evidence lanes."
+    },
+    {
+      "name": "lineage-of-practice",
+      "description": "Healing knowledge is passed through family teaching, practice, and remembered obligation.",
+      "codex_translation": "Methods, brushes, rituals, recipes, and procedures may carry inspectable teaching lineage without lineage becoming automatic authority or canon."
+    },
+    {
+      "name": "ecology-binds-capability",
+      "description": "A treatment depends on a specific moss that grows only in a particular cave location, tying capability to a material source and acquisition cost.",
+      "codex_translation": "When a function depends on a specific dataset, model, file, sensor, material, or external service, show that dependency and its availability instead of presenting capability as self-contained."
+    }
+  ],
+  "candidate_state_machine": [
+    "arrival",
+    "resource-check",
+    "observation",
+    "candidate-diagnosis",
+    "consent",
+    "treatment",
+    "temporary-constraint",
+    "follow-up",
+    "recovery",
+    "exit-criteria-met"
+  ],
+  "laws": [
+    "fear is not observation",
+    "authority label is not measured function",
+    "diagnosis is not ground truth until evidence and confirmation support it",
+    "care that mutates state requires consent",
+    "recovery may reduce short-term capability without constituting failure",
+    "capability dependencies remain visible",
+    "teaching lineage is provenance, not automatic authority"
+  ],
+  "universal_codex_visual_ideas": [
+    "readiness constellation showing rest, equipment, injury, companion, and environment as separate dependencies",
+    "rumour/doctrine/observation layers rendered with distinct provenance textures",
+    "diagnostic glyph that separates observed features from inferred cause",
+    "consent seal before repair or caretaker mutation",
+    "recovery ribbon that temporarily gates risky controls while displaying why",
+    "ingredient or dependency trail from a tool back to the source that makes it possible"
+  ],
+  "prohibitions": [
+    "Do not import Voidcaller story characters, institutions, religious claims, plot, creatures, or cosmology into ArcSweep canon.",
+    "Do not treat fear, gossip, doctrine, or institutional rank as direct evidence.",
+    "Do not let a diagnostic inference silently become fact.",
+    "Do not make caretaker intervention override explicit user agency.",
+    "Do not infer direct conceptual descent solely from thematic similarity; chronology is necessary but not sufficient."
+  ]
+}
