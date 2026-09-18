@@ -108,7 +108,7 @@ function updateSurface(select) {
   if (active) {
     writePreference(STORY_MODE_VALUE);
     if (textarea) textarea.setAttribute('placeholder', 'Continue the scene. Preserve POV, tense, chronology, character knowledge, agency, distinct voices, and unresolved edges. Do not force agreement where the world is genuinely plural.');
-    if (note) note.textContent = 'Story Mode · viable polyphony · C/R/M continuity · participant belief ≠ canon · productive apocrypha may remain unresolved · event-reactive soundscape · Qualia remains firsthand-only.';
+    if (note) note.textContent = 'Story Mode · continuous narrative · viable polyphony · C/R/M continuity · participant belief ≠ canon · productive apocrypha may remain unresolved · event-reactive soundscape · Qualia remains firsthand-only.';
   } else {
     writePreference(null);
     if (textarea) textarea.setAttribute('placeholder', textarea.dataset.storyModeOriginalPlaceholder || '');
