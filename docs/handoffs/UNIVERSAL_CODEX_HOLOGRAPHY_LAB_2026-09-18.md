@@ -124,6 +124,42 @@ Candidate scene classes:
 
 The governing rule is simple: **visual vividness never silently changes epistemic class.**
 
+## The Rifts In the Night reference ingest
+
+A third Rowan-supplied Google Doc, **The Rifts In the Night**, contributes threshold, arrival, quarantine, and post-transition recovery grammar.
+
+Source:
+
+`https://docs.google.com/document/d/1VYwwkjg_RhVpJEMpgafB2yekhd4U4Z6PcBdycmFRc8g`
+
+Reference ingest:
+
+`apps/arcsweep/skills/sources/drive/the-rifts-in-the-night-reference.v0.1.json`
+
+The Star Wars setting remains reference-only. The useful mechanism layer is the way a Rift announces itself before anything crosses it: low throb, pitch change, flicker, pressure, a sharp threshold event, warped/shimmering space, then materialisation followed by quiet aftermath and intake.
+
+Candidate Universal Codex threshold machine:
+
+`baseline -> signal drift -> tone/pulse change -> edge shimmer -> pressure build -> threshold crack -> coalescence -> stabilisation -> receipt/intake -> quiet recovery`
+
+That gives the Codex a much stronger answer for portals, room transitions, new-source ingestion, Signal arrival, Worldseed entry, and quarantine. The arrival should not pop into existence as a modal. The environment should tell us that something is coming.
+
+The document also contributes an important operational distinction: **arrival and assessment are separate states.** New arrivals are received, protected, given time to recover, their belongings/context preserved, and only then assessed. ArcSweep can use the same structure for uncertain source material or cross-world objects: receive first, preserve provenance, stabilise, then classify.
+
+## Combined animation constitution
+
+The three fiction references now teach different organs of the Codex:
+
+- **Kala Fierro:** how a tool transforms and confirms state.
+- **Circles:** how a presence appears, persists, and fades while preserving epistemic class.
+- **The Rifts In the Night:** how a threshold warns, opens, receives, and settles.
+
+Together:
+
+`approach -> threshold cues -> arrival/coalescence -> identification of source class -> optional transformation into tool/state -> active function -> receipt -> quiet residual state`
+
+The animation is never allowed to outrun the underlying state machine.
+
 A useful adjacent Drive source already located is *The Cyber Spellbook: Magick in the Virtual World*; it may receive its own reference ingest for digital-grimoire mechanics, but it remains a separate source.
 
 ## Next visual experiments
@@ -133,9 +169,10 @@ A useful adjacent Drive source already located is *The Cyber Spellbook: Magick i
 3. Add page-specific projection profiles: Threshold, Glyph Forge, Receipts.
 4. Add Kala-derived transformation-state choreography for opening a room, invoking a tool, merging views, quarantining a source, or entering Story Mode.
 5. Add Circles-derived presence states so remote/archived/dream/memory projections visibly arrive and depart without flattening source class.
-6. Turn successful action receipts into brief luminous numbered glyphs that can be opened back into the exact machine receipt.
-7. Add gesture input only after desktop/touch controls remain fully usable.
-8. Feed future Signal events into the same projection grammar as discrete, provenance-bearing objects.
+6. Add Rift-derived threshold buildup so significant arrivals announce themselves through local sound/light/geometry cues before coalescence.
+7. Turn successful action receipts into brief luminous numbered glyphs that can be opened back into the exact machine receipt.
+8. Add gesture input only after desktop/touch controls remain fully usable.
+9. Feed future Signal events into the same projection grammar as discrete, provenance-bearing objects.
 
 ## Seal
 
