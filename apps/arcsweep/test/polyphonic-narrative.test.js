@@ -13,16 +13,16 @@ import {
 
 test('diegetic provenance stays separate from system source receipts', () => {
   const record = buildDiegeticProvenance({
-    claimId: 'caelwyn-origin',
-    worldId: 'hollow-vale',
+    claimId: 'fixture-origin',
+    worldId: 'fixture-world',
     hops: [
       { actor_or_carrier: 'village tradition', medium: 'oral', action: 'retold' },
       { actor_or_carrier: 'monastic copyist', medium: 'manuscript', action: 'translated' },
     ],
-    sourceReceipts: ['source:author-site'],
+    sourceReceipts: ['source:fixture-reference'],
   });
   assert.equal(record.hops.length, 2);
-  assert.deepEqual(record.source_receipts, ['source:author-site']);
+  assert.deepEqual(record.source_receipts, ['source:fixture-reference']);
   assert.match(record.rule, /remain distinct/);
 });
 
@@ -71,10 +71,10 @@ test('palimpsest places preserve overlapping strata', () => {
 
 test('productive apocrypha deliberately preserves multiple variants', () => {
   const record = preserveProductiveApocrypha({
-    subjectId: 'caelwyn-origin',
+    subjectId: 'fixture-origin',
     variants: [
-      { id: 'tree', label: 'Wyrm Tree', tradition: 'celestial' },
-      { id: 'wanderer', label: 'Bell-Touched Wanderer', tradition: 'folk' },
+      { id: 'variant-a', label: 'Origin Variant A', tradition: 'tradition-a' },
+      { id: 'variant-b', label: 'Origin Variant B', tradition: 'tradition-b' },
     ],
     reviewedBy: 'Rowan',
   });
