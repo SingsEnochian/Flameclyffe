@@ -1,0 +1,23 @@
+{
+  "schema": "arcsweep.pending-reference-ingest/v0.1",
+  "source": {
+    "kind": "google-drive-file",
+    "file_id": "0B9pIUkj4kykHVkJQak1SUmw3NjE2MHdJaFI2TmNNZ0dod3NJ",
+    "resource_key": "0-dA0C-mH4fdVH8KHT2Y44nA",
+    "url": "https://drive.google.com/file/d/0B9pIUkj4kykHVkJQak1SUmw3NjE2MHdJaFI2TmNNZ0dod3NJ/view?resourcekey=0-dA0C-mH4fdVH8KHT2Y44nA",
+    "provenance": "Rowan-supplied Drive file"
+  },
+  "status": "pending-access",
+  "access_receipt": {
+    "observed": "2026-09-18",
+    "result": "not-found-to-connected-drive-account",
+    "http_status": 404
+  },
+  "boundaries": {
+    "title_guessing": false,
+    "content_guessing": false,
+    "mechanism_extraction_before_read": false,
+    "canon_promotion": false
+  },
+  "next_action": "When the connected Drive account can resolve this file, replace this pending record with a provenance-bound reference ingest and preserve this access receipt in history."
+}
