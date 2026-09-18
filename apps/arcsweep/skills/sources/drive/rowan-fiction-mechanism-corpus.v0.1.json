@@ -81,17 +81,31 @@
   "pending_sources": [
     {
       "document_id": "1bqc3l9-C_CbERvPjPefnQJztgVjK7JGag-qiH87aRIo",
+      "pending_record": "pending/1bqc3l9-C_CbERvPjPefnQJztgVjK7JGag-qiH87aRIo.pending.json",
       "status": "pending-access",
       "reason": "Drive permission/file visibility prevented content read; title and mechanisms intentionally not guessed."
     },
     {
       "document_id": "1T0mKIwwyVFX9fkD2Gf_W2HOWWk4WTo0jm0ZdF-0vKGo",
+      "pending_record": "pending/1T0mKIwwyVFX9fkD2Gf_W2HOWWk4WTo0jm0ZdF-0vKGo.pending.json",
       "status": "pending-access",
       "reason": "Drive permission/file visibility prevented content read; title and mechanisms intentionally not guessed."
     },
     {
       "document_id": "1dTRIWWTZfWlpC60lbmCsVSTixj2tEYQIPfoJZqqPRvM",
       "pending_record": "pending/1dTRIWWTZfWlpC60lbmCsVSTixj2tEYQIPfoJZqqPRvM.pending.json",
+      "status": "pending-access",
+      "reason": "Drive returned permission denied on 2026-09-18; title and mechanisms intentionally not guessed."
+    },
+    {
+      "document_id": "121FDGpKOyo-xYwNliD_c7LOarV7a2Qxz5dyfpYAVrE8",
+      "pending_record": "pending/121FDGpKOyo-xYwNliD_c7LOarV7a2Qxz5dyfpYAVrE8.pending.json",
+      "status": "pending-access",
+      "reason": "Drive returned permission denied on 2026-09-18; title and mechanisms intentionally not guessed."
+    },
+    {
+      "document_id": "16gt7JESAWoiDdlVrOPR2fZhGMr0KdMc1EwuNqXlovhY",
+      "pending_record": "pending/16gt7JESAWoiDdlVrOPR2fZhGMr0KdMc1EwuNqXlovhY.pending.json",
       "status": "pending-access",
       "reason": "Drive returned permission denied on 2026-09-18; title and mechanisms intentionally not guessed."
     }
