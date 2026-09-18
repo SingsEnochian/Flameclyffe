@@ -160,3 +160,11 @@ test('Arcsweep keeps Canon Intelligence build-visible after the lean House Chat 
   const intelligence = manifest.indexOf('./canon-intelligence-live-ui.js');
   assert.ok(runtime >= 0 && commons > runtime && intelligence > commons);
 });
+
+
+test('Canon Intelligence live UI exposes productive-apocrypha review and filter controls', async () => {
+  const source = await readFile(new URL('../src/canon-intelligence-live-ui.js', import.meta.url), 'utf8');
+  assert.match(source, /data-canon-review="preserve-apocrypha"/);
+  assert.match(source, /Preserve plurality/);
+  assert.match(source, /value="preserved-apocrypha"/);
+});
