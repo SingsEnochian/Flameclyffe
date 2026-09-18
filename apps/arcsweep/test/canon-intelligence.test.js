@@ -79,6 +79,36 @@ test('contradiction bundle exposes competing values without resolving them', () 
   assert.equal(bundle.requires_review, true);
   assert.equal(bundle.existing_value, 'Aes Sedai');
   assert.equal(bundle.proposed_value, 'Wise Woman');
+  assert.equal(bundle.may_preserve_as_productive_apocrypha, true);
+  assert.equal(bundle.automatic_winner_selection, false);
+  assert.ok(bundle.resolution_options.includes('preserve-apocrypha'));
+});
+
+test('Steward can intentionally preserve a contradiction as productive apocrypha without promoting either value', () => {
+  const proposal = createCanonIntelligenceProposal({
+    worldId: 'hollow-vale',
+    entity: { id: 'caelwyn', type: 'character', name: 'Caelwyn' },
+    field: { key: 'origin', label: 'Origin' },
+    proposedValue: 'Bell-Touched Wanderer',
+    existingValue: 'Wyrm Tree / Elysian Convergence',
+    evidence: [normaliseCanonEvidence({
+      source_id: 'hollow-vale:origin-tradition',
+      world_id: 'hollow-vale',
+      entity_hint: 'Caelwyn',
+      field_hint: 'origin',
+      value: 'Bell-Touched Wanderer',
+      authority: 'in-world-tradition',
+    })],
+    proposer: 'canon-intelligence',
+  });
+  const preserved = reviewCanonProposal(proposal, {
+    action: 'preserve-apocrypha',
+    steward: 'Rowan',
+    note: 'The plurality is intentional world lore.',
+  });
+  assert.equal(preserved.status, 'preserved-apocrypha');
+  assert.equal(preserved.review.action, 'preserve-apocrypha');
+  assert.throws(() => createCanonPromotionReceipt(preserved, { steward: 'Rowan' }), /only an accepted proposal/);
 });
 
 test('field population generates proposals only for missing fields', () => {
@@ -129,4 +159,12 @@ test('Arcsweep keeps Canon Intelligence build-visible after the lean House Chat 
   const commons = manifest.indexOf('./house-commons-chat-v5.js');
   const intelligence = manifest.indexOf('./canon-intelligence-live-ui.js');
   assert.ok(runtime >= 0 && commons > runtime && intelligence > commons);
+});
+
+
+test('Canon Intelligence live UI exposes productive-apocrypha review and filter controls', async () => {
+  const source = await readFile(new URL('../src/canon-intelligence-live-ui.js', import.meta.url), 'utf8');
+  assert.match(source, /data-canon-review="preserve-apocrypha"/);
+  assert.match(source, /Preserve plurality/);
+  assert.match(source, /value="preserved-apocrypha"/);
 });

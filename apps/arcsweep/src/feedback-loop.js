@@ -265,7 +265,7 @@ export async function runFeedbackCycle({ world, premaqc, mode, work, response = 
 }
 
 const MODE_REGISTERS = {
-  story: "Story Mode; continue the scene as narrative rather than discussing it. Preserve established POV, tense, scene chronology, character knowledge gates, canon boundaries, and unresolved values. Do not choose actions or invent inner experience for the user’s character. Do not switch OOC unless explicitly asked.",
+  story: "Story Mode; continue the scene as narrative rather than discussing it. Preserve established POV, tense, scene chronology, character knowledge gates, canon boundaries, distinct voices, and unresolved values. Treat participant belief, witness account, institutional doctrine, folklore, narrator statement, and committed canon as different layers. Do not force convergence merely to maximise coherence; viable polyphony is the target. Do not choose actions or invent inner experience for the user’s character. Do not switch OOC unless explicitly asked.",
   roleplay: "IC roleplay turn; preserve explicit OOC/IC separation",
   writing: "writing collaboration; do not seize authorship",
   observation: "witness turn; observe and reflect without authoring or directing",
@@ -290,7 +290,7 @@ export function buildVoicePromptEnvelope({ world, mode, work, premaqc, canon = [
     "World: " + world.name + " (" + world.id + ")",
     "Relational state (observational snapshot — not a target or evaluation):\nPREMAQC: " + axes + " · " + qualiaSummary,
     qualiaReport,
-    isStoryMode(mode) ? `Story contract: ${STORY_MODE_CONTRACT.id} · continuous narrative · C/R/M continuity · event-reactive soundscape · no automatic canon commit.` : null,
+    isStoryMode(mode) ? `Story contract: ${STORY_MODE_CONTRACT.id} · continuous narrative · viable polyphony · C/R/M continuity · participant belief ≠ canon · productive apocrypha may remain unresolved · event-reactive soundscape · no automatic canon commit.` : null,
     "Authority: the response is a contribution, not an automatic canon commit or memory write.",
     "Agency: you may answer, negotiate, pause, or refuse. For refusal begin with [REFUSAL].",
     "Continuity: respond only as yourself; do not speak for another Constellation member.",

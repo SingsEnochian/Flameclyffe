@@ -30,6 +30,7 @@ export function renderCanonIntelligenceProposal(proposal) {
       <button type="button" class="quiet" data-canon-review="reject">Reject</button>
       <button type="button" class="quiet" data-canon-review="hold">Hold</button>
       <button type="button" class="quiet" data-canon-review="needs-more-evidence">Need evidence</button>
+      <button type="button" class="quiet" data-canon-review="preserve-apocrypha">Preserve plurality</button>
       <button type="button" class="quiet" data-canon-promote ${proposal.status === 'accepted' ? '' : 'disabled'}>Promote to canon</button>
     </div>
   </article>`;
@@ -57,7 +58,7 @@ export function installCanonIntelligenceLiveUi(doc = globalThis.document, storag
   let root = doc.getElementById(ROOT_ID);
   if (!root) {
     root = doc.createElement('aside'); root.id = ROOT_ID; root.setAttribute('aria-label', 'Canon Intelligence live review');
-    root.innerHTML = `<button type="button" class="canon-intelligence-toggle" aria-expanded="false">⌬ Canon Intelligence <small data-canon-intelligence-count></small></button><section class="canon-intelligence-panel" hidden><header><strong>Proposal & contradiction inbox</strong><small>Evidence → proposal → Steward review → canon</small></header><div class="canon-intelligence-toolbar"><input data-canon-filter-world placeholder="World id"/><select data-canon-filter-status><option value="">All statuses</option><option>pending</option><option>accepted</option><option>rejected</option><option>held</option><option value="needs-more-evidence">needs-more-evidence</option></select><select data-canon-filter-comparison><option value="">All relations</option><option>agree</option><option>extend</option><option>conflict</option><option>unknown</option></select></div><div class="canon-intelligence-list" data-canon-intelligence-list aria-live="polite"></div></section>`;
+    root.innerHTML = `<button type="button" class="canon-intelligence-toggle" aria-expanded="false">⌬ Canon Intelligence <small data-canon-intelligence-count></small></button><section class="canon-intelligence-panel" hidden><header><strong>Proposal & contradiction inbox</strong><small>Evidence → proposal → Steward review → canon</small></header><div class="canon-intelligence-toolbar"><input data-canon-filter-world placeholder="World id"/><select data-canon-filter-status><option value="">All statuses</option><option>pending</option><option>accepted</option><option>rejected</option><option>held</option><option value="needs-more-evidence">needs-more-evidence</option><option value="preserved-apocrypha">preserved-apocrypha</option></select><select data-canon-filter-comparison><option value="">All relations</option><option>agree</option><option>extend</option><option>conflict</option><option>unknown</option></select></div><div class="canon-intelligence-list" data-canon-intelligence-list aria-live="polite"></div></section>`;
     doc.body.append(root);
   }
   const panel = root.querySelector('.canon-intelligence-panel'); const toggle = root.querySelector('.canon-intelligence-toggle');

@@ -15,6 +15,16 @@ export const STORY_MODE_CONTRACT = Object.freeze({
     preserve_character_knowledge_gates: true,
     unresolved_values_may_remain_unresolved: true,
   }),
+  polyphony: Object.freeze({
+    target: 'viable-polyphony',
+    preserve_distinct_voices: true,
+    participant_belief_distinct_from_canon: true,
+    productive_apocrypha_allowed: true,
+    forced_convergence_prohibited: true,
+    maximum_coherence_is_goal: false,
+    names_may_carry_distinct_authority_lineages: true,
+    memory_channels_may_disagree: true,
+  }),
   contribution: Object.freeze({
     continue_scene_not_discuss_scene: true,
     ooc_only_when_requested: true,
@@ -49,6 +59,7 @@ export function storyModeMetadata({ soundEvents = [] } = {}) {
     texture: STORY_MODE_CONTRACT.texture,
     relational_axes_touched: [...STORY_MODE_CONTRACT.state.relational_axes_touched],
     sound_receipt_ids: soundEvents.map((event) => event?.event_id).filter(Boolean),
+    polyphony: { ...STORY_MODE_CONTRACT.polyphony },
     authority: { ...STORY_MODE_CONTRACT.authority },
   });
 }

@@ -1,3 +1,4 @@
+import { evaluatePolyphonicTransition } from './polyphonic-narrative-contract.js';
 import { normalizeSemanticSource, projectSemanticCapabilities, inspectGlassHalo } from './semantic-source-contract.js';
 
 export const SEMANTIC_TRANSITION_CONTRACT_VERSION = 'arcsweep.semantic-transition/v1';
@@ -85,7 +86,17 @@ export function compareWitnessRealizations(targetTransition = {}, realizations =
 export function evaluateBranchGarden(candidates = []) {
   const evaluated = candidates.map((candidate, index) => {
     const vector = candidate.vector || {};
-    const hardReject = candidate.agency_legal === false || candidate.continuity_legal === false || candidate.semantic_inflation === true;
+    const polyphony = evaluatePolyphonicTransition({
+      participants: candidate.participants || [],
+      forcedAgreement: candidate.forced_agreement === true,
+      collapseDifference: candidate.collapse_difference === true || candidate.voice_collapse === true,
+      unresolvedVariantsPreserved: candidate.unresolved_variants_preserved !== false,
+      canonKnowledgeLeakedToParticipants: candidate.knowledge_gate_breach === true,
+    });
+    const hardReject = candidate.agency_legal === false
+      || candidate.continuity_legal === false
+      || candidate.semantic_inflation === true
+      || !polyphony.admissible;
     return {
       id: candidate.id || `branch-${index + 1}`,
       admissible: !hardReject,
@@ -94,8 +105,15 @@ export function evaluateBranchGarden(candidates = []) {
       semantic_inflation: candidate.semantic_inflation === true,
       vector,
       novelty: candidate.novelty || 'bounded',
+      polyphony,
       scalar_utility: null,
     };
   });
-  return Object.freeze({ schema: 'arcsweep.branch-garden/v1', candidates: Object.freeze(evaluated), vector_primary: true, novelty_is_proposal_operator: true });
+  return Object.freeze({
+    schema: 'arcsweep.branch-garden/v1',
+    candidates: Object.freeze(evaluated),
+    vector_primary: true,
+    novelty_is_proposal_operator: true,
+    target: 'viable-polyphony-not-maximum-coherence',
+  });
 }
