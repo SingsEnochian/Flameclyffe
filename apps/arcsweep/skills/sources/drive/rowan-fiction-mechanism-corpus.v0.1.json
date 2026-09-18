@@ -1,0 +1,107 @@
+{
+  "schema": "arcsweep.reference-corpus-ingest/v0.1",
+  "corpus_id": "rowan-fiction-mechanism-corpus",
+  "title": "Rowan Fiction Mechanism Corpus",
+  "status": "active-reference-ingest",
+  "purpose": [
+    "preserve provenance for Rowan-authored fiction and character-development sources",
+    "extract reusable interaction, animation, continuity, teaching, signal, and interface mechanisms",
+    "track candidate design ancestry into Universal Codex, ArcSweep, Observer, Runa/Glyph Forge, Time Room, and Story Mode",
+    "keep source story lore separate from ArcSweep canon unless explicitly adopted"
+  ],
+  "policy": {
+    "canon_status": "reference-only",
+    "full_text_mirroring": false,
+    "story_lore_auto_promotes": false,
+    "characters_auto_promote": false,
+    "settings_auto_promote": false,
+    "mechanism_abstraction_allowed": true,
+    "design_ancestry_claims_require_chronology": true,
+    "unread_sources_may_be_registered_pending": true,
+    "unread_sources_may_not_be_summarised_or_guessed": true
+  },
+  "accessible_sources": [
+    {
+      "title": "Kala Alexis Fierro",
+      "ingest": "../kala-fierro/kala-fierro-reference-ingest.v0.1.json",
+      "primary_mechanisms": ["transformation choreography", "stateful device forms", "command acknowledgement", "sealing/barriers", "diegetic receipts"]
+    },
+    {
+      "title": "Circles",
+      "ingest": "circles-reference.v0.1.json",
+      "primary_mechanisms": ["presence coalescence", "dream/memory projection classes", "relational anchors", "absence states"]
+    },
+    {
+      "title": "The Rifts In the Night",
+      "ingest": "the-rifts-in-the-night-reference.v0.1.json",
+      "primary_mechanisms": ["threshold buildup", "arrival", "intake/quarantine", "settling"]
+    },
+    {
+      "title": "Praxeum Pad",
+      "ingest": "praxeum-pad-reference.v0.1.json",
+      "primary_mechanisms": ["branch ancestry", "divergence markers", "uncertain chronology", "repair as event"]
+    },
+    {
+      "title": "Portents & Dreams",
+      "ingest": "portents-and-dreams-reference.v0.1.json",
+      "primary_mechanisms": ["mutable projected environments", "persistent continuity threads", "stable participant anchors"]
+    },
+    {
+      "title": "Praxeum-Musebox",
+      "ingest": "praxeum-musebox-reference.v0.1.json",
+      "primary_mechanisms": ["adaptive teaching", "representation change", "practice receipts", "signal attenuation"]
+    },
+    {
+      "title": "Candidate & Tower Appentice Anael",
+      "ingest": "candidate-tower-apprentice-anael-reference.v0.1.json",
+      "primary_mechanisms": ["gain control", "parallel lanes", "broadcast scope", "remote manipulation", "diagnosis/authority separation"]
+    },
+    {
+      "title": "Not Broken",
+      "ingest": "not-broken-reference.v0.1.json",
+      "primary_mechanisms": ["weathered-but-functional state", "maintenance", "repair history", "readiness recovery"]
+    },
+    {
+      "title": "Farpoint Weyr Practice Pad",
+      "ingest": "farpoint-weyr-practice-pad-reference.v0.1.json",
+      "primary_mechanisms": ["filtered anomaly sensing", "interrupted signals", "evidence weathering", "provenance-tagged handoffs"]
+    },
+    {
+      "title": "The Hajra Child",
+      "ingest": "the-hajra-child-reference.v0.1.json",
+      "primary_mechanisms": ["raw signal versus interpretation", "continuity gaps", "artifact-carried provenance", "identity reconstruction from anchors", "transformation lineage"]
+    },
+    {
+      "title": "Profile: Ailis Genessee",
+      "ingest": "profile-ailis-genessee-reference.v0.1.json",
+      "source_note": "Rowan identifies this as one of her first-created character profiles.",
+      "primary_mechanisms": ["programmable wearable interface", "body-linked authentication", "signal-bounded autonomy", "filtering and sensory load", "capability cost", "parallel assessment", "maintenance through craft", "coercion versus local intent"]
+    }
+  ],
+  "pending_sources": [
+    {
+      "document_id": "1bqc3l9-C_CbERvPjPefnQJztgVjK7JGag-qiH87aRIo",
+      "status": "pending-access",
+      "reason": "Drive permission/file visibility prevented content read; title and mechanisms intentionally not guessed."
+    },
+    {
+      "document_id": "1T0mKIwwyVFX9fkD2Gf_W2HOWWk4WTo0jm0ZdF-0vKGo",
+      "status": "pending-access",
+      "reason": "Drive permission/file visibility prevented content read; title and mechanisms intentionally not guessed."
+    },
+    {
+      "document_id": "1dTRIWWTZfWlpC60lbmCsVSTixj2tEYQIPfoJZqqPRvM",
+      "pending_record": "pending/1dTRIWWTZfWlpC60lbmCsVSTixj2tEYQIPfoJZqqPRvM.pending.json",
+      "status": "pending-access",
+      "reason": "Drive returned permission denied on 2026-09-18; title and mechanisms intentionally not guessed."
+    }
+  ],
+  "cross_corpus_questions": [
+    "Which mechanisms recur across independently written works?",
+    "Which mechanisms appear earliest in dated/revisioned sources?",
+    "Which later ArcSweep or Universal Codex mechanisms have demonstrable antecedents in these works?",
+    "Which similarities are broad genre motifs versus unusually specific design ancestry?",
+    "Where do later systems materially revise or reject an earlier mechanism?"
+  ],
+  "governing_law": "Preserve the story as provenance, abstract the mechanism deliberately, and make chronology carry ancestry claims."
+}
