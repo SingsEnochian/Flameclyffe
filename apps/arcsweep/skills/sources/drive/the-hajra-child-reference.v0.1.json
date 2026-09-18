@@ -1,0 +1,62 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source": {
+    "title": "The Hajra Child",
+    "url": "https://docs.google.com/document/d/1ph-5tCceSM7XkCEydhHFJ7WD9ebOQU62hl7dpxB4OW8",
+    "class": "fiction-reference",
+    "canon_policy": "reference-only"
+  },
+  "boundaries": {
+    "story_lore_auto_promotes": false,
+    "characters_auto_promote": false,
+    "setting_auto_promotes": false,
+    "mechanisms_may_be_abstracted": true
+  },
+  "mechanisms": [
+    {
+      "id": "engineered-training-environment",
+      "summary": "A deliberately constructed environment can tune weather, terrain, stimuli, and constraints for learning without being mistaken for the external world it models."
+    },
+    {
+      "id": "raw-signal-vs-interpretation",
+      "summary": "Wordless images, affect, rhythm, or sensation may be translated into language by a participant. Store the raw/first-order signal class separately from the participant's interpretation."
+    },
+    {
+      "id": "artifact-carried-continuity",
+      "summary": "A physical or persistent artefact can bridge discontinuous states and carry provenance even when memory is incomplete."
+    },
+    {
+      "id": "identity-reconstruction-from-anchors",
+      "summary": "After a discontinuity, identity and context may be reconstructed from sparse anchors such as a name, tools, bodily knowledge, recurring relationships, and artefacts without inventing the missing interval."
+    },
+    {
+      "id": "closed-memory-gap",
+      "summary": "A participant may recover before-and-after continuity while an interval remains inaccessible. The gap stays explicitly unknown instead of being filled by narrative convenience."
+    },
+    {
+      "id": "transformation-with-lineage",
+      "summary": "A transformative state change may alter capability and perspective while retaining inspectable lineage from the prior state."
+    },
+    {
+      "id": "compartmented-knowledge",
+      "summary": "Restricted or staged knowledge should be represented as scoped access and provenance, not as universal hidden truth available to every observer."
+    }
+  ],
+  "candidate_ui": {
+    "continuity_machine": "known prior state -> catastrophic/discontinuous transition -> unknown interval -> anchor recovery -> self-identification -> partial context restoration -> transformed active state with gap preserved",
+    "visuals": [
+      "dark or occluded interval between two inspectable timeline segments",
+      "persistent artefact orbit bridging pre-gap and post-gap state",
+      "anchor words or objects lighting one by one during reconstruction",
+      "raw nonverbal signal and interpreted-language layers rendered separately",
+      "transformation ring that preserves a visible lineage filament to the prior state"
+    ]
+  },
+  "laws": [
+    "Translation is interpretation, not the raw signal.",
+    "A continuity gap is not permission to invent the missing interval.",
+    "An artefact can carry provenance across memory discontinuity.",
+    "Transformation may preserve lineage without preserving every prior state unchanged.",
+    "Recovered identity does not retroactively explain an unknown transition."
+  ]
+}

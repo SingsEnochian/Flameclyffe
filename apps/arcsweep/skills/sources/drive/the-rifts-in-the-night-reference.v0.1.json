@@ -1,0 +1,88 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source_id": "drive-the-rifts-in-the-night-1VYwwkjg_RhVpJEMpgafB2yekhd4U4Z6PcBdycmFRc8g",
+  "title": "The Rifts In the Night",
+  "source_type": "google-doc",
+  "source_url": "https://docs.google.com/document/d/1VYwwkjg_RhVpJEMpgafB2yekhd4U4Z6PcBdycmFRc8g/edit?usp=drivesdk",
+  "canon_status": "reference-only",
+  "provenance": {
+    "observed_title": "The Rifts In the Night",
+    "observed_revision_id": "ANLCKQlUJs-OOWujxiJ4dKl-Vzza0ZKS0nk4GlJDto4P0ntIhKmwCc79lId15jmzFiP3GK6OmRz0dVy76BpVaw",
+    "observed_on": "2026-09-18"
+  },
+  "story_lore_boundary": {
+    "star_wars_story_material_is_reference_only": true,
+    "auto_promote_to_arcsweep_canon": false,
+    "auto_promote_characters": false,
+    "auto_promote_plot": false,
+    "auto_promote_setting": false
+  },
+  "mechanism_extract": {
+    "rift_cycle": [
+      "dormant_or_baseline",
+      "pitch_change",
+      "flicker_or_fluctuation",
+      "pressure_build",
+      "crack_or_threshold_event",
+      "materialisation_window",
+      "stabilisation",
+      "aftermath"
+    ],
+    "observable_channels": [
+      "sound_pitch",
+      "low_throb",
+      "pressure",
+      "visual_flicker",
+      "warping",
+      "shimmer",
+      "presence_of_arrivals"
+    ],
+    "response_pattern": [
+      "detect anomaly",
+      "call specialists",
+      "prepare protected receiving area",
+      "wait for event completion",
+      "triage arrivals",
+      "preserve belongings",
+      "allow recovery",
+      "offer food_and_drink",
+      "assess later"
+    ],
+    "ui_value": [
+      "multi-sensory threshold warning before a major state change",
+      "progressive rather than instantaneous portal materialisation",
+      "quiet receiving mode after an intense transition",
+      "protected quarantine or intake rooms for newly arrived entities or sources",
+      "separate arrival from evaluation so assessment does not overwrite first contact",
+      "preserve source-linked belongings and context during intake"
+    ]
+  },
+  "universal_codex_translation": {
+    "threshold_profile": "rift",
+    "candidate_sequence": [
+      "signal drift",
+      "tone/pulse change",
+      "edge shimmer",
+      "pressure field",
+      "threshold crack",
+      "object/page/entity coalescence",
+      "receipt and intake",
+      "quiet recovery state"
+    ],
+    "candidate_surfaces": [
+      "Continuity Gate",
+      "Ingest",
+      "Quarantine",
+      "Worldseed arrival",
+      "Signal message arrival",
+      "cross-world transition"
+    ],
+    "intake_rule": "Arrival and assessment are separate states. The Codex may receive, preserve, and stabilise an arrival before evaluating what it is.",
+    "animation_rule": "Threshold events should accumulate cues before materialisation and should settle into a quieter post-transition state rather than ending at peak spectacle."
+  },
+  "copyright_boundary": {
+    "store_full_prose": false,
+    "copy_story_text_into_ui": false,
+    "use_mechanisms_and_paraphrased_patterns_only": true
+  }
+}

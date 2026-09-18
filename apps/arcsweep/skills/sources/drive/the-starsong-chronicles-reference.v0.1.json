@@ -1,0 +1,103 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "id": "drive:the-starsong-chronicles:1k9ZP9KWN2JoOqsSioZyjGGHdfF-R2m5IINwgCuKsi-Y",
+  "title": "The Starsong Chronicles",
+  "source": {
+    "kind": "google-doc",
+    "url": "https://docs.google.com/document/d/1k9ZP9KWN2JoOqsSioZyjGGHdfF-R2m5IINwgCuKsi-Y",
+    "document_id": "1k9ZP9KWN2JoOqsSioZyjGGHdfF-R2m5IINwgCuKsi-Y",
+    "created_at": "2018-01-19T17:27:31.302Z",
+    "modified_at": "2023-06-08T20:33:33.253Z",
+    "document_footer_year": 2019,
+    "author_credit": "Rowan Winters",
+    "book_one": "The Key of Aldamar",
+    "opening_chapter": "The Stars Sang Us Here",
+    "lineage": ["Rowan-authored speculative fiction"],
+    "content_policy": "reference-only"
+  },
+  "canon_policy": {
+    "auto_promote": false,
+    "story_lore_transfer": false,
+    "mechanism_transfer": true,
+    "ancestry_status": "candidate-authorial-precursor",
+    "notes": "Ellena, Aldamar, Earth-destruction events, portal cosmology, refugee-group specifics, locations, and plot remain source-bound. The title, 2018 Drive creation timestamp, 2019 document footer, and threshold/world-displacement mechanisms may be compared against later Rowan systems as provenance, but direct descent must be demonstrated rather than assumed."
+  },
+  "mechanisms": [
+    {
+      "name": "catastrophe-to-threshold-to-arrival",
+      "description": "A collapsing source world forces a cohort through an anomalous portal into a radically different environment.",
+      "codex_translation": "Model migration or world-transition as source-state, threshold event, transit, arrival, and reorientation rather than one teleport flag."
+    },
+    {
+      "name": "threshold-has-somatic-cost",
+      "description": "Transit is experienced through cold, heat, nausea, disorientation, injury, and delayed sensory recovery.",
+      "codex_translation": "Transformation and threshold animation may expose transition cost or instability as receipts instead of presenting every state change as frictionless."
+    },
+    {
+      "name": "familiar-anchor-after-displacement",
+      "description": "After extreme disorientation, a familiar person, scent, touch, or object provides immediate continuity and orientation.",
+      "codex_translation": "After a major mode/world switch, preserve a stable identity or continuity anchor so the user knows what remained constant."
+    },
+    {
+      "name": "portal-lifecycle",
+      "description": "The portal has operational states, can become dormant, is defended, and may need deliberate destruction to prevent harmful reuse.",
+      "codex_translation": "Treat portals, bridges, connectors, and channels as stateful infrastructure with open, unstable, dormant, defended, sealed, and destroyed states."
+    },
+    {
+      "name": "cohort-survival-with-uncertain-total",
+      "description": "The local survivor group is countable while the existence of other surviving groups through other portals remains unknown.",
+      "codex_translation": "Keep local census, known external cohorts, and unknown possible branches separate; absence of contact does not prove absence of other survivors."
+    },
+    {
+      "name": "continuity-under-radical-environment-change",
+      "description": "The people remain themselves while their surrounding world changes abruptly from a familiar shoreline to an alien jungle.",
+      "codex_translation": "World-state transformation must preserve participant identity and ancestry unless an explicit transformation event changes them."
+    },
+    {
+      "name": "echo-signal-with-unknown-referent",
+      "description": "Faint mental echoes are experienced while the narrator explicitly does not know who is alive, dead, present, or absent.",
+      "codex_translation": "Render weak signals as weak signals with unknown referents; do not promote felt or partial echoes into identified participants without evidence."
+    },
+    {
+      "name": "continuity-statement-after-loss",
+      "description": "The group frames survival as not-yet-lost even after catastrophic rupture, preserving identity without pretending the old world remains intact.",
+      "codex_translation": "Support continuity that acknowledges rupture: survival may preserve lineage while world state, population, and available infrastructure have materially changed."
+    }
+  ],
+  "candidate_state_machine": [
+    "source-world",
+    "catastrophic-loss",
+    "portal-active",
+    "transit",
+    "arrival-shock",
+    "anchor-recovery",
+    "portal-dormant-or-sealed",
+    "local-census",
+    "unknown-external-branches",
+    "new-world-orientation"
+  ],
+  "laws": [
+    "threshold transit is an event with receipts, not an invisible cut",
+    "participant continuity survives environmental substitution unless explicitly changed",
+    "known local survivors != total survivors everywhere",
+    "unknown external cohorts remain unknown",
+    "weak echoes do not identify their source by themselves",
+    "portal state and portal access authority remain explicit",
+    "rupture does not require identity erasure"
+  ],
+  "universal_codex_visual_ideas": [
+    "portal edges that visibly move through active, unstable, dormant, sealed, and destroyed states",
+    "arrival animation that briefly carries cold/heat distortion and orientation loss before settling",
+    "a familiar continuity-thread or anchor sigil that remains visible through a world morph",
+    "cohort map with known local nodes, confirmed remote nodes, and unresolved dark regions rather than invented population fill",
+    "world-page transformation in which landscape changes completely while participant identity marks remain fixed",
+    "faint echo filaments that remain anonymous until provenance resolves them"
+  ],
+  "prohibitions": [
+    "Do not import The Starsong Chronicles characters, Aldamar, portal lore, apocalypse events, or plot into ArcSweep or Terra Aeterna canon automatically.",
+    "Do not treat the shared word Starsong as proof of direct continuity with later projects without chronology and explicit adoption evidence.",
+    "Do not identify weak or ambiguous signals merely because they feel familiar.",
+    "Do not fill unknown survivor branches with inferred people or histories.",
+    "Do not make a world transition erase participant identity or provenance unless the source state actually changes them."
+  ]
+}

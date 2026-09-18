@@ -1,0 +1,97 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "id": "drive:back-up-your-vampires:1f4l6xZ94zTdqLcaII16INkh9S2zb-0C8zjPNUa0KNgc",
+  "title": "Back up your vampires",
+  "source": {
+    "kind": "google-doc",
+    "url": "https://docs.google.com/document/d/1f4l6xZ94zTdqLcaII16INkh9S2zb-0C8zjPNUa0KNgc",
+    "document_id": "1f4l6xZ94zTdqLcaII16INkh9S2zb-0C8zjPNUa0KNgc",
+    "lineage": ["Rowan-authored fiction", "Tesla-inspired speculative fiction"],
+    "content_policy": "reference-only"
+  },
+  "canon_policy": {
+    "auto_promote": false,
+    "story_lore_transfer": false,
+    "mechanism_transfer": true,
+    "notes": "Kyra, Tesla, Valrr, the crystalline dragon, locations, plot events, and story cosmology remain source-bound. Only abstract interaction, embodiment, relay, state-transition, and sensory-interface mechanisms may cross into Universal Codex design."
+  },
+  "mechanisms": [
+    {
+      "name": "facts-before-panic",
+      "description": "A high-stress anomaly is first reconstructed as a sequence of concrete observations before interpretation or action expands.",
+      "codex_translation": "When an unexpected state appears, Universal Codex should first surface what changed, where, when, and from which source before offering interpretation, escalation, or repair."
+    },
+    {
+      "name": "relay-bridged-presence",
+      "description": "Presence can be extended through multiple relays by following a known endpoint and compensating for dead zones with alternate energy or carrier paths.",
+      "codex_translation": "Represent multi-hop presence as an inspectable route with endpoint lock, dead-zone markers, fallback carriers, and receipts for each successful handoff."
+    },
+    {
+      "name": "consented-knowledge-transfer",
+      "description": "Skill transfer occurs through explicit permission to access lived experience rather than requiring a separate manual or duplicate model.",
+      "codex_translation": "Permit a user to grant a scoped tool or guide access to selected skill context, traces, or demonstrations, with visible scope and revocation rather than silent context absorption."
+    },
+    {
+      "name": "remote-embodiment-through-tool",
+      "description": "A remote or nonlocal participant gains agency through a vehicle or machine while remaining distinct from that machine.",
+      "codex_translation": "Allow a guide or agent to inhabit a tool form, room, ship, page, or projection organ while preserving separate identity, authority scope, and machine state."
+    },
+    {
+      "name": "embodiment-with-actuation",
+      "description": "Embodied presence is meaningful because it can actuate real functions such as navigation, first-aid access, or system routing rather than merely appearing visually.",
+      "codex_translation": "A manifested Codex presence should expose only the actions actually authorised for that form and report results through receipts."
+    },
+    {
+      "name": "layer-transition-with-reentry",
+      "description": "Movement between physical, dreamlike, virtual, and embodied-machine states is experienced as a transition with re-entry effects rather than a hard scene cut.",
+      "codex_translation": "Render threshold crossings as explicit transitions that preserve previous-state anchors and mark return-to-body or return-to-page state separately."
+    },
+    {
+      "name": "sensory-fidelity-gradient",
+      "description": "A mediated environment can become progressively more vivid, crisp, embodied, and multisensory without that vividness changing its source class.",
+      "codex_translation": "Track sensory fidelity independently from epistemic class so a memory, simulation, dream, remote presence, or projection can become hyperreal without being relabelled as present-time physical observation."
+    },
+    {
+      "name": "machine-as-body-without-identity-collapse",
+      "description": "A participant can experience a ship or machine as body-like while remaining distinguishable from the vessel and its systems.",
+      "codex_translation": "Support temporary embodiment forms where control, sensation, damage, and motion belong to the active vessel while identity remains separately represented and auditable."
+    }
+  ],
+  "candidate_state_machine": [
+    "anomaly-detected",
+    "facts-collected",
+    "endpoint-identified",
+    "relay-route-built",
+    "scope-granted",
+    "presence-established",
+    "tool-embodiment-active",
+    "actuation",
+    "receipt",
+    "reentry-or-release"
+  ],
+  "laws": [
+    "connection != embodiment authority",
+    "embodiment != identity collapse",
+    "sensory vividness != epistemic class",
+    "knowledge access requires explicit scope",
+    "relay failure remains visible as a broken or degraded route",
+    "actuation must follow actual authority and state",
+    "reentry is a state transition, not an invisible cut"
+  ],
+  "universal_codex_visual_ideas": [
+    "visible multi-hop relay filaments between Book, room, remote endpoint, and embodied tool",
+    "dead-zone gaps shown as dim or broken segments with alternate carrier routes lighting when engaged",
+    "temporary tool embodiment where a projected presence folds into the geometry of a ship, page organ, room, or instrument without losing its own identity marker",
+    "consent glyphs that show exactly what skill traces or context were granted to a guide",
+    "first-aid or support functions emerging from the embodied tool itself when the underlying action is available",
+    "transition tunnel or refraction effect when moving between physical, dream, simulation, remote-presence, and machine-body layers",
+    "sensory-fidelity halo that can intensify separately from source-class labels"
+  ],
+  "prohibitions": [
+    "Do not import source characters, plot, creatures, cosmology, or setting as ArcSweep canon.",
+    "Do not infer sentience from vividness, speech, embodiment, or responsiveness alone.",
+    "Do not let a connected participant inherit control of a tool merely because a communication path exists.",
+    "Do not silently copy private experience or skill context into a guide; access must be scoped and explicit.",
+    "Do not let machine embodiment erase the distinction between participant identity and vessel state."
+  ]
+}

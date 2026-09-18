@@ -1,0 +1,91 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source": {
+    "title": "Gryben Plotting",
+    "document_id": "1RKGxaf_y-WLm1I4MVNYX6qEVycGSCGwMFWH3esbmSYg",
+    "url": "https://docs.google.com/document/d/1RKGxaf_y-WLm1I4MVNYX6qEVycGSCGwMFWH3esbmSYg/edit",
+    "class": "early-world-system-design-reference",
+    "created_time": "2015-01-02T02:02:36.825Z",
+    "modified_time": "2015-01-07T23:19:38.418Z",
+    "provenance": "Rowan-supplied Google Doc",
+    "canon_policy": "reference-only"
+  },
+  "boundaries": {
+    "story_lore_auto_promotes": false,
+    "characters_auto_promote": false,
+    "franchise_lore_auto_promotes": false,
+    "mechanisms_may_be_abstracted": true,
+    "full_text_mirror": false
+  },
+  "design_ancestry_signals": [
+    {
+      "id": "anomalous-threshold-arrival",
+      "summary": "A new object/system appears abruptly and changes the local rules before its origin or purpose is understood.",
+      "codex_use": "Model significant arrivals as source-preserved events with separate arrival, interpretation, quarantine, and adoption stages."
+    },
+    {
+      "id": "cross-world-ingress",
+      "summary": "Temporal disturbances deposit people and objects from other worlds/times into bounded arrival zones.",
+      "codex_use": "Universal Codex portals and ingest surfaces can receive provenance-bearing objects from multiple worlds without collapsing them into one canon."
+    },
+    {
+      "id": "flicker-state",
+      "summary": "Participants may shift into an unstable shadow/flux state and may or may not return cleanly.",
+      "codex_use": "Use explicit transitional presence states for unstable, partial, remote, quarantined, or unresolved manifestations instead of binary present/absent."
+    },
+    {
+      "id": "alien-interface-by-affinity",
+      "summary": "Controls respond more strongly to a particular mode of contact, but interaction remains partial, costly, and difficult to interpret.",
+      "codex_use": "Permit gesture, voice, ink, haptic, or model-specific interaction affinities while keeping capability confidence, interpretation confidence, and cost separate."
+    },
+    {
+      "id": "partial-control-map",
+      "summary": "Some consoles and sections are active, some dead, some locked, and some functions remain automatic.",
+      "codex_use": "Projected OS maps should show discovered, unavailable, locked, degraded, automatic, and unknown organs as distinct states."
+    },
+    {
+      "id": "sealed-research-zones",
+      "summary": "Dedicated research rooms can be sealed and isolated for risky or incompatible material.",
+      "codex_use": "Quarantine and Proving Chamber spaces may be rendered as visibly bounded containers with ingress/egress receipts and scope-limited authority."
+    },
+    {
+      "id": "multi-climate-interior-world",
+      "summary": "One station contains distinct controlled ecological zones and climates maintained by the system itself.",
+      "codex_use": "Treat rooms/worlds as different environmental projection profiles sharing one substrate without flattening their local rules."
+    },
+    {
+      "id": "exposure-accumulation",
+      "summary": "Time spent in an environment progressively changes participant state, with recovery requiring leaving or returning to a baseline zone.",
+      "codex_use": "Track interaction load, session intensity, adaptation, and cooldown as explicit state rather than hiding cumulative effects."
+    },
+    {
+      "id": "return-bound-capability",
+      "summary": "Participants can leave a bounded system temporarily but must return before a deadline or suffer escalating consequences.",
+      "codex_use": "Represent time-limited leases, dependency windows, return requirements, and expiry separately from identity and location."
+    },
+    {
+      "id": "multiple-live-hypotheses",
+      "summary": "Several explanations for the same anomaly coexist while the underlying cause remains unresolved.",
+      "codex_use": "Observer should preserve competing causal hypotheses with status/evidence rather than selecting one explanatory story prematurely."
+    }
+  ],
+  "candidate_ui": {
+    "station_machine": "arrival -> anomaly field -> partial interface discovery -> room/zone mapping -> exposure tracking -> scoped investigation -> competing hypotheses -> receipt",
+    "visuals": [
+      "station organs lighting according to discovered/locked/dead/automatic state",
+      "flicker silhouettes for unstable presence states",
+      "timestorm/rift ingress rendered as incoming provenance ribbons",
+      "sealed research rooms as floating bounded cells",
+      "exposure clock or halo that accumulates without changing identity",
+      "hypothesis cards orbiting one observation without auto-merging"
+    ]
+  },
+  "laws": [
+    "Arrival is not explanation.",
+    "Unknown interface semantics remain unknown until learned.",
+    "Partial control does not imply system ownership.",
+    "Exposure state belongs in the receipt.",
+    "Multiple hypotheses may remain live at once.",
+    "A bounded world may have local rules without becoming universal law."
+  ]
+}

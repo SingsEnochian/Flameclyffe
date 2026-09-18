@@ -1,0 +1,67 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "id": "drive-circles-1HGXZGyK",
+  "title": "Circles",
+  "source": {
+    "kind": "google-doc",
+    "document_id": "1HGXZGyK-brTrvFwsMKiK93FzP6RpjrmmYt1nCHjmxeA",
+    "url": "https://docs.google.com/document/d/1HGXZGyK-brTrvFwsMKiK93FzP6RpjrmmYt1nCHjmxeA/edit",
+    "provenance": "Rowan-supplied Drive document",
+    "copyright_boundary": "Reference-only summary and mechanism extraction; no full-text mirroring."
+  },
+  "canon_status": "reference-only",
+  "story_lore_boundary": {
+    "external_setting": "Star Wars-derived fanfiction continuity",
+    "auto_promote_to_arcsweep_canon": false,
+    "auto_promote_characters": false,
+    "auto_promote_plot": false
+  },
+  "mechanisms": [
+    {
+      "id": "coalescing-presence",
+      "summary": "A remote or non-corporeal presence may resolve gradually into a visible form rather than appear as a binary on/off state.",
+      "codex_use": "Holographic correspondents, archived witnesses, AI/character presences, and remote participants can phase from signal haze to stable projection with provenance/status visible throughout."
+    },
+    {
+      "id": "voice-before-form",
+      "summary": "A presence can be perceived first as voice or felt signal, then later as visible projection.",
+      "codex_use": "Allow audio/text/indicator states to precede full Three.js manifestation, creating a legible presence-state machine."
+    },
+    {
+      "id": "shared-vision-transfer",
+      "summary": "One participant intentionally shares a remembered/dreamed scene with another through direct experiential transfer.",
+      "codex_use": "Story Mode and Observer can project a selected memory/dream/reference as a bounded scene object with source, witness, and interpretation lanes kept distinct."
+    },
+    {
+      "id": "dream-overlay",
+      "summary": "Dream content overlays waking continuity while remaining narratively distinguishable from ordinary present-time observation.",
+      "codex_use": "Render dreams, simulations, forecasts, and remembered scenes with distinct visual treatment and explicit epistemic labels instead of flattening them into the current world state."
+    },
+    {
+      "id": "absence-as-state",
+      "summary": "The inability to locate or physically contact someone is represented as a meaningful continuity state rather than simply removing them from the narrative.",
+      "codex_use": "Presence UI can model absent, unreachable, remote, archived, projected, and co-present as distinct states rather than present/not-present only."
+    },
+    {
+      "id": "material-relic-anchor",
+      "summary": "Physical objects can serve as relational and continuity anchors to an absent person.",
+      "codex_use": "Objects, files, messages, and artefacts may act as provenance anchors that summon related timelines, receipts, relationships, or projections without asserting identity equivalence."
+    },
+    {
+      "id": "mission-threshold",
+      "summary": "A transition from contemplation/vision into mission action is marked by preparation, team assembly, launch windows, and explicit readiness.",
+      "codex_use": "Room/tool invocation may use a staged threshold sequence: context -> companions/tools -> readiness -> transition -> active mission state."
+    }
+  ],
+  "ui_translation": {
+    "projection_states": ["signal", "voice", "flicker", "coalescing", "stable", "fading", "absent"],
+    "scene_classes": ["present", "memory", "dream", "forecast", "remote-presence", "archived-witness"],
+    "rule": "The projection may become vivid without changing the epistemic class of the underlying source."
+  },
+  "non_inferences": [
+    "Do not treat fictional Force mechanics as empirical claims.",
+    "Do not infer ontology from vividness of presentation.",
+    "Do not collapse dream, memory, remote presence, and present observation into one state.",
+    "Do not import Star Wars characters or plot into ArcSweep canon without explicit adoption."
+  ]
+}

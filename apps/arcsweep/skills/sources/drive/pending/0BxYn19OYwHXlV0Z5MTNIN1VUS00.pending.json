@@ -1,0 +1,14 @@
+{
+  "schema": "arcsweep.pending-reference/v0.1",
+  "document_id": "0BxYn19OYwHXlV0Z5MTNIN1VUS00",
+  "source_url": "https://drive.google.com/file/d/0BxYn19OYwHXlV0Z5MTNIN1VUS00/view?usp=drivesdk&resourcekey=0-rNqpAIqmnkxC9kHv3EiPDg",
+  "status": "pending-access",
+  "observed_on": "2026-09-18",
+  "reason": "Connected Google Drive returned 404/file not found. Content, title, type, and mechanisms remain unknown and must not be inferred.",
+  "canon_status": "reference-only-pending",
+  "rules": [
+    "Do not guess title or contents.",
+    "Do not derive mechanisms before content is readable.",
+    "Preserve this legacy Drive identifier and resource-key URL as provenance."
+  ]
+}

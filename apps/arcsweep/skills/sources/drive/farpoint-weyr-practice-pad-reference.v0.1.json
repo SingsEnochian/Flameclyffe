@@ -1,0 +1,62 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source": {
+    "title": "Farpoint Weyr Practice Pad",
+    "url": "https://docs.google.com/document/d/1tvpx5mb7S5dvdssMsy17DM6BXME4r6zvtowQ3EELS1U",
+    "class": "fiction-reference",
+    "canon_policy": "reference-only"
+  },
+  "boundaries": {
+    "story_lore_auto_promotes": false,
+    "characters_auto_promote": false,
+    "setting_auto_promotes": false,
+    "mechanisms_may_be_abstracted": true
+  },
+  "mechanisms": [
+    {
+      "id": "filtered-anomaly-detection",
+      "summary": "Protective filters can reduce noise while also hiding weak warning signals; the UI should expose when detection is operating through a filter or shield."
+    },
+    {
+      "id": "interrupted-signal-receipt",
+      "summary": "A distress or anomaly signal may be cut off before interpretation completes. Preserve the partial observation instead of filling in the missing content."
+    },
+    {
+      "id": "observed-sequence-marker",
+      "summary": "A numbered or sequential marker is evidence of an observed sequence token, not by itself proof of the generator, motive, or complete sequence."
+    },
+    {
+      "id": "evidence-weathering",
+      "summary": "Environmental conditions can degrade a scene before assessment. Provenance should record evidence quality and loss, not silently present the surviving view as pristine."
+    },
+    {
+      "id": "visual-packet-handoff",
+      "summary": "A compact visual may be transferred as a case or task handoff. The receiving surface should preserve who supplied it, when, and what remains unverified."
+    },
+    {
+      "id": "companion-channel",
+      "summary": "A companion may remain nearby, converse in a side channel, or assist without taking over the primary task or authority lane."
+    },
+    {
+      "id": "mode-shift-by-context",
+      "summary": "Social chatter can yield visibly to investigative focus when context changes. The interface may alter animation intensity and information density without erasing the prior interaction state."
+    }
+  ],
+  "candidate_ui": {
+    "anomaly_machine": "baseline -> filtered sensing -> weak anomaly -> interrupted signal -> preserved partial receipt -> scoped investigation",
+    "visuals": [
+      "shield/filter halo with visible attenuation state",
+      "cut-off pulse leaving an incomplete arc rather than a completed alert glyph",
+      "evidence-quality wash or erosion layer",
+      "handoff visual carried as a provenance-tagged card or projected shard",
+      "companion channel orbit kept spatially distinct from primary work"
+    ]
+  },
+  "laws": [
+    "A filter may protect and still create a blind spot.",
+    "An interrupted signal remains partial evidence.",
+    "Observed sequence is not inferred causation.",
+    "Evidence quality is part of provenance.",
+    "A companion channel does not become hidden authority."
+  ]
+}

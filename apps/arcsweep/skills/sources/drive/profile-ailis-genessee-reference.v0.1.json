@@ -1,0 +1,90 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source": {
+    "title": "Profile: Ailis Genessee",
+    "url": "https://docs.google.com/document/d/14PPz59bYo0KwOk9BWDMrkCQ3Ov_rYwumSOlc6Hg-d-4",
+    "class": "early-character-design-reference",
+    "provenance": "Rowan-supplied Google Doc; described by Rowan as one of the first character profiles she created",
+    "canon_policy": "reference-only"
+  },
+  "boundaries": {
+    "story_lore_auto_promotes": false,
+    "characters_auto_promote": false,
+    "setting_auto_promotes": false,
+    "personal_history_auto_promotes": false,
+    "mechanisms_may_be_abstracted": true,
+    "full_text_mirror": false
+  },
+  "design_ancestry_signals": [
+    {
+      "id": "programmable-wearable-interface",
+      "summary": "A personally programmable shipsuit changes presentation and function according to context.",
+      "codex_use": "Treat vestments and projected controls as adaptive interface skins over persistent state rather than fixed costumes."
+    },
+    {
+      "id": "body-embedded-authentication",
+      "summary": "An implant-linked mark can be scanned as identity/access state at system boundaries.",
+      "codex_use": "Model identity credentials, capability grants, and threshold admission as explicit provenance-bearing tokens rather than visual implication."
+    },
+    {
+      "id": "signal-bounded-autonomy",
+      "summary": "A remote control system can grant temporary operational range while enforcing check-in, signal, and consequence constraints.",
+      "codex_use": "Render capability leases, expiry windows, external dependencies, and loss-of-link states independently from user identity or intent."
+    },
+    {
+      "id": "filtering-and-sensory-load",
+      "summary": "Psychic shielding changes the amount of environmental information that reaches the character; removing it causes extreme signal load.",
+      "codex_use": "Support local attenuation, focus filters, sensory gain controls, and explicit indication that a filter changes observability."
+    },
+    {
+      "id": "small-scale-fine-control",
+      "summary": "Fine manipulation is easier and more reliable than high-energy large-scale action; larger actions require an external power source and incur cost.",
+      "codex_use": "Keep precision, range, energy source, and operation cost as separate capability dimensions."
+    },
+    {
+      "id": "parallel-assessment",
+      "summary": "The character is repeatedly described as calculating multiple odds while maintaining outward composure.",
+      "codex_use": "Use separated concurrent reasoning/task lanes with inspectable status instead of collapsing simultaneous work into one undifferentiated activity state."
+    },
+    {
+      "id": "repair-through-craft",
+      "summary": "Mechanics, botany, cooking, music, gardening, and repetitive craft function as restoration practices rather than decorative hobbies.",
+      "codex_use": "Allow maintenance, recovery, making, and practice modes to be first-class operational states, not idle screens."
+    },
+    {
+      "id": "persistent-coercion-overlay",
+      "summary": "The character's own goals and moral code remain distinct from externally imposed commands and control infrastructure.",
+      "codex_use": "Separate participant intent, external command, permission, coercion, and resulting action in receipts so action does not erase agency context."
+    },
+    {
+      "id": "survival-oriented-tool-multiplicity",
+      "summary": "One person uses many disciplines, tools, languages, vehicles, and improvisational skills while retaining a stable identity and purpose.",
+      "codex_use": "Universal Codex forms can change radically by task while preserving one identity/provenance spine."
+    },
+    {
+      "id": "material-memory-anchor",
+      "summary": "Objects, marks, garments, instruments, mechanical projects, and inherited spaces carry continuity across long isolation.",
+      "codex_use": "Permit artefacts to open linked memories, receipts, relationships, and timelines without claiming the artefact is the person or event."
+    }
+  ],
+  "candidate_ui": {
+    "form_machine": "stable identity -> context scan -> capability lease -> vestment/tool manifestation -> bounded action -> cost/residue -> maintenance -> ready",
+    "visuals": [
+      "programmable vestment patterns that change with room or task while keeping one identity seal",
+      "implant/credential glyph rendered separately from identity portraiture",
+      "external-link filament showing capability lease source, expiry, and signal quality",
+      "small precise manipulation rings versus high-energy external-source channel",
+      "parallel odds/task lanes orbiting without hiding the primary action",
+      "maintenance scenes where tools, plants, music, or repetitive craft visibly restore readiness"
+    ]
+  },
+  "laws": [
+    "Identity is not the same thing as the control system attached to it.",
+    "External command does not erase local intent or moral context.",
+    "Capability, permission, energy source, and cost are separate dimensions.",
+    "A filter changes observability and must be visible as a filter.",
+    "Adaptive form may change without changing the identity spine.",
+    "Maintenance and making are operational states, not decorative downtime."
+  ],
+  "lineage_note": "Because Rowan identifies this as one of her earliest character profiles, mechanism overlaps with later ArcSweep, Observer, Runa, Universal Codex, and continuity work should be tracked as design ancestry candidates, not treated as proof of a single direct causal lineage without dated source comparison."
+}
