@@ -812,6 +812,12 @@ async function createThreeRenderer(canvas) {
     cover.position.z = -0.18;
     group.add(cover);
 
+    const frontCoverGeometry = new THREE.BoxGeometry(3.45, 4.8, 0.11);
+    frontCoverGeometry.translate(1.725, 0, 0);
+    const frontCover = new THREE.Mesh(frontCoverGeometry, coverMaterial);
+    frontCover.position.set(0, 0, 0.08);
+    group.add(frontCover);
+
     const left = new THREE.Mesh(new THREE.PlaneGeometry(3.28, 4.45), paperMaterial);
     left.position.set(-1.66, 0, -0.08);
     group.add(left);
@@ -823,7 +829,6 @@ async function createThreeRenderer(canvas) {
       new THREE.CylinderGeometry(0.09, 0.09, 4.65, 18),
       new THREE.MeshStandardMaterial({ color: 0xa97842, roughness: 0.48, metalness: 0.22 }),
     );
-    spine.rotation.z = Math.PI / 2;
     spine.position.z = -0.02;
     group.add(spine);
 
@@ -882,10 +887,15 @@ async function createThreeRenderer(canvas) {
     async function open() {
       group.scale.setScalar(.94);
       group.rotation.z = -0.015;
-      await animate(420, (progress) => {
+      frontCover.rotation.y = 0;
+      await animate(520, (progress) => {
         group.scale.setScalar(.94 + .06 * progress);
         group.rotation.z = -0.015 * (1 - progress);
+        frontCover.rotation.y = -Math.PI * progress;
+        frontCover.position.z = 0.08 + Math.sin(Math.PI * progress) * .08;
       });
+      frontCover.rotation.y = -Math.PI;
+      frontCover.position.z = -0.1;
     }
 
     async function turn(direction, midpoint) {
@@ -919,6 +929,7 @@ async function createThreeRenderer(canvas) {
         renderer.dispose();
         pageGeometry.dispose();
         cover.geometry.dispose();
+        frontCoverGeometry.dispose();
         left.geometry.dispose();
         right.geometry.dispose();
         spine.geometry.dispose();
@@ -948,8 +959,10 @@ async function ensureRenderer() {
   updateRendererStatus(rendererController.mode === 'three'
     ? 'Three.js binding active · DOM pages remain the accessible interaction surface'
     : 'Functional book active · reduced-motion/WebGL fallback');
-  resizeObserver = new ResizeObserver(() => rendererController?.resize?.());
-  resizeObserver.observe(canvas);
+  if (typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(() => rendererController?.resize?.());
+    resizeObserver.observe(canvas);
+  }
   return rendererController;
 }
 
