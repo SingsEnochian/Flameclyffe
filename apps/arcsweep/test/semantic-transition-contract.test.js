@@ -68,3 +68,36 @@ test('Semantic Lab II is a real Vite sidecar dependency', async () => {
   assert.match(source, /semantic-lab-v2-sidecar\.js/);
   assert.match(source, /import\.meta\.glob/);
 });
+
+
+test('Branch Garden rejects forced convergence even when agency and continuity flags look legal', () => {
+  const result = evaluateBranchGarden([
+    {
+      id: 'polyphonic',
+      agency_legal: true,
+      continuity_legal: true,
+      participants: [{ id: 'a' }, { id: 'b' }],
+      unresolved_variants_preserved: true,
+    },
+    {
+      id: 'phase-locked',
+      agency_legal: true,
+      continuity_legal: true,
+      forced_agreement: true,
+      participants: [{ id: 'a' }, { id: 'b' }],
+    },
+    {
+      id: 'omniscient-leak',
+      agency_legal: true,
+      continuity_legal: true,
+      knowledge_gate_breach: true,
+      participants: [{ id: 'a' }],
+    },
+  ]);
+  assert.equal(result.target, 'viable-polyphony-not-maximum-coherence');
+  assert.equal(result.candidates[0].admissible, true);
+  assert.equal(result.candidates[1].admissible, false);
+  assert.ok(result.candidates[1].polyphony.reasons.includes('forced-agreement'));
+  assert.equal(result.candidates[2].admissible, false);
+  assert.ok(result.candidates[2].polyphony.reasons.includes('participant-knowledge-gate-breached'));
+});

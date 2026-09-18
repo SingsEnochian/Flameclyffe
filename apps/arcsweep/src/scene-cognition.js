@@ -3,7 +3,7 @@ import { invokeConstellationRuntimeVoice } from './constellation-runtime-adapter
 
 export const SCENE_COGNITION_DEFAULT_VOICES = Object.freeze(['uial', 'lioreal']);
 
-const OBSERVATION_KINDS = new Set(['dialogue', 'narrative', 'behaviour', 'continuity', 'style', 'sensory', 'relationship', 'observation']);
+const OBSERVATION_KINDS = new Set(['dialogue', 'narrative', 'behaviour', 'continuity', 'style', 'sensory', 'relationship', 'belief', 'memory', 'naming', 'provenance', 'erasure', 'resonance', 'observation']);
 
 function uuid() {
   return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -61,8 +61,11 @@ export function buildSceneCognitionPrompt(packet, voiceContext) {
     '- Proposed observations are evidence records, not canon declarations and not self-authorship.',
     '- Target only an active character, narrative_voice, or writing_style listed above.',
     '- Keep one semantic observation per item.',
+    '- Distinguish world state from narrator statement, witness observation, character belief, institutional doctrine, folklore, and reader knowledge.',
+    '- Do not flatten disagreement merely to make the scene more coherent. Productive uncertainty and incompatible beliefs may remain live.',
+    '- Treat forced agreement, voice collapse, compulsory naming, or identity-erasing resonance as integrity failures rather than successful coherence.',
     '- Evidence must be a short excerpt copied from the current scene prose. Arcsweep verifies it before the observation can be kept.',
-    '- Use observationKind dialogue, narrative, behaviour, continuity, style, sensory, relationship, or observation.',
+    '- Use observationKind dialogue, narrative, behaviour, continuity, style, sensory, relationship, belief, memory, naming, provenance, erasure, resonance, or observation.',
     '- Up to 8 observations may travel in one pass; further observations can travel in another pass.',
     '- Confidence is optional and ranges from 0 to 1.',
     '- State conclusions and observations without hidden chain-of-thought.',

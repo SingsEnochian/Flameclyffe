@@ -35,6 +35,9 @@ test('Story Mode is a first-class interaction and not an alias for writing', asy
   assert.equal(cycle.story_mode.contract_id, STORY_MODE_CONTRACT.id);
   assert.deepEqual(cycle.story_mode.relational_axes_touched, ['C', 'R', 'M']);
   assert.deepEqual(cycle.story_mode.sound_receipt_ids, ['story-rain-1']);
+  assert.equal(cycle.story_mode.polyphony.target, 'viable-polyphony');
+  assert.equal(cycle.story_mode.polyphony.maximum_coherence_is_goal, false);
+  assert.equal(cycle.story_mode.polyphony.productive_apocrypha_allowed, true);
   assert.equal(cycle.authority.story_mode_is_provisional_narrative, true);
   assert.equal(cycle.authority.canon_commit, false);
   assert.equal(cycle.premaqc_after.state.Q.value, before.state.Q.value, 'Story Mode must not manufacture Qualia');
@@ -54,6 +57,9 @@ test('Story Mode prompt requests scene continuation while preserving agency and 
   assert.match(prompt, /Preserve established POV, tense, scene chronology, character knowledge gates/i);
   assert.match(prompt, /Do not choose actions or invent inner experience for the user/i);
   assert.match(prompt, /no automatic canon commit/i);
+  assert.match(prompt, /viable polyphony/i);
+  assert.match(prompt, /participant belief/i);
+  assert.match(prompt, /productive apocrypha/i);
   assert.match(prompt, /PREMAQC:/);
   assert.doesNotMatch(prompt, /PREMAC:/);
 });
@@ -62,6 +68,10 @@ test('Story Mode contract names its texture, state touch, persistence, replay, a
   assert.equal(STORY_MODE_CONTRACT.texture, 'continuous-narrative');
   assert.deepEqual(STORY_MODE_CONTRACT.state.relational_axes_touched, ['C', 'R', 'M']);
   assert.match(STORY_MODE_CONTRACT.state.qualia_policy, /firsthand-only/i);
+  assert.equal(STORY_MODE_CONTRACT.polyphony.target, 'viable-polyphony');
+  assert.equal(STORY_MODE_CONTRACT.polyphony.preserve_distinct_voices, true);
+  assert.equal(STORY_MODE_CONTRACT.polyphony.forced_convergence_prohibited, true);
+  assert.equal(STORY_MODE_CONTRACT.polyphony.maximum_coherence_is_goal, false);
   assert.equal(STORY_MODE_CONTRACT.persistence.cycle_receipted, true);
   assert.equal(STORY_MODE_CONTRACT.persistence.shared_runtime_eligible, true);
   assert.equal(STORY_MODE_CONTRACT.persistence.deterministic_replay_required, true);
@@ -85,4 +95,6 @@ test('Story Mode has a visible sidebar front door and survives Feedback Chamber 
   assert.match(sidecar, /MutationObserver/);
   assert.match(sidecar, /aria-live/);
   assert.match(sidecar, /continuous narrative/);
+  assert.match(sidecar, /viable polyphony/);
+  assert.match(sidecar, /participant belief ≠ canon/);
 });

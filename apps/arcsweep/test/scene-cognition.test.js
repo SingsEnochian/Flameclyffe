@@ -133,3 +133,34 @@ test('scene cognition prompt names active targets and treats quiet as a valid re
   assert.match(prompt, /Quiet is a valid response/);
   assert.match(prompt, /Evidence must be a short excerpt copied from the current scene prose/);
 });
+
+
+test('polyphonic observation kinds preserve belief and naming as evidence-bearing layers', () => {
+  const parsed = normaliseSceneCognitionObservations({ observations: [
+    {
+      target: { kind: 'character', id: 'kestrelle' },
+      observationKind: 'belief',
+      claim: 'Kestrelle believes the warning applies to this road.',
+      evidence: 'Don’t move it yet',
+      confidence: 0.7,
+    },
+    {
+      target: { kind: 'character', id: 'kestrelle' },
+      observationKind: 'naming',
+      claim: 'The scene treats the spoken name as socially significant.',
+      evidence: 'Don’t move it yet',
+      confidence: 0.4,
+    },
+  ] }, packet);
+  assert.equal(parsed.observations[0].observationKind, 'belief');
+  assert.equal(parsed.observations[1].observationKind, 'naming');
+  assert.equal(parsed.observations[0].keepable, true);
+  assert.equal(parsed.observations[1].keepable, true);
+});
+
+test('scene cognition prompt tells voices not to flatten productive disagreement', () => {
+  const prompt = buildSceneCognitionPrompt(packet, packet.voices[0]);
+  assert.match(prompt, /Distinguish world state from narrator statement/i);
+  assert.match(prompt, /Do not flatten disagreement/i);
+  assert.match(prompt, /forced agreement/i);
+});
