@@ -1,0 +1,70 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source_id": "drive-praxeum-pad-1KcoDUd3ttdXX2MmuIYzvKY9FQpkMZGnaNqB-fCkah6Y",
+  "title": "Praxeum Pad",
+  "source_type": "google-doc",
+  "source_url": "https://docs.google.com/document/d/1KcoDUd3ttdXX2MmuIYzvKY9FQpkMZGnaNqB-fCkah6Y/edit?usp=drivesdk",
+  "canon_status": "reference-only",
+  "provenance": {
+    "observed_title": "Praxeum Pad",
+    "observed_revision_id": "ANLCKQmoYv-J7VNKpthQIN8ZqoJF371dA0YHY2nH76u84mC_5QPymzFXHWITmRadGBzou5zZZZoX0b3bSLCNtg",
+    "observed_on": "2026-09-18"
+  },
+  "story_lore_boundary": {
+    "star_wars_story_material_is_reference_only": true,
+    "auto_promote_to_arcsweep_canon": false,
+    "auto_promote_characters": false,
+    "auto_promote_plot": false,
+    "auto_promote_setting": false
+  },
+  "mechanism_extract": {
+    "timeline_features": [
+      "dated sequence with explicit uncertainty notes",
+      "branch point that changes downstream history",
+      "counterfactual divergence from an established baseline",
+      "multiple event scales from single choice to war-level consequence",
+      "later events retain ancestry to the divergence point"
+    ],
+    "rift_features": [
+      "space-time rupture associated with a high-impact event",
+      "different concentrations produce different pull effects",
+      "force-bleed or nexus locations can be tracked separately",
+      "failed repair attempts can worsen a rupture",
+      "remote rupture points may require dedicated receiving/research stations"
+    ],
+    "arrival_features": [
+      "arrival may include memory loss or incomplete self-context",
+      "initial observation should precede identity conclusions",
+      "movement and access may be constrained while assessment is active",
+      "multiple observers can disagree about the meaning or risk of an arrival",
+      "assessment history should preserve disagreement rather than flatten it"
+    ]
+  },
+  "universal_codex_translation": {
+    "candidate_surfaces": [
+      "Time Room",
+      "Continuity Gate",
+      "Observer",
+      "Worldseed",
+      "Ingest",
+      "branch-history view"
+    ],
+    "timeline_rule": "A timeline view should preserve branch ancestry, divergence points, and uncertainty instead of rewriting alternate history into one flat sequence.",
+    "branch_sequence": [
+      "baseline",
+      "decision_or_event",
+      "divergence marker",
+      "parallel continuation",
+      "consequence propagation",
+      "later reconciliation or continued plurality"
+    ],
+    "uncertainty_rule": "Approximate or disputed dates remain visibly approximate or disputed.",
+    "arrival_rule": "Incomplete memory or context must not be filled by system inference as if recalled fact.",
+    "repair_rule": "A repair attempt is itself an event with consequences and may worsen the state; record before/after rather than assuming repair success."
+  },
+  "copyright_boundary": {
+    "store_full_prose": false,
+    "copy_story_text_into_ui": false,
+    "use_mechanisms_and_paraphrased_patterns_only": true
+  }
+}
