@@ -1,0 +1,96 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source": {
+    "title": "Candidate & Tower Appentice Anael",
+    "provider": "Google Drive",
+    "document_id": "14iLNG8V0dU4gJtAXl0-SgXy8ECZ5jfVFSeQnzpFjSww",
+    "url": "https://docs.google.com/document/d/14iLNG8V0dU4gJtAXl0-SgXy8ECZ5jfVFSeQnzpFjSww",
+    "captured_on": "2026-09-18"
+  },
+  "canon_status": "reference-only",
+  "story_lore_boundary": {
+    "auto_promote_to_arcsweep_canon": false,
+    "auto_promote_characters": false,
+    "auto_promote_setting": false,
+    "auto_promote_psionic_scale": false,
+    "note": "Epra, Orsus, dragons, Weyrs, Tower Administration, psi ranks, Anael, Ace, Leo, and related story-world facts remain source lore. Only interaction and systems mechanisms may transfer after explicit design review."
+  },
+  "mechanisms": [
+    {
+      "id": "presence-gain-normalisation",
+      "description": "A very strong sender must actively attenuate output so the same signal can be useful at human-scale, group-scale, and long-range scale.",
+      "codex_use": "Treat projected presence, alerts, audio, glow, motion, and agent salience as gain-controlled channels. High capability should not imply maximum visual or acoustic intensity."
+    },
+    {
+      "id": "parallel-task-lanes",
+      "description": "Multi-thread training allows several simultaneous operations without collapsing them into one undifferentiated task.",
+      "codex_use": "Represent concurrent operations as visible lanes/orbits with independent progress, provenance, and attention state rather than one overloaded activity spinner."
+    },
+    {
+      "id": "remote-fine-manipulation",
+      "description": "Telekinetic control is depicted as precise enough for buttons, typing, cargo handling, and coordinated work at distance.",
+      "codex_use": "Use remote pointer/gesture affordances for selecting, nudging, grouping, and routing holographic objects while retaining accessible conventional controls underneath."
+    },
+    {
+      "id": "broadcast-with-detail",
+      "description": "Anael is described as especially good at transmitting detailed visuals to different classes of receivers.",
+      "codex_use": "Support one-to-one, room, group, and wide-broadcast projection modes with explicit audience scope and preserved source identity."
+    },
+    {
+      "id": "diagram-to-system",
+      "description": "Ideas are rapidly translated into technical drawings, maps, buildings, and vehicle designs.",
+      "codex_use": "Let drawn glyphs/diagrams graduate into structured manipulable system objects without losing the originating stroke/provenance layer."
+    },
+    {
+      "id": "diagnostic-without-action",
+      "description": "Diagnostic perception is distinct from the ability to perform healing or repair.",
+      "codex_use": "Keep inspect/diagnose and mutate/repair as separate capabilities and separate UI states. Detecting a problem must never silently imply authority to change it."
+    },
+    {
+      "id": "support-companion-stabiliser",
+      "description": "A bonded companion is used as a stabilising presence while remaining its own agent with quirks and independent behaviour.",
+      "codex_use": "Caretaker/guide companions may provide stabilisation, reminders, and context without becoming hidden authority or replacing user control."
+    }
+  ],
+  "ui_translation": {
+    "presence_gain_states": [
+      "whisper",
+      "local",
+      "room",
+      "broadcast",
+      "long-range"
+    ],
+    "parallel_lane_states": [
+      "queued",
+      "active",
+      "held",
+      "waiting-on-input",
+      "complete",
+      "failed"
+    ],
+    "authority_split": {
+      "inspect": "read and diagnose",
+      "propose": "suggest or stage a change",
+      "mutate": "perform an authorised change"
+    },
+    "candidate_visuals": [
+      "orbital rings for concurrent lanes",
+      "gain halo that expands/contracts without changing identity",
+      "remote manipulation filaments from hand/pointer to object",
+      "diagram ink extruding into labelled holographic geometry",
+      "diagnostic overlays that remain visually distinct from repair controls"
+    ],
+    "rule": "Capability intensity, output intensity, and mutation authority are three different things."
+  },
+  "candidate_animation_grammar": "sense -> scope -> attenuate/amplify -> engage one or more lanes -> manipulate/inspect -> propose or act within authority -> receipt -> return to baseline",
+  "copyright_boundary": {
+    "copy_full_text": false,
+    "copy_story_passages": false,
+    "preserve_only": [
+      "source metadata",
+      "short mechanism descriptions",
+      "design abstractions",
+      "provenance"
+    ]
+  }
+}
