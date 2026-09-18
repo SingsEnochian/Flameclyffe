@@ -1,0 +1,101 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "id": "kala-fierro-reference-ingest-v0-1",
+  "title": "Kala Alexis Fierro",
+  "source_class": "user-supplied-drive-document",
+  "source_url": "https://docs.google.com/document/d/1U_3d_L4p2Gjs-WZlwsP62LUxlO-CNRrG3nbHwsXqOMo",
+  "source_file_id": "1U_3d_L4p2Gjs-WZlwsP62LUxlO-CNRrG3nbHwsXqOMo",
+  "canon_status": "reference-only",
+  "adoption_policy": "mechanisms-may-transfer-story-lore-does-not-auto-promote",
+  "review_state": "ingested-for-universal-codex-interface-reference",
+  "scope": {
+    "target": "Universal Codex holography, transformation choreography, control grammar, living ink",
+    "not_auto_imported": [
+      "Kala Alexis Fierro as an ArcSweep character",
+      "Mardis",
+      "TSAB",
+      "Lost Logia",
+      "Farla/Farliana Jarlon",
+      "Raging Phoenix / Rising Phoenix continuity",
+      "story events, cosmology, combat outcomes, or setting lore"
+    ]
+  },
+  "observed_mechanisms": [
+    {
+      "id": "device-form-state-machine",
+      "source_observation": "A magical device changes between wearable and weapon states, with staff, bow, sword, defensive, sealing, healing, and air-combat modes.",
+      "codex_application": "Treat Codex tools as named stateful forms rather than generic panels. A tool invocation can visibly transform one projection grammar into another while preserving a single underlying object identity."
+    },
+    {
+      "id": "spoken-imperative-command-grammar",
+      "source_observation": "The user gives short spoken commands and the device confirms, prepares, activates, or rejects state changes.",
+      "codex_application": "Map voice, tap, Pencil, and gesture actions to explicit command verbs with visible confirmation receipts: invoke, engage, seal, protect, open, bind, project, dismiss."
+    },
+    {
+      "id": "materialisation-choreography",
+      "source_observation": "Wearable objects transform through bright light into gemmed gloves, armour, weapons, stabilisers, barriers, and other functional states.",
+      "codex_application": "Use staged animation: seed light -> glyph geometry -> projected construction lines -> materialised control/object -> persistent state marker."
+    },
+    {
+      "id": "companion-device-dialogue",
+      "source_observation": "The device speaks, reports state, warns of incoming events, announces failures, and responds conversationally.",
+      "codex_application": "Projected controls may have a concise machine voice/state-caption layer without replacing the accessible DOM or model-authored conversation surface."
+    },
+    {
+      "id": "failure-is-visible-state",
+      "source_observation": "Modes can fail, be damaged, behave imperfectly, or require recovery/merge rather than silently succeeding.",
+      "codex_application": "Animation must represent degraded/failed states truthfully. No success flourish when the underlying action failed; damaged or unavailable tools can visibly flicker, collapse, or remain incomplete."
+    },
+    {
+      "id": "merge-and-sync-transformation",
+      "source_observation": "Damaged devices can merge/synchronise into a new functional unit after an explicit choice.",
+      "codex_application": "Use consented merge choreography for combining tools, views, or data layers: preview both sources, show convergence geometry, require explicit adoption, then emit a receipt naming the new composite state."
+    },
+    {
+      "id": "barrier-and-seal-visual-language",
+      "source_observation": "Protection appears as luminous shields; sealing appears as chains/bindings and converts a dangerous target into a contained artefact.",
+      "codex_application": "Quarantine, provenance lock, and protected-mode UI can use enclosure/ring/binding animation rather than generic modal dialogs, while preserving exact status text."
+    },
+    {
+      "id": "flight-stabiliser-projection",
+      "source_observation": "Air-combat mode manifests stabilisers/thrusters and materially changes movement behaviour.",
+      "codex_application": "Spatial panels can transition between anchored-to-page and free-orbit modes, with visible stabiliser geometry marking the movement contract."
+    },
+    {
+      "id": "action-receipt-motif",
+      "source_observation": "The device explicitly announces a numbered receipt after a sealing action.",
+      "codex_application": "ArcSweep receipts can become diegetic objects: each completed transformation/action may leave a numbered luminous receipt glyph that can be opened for the exact machine record."
+    },
+    {
+      "id": "white-gold-gemmed-projection-language",
+      "source_observation": "The source repeatedly uses white, metallic gold, jewels, brilliant light, energy arrows, and luminous barriers.",
+      "codex_application": "Candidate visual family for a transformation/projection profile: white-gold structural light with gem-like nodes, distinct from ArcSweep's normal copper/green binding palette."
+    }
+  ],
+  "universal_codex_animation_grammar": {
+    "sequence": [
+      "intent",
+      "explicit command",
+      "acknowledgement",
+      "gathering light / ink",
+      "geometry construction",
+      "materialisation or mode change",
+      "functional state becomes active",
+      "receipt",
+      "residual glow settles"
+    ],
+    "principles": [
+      "animation follows real state",
+      "failed transitions remain visibly failed",
+      "forms transform without changing underlying authority",
+      "receipts remain inspectable",
+      "projected controls do not replace accessible controls",
+      "reference lore does not auto-promote into ArcSweep canon"
+    ]
+  },
+  "provenance_notes": [
+    "Document title read directly from the supplied Google Doc as Kala Alexis Fierro.",
+    "The source contains explicit Nanoha/TSAB/Lost Logia vocabulary and is therefore treated as a reference lineage rather than original ArcSweep setting canon.",
+    "No third-party story text is copied into runtime code. This ingest stores mechanism-level observations and application ideas."
+  ]
+}
