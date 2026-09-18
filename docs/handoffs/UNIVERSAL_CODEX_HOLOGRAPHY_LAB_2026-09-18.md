@@ -59,30 +59,50 @@ Future path:
 
 The projection may receive message/thread/reaction/attachment/read-state events. It does not receive Signal private-key material.
 
-## Magical-girl source ingest
+## Kala Fierro reference ingest
 
-Rowan identified a second reference source in Google Drive as being about magical girls, but the title was not recalled.
+The previously unidentified magical-girl Drive source has now been identified from the supplied Google Doc as **Kala Alexis Fierro**.
 
-Searches performed so far include variants of:
+Source:
 
-- magical girl / magical girls / magical heroine;
-- transformation / transformation sequence / transformation wand;
-- Madoka, Nanoha, Cardcaptor/Sakura, Rayearth, Precure, Utena, Symphogear, Winx, Yuki Yuna, Blue Reflection, Star Guardian, and Magical Girl Raising Project.
+`https://docs.google.com/document/d/1U_3d_L4p2Gjs-WZlwsP62LUxlO-CNRrG3nbHwsXqOMo`
 
-No result has yet been verified as Rowan's intended source. `NecroGirl` was inspected and is not the requested magical-girl reference.
+Reference ingest:
 
-Do not create a fake ingest under a guessed title. Once the source is identified, ingest it as a provenance-bound reference pack and extract interface/animation mechanisms separately from story lore.
+`apps/arcsweep/skills/sources/kala-fierro/kala-fierro-reference-ingest.v0.1.json`
 
-A useful adjacent Drive source already located is *The Cyber Spellbook: Magick in the Virtual World*; it may receive its own reference ingest for digital-grimoire mechanics, but it is not being substituted for the missing magical-girl source.
+The document contains explicit Nanoha/TSAB/Lost Logia lineage, so ArcSweep treats it as a provenance-bound reference source rather than Universal Codex setting canon. Story lore does not auto-promote.
+
+Mechanisms extracted for the Codex include:
+
+- a stateful magical device that changes wearable/weapon/defence/sealing/flight forms;
+- short imperative command grammar followed by device acknowledgement and state confirmation;
+- bright-light materialisation choreography from jewellery into gloves, armour, weapons, stabilisers, barriers, and bindings;
+- a speaking device that announces warnings, state changes, failures, and readiness;
+- visible damage, failure, imperfect control, and recovery rather than ornamental success-only animation;
+- explicit merge/synchronisation of damaged devices into a new composite state after choice;
+- luminous barriers and binding/sealing imagery as a natural visual grammar for protection and quarantine;
+- spatial movement contracts marked by stabiliser/thruster geometry;
+- a numbered **receipt** after a completed sealing action, which maps uncannily well onto ArcSweep's existing receipt architecture;
+- white/gold/gemmed visual language as a candidate transformation profile distinct from the Book's everyday copper/green palette.
+
+Candidate Universal Codex sequence derived from the mechanism layer:
+
+`intent -> explicit command -> acknowledgement -> gathering light/ink -> geometry construction -> materialisation/mode change -> active functional state -> receipt -> residual glow settles`
+
+The important law is that the animation follows the real state. Failed actions do not receive triumphant flourishes; successful actions leave an inspectable receipt.
+
+A useful adjacent Drive source already located is *The Cyber Spellbook: Magick in the Virtual World*; it may receive its own reference ingest for digital-grimoire mechanics, but it remains a separate source.
 
 ## Next visual experiments
 
 1. Project current ink strokes upward as fading 3D ribbons rather than only sparks.
 2. Replace ordinary sliders with optional radial spell-control projections while retaining the underlying accessible controls.
 3. Add page-specific projection profiles: Threshold, Glyph Forge, Receipts.
-4. Add transformation-state choreography for opening a room, invoking a tool, or entering Story Mode.
-5. Add gesture input only after desktop/touch controls remain fully usable.
-6. Feed future Signal events into the same projection grammar as discrete, provenance-bearing objects.
+4. Add Kala-derived transformation-state choreography for opening a room, invoking a tool, merging views, quarantining a source, or entering Story Mode.
+5. Turn successful action receipts into brief luminous numbered glyphs that can be opened back into the exact machine receipt.
+6. Add gesture input only after desktop/touch controls remain fully usable.
+7. Feed future Signal events into the same projection grammar as discrete, provenance-bearing objects.
 
 ## Seal
 
