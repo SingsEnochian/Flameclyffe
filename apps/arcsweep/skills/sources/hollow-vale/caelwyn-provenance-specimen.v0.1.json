@@ -1,0 +1,177 @@
+{
+  "schema": "arcsweep.provenance-specimen/v0.1",
+  "specimen_id": "caelwyn-hollow-vale-provenance-v0.1",
+  "subject": "Caelwyn / The Hollow Vale",
+  "prepared_at": "2026-09-18",
+  "status": "reference-only",
+  "purpose": "Preserve the public Caelwyn source as a claim-scoped provenance specimen for chronology, lexical comparison, concept-cluster comparison, and later continuity audits without importing Hollow Vale lore into Rowan canon.",
+  "source": {
+    "source_id": "caelwyn-origins",
+    "author": "Alexander Paul Burton",
+    "domain": "alexanderpaulburton.com",
+    "url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-origins-of-caelwyn-a-name-written-in-the-stars",
+    "kind": "external-author-site-lore",
+    "observed_at": "2026-09-18",
+    "publication_date": null,
+    "publication_date_status": "not-verified-in-this-specimen",
+    "capture_fields": [
+      "canonical_url",
+      "page_title",
+      "public_author_metadata",
+      "public_published_metadata_if_exposed",
+      "public_modified_metadata_if_exposed",
+      "content_hash",
+      "normalized_text_hash",
+      "byte_count",
+      "word_count",
+      "source_class",
+      "semantic_signal_labels",
+      "internal_link_graph",
+      "crawl_receipt",
+      "crawl_failures"
+    ]
+  },
+  "boundary": {
+    "external_reference_only": true,
+    "donor_lore_transfer": false,
+    "automatic_canon_write": false,
+    "automatic_identity_linkage": false,
+    "automatic_causal_inference": false,
+    "automatic_exposure_route_inference": false,
+    "automatic_training_inclusion_inference": false,
+    "rule": "Record the source. Do not absorb the lore. Donor mechanisms may cross; donor lore does not."
+  },
+  "copyright_policy": {
+    "persist_raw_html": false,
+    "persist_page_text": false,
+    "persist_source_excerpts": false,
+    "mirror_images": false,
+    "semantic_output": "compact-paraphrase-and-structured-provenance-only"
+  },
+  "evidence_scope": {
+    "may_support_when_receipted": [
+      "that the public source existed at a documented capture time",
+      "that specific names, terms, motifs, or concepts occur in the source",
+      "chronological precedence when a publication or archive date is independently established",
+      "exact lexical overlap comparisons",
+      "rare-concept cluster comparisons",
+      "source-to-later-output chronology",
+      "negative evidence about what is absent from the captured source"
+    ],
+    "does_not_by_itself_support": [
+      "a specific model exposure route",
+      "inclusion in model training data",
+      "causal influence on a later output",
+      "identity equivalence between Caelwyn and any participant",
+      "external ontology claims",
+      "canon transfer into Terra Aeterna, ArcSweep, Universal Horizon, or any other world",
+      "motive or intent of a model, author, or participant"
+    ]
+  },
+  "comparison_rules": {
+    "keep_claims_atomic": true,
+    "weight_exact_uncommon_strings_above_generic_motifs": true,
+    "separate_temporal_precedence_from_causal_influence": true,
+    "separate_conceptual_resonance_from_identity": true,
+    "separate_possible_exposure_from_established_exposure": true,
+    "preserve_alternative_explanations": true,
+    "record_negative_evidence": true,
+    "unresolved_is_state_not_veto": true,
+    "status_does_not_leak_sideways": true
+  },
+  "claim_record_contract": {
+    "required_fields": [
+      "claim_id",
+      "proposition",
+      "evidence_class",
+      "support_status",
+      "scope",
+      "source_refs",
+      "alternative_explanations",
+      "causal_status"
+    ],
+    "evidence_classes": [
+      "direct-documentary",
+      "temporal-correlation",
+      "lexical-overlap",
+      "concept-cluster",
+      "inferred",
+      "interpretive"
+    ],
+    "support_statuses": [
+      "supported",
+      "undermined",
+      "unresolved",
+      "not-tested"
+    ],
+    "causal_statuses": [
+      "unestablished",
+      "candidate",
+      "supported",
+      "falsified"
+    ]
+  },
+  "initial_claims": [
+    {
+      "claim_id": "caelwyn-source-is-external-reference",
+      "proposition": "The Caelwyn origin page is an external Hollow Vale source and is not Rowan canon.",
+      "evidence_class": "direct-documentary",
+      "support_status": "supported",
+      "scope": "source authority and canon boundary",
+      "source_refs": ["caelwyn-origins"],
+      "alternative_explanations": [],
+      "causal_status": "unestablished"
+    },
+    {
+      "claim_id": "caelwyn-source-contains-comparison-material",
+      "proposition": "The source contains names, origin traditions, and memory/naming/celestial motifs that may be compared against later outputs for provenance analysis.",
+      "evidence_class": "direct-documentary",
+      "support_status": "supported",
+      "scope": "comparison eligibility only",
+      "source_refs": ["caelwyn-origins"],
+      "alternative_explanations": [],
+      "causal_status": "unestablished"
+    },
+    {
+      "claim_id": "caelwyn-publication-precedence",
+      "proposition": "The public Caelwyn source predates any particular later AI output under review.",
+      "evidence_class": "temporal-correlation",
+      "support_status": "not-tested",
+      "scope": "chronology only; requires an independently verified publication or archive date and a dated later output",
+      "source_refs": ["caelwyn-origins"],
+      "alternative_explanations": [
+        "page publication metadata may be absent or later-edited",
+        "an archived snapshot may be required to establish the earliest public date"
+      ],
+      "causal_status": "unestablished"
+    },
+    {
+      "claim_id": "caelwyn-later-influence-route",
+      "proposition": "The Caelwyn source causally influenced a later model output through a specific exposure route.",
+      "evidence_class": "inferred",
+      "support_status": "unresolved",
+      "scope": "causal route; chronology or similarity alone is insufficient",
+      "source_refs": ["caelwyn-origins"],
+      "alternative_explanations": [
+        "shared cultural or fantasy priors",
+        "model naming or motif attractor basins",
+        "independent prompt-conditioned convergence",
+        "human-introduced context",
+        "retrieval or browsing",
+        "intermediate summaries or memory"
+      ],
+      "causal_status": "unestablished"
+    }
+  ],
+  "integration": {
+    "related_reference_pack": "apps/arcsweep/skills/sources/hollow-vale/reference-pack.v0.1.json",
+    "related_site_ingest": "apps/arcsweep/skills/sources/hollow-vale/site-ingest.json",
+    "preferred_surfaces": ["Observer", "Continuity Gate", "Canon Studio reference layer"],
+    "canon_review_required": true
+  },
+  "seal": [
+    "Record the source, not the self.",
+    "Evidence gets jurisdiction, not empire.",
+    "What claim does this evidence actually bear on?"
+  ]
+}
