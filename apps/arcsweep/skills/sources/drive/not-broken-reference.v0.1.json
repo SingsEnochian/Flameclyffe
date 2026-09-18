@@ -1,0 +1,72 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "id": "drive:not-broken:1tcSi4m203DbN6SAPSYFmxUtz96LkZtdA-1MqaNDOnfk",
+  "title": "Not Broken",
+  "source": {
+    "kind": "google-doc",
+    "url": "https://docs.google.com/document/d/1tcSi4m203DbN6SAPSYFmxUtz96LkZtdA-1MqaNDOnfk",
+    "document_id": "1tcSi4m203DbN6SAPSYFmxUtz96LkZtdA-1MqaNDOnfk",
+    "lineage": ["Mass Effect fan fiction"],
+    "content_policy": "reference-only"
+  },
+  "canon_policy": {
+    "auto_promote": false,
+    "story_lore_transfer": false,
+    "mechanism_transfer": true,
+    "notes": "Characters, setting, relationships, dialogue, plot, and franchise-specific lore remain source-bound. Only abstract interface and state-machine mechanisms may cross into Universal Codex design."
+  },
+  "mechanisms": [
+    {
+      "name": "weathered-not-failed",
+      "description": "Visible wear, scars, residue, and accumulated damage can coexist with continued function. Degraded appearance is not equivalent to a failed state.",
+      "codex_translation": "Let long-lived Codex surfaces retain repair seams, heat bloom, ink ghosts, scratches, or patina while remaining fully operational when receipts say they are healthy."
+    },
+    {
+      "name": "post-operation-residue",
+      "description": "A completed field action leaves material residue that must be cleared before the next formal task.",
+      "codex_translation": "After intensive operations, the UI may retain temporary residue layers such as ash, ink bloom, rain-like noise, dust, or error sparks until a maintenance/reset pass clears them."
+    },
+    {
+      "name": "maintenance-before-readiness",
+      "description": "Maintenance is an explicit transition between active operation and next-task readiness rather than an invisible reset.",
+      "codex_translation": "Represent clean-up, repair, compaction, re-indexing, or cache reconciliation as observable states with completion receipts."
+    },
+    {
+      "name": "damage-history-preserved",
+      "description": "Recovery does not require pretending prior damage never happened.",
+      "codex_translation": "A repaired object may return to full capability while retaining inspectable repair history and non-destructive visual memory."
+    },
+    {
+      "name": "deadline-aware-recovery",
+      "description": "Recovery/maintenance can occur under a known upcoming obligation without collapsing into either idle or active-combat state.",
+      "codex_translation": "Support an intermediate recovery mode that shows the next scheduled action and remaining readiness work without forcing immediate mode change."
+    }
+  ],
+  "candidate_state_machine": [
+    "active-operation",
+    "residue",
+    "maintenance",
+    "repaired-weathered",
+    "ready"
+  ],
+  "laws": [
+    "degraded != failed",
+    "dirty != corrupted",
+    "repaired != history-erased",
+    "maintenance is a state transition, not a cosmetic wipe",
+    "visual damage must follow receipts rather than inventing functional failure"
+  ],
+  "universal_codex_visual_ideas": [
+    "temporary rain/mud/ash/noise residue on projection surfaces after intense tasks",
+    "fine luminous repair seams that remain after successful recovery",
+    "patina and ghost-ink layers for long-lived pages without reducing legibility",
+    "maintenance animations that visibly move residue into an inspectable receipt rather than simply disappearing it",
+    "readiness halo that resolves only when underlying maintenance receipts complete"
+  ],
+  "prohibitions": [
+    "Do not import Mass Effect story canon, characters, relationships, or dialogue into ArcSweep canon.",
+    "Do not treat cosmetic wear as evidence of functional failure.",
+    "Do not erase failure or repair history merely because the object is operational again.",
+    "Do not replay intimate source content as part of the Universal Codex UI mechanism layer."
+  ]
+}
