@@ -1,0 +1,255 @@
+{
+  "schema": "arcsweep.reference-pack/v0.1",
+  "pack_id": "hollow-vale-public-reference-v0.1",
+  "name": "The Hollow Vale / Tharion Cycle public reference pack",
+  "prepared_at": "2026-09-17",
+  "authority": "external-author-site",
+  "status": "reference-only",
+  "source_policy": "Compact paraphrase and structured provenance only; no wholesale source prose or image mirroring.",
+  "sources": [
+    {
+      "source_id": "hollow-vale-wiki-index",
+      "url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki",
+      "kind": "author-site-index"
+    },
+    {
+      "source_id": "caelwyn-origins",
+      "url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-origins-of-caelwyn-a-name-written-in-the-stars",
+      "kind": "author-site-lore"
+    },
+    {
+      "source_id": "daughters-of-avalon",
+      "url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-daughters-of-avalon-and-the-veil-of-dreams",
+      "kind": "author-site-lore"
+    },
+    {
+      "source_id": "rune-stone",
+      "url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-rune-stone-and-the-spiral-of-names",
+      "kind": "author-site-lore"
+    },
+    {
+      "source_id": "starforged-bell",
+      "url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-starforged-bell-and-the-spiral-of-memory",
+      "kind": "author-site-lore"
+    },
+    {
+      "source_id": "wyrdsong",
+      "url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-wyrdsong-and-the-forgotten-tongue",
+      "kind": "author-site-lore"
+    },
+    {
+      "source_id": "hollow-vale-memory",
+      "url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/exploring-the-mysteries-of-the-hollow-vale-memory",
+      "kind": "author-site-lore"
+    }
+  ],
+  "records": {
+    "world": [
+      {
+        "id": "tharion-hollow-vale",
+        "kind": "world",
+        "name": "Tharion / The Hollow Vale",
+        "status": "reference-only",
+        "summary": "A mythic Romano-British setting in which memory, naming, silence, magic and unstable geography are part of the world's causal texture. The public wiki presents shifting roads, disappearing names and uncertain time as recurring features.",
+        "sources": ["hollow-vale-wiki-index", "hollow-vale-memory"]
+      }
+    ],
+    "characters": [
+      {
+        "id": "caelwyn",
+        "kind": "character",
+        "name": "Caelwyn",
+        "aliases": ["Bellbearer"],
+        "status": "reference-only",
+        "summary": "A central figure tied to the Bell, memory and the Wyrd. The public lore deliberately preserves several incompatible or semi-compatible origin traditions rather than resolving them into one history.",
+        "sources": ["caelwyn-origins", "starforged-bell", "wyrdsong"]
+      }
+    ],
+    "groups": [
+      {
+        "id": "daughters-of-avalon",
+        "kind": "group",
+        "name": "Daughters of Avalon",
+        "status": "reference-only",
+        "summary": "Veiled figures associated with dreams, moonlight, the edges of reality and guidance through the Vale. Their ritual songs are presented as affecting the Wyrd and linking multiple times.",
+        "sources": ["daughters-of-avalon"]
+      }
+    ],
+    "places": [
+      {
+        "id": "elderglen",
+        "kind": "place",
+        "name": "Elderglen",
+        "status": "reference-only",
+        "summary": "Settlement on the edge of the Vale and the birthplace assigned to Caelwyn in the most grounded origin tradition.",
+        "sources": ["caelwyn-origins"]
+      },
+      {
+        "id": "tor-velden",
+        "kind": "place",
+        "name": "Tor Velden",
+        "status": "reference-only",
+        "summary": "Sacred hill associated with prophecy, resonance and the Starforged Bell.",
+        "sources": ["starforged-bell", "daughters-of-avalon"]
+      }
+    ],
+    "artefacts": [
+      {
+        "id": "rune-stone",
+        "kind": "object",
+        "name": "Rune-Stone",
+        "aliases": ["Cavren byraeth"],
+        "status": "reference-only",
+        "summary": "A fractured inscribed stone linked to names, memory and fate. The lore treats names as active vessels of identity rather than passive labels.",
+        "sources": ["rune-stone"]
+      },
+      {
+        "id": "starforged-bell",
+        "kind": "object",
+        "name": "Starforged Bell",
+        "aliases": ["Bellum naedh"],
+        "status": "reference-only",
+        "summary": "A star-forged relic on Tor Velden that anchors the Wyrd to physical reality. Its resonance can bind names into memory and may also erode or hollow what it names.",
+        "sources": ["starforged-bell", "wyrdsong"]
+      }
+    ],
+    "languages_and_terms": [
+      {
+        "id": "tharionese",
+        "kind": "language",
+        "name": "Tharionese",
+        "aliases": ["Lyth Ébrenn", "The Veiled Tongue"],
+        "status": "reference-only",
+        "summary": "A ritual and poetic language associated with circular logic, repetition, mirrored structures, memory anchoring and communication across seen and unseen layers.",
+        "sources": ["wyrdsong", "hollow-vale-memory"]
+      },
+      {
+        "id": "wyrmreth",
+        "kind": "term",
+        "name": "Wyrmreth",
+        "status": "reference-only",
+        "summary": "The spiral model of memory and fate. Public lore describes the Wyrd as non-linear, with past, present and future coiling back through one another.",
+        "sources": ["rune-stone", "starforged-bell"]
+      },
+      {
+        "id": "lleirwyn",
+        "kind": "term",
+        "name": "Lleirwyn",
+        "status": "reference-only",
+        "summary": "A Tharionese term associated with moonlight and the Daughters of Avalon.",
+        "sources": ["daughters-of-avalon"]
+      },
+      {
+        "id": "swefnunga-wyrcan",
+        "kind": "term",
+        "name": "swefnunga wyrcan",
+        "status": "reference-only",
+        "summary": "Name given to the dream-shaping chants associated with the Daughters of Avalon.",
+        "sources": ["daughters-of-avalon"]
+      }
+    ],
+    "events": [
+      {
+        "id": "elysian-convergence",
+        "kind": "event",
+        "name": "Elysian Convergence",
+        "status": "legend-variant",
+        "summary": "Rare celestial event used by one major Caelwyn birth tradition to explain her manifestation beneath the Wyrm Tree.",
+        "sources": ["caelwyn-origins"]
+      },
+      {
+        "id": "breaking-of-the-stars",
+        "kind": "event",
+        "name": "Breaking of the Stars",
+        "status": "legend-variant",
+        "summary": "Cosmic event used by the Starborn Nomad origin tradition to explain Caelwyn's descent from a celestial realm.",
+        "sources": ["caelwyn-origins"]
+      },
+      {
+        "id": "thonbrial-aethrun",
+        "kind": "event",
+        "name": "Thonbrial aethrun",
+        "status": "reference-only",
+        "summary": "The 'last bell' event associated with fracture, memory disruption and the broken Rune-Stone.",
+        "sources": ["rune-stone", "starforged-bell"]
+      }
+    ],
+    "rules": [
+      {
+        "id": "memory-is-causal",
+        "kind": "rule",
+        "name": "Memory is causal",
+        "status": "reference-only",
+        "summary": "Memory in the Vale acts as a force that can anchor identity, affect reality and bind separate moments rather than functioning only as recollection.",
+        "sources": ["starforged-bell", "wyrdsong", "hollow-vale-memory"]
+      },
+      {
+        "id": "names-carry-identity",
+        "kind": "rule",
+        "name": "Names carry identity and power",
+        "status": "reference-only",
+        "summary": "Names are repeatedly treated as containers or anchors of identity. Naming, inscription and resonance can therefore alter a person's or thing's continuity.",
+        "sources": ["rune-stone", "starforged-bell"]
+      },
+      {
+        "id": "myth-variants-remain-live",
+        "kind": "rule",
+        "name": "Competing in-world traditions remain live",
+        "status": "reference-only",
+        "summary": "The public lore explicitly presents multiple versions of Caelwyn's origins. ArcSweep should preserve these as named traditions rather than selecting a single canonical winner.",
+        "sources": ["caelwyn-origins"]
+      }
+    ],
+    "myth_variants": [
+      {
+        "subject": "caelwyn",
+        "variant_id": "wyrm-tree-birth",
+        "label": "Wyrm Tree / Elysian Convergence",
+        "status": "major-tradition",
+        "summary": "Caelwyn originates beneath the ancient Wyrm Tree during a celestial convergence and is marked by a luminous sign tied to memory prophecy.",
+        "sources": ["caelwyn-origins"]
+      },
+      {
+        "subject": "caelwyn",
+        "variant_id": "starborn-nomad",
+        "label": "Starborn Nomad",
+        "status": "alternative-tradition",
+        "summary": "Caelwyn descends from a celestial realm after the Breaking of the Stars and carries inaccessible memories of that origin.",
+        "sources": ["caelwyn-origins"]
+      },
+      {
+        "subject": "caelwyn",
+        "variant_id": "bell-touched-wanderer",
+        "label": "Bell-Touched Wanderer",
+        "status": "alternative-tradition",
+        "summary": "Caelwyn is an orphan who encounters the Bell in childhood, acquires a connection to the Vale and later adopts the name Caelwyn.",
+        "sources": ["caelwyn-origins"]
+      },
+      {
+        "subject": "caelwyn",
+        "variant_id": "child-of-the-vale",
+        "label": "Child of the Vale",
+        "status": "most-common-grounded-tradition",
+        "summary": "Caelwyn is born in Elderglen and becomes important through courage, curiosity and her own relationship with the Vale rather than through celestial birth.",
+        "sources": ["caelwyn-origins"]
+      }
+    ],
+    "relationships": [
+      {"from": "caelwyn", "to": "starforged-bell", "kind": "bellbearer-linked-to", "status": "reference-only"},
+      {"from": "starforged-bell", "to": "wyrmreth", "kind": "expresses-and-anchors", "status": "reference-only"},
+      {"from": "rune-stone", "to": "wyrmreth", "kind": "records-and-reflects", "status": "reference-only"},
+      {"from": "daughters-of-avalon", "to": "caelwyn", "kind": "guide-and-bind-in-lore", "status": "reference-only"},
+      {"from": "tharionese", "to": "wyrmreth", "kind": "ritual-language-of", "status": "reference-only"}
+    ]
+  },
+  "provenance": {
+    "prepared_by": ["Rowan", "ChatGPT"],
+    "method": "web-indexed author-site review plus compact paraphrased extraction",
+    "automatic_canon_write": false,
+    "notes": [
+      "This pack is a reference layer, not an import of Burton's prose.",
+      "Contradictory in-world origin traditions are retained as separate variants.",
+      "Source URLs remain attached so later ArcSweep reviews can revisit author-site context."
+    ]
+  }
+}
