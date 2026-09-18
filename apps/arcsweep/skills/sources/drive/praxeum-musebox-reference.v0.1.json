@@ -1,0 +1,77 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source_id": "drive-praxeum-musebox-11eOrpoXc-3T-cudykFJlIcOSHy-VkyiQpq9Xzed5I-8",
+  "title": "Praxeum-Musebox",
+  "source_type": "google-doc",
+  "source_url": "https://docs.google.com/document/d/11eOrpoXc-3T-cudykFJlIcOSHy-VkyiQpq9Xzed5I-8/edit?usp=drivesdk",
+  "canon_status": "reference-only",
+  "provenance": {
+    "observed_title": "Praxeum-Musebox",
+    "observed_revision_id": "ANLCKQmf7TILIDAIL_ivZfRjrwY0UYAlzrvpLsvW3z_Tndj5o_9VCaslLwSf05VcetYwSy6JhkAkBDsWryUHZQ",
+    "observed_on": "2026-09-18"
+  },
+  "story_lore_boundary": {
+    "star_wars_story_material_is_reference_only": true,
+    "auto_promote_to_arcsweep_canon": false,
+    "auto_promote_characters": false,
+    "auto_promote_plot": false,
+    "auto_promote_setting": false
+  },
+  "mechanism_extract": {
+    "intake_and_learning": [
+      "wake into an unfamiliar system with incomplete memory and high sensory load",
+      "reduce stimulus before demanding answers",
+      "provide safety/context before assessment",
+      "let identity begin from known facts rather than inferred backstory",
+      "progress from observation to guided exploration to autonomous use",
+      "adapt teaching to the learner's actual cognitive model rather than enforcing one explanation"
+    ],
+    "skill_growth": [
+      "practice loops can expose failure modes without treating failure as identity",
+      "successful reframing can unlock a previously blocked capability",
+      "training should preserve both attempt history and the technique that finally worked",
+      "multi-focus interaction can be a capability, not necessarily an error",
+      "simulation and playful practice can reinforce mastery"
+    ],
+    "sensory_features": [
+      "people or processes can have different perceived intensity levels",
+      "sensory channels may need local attenuation or filtering",
+      "music can be represented as more than sound through cross-modal response",
+      "learning environments should expose state gently enough to remain usable"
+    ]
+  },
+  "universal_codex_translation": {
+    "candidate_surfaces": [
+      "onboarding",
+      "tutorial mode",
+      "skill forge",
+      "accessibility controls",
+      "presence intensity controls",
+      "training simulations"
+    ],
+    "onboarding_rule": "Do not interrogate an arrival before orientation. Reduce noise, establish what is known, then let the user explore.",
+    "teaching_rule": "When a user repeatedly fails, vary the representation or metaphor before increasing pressure. A different cognitive angle may be the missing tool.",
+    "failure_rule": "A failed attempt remains a training receipt, not a verdict on capability.",
+    "adaptive_sequence": [
+      "observe",
+      "attempt",
+      "detect friction",
+      "change representation",
+      "retry",
+      "stabilise success",
+      "record the working method"
+    ],
+    "candidate_visuals": [
+      "intensity halos around active presences or processes",
+      "focus dimming when one signal overwhelms the field",
+      "training targets that visibly change behaviour as skill improves",
+      "success state that is quieter and steadier rather than merely brighter",
+      "cross-modal music ripples through ink, geometry, and ambient light"
+    ]
+  },
+  "copyright_boundary": {
+    "store_full_prose": false,
+    "copy_story_text_into_ui": false,
+    "use_mechanisms_and_paraphrased_patterns_only": true
+  }
+}
