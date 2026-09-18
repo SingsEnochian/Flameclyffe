@@ -1,0 +1,126 @@
+{
+  "schema": "arcsweep.narrativenode-integration-profile/v0.1",
+  "profile_id": "narrativenode-polyphony-v0.1",
+  "prepared_at": "2026-09-17",
+  "external_project": {
+    "name": "NarrativeNode",
+    "repository": "Carasibana/NarrativeNode",
+    "observed_branch": "release",
+    "observed_program_version": "1.0.0.0",
+    "canonical_url": "https://github.com/Carasibana/NarrativeNode",
+    "default_local_mcp_url": "http://127.0.0.1:13316/mcp/server/"
+  },
+  "licence_boundary": {
+    "source_available_not_osi_open_source": true,
+    "incorporate_external_source_code_into_arcsweep": false,
+    "redistribute_narrativenode": false,
+    "integration_mode": "public-interface-protocol-only",
+    "allowed_personal_patch_workflow": "NarrativeNode licence permits personal modifications and sharing modifications as patches/diffs; ArcSweep does not vendor NarrativeNode code."
+  },
+  "native_surfaces_used": [
+    "entities",
+    "entity-history",
+    "aliases",
+    "name-awareness",
+    "knowledge",
+    "knowledge-awareness",
+    "perspectives",
+    "circumstances",
+    "motivators",
+    "project-tags",
+    "custom-categories",
+    "concept-nodes",
+    "story-seeds",
+    "temporal-order",
+    "narrative-order",
+    "mcp"
+  ],
+  "bootstrap": {
+    "custom_categories": [
+      {
+        "name": "In-world Source",
+        "description": "A diegetic document, song, inscription, archive, testimony carrier, translation, or other source that exists inside the story world."
+      },
+      {
+        "name": "Tradition",
+        "description": "A named cultural, institutional, familial, religious, scholarly, or folkloric tradition that can hold its own version of a claim."
+      },
+      {
+        "name": "Place Layer",
+        "description": "One historical, sacred, linguistic, political, archaeological, folkloric, or recovered stratum of a palimpsest place."
+      }
+    ],
+    "project_tags": [
+      "diegetic-source",
+      "productive-apocrypha",
+      "name-lineage",
+      "imposed-name",
+      "recovered-name",
+      "erasure-active",
+      "mnemonic-ecology",
+      "palimpsest",
+      "sensory-memory",
+      "overcoupling-risk",
+      "agency-boundary",
+      "world-truth",
+      "witness-belief",
+      "institutional-doctrine",
+      "folklore"
+    ],
+    "story_seed_attributes": [
+      {
+        "entity_types": ["character", "location", "item", "faction", "custom"],
+        "name": "Name Lineage",
+        "attribute_type": "text_list",
+        "default_value": ""
+      },
+      {
+        "entity_types": ["character", "location", "item", "faction", "custom"],
+        "name": "Mnemonic Channels",
+        "attribute_type": "text_list",
+        "default_value": ""
+      },
+      {
+        "entity_types": ["character", "location", "item", "faction", "custom"],
+        "name": "Erasure Pressure",
+        "attribute_type": "number",
+        "default_value": "0"
+      },
+      {
+        "entity_types": ["character", "location", "item", "faction", "custom"],
+        "name": "Resonance Autonomy",
+        "attribute_type": "number",
+        "default_value": "1"
+      }
+    ]
+  },
+  "mapping": {
+    "diegetic_claim": "knowledge",
+    "claim_holders": "knowledge-awareness",
+    "name_lineage": "canonical-name-plus-alias-history-and-name-awareness",
+    "diegetic_source": "custom-entity:In-world Source",
+    "tradition": "custom-entity:Tradition",
+    "palimpsest_layer": "custom-entity:Place Layer",
+    "mnemonic_channel": "entity-attribute-plus-tag",
+    "productive_apocrypha": "knowledge-plus-tag; no winner selection",
+    "erasure": "scene-anchored change plus knowledge tracking",
+    "resonance_risk": "circumstance-or-knowledge plus overcoupling-risk tag",
+    "speculative_links": "concept-nodes"
+  },
+  "mcp_tools": {
+    "permission": ["request_mcp_session", "end_mcp_session"],
+    "bootstrap": ["create_custom_category", "create_tag", "add_story_seed"],
+    "entities": ["create_entity", "add_attributes", "add_aliases", "set_entity_awareness", "set_alias_awareness"],
+    "knowledge": ["create_knowledge", "update_knowledge", "set_knowledge_awareness"],
+    "relations": ["create_relationship", "add_perspectives", "add_circumstances", "add_motivators"],
+    "concepts": ["create_concept", "wire_concepts"],
+    "verification": ["get_project_summary", "list_entities", "list_knowledges", "get_entity", "get_knowledge", "get_scene_context", "list_alerts"]
+  },
+  "authority": {
+    "narrativenode_is_canon_authority": false,
+    "arcsweep_auto_promotes_narrativenode_edits": false,
+    "steward_review_required": true,
+    "firsthand_qualia_inference_allowed": false,
+    "productive_apocrypha_may_be_auto_resolved": false
+  }
+}
