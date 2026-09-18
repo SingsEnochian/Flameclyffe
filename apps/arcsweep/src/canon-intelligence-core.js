@@ -2,7 +2,7 @@ export const CANON_INTELLIGENCE_PROPOSAL_SCHEMA = 'arcsweep.canon-intelligence-p
 export const CANON_INTELLIGENCE_EVIDENCE_SCHEMA = 'arcsweep.canon-intelligence-evidence/v1';
 export const CANON_INTELLIGENCE_PROMOTION_SCHEMA = 'arcsweep.canon-intelligence-promotion/v1';
 export const CANON_INTELLIGENCE_COMPARISONS = Object.freeze(['agree', 'extend', 'conflict', 'unknown']);
-export const CANON_INTELLIGENCE_REVIEW_STATES = Object.freeze(['pending', 'accepted', 'rejected', 'revised', 'held', 'needs-more-evidence']);
+export const CANON_INTELLIGENCE_REVIEW_STATES = Object.freeze(['pending', 'accepted', 'rejected', 'revised', 'held', 'needs-more-evidence', 'preserved-apocrypha']);
 
 const text = (value) => String(value ?? '').trim();
 const clone = (value) => value == null ? value : structuredClone(value);
@@ -130,6 +130,9 @@ export function buildContradictionBundle(proposal) {
     proposed_value: clone(proposal.proposed_value),
     evidence_ids: proposal.evidence.map((item) => item.evidence_id),
     requires_review: proposal.comparison === 'conflict' || proposal.comparison === 'unknown',
+    may_preserve_as_productive_apocrypha: proposal.comparison === 'conflict' || proposal.comparison === 'unknown',
+    automatic_winner_selection: false,
+    resolution_options: Object.freeze(['accept', 'reject', 'revise', 'hold', 'needs-more-evidence', 'preserve-apocrypha']),
   });
 }
 
@@ -149,7 +152,7 @@ export function reviewCanonProposal(proposal, { action, steward, note = null, re
   if (proposal?.schema !== CANON_INTELLIGENCE_PROPOSAL_SCHEMA) throw new Error('CANON_INTELLIGENCE: review requires proposal');
   const stewardId = text(steward?.id || steward);
   if (!stewardId) throw new Error('CANON_INTELLIGENCE: Steward identity is required');
-  const mapping = { accept: 'accepted', reject: 'rejected', revise: 'revised', hold: 'held', 'needs-more-evidence': 'needs-more-evidence' };
+  const mapping = { accept: 'accepted', reject: 'rejected', revise: 'revised', hold: 'held', 'needs-more-evidence': 'needs-more-evidence', 'preserve-apocrypha': 'preserved-apocrypha' };
   const status = mapping[text(action).toLowerCase()];
   if (!status) throw new Error('CANON_INTELLIGENCE: unknown review action');
   return Object.freeze({
