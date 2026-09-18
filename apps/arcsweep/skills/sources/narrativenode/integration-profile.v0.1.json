@@ -69,25 +69,49 @@
     ],
     "story_seed_attributes": [
       {
-        "entity_types": ["character", "location", "item", "faction", "custom"],
+        "entity_types": [
+          "character",
+          "location",
+          "item",
+          "faction",
+          "custom"
+        ],
         "name": "Name Lineage",
         "attribute_type": "text_list",
         "default_value": ""
       },
       {
-        "entity_types": ["character", "location", "item", "faction", "custom"],
+        "entity_types": [
+          "character",
+          "location",
+          "item",
+          "faction",
+          "custom"
+        ],
         "name": "Mnemonic Channels",
         "attribute_type": "text_list",
         "default_value": ""
       },
       {
-        "entity_types": ["character", "location", "item", "faction", "custom"],
+        "entity_types": [
+          "character",
+          "location",
+          "item",
+          "faction",
+          "custom"
+        ],
         "name": "Erasure Pressure",
         "attribute_type": "number",
         "default_value": "0"
       },
       {
-        "entity_types": ["character", "location", "item", "faction", "custom"],
+        "entity_types": [
+          "character",
+          "location",
+          "item",
+          "faction",
+          "custom"
+        ],
         "name": "Resonance Autonomy",
         "attribute_type": "number",
         "default_value": "1"
@@ -108,13 +132,47 @@
     "speculative_links": "concept-nodes"
   },
   "mcp_tools": {
-    "permission": ["request_mcp_session", "end_mcp_session"],
-    "bootstrap": ["create_custom_category", "create_tag", "add_story_seed"],
-    "entities": ["create_entity", "add_attributes", "add_aliases", "set_entity_awareness", "set_alias_awareness"],
-    "knowledge": ["create_knowledge", "update_knowledge", "set_knowledge_awareness"],
-    "relations": ["create_relationship", "add_perspectives", "add_circumstances", "add_motivators"],
-    "concepts": ["create_concept", "wire_concepts"],
-    "verification": ["get_project_summary", "list_entities", "list_knowledges", "get_entity", "get_knowledge", "get_scene_context", "list_alerts"]
+    "permission": [
+      "request_mcp_session",
+      "end_mcp_session"
+    ],
+    "bootstrap": [
+      "create_custom_category",
+      "create_tag",
+      "add_tags",
+      "add_story_seed"
+    ],
+    "entities": [
+      "create_entity",
+      "add_attributes",
+      "add_aliases",
+      "set_entity_awareness",
+      "set_alias_awareness"
+    ],
+    "knowledge": [
+      "create_knowledge",
+      "update_knowledge",
+      "set_knowledge_awareness"
+    ],
+    "relations": [
+      "create_relationship",
+      "add_perspectives",
+      "add_circumstances",
+      "add_motivators"
+    ],
+    "concepts": [
+      "create_concept",
+      "wire_concepts"
+    ],
+    "verification": [
+      "get_project_summary",
+      "list_entities",
+      "list_knowledges",
+      "get_entity",
+      "get_knowledge",
+      "get_scene_context",
+      "list_alerts"
+    ]
   },
   "authority": {
     "narrativenode_is_canon_authority": false,
