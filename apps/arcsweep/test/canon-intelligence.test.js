@@ -79,6 +79,36 @@ test('contradiction bundle exposes competing values without resolving them', () 
   assert.equal(bundle.requires_review, true);
   assert.equal(bundle.existing_value, 'Aes Sedai');
   assert.equal(bundle.proposed_value, 'Wise Woman');
+  assert.equal(bundle.may_preserve_as_productive_apocrypha, true);
+  assert.equal(bundle.automatic_winner_selection, false);
+  assert.ok(bundle.resolution_options.includes('preserve-apocrypha'));
+});
+
+test('Steward can intentionally preserve a contradiction as productive apocrypha without promoting either value', () => {
+  const proposal = createCanonIntelligenceProposal({
+    worldId: 'hollow-vale',
+    entity: { id: 'caelwyn', type: 'character', name: 'Caelwyn' },
+    field: { key: 'origin', label: 'Origin' },
+    proposedValue: 'Bell-Touched Wanderer',
+    existingValue: 'Wyrm Tree / Elysian Convergence',
+    evidence: [normaliseCanonEvidence({
+      source_id: 'hollow-vale:origin-tradition',
+      world_id: 'hollow-vale',
+      entity_hint: 'Caelwyn',
+      field_hint: 'origin',
+      value: 'Bell-Touched Wanderer',
+      authority: 'in-world-tradition',
+    })],
+    proposer: 'canon-intelligence',
+  });
+  const preserved = reviewCanonProposal(proposal, {
+    action: 'preserve-apocrypha',
+    steward: 'Rowan',
+    note: 'The plurality is intentional world lore.',
+  });
+  assert.equal(preserved.status, 'preserved-apocrypha');
+  assert.equal(preserved.review.action, 'preserve-apocrypha');
+  assert.throws(() => createCanonPromotionReceipt(preserved, { steward: 'Rowan' }), /only an accepted proposal/);
 });
 
 test('field population generates proposals only for missing fields', () => {
