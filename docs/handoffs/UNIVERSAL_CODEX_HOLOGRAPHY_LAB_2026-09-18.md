@@ -172,9 +172,34 @@ Useful laws:
 
 This is directly useful for onboarding, accessibility, tutorial mode, the Skill Forge, and projected control intensity.
 
+## Candidate & Tower Appentice Anael reference ingest
+
+**Candidate & Tower Appentice Anael** contributes gain control, multi-threaded work, long-range projection, fine remote manipulation, and a clean separation between diagnosis and authority to act.
+
+Reference ingest:
+
+`apps/arcsweep/skills/sources/drive/candidate-tower-apprentice-anael-reference.v0.1.json`
+
+Candidate control machine:
+
+`sense -> scope -> attenuate/amplify -> engage one or more lanes -> manipulate/inspect -> propose or act within authority -> receipt -> return to baseline`
+
+Useful laws:
+
+- strong capability does not imply maximum output intensity;
+- concurrent work should remain visibly separated into lanes instead of collapsing into one undifferentiated busy state;
+- broadcast scope should be explicit: local, room, group, wide, or long-range;
+- drawn diagrams may become manipulable system objects while retaining stroke/provenance ancestry;
+- detecting a problem is not the same capability as repairing it;
+- a companion/caretaker may stabilise or assist without becoming hidden authority.
+
+The UI translation is especially useful for the holographic OS: concurrent tasks can orbit as independent rings; a projected presence can expand or contract its gain halo without changing identity; remote pointers may manipulate spatial objects through visible filaments; diagnostic overlays remain visually distinct from controls that can mutate state.
+
+Governing rule: **capability intensity, output intensity, and mutation authority are three different things.**
+
 ## Combined animation constitution
 
-The current reference stack now teaches six different organs of the Codex:
+The current reference stack now teaches seven different organs of the Codex:
 
 - **Kala Fierro:** how a tool transforms and confirms state.
 - **Circles:** how a presence appears, persists, and fades while preserving source class.
@@ -182,10 +207,11 @@ The current reference stack now teaches six different organs of the Codex:
 - **Praxeum Pad:** how timelines branch and retain ancestry.
 - **Portents & Dreams:** how a projected world can morph while continuity remains legible.
 - **Praxeum-Musebox:** how the Codex teaches, attenuates, retries, and records the method that worked.
+- **Candidate & Tower Appentice Anael:** how concurrent lanes, signal gain, broadcast scope, remote manipulation, and authority separation should behave.
 
 Together:
 
-`approach -> threshold cues -> arrival/coalescence -> source-class identification -> optional transformation -> active function -> adaptive interaction -> receipt -> quiet residual state`
+`approach -> threshold cues -> arrival/coalescence -> source-class identification -> optional transformation -> scope/gain selection -> active function -> parallel/adaptive interaction -> receipt -> quiet residual state`
 
 Across all of them:
 
@@ -194,7 +220,9 @@ Across all of them:
 - failure must remain inspectable;
 - branch ancestry must remain visible;
 - arrival must not be mistaken for assessment;
-- learning should adapt representation before declaring inability.
+- learning should adapt representation before declaring inability;
+- output intensity must not be confused with capability;
+- diagnosis must not be confused with mutation authority.
 
 A useful adjacent Drive source already located is *The Cyber Spellbook: Magick in the Virtual World*; it may receive its own reference ingest for digital-grimoire mechanics, but it remains a separate source.
 
@@ -209,9 +237,11 @@ A useful adjacent Drive source already located is *The Cyber Spellbook: Magick i
 7. Add Praxeum Pad branch ribbons and divergence markers to Time Room / Continuity Gate.
 8. Add Portents-derived world morphs with persistent continuity threads for Dream/Story Mode.
 9. Add Musebox-derived adaptive tutorial states and local signal-intensity controls.
-10. Turn successful action receipts into brief luminous numbered glyphs that can be opened back into the exact machine receipt.
-11. Add gesture input only after desktop/touch controls remain fully usable.
-12. Feed future Signal events into the same projection grammar as discrete, provenance-bearing objects.
+10. Add Anael-derived concurrent task orbits, explicit audience scope, and gain halos.
+11. Separate diagnostic overlays from propose/mutate controls in all projected inspectors.
+12. Turn successful action receipts into brief luminous numbered glyphs that can be opened back into the exact machine receipt.
+13. Add gesture input only after desktop/touch controls remain fully usable.
+14. Feed future Signal events into the same projection grammar as discrete, provenance-bearing objects.
 
 ## Seal
 
