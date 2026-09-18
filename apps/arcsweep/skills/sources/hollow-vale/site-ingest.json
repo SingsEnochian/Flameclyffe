@@ -1,0 +1,67 @@
+{
+  "schema": "arcsweep.external-site-ingest/v0.1",
+  "corpus_id": "hollow-vale-alexander-paul-burton",
+  "name": "The Hollow Vale / Tharion Cycle public reference corpus",
+  "prepared_at": "2026-09-17",
+  "base_url": "https://www.alexanderpaulburton.com/",
+  "entry_url": "https://www.alexanderpaulburton.com/the-hollow-vale-wiki",
+  "primer": "apps/arcsweep/presets/hollow-vale-whole-site-ingest.v0.1.json",
+  "scope_mode": "hollow-vale-related-content-across-domain",
+  "storage_mode": "metadata-hashes-link-graph-and-paraphrased-reference-records",
+  "copyright_policy": {
+    "mirror_full_prose": false,
+    "mirror_images": false,
+    "persist_raw_html": false,
+    "persist_page_text": false,
+    "retain_source_hashes": true,
+    "retain_canonical_urls": true,
+    "retain_titles_and_public_metadata": true,
+    "semantic_output": "compact-paraphrase-only",
+    "note": "The source site identifies its creative content and images as copyrighted. The ingest preserves provenance and derived reference structure rather than reproducing the creative corpus."
+  },
+  "crawl": {
+    "same_origin_only": true,
+    "discover_sitemaps": true,
+    "respect_robots": true,
+    "follow_internal_links_from_relevant_pages": true,
+    "max_pages": 2500,
+    "max_depth": 4,
+    "delay_ms": 350,
+    "user_agent": "ArcSweep-HollowVale-ReferenceIndexer/0.1 (+source-provenance-only)",
+    "drop_query_parameters": ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"],
+    "deny_path_prefixes": ["/cart", "/checkout", "/account"],
+    "direct_path_prefixes": ["/the-hollow-vale-wiki"],
+    "relevance_terms": ["the hollow vale", "tharion", "caelwyn", "fabled gable", "wyrdsong", "wyrm tree", "bell of memory", "starforged bell", "eldarglen", "elderglen", "daughters of avalon", "sundered land", "deep wyrd", "wenderbeast", "tharionese"]
+  },
+  "seed_urls": [
+    "https://www.alexanderpaulburton.com/the-hollow-vale-wiki",
+    "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-origins-of-caelwyn-a-name-written-in-the-stars",
+    "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-daughters-of-avalon-and-the-veil-of-dreams",
+    "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-rune-stone-and-the-spiral-of-names",
+    "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-starforged-bell-and-the-spiral-of-memory",
+    "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/the-wyrdsong-and-the-forgotten-tongue",
+    "https://www.alexanderpaulburton.com/the-hollow-vale-wiki/exploring-the-mysteries-of-the-hollow-vale-memory",
+    "https://www.alexanderpaulburton.com/free-spotify-audiobook",
+    "https://www.alexanderpaulburton.com/new-work"
+  ],
+  "classification_rules": [
+    {"match": "/the-hollow-vale-wiki/", "class": "hollow-vale-wiki-entry"},
+    {"match": "/the-hollow-vale-wiki", "class": "hollow-vale-wiki-index"},
+    {"match": "/new-work/", "class": "hollow-vale-publication-or-companion"},
+    {"match": "/free-spotify-audiobook", "class": "hollow-vale-audiobook-reference"}
+  ],
+  "semantic_targets": ["characters", "places", "artefacts", "languages-and-terms", "cosmology", "memory-mechanics", "name-and-identity-mechanics", "events", "groups", "myth-variants", "source-authority", "publication-lineage", "cross-page-relationships"],
+  "variant_policy": {
+    "preserve_competing_origin_traditions": true,
+    "do_not_select_winner_automatically": true,
+    "mark_common_or_majority_traditions_when_source_does": true,
+    "distinguish_storyworld_fact_from_in-world-legend": true
+  },
+  "output": {
+    "default_directory": "ingests/hollow-vale",
+    "source_index": "source-index.json",
+    "link_graph": "link-graph.json",
+    "crawl_report": "crawl-report.json"
+  },
+  "reference_pack": "apps/arcsweep/skills/sources/hollow-vale/reference-pack.v0.1.json"
+}
