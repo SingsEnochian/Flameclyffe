@@ -76,6 +76,23 @@
       "ingest": "profile-ailis-genessee-reference.v0.1.json",
       "source_note": "Rowan identifies this as one of her first-created character profiles.",
       "primary_mechanisms": ["programmable wearable interface", "body-linked authentication", "signal-bounded autonomy", "filtering and sensory load", "capability cost", "parallel assessment", "maintenance through craft", "coercion versus local intent"]
+    },
+    {
+      "title": "Back up your vampires",
+      "ingest": "back-up-your-vampires-reference.v0.1.json",
+      "primary_mechanisms": ["facts-before-panic anomaly reconstruction", "relay-bridged presence", "consented knowledge transfer", "scoped remote embodiment", "actuation through tools", "sensory-fidelity gradients"]
+    },
+    {
+      "title": "Voidcaller",
+      "ingest": "voidcaller-reference.v0.1.json",
+      "source_note": "Drive metadata records creation on 2012-11-03; use as chronology evidence, not automatic proof of direct ancestry.",
+      "primary_mechanisms": ["resource-bounded readiness", "fear prior versus observation", "consent before care", "diagnosis with confirmation", "care until exit criteria", "practice lineage", "ecology-bound capability"]
+    },
+    {
+      "title": "The Starsong Chronicles",
+      "ingest": "the-starsong-chronicles-reference.v0.1.json",
+      "source_note": "Drive metadata records creation on 2018-01-19 and the document footer identifies 2019; shared terminology with later projects is a candidate ancestry signal only.",
+      "primary_mechanisms": ["catastrophe-threshold-arrival sequence", "somatic transition receipts", "continuity anchors", "portal lifecycle", "uncertain parallel cohorts", "identity through world change", "anonymous weak signals"]
     }
   ],
   "pending_sources": [
