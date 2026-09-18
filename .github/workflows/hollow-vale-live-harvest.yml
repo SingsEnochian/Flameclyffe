@@ -1,0 +1,53 @@
+name: Hollow Vale Reference Harvest
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/hollow-vale-live-harvest.yml'
+      - 'apps/arcsweep/scripts/hollow-vale-ingest.mjs'
+      - 'apps/arcsweep/skills/sources/hollow-vale/**'
+      - 'apps/arcsweep/presets/hollow-vale-whole-site-ingest.v0.1.json'
+      - 'apps/arcsweep/test/hollow-vale-ingest.test.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-harvest:
+    name: Verify and index public Hollow Vale references
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Run Hollow Vale ingest tests
+        run: node --test apps/arcsweep/test/hollow-vale-ingest.test.js
+
+      - name: Crawl public references without mirroring prose
+        run: |
+          node apps/arcsweep/scripts/hollow-vale-ingest.mjs \
+            --out ingests/hollow-vale-live \
+            --max-pages 2500
+
+      - name: Show receipt
+        if: always()
+        run: |
+          test -f ingests/hollow-vale-live/crawl-report.json && cat ingests/hollow-vale-live/crawl-report.json || true
+
+      - name: Upload provenance-only harvest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hollow-vale-reference-harvest
+          path: ingests/hollow-vale-live
+          if-no-files-found: error
+          retention-days: 14
