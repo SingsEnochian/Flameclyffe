@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-18T00:34:52.692Z",
+  "generated_at": "2026-09-18T05:30:13.072Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-17T20:30",
+    "time": "2026-09-18T01:30",
     "sky": "Night",
     "current": {
-      "time": "2026-09-17T20:30",
+      "time": "2026-09-18T01:30",
       "interval": 900,
-      "temperature_2m": 77,
-      "relative_humidity_2m": 76,
+      "temperature_2m": 75.2,
+      "relative_humidity_2m": 84,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 2,
-      "cloud_cover": 51,
-      "pressure_msl": 1020.8,
-      "wind_speed_10m": 6.5,
-      "wind_direction_10m": 41
+      "cloud_cover": 73,
+      "pressure_msl": 1019.3,
+      "wind_speed_10m": 3.7,
+      "wind_direction_10m": 335
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2.33,
-      "time_tag": "2026-09-17T21:00:00",
-      "a_running": 9
+      "value": 1.67,
+      "time_tag": "2026-09-18T00:00:00",
+      "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-09-18T00:26:00Z",
-      "bz": 1,
-      "bt": 4,
+      "time_tag": "2026-09-18T05:23:00Z",
+      "bz": -1,
+      "bt": 5,
       "density": null,
-      "speed": 452
+      "speed": 433
     }
   },
   "moon": {
-    "age_days": 6.17,
-    "illumination": 37.2,
+    "age_days": 6.38,
+    "illumination": 39.4,
     "name": "First Quarter"
   },
   "field": {
-    "P": 0.5466666666666661,
-    "C": 0.48714285714285716,
-    "R": 0.825,
-    "E": 0.6987362637362637,
-    "M": 0.37200000000000005,
-    "A": 0.5684615384615385,
+    "P": 0.5299999999999995,
+    "C": 0.38238095238095243,
+    "R": 0.7625,
+    "E": 0.7073626373626374,
+    "M": 0.39399999999999996,
+    "A": 0.48384615384615387,
     "Q": null,
-    "dpdt": 0.825,
+    "dpdt": 0.7625,
     "dynamic_axes": [
       "P",
       "C",
