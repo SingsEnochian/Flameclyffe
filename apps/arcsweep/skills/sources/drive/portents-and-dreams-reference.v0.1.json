@@ -1,0 +1,61 @@
+{
+  "schema": "arcsweep.reference-ingest/v0.1",
+  "source_id": "drive-portents-and-dreams-1xkDSHYjW-dGBdDSKCRicoa2LeyVbhfvVtzHBVWGgSQU",
+  "title": "Portents & Dreams",
+  "source_type": "google-doc",
+  "source_url": "https://docs.google.com/document/d/1xkDSHYjW-dGBdDSKCRicoa2LeyVbhfvVtzHBVWGgSQU/edit?usp=drivesdk",
+  "canon_status": "reference-only",
+  "provenance": {
+    "observed_title": "Portents & Dreams",
+    "observed_revision_id": "ANLCKQmwpyvTAXTdoMbZlJbQYnzsIaIvAHa5R9fWz4OOY7vS3Tqju7lpwCQWvq-Cs40xl0hmueyl6niWTNQweA",
+    "observed_on": "2026-09-18"
+  },
+  "story_lore_boundary": {
+    "star_wars_and_dune_story_material_is_reference_only": true,
+    "auto_promote_to_arcsweep_canon": false,
+    "auto_promote_characters": false,
+    "auto_promote_plot": false,
+    "auto_promote_setting": false
+  },
+  "mechanism_extract": {
+    "dream_space_features": [
+      "environment can morph continuously while participants remain relationally anchored",
+      "shared dream participants may experience the same scene through different interpretive frames",
+      "objects and colours can function as navigational threads through an unstable space",
+      "the background may be acknowledged as transitory while interaction remains meaningful",
+      "multiple world-fragments can blend without requiring them to become one canon world"
+    ],
+    "continuity_features": [
+      "a path or thread can mark where a participant has been",
+      "an anchor can persist across scene changes",
+      "relationship continuity can survive radical environmental transformation",
+      "new companionship does not require erasure of prior bonds",
+      "becoming is represented as ongoing rather than a single completed transformation"
+    ]
+  },
+  "universal_codex_translation": {
+    "candidate_surfaces": [
+      "Story Mode",
+      "Dream/Memory projection",
+      "Resonance Bridge",
+      "Worldseed preview",
+      "Continuity path view"
+    ],
+    "dream_scene_rule": "Scene geometry may shift fluidly while provenance, participant identity, and scene class remain anchored.",
+    "thread_rule": "Use persistent visual threads, ribbons, or paths to show continuity through changing environments without claiming that all visible worlds are the same world.",
+    "candidate_visuals": [
+      "red ribbon path home",
+      "blue luminous relational thread",
+      "landscape morph between desert, stars, moons, rain, jungle, and interior space",
+      "scene transitions driven by participant attention rather than hard cuts",
+      "stable participant silhouettes within a mutable projected environment"
+    ],
+    "scene_class": "dream",
+    "epistemic_rule": "Dream vividness and shared experience do not silently promote dream content into present-time observation."
+  },
+  "copyright_boundary": {
+    "store_full_prose": false,
+    "copy_story_text_into_ui": false,
+    "use_mechanisms_and_paraphrased_patterns_only": true
+  }
+}
