@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-19T17:43:50.213Z",
+  "generated_at": "2026-09-19T19:58:22.339Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-19T13:30",
+    "time": "2026-09-19T15:45",
     "sky": "Day",
     "current": {
-      "time": "2026-09-19T13:30",
+      "time": "2026-09-19T15:45",
       "interval": 900,
-      "temperature_2m": 84.9,
-      "relative_humidity_2m": 71,
+      "temperature_2m": 84.3,
+      "relative_humidity_2m": 70,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 0,
-      "cloud_cover": 5,
-      "pressure_msl": 1015,
-      "wind_speed_10m": 8.1,
-      "wind_direction_10m": 51
+      "weather_code": 3,
+      "cloud_cover": 93,
+      "pressure_msl": 1014.6,
+      "wind_speed_10m": 7.8,
+      "wind_direction_10m": 66
     }
   },
   "space_weather": {
     "kp": {
       "value": 1.67,
-      "time_tag": "2026-09-19T12:00:00",
+      "time_tag": "2026-09-19T15:00:00",
       "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-09-19T17:35:00Z",
-      "bz": 2,
+      "time_tag": "2026-09-19T19:48:00Z",
+      "bz": 3,
       "bt": 4,
       "density": null,
-      "speed": 409
+      "speed": 416
     }
   },
   "moon": {
-    "age_days": 7.88,
-    "illumination": 55.3,
+    "age_days": 7.98,
+    "illumination": 56.3,
     "name": "First Quarter"
   },
   "field": {
-    "P": 0.5422222222222223,
-    "C": 0.7061904761904763,
-    "R": 0.8358333333333333,
-    "E": 0.6323626373626373,
-    "M": 0.5529999999999999,
-    "A": 0.9653846153846153,
+    "P": 0.537777777777778,
+    "C": 0.2871428571428572,
+    "R": 0.8566666666666667,
+    "E": 0.6285164835164835,
+    "M": 0.563,
+    "A": 0.6269230769230769,
     "Q": null,
-    "dpdt": 0.8358333333333333,
+    "dpdt": 0.8566666666666667,
     "dynamic_axes": [
       "P",
       "C",
