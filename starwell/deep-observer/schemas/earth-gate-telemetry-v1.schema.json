@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/earth-gate-telemetry-v1.schema.json",
+  "title": "Earth Gate Telemetry Receipt v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "math_spine",
+    "observed_at",
+    "calibration_status",
+    "physical_claim",
+    "medical_claim",
+    "status",
+    "archetype",
+    "implementation",
+    "inputs",
+    "metrics",
+    "premaqc_bearing"
+  ],
+  "properties": {
+    "schema": { "const": "hearthgate.earth-gate-telemetry/v1" },
+    "math_spine": { "const": "hearthgate.math-spine/v1.8" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "calibration_status": { "const": "experimental" },
+    "physical_claim": { "const": false },
+    "medical_claim": { "const": false },
+    "status": { "type": "string" },
+    "archetype": {
+      "enum": [
+        "RA-90",
+        "Temporal Anchoring Rod",
+        "Chrono-Spatial Matrix Grid"
+      ]
+    },
+    "implementation": { "type": "string", "minLength": 1 },
+    "inputs": { "type": "object" },
+    "metrics": { "type": "object" },
+    "premaqc_bearing": {
+      "type": "object",
+      "required": ["schema", "vocabulary", "dynamic_axes", "context_only_axes", "axes", "authority"],
+      "properties": {
+        "schema": { "const": "hearthgate.premaqc-bearing/v1" },
+        "vocabulary": { "const": "PREMAQC" },
+        "dynamic_axes": {
+          "const": ["P", "C", "R", "E", "M", "A"]
+        },
+        "context_only_axes": {
+          "const": ["Q"]
+        },
+        "axes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["P", "C", "R", "E", "M", "A", "Q"],
+          "properties": {
+            "P": { "$ref": "#/$defs/dynamicBearing" },
+            "C": { "$ref": "#/$defs/dynamicBearing" },
+            "R": { "$ref": "#/$defs/dynamicBearing" },
+            "E": { "$ref": "#/$defs/dynamicBearing" },
+            "M": { "$ref": "#/$defs/dynamicBearing" },
+            "A": { "$ref": "#/$defs/dynamicBearing" },
+            "Q": {
+              "type": "object",
+              "required": ["status", "report_present", "value", "derivative", "inferred", "authority"],
+              "properties": {
+                "status": { "const": "context-only" },
+                "report_present": { "type": "boolean" },
+                "value": { "enum": [0, 1] },
+                "derivative": { "const": 0 },
+                "inferred": { "const": false },
+                "authority": { "const": "firsthand-only" }
+              }
+            }
+          }
+        },
+        "authority": {
+          "type": "object",
+          "required": [
+            "qualia_is_firsthand_only",
+            "qualia_magnitude_inference_allowed",
+            "unsupported_or_ungranted_fields_remain_unknown",
+            "canon_commit",
+            "physical_claim"
+          ],
+          "properties": {
+            "qualia_is_firsthand_only": { "const": true },
+            "qualia_magnitude_inference_allowed": { "const": false },
+            "unsupported_or_ungranted_fields_remain_unknown": { "const": true },
+            "canon_commit": { "const": false },
+            "physical_claim": { "const": false }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "dynamicBearing": {
+      "type": "object",
+      "required": ["status", "delta_estimate", "confidence", "contributors", "note"],
+      "properties": {
+        "status": { "enum": ["estimated", "unasserted"] },
+        "delta_estimate": { "type": ["number", "null"] },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "contributors": { "type": "array", "items": { "type": "string" } },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}
