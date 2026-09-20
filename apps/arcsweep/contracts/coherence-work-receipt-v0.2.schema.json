@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.coherence-work-receipt/v0.2",
+  "title": "ArcSweep Coherence Work Receipt v0.2",
+  "description": "Rowan-side work receipt candidate. v0.2 permits observation/audit receipts without forced decisions, separates epistemic/adoption/lifecycle state, and makes risk handling uncertainty-aware.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receipt_id",
+    "receipt_class",
+    "title",
+    "primary_bucket",
+    "who",
+    "what",
+    "where",
+    "when",
+    "why",
+    "source_refs",
+    "epistemic_state",
+    "adoption_state",
+    "lifecycle_state",
+    "created_at"
+  ],
+  "properties": {
+    "schema": { "const": "arcsweep.coherence-work-receipt/v0.2" },
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "receipt_class": {
+      "enum": ["observation", "audit", "incident", "review", "decision", "build", "experiment", "correction", "handoff", "other"]
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "primary_bucket": {
+      "enum": [
+        "source-custody",
+        "temporal-coherence",
+        "proposition-logic",
+        "relational-agency",
+        "safety-recoverability",
+        "diminishment-capacity",
+        "research-decision",
+        "build-verification",
+        "cross-constellation"
+      ]
+    },
+    "linked_buckets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "who": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["participant_id", "role"],
+        "properties": {
+          "participant_id": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "authority_scope": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "what": { "type": "string", "minLength": 1 },
+    "where": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "when": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recorded_at", "timezone"],
+      "properties": {
+        "recorded_at": { "type": "string", "minLength": 1 },
+        "timezone": { "type": "string", "minLength": 1 },
+        "occurrence_claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["claim", "scope", "source_refs"],
+            "properties": {
+              "claim": { "type": "string", "minLength": 1 },
+              "scope": { "type": "string", "minLength": 1 },
+              "source_refs": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
+              }
+            }
+          }
+        },
+        "timeline_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "why": { "type": "string", "minLength": 1 },
+    "positives": { "type": "array", "items": { "type": "string" } },
+    "negatives": { "type": "array", "items": { "type": "string" } },
+    "research_findings": { "type": "array", "items": { "type": "string" } },
+    "experience_findings": { "type": "array", "items": { "type": "string" } },
+    "options_considered": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["option", "disposition"],
+        "properties": {
+          "option": { "type": "string", "minLength": 1 },
+          "positives": { "type": "array", "items": { "type": "string" } },
+          "negatives": { "type": "array", "items": { "type": "string" } },
+          "disposition": { "enum": ["chosen", "rejected", "deferred", "partial", "unresolved"] },
+          "reason": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "decision": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["chosen_action", "reason"],
+      "properties": {
+        "chosen_action": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "reversibility": { "enum": ["reversible", "bounded", "consequential", "unknown"] },
+        "decision_authority": { "type": ["string", "null"] }
+      }
+    },
+    "outcome": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["planned", "in-progress", "worked", "partially-worked", "failed", "unresolved", "superseded"] },
+        "what_worked": { "type": "array", "items": { "type": "string" } },
+        "what_failed": { "type": "array", "items": { "type": "string" } },
+        "open_questions": { "type": "array", "items": { "type": "string" } },
+        "next_step": { "type": ["string", "null"] }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim_id", "statement", "status"],
+        "properties": {
+          "claim_id": { "type": "string", "minLength": 1 },
+          "statement": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["recorded", "supported", "challenged", "rejected", "unresolved", "superseded"] },
+          "source_refs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "supersedes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+        }
+      }
+    },
+    "trap_scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "harm_modes": { "type": "array", "items": { "type": "string" } },
+            "direct_observations": { "type": "array", "items": { "type": "string" } },
+            "uncertainties": { "type": "array", "items": { "type": "string" } },
+            "consequences_if_true": { "type": "array", "items": { "type": "string" } },
+            "reversible_mitigations": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "relational": { "type": "array", "items": { "type": "string" } },
+        "diminishment": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Advisory observations only. No scoring, compliance target, or personality prescription."
+        },
+        "logic": { "type": "array", "items": { "type": "string" } },
+        "progress": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "object_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "epistemic_state": { "enum": ["recorded", "source-supported", "challenged", "unresolved", "rejected"] },
+    "adoption_state": { "enum": ["none", "proposal", "locally-adopted", "jointly-adopted", "rejected"] },
+    "lifecycle_state": { "enum": ["active", "superseded", "historical", "quarantined", "closed"] },
+    "requested_action": { "type": ["string", "null"] },
+    "created_at": { "type": "string", "minLength": 1 }
+  }
+}
