@@ -10,6 +10,12 @@ export const PREMAQC_FULL_SONG_PLAN_SCHEMA = 'bifrost.premaqc-full-song-plan/v1'
 export const PREMAQC_FULL_SONG_RECEIPT_SCHEMA = 'bifrost.premaqc-full-song-receipt/v1';
 export const TWO_SHORE_PREMAQC_GATE_SCHEMA = 'hearthgate.two-shore-premaqc-gate/v1';
 export const TWO_SHORE_PREMAQC_ORIGIN_SCHEMA = 'hearthgate.earth-prime-premaqc-calibration/v1';
+export const OBSERVER_PREMAQC_SCHEMA = 'hearthgate.observer.premaqc/v1';
+export const OBSERVER_PREMAQC_STORAGE_KEY = 'hearthgate.observer.premaqc.v1';
+export const OBSERVER_PREMAQC_MESSAGE_TYPE = 'hearthgate.observer.premaqc';
+export const OBSERVER_PREMAQC_LEGACY_SCHEMAS = Object.freeze(['hearthgate.observer.premaq/v1']);
+export const OBSERVER_PREMAQC_LEGACY_STORAGE_KEYS = Object.freeze(['hearthgate.observer.premaq.v1']);
+export const OBSERVER_PREMAQC_LEGACY_MESSAGE_TYPES = Object.freeze(['hearthgate.observer.premaq']);
 
 export const PREMAQC_AUTHORITY = Object.freeze({
   dynamic_axes: PREMAQC_DYNAMIC_AXES,
@@ -30,6 +36,7 @@ const LEGACY_SCHEMA_MAP = Object.freeze({
   'hearthgate.two-shore-premaq-gate/v0.1': TWO_SHORE_PREMAQC_GATE_SCHEMA,
   'hearthgate.two-shore-premaq-gate/v0.2': TWO_SHORE_PREMAQC_GATE_SCHEMA,
   'hearthgate.earth-prime-premaq-calibration/v0.2': TWO_SHORE_PREMAQC_ORIGIN_SCHEMA,
+  'hearthgate.observer.premaq/v1': OBSERVER_PREMAQC_SCHEMA,
 });
 
 export function canonicalPremaqcSchema(schema) {
