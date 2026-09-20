@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-20T17:18:17.905Z",
+  "generated_at": "2026-09-20T19:36:47.018Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-20T13:15",
+    "time": "2026-09-20T15:30",
     "sky": "Day",
     "current": {
-      "time": "2026-09-20T13:15",
+      "time": "2026-09-20T15:30",
       "interval": 900,
-      "temperature_2m": 85.7,
-      "relative_humidity_2m": 62,
+      "temperature_2m": 83.3,
+      "relative_humidity_2m": 73,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 2,
-      "cloud_cover": 61,
-      "pressure_msl": 1013.4,
-      "wind_speed_10m": 6.8,
-      "wind_direction_10m": 349
+      "weather_code": 1,
+      "cloud_cover": 49,
+      "pressure_msl": 1013,
+      "wind_speed_10m": 3.2,
+      "wind_direction_10m": 12
     }
   },
   "space_weather": {
     "kp": {
-      "value": 1,
-      "time_tag": "2026-09-20T12:00:00",
-      "a_running": 4
+      "value": 0.33,
+      "time_tag": "2026-09-20T15:00:00",
+      "a_running": 2
     },
     "solar_wind": {
-      "time_tag": "2026-09-20T17:09:00Z",
-      "bz": 3,
+      "time_tag": "2026-09-20T19:26:00Z",
+      "bz": 1,
       "bt": 4,
       "density": null,
-      "speed": 380
+      "speed": 373
     }
   },
   "moon": {
-    "age_days": 8.87,
-    "illumination": 65.5,
+    "age_days": 8.96,
+    "illumination": 66.5,
     "name": "First Quarter"
   },
   "field": {
-    "P": 0.5244444444444442,
-    "C": 0.43952380952380954,
-    "R": 0.81,
-    "E": 0.5498901098901099,
-    "M": 0.655,
-    "A": 0.75,
+    "P": 0.52,
+    "C": 0.4966666666666667,
+    "R": 0.7041666666666667,
+    "E": 0.5443406593406593,
+    "M": 0.665,
+    "A": 0.7961538461538461,
     "Q": null,
-    "dpdt": 0.81,
+    "dpdt": 0.7041666666666667,
     "dynamic_axes": [
       "P",
       "C",
