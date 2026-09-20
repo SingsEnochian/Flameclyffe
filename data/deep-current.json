@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-20T19:36:47.018Z",
+  "generated_at": "2026-09-20T22:08:36.525Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-20T15:30",
+    "time": "2026-09-20T18:00",
     "sky": "Day",
     "current": {
-      "time": "2026-09-20T15:30",
+      "time": "2026-09-20T18:00",
       "interval": 900,
-      "temperature_2m": 83.3,
-      "relative_humidity_2m": 73,
+      "temperature_2m": 79.2,
+      "relative_humidity_2m": 85,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 1,
-      "cloud_cover": 49,
-      "pressure_msl": 1013,
-      "wind_speed_10m": 3.2,
-      "wind_direction_10m": 12
+      "weather_code": 3,
+      "cloud_cover": 100,
+      "pressure_msl": 1012.5,
+      "wind_speed_10m": 6.1,
+      "wind_direction_10m": 33
     }
   },
   "space_weather": {
     "kp": {
       "value": 0.33,
-      "time_tag": "2026-09-20T15:00:00",
+      "time_tag": "2026-09-20T18:00:00",
       "a_running": 2
     },
     "solar_wind": {
-      "time_tag": "2026-09-20T19:26:00Z",
-      "bz": 1,
+      "time_tag": "2026-09-20T22:01:00Z",
+      "bz": 0,
       "bt": 4,
       "density": null,
-      "speed": 373
+      "speed": 360
     }
   },
   "moon": {
-    "age_days": 8.96,
-    "illumination": 66.5,
+    "age_days": 9.07,
+    "illumination": 67.6,
     "name": "First Quarter"
   },
   "field": {
-    "P": 0.52,
-    "C": 0.4966666666666667,
-    "R": 0.7041666666666667,
-    "E": 0.5443406593406593,
-    "M": 0.665,
-    "A": 0.7961538461538461,
+    "P": 0.5144444444444445,
+    "C": 0.2538095238095239,
+    "R": 0.7216666666666667,
+    "E": 0.5904945054945054,
+    "M": 0.6759999999999999,
+    "A": 0.6,
     "Q": null,
-    "dpdt": 0.7041666666666667,
+    "dpdt": 0.7216666666666667,
     "dynamic_axes": [
       "P",
       "C",
