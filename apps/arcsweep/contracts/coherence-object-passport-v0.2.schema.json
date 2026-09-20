@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.coherence-object-passport/v0.2",
+  "title": "ArcSweep Coherence Object Passport v0.2",
+  "description": "Rowan-side architecture-object passport candidate. v0.2 narrows the passport to systems/artifacts, separates status axes, moves verification into receipts, and treats source/authority statements as scoped assertions rather than receiver-certified truth.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "canonical_name",
+    "namespace",
+    "kind",
+    "purpose",
+    "provenance_class",
+    "implementation_state",
+    "lifecycle_state",
+    "source_owner_assertions",
+    "source_refs",
+    "authority_assertions"
+  ],
+  "properties": {
+    "schema": { "const": "arcsweep.coherence-object-passport/v0.2" },
+    "id": { "type": "string", "minLength": 1 },
+    "canonical_name": { "type": "string", "minLength": 1 },
+    "namespace": { "type": "string", "minLength": 1 },
+    "kind": {
+      "enum": [
+        "project",
+        "subsystem",
+        "external-project",
+        "contract",
+        "room",
+        "model",
+        "dataset",
+        "document",
+        "service",
+        "protocol",
+        "artifact",
+        "other"
+      ]
+    },
+    "purpose": { "type": "string", "minLength": 1 },
+    "provenance_class": {
+      "enum": ["rowan-local", "external", "cross-house", "mixed", "unknown"]
+    },
+    "implementation_state": {
+      "enum": ["unknown", "envisioned", "specified", "partial", "functional", "released", "not-applicable"]
+    },
+    "lifecycle_state": {
+      "enum": ["unknown", "active", "historical", "superseded", "retired"]
+    },
+    "source_owner_assertions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["owner_id", "asserted_by", "source_refs"],
+        "properties": {
+          "owner_id": { "type": "string", "minLength": 1 },
+          "asserted_by": { "type": "string", "minLength": 1 },
+          "source_refs": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref", "role", "asserted_by"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1 },
+          "role": {
+            "enum": [
+              "source-owner-declared",
+              "rowan-observed",
+              "integration-ref",
+              "canonical-artifact",
+              "historical-ref",
+              "unknown"
+            ]
+          },
+          "asserted_by": { "type": "string", "minLength": 1 },
+          "revision": { "type": ["string", "null"] },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "first_attestation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["time_claim", "scope", "source_refs"],
+      "properties": {
+        "time_claim": { "type": "string", "minLength": 1 },
+        "scope": { "type": "string", "minLength": 1 },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "authority_assertions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asserted_by", "statement", "source_refs"],
+        "properties": {
+          "asserted_by": { "type": "string", "minLength": 1 },
+          "statement": { "type": "string", "minLength": 1 },
+          "source_refs": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "mutation_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "may_change": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "may_not_change": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "verification_receipt_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "aliases": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation", "target"],
+        "properties": {
+          "relation": { "type": "string", "minLength": 1 },
+          "target": { "type": "string", "minLength": 1 },
+          "source_ref": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "notes": { "type": ["string", "null"] }
+  }
+}
