@@ -9,7 +9,7 @@ function leg(status = 'awaiting', detail = null, extra = {}) {
 }
 
 async function jsonBody(response) {
-  return response.json().catch(async () => ({ raw: await response.text().catch(() => '') }));
+  return response.json().catch(() => ({}));
 }
 
 function newestEntry(entries) {
@@ -144,6 +144,15 @@ function colourFor(status) {
   return '#e39a78';
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 export function renderHouseSessionAudit(report, root = document.body) {
   const old = document.querySelector('[data-house-session-audit]');
   old?.remove();
@@ -162,8 +171,8 @@ export function renderHouseSessionAudit(report, root = document.body) {
       <strong style="color:#ffb852;letter-spacing:.1em">HOUSE COMMONS AUTH AUDIT</strong>
       <button type="button" data-house-audit-close style="background:transparent;color:#d9a05b;border:1px solid #3c3224;padding:3px 7px;cursor:pointer">close</button>
     </div>
-    ${legs.map(([name, item]) => `<div style="border-top:1px solid #3c3224;padding:7px 0"><b>${name}</b> <span style="color:${colourFor(item.status)}">${String(item.status).toUpperCase()}</span><br><span style="color:#8c7f70">${item.detail || ''}${item.http_status ? ` · HTTP ${item.http_status}` : ''}</span></div>`).join('')}
-    <div style="border-top:1px solid #3c3224;padding-top:8px">LEDGER <span style="color:#ffb852">${report.ledger_snapshot.row_count ?? '—'} rows</span><br><span style="color:#8c7f70">newest: ${report.ledger_snapshot.newest_receipt || '—'}</span></div>
+    ${legs.map(([name, item]) => `<div style="border-top:1px solid #3c3224;padding:7px 0"><b>${escapeHtml(name)}</b> <span style="color:${colourFor(item.status)}">${escapeHtml(String(item.status).toUpperCase())}</span><br><span style="color:#8c7f70">${escapeHtml(item.detail || '')}${item.http_status ? ` · HTTP ${escapeHtml(item.http_status)}` : ''}</span></div>`).join('')}
+    <div style="border-top:1px solid #3c3224;padding-top:8px">LEDGER <span style="color:#ffb852">${escapeHtml(report.ledger_snapshot.row_count ?? '—')} rows</span><br><span style="color:#8c7f70">newest: ${escapeHtml(report.ledger_snapshot.newest_receipt || '—')}</span></div>
   `;
   panel.querySelector('[data-house-audit-close]')?.addEventListener('click', () => panel.remove());
   root.append(panel);
