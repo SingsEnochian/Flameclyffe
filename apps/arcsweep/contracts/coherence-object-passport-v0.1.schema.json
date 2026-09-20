@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arcsweep.coherence-object-passport/v0.1",
+  "title": "ArcSweep Coherence Object Passport v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "canonical_name",
+    "namespace",
+    "kind",
+    "owner_or_steward",
+    "purpose",
+    "canonical_source",
+    "current_status",
+    "authority_scope",
+    "source_refs"
+  ],
+  "properties": {
+    "schema": { "const": "arcsweep.coherence-object-passport/v0.1" },
+    "id": { "type": "string", "minLength": 1 },
+    "canonical_name": { "type": "string", "minLength": 1 },
+    "namespace": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["project", "subsystem", "external-project", "contract", "room", "model", "person", "presence", "relationship", "concept", "dataset", "document", "other"] },
+    "owner_or_steward": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
+    "purpose": { "type": "string", "minLength": 1 },
+    "canonical_source": { "type": "string", "minLength": 1 },
+    "first_attested_at": { "type": ["string", "null"] },
+    "current_status": { "enum": ["external", "envisioned", "specified", "partial", "functional", "verified", "released", "historical", "superseded", "unknown"] },
+    "last_verified_at": { "type": ["string", "null"] },
+    "authority_scope": { "type": "string", "minLength": 1 },
+    "may_mutate": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "may_not_mutate": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "aliases": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "source_refs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation", "target"],
+        "properties": {
+          "relation": { "type": "string", "minLength": 1 },
+          "target": { "type": "string", "minLength": 1 },
+          "source_ref": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "notes": { "type": ["string", "null"] }
+  }
+}
