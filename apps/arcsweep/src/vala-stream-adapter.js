@@ -1,7 +1,9 @@
+const viteEnv = import.meta.env || {};
+
 export const VALA_STREAM_SCHEMA = 'arcsweep.vala-matrix-stream/v1';
 export const VALA_WORK_PROJECT_REF = 'frqrxmshxftpylwdtsdm';
-export const VALA_WORK_URL = import.meta.env.VITE_VALA_SUPABASE_URL || 'https://frqrxmshxftpylwdtsdm.supabase.co';
-export const VALA_WORK_PUBLISHABLE_KEY = import.meta.env.VITE_VALA_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_B7btDOIu8stjc7rEGOdjTw_yWpgetll';
+export const VALA_WORK_URL = viteEnv.VITE_VALA_SUPABASE_URL || 'https://frqrxmshxftpylwdtsdm.supabase.co';
+export const VALA_WORK_PUBLISHABLE_KEY = viteEnv.VITE_VALA_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_B7btDOIu8stjc7rEGOdjTw_yWpgetll';
 
 let clientPromise;
 
