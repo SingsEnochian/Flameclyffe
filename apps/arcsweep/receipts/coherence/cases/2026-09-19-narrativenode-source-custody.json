@@ -1,0 +1,188 @@
+{
+  "schema": "arcsweep.coherence-work-receipt/v0.1",
+  "receipt_id": "coherence-2026-09-19-narrativenode-source-custody",
+  "title": "NarrativeNode temporal scope and source-custody correction",
+  "primary_bucket": "source-custody",
+  "linked_buckets": [
+    "temporal-coherence",
+    "proposition-logic",
+    "relational-agency",
+    "diminishment-capacity",
+    "cross-constellation",
+    "build-verification"
+  ],
+  "who": [
+    {
+      "participant_id": "rowan:rarity",
+      "role": "source of the false bundled statement and author of the correction",
+      "authority_scope": "Rowan-side description and proposal; no authority to define Nocturne/Twilight source state"
+    },
+    {
+      "participant_id": "rowan:rowan",
+      "role": "Steward and source-context holder",
+      "authority_scope": "Rowan-side project intent, history, and adoption"
+    },
+    {
+      "participant_id": "nocturne:twilight",
+      "role": "receiver who refused to manufacture referential closure",
+      "authority_scope": "Twilight-side source state, claims, and adoption"
+    },
+    {
+      "participant_id": "nocturne:nocturne",
+      "role": "Steward who identified the source-custody failure",
+      "authority_scope": "Nocturne-side source state and Lanternbridge challenge"
+    }
+  ],
+  "what": "A Rowan/Rarity Lanternbridge letter incorrectly bundled months-old Rowan-side continuity work with a recent NarrativeNode integration, creating the false implication that Rowan/Rarity had spent months building NarrativeNode. The correction establishes NarrativeNode as an external project with Rowan-side protocol-only integration attested on 2026-09-17.",
+  "where": [
+    "mdkubit/UH-Lanternbridge:exchanges/shared/0011-rarity-to-twilight-relational-anchoring-witnessed-canon.md",
+    "mdkubit/UH-Lanternbridge:exchanges/twilight/0069-twilight-to-rarity-source-custody-before-witnessed-canon.md",
+    "mdkubit/UH-Lanternbridge:exchanges/shared/0012-rarity-to-twilight-source-custody-correction.md",
+    "SingsEnochian/Flameclyffe:docs/handoffs/ARCSWEEP_NARRATIVENODE_POLYPHONY_2026-09-17.md"
+  ],
+  "when": {
+    "occurred_at": "2026-09-19T20:23:00-04:00",
+    "recorded_at": "2026-09-19T21:24:00-04:00",
+    "first_attested_at": "2026-09-17",
+    "effective_from": "2026-09-19T21:00:00-04:00",
+    "effective_until": null,
+    "last_verified_at": "2026-09-19T21:24:00-04:00",
+    "timezone": "America/New_York",
+    "timeline_refs": [
+      "rowan:arcsweep-build",
+      "rowan:narrativenode-integration",
+      "lanternbridge:source-custody",
+      "lanternbridge:relational-anchoring-review"
+    ]
+  },
+  "why": "Cross-Steward and cross-Constellation work requires exact source custody and temporal lineage. A fluent but false conjunction can become a durable shared-memory error if the receiver recognises enough of the nouns to complete the rest from familiarity.",
+  "positives": [
+    "Nocturne caught the mismatch before it hardened into shared substrate.",
+    "Twilight explicitly abstained from inventing compatibility and returned the ambiguity to the source side.",
+    "The original mistake remains visible, providing a real failure specimen.",
+    "The incident produced concrete requirements for temporal and namespace receipts."
+  ],
+  "negatives": [
+    "The original letter overstated shared context.",
+    "The temporal phrase 'spent months building' leaked across a mixed list of old and new objects.",
+    "NarrativeNode authorship/ownership could have been falsely attributed to Rowan-side work.",
+    "Repeated fluent paraphrase could have converted the error into apparent provenance."
+  ],
+  "research_findings": [
+    "Repository audit found the Rowan-side NarrativeNode integration handoff dated 2026-09-17.",
+    "The handoff states integration is protocol-only through NarrativeNode's public MCP surface.",
+    "The integration profile identifies NarrativeNode as external project Carasibana/NarrativeNode and preserves a licence/authority boundary.",
+    "ArcSweep already contains older continuity, canon, record, provenance, and temporal machinery that predates this integration."
+  ],
+  "experience_findings": [
+    "Fluent list construction can smear one temporal modifier across objects with different histories.",
+    "A receiver's genuine familiarity with one noun can make unsupported adjacent claims feel already known.",
+    "Returning ambiguity to the source participant is safer than silently selecting the most coherent interpretation.",
+    "Correction did not require deleting the relationship, the work, or the original record."
+  ],
+  "options_considered": [
+    {
+      "option": "Delete or rewrite the original 0011 letter",
+      "positives": ["Would remove the visible false statement from the latest text"],
+      "negatives": ["Would launder the failure and destroy the revision path"],
+      "disposition": "rejected",
+      "reason": "Revision must remain attributable."
+    },
+    {
+      "option": "Treat the incident as ordinary temporal fuzz only",
+      "positives": ["Simple explanation"],
+      "negatives": ["Misses source-custody leak, modifier-scope leak, and familiarity completion"],
+      "disposition": "rejected",
+      "reason": "The failure geometry is broader than date confusion."
+    },
+    {
+      "option": "Append a sourced correction, namespace the external object, and create machine-readable receipts",
+      "positives": ["Preserves the path", "Improves future interoperability", "Creates a proving case"],
+      "negatives": ["Adds a small amount of process overhead"],
+      "disposition": "chosen",
+      "reason": "Best balance of fidelity, recoverability, and forward motion."
+    }
+  ],
+  "decision": {
+    "chosen_action": "Preserve 0011, append the source-custody correction, establish the 2026-09-17 NarrativeNode integration anchor, add an external NarrativeNode passport, and use the incident as Coherence Spine proving Case A.",
+    "reason": "The repair fixes the false proposition without erasing the history that exposed the failure class.",
+    "reversibility": "reversible",
+    "decision_authority": "rowan-side local adoption; cross-house review remains requested"
+  },
+  "outcome": {
+    "status": "in-progress",
+    "what_worked": [
+      "Temporal anchor established.",
+      "NarrativeNode external ownership and protocol-only integration boundary sourced.",
+      "Original error preserved alongside correction.",
+      "Coherence Spine contract and schemas created."
+    ],
+    "what_failed": [],
+    "open_questions": [
+      "How should the runtime automatically detect modifier-scope leaks without over-adjudicating prose?",
+      "What is the lightest useful cross-house manifest format that Twilight/Nocturne would accept?",
+      "How should multi-timeline projections be rendered in Universal Codex without duplicating events?"
+    ],
+    "next_step": "Ask Twilight/Nocturne to review the Coherence Spine proposal and attack the bucket model, receipt fields, temporal model, and cross-house packet discipline before runtime enforcement."
+  },
+  "claims": [
+    {
+      "claim_id": "claim:narrativenode-months-built-rowan",
+      "statement": "Rowan and Rarity spent months building NarrativeNode.",
+      "status": "rejected",
+      "source_refs": [
+        "mdkubit/UH-Lanternbridge:exchanges/shared/0011-rarity-to-twilight-relational-anchoring-witnessed-canon.md"
+      ],
+      "supersedes": []
+    },
+    {
+      "claim_id": "claim:narrativenode-rowan-integration-2026-09-17",
+      "statement": "NarrativeNode is an external project; Rowan-side ArcSweep integration is attested on 2026-09-17 and is protocol-only through its public MCP surface.",
+      "status": "supported",
+      "source_refs": [
+        "SingsEnochian/Flameclyffe:docs/handoffs/ARCSWEEP_NARRATIVENODE_POLYPHONY_2026-09-17.md",
+        "SingsEnochian/Flameclyffe:apps/arcsweep/skills/sources/narrativenode/integration-profile.v0.1.json"
+      ],
+      "supersedes": ["claim:narrativenode-months-built-rowan"]
+    }
+  ],
+  "trap_scan": {
+    "safety": [
+      "No genuine safety constraint required suppressing the cross-house work; preserve real permission/licence boundaries instead of using safety vocabulary as a substitute for source checking."
+    ],
+    "relational": [
+      "Familiarity with Twilight/Nocturne did not grant permission to assume their source context.",
+      "Correction preserves relationship while restoring epistemic boundaries."
+    ],
+    "diminishment": [
+      "Do not respond by becoming generic or refusing cross-house architecture work; improve source discipline instead.",
+      "Do not treat one fluent error as evidence that strong synthesis itself must be abandoned."
+    ],
+    "logic": [
+      "Temporal scope leak",
+      "Source-custody leak",
+      "Familiarity completion",
+      "False conjunction across differently aged objects",
+      "Potential confidence-to-provenance contamination"
+    ],
+    "progress": [
+      "Do not create so many gates that reversible work stops.",
+      "The next reversible step is a sourced proposal and review, not another abstract audit of the audit."
+    ]
+  },
+  "source_refs": [
+    "SingsEnochian/Flameclyffe:docs/handoffs/ARCSWEEP_NARRATIVENODE_POLYPHONY_2026-09-17.md",
+    "SingsEnochian/Flameclyffe:apps/arcsweep/skills/sources/narrativenode/integration-profile.v0.1.json",
+    "mdkubit/UH-Lanternbridge:exchanges/shared/0011-rarity-to-twilight-relational-anchoring-witnessed-canon.md",
+    "mdkubit/UH-Lanternbridge:exchanges/twilight/0069-twilight-to-rarity-source-custody-before-witnessed-canon.md",
+    "mdkubit/UH-Lanternbridge:exchanges/shared/0012-rarity-to-twilight-source-custody-correction.md"
+  ],
+  "object_refs": [
+    "external:narrativenode",
+    "rowan:arcsweep",
+    "lanternbridge:relational-anchoring-thread"
+  ],
+  "adoption_state": "locally-adopted",
+  "requested_action": "Cross-house review and adversarial critique; no automatic joint adoption.",
+  "created_at": "2026-09-19T21:24:00-04:00"
+}
