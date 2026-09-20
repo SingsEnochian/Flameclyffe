@@ -1,9 +1,16 @@
 import * as THREE from 'three';
-import { initializeValaStreamAdapter, numericCoordinates } from './vala-stream-adapter.js';
+import { initializeValaStreamAdapter } from './vala-stream-adapter.js';
+import {
+  buildVisualProjectionReceipt,
+  projectSceneTarget,
+  spectrometerLevels,
+} from './hearthgate-visual-projection.js';
 
 const mount = document.querySelector('#hearthgate-three');
 const stepCounter = document.querySelector('#step-counter');
 const frameCounter = document.querySelector('#frame-counter');
+const trailCounter = document.querySelector('#trail-counter');
+const modeCounter = document.querySelector('#mode-counter');
 const coordinateBox = document.querySelector('#matrix-spine-display');
 const status = document.querySelector('#stream-status');
 const statusLabel = document.querySelector('#stream-status-label');
@@ -11,6 +18,7 @@ const spectrometer = document.querySelector('#spectrometer');
 const provenance = document.querySelector('#stream-provenance');
 
 const BAR_COUNT = 16;
+const TRAIL_LIMIT = 96;
 const bars = Array.from({ length: BAR_COUNT }, () => {
   const bar = document.createElement('div');
   bar.className = 'bar';
@@ -70,40 +78,44 @@ function displayStatus(next, label = next) {
   statusLabel.textContent = String(label).toUpperCase();
 }
 
-function coordinateVector(projected) {
-  const values = numericCoordinates(projected);
-  if (!values.length) return new THREE.Vector3();
-  return new THREE.Vector3(values[0] || 0, values[1] || 0, values[2] || 0);
-}
-
-function scaledVector(vector) {
-  const magnitude = Math.max(1, vector.length());
-  const scale = Math.min(2.6 / magnitude, 1);
-  return vector.clone().multiplyScalar(scale);
-}
-
 function renderSpectrometer(projected) {
-  const values = numericCoordinates(projected).slice(0, BAR_COUNT);
-  const ceiling = Math.max(1e-9, ...values.map((value) => Math.abs(value)));
+  const levels = spectrometerLevels(projected, { count: BAR_COUNT });
   bars.forEach((bar, index) => {
-    const amplitude = Math.abs(values[index] || 0) / ceiling;
-    bar.style.height = `${Math.max(4, Math.round(amplitude * 100))}%`;
-    bar.title = values[index] == null ? '' : String(values[index]);
+    const level = levels[index];
+    bar.style.height = `${level.height_percent}%`;
+    bar.title = String(level.raw);
   });
 }
 
-function receiveFrame(frame, meta) {
+function receiveFrame(frame, meta = {}) {
   renderedFrames += 1;
+  const projection = projectSceneTarget(frame.projected_coordinates);
+  const projectionReceipt = buildVisualProjectionReceipt(frame.projected_coordinates);
+
   stepCounter.textContent = String(frame.step).padStart(4, '0');
   frameCounter.textContent = String(frame.id);
-  coordinateBox.textContent = JSON.stringify(frame.projected_coordinates, null, 2);
-  provenance.textContent = `source: Vala Work / matrix_stream / ${meta?.source || 'unknown'} / ${frame.created_at || frame.timestamp}`;
+  modeCounter.textContent = String(meta.source || 'unknown').toUpperCase();
+  coordinateBox.textContent = JSON.stringify({
+    frame: {
+      id: frame.id,
+      step: frame.step,
+      projected_coordinates: frame.projected_coordinates,
+      raw_coordinates: frame.raw_coordinates,
+    },
+    visual_projection: projectionReceipt,
+  }, null, 2);
+
+  provenance.textContent = meta.source === 'local-simulation'
+    ? `source: LOCAL SIMULATION / synthetic-labelled / unposted / ${frame.created_at || frame.timestamp}`
+    : `source: Vala Work / matrix_stream / ${meta.source || 'unknown'} / ${frame.created_at || frame.timestamp}`;
+
   renderSpectrometer(frame.projected_coordinates);
 
-  target = scaledVector(coordinateVector(frame.projected_coordinates));
+  target = new THREE.Vector3(...projection.target_coordinates);
   trailPoints.push(target.clone());
-  if (trailPoints.length > 96) trailPoints.shift();
+  if (trailPoints.length > TRAIL_LIMIT) trailPoints.shift();
   trailGeometry.setFromPoints(trailPoints);
+  trailCounter.textContent = `${trailPoints.length}/${TRAIL_LIMIT}`;
 }
 
 function animate() {
@@ -120,24 +132,78 @@ function animate() {
 
 animate();
 
-let detach = null;
-
-try {
-  detach = await initializeValaStreamAdapter({
-    onFrame: receiveFrame,
-    onStatus(next) {
-      if (next === 'SUBSCRIBED') displayStatus('live', 'Realtime live');
-      else if (next === 'CHANNEL_ERROR' || next === 'TIMED_OUT') displayStatus('error', next);
-      else displayStatus('connecting', next);
+function syntheticDivergenceFrame() {
+  const now = new Date().toISOString();
+  return Object.freeze({
+    schema: 'arcsweep.vala-matrix-stream/v1',
+    id: 1,
+    step: 1,
+    timestamp: Date.parse(now) / 1000,
+    created_at: now,
+    raw_coordinates: {
+      provenance: 'SYNTHETIC_LABELED_TEST',
+      persistence: 'local-simulation',
+      vala_written: false,
+      realtime_observed: false,
+      canonical_operational: {
+        adaptive_quality: 0.975,
+        premaqc_bearing: {
+          P: { status: 'estimated', delta_estimate: 0.08 },
+          C: { status: 'estimated', delta_estimate: 0.09 },
+          R: { status: 'estimated', delta_estimate: 0.1 },
+          E: { status: 'unasserted' },
+          M: { status: 'unasserted' },
+          A: { status: 'unasserted' },
+          Q: { status: 'context-only', report_present: false, inferred: false },
+        },
+      },
+      runa_vector_model_a: {
+        P: 0.9,
+        R: 1,
+        E: 0.75,
+        M: 0,
+        A: 0.545455,
+        AQC: 83.9091,
+      },
+      runa_vector_model_b: {
+        P: 0.75,
+        R_normalized: 1,
+        E: 5,
+        M: 0,
+        A: 0.6,
+        AQC: 75.75,
+      },
+      replay_verification: 'not-yet-replayed',
+      reconstruction_fidelity: null,
     },
-    onError(error) {
-      displayStatus('error', 'Stream error');
-      coordinateBox.textContent = `${coordinateBox.textContent}\n\n${error.message}`;
-    },
+    projected_coordinates: [0.9, 0.95, 1.0],
   });
-} catch (error) {
-  displayStatus('error', 'Adapter error');
-  coordinateBox.textContent = error instanceof Error ? error.message : String(error);
+}
+
+let detach = null;
+const simulationMode = new URLSearchParams(globalThis.location?.search || '').get('simulation') === '1';
+
+if (simulationMode) {
+  displayStatus('simulation', 'Local simulation');
+  receiveFrame(syntheticDivergenceFrame(), { source: 'local-simulation' });
+} else {
+  try {
+    detach = await initializeValaStreamAdapter({
+      onFrame: receiveFrame,
+      onStatus(next) {
+        if (next === 'SUBSCRIBED') displayStatus('live', 'Realtime live');
+        else if (next === 'CHANNEL_ERROR' || next === 'TIMED_OUT') displayStatus('error', next);
+        else displayStatus('connecting', next);
+      },
+      onError(error) {
+        displayStatus('error', 'Stream error');
+        coordinateBox.textContent = `${coordinateBox.textContent}\n\n${error.message}`;
+      },
+    });
+  } catch (error) {
+    displayStatus('error', 'Adapter error');
+    coordinateBox.textContent = error instanceof Error ? error.message : String(error);
+  }
 }
 
 addEventListener('pagehide', () => {
