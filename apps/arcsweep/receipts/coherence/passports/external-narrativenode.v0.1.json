@@ -1,0 +1,39 @@
+{
+  "schema": "arcsweep.coherence-object-passport/v0.1",
+  "id": "external:narrativenode",
+  "canonical_name": "NarrativeNode",
+  "namespace": "external",
+  "kind": "external-project",
+  "owner_or_steward": ["external:Carasibana/NarrativeNode"],
+  "purpose": "External narrative state and knowledge application used by ArcSweep only through a public-interface protocol integration.",
+  "canonical_source": "https://github.com/Carasibana/NarrativeNode",
+  "first_attested_at": "2026-09-17",
+  "current_status": "external",
+  "last_verified_at": "2026-09-19T21:24:00-04:00",
+  "authority_scope": "NarrativeNode retains its own application identity and authority. Rowan/ArcSweep authority is limited to independently authored adapters, mapping, plans, receipts, and user-authorised interoperability through the public MCP surface.",
+  "may_mutate": [
+    "rowan-side adapter code",
+    "rowan-side mapping and planning contracts",
+    "rowan-side interop receipts"
+  ],
+  "may_not_mutate": [
+    "NarrativeNode source as though owned by ArcSweep",
+    "NarrativeNode project identity",
+    "NarrativeNode licence boundary",
+    "NarrativeNode user data without a user-authorised MCP session"
+  ],
+  "aliases": ["NarrativeNode"],
+  "source_refs": [
+    "SingsEnochian/Flameclyffe:docs/handoffs/ARCSWEEP_NARRATIVENODE_POLYPHONY_2026-09-17.md",
+    "SingsEnochian/Flameclyffe:apps/arcsweep/skills/sources/narrativenode/integration-profile.v0.1.json",
+    "SingsEnochian/Flameclyffe:apps/arcsweep/src/narrativenode-polyphony-adapter.js"
+  ],
+  "relations": [
+    {
+      "relation": "interop-target-for",
+      "target": "rowan:arcsweep",
+      "source_ref": "SingsEnochian/Flameclyffe:docs/handoffs/ARCSWEEP_NARRATIVENODE_POLYPHONY_2026-09-17.md"
+    }
+  ],
+  "notes": "Temporal anchor: Rowan-side integration is attested on 2026-09-17. This passport does not claim that NarrativeNode itself originated then."
+}
