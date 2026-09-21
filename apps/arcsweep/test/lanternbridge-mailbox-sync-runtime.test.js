@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createLanternbridgeMailboxSyncHandler } from '../../../netlify/functions/_shared/lanternbridge-mailbox-sync-runtime.mjs';
+import {
+  createLanternbridgeMailboxSyncHandler,
+  DEFAULT_LANTERNBRIDGE_LANES,
+} from '../../../netlify/functions/_shared/lanternbridge-mailbox-sync-runtime.mjs';
 
 const source = `---
 bridge_protocol: "0.2"
@@ -53,6 +56,16 @@ function stores() {
 
 function envWith(values) { return { get(key) { return values[key] || ''; } }; }
 
+test('default mailbox sync lane registry is the authorised five-lane model', () => {
+  assert.deepEqual(DEFAULT_LANTERNBRIDGE_LANES, [
+    'exchanges/nocturne',
+    'exchanges/rowan',
+    'exchanges/shared',
+    'exchanges/twilight',
+    'exchanges/vee',
+  ]);
+});
+
 test('server-side sync reads private GitHub with server credential and ingests into durable House storage', async () => {
   const state = stores();
   const env = envWith({ ARCSWEEP_RUNTIME_TOKEN: 'house-token', LANTERNBRIDGE_GITHUB_TOKEN: 'private-github-token' });
@@ -64,7 +77,12 @@ test('server-side sync reads private GitHub with server credential and ingests i
     const value = String(url);
     if (value.endsWith('/commits/main')) return new Response(JSON.stringify({ sha: 'commit-main-007' }), { status: 200 });
     if (value.includes('/contents/exchanges/nocturne')) return new Response(JSON.stringify([item]), { status: 200 });
-    if (value.includes('/contents/exchanges/rowan') || value.includes('/contents/exchanges/shared')) return new Response('[]', { status: 200 });
+    if (
+      value.includes('/contents/exchanges/rowan')
+      || value.includes('/contents/exchanges/shared')
+      || value.includes('/contents/exchanges/twilight')
+      || value.includes('/contents/exchanges/vee')
+    ) return new Response('[]', { status: 200 });
     if (value === item.url) return new Response(JSON.stringify({ encoding: 'base64', content: Buffer.from(source).toString('base64') }), { status: 200 });
     throw new Error(`Unexpected GitHub URL: ${value}`);
   };
@@ -82,7 +100,7 @@ test('server-side sync reads private GitHub with server credential and ingests i
   assert.equal(body.source_commit, 'commit-main-007');
   assert.equal(state.rows.size, 1);
   assert.equal(state.commons.size, 1);
-  assert.equal(githubCalls, 5);
+  assert.equal(githubCalls, 7);
 });
 
 test('missing private GitHub credential fails closed before any repository request', async () => {
