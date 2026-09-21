@@ -111,12 +111,13 @@ function checkRows(checks = {}) {
   const labels = {
     pointer_events_available: 'Pointer Events available',
     touch_capable_device: 'Touch-capable device',
+    proof_session_opened: 'Proof session opened in the Book',
     touch_stroke_observed: 'Real touch stroke recorded',
     pencil_stroke_observed: 'Apple Pencil / pen stroke recorded',
     pencil_pressure_observed: 'Pencil pressure observed',
-    glyph_forge_page_entered: 'Glyph Forge entered through the Book',
-    brush_selected: 'Brush selected',
-    brush_setting_changed: 'Brush setting changed',
+    glyph_forge_page_entered: 'Glyph Forge entered during this proof session',
+    brush_selected: 'Brush selected during this proof session',
+    brush_setting_changed: 'Brush setting changed during this proof session',
     proof_strokes_persisted: 'Touch + Pencil strokes read back from persisted project',
     leave_return_observed: 'Book closed and reopened after proof strokes',
   };
@@ -140,6 +141,10 @@ async function renderPanel({ refreshDevice = false } = {}) {
   }
 
   const result = await candidate({ refreshDevice });
+  const liveRoot = document.getElementById(ROOT_ID);
+  const livePage = liveRoot?.querySelector('[data-magic-book-right]');
+  if (!bookOnReceiptsPage() || !panel.isConnected || livePage !== page) return;
+
   const sealed = readJson(MAGIC_BOOK_PHYSICAL_ACCEPTANCE_KEY, null);
   const sealedOk = sealed?.schema === 'arcsweep.magic-book-physical-acceptance/v0.1' && sealed?.human_confirmed === true;
 
@@ -148,7 +153,7 @@ async function renderPanel({ refreshDevice = false } = {}) {
     '<h2>iPad + Apple Pencil proving</h2>',
     sealedOk
       ? `<p class="magic-book-acceptance-sealed"><strong>Physical gate sealed.</strong> ${esc(sealed.sealed_at || '')}</p>`
-      : '<p>Use this page on the real iPad. Make one touch stroke and one Apple Pencil stroke, select a brush, change a setting, close and reopen the Book, then return here.</p>',
+      : '<p>Use this page on the real iPad. Open the Book, enter Glyph Forge, choose a brush, change a setting, make one touch stroke and one Apple Pencil stroke with pressure, close and reopen the Book, then return here.</p>',
     `<ul class="magic-book-acceptance-checks">${checkRows(result.checks)}</ul>`,
     result.missing.length
       ? `<p class="magic-book-glyph-status">Still needed: ${esc(result.missing.join(', '))}</p>`
@@ -157,7 +162,7 @@ async function renderPanel({ refreshDevice = false } = {}) {
       '<button type="button" data-magic-book-acceptance-refresh>Refresh physical proof</button>',
       `<button type="button" data-magic-book-acceptance-seal ${result.ready_to_seal && !sealedOk ? '' : 'disabled'}>Seal this iPad proof</button>`,
     '</div>',
-    '<p class="magic-book-glyph-status">The acceptance receipt stores pointer classes and pass/fail evidence only. It does not store coordinates, drawing content, or text. Sealing does not auto-promote the final release.</p>',
+    '<p class="magic-book-glyph-status">The acceptance receipt stores pointer classes, receipt IDs, and pass/fail evidence only. It does not store coordinates, drawing content, or text. Sealing does not auto-promote the final release.</p>',
   ].join('');
   panel.dataset.readyToSeal = result.ready_to_seal ? 'true' : 'false';
 }
@@ -169,6 +174,12 @@ function queueRender(options = {}) {
     renderQueued = false;
     void renderPanel(options);
   });
+}
+
+function mutationIsInsidePanel(mutation) {
+  const target = mutation?.target;
+  const element = target?.nodeType === 1 ? target : target?.parentElement;
+  return Boolean(element?.closest?.('#' + PANEL_ID));
 }
 
 async function sealCurrentDevice() {
@@ -206,7 +217,10 @@ function install() {
     if (event.target.closest?.('[data-magic-book-acceptance-seal]')) void sealCurrentDevice();
   }, true);
 
-  observer = new MutationObserver(() => queueRender());
+  observer = new MutationObserver((mutations) => {
+    if (mutations.every(mutationIsInsidePanel)) return;
+    queueRender();
+  });
   observer.observe(document.body, { childList: true, subtree: true });
   queueRender({ refreshDevice: true });
 
