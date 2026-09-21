@@ -6,15 +6,45 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
+  dispatch-trusted-rc8-smoke:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[rc8-smoke]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Dispatch trusted rc8 smoke run
+        shell: bash
+        run: |
+          node <<'NODE'
+          const response = await fetch('https://api.github.com/repos/SingsEnochian/Flameclyffe/actions/workflows/arcsweep-rc8-production-integration-smoke.yml/dispatches', {
+            method: 'POST',
+            headers: {
+              accept: 'application/vnd.github+json',
+              authorization: `Bearer ${process.env.GH_TOKEN}`,
+              'content-type': 'application/json',
+              'x-github-api-version': '2026-03-10',
+            },
+            body: JSON.stringify({ ref: 'main' }),
+          });
+          const text = await response.text();
+          if (![200, 204].includes(response.status)) {
+            throw new Error(`RC8 smoke dispatch failed: ${response.status} ${text}`);
+          }
+          console.log('Trusted rc8 production smoke dispatched as workflow_dispatch.');
+          NODE
+
   rc8-production-integration-smoke:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[rc8-smoke]')
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 12
+    permissions:
+      contents: read
+      id-token: write
     env:
       BASE_URL: https://flameclyffe.vercel.app
       OIDC_AUDIENCE: flameclyffe-house-smoke/v1
@@ -29,7 +59,7 @@ jobs:
 
       - name: Prove rc.8 route, Magic Book, Settings, Glyph Forge, and Observer/DEEP crossing
         shell: bash
-        run: node scripts/arcsweep-rc8-production-integration-smoke-session.mjs | tee rc8-production-integration-smoke.json
+        run: node scripts/arcsweep-rc8-production-integration-smoke.mjs | tee rc8-production-integration-smoke.json
 
       - name: Publish smoke summary
         if: always()
