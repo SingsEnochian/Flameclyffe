@@ -4,6 +4,12 @@ export const GITHUB_OIDC_ISSUER = 'https://token.actions.githubusercontent.com';
 export const HOUSE_SMOKE_AUDIENCE = 'flameclyffe-house-smoke/v1';
 export const HOUSE_SMOKE_REPOSITORY = 'SingsEnochian/Flameclyffe';
 export const HOUSE_SMOKE_WORKFLOW_REF = 'SingsEnochian/Flameclyffe/.github/workflows/vercel-production-authenticated-smoke.yml@refs/heads/main';
+export const ARCSWEEP_RC8_SMOKE_WORKFLOW_REF = 'SingsEnochian/Flameclyffe/.github/workflows/arcsweep-rc8-production-integration-smoke.yml@refs/heads/main';
+
+const TRUSTED_SMOKE_WORKFLOWS = Object.freeze(new Set([
+  HOUSE_SMOKE_WORKFLOW_REF,
+  ARCSWEEP_RC8_SMOKE_WORKFLOW_REF,
+]));
 
 let cachedJwks = null;
 let cachedAt = 0;
@@ -42,7 +48,7 @@ export async function verifyGitHubActionsOidc(token, {
   now = Date.now(),
   audience = HOUSE_SMOKE_AUDIENCE,
   repository = HOUSE_SMOKE_REPOSITORY,
-  workflowRef = HOUSE_SMOKE_WORKFLOW_REF,
+  workflowRef = null,
 } = {}) {
   const parts = String(token || '').split('.');
   if (parts.length !== 3) throw new Error('GitHub OIDC token is malformed.');
@@ -70,7 +76,11 @@ export async function verifyGitHubActionsOidc(token, {
   if (Number.isFinite(claims.nbf) && claims.nbf > seconds + 30) throw new Error('GitHub OIDC token is not active yet.');
   if (claims.repository !== repository) throw new Error('GitHub OIDC repository is not authorised.');
   if (claims.ref !== 'refs/heads/main') throw new Error('GitHub OIDC ref is not authorised.');
-  if (claims.workflow_ref !== workflowRef) throw new Error('GitHub OIDC workflow is not authorised.');
+
+  const acceptedWorkflow = workflowRef
+    ? claims.workflow_ref === workflowRef
+    : TRUSTED_SMOKE_WORKFLOWS.has(claims.workflow_ref);
+  if (!acceptedWorkflow) throw new Error('GitHub OIDC workflow is not authorised.');
   if (claims.event_name !== 'workflow_dispatch') throw new Error('GitHub OIDC event is not authorised.');
 
   return Object.freeze({
