@@ -85,7 +85,10 @@ test('Relational Field OS persists explicit relation creation and event updates 
   const changes = bus.history().filter((item) => item.name === 'arcsweep:relational-field-changed');
   assert.equal(changes.length, 2);
   assert.equal(changes[0].payload.participant_count, 2);
-  assert.equal(JSON.stringify(changes).includes('trust'), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(changes[0].payload, 'state'), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(changes[1].payload, 'state'), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(changes[0].payload, 'provenance'), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(changes[1].payload, 'provenance'), false);
 });
 
 test('Relational Field projections are non-mutating and bounded by PREMAQC/Runa rules', async () => {
