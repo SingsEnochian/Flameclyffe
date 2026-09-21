@@ -27,9 +27,34 @@ function after(receipts, kind, at) {
   return receipts.find((receipt) => receiptKind(receipt, kind) && time(receipt.created_at) > threshold) || null;
 }
 
+function boundedInputProofs(deviceProof, deviceProofs = []) {
+  const proofs = [...(Array.isArray(deviceProofs) ? deviceProofs : []), deviceProof]
+    .filter((proof) => proof && typeof proof === 'object')
+    .map((proof) => ({
+      pointer_type: text(proof.pointer_type || proof.pointerType).toLowerCase() || 'unknown',
+      pressure_observed: proof.pressure_observed === true || Number(proof.pressure || 0) > 0,
+      tilt_observed: proof.tilt_observed === true || Math.abs(Number(proof.tilt_x || proof.tiltX || 0)) > 0 || Math.abs(Number(proof.tilt_y || proof.tiltY || 0)) > 0,
+      twist_observed: proof.twist_observed === true || Number(proof.twist || 0) !== 0,
+      observed_at: proof.observed_at || null,
+    }));
+  const byType = new Map();
+  for (const proof of proofs) {
+    const prior = byType.get(proof.pointer_type);
+    byType.set(proof.pointer_type, prior ? {
+      pointer_type: proof.pointer_type,
+      pressure_observed: prior.pressure_observed || proof.pressure_observed,
+      tilt_observed: prior.tilt_observed || proof.tilt_observed,
+      twist_observed: prior.twist_observed || proof.twist_observed,
+      observed_at: proof.observed_at || prior.observed_at,
+    } : proof);
+  }
+  return [...byType.values()].slice(-4);
+}
+
 export function evaluateMagicBookPhysicalAcceptance({
   deviceStatus = null,
   deviceProof = null,
+  deviceProofs = [],
   receipts = [],
   persistedProject = null,
 } = {}) {
@@ -38,6 +63,9 @@ export function evaluateMagicBookPhysicalAcceptance({
   const penStroke = strokeReceipt(trail, 'pen');
   const proofStroke = penStroke || touchStroke;
   const storedIds = persistedStrokeIds(persistedProject || {});
+  const proofs = boundedInputProofs(deviceProof, deviceProofs);
+  const penProof = proofs.find((proof) => proof.pointer_type === 'pen') || null;
+  const latestProof = proofs.at(-1) || null;
   const latestStrokeAt = Math.max(time(touchStroke?.created_at), time(penStroke?.created_at));
   const closeAfterStroke = latestStrokeAt
     ? trail.find((receipt) => receiptKind(receipt, 'book-close') && time(receipt.created_at) > latestStrokeAt)
@@ -49,7 +77,7 @@ export function evaluateMagicBookPhysicalAcceptance({
     touch_capable_device: Number(deviceStatus?.touch_points || 0) > 0,
     touch_stroke_observed: Boolean(touchStroke),
     pencil_stroke_observed: Boolean(penStroke),
-    pencil_pressure_observed: penStroke?.detail?.pressure_observed === true,
+    pencil_pressure_observed: Boolean(penProof?.pressure_observed || penStroke?.detail?.pressure_observed === true),
     glyph_forge_page_entered: trail.some((receipt) => receiptKind(receipt, 'page-turn') && receipt.page_id === 'glyph-forge'),
     brush_selected: trail.some((receipt) => receiptKind(receipt, 'brush-select')),
     brush_setting_changed: trail.some((receipt) => receiptKind(receipt, 'brush-setting-change')),
@@ -60,7 +88,7 @@ export function evaluateMagicBookPhysicalAcceptance({
       && storedIds.has(penStroke.detail.stroke_id)
     ),
     leave_return_observed: Boolean(closeAfterStroke && reopenAfterClose),
-    device_probe_observed: Boolean(deviceProof?.pointer_type),
+    device_probe_observed: proofs.length > 0,
   });
 
   const required = [
@@ -85,10 +113,10 @@ export function evaluateMagicBookPhysicalAcceptance({
     evidence: Object.freeze({
       touch_stroke_receipt_id: touchStroke?.receipt_id || null,
       pencil_stroke_receipt_id: penStroke?.receipt_id || null,
-      pencil_tilt_observed: penStroke?.detail?.tilt_observed === true,
-      pencil_twist_observed: penStroke?.detail?.twist_observed === true,
-      latest_device_pointer_type: deviceProof?.pointer_type || null,
-      latest_device_pressure_observed: deviceProof?.pressure_observed === true,
+      pencil_tilt_observed: penProof?.tilt_observed === true || penStroke?.detail?.tilt_observed === true,
+      pencil_twist_observed: penProof?.twist_observed === true || penStroke?.detail?.twist_observed === true,
+      latest_device_pointer_type: latestProof?.pointer_type || null,
+      latest_device_pressure_observed: latestProof?.pressure_observed === true,
       proof_stroke_receipt_id: proofStroke?.receipt_id || null,
     }),
     privacy: Object.freeze({
