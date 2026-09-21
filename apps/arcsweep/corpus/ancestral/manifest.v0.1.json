@@ -1,0 +1,92 @@
+{
+  "schema": "arcsweep.ancestral-corpus-manifest/v0.1",
+  "corpus_id": "rowan-ancestral-roots-v0.1",
+  "privacy_default": "private_draft",
+  "public_repo_policy": "no-manuscript-prose",
+  "roots": [
+    {
+      "root_id": "ancestral:amalthi-transition",
+      "display_name": "The Amalthi Transition",
+      "source_binding": "private_only",
+      "source_ref": null,
+      "privacy_class": "private_draft",
+      "canonical_status": "ancestral_source",
+      "ingest_status": "awaiting_private_binding",
+      "fingerprints": [
+        "living-technology-partnership",
+        "bonded-identity-without-erasure",
+        "shared-sensory-field",
+        "paired-regulation",
+        "distributed-cognition",
+        "relationship-as-state-bearing-entity"
+      ],
+      "notes": "Creator-owned original-fiction root. Public manifest stores fingerprints only; source prose remains private."
+    },
+    {
+      "root_id": "ancestral:kalladia-cycle",
+      "display_name": "The Lines of Power / The Kalladia Cycle",
+      "source_binding": "private_only",
+      "source_ref": null,
+      "privacy_class": "private_draft",
+      "canonical_status": "ancestral_source",
+      "ingest_status": "awaiting_private_binding",
+      "fingerprints": [
+        "embodied-information-interface",
+        "harmonic-signature",
+        "living-counterpart-regulation",
+        "glyph-mediated-power",
+        "somatic-state-display",
+        "relationship-as-anchor"
+      ],
+      "notes": "Creator-owned original-fiction root. Public manifest stores fingerprints only; source prose remains private."
+    }
+  ],
+  "correspondences": [
+    {
+      "correspondence_id": "correspondence:relational-identity",
+      "source_root_ids": [
+        "ancestral:amalthi-transition",
+        "ancestral:kalladia-cycle"
+      ],
+      "present_system_refs": [
+        "arcsweep",
+        "narrativenode",
+        "universal-codex"
+      ],
+      "concept": "distinct participants can form a persistent relation with its own history and state without identity collapse",
+      "status": "steward_reviewed",
+      "confidence": "qualitative",
+      "evidence_refs": []
+    },
+    {
+      "correspondence_id": "correspondence:resonance-state",
+      "source_root_ids": [
+        "ancestral:kalladia-cycle"
+      ],
+      "present_system_refs": [
+        "runa",
+        "premaqc",
+        "glyph-forge"
+      ],
+      "concept": "internal state can be represented through perceptible harmonic, symbolic, and somatic signatures",
+      "status": "steward_reviewed",
+      "confidence": "qualitative",
+      "evidence_refs": []
+    },
+    {
+      "correspondence_id": "correspondence:distributed-witness",
+      "source_root_ids": [
+        "ancestral:amalthi-transition"
+      ],
+      "present_system_refs": [
+        "observer",
+        "premaqc",
+        "arcsweep"
+      ],
+      "concept": "expanded awareness increases capability and vulnerability, requiring stable relational anchoring",
+      "status": "steward_reviewed",
+      "confidence": "qualitative",
+      "evidence_refs": []
+    }
+  ]
+}
