@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-21T00:22:43.840Z",
+  "generated_at": "2026-09-21T05:14:28.362Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-20T20:15",
+    "time": "2026-09-21T01:00",
     "sky": "Night",
     "current": {
-      "time": "2026-09-20T20:15",
+      "time": "2026-09-21T01:00",
       "interval": 900,
-      "temperature_2m": 77,
-      "relative_humidity_2m": 81,
+      "temperature_2m": 74.3,
+      "relative_humidity_2m": 92,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
-      "cloud_cover": 14,
-      "pressure_msl": 1013.1,
-      "wind_speed_10m": 0.7,
-      "wind_direction_10m": 90
+      "cloud_cover": 6,
+      "pressure_msl": 1012.1,
+      "wind_speed_10m": 2.1,
+      "wind_direction_10m": 288
     }
   },
   "space_weather": {
     "kp": {
-      "value": 1,
-      "time_tag": "2026-09-20T21:00:00",
-      "a_running": 4
+      "value": 1.67,
+      "time_tag": "2026-09-21T00:00:00",
+      "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-09-21T00:17:00Z",
-      "bz": 1,
+      "time_tag": "2026-09-21T05:06:00Z",
+      "bz": -1,
       "bt": 4,
       "density": null,
-      "speed": 347
+      "speed": 354
     }
   },
   "moon": {
-    "age_days": 9.16,
-    "illumination": 68.5,
-    "name": "First Quarter"
+    "age_days": 9.36,
+    "illumination": 70.5,
+    "name": "Waxing Gibbous"
   },
   "field": {
-    "P": 0.4611111111111113,
-    "C": 0.6633333333333333,
-    "R": 0.6408333333333334,
-    "E": 0.6229670329670329,
-    "M": 0.685,
-    "A": 0.7107692307692308,
+    "P": 0.45000000000000023,
+    "C": 0.7014285714285715,
+    "R": 0.6699999999999999,
+    "E": 0.7381318681318683,
+    "M": 0.705,
+    "A": 0.7415384615384615,
     "Q": null,
-    "dpdt": 0.6408333333333334,
+    "dpdt": 0.6699999999999999,
     "dynamic_axes": [
       "P",
       "C",
