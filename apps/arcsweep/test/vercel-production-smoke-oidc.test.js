@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, sign } from 'node:crypto';
 import {
+  ARCSWEEP_RC8_SMOKE_WORKFLOW_REF,
   GITHUB_OIDC_ISSUER,
   HOUSE_SMOKE_AUDIENCE,
   HOUSE_SMOKE_REPOSITORY,
@@ -51,12 +52,23 @@ const fetchImpl = async (url) => {
   return new Response('not found', { status: 404 });
 };
 
-test('production circulation accepts only the exact main workflow OIDC identity', async () => {
+test('production circulation accepts the established main workflow OIDC identity', async () => {
   const identity = await verifyGitHubActionsOidc(token(), { fetchImpl, now: NOW });
   assert.equal(identity.repository, HOUSE_SMOKE_REPOSITORY);
   assert.equal(identity.ref, 'refs/heads/main');
   assert.equal(identity.workflow_ref, HOUSE_SMOKE_WORKFLOW_REF);
   assert.equal(identity.event_name, 'workflow_dispatch');
+});
+
+test('rc8 production proof accepts only its workflow_dispatch identity', async () => {
+  const identity = await verifyGitHubActionsOidc(token({ workflow_ref: ARCSWEEP_RC8_SMOKE_WORKFLOW_REF }), { fetchImpl, now: NOW });
+  assert.equal(identity.workflow_ref, ARCSWEEP_RC8_SMOKE_WORKFLOW_REF);
+  assert.equal(identity.event_name, 'workflow_dispatch');
+
+  await assert.rejects(
+    verifyGitHubActionsOidc(token({ workflow_ref: ARCSWEEP_RC8_SMOKE_WORKFLOW_REF, event_name: 'push' }), { fetchImpl, now: NOW }),
+    /event is not authorised/i,
+  );
 });
 
 test('trusted production smoke can mint a sealed House session without a reusable Steward credential', () => {
