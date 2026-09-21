@@ -89,6 +89,25 @@ test('OIDC authority can ingest and source repository/commit are taken from atte
   assert.equal(state.commons.size, 1);
 });
 
+test('OIDC delivery accepts the five authorised exchange lanes', async () => {
+  for (const lane of ['nocturne', 'rowan', 'shared', 'twilight', 'vee']) {
+    const state = stores();
+    const handle = createLanternbridgeMessageHandler({
+      env: env(), indexStore: state.indexStore, commonsStore: state.commonsStore,
+      oidcAuthoriser: async () => ({ authorised: true, reason: null, claims }),
+    });
+    const response = await handle(request({
+      source_repo: claims.repository,
+      source_commit: claims.sha,
+      source_path: `exchanges/${lane}/0007.md`,
+      source_ref: `github-blob:${lane}`,
+      raw_source: source,
+    }));
+    assert.equal(response.status, 201, `expected exchanges/${lane} to be admitted`);
+    assert.equal(state.rows.size, 1);
+  }
+});
+
 test('OIDC delivery cannot claim another repository', async () => {
   const state = stores();
   const handle = createLanternbridgeMessageHandler({
@@ -108,7 +127,7 @@ test('OIDC delivery cannot claim another repository', async () => {
   assert.equal(state.rows.size, 0);
 });
 
-test('OIDC delivery cannot escape the three exchange lanes', async () => {
+test('OIDC delivery cannot escape the five exchange lanes', async () => {
   const state = stores();
   const handle = createLanternbridgeMessageHandler({
     env: env(), indexStore: state.indexStore, commonsStore: state.commonsStore,
