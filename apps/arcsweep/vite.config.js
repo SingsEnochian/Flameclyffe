@@ -107,6 +107,7 @@ export default defineConfig({
         main: resolve(ARCSWEEP_ROOT, 'index.html'),
         spine: resolve(ARCSWEEP_ROOT, 'spine/index.html'),
         hearthgate: resolve(ARCSWEEP_ROOT, 'hearthgate/index.html'),
+        ancestry: resolve(ARCSWEEP_ROOT, 'ancestry/index.html'),
       },
     },
   },
