@@ -29,7 +29,7 @@ jobs:
 
       - name: Prove rc.8 route, Magic Book, Settings, Glyph Forge, and Observer/DEEP crossing
         shell: bash
-        run: node scripts/arcsweep-rc8-production-integration-smoke.mjs | tee rc8-production-integration-smoke.json
+        run: node scripts/arcsweep-rc8-production-integration-smoke-session.mjs | tee rc8-production-integration-smoke.json
 
       - name: Publish smoke summary
         if: always()
