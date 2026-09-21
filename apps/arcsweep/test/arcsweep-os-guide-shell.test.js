@@ -16,6 +16,7 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   const context = await guide.request('os.context');
   const navigate = await guide.request('os.navigate', { room: 'forge' });
   const witnessSummary = await guide.request('witness.summary');
+  const ancestry = await guide.request('ancestry.read', { ref: 'ancestral:amalthi-transition' });
   const forbidden = await guide.request('runa.launch-preview', { plan: {} });
   const forbiddenWitnessProse = await guide.request('witness.list-local', { limit: 1 });
   const forbiddenWitnessWrite = await guide.request('witness.record', { record_type: 'system-note', title: 'nope' });
@@ -24,14 +25,21 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   assert.equal(context.status, 'applied');
   assert.equal(navigate.status, 'applied');
   assert.equal(witnessSummary.status, 'applied');
+  assert.equal(ancestry.status, 'applied');
   assert.equal(forbidden.status, 'rejected');
   assert.equal(forbidden.reason, 'guide-capability-not-allowed');
   assert.equal(forbiddenWitnessProse.status, 'rejected');
   assert.equal(forbiddenWitnessProse.reason, 'guide-capability-not-allowed');
   assert.equal(forbiddenWitnessWrite.status, 'rejected');
   assert.equal(forbiddenWitnessWrite.reason, 'guide-capability-not-allowed');
-  assert.equal(seen.length, 4);
+  assert.equal(seen.length, 5);
   assert.deepEqual(guide.allowedCapabilities().map((item) => item.capability_id).sort(), [
+    'ancestry.index',
+    'ancestry.query',
+    'ancestry.read',
+    'ancestry.status',
+    'ancestry.system-lineage',
+    'ancestry.traverse',
     'device.input-proof',
     'device.status',
     'glyphforge.active-brush',
