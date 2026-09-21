@@ -44,7 +44,7 @@ function oidcSourceProblem(body, claims) {
   if (body.source_repo && String(body.source_repo) !== String(claims.repository)) return 'source_repo does not match the attested GitHub repository.';
   if (body.source_commit && claims.sha && String(body.source_commit) !== String(claims.sha)) return 'source_commit does not match the attested GitHub commit.';
   const path = String(body.source_path || '');
-  if (!/^exchanges\/(nocturne|rowan|shared)\/.+\.md$/i.test(path)) return 'source_path is outside the Lanternbridge exchange lanes.';
+  if (!/^exchanges\/(nocturne|rowan|shared|twilight|vee)\/.+\.md$/i.test(path)) return 'source_path is outside the Lanternbridge exchange lanes.';
   return null;
 }
 

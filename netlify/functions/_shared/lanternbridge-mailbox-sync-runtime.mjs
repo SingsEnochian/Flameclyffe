@@ -6,6 +6,8 @@ export const DEFAULT_LANTERNBRIDGE_LANES = Object.freeze([
   'exchanges/nocturne',
   'exchanges/rowan',
   'exchanges/shared',
+  'exchanges/twilight',
+  'exchanges/vee',
 ]);
 
 const json = (status, body) => new Response(JSON.stringify(body), {
