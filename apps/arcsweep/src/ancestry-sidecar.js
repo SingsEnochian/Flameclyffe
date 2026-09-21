@@ -1,3 +1,4 @@
+import './relational-field-sidecar.js';
 import { registerAncestryService } from './os/ancestry-service.js';
 
 const GLOBAL_KEY = '__arcsweepAncestry';
@@ -20,12 +21,12 @@ function install() {
     status: 'healthy',
     version: os.manifest?.version || null,
     last_success_at: new Date().toISOString(),
-    dependencies: ['arcsweep-os-kernel'],
+    dependencies: ['arcsweep-os-kernel', 'relational-field'],
     recoverable: true,
   });
 
   const api = Object.freeze({
-    schema: 'arcsweep.ancestry-sidecar/v0.1',
+    schema: 'arcsweep.ancestry-sidecar/v0.2',
     service_id: 'ancestry',
     capabilities: service?.capabilities || [
       'ancestry.status',
@@ -35,6 +36,7 @@ function install() {
       'ancestry.traverse',
       'ancestry.system-lineage',
     ],
+    relational_field_service: Boolean(globalThis.__arcsweepRelationalField),
   });
   globalThis[GLOBAL_KEY] = api;
   dispatch('arcsweep:ancestry-ready', api);
