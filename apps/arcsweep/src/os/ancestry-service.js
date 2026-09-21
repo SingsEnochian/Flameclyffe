@@ -9,8 +9,9 @@ import {
   ancestralCodexIndex,
   ancestralCodexSnapshot,
 } from '../ancestral-codex-reader.js';
+import { buildNarrativeNodeAncestryPlan } from '../narrativenode-ancestry-adapter.js';
 
-export const ANCESTRY_SERVICE_SCHEMA = 'arcsweep.ancestry-service/v0.1';
+export const ANCESTRY_SERVICE_SCHEMA = 'arcsweep.ancestry-service/v0.2';
 export const ANCESTRY_STATUS_SCHEMA = 'arcsweep.ancestry-status/v0.1';
 
 const corpus = createAncestralCorpus(ANCESTRAL_PUBLIC_MANIFEST);
@@ -40,6 +41,7 @@ export function ancestryStatus() {
     private_source_ref_exposed: false,
     canon_merge_authority: false,
     relation_identity_law: 'A != B != R',
+    narrativenode_projection: 'plan-only-explicit-session-grant',
   });
 }
 
@@ -53,6 +55,9 @@ export function registerAncestryService(registry, { bus = null } = {}) {
     if (!known.has('arcsweep:ancestry-read')) {
       bus.define('arcsweep:ancestry-read', (payload) => payload?.schema === 'arcsweep.ancestry-read-event/v0.1' && Boolean(payload?.ref));
     }
+    if (!known.has('arcsweep:ancestry-plan')) {
+      bus.define('arcsweep:ancestry-plan', (payload) => payload?.schema === 'arcsweep.ancestry-plan-event/v0.1' && Boolean(payload?.plan_id));
+    }
   }
 
   registry.registerService({
@@ -65,10 +70,11 @@ export function registerAncestryService(registry, { bus = null } = {}) {
       source_binding_mutation: false,
       canon_promotion: false,
       narrative_node_mutation: false,
+      narrative_node_plan: 'read-only-plan-explicit-external-grant',
       relation_state_mutation: false,
     },
     consumes: ['ancestral-public-manifest'],
-    emits: ['arcsweep:ancestry-read'],
+    emits: ['arcsweep:ancestry-read', 'arcsweep:ancestry-plan'],
   });
 
   registry.registerCapability({
@@ -143,6 +149,32 @@ export function registerAncestryService(registry, { bus = null } = {}) {
     execute: (input = {}) => ancestralCodexForSystem(text(input.system_ref)),
   });
 
+  registry.registerCapability({
+    capability_id: 'ancestry.narrativenode-plan',
+    service_id: 'ancestry',
+    description: 'Build a public-safe NarrativeNode MCP projection plan. This does not open a session or mutate NarrativeNode.',
+    authority: 'read',
+    input_schema: { optional: ['root_ids', 'correspondence_ids'] },
+    validate: (input = {}) => input && typeof input === 'object' && !Array.isArray(input),
+    execute: (input = {}) => {
+      const plan = buildNarrativeNodeAncestryPlan({
+        manifest: ANCESTRAL_PUBLIC_MANIFEST,
+        rootIds: list(input.root_ids),
+        correspondenceIds: list(input.correspondence_ids),
+      });
+      bus?.publish?.('arcsweep:ancestry-plan', {
+        schema: 'arcsweep.ancestry-plan-event/v0.1',
+        plan_id: plan.plan_id,
+        step_count: plan.steps.length,
+        user_grant_required: plan.user_grant_required,
+        manuscript_text_transmitted: false,
+        private_source_ref_transmitted: false,
+        executed: false,
+      }, { source: 'ancestry' });
+      return plan;
+    },
+  });
+
   return freeze({
     schema: ANCESTRY_SERVICE_SCHEMA,
     service_id: 'ancestry',
@@ -153,6 +185,7 @@ export function registerAncestryService(registry, { bus = null } = {}) {
       'ancestry.read',
       'ancestry.traverse',
       'ancestry.system-lineage',
+      'ancestry.narrativenode-plan',
     ]),
   });
 }
