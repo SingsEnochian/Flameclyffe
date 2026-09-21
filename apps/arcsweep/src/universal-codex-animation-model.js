@@ -1,4 +1,4 @@
-export const UNIVERSAL_CODEX_ANIMATION_SCHEMA = 'arcsweep.universal-codex-animation/v0.1';
+export const UNIVERSAL_CODEX_ANIMATION_SCHEMA = 'arcsweep.universal-codex-animation/v0.2';
 export const UNIVERSAL_CODEX_ANIMATION_KEY = 'arcsweep.universal-codex-animation.v0.1';
 
 export const DEFAULT_CODEX_ANIMATION_STATE = Object.freeze({
@@ -59,5 +59,31 @@ export function receiptToCodexPulse(receipt = {}) {
     kind,
     pageId,
     strength: family === 'ink' ? 1 : family === 'page' ? 0.88 : 0.68,
+  });
+}
+
+export function ancestryEventToCodexPulse(event = {}) {
+  const schema = String(event.schema || '');
+  if (schema === 'arcsweep.ancestry-plan-event/v0.1') {
+    return Object.freeze({
+      family: 'projection',
+      kind: 'ancestry-plan',
+      pageId: String(event.plan_id || 'ancestry-plan'),
+      strength: 0.94,
+    });
+  }
+  if (schema === 'arcsweep.ancestry-read-event/v0.1') {
+    return Object.freeze({
+      family: 'ancestry',
+      kind: 'ancestry-read',
+      pageId: String(event.ref || 'ancestry'),
+      strength: 0.74,
+    });
+  }
+  return Object.freeze({
+    family: 'ancestry',
+    kind: 'ancestry',
+    pageId: 'ancestry',
+    strength: 0.58,
   });
 }
