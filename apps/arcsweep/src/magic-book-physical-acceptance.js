@@ -4,6 +4,7 @@ export const MAGIC_BOOK_PHYSICAL_ACCEPTANCE_KEY = 'hearthgate.arcsweep.magic-boo
 const clone = (value) => value == null ? value : structuredClone(value);
 const text = (value) => String(value ?? '').trim();
 const time = (value) => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
   const ms = Date.parse(String(value || ''));
   return Number.isFinite(ms) ? ms : 0;
 };
