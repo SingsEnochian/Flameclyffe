@@ -30,3 +30,10 @@ test('iPad and mobile More navigation inherit the selected applet rail', () => {
   assert.match(mobile, /\.sidebar nav \[data-room\]/);
   assert.match(mobile, /roomGridMarkup/);
 });
+
+test('iPad and mobile More navigation exposes the Universal Codex launcher', () => {
+  assert.match(mobile, /\[data-magic-book-launch\]/);
+  assert.match(mobile, /data-mobile-magic-book/);
+  assert.match(mobile, /Universal Codex/);
+  assert.match(mobile, /openUniversalCodex/);
+});
