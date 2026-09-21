@@ -1,3 +1,5 @@
+import { registerSelfAuthoringSandbox } from './self-authoring-sandbox.js';
+import { installSelfAuthoringSurface } from './self-authoring-surface.js';
 import {
   advanceSession,
   createCheckpointStore,
@@ -246,6 +248,18 @@ function installArcSweepOS({ navigation = createRoomNavigation(), workspace = ty
   registerGlyphForgeService(capabilityRegistry);
   registerRunaService(capabilityRegistry, { bus });
   registerDeviceProvingService(capabilityRegistry);
+  let selfAuthoringSurface = null;
+  let sandboxStorage = null;
+  try { sandboxStorage = globalThis.localStorage || null; } catch {}
+  const selfAuthoringAgent = registerSelfAuthoringSandbox(capabilityRegistry, {
+    storage: sandboxStorage,
+    paused: () => caretaker.featherPaused(),
+    onProgress: () => selfAuthoringSurface?.render(),
+    invoke: async ({ signal, ...request }) => {
+      const { invokeConstellationRuntimeVoice } = await import('../constellation-runtime-adapter.js');
+      return invokeConstellationRuntimeVoice({ ...request, fetchImpl: (url, options = {}) => fetch(url, { ...options, signal }) });
+    },
+  });
 
   capabilityRegistry.registerService({
     service_id: 'arcsweep-guide', label: 'ArcSweep Guide',
@@ -432,6 +446,7 @@ function installArcSweepOS({ navigation = createRoomNavigation(), workspace = ty
     const installSurfaces = () => {
       installStewardSurface();
       if (!osShellSurface) osShellSurface = installArcSweepOSShell({ os: api });
+      if (!selfAuthoringSurface) selfAuthoringSurface = installSelfAuthoringSurface({ os: api, agent: selfAuthoringAgent });
     };
     if (document.body) installSurfaces();
     else document.addEventListener('DOMContentLoaded', installSurfaces, { once: true });
