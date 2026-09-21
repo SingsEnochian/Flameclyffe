@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   DEFAULT_CODEX_ANIMATION_STATE,
   UNIVERSAL_CODEX_ANIMATION_SCHEMA,
+  ancestryEventToCodexPulse,
   glyphSampleToInkSpark,
   normaliseCodexAnimationState,
   patchCodexAnimationState,
@@ -40,4 +41,21 @@ test('receipt pulses keep effect family local to receipt kind', () => {
   assert.equal(receiptToCodexPulse({ kind: 'page-turn', page_id: 'receipts' }).family, 'page');
   assert.equal(receiptToCodexPulse({ kind: 'room-crossing', page_id: 'threshold' }).family, 'threshold');
   assert.equal(receiptToCodexPulse({ kind: 'brush-select', page_id: 'glyph-forge' }).family, 'control');
+});
+
+test('ancestry read and NarrativeNode plan receipts have distinct Codex pulse families', () => {
+  const read = ancestryEventToCodexPulse({
+    schema: 'arcsweep.ancestry-read-event/v0.1',
+    ref: 'ancestral:amalthi-transition',
+  });
+  const plan = ancestryEventToCodexPulse({
+    schema: 'arcsweep.ancestry-plan-event/v0.1',
+    plan_id: 'narrativenode-ancestry-v0.1',
+  });
+
+  assert.equal(read.family, 'ancestry');
+  assert.equal(read.pageId, 'ancestral:amalthi-transition');
+  assert.equal(plan.family, 'projection');
+  assert.equal(plan.pageId, 'narrativenode-ancestry-v0.1');
+  assert.ok(plan.strength > read.strength);
 });
