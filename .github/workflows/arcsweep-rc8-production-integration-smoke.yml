@@ -1,0 +1,57 @@
+name: ArcSweep RC8 Production Integration Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  rc8-production-integration-smoke:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[rc8-smoke]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      BASE_URL: https://flameclyffe.vercel.app
+      OIDC_AUDIENCE: flameclyffe-house-smoke/v1
+    steps:
+      - name: Checkout exact smoke code
+        uses: actions/checkout@v6
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
+      - name: Prove rc.8 route, Magic Book, Settings, Glyph Forge, and Observer/DEEP crossing
+        shell: bash
+        run: node scripts/arcsweep-rc8-production-integration-smoke.mjs | tee rc8-production-integration-smoke.json
+
+      - name: Publish smoke summary
+        if: always()
+        shell: bash
+        run: |
+          STATUS='PASSED'
+          if [[ '${{ job.status }}' != 'success' ]]; then STATUS='FAILED'; fi
+          {
+            echo "## ArcSweep rc.8 production integration smoke: ${STATUS}"
+            echo
+            echo 'Production: `https://flameclyffe.vercel.app/arcsweep/`'
+            echo "Workflow commit: \`${GITHUB_SHA}\`"
+            echo
+            echo '```json'
+            cat rc8-production-integration-smoke.json 2>/dev/null || echo '{"ok":false,"error":"smoke failed before receipt"}'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload production receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arcsweep-rc8-production-integration-smoke
+          path: rc8-production-integration-smoke.json
+          if-no-files-found: warn

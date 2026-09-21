@@ -17,6 +17,12 @@ function readStoredSnapshot(storageKey) {
   }
 }
 
+function bridgeConnected(current) {
+  if (!current) return false;
+  if (current.connected === true) return true;
+  return Boolean(readStoredSnapshot(current.storageKey));
+}
+
 function timelineReceipt(receipt = {}) {
   return {
     event_id: receipt.event_id || null,
@@ -53,7 +59,7 @@ export function registerObserverService(registry, { bus = null, timelineLimit = 
       const current = bridge();
       return {
         available: Boolean(current),
-        connected: Boolean(current?.connected),
+        connected: bridgeConnected(current),
         schema: current?.schema || null,
         storage_key: current?.storageKey || null,
       };
