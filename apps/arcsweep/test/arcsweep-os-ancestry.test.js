@@ -19,6 +19,7 @@ test('Ancestry service exposes public-safe read capabilities only', async () => 
     'ancestry.read',
     'ancestry.traverse',
     'ancestry.system-lineage',
+    'ancestry.narrativenode-plan',
   ]);
 
   const status = await registry.invoke('ancestry.status', {}, { authority: 'read', source: 'test' });
@@ -27,6 +28,7 @@ test('Ancestry service exposes public-safe read capabilities only', async () => 
   assert.equal(status.output.private_source_ref_exposed, false);
   assert.equal(status.output.canon_merge_authority, false);
   assert.equal(status.output.relation_identity_law, 'A != B != R');
+  assert.equal(status.output.narrativenode_projection, 'plan-only-explicit-session-grant');
 
   const query = await registry.invoke('ancestry.query', {
     present_system_refs: ['runa'],
@@ -65,6 +67,37 @@ test('Ancestry read emits a compact public receipt and traversal preserves node 
   assert.ok(traversal.output.nodes.some((node) => node.kind === 'present-system'));
 });
 
+test('NarrativeNode ancestry planning is inspectable, grant-gated, non-executing, and public-safe', async () => {
+  const bus = createEventBus();
+  const registry = createCapabilityRegistry({ bus });
+  registerAncestryService(registry, { bus });
+
+  const result = await registry.invoke('ancestry.narrativenode-plan', {
+    root_ids: ['ancestral:amalthi-transition'],
+  }, { authority: 'read', source: 'test' });
+
+  assert.equal(result.status, 'applied');
+  assert.equal(result.output.user_grant_required, true);
+  assert.equal(result.output.private_source_ref_transmitted, false);
+  assert.equal(result.output.manuscript_text_transmitted, false);
+  assert.equal(result.output.canon_promoted, false);
+  assert.equal(result.output.steps[0].tool, 'request_mcp_session');
+  assert.equal(result.output.steps[0].requires_active_session, false);
+  assert.equal(result.output.steps.at(-1).tool, 'end_mcp_session');
+  assert.ok(result.output.steps.slice(1, -1).every((step) => step.requires_active_session === true));
+  assert.equal(JSON.stringify(result.output).includes('docs.google.com'), false);
+  assert.equal(JSON.stringify(result.output).includes('drive.google.com'), false);
+
+  const event = bus.history().find((item) => item.name === 'arcsweep:ancestry-plan');
+  assert.ok(event);
+  assert.equal(event.payload.plan_id, result.output.plan_id);
+  assert.equal(event.payload.user_grant_required, true);
+  assert.equal(event.payload.manuscript_text_transmitted, false);
+  assert.equal(event.payload.private_source_ref_transmitted, false);
+  assert.equal(event.payload.executed, false);
+  assert.equal(JSON.stringify(event).includes('create_knowledge'), false);
+});
+
 test('Guide may inspect public ancestry but receives no mutation capability', async () => {
   const requested = [];
   const guide = createGuideShell({
@@ -78,6 +111,7 @@ test('Guide may inspect public ancestry but receives no mutation capability', as
   assert.ok(allowed.includes('ancestry.status'));
   assert.ok(allowed.includes('ancestry.read'));
   assert.ok(allowed.includes('ancestry.traverse'));
+  assert.ok(allowed.includes('ancestry.narrativenode-plan'));
 
   const read = await guide.request('ancestry.read', { ref: 'ancestral:amalthi-transition' }, {
     authority: 'admin',
@@ -86,6 +120,18 @@ test('Guide may inspect public ancestry but receives no mutation capability', as
   assert.equal(read.status, 'applied');
   assert.equal(requested[0].context.authority, 'read');
   assert.equal(requested[0].context.steward_approved, undefined);
+
+  const plan = await guide.request('ancestry.narrativenode-plan', {
+    root_ids: ['ancestral:amalthi-transition'],
+  }, {
+    authority: 'admin',
+    confirmed: true,
+    steward_approved: true,
+  });
+  assert.equal(plan.status, 'applied');
+  assert.equal(requested[1].context.authority, 'read');
+  assert.equal(requested[1].context.confirmed, undefined);
+  assert.equal(requested[1].context.steward_approved, undefined);
 
   const forbidden = await guide.request('ancestry.bind-private-source', { source_ref: 'private://forbidden' });
   assert.equal(forbidden.status, 'rejected');

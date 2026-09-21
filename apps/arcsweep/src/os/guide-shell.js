@@ -20,6 +20,7 @@ const GUIDE_CAPABILITIES = Object.freeze({
   'ancestry.read': Object.freeze({ authority: 'read' }),
   'ancestry.traverse': Object.freeze({ authority: 'read' }),
   'ancestry.system-lineage': Object.freeze({ authority: 'read' }),
+  'ancestry.narrativenode-plan': Object.freeze({ authority: 'read' }),
   'relation.status': Object.freeze({ authority: 'read' }),
   'relation.list': Object.freeze({ authority: 'read' }),
   'relation.get': Object.freeze({ authority: 'read' }),

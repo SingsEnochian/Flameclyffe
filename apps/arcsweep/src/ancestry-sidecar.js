@@ -26,7 +26,7 @@ function install() {
   });
 
   const api = Object.freeze({
-    schema: 'arcsweep.ancestry-sidecar/v0.2',
+    schema: 'arcsweep.ancestry-sidecar/v0.3',
     service_id: 'ancestry',
     capabilities: service?.capabilities || [
       'ancestry.status',
@@ -35,6 +35,7 @@ function install() {
       'ancestry.read',
       'ancestry.traverse',
       'ancestry.system-lineage',
+      'ancestry.narrativenode-plan',
     ],
     relational_field_service: Boolean(globalThis.__arcsweepRelationalField),
   });
