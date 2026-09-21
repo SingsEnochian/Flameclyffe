@@ -1,0 +1,47 @@
+.magic-book-physical-acceptance {
+  margin: 0 0 1rem;
+  padding: .9rem 1rem;
+  border: 1px solid rgba(151, 111, 58, .34);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(245, 227, 190, .38), rgba(214, 183, 127, .14));
+}
+
+.magic-book-physical-acceptance h2 {
+  margin-top: .15rem;
+}
+
+.magic-book-acceptance-checks {
+  display: grid;
+  gap: .35rem;
+  margin: .8rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.magic-book-acceptance-checks li {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr;
+  gap: .35rem;
+  align-items: start;
+  font-size: .9rem;
+}
+
+.magic-book-acceptance-checks li[data-pass="true"] {
+  color: #315f4f;
+}
+
+.magic-book-acceptance-checks li[data-pass="false"] {
+  color: #755b43;
+}
+
+.magic-book-acceptance-sealed {
+  padding: .6rem .7rem;
+  border-radius: 10px;
+  background: rgba(58, 119, 94, .13);
+  border: 1px solid rgba(58, 119, 94, .25);
+}
+
+.magic-book-physical-acceptance button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+}
