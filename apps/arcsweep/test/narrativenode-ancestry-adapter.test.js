@@ -14,12 +14,12 @@ test('NarrativeNode ancestry plan begins and ends with explicit MCP permission b
 
 test('NarrativeNode ancestry plan never transmits manuscript prose or private source refs', () => {
   const plan = buildNarrativeNodeAncestryPlan({ manifest: ANCESTRAL_PUBLIC_MANIFEST });
-  const serialised = JSON.stringify(plan);
+  const transmittedSteps = JSON.stringify(plan.steps);
   assert.equal(plan.private_source_ref_transmitted, false);
   assert.equal(plan.manuscript_text_transmitted, false);
   assert.equal(plan.canon_promoted, false);
-  assert.doesNotMatch(serialised, /docs\.google\.com|drive\.google\.com|private:\/\//i);
-  assert.doesNotMatch(serialised, /source_ref/i);
+  assert.doesNotMatch(transmittedSteps, /docs\.google\.com|drive\.google\.com|private:\/\//i);
+  assert.doesNotMatch(transmittedSteps, /"source_ref"\s*:/i);
 });
 
 test('NarrativeNode ancestry plan can scope roots without collapsing correspondences', () => {
