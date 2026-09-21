@@ -13,7 +13,9 @@ test('Observer joins the OS as a read-only service with receipted status, source
   globalThis.__arcsweepObserverBridge = {
     schema: 'hearthgate.observer.premaq/v1',
     storageKey: 'observer-test',
-    connected: true,
+    // The bridge sidecar historically froze this flag at boot. The OS service
+    // must still recognise a snapshot that arrives later through storage.
+    connected: false,
   };
   globalThis.localStorage = {
     getItem(key) { return key === 'observer-test' ? JSON.stringify(snapshot) : null; },
