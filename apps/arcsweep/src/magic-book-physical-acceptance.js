@@ -27,6 +27,23 @@ function after(receipts, kind, at) {
   return receipts.find((receipt) => receiptKind(receipt, kind) && time(receipt.created_at) > threshold) || null;
 }
 
+function latestBefore(receipts, kind, at) {
+  const threshold = time(at);
+  return [...receipts]
+    .reverse()
+    .find((receipt) => receiptKind(receipt, kind) && time(receipt.created_at) > 0 && time(receipt.created_at) < threshold) || null;
+}
+
+function between(receipts, predicate, startAt, endAt) {
+  const start = time(startAt);
+  const end = time(endAt);
+  if (!start || !end || end <= start) return false;
+  return receipts.some((receipt) => {
+    const observed = time(receipt.created_at);
+    return observed >= start && observed <= end && predicate(receipt);
+  });
+}
+
 function boundedInputProofs(deviceProof, deviceProofs = []) {
   const proofs = [...(Array.isArray(deviceProofs) ? deviceProofs : []), deviceProof]
     .filter((proof) => proof && typeof proof === 'object')
@@ -66,7 +83,14 @@ export function evaluateMagicBookPhysicalAcceptance({
   const proofs = boundedInputProofs(deviceProof, deviceProofs);
   const penProof = proofs.find((proof) => proof.pointer_type === 'pen') || null;
   const latestProof = proofs.at(-1) || null;
-  const latestStrokeAt = Math.max(time(touchStroke?.created_at), time(penStroke?.created_at));
+
+  const touchAt = time(touchStroke?.created_at);
+  const penAt = time(penStroke?.created_at);
+  const earliestStrokeAt = touchAt && penAt ? Math.min(touchAt, penAt) : Math.max(touchAt, penAt);
+  const latestStrokeAt = Math.max(touchAt, penAt);
+  const proofSessionOpen = earliestStrokeAt ? latestBefore(trail, 'book-open', earliestStrokeAt) : null;
+  const sessionStartAt = proofSessionOpen?.created_at || null;
+  const sessionReady = Boolean(proofSessionOpen && latestStrokeAt > time(sessionStartAt));
   const closeAfterStroke = latestStrokeAt
     ? trail.find((receipt) => receiptKind(receipt, 'book-close') && time(receipt.created_at) > latestStrokeAt)
     : null;
@@ -75,12 +99,28 @@ export function evaluateMagicBookPhysicalAcceptance({
   const checks = Object.freeze({
     pointer_events_available: deviceStatus?.pointer_events_available === true,
     touch_capable_device: Number(deviceStatus?.touch_points || 0) > 0,
+    proof_session_opened: sessionReady,
     touch_stroke_observed: Boolean(touchStroke),
     pencil_stroke_observed: Boolean(penStroke),
     pencil_pressure_observed: Boolean(penProof?.pressure_observed || penStroke?.detail?.pressure_observed === true),
-    glyph_forge_page_entered: trail.some((receipt) => receiptKind(receipt, 'page-turn') && receipt.page_id === 'glyph-forge'),
-    brush_selected: trail.some((receipt) => receiptKind(receipt, 'brush-select')),
-    brush_setting_changed: trail.some((receipt) => receiptKind(receipt, 'brush-setting-change')),
+    glyph_forge_page_entered: sessionReady && between(
+      trail,
+      (receipt) => receiptKind(receipt, 'page-turn') && receipt.page_id === 'glyph-forge',
+      sessionStartAt,
+      new Date(latestStrokeAt).toISOString(),
+    ),
+    brush_selected: sessionReady && between(
+      trail,
+      (receipt) => receiptKind(receipt, 'brush-select'),
+      sessionStartAt,
+      new Date(latestStrokeAt).toISOString(),
+    ),
+    brush_setting_changed: sessionReady && between(
+      trail,
+      (receipt) => receiptKind(receipt, 'brush-setting-change'),
+      sessionStartAt,
+      new Date(latestStrokeAt).toISOString(),
+    ),
     proof_strokes_persisted: Boolean(
       touchStroke?.detail?.stroke_id
       && penStroke?.detail?.stroke_id
@@ -94,6 +134,7 @@ export function evaluateMagicBookPhysicalAcceptance({
   const required = [
     'pointer_events_available',
     'touch_capable_device',
+    'proof_session_opened',
     'touch_stroke_observed',
     'pencil_stroke_observed',
     'pencil_pressure_observed',
@@ -111,6 +152,7 @@ export function evaluateMagicBookPhysicalAcceptance({
     checks,
     missing,
     evidence: Object.freeze({
+      proof_session_open_receipt_id: proofSessionOpen?.receipt_id || null,
       touch_stroke_receipt_id: touchStroke?.receipt_id || null,
       pencil_stroke_receipt_id: penStroke?.receipt_id || null,
       pencil_tilt_observed: penProof?.tilt_observed === true || penStroke?.detail?.tilt_observed === true,
@@ -118,6 +160,8 @@ export function evaluateMagicBookPhysicalAcceptance({
       latest_device_pointer_type: latestProof?.pointer_type || null,
       latest_device_pressure_observed: latestProof?.pressure_observed === true,
       proof_stroke_receipt_id: proofStroke?.receipt_id || null,
+      close_after_proof_receipt_id: closeAfterStroke?.receipt_id || null,
+      reopen_after_proof_receipt_id: reopenAfterClose?.receipt_id || null,
     }),
     privacy: Object.freeze({
       coordinates_recorded: false,
