@@ -20,6 +20,10 @@ function desktopRoom(id) {
   return desktopRoomButtons().find((button) => button.dataset.room === id) || null;
 }
 
+function magicBookLauncher() {
+  return document.querySelector('.sidebar nav [data-magic-book-launch]');
+}
+
 function activeRoomId() {
   return document.querySelector('.sidebar nav [data-room].active')?.dataset.room || 'portal';
 }
@@ -52,15 +56,32 @@ function activateRoom(id, shell) {
   requestAnimationFrame(() => renderShell(shell));
 }
 
+function openUniversalCodex(shell) {
+  const target = magicBookLauncher();
+  if (!target) return;
+  menuOpen = false;
+  document.documentElement.classList.remove('mobile-room-menu-open');
+  document.body.classList.remove('mobile-room-menu-open');
+  target.click();
+  requestAnimationFrame(() => renderShell(shell));
+}
+
 function pinnedButtonMarkup(room, active) {
   return `<button type="button" class="mobile-room-tab${active === room.id ? ' active' : ''}" data-mobile-room="${room.id}" ${active === room.id ? 'aria-current="page"' : ''}><span aria-hidden="true">${room.glyph}</span><span>${room.label}</span></button>`;
 }
 
 function roomGridMarkup(active) {
-  return desktopRoomButtons().map(roomDescriptor).map((room) => `
+  const codex = magicBookLauncher()
+    ? `
+    <button type="button" class="mobile-room-sheet-button mobile-universal-codex" data-mobile-magic-book>
+      <span aria-hidden="true">📖</span><span>Universal Codex</span>
+    </button>`
+    : '';
+  const rooms = desktopRoomButtons().map(roomDescriptor).map((room) => `
     <button type="button" class="mobile-room-sheet-button${active === room.id ? ' active' : ''}" data-mobile-room="${room.id}" ${active === room.id ? 'aria-current="page"' : ''}>
       <span aria-hidden="true">${room.glyph}</span><span>${room.label}</span>
     </button>`).join('');
+  return codex + rooms;
 }
 
 function renderShell(shell) {
@@ -76,7 +97,7 @@ function renderShell(shell) {
     </nav>
     ${menuOpen ? `<div class="mobile-room-scrim" data-mobile-scrim>
       <section class="mobile-room-sheet" role="dialog" aria-modal="true" aria-labelledby="mobile-room-sheet-title">
-        <header><div><p class="eyebrow">Arcsweep</p><h2 id="mobile-room-sheet-title">Rooms</h2></div><button type="button" class="quiet mobile-room-close" data-mobile-close aria-label="Close room menu">×</button></header>
+        <header><div><p class="eyebrow">Arcsweep</p><h2 id="mobile-room-sheet-title">Rooms & instruments</h2></div><button type="button" class="quiet mobile-room-close" data-mobile-close aria-label="Close room menu">×</button></header>
         <div class="mobile-room-grid">${roomGridMarkup(active)}</div>
       </section>
     </div>` : ''}
@@ -105,6 +126,7 @@ function ensureShell() {
     shell.addEventListener('click', (event) => {
       const room = event.target.closest('[data-mobile-room]');
       if (room) { activateRoom(room.dataset.mobileRoom, shell); return; }
+      if (event.target.closest('[data-mobile-magic-book]')) { openUniversalCodex(shell); return; }
       if (event.target.closest('[data-mobile-more]')) { setMenuOpen(true, shell); return; }
       if (event.target.closest('[data-mobile-close]') || event.target.matches('[data-mobile-scrim]')) { setMenuOpen(false, shell); return; }
       if (event.target.closest('[data-mobile-houseglass]')) {
