@@ -1,0 +1,70 @@
+[data-universal-codex-surface="ancestry"] {
+  position: relative;
+  isolation: isolate;
+}
+
+.ancestry-holography-stage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(42rem, 62vw);
+  height: 18rem;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .92;
+}
+
+.ancestry-holography-stage .universal-codex-fx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+[data-universal-codex-surface="ancestry"] > header,
+[data-universal-codex-surface="ancestry"] > .layout {
+  position: relative;
+  z-index: 1;
+}
+
+.ancestry-projection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  align-items: center;
+}
+
+.ancestry-projection-actions button {
+  border: 1px solid rgba(232, 183, 112, .48);
+  border-radius: 999px;
+  padding: .6rem .85rem;
+  background: rgba(182, 118, 55, .12);
+  color: inherit;
+  cursor: pointer;
+}
+
+.ancestry-plan-preview {
+  margin-top: .85rem;
+  padding-top: .85rem;
+  border-top: 1px solid rgba(225, 190, 138, .16);
+}
+
+.ancestry-plan-preview dl {
+  margin-top: .65rem;
+}
+
+@media (max-width: 760px) {
+  .ancestry-holography-stage {
+    width: 100%;
+    height: 13rem;
+    opacity: .62;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ancestry-holography-stage {
+    display: none;
+  }
+}
