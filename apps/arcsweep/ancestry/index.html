@@ -7,9 +7,10 @@
   <link rel="stylesheet" href="./ancestry.css" />
 </head>
 <body>
-  <main class="shell">
+  <main class="shell" id="arcsweep-ancestral-reader" data-universal-codex-surface="ancestry">
+    <div class="ancestry-holography-stage" data-universal-codex-stage aria-hidden="true"></div>
     <header>
-      <p class="kicker">Universal Codex · Ancestral Reader v0.1</p>
+      <p class="kicker">Universal Codex · Ancestral Reader v0.2</p>
       <h1>Root → Correspondence → Present System</h1>
       <p class="lede">Explore creator-owned conceptual ancestry without merging canons or exposing unpublished source prose.</p>
     </header>
@@ -23,6 +24,7 @@
         <section class="pane" id="fingerprint-pane"></section>
         <section class="pane" id="correspondence-pane"></section>
         <section class="pane boundary" id="boundary-pane"></section>
+        <section class="pane" id="projection-pane" aria-live="polite"></section>
       </article>
     </section>
   </main>

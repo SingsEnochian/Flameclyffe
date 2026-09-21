@@ -1,4 +1,5 @@
 import './relational-field-sidecar.js';
+import './universal-codex-animation-sidecar.js';
 import { registerAncestryService } from './os/ancestry-service.js';
 
 const GLOBAL_KEY = '__arcsweepAncestry';
@@ -26,7 +27,7 @@ function install() {
   });
 
   const api = Object.freeze({
-    schema: 'arcsweep.ancestry-sidecar/v0.3',
+    schema: 'arcsweep.ancestry-sidecar/v0.4',
     service_id: 'ancestry',
     capabilities: service?.capabilities || [
       'ancestry.status',
@@ -38,6 +39,7 @@ function install() {
       'ancestry.narrativenode-plan',
     ],
     relational_field_service: Boolean(globalThis.__arcsweepRelationalField),
+    codex_holography_loaded: true,
   });
   globalThis[GLOBAL_KEY] = api;
   dispatch('arcsweep:ancestry-ready', api);
