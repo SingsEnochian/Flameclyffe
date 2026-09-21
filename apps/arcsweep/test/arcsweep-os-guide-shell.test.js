@@ -17,6 +17,7 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   const navigate = await guide.request('os.navigate', { room: 'forge' });
   const witnessSummary = await guide.request('witness.summary');
   const ancestry = await guide.request('ancestry.read', { ref: 'ancestral:amalthi-transition' });
+  const ancestryPlan = await guide.request('ancestry.narrativenode-plan', { root_ids: ['ancestral:amalthi-transition'] });
   const relation = await guide.request('relation.get', { relation_id: 'relation:test' });
   const forbidden = await guide.request('runa.launch-preview', { plan: {} });
   const forbiddenWitnessProse = await guide.request('witness.list-local', { limit: 1 });
@@ -28,6 +29,7 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   assert.equal(navigate.status, 'applied');
   assert.equal(witnessSummary.status, 'applied');
   assert.equal(ancestry.status, 'applied');
+  assert.equal(ancestryPlan.status, 'applied');
   assert.equal(relation.status, 'applied');
   assert.equal(forbidden.status, 'rejected');
   assert.equal(forbidden.reason, 'guide-capability-not-allowed');
@@ -37,9 +39,10 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   assert.equal(forbiddenWitnessWrite.reason, 'guide-capability-not-allowed');
   assert.equal(forbiddenRelationWrite.status, 'rejected');
   assert.equal(forbiddenRelationWrite.reason, 'guide-capability-not-allowed');
-  assert.equal(seen.length, 6);
+  assert.equal(seen.length, 7);
   assert.deepEqual(guide.allowedCapabilities().map((item) => item.capability_id).sort(), [
     'ancestry.index',
+    'ancestry.narrativenode-plan',
     'ancestry.query',
     'ancestry.read',
     'ancestry.status',
