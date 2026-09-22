@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-22T08:42:39.309Z",
+  "generated_at": "2026-09-22T13:51:17.876Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-22T04:30",
-    "sky": "Night",
+    "time": "2026-09-22T09:45",
+    "sky": "Day",
     "current": {
-      "time": "2026-09-22T04:30",
+      "time": "2026-09-22T09:45",
       "interval": 900,
-      "temperature_2m": 74.5,
-      "relative_humidity_2m": 92,
-      "is_day": 0,
+      "temperature_2m": 80.3,
+      "relative_humidity_2m": 81,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 1,
-      "cloud_cover": 29,
-      "pressure_msl": 1013.3,
-      "wind_speed_10m": 2.6,
-      "wind_direction_10m": 308
+      "weather_code": 0,
+      "cloud_cover": 2,
+      "pressure_msl": 1015.4,
+      "wind_speed_10m": 2.5,
+      "wind_direction_10m": 355
     }
   },
   "space_weather": {
     "kp": {
-      "value": 0.67,
-      "time_tag": "2026-09-22T03:00:00",
-      "a_running": 3
+      "value": 0.33,
+      "time_tag": "2026-09-22T09:00:00",
+      "a_running": 2
     },
     "solar_wind": {
-      "time_tag": "2026-09-22T08:35:00Z",
+      "time_tag": "2026-09-22T13:34:00Z",
       "bz": 3,
       "bt": 4,
       "density": null,
-      "speed": 306
+      "speed": 316
     }
   },
   "moon": {
-    "age_days": 10.51,
-    "illumination": 80.9,
+    "age_days": 10.72,
+    "illumination": 82.6,
     "name": "Waxing Gibbous"
   },
   "field": {
-    "P": 0.4633333333333328,
-    "C": 0.5919047619047619,
-    "R": 0.6783333333333335,
-    "E": 0.6417032967032967,
-    "M": 0.809,
-    "A": 0.6530769230769231,
+    "P": 0.5466666666666664,
+    "C": 0.7204761904761905,
+    "R": 0.685,
+    "E": 0.5751098901098901,
+    "M": 0.826,
+    "A": 0.9769230769230769,
     "Q": null,
-    "dpdt": 0.6783333333333335,
+    "dpdt": 0.685,
     "dynamic_axes": [
       "P",
       "C",
