@@ -42,6 +42,7 @@ export const MAGIC_BOOK_SURFACE_VERSION = 'arcsweep.magic-book-surface/v0.1';
 
 const ROOT_ID = 'arcsweep-magic-book';
 const LAUNCH_SELECTOR = '[data-magic-book-launch]';
+const ATELIER_LAUNCH_SELECTOR = '[data-generator-atelier-launch]';
 const MAX_RECEIPTS = 48;
 
 let binding = readJson(MAGIC_BOOK_BINDING_KEY, null);
@@ -336,9 +337,9 @@ function bindingMarkup() {
   )).join('');
   return [
     '<p class="magic-book-kicker">ArcSweep OS · living binding</p>',
-    '<h1>The Magic Book</h1>',
+    '<h1>The Universal Codex</h1>',
     '<p>The page may change. The binding keeps the thread.</p>',
-    '<nav class="magic-book-binding-nav" aria-label="Magic Book pages">' + nav + '</nav>',
+    '<nav class="magic-book-binding-nav" aria-label="Universal Codex pages">' + nav + '</nav>',
     '<div class="magic-book-binding-facts">',
       '<div><small>World</small><strong>' + esc(world) + '</strong></div>',
       '<div><small>Room beneath the page</small><strong>' + esc(room) + '</strong></div>',
@@ -376,7 +377,7 @@ function glyphMarkup() {
     '<div class="magic-book-glyph-layout">',
       '<div>',
         '<div class="magic-book-glyph-canvas-wrap">',
-          '<canvas class="magic-book-glyph-canvas" data-magic-glyph-canvas width="' + VIEWBOX + '" height="' + VIEWBOX + '" aria-label="Magic Book Glyph Forge drawing page"></canvas>',
+          '<canvas class="magic-book-glyph-canvas" data-magic-glyph-canvas width="' + VIEWBOX + '" height="' + VIEWBOX + '" aria-label="Universal Codex Glyph Forge drawing page"></canvas>',
         '</div>',
         '<p class="magic-book-glyph-status" data-magic-glyph-status>' + esc((glyph?.strokes?.length || 0) + ' stored strokes · ' + runtime.name) + '</p>',
       '</div>',
@@ -412,7 +413,7 @@ function generatorOutputMarkup() {
 
 function generatorMarkup() {
   return [
-    '<section class="magic-book-generator" aria-labelledby="magic-book-generator-title">',
+    '<section id="universal-codex-generator-atelier" class="magic-book-generator" data-generator-atelier tabindex="-1" aria-labelledby="magic-book-generator-title">',
       '<div class="magic-book-generator-heading">',
         '<div>',
           '<p class="magic-book-kicker">Generator bridge · local forge</p>',
@@ -472,13 +473,14 @@ function rightMarkup() {
 
 function rootMarkup() {
   return [
-    '<section id="' + ROOT_ID + '" class="magic-book-shell" data-renderer="pending" role="dialog" aria-modal="true" aria-label="ArcSweep Magic Book" hidden>',
+    '<section id="' + ROOT_ID + '" class="magic-book-shell" data-renderer="pending" role="dialog" aria-modal="true" aria-label="ArcSweep Universal Codex" hidden>',
       '<header class="magic-book-toolbar">',
-        '<div class="magic-book-brand"><strong>ArcSweep · Magic Book</strong><small>v0.1 embodied interface proof</small></div>',
+        '<div class="magic-book-brand"><strong>ArcSweep · Universal Codex</strong><small>v0.1 embodied interface proof</small></div>',
         '<span class="magic-book-toolbar-status" data-magic-book-renderer-status>Binding ready · renderer waking</span>',
         '<div class="magic-book-toolbar-actions">',
           '<button type="button" data-magic-book-page-prev aria-label="Previous page">← Page</button>',
           '<button type="button" data-magic-book-page-next aria-label="Next page">Page →</button>',
+          '<button type="button" data-generator-atelier-open>Generator Atelier</button>',
           '<button type="button" data-magic-book-close>Close Book</button>',
         '</div>',
       '</header>',
@@ -1009,6 +1011,32 @@ async function transformCurrentGlyph() {
   });
 }
 
+function focusGeneratorAtelier() {
+  const atelier = document.querySelector('#' + ROOT_ID + ' [data-generator-atelier]');
+  if (!atelier) return false;
+  atelier.scrollIntoView?.({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+  atelier.focus?.({ preventScroll: true });
+  return true;
+}
+
+async function openGeneratorAtelier() {
+  const root = ensureSurface();
+  if (!root) return false;
+  if (binding.active_page_id !== 'glyph-forge') {
+    if (root.hidden) {
+      renderPageAtMidpoint(turnMagicBookPage(binding, 'glyph-forge', {
+        worldId: currentWorld(),
+        room: currentRoom(),
+      }));
+    } else {
+      await turnTo('glyph-forge');
+    }
+  }
+  await openBook();
+  requestAnimationFrame(() => requestAnimationFrame(focusGeneratorAtelier));
+  return true;
+}
+
 function handleRootClick(event) {
   const pageButton = event.target.closest?.('[data-magic-book-page]');
   if (pageButton) {
@@ -1027,6 +1055,10 @@ function handleRootClick(event) {
   }
   if (event.target.closest?.('[data-magic-book-close]')) {
     closeBook();
+    return;
+  }
+  if (event.target.closest?.('[data-generator-atelier-open]')) {
+    void openGeneratorAtelier();
     return;
   }
   const roomButton = event.target.closest?.('[data-book-room]');
@@ -1314,9 +1346,19 @@ function ensureLauncher() {
     button.type = 'button';
     button.className = 'nav-button magic-book-launch';
     button.dataset.magicBookLaunch = MAGIC_BOOK_SURFACE_VERSION;
-    button.innerHTML = '<span aria-hidden="true">📖</span><span>Magic Book</span>';
+    button.innerHTML = '<span aria-hidden="true">📖</span><span>Universal Codex</span>';
     button.addEventListener('click', () => void openBook());
     nav.insertBefore(button, nav.firstChild);
+  }
+  let atelierButton = nav.querySelector(ATELIER_LAUNCH_SELECTOR);
+  if (!atelierButton) {
+    atelierButton = document.createElement('button');
+    atelierButton.type = 'button';
+    atelierButton.className = 'nav-button magic-book-launch generator-atelier-launch';
+    atelierButton.dataset.generatorAtelierLaunch = 'arcsweep.generator-atelier-launch/v0.1';
+    atelierButton.innerHTML = '<span aria-hidden="true">✦</span><span>Generator Atelier</span>';
+    atelierButton.addEventListener('click', () => void openGeneratorAtelier());
+    button.insertAdjacentElement('afterend', atelierButton);
   }
   return button;
 }
@@ -1374,13 +1416,15 @@ function install() {
   installKeyboard();
 
   const params = new URLSearchParams(globalThis.location?.search || '');
-  if (params.get('book') === '1') queueMicrotask(() => void openBook());
+  if (params.get('codex') === 'generator') queueMicrotask(() => void openGeneratorAtelier());
+  else if (params.get('book') === '1') queueMicrotask(() => void openBook());
 
   globalThis.__arcsweepMagicBook = Object.freeze({
     schema: MAGIC_BOOK_SURFACE_VERSION,
     open: openBook,
     close: closeBook,
     turn: turnTo,
+    open_generator: openGeneratorAtelier,
     state: () => structuredClone(binding),
     receipts: () => structuredClone(receipts),
     glyph_snapshot: bridgeSnapshot,

@@ -13,6 +13,11 @@
   margin-top: .2rem;
 }
 
+.generator-atelier-launch {
+  border-color: rgba(217,184,107,.58);
+  background: linear-gradient(90deg, rgba(217,184,107,.14), rgba(82,120,98,.1));
+}
+
 .magic-book-shell[hidden] {
   display: none !important;
 }
@@ -343,6 +348,13 @@
   margin-top: 1.25rem;
   padding-top: 1.15rem;
   border-top: 1px solid rgba(82,120,98,.28);
+  scroll-margin-top: 5.5rem;
+  outline: none;
+}
+
+.magic-book-generator:focus-visible {
+  border-radius: 14px;
+  box-shadow: 0 0 0 3px rgba(164,95,55,.32);
 }
 
 .magic-book-generator-heading {
