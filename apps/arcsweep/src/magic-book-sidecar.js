@@ -28,6 +28,15 @@ import {
   pageById,
   turnMagicBookPage,
 } from './magic-book-model.js';
+import {
+  DEFAULT_COMFYUI_ENDPOINT,
+  GENERATOR_BRIDGE_SCHEMA,
+  GENERATOR_ENDPOINT_KEY,
+  canvasToPngBlob,
+  createComfyUIGeneratorClient,
+  normaliseGeneratorEndpoint,
+  normaliseGeneratorRequest,
+} from './generator-bridge.js';
 
 export const MAGIC_BOOK_SURFACE_VERSION = 'arcsweep.magic-book-surface/v0.1';
 
@@ -49,9 +58,28 @@ let rendererController = null;
 let returnFocus = null;
 let previousBridge = null;
 let installedBridge = null;
+let previousGeneratorBridge = null;
+let installedGeneratorBridge = null;
 let mutationObserver = null;
 let resizeObserver = null;
 let booted = false;
+let generatorBusy = false;
+let generatorResult = null;
+
+const generatorDraft = {
+  endpoint: readJson(GENERATOR_ENDPOINT_KEY, DEFAULT_COMFYUI_ENDPOINT) || DEFAULT_COMFYUI_ENDPOINT,
+  prompt: '',
+  negative_prompt: '',
+  width: 1024,
+  height: 1024,
+  steps: 8,
+  cfg: 1,
+  shift: 3,
+  sampler: 'euler',
+  scheduler: 'simple',
+  denoise: 0.65,
+  seed: '',
+};
 
 function text(value) {
   return String(value == null ? '' : value);
@@ -365,6 +393,57 @@ function glyphMarkup() {
         '<p class="magic-book-glyph-status">Pointer pressure, tilt, twist, and coalesced Pencil events remain in the stroke record.</p>',
       '</div>',
     '</div>',
+    generatorMarkup(),
+  ].join('');
+}
+
+function generatorOutputMarkup() {
+  const output = generatorResult?.outputs?.[0];
+  if (!output?.url) {
+    return '<div class="magic-book-generator-output" data-generator-output><p>The receiving page is blank. A completed local render will appear here.</p></div>';
+  }
+  return [
+    '<figure class="magic-book-generator-output" data-generator-output>',
+      '<img src="' + esc(output.url) + '" alt="Image rendered by the connected local generator">',
+      '<figcaption>' + esc(output.filename) + ' · prompt ' + esc(generatorResult.prompt_id) + '</figcaption>',
+    '</figure>',
+  ].join('');
+}
+
+function generatorMarkup() {
+  return [
+    '<section class="magic-book-generator" aria-labelledby="magic-book-generator-title">',
+      '<div class="magic-book-generator-heading">',
+        '<div>',
+          '<p class="magic-book-kicker">Generator bridge · local forge</p>',
+          '<h3 id="magic-book-generator-title">Render a Page Vision</h3>',
+        '</div>',
+        '<span class="magic-book-generator-badge">Z-Image · TJ Studio</span>',
+      '</div>',
+      '<p>The Codex sends a bounded workflow to your own ComfyUI forge. The provider makes pixels; ArcSweep keeps the request, model lineage, result address, and receipt.</p>',
+      '<div class="magic-book-generator-grid">',
+        '<div class="magic-book-generator-fields">',
+          '<label>ComfyUI endpoint<input type="url" value="' + esc(generatorDraft.endpoint) + '" data-generator-field="endpoint" spellcheck="false"></label>',
+          '<label>Page vision<textarea rows="4" data-generator-field="prompt" placeholder="A copper-haired cartographer opening a living book beneath an aurora…">' + esc(generatorDraft.prompt) + '</textarea></label>',
+          '<label>Negative prompt<textarea rows="2" data-generator-field="negative_prompt" placeholder="Optional exclusions">' + esc(generatorDraft.negative_prompt) + '</textarea></label>',
+          '<div class="magic-book-generator-numbers">',
+            '<label>Width<input type="number" min="256" max="2048" step="64" value="' + esc(generatorDraft.width) + '" data-generator-field="width"></label>',
+            '<label>Height<input type="number" min="256" max="2048" step="64" value="' + esc(generatorDraft.height) + '" data-generator-field="height"></label>',
+            '<label>Steps<input type="number" min="1" max="100" step="1" value="' + esc(generatorDraft.steps) + '" data-generator-field="steps"></label>',
+            '<label>Seed<input type="number" min="0" step="1" value="' + esc(generatorDraft.seed) + '" data-generator-field="seed" placeholder="random"></label>',
+          '</div>',
+          '<label>Glyph transformation strength <span class="magic-book-range-value">' + Number(generatorDraft.denoise).toFixed(2) + '</span><input type="range" min="0.05" max="1" step="0.05" value="' + esc(generatorDraft.denoise) + '" data-generator-field="denoise"></label>',
+          '<div class="magic-book-generator-actions">',
+            '<button type="button" data-generator-test ' + (generatorBusy ? 'disabled' : '') + '>Test local forge</button>',
+            '<button type="button" data-generator-render ' + (generatorBusy ? 'disabled' : '') + '>Render page vision</button>',
+            '<button type="button" data-generator-transform ' + (generatorBusy ? 'disabled' : '') + '>Transform current glyph</button>',
+          '</div>',
+          '<p class="magic-book-generator-status" data-generator-status aria-live="polite">' + (generatorBusy ? 'The local forge is working…' : 'No network call is made until you choose a button.') + '</p>',
+        '</div>',
+        generatorOutputMarkup(),
+      '</div>',
+      '<p class="magic-book-generator-note">Transform current glyph flattens the visible canvas onto parchment, uploads that PNG to ComfyUI, and uses it as the generation source. No API key is stored here. If ArcSweep is opened over HTTPS, browsers may block a plain HTTP localhost forge.</p>',
+    '</section>',
   ].join('');
 }
 
@@ -727,6 +806,209 @@ function clearGlyph() {
   renderRightPage();
 }
 
+function generatorFormRequest() {
+  return normaliseGeneratorRequest({
+    prompt: generatorDraft.prompt,
+    negative_prompt: generatorDraft.negative_prompt,
+    width: generatorDraft.width,
+    height: generatorDraft.height,
+    steps: generatorDraft.steps,
+    cfg: generatorDraft.cfg,
+    shift: generatorDraft.shift,
+    sampler: generatorDraft.sampler,
+    scheduler: generatorDraft.scheduler,
+    seed: generatorDraft.seed === '' ? undefined : generatorDraft.seed,
+  });
+}
+
+function generatorStatus(message, tone = 'idle') {
+  const node = document.querySelector('#' + ROOT_ID + ' [data-generator-status]');
+  if (!node) return;
+  node.textContent = message;
+  node.dataset.tone = tone;
+}
+
+function friendlyGeneratorError(error) {
+  const message = text(error?.message || error, 600) || 'The local generator did not answer.';
+  if (globalThis.location?.protocol === 'https:' && generatorDraft.endpoint.startsWith('http:')) {
+    return `${message} This HTTPS page may be blocked from calling an HTTP localhost forge; use local/desktop ArcSweep or an HTTPS bridge.`;
+  }
+  return message;
+}
+
+function generatorClient() {
+  const endpoint = normaliseGeneratorEndpoint(generatorDraft.endpoint);
+  generatorDraft.endpoint = endpoint;
+  writeJson(GENERATOR_ENDPOINT_KEY, endpoint);
+  return createComfyUIGeneratorClient({ endpoint });
+}
+
+async function probeGenerator() {
+  if (generatorBusy) return null;
+  generatorBusy = true;
+  generatorStatus('Listening for ComfyUI and TJ Studio…', 'working');
+  try {
+    const availability = await generatorClient().probe();
+    publishReceipt(createMagicBookReceipt({
+      kind: 'generator-bridge-probe',
+      pageId: 'glyph-forge',
+      worldId: currentWorld(),
+      room: currentRoom(),
+      detail: {
+        provider: availability.provider,
+        endpoint: availability.endpoint,
+        connected: true,
+        models: availability.models,
+      },
+    }));
+    generatorStatus(`Forge awake · ${availability.models.diffusion_model}`, 'success');
+    return availability;
+  } catch (error) {
+    publishReceipt(createMagicBookReceipt({
+      kind: 'generator-bridge-probe-failed',
+      pageId: 'glyph-forge',
+      worldId: currentWorld(),
+      room: currentRoom(),
+      detail: { endpoint: generatorDraft.endpoint, message: text(error?.message || error, 600) },
+    }));
+    generatorStatus(friendlyGeneratorError(error), 'error');
+    return null;
+  } finally {
+    generatorBusy = false;
+  }
+}
+
+async function renderGeneratorVision(input = null, { prepare = null, lineage = {} } = {}) {
+  if (generatorBusy) return null;
+  generatorBusy = true;
+  generatorStatus('Binding prompt, models, seed, and page provenance…', 'working');
+  let request;
+  try {
+    const client = generatorClient();
+    const prepared = typeof prepare === 'function' ? await prepare(client) : null;
+    if (prepared?.lineage) lineage = prepared.lineage;
+    const requestInput = prepared?.input || input;
+    request = requestInput ? normaliseGeneratorRequest(requestInput) : generatorFormRequest();
+    publishReceipt(createMagicBookReceipt({
+      kind: 'generator-request',
+      pageId: 'glyph-forge',
+      worldId: currentWorld(),
+      room: currentRoom(),
+      detail: {
+        provider: request.provider,
+        mode: request.mode,
+        prompt: request.prompt,
+        negative_prompt: request.negative_prompt,
+        width: request.width,
+        height: request.height,
+        steps: request.steps,
+        cfg: request.cfg,
+        shift: request.shift,
+        sampler: request.sampler,
+        scheduler: request.scheduler,
+        denoise: request.denoise,
+        source_image: request.source_image || null,
+        seed: request.seed,
+        ...lineage,
+      },
+    }));
+    generatorStatus('The local forge is rendering. The Book is keeping the thread…', 'working');
+    const result = await client.generateZImage(request);
+    generatorResult = result;
+    publishReceipt(createMagicBookReceipt({
+      kind: 'generator-complete',
+      pageId: 'glyph-forge',
+      worldId: currentWorld(),
+      room: currentRoom(),
+      detail: {
+        provider: result.provider,
+        endpoint: result.endpoint,
+        prompt_id: result.prompt_id,
+        mode: result.request.mode,
+        source_image: result.request.source_image || null,
+        denoise: result.request.denoise,
+        seed: result.request.seed,
+        models: result.models,
+        outputs: result.outputs.map(({ filename, subfolder, type }) => ({ filename, subfolder, type })),
+        ...lineage,
+      },
+    }));
+    generatorBusy = false;
+    renderRightPage();
+    generatorStatus(`Render complete · seed ${result.request.seed}`, 'success');
+    return result;
+  } catch (error) {
+    publishReceipt(createMagicBookReceipt({
+      kind: 'generator-failed',
+      pageId: 'glyph-forge',
+      worldId: currentWorld(),
+      room: currentRoom(),
+      detail: {
+        provider: request?.provider || 'tj-studio-zimage',
+        endpoint: generatorDraft.endpoint,
+        seed: request?.seed ?? null,
+        mode: request?.mode || null,
+        source_image: request?.source_image || null,
+        ...lineage,
+        message: text(error?.message || error, 600),
+      },
+    }));
+    generatorStatus(friendlyGeneratorError(error), 'error');
+    return null;
+  } finally {
+    generatorBusy = false;
+  }
+}
+
+function safeGlyphFilename(glyph) {
+  const stem = text(glyph?.id || glyph?.name || 'glyph')
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'glyph';
+  return `arcsweep-${stem}-${Date.now()}.png`;
+}
+
+async function transformCurrentGlyph() {
+  const canvas = document.querySelector('#' + ROOT_ID + ' [data-magic-glyph-canvas]');
+  const glyph = activeGlyph();
+  const brush = activeBrush();
+  return renderGeneratorVision(null, {
+    lineage: {
+      glyph_id: glyph?.id || null,
+      glyph_stroke_count: glyph?.strokes?.length || 0,
+      brush_id: brush?.id || null,
+    },
+    prepare: async (client) => {
+      generatorStatus('Flattening the glyph onto parchment and offering it to the local forge…', 'working');
+      const blob = await canvasToPngBlob(canvas);
+      const uploaded = await client.uploadImage(blob, safeGlyphFilename(glyph));
+      const glyphLineage = {
+        glyph_id: glyph?.id || null,
+        glyph_stroke_count: glyph?.strokes?.length || 0,
+        brush_id: brush?.id || null,
+        source_image: uploaded.reference,
+      };
+      publishReceipt(createMagicBookReceipt({
+        kind: 'generator-source-upload',
+        pageId: 'glyph-forge',
+        worldId: currentWorld(),
+        room: currentRoom(),
+        detail: { ...glyphLineage, source_type: uploaded.type, source_mime: blob.type || 'image/png' },
+      }));
+      return {
+        input: {
+          ...generatorFormRequest(),
+          mode: 'i2i',
+          source_image: uploaded.reference,
+          denoise: generatorDraft.denoise,
+        },
+        lineage: glyphLineage,
+      };
+    },
+  });
+}
+
 function handleRootClick(event) {
   const pageButton = event.target.closest?.('[data-magic-book-page]');
   if (pageButton) {
@@ -758,7 +1040,32 @@ function handleRootClick(event) {
   }
   if (event.target.closest?.('[data-glyph-clear]')) {
     clearGlyph();
+    return;
   }
+  if (event.target.closest?.('[data-generator-test]')) {
+    void probeGenerator();
+    return;
+  }
+  if (event.target.closest?.('[data-generator-render]')) {
+    void renderGeneratorVision();
+    return;
+  }
+  if (event.target.closest?.('[data-generator-transform]')) {
+    void transformCurrentGlyph();
+  }
+}
+
+function handleRootInput(event) {
+  const control = event.target.closest?.('[data-generator-field]');
+  if (!control) return;
+  const key = control.dataset.generatorField;
+  if (!Object.prototype.hasOwnProperty.call(generatorDraft, key)) return;
+  generatorDraft[key] = control.value;
+  if (key === 'denoise') {
+    const value = control.closest('label')?.querySelector('.magic-book-range-value');
+    if (value) value.textContent = Number(control.value).toFixed(2);
+  }
+  if (key === 'endpoint') writeJson(GENERATOR_ENDPOINT_KEY, control.value);
 }
 
 function handleRootChange(event) {
@@ -1020,6 +1327,7 @@ function ensureSurface() {
   document.body.insertAdjacentHTML('beforeend', rootMarkup());
   root = document.getElementById(ROOT_ID);
   root.addEventListener('click', handleRootClick);
+  root.addEventListener('input', handleRootInput);
   root.addEventListener('change', handleRootChange);
   renderRightPage();
   return root;
@@ -1054,6 +1362,15 @@ function install() {
   booted = true;
   ensureSurface();
   installGlyphBridge();
+  previousGeneratorBridge = globalThis.__arcsweepGeneratorBridge;
+  installedGeneratorBridge = Object.freeze({
+    schema: GENERATOR_BRIDGE_SCHEMA,
+    endpoint: () => normaliseGeneratorEndpoint(generatorDraft.endpoint),
+    probe: probeGenerator,
+    generate: renderGeneratorVision,
+    transform_glyph: transformCurrentGlyph,
+  });
+  globalThis.__arcsweepGeneratorBridge = installedGeneratorBridge;
   installKeyboard();
 
   const params = new URLSearchParams(globalThis.location?.search || '');
@@ -1067,6 +1384,7 @@ function install() {
     state: () => structuredClone(binding),
     receipts: () => structuredClone(receipts),
     glyph_snapshot: bridgeSnapshot,
+    generator_bridge: installedGeneratorBridge,
   });
   globalThis.dispatchEvent?.(new CustomEvent('arcsweep:magic-book-ready', {
     detail: { schema: MAGIC_BOOK_SURFACE_VERSION, page_id: binding.active_page_id },
@@ -1094,5 +1412,9 @@ globalThis.addEventListener?.('pagehide', () => {
   if (globalThis.__starwellGlyphStudioBridge === installedBridge) {
     if (previousBridge === undefined) delete globalThis.__starwellGlyphStudioBridge;
     else globalThis.__starwellGlyphStudioBridge = previousBridge;
+  }
+  if (globalThis.__arcsweepGeneratorBridge === installedGeneratorBridge) {
+    if (previousGeneratorBridge === undefined) delete globalThis.__arcsweepGeneratorBridge;
+    else globalThis.__arcsweepGeneratorBridge = previousGeneratorBridge;
   }
 }, { once: true });
