@@ -141,3 +141,13 @@ test('Magic Book is mounted by the normal lazy sidecar boot graph', async () => 
   const globals = source.slice(source.indexOf('const GLOBAL_SIDECARS'), source.indexOf('const SIDECAR_PACKS'));
   assert.match(globals, /magic-book-sidecar\.js/);
 });
+
+test('Universal Codex and Generator Atelier are visible first-class doorways', async () => {
+  const source = await readFile(new URL('../src/magic-book-sidecar.js', import.meta.url), 'utf8');
+  assert.match(source, /<span>Universal Codex<\/span>/);
+  assert.match(source, /<span>Generator Atelier<\/span>/);
+  assert.match(source, /data-generator-atelier-open/);
+  assert.match(source, /openGeneratorAtelier/);
+  assert.match(source, /data-generator-atelier/);
+  assert.match(source, /params\.get\('codex'\) === 'generator'/);
+});

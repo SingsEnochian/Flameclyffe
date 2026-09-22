@@ -255,9 +255,16 @@ test('Magic Book exposes the local forge as a receipted instrument, not a second
   assert.match(source, /generator-failed/);
   assert.match(source, /generator-source-upload/);
   assert.match(source, /Transform current glyph/);
+  assert.match(source, /Universal Codex/);
+  assert.match(source, /Generator Atelier/);
+  assert.match(source, /data-generator-atelier-launch/);
+  assert.match(source, /params\.get\('codex'\) === 'generator'/);
+  assert.match(source, /scrollIntoView/);
   assert.match(source, /local forge/);
   assert.equal(ARCSWEEP_OS_MANIFEST.runtime.magicBookGeneratorBridge, true);
   assert.equal(ARCSWEEP_OS_MANIFEST.runtime.magicBookGlyphTransformation, true);
+  assert.equal(ARCSWEEP_OS_MANIFEST.runtime.universalCodexVisibleLauncher, true);
+  assert.equal(ARCSWEEP_OS_MANIFEST.runtime.universalCodexGeneratorDeepLink, '?codex=generator');
   assert.match(ARCSWEEP_OS_MANIFEST.runtime.magicBookGeneratorAuthority, /provider-renders/);
   assert.equal(ARCSWEEP_OS_MANIFEST.contracts.generatorBridge, GENERATOR_BRIDGE_SCHEMA);
   assert.match(html, /connect-src[^;]*http:\/\/127\.0\.0\.1:\*/);
