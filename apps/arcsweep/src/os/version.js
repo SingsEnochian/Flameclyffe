@@ -92,6 +92,7 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     magicBookGlyphTransformation: true,
     universalCodexVisibleLauncher: true,
     universalCodexGeneratorDeepLink: '?codex=generator',
+    universalCodexBalancedSpread: true,
     magicBookGeneratorProvider: 'optional-local-comfyui-tj-studio',
     magicBookGeneratorAuthority: 'provider-renders-arcsweep-receipts-steward-decides',
     ontologicalKernel: true,

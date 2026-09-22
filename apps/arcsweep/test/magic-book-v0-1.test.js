@@ -151,3 +151,9 @@ test('Universal Codex and Generator Atelier are visible first-class doorways', a
   assert.match(source, /data-generator-atelier/);
   assert.match(source, /params\.get\('codex'\) === 'generator'/);
 });
+
+test('Universal Codex uses equal facing pages and keeps the mobile fold single-column', async () => {
+  const css = await readFile(new URL('../src/magic-book.css', import.meta.url), 'utf8');
+  assert.match(css, /\.magic-book-spread\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css, /@media \(max-width: 820px\)[\s\S]*?\.magic-book-spread\s*\{[\s\S]*?grid-template-columns:\s*1fr/);
+});
