@@ -124,7 +124,8 @@
   min-height: min(760px, calc(100dvh - 7rem));
   margin: clamp(1rem, 4vh, 3rem) auto 4rem;
   display: grid;
-  grid-template-columns: minmax(240px, .78fr) minmax(0, 1.5fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
   border-radius: 24px;
   transform-origin: 50% 50%;
   box-shadow: 0 38px 100px rgba(0,0,0,.54);
