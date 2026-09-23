@@ -1,0 +1,77 @@
+{
+  "schema": "arcsweep.external-reference-pack/v0.1",
+  "pack_id": "grimoire-interface-patterns-v0.1",
+  "source_corpus": "getgrimoire-interface-reference",
+  "source_url": "https://getgrimoire.app/",
+  "prepared_at": "2026-09-22",
+  "authority": "external-reference-only",
+  "verification": {
+    "public_feature_pages_observed": true,
+    "rule": "Retain product behaviour as attributed external reference. Reimplement only general interaction patterns and data-model ideas."
+  },
+  "patterns": [
+    {
+      "id": "composable-working-page",
+      "source_features": ["Virtual Altar"],
+      "summary": "A page can be a manipulable composition rather than a static document.",
+      "arcsweep_targets": ["Universal Codex", "Glyph Forge", "Artefact pages"],
+      "implementation": ["drag", "resize", "rotate", "layer", "group", "link", "save composition state", "replay composition"]
+    },
+    {
+      "id": "living-artefact-record",
+      "source_features": ["Sigil Forge", "Virtual Altar"],
+      "summary": "Save the created artefact together with the method and context that produced it.",
+      "arcsweep_targets": ["Glyph Forge", "Universal Codex provenance"],
+      "implementation": ["source intent", "method", "parameters", "creator", "timestamp", "context", "SVG/vector result", "revision ancestry"]
+    },
+    {
+      "id": "capture-now-organise-later",
+      "source_features": ["Dream Weaver"],
+      "summary": "Make low-friction capture primary, then classify and connect after the thought has been preserved.",
+      "arcsweep_targets": ["Universal Capture", "NarrativeNode", "dream/vision/idea pages"],
+      "implementation": ["voice", "text", "drawing", "image", "dark low-glare capture", "post-capture tagging", "suggested relationships"]
+    },
+    {
+      "id": "typed-practice-records",
+      "source_features": ["My Craft"],
+      "summary": "Different record types share one journal graph while retaining type-specific behaviour.",
+      "arcsweep_targets": ["Universal Codex page model"],
+      "implementation": ["Dream", "Transmission", "World", "Character", "Glyph", "Ritual", "Experiment", "Observation", "Conversation", "Artefact", "Map", "Sound", "AgentMemory", "Portal", "Reference", "NarrativeNode"]
+    },
+    {
+      "id": "cross-reference-library",
+      "source_features": ["Codex", "My Craft"],
+      "summary": "Reference entries become useful through links into active practice rather than by remaining isolated encyclopedia pages.",
+      "arcsweep_targets": ["Universal Codex", "Ancestry", "Relations"],
+      "implementation": ["typed edges", "backlinks", "related artefacts", "contextual opening", "graph traversal"]
+    },
+    {
+      "id": "local-first-private-realm",
+      "source_features": ["local journal storage", "privacy controls"],
+      "summary": "Private practice state should remain local/private by default and move into shared realms only by explicit user action.",
+      "arcsweep_targets": ["Codex identity", "Constellations", "Lanternbridge"],
+      "implementation": ["Local Realm", "Constellation Realm", "World Realm", "Bridge Realm", "explicit promotion receipts"]
+    },
+    {
+      "id": "context-stamped-entry",
+      "source_features": ["automatic lunar/planetary context"],
+      "summary": "Capture environmental context automatically when it is useful, but keep it metadata rather than forcing an interpretation.",
+      "arcsweep_targets": ["Universal Capture", "Observer/DEEP"],
+      "implementation": ["timestamp", "timezone", "optional location granularity", "astronomical context", "sensor context", "software/version provenance"]
+    },
+    {
+      "id": "practice-not-engagement",
+      "source_features": ["no streaks", "no attention-demanding notifications"],
+      "summary": "The artefact should support return and continuity without coercive engagement mechanics.",
+      "arcsweep_targets": ["ArcSweep OS", "Universal Codex"],
+      "implementation": ["no streak pressure", "quiet state persistence", "user-scheduled events", "non-punitive absence"]
+    }
+  ],
+  "explicit_nonimports": [
+    "Grimoire branding or copy",
+    "their proprietary artwork or illustrations",
+    "their exact taxonomy where ArcSweep already has a richer domain model",
+    "engagement or subscription mechanics",
+    "any implication that their Codex and Universal Codex are the same product concept"
+  ]
+}
