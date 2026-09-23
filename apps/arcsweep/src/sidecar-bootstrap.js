@@ -25,6 +25,14 @@ const GLOBAL_SIDECARS = Object.freeze([
   './magic-book-physical-acceptance-entry.js',
 ]);
 
+const CODEX_BOOT_SIDECARS = Object.freeze([
+  './os/bootstrap.js',
+  './os-navigation-driver.js',
+  './glyphforge-os-sidecar.js',
+  './magic-book-sidecar.js',
+  './magic-book-physical-acceptance-entry.js',
+]);
+
 const SIDECAR_PACKS = Object.freeze({
   worlds: Object.freeze(['./world-registry-persistence-sidecar.js','./possible-worlds-live-ui.js','./terra-prime-truth-sidecar.js','./instrument-console-sidecar.js']),
   feedback: Object.freeze(['./feedback-queue-bootstrap.js','./feedback-chamber-v2.js']),
@@ -50,6 +58,7 @@ const sidecarPromises = new Map();
 const packPromises = new Map();
 let schedulerObserver = null;
 let scanQueued = false;
+let resumedFullBoot = false;
 
 function diagnostics() {
   if (!globalThis.__arcsweepSidecarDiagnostics) globalThis.__arcsweepSidecarDiagnostics = { schema:'arcsweep.sidecar-scheduler/v1', loaded:[], failures:[], packs:[] };
@@ -61,6 +70,15 @@ function yieldToBrowser() {
     if (typeof requestIdleCallback === 'function') { requestIdleCallback(() => resolve(), { timeout:180 }); return; }
     requestAnimationFrame(() => setTimeout(resolve, 0));
   });
+}
+
+function touchCodexBootRequested() {
+  const params = new URLSearchParams(globalThis.location?.search || '');
+  if (params.get('book') !== '1') return false;
+  const coarse = globalThis.matchMedia?.('(pointer: coarse)')?.matches === true;
+  const noHover = globalThis.matchMedia?.('(hover: none)')?.matches === true;
+  const touchPoints = Number(globalThis.navigator?.maxTouchPoints || 0) > 0;
+  return coarse || noHover || touchPoints;
 }
 
 async function loadSidecar(specifier, pack = 'global') {
@@ -134,8 +152,32 @@ function installPackScheduler() {
   globalThis.addEventListener?.('beforeunload',() => schedulerObserver?.disconnect(),{ once:true });
 }
 
+async function resumeFullBoot() {
+  if (resumedFullBoot) return;
+  resumedFullBoot = true;
+  for (const specifier of GLOBAL_SIDECARS) { await loadSidecar(specifier,'global-resume'); await yieldToBrowser(); }
+  installPackScheduler();
+  triggerDetectedPacks();
+  globalThis.dispatchEvent?.(new CustomEvent('arcsweep:sidecars-resumed',{ detail:{ scope:'full' } }));
+}
+
+function installCodexExitResume() {
+  document.addEventListener('click', (event) => {
+    if (!event.target?.closest?.('[data-magic-book-close]')) return;
+    setTimeout(() => void resumeFullBoot(), 0);
+  }, true);
+}
+
 export async function mountArcsweepSidecars() {
   const results = [];
+  if (touchCodexBootRequested()) {
+    for (const specifier of CODEX_BOOT_SIDECARS) { results.push(await loadSidecar(specifier,'codex-touch')); await yieldToBrowser(); }
+    installCodexExitResume();
+    const failures = results.filter((item) => item?.message);
+    globalThis.dispatchEvent?.(new CustomEvent('arcsweep:sidecars-ready',{ detail:{ failures, scope:'codex-touch', lazyPacks:true } }));
+    return failures;
+  }
+
   for (const specifier of GLOBAL_SIDECARS) { results.push(await loadSidecar(specifier,'global')); await yieldToBrowser(); }
   installPackScheduler();
   const params = new URLSearchParams(globalThis.location?.search || '');
@@ -145,4 +187,4 @@ export async function mountArcsweepSidecars() {
   return failures;
 }
 
-export { GLOBAL_SIDECARS, SIDECARS, SIDECAR_LOADERS, SIDECAR_PACKS };
+export { CODEX_BOOT_SIDECARS, GLOBAL_SIDECARS, SIDECARS, SIDECAR_LOADERS, SIDECAR_PACKS };
