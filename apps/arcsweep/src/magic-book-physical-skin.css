@@ -1,0 +1,220 @@
+/* Universal Codex physical-book skin.
+ *
+ * Keep the touch-safe one-scroll-owner architecture, but make the object read
+ * unmistakably as a bound book: cover boards, page block, gutter, fore-edge,
+ * facing leaves in iPad landscape, and a single-leaf reader in portrait.
+ * Decorative layers remain pointer-events:none.
+ */
+
+.magic-book-stage {
+  padding-inline: clamp(.45rem, 1.8vw, 1.3rem) !important;
+}
+
+.magic-book-spread {
+  position: relative !important;
+  width: min(1220px, calc(100% - 1rem)) !important;
+  margin: clamp(.7rem, 2vh, 1.5rem) auto max(3rem, env(safe-area-inset-bottom)) !important;
+  padding: clamp(.65rem, 1.6vw, 1.1rem) !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(210,181,109,.30) !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(210,181,109,.11), transparent 42%),
+    linear-gradient(90deg, #120d0a 0%, #25160f 3%, #100b08 8%, #080b09 50%, #100b08 92%, #25160f 97%, #120d0a 100%) !important;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.64),
+    0 8px 20px rgba(0,0,0,.55),
+    inset 0 0 0 2px rgba(96,49,28,.36),
+    inset 0 0 0 5px rgba(8,6,5,.72) !important;
+}
+
+.magic-book-spread::after {
+  content: "";
+  position: absolute;
+  inset: .34rem;
+  z-index: 0;
+  border-radius: 24px;
+  border: 1px solid rgba(182,118,75,.26);
+  box-shadow: inset 0 0 22px rgba(0,0,0,.58);
+  pointer-events: none;
+}
+
+.magic-book-page {
+  position: relative !important;
+  z-index: 1 !important;
+  margin: 0 !important;
+  border-color: rgba(210,181,109,.24) !important;
+  background:
+    repeating-linear-gradient(180deg, rgba(255,255,255,.008) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 50% 10%, rgba(111,155,130,.055), transparent 34%),
+    linear-gradient(180deg, #18231f 0%, #111a17 42%, #0c1411 100%) !important;
+  box-shadow:
+    inset 0 0 38px rgba(0,0,0,.25),
+    inset 0 0 0 1px rgba(255,255,255,.016),
+    0 2px 0 rgba(210,181,109,.08) !important;
+}
+
+.magic-book-left {
+  border-radius: 20px 8px 8px 20px !important;
+}
+
+.magic-book-right {
+  border-radius: 8px 20px 20px 8px !important;
+}
+
+/* Page block / fore-edge. This gives the dark parchment visible thickness
+   without introducing any interactive overlay. */
+.magic-book-left::before,
+.magic-book-right::before {
+  content: "";
+  position: absolute;
+  top: .45rem;
+  bottom: .45rem;
+  width: 7px;
+  z-index: 0;
+  opacity: .68;
+  background: repeating-linear-gradient(180deg,
+    rgba(210,181,109,.23) 0 1px,
+    rgba(47,57,50,.40) 1px 3px
+  );
+  pointer-events: none;
+}
+
+.magic-book-left::before { left: -7px; border-radius: 10px 0 0 10px; }
+.magic-book-right::before { right: -7px; border-radius: 0 10px 10px 0; }
+
+.magic-book-page::after {
+  inset: .72rem !important;
+  border-radius: 12px !important;
+  border-color: rgba(182,118,75,.20) !important;
+  box-shadow: inset 0 0 18px rgba(0,0,0,.12);
+  pointer-events: none !important;
+}
+
+/* In portrait/small touch mode each visible leaf still sits in a binding,
+   rather than becoming a generic full-width application card. */
+@media (hover: none), (pointer: coarse), (max-width: 899px), (orientation: portrait) {
+  #arcsweep-magic-book .magic-book-spread {
+    display: block !important;
+    width: calc(100% - .8rem) !important;
+    margin: .55rem auto max(2.5rem, env(safe-area-inset-bottom)) !important;
+    padding: .6rem !important;
+    border-radius: 24px !important;
+  }
+
+  #arcsweep-magic-book .magic-book-page {
+    margin: 0 0 .65rem !important;
+    border-radius: 16px !important;
+  }
+
+  #arcsweep-magic-book .magic-book-page:last-child {
+    margin-bottom: 0 !important;
+  }
+}
+
+/* iPad landscape: a real two-page spread. The shell remains the only vertical
+   scroller; there is no nested scrolling and no transforms/WebGL involved. */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (min-width: 900px) {
+  #arcsweep-magic-book .magic-book-stage {
+    display: block !important;
+    padding: .45rem clamp(.45rem, 1.4vw, 1rem) max(3rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  #arcsweep-magic-book .magic-book-spread {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    width: min(1180px, calc(100vw - 2rem)) !important;
+    margin: .7rem auto max(3rem, env(safe-area-inset-bottom)) !important;
+    padding: .75rem .9rem !important;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.68),
+      0 8px 18px rgba(0,0,0,.58),
+      inset 0 0 0 2px rgba(96,49,28,.38),
+      inset 0 0 0 5px rgba(8,6,5,.78) !important;
+  }
+
+  #arcsweep-magic-book .magic-book-spread::before {
+    content: "";
+    position: absolute !important;
+    left: 50% !important;
+    top: .7rem !important;
+    bottom: .7rem !important;
+    width: 34px !important;
+    transform: translateX(-50%) !important;
+    z-index: 4 !important;
+    background:
+      linear-gradient(90deg,
+        transparent 0%,
+        rgba(0,0,0,.18) 18%,
+        rgba(0,0,0,.58) 45%,
+        rgba(210,181,109,.08) 50%,
+        rgba(0,0,0,.58) 55%,
+        rgba(0,0,0,.18) 82%,
+        transparent 100%
+      ) !important;
+    filter: none !important;
+    pointer-events: none !important;
+  }
+
+  #arcsweep-magic-book .magic-book-page {
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: clamp(1rem, 2.2vw, 1.8rem) !important;
+    overflow: visible !important;
+  }
+
+  #arcsweep-magic-book .magic-book-left {
+    border-radius: 18px 4px 4px 18px !important;
+    border-right-color: rgba(0,0,0,.52) !important;
+    box-shadow:
+      inset -26px 0 34px rgba(0,0,0,.36),
+      inset 0 0 30px rgba(0,0,0,.18) !important;
+  }
+
+  #arcsweep-magic-book .magic-book-right {
+    border-radius: 4px 18px 18px 4px !important;
+    border-left-color: rgba(0,0,0,.52) !important;
+    box-shadow:
+      inset 26px 0 34px rgba(0,0,0,.32),
+      inset 0 0 30px rgba(0,0,0,.18) !important;
+  }
+
+  /* Restore useful two-column sub-layouts inside each leaf where they fit,
+     but leave the Living Page itself single-column for comfortable reading. */
+  #arcsweep-magic-book .magic-book-room-grid,
+  #arcsweep-magic-book .magic-book-binding-facts,
+  #arcsweep-magic-book .magic-book-control-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #arcsweep-magic-book .magic-book-glyph-layout,
+  #arcsweep-magic-book .magic-book-generator-grid,
+  #arcsweep-magic-book [data-first-living-page-root] .living-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Desktop keeps the established two-page spread, with more overt binding and
+   page depth so the Codex still reads as the same artefact across devices. */
+@media (hover: hover) and (pointer: fine) {
+  .magic-book-spread {
+    gap: 0 !important;
+  }
+
+  .magic-book-spread::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: .7rem;
+    bottom: .7rem;
+    width: 38px;
+    transform: translateX(-50%);
+    z-index: 5;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,.66) 46%, rgba(210,181,109,.07) 50%, rgba(0,0,0,.66) 54%, transparent);
+    pointer-events: none;
+  }
+}
