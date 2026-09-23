@@ -1,5 +1,6 @@
 import { RUNA_PREVIEW_PLAN_SCHEMA, createRunaPreviewRenderReceipt } from '../runa-preview-render.js';
 import { launchRunaPreviewPlan, previewIsActive, stopRunaPreview } from '../runa-preview-player.js';
+import { RUNA_MANIFESTATION_RECEIPT_SCHEMA, createRunaManifestationAdapter } from './runa-manifestation.js';
 
 function clone(value) {
   if (value === undefined) return undefined;
@@ -54,8 +55,35 @@ function semanticCue(kind, input = {}) {
   };
 }
 
+function defineManifestationEvent(bus) {
+  if (!bus?.define || !bus?.eventNames) return;
+  const known = new Set(bus.eventNames());
+  if (!known.has('arcsweep:runa-manifested')) {
+    bus.define('arcsweep:runa-manifested', (payload) => payload?.schema === RUNA_MANIFESTATION_RECEIPT_SCHEMA && Boolean(payload?.receipt_id));
+  }
+}
+
+function sameOrigin(event) {
+  const expected = globalThis.location?.origin;
+  if (!expected || !event?.origin) return true;
+  return event.origin === expected;
+}
+
+function messageStroke(event) {
+  if (!sameOrigin(event)) return null;
+  const data = event?.data;
+  if (!data || typeof data !== 'object') return null;
+  const type = data.type || data.name;
+  if (type !== 'starwell:glyph-stroke-committed') return null;
+  if (data.schema && data.schema !== 'starwell.glyph-studio-event-message/v1') return null;
+  const stroke = data.detail || data.payload || null;
+  return stroke?.schema === 'starwell.glyph-stroke-receipt/v1' ? stroke : null;
+}
+
 export function registerRunaService(registry, {
   bus = null,
+  eventTarget = globalThis,
+  manifestation = null,
   launchPreview = launchRunaPreviewPlan,
   stopPreview = stopRunaPreview,
   isPreviewActive = previewIsActive,
@@ -65,6 +93,12 @@ export function registerRunaService(registry, {
 } = {}) {
   if (!registry?.registerService || !registry?.registerCapability) throw new Error('Runa service requires the ArcSweep capability registry.');
 
+  defineManifestationEvent(bus);
+  const manifestationRuntime = manifestation || createRunaManifestationAdapter({
+    now,
+    onReceipt: (receipt) => bus?.publish?.('arcsweep:runa-manifested', receipt, { source: 'runa-sensory' }),
+  });
+
   registry.registerService({
     service_id: 'runa-sensory',
     label: 'Runa Sensory Runtime',
@@ -73,33 +107,49 @@ export function registerRunaService(registry, {
       explicit_user_launch_required: true,
       autoplay: false,
       persistent_world_root_mutation: false,
+      world_hum_output: 'explicit-human-launch',
+      safe_gateway_output: 'explicit-human-launch',
+      glyph_sonification: 'explicit-human-arm-then-observed-strokes',
       haptic_preview: false,
       midi_preview: false,
       soundfont_preview: false,
       somatic_semantic_cues: true,
-      hardware_haptic_output: false,
+      hardware_haptic_output: 'capability-detected-explicit-launch',
+      legacy_heartfield_surface: 'compatibility-only',
     },
-    consumes: ['arcsweep:feather-paused'],
-    emits: [],
+    consumes: ['arcsweep:feather-paused', 'starwell:glyph-stroke-committed', 'arcsweep:glyph-stroke-observed'],
+    emits: ['arcsweep:runa-manifested'],
   });
 
   registry.registerCapability({
     capability_id: 'runa.status',
     service_id: 'runa-sensory',
-    description: 'Read Runa temporary-preview readiness without starting sensory output.',
+    description: 'Read Runa preview and manifestation readiness without starting sensory output.',
     authority: 'read',
-    execute: () => ({
-      schema: 'arcsweep.runa-status/v1',
-      preview_active: Boolean(isPreviewActive()),
-      web_audio_available: typeof audioContextProvider() === 'function',
-      explicit_user_launch_required: true,
-      temporary_audio_only: true,
-      haptic_preview_authorized: false,
-      midi_preview_authorized: false,
-      soundfont_preview_authorized: false,
-      somatic_semantic_cues: true,
-      hardware_haptic_output: false,
-    }),
+    execute: () => {
+      const manifestationStatus = manifestationRuntime.status?.() || null;
+      return {
+        schema: 'arcsweep.runa-status/v1',
+        preview_active: Boolean(isPreviewActive()),
+        web_audio_available: typeof audioContextProvider() === 'function',
+        explicit_user_launch_required: true,
+        temporary_audio_only: false,
+        haptic_preview_authorized: false,
+        midi_preview_authorized: false,
+        soundfont_preview_authorized: false,
+        somatic_semantic_cues: true,
+        hardware_haptic_output: Boolean(manifestationStatus?.native_haptics_available),
+        manifestation: manifestationStatus,
+      };
+    },
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.manifestation.status',
+    service_id: 'runa-sensory',
+    description: 'Read the live World Hum, Safe Gateway, glyph-sonification, and haptic manifestation state.',
+    authority: 'read',
+    execute: () => manifestationRuntime.status?.() || null,
   });
 
   registry.registerCapability({
@@ -142,6 +192,69 @@ export function registerRunaService(registry, {
   });
 
   registry.registerCapability({
+    capability_id: 'runa.world-hum.start',
+    service_id: 'runa-sensory',
+    description: 'Manifest the active World Hum through the existing ArcSweep StorySoundscape after explicit human launch.',
+    authority: 'operate',
+    requires_confirmation: true,
+    execute: (input) => manifestationRuntime.startWorldHum(input || {}),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.world-hum.stop',
+    service_id: 'runa-sensory',
+    description: 'Stop the manifested World Hum without altering the canonical world profile.',
+    authority: 'operate',
+    execute: (input) => manifestationRuntime.stopWorldHum(input?.reason || 'OS stop'),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.safe-gateway.start',
+    service_id: 'runa-sensory',
+    description: 'Launch the existing Möbius Safe Gateway engine through Runa after explicit human confirmation.',
+    authority: 'operate',
+    requires_confirmation: true,
+    execute: (input) => manifestationRuntime.startSafeGateway(input || {}),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.safe-gateway.stop',
+    service_id: 'runa-sensory',
+    description: 'Feather the active Möbius Safe Gateway output.',
+    authority: 'operate',
+    execute: (input) => manifestationRuntime.stopSafeGateway(input?.reason || 'OS stop'),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.glyph-sonification.set',
+    service_id: 'runa-sensory',
+    description: 'Arm or disarm observed Glyph Forge strokes as Runa sound/haptic manifestations.',
+    authority: 'operate',
+    requires_confirmation: true,
+    execute: (input) => manifestationRuntime.setGlyphSonification(input || {}),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.haptic.pulse',
+    service_id: 'runa-sensory',
+    description: 'Attempt one explicit native haptic pulse when the current browser/device exposes vibration output.',
+    authority: 'operate',
+    requires_confirmation: true,
+    execute: (input) => manifestationRuntime.pulseHaptic(input || {}),
+  });
+
+  registry.registerCapability({
+    capability_id: 'runa.feather',
+    service_id: 'runa-sensory',
+    description: 'Stop Runa manifestation outputs and disarm glyph sonification.',
+    authority: 'operate',
+    execute: (input) => {
+      stopPreview(input?.reason || 'Feather');
+      return manifestationRuntime.feather(input?.reason || 'Feather');
+    },
+  });
+
+  registry.registerCapability({
     capability_id: 'runa.haptic.start',
     service_id: 'runa-sensory',
     description: 'Present a semantic haptic-start cue for Somatic Cartography without activating hardware output.',
@@ -165,14 +278,54 @@ export function registerRunaService(registry, {
     execute: (input) => semanticCue('haptic-pattern', input),
   });
 
+  const observeStroke = (stroke, source) => {
+    if (!stroke) return;
+    Promise.resolve(manifestationRuntime.observeGlyphStroke?.(stroke, { source })).catch(() => {});
+  };
+  const onLocalStroke = (event) => observeStroke(event?.detail || null, 'glyph-forge-local');
+  const onObservedStroke = (event) => observeStroke(event?.detail?.stroke || event?.detail || null, 'glyph-forge-observer');
+  const onMessage = (event) => observeStroke(messageStroke(event), 'glyph-forge-postmessage');
+  eventTarget?.addEventListener?.('starwell:glyph-stroke-committed', onLocalStroke);
+  eventTarget?.addEventListener?.('arcsweep:glyph-stroke-observed', onObservedStroke);
+  if (eventTarget !== globalThis) globalThis.addEventListener?.('message', onMessage);
+  else eventTarget?.addEventListener?.('message', onMessage);
+
   let unsubscribe = null;
   if (bus?.subscribe) {
-    unsubscribe = bus.subscribe('arcsweep:feather-paused', () => { stopPreview('Feather'); }, { id: 'runa-feather-stop' });
+    unsubscribe = bus.subscribe('arcsweep:feather-paused', () => {
+      stopPreview('Feather');
+      manifestationRuntime.feather?.('Feather');
+    }, { id: 'runa-feather-stop' });
   }
+
+  const capabilities = [
+    'runa.status',
+    'runa.manifestation.status',
+    'runa.inspect-preview-plan',
+    'runa.launch-preview',
+    'runa.stop-preview',
+    'runa.world-hum.start',
+    'runa.world-hum.stop',
+    'runa.safe-gateway.start',
+    'runa.safe-gateway.stop',
+    'runa.glyph-sonification.set',
+    'runa.haptic.pulse',
+    'runa.feather',
+    'runa.haptic.start',
+    'runa.audio.play',
+    'runa.haptic.pattern',
+  ];
 
   return Object.freeze({
     service_id: 'runa-sensory',
-    capabilities: ['runa.status', 'runa.inspect-preview-plan', 'runa.launch-preview', 'runa.stop-preview', 'runa.haptic.start', 'runa.audio.play', 'runa.haptic.pattern'],
-    destroy: () => unsubscribe?.(),
+    capabilities,
+    manifestation: manifestationRuntime,
+    destroy: () => {
+      unsubscribe?.();
+      eventTarget?.removeEventListener?.('starwell:glyph-stroke-committed', onLocalStroke);
+      eventTarget?.removeEventListener?.('arcsweep:glyph-stroke-observed', onObservedStroke);
+      if (eventTarget !== globalThis) globalThis.removeEventListener?.('message', onMessage);
+      else eventTarget?.removeEventListener?.('message', onMessage);
+    },
   });
 }
