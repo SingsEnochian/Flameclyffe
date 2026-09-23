@@ -1,0 +1,227 @@
+/* Universal Codex dark reader palette.
+ * Default for the Book: low-luminance green-black parchment, warm ivory text,
+ * muted gold/copper accents. Designed for long iPad reading sessions.
+ */
+
+:root {
+  --magic-book-paper: #111a17;
+  --magic-book-paper-deep: #0b1210;
+  --magic-book-ink: #e7e1d4;
+  --magic-book-gold: #d2b56d;
+  --magic-book-copper: #b6764b;
+  --magic-book-green: #6f9b82;
+  --magic-book-night: #030706;
+  --magic-book-muted: #a9afa8;
+  --magic-book-panel: #16211d;
+  --magic-book-panel-2: #1b2822;
+  --magic-book-line: rgba(210,181,109,.24);
+}
+
+.magic-book-shell {
+  color: #ede8dc !important;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(92,132,108,.10), transparent 34rem),
+    radial-gradient(circle at 14% 12%, rgba(210,181,109,.055), transparent 26rem),
+    #030706 !important;
+}
+
+.magic-book-toolbar {
+  background: rgba(4,9,8,.96) !important;
+  border-bottom-color: rgba(210,181,109,.22) !important;
+  color: #ede8dc !important;
+}
+
+.magic-book-brand small,
+.magic-book-toolbar-status {
+  color: #a6afa9 !important;
+}
+
+.magic-book-toolbar button {
+  color: #eee7d8 !important;
+  background: rgba(210,181,109,.075) !important;
+  border-color: rgba(210,181,109,.42) !important;
+}
+
+.magic-book-toolbar button:hover,
+.magic-book-toolbar button:focus-visible {
+  background: rgba(210,181,109,.14) !important;
+  border-color: rgba(226,199,128,.82) !important;
+}
+
+.magic-book-spread {
+  box-shadow: 0 32px 90px rgba(0,0,0,.72) !important;
+}
+
+.magic-book-page {
+  color: var(--magic-book-ink) !important;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.24), transparent 9%, transparent 91%, rgba(0,0,0,.20)),
+    linear-gradient(180deg, #17231e, #0f1815 48%, #0b1210) !important;
+  border-color: rgba(210,181,109,.24) !important;
+}
+
+.magic-book-page::after {
+  border-color: rgba(182,118,75,.22) !important;
+}
+
+.magic-book-left {
+  box-shadow: inset -22px 0 36px rgba(0,0,0,.30) !important;
+}
+
+.magic-book-right {
+  box-shadow: inset 22px 0 36px rgba(0,0,0,.26) !important;
+}
+
+.magic-book-page h1,
+.magic-book-page h2,
+.magic-book-page h3 {
+  color: #dfe9df !important;
+}
+
+.magic-book-kicker {
+  color: #b99879 !important;
+}
+
+.magic-book-binding-nav button,
+.magic-book-room-grid button,
+.magic-book-control-grid button,
+.magic-book-glyph-actions button,
+.magic-book-generator-actions button,
+.magic-book-page button {
+  color: var(--magic-book-ink) !important;
+  background: rgba(255,255,255,.035) !important;
+  border-color: rgba(210,181,109,.22) !important;
+}
+
+.magic-book-binding-nav button:hover,
+.magic-book-room-grid button:hover,
+.magic-book-page button:hover {
+  background: rgba(111,155,130,.12) !important;
+  border-color: rgba(111,155,130,.55) !important;
+}
+
+.magic-book-binding-nav button[aria-current="page"] {
+  color: #edf5ed !important;
+  background: rgba(111,155,130,.17) !important;
+  border-color: rgba(111,155,130,.68) !important;
+}
+
+.magic-book-binding-facts div,
+.magic-book-receipt,
+.magic-book-empty,
+.magic-book-generator-output,
+.magic-book-page .living-card,
+.magic-book-page .living-message,
+.magic-book-page .living-event {
+  color: var(--magic-book-ink) !important;
+  background: rgba(255,255,255,.035) !important;
+  border-color: rgba(210,181,109,.16) !important;
+}
+
+.magic-book-binding-facts small,
+.magic-book-room-grid button small,
+.magic-book-glyph-status,
+.magic-book-controls label,
+.magic-book-generator-fields label,
+.magic-book-generator-status,
+.magic-book-generator-output p,
+.magic-book-generator-output figcaption,
+.magic-book-generator-note,
+.magic-book-receipt small,
+.magic-book-empty,
+.magic-book-page .living-empty,
+.magic-book-page .living-seam,
+.magic-book-page .living-presence-meta small,
+.magic-book-page .living-event small,
+.magic-book-page .living-message small {
+  color: #aeb4ad !important;
+}
+
+.magic-book-glyph-canvas-wrap {
+  background:
+    linear-gradient(rgba(143,176,155,.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143,176,155,.08) 1px, transparent 1px),
+    #0c1512 !important;
+  border-color: rgba(111,155,130,.34) !important;
+  box-shadow: inset 0 0 30px rgba(0,0,0,.38) !important;
+}
+
+.magic-book-controls select,
+.magic-book-generator-fields input,
+.magic-book-generator-fields textarea,
+.magic-book-page input,
+.magic-book-page textarea,
+.magic-book-page select {
+  color: #eee8dc !important;
+  background: #111b17 !important;
+  border-color: rgba(210,181,109,.24) !important;
+  color-scheme: dark;
+}
+
+.magic-book-page input::placeholder,
+.magic-book-page textarea::placeholder {
+  color: #7f8a83 !important;
+  opacity: 1;
+}
+
+.magic-book-range-value,
+.magic-book-generator-badge,
+.magic-book-generator-status[data-tone="success"] {
+  color: #9dccad !important;
+}
+
+.magic-book-generator-status[data-tone="error"] {
+  color: #e59a8c !important;
+}
+
+.magic-book-generator-badge {
+  background: rgba(111,155,130,.10) !important;
+  border-color: rgba(111,155,130,.42) !important;
+}
+
+.magic-book-generator-output {
+  background:
+    radial-gradient(circle at 50% 36%, rgba(210,181,109,.09), transparent 42%),
+    #0c1512 !important;
+}
+
+.magic-book-generator-output figcaption {
+  background: rgba(255,255,255,.035) !important;
+}
+
+/* First Living Page styles are injected at runtime, so use strong overrides. */
+.magic-book-page [data-first-living-page-root] {
+  color: #e9e4d9 !important;
+}
+
+.magic-book-page [data-first-living-page-root] .living-presence {
+  background: radial-gradient(circle at 15% 45%, var(--living-glow), rgba(255,255,255,.025) 52%, transparent 74%) !important;
+  border-color: rgba(210,181,109,.20) !important;
+}
+
+.magic-book-page [data-first-living-page-root] .living-message[data-role="assistant"] {
+  background: rgba(111,155,130,.12) !important;
+}
+
+.magic-book-page [data-first-living-page-root] .living-message[data-role="user"] {
+  background: rgba(210,181,109,.07) !important;
+}
+
+.magic-book-page [data-first-living-page-root] .living-form textarea,
+.magic-book-page [data-first-living-page-root] .living-form button,
+.magic-book-page [data-first-living-page-root] .living-actions button {
+  color: #eee8dc !important;
+  background: #111b17 !important;
+  border-color: rgba(210,181,109,.24) !important;
+}
+
+@media (hover: none), (pointer: coarse), (max-width: 1180px) {
+  .magic-book-page {
+    background: linear-gradient(180deg, #141f1b, #0c1411) !important;
+  }
+
+  .magic-book-left,
+  .magic-book-right {
+    box-shadow: inset 0 0 24px rgba(0,0,0,.28) !important;
+  }
+}
