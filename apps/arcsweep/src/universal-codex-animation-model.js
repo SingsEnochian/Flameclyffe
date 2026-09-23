@@ -1,12 +1,12 @@
-export const UNIVERSAL_CODEX_ANIMATION_SCHEMA = 'arcsweep.universal-codex-animation/v0.2';
+export const UNIVERSAL_CODEX_ANIMATION_SCHEMA = 'arcsweep.universal-codex-animation/v0.3';
 export const UNIVERSAL_CODEX_ANIMATION_KEY = 'arcsweep.universal-codex-animation.v0.1';
 
 export const DEFAULT_CODEX_ANIMATION_STATE = Object.freeze({
   holograms: true,
   inkAura: true,
-  orbit: true,
-  scanlines: true,
-  intensity: 0.72,
+  orbit: false,
+  scanlines: false,
+  intensity: 0.28,
 });
 
 function finite(value, fallback) {
@@ -15,18 +15,42 @@ function finite(value, fallback) {
 }
 
 export function normaliseCodexAnimationState(value = {}) {
+  value = value && typeof value === 'object' ? value : {};
   return Object.freeze({
     schema: UNIVERSAL_CODEX_ANIMATION_SCHEMA,
     holograms: value.holograms !== false,
     inkAura: value.inkAura !== false,
-    orbit: value.orbit !== false,
-    scanlines: value.scanlines !== false,
+    orbit: value.orbit === true,
+    scanlines: value.scanlines === true,
     intensity: Math.max(0.15, Math.min(1, finite(value.intensity, DEFAULT_CODEX_ANIMATION_STATE.intensity))),
+  });
+}
+
+// Drawing coordinates belong to the drawing leaf, never to the Book stage.
+export function glyphSampleToPagePoint(sample = {}, viewbox = 1024) {
+  const size = Math.max(1, finite(viewbox, 1024));
+  return Object.freeze({
+    x: Math.max(0, Math.min(1, finite(sample.x, size / 2) / size)),
+    y: Math.max(0, Math.min(1, finite(sample.y, size / 2) / size)),
+    energy: glyphSampleToInkSpark(sample, size).energy,
   });
 }
 
 export function patchCodexAnimationState(state, patch = {}) {
   return normaliseCodexAnimationState({ ...state, ...patch });
+}
+
+export function migrateCodexAnimationState(value) {
+  const state = normaliseCodexAnimationState(value);
+  if (value?.schema === UNIVERSAL_CODEX_ANIMATION_SCHEMA) return state;
+  // v0.2 persisted its loud defaults on every mount. Keep explicit visibility
+  // opt-outs, but do not mistake those automatically saved defaults for intent.
+  return normaliseCodexAnimationState({
+    ...state,
+    orbit: false,
+    scanlines: false,
+    intensity: DEFAULT_CODEX_ANIMATION_STATE.intensity,
+  });
 }
 
 export function glyphSampleToInkSpark(sample = {}, viewbox = 1024) {
