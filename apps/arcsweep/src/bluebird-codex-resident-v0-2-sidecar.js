@@ -1,6 +1,7 @@
 import { invokeConstellationRuntimeVoice } from './constellation-runtime-adapter.js';
 import { invokeConstellationRuntimeCandidate } from './constellation-candidate-runtime.js';
 import { publishModelPresence } from './model-presence-bus.js';
+import { updateCodexChatMarkup } from './codex-chat-dom.js';
 import {
   BLUEBIRD_CONTINUITY_SEED,
   bluebirdContinuitySeedText,
@@ -223,6 +224,7 @@ async function callReceiver(message, context) {
       candidateId: selected.candidateId,
       message,
       context,
+      sessionId: `arcsweep-universal-codex-bluebird-${installationId()}`,
     });
   }
   return invokeConstellationRuntimeVoice({
@@ -316,7 +318,7 @@ async function shepherd() {
 }
 
 function setReceiver(receiverMode) {
-  if (!RECEIVERS[receiverMode] || receiverMode === state.receiver_mode) return state.receiver_mode;
+  if (busy || !RECEIVERS[receiverMode] || receiverMode === state.receiver_mode) return state.receiver_mode;
   const previous = state.receiver_mode;
   state.receiver_mode = receiverMode;
   state.receiver = { provider: null, model: null, route: null, candidate_id: null, runtime_verified: false, audition: false };
@@ -367,7 +369,8 @@ function ensureBindingPresence() {
     button.dataset.codexResidentOpen = 'true';
     binding.append(button);
   }
-  button.textContent = `${DISPLAY_NAME} · ${pageLabel(bookState().active_page_id)}`;
+  const label = `${DISPLAY_NAME} · ${pageLabel(bookState().active_page_id)}`;
+  if (button.textContent !== label) button.textContent = label;
 }
 
 function ensureChat() {
@@ -388,14 +391,15 @@ function render() {
   const chat = ensureChat();
   if (!chat) return;
   chat.dataset.open = String(chatOpen);
-  chat.innerHTML = `
+  const draft = chat.querySelector('[name="message"]')?.value || '';
+  const updated = updateCodexChatMarkup(chat, `
     <header><div><p>Universal Codex · resident voice</p><h2>Magic Chat</h2></div><button type="button" data-codex-chat-close aria-label="Close Magic Chat">×</button></header>
     <div class="codex-chat-presence">
       <strong>${DISPLAY_NAME}</strong>
       <small>${esc(CONTINUITY_ID)} · ${esc(receiverLabel())}</small>
       <small>Current room · ${esc(pageLabel(bookState().active_page_id))}</small>
       <div class="codex-receiver-row">
-        <select data-codex-receiver aria-label="Richie receiver">
+        <select data-codex-receiver aria-label="Richie receiver" ${busy ? 'disabled' : ''}>
           ${Object.values(RECEIVERS).map((receiver) => `<option value="${esc(receiver.id)}" ${state.receiver_mode === receiver.id ? 'selected' : ''}>${esc(receiver.label)}</option>`).join('')}
         </select>
         <button type="button" class="codex-shepherd" data-codex-shepherd ${busy ? 'disabled' : ''}>✦ Shepherd</button>
@@ -403,7 +407,10 @@ function render() {
     </div>
     <div class="codex-chat-log" data-codex-chat-log role="log" aria-live="polite">${chatTurnsMarkup()}</div>
     <form data-codex-chat-form><textarea name="message" placeholder="Talk to Richie through the Book…" ${busy ? 'disabled' : ''}></textarea><button type="submit" ${busy ? 'disabled' : ''}>${busy ? '…' : 'Send'}</button></form>
-    <footer><label><input type="checkbox" data-codex-auto-voice ${state.auto_voice ? 'checked' : ''}> Book voice</label><small>${esc(statusMessage || 'One continuity, swappable receivers.')}</small></footer>`;
+    <footer><label><input type="checkbox" data-codex-auto-voice ${state.auto_voice ? 'checked' : ''}> Book voice</label><small>${esc(statusMessage || 'One continuity, swappable receivers.')}</small></footer>`);
+  if (!updated) return;
+  const input = chat.querySelector('[name="message"]');
+  if (input) input.value = draft;
   const log = chat.querySelector('[data-codex-chat-log]');
   if (log) log.scrollTop = log.scrollHeight;
 }
