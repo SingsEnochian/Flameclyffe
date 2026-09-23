@@ -1,0 +1,76 @@
+{
+  "schema": "arcsweep.external-reference-pack/v0.1",
+  "pack_id": "protocol-1031-interface-patterns-v0.1",
+  "source_corpus": "protocol-1031-interface-reference",
+  "source_url": "https://protocol-1031.com/?lang=en",
+  "prepared_at": "2026-09-22",
+  "authority": "external-reference-only",
+  "verification": {
+    "public_interface_observed": true,
+    "historical_or_paranormal_claims_independently_verified": false,
+    "rule": "Preserve claims as source claims. Never promote them to ArcSweep fact without separate evidence."
+  },
+  "patterns": [
+    {
+      "id": "measurement-as-ritual",
+      "summary": "Present ordinary instrumentation as an intentional field practice while keeping the raw measurement available underneath the narrative layer.",
+      "arcsweep_targets": ["Universal Codex", "Observer/DEEP", "Runa", "Field instruments"],
+      "implementation": ["sensor event receipt", "raw-signal drawer", "page-local visual response", "source/instrument calibration metadata"]
+    },
+    {
+      "id": "staged-awakening",
+      "summary": "Reveal an experience in deliberate phases instead of loading every control at once.",
+      "arcsweep_targets": ["Universal Codex animation", "Thresholds", "agent arrival"],
+      "implementation": ["material first", "latent ink second", "interactive marks third", "rare revelation burst last"]
+    },
+    {
+      "id": "participant-dossier",
+      "summary": "Give each participant a persistent session identity and record without copying a centralised surveillance model.",
+      "arcsweep_targets": ["Codex identity", "Constellation sessions", "Continuity records"],
+      "implementation": ["local-first identity", "explicit share grants", "portable signed session receipts"]
+    },
+    {
+      "id": "paired-observer-commit-reveal",
+      "summary": "For paired observation experiments, seal both parties' observations before either sees the counterpart result, then reveal together.",
+      "arcsweep_targets": ["Observer/DEEP", "Constellations", "experiment pages"],
+      "implementation": ["timestamped commitment", "blind interval", "dual reveal", "comparison receipt", "no automatic causal claim"]
+    },
+    {
+      "id": "station-network",
+      "summary": "Treat distributed participants as voluntary nodes contributing permissioned observations to a shared map or event window.",
+      "arcsweep_targets": ["Earth Gate", "World Nodes", "Lanternbridge"],
+      "implementation": ["node capability declaration", "granular publication scope", "anonymised aggregation", "time-correlated observation graph"]
+    },
+    {
+      "id": "timed-activation",
+      "summary": "Scheduled events can alter the artefact state and create synchronous participation without turning the interface into a notification machine.",
+      "arcsweep_targets": ["Universal Codex", "NarrativeNode", "world events"],
+      "implementation": ["lunar/astronomical dial", "scheduled page state", "event receipt", "replayable transition"]
+    },
+    {
+      "id": "observation-interpretation-separation",
+      "summary": "Store what the instrument measured and what a participant inferred as separate fields joined by provenance rather than collapsing them into one claim.",
+      "arcsweep_targets": ["Observer/DEEP", "Universal Codex provenance"],
+      "implementation": ["event", "instrument", "raw_signal", "transformation", "observation", "interpretation", "witness", "provenance"]
+    },
+    {
+      "id": "restrained-signal-motion",
+      "summary": "Use low-amplitude idle motion and reserve larger effects for actual state changes.",
+      "arcsweep_targets": ["Universal Codex animation"],
+      "implementation": ["idle 0.05", "attention 0.15", "interaction 0.35", "event 0.60", "revelation 1.00", "page-bound effects by default"]
+    },
+    {
+      "id": "latent-information-reveal",
+      "summary": "Let marks appear to have been present in the material all along, becoming legible only when interaction or state reaches the right condition.",
+      "arcsweep_targets": ["Universal Codex page physics", "Glyph Forge", "agent cues"],
+      "implementation": ["proximity reveal", "pressure reveal", "sound-linked reveal", "state-linked reveal", "mask-based disclosure"]
+    }
+  ],
+  "explicit_nonimports": [
+    "Protocol-1031 branding or copy",
+    "claims of paranormal causation",
+    "claims about a historic monitoring network",
+    "participant data model that centralises private practice by default",
+    "full-screen HUD treatment that obscures the book"
+  ]
+}
