@@ -149,6 +149,7 @@ async function openCore() {
       else status('Terra Prime verified. Opening Arcsweep…');
     }
     await import('./qualia-ui-preload.js');
+    await import('./story-soundscape-singleton-bridge.js');
     await import('./main.js');
     finished = true;
     clearTimeout(slowTimer);

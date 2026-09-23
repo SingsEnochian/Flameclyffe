@@ -43,6 +43,33 @@ export function canonicalSomaticWorldId(value) {
   return WORLD_ALIASES.get(slug) ?? slug;
 }
 
+export function somaticWorldIdFromLaunchContext(search = globalThis.location?.search || '') {
+  const params = new URLSearchParams(String(search || ''));
+  const raw = params.get('worldId') || params.get('world_id') || '';
+  if (!raw.trim()) return null;
+  const withoutHousePrefix = raw.replace(/^house-world-/iu, '');
+  return canonicalSomaticWorldId(withoutHousePrefix);
+}
+
+function installToneLabLaunchContext() {
+  if (typeof document === 'undefined' || typeof globalThis.location === 'undefined') return;
+  if (!/world-tone-approval\/?$/iu.test(globalThis.location.pathname || '')) return;
+  const requested = somaticWorldIdFromLaunchContext();
+  if (!requested) return;
+
+  globalThis.setTimeout?.(() => {
+    const select = document.querySelector('#world');
+    if (!select?.options) return;
+    const option = [...select.options].find((entry) => {
+      try { return canonicalSomaticWorldId(entry.value) === requested; }
+      catch { return false; }
+    });
+    if (!option || select.value === option.value) return;
+    select.value = option.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  }, 0);
+}
+
 export function buildIPadSomaticLineage(packetInput) {
   invariant(packetInput && typeof packetInput === 'object' && !Array.isArray(packetInput), 'DualAspectPacket is required');
   const packet = copy(packetInput);
@@ -153,3 +180,5 @@ export function clearIPadSomaticLineage({
 } = {}) {
   storage?.removeItem?.(IPAD_SOMATIC_LINEAGE_STORAGE_KEY);
 }
+
+installToneLabLaunchContext();

@@ -19,15 +19,18 @@ test('every sound organ preserves a real source owner', async () => {
   }
 });
 
-test('Runa protects its canonical 3·6·9 engine while using the existing Heartfield surface', () => {
+test('Runa manifestation bus is the first-class sensory surface while Heartfield remains compatibility-only', () => {
   const runa = SOUND_ORGANS.find((organ) => organ.id === 'runa');
-  assert.equal(runa.sourcePath, 'assets/runa-369-percussion-oscillator.js');
-  assert.equal(runa.surfaceSourcePath, 'apps/arcsweep/src/synaptic-heartfield.js');
-  assert.equal(runa.focusSelector, '.synaptic-heartfield');
-  assert.match(runa.implementation, /3·6·9/);
+  assert.equal(runa.sourcePath, 'apps/arcsweep/src/os/runa-manifestation.js');
+  assert.equal(runa.surfaceSourcePath, 'apps/arcsweep/src/runa-manifestation-sidecar.js');
+  assert.equal(runa.focusSelector, '[data-runa-manifestation-controls]');
+  assert.match(runa.implementation, /Manifestation Bus/);
+  assert.equal(runa.canonicalTemporalEnginePath, 'assets/runa-369-percussion-oscillator.js');
+  assert.equal(runa.legacySurfacePath, 'apps/arcsweep/src/synaptic-heartfield.js');
+  assert.equal(runa.legacySurfaceStatus, 'compatibility-only');
 });
 
-test('native sound organs deliberately focus the existing Feedback soundscape', () => {
+test('native sound organs deliberately focus existing ArcSweep surfaces', () => {
   const native = SOUND_ORGANS.filter((organ) => organ.kind === 'native-focus');
   assert.ok(native.length >= 4);
   native.forEach((organ) => {

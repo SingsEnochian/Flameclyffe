@@ -1,0 +1,135 @@
+.magic-book-shell[data-runa-manifestation-mounted="true"] {
+  grid-template-rows: auto auto 1fr;
+}
+
+.runa-manifestation-controls {
+  position: relative;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: .8rem 1rem;
+  padding: .55rem clamp(.8rem, 3vw, 2rem);
+  border: 1px solid rgba(217,184,107,.2);
+  border-radius: 16px;
+  background: linear-gradient(90deg, rgba(9,17,14,.94), rgba(24,19,13,.92));
+  color: #f4ead6;
+  box-shadow: 0 14px 36px rgba(0,0,0,.22);
+}
+
+.runa-manifestation-codex {
+  border-width: 0 0 1px;
+  border-radius: 0;
+  border-color: rgba(217,184,107,.2);
+  background: rgba(5,11,9,.88);
+  backdrop-filter: blur(18px);
+}
+
+.runa-manifestation-sound-room {
+  margin: 0 0 1rem;
+}
+
+.runa-manifestation-heading {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-width: min(19rem, 100%);
+}
+
+.runa-manifestation-heading > div {
+  display: grid;
+  gap: .08rem;
+}
+
+.runa-manifestation-heading strong {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: .03em;
+}
+
+.runa-manifestation-heading small,
+.runa-manifestation-status {
+  color: #aebcaf;
+  font-size: .76rem;
+}
+
+.runa-manifestation-glyph {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(217,184,107,.44);
+  border-radius: 50%;
+  color: #e5c87f;
+  background: rgba(217,184,107,.08);
+  font-size: 1.15rem;
+}
+
+.runa-manifestation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .42rem;
+  align-items: center;
+}
+
+.runa-manifestation-actions button,
+.runa-manifestation-actions a {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(217,184,107,.42);
+  border-radius: 999px;
+  padding: .42rem .68rem;
+  background: rgba(217,184,107,.07);
+  color: #f4ead6;
+  font: 650 .78rem/1.1 system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.runa-manifestation-actions button[aria-pressed="true"] {
+  border-color: rgba(126,165,140,.92);
+  background: rgba(82,120,98,.28);
+  color: #dff0e5;
+}
+
+.runa-manifestation-actions button:hover,
+.runa-manifestation-actions a:hover {
+  border-color: rgba(217,184,107,.88);
+  background: rgba(217,184,107,.14);
+}
+
+.runa-manifestation-status {
+  margin: 0 0 0 auto;
+  max-width: 20rem;
+  line-height: 1.3;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .runa-manifestation-controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .runa-manifestation-status {
+    margin-left: 0;
+    max-width: none;
+    text-align: left;
+  }
+}
+
+@media (max-width: 620px) {
+  .runa-manifestation-controls {
+    gap: .55rem;
+    padding: .55rem .7rem;
+  }
+  .runa-manifestation-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .runa-manifestation-actions button,
+  .runa-manifestation-actions a {
+    min-height: 42px;
+    padding-inline: .4rem;
+  }
+}
