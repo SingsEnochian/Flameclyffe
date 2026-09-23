@@ -1,4 +1,4 @@
-export const SOUND_ORGAN_REGISTRY_VERSION = 'arcsweep.sound-organs/v1';
+export const SOUND_ORGAN_REGISTRY_VERSION = 'arcsweep.sound-organs/v2';
 
 export const SOUND_ORGANS = Object.freeze([
   Object.freeze({
@@ -23,14 +23,17 @@ export const SOUND_ORGANS = Object.freeze([
     family: 'sound',
     kind: 'native-focus',
     roomId: 'feedback',
-    focusSelector: '.synaptic-heartfield',
+    focusSelector: '[data-runa-manifestation-controls]',
     pagesHref: '/Flameclyffe/apps/arcsweep/?soundOrgan=runa',
     webHref: '/arcsweep/?soundOrgan=runa',
     deployedPath: 'apps/arcsweep/index.html',
-    sourcePath: 'assets/runa-369-percussion-oscillator.js',
-    surfaceSourcePath: 'apps/arcsweep/src/synaptic-heartfield.js',
-    implementation: 'Runa 3·6·9 Percussion v0.3 · Synaptic Heartfield surface',
-    description: 'The canonical Runa 3·6·9 temporal percussion engine, exposed through the existing ArcSweep Synaptic Heartfield surface rather than cloned.',
+    sourcePath: 'apps/arcsweep/src/os/runa-manifestation.js',
+    surfaceSourcePath: 'apps/arcsweep/src/runa-manifestation-sidecar.js',
+    implementation: 'Runa Manifestation Bus v1 · World Hum · Safe Gateway · Glyph Voice',
+    description: 'The canonical Runa sensory front door. It orchestrates the existing StorySoundscape World Hum, Möbius Safe Gateway, observed Glyph Forge strokes, and explicit haptic output without cloning their engines.',
+    canonicalTemporalEnginePath: 'assets/runa-369-percussion-oscillator.js',
+    legacySurfacePath: 'apps/arcsweep/src/synaptic-heartfield.js',
+    legacySurfaceStatus: 'compatibility-only',
   }),
   Object.freeze({
     id: 'tone-lab',
