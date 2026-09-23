@@ -1,0 +1,70 @@
+{
+  "schema": "arcsweep.external-site-ingest/v0.1",
+  "corpus_id": "getgrimoire-interface-reference",
+  "name": "Grimoire public interface and practice-design reference corpus",
+  "prepared_at": "2026-09-22",
+  "base_url": "https://getgrimoire.app/",
+  "entry_url": "https://getgrimoire.app/",
+  "scope_mode": "public-site-interface-and-practice-reference",
+  "storage_mode": "metadata-hashes-link-graph-and-paraphrased-pattern-records",
+  "default_source_class": "grimoire-public-reference",
+  "copyright_policy": {
+    "mirror_full_prose": false,
+    "mirror_images": false,
+    "persist_raw_html": false,
+    "persist_page_text": false,
+    "retain_source_hashes": true,
+    "retain_canonical_urls": true,
+    "retain_titles_and_public_metadata": true,
+    "semantic_output": "compact-paraphrase-only",
+    "note": "Grimoire is ingested only as an external product/interface reference. Copy, illustrations, branded taxonomies, and proprietary assets are not reproduced."
+  },
+  "crawl": {
+    "same_origin_only": true,
+    "discover_sitemaps": true,
+    "respect_robots": true,
+    "follow_internal_links_from_relevant_pages": true,
+    "max_pages": 600,
+    "max_depth": 4,
+    "delay_ms": 400,
+    "user_agent": "ArcSweep-ExternalReferenceIndexer/0.1 (+provenance-only)",
+    "drop_query_parameters": ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"],
+    "deny_path_prefixes": ["/account", "/checkout", "/payment"],
+    "direct_path_prefixes": ["/features/", "/faq", "/settings"],
+    "relevance_terms": ["virtual altar", "sigil forge", "dream weaver", "my craft", "codex", "privacy", "stored on your device", "journal", "svg", "moon phase", "planetary hour"]
+  },
+  "seed_urls": [
+    "https://getgrimoire.app/",
+    "https://getgrimoire.app/features/virtual-altar",
+    "https://getgrimoire.app/features/sigil-forge",
+    "https://getgrimoire.app/features/dream-weaver",
+    "https://getgrimoire.app/features/codex",
+    "https://getgrimoire.app/features/my-craft",
+    "https://getgrimoire.app/faq"
+  ],
+  "classification_rules": [
+    {"match": "/features/virtual-altar", "class": "grimoire-composition-surface"},
+    {"match": "/features/sigil-forge", "class": "grimoire-generative-artefact-workbench"},
+    {"match": "/features/dream-weaver", "class": "grimoire-capture-and-pattern-surface"},
+    {"match": "/features/codex", "class": "grimoire-cross-reference-library"},
+    {"match": "/features/my-craft", "class": "grimoire-personal-record-system"},
+    {"match": "/faq", "class": "grimoire-product-and-privacy-reference"}
+  ],
+  "semantic_signal_terms": {
+    "composable-canvas": ["drag-and-drop", "resize", "rotate", "layer", "scene background"],
+    "artefact-provenance": ["original intent", "method", "moon phase", "planetary hour", "svg"],
+    "rapid-capture": ["voice", "text", "low-glare", "capture"],
+    "pattern-tracking": ["recurring", "pattern", "filter", "searchable", "tags"],
+    "typed-records": ["note", "audio", "ritual", "reflection", "spell", "sigil", "dream", "tarot"],
+    "cross-reference-graph": ["linked", "cross-referenced", "connect", "relationships"],
+    "local-first-privacy": ["stored on your device", "stored locally", "no tracking", "private"],
+    "practice-over-engagement": ["no streaks", "no notifications", "no algorithm"]
+  },
+  "output": {
+    "default_directory": "ingests/grimoire",
+    "source_index": "source-index.json",
+    "link_graph": "link-graph.json",
+    "crawl_report": "crawl-report.json"
+  },
+  "reference_pack": "apps/arcsweep/skills/sources/grimoire/reference-pack.v0.1.json"
+}
