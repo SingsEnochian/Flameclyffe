@@ -1,6 +1,7 @@
 import './runa-manifestation.css';
 import { contextualOrganLaunchHref } from './organ-launch-route.js';
 import { soundOrgan } from './sound-organ-registry.js';
+import { readRunaManifestationContext } from './runa-manifestation-context.js';
 
 export const RUNA_MANIFESTATION_SURFACE_VERSION = 'arcsweep.runa-manifestation-surface/v1';
 
@@ -8,22 +9,20 @@ const CONTROL_SELECTOR = '[data-runa-manifestation-controls]';
 let observer = null;
 let refreshQueued = false;
 let lastStatus = null;
+let lastContext = { from: 'universal-codex' };
 
 function os() {
   return globalThis.__arcsweepOS || null;
 }
 
-function context() {
-  const session = os()?.session?.() || {};
-  return {
-    worldId: session.active_world_id || null,
-    worldName: session.active_world_name || null,
-    from: 'universal-codex',
-  };
+async function context() {
+  lastContext = await readRunaManifestationContext();
+  document.querySelectorAll('[data-runa-tone-lab]').forEach((link) => { link.href = toneLabHref(); });
+  return lastContext;
 }
 
 function toneLabHref() {
-  return contextualOrganLaunchHref(soundOrgan('tone-lab'), context(), globalThis.location);
+  return contextualOrganLaunchHref(soundOrgan('tone-lab'), lastContext, globalThis.location);
 }
 
 function button(action, label, pressed = null) {
@@ -63,17 +62,20 @@ function mountCodex() {
   if (!stage) return;
   stage.insertAdjacentHTML('beforebegin', panelMarkup('codex'));
   root.dataset.runaManifestationMounted = 'true';
+  return true;
 }
 
 function mountSoundRoom() {
   const host = document.querySelector('[data-story-soundscape]');
   if (!host || host.querySelector(`${CONTROL_SELECTOR}[data-runa-manifestation-controls="sound-room"]`)) return;
   host.insertAdjacentHTML('afterbegin', panelMarkup('sound-room'));
+  return true;
 }
 
 function mounts() {
-  mountCodex();
-  mountSoundRoom();
+  const codexMounted = mountCodex();
+  const soundMounted = mountSoundRoom();
+  if (codexMounted || soundMounted) void context().catch(() => {});
 }
 
 function setPanelStatus(message) {
@@ -90,6 +92,7 @@ function renderStatus() {
 }
 
 async function readStatus() {
+  await context();
   const runtime = os();
   if (!runtime?.capabilities?.invoke) return null;
   const receipt = await runtime.capabilities.invoke('runa.manifestation.status', {}, {
@@ -120,10 +123,12 @@ async function invoke(capability, input, surface) {
 async function handleAction(buttonNode, panel) {
   const action = buttonNode.dataset.runaAction;
   const surface = panel?.dataset.runaManifestationControls || 'surface';
-  const active = context();
   if (action === 'world-hum') {
     if (lastStatus?.story_soundscape?.hum_active) await invoke('runa.world-hum.stop', { reason: `toggle:${surface}` }, surface);
-    else await invoke('runa.world-hum.start', { world_id: active.worldId, world_name: active.worldName }, surface);
+    else {
+      const active = await context();
+      await invoke('runa.world-hum.start', { world_id: active.worldId, world_name: active.worldName, world: active.world }, surface);
+    }
     return;
   }
   if (action === 'safe-gateway') {
@@ -132,11 +137,13 @@ async function handleAction(buttonNode, panel) {
     return;
   }
   if (action === 'glyph-voice') {
+    const active = await context();
     await invoke('runa.glyph-sonification.set', {
       enabled: !lastStatus?.glyph_sonification_enabled,
       haptics: false,
       world_id: active.worldId,
       world_name: active.worldName,
+      world: active.world,
     }, surface);
     return;
   }
@@ -151,6 +158,12 @@ async function handleAction(buttonNode, panel) {
 
 function installEvents() {
   document.addEventListener('click', (event) => {
+    const toneLink = event.target.closest?.('[data-runa-tone-lab]');
+    if (toneLink && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault();
+      void context().then(() => { globalThis.location.assign(toneLabHref()); });
+      return;
+    }
     const buttonNode = event.target.closest?.('[data-runa-action]');
     if (!buttonNode) return;
     const panel = buttonNode.closest(CONTROL_SELECTOR);
