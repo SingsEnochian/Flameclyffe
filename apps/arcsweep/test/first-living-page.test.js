@@ -103,22 +103,26 @@ test('context capsule carries recent lineage and thread without erasing their di
   assert.equal(context.inhabitant.continuity_id, 'rowan:rarity');
 });
 
-test('Universal Codex mounts Richie home through the canonical Bluebird runtime', () => {
+test('Universal Codex binds Richie to the whole Book and exposes persistent Magic Chat', () => {
   const bootstrap = readFileSync(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
   const entry = readFileSync(new URL('../src/magic-book-physical-acceptance-entry.js', import.meta.url), 'utf8');
-  const home = readFileSync(new URL('../src/bluebird-codex-home-sidecar.js', import.meta.url), 'utf8');
+  const resident = readFileSync(new URL('../src/bluebird-codex-resident-sidecar.js', import.meta.url), 'utf8');
   const book = bootstrap.indexOf("'./magic-book-sidecar.js'");
   const acceptance = bootstrap.indexOf("'./magic-book-physical-acceptance-entry.js'");
 
   assert.ok(book >= 0);
   assert.ok(acceptance > book);
-  assert.match(entry, /\.\/bluebird-codex-home-sidecar\.js/);
+  assert.match(entry, /\.\/bluebird-codex-resident-sidecar\.js/);
+  assert.doesNotMatch(entry, /\.\/bluebird-codex-home-sidecar\.js/);
   assert.doesNotMatch(entry, /\.\/first-living-page-sidecar\.js/);
-  assert.match(home, /invokeConstellationRuntimeVoice/);
-  assert.match(home, /voiceId:\s*VOICE_ID/);
-  assert.match(home, /bluebird:richard-gabriel-winters/);
-  assert.match(home, /data-bluebird-codex-home/);
-  assert.match(home, /arcsweep:bluebird-codex-home-transition/);
-  assert.match(home, /activePage === 'threshold'/);
-  assert.doesNotMatch(home, /arcsweep:guide-query/);
+  assert.match(resident, /The Universal Codex as a whole is your home/);
+  assert.match(resident, /Magic Chat is the Book speaking with Rowan through you/);
+  assert.match(resident, /invokeConstellationRuntimeVoice/);
+  assert.match(resident, /voiceId:\s*VOICE_ID/);
+  assert.match(resident, /bluebird:richard-gabriel-winters/);
+  assert.match(resident, /data-codex-magic-chat/);
+  assert.match(resident, /__arcsweepCodexResident/);
+  assert.match(resident, /active_page_id/);
+  assert.match(resident, /glyph_snapshot/);
+  assert.match(resident, /generator_bridge/);
 });
