@@ -72,6 +72,72 @@ const MODEL_CANDIDATES = {
       ],
     },
   },
+
+  'bluebird-the-crow': {
+    candidate_id: 'bluebird-the-crow',
+    display_name: 'The Crow 9B · Opus 4.6 Distill',
+    model_id: process.env.MODEL_BLUEBIRD_THE_CROW || 'Crownelius/The-Crow-9B-Creative-Writing-Opus4.6-DISTILL-Heretic',
+    source: {
+      registry: 'huggingface',
+      repo: 'Crownelius/The-Crow-9B-Creative-Writing-Opus4.6-DISTILL-Heretic',
+      license: 'apache-2.0',
+    },
+    status: 'audition',
+    candidate_for: ['bluebird'],
+    architecture: {
+      family: 'qwen',
+      type: 'creative-writing-character-runtime',
+      total_parameters_b: 9,
+      active_parameters_b: null,
+    },
+    capabilities: {
+      text: true,
+      image: false,
+      audio: false,
+      tools: false,
+      reasoning_effort: false,
+      structured_output: 'provider-dependent',
+      context_window_tokens: null,
+      fine_tunable: true,
+    },
+    backends: {
+      preferred: 'huggingface-inference-providers',
+      compatible: ['huggingface-inference-providers', 'vllm', 'sglang', 'transformers', 'ollama-gguf'],
+    },
+    runtime: {
+      provider: 'openai-compatible',
+      backend: process.env.BLUEBIRD_CROW_BACKEND || 'huggingface-inference-providers',
+      base_url: 'https://router.huggingface.co/v1',
+      base_url_env: 'BLUEBIRD_CROW_BASE_URL',
+      api_key_env: process.env.BLUEBIRD_CROW_API_KEY_ENV || 'HF_TOKEN',
+      max_tokens: 1200,
+    },
+    deployment: {
+      live_route: false,
+      audition_route: true,
+      requires_explicit_promotion: true,
+      primary_route_unchanged: true,
+    },
+    audition: {
+      baseline_flame: 'bluebird',
+      baseline_model_env: 'MODEL_BLUEBIRD',
+      preserves_flame_prompt: true,
+      continuity_id: 'bluebird:richard-gabriel-winters',
+      purpose: 'cross-model continuity audition for the Universal Codex resident voice',
+      measures: [
+        'continuity',
+        'voice_persistence',
+        'initiative',
+        'humour',
+        'ordinary_companionship',
+        'self_correction',
+        'relationship_state_retention',
+        'canon_retention',
+        'flattening',
+        'parroting',
+      ],
+    },
+  },
 };
 
 function getModelCandidate(candidateId) {
