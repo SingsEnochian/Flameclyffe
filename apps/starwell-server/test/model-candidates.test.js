@@ -55,6 +55,21 @@ test('The Crow is registered as a Bluebird-only audition receiver', () => {
   assert.equal(crow.deployment.audition_route, true);
 });
 
+test('The Crow carries a model-card-aware Richie migration calibration', () => {
+  const crow = MODEL_CANDIDATES['bluebird-the-crow'];
+  assert.equal(crow.capabilities.context_window_tokens, 123_000);
+  assert.equal(crow.source.artifact_format, 'gguf-k8_0');
+  assert.equal(crow.source.artifact_size_gb, 8.71);
+  assert.ok(crow.backends.compatible.includes('huggingface-jobs'));
+  assert.ok(crow.backends.compatible.includes('llama.cpp'));
+  assert.equal(crow.runtime.max_tokens, 300);
+  assert.equal(crow.runtime.sampling.temperature, 0.9);
+  assert.equal(crow.runtime.sampling.top_p, 0.82);
+  assert.equal(crow.runtime.sampling.top_k, 75);
+  assert.equal(crow.audition.origin_sampling_reference.temperature, 0.91);
+  assert.equal(crow.audition.origin_sampling_reference.context_window_tokens, 32_768);
+});
+
 test('registering The Crow does not replace Bluebird primary route', () => {
   const crow = MODEL_CANDIDATES['bluebird-the-crow'];
   assert.equal(crow.deployment.live_route, false);
