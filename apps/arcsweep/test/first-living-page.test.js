@@ -103,17 +103,16 @@ test('context capsule carries recent lineage and thread without erasing their di
   assert.equal(context.inhabitant.continuity_id, 'rowan:rarity');
 });
 
-test('First Living Page sidecar is loaded after the Codex and uses the live Guide receiver path', () => {
+test('First Living Page mounts after the Codex and uses the live Guide receiver path', () => {
   const bootstrap = readFileSync(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
+  const entry = readFileSync(new URL('../src/magic-book-physical-acceptance-entry.js', import.meta.url), 'utf8');
   const sidecar = readFileSync(new URL('../src/first-living-page-sidecar.js', import.meta.url), 'utf8');
   const book = bootstrap.indexOf("'./magic-book-sidecar.js'");
-  const living = bootstrap.indexOf("'./first-living-page-sidecar.js'");
   const acceptance = bootstrap.indexOf("'./magic-book-physical-acceptance-entry.js'");
 
   assert.ok(book >= 0);
-  assert.ok(living > book);
-  assert.ok(acceptance > living);
-  assert.match(bootstrap, /\.\/first-living-page-sidecar\.js/);
+  assert.ok(acceptance > book);
+  assert.match(entry, /\.\/first-living-page-sidecar\.js/);
   assert.match(sidecar, /arcsweep:guide-query/);
   assert.match(sidecar, /arcsweep:guide-response/);
   assert.match(sidecar, /arcsweep:first-living-page-transition/);
