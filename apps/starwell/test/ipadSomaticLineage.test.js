@@ -9,6 +9,7 @@ import {
   clearIPadSomaticLineage,
   publishIPadSomaticLineage,
   readIPadSomaticLineage,
+  somaticWorldIdFromLaunchContext,
 } from '../src/ipad-somatic-lineage.js';
 
 if (typeof globalThis.CustomEvent !== 'function') {
@@ -120,6 +121,13 @@ test('world aliases resolve to the same somatic identity', () => {
   assert.equal(canonicalSomaticWorldId('Ta’veren Vaen'), 'taveren-vaen');
   assert.equal(canonicalSomaticWorldId('ta-veren-vaen'), 'taveren-vaen');
   assert.equal(canonicalSomaticWorldId('ta-veren-unbound'), 'taveren-vaen');
+});
+
+test('Tone Lab launch context preserves the ArcSweep world across hosted and house-prefixed routes', () => {
+  assert.equal(somaticWorldIdFromLaunchContext('?worldId=terra-aeterna&from=universal-codex'), 'terra-aeterna');
+  assert.equal(somaticWorldIdFromLaunchContext('?worldId=house-world-ta-veren-vaen'), 'taveren-vaen');
+  assert.equal(somaticWorldIdFromLaunchContext('?worldId=Ta%E2%80%99veren%20Vaen'), 'taveren-vaen');
+  assert.equal(somaticWorldIdFromLaunchContext('?from=universal-codex'), null);
 });
 
 test('active DualAspectPacket produces a complete iPad somatic lineage', () => {
