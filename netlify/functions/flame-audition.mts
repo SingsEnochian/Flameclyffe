@@ -53,7 +53,7 @@ function visibleMessage(data) {
 
 async function callWebDirect(manifest, candidate, body, env, fetchImpl) {
   const credential = candidateCredential(candidate, env);
-  if (!credential.value) throw new Error(`Missing server configuration: ${candidate.runtime.api_key_env}`);
+  if (candidate.runtime.api_key_env && !credential.value) throw new Error(`Missing server configuration: ${candidate.runtime.api_key_env}`);
 
   const base = String(env.get(candidate.runtime.base_url_env) || candidate.runtime.base_url).replace(/\/$/, '');
   const effort = reasoningEffort(body, candidate);
@@ -75,7 +75,7 @@ async function callWebDirect(manifest, candidate, body, env, fetchImpl) {
   const endpoint = `${base}/chat/completions`;
   const options = {
     method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${credential.value}` },
+    headers: { 'content-type': 'application/json', ...(credential.value ? { authorization: `Bearer ${credential.value}` } : {}) },
     body: JSON.stringify(payload),
   };
 
@@ -167,16 +167,16 @@ function statusFor(manifest, candidate, env) {
       candidate_id: candidate.candidate_id,
       model: candidate.model_id,
       status: candidate.status,
-      configured: Boolean(credential.value),
-      backend_configured: Boolean(credential.value),
+      configured: candidate.runtime.api_key_env ? Boolean(credential.value) : true,
+      backend_configured: candidate.runtime.api_key_env ? Boolean(credential.value) : true,
       gateway_configured: null,
       provider: candidate.runtime.provider,
       backend: candidate.runtime.backend,
       api_key_env: candidate.runtime.api_key_env,
-      api_key_present: Boolean(credential.value),
+      api_key_present: candidate.runtime.api_key_env ? Boolean(credential.value) : null,
       credential_source: credential.source,
       runtime_reachable: null,
-      missing: credential.value ? [] : [candidate.runtime.api_key_env],
+      missing: candidate.runtime.api_key_env && !credential.value ? [candidate.runtime.api_key_env] : [],
       audition_route: Boolean(candidate.deployment?.audition_route),
       primary_route_unchanged: true,
       execution_path: 'web-direct',
