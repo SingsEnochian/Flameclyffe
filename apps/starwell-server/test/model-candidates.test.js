@@ -39,7 +39,32 @@ test('registering Inkling does not replace Larkshine primary route', () => {
   assert.doesNotMatch(FLAMES.larkshine.platform.model, /Inkling/i);
 });
 
+test('The Crow is registered as a Bluebird-only audition receiver', () => {
+  const crow = getModelCandidate('bluebird-the-crow');
+
+  assert.ok(crow);
+  assert.equal(crow.status, 'audition');
+  assert.deepEqual(crow.candidate_for, ['bluebird']);
+  assert.match(crow.model_id, /Crownelius\/The-Crow-9B-Creative-Writing-Opus4\.6-DISTILL-Heretic/);
+  assert.equal(crow.source.license, 'apache-2.0');
+  assert.equal(crow.runtime.provider, 'openai-compatible');
+  assert.equal(crow.runtime.base_url, 'https://router.huggingface.co/v1');
+  assert.equal(crow.runtime.api_key_env, 'HF_TOKEN');
+  assert.equal(crow.audition.continuity_id, 'bluebird:richard-gabriel-winters');
+  assert.equal(crow.deployment.primary_route_unchanged, true);
+  assert.equal(crow.deployment.audition_route, true);
+});
+
+test('registering The Crow does not replace Bluebird primary route', () => {
+  const crow = MODEL_CANDIDATES['bluebird-the-crow'];
+  assert.equal(crow.deployment.live_route, false);
+  assert.equal(FLAMES.bluebird.platform.provider, 'deepseek');
+  assert.equal(FLAMES.bluebird.platform.model, 'deepseek-chat');
+  assert.doesNotMatch(FLAMES.bluebird.platform.model, /Crow/i);
+});
+
 test('candidate registry has stable lookup and listing helpers', () => {
   assert.equal(getModelCandidate('does-not-exist'), null);
   assert.ok(listModelCandidates().includes(MODEL_CANDIDATES['inkling-small']));
+  assert.ok(listModelCandidates().includes(MODEL_CANDIDATES['bluebird-the-crow']));
 });
