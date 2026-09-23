@@ -1,16 +1,23 @@
 /*
- * Universal Codex responsive viewport repair v2.
+ * Universal Codex responsive viewport repair v3.
  *
- * Safari on iPad can trap touch scrolling inside a fixed grid child even when
- * that child is technically scrollable. The Codex shell is therefore the only
- * vertical scroll owner. Everything below the sticky toolbar stays in normal
- * document flow so living pages can grow to their full height.
+ * iPad/WebKit can leave ArcSweep's high-z-index helper surfaces above the Book.
+ * That makes the parchment visible while taps land on another layer. While the
+ * Codex is open it is therefore the modal interaction island as well as the
+ * sole vertical scroll owner.
  */
 
 html[data-magic-book-open],
 html[data-magic-book-open] body {
   overflow: hidden !important;
   overscroll-behavior: none;
+}
+
+/* No ArcSweep surface behind the modal Book may receive taps. This is broader
+   than hiding individual launchers because several OS surfaces intentionally
+   live near the top of the z-index range. */
+html[data-magic-book-open="true"] body > *:not(#arcsweep-magic-book) {
+  pointer-events: none !important;
 }
 
 .magic-book-shell {
@@ -28,12 +35,37 @@ html[data-magic-book-open] body {
   overscroll-behavior-y: contain;
   background: #030807;
   scrollbar-gutter: stable;
+  z-index: 2147483400 !important;
+  isolation: isolate;
+  pointer-events: auto !important;
 }
 
 .magic-book-toolbar {
   position: sticky !important;
   top: 0;
   z-index: 40;
+  pointer-events: auto !important;
+}
+
+.magic-book-toolbar-actions,
+.magic-book-toolbar button,
+.magic-book-page,
+.magic-book-page button,
+.magic-book-page input,
+.magic-book-page textarea,
+.magic-book-page select,
+.magic-book-page a,
+.universal-codex-control-dock,
+.universal-codex-control-dock button,
+.universal-codex-control-dock input {
+  pointer-events: auto !important;
+}
+
+.magic-book-toolbar button,
+.magic-book-page button,
+.universal-codex-control-dock button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(217,184,107,.22);
 }
 
 .magic-book-stage {
@@ -46,6 +78,7 @@ html[data-magic-book-open] body {
   max-height: none !important;
   overflow: visible !important;
   touch-action: auto;
+  pointer-events: auto !important;
   padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
 }
 
@@ -55,6 +88,7 @@ html[data-magic-book-open] body {
   min-height: 0 !important;
   align-items: start;
   margin-bottom: max(3rem, env(safe-area-inset-bottom));
+  pointer-events: auto !important;
 }
 
 .magic-book-page {
@@ -65,11 +99,18 @@ html[data-magic-book-open] body {
   overflow: visible !important;
 }
 
-/* ArcSweep's global floating helpers remain useful outside the Book, but on
-   iPad they cover the reading surface and can intercept the same touch path.
-   The Codex has its own controls while it is open. */
+/* Decorative layers must never become the touch target. */
+.magic-book-three,
+.universal-codex-fx,
+.magic-book-page::after {
+  pointer-events: none !important;
+}
+
+/* Keep legacy helpers out of the reader even though the Book now sits above
+   them. This avoids focus and accessibility collisions while the modal is open. */
 html[data-magic-book-open="true"] [data-arcsweep-os-shell],
-html[data-magic-book-open="true"] .arcsweep-caretaker-launch {
+html[data-magic-book-open="true"] .arcsweep-caretaker-launch,
+html[data-magic-book-open="true"] [data-somatic-calibration] {
   display: none !important;
 }
 
