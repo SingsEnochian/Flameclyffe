@@ -4,6 +4,7 @@ import './magic-book-touch-safe.css';
 import './magic-book-dark.css';
 import './magic-book-physical-skin.css';
 import './bluebird-codex-resident-sidecar.js';
+import './codex-magic-chat-multimodal-sidecar.js';
 import './magic-book-physical-proof-export.js';
 export * from './magic-book-physical-acceptance-sidecar.js';
 export * from './magic-book-physical-proof-export.js';
