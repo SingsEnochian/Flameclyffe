@@ -22,6 +22,7 @@ export async function invokeConstellationRuntimeCandidate({
   voiceId,
   candidateId,
   message,
+  sessionId,
   context = [],
   fetchImpl = fetch,
 } = {}) {
@@ -43,6 +44,7 @@ export async function invokeConstellationRuntimeCandidate({
     cache: 'no-store',
     body: JSON.stringify({
       message: utterance,
+      session_id: sessionId || null,
       context: Array.isArray(context) ? context : [],
     }),
   });
@@ -61,7 +63,9 @@ export async function invokeConstellationRuntimeCandidate({
   const runtimeVerified = normalise(data.flame_id) === voice
     && String(data.candidate_id || '') === candidate
     && Boolean(data.provider)
-    && Boolean(data.model);
+    && Boolean(data.model)
+    && data.audition === true
+    && data.primary_route_unchanged === true;
   if (!runtimeVerified) {
     return {
       status: 'runtime-mismatch',
@@ -76,6 +80,10 @@ export async function invokeConstellationRuntimeCandidate({
         model: data.model || null,
       },
     };
+  }
+
+  if (!String(data.message || '').trim()) {
+    return { status: 'empty-reply', reason: 'The selected receiver returned no visible reply.', voiceId: voice, candidateId: candidate, latencyMs };
   }
 
   return {

@@ -1,3 +1,5 @@
+import { updateCodexChatMarkup } from './codex-chat-dom.js';
+
 export const CODEX_MAGIC_CHAT_MULTIMODAL_SCHEMA = 'arcsweep.codex-magic-chat-multimodal/v0.1';
 
 const ROOT_ID = 'arcsweep-magic-book';
@@ -108,14 +110,14 @@ function ensureTools() {
   }
   const state = resident()?.state?.() || {};
   const threadCount = Array.isArray(state.thread) ? state.thread.length : 0;
-  tools.innerHTML = `
+  updateCodexChatMarkup(tools, `
     <div class="codex-chat-tool-row">
       <label class="codex-file-label">＋ Attach<input type="file" data-codex-file-input multiple accept="image/*,text/*,.md,.json,.js,.mjs,.cjs,.ts,.tsx,.jsx,.py,.html,.css,.csv,.xml,.yaml,.yml,.toml,.ini,.log"></label>
       <button type="button" data-codex-copy-last>Copy last reply</button>
       <button type="button" data-codex-export-chat>Export thread</button>
       <span class="codex-context-meter">${threadCount}/40 resident turns · smart window</span>
     </div>
-    <div class="codex-attachment-list" data-codex-attachment-list>${attachmentMarkup()}</div>`;
+    <div class="codex-attachment-list" data-codex-attachment-list>${attachmentMarkup()}</div>`);
   return tools;
 }
 

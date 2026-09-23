@@ -104,13 +104,15 @@ const MODEL_CANDIDATES = {
       fine_tunable: true,
     },
     backends: {
-      preferred: 'huggingface-inference-providers',
-      compatible: ['huggingface-inference-providers', 'huggingface-jobs', 'llama.cpp', 'vllm', 'sglang', 'transformers', 'ollama-gguf'],
+      preferred: 'dedicated-inference-endpoint',
+      compatible: ['huggingface-jobs', 'llama.cpp', 'vllm', 'sglang', 'transformers', 'ollama-gguf'],
     },
     runtime: {
       provider: 'openai-compatible',
-      backend: process.env.BLUEBIRD_CROW_BACKEND || 'huggingface-inference-providers',
-      base_url: 'https://router.huggingface.co/v1',
+      backend: process.env.BLUEBIRD_CROW_BACKEND || 'openai-compatible-dedicated',
+      // This Crow repository has no HF Inference Provider deployment.
+      // A Hub download and token alone are not a configured runtime.
+      base_url: null,
       base_url_env: 'BLUEBIRD_CROW_BASE_URL',
       api_key_env: process.env.BLUEBIRD_CROW_API_KEY_ENV || 'HF_TOKEN',
       max_tokens: 300,
