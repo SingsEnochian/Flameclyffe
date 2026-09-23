@@ -6,10 +6,60 @@ import {
   UNIVERSAL_CODEX_ANIMATION_SCHEMA,
   ancestryEventToCodexPulse,
   glyphSampleToInkSpark,
+  glyphSampleToPagePoint,
+  migrateCodexAnimationState,
   normaliseCodexAnimationState,
   patchCodexAnimationState,
   receiptToCodexPulse,
 } from '../src/universal-codex-animation-model.js';
+
+test('fresh and malformed state use quiet Book defaults without opt-out motion', () => {
+  for (const value of [undefined, {}, null, 'invalid']) {
+    const state = normaliseCodexAnimationState(value);
+    assert.equal(state.intensity, .28);
+    assert.equal(state.orbit, false);
+    assert.equal(state.scanlines, false);
+    assert.equal(state.holograms, true);
+    assert.equal(state.inkAura, true);
+  }
+});
+
+test('saved preferences remain readable without defining projection bounds', () => {
+  const state = normaliseCodexAnimationState({ schema: 'arcsweep.universal-codex-animation/v0.2', orbit: true, scanlines: true, intensity: .72 });
+  assert.equal(state.schema, UNIVERSAL_CODEX_ANIMATION_SCHEMA);
+  assert.equal(state.orbit, true);
+  assert.equal(state.scanlines, true);
+  assert.equal(state.intensity, .72);
+});
+
+test('old automatically persisted defaults migrate while visibility opt-outs survive', () => {
+  for (const schema of [undefined, 'arcsweep.universal-codex-animation/v0.1', 'arcsweep.universal-codex-animation/v0.2']) {
+    const state = migrateCodexAnimationState({ schema, holograms: false, inkAura: false, orbit: true, scanlines: true, intensity: .72 });
+    assert.equal(state.schema, UNIVERSAL_CODEX_ANIMATION_SCHEMA);
+    assert.equal(state.orbit, false);
+    assert.equal(state.scanlines, false);
+    assert.equal(state.intensity, .28);
+    assert.equal(state.holograms, false);
+    assert.equal(state.inkAura, false);
+  }
+  const current = normaliseCodexAnimationState({ orbit: true, intensity: .44 });
+  assert.deepEqual(migrateCodexAnimationState(current), current);
+});
+
+test('brush points stay in normalized coordinates of their own leaf', () => {
+  for (const [sample, expected] of [
+    [{ x: 0, y: 0 }, [0, 0]],
+    [{ x: 1024, y: 1024 }, [1, 1]],
+    [{ x: 512, y: 512 }, [.5, .5]],
+    [{ x: -100, y: 4000 }, [0, 1]],
+    [{ x: NaN, y: Infinity }, [.5, .5]],
+  ]) {
+    const point = glyphSampleToPagePoint(sample);
+    assert.deepEqual([point.x, point.y], expected);
+  }
+  const resized = glyphSampleToPagePoint({ x: 100, y: 150 }, 200);
+  assert.deepEqual([resized.x, resized.y], [.5, .75]);
+});
 
 test('animation state normalises toggles and clamps intensity', () => {
   const state = normaliseCodexAnimationState({ holograms: false, intensity: 4 });
