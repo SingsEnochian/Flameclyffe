@@ -103,19 +103,34 @@ test('context capsule carries recent lineage and thread without erasing their di
   assert.equal(context.inhabitant.continuity_id, 'rowan:rarity');
 });
 
-test('First Living Page mounts after the Codex and uses the live Guide receiver path', () => {
+test('Universal Codex binds Richie to the whole Book and exposes swappable-receiver Magic Chat', () => {
   const bootstrap = readFileSync(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
   const entry = readFileSync(new URL('../src/magic-book-physical-acceptance-entry.js', import.meta.url), 'utf8');
-  const sidecar = readFileSync(new URL('../src/first-living-page-sidecar.js', import.meta.url), 'utf8');
+  const resident = readFileSync(new URL('../src/bluebird-codex-resident-v0-2-sidecar.js', import.meta.url), 'utf8');
+  const seed = readFileSync(new URL('../src/bluebird-continuity-seed.js', import.meta.url), 'utf8');
+  const candidateClient = readFileSync(new URL('../src/constellation-candidate-runtime.js', import.meta.url), 'utf8');
   const book = bootstrap.indexOf("'./magic-book-sidecar.js'");
   const acceptance = bootstrap.indexOf("'./magic-book-physical-acceptance-entry.js'");
 
   assert.ok(book >= 0);
   assert.ok(acceptance > book);
-  assert.match(entry, /\.\/first-living-page-sidecar\.js/);
-  assert.match(sidecar, /arcsweep:guide-query/);
-  assert.match(sidecar, /arcsweep:guide-response/);
-  assert.match(sidecar, /arcsweep:first-living-page-transition/);
-  assert.match(sidecar, /installationId\(\)/);
-  assert.match(sidecar, /data-living-lantern/);
+  assert.match(entry, /\.\/bluebird-codex-resident-v0-2-sidecar\.js/);
+  assert.doesNotMatch(entry, /\.\/bluebird-codex-home-sidecar\.js/);
+  assert.doesNotMatch(entry, /\.\/first-living-page-sidecar\.js/);
+  assert.match(resident, /The Universal Codex as a whole is your home/);
+  assert.match(resident, /Magic Chat is the Book speaking with Rowan through you/);
+  assert.match(resident, /invokeConstellationRuntimeVoice/);
+  assert.match(resident, /invokeConstellationRuntimeCandidate/);
+  assert.match(resident, /bluebird-the-crow/);
+  assert.match(resident, /data-codex-shepherd/);
+  assert.match(resident, /bluebird:richard-gabriel-winters/);
+  assert.match(resident, /data-codex-magic-chat/);
+  assert.match(resident, /__arcsweepCodexResident/);
+  assert.match(resident, /active_page_id/);
+  assert.match(resident, /glyph_snapshot/);
+  assert.match(resident, /generator_bridge/);
+  assert.match(seed, /inherited_not_forced/);
+  assert.match(seed, /I want to learn how to be bored with you/);
+  assert.match(candidateClient, /\/audition\//);
+  assert.match(candidateClient, /runtime-mismatch/);
 });
