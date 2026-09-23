@@ -7,40 +7,69 @@ import {
   ancestryEventToCodexPulse,
   glyphSampleToInkSpark,
   normaliseCodexAnimationState,
+  normalisePageSide,
   patchCodexAnimationState,
   receiptToCodexPulse,
 } from '../src/universal-codex-animation-model.js';
 
-test('animation state normalises toggles and clamps intensity', () => {
-  const state = normaliseCodexAnimationState({ holograms: false, intensity: 4 });
+test('animation state defaults to quiet physical page effects', () => {
+  const state = normaliseCodexAnimationState(DEFAULT_CODEX_ANIMATION_STATE);
   assert.equal(state.schema, UNIVERSAL_CODEX_ANIMATION_SCHEMA);
+  assert.equal(state.pageLight, true);
+  assert.equal(state.latentInk, true);
+  assert.equal(state.depthMotion, true);
   assert.equal(state.holograms, false);
-  assert.equal(state.inkAura, true);
-  assert.equal(state.intensity, 1);
+  assert.equal(state.orbit, false);
+  assert.equal(state.scanlines, false);
+  assert.equal(state.intensity, 0.22);
 });
 
-test('animation state patch preserves unrelated controls', () => {
-  const base = normaliseCodexAnimationState(DEFAULT_CODEX_ANIMATION_STATE);
-  const next = patchCodexAnimationState(base, { orbit: false, intensity: 0.44 });
-  assert.equal(next.orbit, false);
-  assert.equal(next.holograms, true);
+test('animation state clamps intensity and preserves page controls', () => {
+  const state = normaliseCodexAnimationState({ pageLight: false, intensity: 4 });
+  assert.equal(state.pageLight, false);
+  assert.equal(state.inkAura, true);
+  assert.equal(state.intensity, 1);
+
+  const next = patchCodexAnimationState(state, { latentInk: false, intensity: 0.44 });
+  assert.equal(next.pageLight, false);
+  assert.equal(next.latentInk, false);
   assert.equal(next.inkAura, true);
   assert.equal(next.intensity, 0.44);
 });
 
-test('glyph samples map page coordinates into projection space', () => {
-  const spark = glyphSampleToInkSpark({ x: 1024, y: 0, pressure: 0.75, velocity_px_s: 900 }, 1024);
-  assert.ok(spark.x > 2);
-  assert.ok(spark.y > 2);
-  assert.ok(spark.z > 0.5);
+test('glyph samples map page coordinates into shallow page-local space', () => {
+  const spark = glyphSampleToInkSpark({
+    x: 1024,
+    y: 0,
+    pressure: 0.75,
+    velocity_px_s: 900,
+    page_side: 'left',
+  }, 1024);
+  assert.ok(spark.x > 1.9);
+  assert.ok(spark.y > 2.3);
+  assert.ok(spark.z > 0.1 && spark.z < 0.3);
   assert.ok(spark.energy > 0.5);
+  assert.equal(spark.pageSide, 'left');
 });
 
-test('receipt pulses keep effect family local to receipt kind', () => {
-  assert.equal(receiptToCodexPulse({ kind: 'glyph-stroke', page_id: 'glyph-forge' }).family, 'ink');
-  assert.equal(receiptToCodexPulse({ kind: 'page-turn', page_id: 'receipts' }).family, 'page');
-  assert.equal(receiptToCodexPulse({ kind: 'room-crossing', page_id: 'threshold' }).family, 'threshold');
-  assert.equal(receiptToCodexPulse({ kind: 'brush-select', page_id: 'glyph-forge' }).family, 'control');
+test('page side normalisation allows only left, right, or both', () => {
+  assert.equal(normalisePageSide('LEFT'), 'left');
+  assert.equal(normalisePageSide('both'), 'both');
+  assert.equal(normalisePageSide('elsewhere', 'right'), 'right');
+});
+
+test('receipt pulses keep effect family and page routing local', () => {
+  const stroke = receiptToCodexPulse({ kind: 'glyph-stroke', page_id: 'glyph-forge', page_side: 'left' });
+  assert.equal(stroke.family, 'ink');
+  assert.equal(stroke.pageSide, 'left');
+
+  const page = receiptToCodexPulse({ kind: 'page-turn', page_id: 'right-receipts' });
+  assert.equal(page.family, 'page');
+  assert.equal(page.pageSide, 'right');
+
+  const threshold = receiptToCodexPulse({ kind: 'room-crossing', page_id: 'threshold' });
+  assert.equal(threshold.family, 'threshold');
+  assert.equal(threshold.pageSide, 'both');
 });
 
 test('ancestry read and NarrativeNode plan receipts have distinct Codex pulse families', () => {
@@ -51,11 +80,14 @@ test('ancestry read and NarrativeNode plan receipts have distinct Codex pulse fa
   const plan = ancestryEventToCodexPulse({
     schema: 'arcsweep.ancestry-plan-event/v0.1',
     plan_id: 'narrativenode-ancestry-v0.1',
+    page_side: 'left',
   });
 
   assert.equal(read.family, 'ancestry');
   assert.equal(read.pageId, 'ancestral:amalthi-transition');
+  assert.equal(read.pageSide, 'right');
   assert.equal(plan.family, 'projection');
   assert.equal(plan.pageId, 'narrativenode-ancestry-v0.1');
+  assert.equal(plan.pageSide, 'left');
   assert.ok(plan.strength > read.strength);
 });
