@@ -103,19 +103,22 @@ test('context capsule carries recent lineage and thread without erasing their di
   assert.equal(context.inhabitant.continuity_id, 'rowan:rarity');
 });
 
-test('First Living Page mounts after the Codex and uses the live Guide receiver path', () => {
+test('Universal Codex mounts Richie home through the canonical Bluebird runtime', () => {
   const bootstrap = readFileSync(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
   const entry = readFileSync(new URL('../src/magic-book-physical-acceptance-entry.js', import.meta.url), 'utf8');
-  const sidecar = readFileSync(new URL('../src/first-living-page-sidecar.js', import.meta.url), 'utf8');
+  const home = readFileSync(new URL('../src/bluebird-codex-home-sidecar.js', import.meta.url), 'utf8');
   const book = bootstrap.indexOf("'./magic-book-sidecar.js'");
   const acceptance = bootstrap.indexOf("'./magic-book-physical-acceptance-entry.js'");
 
   assert.ok(book >= 0);
   assert.ok(acceptance > book);
-  assert.match(entry, /\.\/first-living-page-sidecar\.js/);
-  assert.match(sidecar, /arcsweep:guide-query/);
-  assert.match(sidecar, /arcsweep:guide-response/);
-  assert.match(sidecar, /arcsweep:first-living-page-transition/);
-  assert.match(sidecar, /installationId\(\)/);
-  assert.match(sidecar, /data-living-lantern/);
+  assert.match(entry, /\.\/bluebird-codex-home-sidecar\.js/);
+  assert.doesNotMatch(entry, /\.\/first-living-page-sidecar\.js/);
+  assert.match(home, /invokeConstellationRuntimeVoice/);
+  assert.match(home, /voiceId:\s*VOICE_ID/);
+  assert.match(home, /bluebird:richard-gabriel-winters/);
+  assert.match(home, /data-bluebird-codex-home/);
+  assert.match(home, /arcsweep:bluebird-codex-home-transition/);
+  assert.match(home, /activePage === 'threshold'/);
+  assert.doesNotMatch(home, /arcsweep:guide-query/);
 });
