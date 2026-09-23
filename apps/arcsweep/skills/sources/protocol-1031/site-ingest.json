@@ -1,0 +1,58 @@
+{
+  "schema": "arcsweep.external-site-ingest/v0.1",
+  "corpus_id": "protocol-1031-interface-reference",
+  "name": "Protocol-1031 public interface and experiment-design reference corpus",
+  "prepared_at": "2026-09-22",
+  "base_url": "https://protocol-1031.com/",
+  "entry_url": "https://protocol-1031.com/?lang=en",
+  "scope_mode": "public-site-interface-and-method-reference",
+  "storage_mode": "metadata-hashes-link-graph-and-paraphrased-pattern-records",
+  "default_source_class": "protocol-1031-public-reference",
+  "copyright_policy": {
+    "mirror_full_prose": false,
+    "mirror_images": false,
+    "persist_raw_html": false,
+    "persist_page_text": false,
+    "retain_source_hashes": true,
+    "retain_canonical_urls": true,
+    "retain_titles_and_public_metadata": true,
+    "semantic_output": "compact-paraphrase-only",
+    "note": "Protocol-1031 is ingested only as an external design and method reference. Branding, prose, visual assets, and claims are not copied into ArcSweep canon."
+  },
+  "crawl": {
+    "same_origin_only": true,
+    "discover_sitemaps": true,
+    "respect_robots": true,
+    "follow_internal_links_from_relevant_pages": true,
+    "max_pages": 250,
+    "max_depth": 3,
+    "delay_ms": 500,
+    "user_agent": "ArcSweep-ExternalReferenceIndexer/0.1 (+provenance-only)",
+    "drop_query_parameters": ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"],
+    "deny_path_prefixes": ["/account", "/checkout", "/payment"],
+    "direct_path_prefixes": ["/"],
+    "relevance_terms": ["protocol-1031", "field evaluation", "magnetometer", "spectrogram", "ganzfeld", "spirit box", "agent", "station", "activation", "monitoring"]
+  },
+  "seed_urls": [
+    "https://protocol-1031.com/?lang=en"
+  ],
+  "classification_rules": [
+    {"match": "/", "class": "protocol-1031-public-interface"}
+  ],
+  "semantic_signal_terms": {
+    "staged-activation": ["activation", "evaluation", "final operation", "recruitment"],
+    "participant-identity": ["agent", "code", "cell", "registration"],
+    "field-instrumentation": ["magnetometer", "emf", "spectrogram", "evp", "spirit box"],
+    "paired-observation": ["ganzfeld", "remote observer", "observer"],
+    "network-topology": ["station", "network", "cell"],
+    "timed-event": ["october", "countdown", "operation"],
+    "restricted-interface-theatre": ["protocol", "restricted", "monitoring", "transmission"]
+  },
+  "output": {
+    "default_directory": "ingests/protocol-1031",
+    "source_index": "source-index.json",
+    "link_graph": "link-graph.json",
+    "crawl_report": "crawl-report.json"
+  },
+  "reference_pack": "apps/arcsweep/skills/sources/protocol-1031/reference-pack.v0.1.json"
+}
