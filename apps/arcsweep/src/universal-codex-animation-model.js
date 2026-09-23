@@ -1,4 +1,4 @@
-export const UNIVERSAL_CODEX_ANIMATION_SCHEMA = 'arcsweep.universal-codex-animation/v0.3';
+export const UNIVERSAL_CODEX_ANIMATION_SCHEMA = 'arcsweep.universal-codex-animation/v0.4';
 export const UNIVERSAL_CODEX_ANIMATION_KEY = 'arcsweep.universal-codex-animation.v0.1';
 
 export const DEFAULT_CODEX_ANIMATION_STATE = Object.freeze({
@@ -14,6 +14,8 @@ export const DEFAULT_CODEX_ANIMATION_STATE = Object.freeze({
   scanlines: false,
 });
 
+const LEGACY_LOUD_DEFAULT_INTENSITY = 0.72;
+
 function finite(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
@@ -26,16 +28,25 @@ export function normalisePageSide(value, fallback = 'right') {
 }
 
 export function normaliseCodexAnimationState(value = {}) {
+  const source = value && typeof value === 'object' ? value : {};
+  const sourceSchema = String(source.schema || '');
+  const parsedIntensity = finite(source.intensity, DEFAULT_CODEX_ANIMATION_STATE.intensity);
+  const migrateLegacyDefault = sourceSchema !== UNIVERSAL_CODEX_ANIMATION_SCHEMA
+    && Math.abs(parsedIntensity - LEGACY_LOUD_DEFAULT_INTENSITY) < 1e-9;
+  const intensity = migrateLegacyDefault
+    ? DEFAULT_CODEX_ANIMATION_STATE.intensity
+    : parsedIntensity;
+
   return Object.freeze({
     schema: UNIVERSAL_CODEX_ANIMATION_SCHEMA,
-    pageLight: value.pageLight !== false,
-    latentInk: value.latentInk !== false,
-    inkAura: value.inkAura !== false,
-    depthMotion: value.depthMotion !== false,
-    intensity: Math.max(0.02, Math.min(1, finite(value.intensity, DEFAULT_CODEX_ANIMATION_STATE.intensity))),
-    holograms: value.holograms === true,
-    orbit: value.orbit === true,
-    scanlines: value.scanlines === true,
+    pageLight: source.pageLight !== false,
+    latentInk: source.latentInk !== false,
+    inkAura: source.inkAura !== false,
+    depthMotion: source.depthMotion !== false,
+    intensity: Math.max(0.02, Math.min(1, intensity)),
+    holograms: source.holograms === true,
+    orbit: source.orbit === true,
+    scanlines: source.scanlines === true,
   });
 }
 

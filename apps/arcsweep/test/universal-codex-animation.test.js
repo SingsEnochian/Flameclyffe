@@ -24,6 +24,37 @@ test('animation state defaults to quiet physical page effects', () => {
   assert.equal(state.intensity, 0.22);
 });
 
+test('legacy loud default migrates once without clobbering later user intensity choices', () => {
+  const v02 = normaliseCodexAnimationState({
+    schema: 'arcsweep.universal-codex-animation/v0.2',
+    intensity: 0.72,
+    inkAura: false,
+  });
+  assert.equal(v02.schema, UNIVERSAL_CODEX_ANIMATION_SCHEMA);
+  assert.equal(v02.intensity, 0.22);
+  assert.equal(v02.inkAura, false);
+
+  const v03 = normaliseCodexAnimationState({
+    schema: 'arcsweep.universal-codex-animation/v0.3',
+    intensity: 0.72,
+    pageLight: false,
+  });
+  assert.equal(v03.intensity, 0.22);
+  assert.equal(v03.pageLight, false);
+
+  const deliberateLegacyEraChoice = normaliseCodexAnimationState({
+    schema: 'arcsweep.universal-codex-animation/v0.3',
+    intensity: 0.44,
+  });
+  assert.equal(deliberateLegacyEraChoice.intensity, 0.44);
+
+  const current = normaliseCodexAnimationState({
+    schema: UNIVERSAL_CODEX_ANIMATION_SCHEMA,
+    intensity: 0.72,
+  });
+  assert.equal(current.intensity, 0.72);
+});
+
 test('animation state clamps intensity and preserves page controls', () => {
   const state = normaliseCodexAnimationState({ pageLight: false, intensity: 4 });
   assert.equal(state.pageLight, false);
