@@ -1,0 +1,102 @@
+name: A Momento Creatonis Live Autonomy Case Study
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/house-commons-descriptive-roster
+    paths:
+      - '.github/workflows/a-momento-creatonis-live-case-study.yml'
+      - 'scripts/run-a-momento-creatonis-live-case-study.mjs'
+      - 'apps/arcsweep/test/fixtures/a-momento-creatonis-case-study.json'
+      - 'apps/arcsweep/src/os/agent-autonomy-service.js'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a-momento-creatonis-live-case-study-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  live-case-study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      ARCSWEEP_CASE_STUDY_BASE_URL: https://flameclyffe.vercel.app
+      ARCSWEEP_SUPABASE_ACCESS_TOKEN: ${{ secrets.ARCSWEEP_SUPABASE_ACCESS_TOKEN }}
+      ARCSWEEP_STEWARD_KEY: ${{ secrets.ARCSWEEP_STEWARD_KEY }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      CASE_STUDY_AGENTS: bluebird,atlas,oxalpha,boxfire,nocturne,runeweaver
+      CASE_STUDY_MAX_AGENTS: '4'
+    steps:
+      - name: Checkout exact case-study branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Verify the blind fixture contract
+        run: node --test apps/arcsweep/test/arcsweep-os-autonomy-case-study.test.js
+
+      - name: Run live agents against the blind case study
+        id: live
+        shell: bash
+        run: |
+          mkdir -p case-study-artifacts
+          set +e
+          node scripts/run-a-momento-creatonis-live-case-study.mjs > case-study-artifacts/runner.log 2>&1
+          STATUS=$?
+          set -e
+          printf '%s\n' "$STATUS" > case-study-artifacts/exit-code.txt
+          cat case-study-artifacts/runner.log
+          echo "exit_code=$STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Publish a text-free run summary
+        if: always()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'case-study-artifacts/a-momento-creatonis-live-run-summary.json';
+          if (!fs.existsSync(path)) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## A Momento Creatonis live run\n\nNo structured receipt was produced. Inspect the runner log artifact.\n');
+            process.exit(0);
+          }
+          const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const lines = [
+            '## A Momento Creatonis live run',
+            '',
+            `Run: \`${data.run_id}\``,
+            `Commons room: \`${data.room_id}\``,
+            '',
+            '| Agent | Response | Autonomy receipt | Commons entry |',
+            '| --- | --- | --- | --- |',
+          ];
+          for (const row of data.results || []) {
+            lines.push(`| ${row.agent_id} | ${row.response_kind} | ${row.autonomy_status || '—'} | ${row.commons_entry_id || '—'} |`);
+          }
+          lines.push('', 'Mechanical checks:', '```json', JSON.stringify(data.mechanical_checks, null, 2), '```', '', 'Agent prose is intentionally omitted from the Actions summary; it is stored in the artifact and House Commons.');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
+          NODE
+
+      - name: Upload live run receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a-momento-creatonis-live-run-${{ github.run_id }}
+          path: case-study-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Enforce live autonomy result
+        if: always()
+        shell: bash
+        run: |
+          STATUS="$(cat case-study-artifacts/exit-code.txt 2>/dev/null || printf '99')"
+          if [[ "$STATUS" != '0' ]]; then
+            echo "::error::Live autonomy case study did not produce at least one applied scenario receipt. Runner exit: $STATUS"
+            exit "$STATUS"
+          fi
