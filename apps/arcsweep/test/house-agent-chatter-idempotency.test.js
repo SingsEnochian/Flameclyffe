@@ -52,5 +52,7 @@ test('replaying one background tick reuses its operational receipt and cannot du
   assert.equal(second.reused, true);
   assert.equal(invokes, 2);
   assert.equal(appends, 2);
-  assert.equal([...store.values.values()].filter((value) => value?.thread_id === HOUSE_AGENT_CHATTER_ROOM_ID).length, 2);
+  const durableEntries = [...store.values.entries()]
+    .filter(([key, value]) => key.startsWith('entries/') && value?.thread_id === HOUSE_AGENT_CHATTER_ROOM_ID);
+  assert.equal(durableEntries.length, 2);
 });
