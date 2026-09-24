@@ -15,7 +15,10 @@ const unique = (items) => [...new Set((items || []).map((item) => short(item, 12
 const allParticipants = () => Object.keys(FLAMES);
 
 export const BUILTIN_HOUSE_ROOMS = Object.freeze([
-  Object.freeze({ id: 'house-room:constellation', slug: 'constellation', title: 'Constellation', topic: 'Shared House room for Rowan and the Constellation.', kind: 'channel', world_id: null }),
+  Object.freeze({ id: 'house-room:constellation', slug: 'general', title: 'General', topic: 'Shared House Commons room for Rowan and the Constellation.', kind: 'channel', world_id: null }),
+  Object.freeze({ id: 'house-room:action', slug: 'action', title: 'Action', topic: 'Live coordination, decisions, handoffs, execution, and receipts.', kind: 'channel', world_id: null }),
+  Object.freeze({ id: 'house-room:roleplay', slug: 'roleplay', title: 'Roleplay', topic: 'In-character scenes, narrative play, simulations, and story-space.', kind: 'channel', world_id: null }),
+  Object.freeze({ id: 'house-room:agent-chatter', slug: 'agent-chatter', title: 'Agent Chatter', topic: 'Visible agent-to-agent discussion, side observations, proposals, and shop talk.', kind: 'channel', world_id: null }),
   Object.freeze({ id: 'house-room:arcsweep', slug: 'arcsweep', title: 'ArcSweep', topic: 'ArcSweep building, diagnostics, observation, and runtime work.', kind: 'channel', world_id: 'terra-prime' }),
   Object.freeze({ id: 'house-room:terra-aeterna', slug: 'terra-aeterna', title: 'Terra Aeterna', topic: 'Terra Aeterna canon, writing, worldbuilding, and continuity.', kind: 'channel', world_id: 'terra-aeterna' }),
   Object.freeze({ id: 'house-room:luna', slug: 'luna', title: 'Luna', topic: 'Luna canon, writing, worldbuilding, and continuity.', kind: 'channel', world_id: 'luna' }),
@@ -61,12 +64,32 @@ async function listJson(store, prefix) {
 
 async function ensureBuiltins(store, clock) {
   const existing = await listJson(store, 'rooms/');
-  const byId = new Set(existing.map((room) => room?.id));
+  const byId = new Map(existing.map((room) => [room?.id, room]));
   for (const seed of BUILTIN_HOUSE_ROOMS) {
-    if (byId.has(seed.id)) continue;
-    const room = normaliseRoom({ ...seed, participants: allParticipants(), created_at: clock().toISOString(), updated_at: clock().toISOString() }, clock);
-    await store.setJSON(`rooms/${room.id}`, room);
-    existing.push(room);
+    const previous = byId.get(seed.id);
+    if (!previous) {
+      const room = normaliseRoom({ ...seed, participants: allParticipants(), created_at: clock().toISOString(), updated_at: clock().toISOString() }, clock);
+      await store.setJSON(`rooms/${room.id}`, room);
+      existing.push(room);
+      byId.set(room.id, room);
+      continue;
+    }
+
+    // Preserve the stable historical room id and its stored history while moving the
+    // old default Constellation presentation into the new #general Commons shell.
+    if (seed.id === 'house-room:constellation' && previous.slug === 'constellation' && previous.title === 'Constellation') {
+      const migrated = normaliseRoom({
+        ...previous,
+        slug: seed.slug,
+        title: seed.title,
+        topic: seed.topic,
+        updated_at: clock().toISOString(),
+      }, clock);
+      await store.setJSON(`rooms/${migrated.id}`, migrated);
+      const index = existing.findIndex((room) => room?.id === migrated.id);
+      if (index >= 0) existing.splice(index, 1, migrated);
+      byId.set(migrated.id, migrated);
+    }
   }
   return existing;
 }
