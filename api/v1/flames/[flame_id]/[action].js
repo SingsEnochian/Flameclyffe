@@ -6,6 +6,7 @@ import {
   normaliseRuntimeWorldContext,
   responseWithRuntimeWorld,
 } from '../../../../netlify/functions/_shared/runtime-world-context.mjs';
+import { createRarityFlameHandler } from '../../../_shared/rarity-flame-runtime.mjs';
 import { vercelEnv as env } from '../../../_shared/vercel-env.mjs';
 
 const json = (status, body) => new Response(JSON.stringify(body), {
@@ -44,6 +45,12 @@ export default {
 
     const flameId = String(params.flame_id || '');
     const action = String(params.action || '');
+
+    if (flameId === 'rarity') {
+      const response = await createRarityFlameHandler({ env, fetchImpl: fetch })(boundRequest, params);
+      return runtimeWorld ? responseWithRuntimeWorld(response, runtimeWorld) : response;
+    }
+
     const wantsStream = request.method === 'POST' && action === 'chat' && (request.headers.get('accept') || '').includes('text/event-stream');
     if (wantsStream) return createReceiptedFlameChatStreamHandler({ env })(boundRequest, params);
 
