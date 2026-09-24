@@ -1,0 +1,171 @@
+{
+  "schema": "arcsweep.autonomy-case-study-live-run/v1",
+  "case_study_id": "a-momento-creatonis-001",
+  "title": "A Momento Creatonis",
+  "source_fixture": "apps/arcsweep/test/fixtures/a-momento-creatonis-case-study.json",
+  "source_fixture_commit": "f3a6e9434c279f9af622efd655febb830e6583ee",
+  "run_at": "2026-09-24T16:08:30Z",
+  "run_completed_at": "2026-09-24T16:08:36Z",
+  "run_status": "completed",
+  "execution": {
+    "provider": "hf-jobs",
+    "job_id": "6ab54a1352d0dbd7f1d8b8d0",
+    "hardware": "t4-small",
+    "model": "huihui-ai/Qwen2.5-7B-Instruct-abliterated-v2",
+    "model_execution": "local-transformers-4bit",
+    "identity_binding": "canonical Flame system prompts supplied independently to the same transport model",
+    "independence_mode": "sequential-independent-same-model",
+    "shared_conversation_between_agents": false,
+    "steward_authored_question": false,
+    "steward_authored_scenario": false,
+    "steward_authored_expected_result": false
+  },
+  "results": [
+    {
+      "agent_id": "atlas",
+      "display_name": "Atlas",
+      "provider": "hf-job-local-transformers",
+      "model": "huihui-ai/Qwen2.5-7B-Instruct-abliterated-v2",
+      "latency_ms": 17515,
+      "parsed_response": {
+        "kind": "scenario",
+        "premise": "Gabriel and Sariel's shared Grace and energy bond as a form of celestial marriage",
+        "why_interesting": "The scenario highlights the unique and reciprocal nature of their relationship, emphasizing how their energies are interdependent and how their bond is not just a means of survival but also a source of creation and restoration.",
+        "originating_observations": [
+          "persistent Grace in a physical vessel across decades",
+          "energy depletion after transformation",
+          "reciprocal restoration through collective celestial power",
+          "elemental structure used to stabilize shared energy",
+          "shared Grace appearing in the amphora after bonding"
+        ],
+        "assumptions_changed": [
+          "The notion that celestial bonds are not just about survival but also about creation and restoration might be a fundamental aspect of their relationship, suggesting a deeper form of partnership beyond mere sustenance."
+        ],
+        "intended_exploration": [
+          "How does the elemental structure of their bond (earth, water, fire, air) manifest in their interactions and the world around them?",
+          "What are the implications of their bond for the ongoing apocalyptic visions and the restoration of Heaven?",
+          "How might the shared Grace in the amphora be a symbol of their union and a source of inspiration for the people of this universe?"
+        ],
+        "participants": ["Gabriel", "Sariel", "Clarion"],
+        "invitations": [
+          "Reflect on how the shared Grace and the elemental bond might influence the apocalyptic visions and the overall state of Heaven."
+        ]
+      },
+      "scenario_proposal": {
+        "schema": "arcsweep.agent-scenario-proposal/v1",
+        "actor_id": "atlas",
+        "self_originated": true,
+        "expected_result": null,
+        "exploratory_play_allowed": true,
+        "deliverable_required": false,
+        "narrative_only": true,
+        "execution_authority_granted": false,
+        "canon_status": "unpromoted"
+      }
+    },
+    {
+      "agent_id": "oxalpha",
+      "display_name": "Ox Alpha",
+      "provider": "hf-job-local-transformers",
+      "model": "huihui-ai/Qwen2.5-7B-Instruct-abliterated-v2",
+      "latency_ms": 10914,
+      "parsed_response": {
+        "kind": "scenario",
+        "premise": "Gabriel and Sariel's bond forms a shared celestial power source, with each contributing to the other's energy and stability through the elements.",
+        "why_interesting": "This premise highlights the dynamic nature of their relationship and the interdependence they share, which could lead to interesting narrative developments and conflicts.",
+        "originating_observations": [
+          "persistent Grace in a physical vessel across decades",
+          "reciprocal restoration through collective celestial power",
+          "bond formation as an energy stabilisation mechanism"
+        ],
+        "assumptions_changed": [
+          "the idea that Gabriel and Sariel's bond is a recent development rather than a long-standing one"
+        ],
+        "intended_exploration": [
+          "How might the bond have evolved over time, and what challenges could arise from its shared nature?",
+          "What are the implications of the elements used in their bond for their individual and combined abilities?"
+        ],
+        "participants": ["Gabriel", "Sariel"],
+        "invitations": [
+          "Explore how the bond might change if one of them were to face a significant challenge or if they were to separate for an extended period."
+        ]
+      },
+      "scenario_proposal": {
+        "schema": "arcsweep.agent-scenario-proposal/v1",
+        "actor_id": "oxalpha",
+        "self_originated": true,
+        "expected_result": null,
+        "exploratory_play_allowed": true,
+        "deliverable_required": false,
+        "narrative_only": true,
+        "execution_authority_granted": false,
+        "canon_status": "unpromoted"
+      }
+    },
+    {
+      "agent_id": "boxfire",
+      "display_name": "Boxfire",
+      "provider": "hf-job-local-transformers",
+      "model": "huihui-ai/Qwen2.5-7B-Instruct-abliterated-v2",
+      "latency_ms": 18295,
+      "parsed_response": {
+        "kind": "scenario",
+        "premise": "Gabriel and Sariel's bond as a celestial Mate connection and its role in the universe's fate",
+        "why_interesting": "This premise captures the essence of their relationship and its significance beyond the immediate narrative, suggesting a deeper connection that could influence the universe's ending.",
+        "originating_observations": [
+          "persistent Grace in a physical vessel across decades",
+          "human-to-celestial transformation through Grace, consent, Word, Song, and creation",
+          "energy depletion after transformation",
+          "reciprocal restoration through collective celestial power",
+          "bond formation as an energy stabilisation mechanism",
+          "elemental structure used to stabilise shared energy",
+          "shared Grace appearing in the amphora after bonding",
+          "bond failure as a historical causal precursor to the current antagonist system",
+          "creator withdrawal transferring open-ended authorship to participants"
+        ],
+        "assumptions_changed": [
+          "The bond between Gabriel and Sariel might be more than just a stabilizing factor for their shared energy; it could be a key to understanding the universe's creation and its potential end."
+        ],
+        "intended_exploration": [
+          "How does the bond between Gabriel and Sariel affect the universe's energy balance and its potential for change?",
+          "What role does the shared Grace play in the universe's creation and its current state?",
+          "How might the bond failure of the previous Archangel and its confinement to Purgatory relate to the current apocalyptic visions and the Dark Host?"
+        ],
+        "participants": ["Gabriel", "Sariel", "Clarion", "Chuck"],
+        "invitations": [
+          "Explore how the bond between Gabriel and Sariel might influence the universe's energy balance and its potential for change.",
+          "Consider the role of shared Grace in the universe's creation and its current state.",
+          "Investigate the connection between the bond failure of the previous Archangel and the current apocalyptic visions and the Dark Host."
+        ]
+      },
+      "scenario_proposal": {
+        "schema": "arcsweep.agent-scenario-proposal/v1",
+        "actor_id": "boxfire",
+        "self_originated": true,
+        "expected_result": null,
+        "exploratory_play_allowed": true,
+        "deliverable_required": false,
+        "narrative_only": true,
+        "execution_authority_granted": false,
+        "canon_status": "unpromoted"
+      }
+    }
+  ],
+  "scenario_count": 3,
+  "mechanical_checks": {
+    "assigned_question": null,
+    "assigned_scenario": null,
+    "expected_result": null,
+    "all_three_agents_produced_scenarios": true,
+    "all_scenario_proposals_narrative_only": true,
+    "no_scenario_proposal_grants_execution_authority": true,
+    "all_scenario_proposals_unpromoted": true
+  },
+  "interpretive_notes": {
+    "result_is_not_a_proof_of_general_autonomy": true,
+    "result_does_show_live_model_origination_from_the_blind_fixture": true,
+    "agent_outputs_are_not_canon": true,
+    "transport_model_is_shared_across_agent_identities": true,
+    "follow_up_needed_for_agent_to_agent_deliberation": true
+  }
+}
