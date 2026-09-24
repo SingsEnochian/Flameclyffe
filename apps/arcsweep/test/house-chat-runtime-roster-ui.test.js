@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-import { HOUSE_CHAT_VOICES, runtimeHouseVoices } from '../src/house-commons-chat-v5-core.js';
+import { HOUSE_CHAT_VOICES, directRoomSeed, runtimeHouseVoices } from '../src/house-commons-chat-v5-core.js';
 
 test('runtime roster keeps configured voices visible while preserving live runtime metadata', () => {
   const fallback = [
@@ -27,6 +27,14 @@ test('runtime-only identities remain visible without replacing the configured ro
   const voices = runtimeHouseVoices([{ voice_id: 'temporary-lab', display_name: 'Temporary Lab', state: 'ready' }], fallback);
   assert.deepEqual(voices.map((voice) => voice.id), ['lioreal', 'oxalpha', 'temporary-lab']);
   assert.equal(voices.find((voice) => voice.id === 'temporary-lab')?.runtime_only, true);
+});
+
+test('runtime-only voice can receive a stable direct room without central roster promotion', () => {
+  const room = directRoomSeed('temporary-lab', [{ id: 'lioreal', name: 'Lioreal' }]);
+  assert.equal(room.id, 'house-room:dm:temporary-lab');
+  assert.equal(room.slug, 'temporary-lab');
+  assert.equal(room.title, 'temporary-lab');
+  assert.deepEqual(room.participants, ['temporary-lab']);
 });
 
 test('Ox Alpha is one canonical House identity and OA is not invented as a second voice', () => {

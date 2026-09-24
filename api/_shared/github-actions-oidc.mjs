@@ -49,6 +49,7 @@ export async function verifyGitHubActionsOidc(token, {
   audience = HOUSE_SMOKE_AUDIENCE,
   repository = HOUSE_SMOKE_REPOSITORY,
   workflowRef = null,
+  eventNames = ['workflow_dispatch'],
 } = {}) {
   const parts = String(token || '').split('.');
   if (parts.length !== 3) throw new Error('GitHub OIDC token is malformed.');
@@ -81,7 +82,8 @@ export async function verifyGitHubActionsOidc(token, {
     ? claims.workflow_ref === workflowRef
     : TRUSTED_SMOKE_WORKFLOWS.has(claims.workflow_ref);
   if (!acceptedWorkflow) throw new Error('GitHub OIDC workflow is not authorised.');
-  if (claims.event_name !== 'workflow_dispatch') throw new Error('GitHub OIDC event is not authorised.');
+  const acceptedEvents = new Set((Array.isArray(eventNames) ? eventNames : [eventNames]).map((value) => String(value || '')));
+  if (!acceptedEvents.has(claims.event_name)) throw new Error('GitHub OIDC event is not authorised.');
 
   return Object.freeze({
     repository: claims.repository,

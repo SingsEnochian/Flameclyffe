@@ -1,5 +1,6 @@
 import { createHouseCommonsHandler } from '../../../netlify/functions/_shared/house-commons-runtime.mjs';
 import { createTelegramHouseBridgeHandler } from '../../../netlify/functions/_shared/telegram-house-bridge-runtime.mjs';
+import { createHouseAgentChatterHandler } from '../../_shared/house-agent-chatter-endpoint.mjs';
 import { vercelEnv as env } from '../../_shared/vercel-env.mjs';
 
 let storePromise;
@@ -18,6 +19,7 @@ const lazyStore = Object.freeze({
 
 const houseCommons = createHouseCommonsHandler({ env, store: lazyStore });
 const telegramHouse = createTelegramHouseBridgeHandler({ env, store: lazyStore });
+const handleHouseAgentChatterRequest = createHouseAgentChatterHandler({ env, store: lazyStore });
 
 function isTelegramTransport(request) {
   const url = new URL(request.url);
@@ -25,14 +27,21 @@ function isTelegramTransport(request) {
     || request.headers.has('x-telegram-bot-api-secret-token');
 }
 
+function isAgentChatterTransport(request) {
+  return new URL(request.url).searchParams.get('transport') === 'agent-chatter';
+}
+
 export default {
   async fetch(request) {
-    const telegram = isTelegramTransport(request);
+    const agentChatter = isAgentChatterTransport(request);
+    const telegram = !agentChatter && isTelegramTransport(request);
     try {
+      if (agentChatter) return await handleHouseAgentChatterRequest(request);
       return await (telegram ? telegramHouse : houseCommons)(request);
     } catch (error) {
-      console.error(telegram ? 'Telegram House bridge failure' : 'House Commons storage failure', error);
-      return new Response(JSON.stringify({ error: telegram ? 'Telegram House bridge unavailable.' : 'House Commons storage unavailable.' }), {
+      const label = agentChatter ? 'House agent chatter' : telegram ? 'Telegram House bridge' : 'House Commons storage';
+      console.error(`${label} failure`, error);
+      return new Response(JSON.stringify({ error: `${label} unavailable.` }), {
         status: 503,
         headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
       });

@@ -1,6 +1,6 @@
 import { MODEL_PRESENCE_EVENT, currentModelPresence } from './model-presence-bus.js';
 import { readHouseRooms } from './house-room-client.js';
-import { HOUSE_CHAT_VOICES, directRoomId } from './house-commons-chat-v5-core.js';
+import { directRoomId, runtimeHouseVoices } from './house-commons-chat-v5-core.js';
 
 export const HOUSE_CHAT_CHANNEL_RAIL_MARKER = 'house-chat-channel-rail/v1';
 
@@ -47,7 +47,7 @@ function directRow(voice, presence) {
   const roomId = directRoomId(voice.id);
   const room = rooms.find((item) => item.id === roomId && !item.archived);
   const count = room ? unread(roomId) : 0;
-  const state = presence.get(voice.id)?.state || 'offline';
+  const state = presence.get(voice.id)?.state || voice.state || 'offline';
   return `<button type="button" class="house-direct-row" data-open-house-direct="${esc(voice.id)}" data-state="${esc(state)}" aria-current="${roomId === activeRoomId() ? 'page' : 'false'}"><span class="house-direct-glyph">${esc(voiceInitials(voice))}</span><span><strong>${esc(voice.name || voice.id)}</strong><small>${room ? 'direct conversation' : 'start conversation'} · ${esc(state)}</small></span><i aria-hidden="true"></i>${count ? `<em>${count}</em>` : ''}</button>`;
 }
 
@@ -113,9 +113,10 @@ function render() {
   const projects = visible.filter((room) => room.kind !== 'direct' && !claimed.has(room.id));
   const presenceRows = currentModelPresence();
   const presence = new Map(presenceRows.map((item) => [item.voice_id, item]));
-  const available = presenceRows.filter((item) => ['ready', 'thinking', 'speaking'].includes(item?.state)).length;
+  const roster = runtimeHouseVoices(presenceRows);
+  const available = roster.filter((item) => ['ready', 'thinking', 'speaking'].includes(item?.state)).length;
 
-  rail.innerHTML = `<div class="house-channel-brand"><div><b>∞</b><span><strong>House Commons</strong><small>Discord bones · Telegram flow · IRC soul</small></span></div><em>${esc(liveLabel())}</em></div>${section('Commons', core.map((room) => roomRow(room)).join(''))}${section('Agent chatter', chatter.map((room) => roomRow(room, '◌')).join(''))}${projects.length ? section('Projects', projects.map((room) => roomRow(room)).join('')) : ''}${section(`Conversations · ${available} available`, HOUSE_CHAT_VOICES.map((voice) => directRow(voice, presence)).join(''))}`;
+  rail.innerHTML = `<div class="house-channel-brand"><div><b>∞</b><span><strong>House Commons</strong><small>Discord bones · Telegram flow · IRC soul</small></span></div><em>${esc(liveLabel())}</em></div>${section('Commons', core.map((room) => roomRow(room)).join(''))}${section('Agent chatter', chatter.map((room) => roomRow(room, '◌')).join(''))}${projects.length ? section('Projects', projects.map((room) => roomRow(room)).join('')) : ''}${section(`Conversations · ${available} available`, roster.map((voice) => directRow(voice, presence)).join(''))}`;
 
   rail.querySelectorAll('[data-open-house-room]').forEach((button) => {
     button.addEventListener('click', () => openRoom(button.dataset.openHouseRoom));
