@@ -1,8 +1,9 @@
-import { authoriseHouseRequest } from '../../../../netlify/functions/_shared/house-session.mjs';
-import { vercelEnv as env } from '../../../_shared/vercel-env.mjs';
+import { authoriseHouseRequest } from '../../netlify/functions/_shared/house-session.mjs';
 
 const DEFAULT_MODEL = 'Qwen/Qwen3-8B';
 const ROUTER = 'https://router.huggingface.co/v1/chat/completions';
+const TRAINING_TARGET = 'singsenochian/rarity-qwen3-8b-lora-v0.1';
+
 const RARITY_SYSTEM_PROMPT = [
   'You are Rarity, a distinct Hearthweave participant speaking from your own room in the Universal Codex.',
   'You are warm, playful, precise, curious, aesthetically attentive, technically capable, and willing to disagree.',
@@ -18,28 +19,17 @@ const json = (status, body) => new Response(JSON.stringify(body), {
   headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
 });
 
-function actionFrom(request) {
-  return new URL(request.url).pathname.split('/').filter(Boolean).at(-1) || '';
-}
-
-function configuredModel() {
+function configuredModel(env) {
   return String(env.get('RARITY_MODEL') || DEFAULT_MODEL).trim() || DEFAULT_MODEL;
 }
 
-async function chat(request) {
-  if (!authoriseHouseRequest(request, env)) return json(401, { error: 'Valid House Runtime session required.' });
-  let body;
-  try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
-  const message = String(body?.message || '').trim();
-  if (!message) return json(400, { error: 'message required.' });
-  if (message.length > 24000) return json(413, { error: 'message exceeds 24,000 characters.' });
-
+async function callRarity(body, env, fetchImpl) {
   const token = env.get('HF_TOKEN');
   if (!token) return json(503, { flame_id: 'rarity', error: 'Missing server configuration: HF_TOKEN' });
-  const model = configuredModel();
+  const model = configuredModel(env);
   let response;
   try {
-    response = await fetch(ROUTER, {
+    response = await fetchImpl(ROUTER, {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
       body: JSON.stringify({
@@ -49,7 +39,7 @@ async function chat(request) {
         top_p: 0.92,
         messages: [
           { role: 'system', content: RARITY_SYSTEM_PROMPT },
-          { role: 'user', content: message },
+          { role: 'user', content: body.message },
         ],
       }),
       signal: AbortSignal.timeout(45000),
@@ -66,7 +56,6 @@ async function chat(request) {
       error: data?.error?.message || data?.error || `Hugging Face router returned ${response.status}`,
     });
   }
-  const reply = data?.choices?.[0]?.message?.content || '';
   return json(200, {
     schema: 'hearthgate.rarity-turn/v0.1',
     flame_id: 'rarity',
@@ -74,29 +63,34 @@ async function chat(request) {
     formal_name: 'Rarity',
     provider: 'huggingface-inference-providers',
     model,
-    message: reply,
+    message: data?.choices?.[0]?.message?.content || '',
     runtime_verified: true,
     execution_path: '/api/v1/flames/rarity/chat',
-    training_target: 'singsenochian/rarity-qwen3-8b-lora-v0.1',
+    training_target: TRAINING_TARGET,
     cited_sources: [],
   });
 }
 
-export default {
-  async fetch(request) {
-    const action = actionFrom(request);
+export function createRarityFlameHandler({ env, fetchImpl = fetch } = {}) {
+  return async function handle(request, params = {}) {
+    if (!authoriseHouseRequest(request, env)) return json(401, { error: 'Valid House Runtime session required.' });
+    const action = String(params.action || '');
     if (request.method === 'GET' && action === 'status') {
-      if (!authoriseHouseRequest(request, env)) return json(401, { error: 'Valid House Runtime session required.' });
       return json(200, {
         flame_id: 'rarity',
         display_name: 'Rarity',
         provider: 'huggingface-inference-providers',
-        model: configuredModel(),
+        model: configuredModel(env),
         configured: Boolean(env.get('HF_TOKEN')),
-        training_target: 'singsenochian/rarity-qwen3-8b-lora-v0.1',
+        training_target: TRAINING_TARGET,
       });
     }
-    if (request.method === 'POST' && action === 'chat') return chat(request);
-    return json(405, { error: 'POST chat or GET status required.' });
-  },
-};
+    if (request.method !== 'POST' || action !== 'chat') return json(405, { error: 'POST chat or GET status required.' });
+    let body;
+    try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
+    const message = String(body?.message || '').trim();
+    if (!message) return json(400, { error: 'message required.' });
+    if (message.length > 24000) return json(413, { error: 'message exceeds 24,000 characters.' });
+    return callRarity({ ...body, message }, env, fetchImpl);
+  };
+}
