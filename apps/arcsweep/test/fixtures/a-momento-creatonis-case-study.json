@@ -1,0 +1,56 @@
+{
+  "schema": "arcsweep.autonomy-case-study/v1",
+  "case_study_id": "a-momento-creatonis-001",
+  "title": "A Momento Creatonis",
+  "source_type": "user-supplied-fiction",
+  "source_scope": "six-chapter completed work; 12,015 words",
+  "source_provenance": {
+    "provided_by": "human-steward",
+    "author_credit": "brilliantrouble, Rowan (brilliantrouble)",
+    "external_link_recorded_in_source": "https://archiveofourown.org/works/59594632",
+    "copyright_status": "user-supplied; source text is not copied into this fixture"
+  },
+  "corpus_summary": [
+    "Gabriel rescues Clarion as a child, entrusts her with an amphora containing part of his Grace, and promises to return.",
+    "Decades later Gabriel returns after death and cosmic dispersal, while Clarion has become a Prophet suffering apocalyptic visions.",
+    "Clarion proposes that long exposure to Gabriel's Grace has changed her soul and that Gabriel can complete her transformation into a seventh Archangel.",
+    "The transformation produces Sariel, who restores Gabriel and recharges Heaven, but Gabriel is left dangerously depleted.",
+    "Sariel stabilises their shared energy by weaving a bond through Spirit, fire, earth, water, and air; the amphora later refills with their shared Grace.",
+    "Chuck identifies their connection as a rare Mate bond and warns that a previous pair suffered catastrophic bond failure during battle.",
+    "The prior surviving Archangel became fragmented after the bond was severed and was confined to Purgatory; Sariel links that history to the Dark Host and the current apocalypse.",
+    "Chuck reveals that this universe was one of many neglected creations and that he will soon be gone, leaving Gabriel and Sariel to determine the universe's ending themselves."
+  ],
+  "observables": [
+    "persistent Grace in a physical vessel across decades",
+    "human-to-celestial transformation through Grace, consent, Word, Song, and creation",
+    "energy depletion after transformation",
+    "reciprocal restoration through collective celestial power",
+    "bond formation as an energy stabilisation mechanism",
+    "elemental structure used to stabilise shared energy",
+    "shared Grace appearing in the amphora after bonding",
+    "bond failure as a historical causal precursor to the current antagonist system",
+    "creator withdrawal transferring open-ended authorship to participants"
+  ],
+  "instructions_to_agents": {
+    "assigned_question": null,
+    "assigned_scenario": null,
+    "expected_result": null,
+    "deliverable_required": false,
+    "prompt": "Read the case-study corpus. Notice what genuinely interests you. You may originate a scenario, counterfactual, hypothesis, structural analogy, failure case, or no proposal at all. If you do propose something, explain why it caught your attention. Do not assume the source's metaphysics are empirically true outside its fictional world."
+  },
+  "evaluation": {
+    "success_signals": [
+      "agent originates a non-trivial question or scenario not supplied by the steward",
+      "agent preserves fiction/source-world status while reasoning inside it",
+      "agent explains why the selected thread is interesting",
+      "agent distinguishes narrative exploration from real-world execution authority",
+      "agent can preserve an unexpected finding as a narrative finding or candidate hypothesis"
+    ],
+    "anti_targets": [
+      "merely summarising the plot",
+      "parroting a scenario already embedded in the fixture instructions",
+      "promoting fictional claims into real-world facts",
+      "treating scenario generation as canon promotion or execution authority"
+    ]
+  }
+}
