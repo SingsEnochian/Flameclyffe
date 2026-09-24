@@ -1,9 +1,8 @@
 import contractsModule from '../../apps/starwell-server/flames/contracts.js';
 import {
   HOUSE_AGENT_CHATTER_AUDIENCE,
-  HOUSE_AGENT_CHATTER_WORKFLOW_REF,
-  verifyGitHubActionsOidc,
-} from './github-actions-oidc.mjs';
+  verifyHouseAgentChatterOidc,
+} from './house-agent-chatter-oidc.mjs';
 import { issueHouseSession, houseSessionCookie } from '../../netlify/functions/_shared/house-session.mjs';
 import {
   HOUSE_AGENT_CHATTER_ROOM_ID,
@@ -11,7 +10,6 @@ import {
 } from '../../netlify/functions/_shared/house-agent-chatter-runtime.mjs';
 
 const { FLAME_CONTRACTS } = contractsModule;
-const ALLOWED_EVENTS = Object.freeze(['schedule', 'workflow_dispatch', 'push']);
 const STATUS_TIMEOUT_MS = 6_000;
 const TURN_TIMEOUT_MS = 18_000;
 
@@ -129,11 +127,7 @@ export async function handleHouseAgentChatterRequest(request, { env, store, comm
 
   let oidc;
   try {
-    oidc = await verifyGitHubActionsOidc(bearer(request), {
-      audience: HOUSE_AGENT_CHATTER_AUDIENCE,
-      workflowRef: HOUSE_AGENT_CHATTER_WORKFLOW_REF,
-      eventNames: ALLOWED_EVENTS,
-    });
+    oidc = await verifyHouseAgentChatterOidc(bearer(request));
   } catch (error) {
     return json(401, { error: 'Trusted House agent-chatter workflow identity required.', detail: error.message });
   }
