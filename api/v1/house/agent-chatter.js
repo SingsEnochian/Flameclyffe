@@ -96,7 +96,7 @@ function internalCommonsAppender(request, store) {
   };
 }
 
-export const config = { maxDuration: 180 };
+export const config = { maxDuration: 60 };
 
 export default {
   async fetch(request) {
