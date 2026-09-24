@@ -19,14 +19,14 @@ test('House Commons mounts the native authoritative social chat compartment befo
   assert.match(bootstrap, /house-chat-authoritative-surface\.js'[\s\S]*house-commons-chat-v5\.js'[\s\S]*house-chat-runtime-roster-ui\.js'/);
 });
 
-test('House Commons channel rail exposes canonical rooms, live capture, and direct-agent presence', async () => {
+test('House Commons channel rail exposes canonical rooms, live capture, and descriptive runtime-agent presence', async () => {
   const rail = await readFile(new URL('../src/house-chat-channel-rail.js', import.meta.url), 'utf8');
   assert.match(rail, /house-room:constellation/);
   assert.match(rail, /house-room:action/);
   assert.match(rail, /house-room:roleplay/);
   assert.match(rail, /house-room:agent-chatter/);
   assert.match(rail, /LIVE CAPTURE/);
-  assert.match(rail, /HOUSE_CHAT_VOICES/);
+  assert.match(rail, /runtimeHouseVoices/);
   assert.match(rail, /directRoomId/);
   assert.match(rail, /MODEL_PRESENCE_EVENT/);
   assert.match(rail, /data-open-house-direct/);
