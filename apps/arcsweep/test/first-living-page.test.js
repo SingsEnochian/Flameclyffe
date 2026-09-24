@@ -144,7 +144,8 @@ test('Universal Codex mounts distinct Bluebird and Rarity rooms and routes direc
   const bootstrap = readFileSync(new URL('../src/sidecar-bootstrap.js', import.meta.url), 'utf8');
   const entry = readFileSync(new URL('../src/magic-book-physical-acceptance-entry.js', import.meta.url), 'utf8');
   const sidecar = readFileSync(new URL('../src/living-rooms-sidecar.js', import.meta.url), 'utf8');
-  const rarityRoute = readFileSync(new URL('../../../api/v1/flames/rarity/[action].js', import.meta.url), 'utf8');
+  const rarityRuntime = readFileSync(new URL('../../../api/_shared/rarity-flame-runtime.mjs', import.meta.url), 'utf8');
+  const flameRoute = readFileSync(new URL('../../../api/v1/flames/[flame_id]/[action].js', import.meta.url), 'utf8');
   const book = bootstrap.indexOf("'./magic-book-sidecar.js'");
   const acceptance = bootstrap.indexOf("'./magic-book-physical-acceptance-entry.js'");
 
@@ -158,7 +159,9 @@ test('Universal Codex mounts distinct Bluebird and Rarity rooms and routes direc
   assert.match(sidecar, /open_rarity/);
   assert.match(sidecar, /Bluebird’s home is not Rarity’s room/);
   assert.doesNotMatch(sidecar, /arcsweep:guide-query/);
-  assert.match(rarityRoute, /Qwen\/Qwen3-8B/);
-  assert.match(rarityRoute, /RARITY_MODEL/);
-  assert.match(rarityRoute, /flame_id:\s*'rarity'/);
+  assert.match(rarityRuntime, /Qwen\/Qwen3-8B/);
+  assert.match(rarityRuntime, /RARITY_MODEL/);
+  assert.match(rarityRuntime, /flame_id:\s*'rarity'/);
+  assert.match(flameRoute, /createRarityFlameHandler/);
+  assert.match(flameRoute, /flameId === 'rarity'/);
 });
