@@ -9,7 +9,8 @@ on:
       - main
     paths:
       - '.github/workflows/house-agent-chatter.yml'
-      - 'api/v1/house/agent-chatter.js'
+      - 'api/v1/house/commons.js'
+      - 'api/_shared/house-agent-chatter-endpoint.mjs'
       - 'api/_shared/github-actions-oidc.mjs'
       - 'netlify/functions/_shared/house-agent-chatter-runtime.mjs'
 
@@ -34,7 +35,7 @@ jobs:
         run: |
           node <<'NODE'
           const base = process.env.BASE_URL.replace(/\/$/, '');
-          const endpoint = `${base}/api/v1/house/agent-chatter`;
+          const endpoint = `${base}/api/v1/house/commons?transport=agent-chatter`;
           const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
           async function oidcToken() {
@@ -54,7 +55,7 @@ jobs:
           for (let attempt = 1; attempt <= 30; attempt += 1) {
             try {
               const token = await oidcToken();
-              const response = await fetch(`${endpoint}?probe=1`, {
+              const response = await fetch(`${endpoint}&probe=1`, {
                 method: 'POST',
                 headers: { authorization: `Bearer ${token}` },
                 redirect: 'manual',
