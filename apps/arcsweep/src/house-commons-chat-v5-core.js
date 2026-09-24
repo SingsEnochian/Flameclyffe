@@ -63,4 +63,9 @@ export function createOptimisticStewardEntry({ roomId, turnId, text, formattedTe
 export function deliveryState(entry) { if (entry?.optimistic && entry?.status === 'failed') return 'failed'; if (entry?.optimistic) return 'sending'; if (entry?.kind === 'steward') return entry?.status === 'sent' ? 'sent' : entry?.status || 'delivered'; return entry?.status || 'received'; }
 export function roomLabel(room, unread = 0) { const prefix = room?.kind === 'direct' ? '@' : '#'; return `${prefix}${room?.slug || room?.title || 'room'}${unread ? ` (${unread})` : ''}`; }
 export function directRoomId(voiceId) { return `house-room:dm:${String(voiceId || '').trim().toLowerCase()}`; }
-export function directRoomSeed(voiceId, voices = HOUSE_CHAT_VOICES) { const voice = voices.find((item) => item.id === voiceId); if (!voice) return null; return { id: directRoomId(voice.id), slug: voice.id, title: voice.name, topic: `Direct House room with ${voice.name}.`, kind: 'direct', participants: [voice.id], world_id: null, archived: false }; }
+export function directRoomSeed(voiceId, voices = HOUSE_CHAT_VOICES) {
+  const id = String(voiceId || '').trim().toLowerCase();
+  if (!id) return null;
+  const voice = voices.find((item) => item.id === id) || { id, name: id };
+  return { id: directRoomId(voice.id), slug: voice.id, title: voice.name || voice.id, topic: `Direct House room with ${voice.name || voice.id}.`, kind: 'direct', participants: [voice.id], world_id: null, archived: false };
+}
