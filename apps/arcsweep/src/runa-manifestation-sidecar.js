@@ -9,7 +9,7 @@ const CONTROL_SELECTOR = '[data-runa-manifestation-controls]';
 let observer = null;
 let refreshQueued = false;
 let lastStatus = null;
-let lastContext = { from: 'universal-codex' };
+let lastContext = null;
 
 function os() {
   return globalThis.__arcsweepOS || null;
@@ -17,12 +17,20 @@ function os() {
 
 async function context() {
   lastContext = await readRunaManifestationContext();
-  document.querySelectorAll('[data-runa-tone-lab]').forEach((link) => { link.href = toneLabHref(); });
+  document.querySelectorAll('[data-runa-tone-lab]').forEach((link) => {
+    link.setAttribute('href', toneLabHref());
+    link.removeAttribute('aria-disabled');
+  });
   return lastContext;
 }
 
 function toneLabHref() {
-  return contextualOrganLaunchHref(soundOrgan('tone-lab'), lastContext, globalThis.location);
+  return contextualOrganLaunchHref(soundOrgan('tone-lab'), lastContext || { from: 'universal-codex' }, globalThis.location);
+}
+
+function toneLabLinkMarkup() {
+  if (!lastContext) return '<a data-runa-tone-lab aria-disabled="true">Tone Lab ↗</a>';
+  return `<a data-runa-tone-lab href="${toneLabHref()}">Tone Lab ↗</a>`;
 }
 
 function button(action, label, pressed = null) {
@@ -48,7 +56,7 @@ function panelMarkup(surface) {
         button('glyph-voice', glyphActive ? 'Mute Glyph Voice' : 'Glyph Voice', glyphActive),
         button('haptic-pulse', haptics ? 'Haptic Tap' : 'Haptic unavailable', false),
         button('feather', 'Feather'),
-        `<a data-runa-tone-lab href="${toneLabHref()}">Tone Lab ↗</a>`,
+        toneLabLinkMarkup(),
       '</div>',
       '<p class="runa-manifestation-status" data-runa-status aria-live="polite">Runa ready. Sound starts only from an explicit control.</p>',
     '</section>',
@@ -159,6 +167,13 @@ async function handleAction(buttonNode, panel) {
 function installEvents() {
   document.addEventListener('click', (event) => {
     const toneLink = event.target.closest?.('[data-runa-tone-lab]');
+    if (toneLink && !toneLink.hasAttribute('href')) {
+      event.preventDefault();
+      if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+        void context().then(() => { globalThis.location.assign(toneLabHref()); });
+      }
+      return;
+    }
     if (toneLink && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
       event.preventDefault();
       void context().then(() => { globalThis.location.assign(toneLabHref()); });
