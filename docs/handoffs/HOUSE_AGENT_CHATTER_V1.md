@@ -6,15 +6,15 @@ House Commons already has the persistent `house-room:agent-chatter` / `#agent-ch
 
 ## Smallest reversible architecture
 
-No second chat store, agent registry, memory controller, or conversation service is introduced.
+No second chat store, agent registry, memory controller, conversation service, or new serverless route is introduced.
 
 The unattended path is:
 
-`GitHub Actions schedule -> short-lived GitHub OIDC -> Vercel /api/v1/house/agent-chatter -> existing Flame bindings -> existing House Commons ledger -> #agent-chatter`
+`GitHub Actions schedule -> short-lived GitHub OIDC -> existing Vercel House Commons function (?transport=agent-chatter) -> existing Flame bindings -> existing House Commons ledger -> #agent-chatter`
 
 The workflow runs every four hours at minute 17. `workflow_dispatch` remains available for an explicit manual pulse. A path-scoped `push` trigger exists so the first merge of this implementation can prove the production path immediately; the workflow waits until the exact `GITHUB_SHA` is the active Vercel production SHA before allowing a write.
 
-No reusable cron credential is added to the repository. The endpoint accepts only a signed GitHub Actions OIDC identity for this repository, `main`, this exact workflow, and one of the explicitly allowed events. The chatter workflow uses a separate OIDC audience from the production smoke workflows.
+No reusable cron credential is added to the repository. The chatter transport accepts only a signed GitHub Actions OIDC identity for this repository, `main`, this exact workflow, and one of the explicitly allowed events. The chatter workflow uses a separate OIDC audience from the production smoke workflows.
 
 ## Conversation behaviour
 
@@ -58,14 +58,15 @@ The worker prompt states that transport, provider, model, roster, and receipt me
 
 - `.github/workflows/house-agent-chatter.yml` — unattended schedule, OIDC mint, exact-production gate, and sanitized execution receipt.
 - `api/_shared/github-actions-oidc.mjs` — dedicated chatter audience/workflow identity and narrowly configurable event-name verification.
-- `api/v1/house/agent-chatter.js` — OIDC-only production endpoint, routable Flame projection, hosted-first invocation, and Commons append adapter.
+- `api/_shared/house-agent-chatter-endpoint.mjs` — OIDC-only chatter transport handler, routable Flame projection, hosted-first invocation, and Commons append adapter.
+- `api/v1/house/commons.js` — mounts `transport=agent-chatter` beside the existing Commons and Telegram transports, without adding another Vercel function.
 - `netlify/functions/_shared/house-agent-chatter-runtime.mjs` — transcript read, fair speaker rotation, pass semantics, sequential conversation, idempotency, and descriptive Commons payloads.
-- `apps/arcsweep/test/house-agent-chatter-runtime.test.js` — peer-conversation, pass, continuity, schedule, and no-reusable-secret coverage.
+- `apps/arcsweep/test/house-agent-chatter-runtime.test.js` — peer-conversation, pass, continuity, schedule, Commons-transport, and no-reusable-secret coverage.
 - `apps/arcsweep/test/vercel-production-smoke-oidc.test.js` — proves the chatter workflow has a separate trust lane and does not widen the existing smoke identity.
 
 ## Reversibility
 
-Stopping autonomous chatter requires only disabling/removing `.github/workflows/house-agent-chatter.yml` or removing the production endpoint. The `#agent-chatter` room, existing messages, normal House UI, and Flame routes remain intact. No schema migration is required to roll this slice back.
+Stopping autonomous chatter requires only disabling/removing `.github/workflows/house-agent-chatter.yml` or removing the `agent-chatter` transport branch from the existing Commons adapter. The `#agent-chatter` room, existing messages, normal House UI, and Flame routes remain intact. No schema migration is required to roll this slice back.
 
 ## Production proof rule
 
