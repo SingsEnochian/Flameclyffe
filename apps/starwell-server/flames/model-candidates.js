@@ -104,15 +104,18 @@ const MODEL_CANDIDATES = {
       fine_tunable: true,
     },
     backends: {
-      preferred: 'huggingface-inference-providers',
-      compatible: ['huggingface-inference-providers', 'huggingface-jobs', 'llama.cpp', 'vllm', 'sglang', 'transformers', 'ollama-gguf'],
+      preferred: 'local-openai-compatible',
+      compatible: ['local-openai-compatible', 'llama.cpp', 'ollama-gguf', 'vllm', 'sglang', 'transformers', 'huggingface-inference-providers', 'huggingface-jobs'],
     },
     runtime: {
       provider: 'openai-compatible',
-      backend: process.env.BLUEBIRD_CROW_BACKEND || 'huggingface-inference-providers',
-      base_url: 'https://router.huggingface.co/v1',
+      backend: process.env.BLUEBIRD_CROW_BACKEND || 'local-openai-compatible',
+      base_url: 'http://127.0.0.1:8081/v1',
       base_url_env: 'BLUEBIRD_CROW_BASE_URL',
-      api_key_env: process.env.BLUEBIRD_CROW_API_KEY_ENV || 'HF_TOKEN',
+      api_key_env: process.env.BLUEBIRD_CROW_API_KEY_ENV || null,
+      local_first: true,
+      network_required: false,
+      health_path: '/models',
       max_tokens: 300,
       sampling: {
         profile_id: 'richie-migration-v1',

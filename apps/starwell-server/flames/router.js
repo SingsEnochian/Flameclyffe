@@ -29,7 +29,7 @@ async function callDeepSeek(manifest, systemPrompt, userMessage) {
   if (!key) throw new Error(`Env var ${manifest.platform.api_key_env} not set`);
   const res = await fetch(`${manifest.platform.base_url}/chat/completions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
     body: JSON.stringify({
       model: manifest.platform.model,
       messages: [
@@ -107,8 +107,8 @@ function candidateRuntimeStatus(candidate) {
 
 async function callOpenAICompatibleCandidate(candidate, systemPrompt, userMessage, requestedEffort) {
   const runtime = candidate.runtime || {};
-  const key = process.env[runtime.api_key_env];
-  if (!key) throw new Error(`Env var ${runtime.api_key_env} not set`);
+  const key = runtime.api_key_env ? process.env[runtime.api_key_env] : null;
+  if (runtime.api_key_env && !key) throw new Error(`Env var ${runtime.api_key_env} not set`);
 
   const baseUrl = (runtime.base_url_env && process.env[runtime.base_url_env]) || runtime.base_url;
   if (!baseUrl) throw new Error(`Candidate base URL not configured (${runtime.base_url_env || 'no env override'}).`);
@@ -130,7 +130,7 @@ async function callOpenAICompatibleCandidate(candidate, systemPrompt, userMessag
   const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
   const res = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(120000),
   });

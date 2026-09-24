@@ -118,3 +118,36 @@ test('Inkling web audition status reports configured from HFTOKEN alias', async 
   assert.equal(data.gateway_configured, null);
   assert.deepEqual(data.missing, []);
 });
+
+
+test('Crow local-first audition needs no cloud credential and preserves provenance', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    assert.equal(url, 'http://127.0.0.1:8081/v1/chat/completions');
+    assert.equal(options.headers.authorization, undefined);
+    const body = JSON.parse(options.body);
+    assert.equal(body.model, 'Crownelius/The-Crow-9B-Creative-Writing-Opus4.6-DISTILL-Heretic');
+    return new Response(JSON.stringify({
+      choices: [{ message: { content: 'CROW_LOCAL_LIVENESS_OK' } }],
+      usage: { prompt_tokens: 12, completion_tokens: 4 },
+    }), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+
+  try {
+    const request = new Request('https://example.test/api/v1/flames/bluebird/audition/bluebird-the-crow', {
+      method: 'POST',
+      headers: { authorization: 'Bearer house-key', 'content-type': 'application/json' },
+      body: JSON.stringify({ message: 'Private-safe local liveness probe.' }),
+    });
+    const response = await flameAuditionHandler(request, { params: { flame_id: 'bluebird', candidate_id: 'bluebird-the-crow' } });
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    assert.equal(data.message, 'CROW_LOCAL_LIVENESS_OK');
+    assert.equal(data.provider, 'local-openai-compatible');
+    assert.equal(data.model, 'Crownelius/The-Crow-9B-Creative-Writing-Opus4.6-DISTILL-Heretic');
+    assert.equal(data.audition, true);
+    assert.equal(data.primary_route_unchanged, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
