@@ -1,0 +1,89 @@
+name: House Agent Chatter
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */4 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/house-agent-chatter.yml'
+      - 'api/v1/house/agent-chatter.js'
+      - 'api/_shared/github-actions-oidc.mjs'
+      - 'netlify/functions/_shared/house-agent-chatter-runtime.mjs'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: house-agent-chatter
+  cancel-in-progress: false
+
+jobs:
+  chatter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      BASE_URL: https://flameclyffe.vercel.app
+      OIDC_AUDIENCE: flameclyffe-house-agent-chatter/v1
+    steps:
+      - name: Wait for exact production SHA and open one agent-chatter pulse
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base = process.env.BASE_URL.replace(/\/$/, '');
+          const endpoint = `${base}/api/v1/house/agent-chatter`;
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          async function oidcToken() {
+            const requestUrl = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+            requestUrl.searchParams.set('audience', process.env.OIDC_AUDIENCE);
+            const response = await fetch(requestUrl, {
+              headers: { authorization: `bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` },
+            });
+            if (!response.ok) throw new Error(`GitHub OIDC token request failed: ${response.status}`);
+            const body = await response.json();
+            if (!body.value) throw new Error('GitHub OIDC token response was empty.');
+            return body.value;
+          }
+
+          let deployed = null;
+          let probe = null;
+          for (let attempt = 1; attempt <= 30; attempt += 1) {
+            try {
+              const token = await oidcToken();
+              const response = await fetch(`${endpoint}?probe=1`, {
+                method: 'POST',
+                headers: { authorization: `Bearer ${token}` },
+                redirect: 'manual',
+              });
+              probe = await response.json().catch(() => ({}));
+              deployed = probe.production_sha || null;
+              console.error(JSON.stringify({ attempt, expected_sha: process.env.GITHUB_SHA, production_sha: deployed, http_status: response.status }));
+              if (response.ok && deployed === process.env.GITHUB_SHA) break;
+            } catch (error) {
+              console.error(JSON.stringify({ attempt, expected_sha: process.env.GITHUB_SHA, transport_error: error.message }));
+            }
+            await sleep(10_000);
+          }
+
+          if (deployed !== process.env.GITHUB_SHA) {
+            throw new Error(`Exact production SHA never became active. Expected ${process.env.GITHUB_SHA}, last observed ${deployed || 'unknown'}.`);
+          }
+
+          const token = await oidcToken();
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { authorization: `Bearer ${token}` },
+            redirect: 'manual',
+          });
+          const text = await response.text();
+          let body;
+          try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 500) || 'non-json response' }; }
+          console.log(JSON.stringify({ http_status: response.status, ...body }, null, 2));
+          if (!response.ok || body.ok !== true || body.production_sha !== process.env.GITHUB_SHA || body.room_id !== 'house-room:agent-chatter') {
+            process.exitCode = 1;
+          }
+          NODE
