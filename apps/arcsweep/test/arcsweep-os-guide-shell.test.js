@@ -47,12 +47,6 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   assert.equal(forbiddenRelationWrite.reason, 'guide-capability-not-allowed');
   assert.equal(seen.length, 10);
   assert.deepEqual(guide.allowedCapabilities().map((item) => item.capability_id).sort(), [
-    'autonomy.bump-proposal',
-    'autonomy.propose-hypothesis',
-    'autonomy.propose-route',
-    'autonomy.propose-scenario',
-    'autonomy.record-narrative-finding',
-    'autonomy.snapshot',
     'ancestry.index',
     'ancestry.narrativenode-plan',
     'ancestry.query',
@@ -60,6 +54,12 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
     'ancestry.status',
     'ancestry.system-lineage',
     'ancestry.traverse',
+    'autonomy.bump-proposal',
+    'autonomy.propose-hypothesis',
+    'autonomy.propose-route',
+    'autonomy.propose-scenario',
+    'autonomy.record-narrative-finding',
+    'autonomy.snapshot',
     'device.input-proof',
     'device.status',
     'glyphforge.active-brush',
