@@ -11,7 +11,7 @@ on:
       - '.github/workflows/house-agent-chatter.yml'
       - 'api/v1/house/commons.js'
       - 'api/_shared/house-agent-chatter-endpoint.mjs'
-      - 'api/_shared/github-actions-oidc.mjs'
+      - 'api/_shared/house-agent-chatter-oidc.mjs'
       - 'netlify/functions/_shared/house-agent-chatter-runtime.mjs'
 
 permissions:
