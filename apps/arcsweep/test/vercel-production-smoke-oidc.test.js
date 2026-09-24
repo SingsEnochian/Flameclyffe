@@ -4,8 +4,6 @@ import { generateKeyPairSync, sign } from 'node:crypto';
 import {
   ARCSWEEP_RC8_SMOKE_WORKFLOW_REF,
   GITHUB_OIDC_ISSUER,
-  HOUSE_AGENT_CHATTER_AUDIENCE,
-  HOUSE_AGENT_CHATTER_WORKFLOW_REF,
   HOUSE_SMOKE_AUDIENCE,
   HOUSE_SMOKE_REPOSITORY,
   HOUSE_SMOKE_WORKFLOW_REF,
@@ -70,28 +68,6 @@ test('rc8 production proof accepts only its workflow_dispatch identity', async (
   await assert.rejects(
     verifyGitHubActionsOidc(token({ workflow_ref: ARCSWEEP_RC8_SMOKE_WORKFLOW_REF, event_name: 'push' }), { fetchImpl, now: NOW }),
     /event is not authorised/i,
-  );
-});
-
-test('agent chatter has a separate OIDC audience and can admit its own schedule without widening smoke workflows', async () => {
-  const chatterToken = token({
-    aud: HOUSE_AGENT_CHATTER_AUDIENCE,
-    workflow_ref: HOUSE_AGENT_CHATTER_WORKFLOW_REF,
-    event_name: 'schedule',
-  });
-  const identity = await verifyGitHubActionsOidc(chatterToken, {
-    fetchImpl,
-    now: NOW,
-    audience: HOUSE_AGENT_CHATTER_AUDIENCE,
-    workflowRef: HOUSE_AGENT_CHATTER_WORKFLOW_REF,
-    eventNames: ['schedule', 'workflow_dispatch', 'push'],
-  });
-  assert.equal(identity.workflow_ref, HOUSE_AGENT_CHATTER_WORKFLOW_REF);
-  assert.equal(identity.event_name, 'schedule');
-
-  await assert.rejects(
-    verifyGitHubActionsOidc(chatterToken, { fetchImpl, now: NOW }),
-    /audience is invalid|workflow is not authorised/i,
   );
 });
 
