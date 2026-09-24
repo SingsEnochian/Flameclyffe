@@ -84,7 +84,9 @@ test('unattended chatter posts sequential agent turns into the dedicated room an
   assert.equal(calls.length, 2);
   assert.match(calls[1].body.message, /what do you make of the pattern/i);
 
-  const saved = [...store.values.values()].filter((entry) => entry?.thread_id === HOUSE_AGENT_CHATTER_ROOM_ID && /^entry-/.test(entry.id || ''));
+  const saved = [...store.values.entries()]
+    .filter(([key, entry]) => key.startsWith('entries/') && entry?.thread_id === HOUSE_AGENT_CHATTER_ROOM_ID && /^entry-/.test(entry.id || ''))
+    .map(([, entry]) => entry);
   assert.equal(saved.length, 2);
   assert.ok(saved.every((entry) => entry.kind === 'voice'));
   assert.ok(saved.every((entry) => entry.thread_id === HOUSE_AGENT_CHATTER_ROOM_ID));
