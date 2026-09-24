@@ -1,6 +1,5 @@
 import { createHouseCommonsHandler } from '../../../netlify/functions/_shared/house-commons-runtime.mjs';
 import { createTelegramHouseBridgeHandler } from '../../../netlify/functions/_shared/telegram-house-bridge-runtime.mjs';
-import { handleHouseAgentChatterRequest } from '../../_shared/house-agent-chatter-endpoint.mjs';
 import { vercelEnv as env } from '../../_shared/vercel-env.mjs';
 
 let storePromise;
@@ -20,31 +19,20 @@ const lazyStore = Object.freeze({
 const houseCommons = createHouseCommonsHandler({ env, store: lazyStore });
 const telegramHouse = createTelegramHouseBridgeHandler({ env, store: lazyStore });
 
-function transport(request) {
+function isTelegramTransport(request) {
   const url = new URL(request.url);
-  if (url.searchParams.get('transport') === 'agent-chatter') return 'agent-chatter';
-  if (url.searchParams.get('transport') === 'telegram' || request.headers.has('x-telegram-bot-api-secret-token')) return 'telegram';
-  return 'commons';
+  return url.searchParams.get('transport') === 'telegram'
+    || request.headers.has('x-telegram-bot-api-secret-token');
 }
-
-export const config = { maxDuration: 60 };
 
 export default {
   async fetch(request) {
-    const selected = transport(request);
+    const telegram = isTelegramTransport(request);
     try {
-      if (selected === 'agent-chatter') {
-        return await handleHouseAgentChatterRequest(request, { env, store: lazyStore, commonsHandler: houseCommons });
-      }
-      return await (selected === 'telegram' ? telegramHouse : houseCommons)(request);
+      return await (telegram ? telegramHouse : houseCommons)(request);
     } catch (error) {
-      const label = selected === 'telegram'
-        ? 'Telegram House bridge'
-        : selected === 'agent-chatter'
-          ? 'House agent chatter'
-          : 'House Commons storage';
-      console.error(`${label} failure`, error);
-      return new Response(JSON.stringify({ error: `${label} unavailable.` }), {
+      console.error(telegram ? 'Telegram House bridge failure' : 'House Commons storage failure', error);
+      return new Response(JSON.stringify({ error: telegram ? 'Telegram House bridge unavailable.' : 'House Commons storage unavailable.' }), {
         status: 503,
         headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
       });
