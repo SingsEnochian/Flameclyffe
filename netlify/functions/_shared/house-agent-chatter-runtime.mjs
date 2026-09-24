@@ -15,7 +15,11 @@ function normaliseVoices(voices = []) {
     id: clean(voice?.id, 120).toLowerCase(),
     name: clean(voice?.name || voice?.displayName || voice?.id, 160),
     roles: Array.isArray(voice?.roles) ? [...new Set(voice.roles.map((item) => clean(item, 80)).filter(Boolean))] : [],
-  })).filter((voice) => voice.id && voice.name && !seen.has(voice.id) && seen.add(voice.id));
+  })).filter((voice) => {
+    if (!voice.id || !voice.name || seen.has(voice.id)) return false;
+    seen.add(voice.id);
+    return true;
+  });
 }
 
 export async function readAgentChatterHistory(store, { limit = 18 } = {}) {
@@ -76,6 +80,24 @@ function idempotencyKey(tickId, voiceId, ordinal) {
   return `commons:agent-chatter:${clean(tickId, 100)}:${clean(voiceId, 80)}:${ordinal}`.replace(/[^a-zA-Z0-9:._-]+/g, '-').slice(0, 240);
 }
 
+function tickReceiptKey(tickId) {
+  return `agent-chatter-ticks/${clean(tickId, 120).replace(/[^a-zA-Z0-9:._-]+/g, '-')}`;
+}
+
+function tickResult({ stableTickId, startedAt, clock, posted, passes, failures, completed = true }) {
+  return {
+    schema: HOUSE_AGENT_CHATTER_SCHEMA,
+    tick_id: stableTickId,
+    state: posted.length ? 'posted' : 'quiet',
+    started_at: startedAt,
+    completed_at: completed ? clock().toISOString() : null,
+    room_id: HOUSE_AGENT_CHATTER_ROOM_ID,
+    posted,
+    passes,
+    failures,
+  };
+}
+
 export async function runAgentChatterTick({
   store,
   voices,
@@ -87,7 +109,7 @@ export async function runAgentChatterTick({
   maxAttempts = null,
   historyLimit = 18,
 } = {}) {
-  if (!store?.get || typeof invokeVoice !== 'function' || typeof appendEntry !== 'function') {
+  if (!store?.get || !store?.setJSON || typeof invokeVoice !== 'function' || typeof appendEntry !== 'function') {
     throw new Error('Agent chatter requires store, invokeVoice, and appendEntry.');
   }
   const roster = normaliseVoices(voices);
@@ -95,10 +117,17 @@ export async function runAgentChatterTick({
     return { schema: HOUSE_AGENT_CHATTER_SCHEMA, tick_id: clean(tickId, 120), state: 'quiet', reason: 'fewer-than-two-routable-voices', posted: [], passes: [], failures: [] };
   }
 
-  const desired = clamp(maxTurns, 1, 3);
-  const attempts = clamp(maxAttempts == null ? Math.max(desired + 2, 4) : maxAttempts, desired, Math.min(roster.length, 8));
   const startedAt = clock().toISOString();
   const stableTickId = clean(tickId || `local-${startedAt.replace(/[^0-9]/g, '').slice(0, 12)}`, 120);
+  const receiptKey = tickReceiptKey(stableTickId);
+  const priorTick = await store.get(receiptKey, { type: 'json' }).catch(() => null);
+  if (priorTick?.schema === HOUSE_AGENT_CHATTER_SCHEMA && priorTick?.tick_id === stableTickId) {
+    return { ...priorTick, reused: true };
+  }
+
+  const desired = Math.min(roster.length, clamp(maxTurns, 1, 3));
+  const attemptCeiling = Math.min(roster.length, 8);
+  const attempts = clamp(maxAttempts == null ? Math.max(desired + 2, 4) : maxAttempts, desired, attemptCeiling);
   const history = await readAgentChatterHistory(store, { limit: historyLimit });
   const candidates = chooseAgentChatterSpeakers(roster, history, { limit: attempts });
   const posted = [];
@@ -121,6 +150,7 @@ export async function runAgentChatterTick({
         reused: true,
       });
       history.push(existing);
+      await store.setJSON(receiptKey, tickResult({ stableTickId, startedAt, clock, posted, passes, failures, completed: false }));
       continue;
     }
 
@@ -181,20 +211,15 @@ export async function runAgentChatterTick({
         route: entry.runtime?.route || reply?.route || speaker.id,
         reused: false,
       });
+      // Persist an operational tick receipt after every durable post. If the worker
+      // is retried after a platform interruption, the already-held gathering is not replayed.
+      await store.setJSON(receiptKey, tickResult({ stableTickId, startedAt, clock, posted, passes, failures, completed: false }));
     } catch (error) {
       failures.push({ voice_id: speaker.id, error: clean(error?.message || error, 500) });
     }
   }
 
-  return {
-    schema: HOUSE_AGENT_CHATTER_SCHEMA,
-    tick_id: stableTickId,
-    state: posted.length ? 'posted' : 'quiet',
-    started_at: startedAt,
-    completed_at: clock().toISOString(),
-    room_id: HOUSE_AGENT_CHATTER_ROOM_ID,
-    posted,
-    passes,
-    failures,
-  };
+  const result = tickResult({ stableTickId, startedAt, clock, posted, passes, failures, completed: true });
+  await store.setJSON(receiptKey, result);
+  return result;
 }
