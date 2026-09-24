@@ -1,7 +1,9 @@
 import { HOUSE_CHAT_VOICES } from './house-commons-chat-v5-core.js';
 import './house-live-recovery.js';
+import './house-chat-room-social.js';
+import './house-chat-channel-rail.js';
 
-export const HOUSE_CHAT_SURFACE_MARKER = 'house-chat-authoritative-surface/v3';
+export const HOUSE_CHAT_SURFACE_MARKER = 'house-chat-authoritative-surface/v4';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -18,8 +20,8 @@ function authoritativeMarkup() {
   return `<section class="house-chat-native devconsole-chat-native" data-house-chat-authoritative="${HOUSE_CHAT_SURFACE_MARKER}" data-devconsole-chat-root="true">
     <header class="house-chat-native-head devconsole-chat-head" data-house-room-chrome="true">
       <div>
-        <p class="eyebrow">HOUSE COMMONS · live Constellation room</p>
-        <h2>Conversation</h2>
+        <p class="eyebrow">HOUSE COMMONS · live capture mesh</p>
+        <h2>House Commons</h2>
         <p class="house-chat-native-status" data-commons-connection>Restoring House Runtime session…</p>
       </div>
       <div class="house-chat-native-actions"><button type="button" class="quiet" data-action="commons-refresh" data-house-chat-refresh>Refresh room</button></div>
@@ -29,7 +31,7 @@ function authoritativeMarkup() {
       <aside class="panel house-chat-native-compose">
         <form id="commons-form" class="stack" data-house-chat-native-form="true" data-devconsole-chat-form="true">
           <div class="house-chat-transport" aria-hidden="true">${HOUSE_CHAT_VOICES.map(voiceTransport).join('')}</div>
-          <textarea name="message" rows="6" required aria-label="House Commons message" placeholder="Speak to the room…"></textarea>
+          <textarea name="message" rows="6" required aria-label="House Commons message" placeholder="Speak to this room…"></textarea>
           <button type="submit">Send to House Commons ∞</button>
         </form>
       </aside>
