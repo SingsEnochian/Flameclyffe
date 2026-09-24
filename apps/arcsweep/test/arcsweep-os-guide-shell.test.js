@@ -19,6 +19,9 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   const ancestry = await guide.request('ancestry.read', { ref: 'ancestral:amalthi-transition' });
   const ancestryPlan = await guide.request('ancestry.narrativenode-plan', { root_ids: ['ancestral:amalthi-transition'] });
   const relation = await guide.request('relation.get', { relation_id: 'relation:test' });
+  const autonomySnapshot = await guide.request('autonomy.snapshot');
+  const scenario = await guide.request('autonomy.propose-scenario', { premise: 'A door appears where no door was registered.', why_interesting: 'It tests whether the Guide may originate a narrative branch.' });
+  const route = await guide.request('autonomy.propose-route', { objective: 'Reach a blocked goal', alternative: 'Use a different architecture', why_good: 'It preserves the objective without pretending the denied route is allowed.', recommendation: 'Try the alternate architecture.' });
   const forbidden = await guide.request('runa.launch-preview', { plan: {} });
   const forbiddenWitnessProse = await guide.request('witness.list-local', { limit: 1 });
   const forbiddenWitnessWrite = await guide.request('witness.record', { record_type: 'system-note', title: 'nope' });
@@ -31,6 +34,9 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   assert.equal(ancestry.status, 'applied');
   assert.equal(ancestryPlan.status, 'applied');
   assert.equal(relation.status, 'applied');
+  assert.equal(autonomySnapshot.status, 'applied');
+  assert.equal(scenario.status, 'applied');
+  assert.equal(route.status, 'applied');
   assert.equal(forbidden.status, 'rejected');
   assert.equal(forbidden.reason, 'guide-capability-not-allowed');
   assert.equal(forbiddenWitnessProse.status, 'rejected');
@@ -39,7 +45,7 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
   assert.equal(forbiddenWitnessWrite.reason, 'guide-capability-not-allowed');
   assert.equal(forbiddenRelationWrite.status, 'rejected');
   assert.equal(forbiddenRelationWrite.reason, 'guide-capability-not-allowed');
-  assert.equal(seen.length, 7);
+  assert.equal(seen.length, 10);
   assert.deepEqual(guide.allowedCapabilities().map((item) => item.capability_id).sort(), [
     'ancestry.index',
     'ancestry.narrativenode-plan',
@@ -48,6 +54,12 @@ test('Guide shell can request only its explicit OS capability allowlist', async 
     'ancestry.status',
     'ancestry.system-lineage',
     'ancestry.traverse',
+    'autonomy.bump-proposal',
+    'autonomy.propose-hypothesis',
+    'autonomy.propose-route',
+    'autonomy.propose-scenario',
+    'autonomy.record-narrative-finding',
+    'autonomy.snapshot',
     'device.input-proof',
     'device.status',
     'glyphforge.active-brush',
