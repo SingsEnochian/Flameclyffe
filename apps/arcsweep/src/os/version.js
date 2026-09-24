@@ -31,6 +31,11 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     ontologyReviewRequiresHumanStewardAction: true,
     continuityLossMustBeReceipted: true,
     providerChangeMaySilentlyRewriteContinuity: false,
+    agentMayProposeAlternativeRoutes: true,
+    alternativeProposalMayDifferWithoutClaimingSafer: true,
+    agentMayOriginateNarrativeScenarios: true,
+    narrativePlayGrantsExecutionAuthority: false,
+    narrativeFindingMayBecomeCandidateHypothesis: true,
   }),
   security: Object.freeze({
     capabilityFirewall: true,
@@ -99,6 +104,10 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     ontologyObserverSync: true,
     ontologyTransformationReceipts: true,
     ontologyReview: 'steward-scored-five-axis-loss-review',
+    agentAutonomy: true,
+    agentAutonomyMode: 'reason-propose-deliberate-without-silent-authority-expansion',
+    agentProposalEscalation: 'new-evidence-or-changed-reasoning-with-bounded-nag-budget',
+    autonomousNarrativePlay: true,
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
@@ -159,5 +168,10 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     deviceInputProof: 'arcsweep.device-input-proof/v1',
     cybersecurityIntelligence: 'arcsweep.cybersecurity-intelligence/v1',
     cybersecuritySeed: 'arcsweep.cybersecurity-seed/v1',
+    agentObstacle: 'arcsweep.agent-obstacle/v1',
+    agentRouteProposal: 'arcsweep.agent-route-proposal/v1',
+    agentScenarioProposal: 'arcsweep.agent-scenario-proposal/v1',
+    narrativeFinding: 'arcsweep.narrative-finding/v1',
+    narrativeHypothesisCandidate: 'arcsweep.narrative-hypothesis-candidate/v1',
   }),
 });
