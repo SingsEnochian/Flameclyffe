@@ -130,7 +130,7 @@ async function callOpenAICompatibleCandidate(candidate, systemPrompt, userMessag
   const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
   const res = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(120000),
   });

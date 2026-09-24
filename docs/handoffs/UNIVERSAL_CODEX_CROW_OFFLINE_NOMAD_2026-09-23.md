@@ -38,6 +38,22 @@ llama-server \
 
 Keep the listener on loopback unless a deliberate authenticated LAN gateway is configured.
 
+## Away-from-home proving chamber
+
+When Rowan's Windows host is unavailable, manually dispatch
+`.github/workflows/crow-offline-proving-chamber.yml` from the target branch.
+
+The job is normally manual. Its guarded branch-push trigger runs only when the commit message explicitly contains `[crow-proof]`, allowing an authorised one-shot proof without leaving every later push expensive. It:
+
+1. verifies the public `Crow-8B.gguf` byte length and SHA-256;
+2. builds `llama-server` from the current llama.cpp source;
+3. removes provider credentials and creates a network namespace with no default route;
+4. starts Crow on `127.0.0.1:8081` and Hearthgate on `127.0.0.1:3000` inside that namespace;
+5. requests a real Bluebird/Crow audition through Hearthgate; and
+6. uploads the receipt, model listing, namespace evidence, and process logs without uploading model weights.
+
+The chamber proves the repository path and real GGUF inference without claiming that Rowan's Windows installation is configured. The Windows-machine acceptance below remains a separate final gate.
+
 ## Codex path
 
 `Universal Codex -> candidate audition route -> Hearthgate -> local OpenAI-compatible Crow -> response receipt`

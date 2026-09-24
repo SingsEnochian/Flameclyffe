@@ -48,8 +48,11 @@ test('The Crow is registered as a Bluebird-only audition receiver', () => {
   assert.match(crow.model_id, /Crownelius\/The-Crow-9B-Creative-Writing-Opus4\.6-DISTILL-Heretic/);
   assert.equal(crow.source.license, 'apache-2.0');
   assert.equal(crow.runtime.provider, 'openai-compatible');
-  assert.equal(crow.runtime.base_url, 'https://router.huggingface.co/v1');
-  assert.equal(crow.runtime.api_key_env, 'HF_TOKEN');
+  assert.equal(crow.runtime.backend, 'local-openai-compatible');
+  assert.equal(crow.runtime.base_url, 'http://127.0.0.1:8081/v1');
+  assert.equal(crow.runtime.api_key_env, null);
+  assert.equal(crow.runtime.local_first, true);
+  assert.equal(crow.runtime.network_required, false);
   assert.equal(crow.audition.continuity_id, 'bluebird:richard-gabriel-winters');
   assert.equal(crow.deployment.primary_route_unchanged, true);
   assert.equal(crow.deployment.audition_route, true);

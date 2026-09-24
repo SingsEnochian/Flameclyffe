@@ -1,0 +1,215 @@
+name: Crow Offline Proving Chamber
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/crow-offline-nomad-v0-1
+    paths:
+      - .github/workflows/crow-offline-proving-chamber.yml
+      - apps/starwell-server/flames/router.js
+      - apps/starwell-server/test/model-candidates.test.js
+      - docs/handoffs/UNIVERSAL_CODEX_CROW_OFFLINE_NOMAD_2026-09-23.md
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crow-offline-proving-chamber-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prove-crow-loopback:
+    name: Prove Crow through loopback-only Hearthgate
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[crow-proof]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CROW_MODEL_ID: Crownelius/The-Crow-9B-Creative-Writing-Opus4.6-DISTILL-Heretic
+      CROW_GGUF_BYTES: "8709519264"
+      CROW_GGUF_SHA256: ce0294424af1aa993a599eb80a5432660e6ad465f5bc5fddcb982f7a6d57b910
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/starwell-server/package-lock.json
+
+      - name: Install Hearthgate dependencies
+        run: npm ci --prefix apps/starwell-server --no-audit --no-fund
+
+      - name: Run focused Crow and Hearthgate tests
+        run: |
+          node --test apps/arcsweep/test/flame-audition-web-direct.test.js
+          npm --prefix apps/starwell-server test
+
+      - name: Build llama.cpp server
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends cmake ninja-build jq iproute2
+          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git "$RUNNER_TEMP/llama.cpp"
+          cmake \
+            -S "$RUNNER_TEMP/llama.cpp" \
+            -B "$RUNNER_TEMP/llama.cpp/build" \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DGGML_NATIVE=OFF \
+            -DLLAMA_CURL=OFF
+          cmake --build "$RUNNER_TEMP/llama.cpp/build" --target llama-server --parallel 2
+
+      - name: Download and verify Crow GGUF
+        shell: bash
+        run: |
+          set -euo pipefail
+          model="$RUNNER_TEMP/Crow-8B.gguf"
+          curl \
+            --location \
+            --fail \
+            --retry 5 \
+            --retry-all-errors \
+            --output "$model" \
+            "https://huggingface.co/${CROW_MODEL_ID}/resolve/main/Crow-8B.gguf?download=true"
+          test "$(stat --format='%s' "$model")" = "$CROW_GGUF_BYTES"
+          printf '%s  %s\n' "$CROW_GGUF_SHA256" "$model" | sha256sum --check --strict
+
+      - name: Run isolated real-model receipt proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/crow-proof"
+          sudo unshare --net --mount-proc bash -s -- \
+            "$GITHUB_WORKSPACE" \
+            "$RUNNER_TEMP" \
+            "$CROW_MODEL_ID" \
+            "$(command -v node)" <<'CHAMBER'
+          set -euo pipefail
+          workspace="$1"
+          runner_temp="$2"
+          model_id="$3"
+          node_bin="$4"
+          proof="$workspace/crow-proof"
+
+          unset HF_TOKEN HFTOKEN OPENAI_API_KEY ANTHROPIC_API_KEY DEEPSEEK_API_KEY
+          ip link set lo up
+          ip -brief address > "$proof/network-namespace.txt"
+          if ip route | grep -q '^default'; then
+            echo 'Offline chamber unexpectedly has a default route.' >&2
+            exit 1
+          fi
+          if curl --silent --fail --connect-timeout 2 https://huggingface.co >/dev/null 2>&1; then
+            echo 'Offline chamber unexpectedly reached the WAN.' >&2
+            exit 1
+          fi
+
+          "$runner_temp/llama.cpp/build/bin/llama-server" \
+            -m "$runner_temp/Crow-8B.gguf" \
+            --alias "$model_id" \
+            --host 127.0.0.1 \
+            --port 8081 \
+            -c 4096 \
+            > "$proof/llama-server.log" 2>&1 &
+          llama_pid=$!
+
+          cd "$workspace/apps/starwell-server"
+          PORT=3000 \
+          BLUEBIRD_CROW_BASE_URL=http://127.0.0.1:8081/v1 \
+          BLUEBIRD_CROW_BACKEND=local-openai-compatible \
+          "$node_bin" server-secure.js > "$proof/hearthgate.log" 2>&1 &
+          hearthgate_pid=$!
+
+          cleanup() {
+            kill "$hearthgate_pid" "$llama_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          ready=false
+          for _ in $(seq 1 180); do
+            if ! kill -0 "$llama_pid" 2>/dev/null; then
+              tail -200 "$proof/llama-server.log" >&2
+              exit 1
+            fi
+            if curl --silent --fail http://127.0.0.1:8081/v1/models > "$proof/models.json"; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            tail -200 "$proof/llama-server.log" >&2
+            exit 1
+          fi
+
+          ready=false
+          for _ in $(seq 1 60); do
+            if ! kill -0 "$hearthgate_pid" 2>/dev/null; then
+              tail -200 "$proof/hearthgate.log" >&2
+              exit 1
+            fi
+            if curl --silent --fail \
+              http://127.0.0.1:3000/api/v1/flames/bluebird/audition/bluebird-the-crow \
+              > "$proof/candidate-status.json"; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            tail -200 "$proof/hearthgate.log" >&2
+            exit 1
+          fi
+
+          curl \
+            --silent \
+            --show-error \
+            --fail-with-body \
+            --max-time 300 \
+            --request POST \
+            --header 'content-type: application/json' \
+            --data '{"message":"Private-safe local liveness probe. Reply briefly to confirm this is a real Crow generation.","context":[]}' \
+            http://127.0.0.1:3000/api/v1/flames/bluebird/audition/bluebird-the-crow \
+            > "$proof/receipt.json"
+
+          jq --exit-status \
+            --arg model "$model_id" \
+            '.flame_id == "bluebird"
+             and .candidate_id == "bluebird-the-crow"
+             and .provider == "local-openai-compatible"
+             and .model == $model
+             and .audition == true
+             and .primary_route_unchanged == true
+             and (.message | type == "string" and length > 0)' \
+            "$proof/receipt.json" >/dev/null
+          CHAMBER
+
+      - name: Record proof summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Crow offline proving chamber'
+            echo
+            echo "- PR commit: \`$GITHUB_SHA\`"
+            echo "- GGUF SHA-256: \`$CROW_GGUF_SHA256\`"
+            if [ -s crow-proof/receipt.json ]; then
+              echo '- Loopback-only real-model receipt: **PASS**'
+              jq -r '"- Candidate: `\(.candidate_id)`\n- Provider: `\(.provider)`\n- Model: `\(.model)`\n- Audition: `\(.audition)`\n- Primary route unchanged: `\(.primary_route_unchanged)`"' crow-proof/receipt.json
+            else
+              echo '- Loopback-only real-model receipt: **FAIL**'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload receipt and diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: crow-offline-proof-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: crow-proof/
