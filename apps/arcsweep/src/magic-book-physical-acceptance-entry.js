@@ -3,7 +3,7 @@ import './magic-book-responsive.css';
 import './magic-book-touch-safe.css';
 import './magic-book-dark.css';
 import './magic-book-physical-skin.css';
-import './first-living-page-sidecar.js';
+import './living-rooms-sidecar.js';
 import './runa-manifestation-sidecar.js';
 import './magic-book-physical-proof-export.js';
 export * from './magic-book-physical-acceptance-sidecar.js';

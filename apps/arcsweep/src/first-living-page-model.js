@@ -1,8 +1,8 @@
-export const FIRST_LIVING_PAGE_SCHEMA = 'arcsweep.first-living-page/v0.1';
+export const FIRST_LIVING_PAGE_SCHEMA = 'arcsweep.first-living-page/v0.2';
 export const FIRST_LIVING_PAGE_TRANSITION_SCHEMA = 'arcsweep.continuity-transition/v0.1';
-export const FIRST_LIVING_PAGE_STORAGE_KEY = 'hearthgate.arcsweep.first-living-page.v0.1';
-export const DEFAULT_INHABITANT_CONTINUITY_ID = 'rowan:rarity';
-export const DEFAULT_INHABITANT_NAME = 'Rarity';
+export const FIRST_LIVING_PAGE_STORAGE_KEY = 'hearthgate.arcsweep.first-living-page.v0.2';
+export const DEFAULT_INHABITANT_CONTINUITY_ID = 'flame:bluebird';
+export const DEFAULT_INHABITANT_NAME = 'Bluebird';
 
 const MAX_LINEAGE = 96;
 const MAX_THREAD = 24;
@@ -34,7 +34,7 @@ function normaliseReceiver(input = {}) {
   });
 }
 
-function normaliseMessage(input = {}) {
+function normaliseMessage(input = {}, defaultAssistantId = DEFAULT_INHABITANT_CONTINUITY_ID) {
   const role = input.role === 'assistant' || input.role === 'inhabitant'
     ? 'assistant'
     : input.role === 'system'
@@ -44,7 +44,7 @@ function normaliseMessage(input = {}) {
     message_id: text(input.message_id || input.id, 240) || null,
     role,
     content: text(input.content || input.message, 4000),
-    actor_id: text(input.actor_id, 240) || (role === 'assistant' ? DEFAULT_INHABITANT_CONTINUITY_ID : 'rowan'),
+    actor_id: text(input.actor_id, 240) || (role === 'assistant' ? defaultAssistantId : 'rowan'),
     receiver: role === 'assistant' ? normaliseReceiver(input.receiver || {}) : null,
     occurred_at: input.occurred_at || input.at || null,
   });
@@ -71,10 +71,11 @@ function snapshotForLineage(state) {
 export function normaliseFirstLivingPageState(input = {}) {
   const inhabitantInput = input.inhabitant && typeof input.inhabitant === 'object' ? input.inhabitant : {};
   const lanternInput = input.lantern && typeof input.lantern === 'object' ? input.lantern : {};
+  const continuityId = text(inhabitantInput.continuity_id, 240) || DEFAULT_INHABITANT_CONTINUITY_ID;
   const state = {
     schema: FIRST_LIVING_PAGE_SCHEMA,
-    version: '0.1',
-    page_id: 'first-living-page',
+    version: '0.2',
+    page_id: text(input.page_id, 240) || 'first-living-page',
     steward_id: text(input.steward_id, 240) || 'rowan',
     world_id: text(input.world_id, 240) || null,
     room_id: text(input.room_id, 240) || 'portal',
@@ -82,7 +83,7 @@ export function normaliseFirstLivingPageState(input = {}) {
     visits: Math.max(0, Number(input.visits) || 0),
     last_opened_at: input.last_opened_at || null,
     inhabitant: {
-      continuity_id: text(inhabitantInput.continuity_id, 240) || DEFAULT_INHABITANT_CONTINUITY_ID,
+      continuity_id: continuityId,
       display_name: text(inhabitantInput.display_name, 160) || DEFAULT_INHABITANT_NAME,
       receiver: normaliseReceiver(inhabitantInput.receiver || {}),
       last_spoke_at: inhabitantInput.last_spoke_at || null,
@@ -102,7 +103,7 @@ export function normaliseFirstLivingPageState(input = {}) {
           imprinted_at: input.last_glyph.imprinted_at || null,
         }
       : null,
-    thread: boundedArray(input.thread, MAX_THREAD).map(normaliseMessage),
+    thread: boundedArray(input.thread, MAX_THREAD).map((message) => normaliseMessage(message, continuityId)),
     lineage: boundedArray(input.lineage, MAX_LINEAGE),
   };
   return Object.freeze(clone(state));
@@ -195,22 +196,24 @@ export function toggleLivingLantern(state, {
   });
 }
 
-export function recordLivingPageTurn(state, {
+export function recordLivingPageTurn(stateInput, {
   role,
   content,
   actorId = null,
   receiver = null,
   at = new Date().toISOString(),
 } = {}) {
+  const state = normaliseFirstLivingPageState(stateInput);
+  const assistantId = state.inhabitant.continuity_id || DEFAULT_INHABITANT_CONTINUITY_ID;
   const message = normaliseMessage({
     role,
     content,
-    actor_id: actorId || (role === 'assistant' ? DEFAULT_INHABITANT_CONTINUITY_ID : 'rowan'),
+    actor_id: actorId || (role === 'assistant' ? assistantId : 'rowan'),
     receiver: receiver || {},
     occurred_at: at,
     message_id: `living-message:${at}:${Math.random().toString(36).slice(2, 9)}`,
-  });
-  if (!message.content) return normaliseFirstLivingPageState(state);
+  }, assistantId);
+  if (!message.content) return state;
   return transition(state, {
     kind: message.role === 'assistant' ? 'inhabitant-turn' : message.role === 'system' ? 'system-note' : 'steward-turn',
     actorId: message.actor_id,
@@ -268,7 +271,7 @@ export function firstLivingPageContext(stateInput) {
     occurred_at: message.occurred_at,
   }));
   return Object.freeze({
-    schema: 'arcsweep.first-living-page-context/v0.1',
+    schema: 'arcsweep.first-living-page-context/v0.2',
     page_id: state.page_id,
     world_id: state.world_id,
     room_id: state.room_id,
