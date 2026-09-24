@@ -5,11 +5,6 @@ import {
   verifyGitHubActionsOidc,
 } from './github-actions-oidc.mjs';
 import { issueHouseSession, houseSessionCookie } from '../../netlify/functions/_shared/house-session.mjs';
-import { flameStatus, invokeFlame } from '../../netlify/functions/_shared/flame-runtime.mjs';
-import {
-  hostedFlameFallbackStatus,
-  invokeHostedFlameFallback,
-} from '../../netlify/functions/_shared/hosted-flame-fallback.mjs';
 import {
   HOUSE_AGENT_CHATTER_ROOM_ID,
   runAgentChatterTick,
@@ -17,6 +12,8 @@ import {
 
 const { FLAME_CONTRACTS } = contractsModule;
 const ALLOWED_EVENTS = Object.freeze(['schedule', 'workflow_dispatch', 'push']);
+const STATUS_TIMEOUT_MS = 6_000;
+const TURN_TIMEOUT_MS = 18_000;
 
 const json = (status, body) => new Response(JSON.stringify(body), {
   status,
@@ -33,43 +30,91 @@ function boundedInt(value, fallback, min, max) {
   return Number.isFinite(parsed) ? Math.max(min, Math.min(max, Math.trunc(parsed))) : fallback;
 }
 
-function voiceBindings(env) {
-  const rows = Object.values(FLAME_CONTRACTS).map((contract) => {
-    const primary = flameStatus(contract.id, env);
-    const hosted = hostedFlameFallbackStatus(contract.id, env);
+function houseSessionTransport(request, env) {
+  const session = issueHouseSession(env);
+  const setCookie = houseSessionCookie(request, session.token, session.ttl);
+  const cookie = setCookie.split(';')[0].trim();
+  const base = new URL(request.url).origin;
+  if (!cookie) throw new Error('House session mint returned no sealed session cookie.');
+  return { cookie, base };
+}
+
+async function readFlameStatus(contract, transport) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), STATUS_TIMEOUT_MS);
+  try {
+    const response = await fetch(`${transport.base}/api/v1/flames/${encodeURIComponent(contract.id)}/status`, {
+      headers: { cookie: transport.cookie, accept: 'application/json' },
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    const status = await response.json().catch(() => ({}));
+    if (!response.ok) return null;
+    const primaryConfigured = status.configured === true;
+    const hostedConfigured = status.hosted_fallback?.configured === true;
+    if (!primaryConfigured && !hostedConfigured) return null;
     return {
       id: contract.id,
       name: contract.identity.displayName,
       roles: [...contract.roles],
-      primary_configured: primary?.configured === true,
-      hosted_configured: hosted?.configured === true,
+      primary_configured: primaryConfigured,
+      hosted_configured: hostedConfigured,
+      provider: hostedConfigured && !primaryConfigured ? status.hosted_fallback?.provider || null : status.provider || null,
+      model: hostedConfigured && !primaryConfigured ? status.hosted_fallback?.model || null : status.model || null,
     };
-  });
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function voiceBindings(transport) {
+  const rows = (await Promise.all(Object.values(FLAME_CONTRACTS).map((contract) => readFlameStatus(contract, transport)))).filter(Boolean);
   const hosted = rows.filter((row) => row.hosted_configured);
-  return hosted.length >= 2 ? hosted : rows.filter((row) => row.hosted_configured || row.primary_configured);
+  const primary = rows.filter((row) => !row.hosted_configured);
+  return [...hosted, ...primary];
 }
 
-async function invokeUnattendedVoice(binding, body, env) {
-  const failures = [];
-  if (binding?.hosted_configured) {
-    try { return await invokeHostedFlameFallback(binding.id, body, env); }
-    catch (error) { failures.push(`hosted: ${error?.message || error}`); }
+async function invokeUnattendedVoice(binding, body, transport) {
+  if (!binding?.id) throw new Error('Agent chatter voice binding is missing.');
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TURN_TIMEOUT_MS);
+  try {
+    const response = await fetch(`${transport.base}/api/v1/flames/${encodeURIComponent(binding.id)}/chat`, {
+      method: 'POST',
+      headers: {
+        cookie: transport.cookie,
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+      cache: 'no-store',
+      signal: controller.signal,
+      body: JSON.stringify(body),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Flame ${binding.id} returned ${response.status}`);
+    const message = String(data.message || '').trim();
+    if (!message) throw new Error(`Flame ${binding.id} returned no message.`);
+    return {
+      ...data,
+      flame_id: data.flame_id || binding.id,
+      display_name: data.display_name || binding.name,
+      provider: data.provider || binding.provider || null,
+      model: data.model || binding.model || null,
+      route: data.route || binding.id,
+      message,
+    };
+  } finally {
+    clearTimeout(timeout);
   }
-  if (binding?.primary_configured) {
-    try { return await invokeFlame(binding.id, body, env); }
-    catch (error) { failures.push(`primary: ${error?.message || error}`); }
-  }
-  throw new Error(failures.length ? failures.join(' | ') : `No unattended execution path is configured for ${binding?.id || 'voice'}.`);
 }
 
-function internalCommonsAppender(request, { env, commonsHandler }) {
-  const session = issueHouseSession(env);
-  const setCookie = houseSessionCookie(request, session.token, session.ttl);
-  const cookie = setCookie.split(';')[0].trim();
+function internalCommonsAppender(transport, commonsHandler) {
   return async (body) => {
     const response = await commonsHandler(new Request('https://house.internal/api/v1/house/commons', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', cookie },
+      headers: { 'content-type': 'application/json', cookie: transport.cookie },
       body: JSON.stringify(body),
     }));
     const data = await response.json().catch(() => ({}));
@@ -93,9 +138,23 @@ export async function handleHouseAgentChatterRequest(request, { env, store, comm
     return json(401, { error: 'Trusted House agent-chatter workflow identity required.', detail: error.message });
   }
 
-  const url = new URL(request.url);
-  const bindings = voiceBindings(env);
   const productionSha = process.env.VERCEL_GIT_COMMIT_SHA || null;
+  let transport;
+  let bindings;
+  try {
+    transport = houseSessionTransport(request, env);
+    bindings = await voiceBindings(transport);
+  } catch (error) {
+    return json(503, {
+      ok: false,
+      schema: 'hearthgate.house-agent-chatter-result/v1',
+      production_sha: productionSha,
+      room_id: HOUSE_AGENT_CHATTER_ROOM_ID,
+      error: String(error?.message || error).slice(0, 500),
+    });
+  }
+
+  const url = new URL(request.url);
   if (url.searchParams.get('probe') === '1') {
     return json(200, {
       ok: true,
@@ -110,7 +169,13 @@ export async function handleHouseAgentChatterRequest(request, { env, store, comm
         run_id: oidc.run_id,
         sha: oidc.sha,
       },
-      routable_voices: bindings.map((voice) => ({ id: voice.id, hosted: voice.hosted_configured, primary: voice.primary_configured })),
+      routable_voices: bindings.map((voice) => ({
+        id: voice.id,
+        hosted: voice.hosted_configured,
+        primary: voice.primary_configured,
+        provider: voice.provider,
+        model: voice.model,
+      })),
       write_scope: 'none',
     });
   }
@@ -128,15 +193,15 @@ export async function handleHouseAgentChatterRequest(request, { env, store, comm
 
   try {
     const byId = new Map(bindings.map((voice) => [voice.id, voice]));
-    const maxTurns = boundedInt(env.get('HOUSE_AGENT_CHATTER_MAX_TURNS'), 2, 1, 3);
+    const maxTurns = boundedInt(env.get('HOUSE_AGENT_CHATTER_MAX_TURNS'), 2, 1, 2);
     const result = await runAgentChatterTick({
       store,
       voices: bindings,
       tickId: `gh-${oidc.run_id || Date.now()}`,
       maxTurns,
-      maxAttempts: Math.min(bindings.length, Math.max(4, maxTurns + 2)),
-      invokeVoice: async (voiceId, body) => invokeUnattendedVoice(byId.get(voiceId), body, env),
-      appendEntry: internalCommonsAppender(request, { env, commonsHandler }),
+      maxAttempts: Math.min(bindings.length, 3),
+      invokeVoice: async (voiceId, body) => invokeUnattendedVoice(byId.get(voiceId), body, transport),
+      appendEntry: internalCommonsAppender(transport, commonsHandler),
     });
 
     return json(200, {
@@ -159,6 +224,7 @@ export async function handleHouseAgentChatterRequest(request, { env, store, comm
         room_scope: HOUSE_AGENT_CHATTER_ROOM_ID,
         writes: 'agent-authored Commons messages only',
         participant_semantics: 'descriptive-not-constitutive',
+        execution_transport: 'existing-house-flame-routes',
         message_text_returned_in_workflow_receipt: false,
       },
     });
