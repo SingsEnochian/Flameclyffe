@@ -22,17 +22,36 @@ function request(url, body = null) {
   });
 }
 
-test('House room registry seeds first-class channels and persists read cursors', async () => {
+test('House room registry seeds first-class social channels and persists read cursors', async () => {
   const backing = store();
   const handler = createHouseRoomsHandler({ env: env({ ARCSWEEP_RUNTIME_TOKEN: 'house' }), store: backing, clock: () => new Date('2026-08-28T06:40:00.000Z') });
   const initial = await (await handler(request('https://example.test/api/v1/house/rooms'))).json();
   assert.equal(initial.rooms.length, BUILTIN_HOUSE_ROOMS.length);
-  assert.ok(initial.rooms.some((room) => room.id === 'house-room:constellation'));
+  assert.ok(initial.rooms.some((room) => room.id === 'house-room:constellation' && room.slug === 'general'));
+  assert.ok(initial.rooms.some((room) => room.id === 'house-room:action'));
+  assert.ok(initial.rooms.some((room) => room.id === 'house-room:roleplay'));
+  assert.ok(initial.rooms.some((room) => room.id === 'house-room:agent-chatter'));
   assert.ok(initial.rooms.some((room) => room.id === 'house-room:arcsweep'));
   const read = await (await handler(request('https://example.test/api/v1/house/rooms', { action: 'mark-read', room_id: 'house-room:constellation', last_read_entry_id: 'entry-7', last_read_at: '2026-08-28T06:39:00.000Z' }))).json();
   assert.equal(read.last_read_entry_id, 'entry-7');
   const next = await (await handler(request('https://example.test/api/v1/house/rooms'))).json();
   assert.equal(next.reads[0].room_id, 'house-room:constellation');
+});
+
+test('House room registry migrates the legacy Constellation presentation without moving its history id', async () => {
+  const backing = store();
+  await backing.setJSON('rooms/house-room:constellation', {
+    schema: 'hearthgate.house-room/v1', id: 'house-room:constellation', slug: 'constellation', title: 'Constellation',
+    topic: 'Shared House room for Rowan and the Constellation.', kind: 'channel', participants: ['atlas'], world_id: null,
+    created_at: '2026-08-01T00:00:00.000Z', updated_at: '2026-08-01T00:00:00.000Z', archived: false,
+  });
+  const handler = createHouseRoomsHandler({ env: env({ ARCSWEEP_RUNTIME_TOKEN: 'house' }), store: backing, clock: () => new Date('2026-09-24T11:20:00.000Z') });
+  const initial = await (await handler(request('https://example.test/api/v1/house/rooms'))).json();
+  const room = initial.rooms.find((item) => item.id === 'house-room:constellation');
+  assert.equal(room.slug, 'general');
+  assert.equal(room.title, 'General');
+  assert.equal(room.created_at, '2026-08-01T00:00:00.000Z');
+  assert.deepEqual(room.participants, ['atlas']);
 });
 
 test('House room registry creates stable direct rooms without changing channel history', async () => {
