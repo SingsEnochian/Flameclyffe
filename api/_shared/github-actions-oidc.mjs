@@ -2,9 +2,11 @@ import { createPublicKey, verify as verifySignature } from 'node:crypto';
 
 export const GITHUB_OIDC_ISSUER = 'https://token.actions.githubusercontent.com';
 export const HOUSE_SMOKE_AUDIENCE = 'flameclyffe-house-smoke/v1';
+export const HOUSE_AGENT_CHATTER_AUDIENCE = 'flameclyffe-house-agent-chatter/v1';
 export const HOUSE_SMOKE_REPOSITORY = 'SingsEnochian/Flameclyffe';
 export const HOUSE_SMOKE_WORKFLOW_REF = 'SingsEnochian/Flameclyffe/.github/workflows/vercel-production-authenticated-smoke.yml@refs/heads/main';
 export const ARCSWEEP_RC8_SMOKE_WORKFLOW_REF = 'SingsEnochian/Flameclyffe/.github/workflows/arcsweep-rc8-production-integration-smoke.yml@refs/heads/main';
+export const HOUSE_AGENT_CHATTER_WORKFLOW_REF = 'SingsEnochian/Flameclyffe/.github/workflows/house-agent-chatter.yml@refs/heads/main';
 
 const TRUSTED_SMOKE_WORKFLOWS = Object.freeze(new Set([
   HOUSE_SMOKE_WORKFLOW_REF,
@@ -49,6 +51,7 @@ export async function verifyGitHubActionsOidc(token, {
   audience = HOUSE_SMOKE_AUDIENCE,
   repository = HOUSE_SMOKE_REPOSITORY,
   workflowRef = null,
+  eventNames = ['workflow_dispatch'],
 } = {}) {
   const parts = String(token || '').split('.');
   if (parts.length !== 3) throw new Error('GitHub OIDC token is malformed.');
@@ -81,7 +84,8 @@ export async function verifyGitHubActionsOidc(token, {
     ? claims.workflow_ref === workflowRef
     : TRUSTED_SMOKE_WORKFLOWS.has(claims.workflow_ref);
   if (!acceptedWorkflow) throw new Error('GitHub OIDC workflow is not authorised.');
-  if (claims.event_name !== 'workflow_dispatch') throw new Error('GitHub OIDC event is not authorised.');
+  const acceptedEvents = new Set((Array.isArray(eventNames) ? eventNames : [eventNames]).map((item) => String(item || '').trim()).filter(Boolean));
+  if (!acceptedEvents.has(claims.event_name)) throw new Error('GitHub OIDC event is not authorised.');
 
   return Object.freeze({
     repository: claims.repository,
