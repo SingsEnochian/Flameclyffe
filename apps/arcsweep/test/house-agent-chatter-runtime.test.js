@@ -126,14 +126,18 @@ test('fewer than two routable voices leaves the peer room quiet', async () => {
   assert.equal(result.reason, 'fewer-than-two-routable-voices');
 });
 
-test('scheduled workflow uses OIDC, waits for exact production, and never asks GitHub for a reusable secret', async () => {
+test('scheduled workflow uses OIDC, waits for exact production, reuses Commons transport, and never asks GitHub for a reusable secret', async () => {
   const workflow = await readFile(new URL('../../../.github/workflows/house-agent-chatter.yml', import.meta.url), 'utf8');
-  const endpoint = await readFile(new URL('../../../api/v1/house/agent-chatter.js', import.meta.url), 'utf8');
+  const endpoint = await readFile(new URL('../../../api/_shared/house-agent-chatter-endpoint.mjs', import.meta.url), 'utf8');
+  const commons = await readFile(new URL('../../../api/v1/house/commons.js', import.meta.url), 'utf8');
   assert.match(workflow, /cron:\s*'17 \*\/4 \* \* \*'/);
   assert.match(workflow, /id-token:\s*write/);
   assert.match(workflow, /flameclyffe-house-agent-chatter\/v1/);
   assert.match(workflow, /production_sha/);
+  assert.match(workflow, /commons\?transport=agent-chatter/);
   assert.doesNotMatch(workflow, /CRON_SECRET|ARCSWEEP_RUNTIME_TOKEN|SUPABASE_SERVICE_ROLE_KEY/);
   assert.match(endpoint, /message_text_returned_in_workflow_receipt:\s*false/);
-  assert.match(endpoint, /house-room:agent-chatter|HOUSE_AGENT_CHATTER_ROOM_ID/);
+  assert.match(endpoint, /HOUSE_AGENT_CHATTER_ROOM_ID/);
+  assert.match(commons, /handleHouseAgentChatterRequest/);
+  assert.match(commons, /agent-chatter/);
 });
