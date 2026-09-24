@@ -28,6 +28,7 @@ import { registerCybersecurityIntelligenceService } from './cybersecurity-servic
 import { registerGlyphForgeService } from './glyphforge-service.js';
 import { registerRunaService } from './runa-service.js';
 import { registerDeviceProvingService } from './device-proving.js';
+import { registerAgentAutonomyService } from './agent-autonomy-service.js';
 import { ARCSWEEP_OS_MANIFEST } from './version.js';
 
 const GLOBAL_KEY = '__arcsweepOS';
@@ -246,6 +247,7 @@ function installArcSweepOS({ navigation = createRoomNavigation(), workspace = ty
   registerGlyphForgeService(capabilityRegistry);
   registerRunaService(capabilityRegistry, { bus });
   registerDeviceProvingService(capabilityRegistry);
+  registerAgentAutonomyService(capabilityRegistry, { bus });
 
   capabilityRegistry.registerService({
     service_id: 'arcsweep-guide', label: 'ArcSweep Guide',
@@ -427,6 +429,7 @@ function installArcSweepOS({ navigation = createRoomNavigation(), workspace = ty
   healthRegistry.set({ service_id: 'arcsweep-guide', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel', 'house-runtime'], recoverable: true });
   healthRegistry.set({ service_id: 'runa-sensory', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: true });
   healthRegistry.set({ service_id: 'device-proving', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: true });
+  healthRegistry.set({ service_id: 'agent-autonomy', status: 'healthy', version: ARCSWEEP_OS_MANIFEST.version, last_success_at: new Date().toISOString(), dependencies: ['arcsweep-os-kernel'], recoverable: true });
 
   if (typeof document !== 'undefined') {
     const installSurfaces = () => {
