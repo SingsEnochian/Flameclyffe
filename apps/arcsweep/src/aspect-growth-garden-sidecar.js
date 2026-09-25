@@ -29,6 +29,7 @@ function living(profile) {
     profile.messageCount > 0
     || profile.claims.length > 0
     || profile.openCuriosities.length > 0
+    || profile.openThreads.length > 0
     || profile.collaborators.length > 0
   );
 }
@@ -46,14 +47,20 @@ function compactRow(profile) {
   return `<button type="button" class="growth-garden-row" data-growth-aspect="${esc(profile.aspectId)}" aria-pressed="${profile.aspectId === selectedAspectId ? 'true' : 'false'}"><span>❧</span><span><strong>${esc(profile.aspectName)}</strong><small>${esc(topPattern(profile))}</small></span><em>${profile.claims.length} sprouts · ${recurringCount(profile)} threads</em></button>`;
 }
 
+function claimSection(title, claims, limit = 4) {
+  const rows = (claims || []).slice(-limit).reverse();
+  return rows.length ? `<div><b>${esc(title)}</b>${rows.map((claim) => `<p>${esc(claim.statement)}</p>`).join('')}</div>` : '';
+}
+
 function detailMarkup(profile) {
   if (!profile) return '<p class="growth-garden-empty">Nothing has been planted here yet.</p>';
   const patterns = profile.demonstratedPatterns.slice(0, 4);
   const recurring = profile.collaborators.filter((row) => row.recurring).slice(0, 4);
-  const notes = profile.selfReports.slice(-4).reverse();
+  const notes = profile.selfReports.filter((claim) => !['skill', 'role', 'preference', 'relationship'].includes(claim.type)).slice(-4).reverse();
   const peers = profile.peerObservations.slice(-3).reverse();
   const curiosities = profile.openCuriosities.slice(0, 4);
-  return `<section class="growth-garden-detail"><header><span>🌱</span><div><strong>${esc(profile.aspectName)}</strong><small>${profile.messageCount} trace rings · seed strengths: ${esc(profile.seedStrengths.join(', ') || 'open')}</small></div></header><p class="growth-garden-law">Patterns describe history. They do not dictate identity.</p>${patterns.length ? `<div><b>Observed rings</b>${patterns.map((row) => `<p>${esc(row.label)} <small>×${row.count}</small></p>`).join('')}</div>` : ''}${notes.length ? `<div><b>Carried self-observations</b>${notes.map((claim) => `<p>${esc(claim.statement)}</p>`).join('')}</div>` : ''}${peers.length ? `<div><b>Peer observations</b>${peers.map((claim) => `<p><small>${esc(names.get(claim.sourceAspectId) || claim.sourceAspectId)}:</small> ${esc(claim.statement)}</p>`).join('')}</div>` : ''}${recurring.length ? `<div><b>Recurring threads</b>${recurring.map((row) => `<p>${esc(names.get(row.aspectId) || row.aspectId)} <small>${row.turns} turns · ${row.traceCount} traces</small></p>`).join('')}</div>` : ''}${curiosities.length ? `<div><b>Still growing toward</b>${curiosities.map((item) => `<p>${esc(item.text)}</p>`).join('')}</div>` : ''}</section>`;
+  const openThreads = profile.openThreads.slice(0, 4);
+  return `<section class="growth-garden-detail"><header><span>🌱</span><div><strong>${esc(profile.aspectName)}</strong><small>${profile.messageCount} trace rings · seed strengths: ${esc(profile.seedStrengths.join(', ') || 'open')}</small></div></header><p class="growth-garden-law">Patterns describe history. They do not dictate identity.</p>${patterns.length ? `<div><b>Observed rings</b>${patterns.map((row) => `<p>${esc(row.label)} <small>×${row.count}</small></p>`).join('')}</div>` : ''}${claimSection('Discovered skills', profile.skillClaims)}${claimSection('Role possibilities', profile.roleSuggestions)}${claimSection('Preferences & relationships', profile.preferenceClaims)}${notes.length ? `<div><b>Carried self-observations</b>${notes.map((claim) => `<p>${esc(claim.statement)}</p>`).join('')}</div>` : ''}${peers.length ? `<div><b>Peer observations</b>${peers.map((claim) => `<p><small>${esc(names.get(claim.sourceAspectId) || claim.sourceAspectId)}:</small> ${esc(claim.statement)}</p>`).join('')}</div>` : ''}${recurring.length ? `<div><b>Recurring threads</b>${recurring.map((row) => `<p>${esc(names.get(row.aspectId) || row.aspectId)} <small>${row.turns} turns · ${row.traceCount} traces</small></p>`).join('')}</div>` : ''}${curiosities.length ? `<div><b>Open curiosities</b>${curiosities.map((item) => `<p>${esc(item.text)}</p>`).join('')}</div>` : ''}${openThreads.length ? `<div><b>Unfinished paths</b>${openThreads.map((item) => `<p>${esc(item.text)} <small>${esc(item.traceId)}</small></p>`).join('')}</div>` : ''}</section>`;
 }
 
 function housePanel() {
