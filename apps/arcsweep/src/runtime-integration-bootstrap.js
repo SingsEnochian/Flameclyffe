@@ -11,6 +11,7 @@ import { currentModelPresence } from './model-presence-bus.js';
 import { readActiveRuntimeWorldContext } from './runtime-world-context.js';
 import { installAspectMeshRuntime } from './aspects/aspect-mesh-runtime.js';
 import './aspect-growth-garden-sidecar.js';
+import './aspect-experiment-bed-sidecar.js';
 
 export const RUNTIME_INTEGRATION_BOOTSTRAP_EVENT = 'arcsweep:runtime-integration-ready';
 
