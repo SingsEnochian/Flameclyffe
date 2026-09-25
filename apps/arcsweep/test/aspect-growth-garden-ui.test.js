@@ -11,10 +11,14 @@ test('Growth Garden UI is descriptive, provenance-shaped, and not a ranking syst
   const source = await readFile(new URL('../src/aspect-growth-garden-sidecar.js', import.meta.url), 'utf8');
   assert.match(source, /Patterns describe history\. They do not dictate identity\./);
   assert.match(source, /trace rings/);
+  assert.match(source, /Discovered skills/);
+  assert.match(source, /Role possibilities/);
+  assert.match(source, /Preferences & relationships/);
   assert.match(source, /Carried self-observations/);
   assert.match(source, /Peer observations/);
   assert.match(source, /Recurring threads/);
-  assert.match(source, /Still growing toward/);
+  assert.match(source, /Open curiosities/);
+  assert.match(source, /Unfinished paths/);
   assert.doesNotMatch(source, /progress-bar|xp\b|level\s*\d|score\s*[:=]/i);
   assert.doesNotMatch(source, /localStorage|sessionStorage/);
 });
