@@ -1,8 +1,9 @@
 import { INITIAL_ASPECTS } from './aspect-contract.js';
 
-export const ASPECT_GROWTH_GARDEN_SCHEMA = 'hearthweave.aspect-growth-garden/v0.1';
-export const ASPECT_GROWTH_PROFILE_SCHEMA = 'hearthweave.aspect-growth-profile/v0.1';
+export const ASPECT_GROWTH_GARDEN_SCHEMA = 'hearthweave.aspect-growth-garden/v0.2';
+export const ASPECT_GROWTH_PROFILE_SCHEMA = 'hearthweave.aspect-growth-profile/v0.2';
 export const GROWTH_CLAIM_TYPES = Object.freeze(['skill', 'curiosity', 'preference', 'relationship', 'role', 'boundary', 'note']);
+export const GROWTH_RELATIONS = Object.freeze(['adds', 'supersedes', 'contradicts', 'retires', 'affirms']);
 
 const PATTERN_LABELS = Object.freeze({
   proposal: 'route-making',
@@ -25,6 +26,12 @@ function text(value, max = 1200) {
 function bodyText(body, max = 500) {
   if (typeof body === 'string') return text(body, max);
   try { return text(JSON.stringify(body ?? ''), max); } catch { return text(body, max); }
+}
+
+function strings(values, max = 120) {
+  return [...new Set((Array.isArray(values) ? values : [])
+    .map((value) => text(value, max))
+    .filter(Boolean))];
 }
 
 function knownAspectIds(aspects = INITIAL_ASPECTS) {
@@ -53,20 +60,71 @@ function normaliseClaim(message, known) {
     : message.sender.aspectId;
   const statement = text(object.statement || object.text || (typeof body === 'string' ? body : JSON.stringify(body ?? '')), 1000);
   if (!statement) return null;
-  const tags = Array.isArray(object.tags)
-    ? [...new Set(object.tags.map((tag) => text(tag, 80)).filter(Boolean))]
-    : [];
+  const requestedRelation = text(object.relation || 'adds', 32).toLowerCase();
+  const relation = GROWTH_RELATIONS.includes(requestedRelation) ? requestedRelation : 'adds';
+  const targetEnvelopeIds = strings(object.targetEnvelopeIds || object.target_envelope_ids || object.targets, 160);
+  const tags = strings(object.tags, 80);
   return Object.freeze({
     type,
     subjectAspectId,
     sourceAspectId: message.sender.aspectId,
     source: subjectAspectId === message.sender.aspectId ? 'self-report' : 'peer-observation',
     statement,
+    relation,
+    targetEnvelopeIds: Object.freeze(targetEnvelopeIds),
     tags: Object.freeze(tags),
     envelopeId: message.id,
     traceId: message.traceId || null,
     createdAt: message.createdAt || '',
   });
+}
+
+function claimStates(claims) {
+  const states = new Map(claims.map((claim) => [claim.envelopeId, {
+    active: true,
+    contested: false,
+    retired: false,
+    supersededBy: [],
+    contradictedBy: [],
+    retiredBy: [],
+    affirmedBy: [],
+  }]));
+
+  for (const claim of claims) {
+    for (const targetId of claim.targetEnvelopeIds || []) {
+      const target = states.get(targetId);
+      if (!target || targetId === claim.envelopeId) continue;
+      if (claim.relation === 'supersedes') {
+        target.active = false;
+        target.supersededBy.push(claim.envelopeId);
+      } else if (claim.relation === 'retires') {
+        target.active = false;
+        target.retired = true;
+        target.retiredBy.push(claim.envelopeId);
+      } else if (claim.relation === 'contradicts') {
+        target.contested = true;
+        target.contradictedBy.push(claim.envelopeId);
+      } else if (claim.relation === 'affirms') {
+        target.affirmedBy.push(claim.envelopeId);
+      }
+    }
+  }
+
+  return new Map([...states].map(([id, state]) => [id, Object.freeze({
+    ...state,
+    supersededBy: Object.freeze([...state.supersededBy]),
+    contradictedBy: Object.freeze([...state.contradictedBy]),
+    retiredBy: Object.freeze([...state.retiredBy]),
+    affirmedBy: Object.freeze([...state.affirmedBy]),
+  })]));
+}
+
+function decorateClaims(claims) {
+  const states = claimStates(claims);
+  return claims.map((claim) => Object.freeze({
+    ...claim,
+    state: states.get(claim.envelopeId) || Object.freeze({ active: true, contested: false, retired: false }),
+  }));
 }
 
 function patternRows(messages) {
@@ -161,12 +219,13 @@ function openThreadRows(aspectId, messages, known) {
 export function buildAspectGrowthSnapshot(messages = [], aspects = INITIAL_ASPECTS) {
   const source = mergeMessages(messages);
   const known = knownAspectIds(aspects);
-  const claims = source.map((message) => normaliseClaim(message, known)).filter(Boolean);
+  const claims = decorateClaims(source.map((message) => normaliseClaim(message, known)).filter(Boolean));
   const profiles = {};
 
   for (const aspect of aspects) {
     const own = source.filter((message) => message?.sender?.aspectId === aspect.id);
     const aspectClaims = claims.filter((claim) => claim.subjectAspectId === aspect.id);
+    const activeClaims = aspectClaims.filter((claim) => claim.state.active && !claim.state.retired);
     profiles[aspect.id] = Object.freeze({
       schema: ASPECT_GROWTH_PROFILE_SCHEMA,
       aspectId: aspect.id,
@@ -178,12 +237,15 @@ export function buildAspectGrowthSnapshot(messages = [], aspects = INITIAL_ASPEC
       openCuriosities: Object.freeze(openCuriosities(aspect.id, source)),
       openThreads: Object.freeze(openThreadRows(aspect.id, source, known)),
       claims: Object.freeze(aspectClaims),
-      selfReports: Object.freeze(aspectClaims.filter((claim) => claim.source === 'self-report')),
-      peerObservations: Object.freeze(aspectClaims.filter((claim) => claim.source === 'peer-observation')),
-      skillClaims: Object.freeze(aspectClaims.filter((claim) => claim.type === 'skill')),
-      roleSuggestions: Object.freeze(aspectClaims.filter((claim) => claim.type === 'role')),
-      preferenceClaims: Object.freeze(aspectClaims.filter((claim) => claim.type === 'preference' || claim.type === 'relationship')),
-      boundaryNotes: Object.freeze(aspectClaims.filter((claim) => claim.type === 'boundary')),
+      activeClaims: Object.freeze(activeClaims),
+      archivedClaims: Object.freeze(aspectClaims.filter((claim) => !claim.state.active || claim.state.retired)),
+      contestedClaims: Object.freeze(aspectClaims.filter((claim) => claim.state.contested)),
+      selfReports: Object.freeze(activeClaims.filter((claim) => claim.source === 'self-report')),
+      peerObservations: Object.freeze(activeClaims.filter((claim) => claim.source === 'peer-observation')),
+      skillClaims: Object.freeze(activeClaims.filter((claim) => claim.type === 'skill')),
+      roleSuggestions: Object.freeze(activeClaims.filter((claim) => claim.type === 'role')),
+      preferenceClaims: Object.freeze(activeClaims.filter((claim) => claim.type === 'preference' || claim.type === 'relationship')),
+      boundaryNotes: Object.freeze(activeClaims.filter((claim) => claim.type === 'boundary')),
     });
   }
 
@@ -191,6 +253,7 @@ export function buildAspectGrowthSnapshot(messages = [], aspects = INITIAL_ASPEC
     schema: ASPECT_GROWTH_GARDEN_SCHEMA,
     messageCount: source.length,
     claimCount: claims.length,
+    activeClaimCount: claims.filter((claim) => claim.state.active && !claim.state.retired).length,
     profiles: Object.freeze(profiles),
   });
 }
@@ -200,6 +263,7 @@ export function growthContextForAspect(snapshot, aspectId) {
   if (!profile) return Object.freeze([]);
   const lines = [
     'Growth memory is descriptive continuity, not identity law. Patterns may suggest; they do not silently redefine you.',
+    'Older rings remain available even when later growth supersedes, retires, or contradicts them.',
   ];
   const patterns = profile.demonstratedPatterns.filter((row) => row.count >= 2).slice(0, 4);
   if (patterns.length) lines.push(`Demonstrated patterns: ${patterns.map((row) => `${row.label} ×${row.count}`).join(', ')}.`);
@@ -208,7 +272,8 @@ export function growthContextForAspect(snapshot, aspectId) {
   if (profile.openCuriosities.length) lines.push(`Open curiosities: ${profile.openCuriosities.slice(0, 3).map((item) => item.text).join(' | ')}`);
   if (profile.openThreads.length) lines.push(`Unfinished threads: ${profile.openThreads.slice(0, 3).map((item) => `${item.traceId}: ${item.text}`).join(' | ')}`);
   if (profile.selfReports.length) lines.push(`Your carried self-observations: ${profile.selfReports.slice(-3).map((claim) => claim.statement).join(' | ')}`);
-  if (profile.peerObservations.length) lines.push(`Peer observations, not facts about identity: ${profile.peerObservations.slice(-3).map((claim) => `${claim.sourceAspectId}: ${claim.statement}`).join(' | ')}`);
+  if (profile.peerObservations.length) lines.push(`Peer observations, not facts about identity: ${profile.peerObservations.slice(-3).map((claim) => `${claim.sourceAspectId}: ${claim.statement}${claim.state.contested ? ' [contested]' : ''}`).join(' | ')}`);
+  if (profile.contestedClaims.length) lines.push(`Contested older rings remain in provenance: ${profile.contestedClaims.slice(-3).map((claim) => `${claim.envelopeId}: ${claim.statement}`).join(' | ')}`);
   return Object.freeze(lines);
 }
 
