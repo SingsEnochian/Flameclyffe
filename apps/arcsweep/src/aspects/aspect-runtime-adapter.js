@@ -133,6 +133,7 @@ export async function invokeAspectRuntime({
     sender: {
       aspectId: aspect.id,
       invocationId: `runtime:${binding.voiceId}:${raw.profileId || raw.model || 'unknown'}`,
+      voiceId: binding.voiceId,
       provider: raw.provider,
       model: raw.model,
     },
