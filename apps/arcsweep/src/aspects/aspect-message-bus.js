@@ -44,6 +44,7 @@ export function createAspectEnvelope({
     sender: Object.freeze({
       aspectId: String(sender.aspectId),
       invocationId: String(sender.invocationId || id('aspect-invocation')),
+      ...(sender.voiceId ? { voiceId: String(sender.voiceId) } : {}),
       ...(sender.provider ? { provider: String(sender.provider) } : {}),
       ...(sender.model ? { model: String(sender.model) } : {}),
     }),
