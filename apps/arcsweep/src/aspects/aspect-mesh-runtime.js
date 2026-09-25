@@ -42,6 +42,40 @@ export function createAspectMeshRuntime({
     ? hydrateAspectGrowthGardenFromHouse(growthGarden).catch((error) => Object.freeze({ status: 'error', error: error?.message || String(error) }))
     : Promise.resolve(Object.freeze({ status: 'local-only', count: bus.all().length }));
 
+  function publishGrowth({
+    aspectId,
+    subjectAspectId = aspectId,
+    type = 'note',
+    statement,
+    relation = 'adds',
+    targetEnvelopeIds = [],
+    tags = [],
+    traceId: growthTraceId,
+    parentId = null,
+    evidenceRefs = [],
+    stateRefs = [],
+  } = {}) {
+    if (!String(aspectId || '').trim()) throw new Error('Growth note requires aspectId.');
+    if (!String(statement || '').trim()) throw new Error('Growth note requires a statement.');
+    return bus.publish({
+      traceId: growthTraceId || traceId('growth-trace'),
+      ...(parentId ? { parentId } : {}),
+      sender: { aspectId: String(aspectId), invocationId: 'aspect-growth-garden' },
+      recipients: [],
+      kind: 'growth',
+      body: {
+        type: String(type || 'note'),
+        subjectAspectId: String(subjectAspectId || aspectId),
+        statement: String(statement).trim(),
+        relation: String(relation || 'adds'),
+        targetEnvelopeIds: Array.isArray(targetEnvelopeIds) ? targetEnvelopeIds : [],
+        tags: Array.isArray(tags) ? tags : [],
+      },
+      evidenceRefs,
+      stateRefs,
+    });
+  }
+
   const runtime = {
     schema: ASPECT_MESH_RUNTIME_SCHEMA,
     bus,
@@ -54,34 +88,28 @@ export function createAspectMeshRuntime({
       return bus.publish(input);
     },
 
-    recordGrowth({
-      aspectId,
-      subjectAspectId = aspectId,
-      type = 'note',
-      statement,
-      tags = [],
-      traceId: growthTraceId,
-      parentId = null,
-      evidenceRefs = [],
-      stateRefs = [],
-    } = {}) {
-      if (!String(aspectId || '').trim()) throw new Error('Growth note requires aspectId.');
-      if (!String(statement || '').trim()) throw new Error('Growth note requires a statement.');
-      return bus.publish({
-        traceId: growthTraceId || traceId('growth-trace'),
-        ...(parentId ? { parentId } : {}),
-        sender: { aspectId: String(aspectId), invocationId: 'aspect-growth-garden' },
-        recipients: [],
-        kind: 'growth',
-        body: {
-          type: String(type || 'note'),
-          subjectAspectId: String(subjectAspectId || aspectId),
-          statement: String(statement).trim(),
-          tags: Array.isArray(tags) ? tags : [],
-        },
-        evidenceRefs,
-        stateRefs,
-      });
+    recordGrowth(input = {}) {
+      return publishGrowth({ ...input, relation: input.relation || 'adds' });
+    },
+
+    reviseGrowth({ targetEnvelopeId, ...input } = {}) {
+      if (!String(targetEnvelopeId || '').trim()) throw new Error('Growth revision requires targetEnvelopeId.');
+      return publishGrowth({ ...input, relation: 'supersedes', targetEnvelopeIds: [targetEnvelopeId] });
+    },
+
+    contradictGrowth({ targetEnvelopeId, ...input } = {}) {
+      if (!String(targetEnvelopeId || '').trim()) throw new Error('Growth contradiction requires targetEnvelopeId.');
+      return publishGrowth({ ...input, relation: 'contradicts', targetEnvelopeIds: [targetEnvelopeId] });
+    },
+
+    retireGrowth({ targetEnvelopeId, ...input } = {}) {
+      if (!String(targetEnvelopeId || '').trim()) throw new Error('Growth retirement requires targetEnvelopeId.');
+      return publishGrowth({ ...input, relation: 'retires', targetEnvelopeIds: [targetEnvelopeId] });
+    },
+
+    affirmGrowth({ targetEnvelopeId, ...input } = {}) {
+      if (!String(targetEnvelopeId || '').trim()) throw new Error('Growth affirmation requires targetEnvelopeId.');
+      return publishGrowth({ ...input, relation: 'affirms', targetEnvelopeIds: [targetEnvelopeId] });
     },
 
     growthSnapshot() {
