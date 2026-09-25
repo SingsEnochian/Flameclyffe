@@ -271,9 +271,10 @@ export function growthContextForAspect(snapshot, aspectId) {
   if (recurring.length) lines.push(`Recurring collaborators: ${recurring.map((row) => `${row.aspectId} (${row.turns} turns across ${row.traceCount} traces)`).join(', ')}.`);
   if (profile.openCuriosities.length) lines.push(`Open curiosities: ${profile.openCuriosities.slice(0, 3).map((item) => item.text).join(' | ')}`);
   if (profile.openThreads.length) lines.push(`Unfinished threads: ${profile.openThreads.slice(0, 3).map((item) => `${item.traceId}: ${item.text}`).join(' | ')}`);
-  if (profile.selfReports.length) lines.push(`Your carried self-observations: ${profile.selfReports.slice(-3).map((claim) => claim.statement).join(' | ')}`);
-  if (profile.peerObservations.length) lines.push(`Peer observations, not facts about identity: ${profile.peerObservations.slice(-3).map((claim) => `${claim.sourceAspectId}: ${claim.statement}${claim.state.contested ? ' [contested]' : ''}`).join(' | ')}`);
-  if (profile.contestedClaims.length) lines.push(`Contested older rings remain in provenance: ${profile.contestedClaims.slice(-3).map((claim) => `${claim.envelopeId}: ${claim.statement}`).join(' | ')}`);
+  if (profile.selfReports.length) lines.push(`Your carried self-observations: ${profile.selfReports.slice(-3).map((claim) => `[${claim.envelopeId}] ${claim.statement}`).join(' | ')}`);
+  if (profile.peerObservations.length) lines.push(`Peer observations, not facts about identity: ${profile.peerObservations.slice(-3).map((claim) => `[${claim.envelopeId}] ${claim.sourceAspectId}: ${claim.statement}${claim.state.contested ? ' [contested]' : ''}`).join(' | ')}`);
+  if (profile.archivedClaims.length) lines.push(`Older rings retained for provenance: ${profile.archivedClaims.slice(-3).map((claim) => `[${claim.envelopeId}] ${claim.statement}`).join(' | ')}`);
+  if (profile.contestedClaims.length) lines.push(`Contested rings remain in provenance: ${profile.contestedClaims.slice(-3).map((claim) => `[${claim.envelopeId}] ${claim.statement}`).join(' | ')}`);
   return Object.freeze(lines);
 }
 
