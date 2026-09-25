@@ -12,6 +12,7 @@ import { readActiveRuntimeWorldContext } from './runtime-world-context.js';
 import { installAspectMeshRuntime } from './aspects/aspect-mesh-runtime.js';
 import './aspect-growth-garden-sidecar.js';
 import './aspect-experiment-bed-sidecar.js';
+import './codex-physical-materials-sidecar.js';
 import './codex-alive-sidecar.js';
 import './codex-residue-sidecar.js';
 import './codex-attention-notes-sidecar.js';
