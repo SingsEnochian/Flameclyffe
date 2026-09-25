@@ -8,8 +8,11 @@ export const CODEX_QUIET_LAW = Object.freeze([
   'New activity may appear only when grounded in a real event or relevant remembered connection.',
 ]);
 
-export function codexQuietState({ manifestations = [], attention = [] } = {}) {
-  const visible = Array.isArray(attention) && attention.length
+export function codexQuietState({ manifestations = [], attention = null } = {}) {
+  // When a caller supplies an attention set, even an empty one, that set is the
+  // page-local truth about what deserves notice. Activity elsewhere in the
+  // House must not wake an unrelated Codex page.
+  const visible = Array.isArray(attention)
     ? attention.map((row) => row.manifestation || row).filter(Boolean)
     : (Array.isArray(manifestations) ? manifestations : []).filter((item) => item && !item.quiet && item.material?.live);
   return Object.freeze({
