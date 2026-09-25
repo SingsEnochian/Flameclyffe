@@ -1,12 +1,14 @@
-import { createAspectMessageBus } from './aspect-message-bus.js';
+import { createAspectMessageBus, createAspectEnvelope } from './aspect-message-bus.js';
 import { bindAspectBusToHouse } from './aspect-house-runtime.js';
 import { createAspectCoalition, runAspectCoalition } from './aspect-coalition.js';
-import { createAspectEnvelope } from './aspect-message-bus.js';
+import { createAspectGrowthGarden } from './aspect-growth-garden.js';
+import { hydrateAspectGrowthGardenFromHouse } from './aspect-growth-continuity.js';
 
 export const ASPECT_MESH_RUNTIME_SCHEMA = 'hearthweave.aspect-mesh-runtime/v0.2';
 export const ASPECT_MESH_EVENTS = Object.freeze({
   ready: 'arcsweep:aspect-mesh-ready',
   message: 'arcsweep:aspect-mesh-message',
+  growthChanged: 'arcsweep:aspect-growth-changed',
   coalitionStarted: 'arcsweep:aspect-mesh-coalition-started',
   coalitionComplete: 'arcsweep:aspect-mesh-coalition-complete',
 });
@@ -29,18 +31,65 @@ export function createAspectMeshRuntime({
   persistence = true,
 } = {}) {
   const houseBridge = persistence ? bindAspectBusToHouse({ bus, world }) : null;
+  const growthGarden = createAspectGrowthGarden({ bus });
   const unsubscribeEvents = bus.subscribe((envelope) => {
     dispatch(target, ASPECT_MESH_EVENTS.message, envelope);
   });
+  const unsubscribeGrowth = growthGarden.subscribe((snapshot) => {
+    dispatch(target, ASPECT_MESH_EVENTS.growthChanged, snapshot);
+  });
+  const growthReady = persistence
+    ? hydrateAspectGrowthGardenFromHouse(growthGarden).catch((error) => Object.freeze({ status: 'error', error: error?.message || String(error) }))
+    : Promise.resolve(Object.freeze({ status: 'local-only', count: bus.all().length }));
 
   const runtime = {
     schema: ASPECT_MESH_RUNTIME_SCHEMA,
     bus,
     houseBridge,
+    growthGarden,
+    growthReady,
     world,
 
     publish(input) {
       return bus.publish(input);
+    },
+
+    recordGrowth({
+      aspectId,
+      subjectAspectId = aspectId,
+      type = 'note',
+      statement,
+      tags = [],
+      traceId: growthTraceId,
+      parentId = null,
+      evidenceRefs = [],
+      stateRefs = [],
+    } = {}) {
+      if (!String(aspectId || '').trim()) throw new Error('Growth note requires aspectId.');
+      if (!String(statement || '').trim()) throw new Error('Growth note requires a statement.');
+      return bus.publish({
+        traceId: growthTraceId || traceId('growth-trace'),
+        ...(parentId ? { parentId } : {}),
+        sender: { aspectId: String(aspectId), invocationId: 'aspect-growth-garden' },
+        recipients: [],
+        kind: 'growth',
+        body: {
+          type: String(type || 'note'),
+          subjectAspectId: String(subjectAspectId || aspectId),
+          statement: String(statement).trim(),
+          tags: Array.isArray(tags) ? tags : [],
+        },
+        evidenceRefs,
+        stateRefs,
+      });
+    },
+
+    growthSnapshot() {
+      return growthGarden.snapshot();
+    },
+
+    growthFor(aspectId) {
+      return growthGarden.forAspect(aspectId);
     },
 
     async startCoalition({
@@ -73,7 +122,7 @@ export function createAspectMeshRuntime({
         seed: envelope,
         rounds,
         bus,
-        runtimeOptions,
+        runtimeOptions: { ...runtimeOptions, growthGarden },
       });
       dispatch(target, ASPECT_MESH_EVENTS.coalitionComplete, {
         coalition: result.coalition,
@@ -89,6 +138,8 @@ export function createAspectMeshRuntime({
 
     stop() {
       unsubscribeEvents();
+      unsubscribeGrowth();
+      growthGarden.stop();
       houseBridge?.stop?.();
       if (installedRuntime === runtime) installedRuntime = null;
     },
@@ -104,7 +155,11 @@ export function installAspectMeshRuntime(options = {}) {
   dispatch(options.target || globalThis.document, ASPECT_MESH_EVENTS.ready, {
     schema: installedRuntime.schema,
     persistence: Boolean(installedRuntime.houseBridge),
+    growthMemory: installedRuntime.growthGarden?.schema || null,
     worldId: options.world?.identity_anchor?.world_id || options.world?.id || null,
+  });
+  void installedRuntime.growthReady.then(() => {
+    dispatch(options.target || globalThis.document, ASPECT_MESH_EVENTS.growthChanged, installedRuntime?.growthSnapshot?.());
   });
   return installedRuntime;
 }
