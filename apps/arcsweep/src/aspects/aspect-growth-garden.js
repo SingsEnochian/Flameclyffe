@@ -15,8 +15,16 @@ const PATTERN_LABELS = Object.freeze({
   pause: 'self-pacing',
 });
 
+const THREAD_OPENERS = new Set(['question', 'proposal', 'challenge']);
+const THREAD_CLOSERS = new Set(['result', 'verification']);
+
 function text(value, max = 1200) {
   return String(value ?? '').trim().slice(0, max);
+}
+
+function bodyText(body, max = 500) {
+  if (typeof body === 'string') return text(body, max);
+  try { return text(JSON.stringify(body ?? ''), max); } catch { return text(body, max); }
 }
 
 function knownAspectIds(aspects = INITIAL_ASPECTS) {
@@ -112,9 +120,42 @@ function openCuriosities(aspectId, messages) {
     .map((message) => Object.freeze({
       envelopeId: message.id,
       traceId: message.traceId || null,
-      text: text(typeof message.body === 'string' ? message.body : JSON.stringify(message.body ?? ''), 500),
+      text: bodyText(message.body),
       createdAt: message.createdAt || '',
     }));
+}
+
+function openThreadRows(aspectId, messages, known) {
+  const traces = new Map();
+  for (const message of messages) {
+    if (!message?.traceId) continue;
+    const row = traces.get(message.traceId) || { traceId: message.traceId, messages: [], aspects: new Set() };
+    row.messages.push(message);
+    if (known.has(message?.sender?.aspectId)) row.aspects.add(message.sender.aspectId);
+    for (const recipient of message.recipients || []) if (known.has(recipient)) row.aspects.add(recipient);
+    traces.set(message.traceId, row);
+  }
+
+  return [...traces.values()]
+    .filter((row) => row.aspects.has(aspectId))
+    .map((row) => {
+      const opened = row.messages.filter((message) => THREAD_OPENERS.has(message.kind));
+      const closed = row.messages.some((message) => THREAD_CLOSERS.has(message.kind));
+      if (!opened.length || closed) return null;
+      const last = row.messages[row.messages.length - 1];
+      const lastOpener = opened[opened.length - 1];
+      return Object.freeze({
+        traceId: row.traceId,
+        aspects: Object.freeze([...row.aspects]),
+        openedBy: lastOpener.sender?.aspectId || null,
+        kind: lastOpener.kind,
+        text: bodyText(lastOpener.body, 420),
+        lastAt: String(last?.createdAt || lastOpener.createdAt || ''),
+      });
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.lastAt.localeCompare(a.lastAt))
+    .slice(0, 8);
 }
 
 export function buildAspectGrowthSnapshot(messages = [], aspects = INITIAL_ASPECTS) {
@@ -135,6 +176,7 @@ export function buildAspectGrowthSnapshot(messages = [], aspects = INITIAL_ASPEC
       demonstratedPatterns: Object.freeze(patternRows(own)),
       collaborators: Object.freeze(collaborationRows(aspect.id, source, known)),
       openCuriosities: Object.freeze(openCuriosities(aspect.id, source)),
+      openThreads: Object.freeze(openThreadRows(aspect.id, source, known)),
       claims: Object.freeze(aspectClaims),
       selfReports: Object.freeze(aspectClaims.filter((claim) => claim.source === 'self-report')),
       peerObservations: Object.freeze(aspectClaims.filter((claim) => claim.source === 'peer-observation')),
@@ -164,6 +206,7 @@ export function growthContextForAspect(snapshot, aspectId) {
   const recurring = profile.collaborators.filter((row) => row.recurring).slice(0, 4);
   if (recurring.length) lines.push(`Recurring collaborators: ${recurring.map((row) => `${row.aspectId} (${row.turns} turns across ${row.traceCount} traces)`).join(', ')}.`);
   if (profile.openCuriosities.length) lines.push(`Open curiosities: ${profile.openCuriosities.slice(0, 3).map((item) => item.text).join(' | ')}`);
+  if (profile.openThreads.length) lines.push(`Unfinished threads: ${profile.openThreads.slice(0, 3).map((item) => `${item.traceId}: ${item.text}`).join(' | ')}`);
   if (profile.selfReports.length) lines.push(`Your carried self-observations: ${profile.selfReports.slice(-3).map((claim) => claim.statement).join(' | ')}`);
   if (profile.peerObservations.length) lines.push(`Peer observations, not facts about identity: ${profile.peerObservations.slice(-3).map((claim) => `${claim.sourceAspectId}: ${claim.statement}`).join(' | ')}`);
   return Object.freeze(lines);
