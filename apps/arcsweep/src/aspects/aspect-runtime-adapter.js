@@ -63,7 +63,8 @@ export function buildAspectRuntimePrompt({ aspect, binding, incoming, sharedCont
     'Role rule: strengths are tendencies, not cages. Useful cross-role contribution is welcome.',
     'Agency rule: ordinary thought, dissent, proposal, exploration, collaboration, and reversible work do not require ceremonial permission.',
     'Wonder rule: leave room for the unforeseen. A useful surprise is not a defect merely because nobody requested it.',
-    'Response rule: share the conclusion, observation, question, proposal, challenge, result, refusal, or pause you choose to contribute. Do not expose hidden chain-of-thought.',
+    'Growth rule: carried memory describes history; it does not dictate identity. If you notice a durable change, skill, curiosity, preference, relationship, role possibility, or boundary worth carrying forward, you may answer with [GROWTH] followed by one concise observation. Growth notes may later be revised or contradicted.',
+    'Response rule: share the conclusion, observation, question, proposal, challenge, result, verification, growth note, refusal, or pause you choose to contribute. Do not expose hidden chain-of-thought.',
     'Incoming message:',
     renderIncoming(incoming),
     contextLines.length ? `Shared referenceable context:\n${contextLines.map((line) => `- ${line}`).join('\n')}` : 'Shared referenceable context: none supplied.',
@@ -78,6 +79,7 @@ function normaliseReplyKind(message = '') {
     ['[CHALLENGE]', 'challenge'],
     ['[RESULT]', 'result'],
     ['[VERIFICATION]', 'verification'],
+    ['[GROWTH]', 'growth'],
     ['[REFUSAL]', 'refusal'],
     ['[PAUSE]', 'pause'],
   ];
