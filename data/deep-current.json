@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-24T21:39:16.495Z",
+  "generated_at": "2026-09-25T00:13:59.929Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-24T17:30",
-    "sky": "Day",
+    "time": "2026-09-24T20:00",
+    "sky": "Night",
     "current": {
-      "time": "2026-09-24T17:30",
+      "time": "2026-09-24T20:00",
       "interval": 900,
-      "temperature_2m": 76.3,
-      "relative_humidity_2m": 81,
-      "is_day": 1,
+      "temperature_2m": 71.5,
+      "relative_humidity_2m": 85,
+      "is_day": 0,
       "precipitation": 0,
       "rain": 0,
-      "weather_code": 2,
-      "cloud_cover": 78,
-      "pressure_msl": 1015.6,
-      "wind_speed_10m": 14.8,
-      "wind_direction_10m": 4
+      "weather_code": 3,
+      "cloud_cover": 100,
+      "pressure_msl": 1015.4,
+      "wind_speed_10m": 10.1,
+      "wind_direction_10m": 328
     }
   },
   "space_weather": {
     "kp": {
-      "value": 2,
-      "time_tag": "2026-09-24T18:00:00",
-      "a_running": 7
+      "value": 2.67,
+      "time_tag": "2026-09-24T21:00:00",
+      "a_running": 12
     },
     "solar_wind": {
-      "time_tag": "2026-09-24T21:31:00Z",
-      "bz": 8,
-      "bt": 8,
+      "time_tag": "2026-09-25T00:05:00Z",
+      "bz": -3,
+      "bt": 7,
       "density": null,
-      "speed": 441
+      "speed": 445
     }
   },
   "moon": {
-    "age_days": 13.05,
-    "illumination": 96.7,
+    "age_days": 13.16,
+    "illumination": 97.1,
     "name": "Full Moon"
   },
   "field": {
-    "P": 0.5488888888888892,
-    "C": 0.3585714285714286,
-    "R": 1,
-    "E": 0.6943956043956043,
-    "M": 0.9670000000000001,
-    "A": 0.6846153846153846,
+    "P": 0.48666666666666636,
+    "C": 0.2538095238095239,
+    "R": 0.9191666666666667,
+    "E": 0.8326373626373625,
+    "M": 0.971,
+    "A": 0.38,
     "Q": null,
-    "dpdt": 1,
+    "dpdt": 0.9191666666666667,
     "dynamic_axes": [
       "P",
       "C",
