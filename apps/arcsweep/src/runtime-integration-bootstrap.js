@@ -16,6 +16,7 @@ import './codex-physical-materials-sidecar.js';
 import './codex-alive-sidecar.js';
 import './codex-residue-sidecar.js';
 import './codex-attention-notes-sidecar.js';
+import './universal-codex-artefact-motion-sidecar.js';
 
 export const RUNTIME_INTEGRATION_BOOTSTRAP_EVENT = 'arcsweep:runtime-integration-ready';
 
