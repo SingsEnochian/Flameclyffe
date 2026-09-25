@@ -57,6 +57,21 @@ export function coalitionSharedContext({ coalition, bus, state } = {}) {
   ]);
 }
 
+function turnOptionsFor(aspectId, coalition, bus, state, runtimeOptions = {}) {
+  const {
+    growthGarden = null,
+    sharedContext: suppliedContext = [],
+    ...invokeOptions
+  } = runtimeOptions || {};
+  const base = coalitionSharedContext({ coalition, bus, state });
+  const growth = growthGarden?.contextFor?.(aspectId) || [];
+  const supplied = Array.isArray(suppliedContext) ? suppliedContext : [suppliedContext].filter(Boolean);
+  return Object.freeze({
+    invokeOptions,
+    sharedContext: Object.freeze([...base, ...growth, ...supplied]),
+  });
+}
+
 export async function runCoalitionRound({
   coalition,
   incoming,
@@ -70,12 +85,13 @@ export async function runCoalitionRound({
   const replies = [];
 
   for (const aspectId of coalition.members) {
+    const turnOptions = turnOptionsFor(aspectId, coalition, bus, state, runtimeOptions);
     const reply = await invokeTurn({
       bus,
       aspectId,
       incoming: current,
-      sharedContext: coalitionSharedContext({ coalition, bus, state }),
-      ...runtimeOptions,
+      sharedContext: turnOptions.sharedContext,
+      ...turnOptions.invokeOptions,
     });
     replies.push(reply);
     if (!reply?.envelope) continue;
@@ -122,12 +138,13 @@ export async function requestCoalitionSynthesis({
       request: 'Synthesize the coalition’s useful conclusions, retained disagreements, and next reversible route. Do not erase dissent.',
     },
   });
+  const turnOptions = turnOptionsFor(aspectId, coalition, bus, state, runtimeOptions);
   const reply = await invokeTurn({
     bus,
     aspectId,
     incoming: synthesisRequest,
-    sharedContext: coalitionSharedContext({ coalition, bus, state }),
-    ...runtimeOptions,
+    sharedContext: turnOptions.sharedContext,
+    ...turnOptions.invokeOptions,
   });
   if (reply?.envelope) {
     state.contribute({
