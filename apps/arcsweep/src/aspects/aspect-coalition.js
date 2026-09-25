@@ -152,7 +152,8 @@ export async function runAspectCoalition({
   if (!coalition) throw new Error('Aspect coalition is required.');
   if (!seed?.id) throw new Error('Aspect coalition requires a seed envelope.');
   const count = Math.max(1, Math.min(6, Number(rounds) || 1));
-  let incoming = seed;
+  const existingSeed = bus.all().find((message) => message.id === seed.id);
+  let incoming = existingSeed || bus.publish(seed);
   const roundResults = [];
 
   for (let round = 0; round < count; round += 1) {
