@@ -30,6 +30,27 @@ function uniqueLinks(links) {
   }).slice(0, 24);
 }
 
+function senderPresentation(sender, aspects = INITIAL_ASPECTS) {
+  const knownAspect = aspects.find((aspect) => aspect.id === sender?.aspectId) || null;
+  const runtimeBacked = Boolean(sender?.voiceId || sender?.provider || sender?.model);
+  const participant = Boolean(knownAspect || runtimeBacked);
+  if (participant) {
+    return Object.freeze({
+      kind: 'voice',
+      author: knownAspect?.name || aspectName(sender?.aspectId, aspects),
+      voiceId: sender?.voiceId || null,
+      runtimeBacked,
+    });
+  }
+  if (sender?.aspectId === 'steward') {
+    return Object.freeze({ kind: 'system', author: 'Steward invitation', voiceId: null, runtimeBacked: false });
+  }
+  if (sender?.aspectId === 'coalition') {
+    return Object.freeze({ kind: 'system', author: 'Aspect coalition', voiceId: null, runtimeBacked: false });
+  }
+  return Object.freeze({ kind: 'system', author: aspectName(sender?.aspectId, aspects), voiceId: null, runtimeBacked: false });
+}
+
 export function aspectEnvelopeLinks(envelope = {}) {
   return uniqueLinks([
     { kind: 'aspect-envelope', id: envelope.id, label: envelope.sender?.aspectId || 'aspect' },
@@ -54,24 +75,24 @@ export function aspectEnvelopeToHouseEntry(envelope, {
   const route = routing(envelope);
   const text = bodyText(envelope.body) || `[${envelope.kind || 'thought'}]`;
   const sender = envelope.sender;
-  const voiceId = sender.voiceId || null;
+  const presentation = senderPresentation(sender, aspects);
 
   return Object.freeze({
     schema: ASPECT_HOUSE_PERSISTENCE_SCHEMA,
     idempotency_key: `aspect:${envelope.id}`,
-    kind: 'voice',
-    author: aspectName(sender.aspectId, aspects),
-    voice_id: voiceId,
+    kind: presentation.kind,
+    author: presentation.author,
+    voice_id: presentation.voiceId,
     status: envelope.kind || 'thought',
     world: world?.id ? { id: world.id, name: world.name || world.id } : null,
     turn_id: `aspect-trace:${envelope.traceId}`,
     thread_id: route.roomId,
     reply_to: houseParentId || null,
     links: aspectEnvelopeLinks(envelope),
-    runtime: voiceId || sender.provider || sender.model ? {
+    runtime: presentation.runtimeBacked ? {
       provider: sender.provider || null,
       model: sender.model || null,
-      route: voiceId,
+      route: sender.voiceId || null,
       profile_id: sender.invocationId || null,
     } : null,
     text,
