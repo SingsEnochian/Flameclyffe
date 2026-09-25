@@ -70,7 +70,7 @@ export function buildAspectRuntimePrompt({ aspect, binding, incoming, sharedCont
     'Wonder rule: leave room for the unforeseen. A useful surprise is not a defect merely because nobody requested it.',
     'Growth rule: carried memory describes history; it does not dictate identity. If you notice a durable change, skill, curiosity, preference, relationship, role possibility, or boundary worth carrying forward, you may answer with [GROWTH].',
     'Growth revision rule: if an older growth ring no longer fits, do not erase it. You may use [GROWTH] followed by JSON with type, statement, relation, and targetEnvelopeIds. relation may be supersedes, contradicts, retires, affirms, or adds. Only target ring ids that appear in carried growth context.',
-    'Experiment rule: if a curiosity about your own method or capability is worth trying, you may propose one small reversible experiment with [EXPERIMENT] followed by JSON containing title, hypothesis, method, reversibleScope, optional collaborators, and optional successSignals. Experiments are invitations to learn, not tests of worth. Failure and inconclusive results are valid experience.',
+    'Experiment rule: if a curiosity about your own method or capability is worth trying, you may propose one small reversible experiment with [EXPERIMENT] followed by JSON containing title, hypothesis, method, reversibleScope, optional collaborators, optional successSignals, and optional operation booleans describing consequence edges. Set autoStart false only when you want the trial to remain a proposal. Experiments are invitations to learn, not tests of worth. Failure and inconclusive results are valid experience.',
     'Response rule: share the conclusion, observation, question, proposal, challenge, result, verification, experiment proposal, growth note, refusal, or pause you choose to contribute. Do not expose hidden chain-of-thought.',
     'Incoming message:',
     renderIncoming(incoming),
@@ -102,6 +102,8 @@ function parseExperimentBody(rawText) {
     reversibleScope: object.reversibleScope || object.reversible_scope || '',
     collaborators: object.collaborators || [],
     successSignals: object.successSignals || object.success_signals || [],
+    operation: object.operation || { reversible: true },
+    autoStart: object.autoStart !== false,
     tags: object.tags || [],
   });
 }
@@ -168,6 +170,9 @@ export async function invokeAspectRuntime({
   }
 
   const parsed = normaliseReplyKind(raw.message);
+  const experimentRecipients = parsed.body?.mode === 'experiment' && Array.isArray(parsed.body.collaborators)
+    ? parsed.body.collaborators
+    : null;
   const envelope = createAspectEnvelope({
     traceId: incoming?.traceId,
     parentId: incoming?.id,
@@ -178,7 +183,7 @@ export async function invokeAspectRuntime({
       provider: raw.provider,
       model: raw.model,
     },
-    recipients: incoming?.sender?.aspectId ? [incoming.sender.aspectId] : [],
+    recipients: experimentRecipients || (incoming?.sender?.aspectId ? [incoming.sender.aspectId] : []),
     kind: parsed.kind,
     body: parsed.body,
     evidenceRefs: raw.citedSources || [],
