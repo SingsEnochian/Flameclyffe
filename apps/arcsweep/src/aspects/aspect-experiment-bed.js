@@ -1,7 +1,7 @@
 import { INITIAL_ASPECTS } from './aspect-contract.js';
 
-export const ASPECT_EXPERIMENT_SCHEMA = 'hearthweave.aspect-experiment/v0.1';
-export const ASPECT_EXPERIMENT_BED_SCHEMA = 'hearthweave.aspect-experiment-bed/v0.1';
+export const ASPECT_EXPERIMENT_SCHEMA = 'hearthweave.aspect-experiment/v0.2';
+export const ASPECT_EXPERIMENT_BED_SCHEMA = 'hearthweave.aspect-experiment-bed/v0.2';
 export const ASPECT_EXPERIMENT_OUTCOMES = Object.freeze(['observed', 'worked', 'did-not-work', 'mixed', 'inconclusive']);
 
 const knownAspectIds = new Set(INITIAL_ASPECTS.map((aspect) => aspect.id));
@@ -26,6 +26,25 @@ function mergeMessages(...sources) {
   return [...byId.values()].sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
 }
 
+function operationShape(operation = {}) {
+  const source = operation && typeof operation === 'object' && !Array.isArray(operation) ? operation : {};
+  return Object.freeze({
+    reversible: source.reversible !== false,
+    external: source.external === true,
+    externallyBinding: source.externallyBinding === true,
+    financial: source.financial === true,
+    destructive: source.destructive === true,
+    exposesCredentials: source.exposesCredentials === true,
+    exposesSecrets: source.exposesSecrets === true,
+    identityMutation: source.identityMutation || null,
+    canonPromotion: source.canonPromotion || null,
+    permissionExpansion: source.permissionExpansion === true,
+    consentBoundary: source.consentBoundary === true,
+    production: source.production === true,
+    practicalRecovery: source.practicalRecovery !== false,
+  });
+}
+
 export function isAspectExperimentBody(body) {
   return Boolean(body && typeof body === 'object' && !Array.isArray(body)
     && (body.schema === ASPECT_EXPERIMENT_SCHEMA || body.mode === 'experiment')
@@ -45,6 +64,8 @@ export function createExperimentBody({
   reversibleScope = '',
   collaborators = [],
   successSignals = [],
+  operation = { reversible: true },
+  autoStart = false,
   outcome = null,
   observation = '',
   reflection = '',
@@ -67,6 +88,8 @@ export function createExperimentBody({
     reversibleScope: text(reversibleScope, 1000),
     collaborators: Object.freeze(strings(collaborators).filter((id) => knownAspectIds.has(id))),
     successSignals: Object.freeze(strings(successSignals, 300)),
+    operation: operationShape(operation),
+    autoStart: autoStart === true,
     ...(outcome ? { outcome: ASPECT_EXPERIMENT_OUTCOMES.includes(String(outcome)) ? String(outcome) : 'observed' } : {}),
     ...(observation ? { observation: text(observation, 2400) } : {}),
     ...(reflection ? { reflection: text(reflection, 1800) } : {}),
@@ -94,6 +117,8 @@ function experimentRows(messages) {
       reversibleScope: '',
       collaborators: [],
       successSignals: [],
+      operation: operationShape(body.operation),
+      autoStart: body.autoStart === true,
       initiatorAspectId: null,
       traceId: message.traceId || null,
       status: 'proposed',
@@ -116,6 +141,8 @@ function experimentRows(messages) {
     row.reversibleScope = body.reversibleScope || row.reversibleScope;
     row.collaborators = body.collaborators?.length ? [...body.collaborators] : row.collaborators;
     row.successSignals = body.successSignals?.length ? [...body.successSignals] : row.successSignals;
+    row.operation = operationShape(body.operation || row.operation);
+    if (body.phase === 'proposed') row.autoStart = body.autoStart === true;
 
     if (body.phase === 'proposed') {
       row.initiatorAspectId = message.sender?.aspectId || row.initiatorAspectId;
@@ -143,6 +170,7 @@ function experimentRows(messages) {
       ...row,
       collaborators: Object.freeze([...row.collaborators]),
       successSignals: Object.freeze([...row.successSignals]),
+      operation: Object.freeze({ ...row.operation }),
     }));
 }
 
