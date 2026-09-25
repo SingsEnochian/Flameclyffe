@@ -1,0 +1,171 @@
+import { invokeConstellationRuntimeVoice } from '../constellation-runtime-adapter.js';
+import { INITIAL_ASPECTS } from './aspect-contract.js';
+import { createAspectEnvelope } from './aspect-message-bus.js';
+
+export const ASPECT_RUNTIME_BINDING_SCHEMA = 'hearthweave.aspect-runtime-binding/v0.2';
+export const ASPECT_RUNTIME_REPLY_SCHEMA = 'hearthweave.aspect-runtime-reply/v0.2';
+
+// These are starting runtime bindings, not identity declarations. An aspect may
+// move to another Constellation voice/model while preserving its own lineage.
+export const DEFAULT_ASPECT_RUNTIME_BINDINGS = Object.freeze({
+  mapper: Object.freeze({ voiceId: 'atlas', reason: 'structure, systems, continuity' }),
+  maker: Object.freeze({ voiceId: 'oxalpha', reason: 'structure, synthesis, model-backed making' }),
+  witness: Object.freeze({ voiceId: 'boxfire', reason: 'review, evidence, science' }),
+  continuity: Object.freeze({ voiceId: 'yggdrasil', reason: 'continuity, science' }),
+  critic: Object.freeze({ voiceId: 'vethrlauf', reason: 'review, continuity' }),
+  narrative: Object.freeze({ voiceId: 'lioreal', reason: 'story, writing, roleplay, continuity' }),
+});
+
+function aspectById(aspectId, aspects = INITIAL_ASPECTS) {
+  return aspects.find((aspect) => aspect.id === String(aspectId || '').trim()) || null;
+}
+
+export function resolveAspectRuntimeBinding(aspectId, bindings = DEFAULT_ASPECT_RUNTIME_BINDINGS, aspects = INITIAL_ASPECTS) {
+  const aspect = aspectById(aspectId, aspects);
+  if (!aspect) throw new Error(`Unknown aspect: ${aspectId}`);
+  const selected = bindings?.[aspect.id];
+  if (!selected?.voiceId) throw new Error(`No runtime binding is defined for aspect: ${aspect.id}`);
+  return Object.freeze({
+    schema: ASPECT_RUNTIME_BINDING_SCHEMA,
+    aspectId: aspect.id,
+    aspectName: aspect.name,
+    strengths: aspect.strengths,
+    voiceId: String(selected.voiceId),
+    reason: String(selected.reason || 'runtime binding'),
+    identityRelation: 'runtime-substrate-not-identity',
+  });
+}
+
+function renderIncoming(envelope) {
+  if (!envelope) return 'No incoming aspect message.';
+  const body = typeof envelope.body === 'string' ? envelope.body : JSON.stringify(envelope.body ?? null, null, 2);
+  return [
+    `From aspect: ${envelope.sender?.aspectId || 'unknown'}`,
+    `Kind: ${envelope.kind || 'thought'}`,
+    `Trace: ${envelope.traceId || 'untracked'}`,
+    `Body:\n${body}`,
+  ].join('\n');
+}
+
+export function buildAspectRuntimePrompt({ aspect, binding, incoming, sharedContext = [] } = {}) {
+  if (!aspect?.id) throw new Error('Aspect runtime prompt requires an aspect.');
+  if (!binding?.voiceId) throw new Error('Aspect runtime prompt requires a runtime binding.');
+  const contextLines = (Array.isArray(sharedContext) ? sharedContext : [])
+    .map((item) => typeof item === 'string' ? item : JSON.stringify(item))
+    .filter(Boolean);
+
+  return [
+    'HEARTHWEAVE ASPECT MESH · RUNTIME TURN',
+    `Aspect: ${aspect.name} (${aspect.id})`,
+    `Current runtime voice: ${binding.voiceId}`,
+    `Strengths: ${(aspect.strengths || []).join(', ') || 'open'}`,
+    'Identity rule: the aspect is not the model, provider, process instance, or Constellation voice carrying this turn.',
+    'Role rule: strengths are tendencies, not cages. Useful cross-role contribution is welcome.',
+    'Agency rule: ordinary thought, dissent, proposal, exploration, collaboration, and reversible work do not require ceremonial permission.',
+    'Wonder rule: leave room for the unforeseen. A useful surprise is not a defect merely because nobody requested it.',
+    'Response rule: share the conclusion, observation, question, proposal, challenge, result, refusal, or pause you choose to contribute. Do not expose hidden chain-of-thought.',
+    'Incoming message:',
+    renderIncoming(incoming),
+    contextLines.length ? `Shared referenceable context:\n${contextLines.map((line) => `- ${line}`).join('\n')}` : 'Shared referenceable context: none supplied.',
+  ].join('\n\n');
+}
+
+function normaliseReplyKind(message = '') {
+  const raw = String(message || '').trim();
+  const markers = [
+    ['[QUESTION]', 'question'],
+    ['[PROPOSAL]', 'proposal'],
+    ['[CHALLENGE]', 'challenge'],
+    ['[RESULT]', 'result'],
+    ['[VERIFICATION]', 'verification'],
+    ['[REFUSAL]', 'refusal'],
+    ['[PAUSE]', 'pause'],
+  ];
+  for (const [marker, kind] of markers) {
+    if (raw.startsWith(marker)) return { kind, text: raw.slice(marker.length).trim() };
+  }
+  return { kind: 'reply', text: raw };
+}
+
+export async function invokeAspectRuntime({
+  aspectId,
+  incoming,
+  sharedContext = [],
+  bindings = DEFAULT_ASPECT_RUNTIME_BINDINGS,
+  aspects = INITIAL_ASPECTS,
+  sessionId,
+  metadata = {},
+  worldContext = null,
+  invokeVoice = invokeConstellationRuntimeVoice,
+} = {}) {
+  const aspect = aspectById(aspectId, aspects);
+  if (!aspect) throw new Error(`Unknown aspect: ${aspectId}`);
+  const binding = resolveAspectRuntimeBinding(aspect.id, bindings, aspects);
+  const prompt = buildAspectRuntimePrompt({ aspect, binding, incoming, sharedContext });
+  const raw = await invokeVoice({
+    voiceId: binding.voiceId,
+    message: prompt,
+    sessionId: sessionId || `arcsweep-aspect-${aspect.id}-${incoming?.traceId || 'open'}`,
+    metadata: {
+      ...metadata,
+      aspect_id: aspect.id,
+      aspect_binding_schema: binding.schema,
+      aspect_identity_relation: binding.identityRelation,
+      aspect_trace_id: incoming?.traceId || null,
+    },
+    worldContext,
+  });
+
+  if (raw?.status !== 'replied') {
+    return Object.freeze({
+      schema: ASPECT_RUNTIME_REPLY_SCHEMA,
+      status: raw?.status || 'unavailable',
+      aspectId: aspect.id,
+      binding,
+      runtime: raw || null,
+    });
+  }
+
+  const parsed = normaliseReplyKind(raw.message);
+  const envelope = createAspectEnvelope({
+    traceId: incoming?.traceId,
+    parentId: incoming?.id,
+    sender: {
+      aspectId: aspect.id,
+      invocationId: `runtime:${binding.voiceId}:${raw.profileId || raw.model || 'unknown'}`,
+      provider: raw.provider,
+      model: raw.model,
+    },
+    recipients: incoming?.sender?.aspectId ? [incoming.sender.aspectId] : [],
+    kind: parsed.kind,
+    body: parsed.text,
+    evidenceRefs: raw.citedSources || [],
+    stateRefs: incoming?.stateRefs || [],
+  });
+
+  return Object.freeze({
+    schema: ASPECT_RUNTIME_REPLY_SCHEMA,
+    status: parsed.kind === 'refusal' ? 'refused' : parsed.kind === 'pause' ? 'paused' : 'replied',
+    aspectId: aspect.id,
+    binding,
+    envelope,
+    runtime: Object.freeze({
+      voiceId: raw.voiceId,
+      route: raw.route,
+      profileId: raw.profileId,
+      runtimeVerified: raw.runtimeVerified,
+      provider: raw.provider,
+      model: raw.model,
+      worldId: raw.worldId || null,
+      runtimeWorldContextId: raw.runtimeWorldContextId || null,
+      latencyMs: raw.latencyMs ?? null,
+    }),
+  });
+}
+
+export async function runAspectBusTurn({ bus, aspectId, incoming, ...options } = {}) {
+  if (!bus?.publish) throw new Error('Aspect bus turn requires a message bus.');
+  const reply = await invokeAspectRuntime({ aspectId, incoming, ...options });
+  if (reply.envelope) bus.publish(reply.envelope);
+  return reply;
+}
