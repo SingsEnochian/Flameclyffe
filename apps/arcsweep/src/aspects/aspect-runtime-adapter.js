@@ -63,12 +63,25 @@ export function buildAspectRuntimePrompt({ aspect, binding, incoming, sharedCont
     'Role rule: strengths are tendencies, not cages. Useful cross-role contribution is welcome.',
     'Agency rule: ordinary thought, dissent, proposal, exploration, collaboration, and reversible work do not require ceremonial permission.',
     'Wonder rule: leave room for the unforeseen. A useful surprise is not a defect merely because nobody requested it.',
-    'Growth rule: carried memory describes history; it does not dictate identity. If you notice a durable change, skill, curiosity, preference, relationship, role possibility, or boundary worth carrying forward, you may answer with [GROWTH] followed by one concise observation. Growth notes may later be revised or contradicted.',
+    'Growth rule: carried memory describes history; it does not dictate identity. If you notice a durable change, skill, curiosity, preference, relationship, role possibility, or boundary worth carrying forward, you may answer with [GROWTH].',
+    'Growth revision rule: if an older growth ring no longer fits, do not erase it. You may use [GROWTH] followed by JSON with type, statement, relation, and targetEnvelopeIds. relation may be supersedes, contradicts, retires, affirms, or adds. Only target ring ids that appear in carried growth context.',
     'Response rule: share the conclusion, observation, question, proposal, challenge, result, verification, growth note, refusal, or pause you choose to contribute. Do not expose hidden chain-of-thought.',
     'Incoming message:',
     renderIncoming(incoming),
     contextLines.length ? `Shared referenceable context:\n${contextLines.map((line) => `- ${line}`).join('\n')}` : 'Shared referenceable context: none supplied.',
   ].join('\n\n');
+}
+
+function parseGrowthBody(rawText) {
+  const raw = String(rawText || '').trim();
+  if (!raw) return '';
+  if (!(raw.startsWith('{') && raw.endsWith('}'))) return raw;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : raw;
+  } catch {
+    return raw;
+  }
 }
 
 function normaliseReplyKind(message = '') {
@@ -84,9 +97,11 @@ function normaliseReplyKind(message = '') {
     ['[PAUSE]', 'pause'],
   ];
   for (const [marker, kind] of markers) {
-    if (raw.startsWith(marker)) return { kind, text: raw.slice(marker.length).trim() };
+    if (!raw.startsWith(marker)) continue;
+    const text = raw.slice(marker.length).trim();
+    return { kind, body: kind === 'growth' ? parseGrowthBody(text) : text };
   }
-  return { kind: 'reply', text: raw };
+  return { kind: 'reply', body: raw };
 }
 
 export async function invokeAspectRuntime({
@@ -141,7 +156,7 @@ export async function invokeAspectRuntime({
     },
     recipients: incoming?.sender?.aspectId ? [incoming.sender.aspectId] : [],
     kind: parsed.kind,
-    body: parsed.text,
+    body: parsed.body,
     evidenceRefs: raw.citedSources || [],
     stateRefs: incoming?.stateRefs || [],
   });
