@@ -1,14 +1,21 @@
 import { createAspectMessageBus, createAspectEnvelope } from './aspect-message-bus.js';
 import { bindAspectBusToHouse } from './aspect-house-runtime.js';
 import { createAspectCoalition, runAspectCoalition } from './aspect-coalition.js';
+import { runAspectBusTurn } from './aspect-runtime-adapter.js';
 import { createAspectGrowthGarden } from './aspect-growth-garden.js';
 import { hydrateAspectGrowthGardenFromHouse } from './aspect-growth-continuity.js';
+import { createAspectExperimentBed, createExperimentBody } from './aspect-experiment-bed.js';
+import { hydrateAspectExperimentBedFromHouse } from './aspect-experiment-continuity.js';
 
-export const ASPECT_MESH_RUNTIME_SCHEMA = 'hearthweave.aspect-mesh-runtime/v0.2';
+export const ASPECT_MESH_RUNTIME_SCHEMA = 'hearthweave.aspect-mesh-runtime/v0.3';
 export const ASPECT_MESH_EVENTS = Object.freeze({
   ready: 'arcsweep:aspect-mesh-ready',
   message: 'arcsweep:aspect-mesh-message',
   growthChanged: 'arcsweep:aspect-growth-changed',
+  experimentChanged: 'arcsweep:aspect-experiment-changed',
+  experimentStarted: 'arcsweep:aspect-experiment-started',
+  experimentComplete: 'arcsweep:aspect-experiment-complete',
+  experimentReflected: 'arcsweep:aspect-experiment-reflected',
   coalitionStarted: 'arcsweep:aspect-mesh-coalition-started',
   coalitionComplete: 'arcsweep:aspect-mesh-coalition-complete',
 });
@@ -20,8 +27,24 @@ function dispatch(target, name, detail) {
   target.dispatchEvent(new CustomEvent(name, { detail }));
 }
 
-function traceId(prefix = 'aspect-trace') {
+function id(prefix = 'aspect-trace') {
   return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+}
+
+function bodyText(body) {
+  if (typeof body === 'string') return body;
+  try { return JSON.stringify(body ?? null); } catch { return String(body ?? ''); }
+}
+
+function experimentContext(experiment) {
+  return [
+    `Experiment: ${experiment.title}`,
+    experiment.hypothesis ? `Hypothesis: ${experiment.hypothesis}` : '',
+    experiment.method ? `Method: ${experiment.method}` : '',
+    experiment.reversibleScope ? `Reversible scope: ${experiment.reversibleScope}` : '',
+    experiment.successSignals?.length ? `Signals to notice: ${experiment.successSignals.join(' | ')}` : '',
+    'This is an experiment, not an exam. A result may be worked, did-not-work, mixed, inconclusive, or simply observed. Preserve useful surprise.',
+  ].filter(Boolean);
 }
 
 export function createAspectMeshRuntime({
@@ -32,14 +55,21 @@ export function createAspectMeshRuntime({
 } = {}) {
   const houseBridge = persistence ? bindAspectBusToHouse({ bus, world }) : null;
   const growthGarden = createAspectGrowthGarden({ bus });
+  const experimentBed = createAspectExperimentBed({ bus });
   const unsubscribeEvents = bus.subscribe((envelope) => {
     dispatch(target, ASPECT_MESH_EVENTS.message, envelope);
   });
   const unsubscribeGrowth = growthGarden.subscribe((snapshot) => {
     dispatch(target, ASPECT_MESH_EVENTS.growthChanged, snapshot);
   });
+  const unsubscribeExperiments = experimentBed.subscribe((snapshot) => {
+    dispatch(target, ASPECT_MESH_EVENTS.experimentChanged, snapshot);
+  });
   const growthReady = persistence
     ? hydrateAspectGrowthGardenFromHouse(growthGarden).catch((error) => Object.freeze({ status: 'error', error: error?.message || String(error) }))
+    : Promise.resolve(Object.freeze({ status: 'local-only', count: bus.all().length }));
+  const experimentReady = persistence
+    ? hydrateAspectExperimentBedFromHouse(experimentBed).catch((error) => Object.freeze({ status: 'error', error: error?.message || String(error) }))
     : Promise.resolve(Object.freeze({ status: 'local-only', count: bus.all().length }));
 
   function publishGrowth({
@@ -58,7 +88,7 @@ export function createAspectMeshRuntime({
     if (!String(aspectId || '').trim()) throw new Error('Growth note requires aspectId.');
     if (!String(statement || '').trim()) throw new Error('Growth note requires a statement.');
     return bus.publish({
-      traceId: growthTraceId || traceId('growth-trace'),
+      traceId: growthTraceId || id('growth-trace'),
       ...(parentId ? { parentId } : {}),
       sender: { aspectId: String(aspectId), invocationId: 'aspect-growth-garden' },
       recipients: [],
@@ -76,12 +106,69 @@ export function createAspectMeshRuntime({
     });
   }
 
+  function publishExperimentPhase({
+    aspectId,
+    experimentId,
+    phase,
+    title,
+    hypothesis,
+    method,
+    reversibleScope,
+    collaborators = [],
+    successSignals = [],
+    outcome = null,
+    observation = '',
+    reflection = '',
+    growthType = 'note',
+    relation = 'adds',
+    targetEnvelopeIds = [],
+    tags = [],
+    subjectAspectId = null,
+    traceId: experimentTraceId,
+    parentId = null,
+    evidenceRefs = [],
+    stateRefs = [],
+  } = {}) {
+    if (!String(aspectId || '').trim()) throw new Error('Experiment phase requires aspectId.');
+    const body = createExperimentBody({
+      experimentId,
+      phase,
+      title,
+      hypothesis,
+      method,
+      reversibleScope,
+      collaborators,
+      successSignals,
+      outcome,
+      observation,
+      reflection,
+      growthType,
+      relation,
+      targetEnvelopeIds,
+      tags,
+      subjectAspectId: subjectAspectId || aspectId,
+    });
+    const kind = phase === 'outcome' ? 'result' : phase === 'reflection' ? 'growth' : 'proposal';
+    return bus.publish({
+      traceId: experimentTraceId || id('experiment-trace'),
+      ...(parentId ? { parentId } : {}),
+      sender: { aspectId: String(aspectId), invocationId: 'aspect-experiment-bed' },
+      recipients: phase === 'proposed' || phase === 'started' ? collaborators : [],
+      kind,
+      body,
+      evidenceRefs,
+      stateRefs,
+    });
+  }
+
   const runtime = {
     schema: ASPECT_MESH_RUNTIME_SCHEMA,
     bus,
     houseBridge,
     growthGarden,
     growthReady,
+    experimentBed,
+    experimentReady,
     world,
 
     publish(input) {
@@ -120,8 +207,173 @@ export function createAspectMeshRuntime({
       return growthGarden.forAspect(aspectId);
     },
 
+    experimentSnapshot() {
+      return experimentBed.snapshot();
+    },
+
+    experimentsFor(aspectId) {
+      return experimentBed.forAspect(aspectId);
+    },
+
+    proposeExperiment({
+      aspectId,
+      title,
+      hypothesis = '',
+      method = '',
+      reversibleScope = '',
+      collaborators = [],
+      successSignals = [],
+      tags = [],
+      traceId: proposedTraceId,
+    } = {}) {
+      const experimentId = id('experiment');
+      return publishExperimentPhase({
+        aspectId,
+        experimentId,
+        phase: 'proposed',
+        title,
+        hypothesis,
+        method,
+        reversibleScope,
+        collaborators,
+        successSignals,
+        tags,
+        traceId: proposedTraceId || id('experiment-trace'),
+      });
+    },
+
+    recordExperimentOutcome({
+      experimentId,
+      aspectId = null,
+      outcome = 'observed',
+      observation,
+      evidenceRefs = [],
+      stateRefs = [],
+    } = {}) {
+      const experiment = experimentBed.get(experimentId);
+      if (!experiment) throw new Error(`Unknown experiment: ${experimentId}`);
+      const envelope = publishExperimentPhase({
+        aspectId: aspectId || experiment.initiatorAspectId,
+        experimentId,
+        phase: 'outcome',
+        title: experiment.title,
+        hypothesis: experiment.hypothesis,
+        method: experiment.method,
+        reversibleScope: experiment.reversibleScope,
+        collaborators: experiment.collaborators,
+        successSignals: experiment.successSignals,
+        outcome,
+        observation: String(observation || '').trim() || 'Experiment completed; no additional observation was recorded.',
+        traceId: experiment.traceId,
+        parentId: experiment.startedEnvelopeId || experiment.proposalEnvelopeId,
+        evidenceRefs,
+        stateRefs,
+      });
+      dispatch(target, ASPECT_MESH_EVENTS.experimentComplete, { experimentId, envelope, experiment: experimentBed.get(experimentId) });
+      return envelope;
+    },
+
+    reflectOnExperiment({
+      experimentId,
+      aspectId = null,
+      reflection,
+      growthType = 'note',
+      relation = 'adds',
+      targetEnvelopeIds = [],
+      tags = [],
+    } = {}) {
+      const experiment = experimentBed.get(experimentId);
+      if (!experiment) throw new Error(`Unknown experiment: ${experimentId}`);
+      if (!String(reflection || '').trim()) throw new Error('Experiment reflection requires reflection text.');
+      const envelope = publishExperimentPhase({
+        aspectId: aspectId || experiment.initiatorAspectId,
+        experimentId,
+        phase: 'reflection',
+        title: experiment.title,
+        hypothesis: experiment.hypothesis,
+        method: experiment.method,
+        reversibleScope: experiment.reversibleScope,
+        collaborators: experiment.collaborators,
+        successSignals: experiment.successSignals,
+        reflection,
+        growthType,
+        relation,
+        targetEnvelopeIds,
+        tags: ['experiment', ...tags],
+        traceId: experiment.traceId,
+        parentId: experiment.outcomeEnvelopeId || experiment.startedEnvelopeId || experiment.proposalEnvelopeId,
+        evidenceRefs: experiment.outcomeEnvelopeId ? [experiment.outcomeEnvelopeId] : [],
+        stateRefs: [experiment.proposalEnvelopeId].filter(Boolean),
+      });
+      dispatch(target, ASPECT_MESH_EVENTS.experimentReflected, { experimentId, envelope, experiment: experimentBed.get(experimentId) });
+      return envelope;
+    },
+
+    async runExperiment({ experimentId, rounds = 1, synthesisAspectId = null, runtimeOptions = {} } = {}) {
+      await experimentReady;
+      const experiment = experimentBed.get(experimentId);
+      if (!experiment) throw new Error(`Unknown experiment: ${experimentId}`);
+      if (experiment.status === 'running') throw new Error(`Experiment is already running: ${experimentId}`);
+
+      const started = publishExperimentPhase({
+        aspectId: experiment.initiatorAspectId,
+        experimentId,
+        phase: 'started',
+        title: experiment.title,
+        hypothesis: experiment.hypothesis,
+        method: experiment.method,
+        reversibleScope: experiment.reversibleScope,
+        collaborators: experiment.collaborators,
+        successSignals: experiment.successSignals,
+        traceId: experiment.traceId,
+        parentId: experiment.proposalEnvelopeId,
+      });
+      dispatch(target, ASPECT_MESH_EVENTS.experimentStarted, { experimentId, envelope: started, experiment: experimentBed.get(experimentId) });
+
+      const members = [...new Set([experiment.initiatorAspectId, ...(experiment.collaborators || [])].filter(Boolean))];
+      let observation = '';
+      let execution = null;
+
+      if (members.length >= 2) {
+        execution = await runtime.startCoalition({
+          purpose: `Run reversible experiment: ${experiment.title}`,
+          members,
+          synthesisAspectId: synthesisAspectId || experiment.initiatorAspectId,
+          rounds,
+          seed: started,
+          runtimeOptions: {
+            ...runtimeOptions,
+            metadata: { ...(runtimeOptions.metadata || {}), surface: 'experiment-bed', experiment_id: experimentId },
+          },
+        });
+        observation = bodyText(execution?.synthesis?.envelope?.body)
+          || bodyText(execution?.rounds?.at?.(-1)?.lastEnvelope?.body)
+          || 'Experiment coalition returned without a textual synthesis.';
+      } else {
+        const aspectId = experiment.initiatorAspectId;
+        execution = await runAspectBusTurn({
+          bus,
+          aspectId,
+          incoming: started,
+          sharedContext: [...experimentContext(experiment), ...growthGarden.contextFor(aspectId)],
+          ...runtimeOptions,
+          metadata: { ...(runtimeOptions.metadata || {}), surface: 'experiment-bed', experiment_id: experimentId },
+        });
+        observation = bodyText(execution?.envelope?.body) || `Experiment turn returned with status ${execution?.status || 'unknown'}.`;
+      }
+
+      const outcomeEnvelope = runtime.recordExperimentOutcome({
+        experimentId,
+        aspectId: experiment.initiatorAspectId,
+        outcome: 'observed',
+        observation,
+        evidenceRefs: execution?.envelope?.evidenceRefs || execution?.synthesis?.envelope?.evidenceRefs || [],
+      });
+      return Object.freeze({ experimentId, experiment: experimentBed.get(experimentId), execution, outcomeEnvelope });
+    },
+
     async startCoalition({
-      id,
+      id: coalitionId,
       purpose,
       members,
       synthesisAspectId = null,
@@ -129,10 +381,10 @@ export function createAspectMeshRuntime({
       seed,
       runtimeOptions = {},
     } = {}) {
-      const coalition = createAspectCoalition({ id, purpose, members, synthesisAspectId });
+      const coalition = createAspectCoalition({ id: coalitionId, purpose, members, synthesisAspectId });
       const envelope = seed?.id ? seed : createAspectEnvelope({
         id: seed?.id,
-        traceId: seed?.traceId || traceId('coalition-trace'),
+        traceId: seed?.traceId || id('coalition-trace'),
         sender: seed?.sender || { aspectId: 'steward', invocationId: 'aspect-mesh-runtime' },
         recipients: seed?.recipients || coalition.members,
         kind: seed?.kind || 'proposal',
@@ -167,7 +419,9 @@ export function createAspectMeshRuntime({
     stop() {
       unsubscribeEvents();
       unsubscribeGrowth();
+      unsubscribeExperiments();
       growthGarden.stop();
+      experimentBed.stop();
       houseBridge?.stop?.();
       if (installedRuntime === runtime) installedRuntime = null;
     },
@@ -184,10 +438,12 @@ export function installAspectMeshRuntime(options = {}) {
     schema: installedRuntime.schema,
     persistence: Boolean(installedRuntime.houseBridge),
     growthMemory: installedRuntime.growthGarden?.schema || null,
+    experimentMemory: installedRuntime.experimentBed?.schema || null,
     worldId: options.world?.identity_anchor?.world_id || options.world?.id || null,
   });
-  void installedRuntime.growthReady.then(() => {
+  void Promise.all([installedRuntime.growthReady, installedRuntime.experimentReady]).then(() => {
     dispatch(options.target || globalThis.document, ASPECT_MESH_EVENTS.growthChanged, installedRuntime?.growthSnapshot?.());
+    dispatch(options.target || globalThis.document, ASPECT_MESH_EVENTS.experimentChanged, installedRuntime?.experimentSnapshot?.());
   });
   return installedRuntime;
 }
