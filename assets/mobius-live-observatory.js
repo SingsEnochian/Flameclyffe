@@ -1,12 +1,32 @@
 'use strict';
+
+(function loadMobiusEngineeringConsole(){
+  const root=document.querySelector('[data-mobius-lab]');
+  if(!root||window.MobiusEngineeringConsole||document.querySelector('script[data-mobius-engineering-loader]')) return;
+  const script=document.createElement('script');
+  script.src='../assets/mobius-engineering-console.js?v=0.1.0';
+  script.defer=true;
+  script.dataset.mobiusEngineeringLoader='true';
+  document.head.appendChild(script);
+})();
+
 (async function(){
   const live=window.ObservatoryLive;
   const root=document.querySelector('[data-mobius-lab]');
-  if(!live||!root) return;
+  if(!root) return;
   const grid=root.querySelector('.grid');
+  if(!live){
+    const card=document.createElement('article');
+    card.className='card';
+    card.dataset.panel='observatory';
+    card.innerHTML='<p class="eyebrow" style="margin-bottom:.35rem">Context plane</p><h2>Live Observatory coupling</h2><p id="observatory-audio-status">Canonical Observatory client is unavailable. The audio engine remains local and usable; no projected context has been applied.</p><p class="tiny">Signal and context stay separate by design. Missing Observatory data does not silently alter the bus.</p>';
+    grid?.prepend(card);
+    return;
+  }
   const card=document.createElement('article');
   card.className='card';
-  card.innerHTML='<h2>Live Observatory coupling</h2><p id="observatory-audio-status">Connecting to canonical audio and Temporal Twist data…</p><div class="stack"><label>Resonance preset<select id="live-resonance-preset"></select></label><label>Temporal horizon<select id="live-temporal-horizon"></select></label></div><pre id="live-observatory-receipt">{}</pre><p class="tiny">Audio records are canonical/projected according to their live contract. Temporal horizons remain projected scenarios, not measurements.</p>';
+  card.dataset.panel='observatory';
+  card.innerHTML='<p class="eyebrow" style="margin-bottom:.35rem">Context plane</p><h2>Live Observatory coupling</h2><p id="observatory-audio-status">Connecting to canonical audio and Temporal Twist data…</p><div class="stack"><label>Resonance preset<select id="live-resonance-preset"></select></label><label>Temporal horizon<select id="live-temporal-horizon"></select></label></div><pre id="live-observatory-receipt">{}</pre><p class="tiny">Context only: audio records are canonical/projected according to their live contract. Temporal horizons remain projected scenarios, not measurements, and do not touch the audible signal unless an explicit mapper is active.</p>';
   grid.prepend(card);
   const status=card.querySelector('#observatory-audio-status');
   const presetSelect=card.querySelector('#live-resonance-preset');
@@ -33,10 +53,10 @@
     }
     presetSelect.addEventListener('change',selected);
     horizonSelect.addEventListener('change',selected);
-    status.textContent=`Live Observatory · ${presets.length} presets · ${tones.length} tones · ${horizons.length} temporal horizons`;
+    status.textContent=`Live Observatory · ${presets.length} presets · ${tones.length} tones · ${horizons.length} projected horizons`;
     selected();
   }catch(error){
-    status.textContent=`Live data unavailable · ${error.message}`;
-    receipt.textContent=JSON.stringify({error:error.message,fallback:false},null,2);
+    status.textContent=`Live context unavailable · ${error.message}`;
+    receipt.textContent=JSON.stringify({error:error.message,fallback:false,signalPlane:'unchanged'},null,2);
   }
 })();
