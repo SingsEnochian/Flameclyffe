@@ -53,6 +53,7 @@ export function createAspectMeshRuntime({
   world = null,
   target = globalThis.document,
   persistence = true,
+  experimentRuntimeOptions = {},
 } = {}) {
   const houseBridge = persistence ? bindAspectBusToHouse({ bus, world }) : null;
   const growthGarden = createAspectGrowthGarden({ bus });
@@ -466,7 +467,7 @@ export function createAspectMeshRuntime({
       const consequence = classifyConsequence(experiment.operation || {});
       if (!experiment.reversibleScope || experiment.operation?.reversible !== true || !consequence.ordinary) return null;
       try {
-        return await runtime.runExperiment({ experimentId });
+        return await runtime.runExperiment({ experimentId, runtimeOptions: experimentRuntimeOptions });
       } catch (error) {
         console.warn('[Aspect Mesh] experiment autostart failed', error);
         return null;
