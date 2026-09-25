@@ -7,6 +7,7 @@ export const ASPECT_MESH_RUNTIME_SCHEMA = 'hearthweave.aspect-mesh-runtime/v0.2'
 export const ASPECT_MESH_EVENTS = Object.freeze({
   ready: 'arcsweep:aspect-mesh-ready',
   message: 'arcsweep:aspect-mesh-message',
+  coalitionStarted: 'arcsweep:aspect-mesh-coalition-started',
   coalitionComplete: 'arcsweep:aspect-mesh-coalition-complete',
 });
 
@@ -61,6 +62,11 @@ export function createAspectMeshRuntime({
         body: seed?.body ?? purpose,
         evidenceRefs: seed?.evidenceRefs || [],
         stateRefs: seed?.stateRefs || [],
+      });
+      dispatch(target, ASPECT_MESH_EVENTS.coalitionStarted, {
+        coalition,
+        traceId: envelope.traceId,
+        seedEnvelopeId: envelope.id,
       });
       const result = await runAspectCoalition({
         coalition,
