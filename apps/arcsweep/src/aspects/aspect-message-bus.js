@@ -11,6 +11,7 @@ export const ASPECT_MESSAGE_KINDS = Object.freeze([
   'verification',
   'refusal',
   'pause',
+  'growth',
 ]);
 
 function id(prefix = 'aspect-msg') {
