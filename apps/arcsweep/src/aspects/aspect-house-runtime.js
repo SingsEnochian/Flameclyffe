@@ -119,6 +119,58 @@ export async function persistAspectTrace(envelopes = [], options = {}) {
   return Object.freeze(results);
 }
 
+/**
+ * Attach House persistence to an existing direct aspect bus. Publishing stays
+ * synchronous; persistence is serialized underneath so conversation is never
+ * blocked on a network round trip and parent lineage can still be recovered.
+ */
+export function bindAspectBusToHouse({
+  bus,
+  token = null,
+  world = null,
+  aspects = INITIAL_ASPECTS,
+  persist = persistAspectEnvelope,
+  fetchImpl = fetch,
+} = {}) {
+  if (!bus?.subscribe) throw new Error('House bridge requires an aspect message bus.');
+  const savedByEnvelopeId = new Map();
+  const results = [];
+  let queue = Promise.resolve();
+  let active = true;
+
+  const unsubscribe = bus.subscribe((envelope) => {
+    if (!active) return;
+    queue = queue.then(async () => {
+      const parentEntryId = envelope.parentId ? savedByEnvelopeId.get(envelope.parentId) || null : null;
+      try {
+        const result = await persist(envelope, {
+          token,
+          world,
+          aspects,
+          houseParentId: parentEntryId,
+          fetchImpl,
+        });
+        results.push(result);
+        if (result?.status === 'persisted' && result.entry?.id) savedByEnvelopeId.set(envelope.id, result.entry.id);
+      } catch (error) {
+        results.push(Object.freeze({ status: 'error', envelopeId: envelope.id, error: error?.message || String(error) }));
+      }
+    });
+  });
+
+  return Object.freeze({
+    schema: ASPECT_HOUSE_PERSISTENCE_SCHEMA,
+    async flush() {
+      await queue;
+      return Object.freeze([...results]);
+    },
+    stop() {
+      active = false;
+      unsubscribe();
+    },
+  });
+}
+
 export function houseEntryAspectMetadata(entry = {}) {
   const links = Array.isArray(entry.links) ? entry.links : [];
   const one = (kind) => links.find((link) => link.kind === kind)?.id || null;
