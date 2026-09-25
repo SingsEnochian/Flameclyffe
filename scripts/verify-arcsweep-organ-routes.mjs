@@ -1,7 +1,7 @@
 import { access, readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { CREATIVE_ORGANS } from '../apps/arcsweep/src/creative-organ-registry.js';
-import { SOUND_ORGANS } from '../apps/arcsweep/src/sound-organ-registry.js';
+import { SOUND_ORGANS, SOUND_ORGAN_REGISTRY_VERSION } from '../apps/arcsweep/src/sound-organ-registry.js';
 
 const siteArg = process.argv.indexOf('--site');
 const siteRoot = siteArg >= 0 ? process.argv[siteArg + 1] : null;
@@ -48,7 +48,7 @@ if (siteRoot) {
     const jsFiles = names.filter((name) => /\.js$/u.test(name));
     const source = (await Promise.all(jsFiles.map((name) => readFile(resolve(assetsRoot, name), 'utf8').catch(() => '')))).join('\n');
     const markers = [
-      ['arcsweep.sound-organs/v1', 'sound organ registry'],
+      [SOUND_ORGAN_REGISTRY_VERSION, 'sound organ registry'],
       ['arcsweep.soundfont-worklet/v3', 'SoundFont runtime repair v3'],
       ['arcsweep.semantic-lab/v1', 'Semantic Lab'],
       ['arcsweep.sidecar-health/v1', 'production sidecar health panel'],
