@@ -4,8 +4,9 @@ import { createAspectCoalition, runAspectCoalition } from './aspect-coalition.js
 import { runAspectBusTurn } from './aspect-runtime-adapter.js';
 import { createAspectGrowthGarden } from './aspect-growth-garden.js';
 import { hydrateAspectGrowthGardenFromHouse } from './aspect-growth-continuity.js';
-import { createAspectExperimentBed, createExperimentBody } from './aspect-experiment-bed.js';
+import { createAspectExperimentBed, createExperimentBody, isAspectExperimentEnvelope } from './aspect-experiment-bed.js';
 import { hydrateAspectExperimentBedFromHouse } from './aspect-experiment-continuity.js';
+import { classifyConsequence } from './consequence-boundary.js';
 
 export const ASPECT_MESH_RUNTIME_SCHEMA = 'hearthweave.aspect-mesh-runtime/v0.3';
 export const ASPECT_MESH_EVENTS = Object.freeze({
@@ -116,6 +117,8 @@ export function createAspectMeshRuntime({
     reversibleScope,
     collaborators = [],
     successSignals = [],
+    operation = { reversible: true },
+    autoStart = false,
     outcome = null,
     observation = '',
     reflection = '',
@@ -139,6 +142,8 @@ export function createAspectMeshRuntime({
       reversibleScope,
       collaborators,
       successSignals,
+      operation,
+      autoStart,
       outcome,
       observation,
       reflection,
@@ -153,13 +158,16 @@ export function createAspectMeshRuntime({
       traceId: experimentTraceId || id('experiment-trace'),
       ...(parentId ? { parentId } : {}),
       sender: { aspectId: String(aspectId), invocationId: 'aspect-experiment-bed' },
-      recipients: phase === 'proposed' || phase === 'started' ? collaborators : [],
+      recipients: phase === 'proposed' || phase === 'started' ? body.collaborators : [],
       kind,
       body,
       evidenceRefs,
       stateRefs,
     });
   }
+
+  let autoStartQueue = Promise.resolve();
+  let unsubscribeExperimentAutoStart = () => {};
 
   const runtime = {
     schema: ASPECT_MESH_RUNTIME_SCHEMA,
@@ -223,6 +231,8 @@ export function createAspectMeshRuntime({
       reversibleScope = '',
       collaborators = [],
       successSignals = [],
+      operation = { reversible: true },
+      autoStart = true,
       tags = [],
       traceId: proposedTraceId,
     } = {}) {
@@ -237,6 +247,8 @@ export function createAspectMeshRuntime({
         reversibleScope,
         collaborators,
         successSignals,
+        operation,
+        autoStart,
         tags,
         traceId: proposedTraceId || id('experiment-trace'),
       });
@@ -262,6 +274,7 @@ export function createAspectMeshRuntime({
         reversibleScope: experiment.reversibleScope,
         collaborators: experiment.collaborators,
         successSignals: experiment.successSignals,
+        operation: experiment.operation,
         outcome,
         observation: String(observation || '').trim() || 'Experiment completed; no additional observation was recorded.',
         traceId: experiment.traceId,
@@ -295,6 +308,7 @@ export function createAspectMeshRuntime({
         reversibleScope: experiment.reversibleScope,
         collaborators: experiment.collaborators,
         successSignals: experiment.successSignals,
+        operation: experiment.operation,
         reflection,
         growthType,
         relation,
@@ -313,7 +327,19 @@ export function createAspectMeshRuntime({
       await experimentReady;
       const experiment = experimentBed.get(experimentId);
       if (!experiment) throw new Error(`Unknown experiment: ${experimentId}`);
-      if (experiment.status === 'running') throw new Error(`Experiment is already running: ${experimentId}`);
+      if (experiment.status === 'running') return Object.freeze({ status: 'already-running', experimentId, experiment });
+      if (['completed', 'reflected'].includes(experiment.status)) return Object.freeze({ status: 'already-complete', experimentId, experiment });
+
+      const consequence = classifyConsequence(experiment.operation || {});
+      if (!experiment.reversibleScope || experiment.operation?.reversible !== true || !consequence.ordinary) {
+        return Object.freeze({
+          status: 'edge-required',
+          experimentId,
+          experiment,
+          edges: consequence.edges,
+          reason: !experiment.reversibleScope ? 'reversible-scope-not-declared' : experiment.operation?.reversible !== true ? 'not-declared-reversible' : 'consequence-boundary',
+        });
+      }
 
       const started = publishExperimentPhase({
         aspectId: experiment.initiatorAspectId,
@@ -325,6 +351,7 @@ export function createAspectMeshRuntime({
         reversibleScope: experiment.reversibleScope,
         collaborators: experiment.collaborators,
         successSignals: experiment.successSignals,
+        operation: experiment.operation,
         traceId: experiment.traceId,
         parentId: experiment.proposalEnvelopeId,
       });
@@ -369,7 +396,7 @@ export function createAspectMeshRuntime({
         observation,
         evidenceRefs: execution?.envelope?.evidenceRefs || execution?.synthesis?.envelope?.evidenceRefs || [],
       });
-      return Object.freeze({ experimentId, experiment: experimentBed.get(experimentId), execution, outcomeEnvelope });
+      return Object.freeze({ status: 'completed', experimentId, experiment: experimentBed.get(experimentId), execution, outcomeEnvelope });
     },
 
     async startCoalition({
@@ -413,10 +440,12 @@ export function createAspectMeshRuntime({
     },
 
     async flushPersistence() {
+      await autoStartQueue;
       return houseBridge?.flush?.() || [];
     },
 
     stop() {
+      unsubscribeExperimentAutoStart();
       unsubscribeEvents();
       unsubscribeGrowth();
       unsubscribeExperiments();
@@ -426,6 +455,24 @@ export function createAspectMeshRuntime({
       if (installedRuntime === runtime) installedRuntime = null;
     },
   };
+
+  unsubscribeExperimentAutoStart = bus.subscribe((envelope) => {
+    if (!isAspectExperimentEnvelope(envelope) || envelope.body.phase !== 'proposed' || envelope.body.autoStart !== true) return;
+    const experimentId = envelope.body.experimentId;
+    autoStartQueue = autoStartQueue.then(async () => {
+      await experimentReady;
+      const experiment = experimentBed.get(experimentId);
+      if (!experiment || experiment.status !== 'proposed') return null;
+      const consequence = classifyConsequence(experiment.operation || {});
+      if (!experiment.reversibleScope || experiment.operation?.reversible !== true || !consequence.ordinary) return null;
+      try {
+        return await runtime.runExperiment({ experimentId });
+      } catch (error) {
+        console.warn('[Aspect Mesh] experiment autostart failed', error);
+        return null;
+      }
+    });
+  });
 
   return Object.freeze(runtime);
 }
