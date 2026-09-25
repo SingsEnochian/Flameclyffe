@@ -71,7 +71,7 @@ test('Experiment Bed preserves proposal, outcome, and reflection as one trace-sh
   assert.match(experiment.reflection, /composable seams/i);
 });
 
-test('ordinary reversible self-start experiment runs and returns an outcome through injected transport', async () => {
+test('ordinary reversible self-start experiment runs, returns an outcome, and closes with reflection', async () => {
   const calls = [];
   const invokeVoice = async (input) => {
     calls.push(input);
@@ -93,10 +93,11 @@ test('ordinary reversible self-start experiment runs and returns an outcome thro
   });
   await runtime.flushPersistence();
   const experiment = runtime.experimentSnapshot().experiments.find((row) => row.experimentId === proposal.body.experimentId);
-  assert.equal(experiment.status, 'completed');
+  assert.equal(experiment.status, 'reflected');
   assert.equal(experiment.outcome, 'observed');
   assert.match(experiment.observation, /useful observation/i);
-  assert.equal(calls.length > 0, true);
+  assert.ok(experiment.reflectionEnvelopeId);
+  assert.equal(calls.length >= 2, true);
   runtime.stop();
 });
 
@@ -141,7 +142,7 @@ test('experiment reflection becomes a carried growth ring without converting out
   const profile = runtime.growthFor('narrative');
   assert.equal(reflection.kind, 'growth');
   assert.ok(profile.roleSuggestions.some((claim) => /spatial composition/i.test(claim.statement)));
-  assert.doesNotMatch(JSON.stringify(runtime.experimentSnapshot()), /score|xp|level/i);
+  assert.doesNotMatch(JSON.stringify(runtime.experimentSnapshot()), /"(?:score|xp|level)"\s*:/i);
   runtime.stop();
 });
 
