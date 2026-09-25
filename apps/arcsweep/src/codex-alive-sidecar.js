@@ -33,8 +33,11 @@ function setCssVariables(node, variables = {}) {
 }
 
 function decorateAspectNode(node) {
-  const label = node?.querySelector?.('span, strong')?.textContent?.trim() || '';
-  const aspectId = node?.dataset?.codexAspect || aspectIdsByName.get(label) || null;
+  const labels = [...(node?.querySelectorAll?.('strong, span') || [])]
+    .map((item) => item.textContent?.trim() || '')
+    .filter(Boolean);
+  const namedLabel = labels.find((label) => aspectIdsByName.has(label));
+  const aspectId = node?.dataset?.codexAspect || aspectIdsByName.get(namedLabel) || null;
   if (!aspectId) return;
   const runtime = readAspectMeshRuntime();
   const signature = codexAspectSignature(aspectId, runtime?.growthFor?.(aspectId));
