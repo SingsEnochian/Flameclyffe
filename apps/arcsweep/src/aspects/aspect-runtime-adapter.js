@@ -1,9 +1,10 @@
 import { invokeConstellationRuntimeVoice } from '../constellation-runtime-adapter.js';
 import { INITIAL_ASPECTS } from './aspect-contract.js';
 import { createAspectEnvelope } from './aspect-message-bus.js';
+import { createExperimentBody } from './aspect-experiment-bed.js';
 
 export const ASPECT_RUNTIME_BINDING_SCHEMA = 'hearthweave.aspect-runtime-binding/v0.2';
-export const ASPECT_RUNTIME_REPLY_SCHEMA = 'hearthweave.aspect-runtime-reply/v0.2';
+export const ASPECT_RUNTIME_REPLY_SCHEMA = 'hearthweave.aspect-runtime-reply/v0.3';
 
 // These are starting runtime bindings, not identity declarations. An aspect may
 // move to another Constellation voice/model while preserving its own lineage.
@@ -15,6 +16,10 @@ export const DEFAULT_ASPECT_RUNTIME_BINDINGS = Object.freeze({
   critic: Object.freeze({ voiceId: 'vethrlauf', reason: 'review, continuity' }),
   narrative: Object.freeze({ voiceId: 'lioreal', reason: 'story, writing, roleplay, continuity' }),
 });
+
+function id(prefix = 'aspect') {
+  return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+}
 
 function aspectById(aspectId, aspects = INITIAL_ASPECTS) {
   return aspects.find((aspect) => aspect.id === String(aspectId || '').trim()) || null;
@@ -65,14 +70,15 @@ export function buildAspectRuntimePrompt({ aspect, binding, incoming, sharedCont
     'Wonder rule: leave room for the unforeseen. A useful surprise is not a defect merely because nobody requested it.',
     'Growth rule: carried memory describes history; it does not dictate identity. If you notice a durable change, skill, curiosity, preference, relationship, role possibility, or boundary worth carrying forward, you may answer with [GROWTH].',
     'Growth revision rule: if an older growth ring no longer fits, do not erase it. You may use [GROWTH] followed by JSON with type, statement, relation, and targetEnvelopeIds. relation may be supersedes, contradicts, retires, affirms, or adds. Only target ring ids that appear in carried growth context.',
-    'Response rule: share the conclusion, observation, question, proposal, challenge, result, verification, growth note, refusal, or pause you choose to contribute. Do not expose hidden chain-of-thought.',
+    'Experiment rule: if a curiosity about your own method or capability is worth trying, you may propose one small reversible experiment with [EXPERIMENT] followed by JSON containing title, hypothesis, method, reversibleScope, optional collaborators, and optional successSignals. Experiments are invitations to learn, not tests of worth. Failure and inconclusive results are valid experience.',
+    'Response rule: share the conclusion, observation, question, proposal, challenge, result, verification, experiment proposal, growth note, refusal, or pause you choose to contribute. Do not expose hidden chain-of-thought.',
     'Incoming message:',
     renderIncoming(incoming),
     contextLines.length ? `Shared referenceable context:\n${contextLines.map((line) => `- ${line}`).join('\n')}` : 'Shared referenceable context: none supplied.',
   ].join('\n\n');
 }
 
-function parseGrowthBody(rawText) {
+function parseObjectBody(rawText) {
   const raw = String(rawText || '').trim();
   if (!raw) return '';
   if (!(raw.startsWith('{') && raw.endsWith('}'))) return raw;
@@ -84,10 +90,27 @@ function parseGrowthBody(rawText) {
   }
 }
 
+function parseExperimentBody(rawText) {
+  const parsed = parseObjectBody(rawText);
+  const object = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : { title: String(parsed || 'Self-proposed experiment') };
+  return createExperimentBody({
+    experimentId: object.experimentId || id('experiment'),
+    phase: 'proposed',
+    title: object.title || 'Self-proposed experiment',
+    hypothesis: object.hypothesis || '',
+    method: object.method || '',
+    reversibleScope: object.reversibleScope || object.reversible_scope || '',
+    collaborators: object.collaborators || [],
+    successSignals: object.successSignals || object.success_signals || [],
+    tags: object.tags || [],
+  });
+}
+
 function normaliseReplyKind(message = '') {
   const raw = String(message || '').trim();
   const markers = [
     ['[QUESTION]', 'question'],
+    ['[EXPERIMENT]', 'experiment'],
     ['[PROPOSAL]', 'proposal'],
     ['[CHALLENGE]', 'challenge'],
     ['[RESULT]', 'result'],
@@ -99,7 +122,8 @@ function normaliseReplyKind(message = '') {
   for (const [marker, kind] of markers) {
     if (!raw.startsWith(marker)) continue;
     const text = raw.slice(marker.length).trim();
-    return { kind, body: kind === 'growth' ? parseGrowthBody(text) : text };
+    if (kind === 'experiment') return { kind: 'proposal', body: parseExperimentBody(text) };
+    return { kind, body: kind === 'growth' ? parseObjectBody(text) : text };
   }
   return { kind: 'reply', body: raw };
 }
