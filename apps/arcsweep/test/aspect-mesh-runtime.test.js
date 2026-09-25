@@ -21,11 +21,12 @@ test('live Aspect Mesh publishes message events without requiring House persiste
     body: 'Reuse the existing runtime seam.',
   });
 
-  assert.equal(runtime.schema, 'hearthweave.aspect-mesh-runtime/v0.2');
+  assert.equal(runtime.schema, 'hearthweave.aspect-mesh-runtime/v0.3');
   assert.equal(runtime.houseBridge, null);
   assert.equal(runtime.bus.all().length, 1);
   assert.equal(events.length, 1);
   assert.equal(events[0].id, envelope.id);
+  assert.ok(runtime.experimentBed);
   runtime.stop();
 });
 
