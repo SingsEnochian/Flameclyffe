@@ -3,7 +3,9 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 
 import {
+  aspectEnvelopeFromHouseEntry,
   classifyCodexAspectEntry,
+  mergeCodexAspectMessages,
   projectCodexAspectMessages,
 } from '../src/magic-book-aspect-mesh-sidecar.js';
 
@@ -71,6 +73,40 @@ test('trace bookmarks preserve authorship and selected trace history', () => {
   assert.deepEqual(projection.trace.map((item) => item.aspectName), ['Mapper', 'Critic']);
 });
 
+test('House receipts reconstruct aspect identity and narrative branch meaning after reconnect', () => {
+  const restored = aspectEnvelopeFromHouseEntry({
+    id: 'house-1',
+    created_at: '2026-09-24T21:03:00.000-04:00',
+    kind: 'voice',
+    author: 'Narrative',
+    voice_id: 'lioreal',
+    status: 'proposal',
+    thread_id: 'house-room:roleplay',
+    text: 'Try a leaf where the reader and book remember one another.',
+    runtime: { provider: 'test-provider', model: 'test-model', profile_id: 'runtime:lioreal:test' },
+    links: [
+      { kind: 'aspect-envelope', id: 'persisted-1', label: 'narrative' },
+      { kind: 'aspect-trace', id: 'trace-persisted', label: 'trace' },
+      { kind: 'aspect-kind', id: 'proposal', label: 'kind' },
+      { kind: 'state-ref', id: 'state:book', label: 'state' },
+    ],
+  });
+  assert.ok(restored);
+  assert.equal(restored.sender.aspectId, 'narrative');
+  assert.equal(restored.sender.voiceId, 'lioreal');
+  assert.equal(restored.body.mode, 'exploration');
+  assert.equal(classifyCodexAspectEntry(restored), 'branch');
+  assert.deepEqual(restored.stateRefs, ['state:book']);
+});
+
+test('live messages supersede their persisted copy without duplicating a trace', () => {
+  const persisted = envelope({ id: 'same-1', body: 'Old persisted wording.', createdAt: '2026-09-24T21:00:00.000-04:00' });
+  const live = envelope({ id: 'same-1', body: 'Current live wording.', createdAt: '2026-09-24T21:01:00.000-04:00' });
+  const merged = mergeCodexAspectMessages([persisted], [live]);
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].body, 'Current live wording.');
+});
+
 test('physical Codex entry mounts living projection after the book skin', async () => {
   const source = await readFile(new URL('../src/magic-book-physical-acceptance-entry.js', import.meta.url), 'utf8');
   const skin = source.indexOf("'./magic-book-physical-skin.css'");
@@ -79,11 +115,12 @@ test('physical Codex entry mounts living projection after the book skin', async 
   assert.ok(projection > skin);
 });
 
-test('Codex mesh organ reads the existing mesh and lazily wakes runtime integration instead of writing a second store', async () => {
+test('Codex mesh organ reads existing mesh and canonical House continuity instead of writing a second store', async () => {
   const source = await readFile(new URL('../src/magic-book-aspect-mesh-sidecar.js', import.meta.url), 'utf8');
   assert.match(source, /readAspectMeshRuntime/);
   assert.match(source, /runtime-integration-bootstrap\.js/);
-  assert.match(source, /runtime\?\.bus\?\.all/);
+  assert.match(source, /readHouseCommons/);
+  assert.match(source, /bus\?\.all/);
   assert.doesNotMatch(source, /appendHouseCommons/);
   assert.doesNotMatch(source, /localStorage/);
 });
