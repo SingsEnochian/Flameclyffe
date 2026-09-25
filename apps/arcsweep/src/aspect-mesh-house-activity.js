@@ -109,6 +109,10 @@ function activeRoomId() {
   return document.querySelector('[data-house-room-select], .commons-log [data-commons-thread]')?.value || 'house-room:agent-chatter';
 }
 
+function activityPanel() {
+  return document.querySelector(`[data-aspect-house-activity="${ASPECT_HOUSE_ACTIVITY_MARKER}"]`);
+}
+
 function ensurePanel() {
   const rail = document.querySelector('[data-house-channel-rail="house-chat-channel-rail/v1"]');
   if (!rail) return null;
@@ -230,7 +234,10 @@ export function installAspectMeshHouseActivity() {
   document.addEventListener(ASPECT_MESH_EVENTS.coalitionStarted, onCoalitionStarted);
   document.addEventListener(ASPECT_MESH_EVENTS.coalitionComplete, onCoalitionComplete);
   document.addEventListener(ASPECT_WANDER_EVENT, (event) => void wanderOnce(event.detail || {}).catch((error) => console.warn('[Aspect Mesh] wander failed', error)));
-  observer = new MutationObserver(scheduleRender);
+  observer = new MutationObserver(() => {
+    const rail = document.querySelector('[data-house-channel-rail="house-chat-channel-rail/v1"]');
+    if (rail && !activityPanel()) scheduleRender();
+  });
   observer.observe(document.body, { childList: true, subtree: true });
   pruneTimer = setInterval(scheduleRender, 15_000);
   scheduleRender();
