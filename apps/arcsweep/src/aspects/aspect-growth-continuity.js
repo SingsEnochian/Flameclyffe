@@ -14,6 +14,17 @@ function firstLink(entry, kind) {
   return links(entry, kind)[0] || null;
 }
 
+function restoredBody(entry, kind) {
+  const raw = String(entry?.text || '');
+  if (kind !== 'growth') return raw;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : raw;
+  } catch {
+    return raw;
+  }
+}
+
 export function growthEnvelopeFromHouseEntry(entry = {}) {
   const envelopeLink = firstLink(entry, 'aspect-envelope');
   const traceLink = firstLink(entry, 'aspect-trace');
@@ -35,7 +46,7 @@ export function growthEnvelopeFromHouseEntry(entry = {}) {
     }),
     recipients: Object.freeze(links(entry, 'aspect-recipient').map((item) => String(item.id)).filter(Boolean)),
     kind,
-    body: String(entry.text || ''),
+    body: restoredBody(entry, kind),
     evidenceRefs: Object.freeze(links(entry, 'evidence-ref').map((item) => String(item.id)).filter(Boolean)),
     stateRefs: Object.freeze(links(entry, 'state-ref').map((item) => String(item.id)).filter(Boolean)),
     createdAt: String(entry.created_at || ''),
