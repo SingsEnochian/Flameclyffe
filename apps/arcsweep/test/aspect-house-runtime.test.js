@@ -44,6 +44,29 @@ test('ordinary aspect chatter persists to #agent-chatter with aspect/runtime ide
   assert.deepEqual(metadata.evidenceRefs, ['receipt:reload']);
 });
 
+test('Steward and coalition control packets are not misrepresented as model voices', () => {
+  const invitation = aspectEnvelopeToHouseEntry({
+    id: 'aspect-seed-1', traceId: 'trace-seed',
+    sender: { aspectId: 'steward', invocationId: 'house-wander-once' },
+    recipients: ['mapper', 'critic', 'narrative'], kind: 'proposal', body: 'Wander once.',
+    evidenceRefs: [], stateRefs: [],
+  });
+  const synthesisRequest = aspectEnvelopeToHouseEntry({
+    id: 'aspect-coalition-1', traceId: 'trace-seed',
+    sender: { aspectId: 'coalition', invocationId: 'coalition-1' },
+    recipients: ['mapper'], kind: 'question', body: 'Synthesize without erasing dissent.',
+    evidenceRefs: [], stateRefs: [],
+  });
+
+  assert.equal(invitation.kind, 'system');
+  assert.equal(invitation.author, 'Steward invitation');
+  assert.equal(invitation.voice_id, null);
+  assert.equal(invitation.runtime, null);
+  assert.equal(synthesisRequest.kind, 'system');
+  assert.equal(synthesisRequest.author, 'Aspect coalition');
+  assert.equal(synthesisRequest.voice_id, null);
+});
+
 test('operational results route to #action while exploratory narrative routes to #roleplay', () => {
   const result = aspectEnvelopeToHouseEntry({
     id: 'aspect-result-1', traceId: 'trace-result', sender: { aspectId: 'maker' }, recipients: [],
