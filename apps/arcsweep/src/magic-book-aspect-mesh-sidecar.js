@@ -1,3 +1,4 @@
+import { readHouseCommons, readHouseRuntimeToken, restoreHouseRuntimeSession } from './house-runtime.js';
 import { INITIAL_ASPECTS } from './aspects/aspect-contract.js';
 import { ASPECT_MESH_EVENTS, readAspectMeshRuntime } from './aspects/aspect-mesh-runtime.js';
 
@@ -12,6 +13,8 @@ const aspectNames = new Map(INITIAL_ASPECTS.map((aspect) => [aspect.id, aspect.n
 let installed = false;
 let meshUnsubscribe = null;
 let wakePromise = null;
+let hydratePromise = null;
+let persistedMessages = [];
 let selectedTraceId = null;
 let coalitionState = null;
 
@@ -31,6 +34,53 @@ function bodyObject(body) {
 
 function knownAspect(envelope) {
   return aspectNames.has(String(envelope?.sender?.aspectId || '').trim());
+}
+
+function link(entry, kind) {
+  return (Array.isArray(entry?.links) ? entry.links : []).find((item) => item?.kind === kind) || null;
+}
+
+function linkIds(entry, kind) {
+  return (Array.isArray(entry?.links) ? entry.links : []).filter((item) => item?.kind === kind && item.id).map((item) => String(item.id));
+}
+
+export function aspectEnvelopeFromHouseEntry(entry = {}) {
+  const envelopeLink = link(entry, 'aspect-envelope');
+  const traceLink = link(entry, 'aspect-trace');
+  const kindLink = link(entry, 'aspect-kind');
+  const aspectId = String(envelopeLink?.label || '').trim();
+  if (!envelopeLink?.id || !traceLink?.id || !aspectNames.has(aspectId)) return null;
+  const kind = String(kindLink?.id || entry.status || 'thought');
+  const branchFromRoom = entry.thread_id === 'house-room:roleplay' && kind === 'proposal';
+  return Object.freeze({
+    id: String(envelopeLink.id),
+    traceId: String(traceLink.id),
+    ...(link(entry, 'aspect-parent')?.id ? { parentId: String(link(entry, 'aspect-parent').id) } : {}),
+    sender: Object.freeze({
+      aspectId,
+      invocationId: String(entry.runtime?.profile_id || `house:${entry.id || envelopeLink.id}`),
+      ...(entry.voice_id ? { voiceId: String(entry.voice_id) } : {}),
+      ...(entry.runtime?.provider ? { provider: String(entry.runtime.provider) } : {}),
+      ...(entry.runtime?.model ? { model: String(entry.runtime.model) } : {}),
+    }),
+    recipients: Object.freeze(linkIds(entry, 'aspect-recipient')),
+    kind,
+    body: branchFromRoom ? Object.freeze({ mode: 'exploration', domain: 'narrative', text: String(entry.text || '') }) : String(entry.text || ''),
+    evidenceRefs: Object.freeze(linkIds(entry, 'evidence-ref')),
+    stateRefs: Object.freeze(linkIds(entry, 'state-ref')),
+    createdAt: String(entry.created_at || ''),
+  });
+}
+
+export function mergeCodexAspectMessages(...sources) {
+  const byId = new Map();
+  for (const source of sources) {
+    for (const message of Array.isArray(source) ? source : []) {
+      if (!message?.id) continue;
+      byId.set(message.id, message);
+    }
+  }
+  return Object.freeze([...byId.values()].sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || ''))).slice(-60));
 }
 
 export function classifyCodexAspectEntry(envelope = {}) {
@@ -127,8 +177,7 @@ function projectionNode() {
 }
 
 function ensureProjectionNode() {
-  const book = root();
-  const stage = book?.querySelector('.magic-book-stage');
+  const stage = root()?.querySelector('.magic-book-stage');
   if (!stage) return null;
   let node = projectionNode();
   if (node) return node;
@@ -171,19 +220,21 @@ function bookmarkMarkup(item) {
 
 function traceDrawerMarkup(projection) {
   if (!projection.selectedTraceId) return '';
-  const body = projection.trace.length ? projection.trace.map((item) => `<article><header><strong>${esc(item.aspectName)}</strong><small>${esc(item.kind)}</small></header><p>${esc(item.text.slice(0, 900))}</p></article>`).join('') : '<p>No live entries for this trace.</p>';
+  const body = projection.trace.length ? projection.trace.map((item) => `<article><header><strong>${esc(item.aspectName)}</strong><small>${esc(item.kind)}</small></header><p>${esc(item.text.slice(0, 900))}</p></article>`).join('') : '<p>No entries for this trace.</p>';
   return `<section class="codex-trace-drawer"><header><span><b>Trace bookmark</b><small>${esc(projection.selectedTraceId)}</small></span><button type="button" data-codex-trace-close aria-label="Close trace">×</button></header><div>${body}</div></section>`;
+}
+
+function currentMessages() {
+  const live = readAspectMeshRuntime()?.bus?.all?.() || [];
+  return mergeCodexAspectMessages(persistedMessages, live);
 }
 
 function render() {
   const node = ensureProjectionNode();
   if (!node) return;
-  const runtime = readAspectMeshRuntime();
-  const messages = runtime?.bus?.all?.() || [];
-  const projection = projectCodexAspectMessages(messages, { selectedTrace: selectedTraceId });
+  const projection = projectCodexAspectMessages(currentMessages(), { selectedTrace: selectedTraceId });
   const quiet = !projection.marginalia.length && !projection.proposals.length && !projection.branches.length;
   const coalition = coalitionState?.state === 'working' ? `<div class="codex-coalition-whisper"><span>⌁</span><strong>${esc((coalitionState.members || []).map((id) => aspectNames.get(id) || id).join(' + '))}</strong><small>${esc(coalitionState.purpose || 'working')}</small></div>` : '';
-
   node.innerHTML = `<div class="codex-trace-ribbons">${projection.bookmarks.map(bookmarkMarkup).join('')}</div><aside class="codex-marginalia" aria-label="Aspect marginalia">${projection.marginalia.map(marginMarkup).join('')}${quiet ? '<p class="codex-wonder-listening">Wonder margin · listening</p>' : ''}</aside><aside class="codex-proposal-shelf" aria-label="Aspect proposals">${coalition}${projection.proposals.map(proposalMarkup).join('')}</aside><aside class="codex-branch-stack" aria-label="Alternate leaves">${projection.branches.map(branchMarkup).join('')}</aside>${traceDrawerMarkup(projection)}`;
 }
 
@@ -194,15 +245,44 @@ function attachMesh(runtime) {
   return runtime;
 }
 
+async function activeHouseSession() {
+  return readHouseRuntimeToken() || restoreHouseRuntimeSession();
+}
+
+export async function hydrateCodexAspectContinuity({ token = null, read = readHouseCommons } = {}) {
+  if (hydratePromise) return hydratePromise;
+  hydratePromise = (async () => {
+    const session = token || await activeHouseSession().catch(() => '');
+    if (!session) return Object.freeze([...persistedMessages]);
+    const log = await read(session).catch(() => null);
+    if (!log) return Object.freeze([...persistedMessages]);
+    persistedMessages = (Array.isArray(log.entries) ? log.entries : [])
+      .map(aspectEnvelopeFromHouseEntry)
+      .filter(Boolean)
+      .slice(-60);
+    render();
+    return Object.freeze([...persistedMessages]);
+  })().finally(() => { hydratePromise = null; });
+  return hydratePromise;
+}
+
 async function wakeMesh() {
   const existing = readAspectMeshRuntime();
-  if (existing) return attachMesh(existing);
+  if (existing) {
+    attachMesh(existing);
+    void hydrateCodexAspectContinuity();
+    return existing;
+  }
   if (!wakePromise) {
     wakePromise = import('./runtime-integration-bootstrap.js')
       .then(async () => {
         for (let attempt = 0; attempt < 30; attempt += 1) {
           const runtime = readAspectMeshRuntime();
-          if (runtime) return attachMesh(runtime);
+          if (runtime) {
+            attachMesh(runtime);
+            void hydrateCodexAspectContinuity();
+            return runtime;
+          }
           await new Promise((resolve) => setTimeout(resolve, 40));
         }
         return null;
@@ -219,7 +299,7 @@ function onBookReady() {
 
 function onBookReceipt(event) {
   const receipt = event.detail || {};
-  if (receipt.kind === 'book-open') void wakeMesh().then(() => render());
+  if (receipt.kind === 'book-open') void wakeMesh().then(() => hydrateCodexAspectContinuity()).then(() => render());
   else render();
 }
 
@@ -236,6 +316,7 @@ function onCoalitionStarted(event) {
 
 function onCoalitionComplete(event) {
   if (!coalitionState || coalitionState.traceId === event.detail?.traceId) coalitionState = null;
+  void hydrateCodexAspectContinuity();
   render();
 }
 
