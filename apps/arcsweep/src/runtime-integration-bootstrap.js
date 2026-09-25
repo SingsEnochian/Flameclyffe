@@ -14,6 +14,7 @@ import './aspect-growth-garden-sidecar.js';
 import './aspect-experiment-bed-sidecar.js';
 import './codex-alive-sidecar.js';
 import './codex-residue-sidecar.js';
+import './codex-attention-notes-sidecar.js';
 
 export const RUNTIME_INTEGRATION_BOOTSTRAP_EVENT = 'arcsweep:runtime-integration-ready';
 
