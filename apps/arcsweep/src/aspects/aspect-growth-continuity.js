@@ -5,6 +5,7 @@ import { ASPECT_MESSAGE_KINDS } from './aspect-message-bus.js';
 export const ASPECT_GROWTH_CONTINUITY_SCHEMA = 'hearthweave.aspect-growth-continuity/v0.1';
 
 const known = new Set(INITIAL_ASPECTS.map((aspect) => aspect.id));
+const DURABLE_KINDS = new Set(['growth', 'question', 'proposal', 'challenge', 'result', 'verification', 'refusal', 'pause']);
 
 function links(entry, kind) {
   return (Array.isArray(entry?.links) ? entry.links : []).filter((item) => item?.kind === kind);
@@ -23,6 +24,14 @@ function restoredBody(entry, kind) {
   } catch {
     return raw;
   }
+}
+
+function mergeById(...sources) {
+  const byId = new Map();
+  for (const source of sources) {
+    for (const message of Array.isArray(source) ? source : []) if (message?.id) byId.set(message.id, message);
+  }
+  return [...byId.values()].sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
 }
 
 export function growthEnvelopeFromHouseEntry(entry = {}) {
@@ -61,21 +70,25 @@ export async function hydrateAspectGrowthGardenFromHouse(garden, {
   token = null,
   read = readHouseCommons,
   fetchImpl = fetch,
-  limit = 600,
+  recentLimit = 600,
 } = {}) {
   if (!garden?.hydrate) throw new Error('Growth continuity requires a Growth Garden.');
   const session = token || await activeSession(fetchImpl);
   if (!session) return Object.freeze({ schema: ASPECT_GROWTH_CONTINUITY_SCHEMA, status: 'house-offline', count: 0 });
   const log = await read(session, fetchImpl).catch(() => null);
   if (!log) return Object.freeze({ schema: ASPECT_GROWTH_CONTINUITY_SCHEMA, status: 'unavailable', count: 0 });
-  const messages = (Array.isArray(log.entries) ? log.entries : [])
-    .slice(-Math.max(1, Number(limit) || 600))
+  const restored = (Array.isArray(log.entries) ? log.entries : [])
     .map(growthEnvelopeFromHouseEntry)
     .filter(Boolean);
+  const recent = restored.slice(-Math.max(1, Number(recentLimit) || 600));
+  const durable = restored.filter((message) => DURABLE_KINDS.has(message.kind));
+  const messages = mergeById(durable, recent);
   garden.hydrate(messages);
   return Object.freeze({
     schema: ASPECT_GROWTH_CONTINUITY_SCHEMA,
     status: 'hydrated',
     count: messages.length,
+    durableCount: durable.length,
+    recentCount: recent.length,
   });
 }
