@@ -1,7 +1,7 @@
 import { createAspectMessageBus, createAspectEnvelope } from './aspect-message-bus.js';
 import { bindAspectBusToHouse } from './aspect-house-runtime.js';
 import { createAspectCoalition, runAspectCoalition } from './aspect-coalition.js';
-import { runAspectBusTurn } from './aspect-runtime-adapter.js';
+import { invokeAspectRuntime, runAspectBusTurn } from './aspect-runtime-adapter.js';
 import { createAspectGrowthGarden } from './aspect-growth-garden.js';
 import { hydrateAspectGrowthGardenFromHouse } from './aspect-growth-continuity.js';
 import { createAspectExperimentBed, createExperimentBody, isAspectExperimentEnvelope } from './aspect-experiment-bed.js';
@@ -35,6 +35,10 @@ function id(prefix = 'aspect-trace') {
 function bodyText(body) {
   if (typeof body === 'string') return body;
   try { return JSON.stringify(body ?? null); } catch { return String(body ?? ''); }
+}
+
+function bodyObject(body) {
+  return body && typeof body === 'object' && !Array.isArray(body) ? body : {};
 }
 
 function experimentContext(experiment) {
@@ -132,6 +136,7 @@ export function createAspectMeshRuntime({
     parentId = null,
     evidenceRefs = [],
     stateRefs = [],
+    sender = null,
   } = {}) {
     if (!String(aspectId || '').trim()) throw new Error('Experiment phase requires aspectId.');
     const body = createExperimentBody({
@@ -158,7 +163,7 @@ export function createAspectMeshRuntime({
     return bus.publish({
       traceId: experimentTraceId || id('experiment-trace'),
       ...(parentId ? { parentId } : {}),
-      sender: { aspectId: String(aspectId), invocationId: 'aspect-experiment-bed' },
+      sender: sender || { aspectId: String(aspectId), invocationId: 'aspect-experiment-bed' },
       recipients: phase === 'proposed' || phase === 'started' ? body.collaborators : [],
       kind,
       body,
@@ -295,6 +300,8 @@ export function createAspectMeshRuntime({
       relation = 'adds',
       targetEnvelopeIds = [],
       tags = [],
+      sender = null,
+      evidenceRefs = [],
     } = {}) {
       const experiment = experimentBed.get(experimentId);
       if (!experiment) throw new Error(`Unknown experiment: ${experimentId}`);
@@ -317,14 +324,53 @@ export function createAspectMeshRuntime({
         tags: ['experiment', ...tags],
         traceId: experiment.traceId,
         parentId: experiment.outcomeEnvelopeId || experiment.startedEnvelopeId || experiment.proposalEnvelopeId,
-        evidenceRefs: experiment.outcomeEnvelopeId ? [experiment.outcomeEnvelopeId] : [],
+        evidenceRefs: [...new Set([experiment.outcomeEnvelopeId, ...evidenceRefs].filter(Boolean))],
         stateRefs: [experiment.proposalEnvelopeId].filter(Boolean),
+        sender,
       });
       dispatch(target, ASPECT_MESH_EVENTS.experimentReflected, { experimentId, envelope, experiment: experimentBed.get(experimentId) });
       return envelope;
     },
 
-    async runExperiment({ experimentId, rounds = 1, synthesisAspectId = null, runtimeOptions = {} } = {}) {
+    async requestExperimentReflection({ experimentId, runtimeOptions = {} } = {}) {
+      await Promise.all([growthReady, experimentReady]);
+      const experiment = experimentBed.get(experimentId);
+      if (!experiment) throw new Error(`Unknown experiment: ${experimentId}`);
+      if (experiment.status === 'reflected') return Object.freeze({ status: 'already-reflected', experiment });
+      if (!experiment.outcomeEnvelopeId) return Object.freeze({ status: 'outcome-required', experiment });
+      const outcomeEnvelope = bus.all().find((message) => message.id === experiment.outcomeEnvelopeId);
+      if (!outcomeEnvelope) return Object.freeze({ status: 'outcome-unavailable', experiment });
+
+      const reply = await invokeAspectRuntime({
+        aspectId: experiment.initiatorAspectId,
+        incoming: outcomeEnvelope,
+        sharedContext: [
+          ...experimentContext(experiment),
+          'Reflection invitation: what, if anything, did this experience change about your method, curiosity, preferences, working relationships, role possibilities, or boundaries? A valid reflection may also be that nothing durable changed.',
+          ...growthGarden.contextFor(experiment.initiatorAspectId),
+        ],
+        ...runtimeOptions,
+        metadata: { ...(runtimeOptions.metadata || {}), surface: 'experiment-reflection', experiment_id: experimentId },
+      });
+      if (!reply?.envelope) return Object.freeze({ status: reply?.status || 'unavailable', experiment, reply });
+      const object = bodyObject(reply.envelope.body);
+      const reflection = String(object.statement || object.reflection || bodyText(reply.envelope.body) || '').trim();
+      if (!reflection) return Object.freeze({ status: 'quiet', experiment, reply });
+      const envelope = runtime.reflectOnExperiment({
+        experimentId,
+        aspectId: experiment.initiatorAspectId,
+        reflection,
+        growthType: object.type || 'note',
+        relation: object.relation || 'adds',
+        targetEnvelopeIds: object.targetEnvelopeIds || object.target_envelope_ids || [],
+        tags: object.tags || [],
+        sender: reply.envelope.sender,
+        evidenceRefs: reply.envelope.evidenceRefs || [],
+      });
+      return Object.freeze({ status: 'reflected', experiment: experimentBed.get(experimentId), reply, envelope });
+    },
+
+    async runExperiment({ experimentId, rounds = 1, synthesisAspectId = null, runtimeOptions = {}, autoReflect = true } = {}) {
       await experimentReady;
       const experiment = experimentBed.get(experimentId);
       if (!experiment) throw new Error(`Unknown experiment: ${experimentId}`);
@@ -397,7 +443,17 @@ export function createAspectMeshRuntime({
         observation,
         evidenceRefs: execution?.envelope?.evidenceRefs || execution?.synthesis?.envelope?.evidenceRefs || [],
       });
-      return Object.freeze({ status: 'completed', experimentId, experiment: experimentBed.get(experimentId), execution, outcomeEnvelope });
+      const reflection = autoReflect
+        ? await runtime.requestExperimentReflection({ experimentId, runtimeOptions })
+        : Object.freeze({ status: 'not-requested' });
+      return Object.freeze({
+        status: reflection.status === 'reflected' ? 'reflected' : 'completed',
+        experimentId,
+        experiment: experimentBed.get(experimentId),
+        execution,
+        outcomeEnvelope,
+        reflection,
+      });
     },
 
     async startCoalition({
