@@ -61,6 +61,13 @@ function stageRect() {
   return stage?.getBoundingClientRect?.() || null;
 }
 
+function contentOffset() {
+  return {
+    x: Number(stage?.scrollLeft) || 0,
+    y: Number(stage?.scrollTop) || 0,
+  };
+}
+
 function pageElement(side = 'right') {
   return root?.querySelector?.(PAGE_SELECTORS[side === 'left' ? 'left' : 'right']) || null;
 }
@@ -70,11 +77,12 @@ function pageRect(side = 'right') {
   const page = pageElement(side);
   if (!host || !page) return null;
   const rect = page.getBoundingClientRect();
+  const offset = contentOffset();
   return {
-    left: rect.left - host.left,
-    top: rect.top - host.top,
-    right: rect.right - host.left,
-    bottom: rect.bottom - host.top,
+    left: rect.left - host.left + offset.x,
+    top: rect.top - host.top + offset.y,
+    right: rect.right - host.left + offset.x,
+    bottom: rect.bottom - host.top + offset.y,
     width: rect.width,
     height: rect.height,
   };
@@ -94,8 +102,8 @@ function resize() {
   if (!canvas || !stage) return;
   const rect = stage.getBoundingClientRect();
   dpr = Math.min(2, globalThis.devicePixelRatio || 1);
-  const width = Math.max(1, Math.round(rect.width));
-  const height = Math.max(1, Math.round(rect.height));
+  const width = Math.max(1, Math.round(Math.max(rect.width, stage.scrollWidth || 0)));
+  const height = Math.max(1, Math.round(Math.max(rect.height, stage.scrollHeight || 0)));
   canvas.width = Math.max(1, Math.round(width * dpr));
   canvas.height = Math.max(1, Math.round(height * dpr));
   canvas.style.width = `${width}px`;
@@ -137,8 +145,9 @@ function addInkParticle({ clientX, clientY, pressure = 0.22, velocity = 0, seed 
   const x = clamp01((clientX - page.left) / Math.max(1, page.width));
   const y = clamp01((clientY - page.top) / Math.max(1, page.height));
   const sample = liquidInkSample({ x, y, pressure, velocity, seed });
-  const localX = clientX - host.left;
-  const localY = clientY - host.top;
+  const offset = contentOffset();
+  const localX = clientX - host.left + offset.x;
+  const localY = clientY - host.top + offset.y;
   const now = performance.now();
   ink.push({
     ...sample,
@@ -371,12 +380,12 @@ function drawEffects(now, colors) {
     const progress = clamp01((now - effect.startedAt) / effect.durationMs);
     if (progress >= 1) continue;
     const alpha = fadeCurve(progress);
-    if (effect.id === ARTEFACT_EFFECTS.edgeGlint.id) drawEdgeGlint(effect, progress, alpha, colors);
-    else if (effect.id === ARTEFACT_EFFECTS.pageWake.id) drawPageWake(effect, progress, alpha, colors);
-    else if (effect.id === ARTEFACT_EFFECTS.glyphBloom.id) drawGlyphBloom(effect, progress, alpha, colors);
-    else if (effect.id === ARTEFACT_EFFECTS.traceThread.id) drawTraceThread(effect, progress, alpha, colors);
-    else if (effect.id === ARTEFACT_EFFECTS.afterimage.id) drawAfterimage(effect, progress, alpha, colors);
-    else if (effect.id === ARTEFACT_EFFECTS.liquidInk.id) drawEdgeGlint({ ...effect, id: ARTEFACT_EFFECTS.edgeGlint.id }, progress, alpha * 0.42, colors);
+    if (effect.id.startsWith(ARTEFACT_EFFECTS.edgeGlint.id)) drawEdgeGlint(effect, progress, alpha, colors);
+    else if (effect.id.startsWith(ARTEFACT_EFFECTS.pageWake.id)) drawPageWake(effect, progress, alpha, colors);
+    else if (effect.id.startsWith(ARTEFACT_EFFECTS.glyphBloom.id)) drawGlyphBloom(effect, progress, alpha, colors);
+    else if (effect.id.startsWith(ARTEFACT_EFFECTS.traceThread.id)) drawTraceThread(effect, progress, alpha, colors);
+    else if (effect.id.startsWith(ARTEFACT_EFFECTS.afterimage.id)) drawAfterimage(effect, progress, alpha, colors);
+    else if (effect.id.startsWith(ARTEFACT_EFFECTS.liquidInk.id)) drawEdgeGlint(effect, progress, alpha * 0.42, colors);
     next.push(effect);
   }
   context.restore();
@@ -465,6 +474,7 @@ function pointerUpEvent() {
   if (lastPointer) {
     const host = stageRect();
     if (host) {
+      const offset = contentOffset();
       pushEffect({
         ...ARTEFACT_EFFECTS.afterimage,
         pageSide: lastPointer.side,
@@ -472,9 +482,9 @@ function pointerUpEvent() {
         seed: `${lastPointer.x}:${lastPointer.y}:${lastPointer.at}`,
         kind: 'gesture-afterimage',
         points: [
-          { x: lastPointer.x - host.left - 12, y: lastPointer.y - host.top + 4 },
-          { x: lastPointer.x - host.left - 4, y: lastPointer.y - host.top },
-          { x: lastPointer.x - host.left + 6, y: lastPointer.y - host.top - 3 },
+          { x: lastPointer.x - host.left + offset.x - 12, y: lastPointer.y - host.top + offset.y + 4 },
+          { x: lastPointer.x - host.left + offset.x - 4, y: lastPointer.y - host.top + offset.y },
+          { x: lastPointer.x - host.left + offset.x + 6, y: lastPointer.y - host.top + offset.y - 3 },
         ],
       });
     }
@@ -585,7 +595,7 @@ globalThis.__universalCodexArtefactMotion = Object.freeze({
     pointerDown = false;
     cancelAnimationFrame(raf);
     raf = 0;
-    context?.clearRect?.(0, 0, canvas?.width || 0, canvas?.height || 0);
+    context?.clearRect?.(0, 0, canvas ? canvas.width / dpr : 0, canvas ? canvas.height / dpr : 0);
     setMotionState(false);
   },
 });
