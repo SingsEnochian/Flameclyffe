@@ -1,0 +1,196 @@
+.codex-instrument-cabinet {
+  position: absolute;
+  inset: 4.75rem 1rem 1rem;
+  z-index: 45;
+  overflow: auto;
+  padding: clamp(1rem, 2.5vw, 1.6rem);
+  border: 1px solid color-mix(in srgb, var(--magic-book-gold, #d2b56d) 55%, transparent);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--magic-book-paper, #101815) 96%, transparent), color-mix(in srgb, var(--magic-book-paper-deep, #0b1210) 98%, transparent));
+  box-shadow: 0 24px 70px rgb(0 0 0 / 0.48), inset 0 0 0 1px rgb(255 255 255 / 0.035);
+  color: var(--magic-book-ink, #e7e1d4);
+  backdrop-filter: blur(14px);
+}
+
+.codex-instrument-cabinet[hidden] {
+  display: none;
+}
+
+.codex-instrument-cabinet-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.codex-instrument-cabinet-heading h2,
+.codex-instrument-cabinet-heading p {
+  margin-top: 0;
+}
+
+.codex-instrument-cabinet-heading > div > p:last-child {
+  max-width: 72ch;
+  opacity: 0.82;
+}
+
+.codex-instrument-cabinet-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.codex-instrument-cabinet-summary span,
+.codex-instrument-semantic,
+.codex-instrument-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.18rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--magic-book-gold, #d2b56d) 34%, transparent);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  letter-spacing: 0.035em;
+}
+
+.codex-instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.codex-instrument-card {
+  min-width: 0;
+  padding: 0.95rem;
+  border: 1px solid rgb(255 255 255 / 0.085);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.025);
+}
+
+.codex-instrument-card[data-codex-material="living"] {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, #65d8c0 68%, transparent);
+}
+
+.codex-instrument-card[data-codex-material="organic"] {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, #9bc7a1 62%, transparent);
+}
+
+.codex-instrument-card[data-codex-material="possible"] {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, #79c9cf 58%, transparent);
+}
+
+.codex-instrument-card[data-codex-material="enduring"] {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--magic-book-gold, #d2b56d) 68%, transparent);
+}
+
+.codex-instrument-card[data-codex-material="continuity"] {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, #8c7657 68%, transparent);
+}
+
+.codex-instrument-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.codex-instrument-card h3 {
+  margin: 0.1rem 0 0.45rem;
+  font-size: 1.05rem;
+}
+
+.codex-instrument-kind {
+  margin: 0;
+  opacity: 0.58;
+  font-size: 0.7rem;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.codex-instrument-card > p {
+  margin: 0.2rem 0 0.7rem;
+  line-height: 1.48;
+  opacity: 0.86;
+}
+
+.codex-instrument-card[data-implementation="implemented"] .codex-instrument-status {
+  border-color: color-mix(in srgb, #8bc9a5 55%, transparent);
+}
+
+.codex-instrument-card[data-implementation="prototype"] .codex-instrument-status {
+  border-color: color-mix(in srgb, #d7bc73 55%, transparent);
+}
+
+.codex-instrument-card[data-implementation="proposed"] .codex-instrument-status {
+  opacity: 0.72;
+}
+
+.codex-instrument-semantics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.codex-instrument-semantic {
+  min-height: 1.45rem;
+  padding: 0.08rem 0.42rem;
+  font-size: 0.68rem;
+  opacity: 0.78;
+}
+
+.codex-instrument-card dl {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.codex-instrument-card dl > div {
+  display: grid;
+  grid-template-columns: minmax(4.8rem, auto) 1fr;
+  gap: 0.6rem;
+}
+
+.codex-instrument-card dt {
+  opacity: 0.56;
+  font-size: 0.74rem;
+}
+
+.codex-instrument-card dd {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.codex-instrument-references {
+  display: block;
+  margin-top: 0.7rem;
+  overflow-wrap: anywhere;
+  opacity: 0.48;
+  line-height: 1.4;
+}
+
+@media (max-width: 820px) {
+  .codex-instrument-cabinet {
+    inset: 6.5rem 0.65rem 0.65rem;
+    padding: 0.85rem;
+  }
+
+  .codex-instrument-cabinet-heading {
+    display: grid;
+  }
+
+  .codex-instrument-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .codex-instrument-cabinet,
+  .codex-instrument-card {
+    scroll-behavior: auto;
+    transition: none !important;
+    animation: none !important;
+  }
+}
