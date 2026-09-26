@@ -87,10 +87,12 @@ function cloneLeaf() {
   const spreadRect = spread.getBoundingClientRect();
   const pageRect = page.getBoundingClientRect();
   const leaf = page.cloneNode(true);
+  leaf.removeAttribute('id');
   leaf.removeAttribute('data-magic-book-right');
   leaf.classList.add('magic-book-drag-leaf');
   leaf.setAttribute('aria-hidden', 'true');
   leaf.inert = true;
+  leaf.querySelectorAll?.('[id]').forEach((node) => node.removeAttribute('id'));
   leaf.querySelectorAll?.('button, input, select, textarea, a, [tabindex]').forEach((node) => {
     node.setAttribute?.('tabindex', '-1');
   });
@@ -272,7 +274,7 @@ function bindHandle(handle) {
   handle.addEventListener('pointercancel', (event) => {
     if (!session || event.pointerId !== session.pointerId) return;
     if (handle.hasPointerCapture?.(event.pointerId)) handle.releasePointerCapture(event.pointerId);
-    suppressClick = true;
+    suppressClick = false;
     void finishSession({ cancelled: true });
   });
   handle.addEventListener('click', (event) => {
