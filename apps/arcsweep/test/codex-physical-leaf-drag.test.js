@@ -55,16 +55,18 @@ test('drag sidecar uses pointer capture and coalesced events while canonical Boo
   assert.match(source, /setPointerCapture/);
   assert.match(source, /getCoalescedEvents/);
   assert.match(source, /__arcsweepMagicBook/);
-  assert.match(source, /bridge\.turn\?\.\(active\.target\.id\)/);
+  assert.match(source, /bookBridge\(\)\?\.turn\?\.\(active\.target\.id\)/);
   assert.doesNotMatch(source, /createMagicBookReceipt/);
   assert.doesNotMatch(source, /turnMagicBookPage/);
 });
 
 test('physical leaf keeps reduced-motion and iPad-class pointer interaction semantics', async () => {
   const css = await readFile(new URL('../src/magic-book-leaf-drag.css', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../src/magic-book-leaf-drag-sidecar.js', import.meta.url), 'utf8');
   assert.match(css, /touch-action:\s*none/);
-  assert.match(css, /perspective\(1400px\)/);
+  assert.match(css, /transform-style:\s*preserve-3d/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(source, /perspective\(1400px\)/);
   const entry = await readFile(new URL('../src/magic-book-physical-acceptance-entry.js', import.meta.url), 'utf8');
   const cabinet = entry.indexOf("'./codex-instrument-cabinet-sidecar.js'");
   const leaf = entry.indexOf("'./magic-book-leaf-drag-sidecar.js'");
