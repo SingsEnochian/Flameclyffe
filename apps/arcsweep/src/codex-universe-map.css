@@ -1,0 +1,158 @@
+.codex-universe-map {
+  position: absolute;
+  inset: 4.5rem 1.5rem 1.5rem;
+  z-index: 54;
+  overflow: auto;
+  padding: 1.1rem;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, #0b0d0c 94%, transparent);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.48);
+  color: inherit;
+}
+
+.codex-universe-map[hidden] { display: none; }
+
+.codex-universe-map-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.codex-universe-map-heading h2,
+.codex-universe-card h3 { margin: 0.1rem 0 0; }
+
+.codex-universe-map-heading p { margin: 0.3rem 0 0; max-width: 72ch; }
+
+.codex-universe-map-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.9rem 0;
+}
+
+.codex-universe-map-summary span,
+.codex-universe-card header > span {
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.codex-universe-reference {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.85rem;
+  border-inline-start: 3px solid currentColor;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+}
+
+.codex-universe-reference small { opacity: 0.72; }
+
+.codex-universe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.8rem;
+}
+
+.codex-universe-card {
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, currentColor 4%, transparent);
+}
+
+.codex-universe-card[data-mapping-state="anchored"] {
+  border-width: 2px;
+}
+
+.codex-universe-card[data-mapping-state="ingest-queued"] {
+  border-style: dashed;
+}
+
+.codex-universe-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.codex-universe-card header p {
+  margin: 0;
+  font-size: 0.72rem;
+  opacity: 0.68;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.codex-universe-card > p { line-height: 1.45; }
+
+.codex-universe-card dl {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.8rem 0 0;
+}
+
+.codex-universe-card dl div {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.5rem;
+}
+
+.codex-universe-card dt { opacity: 0.65; }
+.codex-universe-card dd { margin: 0; overflow-wrap: anywhere; }
+
+.codex-universe-lineage,
+.codex-universe-notes,
+.codex-universe-ingest {
+  display: block;
+  margin-top: 0.7rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.codex-universe-ingest {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  font-size: 0.82rem;
+}
+
+.codex-universe-map footer {
+  margin-top: 1rem;
+  opacity: 0.72;
+}
+
+@media (max-width: 720px) {
+  .codex-universe-map {
+    inset: 4rem 0.6rem 0.6rem;
+    padding: 0.8rem;
+  }
+
+  .codex-universe-map-heading,
+  .codex-universe-reference,
+  .codex-universe-ingest {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .codex-universe-card dl div {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .codex-universe-map,
+  .codex-universe-map * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
