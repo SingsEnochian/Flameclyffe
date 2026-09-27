@@ -17,8 +17,8 @@ export const DEFAULT_COGNITIVE_QUESTIONS = Object.freeze([
   }),
   Object.freeze({
     id: 'uncertainty',
-    type: 'score',
-    scale: Object.freeze(['low', 'medium', 'high']),
+    type: 'choice',
+    options: Object.freeze(['low', 'medium', 'high']),
   }),
   Object.freeze({
     id: 'conflict',
@@ -31,6 +31,7 @@ export function createLayaCognitiveFrame({
   runtime,
   input,
   contextRefs = [],
+  symbolicState = null,
   questions = DEFAULT_COGNITIVE_QUESTIONS,
 } = {}) {
   if (!runtime?.identityId || !input) {
@@ -43,6 +44,7 @@ export function createLayaCognitiveFrame({
     continuityNamespace: runtime.continuity.namespace,
     input,
     contextRefs: freezeArray(contextRefs),
+    symbolicState,
     questions: freezeArray(questions),
     constraints: Object.freeze({
       judgementOnly: true,
