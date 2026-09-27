@@ -123,6 +123,31 @@ export function createResidentLayaMcpSession({
     return current;
   }
 
+  async function close({ forceAfterMs = 5_000 } = {}) {
+    if (!proc) return;
+    closed = true;
+    const child = proc;
+    proc = null;
+    started = false;
+
+    rejectAll(new Error('Laya MCP session closed.'));
+
+    stdoutReader?.close();
+    stderrReader?.close();
+    stdoutReader = null;
+    stderrReader = null;
+
+    try { child.stdin.end(); } catch {}
+    const exited = new Promise((resolve) => child.once('exit', resolve));
+    const timer = setTimeout(() => {
+      if (child.exitCode == null) child.kill('SIGTERM');
+    }, forceAfterMs);
+    timer.unref?.();
+    await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, forceAfterMs + 500))]);
+    clearTimeout(timer);
+    if (child.exitCode == null) child.kill('SIGKILL');
+  }
+
   async function start() {
     if (started && !closed) return api;
     if (proc) throw new Error('Laya MCP process already exists.');
@@ -173,53 +198,36 @@ export function createResidentLayaMcpSession({
       }
     });
 
-    const initialize = await withTimeout(
-      request('initialize', {
-        protocolVersion,
-        capabilities: {},
-        clientInfo: { name: 'arcsweep-cognition-engine', version: '0.1.0' },
-      }, startupTimeoutMs),
-      startupTimeoutMs,
-      `Laya MCP initialize timed out. stderr tail: ${stderrTail.join(' | ')}`,
-    );
+    try {
+      const initialize = await withTimeout(
+        request('initialize', {
+          protocolVersion,
+          capabilities: {},
+          clientInfo: { name: 'arcsweep-cognition-engine', version: '0.1.0' },
+        }, startupTimeoutMs),
+        startupTimeoutMs,
+        `Laya MCP initialize timed out. stderr tail: ${stderrTail.join(' | ')}`,
+      );
 
-    if (initialize?.serverInfo?.name !== 'laya') {
-      throw new Error(`Unexpected MCP server identity: ${JSON.stringify(initialize?.serverInfo || null)}`);
+      if (initialize?.serverInfo?.name !== 'laya') {
+        throw new Error(`Unexpected MCP server identity: ${JSON.stringify(initialize?.serverInfo || null)}`);
+      }
+      notify('notifications/initialized');
+
+      const tools = await request('tools/list', {}, startupTimeoutMs);
+      const names = new Set((tools?.tools || []).map((tool) => tool?.name));
+      for (const required of ['laya_predict', 'laya_status']) {
+        if (!names.has(required)) throw new Error(`Laya MCP server is missing required tool ${required}.`);
+      }
+
+      started = true;
+      await withTimeout(warm(), startupTimeoutMs, `Laya MCP warmup timed out for ${model}.`);
+      return api;
+    } catch (error) {
+      started = false;
+      try { await close({ forceAfterMs: 250 }); } catch {}
+      throw error;
     }
-    notify('notifications/initialized');
-
-    const tools = await request('tools/list', {}, startupTimeoutMs);
-    const names = new Set((tools?.tools || []).map((tool) => tool?.name));
-    for (const required of ['laya_predict', 'laya_status']) {
-      if (!names.has(required)) throw new Error(`Laya MCP server is missing required tool ${required}.`);
-    }
-
-    started = true;
-    await withTimeout(warm(), startupTimeoutMs, `Laya MCP warmup timed out for ${model}.`);
-    return api;
-  }
-
-  async function close({ forceAfterMs = 5_000 } = {}) {
-    if (!proc) return;
-    closed = true;
-    const child = proc;
-    proc = null;
-    started = false;
-
-    stdoutReader?.close();
-    stderrReader?.close();
-    stdoutReader = null;
-    stderrReader = null;
-
-    try { child.stdin.end(); } catch {}
-    const exited = new Promise((resolve) => child.once('exit', resolve));
-    const timer = setTimeout(() => {
-      if (child.exitCode == null) child.kill('SIGTERM');
-    }, forceAfterMs);
-    timer.unref?.();
-    await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, forceAfterMs + 500))]);
-    clearTimeout(timer);
-    if (child.exitCode == null) child.kill('SIGKILL');
   }
 
   const api = Object.freeze({
