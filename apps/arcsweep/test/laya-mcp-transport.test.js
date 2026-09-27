@@ -32,12 +32,22 @@ test('Laya MCP transport calls laya_predict with typed-decisions', async () => {
     continuityNamespace: 'constellation/ellowind/primary',
     input: 'Compare two interpretations.',
     contextRefs: ['codex://ellowind/recent'],
+    symbolicState: {
+      activeGlyphs: ['witness'],
+      attentionTags: ['evidence'],
+      retrievalTags: ['receipts'],
+      routeHints: ['research'],
+      flags: { provenanceRequired: true },
+      grantsAuthority: false,
+    },
     constraints: { executionMode: 'sandbox' },
   });
 
   assert.equal(call.name, 'laya_predict');
   assert.equal(call.arguments.model, 'typed-decisions');
   assert.equal(call.arguments.state.grants_authority, false);
+  assert.equal(call.arguments.state.symbolic_state.grants_authority, false);
+  assert.deepEqual(call.arguments.state.symbolic_state.active_glyphs, ['witness']);
   assert.equal(call.arguments.questions.route.type, 'choice');
   assert.equal(call.arguments.questions.uncertainty.type, 'choice');
   assert.equal(result.route, 'deep-reasoning');
