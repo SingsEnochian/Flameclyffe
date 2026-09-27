@@ -147,12 +147,16 @@ export function createRuntimeReceipt({
   runtime,
   decision,
   symbolicState = null,
+  cognitiveFieldReceipt = null,
   modelBinding = null,
   actionEvaluation = null,
   evidenceRefs = [],
 } = {}) {
   if (!runtime?.identityId || !decision) {
     throw new Error('Runtime receipt requires runtime and decision.');
+  }
+  if (cognitiveFieldReceipt?.grantsAuthority === true) {
+    throw new Error('Cognitive field receipts may not grant authority.');
   }
 
   return Object.freeze({
@@ -162,6 +166,7 @@ export function createRuntimeReceipt({
     continuityEpoch: runtime.continuity.epoch,
     cognitionProfile: runtime.cognition.profile,
     symbolicState,
+    cognitiveFieldReceipt,
     decision,
     modelBinding,
     actionEvaluation,

@@ -32,10 +32,14 @@ export function createLayaCognitiveFrame({
   input,
   contextRefs = [],
   symbolicState = null,
+  cognitiveField = null,
   questions = DEFAULT_COGNITIVE_QUESTIONS,
 } = {}) {
   if (!runtime?.identityId || !input) {
     throw new Error('Laya cognitive frames require a runtime and input.');
+  }
+  if (cognitiveField?.grantsAuthority === true) {
+    throw new Error('Cognitive fields may inform Laya judgement but may not grant authority.');
   }
 
   return Object.freeze({
@@ -45,6 +49,7 @@ export function createLayaCognitiveFrame({
     input,
     contextRefs: freezeArray(contextRefs),
     symbolicState,
+    cognitiveField,
     questions: freezeArray(questions),
     constraints: Object.freeze({
       judgementOnly: true,

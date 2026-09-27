@@ -70,6 +70,23 @@ function confidenceSummary(payload) {
   return Math.min(...values);
 }
 
+function fieldForWire(field) {
+  if (!field) return null;
+  if (field.grantsAuthority === true) throw new Error('Cognitive field cannot grant authority over MCP.');
+  return {
+    field_id: field.fieldId,
+    tick: field.tick,
+    dominant_patterns: field.dominantPatterns || [],
+    secondary_patterns: field.secondaryPatterns || [],
+    tensions: field.tensions || [],
+    novel_associations: field.novelAssociations || [],
+    salience: field.salience ?? null,
+    stability: field.stability ?? null,
+    trajectory: field.trajectory || [],
+    grants_authority: false,
+  };
+}
+
 export function createLayaMcpInvoke({ callTool, model = 'typed-decisions' } = {}) {
   if (typeof callTool !== 'function') {
     throw new Error('Laya MCP transport requires callTool.');
@@ -94,6 +111,7 @@ export function createLayaMcpInvoke({ callTool, model = 'typed-decisions' } = {}
         flags: symbolic.flags || {},
         grants_authority: false,
       } : null,
+      cognitive_field: fieldForWire(frame.cognitiveField),
       execution_mode: frame.constraints?.executionMode || 'sandbox',
       judgement_only: true,
       grants_authority: false,
