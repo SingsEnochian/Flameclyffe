@@ -1,0 +1,263 @@
+.codex-astrolabe[hidden] {
+  display: none !important;
+}
+
+.codex-astrolabe {
+  position: absolute;
+  inset: clamp(1rem, 4vw, 3rem);
+  z-index: 28;
+  overflow: auto;
+  padding: clamp(1rem, 2.4vw, 2rem);
+  border: 1px solid color-mix(in srgb, var(--codex-gold, #b99759) 68%, transparent);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(193, 164, 101, .09), transparent 34%),
+    linear-gradient(145deg, rgba(19, 18, 18, .98), rgba(35, 29, 24, .98));
+  box-shadow: 0 1.6rem 5rem rgba(0, 0, 0, .58);
+  color: var(--codex-ink-light, #e7ddc8);
+}
+
+.codex-astrolabe-heading,
+.codex-astrolabe-body,
+.codex-astrolabe-actions,
+.codex-astrolabe-reading div {
+  display: flex;
+}
+
+.codex-astrolabe-heading {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.codex-astrolabe-heading h2,
+.codex-astrolabe-heading p {
+  margin-block: .2rem;
+}
+
+.codex-astrolabe-body {
+  gap: clamp(1rem, 3vw, 2.5rem);
+  align-items: stretch;
+  margin-top: 1.2rem;
+}
+
+.codex-astrolabe-controls,
+.codex-astrolabe-instrument {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.codex-astrolabe-controls {
+  display: grid;
+  align-content: start;
+  gap: .8rem;
+}
+
+.codex-astrolabe-controls label {
+  display: grid;
+  gap: .32rem;
+  font-size: .86rem;
+  letter-spacing: .03em;
+}
+
+.codex-astrolabe-controls input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: .64rem .72rem;
+  border: 1px solid rgba(205, 183, 128, .32);
+  border-radius: .55rem;
+  background: rgba(7, 8, 9, .55);
+  color: inherit;
+}
+
+.codex-astrolabe-actions {
+  gap: .55rem;
+  flex-wrap: wrap;
+}
+
+.codex-astrolabe button,
+[data-codex-astrolabe-open] {
+  padding: .55rem .78rem;
+  border: 1px solid rgba(205, 183, 128, .4);
+  border-radius: .55rem;
+  background: rgba(169, 136, 75, .11);
+  color: inherit;
+  cursor: pointer;
+}
+
+.codex-astrolabe button:hover,
+.codex-astrolabe button:focus-visible,
+[data-codex-astrolabe-open]:hover,
+[data-codex-astrolabe-open]:focus-visible {
+  border-color: rgba(230, 203, 138, .78);
+  background: rgba(169, 136, 75, .2);
+}
+
+.codex-astrolabe-status {
+  min-height: 2.8em;
+  margin: .25rem 0 0;
+  padding: .65rem .72rem;
+  border-left: 2px solid rgba(205, 183, 128, .44);
+  background: rgba(0, 0, 0, .18);
+}
+
+.codex-astrolabe-status[data-state="error"] {
+  border-left-color: rgba(212, 115, 101, .75);
+}
+
+.codex-astrolabe-status[data-state="read"] {
+  border-left-color: rgba(106, 187, 168, .74);
+}
+
+.codex-astrolabe-instrument {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+}
+
+.codex-astrolabe-dial {
+  --astrolabe-sidereal-angle: 0deg;
+  --astrolabe-sun-azimuth: 0deg;
+  position: relative;
+  width: min(100%, 24rem);
+  aspect-ratio: 1;
+  border: 2px solid rgba(219, 188, 118, .58);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 0 8%, rgba(213, 184, 119, .08) 8.3% 9%, transparent 9.3% 31%, rgba(213, 184, 119, .09) 31.4% 32%, transparent 32.4%),
+    repeating-conic-gradient(from -1deg, rgba(224, 199, 143, .26) 0 1deg, transparent 1deg 15deg),
+    radial-gradient(circle, rgba(19, 26, 29, .76), rgba(9, 11, 13, .98));
+  box-shadow: inset 0 0 2rem rgba(212, 175, 99, .08), 0 .9rem 2.2rem rgba(0, 0, 0, .34);
+}
+
+.codex-astrolabe-dial::before,
+.codex-astrolabe-dial::after {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border: 1px solid rgba(207, 183, 127, .2);
+  border-radius: 50%;
+}
+
+.codex-astrolabe-dial::after {
+  inset: 24%;
+  border-style: dashed;
+}
+
+.codex-astrolabe-cardinals span {
+  position: absolute;
+  font: 600 .72rem/1 ui-monospace, monospace;
+  color: rgba(237, 218, 174, .74);
+}
+
+.codex-astrolabe-cardinals span:nth-child(1) { top: 3%; left: 50%; transform: translateX(-50%); }
+.codex-astrolabe-cardinals span:nth-child(2) { right: 3%; top: 50%; transform: translateY(-50%); }
+.codex-astrolabe-cardinals span:nth-child(3) { bottom: 3%; left: 50%; transform: translateX(-50%); }
+.codex-astrolabe-cardinals span:nth-child(4) { left: 3%; top: 50%; transform: translateY(-50%); }
+
+.codex-astrolabe-sidereal,
+.codex-astrolabe-sun-hand {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: rotate(var(--astrolabe-sidereal-angle));
+  transition: transform 340ms cubic-bezier(.2,.7,.25,1);
+}
+
+.codex-astrolabe-sidereal::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 50%;
+  background: linear-gradient(rgba(229, 198, 123, .92), rgba(229, 198, 123, .08));
+}
+
+.codex-astrolabe-sun-hand {
+  inset: 14%;
+  transform: rotate(var(--astrolabe-sun-azimuth));
+}
+
+.codex-astrolabe-sun-hand::before {
+  content: '';
+  position: absolute;
+  left: calc(50% - 1px);
+  top: 8%;
+  width: 2px;
+  height: 42%;
+  background: linear-gradient(rgba(119, 211, 191, .92), rgba(119, 211, 191, .14));
+}
+
+.codex-astrolabe-sun-hand span {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.15rem;
+  color: rgba(240, 207, 117, .96);
+}
+
+.codex-astrolabe-dial[data-above-horizon="false"] .codex-astrolabe-sun-hand {
+  opacity: .38;
+}
+
+.codex-astrolabe-pin {
+  position: absolute;
+  width: .75rem;
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #bfa369;
+  box-shadow: 0 0 0 .3rem rgba(191, 163, 105, .12);
+}
+
+.codex-astrolabe-reading {
+  width: min(100%, 28rem);
+  margin: 0;
+}
+
+.codex-astrolabe-reading div {
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .4rem .15rem;
+  border-bottom: 1px solid rgba(214, 190, 136, .12);
+}
+
+.codex-astrolabe-reading dt {
+  color: rgba(231, 221, 200, .7);
+}
+
+.codex-astrolabe-reading dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.codex-astrolabe footer {
+  margin-top: 1rem;
+  color: rgba(231, 221, 200, .58);
+}
+
+@media (max-width: 760px) {
+  .codex-astrolabe {
+    inset: .5rem;
+  }
+
+  .codex-astrolabe-body {
+    flex-direction: column;
+  }
+
+  .codex-astrolabe-dial {
+    width: min(88vw, 21rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .codex-astrolabe-sidereal,
+  .codex-astrolabe-sun-hand {
+    transition: none !important;
+  }
+}
