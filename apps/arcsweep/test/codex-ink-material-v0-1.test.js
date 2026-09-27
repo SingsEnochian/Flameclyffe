@@ -26,24 +26,34 @@ test('Ink remains finite and pressure-sensitive', () => {
   assert.ok(heavy.lifeMs < 2000);
 });
 
-test('Artefact ink appears only during active Glyph Surface drawing, never pointer hover', async () => {
+test('Artefact ink is driven by actual Glyph Surface brush samples, never pointer hover', async () => {
   const source = await readFile(new URL('../src/universal-codex-artefact-motion-sidecar.js', import.meta.url), 'utf8');
-  assert.match(source, /\[data-magic-glyph-canvas\]/);
-  assert.match(source, /pointerDown\s*&&\s*glyphSurface/);
+  assert.match(source, /arcsweep:glyph-brush-sample/);
+  assert.match(source, /arcsweep\.glyph-brush-sample\/v1/);
+  assert.match(source, /glyphSampleClientPoint/);
+  assert.match(source, /velocity_px_s/);
+  assert.match(source, /detail\.pressure/);
   assert.doesNotMatch(source, /pointerDown\s*\|\|\s*event\.pointerType\s*===\s*['"]pen['"]\s*\|\|\s*velocity\s*>\s*42/);
-  assert.match(source, /starwell:glyph-stroke-committed/);
+});
+
+test('Pointer tracking no longer deposits pigment by itself', async () => {
+  const source = await readFile(new URL('../src/universal-codex-artefact-motion-sidecar.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function pointerMove(event)');
+  const end = source.indexOf('function pointerDownEvent', start);
+  assert.ok(start >= 0 && end > start);
+  assert.doesNotMatch(source.slice(start, end), /addInkParticle/);
 });
 
 test('Glyph receipt does not create a second generic ink effect after the physical stroke', async () => {
   const source = await readFile(new URL('../src/universal-codex-artefact-motion-sidecar.js', import.meta.url), 'utf8');
   assert.match(source, /String\(detail\.kind\s*\|\|\s*['"]['"]\)\.toLowerCase\(\)\s*===\s*['"]glyph-stroke['"]/);
-  assert.match(source, /return;/);
 });
 
-test('Ink drains to quiet and emits codex:ink-settled instead of running forever', async () => {
+test('Ink drains to quiet only after the active stroke has ended', async () => {
   const source = await readFile(new URL('../src/universal-codex-artefact-motion-sidecar.js', import.meta.url), 'utf8');
   assert.match(source, /codex:ink-settled/);
-  assert.match(source, /if \(inkActive && ink\.length === 0\) emitInkSettled\(['"]settled['"]\)/);
+  assert.match(source, /inkActive && ink\.length === 0 && !activeInkStroke/);
+  assert.match(source, /phase === ['"]end['"] \? null : strokeId/);
   assert.match(source, /prefers-reduced-motion/);
   assert.doesNotMatch(source, /setInterval\s*\(/);
 });
