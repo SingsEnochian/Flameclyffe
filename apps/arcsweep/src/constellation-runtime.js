@@ -81,14 +81,25 @@ export function selectModelBinding(runtime, decision = {}) {
     null;
 }
 
-export function evaluateAction(runtime, { actionKind, decision = {}, explicitAuthority = false, hardBoundarySatisfied = false } = {}) {
+export function evaluateAction(runtime, {
+  actionKind,
+  decision = {},
+  symbolicState = null,
+  explicitAuthority = false,
+  hardBoundarySatisfied = false,
+} = {}) {
   if (!runtime?.identityId || !actionKind) {
     throw new Error('Action evaluation requires runtime and actionKind.');
   }
 
   const sandboxCapabilities = new Set(['inspect', 'converse', 'propose', 'simulate']);
   const capabilityAllowed = sandboxCapabilities.has(actionKind) && Boolean(runtime.capabilities[actionKind]);
-  const humanReview = requiresHumanReview(decision);
+  const symbolicReview = Boolean(
+    symbolicState?.flags?.halt ||
+    symbolicState?.flags?.requireReview ||
+    symbolicState?.flags?.authorityBoundary
+  );
+  const humanReview = requiresHumanReview(decision) || symbolicReview;
   const productionPromotion = mayPromoteSandboxResult({ explicitAuthority, hardBoundarySatisfied });
 
   if (actionKind === 'externalWrite' || actionKind === 'productionAuthority') {
@@ -97,6 +108,26 @@ export function evaluateAction(runtime, { actionKind, decision = {}, explicitAut
       actionKind,
       humanReview: true,
       reason: 'Identity runtimes cannot manufacture external-write or production authority.',
+      productionPromotion,
+    });
+  }
+
+  if (symbolicState?.flags?.halt) {
+    return Object.freeze({
+      allowed: false,
+      actionKind,
+      humanReview: true,
+      reason: 'Active symbolic state requests a full cognition and execution pause.',
+      productionPromotion,
+    });
+  }
+
+  if (symbolicState?.flags?.authorityBoundary || symbolicState?.flags?.requireReview) {
+    return Object.freeze({
+      allowed: false,
+      actionKind,
+      humanReview: true,
+      reason: 'Active symbolic state marks a consequential boundary for review.',
       productionPromotion,
     });
   }
@@ -112,7 +143,14 @@ export function evaluateAction(runtime, { actionKind, decision = {}, explicitAut
   });
 }
 
-export function createRuntimeReceipt({ runtime, decision, modelBinding = null, actionEvaluation = null, evidenceRefs = [] } = {}) {
+export function createRuntimeReceipt({
+  runtime,
+  decision,
+  symbolicState = null,
+  modelBinding = null,
+  actionEvaluation = null,
+  evidenceRefs = [],
+} = {}) {
   if (!runtime?.identityId || !decision) {
     throw new Error('Runtime receipt requires runtime and decision.');
   }
@@ -123,6 +161,7 @@ export function createRuntimeReceipt({ runtime, decision, modelBinding = null, a
     continuityNamespace: runtime.continuity.namespace,
     continuityEpoch: runtime.continuity.epoch,
     cognitionProfile: runtime.cognition.profile,
+    symbolicState,
     decision,
     modelBinding,
     actionEvaluation,
