@@ -1,6 +1,7 @@
 import { createLayaCognitiveFrame, runLayaCognition, requiresHumanReview } from './laya-cognition-adapter.js';
 import { evaluateAction, selectModelBinding, createRuntimeReceipt } from './constellation-runtime.js';
 import { compileSymbolicState } from './symbolic-cognition.js';
+import { createCognitiveFieldState, stepCognitiveField } from './cognitive-field-engine.js';
 
 export const COGNITION_ENGINE_SCHEMA = 'hearthweave.cognition-engine/v0.1';
 
@@ -13,13 +14,26 @@ export function createCognitionEngine({
   modelInvoke,
   retrieveContext = async () => [],
   glyphRegistry = null,
+  cognitiveFieldConfig = null,
 } = {}) {
   if (typeof layaInvoke !== 'function') throw new Error('Cognition engine requires a Laya invoke adapter.');
   if (typeof modelInvoke !== 'function') throw new Error('Cognition engine requires a model invoke adapter.');
   if (typeof retrieveContext !== 'function') throw new Error('retrieveContext must be a function.');
 
+  const fieldStates = new Map();
+
+  function currentField(runtime) {
+    const fieldId = runtime.continuity.namespace;
+    return fieldStates.get(fieldId) || createCognitiveFieldState({ fieldId });
+  }
+
   return Object.freeze({
     schema: COGNITION_ENGINE_SCHEMA,
+
+    getFieldState(runtime) {
+      if (!runtime?.continuity?.namespace) throw new Error('Field state lookup requires a runtime.');
+      return currentField(runtime);
+    },
 
     async cognize({
       runtime,
@@ -55,6 +69,7 @@ export function createCognitionEngine({
           runtime,
           decision,
           symbolicState,
+          cognitiveFieldReceipt: null,
           modelBinding: null,
           actionEvaluation,
           evidenceRefs: freezeArray(evidenceRefs),
@@ -67,6 +82,8 @@ export function createCognitionEngine({
           frame: null,
           decision,
           symbolicState,
+          cognitiveField: null,
+          cognitiveFieldReceipt: null,
           context: Object.freeze([]),
           modelBinding: null,
           output: null,
@@ -77,7 +94,17 @@ export function createCognitionEngine({
 
       const context = await retrieveContext({ runtime, input, symbolicState });
       const contextRefs = freezeArray((context || []).map((entry) => entry.ref).filter(Boolean));
-      const frame = createLayaCognitiveFrame({ runtime, input, contextRefs, symbolicState });
+      const fieldStep = stepCognitiveField({
+        state: currentField(runtime),
+        symbolicState,
+        continuitySlice: context,
+        recentEvents: [input],
+        config: cognitiveFieldConfig || undefined,
+      });
+      fieldStates.set(runtime.continuity.namespace, fieldStep.state);
+
+      const cognitiveField = fieldStep.summary;
+      const frame = createLayaCognitiveFrame({ runtime, input, contextRefs, symbolicState, cognitiveField });
       const decision = await runLayaCognition(frame, { invoke: layaInvoke });
 
       const actionEvaluation = evaluateAction(runtime, {
@@ -91,6 +118,7 @@ export function createCognitionEngine({
           runtime,
           decision,
           symbolicState,
+          cognitiveFieldReceipt: fieldStep.receipt,
           modelBinding: null,
           actionEvaluation,
           evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
@@ -103,6 +131,8 @@ export function createCognitionEngine({
           frame,
           decision,
           symbolicState,
+          cognitiveField,
+          cognitiveFieldReceipt: fieldStep.receipt,
           context: freezeArray(context),
           modelBinding: null,
           output: null,
@@ -117,6 +147,7 @@ export function createCognitionEngine({
           runtime,
           decision,
           symbolicState,
+          cognitiveFieldReceipt: fieldStep.receipt,
           modelBinding: null,
           actionEvaluation: Object.freeze({
             ...actionEvaluation,
@@ -134,6 +165,8 @@ export function createCognitionEngine({
           frame,
           decision,
           symbolicState,
+          cognitiveField,
+          cognitiveFieldReceipt: fieldStep.receipt,
           context: freezeArray(context),
           modelBinding: null,
           output: null,
@@ -148,6 +181,7 @@ export function createCognitionEngine({
         input,
         context: freezeArray(context),
         symbolicState,
+        cognitiveField,
         cognitiveDecision: decision,
       });
 
@@ -155,6 +189,7 @@ export function createCognitionEngine({
         runtime,
         decision,
         symbolicState,
+        cognitiveFieldReceipt: fieldStep.receipt,
         modelBinding,
         actionEvaluation,
         evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
@@ -167,6 +202,8 @@ export function createCognitionEngine({
         frame,
         decision,
         symbolicState,
+        cognitiveField,
+        cognitiveFieldReceipt: fieldStep.receipt,
         context: freezeArray(context),
         modelBinding,
         output,
