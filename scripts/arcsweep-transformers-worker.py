@@ -50,7 +50,7 @@ def load(model_ref: str) -> tuple[Any, Any]:
 
     unload()
     tokenizer = AutoTokenizer.from_pretrained(model_ref)
-    kwargs: dict[str, Any] = {"low_cpu_mem_usage": True}
+    kwargs: dict[str, Any] = {}
     if DEVICE.startswith("cuda") and torch.cuda.is_available():
         kwargs["torch_dtype"] = torch.float16
     model = AutoModelForCausalLM.from_pretrained(model_ref, **kwargs)
@@ -114,6 +114,7 @@ def generate(payload: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> None:
     emit({"event": "ready", "device": DEVICE})
+    payload: dict[str, Any] = {}
     for raw in sys.stdin:
         raw = raw.strip()
         if not raw:
@@ -126,7 +127,7 @@ def main() -> None:
             emit(generate(payload))
         except Exception as exc:
             emit({
-                "id": (payload.get("id") if isinstance(locals().get("payload"), dict) else None),
+                "id": payload.get("id") if isinstance(payload, dict) else None,
                 "error": f"{type(exc).__name__}: {exc}",
                 "trace": traceback.format_exc(limit=4),
             })
