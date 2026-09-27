@@ -28,6 +28,8 @@
     "prearcsweep:test": "npm run wonder:verify && npm run spine:verify",
     "arcsweep:test": "node --test apps/arcsweep/test/*.test.js apps/arcsweep/test/*.test.cjs",
     "arcsweep:smoke:terra-prime": "node scripts/arcsweep-terra-prime-live-smoke.mjs",
+    "arcsweep:smoke:laya-live": "node scripts/arcsweep-laya-live-smoke.mjs",
+    "arcsweep:smoke:laya-real-substrates": "node scripts/arcsweep-laya-real-substrates-smoke.mjs",
     "lanternbridge:interop": "node scripts/lanternbridge-v02-interop.mjs",
     "arcsweep:stage:desktop": "node apps/arcsweep/desktop/stage.cjs",
     "arcsweep:stage:server": "node apps/arcsweep/server-stage.cjs",
