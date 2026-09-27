@@ -7,7 +7,7 @@ const FAKE_SERVER = String.raw`
 import readline from 'node:readline';
 let loaded = false;
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
-function send(payload) { process.stdout.write(JSON.stringify(payload) + '\\n'); }
+function send(payload) { process.stdout.write(JSON.stringify(payload) + '\n'); }
 rl.on('line', (line) => {
   const msg = JSON.parse(line);
   if (msg.method === 'initialize') {
