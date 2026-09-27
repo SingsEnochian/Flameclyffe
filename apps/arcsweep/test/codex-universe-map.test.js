@@ -50,7 +50,7 @@ test('Epra manifest separates current, ancestor, legacy, reference, and excluded
   const manifest = epraCanonManifestSnapshot();
   assert.equal(manifest.schema, EPRA_CANON_MANIFEST_SCHEMA);
   assert.deepEqual(manifest.counts, {
-    current: 2,
+    current: 5,
     ancestor: 5,
     legacy: 9,
     reference: 1,
@@ -59,6 +59,10 @@ test('Epra manifest separates current, ancestor, legacy, reference, and excluded
 
   assert.equal(epraCanonSource('epra-current-world-bible')?.canonClass, 'current');
   assert.equal(epraCanonSource('epra-current-world-bible')?.required, true);
+  assert.equal(epraCanonSource('epra-current-core')?.required, true);
+  assert.equal(epraCanonSource('epra-current-world')?.required, true);
+  assert.equal(epraCanonSource('epra-current-deep-dive')?.required, true);
+  assert.equal(epraCanonSource('epra-current-ekhara')?.title, 'Epra_Ekhara_Biology_V5');
   assert.equal(epraCanonSource('destiny-weaves-guidebook')?.canonClass, 'ancestor');
   assert.equal(epraCanonSource('hopes-crest-setting')?.canonClass, 'legacy');
   assert.equal(epraCanonSource('hopes-crest-plots')?.canonClass, 'reference');
@@ -104,7 +108,7 @@ test('public Epra manifest contains no private Drive locator', async () => {
   const source = await readFile(new URL('../src/codex/epra-canon-ingest-manifest.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /drive\.google\.com/i);
   assert.doesNotMatch(source, /docs\.google\.com/i);
-  assert.doesNotMatch(source, /1tDOYjlj|1JjeD2FQ|1RKEnl5k|1ICHPDD/i);
+  assert.doesNotMatch(source, /1gbE4pLK|1tDOYjlj|1JjeD2FQ|1RKEnl5k|1ICHPDD|11m3ZjUI/i);
 });
 
 test('Universe Map mounts through the existing physical Codex and has no autonomous motion', async () => {
