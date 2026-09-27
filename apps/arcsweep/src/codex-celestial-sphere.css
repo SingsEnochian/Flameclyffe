@@ -1,0 +1,125 @@
+.codex-celestial-sphere {
+  position: absolute;
+  inset: 4.5rem 4.5%;
+  z-index: 35;
+  overflow: auto;
+  padding: 1.1rem;
+  border: 1px solid rgba(178, 190, 218, 0.3);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(69, 89, 126, 0.15), transparent 42%),
+    rgba(12, 14, 19, 0.97);
+  color: var(--magic-book-ink, #eadfc8);
+  box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.48);
+}
+
+.codex-celestial-sphere[hidden] { display: none; }
+.codex-celestial-heading,
+.codex-celestial-body,
+.codex-celestial-instrument,
+.codex-celestial-actions,
+.codex-celestial-focus dl div,
+.codex-celestial-body-list { display: flex; }
+
+.codex-celestial-heading {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.codex-celestial-heading h2,
+.codex-celestial-focus h3 { margin: 0.1rem 0 0.35rem; }
+.codex-celestial-heading p { margin: 0; max-width: 50rem; }
+
+.codex-celestial-body {
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.codex-celestial-controls {
+  width: min(18rem, 30%);
+  min-width: 14rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(178, 190, 218, 0.18);
+  border-radius: 0.8rem;
+  background: rgba(225, 233, 255, 0.035);
+}
+
+.codex-celestial-controls label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.codex-celestial-controls input { width: 100%; box-sizing: border-box; }
+.codex-celestial-actions { flex-wrap: wrap; gap: 0.45rem; margin-top: 0.75rem; }
+.codex-celestial-status { min-height: 2.5em; margin: 0.8rem 0 0.35rem; }
+.codex-celestial-status[data-state="working"] { opacity: 0.76; }
+.codex-celestial-status[data-state="error"] { font-weight: 700; }
+
+.codex-celestial-instrument {
+  flex: 1;
+  min-width: 0;
+  gap: 1rem;
+  align-items: center;
+}
+
+.codex-celestial-canvas {
+  width: min(62vh, 34rem, 56vw);
+  height: auto;
+  aspect-ratio: 1;
+  border: 1px solid rgba(178, 190, 218, 0.32);
+  border-radius: 50%;
+  background: rgba(5, 8, 15, 0.76);
+  box-shadow: inset 0 0 3.2rem rgba(0, 0, 0, 0.56);
+  touch-action: none;
+  cursor: grab;
+}
+
+.codex-celestial-canvas:active { cursor: grabbing; }
+
+.codex-celestial-focus {
+  width: min(15rem, 31%);
+  min-width: 11rem;
+  padding: 0.8rem;
+  border-left: 1px solid rgba(178, 190, 218, 0.18);
+}
+
+.codex-celestial-focus dl { margin: 0 0 0.8rem; }
+.codex-celestial-focus dl div {
+  justify-content: space-between;
+  gap: 0.8rem;
+  font-size: 0.76rem;
+  margin-bottom: 0.28rem;
+}
+.codex-celestial-focus dt { opacity: 0.68; }
+.codex-celestial-focus dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+.codex-celestial-body-list {
+  flex-wrap: wrap;
+  gap: 0.38rem;
+}
+
+.codex-celestial-body-list button[data-focused="true"] {
+  outline: 1px solid currentColor;
+  outline-offset: 0.14rem;
+}
+
+.codex-celestial-sphere footer { margin-top: 0.9rem; opacity: 0.7; }
+
+@media (max-width: 820px) {
+  .codex-celestial-sphere { inset: 4rem 2.5%; }
+  .codex-celestial-body,
+  .codex-celestial-instrument { flex-direction: column; }
+  .codex-celestial-controls,
+  .codex-celestial-focus { width: auto; min-width: 0; }
+  .codex-celestial-canvas { width: min(88vw, 32rem); align-self: center; }
+  .codex-celestial-focus { border-left: 0; border-top: 1px solid rgba(178, 190, 218, 0.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .codex-celestial-sphere *,
+  .codex-celestial-sphere *::before,
+  .codex-celestial-sphere *::after { scroll-behavior: auto; transition: none !important; animation: none !important; }
+}
