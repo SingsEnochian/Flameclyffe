@@ -80,11 +80,20 @@ export function createLayaMcpInvoke({ callTool, model = 'typed-decisions' } = {}
       throw new Error('Laya MCP invocation requires a cognitive frame.');
     }
 
+    const symbolic = frame.symbolicState || null;
     const state = {
       identity_id: frame.identityId,
       continuity_namespace: frame.continuityNamespace,
       input: frame.input,
       context_refs: frame.contextRefs || [],
+      symbolic_state: symbolic ? {
+        active_glyphs: symbolic.activeGlyphs || [],
+        attention_tags: symbolic.attentionTags || [],
+        retrieval_tags: symbolic.retrievalTags || [],
+        route_hints: symbolic.routeHints || [],
+        flags: symbolic.flags || {},
+        grants_authority: false,
+      } : null,
       execution_mode: frame.constraints?.executionMode || 'sandbox',
       judgement_only: true,
       grants_authority: false,
