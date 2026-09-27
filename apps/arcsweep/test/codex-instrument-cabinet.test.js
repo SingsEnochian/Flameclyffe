@@ -40,20 +40,21 @@ test('cabinet snapshot distinguishes repository-supported work from prototypes a
   assert.equal(snapshot.schema, CODEX_INSTRUMENT_CABINET_SCHEMA);
   assert.equal(snapshot.count, 8);
   assert.equal(snapshot.counts.implemented, 2);
-  assert.equal(snapshot.counts.prototype, 2);
-  assert.equal(snapshot.counts.proposed, 4);
+  assert.equal(snapshot.counts.prototype, 3);
+  assert.equal(snapshot.counts.proposed, 3);
   assert.match(snapshot.principle, /state, relation, transformation, or computation/);
 });
 
 test('instrument lookup and semantic filtering make the cabinet usable as runtime data', () => {
   assert.equal(codexInstrument('glyph-surface')?.implementation, 'implemented');
+  assert.equal(codexInstrument('ink')?.implementation, 'prototype');
   assert.equal(codexInstrument('missing'), null);
 
   const computational = listCodexInstruments({ exposes: 'computation' }).map((instrument) => instrument.id);
   assert.deepEqual(computational, ['astrolabe', 'orrery', 'celestial-sphere', 'glyph-surface']);
 
   const prototypes = listCodexInstruments({ implementation: 'prototype' }).map((instrument) => instrument.id);
-  assert.deepEqual(prototypes, ['projection-glass', 'presence']);
+  assert.deepEqual(prototypes, ['ink', 'projection-glass', 'presence']);
 });
 
 test('cabinet sidecar mounts through the existing physical Codex boot path without replacing the book', async () => {
