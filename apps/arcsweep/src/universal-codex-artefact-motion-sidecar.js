@@ -33,6 +33,8 @@ let lastPointerSampleAt = 0;
 let lastPointer = null;
 let pointerDown = false;
 let lastAttentionSignature = '';
+let inkActive = false;
+let lastInkStroke = null;
 
 const clamp01 = (value) => Math.max(0, Math.min(1, Number(value) || 0));
 
@@ -117,6 +119,21 @@ function setMotionState(active) {
   root.dataset.codexArtefactMotion = active ? 'active' : 'quiet';
 }
 
+function emitInkSettled(reason = 'settled') {
+  if (!inkActive) return;
+  inkActive = false;
+  globalThis.dispatchEvent?.(new CustomEvent('codex:ink-settled', {
+    detail: Object.freeze({
+      schema: 'hearthweave.codex-ink-settled/v0.1',
+      stroke_id: lastInkStroke,
+      page_side: 'right',
+      reason,
+      remaining_particles: ink.length,
+    }),
+  }));
+  lastInkStroke = null;
+}
+
 function ensureLoop() {
   if (reducedMotion() || raf) return;
   raf = requestAnimationFrame(frame);
@@ -159,6 +176,7 @@ function addInkParticle({ clientX, clientY, pressure = 0.22, velocity = 0, seed 
     side,
     seed: hashArtefactSeed(seed),
   });
+  inkActive = true;
   if (ink.length > MAX_INK) ink.splice(0, ink.length - MAX_INK);
   const pageNode = pageElement(side);
   if (pageNode) {
@@ -405,6 +423,7 @@ function frame(now) {
   context.clearRect(0, 0, width, height);
   const colors = palette();
   drawInk(now, delta, colors);
+  if (inkActive && ink.length === 0) emitInkSettled('settled');
   drawEffects(now, colors);
 
   const running = shouldRunArtefactFrame({ effects: effects.length, ink: ink.length, pointerActive: pointerDown });
@@ -449,8 +468,9 @@ function pointerMove(event) {
     : event.pointerType === 'touch'
       ? Math.max(0.16, event.pressure || 0.22)
       : pointerDown ? 0.24 : 0.08;
+  const glyphSurface = event.target?.closest?.('[data-magic-glyph-canvas]');
 
-  if (now - lastPointerSampleAt >= POINTER_SAMPLE_MS && (pointerDown || event.pointerType === 'pen' || velocity > 42)) {
+  if (now - lastPointerSampleAt >= POINTER_SAMPLE_MS && pointerDown && glyphSurface) {
     addInkParticle({
       clientX: event.clientX,
       clientY: event.clientY,
@@ -508,6 +528,7 @@ function installEvents() {
   root.addEventListener('pointercancel', pointerUpEvent, { passive: true });
   root.addEventListener('click', clickEffect, { passive: true });
   globalThis.addEventListener('arcsweep:magic-book-receipt', onReceipt);
+  globalThis.addEventListener('starwell:glyph-stroke-committed', onGlyphStrokeCommitted);
   globalThis.addEventListener('arcsweep:codex-motion', onCodexMotion);
   document.addEventListener('arcsweep:universal-codex-alive-changed', attentionEffect);
 }
@@ -519,12 +540,19 @@ function removeEvents() {
   root?.removeEventListener('pointercancel', pointerUpEvent);
   root?.removeEventListener('click', clickEffect);
   globalThis.removeEventListener('arcsweep:magic-book-receipt', onReceipt);
+  globalThis.removeEventListener('starwell:glyph-stroke-committed', onGlyphStrokeCommitted);
   globalThis.removeEventListener('arcsweep:codex-motion', onCodexMotion);
   document.removeEventListener('arcsweep:universal-codex-alive-changed', attentionEffect);
 }
 
 function onReceipt(event) {
-  eventEffect(event.detail || {});
+  const detail = event.detail || {};
+  if (String(detail.kind || '').toLowerCase() === 'glyph-stroke') return;
+  eventEffect(detail);
+}
+
+function onGlyphStrokeCommitted(event) {
+  lastInkStroke = event.detail?.stroke_id || lastInkStroke;
 }
 
 function onCodexMotion(event) {
@@ -590,6 +618,7 @@ globalThis.__universalCodexArtefactMotion = Object.freeze({
     pushEffect({ ...ARTEFACT_EFFECTS.pageWake, pageSide, strength, seed: 'api-page-wake', kind: 'manual-page-wake' });
   },
   quiet() {
+    const hadInk = inkActive;
     ink = [];
     effects = [];
     pointerDown = false;
@@ -597,6 +626,7 @@ globalThis.__universalCodexArtefactMotion = Object.freeze({
     raf = 0;
     context?.clearRect?.(0, 0, canvas ? canvas.width / dpr : 0, canvas ? canvas.height / dpr : 0);
     setMotionState(false);
+    if (hadInk) emitInkSettled('quiet');
   },
 });
 
