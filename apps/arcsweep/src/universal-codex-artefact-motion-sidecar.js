@@ -16,7 +16,7 @@ const CANVAS_CLASS = 'universal-codex-artefact-canvas';
 const PAGE_SELECTORS = Object.freeze({ left: '.magic-book-left', right: '.magic-book-right' });
 const MAX_INK = 160;
 const MAX_EFFECTS = 28;
-const POINTER_SAMPLE_MS = 18;
+const INK_SAMPLE_MS = 18;
 
 let root = null;
 let stage = null;
@@ -29,11 +29,12 @@ let dpr = 1;
 let ink = [];
 let effects = [];
 let lastFrameAt = 0;
-let lastPointerSampleAt = 0;
+let lastInkSampleAt = 0;
 let lastPointer = null;
 let pointerDown = false;
 let lastAttentionSignature = '';
 let inkActive = false;
+let activeInkStroke = null;
 let lastInkStroke = null;
 
 const clamp01 = (value) => Math.max(0, Math.min(1, Number(value) || 0));
@@ -423,7 +424,7 @@ function frame(now) {
   context.clearRect(0, 0, width, height);
   const colors = palette();
   drawInk(now, delta, colors);
-  if (inkActive && ink.length === 0) emitInkSettled('settled');
+  if (inkActive && ink.length === 0 && !activeInkStroke) emitInkSettled('settled');
   drawEffects(now, colors);
 
   const running = shouldRunArtefactFrame({ effects: effects.length, ink: ink.length, pointerActive: pointerDown });
@@ -451,6 +452,42 @@ function attentionEffect(event) {
   pushEffect({ ...ARTEFACT_EFFECTS.traceThread, pageSide: 'both', strength: 0.58, seed: signature, kind: 'attention-memory' });
 }
 
+function glyphSampleClientPoint(detail = {}) {
+  const glyphCanvas = root?.querySelector?.('[data-magic-glyph-canvas]');
+  const rect = glyphCanvas?.getBoundingClientRect?.();
+  if (!glyphCanvas || !rect) return null;
+  const width = Math.max(1, Number(glyphCanvas.width) || 1);
+  const height = Math.max(1, Number(glyphCanvas.height) || 1);
+  return {
+    clientX: rect.left + clamp01(Number(detail.x) / width) * rect.width,
+    clientY: rect.top + clamp01(Number(detail.y) / height) * rect.height,
+  };
+}
+
+function onGlyphBrushSample(event) {
+  if (reducedMotion()) return;
+  const detail = event.detail || {};
+  if (detail.schema !== 'arcsweep.glyph-brush-sample/v1') return;
+  const strokeId = String(detail.stroke_id || '').trim();
+  if (!strokeId) return;
+  const phase = String(detail.phase || 'move').toLowerCase();
+  const now = Number(detail.timestamp_ms) || performance.now();
+  if (phase === 'move' && now - lastInkSampleAt < INK_SAMPLE_MS) return;
+  const point = glyphSampleClientPoint(detail);
+  if (!point) return;
+  activeInkStroke = phase === 'end' ? null : strokeId;
+  lastInkStroke = strokeId;
+  addInkParticle({
+    clientX: point.clientX,
+    clientY: point.clientY,
+    pressure: clamp01(detail.pressure == null ? 0.22 : detail.pressure),
+    velocity: Math.max(0, Math.min(5000, Number(detail.velocity_px_s) || 0)),
+    seed: `${strokeId}:${Math.round(now / 28)}`,
+    pageSide: 'right',
+  });
+  lastInkSampleAt = now;
+}
+
 function pointerMove(event) {
   if (!stage || reducedMotion()) return;
   const side = sideForPoint(event.clientX, event.clientY);
@@ -458,30 +495,7 @@ function pointerMove(event) {
     lastPointer = null;
     return;
   }
-  const now = performance.now();
-  const previous = lastPointer;
-  const elapsed = previous ? Math.max(1, now - previous.at) : 16;
-  const distance = previous ? Math.hypot(event.clientX - previous.x, event.clientY - previous.y) : 0;
-  const velocity = Math.min(5000, distance / elapsed * 1000);
-  const pressure = event.pointerType === 'pen'
-    ? Math.max(0.08, event.pressure || 0.08)
-    : event.pointerType === 'touch'
-      ? Math.max(0.16, event.pressure || 0.22)
-      : pointerDown ? 0.24 : 0.08;
-  const glyphSurface = event.target?.closest?.('[data-magic-glyph-canvas]');
-
-  if (now - lastPointerSampleAt >= POINTER_SAMPLE_MS && pointerDown && glyphSurface) {
-    addInkParticle({
-      clientX: event.clientX,
-      clientY: event.clientY,
-      pressure,
-      velocity,
-      seed: `${event.pointerId}:${Math.round(now / 28)}`,
-      pageSide: side,
-    });
-    lastPointerSampleAt = now;
-  }
-  lastPointer = { x: event.clientX, y: event.clientY, at: now, side };
+  lastPointer = { x: event.clientX, y: event.clientY, at: performance.now(), side };
 }
 
 function pointerDownEvent(event) {
@@ -527,6 +541,7 @@ function installEvents() {
   root.addEventListener('pointerup', pointerUpEvent, { passive: true });
   root.addEventListener('pointercancel', pointerUpEvent, { passive: true });
   root.addEventListener('click', clickEffect, { passive: true });
+  globalThis.addEventListener('arcsweep:glyph-brush-sample', onGlyphBrushSample);
   globalThis.addEventListener('arcsweep:magic-book-receipt', onReceipt);
   globalThis.addEventListener('starwell:glyph-stroke-committed', onGlyphStrokeCommitted);
   globalThis.addEventListener('arcsweep:codex-motion', onCodexMotion);
@@ -539,6 +554,7 @@ function removeEvents() {
   root?.removeEventListener('pointerup', pointerUpEvent);
   root?.removeEventListener('pointercancel', pointerUpEvent);
   root?.removeEventListener('click', clickEffect);
+  globalThis.removeEventListener('arcsweep:glyph-brush-sample', onGlyphBrushSample);
   globalThis.removeEventListener('arcsweep:magic-book-receipt', onReceipt);
   globalThis.removeEventListener('starwell:glyph-stroke-committed', onGlyphStrokeCommitted);
   globalThis.removeEventListener('arcsweep:codex-motion', onCodexMotion);
@@ -622,6 +638,7 @@ globalThis.__universalCodexArtefactMotion = Object.freeze({
     ink = [];
     effects = [];
     pointerDown = false;
+    activeInkStroke = null;
     cancelAnimationFrame(raf);
     raf = 0;
     context?.clearRect?.(0, 0, canvas ? canvas.width / dpr : 0, canvas ? canvas.height / dpr : 0);
