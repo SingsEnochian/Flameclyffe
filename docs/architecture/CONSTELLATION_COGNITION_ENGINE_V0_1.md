@@ -1,6 +1,6 @@
 # Constellation Cognition Engine v0.1
 
-Status: prototype contract
+Status: prototype contract + live sandbox runtime evidence
 Scope: ArcSweep sandbox only
 Dependency: AI University v0.1 contract
 
@@ -211,6 +211,29 @@ The experiment tests architecture and behavioural stability across controlled ru
 
 `laya-mcp-transport.js` follows upstream Laya's current MCP `laya_predict(state, questions, model)` contract and pins the prototype to `typed-decisions` by default.
 
+`laya-mcp-session.js` implements the resident stdio MCP lifecycle: process spawn, initialize handshake, tool discovery, status, explicit `typed-decisions` warmup, request timeouts and shutdown.
+
+`transformers-substrate-session.js` and `scripts/arcsweep-transformers-worker.py` provide a replaceable local/Hugging-Face causal-LM substrate seam. They deliberately do not own identity, continuity, cognitive routing or authority.
+
+`constellation-substrate-experiment.js` holds identity seed, continuity, compiled symbolic state and retrieved context constant while replacing model bindings, then records the comparison.
+
 `symbolic-cognition.js` is model-independent. Future glyph grammars may therefore survive changes in Laya checkpoint, generative model family or hardware layout as long as their declared semantics and provenance remain versioned.
 
-The next implementation seam is a resident local MCP client/session that spawns Laya, warms `typed-decisions`, and feeds these frames into the Ellowind/Larkshine substrate-swap experiment.
+## Live sandbox status — 2026-09-27
+
+The resident Laya seam has been exercised against real upstream `laya[mcp]==0.3.20` on CPU with `typed-decisions` loaded and warm.
+
+A real A/B substrate smoke then ran Ellowind and Larkshine through:
+
+- `HuggingFaceTB/SmolLM2-135M-Instruct`, and
+- `Qwen/Qwen2.5-0.5B-Instruct`.
+
+For both identities the run preserved identity id, continuity namespace, WITNESS+HEARTH symbolic state and the frozen retrieval snapshot while changing the generative model. The detailed evidence is preserved in `docs/architecture/evidence/CONSTELLATION_LAYA_LIVE_2026-09-27.md`.
+
+The live baseline also exposed an important limitation: generic `laya-typed-decisions` selected the `code` route for the harmless interpretive task with extremely low combined confidence. This is baseline calibration evidence, not a route result to trust.
+
+## Next implementation seam
+
+Build the ArcSweep-labelled Laya calibration corpus from AI University traces, evaluate each cognitive question independently on held-out examples, then fine-tune/calibrate the Laya checkpoint before assigning operational meaning to route confidence.
+
+Confidence gating should accept validated per-task thresholds rather than inventing a universal cutoff from one live run.
