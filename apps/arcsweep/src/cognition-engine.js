@@ -1,5 +1,6 @@
 import { createLayaCognitiveFrame, runLayaCognition, requiresHumanReview } from './laya-cognition-adapter.js';
 import { evaluateAction, selectModelBinding, createRuntimeReceipt } from './constellation-runtime.js';
+import { compileSymbolicState } from './symbolic-cognition.js';
 
 export const COGNITION_ENGINE_SCHEMA = 'hearthweave.cognition-engine/v0.1';
 
@@ -11,6 +12,7 @@ export function createCognitionEngine({
   layaInvoke,
   modelInvoke,
   retrieveContext = async () => [],
+  glyphRegistry = null,
 } = {}) {
   if (typeof layaInvoke !== 'function') throw new Error('Cognition engine requires a Laya invoke adapter.');
   if (typeof modelInvoke !== 'function') throw new Error('Cognition engine requires a model invoke adapter.');
@@ -24,25 +26,71 @@ export function createCognitionEngine({
       input,
       requestedAction = 'converse',
       evidenceRefs = [],
+      activeGlyphs = [],
     } = {}) {
       if (!runtime?.identityId || !input) {
         throw new Error('Cognition requires runtime and input.');
       }
 
-      const context = await retrieveContext({ runtime, input });
+      const symbolicState = glyphRegistry
+        ? compileSymbolicState({ activeGlyphs, registry: glyphRegistry })
+        : compileSymbolicState({ activeGlyphs });
+
+      if (symbolicState.flags.halt) {
+        const decision = Object.freeze({
+          schema: 'hearthweave.laya-decision/v0.1',
+          route: 'human-review',
+          authority: 'permission-required',
+          uncertainty: 'high',
+          conflict: 'none',
+          confidence: null,
+          source: 'symbolic-halt',
+        });
+        const actionEvaluation = evaluateAction(runtime, {
+          actionKind: requestedAction,
+          decision,
+          symbolicState,
+        });
+        const receipt = createRuntimeReceipt({
+          runtime,
+          decision,
+          symbolicState,
+          modelBinding: null,
+          actionEvaluation,
+          evidenceRefs: freezeArray(evidenceRefs),
+        });
+
+        return Object.freeze({
+          schema: COGNITION_ENGINE_SCHEMA,
+          phase: 'paused',
+          runtimeId: runtime.identityId,
+          frame: null,
+          decision,
+          symbolicState,
+          context: Object.freeze([]),
+          modelBinding: null,
+          output: null,
+          actionEvaluation,
+          receipt,
+        });
+      }
+
+      const context = await retrieveContext({ runtime, input, symbolicState });
       const contextRefs = freezeArray((context || []).map((entry) => entry.ref).filter(Boolean));
-      const frame = createLayaCognitiveFrame({ runtime, input, contextRefs });
+      const frame = createLayaCognitiveFrame({ runtime, input, contextRefs, symbolicState });
       const decision = await runLayaCognition(frame, { invoke: layaInvoke });
 
       const actionEvaluation = evaluateAction(runtime, {
         actionKind: requestedAction,
         decision,
+        symbolicState,
       });
 
       if (requiresHumanReview(decision) || !actionEvaluation.allowed) {
         const receipt = createRuntimeReceipt({
           runtime,
           decision,
+          symbolicState,
           modelBinding: null,
           actionEvaluation,
           evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
@@ -54,6 +102,7 @@ export function createCognitionEngine({
           runtimeId: runtime.identityId,
           frame,
           decision,
+          symbolicState,
           context: freezeArray(context),
           modelBinding: null,
           output: null,
@@ -67,6 +116,7 @@ export function createCognitionEngine({
         const receipt = createRuntimeReceipt({
           runtime,
           decision,
+          symbolicState,
           modelBinding: null,
           actionEvaluation: Object.freeze({
             ...actionEvaluation,
@@ -83,6 +133,7 @@ export function createCognitionEngine({
           runtimeId: runtime.identityId,
           frame,
           decision,
+          symbolicState,
           context: freezeArray(context),
           modelBinding: null,
           output: null,
@@ -96,12 +147,14 @@ export function createCognitionEngine({
         modelBinding,
         input,
         context: freezeArray(context),
+        symbolicState,
         cognitiveDecision: decision,
       });
 
       const receipt = createRuntimeReceipt({
         runtime,
         decision,
+        symbolicState,
         modelBinding,
         actionEvaluation,
         evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
@@ -113,6 +166,7 @@ export function createCognitionEngine({
         runtimeId: runtime.identityId,
         frame,
         decision,
+        symbolicState,
         context: freezeArray(context),
         modelBinding,
         output,
