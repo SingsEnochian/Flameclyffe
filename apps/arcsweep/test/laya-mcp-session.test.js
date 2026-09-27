@@ -35,6 +35,14 @@ rl.on('line', (line) => {
 });
 `;
 
+const SILENT_SERVER = String.raw`
+import readline from 'node:readline';
+createReadStream();
+function createReadStream() {
+  readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
+}
+`;
+
 test('resident session performs MCP handshake and warms typed-decisions', async () => {
   const session = createResidentLayaMcpSession({
     command: process.execPath,
@@ -48,6 +56,22 @@ test('resident session performs MCP handshake and warms typed-decisions', async 
   const status = await session.status();
   assert.deepEqual(status.loaded, ['typed-decisions']);
   assert.equal(status.device, 'cpu');
+  await session.close();
+  assert.equal(session.started, false);
+});
+
+test('failed startup tears down the resident child process', async () => {
+  const session = createResidentLayaMcpSession({
+    command: process.execPath,
+    args: ['--input-type=module', '-e', SILENT_SERVER],
+    startupTimeoutMs: 75,
+    requestTimeoutMs: 75,
+  });
+
+  await assert.rejects(session.start(), /timed out/);
+  assert.equal(session.started, false);
+
+  // close() must be idempotent after startup failure cleanup.
   await session.close();
   assert.equal(session.started, false);
 });
