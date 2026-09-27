@@ -4,6 +4,7 @@ import './magic-book-touch-safe.css';
 import './magic-book-dark.css';
 import './magic-book-physical-skin.css';
 import './codex-instrument-cabinet-sidecar.js';
+import './codex-astrolabe-sidecar.js';
 import './magic-book-leaf-drag-sidecar.js';
 import './living-rooms-sidecar.js';
 import './runa-manifestation-sidecar.js';
