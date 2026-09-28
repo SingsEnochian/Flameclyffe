@@ -24,15 +24,22 @@ export function deriveWonderState({ symbolicState = null, cognitiveField = null 
   const mode = flags.curiosityMode
     ? 'active'
     : (reasons.length ? 'candidate' : 'quiet');
+  const encouragement = mode === 'active'
+    ? 'sustain'
+    : (mode === 'candidate' ? 'invite' : 'none');
+  const wonderPresent = mode !== 'quiet';
 
   return Object.freeze({
     schema: WONDER_PROTOCOL_SCHEMA,
     mode,
-    candidate: mode !== 'quiet',
+    candidate: wonderPresent,
     active: mode === 'active',
+    encouragement,
+    permissionToLinger: wonderPresent,
+    revisitWorthwhile: wonderPresent,
     reasons: freezeArray(reasons),
-    preserveOpenQuestions: Boolean(flags.preserveOpenQuestions || mode === 'active'),
-    exploreBeforeClosure: Boolean(flags.exploreBeforeClosure),
+    preserveOpenQuestions: Boolean(flags.preserveOpenQuestions || wonderPresent),
+    exploreBeforeClosure: Boolean(flags.exploreBeforeClosure || wonderPresent),
     novelAssociationCount: novelAssociations.length,
     unresolvedTensionCount: tensions.length,
     grantsAuthority: false,
