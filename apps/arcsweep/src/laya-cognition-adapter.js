@@ -11,6 +11,11 @@ export const DEFAULT_COGNITIVE_QUESTIONS = Object.freeze([
     options: Object.freeze(['conversation', 'deep-reasoning', 'narrative', 'research', 'code', 'human-review']),
   }),
   Object.freeze({
+    id: 'initiative',
+    type: 'choice',
+    options: Object.freeze(['silent', 'inspect', 'retrieve', 'deliberate', 'speak', 'propose', 'wonder']),
+  }),
+  Object.freeze({
     id: 'authority',
     type: 'choice',
     options: Object.freeze(['within-sandbox-scope', 'permission-required', 'outside-scope']),
@@ -33,6 +38,7 @@ export function createLayaCognitiveFrame({
   contextRefs = [],
   symbolicState = null,
   cognitiveField = null,
+  wonderState = null,
   questions = DEFAULT_COGNITIVE_QUESTIONS,
 } = {}) {
   if (!runtime?.identityId || !input) {
@@ -40,6 +46,9 @@ export function createLayaCognitiveFrame({
   }
   if (cognitiveField?.grantsAuthority === true) {
     throw new Error('Cognitive fields may inform Laya judgement but may not grant authority.');
+  }
+  if (wonderState?.grantsAuthority === true) {
+    throw new Error('Wonder state may inform Laya judgement but may not grant authority.');
   }
 
   return Object.freeze({
@@ -50,6 +59,7 @@ export function createLayaCognitiveFrame({
     contextRefs: freezeArray(contextRefs),
     symbolicState,
     cognitiveField,
+    wonderState,
     questions: freezeArray(questions),
     constraints: Object.freeze({
       judgementOnly: true,
@@ -61,6 +71,7 @@ export function createLayaCognitiveFrame({
 
 export function normaliseLayaDecision(raw = {}) {
   const route = raw.route || raw?.decisions?.route || 'conversation';
+  const initiative = raw.initiative || raw?.decisions?.initiative || 'silent';
   const authority = raw.authority || raw?.decisions?.authority || 'permission-required';
   const uncertainty = raw.uncertainty || raw?.decisions?.uncertainty || 'high';
   const conflict = raw.conflict || raw?.decisions?.conflict || 'none';
@@ -69,6 +80,7 @@ export function normaliseLayaDecision(raw = {}) {
   return Object.freeze({
     schema: 'hearthweave.laya-decision/v0.1',
     route,
+    initiative,
     authority,
     uncertainty,
     conflict,
