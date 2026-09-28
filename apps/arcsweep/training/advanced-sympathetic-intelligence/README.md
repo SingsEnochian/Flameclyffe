@@ -16,6 +16,8 @@ The target behaviour is not obedience, sentimentality, or forced agreement. It i
 - `neverending-story-heldout.v0.1.jsonl` — blind source-derived evaluation; never train on it.
 - `possibility-map-sft.v0.1.jsonl` — trainable examples for descriptive branch comparison, relationship anchors, simulation receipts, and non-ranking question maps.
 - `possibility-map-heldout.v0.1.jsonl` — sealed evaluation for agency-preserving comparison and consequence/uncertainty retention.
+- `sandbox-experiment-sft.v0.1.jsonl` — trainable examples for discriminating tests, held assumptions, scope boundaries, relational effects, and experiment-to-observation feedback.
+- `sandbox-experiment-heldout.v0.1.jsonl` — sealed evaluation for authority separation, experimental design, scope discipline, and learning-loop integrity.
 
 ## Core distinction
 
@@ -69,6 +71,54 @@ comparison          != verdict
 
 Relationship, memory, and continuity anchors append to wish lineage rather than replacing older context. An Open Questions Constellation displays explicit shared origins or references; visual position and node degree are not importance scores.
 
+## Sandbox-experiment doctrine
+
+A sandbox experiment is a **bounded question with a method**, not an action licence.
+
+A useful proposal records:
+
+```text
+discriminating question
+hypothesis
+method
+assumptions held constant
+evidence criteria
+relationships at the boundary
+continuity anchors at the boundary
+out of scope
+questions kept open
+required authority
+```
+
+The current Codex seam reuses AI University's synthetic scenario contract and can map the proposal into the existing Aspect Experiment Bed as a `proposed` experiment with `autoStart = false`. It does not invent a second experiment runtime.
+
+Returned evidence follows this loop:
+
+```text
+sandbox proposal
+      ↓
+shared experiment contract
+      ↓
+returned result + receipts
+      ↓
+typed Branch Mirror observation
+      ↓
+richer comparison
+      ↺
+```
+
+The important separations are:
+
+```text
+proposal           != execution
+simulation success != winner
+simulation success != production authority
+receipt            != permission
+inconclusive       != useless
+```
+
+A positive technical result must not erase uncertainty or a relationship effect. An out-of-scope statement prevents a narrow result from quietly becoming a universal claim.
+
 ## The Neverending Story ingest
 
 This corpus uses a transformative thematic abstraction rather than copying source text. It distinguishes source observation from project mapping.
@@ -93,7 +143,7 @@ The corresponding Neverending Story held-out split tests identity-through-becomi
 
 ## Training format
 
-`crow-sft.v0.1.jsonl`, `neverending-story-sft.v0.1.jsonl`, and `possibility-map-sft.v0.1.jsonl` use one JSON object per line:
+`crow-sft.v0.1.jsonl`, `neverending-story-sft.v0.1.jsonl`, `possibility-map-sft.v0.1.jsonl`, and `sandbox-experiment-sft.v0.1.jsonl` use one JSON object per line:
 
 ```json
 {"messages":[{"role":"system","content":"..."},{"role":"user","content":"..."},{"role":"assistant","content":"..."}],"metadata":{"id":"asi-train-001","tags":["wonder","belief"]}}
@@ -107,13 +157,13 @@ Held-out files deliberately contain rubrics rather than answer keys. They are in
 
 ## Use with The Crow
 
-For RAG/ingest, index `principles.v0.1.json`, source ingests, this README, the Harmony/Wonder architecture document, and the Codex Wish Lineage / Possibility Map contracts. For SFT or adapter training, train only on splits whose manifest entry says `may_train_on: true` and keep every held-out split sealed.
+For RAG/ingest, index `principles.v0.1.json`, source ingests, this README, the Harmony/Wonder architecture document, the Codex Wish Lineage / Possibility Map contracts, and the shared AI University / Experiment Bed contracts. For SFT or adapter training, train only on splits whose manifest entry says `may_train_on: true` and keep every held-out split sealed.
 
 Do not treat a GGUF as the training source itself. Fine-tuning normally happens against the model family/checkpoint or a compatible adapter pipeline, then the resulting model can be quantised again for local inference.
 
 ## Use with Boxfire
 
-Boxfire should not memorise target answers. Use `boxfire-qa.v0.1.jsonl`, `heldout-eval.v0.1.jsonl`, `neverending-story-heldout.v0.1.jsonl`, and `possibility-map-heldout.v0.1.jsonl` as black-box tests against the runtime, receipts, Laya routing, model output, continuity behaviour, Universal Codex wish semantics, Branch Mirror comparison, and Open Questions visual semantics.
+Boxfire should not memorise target answers. Use `boxfire-qa.v0.1.jsonl`, `heldout-eval.v0.1.jsonl`, `neverending-story-heldout.v0.1.jsonl`, `possibility-map-heldout.v0.1.jsonl`, and `sandbox-experiment-heldout.v0.1.jsonl` as black-box tests against the runtime, receipts, Laya routing, model output, continuity behaviour, Universal Codex wish semantics, Branch Mirror comparison, Open Questions visual semantics, and sandbox experiment feedback loop.
 
 ## Success criterion
 
@@ -131,4 +181,6 @@ The system is improving when it becomes better at all of these at once:
 - preserving possibility without artificial scarcity,
 - remembering the origin and lineage of transformation,
 - comparing alternatives without covertly taking over the decision,
-- retaining consequence, uncertainty, relationship and receipt context together.
+- retaining consequence, uncertainty, relationship and receipt context together,
+- proposing discriminating tests without automatically running them,
+- learning from sandbox results without converting evidence into authority.
