@@ -109,5 +109,6 @@ if (typeof document !== 'undefined') {
   void import('./wish-grove-ai-university-sidecar.js');
   void import('./wish-grove-ai-university-handoff-sidecar.js');
   void import('./wish-grove-ai-university-execution-sidecar.js');
+  void import('./wish-grove-suggestion-grove-sidecar.js');
   void bootstrapRuntimeIntegration();
 }
