@@ -31,6 +31,8 @@ import {
   addExperimentReturnSuggestions,
   decideCodexBranchSuggestion,
 } from './codex-suggestion-grove.js';
+import { materialiseCodexBranchSuggestion } from './codex-suggestion-materialisation.js';
+import { recordCodexBranchLearningReflection } from './codex-learning-reflection.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -218,6 +220,36 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     return Object.freeze({ ...outcome, wish });
   }
 
+  function materialiseBranchSuggestion(wishId, input) {
+    const index = findIndex(state.wishes, 'wishId', wishId);
+    if (index < 0) throw new Error(`Unknown wish: ${wishId}`);
+    const outcome = materialiseCodexBranchSuggestion({
+      wish: state.wishes[index],
+      openQuestions: state.openQuestions,
+      ...input,
+    });
+    const wishes = [...state.wishes];
+    wishes[index] = outcome.wish;
+    commit(
+      { ...state, wishes, openQuestions: [...outcome.openQuestions] },
+      `wish-branch-suggestion-materialised:${wishId}:${input?.suggestionId || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish: wishes[index] });
+  }
+
+  function recordLearningReflection(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(
+      wishId,
+      (current) => {
+        outcome = recordCodexBranchLearningReflection(current, input);
+        return outcome.wish;
+      },
+      `wish-branch-learning-reflection:${wishId}:${input?.reflectionId || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish });
+  }
+
   function reviseWish(wishId, input) {
     return updateWish(wishId, (wish) => reviseCodexWish(wish, input), `wish-revised:${wishId}`);
   }
@@ -294,6 +326,8 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     ingestExperimentReturn,
     addBranchSuggestion,
     decideBranchSuggestion,
+    materialiseBranchSuggestion,
+    recordLearningReflection,
     reviseWish,
     transformWish,
     anchorWish,
