@@ -20,6 +20,10 @@ import {
   proposeCodexBranchExperiment,
   recordCodexBranchExperimentResult,
 } from './codex-branch-experiment-proposal.js';
+import {
+  prepareCodexExperimentPreflight,
+  recordCodexExperimentPreflightReview,
+} from './codex-experiment-preflight.js';
 import { recordBranchExperimentHandoff } from './codex-branch-experiment-handoff.js';
 import { ingestBranchExperimentReturn } from './codex-branch-experiment-execution.js';
 
@@ -131,6 +135,22 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     );
   }
 
+  function prepareExperimentPreflight(wishId, input) {
+    return updateWish(
+      wishId,
+      (wish) => prepareCodexExperimentPreflight(wish, input),
+      `wish-branch-experiment-preflight-prepared:${wishId}:${input?.proposalId || 'unknown'}`,
+    );
+  }
+
+  function recordExperimentPreflightReview(wishId, input) {
+    return updateWish(
+      wishId,
+      (wish) => recordCodexExperimentPreflightReview(wish, input),
+      `wish-branch-experiment-preflight-reviewed:${wishId}:${input?.preflightId || 'unknown'}`,
+    );
+  }
+
   function recordBranchExperimentResult(wishId, input) {
     return updateWish(
       wishId,
@@ -229,6 +249,8 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     transitionBranch,
     mergeBranches,
     proposeBranchExperiment,
+    prepareExperimentPreflight,
+    recordExperimentPreflightReview,
     recordBranchExperimentResult,
     recordExperimentHandoff,
     ingestExperimentReturn,
