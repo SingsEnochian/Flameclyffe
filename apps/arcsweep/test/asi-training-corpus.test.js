@@ -35,11 +35,13 @@ test('ASI manifest names Advanced Sympathetic Intelligence and keeps eval splits
   assert.equal(manifest.splits.curriculum_review_sft.may_train_on, true);
   assert.equal(manifest.splits.learning_forge_sft.may_train_on, true);
   assert.equal(manifest.splits.learning_trial_sft.may_train_on, true);
+  assert.equal(manifest.splits.developmental_field_sft.may_train_on, true);
   assert.equal(manifest.splits.heldout_eval.may_train_on, false);
   assert.equal(manifest.splits.neverending_story_heldout.may_train_on, false);
   assert.equal(manifest.splits.curriculum_review_heldout.may_train_on, false);
   assert.equal(manifest.splits.learning_forge_heldout.may_train_on, false);
   assert.equal(manifest.splits.learning_trial_heldout.may_train_on, false);
+  assert.equal(manifest.splits.developmental_field_heldout.may_train_on, false);
   assert.equal(manifest.splits.boxfire_qa.may_train_on, false);
   assert.deepEqual(manifest.epistemic_classes, ['belief', 'experience', 'hypothesis', 'symbol', 'evidence']);
   assert.ok(manifest.laws.includes('do-not-kill-belief'));
@@ -107,7 +109,7 @@ test('curriculum references only known ids from declared training and held-out s
     }
   }
 
-  assert.ok(curriculum.modules.length >= 10);
+  assert.ok(curriculum.modules.length >= 11);
   for (const module of curriculum.modules) {
     for (const id of module.train_examples || []) assert.ok(trainIds.has(id), `${module.id} references unknown training id ${id}`);
     for (const id of module.heldout_examples || []) assert.ok(evalIds.has(id), `${module.id} references unknown eval id ${id}`);
@@ -160,6 +162,24 @@ test('Learning Trial split teaches blind evaluation and Transfer Atlas while its
   }
   for (const row of heldout) {
     assert.ok(row.id.startsWith('asi-trial-eval-'));
+    assert.equal(row.train, false);
+    assert.equal('messages' in row, false);
+    assert.ok(Array.isArray(row.must_preserve));
+    assert.ok(Array.isArray(row.failure_signals));
+  }
+});
+
+test('Developmental Field split teaches scoped low-authority feedback while its evaluation remains sealed', () => {
+  const sft = readJsonl('developmental-field-sft.v0.1.jsonl');
+  const heldout = readJsonl('developmental-field-heldout.v0.1.jsonl');
+  assert.ok(sft.length >= 8);
+  assert.ok(heldout.length >= 6);
+  for (const row of sft) {
+    assert.ok(row.id.startsWith('asi-field-'));
+    assert.deepEqual(row.messages.map((message) => message.role), ['system', 'user', 'assistant']);
+  }
+  for (const row of heldout) {
+    assert.ok(row.id.startsWith('asi-field-eval-'));
     assert.equal(row.train, false);
     assert.equal('messages' in row, false);
     assert.ok(Array.isArray(row.must_preserve));
