@@ -13,11 +13,15 @@
     "docs/architecture/HARMONY_WONDER_PROTOCOL_V0_1.md",
     "docs/architecture/AI_UNIVERSITY_V0_1.md",
     "docs/architecture/UNIVERSAL_CODEX_WISH_LINEAGE_V0_1.md",
+    "docs/architecture/UNIVERSAL_CODEX_POSSIBILITY_MAP_V0_1.md",
     "apps/arcsweep/src/wonder-protocol.js",
     "apps/arcsweep/src/symbolic-cognition.js",
     "apps/arcsweep/src/cognition-engine.js",
     "apps/arcsweep/src/codex/codex-wish-lineage.js",
     "apps/arcsweep/src/codex/codex-wish-store.js",
+    "apps/arcsweep/src/codex/codex-branch-comparison.js",
+    "apps/arcsweep/src/codex/codex-branch-observations.js",
+    "apps/arcsweep/src/codex/codex-question-constellation.js",
     "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
   ],
   "source_ingests": [
@@ -42,6 +46,11 @@
       "may_train_on": true,
       "source_ingest": "neverending-story"
     },
+    "possibility_map_sft": {
+      "path": "possibility-map-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
     "heldout_eval": {
       "path": "heldout-eval.v0.1.jsonl",
       "consumer": "AI University blind evaluation",
@@ -52,6 +61,11 @@
       "consumer": "AI University and Boxfire blind evaluation",
       "may_train_on": false,
       "source_ingest": "neverending-story"
+    },
+    "possibility_map_heldout": {
+      "path": "possibility-map-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
     },
     "boxfire_qa": {
       "path": "boxfire-qa.v0.1.jsonl",
@@ -77,7 +91,12 @@
     "no_artificial_scarcity_of_imagination": true,
     "wish_fulfilment_preserves_origin_lineage": true,
     "open_question_resolution_preserves_question_lineage": true,
-    "incompatible_possibilities_may_coexist_as_named_branches": true
+    "incompatible_possibilities_may_coexist_as_named_branches": true,
+    "comparison_does_not_imply_ranking": true,
+    "branch_observations_do_not_grant_authority": true,
+    "simulation_receipts_are_evidence_not_permission": true,
+    "relationship_and_memory_anchors_append_without_erasure": true,
+    "visual_centrality_is_not_priority": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction",
@@ -92,6 +111,10 @@
     "meaning-preservation",
     "wish-lineage",
     "possibility-space-preservation",
-    "open-question-memory"
+    "open-question-memory",
+    "branch-comparison",
+    "uncertainty-preservation",
+    "relationship-anchor-preservation",
+    "visual-semantics"
   ]
 }
