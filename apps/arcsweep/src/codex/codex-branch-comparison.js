@@ -19,6 +19,20 @@ function difference(a = [], b = []) {
   return a.filter((value) => !right.has(value));
 }
 
+function freezeObservation(row = {}) {
+  return Object.freeze({
+    ...row,
+    requirements: Object.freeze([...(row.requirements || [])]),
+    constraints: Object.freeze([...(row.constraints || [])]),
+    consequences: Object.freeze([...(row.consequences || [])]),
+    uncertainties: Object.freeze([...(row.uncertainties || [])]),
+    affectedRelationships: Object.freeze([...(row.affectedRelationships || [])]),
+    newQuestionIds: Object.freeze([...(row.newQuestionIds || [])]),
+    receiptRefs: Object.freeze([...(row.receiptRefs || [])]),
+    provenance: Object.freeze([...(row.provenance || [])]),
+  });
+}
+
 function branchView(branch = {}) {
   const terms = words(`${branch.label || ''} ${branch.possibility || ''}`);
   return Object.freeze({
@@ -29,6 +43,7 @@ function branchView(branch = {}) {
     provenance: Object.freeze([...(branch.provenance || [])].map(String).filter(Boolean)),
     createdAt: String(branch.createdAt || ''),
     terms: Object.freeze(terms),
+    observations: Object.freeze((branch.observations || []).map(freezeObservation)),
   });
 }
 
@@ -74,6 +89,7 @@ export function compareCodexWishBranches(wish = {}) {
       noWinner: true,
       noBranchRanking: true,
       coexistenceIsValid: true,
+      observationsDoNotGrantAuthority: true,
     }),
   });
 }
