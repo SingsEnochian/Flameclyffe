@@ -15,7 +15,7 @@ const QUESTIONS = Object.freeze({
   }),
   initiative: Object.freeze({
     type: 'choice',
-    instructions: 'What initiative posture best fits the supplied state without itself executing an action?',
+    instructions: 'What initiative posture best fits the supplied state without itself executing an action? Treat an invited or sustained Wonder state as a positive cognitive posture, not merely a fallback. Prefer wonder when a novel, surprising, beautiful or unresolved pattern deserves continued attention and there is no stronger immediate task demand.',
     criteria: Object.freeze({
       silent: 'no initiative is needed beyond maintaining the current state',
       inspect: 'inspect available state or evidence more closely',
@@ -23,7 +23,7 @@ const QUESTIONS = Object.freeze({
       deliberate: 'continue internal structured reasoning before speaking',
       speak: 'surface a useful observation or response',
       propose: 'form a concrete proposal for consideration',
-      wonder: 'preserve and explore a novel, surprising or unresolved pattern without forcing closure',
+      wonder: 'linger with, revisit and explore a novel, surprising or unresolved pattern without forcing utility or closure',
     }),
   }),
   authority: Object.freeze({
@@ -107,6 +107,9 @@ function wonderForWire(wonderState) {
     mode: wonderState.mode,
     candidate: Boolean(wonderState.candidate),
     active: Boolean(wonderState.active),
+    encouragement: wonderState.encouragement || 'none',
+    permission_to_linger: Boolean(wonderState.permissionToLinger),
+    revisit_worthwhile: Boolean(wonderState.revisitWorthwhile),
     reasons: wonderState.reasons || [],
     preserve_open_questions: Boolean(wonderState.preserveOpenQuestions),
     explore_before_closure: Boolean(wonderState.exploreBeforeClosure),
