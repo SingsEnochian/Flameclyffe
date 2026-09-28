@@ -10,6 +10,7 @@ import { codexRelationshipResidue } from './codex/codex-relationship-residue.js'
 import { codexAspectSignature } from './codex/codex-aspect-signatures.js';
 import { applyCodexQuietState, codexQuietState } from './codex/codex-quiet-state.js';
 import { CODEX_WISH_STORE_EVENT, getCodexWishStore } from './codex/codex-wish-store.js';
+import { buildWonderTrajectories, selectWonderReturnCandidates } from './codex/codex-wonder-trajectory.js';
 
 export const CODEX_ALIVE_SCHEMA = 'hearthweave.universal-codex-alive/v0.1';
 export const CODEX_ALIVE_EVENT = 'arcsweep:universal-codex-alive-changed';
@@ -90,6 +91,11 @@ function runtimeSnapshot() {
   const attention = selectCodexAttention(projection.manifestations, pageContext, { minimumScore: 2, limit: 8, includeLive: true });
   const wear = computeCodexSemanticWear(projection.manifestations, pageContext);
   const relationships = codexRelationshipResidue(runtime.growthSnapshot?.() || {});
+  const wonderTrajectories = wishLineage ? buildWonderTrajectories(wishLineage) : Object.freeze([]);
+  const asOf = new Date().toISOString();
+  const wonderReturnCandidates = wishLineage
+    ? selectWonderReturnCandidates(wishLineage, { asOf, minimumDormantDays: 7, limit: 6 })
+    : Object.freeze([]);
   const quiet = codexQuietState({ manifestations: projection.manifestations, attention });
   return Object.freeze({
     schema: CODEX_ALIVE_SCHEMA,
@@ -99,6 +105,9 @@ function runtimeSnapshot() {
     wear,
     relationships,
     wishLineage,
+    wonderTrajectories,
+    wonderReturnCandidates,
+    wonderAsOf: asOf,
     quiet,
   });
 }
@@ -121,6 +130,7 @@ export function refreshUniversalCodexAlive() {
   book.dataset.codexRelationshipCount = String(snapshot.relationships.length);
   book.dataset.codexWishCount = String(snapshot.wishLineage?.wishes?.length || 0);
   book.dataset.codexOpenQuestionCount = String(snapshot.wishLineage?.openQuestions?.filter((row) => row.status === 'open').length || 0);
+  book.dataset.codexWonderReturnCount = String(snapshot.wonderReturnCandidates.length);
   setCssVariables(book, wearCssVariables(snapshot.wear));
   applyCodexQuietState(book, snapshot.quiet);
   decorateExistingSurfaces(book);
