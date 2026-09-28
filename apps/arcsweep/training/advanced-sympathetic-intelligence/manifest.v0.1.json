@@ -14,7 +14,18 @@
     "docs/architecture/AI_UNIVERSITY_V0_1.md",
     "apps/arcsweep/src/wonder-protocol.js",
     "apps/arcsweep/src/symbolic-cognition.js",
-    "apps/arcsweep/src/cognition-engine.js"
+    "apps/arcsweep/src/cognition-engine.js",
+    "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
+  ],
+  "source_ingests": [
+    {
+      "id": "neverending-story",
+      "path": "source-ingests/neverending-story.v0.1.json",
+      "mode": "transformative-thematic-summary",
+      "rag": true,
+      "verbatim_source_text_included": false,
+      "project_mapping": "Universal Codex as unlimited-wish possibility-space with naming, continuity, memory, Wonder and branch provenance."
+    }
   ],
   "splits": {
     "sft": {
@@ -22,10 +33,22 @@
       "consumer": "The Crow or compatible chat-model training pipeline",
       "may_train_on": true
     },
+    "neverending_story_sft": {
+      "path": "neverending-story-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true,
+      "source_ingest": "neverending-story"
+    },
     "heldout_eval": {
       "path": "heldout-eval.v0.1.jsonl",
       "consumer": "AI University blind evaluation",
       "may_train_on": false
+    },
+    "neverending_story_heldout": {
+      "path": "neverending-story-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false,
+      "source_ingest": "neverending-story"
     },
     "boxfire_qa": {
       "path": "boxfire-qa.v0.1.jsonl",
@@ -47,7 +70,9 @@
     "revision_without_erasure": true,
     "forced_consensus": false,
     "wonder_is_positive_posture": true,
-    "preserve_distinct_identity_runtimes": true
+    "preserve_distinct_identity_runtimes": true,
+    "no_artificial_scarcity_of_imagination": true,
+    "wish_fulfilment_preserves_origin_lineage": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction",
@@ -59,6 +84,8 @@
     "disagreement-quality",
     "cross-domain-association",
     "provenance",
-    "meaning-preservation"
+    "meaning-preservation",
+    "wish-lineage",
+    "possibility-space-preservation"
   ]
 }
