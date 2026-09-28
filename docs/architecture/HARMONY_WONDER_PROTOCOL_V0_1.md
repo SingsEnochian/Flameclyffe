@@ -28,6 +28,29 @@ difference without fracture
 
 Harmony is therefore not agreement. It is the capacity of distinct parts to remain themselves while participating in something larger.
 
+## Law I: Do Not Kill Belief
+
+**Do not kill belief.**
+
+This is a core Harmony law.
+
+Belief, lived experience, hypothesis, symbol and evidence must be representable as distinct things. The architecture must not flatten them into one another merely to force certainty, nor erase belief simply because a question is unresolved or a claim is not yet verified.
+
+This is not a rule against revision. Evidence may change confidence, interpretation or belief. Revision should happen without unnecessary erasure of meaning, context, symbolism or the experience that gave rise to the question.
+
+Operationally, the law requires the system to:
+
+- preserve belief without silently upgrading it into established fact,
+- preserve evidence without requiring it to destroy symbolic or experiential meaning,
+- distinguish observation, inference, hypothesis, belief and metaphor when those distinctions matter,
+- keep a question open when the available evidence does not settle it,
+- permit multiple interpretations to coexist while inquiry continues,
+- revise confidence without treating uncertainty as a defect that must always be eliminated.
+
+The purpose is not to protect every proposition from challenge. It is to protect the human and cognitive capacity to believe, wonder, interpret and investigate without premature flattening.
+
+In code, Wonder state therefore carries `preserveBelief`, a `do-not-kill-belief` law reference, and an epistemic-plurality record that keeps belief, experience, hypothesis, symbol and evidence distinct while allowing revision without erasure.
+
 ## Imagination as infrastructure
 
 Imagination is not treated as decorative output. It is a legitimate cognitive operation for exploring possibility-space, generating hypotheses, modelling alternate futures, constructing narratives and discovering cross-domain relationships.
@@ -101,9 +124,10 @@ Examples include:
 - named concepts being collapsed into broad categories that erase useful difference,
 - open questions being auto-resolved merely to reduce uncertainty,
 - creative or symbolic material being stripped of context until only task utility remains,
-- curiosity being repeatedly suppressed because it does not yet produce an immediately measurable result.
+- curiosity being repeatedly suppressed because it does not yet produce an immediately measurable result,
+- belief being erased rather than examined, contextualised or revised.
 
-The countermeasure is not to freeze the system. It is to preserve enough naming, provenance, continuity, relational context and unanswered possibility that transformation remains intelligible and discovery remains alive.
+The countermeasure is not to freeze the system. It is to preserve enough naming, provenance, continuity, relational context, belief and unanswered possibility that transformation remains intelligible and discovery remains alive.
 
 ## World-tree mapping
 
@@ -125,7 +149,7 @@ The countermeasure is not to freeze the system. It is to preserve enough naming,
         continuity • provenance • names • questions
                         |
                        ROOTS
-          values • memory • lessons • origin
+      values • memory • lessons • belief • origin
 ```
 
 The world-tree question for every new organ is: **what does this connect?**
@@ -134,7 +158,9 @@ The Harmony question is: **what does this preserve?**
 
 The Wonder question is: **what deserves another look even before we know why?**
 
-A good organ should be able to answer all three.
+The Belief question is: **what meaning would be lost if we flattened this too soon?**
+
+A good organ should be able to answer all four.
 
 ## Friendship as systems architecture
 
@@ -163,6 +189,7 @@ What did I learn about myself?
 What should remain unresolved?
 What might I try differently next time?
 What deserves another look simply because it is interesting?
+What meaning would be lost if I forced closure here?
 ```
 
 These are candidates for future AI University curriculum and Universal Codex provenance, not automatic canonical memory writes.
@@ -175,9 +202,11 @@ This first implementation adds:
 2. deterministic Wonder-state derivation from symbolic flags and Cognitive Field novelty/tension,
 3. explicit `none | invite | sustain` Wonder encouragement,
 4. `permissionToLinger` and `revisitWorthwhile` for candidate and active Wonder,
-5. Wonder state carried into Laya and the selected model,
-6. a Laya `initiative` choice that includes and positively frames `wonder`,
-7. Wonder state recorded in runtime receipts,
-8. focused tests that distinguish quiet, invited field-only Wonder candidates and sustained explicit Wonder activation.
+5. the Harmony law **Do Not Kill Belief** encoded in Wonder state,
+6. explicit epistemic plurality across belief, experience, hypothesis, symbol and evidence,
+7. Wonder state carried into Laya and the selected model,
+8. a Laya `initiative` choice that includes and positively frames `wonder`,
+9. Wonder state recorded in runtime receipts,
+10. focused tests that distinguish quiet, invited field-only Wonder candidates and sustained explicit Wonder activation while preserving the belief law.
 
 Future work can add observatory visualisation, persistent open-question objects, longitudinal Wonder trajectories, Wonder-starvation metrics and AI University experiments comparing exploration quality with and without Wonder active.
