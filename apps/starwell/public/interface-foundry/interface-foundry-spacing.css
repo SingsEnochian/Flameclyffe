@@ -1,0 +1,203 @@
+/* Interface Foundry · spacing pass for the JCINK material proof.
+   Keeps an explicit 8 / 12 / 16 / 20px-ish rhythm without changing semantics. */
+
+.jcink-material-proof {
+  --jcink-space-micro: .5rem;
+  --jcink-space-component: .75rem;
+  --jcink-space-group: 1rem;
+  --jcink-space-structural: 1.25rem;
+  gap: var(--jcink-space-group);
+}
+
+.jcink-proof-head {
+  gap: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.jcink-proof-head > div,
+.jcink-proof-head > p {
+  min-width: 0;
+}
+
+.jcink-proof-board {
+  grid-template-columns: minmax(11.5rem, 14.5rem) minmax(0, 1fr);
+  gap: var(--jcink-space-structural);
+}
+
+.jcink-proof-profile {
+  gap: 0;
+  padding: 1rem;
+}
+
+.jcink-proof-avatar {
+  width: min(100%, 12.75rem);
+  justify-self: center;
+  margin-bottom: 1rem;
+}
+
+.jcink-proof-profile > div:not(.jcink-proof-avatar) {
+  display: grid;
+  gap: .375rem;
+  margin-bottom: .75rem;
+  min-width: 0;
+}
+
+.jcink-proof-profile > div:not(.jcink-proof-avatar) br {
+  display: none;
+}
+
+.jcink-proof-profile > div:not(.jcink-proof-avatar) strong,
+.jcink-proof-profile > div:not(.jcink-proof-avatar) span,
+.jcink-proof-profile > span {
+  display: block;
+}
+
+.jcink-proof-profile > span {
+  margin-top: 0;
+}
+
+.jcink-proof-main {
+  gap: var(--jcink-space-component);
+}
+
+.jcink-proof-category {
+  padding: .75rem .9rem;
+}
+
+.jcink-proof-row {
+  grid-template-columns: 2.15rem minmax(0, 1fr) max-content;
+  gap: .85rem;
+  padding: .8rem .9rem;
+}
+
+.jcink-proof-row > div {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: .55rem;
+  flex-wrap: wrap;
+}
+
+.jcink-proof-row button {
+  flex: 0 0 auto;
+  line-height: 1.25;
+}
+
+.jcink-proof-row small {
+  flex: 1 1 20rem;
+  min-width: 12rem;
+}
+
+.jcink-proof-meta {
+  margin-left: .2rem;
+  white-space: nowrap;
+}
+
+.jcink-proof-reply {
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: .75rem;
+  row-gap: .7rem;
+  padding: .85rem .9rem .78rem;
+  align-items: center;
+}
+
+.jcink-proof-reply label,
+.jcink-proof-reply textarea {
+  grid-column: 1 / -1;
+}
+
+.jcink-proof-reply label {
+  margin-bottom: .05rem;
+}
+
+.jcink-proof-reply textarea {
+  margin: 0;
+}
+
+.jcink-proof-actions {
+  grid-column: 2;
+  grid-row: 3;
+  gap: .5rem;
+  margin: .05rem 0 0;
+  padding-right: .05rem;
+}
+
+.jcink-proof-status {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: center;
+  margin: .05rem 0 0;
+}
+
+@media (max-width: 980px) {
+  .jcink-proof-head {
+    align-items: start;
+  }
+
+  .jcink-proof-row > div {
+    display: grid;
+    gap: .3rem;
+  }
+
+  .jcink-proof-row small {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .jcink-proof-head {
+    display: grid;
+    gap: .75rem;
+  }
+
+  .jcink-proof-board {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .jcink-proof-profile {
+    grid-template-columns: 4rem minmax(0,1fr);
+    gap: .45rem 1rem;
+    align-items: center;
+  }
+
+  .jcink-proof-avatar {
+    width: 4rem;
+    margin: 0;
+    grid-row: 1 / span 2;
+  }
+
+  .jcink-proof-profile > div:not(.jcink-proof-avatar) {
+    margin: 0;
+  }
+
+  .jcink-proof-profile > span {
+    grid-column: 2;
+  }
+
+  .jcink-proof-row {
+    grid-template-columns: 2.15rem minmax(0,1fr);
+    gap: .75rem;
+  }
+
+  .jcink-proof-meta {
+    grid-column: 2;
+    margin-left: 0;
+    white-space: normal;
+    text-align: left;
+  }
+
+  .jcink-proof-reply {
+    grid-template-columns: 1fr;
+  }
+
+  .jcink-proof-actions,
+  .jcink-proof-status {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .jcink-proof-actions {
+    justify-content: flex-start;
+  }
+}
