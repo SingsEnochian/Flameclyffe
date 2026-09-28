@@ -22,6 +22,12 @@ function esc(value) {
     .replaceAll("'", '&#39;');
 }
 
+function token(prefix) {
+  const id = globalThis.crypto?.randomUUID?.()
+    || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return `${prefix}:${id}`;
+}
+
 function active() {
   try {
     const raw = globalThis.localStorage?.getItem(MAGIC_BOOK_BINDING_KEY);
@@ -57,15 +63,58 @@ function anchorGroup(label, values, kind) {
   return `<section class="wish-grove-anchor-group"><strong>${esc(label)}</strong>${body}</section>`;
 }
 
+function observationRow(row) {
+  const groups = [
+    ['Requirements', row.requirements],
+    ['Constraints', row.constraints],
+    ['Consequences', row.consequences],
+    ['Uncertainties', row.uncertainties],
+    ['Relationships', row.affectedRelationships],
+    ['Receipts', row.receiptRefs],
+  ].filter(([, values]) => (values || []).length);
+  return [
+    '<article class="wish-grove-branch-observation">',
+      '<header><strong>' + esc(row.kind || 'analysis') + '</strong><small>' + esc(row.source || 'manual') + '</small></header>',
+      '<p>' + esc(row.summary || '') + '</p>',
+      groups.map(([label, values]) => '<div class="wish-grove-observation-group"><b>' + esc(label) + '</b><span>' + esc(values.join(' · ')) + '</span></div>').join(''),
+    '</article>',
+  ].join('');
+}
+
+function observationEditor(wishId, branch) {
+  const observations = branch.observations || [];
+  return [
+    '<section class="wish-grove-branch-observations">',
+      '<p class="wish-grove-map-note">' + observations.length + ' typed observations. They describe this branch and do not grant authority or select it.</p>',
+      observations.length ? '<div class="wish-grove-observation-list">' + observations.map(observationRow).join('') + '</div>' : '',
+      '<details class="wish-grove-action">',
+        '<summary>Add consequence / uncertainty / simulation receipt</summary>',
+        '<form class="wish-grove-observation-form" data-wish-branch-observation-form data-wish-id="' + esc(wishId) + '" data-branch-id="' + esc(branch.branchId) + '">',
+          '<label>Observation kind<select name="kind"><option value="analysis">Analysis</option><option value="simulation">Simulation</option><option value="test">Test</option><option value="user-observation">User observation</option></select></label>',
+          '<label>Summary<textarea name="summary" required rows="2" maxlength="1400" placeholder="What did this branch reveal?"></textarea></label>',
+          '<label>Requirements<input name="requirements" placeholder="comma-separated"></label>',
+          '<label>Constraints<input name="constraints" placeholder="comma-separated"></label>',
+          '<label>Likely consequences<input name="consequences" placeholder="comma-separated"></label>',
+          '<label>Uncertainties<input name="uncertainties" placeholder="comma-separated"></label>',
+          '<label>Affected relationships<input name="relationships" placeholder="comma-separated"></label>',
+          '<label>Simulation / test receipt refs<input name="receipts" placeholder="comma-separated receipt refs"></label>',
+          '<button type="submit">Record branch observation</button>',
+        '</form>',
+      '</details>',
+    '</section>',
+  ].join('');
+}
+
 function branchMirrorMarkup(wish) {
   const comparison = compareCodexWishBranches(wish);
   if (comparison.branches.length < 2) return '';
 
   const branchCards = comparison.branches.map((branch) => [
-    '<article class="wish-grove-branch-view">',
+    '<article class="wish-grove-branch-view" data-branch-id="' + esc(branch.branchId) + '">',
       '<strong>' + esc(branch.label) + '</strong>',
       '<span>' + esc(branch.possibility) + '</span>',
       '<div class="wish-grove-branch-terms">' + branch.terms.map((term) => `<span class="wish-grove-branch-term">${esc(term)}</span>`).join('') + '</div>',
+      observationEditor(wish.wishId, branch),
     '</article>',
   ].join('')).join('');
 
@@ -85,7 +134,7 @@ function branchMirrorMarkup(wish) {
   return [
     '<section class="wish-grove-branch-mirror">',
       '<header><div><p class="wish-grove-label">Branch Mirror</p><h4>Compare without collapsing</h4></div><span>' + comparison.branches.length + ' possibilities</span></header>',
-      '<p class="wish-grove-map-note">This view describes overlap and difference. It does not score, rank, or choose a winner.</p>',
+      '<p class="wish-grove-map-note">This view describes overlap, difference, consequence, and uncertainty. It does not score, rank, or choose a winner.</p>',
       '<div class="wish-grove-branch-grid">' + branchCards + '</div>',
       '<div class="wish-grove-branch-pairs">' + pairRows + '</div>',
     '</section>',
@@ -190,6 +239,13 @@ function jumpToQuestion(questionId) {
   target?.focus?.({ preventScroll: true });
 }
 
+function setStatus(message, tone = 'success') {
+  const status = grove()?.querySelector?.('[data-wish-grove-status]');
+  if (!status) return;
+  status.textContent = String(message || '');
+  status.dataset.tone = tone;
+}
+
 function handleClick(event) {
   const node = event.target?.closest?.('[data-question-map-jump]');
   if (node) jumpToQuestion(node.dataset.questionMapJump);
@@ -203,26 +259,52 @@ function handleKeydown(event) {
   jumpToQuestion(node.dataset.questionMapJump);
 }
 
+function handleAnchorSubmit(form) {
+  const data = new FormData(form);
+  store().anchorWish(form.dataset.wishId, {
+    continuityAnchors: csv(data.get('continuity')),
+    relationshipsTouched: csv(data.get('relationships')),
+    memoryRefs: csv(data.get('memories')),
+    createdAt: new Date().toISOString(),
+    provenance: ['surface://universal-codex/wish-grove/anchors'],
+  });
+  form.reset();
+  setStatus('Context linked. Earlier anchors remain in lineage.');
+}
+
+function handleObservationSubmit(form) {
+  const data = new FormData(form);
+  const kind = String(data.get('kind') || 'analysis');
+  store().observeBranch(form.dataset.wishId, {
+    branchId: form.dataset.branchId,
+    observationId: token('branch-observation'),
+    kind,
+    source: kind === 'simulation' ? 'simulation-receipt' : 'wish-grove',
+    summary: String(data.get('summary') || '').trim(),
+    requirements: csv(data.get('requirements')),
+    constraints: csv(data.get('constraints')),
+    consequences: csv(data.get('consequences')),
+    uncertainties: csv(data.get('uncertainties')),
+    affectedRelationships: csv(data.get('relationships')),
+    receiptRefs: csv(data.get('receipts')),
+    createdAt: new Date().toISOString(),
+    provenance: ['surface://universal-codex/wish-grove/branch-mirror'],
+  });
+  form.reset();
+  setStatus('Branch observation recorded without selecting a winner.');
+}
+
 function handleSubmit(event) {
-  const form = event.target?.closest?.('[data-wish-anchor-form]');
+  const anchorForm = event.target?.closest?.('[data-wish-anchor-form]');
+  const observationForm = event.target?.closest?.('[data-wish-branch-observation-form]');
+  const form = observationForm || anchorForm;
   if (!form || !grove()?.contains(form)) return;
   event.preventDefault();
-  const data = new FormData(form);
   try {
-    store().anchorWish(form.dataset.wishId, {
-      continuityAnchors: csv(data.get('continuity')),
-      relationshipsTouched: csv(data.get('relationships')),
-      memoryRefs: csv(data.get('memories')),
-      createdAt: new Date().toISOString(),
-      provenance: ['surface://universal-codex/wish-grove/anchors'],
-    });
-    form.reset();
+    if (observationForm) handleObservationSubmit(observationForm);
+    else handleAnchorSubmit(anchorForm);
   } catch (error) {
-    const status = grove()?.querySelector?.('[data-wish-grove-status]');
-    if (status) {
-      status.textContent = error?.message || String(error);
-      status.dataset.tone = 'error';
-    }
+    setStatus(error?.message || String(error), 'error');
   }
 }
 
