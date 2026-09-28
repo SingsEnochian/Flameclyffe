@@ -97,9 +97,10 @@ export async function bootstrapRuntimeIntegration({
 }
 
 if (typeof document !== 'undefined') {
-  // The artefact sidecar imports its CSS through Vite. Keep that browser-only
-  // so Node contract tests can import the runtime bootstrap without being
-  // asked to interpret a stylesheet as an ES module.
+  // Browser-only sidecars import CSS through Vite. Keep them here so Node
+  // contract tests can import the runtime bootstrap without interpreting a
+  // stylesheet as an ES module.
   void import('./universal-codex-artefact-motion-sidecar.js');
+  void import('./wish-grove-sidecar.js');
   void bootstrapRuntimeIntegration();
 }
