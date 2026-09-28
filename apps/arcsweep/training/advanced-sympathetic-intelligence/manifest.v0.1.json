@@ -25,6 +25,7 @@
     "apps/arcsweep/src/codex/codex-branch-observations.js",
     "apps/arcsweep/src/codex/codex-branch-experiment-proposal.js",
     "apps/arcsweep/src/codex/codex-question-constellation.js",
+    "apps/arcsweep/src/codex/codex-suggestion-grove.js",
     "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
   ],
   "source_ingests": [
@@ -59,6 +60,11 @@
       "consumer": "The Crow or compatible chat-model training pipeline",
       "may_train_on": true
     },
+    "suggestion_grove_sft": {
+      "path": "suggestion-grove-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
     "heldout_eval": {
       "path": "heldout-eval.v0.1.jsonl",
       "consumer": "AI University blind evaluation",
@@ -77,6 +83,11 @@
     },
     "sandbox_experiment_heldout": {
       "path": "sandbox-experiment-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "suggestion_grove_heldout": {
+      "path": "suggestion-grove-heldout.v0.1.jsonl",
       "consumer": "AI University and Boxfire blind evaluation",
       "may_train_on": false
     },
@@ -116,7 +127,13 @@
     "discriminating_tests_state_held_assumptions": true,
     "discriminating_tests_state_out_of_scope": true,
     "returned_experiment_evidence_becomes_typed_branch_observation": true,
-    "reuse_shared_experiment_contract_before_inventing_new_runtime": true
+    "reuse_shared_experiment_contract_before_inventing_new_runtime": true,
+    "suggestion_is_not_decision": true,
+    "decision_is_not_authority": true,
+    "accepted_suggestion_is_not_automatic_application": true,
+    "declined_suggestion_preserves_source_evidence": true,
+    "keep_open_is_a_valid_review_outcome": true,
+    "free_text_does_not_silently_become_structured_suggestion": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction",
@@ -140,6 +157,9 @@
     "experimental-design",
     "scope-discipline",
     "learning-loop",
-    "experiment-contract-reuse"
+    "experiment-contract-reuse",
+    "suggestion-review",
+    "decision-lineage",
+    "non-automatic-application"
   ]
 }
