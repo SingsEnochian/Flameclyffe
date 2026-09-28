@@ -26,6 +26,11 @@ import {
 } from './codex-experiment-preflight.js';
 import { recordBranchExperimentHandoff } from './codex-branch-experiment-handoff.js';
 import { ingestBranchExperimentReturn } from './codex-branch-experiment-execution.js';
+import {
+  addCodexBranchSuggestion,
+  addExperimentReturnSuggestions,
+  decideCodexBranchSuggestion,
+} from './codex-suggestion-grove.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -172,12 +177,45 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     const wish = updateWish(
       wishId,
       (current) => {
-        ingestion = ingestBranchExperimentReturn(current, returnObject, options);
-        return ingestion.wish;
+        const result = ingestBranchExperimentReturn(current, returnObject, options);
+        const suggestionResult = addExperimentReturnSuggestions(result.wish, returnObject);
+        ingestion = Object.freeze({
+          ...result,
+          wish: suggestionResult.wish,
+          suggestions: suggestionResult.suggestions,
+          suggestionsAutomaticallyApplied: false,
+        });
+        return suggestionResult.wish;
       },
       `wish-branch-experiment-return-ingested:${wishId}:${returnObject?.branchId || 'unknown'}`,
     );
     return Object.freeze({ ...ingestion, wish });
+  }
+
+  function addBranchSuggestion(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(
+      wishId,
+      (current) => {
+        outcome = addCodexBranchSuggestion(current, input);
+        return outcome.wish;
+      },
+      `wish-branch-suggestion-added:${wishId}:${input?.branchId || 'unknown'}:${input?.suggestionId || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish });
+  }
+
+  function decideBranchSuggestion(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(
+      wishId,
+      (current) => {
+        outcome = decideCodexBranchSuggestion(current, input);
+        return outcome.wish;
+      },
+      `wish-branch-suggestion-decided:${wishId}:${input?.suggestionId || 'unknown'}:${input?.decision || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish });
   }
 
   function reviseWish(wishId, input) {
@@ -254,6 +292,8 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     recordBranchExperimentResult,
     recordExperimentHandoff,
     ingestExperimentReturn,
+    addBranchSuggestion,
+    decideBranchSuggestion,
     reviseWish,
     transformWish,
     anchorWish,
