@@ -84,7 +84,7 @@ function executionMarkup(wishId, branch, authority) {
 
   return [
     '<article class="wish-grove-suggestion" data-learning-trial-authority="' + esc(authority.authorityId) + '">',
-      '<header><div><p class="wish-grove-label">Training execution</p><strong>' + esc(bundle.objective) + '</strong></div><span>' + esc(run?.status || envelope ? 'materialised' : 'authorised') + '</span></header>',
+      '<header><div><p class="wish-grove-label">Training execution</p><strong>' + esc(bundle.objective) + '</strong></div><span>' + esc(run?.status || (envelope ? 'materialised' : 'authorised')) + '</span></header>',
       '<p class="wish-grove-suggestion-law">Materialised execution ≠ started execution. Training completion ≠ improvement. Evaluation signal ≠ authority.</p>',
       envelope ? [
         '<p>Envelope: ' + esc(envelope.executionId) + ' · executor ' + esc(envelope.executorTarget) + ' · <strong>autoStart=false</strong></p>',
