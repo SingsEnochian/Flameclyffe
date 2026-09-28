@@ -197,6 +197,7 @@ export function recordLearningForgeTrainingRun(wish, {
   branchId,
   bundleId,
   authorityId,
+  executionId = '',
   runId,
   status,
   modelArtifactRef = '',
@@ -216,6 +217,13 @@ export function recordLearningForgeTrainingRun(wish, {
     throw new Error(`Single-use training authority already consumed: ${authority.authorityId}`);
   }
 
+  const executionEnvelope = (branch.trainingExecutionEnvelopes || []).find((row) => row.authorityId === authority.authorityId) || null;
+  const requestedExecutionId = optionalText(executionId);
+  if (requestedExecutionId && !executionEnvelope) throw new Error(`Unknown training execution envelope: ${requestedExecutionId}`);
+  if (requestedExecutionId && executionEnvelope?.executionId !== requestedExecutionId) {
+    throw new Error('Training run execution envelope does not match the single-use authority.');
+  }
+
   const nextStatus = text(status, 'status');
   if (!['completed', 'failed', 'cancelled'].includes(nextStatus)) throw new Error(`Unsupported training run status: ${nextStatus}`);
 
@@ -226,6 +234,7 @@ export function recordLearningForgeTrainingRun(wish, {
     branchId: branch.branchId,
     bundleId: bundle.bundleId,
     authorityId: authority.authorityId,
+    sourceExecutionEnvelopeId: executionEnvelope?.executionId || requestedExecutionId || null,
     status: nextStatus,
     modelArtifactRef: optionalText(modelArtifactRef),
     metrics: Object.freeze({ ...(metrics || {}) }),
@@ -236,6 +245,7 @@ export function recordLearningForgeTrainingRun(wish, {
     receiptRefs,
     provenance,
     authorityConsumed: true,
+    exactExecutionEnvelopeBinding: Boolean(executionEnvelope),
     trainingCompletionMeansImprovement: false,
     automaticDeployment: false,
     automaticCanonPromotion: false,
@@ -247,7 +257,7 @@ export function recordLearningForgeTrainingRun(wish, {
     ...branch,
     trainingRuns: Object.freeze([...(branch.trainingRuns || []), run]),
   });
-  return Object.freeze({ wish: replaceBranch(wish, index, nextBranch, completedAt || createdAt), bundle, authority, run });
+  return Object.freeze({ wish: replaceBranch(wish, index, nextBranch, completedAt || createdAt), bundle, authority, executionEnvelope, run });
 }
 
 export function recordBehaviouralDelta(wish, {
