@@ -39,5 +39,6 @@ test('ArcSweep depth styling excludes floating and nested work surfaces', async 
   assert.match(css, /\.panel \.commons-entry/);
   assert.match(css, /pointer:coarse/);
   assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.doesNotMatch(css, /,\s*@media/);
   assert.doesNotMatch(css, /animation\s*:[^;]*infinite/i);
 });
