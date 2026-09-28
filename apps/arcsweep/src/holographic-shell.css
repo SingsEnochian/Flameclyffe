@@ -173,3 +173,4 @@ html[data-holographic-shell][data-high-contrast="true"] .app-shell { --holo-mute
 html[data-holographic-shell] #app > [data-arcsweep-recovery] { background: radial-gradient(ellipse at top right,#242447,#070b18 70%) !important; color: #eef7ff !important; }
 html[data-holographic-shell] #app > [data-arcsweep-recovery] h1 { font-family: Georgia,serif; font-weight: 400; }
 html[data-holographic-shell] #app > [data-arcsweep-recovery] a { background: #102b39 !important; color: #8eeee8 !important; border-color: #438c9b !important; }
+html[data-holographic-shell] .app-shell .holo-nav-group h2 { margin: 0 12px 6px; font: 11px/1.4 ui-monospace, monospace; text-transform: uppercase; letter-spacing: .15em; color: #8b99b5; }
