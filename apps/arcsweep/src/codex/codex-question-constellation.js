@@ -39,6 +39,20 @@ function nodeForQuestion(question = {}, index = 0, total = 1) {
   });
 }
 
+function shared(left = [], right = []) {
+  const rightSet = new Set(right);
+  return left.filter((value) => rightSet.has(value));
+}
+
+function relationReasons(left, right) {
+  const reasons = [];
+  if (left.originWishId && left.originWishId === right.originWishId) reasons.push('shared-origin-wish');
+  if (shared(left.refs.belief, right.refs.belief).length) reasons.push('shared-belief-reference');
+  if (shared(left.refs.evidence, right.refs.evidence).length) reasons.push('shared-evidence-reference');
+  if (shared(left.refs.symbol, right.refs.symbol).length) reasons.push('shared-symbol-reference');
+  return Object.freeze(reasons);
+}
+
 export function buildOpenQuestionsConstellation(lineage = {}) {
   const questions = [...(lineage.openQuestions || [])]
     .sort((a, b) => String(a.questionId || '').localeCompare(String(b.questionId || '')));
@@ -53,6 +67,7 @@ export function buildOpenQuestionsConstellation(lineage = {}) {
         kind: 'wish-question',
         from: node.originWishId,
         to: node.id,
+        reasons: Object.freeze(['origin-wish']),
       }));
     }
     for (const [kind, values] of Object.entries(node.refs)) {
@@ -62,8 +77,25 @@ export function buildOpenQuestionsConstellation(lineage = {}) {
           kind: `${kind}-reference`,
           from: node.id,
           to: value,
+          reasons: Object.freeze([`${kind}-reference`]),
         }));
       }
+    }
+  }
+
+  for (let leftIndex = 0; leftIndex < nodes.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < nodes.length; rightIndex += 1) {
+      const left = nodes[leftIndex];
+      const right = nodes[rightIndex];
+      const reasons = relationReasons(left, right);
+      if (!reasons.length) continue;
+      edges.push(Object.freeze({
+        id: `question-question:${left.id}:${right.id}`,
+        kind: 'question-question',
+        from: left.id,
+        to: right.id,
+        reasons,
+      }));
     }
   }
 
@@ -79,6 +111,7 @@ export function buildOpenQuestionsConstellation(lineage = {}) {
       ranksQuestions: false,
       selectsPriority: false,
       preservesReferenceKinds: true,
+      relationEdgesAreDescriptiveOnly: true,
     }),
   });
 }
