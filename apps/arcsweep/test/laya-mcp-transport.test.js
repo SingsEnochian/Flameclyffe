@@ -57,6 +57,9 @@ test('Laya MCP transport calls laya_predict with typed-decisions', async () => {
       mode: 'active',
       candidate: true,
       active: true,
+      encouragement: 'sustain',
+      permissionToLinger: true,
+      revisitWorthwhile: true,
       reasons: ['wonder-glyph', 'novel-association'],
       preserveOpenQuestions: true,
       exploreBeforeClosure: true,
@@ -76,9 +79,14 @@ test('Laya MCP transport calls laya_predict with typed-decisions', async () => {
   assert.equal(call.arguments.state.cognitive_field.tick, 3);
   assert.equal(call.arguments.state.cognitive_field.grants_authority, false);
   assert.equal(call.arguments.state.wonder_state.mode, 'active');
+  assert.equal(call.arguments.state.wonder_state.encouragement, 'sustain');
+  assert.equal(call.arguments.state.wonder_state.permission_to_linger, true);
+  assert.equal(call.arguments.state.wonder_state.revisit_worthwhile, true);
   assert.equal(call.arguments.state.wonder_state.preserve_open_questions, true);
   assert.equal(call.arguments.questions.route.type, 'choice');
   assert.equal(call.arguments.questions.initiative.type, 'choice');
+  assert.match(call.arguments.questions.initiative.instructions, /positive cognitive posture/i);
+  assert.match(call.arguments.questions.initiative.criteria.wonder, /linger/i);
   assert.equal(call.arguments.questions.uncertainty.type, 'choice');
   assert.equal(result.route, 'deep-reasoning');
   assert.equal(result.initiative, 'wonder');
