@@ -154,6 +154,7 @@ test('browser runtime mounts Suggestion Grove with three explicit review choices
   assert.match(source, />Accept</);
   assert.match(source, />Keep Open</);
   assert.match(source, />Decline</);
-  assert.match(source, /acceptance ≠ automatic application/);
+  assert.match(source, /acceptance ≠ application/);
+  assert.match(source, /Materialisation is a separate explicit act/);
   assert.match(source, /Nothing was applied automatically/);
 });
