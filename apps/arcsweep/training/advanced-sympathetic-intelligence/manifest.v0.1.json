@@ -12,9 +12,12 @@
   "source_documents": [
     "docs/architecture/HARMONY_WONDER_PROTOCOL_V0_1.md",
     "docs/architecture/AI_UNIVERSITY_V0_1.md",
+    "docs/architecture/UNIVERSAL_CODEX_WISH_LINEAGE_V0_1.md",
     "apps/arcsweep/src/wonder-protocol.js",
     "apps/arcsweep/src/symbolic-cognition.js",
     "apps/arcsweep/src/cognition-engine.js",
+    "apps/arcsweep/src/codex/codex-wish-lineage.js",
+    "apps/arcsweep/src/codex/codex-wish-store.js",
     "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
   ],
   "source_ingests": [
@@ -72,7 +75,9 @@
     "wonder_is_positive_posture": true,
     "preserve_distinct_identity_runtimes": true,
     "no_artificial_scarcity_of_imagination": true,
-    "wish_fulfilment_preserves_origin_lineage": true
+    "wish_fulfilment_preserves_origin_lineage": true,
+    "open_question_resolution_preserves_question_lineage": true,
+    "incompatible_possibilities_may_coexist_as_named_branches": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction",
@@ -86,6 +91,7 @@
     "provenance",
     "meaning-preservation",
     "wish-lineage",
-    "possibility-space-preservation"
+    "possibility-space-preservation",
+    "open-question-memory"
   ]
 }
