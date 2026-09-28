@@ -28,7 +28,15 @@
     });
   </script>
   <script type='module' src='./src/main.jsx'></script>
-  <script type='module' src='%BASE_URL%interface-foundry/atlas-hall-bridge.js'></script>
+  <script>
+    (() => {
+      const atlasBridge = document.createElement('script');
+      atlasBridge.type = 'module';
+      atlasBridge.dataset.starwellAtlasHallBridge = 'runtime-public-asset';
+      atlasBridge.src = new URL('interface-foundry/atlas-hall-bridge.js', document.baseURI).href;
+      document.head.appendChild(atlasBridge);
+    })();
+  </script>
   <script type='module' src='./src/city-state-motion.jsx'></script>
   <script type='module' src='./src/deep-material-vars-bind.js'></script>
   <script type='module' src='./src/deep-hud-socket-bind.js'></script>
