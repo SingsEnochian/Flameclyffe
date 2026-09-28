@@ -1,5 +1,5 @@
-import assert from 'node:assert/strict';
 import test from 'node:test';
+import assert from 'node:assert/strict';
 
 import {
   CODEX_WISH_STORE_EVENT,
@@ -92,6 +92,59 @@ test('resolving a question persists a resolution without deleting the original q
   assert.equal(question.resolutions.length, 1);
   assert.equal(question.resolutions[0].mode, 'tentative');
   assert.equal(snapshot.doctrine.preserveOpenQuestions, true);
+});
+
+test('accepted suggestion materialisation persists native state, receipt lineage and reflection across reload', () => {
+  const storage = memoryStorage();
+  const store = createCodexWishStore({ storage });
+  store.createWish({ wishId: 'wish:learn', origin: 'rowan', desire: 'Learn without flattening.', createdAt: T0 });
+  store.branchWish('wish:learn', { branchId: 'branch:learn', label: 'Learn', possibility: 'A reviewable learning branch.', createdAt: T0 });
+  store.addBranchSuggestion('wish:learn', {
+    branchId: 'branch:learn',
+    suggestionId: 'suggestion:question',
+    kind: 'open-question',
+    summary: 'Keep the strange question alive.',
+    payload: { question: 'What became more interesting?' },
+    createdAt: T1,
+  });
+  store.decideBranchSuggestion('wish:learn', {
+    branchId: 'branch:learn',
+    suggestionId: 'suggestion:question',
+    decisionId: 'decision:accept',
+    decision: 'accept',
+    decidedBy: 'rowan',
+    createdAt: T1,
+  });
+  const materialised = store.materialiseBranchSuggestion('wish:learn', {
+    branchId: 'branch:learn',
+    suggestionId: 'suggestion:question',
+    materialisationId: 'materialisation:question',
+    materialisedBy: 'rowan',
+    createdAt: T2,
+  });
+  store.recordLearningReflection('wish:learn', {
+    branchId: 'branch:learn',
+    reflectionId: 'reflection:question',
+    sourceSuggestionId: 'suggestion:question',
+    sourceMaterialisationId: 'materialisation:question',
+    whatChanged: 'The accepted suggestion became an explicit Open Question.',
+    surprises: ['The unresolved question became more useful after materialisation.'],
+    deservesAnotherLook: ['The question itself.'],
+    reflectedBy: 'rowan',
+    createdAt: T2,
+  });
+
+  assert.equal(materialised.openQuestions.length, 1);
+  const reloaded = createCodexWishStore({ storage }).snapshot();
+  const wish = reloaded.wishes.find((row) => row.wishId === 'wish:learn');
+  const branch = wish.possibilityBranches.find((row) => row.branchId === 'branch:learn');
+  const suggestion = branch.suggestions.find((row) => row.suggestionId === 'suggestion:question');
+  assert.equal(suggestion.applied, true);
+  assert.equal(suggestion.materialisationHistory.length, 1);
+  assert.equal(reloaded.openQuestions[0].question, 'What became more interesting?');
+  assert.equal(branch.learningReflections.length, 1);
+  assert.equal(branch.learningReflections[0].automaticTraining, false);
+  assert.equal(branch.learningReflections[0].automaticMemoryWrite, false);
 });
 
 test('corrupt persisted state fails soft to an empty lineage instead of inventing records', () => {
