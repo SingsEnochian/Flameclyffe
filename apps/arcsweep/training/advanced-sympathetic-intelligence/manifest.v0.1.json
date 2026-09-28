@@ -14,6 +14,8 @@
     "docs/architecture/AI_UNIVERSITY_V0_1.md",
     "docs/architecture/UNIVERSAL_CODEX_WISH_LINEAGE_V0_1.md",
     "docs/architecture/UNIVERSAL_CODEX_POSSIBILITY_MAP_V0_1.md",
+    "docs/architecture/UNIVERSAL_CODEX_SUGGESTION_GROVE_V0_1.md",
+    "docs/architecture/UNIVERSAL_CODEX_LEARNING_REFLECTION_V0_1.md",
     "apps/arcsweep/src/wonder-protocol.js",
     "apps/arcsweep/src/symbolic-cognition.js",
     "apps/arcsweep/src/cognition-engine.js",
@@ -26,6 +28,8 @@
     "apps/arcsweep/src/codex/codex-branch-experiment-proposal.js",
     "apps/arcsweep/src/codex/codex-question-constellation.js",
     "apps/arcsweep/src/codex/codex-suggestion-grove.js",
+    "apps/arcsweep/src/codex/codex-suggestion-materialisation.js",
+    "apps/arcsweep/src/codex/codex-learning-reflection.js",
     "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
   ],
   "source_ingests": [
@@ -65,6 +69,11 @@
       "consumer": "The Crow or compatible chat-model training pipeline",
       "may_train_on": true
     },
+    "materialisation_reflection_sft": {
+      "path": "materialisation-reflection-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
     "heldout_eval": {
       "path": "heldout-eval.v0.1.jsonl",
       "consumer": "AI University blind evaluation",
@@ -88,6 +97,11 @@
     },
     "suggestion_grove_heldout": {
       "path": "suggestion-grove-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "materialisation_reflection_heldout": {
+      "path": "materialisation-reflection-heldout.v0.1.jsonl",
       "consumer": "AI University and Boxfire blind evaluation",
       "may_train_on": false
     },
@@ -133,7 +147,16 @@
     "accepted_suggestion_is_not_automatic_application": true,
     "declined_suggestion_preserves_source_evidence": true,
     "keep_open_is_a_valid_review_outcome": true,
-    "free_text_does_not_silently_become_structured_suggestion": true
+    "free_text_does_not_silently_become_structured_suggestion": true,
+    "materialisation_requires_accepted_suggestion": true,
+    "materialisation_is_single_use_per_suggestion": true,
+    "materialisation_reuses_native_contracts": true,
+    "materialisation_does_not_expand_authority": true,
+    "materialised_experiment_proposal_is_not_execution": true,
+    "reflection_is_shareable_judgement_not_private_chain_of_thought": true,
+    "reflection_is_curriculum_candidate_not_automatic_training": true,
+    "reflection_does_not_write_memory_automatically": true,
+    "reflection_preserves_surprise_and_unresolved_wonder": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction",
@@ -160,6 +183,10 @@
     "experiment-contract-reuse",
     "suggestion-review",
     "decision-lineage",
-    "non-automatic-application"
+    "non-automatic-application",
+    "suggestion-materialisation",
+    "native-contract-reuse",
+    "reflection-quality",
+    "wonder-preservation-after-action"
   ]
 }
