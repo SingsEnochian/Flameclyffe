@@ -2,6 +2,7 @@ import { createLayaCognitiveFrame, runLayaCognition, requiresHumanReview } from 
 import { evaluateAction, selectModelBinding, createRuntimeReceipt } from './constellation-runtime.js';
 import { compileSymbolicState } from './symbolic-cognition.js';
 import { createCognitiveFieldState, stepCognitiveField } from './cognitive-field-engine.js';
+import { deriveWonderState } from './wonder-protocol.js';
 
 export const COGNITION_ENGINE_SCHEMA = 'hearthweave.cognition-engine/v0.1';
 
@@ -51,9 +52,11 @@ export function createCognitionEngine({
         : compileSymbolicState({ activeGlyphs });
 
       if (symbolicState.flags.halt) {
+        const wonderState = deriveWonderState({ symbolicState });
         const decision = Object.freeze({
           schema: 'hearthweave.laya-decision/v0.1',
           route: 'human-review',
+          initiative: 'silent',
           authority: 'permission-required',
           uncertainty: 'high',
           conflict: 'none',
@@ -70,6 +73,7 @@ export function createCognitionEngine({
           decision,
           symbolicState,
           cognitiveFieldReceipt: null,
+          wonderState,
           modelBinding: null,
           actionEvaluation,
           evidenceRefs: freezeArray(evidenceRefs),
@@ -84,6 +88,7 @@ export function createCognitionEngine({
           symbolicState,
           cognitiveField: null,
           cognitiveFieldReceipt: null,
+          wonderState,
           context: Object.freeze([]),
           modelBinding: null,
           output: null,
@@ -104,7 +109,15 @@ export function createCognitionEngine({
       fieldStates.set(runtime.continuity.namespace, fieldStep.state);
 
       const cognitiveField = fieldStep.summary;
-      const frame = createLayaCognitiveFrame({ runtime, input, contextRefs, symbolicState, cognitiveField });
+      const wonderState = deriveWonderState({ symbolicState, cognitiveField });
+      const frame = createLayaCognitiveFrame({
+        runtime,
+        input,
+        contextRefs,
+        symbolicState,
+        cognitiveField,
+        wonderState,
+      });
       const decision = await runLayaCognition(frame, { invoke: layaInvoke });
 
       const actionEvaluation = evaluateAction(runtime, {
@@ -119,6 +132,7 @@ export function createCognitionEngine({
           decision,
           symbolicState,
           cognitiveFieldReceipt: fieldStep.receipt,
+          wonderState,
           modelBinding: null,
           actionEvaluation,
           evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
@@ -133,6 +147,7 @@ export function createCognitionEngine({
           symbolicState,
           cognitiveField,
           cognitiveFieldReceipt: fieldStep.receipt,
+          wonderState,
           context: freezeArray(context),
           modelBinding: null,
           output: null,
@@ -148,6 +163,7 @@ export function createCognitionEngine({
           decision,
           symbolicState,
           cognitiveFieldReceipt: fieldStep.receipt,
+          wonderState,
           modelBinding: null,
           actionEvaluation: Object.freeze({
             ...actionEvaluation,
@@ -167,6 +183,7 @@ export function createCognitionEngine({
           symbolicState,
           cognitiveField,
           cognitiveFieldReceipt: fieldStep.receipt,
+          wonderState,
           context: freezeArray(context),
           modelBinding: null,
           output: null,
@@ -182,6 +199,7 @@ export function createCognitionEngine({
         context: freezeArray(context),
         symbolicState,
         cognitiveField,
+        wonderState,
         cognitiveDecision: decision,
       });
 
@@ -190,6 +208,7 @@ export function createCognitionEngine({
         decision,
         symbolicState,
         cognitiveFieldReceipt: fieldStep.receipt,
+        wonderState,
         modelBinding,
         actionEvaluation,
         evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
@@ -204,6 +223,7 @@ export function createCognitionEngine({
         symbolicState,
         cognitiveField,
         cognitiveFieldReceipt: fieldStep.receipt,
+        wonderState,
         context: freezeArray(context),
         modelBinding,
         output,
