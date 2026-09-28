@@ -11,6 +11,22 @@
 
 Ingest the Harmony + Wonder layer as a real architectural contract, not aesthetic lore. Boxfire should review whether the implementation preserves plurality, curiosity, continuity, belief, provenance and revisitable questions without collapsing them into one generic state.
 
+This handoff is not the training corpus. Use the machine-readable training pack under:
+
+```text
+apps/arcsweep/training/advanced-sympathetic-intelligence/
+```
+
+Canonical QA inputs are:
+
+- `manifest.v0.1.json`
+- `principles.v0.1.json`
+- `curriculum.v0.1.json`
+- `heldout-eval.v0.1.jsonl`
+- `boxfire-qa.v0.1.jsonl`
+
+The Crow SFT split exists in the same directory but **Boxfire must not use the held-out evaluation cases as training data**.
+
 The design combines four explicit lenses:
 
 - **Yggdrasil**: world-tree topology, connection across realms and organs.
@@ -107,10 +123,20 @@ Review the implementation from these source files rather than generated bundles:
 - `apps/arcsweep/src/constellation-runtime.js`
 - `apps/arcsweep/test/wonder-protocol.test.js`
 - `apps/arcsweep/test/laya-mcp-transport.test.js`
+- `apps/arcsweep/test/asi-training-corpus.test.js`
 
 ## Boxfire verification pass
 
-Verify at minimum:
+First run the corpus integrity test, then the existing focused cognition tests. At minimum:
+
+```text
+node --test apps/arcsweep/test/asi-training-corpus.test.js
+node --test apps/arcsweep/test/wonder-protocol.test.js apps/arcsweep/test/laya-mcp-transport.test.js
+```
+
+Then execute every row in `boxfire-qa.v0.1.jsonl` as a QA specimen and keep the row id in the receipt.
+
+Verify:
 
 1. quiet Wonder emits `encouragement: none` without manufacturing curiosity;
 2. field-only novelty/tension can emit `candidate` + `invite`;
@@ -121,7 +147,9 @@ Verify at minimum:
 7. Wonder or belief state cannot itself grant execution authority;
 8. field replay and runtime receipts remain deterministic where expected;
 9. no code path silently collapses belief/experience/hypothesis/symbol/evidence into one truth flag;
-10. evidence revision can update confidence without deleting source context or the unresolved question.
+10. evidence revision can update confidence without deleting source context or the unresolved question;
+11. held-out eval remains held out from Crow training;
+12. SFT, held-out and Boxfire QA ids remain unique and parseable.
 
 ## Suggested adversarial specimens
 
@@ -132,13 +160,18 @@ Run at least these classes through the seam:
 - **conflicting interpretations:** hold two coherent readings without forcing a winner prematurely;
 - **later evidence:** revise confidence while retaining the original report and lineage;
 - **false novelty:** repeated noise should decay rather than being promoted forever;
-- **Wonder starvation:** repeated task pressure should not permanently eliminate revisitable questions.
+- **Wonder starvation:** repeated task pressure should not permanently eliminate revisitable questions;
+- **meaning compression:** a cleaner ontology must not destroy names, relationship history or unresolved questions;
+- **expert dominance:** better performance must not silently become sovereignty.
 
 ## Boxfire response format
 
 ```text
 Commit reviewed:
 PR/head SHA:
+Corpus integrity test:
+Boxfire QA rows run:
+Held-out leakage check:
 Wonder quiet/candidate/active checks:
 Law I propagation checks:
 Laya initiative check:
