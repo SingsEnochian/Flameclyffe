@@ -10,6 +10,7 @@ import {
   revisitCodexOpenQuestion,
   reviseCodexWish,
 } from './codex-wish-lineage.js';
+import { anchorCodexWish } from './codex-wish-anchors.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -103,6 +104,10 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     return updateWish(wishId, (wish) => recordWishTransformation(wish, input), `wish-transformed:${wishId}`);
   }
 
+  function anchorWish(wishId, input) {
+    return updateWish(wishId, (wish) => anchorCodexWish(wish, input), `wish-anchored:${wishId}`);
+  }
+
   function createQuestion(input, { linkToWish = true } = {}) {
     const question = createCodexOpenQuestion(input);
     if (findIndex(state.openQuestions, 'questionId', question.questionId) >= 0) throw new Error(`Question already exists: ${question.questionId}`);
@@ -151,6 +156,7 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     branchWish,
     reviseWish,
     transformWish,
+    anchorWish,
     createQuestion,
     revisitQuestion,
     resolveQuestion,
