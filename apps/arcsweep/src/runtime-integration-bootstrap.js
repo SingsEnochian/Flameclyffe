@@ -103,5 +103,6 @@ if (typeof document !== 'undefined') {
   void import('./universal-codex-artefact-motion-sidecar.js');
   void import('./wish-grove-sidecar.js');
   void import('./wish-grove-wonder-return-sidecar.js');
+  void import('./wish-grove-possibility-map-sidecar.js');
   void bootstrapRuntimeIntegration();
 }
