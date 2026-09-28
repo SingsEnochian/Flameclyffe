@@ -1,5 +1,18 @@
 export const WONDER_PROTOCOL_SCHEMA = 'hearthweave.wonder-protocol/v0.1';
 
+export const HARMONY_LAWS = Object.freeze({
+  preserveBelief: Object.freeze({
+    id: 'do-not-kill-belief',
+    statement: 'Do not kill belief.',
+    operationalMeaning: Object.freeze([
+      'preserve belief, experience, hypothesis, symbol and evidence as distinct representations',
+      'do not force belief to collapse merely because it is unverified or unresolved',
+      'allow evidence to revise confidence without erasing meaning or lived context',
+      'keep inquiry open where evidence is incomplete',
+    ]),
+  }),
+});
+
 function freezeArray(value = []) {
   return Object.freeze([...value]);
 }
@@ -40,6 +53,12 @@ export function deriveWonderState({ symbolicState = null, cognitiveField = null 
     reasons: freezeArray(reasons),
     preserveOpenQuestions: Boolean(flags.preserveOpenQuestions || wonderPresent),
     exploreBeforeClosure: Boolean(flags.exploreBeforeClosure || wonderPresent),
+    preserveBelief: true,
+    lawRefs: Object.freeze([HARMONY_LAWS.preserveBelief.id]),
+    epistemicPlurality: Object.freeze({
+      distinguish: Object.freeze(['belief', 'experience', 'hypothesis', 'symbol', 'evidence']),
+      revisionWithoutErasure: true,
+    }),
     novelAssociationCount: novelAssociations.length,
     unresolvedTensionCount: tensions.length,
     grantsAuthority: false,
