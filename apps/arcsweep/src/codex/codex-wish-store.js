@@ -40,6 +40,9 @@ import {
   recordBehaviouralDelta,
   recordLearningForgeTrainingRun,
 } from './codex-learning-forge.js';
+import { materialiseTrainingExecutionEnvelope } from './codex-training-execution-adapter.js';
+import { recordBlindLearningTrial } from './codex-blind-learning-trial.js';
+import { recordTransferAtlas } from './codex-transfer-atlas.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -126,199 +129,150 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
   }
 
   function transitionBranch(wishId, input) {
-    return updateWish(
-      wishId,
-      (wish) => transitionCodexWishBranch(wish, input),
-      `wish-branch-transitioned:${wishId}:${input?.branchId || 'unknown'}`,
-    );
+    return updateWish(wishId, (wish) => transitionCodexWishBranch(wish, input), `wish-branch-transitioned:${wishId}:${input?.branchId || 'unknown'}`);
   }
 
   function mergeBranches(wishId, input) {
-    return updateWish(
-      wishId,
-      (wish) => mergeCodexWishBranches(wish, input),
-      `wish-branches-merged:${wishId}:${input?.branchId || 'unknown'}`,
-    );
+    return updateWish(wishId, (wish) => mergeCodexWishBranches(wish, input), `wish-branches-merged:${wishId}:${input?.branchId || 'unknown'}`);
   }
 
   function proposeBranchExperiment(wishId, input) {
-    return updateWish(
-      wishId,
-      (wish) => proposeCodexBranchExperiment(wish, input),
-      `wish-branch-experiment-proposed:${wishId}:${input?.branchId || 'unknown'}`,
-    );
+    return updateWish(wishId, (wish) => proposeCodexBranchExperiment(wish, input), `wish-branch-experiment-proposed:${wishId}:${input?.branchId || 'unknown'}`);
   }
 
   function prepareExperimentPreflight(wishId, input) {
-    return updateWish(
-      wishId,
-      (wish) => prepareCodexExperimentPreflight(wish, input),
-      `wish-branch-experiment-preflight-prepared:${wishId}:${input?.proposalId || 'unknown'}`,
-    );
+    return updateWish(wishId, (wish) => prepareCodexExperimentPreflight(wish, input), `wish-branch-experiment-preflight-prepared:${wishId}:${input?.proposalId || 'unknown'}`);
   }
 
   function recordExperimentPreflightReview(wishId, input) {
-    return updateWish(
-      wishId,
-      (wish) => recordCodexExperimentPreflightReview(wish, input),
-      `wish-branch-experiment-preflight-reviewed:${wishId}:${input?.preflightId || 'unknown'}`,
-    );
+    return updateWish(wishId, (wish) => recordCodexExperimentPreflightReview(wish, input), `wish-branch-experiment-preflight-reviewed:${wishId}:${input?.preflightId || 'unknown'}`);
   }
 
   function recordBranchExperimentResult(wishId, input) {
-    return updateWish(
-      wishId,
-      (wish) => recordCodexBranchExperimentResult(wish, input),
-      `wish-branch-experiment-observed:${wishId}:${input?.branchId || 'unknown'}`,
-    );
+    return updateWish(wishId, (wish) => recordCodexBranchExperimentResult(wish, input), `wish-branch-experiment-observed:${wishId}:${input?.branchId || 'unknown'}`);
   }
 
   function recordExperimentHandoff(wishId, handoff) {
-    return updateWish(
-      wishId,
-      (wish) => recordBranchExperimentHandoff(wish, handoff),
-      `wish-branch-experiment-materialised:${wishId}:${handoff?.branchId || 'unknown'}`,
-    );
+    return updateWish(wishId, (wish) => recordBranchExperimentHandoff(wish, handoff), `wish-branch-experiment-materialised:${wishId}:${handoff?.branchId || 'unknown'}`);
   }
 
   function ingestExperimentReturn(wishId, returnObject, options = {}) {
     let ingestion = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        const result = ingestBranchExperimentReturn(current, returnObject, options);
-        const suggestionResult = addExperimentReturnSuggestions(result.wish, returnObject);
-        ingestion = Object.freeze({
-          ...result,
-          wish: suggestionResult.wish,
-          suggestions: suggestionResult.suggestions,
-          suggestionsAutomaticallyApplied: false,
-        });
-        return suggestionResult.wish;
-      },
-      `wish-branch-experiment-return-ingested:${wishId}:${returnObject?.branchId || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      const result = ingestBranchExperimentReturn(current, returnObject, options);
+      const suggestionResult = addExperimentReturnSuggestions(result.wish, returnObject);
+      ingestion = Object.freeze({ ...result, wish: suggestionResult.wish, suggestions: suggestionResult.suggestions, suggestionsAutomaticallyApplied: false });
+      return suggestionResult.wish;
+    }, `wish-branch-experiment-return-ingested:${wishId}:${returnObject?.branchId || 'unknown'}`);
     return Object.freeze({ ...ingestion, wish });
   }
 
   function addBranchSuggestion(wishId, input) {
     let outcome = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        outcome = addCodexBranchSuggestion(current, input);
-        return outcome.wish;
-      },
-      `wish-branch-suggestion-added:${wishId}:${input?.branchId || 'unknown'}:${input?.suggestionId || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      outcome = addCodexBranchSuggestion(current, input);
+      return outcome.wish;
+    }, `wish-branch-suggestion-added:${wishId}:${input?.branchId || 'unknown'}:${input?.suggestionId || 'unknown'}`);
     return Object.freeze({ ...outcome, wish });
   }
 
   function decideBranchSuggestion(wishId, input) {
     let outcome = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        outcome = decideCodexBranchSuggestion(current, input);
-        return outcome.wish;
-      },
-      `wish-branch-suggestion-decided:${wishId}:${input?.suggestionId || 'unknown'}:${input?.decision || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      outcome = decideCodexBranchSuggestion(current, input);
+      return outcome.wish;
+    }, `wish-branch-suggestion-decided:${wishId}:${input?.suggestionId || 'unknown'}:${input?.decision || 'unknown'}`);
     return Object.freeze({ ...outcome, wish });
   }
 
   function materialiseBranchSuggestion(wishId, input) {
     const index = findIndex(state.wishes, 'wishId', wishId);
     if (index < 0) throw new Error(`Unknown wish: ${wishId}`);
-    const outcome = materialiseCodexBranchSuggestion({
-      wish: state.wishes[index],
-      openQuestions: state.openQuestions,
-      ...input,
-    });
+    const outcome = materialiseCodexBranchSuggestion({ wish: state.wishes[index], openQuestions: state.openQuestions, ...input });
     const wishes = [...state.wishes];
     wishes[index] = outcome.wish;
-    commit(
-      { ...state, wishes, openQuestions: [...outcome.openQuestions] },
-      `wish-branch-suggestion-materialised:${wishId}:${input?.suggestionId || 'unknown'}`,
-    );
+    commit({ ...state, wishes, openQuestions: [...outcome.openQuestions] }, `wish-branch-suggestion-materialised:${wishId}:${input?.suggestionId || 'unknown'}`);
     return Object.freeze({ ...outcome, wish: wishes[index] });
   }
 
   function recordLearningReflection(wishId, input) {
     let outcome = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        outcome = recordCodexBranchLearningReflection(current, input);
-        return outcome.wish;
-      },
-      `wish-branch-learning-reflection:${wishId}:${input?.reflectionId || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      outcome = recordCodexBranchLearningReflection(current, input);
+      return outcome.wish;
+    }, `wish-branch-learning-reflection:${wishId}:${input?.reflectionId || 'unknown'}`);
     return Object.freeze({ ...outcome, wish });
   }
 
   function reviewLearningReflection(wishId, input) {
     let outcome = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        outcome = reviewCodexLearningReflection(current, input);
-        return outcome.wish;
-      },
-      `wish-branch-curriculum-review:${wishId}:${input?.reflectionId || 'unknown'}:${input?.outcome || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      outcome = reviewCodexLearningReflection(current, input);
+      return outcome.wish;
+    }, `wish-branch-curriculum-review:${wishId}:${input?.reflectionId || 'unknown'}:${input?.outcome || 'unknown'}`);
     return Object.freeze({ ...outcome, wish });
   }
 
   function prepareTrainingBundle(wishId, input) {
     let outcome = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        outcome = prepareLearningForgeBundle(current, input);
-        return outcome.wish;
-      },
-      `wish-learning-forge-bundle:${wishId}:${input?.bundleId || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      outcome = prepareLearningForgeBundle(current, input);
+      return outcome.wish;
+    }, `wish-learning-forge-bundle:${wishId}:${input?.bundleId || 'unknown'}`);
     return Object.freeze({ ...outcome, wish });
   }
 
   function authoriseTrainingBundle(wishId, input) {
     let outcome = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        outcome = authoriseLearningForgeBundle(current, input);
-        return outcome.wish;
-      },
-      `wish-learning-forge-authority:${wishId}:${input?.authorityId || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      outcome = authoriseLearningForgeBundle(current, input);
+      return outcome.wish;
+    }, `wish-learning-forge-authority:${wishId}:${input?.authorityId || 'unknown'}`);
+    return Object.freeze({ ...outcome, wish });
+  }
+
+  function materialiseTrainingExecution(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(wishId, (current) => {
+      outcome = materialiseTrainingExecutionEnvelope(current, input);
+      return outcome.wish;
+    }, `wish-training-execution-materialised:${wishId}:${input?.executionId || 'unknown'}`);
     return Object.freeze({ ...outcome, wish });
   }
 
   function recordTrainingRun(wishId, input) {
     let outcome = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        outcome = recordLearningForgeTrainingRun(current, input);
-        return outcome.wish;
-      },
-      `wish-learning-forge-run:${wishId}:${input?.runId || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      outcome = recordLearningForgeTrainingRun(current, input);
+      return outcome.wish;
+    }, `wish-learning-forge-run:${wishId}:${input?.runId || 'unknown'}`);
     return Object.freeze({ ...outcome, wish });
   }
 
   function recordTrainingBehaviouralDelta(wishId, input) {
     let outcome = null;
-    const wish = updateWish(
-      wishId,
-      (current) => {
-        outcome = recordBehaviouralDelta(current, input);
-        return outcome.wish;
-      },
-      `wish-learning-forge-delta:${wishId}:${input?.deltaId || 'unknown'}`,
-    );
+    const wish = updateWish(wishId, (current) => {
+      outcome = recordBehaviouralDelta(current, input);
+      return outcome.wish;
+    }, `wish-learning-forge-delta:${wishId}:${input?.deltaId || 'unknown'}`);
+    return Object.freeze({ ...outcome, wish });
+  }
+
+  function recordBlindTrial(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(wishId, (current) => {
+      outcome = recordBlindLearningTrial(current, input);
+      return outcome.wish;
+    }, `wish-blind-learning-trial:${wishId}:${input?.trialId || 'unknown'}`);
+    return Object.freeze({ ...outcome, wish });
+  }
+
+  function recordLearningTransferAtlas(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(wishId, (current) => {
+      outcome = recordTransferAtlas(current, input);
+      return outcome.wish;
+    }, `wish-transfer-atlas:${wishId}:${input?.atlasId || 'unknown'}`);
     return Object.freeze({ ...outcome, wish });
   }
 
@@ -335,11 +289,7 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
   }
 
   function observeBranch(wishId, input) {
-    return updateWish(
-      wishId,
-      (wish) => recordCodexBranchObservation(wish, input),
-      `wish-branch-observed:${wishId}:${input?.branchId || 'unknown'}`,
-    );
+    return updateWish(wishId, (wish) => recordCodexBranchObservation(wish, input), `wish-branch-observed:${wishId}:${input?.branchId || 'unknown'}`);
   }
 
   function createQuestion(input, { linkToWish = true } = {}) {
@@ -403,8 +353,11 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     reviewLearningReflection,
     prepareTrainingBundle,
     authoriseTrainingBundle,
+    materialiseTrainingExecution,
     recordTrainingRun,
     recordTrainingBehaviouralDelta,
+    recordBlindTrial,
+    recordLearningTransferAtlas,
     reviseWish,
     transformWish,
     anchorWish,
