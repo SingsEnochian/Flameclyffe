@@ -4,16 +4,22 @@ import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 
-test('ArcSweep loads bounded depth assets after the dark board theme', async () => {
+test('ArcSweep loads depth CSS after the dark board while keeping depth JS off critical HTML boot', async () => {
   const html = await read('../index.html');
   const darkBoard = html.indexOf('./src/arcsweep-dark-board.css');
   const depthCss = html.indexOf('./src/arcsweep-depth-sidecar.css');
-  const bootstrap = html.indexOf('./src/main-bootstrap.js');
-  const depthJs = html.indexOf('./src/arcsweep-depth-sidecar.js');
   assert.ok(darkBoard >= 0);
   assert.ok(depthCss > darkBoard);
-  assert.ok(bootstrap >= 0);
-  assert.ok(depthJs > bootstrap);
+  assert.doesNotMatch(html, /<script[^>]+arcsweep-depth-sidecar\.js/);
+});
+
+test('ArcSweep depth sidecar is registered once globally and once in the Vite loader graph', async () => {
+  const bootstrap = await read('../src/sidecar-bootstrap.js');
+  const specifier = './arcsweep-depth-sidecar.js';
+  const occurrences = bootstrap.split(`'${specifier}'`).length - 1;
+  assert.equal(occurrences, 2);
+  const globalBlock = bootstrap.slice(bootstrap.indexOf('const GLOBAL_SIDECARS'), bootstrap.indexOf('const CODEX_BOOT_SIDECARS'));
+  assert.match(globalBlock, /arcsweep-depth-sidecar\.js/);
 });
 
 test('ArcSweep depth sidecar is pointer-bounded and reduced-motion aware', async () => {
