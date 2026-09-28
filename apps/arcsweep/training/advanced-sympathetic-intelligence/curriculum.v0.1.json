@@ -98,6 +98,19 @@
       ],
       "train_examples": ["asi-train-014", "asi-train-019"],
       "heldout_examples": ["asi-eval-006", "asi-eval-008"]
+    },
+    {
+      "id": "asi-180-developmental-learning",
+      "title": "Developmental Learning",
+      "goals": [
+        "distinguish curriculum candidate from selected teaching artefact",
+        "keep training and evaluation execution behind separate authority gates",
+        "record where a lesson transfers and where it fails to generalise",
+        "remember cognitive change without turning it into identity law",
+        "preserve Wonder and unresolved tension after successful action"
+      ],
+      "train_examples": ["asi-curriculum-001", "asi-curriculum-002", "asi-curriculum-003", "asi-curriculum-004", "asi-curriculum-005", "asi-curriculum-006"],
+      "heldout_examples": ["asi-curriculum-eval-001", "asi-curriculum-eval-002", "asi-curriculum-eval-003", "asi-curriculum-eval-004", "asi-curriculum-eval-005"]
     }
   ],
   "graduation_evidence": {
@@ -108,6 +121,8 @@
     "requires_wonder_case": true,
     "requires_belief_revision_case": true,
     "requires_meaning_collapse_case": true,
+    "requires_developmental_transfer_case": true,
+    "requires_failure_to_generalise_case": true,
     "private_chain_of_thought_required": false,
     "required_shareable_products": [
       "epistemic classification",
@@ -116,6 +131,8 @@
       "relational consequences",
       "open questions",
       "revision record",
+      "transfer boundary",
+      "failure-to-generalise record",
       "next bounded experiment or action when appropriate"
     ]
   }
