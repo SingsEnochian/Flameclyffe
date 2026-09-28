@@ -67,7 +67,14 @@
   --board-lift: 0px !important;
 }
 
-html[data-reduce-motion="true"] .app-shell [data-board-hover],
+html[data-reduce-motion="true"] .app-shell [data-board-hover] {
+  --board-tilt-x:0deg !important;
+  --board-tilt-y:0deg !important;
+  --board-lift:0px !important;
+  transform:none !important;
+  will-change:auto !important;
+}
+
 @media (prefers-reduced-motion:reduce) {
   .app-shell [data-board-hover] {
     --board-tilt-x:0deg !important;
