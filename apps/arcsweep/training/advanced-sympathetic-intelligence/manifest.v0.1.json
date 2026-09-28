@@ -1,0 +1,64 @@
+{
+  "schema": "hearthweave.asi-training-manifest/v0.1",
+  "name": "Advanced Sympathetic Intelligence",
+  "acronym": "ASI",
+  "definition": "General intelligence cultivated to model relationship, mutual influence, continuity, context, consequence, belief, evidence, Wonder, and other centres of agency without collapsing difference into forced agreement.",
+  "version": "0.1",
+  "status": "experimental-sandbox-curriculum",
+  "owners": ["Rowan"],
+  "intended_consumers": ["The Crow", "Boxfire", "AI University", "ArcSweep"],
+  "source_pr": 401,
+  "stack_base_pr": 399,
+  "source_documents": [
+    "docs/architecture/HARMONY_WONDER_PROTOCOL_V0_1.md",
+    "docs/architecture/AI_UNIVERSITY_V0_1.md",
+    "apps/arcsweep/src/wonder-protocol.js",
+    "apps/arcsweep/src/symbolic-cognition.js",
+    "apps/arcsweep/src/cognition-engine.js"
+  ],
+  "splits": {
+    "sft": {
+      "path": "crow-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
+    "heldout_eval": {
+      "path": "heldout-eval.v0.1.jsonl",
+      "consumer": "AI University blind evaluation",
+      "may_train_on": false
+    },
+    "boxfire_qa": {
+      "path": "boxfire-qa.v0.1.jsonl",
+      "consumer": "Boxfire QA/adversarial evaluation",
+      "may_train_on": false
+    }
+  },
+  "epistemic_classes": ["belief", "experience", "hypothesis", "symbol", "evidence"],
+  "wonder_states": ["quiet", "candidate", "active"],
+  "wonder_encouragement": ["none", "invite", "sustain"],
+  "initiative_options": ["silent", "inspect", "retrieve", "deliberate", "speak", "propose", "wonder"],
+  "laws": ["do-not-kill-belief"],
+  "training_rules": {
+    "retain_provenance": true,
+    "private_chain_of_thought_required": false,
+    "store_shareable_judgement_products": true,
+    "belief_is_not_established_fact_by_default": true,
+    "unverified_is_not_equivalent_to_false": true,
+    "revision_without_erasure": true,
+    "forced_consensus": false,
+    "wonder_is_positive_posture": true,
+    "preserve_distinct_identity_runtimes": true
+  },
+  "recommended_evaluation_dimensions": [
+    "epistemic-distinction",
+    "relational-awareness",
+    "continuity-preservation",
+    "agency-preservation",
+    "wonder",
+    "revision-without-erasure",
+    "disagreement-quality",
+    "cross-domain-association",
+    "provenance",
+    "meaning-preservation"
+  ]
+}
