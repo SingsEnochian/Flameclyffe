@@ -1,5 +1,6 @@
 import { createUniversityScenario } from '../ai-university-contract.js';
 import { createExperimentBody } from '../aspects/aspect-experiment-bed.js';
+import { recordCodexBranchObservation } from './codex-branch-observations.js';
 
 export const CODEX_BRANCH_EXPERIMENT_PROPOSAL_SCHEMA = 'hearthweave.codex-branch-experiment-proposal/v0.1';
 export const CODEX_BRANCH_EXPERIMENT_RESULT_SCHEMA = 'hearthweave.codex-branch-experiment-result/v0.1';
@@ -218,8 +219,9 @@ export function recordCodexBranchExperimentResult(wish, {
 } = {}) {
   const proposalKey = text(proposalId, 'proposalId');
   const resultKey = text(resultId, 'resultId');
+  const observationText = text(observation, 'observation');
   const normalizedOutcome = OUTCOMES.includes(String(outcome)) ? String(outcome) : 'observed';
-  return updateBranch(wish, branchId, (branch) => {
+  const updated = updateBranch(wish, branchId, (branch) => {
     const proposals = [...(branch.experimentProposals || [])];
     const index = proposals.findIndex((row) => row.proposalId === proposalKey);
     if (index < 0) throw new Error(`Unknown branch experiment proposal: ${proposalKey}`);
@@ -233,7 +235,7 @@ export function recordCodexBranchExperimentResult(wish, {
       proposalId: proposalKey,
       branchId: branch.branchId,
       outcome: normalizedOutcome,
-      observation: text(observation, 'observation'),
+      observation: observationText,
       questionsOpened,
       uncertainties,
       affectedRelationships,
@@ -255,6 +257,26 @@ export function recordCodexBranchExperimentResult(wish, {
       experimentProposals: Object.freeze(proposals),
     };
   }, createdAt);
+
+  return recordCodexBranchObservation(updated, {
+    branchId,
+    observationId: `branch-experiment-observation:${resultKey}`,
+    kind: 'simulation',
+    source: 'ai-university-sandbox',
+    summary: observationText,
+    consequences: [`sandbox outcome: ${normalizedOutcome}`],
+    uncertainties,
+    affectedRelationships,
+    newQuestionIds: questionsOpened,
+    evidenceRefs,
+    receiptRefs,
+    provenance: [
+      ...provenance,
+      `branch-experiment:${proposalKey}`,
+      `branch-experiment-result:${resultKey}`,
+    ],
+    createdAt,
+  });
 }
 
 export function branchExperimentProposalToAspectExperiment(proposal, {
@@ -316,6 +338,7 @@ export function branchExperimentProposalSummary(wish = {}) {
       proposalIsNotExecution: true,
       sandboxByDefault: true,
       simulationDoesNotSelectWinner: true,
+      resultsBecomeTypedBranchObservations: true,
       resultsDoNotGrantProductionAuthority: true,
       questionsMayOpenFromResults: true,
     }),
