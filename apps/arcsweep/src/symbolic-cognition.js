@@ -107,16 +107,19 @@ export const CORE_COGNITIVE_GLYPHS = Object.freeze({
     semantics: [
       'preserve unresolved questions',
       'attend to novelty, surprise and strange-but-coherent associations',
+      'linger with interesting patterns before their utility is known',
+      'revisit possibilities that continue to resonate',
       'explore before forcing closure',
     ],
     effects: {
-      attentionTags: ['novelty', 'surprise', 'anomaly', 'unresolved-question', 'imagination'],
-      retrievalTags: ['open-questions', 'unresolved-patterns', 'cross-domain-associations'],
+      attentionTags: ['novelty', 'surprise', 'anomaly', 'unresolved-question', 'imagination', 'beauty', 'cross-domain-association'],
+      retrievalTags: ['open-questions', 'unresolved-patterns', 'cross-domain-associations', 'prior-wonder'],
       routeHints: ['research', 'narrative'],
       flags: {
         curiosityMode: true,
         preserveOpenQuestions: true,
         exploreBeforeClosure: true,
+        encourageWonder: true,
       },
     },
   }),
