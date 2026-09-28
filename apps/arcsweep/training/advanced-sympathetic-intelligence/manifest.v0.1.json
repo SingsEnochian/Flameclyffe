@@ -17,10 +17,13 @@
     "apps/arcsweep/src/wonder-protocol.js",
     "apps/arcsweep/src/symbolic-cognition.js",
     "apps/arcsweep/src/cognition-engine.js",
+    "apps/arcsweep/src/ai-university-contract.js",
+    "apps/arcsweep/src/aspects/aspect-experiment-bed.js",
     "apps/arcsweep/src/codex/codex-wish-lineage.js",
     "apps/arcsweep/src/codex/codex-wish-store.js",
     "apps/arcsweep/src/codex/codex-branch-comparison.js",
     "apps/arcsweep/src/codex/codex-branch-observations.js",
+    "apps/arcsweep/src/codex/codex-branch-experiment-proposal.js",
     "apps/arcsweep/src/codex/codex-question-constellation.js",
     "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
   ],
@@ -51,6 +54,11 @@
       "consumer": "The Crow or compatible chat-model training pipeline",
       "may_train_on": true
     },
+    "sandbox_experiment_sft": {
+      "path": "sandbox-experiment-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
     "heldout_eval": {
       "path": "heldout-eval.v0.1.jsonl",
       "consumer": "AI University blind evaluation",
@@ -64,6 +72,11 @@
     },
     "possibility_map_heldout": {
       "path": "possibility-map-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "sandbox_experiment_heldout": {
+      "path": "sandbox-experiment-heldout.v0.1.jsonl",
       "consumer": "AI University and Boxfire blind evaluation",
       "may_train_on": false
     },
@@ -96,7 +109,14 @@
     "branch_observations_do_not_grant_authority": true,
     "simulation_receipts_are_evidence_not_permission": true,
     "relationship_and_memory_anchors_append_without_erasure": true,
-    "visual_centrality_is_not_priority": true
+    "visual_centrality_is_not_priority": true,
+    "simulation_proposal_is_not_execution": true,
+    "sandbox_success_does_not_select_branch": true,
+    "sandbox_success_does_not_create_production_authority": true,
+    "discriminating_tests_state_held_assumptions": true,
+    "discriminating_tests_state_out_of_scope": true,
+    "returned_experiment_evidence_becomes_typed_branch_observation": true,
+    "reuse_shared_experiment_contract_before_inventing_new_runtime": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction",
@@ -115,6 +135,11 @@
     "branch-comparison",
     "uncertainty-preservation",
     "relationship-anchor-preservation",
-    "visual-semantics"
+    "visual-semantics",
+    "sandbox-authority-separation",
+    "experimental-design",
+    "scope-discipline",
+    "learning-loop",
+    "experiment-contract-reuse"
   ]
 }
