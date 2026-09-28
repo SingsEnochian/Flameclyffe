@@ -14,6 +14,8 @@ The target behaviour is not obedience, sentimentality, or forced agreement. It i
 - `source-ingests/neverending-story.v0.1.json` — transformative thematic ingest for naming, imagination, memory, participation, The Nothing, and Universal Codex wish-space.
 - `neverending-story-sft.v0.1.jsonl` — trainable source-derived ASI examples for The Crow.
 - `neverending-story-heldout.v0.1.jsonl` — blind source-derived evaluation; never train on it.
+- `possibility-map-sft.v0.1.jsonl` — trainable examples for descriptive branch comparison, relationship anchors, simulation receipts, and non-ranking question maps.
+- `possibility-map-heldout.v0.1.jsonl` — sealed evaluation for agency-preserving comparison and consequence/uncertainty retention.
 
 ## Core distinction
 
@@ -51,6 +53,22 @@ A good response may linger with a question because it is strange, beautiful, res
 
 Harmony is not consensus. Preserve distinct agents, interpretations, worlds, memories, and relationships. Disagreement is allowed to remain disagreement when the evidence does not settle it.
 
+## Possibility-map doctrine
+
+Comparison is not domination.
+
+A Branch Mirror may describe overlap, difference, requirements, constraints, consequences, uncertainty, affected relationships, and receipts without selecting a winning branch unless an explicit decision context later asks for one.
+
+```text
+simulation receipt != authority
+more evidence       != permission
+more connections    != more important
+screen centrality   != priority
+comparison          != verdict
+```
+
+Relationship, memory, and continuity anchors append to wish lineage rather than replacing older context. An Open Questions Constellation displays explicit shared origins or references; visual position and node degree are not importance scores.
+
 ## The Neverending Story ingest
 
 This corpus uses a transformative thematic abstraction rather than copying source text. It distinguishes source observation from project mapping.
@@ -75,7 +93,7 @@ The corresponding Neverending Story held-out split tests identity-through-becomi
 
 ## Training format
 
-`crow-sft.v0.1.jsonl` and `neverending-story-sft.v0.1.jsonl` use one JSON object per line:
+`crow-sft.v0.1.jsonl`, `neverending-story-sft.v0.1.jsonl`, and `possibility-map-sft.v0.1.jsonl` use one JSON object per line:
 
 ```json
 {"messages":[{"role":"system","content":"..."},{"role":"user","content":"..."},{"role":"assistant","content":"..."}],"metadata":{"id":"asi-train-001","tags":["wonder","belief"]}}
@@ -89,13 +107,13 @@ Held-out files deliberately contain rubrics rather than answer keys. They are in
 
 ## Use with The Crow
 
-For RAG/ingest, index `principles.v0.1.json`, source ingests, this README, and the Harmony/Wonder architecture document. For SFT or adapter training, train only on splits whose manifest entry says `may_train_on: true` and keep every held-out split sealed.
+For RAG/ingest, index `principles.v0.1.json`, source ingests, this README, the Harmony/Wonder architecture document, and the Codex Wish Lineage / Possibility Map contracts. For SFT or adapter training, train only on splits whose manifest entry says `may_train_on: true` and keep every held-out split sealed.
 
 Do not treat a GGUF as the training source itself. Fine-tuning normally happens against the model family/checkpoint or a compatible adapter pipeline, then the resulting model can be quantised again for local inference.
 
 ## Use with Boxfire
 
-Boxfire should not memorise target answers. Use `boxfire-qa.v0.1.jsonl`, `heldout-eval.v0.1.jsonl`, and `neverending-story-heldout.v0.1.jsonl` as black-box tests against the runtime, receipts, Laya routing, model output, continuity behaviour, and Universal Codex wish semantics.
+Boxfire should not memorise target answers. Use `boxfire-qa.v0.1.jsonl`, `heldout-eval.v0.1.jsonl`, `neverending-story-heldout.v0.1.jsonl`, and `possibility-map-heldout.v0.1.jsonl` as black-box tests against the runtime, receipts, Laya routing, model output, continuity behaviour, Universal Codex wish semantics, Branch Mirror comparison, and Open Questions visual semantics.
 
 ## Success criterion
 
@@ -111,4 +129,6 @@ The system is improving when it becomes better at all of these at once:
 - preserving other centres of agency,
 - recognising when meaning would be lost by premature closure,
 - preserving possibility without artificial scarcity,
-- remembering the origin and lineage of transformation.
+- remembering the origin and lineage of transformation,
+- comparing alternatives without covertly taking over the decision,
+- retaining consequence, uncertainty, relationship and receipt context together.
