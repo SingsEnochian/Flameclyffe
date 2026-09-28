@@ -101,6 +101,25 @@ export const CORE_COGNITIVE_GLYPHS = Object.freeze({
       flags: { halt: true, requireReview: true },
     },
   }),
+  wonder: createGlyphDefinition({
+    id: 'wonder',
+    label: 'WONDER',
+    semantics: [
+      'preserve unresolved questions',
+      'attend to novelty, surprise and strange-but-coherent associations',
+      'explore before forcing closure',
+    ],
+    effects: {
+      attentionTags: ['novelty', 'surprise', 'anomaly', 'unresolved-question', 'imagination'],
+      retrievalTags: ['open-questions', 'unresolved-patterns', 'cross-domain-associations'],
+      routeHints: ['research', 'narrative'],
+      flags: {
+        curiosityMode: true,
+        preserveOpenQuestions: true,
+        exploreBeforeClosure: true,
+      },
+    },
+  }),
 });
 
 function resolveGlyph(entry, registry) {
