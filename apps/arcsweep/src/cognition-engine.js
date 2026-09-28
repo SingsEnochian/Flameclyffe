@@ -14,12 +14,14 @@ export function createCognitionEngine({
   layaInvoke,
   modelInvoke,
   retrieveContext = async () => [],
+  retrieveDevelopmentalContext = async () => [],
   glyphRegistry = null,
   cognitiveFieldConfig = null,
 } = {}) {
   if (typeof layaInvoke !== 'function') throw new Error('Cognition engine requires a Laya invoke adapter.');
   if (typeof modelInvoke !== 'function') throw new Error('Cognition engine requires a model invoke adapter.');
   if (typeof retrieveContext !== 'function') throw new Error('retrieveContext must be a function.');
+  if (typeof retrieveDevelopmentalContext !== 'function') throw new Error('retrieveDevelopmentalContext must be a function.');
 
   const fieldStates = new Map();
 
@@ -90,6 +92,7 @@ export function createCognitionEngine({
           cognitiveFieldReceipt: null,
           wonderState,
           context: Object.freeze([]),
+          developmentalContext: Object.freeze([]),
           modelBinding: null,
           output: null,
           actionEvaluation,
@@ -98,11 +101,13 @@ export function createCognitionEngine({
       }
 
       const context = await retrieveContext({ runtime, input, symbolicState });
+      const developmentalContext = await retrieveDevelopmentalContext({ runtime, input, symbolicState });
       const contextRefs = freezeArray((context || []).map((entry) => entry.ref).filter(Boolean));
+      const developmentalRefs = freezeArray((developmentalContext || []).map((entry) => entry.ref).filter(Boolean));
       const fieldStep = stepCognitiveField({
         state: currentField(runtime),
         symbolicState,
-        continuitySlice: context,
+        continuitySlice: [...(context || []), ...(developmentalContext || [])],
         recentEvents: [input],
         config: cognitiveFieldConfig || undefined,
       });
@@ -135,7 +140,7 @@ export function createCognitionEngine({
           wonderState,
           modelBinding: null,
           actionEvaluation,
-          evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
+          evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs, ...developmentalRefs]),
         });
 
         return Object.freeze({
@@ -149,6 +154,7 @@ export function createCognitionEngine({
           cognitiveFieldReceipt: fieldStep.receipt,
           wonderState,
           context: freezeArray(context),
+          developmentalContext: freezeArray(developmentalContext),
           modelBinding: null,
           output: null,
           actionEvaluation,
@@ -171,7 +177,7 @@ export function createCognitionEngine({
             humanReview: true,
             reason: 'No enabled model binding satisfies the selected cognitive route.',
           }),
-          evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
+          evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs, ...developmentalRefs]),
         });
 
         return Object.freeze({
@@ -185,6 +191,7 @@ export function createCognitionEngine({
           cognitiveFieldReceipt: fieldStep.receipt,
           wonderState,
           context: freezeArray(context),
+          developmentalContext: freezeArray(developmentalContext),
           modelBinding: null,
           output: null,
           actionEvaluation: receipt.actionEvaluation,
@@ -211,7 +218,7 @@ export function createCognitionEngine({
         wonderState,
         modelBinding,
         actionEvaluation,
-        evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs]),
+        evidenceRefs: freezeArray([...evidenceRefs, ...contextRefs, ...developmentalRefs]),
       });
 
       return Object.freeze({
@@ -225,6 +232,7 @@ export function createCognitionEngine({
         cognitiveFieldReceipt: fieldStep.receipt,
         wonderState,
         context: freezeArray(context),
+        developmentalContext: freezeArray(developmentalContext),
         modelBinding,
         output,
         actionEvaluation,
