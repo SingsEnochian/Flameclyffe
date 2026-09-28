@@ -106,5 +106,6 @@ if (typeof document !== 'undefined') {
   void import('./wish-grove-possibility-map-sidecar.js');
   void import('./wish-grove-branch-lifecycle-sidecar.js');
   void import('./wish-grove-world-tree-sidecar.js');
+  void import('./wish-grove-ai-university-sidecar.js');
   void bootstrapRuntimeIntegration();
 }
