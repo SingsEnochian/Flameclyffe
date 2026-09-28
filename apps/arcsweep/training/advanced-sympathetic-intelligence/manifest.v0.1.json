@@ -19,6 +19,7 @@
     "docs/architecture/UNIVERSAL_CODEX_CURRICULUM_REVIEW_DEVELOPMENTAL_MEMORY_V0_1.md",
     "docs/architecture/UNIVERSAL_CODEX_LEARNING_FORGE_V0_1.md",
     "docs/architecture/UNIVERSAL_CODEX_BLIND_TRIAL_TRANSFER_ATLAS_V0_1.md",
+    "docs/architecture/UNIVERSAL_CODEX_DEVELOPMENTAL_FIELD_FEEDBACK_V0_1.md",
     "apps/arcsweep/src/wonder-protocol.js",
     "apps/arcsweep/src/symbolic-cognition.js",
     "apps/arcsweep/src/cognition-engine.js",
@@ -38,6 +39,7 @@
     "apps/arcsweep/src/codex/codex-training-execution-adapter.js",
     "apps/arcsweep/src/codex/codex-blind-learning-trial.js",
     "apps/arcsweep/src/codex/codex-transfer-atlas.js",
+    "apps/arcsweep/src/codex/codex-developmental-field-feedback.js",
     "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
   ],
   "source_ingests": [
@@ -60,6 +62,7 @@
     "curriculum_review_sft": {"path": "curriculum-review-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
     "learning_forge_sft": {"path": "learning-forge-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
     "learning_trial_sft": {"path": "learning-trial-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
+    "developmental_field_sft": {"path": "developmental-field-sft.v0.1.jsonl", "consumer": "The Crow or compatible chat-model training pipeline", "may_train_on": true},
     "heldout_eval": {"path": "heldout-eval.v0.1.jsonl", "consumer": "AI University blind evaluation", "may_train_on": false},
     "neverending_story_heldout": {"path": "neverending-story-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false, "source_ingest": "neverending-story"},
     "possibility_map_heldout": {"path": "possibility-map-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
@@ -69,6 +72,7 @@
     "curriculum_review_heldout": {"path": "curriculum-review-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
     "learning_forge_heldout": {"path": "learning-forge-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
     "learning_trial_heldout": {"path": "learning-trial-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
+    "developmental_field_heldout": {"path": "developmental-field-heldout.v0.1.jsonl", "consumer": "AI University and Boxfire blind evaluation", "may_train_on": false},
     "boxfire_qa": {"path": "boxfire-qa.v0.1.jsonl", "consumer": "Boxfire QA/adversarial evaluation", "may_train_on": false}
   },
   "epistemic_classes": ["belief", "experience", "hypothesis", "symbol", "evidence"],
@@ -140,7 +144,13 @@
     "blind_evaluation_does_not_create_overall_verdict": true,
     "unknown_transfer_is_not_failure": true,
     "partial_transfer_is_not_universality": true,
-    "transfer_atlas_is_descriptive_not_authoritative": true
+    "transfer_atlas_is_descriptive_not_authoritative": true,
+    "developmental_field_feedback_requires_explicit_scope": true,
+    "cross_runtime_memory_is_not_shared_memory": true,
+    "developmental_evidence_is_not_direct_model_prompt": true,
+    "field_influence_is_not_authority": true,
+    "recent_selection_is_not_importance": true,
+    "developmental_feedback_preserves_regressions_partial_and_unknown_transfer": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction", "relational-awareness", "continuity-preservation", "agency-preservation", "wonder",
@@ -151,6 +161,7 @@
     "suggestion-materialisation", "native-contract-reuse", "reflection-quality", "wonder-preservation-after-action", "curriculum-review",
     "split-integrity", "developmental-memory", "transfer", "failure-to-generalise", "training-authority", "dataset-immutability",
     "heldout-integrity", "behavioural-delta", "regression-preservation", "unexpected-change", "self-governance",
-    "training-execution", "blind-evaluation", "same-cohort-integrity", "transfer-atlas", "partial-transfer", "unknown-vs-failure"
+    "training-execution", "blind-evaluation", "same-cohort-integrity", "transfer-atlas", "partial-transfer", "unknown-vs-failure",
+    "developmental-field", "field-vs-prompt", "continuity-boundary", "low-authority-context", "recent-selection-non-ranking"
   ]
 }
