@@ -102,5 +102,6 @@ if (typeof document !== 'undefined') {
   // stylesheet as an ES module.
   void import('./universal-codex-artefact-motion-sidecar.js');
   void import('./wish-grove-sidecar.js');
+  void import('./wish-grove-wonder-return-sidecar.js');
   void bootstrapRuntimeIntegration();
 }
