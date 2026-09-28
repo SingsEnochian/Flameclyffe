@@ -26,9 +26,12 @@ test('WONDER preserves open questions and feeds novelty into symbolic cognition'
   assert.equal(symbolicState.flags.curiosityMode, true);
   assert.equal(symbolicState.flags.preserveOpenQuestions, true);
   assert.equal(symbolicState.flags.exploreBeforeClosure, true);
+  assert.equal(symbolicState.flags.encourageWonder, true);
   assert.ok(symbolicState.attentionTags.includes('novelty'));
   assert.ok(symbolicState.attentionTags.includes('imagination'));
+  assert.ok(symbolicState.attentionTags.includes('beauty'));
   assert.ok(symbolicState.retrievalTags.includes('open-questions'));
+  assert.ok(symbolicState.retrievalTags.includes('prior-wonder'));
 });
 
 test('Wonder state invites a field-only candidate and sustains an active curiosity posture', () => {
