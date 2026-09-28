@@ -1,0 +1,89 @@
+/* Astra 6 · bounded spatial depth for ArcSweep.
+   Presentation only. Semantic state, canon, identity and authority remain untouched. */
+
+.app-shell[data-board-depth="sculpted"] {
+  --board-tilt-x: 0deg;
+  --board-tilt-y: 0deg;
+}
+
+@media (pointer:fine) and (prefers-reduced-motion:no-preference) {
+  .app-shell[data-board-depth="sculpted"] .hero.panel,
+  .app-shell[data-board-depth="sculpted"] .grid > .panel,
+  .app-shell[data-board-depth="sculpted"] .split-layout > .panel {
+    transform-style: preserve-3d;
+    transform:
+      rotateX(var(--board-tilt-x,0deg))
+      rotateY(var(--board-tilt-y,0deg))
+      translateZ(var(--board-lift,0px));
+    transition:
+      transform 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+    will-change: transform;
+  }
+
+  .app-shell[data-board-depth="sculpted"] .hero.panel[data-board-hover="true"] {
+    --board-lift: 10px;
+    box-shadow:
+      inset 0 1px rgba(255,255,255,.055),
+      inset 0 -18px 42px rgba(0,0,0,.24),
+      0 34px 92px rgba(0,0,0,.42),
+      0 7px 17px rgba(0,0,0,.24);
+  }
+
+  .app-shell[data-board-depth="sculpted"] .grid > .panel[data-board-hover="true"],
+  .app-shell[data-board-depth="sculpted"] .split-layout > .panel[data-board-hover="true"] {
+    --board-lift: 7px;
+    border-color: rgba(107,225,221,.24);
+    box-shadow:
+      inset 0 1px rgba(255,255,255,.045),
+      inset 0 -1px rgba(0,0,0,.48),
+      0 24px 54px rgba(0,0,0,.34),
+      0 5px 12px rgba(0,0,0,.22);
+  }
+
+  .app-shell[data-board-depth="sculpted"] .hero.panel > *,
+  .app-shell[data-board-depth="sculpted"] .grid > .panel > *,
+  .app-shell[data-board-depth="sculpted"] .split-layout > .panel > * {
+    position: relative;
+    transform: translateZ(1px);
+  }
+}
+
+/* Never tilt floating Houseglass, modals, nested evidence wells, or long-form social entries. */
+#houseglass,
+.modal-backdrop,
+.return-dialog,
+.panel .panel,
+.panel fieldset,
+.panel .runtime-flame,
+.panel .commons-entry,
+.panel .queue-entry,
+.panel .working-card,
+.panel .attachment-box,
+.panel .story-soundscape {
+  --board-tilt-x: 0deg !important;
+  --board-tilt-y: 0deg !important;
+  --board-lift: 0px !important;
+}
+
+html[data-reduce-motion="true"] .app-shell [data-board-hover],
+@media (prefers-reduced-motion:reduce) {
+  .app-shell [data-board-hover] {
+    --board-tilt-x:0deg !important;
+    --board-tilt-y:0deg !important;
+    --board-lift:0px !important;
+    transform:none !important;
+    will-change:auto !important;
+  }
+}
+
+@media (pointer:coarse) {
+  .app-shell [data-board-hover] {
+    --board-tilt-x:0deg !important;
+    --board-tilt-y:0deg !important;
+    --board-lift:0px !important;
+    transform:none !important;
+    will-change:auto !important;
+  }
+}
