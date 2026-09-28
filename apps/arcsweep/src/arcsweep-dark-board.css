@@ -14,6 +14,13 @@
   --board-muted: #8e9b99;
   --board-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
   --board-inset: inset 0 1px rgba(255, 255, 255, 0.025);
+  --board-e0: inset 0 1px rgba(255,255,255,.025), inset 0 -1px rgba(0,0,0,.5);
+  --board-e1: 0 8px 18px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.025);
+  --board-e2: 0 16px 38px rgba(0,0,0,.28), 0 2px 0 rgba(255,255,255,.025);
+  --board-e3: 0 26px 78px rgba(0,0,0,.42), 0 1px 0 rgba(255,255,255,.035);
+  --board-well: inset 0 1px 12px rgba(0,0,0,.46), inset 0 1px rgba(255,255,255,.018);
+  --board-edge-light: rgba(255,255,255,.045);
+  --board-edge-dark: rgba(0,0,0,.52);
 
   /* Rebind existing ArcSweep tokens without changing the semantic contract. */
   --bg: var(--board-void);
@@ -40,15 +47,40 @@ body {
 
 /* Dark-board shell: high density, low noise, strong information hierarchy. */
 .app-shell {
-  background: linear-gradient(135deg, rgba(255,255,255,0.008), transparent 34%);
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.008), transparent 20rem),
+    linear-gradient(135deg, rgba(255,255,255,0.008), transparent 34%);
+  perspective: 1600px;
+  perspective-origin: 58% 32%;
+}
+
+.content {
+  position: relative;
+  isolation: isolate;
+}
+
+.content::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0 0 0 16rem;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% -8%, rgba(255,255,255,.028), transparent 34rem),
+    linear-gradient(115deg, transparent 0 43%, rgba(107,225,221,.018) 43.2% 43.35%, transparent 43.55% 100%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.8), transparent 82%);
 }
 
 .sidebar {
   background:
-    linear-gradient(180deg, rgba(10, 11, 16, 0.98), rgba(6, 7, 10, 0.985)),
+    linear-gradient(180deg, rgba(16, 18, 24, 0.985), rgba(6, 7, 10, 0.995)),
     var(--board-abyss);
   border-right-color: var(--board-line);
-  box-shadow: 18px 0 54px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    20px 0 54px rgba(0, 0, 0, 0.26),
+    inset -1px 0 rgba(255,255,255,.018),
+    inset -8px 0 22px rgba(0,0,0,.24);
+  z-index: 30;
 }
 
 .brand {
@@ -57,12 +89,28 @@ body {
   border-bottom: 1px solid rgba(255,255,255,0.035);
 }
 
+.brand::after {
+  content: "";
+  position: absolute;
+  left: .5rem;
+  right: 42%;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(214,180,111,.65), transparent);
+}
+
 .brand-mark {
   border-radius: 0.72rem 0.72rem 0.72rem 0.24rem;
   border-color: rgba(214, 180, 111, 0.42);
   color: var(--board-gold);
-  background: linear-gradient(145deg, rgba(214,180,111,.09), rgba(107,225,221,.025));
-  box-shadow: var(--board-inset), 0 0 24px rgba(214,180,111,.05);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.04), transparent 40%),
+    linear-gradient(145deg, rgba(214,180,111,.11), rgba(107,225,221,.025));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.08),
+    inset 0 -7px 14px rgba(0,0,0,.2),
+    0 8px 18px rgba(0,0,0,.24),
+    0 0 24px rgba(214,180,111,.05);
 }
 
 .brand strong,
@@ -98,21 +146,29 @@ body {
   border-radius: 0.65rem 0.65rem 0.65rem 0.2rem;
   border: 1px solid transparent;
   color: #919e9b;
-  transition: color 150ms ease, background 150ms ease, border-color 150ms ease, transform 150ms ease;
+  box-shadow: inset 0 1px rgba(255,255,255,.008);
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
 }
 
 .nav-button:hover:not(:disabled) {
   color: var(--board-text);
-  background: rgba(107, 225, 221, 0.035);
+  background:
+    linear-gradient(90deg, rgba(107,225,221,.055), rgba(255,255,255,.012));
   border-color: rgba(107, 225, 221, 0.16);
-  transform: translateX(2px);
+  transform: translateX(3px) translateZ(6px);
+  box-shadow: inset 2px 0 rgba(107,225,221,.5), 0 6px 16px rgba(0,0,0,.16);
 }
 
 .nav-button.active {
   color: var(--board-text);
-  background: linear-gradient(90deg, rgba(107,225,221,.085), rgba(214,180,111,.025));
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.02), transparent 40%),
+    linear-gradient(90deg, rgba(107,225,221,.09), rgba(214,180,111,.025));
   border-color: rgba(107,225,221,.26);
-  box-shadow: inset 2px 0 var(--board-teal), var(--board-inset);
+  box-shadow:
+    inset 2px 0 var(--board-teal),
+    inset 0 1px rgba(255,255,255,.035),
+    0 8px 20px rgba(0,0,0,.2);
 }
 
 .sidebar-world,
@@ -128,9 +184,9 @@ fieldset,
 .notice-card {
   border-color: var(--board-line);
   background:
-    linear-gradient(155deg, rgba(255,255,255,.018), transparent 38%),
-    var(--board-panel);
-  box-shadow: var(--board-inset), 0 14px 40px rgba(0,0,0,.18);
+    linear-gradient(155deg, rgba(255,255,255,.022), transparent 34%),
+    linear-gradient(180deg, rgba(20,23,30,.94), rgba(9,11,15,.95));
+  box-shadow: var(--board-e1), var(--board-e0);
 }
 
 .panel,
@@ -142,6 +198,13 @@ fieldset,
   border-radius: 0.86rem 0.86rem 0.86rem 0.24rem;
 }
 
+.panel,
+.applet-card,
+.item-card {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
 .panel::before,
 .applet-card::before,
 .item-card::before {
@@ -151,25 +214,108 @@ fieldset,
   width: 2.25rem;
   height: 1px;
   background: linear-gradient(90deg, var(--board-gold), transparent);
-  opacity: .48;
+  opacity: .52;
   pointer-events: none;
 }
 
-.panel,
-.applet-card,
-.item-card {
-  position: relative;
+.panel::after,
+.applet-card::after,
+.item-card::after {
+  content: "";
+  position: absolute;
+  inset: auto .55rem -.22rem .55rem;
+  height: .34rem;
+  border-radius: 0 0 .8rem .18rem;
+  background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.02));
+  filter: blur(.7px);
+  opacity: .72;
+  pointer-events: none;
+  transform: translateZ(-1px);
+}
+
+.panel {
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.035),
+    inset 0 -1px rgba(0,0,0,.42),
+    0 12px 28px rgba(0,0,0,.22),
+    0 2px 5px rgba(0,0,0,.2);
+}
+
+.grid > .panel,
+.split-layout > .panel,
+.split-layout > article.panel,
+.split-layout > aside.panel {
+  transform: translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.grid > .panel:hover,
+.split-layout > .panel:hover,
+.split-layout > article.panel:hover,
+.split-layout > aside.panel:hover {
+  transform: translateY(-2px) translateZ(10px);
+  border-color: rgba(107,225,221,.22);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.045),
+    inset 0 -1px rgba(0,0,0,.48),
+    0 22px 46px rgba(0,0,0,.3),
+    0 4px 9px rgba(0,0,0,.24);
+}
+
+.panel .panel,
+.panel fieldset,
+.panel .runtime-flame,
+.panel .commons-entry,
+.panel .queue-entry,
+.panel .working-card,
+.panel .attachment-box,
+.panel .story-soundscape {
+  box-shadow: var(--board-well);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.009), transparent 22%),
+    rgba(4,6,9,.48);
 }
 
 .hero {
+  overflow: hidden;
+  border-color: rgba(214,180,111,.22);
   background:
-    radial-gradient(circle at 86% 18%, rgba(107,225,221,.055), transparent 24rem),
-    radial-gradient(circle at 14% 92%, rgba(154,120,199,.04), transparent 24rem),
-    linear-gradient(145deg, rgba(19,22,28,.96), rgba(8,10,14,.96));
+    radial-gradient(circle at 86% 18%, rgba(107,225,221,.075), transparent 24rem),
+    radial-gradient(circle at 14% 92%, rgba(154,120,199,.055), transparent 24rem),
+    linear-gradient(145deg, rgba(23,26,34,.97), rgba(8,10,14,.98));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.05),
+    inset 0 -18px 42px rgba(0,0,0,.22),
+    0 28px 72px rgba(0,0,0,.34),
+    0 4px 12px rgba(0,0,0,.22);
 }
 
 .hero::after {
   color: rgba(214, 180, 111, 0.035);
+  transform: translateZ(-2px);
+}
+
+.hero .world-ribbon,
+.hero .button-row,
+.hero .facts {
+  position: relative;
+  z-index: 1;
+}
+
+.section-heading {
+  position: relative;
+  padding-bottom: .78rem;
+}
+
+.section-heading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(214,180,111,.34), rgba(107,225,221,.11) 42%, transparent 82%);
+  pointer-events: none;
 }
 
 .eyebrow,
@@ -189,27 +335,50 @@ legend,
 
 button,
 .file-button {
+  position: relative;
   border-radius: 0.62rem 0.62rem 0.62rem 0.18rem;
   border-color: rgba(214,180,111,.36);
-  background: linear-gradient(180deg, rgba(214,180,111,.16), rgba(214,180,111,.07));
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 42%),
+    linear-gradient(180deg, rgba(214,180,111,.17), rgba(214,180,111,.065));
   color: #f5e7c8;
-  box-shadow: var(--board-inset);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.05),
+    inset 0 -1px rgba(0,0,0,.35),
+    0 5px 10px rgba(0,0,0,.18);
   transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, color 140ms ease, box-shadow 140ms ease;
 }
 
 button:hover:not(:disabled),
 .file-button:hover {
   filter: none;
+  transform: translateY(-1px);
   border-color: rgba(107,225,221,.44);
-  background: linear-gradient(180deg, rgba(107,225,221,.105), rgba(107,225,221,.04));
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), transparent 42%),
+    linear-gradient(180deg, rgba(107,225,221,.12), rgba(107,225,221,.045));
   color: var(--board-text);
-  box-shadow: var(--board-inset), 0 0 22px rgba(107,225,221,.05);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.06),
+    inset 0 -1px rgba(0,0,0,.38),
+    0 8px 18px rgba(0,0,0,.22),
+    0 0 22px rgba(107,225,221,.035);
+}
+
+button:active:not(:disabled),
+.file-button:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 2px 7px rgba(0,0,0,.36),
+    inset 0 1px rgba(255,255,255,.025);
 }
 
 button.quiet,
 button.icon-button,
 button.icon-inline {
-  background: rgba(255,255,255,.012);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), transparent),
+    rgba(255,255,255,.008);
   border-color: var(--board-line);
   color: var(--board-muted);
 }
@@ -230,15 +399,21 @@ textarea,
 select {
   border-radius: 0.62rem 0.62rem 0.62rem 0.18rem;
   border-color: var(--board-line);
-  background: rgba(2, 4, 6, 0.72);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.012), transparent 28%),
+    rgba(2, 4, 6, 0.78);
   color: var(--board-text);
-  box-shadow: inset 0 1px rgba(255,255,255,.018);
+  box-shadow: var(--board-well);
 }
 
 input:hover,
 textarea:hover,
 select:hover {
   border-color: rgba(107,225,221,.24);
+}
+
+fieldset {
+  box-shadow: var(--board-well);
 }
 
 /* JCINK-derived information-board grammar, mapped onto existing ArcSweep semantics. */
@@ -258,24 +433,51 @@ select:hover {
 
 .applet-card:hover,
 .item-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(107,225,221,.26);
+  transform: translateY(-3px) translateZ(14px);
+  border-color: rgba(107,225,221,.28);
   background:
-    linear-gradient(135deg, rgba(107,225,221,.035), transparent 48%),
-    var(--board-panel);
-  box-shadow: var(--board-inset), 0 18px 46px rgba(0,0,0,.22);
+    linear-gradient(145deg, rgba(255,255,255,.025), transparent 30%),
+    linear-gradient(135deg, rgba(107,225,221,.045), transparent 48%),
+    linear-gradient(180deg, rgba(19,22,29,.96), rgba(8,10,14,.96));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.04),
+    inset 0 -1px rgba(0,0,0,.42),
+    0 24px 48px rgba(0,0,0,.32),
+    0 5px 12px rgba(0,0,0,.2);
 }
 
 .item-card.active {
   border-color: rgba(214,180,111,.44);
   background:
-    linear-gradient(90deg, rgba(214,180,111,.075), transparent 65%),
-    var(--board-panel);
-  box-shadow: inset 2px 0 var(--board-gold), var(--board-inset);
+    linear-gradient(180deg, rgba(255,255,255,.022), transparent 35%),
+    linear-gradient(90deg, rgba(214,180,111,.085), transparent 65%),
+    linear-gradient(180deg, rgba(19,22,29,.96), rgba(8,10,14,.96));
+  box-shadow:
+    inset 2px 0 var(--board-gold),
+    inset 0 1px rgba(255,255,255,.04),
+    0 12px 28px rgba(0,0,0,.22);
+}
+
+.facts {
+  gap: .68rem;
 }
 
 .facts div {
+  position: relative;
   border-left-color: rgba(185,119,79,.72);
+  padding-top: .12rem;
+  padding-bottom: .12rem;
+}
+
+.facts div::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: .1rem;
+  width: 2px;
+  height: 34%;
+  background: rgba(214,180,111,.66);
+  box-shadow: 0 0 8px rgba(214,180,111,.08);
 }
 
 .world-ribbon span,
@@ -285,8 +487,11 @@ select:hover {
 .chip,
 .pill {
   border-color: var(--board-line);
-  background: rgba(255,255,255,.018);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.02), transparent),
+    rgba(255,255,255,.012);
   color: #cbd5d2;
+  box-shadow: inset 0 1px rgba(255,255,255,.025), 0 4px 10px rgba(0,0,0,.12);
 }
 
 /* Status should read without relying on colour alone. */
@@ -314,6 +519,29 @@ select:hover {
   color: var(--board-muted);
 }
 
+.runtime-flame,
+.commons-entry,
+.queue-entry,
+.working-card {
+  position: relative;
+  border: 1px solid var(--board-line);
+  box-shadow: var(--board-well);
+}
+
+.runtime-flame::before,
+.commons-entry::before,
+.queue-entry::before,
+.working-card::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: .6rem;
+  bottom: .6rem;
+  width: 2px;
+  background: var(--board-state-accent, rgba(214,180,111,.34));
+  opacity: .72;
+}
+
 /* Tables become information boards rather than old admin grids. */
 table {
   width: 100%;
@@ -322,16 +550,20 @@ table {
   border: 1px solid var(--board-line);
   border-radius: 0.78rem 0.78rem 0.78rem 0.22rem;
   overflow: hidden;
-  background: rgba(6,8,11,.58);
+  background: rgba(6,8,11,.62);
+  box-shadow: var(--board-well), 0 9px 22px rgba(0,0,0,.14);
 }
 
 th {
-  background: rgba(17,20,27,.96);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.025), transparent 45%),
+    rgba(17,20,27,.98);
   color: var(--board-gold);
   text-align: left;
   font-size: .72rem;
   text-transform: uppercase;
   letter-spacing: .11em;
+  box-shadow: inset 0 -1px rgba(0,0,0,.48);
 }
 
 th,
@@ -341,14 +573,37 @@ td {
 }
 
 tbody tr:last-child td { border-bottom: 0; }
-tbody tr:hover { background: rgba(107,225,221,.025); }
+tbody tr { transition: background 120ms ease, transform 120ms ease; }
+tbody tr:hover { background: rgba(107,225,221,.03); }
 
-/* House Commons gets the same board grammar without pretending chat is a HUD. */
+/* House Commons remains social, but individual messages have physical layering. */
 .commons-entry {
   border-radius: .72rem .72rem .72rem .2rem;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.018), transparent 36%),
+    rgba(5,8,10,.56);
 }
 
 .commons-entry:hover {
+  border-color: rgba(107,225,221,.22);
+  box-shadow: inset 0 1px 10px rgba(0,0,0,.34), 0 8px 18px rgba(0,0,0,.14);
+}
+
+/* Floating secondary surfaces should genuinely sit above the board. */
+.houseglass,
+.return-dialog,
+.modal-backdrop > section,
+.magic-book-shell,
+.magic-book-surface {
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.05),
+    inset 0 -1px rgba(0,0,0,.48),
+    0 36px 96px rgba(0,0,0,.52),
+    0 8px 22px rgba(0,0,0,.3);
+}
+
+.houseglass[data-layout="float"] {
+  backdrop-filter: blur(22px) saturate(112%);
   border-color: rgba(107,225,221,.22);
 }
 
@@ -360,11 +615,23 @@ tbody tr:hover { background: rgba(107,225,221,.025); }
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
   }
+
+  .grid > .panel:hover,
+  .split-layout > .panel:hover,
+  .applet-card:hover,
+  .item-card:hover,
+  .nav-button:hover:not(:disabled),
+  button:hover:not(:disabled),
+  .file-button:hover {
+    transform: none !important;
+  }
 }
 
 @media (max-width: 820px) {
+  .content::before { inset-left: 0; }
+
   .sidebar {
-    box-shadow: 0 -16px 42px rgba(0,0,0,.28);
+    box-shadow: 0 -16px 42px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.025);
   }
 
   .nav-button:hover:not(:disabled) {
@@ -375,5 +642,12 @@ tbody tr:hover { background: rgba(107,225,221,.025); }
   .applet-card,
   .item-card {
     border-radius: .72rem .72rem .72rem .2rem;
+  }
+
+  .grid > .panel:hover,
+  .split-layout > .panel:hover,
+  .applet-card:hover,
+  .item-card:hover {
+    transform: none;
   }
 }
