@@ -1,0 +1,379 @@
+:root {
+  --board-void: #050507;
+  --board-abyss: #0a0a10;
+  --board-panel: rgba(13, 14, 20, 0.9);
+  --board-panel-soft: rgba(17, 20, 27, 0.76);
+  --board-line: rgba(107, 225, 221, 0.14);
+  --board-line-strong: rgba(107, 225, 221, 0.34);
+  --board-teal: #6be1dd;
+  --board-teal-soft: #8de8e4;
+  --board-gold: #d6b46f;
+  --board-copper: #b9774f;
+  --board-violet: #9a78c7;
+  --board-text: #edf4f1;
+  --board-muted: #8e9b99;
+  --board-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
+  --board-inset: inset 0 1px rgba(255, 255, 255, 0.025);
+
+  /* Rebind existing ArcSweep tokens without changing the semantic contract. */
+  --bg: var(--board-void);
+  --sidebar: #090b0f;
+  --panel-solid: #10141a;
+  --panel: var(--board-panel);
+  --panel-2: #141a20;
+  --line: #314541;
+  --line-soft: var(--board-line);
+  --text: var(--board-text);
+  --muted: var(--board-muted);
+  --gold: var(--board-gold);
+  --copper: var(--board-copper);
+  --green: var(--board-teal-soft);
+  --shadow: var(--board-shadow);
+}
+
+body {
+  background:
+    radial-gradient(circle at 82% 8%, rgba(214, 180, 111, 0.08), transparent 30rem),
+    radial-gradient(circle at 12% 86%, rgba(107, 225, 221, 0.055), transparent 33rem),
+    linear-gradient(180deg, #050507 0%, #07090c 52%, #050507 100%);
+}
+
+/* Dark-board shell: high density, low noise, strong information hierarchy. */
+.app-shell {
+  background: linear-gradient(135deg, rgba(255,255,255,0.008), transparent 34%);
+}
+
+.sidebar {
+  background:
+    linear-gradient(180deg, rgba(10, 11, 16, 0.98), rgba(6, 7, 10, 0.985)),
+    var(--board-abyss);
+  border-right-color: var(--board-line);
+  box-shadow: 18px 0 54px rgba(0, 0, 0, 0.2);
+}
+
+.brand {
+  position: relative;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.035);
+}
+
+.brand-mark {
+  border-radius: 0.72rem 0.72rem 0.72rem 0.24rem;
+  border-color: rgba(214, 180, 111, 0.42);
+  color: var(--board-gold);
+  background: linear-gradient(145deg, rgba(214,180,111,.09), rgba(107,225,221,.025));
+  box-shadow: var(--board-inset), 0 0 24px rgba(214,180,111,.05);
+}
+
+.brand strong,
+.panel h1,
+.panel h2,
+.panel h3,
+.hero h1,
+.hero h2,
+.hero h3,
+.section-heading h1,
+.section-heading h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.01em;
+}
+
+.brand small,
+.eyebrow,
+.facts dt,
+.applet-card small,
+.runtime-flame small,
+.sidebar-world span {
+  letter-spacing: 0.14em;
+}
+
+.sidebar nav {
+  gap: 0.34rem;
+  padding-top: 0.85rem;
+}
+
+.nav-button {
+  min-height: 2.7rem;
+  padding: 0.62rem 0.68rem;
+  border-radius: 0.65rem 0.65rem 0.65rem 0.2rem;
+  border: 1px solid transparent;
+  color: #919e9b;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.nav-button:hover:not(:disabled) {
+  color: var(--board-text);
+  background: rgba(107, 225, 221, 0.035);
+  border-color: rgba(107, 225, 221, 0.16);
+  transform: translateX(2px);
+}
+
+.nav-button.active {
+  color: var(--board-text);
+  background: linear-gradient(90deg, rgba(107,225,221,.085), rgba(214,180,111,.025));
+  border-color: rgba(107,225,221,.26);
+  box-shadow: inset 2px 0 var(--board-teal), var(--board-inset);
+}
+
+.sidebar-world,
+.panel,
+fieldset,
+.applet-card,
+.applet-editor,
+.item-card,
+.kelyran-card,
+.kelyran-lexicon details,
+.commons-entry,
+.runtime-flame,
+.notice-card {
+  border-color: var(--board-line);
+  background:
+    linear-gradient(155deg, rgba(255,255,255,.018), transparent 38%),
+    var(--board-panel);
+  box-shadow: var(--board-inset), 0 14px 40px rgba(0,0,0,.18);
+}
+
+.panel,
+.sidebar-world,
+.applet-card,
+.applet-editor,
+.item-card,
+.kelyran-card {
+  border-radius: 0.86rem 0.86rem 0.86rem 0.24rem;
+}
+
+.panel::before,
+.applet-card::before,
+.item-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 2.25rem;
+  height: 1px;
+  background: linear-gradient(90deg, var(--board-gold), transparent);
+  opacity: .48;
+  pointer-events: none;
+}
+
+.panel,
+.applet-card,
+.item-card {
+  position: relative;
+}
+
+.hero {
+  background:
+    radial-gradient(circle at 86% 18%, rgba(107,225,221,.055), transparent 24rem),
+    radial-gradient(circle at 14% 92%, rgba(154,120,199,.04), transparent 24rem),
+    linear-gradient(145deg, rgba(19,22,28,.96), rgba(8,10,14,.96));
+}
+
+.hero::after {
+  color: rgba(214, 180, 111, 0.035);
+}
+
+.eyebrow,
+legend,
+.kelyran-card strong,
+.applet-card > span {
+  color: var(--board-gold);
+}
+
+.muted,
+.lede,
+.applet-card small,
+.item-card span,
+.facts dt {
+  color: var(--board-muted);
+}
+
+button,
+.file-button {
+  border-radius: 0.62rem 0.62rem 0.62rem 0.18rem;
+  border-color: rgba(214,180,111,.36);
+  background: linear-gradient(180deg, rgba(214,180,111,.16), rgba(214,180,111,.07));
+  color: #f5e7c8;
+  box-shadow: var(--board-inset);
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+button:hover:not(:disabled),
+.file-button:hover {
+  filter: none;
+  border-color: rgba(107,225,221,.44);
+  background: linear-gradient(180deg, rgba(107,225,221,.105), rgba(107,225,221,.04));
+  color: var(--board-text);
+  box-shadow: var(--board-inset), 0 0 22px rgba(107,225,221,.05);
+}
+
+button.quiet,
+button.icon-button,
+button.icon-inline {
+  background: rgba(255,255,255,.012);
+  border-color: var(--board-line);
+  color: var(--board-muted);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.file-button:focus-within,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--board-teal);
+  outline-offset: 3px;
+}
+
+input,
+textarea,
+select {
+  border-radius: 0.62rem 0.62rem 0.62rem 0.18rem;
+  border-color: var(--board-line);
+  background: rgba(2, 4, 6, 0.72);
+  color: var(--board-text);
+  box-shadow: inset 0 1px rgba(255,255,255,.018);
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: rgba(107,225,221,.24);
+}
+
+/* JCINK-derived information-board grammar, mapped onto existing ArcSweep semantics. */
+.grid,
+.stack,
+.applet-grid,
+.applet-manager,
+.working-list,
+.timeline {
+  gap: 0.82rem;
+}
+
+.applet-card,
+.item-card {
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.applet-card:hover,
+.item-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(107,225,221,.26);
+  background:
+    linear-gradient(135deg, rgba(107,225,221,.035), transparent 48%),
+    var(--board-panel);
+  box-shadow: var(--board-inset), 0 18px 46px rgba(0,0,0,.22);
+}
+
+.item-card.active {
+  border-color: rgba(214,180,111,.44);
+  background:
+    linear-gradient(90deg, rgba(214,180,111,.075), transparent 65%),
+    var(--board-panel);
+  box-shadow: inset 2px 0 var(--board-gold), var(--board-inset);
+}
+
+.facts div {
+  border-left-color: rgba(185,119,79,.72);
+}
+
+.world-ribbon span,
+.tag,
+.badge,
+.status-chip,
+.chip,
+.pill {
+  border-color: var(--board-line);
+  background: rgba(255,255,255,.018);
+  color: #cbd5d2;
+}
+
+/* Status should read without relying on colour alone. */
+[data-state="active"],
+[data-status="active"],
+[data-status="connected"] {
+  --board-state-accent: var(--board-teal);
+}
+
+[data-state="warning"],
+[data-status="warning"],
+[data-status="degraded"] {
+  --board-state-accent: var(--board-gold);
+}
+
+[data-state="error"],
+[data-status="error"],
+[data-status="failed"] {
+  --board-state-accent: #d98d82;
+}
+
+[data-state][data-label]::before,
+[data-status][data-label]::before {
+  content: attr(data-label) " · ";
+  color: var(--board-muted);
+}
+
+/* Tables become information boards rather than old admin grids. */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--board-line);
+  border-radius: 0.78rem 0.78rem 0.78rem 0.22rem;
+  overflow: hidden;
+  background: rgba(6,8,11,.58);
+}
+
+th {
+  background: rgba(17,20,27,.96);
+  color: var(--board-gold);
+  text-align: left;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .11em;
+}
+
+th,
+td {
+  padding: .72rem .8rem;
+  border-bottom: 1px solid rgba(255,255,255,.035);
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: rgba(107,225,221,.025); }
+
+/* House Commons gets the same board grammar without pretending chat is a HUD. */
+.commons-entry {
+  border-radius: .72rem .72rem .72rem .2rem;
+}
+
+.commons-entry:hover {
+  border-color: rgba(107,225,221,.22);
+}
+
+/* Motion is interaction-bound only. No ambient scanline, ring, or infinite-pulse layer. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (max-width: 820px) {
+  .sidebar {
+    box-shadow: 0 -16px 42px rgba(0,0,0,.28);
+  }
+
+  .nav-button:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .panel,
+  .applet-card,
+  .item-card {
+    border-radius: .72rem .72rem .72rem .2rem;
+  }
+}
