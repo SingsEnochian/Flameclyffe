@@ -70,7 +70,6 @@ export function renderWonderReturns({ asOf = new Date().toISOString() } = {}) {
 
   const section = document.createElement('section');
   section.className = 'wish-grove-section';
-  section.dataset[SLOT.replaceAll('-', '')] = WISH_GROVE_WONDER_RETURN_SCHEMA;
   section.setAttribute(`data-${SLOT}`, WISH_GROVE_WONDER_RETURN_SCHEMA);
   section.innerHTML = [
     '<header><p class="wish-grove-label">Questions glowing again</p><strong>' + candidates.length + ' return invitations</strong></header>',
@@ -92,11 +91,15 @@ function schedule() {
   });
 }
 
+function questionNode(questionId) {
+  return [...(globalThis.document?.querySelectorAll?.('[data-question-id]') || [])]
+    .find((node) => node.dataset.questionId === questionId) || null;
+}
+
 function onClick(event) {
   const button = event.target?.closest?.('[data-wonder-return-jump]');
   if (!button) return;
-  const id = button.dataset.wonderReturnJump;
-  const target = globalThis.document?.querySelector?.(`[data-question-id="${CSS.escape(id)}"]`);
+  const target = questionNode(button.dataset.wonderReturnJump);
   target?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
   target?.setAttribute?.('tabindex', '-1');
   target?.focus?.({ preventScroll: true });
