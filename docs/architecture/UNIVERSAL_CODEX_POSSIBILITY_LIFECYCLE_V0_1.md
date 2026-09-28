@@ -2,7 +2,7 @@
 
 **Status:** draft implementation contract  
 **Applies to:** Universal Codex, Wish Grove, ArcSweep, Advanced Sympathetic Intelligence  
-**Inherits:** Wish Lineage v0.1, Harmony + Wonder Protocol v0.1
+**Inherits:** Wish Lineage v0.1, Harmony + Wonder Protocol v0.1, AI University v0.1
 
 ## Thesis
 
@@ -61,22 +61,55 @@ This matters for Harmony: synthesis is permitted, forced consensus is not.
 
 A branch may carry typed observations from analysis, simulations, tests, or user observation.
 
-Observations can record:
-
-- requirements,
-- constraints,
-- consequences,
-- uncertainties,
-- affected relationships,
-- newly opened questions,
-- receipt references,
-- provenance.
+Observations can record requirements, constraints, consequences, uncertainties, affected relationships, newly opened questions, receipt references, and provenance.
 
 Observations describe what became visible. They do not score the branch or choose it.
 
+## AI University branch experiments
+
+A possibility branch can now carry a proposed AI University experiment. A proposal stores:
+
+```text
+proposal_id
+branch_id
+title
+hypothesis
+method
+success_signals
+questions
+scenario
+status
+provenance
+results
+```
+
+The generated scenario is explicitly:
+
+```text
+sandbox = true
+synthetic = true
+production_effects = false
+execution_permission = false
+grants_authority = false
+```
+
+Its hard boundaries include no production effects, no external writes, no authority expansion, and the explicit rule that a proposal does not grant execution permission.
+
+A returned sandbox result may later be attached to the exact proposal with outcome, observation, newly opened questions, receipts, and provenance. Recording the result still grants no production authority.
+
+The distinction is structural:
+
+```text
+proposal ≠ execution
+result ≠ authority
+simulation success ≠ production permission
+```
+
+Wish Grove exposes **Save sandbox proposal** and **Attach returned sandbox evidence**. It deliberately does not expose a run button in this seam.
+
 ## The possibility tree
 
-The Codex now builds a deterministic world-tree view across five explicit node families:
+The Codex builds a deterministic world-tree view across five explicit node families:
 
 ```text
 wishes
@@ -96,7 +129,7 @@ Edges exist only when explicit lineage or references exist. The map does not inf
 
 ## Yggdrasil + Tree of Harmony
 
-The two metaphors now operate at different layers:
+The two metaphors operate at different layers:
 
 - **Yggdrasil** provides topology: what connects to what across wishes, branches, questions, anchors and references.
 - **The Tree of Harmony** provides relational law: connected things do not have to collapse into sameness.
@@ -123,6 +156,7 @@ Core modules:
 
 - `apps/arcsweep/src/codex/codex-branch-lifecycle.js`
 - `apps/arcsweep/src/codex/codex-branch-observations.js`
+- `apps/arcsweep/src/codex/codex-branch-experiment-proposal.js`
 - `apps/arcsweep/src/codex/codex-possibility-tree.js`
 - `apps/arcsweep/src/codex/codex-wish-store.js`
 
@@ -130,6 +164,7 @@ Wish Grove surfaces:
 
 - `apps/arcsweep/src/wish-grove-branch-lifecycle-sidecar.js`
 - `apps/arcsweep/src/wish-grove-world-tree-sidecar.js`
+- `apps/arcsweep/src/wish-grove-ai-university-sidecar.js`
 - `apps/arcsweep/src/wish-grove-possibility-map-sidecar.js`
 
 ## Non-collapse invariants
@@ -138,38 +173,42 @@ Wish Grove surfaces:
 2. Realisation does not erase alternatives.
 3. Merge creates a child branch rather than mutating its parents.
 4. Branch observations do not grant authority.
-5. Map position is not an importance score.
-6. Explicit relationships remain typed as continuity, relationship, memory, belief, evidence or symbol.
-7. A future implementation may compare consequences, but comparison must remain distinguishable from selection.
+5. Experiment proposals do not grant execution permission.
+6. Sandbox results do not grant production authority.
+7. Map position is not an importance score.
+8. Explicit relationships remain typed as continuity, relationship, memory, belief, evidence or symbol.
+9. Comparison remains distinguishable from selection.
 
-## Next seam
-
-The next layer is **deliberative possibility exploration**:
-
-- allow AI University to propose which branch deserves a sandbox experiment and why,
-- keep the proposal distinct from permission to execute,
-- attach simulation/test receipts back to the exact branch,
-- let new evidence open questions rather than merely update a score,
-- compare resulting branch consequences without producing an automatic winner.
-
-That yields the next loop:
+## Current loop
 
 ```text
 wish
   ↓
 branch
   ↓
-proposal for experiment
+AI University sandbox proposal
   ↓
-explicit permission / sandbox contract
+explicitly separate execution permission
   ↓
-experiment
+returned experiment evidence
   ↓
 receipt + observation
   ↓
 new question / revised branch state
   ↺
 ```
+
+The proposal and result sides of this loop are implemented. The proposal seam does not itself execute a sandbox experiment.
+
+## Next seam
+
+The next implementation layer is an **explicit experiment handoff contract** between the Codex proposal and AI University runtime:
+
+- materialise a proposal into the existing AI University / Aspect Experiment contract only after a separate permission event,
+- keep branch ID, wish ID, proposal ID and receipts intact through the handoff,
+- make the sandbox runner return a typed result instead of writing directly into Codex state,
+- require Codex ingestion of that result as a separate receipted step,
+- let results open questions or suggest branch state transitions without applying those transitions automatically.
 
 The point is not to make possibility collapse faster.
 
