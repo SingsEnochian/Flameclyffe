@@ -11,6 +11,10 @@ import {
 import { compareCodexWishBranches } from '../src/codex/codex-branch-comparison.js';
 import { buildOpenQuestionsConstellation } from '../src/codex/codex-question-constellation.js';
 import { anchorCodexWish } from '../src/codex/codex-wish-anchors.js';
+import {
+  recordCodexBranchObservation,
+  summariseCodexBranchObservations,
+} from '../src/codex/codex-branch-observations.js';
 import { createCodexWishStore, CODEX_WISH_STORE_KEY } from '../src/codex/codex-wish-store.js';
 
 function seedWish() {
@@ -64,6 +68,35 @@ test('Wish anchors add continuity, relationship and memory context without repla
   assert.equal(second.anchorLinks.length, 2);
 });
 
+test('typed branch observations retain consequences, uncertainty, relationships and receipts without authority', () => {
+  const observed = recordCodexBranchObservation(seedWish(), {
+    branchId: 'branch:bridge',
+    observationId: 'observation:bridge-sim-1',
+    kind: 'simulation',
+    source: 'sandbox',
+    summary: 'The bridge preserves names but requires a reversible crossing contract.',
+    requirements: ['named endpoints'],
+    constraints: ['reversible crossings'],
+    consequences: ['shared navigation path'],
+    uncertainties: ['long-term semantic drift'],
+    affectedRelationships: ['relationship:world-a-world-b'],
+    receiptRefs: ['receipt:simulation:1'],
+    createdAt: '2026-09-28T10:04:30-04:00',
+  });
+  const branch = observed.possibilityBranches.find((row) => row.branchId === 'branch:bridge');
+  assert.equal(branch.observations.length, 1);
+  assert.equal(branch.observations[0].grantsAuthority, false);
+  assert.equal(branch.observations[0].selectsWinner, false);
+  assert.deepEqual(branch.observations[0].affectedRelationships, ['relationship:world-a-world-b']);
+  assert.deepEqual(observed.receipts, ['receipt:simulation:1']);
+  const summary = summariseCodexBranchObservations(observed).find((row) => row.branchId === 'branch:bridge');
+  assert.equal(summary.uncertaintyCount, 1);
+  assert.equal(summary.affectedRelationshipCount, 1);
+  assert.equal(summary.selectsWinner, false);
+  const comparison = compareCodexWishBranches(observed);
+  assert.equal(comparison.branches.find((row) => row.branchId === 'branch:bridge').observations.length, 1);
+});
+
 test('Open Questions constellation is deterministic and connects explicit shared context only', () => {
   const wish = seedWish();
   const q1 = createCodexOpenQuestion({
@@ -93,7 +126,7 @@ test('Open Questions constellation is deterministic and connects explicit shared
   assert.equal(a.doctrine.selectsPriority, false);
 });
 
-test('persistent Wish Store exposes anchorWish and reload preserves anchor lineage', () => {
+test('persistent Wish Store preserves anchors and typed branch observations across reload', () => {
   const map = new Map();
   const storage = {
     getItem: (key) => map.has(key) ? map.get(key) : null,
@@ -106,10 +139,25 @@ test('persistent Wish Store exposes anchorWish and reload preserves anchor linea
     desire: 'Remember the relationship that shaped this wish.',
     createdAt: '2026-09-28T10:07:00-04:00',
   });
+  store.branchWish('wish:persist', {
+    branchId: 'branch:persist-a',
+    label: 'First possibility',
+    possibility: 'Keep the relationship context visible.',
+    createdAt: '2026-09-28T10:07:30-04:00',
+  });
   store.anchorWish('wish:persist', {
     relationshipsTouched: ['relationship:rowan-codex'],
     memoryRefs: ['memory:why-it-mattered'],
     createdAt: '2026-09-28T10:08:00-04:00',
+  });
+  store.observeBranch('wish:persist', {
+    branchId: 'branch:persist-a',
+    observationId: 'observation:persist-a',
+    kind: 'analysis',
+    summary: 'The relationship reference survives the branch.',
+    affectedRelationships: ['relationship:rowan-codex'],
+    receiptRefs: ['receipt:persist-a'],
+    createdAt: '2026-09-28T10:08:30-04:00',
   });
   assert.ok(map.get(CODEX_WISH_STORE_KEY));
   const reloaded = createCodexWishStore({ storage });
@@ -117,6 +165,8 @@ test('persistent Wish Store exposes anchorWish and reload preserves anchor linea
   assert.deepEqual(wish.relationshipsTouched, ['relationship:rowan-codex']);
   assert.deepEqual(wish.memoryRefs, ['memory:why-it-mattered']);
   assert.equal(wish.anchorLinks.length, 1);
+  assert.equal(wish.possibilityBranches[0].observations.length, 1);
+  assert.deepEqual(wish.receipts, ['receipt:persist-a']);
 });
 
 test('Wish Grove possibility map is browser-mounted and explicitly non-ranking', async () => {
@@ -127,5 +177,7 @@ test('Wish Grove possibility map is browser-mounted and explicitly non-ranking',
   assert.match(sidecar, /Open Questions Constellation/);
   assert.match(sidecar, /data-wish-anchor-form/);
   assert.match(sidecar, /anchorWish/);
+  assert.match(sidecar, /data-wish-branch-observation-form/);
+  assert.match(sidecar, /observeBranch/);
   assert.match(bootstrap, /wish-grove-possibility-map-sidecar\.js/);
 });
