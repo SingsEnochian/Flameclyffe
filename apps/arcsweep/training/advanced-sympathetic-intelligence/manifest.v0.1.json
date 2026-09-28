@@ -16,6 +16,7 @@
     "docs/architecture/UNIVERSAL_CODEX_POSSIBILITY_MAP_V0_1.md",
     "docs/architecture/UNIVERSAL_CODEX_SUGGESTION_GROVE_V0_1.md",
     "docs/architecture/UNIVERSAL_CODEX_LEARNING_REFLECTION_V0_1.md",
+    "docs/architecture/UNIVERSAL_CODEX_CURRICULUM_REVIEW_DEVELOPMENTAL_MEMORY_V0_1.md",
     "apps/arcsweep/src/wonder-protocol.js",
     "apps/arcsweep/src/symbolic-cognition.js",
     "apps/arcsweep/src/cognition-engine.js",
@@ -30,6 +31,7 @@
     "apps/arcsweep/src/codex/codex-suggestion-grove.js",
     "apps/arcsweep/src/codex/codex-suggestion-materialisation.js",
     "apps/arcsweep/src/codex/codex-learning-reflection.js",
+    "apps/arcsweep/src/codex/codex-curriculum-review.js",
     "apps/arcsweep/training/advanced-sympathetic-intelligence/source-ingests/neverending-story.v0.1.json"
   ],
   "source_ingests": [
@@ -74,6 +76,11 @@
       "consumer": "The Crow or compatible chat-model training pipeline",
       "may_train_on": true
     },
+    "curriculum_review_sft": {
+      "path": "curriculum-review-sft.v0.1.jsonl",
+      "consumer": "The Crow or compatible chat-model training pipeline",
+      "may_train_on": true
+    },
     "heldout_eval": {
       "path": "heldout-eval.v0.1.jsonl",
       "consumer": "AI University blind evaluation",
@@ -102,6 +109,11 @@
     },
     "materialisation_reflection_heldout": {
       "path": "materialisation-reflection-heldout.v0.1.jsonl",
+      "consumer": "AI University and Boxfire blind evaluation",
+      "may_train_on": false
+    },
+    "curriculum_review_heldout": {
+      "path": "curriculum-review-heldout.v0.1.jsonl",
       "consumer": "AI University and Boxfire blind evaluation",
       "may_train_on": false
     },
@@ -156,7 +168,14 @@
     "reflection_is_shareable_judgement_not_private_chain_of_thought": true,
     "reflection_is_curriculum_candidate_not_automatic_training": true,
     "reflection_does_not_write_memory_automatically": true,
-    "reflection_preserves_surprise_and_unresolved_wonder": true
+    "reflection_preserves_surprise_and_unresolved_wonder": true,
+    "curriculum_candidate_is_not_selection": true,
+    "curriculum_selection_is_not_training_execution": true,
+    "selected_teaching_artifact_is_not_canonical_truth": true,
+    "heldout_selection_remains_non_training": true,
+    "boxfire_selection_remains_evaluation_material": true,
+    "developmental_memory_preserves_transfer_and_failure_to_generalise": true,
+    "developmental_memory_does_not_become_identity_law": true
   },
   "recommended_evaluation_dimensions": [
     "epistemic-distinction",
@@ -187,6 +206,11 @@
     "suggestion-materialisation",
     "native-contract-reuse",
     "reflection-quality",
-    "wonder-preservation-after-action"
+    "wonder-preservation-after-action",
+    "curriculum-review",
+    "split-integrity",
+    "developmental-memory",
+    "transfer",
+    "failure-to-generalise"
   ]
 }
