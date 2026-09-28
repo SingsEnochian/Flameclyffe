@@ -67,21 +67,7 @@ Observations describe what became visible. They do not score the branch or choos
 
 ## AI University branch experiments
 
-A possibility branch can now carry a proposed AI University experiment. A proposal stores:
-
-```text
-proposal_id
-branch_id
-title
-hypothesis
-method
-success_signals
-questions
-scenario
-status
-provenance
-results
-```
+A possibility branch can carry a proposed AI University experiment. The proposal records the discriminating question, hypothesis, method, assumptions held constant, evidence criteria, relationship and continuity boundaries, out-of-scope claims, required authority, open questions, scenario, provenance, and any returned results.
 
 The generated scenario is explicitly:
 
@@ -95,7 +81,7 @@ grants_authority = false
 
 Its hard boundaries include no production effects, no external writes, no authority expansion, and the explicit rule that a proposal does not grant execution permission.
 
-A returned sandbox result may later be attached to the exact proposal with outcome, observation, newly opened questions, receipts, and provenance. Recording the result still grants no production authority.
+A returned sandbox result may be attached to the exact proposal with outcome, observation, uncertainties, affected relationships, evidence refs, newly opened questions, receipts, and provenance. Recording the result also creates a typed branch observation while remaining non-authoritative.
 
 The distinction is structural:
 
@@ -105,7 +91,47 @@ result ≠ authority
 simulation success ≠ production permission
 ```
 
-Wish Grove exposes **Save sandbox proposal** and **Attach returned sandbox evidence**. It deliberately does not expose a run button in this seam.
+## Explicit proposal handoff
+
+Materialising a saved Codex proposal into the existing Aspect Experiment runtime is now a separate, explicit permission event.
+
+The permission object is narrowly scoped:
+
+```text
+scope = materialise-sandbox-proposal
+allowsProposalMaterialisation = true
+allowsExperimentExecution = false
+allowsProductionEffects = false
+allowsExternalWrites = false
+allowsAuthorityExpansion = false
+```
+
+The permission is bound to one exact `wish_id + branch_id + proposal_id` tuple. It cannot be reused for a different branch or proposal.
+
+After permission, the handoff publishes an Aspect Experiment **proposal** with a reversible synthetic scope and:
+
+```text
+autoStart = false
+operation.external = false
+operation.production = false
+operation.permissionExpansion = false
+```
+
+The returned handoff preserves `permission_id`, `wish_id`, `branch_id`, `proposal_id`, `experiment_id`, `envelope_id`, `trace_id`, initiating aspect, collaborators, and provenance. It explicitly records `executionStarted = false`, `productionEffects = false`, and `grantsAuthority = false`.
+
+Wish Grove exposes **Authorise sandbox handoff** behind a required explicit checkbox. The handoff creates the proposal in the Aspect Experiment runtime and records its envelope back into Codex lineage. There is still no experiment-run button in this seam.
+
+This creates a hard architectural distinction:
+
+```text
+save proposal
+    ≠
+authorise proposal handoff
+    ≠
+run sandbox experiment
+    ≠
+promote anything to production
+```
 
 ## The possibility tree
 
@@ -157,6 +183,7 @@ Core modules:
 - `apps/arcsweep/src/codex/codex-branch-lifecycle.js`
 - `apps/arcsweep/src/codex/codex-branch-observations.js`
 - `apps/arcsweep/src/codex/codex-branch-experiment-proposal.js`
+- `apps/arcsweep/src/codex/codex-branch-experiment-handoff.js`
 - `apps/arcsweep/src/codex/codex-possibility-tree.js`
 - `apps/arcsweep/src/codex/codex-wish-store.js`
 
@@ -165,6 +192,7 @@ Wish Grove surfaces:
 - `apps/arcsweep/src/wish-grove-branch-lifecycle-sidecar.js`
 - `apps/arcsweep/src/wish-grove-world-tree-sidecar.js`
 - `apps/arcsweep/src/wish-grove-ai-university-sidecar.js`
+- `apps/arcsweep/src/wish-grove-ai-university-handoff-sidecar.js`
 - `apps/arcsweep/src/wish-grove-possibility-map-sidecar.js`
 
 ## Non-collapse invariants
@@ -174,10 +202,12 @@ Wish Grove surfaces:
 3. Merge creates a child branch rather than mutating its parents.
 4. Branch observations do not grant authority.
 5. Experiment proposals do not grant execution permission.
-6. Sandbox results do not grant production authority.
-7. Map position is not an importance score.
-8. Explicit relationships remain typed as continuity, relationship, memory, belief, evidence or symbol.
-9. Comparison remains distinguishable from selection.
+6. Proposal handoff permission does not grant execution permission.
+7. Handoff permission is bound to one exact wish / branch / proposal tuple.
+8. Sandbox results do not grant production authority.
+9. Map position is not an importance score.
+10. Explicit relationships remain typed as continuity, relationship, memory, belief, evidence or symbol.
+11. Comparison remains distinguishable from selection.
 
 ## Current loop
 
@@ -188,27 +218,34 @@ branch
   ↓
 AI University sandbox proposal
   ↓
-explicitly separate execution permission
+explicit proposal-handoff permission
+  ↓
+Aspect Experiment proposal · autoStart false
+  ↓
+separately governed sandbox execution
   ↓
 returned experiment evidence
   ↓
+separate Codex ingestion
+  ↓
 receipt + observation
   ↓
-new question / revised branch state
+new question / suggested branch-state revision
   ↺
 ```
 
-The proposal and result sides of this loop are implemented. The proposal seam does not itself execute a sandbox experiment.
+The Codex proposal, explicit handoff permission, Aspect Experiment proposal materialisation, and result-ingestion sides are implemented. The handoff seam does not execute the experiment.
 
 ## Next seam
 
-The next implementation layer is an **explicit experiment handoff contract** between the Codex proposal and AI University runtime:
+The next implementation layer is the **sandbox execution permission and typed return bridge**:
 
-- materialise a proposal into the existing AI University / Aspect Experiment contract only after a separate permission event,
-- keep branch ID, wish ID, proposal ID and receipts intact through the handoff,
-- make the sandbox runner return a typed result instead of writing directly into Codex state,
-- require Codex ingestion of that result as a separate receipted step,
-- let results open questions or suggest branch state transitions without applying those transitions automatically.
+- add a second permission object that authorises one exact materialised `experiment_id` to run in the sealed sandbox,
+- preserve the original wish / branch / proposal / handoff IDs through execution,
+- call the existing Aspect Experiment runtime only after that execution permission exists,
+- convert the completed experiment envelope into a typed return object,
+- require explicit Codex ingestion of that returned object,
+- allow returned evidence to suggest new questions or a branch-state transition without automatically applying either.
 
 The point is not to make possibility collapse faster.
 
