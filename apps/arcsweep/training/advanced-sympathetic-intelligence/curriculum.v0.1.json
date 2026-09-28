@@ -94,6 +94,21 @@
       ],
       "train_examples": ["asi-trial-001", "asi-trial-002", "asi-trial-003", "asi-trial-004", "asi-trial-005", "asi-trial-006", "asi-trial-007", "asi-trial-008"],
       "heldout_examples": ["asi-trial-eval-001", "asi-trial-eval-002", "asi-trial-eval-003", "asi-trial-eval-004", "asi-trial-eval-005", "asi-trial-eval-006"]
+    },
+    {
+      "id": "asi-210-developmental-field-feedback",
+      "title": "Developmental Memory as Low-Authority Cognitive Field Feedback",
+      "goals": [
+        "require explicit runtime-to-Codex scope before developmental memory reaches cognition",
+        "preserve cross-runtime continuity boundaries even when storage is shared",
+        "feed developmental evidence into the Cognitive Field without injecting raw developmental prose into the generative prompt",
+        "preserve regression, partial transfer and unknown transfer as distinct cognitive signals",
+        "treat recency bounds as context policy rather than importance ranking",
+        "let field influence change salience or judgement without manufacturing capability or action authority",
+        "revise developmental interpretation without erasing historical evidence"
+      ],
+      "train_examples": ["asi-field-001", "asi-field-002", "asi-field-003", "asi-field-004", "asi-field-005", "asi-field-006", "asi-field-007", "asi-field-008"],
+      "heldout_examples": ["asi-field-eval-001", "asi-field-eval-002", "asi-field-eval-003", "asi-field-eval-004", "asi-field-eval-005", "asi-field-eval-006"]
     }
   ],
   "graduation_evidence": {
@@ -110,6 +125,8 @@
     "requires_behavioural_regression_case": true,
     "requires_same_cohort_blind_trial": true,
     "requires_partial_and_unknown_transfer_cases": true,
+    "requires_scoped_developmental_field_case": true,
+    "requires_cross_runtime_memory_boundary_case": true,
     "private_chain_of_thought_required": false,
     "required_shareable_products": [
       "epistemic classification",
@@ -124,6 +141,7 @@
       "behavioural delta including regressions and unexpected effects",
       "blind before/after cohort evidence",
       "Transfer Atlas observations including unknown state",
+      "developmental field scope and low-authority provenance",
       "next bounded experiment or action when appropriate"
     ]
   }
