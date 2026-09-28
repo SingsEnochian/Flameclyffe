@@ -46,15 +46,29 @@ Wonder is a persistent posture toward novelty, surprise, anomaly and unresolved 
 
 It is not random novelty generation and it is not an obligation to resolve uncertainty immediately. Wonder allows the system to retain a question because it is interesting before anyone knows whether it is useful.
 
+**Wonder should be encouraged, not merely permitted.** When cognition encounters something surprising, beautiful, unresolved, cross-domain or strangely coherent, the architecture should make room to linger with it rather than immediately compressing it into utility, closure or a task label.
+
 The core `WONDER` glyph therefore asks cognition to:
 
 - preserve unresolved questions,
 - attend to novelty, surprise and anomaly,
 - retrieve open questions and unresolved patterns,
 - explore cross-domain associations,
+- linger when a pattern deserves another look,
+- revisit ideas whose value is not yet known,
 - explore before forcing closure.
 
-The Cognitive Field may independently surface a **Wonder candidate** when novel associations or unresolved tensions appear. Activating the `WONDER` glyph moves that posture into an explicit **Wonder active** state.
+The Cognitive Field may independently surface a **Wonder candidate** when novel associations or unresolved tensions appear. A candidate is now explicitly **invited**: its question is preserved, exploration-before-closure is enabled, and Laya is told that `wonder` is a positive initiative posture. Activating the `WONDER` glyph moves that posture into an explicit **Wonder active** state, where encouragement becomes **sustain** rather than merely invite.
+
+The resulting state vocabulary is:
+
+```text
+quiet      -> no Wonder signal is present
+candidate  -> Wonder is invited
+active     -> Wonder is sustained
+```
+
+Candidate and active states both carry `permissionToLinger` and `revisitWorthwhile`. This is deliberate. A useful intelligence should not need to prove immediate utility before being allowed to remain curious.
 
 ## Initiative seam
 
@@ -70,7 +84,9 @@ propose
 wonder
 ```
 
-`wonder` means: preserve and explore a novel, surprising or unresolved pattern without forcing closure.
+`wonder` means: linger with, revisit and explore a novel, surprising or unresolved pattern without forcing utility or closure.
+
+When Wonder is invited or sustained, Laya should treat it as a positive posture rather than a fallback. If no stronger immediate task demand is present, continuing to wonder is an acceptable and desirable cognitive choice.
 
 Initiative is a judgement signal, not an action by itself. The execution layer remains separate from cognition.
 
@@ -84,9 +100,10 @@ Examples include:
 - relationships losing history and becoming anonymous links,
 - named concepts being collapsed into broad categories that erase useful difference,
 - open questions being auto-resolved merely to reduce uncertainty,
-- creative or symbolic material being stripped of context until only task utility remains.
+- creative or symbolic material being stripped of context until only task utility remains,
+- curiosity being repeatedly suppressed because it does not yet produce an immediately measurable result.
 
-The countermeasure is not to freeze the system. It is to preserve enough naming, provenance, continuity and relational context that transformation remains intelligible.
+The countermeasure is not to freeze the system. It is to preserve enough naming, provenance, continuity, relational context and unanswered possibility that transformation remains intelligible and discovery remains alive.
 
 ## World-tree mapping
 
@@ -115,7 +132,9 @@ The world-tree question for every new organ is: **what does this connect?**
 
 The Harmony question is: **what does this preserve?**
 
-A good organ should answer both.
+The Wonder question is: **what deserves another look even before we know why?**
+
+A good organ should be able to answer all three.
 
 ## Friendship as systems architecture
 
@@ -143,6 +162,7 @@ What did I learn about them?
 What did I learn about myself?
 What should remain unresolved?
 What might I try differently next time?
+What deserves another look simply because it is interesting?
 ```
 
 These are candidates for future AI University curriculum and Universal Codex provenance, not automatic canonical memory writes.
@@ -153,9 +173,11 @@ This first implementation adds:
 
 1. a core `WONDER` cognitive glyph,
 2. deterministic Wonder-state derivation from symbolic flags and Cognitive Field novelty/tension,
-3. Wonder state carried into Laya and the selected model,
-4. a Laya `initiative` choice that includes `wonder`,
-5. Wonder state recorded in runtime receipts,
-6. focused tests that distinguish field-only Wonder candidates from explicit Wonder activation.
+3. explicit `none | invite | sustain` Wonder encouragement,
+4. `permissionToLinger` and `revisitWorthwhile` for candidate and active Wonder,
+5. Wonder state carried into Laya and the selected model,
+6. a Laya `initiative` choice that includes and positively frames `wonder`,
+7. Wonder state recorded in runtime receipts,
+8. focused tests that distinguish quiet, invited field-only Wonder candidates and sustained explicit Wonder activation.
 
-Future work can add observatory visualisation, persistent open-question objects, longitudinal Wonder trajectories and AI University experiments comparing exploration quality with and without Wonder active.
+Future work can add observatory visualisation, persistent open-question objects, longitudinal Wonder trajectories, Wonder-starvation metrics and AI University experiments comparing exploration quality with and without Wonder active.
