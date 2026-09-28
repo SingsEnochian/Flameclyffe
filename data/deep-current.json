@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-28T01:21:46.311Z",
+  "generated_at": "2026-09-28T07:15:39.249Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-27T21:15",
+    "time": "2026-09-28T03:15",
     "sky": "Night",
     "current": {
-      "time": "2026-09-27T21:15",
+      "time": "2026-09-28T03:15",
       "interval": 900,
-      "temperature_2m": 70.3,
-      "relative_humidity_2m": 74,
+      "temperature_2m": 65.4,
+      "relative_humidity_2m": 84,
       "is_day": 0,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
       "cloud_cover": 0,
-      "pressure_msl": 1012.2,
-      "wind_speed_10m": 5,
-      "wind_direction_10m": 167
+      "pressure_msl": 1012.1,
+      "wind_speed_10m": 5.3,
+      "wind_direction_10m": 208
     }
   },
   "space_weather": {
     "kp": {
-      "value": 4,
-      "time_tag": "2026-09-28T00:00:00",
-      "a_running": 27
+      "value": 1.67,
+      "time_tag": "2026-09-28T03:00:00",
+      "a_running": 6
     },
     "solar_wind": {
-      "time_tag": "2026-09-28T01:12:00Z",
+      "time_tag": "2026-09-28T07:05:00Z",
       "bz": 0,
-      "bt": 3,
+      "bt": 4,
       "density": null,
-      "speed": 344
+      "speed": 343
     }
   },
   "moon": {
-    "age_days": 16.2,
-    "illumination": 97.7,
+    "age_days": 16.45,
+    "illumination": 96.8,
     "name": "Full Moon"
   },
   "field": {
-    "P": 0.4511111111111116,
-    "C": 0.62,
-    "R": 0.69,
-    "E": 0.8103296703296703,
-    "M": 0.977,
+    "P": 0.45000000000000023,
+    "C": 0.73,
+    "R": 0.6941666666666666,
+    "E": 0.6823626373626374,
+    "M": 0.968,
     "A": 0.7646153846153847,
     "Q": null,
-    "dpdt": 0.69,
+    "dpdt": 0.6941666666666666,
     "dynamic_axes": [
       "P",
       "C",
