@@ -36,6 +36,7 @@ export async function runIgnitionCycle({
   execute,
   idFactory = defaultIdFactory,
   now = () => new Date(),
+  observeCognition = null,
 } = {}) {
   if (!trajectory) throw new Error('ignition-trajectory-required');
   if (!observation?.id) throw new Error('ignition-observation-required');
@@ -72,6 +73,15 @@ export async function runIgnitionCycle({
   }
 
   const intention = await cognition({ trajectory: evidenced, observation, possibility });
+  if (typeof observeCognition === 'function') {
+    await observeCognition(Object.freeze({
+      phase: 'intention',
+      trajectory: evidenced,
+      observation,
+      possibility,
+      intention: intention || null,
+    }));
+  }
   if (!intention?.capability) {
     return Object.freeze({
       schema: IGNITION_CYCLE_SCHEMA,
@@ -97,6 +107,17 @@ export async function runIgnitionCycle({
   }, { now });
 
   const decision = await negotiate(request);
+  if (typeof observeCognition === 'function') {
+    await observeCognition(Object.freeze({
+      phase: 'capability-decision',
+      trajectory: evidenced,
+      observation,
+      possibility,
+      intention,
+      request,
+      decision: decision || null,
+    }));
+  }
   if (!decision?.granted) {
     return Object.freeze({
       schema: IGNITION_CYCLE_SCHEMA,
@@ -112,6 +133,18 @@ export async function runIgnitionCycle({
   }
 
   const receipt = await execute({ request, decision, trajectory: evidenced, observation });
+  if (typeof observeCognition === 'function') {
+    await observeCognition(Object.freeze({
+      phase: 'execution-result',
+      trajectory: evidenced,
+      observation,
+      possibility,
+      intention,
+      request,
+      decision,
+      receipt: receipt || null,
+    }));
+  }
   const validation = validateExecutionReceipt(receipt, request);
   if (!validation.valid) {
     return Object.freeze({
