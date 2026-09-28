@@ -34,6 +34,12 @@ import {
 import { materialiseCodexBranchSuggestion } from './codex-suggestion-materialisation.js';
 import { recordCodexBranchLearningReflection } from './codex-learning-reflection.js';
 import { reviewCodexLearningReflection } from './codex-curriculum-review.js';
+import {
+  authoriseLearningForgeBundle,
+  prepareLearningForgeBundle,
+  recordBehaviouralDelta,
+  recordLearningForgeTrainingRun,
+} from './codex-learning-forge.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -264,6 +270,58 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     return Object.freeze({ ...outcome, wish });
   }
 
+  function prepareTrainingBundle(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(
+      wishId,
+      (current) => {
+        outcome = prepareLearningForgeBundle(current, input);
+        return outcome.wish;
+      },
+      `wish-learning-forge-bundle:${wishId}:${input?.bundleId || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish });
+  }
+
+  function authoriseTrainingBundle(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(
+      wishId,
+      (current) => {
+        outcome = authoriseLearningForgeBundle(current, input);
+        return outcome.wish;
+      },
+      `wish-learning-forge-authority:${wishId}:${input?.authorityId || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish });
+  }
+
+  function recordTrainingRun(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(
+      wishId,
+      (current) => {
+        outcome = recordLearningForgeTrainingRun(current, input);
+        return outcome.wish;
+      },
+      `wish-learning-forge-run:${wishId}:${input?.runId || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish });
+  }
+
+  function recordTrainingBehaviouralDelta(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(
+      wishId,
+      (current) => {
+        outcome = recordBehaviouralDelta(current, input);
+        return outcome.wish;
+      },
+      `wish-learning-forge-delta:${wishId}:${input?.deltaId || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish });
+  }
+
   function reviseWish(wishId, input) {
     return updateWish(wishId, (wish) => reviseCodexWish(wish, input), `wish-revised:${wishId}`);
   }
@@ -343,6 +401,10 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     materialiseBranchSuggestion,
     recordLearningReflection,
     reviewLearningReflection,
+    prepareTrainingBundle,
+    authoriseTrainingBundle,
+    recordTrainingRun,
+    recordTrainingBehaviouralDelta,
     reviseWish,
     transformWish,
     anchorWish,
