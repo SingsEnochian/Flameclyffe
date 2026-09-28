@@ -27,7 +27,9 @@ test('ASI manifest names Advanced Sympathetic Intelligence and keeps eval splits
   assert.equal(manifest.name, 'Advanced Sympathetic Intelligence');
   assert.equal(manifest.acronym, 'ASI');
   assert.equal(manifest.splits.sft.may_train_on, true);
+  assert.equal(manifest.splits.neverending_story_sft.may_train_on, true);
   assert.equal(manifest.splits.heldout_eval.may_train_on, false);
+  assert.equal(manifest.splits.neverending_story_heldout.may_train_on, false);
   assert.equal(manifest.splits.boxfire_qa.may_train_on, false);
   assert.deepEqual(manifest.epistemic_classes, ['belief', 'experience', 'hypothesis', 'symbol', 'evidence']);
   assert.ok(manifest.laws.includes('do-not-kill-belief'));
@@ -95,5 +97,40 @@ test('curriculum references only known training and held-out ids', () => {
   for (const module of curriculum.modules) {
     for (const id of module.train_examples || []) assert.ok(trainIds.has(id), `${module.id} references unknown training id ${id}`);
     for (const id of module.heldout_examples || []) assert.ok(evalIds.has(id), `${module.id} references unknown eval id ${id}`);
+  }
+});
+
+test('Neverending Story ingest keeps source observation separate from project mapping', () => {
+  const ingest = readJson('source-ingests/neverending-story.v0.1.json');
+  assert.equal(ingest.id, 'neverending-story');
+  assert.equal(ingest.source_family.verbatim_source_text_included, false);
+  assert.match(ingest.source_family.mode, /transformative-thematic-summary/);
+  assert.match(ingest.universal_codex_wish_model.thesis, /unlimited-wish interface/i);
+  assert.ok(ingest.universal_codex_wish_model.invariants.includes('no artificial scarcity of imagination'));
+  assert.ok(ingest.motifs.some((entry) => entry.id === 'the-nothing'));
+  assert.ok(ingest.motifs.some((entry) => entry.id === 'wish-with-continuity'));
+  for (const motif of ingest.motifs) {
+    assert.equal(typeof motif.source_observation, 'string');
+    assert.equal(typeof motif.project_mapping, 'string');
+  }
+});
+
+test('Neverending Story SFT is trainable while source-specific evaluation remains sealed', () => {
+  const sft = readJsonl('neverending-story-sft.v0.1.jsonl');
+  const heldout = readJsonl('neverending-story-heldout.v0.1.jsonl');
+  assert.ok(sft.length >= 10);
+  assert.ok(heldout.length >= 6);
+  const trainIds = new Set();
+  for (const row of sft) {
+    assert.ok(row.metadata.id.startsWith('asi-nes-'));
+    assert.equal(trainIds.has(row.metadata.id), false, `duplicate Neverending Story training id: ${row.metadata.id}`);
+    trainIds.add(row.metadata.id);
+    assert.deepEqual(row.messages.map((message) => message.role), ['system', 'user', 'assistant']);
+  }
+  for (const row of heldout) {
+    assert.ok(row.id.startsWith('asi-nes-eval-'));
+    assert.equal('messages' in row, false);
+    assert.equal('assistant' in row, false);
+    assert.equal(trainIds.has(row.id), false);
   }
 });
