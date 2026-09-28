@@ -6,7 +6,7 @@ const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 
 test('STARWELL main page loads the Atlas Hall interface bridge', async () => {
   const html = await read('../index.html');
-  assert.match(html, /interface-foundry\/atlas-hall-bridge\.js/);
+  assert.match(html, /%BASE_URL%interface-foundry\/atlas-hall-bridge\.js/);
 });
 
 test('Atlas Hall bridge reuses the shared Epra projection contracts', async () => {
@@ -22,10 +22,10 @@ test('Atlas Hall bridge preserves canon and authority boundaries', async () => {
   const source = await read('../public/interface-foundry/atlas-hall-bridge.js');
   assert.match(source, /canonical_truth_owned_elsewhere:\s*true/);
   assert.match(source, /execution_authority:\s*false/);
+  assert.doesNotMatch(source, /\bsupabase\b/);
+  assert.doesNotMatch(source, /\bfetch\s*\(/);
   assert.doesNotMatch(source, /\.from\(['"]starwell_/);
-  assert.doesNotMatch(source, /\.insert\(/);
-  assert.doesNotMatch(source, /\.update\(/);
-  assert.doesNotMatch(source, /\.delete\(/);
+  assert.doesNotMatch(source, /\b(?:POST|PUT|PATCH|DELETE)\b/);
 });
 
 test('Atlas Hall bridge exposes interactive map, layers, inspector, and cinematic route controls', async () => {
