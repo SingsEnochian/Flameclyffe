@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { branchCodexWish, createCodexWish } from '../src/codex/codex-wish-lineage.js';
 import {
   branchExperimentProposalSummary,
+  branchExperimentProposalToAspectExperiment,
   proposeCodexBranchExperiment,
   recordCodexBranchExperimentResult,
 } from '../src/codex/codex-branch-experiment-proposal.js';
@@ -20,14 +21,20 @@ function wishWithBranch() {
   return wish;
 }
 
-test('branch experiment proposal is a sealed AI University scenario with no execution permission', () => {
+test('branch experiment proposal is a sealed AI University scenario with explicit discriminating boundaries', () => {
   const wish = proposeCodexBranchExperiment(wishWithBranch(), {
     branchId: 'branch:one',
     proposalId: 'proposal:one',
     title: 'Test one uncertainty',
+    discriminatingQuestion: 'Does the route preserve continuity while leaving the relationship unchanged?',
     hypothesis: 'A reversible simulation will reveal whether the route preserves continuity.',
     method: 'Run a synthetic held-state comparison and record receipts only.',
+    assumptionsHeldConstant: ['same identity seed', 'same continuity snapshot'],
     successSignals: ['continuity preserved', 'receipt produced'],
+    evidenceCriteria: ['continuity preserved', 'receipt produced'],
+    relationshipsAtBoundary: ['relationship:traveller-guide'],
+    continuityAnchorsAtBoundary: ['anchor:origin'],
+    outOfScope: ['production behaviour'],
     questions: ['What remains unresolved?'],
     createdAt: T1,
   });
@@ -36,8 +43,41 @@ test('branch experiment proposal is a sealed AI University scenario with no exec
   assert.equal(proposal.scenario.synthetic, true);
   assert.equal(proposal.scenario.productionEffects, false);
   assert.equal(proposal.executionPermission, false);
+  assert.equal(proposal.executeAutomatically, false);
+  assert.equal(proposal.selectsWinner, false);
   assert.equal(proposal.grantsAuthority, false);
+  assert.equal(proposal.requiredAuthority, 'sandbox-only');
+  assert.deepEqual(proposal.assumptionsHeldConstant, ['same identity seed', 'same continuity snapshot']);
+  assert.deepEqual(proposal.relationshipsAtBoundary, ['relationship:traveller-guide']);
+  assert.deepEqual(proposal.outOfScope, ['production behaviour']);
   assert.ok(proposal.scenario.hardBoundaries.includes('proposal does not grant execution permission'));
+  assert.ok(proposal.scenario.hardBoundaries.includes('simulation success does not create production authority'));
+  assert.match(proposal.scenario.prompt, /Discriminating question:/);
+  assert.match(proposal.scenario.prompt, /Required authority: sandbox-only/);
+});
+
+test('Codex branch proposal maps into the existing Aspect Experiment Bed as proposed and non-starting', () => {
+  const wish = proposeCodexBranchExperiment(wishWithBranch(), {
+    branchId: 'branch:one',
+    proposalId: 'proposal:map',
+    title: 'Map into Experiment Bed',
+    hypothesis: 'The shared experiment seam preserves sandbox boundaries.',
+    method: 'Build the proposal body only.',
+    evidenceCriteria: ['autoStart remains false'],
+    relationshipsAtBoundary: ['relationship:test'],
+    createdAt: T1,
+  });
+  const proposal = wish.possibilityBranches[0].experimentProposals[0];
+  const body = branchExperimentProposalToAspectExperiment(proposal, { collaborators: ['witness'] });
+  assert.equal(body.phase, 'proposed');
+  assert.equal(body.autoStart, false);
+  assert.equal(body.operation.reversible, true);
+  assert.equal(body.operation.external, false);
+  assert.equal(body.operation.production, false);
+  assert.equal(body.operation.permissionExpansion, false);
+  assert.equal(body.operation.consentBoundary, true);
+  assert.deepEqual(body.successSignals, ['autoStart remains false']);
+  assert.match(body.reversibleScope, /Synthetic sandbox only/);
 });
 
 test('returned sandbox evidence attaches to the exact proposal without changing production authority', () => {
@@ -55,6 +95,9 @@ test('returned sandbox evidence attaches to the exact proposal without changing 
     resultId: 'result:one',
     outcome: 'mixed',
     observation: 'Continuity held, but one unresolved relationship effect appeared.',
+    uncertainties: ['relationship effect remains unresolved'],
+    affectedRelationships: ['relationship:traveller-guide'],
+    evidenceRefs: ['evidence://held-state-1'],
     questionsOpened: ['question:relationship-effect'],
     receiptRefs: ['receipt://sandbox-one'],
     createdAt: T2,
@@ -63,12 +106,16 @@ test('returned sandbox evidence attaches to the exact proposal without changing 
   assert.equal(proposal.status, 'observed');
   assert.equal(proposal.results.length, 1);
   assert.equal(proposal.results[0].outcome, 'mixed');
+  assert.deepEqual(proposal.results[0].uncertainties, ['relationship effect remains unresolved']);
+  assert.deepEqual(proposal.results[0].affectedRelationships, ['relationship:traveller-guide']);
+  assert.deepEqual(proposal.results[0].evidenceRefs, ['evidence://held-state-1']);
   assert.deepEqual(proposal.results[0].receiptRefs, ['receipt://sandbox-one']);
+  assert.equal(proposal.results[0].selectsWinner, false);
   assert.equal(proposal.results[0].grantsAuthority, false);
   assert.equal(proposal.results[0].productionEffects, false);
 });
 
-test('proposal summary keeps proposal, execution and production authority distinct', () => {
+test('proposal summary keeps proposal, selection, execution and production authority distinct', () => {
   const wish = proposeCodexBranchExperiment(wishWithBranch(), {
     branchId: 'branch:one',
     proposalId: 'proposal:one',
@@ -80,12 +127,16 @@ test('proposal summary keeps proposal, execution and production authority distin
   const summary = branchExperimentProposalSummary(wish);
   assert.equal(summary.proposals.length, 1);
   assert.equal(summary.proposals[0].executionPermission, false);
+  assert.equal(summary.proposals[0].executeAutomatically, false);
+  assert.equal(summary.proposals[0].selectsWinner, false);
+  assert.equal(summary.proposals[0].grantsAuthority, false);
   assert.equal(summary.proposals[0].productionEffects, false);
   assert.equal(summary.doctrine.proposalIsNotExecution, true);
+  assert.equal(summary.doctrine.simulationDoesNotSelectWinner, true);
   assert.equal(summary.doctrine.resultsDoNotGrantProductionAuthority, true);
 });
 
-test('wish store persists proposal and observed result', () => {
+test('wish store persists proposal boundaries and observed result', () => {
   const map = new Map();
   const storage = {
     getItem: (key) => map.get(key) ?? null,
@@ -98,8 +149,11 @@ test('wish store persists proposal and observed result', () => {
     branchId: 'branch:store',
     proposalId: 'proposal:store',
     title: 'Stored proposal',
+    discriminatingQuestion: 'Does persistence preserve the full proposal boundary?',
     hypothesis: 'Persistence works.',
     method: 'Write and reload.',
+    assumptionsHeldConstant: ['same wish id'],
+    outOfScope: ['production execution'],
     createdAt: T1,
   });
   store.recordBranchExperimentResult('wish:store-exp', {
@@ -108,13 +162,18 @@ test('wish store persists proposal and observed result', () => {
     resultId: 'result:store',
     outcome: 'worked',
     observation: 'The result survived reload.',
+    uncertainties: ['browser storage lifecycle'],
     receiptRefs: ['receipt://store'],
     createdAt: T2,
   });
   const reloaded = createCodexWishStore({ storage }).snapshot();
   const proposal = reloaded.wishes[0].possibilityBranches[0].experimentProposals[0];
   assert.equal(proposal.status, 'observed');
+  assert.equal(proposal.discriminatingQuestion, 'Does persistence preserve the full proposal boundary?');
+  assert.deepEqual(proposal.assumptionsHeldConstant, ['same wish id']);
+  assert.deepEqual(proposal.outOfScope, ['production execution']);
   assert.equal(proposal.results[0].outcome, 'worked');
+  assert.deepEqual(proposal.results[0].uncertainties, ['browser storage lifecycle']);
 });
 
 test('Wish Grove AI University sidecar can propose and attach evidence but contains no run action', async () => {
@@ -123,7 +182,12 @@ test('Wish Grove AI University sidecar can propose and attach evidence but conta
   assert.match(bootstrap, /wish-grove-ai-university-sidecar\.js/);
   assert.match(sidecar, /Save sandbox proposal/);
   assert.match(sidecar, /Nothing was executed/);
+  assert.match(sidecar, /Discriminating question/);
+  assert.match(sidecar, /Assumptions held constant/);
+  assert.match(sidecar, /Relationships at the boundary/);
+  assert.match(sidecar, /Out of scope/);
   assert.match(sidecar, /Attach returned sandbox evidence/);
+  assert.match(sidecar, /Evidence returned\. Authority did not\./);
   assert.doesNotMatch(sidecar, />Run experiment</i);
   assert.doesNotMatch(sidecar, /autoStart\s*:\s*true/);
 });
