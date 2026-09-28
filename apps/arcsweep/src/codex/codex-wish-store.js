@@ -33,6 +33,7 @@ import {
 } from './codex-suggestion-grove.js';
 import { materialiseCodexBranchSuggestion } from './codex-suggestion-materialisation.js';
 import { recordCodexBranchLearningReflection } from './codex-learning-reflection.js';
+import { reviewCodexLearningReflection } from './codex-curriculum-review.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -250,6 +251,19 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     return Object.freeze({ ...outcome, wish });
   }
 
+  function reviewLearningReflection(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(
+      wishId,
+      (current) => {
+        outcome = reviewCodexLearningReflection(current, input);
+        return outcome.wish;
+      },
+      `wish-branch-curriculum-review:${wishId}:${input?.reflectionId || 'unknown'}:${input?.outcome || 'unknown'}`,
+    );
+    return Object.freeze({ ...outcome, wish });
+  }
+
   function reviseWish(wishId, input) {
     return updateWish(wishId, (wish) => reviseCodexWish(wish, input), `wish-revised:${wishId}`);
   }
@@ -328,6 +342,7 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     decideBranchSuggestion,
     materialiseBranchSuggestion,
     recordLearningReflection,
+    reviewLearningReflection,
     reviseWish,
     transformWish,
     anchorWish,
