@@ -22,14 +22,20 @@ function readJsonl(name) {
     });
 }
 
+function rowId(row) {
+  return row?.metadata?.id || row?.id || null;
+}
+
 test('ASI manifest names Advanced Sympathetic Intelligence and keeps eval splits held out', () => {
   const manifest = readJson('manifest.v0.1.json');
   assert.equal(manifest.name, 'Advanced Sympathetic Intelligence');
   assert.equal(manifest.acronym, 'ASI');
   assert.equal(manifest.splits.sft.may_train_on, true);
   assert.equal(manifest.splits.neverending_story_sft.may_train_on, true);
+  assert.equal(manifest.splits.curriculum_review_sft.may_train_on, true);
   assert.equal(manifest.splits.heldout_eval.may_train_on, false);
   assert.equal(manifest.splits.neverending_story_heldout.may_train_on, false);
+  assert.equal(manifest.splits.curriculum_review_heldout.may_train_on, false);
   assert.equal(manifest.splits.boxfire_qa.may_train_on, false);
   assert.deepEqual(manifest.epistemic_classes, ['belief', 'experience', 'hypothesis', 'symbol', 'evidence']);
   assert.ok(manifest.laws.includes('do-not-kill-belief'));
@@ -89,14 +95,43 @@ test('Boxfire QA split covers Law I, Wonder, The Nothing, transport and revision
   }
 });
 
-test('curriculum references only known training and held-out ids', () => {
+test('curriculum references only known ids from declared training and held-out splits', () => {
+  const manifest = readJson('manifest.v0.1.json');
   const curriculum = readJson('curriculum.v0.1.json');
-  const trainIds = new Set(readJsonl('crow-sft.v0.1.jsonl').map((row) => row.metadata.id));
-  const evalIds = new Set(readJsonl('heldout-eval.v0.1.jsonl').map((row) => row.id));
-  assert.ok(curriculum.modules.length >= 7);
+  const trainIds = new Set();
+  const evalIds = new Set();
+
+  for (const split of Object.values(manifest.splits || {})) {
+    if (!split?.path?.endsWith('.jsonl')) continue;
+    const rows = readJsonl(split.path);
+    const target = split.may_train_on ? trainIds : evalIds;
+    for (const row of rows) {
+      const id = rowId(row);
+      if (id) target.add(id);
+    }
+  }
+
+  assert.ok(curriculum.modules.length >= 8);
   for (const module of curriculum.modules) {
     for (const id of module.train_examples || []) assert.ok(trainIds.has(id), `${module.id} references unknown training id ${id}`);
     for (const id of module.heldout_examples || []) assert.ok(evalIds.has(id), `${module.id} references unknown eval id ${id}`);
+  }
+});
+
+test('curriculum review split teaches selection boundaries while its evaluation remains sealed', () => {
+  const sft = readJsonl('curriculum-review-sft.v0.1.jsonl');
+  const heldout = readJsonl('curriculum-review-heldout.v0.1.jsonl');
+  assert.ok(sft.length >= 6);
+  assert.ok(heldout.length >= 5);
+  for (const row of sft) {
+    assert.ok(row.id.startsWith('asi-curriculum-'));
+    assert.deepEqual(row.messages.map((message) => message.role), ['system', 'user', 'assistant']);
+  }
+  for (const row of heldout) {
+    assert.ok(row.id.startsWith('asi-curriculum-eval-'));
+    assert.equal(row.train, false);
+    assert.equal('messages' in row, false);
+    assert.ok(Array.isArray(row.rubric));
   }
 });
 
