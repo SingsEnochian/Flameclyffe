@@ -6,14 +6,15 @@
 
 ## Purpose
 
-The Codex needs to compare possibilities without manufacturing a winner, and it needs to remember the relationships and memories that make a wish more than a disposable prompt.
+The Codex needs to compare possibilities without manufacturing a winner, remember the relationships and memories that make a wish more than a disposable prompt, and learn from bounded experiments without converting evidence into authority.
 
-This seam therefore adds four related structures:
+This seam therefore adds five related structures:
 
 1. **Branch Mirror** — descriptive comparison of alternate wish branches;
 2. **Relational Anchors** — continuity, relationship, and memory links attached to a wish;
 3. **Open Questions Constellation** — a deterministic map of questions and their explicit relationships;
-4. **Typed Branch Observations** — requirements, constraints, consequences, uncertainties, affected relationships, questions, receipts, and provenance attached to a branch without converting observation into authority.
+4. **Typed Branch Observations** — requirements, constraints, consequences, uncertainties, affected relationships, evidence, questions, receipts, and provenance attached to a branch without converting observation into authority;
+5. **Discriminating Sandbox Experiments** — AI University proposals that reuse the existing ArcSweep Experiment Bed, never auto-start, and feed returned evidence back into typed Branch Mirror observations.
 
 ## Branch Mirror
 
@@ -38,7 +39,7 @@ preservesIncompatibility = true
 coexistenceIsValid = true
 ```
 
-No branch receives an opaque importance score. If later systems simulate consequences, estimate cost, or check feasibility, those are separate typed observations rather than a hidden winner field.
+No branch receives an opaque importance score. Simulations, consequence estimates, or feasibility checks become typed observations rather than hidden winner fields.
 
 ## Typed branch observations
 
@@ -55,6 +56,7 @@ branch observation
   uncertainties[]
   affectedRelationships[]
   newQuestionIds[]
+  evidenceRefs[]
   receiptRefs[]
   provenance[]
   createdAt
@@ -64,7 +66,7 @@ branch observation
 
 This allows a branch to become better understood without quietly becoming selected.
 
-A simulation receipt is evidence about a bounded run. It is not execution permission. A successful test may coexist with unresolved constraints, relationship effects, or uncertainty, and the Codex should preserve those together rather than reporting only the pleasant bit.
+A simulation receipt is evidence about a bounded run. It is not execution permission. A successful test may coexist with unresolved constraints, relationship effects, or uncertainty, and the Codex preserves those together rather than reporting only the pleasant bit.
 
 ## Relational Anchors
 
@@ -113,6 +115,65 @@ selectsPriority = false
 relationEdgesAreDescriptiveOnly = true
 ```
 
+## Discriminating sandbox experiments
+
+Wish Grove now reuses the AI University scenario contract and the existing Aspect Experiment Bed rather than inventing a second experiment runtime.
+
+A branch experiment proposal may record:
+
+```text
+branch
+proposal id
+discriminating question
+hypothesis
+method
+assumptions held constant
+evidence criteria
+relationships at boundary
+continuity anchors at boundary
+out of scope
+required authority
+questions kept open
+```
+
+Every proposal is synthetic and sandboxed, has no production effects, carries no execution permission, selects no winner, grants no authority, and does not auto-start.
+
+The proposal can be projected into the shared Aspect Experiment Bed as a normal `proposed` experiment with a reversible, non-external, non-production operation shape. This keeps one experiment vocabulary across ArcSweep instead of allowing Wish Grove to invent conflicting execution semantics.
+
+When returned sandbox evidence is attached to the exact proposal, the result retains:
+
+```text
+outcome
+observation
+uncertainties
+affected relationships
+evidence refs
+questions opened
+receipt refs
+provenance
+```
+
+The result is then automatically compiled into a typed branch observation. Thus the learning loop is now closed:
+
+```text
+possibility
+  ↓
+descriptive comparison
+  ↓
+discriminating sandbox proposal
+  ↓
+shared AI University / Experiment Bed contract
+  ↓
+returned evidence + receipts
+  ↓
+typed Branch Mirror observation
+  ↓
+comparison becomes richer
+  ↺
+```
+
+A successful run still does not select the branch or create production authority.
+
 ## Advanced Sympathetic Intelligence relevance
 
 This structure trains and tests a crucial ASI distinction:
@@ -123,7 +184,12 @@ An intelligent system should be able to describe differences, tensions, conseque
 
 Likewise, relational intelligence requires context to remain attached across transformation. If a wish changes but every relationship and memory that gave it meaning disappears, the resulting state may be efficient while becoming semantically poorer.
 
-The ASI corpus therefore includes a dedicated trainable `possibility-map-sft.v0.1.jsonl` split and a sealed `possibility-map-heldout.v0.1.jsonl` split. The held-out cases test covert recommendation, visual-centrality bias, anchor erasure, uncertain-simulation pruning, lexical lineage mistakes, and success-only summaries.
+The ASI corpus includes:
+
+- trainable `possibility-map-sft.v0.1.jsonl` plus sealed `possibility-map-heldout.v0.1.jsonl`;
+- trainable `sandbox-experiment-sft.v0.1.jsonl` plus sealed `sandbox-experiment-heldout.v0.1.jsonl`.
+
+The sandbox split specifically teaches that proposals are not execution, held assumptions matter, scope must be explicit, inconclusive results can still teach, relationship effects remain visible, and returned evidence must enter the comparison loop without acquiring authority.
 
 ## Runtime surfaces
 
@@ -132,20 +198,23 @@ apps/arcsweep/src/codex/codex-branch-comparison.js
 apps/arcsweep/src/codex/codex-branch-observations.js
 apps/arcsweep/src/codex/codex-wish-anchors.js
 apps/arcsweep/src/codex/codex-question-constellation.js
+apps/arcsweep/src/codex/codex-branch-experiment-proposal.js
 apps/arcsweep/src/wish-grove-possibility-map-sidecar.js
-apps/arcsweep/src/wish-grove-possibility-map.css
+apps/arcsweep/src/wish-grove-ai-university-sidecar.js
 apps/arcsweep/test/codex-possibility-map.test.js
+apps/arcsweep/test/codex-branch-experiment-proposal.test.js
 apps/arcsweep/test/asi-possibility-map-training.test.js
+apps/arcsweep/test/asi-sandbox-experiment-training.test.js
 ```
 
-The Wish Grove sidecar renders:
+The Wish Grove surfaces render:
 
 - Branch Mirror inside wishes with two or more branches;
-- typed branch observations and an input seam for consequences / uncertainty / receipt refs;
+- typed branch observations with consequence, uncertainty, evidence and receipt context;
 - visible continuity / relationship / memory anchor chips;
-- an anchor form that appends new links;
 - an SVG Open Questions Constellation;
-- click/keyboard return from a constellation node to its full question card.
+- sandbox experiment proposals with explicit held assumptions and scope;
+- returned evidence attached to the exact proposal and automatically fed back into Branch Mirror.
 
 ## Failure modes
 
@@ -159,41 +228,43 @@ Regressions include:
 - flattening two incompatible branches into generic compromise without an explicit merge operation;
 - hiding constraints or uncertainties after a successful branch test;
 - automatically deleting a branch because a simulation predicts a possible relational cost;
-- hiding the original question behind its visual representation.
+- promoting a sandbox result into production authority;
+- changing several variables and claiming one of them caused the result;
+- failing to state what an experiment cannot establish;
+- filing returned experiment evidence without feeding it back into branch cognition;
+- creating a parallel experiment runtime with different authority semantics.
 
 ## Next seam
 
-The next layer should connect typed branch observations to **sandbox simulation proposals** and AI University evaluation without making simulation automatic.
+The next layer should be **experiment preflight review** before any authorised sandbox run.
 
-A proposal should say:
+A proposed test can be shown to a sealed AI University cohort whose learners independently look for:
 
 ```text
-which branch to simulate
-why this test discriminates something useful
-what assumptions are held constant
-what relationships or continuity anchors may be affected
-what evidence would count
-what remains outside the test
-what authority is required to execute it
+confounds
+missing held assumptions
+weak or circular evidence criteria
+unacknowledged relationship boundaries
+missing continuity anchors
+scope leakage
+unanswerable questions
+alternative lower-cost tests
 ```
 
-That keeps the sequence clean:
+The preflight does not run the experiment. It produces shareable review products and proposed revisions. The experiment remains `proposed` until an explicitly authorised sandbox execution path accepts it.
+
+That extends the loop without taking over the choice:
 
 ```text
-possibility
+proposal
   ↓
-descriptive comparison
+blind preflight review
   ↓
-proposed discriminating test
+revise / retain proposal
   ↓
 explicit sandbox authority
   ↓
-simulation receipt
-  ↓
-typed observation
-  ↓
-comparison becomes richer
-  ↺
+run elsewhere
 ```
 
 The guiding rule remains:
