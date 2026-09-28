@@ -6,6 +6,7 @@ import {
   codexUniverseMapSnapshot,
 } from './codex/universe-map-registry.js';
 import { epraCanonManifestSnapshot } from './codex/epra-canon-ingest-manifest.js';
+import { runEpraSyntheticRuntimeCheck } from './codex/epra-synthetic-runtime-check.js';
 
 export const CODEX_UNIVERSE_MAP_SIDECAR_SCHEMA = 'hearthweave.codex-universe-map-sidecar/v0.1';
 
@@ -37,7 +38,7 @@ function universeMarkup(universe) {
     ? `<small class="codex-universe-notes">${esc(universe.notes.join(' · '))}</small>`
     : '';
   const epra = universe.id === 'epra-a-new-hope'
-    ? `<div class="codex-universe-ingest"><strong>Canon ingest</strong><span data-codex-epra-ingest-summary></span></div>`
+    ? `<div class="codex-universe-ingest"><strong>Canon ingest</strong><span data-codex-epra-ingest-summary></span><button type="button" data-codex-epra-synthetic-check>Run synthetic ingest check</button><div class="codex-epra-check-result" data-codex-epra-synthetic-result role="status" aria-live="polite" hidden></div></div>`
     : '';
   return [
     `<article class="codex-universe-card" data-codex-universe="${esc(universe.id)}" data-mapping-state="${esc(universe.mappingState)}">`,
@@ -157,6 +158,34 @@ function closeMap() {
 }
 
 function onClick(event) {
+  const check = event.target?.closest?.('[data-codex-epra-synthetic-check]');
+  if (check) {
+    event.preventDefault();
+    const output = check.parentElement?.querySelector('[data-codex-epra-synthetic-result]');
+    if (output) {
+      try {
+        const { receipt } = runEpraSyntheticRuntimeCheck();
+        output.innerHTML = [
+          '<div class="codex-epra-check-heading"><span class="codex-epra-check-beacon" aria-hidden="true"></span><strong>Runtime path verified</strong><small>Synthetic · in memory</small></div>',
+          '<dl class="codex-epra-check-metrics">',
+          '<div><dt>World</dt><dd data-epra-check-world></dd></div>',
+          '<div><dt>Evidence</dt><dd data-epra-check-count></dd></div>',
+          '<div><dt>Canon write</dt><dd>Blocked pending Steward review</dd></div>',
+          '</dl>',
+          '<details><summary>Inspect redacted public receipt</summary><pre data-epra-check-receipt></pre></details>',
+        ].join('');
+        output.querySelector('[data-epra-check-world]').textContent = receipt.universeId;
+        output.querySelector('[data-epra-check-count]').textContent = String(receipt.factCount);
+        output.querySelector('[data-epra-check-receipt]').textContent = JSON.stringify(receipt, null, 2);
+        output.dataset.checkStatus = 'passed';
+      } catch {
+        output.textContent = 'Synthetic ingest check failed. No receipt was published.';
+        output.dataset.checkStatus = 'failed';
+      }
+      output.hidden = false;
+    }
+    return;
+  }
   const open = event.target?.closest?.('[data-codex-universe-map-open]');
   if (open) {
     event.preventDefault();

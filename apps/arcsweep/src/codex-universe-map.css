@@ -125,6 +125,85 @@
   font-size: 0.82rem;
 }
 
+
+.codex-universe-ingest {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.codex-universe-ingest > button {
+  min-height: 44px;
+  border: 1px solid color-mix(in srgb, #80e9e5 55%, transparent);
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  background: linear-gradient(125deg, rgba(35, 139, 151, 0.18), rgba(203, 163, 83, 0.12));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.codex-universe-ingest > button:hover,
+.codex-universe-ingest > button:focus-visible {
+  border-color: #80e9e5;
+  box-shadow: 0 0 18px rgba(86, 227, 226, 0.24), inset 0 0 12px rgba(86, 227, 226, 0.08);
+}
+
+.codex-universe-ingest > button:focus-visible { outline: 2px solid #e6c77f; outline-offset: 3px; }
+.codex-universe-ingest > button:active { transform: scale(0.98); }
+
+.codex-epra-check-result {
+  flex: 1 0 100%;
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid rgba(105, 223, 221, 0.42);
+  border-radius: 12px;
+  background: radial-gradient(circle at top left, rgba(55, 166, 178, 0.16), transparent 70%), rgba(6, 23, 29, 0.72);
+  box-shadow: inset 0 0 20px rgba(87, 226, 220, 0.07), 0 0 16px rgba(65, 199, 205, 0.08);
+}
+
+.codex-epra-check-result[hidden] { display: none; }
+.codex-epra-check-result[data-check-status="failed"] { border-color: #dcb274; }
+
+.codex-epra-check-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.codex-epra-check-heading small { margin-inline-start: auto; opacity: 0.72; }
+.codex-epra-check-beacon {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: #80e9e5;
+  box-shadow: 0 0 12px #80e9e5;
+}
+
+.codex-epra-check-metrics {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: 0.5rem !important;
+}
+.codex-epra-check-metrics div {
+  display: block !important;
+  min-width: 0;
+  padding: 0.55rem;
+  border: 1px solid rgba(128, 233, 229, 0.16);
+  border-radius: 8px;
+}
+.codex-epra-check-metrics dd { margin-top: 0.2rem; }
+.codex-epra-check-result details { margin-top: 0.65rem; }
+.codex-epra-check-result summary { cursor: pointer; }
+.codex-epra-check-result pre {
+  max-height: 18rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
 .codex-universe-map footer {
   margin-top: 1rem;
   opacity: 0.72;

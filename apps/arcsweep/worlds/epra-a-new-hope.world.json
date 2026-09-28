@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "arcsweep.world/v0.1",
+  "id": "epra-a-new-hope",
+  "name": "Epra: A New Hope",
+  "status": "working-canon",
+  "kind": "authored-colony-universe",
+  "summary": "A psionically saturated colony world at EY 500, shaped by the legacy of Anthe, the USFP exodus, Epra's living Field, Veilstorms, Eprathinium, and the sapient Ekhara who share the world with humanity.",
+  "canon": {
+    "authority": "Rowan-first",
+    "sourcePolicy": "Current Epra World Bible canon is primary. Destiny Weaves and Hope's Crest remain named ancestor/legacy lineages and may never silently overwrite current canon. Administrative/OOC material is excluded from canon ingest.",
+    "ingestPrimer": "../presets/epra-canon-ingest.v0.1.json",
+    "sourceManifest": "../src/codex/epra-canon-ingest-manifest.js",
+    "privateSourcePolicy": "Private source text and locators remain in the Canon Gate private store; public repository and export surfaces receive redacted receipts only.",
+    "timeline": {
+      "present": "EY 500 / SGY 6200",
+      "systems": ["EY", "SGY"],
+      "conversionRule": "EY + 5700 = absolute SGY",
+      "ancestorLineages": ["Destiny Weaves", "Hope's Crest"],
+      "legacyConflictPolicy": "preserve-explicit-divergence-until-current-canon-adjudicates"
+    }
+  },
+  "fieldPacks": [
+    "../presets/universal-canon-ingest-primer.v0.1.json"
+  ],
+  "runtime": {
+    "enabled": true,
+    "worldClock": {
+      "mode": "canon-calendar",
+      "dayLengthHours": 28,
+      "yearLengthDays": 398,
+      "modelInvocation": "event-driven-not-per-tick"
+    },
+    "storyClock": {
+      "mode": "scene-and-roleplay-paced",
+      "majorCanonChangeRequiresApproval": true
+    },
+    "eventDomains": [
+      "world-history",
+      "psionics",
+      "field-and-eprathinium",
+      "veilstorms",
+      "ekhara",
+      "ecology",
+      "settlements-and-geography",
+      "guilds-and-governance",
+      "law-and-personhood",
+      "science-and-infrastructure",
+      "culture-and-society",
+      "calendar-and-timekeeping"
+    ]
+  },
+  "roleplay": {
+    "supported": true,
+    "modes": ["guided-scene", "open-world", "character-dialogue", "event-follow-up", "quiet-presence"],
+    "improvisationAuthority": "colour-and-reversible-local-events",
+    "candidateCanonReceiptsRequired": true
+  },
+  "nextCanonTasks": [
+    "ingest current Ekhara Biology V5 through Canon Gate",
+    "ingest current Core Lore and World material",
+    "map current World and Deep Dive collections recursively",
+    "extract entities, fields, relationships, timeline events, rules, and contradiction candidates",
+    "compare Hope's Crest and Destiny Weaves only after current canon is represented",
+    "preserve every ancestor/current conflict as an explicit divergence until Steward review"
+  ]
+}

@@ -1,3 +1,6 @@
+import './holographic-shell.css';
+import './holographic-shell.js';
+
 const app = document.querySelector('#app');
 const params = new URLSearchParams(location.search);
 const safeBoot = params.get('safe') === '1';
