@@ -13,6 +13,8 @@ import {
   validateEpraPublicIngestReceipt,
 } from '../src/codex/epra-canon-intelligence-bridge.js';
 
+import { runEpraSyntheticRuntimeCheck } from '../src/codex/epra-synthetic-runtime-check.js';
+
 async function readJson(relativeUrl) {
   return JSON.parse(await readFile(new URL(relativeUrl, import.meta.url), 'utf8'));
 }
@@ -138,4 +140,17 @@ test('Epra branch source contains no private Drive IDs or source-body sentinels'
   const source = files.join('\n');
   assert.doesNotMatch(source, /drive\.google\.com|docs\.google\.com/i);
   assert.doesNotMatch(source, /11m3ZjUI|1Je771zW|PRIVATE SYNTHETIC SOURCE BODY|PRIVATE-LOCATOR-SENTINEL/);
+});
+
+test('explicit synthetic runtime check traverses private packet to redacted public receipt', () => {
+  const result = runEpraSyntheticRuntimeCheck();
+  assert.equal(result.status, 'passed');
+  assert.equal(result.mode, 'synthetic-in-memory');
+  assert.equal(result.receipt.universeId, 'epra-a-new-hope');
+  assert.equal(result.receipt.factCount, 1);
+  assert.equal(result.receipt.authority.mayPromoteToCanon, false);
+  assert.equal(result.receipt.authority.stewardReviewRequired, true);
+  assert.deepEqual(validateEpraPublicIngestReceipt(result.receipt), { valid: true, violations: [] });
+  const serialized = JSON.stringify(result);
+  assert.doesNotMatch(serialized, /SYNTHETIC_PRIVATE_BODY_DO_NOT_PUBLISH|SYNTHETIC_PRIVATE_LOCATOR_DO_NOT_PUBLISH|SYNTHETIC_EXTRACTED_VALUE_DO_NOT_PUBLISH/);
 });
