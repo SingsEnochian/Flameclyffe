@@ -16,6 +16,10 @@ import {
   mergeCodexWishBranches,
   transitionCodexWishBranch,
 } from './codex-branch-lifecycle.js';
+import {
+  proposeCodexBranchExperiment,
+  recordCodexBranchExperimentResult,
+} from './codex-branch-experiment-proposal.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -117,6 +121,22 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     );
   }
 
+  function proposeBranchExperiment(wishId, input) {
+    return updateWish(
+      wishId,
+      (wish) => proposeCodexBranchExperiment(wish, input),
+      `wish-branch-experiment-proposed:${wishId}:${input?.branchId || 'unknown'}`,
+    );
+  }
+
+  function recordBranchExperimentResult(wishId, input) {
+    return updateWish(
+      wishId,
+      (wish) => recordCodexBranchExperimentResult(wish, input),
+      `wish-branch-experiment-observed:${wishId}:${input?.branchId || 'unknown'}`,
+    );
+  }
+
   function reviseWish(wishId, input) {
     return updateWish(wishId, (wish) => reviseCodexWish(wish, input), `wish-revised:${wishId}`);
   }
@@ -185,6 +205,8 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     branchWish,
     transitionBranch,
     mergeBranches,
+    proposeBranchExperiment,
+    recordBranchExperimentResult,
     reviseWish,
     transformWish,
     anchorWish,
