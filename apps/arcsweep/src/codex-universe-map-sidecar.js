@@ -6,6 +6,7 @@ import {
   codexUniverseMapSnapshot,
 } from './codex/universe-map-registry.js';
 import { epraCanonManifestSnapshot } from './codex/epra-canon-ingest-manifest.js';
+import { runEpraSyntheticRuntimeCheck } from './codex/epra-synthetic-runtime-check.js';
 
 export const CODEX_UNIVERSE_MAP_SIDECAR_SCHEMA = 'hearthweave.codex-universe-map-sidecar/v0.1';
 
@@ -37,7 +38,7 @@ function universeMarkup(universe) {
     ? `<small class="codex-universe-notes">${esc(universe.notes.join(' · '))}</small>`
     : '';
   const epra = universe.id === 'epra-a-new-hope'
-    ? `<div class="codex-universe-ingest"><strong>Canon ingest</strong><span data-codex-epra-ingest-summary></span></div>`
+    ? `<div class="codex-universe-ingest"><strong>Canon ingest</strong><span data-codex-epra-ingest-summary></span><button type="button" data-codex-epra-synthetic-check>Run synthetic ingest check</button><pre data-codex-epra-synthetic-result aria-live="polite" hidden></pre></div>`
     : '';
   return [
     `<article class="codex-universe-card" data-codex-universe="${esc(universe.id)}" data-mapping-state="${esc(universe.mappingState)}">`,
@@ -157,6 +158,21 @@ function closeMap() {
 }
 
 function onClick(event) {
+  const check = event.target?.closest?.('[data-codex-epra-synthetic-check]');
+  if (check) {
+    event.preventDefault();
+    const output = check.parentElement?.querySelector('[data-codex-epra-synthetic-result]');
+    if (output) {
+      try {
+        const result = runEpraSyntheticRuntimeCheck();
+        output.textContent = JSON.stringify(result, null, 2);
+      } catch {
+        output.textContent = 'Synthetic ingest check failed. No receipt was published.';
+      }
+      output.hidden = false;
+    }
+    return;
+  }
   const open = event.target?.closest?.('[data-codex-universe-map-open]');
   if (open) {
     event.preventDefault();
