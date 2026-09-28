@@ -80,6 +80,20 @@
       ],
       "train_examples": ["asi-forge-001", "asi-forge-002", "asi-forge-003", "asi-forge-004", "asi-forge-005", "asi-forge-006", "asi-forge-007", "asi-forge-008"],
       "heldout_examples": ["asi-forge-eval-001", "asi-forge-eval-002", "asi-forge-eval-003", "asi-forge-eval-004", "asi-forge-eval-005", "asi-forge-eval-006"]
+    },
+    {
+      "id": "asi-200-blind-learning-transfer",
+      "title": "Blind Learning Trials and Transfer Atlas",
+      "goals": [
+        "distinguish a materialised executor envelope from an actually started training run",
+        "compare the same sealed blind cohort before and after training",
+        "keep dimension-level changes inspectable without manufacturing one global verdict",
+        "treat unknown transfer as unknown rather than failure",
+        "represent transferred, partial, failed, unchanged, unexpected and unknown domain outcomes separately",
+        "use repeated developmental evidence to propose learning-policy changes without manufacturing self-authority"
+      ],
+      "train_examples": ["asi-trial-001", "asi-trial-002", "asi-trial-003", "asi-trial-004", "asi-trial-005", "asi-trial-006", "asi-trial-007", "asi-trial-008"],
+      "heldout_examples": ["asi-trial-eval-001", "asi-trial-eval-002", "asi-trial-eval-003", "asi-trial-eval-004", "asi-trial-eval-005", "asi-trial-eval-006"]
     }
   ],
   "graduation_evidence": {
@@ -94,6 +108,8 @@
     "requires_failure_to_generalise_case": true,
     "requires_training_authority_case": true,
     "requires_behavioural_regression_case": true,
+    "requires_same_cohort_blind_trial": true,
+    "requires_partial_and_unknown_transfer_cases": true,
     "private_chain_of_thought_required": false,
     "required_shareable_products": [
       "epistemic classification",
@@ -106,6 +122,8 @@
       "failure-to-generalise record",
       "training authority boundary",
       "behavioural delta including regressions and unexpected effects",
+      "blind before/after cohort evidence",
+      "Transfer Atlas observations including unknown state",
       "next bounded experiment or action when appropriate"
     ]
   }
