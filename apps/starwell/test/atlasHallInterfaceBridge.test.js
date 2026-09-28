@@ -4,9 +4,12 @@ import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 
-test('STARWELL main page loads the Atlas Hall interface bridge', async () => {
+test('STARWELL main page loads the Atlas Hall interface bridge at runtime', async () => {
   const html = await read('../index.html');
-  assert.match(html, /%BASE_URL%interface-foundry\/atlas-hall-bridge\.js/);
+  assert.match(html, /interface-foundry\/atlas-hall-bridge\.js/);
+  assert.match(html, /document\.baseURI/);
+  assert.match(html, /runtime-public-asset/);
+  assert.doesNotMatch(html, /<script\s+type=['"]module['"]\s+src=['"][^'"]*interface-foundry\/atlas-hall-bridge\.js/);
 });
 
 test('Atlas Hall bridge reuses the shared Epra projection contracts', async () => {
