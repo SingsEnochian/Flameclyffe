@@ -104,5 +104,6 @@ if (typeof document !== 'undefined') {
   void import('./wish-grove-sidecar.js');
   void import('./wish-grove-wonder-return-sidecar.js');
   void import('./wish-grove-possibility-map-sidecar.js');
+  void import('./wish-grove-branch-lifecycle-sidecar.js');
   void bootstrapRuntimeIntegration();
 }
