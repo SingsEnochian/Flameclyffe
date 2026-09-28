@@ -279,7 +279,7 @@ function handleObservationSubmit(form) {
     branchId: form.dataset.branchId,
     observationId: token('branch-observation'),
     kind,
-    source: kind === 'simulation' ? 'simulation-receipt' : 'wish-grove',
+    source: kind === 'simulation' ? 'wish-grove:simulation' : 'wish-grove',
     summary: String(data.get('summary') || '').trim(),
     requirements: csv(data.get('requirements')),
     constraints: csv(data.get('constraints')),
