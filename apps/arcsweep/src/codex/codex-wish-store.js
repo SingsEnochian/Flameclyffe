@@ -12,6 +12,10 @@ import {
 } from './codex-wish-lineage.js';
 import { anchorCodexWish } from './codex-wish-anchors.js';
 import { recordCodexBranchObservation } from './codex-branch-observations.js';
+import {
+  mergeCodexWishBranches,
+  transitionCodexWishBranch,
+} from './codex-branch-lifecycle.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -97,6 +101,22 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     return updateWish(wishId, (wish) => branchCodexWish(wish, input), `wish-branched:${wishId}`);
   }
 
+  function transitionBranch(wishId, input) {
+    return updateWish(
+      wishId,
+      (wish) => transitionCodexWishBranch(wish, input),
+      `wish-branch-transitioned:${wishId}:${input?.branchId || 'unknown'}`,
+    );
+  }
+
+  function mergeBranches(wishId, input) {
+    return updateWish(
+      wishId,
+      (wish) => mergeCodexWishBranches(wish, input),
+      `wish-branches-merged:${wishId}:${input?.branchId || 'unknown'}`,
+    );
+  }
+
   function reviseWish(wishId, input) {
     return updateWish(wishId, (wish) => reviseCodexWish(wish, input), `wish-revised:${wishId}`);
   }
@@ -163,6 +183,8 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     snapshot,
     createWish,
     branchWish,
+    transitionBranch,
+    mergeBranches,
     reviseWish,
     transformWish,
     anchorWish,
