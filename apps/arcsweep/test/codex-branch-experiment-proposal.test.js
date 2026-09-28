@@ -80,7 +80,7 @@ test('Codex branch proposal maps into the existing Aspect Experiment Bed as prop
   assert.match(body.reversibleScope, /Synthetic sandbox only/);
 });
 
-test('returned sandbox evidence attaches to the exact proposal without changing production authority', () => {
+test('returned sandbox evidence enriches Branch Mirror without changing production authority', () => {
   let wish = proposeCodexBranchExperiment(wishWithBranch(), {
     branchId: 'branch:one',
     proposalId: 'proposal:one',
@@ -102,7 +102,8 @@ test('returned sandbox evidence attaches to the exact proposal without changing 
     receiptRefs: ['receipt://sandbox-one'],
     createdAt: T2,
   });
-  const proposal = wish.possibilityBranches[0].experimentProposals[0];
+  const branch = wish.possibilityBranches[0];
+  const proposal = branch.experimentProposals[0];
   assert.equal(proposal.status, 'observed');
   assert.equal(proposal.results.length, 1);
   assert.equal(proposal.results[0].outcome, 'mixed');
@@ -113,6 +114,20 @@ test('returned sandbox evidence attaches to the exact proposal without changing 
   assert.equal(proposal.results[0].selectsWinner, false);
   assert.equal(proposal.results[0].grantsAuthority, false);
   assert.equal(proposal.results[0].productionEffects, false);
+
+  assert.equal(branch.observations.length, 1);
+  const observation = branch.observations[0];
+  assert.equal(observation.kind, 'simulation');
+  assert.equal(observation.source, 'ai-university-sandbox');
+  assert.deepEqual(observation.consequences, ['sandbox outcome: mixed']);
+  assert.deepEqual(observation.uncertainties, ['relationship effect remains unresolved']);
+  assert.deepEqual(observation.affectedRelationships, ['relationship:traveller-guide']);
+  assert.deepEqual(observation.evidenceRefs, ['evidence://held-state-1']);
+  assert.deepEqual(observation.newQuestionIds, ['question:relationship-effect']);
+  assert.deepEqual(observation.receiptRefs, ['receipt://sandbox-one']);
+  assert.equal(observation.grantsAuthority, false);
+  assert.equal(observation.selectsWinner, false);
+  assert.deepEqual(wish.receipts, ['receipt://sandbox-one']);
 });
 
 test('proposal summary keeps proposal, selection, execution and production authority distinct', () => {
@@ -133,10 +148,11 @@ test('proposal summary keeps proposal, selection, execution and production autho
   assert.equal(summary.proposals[0].productionEffects, false);
   assert.equal(summary.doctrine.proposalIsNotExecution, true);
   assert.equal(summary.doctrine.simulationDoesNotSelectWinner, true);
+  assert.equal(summary.doctrine.resultsBecomeTypedBranchObservations, true);
   assert.equal(summary.doctrine.resultsDoNotGrantProductionAuthority, true);
 });
 
-test('wish store persists proposal boundaries and observed result', () => {
+test('wish store persists proposal boundaries, returned evidence and Branch Mirror observation', () => {
   const map = new Map();
   const storage = {
     getItem: (key) => map.get(key) ?? null,
@@ -163,17 +179,22 @@ test('wish store persists proposal boundaries and observed result', () => {
     outcome: 'worked',
     observation: 'The result survived reload.',
     uncertainties: ['browser storage lifecycle'],
+    evidenceRefs: ['evidence://persisted'],
     receiptRefs: ['receipt://store'],
     createdAt: T2,
   });
   const reloaded = createCodexWishStore({ storage }).snapshot();
-  const proposal = reloaded.wishes[0].possibilityBranches[0].experimentProposals[0];
+  const wish = reloaded.wishes[0];
+  const proposal = wish.possibilityBranches[0].experimentProposals[0];
   assert.equal(proposal.status, 'observed');
   assert.equal(proposal.discriminatingQuestion, 'Does persistence preserve the full proposal boundary?');
   assert.deepEqual(proposal.assumptionsHeldConstant, ['same wish id']);
   assert.deepEqual(proposal.outOfScope, ['production execution']);
   assert.equal(proposal.results[0].outcome, 'worked');
   assert.deepEqual(proposal.results[0].uncertainties, ['browser storage lifecycle']);
+  assert.equal(wish.possibilityBranches[0].observations.length, 1);
+  assert.deepEqual(wish.possibilityBranches[0].observations[0].evidenceRefs, ['evidence://persisted']);
+  assert.deepEqual(wish.receipts, ['receipt://store']);
 });
 
 test('Wish Grove AI University sidecar can propose and attach evidence but contains no run action', async () => {
