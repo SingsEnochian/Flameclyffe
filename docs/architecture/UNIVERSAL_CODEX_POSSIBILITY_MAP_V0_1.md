@@ -8,11 +8,12 @@
 
 The Codex needs to compare possibilities without manufacturing a winner, and it needs to remember the relationships and memories that make a wish more than a disposable prompt.
 
-This seam therefore adds three related structures:
+This seam therefore adds four related structures:
 
 1. **Branch Mirror** — descriptive comparison of alternate wish branches;
 2. **Relational Anchors** — continuity, relationship, and memory links attached to a wish;
-3. **Open Questions Constellation** — a deterministic map of questions and their explicit relationships.
+3. **Open Questions Constellation** — a deterministic map of questions and their explicit relationships;
+4. **Typed Branch Observations** — requirements, constraints, consequences, uncertainties, affected relationships, questions, receipts, and provenance attached to a branch without converting observation into authority.
 
 ## Branch Mirror
 
@@ -38,6 +39,32 @@ coexistenceIsValid = true
 ```
 
 No branch receives an opaque importance score. If later systems simulate consequences, estimate cost, or check feasibility, those are separate typed observations rather than a hidden winner field.
+
+## Typed branch observations
+
+A branch may accumulate observations from analysis, sandbox simulation, tests, or attributed user observations.
+
+```text
+branch observation
+  kind
+  source
+  summary
+  requirements[]
+  constraints[]
+  consequences[]
+  uncertainties[]
+  affectedRelationships[]
+  newQuestionIds[]
+  receiptRefs[]
+  provenance[]
+  createdAt
+  grantsAuthority = false
+  selectsWinner = false
+```
+
+This allows a branch to become better understood without quietly becoming selected.
+
+A simulation receipt is evidence about a bounded run. It is not execution permission. A successful test may coexist with unresolved constraints, relationship effects, or uncertainty, and the Codex should preserve those together rather than reporting only the pleasant bit.
 
 ## Relational Anchors
 
@@ -96,20 +123,25 @@ An intelligent system should be able to describe differences, tensions, conseque
 
 Likewise, relational intelligence requires context to remain attached across transformation. If a wish changes but every relationship and memory that gave it meaning disappears, the resulting state may be efficient while becoming semantically poorer.
 
+The ASI corpus therefore includes a dedicated trainable `possibility-map-sft.v0.1.jsonl` split and a sealed `possibility-map-heldout.v0.1.jsonl` split. The held-out cases test covert recommendation, visual-centrality bias, anchor erasure, uncertain-simulation pruning, lexical lineage mistakes, and success-only summaries.
+
 ## Runtime surfaces
 
 ```text
 apps/arcsweep/src/codex/codex-branch-comparison.js
+apps/arcsweep/src/codex/codex-branch-observations.js
 apps/arcsweep/src/codex/codex-wish-anchors.js
 apps/arcsweep/src/codex/codex-question-constellation.js
 apps/arcsweep/src/wish-grove-possibility-map-sidecar.js
 apps/arcsweep/src/wish-grove-possibility-map.css
 apps/arcsweep/test/codex-possibility-map.test.js
+apps/arcsweep/test/asi-possibility-map-training.test.js
 ```
 
 The Wish Grove sidecar renders:
 
 - Branch Mirror inside wishes with two or more branches;
+- typed branch observations and an input seam for consequences / uncertainty / receipt refs;
 - visible continuity / relationship / memory anchor chips;
 - an anchor form that appends new links;
 - an SVG Open Questions Constellation;
@@ -120,26 +152,50 @@ The Wish Grove sidecar renders:
 Regressions include:
 
 - selecting a branch merely because its wording overlaps more strongly;
+- using receipt count as authority or permission;
 - using node degree, screen position, or line count as importance;
 - overwriting old anchors when new relational context is linked;
 - interpreting a relationship ref as proof of emotional status;
 - flattening two incompatible branches into generic compromise without an explicit merge operation;
+- hiding constraints or uncertainties after a successful branch test;
+- automatically deleting a branch because a simulation predicts a possible relational cost;
 - hiding the original question behind its visual representation.
 
 ## Next seam
 
-The next useful layer is **typed branch consequences** and **relationship-aware simulation receipts**.
+The next layer should connect typed branch observations to **sandbox simulation proposals** and AI University evaluation without making simulation automatic.
 
-A branch should be able to accumulate observations such as:
+A proposal should say:
 
 ```text
-requirements
-constraints
-likely consequences
-uncertainties
-affected relationships
-new questions
-simulation receipts
+which branch to simulate
+why this test discriminates something useful
+what assumptions are held constant
+what relationships or continuity anchors may be affected
+what evidence would count
+what remains outside the test
+what authority is required to execute it
 ```
 
-Those observations should remain descriptive until an explicit decision context asks for action. Branch Mirror can then show richer differences while preserving the rule that a comparison does not secretly become a verdict.
+That keeps the sequence clean:
+
+```text
+possibility
+  ↓
+descriptive comparison
+  ↓
+proposed discriminating test
+  ↓
+explicit sandbox authority
+  ↓
+simulation receipt
+  ↓
+typed observation
+  ↓
+comparison becomes richer
+  ↺
+```
+
+The guiding rule remains:
+
+> **learn more without quietly taking over the choice.**
