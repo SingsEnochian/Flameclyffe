@@ -20,6 +20,7 @@ import {
   proposeCodexBranchExperiment,
   recordCodexBranchExperimentResult,
 } from './codex-branch-experiment-proposal.js';
+import { recordBranchExperimentHandoff } from './codex-branch-experiment-handoff.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -137,6 +138,14 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     );
   }
 
+  function recordExperimentHandoff(wishId, handoff) {
+    return updateWish(
+      wishId,
+      (wish) => recordBranchExperimentHandoff(wish, handoff),
+      `wish-branch-experiment-materialised:${wishId}:${handoff?.branchId || 'unknown'}`,
+    );
+  }
+
   function reviseWish(wishId, input) {
     return updateWish(wishId, (wish) => reviseCodexWish(wish, input), `wish-revised:${wishId}`);
   }
@@ -207,6 +216,7 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     mergeBranches,
     proposeBranchExperiment,
     recordBranchExperimentResult,
+    recordExperimentHandoff,
     reviseWish,
     transformWish,
     anchorWish,
