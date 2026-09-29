@@ -20,8 +20,11 @@ If not, it remains a sandbox experiment until its purpose is clear.
 6. Notion Terra Aeterna Novel Line Wiki — editorial canon, galleries, and production assets.
 7. This file — architectural classification and route ownership.
 8. `AGENTS.md` — provider-neutral contributor entry contract.
-9. `docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md` — current cross-system architecture synthesis and implementation programme.
-10. `docs/research/CORPUS_INDEX_V0_1.md` — external research/design corpus registry and promotion rules.
+9. `CLAUDE.md` — Claude-specific routing shim into the shared contributor contract.
+10. `docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md` — current cross-system architecture synthesis and implementation programme.
+11. `docs/research/CORPUS_INDEX_V0_1.md` — external research/design corpus registry and promotion rules.
+12. `docs/handoffs/ASTRA_6_1_CLAUDE_HANDOFF.md` — human-readable Astra 6.1 Claude handoff packet.
+13. `docs/handoffs/astra-6.1-claude-task.json` — machine-readable first-task packet.
 
 ## Trunk
 
@@ -100,9 +103,9 @@ Enduring systems attached to the trunk with a clear purpose.
 
 ### Astra 6.1 contributor and integration architecture
 
-**Owners:** `AGENTS.md`, `docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md`, `docs/research/CORPUS_INDEX_V0_1.md`
+**Owners:** `AGENTS.md`, `CLAUDE.md`, `docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md`, `docs/research/CORPUS_INDEX_V0_1.md`, `docs/handoffs/ASTRA_6_1_CLAUDE_HANDOFF.md`, `docs/handoffs/astra-6.1-claude-task.json`
 
-**Purpose:** Give human and agent contributors one common operating map for ArcSweep, Presence Fabric, provider routing, Runa/auditory systems, AR Companion Nodes, symbolic/experiential corpora, provenance, and runtime evidence.
+**Purpose:** Give human and agent contributors one common operating map for ArcSweep, Presence Fabric, provider routing, Runa/auditory systems, AR Companion Nodes, symbolic/experiential corpora, provenance, and runtime evidence, with an immediately actionable Claude handoff.
 
 **Core laws:**
 
