@@ -42,6 +42,10 @@ function freezeArray(value) {
   return Object.freeze([...(Array.isArray(value) ? value : [])]);
 }
 
+function freezeStringArray(value) {
+  return Object.freeze([...(Array.isArray(value) ? value : [])].map(String));
+}
+
 function freezeRecord(value) {
   return Object.freeze({ ...(value && typeof value === 'object' ? value : {}) });
 }
@@ -95,9 +99,9 @@ export function createSwarmEvent({
     mode,
     body,
     epistemicMode,
-    parentEventIds: freezeArray(parentEventIds).map(String),
-    evidenceRefs: freezeArray(evidenceRefs).map(String),
-    stateRefs: freezeArray(stateRefs).map(String),
+    parentEventIds: freezeStringArray(parentEventIds),
+    evidenceRefs: freezeStringArray(evidenceRefs),
+    stateRefs: freezeStringArray(stateRefs),
     claims: freezeArray(claims),
     alternatives: freezeArray(alternatives),
     authority: authority ? freezeRecord(authority) : null,
@@ -110,7 +114,7 @@ export function createSwarmEvent({
 export function validateSwarmTrace(events = []) {
   const violations = [];
   const seen = new Set();
-  let previousStageIndex = -1;
+  const participantStage = new Map();
 
   for (const event of events) {
     if (!event || event.schema !== SWARM_EVENT_SCHEMA) {
@@ -121,10 +125,11 @@ export function validateSwarmTrace(events = []) {
     seen.add(event.id);
 
     const stageIndex = SWARM_STAGES.indexOf(event.stage);
+    const previousStageIndex = participantStage.get(event.participant?.id) ?? -1;
     if (stageIndex < previousStageIndex && event.stage !== 'repair') {
       violations.push(`stage-regression:${event.id}:${event.stage}`);
     }
-    previousStageIndex = Math.max(previousStageIndex, stageIndex);
+    participantStage.set(event.participant?.id, Math.max(previousStageIndex, stageIndex));
 
     for (const parentId of event.parentEventIds || []) {
       if (!seen.has(parentId)) violations.push(`missing-parent:${event.id}:${parentId}`);
