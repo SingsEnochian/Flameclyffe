@@ -106,13 +106,19 @@ No code-level integration blocker was identified in the audited authority/cognit
 
 This does **not** mean the stack is production-hardened or that every external/runtime configuration has been exercised.
 
+## Canonical naming decision
+
+### ASI = Advanced Sympathetic Intelligence
+
+As of 2026-09-29, the canonical acronym for **Advanced Sympathetic Intelligence** is **ASI**.
+
+Repository curriculum IDs, filenames, tests, handoffs, and future architecture material should use `ASI` for this concept. Earlier project-language uses of `AGI` that meant Advanced Sympathetic Intelligence are legacy terminology and should be migrated when touched rather than perpetuated.
+
+Where acronym ambiguity matters, spell out **Advanced Sympathetic Intelligence** on first use and use `ASI` thereafter.
+
+This naming decision changes terminology only. It does not alter runtime behaviour, model authority, curriculum semantics, or release scope.
+
 ## Known non-blocking decisions / hardening gaps
-
-### Advanced Sympathetic Intelligence acronym
-
-The repository currently uses `ASI` in curriculum IDs, filenames, tests, and handoffs. Earlier project language also used `AGI` to mean **Advanced Sympathetic Intelligence**.
-
-This audit does not silently rename either form. A single canonical acronym should be chosen deliberately before the training/curriculum naming spreads further. Until then, use the full phrase when ambiguity matters.
 
 ### Browser storage is not a security boundary
 
