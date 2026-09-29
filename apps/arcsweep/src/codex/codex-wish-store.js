@@ -43,6 +43,7 @@ import {
 import { materialiseTrainingExecutionEnvelope } from './codex-training-execution-adapter.js';
 import { recordBlindLearningTrial } from './codex-blind-learning-trial.js';
 import { recordTransferAtlas } from './codex-transfer-atlas.js';
+import { proposeDevelopmentalGovernanceChange as proposeDevelopmentalGovernanceChangeContract } from './codex-developmental-governance.js';
 
 export const CODEX_WISH_STORE_SCHEMA = 'hearthweave.codex-wish-store/v0.1';
 export const CODEX_WISH_STORE_KEY = 'arcsweep:universal-codex:wishes:v0.1';
@@ -276,6 +277,15 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     return Object.freeze({ ...outcome, wish });
   }
 
+  function proposeDevelopmentalGovernanceChange(wishId, input) {
+    let outcome = null;
+    const wish = updateWish(wishId, (current) => {
+      outcome = proposeDevelopmentalGovernanceChangeContract(current, input);
+      return outcome.wish;
+    }, `wish-developmental-governance-proposed:${wishId}:${input?.proposalId || 'unknown'}`);
+    return Object.freeze({ ...outcome, wish });
+  }
+
   function reviseWish(wishId, input) {
     return updateWish(wishId, (wish) => reviseCodexWish(wish, input), `wish-revised:${wishId}`);
   }
@@ -358,6 +368,7 @@ export function createCodexWishStore({ storage = null, target = null } = {}) {
     recordTrainingBehaviouralDelta,
     recordBlindTrial,
     recordLearningTransferAtlas,
+    proposeDevelopmentalGovernanceChange,
     reviseWish,
     transformWish,
     anchorWish,
