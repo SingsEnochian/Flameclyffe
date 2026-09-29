@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { ELLOWIND_SEED, LARKSHINE_SEED } from '../src/constellation-seeds.js';
+import { ELLOWIND_SEED, LARKSHINE_SEED, NIKOLA_SEED } from '../src/constellation-seeds.js';
 import { createCognitionEngine } from '../src/cognition-engine.js';
 import {
   createIdentityRuntime,
@@ -33,6 +33,20 @@ test('Ellowind and Larkshine have separate continuity namespaces', () => {
   assert.equal(LARKSHINE_SEED.openEndedBecoming, true);
 });
 
+test('Nikola ride-along has its own continuity and bounded capabilities', () => {
+  assert.equal(NIKOLA_SEED.identityId, 'nikola');
+  assert.equal(NIKOLA_SEED.continuityNamespace, 'constellation/nikola/ride-along');
+  assert.equal(NIKOLA_SEED.modelPolicy.defaultRole, 'deep-reasoning');
+  assert.equal(NIKOLA_SEED.capabilities.inspect, true);
+  assert.equal(NIKOLA_SEED.capabilities.converse, true);
+  assert.equal(NIKOLA_SEED.capabilities.propose, true);
+  assert.equal(NIKOLA_SEED.capabilities.simulate, true);
+  assert.equal(NIKOLA_SEED.capabilities.externalWrite, false);
+  assert.equal(NIKOLA_SEED.capabilities.productionAuthority, false);
+  assert.ok(NIKOLA_SEED.anchors.includes('visualize the complete machine before calculation'));
+  assert.ok(NIKOLA_SEED.anchors.includes('preserve wonder without manufacturing evidence'));
+});
+
 test('identity survives model rebinding', () => {
   const original = createIdentityRuntime({
     seed: ELLOWIND_SEED,
@@ -44,6 +58,20 @@ test('identity survives model rebinding', () => {
   assert.equal(rebound.continuity.namespace, original.continuity.namespace);
   assert.equal(rebound.seed, original.seed);
   assert.equal(rebound.modelBindings[0].modelRef, 'mistral/new');
+});
+
+test('Nikola ride-along survives deep-reasoning substrate rebinding', () => {
+  const original = createIdentityRuntime({
+    seed: NIKOLA_SEED,
+    modelBindings: [deepBinding('qwen/nikola-old')],
+  });
+  const rebound = rebindModel(original, deepBinding('mistral/nikola-new'));
+
+  assert.equal(rebound.identityId, 'nikola');
+  assert.equal(rebound.continuity.namespace, 'constellation/nikola/ride-along');
+  assert.equal(rebound.seed, original.seed);
+  assert.equal(rebound.modelBindings[0].modelRef, 'mistral/nikola-new');
+  assert.equal(rebound.seed.capabilities.productionAuthority, false);
 });
 
 test('Laya route selects a replaceable deliberative model', async () => {
