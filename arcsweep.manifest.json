@@ -5,10 +5,13 @@
   "status": "architecture-candidate",
   "entrypoints": {
     "contributors": "AGENTS.md",
+    "claude": "CLAUDE.md",
     "currentBuild": "CURRENT_BUILD.md",
     "projectMap": "PROJECT_MAP.md",
     "astra61": "docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md",
-    "researchCorpus": "docs/research/CORPUS_INDEX_V0_1.md"
+    "researchCorpus": "docs/research/CORPUS_INDEX_V0_1.md",
+    "claudeHandoff": "docs/handoffs/ASTRA_6_1_CLAUDE_HANDOFF.md",
+    "claudeTaskPacket": "docs/handoffs/astra-6.1-claude-task.json"
   },
   "planes": [
     "observation",
