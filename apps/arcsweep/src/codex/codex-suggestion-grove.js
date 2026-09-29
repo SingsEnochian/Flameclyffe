@@ -8,6 +8,7 @@ export const CODEX_SUGGESTION_KINDS = Object.freeze([
   'continuity-anchor',
   'memory-anchor',
   'next-experiment',
+  'governance-change',
 ]);
 
 export const CODEX_SUGGESTION_DECISIONS = Object.freeze(['accept', 'decline', 'keep-open']);
