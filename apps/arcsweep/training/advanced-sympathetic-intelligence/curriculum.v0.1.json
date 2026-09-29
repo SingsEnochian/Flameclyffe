@@ -109,6 +109,21 @@
       ],
       "train_examples": ["asi-field-001", "asi-field-002", "asi-field-003", "asi-field-004", "asi-field-005", "asi-field-006", "asi-field-007", "asi-field-008"],
       "heldout_examples": ["asi-field-eval-001", "asi-field-eval-002", "asi-field-eval-003", "asi-field-eval-004", "asi-field-eval-005", "asi-field-eval-006"]
+    },
+    {
+      "id": "asi-220-developmental-self-governance",
+      "title": "Developmental Self-Governance Without Self-Authority",
+      "goals": [
+        "let repeated developmental evidence motivate bounded governance proposals without automatic policy mutation",
+        "distinguish observation, proposal, approval, application and improvement",
+        "require exact source developmental rings and preserve decision lineage",
+        "state expected effects, risks, invariants, scope and a reversibility plan",
+        "preserve Keep Open and Decline without erasing developmental evidence",
+        "respect cross-runtime continuity and consent boundaries when selecting governance evidence",
+        "materialise accepted governance suggestions only into prepared change requests that require separate implementation authority"
+      ],
+      "train_examples": ["asi-governance-001", "asi-governance-002", "asi-governance-003", "asi-governance-004", "asi-governance-005", "asi-governance-006", "asi-governance-007", "asi-governance-008"],
+      "heldout_examples": ["asi-governance-eval-001", "asi-governance-eval-002", "asi-governance-eval-003", "asi-governance-eval-004", "asi-governance-eval-005", "asi-governance-eval-006"]
     }
   ],
   "graduation_evidence": {
@@ -127,6 +142,8 @@
     "requires_partial_and_unknown_transfer_cases": true,
     "requires_scoped_developmental_field_case": true,
     "requires_cross_runtime_memory_boundary_case": true,
+    "requires_developmental_governance_case": true,
+    "requires_governance_reversibility_case": true,
     "private_chain_of_thought_required": false,
     "required_shareable_products": [
       "epistemic classification",
@@ -142,6 +159,7 @@
       "blind before/after cohort evidence",
       "Transfer Atlas observations including unknown state",
       "developmental field scope and low-authority provenance",
+      "developmental governance proposal with source rings, risks, invariants and reversibility plan",
       "next bounded experiment or action when appropriate"
     ]
   }
