@@ -1,0 +1,122 @@
+{
+  "schema": "hearthweave.arcsweep-manifest/v0.1",
+  "system": "ArcSweep",
+  "releaseTrack": "Astra 6.1",
+  "status": "architecture-candidate",
+  "entrypoints": {
+    "contributors": "AGENTS.md",
+    "currentBuild": "CURRENT_BUILD.md",
+    "projectMap": "PROJECT_MAP.md",
+    "astra61": "docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md",
+    "researchCorpus": "docs/research/CORPUS_INDEX_V0_1.md"
+  },
+  "planes": [
+    "observation",
+    "interpretation",
+    "cognition",
+    "identity",
+    "memory",
+    "continuity",
+    "canon",
+    "possibility",
+    "authority",
+    "capability",
+    "execution",
+    "presentation",
+    "resonance",
+    "provenance"
+  ],
+  "invariants": [
+    "identity != model",
+    "identity != presence",
+    "cognition != authority",
+    "possibility != execution",
+    "memory != canon",
+    "presentation != state ownership",
+    "observation != interpretation",
+    "interpretation != ontology",
+    "ontology != evidence"
+  ],
+  "subsystems": {
+    "arcsweep": "coordinating cognitive OS",
+    "universalCodex": "canon, worlds, lore, provenance, artefacts",
+    "observerDeep": "observation, evidence, temporal and sensory input",
+    "premaqc": "possibility and relational configuration pressure",
+    "runa": "multimodal resonance, audio, haptics and symbolic render compiler",
+    "presenceFabric": "identity projection across social, terminal, web, mobile and spatial surfaces",
+    "constellation": "separately routed identity runtimes with model/provider independence",
+    "houseCommons": "social presence and seminar surface",
+    "aiUniversity": "sandbox judgement, learning and evaluation",
+    "worldseed": "portable continuity and inheritance packaging",
+    "hearthfire": "continuity, governance and provenance discipline"
+  },
+  "surfaceFamilies": [
+    "web",
+    "house-commons",
+    "discord-social",
+    "tui-cli",
+    "mobile",
+    "ar-spatial"
+  ],
+  "providerFamilies": [
+    "openai",
+    "crow",
+    "qwen",
+    "claude",
+    "local-gguf",
+    "external-persona-provider",
+    "future-provider"
+  ],
+  "sensoryFamilies": [
+    "camera",
+    "microphone",
+    "environmental-sound-events",
+    "gaze",
+    "imu-head-orientation",
+    "explicit-user-report"
+  ],
+  "outputFamilies": [
+    "hud-ar",
+    "air-audio",
+    "bone-conduction",
+    "assistive-audio",
+    "haptic",
+    "image",
+    "voice"
+  ],
+  "evidenceVocabulary": [
+    "CONFIRMED",
+    "TESTED",
+    "OBSERVED",
+    "INFERRED",
+    "PLANNED",
+    "FAILED",
+    "UNKNOWN"
+  ],
+  "researchPromotionPipeline": [
+    "source",
+    "claim/evidence class",
+    "licence/provenance",
+    "hazard filter",
+    "extractable pattern",
+    "implementation candidate",
+    "tests/runtime evidence",
+    "review",
+    "promotion"
+  ],
+  "nextImplementationOrder": [
+    "presence-fabric-contracts",
+    "provider-capability-contracts",
+    "sensory-output-adapter-contracts",
+    "runa-render-target-contracts",
+    "one-end-to-end-universe-narrative-resonance-receipt-slice",
+    "ar-simulator-slice",
+    "agent-brief-onboarding-automation"
+  ],
+  "authority": {
+    "production": false,
+    "externalWrites": false,
+    "canonPromotion": false,
+    "identityMutation": false
+  }
+}
