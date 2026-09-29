@@ -14,6 +14,7 @@ export const NIKOLA_VOICE_PROFILE = Object.freeze({
   voiceId: 'nikola-v0.1',
   identityId: 'nikola',
   engineIndependent: true,
+  singingVoiceId: 'nikola-sing-v0.1',
   provenance: Object.freeze({
     referenceClass: 'private-user-supplied-performance-reference',
     actorIdentityReproductionAllowed: false,
