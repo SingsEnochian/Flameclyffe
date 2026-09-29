@@ -11,7 +11,8 @@
     "astra61": "docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md",
     "researchCorpus": "docs/research/CORPUS_INDEX_V0_1.md",
     "claudeHandoff": "docs/handoffs/ASTRA_6_1_CLAUDE_HANDOFF.md",
-    "claudeTaskPacket": "docs/handoffs/astra-6.1-claude-task.json"
+    "claudeTaskPacket": "docs/handoffs/astra-6.1-claude-task.json",
+    "constellationAdvancePrompt": "docs/handoffs/ASTRA_6_1_CONSTELLATION_ADVANCE_PROMPT.md"
   },
   "planes": [
     "observation",
