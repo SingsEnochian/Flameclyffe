@@ -1,0 +1,81 @@
+{
+  "schema": "hearthweave.agent-task-packet/v0.1",
+  "name": "Astra 6.1 Claude Handoff",
+  "repository": "SingsEnochian/Flameclyffe",
+  "branch": "feature/astra-6.1-canonical-ingest",
+  "pullRequest": 406,
+  "base": "main",
+  "readFirst": [
+    "AGENTS.md",
+    "CURRENT_BUILD.md",
+    "PROJECT_MAP.md",
+    "docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md",
+    "docs/research/CORPUS_INDEX_V0_1.md",
+    "docs/handoffs/ASTRA_6_1_CLAUDE_HANDOFF.md",
+    "arcsweep.manifest.json"
+  ],
+  "mission": "Move Astra 6.1 from architecture into the smallest executable shared-contract slice without duplicating identity, continuity, capability, authority, canon, or presentation ownership.",
+  "firstTask": {
+    "title": "Presence Fabric contract",
+    "goal": "Find the existing owner seams and formalise the minimum shared Presence contract for ArcSweep/Constellation/House Commons.",
+    "allowed": [
+      "inspect and reuse existing Constellation/Chorus/House Commons/model-route/session/receipt code",
+      "extend existing contracts",
+      "add a minimal shared Presence contract if necessary",
+      "add focused tests",
+      "add or update one architecture contract",
+      "record evidence and handoff"
+    ],
+    "forbidden": [
+      "second identity store",
+      "second continuity engine",
+      "production authority",
+      "external-write authority",
+      "live vendor integration",
+      "canon migration",
+      "provider-specific identity coupling",
+      "unrelated UI refactor"
+    ],
+    "requiredInvariants": [
+      "one identity may have multiple presences without identity duplication",
+      "provider/model rebinding does not change identity id",
+      "surface changes do not change identity id",
+      "presence mode does not grant authority",
+      "presence teardown does not delete identity or continuity",
+      "receipts preserve identity+surface+session lineage without credentials",
+      "unknown surfaces/providers fail safely or remain explicit UNKNOWN"
+    ]
+  },
+  "nextTasks": [
+    "provider-capability-contract",
+    "sensory-output-adapter-contracts",
+    "runa-auditory-render-target-contract",
+    "one-end-to-end-vertical-slice"
+  ],
+  "evidenceVocabulary": [
+    "CONFIRMED",
+    "TESTED",
+    "OBSERVED",
+    "INFERRED",
+    "PLANNED",
+    "FAILED",
+    "UNKNOWN"
+  ],
+  "stopConditions": [
+    "unclear authority",
+    "destructive or irreversible migration",
+    "production data risk",
+    "credential or secret ambiguity",
+    "conflicting canonical sources",
+    "architecture-defining fork unresolved by existing contracts"
+  ],
+  "handoffRequired": [
+    "what was found",
+    "what was reused versus added",
+    "files changed",
+    "tests and commands run",
+    "runtime or receipt evidence",
+    "what remains UNKNOWN",
+    "next smallest step"
+  ]
+}
