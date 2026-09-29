@@ -14,13 +14,14 @@ The goal is not to invent another framework. The goal is to make the existing ar
 ## Read order
 
 1. `AGENTS.md`
-2. `CURRENT_BUILD.md`
-3. `PROJECT_MAP.md`
-4. `docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md`
-5. `docs/research/CORPUS_INDEX_V0_1.md`
-6. `arcsweep.manifest.json`
-7. Relevant existing contracts under `docs/architecture/`
-8. Existing ArcSweep tests nearest any file you intend to change
+2. `CLAUDE.md`
+3. `CURRENT_BUILD.md`
+4. `PROJECT_MAP.md`
+5. `docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md`
+6. `docs/research/CORPUS_INDEX_V0_1.md`
+7. `arcsweep.manifest.json`
+8. Relevant existing contracts under `docs/architecture/`
+9. Existing ArcSweep tests nearest any file you intend to change
 
 ## Current evidence
 
@@ -28,8 +29,10 @@ The goal is not to invent another framework. The goal is to make the existing ar
 
 - Astra 6.1 documentation is isolated on a fresh branch from `main`.
 - `AGENTS.md` provides a provider-neutral entry contract.
-- `arcsweep.manifest.json` records planes, invariants, subsystem roles, surfaces, provider families, evidence vocabulary, and implementation order.
-- `PROJECT_MAP.md` registers Astra 6.1 and its new source-of-truth files.
+- `CLAUDE.md` routes Claude into the same shared contract rather than establishing model-specific architecture.
+- `arcsweep.manifest.json` records planes, invariants, subsystem roles, surfaces, provider families, evidence vocabulary, implementation order, and Claude handoff entrypoints.
+- `PROJECT_MAP.md` registers Astra 6.1 and its source-of-truth / handoff files.
+- `docs/handoffs/astra-6.1-claude-task.json` provides a machine-readable task packet.
 - No runtime implementation file has been changed by the Astra 6.1 ingest branch as of this handoff.
 
 ### UNKNOWN / needs verification before implementation
@@ -38,7 +41,7 @@ The goal is not to invent another framework. The goal is to make the existing ar
 - whether an existing provider abstraction can be extended rather than introducing a new module
 - which receipt schema should be reused as the base for Presence/Provider receipts
 - whether existing tests already encode some of the proposed invariants under different names
-- current CI/mergeability state of PR #406 after this handoff commit
+- current CI and branch-conflict/mergeability state of PR #406
 
 ## First task
 
