@@ -116,6 +116,9 @@ function materialiseForm(wishId, branchId, suggestion) {
 
 function reflectionForm(wishId, branchId, suggestion) {
   if (suggestion.applied !== true || !suggestion.materialisationId) return '';
+  if (suggestion.kind === 'governance-change') {
+    return '<p class="wish-grove-suggestion-law">Governance request prepared. Record a learning reflection only after a separately authorised implementation and evaluation establish what actually changed.</p>';
+  }
   return [
     '<details class="wish-grove-learning-reflection">',
       '<summary>Record learning reflection</summary>',
