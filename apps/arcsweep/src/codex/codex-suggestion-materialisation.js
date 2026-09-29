@@ -5,6 +5,7 @@ import {
 import { anchorCodexWish } from './codex-wish-anchors.js';
 import { transitionCodexWishBranch } from './codex-branch-lifecycle.js';
 import { proposeCodexBranchExperiment } from './codex-branch-experiment-proposal.js';
+import { materialiseDevelopmentalGovernanceChangeRequest } from './codex-developmental-governance.js';
 
 export const CODEX_SUGGESTION_MATERIALISATION_SCHEMA = 'hearthweave.codex-suggestion-materialisation/v0.1';
 
@@ -220,6 +221,21 @@ export function materialiseCodexBranchSuggestion({
     nativeObject = nextWish.possibilityBranches.find((row) => row.branchId === branchId)
       ?.experimentProposals?.find((row) => row.proposalId === proposalId) || null;
     nativeRef = `branch-experiment-proposal:${proposalId}`;
+  } else if (suggestion.kind === 'governance-change') {
+    const requestId = String(payload.requestId || `governance-request:${id}`);
+    const governance = materialiseDevelopmentalGovernanceChangeRequest(nextWish, {
+      branchId,
+      proposalId: text(payload.proposalId, 'payload.proposalId'),
+      suggestionId: suggestion.suggestionId,
+      requestId,
+      materialisedBy: actor,
+      reason: reason || suggestion.rationale || suggestion.summary,
+      createdAt: timestamp,
+      provenance: sourceProvenance,
+    });
+    nextWish = governance.wish;
+    nativeObject = governance.request;
+    nativeRef = `governance-change-request:${requestId}`;
   } else {
     throw new Error(`Unsupported suggestion kind for materialisation: ${suggestion.kind}`);
   }
