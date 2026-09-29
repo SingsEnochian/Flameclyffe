@@ -14,8 +14,12 @@ export const MODEL_PRESENCE_STATES = Object.freeze([
   'degraded',
   'error',
 ]);
+export const PARTICIPATION_MODES = Object.freeze(['silent', 'addressed', 'reply-only', 'ambient', 'active']);
+export const PRESENCE_SURFACES = Object.freeze(['web', 'discord', 'tui', 'mobile', 'ar', 'house-commons', 'api', 'unknown']);
 
 const STATE_SET = new Set(MODEL_PRESENCE_STATES);
+const PARTICIPATION_MODE_SET = new Set(PARTICIPATION_MODES);
+const SURFACE_SET = new Set(PRESENCE_SURFACES);
 const presence = new Map();
 let installed = false;
 
@@ -35,6 +39,27 @@ function deepFreeze(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
   for (const child of Object.values(value)) deepFreeze(child);
   return Object.freeze(value);
+}
+
+function generatePresenceId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback: timestamp + random hex
+  return `${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`;
+}
+
+function normaliseParticipationMode(value) {
+  const v = text(value).toLowerCase();
+  if (!v) return null;
+  return PARTICIPATION_MODE_SET.has(v) ? v : null;
+}
+
+function normaliseSurface(value) {
+  const v = text(value).toLowerCase();
+  if (!v) return null;
+  if (SURFACE_SET.has(v)) return v;
+  return 'unknown';
 }
 
 export function normalisePresenceState(status) {
@@ -61,10 +86,17 @@ export function createModelPresence({
   task = null,
   reason = null,
   observedAt = nowIso(),
+  identityId = null,
+  presenceId = null,
+  surface = null,
+  participationMode = null,
+  sessionId = null,
 } = {}) {
   const id = text(voiceId).toLowerCase();
   if (!id) throw new Error('MODEL_PRESENCE: voiceId is required');
   const normalised = normalisePresenceState(state);
+  const resolvedIdentityId = text(identityId).toLowerCase() || id;
+  const resolvedPresenceId = text(presenceId) || generatePresenceId();
   return deepFreeze({
     schema: MODEL_PRESENCE_SCHEMA,
     voice_id: id,
@@ -79,6 +111,11 @@ export function createModelPresence({
     task: text(task) || null,
     reason: text(reason) || null,
     observed_at: observedAt,
+    presence_id: resolvedPresenceId,
+    identity_id: resolvedIdentityId,
+    surface: normaliseSurface(surface),
+    participation_mode: normaliseParticipationMode(participationMode),
+    session_id: text(sessionId) || null,
   });
 }
 
@@ -99,8 +136,15 @@ export function publishModelPresence(input, target = globalThis.document) {
       worldId: previous.world_id,
       runtimeWorldContextId: previous.runtime_world_context_id,
       task: previous.task,
+      identityId: previous.identity_id,
+      presenceId: previous.presence_id,
+      surface: previous.surface,
+      participationMode: previous.participation_mode,
+      sessionId: previous.session_id,
     } : {}),
     ...input,
+    // Invariant: identity_id must never change on rebind — always carry forward
+    ...(previous ? { identityId: previous.identity_id } : {}),
   });
   presence.set(next.voice_id, next);
   if (target?.dispatchEvent && typeof CustomEvent !== 'undefined') {
