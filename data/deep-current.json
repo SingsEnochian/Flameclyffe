@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-09-29T14:12:06.985Z",
+  "generated_at": "2026-09-29T19:32:07.127Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-09-29T10:00",
+    "time": "2026-09-29T15:30",
     "sky": "Day",
     "current": {
-      "time": "2026-09-29T10:00",
+      "time": "2026-09-29T15:30",
       "interval": 900,
-      "temperature_2m": 77.1,
-      "relative_humidity_2m": 73,
+      "temperature_2m": 83.2,
+      "relative_humidity_2m": 74,
       "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 3,
-      "cloud_cover": 81,
-      "pressure_msl": 1015.5,
-      "wind_speed_10m": 4.3,
-      "wind_direction_10m": 208
+      "cloud_cover": 100,
+      "pressure_msl": 1014.2,
+      "wind_speed_10m": 9.4,
+      "wind_direction_10m": 91
     }
   },
   "space_weather": {
     "kp": {
-      "value": 1.33,
-      "time_tag": "2026-09-29T09:00:00",
-      "a_running": 5
+      "value": 0.67,
+      "time_tag": "2026-09-29T15:00:00",
+      "a_running": 3
     },
     "solar_wind": {
-      "time_tag": "2026-09-29T14:04:00Z",
+      "time_tag": "2026-09-29T19:23:00Z",
       "bz": -2,
-      "bt": 4,
+      "bt": 3,
       "density": null,
-      "speed": 290
+      "speed": 286
     }
   },
   "moon": {
-    "age_days": 17.74,
-    "illumination": 90.3,
+    "age_days": 17.96,
+    "illumination": 88.9,
     "name": "Waning Gibbous"
   },
   "field": {
-    "P": 0.5477777777777778,
-    "C": 0.3442857142857143,
-    "R": 0.6733333333333333,
-    "E": 0.6657692307692308,
-    "M": 0.903,
-    "A": 0.673076923076923,
+    "P": 0.5333333333333339,
+    "C": 0.2538095238095239,
+    "R": 0.7550000000000001,
+    "E": 0.6224725274725275,
+    "M": 0.889,
+    "A": 0.6,
     "Q": null,
-    "dpdt": 0.6733333333333333,
+    "dpdt": 0.7550000000000001,
     "dynamic_axes": [
       "P",
       "C",
