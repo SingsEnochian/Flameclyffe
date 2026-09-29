@@ -19,6 +19,9 @@ If not, it remains a sandbox experiment until its purpose is clear.
 5. Supabase Flameclyffe schema — live world, character, archive, and observation records.
 6. Notion Terra Aeterna Novel Line Wiki — editorial canon, galleries, and production assets.
 7. This file — architectural classification and route ownership.
+8. `AGENTS.md` — provider-neutral contributor entry contract.
+9. `docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md` — current cross-system architecture synthesis and implementation programme.
+10. `docs/research/CORPUS_INDEX_V0_1.md` — external research/design corpus registry and promotion rules.
 
 ## Trunk
 
@@ -31,6 +34,8 @@ Systems that define the product and should remain coherent across every route.
 - STARWELL room routing and living manuscript architecture.
 - Supabase-backed canon, archive, and observation data.
 - Stonewood material language.
+- ArcSweep separation of identity, cognition, continuity, canon, possibility, authority, execution, presentation, resonance, and provenance.
+- Runtime evidence and receipt discipline: nothing important happens invisibly.
 
 ## Branches
 
@@ -93,6 +98,23 @@ Enduring systems attached to the trunk with a clear purpose.
 - Reduced-motion and keyboard access remain first-class.
 - Themes change atmosphere, never user intent or canon.
 
+### Astra 6.1 contributor and integration architecture
+
+**Owners:** `AGENTS.md`, `docs/architecture/ASTRA_6_1_CANONICAL_INGEST.md`, `docs/research/CORPUS_INDEX_V0_1.md`
+
+**Purpose:** Give human and agent contributors one common operating map for ArcSweep, Presence Fabric, provider routing, Runa/auditory systems, AR Companion Nodes, symbolic/experiential corpora, provenance, and runtime evidence.
+
+**Core laws:**
+
+- Identity persists; presence travels; models serve; surfaces render; ArcSweep keeps the thread.
+- Observation, interpretation, ontology, evidence, canon, and authority remain separate.
+- External corpora are component quarries and research references, never implicit system authority.
+- AR, auditory, haptic, social, and terminal surfaces attach through adapters rather than becoming rival cores.
+- Significant operations leave receipts and verification evidence.
+- Contributors work the smallest coherent vertical slice and leave a handoff.
+
+**Status:** documentation/architecture branch. No production authority is granted by the Astra 6.1 ingest itself.
+
 ## Leaves
 
 Replaceable expressions of a branch.
@@ -102,6 +124,7 @@ Replaceable expressions of a branch.
 - Room-specific art treatments.
 - Optional haptics and future sound cues.
 - Future weather and story-location adapters, provided they remain user-controlled.
+- Individual Presence Surface adapters, model/provider adapters, AR/HUD adapters, auditory render targets, and research-source connectors that obey their owning contracts.
 
 ## Compost
 
@@ -111,6 +134,8 @@ Experiments that may be archived or removed after verification.
 - Duplicate CSS palettes embedded inside individual pages.
 - Route shims confirmed to have no live callers.
 - One-off visual experiments with no canon or accessibility path.
+- Provider-specific identity stores that duplicate the shared identity/continuity architecture.
+- Surface-specific persona logic that cannot be projected through Presence Fabric.
 
 Nothing is deleted merely because it is old. Confirm that it has no active route, data dependency, or archival value first.
 
