@@ -113,5 +113,6 @@ if (typeof document !== 'undefined') {
   void import('./wish-grove-curriculum-review-sidecar.js');
   void import('./wish-grove-learning-forge-sidecar.js');
   void import('./wish-grove-learning-trial-sidecar.js');
+  void import('./wish-grove-developmental-governance-sidecar.js');
   void bootstrapRuntimeIntegration();
 }
