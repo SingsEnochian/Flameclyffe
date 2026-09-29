@@ -12,7 +12,8 @@
     "researchCorpus": "docs/research/CORPUS_INDEX_V0_1.md",
     "claudeHandoff": "docs/handoffs/ASTRA_6_1_CLAUDE_HANDOFF.md",
     "claudeTaskPacket": "docs/handoffs/astra-6.1-claude-task.json",
-    "constellationAdvancePrompt": "docs/handoffs/ASTRA_6_1_CONSTELLATION_ADVANCE_PROMPT.md"
+    "constellationAdvancePrompt": "docs/handoffs/ASTRA_6_1_CONSTELLATION_ADVANCE_PROMPT.md",
+    "watchAndVideoIngest": "docs/architecture/HOUSE_COMMONS_WATCH_AND_VIDEO_INGEST_V0_1.md"
   },
   "planes": [
     "observation",
@@ -39,7 +40,9 @@
     "presentation != state ownership",
     "observation != interpretation",
     "interpretation != ontology",
-    "ontology != evidence"
+    "ontology != evidence",
+    "watching != ingesting",
+    "ingesting != canonising"
   ],
   "subsystems": {
     "arcsweep": "coordinating cognitive OS",
@@ -49,7 +52,8 @@
     "runa": "multimodal resonance, audio, haptics and symbolic render compiler",
     "presenceFabric": "identity projection across social, terminal, web, mobile and spatial surfaces",
     "constellation": "separately routed identity runtimes with model/provider independence",
-    "houseCommons": "social presence and seminar surface",
+    "houseCommons": "social presence, seminar, watch-room and shared-attention surface",
+    "videoIngest": "permitted metadata/transcript ingestion into timestamped reviewable knowledge packets",
     "aiUniversity": "sandbox judgement, learning and evaluation",
     "worldseed": "portable continuity and inheritance packaging",
     "hearthfire": "continuity, governance and provenance discipline"
@@ -60,7 +64,8 @@
     "discord-social",
     "tui-cli",
     "mobile",
-    "ar-spatial"
+    "ar-spatial",
+    "watch-room"
   ],
   "providerFamilies": [
     "openai",
@@ -77,7 +82,8 @@
     "environmental-sound-events",
     "gaze",
     "imu-head-orientation",
-    "explicit-user-report"
+    "explicit-user-report",
+    "video-transcript"
   ],
   "outputFamilies": [
     "hud-ar",
@@ -86,7 +92,9 @@
     "assistive-audio",
     "haptic",
     "image",
-    "voice"
+    "voice",
+    "synced-video-player",
+    "transcript-sidecar"
   ],
   "evidenceVocabulary": [
     "CONFIRMED",
@@ -111,6 +119,8 @@
   "nextImplementationOrder": [
     "presence-fabric-contracts",
     "provider-capability-contracts",
+    "house-commons-watch-room-contract",
+    "video-ingest-packet-contract",
     "sensory-output-adapter-contracts",
     "runa-render-target-contracts",
     "one-end-to-end-universe-narrative-resonance-receipt-slice",
@@ -121,6 +131,7 @@
     "production": false,
     "externalWrites": false,
     "canonPromotion": false,
-    "identityMutation": false
+    "identityMutation": false,
+    "mediaBypass": false
   }
 }
