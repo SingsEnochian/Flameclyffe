@@ -2,6 +2,7 @@ import { getConstellationRuntimeVoiceStatus } from './constellation-runtime-adap
 import { WRITER_CONTEXT_EVENTS } from './writer-context-resolver.js';
 import { CONSTELLATION_LENS_EVENTS } from './constellation-lens.js';
 import { CONSTELLATION_RUNTIME_EVENTS } from './constellation-runtime-adapter.js';
+import { createPresence, PRESENCE_UNKNOWN } from './presence-fabric.js';
 
 export const MODEL_PRESENCE_SCHEMA = 'arcsweep.model-presence/v1';
 export const MODEL_PRESENCE_EVENT = 'arcsweep:model-presence';
@@ -97,6 +98,18 @@ export function createModelPresence({
   const normalised = normalisePresenceState(state);
   const resolvedIdentityId = text(identityId).toLowerCase() || id;
   const resolvedPresenceId = text(presenceId) || generatePresenceId();
+  const presenceRecord = createPresence({
+    presenceId: resolvedPresenceId,
+    identityId: resolvedIdentityId,
+    surface: normaliseSurface(surface) || PRESENCE_UNKNOWN,
+    participationMode: normaliseParticipationMode(participationMode) || 'ambient',
+    sessionId: text(sessionId) || PRESENCE_UNKNOWN,
+    providerId: text(provider) || PRESENCE_UNKNOWN,
+    modelId: text(model) || PRESENCE_UNKNOWN,
+    bindingId: text(route) || PRESENCE_UNKNOWN,
+    createdAt: observedAt,
+    updatedAt: observedAt,
+  });
   return deepFreeze({
     schema: MODEL_PRESENCE_SCHEMA,
     voice_id: id,
@@ -116,6 +129,7 @@ export function createModelPresence({
     surface: normaliseSurface(surface),
     participation_mode: normaliseParticipationMode(participationMode),
     session_id: text(sessionId) || null,
+    presence: presenceRecord,
   });
 }
 

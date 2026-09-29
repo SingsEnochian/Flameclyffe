@@ -434,7 +434,13 @@ async function runVoiceStream({ voiceId, message, turnId, roomId, stewardEntry, 
   const key = `${turnId}:${voiceId}`;
   const controller = new AbortController(); streamControllers.set(key, controller);
   streamingTurns.set(key, { key, voiceId, roomId, state: 'thinking', text: '', provider: null, model: null });
-  publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'thinking', worldId: world.id, task: 'house-commons-stream' });
+  const presenceContext = {
+    identityId: voiceId,
+    surface: 'house-commons',
+    participationMode: 'addressed',
+    sessionId: `house-commons:${roomId}:${voiceId}`,
+  };
+  publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'thinking', worldId: world.id, task: 'house-commons-stream', ...presenceContext });
   updateStreamingBubble(key);
   let firstDelta = true;
   try {
@@ -445,19 +451,19 @@ async function runVoiceStream({ voiceId, message, turnId, roomId, stewardEntry, 
       onStarted(event) {
         const stream = streamingTurns.get(key); if (!stream) return;
         Object.assign(stream, { state: 'thinking', provider: event.provider, model: event.model });
-        publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'thinking', provider: event.provider, model: event.model, worldId: world.id, runtimeWorldContextId: event.runtime_world_context_id, task: 'house-commons-stream' });
+        publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'thinking', provider: event.provider, model: event.model, worldId: world.id, runtimeWorldContextId: event.runtime_world_context_id, task: 'house-commons-stream', ...presenceContext });
         updateStreamingBubble(key);
       },
       onDelta(event) {
         const stream = streamingTurns.get(key); if (!stream) return;
         stream.text = event.message || stream.text;
         stream.state = 'speaking';
-        if (firstDelta) { firstDelta = false; publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'speaking', provider: stream.provider, model: stream.model, worldId: world.id, task: 'house-commons-stream-reply' }); }
+        if (firstDelta) { firstDelta = false; publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'speaking', provider: stream.provider, model: stream.model, worldId: world.id, task: 'house-commons-stream-reply', ...presenceContext }); }
         updateStreamingBubble(key);
       },
     });
     await persistVoiceResult({ token, turnId, roomId, stewardEntry, voiceId, reply, world });
-    publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'ready', provider: reply.provider, model: reply.model, latencyMs: reply.latencyMs, worldId: world.id, runtimeWorldContextId: reply.runtimeWorldContextId, task: null });
+    publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: 'ready', provider: reply.provider, model: reply.model, latencyMs: reply.latencyMs, worldId: world.id, runtimeWorldContextId: reply.runtimeWorldContextId, task: null, ...presenceContext });
   } catch (error) {
     const cancelled = error?.name === 'AbortError' || controller.signal.aborted;
     const text = cancelled ? 'Reply cancelled.' : `Route error: ${error?.message || 'Flame stream failed.'}`;
@@ -466,7 +472,7 @@ async function runVoiceStream({ voiceId, message, turnId, roomId, stewardEntry, 
       status: cancelled ? 'cancelled' : 'route-error', world: world.id ? { id: world.id, name: world.name } : null,
       turn_id: turnId, thread_id: roomId, reply_to: stewardEntry.id, rich_text_html: `<p>${escapeHtml(text)}</p>`, text,
     }).catch(() => null);
-    publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: cancelled ? 'ready' : 'degraded', worldId: world.id, task: null, reason: cancelled ? null : error?.message });
+    publishModelPresence({ voiceId, displayName: voiceName(voiceId), state: cancelled ? 'ready' : 'degraded', worldId: world.id, task: null, reason: cancelled ? null : error?.message, ...presenceContext });
   } finally {
     streamControllers.delete(key); streamingTurns.delete(key); pendingStreamPaints.delete(key); await refreshLog({ force: true, scroll: true });
   }

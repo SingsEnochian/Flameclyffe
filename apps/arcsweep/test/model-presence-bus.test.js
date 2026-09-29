@@ -121,7 +121,7 @@ test('Astra 6.1 — participation_mode "active" adds no authority field and gran
   const knownFields = new Set([
     'schema', 'voice_id', 'display_name', 'state', 'provider', 'model', 'route',
     'latency_ms', 'world_id', 'runtime_world_context_id', 'task', 'reason', 'observed_at',
-    'presence_id', 'identity_id', 'surface', 'participation_mode', 'session_id',
+    'presence_id', 'identity_id', 'surface', 'participation_mode', 'session_id', 'presence',
   ]);
   for (const key of keys) {
     assert.ok(knownFields.has(key), `unexpected field on presence object: ${key}`);

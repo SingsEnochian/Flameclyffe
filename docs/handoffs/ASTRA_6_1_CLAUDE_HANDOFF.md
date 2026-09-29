@@ -168,3 +168,17 @@ These sources inform design. They do not override repository contracts.
 ## Final instruction
 
 Do not optimise for the prettiest abstraction. Optimise for the smallest shared seam that fits the living code, preserves ownership boundaries, passes tests, and leaves stronger evidence than it found.
+
+## Current implementation evidence (2026-09-29)
+
+**CONFIRMED:** The first Presence Fabric slice is implemented in `apps/arcsweep/src/presence-fabric.js` and documented in `docs/architecture/PRESENCE_FABRIC_V0_1.md`. It is additive: `apps/arcsweep/src/model-presence-bus.js` retains its existing fields and exposes a nested `presence` record. House Commons v5 now supplies the `house-commons` surface, addressed participation mode, and stable room/voice session key during streaming.
+
+**TESTED:** `node --test apps/arcsweep/test/presence-fabric.test.js apps/arcsweep/test/model-presence-bus.test.js` passes all 16 tests. `npm run contracts:verify` passes. `npm run arcsweep:build` passes. The full `npm run arcsweep:test` run still contains unrelated pre-existing failures in canon-pack and performance-safe-pack assertions; those failures are not in the Presence Fabric tests.
+
+**OBSERVED:** Records are deeply frozen; provider rebinding preserves identity/presence/surface/session; surface projection creates a new presence while preserving identity; teardown receipts are credential-free and carry `before` lineage with `after: null`. Unknown surfaces/providers/models are explicit `UNKNOWN` in the canonical record.
+
+**ADDED RESEARCH:** `docs/research/MIRAGE_FS_ADAPTER_ASSESSMENT.md` and the corpus index now record `SSL-ACTX/mirage-fs` at commit `e199f5d` as AGPL-3.0 external research only. No binary, mount, covert carrier, uploader, or destructive format operation is integrated or executed.
+
+**UNKNOWN:** Provider capability seam, sensory/output contracts, runtime deployment observation, and production credential state remain future work. The GitNexus safe plan writer was unavailable on Windows; implementation evidence is recorded here and in the local ASTRA context ledger instead.
+
+**NEXT:** Add the minimal provider/capability seam, then sensory/output interfaces, with the same identity/authority boundaries and focused runtime evidence.
