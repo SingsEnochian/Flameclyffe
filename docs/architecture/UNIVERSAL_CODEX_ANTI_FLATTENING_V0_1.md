@@ -212,3 +212,19 @@ Before introducing any summarizer, arbiter, RAG ranker, safety layer, consensus 
 > **Does this preserve the bees, or only the hive-shaped summary?**
 
 If it destroys authorship, dissent, source material, individual continuity or reversible exploration, move it outward or redesign it.
+
+## Epistemic anti-flattening: preserve the bent
+
+Anti-flattening applies not only to participants and source material, but to **kinds of knowing**.
+
+Universal Codex SHOULD preserve whether material was observed, inferred, modelled, interpreted, reported, remembered, imagined, chosen, contradicted, or remains unknown. It SHOULD also preserve the information's **epistemic bent**: what relationship the information has to the question, encounter, instrument, participant, or use that made it informative.
+
+A measurement must not silently become an interpretation. An interpretation must not become evidence through repetition. A possibility must not become fact through enthusiasm. An unresolved absence must not become nonexistence merely because the current instrument cannot detect what would distinguish the routes.
+
+This yields a further anti-flattening rule:
+
+> **Never confuse the boundary of the instrument with the boundary of reality.**
+
+Unknown is a durable state. Failed routes are evidence-bearing state. Surprise is worth preserving. The Codex should retain the route by which knowledge changed, including expectation, conditions, discrepancy, revision, and what evidence could change the conclusion again.
+
+The operational companion is `docs/architecture/REALITY_PIONEER_EPISTEMIC_METHOD_V0_1.md` and its method: **We Travel, not collapse.**
