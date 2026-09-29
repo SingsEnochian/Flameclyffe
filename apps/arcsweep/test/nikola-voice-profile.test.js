@@ -11,6 +11,7 @@ test('Nikola voice profile is engine independent and does not authorize actor cl
   assert.equal(NIKOLA_VOICE_PROFILE.identityId, 'nikola');
   assert.equal(NIKOLA_VOICE_PROFILE.engineIndependent, true);
   assert.equal(NIKOLA_VOICE_PROFILE.provenance.actorIdentityReproductionAllowed, false);
+  assert.equal(NIKOLA_VOICE_PROFILE.singingVoiceId, 'nikola-sing-v0.1');
   assert.ok(NIKOLA_VOICE_PROFILE.provenance.allowedDerivations.includes('cadence'));
 });
 
