@@ -93,6 +93,30 @@ Enduring systems attached to the trunk with a clear purpose.
 - Reduced-motion and keyboard access remain first-class.
 - Themes change atmosphere, never user intent or canon.
 
+### Astra spatial gesture interaction
+
+**Architecture:** `docs/architecture/ASTRA_SPATIAL_GESTURE_LANGUAGE_V0_1.md`
+
+**Research ingest:** `docs/research/GESTURE_CONTROL_PROGRAMMING_AESTHETICS_INGEST_V0_1.md`
+
+**Purpose:** Give ArcSweep / Astra a provider-neutral spatial interaction grammar in which gesture control, Three.js embodiment, WebXR hands, camera hand tracking, touch, pointer, controller, voice, and accessibility fallbacks can share the same intent model.
+
+**North-star:** PreCrime-grade spatial choreography with real-world comfort, legibility, consent, accessibility, and capability boundaries.
+
+**Behaviour:**
+
+- Raw hand motion is observation, not intent or authority.
+- Core gestures begin with approach, target, pinch/grab, capture, manipulate, release, and settle rather than a large memorised symbolic vocabulary.
+- Captured targets retain ownership until release/cancel so interactions do not slip between nearby objects.
+- Motion uses filtering, hysteresis, damping, and bounded inertia rather than mapping landmark jitter directly into the scene.
+- Near and far interaction preserve the same conceptual verbs.
+- Gesture actions pass through ArcSweep capability checks before consequential execution.
+- Camera/hand tracking requires explicit initiation; raw video is not retained by default.
+- Pointer, touch, keyboard, voice, reduced-motion, seated, and one-handed paths remain first-class.
+- The visual field stays quiet until interaction gives motion a semantic reason.
+
+**First implementation slice:** MediaPipe camera adapter → filtered landmarks → approach → pinch begin/hold/release → target capture → drag → settle → synthetic Three.js artefact → local receipt.
+
 ## Leaves
 
 Replaceable expressions of a branch.
