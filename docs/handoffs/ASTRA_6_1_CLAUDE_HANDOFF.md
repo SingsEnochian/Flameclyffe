@@ -208,3 +208,23 @@ Do not optimise for the prettiest abstraction. Optimise for the smallest shared 
 **UNKNOWN:** No live adapter implementations exist. `assertSensoryAdapter`, `assertOutputAdapter`, `assertAuditoryRenderTarget` are shape checks only — real adapter conformance requires integration tests per surface. Runa render-target contracts and the end-to-end vertical slice remain future work.
 
 **NEXT:** The four shared contract seams are now in place (Presence Fabric, CognitiveProvider, SensoryAdapter/OutputAdapter/AuditoryRenderTarget). The next step is Task 4/5: one end-to-end vertical slice with runtime receipts — `enter/select universe → Codex context → ArcSweep reasoning → Crow realisation → continuity → receipt → continue`. Start from the existing Constellation lens flow and wire the new contracts into one observable path.
+
+## Current implementation evidence (2026-09-30, Task 4/5 — vertical slice)
+
+**CONFIRMED:** `runAstraVerticalSlice` in `apps/arcsweep/src/architecture/astra-vertical-slice.js` is the end-to-end contract orchestrator. It composes all four Astra 6.1 layers: Presence Fabric → CognitiveProvider gate → sensory/output descriptors → provider invoke → execution receipt → presence lineage receipt. Returns a frozen `arcsweep.astra-slice-receipt/v1`. Documented in `docs/architecture/ASTRA_VERTICAL_SLICE_V1.md`.
+
+**TESTED:** `node --test apps/arcsweep/test/astra-vertical-slice.test.js` passes 7/7. Full Astra 6.1 suite passes 69/69.
+
+**OBSERVED:** Granted path: delta + done events, execution receipt `applied`, presence receipt `provider-rebound` with identity preserved. Denied path (missing capability): `null` execution receipt, presence `torn-down`, events empty. Denied path (authority escalation): same — gate blocks even when provider declares the capability. Provider invoke error: caught as `error` event, execution receipt `failed`, no crash. No credentials or elevated authority_grants anywhere in the receipt. Identity never equals surface or provider.
+
+**UNKNOWN:** No live runtime observation yet — slice uses stub providers. Runa render-target contracts, continuity resolution, and full Constellation lens integration remain future work. A PR from this branch has not been created yet.
+
+**ALL ASTRA 6.1 CONTRACT SEAMS COMPLETE:**
+- `apps/arcsweep/src/model-presence-bus.js` — additive Presence Fabric fields
+- `apps/arcsweep/src/presence-fabric.js` — canonical Presence contract
+- `apps/arcsweep/src/architecture/capability-negotiation.js` — capability gate (ported from PR #400)
+- `apps/arcsweep/src/architecture/cognitive-provider.js` — CognitiveProvider descriptor + event stream
+- `apps/arcsweep/src/architecture/sensory-output-contracts.js` — SensoryAdapter / OutputAdapter / AuditoryRenderTarget
+- `apps/arcsweep/src/architecture/astra-vertical-slice.js` — end-to-end slice orchestrator
+
+**NEXT FOR NEXT WORKER:** Create a PR from `codex/astra-6-1-constellation-advance` into `feature/astra-6.1-canonical-ingest`. Then wire `runAstraVerticalSlice` into the Constellation lens response path so real runtime receipts appear in `runtime-integration-bridge.js`'s active envelope.
