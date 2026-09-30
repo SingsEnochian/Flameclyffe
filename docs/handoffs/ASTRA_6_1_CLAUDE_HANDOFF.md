@@ -228,3 +228,17 @@ Do not optimise for the prettiest abstraction. Optimise for the smallest shared 
 - `apps/arcsweep/src/architecture/astra-vertical-slice.js` — end-to-end slice orchestrator
 
 **NEXT FOR NEXT WORKER:** Create a PR from `codex/astra-6-1-constellation-advance` into `feature/astra-6.1-canonical-ingest`. Then wire `runAstraVerticalSlice` into the Constellation lens response path so real runtime receipts appear in `runtime-integration-bridge.js`'s active envelope.
+
+## Current implementation evidence (2026-09-30, ComfyUI Desktop Adapter — Slice 1 + Slice 2)
+
+**CONFIRMED (Slice 1):** `apps/arcsweep/src/architecture/comfy-desktop-adapter.js` — five frozen contract records for ComfyUI integration. `computeWorkflowHash` (SHA-256 / djb2 fallback). All execution gates default `false`. `may_canonize` hardcoded `false` on output artifacts — not a parameter, no code path sets it `true`.
+
+**CONFIRMED (Slice 2):** `apps/arcsweep/src/architecture/comfy-endpoint-probe.js` — safe endpoint config + probe. `probeComfyEndpoint` uses `GET /system_stats` only. Injectable `fetch` for tests. No prompt submission, no queue modification, no model download, no custom node install during discovery. Timeout via `AbortController`. Always returns frozen status whether reachable or not.
+
+**TESTED:** `node --test apps/arcsweep/test/comfy-desktop-adapter.test.js apps/arcsweep/test/comfy-endpoint-probe.test.js` passes 39/39. Full 70-test architecture suite passes 70/70.
+
+**OBSERVED:** Probe status never carries `prompt_id`, `queue_remaining`, `may_execute`, `may_download_models`, `may_install_custom_nodes`, `may_canonize`, or `workflow_hash`. Endpoint config carries no credentials. Each probe call returns an independent frozen record. Timeout mock confirms `AbortController` wiring works. Network-error path surfaces the error message without crashing.
+
+**UNKNOWN:** No live probe against real ComfyUI Desktop has been attempted — ComfyUI is installed at `:8188` but was not probed during this session (Slice 2 spec is contracts + tests only; live probe is separate). Slice 3 (real `/prompt` POST) requires explicit user approval.
+
+**NEXT SMALLEST STEP:** With user approval, attempt a live `probeComfyEndpoint` call against `http://127.0.0.1:8188` to confirm the Desktop install responds. If reachable, Slice 3 (real API execution) is open. Otherwise diagnose first.
