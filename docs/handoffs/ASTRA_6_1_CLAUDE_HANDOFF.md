@@ -196,3 +196,15 @@ Do not optimise for the prettiest abstraction. Optimise for the smallest shared 
 **UNKNOWN:** No live provider implementations exist yet. `assertCognitiveProvider` is a shape-only check — real provider conformance requires integration tests with each provider adapter. Sensory/output contracts remain future work.
 
 **NEXT:** Add the `SensoryAdapter`, `OutputAdapter`, and `AuditoryRenderTarget` interface contracts (Task 3). These are shape-only contracts — no vendor integrations. Same pattern: frozen descriptors, schema-tagged, no authority fields, focused tests, architecture doc.
+
+## Current implementation evidence (2026-09-30, Task 3)
+
+**CONFIRMED:** Sensory/output adapter contracts are implemented in `apps/arcsweep/src/architecture/sensory-output-contracts.js`. Three contracts: `SensoryAdapter` (input, modalities), `OutputAdapter` (output, channels), `AuditoryRenderTarget` (auditory-specific, render modes). Documented in `docs/architecture/SENSORY_OUTPUT_CONTRACTS_V1.md`.
+
+**TESTED:** `node --test apps/arcsweep/test/sensory-output-contracts.test.js` passes 25/25 tests. Full suite: `node --test apps/arcsweep/test/presence-fabric.test.js apps/arcsweep/test/model-presence-bus.test.js apps/arcsweep/test/cognitive-provider.test.js apps/arcsweep/test/sensory-output-contracts.test.js` passes 62/62.
+
+**OBSERVED:** All descriptor records are frozen. `audio-air` and `audio-bone` are separate channels; `bone-conduction` and `assistive` are separate render modes. Unknown modalities/channels/modes are stripped. No authority, credential, or identity fields on any descriptor. `surface_hint` is always distinct from `id`. `max_latency_ms` is `null` for non-finite input.
+
+**UNKNOWN:** No live adapter implementations exist. `assertSensoryAdapter`, `assertOutputAdapter`, `assertAuditoryRenderTarget` are shape checks only — real adapter conformance requires integration tests per surface. Runa render-target contracts and the end-to-end vertical slice remain future work.
+
+**NEXT:** The four shared contract seams are now in place (Presence Fabric, CognitiveProvider, SensoryAdapter/OutputAdapter/AuditoryRenderTarget). The next step is Task 4/5: one end-to-end vertical slice with runtime receipts — `enter/select universe → Codex context → ArcSweep reasoning → Crow realisation → continuity → receipt → continue`. Start from the existing Constellation lens flow and wire the new contracts into one observable path.
