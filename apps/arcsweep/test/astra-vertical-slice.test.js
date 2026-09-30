@@ -140,6 +140,7 @@ test('vertical slice: provider invoke error is captured in events and execution 
     sessionId: 'sess-004',
     surface: 'discord',
     capability: 'text-generation',
+    authorityGrants: ['read-only'],
     trajectoryId: 'traj-err',
     provider: errorProvider,
     requestText: 'query',
@@ -159,6 +160,7 @@ test('vertical slice: identity never changes across provider rebind in receipt',
     sessionId: 'sess-005',
     surface: 'house-commons',
     capability: 'text-generation',
+    authorityGrants: ['read-only'],
     trajectoryId: 'traj-rebind',
     provider: makeProvider({ id: 'openai', capabilities: ['text-generation', 'streaming'] }),
     requestText: 'test rebind',
@@ -181,6 +183,7 @@ test('vertical slice: receipt carries no credentials, tokens, or authority grant
     sessionId: 'sess-006',
     surface: 'web',
     capability: 'text-generation',
+    authorityGrants: ['read-only'],
     trajectoryId: 'traj-clean',
     provider: makeProvider(),
     requestText: 'test',
@@ -201,6 +204,7 @@ test('vertical slice: surface does not become identity in receipt', async () => 
     sessionId: 'sess-007',
     surface: 'discord',
     capability: 'text-generation',
+    authorityGrants: ['read-only'],
     trajectoryId: 'traj-surface',
     provider: makeProvider(),
     requestText: 'test',
@@ -211,4 +215,23 @@ test('vertical slice: surface does not become identity in receipt', async () => 
   assert.equal(receipt.presence_receipt.before.identity_id, 'atlas');
   assert.equal(receipt.presence_receipt.before.surface, 'discord');
   assert.notEqual(receipt.presence_receipt.before.identity_id, receipt.presence_receipt.before.surface);
+});
+
+test('fail-closed: omitting authorityGrants in vertical slice denies and tears down presence', async () => {
+  const receipt = await runAstraVerticalSlice({
+    voiceId: 'failclosed-voice',
+    sessionId: 'sess-fc',
+    surface: 'web',
+    capability: 'text-generation',
+    // authorityGrants deliberately omitted — must deny
+    trajectoryId: 'traj-failclosed',
+    provider: makeProvider(),
+    requestText: 'should not execute',
+    occurredAt: '2026-09-30T00:07:00.000Z',
+  });
+
+  assert.equal(receipt.granted, false, 'omitted authorityGrants must deny — fail-closed not fail-open');
+  assert.equal(receipt.execution_receipt, null, 'no execution receipt when denied');
+  assert.equal(receipt.events.length, 0, 'no events when denied');
+  assert.equal(receipt.presence_receipt.action, 'torn-down', 'presence must be torn down on denial');
 });

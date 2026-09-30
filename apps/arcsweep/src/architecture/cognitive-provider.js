@@ -122,7 +122,7 @@ export function evaluateProviderCapability(descriptor, capability, {
   trajectoryId,
   requestId,
   requestedAuthority = 'read-only',
-  authorityGrants = ['read-only'],
+  authorityGrants = [],
   route = null,
   reason = '',
 } = {}) {

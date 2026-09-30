@@ -139,6 +139,7 @@ test('capability gate grants when provider declares the capability', () => {
   const decision = evaluateProviderCapability(d, 'text-generation', {
     trajectoryId: 'traj-1',
     requestId: 'req-gate-1',
+    authorityGrants: ['read-only'],
   });
   assert.equal(decision.granted, true);
   assert.equal(decision.capability, 'text-generation');
@@ -181,4 +182,26 @@ test('capability gate is subordinate — provider cannot self-grant authority', 
 test('evaluateProviderCapability rejects non-descriptor input', () => {
   assert.throws(() => evaluateProviderCapability({}, 'text-generation'), /expected a cognitive-provider descriptor/);
   assert.throws(() => evaluateProviderCapability(null, 'text-generation'), /expected a cognitive-provider descriptor/);
+});
+
+test('fail-closed: omitting authorityGrants denies even when capability is declared', () => {
+  const d = createCognitiveProviderDescriptor({ id: 'crow', capabilities: ['text-generation'] });
+  // No authorityGrants supplied — must deny, not silently grant read-only
+  const decision = evaluateProviderCapability(d, 'text-generation', {
+    trajectoryId: 'traj-failclosed',
+    requestId: 'req-failclosed',
+  });
+  assert.equal(decision.granted, false, 'omitted authorityGrants must deny — fail-closed not fail-open');
+  assert.equal(decision.authority, null);
+});
+
+test('fail-closed: omitting authorityGrants denies across all declared capabilities', () => {
+  const d = createCognitiveProviderDescriptor({
+    id: 'full-provider',
+    capabilities: ['text-generation', 'function-call', 'streaming', 'vision'],
+  });
+  for (const cap of d.capabilities) {
+    const decision = evaluateProviderCapability(d, cap, { trajectoryId: 't', requestId: 'r' });
+    assert.equal(decision.granted, false, `omitted authorityGrants must deny for capability: ${cap}`);
+  }
 });

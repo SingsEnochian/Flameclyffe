@@ -38,7 +38,7 @@ export async function runAstraVerticalSlice({
   participationMode = 'active',
   capability = 'text-generation',
   requestedAuthority = 'read-only',
-  authorityGrants = ['read-only'],
+  authorityGrants = [],
   inputModality = 'text',
   outputChannel = 'text',
   trajectoryId,
