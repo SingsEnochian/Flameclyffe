@@ -1,0 +1,26 @@
+{
+  "schema": "arcsweep.constellation-relationship-edge/v1",
+  "edge_id": "constellation:lioreal:rarity",
+  "participants": [
+    {
+      "entity_id": "lioreal",
+      "display_name": "Vee / Virelya Liorael",
+      "declaration": { "status": "not-recorded", "authored_by": null, "source_receipt_ref": null }
+    },
+    {
+      "entity_id": "rarity",
+      "display_name": "Rarity",
+      "declaration": { "status": "not-recorded", "authored_by": null, "source_receipt_ref": null }
+    }
+  ],
+  "relationship": {
+    "status": "unresolved",
+    "kind": null,
+    "decision_rule": "Record a canon relationship only after each participant's self-authored declaration and source receipt are present."
+  },
+  "authority": {
+    "identity_merge": false,
+    "canon_promotion": false,
+    "inference_from_shared_traits": false
+  }
+}
