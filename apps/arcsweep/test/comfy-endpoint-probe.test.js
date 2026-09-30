@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import {
   COMFY_ENDPOINT_CONFIG_SCHEMA,
   COMFY_ENDPOINT_STATUS_SCHEMA,
+  COMFY_WAIT_RESULT_SCHEMA,
   createComfyEndpointConfig,
   probeComfyEndpoint,
+  waitForComfyEndpoint,
 } from '../src/architecture/comfy-endpoint-probe.js';
 
 // --- Mock fetch helpers ---
@@ -191,4 +193,103 @@ test('same config can be probed multiple times returning independent frozen reco
   assert.notEqual(s1, s2, 'each probe returns a distinct record');
   assert.equal(Object.isFrozen(s1), true);
   assert.equal(Object.isFrozen(s2), true);
+});
+
+// --- waitForComfyEndpoint ---
+
+test('wait resolves immediately when endpoint is already reachable', async () => {
+  const cfg = createComfyEndpointConfig({ installId: 'x', baseUrl: 'http://127.0.0.1:8188' });
+  const result = await waitForComfyEndpoint(cfg, {
+    fetch: mockFetch(200, MOCK_SYSTEM_STATS),
+    maxWaitMs: 10_000,
+    retryIntervalMs: 500,
+  });
+  assert.equal(result.schema, COMFY_WAIT_RESULT_SCHEMA);
+  assert.equal(result.reachable, true);
+  assert.equal(result.attempts, 1, 'should succeed on first attempt');
+  assert.equal(Object.isFrozen(result), true);
+});
+
+test('wait retries until reachable then stops', async () => {
+  const cfg = createComfyEndpointConfig({ installId: 'x', baseUrl: 'http://127.0.0.1:8188' });
+  let calls = 0;
+  // First two calls fail, third succeeds
+  const fetch = async () => {
+    calls += 1;
+    if (calls < 3) throw new Error('ECONNREFUSED');
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  const result = await waitForComfyEndpoint(cfg, {
+    fetch,
+    maxWaitMs: 10_000,
+    retryIntervalMs: 10, // very short for test speed
+  });
+  assert.equal(result.reachable, true);
+  assert.equal(result.attempts, 3);
+});
+
+test('wait gives up after maxWaitMs exhausted', async () => {
+  const cfg = createComfyEndpointConfig({
+    installId: 'x',
+    baseUrl: 'http://127.0.0.1:8188',
+    timeoutMs: 20,
+  });
+  const result = await waitForComfyEndpoint(cfg, {
+    fetch: mockFetchNetworkError('ECONNREFUSED'),
+    maxWaitMs: 80,
+    retryIntervalMs: 10,
+  });
+  assert.equal(result.reachable, false);
+  assert.ok(result.attempts >= 1, 'must have attempted at least once');
+});
+
+test('wait result is always frozen', async () => {
+  const cfg = createComfyEndpointConfig({ installId: 'x', baseUrl: 'http://127.0.0.1:8188' });
+  const ok = await waitForComfyEndpoint(cfg, { fetch: mockFetch(200), retryIntervalMs: 10, maxWaitMs: 500 });
+  const fail = await waitForComfyEndpoint(cfg, {
+    fetch: mockFetchNetworkError(),
+    retryIntervalMs: 10,
+    maxWaitMs: 30,
+  });
+  assert.equal(Object.isFrozen(ok), true);
+  assert.equal(Object.isFrozen(fail), true);
+});
+
+test('wait result preserves install_id and base_url', async () => {
+  const cfg = createComfyEndpointConfig({ installId: 'desktop-01', baseUrl: 'http://127.0.0.1:8188' });
+  const result = await waitForComfyEndpoint(cfg, { fetch: mockFetch(200) });
+  assert.equal(result.install_id, 'desktop-01');
+  assert.equal(result.base_url, 'http://127.0.0.1:8188');
+});
+
+test('wait result carries last_status from final probe', async () => {
+  const cfg = createComfyEndpointConfig({ installId: 'x', baseUrl: 'http://127.0.0.1:8188' });
+  const result = await waitForComfyEndpoint(cfg, { fetch: mockFetch(200, MOCK_SYSTEM_STATS) });
+  assert.ok(result.last_status != null, 'last_status must be present');
+  assert.equal(result.last_status.schema, COMFY_ENDPOINT_STATUS_SCHEMA);
+});
+
+test('wait fires onAttempt callback for each probe', async () => {
+  const cfg = createComfyEndpointConfig({ installId: 'x', baseUrl: 'http://127.0.0.1:8188' });
+  let calls = 0;
+  let callCount = 0;
+  const fetch = async () => {
+    calls += 1;
+    if (calls < 3) throw new Error('ECONNREFUSED');
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  await waitForComfyEndpoint(cfg, {
+    fetch,
+    retryIntervalMs: 10,
+    maxWaitMs: 10_000,
+    onAttempt: () => { callCount += 1; },
+  });
+  assert.equal(callCount, 3, 'onAttempt must fire once per probe attempt');
+});
+
+test('wait rejects non-schema config', async () => {
+  await assert.rejects(
+    () => waitForComfyEndpoint({ base_url: 'http://127.0.0.1:8188' }),
+    /must be a createComfyEndpointConfig record/,
+  );
 });

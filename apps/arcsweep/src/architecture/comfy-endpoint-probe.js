@@ -116,3 +116,55 @@ export async function probeComfyEndpoint(config, { fetch: fetchFn = globalThis.f
     // (named explicitly so reviewers can confirm their absence)
   });
 }
+
+export const COMFY_WAIT_RESULT_SCHEMA = 'arcsweep.comfy-wait-result/v1';
+
+/**
+ * Wait for a ComfyUI endpoint to become reachable, retrying at intervals.
+ * Useful when ComfyUI Desktop is still starting up.
+ *
+ * Returns a frozen result when the endpoint responds or maxWaitMs is exhausted.
+ * Never submits prompts, never modifies queue, never downloads models.
+ *
+ * @param {ReturnType<typeof createComfyEndpointConfig>} config
+ * @param {{ maxWaitMs?: number, retryIntervalMs?: number, fetch?: typeof globalThis.fetch, onAttempt?: function }} options
+ * @returns {Promise<Readonly<object>>}
+ */
+export async function waitForComfyEndpoint(config, {
+  maxWaitMs = 120_000,
+  retryIntervalMs = 2_000,
+  fetch: fetchFn = globalThis.fetch,
+  onAttempt = null,
+} = {}) {
+  if (config?.schema !== COMFY_ENDPOINT_CONFIG_SCHEMA) {
+    throw new Error('waitForComfyEndpoint: config must be a createComfyEndpointConfig record');
+  }
+
+  const normMax = Number.isFinite(maxWaitMs) && maxWaitMs > 0 ? maxWaitMs : 120_000;
+  const normInterval = Number.isFinite(retryIntervalMs) && retryIntervalMs > 0 ? retryIntervalMs : 2_000;
+  const deadline = Date.now() + normMax;
+  let attempt = 0;
+  let lastStatus = null;
+
+  while (Date.now() < deadline) {
+    attempt += 1;
+    lastStatus = await probeComfyEndpoint(config, { fetch: fetchFn });
+    if (typeof onAttempt === 'function') onAttempt({ attempt, status: lastStatus });
+    if (lastStatus.reachable) break;
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
+    await new Promise((resolve) => setTimeout(resolve, Math.min(normInterval, remaining)));
+  }
+
+  return Object.freeze({
+    schema: COMFY_WAIT_RESULT_SCHEMA,
+    install_id: config.install_id,
+    base_url: config.base_url,
+    reachable: lastStatus?.reachable ?? false,
+    attempts: attempt,
+    max_wait_ms: normMax,
+    retry_interval_ms: normInterval,
+    last_status: lastStatus,
+    waited_at: new Date().toISOString(),
+  });
+}
