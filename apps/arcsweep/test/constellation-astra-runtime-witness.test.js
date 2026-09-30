@@ -33,7 +33,7 @@ test('verified Constellation reply produces an Astra runtime witness receipt wit
   assert.equal(receipt.provider_descriptor.id, 'claude');
   assert.equal(receipt.presence_receipt.before.identity_id, 'rarity');
   assert.equal(receipt.presence_receipt.after.identity_id, 'rarity');
-  assert.equal(receipt.presence_receipt.before.surface, 'constellation-lens');
+  assert.equal(receipt.presence_receipt.before.surface, 'web');
   assert.notEqual(receipt.presence_receipt.after.identity_id, receipt.provider_descriptor.id);
   assert.equal(receipt.execution_receipt.status, 'applied');
   assert.ok(receipt.events.some((event) => event.kind === 'delta' && event.delta === 'Observed reply.'));
