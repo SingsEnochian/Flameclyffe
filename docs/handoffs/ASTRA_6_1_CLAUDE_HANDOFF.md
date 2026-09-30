@@ -182,3 +182,17 @@ Do not optimise for the prettiest abstraction. Optimise for the smallest shared 
 **UNKNOWN:** Provider capability seam, sensory/output contracts, runtime deployment observation, and production credential state remain future work. The GitNexus safe plan writer was unavailable on Windows; implementation evidence is recorded here and in the local ASTRA context ledger instead.
 
 **NEXT:** Add the minimal provider/capability seam, then sensory/output interfaces, with the same identity/authority boundaries and focused runtime evidence.
+
+## Current implementation evidence (2026-09-30)
+
+**CONFIRMED:** The CognitiveProvider contract is implemented in `apps/arcsweep/src/architecture/cognitive-provider.js`. The companion `capability-negotiation.js` (ported from `feature/arcsweep-asi-ignition-v0`, PR #400) lives alongside it in `apps/arcsweep/src/architecture/`. The contract is documented in `docs/architecture/COGNITIVE_PROVIDER_V1.md`.
+
+**TESTED:** `node --test apps/arcsweep/test/cognitive-provider.test.js` passes 21/21 tests. Running alongside prior tests: `node --test apps/arcsweep/test/presence-fabric.test.js apps/arcsweep/test/model-presence-bus.test.js apps/arcsweep/test/cognitive-provider.test.js` passes 37/37.
+
+**OBSERVED:** Provider descriptors are frozen and carry no authority, credentials, or session fields. Unknown capability names are stripped. The gate (`evaluateProviderCapability`) delegates to `capability-negotiation.js`'s `evaluateCapabilityRequest` — providers cannot self-grant capability or authority. Cognitive events are frozen and kind-exclusive (only one payload field non-null per event). The contract is additive: no existing file was modified.
+
+**REUSED:** `capability-negotiation.js` from PR #400 (`arcsweep.capability-request/v0.1`, `arcsweep.capability-decision/v0.1`, `arcsweep.execution-receipt/v0.1`) was ported as-is without modification. Presence Fabric (`presence-fabric.js`) and `model-presence-bus.js` are unchanged.
+
+**UNKNOWN:** No live provider implementations exist yet. `assertCognitiveProvider` is a shape-only check — real provider conformance requires integration tests with each provider adapter. Sensory/output contracts remain future work.
+
+**NEXT:** Add the `SensoryAdapter`, `OutputAdapter`, and `AuditoryRenderTarget` interface contracts (Task 3). These are shape-only contracts — no vendor integrations. Same pattern: frozen descriptors, schema-tagged, no authority fields, focused tests, architecture doc.
