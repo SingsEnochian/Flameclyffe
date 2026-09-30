@@ -13,7 +13,8 @@
     "claudeHandoff": "docs/handoffs/ASTRA_6_1_CLAUDE_HANDOFF.md",
     "claudeTaskPacket": "docs/handoffs/astra-6.1-claude-task.json",
     "constellationAdvancePrompt": "docs/handoffs/ASTRA_6_1_CONSTELLATION_ADVANCE_PROMPT.md",
-    "watchAndVideoIngest": "docs/architecture/HOUSE_COMMONS_WATCH_AND_VIDEO_INGEST_V0_1.md"
+    "watchAndVideoIngest": "docs/architecture/HOUSE_COMMONS_WATCH_AND_VIDEO_INGEST_V0_1.md",
+    "comfyWorkflowRegistry": "docs/architecture/COMFY_WORKFLOW_REGISTRY_V0_1.md"
   },
   "planes": [
     "observation",
@@ -42,7 +43,11 @@
     "interpretation != ontology",
     "ontology != evidence",
     "watching != ingesting",
-    "ingesting != canonising"
+    "ingesting != canonising",
+    "workflow reference != workflow import",
+    "workflow import != validated workflow",
+    "validated workflow != execution authority",
+    "output artefact != truth"
   ],
   "subsystems": {
     "arcsweep": "coordinating cognitive OS",
@@ -54,6 +59,7 @@
     "constellation": "separately routed identity runtimes with model/provider independence",
     "houseCommons": "social presence, seminar, watch-room and shared-attention surface",
     "videoIngest": "permitted metadata/transcript ingestion into timestamped reviewable knowledge packets",
+    "comfyWorkflowRegistry": "ComfyUI workflow metadata, dependency and execution-readiness registry behind capability gates",
     "aiUniversity": "sandbox judgement, learning and evaluation",
     "worldseed": "portable continuity and inheritance packaging",
     "hearthfire": "continuity, governance and provenance discipline"
@@ -74,7 +80,8 @@
     "claude",
     "local-gguf",
     "external-persona-provider",
-    "future-provider"
+    "future-provider",
+    "comfyui-workflow-runner"
   ],
   "sensoryFamilies": [
     "camera",
@@ -94,7 +101,8 @@
     "image",
     "voice",
     "synced-video-player",
-    "transcript-sidecar"
+    "transcript-sidecar",
+    "comfy-output-artefact"
   ],
   "evidenceVocabulary": [
     "CONFIRMED",
@@ -121,6 +129,7 @@
     "provider-capability-contracts",
     "house-commons-watch-room-contract",
     "video-ingest-packet-contract",
+    "comfy-workflow-registry-contract",
     "sensory-output-adapter-contracts",
     "runa-render-target-contracts",
     "one-end-to-end-universe-narrative-resonance-receipt-slice",
@@ -132,6 +141,8 @@
     "externalWrites": false,
     "canonPromotion": false,
     "identityMutation": false,
-    "mediaBypass": false
+    "mediaBypass": false,
+    "workflowExecution": false,
+    "modelDownloads": false
   }
 }
