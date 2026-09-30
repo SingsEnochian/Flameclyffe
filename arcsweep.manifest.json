@@ -14,7 +14,8 @@
     "claudeTaskPacket": "docs/handoffs/astra-6.1-claude-task.json",
     "constellationAdvancePrompt": "docs/handoffs/ASTRA_6_1_CONSTELLATION_ADVANCE_PROMPT.md",
     "watchAndVideoIngest": "docs/architecture/HOUSE_COMMONS_WATCH_AND_VIDEO_INGEST_V0_1.md",
-    "comfyWorkflowRegistry": "docs/architecture/COMFY_WORKFLOW_REGISTRY_V0_1.md"
+    "comfyWorkflowRegistry": "docs/architecture/COMFY_WORKFLOW_REGISTRY_V0_1.md",
+    "comfyDeepIngest": "docs/research/COMFYUI_DEEP_INGEST_V0_1.md"
   },
   "planes": [
     "observation",
@@ -47,6 +48,7 @@
     "workflow reference != workflow import",
     "workflow import != validated workflow",
     "validated workflow != execution authority",
+    "execution approval != canon approval",
     "output artefact != truth"
   ],
   "subsystems": {
@@ -60,6 +62,7 @@
     "houseCommons": "social presence, seminar, watch-room and shared-attention surface",
     "videoIngest": "permitted metadata/transcript ingestion into timestamped reviewable knowledge packets",
     "comfyWorkflowRegistry": "ComfyUI workflow metadata, dependency and execution-readiness registry behind capability gates",
+    "comfyDesktopAdapter": "local ComfyUI Desktop/ComfyUI execution surface adapter with approval and receipt gates",
     "aiUniversity": "sandbox judgement, learning and evaluation",
     "worldseed": "portable continuity and inheritance packaging",
     "hearthfire": "continuity, governance and provenance discipline"
@@ -71,7 +74,8 @@
     "tui-cli",
     "mobile",
     "ar-spatial",
-    "watch-room"
+    "watch-room",
+    "comfy-desktop"
   ],
   "providerFamilies": [
     "openai",
@@ -130,6 +134,7 @@
     "house-commons-watch-room-contract",
     "video-ingest-packet-contract",
     "comfy-workflow-registry-contract",
+    "comfy-desktop-adapter-contract",
     "sensory-output-adapter-contracts",
     "runa-render-target-contracts",
     "one-end-to-end-universe-narrative-resonance-receipt-slice",
@@ -143,6 +148,8 @@
     "identityMutation": false,
     "mediaBypass": false,
     "workflowExecution": false,
-    "modelDownloads": false
+    "modelDownloads": false,
+    "customNodeInstalls": false,
+    "comfyApiNodes": false
   }
 }
