@@ -68,8 +68,8 @@ This file is a point-in-time snapshot. Do not treat it as live truth — verify 
 |-------------|-------|
 | branch      | **DETACHED HEAD** at `c7730ac` — Loopback Continuity Handshake v0.1 |
 | dirty files | none |
-| safe to pull | **NO** — detached HEAD. `git pull` does nothing useful. Must `git checkout main` (or appropriate branch) before pulling. |
-| notes       | Intentionally at this commit for review purposes? Verify before attaching to a branch. |
+| safe to pull | **N/A** — this is a git worktree of `GH - Repos/Hearthfire`. `main` is locked to the parent worktree and cannot be checked out here. Detached HEAD at this commit is likely intentional review positioning. |
+| notes       | To use this worktree on a branch, checkout any branch *not* already checked out in the parent (`boxfire/census-phase-0`, `feat/bridge-lamination-engine-v0.1`, or a new branch). Do not force-attach to `main`. |
 
 ### `C:\Users\light\GH - Repos\Runa`
 
