@@ -7,13 +7,17 @@ const DEFAULT_PROFILE = Object.freeze({
   enabled: true,
   gain_ceiling: 0.025,
   channels: Object.freeze({ audio: true, haptic: true }),
-  bindings: Object.freeze({ navigation: false, brush_contact: false, brush_expression: false }),
+  bindings: Object.freeze({ navigation: false, brush_contact: false, brush_expression: false, gesture_feedback: false }),
   cooldown_ms: 450,
   brush: Object.freeze({
     contact_cooldown_ms: 180,
     expression_cooldown_ms: 120,
     velocity_reference_px_s: 900,
     min_pressure: 0.05,
+  }),
+  gesture: Object.freeze({
+    feedback_cooldown_ms: 120,
+    min_confidence: 0.55,
   }),
   quiet_mode: false,
   cue_feedback: Object.freeze({}),
@@ -36,10 +40,13 @@ function bounded(value, low, high, fallback) {
 
 export function detectSomaticChannels(scope = globalThis) {
   const navigator = scope.navigator || {};
+  const gamepadHaptics = typeof navigator.getGamepads === 'function'
+    && Array.from(navigator.getGamepads?.() || []).some((pad) => Boolean(pad?.vibrationActuator));
   return Object.freeze({
     schema: 'arcsweep.somatic-channel-status/v1',
     web_audio: typeof (scope.AudioContext || scope.webkitAudioContext) === 'function',
     vibration: typeof navigator.vibrate === 'function',
+    gamepad_haptics: gamepadHaptics,
     pointer_events: typeof scope.PointerEvent === 'function',
     touch: Number(navigator.maxTouchPoints || 0) > 0,
     device_motion: typeof scope.DeviceMotionEvent === 'function',
@@ -48,7 +55,7 @@ export function detectSomaticChannels(scope = globalThis) {
     gamepad_api: typeof navigator.getGamepads === 'function',
     selected_audio_route: 'system-selected-output',
     bone_conduction_compatible: typeof (scope.AudioContext || scope.webkitAudioContext) === 'function',
-    note: 'Bone-conduction compatibility means ordinary audio can use a user-selected system audio route; ArcSweep does not control implants or medical devices.',
+    note: 'Browser vibration and controller haptics are adapters, not the haptic contract itself. Native and wearable adapters may supply richer feedback where authorised.',
   });
 }
 
@@ -60,6 +67,7 @@ export function createSomaticProfileStore({ storage = null, key = SOMATIC_PROFIL
     const gain = Number(input.gain_ceiling);
     const cooldown = Number(input.cooldown_ms);
     const brush = input.brush || {};
+    const gesture = input.gesture || {};
     return Object.freeze({
       ...base,
       ...clone(input),
@@ -75,6 +83,7 @@ export function createSomaticProfileStore({ storage = null, key = SOMATIC_PROFIL
         navigation: input.bindings?.navigation === true,
         brush_contact: input.bindings?.brush_contact === true,
         brush_expression: input.bindings?.brush_expression === true,
+        gesture_feedback: input.bindings?.gesture_feedback === true,
       }),
       cooldown_ms: Number.isFinite(cooldown) ? Math.max(150, Math.min(5000, Math.round(cooldown))) : base.cooldown_ms,
       brush: Object.freeze({
@@ -82,6 +91,10 @@ export function createSomaticProfileStore({ storage = null, key = SOMATIC_PROFIL
         expression_cooldown_ms: Math.round(bounded(brush.expression_cooldown_ms, 80, 1000, base.brush.expression_cooldown_ms)),
         velocity_reference_px_s: Math.round(bounded(brush.velocity_reference_px_s, 100, 5000, base.brush.velocity_reference_px_s)),
         min_pressure: bounded(brush.min_pressure, 0.01, 0.95, base.brush.min_pressure),
+      }),
+      gesture: Object.freeze({
+        feedback_cooldown_ms: Math.round(bounded(gesture.feedback_cooldown_ms, 80, 1500, base.gesture.feedback_cooldown_ms)),
+        min_confidence: bounded(gesture.min_confidence, 0, 1, base.gesture.min_confidence),
       }),
       quiet_mode: input.quiet_mode === true,
       cue_feedback: Object.freeze({ ...(input.cue_feedback || {}) }),
@@ -106,6 +119,7 @@ export function createSomaticProfileStore({ storage = null, key = SOMATIC_PROFIL
       channels: { ...current.channels, ...(patch.channels || {}) },
       bindings: { ...current.bindings, ...(patch.bindings || {}) },
       brush: { ...current.brush, ...(patch.brush || {}) },
+      gesture: { ...current.gesture, ...(patch.gesture || {}) },
       updated_at: now(),
     });
     try { target?.setItem?.(key, JSON.stringify(next)); } catch {}
