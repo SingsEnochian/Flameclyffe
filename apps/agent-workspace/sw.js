@@ -1,5 +1,17 @@
-const CACHE = 'house-workspace-os-v0.1.1';
-const SHELL = ['./', './index.html', './styles.css', './app.js', './chat.css', './chat.js', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'house-workspace-os-v0.2.0';
+const SHELL = [
+  './',
+  './index.html',
+  './styles.css',
+  './app.js',
+  './chat.css',
+  './chat.js',
+  './crow-nest.css',
+  './crow-nest.js',
+  './astra-bridge.js',
+  './manifest.webmanifest',
+  './icon.svg',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
