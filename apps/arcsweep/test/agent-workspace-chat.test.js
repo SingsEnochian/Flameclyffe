@@ -49,10 +49,11 @@ test('chat keeps thread content device-local and separates it by agent', () => {
 });
 
 test('offline shell includes chat and Crow Nest assets', () => {
-  assert.match(sw, /house-workspace-os-v0\.2\.1/);
+  assert.match(sw, /house-workspace-os-v0\.2\.2/);
   assert.match(sw, /'\.\/chat\.css'/);
   assert.match(sw, /'\.\/chat\.js'/);
   assert.match(sw, /'\.\/crow-nest\.css'/);
+  assert.match(sw, /'\.\/crow-nest-motion\.css'/);
   assert.match(sw, /'\.\/crow-nest-bootstrap\.js'/);
   assert.match(sw, /'\.\/crow-nest\.js'/);
   assert.match(sw, /'\.\/astra-bridge\.js'/);
