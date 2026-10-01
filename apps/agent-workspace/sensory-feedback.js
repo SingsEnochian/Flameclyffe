@@ -113,12 +113,12 @@ function renderControl() {
 }
 
 function gestureForElement(target) {
-  const button = target?.closest?.('button, [role="button"], a');
-  if (!button) return null;
-  if (button.matches('[data-sensory-toggle]')) return null;
-  if (button.matches('[data-nest-launch]')) return 'open';
-  if (button.matches('[data-nest-send], .house-chat-compose button[type="submit"]')) return 'send';
-  if (button.matches('[data-nest-target], [data-agent-id], [data-view], select')) return 'select';
+  const control = target?.closest?.('button, [role="button"], a, select');
+  if (!control) return null;
+  if (control.matches('[data-sensory-toggle]')) return null;
+  if (control.matches('[data-nest-launch]')) return 'open';
+  if (control.matches('[data-nest-send], .house-chat-compose button[type="submit"]')) return 'send';
+  if (control.matches('[data-nest-target], [data-agent-id], [data-view], select')) return 'select';
   return 'tap';
 }
 
