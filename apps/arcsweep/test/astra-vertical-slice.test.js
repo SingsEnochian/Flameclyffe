@@ -74,8 +74,8 @@ test('vertical slice: granted — full receipt with all contract layers', async 
 
   // Execution receipt
   assert.equal(receipt.execution_receipt.schema, EXECUTION_RECEIPT_SCHEMA);
-  assert.equal(receipt.execution_receipt.status, 'applied');
-  assert.ok(receipt.execution_receipt.evidenceRefs.includes('traj-test'));
+  assert.equal(receipt.execution_receipt.status, 'no-op');
+  assert.deepEqual([...receipt.execution_receipt.evidenceRefs], []);
   assert.equal(receipt.execution_receipt.executor, 'crow');
 });
 
@@ -234,4 +234,41 @@ test('fail-closed: omitting authorityGrants in vertical slice denies and tears d
   assert.equal(receipt.execution_receipt, null, 'no execution receipt when denied');
   assert.equal(receipt.events.length, 0, 'no events when denied');
   assert.equal(receipt.presence_receipt.action, 'torn-down', 'presence must be torn down on denial');
+});
+
+
+test('vertical slice: provider metadata is normalised out of credential-free receipts', async () => {
+  const provider = makeProvider({
+    events: [{
+      schema: COGNITIVE_EVENT_SCHEMA,
+      kind: 'done',
+      provider_id: 'spoofed-provider',
+      request_id: 'spoofed-request',
+      receipt: { token: 'secret-token', status: 'applied' },
+      token: 'secret-token',
+      credentials: { api_key: 'secret-key' },
+      occurred_at: '2026-09-30T00:08:00.000Z',
+    }],
+  });
+
+  const receipt = await runAstraVerticalSlice({
+    voiceId: 'sanitizer',
+    sessionId: 'sess-sanitize',
+    capability: 'text-generation',
+    authorityGrants: ['read-only'],
+    trajectoryId: 'traj-sanitize',
+    provider,
+    occurredAt: '2026-09-30T00:08:00.000Z',
+  });
+
+  assert.equal(receipt.events.length, 1);
+  assert.equal(receipt.events[0].provider_id, 'crow');
+  assert.equal(receipt.events[0].request_id, 'traj-sanitize');
+  assert.equal(receipt.events[0].receipt, null);
+  assert.equal(Object.hasOwn(receipt.events[0], 'token'), false);
+  assert.equal(Object.hasOwn(receipt.events[0], 'credentials'), false);
+  assert.ok(!JSON.stringify(receipt).includes('secret-token'));
+  assert.ok(!JSON.stringify(receipt).includes('secret-key'));
+  assert.equal(receipt.execution_receipt.status, 'no-op');
+  assert.deepEqual([...receipt.execution_receipt.evidenceRefs], []);
 });
