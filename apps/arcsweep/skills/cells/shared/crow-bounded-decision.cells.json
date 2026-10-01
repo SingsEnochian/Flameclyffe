@@ -1,0 +1,83 @@
+{
+  "contract": "arcsweep.knowledge-cell-bank/v1",
+  "bankId": "shared:crow-bounded-decision",
+  "subject": { "kind": "shared_constellation", "id": "crow-bounded-decision" },
+  "status": "active-user-authorized",
+  "cells": [
+    {
+      "id": "crow-decision.rule.three-layer-triage",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "crow-bounded-decision" },
+      "predicate": "routes_decisions_by",
+      "value": {
+        "deterministic": "code",
+        "semantic_bounded": "bounded-decision-layer",
+        "open_ended": "frontier-model",
+        "high_impact_or_uncertain": "escalate-to-stronger-review"
+      },
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/CROW_BOUNDED_DECISION_LAYER.md" },
+      "scope": { "modes": ["agent", "writing", "research", "workflow", "tool-routing"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["crow", "routing", "bounded-decision", "agent-architecture"]
+    },
+    {
+      "id": "crow-decision.rule.typed-output-not-truth",
+      "cellType": "boundary",
+      "subject": { "kind": "shared_constellation", "id": "crow-bounded-decision" },
+      "predicate": "requires",
+      "value": "typed bounded outputs must be validated by code; confidence constrains workflow but does not establish correctness, truth, canon, or authority",
+      "status": "stable",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/CROW_BOUNDED_DECISION_LAYER.md" },
+      "scope": { "modes": ["agent", "writing", "memory", "canon", "evaluation"] },
+      "mutability": "stable_core",
+      "privacy": "house",
+      "tags": ["validation", "confidence", "truth", "canon"]
+    },
+    {
+      "id": "crow-decision.rule.skill-selection",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "crow-bounded-decision" },
+      "predicate": "prefers",
+      "value": "select the smallest relevant skill set for the current task instead of loading the entire Crow curriculum into context",
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/CROW_BOUNDED_DECISION_LAYER.md" },
+      "scope": { "modes": ["agent", "writing", "research", "context-management"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["skills", "context", "routing", "efficiency"]
+    },
+    {
+      "id": "crow-decision.rule.memory-admission-is-not-canon",
+      "cellType": "boundary",
+      "subject": { "kind": "shared_constellation", "id": "crow-bounded-decision" },
+      "predicate": "forbids",
+      "value": "using memory relevance, retrieval score, or semantic confidence as authority to promote a candidate fact into canon",
+      "status": "stable",
+      "authority": { "kind": "founding_law", "speakerOrAuthor": "Hearthweave", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/CROW_BOUNDED_DECISION_LAYER.md" },
+      "scope": { "modes": ["memory", "canon", "retrieval", "agent"] },
+      "mutability": "stable_core",
+      "privacy": "house",
+      "tags": ["memory", "canon", "authority", "retrieval"]
+    },
+    {
+      "id": "crow-decision.rule.evidence-preserving-escalation",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "crow-bounded-decision" },
+      "predicate": "escalates_with",
+      "value": ["candidate options", "scores/confidence", "evidence references", "risk/impact", "reason code", "requested next action"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/CROW_BOUNDED_DECISION_LAYER.md" },
+      "scope": { "modes": ["agent", "workflow", "review"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["escalation", "evidence", "receipts"]
+    }
+  ]
+}
