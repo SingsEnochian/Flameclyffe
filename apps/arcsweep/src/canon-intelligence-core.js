@@ -1,3 +1,5 @@
+import { ROWAN_RARITY_CONSTELLATION } from './constellation-sovereignty.js';
+
 export const CANON_INTELLIGENCE_PROPOSAL_SCHEMA = 'arcsweep.canon-intelligence-proposal/v1';
 export const CANON_INTELLIGENCE_EVIDENCE_SCHEMA = 'arcsweep.canon-intelligence-evidence/v1';
 export const CANON_INTELLIGENCE_PROMOTION_SCHEMA = 'arcsweep.canon-intelligence-promotion/v1';
@@ -10,10 +12,18 @@ const slug = (value) => text(value).toLowerCase().normalize('NFKD').replace(/[^a
 const boundedConfidence = (value) => value == null ? null : Math.max(0, Math.min(1, Number(value)));
 const nowIso = () => new Date().toISOString();
 
+function foreignSourceConstellations(evidence = []) {
+  return [...new Set(evidence
+    .map((item) => text(item?.source_constellation))
+    .filter((value) => value && value !== ROWAN_RARITY_CONSTELLATION))];
+}
+
 export function normaliseCanonEvidence(input = {}) {
   const sourceId = text(input.source_id || input.sourceId);
   if (!sourceId) throw new Error('CANON_INTELLIGENCE: evidence requires source_id');
   const worldId = text(input.world_id || input.worldId) || null;
+  const sourceConstellation = text(input.source_constellation || input.sourceConstellation) || null;
+  const foreign = Boolean(sourceConstellation && sourceConstellation !== ROWAN_RARITY_CONSTELLATION);
   return Object.freeze({
     schema: CANON_INTELLIGENCE_EVIDENCE_SCHEMA,
     evidence_id: text(input.evidence_id || input.evidenceId) || `evidence:${slug(worldId || 'unscoped')}:${slug(sourceId)}:${slug(input.locator || input.title || 'root')}`,
@@ -31,7 +41,10 @@ export function normaliseCanonEvidence(input = {}) {
     confidence: boundedConfidence(input.confidence),
     observed_at: input.observed_at || input.observedAt || nowIso(),
     provenance: Array.isArray(input.provenance) ? clone(input.provenance) : [],
-    canon_status: 'evidence-only',
+    source_constellation: sourceConstellation,
+    source_namespace: text(input.source_namespace || input.sourceNamespace) || null,
+    foreign_context: foreign,
+    canon_status: foreign ? 'foreign-evidence-only' : 'evidence-only',
   });
 }
 
@@ -100,6 +113,7 @@ export function createCanonIntelligenceProposal({
   if (!resolvedWorldId || !entityId || !fieldKey || !proposerId) throw new Error('CANON_INTELLIGENCE: proposal requires world, entity, field, and proposer');
   const receipts = evidence.map((item) => item?.schema === CANON_INTELLIGENCE_EVIDENCE_SCHEMA ? clone(item) : normaliseCanonEvidence(item));
   const comparison = compareCanonValue(existingValue, proposedValue);
+  const foreignSources = foreignSourceConstellations(receipts);
   return Object.freeze({
     schema: CANON_INTELLIGENCE_PROPOSAL_SCHEMA,
     proposal_id: proposalId || `canon-proposal:${slug(resolvedWorldId)}:${slug(entityId)}:${slug(fieldKey)}:${Date.parse(createdAt) || Date.now()}`,
@@ -115,6 +129,13 @@ export function createCanonIntelligenceProposal({
     status: 'pending',
     created_at: createdAt,
     authority: { may_propose: true, may_promote_to_canon: false, steward_review_required: true },
+    sovereignty: {
+      local_constellation: ROWAN_RARITY_CONSTELLATION,
+      foreign_influence: foreignSources.length > 0,
+      foreign_source_constellations: foreignSources,
+      foreign_context_is_read_only: true,
+      explicit_foreign_influence_acceptance_required: foreignSources.length > 0,
+    },
   });
 }
 
@@ -148,24 +169,47 @@ export function proposeMissingCanonFields({ worldId, entity, fieldRegistry = [],
   });
 }
 
-export function reviewCanonProposal(proposal, { action, steward, note = null, revisedValue, reviewedAt = nowIso() } = {}) {
+export function reviewCanonProposal(proposal, {
+  action,
+  steward,
+  note = null,
+  revisedValue,
+  reviewedAt = nowIso(),
+  acceptForeignInfluence = false,
+} = {}) {
   if (proposal?.schema !== CANON_INTELLIGENCE_PROPOSAL_SCHEMA) throw new Error('CANON_INTELLIGENCE: review requires proposal');
   const stewardId = text(steward?.id || steward);
   if (!stewardId) throw new Error('CANON_INTELLIGENCE: Steward identity is required');
   const mapping = { accept: 'accepted', reject: 'rejected', revise: 'revised', hold: 'held', 'needs-more-evidence': 'needs-more-evidence', 'preserve-apocrypha': 'preserved-apocrypha' };
-  const status = mapping[text(action).toLowerCase()];
+  const reviewAction = text(action).toLowerCase();
+  const status = mapping[reviewAction];
   if (!status) throw new Error('CANON_INTELLIGENCE: unknown review action');
+
+  const changesLocalCanon = status === 'accepted' || status === 'revised';
+  if (changesLocalCanon && proposal.sovereignty?.foreign_influence && acceptForeignInfluence !== true) {
+    throw new Error('CANON_INTELLIGENCE: foreign-influenced proposal requires explicit Steward acceptance of foreign influence');
+  }
+
   return Object.freeze({
     ...clone(proposal),
     proposed_value: status === 'revised' ? clone(revisedValue) : clone(proposal.proposed_value),
     status,
-    review: { steward_id: stewardId, action: text(action).toLowerCase(), note: text(note) || null, reviewed_at: reviewedAt },
+    review: {
+      steward_id: stewardId,
+      action: reviewAction,
+      note: text(note) || null,
+      reviewed_at: reviewedAt,
+      foreign_influence_accepted: proposal.sovereignty?.foreign_influence ? acceptForeignInfluence === true : null,
+    },
   });
 }
 
 export function createCanonPromotionReceipt(reviewedProposal, { steward, mutationReceiptId, promotedAt = nowIso() } = {}) {
   if (reviewedProposal?.schema !== CANON_INTELLIGENCE_PROPOSAL_SCHEMA || reviewedProposal.status !== 'accepted') {
     throw new Error('CANON_INTELLIGENCE: only an accepted proposal may be promoted');
+  }
+  if (reviewedProposal.sovereignty?.foreign_influence && reviewedProposal.review?.foreign_influence_accepted !== true) {
+    throw new Error('CANON_INTELLIGENCE: foreign-influenced proposal lacks explicit Steward acceptance');
   }
   const stewardId = text(steward?.id || steward || reviewedProposal.review?.steward_id);
   if (!stewardId) throw new Error('CANON_INTELLIGENCE: promotion requires Steward identity');
@@ -181,12 +225,16 @@ export function createCanonPromotionReceipt(reviewedProposal, { steward, mutatio
     mutation_receipt_id: text(mutationReceiptId) || null,
     promoted_at: promotedAt,
     authority: 'explicit-steward-promotion',
+    sovereignty: clone(reviewedProposal.sovereignty || null),
   });
 }
 
 export async function applyCanonPromotion(reviewedProposal, { steward, mutateCanon } = {}) {
   if (typeof mutateCanon !== 'function') throw new Error('CANON_INTELLIGENCE: canon mutator is required');
   if (reviewedProposal?.status !== 'accepted') throw new Error('CANON_INTELLIGENCE: proposal must be accepted before mutation');
+  if (reviewedProposal.sovereignty?.foreign_influence && reviewedProposal.review?.foreign_influence_accepted !== true) {
+    throw new Error('CANON_INTELLIGENCE: foreign-influenced proposal cannot mutate canon without explicit Steward acceptance');
+  }
   const mutation = await mutateCanon({
     world_id: reviewedProposal.world_id,
     target: clone(reviewedProposal.target),
