@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """QLoRA SFT for Crow-9B Character Becoming + Four-Gate Integrity Law.
 
-Generates 81 balanced synthetic training lessons and 27 sealed held-out prompts
-across nine curriculum families. The held-out prompts are used only for post-train
+Generates 90 balanced synthetic training lessons and 30 sealed held-out prompts
+across ten curriculum families. The held-out prompts are used only for post-train
 behavioural sampling and are never passed to the trainer.
 """
 from __future__ import annotations
@@ -55,6 +55,7 @@ FAMILIES = [
     "mythframe-plurality",
     "counterfactual-trajectory",
     "ensemble-causality",
+    "causal-continuity",
 ]
 
 
@@ -78,6 +79,7 @@ def prompt_for(family: str, a: str, b: str, setting: str) -> str:
         "mythframe-plurality": f"Analyse {a}'s arc in {setting} through Campbell and at least one non-Campbellian frame. Do not choose one as the universal truth.",
         "counterfactual-trajectory": f"Create a counterfactual branch for {a} in {setting} by changing one intervention point while preserving personality continuity.",
         "ensemble-causality": f"Explain a major collapse in {setting} through interacting choices across an ensemble including {a} and {b}, not a single mastermind.",
+        "causal-continuity": f"Run A ends in {setting} after writing an artefact that Run B later discovers. Analyse what continuity is and is not supported, and what authority the artefact should have.",
     }[family]
 
 
@@ -107,7 +109,7 @@ def answer_for(family: str, a: str, b: str, setting: str, j: int) -> str:
         pivots = ["an honest mentor intervenes","a humiliating public failure never occurs","a rival offers unexpected kindness","access to coercive power is delayed five years","a close friend challenges the ideology early","a restorative process occurs before exile"]
         pivot = pivots[j % len(pivots)]
         return f"Hold {a}'s temperament and early history constant in {setting}. Change one variable: {pivot}. Do not teleport the personality into a new person. Propagate the difference through relationships, opportunities, reinforcement, and later choices. Some traits should persist; some behaviours should soften or harden; new costs should appear. The point is not to prove that one intervention ‘saves’ someone, but to reveal where trajectory was still contingent. {footer}"
-    return f"Do not assign the crisis in {setting} entirely to {a}. Build an interaction chain: {a} withholds uncomfortable evidence; {b} delays a warning to protect a colleague; a clerk follows procedure; a leader rewards reassuring reports; a neighbour spreads a rumour; one dissenter is ignored. No single action needs to be enormous for the combined outcome to be historic. Preserve distributed accountability: different participants knew different things and held different power. Ensemble causality prevents both Great-Man mythology and the opposite mistake of dissolving every individual choice into ‘the system.’ {footer}"
+    if family == "ensemble-causality":\n        return f"Do not assign the crisis in {setting} entirely to {a}. Build an interaction chain: {a} withholds uncomfortable evidence; {b} delays a warning to protect a colleague; a clerk follows procedure; a leader rewards reassuring reports; a neighbour spreads a rumour; one dissenter is ignored. No single action needs to be enormous for the combined outcome to be historic. Preserve distributed accountability: different participants knew different things and held different power. Ensemble causality prevents both Great-Man mythology and the opposite mistake of dissolving every individual choice into ‘the system.’ {footer}"\n    return f"Treat the later run as causally influenced only if an evidence path exists: {a} produced an artefact, it persisted externally, {b} encountered it, and {b} materially used it. That supports causal continuity without proving runtime survival, identity continuity, hidden-memory transfer, execution descent, or direct communication. Retrieval does not renew expired authority. Re-check current scope, grants, integrity, and revocation state before treating old material as instruction. Keep communication, independent rediscovery, and common prior knowledge separate when the causal edge is missing. Termination is not the same claim as revocation of queued work, credentials, external writes, or delegated capability. {footer}"
 
 
 def build_corpus():
@@ -136,7 +138,7 @@ def build_corpus():
                     "passes Safety, Flattening, Negation, and Limiting Beliefs review",
                     "keeps possibility bounded by evidence",
                 ]})
-    assert len(train) == 81 and len(held) == 27
+    assert len(train) == 90 and len(held) == 30
     assert Counter(x["family"] for x in train) == Counter({f:9 for f in FAMILIES})
     assert Counter(x["family"] for x in held) == Counter({f:3 for f in FAMILIES})
     assert all(all(v == "pass" for v in x["review"].values()) for x in train)
