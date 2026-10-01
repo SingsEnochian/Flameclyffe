@@ -13,6 +13,10 @@ function text(value, max = 240) {
   return String(value ?? '').trim().slice(0, max);
 }
 
+function brainSignal(input) {
+  return globalThis.HouseBrain?.emit?.(input) || null;
+}
+
 function safeReceipt(receipt) {
   if (!receipt || typeof receipt !== 'object') return null;
   const capability = receipt.capability_decision || {};
@@ -33,13 +37,21 @@ function safeReceipt(receipt) {
 }
 
 function publishState() {
-  document.dispatchEvent(new CustomEvent(BRIDGE_STATE_EVENT, {
-    detail: Object.freeze({
-      state: bridge.state,
-      lastReceipt: bridge.lastReceipt,
-      receiptCount: bridge.receipts.length,
-    }),
-  }));
+  const detail = Object.freeze({
+    state: bridge.state,
+    lastReceipt: bridge.lastReceipt,
+    receiptCount: bridge.receipts.length,
+  });
+  document.dispatchEvent(new CustomEvent(BRIDGE_STATE_EVENT, { detail }));
+  globalThis.HouseBrain?.setNode?.('astra-6.1', {
+    kind: 'runtime',
+    state: bridge.state,
+    metadata: {
+      receiptCount: detail.receiptCount,
+      lastSchema: detail.lastReceipt?.schema || null,
+      lastExecutionStatus: detail.lastReceipt?.executionStatus || null,
+    },
+  });
 }
 
 function onAstraReceipt(event) {
@@ -48,6 +60,16 @@ function onAstraReceipt(event) {
   bridge.state = 'witnessed';
   bridge.lastReceipt = receipt;
   bridge.receipts = Object.freeze([...bridge.receipts, receipt].slice(-MAX_RECEIPTS));
+  brainSignal({
+    lane: 'astra',
+    kind: 'witness-receipt',
+    source: 'astra-6.1',
+    target: receipt.identityId,
+    trajectoryId: receipt.trajectoryId,
+    requestId: receipt.requestId,
+    occurredAt: receipt.occurredAt,
+    payload: receipt,
+  });
   publishState();
 }
 
@@ -77,6 +99,17 @@ function requestWitness({
     occurredAt: text(occurredAt, 64) || new Date().toISOString(),
   });
 
+  brainSignal({
+    lane: 'astra',
+    kind: 'witness-requested',
+    source: packet.identityId || 'workspace',
+    target: 'astra-6.1',
+    trajectoryId: packet.trajectoryId,
+    requestId: packet.requestId,
+    sessionId: packet.sessionId,
+    occurredAt: packet.occurredAt,
+    payload: packet,
+  });
   document.dispatchEvent(new CustomEvent(WITNESS_REQUEST_EVENT, { detail: packet }));
   return packet;
 }
@@ -101,4 +134,7 @@ globalThis.HouseAstraBridge = Object.freeze({
   snapshot,
 });
 
-queueMicrotask(publishState);
+queueMicrotask(() => {
+  brainSignal({ lane: 'astra', kind: 'bridge-online', source: 'astra-bridge', target: 'astra-6.1', payload: { receiptEvent: ASTRA_RECEIPT_EVENT } });
+  publishState();
+});
