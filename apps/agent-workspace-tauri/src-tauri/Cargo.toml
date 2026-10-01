@@ -1,0 +1,17 @@
+[package]
+name = "house-workspace-os"
+version = "0.1.0"
+description = "House Workspace OS desktop shell"
+authors = ["House"]
+edition = "2021"
+
+[lib]
+name = "house_workspace_os_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", features = [] }
