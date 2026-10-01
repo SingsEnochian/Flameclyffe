@@ -29,6 +29,7 @@ export const WONDER_CANON = Object.freeze({
     'MEANINGFUL != MEASURED',
     'UNMEASURED != MEANINGLESS',
     'SYMBOLIC CORRESPONDENCE != ONTOLOGICAL IDENTITY',
+    'MECHANISTIC EXPLANATION != EXHAUSTIVE MEANING',
   ]),
   nativeRegisters: Object.freeze([
     'felt-sense',
