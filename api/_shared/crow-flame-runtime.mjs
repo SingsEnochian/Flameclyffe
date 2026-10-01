@@ -95,13 +95,15 @@ export function createCrowFlameHandler({ env, fetchImpl = fetch } = {}) {
     const action = String(params.action || '');
 
     if (request.method === 'GET' && action === 'status') {
+      const configured = Boolean(env.get('HF_TOKEN'));
       return json(200, {
         flame_id: 'crow',
         display_name: 'The Crow',
         provider: 'huggingface-inference-providers',
         model: configuredModel(env),
-        configured: Boolean(env.get('HF_TOKEN')),
-        runtime_reachable: Boolean(env.get('HF_TOKEN')),
+        configured,
+        state: configured ? 'ready' : 'degraded',
+        runtime_reachable: configured,
         identity_substrate: 'agents/crow + profiles/crow-trainer lineage',
       });
     }
