@@ -4,6 +4,8 @@ import { registerSomaticService } from './os/somatic-service.js';
 import { createSomaticProfileStore, detectSomaticChannels } from './somatic-profile.js';
 import { installSomaticCalibrationSurface } from './somatic-calibration-surface.js';
 import { createSomaticEventBridge } from './somatic-event-bridge.js';
+import { createGestureSomaticFeedback } from './gesture-somatic-feedback.js';
+import { createGestureGlassFeedback } from './gesture-glass-feedback.js';
 
 const GLOBAL_KEY = '__arcsweepSomatic';
 
@@ -21,6 +23,8 @@ function install() {
   });
   let calibration = null;
   let bridge = null;
+  let gestureFeedback = null;
+  let glassFeedback = null;
   const api = {
     service_id: service.service_id,
     capabilities: [...service.capabilities],
@@ -49,18 +53,27 @@ function install() {
     enableNavigationCue: (enabled = true) => profileStore.save({ bindings: { navigation: Boolean(enabled) } }),
     enableBrushContact: (enabled = true) => profileStore.save({ bindings: { brush_contact: Boolean(enabled) } }),
     enableBrushExpression: (enabled = true) => profileStore.save({ bindings: { brush_expression: Boolean(enabled) } }),
+    enableGestureFeedback: (enabled = true) => profileStore.save({ bindings: { gesture_feedback: Boolean(enabled) } }),
     bridgeStatus: () => bridge?.status?.() || null,
+    gestureFeedbackStatus: () => gestureFeedback?.status?.() || null,
+    gestureGlassStatus: () => glassFeedback?.status?.() || null,
   };
   const frozen = Object.freeze(api);
   globalThis[GLOBAL_KEY] = frozen;
   bridge = createSomaticEventBridge({ bus: arcsweepOS.bus, somatic: frozen, profile: profileStore });
+  gestureFeedback = createGestureSomaticFeedback({ somatic: frozen, profile: profileStore, eventTarget: globalThis });
+  glassFeedback = createGestureGlassFeedback({ eventTarget: globalThis, doc: globalThis.document });
 
   if (typeof document !== 'undefined') {
     const mount = () => { if (!calibration && document.body) calibration = installSomaticCalibrationSurface({ somatic: frozen }); };
     if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount, { once: true });
   }
 
-  globalThis.addEventListener?.('beforeunload', () => bridge?.destroy?.(), { once: true });
+  globalThis.addEventListener?.('beforeunload', () => {
+    bridge?.destroy?.();
+    gestureFeedback?.destroy?.();
+    glassFeedback?.destroy?.();
+  }, { once: true });
   globalThis.dispatchEvent?.(new CustomEvent('arcsweep:somatic-ready', {
     detail: { service_id: service.service_id, capabilities: service.capabilities, channels: detectSomaticChannels(globalThis) },
   }));

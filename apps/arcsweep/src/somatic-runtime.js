@@ -42,6 +42,62 @@ const CUES = Object.freeze({
     gap_ms: 0,
     vibration_ms: Object.freeze([24]),
   }),
+  gesture_aware: Object.freeze({
+    id: 'gesture_aware',
+    meaning: 'A gesture-capable surface noticed an intentional approach. No target or action is implied.',
+    tones_hz: Object.freeze([280]),
+    tone_ms: 42,
+    gap_ms: 0,
+    vibration_ms: Object.freeze([10]),
+  }),
+  gesture_targeted: Object.freeze({
+    id: 'gesture_targeted',
+    meaning: 'A gesture target is acquired. Targeting is not selection or authority.',
+    tones_hz: Object.freeze([320]),
+    tone_ms: 52,
+    gap_ms: 0,
+    vibration_ms: Object.freeze([14]),
+  }),
+  gesture_armed: Object.freeze({
+    id: 'gesture_armed',
+    meaning: 'A recognized gesture is armed and waiting for commit. No action has executed.',
+    tones_hz: Object.freeze([360, 420]),
+    tone_ms: 48,
+    gap_ms: 28,
+    vibration_ms: Object.freeze([16, 18, 16]),
+  }),
+  gesture_captured: Object.freeze({
+    id: 'gesture_captured',
+    meaning: 'A target is captured for direct manipulation until release or cancellation.',
+    tones_hz: Object.freeze([180, 260]),
+    tone_ms: 58,
+    gap_ms: 24,
+    vibration_ms: Object.freeze([28, 22, 42]),
+  }),
+  gesture_commit_request: Object.freeze({
+    id: 'gesture_commit_request',
+    meaning: 'A gesture requested commit and is entering capability and target checks. Success is not implied.',
+    tones_hz: Object.freeze([392, 523]),
+    tone_ms: 58,
+    gap_ms: 26,
+    vibration_ms: Object.freeze([22, 18, 32]),
+  }),
+  gesture_cancelled: Object.freeze({
+    id: 'gesture_cancelled',
+    meaning: 'The current gesture interaction was cancelled without claiming failure or denial.',
+    tones_hz: Object.freeze([294, 220]),
+    tone_ms: 64,
+    gap_ms: 30,
+    vibration_ms: Object.freeze([34, 24, 24]),
+  }),
+  gesture_tracking_lost: Object.freeze({
+    id: 'gesture_tracking_lost',
+    meaning: 'Gesture tracking was lost and the interaction should freeze, reacquire, or cancel safely.',
+    tones_hz: Object.freeze([160, 160]),
+    tone_ms: 86,
+    gap_ms: 48,
+    vibration_ms: Object.freeze([45, 35, 45]),
+  }),
 });
 
 let activeCue = null;
@@ -73,7 +129,10 @@ function normaliseModulation(input = {}) {
 
 function boundedContext(input = null) {
   if (!input || typeof input !== 'object') return null;
-  const allowed = ['trigger', 'phase', 'stroke_id', 'brush_id', 'pointer_type', 'pressure', 'velocity_px_s', 'tilt_x', 'tilt_y', 'twist', 'previous_room', 'current_room'];
+  const allowed = [
+    'trigger', 'phase', 'stroke_id', 'brush_id', 'pointer_type', 'pressure', 'velocity_px_s', 'tilt_x', 'tilt_y', 'twist',
+    'previous_room', 'current_room', 'gesture', 'gesture_state', 'gesture_event_id', 'gesture_source', 'hand', 'target_id', 'confidence',
+  ];
   const output = {};
   for (const key of allowed) {
     const value = input[key];
