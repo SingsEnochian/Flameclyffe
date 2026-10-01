@@ -257,7 +257,8 @@ async function refreshAgent(id, { quiet = false } = {}) {
   render();
   const started = performance.now();
   try {
-    const response = await fetch(`/api/v1/flames/${encodeURIComponent(agent.route)}/status`, { credentials: 'same-origin', cache: 'no-store' });
+    const routePath = String(agent.route).split('/').map((segment) => encodeURIComponent(segment)).join('/');
+    const response = await fetch(`/api/v1/flames/${routePath}/status`, { credentials: 'same-origin', cache: 'no-store' });
     const latencyMs = Math.max(0, Math.round(performance.now() - started));
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
