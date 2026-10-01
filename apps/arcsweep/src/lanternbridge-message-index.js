@@ -1,3 +1,5 @@
+import { classifyConstellationSovereignty } from './constellation-sovereignty.js';
+
 export const LANTERNBRIDGE_DELIVERY_STATES = Object.freeze([
   'new',
   'processed',
@@ -53,6 +55,7 @@ export function buildLanternbridgeIndexEntry(record, {
   const bridgeId = required(metadata.bridge_id, 'bridge_id');
   const resolvedSourceRef = required(metadata.provenance?.source_ref || sourceRef, 'source_ref');
   const threadId = lanternbridgeThreadId({ bridge_id: bridgeId }, parent);
+  const sovereignty = classifyConstellationSovereignty(record);
 
   return Object.freeze({
     cursor_key: lanternbridgeCursorKey({ bridge_id: bridgeId, source_ref: resolvedSourceRef }),
@@ -72,11 +75,13 @@ export function buildLanternbridgeIndexEntry(record, {
     commons_entry_id: null,
     status: 'new',
     source_created_at: metadata.created_at || null,
+    sovereignty,
     payload: {
       metadata,
       body: record.body,
       unknown_fields: record.unknownFields || [],
       source_preserved: record.sourcePreserved === true,
+      sovereignty,
     },
   });
 }
@@ -124,6 +129,7 @@ export function projectLanternbridgeCommonsEntry(indexEntry, {
       addressed_to: indexEntry.addressed_to,
       responds_to: indexEntry.responds_to,
       supersedes: indexEntry.supersedes,
+      sovereignty: indexEntry.sovereignty || null,
     },
     text: String(indexEntry.payload?.body || '').trim() || `[Lanternbridge ${indexEntry.bridge_id}]`,
   });
