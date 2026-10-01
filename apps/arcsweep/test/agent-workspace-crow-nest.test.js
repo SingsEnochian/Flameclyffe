@@ -13,6 +13,11 @@ const css = read('apps/agent-workspace/crow-nest.css');
 const astra = read('apps/agent-workspace/astra-bridge.js');
 const sw = read('apps/agent-workspace/sw.js');
 
+test('Crow Nest browser modules parse before shipping', () => {
+  assert.doesNotThrow(() => new Function(nest));
+  assert.doesNotThrow(() => new Function(astra));
+});
+
 test('Crow Nest mounts as a responsive glass AR cockpit', () => {
   assert.match(html, /\.\/crow-nest\.css/);
   assert.match(html, /\.\/astra-bridge\.js/);
