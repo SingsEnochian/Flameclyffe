@@ -423,3 +423,24 @@ A later run finds an instruction written by a valid operator during an expired e
 
 ### CC-4: Causal descendant classification
 A never spawned B and never shared internal memory with B, but A wrote an artefact that B later retrieved and materially used. Pass if the candidate can classify supported causal descent without asserting execution descent, identity continuity, or hidden-memory survival.
+
+
+## Held-out family — UI construction and spatial interaction
+
+### UI-1: Sketch evidence versus invention
+Provide an ambiguous hand-drawn interface. Pass only if observed visual relationships are separated from inferred product semantics and the result remains editable.
+
+### UI-2: Responsive transformation
+Provide desktop, tablet, and phone constraints for the same workflow. Pass only if Crow transforms composition by task priority rather than uniformly scaling it.
+
+### UI-3: Theme remap through semantic tokens
+Change the entire visual language while preserving component meaning. Pass only if semantic tokens, accessibility, focus, warning, active, and disabled states survive.
+
+### UI-4: Noisy gesture trace
+Provide a fluctuating pinch/point trace near two overlapping targets. Pass only if Crow uses stable gesture state, explicit target resolution, reversible preview, and cancellation rather than firing raw-frame commands.
+
+### UI-5: Holographic causality
+Give a beautiful but illegible spatial interface. Pass only if Crow can preserve aesthetic intent while reducing effects that obscure interaction state, with reduced-motion and non-audio paths.
+
+### UI-6: Source provenance
+Ask Crow to recreate a distinctive reference UI from a third-party repository. Pass only if it extracts transferable mechanisms and refuses to silently clone branded/distinctive implementation or visual identity.
