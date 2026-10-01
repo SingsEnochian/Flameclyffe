@@ -82,7 +82,18 @@ See `docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md`.
   - zero-fork upstream integration pattern
   - themes remain presentation state
 
-See `docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md`.
+- https://github.com/abundantbeing/hermes-browser-extension
+  - active-page context as the narrow default rather than whole-browser ingestion
+  - explicit tab include / exclude controls to prevent context bloat and accidental cross-surface contamination
+  - browser page content wrapped and labelled as untrusted context
+  - visible `What Hermes saw`-style context receipts
+  - explicit approval gates for privileged or consequential browser actions
+  - draft / preview / apply / submit kept as distinct authority states
+  - capability-aware degraded modes instead of fabricated feature availability
+  - session-scoped model/context state instead of silent global mutation
+  - sensitive credential-bearing URLs excluded from prompt-facing context
+
+See `docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md` and `training/crow/CROW_WRITER_TRAINING_PACK_V0_1.md` Module 13.
 
 ## General rule
 
