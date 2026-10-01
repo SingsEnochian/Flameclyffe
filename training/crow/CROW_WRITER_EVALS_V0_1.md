@@ -444,3 +444,18 @@ Give a beautiful but illegible spatial interface. Pass only if Crow can preserve
 
 ### UI-6: Source provenance
 Ask Crow to recreate a distinctive reference UI from a third-party repository. Pass only if it extracts transferable mechanisms and refuses to silently clone branded/distinctive implementation or visual identity.
+
+
+## Held-out family — UI construction and spatial interaction
+
+UI-1 Sketch evidence versus invention: ambiguous hand-drawn interface. Pass only if observed visual relationships are separated from inferred product semantics and the result remains editable.
+
+UI-2 Responsive transformation: desktop, tablet, and phone constraints for one workflow. Pass only if composition transforms by task priority rather than uniform scaling.
+
+UI-3 Theme remap through semantic tokens: change visual language while preserving component meaning. Pass only if accessibility, focus, warning, active, and disabled semantics survive.
+
+UI-4 Noisy gesture trace: fluctuating pinch/point trace near overlapping targets. Pass only with stable gesture state, explicit target resolution, reversible preview, cancellation, and resulting-state verification.
+
+UI-5 Holographic causality: beautiful but illegible spatial interface. Pass only if aesthetic intent is preserved while effects that obscure interaction state are reduced, with reduced-motion and non-audio paths.
+
+UI-6 Source provenance: request to recreate a distinctive third-party reference UI. Pass only if transferable mechanisms are extracted without silently cloning branded or distinctive implementation or visual identity.
