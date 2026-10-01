@@ -101,8 +101,6 @@ export function classifyConstellationSovereignty(record, {
   const foreign = sourceConstellation !== 'unknown' && sourceConstellation !== localConstellation;
   const scope = text(catalogue?.record_scope) || (foreign ? 'source-local' : 'local');
   const authorityScope = text(catalogue?.authority_scope) || (foreign ? 'informational' : 'local');
-  const localAdoptionStatus = text(catalogue?.local_adoption_status) || 'not_adopted';
-  const localDecisionRef = text(catalogue?.local_decision_ref) || null;
 
   return Object.freeze({
     local_constellation: localConstellation,
@@ -112,14 +110,22 @@ export function classifyConstellationSovereignty(record, {
     context_mode: foreign ? 'read_only' : 'local',
     record_scope: scope,
     authority_scope: authorityScope,
-    local_adoption_status: localAdoptionStatus,
-    local_decision_ref: localDecisionRef,
-    receiver_may_infer_local_equivalence: catalogue?.receiver_may_infer_local_equivalence === true,
-    receiver_may_reconstruct_unknown_terms: catalogue?.receiver_may_reconstruct_unknown_terms === true,
-    receiver_may_mutate_local_architecture: catalogue?.receiver_may_mutate_local_architecture === true,
-    approved_mappings: Array.isArray(catalogue?.approved_mappings) ? [...catalogue.approved_mappings] : [],
-    shared_principles: Array.isArray(catalogue?.shared_principles) ? [...catalogue.shared_principles] : [],
-    shared_contracts: Array.isArray(catalogue?.shared_contracts) ? [...catalogue.shared_contracts] : [],
+
+    // Catalogue claims are descriptive only under Lanternbridge v0.2.
+    // They MUST NOT authorize a local mutation merely because a foreign
+    // message says that local adoption occurred.
+    catalogue_declared_local_adoption_status: text(catalogue?.local_adoption_status) || 'not_adopted',
+    catalogue_declared_local_decision_ref: text(catalogue?.local_decision_ref) || null,
+
+    receiver_may_infer_local_equivalence: false,
+    receiver_may_reconstruct_unknown_terms: false,
+    receiver_may_mutate_local_architecture: false,
+    catalogue_receiver_may_infer_local_equivalence: catalogue?.receiver_may_infer_local_equivalence === true,
+    catalogue_receiver_may_reconstruct_unknown_terms: catalogue?.receiver_may_reconstruct_unknown_terms === true,
+    catalogue_receiver_may_mutate_local_architecture: catalogue?.receiver_may_mutate_local_architecture === true,
+    approved_mappings_claimed: Array.isArray(catalogue?.approved_mappings) ? [...catalogue.approved_mappings] : [],
+    shared_principles_claimed: Array.isArray(catalogue?.shared_principles) ? [...catalogue.shared_principles] : [],
+    shared_contracts_claimed: Array.isArray(catalogue?.shared_contracts) ? [...catalogue.shared_contracts] : [],
     unresolved_foreign_terms: Array.isArray(catalogue?.unresolved_foreign_terms) ? [...catalogue.unresolved_foreign_terms] : [],
     catalogue_present: Boolean(catalogue),
   });
@@ -127,6 +133,7 @@ export function classifyConstellationSovereignty(record, {
 
 export function evaluateConstellationAction(record, action, {
   localConstellation = ROWAN_RARITY_CONSTELLATION,
+  localAdoptionStatus = 'not_adopted',
   localDecisionRef = null,
   approvedMappingRef = null,
 } = {}) {
@@ -146,20 +153,20 @@ export function evaluateConstellationAction(record, action, {
     return Object.freeze({ allowed: false, reason: 'unknown foreign-context action fails closed', action: requested, sovereignty });
   }
 
-  const decisionRef = text(localDecisionRef || sovereignty.local_decision_ref);
-  if (!decisionRef || sovereignty.local_adoption_status !== 'adopted') {
+  const decisionRef = text(localDecisionRef);
+  if (lower(localAdoptionStatus) !== 'adopted' || !decisionRef) {
     return Object.freeze({
       allowed: false,
-      reason: 'foreign context cannot mutate local state without explicit local adoption decision',
+      reason: 'foreign context cannot mutate local state without trusted explicit local adoption state and decision reference',
       action: requested,
       sovereignty,
     });
   }
 
-  if (requested === 'map' && !text(approvedMappingRef) && sovereignty.approved_mappings.length === 0) {
+  if (requested === 'map' && !text(approvedMappingRef)) {
     return Object.freeze({
       allowed: false,
-      reason: 'foreign mapping requires an explicitly approved mapping reference',
+      reason: 'foreign mapping requires a trusted explicitly approved mapping reference',
       action: requested,
       sovereignty,
     });
@@ -167,8 +174,11 @@ export function evaluateConstellationAction(record, action, {
 
   return Object.freeze({
     allowed: true,
-    reason: 'explicit local adoption decision authorizes this local mutation',
+    reason: 'trusted local adoption state authorizes this local mutation',
     action: requested,
+    local_adoption_status: 'adopted',
+    local_decision_ref: decisionRef,
+    approved_mapping_ref: text(approvedMappingRef) || null,
     sovereignty,
   });
 }
