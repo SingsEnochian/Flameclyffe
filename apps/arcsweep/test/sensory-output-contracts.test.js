@@ -187,3 +187,15 @@ test('surface-hint on sensory/output descriptors does not become identity', () =
   assert.equal(Object.hasOwn(sensory, 'identity_id'), false);
   assert.equal(Object.hasOwn(output, 'identity_id'), false);
 });
+
+
+test('AuditoryRenderTarget preserves omitted, null, and blank latency as unknown', () => {
+  for (const maxLatencyMs of [undefined, null, '', '   ']) {
+    const d = createAuditoryRenderTargetDescriptor({
+      id: 'unknown-latency',
+      renderModes: ['air-conduction'],
+      maxLatencyMs,
+    });
+    assert.equal(d.max_latency_ms, null);
+  }
+});
