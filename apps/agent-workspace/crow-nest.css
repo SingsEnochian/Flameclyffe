@@ -1,0 +1,340 @@
+:root {
+  --nest-rim: color-mix(in srgb, var(--accent, #84a29a) 72%, white 28%);
+  --nest-rim-soft: color-mix(in srgb, var(--accent, #84a29a) 30%, transparent);
+  --nest-ink: var(--ink, #eef8f3);
+  --nest-muted: var(--muted, #a9bbb4);
+}
+
+.crow-nest-launch {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: calc(86px + env(safe-area-inset-bottom));
+  z-index: 77;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 1px solid var(--nest-rim-soft);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255,255,255,.28), transparent 22%),
+    radial-gradient(circle, color-mix(in srgb, var(--accent, #84a29a) 32%, transparent), rgba(4,14,12,.82) 66%);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.05) inset, 0 0 28px var(--nest-rim-soft), 0 18px 48px rgba(0,0,0,.38);
+  color: var(--nest-ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  touch-action: manipulation;
+}
+
+.crow-nest-launch::before,
+.crow-nest-launch::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.crow-nest-launch::before {
+  inset: 7px;
+  border: 1px solid color-mix(in srgb, var(--nest-rim) 58%, transparent);
+  animation: nest-orbit 8s linear infinite;
+}
+
+.crow-nest-launch::after {
+  inset: -7px;
+  border: 1px dashed color-mix(in srgb, var(--nest-rim) 24%, transparent);
+  animation: nest-orbit-reverse 16s linear infinite;
+}
+
+.crow-nest-launch span { font-size: 25px; transform: translateY(-1px); }
+
+.crow-nest-shell[hidden] { display: none; }
+
+.crow-nest-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  color: var(--nest-ink);
+  background:
+    radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--accent, #84a29a) 12%, transparent), transparent 30%),
+    linear-gradient(145deg, rgba(1,9,8,.8), rgba(4,10,18,.88));
+  backdrop-filter: blur(28px) saturate(1.2);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+  overflow: hidden;
+}
+
+.crow-nest-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .24;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--accent, #84a29a) 13%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--accent, #84a29a) 13%, transparent) 1px, transparent 1px);
+  background-size: 42px 42px;
+  transform: perspective(620px) rotateX(63deg) scale(1.45) translateY(28%);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, #000 0 42%, transparent 90%);
+}
+
+.crow-nest-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .1;
+  background: repeating-linear-gradient(180deg, transparent 0 4px, rgba(255,255,255,.08) 5px);
+}
+
+.crow-nest-frame {
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto;
+  gap: 12px;
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+}
+
+.crow-nest-hud,
+.crow-nest-comms,
+.crow-nest-panel {
+  border: 1px solid color-mix(in srgb, var(--nest-rim) 25%, transparent);
+  background: linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+  box-shadow: 0 0 0 1px rgba(255,255,255,.025) inset, 0 20px 56px rgba(0,0,0,.28);
+  backdrop-filter: blur(24px) saturate(1.25);
+  -webkit-backdrop-filter: blur(24px) saturate(1.25);
+}
+
+.crow-nest-hud {
+  min-height: 64px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px 11px 18px;
+}
+
+.crow-nest-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.crow-nest-title strong { display: block; font-size: 16px; letter-spacing: .02em; }
+.crow-nest-title small { display: block; color: var(--nest-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.crow-nest-glyph {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--nest-rim-soft);
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.25), color-mix(in srgb, var(--accent, #84a29a) 18%, transparent) 35%, rgba(0,0,0,.22));
+  box-shadow: 0 0 20px var(--nest-rim-soft);
+}
+
+.crow-nest-telemetry { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
+.crow-nest-chip {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.15);
+  color: var(--nest-muted);
+  font-size: 11px;
+}
+.crow-nest-chip[data-state="live"], .crow-nest-chip[data-state="witnessed"] { color: var(--nest-ink); border-color: var(--nest-rim-soft); box-shadow: 0 0 16px var(--nest-rim-soft) inset; }
+.crow-nest-chip[data-state="error"] { color: #ffd3d3; border-color: rgba(255,110,110,.3); }
+
+.crow-nest-icon-button,
+.crow-nest-button {
+  min-height: 44px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--nest-rim) 30%, transparent);
+  background: rgba(255,255,255,.06);
+  color: var(--nest-ink);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.crow-nest-icon-button { width: 44px; font-size: 22px; }
+.crow-nest-button { padding: 9px 14px; font: inherit; }
+.crow-nest-button.primary { background: color-mix(in srgb, var(--accent, #84a29a) 22%, rgba(255,255,255,.06)); box-shadow: 0 0 20px var(--nest-rim-soft); }
+.crow-nest-button:disabled { opacity: .45; cursor: default; }
+
+.crow-nest-stage {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0,1.45fr) minmax(300px,.55fr);
+  gap: 12px;
+}
+
+.crow-nest-orbit {
+  position: relative;
+  min-height: 0;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--nest-rim) 16%, transparent);
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.035), rgba(0,0,0,.15) 58%, rgba(0,0,0,.28));
+}
+
+.crow-nest-orbit-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--nest-rim) 25%, transparent);
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+.crow-nest-orbit-ring.r1 { width: min(48vw, 520px); aspect-ratio: 1; }
+.crow-nest-orbit-ring.r2 { width: min(68vw, 760px); aspect-ratio: 1; border-style: dashed; opacity: .48; animation: nest-orbit 48s linear infinite; }
+.crow-nest-orbit-ring.r3 { width: min(86vw, 980px); aspect-ratio: 1; opacity: .25; }
+
+.crow-presence {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  width: clamp(180px, 23vw, 280px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--nest-rim) 55%, transparent);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255,255,255,.34), transparent 13%),
+    radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--accent, #84a29a) 34%, transparent), rgba(1,10,9,.72) 58%, rgba(0,0,0,.78));
+  box-shadow: 0 0 0 10px rgba(255,255,255,.012), 0 0 70px var(--nest-rim-soft), inset 0 0 42px rgba(255,255,255,.05);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 30px;
+  cursor: pointer;
+}
+.crow-presence::before { content: ''; position: absolute; inset: 14px; border-radius: 50%; border: 1px dashed color-mix(in srgb, var(--nest-rim) 42%, transparent); animation: nest-orbit 24s linear infinite; }
+.crow-presence strong { display: block; font-size: clamp(24px, 3vw, 39px); letter-spacing: .05em; }
+.crow-presence small { display: block; margin-top: 6px; color: var(--nest-muted); }
+.crow-presence[data-state="live"] { box-shadow: 0 0 0 10px rgba(255,255,255,.012), 0 0 92px color-mix(in srgb, var(--accent, #84a29a) 45%, transparent), inset 0 0 46px rgba(255,255,255,.08); }
+
+.crow-nest-node {
+  position: absolute;
+  width: 124px;
+  min-height: 72px;
+  transform: translate(-50%,-50%);
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--nest-rim) 24%, transparent);
+  background: rgba(4,16,14,.7);
+  color: var(--nest-ink);
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(0,0,0,.28);
+  backdrop-filter: blur(16px);
+}
+.crow-nest-node strong, .crow-nest-node small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crow-nest-node small { color: var(--nest-muted); margin-top: 4px; }
+.crow-nest-node.active { border-color: var(--nest-rim); box-shadow: 0 0 28px var(--nest-rim-soft); }
+.crow-nest-node[data-state="ready"]::after { content: '●'; position: absolute; right: 8px; top: 7px; color: var(--nest-rim); font-size: 9px; }
+
+.crow-nest-panel {
+  min-height: 0;
+  border-radius: 24px;
+  padding: 14px;
+  overflow: auto;
+}
+.crow-nest-panel h2 { margin: 0; font-size: 18px; }
+.crow-nest-panel p { color: var(--nest-muted); line-height: 1.45; font-size: 13px; }
+.crow-nest-panel label { display: grid; gap: 6px; color: var(--nest-muted); font-size: 12px; margin: 10px 0; }
+.crow-nest-panel input,
+.crow-nest-panel select,
+.crow-nest-comms textarea {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 13px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(0,0,0,.22);
+  color: var(--nest-ink);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+.crow-nest-panel input:focus,
+.crow-nest-panel select:focus,
+.crow-nest-comms textarea:focus { border-color: var(--nest-rim); box-shadow: 0 0 0 3px var(--nest-rim-soft); }
+
+.crow-nest-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.crow-nest-detail { border-radius: 14px; padding: 10px; background: rgba(255,255,255,.035); min-width: 0; }
+.crow-nest-detail small, .crow-nest-detail strong { display: block; overflow: hidden; text-overflow: ellipsis; }
+.crow-nest-detail small { color: var(--nest-muted); }
+.crow-nest-detail strong { margin-top: 4px; font-size: 12px; }
+
+.crow-nest-list { display: grid; gap: 7px; margin-top: 12px; }
+.crow-nest-list-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 10px; border-radius: 14px; background: rgba(255,255,255,.035); }
+.crow-nest-list-row button { min-height: 34px; border-radius: 10px; border: 1px solid rgba(255,255,255,.08); color: var(--nest-ink); background: rgba(0,0,0,.15); }
+
+.crow-nest-comms {
+  border-radius: 22px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 9px;
+  align-items: end;
+}
+.crow-nest-comms textarea { resize: none; min-height: 48px; max-height: 150px; }
+.crow-nest-comms-meta { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--nest-muted); font-size: 11px; padding: 0 4px; }
+
+.crow-nest-thread {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  max-height: min(38vh, 320px);
+  display: grid;
+  align-content: end;
+  gap: 7px;
+  pointer-events: none;
+}
+.crow-nest-bubble { max-width: min(72%, 650px); padding: 9px 12px; border-radius: 16px; background: rgba(5,14,13,.72); border: 1px solid rgba(255,255,255,.06); font-size: 12px; line-height: 1.42; box-shadow: 0 12px 28px rgba(0,0,0,.2); pointer-events: auto; }
+.crow-nest-bubble.user { justify-self: end; border-color: var(--nest-rim-soft); }
+.crow-nest-bubble.system { color: var(--nest-muted); }
+.crow-nest-bubble small { display: block; color: var(--nest-muted); margin-bottom: 3px; }
+
+@keyframes nest-orbit { to { transform: rotate(360deg); } }
+@keyframes nest-orbit-reverse { to { transform: rotate(-360deg); } }
+
+@media (max-width: 920px) {
+  .crow-nest-stage { grid-template-columns: 1fr; }
+  .crow-nest-panel { position: absolute; right: 8px; top: 8px; width: min(88vw, 370px); max-height: calc(100% - 16px); z-index: 4; transform: translateX(calc(100% + 30px)); transition: transform .24s ease; }
+  .crow-nest-panel.is-open { transform: translateX(0); }
+  .crow-nest-orbit-ring.r1 { width: 58vw; }
+  .crow-nest-orbit-ring.r2 { width: 82vw; }
+  .crow-nest-node { width: 104px; min-height: 64px; font-size: 11px; }
+  .crow-nest-thread { bottom: 12px; left: 10px; right: 10px; max-height: 30vh; }
+}
+
+@media (max-width: 620px) {
+  .crow-nest-frame { gap: 8px; padding-top: max(8px, env(safe-area-inset-top)); }
+  .crow-nest-hud { border-radius: 18px; padding-left: 10px; }
+  .crow-nest-title small { max-width: 36vw; }
+  .crow-nest-telemetry .crow-nest-chip:nth-child(-n+2) { display: none; }
+  .crow-nest-stage { min-height: 0; }
+  .crow-nest-orbit { border-radius: 22px; }
+  .crow-presence { width: 170px; padding: 24px; }
+  .crow-presence strong { font-size: 25px; }
+  .crow-nest-node { width: 94px; padding: 8px; }
+  .crow-nest-comms { border-radius: 18px; }
+  .crow-nest-bubble { max-width: 88%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crow-nest-launch::before,
+  .crow-nest-launch::after,
+  .crow-presence::before,
+  .crow-nest-orbit-ring { animation: none !important; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .crow-nest-shell { background: #07110f; backdrop-filter: none; }
+  .crow-nest-hud, .crow-nest-comms, .crow-nest-panel, .crow-nest-node { background: #0d1916; backdrop-filter: none; }
+}
