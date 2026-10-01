@@ -13,6 +13,7 @@ const app = read('apps/agent-workspace/app.js');
 const manifest = JSON.parse(read('apps/agent-workspace/manifest.webmanifest'));
 const sw = read('apps/agent-workspace/sw.js');
 const stage = read('apps/arcsweep/vercel-stage.cjs');
+const pages = read('.github/workflows/pages.yml');
 
 test('House Workspace is an installable mobile-first web surface', () => {
   assert.match(html, /viewport-fit=cover/);
@@ -64,4 +65,10 @@ test('Vercel staging publishes House Workspace at /agents', () => {
   assert.match(stage, /agentWorkspaceSource/);
   assert.match(stage, /'agents'/);
   assert.match(stage, /House Workspace Vercel stage failed/);
+});
+
+test('GitHub Pages fallback publishes House Workspace at /Flameclyffe/agents', () => {
+  assert.match(pages, /mkdir -p _site\/agents/);
+  assert.match(pages, /cp -a apps\/agent-workspace\/\. _site\/agents\//);
+  assert.match(pages, /House Workspace OS: \/Flameclyffe\/agents\//);
 });
