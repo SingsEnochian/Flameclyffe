@@ -37,7 +37,7 @@ export function createCapabilityRequest({
 
 export function evaluateCapabilityRequest(request, {
   allowedCapabilities = [],
-  authorityGrants = ['read-only'],
+  authorityGrants = [],
   route = null,
   reason = '',
 } = {}, { now = () => new Date() } = {}) {
