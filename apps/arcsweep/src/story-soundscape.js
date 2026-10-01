@@ -133,7 +133,8 @@ export class StorySoundscape {
   }
 
   async arm(world) {
-    this.setWorld(world);
+    // Re-arming the mounted graph must not reset its live mixer profile.
+    if (world != null) this.setWorld(world);
     if (!this.context) {
       const AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext;
       if (!AudioContextClass) throw new Error('Web Audio is unavailable in this browser.');
