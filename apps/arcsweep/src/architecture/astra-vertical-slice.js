@@ -113,7 +113,21 @@ export async function runAstraVerticalSlice({
   let invokeError = null;
   try {
     for await (const event of provider.invoke({ requestText, trajectoryId, presence })) {
-      events.push(event);
+      // Provider objects are untrusted input. Rebuild the event from the bounded
+      // CognitiveEvent schema so arbitrary metadata, credentials, or tokens cannot
+      // hitch a ride into the credential-free Astra receipt.
+      events.push(createCognitiveEvent({
+        kind: event?.kind,
+        providerId: provider.id,
+        requestId: trajectoryId,
+        delta: event?.delta,
+        thinking: event?.thinking,
+        // Provider-supplied receipts are not execution evidence. A future execution
+        // adapter must validate and attach its own receipt explicitly.
+        receipt: null,
+        reason: event?.reason,
+        occurredAt: event?.occurred_at ?? resolvedAt,
+      }));
     }
   } catch (error) {
     invokeError = error?.message || String(error);
@@ -127,13 +141,12 @@ export async function runAstraVerticalSlice({
   }
 
   // 7. Execution receipt — carried forward from the capability decision
-  const hasDoneEvent = events.some((e) => e.kind === 'done');
   const hasError = events.some((e) => e.kind === 'error');
   const executionReceipt = createExecutionReceipt({
     id: `exec:${trajectoryId}:${resolvedAt}`,
     requestId: capabilityDecision.requestId,
-    status: hasError ? 'failed' : (hasDoneEvent ? 'applied' : 'no-op'),
-    evidenceRefs: [trajectoryId],
+    status: hasError ? 'failed' : 'no-op',
+    evidenceRefs: hasError ? [trajectoryId] : [],
     executor: provider.id,
   });
 
