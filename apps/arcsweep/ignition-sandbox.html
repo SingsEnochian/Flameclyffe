@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'self'" />
+  <title>ArcSweep Ignition Sandbox</title>
+  <style>
+    body { max-width: 64rem; margin: 2rem auto; padding: 0 1rem; background: #111816; color: #e7efe9; font: 1rem/1.5 system-ui; }
+    button { margin: .4rem .5rem .4rem 0; padding: .7rem 1rem; background: #22473c; color: white; border: 1px solid #7bb89e; border-radius: .4rem; cursor: pointer; }
+    button:focus-visible { outline: 3px solid #e6c874; }
+    pre { overflow: auto; padding: 1rem; background: #1b2824; border: 1px solid #466758; border-radius: .4rem; }
+    a { color: #abdec5; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ArcSweep Ignition Sandbox</h1>
+    <p>Labelled synthetic Observer evidence. Local, read-only simulation; no network calls or external writes.</p>
+    <button type="button" data-scenario="success">Run receipted cycle</button>
+    <button type="button" data-scenario="denied">Run denied request</button>
+    <button type="button" data-scenario="unverified">Run invalid receipt</button>
+    <p id="status" role="status">Ready to run.</p>
+    <pre id="result" aria-label="Ignition cycle result"></pre>
+    <p><a href="./">Return to ArcSweep</a></p>
+  </main>
+  <script type="module" src="./src/architecture/ignition-sandbox-ui.js"></script>
+</body>
+</html>

@@ -105,6 +105,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(ARCSWEEP_ROOT, 'index.html'),
+        ignitionSandbox: resolve(ARCSWEEP_ROOT, 'ignition-sandbox.html'),
         spine: resolve(ARCSWEEP_ROOT, 'spine/index.html'),
         hearthgate: resolve(ARCSWEEP_ROOT, 'hearthgate/index.html'),
         ancestry: resolve(ARCSWEEP_ROOT, 'ancestry/index.html'),
