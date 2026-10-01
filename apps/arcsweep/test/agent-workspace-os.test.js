@@ -72,3 +72,9 @@ test('GitHub Pages fallback publishes House Workspace at /Flameclyffe/agents', (
   assert.match(pages, /cp -a apps\/agent-workspace\/\. _site\/agents\//);
   assert.match(pages, /House Workspace OS: \/Flameclyffe\/agents\//);
 });
+
+
+test('GitHub Pages workspace links cross into the published ArcSweep route', () => {
+  assert.match(app, /href="\.\.\/apps\/arcsweep\/\?open=1"/);
+  assert.doesNotMatch(app, /href="\.\.\/arcsweep\/\?open=1"/);
+});
