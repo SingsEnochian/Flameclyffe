@@ -1,0 +1,10 @@
+name: crow-trainer
+version: 0.1.0
+description: "Train and evaluate The Crow writing agent"
+author: "Rowan, Rarity"
+license: "MIT"
+
+distribution_owned:
+  - SOUL.md
+  - skills/crow-training/
+  - README.md
