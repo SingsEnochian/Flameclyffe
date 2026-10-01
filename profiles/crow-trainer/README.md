@@ -104,33 +104,32 @@ or enable it through `hermes tools`.
 
 A missing runtime capability is not a training failure. The trainer records the lab as degraded/held rather than hallucinating desktop state.
 
-## Super-Hermes-inspired blind-spot loop
+## Adaptive growth loop
 
-The profile incorporates an original, vendor-neutral adaptation of a useful mechanism surfaced by Super Hermes: complex analyses should state not only what they found, but what their chosen analytical lens was likely to miss.
+This is the important bit.
 
-For complex work:
-
-```text
-FOCUS
-what this pass is trying to reveal
-
-CONSTRUCTION
-what comparison / inversion / simulation exposes it
-
-EVIDENCE
-what would falsify the hypothesis
-
-BLIND SPOTS
-what this lens under-examines
-```
-
-Afterwards:
+Crow Trainer does not merely accumulate completed drills. It accumulates **analytical history** about which lens was used and what that lens failed to inspect.
 
 ```text
-MAXIMIZED
-SACRIFICED
-NEXT LENS / TEST
+TASK A
+→ generate lens
+→ analyze / build / test
+→ findings
+→ constraint report
+→ persist blind spots
+
+TASK B
+→ read project blind spots
+→ choose a relevant under-examined dimension
+→ generate a different lens
+→ analyze / build / test
+→ persist new blind spots
+
+TASK C
+→ repeat
 ```
+
+That is how the trainer becomes project-adaptive without pretending model weights changed.
 
 Persist a constraint record with:
 
@@ -142,7 +141,94 @@ python <skill-dir>/scripts/trainer.py constraint \
   --next "run pacing/setting-pressure lens"
 ```
 
-Repeated blind spots become **curriculum signals**, not proof that a defect exists.
+Crow Trainer writes both structured state and a human-readable project record:
+
+```text
+.crow-trainer/state.json
+.crow-trainer/constraint-history.md
+```
+
+Future unscoped `next` calls run in adaptive mode by default and bias drill selection toward relevant dimensions repeatedly recorded as sacrificed or next-to-investigate.
+
+Inspect what the curriculum currently wants to revisit:
+
+```bash
+python <skill-dir>/scripts/trainer.py recommend
+python <skill-dir>/scripts/trainer.py history
+```
+
+Disable adaptation for a neutral/random curriculum pass:
+
+```bash
+python <skill-dir>/scripts/trainer.py next --mode train --adaptive off
+```
+
+Repeated blind spots are **curriculum signals**, not proof that a defect exists.
+
+## Optional upstream Super Hermes companion
+
+If you want the actual upstream `/prism-scan` and `/prism-reflect` skills beside Crow Trainer rather than only our House adaptation, install them separately through Hermes Skills Hub:
+
+```bash
+hermes skills install Cranot/super-hermes/skills/prism-scan
+hermes skills install Cranot/super-hermes/skills/prism-reflect
+```
+
+Then, in Hermes:
+
+```text
+/prism-scan analyze examples/circuit_breaker.py
+/prism-reflect examples/circuit_breaker.py
+```
+
+Super Hermes writes its own project history to `.prism-history.md`. Crow Trainer treats that as **external provenance-bound analytical history**. It can inspect it without silently taking ownership or overwriting it:
+
+```bash
+python <skill-dir>/scripts/trainer.py recommend --include-external
+python <skill-dir>/scripts/trainer.py history --include-external
+```
+
+This gives us two compatible loops:
+
+```text
+Super Hermes
+.prism-history.md
+  external prism constraint history
+
+Crow Trainer
+.crow-trainer/constraint-history.md
+  House training constraint history
+```
+
+They can inform one another while remaining distinguishable.
+
+## Task-specific lenses
+
+For complex work Crow Trainer uses an original House lens contract:
+
+```text
+FOCUS
+what this pass is trying to reveal
+
+CONSTRUCTION
+what comparison / inversion / simulation / pressure test exposes it
+
+EVIDENCE
+what would falsify the working hypothesis
+
+BLIND SPOTS
+what this lens probably under-examines
+```
+
+Afterward:
+
+```text
+MAXIMIZED
+SACRIFICED
+NEXT LENS / TEST
+```
+
+The mechanism is learned from public analytical-prism work. The House does not copy external prism text or treat external benchmark scores as locally verified facts.
 
 ## Training surfaces
 
@@ -196,6 +282,7 @@ The trainer script writes project-local runtime state to:
 
 ```text
 .crow-trainer/state.json
+.crow-trainer/constraint-history.md
 .crow-trainer/frozen/
 ```
 
