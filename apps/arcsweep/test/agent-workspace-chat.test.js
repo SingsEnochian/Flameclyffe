@@ -48,8 +48,11 @@ test('chat keeps thread content device-local and separates it by agent', () => {
   assert.match(chat, /Thread history stays on this device\. House credentials do not\./);
 });
 
-test('offline shell includes chat assets', () => {
-  assert.match(sw, /house-workspace-os-v0\.1\.1/);
+test('offline shell includes chat and Crow Nest assets', () => {
+  assert.match(sw, /house-workspace-os-v0\.2\.0/);
   assert.match(sw, /'\.\/chat\.css'/);
   assert.match(sw, /'\.\/chat\.js'/);
+  assert.match(sw, /'\.\/crow-nest\.css'/);
+  assert.match(sw, /'\.\/crow-nest\.js'/);
+  assert.match(sw, /'\.\/astra-bridge\.js'/);
 });
