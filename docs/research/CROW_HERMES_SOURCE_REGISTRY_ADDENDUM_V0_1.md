@@ -111,7 +111,16 @@ See `docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md`.
   - source-reported benchmark/depth scores remain source claims, not House-verified performance facts
   - House adaptation keeps the mechanism while writing original Crow training lenses and state formats
 
-See `docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md`, `training/crow/CROW_WRITER_TRAINING_PACK_V0_1.md`, and `profiles/crow-trainer/`.
+- https://github.com/Cranot/agi-in-md
+  - larger research/tooling corpus behind the prism idea
+  - public repo describes 58 prisms, 27 scan modes, 1,000+ experiments and multiple domains; these counts and benchmark results remain source-reported unless independently re-verified
+  - especially useful distinction: structural insight can be strong while specific bug/factual claims still require verification
+  - `knowledge_boundary` / `knowledge_audit` style passes motivate explicit epistemic typing and confabulation checks
+  - `oracle`-style pipeline motivates separating structural analysis, epistemic classification, self-correction, reflection and final harvest
+  - `strategist`, `evolve`, `verify-claims`, `gaps`, and multi-angle modes reinforce routing the analysis procedure to the problem rather than using one universal lens
+  - House retains the mechanism as original Crow lens generation, evidence typing and adaptive constraint history rather than importing the prism corpus wholesale
+
+See `docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md`, `docs/research/CROW_ADAPTIVE_LENS_GROWTH_LOOP_V0_1.md`, `training/crow/CROW_WRITER_TRAINING_PACK_V0_1.md`, and `profiles/crow-trainer/`.
 
 ## General rule
 
