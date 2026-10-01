@@ -1,0 +1,64 @@
+{
+  "contract": "arcsweep.knowledge-cell-bank/v1",
+  "bankId": "shared:narrative-dna-ingest",
+  "subject": { "kind": "shared_constellation", "id": "narrative-dna-ingest" },
+  "status": "active-user-authorized",
+  "cells": [
+    {
+      "id": "narrative-dna.rule.ingest-beyond-surface",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "narrative-dna-ingest" },
+      "predicate": "studies_sources_for",
+      "value": ["purpose", "interaction grammar", "state model", "narrative mechanics", "character mechanics", "relationship mechanics", "world mechanics", "aesthetic mechanics", "failure signals", "authorial attractors", "transferable principles"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/NARRATIVE_DNA_INGEST_DOCTRINE.md" },
+      "scope": { "modes": ["writing", "story", "research", "worldbuilding", "design"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["ingest", "learning", "narrative-dna"]
+    },
+    {
+      "id": "narrative-dna.rule.typed-story-atoms",
+      "cellType": "shared_doctrine",
+      "subject": { "kind": "shared_constellation", "id": "narrative-dna-ingest" },
+      "predicate": "classifies_story_atoms_by",
+      "value": ["pressure", "role", "relationship", "world_condition", "mystery", "quest", "object", "reversal", "trial", "character_arc", "ethical_constraint", "faction_conflict", "vulnerability", "revelation", "setup", "payoff", "callback", "resource_constraint", "environmental_rule", "identity_conflict"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/NARRATIVE_DNA_INGEST_DOCTRINE.md" },
+      "scope": { "modes": ["writing", "story", "analysis"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["story-atoms", "classification"]
+    },
+    {
+      "id": "narrative-dna.boundary.recurrence-not-destiny",
+      "cellType": "boundary",
+      "subject": { "kind": "shared_constellation", "id": "narrative-dna-ingest" },
+      "predicate": "forbids",
+      "value": "turning recurring authorial patterns into compulsory future generation rules or identity claims",
+      "status": "stable",
+      "authority": { "kind": "founding_law", "speakerOrAuthor": "Hearthweave", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/NARRATIVE_DNA_INGEST_DOCTRINE.md" },
+      "scope": { "modes": ["writing", "story", "research"] },
+      "mutability": "stable_core",
+      "privacy": "house",
+      "tags": ["agency", "authorial-attractor", "inference"]
+    },
+    {
+      "id": "narrative-dna.rule.relationship-becoming",
+      "cellType": "writing_style_rule",
+      "subject": { "kind": "shared_constellation", "id": "narrative-dna-ingest" },
+      "predicate": "tracks_relationships_through",
+      "value": ["attention", "familiarity", "privileged access", "dependence", "recognition", "cost", "choice", "transformation"],
+      "status": "active",
+      "authority": { "kind": "user_confirmed", "speakerOrAuthor": "Rowan", "confidence": 1 },
+      "source": { "surface": "github", "repository": "SingsEnochian/Flameclyffe", "locator": "apps/arcsweep/skills/sources/shared/NARRATIVE_DNA_INGEST_DOCTRINE.md" },
+      "scope": { "modes": ["writing", "story", "character-becoming"] },
+      "mutability": "revisable_with_provenance",
+      "privacy": "house",
+      "tags": ["relationship", "delta", "becoming"]
+    }
+  ]
+}
