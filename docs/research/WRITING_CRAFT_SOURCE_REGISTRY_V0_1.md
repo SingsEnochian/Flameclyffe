@@ -62,13 +62,16 @@ See `docs/research/READER_DESIRE_STORY_CRAFT_INGEST_V0_1.md`.
 
 ## Rowan-curated Pinterest writing board
 
+Stable board:
 - https://www.pinterest.com/rowanwillowart/writing/
+
+Refreshed user-supplied board snapshot: 2026-10-01. The supplied Pinterest request parameters expose a new candidate pin set for the Writing board; treat it as a discovery snapshot rather than a canonical or complete board export.
 
 Treat this as a **user-curated discovery index**, not as proof that Rowan owns every linked pin or underlying article.
 
 Use it to discover candidate craft sources around scene construction, character writing, dialogue, relationship beats, plotting, tension, description, pacing, revision, prompts, and visual writing aids.
 
-Current automated web access could not reliably enumerate the board itself. Do not invent its contents. When individual pins, screenshots, or linked articles are available, ingest those items with their own provenance.
+Current automated web access still cannot reliably enumerate the board itself. Do not invent its contents. When individual pins, screenshots, or linked articles are available, ingest those items with their own provenance. When a refreshed board URL is supplied, register the snapshot date and treat newly surfaced items as candidates for differential ingest rather than re-learning the entire corpus blindly.
 
 ## Pinterest scene-idea discovery corpus
 
