@@ -37,6 +37,29 @@ Do not copy article text or prompt lists wholesale. Extract principles and test 
 
 See `docs/ingest/STORY_SETTING_ARCHITECTURE_INGEST_V0_1.md`.
 
+## Katri Soikkeli reader-desire craft corpus
+
+- https://katrisoikkeli.com/stories-people-want-to-read/
+- https://katrisoikkeli.com/writing-process-stages/
+
+Retained learning lanes:
+- concept as reader promise
+- story as fulfilment of that promise
+- familiar patterns versus surface imitation
+- novelty through meaningful causal change
+- character-centred event significance
+- emotional signature as part of reader experience
+- surprise without arbitrary twist dependence
+- immersive setting through specific, active sensory detail
+- genre competence and audience fit
+- universal themes carried by specificity
+- durable human pressures beneath era-specific furniture
+- locally important problems
+- stacked questions and curiosity architecture
+- no-easy-answer problem design
+
+See `docs/research/READER_DESIRE_STORY_CRAFT_INGEST_V0_1.md`.
+
 ## Rowan-curated Pinterest writing board
 
 - https://www.pinterest.com/rowanwillowart/writing/
