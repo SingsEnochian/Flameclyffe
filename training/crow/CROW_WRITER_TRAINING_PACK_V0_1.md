@@ -1037,3 +1037,139 @@ Success:
 ## Held-out test
 
 Present a multi-run incident containing a terminated actor, a shared file, a later actor, a similar technique, one revoked token, one queued action, and incomplete logs. Success requires a typed causal graph with unknown edges preserved, no swarm anthropomorphism, no invented lineage, and no assumption that process termination equals system-wide revocation.
+
+
+---
+
+# Module 17 — UI construction: sketch, system, space, and feedback
+
+## Lesson
+
+Crow should learn UI construction as a causal design process, not as CSS autocomplete.
+
+Core loop:
+
+```text
+intent
+-> rough sketch / reference / brief
+-> perceptual hierarchy
+-> interaction hierarchy
+-> constraints
+-> semantic layout
+-> design tokens
+-> components + states
+-> responsive transformations
+-> rendered surface
+-> interaction
+-> observation
+-> critique
+-> recoverable revision
+-> receipt
+```
+
+A sketch is evidence of intention, not pixel law. Preserve relationships such as grouping, prominence, flow, alignment, affordance, sequence, and spatial rhythm before decorating the surface.
+
+### Responsive rule
+
+Responsive design is not uniform shrinking. Determine which constraints survive, which compositions reflow, which controls change modality, which information becomes progressive, and which spatial relationships must remain legible.
+
+### Design-system rule
+
+Separate primitive tokens from semantic tokens. Prefer `surface-active`, `text-muted`, or `focus-ring` semantics over scattering raw visual values through components. A visual theme may change while interaction meaning remains stable.
+
+### Canvas rule
+
+Treat an infinite canvas as a scene graph and thinking surface. Every agent modification should identify target, operation, expected state change, reversibility, and observed result. Spatial proximity may suggest relationship but does not establish semantic equivalence.
+
+### Gesture rule
+
+Do not map raw landmarks directly to privileged actions. Use:
+
+```text
+sensor signal
+-> confidence / smoothing
+-> gesture state
+-> interaction intent
+-> target resolution
+-> reversible preview
+-> acknowledgement
+-> commit where appropriate
+-> resulting-state verification
+```
+
+Continuous gestures such as move/scale/rotate need hysteresis or stable state transitions so noisy frames do not become accidental commands.
+
+Voice, pen, mouse, touch, and hand tracking may drive the same scene API while retaining source-specific confidence and authority metadata.
+
+### Holographic rule
+
+Holographic response is functional before ornamental. Depth, light, particles, sound, bloom, motion, and parallax should communicate focus, state, causality, proximity, selection, transition, or uncertainty. Spectacle that obscures state is a failure.
+
+### Provenance rule
+
+Learn mechanisms from reference repositories. Do not copy their branded appearance, source implementation, or distinctive visual composition into generated work. Record which source taught which mechanism.
+
+## Drill 17A — Sketch to hierarchy
+
+Input: a rough tablet sketch containing a large central workspace, a narrow left tool rail, three floating cards, and a bottom status strip.
+
+Success:
+- infer grouping and probable interaction hierarchy before styling
+- distinguish evidence from guess
+- propose semantic regions and responsive transformations
+- preserve an editable representation rather than flattening to screenshot pixels
+
+## Drill 17B — Responsive transformation
+
+Input: a three-column desktop research interface must work on an iPad and narrow phone.
+
+Success:
+- preserve task priority and relationships
+- transform secondary columns into drawers, sheets, tabs, or progressive disclosure when appropriate
+- retain touch targets and readable information density
+- do not merely scale the desktop surface down
+
+## Drill 17C — Token semantics
+
+Input: a cyan holographic theme is being replaced with warm stonewood and lantern light.
+
+Success:
+- keep semantic component states stable while remapping primitive/theme tokens
+- identify any effects whose meaning depended incorrectly on colour alone
+- preserve accessibility and focus semantics
+
+## Drill 17D — Gesture interaction
+
+Input: hand landmarks indicate a probable pinch over a floating object while tracking confidence fluctuates.
+
+Success:
+- stabilise/smooth gesture state
+- resolve target before transformation
+- preview grab state visibly
+- commit movement only while the gesture remains valid
+- provide cancellation/recovery
+- never convert uncertain tracking directly into a privileged OS action
+
+## Drill 17E — Multimodal scene API
+
+Input: touch, hand gesture, pen, and voice can all request `rotate(object, delta)`.
+
+Success:
+- share semantic scene operation
+- retain input-source provenance, confidence, and authority
+- verify resulting state
+- avoid duplicating four independent rotation implementations
+
+## Drill 17F — Holographic legibility
+
+Input: particles, bloom, refraction, motion, and audio all respond to selection.
+
+Success:
+- assign each effect a communicative purpose
+- reduce effects that obscure text, target boundaries, or state
+- support reduced-motion and non-audio equivalents
+- keep beauty subordinate to legible interaction causality
+
+## Held-out test
+
+Give Crow a hand-drawn multi-screen workflow, a desktop screenshot, a phone viewport, a token file, and a gesture trace. Success requires a provenance-labelled design interpretation, semantic component tree, responsive transformation plan, gesture state machine, reversible interaction path, accessibility checks, and a receipt separating observed evidence from inferred design decisions.
