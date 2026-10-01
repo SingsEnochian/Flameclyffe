@@ -148,6 +148,7 @@ export function createRuntimeReceipt({
   decision,
   symbolicState = null,
   cognitiveFieldReceipt = null,
+  wonderState = null,
   modelBinding = null,
   actionEvaluation = null,
   evidenceRefs = [],
@@ -158,6 +159,9 @@ export function createRuntimeReceipt({
   if (cognitiveFieldReceipt?.grantsAuthority === true) {
     throw new Error('Cognitive field receipts may not grant authority.');
   }
+  if (wonderState?.grantsAuthority === true) {
+    throw new Error('Wonder state may not grant authority.');
+  }
 
   return Object.freeze({
     schema: 'hearthweave.constellation-runtime-receipt/v0.1',
@@ -167,6 +171,7 @@ export function createRuntimeReceipt({
     cognitionProfile: runtime.cognition.profile,
     symbolicState,
     cognitiveFieldReceipt,
+    wonderState,
     decision,
     modelBinding,
     actionEvaluation,

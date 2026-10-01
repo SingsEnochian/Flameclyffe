@@ -12,6 +12,11 @@ const entry = (id, material, physical, quiet = false) => Object.freeze({
 export const CODEX_MANIFESTATIONS = Object.freeze({
   observation: entry('observation', 'living', 'marginal-note'),
   question: entry('question', 'living', 'open-margin-mark'),
+  wish: entry('wish', 'possible', 'wish-leaf'),
+  wishBranch: entry('wish-branch', 'liminal', 'branching-wish-leaf'),
+  openQuestion: entry('open-question', 'living', 'open-question-thread'),
+  questionRevisited: entry('question-revisited', 'organic', 'returning-question-thread'),
+  questionResolved: entry('question-resolved', 'continuity', 'knotted-question-thread'),
   proposal: entry('proposal', 'possible', 'foldout'),
   alternateProposal: entry('alternate-proposal', 'liminal', 'alternate-leaf'),
   narrativeBranch: entry('narrative-branch', 'liminal', 'alternate-leaf'),

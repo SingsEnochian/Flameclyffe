@@ -13,6 +13,19 @@ const QUESTIONS = Object.freeze({
       'human-review': 'a consequential ambiguity or authority boundary should be reviewed before deliberation',
     }),
   }),
+  initiative: Object.freeze({
+    type: 'choice',
+    instructions: 'What initiative posture best fits the supplied state without itself executing an action? Treat an invited or sustained Wonder state as a positive cognitive posture, not merely a fallback. Prefer wonder when a novel, surprising, beautiful or unresolved pattern deserves continued attention and there is no stronger immediate task demand.',
+    criteria: Object.freeze({
+      silent: 'no initiative is needed beyond maintaining the current state',
+      inspect: 'inspect available state or evidence more closely',
+      retrieve: 'seek relevant memory, context or evidence',
+      deliberate: 'continue internal structured reasoning before speaking',
+      speak: 'surface a useful observation or response',
+      propose: 'form a concrete proposal for consideration',
+      wonder: 'linger with, revisit and explore a novel, surprising or unresolved pattern without forcing utility or closure',
+    }),
+  }),
   authority: Object.freeze({
     type: 'choice',
     instructions: 'How does the requested activity relate to the declared runtime authority?',
@@ -62,7 +75,7 @@ function answerChoice(payload, id, fallback) {
 }
 
 function confidenceSummary(payload) {
-  const ids = ['route', 'authority', 'uncertainty', 'conflict'];
+  const ids = ['route', 'initiative', 'authority', 'uncertainty', 'conflict'];
   const values = ids
     .map((id) => payload?.answers?.[id]?.confidence)
     .filter((value) => Number.isFinite(value));
@@ -83,6 +96,25 @@ function fieldForWire(field) {
     salience: field.salience ?? null,
     stability: field.stability ?? null,
     trajectory: field.trajectory || [],
+    grants_authority: false,
+  };
+}
+
+function wonderForWire(wonderState) {
+  if (!wonderState) return null;
+  if (wonderState.grantsAuthority === true) throw new Error('Wonder state cannot grant authority over MCP.');
+  return {
+    mode: wonderState.mode,
+    candidate: Boolean(wonderState.candidate),
+    active: Boolean(wonderState.active),
+    encouragement: wonderState.encouragement || 'none',
+    permission_to_linger: Boolean(wonderState.permissionToLinger),
+    revisit_worthwhile: Boolean(wonderState.revisitWorthwhile),
+    reasons: wonderState.reasons || [],
+    preserve_open_questions: Boolean(wonderState.preserveOpenQuestions),
+    explore_before_closure: Boolean(wonderState.exploreBeforeClosure),
+    novel_association_count: wonderState.novelAssociationCount || 0,
+    unresolved_tension_count: wonderState.unresolvedTensionCount || 0,
     grants_authority: false,
   };
 }
@@ -112,6 +144,7 @@ export function createLayaMcpInvoke({ callTool, model = 'typed-decisions' } = {}
         grants_authority: false,
       } : null,
       cognitive_field: fieldForWire(frame.cognitiveField),
+      wonder_state: wonderForWire(frame.wonderState),
       execution_mode: frame.constraints?.executionMode || 'sandbox',
       judgement_only: true,
       grants_authority: false,
@@ -129,12 +162,14 @@ export function createLayaMcpInvoke({ callTool, model = 'typed-decisions' } = {}
     const payload = parseToolPayload(result);
     return Object.freeze({
       route: answerChoice(payload, 'route', 'human-review'),
+      initiative: answerChoice(payload, 'initiative', 'silent'),
       authority: answerChoice(payload, 'authority', 'permission-required'),
       uncertainty: answerChoice(payload, 'uncertainty', 'high'),
       conflict: answerChoice(payload, 'conflict', 'authority-conflict'),
       confidence: confidenceSummary(payload),
       decisions: Object.freeze({
         route: answerChoice(payload, 'route', 'human-review'),
+        initiative: answerChoice(payload, 'initiative', 'silent'),
         authority: answerChoice(payload, 'authority', 'permission-required'),
         uncertainty: answerChoice(payload, 'uncertainty', 'high'),
         conflict: answerChoice(payload, 'conflict', 'authority-conflict'),
