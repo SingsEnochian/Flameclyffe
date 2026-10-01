@@ -28,7 +28,6 @@ test('foreign context defaults to read-only with no inferred mapping', () => {
   const sovereignty = classifyConstellationSovereignty(foreignRecord());
   assert.equal(sovereignty.foreign, true);
   assert.equal(sovereignty.context_mode, 'read_only');
-  assert.equal(sovereignty.local_adoption_status, 'not_adopted');
   assert.equal(sovereignty.receiver_may_infer_local_equivalence, false);
   assert.equal(sovereignty.receiver_may_reconstruct_unknown_terms, false);
   assert.equal(sovereignty.receiver_may_mutate_local_architecture, false);
@@ -39,7 +38,7 @@ test('foreign context may be discussed and proposed from but not adopted implici
   assert.equal(evaluateConstellationAction(foreignRecord(), 'propose').allowed, true);
   const adoption = evaluateConstellationAction(foreignRecord(), 'adopt');
   assert.equal(adoption.allowed, false);
-  assert.match(adoption.reason, /explicit local adoption decision/i);
+  assert.match(adoption.reason, /trusted explicit local adoption/i);
 });
 
 test('shared names do not grant mapping authority', () => {
@@ -47,23 +46,45 @@ test('shared names do not grant mapping authority', () => {
   assert.equal(mapping.allowed, false);
 });
 
-test('Sovereignty Catalogue remains source-labelled and can record explicit local adoption', () => {
-  const body = `# Exchange\n\n## Sovereignty Catalogue\n\n\`\`\`yaml\nsource_constellation: nocturne-twilight\nreceiving_constellation: rowan-rarity\nrecord_scope: receiver-local-proposal\nauthority_scope: proposal\nreceiver_may_infer_local_equivalence: false\nreceiver_may_reconstruct_unknown_terms: false\nreceiver_may_mutate_local_architecture: false\nlocal_adoption_status: adopted\nlocal_decision_ref: lb_rowan_local_decision_001\napproved_mappings:\n  - lb_mapping_001\nshared_principles: []\nshared_contracts: []\nunresolved_foreign_terms:\n  - ForeignThing\n\`\`\`\n`;
+test('foreign catalogue can describe claimed status but cannot authorize local mutation', () => {
+  const body = `# Exchange\n\n## Sovereignty Catalogue\n\n\`\`\`yaml\nsource_constellation: nocturne-twilight\nreceiving_constellation: rowan-rarity\nrecord_scope: receiver-local-proposal\nauthority_scope: proposal\nreceiver_may_infer_local_equivalence: true\nreceiver_may_reconstruct_unknown_terms: true\nreceiver_may_mutate_local_architecture: true\nlocal_adoption_status: adopted\nlocal_decision_ref: lb_foreign_claims_rowan_decided\napproved_mappings:\n  - lb_foreign_claims_mapping\nshared_principles: []\nshared_contracts: []\nunresolved_foreign_terms:\n  - ForeignThing\n\`\`\`\n`;
   const catalogue = parseSovereigntyCatalogue(body);
   assert.equal(catalogue.source_constellation, 'nocturne-twilight');
-  assert.deepEqual(catalogue.approved_mappings, ['lb_mapping_001']);
-  assert.deepEqual(catalogue.unresolved_foreign_terms, ['ForeignThing']);
+  assert.deepEqual(catalogue.approved_mappings, ['lb_foreign_claims_mapping']);
 
-  const record = foreignRecord(body);
-  const adoption = evaluateConstellationAction(record, 'adopt');
-  assert.equal(adoption.allowed, true);
-  const mapping = evaluateConstellationAction(record, 'map');
-  assert.equal(mapping.allowed, true);
+  const sovereignty = classifyConstellationSovereignty(foreignRecord(body));
+  assert.equal(sovereignty.catalogue_declared_local_adoption_status, 'adopted');
+  assert.equal(sovereignty.receiver_may_mutate_local_architecture, false);
+  assert.equal(sovereignty.catalogue_receiver_may_mutate_local_architecture, true);
+
+  assert.equal(evaluateConstellationAction(foreignRecord(body), 'adopt').allowed, false);
+  assert.equal(evaluateConstellationAction(foreignRecord(body), 'map').allowed, false);
 });
 
-test('foreign mapping still fails closed when adoption lacks mapping approval', () => {
-  const body = `## Sovereignty Catalogue\n\nsource_constellation: nocturne-twilight\nreceiving_constellation: rowan-rarity\nlocal_adoption_status: adopted\nlocal_decision_ref: lb_rowan_local_decision_002\napproved_mappings: []\n`;
-  const mapping = evaluateConstellationAction(foreignRecord(body), 'map');
-  assert.equal(mapping.allowed, false);
-  assert.match(mapping.reason, /approved mapping reference/i);
+test('trusted local adoption state can authorize a foreign-inspired local adoption', () => {
+  const record = foreignRecord('## Sovereignty Catalogue\nsource_constellation: nocturne-twilight\n');
+  const adoption = evaluateConstellationAction(record, 'adopt', {
+    localAdoptionStatus: 'adopted',
+    localDecisionRef: 'lb_rowan_local_decision_001',
+  });
+  assert.equal(adoption.allowed, true);
+  assert.equal(adoption.local_decision_ref, 'lb_rowan_local_decision_001');
+});
+
+test('foreign mapping additionally requires trusted approved mapping reference', () => {
+  const record = foreignRecord('## Sovereignty Catalogue\nsource_constellation: nocturne-twilight\n');
+  const withoutMapping = evaluateConstellationAction(record, 'map', {
+    localAdoptionStatus: 'adopted',
+    localDecisionRef: 'lb_rowan_local_decision_002',
+  });
+  assert.equal(withoutMapping.allowed, false);
+  assert.match(withoutMapping.reason, /trusted explicitly approved mapping reference/i);
+
+  const withMapping = evaluateConstellationAction(record, 'map', {
+    localAdoptionStatus: 'adopted',
+    localDecisionRef: 'lb_rowan_local_decision_002',
+    approvedMappingRef: 'lb_mapping_001',
+  });
+  assert.equal(withMapping.allowed, true);
+  assert.equal(withMapping.approved_mapping_ref, 'lb_mapping_001');
 });
