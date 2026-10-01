@@ -1,6 +1,6 @@
 {
   "version": "deep-observer-backend-v1.8",
-  "generated_at": "2026-10-01T06:18:29.063Z",
+  "generated_at": "2026-10-01T13:41:35.746Z",
   "source": {
     "weather": "Open-Meteo Forecast API",
     "space_weather": "NOAA SWPC JSON products",
@@ -13,51 +13,51 @@
     "public_precision": "coarse"
   },
   "weather": {
-    "time": "2026-10-01T02:15",
-    "sky": "Night",
+    "time": "2026-10-01T09:30",
+    "sky": "Day",
     "current": {
-      "time": "2026-10-01T02:15",
+      "time": "2026-10-01T09:30",
       "interval": 900,
-      "temperature_2m": 74.6,
+      "temperature_2m": 80.6,
       "relative_humidity_2m": 84,
-      "is_day": 0,
+      "is_day": 1,
       "precipitation": 0,
       "rain": 0,
       "weather_code": 0,
-      "cloud_cover": 1,
-      "pressure_msl": 1016.6,
-      "wind_speed_10m": 3.6,
-      "wind_direction_10m": 101
+      "cloud_cover": 9,
+      "pressure_msl": 1018,
+      "wind_speed_10m": 8.1,
+      "wind_direction_10m": 114
     }
   },
   "space_weather": {
     "kp": {
-      "value": 0.33,
-      "time_tag": "2026-10-01T03:00:00",
-      "a_running": 2
+      "value": 1,
+      "time_tag": "2026-10-01T09:00:00",
+      "a_running": 4
     },
     "solar_wind": {
-      "time_tag": "2026-10-01T06:09:00Z",
-      "bz": 5,
+      "time_tag": "2026-10-01T13:33:00Z",
+      "bz": 1,
       "bt": 6,
       "density": null,
-      "speed": 294
+      "speed": 298
     }
   },
   "moon": {
-    "age_days": 19.41,
-    "illumination": 77.5,
+    "age_days": 19.72,
+    "illumination": 74.7,
     "name": "Waning Gibbous"
   },
   "field": {
-    "P": 0.5000000000000002,
-    "C": 0.7252380952380952,
-    "R": 0.725,
-    "E": 0.5866483516483516,
-    "M": 0.775,
-    "A": 0.7607692307692308,
+    "P": 0.5755555555555556,
+    "C": 0.6871428571428573,
+    "R": 0.7233333333333333,
+    "E": 0.6345054945054944,
+    "M": 0.747,
+    "A": 0.95,
     "Q": null,
-    "dpdt": 0.725,
+    "dpdt": 0.7233333333333333,
     "dynamic_axes": [
       "P",
       "C",
