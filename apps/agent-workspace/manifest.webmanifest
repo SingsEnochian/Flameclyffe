@@ -1,0 +1,19 @@
+{
+  "name": "House Workspace OS",
+  "short_name": "House OS",
+  "description": "Responsive workspace for House agents, training, work queues, and runtime presence.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#012819",
+  "theme_color": "#012819",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Agents", "short_name": "Agents", "url": "./?view=agents" },
+    { "name": "Work", "short_name": "Work", "url": "./?view=work" },
+    { "name": "Training", "short_name": "Train", "url": "./?view=training" }
+  ]
+}
