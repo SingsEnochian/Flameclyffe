@@ -9,18 +9,21 @@ const read = (relative) => fs.readFileSync(path.join(root, relative), 'utf8');
 
 const html = read('apps/agent-workspace/index.html');
 const nest = read('apps/agent-workspace/crow-nest.js');
+const bootstrap = read('apps/agent-workspace/crow-nest-bootstrap.js');
 const css = read('apps/agent-workspace/crow-nest.css');
 const astra = read('apps/agent-workspace/astra-bridge.js');
 const sw = read('apps/agent-workspace/sw.js');
 
 test('Crow Nest browser modules parse before shipping', () => {
   assert.doesNotThrow(() => new Function(nest));
+  assert.doesNotThrow(() => new Function(bootstrap));
   assert.doesNotThrow(() => new Function(astra));
 });
 
 test('Crow Nest mounts as a responsive glass AR cockpit', () => {
   assert.match(html, /\.\/crow-nest\.css/);
   assert.match(html, /\.\/astra-bridge\.js/);
+  assert.match(html, /\.\/crow-nest-bootstrap\.js/);
   assert.match(html, /\.\/crow-nest\.js/);
   assert.match(css, /\.crow-nest-orbit/);
   assert.match(css, /\.crow-presence/);
@@ -30,7 +33,9 @@ test('Crow Nest mounts as a responsive glass AR cockpit', () => {
   assert.match(css, /prefers-reduced-transparency/);
 });
 
-test('Crow runtime truth stays separate from configured profile', () => {
+test('fresh Crow desks bind to the dedicated House runtime without equating route and identity', () => {
+  assert.match(bootstrap, /crowRoute: 'crow'/);
+  assert.match(bootstrap, /runtimeDefaultVersion/);
   assert.match(nest, /profile configured · runtime unbound/);
   assert.match(nest, /no live House runtime route is bound yet/);
   assert.match(nest, /cleanRoute/);
@@ -64,7 +69,9 @@ test('Astra bridge witnesses events without smuggling prompt text or authority',
 });
 
 test('Crow Nest shell is available offline with the workspace', () => {
+  assert.match(sw, /house-workspace-os-v0\.2\.1/);
   assert.match(sw, /'\.\/crow-nest\.css'/);
+  assert.match(sw, /'\.\/crow-nest-bootstrap\.js'/);
   assert.match(sw, /'\.\/crow-nest\.js'/);
   assert.match(sw, /'\.\/astra-bridge\.js'/);
 });
