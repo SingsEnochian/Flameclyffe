@@ -61,6 +61,18 @@ profiles/crow-trainer/
 
 These are connected but distinct.
 
+## Current scientific rooms
+
+The School now has a research/adoption map and an epistemic lab for physics, quantum foundations, astrophysics, mechanics and audio work:
+
+```text
+school/research/PHYSICS_QUANTUM_AUDIO_STACK_INGEST_V0_1.md
+school/research/QUANTUM_FOUNDATIONS_PHILOSOPHY_AND_IMMORTALITY_INGEST_V0_1.md
+school/labs/PHYSICS_QUANTUM_AND_AUDIO_EPISTEMIC_LAB_V0_1.md
+```
+
+These rooms preserve explicit distinctions between formalism, simulation, measurement, derivation, interpretation, speculation and fiction. Quantum-foundations material is taught as a comparison of formal and philosophical models, not as silent canon promotion. Audio engineering similarly separates what the renderer generates from claims about psychological or physiological effects.
+
 ## Next rooms
 
 The institution can grow into explicit rooms/contracts for:
@@ -69,6 +81,9 @@ The institution can grow into explicit rooms/contracts for:
 - Character Becoming
 - Writing Studio
 - Research Lab
+- Physics / Astrophysics Lab
+- Quantum Foundations Lab
+- Acoustics / Sound Design Lab
 - Browser Lab
 - OS / Computer-Use Lab
 - Worldbuilding & Mythframe
