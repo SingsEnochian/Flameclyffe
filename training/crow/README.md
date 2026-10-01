@@ -103,3 +103,8 @@ The training target is not:
 It is:
 
 > Can Crow understand what the writer is trying to do, make the craft sharper, preserve what belongs to the writer, and explain its own changes well enough that the writer remains in control?
+
+
+## 2026-10-01 curriculum update: causal continuity
+
+Added a training family for causal continuity, externalised state, cross-run influence, revocation, residual effects, and evidence-bounded descendant classification. This explicitly preserves ArcSweep's existing architecture: it is not a kill-switch doctrine. The training target is to reason correctly about what persists, what retains authority, what was actually revoked, and which causal edges are demonstrated versus unknown.
