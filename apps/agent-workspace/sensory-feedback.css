@@ -1,0 +1,39 @@
+.sensory-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+}
+
+.sensory-control button {
+  min-height: 28px;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  opacity: .72;
+}
+
+.sensory-control button[aria-pressed="true"] {
+  opacity: 1;
+  background: color-mix(in srgb, var(--nest-rim, #84a29a) 18%, transparent);
+  box-shadow: inset 0 0 12px color-mix(in srgb, var(--nest-rim, #84a29a) 12%, transparent);
+}
+
+.sensory-control button:focus-visible {
+  outline: 1px solid var(--nest-rim, #84a29a);
+  outline-offset: 2px;
+}
+
+@media (max-width: 620px) {
+  .sensory-control {
+    position: absolute;
+    right: 60px;
+    bottom: 8px;
+    background: rgba(0,0,0,.14);
+  }
+}
