@@ -45,7 +45,10 @@ test('workspace carries explicit agent and handoff boundaries', () => {
 });
 
 test('runtime presence probes existing same-origin House routes truthfully', () => {
-  assert.match(app, /\/api\/v1\/flames\/\$\{encodeURIComponent\(agent\.route\)\}\/status/);
+  assert.match(app, /String\(agent\.route\)\.split\('\/'\)\.map\(\(segment\) => encodeURIComponent\(segment\)\)\.join\('\/'\)/);
+  assert.match(app, /\/api\/v1\/flames\/\$\{routePath\}\/status/);
+  assert.match(app, /route: 'starsong\/larkshine'/);
+  assert.match(app, /route: 'starsong\/ellowind'/);
   assert.match(app, /credentials: 'same-origin'/);
   assert.match(app, /response\.status === 401 \? 'offline' : 'degraded'/);
   assert.match(app, /runtime route mismatch/);
