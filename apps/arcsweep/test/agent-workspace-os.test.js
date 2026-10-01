@@ -56,7 +56,7 @@ test('runtime presence probes existing same-origin House routes truthfully', () 
 });
 
 test('workspace offline cache is shell-scoped', () => {
-  assert.match(sw, /house-workspace-os-v0\.1\.1/);
+  assert.match(sw, /house-workspace-os-v0\.2\.0/);
   assert.match(sw, /url\.origin !== location\.origin/);
   assert.match(sw, /url\.pathname\.includes\('\/agents\/'\)/);
 });
