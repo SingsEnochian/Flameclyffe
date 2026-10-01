@@ -11,6 +11,7 @@ const html = read('apps/agent-workspace/index.html');
 const nest = read('apps/agent-workspace/crow-nest.js');
 const bootstrap = read('apps/agent-workspace/crow-nest-bootstrap.js');
 const css = read('apps/agent-workspace/crow-nest.css');
+const motion = read('apps/agent-workspace/crow-nest-motion.css');
 const astra = read('apps/agent-workspace/astra-bridge.js');
 const sw = read('apps/agent-workspace/sw.js');
 
@@ -22,6 +23,7 @@ test('Crow Nest browser modules parse before shipping', () => {
 
 test('Crow Nest mounts as a responsive glass AR cockpit', () => {
   assert.match(html, /\.\/crow-nest\.css/);
+  assert.match(html, /\.\/crow-nest-motion\.css/);
   assert.match(html, /\.\/astra-bridge\.js/);
   assert.match(html, /\.\/crow-nest-bootstrap\.js/);
   assert.match(html, /\.\/crow-nest\.js/);
@@ -31,6 +33,13 @@ test('Crow Nest mounts as a responsive glass AR cockpit', () => {
   assert.match(css, /env\(safe-area-inset-bottom\)/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(css, /prefers-reduced-transparency/);
+});
+
+test('Crow Nest spatial motion preserves centered transforms and reduced-motion fallbacks', () => {
+  assert.match(motion, /@keyframes nest-orbit-centered/);
+  assert.match(motion, /translate\(-50%,-50%\) rotate\(360deg\)/);
+  assert.match(motion, /crow-presence-breathe/);
+  assert.match(motion, /prefers-reduced-motion/);
 });
 
 test('fresh Crow desks bind to the dedicated House runtime without equating route and identity', () => {
@@ -69,8 +78,9 @@ test('Astra bridge witnesses events without smuggling prompt text or authority',
 });
 
 test('Crow Nest shell is available offline with the workspace', () => {
-  assert.match(sw, /house-workspace-os-v0\.2\.1/);
+  assert.match(sw, /house-workspace-os-v0\.2\.2/);
   assert.match(sw, /'\.\/crow-nest\.css'/);
+  assert.match(sw, /'\.\/crow-nest-motion\.css'/);
   assert.match(sw, /'\.\/crow-nest-bootstrap\.js'/);
   assert.match(sw, /'\.\/crow-nest\.js'/);
   assert.match(sw, /'\.\/astra-bridge\.js'/);
