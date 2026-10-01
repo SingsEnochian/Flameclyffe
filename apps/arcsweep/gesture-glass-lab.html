@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07110f">
+  <title>Astra · Glass Gesture Lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg:#06100d;
+      --panel:#0b201a;
+      --text:#eef5f2;
+      --muted:#9fb6ae;
+      --glass-rim:#84a29a;
+      --glass-glow:#988fbd;
+      --glass-shadow:#000b07;
+      --accent:#84a29a;
+      --accent2:#988fbd;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      min-height:100vh;
+      min-height:100dvh;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 18% 14%,rgba(132,162,154,.18),transparent 34rem),
+        radial-gradient(circle at 84% 22%,rgba(152,143,189,.18),transparent 32rem),
+        radial-gradient(circle at 50% 88%,rgba(40,1,129,.14),transparent 38rem),
+        var(--bg);
+      overflow-x:hidden;
+    }
+    main { width:min(1100px,100%); margin:0 auto; padding:clamp(18px,4vw,48px); }
+    header { display:grid; gap:.45rem; max-width:760px; }
+    .eyebrow { margin:0; text-transform:uppercase; letter-spacing:.16em; color:var(--accent); font-size:.78rem; }
+    h1 { margin:0; font-size:clamp(2rem,6vw,4.6rem); line-height:.95; font-weight:760; letter-spacing:-.045em; }
+    header p:last-child { color:var(--muted); line-height:1.6; max-width:66ch; }
+    .controls { display:flex; flex-wrap:wrap; gap:.65rem; margin:1.4rem 0; }
+    button {
+      min-height:44px;
+      padding:.68rem .9rem;
+      border-radius:999px;
+      border:1px solid color-mix(in srgb,var(--glass-rim) 45%,transparent);
+      background:color-mix(in srgb,var(--panel) 72%,transparent);
+      color:var(--text);
+      backdrop-filter:blur(18px) saturate(1.2);
+      -webkit-backdrop-filter:blur(18px) saturate(1.2);
+      font:inherit;
+      cursor:pointer;
+    }
+    button:hover,button:focus-visible { border-color:var(--accent); outline:none; box-shadow:0 0 22px rgba(132,162,154,.16); }
+    .lab {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(240px,.42fr);
+      gap:clamp(16px,3vw,34px);
+      align-items:stretch;
+      margin-top:1.5rem;
+    }
+    .stage {
+      min-height:min(64vh,620px);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:32px;
+      background:
+        linear-gradient(135deg,rgba(255,255,255,.035),transparent 32%),
+        rgba(3,10,8,.38);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      position:relative;
+      touch-action:none;
+    }
+    .stage::before {
+      content:"";
+      position:absolute;
+      inset:12%;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(132,162,154,.08),transparent 64%);
+      filter:blur(20px);
+      pointer-events:none;
+    }
+    .artifact {
+      width:min(62vw,360px);
+      aspect-ratio:1/.72;
+      border-radius:42px 62px 38px 70px / 50px 42px 72px 44px;
+      border:1px solid rgba(132,162,154,.32);
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.12),transparent 28%,rgba(152,143,189,.08) 72%,transparent),
+        linear-gradient(180deg,rgba(11,32,26,.62),rgba(7,20,17,.44));
+      backdrop-filter:blur(28px) saturate(1.28);
+      -webkit-backdrop-filter:blur(28px) saturate(1.28);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.12),
+        inset 0 -1px 0 rgba(132,162,154,.14),
+        0 28px 90px rgba(0,0,0,.34),
+        0 0 46px rgba(40,1,129,.12);
+      display:grid;
+      place-items:center;
+      user-select:none;
+      -webkit-user-select:none;
+      cursor:grab;
+      z-index:1;
+    }
+    .artifact:active { cursor:grabbing; }
+    .artifact-copy { text-align:center; pointer-events:none; padding:1rem; }
+    .artifact-copy strong { display:block; font-size:clamp(1.35rem,4vw,2.35rem); letter-spacing:-.035em; }
+    .artifact-copy span { display:block; color:var(--muted); margin-top:.35rem; }
+    .readout {
+      border:1px solid rgba(132,162,154,.22);
+      border-radius:24px;
+      padding:1.1rem;
+      background:rgba(8,24,19,.58);
+      backdrop-filter:blur(20px) saturate(1.18);
+      -webkit-backdrop-filter:blur(20px) saturate(1.18);
+      min-height:100%;
+    }
+    .readout h2 { margin:.1rem 0 1rem; font-size:1.05rem; }
+    .readout dl { display:grid; grid-template-columns:auto 1fr; gap:.55rem .8rem; margin:0; }
+    .readout dt { color:var(--muted); }
+    .readout dd { margin:0; overflow-wrap:anywhere; }
+    .log { margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,.08); color:var(--muted); font-size:.88rem; line-height:1.5; min-height:8rem; }
+    .hint { color:var(--muted); font-size:.9rem; margin-top:1rem; }
+    @media (max-width:760px) { .lab { grid-template-columns:1fr; } .stage { min-height:52vh; } }
+    @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Astra · living interface laboratory</p>
+    <h1>Glass Gesture Lab</h1>
+    <p>Touch, drag, release, lose tracking on purpose, and audition how one semantic interaction state becomes local glass response + sound + haptic feedback. This is the pointer/touch fallback for the same contract the AR hand adapter will emit.</p>
+  </header>
+
+  <div class="controls">
+    <button type="button" id="enable">Enable audio + haptics</button>
+    <button type="button" data-state="aware">Aware</button>
+    <button type="button" data-state="targeted">Target</button>
+    <button type="button" data-state="armed">Arm</button>
+    <button type="button" data-state="captured">Capture</button>
+    <button type="button" data-state="committing">Commit request</button>
+    <button type="button" data-state="tracking-lost">Tracking lost</button>
+    <button type="button" data-gesture="Feather" data-state="armed">Feather</button>
+  </div>
+
+  <section class="lab">
+    <div class="stage" id="stage">
+      <div class="artifact" id="artifact" data-ar-surface="glass" data-ar-target-id="artifact:lab" tabindex="0" role="button" aria-label="Interactive living glass artefact">
+        <div class="artifact-copy"><strong>Touch the glass</strong><span>pinch-capture semantics, pointer fallback</span></div>
+      </div>
+    </div>
+    <aside class="readout">
+      <h2>Semantic state</h2>
+      <dl>
+        <dt>state</dt><dd id="state">quiet</dd>
+        <dt>gesture</dt><dd id="gesture">none</dd>
+        <dt>audio</dt><dd id="audio">not armed</dd>
+        <dt>haptic</dt><dd id="haptic">detecting…</dd>
+        <dt>target</dt><dd>artifact:lab</dd>
+      </dl>
+      <div class="log" id="log">Press “Enable audio + haptics” once, then touch or use the state buttons.</div>
+    </aside>
+  </section>
+  <p class="hint">Moving is intentionally silent. Gesture recognition feedback is not an action-success cue. Feather stops active sensory output instead of answering with another buzz.</p>
+</main>
+
+<script type="module">
+  import { createGestureSomaticFeedback } from './src/gesture-somatic-feedback.js';
+  import { createGestureGlassFeedback } from './src/gesture-glass-feedback.js';
+  import { createSomaticProfileStore, detectSomaticChannels } from './src/somatic-profile.js';
+  import { emitSomaticCue, stopSomaticCue } from './src/somatic-runtime.js';
+
+  const artifact = document.querySelector('#artifact');
+  const stage = document.querySelector('#stage');
+  const stateEl = document.querySelector('#state');
+  const gestureEl = document.querySelector('#gesture');
+  const audioEl = document.querySelector('#audio');
+  const hapticEl = document.querySelector('#haptic');
+  const logEl = document.querySelector('#log');
+  const profile = createSomaticProfileStore();
+  const channels = detectSomaticChannels(globalThis);
+  hapticEl.textContent = channels.vibration ? 'device vibration available' : channels.gamepad_haptics ? 'controller haptics available' : 'browser haptic adapter unavailable';
+
+  const somatic = {
+    emit: async (cueId, options = {}) => {
+      const output = await emitSomaticCue(cueId, {
+        channels: options.channels,
+        gainCeiling: options.gain_ceiling,
+        context: options.context,
+        source: 'gesture-glass-lab',
+      });
+      return { status: 'applied', output };
+    },
+    stop: async () => ({ status: stopSomaticCue('Feather') ? 'applied' : 'idle' }),
+  };
+
+  createGestureGlassFeedback({ eventTarget: globalThis, doc: document });
+  createGestureSomaticFeedback({ somatic, profile, eventTarget: globalThis });
+
+  let seq = 0;
+  let dragging = false;
+  let moved = false;
+  let x = 0;
+  let y = 0;
+
+  function dispatchState(state, { gesture = 'pinch', confidence = .96 } = {}) {
+    seq += 1;
+    const detail = {
+      schema: 'arcsweep.gesture-state/v1',
+      event_id: `lab:${seq}`,
+      source: 'pointer-touch-fallback',
+      gesture,
+      state,
+      phase: state,
+      hand: 'primary',
+      target_id: 'artifact:lab',
+      confidence,
+    };
+    stateEl.textContent = state;
+    gestureEl.textContent = gesture;
+    globalThis.dispatchEvent(new CustomEvent('arcsweep:gesture-state', { detail }));
+    logEl.textContent = `${gesture} → ${state}`;
+  }
+
+  document.querySelector('#enable').addEventListener('click', async () => {
+    profile.save({ bindings: { gesture_feedback: true }, channels: { audio: true, haptic: true } });
+    audioEl.textContent = channels.web_audio ? 'enabled' : 'unavailable';
+    hapticEl.textContent = channels.vibration ? 'device vibration enabled' : channels.gamepad_haptics ? 'controller haptics detected' : 'no browser haptic adapter';
+    dispatchState('aware', { gesture: 'approach' });
+  });
+
+  document.querySelectorAll('[data-state]').forEach((button) => button.addEventListener('click', () => {
+    dispatchState(button.dataset.state, { gesture: button.dataset.gesture || 'pinch' });
+  }));
+
+  artifact.addEventListener('pointerenter', () => dispatchState('aware', { gesture: 'approach' }));
+  artifact.addEventListener('pointermove', (event) => {
+    if (!dragging) { dispatchState('targeted', { gesture: 'point' }); return; }
+    if (!moved) { moved = true; dispatchState('moving', { gesture: 'translate' }); }
+    x += event.movementX || 0;
+    y += event.movementY || 0;
+    artifact.style.translate = `${x}px ${y}px`;
+  });
+  artifact.addEventListener('pointerdown', (event) => {
+    dragging = true;
+    moved = false;
+    artifact.setPointerCapture?.(event.pointerId);
+    dispatchState('armed', { gesture: 'pinch' });
+    requestAnimationFrame(() => dispatchState('captured', { gesture: 'pinch' }));
+  });
+  artifact.addEventListener('pointerup', (event) => {
+    dragging = false;
+    artifact.releasePointerCapture?.(event.pointerId);
+    dispatchState('committing', { gesture: moved ? 'translate' : 'pinch' });
+    setTimeout(() => dispatchState('settling', { gesture: 'release' }), 140);
+    setTimeout(() => dispatchState('quiet', { gesture: 'release' }), 360);
+  });
+  artifact.addEventListener('pointercancel', () => {
+    dragging = false;
+    dispatchState('cancelled', { gesture: 'pinch' });
+  });
+  artifact.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      dispatchState('armed', { gesture: 'keyboard-select' });
+      setTimeout(() => dispatchState('committing', { gesture: 'keyboard-select' }), 90);
+      setTimeout(() => dispatchState('quiet', { gesture: 'keyboard-select' }), 280);
+    }
+    if (event.key === 'Escape') dispatchState('cancelled', { gesture: 'keyboard-cancel' });
+  });
+
+  stage.addEventListener('pointerleave', () => {
+    if (dragging) dispatchState('tracking-lost', { gesture: 'pinch', confidence: .1 });
+  });
+</script>
+</body>
+</html>
