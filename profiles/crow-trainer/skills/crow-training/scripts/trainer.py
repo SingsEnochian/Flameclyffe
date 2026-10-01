@@ -10,25 +10,56 @@ import hashlib
 import json
 import os
 import random
-import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 DRILLS_PATH = SKILL_DIR / "references" / "DRILLS.jsonl"
 STATE_DIR = Path.cwd() / ".crow-trainer"
 STATE_PATH = STATE_DIR / "state.json"
+HISTORY_PATH = STATE_DIR / "constraint-history.md"
 FREEZE_DIR = STATE_DIR / "frozen"
+EXTERNAL_PRISM_HISTORY = Path.cwd() / ".prism-history.md"
+
+KEYWORD_TAGS = {
+    "causal": ["scene-delta", "causality"],
+    "causality": ["scene-delta", "causality"],
+    "plot": ["scene-delta", "question-stack", "callback"],
+    "state": ["scene-delta", "relationship-delta", "observe-act-verify"],
+    "relationship": ["relationship-becoming", "relationship-delta"],
+    "intimacy": ["relationship-becoming", "intimacy"],
+    "trust": ["relationship-delta", "power"],
+    "setting": ["setting", "world-law"],
+    "world": ["setting", "world-law"],
+    "economics": ["setting", "active-system"],
+    "resource": ["setting", "active-system"],
+    "pacing": ["pacing", "reader-promise"],
+    "structure": ["pacing", "reader-promise"],
+    "voice": ["voice", "rhythm"],
+    "style": ["voice", "anti-costume"],
+    "rhythm": ["rhythm", "pacing"],
+    "research": ["research", "evidence"],
+    "evidence": ["research", "evidence", "provenance"],
+    "provenance": ["provenance", "claim-discipline"],
+    "browser": ["browser", "browser-context"],
+    "web": ["browser", "research"],
+    "desktop": ["os", "computer-use"],
+    "gui": ["os", "computer-use"],
+    "tool": ["tool-routing", "observe-act-verify"],
+    "authority": ["authority", "writer-authority"],
+    "canon": ["authority", "writer-authority"],
+    "memory": ["memory", "writer-authority"],
+}
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def load_drills() -> list[dict[str, Any]]:
-    drills: list[dict[str, Any]] = []
+def load_drills() -> List[Dict[str, Any]]:
+    drills: List[Dict[str, Any]] = []
     with DRILLS_PATH.open("r", encoding="utf-8") as fh:
         for lineno, line in enumerate(fh, 1):
             line = line.strip()
@@ -48,9 +79,9 @@ def load_drills() -> list[dict[str, Any]]:
     return drills
 
 
-def default_state() -> dict[str, Any]:
+def default_state() -> Dict[str, Any]:
     return {
-        "version": 1,
+        "version": 2,
         "created_at": now_iso(),
         "cycle_seen": [],
         "selections": [],
@@ -60,7 +91,7 @@ def default_state() -> dict[str, Any]:
     }
 
 
-def load_state() -> dict[str, Any]:
+def load_state() -> Dict[str, Any]:
     if not STATE_PATH.exists():
         return default_state()
     try:
@@ -72,35 +103,89 @@ def load_state() -> dict[str, Any]:
     return base
 
 
-def save_state(state: dict[str, Any]) -> None:
+def save_state(state: Dict[str, Any]) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     tmp = STATE_PATH.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     os.replace(tmp, STATE_PATH)
 
 
-def drill_map(drills: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+def append_constraint_history(entry: Dict[str, Any]) -> None:
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    if not HISTORY_PATH.exists():
+        HISTORY_PATH.write_text(
+            "# Crow Trainer Constraint History\n\n"
+            "Project-local record of what each substantial pass maximized, sacrificed, and should examine next.\n\n",
+            encoding="utf-8",
+        )
+    with HISTORY_PATH.open("a", encoding="utf-8") as fh:
+        fh.write(
+            f"### {entry['recorded_at']} — {entry['artifact']}\n"
+            f"- **Maximized:** {entry['maximized']}\n"
+            f"- **Sacrificed:** {entry['sacrificed']}\n"
+            f"- **Next:** {entry['next']}\n"
+            "- **Source:** crow-trainer\n"
+            "---\n\n"
+        )
+
+
+def drill_map(drills: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     return {d["id"]: d for d in drills}
 
 
-def select_drill(drills: list[dict[str, Any]], state: dict[str, Any], tag: str | None) -> dict[str, Any]:
-    pool = [d for d in drills if tag is None or tag in d.get("tags", [])]
-    if not pool:
+def adaptive_tag_scores(state: Dict[str, Any]) -> Counter:
+    scores = Counter()
+    constraints = state.get("constraints", [])[-12:]
+    for offset, entry in enumerate(reversed(constraints), 1):
+        # Recent constraints count more, but older repeated gaps still matter.
+        weight = max(1, 5 - (offset - 1) // 3)
+        text = f"{entry.get('sacrificed', '')} {entry.get('next', '')}".lower()
+        for keyword, tags in KEYWORD_TAGS.items():
+            if keyword in text:
+                for tag in tags:
+                    scores[tag] += weight
+    return scores
+
+
+def adaptive_pool(
+    drills: List[Dict[str, Any]], state: Dict[str, Any], enabled: bool
+) -> Tuple[List[Dict[str, Any]], List[str]]:
+    if not enabled:
+        return drills, []
+    scores = adaptive_tag_scores(state)
+    if not scores:
+        return drills, []
+    ranked = [tag for tag, _ in scores.most_common(6)]
+    focused = [d for d in drills if any(tag in d.get("tags", []) for tag in ranked)]
+    return (focused or drills), ranked
+
+
+def select_drill(
+    drills: List[Dict[str, Any]],
+    state: Dict[str, Any],
+    tag: Optional[str],
+    adaptive: bool,
+) -> Tuple[Dict[str, Any], List[str]]:
+    base_pool = [d for d in drills if tag is None or tag in d.get("tags", [])]
+    if not base_pool:
         raise SystemExit(f"No drills match tag {tag!r}")
+
+    if tag is None:
+        pool, adaptive_tags = adaptive_pool(base_pool, state, adaptive)
+    else:
+        pool, adaptive_tags = base_pool, []
 
     seen = set(state.get("cycle_seen", []))
     unseen = [d for d in pool if d["id"] not in seen]
     if not unseen:
-        # reset only ids in this pool so tag-specific cycles remain useful
         pool_ids = {d["id"] for d in pool}
         state["cycle_seen"] = [x for x in state.get("cycle_seen", []) if x not in pool_ids]
         unseen = pool
 
-    # Bias toward tags with fewer recorded attempts while retaining variation.
     attempt_counts = Counter(r["id"] for r in state.get("results", []))
     min_attempts = min(attempt_counts.get(d["id"], 0) for d in unseen)
     least_seen = [d for d in unseen if attempt_counts.get(d["id"], 0) == min_attempts]
-    return random.choice(least_seen)
+    return random.choice(least_seen), adaptive_tags
 
 
 def cmd_selftest(_: argparse.Namespace) -> None:
@@ -116,6 +201,8 @@ def cmd_selftest(_: argparse.Namespace) -> None:
         "drills": len(drills),
         "tags": len(tags),
         "state_path": str(STATE_PATH),
+        "history_path": str(HISTORY_PATH),
+        "external_prism_history_present": EXTERNAL_PRISM_HISTORY.exists(),
         "existing_results": len(state.get("results", [])),
         "existing_constraints": len(state.get("constraints", [])),
     }, indent=2))
@@ -124,23 +211,28 @@ def cmd_selftest(_: argparse.Namespace) -> None:
 def cmd_next(args: argparse.Namespace) -> None:
     drills = load_drills()
     state = load_state()
-    drill = select_drill(drills, state, args.tag)
+    drill, adaptive_tags = select_drill(drills, state, args.tag, args.adaptive == "on")
     state.setdefault("cycle_seen", []).append(drill["id"])
     state.setdefault("selections", []).append({
         "id": drill["id"],
         "mode": args.mode,
         "tag": args.tag,
+        "adaptive": args.adaptive,
+        "adaptive_tags": adaptive_tags,
         "selected_at": now_iso(),
     })
     save_state(state)
 
-    payload: dict[str, Any] = {
+    payload: Dict[str, Any] = {
         "id": drill["id"],
         "task": drill["task"],
         "input": drill["input"],
         "tags": drill.get("tags", []),
         "mode": args.mode,
     }
+    if adaptive_tags and args.tag is None:
+        payload["adaptive_focus"] = adaptive_tags
+        payload["adaptive_reason"] = "Selected from project-local sacrificed/next dimensions."
     if args.mode == "train":
         payload["ideal_behavior"] = drill["ideal_behavior"]
         payload["reject_behavior"] = drill["reject_behavior"]
@@ -229,7 +321,51 @@ def cmd_constraint(args: argparse.Namespace) -> None:
     }
     state.setdefault("constraints", []).append(entry)
     save_state(state)
-    print(json.dumps({"recorded": True, "constraint": entry}, indent=2, ensure_ascii=False))
+    append_constraint_history(entry)
+    print(json.dumps({
+        "recorded": True,
+        "constraint": entry,
+        "history_path": str(HISTORY_PATH),
+    }, indent=2, ensure_ascii=False))
+
+
+def cmd_recommend(args: argparse.Namespace) -> None:
+    state = load_state()
+    scores = adaptive_tag_scores(state)
+    payload: Dict[str, Any] = {
+        "project_history": str(HISTORY_PATH),
+        "constraint_records": len(state.get("constraints", [])),
+        "recommended_tags": [
+            {"tag": tag, "weight": weight} for tag, weight in scores.most_common(10)
+        ],
+    }
+    if args.include_external:
+        payload["external_prism_history"] = {
+            "path": str(EXTERNAL_PRISM_HISTORY),
+            "present": EXTERNAL_PRISM_HISTORY.exists(),
+            "note": "External history is provenance-bound and is not modified by Crow Trainer.",
+        }
+        if EXTERNAL_PRISM_HISTORY.exists():
+            text = EXTERNAL_PRISM_HISTORY.read_text(encoding="utf-8", errors="replace")
+            payload["external_prism_history"]["tail"] = text[-4000:]
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
+def cmd_history(args: argparse.Namespace) -> None:
+    payload: Dict[str, Any] = {
+        "crow_history_path": str(HISTORY_PATH),
+        "crow_history_present": HISTORY_PATH.exists(),
+        "crow_history": HISTORY_PATH.read_text(encoding="utf-8") if HISTORY_PATH.exists() else "",
+    }
+    if args.include_external:
+        payload["external_prism_history_path"] = str(EXTERNAL_PRISM_HISTORY)
+        payload["external_prism_history_present"] = EXTERNAL_PRISM_HISTORY.exists()
+        payload["external_prism_history"] = (
+            EXTERNAL_PRISM_HISTORY.read_text(encoding="utf-8", errors="replace")
+            if EXTERNAL_PRISM_HISTORY.exists()
+            else ""
+        )
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
 def cmd_report(_: argparse.Namespace) -> None:
@@ -237,10 +373,10 @@ def cmd_report(_: argparse.Namespace) -> None:
     state = load_state()
     results = state.get("results", [])
     verdicts = Counter(r.get("verdict") for r in results)
-    tag_stats: dict[str, Counter[str]] = defaultdict(Counter)
-    for r in results:
-        for tag in r.get("tags", []):
-            tag_stats[tag][r.get("verdict", "unknown")] += 1
+    tag_stats: Dict[str, Counter] = defaultdict(Counter)
+    for result in results:
+        for tag in result.get("tags", []):
+            tag_stats[tag][result.get("verdict", "unknown")] += 1
 
     weak = []
     for tag, counts in tag_stats.items():
@@ -250,27 +386,39 @@ def cmd_report(_: argparse.Namespace) -> None:
             weak.append((fail_weight / attempts, attempts, tag, dict(counts)))
     weak.sort(reverse=True)
 
-    unattempted = [d_id for d_id in drills if not any(r.get("id") == d_id for r in results)]
+    unattempted = [
+        drill_id for drill_id in drills
+        if not any(result.get("id") == drill_id for result in results)
+    ]
     constraints = state.get("constraints", [])
     sacrificed_terms = Counter()
-    for c in constraints:
-        for token in str(c.get("sacrificed", "")).lower().replace(",", " ").split():
+    for constraint in constraints:
+        for token in str(constraint.get("sacrificed", "")).lower().replace(",", " ").split():
             token = token.strip(".;:()[]{}")
             if len(token) >= 5:
                 sacrificed_terms[token] += 1
 
+    adaptive_scores = adaptive_tag_scores(state)
     payload = {
         "drills_total": len(drills),
         "attempts": len(results),
         "verdicts": dict(verdicts),
         "unattempted": unattempted,
         "weak_tags": [
-            {"tag": tag, "weighted_failure_rate": round(rate, 3), "attempts": attempts, "verdicts": counts}
+            {
+                "tag": tag,
+                "weighted_failure_rate": round(rate, 3),
+                "attempts": attempts,
+                "verdicts": counts,
+            }
             for rate, attempts, tag, counts in weak[:10]
         ],
         "constraint_records": len(constraints),
         "recurring_sacrificed_terms": sacrificed_terms.most_common(12),
+        "adaptive_training_tags": adaptive_scores.most_common(10),
         "state_path": str(STATE_PATH),
+        "history_path": str(HISTORY_PATH),
+        "external_prism_history_present": EXTERNAL_PRISM_HISTORY.exists(),
     }
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
@@ -292,6 +440,7 @@ def parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("next")
     sp.add_argument("--mode", choices=("train", "exam"), default="train")
     sp.add_argument("--tag")
+    sp.add_argument("--adaptive", choices=("on", "off"), default="on")
     sp.set_defaults(func=cmd_next)
 
     sp = sub.add_parser("freeze")
@@ -315,6 +464,14 @@ def parser() -> argparse.ArgumentParser:
     sp.add_argument("--sacrificed", required=True)
     sp.add_argument("--next", required=True)
     sp.set_defaults(func=cmd_constraint)
+
+    sp = sub.add_parser("recommend")
+    sp.add_argument("--include-external", action="store_true")
+    sp.set_defaults(func=cmd_recommend)
+
+    sp = sub.add_parser("history")
+    sp.add_argument("--include-external", action="store_true")
+    sp.set_defaults(func=cmd_history)
 
     sp = sub.add_parser("report")
     sp.set_defaults(func=cmd_report)
