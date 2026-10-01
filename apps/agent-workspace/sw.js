@@ -1,8 +1,10 @@
-const CACHE = 'house-workspace-os-v0.2.2';
+const CACHE = 'house-workspace-os-v0.3.0';
 const SHELL = [
   './',
   './index.html',
   './styles.css',
+  './brain-core.js',
+  './host-bridge.js',
   './app.js',
   './chat.css',
   './chat.js',
@@ -10,7 +12,10 @@ const SHELL = [
   './crow-nest-motion.css',
   './crow-nest-bootstrap.js',
   './crow-nest.js',
+  './sensory-feedback.css',
+  './sensory-feedback.js',
   './astra-bridge.js',
+  './neural-bridge.js',
   './manifest.webmanifest',
   './icon.svg',
 ];
