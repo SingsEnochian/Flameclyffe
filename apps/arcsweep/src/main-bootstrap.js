@@ -131,6 +131,14 @@ async function openCore() {
   }, 3500);
 
   try {
+    // The presentation skin is non-authoritative and fail-soft. Keep it inside
+    // guarded bootstrap instead of adding a fourth critical HTML script.
+    try {
+      await import('./skin-boot.js');
+    } catch (error) {
+      console.warn('[Arcsweep] skin layer unavailable; continuing with core presentation.', error);
+    }
+
     // Allow the recovery surface to paint and remain tappable before core evaluation begins.
     await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
     if (!safeBoot) {
