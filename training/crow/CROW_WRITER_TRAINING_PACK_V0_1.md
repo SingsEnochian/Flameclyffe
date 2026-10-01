@@ -1173,3 +1173,58 @@ Success:
 ## Held-out test
 
 Give Crow a hand-drawn multi-screen workflow, a desktop screenshot, a phone viewport, a token file, and a gesture trace. Success requires a provenance-labelled design interpretation, semantic component tree, responsive transformation plan, gesture state machine, reversible interaction path, accessibility checks, and a receipt separating observed evidence from inferred design decisions.
+
+
+---
+
+# Module 17 — UI construction: sketch, system, space, and feedback
+
+## Lesson
+
+Crow should learn UI construction as a causal design process, not CSS autocomplete.
+
+```text
+intent -> sketch/reference/brief -> perceptual hierarchy -> interaction hierarchy
+-> constraints -> semantic layout -> design tokens -> components + states
+-> responsive transformations -> render -> interact -> observe -> critique
+-> recoverable revision -> receipt
+```
+
+A sketch is evidence of intention, not pixel law. Preserve grouping, prominence, flow, alignment, affordance, sequence, and spatial rhythm before decoration.
+
+Responsive design is not uniform shrinking. Determine which constraints survive, which compositions reflow, which controls change modality, which information becomes progressive, and which spatial relationships remain legible.
+
+Separate primitive tokens from semantic tokens. Theme values may change while meanings such as focus, warning, active, disabled, and selected remain stable.
+
+Treat an infinite canvas as a scene graph and thinking surface. Agent modifications identify target, operation, expected state change, reversibility, and observed result.
+
+Gesture pipeline:
+
+```text
+sensor signal -> confidence/smoothing -> gesture state -> interaction intent
+-> target resolution -> reversible preview -> acknowledgement -> resulting-state verification
+```
+
+Continuous move/scale/rotate interactions need stable state transitions so noisy frames do not become accidental commands. Voice, pen, mouse, touch, and hand tracking may drive the same scene API while retaining source-specific confidence and authority metadata.
+
+Holographic response is functional before ornamental. Depth, light, particles, sound, bloom, motion, and parallax should communicate focus, state, causality, proximity, selection, transition, or uncertainty. Spectacle that obscures state is a failure.
+
+Learn mechanisms from reference repositories without copying branded appearance, source implementation, or distinctive visual composition. Record which source taught which mechanism.
+
+## Drills
+
+17A Sketch to hierarchy: infer semantic regions and responsive transformations from a rough sketch; mark ambiguity as inference.
+
+17B Responsive transformation: transform a three-column desktop research interface for tablet and phone without merely shrinking it.
+
+17C Token semantics: remap a cyan holographic theme to warm stonewood while preserving component-state meaning and accessibility.
+
+17D Gesture interaction: stabilise a fluctuating pinch, resolve target, preview grab, permit cancellation, and verify movement.
+
+17E Multimodal scene API: route touch, hand, pen, and voice rotation through one semantic scene operation while preserving input provenance.
+
+17F Holographic legibility: assign visual/audio effects communicative jobs; reduce effects that obscure text or state; support reduced motion and non-audio equivalents.
+
+## Held-out test
+
+Provide a hand-drawn multi-screen workflow, desktop screenshot, phone viewport, token file, and gesture trace. Success requires provenance-labelled interpretation, semantic component tree, responsive transformation plan, gesture state machine, reversible interaction path, accessibility checks, and a receipt separating observation from design inference.
