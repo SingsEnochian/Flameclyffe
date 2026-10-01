@@ -1,4 +1,4 @@
-const CACHE = 'house-workspace-os-v0.2.1';
+const CACHE = 'house-workspace-os-v0.2.2';
 const SHELL = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const SHELL = [
   './chat.css',
   './chat.js',
   './crow-nest.css',
+  './crow-nest-motion.css',
   './crow-nest-bootstrap.js',
   './crow-nest.js',
   './astra-bridge.js',
