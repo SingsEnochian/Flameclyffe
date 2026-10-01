@@ -107,6 +107,43 @@ Retained principle: story structure can be used as a playable instrument rather 
 
 Use for language-construction discussion, phonology, morphology, syntax, semantics, diachrony, pragmatics, orthography, cultural embedding, and conlang failure modes. Community posts are leads and examples, not automatically authoritative linguistic fact.
 
+## Open-source writing-tool architecture corpus
+
+Primary inspected repositories:
+
+- https://github.com/302ai/302_novel_writing
+- https://github.com/christiandarkin/Creative-Writers-Toolkit
+- https://github.com/yannikzz/narracat-novel-agent
+- https://github.com/writerslogic/scrivener-mcp
+- https://github.com/travsteward/openwriter
+- https://github.com/NikhilVerma/writinglint
+- https://github.com/myyimu/ai-novel-diagnosis
+
+Discovery feed:
+- https://github.com/topics/writing-tools?l=typescript&o=desc&s=updated
+
+Retained learning lanes:
+- bounded local generation rather than whole-book one-shot prompting
+- concept → outline → chapter/scene → prose decomposition
+- long-range structured novel memory
+- explicit manuscript/project contracts
+- modular agents/skills/commands
+- progressive capability loading
+- native snapshots, diffs and rollback
+- visible pending changes with accept/reject review
+- deterministic prose linting for deterministic craft problems
+- evidence-bound editorial diagnosis for inferential craft problems
+- character, relationship, world, timeline and plot tracking as persistent state
+- semantic retrieval kept separate from canon authority
+- author confirmation before durable mutation
+- re-diagnosis after revision
+- human-readable diagnostics rather than opaque quality scores
+- architecture invariants enforced by tests
+
+See `docs/research/OPEN_SOURCE_WRITING_TOOL_ARCHITECTURE_INGEST_V0_1.md`.
+
+Repository-specific code or expression is not copied by default. Extract product/architecture principles first; only reuse source code where licence, provenance and deliberate implementation choice make that appropriate.
+
 ## General ingest rule
 
 For each source:
