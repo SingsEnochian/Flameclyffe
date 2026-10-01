@@ -142,6 +142,14 @@ jobs:
           fi
           grep -Eq '<script[^>]+type="module"[^>]+src="\./assets/[^\"]+\.js"' _site/apps/arcsweep/index.html
 
+          mkdir -p _site/agents
+          cp -a apps/agent-workspace/. _site/agents/
+          test -f _site/agents/index.html
+          test -f _site/agents/app.js
+          test -f _site/agents/styles.css
+          test -f _site/agents/manifest.webmanifest
+          test -f _site/agents/sw.js
+
           mkdir -p _site/starwell-react-lab
           cp -a /tmp/starwell-react-lab/. _site/starwell-react-lab/
           test -f _site/starwell-react-lab/unit-resonance-lab.html
@@ -173,6 +181,7 @@ jobs:
           Source branch: $GITHUB_REF_NAME
           Publisher: .github/workflows/pages.yml
           Arcsweep: /Flameclyffe/apps/arcsweep/
+          House Workspace OS: /Flameclyffe/agents/
           Bifröst Live: /Flameclyffe/bifrost-live/
           STARWELL Lab: /Flameclyffe/starwell-react-lab/
           Glyph Lab: /Flameclyffe/starwell-react-lab/glyph-studio/
