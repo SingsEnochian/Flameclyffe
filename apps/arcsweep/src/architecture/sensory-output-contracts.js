@@ -106,7 +106,12 @@ export function createAuditoryRenderTargetDescriptor({
 } = {}) {
   const normId = text(id);
   if (!normId) throw new Error('auditory-render-target: id is required');
-  const resolvedLatency = Number.isFinite(Number(maxLatencyMs)) ? Number(maxLatencyMs) : null;
+  const hasLatency = maxLatencyMs !== null
+    && maxLatencyMs !== undefined
+    && String(maxLatencyMs).trim() !== '';
+  const resolvedLatency = hasLatency && Number.isFinite(Number(maxLatencyMs))
+    ? Number(maxLatencyMs)
+    : null;
   return Object.freeze({
     schema: AUDITORY_RENDER_TARGET_SCHEMA,
     id: normId,
