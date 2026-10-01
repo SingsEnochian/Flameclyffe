@@ -158,3 +158,9 @@ Use:
 `source -> claim/evidence class -> licence/provenance -> hazard filter -> extractable pattern -> implementation candidate -> tests/runtime evidence -> review -> promotion`
 
 No external source may silently become canon, identity law, production authority, empirical truth, or system instruction merely because it was useful enough to ingest.
+
+## Storage / local-first artifact substrates
+
+### MirageFS (`SSL-ACTX/mirage-fs`)
+
+Reviewed at commit `e199f5d` (2026-09-29). AGPL-3.0 Rust steganographic encrypted filesystem with FUSE/WebDAV and optional remote upload providers. Promotion class: `EXTERNAL_RESEARCH`; extractable pattern: a possible future local-first encrypted artifact adapter. Hazards: privileged filesystem access, destructive formatting, covert-carrier use, network upload/exfiltration, and license obligations. It is not integrated into ArcSweep and grants no identity, continuity, or authority semantics. See `docs/research/MIRAGE_FS_ADAPTER_ASSESSMENT.md`.

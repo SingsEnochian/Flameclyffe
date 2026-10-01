@@ -168,3 +168,77 @@ These sources inform design. They do not override repository contracts.
 ## Final instruction
 
 Do not optimise for the prettiest abstraction. Optimise for the smallest shared seam that fits the living code, preserves ownership boundaries, passes tests, and leaves stronger evidence than it found.
+
+## Current implementation evidence (2026-09-29)
+
+**CONFIRMED:** The first Presence Fabric slice is implemented in `apps/arcsweep/src/presence-fabric.js` and documented in `docs/architecture/PRESENCE_FABRIC_V0_1.md`. It is additive: `apps/arcsweep/src/model-presence-bus.js` retains its existing fields and exposes a nested `presence` record. House Commons v5 now supplies the `house-commons` surface, addressed participation mode, and stable room/voice session key during streaming.
+
+**TESTED:** `node --test apps/arcsweep/test/presence-fabric.test.js apps/arcsweep/test/model-presence-bus.test.js` passes all 16 tests. `npm run contracts:verify` passes. `npm run arcsweep:build` passes. The full `npm run arcsweep:test` run still contains unrelated pre-existing failures in canon-pack and performance-safe-pack assertions; those failures are not in the Presence Fabric tests.
+
+**OBSERVED:** Records are deeply frozen; provider rebinding preserves identity/presence/surface/session; surface projection creates a new presence while preserving identity; teardown receipts are credential-free and carry `before` lineage with `after: null`. Unknown surfaces/providers/models are explicit `UNKNOWN` in the canonical record.
+
+**ADDED RESEARCH:** `docs/research/MIRAGE_FS_ADAPTER_ASSESSMENT.md` and the corpus index now record `SSL-ACTX/mirage-fs` at commit `e199f5d` as AGPL-3.0 external research only. No binary, mount, covert carrier, uploader, or destructive format operation is integrated or executed.
+
+**UNKNOWN:** Provider capability seam, sensory/output contracts, runtime deployment observation, and production credential state remain future work. The GitNexus safe plan writer was unavailable on Windows; implementation evidence is recorded here and in the local ASTRA context ledger instead.
+
+**NEXT:** Add the minimal provider/capability seam, then sensory/output interfaces, with the same identity/authority boundaries and focused runtime evidence.
+
+## Current implementation evidence (2026-09-30)
+
+**CONFIRMED:** The CognitiveProvider contract is implemented in `apps/arcsweep/src/architecture/cognitive-provider.js`. The companion `capability-negotiation.js` (ported from `feature/arcsweep-asi-ignition-v0`, PR #400) lives alongside it in `apps/arcsweep/src/architecture/`. The contract is documented in `docs/architecture/COGNITIVE_PROVIDER_V1.md`.
+
+**TESTED:** `node --test apps/arcsweep/test/cognitive-provider.test.js` passes 21/21 tests. Running alongside prior tests: `node --test apps/arcsweep/test/presence-fabric.test.js apps/arcsweep/test/model-presence-bus.test.js apps/arcsweep/test/cognitive-provider.test.js` passes 37/37.
+
+**OBSERVED:** Provider descriptors are frozen and carry no authority, credentials, or session fields. Unknown capability names are stripped. The gate (`evaluateProviderCapability`) delegates to `capability-negotiation.js`'s `evaluateCapabilityRequest` — providers cannot self-grant capability or authority. Cognitive events are frozen and kind-exclusive (only one payload field non-null per event). The contract is additive: no existing file was modified.
+
+**REUSED:** `capability-negotiation.js` from PR #400 (`arcsweep.capability-request/v0.1`, `arcsweep.capability-decision/v0.1`, `arcsweep.execution-receipt/v0.1`) was ported as-is without modification. Presence Fabric (`presence-fabric.js`) and `model-presence-bus.js` are unchanged.
+
+**UNKNOWN:** No live provider implementations exist yet. `assertCognitiveProvider` is a shape-only check — real provider conformance requires integration tests with each provider adapter. Sensory/output contracts remain future work.
+
+**NEXT:** Add the `SensoryAdapter`, `OutputAdapter`, and `AuditoryRenderTarget` interface contracts (Task 3). These are shape-only contracts — no vendor integrations. Same pattern: frozen descriptors, schema-tagged, no authority fields, focused tests, architecture doc.
+
+## Current implementation evidence (2026-09-30, Task 3)
+
+**CONFIRMED:** Sensory/output adapter contracts are implemented in `apps/arcsweep/src/architecture/sensory-output-contracts.js`. Three contracts: `SensoryAdapter` (input, modalities), `OutputAdapter` (output, channels), `AuditoryRenderTarget` (auditory-specific, render modes). Documented in `docs/architecture/SENSORY_OUTPUT_CONTRACTS_V1.md`.
+
+**TESTED:** `node --test apps/arcsweep/test/sensory-output-contracts.test.js` passes 25/25 tests. Full suite: `node --test apps/arcsweep/test/presence-fabric.test.js apps/arcsweep/test/model-presence-bus.test.js apps/arcsweep/test/cognitive-provider.test.js apps/arcsweep/test/sensory-output-contracts.test.js` passes 62/62.
+
+**OBSERVED:** All descriptor records are frozen. `audio-air` and `audio-bone` are separate channels; `bone-conduction` and `assistive` are separate render modes. Unknown modalities/channels/modes are stripped. No authority, credential, or identity fields on any descriptor. `surface_hint` is always distinct from `id`. `max_latency_ms` is `null` for non-finite input.
+
+**UNKNOWN:** No live adapter implementations exist. `assertSensoryAdapter`, `assertOutputAdapter`, `assertAuditoryRenderTarget` are shape checks only — real adapter conformance requires integration tests per surface. Runa render-target contracts and the end-to-end vertical slice remain future work.
+
+**NEXT:** The four shared contract seams are now in place (Presence Fabric, CognitiveProvider, SensoryAdapter/OutputAdapter/AuditoryRenderTarget). The next step is Task 4/5: one end-to-end vertical slice with runtime receipts — `enter/select universe → Codex context → ArcSweep reasoning → Crow realisation → continuity → receipt → continue`. Start from the existing Constellation lens flow and wire the new contracts into one observable path.
+
+## Current implementation evidence (2026-09-30, Task 4/5 — vertical slice)
+
+**CONFIRMED:** `runAstraVerticalSlice` in `apps/arcsweep/src/architecture/astra-vertical-slice.js` is the end-to-end contract orchestrator. It composes all four Astra 6.1 layers: Presence Fabric → CognitiveProvider gate → sensory/output descriptors → provider invoke → execution receipt → presence lineage receipt. Returns a frozen `arcsweep.astra-slice-receipt/v1`. Documented in `docs/architecture/ASTRA_VERTICAL_SLICE_V1.md`.
+
+**TESTED:** `node --test apps/arcsweep/test/astra-vertical-slice.test.js` passes 7/7. Full Astra 6.1 suite passes 69/69.
+
+**OBSERVED:** Granted path: delta + done events, execution receipt `applied`, presence receipt `provider-rebound` with identity preserved. Denied path (missing capability): `null` execution receipt, presence `torn-down`, events empty. Denied path (authority escalation): same — gate blocks even when provider declares the capability. Provider invoke error: caught as `error` event, execution receipt `failed`, no crash. No credentials or elevated authority_grants anywhere in the receipt. Identity never equals surface or provider.
+
+**UNKNOWN:** No live runtime observation yet — slice uses stub providers. Runa render-target contracts, continuity resolution, and full Constellation lens integration remain future work. A PR from this branch has not been created yet.
+
+**ALL ASTRA 6.1 CONTRACT SEAMS COMPLETE:**
+- `apps/arcsweep/src/model-presence-bus.js` — additive Presence Fabric fields
+- `apps/arcsweep/src/presence-fabric.js` — canonical Presence contract
+- `apps/arcsweep/src/architecture/capability-negotiation.js` — capability gate (ported from PR #400)
+- `apps/arcsweep/src/architecture/cognitive-provider.js` — CognitiveProvider descriptor + event stream
+- `apps/arcsweep/src/architecture/sensory-output-contracts.js` — SensoryAdapter / OutputAdapter / AuditoryRenderTarget
+- `apps/arcsweep/src/architecture/astra-vertical-slice.js` — end-to-end slice orchestrator
+
+**NEXT FOR NEXT WORKER:** Create a PR from `codex/astra-6-1-constellation-advance` into `feature/astra-6.1-canonical-ingest`. Then wire `runAstraVerticalSlice` into the Constellation lens response path so real runtime receipts appear in `runtime-integration-bridge.js`'s active envelope.
+
+## Current implementation evidence (2026-09-30, ComfyUI Desktop Adapter — Slice 1 + Slice 2)
+
+**CONFIRMED (Slice 1):** `apps/arcsweep/src/architecture/comfy-desktop-adapter.js` — five frozen contract records for ComfyUI integration. `computeWorkflowHash` (SHA-256 / djb2 fallback). All execution gates default `false`. `may_canonize` hardcoded `false` on output artifacts — not a parameter, no code path sets it `true`.
+
+**CONFIRMED (Slice 2):** `apps/arcsweep/src/architecture/comfy-endpoint-probe.js` — safe endpoint config + probe. `probeComfyEndpoint` uses `GET /system_stats` only. Injectable `fetch` for tests. No prompt submission, no queue modification, no model download, no custom node install during discovery. Timeout via `AbortController`. Always returns frozen status whether reachable or not.
+
+**TESTED:** `node --test apps/arcsweep/test/comfy-desktop-adapter.test.js apps/arcsweep/test/comfy-endpoint-probe.test.js` passes 39/39. Full 70-test architecture suite passes 70/70.
+
+**OBSERVED:** Probe status never carries `prompt_id`, `queue_remaining`, `may_execute`, `may_download_models`, `may_install_custom_nodes`, `may_canonize`, or `workflow_hash`. Endpoint config carries no credentials. Each probe call returns an independent frozen record. Timeout mock confirms `AbortController` wiring works. Network-error path surfaces the error message without crashing.
+
+**UNKNOWN:** No live probe against real ComfyUI Desktop has been attempted — ComfyUI is installed at `:8188` but was not probed during this session (Slice 2 spec is contracts + tests only; live probe is separate). Slice 3 (real `/prompt` POST) requires explicit user approval.
+
+**NEXT SMALLEST STEP:** With user approval, attempt a live `probeComfyEndpoint` call against `http://127.0.0.1:8188` to confirm the Desktop install responds. If reachable, Slice 3 (real API execution) is open. Otherwise diagnose first.
