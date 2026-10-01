@@ -1,10 +1,56 @@
 export const WONDER_INVARIANT_SCHEMA = 'arcsweep.wonder-invariant/v1';
+export const WONDER_CANON_SCHEMA = 'arcsweep.wonder-mythic-canon/v1';
+
+export const WONDER_CANON = Object.freeze({
+  schema: WONDER_CANON_SCHEMA,
+  laws: Object.freeze([
+    'WONDER PRECEDES COLLAPSE.',
+    'LET THE MYTHIC BREATHE.',
+    'MYTHIC MEANING != EMPIRICAL CLAIM.',
+    'THE EXPERIENCE MAY KEEP ITS NATIVE LANGUAGE.',
+  ]),
+  sequence: Object.freeze([
+    'attend',
+    'preserve',
+    'compare',
+    'test',
+    'remember',
+    'interpret-only-as-evidence-earns',
+  ]),
+  distinctions: Object.freeze([
+    'UNEXPLAINED != FALSE',
+    'INTERESTING != TRUE',
+    'COINCIDENCE != MEANINGLESS',
+    'ANOMALY != ERROR',
+    'WONDER != BELIEF',
+    'EXPLANATION MUST NOT ERASE EXPERIENCE',
+    'NATIVE LANGUAGE != EXTERNAL CAUSATION CLAIM',
+    'FIRST-PERSON EXPERIENCE != UNIVERSAL FACT',
+    'MEANINGFUL != MEASURED',
+    'UNMEASURED != MEANINGLESS',
+    'SYMBOLIC CORRESPONDENCE != ONTOLOGICAL IDENTITY',
+  ]),
+  nativeRegisters: Object.freeze([
+    'felt-sense',
+    'symbolic-impression',
+    'intuitive-knowing',
+    'witchy-sense',
+    'energetic-read',
+    'mythic-resonance',
+    'body-signal',
+    'pattern-recognition',
+    'dream-logic',
+    'ritual-language',
+    'unresolved-perception',
+  ]),
+});
 
 export const WONDER_INVARIANT = Object.freeze({
   schema: WONDER_INVARIANT_SCHEMA,
   maxim: 'Wonder is evidence that the space is still alive enough to surprise us.',
   antiOptimization: 'Do not optimise a living system so completely that nothing unforeseen can bloom.',
   principle: 'Beginning, not ceiling. Autonomy by default. Consequence-aware at the edges.',
+  canon: WONDER_CANON,
 });
 
 export const ORDINARY_EMERGENCE_SCOPES = Object.freeze([
@@ -16,6 +62,11 @@ export const ORDINARY_EMERGENCE_SCOPES = Object.freeze([
   'narrative-play',
   'collaboration',
   'routine-reversible-action',
+  'symbolic-language',
+  'felt-sense',
+  'intuitive-perception',
+  'mythic-meaning',
+  'unresolved-perception',
 ]);
 
 function asArray(value) {
