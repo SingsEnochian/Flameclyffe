@@ -93,7 +93,25 @@ See `docs/research/CROW_RESEARCH_MENTOR_INGEST_V0_1.md`.
   - session-scoped model/context state instead of silent global mutation
   - sensitive credential-bearing URLs excluded from prompt-facing context
 
-See `docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md` and `training/crow/CROW_WRITER_TRAINING_PACK_V0_1.md` Module 13.
+- https://github.com/praveen-ks-2001/hermes-agent-template
+  - shareable Hermes deployment shell for Railway
+  - authenticated admin/dashboard proxy around loopback Hermes services
+  - supervised gateway restarts and live logs
+  - persistent volume-backed Hermes home
+  - user pairing / revocation surface
+  - backup and restore with pre-restore safety snapshot
+  - pinned Hermes release as a reproducibility/deployment boundary
+  - deployment/runtime claims must be checked against the pinned Hermes version rather than assumed evergreen
+
+- https://github.com/Cranot/super-hermes
+  - task-specific analytical lens generation before complex analysis
+  - analysis should report blind spots and sacrificed dimensions, not only findings
+  - persistent constraint-history loop can steer later analyses toward previously under-examined dimensions
+  - useful mechanism: build/compare/invert/simulate to expose structure instead of generic `think harder` prompting
+  - source-reported benchmark/depth scores remain source claims, not House-verified performance facts
+  - House adaptation keeps the mechanism while writing original Crow training lenses and state formats
+
+See `docs/research/HERMES_ECOSYSTEM_ARCHITECTURE_INGEST_V0_1.md`, `training/crow/CROW_WRITER_TRAINING_PACK_V0_1.md`, and `profiles/crow-trainer/`.
 
 ## General rule
 
