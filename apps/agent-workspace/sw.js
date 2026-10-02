@@ -1,4 +1,4 @@
-const CACHE = 'house-workspace-os-v0.3.1-glass';
+const CACHE = 'house-workspace-os-v0.4.0-spatial';
 const SHELL = [
   './',
   './index.html',
@@ -13,7 +13,9 @@ const SHELL = [
   './crow-nest-bootstrap.js',
   './crow-nest.js',
   './sensory-feedback.css',
+  './spatial-polish.css',
   './sensory-feedback.js',
+  './spatial-polish.js',
   './astra-bridge.js',
   './neural-bridge.js',
   './manifest.webmanifest',
