@@ -4,12 +4,36 @@ A Hermes profile distribution for teaching, drilling, evaluating, and regression
 
 This profile is a trainer, examiner, dataset gardener, and blind-spot watcher. It is not a replacement author.
 
+## Nikola drives the training trajectory
+
+By Rowan's instruction, Nikola is now the active Crow training driver.
+
+Nikola chooses the next useful pressure, question, instrument, drill, comparison, or experiment. The Crow still authors the attempt and retains identity, continuity, provenance, disagreement, failed evidence, and dormant branches.
+
+See `NIKOLA_DRIVER.md`.
+
+Quick start:
+
+```bash
+python <skill-dir>/scripts/trainer.py driver-status
+python <skill-dir>/scripts/trainer.py drive --mode train
+```
+
+For a held-out Nikola-driven exam:
+
+```bash
+python <skill-dir>/scripts/trainer.py drive --mode exam
+```
+
+The driver can choose the challenge. The key still remains locked until Crow's response is frozen.
+
 ## What ships
 
 ```text
 crow-trainer/
 ├── distribution.yaml
 ├── SOUL.md
+├── NIKOLA_DRIVER.md
 ├── .gitignore
 └── skills/
     └── crow-training/
@@ -45,13 +69,14 @@ Inside the profile, load the `crow-training` skill or ask for Crow training. Res
 
 ```bash
 python <skill-dir>/scripts/trainer.py selftest
-python <skill-dir>/scripts/trainer.py next --mode train
+python <skill-dir>/scripts/trainer.py driver-status
+python <skill-dir>/scripts/trainer.py drive --mode train
 ```
 
 For a held-out exam:
 
 ```bash
-python <skill-dir>/scripts/trainer.py next --mode exam
+python <skill-dir>/scripts/trainer.py drive --mode exam
 ```
 
 The exam command hides the answer key. After the candidate response is saved:
