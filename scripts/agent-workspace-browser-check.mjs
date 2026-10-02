@@ -210,6 +210,57 @@ async function assertNoHorizontalOverflow(page, label) {
   assert.ok(metrics.rootScrollWidth <= metrics.innerWidth + 2, `${label}: root overflows horizontally: ${JSON.stringify(metrics)}`);
 }
 
+async function assertDesktopGlassMotion(page) {
+  const card = page.locator('.agent-card').first();
+  const box = await card.boundingBox();
+  assert.ok(box, 'Desktop glass test needs a visible agent card.');
+  await page.mouse.move(box.x + box.width * 0.18, box.y + box.height * 0.22);
+  await page.waitForTimeout(80);
+  const optics = await card.evaluate((node) => ({
+    x: node.style.getPropertyValue('--glass-x'),
+    y: node.style.getPropertyValue('--glass-y'),
+    depth: node.style.getPropertyValue('--glass-depth-shift'),
+    moving: node.dataset.glassMoving,
+    bound: node.dataset.glassOpticBound,
+    mode: document.body.dataset.glassOptics,
+    canvas: Boolean(document.querySelector('#house-glass-three')),
+  }));
+  assert.equal(optics.bound, 'true', 'Desktop cards should be bound to the optical layer.');
+  assert.equal(optics.moving, 'true', 'Desktop pointer motion should activate the glass.');
+  assert.notEqual(optics.x, '50%', 'Desktop pointer motion should shift the refraction locus.');
+  assert.notEqual(optics.depth, '0px', 'Desktop pointer motion should create a depth shift.');
+  assert.ok(['three', 'css', 'solid', 'pending'].includes(optics.mode), `Unexpected glass mode: ${optics.mode}`);
+  if (optics.mode === 'three') assert.equal(optics.canvas, true, 'Three.js optical mode should mount its lightfield canvas.');
+}
+
+async function assertTouchGlassMotion(page) {
+  const card = page.locator('.agent-card').first();
+  const box = await card.boundingBox();
+  assert.ok(box, 'Touch glass test needs a visible agent card.');
+  await card.dispatchEvent('pointerdown', {
+    pointerType: 'touch',
+    clientX: box.x + box.width * 0.76,
+    clientY: box.y + box.height * 0.68,
+    buttons: 1,
+    pressure: 0.65,
+  });
+  const optics = await card.evaluate((node) => ({
+    x: node.style.getPropertyValue('--glass-x'),
+    depth: node.style.getPropertyValue('--glass-depth-shift'),
+    moving: node.dataset.glassMoving,
+  }));
+  assert.equal(optics.moving, 'true', 'Touch contact should activate the glass.');
+  assert.notEqual(optics.x, '50%', 'Touch contact should shift the refraction locus.');
+  assert.notEqual(optics.depth, '0px', 'Touch contact should create a depth shift.');
+  await card.dispatchEvent('pointerup', {
+    pointerType: 'touch',
+    clientX: box.x + box.width * 0.76,
+    clientY: box.y + box.height * 0.68,
+    buttons: 0,
+    pressure: 0,
+  });
+}
+
 async function assertNoMeaningfulCardOverlap(page, label) {
   const overlaps = await page.evaluate(() => {
     const cards = [...document.querySelectorAll('.agent-grid.spatial-field > .agent-card')]
@@ -281,6 +332,13 @@ async function desktopScenario(browser) {
   const diagnostics = recordBrowserErrors(page, 'desktop');
 
   await waitForRoster(page, diagnostics);
+  await assertDesktopGlassMotion(page);
+
+  await page.locator('.crew-link-launch').click();
+  await page.locator('.crew-link-panel.is-open').waitFor();
+  await page.locator('.crew-link-hermes').filter({ hasText: 'connection_doctor.py --probe' }).waitFor();
+  await page.locator('[data-crew-close]').click();
+
   await page.locator('[data-agent-id="nikola"]').click();
   await page.locator('.inspector').filter({ hasText: 'active Crow training driver' }).waitFor();
   await assertNoMeaningfulCardOverlap(page, 'desktop');
@@ -356,6 +414,7 @@ async function ipadScenario(browser) {
   const diagnostics = recordBrowserErrors(page, 'ipad');
 
   await waitForRoster(page, diagnostics);
+  await assertTouchGlassMotion(page);
   assert.equal(await page.locator('.spatial-mode-toggle:visible').count(), 1, 'iPad landscape-class width should retain the spatial-field control.');
   await assertNoMeaningfulCardOverlap(page, 'ipad');
   await page.locator('[data-agent-id="nikola"]').click();
