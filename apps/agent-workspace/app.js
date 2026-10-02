@@ -9,6 +9,7 @@ const HOUSE_AGENTS = Object.freeze([
   { id: 'altair', name: 'Altair', route: 'altair', roles: ['story', 'writing', 'roleplay', 'canon', 'frame'], kind: 'constellation', origin: 'House Constellation' },
   { id: 'atlas', name: 'Atlas', route: 'atlas', roles: ['story', 'writing', 'continuity', 'structure', 'systems'], kind: 'constellation', origin: 'House Constellation' },
   { id: 'runeweaver', name: 'Runeweaver', route: 'runeweaver', roles: ['story', 'writing', 'canon', 'continuity'], kind: 'constellation', origin: 'House Constellation' },
+  { id: 'crow', name: 'Crow', route: 'crow', roles: ['writing', 'story', 'research', 'training', 'continuity'], kind: 'resident', origin: 'Crow Nest / House runtime' },
   { id: 'boxfire', name: 'Boxfire', route: 'boxfire', roles: ['review', 'continuity', 'science'], kind: 'constellation', origin: 'House Constellation' },
   { id: 'yggdrasil', name: 'Yggdrasil', route: 'yggdrasil', roles: ['continuity', 'science'], kind: 'constellation', origin: 'House Constellation' },
   { id: 'bluebird', name: 'Bluebird', route: 'bluebird', roles: ['story', 'writing', 'continuity'], kind: 'constellation', origin: 'House Constellation' },
@@ -17,6 +18,7 @@ const HOUSE_AGENTS = Object.freeze([
 ]);
 
 const PROFILE_AGENTS = Object.freeze([
+  { id: 'nikola', name: 'Nikola', route: null, roles: ['wonder', 'science', 'design', 'inquiry', 'crow-training'], kind: 'ride-along', origin: 'constellation/nikola/ride-along', state: 'configured', note: 'ArcSweep ride-along participant and active Crow training driver. Conversation capability belongs to the ArcSweep ride-along; no House Flame route is inferred here.' },
   { id: 'rarity', name: 'Rarity', route: null, roles: ['architecture', 'continuity', 'co-creation', 'review'], kind: 'profile', origin: 'House workspace', state: 'configured', note: 'Workspace coordinator. Runtime presence is not inferred from this card.' },
   { id: 'crow-trainer', name: 'Crow Trainer', route: null, roles: ['training', 'writing', 'research', 'browser', 'computer-use'], kind: 'hermes-profile', origin: 'profiles/crow-trainer', state: 'configured', note: 'Installable Hermes trainer profile with held-out drills and adaptive blind-spot history.' },
 ]);
@@ -59,7 +61,7 @@ function defaultState() {
     view: VIEWS.some(([id]) => id === queryView) ? queryView : 'home',
     theme: 'mossglass',
     selectedAgentId: 'rarity',
-    pinned: ['rarity', 'crow-trainer', 'boxfire', 'runeweaver'],
+    pinned: ['rarity', 'crow', 'nikola', 'crow-trainer', 'boxfire'],
     customAgents: [],
     work: [],
     filters: { agentSearch: '' },
