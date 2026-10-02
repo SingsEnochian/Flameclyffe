@@ -8,27 +8,29 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [writing, training, evaluation, crow, authorship]
-    related_skills: []
+    related_skills: [wonder-field-design]
 ---
 
 # Crow Training Skill
 
-Train, test, and evaluate The Crow with a provenance-bound curriculum, machine-readable drills, held-out exams, browser labs, OS labs, and a blind-spot learning loop.
+Train, test, and evaluate The Crow with a provenance-bound curriculum, machine-readable drills, held-out exams, browser labs, OS labs, design work, and a blind-spot learning loop.
 
 This skill teaches judgement. It does not treat style metrics as truth, counterfeit author memory, or turn every craft heuristic into a global rule.
+
+For design, UI, sound, haptics, gesture, spatial/AR work, multimodal interaction, or speculative source translation, load the sibling `wonder-field-design` skill. It preserves Wonder First, extracts transferable structure before reduction, and requires implementation to retain the question that made the source interesting.
 
 ## When to Use
 
 Use when the user asks to:
 
 - train The Crow
-- run a writing, research, browser, or OS drill
+- run a writing, research, browser, OS, or design drill
 - evaluate a Crow response
 - inspect training coverage or regressions
 - build new Crow training examples
 - run a held-out exam
 - compare candidate revisions
-- teach Character Becoming, Relationship Becoming, setting, reader promise, pacing, voice, research discipline, browser discipline, or desktop/tool discipline
+- teach Character Becoming, Relationship Becoming, setting, reader promise, pacing, voice, research discipline, browser discipline, desktop/tool discipline, or multimodal design judgement
 
 Don't use for ordinary writing where no training loop is requested, silent canon mutation, or unapproved submission/publishing.
 
@@ -39,6 +41,7 @@ Don't use for ordinary writing where no training loop is requested, silent canon
 - `delegate_task` is recommended for uncontaminated held-out exams.
 - Browser labs use the `browser` toolset when available.
 - OS labs use `computer_use` when available. Hermes gates availability at runtime; absence is a valid degraded state.
+- Multimodal design work should load `wonder-field-design` and pass its compact inheritance packet to delegated nestlings.
 
 The skill ships:
 
@@ -118,6 +121,8 @@ Completion criterion: one mode is explicit before loading more than the minimum 
 
 Resolve purpose, reader/operator, project/world, authority boundary, source/canon boundary, and the desired evidence of success.
 
+For multimodal design, also resolve which question must survive implementation and which media are relevant.
+
 Completion criterion: the trainer can state what success would look like without saying only `good`, `human`, or `better`.
 
 ### 3. Generate a task-specific lens for complex work
@@ -136,6 +141,22 @@ What observations would falsify the current hypothesis?
 
 BLIND SPOTS
 What will this lens probably under-examine?
+```
+
+For design tasks, extend this with the Wonder-Field questions:
+
+```text
+WONDER
+What strange or generative question are we protecting from premature reduction?
+
+PATTERN
+What reusable structural relationship does the source suggest?
+
+INVARIANT
+What must survive device, model, renderer, or modality changes?
+
+OPEN BRANCH
+What meaningful alternative must not be erased by this pass?
 ```
 
 This is an original House adaptation of the task-specific analytical-prism idea. Do not copy an external prism corpus into local doctrine.
@@ -163,6 +184,8 @@ Completion criterion: a drill id and input are selected by the script.
 For training, The Crow may answer in the current context.
 
 For exams, prefer `delegate_task` with only the prompt, task, and required project context. Do not send `ideal_behavior`, `reject_behavior`, or evaluator notes to the student.
+
+When delegating multimodal design work, pass only the smallest useful Wonder-Field inheritance packet rather than the whole curriculum.
 
 Completion criterion: candidate response exists before answer-key access.
 
@@ -194,6 +217,8 @@ symptom
 ```
 
 Do not collapse all dimensions into one score.
+
+For Wonder-Field work, explicitly check whether the candidate preserved the source question, extracted a reusable pattern, distinguished analogy from mechanism, used media semantically, and left a dormant branch rather than pruning everything unselected.
 
 Completion criterion: pass/partial/fail is supported by evidence from the candidate.
 
@@ -248,11 +273,7 @@ python <skill-dir>/scripts/trainer.py record --id <id> --verdict <pass|partial|f
 Then, on substantial work, record a constraint report:
 
 ```text
-python <skill-dir>/scripts/trainer.py constraint \
-  --artifact "<task/artifact>" \
-  --maximized "<what this pass was designed to find>" \
-  --sacrificed "<what it probably under-examined>" \
-  --next "<the next useful lens or test>"
+python <skill-dir>/scripts/trainer.py constraint   --artifact "<task/artifact>"   --maximized "<what this pass was designed to find>"   --sacrificed "<what it probably under-examined>"   --next "<the next useful lens or test>"
 ```
 
 Future training should preferentially cover recurring sacrificed dimensions.
@@ -261,7 +282,7 @@ Completion criterion: `report` reflects both performance and blind-spot history.
 
 ### 11. Temper rather than thrash
 
-If the candidate fails, change the smallest useful variable or assign a targeted drill. Do not rewrite voice, plot, canon, setting, character motivation, tool strategy, and sentence style all at once unless the task truly requires reconstruction.
+If the candidate fails, change the smallest useful variable or assign a targeted drill. Do not rewrite voice, plot, canon, setting, character motivation, tool strategy, sensory language, interaction model, and sentence style all at once unless the task truly requires reconstruction.
 
 Completion criterion: the next attempt tests a specific hypothesis about the failure.
 
@@ -290,6 +311,8 @@ style pattern != identity
 simulation != canon
 revision != erasure
 draft != submit
+analogy != identity
+rendering != reality
 ```
 
 ## Pitfalls
@@ -304,6 +327,10 @@ draft != submit
 8. Copying external analytical-lens wording instead of learning the mechanism.
 9. Calling missing runtime capability a student failure.
 10. Optimising one eval dimension until another quietly regresses.
+11. Flattening a strange design source into only present-day implementation limits before extracting its structural value.
+12. Turning speculative or mythic material into an untyped factual claim.
+13. Treating UI, sound, haptics, or gesture as decorative skins instead of one semantic system.
+14. Deleting "noise" that should have remained dormant, unresolved, or backgrounded.
 
 ## Verification
 
@@ -317,7 +344,10 @@ A functioning installation should satisfy all of these:
 - `constraint` appears in the blind-spot history count.
 - a browser lab can report context used and excluded when browser tools are available.
 - an OS lab predicts, performs, re-observes, and verifies a state transition when `computer_use` is available.
+- a Wonder-Field design pass can state its protected question, extracted pattern, invariant, modality weave, prototype seam, and open branch.
 
 ## Governing Principle
 
 Teach the Crow to become better at the work, and also better at noticing what its own method failed to examine.
+
+When the work is strange, begin with Wonder before asking it to become ordinary.
