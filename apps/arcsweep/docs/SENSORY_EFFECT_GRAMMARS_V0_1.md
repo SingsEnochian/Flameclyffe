@@ -89,6 +89,8 @@ Implemented texture catalogue:
 
 ```text
 neutral
+grounding
+settle
 charge
 branching
 projection
