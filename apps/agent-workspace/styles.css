@@ -268,3 +268,121 @@ label { display: grid; gap: .32rem; color: var(--muted); font-size: .78rem; }
   :root { --surface: #16231f; --surface-raised: #1c2b26; --surface-input: #0d1714; }
   .glass, .rail, .inspector, .mobile-nav { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 }
+
+
+/* ArcSweep physical-glass material pass v0.1
+   Material cue order: transmission -> reflection -> thickness -> specular.
+   Glow remains semantic and sparse. */
+:root {
+  --glass-transmission: rgba(255,255,255,.045);
+  --glass-reflection-cool: rgba(132,162,154,.11);
+  --glass-reflection-warm: rgba(216,181,106,.07);
+  --glass-specular: rgba(255,255,255,.24);
+  --glass-edge-shadow: rgba(0,0,0,.24);
+  --glass-caustic: rgba(216,181,106,.06);
+}
+
+body[data-theme="mossglass"] {
+  --glass-reflection-cool: rgba(132,162,154,.13);
+  --glass-reflection-warm: rgba(152,143,189,.07);
+}
+
+body[data-theme="lapis"] {
+  --glass-reflection-cool: rgba(152,143,189,.15);
+  --glass-reflection-warm: rgba(132,162,154,.065);
+}
+
+body[data-theme="hearthglass"] {
+  --glass-reflection-cool: rgba(142,188,166,.09);
+  --glass-reflection-warm: rgba(216,181,106,.12);
+  --glass-caustic: rgba(216,181,106,.09);
+}
+
+.glass {
+  position: relative;
+  isolation: isolate;
+  border-color: color-mix(in srgb, var(--rim) 76%, transparent);
+  background:
+    linear-gradient(118deg,
+      color-mix(in srgb, var(--glass-specular) 45%, transparent) 0%,
+      transparent 14% 70%,
+      color-mix(in srgb, var(--rim-strong) 12%, transparent) 100%),
+    radial-gradient(circle at 12% -8%, var(--glass-reflection-warm), transparent 34%),
+    radial-gradient(circle at 96% 108%, var(--glass-reflection-cool), transparent 38%),
+    linear-gradient(145deg,
+      color-mix(in srgb, var(--surface-raised) 69%, transparent),
+      color-mix(in srgb, var(--surface) 57%, transparent));
+  box-shadow:
+    inset 1px 1px 0 var(--glass-specular),
+    inset -1px -1px 0 var(--glass-edge-shadow),
+    inset 0 -18px 34px color-mix(in srgb, var(--glass-reflection-cool) 38%, transparent),
+    var(--shadow);
+  backdrop-filter: blur(calc(var(--blur) * .78)) saturate(132%);
+  -webkit-backdrop-filter: blur(calc(var(--blur) * .78)) saturate(132%);
+}
+
+.glass .glass {
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--glass-reflection-warm) 70%, transparent), transparent 28%),
+    linear-gradient(145deg,
+      color-mix(in srgb, var(--surface-raised) 62%, transparent),
+      color-mix(in srgb, var(--surface) 52%, transparent));
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, var(--glass-specular) 68%, transparent),
+    inset -1px -1px 0 color-mix(in srgb, var(--glass-edge-shadow) 68%, transparent);
+}
+
+.agent-card,
+.work-item,
+.stat-card,
+.capability,
+.mobile-nav,
+.inspector,
+.rail {
+  background-image:
+    linear-gradient(122deg, color-mix(in srgb, var(--glass-specular) 16%, transparent), transparent 16% 76%, color-mix(in srgb, var(--glass-reflection-cool) 28%, transparent)),
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--glass-reflection-warm) 48%, transparent), transparent 31%);
+}
+
+.agent-card.active,
+.nav-button.active,
+.mobile-nav button.active {
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, var(--glass-specular) 82%, transparent),
+    inset -1px -1px 0 color-mix(in srgb, var(--glass-edge-shadow) 72%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--accent-2) 16%, transparent),
+    0 12px 36px color-mix(in srgb, var(--glow) 66%, transparent);
+}
+
+.primary,
+.ghost,
+.chip-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.ghost,
+.chip-button {
+  background:
+    linear-gradient(118deg, color-mix(in srgb, var(--glass-specular) 18%, transparent), transparent 24% 78%, color-mix(in srgb, var(--glass-reflection-cool) 22%, transparent)),
+    var(--surface-input);
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, var(--glass-specular) 55%, transparent),
+    inset -1px -1px 0 color-mix(in srgb, var(--glass-edge-shadow) 58%, transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .agent-card,
+  .work-item,
+  .stat-card,
+  .capability,
+  .mobile-nav,
+  .inspector,
+  .rail,
+  .ghost,
+  .chip-button {
+    background-image: none !important;
+    box-shadow: none;
+  }
+}
