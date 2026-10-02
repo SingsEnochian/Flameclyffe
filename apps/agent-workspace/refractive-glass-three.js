@@ -55,15 +55,25 @@ function bindPanel(panel){
   };
   settle();
 
+  const pointerIntensity=(event)=>{
+    if(event.pointerType==='pen') return 0.68+Math.max(0,Math.min(1,event.pressure||0.35))*0.48;
+    if(coarsePointer.matches||event.pointerType==='touch') return 0.72;
+    return 1;
+  };
+  const steer=(event)=>{
+    const samples=event.getCoalescedEvents?.() || [event];
+    const sample=samples[samples.length-1] || event;
+    move(sample.clientX,sample.clientY,pointerIntensity(sample));
+  };
   panel.addEventListener('pointermove',(event)=>{
     // Fine pointers steer on hover. Coarse pointers steer while the finger/stylus is in contact.
-    if(coarsePointer.matches && event.buttons===0 && event.pressure===0) return;
+    if((coarsePointer.matches||event.pointerType==='touch') && event.buttons===0 && event.pressure===0) return;
     clearTimeout(settleTimer);
-    move(event.clientX,event.clientY,coarsePointer.matches?0.72:1);
+    steer(event);
   },{passive:true});
   panel.addEventListener('pointerdown',(event)=>{
     clearTimeout(settleTimer);
-    move(event.clientX,event.clientY,coarsePointer.matches?0.72:1);
+    steer(event);
   },{passive:true});
   const relax=()=>{ settleTimer=setTimeout(settle,coarsePointer.matches?260:90); };
   panel.addEventListener('pointerup',relax,{passive:true});
