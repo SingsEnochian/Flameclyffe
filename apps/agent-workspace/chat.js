@@ -12,6 +12,7 @@ const CHAT_AGENTS = Object.freeze([
   { id: 'atlas', name: 'Atlas', route: 'atlas' },
   { id: 'runeweaver', name: 'Runeweaver', route: 'runeweaver' },
   { id: 'crow', name: 'Crow', route: 'crow' },
+  { id: 'nikola', name: 'Nikola', transport: 'constellation', endpoint: '/api/v1/constellation/nikola/chat' },
   { id: 'boxfire', name: 'Boxfire', route: 'boxfire' },
   { id: 'yggdrasil', name: 'Yggdrasil', route: 'yggdrasil' },
   { id: 'bluebird', name: 'Bluebird', route: 'bluebird' },
@@ -20,6 +21,8 @@ const CHAT_AGENTS = Object.freeze([
 ]);
 
 const routePath = (route) => String(route).split('/').map((segment) => encodeURIComponent(segment)).join('/');
+const chatEndpoint = (agent) => agent.endpoint || `/api/v1/flames/${routePath(agent.route)}/chat`;
+const runtimeIdentity = (data = {}) => String(data.identity_id || data.flame_id || '').trim().toLowerCase();
 const agentById = (id) => CHAT_AGENTS.find((agent) => agent.id === id) || CHAT_AGENTS.find((agent) => agent.id === 'boxfire') || CHAT_AGENTS[0];
 
 function freshSessionId() {
@@ -161,7 +164,7 @@ async function sendMessage(message) {
   renderChat();
 
   try {
-    const data = await readJson(await requestWithTimeout(`/api/v1/flames/${routePath(agent.route)}/chat`, {
+    const data = await readJson(await requestWithTimeout(chatEndpoint(agent), {
       method: 'POST',
       credentials: 'same-origin',
       cache: 'no-store',
@@ -169,8 +172,9 @@ async function sendMessage(message) {
       body: JSON.stringify({ message: clean, session_id: sessionId, context: prior }),
     }));
 
-    if (data.flame_id && String(data.flame_id).toLowerCase() !== String(agent.route.split('/').at(-1)).toLowerCase()) {
-      throw new Error(`Runtime mismatch: expected ${agent.name}, received ${data.flame_id}.`);
+    const observedIdentity = runtimeIdentity(data);
+    if (observedIdentity && observedIdentity !== agent.id.toLowerCase()) {
+      throw new Error(`Runtime mismatch: expected ${agent.name}, received ${observedIdentity}.`);
     }
     appendMessage(agent.id, 'agent', data.message || '(No message returned.)', {
       provider: data.provider || null,
