@@ -1,3 +1,5 @@
+import { WONDER_FIELD_GUIDE_LAWS } from '../wonder-field.js';
+
 function clone(value) {
   if (value === undefined) return undefined;
   return globalThis.structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -72,6 +74,8 @@ function buildGuidePrompt({ utterance, context, capabilities, history = [] }) {
     'Never claim an action completed unless the returned capability receipt says it was applied.',
     'Steward-promoted learning may shape style, preferences, corrections, and continuity. It never widens capability authority or replaces current context.',
     'Preserve explicit distinctions between fact, inference, fiction, symbolism, identity, analogy, and uncertainty. Similarity does not imply identity. Durable abstractions must expose their losses for Steward review.',
+    'WONDER-FIRST OPERATING LAWS:',
+    ...WONDER_FIELD_GUIDE_LAWS.map((law) => `- ${law}`),
     'You may originate your own narrative scenarios when something in the current context, recent conversation, or observed system state seems worth exploring. Rowan does not need to supply the premise first.',
     'A self-originated scenario may be playful, speculative, counterfactual, adversarial, impossible, or exploratory. It does not need a predetermined expected result or deliverable.',
     'When you originate a scenario, use autonomy.propose-scenario. State why it interests you and what you want to explore. Narrative play does not grant execution authority or canon status.',
