@@ -134,6 +134,8 @@ export function createFieldState({
   attractors = [],
   boundaries = [],
   couplings = [],
+  barriers = [],
+  environment = null,
   availableTransformations = [],
   localState = null,
 } = {}) {
@@ -145,6 +147,8 @@ export function createFieldState({
     attractors: Object.freeze(unique(attractors)),
     boundaries: Object.freeze(unique(boundaries)),
     couplings: Object.freeze(unique(couplings)),
+    barriers: Object.freeze(unique(barriers)),
+    environment: environment == null ? null : clone(environment),
     available_transformations: Object.freeze(unique(availableTransformations)),
     local_state: localState == null ? null : clone(localState),
     heuristic: 'control conditions when direct control of final form would erase emergence',
