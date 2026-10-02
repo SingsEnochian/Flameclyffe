@@ -398,3 +398,35 @@ This House skill synthesises transferable lessons from:
 - `umayado17/simple-system-builder` for minimum-sufficient architecture, boundary isolation, GitHub-as-development-truth, and vertical-slice execution
 
 External source-specific mandates are not House law unless explicitly promoted.
+
+
+---
+
+# ArcSweep glass material model
+
+For ArcSweep, Flameclyffe glass/AR work, use the dedicated material doctrine:
+
+```text
+school/skills/house-ui-design/ARCSWEEP_GLASS_MATERIAL_DOCTRINE_V0_1.md
+```
+
+The short rule is:
+
+```text
+silhouette -> planes -> value -> transmission -> reflection -> refraction -> highlight -> caustic -> environment response
+```
+
+Do not start from blur or glow. Establish physical/material cues first, then apply sparse luminous semantics.
+
+Critical cues:
+- variable transparency rather than one uniform opacity;
+- stronger edge/rim cues where glass is thick;
+- environment-derived reflections;
+- justified refraction/distortion;
+- crisp selective highlights;
+- stronger reflection at glancing angles;
+- optional caustics for thick/lens/crystal controls;
+- scene colour reflected into the material.
+
+ArcSweep glass combines this with the adopted graphite/ink field-notebook visual language. The world remains hand-drawn; responsive glass instrumentation grows through and over it.
+
