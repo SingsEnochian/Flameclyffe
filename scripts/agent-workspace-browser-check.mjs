@@ -23,7 +23,7 @@ async function waitForServer() {
   const deadline = Date.now() + 15_000;
   while (Date.now() < deadline) {
     try {
-      const response = await fetch(BASE, { cache: 'no-store' });
+      const response = await fetch(INDEX_URL, { cache: 'no-store' });
       if (response.ok) return;
     } catch {}
     await new Promise((resolve) => setTimeout(resolve, 180));
@@ -220,7 +220,7 @@ async function waitForRoster(page) {
   // Navigation readiness is the rendered workspace, not DOMContentLoaded. Module graphs,
   // service-worker registration, or slow non-critical resources must not turn a healthy
   // static workspace into a false navigation timeout.
-  await page.goto(`${BASE}?view=agents`, { waitUntil: 'commit', timeout: 15_000 });
+  await page.goto(`${INDEX_URL}?view=agents`, { waitUntil: 'commit', timeout: 15_000 });
   try {
     await page.locator('.workspace-shell').waitFor({ state: 'visible', timeout: 30_000 });
   } catch (error) {
