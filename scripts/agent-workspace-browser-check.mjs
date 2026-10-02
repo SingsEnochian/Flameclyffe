@@ -211,7 +211,7 @@ async function assertNoMeaningfulCardOverlap(page, label) {
 }
 
 async function waitForRoster(page) {
-  await page.goto(`${BASE}?view=agents`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}?view=agents`, { waitUntil: 'domcontentloaded', timeout: 15_000 });
   await page.locator('.workspace-shell').waitFor();
   await page.locator('[data-agent-id="nikola"]').waitFor();
   assert.equal(await page.locator('.agent-card').count(), 16, 'Expected the 12 House voices plus Crow, Nikola, Rarity, and Crow Trainer.');
@@ -305,9 +305,18 @@ let browser;
 try {
   await waitForServer();
   browser = await chromium.launch({ headless: true });
-  await desktopScenario(browser);
-  await ipadScenario(browser);
-  await phoneScenario(browser);
+  for (const [label, scenario] of [
+    ['desktop', desktopScenario],
+    ['ipad', ipadScenario],
+    ['phone', phoneScenario],
+  ]) {
+    try {
+      await scenario(browser);
+    } catch (error) {
+      console.error(`House Workspace ${label} acceptance failed:`, error);
+      throw error;
+    }
+  }
   console.log('House Workspace browser acceptance passed: desktop, iPad, and phone.');
 } finally {
   await browser?.close().catch(() => {});
