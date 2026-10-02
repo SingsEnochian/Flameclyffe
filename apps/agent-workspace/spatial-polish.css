@@ -173,6 +173,30 @@
   height: .72rem;
 }
 
+.agent-grid.spatial-field .agent-card[data-presence-state="ready"],
+.agent-grid.spatial-field .agent-card[data-presence-state="thinking"],
+.agent-grid.spatial-field .agent-card[data-presence-state="speaking"] {
+  border-color: color-mix(in srgb, var(--ok) 34%, var(--rim));
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, white 9%, transparent),
+    0 0 28px color-mix(in srgb, var(--ok) 9%, transparent),
+    0 14px 38px rgba(0,0,0,.20);
+}
+.agent-grid.spatial-field .agent-card[data-presence-state="configured"] {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent-2) 28%, var(--rim));
+}
+.agent-grid.spatial-field .agent-card[data-presence-state="degraded"],
+.agent-grid.spatial-field .agent-card[data-presence-state="error"] {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--danger) 52%, var(--rim));
+  filter: saturate(.78);
+}
+.agent-grid.spatial-field .agent-card[data-presence-state="offline"] {
+  opacity: .78;
+  filter: saturate(.68);
+}
+
 .spatial-field-note {
   position: absolute;
   left: 1rem;
