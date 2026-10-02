@@ -60,6 +60,6 @@ test('offline shell includes chat and Crow Nest assets', () => {
 });
 
 
-test('chat does not invent a direct Crow House route before runtime binding', () => {
-  assert.doesNotMatch(chat, /\{ id: 'crow', name: 'Crow', route: 'crow' \}/);
+test('chat exposes the dedicated Crow House route', () => {
+  assert.match(chat, /\{ id: 'crow', name: 'Crow', route: 'crow' \}/);
 });
