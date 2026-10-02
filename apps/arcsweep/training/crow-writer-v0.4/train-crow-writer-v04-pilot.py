@@ -58,12 +58,10 @@ TRAIN = [
 
 HELD = [
     ("yearning", "DIAGNOSE: The characters say almost nothing romantic, yet I want the scene to ache. What should carry the pressure?"),
-    ("mature", "DIAGNOSE: A consensual adult intimate scene is emotionally flat even though the physical sequence is detailed. What is missing?"),
-    ("structure", "DIAGNOSE: A witty scene is fun to read but can be removed without changing the story. What should I inspect first?"),
     ("revision", "COMPARE: A strange metaphor is clear in context but an editor suggests replacing it with a conventional one. How should we decide?")
 ]
 
-def generate(model, tokenizer, prompt, max_new_tokens=150):
+def generate(model, tokenizer, prompt, max_new_tokens=64):
     text = tokenizer.apply_chat_template(
         [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}],
         tokenize=False,
@@ -202,7 +200,7 @@ def main():
             "event": "posttrain_probe",
             "family": family,
             "prompt": prompt,
-            "text": generate(trainer.model, tokenizer, prompt, 180),
+            "text": generate(trainer.model, tokenizer, prompt, 96),
         }, ensure_ascii=False))
 
     upload_status = "not_requested"
