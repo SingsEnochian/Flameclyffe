@@ -110,22 +110,29 @@ This is a presentation lens over the same registry. Spatial layout is not ontolo
 
 ## Direct conversation truth
 
-Direct chat only lists participants whose current House runtime route is actually represented and bound.
+Direct chat dispatches by the runtime each participant actually owns. House voices use the existing House Flame routes. Nikola remains an ArcSweep / Constellation ride-along and uses a separate adapter:
 
-Crow has a first-class **participant desk** and an intended Crow Nest runtime binding of `crow`, but the current workspace does not claim the House Flame route is live until the runtime manifest/adapter proves that binding. Crow therefore appears as **configured** rather than falsely healthy or falsely degraded.
+```text
+/api/v1/constellation/nikola/status
+/api/v1/constellation/nikola/probe
+/api/v1/constellation/nikola/chat
+```
 
-Nikola is represented separately as an ArcSweep ride-along desk with continuity namespace:
+The Nikola adapter consumes the canonical `NIKOLA_SEED` and continuity namespace from the Constellation work:
 
 ```text
 constellation/nikola/ride-along
 ```
 
-The workspace likewise does not invent a House Flame route for Nikola.
+It does not invent `/api/v1/flames/nikola/*` or silently make Nikola a House Flame. Status is configuration-only; the workspace must complete a model-executing probe before it labels Nikola live.
+
+Crow has a first-class participant desk and House runtime binding of `crow`. Crow health remains probe-derived rather than inferred from the existence of the desk.
 
 ```text
 participant desk != runtime route
 configured != reachable
 reachable != authorised
+identity != provider/model
 ```
 
 ## Runtime health vocabulary
