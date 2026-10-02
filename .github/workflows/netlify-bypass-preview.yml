@@ -33,17 +33,23 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Verify exact branch and deploy credential
+        id: auth
         shell: bash
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "rarity/test-flight-glass-connections-v0-1"
-          if [ -z "${NETLIFY_AUTH_TOKEN:-}" ]; then
-            echo "::error::NETLIFY_AUTH_TOKEN is not configured in GitHub Actions."
-            exit 42
-          fi
           printf 'branch=%s\nsha=%s\nsite=%s\n' "${GITHUB_REF_NAME}" "${GITHUB_SHA}" "${NETLIFY_SITE_ID}" > netlify-preview-source.txt
+          if [ -z "${NETLIFY_AUTH_TOKEN:-}" ]; then
+            echo "available=false" >> "${GITHUB_OUTPUT}"
+            printf 'status=held\nreason=NETLIFY_AUTH_TOKEN_not_configured\n' >> netlify-preview-source.txt
+            echo "::notice::Netlify bypass held: NETLIFY_AUTH_TOKEN is not configured in GitHub Actions."
+          else
+            echo "available=true" >> "${GITHUB_OUTPUT}"
+            printf 'status=credential-present\n' >> netlify-preview-source.txt
+          fi
 
       - name: Deploy exact branch to secondary Netlify preview
+        if: steps.auth.outputs.available == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -55,6 +61,7 @@ jobs:
             --json | tee netlify-preview-receipt.json
 
       - name: Verify preview receipt is not production
+        if: steps.auth.outputs.available == 'true'
         shell: bash
         run: |
           node - <<'NODE'
