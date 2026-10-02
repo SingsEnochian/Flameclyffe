@@ -338,3 +338,106 @@
   .crow-nest-shell { background: #07110f; backdrop-filter: none; }
   .crow-nest-hud, .crow-nest-comms, .crow-nest-panel, .crow-nest-node { background: #0d1916; backdrop-filter: none; }
 }
+
+
+/* Crow Nest physical-glass pass v0.1
+   Neutral glass carries reflected environment colour; active state carries light. */
+:root {
+  --nest-glass-specular: rgba(255,255,255,.25);
+  --nest-glass-cool: color-mix(in srgb, var(--accent, #84a29a) 14%, transparent);
+  --nest-glass-warm: rgba(216,181,106,.07);
+  --nest-glass-edge: rgba(0,0,0,.24);
+}
+
+.crow-nest-hud,
+.crow-nest-comms,
+.crow-nest-panel {
+  background:
+    linear-gradient(118deg, rgba(255,255,255,.09), transparent 15% 74%, color-mix(in srgb, var(--accent, #84a29a) 9%, transparent)),
+    radial-gradient(circle at 14% -4%, var(--nest-glass-warm), transparent 32%),
+    radial-gradient(circle at 96% 105%, var(--nest-glass-cool), transparent 36%),
+    linear-gradient(145deg, rgba(255,255,255,.052), rgba(255,255,255,.018));
+  border-color: color-mix(in srgb, var(--nest-rim) 28%, transparent);
+  box-shadow:
+    inset 1px 1px 0 var(--nest-glass-specular),
+    inset -1px -1px 0 var(--nest-glass-edge),
+    inset 0 -16px 28px color-mix(in srgb, var(--nest-glass-cool) 42%, transparent),
+    0 20px 56px rgba(0,0,0,.28);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.crow-nest-launch,
+.crow-nest-glyph {
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255,255,255,.38), transparent 12%),
+    linear-gradient(126deg, rgba(255,255,255,.11), transparent 32% 72%, var(--nest-glass-cool)),
+    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--accent, #84a29a) 24%, transparent), rgba(4,14,12,.78) 68%);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.26),
+    inset -2px -2px 0 rgba(0,0,0,.22),
+    0 0 28px var(--nest-rim-soft),
+    0 18px 48px rgba(0,0,0,.38);
+}
+
+.crow-presence {
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255,255,255,.34), transparent 11%),
+    linear-gradient(120deg, rgba(255,255,255,.065), transparent 26% 72%, var(--nest-glass-cool)),
+    radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--accent, #84a29a) 28%, transparent), rgba(1,10,9,.67) 58%, rgba(0,0,0,.76));
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.18),
+    inset -2px -2px 0 rgba(0,0,0,.26),
+    0 0 70px var(--nest-rim-soft);
+}
+
+.crow-nest-node,
+.crow-nest-detail,
+.crow-nest-list-row,
+.crow-nest-bubble {
+  background:
+    linear-gradient(122deg, rgba(255,255,255,.055), transparent 20% 78%, color-mix(in srgb, var(--accent, #84a29a) 7%, transparent)),
+    rgba(4,16,14,.62);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.09),
+    inset -1px -1px 0 rgba(0,0,0,.18),
+    0 12px 30px rgba(0,0,0,.2);
+}
+
+.crow-nest-node.active,
+.crow-nest-chip[data-state="live"],
+.crow-nest-chip[data-state="witnessed"] {
+  border-color: color-mix(in srgb, var(--nest-rim) 68%, transparent);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.18),
+    0 0 24px color-mix(in srgb, var(--accent, #84a29a) 20%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .crow-nest-button,
+  .crow-nest-icon-button,
+  .crow-nest-node {
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  }
+  .crow-nest-button:hover,
+  .crow-nest-icon-button:hover {
+    border-color: color-mix(in srgb, var(--nest-rim) 58%, transparent);
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.18), 0 0 18px var(--nest-rim-soft);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .crow-nest-hud,
+  .crow-nest-comms,
+  .crow-nest-panel,
+  .crow-nest-launch,
+  .crow-nest-glyph,
+  .crow-presence,
+  .crow-nest-node,
+  .crow-nest-detail,
+  .crow-nest-list-row,
+  .crow-nest-bubble {
+    background-image: none !important;
+    box-shadow: none;
+  }
+}
