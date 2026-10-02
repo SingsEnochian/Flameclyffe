@@ -11,7 +11,7 @@ import {
 
 test('somatic texture catalog separates meaning from rendering texture', () => {
   const ids = listSomaticTextures().map((item) => item.id);
-  for (const id of ['neutral', 'charge', 'branching', 'projection', 'dream', 'damping', 'return', 'focus', 'uncertainty']) {
+  for (const id of ['neutral', 'grounding', 'settle', 'charge', 'branching', 'projection', 'dream', 'damping', 'return', 'focus', 'uncertainty']) {
     assert.ok(ids.includes(id), `missing somatic texture: ${id}`);
   }
   const claim = somaticTextureClaim(getSomaticTexture('projection'));
