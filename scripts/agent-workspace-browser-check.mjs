@@ -217,6 +217,7 @@ async function assertNoMeaningfulCardOverlap(page, label) {
 }
 
 async function waitForRoster(page) {
+  console.log('[browser-acceptance] navigate workspace index');
   // Navigation readiness is the rendered workspace, not DOMContentLoaded. Module graphs,
   // service-worker registration, or slow non-critical resources must not turn a healthy
   // static workspace into a false navigation timeout.
@@ -237,11 +238,14 @@ async function waitForRoster(page) {
   }
   await page.locator('[data-agent-id="nikola"]').waitFor({ state: 'visible', timeout: 30_000 });
   assert.equal(await page.locator('.agent-card').count(), 16, 'Expected the 12 House voices plus Crow, Nikola, Rarity, and Crow Trainer.');
+  console.log('[browser-acceptance] workspace shell and roster rendered');
 
   await page.locator('[data-refresh-roster]').first().click();
+  console.log('[browser-acceptance] roster refresh requested');
   await page.locator('[data-agent-id="nikola"] .badge.state').filter({ hasText: 'live' }).waitFor();
   await page.locator('[data-agent-id="oxalpha"] .badge.state').filter({ hasText: 'live' }).waitFor();
   assert.equal(await page.locator('.badge.state').filter({ hasText: /^degraded$/i }).count(), 0, 'No healthy fixture should be painted as degraded.');
+  console.log('[browser-acceptance] roster probes verified');
 }
 
 async function desktopScenario(browser) {
@@ -329,9 +333,26 @@ async function phoneScenario(browser) {
   await context.close();
 }
 
+async function runBoundedScenario(label, scenario, browser, timeoutMs = 60_000) {
+  console.log(`[browser-acceptance] ${label} scenario start`);
+  let timer;
+  try {
+    await Promise.race([
+      scenario(browser),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`House Workspace ${label} scenario exceeded ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
+    console.log(`[browser-acceptance] ${label} scenario complete`);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 let browser;
 try {
   await waitForServer();
+  console.log('[browser-acceptance] static index is reachable');
   browser = await chromium.launch({ headless: true });
   for (const [label, scenario] of [
     ['desktop', desktopScenario],
@@ -339,7 +360,7 @@ try {
     ['phone', phoneScenario],
   ]) {
     try {
-      await scenario(browser);
+      await runBoundedScenario(label, scenario, browser);
     } catch (error) {
       console.error(`House Workspace ${label} acceptance failed:`, error);
       if (activePage && !activePage.isClosed()) {
