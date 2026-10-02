@@ -341,6 +341,48 @@ Support cognitive modes:
 - Decide: select under explicit criteria
 - Dream: permit unusual recombination with provenance intact
 
+### J. Quantum / Spiritual Resonance Lens
+
+Use quantum concepts as a disciplined source of structural questions when a design, story, ritual, or cognitive system benefits from both/and thinking, uncertainty, interconnection, participation, environmental coupling, or open possibility.
+
+The point is not to make spirituality "scientific" by borrowing quantum vocabulary. The point is to let well-defined physical ideas provoke new architecture while keeping the bridge typed.
+
+Source-pattern translations:
+
+- wave/particle complementarity -> one entity may require different valid representations under different interactions
+- entanglement -> relationship can be a property of the whole system, not reducible to isolated nodes
+- uncertainty -> some dimensions cannot be made arbitrarily precise at the same time; interfaces should expose tradeoffs instead of pretending total knowledge
+- superposition -> preserve multiple live possibilities before commitment
+- measurement/observation -> participation changes the information available and may alter subsequent state
+- nonlocal correlation -> do not assume everyday spatial intuition exhausts the possible structure of relationships
+- collapse/selection -> commitment turns a possibility field into one enacted trajectory while receipts preserve what was not selected
+- tunnelling -> search for lawful paths through apparent barriers rather than assuming the classical route is the only route
+- decoherence -> environment is part of state formation; context can stabilise, scramble, or select behaviour
+- quantum consciousness -> keep as an open research question unless a task provides stronger evidence; use it to generate experiments and philosophy, not counterfeit conclusions
+
+Design questions:
+
+- What must be represented as a relation rather than an object?
+- Which states should remain co-present rather than prematurely resolved?
+- What does observing or interacting with this element change?
+- Which uncertainties are structural rather than defects?
+- Which environmental interactions select the visible state?
+- Is an apparent barrier truly forbidden, or merely inaccessible through the current path?
+- What survives after a choice, measurement, or commitment?
+- What alternate interpretations should remain inspectable?
+
+Multimodal mappings:
+
+- superposition -> overlapping but distinguishable visual/sonic possibilities
+- uncertainty -> softened focus, probabilistic topology, spectral breadth, or haptic ambiguity without hiding state
+- entanglement -> linked motion, shared motifs, reciprocal haptic or spatial responses
+- observation -> explicit inspect mode whose act of inspection may reveal or update state
+- collapse/selection -> convergence in light, motion, harmony, and haptic lock
+- decoherence -> environmental noise or contextual coupling gradually separates/settles possibilities
+- tunnelling -> alternate transition route that becomes available when ordinary path constraints are satisfied differently
+
+A spiritual, mythic, or contemplative interpretation may sit beside the scientific source as its own typed layer. Do not flatten the spiritual layer into "only metaphor" before examining what it contributes, and do not let the spiritual layer silently inherit the evidentiary status of the physics.
+
 ## Modality Translation Matrix
 
 When applying a pattern, translate it across more than one modality where useful.
