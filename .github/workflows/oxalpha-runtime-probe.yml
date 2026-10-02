@@ -1,0 +1,104 @@
+name: Ox Alpha Runtime Probe
+
+on:
+  push:
+    branches:
+      - main
+      - rarity/agent-workspace-os-v0-1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: oxalpha-runtime-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  synthetic-runtime-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Mint bounded GitHub OIDC identity and probe Ox Alpha
+        shell: bash
+        env:
+          PROBE_URL: https://rufrmjyusalnifpegllj.supabase.co/functions/v1/oxalpha
+          OIDC_AUDIENCE: flameclyffe-oxalpha-probe
+        run: |
+          set -euo pipefail
+
+          oidc_response="$(curl --fail --silent --show-error --max-time 20 \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}")"
+
+          oidc_token="$(OIDC_RESPONSE="${oidc_response}" node - <<'NODE'
+          const payload = JSON.parse(process.env.OIDC_RESPONSE || '{}');
+          if (!payload.value || typeof payload.value !== 'string') {
+            console.error('GitHub OIDC provider returned no token.');
+            process.exit(1);
+          }
+          process.stdout.write(payload.value);
+          NODE
+          )"
+
+          echo "::add-mask::${oidc_token}"
+
+          response_file="${RUNNER_TEMP}/oxalpha-runtime-probe.json"
+          http_code="$(curl --silent --show-error --max-time 80 \
+            --output "${response_file}" \
+            --write-out '%{http_code}' \
+            -X POST "${PROBE_URL}" \
+            -H "Authorization: Bearer ${oidc_token}" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"synthetic-runtime-probe"}')"
+
+          RESPONSE_FILE="${response_file}" HTTP_CODE="${http_code}" node - <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'));
+          const fail = (message) => {
+            console.error(message);
+            console.error(JSON.stringify({
+              http_status: Number(process.env.HTTP_CODE),
+              schema: data.schema || null,
+              error: data.error || null,
+              oidc_reason: data.oidc_reason || null,
+              upstream_status: data.upstream_status || null,
+              detail: data.detail || null,
+            }, null, 2));
+            process.exit(1);
+          };
+
+          if (Number(process.env.HTTP_CODE) !== 200) fail('Ox Alpha synthetic runtime probe returned a non-200 response.');
+          if (data.schema !== 'hearthgate.oxalpha-ci-probe/v1') fail('Unexpected Ox Alpha probe schema.');
+          if (data.flame_id !== 'oxalpha') fail('Ox Alpha identity receipt mismatch.');
+          if (data.provider !== 'openrouter') fail('Ox Alpha provider receipt mismatch.');
+          if (data.model !== 'z-ai/glm-5.3-flash') fail('Ox Alpha model declaration mismatch.');
+          if (data.runtime_verified !== true || data.synthetic_probe !== true) fail('Ox Alpha did not attest a model-executing synthetic probe.');
+          if (data.arbitrary_prompt_allowed !== false) fail('Probe authority expanded beyond the fixed synthetic prompt.');
+          if (!Number.isInteger(data.reply_chars) || data.reply_chars < 1) fail('Ox Alpha returned no model text.');
+          if (!/^[a-f0-9]{64}$/.test(String(data.reply_sha256 || ''))) fail('Ox Alpha reply digest is missing or malformed.');
+          if (!String(data.upstream_model || '').trim()) fail('Ox Alpha upstream model provenance is missing.');
+          if (data.github?.repository !== process.env.GITHUB_REPOSITORY) fail('GitHub repository attestation mismatch.');
+          if (data.github?.ref !== process.env.GITHUB_REF) fail('GitHub ref attestation mismatch.');
+          if (!String(data.github?.workflow_ref || '').includes('/.github/workflows/oxalpha-runtime-probe.yml@')) {
+            fail('GitHub workflow attestation mismatch.');
+          }
+
+          console.log(JSON.stringify({
+            schema: data.schema,
+            flame_id: data.flame_id,
+            provider: data.provider,
+            model: data.model,
+            inference_model: data.inference_model,
+            upstream_model: data.upstream_model,
+            execution_path: data.execution_path,
+            runtime_verified: data.runtime_verified,
+            synthetic_probe: data.synthetic_probe,
+            arbitrary_prompt_allowed: data.arbitrary_prompt_allowed,
+            reply_chars: data.reply_chars,
+            reply_sha256: data.reply_sha256,
+            latency_ms: data.latency_ms,
+            github: data.github,
+          }, null, 2));
+          NODE
