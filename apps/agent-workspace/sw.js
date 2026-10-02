@@ -1,4 +1,4 @@
-const CACHE = 'house-workspace-os-v0.5.0-return-engine';
+const CACHE = 'house-workspace-os-v0.6.0-test-flight';
 const SHELL = [
   './',
   './index.html',
@@ -18,6 +18,10 @@ const SHELL = [
   './spatial-polish.js',
   './return-engine.css',
   './return-engine-ui.js',
+  './refractive-glass-three.js',
+  './refractive-glass-three.css',
+  './connection-doctor.js',
+  './connection-doctor.css',
   '../arcsweep/src/return-engine.js',
   './astra-bridge.js',
   './neural-bridge.js',
