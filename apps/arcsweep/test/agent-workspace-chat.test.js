@@ -63,3 +63,11 @@ test('offline shell includes chat and Crow Nest assets', () => {
 test('chat exposes the dedicated Crow House route', () => {
   assert.match(chat, /\{ id: 'crow', name: 'Crow', route: 'crow' \}/);
 });
+
+
+test('chat exposes Nikola through the Constellation adapter without inventing a House Flame route', () => {
+  assert.match(chat, /\{ id: 'nikola', name: 'Nikola', transport: 'constellation', endpoint: '\/api\/v1\/constellation\/nikola\/chat' \}/);
+  assert.match(chat, /chatEndpoint\(agent\)/);
+  assert.match(chat, /data\.identity_id \|\| data\.flame_id/);
+  assert.doesNotMatch(chat, /id: 'nikola'[^\n]*route: 'nikola'/);
+});
