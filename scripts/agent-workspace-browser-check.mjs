@@ -37,8 +37,14 @@ function staticContentType(pathname) {
 }
 
 async function installStaticWorkspace(page) {
-  await page.route(`${ORIGIN}/apps/agent-workspace/**`, async (route) => {
+  await page.route('**/*', async (route) => {
     const url = new URL(route.request().url());
+    // Gate inside the handler instead of relying on a hostname-bearing URL glob.
+    // This keeps synthetic *.localhost navigation deterministic in CI.
+    if (url.origin !== ORIGIN || !url.pathname.startsWith('/apps/agent-workspace/')) {
+      await route.continue();
+      return;
+    }
     let relativePath = decodeURIComponent(url.pathname).replace(/^\/+/u, '');
     if (relativePath.endsWith('/')) relativePath += 'index.html';
     const fullPath = resolve(process.cwd(), relativePath);
