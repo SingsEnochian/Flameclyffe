@@ -30,6 +30,9 @@ test('refractive glass has real transmission thickness and moving caustic cues',
 test('coarse pointer motion can steer optics instead of freezing the glass on touch devices', () => {
   assert.match(glassJs, /coarsePointer\.matches && event\.buttons===0 && event\.pressure===0/);
   assert.match(glassJs, /panel\.addEventListener\('pointerdown'/);
+  assert.match(glassJs, /getCoalescedEvents/);
+  assert.match(glassJs, /pointerType==='pen'/);
+  assert.match(glassJs, /event\.pressure/);
   assert.match(glassJs, /coarsePointer\.matches\?0\.72:1/);
 });
 
