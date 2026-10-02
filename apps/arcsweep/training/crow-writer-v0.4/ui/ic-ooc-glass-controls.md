@@ -160,3 +160,35 @@ Astra Route OS
 ArcSweep must consume the active Astra route rather than hard-coding a provider or model. Changing the active model route must not require replacing the ArcSweep interaction surface.
 
 The existing ArcSweep constellation runtime adapter already points in this direction: ArcSweep resolves a route and invokes the runtime through the route seam while keeping provider/model attestation outside the UI surface.
+
+
+## Trainable and extensible route roster
+
+Astra Route OS must support adding newly trained models and agents as first-class routes. The route catalogue is not a fixed vendor/model list.
+
+Recommended lifecycle:
+
+```text
+train
+  → evaluate
+  → human/authorized approval
+  → register artifact + identity + provenance
+  → bind capabilities/permissions
+  → attach route
+  → expose to compatible UI surfaces
+```
+
+Registration should preserve at minimum:
+- stable route/agent identifier;
+- model or adapter lineage;
+- training/evaluation receipts;
+- intended capabilities and known limits;
+- authority/permission scope;
+- continuity compatibility;
+- active artifact/version;
+- rollback target;
+- provenance for promotion decisions.
+
+Training completion alone MUST NOT imply runtime promotion.
+
+ArcSweep should discover registered Astra routes dynamically and remain agnostic to whether a route is backed by GPT, Crow, Ornith, a locally trained model, an adapter, or a future runtime.
