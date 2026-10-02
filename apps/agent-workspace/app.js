@@ -394,7 +394,7 @@ async function refreshAgent(id, { quiet = false } = {}) {
             state: 'provider-error',
             provider: classified.provider,
             model: classified.model,
-            reason: `Ox Alpha inference probe failed: ${error.message}`,
+            reason: `${agent.name} inference probe failed: ${error.message}`,
             runtimeVerified: false,
           };
         }
@@ -485,6 +485,14 @@ document.addEventListener('visibilitychange', () => {
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   navigator.serviceWorker.register('./sw.js').catch((error) => console.warn('[House Workspace] service worker unavailable', error));
 }
+
+globalThis.HouseWorkspaceRuntime = Object.freeze({
+  allAgents: () => allAgents().map((agent) => ({ ...agent })),
+  statusEndpoint: (id) => statusEndpoint(agentById(id)),
+  refreshAgent: (id, options) => refreshAgent(id, options),
+  refreshRoster,
+  snapshot: () => allAgents().map((agent) => ({ ...agent, ...(runtimeStatus.get(agent.id) || {}) })),
+});
 
 render();
 if (navigator.onLine) queueMicrotask(() => pinnedAgents().filter((agent) => agent.route || agent.statusEndpoint).forEach((agent) => refreshAgent(agent.id, { quiet: true })));
