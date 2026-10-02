@@ -10,6 +10,8 @@ const hermesDoctor = await readFile(new URL('../../../profiles/crow-trainer/scri
 test('refractive glass has real transmission thickness and moving caustic cues', () => {
   assert.match(glassJs, /MeshPhysicalMaterial/);
   assert.match(glassJs, /transmission:0\.95/);
+  assert.match(glassJs, /opacity:1/);
+  assert.match(glassJs, /envMapIntensity/);
   assert.match(glassJs, /thickness:spec\.thickness\+0\.7/);
   assert.match(glassJs, /TorusKnotGeometry/);
   assert.match(glassJs, /CanvasTexture/);
