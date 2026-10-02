@@ -6,6 +6,7 @@ import { chromium } from 'playwright';
 const PORT = 4170;
 const BASE = `http://127.0.0.1:${PORT}/apps/agent-workspace/`;
 const ARTIFACT_DIR = process.env.WORKSPACE_BROWSER_ARTIFACT_DIR || 'artifacts/agent-workspace-browser';
+let activePage = null;
 
 await mkdir(ARTIFACT_DIR, { recursive: true });
 
@@ -225,6 +226,7 @@ async function waitForRoster(page) {
 async function desktopScenario(browser) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
   const page = await context.newPage();
+  activePage = page;
   await installRuntimeStubs(page);
   const assertClean = recordBrowserErrors(page, 'desktop');
 
@@ -244,6 +246,7 @@ async function desktopScenario(browser) {
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/desktop.png`, fullPage: true });
   assertClean();
+  activePage = null;
   await context.close();
 }
 
@@ -254,6 +257,7 @@ async function ipadScenario(browser) {
     hasTouch: true,
   });
   const page = await context.newPage();
+  activePage = page;
   await installRuntimeStubs(page);
   const assertClean = recordBrowserErrors(page, 'ipad');
 
@@ -268,6 +272,7 @@ async function ipadScenario(browser) {
   await assertNoHorizontalOverflow(page, 'ipad');
   await page.screenshot({ path: `${ARTIFACT_DIR}/ipad.png`, fullPage: true });
   assertClean();
+  activePage = null;
   await context.close();
 }
 
@@ -279,6 +284,7 @@ async function phoneScenario(browser) {
     hasTouch: true,
   });
   const page = await context.newPage();
+  activePage = page;
   await installRuntimeStubs(page);
   const assertClean = recordBrowserErrors(page, 'phone');
 
@@ -298,6 +304,7 @@ async function phoneScenario(browser) {
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/phone.png`, fullPage: true });
   assertClean();
+  activePage = null;
   await context.close();
 }
 
@@ -314,6 +321,9 @@ try {
       await scenario(browser);
     } catch (error) {
       console.error(`House Workspace ${label} acceptance failed:`, error);
+      if (activePage && !activePage.isClosed()) {
+        await activePage.screenshot({ path: `${ARTIFACT_DIR}/${label}-failure.png`, fullPage: true }).catch(() => {});
+      }
       throw error;
     }
   }
