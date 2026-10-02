@@ -88,3 +88,47 @@ OOC handoff example:
   ]
 }
 ```
+
+
+## Spatial audio control
+
+Audio is part of the interaction grammar, not a detached media-player control.
+
+### Core gestures
+- pinch a speaking/audio object to reduce its audible field;
+- spread it to widen or foreground it;
+- rotate to shift spatial placement or perspective;
+- pull toward the listener to focus/solo;
+- push away to background without muting;
+- hold to anchor a sound source in space;
+- flick away to silence temporarily while preserving recoverability;
+- circle a set of sources to create a temporary listening group.
+
+### Glass audio objects
+Audio sources may appear as small transparent resonant forms rather than conventional sliders:
+- voice;
+- ambience;
+- music;
+- effects;
+- accessibility/read-aloud;
+- collaborator/Crow speech.
+
+Material state should communicate audio state:
+- clear/stable = audible and anchored;
+- thinned/ghosted = backgrounded;
+- compressed = attenuated;
+- faint suspended ripple = paused;
+- subtle internal pulse = actively speaking.
+
+### Voice and writing
+In the writing room:
+- IC voice should enter the fiction channel;
+- OOC voice should enter the writer-room channel;
+- the active IC/OOC state must be visible before speech is committed;
+- speech can be transcribed into the current turn while preserving speaker and channel;
+- read-aloud may spatially distinguish narrator, owned characters, shared characters, and collaborators where configured.
+
+### Accessibility and haptics
+Every spatial audio gesture must have a conventional accessible equivalent.
+Never rely on sound alone to convey critical state.
+Haptics may reinforce mute, focus, handoff, and spatial lock events.
