@@ -119,9 +119,13 @@ test('Ox Alpha must pass a model-executing probe before the workspace calls it l
   assert.match(app, /provider-error/);
 });
 
-test('Nikola is a distinct visible roster participant and Crow training driver', () => {
+test('Nikola is a distinct visible roster participant, Crow training driver, and separately probed Constellation runtime', () => {
   assert.match(app, /id: 'nikola', name: 'Nikola'/);
   assert.match(app, /roles: \['wonder', 'science', 'design', 'inquiry', 'crow-training'\]/);
   assert.match(app, /constellation\/nikola\/ride-along/);
   assert.match(app, /active Crow training driver/);
+  assert.match(app, /statusEndpoint: '\/api\/v1\/constellation\/nikola\/status'/);
+  assert.match(app, /probeEndpoint: '\/api\/v1\/constellation\/nikola\/probe'/);
+  assert.match(app, /status_scope === 'configuration-only'/);
+  assert.match(app, /agent\.id === 'oxalpha' \|\| agent\.probeEndpoint/);
 });
