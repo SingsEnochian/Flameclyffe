@@ -68,7 +68,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  opacity: .24;
+  opacity: .10;
   background-image:
     linear-gradient(color-mix(in srgb, var(--accent, #84a29a) 13%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--accent, #84a29a) 13%, transparent) 1px, transparent 1px);
@@ -83,7 +83,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: .1;
+  opacity: .04;
   background: repeating-linear-gradient(180deg, transparent 0 4px, rgba(255,255,255,.08) 5px);
 }
 
@@ -188,9 +188,17 @@
   transform: translate(-50%,-50%);
   pointer-events: none;
 }
-.crow-nest-orbit-ring.r1 { width: min(48vw, 520px); aspect-ratio: 1; }
-.crow-nest-orbit-ring.r2 { width: min(68vw, 760px); aspect-ratio: 1; border-style: dashed; opacity: .48; animation: nest-orbit 48s linear infinite; }
-.crow-nest-orbit-ring.r3 { width: min(86vw, 980px); aspect-ratio: 1; opacity: .25; }
+.crow-nest-orbit-ring { opacity: .08; transition: opacity 180ms ease, border-color 180ms ease; }
+.crow-nest-orbit-ring.r1 { width: min(48vw, 520px); aspect-ratio: 1; opacity: .11; }
+.crow-nest-orbit-ring.r2 { width: min(68vw, 760px); aspect-ratio: 1; border-style: dashed; opacity: .07; animation: nest-orbit 64s linear infinite; }
+.crow-nest-orbit-ring.r3 { width: min(86vw, 980px); aspect-ratio: 1; opacity: .045; }
+
+.crow-nest-orbit:focus-within .crow-nest-orbit-ring.r1,
+.crow-nest-orbit:has(.crow-nest-node.active) .crow-nest-orbit-ring.r1 { opacity: .28; }
+.crow-nest-orbit:focus-within .crow-nest-orbit-ring.r2,
+.crow-nest-orbit:has(.crow-nest-node.active) .crow-nest-orbit-ring.r2 { opacity: .17; }
+.crow-nest-orbit:focus-within .crow-nest-orbit-ring.r3,
+.crow-nest-orbit:has(.crow-nest-node.active) .crow-nest-orbit-ring.r3 { opacity: .10; }
 
 .crow-presence {
   position: absolute;
@@ -440,4 +448,13 @@
     background-image: none !important;
     box-shadow: none;
   }
+}
+
+
+/* HUD geometry stays quiet until interaction asks for it.
+   The field is presence-first, instrumentation-second. */
+@media (hover: hover) and (pointer: fine) {
+  .crow-nest-orbit:hover .crow-nest-orbit-ring.r1 { opacity: .20; }
+  .crow-nest-orbit:hover .crow-nest-orbit-ring.r2 { opacity: .12; }
+  .crow-nest-orbit:hover .crow-nest-orbit-ring.r3 { opacity: .07; }
 }
