@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import manifestsModule from '../../starwell-server/flames/manifests.js';
-import { HOSTED_FLAME_FALLBACKS, hostedFlameFallbackStatus } from '../../../netlify/functions/_shared/hosted-flame-fallback.mjs';
+import { HOSTED_FLAME_FALLBACKS, VERCEL_AI_GATEWAY_FALLBACKS, hostedFlameFallbackStatus } from '../../../netlify/functions/_shared/hosted-flame-fallback.mjs';
 
 const { FLAMES } = manifestsModule;
 
@@ -17,17 +17,27 @@ test('Ox Alpha is a distinct live Flame identity backed by GLM-5.3-Flash', () =>
   assert.equal(oa?.memory.can_write_memory, false);
 });
 
-test('Ox Alpha has a Hugging Face hosted fallback with truthful credential status', () => {
+test('Ox Alpha has a truthful multi-path hosted fallback with Vercel OIDC first', () => {
   assert.equal(HOSTED_FLAME_FALLBACKS.oxalpha, 'zai-org/GLM-5.3-Flash');
+  assert.equal(VERCEL_AI_GATEWAY_FALLBACKS.oxalpha, 'zai/glm-5.3-flash');
+
   const unavailable = hostedFlameFallbackStatus('oxalpha', env());
   assert.equal(unavailable.configured, false);
   assert.deepEqual(unavailable.missing, [
+    'VERCEL_OIDC_TOKEN|AI_GATEWAY_API_KEY',
     'HF_TOKEN|HFTOKEN',
     'SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SERVICE_KEY|SUPABASE_SECRET_KEY',
   ]);
-  const available = hostedFlameFallbackStatus('oxalpha', env({ HF_TOKEN: 'configured-secret' }));
-  assert.equal(available.configured, true);
-  assert.equal(available.provider, 'huggingface-inference-providers');
-  assert.equal(available.model, 'zai-org/GLM-5.3-Flash');
-  assert.equal(available.primary_route_unchanged, true);
+
+  const oidc = hostedFlameFallbackStatus('oxalpha', env({ VERCEL_OIDC_TOKEN: 'short-lived-identity' }));
+  assert.equal(oidc.configured, true);
+  assert.equal(oidc.provider, 'vercel-ai-gateway');
+  assert.equal(oidc.model, 'zai/glm-5.3-flash');
+  assert.equal(oidc.credential_type, 'vercel-oidc');
+  assert.equal(oidc.primary_route_unchanged, true);
+
+  const hf = hostedFlameFallbackStatus('oxalpha', env({ HF_TOKEN: 'configured-secret' }));
+  assert.equal(hf.configured, true);
+  assert.equal(hf.provider, 'huggingface-inference-providers');
+  assert.equal(hf.model, 'zai-org/GLM-5.3-Flash');
 });
