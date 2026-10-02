@@ -1,0 +1,166 @@
+{
+  "schema": "kelyran.romanization-phonology-proposal/v0.3",
+  "status": "proposal",
+  "canon_mutation": false,
+  "native_glyphs_mutated": false,
+  "design": {
+    "name": "Mora-Braid",
+    "japanese_role": [
+      "mora-centred timing",
+      "core open-CV bias",
+      "clear vowel sequencing",
+      "light tap /ɾ/",
+      "controlled glides"
+    ],
+    "old_norse_role": [
+      "marked heritage clusters",
+      "small inherited coda class",
+      "front-rounded /y/",
+      "selected lexical roots",
+      "Eddic semantic domains"
+    ],
+    "kelyran_role": [
+      "penultimate performance prominence",
+      "relational semantics",
+      "native glyph sovereignty",
+      "continuity distinctions"
+    ]
+  },
+  "romanization": {
+    "ascii_first": true,
+    "no_silent_letters": true,
+    "vowels": {
+      "a": "/a/",
+      "e": "/e/",
+      "i": "/i/",
+      "o": "/o/",
+      "u": "/u/",
+      "y": "/y/"
+    },
+    "vowel_length": "double-letter",
+    "glide_j": "/j/",
+    "diphthongs": {
+      "aj": "/aj/",
+      "ej": "/ej/"
+    },
+    "consonants": {
+      "p": "/p/",
+      "b": "/b/",
+      "t": "/t/",
+      "d": "/d/",
+      "k": "/k/",
+      "g": "/g/",
+      "f": "/f/",
+      "v": "/v/",
+      "s": "/s/",
+      "sh": "/ɕ/",
+      "h": "/h/",
+      "m": "/m/",
+      "n": "/n/",
+      "r": "/ɾ/",
+      "l": "/l/",
+      "j": "/j/",
+      "w": "/w/",
+      "th": "/θ/"
+    },
+    "reserved": {
+      "dh": "/ð/"
+    },
+    "allophones": {
+      "sh_sung": "[ʃ] permitted in singing",
+      "h_before_i": "[ç] permitted before /i/",
+      "r_emphatic": "[r] permitted in ritual/emphatic singing"
+    }
+  },
+  "phonotactics": {
+    "productive_core": "(C)(j/w)V",
+    "special_timing": [
+      "long vowel adds one mora",
+      "moraic n may occupy a timing slot"
+    ],
+    "eddic_onset_clusters": [
+      "br",
+      "dr",
+      "gr",
+      "kr",
+      "kv",
+      "sk",
+      "sp",
+      "st",
+      "tr"
+    ],
+    "marked_codas": [
+      "n",
+      "r",
+      "l",
+      "s",
+      "f"
+    ],
+    "new_clusters_require_review": true
+  },
+  "prosody": {
+    "timing": "mora-centred",
+    "default_performance_prominence": "penultimate syllable",
+    "phrase_contours": [
+      "level",
+      "rising",
+      "falling",
+      "rise-fall"
+    ],
+    "suno_units": {
+      "prominent_block": 1.25,
+      "unprominent_block": 0.75,
+      "long_vowel": 2
+    },
+    "suno_uppercase_is_canonical_spelling": false
+  },
+  "migration_proposals": [
+    {
+      "from": "veyra",
+      "to": "vejra",
+      "ipa": "/ˈvej.ɾa/",
+      "reason": "resolve legacy spelling against y=/y/, j=/j/",
+      "legacy_alias_preserved_until_approval": true,
+      "glyph_change": false
+    }
+  ],
+  "semantic_boundaries": {
+    "nava:homen": {
+      "nava": "home as belonging",
+      "homen": "home as abode/dwelling-world"
+    },
+    "navari:renaja": {
+      "navari": "homecoming into belonging",
+      "renaja": "continuity-return after transformation"
+    },
+    "mira:lyora": {
+      "mira": "intentional guiding light left for another",
+      "lyora": "living/radiant light as a state or force"
+    },
+    "sora:ikonda:soraja": {
+      "sora": "breath opening into air/voice",
+      "ikonda": "embodied act/process of breathing",
+      "soraja": "sky/celestial air-field"
+    }
+  },
+  "representation_stack": [
+    "canonical romanization",
+    "IPA",
+    "mora/syllable parse",
+    "Suno rehearsal spelling",
+    "native Kelyran glyph expression"
+  ],
+  "authority": {
+    "romanization_is_native_script": false,
+    "donor_resemblance_is_automatic_etymology": false,
+    "suno_output_may_mutate_canon_automatically": false,
+    "unknown_ancestry_stays_unknown": true,
+    "sections_approvable_independently": [
+      "romanization-phonology",
+      "veyra-vejra-migration",
+      "semantic-boundaries",
+      "donor-etymology-labels",
+      "future-sound-history"
+    ]
+  }
+}
