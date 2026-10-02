@@ -212,7 +212,7 @@ async function assertNoMeaningfulCardOverlap(page, label) {
 }
 
 async function waitForRoster(page) {
-  await page.goto(`${BASE}?view=agents`, { waitUntil: 'domcontentloaded', timeout: 15_000 });
+  await page.goto(`${BASE}?view=agents`, { waitUntil: 'commit', timeout: 15_000 });
   await page.locator('.workspace-shell').waitFor();
   await page.locator('[data-agent-id="nikola"]').waitFor();
   assert.equal(await page.locator('.agent-card').count(), 16, 'Expected the 12 House voices plus Crow, Nikola, Rarity, and Crow Trainer.');
