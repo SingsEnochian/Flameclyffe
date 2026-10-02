@@ -161,9 +161,17 @@ async function installRuntimeStubs(page) {
 
 function recordBrowserErrors(page, label) {
   const errors = [];
-  page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
+  page.on('pageerror', (error) => {
+    const line = `pageerror: ${error.message}`;
+    errors.push(line);
+    console.error(`[${label}] ${line}`);
+  });
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(`console: ${message.text()}`);
+    if (message.type() === 'error') {
+      const line = `console: ${message.text()}`;
+      errors.push(line);
+      console.error(`[${label}] ${line}`);
+    }
   });
   page.on('requestfailed', (request) => {
     const url = request.url();
