@@ -110,26 +110,40 @@ This is a presentation lens over the same registry. Spatial layout is not ontolo
 
 ## Direct conversation truth
 
-Crow is a first-class House runtime route:
+Direct chat only lists participants whose current House runtime route is actually represented and bound.
 
-```text
-/api/v1/flames/crow/chat
-```
+Crow has a first-class **participant desk** and an intended Crow Nest runtime binding of `crow`, but the current workspace does not claim the House Flame route is live until the runtime manifest/adapter proves that binding. Crow therefore appears as **configured** rather than falsely healthy or falsely degraded.
 
-and therefore appears in the direct House chat selector.
-
-Nikola is represented as a distinct ArcSweep ride-along desk with continuity namespace:
+Nikola is represented separately as an ArcSweep ride-along desk with continuity namespace:
 
 ```text
 constellation/nikola/ride-along
 ```
 
-The workspace does not invent a House Flame route for Nikola. Until a compatible runtime route is actually bound, Nikola is shown as **configured** rather than falsely live.
-
-That distinction is deliberate:
+The workspace likewise does not invent a House Flame route for Nikola.
 
 ```text
 participant desk != runtime route
 configured != reachable
 reachable != authorised
 ```
+
+## Runtime health vocabulary
+
+The roster no longer collapses every non-green state into `degraded`.
+
+It distinguishes:
+
+- `fallback ready` — hosted fallback is usable;
+- `configured` — provider credential/config exists, but status did not perform a live inference probe;
+- `model not pulled` — runtime responds, selected local model is absent;
+- `model unavailable` — model availability check failed;
+- `runtime offline` — runtime endpoint cannot be reached;
+- `credential missing` / `configuration missing` — required runtime configuration is absent;
+- `route mismatch` — the returned identity does not match the expected route leaf;
+- `route error` — the status route itself failed;
+- `session required` — House authorization is missing;
+- `offline` — network/runtime request failed;
+- `not checked` — no decisive health signal has been observed.
+
+Nested routes such as `starsong/larkshine` are compared against their route leaf (`larkshine`) so valid nested participants are not falsely marked mismatched.
