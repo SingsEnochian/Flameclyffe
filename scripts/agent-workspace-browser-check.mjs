@@ -10,7 +10,8 @@ let activePage = null;
 
 await mkdir(ARTIFACT_DIR, { recursive: true });
 
-const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1', '--directory', '.'], {
+const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+const server = spawn(npx, ['vite', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 
@@ -27,7 +28,7 @@ async function waitForServer() {
     } catch {}
     await new Promise((resolve) => setTimeout(resolve, 180));
   }
-  throw new Error(`Workspace static server did not start.\n${serverOutput}`);
+  throw new Error(`Workspace Vite server did not start.\n${serverOutput}`);
 }
 
 function routeId(url) {
