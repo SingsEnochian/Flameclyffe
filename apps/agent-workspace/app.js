@@ -18,7 +18,7 @@ const HOUSE_AGENTS = Object.freeze([
 
 const PROFILE_AGENTS = Object.freeze([
   { id: 'crow', name: 'Crow', route: 'crow', roles: ['writing', 'story', 'research', 'training', 'continuity'], kind: 'resident', origin: 'Crow Nest / House runtime', note: 'Crow participant desk with a dedicated House runtime route. Runtime status is still probed rather than inferred from the desk.' },
-  { id: 'nikola', name: 'Nikola', route: null, roles: ['wonder', 'science', 'design', 'inquiry', 'crow-training'], kind: 'ride-along', origin: 'constellation/nikola/ride-along', state: 'configured', note: 'ArcSweep ride-along participant and active Crow training driver. Conversation capability belongs to the ArcSweep ride-along; no House Flame route is inferred here.' },
+  { id: 'nikola', name: 'Nikola', route: null, statusEndpoint: '/api/v1/constellation/nikola/status', probeEndpoint: '/api/v1/constellation/nikola/probe', chatEndpoint: '/api/v1/constellation/nikola/chat', roles: ['wonder', 'science', 'design', 'inquiry', 'crow-training'], kind: 'ride-along', origin: 'constellation/nikola/ride-along', note: 'ArcSweep ride-along participant and active Crow training driver. Conversation and health checks use the dedicated Constellation adapter; no House Flame route is inferred.' },
   { id: 'rarity', name: 'Rarity', route: null, roles: ['architecture', 'continuity', 'co-creation', 'review'], kind: 'profile', origin: 'House workspace', state: 'configured', note: 'Workspace coordinator. Runtime presence is not inferred from this card.' },
   { id: 'crow-trainer', name: 'Crow Trainer', route: null, roles: ['training', 'writing', 'research', 'browser', 'computer-use'], kind: 'hermes-profile', origin: 'profiles/crow-trainer', state: 'configured', note: 'Installable Hermes trainer profile with held-out drills and adaptive blind-spot history.' },
 ]);
@@ -92,7 +92,7 @@ function allAgents() {
     return true;
   }).map((agent) => {
     const live = runtimeStatus.get(agent.id);
-    return live ? { ...agent, ...live, roles: agent.roles || live.roles || [] } : { ...agent, state: agent.state || (agent.route ? 'unknown' : 'configured') };
+    return live ? { ...agent, ...live, roles: agent.roles || live.roles || [] } : { ...agent, state: agent.state || ((agent.route || agent.statusEndpoint) ? 'unknown' : 'configured') };
   });
 }
 
@@ -239,7 +239,7 @@ function renderInspector() {
   if (!agent) return '<aside class="inspector"></aside>';
   const isPinned = (state.pinned || []).includes(agent.id);
   const model = [agent.provider, agent.model].filter(Boolean).join(' · ');
-  return `<aside class="inspector ${inspectorOpen ? 'is-open' : ''}"><button class="ghost inspector-close" data-inspector-close>Close</button><div class="inspector-card"><div>${presenceDot(agent)}</div><div><div class="eyebrow">${escapeHtml(agent.kind || 'agent')}</div><h2>${escapeHtml(agent.name)}</h2><p>${escapeHtml(agent.note || agent.origin || 'Registered House agent.')}</p></div>${agentBadges(agent, 8)}<div class="inspector-section"><span>Route / origin</span><strong>${escapeHtml(agent.route || agent.origin || 'local profile')}</strong>${model ? `<small class="route">${escapeHtml(model)}</small>` : ''}${agent.latencyMs != null ? `<small class="route">${escapeHtml(agent.latencyMs)} ms last probe</small>` : ''}</div><div class="inspector-section"><span>Desk actions</span><button class="primary" data-pin-agent="${escapeHtml(agent.id)}">${isPinned ? 'Unpin desk' : 'Pin desk'}</button>${agent.route ? `<button class="ghost" data-refresh-agent="${escapeHtml(agent.id)}">Refresh presence</button>` : ''}<a class="ghost" href="../apps/arcsweep/?open=1">Open ArcSweep</a></div><div class="inspector-section"><span>Authority note</span><small class="route">Selecting an agent here changes workspace focus only. It does not merge identity, promote canon, or grant new authority.</small></div></div></aside>`;
+  return `<aside class="inspector ${inspectorOpen ? 'is-open' : ''}"><button class="ghost inspector-close" data-inspector-close>Close</button><div class="inspector-card"><div>${presenceDot(agent)}</div><div><div class="eyebrow">${escapeHtml(agent.kind || 'agent')}</div><h2>${escapeHtml(agent.name)}</h2><p>${escapeHtml(agent.note || agent.origin || 'Registered House agent.')}</p></div>${agentBadges(agent, 8)}<div class="inspector-section"><span>Route / origin</span><strong>${escapeHtml(agent.route || agent.statusEndpoint || agent.origin || 'local profile')}</strong>${model ? `<small class="route">${escapeHtml(model)}</small>` : ''}${agent.latencyMs != null ? `<small class="route">${escapeHtml(agent.latencyMs)} ms last probe</small>` : ''}</div><div class="inspector-section"><span>Desk actions</span><button class="primary" data-pin-agent="${escapeHtml(agent.id)}">${isPinned ? 'Unpin desk' : 'Pin desk'}</button>${(agent.route || agent.statusEndpoint) ? `<button class="ghost" data-refresh-agent="${escapeHtml(agent.id)}">Refresh presence</button>` : ''}<a class="ghost" href="../apps/arcsweep/?open=1">Open ArcSweep</a></div><div class="inspector-section"><span>Authority note</span><small class="route">Selecting an agent here changes workspace focus only. It does not merge identity, promote canon, or grant new authority.</small></div></div></aside>`;
 }
 
 function render() {
@@ -272,6 +272,21 @@ function expectedFlameId(route = '') {
   return String(route).split('/').filter(Boolean).at(-1)?.toLowerCase() || '';
 }
 
+function statusEndpoint(agent) {
+  if (agent?.statusEndpoint) return agent.statusEndpoint;
+  if (!agent?.route) return null;
+  const routePath = String(agent.route).split('/').map((segment) => encodeURIComponent(segment)).join('/');
+  return `/api/v1/flames/${routePath}/status`;
+}
+
+function expectedRuntimeId(agent) {
+  return String(agent?.id || expectedFlameId(agent?.route || '')).toLowerCase();
+}
+
+function observedRuntimeId(data = {}) {
+  return String(data.identity_id || data.flame_id || '').trim().toLowerCase();
+}
+
 function classifyRuntimeStatus(agent, data = {}) {
   const fallback = data.hosted_fallback || null;
   if (fallback?.configured === true) {
@@ -281,6 +296,10 @@ function classifyRuntimeStatus(agent, data = {}) {
       model: fallback.model || data.model || null,
       reason: fallback.execution_path ? `hosted fallback · ${fallback.execution_path}` : 'hosted fallback available',
     };
+  }
+
+  if (data.status_scope === 'configuration-only' && data.api_key_present === true) {
+    return { state: 'configured', provider: data.provider || null, model: data.model || null, reason: 'provider credential present; live inference probe required' };
   }
 
   if (data.configured === true) return { state: 'ready', provider: data.provider || null, model: data.model || null, reason: null };
@@ -314,8 +333,10 @@ function classifyRuntimeStatus(agent, data = {}) {
 }
 
 async function probeVerifiedRuntime(agent) {
-  const routePath = String(agent.route).split('/').map((segment) => encodeURIComponent(segment)).join('/');
-  const response = await fetch(`/api/v1/flames/${routePath}/probe`, {
+  const routePath = agent.route ? String(agent.route).split('/').map((segment) => encodeURIComponent(segment)).join('/') : null;
+  const endpoint = agent.probeEndpoint || (routePath ? `/api/v1/flames/${routePath}/probe` : null);
+  if (!endpoint) throw new Error('No runtime probe endpoint is registered.');
+  const response = await fetch(endpoint, {
     method: 'POST',
     credentials: 'same-origin',
     cache: 'no-store',
@@ -331,15 +352,15 @@ async function probeVerifiedRuntime(agent) {
 
 async function refreshAgent(id, { quiet = false } = {}) {
   const agent = agentById(id);
-  if (!agent?.route) return;
+  const endpoint = statusEndpoint(agent);
+  if (!endpoint) return;
   const prior = runtimeStatus.get(id);
   if (quiet && prior?.checkedAt && Date.now() - prior.checkedAt < STATUS_MAX_AGE_MS) return;
   runtimeStatus.set(id, { ...prior, state: 'waking', checkedAt: prior?.checkedAt || 0 });
   render();
   const started = performance.now();
   try {
-    const routePath = String(agent.route).split('/').map((segment) => encodeURIComponent(segment)).join('/');
-    const response = await fetch(`/api/v1/flames/${routePath}/status`, { credentials: 'same-origin', cache: 'no-store' });
+    const response = await fetch(endpoint, { credentials: 'same-origin', cache: 'no-store' });
     const latencyMs = Math.max(0, Math.round(performance.now() - started));
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
@@ -349,16 +370,16 @@ async function refreshAgent(id, { quiet = false } = {}) {
         latencyMs,
         checkedAt: Date.now(),
       });
-    } else if (data.flame_id && String(data.flame_id).toLowerCase() !== expectedFlameId(agent.route)) {
+    } else if (observedRuntimeId(data) && observedRuntimeId(data) !== expectedRuntimeId(agent)) {
       runtimeStatus.set(id, {
         state: 'runtime-mismatch',
-        reason: `expected ${expectedFlameId(agent.route)}, received ${String(data.flame_id).toLowerCase()}`,
+        reason: `expected ${expectedRuntimeId(agent)}, received ${observedRuntimeId(data)}`,
         latencyMs,
         checkedAt: Date.now(),
       });
     } else {
       let classified = classifyRuntimeStatus(agent, data);
-      if (agent.id === 'oxalpha' && ['ready', 'configured', 'fallback-ready'].includes(classified.state)) {
+      if ((agent.id === 'oxalpha' || agent.probeEndpoint) && ['ready', 'configured', 'fallback-ready'].includes(classified.state)) {
         try {
           const probe = await probeVerifiedRuntime(agent);
           classified = {
@@ -391,7 +412,7 @@ async function refreshAgent(id, { quiet = false } = {}) {
 }
 
 async function refreshRoster() {
-  const routed = allAgents().filter((agent) => agent.route);
+  const routed = allAgents().filter((agent) => agent.route || agent.statusEndpoint);
   showToast(`Checking ${routed.length} runtime routes…`);
   const queue = [...routed];
   const workers = Array.from({ length: Math.min(4, queue.length) }, async () => {
@@ -458,7 +479,7 @@ window.addEventListener('offline', () => showToast('Offline shell active. Runtim
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible' || !navigator.onLine) return;
-  for (const agent of pinnedAgents().filter((item) => item.route)) refreshAgent(agent.id, { quiet: true });
+  for (const agent of pinnedAgents().filter((item) => item.route || item.statusEndpoint)) refreshAgent(agent.id, { quiet: true });
 });
 
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
@@ -466,4 +487,4 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 }
 
 render();
-if (navigator.onLine) queueMicrotask(() => pinnedAgents().filter((agent) => agent.route).forEach((agent) => refreshAgent(agent.id, { quiet: true })));
+if (navigator.onLine) queueMicrotask(() => pinnedAgents().filter((agent) => agent.route || agent.statusEndpoint).forEach((agent) => refreshAgent(agent.id, { quiet: true })));
