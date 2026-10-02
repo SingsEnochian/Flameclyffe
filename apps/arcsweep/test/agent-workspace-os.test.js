@@ -45,7 +45,7 @@ test('workspace carries explicit agent and handoff boundaries', () => {
   assert.match(app, /Next owner/);
   assert.match(app, /Unacknowledged handoff/);
   assert.match(app, /crow-trainer/);
-  assert.match(app, /route: 'crow'/);
+  assert.match(app, /id: 'crow', name: 'Crow', route: null/);
   assert.match(app, /id: 'nikola'/);
   assert.match(app, /constellation\/nikola\/ride-along/);
 });
@@ -96,4 +96,15 @@ test('spatial polish is progressive, accessible, and mobile-safe', () => {
   assert.match(spatialJs, /sharedRole/);
   assert.match(sw, /'\.\/spatial-polish\.css'/);
   assert.match(sw, /'\.\/spatial-polish\.js'/);
+});
+
+
+test('workspace uses granular runtime states instead of one degraded bucket', () => {
+  for (const state of [
+    'fallback-ready', 'runtime-unreachable', 'runtime-mismatch', 'route-error',
+    'model-not-pulled', 'model-unavailable', 'credential-missing', 'configuration-missing',
+  ]) assert.match(app, new RegExp(state));
+  assert.match(app, /expectedFlameId/);
+  assert.match(app, /split\('\/'\).*at\(-1\)/s);
+  assert.match(app, /hosted_fallback/);
 });
