@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   KELYRAN_SCHOOL_SCHEMA,
+  KELYRAN_CANON_REVISION,
+  KELYRAN_PHONOLOGY,
+  KELYRAN_SEMANTIC_BOUNDARIES,
   APPROVED_FLUID_LEXICON,
   answerExercise,
   buildTutorContext,
@@ -77,10 +80,36 @@ test('approved fluid vocabulary has receipts, stress and explicit unfinished sou
     assert.equal(validateLexeme(entry).valid, true);
     assert.equal(entry.status, 'approved');
     assert.ok(entry.stress.primarySyllable <= entry.syllables.length);
-    assert.equal(entry.phonemes, null);
+    assert.ok(typeof entry.phonemes === 'string' && entry.phonemes.length > 2);
+    assert.equal(entry.phonemeStatus, 'approved-mora-braid-v0.3');
     assert.equal(entry.script, '');
     assert.equal(entry.audio, null);
   }
+});
+
+test('Mora-Braid phonology and semantic boundaries are live canon in tutor context', () => {
+  const school = createDefaultKelyranSchool(NOW);
+  const context = buildTutorContext(school);
+  assert.equal(KELYRAN_CANON_REVISION, 'kelyran-canon/ember-0.3');
+  assert.equal(school.canonRevision, KELYRAN_CANON_REVISION);
+  assert.deepEqual(context.phonology.map((entry) => entry.id), KELYRAN_PHONOLOGY.map((entry) => entry.id));
+  assert.deepEqual(context.semanticBoundaries.map((entry) => entry.id), KELYRAN_SEMANTIC_BOUNDARIES.map((entry) => entry.id));
+  const veyra = APPROVED_FLUID_LEXICON.find((entry) => entry.lemma === 'veyra');
+  assert.equal(veyra.romanization, 'veyra');
+  assert.equal(veyra.orthographyStatus, 'legacy-spelling-pending-separate-migration');
+});
+
+test('ember-0.2 saves migrate to 0.3 canon without overwriting local additions', () => {
+  const school = createDefaultKelyranSchool(NOW);
+  school.canonRevision = 'kelyran-canon/ember-0.2';
+  school.phonology = [{ id: 'local-observation', status: 'attested', rule: 'preserve me' }];
+  school.semanticBoundaries = [{ id: 'local-boundary', status: 'attested', rule: 'preserve me too' }];
+  const migrated = normaliseKelyranSchool(school, NOW);
+  assert.equal(migrated.canonRevision, 'kelyran-canon/ember-0.3');
+  assert.ok(migrated.phonology.some((entry) => entry.id === 'local-observation'));
+  assert.ok(migrated.phonology.some((entry) => entry.id === 'kelyran-mora-braid-v0-3'));
+  assert.ok(migrated.semanticBoundaries.some((entry) => entry.id === 'local-boundary'));
+  assert.ok(migrated.semanticBoundaries.some((entry) => entry.id === 'sora-ikonda-soraja'));
 });
 
 test('old saves gain approved words once while preserving learner data and existing entries', () => {

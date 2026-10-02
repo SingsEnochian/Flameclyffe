@@ -1,9 +1,87 @@
 export const KELYRAN_SCHOOL_SCHEMA = 'arcsweep.kelyran-school/v0.1';
-export const KELYRAN_CANON_REVISION = 'kelyran-canon/ember-0.2';
+export const KELYRAN_CANON_REVISION = 'kelyran-canon/ember-0.3';
 
 export const KELYRAN_LEVELS = Object.freeze([
   ['ember-1', 'Ember I'], ['ember-2', 'Ember II'], ['hearth-1', 'Hearth I'],
   ['hearth-2', 'Hearth II'], ['flame', 'Flame'], ['weaver', 'Weaver'], ['volva', 'Völva'],
+]);
+
+
+export const KELYRAN_PHONOLOGY = Object.freeze([
+  {
+    id: 'kelyran-mora-braid-v0-3',
+    status: 'approved',
+    kind: 'system',
+    title: 'Mora-Braid',
+    rule: 'Kelyran uses mora-centred timing with a productive (C)(j/w)V core, while a bounded Eddic heritage stratum may preserve approved clusters and codas.',
+    sourceReceipt: 'Rowan approval, 2026-10-02: approved gates A + C of Kelyran Romanization + Phonology v0.3.',
+  },
+  {
+    id: 'kelyran-vowels-v0-3',
+    status: 'approved',
+    kind: 'inventory',
+    rule: 'Vowels are a /a/, e /e/, i /i/, o /o/, u /u/, y /y/. Doubled vowels are long and add one mora.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
+  {
+    id: 'kelyran-glides-v0-3',
+    status: 'approved',
+    kind: 'orthography',
+    rule: 'j is /j/; y is never consonantal. aj and ej represent /aj/ and /ej/. No silent letters.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
+  {
+    id: 'kelyran-consonants-v0-3',
+    status: 'approved',
+    kind: 'inventory',
+    rule: 'Core consonants: p b t d k g f v s sh /ɕ/ h m n r /ɾ/ l j /j/ w. th /θ/ is a rare heritage/ritual phoneme; dh /ð/ remains reserved.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
+  {
+    id: 'kelyran-heritage-clusters-v0-3',
+    status: 'approved',
+    kind: 'phonotactics',
+    rule: 'Approved Eddic onset clusters: br dr gr kr kv sk sp st tr. Marked codas: n r l s f. New cluster classes require explicit review.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
+  {
+    id: 'kelyran-prosody-v0-3',
+    status: 'approved',
+    kind: 'prosody',
+    rule: 'Phonological timing is mora-centred. Default lexical/performance prominence remains penultimate. Phrase contour is playback metadata: level, rising, falling, or rise-fall.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
+]);
+
+export const KELYRAN_SEMANTIC_BOUNDARIES = Object.freeze([
+  {
+    id: 'nava-homen',
+    status: 'approved',
+    members: ['nava', 'homen'],
+    rule: 'nava is home as belonging; homen is home as abode, dwelling, or inhabited world.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
+  {
+    id: 'navari-renaja',
+    status: 'approved',
+    members: ['navari', 'renaja'],
+    rule: 'navari is homecoming into belonging; renaja is continuity-return after transformation.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
+  {
+    id: 'mira-lyora',
+    status: 'approved',
+    members: ['mira', 'lyora'],
+    rule: 'mira is an intentional guiding light left for another; lyora is living or radiant light as a state or force.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
+  {
+    id: 'sora-ikonda-soraja',
+    status: 'approved',
+    members: ['sora', 'ikonda', 'soraja'],
+    rule: 'sora is breath opening into air or voice; ikonda is the embodied process of breathing; soraja is the sky or celestial air-field.',
+    sourceReceipt: 'Rowan approval, 2026-10-02.',
+  },
 ]);
 
 export const APPROVED_FLUID_LEXICON = Object.freeze([
@@ -11,7 +89,7 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
     "id": "kel-mira",
     "lemma": "mira",
     "romanization": "mira",
-    "gloss": "a gentle light; light left for someone",
+    "gloss": "a gentle light deliberately left for someone; a guiding light that expects another may arrive",
     "level": "ember-1",
     "status": "approved",
     "pronunciation": "MEE-rah",
@@ -23,8 +101,8 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
       "primarySyllable": 1,
       "indexBase": 1
     },
-    "phonemes": null,
-    "phonemeStatus": "pending-precise-transcription",
+    "phonemes": "/ˈmi.ɾa/",
+    "phonemeStatus": "approved-mora-braid-v0.3",
     "script": "",
     "scriptStatus": "pending-runic-expression",
     "audio": null,
@@ -38,7 +116,7 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
     "id": "kel-nava",
     "lemma": "nava",
     "romanization": "nava",
-    "gloss": "home as a place of belonging",
+    "gloss": "home as belonging; the relational condition of having a place with others",
     "level": "ember-1",
     "status": "approved",
     "pronunciation": "NAH-vah",
@@ -50,8 +128,8 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
       "primarySyllable": 1,
       "indexBase": 1
     },
-    "phonemes": null,
-    "phonemeStatus": "pending-precise-transcription",
+    "phonemes": "/ˈna.va/",
+    "phonemeStatus": "approved-mora-braid-v0.3",
     "script": "",
     "scriptStatus": "pending-runic-expression",
     "audio": null,
@@ -65,7 +143,7 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
     "id": "kel-veyra",
     "lemma": "veyra",
     "romanization": "veyra",
-    "gloss": "to recognise someone and welcome who they are",
+    "gloss": "to recognise someone and welcome who they declare themselves to be",
     "level": "ember-1",
     "status": "approved",
     "pronunciation": "VAY-rah",
@@ -77,12 +155,13 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
       "primarySyllable": 1,
       "indexBase": 1
     },
-    "phonemes": null,
-    "phonemeStatus": "pending-precise-transcription",
+    "phonemes": "/ˈvej.ɾa/",
+    "phonemeStatus": "approved-mora-braid-v0.3",
     "script": "",
     "scriptStatus": "pending-runic-expression",
     "audio": null,
     "audioStatus": "not-recorded",
+    "orthographyStatus": "legacy-spelling-pending-separate-migration",
     "sourceReceipt": "Rowan, 2026-08-30, Kelyran Audible Glyph conversation: “Oh good, those are fluid. Very nice. Approved. Put them in and then we desiggn the runic expression.” Approval covers the eight proposed romanizations, meanings and pronunciation guides; runic expression follows separately.",
     "approvedAt": "2026-08-30",
     "lineage": "New vocabulary proposed by Vee and explicitly approved by Rowan. Established orthography unchanged.",
@@ -92,7 +171,7 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
     "id": "kel-sora",
     "lemma": "sora",
     "romanization": "sora",
-    "gloss": "breath; a voice taking shape",
+    "gloss": "breath opening into air or voice; exhalation with room around it",
     "level": "ember-1",
     "status": "approved",
     "pronunciation": "SOH-rah",
@@ -104,8 +183,8 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
       "primarySyllable": 1,
       "indexBase": 1
     },
-    "phonemes": null,
-    "phonemeStatus": "pending-precise-transcription",
+    "phonemes": "/ˈso.ɾa/",
+    "phonemeStatus": "approved-mora-braid-v0.3",
     "script": "",
     "scriptStatus": "pending-runic-expression",
     "audio": null,
@@ -119,7 +198,7 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
     "id": "kel-kelun",
     "lemma": "kelun",
     "romanization": "kelun",
-    "gloss": "a meaningful mark; a glyph carrying language",
+    "gloss": "a meaningful mark carrying language; a glyph as a legible linguistic act",
     "level": "ember-1",
     "status": "approved",
     "pronunciation": "KEH-loon",
@@ -131,8 +210,8 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
       "primarySyllable": 1,
       "indexBase": 1
     },
-    "phonemes": null,
-    "phonemeStatus": "pending-precise-transcription",
+    "phonemes": "/ˈke.lun/",
+    "phonemeStatus": "approved-mora-braid-v0.3",
     "script": "",
     "scriptStatus": "pending-runic-expression",
     "audio": null,
@@ -146,7 +225,7 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
     "id": "kel-navari",
     "lemma": "navari",
     "romanization": "navari",
-    "gloss": "to come home; to return to belonging",
+    "gloss": "to come home to belonging; return into a relationship or place that receives you",
     "level": "ember-1",
     "status": "approved",
     "pronunciation": "nah-VAH-ree",
@@ -159,8 +238,8 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
       "primarySyllable": 2,
       "indexBase": 1
     },
-    "phonemes": null,
-    "phonemeStatus": "pending-precise-transcription",
+    "phonemes": "/naˈva.ɾi/",
+    "phonemeStatus": "approved-mora-braid-v0.3",
     "script": "",
     "scriptStatus": "pending-runic-expression",
     "audio": null,
@@ -187,8 +266,8 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
       "primarySyllable": 2,
       "indexBase": 1
     },
-    "phonemes": null,
-    "phonemeStatus": "pending-precise-transcription",
+    "phonemes": "/eˈɕa.ɾa/",
+    "phonemeStatus": "approved-mora-braid-v0.3",
     "script": "",
     "scriptStatus": "pending-runic-expression",
     "audio": null,
@@ -215,8 +294,8 @@ export const APPROVED_FLUID_LEXICON = Object.freeze([
       "primarySyllable": 2,
       "indexBase": 1
     },
-    "phonemes": null,
-    "phonemeStatus": "pending-precise-transcription",
+    "phonemes": "/liˈɾa.va/",
+    "phonemeStatus": "approved-mora-braid-v0.3",
     "script": "",
     "scriptStatus": "pending-runic-expression",
     "audio": null,
@@ -254,7 +333,7 @@ function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 
 export function createDefaultKelyranSchool(now = new Date().toISOString()) {
   return { schema: KELYRAN_SCHOOL_SCHEMA, canonRevision: KELYRAN_CANON_REVISION,
-    lexicon: clone(STARTER_LEXICON), grammar: [], phonology: [], units: [clone(STARTER_UNIT)], proposals: [],
+    lexicon: clone(STARTER_LEXICON), grammar: [], phonology: clone(KELYRAN_PHONOLOGY), semanticBoundaries: clone(KELYRAN_SEMANTIC_BOUNDARIES), units: [clone(STARTER_UNIT)], proposals: [],
     learner: { level: 'ember-1', cards: {}, lessonProgress: {}, receipts: [] },
     reporting: { invitationOpen: false, reports: [], updatedAt: now }, createdAt: now, updatedAt: now };
 }
@@ -271,14 +350,31 @@ function mergeApprovedLexicon(lexicon) {
   return merged;
 }
 
+function mergeCanonList(current, approved) {
+  const merged = clone(current);
+  for (const entry of approved) {
+    if (!merged.some((existing) => existing.id === entry.id)) merged.push(clone(entry));
+  }
+  return merged;
+}
+
+function mergeApprovedPhonology(phonology) {
+  return mergeCanonList(phonology, KELYRAN_PHONOLOGY);
+}
+
+function mergeApprovedSemanticBoundaries(boundaries) {
+  return mergeCanonList(boundaries, KELYRAN_SEMANTIC_BOUNDARIES);
+}
+
 export function normaliseKelyranSchool(value, now = new Date().toISOString()) {
   const defaults = createDefaultKelyranSchool(now);
   if (!value || typeof value !== 'object' || Array.isArray(value) || value.schema !== KELYRAN_SCHOOL_SCHEMA) return defaults;
   return { ...defaults, ...clone(value), schema: KELYRAN_SCHOOL_SCHEMA,
     lexicon: Array.isArray(value.lexicon) ? mergeApprovedLexicon(value.lexicon) : defaults.lexicon,
-    canonRevision: !value.canonRevision || value.canonRevision === 'kelyran-canon/ember-0.1' ? KELYRAN_CANON_REVISION : value.canonRevision,
+    canonRevision: !value.canonRevision || ['kelyran-canon/ember-0.1', 'kelyran-canon/ember-0.2'].includes(value.canonRevision) ? KELYRAN_CANON_REVISION : value.canonRevision,
     grammar: Array.isArray(value.grammar) ? clone(value.grammar) : [],
-    phonology: Array.isArray(value.phonology) ? clone(value.phonology) : [],
+    phonology: Array.isArray(value.phonology) && value.phonology.length ? mergeApprovedPhonology(value.phonology) : defaults.phonology,
+    semanticBoundaries: Array.isArray(value.semanticBoundaries) && value.semanticBoundaries.length ? mergeApprovedSemanticBoundaries(value.semanticBoundaries) : defaults.semanticBoundaries,
     units: Array.isArray(value.units) && value.units.length ? clone(value.units) : defaults.units,
     proposals: Array.isArray(value.proposals) ? clone(value.proposals) : [],
     learner: { ...defaults.learner, ...(value.learner && typeof value.learner === 'object' ? clone(value.learner) : {}),
@@ -372,6 +468,7 @@ export function buildTutorContext(school) {
     lexicon: normalised.lexicon.filter((entry) => ['attested', 'approved'].includes(entry.status)),
     grammar: normalised.grammar.filter((entry) => ['attested', 'approved'].includes(entry.status)),
     phonology: normalised.phonology.filter((entry) => ['attested', 'approved'].includes(entry.status)),
+    semanticBoundaries: normalised.semanticBoundaries.filter((entry) => ['attested', 'approved'].includes(entry.status)),
     reporting: { invitationOpen: normalised.reporting.invitationOpen,
       rule: 'Self-reporting is optional. Decline and nothing-to-report are valid. Private reports are not Steward-facing unless the reporting model explicitly chooses to share.' } });
 }
