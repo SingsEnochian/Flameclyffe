@@ -7,8 +7,10 @@ on:
       - main
     paths:
       - apps/arcsweep/src/return-engine.js
+      - apps/arcsweep/src/return-engine-cross-ancestry.js
       - apps/arcsweep/contracts/return-engine-v0.1.schema.json
       - apps/arcsweep/test/return-engine.test.js
+      - apps/arcsweep/test/return-engine-cross-ancestry.test.js
       - apps/agent-workspace/return-engine-ui.js
       - apps/agent-workspace/app.js
       - apps/agent-workspace/index.html
@@ -16,8 +18,10 @@ on:
   pull_request:
     paths:
       - apps/arcsweep/src/return-engine.js
+      - apps/arcsweep/src/return-engine-cross-ancestry.js
       - apps/arcsweep/contracts/return-engine-v0.1.schema.json
       - apps/arcsweep/test/return-engine.test.js
+      - apps/arcsweep/test/return-engine-cross-ancestry.test.js
       - apps/agent-workspace/return-engine-ui.js
       - apps/agent-workspace/app.js
       - apps/agent-workspace/index.html
@@ -41,4 +45,4 @@ jobs:
         with:
           node-version: 24
       - name: Execute Return Engine invariants
-        run: node --test apps/arcsweep/test/return-engine.test.js
+        run: node --test apps/arcsweep/test/return-engine.test.js apps/arcsweep/test/return-engine-cross-ancestry.test.js
