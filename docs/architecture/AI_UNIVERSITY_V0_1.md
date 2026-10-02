@@ -143,3 +143,33 @@ AI University v0.1 is ready for a live model-backed cohort when:
 ## Research basis
 
 This design intentionally follows the direction of current agent-evaluation work: multi-turn tool-using systems need environment-level evaluation, multiple trials, complete trajectories/receipts, realistic simulations, and hardened sandboxes. It extends those ideas toward judgement education by treating clarification, disagreement, revision and rule challenge as first-class learning outcomes rather than noise.
+
+
+## Executable runtime seam
+
+The University now has a bounded runtime in `apps/arcsweep/src/ai-university-runtime.js`.
+
+It executes:
+
+```text
+sealed cohort
+  -> independent blind learner trials
+  -> normalised shareable judgement products
+  -> open seminar
+  -> attributable revisions / boundary-review requests
+  -> Witness receipt
+```
+
+The runtime rejects any cohort that claims production effects. A completed run still has `productionMutationAllowed: false` and `selfPromotionAllowed: false`. The University may export findings, questions, proposals, tests, defensive patch proposals, and evidence receipts. Those artifacts must still cross the ordinary ArcSweep authority membrane before anything consequential happens.
+
+Run the deterministic smoke exercise with:
+
+```bash
+node scripts/ai-university-smoke.mjs
+```
+
+This smoke runner uses no production credentials and no live model provider. To begin model-backed training, supply an `invoke` adapter that returns the documented shareable JSON products. The adapter receives explicit `blind` and `seminar` phases so the first round remains sealed.
+
+**Founding ownership rule:** participation in a cohort does not transfer identity or ownership. Learners remain attributable to themselves; the University may preserve receipts about their work without claiming the learner as University property.
+
+**Graduation rule:** completing curriculum or demonstrating competence does not itself grant teaching, mentor, administrative, production, or delegation authority. Any such authority requires a separate explicit, scoped, revocable grant.
