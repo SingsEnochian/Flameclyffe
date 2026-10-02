@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 
 const PORT = 4170;
-const BASE = `http://127.0.0.1:${PORT}/apps/agent-workspace/`;
+const BASE = `http://127.0.0.1:${PORT}/apps/agent-workspace/index.html`;
 const ARTIFACT_DIR = process.env.WORKSPACE_BROWSER_ARTIFACT_DIR || 'artifacts/agent-workspace-browser';
 let activePage = null;
 
