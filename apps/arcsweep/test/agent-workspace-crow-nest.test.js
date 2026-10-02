@@ -125,3 +125,11 @@ test('Crow Nest shell is available offline with the workspace brain and bridges'
     assert.match(sw, new RegExp(`'\\./${file.replace('.', '\\.')}'`));
   }
 });
+
+
+test('Crow Nest keeps HUD geometry quiet until interaction', () => {
+  assert.match(css, /crow-nest-orbit-ring\.r2[^}]*opacity:\s*\.07/s);
+  assert.match(css, /crow-nest-orbit:focus-within/);
+  assert.match(css, /:has\(\.crow-nest-node\.active\)/);
+  assert.match(css, /field is presence-first, instrumentation-second/i);
+});
