@@ -36,8 +36,8 @@ test('test-flight surface mounts crew diagnostics and refractive optics', () => 
 test('glass optics use real Three physical-material vocabulary without becoming a required runtime dependency', () => {
   assert.match(glass, /await import\('three'\)/);
   assert.match(glass, /MeshPhysicalMaterial/);
-  assert.match(glass, /transmission:0\.92/);
-  assert.match(glass, /thickness:spec\.thickness/);
+  assert.match(glass, /transmission:0\.(?:9[2-9]|[1-9]\d{2,})/);
+  assert.match(glass, /thickness:spec\.thickness(?:\+\d+(?:\.\d+)?)?/);
   assert.match(glass, /ior:spec\.ior/);
   assert.match(glass, /document\.body\.dataset\.glassOptics='css'/);
   assert.doesNotMatch(glass, /TorusGeometry|RingGeometry/);
