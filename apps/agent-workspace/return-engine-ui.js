@@ -1,4 +1,4 @@
-import { createReturnEngine } from '../arcsweep/src/return-engine.js';
+import { createReturnEngine } from './return-engine-core.js';
 
 const STORAGE_KEY = 'hearthweave.return-engine/v0.1';
 const ACTIVE_KEY = 'hearthweave.return-engine-active/v0.1';
