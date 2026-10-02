@@ -1,0 +1,53 @@
+.crow-nest-orbit-ring.r2 {
+  animation-name: nest-orbit-centered;
+}
+
+.crow-presence[data-state="ready"],
+.crow-presence[data-state="thinking"],
+.crow-presence[data-state="speaking"] {
+  animation: crow-presence-breathe 4.8s ease-in-out infinite;
+}
+
+.crow-nest-node,
+.crow-presence,
+.crow-nest-button,
+.crow-nest-icon-button,
+.crow-nest-launch {
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease, opacity .18s ease;
+}
+
+.crow-nest-node:hover,
+.crow-nest-node:focus-visible {
+  border-color: var(--nest-rim);
+  box-shadow: 0 0 28px var(--nest-rim-soft), 0 18px 38px rgba(0,0,0,.34);
+  outline: none;
+}
+
+.crow-nest-node:active { transform: translate(-50%,-50%) scale(.97); }
+.crow-nest-button:active, .crow-nest-icon-button:active, .crow-nest-launch:active { transform: scale(.97); }
+
+.crow-nest-button:focus-visible,
+.crow-nest-icon-button:focus-visible,
+.crow-nest-launch:focus-visible {
+  outline: 2px solid var(--nest-rim);
+  outline-offset: 3px;
+}
+
+@keyframes nest-orbit-centered {
+  from { transform: translate(-50%,-50%) rotate(0deg); }
+  to { transform: translate(-50%,-50%) rotate(360deg); }
+}
+
+@keyframes crow-presence-breathe {
+  0%, 100% { filter: brightness(.98); }
+  50% { filter: brightness(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crow-nest-orbit-ring.r2,
+  .crow-presence[data-state="ready"],
+  .crow-presence[data-state="thinking"],
+  .crow-presence[data-state="speaking"] {
+    animation: none !important;
+  }
+}

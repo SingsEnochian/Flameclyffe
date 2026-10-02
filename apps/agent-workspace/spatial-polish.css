@@ -1,0 +1,274 @@
+/* House Workspace spatial polish v0.1
+   Progressive enhancement: list/grid remains the accessible fallback.
+   Spatial mode is intentionally desktop-first and respects reduced motion/transparency. */
+
+:root {
+  --spatial-field-min: 42rem;
+  --spatial-locus-size: clamp(7.8rem, 12vw, 10.8rem);
+  --spatial-line: color-mix(in srgb, var(--accent) 22%, transparent);
+  --spatial-line-strong: color-mix(in srgb, var(--accent-2) 42%, transparent);
+}
+
+.spatial-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 44px;
+  padding: .58rem .78rem;
+  border: 1px solid var(--rim);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-input) 82%, transparent);
+  color: var(--text);
+  cursor: pointer;
+}
+.spatial-mode-toggle[aria-pressed="true"] {
+  border-color: var(--rim-strong);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--glow) 48%, transparent);
+}
+.spatial-mode-toggle:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 70%, white);
+  outline-offset: 2px;
+}
+.spatial-mode-toggle .spatial-mode-icon {
+  width: 1.55rem;
+  height: 1.55rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--rim-strong) 72%, transparent);
+  font-size: .78rem;
+}
+
+.agent-grid.spatial-field {
+  position: relative;
+  display: block;
+  min-height: var(--spatial-field-min);
+  overflow: clip;
+  border: 1px solid color-mix(in srgb, var(--rim) 62%, transparent);
+  border-radius: clamp(1.4rem, 3vw, 2.4rem);
+  background:
+    radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--accent-2) 8%, transparent), transparent 18rem),
+    radial-gradient(circle at 16% 22%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 20rem),
+    radial-gradient(circle at 82% 80%, color-mix(in srgb, var(--accent-3) 5%, transparent), transparent 18rem);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
+  isolation: isolate;
+}
+
+.agent-grid.spatial-field::before,
+.agent-grid.spatial-field::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border: 1px solid color-mix(in srgb, var(--rim) 24%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.agent-grid.spatial-field::after {
+  inset: 23%;
+  border-color: color-mix(in srgb, var(--rim-strong) 20%, transparent);
+}
+
+.spatial-threads {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+.spatial-thread {
+  stroke: var(--spatial-line);
+  stroke-width: .34;
+  vector-effect: non-scaling-stroke;
+}
+.spatial-thread[data-related="true"] {
+  stroke: var(--spatial-line-strong);
+  stroke-width: .56;
+}
+
+.agent-grid.spatial-field .agent-card {
+  --spatial-x: 50%;
+  --spatial-y: 50%;
+  --spatial-scale: 1;
+  position: absolute;
+  left: var(--spatial-x);
+  top: var(--spatial-y);
+  width: var(--spatial-locus-size);
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 1rem;
+  transform: translate(-50%, -50%) scale(var(--spatial-scale));
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: .72rem;
+  border-radius: 52% 48% 56% 44% / 46% 58% 42% 54%;
+  border-color: color-mix(in srgb, var(--rim) 66%, transparent);
+  background:
+    radial-gradient(circle at 32% 24%, color-mix(in srgb, white 10%, transparent), transparent 22%),
+    radial-gradient(circle at 70% 76%, color-mix(in srgb, var(--accent-2) 11%, transparent), transparent 42%),
+    color-mix(in srgb, var(--surface-raised) 58%, transparent);
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, white 8%, transparent),
+    0 14px 38px rgba(0,0,0,.20);
+  text-align: center;
+  z-index: 2;
+  contain: layout paint;
+}
+.agent-grid.spatial-field .agent-card:nth-of-type(3n + 1) {
+  border-radius: 46% 54% 42% 58% / 54% 45% 55% 46%;
+}
+.agent-grid.spatial-field .agent-card:nth-of-type(3n + 2) {
+  border-radius: 58% 42% 51% 49% / 44% 56% 48% 52%;
+}
+.agent-grid.spatial-field .agent-card:hover,
+.agent-grid.spatial-field .agent-card:focus-visible {
+  transform: translate(-50%, -50%) scale(calc(var(--spatial-scale) * 1.035));
+  border-color: var(--rim-strong);
+  z-index: 5;
+}
+.agent-grid.spatial-field .agent-card.active {
+  --spatial-scale: 1.12;
+  border-color: color-mix(in srgb, var(--accent-3) 60%, var(--rim-strong));
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, white 12%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--accent-3) 18%, transparent),
+    0 0 42px color-mix(in srgb, var(--accent-2) 22%, transparent),
+    0 22px 52px rgba(0,0,0,.26);
+}
+.agent-grid.spatial-field .agent-card header {
+  display: grid;
+  justify-items: center;
+  gap: .38rem;
+}
+.agent-grid.spatial-field .agent-card header > div {
+  display: grid;
+  justify-items: center;
+}
+.agent-grid.spatial-field .agent-card h3 {
+  font-size: clamp(.92rem, 1.5vw, 1.15rem);
+}
+.agent-grid.spatial-field .agent-card .route {
+  max-width: 11ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: .62rem;
+}
+.agent-grid.spatial-field .agent-card > .route {
+  display: none;
+}
+.agent-grid.spatial-field .agent-card .badges {
+  justify-content: center;
+  max-height: 2.7rem;
+  overflow: hidden;
+}
+.agent-grid.spatial-field .agent-card .badge:not(.state) {
+  display: none;
+}
+.agent-grid.spatial-field .presence-dot {
+  width: .72rem;
+  height: .72rem;
+}
+
+.agent-grid.spatial-field .agent-card[data-presence-state="ready"],
+.agent-grid.spatial-field .agent-card[data-presence-state="thinking"],
+.agent-grid.spatial-field .agent-card[data-presence-state="speaking"] {
+  border-color: color-mix(in srgb, var(--ok) 34%, var(--rim));
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, white 9%, transparent),
+    0 0 28px color-mix(in srgb, var(--ok) 9%, transparent),
+    0 14px 38px rgba(0,0,0,.20);
+}
+.agent-grid.spatial-field .agent-card[data-presence-state="configured"] {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--accent-2) 28%, var(--rim));
+}
+.agent-grid.spatial-field .agent-card[data-presence-state="degraded"],
+.agent-grid.spatial-field .agent-card[data-presence-state="error"] {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--danger) 52%, var(--rim));
+  filter: saturate(.78);
+}
+.agent-grid.spatial-field .agent-card[data-presence-state="offline"] {
+  opacity: .78;
+  filter: saturate(.68);
+}
+
+.spatial-field-note {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 4;
+  max-width: min(28rem, calc(100% - 2rem));
+  padding: .5rem .68rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--rim) 62%, transparent);
+  background: color-mix(in srgb, var(--surface-input) 82%, transparent);
+  color: var(--muted);
+  font-size: .68rem;
+  backdrop-filter: blur(14px);
+}
+
+body[data-spatial-mode="true"] .workspace-main {
+  max-width: none;
+}
+
+@media (max-width: 980px) {
+  .spatial-mode-toggle { display: none; }
+  .agent-grid.spatial-field {
+    display: grid;
+    min-height: 0;
+    overflow: visible;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .agent-grid.spatial-field::before,
+  .agent-grid.spatial-field::after,
+  .agent-grid.spatial-field .spatial-threads,
+  .agent-grid.spatial-field .spatial-field-note { display: none; }
+  .agent-grid.spatial-field .agent-card {
+    position: relative;
+    inset: auto;
+    width: auto;
+    aspect-ratio: auto;
+    min-height: 10rem;
+    transform: none !important;
+    border-radius: var(--radius);
+    justify-items: stretch;
+    text-align: left;
+  }
+  .agent-grid.spatial-field .agent-card header {
+    display: flex;
+    justify-content: space-between;
+    justify-items: initial;
+  }
+  .agent-grid.spatial-field .agent-card header > div { justify-items: start; }
+  .agent-grid.spatial-field .agent-card .badges { justify-content: flex-start; max-height: none; }
+  .agent-grid.spatial-field .agent-card .badge:not(.state) { display: inline-flex; }
+  .agent-grid.spatial-field .agent-card > .route { display: block; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .agent-grid.spatial-field .agent-card {
+    transition: transform 170ms ease, border-color 170ms ease, box-shadow 170ms ease, filter 170ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-grid.spatial-field .agent-card { transition: none !important; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .agent-grid.spatial-field,
+  .agent-grid.spatial-field .agent-card,
+  .spatial-field-note,
+  .spatial-mode-toggle {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: var(--surface-raised);
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schema": "arcsweep.runtime-verification-receipt/v0.1",
+  "subject": {
+    "identity_id": "oxalpha",
+    "display_name": "Ox Alpha"
+  },
+  "verified_at": "2026-10-02T06:44:17.405Z",
+  "verification": {
+    "runtime_verified": true,
+    "synthetic_probe": true,
+    "arbitrary_prompt_allowed": false,
+    "provider": "openrouter",
+    "model": "z-ai/glm-5.3-flash",
+    "inference_model": "z-ai/glm-5.3-flash",
+    "upstream_model": "z-ai/glm-5.3-flash",
+    "execution_path": "supabase-edge-to-openrouter",
+    "reply_chars": 282,
+    "reply_sha256": "d7bea061e89652ae34d4ddda173438eb0ae3dd7a544a789dd0294e846f8a7412",
+    "latency_ms": 14076
+  },
+  "attestation": {
+    "auth": "github-actions-oidc",
+    "audience": "flameclyffe-oxalpha-probe",
+    "repository": "SingsEnochian/Flameclyffe",
+    "repository_id": "1237935937",
+    "ref": "refs/heads/rarity/agent-workspace-os-v0-1",
+    "workflow_ref": "SingsEnochian/Flameclyffe/.github/workflows/oxalpha-runtime-probe.yml@refs/heads/rarity/agent-workspace-os-v0-1",
+    "github_run_id": "36974973902",
+    "github_run_attempt": "1",
+    "github_head_sha": "f02c04559cddcba80826672d714b1c038ccfa1f2",
+    "github_run_url": "https://github.com/SingsEnochian/Flameclyffe/actions/runs/36974973902"
+  },
+  "edge_evidence": {
+    "supabase_project_ref": "rufrmjyusalnifpegllj",
+    "edge_function": "oxalpha",
+    "edge_function_version": 5,
+    "function_id": "19ab2791-5b40-4614-a41f-595374df087b",
+    "request_timestamp": "2026-10-02T06:44:17.373Z",
+    "method": "POST",
+    "status_code": 200,
+    "execution_time_ms": 14206,
+    "pathname": "/functions/v1/oxalpha"
+  },
+  "authority_boundary": {
+    "ordinary_chat_auth_unchanged": true,
+    "ci_probe_accepts_user_prompt": false,
+    "ci_probe_accepts_context": false,
+    "ci_probe_fixed_action": "synthetic-runtime-probe"
+  },
+  "note": "This receipt proves the Supabase Edge -> OpenRouter Ox Alpha model path executed successfully. It does not by itself prove that the Vercel production proxy has deployed the PR #417 gateway repair."
+}

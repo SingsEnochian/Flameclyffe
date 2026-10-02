@@ -1,7 +1,9 @@
 import {
   emitSomaticCue,
   getSomaticCue,
+  getSomaticTexture,
   listSomaticCues,
+  listSomaticTextures,
   somaticCueIsActive,
   stopSomaticCue,
 } from '../somatic-runtime.js';
@@ -77,6 +79,24 @@ export function registerSomaticService(registry, {
   });
 
   registry.registerCapability({
+    capability_id: 'somatic.list-textures',
+    service_id: 'somatic-interface',
+    description: 'List experiential sound/haptic texture grammars without changing cue meaning.',
+    authority: 'read',
+    execute: () => ({ schema: 'arcsweep.somatic-texture-catalog/v1', textures: listSomaticTextures() }),
+  });
+
+  registry.registerCapability({
+    capability_id: 'somatic.inspect-texture',
+    service_id: 'somatic-interface',
+    description: 'Inspect one sensory texture grammar. Textures are presentation mappings, not physical-state claims.',
+    authority: 'read',
+    input_schema: { required: ['texture_id'] },
+    validate: (input) => Boolean(getSomaticTexture(input?.texture_id)),
+    execute: (input) => clone(getSomaticTexture(input.texture_id)),
+  });
+
+  registry.registerCapability({
     capability_id: 'somatic.inspect-cue',
     service_id: 'somatic-interface',
     description: 'Inspect one semantic somatic cue without emitting it.',
@@ -99,6 +119,7 @@ export function registerSomaticService(registry, {
         channels: input.channels || { audio: true, haptic: true },
         gainCeiling: input.gain_ceiling,
         modulation: input.modulation || {},
+        texture_id: input.texture_id || 'neutral',
         context: input.context || null,
         source: context.actor_id || context.source || 'human-ui',
       });
@@ -122,7 +143,7 @@ export function registerSomaticService(registry, {
 
   return Object.freeze({
     service_id: 'somatic-interface',
-    capabilities: ['somatic.status', 'somatic.list-cues', 'somatic.inspect-cue', 'somatic.emit-cue', 'somatic.stop'],
+    capabilities: ['somatic.status', 'somatic.list-cues', 'somatic.list-textures', 'somatic.inspect-texture', 'somatic.inspect-cue', 'somatic.emit-cue', 'somatic.stop'],
     destroy: () => unsubscribe?.(),
   });
 }

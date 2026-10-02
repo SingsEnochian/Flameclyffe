@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 import {
   HOSTED_FLAME_FALLBACKS,
+  VERCEL_AI_GATEWAY_FALLBACKS,
   hostedFlameFallbackStatus,
   invokeHostedFlameFallback,
 } from '../../../netlify/functions/_shared/hosted-flame-fallback.mjs';
@@ -30,7 +31,7 @@ test('every hosted House Flame has an explicit Hugging Face fallback declaration
   assert.ok(HOSTED_FLAME_FALLBACKS.nocturne);
 });
 
-test('hosted fallback status is ready only when the server has a Hugging Face credential', () => {
+test('hosted fallback status is ready only when a declared transport credential exists', () => {
   const offline = hostedFlameFallbackStatus('altair', env());
   assert.equal(offline.configured, false);
   assert.deepEqual(offline.missing, ['HF_TOKEN|HFTOKEN']);
@@ -40,6 +41,59 @@ test('hosted fallback status is ready only when the server has a Hugging Face cr
   assert.equal(ready.provider, 'huggingface-inference-providers');
   assert.equal(ready.primary_route_unchanged, true);
   assert.equal(ready.execution_path, 'huggingface-hosted-fallback');
+});
+
+test('Ox Alpha prefers Vercel AI Gateway OIDC over stale Hugging Face credentials', async () => {
+  assert.equal(VERCEL_AI_GATEWAY_FALLBACKS.oxalpha, 'zai/glm-5.3-flash');
+  const status = hostedFlameFallbackStatus('oxalpha', env({
+    VERCEL_OIDC_TOKEN: 'short-lived-vercel-identity',
+    HF_TOKEN: 'stale-hf-token',
+  }));
+  assert.equal(status.configured, true);
+  assert.equal(status.provider, 'vercel-ai-gateway');
+  assert.equal(status.model, 'zai/glm-5.3-flash');
+  assert.equal(status.execution_path, 'vercel-ai-gateway-oidc');
+  assert.equal(status.credential_type, 'vercel-oidc');
+  assert.equal(status.fallback_chain[0].provider, 'vercel-ai-gateway');
+  assert.equal(status.fallback_chain[1].provider, 'huggingface-inference-providers');
+
+  const apiKeyStatus = hostedFlameFallbackStatus('oxalpha', env({ AI_GATEWAY_API_KEY: 'gateway-key' }));
+  assert.equal(apiKeyStatus.credential_type, 'ai-gateway-api-key');
+  assert.equal(apiKeyStatus.execution_path, 'vercel-ai-gateway-api-key');
+
+  const calls = [];
+  const result = await invokeHostedFlameFallback(
+    'oxalpha',
+    { message: 'Synthetic OA gateway probe.' },
+    env({
+      VERCEL_OIDC_TOKEN: 'short-lived-vercel-identity',
+      HF_TOKEN: 'stale-hf-token',
+    }),
+    async (url, options) => {
+      calls.push({ url, authorization: options.headers.authorization, body: JSON.parse(options.body) });
+      return new Response(JSON.stringify({
+        model: 'zai/glm-5.3-flash',
+        choices: [{
+          message: {
+            content: 'OA gateway path is executing.',
+            provider_metadata: { gateway: { routing: { provider: 'modal' } } },
+          },
+        }],
+        usage: { total_tokens: 19 },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    },
+  );
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, 'https://ai-gateway.vercel.sh/v1/chat/completions');
+  assert.equal(calls[0].authorization, 'Bearer short-lived-vercel-identity');
+  assert.equal(calls[0].body.model, 'zai/glm-5.3-flash');
+  assert.match(calls[0].body.messages[0].content, /Ox Alpha/);
+  assert.equal(result.provider, 'vercel-ai-gateway');
+  assert.equal(result.model, 'zai/glm-5.3-flash');
+  assert.equal(result.upstream_provider, 'modal');
+  assert.equal(result.execution_path, 'vercel-ai-gateway-oidc');
+  assert.equal(result.message, 'OA gateway path is executing.');
 });
 
 test('House Runtime board labels a hosted fallback as ready rather than falsely live', async () => {
@@ -103,4 +157,36 @@ test('Starsong legacy routes remain mounted into the living Flame handler', asyn
   assert.match(compat, /ellowind/);
   assert.match(handler, /invokeHostedFlameFallback/);
   assert.match(handler, /hostedFlameFallbackStatus/);
+});
+
+
+test('Ox Alpha falls through from failed Vercel Gateway to the existing Hugging Face path', async () => {
+  const calls = [];
+  const result = await invokeHostedFlameFallback(
+    'oxalpha',
+    { message: 'Fallback check.' },
+    env({
+      VERCEL_OIDC_TOKEN: 'oidc-token',
+      HF_TOKEN: 'hf-token',
+    }),
+    async (url, options) => {
+      calls.push(url);
+      if (url.startsWith('https://ai-gateway.vercel.sh/')) {
+        return new Response(JSON.stringify({ error: { message: 'gateway unavailable' } }), {
+          status: 503,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      return new Response(JSON.stringify({
+        choices: [{ message: { content: 'HF path answered.' } }],
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    },
+  );
+
+  assert.deepEqual(calls, [
+    'https://ai-gateway.vercel.sh/v1/chat/completions',
+    'https://router.huggingface.co/v1/chat/completions',
+  ]);
+  assert.equal(result.provider, 'huggingface-inference-providers');
+  assert.equal(result.execution_path, 'huggingface-hosted-fallback');
 });

@@ -3,8 +3,12 @@ import { resolveSupabaseRuntimeConfig } from './supabase-runtime-config.mjs';
 
 const { FLAME_CONTRACTS } = contractsModule;
 const HF_ROUTER = 'https://router.huggingface.co/v1';
+const VERCEL_AI_GATEWAY = 'https://ai-gateway.vercel.sh/v1';
 const SUPABASE_RELAY_PATH = '/functions/v1/arcsweep-model-relay';
 const RELAY_FLAMES = new Set(['atlas', 'oxalpha', 'boxfire']);
+const VERCEL_GATEWAY_MODELS = Object.freeze({
+  oxalpha: 'zai/glm-5.3-flash',
+});
 
 // Hosted execution is a transport choice only. Identity, prompt, knowledge and
 // receipt policy remain anchored to the canonical Flame contract. Every actual
@@ -15,11 +19,34 @@ export const HOSTED_FLAME_FALLBACKS = Object.freeze(Object.fromEntries(
     .map((contract) => [contract.id, contract.runtime.hostedFallback.model]),
 ));
 
+export const VERCEL_AI_GATEWAY_FALLBACKS = VERCEL_GATEWAY_MODELS;
+
 function hfCredentialCandidates(env) {
   return [...new Set([
     String(env.get('HF_TOKEN') || '').trim(),
     String(env.get('HFTOKEN') || '').trim(),
   ].filter(Boolean))];
+}
+
+function vercelGatewayCredential(env) {
+  const oidc = String(env.get('VERCEL_OIDC_TOKEN') || '').trim();
+  if (oidc) return { token: oidc, type: 'vercel-oidc', executionPath: 'vercel-ai-gateway-oidc' };
+  const apiKey = String(env.get('AI_GATEWAY_API_KEY') || '').trim();
+  if (apiKey) return { token: apiKey, type: 'ai-gateway-api-key', executionPath: 'vercel-ai-gateway-api-key' };
+  return null;
+}
+
+function vercelGatewayStatus(flameId, env) {
+  const model = VERCEL_GATEWAY_MODELS[flameId] || null;
+  if (!model) return null;
+  const credential = vercelGatewayCredential(env);
+  return {
+    configured: Boolean(credential),
+    provider: 'vercel-ai-gateway',
+    model,
+    execution_path: credential?.executionPath || 'vercel-ai-gateway-unconfigured',
+    credential_type: credential?.type || null,
+  };
 }
 
 function relayConfig(flameId, env) {
@@ -36,10 +63,19 @@ export function hostedFlameFallbackStatus(flameId, env) {
   const model = contract?.runtime.hostedFallback?.model || null;
   if (!contract || !model) return null;
   const hfCredentials = hfCredentialCandidates(env);
+  const gateway = vercelGatewayStatus(flameId, env);
   const relay = relayConfig(flameId, env);
   const hfConfigured = hfCredentials.length > 0;
-  const configured = hfConfigured || relay.configured;
+  const gatewayConfigured = gateway?.configured === true;
+  const configured = gatewayConfigured || hfConfigured || relay.configured;
   const fallbackChain = [
+    ...(gateway ? [{
+      provider: gateway.provider,
+      model: gateway.model,
+      execution_path: gateway.execution_path,
+      credential_type: gateway.credential_type,
+      configured: gatewayConfigured,
+    }] : []),
     {
       provider: contract.runtime.hostedFallback.provider,
       model,
@@ -55,18 +91,72 @@ export function hostedFlameFallbackStatus(flameId, env) {
   ];
   return {
     configured,
-    provider: hfConfigured ? contract.runtime.hostedFallback.provider : relay.configured ? 'openrouter' : contract.runtime.hostedFallback.provider,
-    model: hfConfigured ? model : relay.configured ? 'relay-resolved' : model,
-    execution_path: hfConfigured ? 'huggingface-hosted-fallback' : relay.configured ? 'supabase-edge-openrouter-fallback' : 'hosted-fallback-unavailable',
+    provider: gatewayConfigured ? gateway.provider : hfConfigured ? contract.runtime.hostedFallback.provider : relay.configured ? 'openrouter' : contract.runtime.hostedFallback.provider,
+    model: gatewayConfigured ? gateway.model : hfConfigured ? model : relay.configured ? 'relay-resolved' : model,
+    execution_path: gatewayConfigured ? gateway.execution_path : hfConfigured ? 'huggingface-hosted-fallback' : relay.configured ? 'supabase-edge-openrouter-fallback' : 'hosted-fallback-unavailable',
+    credential_type: gatewayConfigured ? gateway.credential_type : null,
     primary_route_unchanged: true,
     flame_contract_schema: contract.schema,
     fallback_chain: fallbackChain,
-    missing: configured ? [] : ['HF_TOKEN|HFTOKEN', ...(relay.eligible ? relay.missing : [])],
+    missing: configured ? [] : [
+      ...(gateway ? ['VERCEL_OIDC_TOKEN|AI_GATEWAY_API_KEY'] : []),
+      'HF_TOKEN|HFTOKEN',
+      ...(relay.eligible ? relay.missing : []),
+    ],
   };
 }
 
 async function responseJson(response) {
   return response.json().catch(() => ({}));
+}
+
+async function invokeVercelGateway(contract, model, message, credential, fetchImpl) {
+  const response = await fetchImpl(`${VERCEL_AI_GATEWAY}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${credential.token}`,
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 900,
+      stream: false,
+      messages: [
+        { role: 'system', content: contract.identity.systemPrompt },
+        { role: 'user', content: message },
+      ],
+    }),
+    signal: AbortSignal.timeout(60_000),
+  });
+  const data = await responseJson(response);
+  if (!response.ok) {
+    const detail = data.error?.message || data.error || data.message || 'gateway rejected request';
+    const error = new Error(`Vercel AI Gateway ${response.status}: ${detail}`);
+    error.status = response.status;
+    throw error;
+  }
+  const reply = String(data.choices?.[0]?.message?.content || '').trim();
+  if (!reply) throw new Error('Vercel AI Gateway returned an empty model response.');
+  const routing = data.choices?.[0]?.message?.provider_metadata?.gateway?.routing
+    || data.provider_metadata?.gateway?.routing
+    || {};
+  return {
+    flame_id: contract.id,
+    display_name: contract.identity.displayName,
+    formal_name: contract.identity.formalName,
+    provider: 'vercel-ai-gateway',
+    model: String(data.model || model),
+    upstream_provider: routing.provider || null,
+    execution_path: credential.executionPath,
+    hosted_fallback: true,
+    primary_route_unchanged: true,
+    flame_contract_schema: contract.schema,
+    sensory_profile_id: contract.sensory.profileId,
+    message: reply,
+    usage: data.usage || null,
+    cited_sources: [],
+    memory_write_recommendation: false,
+  };
 }
 
 async function invokeHuggingFace(contract, model, message, token, fetchImpl) {
@@ -171,6 +261,16 @@ export async function invokeHostedFlameFallback(flameId, body, env, fetchImpl = 
   if (message.length > 24000) throw new Error('message exceeds 24,000 characters.');
 
   const failures = [];
+  const gatewayModel = VERCEL_GATEWAY_MODELS[flameId] || null;
+  const gatewayCredential = vercelGatewayCredential(env);
+  if (gatewayModel && gatewayCredential) {
+    try {
+      return await invokeVercelGateway(contract, gatewayModel, message, gatewayCredential, fetchImpl);
+    } catch (error) {
+      failures.push(error?.message || String(error));
+    }
+  }
+
   for (const token of hfCredentialCandidates(env)) {
     try {
       return await invokeHuggingFace(contract, model, message, token, fetchImpl);

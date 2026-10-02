@@ -1,0 +1,131 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const read = (relative) => fs.readFileSync(path.join(root, relative), 'utf8');
+
+const html = read('apps/agent-workspace/index.html');
+const css = read('apps/agent-workspace/styles.css');
+const app = read('apps/agent-workspace/app.js');
+const manifest = JSON.parse(read('apps/agent-workspace/manifest.webmanifest'));
+const sw = read('apps/agent-workspace/sw.js');
+const stage = read('apps/arcsweep/vercel-stage.cjs');
+const pages = read('.github/workflows/pages.yml');
+const spatialCss = read('apps/agent-workspace/spatial-polish.css');
+const spatialJs = read('apps/agent-workspace/spatial-polish.js');
+
+test('House Workspace is an installable mobile-first web surface', () => {
+  assert.match(html, /viewport-fit=cover/);
+  assert.match(html, /apple-mobile-web-app-capable/);
+  assert.equal(manifest.display, 'standalone');
+  assert.equal(manifest.start_url, './');
+  assert.ok(manifest.icons.some((icon) => icon.src === './icon.svg'));
+  assert.match(css, /env\(safe-area-inset-bottom\)/);
+  assert.match(css, /min-height:\s*44px/);
+  assert.match(css, /@media \(max-width: 820px\)/);
+  assert.match(css, /\.mobile-nav/);
+});
+
+test('workspace keeps living glass material depth instead of stacking blur', () => {
+  assert.match(css, /\.glass \.glass \{ backdrop-filter: none/);
+  assert.match(css, /prefers-reduced-transparency/);
+  assert.match(css, /body\[data-theme="mossglass"\]/);
+  assert.match(css, /body\[data-theme="lapis"\]/);
+  assert.match(css, /body\[data-theme="hearthglass"\]/);
+});
+
+test('workspace carries explicit agent and handoff boundaries', () => {
+  assert.match(app, /workspace ≠ cognition/);
+  assert.match(app, /theme ≠ identity/);
+  assert.match(app, /presence ≠ authority/);
+  assert.match(app, /proposal ≠ decision/);
+  assert.match(app, /Next owner/);
+  assert.match(app, /Unacknowledged handoff/);
+  assert.match(app, /crow-trainer/);
+  assert.match(app, /id: 'crow', name: 'Crow', route: 'crow'/);
+  assert.match(app, /id: 'nikola'/);
+  assert.match(app, /constellation\/nikola\/ride-along/);
+});
+
+test('runtime presence probes existing same-origin House routes truthfully', () => {
+  assert.match(app, /String\(agent\.route\)\.split\('\/'\)\.map\(\(segment\) => encodeURIComponent\(segment\)\)\.join\('\/'\)/);
+  assert.match(app, /\/api\/v1\/flames\/\$\{routePath\}\/status/);
+  assert.match(app, /route: 'starsong\/larkshine'/);
+  assert.match(app, /route: 'starsong\/ellowind'/);
+  assert.match(app, /credentials: 'same-origin'/);
+  assert.match(app, /response\.status === 401 \? 'unauthorised' : 'route-error'/);
+  assert.match(app, /expectedFlameId/);
+});
+
+test('workspace offline cache is shell-scoped', () => {
+  assert.match(sw, /house-workspace-os-v0\.\d+\.\d+(?:-[a-z0-9-]+)?/);
+  assert.match(sw, /url\.origin !== location\.origin/);
+  assert.match(sw, /url\.pathname\.includes\('\/agents\/'\)/);
+});
+
+test('Vercel staging publishes House Workspace at /agents', () => {
+  assert.match(stage, /agentWorkspaceSource/);
+  assert.match(stage, /'agents'/);
+  assert.match(stage, /House Workspace Vercel stage failed/);
+});
+
+test('GitHub Pages fallback publishes House Workspace at /Flameclyffe/agents', () => {
+  assert.match(pages, /mkdir -p _site\/agents/);
+  assert.match(pages, /cp -a apps\/agent-workspace\/\. _site\/agents\//);
+  assert.match(pages, /House Workspace OS: \/Flameclyffe\/agents\//);
+});
+
+
+test('GitHub Pages workspace links cross into the published ArcSweep route', () => {
+  assert.match(app, /href="\.\.\/apps\/arcsweep\/\?open=1"/);
+  assert.doesNotMatch(app, /href="\.\.\/arcsweep\/\?open=1"/);
+});
+
+test('spatial polish is progressive, accessible, and mobile-safe', () => {
+  assert.match(html, /\.\/spatial-polish\.css/);
+  assert.match(html, /\.\/spatial-polish\.js/);
+  assert.match(spatialCss, /\.agent-grid\.spatial-field/);
+  assert.match(spatialCss, /@media \(max-width: 980px\)/);
+  assert.match(spatialCss, /prefers-reduced-motion/);
+  assert.match(spatialCss, /prefers-reduced-transparency/);
+  assert.match(spatialJs, /aria-pressed/);
+  assert.match(spatialJs, /Selected presence anchors the field/);
+  assert.match(spatialJs, /sharedRole/);
+  assert.match(sw, /'\.\/spatial-polish\.css'/);
+  assert.match(sw, /'\.\/spatial-polish\.js'/);
+});
+
+
+test('workspace uses granular runtime states instead of one degraded bucket', () => {
+  for (const state of [
+    'fallback-ready', 'runtime-unreachable', 'runtime-mismatch', 'route-error',
+    'model-not-pulled', 'model-unavailable', 'credential-missing', 'configuration-missing',
+  ]) assert.match(app, new RegExp(state));
+  assert.match(app, /expectedFlameId/);
+  assert.match(app, /split\('\/'\).*at\(-1\)/s);
+  assert.match(app, /hosted_fallback/);
+});
+
+
+test('Ox Alpha must pass a model-executing probe before the workspace calls it live', () => {
+  assert.match(app, /agent\.id === 'oxalpha'/);
+  assert.match(app, /probeVerifiedRuntime/);
+  assert.match(app, /\/api\/v1\/flames\/\$\{routePath\}\/probe/);
+  assert.match(app, /runtime_verified !== true/);
+  assert.match(app, /Ox Alpha inference probe failed/);
+  assert.match(app, /provider-error/);
+});
+
+test('Nikola is a distinct visible roster participant, Crow training driver, and separately probed Constellation runtime', () => {
+  assert.match(app, /id: 'nikola', name: 'Nikola'/);
+  assert.match(app, /roles: \['wonder', 'science', 'design', 'inquiry', 'crow-training'\]/);
+  assert.match(app, /constellation\/nikola\/ride-along/);
+  assert.match(app, /active Crow training driver/);
+  assert.match(app, /statusEndpoint: '\/api\/v1\/constellation\/nikola\/status'/);
+  assert.match(app, /probeEndpoint: '\/api\/v1\/constellation\/nikola\/probe'/);
+  assert.match(app, /status_scope === 'configuration-only'/);
+  assert.match(app, /agent\.id === 'oxalpha' \|\| agent\.probeEndpoint/);
+});

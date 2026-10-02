@@ -6,6 +6,7 @@ import {
   normaliseRuntimeWorldContext,
   responseWithRuntimeWorld,
 } from '../../../../netlify/functions/_shared/runtime-world-context.mjs';
+import { createCrowFlameHandler } from '../../../_shared/crow-flame-runtime.mjs';
 import { createRarityFlameHandler } from '../../../_shared/rarity-flame-runtime.mjs';
 import { vercelEnv as env } from '../../../_shared/vercel-env.mjs';
 
@@ -45,6 +46,11 @@ export default {
 
     const flameId = String(params.flame_id || '');
     const action = String(params.action || '');
+
+    if (flameId === 'crow') {
+      const response = await createCrowFlameHandler({ env, fetchImpl: fetch })(boundRequest, params);
+      return runtimeWorld ? responseWithRuntimeWorld(response, runtimeWorld) : response;
+    }
 
     if (flameId === 'rarity') {
       const response = await createRarityFlameHandler({ env, fetchImpl: fetch })(boundRequest, params);
