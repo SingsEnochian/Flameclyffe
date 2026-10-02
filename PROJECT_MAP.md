@@ -117,6 +117,26 @@ Enduring systems attached to the trunk with a clear purpose.
 
 **First implementation slice:** MediaPipe camera adapter → filtered landmarks → approach → pinch begin/hold/release → target capture → drag → settle → synthetic Three.js artefact → local receipt.
 
+### Wonder field + transduction architecture
+
+**Runtime:** `apps/arcsweep/src/wonder-field.js`
+
+**Spec:** `docs/arcsweep/WONDER_FIELD_TRANSDUCTION_V0_1.md`
+
+**Nikola lane:** `docs/arcsweep/NIKOLA_PARALLEL_SYNTHESIS_V0_1.md`
+
+**Purpose:** Preserve live questions, possibility sets, transduction chains, field-state conditions, temporal replay, and claim provenance without flattening analogy, phenomenology, active research, mythic meaning, and measured evidence into one register.
+
+**Behaviour:**
+
+- Wonder precedes premature collapse into the nearest familiar explanation.
+- Hidden-state and field claims are traced through predicted effects, detectors, measurements, alternatives, and provenance.
+- Source, signal, representation, interpretation, belief, and action remain distinct.
+- Thought fields organise without silently deleting weak signals, contradictions, or incubating ideas.
+- Multimodal cues remain semantic mappings rather than fixed meanings, so sound, haptic, visual, spatial, and symbolic channels can be swapped without corrupting the underlying state.
+- Time, phase, duration, recurrence, and replay remain part of state rather than metadata afterthoughts.
+- Cross-domain structural analogies are allowed and encouraged, but do not become ontological identity by default.
+
 ## Leaves
 
 Replaceable expressions of a branch.
