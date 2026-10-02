@@ -18,15 +18,15 @@ HOME = Path.home()
 HERMES_HOME = Path(os.environ.get("HERMES_HOME", HOME / ".hermes"))
 LOG = HERMES_HOME / "logs" / "agent.log"
 
-def run(label: str, args: list[str]) -> dict:
+def run(label: str, args: list[str], *, required: bool = False) -> dict:
     try:
         proc = subprocess.run(args, text=True, capture_output=True, timeout=TIMEOUT, check=False)
         output = "\n".join(part for part in (proc.stdout.strip(), proc.stderr.strip()) if part)
-        return {"label": label, "ok": proc.returncode == 0, "code": proc.returncode, "output": output[-4000:]}
+        return {"label": label, "ok": proc.returncode == 0, "required": required, "code": proc.returncode, "output": output[-4000:]}
     except FileNotFoundError:
-        return {"label": label, "ok": False, "code": None, "output": "command not found"}
+        return {"label": label, "ok": False, "required": required, "code": None, "output": "command not found"}
     except subprocess.TimeoutExpired:
-        return {"label": label, "ok": False, "code": None, "output": f"timed out after {TIMEOUT}s"}
+        return {"label": label, "ok": False, "required": required, "code": None, "output": f"timed out after {TIMEOUT}s"}
 
 def classify_log(text: str) -> list[dict]:
     findings = []
@@ -59,11 +59,11 @@ def main() -> int:
     }
 
     if not hermes:
-        report["checks"].append({"label": "Hermes executable", "ok": False, "output": "hermes is not on PATH"})
+        report["checks"].append({"label": "Hermes executable", "ok": False, "required": True, "output": "hermes is not on PATH"})
     else:
         report["checks"].extend([
-            run("Hermes version", [hermes, "--version"]),
-            run("Enabled tools", [hermes, "tools", "--summary"]),
+            run("Hermes version", [hermes, "--version"], required=True),
+            run("Enabled tools", [hermes, "tools", "--summary"], required=True),
             run("Computer-use status", [hermes, "computer-use", "status"]),
             run("Computer-use doctor", [hermes, "computer-use", "doctor", "--json"]),
         ])
@@ -81,7 +81,7 @@ def main() -> int:
         report["log_lines_inspected"] = 0
 
     print(json.dumps(report, indent=2))
-    failed = [item for item in report["checks"] if not item.get("ok")]
+    failed = [item for item in report["checks"] if item.get("required") and not item.get("ok")]
     return 1 if hermes and failed else 0
 
 if __name__ == "__main__":
