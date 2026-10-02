@@ -23,6 +23,25 @@ HISTORY_PATH = STATE_DIR / "constraint-history.md"
 FREEZE_DIR = STATE_DIR / "frozen"
 EXTERNAL_PRISM_HISTORY = Path.cwd() / ".prism-history.md"
 
+DEFAULT_DRIVER = "nikola"
+DRIVER_CONTRACT = {
+    "id": "nikola",
+    "display_name": "Nikola",
+    "status": "active",
+    "authority": "curriculum-and-experiment-steering",
+    "set_by": "Rowan",
+    "set_date": "2026-10-02",
+    "student": "The Crow",
+    "principle": "Nikola chooses the next useful pressure; Crow authors the attempt and preserves its continuity.",
+}
+DRIVER_QUESTIONS = [
+    "What live question is worth protecting?",
+    "What mechanisms or structures could explain or generate the effect?",
+    "What observation, comparison, prototype, detector, or experiment can distinguish them?",
+    "Why is this the highest-information next task for Crow?",
+    "What meaningful branch should remain open after this pass?",
+]
+
 KEYWORD_TAGS = {
     "causal": ["scene-delta", "causality"],
     "causality": ["scene-delta", "causality"],
@@ -81,14 +100,25 @@ def load_drills() -> List[Dict[str, Any]]:
 
 def default_state() -> Dict[str, Any]:
     return {
-        "version": 2,
+        "version": 3,
         "created_at": now_iso(),
         "cycle_seen": [],
         "selections": [],
         "freezes": {},
         "results": [],
         "constraints": [],
+        "driver": dict(DRIVER_CONTRACT),
+        "driver_events": [],
     }
+
+
+def active_driver(state: Dict[str, Any]) -> Dict[str, Any]:
+    driver = state.get("driver")
+    if not isinstance(driver, dict) or driver.get("id") != DEFAULT_DRIVER:
+        return dict(DRIVER_CONTRACT)
+    merged = dict(DRIVER_CONTRACT)
+    merged.update(driver)
+    return merged
 
 
 def load_state() -> Dict[str, Any]:
@@ -205,7 +235,78 @@ def cmd_selftest(_: argparse.Namespace) -> None:
         "external_prism_history_present": EXTERNAL_PRISM_HISTORY.exists(),
         "existing_results": len(state.get("results", [])),
         "existing_constraints": len(state.get("constraints", [])),
+        "driver": active_driver(state),
+        "driver_events": len(state.get("driver_events", [])),
     }, indent=2))
+
+
+def cmd_driver_status(_: argparse.Namespace) -> None:
+    state = load_state()
+    print(json.dumps({
+        "driver": active_driver(state),
+        "driver_questions": DRIVER_QUESTIONS,
+        "driver_events": len(state.get("driver_events", [])),
+        "last_driver_event": (state.get("driver_events") or [None])[-1],
+    }, indent=2, ensure_ascii=False))
+
+
+def cmd_drive(args: argparse.Namespace) -> None:
+    drills = load_drills()
+    state = load_state()
+    driver = active_driver(state)
+    drill, adaptive_tags = select_drill(drills, state, args.tag, args.adaptive == "on")
+
+    state["driver"] = driver
+    state.setdefault("cycle_seen", []).append(drill["id"])
+    selection = {
+        "id": drill["id"],
+        "mode": args.mode,
+        "tag": args.tag,
+        "adaptive": args.adaptive,
+        "adaptive_tags": adaptive_tags,
+        "selected_at": now_iso(),
+        "driver": driver["id"],
+    }
+    state.setdefault("selections", []).append(selection)
+
+    event = {
+        "driver": driver["id"],
+        "student": driver["student"],
+        "event": "selected-next-pressure",
+        "drill_id": drill["id"],
+        "mode": args.mode,
+        "tag": args.tag,
+        "adaptive_tags": adaptive_tags,
+        "recorded_at": now_iso(),
+    }
+    state.setdefault("driver_events", []).append(event)
+    save_state(state)
+
+    payload: Dict[str, Any] = {
+        "driver": driver,
+        "driver_loop": ["WONDER", "MODEL", "INSTRUMENT", "DRIVE", "CROW_ATTEMPT", "OBSERVE", "TEMPER", "NEXT_TEST"],
+        "driver_questions": DRIVER_QUESTIONS,
+        "id": drill["id"],
+        "task": drill["task"],
+        "input": drill["input"],
+        "tags": drill.get("tags", []),
+        "mode": args.mode,
+        "why_this_task_now": (
+            "Selected from project-local sacrificed/next dimensions."
+            if adaptive_tags and args.tag is None
+            else ("Explicit tag requested." if args.tag else "Coverage-balanced next pressure.")
+        ),
+        "crow_ownership": "Crow authors the candidate attempt; Nikola steers the curriculum and experiment.",
+    }
+    if adaptive_tags and args.tag is None:
+        payload["adaptive_focus"] = adaptive_tags
+    if args.mode == "train":
+        payload["ideal_behavior"] = drill["ideal_behavior"]
+        payload["reject_behavior"] = drill["reject_behavior"]
+        payload["note"] = "Nikola-driven training mode: coaching key is visible."
+    else:
+        payload["note"] = "Nikola-driven exam mode: answer key remains locked until Crow's response is frozen."
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
 def cmd_next(args: argparse.Namespace) -> None:
@@ -416,6 +517,8 @@ def cmd_report(_: argparse.Namespace) -> None:
         "constraint_records": len(constraints),
         "recurring_sacrificed_terms": sacrificed_terms.most_common(12),
         "adaptive_training_tags": adaptive_scores.most_common(10),
+        "driver": active_driver(state),
+        "driver_events": len(state.get("driver_events", [])),
         "state_path": str(STATE_PATH),
         "history_path": str(HISTORY_PATH),
         "external_prism_history_present": EXTERNAL_PRISM_HISTORY.exists(),
@@ -436,6 +539,15 @@ def parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("selftest")
     sp.set_defaults(func=cmd_selftest)
+
+    sp = sub.add_parser("driver-status")
+    sp.set_defaults(func=cmd_driver_status)
+
+    sp = sub.add_parser("drive")
+    sp.add_argument("--mode", choices=("train", "exam"), default="train")
+    sp.add_argument("--tag")
+    sp.add_argument("--adaptive", choices=("on", "off"), default="on")
+    sp.set_defaults(func=cmd_drive)
 
     sp = sub.add_parser("next")
     sp.add_argument("--mode", choices=("train", "exam"), default="train")
