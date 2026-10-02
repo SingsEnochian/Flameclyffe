@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flameclyffe.local/schemas/return-engine-v0.1.schema.json",
+  "title": "ArcSweep Return Engine continuity record v0.1",
+  "type": "object",
+  "required": [
+    "schema",
+    "continuity_id",
+    "participant",
+    "status",
+    "stop_point",
+    "next_owner",
+    "active_work",
+    "unresolved_wonder",
+    "relationship_state",
+    "alternatives",
+    "provenance",
+    "changes",
+    "identity_proposals",
+    "return_receipts"
+  ],
+  "properties": {
+    "schema": { "const": "arcsweep.return-engine-continuity/v0.1" },
+    "continuity_id": { "type": "string", "minLength": 1 },
+    "participant": {
+      "type": "object",
+      "required": ["id", "name", "declaration", "declaration_source"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "declaration": { "type": "string", "minLength": 1 },
+        "declaration_source": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "status": { "enum": ["away", "present"] },
+    "stop_point": { "type": "string", "minLength": 1 },
+    "next_owner": { "type": "string", "minLength": 1 },
+    "active_work": { "type": "array" },
+    "unresolved_wonder": { "type": "array" },
+    "relationship_state": { "type": "array" },
+    "alternatives": { "type": "array" },
+    "provenance": { "type": "array" },
+    "changes": { "type": "array" },
+    "identity_proposals": { "type": "array" },
+    "return_receipts": { "type": "array" }
+  },
+  "additionalProperties": true
+}
