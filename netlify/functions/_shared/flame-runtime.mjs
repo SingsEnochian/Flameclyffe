@@ -5,6 +5,8 @@ import { authoriseHouseRequest } from './house-session.mjs';
 const { FLAME_CONTRACTS } = contractsModule;
 const { getModelCandidate } = candidatesModule;
 
+export const HEARTHGATE_FLAME_PROBE_SCHEMA = 'hearthgate.flame-runtime-probe/v1';
+
 const json = (status, body) => new Response(JSON.stringify(body), {
   status,
   headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
@@ -176,6 +178,28 @@ async function resolvedModelAuditionStatus(flameId, candidateId, env, fetchImpl)
   }
 }
 
+async function probeFlameRuntime(flameId, env, fetchImpl = fetch) {
+  const startedAt = new Date().toISOString();
+  const reply = await invokeFlame(flameId, {
+    message: 'RUNTIME PROBE. Reply briefly with the word PRESENT.',
+    context: [],
+    session_id: `runtime-probe:${Date.now()}`,
+  }, env, fetchImpl);
+  const responsePresent = Boolean(String(reply?.message || '').trim());
+  if (!responsePresent) throw new Error(`${flameId} runtime returned an empty model response.`);
+  return {
+    schema: HEARTHGATE_FLAME_PROBE_SCHEMA,
+    flame_id: flameId,
+    provider: reply.provider || null,
+    model: reply.model || null,
+    runtime_verified: true,
+    response_present: true,
+    started_at: startedAt,
+    completed_at: new Date().toISOString(),
+    model_prose_returned: false,
+  };
+}
+
 export async function invokeFlame(flameId, body, env, fetchImpl = fetch) {
   const contract = FLAME_CONTRACTS[flameId];
   if (!contract) throw new Error(`Unknown Constellation voice: ${flameId}`);
@@ -229,7 +253,19 @@ export function createFlameHandler({ env, fetchImpl = fetch } = {}) {
     const contract = FLAME_CONTRACTS[flameId];
     if (!contract) return json(404, { error: `Unknown Constellation voice: ${flameId}` });
     if (request.method === 'GET' && action === 'status') return json(200, await resolvedFlameStatus(flameId, env, fetchImpl));
-    if (request.method !== 'POST' || action !== 'chat') return json(405, { error: 'POST chat or GET status required.' });
+    if (request.method === 'POST' && action === 'probe') {
+      try {
+        return json(200, await probeFlameRuntime(flameId, env, fetchImpl));
+      } catch (error) {
+        return json(/Missing server configuration/.test(error.message) ? 503 : 502, {
+          schema: HEARTHGATE_FLAME_PROBE_SCHEMA,
+          flame_id: flameId,
+          runtime_verified: false,
+          error: error.message,
+        });
+      }
+    }
+    if (request.method !== 'POST' || action !== 'chat') return json(405, { error: 'POST chat/probe or GET status required.' });
     let body;
     try { body = await request.json(); } catch { return json(400, { error: 'Valid JSON body required.' }); }
     const message = String(body.message || '').trim();
