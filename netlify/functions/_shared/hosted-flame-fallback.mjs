@@ -29,7 +29,11 @@ function hfCredentialCandidates(env) {
 }
 
 function vercelGatewayCredential(env) {
-  return String(env.get('VERCEL_OIDC_TOKEN') || env.get('AI_GATEWAY_API_KEY') || '').trim();
+  const oidc = String(env.get('VERCEL_OIDC_TOKEN') || '').trim();
+  if (oidc) return { token: oidc, type: 'vercel-oidc', executionPath: 'vercel-ai-gateway-oidc' };
+  const apiKey = String(env.get('AI_GATEWAY_API_KEY') || '').trim();
+  if (apiKey) return { token: apiKey, type: 'ai-gateway-api-key', executionPath: 'vercel-ai-gateway-api-key' };
+  return null;
 }
 
 function vercelGatewayStatus(flameId, env) {
@@ -40,8 +44,8 @@ function vercelGatewayStatus(flameId, env) {
     configured: Boolean(credential),
     provider: 'vercel-ai-gateway',
     model,
-    execution_path: 'vercel-ai-gateway-oidc',
-    credential_type: env.get('VERCEL_OIDC_TOKEN') ? 'vercel-oidc' : env.get('AI_GATEWAY_API_KEY') ? 'ai-gateway-api-key' : null,
+    execution_path: credential?.executionPath || 'vercel-ai-gateway-unconfigured',
+    credential_type: credential?.type || null,
   };
 }
 
@@ -111,7 +115,7 @@ async function invokeVercelGateway(contract, model, message, credential, fetchIm
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      authorization: `Bearer ${credential}`,
+      authorization: `Bearer ${credential.token}`,
     },
     body: JSON.stringify({
       model,
@@ -143,7 +147,7 @@ async function invokeVercelGateway(contract, model, message, credential, fetchIm
     provider: 'vercel-ai-gateway',
     model: String(data.model || model),
     upstream_provider: routing.provider || null,
-    execution_path: 'vercel-ai-gateway-oidc',
+    execution_path: credential.executionPath,
     hosted_fallback: true,
     primary_route_unchanged: true,
     flame_contract_schema: contract.schema,
