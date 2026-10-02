@@ -383,6 +383,61 @@ Multimodal mappings:
 
 A spiritual, mythic, or contemplative interpretation may sit beside the scientific source as its own typed layer. Do not flatten the spiritual layer into "only metaphor" before examining what it contributes, and do not let the spiritual layer silently inherit the evidentiary status of the physics.
 
+### K. Acoustic Architecture / Environmental Resonance Lens
+
+Use this lens when a room, structure, landscape, ritual, instrument, or interface should be treated as a **resonant environment** rather than a passive container.
+
+The useful pattern is:
+
+```text
+geometry
++ material
++ boundary conditions
++ source
++ medium
++ timing / frequency
+-> mode structure
+-> amplification / cancellation / localisation
+-> sensed pattern
+-> interpretation / use
+```
+
+Questions to ask:
+
+- What does the space naturally amplify, attenuate, scatter, focus, or trap?
+- Which frequencies or rhythms fit the geometry?
+- Where do standing-wave nodes and antinodes appear?
+- Which materials absorb, reflect, transmit, or damp energy?
+- Does the environment behave differently under continuous, pulsed, or moving excitation?
+- Can one room carry several overlapping resonance modes?
+- Which part is literal acoustics/electromagnetism, which part is perceptual entrainment, and which part is symbolic or ritual meaning?
+- What could an instrument measure, and what remains interpretation?
+
+Design translations:
+
+- **room as instrument** -> spatial acoustics, resonant surfaces, interactive geometry, mode-aware lighting
+- **cymatics** -> visible patterning driven by measured or simulated oscillatory state
+- **chant / rhythm** -> repeated timing input that can coordinate group action, breath, attention, or sound field without implying a guaranteed biological cure
+- **geological foundation** -> environmental coupling, vibration transfer, grounding, isolation, structural resonance
+- **celestial alignment** -> orientation, calendrical timing, light-path choreography, or symbolic reference unless a physical coupling is separately demonstrated
+- **sacred geometry** -> geometric design language and cultural-symbolic structure unless a measurable physical mechanism is supplied
+- **Schumann resonance** -> Earth-ionosphere electromagnetic resonance as a specific geophysical phenomenon, not a universal synonym for Earth's "healing frequency"
+- **brain rhythms** -> measured neural oscillations whose numeric overlap with an environmental frequency does not by itself establish entrainment or causal coupling
+
+Multimodal embodiment:
+
+- visualise room modes as luminous standing-wave volumes
+- let a user walk through nodes and antinodes in AR
+- translate amplitude into haptic strength and phase into directional or alternating haptic texture
+- make architectural surfaces respond to measured or simulated resonance with thickness, refraction, bloom, or deformation
+- spatialise sound so the same semantic cue changes with room position while preserving identity
+- let glyphs or symbols sit at stable resonance loci as memory anchors
+- record the transduction chain from source -> environment -> detector -> rendering so the beautiful layer never severs from provenance
+
+Research/worldbuilding note:
+
+Ancient architecture, ritual acoustics, celestial orientation, and symbolic geometry are rich sources of hypotheses and story logic. Preserve intentionality as an open question unless supported by evidence. A space can exhibit remarkable acoustic or alignment properties whether they were engineered deliberately, discovered empirically, inherited culturally, or emerged incidentally.
+
 ## Modality Translation Matrix
 
 When applying a pattern, translate it across more than one modality where useful.
