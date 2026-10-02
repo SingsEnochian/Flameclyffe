@@ -76,14 +76,25 @@ If Hermes or Crow Trainer is throwing connection errors, run the bundled read-on
 python profiles/crow-trainer/scripts/connection_doctor.py
 ```
 
+For the bounded **test-flight control**, ask the doctor to send one minimal live query:
+
+```bash
+python profiles/crow-trainer/scripts/connection_doctor.py --probe
+```
+
+The probe uses Hermes' non-interactive `hermes chat -q` path with a tiny fixed reply request. It does not mutate config, rotate credentials, or touch Crow training state.
+
 It checks, without printing secrets:
 
 - whether the `hermes` executable is available;
 - the installed Hermes version;
+- `hermes doctor`;
 - `hermes tools --summary`;
 - `hermes computer-use status`;
 - `hermes computer-use doctor --json`;
-- the last 500 lines of `~/.hermes/logs/agent.log` for connection/authentication/request-size/computer-use failure classes.
+- the last 500 lines of `~/.hermes/logs/agent.log` for authentication, authorisation, rate-limit, upstream 5xx, TLS, DNS/transport, interrupted-stream, route/model, request-size, and computer-use failure classes;
+- presence-only proxy environment flags without exposing proxy URLs or credentials;
+- when `--probe` is requested, one short live-query control whose output is scrubbed for likely secrets before it is printed.
 
 For a Hermes stream-open failure, use a short fresh chat as the control. If short chats work while a long session fails, compress the long session before retrying. If even a small request cannot connect, verify the selected provider/base URL and network path rather than rotating unrelated House credentials.
 
