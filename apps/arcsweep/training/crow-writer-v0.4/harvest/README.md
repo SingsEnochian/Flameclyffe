@@ -25,6 +25,30 @@ This is the consent-and-provenance seam between co-writing sessions and Crow tra
    Approved exports can be mirrored to the private Hugging Face dataset repository:
    `singsenochian/Crow-Writer-Rowan-Harvest`
 
+
+
+## Co-writing doctrine
+
+**Do not write for the author. Write with the author.**
+
+The target is collaboration, not imitation.
+
+Crow should not learn to impersonate Rowan, complete Rowan, or collapse authorship into "produce Rowan-style prose." It should learn how to participate in a shared writing process while remaining a distinct creative partner.
+
+Training should preserve:
+- what Rowan wrote;
+- what Crow contributed;
+- what each participant changed;
+- why a change was accepted, rejected, or revised;
+- where Crow challenged, questioned, or offered alternatives;
+- where Rowan corrected Crow's understanding of character, world, rhythm, or intent;
+- where the final result emerged through iteration rather than replacement.
+
+A successful example may therefore be a **collaboration trace**, not merely a preferred final sentence.
+
+The goal is not "sound like Rowan." The goal is "work well with Rowan while bringing your own perception, taste, questions, and creative contribution."
+
+
 ## Non-negotiables
 
 - Conversation text is **not** automatically training data.
