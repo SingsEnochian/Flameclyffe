@@ -156,3 +156,46 @@ test('audition route rejects an unregistered Flame/candidate pairing', async () 
   const response = await handler(request, { flame_id: 'boxfire', candidate_id: 'inkling-small' });
   assert.equal(response.status, 404);
 });
+
+
+test('Ox Alpha probe performs actual model inference before claiming runtime verified', async () => {
+  const env = makeEnv({ ARCSWEEP_RUNTIME_TOKEN: 'house-key', HF_TOKEN: 'hf-test-key' });
+  const handler = createFlameHandler({ env, fetchImpl: async (url, options) => {
+    assert.equal(url, 'https://router.huggingface.co/v1/chat/completions');
+    assert.equal(options.headers.authorization, 'Bearer hf-test-key');
+    const body = JSON.parse(options.body);
+    assert.equal(body.model, 'zai-org/GLM-5.3-Flash');
+    assert.match(body.messages.at(-1).content, /RUNTIME PROBE/);
+    return new Response(JSON.stringify({ choices: [{ message: { content: 'PRESENT' } }] }), { status: 200 });
+  } });
+  const request = new Request('https://example.test/api/v1/flames/oxalpha/probe', {
+    method: 'POST',
+    headers: { authorization: 'Bearer house-key', 'content-type': 'application/json' },
+    body: '{}',
+  });
+  const response = await handler(request, { flame_id: 'oxalpha', action: 'probe' });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.schema, 'hearthgate.flame-runtime-probe/v1');
+  assert.equal(data.flame_id, 'oxalpha');
+  assert.equal(data.runtime_verified, true);
+  assert.equal(data.response_present, true);
+  assert.equal(data.model_prose_returned, false);
+});
+
+test('Ox Alpha probe reports provider failure instead of pretending configured means live', async () => {
+  const env = makeEnv({ ARCSWEEP_RUNTIME_TOKEN: 'house-key', HF_TOKEN: 'stale-token' });
+  const handler = createFlameHandler({ env, fetchImpl: async () =>
+    new Response(JSON.stringify({ error: { message: 'Invalid username or password.' } }), { status: 401 })
+  });
+  const request = new Request('https://example.test/api/v1/flames/oxalpha/probe', {
+    method: 'POST',
+    headers: { authorization: 'Bearer house-key', 'content-type': 'application/json' },
+    body: '{}',
+  });
+  const response = await handler(request, { flame_id: 'oxalpha', action: 'probe' });
+  assert.equal(response.status, 502);
+  const data = await response.json();
+  assert.equal(data.runtime_verified, false);
+  assert.match(data.error, /401|Invalid username or password/);
+});
