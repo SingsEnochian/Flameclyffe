@@ -19,6 +19,10 @@ function bindPanel(panel){
     panel.style.setProperty('--glass-caustic-alpha','.34');
     panel.style.setProperty('--glass-velocity','0');
     panel.style.setProperty('--glass-specular','.24');
+    panel.style.setProperty('--glass-velocity-blur','0px');
+    panel.style.setProperty('--glass-shadow-y','18px');
+    panel.style.setProperty('--glass-shadow-size','52px');
+    panel.style.setProperty('--glass-inner-depth-size','24px');
   };
   const move=(clientX,clientY,intensity=1)=>{
     if(reducedMotion.matches) return;
@@ -44,6 +48,10 @@ function bindPanel(panel){
     panel.style.setProperty('--glass-caustic-alpha',(0.34+distance*0.26+velocity*0.18).toFixed(2));
     panel.style.setProperty('--glass-velocity',velocity.toFixed(3));
     panel.style.setProperty('--glass-specular',(0.24+distance*0.12+velocity*0.26).toFixed(3));
+    panel.style.setProperty('--glass-velocity-blur',(velocity*1.2).toFixed(2)+'px');
+    panel.style.setProperty('--glass-shadow-y',(18+velocity*6).toFixed(2)+'px');
+    panel.style.setProperty('--glass-shadow-size',(52+velocity*10).toFixed(2)+'px');
+    panel.style.setProperty('--glass-inner-depth-size',(24+velocity*8).toFixed(2)+'px');
   };
   settle();
 
