@@ -293,7 +293,7 @@ async function phoneScenario(browser) {
   await drawer.waitFor();
   await page.locator('[data-chat-agent]').selectOption('nikola');
   const drawerBox = await drawer.boundingBox();
-  assert.ok(drawerBox && drawerBox.left >= 0 && drawerBox.right <= 390 && drawerBox.bottom <= 844, 'Phone chat drawer must fit inside the viewport.');
+  assert.ok(drawerBox && drawerBox.x >= 0 && drawerBox.x + drawerBox.width <= 390 && drawerBox.y + drawerBox.height <= 844, 'Phone chat drawer must fit inside the viewport.');
   await assertNoHorizontalOverflow(page, 'phone');
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/phone.png`, fullPage: true });
