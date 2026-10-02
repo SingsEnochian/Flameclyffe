@@ -115,7 +115,7 @@ test('Ox Alpha must pass a model-executing probe before the workspace calls it l
   assert.match(app, /probeVerifiedRuntime/);
   assert.match(app, /\/api\/v1\/flames\/\$\{routePath\}\/probe/);
   assert.match(app, /runtime_verified !== true/);
-  assert.match(app, /Ox Alpha inference probe failed/);
+  assert.match(app, /\$\{agent\.name\} inference probe failed/);
   assert.match(app, /provider-error/);
 });
 

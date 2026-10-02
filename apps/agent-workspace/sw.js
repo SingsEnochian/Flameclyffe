@@ -1,4 +1,4 @@
-const CACHE = 'house-workspace-os-v0.4.0-spatial';
+const CACHE = 'house-workspace-os-v0.6.0-test-flight';
 const SHELL = [
   './',
   './index.html',
@@ -16,6 +16,13 @@ const SHELL = [
   './spatial-polish.css',
   './sensory-feedback.js',
   './spatial-polish.js',
+  './return-engine.css',
+  './return-engine-ui.js',
+  './refractive-glass-three.js',
+  './refractive-glass-three.css',
+  './connection-doctor.js',
+  './connection-doctor.css',
+  './return-engine-core.js',
   './astra-bridge.js',
   './neural-bridge.js',
   './manifest.webmanifest',

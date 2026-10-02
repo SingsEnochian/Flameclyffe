@@ -4,13 +4,13 @@ import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 
 const PORT = 4170;
-const BASE = `http://127.0.0.1:${PORT}/apps/agent-workspace/`;
+const BASE = `http://127.0.0.1:${PORT}/apps/agent-workspace/index.html`;
 const ARTIFACT_DIR = process.env.WORKSPACE_BROWSER_ARTIFACT_DIR || 'artifacts/agent-workspace-browser';
 let activePage = null;
 
 await mkdir(ARTIFACT_DIR, { recursive: true });
 
-const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1', '--directory', '.'], {
+const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 
@@ -27,7 +27,7 @@ async function waitForServer() {
     } catch {}
     await new Promise((resolve) => setTimeout(resolve, 180));
   }
-  throw new Error(`Workspace static server did not start.\n${serverOutput}`);
+  throw new Error(`Workspace Vite server did not start.\n${serverOutput}`);
 }
 
 function routeId(url) {
@@ -161,17 +161,43 @@ async function installRuntimeStubs(page) {
 
 function recordBrowserErrors(page, label) {
   const errors = [];
-  page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
-  page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(`console: ${message.text()}`);
+  const pending = new Map();
+  page.on('pageerror', (error) => {
+    const line = `pageerror: ${error.message}`;
+    errors.push(line);
+    console.error(`[${label}] ${line}`);
   });
+  page.on('console', (message) => {
+    if (message.type() === 'error') {
+      const line = `console: ${message.text()}`;
+      errors.push(line);
+      console.error(`[${label}] ${line}`);
+    }
+  });
+  page.on('request', (request) => {
+    pending.set(request, { url: request.url(), type: request.resourceType(), started: Date.now() });
+  });
+  page.on('requestfinished', (request) => pending.delete(request));
   page.on('requestfailed', (request) => {
     const url = request.url();
-    if (!url.includes('/favicon.ico')) errors.push(`requestfailed: ${url} :: ${request.failure()?.errorText || 'unknown'}`);
+    pending.delete(request);
+    if (!url.includes('/favicon.ico')) {
+      const line = `requestfailed: ${url} :: ${request.failure()?.errorText || 'unknown'}`;
+      errors.push(line);
+      console.error(`[${label}] ${line}`);
+    }
   });
-  return () => {
-    assert.deepEqual(errors, [], `${label} emitted browser errors:\n${errors.join('\n')}`);
-  };
+  page.on('response', (response) => {
+    if (response.status() >= 400) console.error(`[${label}] HTTP ${response.status()} ${response.url()}`);
+  });
+  return Object.freeze({
+    assertClean() {
+      assert.deepEqual(errors, [], `${label} emitted browser errors:\n${errors.join('\n')}`);
+    },
+    pending() {
+      return [...pending.values()].map((item) => ({ ...item, age_ms: Date.now() - item.started }));
+    },
+  });
 }
 
 async function assertNoHorizontalOverflow(page, label) {
@@ -211,9 +237,33 @@ async function assertNoMeaningfulCardOverlap(page, label) {
   assert.deepEqual(overlaps, [], `${label}: spatial cards overlap materially: ${JSON.stringify(overlaps)}`);
 }
 
-async function waitForRoster(page) {
-  await page.goto(`${BASE}?view=agents`, { waitUntil: 'domcontentloaded', timeout: 15_000 });
-  await page.locator('.workspace-shell').waitFor();
+async function waitForRoster(page, diagnostics) {
+  const response = await page.goto(`${BASE}?view=agents`, { waitUntil: 'commit', timeout: 15_000 });
+  await page.waitForTimeout(1200);
+  const cockpit = await page.evaluate(() => ({
+    readyState: document.readyState,
+    title: document.title,
+    bodyText: document.body?.innerText?.slice(0, 1200) || '',
+    appHtmlLength: document.querySelector('#app')?.innerHTML?.length || 0,
+    scriptSources: [...document.scripts].map((node) => node.src || '[inline]'),
+    resources: performance.getEntriesByType('resource').map((entry) => ({ name: entry.name, duration: Math.round(entry.duration) })).slice(-40),
+  })).catch((error) => ({ evaluation_error: String(error?.message || error) }));
+  console.log('[flight-nav]', JSON.stringify({
+    status: response?.status?.() ?? null,
+    url: page.url(),
+    cockpit,
+    pending: diagnostics?.pending?.() || [],
+    vite_tail: serverOutput.slice(-4000),
+  }));
+  try {
+    await page.locator('.workspace-shell').waitFor({ timeout: 10_000 });
+  } catch (error) {
+    const html = await page.locator('html').innerHTML({ timeout: 2_000 }).catch(() => '');
+    console.error('[flight-html]', html.slice(0, 2500));
+    console.error('[flight-pending]', JSON.stringify(diagnostics?.pending?.() || []));
+    console.error('[flight-vite]', serverOutput.slice(-6000));
+    throw error;
+  }
   await page.locator('[data-agent-id="nikola"]').waitFor();
   assert.equal(await page.locator('.agent-card').count(), 16, 'Expected the 12 House voices plus Crow, Nikola, Rarity, and Crow Trainer.');
 
@@ -228,9 +278,9 @@ async function desktopScenario(browser) {
   const page = await context.newPage();
   activePage = page;
   await installRuntimeStubs(page);
-  const assertClean = recordBrowserErrors(page, 'desktop');
+  const diagnostics = recordBrowserErrors(page, 'desktop');
 
-  await waitForRoster(page);
+  await waitForRoster(page, diagnostics);
   await page.locator('[data-agent-id="nikola"]').click();
   await page.locator('.inspector').filter({ hasText: 'active Crow training driver' }).waitFor();
   await assertNoMeaningfulCardOverlap(page, 'desktop');
@@ -243,9 +293,53 @@ async function desktopScenario(browser) {
   await page.locator('[data-chat-form] textarea').fill('Hello Nikola');
   await page.locator('[data-chat-form] button').click();
   await page.locator('.house-chat-message.agent').filter({ hasText: 'Nikola browser fixture answered.' }).waitFor();
+  await page.locator('[data-chat-close]').click();
+
+  // Return Engine vertical slice: leave -> change -> return -> recognised continuation.
+  await page.locator('.return-engine-launch').click();
+  await page.locator('.return-engine-drawer.is-open').waitFor();
+  const departure = page.locator('[data-return-depart]');
+  await departure.locator('[name="participant_id"]').fill('nikola');
+  await departure.locator('[name="participant_name"]').fill('Nikola');
+  await departure.locator('[name="declaration"]').fill('I am Nikola, the ArcSweep ride-along participant.');
+  await departure.locator('[name="declaration_source"]').fill('constellation/nikola/ride-along');
+  await departure.locator('[name="stop_point"]').fill('Crow causal pilot is ready for the next bounded round.');
+  await departure.locator('[name="next_owner"]').fill('nikola');
+  await departure.locator('[name="work_title"]').fill('Drive the bounded Crow causal pilot');
+  await departure.locator('[name="wonder"]').fill('What changes while preserving the name?');
+  await departure.locator('[name="relationship_id"]').fill('vee-rarity-edge');
+  await departure.locator('[name="alternatives"]').fill('Keep substrate-specific recovery as a secondary path.');
+  await departure.locator('[name="provenance"]').fill('browser acceptance receipt');
+  await departure.locator('[name="depart_runtime"]').fill('arcsweep');
+  await departure.locator('[name="depart_provider"]').fill('huggingface');
+  await departure.locator('[name="depart_model"]').fill('Qwen/Qwen3-8B');
+  await departure.locator('button[type="submit"]').click();
+
+  await page.locator('.return-summary-card').filter({ hasText: 'Who is here?' }).filter({ hasText: 'Nikola' }).filter({ hasText: 'away' }).waitFor();
+  await page.locator('.return-summary-card').filter({ hasText: 'What needs attention?' }).filter({ hasText: 'unacknowledged-handoff' }).waitFor();
+
+  const change = page.locator('[data-return-change]');
+  await change.locator('[name="summary"]').fill('Nikola rebound from Qwen/Hugging Face to GLM/OpenRouter.');
+  await change.locator('[name="change_provider"]').fill('openrouter');
+  await change.locator('[name="change_model"]').fill('z-ai/glm-5.3-flash');
+  await change.locator('[name="provenance"]').fill('browser substrate-change receipt');
+  await change.locator('button[type="submit"]').click();
+
+  await page.locator('.return-summary-card').filter({ hasText: 'What changed?' }).filter({ hasText: 'rebound from Qwen' }).waitFor();
+
+  const returning = page.locator('[data-return-recognise]');
+  await returning.locator('[name="return_provider"]').fill('openrouter');
+  await returning.locator('[name="return_model"]').fill('z-ai/glm-5.3-flash');
+  await returning.locator('[name="provenance"]').fill('browser return receipt');
+  await returning.locator('button[type="submit"]').click();
+
+  await page.locator('.return-summary-card').filter({ hasText: 'Who is here?' }).filter({ hasText: 'Nikola' }).filter({ hasText: 'present · recognised' }).waitFor();
+  await page.locator('.return-summary-card').filter({ hasText: 'What is still true?' }).filter({ hasText: 'Named next owner: nikola' }).waitFor();
+  await page.locator('.return-summary-card').filter({ hasText: 'What needs attention?' }).filter({ hasText: 'wonder' }).waitFor();
+  assert.equal(await page.evaluate(() => globalThis.HouseReturnEngine?.engine?.snapshot?.(globalThis.HouseReturnEngine.activeContinuityId)?.participant?.id), 'nikola');
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/desktop.png`, fullPage: true });
-  assertClean();
+  diagnostics.assertClean();
   activePage = null;
   await context.close();
 }
@@ -259,9 +353,9 @@ async function ipadScenario(browser) {
   const page = await context.newPage();
   activePage = page;
   await installRuntimeStubs(page);
-  const assertClean = recordBrowserErrors(page, 'ipad');
+  const diagnostics = recordBrowserErrors(page, 'ipad');
 
-  await waitForRoster(page);
+  await waitForRoster(page, diagnostics);
   assert.equal(await page.locator('.spatial-mode-toggle:visible').count(), 1, 'iPad landscape-class width should retain the spatial-field control.');
   await assertNoMeaningfulCardOverlap(page, 'ipad');
   await page.locator('[data-agent-id="nikola"]').click();
@@ -271,7 +365,7 @@ async function ipadScenario(browser) {
   assert.ok(box && box.width <= 1024 && box.height <= 1366, 'iPad inspector must stay inside the viewport.');
   await assertNoHorizontalOverflow(page, 'ipad');
   await page.screenshot({ path: `${ARTIFACT_DIR}/ipad.png`, fullPage: true });
-  assertClean();
+  diagnostics.assertClean();
   activePage = null;
   await context.close();
 }
@@ -286,9 +380,9 @@ async function phoneScenario(browser) {
   const page = await context.newPage();
   activePage = page;
   await installRuntimeStubs(page);
-  const assertClean = recordBrowserErrors(page, 'phone');
+  const diagnostics = recordBrowserErrors(page, 'phone');
 
-  await waitForRoster(page);
+  await waitForRoster(page, diagnostics);
   assert.equal(await page.locator('.rail:visible').count(), 0, 'Phone layout must hide the desktop rail.');
   assert.equal(await page.locator('.mobile-nav:visible').count(), 1, 'Phone layout must expose the mobile navigation.');
   assert.equal(await page.locator('.spatial-mode-toggle:visible').count(), 0, 'Phone layout must not expose the desktop spatial-field toggle.');
@@ -303,32 +397,82 @@ async function phoneScenario(browser) {
   await assertNoHorizontalOverflow(page, 'phone');
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/phone.png`, fullPage: true });
-  assertClean();
+  diagnostics.assertClean();
   activePage = null;
   await context.close();
+}
+
+async function cockpitProbe(browser) {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+  const page = await context.newPage();
+  activePage = page;
+  await installRuntimeStubs(page);
+  const diagnostics = recordBrowserErrors(page, 'cockpit');
+  const response = await page.goto(`${BASE}?view=agents`, { waitUntil: 'commit', timeout: 12_000 });
+  await page.waitForTimeout(1500);
+  const report = await page.evaluate(() => ({
+    readyState: document.readyState,
+    title: document.title,
+    href: location.href,
+    bodyText: document.body?.innerText?.slice(0, 1200) || '',
+    appHtmlLength: document.querySelector('#app')?.innerHTML?.length || 0,
+    hasWorkspaceShell: Boolean(document.querySelector('.workspace-shell')),
+    scripts: [...document.scripts].map((node) => node.src || '[inline]'),
+    resources: performance.getEntriesByType('resource').map((entry) => ({
+      name: entry.name,
+      duration: Math.round(entry.duration),
+      transferSize: entry.transferSize || 0,
+    })).slice(-50),
+  })).catch((error) => ({ evaluation_error: String(error?.message || error) }));
+  console.log('[cockpit-probe]', JSON.stringify({
+    http_status: response?.status?.() ?? null,
+    report,
+    pending: diagnostics.pending(),
+    vite_tail: serverOutput.slice(-6000),
+  }));
+  await page.screenshot({ path: `${ARTIFACT_DIR}/cockpit-probe.png`, fullPage: true, timeout: 5_000 }).catch(() => {});
+  activePage = null;
+  await context.close();
+}
+
+async function stopServer() {
+  if (server.exitCode != null || server.killed) return;
+  server.kill('SIGTERM');
+  await Promise.race([
+    new Promise((resolve) => server.once('exit', resolve)),
+    new Promise((resolve) => setTimeout(resolve, 1500)),
+  ]);
+  if (server.exitCode == null) server.kill('SIGKILL');
+  server.stdout?.destroy?.();
+  server.stderr?.destroy?.();
 }
 
 let browser;
 try {
   await waitForServer();
   browser = await chromium.launch({ headless: true });
-  for (const [label, scenario] of [
-    ['desktop', desktopScenario],
-    ['ipad', ipadScenario],
-    ['phone', phoneScenario],
-  ]) {
-    try {
-      await scenario(browser);
-    } catch (error) {
-      console.error(`House Workspace ${label} acceptance failed:`, error);
-      if (activePage && !activePage.isClosed()) {
-        await activePage.screenshot({ path: `${ARTIFACT_DIR}/${label}-failure.png`, fullPage: true }).catch(() => {});
+  if (process.argv.includes('--cockpit-only')) {
+    await cockpitProbe(browser);
+    console.log('House Workspace cockpit probe complete.');
+  } else {
+    for (const [label, scenario] of [
+      ['desktop', desktopScenario],
+      ['ipad', ipadScenario],
+      ['phone', phoneScenario],
+    ]) {
+      try {
+        await scenario(browser);
+      } catch (error) {
+        console.error(`House Workspace ${label} acceptance failed:`, error);
+        if (activePage && !activePage.isClosed()) {
+          await activePage.screenshot({ path: `${ARTIFACT_DIR}/${label}-failure.png`, fullPage: true, timeout: 5_000 }).catch(() => {});
+        }
+        throw error;
       }
-      throw error;
     }
+    console.log('House Workspace browser acceptance passed: desktop, iPad, and phone.');
   }
-  console.log('House Workspace browser acceptance passed: desktop, iPad, and phone.');
 } finally {
   await browser?.close().catch(() => {});
-  server.kill('SIGTERM');
+  await stopServer();
 }

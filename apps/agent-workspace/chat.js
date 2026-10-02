@@ -103,7 +103,18 @@ async function checkHouseSession() {
   connection = { state: 'checking', detail: 'Checking House door…' };
   renderChat();
   try {
-    const response = await requestWithTimeout('/api/v1/house/session', { credentials: 'same-origin', cache: 'no-store' }, 15000);
+    let response;
+    let lastError;
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      try {
+        response = await requestWithTimeout('/api/v1/house/session', { credentials: 'same-origin', cache: 'no-store' }, 15000);
+        break;
+      } catch (error) {
+        lastError = error;
+        if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 350));
+      }
+    }
+    if (!response) throw lastError || new Error('House door unavailable.');
     if (response.status === 401) {
       connection = { state: 'disconnected', detail: 'House session required.' };
     } else {
@@ -183,7 +194,13 @@ async function sendMessage(message) {
     });
   } catch (error) {
     if (error.status === 401) connection = { state: 'disconnected', detail: 'House session expired. Reconnect to continue.' };
-    appendMessage(agent.id, 'system', error.name === 'AbortError' ? 'The agent took too long to answer.' : `Could not reach ${agent.name}: ${error.message}`);
+    const networkish = error.name === 'AbortError' || error instanceof TypeError || /fetch|network|load failed|connection/i.test(String(error.message || ''));
+    const detail = error.name === 'AbortError'
+      ? 'The agent took too long to answer.'
+      : networkish
+        ? `Connection to ${agent.name} failed before a verified reply receipt. The message was not auto-retried, so we do not risk duplicating a turn. Reconnect and retry manually.`
+        : `Could not reach ${agent.name}: ${error.message}`;
+    appendMessage(agent.id, 'system', detail);
   } finally {
     sending = false;
     renderChat();
@@ -358,6 +375,21 @@ root.querySelector('[data-chat-clear]').addEventListener('click', () => {
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && open) { open = false; renderChat(); }
+});
+
+window.addEventListener('online', () => {
+  connection = { state: 'checking', detail: 'Network restored · rechecking House door…' };
+  renderChat();
+  checkHouseSession();
+});
+window.addEventListener('offline', () => {
+  connection = { state: 'error', detail: 'Browser is offline. Threads are preserved locally; no send will be attempted.' };
+  renderChat();
+});
+
+globalThis.HouseChatConnection = Object.freeze({
+  recheck: checkHouseSession,
+  get state() { return { ...connection }; },
 });
 
 renderChat();

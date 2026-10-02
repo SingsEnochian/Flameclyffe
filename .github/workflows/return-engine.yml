@@ -1,0 +1,44 @@
+name: Return Engine Gate
+
+on:
+  push:
+    branches:
+      - rarity/return-engine-v0-1
+      - main
+    paths:
+      - apps/arcsweep/src/return-engine.js
+      - apps/arcsweep/contracts/return-engine-v0.1.schema.json
+      - apps/arcsweep/test/return-engine.test.js
+      - apps/agent-workspace/return-engine-ui.js
+      - apps/agent-workspace/app.js
+      - apps/agent-workspace/index.html
+      - .github/workflows/return-engine.yml
+  pull_request:
+    paths:
+      - apps/arcsweep/src/return-engine.js
+      - apps/arcsweep/contracts/return-engine-v0.1.schema.json
+      - apps/arcsweep/test/return-engine.test.js
+      - apps/agent-workspace/return-engine-ui.js
+      - apps/agent-workspace/app.js
+      - apps/agent-workspace/index.html
+      - .github/workflows/return-engine.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: return-engine-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  invariants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Execute Return Engine invariants
+        run: node --test apps/arcsweep/test/return-engine.test.js

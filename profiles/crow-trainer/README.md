@@ -68,6 +68,27 @@ python <skill-dir>/scripts/trainer.py record --id <id> --verdict pass --notes "e
 python <skill-dir>/scripts/trainer.py report
 ```
 
+## Connection doctor
+
+If Hermes or Crow Trainer is throwing connection errors, run the bundled read-only doctor from the Flameclyffe repository root:
+
+```bash
+python profiles/crow-trainer/scripts/connection_doctor.py
+```
+
+It checks, without printing secrets:
+
+- whether the `hermes` executable is available;
+- the installed Hermes version;
+- `hermes tools --summary`;
+- `hermes computer-use status`;
+- `hermes computer-use doctor --json`;
+- the last 500 lines of `~/.hermes/logs/agent.log` for connection/authentication/request-size/computer-use failure classes.
+
+For a Hermes stream-open failure, use a short fresh chat as the control. If short chats work while a long session fails, compress the long session before retrying. If even a small request cannot connect, verify the selected provider/base URL and network path rather than rotating unrelated House credentials.
+
+The doctor is diagnostic only. It does not edit `~/.hermes/config.yaml`, provider credentials, sessions, Crow training state, or external records.
+
 ## Browser
 
 Hermes' standard interactive CLI toolset already includes browser automation when its runtime is available. The trainer includes browser labs for:
