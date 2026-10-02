@@ -245,6 +245,76 @@ export default {
         }, { 'set-cookie': sessionCookieHeader });
       }
 
+      if (smokeTarget === 'oxalpha') {
+        const oaStatus = await readJson(await houseFetch('/api/v1/flames/oxalpha/status'), 'OA status');
+        const oaPrompt = [
+          'OX ALPHA · PRODUCTION RUNTIME PROBE',
+          'This is a synthetic route check. Do not infer Qualia or claim firsthand perception.',
+          JSON.stringify(aemethPacket),
+          'Reply briefly as Ox Alpha and identify this as a synthetic runtime probe.',
+        ].join('\n\n');
+        const oaReply = await readJson(await houseFetch('/api/v1/flames/oxalpha/chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            message: oaPrompt,
+            session_id: `${threadId}:oxalpha-probe`,
+            context: [],
+            metadata: {
+              surface: 'oxalpha-production-probe',
+              world_id: 'terra-prime',
+              world_context: worldContext,
+              commons_thread_id: threadId,
+              commons_turn_id: `${threadId}:oxalpha`,
+              request_id: `${threadId}:oxalpha`,
+              aemeth: aemethPacket,
+            },
+          }),
+        }), 'Ox Alpha runtime probe');
+        if (oaReply.flame_id && oaReply.flame_id !== 'oxalpha') throw new Error(`OA identity mismatch: ${oaReply.flame_id}`);
+        const oaRuntimeReceipt = assertDurableRuntimeReceipt({
+          reply: oaReply,
+          receipt: oaReply.runtime_braid,
+          threadId,
+          turnId: `${threadId}:oxalpha`,
+          voiceId: 'oxalpha',
+          label: 'OA',
+        });
+        return json(200, {
+          ok: true,
+          schema: 'hearthgate.oxalpha-production-probe/v1',
+          started_at: startedAt,
+          completed_at: new Date().toISOString(),
+          production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
+          caller: { repository: oidc.repository, ref: oidc.ref, run_id: oidc.run_id, sha: oidc.sha },
+          session: { connected: true, mode: sessionCheck.mode },
+          model_presence: {
+            oxalpha: {
+              route: 'oxalpha',
+              provider: oaReply.provider,
+              model: oaReply.model,
+              configured: oaStatus.configured === true,
+              runtime_reachable: oaStatus.runtime_reachable !== false,
+              runtime_verified: true,
+            },
+          },
+          runtime_receipt: runtimeReceiptProjection(oaRuntimeReceipt),
+          aemeth: {
+            packet_schema: aemethPacket.schema,
+            oa_replied: true,
+            rowan_witness_content_used: false,
+            canon_commit: false,
+          },
+          authority: {
+            oidc_audience: HOUSE_SMOKE_AUDIENCE,
+            session_bootstrap: 'trusted-github-oidc',
+            credential_exposed: false,
+            model_prose_returned: false,
+            production_write_scope: 'one verified Ox Alpha model reply runtime receipt; no Commons smoke writes',
+          },
+        }, { 'set-cookie': sessionCookieHeader });
+      }
+
       const atlasStatus = await readJson(await houseFetch('/api/v1/flames/atlas/status'), 'Atlas status');
       if (atlasStatus.runtime_reachable === false) throw new Error('Atlas runtime is unreachable.');
 
@@ -444,7 +514,9 @@ export default {
           ? 'hearthgate.caretaker-production-status/v1'
           : smokeTarget === 'runtime-receipt'
             ? 'hearthgate.runtime-receipt-production-proof/v1'
-            : 'hearthgate.production-circulation-smoke/v2',
+            : smokeTarget === 'oxalpha'
+              ? 'hearthgate.oxalpha-production-probe/v1'
+              : 'hearthgate.production-circulation-smoke/v2',
         production_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
         stage_error: error.message,
         credential_exposed: false,
