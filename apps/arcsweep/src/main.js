@@ -978,7 +978,7 @@ function renderKelyranSchool() {
 }
 
 function renderResonanceChamber() {
-  return \`
+  return `
     <section class="resonance-room" data-resonance-room id="resonance-room">
       <article class="panel resonance-room-hero">
         <p class="eyebrow">Wonder Field · living spatial prototype</p>
@@ -1028,7 +1028,7 @@ function renderResonanceChamber() {
           </section>
         </aside>
       </section>
-    </section>\`;
+    </section>`;
 }
 
 function currentView() {
