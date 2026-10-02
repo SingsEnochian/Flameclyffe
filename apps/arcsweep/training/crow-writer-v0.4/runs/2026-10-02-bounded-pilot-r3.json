@@ -1,0 +1,65 @@
+{
+  "schema": "crow.writer-pilot-receipt/v0.4",
+  "date": "2026-10-02",
+  "branch": "rarity/crow-writer-v0-4-pilot",
+  "recipe_commit": "0ded21734d6c370aa485540ca16bbcc0979be1ef",
+  "jobs": {
+    "r1": {
+      "id": "6abfeaa6fbc85ba682372798",
+      "status": "error",
+      "failure_class": "startup/tooling",
+      "detail": "curl absent from runtime image; model/training never started"
+    },
+    "r2": {
+      "id": "6abfeb49fbc85ba68237282d",
+      "status": "canceled",
+      "reason": "T4 Qwen3.5 fallback kernels made probe generation too slow; canceled to preserve bounded cost"
+    },
+    "r3": {
+      "id": "6abfedb7404719ba37626127",
+      "status": "training_complete",
+      "hardware": "a10g-small"
+    }
+  },
+  "baseline_model": "Crownelius/Crow-9B-HERETIC-4.6",
+  "train_examples": 12,
+  "held_out_examples": 2,
+  "held_out_trained_on": false,
+  "qlora": {
+    "steps": 4,
+    "rank": 8,
+    "alpha": 16,
+    "learning_rate": 0.00008,
+    "gradient_accumulation_steps": 4,
+    "max_length": 768
+  },
+  "metrics": {
+    "step_losses": [4.052, 3.786, 3.706, 3.664],
+    "train_loss": 3.8017135858535767,
+    "train_runtime_seconds": 13.4741,
+    "train_samples_per_second": 1.187,
+    "train_steps_per_second": 0.297,
+    "mean_token_accuracy_last_step": 0.3818
+  },
+  "invariants": {
+    "baseline_preserved": true,
+    "production_promoted": false,
+    "adapter_only": true
+  },
+  "evaluation": {
+    "yearning_probe": "Post-train output became somewhat more craft-specific but remained meta-analytic; no decisive behavioural shift established.",
+    "revision_probe": "Pre/post opening behaviour was effectively unchanged at this tiny step/data scale.",
+    "conclusion": "Pipeline validated; quality improvement not established."
+  },
+  "persistence": {
+    "adapter_uploaded": false,
+    "reason": "Credential-protected persistence intentionally decoupled from the training seam."
+  },
+  "next_gate": [
+    "Harvest author-approved SFT examples from real Rowan/Crow co-writing sessions.",
+    "Target 250-500 approved SFT examples before promotion-oriented adapter training.",
+    "Collect 150-300 genuine preference pairs for optional DPO.",
+    "Keep 15-20 percent fully held out.",
+    "Require held-out evidence of voice preservation, mode obedience, anti-flattening, and canon discipline before any promotion."
+  ]
+}
