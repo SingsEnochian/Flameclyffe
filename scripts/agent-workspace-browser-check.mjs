@@ -161,13 +161,17 @@ async function installRuntimeStubs(page) {
 
 function recordBrowserErrors(page, label) {
   const errors = [];
-  page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
+  const record = (entry) => {
+    errors.push(entry);
+    console.error(`[${label}] ${entry}`);
+  };
+  page.on('pageerror', (error) => record(`pageerror: ${error.message}`));
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(`console: ${message.text()}`);
+    if (message.type() === 'error') record(`console: ${message.text()}`);
   });
   page.on('requestfailed', (request) => {
     const url = request.url();
-    if (!url.includes('/favicon.ico')) errors.push(`requestfailed: ${url} :: ${request.failure()?.errorText || 'unknown'}`);
+    if (!url.includes('/favicon.ico')) record(`requestfailed: ${url} :: ${request.failure()?.errorText || 'unknown'}`);
   });
   return () => {
     assert.deepEqual(errors, [], `${label} emitted browser errors:\n${errors.join('\n')}`);
@@ -216,7 +220,20 @@ async function waitForRoster(page) {
   // service-worker registration, or slow non-critical resources must not turn a healthy
   // static workspace into a false navigation timeout.
   await page.goto(`${BASE}?view=agents`, { waitUntil: 'commit', timeout: 15_000 });
-  await page.locator('.workspace-shell').waitFor({ state: 'visible', timeout: 30_000 });
+  try {
+    await page.locator('.workspace-shell').waitFor({ state: 'visible', timeout: 30_000 });
+  } catch (error) {
+    const diagnostics = await page.evaluate(() => ({
+      href: location.href,
+      readyState: document.readyState,
+      appPresent: Boolean(document.querySelector('#app')),
+      appHtml: document.querySelector('#app')?.innerHTML?.slice(0, 1200) || '',
+      scripts: [...document.scripts].map((script) => ({ src: script.src, type: script.type })),
+    })).catch((diagnosticError) => ({ diagnosticError: String(diagnosticError?.message || diagnosticError) }));
+    console.error('House Workspace render diagnostics:', JSON.stringify(diagnostics, null, 2));
+    console.error('House Workspace static server output:', serverOutput);
+    throw error;
+  }
   await page.locator('[data-agent-id="nikola"]').waitFor({ state: 'visible', timeout: 30_000 });
   assert.equal(await page.locator('.agent-card').count(), 16, 'Expected the 12 House voices plus Crow, Nikola, Rarity, and Crow Trainer.');
 
