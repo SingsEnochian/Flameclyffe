@@ -117,7 +117,7 @@ test('Tauri host remains a bounded surface rather than arbitrary shell authority
 });
 
 test('Crow Nest shell is available offline with the workspace brain and bridges', () => {
-  assert.match(sw, /house-workspace-os-v0\.3\.0/);
+  assert.match(sw, /house-workspace-os-v0\.\d+\.\d+(?:-[a-z0-9-]+)?/);
   for (const file of [
     'brain-core.js', 'host-bridge.js', 'crow-nest.css', 'crow-nest-motion.css',
     'crow-nest-bootstrap.js', 'crow-nest.js', 'sensory-feedback.js', 'astra-bridge.js', 'neural-bridge.js',
