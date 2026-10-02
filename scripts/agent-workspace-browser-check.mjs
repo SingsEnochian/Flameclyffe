@@ -1,35 +1,17 @@
 import assert from 'node:assert/strict';
-import { mkdir } from 'node:fs/promises';
-import { spawn } from 'node:child_process';
+import { mkdir, readFile } from 'node:fs/promises';
+import { extname, resolve } from 'node:path';
 import { chromium } from 'playwright';
 
 const PORT = 4170;
-const BASE = `http://127.0.0.1:${PORT}/apps/agent-workspace/`;
+const ORIGIN = `http://house.localhost:${PORT}`;
+const BASE = `${ORIGIN}/apps/agent-workspace/`;
 const INDEX_URL = `${BASE}index.html`;
+const WORKSPACE_ROOT = resolve(process.cwd(), 'apps/agent-workspace');
 const ARTIFACT_DIR = process.env.WORKSPACE_BROWSER_ARTIFACT_DIR || 'artifacts/agent-workspace-browser';
 let activePage = null;
 
 await mkdir(ARTIFACT_DIR, { recursive: true });
-
-const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1', '--directory', '.'], {
-  stdio: ['ignore', 'pipe', 'pipe'],
-});
-
-let serverOutput = '';
-server.stdout.on('data', (chunk) => { serverOutput += chunk; });
-server.stderr.on('data', (chunk) => { serverOutput += chunk; });
-
-async function waitForServer() {
-  const deadline = Date.now() + 15_000;
-  while (Date.now() < deadline) {
-    try {
-      const response = await fetch(INDEX_URL, { cache: 'no-store' });
-      if (response.ok) return;
-    } catch {}
-    await new Promise((resolve) => setTimeout(resolve, 180));
-  }
-  throw new Error(`Workspace static server did not start.\n${serverOutput}`);
-}
 
 function routeId(url) {
   const parts = new URL(url).pathname.split('/').filter(Boolean);
@@ -38,6 +20,39 @@ function routeId(url) {
   const constellation = parts.indexOf('constellation');
   if (constellation >= 0) return parts[constellation + 1];
   return null;
+}
+
+function staticContentType(pathname) {
+  const extension = extname(pathname).toLowerCase();
+  return ({
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'text/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.webmanifest': 'application/manifest+json; charset=utf-8',
+    '.svg': 'image/svg+xml',
+    '.png': 'image/png',
+    '.ico': 'image/x-icon',
+  })[extension] || 'application/octet-stream';
+}
+
+async function installStaticWorkspace(page) {
+  await page.route(`${ORIGIN}/apps/agent-workspace/**`, async (route) => {
+    const url = new URL(route.request().url());
+    let relativePath = decodeURIComponent(url.pathname).replace(/^\/+/u, '');
+    if (relativePath.endsWith('/')) relativePath += 'index.html';
+    const fullPath = resolve(process.cwd(), relativePath);
+    if (!fullPath.startsWith(WORKSPACE_ROOT)) {
+      await route.fulfill({ status: 403, contentType: 'text/plain', body: 'outside workspace root' });
+      return;
+    }
+    try {
+      const body = await readFile(fullPath);
+      await route.fulfill({ status: 200, contentType: staticContentType(fullPath), body });
+    } catch {
+      await route.fulfill({ status: 404, contentType: 'text/plain', body: `missing static asset: ${relativePath}` });
+    }
+  });
 }
 
 async function installRuntimeStubs(page) {
@@ -233,7 +248,6 @@ async function waitForRoster(page) {
       scripts: [...document.scripts].map((script) => ({ src: script.src, type: script.type })),
     })).catch((diagnosticError) => ({ diagnosticError: String(diagnosticError?.message || diagnosticError) }));
     console.error('House Workspace render diagnostics:', JSON.stringify(diagnostics, null, 2));
-    console.error('House Workspace static server output:', serverOutput);
     throw error;
   }
   await page.locator('[data-agent-id="nikola"]').waitFor({ state: 'visible', timeout: 30_000 });
@@ -249,9 +263,10 @@ async function waitForRoster(page) {
 }
 
 async function desktopScenario(browser) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, serviceWorkers: 'block' });
   const page = await context.newPage();
   activePage = page;
+  await installStaticWorkspace(page);
   await installRuntimeStubs(page);
   const assertClean = recordBrowserErrors(page, 'desktop');
 
@@ -280,9 +295,11 @@ async function ipadScenario(browser) {
     viewport: { width: 1024, height: 1366 },
     deviceScaleFactor: 1,
     hasTouch: true,
+    serviceWorkers: 'block',
   });
   const page = await context.newPage();
   activePage = page;
+  await installStaticWorkspace(page);
   await installRuntimeStubs(page);
   const assertClean = recordBrowserErrors(page, 'ipad');
 
@@ -307,9 +324,11 @@ async function phoneScenario(browser) {
     deviceScaleFactor: 1,
     isMobile: true,
     hasTouch: true,
+    serviceWorkers: 'block',
   });
   const page = await context.newPage();
   activePage = page;
+  await installStaticWorkspace(page);
   await installRuntimeStubs(page);
   const assertClean = recordBrowserErrors(page, 'phone');
 
@@ -351,9 +370,8 @@ async function runBoundedScenario(label, scenario, browser, timeoutMs = 60_000) 
 
 let browser;
 try {
-  await waitForServer();
-  console.log('[browser-acceptance] static index is reachable');
   browser = await chromium.launch({ headless: true });
+  console.log('[browser-acceptance] chromium launched with deterministic static routing');
   for (const [label, scenario] of [
     ['desktop', desktopScenario],
     ['ipad', ipadScenario],
@@ -372,5 +390,4 @@ try {
   console.log('House Workspace browser acceptance passed: desktop, iPad, and phone.');
 } finally {
   await browser?.close().catch(() => {});
-  server.kill('SIGTERM');
 }
