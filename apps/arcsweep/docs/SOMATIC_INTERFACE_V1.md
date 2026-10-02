@@ -207,3 +207,30 @@ This layer must preserve:
 
 The implementation primitive is `createCueConstellation()` in `apps/arcsweep/src/wonder-field.js`.
 
+
+## Spatial resonance and room-as-instrument
+
+Somatic output may eventually depend on spatial position and measured or simulated room response.
+
+A semantic cue can remain the same while its **rendering through the environment** changes:
+
+```text
+semantic cue
+→ source position
+→ room / spatial transfer function
+→ listener position
+→ audio + haptic rendering
+→ perception
+```
+
+This makes the room part of the transduction chain rather than a neutral backdrop.
+
+Candidate experiments:
+
+- map a virtual room's standing-wave structure and let the user walk through nodes and antinodes;
+- preserve semantic cue identity while spatialisation, reverberation, or haptic intensity changes with position;
+- bind phase or directional information to haptic alternation;
+- use measured or simulated resonance data to drive Three.js refraction, thickness, luminous geometry, or surface deformation;
+- correlate every perceptual rendering with the source state and detector/simulation receipt.
+
+Numeric frequency overlap alone is not treated as proof of biological entrainment or shared mechanism. Environmental oscillation, brain rhythm, ritual rhythm, and semantic rhythm remain separate signals until evidence demonstrates coupling.
