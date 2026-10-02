@@ -132,3 +132,31 @@ In the writing room:
 Every spatial audio gesture must have a conventional accessible equivalent.
 Never rely on sound alone to convey critical state.
 Haptics may reinforce mute, focus, handoff, and spatial lock events.
+
+
+## Host relationship: Astra Route OS
+
+ArcSweep does **not** own or wrap the model runtime.
+
+Astra Route OS is the host environment and route layer. ArcSweep attaches to it as an interaction/UI surface.
+
+Conceptually:
+
+```text
+Astra Route OS
+  ├─ model/runtime route: GPT | Crow | Ornith | local | other
+  ├─ continuity/runtime services
+  └─ attached UI surfaces
+       └─ ArcSweep
+            ├─ rooms
+            ├─ glass/shader material system
+            ├─ gesture + haptic grammar
+            ├─ spatial audio
+            ├─ IC/OOC channel state
+            ├─ round-robin ownership/handoffs
+            └─ provenance/continuity views
+```
+
+ArcSweep must consume the active Astra route rather than hard-coding a provider or model. Changing the active model route must not require replacing the ArcSweep interaction surface.
+
+The existing ArcSweep constellation runtime adapter already points in this direction: ArcSweep resolves a route and invokes the runtime through the route seam while keeping provider/model attestation outside the UI surface.
