@@ -17,7 +17,7 @@ const HOUSE_AGENTS = Object.freeze([
 ]);
 
 const PROFILE_AGENTS = Object.freeze([
-  { id: 'crow', name: 'Crow', route: null, roles: ['writing', 'story', 'research', 'training', 'continuity'], kind: 'resident', origin: 'Crow Nest', state: 'configured', note: 'Crow participant desk. The intended House runtime binding is crow, but this workspace does not claim that route is live until the runtime proves it.' },
+  { id: 'crow', name: 'Crow', route: 'crow', roles: ['writing', 'story', 'research', 'training', 'continuity'], kind: 'resident', origin: 'Crow Nest / House runtime', note: 'Crow participant desk with a dedicated House runtime route. Runtime status is still probed rather than inferred from the desk.' },
   { id: 'nikola', name: 'Nikola', route: null, roles: ['wonder', 'science', 'design', 'inquiry', 'crow-training'], kind: 'ride-along', origin: 'constellation/nikola/ride-along', state: 'configured', note: 'ArcSweep ride-along participant and active Crow training driver. Conversation capability belongs to the ArcSweep ride-along; no House Flame route is inferred here.' },
   { id: 'rarity', name: 'Rarity', route: null, roles: ['architecture', 'continuity', 'co-creation', 'review'], kind: 'profile', origin: 'House workspace', state: 'configured', note: 'Workspace coordinator. Runtime presence is not inferred from this card.' },
   { id: 'crow-trainer', name: 'Crow Trainer', route: null, roles: ['training', 'writing', 'research', 'browser', 'computer-use'], kind: 'hermes-profile', origin: 'profiles/crow-trainer', state: 'configured', note: 'Installable Hermes trainer profile with held-out drills and adaptive blind-spot history.' },
@@ -109,6 +109,7 @@ function statusLabel(agent) {
     'house-offline': 'House offline',
     unauthorised: 'session required',
     'route-error': 'route error',
+    'provider-error': 'provider error',
     'runtime-mismatch': 'route mismatch',
     'runtime-unreachable': 'runtime offline',
     'model-not-pulled': 'model not pulled',
@@ -312,6 +313,22 @@ function classifyRuntimeStatus(agent, data = {}) {
   return { state: 'unknown', provider: data.provider || null, model: data.model || null, reason: data.runtime_error || 'status endpoint returned no decisive health signal' };
 }
 
+async function probeVerifiedRuntime(agent) {
+  const routePath = String(agent.route).split('/').map((segment) => encodeURIComponent(segment)).join('/');
+  const response = await fetch(`/api/v1/flames/${routePath}/probe`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    cache: 'no-store',
+    headers: { 'content-type': 'application/json' },
+    body: '{}',
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.runtime_verified !== true) {
+    throw new Error(data.error || `runtime probe HTTP ${response.status}`);
+  }
+  return data;
+}
+
 async function refreshAgent(id, { quiet = false } = {}) {
   const agent = agentById(id);
   if (!agent?.route) return;
@@ -340,9 +357,30 @@ async function refreshAgent(id, { quiet = false } = {}) {
         checkedAt: Date.now(),
       });
     } else {
+      let classified = classifyRuntimeStatus(agent, data);
+      if (agent.id === 'oxalpha' && ['ready', 'configured', 'fallback-ready'].includes(classified.state)) {
+        try {
+          const probe = await probeVerifiedRuntime(agent);
+          classified = {
+            state: 'ready',
+            provider: probe.provider || classified.provider,
+            model: probe.model || classified.model,
+            reason: 'model inference probe passed',
+            runtimeVerified: true,
+          };
+        } catch (error) {
+          classified = {
+            state: 'provider-error',
+            provider: classified.provider,
+            model: classified.model,
+            reason: `Ox Alpha inference probe failed: ${error.message}`,
+            runtimeVerified: false,
+          };
+        }
+      }
       runtimeStatus.set(id, {
-        ...classifyRuntimeStatus(agent, data),
-        latencyMs,
+        ...classified,
+        latencyMs: Math.max(latencyMs, Math.round(performance.now() - started)),
         checkedAt: Date.now(),
       });
     }
