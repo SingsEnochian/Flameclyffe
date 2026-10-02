@@ -16,6 +16,13 @@ const doctor = read('apps/agent-workspace/connection-doctor.js');
 const doctorCss = read('apps/agent-workspace/connection-doctor.css');
 const sw = read('apps/agent-workspace/sw.js');
 const hermesDoctor = read('profiles/crow-trainer/scripts/connection_doctor.py');
+const returnCore = read('apps/arcsweep/src/return-engine.js');
+const returnBrowserCore = read('apps/agent-workspace/return-engine-core.js');
+
+test('browser Return Engine core remains byte-locked to canonical ArcSweep source', () => {
+  const mirrored = returnBrowserCore.replace(/^\/\/ Browser mirror[^\n]*\n\/\/ Keep byte-equivalent below this header; agent-workspace tests reject drift\.\n/, '');
+  assert.equal(mirrored, returnCore);
+});
 
 test('test-flight surface mounts crew diagnostics and refractive optics', () => {
   assert.match(html, /\.\/connection-doctor\.css/);
