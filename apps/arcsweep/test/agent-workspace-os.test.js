@@ -45,6 +45,9 @@ test('workspace carries explicit agent and handoff boundaries', () => {
   assert.match(app, /Next owner/);
   assert.match(app, /Unacknowledged handoff/);
   assert.match(app, /crow-trainer/);
+  assert.match(app, /route: 'crow'/);
+  assert.match(app, /id: 'nikola'/);
+  assert.match(app, /constellation\/nikola\/ride-along/);
 });
 
 test('runtime presence probes existing same-origin House routes truthfully', () => {
