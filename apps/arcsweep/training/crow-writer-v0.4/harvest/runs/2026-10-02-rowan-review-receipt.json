@@ -1,0 +1,27 @@
+{
+  "schema": "crow.writer-harvest-review-receipt/v0.1",
+  "reviewed_at": "2026-10-02",
+  "reviewer": "Rowan",
+  "decision": "keep-all",
+  "approved_count": 6,
+  "training_count": 5,
+  "heldout_count": 1,
+  "holdout_method": {
+    "algorithm": "sha256",
+    "seed": "rowan-crow-v01",
+    "percent": 20
+  },
+  "heldout_ids": ["2026-10-02-004"],
+  "approved_ids": [
+    "2026-10-02-001",
+    "2026-10-02-002",
+    "2026-10-02-003",
+    "2026-10-02-004",
+    "2026-10-02-005",
+    "2026-10-02-006"
+  ],
+  "private_content_location": "Google Drive: Crow Writer — Approved Harvest Export v0.1",
+  "private_content_committed_to_public_repo": false,
+  "canon_promotion_implied": false,
+  "training_promotion_implied": false
+}
