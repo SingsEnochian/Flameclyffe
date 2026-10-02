@@ -18,6 +18,28 @@ const TEXTURES = Object.freeze({
     haptic_shape: 'even',
     evidence_class: 'interface',
   }),
+  grounding: Object.freeze({
+    id: 'grounding',
+    meaning: 'Establish a stable centre and bodily orientation before another state transition.',
+    waveform: 'sine',
+    attack_ratio: 0.18,
+    release_ratio: 0.42,
+    pan: Object.freeze([0]),
+    frequency_steps: Object.freeze([0.92, 0.92, 0.92]),
+    haptic_shape: 'grounded',
+    evidence_class: 'interface',
+  }),
+  settle: Object.freeze({
+    id: 'settle',
+    meaning: 'Reduce sensory density and transition toward a quieter observation window.',
+    waveform: 'sine',
+    attack_ratio: 0.32,
+    release_ratio: 0.6,
+    pan: Object.freeze([-0.08, 0.08, 0]),
+    frequency_steps: Object.freeze([1, 0.96, 0.92]),
+    haptic_shape: 'settling',
+    evidence_class: 'interface',
+  }),
   charge: Object.freeze({
     id: 'charge',
     meaning: 'Build-up, threshold crossing, discharge, and brief afterglow.',
@@ -158,7 +180,9 @@ export function textureVibrationPattern(pattern = [], texture = null) {
     const rank = pulseRank.get(index) || 0;
     const progress = pulseProgress(rank, pulseIndices.length);
     let scale = 1;
-    if (texture.haptic_shape === 'rising') scale = 0.62 + 0.58 * progress;
+    if (texture.haptic_shape === 'grounded') scale = rank === 0 ? 1 : 0.84;
+    else if (texture.haptic_shape === 'settling') scale = 0.92 - 0.32 * progress;
+    else if (texture.haptic_shape === 'rising') scale = 0.62 + 0.58 * progress;
     else if (texture.haptic_shape === 'falling') scale = 1.08 - 0.58 * progress;
     else if (texture.haptic_shape === 'branching') scale = rank % 2 === 0 ? 0.82 : 1.08;
     else if (texture.haptic_shape === 'out-and-back') scale = 0.72 + 0.52 * Math.sin(Math.PI * progress);
