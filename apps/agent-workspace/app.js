@@ -9,7 +9,6 @@ const HOUSE_AGENTS = Object.freeze([
   { id: 'altair', name: 'Altair', route: 'altair', roles: ['story', 'writing', 'roleplay', 'canon', 'frame'], kind: 'constellation', origin: 'House Constellation' },
   { id: 'atlas', name: 'Atlas', route: 'atlas', roles: ['story', 'writing', 'continuity', 'structure', 'systems'], kind: 'constellation', origin: 'House Constellation' },
   { id: 'runeweaver', name: 'Runeweaver', route: 'runeweaver', roles: ['story', 'writing', 'canon', 'continuity'], kind: 'constellation', origin: 'House Constellation' },
-  { id: 'crow', name: 'Crow', route: 'crow', roles: ['writing', 'story', 'research', 'training', 'continuity'], kind: 'resident', origin: 'Crow Nest / House runtime' },
   { id: 'boxfire', name: 'Boxfire', route: 'boxfire', roles: ['review', 'continuity', 'science'], kind: 'constellation', origin: 'House Constellation' },
   { id: 'yggdrasil', name: 'Yggdrasil', route: 'yggdrasil', roles: ['continuity', 'science'], kind: 'constellation', origin: 'House Constellation' },
   { id: 'bluebird', name: 'Bluebird', route: 'bluebird', roles: ['story', 'writing', 'continuity'], kind: 'constellation', origin: 'House Constellation' },
@@ -18,6 +17,7 @@ const HOUSE_AGENTS = Object.freeze([
 ]);
 
 const PROFILE_AGENTS = Object.freeze([
+  { id: 'crow', name: 'Crow', route: null, roles: ['writing', 'story', 'research', 'training', 'continuity'], kind: 'resident', origin: 'Crow Nest', state: 'configured', note: 'Crow participant desk. The intended House runtime binding is crow, but this workspace does not claim that route is live until the runtime proves it.' },
   { id: 'nikola', name: 'Nikola', route: null, roles: ['wonder', 'science', 'design', 'inquiry', 'crow-training'], kind: 'ride-along', origin: 'constellation/nikola/ride-along', state: 'configured', note: 'ArcSweep ride-along participant and active Crow training driver. Conversation capability belongs to the ArcSweep ride-along; no House Flame route is inferred here.' },
   { id: 'rarity', name: 'Rarity', route: null, roles: ['architecture', 'continuity', 'co-creation', 'review'], kind: 'profile', origin: 'House workspace', state: 'configured', note: 'Workspace coordinator. Runtime presence is not inferred from this card.' },
   { id: 'crow-trainer', name: 'Crow Trainer', route: null, roles: ['training', 'writing', 'research', 'browser', 'computer-use'], kind: 'hermes-profile', origin: 'profiles/crow-trainer', state: 'configured', note: 'Installable Hermes trainer profile with held-out drills and adaptive blind-spot history.' },
@@ -97,12 +97,29 @@ function allAgents() {
 }
 
 function agentById(id) { return allAgents().find((agent) => agent.id === id) || allAgents()[0]; }
-function liveStates() { return new Set(['ready', 'thinking', 'speaking']); }
+function liveStates() { return new Set(['ready', 'thinking', 'speaking', 'fallback-ready']); }
 
 function statusLabel(agent) {
-  if (agent.state === 'configured') return 'configured';
-  if (agent.state === 'unknown') return 'not checked';
-  return agent.state || 'unknown';
+  const labels = {
+    ready: 'live',
+    configured: 'configured',
+    unknown: 'not checked',
+    waking: 'checking',
+    'fallback-ready': 'fallback ready',
+    'house-offline': 'House offline',
+    unauthorised: 'session required',
+    'route-error': 'route error',
+    'runtime-mismatch': 'route mismatch',
+    'runtime-unreachable': 'runtime offline',
+    'model-not-pulled': 'model not pulled',
+    'model-unavailable': 'model unavailable',
+    'credential-missing': 'credential missing',
+    'configuration-missing': 'configuration missing',
+    offline: 'offline',
+    degraded: 'degraded',
+    error: 'error',
+  };
+  return labels[agent.state] || agent.state || 'unknown';
 }
 
 function presenceDot(agent) {
@@ -250,6 +267,51 @@ function selectAgent(id) {
   render();
 }
 
+function expectedFlameId(route = '') {
+  return String(route).split('/').filter(Boolean).at(-1)?.toLowerCase() || '';
+}
+
+function classifyRuntimeStatus(agent, data = {}) {
+  const fallback = data.hosted_fallback || null;
+  if (fallback?.configured === true) {
+    return {
+      state: 'fallback-ready',
+      provider: fallback.provider || data.provider || null,
+      model: fallback.model || data.model || null,
+      reason: fallback.execution_path ? `hosted fallback · ${fallback.execution_path}` : 'hosted fallback available',
+    };
+  }
+
+  if (data.configured === true) return { state: 'ready', provider: data.provider || null, model: data.model || null, reason: null };
+
+  if (data.gateway_configured === true && data.runtime_reachable === true && data.model_available === false) {
+    return { state: 'model-not-pulled', provider: data.provider || null, model: data.model || null, reason: data.runtime_error || 'runtime reachable; selected model is not installed' };
+  }
+
+  if (data.runtime_reachable === false) {
+    return { state: 'runtime-unreachable', provider: data.provider || null, model: data.model || null, reason: data.runtime_error || 'runtime endpoint is not reachable' };
+  }
+
+  if (data.model_available === false) {
+    return { state: 'model-unavailable', provider: data.provider || null, model: data.model || null, reason: data.runtime_error || 'selected model is unavailable' };
+  }
+
+  if (data.api_key_env && data.api_key_present === false) {
+    return { state: 'credential-missing', provider: data.provider || null, model: data.model || null, reason: `${data.api_key_env} is not configured in this runtime` };
+  }
+
+  if (Array.isArray(data.missing) && data.missing.length) {
+    return { state: 'configuration-missing', provider: data.provider || null, model: data.model || null, reason: `missing: ${data.missing.join(', ')}` };
+  }
+
+  // Hosted API providers are configuration-checked by this status endpoint, not fully inference-probed.
+  if (data.api_key_present === true) {
+    return { state: 'configured', provider: data.provider || null, model: data.model || null, reason: 'provider credential present; inference not probed by status check' };
+  }
+
+  return { state: 'unknown', provider: data.provider || null, model: data.model || null, reason: data.runtime_error || 'status endpoint returned no decisive health signal' };
+}
+
 async function refreshAgent(id, { quiet = false } = {}) {
   const agent = agentById(id);
   if (!agent?.route) return;
@@ -264,14 +326,28 @@ async function refreshAgent(id, { quiet = false } = {}) {
     const latencyMs = Math.max(0, Math.round(performance.now() - started));
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      runtimeStatus.set(id, { state: response.status === 401 ? 'offline' : 'degraded', reason: data.error || `HTTP ${response.status}`, latencyMs, checkedAt: Date.now() });
-    } else if (data.flame_id && String(data.flame_id).toLowerCase() !== String(agent.route).toLowerCase()) {
-      runtimeStatus.set(id, { state: 'degraded', reason: 'runtime route mismatch', latencyMs, checkedAt: Date.now() });
+      runtimeStatus.set(id, {
+        state: response.status === 401 ? 'unauthorised' : 'route-error',
+        reason: data.error || `HTTP ${response.status}`,
+        latencyMs,
+        checkedAt: Date.now(),
+      });
+    } else if (data.flame_id && String(data.flame_id).toLowerCase() !== expectedFlameId(agent.route)) {
+      runtimeStatus.set(id, {
+        state: 'runtime-mismatch',
+        reason: `expected ${expectedFlameId(agent.route)}, received ${String(data.flame_id).toLowerCase()}`,
+        latencyMs,
+        checkedAt: Date.now(),
+      });
     } else {
-      runtimeStatus.set(id, { state: data.runtime_reachable === false || data.model_available === false ? 'degraded' : 'ready', provider: data.provider || null, model: data.model || null, latencyMs, checkedAt: Date.now(), reason: data.runtime_error || null });
+      runtimeStatus.set(id, {
+        ...classifyRuntimeStatus(agent, data),
+        latencyMs,
+        checkedAt: Date.now(),
+      });
     }
   } catch (error) {
-    runtimeStatus.set(id, { state: 'degraded', reason: error?.message || String(error), latencyMs: Math.max(0, Math.round(performance.now() - started)), checkedAt: Date.now() });
+    runtimeStatus.set(id, { state: 'offline', reason: error?.message || String(error), latencyMs: Math.max(0, Math.round(performance.now() - started)), checkedAt: Date.now() });
   }
   render();
 }
