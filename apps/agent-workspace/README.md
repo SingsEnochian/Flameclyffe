@@ -90,3 +90,46 @@ The app ships with three material auditions:
 - **Hearthglass**
 
 The material grammar uses separate base, raised, and input densities; nested glass does not repeatedly blur; focus changes rim/glow; and reduced-transparency environments receive solid surfaces.
+
+
+## Spatial field mode
+
+Desktop Agent Registry can switch from the standard accessible list/grid into an organic **Spatial field**.
+
+The spatial field:
+
+- keeps the selected participant as the local anchor;
+- arranges the other participants as loci rather than rectangular dashboard cards;
+- draws brighter relation threads only when visible role metadata overlaps;
+- preserves the ordinary list/grid as the responsive mobile and accessibility fallback;
+- persists the user's preference locally;
+- honours reduced-motion and reduced-transparency settings;
+- never treats visual proximity as canon, identity, authority, or proof of relationship.
+
+This is a presentation lens over the same registry. Spatial layout is not ontology.
+
+## Direct conversation truth
+
+Crow is a first-class House runtime route:
+
+```text
+/api/v1/flames/crow/chat
+```
+
+and therefore appears in the direct House chat selector.
+
+Nikola is represented as a distinct ArcSweep ride-along desk with continuity namespace:
+
+```text
+constellation/nikola/ride-along
+```
+
+The workspace does not invent a House Flame route for Nikola. Until a compatible runtime route is actually bound, Nikola is shown as **configured** rather than falsely live.
+
+That distinction is deliberate:
+
+```text
+participant desk != runtime route
+configured != reachable
+reachable != authorised
+```
