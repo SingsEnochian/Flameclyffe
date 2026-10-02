@@ -147,7 +147,21 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .presence-dot { width: .62rem; height: .62rem; border-radius: 50%; background: #6f7d78; box-shadow: 0 0 0 .16rem rgba(111,125,120,.12); }
 .presence-dot[data-state="ready"], .presence-dot[data-state="thinking"], .presence-dot[data-state="speaking"] { background: var(--ok); box-shadow: 0 0 16px color-mix(in srgb, var(--ok) 55%, transparent); }
 .presence-dot[data-state="waking"] { background: var(--warn); }
-.presence-dot[data-state="degraded"], .presence-dot[data-state="error"] { background: var(--danger); }
+.presence-dot[data-state="fallback-ready"] { background: var(--ok); box-shadow: 0 0 12px color-mix(in srgb, var(--ok) 38%, transparent); }
+.presence-dot[data-state="configured"] { background: var(--accent-2); box-shadow: 0 0 10px color-mix(in srgb, var(--accent-2) 28%, transparent); }
+.presence-dot[data-state="model-not-pulled"],
+.presence-dot[data-state="model-unavailable"],
+.presence-dot[data-state="credential-missing"],
+.presence-dot[data-state="configuration-missing"],
+.presence-dot[data-state="unauthorised"] { background: var(--warn); }
+.presence-dot[data-state="runtime-unreachable"],
+.presence-dot[data-state="runtime-mismatch"],
+.presence-dot[data-state="route-error"],
+.presence-dot[data-state="degraded"],
+.presence-dot[data-state="error"] { background: var(--danger); }
+.presence-dot[data-state="offline"],
+.presence-dot[data-state="house-offline"],
+.presence-dot[data-state="unknown"] { background: #6f7d78; }
 
 .theme-select { margin-top: auto; display: grid; gap: .35rem; color: var(--muted); font-size: .72rem; }
 .theme-select select, input, textarea, select {
@@ -189,7 +203,19 @@ textarea { min-height: 7rem; resize: vertical; }
 .badges { display: flex; flex-wrap: wrap; gap: .35rem; }
 .badge { border: 1px solid var(--rim); border-radius: 999px; padding: .24rem .46rem; color: var(--muted); font-size: .68rem; background: color-mix(in srgb, var(--surface-input) 76%, transparent); }
 .badge.state { color: var(--text); }
-.badge.state[data-state="ready"] { border-color: color-mix(in srgb, var(--ok) 50%, transparent); }
+.badge.state[data-state="ready"],
+.badge.state[data-state="fallback-ready"] { border-color: color-mix(in srgb, var(--ok) 50%, transparent); }
+.badge.state[data-state="configured"] { border-color: color-mix(in srgb, var(--accent-2) 42%, transparent); }
+.badge.state[data-state="model-not-pulled"],
+.badge.state[data-state="model-unavailable"],
+.badge.state[data-state="credential-missing"],
+.badge.state[data-state="configuration-missing"],
+.badge.state[data-state="unauthorised"] { border-color: color-mix(in srgb, var(--warn) 55%, transparent); }
+.badge.state[data-state="runtime-unreachable"],
+.badge.state[data-state="runtime-mismatch"],
+.badge.state[data-state="route-error"],
+.badge.state[data-state="degraded"],
+.badge.state[data-state="error"] { border-color: color-mix(in srgb, var(--danger) 58%, transparent); }
 
 .panel { padding: 1rem; border: 1px solid var(--rim); background: color-mix(in srgb, var(--surface) 90%, transparent); }
 .two-col { display: grid; grid-template-columns: minmax(0,1fr) minmax(16rem,.65fr); gap: .8rem; }
