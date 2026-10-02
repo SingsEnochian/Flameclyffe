@@ -89,6 +89,19 @@ function normaliseWork(item = {}) {
   };
 }
 
+function normaliseMemory(item = {}) {
+  const permission = clean(item.permission) || 'allowed';
+  if (!['allowed', 'revoked'].includes(permission)) {
+    throw new TypeError(`memory.permission must be allowed or revoked; received ${permission}.`);
+  }
+  return {
+    id: requireText(item.id, 'memory.id'),
+    ref: requireText(item.ref, 'memory.ref'),
+    permission,
+    provenance: list(item.provenance),
+  };
+}
+
 function openAttention(record) {
   const attention = [];
   for (const work of record.active_work) {
@@ -174,6 +187,7 @@ export function createReturnEngine({
       substrate_at_departure: normaliseSubstrate(input.substrate),
       current_substrate: normaliseSubstrate(input.substrate),
       active_work: activeWork,
+      memory_state: list(input.memory_state).map(normaliseMemory),
       unresolved_wonder: list(input.unresolved_wonder).map(normaliseWonder),
       relationship_state: list(input.relationship_state).map(normaliseRelationship),
       alternatives: list(input.alternatives).map(normaliseAlternative),
@@ -341,6 +355,7 @@ export function createReturnEngine({
         { kind: 'stop-point', value: record.stop_point },
         { kind: 'next-owner', value: record.next_owner },
         { kind: 'active-work', value: clone(record.active_work) },
+        { kind: 'memory-permissions', value: clone(record.memory_state) },
         { kind: 'relationship-state', value: clone(record.relationship_state) },
         { kind: 'unresolved-wonder', value: clone(record.unresolved_wonder) },
         { kind: 'alternatives', value: clone(record.alternatives) },
