@@ -37,6 +37,7 @@ test('chat invokes living Flame routes with bounded local context', () => {
   assert.match(chat, /CONTEXT_MESSAGES = 12/);
   assert.match(chat, /route: 'starsong\/larkshine'/);
   assert.match(chat, /route: 'starsong\/ellowind'/);
+  assert.match(chat, /route: 'crow'/);
   assert.match(chat, /split\('\/'\)\.map\(\(segment\) => encodeURIComponent\(segment\)\)\.join\('\/'\)/);
 });
 
