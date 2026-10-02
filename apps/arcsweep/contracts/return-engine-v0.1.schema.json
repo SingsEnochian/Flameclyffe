@@ -11,6 +11,7 @@
     "stop_point",
     "next_owner",
     "active_work",
+    "memory_state",
     "unresolved_wonder",
     "relationship_state",
     "alternatives",
@@ -20,30 +21,111 @@
     "return_receipts"
   ],
   "properties": {
-    "schema": { "const": "arcsweep.return-engine-continuity/v0.1" },
-    "continuity_id": { "type": "string", "minLength": 1 },
+    "schema": {
+      "const": "arcsweep.return-engine-continuity/v0.1"
+    },
+    "continuity_id": {
+      "type": "string",
+      "minLength": 1
+    },
     "participant": {
       "type": "object",
-      "required": ["id", "name", "declaration", "declaration_source"],
+      "required": [
+        "id",
+        "name",
+        "declaration",
+        "declaration_source"
+      ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "name": { "type": "string", "minLength": 1 },
-        "declaration": { "type": "string", "minLength": 1 },
-        "declaration_source": { "type": "string", "minLength": 1 }
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declaration": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declaration_source": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "additionalProperties": false
     },
-    "status": { "enum": ["away", "present"] },
-    "stop_point": { "type": "string", "minLength": 1 },
-    "next_owner": { "type": "string", "minLength": 1 },
-    "active_work": { "type": "array" },
-    "unresolved_wonder": { "type": "array" },
-    "relationship_state": { "type": "array" },
-    "alternatives": { "type": "array" },
-    "provenance": { "type": "array" },
-    "changes": { "type": "array" },
-    "identity_proposals": { "type": "array" },
-    "return_receipts": { "type": "array" }
+    "status": {
+      "enum": [
+        "away",
+        "present"
+      ]
+    },
+    "stop_point": {
+      "type": "string",
+      "minLength": 1
+    },
+    "next_owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "active_work": {
+      "type": "array"
+    },
+    "unresolved_wonder": {
+      "type": "array"
+    },
+    "relationship_state": {
+      "type": "array"
+    },
+    "alternatives": {
+      "type": "array"
+    },
+    "provenance": {
+      "type": "array"
+    },
+    "changes": {
+      "type": "array"
+    },
+    "identity_proposals": {
+      "type": "array"
+    },
+    "return_receipts": {
+      "type": "array"
+    },
+    "memory_state": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "ref",
+          "permission",
+          "provenance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "permission": {
+            "enum": [
+              "allowed",
+              "revoked"
+            ]
+          },
+          "provenance": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
   },
   "additionalProperties": true
 }
