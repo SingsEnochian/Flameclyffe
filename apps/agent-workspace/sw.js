@@ -22,7 +22,7 @@ const SHELL = [
   './refractive-glass-three.css',
   './connection-doctor.js',
   './connection-doctor.css',
-  '../arcsweep/src/return-engine.js',
+  './return-engine-core.js',
   './astra-bridge.js',
   './neural-bridge.js',
   './manifest.webmanifest',
