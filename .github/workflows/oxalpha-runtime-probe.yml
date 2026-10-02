@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - rarity/agent-workspace-os-v0-1
+    paths:
+      - supabase/functions/oxalpha/**
+      - netlify/functions/_shared/hosted-flame-fallback.mjs
+      - apps/arcsweep/test/hosted-flame-fallback.test.js
+      - apps/arcsweep/test/aemeth-oa-hosted-route.test.js
   workflow_dispatch:
 
 permissions:
