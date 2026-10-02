@@ -177,3 +177,33 @@ Pencil move
 4. Add adaptive recommendations that can suggest, but never silently apply, changes to confusing or indistinct cues.
 5. Complete the replayable Glyph Forge loop: navigation -> brush contact/expression -> glyph completion -> accepted cue -> evidence receipt -> replay.
 6. Add external haptic and wearable adapters only behind explicit, user-authorised device APIs.
+
+## Synthetic senses and cue constellations
+
+The somatic layer now participates in the broader Wonder Field / transduction architecture.
+
+ArcSweep treats each sensory channel as a **transducer** between machine state and human perception. A semantic state may therefore be rendered through several replaceable channels:
+
+```text
+semantic state
+  -> visual geometry
+  -> sound / interval / rhythm
+  -> haptic pattern
+  -> spatial position
+  -> symbolic glyph
+```
+
+The mapping is not the meaning itself. A cue remains inspectable and replaceable. This allows ArcSweep to develop learned **synthetic senses** for uncertainty, provenance conflict, navigation, memory relation, field change, or temporal transition without pretending those meanings are inherent in any particular vibration or tone.
+
+This layer must preserve:
+
+- semantic cue id;
+- current channel mapping;
+- calibration history;
+- user feedback;
+- timing and phase when relevant;
+- source event / receipt;
+- reversibility of remapping.
+
+The implementation primitive is `createCueConstellation()` in `apps/arcsweep/src/wonder-field.js`.
+
