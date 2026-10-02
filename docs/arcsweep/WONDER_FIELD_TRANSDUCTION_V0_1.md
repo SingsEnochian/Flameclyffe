@@ -509,6 +509,55 @@ This is an analogy unless the domain itself supplies a literal physical field mo
 
 ---
 
+## 17A. Resonant architecture and environmental coupling
+
+A room, structure, landscape, or device may act as an **active resonant environment**.
+
+ArcSweep should be able to represent:
+
+- geometry;
+- material properties;
+- source position;
+- source type;
+- medium;
+- boundary conditions;
+- excitation frequency or timing;
+- mode structure;
+- detector position;
+- measured response;
+- inferred pattern;
+- alternative explanations.
+
+The useful chain is:
+
+```text
+geometry + material + boundaries
+→ allowed modes
+→ source excites some modes
+→ interference / amplification / cancellation
+→ spatial response pattern
+→ detector
+→ rendering / interpretation
+```
+
+This applies literally where the domain supplies a physical wave or oscillatory model, such as acoustics or electromagnetism. The same structure may also be used analogically in cognitive, social, narrative, or symbolic design, but the register stays explicit.
+
+Cymatics belongs here as a transduction pattern: oscillatory state becomes visible through the behaviour of a medium.
+
+Architectural orientation, sacred geometry, ritual sound, and ancient structures may also be preserved as research or mythic layers. ArcSweep does not infer intentional engineering merely from an interesting alignment or resonant property.
+
+The design opportunity is substantial: **a room can reveal hidden state by how it responds**.
+
+Possible Magic Book / AR expressions:
+
+- luminous standing-wave volumes;
+- walkable nodes and antinodes;
+- spatial provenance overlays;
+- phase rendered as motion direction;
+- amplitude rendered as depth, haptic strength, or refraction;
+- material surfaces whose visual response tracks measured or simulated resonance;
+- glyph loci attached to persistent spatial modes.
+
 ## 18. Claim lanes
 
 ArcSweep should label the epistemic lane of a claim without using the label to suffocate exploration.
