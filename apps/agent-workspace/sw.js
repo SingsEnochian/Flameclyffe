@@ -1,4 +1,4 @@
-const CACHE = 'house-workspace-os-v0.3.0';
+const CACHE = 'house-workspace-os-v0.3.1-glass';
 const SHELL = [
   './',
   './index.html',
