@@ -10,8 +10,7 @@ let activePage = null;
 
 await mkdir(ARTIFACT_DIR, { recursive: true });
 
-const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-const server = spawn(npx, ['vite', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
+const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], {
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 
@@ -403,27 +402,77 @@ async function phoneScenario(browser) {
   await context.close();
 }
 
+async function cockpitProbe(browser) {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+  const page = await context.newPage();
+  activePage = page;
+  await installRuntimeStubs(page);
+  const diagnostics = recordBrowserErrors(page, 'cockpit');
+  const response = await page.goto(`${BASE}?view=agents`, { waitUntil: 'commit', timeout: 12_000 });
+  await page.waitForTimeout(1500);
+  const report = await page.evaluate(() => ({
+    readyState: document.readyState,
+    title: document.title,
+    href: location.href,
+    bodyText: document.body?.innerText?.slice(0, 1200) || '',
+    appHtmlLength: document.querySelector('#app')?.innerHTML?.length || 0,
+    hasWorkspaceShell: Boolean(document.querySelector('.workspace-shell')),
+    scripts: [...document.scripts].map((node) => node.src || '[inline]'),
+    resources: performance.getEntriesByType('resource').map((entry) => ({
+      name: entry.name,
+      duration: Math.round(entry.duration),
+      transferSize: entry.transferSize || 0,
+    })).slice(-50),
+  })).catch((error) => ({ evaluation_error: String(error?.message || error) }));
+  console.log('[cockpit-probe]', JSON.stringify({
+    http_status: response?.status?.() ?? null,
+    report,
+    pending: diagnostics.pending(),
+    vite_tail: serverOutput.slice(-6000),
+  }));
+  await page.screenshot({ path: `${ARTIFACT_DIR}/cockpit-probe.png`, fullPage: true, timeout: 5_000 }).catch(() => {});
+  activePage = null;
+  await context.close();
+}
+
+async function stopServer() {
+  if (server.exitCode != null || server.killed) return;
+  server.kill('SIGTERM');
+  await Promise.race([
+    new Promise((resolve) => server.once('exit', resolve)),
+    new Promise((resolve) => setTimeout(resolve, 1500)),
+  ]);
+  if (server.exitCode == null) server.kill('SIGKILL');
+  server.stdout?.destroy?.();
+  server.stderr?.destroy?.();
+}
+
 let browser;
 try {
   await waitForServer();
   browser = await chromium.launch({ headless: true });
-  for (const [label, scenario] of [
-    ['desktop', desktopScenario],
-    ['ipad', ipadScenario],
-    ['phone', phoneScenario],
-  ]) {
-    try {
-      await scenario(browser);
-    } catch (error) {
-      console.error(`House Workspace ${label} acceptance failed:`, error);
-      if (activePage && !activePage.isClosed()) {
-        await activePage.screenshot({ path: `${ARTIFACT_DIR}/${label}-failure.png`, fullPage: true, timeout: 5_000 }).catch(() => {});
+  if (process.argv.includes('--cockpit-only')) {
+    await cockpitProbe(browser);
+    console.log('House Workspace cockpit probe complete.');
+  } else {
+    for (const [label, scenario] of [
+      ['desktop', desktopScenario],
+      ['ipad', ipadScenario],
+      ['phone', phoneScenario],
+    ]) {
+      try {
+        await scenario(browser);
+      } catch (error) {
+        console.error(`House Workspace ${label} acceptance failed:`, error);
+        if (activePage && !activePage.isClosed()) {
+          await activePage.screenshot({ path: `${ARTIFACT_DIR}/${label}-failure.png`, fullPage: true, timeout: 5_000 }).catch(() => {});
+        }
+        throw error;
       }
-      throw error;
     }
+    console.log('House Workspace browser acceptance passed: desktop, iPad, and phone.');
   }
-  console.log('House Workspace browser acceptance passed: desktop, iPad, and phone.');
 } finally {
   await browser?.close().catch(() => {});
-  server.kill('SIGTERM');
+  await stopServer();
 }
