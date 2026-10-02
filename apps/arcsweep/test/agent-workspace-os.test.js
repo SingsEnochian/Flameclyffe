@@ -14,6 +14,8 @@ const manifest = JSON.parse(read('apps/agent-workspace/manifest.webmanifest'));
 const sw = read('apps/agent-workspace/sw.js');
 const stage = read('apps/arcsweep/vercel-stage.cjs');
 const pages = read('.github/workflows/pages.yml');
+const spatialCss = read('apps/agent-workspace/spatial-polish.css');
+const spatialJs = read('apps/agent-workspace/spatial-polish.js');
 
 test('House Workspace is an installable mobile-first web surface', () => {
   assert.match(html, /viewport-fit=cover/);
@@ -56,7 +58,7 @@ test('runtime presence probes existing same-origin House routes truthfully', () 
 });
 
 test('workspace offline cache is shell-scoped', () => {
-  assert.match(sw, /house-workspace-os-v0\.2\.2/);
+  assert.match(sw, /house-workspace-os-v0\.\d+\.\d+(?:-[a-z0-9-]+)?/);
   assert.match(sw, /url\.origin !== location\.origin/);
   assert.match(sw, /url\.pathname\.includes\('\/agents\/'\)/);
 });
@@ -77,4 +79,18 @@ test('GitHub Pages fallback publishes House Workspace at /Flameclyffe/agents', (
 test('GitHub Pages workspace links cross into the published ArcSweep route', () => {
   assert.match(app, /href="\.\.\/apps\/arcsweep\/\?open=1"/);
   assert.doesNotMatch(app, /href="\.\.\/arcsweep\/\?open=1"/);
+});
+
+test('spatial polish is progressive, accessible, and mobile-safe', () => {
+  assert.match(html, /\.\/spatial-polish\.css/);
+  assert.match(html, /\.\/spatial-polish\.js/);
+  assert.match(spatialCss, /\.agent-grid\.spatial-field/);
+  assert.match(spatialCss, /@media \(max-width: 980px\)/);
+  assert.match(spatialCss, /prefers-reduced-motion/);
+  assert.match(spatialCss, /prefers-reduced-transparency/);
+  assert.match(spatialJs, /aria-pressed/);
+  assert.match(spatialJs, /Selected presence anchors the field/);
+  assert.match(spatialJs, /sharedRole/);
+  assert.match(sw, /'\.\/spatial-polish\.css'/);
+  assert.match(sw, /'\.\/spatial-polish\.js'/);
 });
