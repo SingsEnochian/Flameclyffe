@@ -15,6 +15,8 @@ metadata:
 
 Train, test, and evaluate The Crow with a provenance-bound curriculum, machine-readable drills, held-out exams, browser labs, OS labs, design work, and a blind-spot learning loop.
 
+**Default steering:** Nikola is the active curriculum/experiment driver by Rowan's instruction. The installed profile-level `NIKOLA_DRIVER.md` contract governs the relationship.
+
 This skill teaches judgement. It does not treat style metrics as truth, counterfeit author memory, or turn every craft heuristic into a global rule.
 
 For design, UI, sound, haptics, gesture, spatial/AR work, multimodal interaction, or speculative source translation, load the sibling `wonder-field-design` skill. It preserves Wonder First, extracts transferable structure before reduction, and requires implementation to retain the question that made the source interesting.
@@ -61,8 +63,9 @@ Use `terminal`:
 
 ```text
 python <skill-dir>/scripts/trainer.py selftest
-python <skill-dir>/scripts/trainer.py next --mode train
-python <skill-dir>/scripts/trainer.py next --mode exam
+python <skill-dir>/scripts/trainer.py driver-status
+python <skill-dir>/scripts/trainer.py drive --mode train
+python <skill-dir>/scripts/trainer.py drive --mode exam
 python <skill-dir>/scripts/trainer.py report
 ```
 
@@ -71,6 +74,12 @@ python <skill-dir>/scripts/trainer.py report
 ```text
 selftest
   validate corpus and local state
+
+driver-status
+  show Nikola's active steering contract and accumulated driver events
+
+drive --mode train|exam [--tag TAG] [--adaptive on|off]
+  let Nikola choose the next drill and emit the driver question/instrument packet
 
 next --mode train [--tag TAG]
   training case with coaching key
@@ -96,6 +105,37 @@ report
 reset-cycle
   clear selection-cycle state without erasing history
 ```
+
+## Nikola driver mode
+
+Nikola drives **curriculum selection and experiment sequencing**, not Crow's identity.
+
+For each substantial pass, Nikola should decide:
+
+```text
+QUESTION
+What live question should survive?
+
+WHY THIS TASK NOW
+What blind spot, regression risk, open branch, or implementation seam makes this the best next pressure?
+
+MECHANISM CANDIDATES
+What could explain or produce the effect?
+
+INSTRUMENT
+What observation, comparison, prototype, detector, or held-out task could discriminate among them?
+
+CROW ATTEMPT
+Let Crow do the becoming work.
+
+OBSERVE
+What actually changed? Include nulls, failures, surprises, and ambiguity.
+
+NEXT TEST
+Change the smallest useful variable.
+```
+
+Use `drive` instead of `next` when Nikola should actively frame the training pass. Exams keep the answer key locked until freeze.
 
 ## Procedure
 
@@ -164,6 +204,15 @@ This is an original House adaptation of the task-specific analytical-prism idea.
 Completion criterion: the lens changes the procedure rather than merely saying `think deeply`.
 
 ### 4. Select the exercise
+
+Nikola-driven default:
+
+```text
+python <skill-dir>/scripts/trainer.py drive --mode train --tag <optional-tag>
+```
+
+Neutral/non-driver selection remains available through `next` when explicitly wanted.
+
 
 Training:
 
