@@ -221,8 +221,19 @@ async function assertNoMeaningfulCardOverlap(page, label) {
 }
 
 async function waitForRoster(page) {
-  await page.goto(`${BASE}?view=agents`, { waitUntil: 'commit', timeout: 15_000 });
-  await page.locator('.workspace-shell').waitFor();
+  const response = await page.goto(`${BASE}?view=agents`, { waitUntil: 'domcontentloaded', timeout: 20_000 });
+  console.log('[flight-nav]', JSON.stringify({
+    status: response?.status?.() ?? null,
+    url: page.url(),
+    title: await page.title().catch(() => ''),
+  }));
+  try {
+    await page.locator('.workspace-shell').waitFor({ timeout: 12_000 });
+  } catch (error) {
+    const body = await page.locator('body').innerText({ timeout: 2_000 }).catch(() => '');
+    console.error('[flight-body]', body.slice(0, 1200));
+    throw error;
+  }
   await page.locator('[data-agent-id="nikola"]').waitFor();
   assert.equal(await page.locator('.agent-card').count(), 16, 'Expected the 12 House voices plus Crow, Nikola, Rarity, and Crow Trainer.');
 
@@ -375,7 +386,7 @@ try {
     } catch (error) {
       console.error(`House Workspace ${label} acceptance failed:`, error);
       if (activePage && !activePage.isClosed()) {
-        await activePage.screenshot({ path: `${ARTIFACT_DIR}/${label}-failure.png`, fullPage: true }).catch(() => {});
+        await activePage.screenshot({ path: `${ARTIFACT_DIR}/${label}-failure.png`, fullPage: true, timeout: 5_000 }).catch(() => {});
       }
       throw error;
     }
