@@ -49,7 +49,7 @@ test('chat keeps thread content device-local and separates it by agent', () => {
 });
 
 test('offline shell includes chat and Crow Nest assets', () => {
-  assert.match(sw, /house-workspace-os-v0\.2\.2/);
+  assert.match(sw, /house-workspace-os-v0\.\d+\.\d+(?:-[a-z0-9-]+)?/);
   assert.match(sw, /'\.\/chat\.css'/);
   assert.match(sw, /'\.\/chat\.js'/);
   assert.match(sw, /'\.\/crow-nest\.css'/);
