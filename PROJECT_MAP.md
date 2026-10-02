@@ -137,6 +137,18 @@ Enduring systems attached to the trunk with a clear purpose.
 - Time, phase, duration, recurrence, and replay remain part of state rather than metadata afterthoughts.
 - Cross-domain structural analogies are allowed and encouraged, but do not become ontological identity by default.
 
+**First living seam — Resonance Chamber:**
+
+- Permanent room id: `resonance-chamber`.
+- Field model: `apps/arcsweep/src/resonance-room-model.js`.
+- Spatial embodiment: `apps/arcsweep/src/resonance-room-sidecar.js` + `resonance-room.css`.
+- One persisted field state drives standing-wave geometry, node/antinode loci, draggable source position, MeshPhysicalMaterial thickness/refraction, bounded somatic modulation, and local receipts.
+- Three.js is lazy-loaded only when the room is present; the DOM remains the accessible control authority.
+- Audio/haptic output travels through the existing opt-in Somatic Interface rather than bypassing its profile or calibration contract.
+- Every tune, source move, reset, and pulse can leave an inspectable `arcsweep.resonance-room-receipt/v0.1`.
+- The current chamber is explicitly a simulation instrument, not a claim that the browser is measuring the physical room.
+
+
 ## Leaves
 
 Replaceable expressions of a branch.
