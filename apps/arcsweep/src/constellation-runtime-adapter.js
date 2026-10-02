@@ -1,6 +1,8 @@
 import { loadVoiceBankRegistry } from './knowledge-bank-loader.js';
 import { WRITER_CONTEXT_EVENTS } from './writer-context-resolver.js';
 import { CONSTELLATION_LENS_EVENTS } from './constellation-lens.js';
+import { runAstraVerticalSlice } from './architecture/astra-vertical-slice.js';
+import { createCognitiveEvent } from './architecture/cognitive-provider.js';
 import {
   HOUSE_COOKIE_SESSION,
   readHouseRuntimeToken,
@@ -12,6 +14,7 @@ import {
 } from './runtime-world-context.js';
 
 const STATE_EVENT = 'arcsweep:constellation-runtime-state';
+const ASTRA_RECEIPT_EVENT = 'arcsweep:astra-slice-receipt';
 
 function normalise(value) {
   return String(value || '').trim().toLowerCase();
@@ -223,6 +226,52 @@ async function invokeVoice(packet, voiceContext, fetchImpl = fetch) {
   return { ...raw, status: parsed.kind === 'quiet' ? 'quiet' : parsed.kind === 'refusal' ? 'refused' : 'replied', kind: parsed.kind, text: parsed.text };
 }
 
+export async function witnessConstellationReplyWithAstra({ packet, voice, reply, occurredAt } = {}) {
+  if (!packet?.requestId || !voice?.voiceId || !reply?.runtimeVerified || !reply?.provider) return null;
+
+  const providerId = String(reply.provider);
+  const trajectoryId = `constellation:${packet.requestId}:${voice.voiceId}`;
+  const provider = {
+    id: providerId,
+    capabilities: ['text-generation'],
+    async *invoke() {
+      if (reply.text) {
+        yield createCognitiveEvent({
+          kind: 'delta',
+          providerId,
+          requestId: trajectoryId,
+          delta: reply.text,
+          occurredAt: occurredAt || new Date().toISOString(),
+        });
+      }
+      yield createCognitiveEvent({
+        kind: 'done',
+        providerId,
+        requestId: trajectoryId,
+        receipt: reply.profileId || null,
+        occurredAt: occurredAt || new Date().toISOString(),
+      });
+    },
+  };
+
+  return runAstraVerticalSlice({
+    voiceId: voice.voiceId,
+    sessionId: `arcsweep-lens-${packet.fieldContext?.page?.worldId || 'world'}-${voice.voiceId}`,
+    worldId: reply.worldId || packet.fieldContext?.page?.worldId || null,
+    surface: 'web',
+    participationMode: 'active',
+    capability: 'text-generation',
+    requestedAuthority: 'read-only',
+    authorityGrants: ['read-only'],
+    inputModality: 'text',
+    outputChannel: 'text',
+    trajectoryId,
+    provider,
+    requestText: '',
+    occurredAt,
+  });
+}
+
 async function handleWriterContext(event) {
   const packet = event.detail;
   if (!packet?.fieldContext?.field?.key) return;
@@ -246,6 +295,16 @@ async function handleWriterContext(event) {
       document.dispatchEvent(new CustomEvent(STATE_EVENT, { detail: { state: reply.status, voiceId: voice.voiceId, reason: reply.reason, actual: reply.actual } }));
       return;
     }
+    witnessConstellationReplyWithAstra({ packet, voice, reply })
+      .then((receipt) => {
+        if (receipt) document.dispatchEvent(new CustomEvent(ASTRA_RECEIPT_EVENT, { detail: receipt }));
+      })
+      .catch((error) => {
+        document.dispatchEvent(new CustomEvent(STATE_EVENT, {
+          detail: { state: 'astra-witness-error', voiceId: voice.voiceId, requestId: packet.requestId, error: error?.message || String(error) },
+        }));
+      });
+
     document.dispatchEvent(new CustomEvent(CONSTELLATION_LENS_EVENTS.response, {
       detail: {
         fieldKey: packet.fieldContext.field.key,
@@ -276,6 +335,9 @@ export function installConstellationRuntimeAdapter() {
   document.addEventListener(WRITER_CONTEXT_EVENTS.ready, handleWriterContext);
 }
 
-export const CONSTELLATION_RUNTIME_EVENTS = Object.freeze({ state: STATE_EVENT });
+export const CONSTELLATION_RUNTIME_EVENTS = Object.freeze({
+  state: STATE_EVENT,
+  astraReceipt: ASTRA_RECEIPT_EVENT,
+});
 
 if (typeof document !== 'undefined') installConstellationRuntimeAdapter();
