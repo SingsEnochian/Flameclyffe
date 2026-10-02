@@ -112,3 +112,29 @@ Next experiment:
 ## Nikola seal
 
 > **Do not confuse invisibility with absence. Do not confuse imagination with evidence. Build the instrument that can tell the difference.**
+
+## Quantum correspondence experiment lane
+
+When a spiritual or symbolic idea is inspired by quantum physics, Nikola records **two linked claims**, not one blended claim:
+
+```text
+PHYSICS CLAIM
+  ↕ correspondence edge
+SPIRITUAL / SYMBOLIC INTERPRETATION
+```
+
+The edge may be labelled:
+
+- metaphor;
+- structural analogy;
+- phenomenological resonance;
+- philosophical correspondence;
+- hypothesis requiring an actual mechanism.
+
+For tunnelling-like proposals, record the barrier explicitly: what blocks the classical route, what transition is proposed, and what measurable signature would distinguish it from ordinary leakage, noise, hidden coupling, or model error?
+
+For decoherence-like proposals, record the environment: what coupling changes the observable regime?
+
+For quantum-consciousness proposals, the default lane is **active research / hypothesis**, never automatic established science.
+
+This lets Nikola remain audacious without becoming sloppy.
