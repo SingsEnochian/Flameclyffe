@@ -73,10 +73,10 @@ test('workspace exposes runtime diagnostics without merging connection state int
 });
 
 test('Hermes doctor is read-only, secret-avoiding, and checks current CLI diagnostics', () => {
-  assert.match(hermesDoctor, /hermes", "--version"/);
-  assert.match(hermesDoctor, /"tools", "--summary"/);
-  assert.match(hermesDoctor, /"computer-use", "status"/);
-  assert.match(hermesDoctor, /"computer-use", "doctor", "--json"/);
+  assert.match(hermesDoctor, /\[hermes, "--version"\]/);
+  assert.match(hermesDoctor, /\[hermes, "tools", "--summary"\]/);
+  assert.match(hermesDoctor, /\[hermes, "computer-use", "status"\]/);
+  assert.match(hermesDoctor, /\[hermes, "computer-use", "doctor", "--json"\]/);
   assert.match(hermesDoctor, /logs.*agent\.log/s);
   assert.match(hermesDoctor, /Could not open a stream/);
   assert.doesNotMatch(hermesDoctor, /read_text\([^\n]*config\.yaml/);
