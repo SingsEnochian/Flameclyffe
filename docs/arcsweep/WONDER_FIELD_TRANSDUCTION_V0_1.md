@@ -316,6 +316,45 @@ This is implemented by `createPossibilityField()`.
 
 ---
 
+## 10A. Quantum-spiritual correspondence without category collapse
+
+The Spirituality Shepherd article **"Quantum Physics and Spirituality: 10 Concepts Explained"** offers a useful pattern because it keeps the physics and the spiritual reading adjacent without claiming that one proves the other.
+
+ArcSweep adopts that structure as **correspondence**, not forced equivalence.
+
+The ten concepts become paired lanes:
+
+1. **wave-particle duality** → a both/and heuristic for representations that depend on interaction context;
+2. **entanglement** → a reminder that some systems require relational or whole-system description;
+3. **uncertainty** → limits can be structural, not merely missing data;
+4. **superposition** → preserve live possibilities before justified selection;
+5. **observer / measurement effects** → observation changes available information and sometimes the system observed;
+6. **nonlocality** → everyday spatial intuition is not the final judge of what a formal theory may permit;
+7. **collapse / definite outcome** → distinguish possibility-space from recorded outcome;
+8. **tunnelling** → model barriers and transition paths rather than assuming classical reachability is the only path;
+9. **decoherence** → environment and coupling can determine which structures remain observable or stable;
+10. **quantum consciousness** → keep as an active research / speculative lane, not settled fact.
+
+The spiritual or contemplative correspondences may still be preserved:
+
+- interconnection;
+- humility before uncertainty;
+- holding possibility;
+- attention and participation;
+- embodied choice;
+- environment shaping inner life;
+- curiosity about consciousness.
+
+The important architecture law is:
+
+> **Correspondence can be meaningful without functioning as proof.**
+
+This is not a downgrade of spiritual meaning. It protects the integrity of both registers so they can converse without one ventriloquising the other.
+
+The code-level response is to keep `barriers`, `environment`, `couplings`, possibility sets, and claim lanes explicit rather than hiding them inside prose.
+
+---
+
 ## 11. Symmetry, duality, and continuity
 
 String theory and related mathematics offer useful research heuristics even where the physics remains unresolved.
