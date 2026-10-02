@@ -14,39 +14,154 @@
     "canon_status"
   ],
   "properties": {
-    "id": {"type": "string", "minLength": 1},
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
     "mode": {
       "type": "string",
-      "enum": ["DRAFT", "DIAGNOSE", "DRILL", "VARIANTS", "REVISE", "COMPARE", "CANON", "HARVEST"]
+      "enum": [
+        "DRAFT",
+        "DIAGNOSE",
+        "DRILL",
+        "VARIANTS",
+        "REVISE",
+        "COMPARE",
+        "CANON",
+        "HARVEST"
+      ]
     },
-    "prompt": {"type": "string"},
-    "candidate": {"type": "string"},
+    "prompt": {
+      "type": "string"
+    },
+    "candidate": {
+      "type": "string"
+    },
     "author_decision": {
       "type": "string",
-      "enum": ["pending", "keep", "reject", "mixed"]
+      "enum": [
+        "pending",
+        "keep",
+        "reject",
+        "mixed"
+      ]
     },
-    "author_note": {"type": "string"},
-    "preferred_text": {"type": "string"},
-    "rejected_text": {"type": "string"},
-    "preference_reason": {"type": "string"},
+    "author_note": {
+      "type": "string"
+    },
+    "preferred_text": {
+      "type": "string"
+    },
+    "rejected_text": {
+      "type": "string"
+    },
+    "preference_reason": {
+      "type": "string"
+    },
     "tags": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": {
+        "type": "string"
+      },
       "uniqueItems": true
     },
-    "project": {"type": "string"},
+    "project": {
+      "type": "string"
+    },
     "source_ref": {
       "type": "string",
       "description": "Non-secret provenance reference. Do not paste private transcript contents here."
     },
     "canon_status": {
       "type": "string",
-      "enum": ["not-canon", "candidate", "canon", "conflicted"]
+      "enum": [
+        "not-canon",
+        "candidate",
+        "canon",
+        "conflicted"
+      ]
     },
-    "sensitive": {"type": "boolean", "default": false},
-    "holdout": {"type": ["boolean", "null"], "default": null},
-    "created_at": {"type": "string"},
-    "reviewed_at": {"type": "string"}
+    "sensitive": {
+      "type": "boolean",
+      "default": false
+    },
+    "holdout": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "default": null
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "reviewed_at": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "IC",
+        "OOC"
+      ],
+      "description": "Interaction channel. IC advances the fiction; OOC is writer-room collaboration."
+    },
+    "turn_owner": {
+      "type": "string",
+      "description": "Named participant whose turn this record represents."
+    },
+    "character_ownership": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "character",
+          "owner"
+        ],
+        "properties": {
+          "character": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string",
+            "enum": [
+              "owned",
+              "shared",
+              "temporary-handoff"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "collaboration_trace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "actor",
+          "action"
+        ],
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
   },
   "additionalProperties": false
 }
