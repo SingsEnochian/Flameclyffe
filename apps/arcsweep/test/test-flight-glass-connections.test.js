@@ -12,10 +12,17 @@ test('refractive glass has real transmission thickness and moving caustic cues',
   assert.match(glassJs, /transmission:0\.95/);
   assert.match(glassJs, /thickness:spec\.thickness\+0\.7/);
   assert.match(glassJs, /TorusKnotGeometry/);
+  assert.match(glassJs, /CanvasTexture/);
+  assert.match(glassJs, /EquirectangularReflectionMapping/);
+  assert.match(glassJs, /ACESFilmicToneMapping/);
   assert.match(glassJs, /dispersion/);
+  assert.match(glassJs, /--glass-velocity/);
+  assert.match(glassJs, /--glass-specular/);
   assert.match(glassCss, /Optical body: a visible slab edge/);
   assert.match(glassCss, /--glass-depth-shift/);
   assert.match(glassCss, /data-glass-moving="true"/);
+  assert.match(glassCss, /--glass-velocity-blur/);
+  assert.match(glassCss, /--glass-shadow-size/);
 });
 
 test('coarse pointer motion can steer optics instead of freezing the glass on touch devices', () => {
