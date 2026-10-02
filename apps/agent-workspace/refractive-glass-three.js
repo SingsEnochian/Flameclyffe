@@ -102,7 +102,7 @@ async function startThreeLightfield(){
     {x:0.4,y:3.8,z:-2.4,s:0.96,color:0xd8b56a,thickness:1.6,ior:1.42}
   ];
   const meshes=specs.map((spec,index)=>{
-    const material=new THREE.MeshPhysicalMaterial({color:spec.color,roughness:0.13+index*0.03,metalness:0,transmission:0.95,thickness:spec.thickness+0.7,ior:spec.ior,clearcoat:1,clearcoatRoughness:0.10,transparent:true,opacity:0.46,attenuationColor:spec.color,attenuationDistance:2.7});
+    const material=new THREE.MeshPhysicalMaterial({color:spec.color,roughness:0.13+index*0.03,metalness:0,transmission:0.95,thickness:spec.thickness+0.7,ior:spec.ior,clearcoat:1,clearcoatRoughness:0.10,transparent:true,opacity:1,attenuationColor:spec.color,attenuationDistance:3.2,envMapIntensity:0.82,specularIntensity:1});
     if('dispersion' in material) material.dispersion=0.055+index*0.012;
     if('anisotropy' in material) material.anisotropy=0.18;
     const mesh=new THREE.Mesh(geometry,material); mesh.position.set(spec.x,spec.y,spec.z); mesh.scale.setScalar(spec.s); mesh.rotation.set(index*0.7,index*1.1,index*0.35); group.add(mesh); return mesh;
