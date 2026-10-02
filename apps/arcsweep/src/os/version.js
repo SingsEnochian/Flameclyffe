@@ -114,6 +114,9 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     possibilityPreservation: true,
     temporalReplay: true,
     fieldDetectionTracing: true,
+    resonanceChamber: true,
+    resonanceChamberThreeEmbodiment: true,
+    resonanceChamberSomaticTransduction: true,
   }),
   contracts: Object.freeze({
     contextCapsule: 'arcsweep.context-capsule/v1',
@@ -186,5 +189,8 @@ export const ARCSWEEP_OS_MANIFEST = Object.freeze({
     wonderCueConstellation: 'arcsweep.wonder-cue-constellation/v1',
     wonderTemporalReplay: 'arcsweep.wonder-temporal-replay/v1',
     wonderFieldDetection: 'arcsweep.wonder-field-detection/v1',
+    resonanceRoomState: 'arcsweep.resonance-room-state/v0.1',
+    resonanceRoomField: 'arcsweep.resonance-room-field/v0.1',
+    resonanceRoomReceipt: 'arcsweep.resonance-room-receipt/v0.1',
   }),
 });
