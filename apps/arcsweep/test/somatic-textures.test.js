@@ -30,7 +30,7 @@ test('sound texture transforms stay bounded', () => {
 });
 
 test('charge haptics build while damping haptics settle', () => {
-  const base = [30, 20, 50, 20, 70];
+  const base = [60, 20, 60, 20, 60];
   const charge = textureVibrationPattern(base, getSomaticTexture('charge'));
   const damping = textureVibrationPattern(base, getSomaticTexture('damping'));
   assert.ok(charge[4] > charge[0]);
