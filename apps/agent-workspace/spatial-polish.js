@@ -73,6 +73,8 @@ function layoutField(grid) {
   });
 
   for (const [card, point] of positions) {
+    const presenceState = card.querySelector('.presence-dot')?.dataset?.state || 'unknown';
+    card.dataset.presenceState = presenceState;
     card.style.setProperty('--spatial-x', point.x + '%');
     card.style.setProperty('--spatial-y', point.y + '%');
     card.style.setProperty('--spatial-scale', String(point.scale));
