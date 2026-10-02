@@ -162,6 +162,7 @@ async function installRuntimeStubs(page) {
 
 function recordBrowserErrors(page, label) {
   const errors = [];
+  const pending = new Map();
   page.on('pageerror', (error) => {
     const line = `pageerror: ${error.message}`;
     errors.push(line);
@@ -174,13 +175,30 @@ function recordBrowserErrors(page, label) {
       console.error(`[${label}] ${line}`);
     }
   });
+  page.on('request', (request) => {
+    pending.set(request, { url: request.url(), type: request.resourceType(), started: Date.now() });
+  });
+  page.on('requestfinished', (request) => pending.delete(request));
   page.on('requestfailed', (request) => {
     const url = request.url();
-    if (!url.includes('/favicon.ico')) errors.push(`requestfailed: ${url} :: ${request.failure()?.errorText || 'unknown'}`);
+    pending.delete(request);
+    if (!url.includes('/favicon.ico')) {
+      const line = `requestfailed: ${url} :: ${request.failure()?.errorText || 'unknown'}`;
+      errors.push(line);
+      console.error(`[${label}] ${line}`);
+    }
   });
-  return () => {
-    assert.deepEqual(errors, [], `${label} emitted browser errors:\n${errors.join('\n')}`);
-  };
+  page.on('response', (response) => {
+    if (response.status() >= 400) console.error(`[${label}] HTTP ${response.status()} ${response.url()}`);
+  });
+  return Object.freeze({
+    assertClean() {
+      assert.deepEqual(errors, [], `${label} emitted browser errors:\n${errors.join('\n')}`);
+    },
+    pending() {
+      return [...pending.values()].map((item) => ({ ...item, age_ms: Date.now() - item.started }));
+    },
+  });
 }
 
 async function assertNoHorizontalOverflow(page, label) {
@@ -220,18 +238,31 @@ async function assertNoMeaningfulCardOverlap(page, label) {
   assert.deepEqual(overlaps, [], `${label}: spatial cards overlap materially: ${JSON.stringify(overlaps)}`);
 }
 
-async function waitForRoster(page) {
-  const response = await page.goto(`${BASE}?view=agents`, { waitUntil: 'domcontentloaded', timeout: 20_000 });
+async function waitForRoster(page, diagnostics) {
+  const response = await page.goto(`${BASE}?view=agents`, { waitUntil: 'commit', timeout: 15_000 });
+  await page.waitForTimeout(1200);
+  const cockpit = await page.evaluate(() => ({
+    readyState: document.readyState,
+    title: document.title,
+    bodyText: document.body?.innerText?.slice(0, 1200) || '',
+    appHtmlLength: document.querySelector('#app')?.innerHTML?.length || 0,
+    scriptSources: [...document.scripts].map((node) => node.src || '[inline]'),
+    resources: performance.getEntriesByType('resource').map((entry) => ({ name: entry.name, duration: Math.round(entry.duration) })).slice(-40),
+  })).catch((error) => ({ evaluation_error: String(error?.message || error) }));
   console.log('[flight-nav]', JSON.stringify({
     status: response?.status?.() ?? null,
     url: page.url(),
-    title: await page.title().catch(() => ''),
+    cockpit,
+    pending: diagnostics?.pending?.() || [],
+    vite_tail: serverOutput.slice(-4000),
   }));
   try {
-    await page.locator('.workspace-shell').waitFor({ timeout: 12_000 });
+    await page.locator('.workspace-shell').waitFor({ timeout: 10_000 });
   } catch (error) {
-    const body = await page.locator('body').innerText({ timeout: 2_000 }).catch(() => '');
-    console.error('[flight-body]', body.slice(0, 1200));
+    const html = await page.locator('html').innerHTML({ timeout: 2_000 }).catch(() => '');
+    console.error('[flight-html]', html.slice(0, 2500));
+    console.error('[flight-pending]', JSON.stringify(diagnostics?.pending?.() || []));
+    console.error('[flight-vite]', serverOutput.slice(-6000));
     throw error;
   }
   await page.locator('[data-agent-id="nikola"]').waitFor();
@@ -248,9 +279,9 @@ async function desktopScenario(browser) {
   const page = await context.newPage();
   activePage = page;
   await installRuntimeStubs(page);
-  const assertClean = recordBrowserErrors(page, 'desktop');
+  const diagnostics = recordBrowserErrors(page, 'desktop');
 
-  await waitForRoster(page);
+  await waitForRoster(page, diagnostics);
   await page.locator('[data-agent-id="nikola"]').click();
   await page.locator('.inspector').filter({ hasText: 'active Crow training driver' }).waitFor();
   await assertNoMeaningfulCardOverlap(page, 'desktop');
@@ -309,7 +340,7 @@ async function desktopScenario(browser) {
   assert.equal(await page.evaluate(() => globalThis.HouseReturnEngine?.engine?.snapshot?.(globalThis.HouseReturnEngine.activeContinuityId)?.participant?.id), 'nikola');
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/desktop.png`, fullPage: true });
-  assertClean();
+  diagnostics.assertClean();
   activePage = null;
   await context.close();
 }
@@ -323,9 +354,9 @@ async function ipadScenario(browser) {
   const page = await context.newPage();
   activePage = page;
   await installRuntimeStubs(page);
-  const assertClean = recordBrowserErrors(page, 'ipad');
+  const diagnostics = recordBrowserErrors(page, 'ipad');
 
-  await waitForRoster(page);
+  await waitForRoster(page, diagnostics);
   assert.equal(await page.locator('.spatial-mode-toggle:visible').count(), 1, 'iPad landscape-class width should retain the spatial-field control.');
   await assertNoMeaningfulCardOverlap(page, 'ipad');
   await page.locator('[data-agent-id="nikola"]').click();
@@ -335,7 +366,7 @@ async function ipadScenario(browser) {
   assert.ok(box && box.width <= 1024 && box.height <= 1366, 'iPad inspector must stay inside the viewport.');
   await assertNoHorizontalOverflow(page, 'ipad');
   await page.screenshot({ path: `${ARTIFACT_DIR}/ipad.png`, fullPage: true });
-  assertClean();
+  diagnostics.assertClean();
   activePage = null;
   await context.close();
 }
@@ -350,9 +381,9 @@ async function phoneScenario(browser) {
   const page = await context.newPage();
   activePage = page;
   await installRuntimeStubs(page);
-  const assertClean = recordBrowserErrors(page, 'phone');
+  const diagnostics = recordBrowserErrors(page, 'phone');
 
-  await waitForRoster(page);
+  await waitForRoster(page, diagnostics);
   assert.equal(await page.locator('.rail:visible').count(), 0, 'Phone layout must hide the desktop rail.');
   assert.equal(await page.locator('.mobile-nav:visible').count(), 1, 'Phone layout must expose the mobile navigation.');
   assert.equal(await page.locator('.spatial-mode-toggle:visible').count(), 0, 'Phone layout must not expose the desktop spatial-field toggle.');
@@ -367,7 +398,7 @@ async function phoneScenario(browser) {
   await assertNoHorizontalOverflow(page, 'phone');
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/phone.png`, fullPage: true });
-  assertClean();
+  diagnostics.assertClean();
   activePage = null;
   await context.close();
 }
