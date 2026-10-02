@@ -64,9 +64,13 @@ test('field state represents conditions rather than preselecting final form', ()
     constraints: ['reachable by one hand'],
     attractors: ['active object'],
     boundaries: ['room'],
+    barriers: ['threshold'],
+    environment: { coupling: 'low-noise' },
   });
   assert.equal(field.medium, 'spatial interface');
   assert.ok(field.dimensions.includes('time'));
+  assert.ok(field.barriers.includes('threshold'));
+  assert.equal(field.environment.coupling, 'low-noise');
   assert.match(field.heuristic, /control conditions/);
 });
 
