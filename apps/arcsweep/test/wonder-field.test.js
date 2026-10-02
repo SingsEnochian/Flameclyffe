@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   WONDER_FIELD_GUIDE_LAWS,
   createCueConstellation,
+  createFieldDetectionTrace,
   createFieldState,
   createPossibilityField,
   createTemporalReplay,
@@ -98,4 +99,20 @@ test('claim lanes and guide laws include frontier and non-flattening distinction
   assert.equal(wonderClaimLane('mythic').authority, 'mythic-interpretation');
   assert.ok(WONDER_FIELD_GUIDE_LAWS.some((law) => /WONDER FIRST/.test(law)));
   assert.ok(WONDER_FIELD_GUIDE_LAWS.some((law) => /Time is part of the state/.test(law)));
+});
+
+
+test('field detection distinguishes unseen structure from unsupported assertion', () => {
+  const trace = createFieldDetectionTrace({
+    source: 'charged source',
+    field: { kind: 'electric', local_strength: 'measured' },
+    predictedBehavior: ['test charge deflects'],
+    detector: 'calibrated field probe',
+    observations: ['probe response repeats at the same location'],
+    inference: 'a field model explains the observed force pattern',
+    claimLane: 'established-science',
+  });
+  assert.equal(trace.direct_visibility_required, false);
+  assert.equal(trace.claim_lane, 'established-science');
+  assert.match(trace.rule, /hidden != imaginary/);
 });
