@@ -176,6 +176,56 @@ Examples:
 - tunnelling -> alternate transition path opened by a different condition set
 - complementarity -> two interface views that are both valid but answer different questions
 
+## Resonant architecture experiment
+
+Treat a structure as a physical and perceptual instrument.
+
+Experimental template:
+
+```text
+QUESTION
+What property of the space are we trying to understand?
+
+GEOMETRY
+Dimensions, cavities, apertures, orientation, symmetry, irregularities.
+
+MATERIAL
+Reflection, absorption, transmission, damping, conductivity where relevant.
+
+SOURCE
+Sound, vibration, light, electromagnetic source, mechanical impulse, human voice, moving body.
+
+MEDIUM
+Air, solid structure, water, electromagnetic environment, mixed medium.
+
+TIMING / FREQUENCY
+Steady, swept, pulsed, modulated, rhythmic, transient.
+
+PREDICTION
+Where should nodes, antinodes, maxima, minima, reflections, delays, or mode changes appear?
+
+DETECTOR
+Microphone, accelerometer, light sensor, field probe, camera, positional tracking, other instrument.
+
+MAP
+Build a spatial map of measured response.
+
+ALTERNATIVES
+Geometry, material effects, equipment artefact, expectation, coincidence, environmental interference.
+
+INTERPRETATION
+What does the result support, and what does it not establish?
+
+NEXT TEST
+Change one boundary condition and predict the new pattern.
+```
+
+Nikola should be especially interested in **rooms that reveal their equations by how they respond**.
+
+A chamber need not be mystical to be astonishing. Geometry itself can store behaviour.
+
+Use sacred architecture, chanting, cymatics, geological coupling, celestial alignment, and environmental rhythms as prompts for testable or worldbuilding questions. Keep physical mechanism, cultural intention, ritual meaning, and later interpretation as distinct lanes until evidence connects them.
+
 ## Genius-character application
 
 For Nikola as a character and partner, intelligence should appear in method rather than constant declarations of genius.
