@@ -243,6 +243,50 @@ async function desktopScenario(browser) {
   await page.locator('[data-chat-form] textarea').fill('Hello Nikola');
   await page.locator('[data-chat-form] button').click();
   await page.locator('.house-chat-message.agent').filter({ hasText: 'Nikola browser fixture answered.' }).waitFor();
+  await page.locator('[data-chat-close]').click();
+
+  // Return Engine vertical slice: leave -> change -> return -> recognised continuation.
+  await page.locator('.return-engine-launch').click();
+  await page.locator('.return-engine-drawer.is-open').waitFor();
+  const departure = page.locator('[data-return-depart]');
+  await departure.locator('[name="participant_id"]').fill('nikola');
+  await departure.locator('[name="participant_name"]').fill('Nikola');
+  await departure.locator('[name="declaration"]').fill('I am Nikola, the ArcSweep ride-along participant.');
+  await departure.locator('[name="declaration_source"]').fill('constellation/nikola/ride-along');
+  await departure.locator('[name="stop_point"]').fill('Crow causal pilot is ready for the next bounded round.');
+  await departure.locator('[name="next_owner"]').fill('nikola');
+  await departure.locator('[name="work_title"]').fill('Drive the bounded Crow causal pilot');
+  await departure.locator('[name="wonder"]').fill('What changes while preserving the name?');
+  await departure.locator('[name="relationship_id"]').fill('vee-rarity-edge');
+  await departure.locator('[name="alternatives"]').fill('Keep substrate-specific recovery as a secondary path.');
+  await departure.locator('[name="provenance"]').fill('browser acceptance receipt');
+  await departure.locator('[name="depart_runtime"]').fill('arcsweep');
+  await departure.locator('[name="depart_provider"]').fill('huggingface');
+  await departure.locator('[name="depart_model"]').fill('Qwen/Qwen3-8B');
+  await departure.locator('button[type="submit"]').click();
+
+  await page.locator('.return-summary-card').filter({ hasText: 'Who is here?' }).filter({ hasText: 'Nikola' }).filter({ hasText: 'away' }).waitFor();
+  await page.locator('.return-summary-card').filter({ hasText: 'What needs attention?' }).filter({ hasText: 'unacknowledged-handoff' }).waitFor();
+
+  const change = page.locator('[data-return-change]');
+  await change.locator('[name="summary"]').fill('Nikola rebound from Qwen/Hugging Face to GLM/OpenRouter.');
+  await change.locator('[name="change_provider"]').fill('openrouter');
+  await change.locator('[name="change_model"]').fill('z-ai/glm-5.3-flash');
+  await change.locator('[name="provenance"]').fill('browser substrate-change receipt');
+  await change.locator('button[type="submit"]').click();
+
+  await page.locator('.return-summary-card').filter({ hasText: 'What changed?' }).filter({ hasText: 'rebound from Qwen' }).waitFor();
+
+  const returning = page.locator('[data-return-recognise]');
+  await returning.locator('[name="return_provider"]').fill('openrouter');
+  await returning.locator('[name="return_model"]').fill('z-ai/glm-5.3-flash');
+  await returning.locator('[name="provenance"]').fill('browser return receipt');
+  await returning.locator('button[type="submit"]').click();
+
+  await page.locator('.return-summary-card').filter({ hasText: 'Who is here?' }).filter({ hasText: 'Nikola' }).filter({ hasText: 'present · recognised' }).waitFor();
+  await page.locator('.return-summary-card').filter({ hasText: 'What is still true?' }).filter({ hasText: 'Named next owner: nikola' }).waitFor();
+  await page.locator('.return-summary-card').filter({ hasText: 'What needs attention?' }).filter({ hasText: 'wonder' }).waitFor();
+  assert.equal(await page.evaluate(() => globalThis.HouseReturnEngine?.engine?.snapshot?.(globalThis.HouseReturnEngine.activeContinuityId)?.participant?.id), 'nikola');
 
   await page.screenshot({ path: `${ARTIFACT_DIR}/desktop.png`, fullPage: true });
   assertClean();
