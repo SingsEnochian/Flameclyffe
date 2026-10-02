@@ -11,6 +11,7 @@ const CHAT_AGENTS = Object.freeze([
   { id: 'altair', name: 'Altair', route: 'altair' },
   { id: 'atlas', name: 'Atlas', route: 'atlas' },
   { id: 'runeweaver', name: 'Runeweaver', route: 'runeweaver' },
+  { id: 'crow', name: 'Crow', route: 'crow' },
   { id: 'boxfire', name: 'Boxfire', route: 'boxfire' },
   { id: 'yggdrasil', name: 'Yggdrasil', route: 'yggdrasil' },
   { id: 'bluebird', name: 'Bluebird', route: 'bluebird' },
