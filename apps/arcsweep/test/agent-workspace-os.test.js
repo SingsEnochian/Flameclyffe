@@ -45,7 +45,7 @@ test('workspace carries explicit agent and handoff boundaries', () => {
   assert.match(app, /Next owner/);
   assert.match(app, /Unacknowledged handoff/);
   assert.match(app, /crow-trainer/);
-  assert.match(app, /id: 'crow', name: 'Crow', route: null/);
+  assert.match(app, /id: 'crow', name: 'Crow', route: 'crow'/);
   assert.match(app, /id: 'nikola'/);
   assert.match(app, /constellation\/nikola\/ride-along/);
 });
@@ -56,8 +56,8 @@ test('runtime presence probes existing same-origin House routes truthfully', () 
   assert.match(app, /route: 'starsong\/larkshine'/);
   assert.match(app, /route: 'starsong\/ellowind'/);
   assert.match(app, /credentials: 'same-origin'/);
-  assert.match(app, /response\.status === 401 \? 'offline' : 'degraded'/);
-  assert.match(app, /runtime route mismatch/);
+  assert.match(app, /response\.status === 401 \? 'unauthorised' : 'route-error'/);
+  assert.match(app, /expectedFlameId/);
 });
 
 test('workspace offline cache is shell-scoped', () => {
@@ -107,4 +107,21 @@ test('workspace uses granular runtime states instead of one degraded bucket', ()
   assert.match(app, /expectedFlameId/);
   assert.match(app, /split\('\/'\).*at\(-1\)/s);
   assert.match(app, /hosted_fallback/);
+});
+
+
+test('Ox Alpha must pass a model-executing probe before the workspace calls it live', () => {
+  assert.match(app, /agent\.id === 'oxalpha'/);
+  assert.match(app, /probeVerifiedRuntime/);
+  assert.match(app, /\/api\/v1\/flames\/\$\{routePath\}\/probe/);
+  assert.match(app, /runtime_verified !== true/);
+  assert.match(app, /Ox Alpha inference probe failed/);
+  assert.match(app, /provider-error/);
+});
+
+test('Nikola is a distinct visible roster participant and Crow training driver', () => {
+  assert.match(app, /id: 'nikola', name: 'Nikola'/);
+  assert.match(app, /roles: \['wonder', 'science', 'design', 'inquiry', 'crow-training'\]/);
+  assert.match(app, /constellation\/nikola\/ride-along/);
+  assert.match(app, /active Crow training driver/);
 });
